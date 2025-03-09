@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022"],
+    "outDir": "dist/server",
+    // Node.js specific settings
+    "isolatedModules": true,
+    "noEmit": false
+  },
+  "include": ["src/server/**/*", "src/shared/**/*"],
+  "references": [{ "path": "./tsconfig.client.json" }]
+}

@@ -1,0 +1,23 @@
+{
+	"compilerOptions": {
+	  // Common settings
+	  "strict": true,
+	  "esModuleInterop": true,
+	  "skipLibCheck": true,
+	  "forceConsistentCasingInFileNames": true,
+	  "sourceMap": true,
+	  "resolveJsonModule": true,
+	  "useDefineForClassFields": true,
+	  "allowSyntheticDefaultImports": true,
+	  "baseUrl": ".",
+	  "paths": {
+		"@/*": ["./src/*"]
+	  },
+	  // Strictness settings
+	  "noUnusedLocals": true,
+	  "noUnusedParameters": true,
+	  "noFallthroughCasesInSwitch": true
+	},
+	"exclude": ["node_modules", "dist"]
+  }
+  
