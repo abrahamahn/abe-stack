@@ -1,10 +1,6 @@
 import { Pool } from 'pg';
 import { Simplify } from '../../shared/typeHelpers';
 import { Logger } from './LoggerService';
-import dotenv from 'dotenv';
-
-// Load environment variables
-dotenv.config();
 
 const logger = new Logger('Database');
 
@@ -12,7 +8,7 @@ export class Database {
   private pool: Pool | null = null;
   private connected = false;
 
-  constructor(private dbPath: string) {
+  constructor(_dbPath: string) {
     // dbPath is ignored when using PostgreSQL
   }
 

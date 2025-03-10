@@ -1,5 +1,5 @@
-import { Pool } from 'pg';
 import { WebSocketServer } from 'ws';
+import { QueueDatabase } from './QueueDatabase';
 
 export type ServerConfig = {
 	port: number;
@@ -39,4 +39,5 @@ export type ServerEnvironment = {
 	db: DatabaseApi;
 	pubsub: PubsubApi;
 	wss?: WebSocketServer;
+	queue: QueueDatabase; // Add the queue property
 };

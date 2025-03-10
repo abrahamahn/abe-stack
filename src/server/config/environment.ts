@@ -1,15 +1,13 @@
 // src/server/config/environment.ts
-import path from 'path';
+import { path } from '../helpers/path';
 
-// Determine which .env file to load based on NODE_ENV
-const NODE_ENV = process.env.NODE_ENV || 'development';
-const envPath = path.resolve(process.cwd(), `.env.${NODE_ENV}`);
-
-// Set the env path before importing dotenv config
-process.env.DOTENV_CONFIG_PATH = envPath;
-
-// Load environment variables
-import 'dotenv/config';
+// Environment configuration
+export const env = {
+  NODE_ENV: process.env.NODE_ENV || 'development',
+  PORT: parseInt(process.env.PORT || '8080', 10),
+  CORS_ORIGINS: (process.env.CORS_ORIGIN || '*').split(','),
+  // ... any other environment variables you need
+};
 
 // Define the configuration schema with types and validation
 export interface EnvConfig {
@@ -84,7 +82,7 @@ function parseArray(value: string): string[] {
 }
 
 // Create and validate the config object
-export const env: EnvConfig = {
+export const envConfig: EnvConfig = {
   // Server
   NODE_ENV: parseEnv<'development' | 'test' | 'staging' | 'production'>(
     'NODE_ENV', 
@@ -162,6 +160,6 @@ export const env: EnvConfig = {
 };
 
 // Freeze the config object to prevent modifications
-Object.freeze(env);
+Object.freeze(envConfig);
 
-export default env;
+export default envConfig;

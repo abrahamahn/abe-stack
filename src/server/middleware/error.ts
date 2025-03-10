@@ -1,4 +1,4 @@
-import { Request as ExpressRequest, Response as ExpressResponse, NextFunction as ExpressNextFunction } from 'express';
+import { Request as ExpressRequest, Response as ExpressResponse, NextFunction as ExpressNextFunction, ErrorRequestHandler } from 'express';
 import { ZodError } from 'zod';
 import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 import { Logger } from '../services/LoggerService';
@@ -68,11 +68,12 @@ export class ValidationError extends Error {
   }
 }
 
-export const errorHandler = (
+// Export the error handler with the correct Express ErrorRequestHandler type
+export const errorHandler: ErrorRequestHandler = (
   err: Error | AppError | ZodError | DatabaseError | ValidationError,
   req: Request,
   res: Response,
-  _next: NextFunction
+  next: NextFunction
 ) => {
   // Log all errors
   logger.error(`${req.method} ${req.path} - ${err.message}`, err);
@@ -89,7 +90,8 @@ export const errorHandler = (
       response.errors = err.errors;
     }
     
-    return res.status(err.statusCode).json(response);
+    res.status(err.statusCode).json(response);
+    return next();
   }
   
   // Handle Zod validation errors
@@ -104,11 +106,12 @@ export const errorHandler = (
       formattedErrors[path].push(error.message);
     });
     
-    return res.status(400).json({
+    res.status(400).json({
       status: 'fail',
       message: 'Validation failed',
       errors: formattedErrors
     });
+    return next();
   }
   
   // Handle our custom validation errors
@@ -123,19 +126,21 @@ export const errorHandler = (
       formattedErrors[path].push(error.message);
     });
     
-    return res.status(400).json({
+    res.status(400).json({
       status: 'fail',
       message: 'Validation failed',
       errors: formattedErrors
     });
+    return next();
   }
   
   // Handle JWT errors
   if (err instanceof JsonWebTokenError || err instanceof TokenExpiredError) {
-    return res.status(401).json({
+    res.status(401).json({
       status: 'fail',
       message: err instanceof TokenExpiredError ? 'Token expired' : 'Invalid token'
     });
+    return next();
   }
   
   // Handle PostgreSQL database errors
@@ -147,19 +152,21 @@ export const errorHandler = (
       constraint: err.constraint
     });
 
-    return res.status(500).json({
+    res.status(500).json({
       status: 'error',
       message: process.env.NODE_ENV === 'production' 
         ? 'Database error occurred' 
         : err.message
     });
+    return next();
   }
 
   // Handle all other errors
-  return res.status(500).json({
+  res.status(500).json({
     status: 'error',
     message: process.env.NODE_ENV === 'production' 
       ? 'Something went wrong!' 
       : err.message || 'Unknown error'
   });
-}; 
+  return next();
+};

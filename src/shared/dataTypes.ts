@@ -1,5 +1,3 @@
-import * as t from 'data-type-ts';
-
 // Define a Validator interface to match what's expected
 export interface Validator<T> {
 	validate(value: unknown): T;

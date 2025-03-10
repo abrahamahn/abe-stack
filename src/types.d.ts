@@ -79,8 +79,18 @@ declare module 'express' {
   }
 
   export type NextFunction = (error?: any) => void;
+  export type ErrorRequestHandler = (err: any, req: Request, res: Response, next: NextFunction) => Response | void | Promise<Response | void>;
+  export type RequestHandler = (req: Request, res: Response, next: NextFunction) => any;
 
-  export default function express(): any;
+  export interface Express {
+    use(path: string | ErrorRequestHandler | RequestHandler, ...handlers: (ErrorRequestHandler | RequestHandler)[]): Express;
+    get(path: string, ...handlers: RequestHandler[]): Express;
+    post(path: string, ...handlers: RequestHandler[]): Express;
+    put(path: string, ...handlers: RequestHandler[]): Express;
+    delete(path: string, ...handlers: RequestHandler[]): Express;
+  }
+
+  export default function express(): Express;
 }
 
 declare module 'cors' {
@@ -89,8 +99,4 @@ declare module 'cors' {
 
 declare module 'cookie-parser' {
   export default function cookieParser(): any;
-}
-
-declare module 'dotenv' {
-  export function config(): void;
 } 

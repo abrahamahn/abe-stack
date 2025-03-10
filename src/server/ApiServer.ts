@@ -1,6 +1,6 @@
 // src/server/ApiServer.ts
 import express from 'express';
-import type { Express as ExpressCore, RequestHandler, Application } from 'express-serve-static-core';
+import type { Express, RequestHandler } from 'express';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -14,7 +14,7 @@ import { env } from './config/environment';
 import { ServerEnvironment } from './services/ServerEnvironment';
 
 const expressApp = express as unknown as {
-  (): ExpressCore;
+  (): Express;
   json: (options?: any) => RequestHandler;
   urlencoded: (options?: any) => RequestHandler;
   static: (path: string) => RequestHandler;
@@ -23,8 +23,8 @@ const expressApp = express as unknown as {
 const jsonParser = expressApp.json({ limit: '10mb' });
 const urlencodedParser = expressApp.urlencoded({ extended: true, limit: '10mb' });
 
-export function ApiServer(_environment: ServerEnvironment, app: ExpressCore) {
-  // Security middleware
+export function ApiServer(_environment: ServerEnvironment, app: Express) {
+  // Security middlewares
   app.use(helmet());
   
   // CORS configuration

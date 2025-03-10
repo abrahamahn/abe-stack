@@ -1,23 +1,27 @@
 import express from 'express';
+import type { Express, RequestHandler } from 'express-serve-static-core';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 import http from 'http';
 import { Pool } from 'pg';
 import { WebSocketServer } from 'ws';
-import dotenv from 'dotenv';
+import type { Request, Response } from 'express-serve-static-core';
 import { ServerEnvironment } from './services/ServerEnvironment';
 import { ApiServer } from './ApiServer';
 import { FileServer } from './FileServer';
-import type { Request, Response } from 'express-serve-static-core';
-
-// Load environment variables
-dotenv.config();
+import { EventEmitter } from 'events';
+import { QueueDatabase } from './services/QueueDatabase';
 
 // Create Express app
-const app = express();
+const expressApp = express as unknown as {
+  (): Express;
+  json: (options?: any) => RequestHandler;
+  urlencoded: (options?: any) => RequestHandler;
+  static: (path: string) => RequestHandler;
+};
+
+const app = expressApp();
 const server = http.createServer(app);
 
 // Server configuration
@@ -87,12 +91,16 @@ const pubsub = {
   }
 };
 
+// Initialize the queue database
+const queue = new QueueDatabase(config.queuePath);
+
 // Create server environment
 const environment: ServerEnvironment = {
   config,
   db,
   pubsub,
-  wss
+  wss,
+  queue // Add the queue to the environment
 };
 
 // Initialize servers
@@ -104,7 +112,7 @@ app.use(cors({
   origin: config.corsOrigins,
   credentials: true
 }));
-app.use(express.json());
+app.use(expressApp.json());
 app.use(cookieParser());
 
 // API routes
@@ -114,22 +122,23 @@ app.get('/api', (_req: Request, res: Response) => {
 
 // In production, serve the static files from the dist directory
 if (config.production) {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = dirname(__filename);
-  const distPath = path.resolve(__dirname, '../../dist');
+  const distPath = path.resolve(process.cwd(), 'dist');
   
-  app.use(express.static(distPath));
+  app.use(expressApp.static(distPath));
   
-  app.get('*', (req, res) => {
+  app.get('*', (_req: Request, res: Response) => {
     res.sendFile(path.join(distPath, 'index.html'));
   });
 }
 
 // WebSocket connection handling
-wss.on('connection', (ws) => {
+wss.on('connection', (ws: WebSocket) => {
   console.log('Client connected');
   
-  ws.on('message', (message) => {
+  // Cast WebSocket to EventEmitter to use the 'on' method
+  const wsWithEvents = ws as unknown as EventEmitter;
+  
+  wsWithEvents.on('message', (message: Buffer) => {
     try {
       const data = JSON.parse(message.toString());
       console.log('Received:', data);
@@ -143,7 +152,7 @@ wss.on('connection', (ws) => {
     }
   });
   
-  ws.on('close', () => {
+  wsWithEvents.on('close', () => {
     console.log('Client disconnected');
   });
 });
@@ -161,4 +170,4 @@ async function startServer() {
   }
 }
 
-startServer(); 
+startServer();

@@ -1,6 +1,6 @@
 import Router from 'express';
 import type { Request, Response, NextFunction } from 'express';
-import { User, Post, Comment } from '../models';
+import { Post, Comment } from '../models';
 import { postRepository } from '../models/Post';
 import { commentRepository } from '../models/Comment';
 import { authenticate, authorize } from '../middleware/auth';
