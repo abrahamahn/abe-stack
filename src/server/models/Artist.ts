@@ -2,6 +2,7 @@ import { Pool } from 'pg';
 import { BaseModel, BaseRepository } from '../database/BaseRepository';
 import { DatabaseConnectionManager } from '../database/config';
 import { User } from './User';
+import Album from './Album';
 
 export interface ArtistAttributes extends BaseModel {
   name: string;
@@ -108,6 +109,9 @@ export class ArtistRepository extends BaseRepository<ArtistAttributes> {
 export const artistRepository = new ArtistRepository();
 
 export class Artist implements ArtistAttributes {
+  static hasMany(Album: Album, arg1: { foreignKey: string; as: string; }) {
+      throw new Error('Method not implemented.');
+  }
   id: string;
   name: string;
   bio: string | null;

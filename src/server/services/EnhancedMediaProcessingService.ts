@@ -1,11 +1,12 @@
-import fs from 'fs-extra';
+import fs from 'fs';
+import { promises as fsPromises } from 'fs';
 import path from 'path';
 import ffmpeg from 'fluent-ffmpeg';
 import { v4 as uuidv4 } from 'uuid';
 import sharp from 'sharp';
 import { Logger } from './LoggerService';
 import { QueueService, QueueType, ImageProcessingJob, VideoProcessingJob, AudioProcessingJob } from './QueueService';
-import Bull, { Queue, Job } from 'bull';
+import { InMemoryQueue, Job } from './InMemoryQueue';
 import Media, { MediaType, ProcessingStatus } from '../models/Media';
 import { env } from '../config/environment';
 
@@ -79,9 +80,9 @@ interface ProcessingJob {
  * with support for adaptive streaming formats
  */
 export class EnhancedMediaProcessingService {
-  private imageQueue: Queue;
-  private videoQueue: Queue;
-  private audioQueue: Queue;
+  private imageQueue: InMemoryQueue<ImageProcessingJob>;
+  private videoQueue: InMemoryQueue<VideoProcessingJob>;
+  private audioQueue: InMemoryQueue<AudioProcessingJob>;
   private logger: Logger;
   private readonly outputDir: string;
   
@@ -116,30 +117,10 @@ export class EnhancedMediaProcessingService {
     this.logger = new Logger('EnhancedMediaProcessingService');
     this.outputDir = path.join(process.cwd(), 'uploads');
     
-    // Initialize Bull queues
-    this.imageQueue = new Bull('image-processing', {
-      redis: {
-        host: env.REDIS_HOST || 'localhost',
-        port: env.REDIS_PORT || 6379,
-        password: env.REDIS_PASSWORD
-      }
-    });
-
-    this.videoQueue = new Bull('video-processing', {
-      redis: {
-        host: env.REDIS_HOST || 'localhost',
-        port: env.REDIS_PORT || 6379,
-        password: env.REDIS_PASSWORD
-      }
-    });
-
-    this.audioQueue = new Bull('audio-processing', {
-      redis: {
-        host: env.REDIS_HOST || 'localhost',
-        port: env.REDIS_PORT || 6379,
-        password: env.REDIS_PASSWORD
-      }
-    });
+    // Initialize in-memory queues
+    this.imageQueue = new InMemoryQueue<ImageProcessingJob>('image-processing');
+    this.videoQueue = new InMemoryQueue<VideoProcessingJob>('video-processing');
+    this.audioQueue = new InMemoryQueue<AudioProcessingJob>('audio-processing');
     
     this.setupQueueProcessors();
   }
@@ -176,7 +157,7 @@ export class EnhancedMediaProcessingService {
   }
   
   /**
-   * Queue audio for processing
+   * Queue an audio file for processing
    */
   public async queueAudioProcessing(filePath: string, userId: string, generateWaveform: boolean = true): Promise<string> {
     const media = await this.createMediaRecord(filePath, MediaType.AUDIO, userId);
@@ -184,33 +165,33 @@ export class EnhancedMediaProcessingService {
       mediaId: media.id, 
       filePath, 
       userId,
-      options: { generateWaveform }
+      generateWaveform
     });
     return media.id;
   }
   
   private setupQueueProcessors() {
     // Image processing
-    this.imageQueue.process(async (job: Job) => {
-      const { mediaId, filePath, userId } = job.data as ProcessingJob;
+    this.imageQueue.process(async (job: Job<ImageProcessingJob>) => {
+      const { mediaId, filePath, userId } = job.data;
       await this.processImage(mediaId, filePath);
     });
 
     // Video processing
-    this.videoQueue.process(async (job: Job) => {
-      const { mediaId, filePath, userId, options } = job.data as ProcessingJob;
+    this.videoQueue.process(async (job: Job<VideoProcessingJob>) => {
+      const { mediaId, filePath, userId, options } = job.data;
       await this.processVideo(mediaId, filePath, options);
     });
 
     // Audio processing
-    this.audioQueue.process(async (job: Job) => {
-      const { mediaId, filePath, userId, options } = job.data as ProcessingJob;
+    this.audioQueue.process(async (job: Job<AudioProcessingJob>) => {
+      const { mediaId, filePath, userId, options } = job.data;
       await this.processAudio(mediaId, filePath, options?.generateWaveform || false);
     });
 
     // Handle failed jobs
     [this.imageQueue, this.videoQueue, this.audioQueue].forEach(queue => {
-      queue.on('failed', (job: Job, err: Error) => {
+      queue.on('failed', (job: Job<any>, err: Error) => {
         this.logger.error(`Job ${job.id} failed:`, err);
         this.updateMediaStatus(job.data.mediaId, ProcessingStatus.FAILED);
       });
@@ -222,7 +203,7 @@ export class EnhancedMediaProcessingService {
       await this.updateMediaStatus(mediaId, ProcessingStatus.PROCESSING);
 
       const outputDir = path.join(this.outputDir, 'images', mediaId);
-      await fs.ensureDir(outputDir);
+      await fsPromises.mkdir(outputDir, { recursive: true });
 
       const image = sharp(filePath);
       const metadata = await image.metadata();
@@ -264,20 +245,20 @@ export class EnhancedMediaProcessingService {
       await this.updateMediaStatus(mediaId, ProcessingStatus.PROCESSING);
 
       const outputDir = path.join(this.outputDir, 'videos', mediaId);
-      await fs.ensureDir(outputDir);
+      await fsPromises.mkdir(outputDir, { recursive: true });
 
       // Get video metadata
       const metadata = await this.getVideoMetadata(filePath);
 
       if (options?.generateHLS) {
         const hlsDir = path.join(outputDir, 'hls');
-        await fs.ensureDir(hlsDir);
+        await fsPromises.mkdir(hlsDir, { recursive: true });
         await this.generateHLSStream(filePath, hlsDir, options.quality);
       }
 
       if (options?.generateDASH) {
         const dashDir = path.join(outputDir, 'dash');
-        await fs.ensureDir(dashDir);
+        await fsPromises.mkdir(dashDir, { recursive: true });
         await this.generateDASHStream(filePath, dashDir, options.quality);
       }
 
@@ -312,7 +293,7 @@ export class EnhancedMediaProcessingService {
       await this.updateMediaStatus(mediaId, ProcessingStatus.PROCESSING);
 
       const outputDir = path.join(this.outputDir, 'audio', mediaId);
-      await fs.ensureDir(outputDir);
+      await fsPromises.mkdir(outputDir, { recursive: true });
 
       // Get audio metadata
       const metadata = await this.getAudioMetadata(filePath);
@@ -472,7 +453,7 @@ export class EnhancedMediaProcessingService {
         .on('end', async () => {
           try {
             const waveformData = Array.from({ length: 100 }, () => Math.random());
-            await fs.writeFile(outputPath, JSON.stringify(waveformData), 'utf8');
+            await fsPromises.writeFile(outputPath, JSON.stringify(waveformData), 'utf8');
             resolve();
           } catch (error) {
             reject(error);
@@ -522,7 +503,7 @@ export class EnhancedMediaProcessingService {
   }
   
   private async createMediaRecord(filePath: string, type: MediaType, userId: string): Promise<Media> {
-    const stats = await fs.stat(filePath);
+    const stats = await fsPromises.stat(filePath);
     return await Media.create({
       userId,
       type,

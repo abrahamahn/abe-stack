@@ -1,4 +1,4 @@
-import * as t from "data-type-ts"
+import * as t from "../../shared/dataTypes"
 import { Request, Response } from "express"
 import AuthService from "../services/AuthService"
 import { tokenBlacklist } from "../services/TokenBlacklist"

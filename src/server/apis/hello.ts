@@ -4,7 +4,7 @@ This API is a template.
 
 */
 
-import * as t from "data-type-ts"
+import * as t from "../../shared/dataTypes"
 import type { Request, Response } from "express"
 import type { ServerEnvironment } from "../services/ServerEnvironment"
 

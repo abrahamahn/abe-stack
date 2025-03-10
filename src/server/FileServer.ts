@@ -1,6 +1,8 @@
 import express from 'express';
 import type { Express as ExpressCore, RequestHandler, Request, Response } from 'express-serve-static-core';
-import { createWriteStream, mkdirp, mkdirpSync } from "fs-extra"
+import fs from 'fs';
+import { promises as fsPromises } from 'fs';
+import { createWriteStream } from 'fs';
 import { DayS } from "../shared/dateHelpers"
 import { FileSignatureData } from "./helpers/fileHelpers"
 import { path } from "./helpers/path"
@@ -54,7 +56,7 @@ function verifyRequest(
 
 export function FileServer(environment: { config: ServerConfig }, app: ExpressCore) {
 	const uploadDir = path("uploads")
-	mkdirpSync(uploadDir)
+	fs.mkdirSync(uploadDir, { recursive: true });
 
 	const MB = 1024 * 1024
 
@@ -67,7 +69,7 @@ export function FileServer(environment: { config: ServerConfig }, app: ExpressCo
 			const { id, filename } = req.params
 			const fileDir = path.join(uploadDir, id)
 			const filePath = path.join(fileDir, filename)
-			await mkdirp(fileDir)
+			await fsPromises.mkdir(fileDir, { recursive: true });
 
 			const writeStream = createWriteStream(filePath)
 			req.pipe(writeStream)

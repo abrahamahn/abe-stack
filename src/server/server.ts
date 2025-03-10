@@ -1,15 +1,14 @@
 // abe-stack\src\server\server.ts
-import injectLiveReload from "connect-livereload"
 import express from "express"
 import helmet from "helmet"
 import http from "http"
-import livereload from "livereload"
 import morgan from "morgan"
+import path from "path"
 import { ApiServer } from "./ApiServer"
 import { FileServer } from "./FileServer"
 import { PubsubServer } from "./PubsubServer"
 import { QueueServer } from "./QueueServer"
-import { path } from "./helpers/path"
+import { path as appPath } from "./helpers/path"
 import { Database } from "./services/Database"
 import { QueueDatabase } from "./services/QueueDatabase"
 import { ServerConfig, DatabaseApi, PubsubApi, ServerEnvironment } from "./services/ServerEnvironment"
@@ -24,11 +23,11 @@ const config: ServerConfig = {
   corsOrigin: process.env.CORS_ORIGIN || '*',
   corsOrigins: (process.env.CORS_ORIGIN || '*').split(','),
   jwtSecret: process.env.JWT_SECRET || 'your-secret-key',
-  uploadDir: process.env.UPLOAD_DIR || path(process.cwd(), 'uploads'),
-  queuePath: process.env.QUEUE_PATH || path(process.cwd(), 'queue'),
+  uploadDir: process.env.UPLOAD_DIR || path.join(process.cwd(), 'uploads'),
+  queuePath: process.env.QUEUE_PATH || path.join(process.cwd(), 'queue'),
   signatureSecret: Buffer.from(process.env.SIGNATURE_SECRET || 'signature-secret-key'),
   passwordSalt: Buffer.from(process.env.PASSWORD_SALT || 'password-salt'),
-  dbPath: process.env.DB_PATH || path(process.cwd(), 'db'),
+  dbPath: process.env.DB_PATH || path.join(process.cwd(), 'db'),
   db: {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432'),
@@ -53,13 +52,8 @@ async function startServer() {
     }
   }))
 
-  if (!config.production) {
-    // Injects into the html file so the browser reloads when files change.
-    app.use(injectLiveReload())
-
-    // Watch for changed to send a message over websocket.
-    livereload.createServer().watch(path("build"))
-  }
+  // Serve static files from the uploads directory
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')))
 
   // Initialize databases
   const dbInstance = new Database(config.dbPath);

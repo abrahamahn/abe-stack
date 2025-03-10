@@ -1,13 +1,5 @@
-import Bull, { Queue, Job, JobOptions } from 'bull';
 import { Logger } from './LoggerService';
-
-// Environment variables with defaults
-const {
-  REDIS_HOST = 'localhost',
-  REDIS_PORT = '6379',
-  REDIS_PASSWORD = '',
-  REDIS_PREFIX = 'media-queue'
-} = process.env;
+import { InMemoryQueue, Job, JobOptions } from './InMemoryQueue';
 
 // Queue types
 export enum QueueType {
@@ -19,19 +11,26 @@ export enum QueueType {
 
 // Job data interfaces
 export interface ImageProcessingJob {
+  mediaId: string;
   filePath: string;
   userId: string;
   metadata?: Record<string, any>;
 }
 
 export interface VideoProcessingJob {
+  mediaId: string;
   filePath: string;
   userId: string;
-  generateHLS?: boolean;
+  options?: {
+    generateHLS?: boolean;
+    generateDASH?: boolean;
+    quality?: ('1080p' | '720p' | '480p' | '360p' | '240p')[];
+  };
   metadata?: Record<string, any>;
 }
 
 export interface AudioProcessingJob {
+  mediaId: string;
   filePath: string;
   userId: string;
   generateWaveform?: boolean;
@@ -50,7 +49,7 @@ export interface NotificationJob {
  */
 export class QueueService {
   private static instance: QueueService;
-  private queues: Map<QueueType, Queue>;
+  private queues: Map<QueueType, InMemoryQueue<any>>;
   private logger: Logger;
 
   private constructor() {
@@ -81,17 +80,8 @@ export class QueueService {
   /**
    * Initialize a queue with the given name
    */
-  private initializeQueue(queueType: QueueType): Queue {
-    const queueOptions = {
-      redis: {
-        host: REDIS_HOST,
-        port: Number(REDIS_PORT),
-        password: REDIS_PASSWORD || undefined
-      },
-      prefix: REDIS_PREFIX
-    };
-
-    const queue = new Bull(queueType, queueOptions);
+  private initializeQueue(queueType: QueueType): InMemoryQueue<any> {
+    const queue = new InMemoryQueue(queueType);
     
     // Set up event handlers
     queue.on('error', (error) => {
@@ -102,21 +92,23 @@ export class QueueService {
       this.logger.error(`Job ${job.id} in ${queueType} queue failed:`, error);
     });
     
-    this.queues.set(queueType, queue);
-    this.logger.info(`Queue ${queueType} initialized`);
+    queue.on('completed', (job) => {
+      this.logger.debug(`Job ${job.id} in ${queueType} queue completed`);
+    });
     
+    this.queues.set(queueType, queue);
     return queue;
   }
 
   /**
    * Get a queue by type
    */
-  public getQueue(queueType: QueueType): Queue | undefined {
+  public getQueue(queueType: QueueType): InMemoryQueue<any> | undefined {
     return this.queues.get(queueType);
   }
 
   /**
-   * Add a job to the image processing queue
+   * Add an image processing job to the queue
    */
   public async addImageProcessingJob(
     data: ImageProcessingJob,
@@ -124,14 +116,13 @@ export class QueueService {
   ): Promise<Job<ImageProcessingJob>> {
     const queue = this.getQueue(QueueType.IMAGE_PROCESSING);
     if (!queue) {
-      throw new Error('Image processing queue not initialized');
+      throw new Error(`Queue ${QueueType.IMAGE_PROCESSING} not found`);
     }
-    
     return queue.add(data, options);
   }
 
   /**
-   * Add a job to the video processing queue
+   * Add a video processing job to the queue
    */
   public async addVideoProcessingJob(
     data: VideoProcessingJob,
@@ -139,14 +130,13 @@ export class QueueService {
   ): Promise<Job<VideoProcessingJob>> {
     const queue = this.getQueue(QueueType.VIDEO_PROCESSING);
     if (!queue) {
-      throw new Error('Video processing queue not initialized');
+      throw new Error(`Queue ${QueueType.VIDEO_PROCESSING} not found`);
     }
-    
     return queue.add(data, options);
   }
 
   /**
-   * Add a job to the audio processing queue
+   * Add an audio processing job to the queue
    */
   public async addAudioProcessingJob(
     data: AudioProcessingJob,
@@ -154,14 +144,13 @@ export class QueueService {
   ): Promise<Job<AudioProcessingJob>> {
     const queue = this.getQueue(QueueType.AUDIO_PROCESSING);
     if (!queue) {
-      throw new Error('Audio processing queue not initialized');
+      throw new Error(`Queue ${QueueType.AUDIO_PROCESSING} not found`);
     }
-    
     return queue.add(data, options);
   }
 
   /**
-   * Add a job to the notification queue
+   * Add a notification job to the queue
    */
   public async addNotificationJob(
     data: NotificationJob,
@@ -169,9 +158,8 @@ export class QueueService {
   ): Promise<Job<NotificationJob>> {
     const queue = this.getQueue(QueueType.NOTIFICATION);
     if (!queue) {
-      throw new Error('Notification queue not initialized');
+      throw new Error(`Queue ${QueueType.NOTIFICATION} not found`);
     }
-    
     return queue.add(data, options);
   }
 
@@ -184,31 +172,20 @@ export class QueueService {
   ): void {
     const queue = this.getQueue(queueType);
     if (!queue) {
-      throw new Error(`Queue ${queueType} not initialized`);
+      throw new Error(`Queue ${queueType} not found`);
     }
     
-    queue.process(async (job) => {
-      try {
-        this.logger.info(`Processing job ${job.id} in ${queueType} queue`);
-        return await processor(job as Job<T>);
-      } catch (error) {
-        this.logger.error(`Error processing job ${job.id} in ${queueType} queue:`, error);
-        throw error;
-      }
-    });
-    
+    queue.process(processor);
     this.logger.info(`Processor registered for ${queueType} queue`);
   }
 
   /**
-   * Close all queues gracefully
+   * Close all queues
    */
   private async closeQueues(): Promise<void> {
-    this.logger.info('Closing queues...');
+    this.logger.info('Closing all queues');
     
-    const closePromises = Array.from(this.queues.values()).map(queue => 
-      (queue as any).close()
-    );
+    const closePromises = Array.from(this.queues.values()).map(queue => queue.close());
     await Promise.all(closePromises);
     
     this.logger.info('All queues closed');

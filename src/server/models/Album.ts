@@ -110,6 +110,12 @@ export class AlbumRepository extends BaseRepository<AlbumAttributes> {
 export const albumRepository = new AlbumRepository();
 
 export class Album implements AlbumAttributes {
+  static belongsTo(_Artist: any, _options: { foreignKey: string; as: string; }) {
+      throw new Error('Method not implemented.');
+  }
+  static hasMany(_Track: any, _options: { foreignKey: string; as: string; }) {
+      throw new Error('Method not implemented.');
+  }
   id: string;
   title: string;
   coverArtUrl: string | null;

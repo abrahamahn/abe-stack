@@ -1,12 +1,6 @@
-import {
-	AsyncTupleDatabase,
-	AsyncTupleDatabaseClient,
-	AsyncTupleDatabaseClientApi,
-	namedTupleToObject,
-	transactionalReadWriteAsync,
-	transactionalWrite,
-} from "tuple-database"
-import { FileTupleStorage } from "tuple-database/storage/FileTupleStorage"
+import fs from 'fs';
+import path from 'path';
+import { promises as fsPromises } from 'fs';
 import { randomId } from "../../shared/randomId"
 import { Simplify } from "../../shared/typeHelpers"
 import { TaskName, Tasks } from "../tasks"
@@ -30,75 +24,125 @@ type Task<T extends TaskName = TaskName> = {
 	error?: TaskError
 }
 
-type TaskDatabaseSchema =
-	| { key: ["task", { id: string }]; value: Task }
-	| { key: ["waiting", { run_at: string }, { id: string }]; value: null }
-	| { key: ["running", { started_at: string }, { id: string }]; value: null }
-	| { key: ["failed", { started_at: string }, { id: string }]; value: Task }
-
-const enqueueTask = transactionalWrite<TaskDatabaseSchema>()((tx, task: Task) => {
-	const { id, run_at } = task
-	tx.set(["task", { id }], task)
-	tx.set(["waiting", { run_at }, { id }], null)
-})
-
-const dequeueTask = transactionalReadWriteAsync<TaskDatabaseSchema>()(async (tx, now: string) => {
-	const waiting = tx.subspace(["waiting"])
-	const running = tx.subspace(["running"])
-	const tasks = tx.subspace(["task"])
-
-	const result = await waiting.scan({ lte: [{ run_at: now }], limit: 1 })
-	if (result.length === 0) return
-	const tuple = result[0].key
-	const taskId = namedTupleToObject(tuple).id
-
-	const task = await tasks.get([{ id: taskId }])
-	if (!task) throw new Error(`Missing task data: ${taskId}`)
-
-	waiting.remove(tuple)
-	tasks.set([{ id: taskId }], { ...task, started_at: now })
-	running.set([{ started_at: now }, { id: taskId }], null)
-	return { ...task, started_at: now }
-})
-
-const finishTask = transactionalWrite<TaskDatabaseSchema>()((tx, task: Task, error?: TaskError) => {
-	const tasks = tx.subspace(["task"])
-	const running = tx.subspace(["running"])
-	const failed = tx.subspace(["failed"])
-
-	const { started_at, id } = task
-	if (!started_at) throw new Error(`Cannot finish a task that was never started: ${id}`)
-
-	running.remove([{ started_at }, { id }])
-	tasks.remove([{ id }])
-
-	if (!error) return
-
-	failed.set([{ started_at }, { id }], { ...task, error })
-})
+// Simple in-memory database structure
+interface TaskStore {
+	tasks: Record<string, Task>;
+	waiting: Record<string, string[]>; // run_at -> task ids
+	running: Record<string, string[]>; // started_at -> task ids
+	failed: Record<string, Task>; // task id -> task
+}
 
 const debug = (...args: any[]) => console.log("queue:", ...args)
 
 export class QueueDatabase {
-	private db: AsyncTupleDatabaseClientApi<TaskDatabaseSchema>
+	private store: TaskStore = {
+		tasks: {},
+		waiting: {},
+		running: {},
+		failed: {}
+	}
+	private dbPath: string
+	private tasksPath: string
 	enqueue!: EnqueueApi
 
-	constructor(private dbPath: string) {
-		this.db = new AsyncTupleDatabaseClient(
-			new AsyncTupleDatabase(new FileTupleStorage(this.dbPath))
-		)
+	constructor(dbPath: string) {
+		this.dbPath = dbPath
+		this.tasksPath = path.join(dbPath, 'tasks.json')
+		
+		// Create directory if it doesn't exist
+		if (!fs.existsSync(dbPath)) {
+			fs.mkdirSync(dbPath, { recursive: true })
+		}
+		
+		// Load existing tasks if available
+		this.loadTasks()
+		
+		// Create the enqueue proxy
 		this.createEnqueueProxy()
+	}
+
+	private async loadTasks() {
+		try {
+			if (fs.existsSync(this.tasksPath)) {
+				const data = await fsPromises.readFile(this.tasksPath, 'utf8')
+				this.store = JSON.parse(data)
+			}
+		} catch (error) {
+			console.error('Error loading tasks:', error)
+			// Initialize with empty store if there's an error
+			this.store = {
+				tasks: {},
+				waiting: {},
+				running: {},
+				failed: {}
+			}
+		}
+	}
+
+	private async saveTasks() {
+		try {
+			await fsPromises.writeFile(this.tasksPath, JSON.stringify(this.store, null, 2), 'utf8')
+		} catch (error) {
+			console.error('Error saving tasks:', error)
+		}
 	}
 
 	private async enqueueTask(task: Task) {
 		debug(`> enqueue.${task.name}`)
-		return await enqueueTask(this.db, task)
+		
+		// Add task to tasks store
+		this.store.tasks[task.id] = task
+		
+		// Add task to waiting queue
+		if (!this.store.waiting[task.run_at]) {
+			this.store.waiting[task.run_at] = []
+		}
+		this.store.waiting[task.run_at].push(task.id)
+		
+		// Save changes
+		await this.saveTasks()
+		
+		return task.id
 	}
 
 	async dequeueTask(now: string) {
-		const task = await dequeueTask(this.db, now)
-		if (task) debug(`< dequeue.${task.name}`)
-		return task
+		// Find the earliest waiting task that should run now
+		const runAtTimes = Object.keys(this.store.waiting).sort()
+		let taskToRun: Task | null = null
+		let runAtTime: string | null = null
+		
+		for (const time of runAtTimes) {
+			if (time <= now && this.store.waiting[time].length > 0) {
+				runAtTime = time
+				const taskId = this.store.waiting[time][0]
+				taskToRun = this.store.tasks[taskId]
+				break
+			}
+		}
+		
+		if (!taskToRun || !runAtTime) return null
+		
+		// Remove task from waiting queue
+		this.store.waiting[runAtTime] = this.store.waiting[runAtTime].filter(id => id !== taskToRun!.id)
+		if (this.store.waiting[runAtTime].length === 0) {
+			delete this.store.waiting[runAtTime]
+		}
+		
+		// Update task with started_at time
+		taskToRun.started_at = now
+		this.store.tasks[taskToRun.id] = taskToRun
+		
+		// Add task to running queue
+		if (!this.store.running[now]) {
+			this.store.running[now] = []
+		}
+		this.store.running[now].push(taskToRun.id)
+		
+		// Save changes
+		await this.saveTasks()
+		
+		if (taskToRun) debug(`< dequeue.${taskToRun.name}`)
+		return taskToRun
 	}
 
 	async finishTask(task: Task, error?: TaskError) {
@@ -108,8 +152,28 @@ export class QueueDatabase {
 		} else {
 			debug(`. finish.${task.name}`)
 		}
-
-		return await finishTask(this.db, task, error)
+		
+		const { started_at, id } = task
+		if (!started_at) throw new Error(`Cannot finish a task that was never started: ${id}`)
+		
+		// Remove task from running queue
+		if (this.store.running[started_at]) {
+			this.store.running[started_at] = this.store.running[started_at].filter(taskId => taskId !== id)
+			if (this.store.running[started_at].length === 0) {
+				delete this.store.running[started_at]
+			}
+		}
+		
+		// If there's an error, add to failed queue
+		if (error) {
+			this.store.failed[id] = { ...task, error }
+		}
+		
+		// Remove task from tasks store
+		delete this.store.tasks[id]
+		
+		// Save changes
+		await this.saveTasks()
 	}
 
 	private createEnqueueProxy() {
@@ -141,13 +205,13 @@ export class QueueDatabase {
 	}
 
 	async reset() {
-		while (true) {
-			const tuples = await this.db.scan({ limit: 100 })
-			if (tuples.length === 0) break
-			const tx = this.db.transact()
-			for (const tuple of tuples) tx.remove(tuple.key)
-			await tx.commit()
+		this.store = {
+			tasks: {},
+			waiting: {},
+			running: {},
+			failed: {}
 		}
+		await this.saveTasks()
 	}
 }
 

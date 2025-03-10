@@ -1,9 +1,7 @@
 .DS_Store
 node_modules
 *.log
-build
-db
-uploads
+dist 
 
 tmp
 .devcontainer
@@ -12,7 +10,6 @@ test-results
 TODO.md
 full_code.py
 project-code_dump.txt
-
 # Environment
 .env
 .env.*

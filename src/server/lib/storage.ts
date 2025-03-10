@@ -1,34 +1,52 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
+import fs from 'fs';
+import { promises as fsPromises } from 'fs';
 
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION || 'us-east-1',
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
-  },
-});
+// Define a generic storage interface
+export interface StorageProvider {
+  uploadFile(file: Express.Multer.File): Promise<string>;
+  getFileUrl(filename: string): string;
+}
 
-const BUCKET_NAME = process.env.AWS_S3_BUCKET || 'your-bucket-name';
+// Local file storage implementation
+export class LocalFileStorage implements StorageProvider {
+  private uploadDir: string;
+  private baseUrl: string;
 
+  constructor(uploadDir = 'uploads', baseUrl = '/uploads') {
+    this.uploadDir = path.resolve(process.cwd(), uploadDir);
+    this.baseUrl = baseUrl;
+    
+    // Ensure upload directory exists
+    fs.mkdirSync(this.uploadDir, { recursive: true });
+  }
+
+  async uploadFile(file: Express.Multer.File): Promise<string> {
+    const fileExtension = path.extname(file.originalname);
+    const fileName = `${uuidv4()}${fileExtension}`;
+    const filePath = path.join(this.uploadDir, fileName);
+    
+    // Write file to disk
+    await fsPromises.writeFile(filePath, file.buffer);
+    
+    // Return the URL to access the file
+    return this.getFileUrl(fileName);
+  }
+
+  getFileUrl(filename: string): string {
+    // Return a URL that can be used to access the file
+    return `${this.baseUrl}/${filename}`;
+  }
+}
+
+// Create and export a default storage provider
+// This can be replaced with other implementations as needed
+const storageProvider: StorageProvider = new LocalFileStorage();
+
+// Export the uploadToStorage function for backward compatibility
 export const uploadToStorage = async (file: Express.Multer.File): Promise<string> => {
-  const fileExtension = path.extname(file.originalname);
-  const fileName = `${uuidv4()}${fileExtension}`;
-  const key = `media/${fileName}`;
+  return storageProvider.uploadFile(file);
+};
 
-  const command = new PutObjectCommand({
-    Bucket: BUCKET_NAME,
-    Key: key,
-    Body: file.buffer,
-    ContentType: file.mimetype,
-  });
-
-  await s3Client.send(command);
-
-  // Generate a signed URL that expires in 7 days
-  const signedUrl = await getSignedUrl(s3Client, command, { expiresIn: 604800 });
-
-  return signedUrl;
-}; 
+export default storageProvider; 

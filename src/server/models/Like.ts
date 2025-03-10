@@ -53,6 +53,141 @@ export class LikeRepository extends BaseRepository<LikeAttributes> {
       throw error;
     }
   }
+
+  /**
+   * Find like with user data
+   */
+  async findWithUser(id: string, client?: Pool): Promise<(LikeAttributes & { user: any }) | null> {
+    const query = `
+      SELECT 
+        l.*,
+        json_build_object(
+          'id', u.id,
+          'username', u.username,
+          'displayName', u.display_name,
+          'profileImage', u.profile_image
+        ) as user
+      FROM 
+        likes l
+      LEFT JOIN 
+        users u ON l.user_id = u.id
+      WHERE 
+        l.id = $1
+    `;
+
+    try {
+      const result = await (client || DatabaseConnectionManager.getPool()).query(query, [id]);
+      if (!result.rows[0]) return null;
+
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        userId: row.user_id,
+        postId: row.post_id,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        user: row.user
+      };
+    } catch (error) {
+      console.error('Error in findWithUser:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Find likes by post ID with user data
+   */
+  async findByPostIdWithUser(postId: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(LikeAttributes & { user: any })[]> {
+    const query = `
+      SELECT 
+        l.*,
+        u.id as "user.id",
+        u.username as "user.username",
+        u.display_name as "user.displayName",
+        u.profile_image as "user.profileImage"
+      FROM ${this.tableName} l
+      LEFT JOIN users u ON l.user_id = u.id
+      WHERE l.post_id = $1
+      ORDER BY l.created_at DESC
+      LIMIT $2 OFFSET $3
+    `;
+
+    try {
+      const result = await (client || DatabaseConnectionManager.getPool()).query(query, [postId, limit, offset]);
+      return result.rows.map(row => ({
+        ...row,
+        user: {
+          id: row['user.id'],
+          username: row['user.username'],
+          displayName: row['user.displayName'],
+          profileImage: row['user.profileImage']
+        }
+      }));
+    } catch (error) {
+      this.logger.error('Error in findByPostIdWithUser', { postId, limit, offset, error });
+      throw error;
+    }
+  }
+
+  /**
+   * Find likes by user ID with post data
+   */
+  async findByUserIdWithPost(userId: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(LikeAttributes & { post: any })[]> {
+    const query = `
+      SELECT 
+        l.*,
+        p.id as "post.id",
+        p.content as "post.content",
+        p.media as "post.media",
+        p.likes_count as "post.likesCount",
+        p.comments_count as "post.commentsCount",
+        p.created_at as "post.createdAt"
+      FROM ${this.tableName} l
+      LEFT JOIN posts p ON l.post_id = p.id
+      WHERE l.user_id = $1
+      ORDER BY l.created_at DESC
+      LIMIT $2 OFFSET $3
+    `;
+
+    try {
+      const result = await (client || DatabaseConnectionManager.getPool()).query(query, [userId, limit, offset]);
+      return result.rows.map(row => ({
+        ...row,
+        post: {
+          id: row['post.id'],
+          content: row['post.content'],
+          media: row['post.media'],
+          likesCount: row['post.likesCount'],
+          commentsCount: row['post.commentsCount'],
+          createdAt: row['post.createdAt']
+        }
+      }));
+    } catch (error) {
+      this.logger.error('Error in findByUserIdWithPost', { userId, limit, offset, error });
+      throw error;
+    }
+  }
+
+  /**
+   * Check if a user has liked a post
+   */
+  async hasUserLikedPost(userId: string, postId: string, client?: Pool): Promise<boolean> {
+    const query = `
+      SELECT EXISTS (
+        SELECT 1
+        FROM ${this.tableName}
+        WHERE user_id = $1 AND post_id = $2
+      ) as has_liked
+    `;
+
+    try {
+      const result = await (client || DatabaseConnectionManager.getPool()).query(query, [userId, postId]);
+      return result.rows[0].has_liked;
+    } catch (error) {
+      this.logger.error('Error in hasUserLikedPost', { userId, postId, error });
+      throw error;
+    }
+  }
 }
 
 // Singleton instance

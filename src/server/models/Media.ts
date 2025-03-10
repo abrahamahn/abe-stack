@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 import { BaseModel, BaseRepository } from '../database/BaseRepository';
 import { DatabaseConnectionManager } from '../database/config';
+import Post from './Post';
 
 // Media types
 export enum MediaType {
@@ -104,6 +105,12 @@ export class MediaRepository extends BaseRepository<MediaAttributes> {
 export const mediaRepository = new MediaRepository();
 
 export class Media implements MediaAttributes {
+  static scope(_undefined: undefined): import("./Comment").Comment {
+      throw new Error('Method not implemented.');
+  }
+  static belongsTo(_Post: Post, _arg1: { foreignKey: string; as: string; }) {
+      throw new Error('Method not implemented.');
+  }
   id: string;
   userId: string;
   type: string;

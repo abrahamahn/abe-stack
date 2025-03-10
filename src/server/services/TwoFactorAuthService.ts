@@ -1,7 +1,7 @@
 import * as speakeasy from 'speakeasy';
 import * as QRCode from 'qrcode';
-import { v4 as uuidv4 } from 'uuid';
-import { User, TwoFactorAuth } from '../models';
+import { User } from '../models';
+import { TwoFactorAuth, TwoFactorAuthRepository, twoFactorAuthRepository } from '../models/TwoFactorAuth';
 import { TwoFactorStatus } from '../models/TwoFactorAuth';
 import { Logger } from './LoggerService';
 import { NotFoundError, UnauthorizedError } from '../../shared/errors/ApiError';
@@ -12,9 +12,11 @@ import { NotFoundError, UnauthorizedError } from '../../shared/errors/ApiError';
 export class TwoFactorAuthService {
   private static instance: TwoFactorAuthService;
   private logger: Logger;
+  private repository: TwoFactorAuthRepository;
 
   private constructor() {
     this.logger = new Logger('TwoFactorAuthService');
+    this.repository = twoFactorAuthRepository;
   }
 
   /**
@@ -34,38 +36,31 @@ export class TwoFactorAuthService {
    */
   public async generateSecret(user: User): Promise<{ secret: string; qrCode: string }> {
     try {
-      // Generate a new secret
       const secret = speakeasy.generateSecret({
         name: `ABE Stack:${user.email}`,
         length: 20
       });
 
-      // Generate QR code
       const qrCode = await QRCode.toDataURL(secret.otpauth_url || '');
 
-      // Check if user already has 2FA
-      let twoFactorAuth = await TwoFactorAuth.findOne({
-        where: { userId: user.id }
-      });
+      const existingAuth = await this.repository.findByUserId(user.id);
 
-      // Create or update 2FA record
-      if (twoFactorAuth) {
-        twoFactorAuth.secret = secret.base32;
-        twoFactorAuth.status = TwoFactorStatus.PENDING;
-        await twoFactorAuth.save();
+      if (existingAuth) {
+        await this.repository.update(existingAuth.id, {
+          secret: secret.base32,
+          status: TwoFactorStatus.PENDING
+        });
       } else {
-        twoFactorAuth = await TwoFactorAuth.create({
+        await this.repository.create({
           userId: user.id,
           secret: secret.base32,
           status: TwoFactorStatus.PENDING,
-          backupCodes: []
+          backupCodes: [],
+          lastUsed: null
         });
       }
 
-      return {
-        secret: secret.base32,
-        qrCode
-      };
+      return { secret: secret.base32, qrCode };
     } catch (error) {
       this.logger.error('Failed to generate 2FA secret', { error });
       throw new Error('Failed to generate 2FA secret');
@@ -80,42 +75,37 @@ export class TwoFactorAuthService {
    */
   public async verifyToken(userId: string, token: string): Promise<boolean> {
     try {
-      // Get user's 2FA record
-      const twoFactorAuth = await TwoFactorAuth.findOne({
-        where: { userId }
-      });
+      const twoFactorAuth = await this.repository.findByUserId(userId);
 
       if (!twoFactorAuth) {
         throw new NotFoundError('Two-factor authentication not set up');
       }
 
-      // Check if token is a backup code
       if (twoFactorAuth.backupCodes.includes(token)) {
-        // Remove used backup code
-        twoFactorAuth.backupCodes = twoFactorAuth.backupCodes.filter(code => code !== token);
-        twoFactorAuth.lastUsed = new Date();
-        await twoFactorAuth.save();
+        const updatedCodes = twoFactorAuth.backupCodes.filter(code => code !== token);
+        await this.repository.update(twoFactorAuth.id, {
+          backupCodes: updatedCodes,
+          lastUsed: new Date()
+        });
         return true;
       }
 
-      // Verify token
       const verified = speakeasy.totp.verify({
         secret: twoFactorAuth.secret,
         encoding: 'base32',
         token,
-        window: 1 // Allow 1 step before/after for clock drift
+        window: 1
       });
 
       if (verified) {
-        twoFactorAuth.lastUsed = new Date();
-        await twoFactorAuth.save();
+        await this.repository.update(twoFactorAuth.id, {
+          lastUsed: new Date()
+        });
       }
 
       return verified;
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        throw error;
-      }
+      if (error instanceof NotFoundError) throw error;
       this.logger.error('Failed to verify 2FA token', { error });
       throw new Error('Failed to verify 2FA token');
     }
@@ -129,16 +119,12 @@ export class TwoFactorAuthService {
    */
   public async enableTwoFactor(userId: string, token: string): Promise<string[]> {
     try {
-      // Get user's 2FA record
-      const twoFactorAuth = await TwoFactorAuth.findOne({
-        where: { userId }
-      });
+      const twoFactorAuth = await this.repository.findByUserId(userId);
 
       if (!twoFactorAuth) {
         throw new NotFoundError('Two-factor authentication not set up');
       }
 
-      // Verify token
       const verified = speakeasy.totp.verify({
         secret: twoFactorAuth.secret,
         encoding: 'base32',
@@ -150,20 +136,17 @@ export class TwoFactorAuthService {
         throw new UnauthorizedError('Invalid verification code');
       }
 
-      // Generate backup codes
       const backupCodes = this.generateBackupCodes();
 
-      // Update 2FA record
-      twoFactorAuth.status = TwoFactorStatus.ENABLED;
-      twoFactorAuth.backupCodes = backupCodes;
-      twoFactorAuth.lastUsed = new Date();
-      await twoFactorAuth.save();
+      await this.repository.update(twoFactorAuth.id, {
+        status: TwoFactorStatus.ENABLED,
+        backupCodes,
+        lastUsed: new Date()
+      });
 
       return backupCodes;
     } catch (error) {
-      if (error instanceof NotFoundError || error instanceof UnauthorizedError) {
-        throw error;
-      }
+      if (error instanceof NotFoundError || error instanceof UnauthorizedError) throw error;
       this.logger.error('Failed to enable 2FA', { error });
       throw new Error('Failed to enable two-factor authentication');
     }
@@ -175,23 +158,18 @@ export class TwoFactorAuthService {
    */
   public async disableTwoFactor(userId: string): Promise<void> {
     try {
-      // Get user's 2FA record
-      const twoFactorAuth = await TwoFactorAuth.findOne({
-        where: { userId }
-      });
+      const twoFactorAuth = await this.repository.findByUserId(userId);
 
       if (!twoFactorAuth) {
         throw new NotFoundError('Two-factor authentication not set up');
       }
 
-      // Update 2FA record
-      twoFactorAuth.status = TwoFactorStatus.DISABLED;
-      twoFactorAuth.backupCodes = [];
-      await twoFactorAuth.save();
+      await this.repository.update(twoFactorAuth.id, {
+        status: TwoFactorStatus.DISABLED,
+        backupCodes: []
+      });
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        throw error;
-      }
+      if (error instanceof NotFoundError) throw error;
       this.logger.error('Failed to disable 2FA', { error });
       throw new Error('Failed to disable two-factor authentication');
     }
@@ -204,10 +182,7 @@ export class TwoFactorAuthService {
    */
   public async regenerateBackupCodes(userId: string): Promise<string[]> {
     try {
-      // Get user's 2FA record
-      const twoFactorAuth = await TwoFactorAuth.findOne({
-        where: { userId }
-      });
+      const twoFactorAuth = await this.repository.findByUserId(userId);
 
       if (!twoFactorAuth) {
         throw new NotFoundError('Two-factor authentication not set up');
@@ -217,18 +192,15 @@ export class TwoFactorAuthService {
         throw new Error('Two-factor authentication is not enabled');
       }
 
-      // Generate backup codes
       const backupCodes = this.generateBackupCodes();
 
-      // Update 2FA record
-      twoFactorAuth.backupCodes = backupCodes;
-      await twoFactorAuth.save();
+      await this.repository.update(twoFactorAuth.id, {
+        backupCodes
+      });
 
       return backupCodes;
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        throw error;
-      }
+      if (error instanceof NotFoundError) throw error;
       this.logger.error('Failed to regenerate backup codes', { error });
       throw new Error('Failed to regenerate backup codes');
     }
@@ -241,10 +213,7 @@ export class TwoFactorAuthService {
    */
   public async getTwoFactorStatus(userId: string): Promise<{ enabled: boolean; status: TwoFactorStatus }> {
     try {
-      // Get user's 2FA record
-      const twoFactorAuth = await TwoFactorAuth.findOne({
-        where: { userId }
-      });
+      const twoFactorAuth = await this.repository.findByUserId(userId);
 
       if (!twoFactorAuth) {
         return { enabled: false, status: TwoFactorStatus.DISABLED };
@@ -252,7 +221,7 @@ export class TwoFactorAuthService {
 
       return {
         enabled: twoFactorAuth.status === TwoFactorStatus.ENABLED,
-        status: twoFactorAuth.status
+        status: twoFactorAuth.status as TwoFactorStatus
       };
     } catch (error) {
       this.logger.error('Failed to get 2FA status', { error });

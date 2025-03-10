@@ -1,6 +1,6 @@
 // src/server/scripts/createMigration.ts
-import * as path from 'path';
-import * as fs from 'fs-extra';
+import path from 'path';
+import { promises as fsPromises } from 'fs';
 import { migrationConfig, createMigrationTemplate } from '../database/migrationConfig';
 
 async function createMigration() {
@@ -14,7 +14,7 @@ async function createMigration() {
 
   // Ensure migrations directory exists
   const migrationsDir = migrationConfig.migrations_path;
-  await fs.ensureDir(migrationsDir);
+  await fsPromises.mkdir(migrationsDir, { recursive: true });
 
   // Generate timestamp for migration filename
   const timestamp = new Date().toISOString().replace(/[-:\.]/g, '').slice(0, 14);
@@ -22,7 +22,7 @@ async function createMigration() {
   const migrationPath = path.join(migrationsDir, migrationFilename);
 
   // Write migration template
-  await fs.writeFile(migrationPath, createMigrationTemplate(migrationName));
+  await fsPromises.writeFile(migrationPath, createMigrationTemplate(migrationName), 'utf8');
 
   console.log(`Migration created: ${migrationFilename}`);
 }

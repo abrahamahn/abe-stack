@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 import { BaseModel, BaseRepository } from '../database/BaseRepository';
 import { DatabaseConnectionManager } from '../database/config';
+import User from './User';
 
 // Two-factor authentication status
 export enum TwoFactorStatus {
@@ -54,6 +55,12 @@ export class TwoFactorAuthRepository extends BaseRepository<TwoFactorAuthAttribu
 export const twoFactorAuthRepository = new TwoFactorAuthRepository();
 
 export class TwoFactorAuth implements TwoFactorAuthAttributes {
+  static scope(undefined: undefined): TwoFactorAuth {
+      throw new Error('Method not implemented.');
+  }
+  static belongsTo(User: User, arg1: { foreignKey: string; as: string; }) {
+      throw new Error('Method not implemented.');
+  }
   id: string;
   userId: string;
   secret: string;

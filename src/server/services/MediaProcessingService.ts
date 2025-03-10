@@ -1,4 +1,5 @@
-import fs from 'fs-extra';
+import fs from 'fs';
+import { promises as fsPromises } from 'fs';
 import path from 'path';
 import ffmpeg from 'fluent-ffmpeg';
 import { v4 as uuidv4 } from 'uuid';
@@ -162,7 +163,7 @@ class MediaProcessingService {
       
       // Copy original if it's already MP4, otherwise convert
       if (path.extname(filePath).toLowerCase() === '.mp4') {
-        await fs.copyFile(filePath, originalPath);
+        await fsPromises.copyFile(filePath, originalPath);
       } else {
         await this.transcodeVideo(filePath, originalPath, {
           width: metadata.width,

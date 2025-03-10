@@ -12,9 +12,6 @@ import Artist from './Artist';
 import Media from './Media';
 import TwoFactorAuth from './TwoFactorAuth';
 
-// Import associations
-import './associations';
-
 // Export models
 export {
   User,

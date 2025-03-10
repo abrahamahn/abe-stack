@@ -1,5 +1,4 @@
-import { createHmac } from "crypto"
-import secureCompare from "secure-compare"
+import { createHmac, timingSafeEqual } from "crypto"
 
 type Data = { [key: string]: string | number }
 
@@ -17,8 +16,19 @@ export function verifySignature(args: {
 	secretKey: Buffer
 }): boolean {
 	const { data, signature, secretKey } = args
-	const validSiganture = createSignature({ data, secretKey })
-	return secureCompare(validSiganture, signature)
+	const validSignature = createSignature({ data, secretKey })
+	
+	// Convert strings to buffers for timingSafeEqual
+	const validBuffer = Buffer.from(validSignature, 'utf8')
+	const signatureBuffer = Buffer.from(signature, 'utf8')
+	
+	// Ensure buffers are the same length (required by timingSafeEqual)
+	if (validBuffer.length !== signatureBuffer.length) {
+		return false
+	}
+	
+	// Use Node.js's native timing-safe comparison
+	return timingSafeEqual(validBuffer, signatureBuffer)
 }
 
 function serialize(data: Data) {

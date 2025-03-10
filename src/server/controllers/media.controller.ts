@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express-serve-static-core';
 import path from 'path';
-import fs from 'fs-extra';
+import fs from 'fs';
+import { promises as fsPromises } from 'fs';
 import { EnhancedMediaProcessingService } from '../services/EnhancedMediaProcessingService';
 import { Logger } from '../services/LoggerService';
 import { NotFoundError } from '../middleware/error';
@@ -131,13 +132,13 @@ export class MediaController {
       }
       
       // Check if the file exists
-      if (!await fs.pathExists(videoPath)) {
+      if (!fs.existsSync(videoPath)) {
         throw new NotFoundError('Video not found');
       }
       
       // Get file stats
-      const stat = await fs.stat(videoPath);
-      const fileSize = stat.size;
+      const stat = fs.promises.stat(videoPath);
+      const fileSize = (await stat).size;
       
       // Handle range requests
       const range = req.headers.range;
@@ -207,7 +208,7 @@ export class MediaController {
       const hlsDir = path.join(this.uploadDir, 'videos', 'hls', videoId);
       
       // Check if the HLS directory exists
-      if (!await fs.pathExists(hlsDir)) {
+      if (!fs.existsSync(hlsDir)) {
         throw new NotFoundError('HLS stream not found');
       }
       
@@ -217,7 +218,7 @@ export class MediaController {
         : path.join(hlsDir, 'master.m3u8');
       
       // Check if the file exists
-      if (!await fs.pathExists(filePath)) {
+      if (!fs.existsSync(filePath)) {
         throw new NotFoundError('HLS file not found');
       }
       
@@ -259,13 +260,13 @@ export class MediaController {
       }
       
       // Check if the file exists
-      if (!await fs.pathExists(audioPath)) {
+      if (!fs.existsSync(audioPath)) {
         throw new NotFoundError('Audio not found');
       }
       
       // Get file stats
-      const stat = await fs.stat(audioPath);
-      const fileSize = stat.size;
+      const stat = fs.promises.stat(audioPath);
+      const fileSize = (await stat).size;
       
       // Handle range requests
       const range = req.headers.range;
@@ -335,12 +336,12 @@ export class MediaController {
       const waveformPath = path.join(this.uploadDir, 'audio', 'waveforms', `${audioId}.json`);
       
       // Check if the file exists
-      if (!await fs.pathExists(waveformPath)) {
+      if (!fs.existsSync(waveformPath)) {
         throw new NotFoundError('Waveform data not found');
       }
       
       // Read the waveform data
-      const waveformData = await fs.readFile(waveformPath, 'utf8');
+      const waveformData = await fs.promises.readFile(waveformPath, 'utf8');
       
       // Send the data
       res.setHeader('Content-Type', 'application/json');

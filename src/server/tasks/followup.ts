@@ -14,6 +14,6 @@ import { ServerEnvironment } from "../services/ServerEnvironment"
 // 	args: {message: "Hey!"},
 // 	run_at: new Date().toISOString()
 // })
-export async function followup(environment: ServerEnvironment, args: { message: string }) {
+export async function followup(args: { message: string }) {
 	console.log("Running followup task: " + args.message)
 }

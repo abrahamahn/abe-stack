@@ -3,6 +3,7 @@ import { BaseModel, BaseRepository } from '../database/BaseRepository';
 import { DatabaseConnectionManager } from '../database/config';
 import { Artist } from './Artist';
 import { Album } from './Album';
+import Playlist from './Playlist';
 
 export interface TrackAttributes extends BaseModel {
   title: string;
@@ -143,6 +144,12 @@ export class TrackRepository extends BaseRepository<TrackAttributes> {
 export const trackRepository = new TrackRepository();
 
 export class Track implements TrackAttributes {
+  static belongsTo(_Album: any, _options: { foreignKey: string; as: string; }) {
+      throw new Error('Method not implemented.');
+  }
+  static belongsToMany(_Playlist: any, _options: { through: any; foreignKey: string; as: string; }) {
+      throw new Error('Method not implemented.');
+  }
   id: string;
   title: string;
   duration: number;

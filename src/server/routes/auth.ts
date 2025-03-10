@@ -3,7 +3,7 @@ import type { Request, Response, NextFunction } from 'express';
 import { User } from '../models';
 import { NotFoundError, UnauthorizedError, BadRequestError } from '../../shared/errors/ApiError';
 import { authenticate, authorize } from '../middleware/auth';
-import { validate } from '../middleware/validate';
+import { customValidate } from '../middleware/customValidate';
 import { 
   registerSchema, 
   loginSchema, 
@@ -11,7 +11,7 @@ import {
   changePasswordSchema,
   twoFactorVerifySchema,
   twoFactorEnableSchema
-} from '../validators/auth.validator';
+} from '../validators/custom-auth.validator';
 import { TokenService, TokenType } from '../services/TokenService';
 import { TwoFactorAuthService } from '../services/TwoFactorAuthService';
 import { Logger } from '../services/LoggerService';
@@ -31,7 +31,7 @@ const twoFactorAuthService = TwoFactorAuthService.getInstance();
 const logger = new Logger('AuthRoutes');
 
 // Register
-router.post('/register', validate(registerSchema), async (req: Request, res: Response, next: NextFunction) => {
+router.post('/register', customValidate(registerSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { username, email, password, displayName } = req.body;
 
@@ -76,7 +76,7 @@ router.post('/register', validate(registerSchema), async (req: Request, res: Res
 });
 
 // Login
-router.post('/login', validate(loginSchema), async (req: Request, res: Response, next: NextFunction) => {
+router.post('/login', customValidate(loginSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = req.body;
 
@@ -205,7 +205,7 @@ router.get('/me', authenticate, async (req: Request, res: Response, next: NextFu
 });
 
 // Update profile
-router.patch('/profile', authenticate, validate(updateProfileSchema), async (req: Request, res: Response, next: NextFunction) => {
+router.patch('/profile', authenticate, customValidate(updateProfileSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { displayName, bio, avatar } = req.body;
     
@@ -234,7 +234,7 @@ router.patch('/profile', authenticate, validate(updateProfileSchema), async (req
 });
 
 // Change password
-router.post('/change-password', authenticate, validate(changePasswordSchema), async (req: Request, res: Response, next: NextFunction) => {
+router.post('/change-password', authenticate, customValidate(changePasswordSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { currentPassword, newPassword } = req.body;
     
@@ -318,7 +318,7 @@ router.post('/2fa/setup', authenticate, async (req: Request, res: Response, next
 });
 
 // Verify and enable 2FA
-router.post('/2fa/enable', authenticate, validate(twoFactorEnableSchema), async (req: Request, res: Response, next: NextFunction) => {
+router.post('/2fa/enable', authenticate, customValidate(twoFactorEnableSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { token } = req.body;
     
@@ -385,7 +385,7 @@ router.get('/2fa/status', authenticate, async (req: Request, res: Response, next
 });
 
 // Verify 2FA token during login
-router.post('/2fa/verify', validate(twoFactorVerifySchema), async (req: Request, res: Response, next: NextFunction) => {
+router.post('/2fa/verify', customValidate(twoFactorVerifySchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { userId, token } = req.body;
     

@@ -1,4 +1,4 @@
-import { Placement, createPopper } from "@popperjs/core"
+import { Placement, createPopper } from "../../hooks/usePopper"
 import React, { useLayoutEffect, useMemo } from "react"
 import { createPortal } from "react-dom"
 import { passthroughRef } from "../../helpers/passthroughRef"

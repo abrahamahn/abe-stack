@@ -23,15 +23,15 @@ export function formatRoute(route: Route) {
 }
 
 // `/thread/:threadId` will return {threadId: string}
-function matchRoutePath(pattern: string, urlPath: string) {
+export function matchRoutePath(pattern: string, urlPath: string): Record<string, string> | undefined {
 	const patternSegments = pattern.split("/")
 	const urlSegments = urlPath.split("/")
 
 	if (patternSegments.length !== urlSegments.length) {
-		return
+		return undefined;
 	}
 
-	let params: { [key: string]: string } = {}
+	let params: Record<string, string> = {}
 
 	for (let i = 0; i < patternSegments.length; i++) {
 		const patternSegment = patternSegments[i]
@@ -41,7 +41,7 @@ function matchRoutePath(pattern: string, urlPath: string) {
 			const key = patternSegment.slice(1)
 			params[key] = urlSegment
 		} else if (patternSegment !== urlSegment) {
-			return
+			return undefined;
 		}
 	}
 

@@ -1,11 +1,24 @@
 {
+    "extends": "./tsconfig.json",
     "compilerOptions": {
       "composite": true,
-      "skipLibCheck": true,
-      "module": "ESNext",
-      "moduleResolution": "bundler",
-      "allowSyntheticDefaultImports": true,
-      "types": ["node", "vite/client"]
+      "module": "NodeNext",
+      "moduleResolution": "NodeNext",
+      
+      // Output settings
+      "outDir": "./dist/server",
+      "rootDir": "./src",
+      
+      // Import paths
+      "paths": {
+        "@/*": ["./src/*"],
+        "@server/*": ["./src/server/*"],
+        "@shared/*": ["./src/shared/*"]
+      },
+      
+      // Server-specific types
+      "types": ["express"]
     },
-    "include": ["vite.config.ts"]
+    "include": ["src/server/**/*", "src/shared/**/*"],
+    "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts", "src/client"]
   }

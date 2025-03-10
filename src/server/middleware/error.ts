@@ -1,5 +1,4 @@
 import { Request as ExpressRequest, Response as ExpressResponse, NextFunction as ExpressNextFunction, ErrorRequestHandler } from 'express';
-import { ZodError } from 'zod';
 import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 import { Logger } from '../services/LoggerService';
 import { DatabaseError } from 'pg';
@@ -70,7 +69,7 @@ export class ValidationError extends Error {
 
 // Export the error handler with the correct Express ErrorRequestHandler type
 export const errorHandler: ErrorRequestHandler = (
-  err: Error | AppError | ZodError | DatabaseError | ValidationError,
+  err: Error | AppError | DatabaseError | ValidationError,
   req: Request,
   res: Response,
   next: NextFunction
@@ -91,26 +90,6 @@ export const errorHandler: ErrorRequestHandler = (
     }
     
     res.status(err.statusCode).json(response);
-    return next();
-  }
-  
-  // Handle Zod validation errors
-  if (err instanceof ZodError) {
-    const formattedErrors: Record<string, string[]> = {};
-    
-    err.errors.forEach((error) => {
-      const path = error.path.join('.');
-      if (!formattedErrors[path]) {
-        formattedErrors[path] = [];
-      }
-      formattedErrors[path].push(error.message);
-    });
-    
-    res.status(400).json({
-      status: 'fail',
-      message: 'Validation failed',
-      errors: formattedErrors
-    });
     return next();
   }
   

@@ -1,4 +1,5 @@
-import fs from 'fs-extra';
+import fs from 'fs';
+import { promises as fsPromises } from 'fs';
 import path from 'path';
 import ffmpeg from 'fluent-ffmpeg';
 import { v4 as uuidv4 } from 'uuid';
@@ -126,7 +127,7 @@ class AudioProcessingService {
     const coverArtPath = path.join(this.uploadDir, 'covers', `${fileId}.${picture.format}`);
     const thumbnailPath = path.join(this.uploadDir, 'covers', `${fileId}_thumb.jpg`);
     
-    await fs.ensureDir(path.dirname(coverArtPath));
+    await fsPromises.mkdir(path.dirname(coverArtPath), { recursive: true });
     await fs.writeFile(coverArtPath, picture.data);
     
     // Create thumbnail - convert Uint8Array to Buffer

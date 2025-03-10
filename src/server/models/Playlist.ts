@@ -148,6 +148,12 @@ export class PlaylistRepository extends BaseRepository<PlaylistAttributes> {
 export const playlistRepository = new PlaylistRepository();
 
 export class Playlist implements PlaylistAttributes {
+  static belongsTo(_User: any, _options: { foreignKey: string; as: string; }) {
+      throw new Error('Method not implemented.');
+  }
+  static belongsToMany(_Track: any, _options: { through: any; foreignKey: string; as: string; }) {
+      throw new Error('Method not implemented.');
+  }
   id: string;
   name: string;
   description: string | null;

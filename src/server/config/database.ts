@@ -1,12 +1,12 @@
 import { Pool } from 'pg';
-import { env } from './environment';
+import { envConfig } from './environment';
 
 export const db = new Pool({
-  user: env.DB_USER,
-  password: env.DB_PASSWORD,
-  host: env.DB_HOST,
-  port: Number(env.DB_PORT),
-  database: env.DB_NAME,
+  user: envConfig.DB_USER,
+  password: envConfig.DB_PASSWORD,
+  host: envConfig.DB_HOST,
+  port: envConfig.DB_PORT,
+  database: envConfig.DB_NAME,
   ssl: {
     rejectUnauthorized: false
   }

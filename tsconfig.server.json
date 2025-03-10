@@ -1,35 +1,23 @@
 {
+  "extends": "./tsconfig.json",
   "compilerOptions": {
     "composite": true,
-    "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     
-    // Output settings - critical to prevent .js files in src
+    // Output settings
     "outDir": "./dist/server",
     "rootDir": "./src",
-    "sourceMap": true,
     
-    // Type checking
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    
-    // Import handling
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "baseUrl": ".",
+    // Import paths
     "paths": {
-      "@server/*": ["./src/server/*"]
+      "@/*": ["./src/*"],
+      "@server/*": ["./src/server/*"],
+      "@shared/*": ["./src/shared/*"]
     },
     
-    // Additional settings
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "types": ["node", "express", "sharp"]
+    // Server-specific types
+    "types": ["node", "express"]
   },
   "include": ["src/server/**/*", "src/shared/**/*"],
   "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts", "src/client"]

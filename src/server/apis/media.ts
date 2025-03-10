@@ -1,5 +1,5 @@
 // src/server/apis/media.ts
-import * as t from 'data-type-ts';
+import * as t from '../../shared/dataTypes';
 import multer from 'multer';
 import { MediaService } from '../services/MediaService';
 import { Request, Response } from 'express';

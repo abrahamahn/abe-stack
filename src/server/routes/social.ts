@@ -1,6 +1,6 @@
 import Router from 'express';
 import { authenticate } from '../middleware/auth';
-import { validate } from '../middleware/validate';
+import { customValidate } from '../middleware/customValidate';
 import {
   createPostSchema,
   postIdParamSchema,
@@ -10,7 +10,7 @@ import {
   userIdParamSchema,
   feedQuerySchema,
   getCommentsQuerySchema
-} from '../validators/social.validator';
+} from '../validators/custom-social.validator';
 import {
   getUserProfileHandler,
   followUser,
@@ -33,41 +33,41 @@ const router = Router();
 router.use(authenticate);
 
 // User profile routes
-router.get('/users/:userId', validate(userIdParamSchema, 'params'), getUserProfileHandler);
-router.post('/users/:userId/follow', validate(userIdParamSchema, 'params'), followUser);
-router.delete('/users/:userId/follow', validate(userIdParamSchema, 'params'), unfollowUser);
+router.get('/users/:userId', customValidate(userIdParamSchema, 'params'), getUserProfileHandler);
+router.post('/users/:userId/follow', customValidate(userIdParamSchema, 'params'), followUser);
+router.delete('/users/:userId/follow', customValidate(userIdParamSchema, 'params'), unfollowUser);
 
 // Feed routes
-router.get('/feed', validate(feedQuerySchema, 'query'), getFeed);
+router.get('/feed', customValidate(feedQuerySchema, 'query'), getFeed);
 
 // Post routes
-router.post('/posts', validate(createPostSchema), createPost);
-router.post('/posts/:postId/like', validate(postIdParamSchema, 'params'), likePost);
-router.delete('/posts/:postId/like', validate(postIdParamSchema, 'params'), unlikePost);
-router.post('/posts/:postId/share', validate(postIdParamSchema, 'params'), sharePost);
+router.post('/posts', customValidate(createPostSchema), createPost);
+router.post('/posts/:postId/like', customValidate(postIdParamSchema, 'params'), likePost);
+router.delete('/posts/:postId/like', customValidate(postIdParamSchema, 'params'), unlikePost);
+router.post('/posts/:postId/share', customValidate(postIdParamSchema, 'params'), sharePost);
 
 // Comment routes
 router.get('/posts/:postId/comments', 
-  validate(postIdParamSchema, 'params'),
-  validate(getCommentsQuerySchema, 'query'),
+  customValidate(postIdParamSchema, 'params'),
+  customValidate(getCommentsQuerySchema, 'query'),
   getComments
 );
 router.post('/posts/:postId/comments', 
-  validate(postIdParamSchema, 'params'),
-  validate(createCommentSchema),
+  customValidate(postIdParamSchema, 'params'),
+  customValidate(createCommentSchema),
   createComment
 );
 router.post('/comments/:commentId/like', 
-  validate(commentIdParamSchema, 'params'),
+  customValidate(commentIdParamSchema, 'params'),
   likeComment
 );
 router.delete('/comments/:commentId/like', 
-  validate(commentIdParamSchema, 'params'),
+  customValidate(commentIdParamSchema, 'params'),
   unlikeComment
 );
 router.post('/comments/:commentId/reply', 
-  validate(commentIdParamSchema, 'params'),
-  validate(replyToCommentSchema),
+  customValidate(commentIdParamSchema, 'params'),
+  customValidate(replyToCommentSchema),
   replyToComment
 );
 

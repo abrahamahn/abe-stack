@@ -1,7 +1,7 @@
 {
+  "extends": "./tsconfig.json",
   "compilerOptions": {
     "composite": true,
-    "target": "ES2022",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
@@ -10,31 +10,19 @@
     // React-specific settings
     "jsx": "react-jsx",
     
-    // Type checking
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    
-    // Import handling
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-    "baseUrl": ".",
+    // Import paths
     "paths": {
-      "@/*": ["./src/client/*"]
+      "@/*": ["./src/*"],
+      "@client/*": ["./src/client/*"],
+      "@shared/*": ["./src/shared/*"]
     },
     
-    // Additional settings
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "sourceMap": true,
+    // Client-specific settings
+    "allowSyntheticDefaultImports": true,
     "useDefineForClassFields": true,
-    "types": ["vite/client", "node"]
+    "types": []
   },
-  "include": ["src/client"],
+  "include": ["src/client/**/*", "src/shared/**/*"],
   "exclude": ["node_modules", "dist", "build", "**/*.spec.ts", "**/*.test.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

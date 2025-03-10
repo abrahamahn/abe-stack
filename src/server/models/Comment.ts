@@ -1,6 +1,8 @@
 import { Pool } from 'pg';
 import { BaseModel, BaseRepository } from '../database/BaseRepository';
 import { DatabaseConnectionManager } from '../database/config';
+import User from './User';
+import CommentLike from './CommentLike';
 
 export interface CommentAttributes extends BaseModel {
   userId: string;
@@ -129,6 +131,226 @@ export class CommentRepository extends BaseRepository<CommentAttributes> {
       await (client || DatabaseConnectionManager.getPool()).query(query, [id]);
     } catch (error) {
       this.logger.error('Error in decrementLikes', { id, error });
+      throw error;
+    }
+  }
+
+  /**
+   * Find comment with user data
+   */
+  async findWithUser(id: string, client?: Pool): Promise<(CommentAttributes & { user: any }) | null> {
+    const query = `
+      SELECT 
+        c.*,
+        json_build_object(
+          'id', u.id,
+          'username', u.username,
+          'displayName', u.display_name,
+          'profileImage', u.profile_image
+        ) as user
+      FROM 
+        comments c
+      LEFT JOIN 
+        users u ON c.user_id = u.id
+      WHERE 
+        c.id = $1
+    `;
+
+    try {
+      const result = await (client || DatabaseConnectionManager.getPool()).query(query, [id]);
+      if (!result.rows[0]) return null;
+
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        userId: row.user_id,
+        postId: row.post_id,
+        parentId: row.parent_id,
+        content: row.content,
+        likesCount: row.likes_count,
+        status: row.status,
+        moderationReason: row.moderation_reason,
+        moderatedBy: row.moderated_by,
+        moderatedAt: row.moderated_at,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        user: row.user
+      };
+    } catch (error) {
+      console.error('Error in findWithUser:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Find comment with likes
+   */
+  async findWithLikes(id: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(CommentAttributes & { likes: any[] }) | null> {
+    const query = `
+      SELECT 
+        c.*,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', cl.id,
+              'userId', cl.user_id,
+              'commentId', cl.comment_id,
+              'createdAt', cl.created_at,
+              'updatedAt', cl.updated_at,
+              'user', json_build_object(
+                'id', u.id,
+                'username', u.username,
+                'displayName', u.display_name,
+                'profileImage', u.profile_image
+              )
+            ) ORDER BY cl.created_at DESC
+          ) FILTER (WHERE cl.id IS NOT NULL), '[]'
+        ) as likes
+      FROM 
+        comments c
+      LEFT JOIN 
+        comment_likes cl ON c.id = cl.comment_id
+      LEFT JOIN
+        users u ON cl.user_id = u.id
+      WHERE 
+        c.id = $1
+      GROUP BY 
+        c.id
+      LIMIT $2 OFFSET $3
+    `;
+
+    try {
+      const result = await (client || DatabaseConnectionManager.getPool()).query(query, [id, limit, offset]);
+      if (!result.rows[0]) return null;
+
+      return {
+        ...result.rows[0],
+        userId: result.rows[0].user_id,
+        postId: result.rows[0].post_id,
+        parentId: result.rows[0].parent_id,
+        likesCount: result.rows[0].likes_count,
+        moderationReason: result.rows[0].moderation_reason,
+        moderatedBy: result.rows[0].moderated_by,
+        moderatedAt: result.rows[0].moderated_at,
+        createdAt: result.rows[0].created_at,
+        updatedAt: result.rows[0].updated_at,
+        likes: result.rows[0].likes || []
+      };
+    } catch (error) {
+      console.error('Error in findWithLikes:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Find complete comment with all relationships
+   */
+  async findComplete(id: string, options: {
+    likesLimit?: number;
+    likesOffset?: number;
+  } = {}, client?: Pool): Promise<(CommentAttributes & { user: any, likes: any[] }) | null> {
+    const {
+      likesLimit = 20,
+      likesOffset = 0
+    } = options;
+
+    const query = `
+      WITH comment_data AS (
+        SELECT 
+          c.*,
+          u.id as "user.id",
+          u.username as "user.username",
+          u.display_name as "user.displayName",
+          u.profile_image as "user.profileImage"
+        FROM ${this.tableName} c
+        LEFT JOIN users u ON c.user_id = u.id
+        WHERE c.id = $1
+      ),
+      like_data AS (
+        SELECT 
+          l.id,
+          l.user_id,
+          l.created_at,
+          u.username,
+          u.display_name as displayName,
+          u.profile_image as profileImage
+        FROM comment_likes l
+        JOIN users u ON l.user_id = u.id
+        WHERE l.comment_id = $1
+        ORDER BY l.created_at DESC
+        LIMIT $2 OFFSET $3
+      )
+      SELECT 
+        cd.*,
+        json_agg(ld.*) FILTER (WHERE ld.id IS NOT NULL) as likes
+      FROM comment_data cd
+      LEFT JOIN like_data ld ON true
+      GROUP BY 
+        cd.id, cd.user_id, cd.post_id, cd.content,
+        cd.likes_count, cd.created_at, cd.updated_at,
+        cd."user.id", cd."user.username", cd."user.displayName", cd."user.profileImage"
+    `;
+
+    try {
+      const result = await (client || DatabaseConnectionManager.getPool())
+        .query(query, [id, likesLimit, likesOffset]);
+      
+      if (!result.rows[0]) return null;
+
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        userId: row.user_id,
+        postId: row.post_id,
+        content: row.content,
+        likesCount: row.likes_count,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        user: {
+          id: row['user.id'],
+          username: row['user.username'],
+          displayName: row['user.displayName'],
+          profileImage: row['user.profileImage']
+        },
+        likes: row.likes || []
+      } as any;
+    } catch (error) {
+      this.logger.error('Error in findComplete', { id, options, error });
+      throw error;
+    }
+  }
+
+  /**
+   * Find comments by post ID with user data
+   */
+  async findByPostIdWithUser(postId: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(CommentAttributes & { user: any })[]> {
+    const query = `
+      SELECT 
+        c.*,
+        u.id as "user.id",
+        u.username as "user.username",
+        u.display_name as "user.displayName",
+        u.profile_image as "user.profileImage"
+      FROM ${this.tableName} c
+      LEFT JOIN users u ON c.user_id = u.id
+      WHERE c.post_id = $1
+      ORDER BY c.created_at DESC
+      LIMIT $2 OFFSET $3
+    `;
+
+    try {
+      const result = await (client || DatabaseConnectionManager.getPool()).query(query, [postId, limit, offset]);
+      return result.rows.map(row => ({
+        ...row,
+        user: {
+          id: row['user.id'],
+          username: row['user.username'],
+          displayName: row['user.displayName'],
+          profileImage: row['user.profileImage']
+        }
+      }));
+    } catch (error) {
+      this.logger.error('Error in findByPostIdWithUser', { postId, limit, offset, error });
       throw error;
     }
   }

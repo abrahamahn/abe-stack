@@ -251,6 +251,297 @@ export class PostRepository extends BaseRepository<PostAttributes> {
       throw error;
     }
   }
+
+  /**
+   * Find posts with user data
+   */
+  async findWithUser(id: string, client?: Pool): Promise<(PostAttributes & { user: any }) | null> {
+    const query = `
+      SELECT 
+        p.*,
+        json_build_object(
+          'id', u.id,
+          'username', u.username,
+          'displayName', u.display_name,
+          'profileImage', u.profile_image
+        ) as user
+      FROM 
+        posts p
+      LEFT JOIN 
+        users u ON p.user_id = u.id
+      WHERE 
+        p.id = $1
+    `;
+
+    try {
+      const result = await (client || DatabaseConnectionManager.getPool()).query(query, [id]);
+      if (!result.rows[0]) return null;
+
+      const row = result.rows[0];
+      const post = {
+        id: row.id,
+        userId: row.user_id,
+        content: row.content,
+        media: row.media,
+        likesCount: row.likes_count,
+        commentsCount: row.comments_count,
+        sharesCount: row.shares_count,
+        status: row.status,
+        moderationReason: row.moderation_reason,
+        moderatedBy: row.moderated_by,
+        moderatedAt: row.moderated_at,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        user: row.user
+      };
+
+      return post;
+    } catch (error) {
+      console.error('Error in findWithUser:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Find posts with comments
+   */
+  async findWithComments(id: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(PostAttributes & { comments: any[] }) | null> {
+    const query = `
+      SELECT 
+        p.*,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', c.id,
+              'userId', c.user_id,
+              'postId', c.post_id,
+              'parentId', c.parent_id,
+              'content', c.content,
+              'likesCount', c.likes_count,
+              'status', c.status,
+              'createdAt', c.created_at,
+              'updatedAt', c.updated_at,
+              'user', json_build_object(
+                'id', u.id,
+                'username', u.username,
+                'displayName', u.display_name,
+                'profileImage', u.profile_image
+              )
+            ) ORDER BY c.created_at DESC
+          ) FILTER (WHERE c.id IS NOT NULL), '[]'
+        ) as comments
+      FROM 
+        posts p
+      LEFT JOIN 
+        comments c ON p.id = c.post_id
+      LEFT JOIN
+        users u ON c.user_id = u.id
+      WHERE 
+        p.id = $1
+      GROUP BY 
+        p.id
+      LIMIT $2 OFFSET $3
+    `;
+
+    try {
+      const result = await (client || DatabaseConnectionManager.getPool()).query(query, [id, limit, offset]);
+      if (!result.rows[0]) return null;
+
+      const post = {
+        id: result.rows[0].id,
+        userId: result.rows[0].user_id,
+        content: result.rows[0].content,
+        media: result.rows[0].media,
+        likesCount: result.rows[0].likes_count,
+        commentsCount: result.rows[0].comments_count,
+        sharesCount: result.rows[0].shares_count,
+        status: result.rows[0].status,
+        moderationReason: result.rows[0].moderation_reason,
+        moderatedBy: result.rows[0].moderated_by,
+        moderatedAt: result.rows[0].moderated_at,
+        createdAt: result.rows[0].created_at,
+        updatedAt: result.rows[0].updated_at,
+        comments: result.rows[0].comments || []
+      };
+
+      return post;
+    } catch (error) {
+      console.error('Error in findWithComments:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Find posts with likes
+   */
+  async findWithLikes(id: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(PostAttributes & { likes: any[] }) | null> {
+    const query = `
+      SELECT 
+        p.*,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', l.id,
+              'userId', l.user_id,
+              'postId', l.post_id,
+              'createdAt', l.created_at,
+              'updatedAt', l.updated_at,
+              'user', json_build_object(
+                'id', u.id,
+                'username', u.username,
+                'displayName', u.display_name,
+                'profileImage', u.profile_image
+              )
+            ) ORDER BY l.created_at DESC
+          ) FILTER (WHERE l.id IS NOT NULL), '[]'
+        ) as likes
+      FROM 
+        posts p
+      LEFT JOIN 
+        likes l ON p.id = l.post_id
+      LEFT JOIN
+        users u ON l.user_id = u.id
+      WHERE 
+        p.id = $1
+      GROUP BY 
+        p.id
+      LIMIT $2 OFFSET $3
+    `;
+
+    try {
+      const result = await (client || DatabaseConnectionManager.getPool()).query(query, [id, limit, offset]);
+      if (!result.rows[0]) return null;
+
+      const post = {
+        id: result.rows[0].id,
+        userId: result.rows[0].user_id,
+        content: result.rows[0].content,
+        media: result.rows[0].media,
+        likesCount: result.rows[0].likes_count,
+        commentsCount: result.rows[0].comments_count,
+        sharesCount: result.rows[0].shares_count,
+        status: result.rows[0].status,
+        moderationReason: result.rows[0].moderation_reason,
+        moderatedBy: result.rows[0].moderated_by,
+        moderatedAt: result.rows[0].moderated_at,
+        createdAt: result.rows[0].created_at,
+        updatedAt: result.rows[0].updated_at,
+        likes: result.rows[0].likes || []
+      };
+
+      return post;
+    } catch (error) {
+      console.error('Error in findWithLikes:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Find complete post with all relationships
+   */
+  async findComplete(id: string, options: { 
+    commentsLimit?: number, 
+    commentsOffset?: number,
+    likesLimit?: number,
+    likesOffset?: number
+  } = {}, client?: Pool): Promise<(PostAttributes & { user: any, comments: any[], likes: any[] }) | null> {
+    const {
+      commentsLimit = 20,
+      commentsOffset = 0,
+      likesLimit = 20,
+      likesOffset = 0
+    } = options;
+
+    const query = `
+      WITH post_data AS (
+        SELECT 
+          p.*,
+          u.id as "user.id",
+          u.username as "user.username",
+          u.display_name as "user.displayName",
+          u.profile_image as "user.profileImage"
+        FROM ${this.tableName} p
+        LEFT JOIN users u ON p.user_id = u.id
+        WHERE p.id = $1
+      ),
+      comment_data AS (
+        SELECT 
+          c.id,
+          c.content,
+          c.user_id,
+          c.created_at,
+          u.username,
+          u.display_name,
+          u.profile_image
+        FROM comments c
+        LEFT JOIN users u ON c.user_id = u.id
+        WHERE c.post_id = $1
+        ORDER BY c.created_at DESC
+        LIMIT $2 OFFSET $3
+      ),
+      like_data AS (
+        SELECT 
+          l.id,
+          l.user_id,
+          l.created_at,
+          u.username,
+          u.display_name,
+          u.profile_image
+        FROM likes l
+        LEFT JOIN users u ON l.user_id = u.id
+        WHERE l.post_id = $1
+        ORDER BY l.created_at DESC
+        LIMIT $4 OFFSET $5
+      )
+      SELECT 
+        pd.*,
+        json_agg(DISTINCT cd.*) FILTER (WHERE cd.id IS NOT NULL) as comments,
+        json_agg(DISTINCT ld.*) FILTER (WHERE ld.id IS NOT NULL) as likes
+      FROM post_data pd
+      LEFT JOIN comment_data cd ON true
+      LEFT JOIN like_data ld ON true
+      GROUP BY 
+        pd.id, pd.user_id, pd.content, pd.media, pd.likes_count,
+        pd.comments_count, pd.shares_count, pd.status, pd.moderation_reason,
+        pd.moderated_by, pd.moderated_at, pd.created_at, pd.updated_at,
+        pd."user.id", pd."user.username", pd."user.displayName", pd."user.profileImage"
+    `;
+
+    try {
+      const result = await (client || DatabaseConnectionManager.getPool())
+        .query(query, [id, commentsLimit, commentsOffset, likesLimit, likesOffset]);
+      
+      if (!result.rows[0]) return null;
+
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        userId: row.user_id,
+        content: row.content,
+        media: row.media,
+        likesCount: row.likes_count,
+        commentsCount: row.comments_count,
+        sharesCount: row.shares_count,
+        status: row.status,
+        moderationReason: row.moderation_reason,
+        moderatedBy: row.moderated_by,
+        moderatedAt: row.moderated_at,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        user: {
+          id: row['user.id'],
+          username: row['user.username'],
+          displayName: row['user.displayName'],
+          profileImage: row['user.profileImage']
+        },
+        comments: row.comments || [],
+        likes: row.likes || []
+      } as any;
+    } catch (error) {
+      this.logger.error('Error in findComplete', { id, options, error });
+      throw error;
+    }
+  }
 }
 
 // Singleton instance
