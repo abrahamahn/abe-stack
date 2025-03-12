@@ -2,9 +2,151 @@ import React, { useState } from 'react';
 import { useClientEnvironment } from '../../services/ClientEnvironment';
 import { PageContent } from '../layouts/PageContent';
 
+// Explore page styles
+const styles = {
+  categories: {
+    marginTop: '20px',
+    borderBottom: '1px solid var(--border-color)',
+    paddingBottom: '10px'
+  },
+  categoryButtons: {
+    display: 'flex',
+    gap: '10px',
+    overflowX: 'auto' as const,
+    paddingBottom: '5px'
+  },
+  categoryButton: {
+    padding: '8px 16px',
+    borderRadius: '20px',
+    cursor: 'pointer',
+    whiteSpace: 'nowrap' as const
+  },
+  categoryButtonActive: {
+    backgroundColor: 'var(--blue)',
+    color: 'white',
+    border: 'none'
+  },
+  categoryButtonInactive: {
+    backgroundColor: 'transparent',
+    color: 'var(--blue)',
+    border: '1px solid var(--blue)'
+  },
+  searchContainer: {
+    marginTop: '20px',
+    display: 'flex',
+    gap: '10px'
+  },
+  searchInput: {
+    flex: 1,
+    padding: '10px 15px',
+    borderRadius: '4px',
+    border: '1px solid var(--border-color)',
+    fontSize: '16px',
+    backgroundColor: 'var(--surface)',
+    color: 'var(--text-primary)'
+  },
+  searchButton: {
+    padding: '10px 20px',
+    backgroundColor: 'var(--blue)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer'
+  },
+  contentSection: {
+    marginTop: '30px'
+  },
+  contentTitle: {
+    color: 'var(--text-primary)'
+  },
+  contentGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+    gap: '20px',
+    marginTop: '15px'
+  },
+  contentCard: {
+    border: '1px solid var(--border-color)',
+    borderRadius: '8px',
+    overflow: 'hidden',
+    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+    cursor: 'pointer',
+    backgroundColor: 'var(--card-bg)',
+    boxShadow: 'var(--shadow)'
+  },
+  contentCardHover: {
+    transform: 'translateY(-5px)',
+    boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)'
+  },
+  contentImage: {
+    height: '160px',
+    backgroundColor: 'var(--blue)',
+    position: 'relative' as const
+  },
+  contentViews: {
+    position: 'absolute' as const,
+    bottom: '10px',
+    right: '10px',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    color: 'white',
+    padding: '3px 8px',
+    borderRadius: '4px',
+    fontSize: '12px'
+  },
+  contentDetails: {
+    padding: '15px'
+  },
+  contentItemTitle: {
+    margin: '0 0 5px 0',
+    fontSize: '18px',
+    color: 'var(--text-primary)'
+  },
+  contentAuthor: {
+    color: 'var(--text-secondary)',
+    fontSize: '14px',
+    marginBottom: '10px'
+  },
+  contentFooter: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  contentLikes: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '5px',
+    color: 'var(--text-secondary)',
+    fontSize: '14px'
+  },
+  pagination: {
+    marginTop: '30px',
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '5px'
+  },
+  paginationButton: {
+    width: '40px',
+    height: '40px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    border: '1px solid var(--border-color)',
+    borderRadius: '4px',
+    backgroundColor: 'var(--card-bg)',
+    cursor: 'pointer',
+    color: 'var(--text-primary)'
+  },
+  paginationButtonActive: {
+    border: 'none',
+    backgroundColor: 'var(--blue)',
+    color: 'white'
+  }
+};
+
 export function ExplorePage() {
   const environment = useClientEnvironment();
   const [activeCategory, setActiveCategory] = useState('all');
+  const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   
   const categories = [
     { id: 'all', name: 'All' },
@@ -36,20 +178,15 @@ export function ExplorePage() {
       description="Discover trending and popular content from creators."
     >
       {/* Categories */}
-      <div style={{ marginTop: '20px', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
-        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '5px' }}>
+      <div style={styles.categories}>
+        <div style={styles.categoryButtons}>
           {categories.map(category => (
             <button
               key={category.id}
               onClick={() => setActiveCategory(category.id)}
               style={{
-                padding: '8px 16px',
-                backgroundColor: activeCategory === category.id ? 'var(--blue)' : 'transparent',
-                color: activeCategory === category.id ? 'white' : 'var(--blue)',
-                border: activeCategory === category.id ? 'none' : '1px solid var(--blue)',
-                borderRadius: '20px',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap'
+                ...styles.categoryButton,
+                ...(activeCategory === category.id ? styles.categoryButtonActive : styles.categoryButtonInactive)
               }}
             >
               {category.name}
@@ -59,83 +196,43 @@ export function ExplorePage() {
       </div>
       
       {/* Search Bar */}
-      <div style={{ marginTop: '20px' }}>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <input
-            type="text"
-            placeholder="Search content..."
-            style={{
-              flex: 1,
-              padding: '10px 15px',
-              borderRadius: '4px',
-              border: '1px solid #ddd',
-              fontSize: '16px'
-            }}
-          />
-          <button
-            style={{
-              padding: '10px 20px',
-              backgroundColor: 'var(--blue)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}
-          >
-            Search
-          </button>
-        </div>
+      <div style={styles.searchContainer}>
+        <input
+          type="text"
+          placeholder="Search content..."
+          style={styles.searchInput}
+        />
+        <button style={styles.searchButton}>
+          Search
+        </button>
       </div>
       
       {/* Content Grid */}
-      <div style={{ marginTop: '30px' }}>
-        <h2>{activeCategory === 'all' ? 'All Content' : categories.find(c => c.id === activeCategory)?.name}</h2>
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
-          gap: '20px',
-          marginTop: '15px'
-        }}>
+      <div style={styles.contentSection}>
+        <h2 style={styles.contentTitle}>
+          {activeCategory === 'all' ? 'All Content' : categories.find(c => c.id === activeCategory)?.name}
+        </h2>
+        <div style={styles.contentGrid}>
           {filteredItems.map(item => (
             <div 
               key={item.id} 
-              style={{ 
-                border: '1px solid #eee', 
-                borderRadius: '8px', 
-                overflow: 'hidden',
-                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                cursor: 'pointer',
-                backgroundColor: 'white',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+              style={{
+                ...styles.contentCard,
+                ...(hoveredCard === item.id ? styles.contentCardHover : {})
               }}
-              onMouseEnter={e => {
-                e.currentTarget.style.transform = 'translateY(-5px)';
-                e.currentTarget.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
-              }}
+              onMouseEnter={() => setHoveredCard(item.id)}
+              onMouseLeave={() => setHoveredCard(null)}
             >
-              <div style={{ height: '160px', backgroundColor: 'var(--blue)', position: 'relative' }}>
-                <div style={{ 
-                  position: 'absolute', 
-                  bottom: '10px', 
-                  right: '10px',
-                  backgroundColor: 'rgba(0,0,0,0.6)',
-                  color: 'white',
-                  padding: '3px 8px',
-                  borderRadius: '4px',
-                  fontSize: '12px'
-                }}>
+              <div style={styles.contentImage}>
+                <div style={styles.contentViews}>
                   {item.views} views
                 </div>
               </div>
-              <div style={{ padding: '15px' }}>
-                <h3 style={{ margin: '0 0 5px 0', fontSize: '18px' }}>{item.title}</h3>
-                <div style={{ color: '#666', fontSize: '14px', marginBottom: '10px' }}>by {item.author}</div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#666', fontSize: '14px' }}>
+              <div style={styles.contentDetails}>
+                <h3 style={styles.contentItemTitle}>{item.title}</h3>
+                <div style={styles.contentAuthor}>by {item.author}</div>
+                <div style={styles.contentFooter}>
+                  <div style={styles.contentLikes}>
                     <span>❤️ {item.likes}</span>
                   </div>
                   <div style={{ 
@@ -159,50 +256,22 @@ export function ExplorePage() {
       </div>
       
       {/* Pagination */}
-      <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'center', gap: '5px' }}>
-        <button style={{ 
-          width: '40px', 
-          height: '40px', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          border: '1px solid #ddd',
-          borderRadius: '4px',
-          backgroundColor: 'white',
-          cursor: 'pointer'
-        }}>
+      <div style={styles.pagination}>
+        <button style={styles.paginationButton}>
           &lt;
         </button>
         {[1, 2, 3, 4, 5].map(page => (
           <button 
             key={page}
-            style={{ 
-              width: '40px', 
-              height: '40px', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              border: page === 1 ? 'none' : '1px solid #ddd',
-              borderRadius: '4px',
-              backgroundColor: page === 1 ? 'var(--blue)' : 'white',
-              color: page === 1 ? 'white' : 'inherit',
-              cursor: 'pointer'
+            style={{
+              ...styles.paginationButton,
+              ...(page === 1 ? styles.paginationButtonActive : {})
             }}
           >
             {page}
           </button>
         ))}
-        <button style={{ 
-          width: '40px', 
-          height: '40px', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          border: '1px solid #ddd',
-          borderRadius: '4px',
-          backgroundColor: 'white',
-          cursor: 'pointer'
-        }}>
+        <button style={styles.paginationButton}>
           &gt;
         </button>
       </div>

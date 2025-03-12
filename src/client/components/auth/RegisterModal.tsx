@@ -4,11 +4,13 @@ interface RegisterModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSwitchToLogin: () => void;
-  onRegister: (name: string, email: string, password: string) => void;
+  onRegister: (username: string, firstName: string, lastName: string, email: string, password: string) => void;
 }
 
 export function RegisterModal({ isOpen, onClose, onSwitchToLogin, onRegister }: RegisterModalProps) {
-  const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -20,8 +22,18 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin, onRegister }: 
     e.preventDefault();
     
     // Basic validation
-    if (!name.trim()) {
-      setError('Name is required');
+    if (!username.trim()) {
+      setError('Username is required');
+      return;
+    }
+    
+    if (!firstName.trim()) {
+      setError('First name is required');
+      return;
+    }
+    
+    if (!lastName.trim()) {
+      setError('Last name is required');
       return;
     }
     
@@ -40,28 +52,51 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin, onRegister }: 
       return;
     }
     
+    // Validate username format
+    if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+      setError('Username can only contain letters, numbers, underscores, and hyphens');
+      return;
+    }
+    
     // Clear any previous errors
     setError(null);
     
     // Call the register function
-    onRegister(name, email, password);
+    onRegister(username, firstName, lastName, email, password);
   };
   
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div 
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000
+      }} 
+      onClick={onClose}
+    >
       <div 
-        className="modal-content" 
         onClick={e => e.stopPropagation()}
         style={{
-          backgroundColor: 'white',
+          position: 'relative',
+          backgroundColor: 'var(--surface)',
+          color: 'var(--text-primary)',
           borderRadius: '8px',
           padding: '24px',
           width: '400px',
           maxWidth: '90%',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
         }}
       >
-        <h2 style={{ marginTop: 0, color: 'var(--blue)' }}>Create Account</h2>
+        <h2 style={{ marginTop: 0, color: 'var(--accent)' }}>Create Account</h2>
         
         {error && (
           <div style={{ 
@@ -78,28 +113,88 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin, onRegister }: 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '16px' }}>
             <label 
-              htmlFor="name" 
+              htmlFor="username" 
               style={{ 
                 display: 'block', 
                 marginBottom: '6px', 
                 fontWeight: 'bold' 
               }}
             >
-              Name
+              Username
             </label>
             <input
-              id="name"
+              id="username"
               type="text"
-              value={name}
-              onChange={e => setName(e.target.value)}
+              value={username}
+              onChange={e => setUsername(e.target.value)}
               style={{
                 width: '100%',
                 padding: '10px',
                 borderRadius: '4px',
-                border: '1px solid #ddd',
-                fontSize: '16px'
+                border: '1px solid var(--border-color)',
+                fontSize: '16px',
+                backgroundColor: 'var(--input-bg)',
+                color: 'var(--text-primary)'
               }}
-              placeholder="Enter your name"
+              placeholder="Choose a username"
+            />
+          </div>
+          
+          <div style={{ marginBottom: '16px' }}>
+            <label 
+              htmlFor="firstName" 
+              style={{ 
+                display: 'block', 
+                marginBottom: '6px', 
+                fontWeight: 'bold' 
+              }}
+            >
+              First Name
+            </label>
+            <input
+              id="firstName"
+              type="text"
+              value={firstName}
+              onChange={e => setFirstName(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px',
+                borderRadius: '4px',
+                border: '1px solid var(--border-color)',
+                fontSize: '16px',
+                backgroundColor: 'var(--input-bg)',
+                color: 'var(--text-primary)'
+              }}
+              placeholder="Enter your first name"
+            />
+          </div>
+          
+          <div style={{ marginBottom: '16px' }}>
+            <label 
+              htmlFor="lastName" 
+              style={{ 
+                display: 'block', 
+                marginBottom: '6px', 
+                fontWeight: 'bold' 
+              }}
+            >
+              Last Name
+            </label>
+            <input
+              id="lastName"
+              type="text"
+              value={lastName}
+              onChange={e => setLastName(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '10px',
+                borderRadius: '4px',
+                border: '1px solid var(--border-color)',
+                fontSize: '16px',
+                backgroundColor: 'var(--input-bg)',
+                color: 'var(--text-primary)'
+              }}
+              placeholder="Enter your last name"
             />
           </div>
           
@@ -123,8 +218,10 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin, onRegister }: 
                 width: '100%',
                 padding: '10px',
                 borderRadius: '4px',
-                border: '1px solid #ddd',
-                fontSize: '16px'
+                border: '1px solid var(--border-color)',
+                fontSize: '16px',
+                backgroundColor: 'var(--input-bg)',
+                color: 'var(--text-primary)'
               }}
               placeholder="Enter your email"
             />
@@ -150,8 +247,10 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin, onRegister }: 
                 width: '100%',
                 padding: '10px',
                 borderRadius: '4px',
-                border: '1px solid #ddd',
-                fontSize: '16px'
+                border: '1px solid var(--border-color)',
+                fontSize: '16px',
+                backgroundColor: 'var(--input-bg)',
+                color: 'var(--text-primary)'
               }}
               placeholder="Create a password"
             />
@@ -177,8 +276,10 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin, onRegister }: 
                 width: '100%',
                 padding: '10px',
                 borderRadius: '4px',
-                border: '1px solid #ddd',
-                fontSize: '16px'
+                border: '1px solid var(--border-color)',
+                fontSize: '16px',
+                backgroundColor: 'var(--input-bg)',
+                color: 'var(--text-primary)'
               }}
               placeholder="Confirm your password"
             />
@@ -189,7 +290,7 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin, onRegister }: 
             style={{
               width: '100%',
               padding: '12px',
-              backgroundColor: 'var(--blue)',
+              backgroundColor: 'var(--accent)',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
@@ -210,7 +311,7 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin, onRegister }: 
               style={{
                 background: 'none',
                 border: 'none',
-                color: 'var(--blue)',
+                color: 'var(--accent)',
                 cursor: 'pointer',
                 padding: 0,
                 fontSize: 'inherit',
@@ -232,7 +333,7 @@ export function RegisterModal({ isOpen, onClose, onSwitchToLogin, onRegister }: 
             border: 'none',
             fontSize: '24px',
             cursor: 'pointer',
-            color: '#666'
+            color: 'var(--text-secondary)'
           }}
         >
           &times;

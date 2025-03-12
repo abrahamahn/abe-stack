@@ -11,6 +11,7 @@ import { ApiServer } from './ApiServer';
 import { FileServer } from './FileServer';
 import { EventEmitter } from 'events';
 import { QueueDatabase } from './services/QueueDatabase';
+import fs from 'fs';
 
 // Create Express app
 const expressApp = express as unknown as {
@@ -108,7 +109,22 @@ ApiServer(environment, app);
 
 // Middleware
 app.use(cors({
-  origin: config.corsOrigins,
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Allow localhost with any port
+    if (origin.startsWith('http://localhost:') || origin.startsWith('https://localhost:')) {
+      return callback(null, true);
+    }
+    
+    // Check against configured origins
+    if (config.corsOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    }
+    
+    callback(null, false);
+  },
   credentials: true
 }));
 app.use(expressApp.json());
@@ -116,17 +132,52 @@ app.use(cookieParser());
 
 // API routes
 app.get('/api', (_req: Request, res: Response) => {
-  res.json({ message: 'Welcome to the ABE Stack API!' });
+  res.json({ message: 'Welcome to the ABE Stack API!', status: 'success' });
 });
 
-// In production, serve the static files from the dist directory
-if (config.production) {
-  const distPath = path.resolve(process.cwd(), 'dist');
+// Only in production, serve the static files from the dist directory
+if (process.env.NODE_ENV === 'production') {
+  console.log('Running in production mode, serving static files');
+  // Check for dist/client directory first (Vite output)
+  let staticPath = path.resolve(process.cwd(), 'dist/client');
   
-  app.use(expressApp.static(distPath));
+  // If dist/client doesn't exist, try dist
+  if (!fs.existsSync(staticPath)) {
+    staticPath = path.resolve(process.cwd(), 'dist');
+  }
   
-  app.get('*', (_req: Request, res: Response) => {
-    res.sendFile(path.join(distPath, 'index.html'));
+  // If dist doesn't exist, try build
+  if (!fs.existsSync(staticPath)) {
+    staticPath = path.resolve(process.cwd(), 'build');
+  }
+  
+  // If the directory exists, serve static files from it
+  if (fs.existsSync(staticPath)) {
+    console.log(`Serving static files from: ${staticPath}`);
+    app.use(expressApp.static(staticPath));
+    
+    app.get('*', (_req: Request, res: Response) => {
+      const indexPath = path.join(staticPath, 'index.html');
+      
+      // Check if index.html exists
+      if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+      } else {
+        res.status(404).send('Not found: index.html does not exist in the static directory');
+      }
+    });
+  } else {
+    console.warn('No static files directory found (tried dist/client, dist, and build)');
+  }
+} else {
+  console.log('Running in development mode, not serving static files');
+  
+  // In development mode, handle API 404s but let the Vite dev server handle frontend routes
+  app.use('/api/*', (_req: Request, res: Response) => {
+    res.status(404).json({ 
+      status: 'error', 
+      message: 'API endpoint not found' 
+    });
   });
 }
 
@@ -156,12 +207,79 @@ wss.on('connection', (ws: WebSocket) => {
   });
 });
 
-// Start server
+// Find an available port starting from the configured port
+async function findAvailablePort(startPort: number): Promise<number> {
+  return new Promise((resolve) => {
+    const testServer = http.createServer();
+    
+    testServer.on('error', () => {
+      // Port is in use, try the next one
+      console.log(`Port ${startPort} is in use, trying next port...`);
+      resolve(findAvailablePort(startPort + 1));
+    });
+    
+    testServer.on('listening', () => {
+      // Found an available port
+      const port = (testServer.address() as any).port;
+      testServer.close(() => resolve(port));
+    });
+    
+    testServer.listen(startPort);
+  });
+}
+
+// Start server with dynamic port
 async function startServer() {
   try {
+    // Try to use port 8080 first, then fall back to other ports
+    // We'll avoid port 5432 (PostgreSQL) and 3000-3005 (likely used by the client)
+    const preferredPorts = [8080, 8081, 8082, 8083, 8084, 8085];
+    let port = config.port;
+    
+    // Try each preferred port in order
+    for (const preferredPort of preferredPorts) {
+      try {
+        const testServer = http.createServer();
+        await new Promise<void>((resolve, reject) => {
+          testServer.on('error', () => {
+            console.log(`Port ${preferredPort} is in use, trying next port...`);
+            resolve();
+          });
+          
+          testServer.on('listening', () => {
+            port = preferredPort;
+            testServer.close(() => resolve());
+          });
+          
+          testServer.listen(preferredPort);
+        });
+        
+        if (port === preferredPort) {
+          // We found an available port from our preferred list
+          break;
+        }
+      } catch (err) {
+        console.log(`Error testing port ${preferredPort}:`, err);
+      }
+    }
+    
+    // If none of our preferred ports are available, find any available port
+    if (!preferredPorts.includes(port)) {
+      port = await findAvailablePort(8086); // Start from 8086 if all preferred ports are taken
+    }
+    
+    // Update the config with the actual port
+    config.port = port;
+    config.baseUrl = `http://localhost:${port}`;
+    
     // Start listening
-    server.listen(config.port, () => {
-      console.log(`Server is running on port ${config.port}`);
+    server.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+      console.log(`API available at http://localhost:${port}/api`);
+      
+      // Write the port to a file so the client can read it
+      const portFilePath = path.join(process.cwd(), '.port');
+      fs.writeFileSync(portFilePath, port.toString());
     });
   } catch (error) {
     console.error('Failed to start server:', error);

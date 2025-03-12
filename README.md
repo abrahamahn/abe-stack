@@ -44,7 +44,7 @@ npm install
 # - Host: localhost
 # - Port: 5432
 # - Username: postgres
-# - Password: postgres
+# - Password: 1083035
 # - Database: abe_stack
 
 # Start the development server
@@ -54,6 +54,59 @@ npm run dev
 The application will be available at:
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8080
+
+### Demo Database
+
+For quick testing and demonstration purposes, you can set up a demo database with sample data:
+
+```sh
+# Create a demo database with sample users, posts, comments, and likes
+npm run seed:demo
+```
+
+This will:
+1. Create a new PostgreSQL database named `abe_stack_demo`
+2. Run all migrations to set up the database schema
+3. Insert 5 demo user accounts with the following credentials:
+   - Username: `johndoe`, Password: `password123`, Role: `user`
+   - Username: `janedoe`, Password: `password123`, Role: `user`
+   - Username: `alexsmith`, Password: `password123`, Role: `user`
+   - Username: `sarahwilson`, Password: `password123`, Role: `user`
+   - Username: `admin`, Password: `admin123`, Role: `admin`
+4. Create sample posts, comments, likes, and follow relationships
+
+#### Database Connection Settings
+
+By default, the seed script tries to connect to PostgreSQL with these settings:
+- Host: `localhost`
+- Port: `5432`
+- Username: `postgres`
+- Password: `1083035`
+
+If your PostgreSQL setup uses different credentials, you can specify them using environment variables:
+
+**Windows PowerShell:**
+```sh
+$env:DB_USER="your_username"; $env:DB_PASSWORD="your_password"; npm run seed:demo
+```
+
+**Windows Command Prompt:**
+```sh
+set DB_USER=your_username && set DB_PASSWORD=your_password && npm run seed:demo
+```
+
+**Linux/macOS:**
+```sh
+DB_USER=your_username DB_PASSWORD=your_password npm run seed:demo
+```
+
+#### Using the Demo Database
+
+To use the demo database, set the `DB_NAME` environment variable to `abe_stack_demo` when starting the application:
+
+```sh
+DB_NAME=abe_stack_demo npm run dev
+```
 
 ## Development Commands
 
@@ -74,6 +127,9 @@ npm run start           # Start the production server
 # Testing
 npm run test            # Run all tests
 npm run type-check      # Check TypeScript types
+
+# Database
+npm run seed:demo       # Create and seed a demo database
 ```
 
 ## Environment Variables
@@ -86,7 +142,12 @@ The application can be configured using the following environment variables:
 |----------|-------------|---------|
 | `NODE_ENV` | Environment mode (development, production) | `development` |
 | `PORT` | Server port | `8080` |
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql://postgres:postgres@localhost:5432/abe_stack` |
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql://postgres:1083035@localhost:5432/abe_stack` |
+| `DB_HOST` | PostgreSQL host | `localhost` |
+| `DB_PORT` | PostgreSQL port | `5432` |
+| `DB_USER` | PostgreSQL username | `postgres` |
+| `DB_PASSWORD` | PostgreSQL password | `1083035` |
+| `DB_NAME` | PostgreSQL database name | `abe_stack` |
 | `JWT_SECRET` | Secret for JWT tokens | `your-secret-key` |
 | `CORS_ORIGIN` | CORS allowed origins (comma-separated) | `*` |
 | `UPLOAD_DIR` | Directory for file uploads | `./uploads` |
@@ -176,9 +237,12 @@ src/
 │   ├── apis/               # API implementations
 │   ├── controllers/        # Request controllers
 │   ├── database/           # Database setup and migrations
+│   │   └── migrations/     # SQL migration files
 │   ├── middleware/         # Express middleware
 │   ├── models/             # Data models
 │   ├── routes/             # API routes
+│   ├── scripts/            # Utility scripts
+│   │   └── seedDemoDatabase.ts  # Demo database seed script
 │   ├── services/           # Backend services
 │   └── utils/              # Utility functions
 │

@@ -3,7 +3,7 @@ import { passthroughRef } from "../../helpers/passthroughRef"
 
 interface InputProps extends ComponentPropsWithoutRef<'input'> {}
 
-const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
+export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
 	return (
 		<input
 			ref={ref}
@@ -20,4 +20,5 @@ const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
 	);
 });
 
+// Also export as default for backward compatibility
 export default Input;

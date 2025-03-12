@@ -12,6 +12,7 @@ export type Route =
 	| { type: 'explore'; url: string }
 	| { type: 'notifications'; url: string }
 	| { type: 'design'; url: string; page: string }
+	| { type: 'auth'; url: string; action: string; token?: string }
 	| { type: 'unknown'; url: string };
 
 export class Router {
@@ -19,62 +20,73 @@ export class Router {
 	private currentRoute: Route
 
 	constructor() {
-		this.currentRoute = this.parseUrl(window.location.pathname)
+		this.currentRoute = this.parseUrl(window.location.pathname + window.location.search)
 
 		// Listen for popstate events (back/forward buttons)
 		window.addEventListener('popstate', () => {
-			this.currentRoute = this.parseUrl(window.location.pathname)
+			this.currentRoute = this.parseUrl(window.location.pathname + window.location.search)
 			this.notifyListeners()
 		})
 	}
 
 	private parseUrl(url: string): Route {
-		if (url === '/' || url === '') {
-			return { type: 'root', url }
+		// Extract path and search params
+		const [path, search] = url.split('?');
+		const searchParams = new URLSearchParams(search ? `?${search}` : '');
+		
+		if (path === '/' || path === '') {
+			return { type: 'root', url: path }
 		}
 		
-		if (url === '/home') {
-			return { type: 'home', url }
+		if (path === '/home') {
+			return { type: 'home', url: path }
 		}
 		
-		if (url === '/media') {
-			return { type: 'media', url }
+		if (path === '/media') {
+			return { type: 'media', url: path }
 		}
 		
-		if (url === '/social') {
-			return { type: 'social', url }
+		if (path === '/social') {
+			return { type: 'social', url: path }
 		}
 		
-		if (url === '/settings') {
-			return { type: 'settings', url }
+		if (path === '/settings') {
+			return { type: 'settings', url: path }
 		}
 		
-		if (url === '/dashboard') {
-			return { type: 'dashboard', url }
+		if (path === '/dashboard') {
+			return { type: 'dashboard', url: path }
 		}
 		
-		if (url === '/profile') {
-			return { type: 'profile', url }
+		if (path === '/profile') {
+			return { type: 'profile', url: path }
 		}
 		
-		if (url === '/upload') {
-			return { type: 'upload', url }
+		if (path === '/upload') {
+			return { type: 'upload', url: path }
 		}
 		
-		if (url === '/explore') {
-			return { type: 'explore', url }
+		if (path === '/explore') {
+			return { type: 'explore', url: path }
 		}
 		
-		if (url === '/notifications') {
-			return { type: 'notifications', url }
+		if (path === '/notifications') {
+			return { type: 'notifications', url: path }
 		}
 		
-		if (url.startsWith('/design/')) {
-			const page = url.slice('/design/'.length)
-			return { type: 'design', url, page }
+		if (path.startsWith('/design/')) {
+			const page = path.slice('/design/'.length)
+			return { type: 'design', url: path, page }
 		}
 		
-		return { type: 'unknown', url }
+		// Auth routes
+		if (path.startsWith('/auth/')) {
+			const action = path.slice('/auth/'.length);
+			const token = searchParams.get('token') || undefined;
+			return { type: 'auth', url: path, action, token };
+		}
+		
+		return { type: 'unknown', url: path }
 	}
 
 	private notifyListeners() {
@@ -99,7 +111,7 @@ export class Router {
 	}
 }
 
-export function useRoute(): Route {
+export function useRouter(): { route: Route; navigate: (url: string) => void } {
 	const [route, setRoute] = useState<Route>(() => {
 		// Access the router from the window object during development
 		const router = (window as any).router as Router | undefined
@@ -120,5 +132,19 @@ export function useRoute(): Route {
 		return unsubscribe
 	}, [])
 
+	const navigate = (url: string) => {
+		const router = (window as any).router as Router
+		if (!router) {
+			console.error('Router not found on window object')
+			return
+		}
+		router.navigate(url)
+	}
+
+	return { route, navigate }
+}
+
+export function useRoute(): Route {
+	const { route } = useRouter()
 	return route
 }

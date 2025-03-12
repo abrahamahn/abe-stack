@@ -17,8 +17,16 @@ export const env = {
   DB_HOST: process.env.DB_HOST || 'localhost',
   DB_PORT: parseInt(process.env.DB_PORT || '5432', 10),
   DB_USER: process.env.DB_USER || 'postgres',
-  DB_PASSWORD: process.env.DB_PASSWORD || 'postgres',
-  DB_NAME: process.env.DB_NAME || 'abe_stack'
+  DB_PASSWORD: process.env.DB_PASSWORD || '1083035',
+  DB_NAME: process.env.DB_NAME || 'abe_stack',
+  // Email configuration
+  EMAIL_HOST: process.env.EMAIL_HOST || 'smtp.gmail.com',
+  EMAIL_PORT: parseInt(process.env.EMAIL_PORT || '587', 10),
+  EMAIL_SECURE: process.env.EMAIL_SECURE === 'true',
+  EMAIL_USER: process.env.EMAIL_USER || 'test@example.com',
+  EMAIL_PASSWORD: process.env.EMAIL_PASSWORD || 'password',
+  APP_NAME: process.env.APP_NAME || 'ABE Stack',
+  APP_URL: process.env.APP_URL || 'http://localhost:8080'
 };
 
 // Define the configuration schema with types and validation
@@ -50,6 +58,15 @@ export interface EnvConfig {
   // File Storage
   UPLOADS_DIR: string;
   MAX_FILE_SIZE: number;
+  
+  // Email
+  EMAIL_HOST: string;
+  EMAIL_PORT: number;
+  EMAIL_SECURE: boolean;
+  EMAIL_USER: string;
+  EMAIL_PASSWORD: string;
+  APP_NAME: string;
+  APP_URL: string;
 }
 
 // Helper function to parse environment variables with type conversion
@@ -113,7 +130,7 @@ export const envConfig: EnvConfig = {
   DB_PORT: parseEnv<number>('DB_PORT', 5432, parseInt),
   DB_NAME: parseEnv<string>('DB_NAME', 'abe_stack'),
   DB_USER: parseEnv<string>('DB_USER', 'postgres'),
-  DB_PASSWORD: parseEnv<string>('DB_PASSWORD', 'postgres'),
+  DB_PASSWORD: parseEnv<string>('DB_PASSWORD', '1083035'),
   
   // Auth
   JWT_SECRET: parseEnv<string>(
@@ -154,7 +171,16 @@ export const envConfig: EnvConfig = {
 
   // File Storage
   UPLOADS_DIR: parseEnv<string>('UPLOADS_DIR', path.resolve(process.cwd(), 'uploads')),
-  MAX_FILE_SIZE: parseEnv<number>('MAX_FILE_SIZE', 10 * 1024 * 1024, parseInt)
+  MAX_FILE_SIZE: parseEnv<number>('MAX_FILE_SIZE', 10 * 1024 * 1024, parseInt),
+  
+  // Email
+  EMAIL_HOST: parseEnv<string>('EMAIL_HOST', 'smtp.gmail.com'),
+  EMAIL_PORT: parseEnv<number>('EMAIL_PORT', 587, parseInt),
+  EMAIL_SECURE: parseEnv<boolean>('EMAIL_SECURE', false, (v) => v === 'true'),
+  EMAIL_USER: parseEnv<string>('EMAIL_USER', 'test@example.com'),
+  EMAIL_PASSWORD: parseEnv<string>('EMAIL_PASSWORD', 'password'),
+  APP_NAME: parseEnv<string>('APP_NAME', 'ABE Stack'),
+  APP_URL: parseEnv<string>('APP_URL', 'http://localhost:8080')
 };
 
 // Freeze the config object to prevent modifications

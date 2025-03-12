@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { LoginModal } from './LoginModal';
 import { RegisterModal } from './RegisterModal';
+import { VerificationModal } from './VerificationModal';
 import { useAuth } from './AuthContext';
-import './auth-modals.css';
 
 export type AuthModalType = 'login' | 'register' | null;
 
@@ -14,7 +14,13 @@ interface AuthModalProps {
 
 export function AuthModal({ isOpen, modalType, onClose }: AuthModalProps) {
   const [activeModal, setActiveModal] = useState<AuthModalType>(modalType);
-  const { login, register } = useAuth();
+  const { 
+    login, 
+    register, 
+    showVerificationModal, 
+    setShowVerificationModal, 
+    verificationEmail 
+  } = useAuth();
   
   // Reset active modal when props change
   React.useEffect(() => {
@@ -39,32 +45,47 @@ export function AuthModal({ isOpen, modalType, onClose }: AuthModalProps) {
     }
   };
   
-  const handleRegister = async (name: string, email: string, password: string) => {
+  const handleRegister = async (username: string, firstName: string, lastName: string, email: string, password: string) => {
     try {
-      await register(name, email, password);
-      onClose();
+      await register(username, firstName, lastName, email, password);
+      // Don't close the modal if verification is needed
+      // The verification modal will be shown instead
+      if (!showVerificationModal) {
+        onClose();
+      }
     } catch (error) {
       // Error is handled in the AuthContext
       console.error('Registration failed:', error);
     }
   };
   
-  if (!isOpen) return null;
+  const handleCloseVerificationModal = () => {
+    setShowVerificationModal(false);
+    onClose();
+  };
+  
+  if (!isOpen && !showVerificationModal) return null;
   
   return (
     <>
       <LoginModal 
-        isOpen={activeModal === 'login'} 
+        isOpen={activeModal === 'login' && isOpen} 
         onClose={onClose}
         onSwitchToRegister={handleSwitchToRegister}
         onLogin={handleLogin}
       />
       
       <RegisterModal 
-        isOpen={activeModal === 'register'} 
+        isOpen={activeModal === 'register' && isOpen} 
         onClose={onClose}
         onSwitchToLogin={handleSwitchToLogin}
         onRegister={handleRegister}
+      />
+      
+      <VerificationModal
+        isOpen={showVerificationModal}
+        onClose={handleCloseVerificationModal}
+        email={verificationEmail}
       />
     </>
   );

@@ -15,6 +15,9 @@ import {
 import { TokenService, TokenType } from '../services/TokenService';
 import { TwoFactorAuthService } from '../services/TwoFactorAuthService';
 import { Logger } from '../services/LoggerService';
+import { AuthController } from '../controllers/AuthController';
+import { validateRequest } from '../middleware/validateRequest';
+import { authenticateJWT } from '../middleware/authenticateJWT';
 
 // Cookie settings
 const REFRESH_TOKEN_COOKIE_OPTIONS = {
@@ -29,180 +32,26 @@ const router = Router();
 const tokenService = TokenService.getInstance();
 const twoFactorAuthService = TwoFactorAuthService.getInstance();
 const logger = new Logger('AuthRoutes');
+const authController = new AuthController();
 
 // Register
-router.post('/register', customValidate(registerSchema), async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { username, email, password, displayName } = req.body;
-
-    // Check if user exists
-    const existingUser = await User.findByEmail(email) || await User.findByUsername(username);
-
-    if (existingUser) {
-      throw new BadRequestError('User already exists');
-    }
-
-    // Create user
-    const user = await User.create({
-      username,
-      email,
-      password,
-      displayName,
-      role: 'user',
-      bio: null,
-      profileImage: null,
-      bannerImage: null,
-      isVerified: false
-    });
-
-    // Generate tokens
-    const { accessToken, refreshToken, expiresIn } = await tokenService.generateTokens(user);
-
-    // Set refresh token as HTTP-only cookie
-    res.cookie('refreshToken', refreshToken, REFRESH_TOKEN_COOKIE_OPTIONS);
-
-    res.status(201).json({
-      status: 'success',
-      data: {
-        user: user.toJSON(),
-        accessToken,
-        expiresIn
-      }
-    });
-  } catch (error) {
-    logger.error('Registration error', { error });
-    next(error);
-  }
-});
+router.post('/register', validateRequest(registerSchema), authController.register);
 
 // Login
-router.post('/login', customValidate(loginSchema), async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { email, password } = req.body;
-
-    // Check if user exists
-    const user = await User.findByEmail(email);
-    if (!user) {
-      throw new UnauthorizedError('Invalid credentials');
-    }
-
-    // Check password
-    const isPasswordValid = await user.comparePassword(password);
-    if (!isPasswordValid) {
-      throw new UnauthorizedError('Invalid credentials');
-    }
-
-    // Check if 2FA is enabled
-    const twoFactorStatus = await twoFactorAuthService.getTwoFactorStatus(user.id);
-    
-    if (twoFactorStatus.enabled) {
-      // Return user ID for 2FA verification
-      return res.json({
-        status: 'success',
-        data: {
-          requireTwoFactor: true,
-          userId: user.id
-        }
-      });
-    }
-
-    // Generate tokens
-    const { accessToken, refreshToken, expiresIn } = await tokenService.generateTokens(user);
-
-    // Set refresh token as HTTP-only cookie
-    res.cookie('refreshToken', refreshToken, REFRESH_TOKEN_COOKIE_OPTIONS);
-
-    res.json({
-      status: 'success',
-      data: {
-        user: user.toJSON(),
-        accessToken,
-        expiresIn
-      }
-    });
-  } catch (error) {
-    logger.error('Login error', { error });
-    next(error);
-  }
-});
+router.post('/login', validateRequest(loginSchema), authController.login);
 
 // Refresh token
-router.post('/refresh', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    // Get refresh token from cookie
-    const refreshToken = req.cookies.refreshToken;
-    
-    if (!refreshToken) {
-      throw new UnauthorizedError('Refresh token not provided');
-    }
-    
-    // Refresh tokens
-    const { accessToken, refreshToken: newRefreshToken, expiresIn } = 
-      await tokenService.refreshTokens(refreshToken);
-    
-    // Set new refresh token as HTTP-only cookie
-    res.cookie('refreshToken', newRefreshToken, REFRESH_TOKEN_COOKIE_OPTIONS);
-    
-    res.json({
-      status: 'success',
-      data: {
-        accessToken,
-        expiresIn
-      }
-    });
-  } catch (error) {
-    // Clear the cookie if there's an error
-    res.clearCookie('refreshToken', { path: '/api/auth/refresh' });
-    logger.error('Token refresh error', { error });
-    next(error);
-  }
-});
-
-// Logout
-router.post('/logout', authenticate, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    // Revoke the current access token
-    if (req.token) {
-      await tokenService.revokeToken(req.token, TokenType.ACCESS);
-    }
-    
-    // Revoke the refresh token if it exists
-    const refreshToken = req.cookies.refreshToken;
-    if (refreshToken) {
-      await tokenService.revokeToken(refreshToken, TokenType.REFRESH);
-    }
-    
-    // Clear refresh token cookie
-    res.clearCookie('refreshToken', { path: '/api/auth/refresh' });
-    
-    res.json({
-      status: 'success',
-      message: 'Logged out successfully'
-    });
-  } catch (error) {
-    logger.error('Logout error', { error });
-    next(error);
-  }
-});
+router.post('/refresh-token', authController.refreshToken);
 
 // Get current user
-router.get('/me', authenticate, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const user = await User.findByPk(req.user!.id);
+router.get('/me', authenticateJWT, authController.getCurrentUser);
 
-    if (!user) {
-      throw new NotFoundError('User not found');
-    }
+// Logout
+router.post('/logout', authenticateJWT, authController.logout);
 
-    res.json({
-      status: 'success',
-      data: { user: user.toJSON() }
-    });
-  } catch (error) {
-    logger.error('Get current user error', { error });
-    next(error);
-  }
-});
+// Email verification
+router.get('/confirm-email', authController.confirmEmail);
+router.post('/resend-confirmation', authController.resendConfirmationEmail);
 
 // Update profile
 router.patch('/profile', authenticate, customValidate(updateProfileSchema), async (req: Request, res: Response, next: NextFunction) => {

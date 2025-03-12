@@ -2,7 +2,7 @@
 import Router from 'express';
 import * as authController from '../controllers/auth.controller';
 import { customValidate } from '../middleware/customValidate';
-import { loginSchema, registerSchema } from '../validators/auth.validator';
+import { loginSchema, registerSchema, emailSchema } from '../validators/auth.validator';
 import { authLimiter } from '../middleware/rateLimiter';
 
 const router = Router();
@@ -15,5 +15,9 @@ router.post('/login', customValidate(loginSchema), authController.login);
 router.post('/register', customValidate(registerSchema), authController.register);
 router.post('/logout', authController.logout);
 router.post('/refresh-token', authController.refreshToken);
+
+// Email verification routes
+router.get('/confirm-email', authController.confirmEmail);
+router.post('/resend-confirmation', customValidate(emailSchema), authController.resendConfirmationEmail);
 
 export default router;

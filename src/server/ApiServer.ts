@@ -23,17 +23,14 @@ const expressApp = express as unknown as {
 const jsonParser = expressApp.json({ limit: '10mb' });
 const urlencodedParser = expressApp.urlencoded({ extended: true, limit: '10mb' });
 
-export function ApiServer(_environment: ServerEnvironment, app: Express) {
-  // Security middlewares
-  app.use(helmet());
+export function ApiServer(environment: ServerEnvironment, app: Express) {
+  // Security middlewares - disable in development for easier debugging
+  if (env.NODE_ENV === 'production') {
+    app.use(helmet());
+  }
   
-  // CORS configuration
-  app.use(cors({
-    origin: env.CORS_ORIGINS,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
-  }));
+  // CORS configuration is already handled in the main server file
+  // We don't need to add it again here
   
   // Request parsing middleware
   app.use(jsonParser);
@@ -50,22 +47,31 @@ export function ApiServer(_environment: ServerEnvironment, app: Express) {
   }
   
   // Serve static assets
-  app.use(expressApp.static(path('build')));
-  app.use('/uploads', expressApp.static(path('uploads')));
+  if (env.NODE_ENV === 'production') {
+    app.use(expressApp.static(path('build')));
+    app.use('/uploads', expressApp.static(path('uploads')));
+  }
   
   // API routes
   app.use('/api', apiRoutes);
   
-  // Fallback to HTML for client-side routing
-  app.use('*', (req, res, next) => {
-    // Skip API routes (they should have been handled by now)
-    if (req.originalUrl.startsWith('/api')) {
-      return next(new NotFoundError('API endpoint not found'));
-    }
-    
-    // Serve the SPA index.html
-    res.sendFile(path('build/index.html'));
-  });
+  // Fallback to HTML for client-side routing in production only
+  if (env.NODE_ENV === 'production') {
+    app.use('*', (req, res, next) => {
+      // Skip API routes (they should have been handled by now)
+      if (req.originalUrl.startsWith('/api')) {
+        return next(new NotFoundError('API endpoint not found'));
+      }
+      
+      // Serve the SPA index.html
+      res.sendFile(path('build/index.html'));
+    });
+  } else {
+    // In development, only handle API 404s
+    app.use('/api/*', (req, res, next) => {
+      next(new NotFoundError('API endpoint not found'));
+    });
+  }
   
   // Error handling middleware (must be last)
   app.use(errorHandler);

@@ -11,9 +11,14 @@ export const registerSchema = z.object({
     .email('Invalid email address'),
   password: z.string()
     .min(8, 'Password must be at least 8 characters'),
+  firstName: z.string()
+    .min(1, 'First name is required')
+    .max(100, 'First name cannot exceed 100 characters'),
+  lastName: z.string()
+    .min(1, 'Last name is required')
+    .max(100, 'Last name cannot exceed 100 characters'),
   displayName: z.string()
-    .min(2, 'Display name must be at least 2 characters')
-    .max(50, 'Display name cannot exceed 50 characters'),
+    .optional()
 });
 
 // Login validation schema
@@ -28,6 +33,12 @@ export const loginSchema = z.object({
 export const refreshTokenSchema = z.object({
   refreshToken: z.string()
     .min(1, 'Refresh token is required'),
+});
+
+// Email validation schema for resend confirmation
+export const emailSchema = z.object({
+  email: z.string()
+    .email('Invalid email format')
 });
 
 // Update profile validation schema

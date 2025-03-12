@@ -2,6 +2,126 @@ import React, { useState } from 'react';
 import { useClientEnvironment } from '../../services/ClientEnvironment';
 import { PageContent } from '../layouts/PageContent';
 
+// Notifications page styles
+const styles = {
+  tabs: {
+    marginTop: '20px',
+    borderBottom: '1px solid var(--border-color)'
+  },
+  tabButtons: {
+    display: 'flex',
+    gap: '10px',
+    overflowX: 'auto' as const
+  },
+  tabButton: {
+    padding: '10px 15px',
+    backgroundColor: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    textTransform: 'capitalize' as const,
+    color: 'var(--text-primary)'
+  },
+  tabButtonActive: {
+    color: 'var(--blue)',
+    borderBottom: '2px solid var(--blue)',
+    fontWeight: 'bold'
+  },
+  container: {
+    marginTop: '20px'
+  },
+  empty: {
+    padding: '40px 20px',
+    textAlign: 'center',
+    backgroundColor: 'var(--surface)',
+    borderRadius: '8px',
+    color: 'var(--text-secondary)'
+  },
+  list: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '10px'
+  },
+  item: {
+    padding: '15px',
+    borderRadius: '8px',
+    border: '1px solid var(--border-color)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '15px'
+  },
+  itemUnread: {
+    backgroundColor: 'rgba(0, 120, 255, 0.05)'
+  },
+  itemRead: {
+    backgroundColor: 'var(--card-bg)'
+  },
+  icon: {
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '18px'
+  },
+  iconUnread: {
+    backgroundColor: 'var(--blue)',
+    color: 'white'
+  },
+  iconRead: {
+    backgroundColor: 'var(--surface)',
+    color: 'var(--text-secondary)'
+  },
+  content: {
+    flex: 1
+  },
+  text: {
+    color: 'var(--text-primary)'
+  },
+  textUnread: {
+    fontWeight: 'bold'
+  },
+  username: {
+    fontWeight: 'bold',
+    color: 'var(--text-primary)'
+  },
+  time: {
+    fontSize: '14px',
+    color: 'var(--text-secondary)',
+    marginTop: '5px'
+  },
+  menuButton: {
+    backgroundColor: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    color: 'var(--text-secondary)',
+    padding: '5px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  actions: {
+    marginTop: '30px',
+    display: 'flex',
+    justifyContent: 'space-between'
+  },
+  actionButton: {
+    padding: '10px 20px',
+    backgroundColor: 'var(--card-bg)',
+    borderRadius: '4px',
+    cursor: 'pointer'
+  },
+  actionPrimary: {
+    color: 'var(--blue)',
+    border: '1px solid var(--blue)'
+  },
+  actionSecondary: {
+    color: 'var(--text-secondary)',
+    border: '1px solid var(--border-color)'
+  }
+};
+
 export function NotificationsPage() {
   const environment = useClientEnvironment();
   const [activeTab, setActiveTab] = useState('all');
@@ -39,21 +159,15 @@ export function NotificationsPage() {
       description="Stay updated with your latest activity and interactions."
     >
       {/* Tabs */}
-      <div style={{ marginTop: '20px', borderBottom: '1px solid #eee' }}>
-        <div style={{ display: 'flex', gap: '10px', overflowX: 'auto' }}>
+      <div style={styles.tabs}>
+        <div style={styles.tabButtons}>
           {['all', 'unread', 'comment', 'like', 'follow', 'mention'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               style={{
-                padding: '10px 15px',
-                backgroundColor: 'transparent',
-                color: activeTab === tab ? 'var(--blue)' : 'inherit',
-                border: 'none',
-                borderBottom: activeTab === tab ? '2px solid var(--blue)' : 'none',
-                cursor: 'pointer',
-                fontWeight: activeTab === tab ? 'bold' : 'normal',
-                textTransform: 'capitalize'
+                ...styles.tabButton,
+                ...(activeTab === tab ? styles.tabButtonActive : {})
               }}
             >
               {tab}
@@ -63,64 +177,39 @@ export function NotificationsPage() {
       </div>
       
       {/* Notifications List */}
-      <div style={{ marginTop: '20px' }}>
+      <div style={styles.container}>
         {filteredNotifications.length === 0 ? (
-          <div style={{ 
-            padding: '40px 20px', 
-            textAlign: 'center', 
-            backgroundColor: '#f9f9f9', 
-            borderRadius: '8px',
-            color: '#666'
-          }}>
+          <div style={styles.empty}>
             No notifications to display
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={styles.list}>
             {filteredNotifications.map(notification => (
               <div 
                 key={notification.id}
-                style={{ 
-                  padding: '15px', 
-                  backgroundColor: notification.read ? 'white' : 'rgba(0, 120, 255, 0.05)', 
-                  borderRadius: '8px',
-                  border: '1px solid #eee',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '15px'
+                style={{
+                  ...styles.item,
+                  ...(notification.read ? styles.itemRead : styles.itemUnread)
                 }}
               >
-                <div style={{ 
-                  width: '40px', 
-                  height: '40px', 
-                  borderRadius: '50%', 
-                  backgroundColor: notification.read ? '#f0f0f0' : 'var(--blue)', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  color: notification.read ? '#666' : 'white',
-                  fontSize: '18px'
+                <div style={{
+                  ...styles.icon,
+                  ...(notification.read ? styles.iconRead : styles.iconUnread)
                 }}>
                   {getNotificationIcon(notification.type)}
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: notification.read ? 'normal' : 'bold' }}>
-                    <span style={{ fontWeight: 'bold' }}>{notification.user}</span> {notification.content}
+                <div style={styles.content}>
+                  <div style={{
+                    ...styles.text,
+                    ...(notification.read ? {} : styles.textUnread)
+                  }}>
+                    <span style={styles.username}>{notification.user}</span> {notification.content}
                   </div>
-                  <div style={{ fontSize: '14px', color: '#666', marginTop: '5px' }}>
+                  <div style={styles.time}>
                     {notification.time}
                   </div>
                 </div>
-                <button style={{ 
-                  backgroundColor: 'transparent', 
-                  border: 'none', 
-                  cursor: 'pointer',
-                  color: '#666',
-                  padding: '5px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
+                <button style={styles.menuButton}>
                   •••
                 </button>
               </div>
@@ -130,25 +219,11 @@ export function NotificationsPage() {
       </div>
       
       {/* Actions */}
-      <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'space-between' }}>
-        <button style={{ 
-          padding: '10px 20px', 
-          backgroundColor: 'white', 
-          color: 'var(--blue)', 
-          border: '1px solid var(--blue)', 
-          borderRadius: '4px', 
-          cursor: 'pointer' 
-        }}>
+      <div style={styles.actions}>
+        <button style={{...styles.actionButton, ...styles.actionPrimary}}>
           Mark all as read
         </button>
-        <button style={{ 
-          padding: '10px 20px', 
-          backgroundColor: 'white', 
-          color: '#666', 
-          border: '1px solid #ddd', 
-          borderRadius: '4px', 
-          cursor: 'pointer' 
-        }}>
+        <button style={{...styles.actionButton, ...styles.actionSecondary}}>
           Notification settings
         </button>
       </div>

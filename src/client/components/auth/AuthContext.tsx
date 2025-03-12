@@ -3,9 +3,18 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 // Define the user type
 interface User {
   id: string;
-  name: string;
+  username: string;
   email: string;
-  avatar?: string;
+  displayName: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  bio: string | null;
+  profileImage: string | null;
+  bannerImage: string | null;
+  role: string;
+  isVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Define the auth context type
@@ -14,9 +23,13 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (username: string, firstName: string, lastName: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   error: string | null;
+  showVerificationModal: boolean;
+  setShowVerificationModal: (show: boolean) => void;
+  verificationEmail: string;
+  setVerificationEmail: (email: string) => void;
 }
 
 // Create the auth context with default values
@@ -27,7 +40,11 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   register: async () => {},
   logout: () => {},
-  error: null
+  error: null,
+  showVerificationModal: false,
+  setShowVerificationModal: () => {},
+  verificationEmail: '',
+  setVerificationEmail: () => {}
 });
 
 // Custom hook to use the auth context
@@ -41,6 +58,37 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [verificationEmail, setVerificationEmail] = useState('');
+
+  // Get the server port
+  const getServerPort = (): number => {
+    // In production, use the same port as the client
+    if (process.env.NODE_ENV === 'production') {
+      return window.location.port ? parseInt(window.location.port) : 80;
+    }
+    
+    // In development, try to find the server port
+    // First, check if we can read the port from localStorage (set by previous successful connections)
+    const savedPort = localStorage.getItem('server_port');
+    if (savedPort) {
+      return parseInt(savedPort);
+    }
+    
+    // Default to 8080 for the server in development
+    return 8080;
+  };
+
+  // Get the base API URL
+  const getApiUrl = () => {
+    // In development, use a direct URL to the server
+    if (process.env.NODE_ENV === 'development') {
+      return `http://localhost:${getServerPort()}/api`;
+    }
+    
+    // In production, use the current window location
+    return `${window.location.protocol}//${window.location.host}/api`;
+  };
 
   // Check if user is already logged in on mount
   useEffect(() => {
@@ -68,8 +116,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     
     try {
       // In a real app, this would be an API call
-      // For now, we'll simulate a successful login
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(`${getApiUrl()}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -84,12 +131,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       const data = await response.json();
       
+      // Check if 2FA is required
+      if (data.data && data.data.requireTwoFactor) {
+        // Handle 2FA flow (not implemented in this example)
+        setError('Two-factor authentication is required but not implemented in this demo');
+        throw new Error('Two-factor authentication required');
+      }
+      
       // Save user data to localStorage
-      localStorage.setItem('user', JSON.stringify(data.user));
-      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.data.user));
+      localStorage.setItem('token', data.data.accessToken);
       
       // Update state
-      setUser(data.user);
+      setUser(data.data.user);
     } catch (error) {
       console.error('Login error:', error);
       setError(error instanceof Error ? error.message : 'Login failed. Please try again.');
@@ -100,19 +154,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   // Register function
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (username: string, firstName: string, lastName: string, email: string, password: string) => {
     setIsLoading(true);
     setError(null);
     
     try {
       // In a real app, this would be an API call
-      // For now, we'll simulate a successful registration
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch(`${getApiUrl()}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ name, email, password })
+        body: JSON.stringify({ 
+          username, 
+          firstName,
+          lastName,
+          email, 
+          password
+        })
       });
       
       if (!response.ok) {
@@ -122,12 +181,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       const data = await response.json();
       
+      // Check if the user needs email verification
+      if (data.data.user && !data.data.user.isVerified) {
+        // Set the verification email and show the verification modal
+        setVerificationEmail(email);
+        setShowVerificationModal(true);
+      }
+      
       // Save user data to localStorage
-      localStorage.setItem('user', JSON.stringify(data.user));
-      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.data.user));
+      localStorage.setItem('token', data.data.accessToken);
       
       // Update state
-      setUser(data.user);
+      setUser(data.data.user);
     } catch (error) {
       console.error('Registration error:', error);
       setError(error instanceof Error ? error.message : 'Registration failed. Please try again.');
@@ -155,7 +221,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     login,
     register,
     logout,
-    error
+    error,
+    showVerificationModal,
+    setShowVerificationModal,
+    verificationEmail,
+    setVerificationEmail
   };
 
   return (

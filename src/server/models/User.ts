@@ -9,14 +9,20 @@ export interface UserAttributes extends BaseModel {
   email: string;
   password: string;
   displayName: string | null;
+  firstName: string | null;
+  lastName: string | null;
   bio: string | null;
   profileImage: string | null;
   bannerImage: string | null;
   role: string;
   isVerified: boolean;
+  emailConfirmed: boolean;
+  emailToken: string | null;
+  emailTokenExpire: Date | null;
+  lastEmailSent: Date | null;
 }
 
-export interface UserJSON extends Omit<User, 'password' | 'update' | 'delete' | 'comparePassword' | 'updatePassword' | 'toJSON'> {
+export interface UserJSON extends Omit<User, 'password' | 'update' | 'delete' | 'comparePassword' | 'updatePassword' | 'toJSON' | 'emailToken' | 'emailTokenExpire'> {
   posts?: any[];
   isFollowing?: boolean;
 }
@@ -29,11 +35,17 @@ export class UserRepository extends BaseRepository<UserAttributes> {
     'email',
     'password',
     'display_name as displayName',
+    'first_name as firstName',
+    'last_name as lastName',
     'bio',
     'profile_image as profileImage',
     'banner_image as bannerImage',
     'role',
     'is_verified as isVerified',
+    'email_confirmed as emailConfirmed',
+    'email_token as emailToken',
+    'email_token_expire as emailTokenExpire',
+    'last_email_sent as lastEmailSent',
     'created_at as createdAt',
     'updated_at as updatedAt'
   ];
@@ -79,11 +91,13 @@ export class UserRepository extends BaseRepository<UserAttributes> {
    */
   async createWithHashedPassword(data: Omit<UserAttributes, 'id' | 'createdAt' | 'updatedAt'>, client?: Pool): Promise<UserAttributes> {
     const hashedPassword = await bcrypt.hash(data.password, 10);
-    const { displayName, profileImage, bannerImage, isVerified, ...rest } = data;
+    const { displayName, firstName, lastName, profileImage, bannerImage, isVerified, ...rest } = data;
     return this.create({
       ...rest,
       password: hashedPassword,
       display_name: displayName,
+      first_name: firstName,
+      last_name: lastName,
       profile_image: profileImage,
       banner_image: bannerImage,
       is_verified: isVerified
@@ -370,11 +384,17 @@ export class User implements UserAttributes {
   email: string;
   password: string;
   displayName: string | null;
+  firstName: string | null;
+  lastName: string | null;
   bio: string | null;
   profileImage: string | null;
   bannerImage: string | null;
   role: string;
   isVerified: boolean;
+  emailConfirmed: boolean;
+  emailToken: string | null;
+  emailTokenExpire: Date | null;
+  lastEmailSent: Date | null;
   createdAt: Date;
   updatedAt: Date;
 
@@ -384,11 +404,17 @@ export class User implements UserAttributes {
     this.email = data.email;
     this.password = data.password;
     this.displayName = data.displayName;
+    this.firstName = data.firstName;
+    this.lastName = data.lastName;
     this.bio = data.bio;
     this.profileImage = data.profileImage;
     this.bannerImage = data.bannerImage;
     this.role = data.role;
     this.isVerified = data.isVerified;
+    this.emailConfirmed = data.emailConfirmed;
+    this.emailToken = data.emailToken;
+    this.emailTokenExpire = data.emailTokenExpire;
+    this.lastEmailSent = data.lastEmailSent;
     this.createdAt = new Date(data.createdAt);
     this.updatedAt = new Date(data.updatedAt);
   }
@@ -421,10 +447,12 @@ export class User implements UserAttributes {
 
   // Instance methods
   async update(data: Partial<UserAttributes>): Promise<User> {
-    const { displayName, profileImage, bannerImage, isVerified, ...rest } = data;
+    const { displayName, firstName, lastName, profileImage, bannerImage, isVerified, ...rest } = data;
     const updateData = {
       ...rest,
       ...(displayName !== undefined && { display_name: displayName }),
+      ...(firstName !== undefined && { first_name: firstName }),
+      ...(lastName !== undefined && { last_name: lastName }),
       ...(profileImage !== undefined && { profile_image: profileImage }),
       ...(bannerImage !== undefined && { banner_image: bannerImage }),
       ...(isVerified !== undefined && { is_verified: isVerified })
@@ -448,8 +476,23 @@ export class User implements UserAttributes {
   }
 
   toJSON(): UserJSON {
-    const { password, ...userWithoutPassword } = this;
-    return userWithoutPassword;
+    return {
+      id: this.id,
+      username: this.username,
+      email: this.email,
+      displayName: this.displayName,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      bio: this.bio,
+      profileImage: this.profileImage,
+      bannerImage: this.bannerImage,
+      role: this.role,
+      isVerified: this.isVerified,
+      emailConfirmed: this.emailConfirmed,
+      lastEmailSent: this.lastEmailSent,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt
+    };
   }
 }
 

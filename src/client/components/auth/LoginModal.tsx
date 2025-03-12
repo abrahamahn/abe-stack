@@ -36,20 +36,37 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister, onLogin }: Log
   };
   
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div 
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000
+      }} 
+      onClick={onClose}
+    >
       <div 
-        className="modal-content" 
         onClick={e => e.stopPropagation()}
         style={{
-          backgroundColor: 'white',
+          position: 'relative',
+          backgroundColor: 'var(--surface)',
+          color: 'var(--text-primary)',
           borderRadius: '8px',
           padding: '24px',
           width: '400px',
           maxWidth: '90%',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
         }}
       >
-        <h2 style={{ marginTop: 0, color: 'var(--blue)' }}>Log In</h2>
+        <h2 style={{ marginTop: 0, color: 'var(--accent)' }}>Log In</h2>
         
         {error && (
           <div style={{ 
@@ -84,8 +101,10 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister, onLogin }: Log
                 width: '100%',
                 padding: '10px',
                 borderRadius: '4px',
-                border: '1px solid #ddd',
-                fontSize: '16px'
+                border: '1px solid var(--border-color)',
+                fontSize: '16px',
+                backgroundColor: 'var(--input-bg)',
+                color: 'var(--text-primary)'
               }}
               placeholder="Enter your email"
             />
@@ -111,8 +130,10 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister, onLogin }: Log
                 width: '100%',
                 padding: '10px',
                 borderRadius: '4px',
-                border: '1px solid #ddd',
-                fontSize: '16px'
+                border: '1px solid var(--border-color)',
+                fontSize: '16px',
+                backgroundColor: 'var(--input-bg)',
+                color: 'var(--text-primary)'
               }}
               placeholder="Enter your password"
             />
@@ -123,7 +144,7 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister, onLogin }: Log
             style={{
               width: '100%',
               padding: '12px',
-              backgroundColor: 'var(--blue)',
+              backgroundColor: 'var(--accent)',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
@@ -144,7 +165,7 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister, onLogin }: Log
               style={{
                 background: 'none',
                 border: 'none',
-                color: 'var(--blue)',
+                color: 'var(--accent)',
                 cursor: 'pointer',
                 padding: 0,
                 fontSize: 'inherit',
@@ -166,7 +187,7 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister, onLogin }: Log
             border: 'none',
             fontSize: '24px',
             cursor: 'pointer',
-            color: '#666'
+            color: 'var(--text-secondary)'
           }}
         >
           &times;

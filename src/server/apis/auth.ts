@@ -2,6 +2,7 @@ import * as t from "../../shared/dataTypes"
 import { Request, Response } from "express"
 import AuthService from "../services/AuthService"
 import { tokenBlacklist } from "../services/TokenBlacklist"
+import { Database } from '../services/Database'
 
 // Register API
 interface RegisterInput {
@@ -36,7 +37,11 @@ const refreshTokenInput = t.object({
   refreshToken: t.string(),
 });
 
-const authService = new AuthService();
+// Create a Database instance
+const db = new Database()
+
+// Pass the database to AuthService
+const authService = new AuthService(db)
 
 export async function register(
   req: Request & { body: RegisterInput },
