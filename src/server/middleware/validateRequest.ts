@@ -1,6 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import { AnyZodObject, ZodError } from 'zod';
-import { ValidationError } from '../../shared/errors/ApiError';
+import { ApiError } from '../../shared/errors/ApiError';
+
+// Create a custom ValidationError class since it's not exported from ApiError
+class ValidationError extends ApiError {
+  constructor(message = 'Validation failed', errors?: Record<string, string[]>) {
+    super(400, message, errors);
+  }
+}
 
 /**
  * Middleware to validate request body against a Zod schema

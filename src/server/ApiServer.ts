@@ -3,7 +3,6 @@ import express from 'express';
 import type { Express, RequestHandler } from 'express';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
-import cors from 'cors';
 import compression from 'compression';
 import apiRoutes from './routes';
 import { requestLogger, detailedLogger } from './middleware/logger';
@@ -23,7 +22,7 @@ const expressApp = express as unknown as {
 const jsonParser = expressApp.json({ limit: '10mb' });
 const urlencodedParser = expressApp.urlencoded({ extended: true, limit: '10mb' });
 
-export function ApiServer(environment: ServerEnvironment, app: Express) {
+export function ApiServer(_environment: ServerEnvironment, app: Express) {
   // Security middlewares - disable in development for easier debugging
   if (env.NODE_ENV === 'production') {
     app.use(helmet());
@@ -68,7 +67,7 @@ export function ApiServer(environment: ServerEnvironment, app: Express) {
     });
   } else {
     // In development, only handle API 404s
-    app.use('/api/*', (req, res, next) => {
+    app.use('/api/*', (_req, _res, next) => {
       next(new NotFoundError('API endpoint not found'));
     });
   }

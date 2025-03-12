@@ -47,10 +47,15 @@ export class AuthService {
         const tokenExpiry = new Date();
         tokenExpiry.setHours(tokenExpiry.getHours() + 24); // Token expires in 24 hours
 
-        await this.db.query(
-          'UPDATE users SET email_token = $1, email_token_expire = $2, last_email_sent = NOW() WHERE id = $3',
-          [confirmationToken, tokenExpiry, existingUser.id]
-        );
+        const pool = this.db.getPool();
+        if (pool) {
+          await pool.query(
+            'UPDATE users SET email_token = $1, email_token_expire = $2, last_email_sent = NOW() WHERE id = $3',
+            [confirmationToken, tokenExpiry, existingUser.id]
+          );
+        } else {
+          console.warn('Database pool is not available, skipping update of email token');
+        }
 
         await this.emailService.sendConfirmationEmail(existingUser.email, confirmationToken);
 
@@ -86,7 +91,8 @@ export class AuthService {
       isVerified: false,
       emailConfirmed: false,
       emailToken: confirmationToken,
-      emailTokenExpire: tokenExpiry
+      emailTokenExpire: tokenExpiry,
+      lastEmailSent: new Date()
     });
 
     // Send confirmation email
@@ -121,10 +127,15 @@ export class AuthService {
       const tokenExpiry = new Date();
       tokenExpiry.setHours(tokenExpiry.getHours() + 24); // Token expires in 24 hours
 
-      await this.db.query(
-        'UPDATE users SET email_token = $1, email_token_expire = $2 WHERE id = $3',
-        [confirmationToken, tokenExpiry, user.id]
-      );
+      const pool = this.db.getPool();
+      if (pool) {
+        await pool.query(
+          'UPDATE users SET email_token = $1, email_token_expire = $2 WHERE id = $3',
+          [confirmationToken, tokenExpiry, user.id]
+        );
+      } else {
+        console.warn('Database pool is not available, skipping update of email token');
+      }
 
       // Send confirmation email
       await this.emailService.sendConfirmationEmail(user.email, confirmationToken);
@@ -144,7 +155,12 @@ export class AuthService {
 
   async confirmEmail(token: string): Promise<boolean> {
     // Find user with the given token
-    const result = await this.db.query(
+    const pool = this.db.getPool();
+    if (!pool) {
+      throw new Error('Database connection not available');
+    }
+    
+    const result = await pool.query(
       'SELECT id FROM users WHERE email_token = $1 AND email_token_expire > NOW()',
       [token]
     );
@@ -155,8 +171,8 @@ export class AuthService {
 
     const userId = result.rows[0].id;
 
-    // Update user to confirm email
-    await this.db.query(
+    // Update user to confirm email - using the same pool variable
+    await pool.query(
       'UPDATE users SET email_confirmed = TRUE, email_token = NULL, email_token_expire = NULL WHERE id = $1',
       [userId]
     );
@@ -190,7 +206,12 @@ export class AuthService {
     const tokenExpiry = new Date();
     tokenExpiry.setHours(tokenExpiry.getHours() + 24); // Token expires in 24 hours
 
-    await this.db.query(
+    const pool = this.db.getPool();
+    if (!pool) {
+      throw new Error('Database connection not available');
+    }
+    
+    await pool.query(
       'UPDATE users SET email_token = $1, email_token_expire = $2 WHERE id = $3',
       [confirmationToken, tokenExpiry, user.id]
     );

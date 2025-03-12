@@ -1,7 +1,7 @@
 import Router from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import { User } from '../models';
-import { NotFoundError, UnauthorizedError, BadRequestError } from '../../shared/errors/ApiError';
+import { NotFoundError, UnauthorizedError } from '../../shared/errors/ApiError';
 import { authenticate, authorize } from '../middleware/auth';
 import { customValidate } from '../middleware/customValidate';
 import { 

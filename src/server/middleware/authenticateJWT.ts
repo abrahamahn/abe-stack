@@ -34,7 +34,7 @@ export const authenticateJWT = async (
     const token = authHeader.split(' ')[1];
 
     // Check if token is blacklisted
-    if (tokenBlacklist.has(token)) {
+    if (tokenBlacklist.isBlacklisted(token)) {
       throw new UnauthorizedError('Token has been revoked');
     }
 

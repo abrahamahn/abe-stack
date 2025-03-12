@@ -10,6 +10,8 @@ interface RegisterInput {
   email: string;
   password: string;
   displayName: string;
+  firstName: string;
+  lastName: string;
 }
 
 interface LoginInput {
@@ -26,6 +28,8 @@ const registerInput = t.object({
   email: t.string(),
   password: t.string(),
   displayName: t.string(),
+  firstName: t.string(),
+  lastName: t.string(),
 });
 
 const loginInput = t.object({
@@ -37,8 +41,8 @@ const refreshTokenInput = t.object({
   refreshToken: t.string(),
 });
 
-// Create a Database instance
-const db = new Database()
+// Create a Database instance with a default path
+const db = new Database(process.env.DB_PATH || './db')
 
 // Pass the database to AuthService
 const authService = new AuthService(db)

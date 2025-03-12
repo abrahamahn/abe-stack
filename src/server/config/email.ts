@@ -9,7 +9,7 @@ export const emailConfig = {
   appName: envConfig.APP_NAME,
   appUrl: envConfig.APP_URL,
   isDevelopment: envConfig.NODE_ENV === 'development',
-  port: envConfig.PORT
+  serverPort: envConfig.PORT
 };
 
 export default emailConfig; 

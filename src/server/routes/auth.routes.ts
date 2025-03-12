@@ -1,11 +1,12 @@
 // src/server/routes/auth.routes.ts
 import Router from 'express';
-import * as authController from '../controllers/auth.controller';
+import { AuthController } from '../controllers/AuthController';
 import { customValidate } from '../middleware/customValidate';
 import { loginSchema, registerSchema, emailSchema } from '../validators/auth.validator';
 import { authLimiter } from '../middleware/rateLimiter';
 
 const router = Router();
+const authController = new AuthController();
 
 // Apply stricter rate limiting for auth routes
 router.use(authLimiter);

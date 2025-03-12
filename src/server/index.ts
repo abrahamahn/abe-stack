@@ -240,7 +240,7 @@ async function startServer() {
     for (const preferredPort of preferredPorts) {
       try {
         const testServer = http.createServer();
-        await new Promise<void>((resolve, reject) => {
+        await new Promise<void>((resolve, _reject) => {
           testServer.on('error', () => {
             console.log(`Port ${preferredPort} is in use, trying next port...`);
             resolve();

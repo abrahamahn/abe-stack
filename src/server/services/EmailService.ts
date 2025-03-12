@@ -1,3 +1,4 @@
+// Remove the custom type declaration
 import nodemailer from 'nodemailer';
 import emailConfig from '../config/email';
 import { Database } from './Database';
@@ -65,10 +66,15 @@ export class EmailService {
       console.log('Email sent:', info.messageId);
 
       // Update last email sent timestamp in the database
-      await this.db.query(
-        'UPDATE users SET last_email_sent = NOW() WHERE email = $1',
-        [userEmail]
-      );
+      const pool = this.db.getPool();
+      if (pool) {
+        await pool.query(
+          'UPDATE users SET last_email_sent = NOW() WHERE email = $1',
+          [userEmail]
+        );
+      } else {
+        console.warn('Database pool is not available, skipping update of last_email_sent');
+      }
 
       return { success: true, message: 'Email sent successfully.' };
     } catch (error) {
@@ -121,10 +127,15 @@ export class EmailService {
       console.log('Email sent:', info.messageId);
 
       // Update last email sent timestamp in the database
-      await this.db.query(
-        'UPDATE users SET last_email_sent = NOW() WHERE email = $1',
-        [userEmail]
-      );
+      const pool = this.db.getPool();
+      if (pool) {
+        await pool.query(
+          'UPDATE users SET last_email_sent = NOW() WHERE email = $1',
+          [userEmail]
+        );
+      } else {
+        console.warn('Database pool is not available, skipping update of last_email_sent');
+      }
 
       return { success: true, message: 'Email sent successfully.' };
     } catch (error) {

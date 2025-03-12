@@ -1,14 +1,15 @@
 import type { Request, Response, NextFunction } from 'express';
 import User from '../models/User';
 import AuthService from '../services/AuthService';
-import { ConflictError, BadRequestError, UnauthorizedError } from '../../shared/errors/ApiError';
+import { ConflictError, UnauthorizedError } from '../../shared/errors/ApiError';
 import { Database } from '../services/Database';
 
 export class AuthController {
   private db: Database;
   
   constructor() {
-    this.db = new Database();
+    // Pass a default path to the Database constructor
+    this.db = new Database(process.env.DB_PATH || './db');
   }
 
   // Login handler
