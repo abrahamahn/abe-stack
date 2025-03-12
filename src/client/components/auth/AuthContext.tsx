@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 // Define the user type
 interface User {
@@ -170,7 +170,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           firstName,
           lastName,
           email, 
-          password
+          password,
+          displayName: `${firstName} ${lastName}`
         })
       });
       

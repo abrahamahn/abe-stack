@@ -24,6 +24,20 @@ const expressApp = express as unknown as {
 const app = expressApp();
 const server = http.createServer(app);
 
+// Apply CORS middleware first, before anything else
+app.use(cors({
+  origin: '*', // Allow all origins in development
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204
+}));
+
+// Other middleware
+app.use(expressApp.json());
+app.use(cookieParser());
+
 // Server configuration
 const config = {
   port: parseInt(process.env.PORT || '8080'),
@@ -106,29 +120,6 @@ const environment: ServerEnvironment = {
 // Initialize servers
 FileServer(environment, app);
 ApiServer(environment, app);
-
-// Middleware
-app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
-    
-    // Allow localhost with any port
-    if (origin.startsWith('http://localhost:') || origin.startsWith('https://localhost:')) {
-      return callback(null, true);
-    }
-    
-    // Check against configured origins
-    if (config.corsOrigins.indexOf(origin) !== -1) {
-      return callback(null, true);
-    }
-    
-    callback(null, false);
-  },
-  credentials: true
-}));
-app.use(expressApp.json());
-app.use(cookieParser());
 
 // API routes
 app.get('/api', (_req: Request, res: Response) => {

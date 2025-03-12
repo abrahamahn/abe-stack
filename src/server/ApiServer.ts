@@ -4,6 +4,7 @@ import type { Express, RequestHandler } from 'express';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import compression from 'compression';
+import cors from 'cors';
 import apiRoutes from './routes';
 import { requestLogger, detailedLogger } from './middleware/logger';
 import { errorHandler } from './middleware/errorHandler';
@@ -28,8 +29,15 @@ export function ApiServer(_environment: ServerEnvironment, app: Express) {
     app.use(helmet());
   }
   
-  // CORS configuration is already handled in the main server file
-  // We don't need to add it again here
+  // Add CORS middleware specifically for API routes
+  app.use(cors({
+    origin: '*', // Allow all origins in development
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+  }));
   
   // Request parsing middleware
   app.use(jsonParser);
