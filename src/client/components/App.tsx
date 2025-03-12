@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useClientEnvironment } from '../services/ClientEnvironment';
 import { useRoute } from '../services/Router';
 import Button from './ui/Button';
+import { Link } from './ui/Link';
 
 export function App() {
 	const environment = useClientEnvironment();
@@ -76,10 +77,87 @@ function LeftPanelLayout(props: { show: boolean; setShow: (show: boolean) => voi
 			<div style={{ padding: '16px' }}>
 				<h2>Navigation</h2>
 				<ul style={{ listStyle: 'none', padding: 0, marginTop: '16px' }}>
-					<li style={{ marginBottom: '8px' }}><a href="#" style={{ color: 'var(--blue)' }}>Home</a></li>
-					<li style={{ marginBottom: '8px' }}><a href="#" style={{ color: 'var(--blue)' }}>Media</a></li>
-					<li style={{ marginBottom: '8px' }}><a href="#" style={{ color: 'var(--blue)' }}>Social</a></li>
-					<li style={{ marginBottom: '8px' }}><a href="#" style={{ color: 'var(--blue)' }}>Settings</a></li>
+					<li style={{ marginBottom: '8px' }}>
+						<Link 
+							to="/dashboard"
+							style={{ textDecoration: 'none', color: 'var(--blue)' }}
+							activeStyle={{ color: 'var(--accent)', fontWeight: 'bold' }}
+						>
+							Dashboard
+						</Link>
+					</li>
+					<li style={{ marginBottom: '8px' }}>
+						<Link 
+							to="/home"
+							style={{ textDecoration: 'none', color: 'var(--blue)' }}
+							activeStyle={{ color: 'var(--accent)', fontWeight: 'bold' }}
+						>
+							Home
+						</Link>
+					</li>
+					<li style={{ marginBottom: '8px' }}>
+						<Link 
+							to="/explore"
+							style={{ textDecoration: 'none', color: 'var(--blue)' }}
+							activeStyle={{ color: 'var(--accent)', fontWeight: 'bold' }}
+						>
+							Explore
+						</Link>
+					</li>
+					<li style={{ marginBottom: '8px' }}>
+						<Link 
+							to="/media"
+							style={{ textDecoration: 'none', color: 'var(--blue)' }}
+							activeStyle={{ color: 'var(--accent)', fontWeight: 'bold' }}
+						>
+							Media
+						</Link>
+					</li>
+					<li style={{ marginBottom: '8px' }}>
+						<Link 
+							to="/upload"
+							style={{ textDecoration: 'none', color: 'var(--blue)' }}
+							activeStyle={{ color: 'var(--accent)', fontWeight: 'bold' }}
+						>
+							Upload
+						</Link>
+					</li>
+					<li style={{ marginBottom: '8px' }}>
+						<Link 
+							to="/social"
+							style={{ textDecoration: 'none', color: 'var(--blue)' }}
+							activeStyle={{ color: 'var(--accent)', fontWeight: 'bold' }}
+						>
+							Social
+						</Link>
+					</li>
+					<li style={{ marginBottom: '8px' }}>
+						<Link 
+							to="/notifications"
+							style={{ textDecoration: 'none', color: 'var(--blue)' }}
+							activeStyle={{ color: 'var(--accent)', fontWeight: 'bold' }}
+						>
+							Notifications
+						</Link>
+					</li>
+					<li style={{ marginBottom: '8px' }}>
+						<Link 
+							to="/profile"
+							style={{ textDecoration: 'none', color: 'var(--blue)' }}
+							activeStyle={{ color: 'var(--accent)', fontWeight: 'bold' }}
+						>
+							Profile
+						</Link>
+					</li>
+					<li style={{ marginBottom: '8px' }}>
+						<Link 
+							to="/settings"
+							style={{ textDecoration: 'none', color: 'var(--blue)' }}
+							activeStyle={{ color: 'var(--accent)', fontWeight: 'bold' }}
+						>
+							Settings
+						</Link>
+					</li>
 				</ul>
 				<Button onClick={() => props.setShow(!props.show)} style={{ marginTop: '16px' }}>
 					{props.show ? 'Hide Sidebar' : 'Show Sidebar'}

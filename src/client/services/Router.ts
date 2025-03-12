@@ -2,6 +2,15 @@ import { useEffect, useState } from "react"
 
 export type Route = 
 	| { type: 'root'; url: string }
+	| { type: 'home'; url: string }
+	| { type: 'media'; url: string }
+	| { type: 'social'; url: string }
+	| { type: 'settings'; url: string }
+	| { type: 'dashboard'; url: string }
+	| { type: 'profile'; url: string }
+	| { type: 'upload'; url: string }
+	| { type: 'explore'; url: string }
+	| { type: 'notifications'; url: string }
 	| { type: 'design'; url: string; page: string }
 	| { type: 'unknown'; url: string };
 
@@ -22,6 +31,42 @@ export class Router {
 	private parseUrl(url: string): Route {
 		if (url === '/' || url === '') {
 			return { type: 'root', url }
+		}
+		
+		if (url === '/home') {
+			return { type: 'home', url }
+		}
+		
+		if (url === '/media') {
+			return { type: 'media', url }
+		}
+		
+		if (url === '/social') {
+			return { type: 'social', url }
+		}
+		
+		if (url === '/settings') {
+			return { type: 'settings', url }
+		}
+		
+		if (url === '/dashboard') {
+			return { type: 'dashboard', url }
+		}
+		
+		if (url === '/profile') {
+			return { type: 'profile', url }
+		}
+		
+		if (url === '/upload') {
+			return { type: 'upload', url }
+		}
+		
+		if (url === '/explore') {
+			return { type: 'explore', url }
+		}
+		
+		if (url === '/notifications') {
+			return { type: 'notifications', url }
 		}
 		
 		if (url.startsWith('/design/')) {
