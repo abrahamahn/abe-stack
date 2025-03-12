@@ -1,0 +1,32 @@
+{
+	"compilerOptions": {
+	  // Base settings
+	  "target": "ES2022",
+	  "module": "NodeNext",
+	  "moduleResolution": "NodeNext",
+	  "strict": true,
+	  "skipLibCheck": true,
+	  "esModuleInterop": true,
+	  "resolveJsonModule": true,
+	  "forceConsistentCasingInFileNames": true,
+	  "sourceMap": true,
+	  
+	  // Strictness settings
+	  "noUnusedLocals": true,
+	  "noUnusedParameters": true,
+	  "noFallthroughCasesInSwitch": true,
+	  "noImplicitAny": true,
+	  "strictNullChecks": true,
+	  
+	  // Base paths
+	  "baseUrl": ".",
+	  "typeRoots": ["./node_modules/@types", "./src/types"],
+	  "types": ["node"]
+	},
+	"exclude": ["node_modules", "dist", "build"],
+	"references": [
+	  { "path": "./tsconfig.server.json" },
+	  { "path": "./tsconfig.client.json" },
+	  { "path": "./tsconfig.node.json" }
+	]
+  }

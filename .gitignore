@@ -1,0 +1,23 @@
+.DS_Store
+node_modules
+*.log
+dist 
+
+tmp
+.devcontainer
+playwright-report
+test-results
+TODO.md
+full_code.py
+project-code_dump.txt
+# Environment
+.env
+.env.*
+.env.development
+.env.production
+
+# Dependencies
+package-lock.json
+
+# Environment
+!.env.example
