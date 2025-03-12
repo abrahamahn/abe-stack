@@ -1,6 +1,5 @@
 // src/server/middleware/mediaRateLimiter.ts
-import type { Request as ExpressRequest, Response as ExpressResponse } from 'express-serve-static-core';
-import { NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { TooManyRequestsError } from '../../shared/errors/ApiError';
 
 interface RateLimitStore {
@@ -14,7 +13,7 @@ const store: RateLimitStore = {};
 const WINDOW_MS = 60 * 1000; // 1 minute
 const MAX_REQUESTS = 10;
 
-export const mediaLimiter = (req: ExpressRequest, res: ExpressResponse, next: NextFunction) => {
+export const mediaLimiter = (req: Request, res: Response, next: NextFunction) => {
   const ip = req.ip || req.socket.remoteAddress || 'unknown';
   const now = Date.now();
   

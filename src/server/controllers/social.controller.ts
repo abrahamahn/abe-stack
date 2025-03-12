@@ -1,10 +1,10 @@
-import type { Request, Response } from 'express-serve-static-core';
+import express from 'express';
 import { Post, Comment, Like, CommentLike, Follow } from '../models';
 import { uploadToStorage } from '../lib/storage';
 import User from '../models/User';
 
 // User Profile
-export const getUserProfileHandler = async (req: Request, res: Response) => {
+export const getUserProfileHandler = async (req: express.Request, res: express.Response) => {
   try {
     const { userId } = req.params;
     const currentUserId = req.user?.id;
@@ -69,7 +69,7 @@ export async function getUserProfile(userId: string, currentUserId?: string): Pr
 }
 
 // Follow/Unfollow
-export const followUser = async (req: Request, res: Response) => {
+export const followUser = async (req: express.Request, res: express.Response) => {
   try {
     const { userId } = req.params;
     const followerId = req.user?.id;
@@ -90,7 +90,7 @@ export const followUser = async (req: Request, res: Response) => {
   }
 };
 
-export const unfollowUser = async (req: Request, res: Response) => {
+export const unfollowUser = async (req: express.Request, res: express.Response) => {
   try {
     const { userId } = req.params;
     const followerId = req.user?.id;
@@ -112,7 +112,7 @@ export const unfollowUser = async (req: Request, res: Response) => {
 };
 
 // Feed
-export const getFeed = async (req: Request, res: Response) => {
+export const getFeed = async (req: express.Request, res: express.Response) => {
   try {
     const userId = req.user?.id;
     const { cursor } = req.query;
@@ -172,7 +172,7 @@ export const getFeed = async (req: Request, res: Response) => {
 };
 
 // Posts
-export const createPost = async (req: Request, res: Response) => {
+export const createPost = async (req: express.Request, res: express.Response) => {
   try {
     const { content } = req.body;
     const userId = req.user?.id;
@@ -216,7 +216,7 @@ export const createPost = async (req: Request, res: Response) => {
   }
 };
 
-export const likePost = async (req: Request, res: Response) => {
+export const likePost = async (req: express.Request, res: express.Response) => {
   try {
     const { postId } = req.params;
     const userId = req.user?.id;
@@ -238,7 +238,7 @@ export const likePost = async (req: Request, res: Response) => {
   }
 };
 
-export const unlikePost = async (req: Request, res: Response) => {
+export const unlikePost = async (req: express.Request, res: express.Response) => {
   try {
     const { postId } = req.params;
     const userId = req.user?.id;
@@ -263,7 +263,7 @@ export const unlikePost = async (req: Request, res: Response) => {
   }
 };
 
-export const sharePost = async (req: Request, res: Response) => {
+export const sharePost = async (req: express.Request, res: express.Response) => {
   try {
     const { postId } = req.params;
 
@@ -279,7 +279,7 @@ export const sharePost = async (req: Request, res: Response) => {
 };
 
 // Comments
-export const getComments = async (req: Request, res: Response) => {
+export const getComments = async (req: express.Request, res: express.Response) => {
   try {
     const { postId } = req.params;
     const userId = req.user?.id;
@@ -352,7 +352,7 @@ export const getComments = async (req: Request, res: Response) => {
   }
 };
 
-export const createComment = async (req: Request, res: Response) => {
+export const createComment = async (req: express.Request, res: express.Response) => {
   try {
     const { postId } = req.params;
     const { content } = req.body;
@@ -386,7 +386,7 @@ export const createComment = async (req: Request, res: Response) => {
   }
 };
 
-export const likeComment = async (req: Request, res: Response) => {
+export const likeComment = async (req: express.Request, res: express.Response) => {
   try {
     const { commentId } = req.params;
     const userId = req.user?.id;
@@ -408,7 +408,7 @@ export const likeComment = async (req: Request, res: Response) => {
   }
 };
 
-export const unlikeComment = async (req: Request, res: Response) => {
+export const unlikeComment = async (req: express.Request, res: express.Response) => {
   try {
     const { commentId } = req.params;
     const userId = req.user?.id;
@@ -433,7 +433,7 @@ export const unlikeComment = async (req: Request, res: Response) => {
   }
 };
 
-export const replyToComment = async (req: Request, res: Response) => {
+export const replyToComment = async (req: express.Request, res: express.Response) => {
   try {
     const { commentId } = req.params;
     const { content } = req.body;

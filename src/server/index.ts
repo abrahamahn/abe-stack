@@ -1,12 +1,11 @@
 import express from 'express';
-import type { Express, RequestHandler } from 'express-serve-static-core';
+import type { Express, Request, Response, RequestHandler } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import http from 'http';
 import { Pool } from 'pg';
 import { WebSocketServer } from 'ws';
-import type { Request, Response } from 'express-serve-static-core';
 import { ServerEnvironment } from './services/ServerEnvironment';
 import { ApiServer } from './ApiServer';
 import { FileServer } from './FileServer';

@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express-serve-static-core';
+import type { Request, Response, NextFunction } from 'express';
 import User from '../models/User';
 import AuthService from '../services/AuthService';
 import { ConflictError } from '../../shared/errors/ApiError';

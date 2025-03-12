@@ -1,5 +1,5 @@
 import express from 'express';
-import type { Express as ExpressCore, RequestHandler, Request, Response } from 'express-serve-static-core';
+import type { Express, RequestHandler, Request, Response } from 'express';
 import fs from 'fs';
 import { promises as fsPromises } from 'fs';
 import { createWriteStream } from 'fs';
@@ -10,7 +10,7 @@ import { verifySignature } from "./helpers/signatureHelpers"
 import { ServerConfig } from "./services/ServerConfig"
 
 const expressApp = express as unknown as {
-	(): ExpressCore;
+	(): Express;
 	raw: (options?: any) => RequestHandler;
 };
 
@@ -54,7 +54,7 @@ function verifyRequest(
 	return true
 }
 
-export function FileServer(environment: { config: ServerConfig }, app: ExpressCore) {
+export function FileServer(environment: { config: ServerConfig }, app: Express) {
 	const uploadDir = path("uploads")
 	fs.mkdirSync(uploadDir, { recursive: true });
 

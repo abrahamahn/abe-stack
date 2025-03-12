@@ -1,6 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
-import { ParamsDictionary } from 'express-serve-static-core';
-import { ParsedQs } from 'qs';
+import express, { Response, NextFunction } from 'express';
 import { Validator } from '../../shared/dataTypes';
 import { ValidationFailedError } from './error';
 import { z } from 'zod';
@@ -36,32 +34,33 @@ export const customValidate = <T>(
 ) => {
   const validator = schema instanceof z.ZodType ? adaptZodValidator(schema) : schema;
   
-  return async (req: Request, _res: Response, next: NextFunction) => {
+  return async (req: express.Request, _res: Response, next: NextFunction) => {
     try {
+      const typedReq = req as any;
       let validatedData: T;
       
       switch (source) {
         case 'body':
-          validatedData = validator.validate(req.body);
-          req.body = validatedData;
+          validatedData = validator.validate(typedReq.body);
+          typedReq.body = validatedData;
           break;
         case 'query':
-          validatedData = validator.validate(req.query);
-          req.query = validatedData as unknown as ParsedQs;
+          validatedData = validator.validate(typedReq.query);
+          typedReq.query = validatedData as any;
           break;
         case 'params':
-          validatedData = validator.validate(req.params);
-          req.params = validatedData as unknown as ParamsDictionary;
+          validatedData = validator.validate(typedReq.params);
+          typedReq.params = validatedData as any;
           break;
         default:
           validatedData = validator.validate({
-            body: req.body,
-            query: req.query,
-            params: req.params
+            body: typedReq.body,
+            query: typedReq.query,
+            params: typedReq.params
           });
-          req.body = (validatedData as any).body ?? {};
-          req.query = (validatedData as any).query ?? {};
-          req.params = (validatedData as any).params ?? {};
+          typedReq.body = (validatedData as any).body ?? {};
+          typedReq.query = (validatedData as any).query ?? {};
+          typedReq.params = (validatedData as any).params ?? {};
       }
       
       next();
@@ -90,4 +89,4 @@ export const customValidate = <T>(
       next(new ValidationFailedError('Validation failed', formattedErrors));
     }
   };
-}; 
+};

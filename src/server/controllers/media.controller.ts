@@ -1,4 +1,4 @@
-import type { Request, Response } from 'express-serve-static-core';
+import type { Request, Response } from 'express';
 import path from 'path';
 import fs from 'fs';
 import { EnhancedMediaProcessingService } from '../services/EnhancedMediaProcessingService';

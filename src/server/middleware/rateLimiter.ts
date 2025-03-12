@@ -1,6 +1,5 @@
 // src/server/middleware/rateLimiter.ts
-import type { Request as ExpressRequest, Response as ExpressResponse } from 'express-serve-static-core';
-import { NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { env } from '../config/environment';
 import { TooManyRequestsError } from '../../shared/errors/ApiError';
 
@@ -15,7 +14,7 @@ const apiStore: RateLimitStore = {};
 const authStore: RateLimitStore = {};
 
 const createLimiter = (store: RateLimitStore, windowMs: number, maxRequests: number, message: string) => {
-  return (req: ExpressRequest, res: ExpressResponse, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
     const now = Date.now();
     

@@ -2,7 +2,6 @@
 import express from "express"
 import helmet from "helmet"
 import http from "http"
-import morgan from "morgan"
 import path from "path"
 import { ApiServer } from "./ApiServer"
 import { FileServer } from "./FileServer"
@@ -11,6 +10,9 @@ import QueueServer from "./QueueServer"
 import { Database } from "./services/Database"
 import { QueueDatabase } from "./services/QueueDatabase"
 import { ServerConfig, DatabaseApi, PubsubApi, ServerEnvironment } from "./services/ServerEnvironment"
+import { Logger } from "./services/LoggerService"
+
+const logger = new Logger('Server');
 
 // Create a complete config object that matches ServerConfig type
 const config: ServerConfig = {
@@ -44,12 +46,15 @@ async function startServer() {
     app.use(helmet())
   }
 
-  // Request logging.
-  app.use(morgan('dev', {
-    stream: {
-      write: (message) => console.log(`express: ${message.trim()}`)
-    }
-  }))
+  // Request logging
+  app.use((req, res, next) => {
+    const start = Date.now();
+    res.on('finish', () => {
+      const duration = Date.now() - start;
+      logger.info(`${req.method} ${req.url} ${res.statusCode} ${duration}ms`);
+    });
+    next();
+  });
 
   // Serve static files from the uploads directory
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')))
