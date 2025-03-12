@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react';
+import './page-content.css';
 
 interface PageContentProps {
   children: ReactNode;
@@ -8,10 +9,10 @@ interface PageContentProps {
 
 export function PageContent({ children, title, description }: PageContentProps) {
   return (
-    <div style={{ padding: '20px' }}>
-      {title && <h1>{title}</h1>}
-      {description && <p>{description}</p>}
-      <div style={{ marginTop: title || description ? '20px' : '0' }}>
+    <div className="page-content">
+      {title && <h1 className="page-title">{title}</h1>}
+      {description && <p className="page-description">{description}</p>}
+      <div className={`page-content-body ${!title && !description ? 'no-header' : ''}`}>
         {children}
       </div>
     </div>

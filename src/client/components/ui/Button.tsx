@@ -1,48 +1,19 @@
 import React, { forwardRef, ComponentPropsWithoutRef } from 'react';
+import './button.css';
 
 interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
-	variant?: 'primary' | 'naked';
+	variant?: 'primary' | 'secondary' | 'text';
+	size?: 'small' | 'medium' | 'large';
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
-	const { variant, ...rest } = props;
-	return <button ref={ref} {...rest} />;
+	const { variant = 'primary', size = 'medium', className = '', ...rest } = props;
+	const buttonClass = `btn btn-${variant} btn-${size} ${className}`;
+	
+	return <button ref={ref} className={buttonClass} {...rest} />;
 });
 
-export const PrimaryButton = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
-	return (
-		<Button
-			ref={ref}
-			{...props}
-			variant="primary"
-			style={{
-				backgroundColor: '#3b82f6',
-				color: 'white',
-				border: 'none',
-				padding: '0.5rem 1rem',
-				borderRadius: '0.25rem',
-				cursor: 'pointer',
-				...props.style,
-			}}
-		/>
-	);
-});
+Button.displayName = 'Button';
 
-export const NakedButton = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
-	return (
-		<Button
-			ref={ref}
-			{...props}
-			variant="naked"
-			style={{
-				backgroundColor: 'transparent',
-				border: 'none',
-				padding: '0',
-				cursor: 'pointer',
-				...props.style,
-			}}
-		/>
-	);
-});
-
+export { Button };
 export default Button;

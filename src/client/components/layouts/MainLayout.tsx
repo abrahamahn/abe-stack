@@ -1,214 +1,141 @@
-import React, { useState, ReactNode } from 'react';
-import { useClientEnvironment } from '../../services/ClientEnvironment';
-import Button from '../ui/Button';
+import React, { useState } from 'react';
 import { Link } from '../ui/Link';
+import { Button } from '../ui/Button';
+import { AuthModal, AuthModalType, useAuth } from '../auth';
+import { useTheme } from '../theme';
+import './main-layout.css';
 
-interface MainLayoutProps {
-  children: ReactNode;
-}
-
-export function MainLayout({ children }: MainLayoutProps) {
-  const [showTopbar, setShowTopbar] = useState(true);
+export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [showSidebar, setShowSidebar] = useState(true);
-  const [showRightPanel, setShowRightPanel] = useState(true);
+  const [showRightPanel, setShowRightPanel] = useState(false);
+  const [showTopbar, setShowTopbar] = useState(true);
   const [showBottomBar, setShowBottomBar] = useState(true);
+  const [authModal, setAuthModal] = useState<{ show: boolean, type: AuthModalType }>({ show: false, type: 'login' });
+  
+  const { isAuthenticated, user, logout } = useAuth();
+  const { theme, toggleTheme, isUsingSystemTheme } = useTheme();
+
+  const openLoginModal = () => {
+    setAuthModal({ show: true, type: 'login' });
+  };
+
+  const openRegisterModal = () => {
+    setAuthModal({ show: true, type: 'register' });
+  };
+
+  const closeAuthModal = () => {
+    setAuthModal({ show: false, type: authModal.type });
+  };
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <TopbarLayout show={showTopbar} setShow={setShowTopbar} />
+    <div className="main-layout">
+      {showTopbar && (
+        <div className="top-bar">
+          <div className="logo">ABE Stack</div>
+          <div className="top-bar-actions">
+            <button 
+              className="theme-toggle-btn" 
+              onClick={toggleTheme}
+              aria-label={isUsingSystemTheme 
+                ? "Using system theme preference" 
+                : `Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+              title={isUsingSystemTheme 
+                ? "Using system theme preference" 
+                : `Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            >
+              {isUsingSystemTheme 
+                ? '🖥️' 
+                : theme === 'light' 
+                  ? '🌙' 
+                  : '☀️'}
+            </button>
+            {isAuthenticated ? (
+              <div className="user-profile">
+                <div 
+                  style={{ 
+                    width: '32px', 
+                    height: '32px', 
+                    borderRadius: '50%', 
+                    backgroundColor: 'var(--accent)', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {user?.name?.charAt(0) || 'U'}
+                </div>
+                <span className="username">{user?.name || 'User'}</span>
+                <Button onClick={handleLogout}>Logout</Button>
+              </div>
+            ) : (
+              <>
+                <Button onClick={openLoginModal}>Log In</Button>
+                <Button onClick={openRegisterModal}>Register</Button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
-      <div style={{ flexGrow: 1, display: 'flex', overflow: 'hidden' }}>
-        <LeftPanelLayout show={showSidebar} setShow={setShowSidebar} />
+      <div className="content-area">
+        {showSidebar && (
+          <div className="left-panel">
+            <nav className="main-nav">
+              <Link to="/">Home</Link>
+              <Link to="/dashboard">Dashboard</Link>
+              <Link to="/profile">Profile</Link>
+              <Link to="/upload">Upload</Link>
+              <Link to="/explore">Explore</Link>
+              <Link to="/notifications">Notifications</Link>
+              <Link to="/media">Media</Link>
+              <Link to="/settings">Settings</Link>
+            </nav>
+          </div>
+        )}
 
-        <div style={{ flexGrow: 1, overflowY: 'auto' }}>
+        <div className="main-content">
           {children}
         </div>
 
-        <RightPanelLayout show={showRightPanel} setShow={setShowRightPanel} />
+        {showRightPanel && (
+          <div className="right-panel">
+            <h3>Additional Info</h3>
+            <p>This panel can contain contextual information, notifications, or other supplementary content.</p>
+          </div>
+        )}
       </div>
 
-      <BottombarLayout show={showBottomBar} setShow={setShowBottomBar} />
-    </div>
-  );
-}
-
-function TopbarLayout(props: { show: boolean; setShow: (show: boolean) => void }) {
-  return (
-    <div
-      style={{
-        flexGrow: 0,
-        flexShrink: 0,
-        borderBottom: '2px solid var(--transparent1)',
-        transition: !props.show ? 'height 0.1s ease-in' : 'height 0.1s ease-out',
-        height: props.show ? 64 : 0,
-        overflow: 'hidden',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', height: '100%', width: '100%', padding: '0 16px' }}>
-        <h1>ABE Stack</h1>
-        <div style={{ marginLeft: 'auto' }}>
-          <Button onClick={() => props.setShow(!props.show)}>{props.show ? 'Hide Header' : 'Show Header'}</Button>
+      {showBottomBar && (
+        <div className="bottom-bar">
+          <div>© 2023 ABE Stack</div>
+          <div className="layout-controls">
+            <button onClick={() => setShowSidebar(!showSidebar)}>
+              {showSidebar ? 'Hide' : 'Show'} Left Panel
+            </button>
+            <button onClick={() => setShowRightPanel(!showRightPanel)}>
+              {showRightPanel ? 'Hide' : 'Show'} Right Panel
+            </button>
+            <button onClick={() => setShowTopbar(!showTopbar)}>
+              {showTopbar ? 'Hide' : 'Show'} Top Bar
+            </button>
+            <button onClick={() => setShowBottomBar(!showBottomBar)}>
+              Hide Bottom Bar
+            </button>
+          </div>
         </div>
-      </div>
-    </div>
-  );
-}
+      )}
 
-function BottombarLayout(props: { show: boolean; setShow: (show: boolean) => void }) {
-  return (
-    <div
-      style={{
-        flexGrow: 0,
-        flexShrink: 0,
-        borderTop: '2px solid var(--transparent1)',
-        transition: !props.show ? 'height 0.1s ease-in' : 'height 0.1s ease-out',
-        height: props.show ? 64 : 0,
-        overflow: 'hidden',
-      }}
-    >
-      <div
-        style={{
-          padding: 8,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <span>ABE Stack &copy; {new Date().getFullYear()}</span>
-        <Button onClick={() => props.setShow(!props.show)}>
-          {props.show ? 'Hide Footer' : 'Show Footer'}
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function LeftPanelLayout(props: { show: boolean; setShow: (show: boolean) => void }) {
-  return (
-    <div
-      style={{
-        flexGrow: 0,
-        flexShrink: 0,
-        borderRight: '2px solid var(--transparent1)',
-        transition: !props.show ? 'width 0.1s ease-in' : 'width 0.1s ease-out',
-        width: props.show ? 256 : 0,
-        overflow: 'hidden',
-      }}
-    >
-      <div style={{ padding: '16px' }}>
-        <h2>Navigation</h2>
-        <ul style={{ listStyle: 'none', padding: 0, marginTop: '16px' }}>
-          <li style={{ marginBottom: '8px' }}>
-            <Link 
-              to="/dashboard"
-              style={{ textDecoration: 'none', color: 'var(--blue)' }}
-              activeStyle={{ color: 'var(--accent)', fontWeight: 'bold' }}
-            >
-              Dashboard
-            </Link>
-          </li>
-          <li style={{ marginBottom: '8px' }}>
-            <Link 
-              to="/home"
-              style={{ textDecoration: 'none', color: 'var(--blue)' }}
-              activeStyle={{ color: 'var(--accent)', fontWeight: 'bold' }}
-            >
-              Home
-            </Link>
-          </li>
-          <li style={{ marginBottom: '8px' }}>
-            <Link 
-              to="/explore"
-              style={{ textDecoration: 'none', color: 'var(--blue)' }}
-              activeStyle={{ color: 'var(--accent)', fontWeight: 'bold' }}
-            >
-              Explore
-            </Link>
-          </li>
-          <li style={{ marginBottom: '8px' }}>
-            <Link 
-              to="/media"
-              style={{ textDecoration: 'none', color: 'var(--blue)' }}
-              activeStyle={{ color: 'var(--accent)', fontWeight: 'bold' }}
-            >
-              Media
-            </Link>
-          </li>
-          <li style={{ marginBottom: '8px' }}>
-            <Link 
-              to="/upload"
-              style={{ textDecoration: 'none', color: 'var(--blue)' }}
-              activeStyle={{ color: 'var(--accent)', fontWeight: 'bold' }}
-            >
-              Upload
-            </Link>
-          </li>
-          <li style={{ marginBottom: '8px' }}>
-            <Link 
-              to="/social"
-              style={{ textDecoration: 'none', color: 'var(--blue)' }}
-              activeStyle={{ color: 'var(--accent)', fontWeight: 'bold' }}
-            >
-              Social
-            </Link>
-          </li>
-          <li style={{ marginBottom: '8px' }}>
-            <Link 
-              to="/notifications"
-              style={{ textDecoration: 'none', color: 'var(--blue)' }}
-              activeStyle={{ color: 'var(--accent)', fontWeight: 'bold' }}
-            >
-              Notifications
-            </Link>
-          </li>
-          <li style={{ marginBottom: '8px' }}>
-            <Link 
-              to="/profile"
-              style={{ textDecoration: 'none', color: 'var(--blue)' }}
-              activeStyle={{ color: 'var(--accent)', fontWeight: 'bold' }}
-            >
-              Profile
-            </Link>
-          </li>
-          <li style={{ marginBottom: '8px' }}>
-            <Link 
-              to="/settings"
-              style={{ textDecoration: 'none', color: 'var(--blue)' }}
-              activeStyle={{ color: 'var(--accent)', fontWeight: 'bold' }}
-            >
-              Settings
-            </Link>
-          </li>
-        </ul>
-        <Button onClick={() => props.setShow(!props.show)} style={{ marginTop: '16px' }}>
-          {props.show ? 'Hide Sidebar' : 'Show Sidebar'}
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function RightPanelLayout(props: { show: boolean; setShow: (show: boolean) => void }) {
-  return (
-    <div
-      style={{
-        flexGrow: 0,
-        flexShrink: 0,
-        borderLeft: '2px solid var(--transparent1)',
-        transition: !props.show ? 'width 0.1s ease-in' : 'width 0.1s ease-out',
-        width: props.show ? 256 : 0,
-        overflow: 'hidden',
-      }}
-    >
-      <div style={{ padding: '16px' }}>
-        <h2>Details</h2>
-        <div style={{ marginTop: '16px' }}>
-          <p>This panel can show details, notifications, or other contextual information.</p>
-        </div>
-        <Button onClick={() => props.setShow(!props.show)} style={{ marginTop: '16px' }}>
-          {props.show ? 'Hide Details' : 'Show Details'}
-        </Button>
-      </div>
+      <AuthModal 
+        isOpen={authModal.show} 
+        modalType={authModal.type} 
+        onClose={closeAuthModal} 
+      />
     </div>
   );
 } 

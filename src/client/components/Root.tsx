@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { ClientEnvironment, ClientEnvironmentProvider } from '../services/ClientEnvironment';
 import { useRoute } from '../services/Router';
 import { App } from './App';
@@ -12,16 +12,22 @@ import { ProfilePage } from './pages/ProfilePage';
 import { UploadPage } from './pages/UploadPage';
 import { ExplorePage } from './pages/ExplorePage';
 import { NotificationsPage } from './pages/NotificationsPage';
-import { MainLayout } from './layouts/MainLayout';
 import { PageContent } from './layouts/PageContent';
+import { AuthProvider } from './auth';
+import { ThemeProvider } from './theme';
+import MainLayout from './layouts/MainLayout';
 
 export function Root(props: { environment: ClientEnvironment }) {
 	return (
-		<Suspense fallback={<Loading />}>
-			<ClientEnvironmentProvider value={props.environment}>
-				<Router />
-			</ClientEnvironmentProvider>
-		</Suspense>
+		<ClientEnvironmentProvider value={props.environment}>
+			<ThemeProvider>
+				<AuthProvider>
+					<Suspense fallback={<Loading />}>
+						<Router />
+					</Suspense>
+				</AuthProvider>
+			</ThemeProvider>
+		</ClientEnvironmentProvider>
 	);
 }
 
@@ -36,13 +42,12 @@ function Loading() {
 function Router() {
 	const route = useRoute();
 	
-	// Special case for the root route which has its own layout
-	if (route.type === 'root') return <App />;
+	// Only design routes don't use the main layout
+	if (route.type === 'design') {
+		return renderRouteContent(route);
+	}
 	
-	// For design pages, we don't use the main layout
-	if (route.type === 'design') return <Design page={route.page} />;
-	
-	// For all other routes, use the MainLayout
+	// All other routes, including root, use the main layout
 	return (
 		<MainLayout>
 			{renderRouteContent(route)}
@@ -50,16 +55,12 @@ function Router() {
 	);
 }
 
-function renderRouteContent(route: ReturnType<typeof useRoute>) {
+function renderRouteContent(route: any) {
 	switch (route.type) {
-		case 'home':
-			return <HomePage />;
-		case 'media':
-			return <MediaPage />;
-		case 'social':
-			return <SocialPage />;
-		case 'settings':
-			return <SettingsPage />;
+		case 'root':
+			return <App />;
+		case 'design':
+			return <Design page={route.page} />;
 		case 'dashboard':
 			return <DashboardPage />;
 		case 'profile':
@@ -70,7 +71,13 @@ function renderRouteContent(route: ReturnType<typeof useRoute>) {
 			return <ExplorePage />;
 		case 'notifications':
 			return <NotificationsPage />;
+		case 'media':
+			return <MediaPage />;
+		case 'settings':
+			return <SettingsPage />;
+		case 'home':
+			return <HomePage />;
 		default:
-			return <PageContent title="Page Not Found">Unknown route: {route.url}</PageContent>;
+			return <div>Page not found</div>;
 	}
 }
