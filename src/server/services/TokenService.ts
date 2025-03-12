@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import { User } from '../models';
 import { Logger } from './LoggerService';
 import { UnauthorizedError } from '../../shared/errors/ApiError';
@@ -86,7 +86,7 @@ export class TokenService {
    */
   private generateAccessToken(user: User): string {
     const payload: TokenPayload = {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       userId: user.id,
       type: TokenType.ACCESS,
       role: user.role
@@ -104,7 +104,7 @@ export class TokenService {
    */
   private generateRefreshToken(user: User): string {
     const payload: TokenPayload = {
-      id: uuidv4(),
+      id: crypto.randomUUID(),
       userId: user.id,
       type: TokenType.REFRESH
     };

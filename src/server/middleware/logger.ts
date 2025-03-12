@@ -1,35 +1,78 @@
 // src/server/middleware/logger.ts
 import { Request, Response as ExpressResponse, NextFunction } from 'express';
-import morgan from 'morgan';
-import { IncomingMessage } from 'http';
+import winston from 'winston';
 import { env } from '../config/environment';
 
-// Custom token for request body (sanitized)
-morgan.token('body', (req: IncomingMessage & { body?: any }) => {
-  const body = { ...req.body };
-  
-  // Remove sensitive fields
-  if (body.password) body.password = '***';
-  if (body.passwordConfirmation) body.passwordConfirmation = '***';
-  if (body.token) body.token = '***';
-  
-  return JSON.stringify(body);
+// Configure winston logger
+const logger = winston.createLogger({
+  level: env.NODE_ENV === 'production' ? 'info' : 'debug',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.json()
+  ),
+  transports: [
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      )
+    })
+  ]
 });
 
-// Development logger with colors and request body
-const developmentFormat = ':method :url :status :response-time ms - :body';
+// Sanitize sensitive data from objects
+const sanitizeData = (data: any): any => {
+  if (!data) return data;
+  const sanitized = { ...data };
+  
+  // Remove sensitive fields
+  if (sanitized.password) sanitized.password = '***';
+  if (sanitized.passwordConfirmation) sanitized.passwordConfirmation = '***';
+  if (sanitized.token) sanitized.token = '***';
+  
+  return sanitized;
+};
 
-// Production logger focused on performance metrics
-const productionFormat = ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" - :response-time ms';
+// Request logger middleware
+export const requestLogger = (req: Request, res: ExpressResponse, next: NextFunction) => {
+  const start = Date.now();
+  
+  // Log request
+  const logData = {
+    method: req.method,
+    url: req.url,
+    body: sanitizeData(req.body),
+    query: sanitizeData(req.query),
+    ip: req.ip,
+    userAgent: req.get('user-agent')
+  };
 
-export const requestLogger = morgan(
-  env.NODE_ENV === 'production' ? productionFormat : developmentFormat,
-  {
-    skip: (_req, res) => env.NODE_ENV === 'production' && res.statusCode < 400
+  // Only log request body in development
+  if (env.NODE_ENV === 'development') {
+    logger.debug('Incoming request', logData);
   }
-);
 
-// Additional logging middleware for request/response
+  // Log response when finished
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    const responseData = {
+      ...logData,
+      status: res.statusCode,
+      duration: `${duration}ms`
+    };
+
+    // In production, only log errors (status >= 400)
+    if (env.NODE_ENV === 'production' && res.statusCode >= 400) {
+      logger.error('Request error', responseData);
+    } else if (env.NODE_ENV === 'development') {
+      logger.info('Request completed', responseData);
+    }
+  });
+
+  next();
+};
+
+// Detailed logger middleware for development
 export const detailedLogger = (req: Request, res: ExpressResponse & { send: any, json: any }, next: NextFunction) => {
   // Only log in development
   if (env.NODE_ENV !== 'development') {
@@ -37,7 +80,7 @@ export const detailedLogger = (req: Request, res: ExpressResponse & { send: any,
   }
   
   // Log request headers
-  console.log('\nRequest Headers:', req.headers);
+  logger.debug('Request Headers:', { headers: req.headers });
   
   // Capture original methods
   const originalSend = res.send;
@@ -45,13 +88,13 @@ export const detailedLogger = (req: Request, res: ExpressResponse & { send: any,
   
   // Override send method to log response
   res.send = function(body?: any) {
-    console.log('\nResponse Body:', body);
+    logger.debug('Response Body:', { body: sanitizeData(body) });
     return originalSend.call(this, body);
   };
   
   // Override json method to log response
   res.json = function(body?: any) {
-    console.log('\nResponse JSON:', body);
+    logger.debug('Response JSON:', { body: sanitizeData(body) });
     return originalJson.call(this, body);
   };
   

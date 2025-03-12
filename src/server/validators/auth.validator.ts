@@ -6,14 +6,11 @@ export const registerSchema = z.object({
   username: z.string()
     .min(3, 'Username must be at least 3 characters')
     .max(30, 'Username cannot exceed 30 characters')
-    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
+    .regex(/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, underscores, and hyphens'),
   email: z.string()
     .email('Invalid email address'),
   password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
+    .min(8, 'Password must be at least 8 characters'),
   displayName: z.string()
     .min(2, 'Display name must be at least 2 characters')
     .max(50, 'Display name cannot exceed 50 characters'),
@@ -22,9 +19,9 @@ export const registerSchema = z.object({
 // Login validation schema
 export const loginSchema = z.object({
   email: z.string()
-    .email('Invalid email address'),
+    .email('Invalid email format'),
   password: z.string()
-    .min(1, 'Password is required'),
+    .min(8, 'Password must be at least 8 characters'),
 });
 
 // Refresh token validation schema
@@ -35,15 +32,14 @@ export const refreshTokenSchema = z.object({
 
 // Update profile validation schema
 export const updateProfileSchema = z.object({
-  displayName: z.string()
-    .min(2, 'Display name must be at least 2 characters')
-    .max(50, 'Display name cannot exceed 50 characters')
-    .optional(),
+  username: z.string()
+    .min(3, 'Username must be at least 3 characters')
+    .regex(/^[a-zA-Z0-9_-]+$/, 'Username can only contain letters, numbers, underscores, and hyphens'),
   bio: z.string()
-    .max(500, 'Bio cannot exceed 500 characters')
+    .max(500, 'Bio must not exceed 500 characters')
     .optional(),
   avatar: z.string()
-    .url('Invalid avatar URL')
+    .url('Avatar must be a valid URL')
     .optional(),
 });
 
@@ -52,24 +48,19 @@ export const changePasswordSchema = z.object({
   currentPassword: z.string()
     .min(1, 'Current password is required'),
   newPassword: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
+    .min(8, 'New password must be at least 8 characters'),
 });
 
 // Two-factor authentication verification schema
 export const twoFactorVerifySchema = z.object({
-  userId: z.string()
-    .uuid('Invalid user ID'),
-  token: z.string()
-    .min(6, 'Token must be at least 6 characters')
-    .max(10, 'Token cannot exceed 10 characters'),
+  code: z.string()
+    .length(6, 'Code must be exactly 6 characters'),
 });
 
 // Two-factor authentication enable schema
 export const twoFactorEnableSchema = z.object({
-  token: z.string()
-    .min(6, 'Token must be at least 6 characters')
-    .max(10, 'Token cannot exceed 10 characters'),
+  secret: z.string()
+    .min(1, 'Secret is required'),
+  code: z.string()
+    .length(6, 'Code must be exactly 6 characters'),
 });

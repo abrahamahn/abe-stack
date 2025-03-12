@@ -2,7 +2,7 @@
 import Router from 'express';
 import * as authController from '../controllers/auth.controller';
 import { customValidate } from '../middleware/customValidate';
-import { loginSchema, registerSchema } from '../validators/custom-auth.validator';
+import { loginSchema, registerSchema } from '../validators/auth.validator';
 import { authLimiter } from '../middleware/rateLimiter';
 
 const router = Router();

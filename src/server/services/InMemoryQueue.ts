@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 
 // Job status enum
 export enum JobStatus {
@@ -54,7 +54,7 @@ export class InMemoryQueue<T> extends EventEmitter {
    * Add a job to the queue
    */
   async add(data: T, opts: JobOptions = {}): Promise<Job<T>> {
-    const id = uuidv4();
+    const id = crypto.randomUUID();
     const job: Job<T> = {
       id,
       data,

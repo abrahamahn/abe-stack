@@ -3,42 +3,38 @@ import { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
 import { Validator } from '../../shared/dataTypes';
 import { ValidationFailedError } from './error';
-import * as t from 'io-ts';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/function';
+import { z } from 'zod';
 
-type IoTsValidator<T> = t.Type<T>;
+type ZodValidator<T> = z.ZodType<T>;
 
-function adaptIoTsValidator<T>(validator: IoTsValidator<T>): Validator<T> {
+function adaptZodValidator<T>(validator: ZodValidator<T>): Validator<T> {
   return {
     validate: (value: unknown) => {
-      const result = validator.decode(value);
-      return pipe(
-        result,
-        fold(
-          (errors) => {
-            const errorMessages = errors.map(error => 
-              error.message || `Invalid value at ${error.context.map(c => c.key).join('.')}`
-            );
-            throw new Error(errorMessages.join(', '));
-          },
-          (result) => result
-        )
-      );
+      try {
+        return validator.parse(value);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          const errorMessages = error.errors.map(err => 
+            `${err.path.join('.')}: ${err.message}`
+          );
+          throw new Error(errorMessages.join(', '));
+        }
+        throw error;
+      }
     }
   };
 }
 
 /**
  * Middleware to validate request data against a validator schema
- * @param schema Validator schema (can be either io-ts type or custom validator)
+ * @param schema Validator schema (can be either Zod schema or custom validator)
  * @param source Where to find the data to validate (body, query, params)
  */
 export const customValidate = <T>(
-  schema: IoTsValidator<T> | Validator<T>,
+  schema: ZodValidator<T> | Validator<T>,
   source: 'body' | 'query' | 'params' | 'all' = 'body'
 ) => {
-  const validator = 'decode' in schema ? adaptIoTsValidator(schema) : schema;
+  const validator = schema instanceof z.ZodType ? adaptZodValidator(schema) : schema;
   
   return async (req: Request, _res: Response, next: NextFunction) => {
     try {
@@ -74,21 +70,22 @@ export const customValidate = <T>(
       const errorMessage = (error as Error).message;
       const formattedErrors: Record<string, string[]> = {};
       
-      // Extract field name from error message if possible
-      const match = errorMessage.match(/Invalid value at ([^,]+)/);
-      if (match && match[1]) {
-        const field = match[1].trim();
-        if (!formattedErrors[field]) {
-          formattedErrors[field] = [];
+      // Parse Zod error messages which are already in field: message format
+      const errorParts = errorMessage.split(', ');
+      errorParts.forEach(part => {
+        const [field, message] = part.split(': ');
+        if (field && message) {
+          if (!formattedErrors[field]) {
+            formattedErrors[field] = [];
+          }
+          formattedErrors[field].push(message);
+        } else {
+          if (!formattedErrors['_error']) {
+            formattedErrors['_error'] = [];
+          }
+          formattedErrors['_error'].push(part);
         }
-        formattedErrors[field].push(errorMessage);
-      } else {
-        // If we can't extract a field name, use a generic key
-        if (!formattedErrors['_error']) {
-          formattedErrors['_error'] = [];
-        }
-        formattedErrors['_error'].push(errorMessage);
-      }
+      });
       
       next(new ValidationFailedError('Validation failed', formattedErrors));
     }

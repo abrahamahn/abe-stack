@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import path from 'path';
 import fs from 'fs';
 import { promises as fsPromises } from 'fs';
@@ -24,7 +24,7 @@ export class LocalFileStorage implements StorageProvider {
 
   async uploadFile(file: Express.Multer.File): Promise<string> {
     const fileExtension = path.extname(file.originalname);
-    const fileName = `${uuidv4()}${fileExtension}`;
+    const fileName = `${crypto.randomUUID()}${fileExtension}`;
     const filePath = path.join(this.uploadDir, fileName);
     
     // Write file to disk

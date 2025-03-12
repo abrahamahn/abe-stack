@@ -11,7 +11,7 @@ import {
   changePasswordSchema,
   twoFactorVerifySchema,
   twoFactorEnableSchema
-} from '../validators/custom-auth.validator';
+} from '../validators/auth.validator';
 import { TokenService, TokenType } from '../services/TokenService';
 import { TwoFactorAuthService } from '../services/TwoFactorAuthService';
 import { Logger } from '../services/LoggerService';

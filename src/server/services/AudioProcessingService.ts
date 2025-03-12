@@ -2,7 +2,7 @@ import fs from 'fs';
 import { promises as fsPromises } from 'fs';
 import path from 'path';
 import ffmpeg from 'fluent-ffmpeg';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import * as mm from 'music-metadata';
 import sharp from 'sharp';
 import { Logger } from './LoggerService';
@@ -48,7 +48,7 @@ class AudioProcessingService {
       const metadata = await this.extractMetadata(filePath);
       
       // Generate unique filenames
-      const fileId = uuidv4();
+      const fileId = crypto.randomUUID();
       const originalExt = path.extname(filePath);
       const mp3OutputPath = path.join(this.uploadDir, 'audio', 'processed', `${fileId}.mp3`);
       
@@ -153,7 +153,7 @@ class AudioProcessingService {
    * Create a streamable audio segment
    */
   async createStreamableSegment(audioPath: string, start: number, duration: number): Promise<string> {
-    const segmentId = uuidv4();
+    const segmentId = crypto.randomUUID();
     const outputPath = path.join(this.uploadDir, 'audio', 'processed', `${segmentId}.mp3`);
     
     return new Promise((resolve, reject) => {

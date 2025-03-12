@@ -2,7 +2,7 @@ import fs from 'fs';
 import { promises as fsPromises } from 'fs';
 import path from 'path';
 import ffmpeg from 'fluent-ffmpeg';
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 import sharp from 'sharp';
 import { Logger } from './LoggerService';
 
@@ -88,7 +88,7 @@ export class MediaProcessingService {
   }> {
     try {
       // Generate a unique ID for the image
-      const imageId = uuidv4();
+      const imageId = crypto.randomUUID();
       const ext = 'jpg'; // Convert all images to JPEG for consistency
       
       // Get image metadata
@@ -148,7 +148,7 @@ export class MediaProcessingService {
   }> {
     try {
       // Generate a unique ID for the video
-      const videoId = uuidv4();
+      const videoId = crypto.randomUUID();
       const outputExt = 'mp4'; // Convert all videos to MP4
       
       // Get video metadata
@@ -324,11 +324,11 @@ export class MediaProcessingService {
     }>;
   }> {
     try {
-      const carouselId = uuidv4();
+      const carouselId = crypto.randomUUID();
       const items = [];
       
       for (const filePath of filePaths) {
-        const imageId = uuidv4();
+        const imageId = crypto.randomUUID();
         const processedImage = await this.processImage(filePath);
         const paths: Record<string, string> = {};
         
