@@ -1,0 +1,20 @@
+# Build outputs
+dist/
+build/
+node_modules/
+
+# Config files
+*.config.js
+vite.config.ts
+
+# Generated files
+*.d.ts
+!src/types/**/*.d.ts
+
+# Test files
+**/*.test.ts
+**/*.spec.ts
+**/__tests__/**
+
+# Other
+.eslintrc.js 

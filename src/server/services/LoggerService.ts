@@ -7,6 +7,36 @@ const {
 } = process.env;
 
 /**
+ * Helper function to format objects for better readability
+ */
+const formatObject = (obj: any): string => {
+  if (!obj) return '';
+  
+  try {
+    // For strings that look like JSON, parse and then stringify with indentation
+    if (typeof obj === 'string' && (obj.startsWith('{') || obj.startsWith('['))) {
+      try {
+        const parsed = JSON.parse(obj);
+        return '\n' + JSON.stringify(parsed, null, 2);
+      } catch {
+        // If parsing fails, treat as regular string
+        return obj;
+      }
+    }
+    
+    // For objects, stringify with indentation
+    if (typeof obj === 'object') {
+      return '\n' + JSON.stringify(obj, null, 2);
+    }
+    
+    // For other types, convert to string
+    return String(obj);
+  } catch (error) {
+    return `[Unformattable object: ${error}]`;
+  }
+};
+
+/**
  * Logger service for consistent logging across the application
  */
 export class Logger {
@@ -28,8 +58,32 @@ export class Logger {
           format: winston.format.combine(
             winston.format.colorize(),
             winston.format.printf(({ timestamp, level, message, service, ...meta }) => {
-              const metaString = Object.keys(meta).length ? JSON.stringify(meta, null, 2) : '';
-              return `${timestamp} ${level} [${service}]: ${message} ${metaString}`;
+              // Format metadata for better readability
+              let metaOutput = '';
+              
+              if (Object.keys(meta).length) {
+                // Handle body property specially for HTTP requests
+                if (meta.body) {
+                  // For sensitive fields like passwords, replace with asterisks
+                  if (typeof meta.body === 'object' && meta.body.password) {
+                    meta.body = { ...meta.body, password: '***' };
+                  }
+                  
+                  metaOutput += `\nBody: ${formatObject(meta.body)}`;
+                  delete meta.body;
+                }
+                
+                // Format remaining metadata
+                if (Object.keys(meta).length) {
+                  metaOutput += `\nMeta: ${formatObject(meta)}`;
+                }
+              }
+              
+              // Add visual separator for debug level
+              const separator = level.includes('debug') ? 
+                '\n----------------------------------------' : '';
+              
+              return `${timestamp} ${level} [${service}]: ${message}${metaOutput}${separator}`;
             })
           )
         })

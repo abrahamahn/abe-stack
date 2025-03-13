@@ -1,8 +1,22 @@
+// Load environment variables from .env file
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Load environment-specific .env file
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const envFile = `.env.${NODE_ENV}`;
+const envPath = path.resolve(process.cwd(), envFile);
+
+// First try to load environment-specific file, then fall back to .env
+dotenv.config({ path: envPath });
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+
+console.log(`Loading environment from ${envFile}`);
+
 import express from 'express';
 import type { Express, Request, Response, RequestHandler } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import path from 'path';
 import http from 'http';
 import { Pool } from 'pg';
 import { WebSocketServer } from 'ws';
@@ -12,6 +26,7 @@ import { FileServer } from './FileServer';
 import { EventEmitter } from 'events';
 import { QueueDatabase } from './services/QueueDatabase';
 import fs from 'fs';
+import { DatabaseConnectionManager } from './database/config';
 
 // Create Express app
 const expressApp = express as unknown as {
@@ -61,6 +76,16 @@ const config = {
     password: process.env.DB_PASSWORD || 'postgres'
   }
 };
+
+// Initialize DatabaseConnectionManager
+(async () => {
+  try {
+    await DatabaseConnectionManager.initialize();
+    console.log('DatabaseConnectionManager initialized successfully');
+  } catch (error) {
+    console.error('Failed to initialize DatabaseConnectionManager:', error);
+  }
+})();
 
 // Database connection
 const dbConfig = new URL(config.dbConnectionString);

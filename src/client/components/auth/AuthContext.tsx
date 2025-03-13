@@ -158,6 +158,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setIsLoading(true);
     setError(null);
     
+    // Validate password length before sending to server
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters');
+      setIsLoading(false);
+      throw new Error('Password must be at least 8 characters');
+    }
+    
     try {
       // In a real app, this would be an API call
       const response = await fetch(`${getApiUrl()}/auth/register`, {

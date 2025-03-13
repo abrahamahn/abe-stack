@@ -6,10 +6,10 @@
 	"scripts": {
 		"start": "node dist/server/index.js",
 		"start:dev": "cross-env NODE_ENV=development tsx src/server/index.ts",
-		"dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+		"dev": "concurrently \"npm run dev:server\" \"npm run dev:client\" \"npm run lint:watch\" \"npm run type-check:server:watch\" \"npm run type-check:client:watch\"",
 		"dev:server": "cross-env NODE_ENV=development tsx watch --ignore dist/ src/server/index.ts",
 		"dev:client": "vite",
-		"build": "npm run build:client && npm run build:server",
+		"build": "npm run lint:errors && npm run type-check && npm run build:client && npm run build:server",
 		"build:client": "vite build",
 		"build:server": "tsc --project tsconfig.server.json",
 		"preview": "vite preview",
@@ -17,7 +17,13 @@
 		"type-check": "tsc --noEmit",
 		"type-check:server": "tsc -p tsconfig.server.json --noEmit",
 		"type-check:client": "tsc -p tsconfig.client.json --noEmit",
-		"seed:demo": "tsx src/server/scripts/seedDemoDatabase.ts"
+		"type-check:server:watch": "tsc -p tsconfig.server.json --noEmit --watch",
+		"type-check:client:watch": "tsc -p tsconfig.client.json --noEmit --watch",
+		"seed:demo": "tsx src/server/scripts/seedDemoDatabase.ts",
+		"lint": "eslint --ext .ts,.tsx src/",
+		"lint:errors": "eslint --ext .ts,.tsx src/ --quiet",
+		"lint:fix": "eslint --ext .ts,.tsx src/ --fix",
+		"lint:watch": "esw --ext .ts,.tsx src/ --watch --color"
 	},
 	"dependencies": {
 		"bcrypt": "^5.1.1",
@@ -45,7 +51,8 @@
 		"speakeasy": "^2.0.0",
 		"winston": "^3.12.0",
 		"ws": "^8.16.0",
-		"zod": "^3.22.4"
+		"zod": "^3.22.4",
+		"dotenv": "^16.3.1"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.42.1",
@@ -74,6 +81,13 @@
 		"@vitejs/plugin-react": "^4.3.4",
 		"concurrently": "^8.2.2",
 		"cross-env": "^7.0.3",
+		"eslint": "^8.57.0",
+		"@typescript-eslint/parser": "^7.4.0",
+		"@typescript-eslint/eslint-plugin": "^7.4.0",
+		"eslint-plugin-react": "^7.34.1",
+		"eslint-plugin-react-hooks": "^4.6.0",
+		"eslint-plugin-import": "^2.29.1",
+		"eslint-watch": "^8.0.0",
 		"jest": "^29.7.0",
 		"lodash": "^4.17.21",
 		"tsx": "^4.7.1",

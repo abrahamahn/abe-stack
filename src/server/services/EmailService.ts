@@ -60,6 +60,35 @@ export class EmailService {
       html: emailContent,
     };
 
+    // In development mode, just log the email and auto-confirm the user
+    if (emailConfig.isDevelopment) {
+      console.log('=== DEVELOPMENT MODE: Email not actually sent ===');
+      console.log('To:', userEmail);
+      console.log('Subject:', 'Email Confirmation');
+      console.log('Confirmation URL:', confirmationUrl);
+      console.log('Email Content:', emailContent);
+      console.log('=== END OF EMAIL PREVIEW ===');
+      
+      // Auto-confirm the user in development mode
+      try {
+        const pool = this.db.getPool();
+        if (pool) {
+          // Update the user to mark email as confirmed
+          await pool.query(
+            'UPDATE users SET email_confirmed = TRUE, last_email_sent = NOW() WHERE email = $1',
+            [userEmail]
+          );
+          console.log(`DEVELOPMENT MODE: Auto-confirmed email for user: ${userEmail}`);
+        } else {
+          console.warn('Database pool is not available, skipping auto-confirmation');
+        }
+      } catch (error) {
+        console.error('Error auto-confirming user:', error);
+      }
+      
+      return { success: true, message: 'Email logged in development mode and user auto-confirmed.' };
+    }
+
     try {
       // Send email
       const info = await this.transporter.sendMail(mailOptions);
@@ -106,8 +135,8 @@ export class EmailService {
 
     // Email content
     const emailContent = `
-      <h2>${emailConfig.appName} Password Reset</h2>
-      <p>You requested to reset your password. Please click the link below to set a new password:</p>
+      <h2>Password Reset Request</h2>
+      <p>You requested a password reset. Please click the link below to reset your password:</p>
       <p><a href="${resetUrl}">Reset Password</a></p>
       <p>This link will expire in 1 hour.</p>
       <p>If you did not request a password reset, please ignore this email.</p>
@@ -117,26 +146,26 @@ export class EmailService {
     const mailOptions = {
       from: `"${emailConfig.appName}" <${emailConfig.user}>`,
       to: userEmail,
-      subject: 'Password Reset Request',
+      subject: 'Password Reset',
       html: emailContent,
     };
+
+    // In development mode, just log the email
+    if (emailConfig.isDevelopment) {
+      console.log('=== DEVELOPMENT MODE: Email not actually sent ===');
+      console.log('To:', userEmail);
+      console.log('Subject:', 'Password Reset');
+      console.log('Reset URL:', resetUrl);
+      console.log('Email Content:', emailContent);
+      console.log('=== END OF EMAIL PREVIEW ===');
+      
+      return { success: true, message: 'Email logged in development mode.' };
+    }
 
     try {
       // Send email
       const info = await this.transporter.sendMail(mailOptions);
       console.log('Email sent:', info.messageId);
-
-      // Update last email sent timestamp in the database
-      const pool = this.db.getPool();
-      if (pool) {
-        await pool.query(
-          'UPDATE users SET last_email_sent = NOW() WHERE email = $1',
-          [userEmail]
-        );
-      } else {
-        console.warn('Database pool is not available, skipping update of last_email_sent');
-      }
-
       return { success: true, message: 'Email sent successfully.' };
     } catch (error) {
       console.error('Error sending password reset email:', error);

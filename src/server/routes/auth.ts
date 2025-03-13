@@ -16,7 +16,6 @@ import { TokenService, TokenType } from '../services/TokenService';
 import { TwoFactorAuthService } from '../services/TwoFactorAuthService';
 import { Logger } from '../services/LoggerService';
 import { AuthController } from '../controllers/AuthController';
-import { validateRequest } from '../middleware/validateRequest';
 import { authenticateJWT } from '../middleware/authenticateJWT';
 
 // Cookie settings
@@ -35,10 +34,13 @@ const logger = new Logger('AuthRoutes');
 const authController = new AuthController();
 
 // Register
-router.post('/register', validateRequest(registerSchema), authController.register);
+router.post('/register', customValidate(registerSchema), (req, res, next) => {
+  console.log('Register route hit with body:', JSON.stringify(req.body, null, 2));
+  return authController.register(req, res, next);
+});
 
 // Login
-router.post('/login', validateRequest(loginSchema), authController.login);
+router.post('/login', customValidate(loginSchema), authController.login);
 
 // Refresh token
 router.post('/refresh-token', authController.refreshToken);

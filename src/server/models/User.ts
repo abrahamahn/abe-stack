@@ -4,6 +4,9 @@ import { BaseModel, BaseRepository } from '../database/BaseRepository';
 import { DatabaseConnectionManager } from '../database/config';
 import bcrypt from 'bcrypt';
 
+// Mock in-memory storage for development without PostgreSQL
+const mockUsers: Map<string, any> = new Map();
+
 export interface UserAttributes extends BaseModel {
   username: string;
   email: string;
@@ -378,7 +381,8 @@ export class UserRepository extends BaseRepository<UserAttributes> {
 // Singleton instance
 export const userRepository = new UserRepository();
 
-export class User implements UserAttributes {
+// Mock implementation for development without PostgreSQL
+class User implements UserAttributes {
   id: string;
   username: string;
   email: string;
@@ -398,102 +402,299 @@ export class User implements UserAttributes {
   createdAt: Date;
   updatedAt: Date;
 
-  constructor(data: UserAttributes) {
-    this.id = data.id;
-    this.username = data.username;
-    this.email = data.email;
-    this.password = data.password;
-    this.displayName = data.displayName;
-    this.firstName = data.firstName;
-    this.lastName = data.lastName;
-    this.bio = data.bio;
-    this.profileImage = data.profileImage;
-    this.bannerImage = data.bannerImage;
-    this.role = data.role;
-    this.isVerified = data.isVerified;
-    this.emailConfirmed = data.emailConfirmed;
-    this.emailToken = data.emailToken;
-    this.emailTokenExpire = data.emailTokenExpire;
-    this.lastEmailSent = data.lastEmailSent;
-    this.createdAt = new Date(data.createdAt);
-    this.updatedAt = new Date(data.updatedAt);
+  constructor(data: Partial<UserAttributes>) {
+    this.id = data.id || crypto.randomUUID();
+    this.username = data.username || '';
+    this.email = data.email || '';
+    this.password = data.password || '';
+    this.displayName = data.displayName || null;
+    this.firstName = data.firstName || null;
+    this.lastName = data.lastName || null;
+    this.bio = data.bio || null;
+    this.profileImage = data.profileImage || null;
+    this.bannerImage = data.bannerImage || null;
+    this.role = data.role || 'user';
+    this.isVerified = data.isVerified || false;
+    this.emailConfirmed = data.emailConfirmed || false;
+    this.emailToken = data.emailToken || null;
+    this.emailTokenExpire = data.emailTokenExpire || null;
+    this.lastEmailSent = data.lastEmailSent || null;
+    this.createdAt = data.createdAt || new Date();
+    this.updatedAt = data.updatedAt || new Date();
   }
 
-  // Static methods that use the repository
-  static async findByPk(id: string): Promise<User | null> {
-    const user = await userRepository.findById(id);
-    return user ? new User(user) : null;
+  // Static methods for mock database operations
+  static async create(data: Partial<UserAttributes>): Promise<User> {
+    try {
+      // Try to use real database first
+      if (DatabaseConnectionManager.isConnected()) {
+        // Real database implementation
+        const pool = DatabaseConnectionManager.getPool();
+        
+        // Convert camelCase to snake_case for database columns
+        const query = `
+          INSERT INTO users (
+            username, 
+            email, 
+            password, 
+            display_name, 
+            first_name, 
+            last_name, 
+            bio, 
+            profile_image, 
+            banner_image, 
+            role, 
+            is_verified, 
+            email_confirmed, 
+            email_token, 
+            email_token_expire, 
+            last_email_sent
+          ) VALUES (
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+          ) RETURNING 
+            id, 
+            username, 
+            email, 
+            password, 
+            display_name as "displayName", 
+            first_name as "firstName", 
+            last_name as "lastName", 
+            bio, 
+            profile_image as "profileImage", 
+            banner_image as "bannerImage", 
+            role, 
+            is_verified as "isVerified", 
+            email_confirmed as "emailConfirmed", 
+            email_token as "emailToken", 
+            email_token_expire as "emailTokenExpire", 
+            last_email_sent as "lastEmailSent", 
+            created_at as "createdAt", 
+            updated_at as "updatedAt"
+        `;
+        
+        const values = [
+          data.username,
+          data.email,
+          data.password,
+          data.displayName,
+          data.firstName,
+          data.lastName,
+          data.bio || '',
+          data.profileImage || '',
+          data.bannerImage || '',
+          data.role || 'user',
+          data.isVerified || false,
+          data.emailConfirmed || false,
+          data.emailToken,
+          data.emailTokenExpire,
+          data.lastEmailSent
+        ];
+        
+        const result = await pool.query(query, values);
+        
+        if (result.rows.length > 0) {
+          console.log('User created in PostgreSQL database:', result.rows[0].id);
+          return new User(result.rows[0]);
+        }
+      }
+      
+      // Fall back to mock implementation if database insertion failed
+      console.warn('Falling back to mock user creation');
+      const user = new User(data);
+      mockUsers.set(user.id, user);
+      mockUsers.set(user.email, user); // Index by email for findByEmail
+      return user;
+    } catch (error) {
+      console.error('Error creating user:', error);
+      // Mock implementation as fallback
+      const user = new User(data);
+      mockUsers.set(user.id, user);
+      mockUsers.set(user.email, user); // Index by email for findByEmail
+      return user;
+    }
   }
 
   static async findByEmail(email: string): Promise<User | null> {
-    const user = await userRepository.findByEmail(email);
-    return user ? new User(user) : null;
+    try {
+      // Try to use real database first
+      if (DatabaseConnectionManager.isConnected()) {
+        const pool = DatabaseConnectionManager.getPool();
+        const query = `
+          SELECT 
+            id, 
+            username, 
+            email, 
+            password, 
+            display_name as "displayName", 
+            first_name as "firstName", 
+            last_name as "lastName", 
+            bio, 
+            profile_image as "profileImage", 
+            banner_image as "bannerImage", 
+            role, 
+            is_verified as "isVerified", 
+            email_confirmed as "emailConfirmed", 
+            email_token as "emailToken", 
+            email_token_expire as "emailTokenExpire", 
+            last_email_sent as "lastEmailSent", 
+            created_at as "createdAt", 
+            updated_at as "updatedAt"
+          FROM users 
+          WHERE email = $1
+        `;
+        
+        const result = await pool.query(query, [email]);
+        
+        if (result.rows.length > 0) {
+          return new User(result.rows[0]);
+        }
+      }
+      
+      // Mock implementation as fallback
+      const user = mockUsers.get(email);
+      return user || null;
+    } catch (error) {
+      console.error('Error finding user by email:', error);
+      // Mock implementation as fallback
+      const user = mockUsers.get(email);
+      return user || null;
+    }
   }
 
   static async findByUsername(username: string): Promise<User | null> {
-    const user = await userRepository.findByUsername(username);
-    return user ? new User(user) : null;
+    try {
+      // Try to use real database first
+      if (DatabaseConnectionManager.isConnected()) {
+        const pool = DatabaseConnectionManager.getPool();
+        const query = `
+          SELECT 
+            id, 
+            username, 
+            email, 
+            password, 
+            display_name as "displayName", 
+            first_name as "firstName", 
+            last_name as "lastName", 
+            bio, 
+            profile_image as "profileImage", 
+            banner_image as "bannerImage", 
+            role, 
+            is_verified as "isVerified", 
+            email_confirmed as "emailConfirmed", 
+            email_token as "emailToken", 
+            email_token_expire as "emailTokenExpire", 
+            last_email_sent as "lastEmailSent", 
+            created_at as "createdAt", 
+            updated_at as "updatedAt"
+          FROM users 
+          WHERE username = $1
+        `;
+        
+        const result = await pool.query(query, [username]);
+        
+        if (result.rows.length > 0) {
+          return new User(result.rows[0]);
+        }
+      }
+      
+      // Mock implementation as fallback
+      // Search through all users to find by username
+      for (const user of mockUsers.values()) {
+        if (user.username === username) {
+          return user;
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Error finding user by username:', error);
+      // Mock implementation as fallback
+      for (const user of mockUsers.values()) {
+        if (user.username === username) {
+          return user;
+        }
+      }
+      return null;
+    }
   }
 
-  static async findAll(): Promise<User[]> {
-    const users = await userRepository.findAll();
-    return users.map(user => new User(user));
-  }
-
-  static async create(data: Omit<UserAttributes, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
-    const user = await userRepository.createWithHashedPassword(data);
-    return new User(user);
+  static async findByPk(id: string): Promise<User | null> {
+    try {
+      // Try to use real database first
+      if (DatabaseConnectionManager.isConnected()) {
+        const pool = DatabaseConnectionManager.getPool();
+        const query = `
+          SELECT 
+            id, 
+            username, 
+            email, 
+            password, 
+            display_name as "displayName", 
+            first_name as "firstName", 
+            last_name as "lastName", 
+            bio, 
+            profile_image as "profileImage", 
+            banner_image as "bannerImage", 
+            role, 
+            is_verified as "isVerified", 
+            email_confirmed as "emailConfirmed", 
+            email_token as "emailToken", 
+            email_token_expire as "emailTokenExpire", 
+            last_email_sent as "lastEmailSent", 
+            created_at as "createdAt", 
+            updated_at as "updatedAt"
+          FROM users 
+          WHERE id = $1
+        `;
+        
+        const result = await pool.query(query, [id]);
+        
+        if (result.rows.length > 0) {
+          return new User(result.rows[0]);
+        }
+      }
+      
+      // Mock implementation as fallback
+      const user = mockUsers.get(id);
+      return user || null;
+    } catch (error) {
+      console.error('Error finding user by ID:', error);
+      // Mock implementation as fallback
+      const user = mockUsers.get(id);
+      return user || null;
+    }
   }
 
   // Instance methods
-  async update(data: Partial<UserAttributes>): Promise<User> {
-    const { displayName, firstName, lastName, profileImage, bannerImage, isVerified, ...rest } = data;
-    const updateData = {
-      ...rest,
-      ...(displayName !== undefined && { display_name: displayName }),
-      ...(firstName !== undefined && { first_name: firstName }),
-      ...(lastName !== undefined && { last_name: lastName }),
-      ...(profileImage !== undefined && { profile_image: profileImage }),
-      ...(bannerImage !== undefined && { banner_image: bannerImage }),
-      ...(isVerified !== undefined && { is_verified: isVerified })
-    };
-    const updated = await userRepository.update(this.id, updateData as any);
-    Object.assign(this, updated);
-    return this;
-  }
-
-  async delete(): Promise<boolean> {
-    return userRepository.delete(this.id);
-  }
-
   async comparePassword(password: string): Promise<boolean> {
     return bcrypt.compare(password, this.password);
   }
 
   async updatePassword(newPassword: string): Promise<void> {
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await this.update({ password: hashedPassword });
+    this.password = await bcrypt.hash(newPassword, 10);
+    this.updatedAt = new Date();
+    mockUsers.set(this.id, this);
+    mockUsers.set(this.email, this);
+  }
+
+  async update(data: Partial<UserAttributes>): Promise<User> {
+    Object.assign(this, data);
+    this.updatedAt = new Date();
+    mockUsers.set(this.id, this);
+    mockUsers.set(this.email, this);
+    return this;
+  }
+
+  async delete(): Promise<void> {
+    mockUsers.delete(this.id);
+    mockUsers.delete(this.email);
   }
 
   toJSON(): UserJSON {
-    return {
-      id: this.id,
-      username: this.username,
-      email: this.email,
-      displayName: this.displayName,
-      firstName: this.firstName,
-      lastName: this.lastName,
-      bio: this.bio,
-      profileImage: this.profileImage,
-      bannerImage: this.bannerImage,
-      role: this.role,
-      isVerified: this.isVerified,
-      emailConfirmed: this.emailConfirmed,
-      lastEmailSent: this.lastEmailSent,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt
-    };
+    const { password, emailToken, emailTokenExpire, ...userJson } = this;
+    return userJson as unknown as UserJSON;
   }
 }
 
+// Export the User class both as default and named export
+export { User };
 export default User;

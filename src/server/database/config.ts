@@ -7,6 +7,7 @@ export class DatabaseConnectionManager {
   private static instance: DatabaseConnectionManager;
   private static pool: Pool | null = null;
   private static logger: Logger = new Logger('DatabaseConnectionManager');
+  private static connected: boolean = false;
 
   private constructor() {}
 
@@ -32,8 +33,10 @@ export class DatabaseConnectionManager {
 
       // Test the connection
       await this.pool.query('SELECT NOW()');
+      this.connected = true;
       this.logger.info('Database connection established');
     } catch (error) {
+      this.connected = false;
       this.logger.error('Failed to initialize database connection', { error });
       throw error;
     }
@@ -46,10 +49,15 @@ export class DatabaseConnectionManager {
     return this.pool;
   }
 
+  public static isConnected(): boolean {
+    return this.connected && this.pool !== null;
+  }
+
   public static async closePool(): Promise<void> {
     if (this.pool) {
       await this.pool.end();
       this.pool = null;
+      this.connected = false;
     }
   }
 }

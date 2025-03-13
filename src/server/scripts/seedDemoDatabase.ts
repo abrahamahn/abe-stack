@@ -9,8 +9,8 @@ const config = {
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432'),
   user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || '1083035',
-  database: 'abe_stack_demo',
+  password: process.env.DB_PASSWORD || 'postgres',
+  database: 'abe_stack',
   migrationsPath: join(__dirname, '../database/migrations')
 };
 

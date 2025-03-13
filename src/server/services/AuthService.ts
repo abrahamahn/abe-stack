@@ -28,13 +28,30 @@ interface AuthResult {
   user: User;
 }
 
-export class AuthService {
+export default class AuthService {
   private emailService: EmailService;
   private db: Database;
 
   constructor(db: Database) {
     this.db = db;
-    this.emailService = new EmailService(db);
+    
+    // Ensure database is initialized
+    if (!this.db.isConnected()) {
+      this.initializeDatabase();
+    }
+    
+    this.emailService = new EmailService(this.db);
+  }
+
+  // Initialize the database connection if not already connected
+  private async initializeDatabase() {
+    try {
+      await this.db.initialize();
+      console.log('Database initialized successfully in AuthService');
+    } catch (error) {
+      console.error('Failed to initialize database in AuthService:', error);
+      throw new Error('Database connection not initialized');
+    }
   }
 
   async register(args: RegisterArgs): Promise<AuthResult> {
@@ -76,24 +93,60 @@ export class AuthService {
     const tokenExpiry = new Date();
     tokenExpiry.setHours(tokenExpiry.getHours() + 24); // Token expires in 24 hours
 
-    // Create user
-    const user = await User.create({
-      username: args.username,
-      email: args.email,
-      password: hashedPassword,
-      displayName: args.displayName,
-      firstName: args.firstName,
-      lastName: args.lastName,
-      bio: '',
-      profileImage: '',
-      bannerImage: '',
-      role: 'user',
-      isVerified: false,
-      emailConfirmed: false,
-      emailToken: confirmationToken,
-      emailTokenExpire: tokenExpiry,
-      lastEmailSent: new Date()
-    });
+    // Create user - handle both real DB and in-memory mode
+    let user;
+    if (this.db.isInMemoryMode && this.db.isInMemoryMode()) {
+      // Mock user creation for in-memory mode
+      const userId = crypto.randomUUID();
+      user = {
+        id: userId,
+        username: args.username,
+        email: args.email,
+        password: hashedPassword,
+        displayName: args.displayName,
+        firstName: args.firstName,
+        lastName: args.lastName,
+        bio: '',
+        profileImage: '',
+        bannerImage: '',
+        role: 'user',
+        isVerified: false,
+        emailConfirmed: false,
+        emailToken: confirmationToken,
+        emailTokenExpire: tokenExpiry,
+        lastEmailSent: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      // Store in in-memory DB
+      const pool = this.db.getPool();
+      if (pool) {
+        await pool.query(
+          'INSERT INTO users (id, username, email, password, display_name, first_name, last_name, bio, profile_image, banner_image, role, is_verified, email_confirmed, email_token, email_token_expire, last_email_sent) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)',
+          [userId, args.username, args.email, hashedPassword, args.displayName, args.firstName, args.lastName, '', '', '', 'user', false, false, confirmationToken, tokenExpiry, new Date()]
+        );
+      }
+    } else {
+      // Regular DB user creation
+      user = await User.create({
+        username: args.username,
+        email: args.email,
+        password: hashedPassword,
+        displayName: args.displayName,
+        firstName: args.firstName,
+        lastName: args.lastName,
+        bio: '',
+        profileImage: '',
+        bannerImage: '',
+        role: 'user',
+        isVerified: false,
+        emailConfirmed: false,
+        emailToken: confirmationToken,
+        emailTokenExpire: tokenExpiry,
+        lastEmailSent: new Date()
+      });
+    }
 
     // Send confirmation email
     await this.emailService.sendConfirmationEmail(user.email, confirmationToken);
@@ -283,5 +336,3 @@ export class AuthService {
     return true;
   }
 }
-
-export default AuthService;

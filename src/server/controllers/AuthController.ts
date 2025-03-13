@@ -10,6 +10,18 @@ export class AuthController {
   constructor() {
     // Pass a default path to the Database constructor
     this.db = new Database(process.env.DB_PATH || './db');
+    // Initialize the database connection
+    this.initializeDatabase();
+  }
+
+  // Initialize the database connection
+  private async initializeDatabase() {
+    try {
+      await this.db.initialize();
+      console.log('Database initialized successfully in AuthController');
+    } catch (error) {
+      console.error('Failed to initialize database in AuthController:', error);
+    }
   }
 
   // Login handler

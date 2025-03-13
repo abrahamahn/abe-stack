@@ -13,8 +13,6 @@ project-code_dump.txt
 # Environment
 .env
 .env.*
-.env.development
-.env.production
 
 # Dependencies
 package-lock.json
