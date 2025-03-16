@@ -1,7 +1,7 @@
 SERVER DIRECTORY SUMMARY
 ================================================================================
-Total Files: 111
-Total Lines: 14867
+Total Files: 112
+Total Lines: 14868
 ================================================================================
 
 DIRECTORY STRUCTURE:
@@ -38,6 +38,10 @@ DIRECTORY STRUCTURE:
 │   ├── migrationConfig.ts
 │   ├── migrationManager.ts
 │   └── transactionManager.ts
+├── domains
+│   └── media
+│       └── services
+│           └── index.ts
 ├── errors
 │   └── UnauthorizedError.ts
 ├── helpers
@@ -3712,6 +3716,11 @@ SET
 -- Create indexes for the new columns
 CREATE INDEX idx_users_first_name ON users(first_name);
 CREATE INDEX idx_users_last_name ON users(last_name); 
+================================================================================
+File: domains\media\services\index.ts
+Lines: 1
+--------------------------------------------------------------------------------
+ 
 ================================================================================
 File: errors\UnauthorizedError.ts
 Lines: 6

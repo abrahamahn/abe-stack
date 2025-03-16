@@ -1,7 +1,7 @@
 OVERALL CODEBASE SUMMARY
 ================================================================================
-Total Files Across All Directories: 234
-Total Lines Across All Directories: 29921
+Total Files Across All Directories: 235
+Total Lines Across All Directories: 29922
 
 Breakdown by Directory:
 
@@ -176,6 +176,10 @@ Server:
 │   ├── migrationConfig.ts
 │   ├── migrationManager.ts
 │   └── transactionManager.ts
+├── domains
+│   └── media
+│       └── services
+│           └── index.ts
 ├── errors
 │   └── UnauthorizedError.ts
 ├── helpers
@@ -274,8 +278,8 @@ Server:
 ├── tasks.ts
 └── types.ts
 
-Files: 111
-Lines: 14867
+Files: 112
+Lines: 14868
 ========================================
 
 Shared:
@@ -310,13 +314,8 @@ Tools:
 │   ├── server_code.txt
 │   ├── shared_code.txt
 │   └── tools_code.txt
-├── client_code.txt
-├── code_summary.txt
 ├── extract_code.py
-├── reset.ts
-├── server_code.txt
-├── shared_code.txt
-└── tools_code.txt
+└── reset.ts
 
 Files: 2
 Lines: 218

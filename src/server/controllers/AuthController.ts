@@ -1,8 +1,9 @@
 import type { Request, Response, NextFunction } from 'express';
 
-import { ConflictError, UnauthorizedError } from '../../shared/errors/ApiError';
+import { ConflictError } from '../../shared/errors/ApiError';
+import { UnauthorizedError } from '../domains/auth/errors/UnauthorizedError';
+import { AuthService } from '../domains/auth/services/AuthService';
 import { User } from '../models/User';
-import { AuthService } from '../services/AuthService';
 import { Database } from '../services/Database';
 
 export class AuthController {

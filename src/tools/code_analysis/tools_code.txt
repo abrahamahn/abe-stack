@@ -12,13 +12,8 @@ DIRECTORY STRUCTURE:
 │   ├── server_code.txt
 │   ├── shared_code.txt
 │   └── tools_code.txt
-├── client_code.txt
-├── code_summary.txt
 ├── extract_code.py
-├── reset.ts
-├── server_code.txt
-├── shared_code.txt
-└── tools_code.txt
+└── reset.ts
 ================================================================================
 
 

@@ -1,14 +1,15 @@
 import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
 
-import { NotFoundError, UnauthorizedError } from '../../shared/errors/ApiError';
+import { NotFoundError } from '../../shared/errors/ApiError';
 import { AuthController } from '../controllers/AuthController';
-import { authenticate, authorize } from '../middleware/auth';
-import { authenticateJWT } from '../middleware/authenticateJWT';
+import { UnauthorizedError } from '../domains/auth/errors/UnauthorizedError';
+import { authenticate, authorize } from '../domains/auth/middleware/auth';
+import { authenticateJWT } from '../domains/auth/middleware/authenticateJWT';
+import { AuthService } from '../domains/auth/services/AuthService';
+import { AuthTokenService, TokenType } from '../domains/auth/services/AuthTokenService';
 import { customValidate } from '../middleware/customValidate';
 import { User, UserAttributes } from '../models/User';
-import { AuthService } from '../services/AuthService';
-import { AuthTokenService, TokenType } from '../services/AuthTokenService';
 import { Logger } from '../services/LoggerService';
 import { 
   registerSchema, 
