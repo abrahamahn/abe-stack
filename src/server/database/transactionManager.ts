@@ -1,7 +1,7 @@
 // src/server/database/transactionManager.ts
-import { PoolClient } from 'pg';
+import { PoolClient, Pool } from 'pg';
 
-import { DatabaseConnectionManager } from './config';
+import { DatabaseConnectionManager } from '../config/database';
 
 export type TransactionCallback<T> = (client: PoolClient) => Promise<T>;
 
@@ -12,7 +12,12 @@ export class TransactionManager {
    * @returns Result of the callback
    */
   static async execute<T>(callback: TransactionCallback<T>): Promise<T> {
-    const client = await DatabaseConnectionManager.getPool().connect();
+    const pool = DatabaseConnectionManager.getPool();
+    if (!(pool instanceof Pool)) {
+      // For in-memory database, execute without transaction
+      return callback(pool as unknown as PoolClient);
+    }
+    const client = await pool.connect();
     
     try {
       await client.query('BEGIN');
@@ -50,7 +55,12 @@ export class TransactionManager {
    * @returns Result of the callback
    */
   static async readTransaction<T>(callback: TransactionCallback<T>): Promise<T> {
-    const client = await DatabaseConnectionManager.getPool().connect();
+    const pool = DatabaseConnectionManager.getPool();
+    if (!(pool instanceof Pool)) {
+      // For in-memory database, execute without transaction
+      return callback(pool as unknown as PoolClient);
+    }
+    const client = await pool.connect();
     
     try {
       await client.query('BEGIN TRANSACTION READ ONLY');

@@ -180,17 +180,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
     
     try {
       // In a real app, this would be an API call
-      const response = await fetch(`${getApiUrl()}/auth/register`, {
+      const apiUrl = getApiUrl();
+      console.log('Making registration request to:', apiUrl);
+      console.log('Registration data:', { 
+        username, 
+        email, 
+        password,
+        firstName,
+        lastName,
+        displayName: `${firstName} ${lastName}`
+      });
+      
+      const response = await fetch(`${apiUrl}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ 
           username, 
-          firstName,
-          lastName,
           email, 
           password,
+          firstName,
+          lastName,
           displayName: `${firstName} ${lastName}`
         })
       });

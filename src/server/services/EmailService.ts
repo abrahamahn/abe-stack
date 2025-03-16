@@ -2,15 +2,16 @@
 import nodemailer from 'nodemailer';
 
 import { emailConfig } from '../config/email';
+import { DatabaseConnectionManager } from '../config/database';
 
-import { Database } from './Database';
+import { Logger } from './LoggerService';
 
 export class EmailService {
   private transporter: nodemailer.Transporter;
-  private db: Database;
+  private logger: Logger;
 
-  constructor(db: Database) {
-    this.db = db;
+  constructor() {
+    this.logger = new Logger('EmailService');
     
     // Create email transporter
     this.transporter = nodemailer.createTransport({
@@ -35,7 +36,7 @@ export class EmailService {
     userEmail: string,
     confirmationToken: string
   ): Promise<{ success: boolean; message: string }> {
-    console.log("Sending confirmation email to:", userEmail);
+    this.logger.info("Sending confirmation email to:", { userEmail });
 
     // Determine website domain based on environment
     const websiteDomain = emailConfig.isDevelopment
@@ -64,28 +65,24 @@ export class EmailService {
 
     // In development mode, just log the email and auto-confirm the user
     if (emailConfig.isDevelopment) {
-      console.log('=== DEVELOPMENT MODE: Email not actually sent ===');
-      console.log('To:', userEmail);
-      console.log('Subject:', 'Email Confirmation');
-      console.log('Confirmation URL:', confirmationUrl);
-      console.log('Email Content:', emailContent);
-      console.log('=== END OF EMAIL PREVIEW ===');
+      this.logger.info('=== DEVELOPMENT MODE: Email not actually sent ===');
+      this.logger.info('To:', { userEmail });
+      this.logger.info('Subject: Email Confirmation');
+      this.logger.info('Confirmation URL:', { confirmationUrl });
+      this.logger.info('Email Content:', { emailContent });
+      this.logger.info('=== END OF EMAIL PREVIEW ===');
       
       // Auto-confirm the user in development mode
       try {
-        const pool = this.db.getPool();
-        if (pool) {
-          // Update the user to mark email as confirmed
-          await pool.query(
-            'UPDATE users SET email_confirmed = TRUE, last_email_sent = NOW() WHERE email = $1',
-            [userEmail]
-          );
-          console.log(`DEVELOPMENT MODE: Auto-confirmed email for user: ${userEmail}`);
-        } else {
-          console.warn('Database pool is not available, skipping auto-confirmation');
-        }
+        const pool = DatabaseConnectionManager.getPool();
+        // Update the user to mark email as confirmed
+        await pool.query(
+          'UPDATE users SET email_confirmed = TRUE, last_email_sent = NOW() WHERE email = $1',
+          [userEmail]
+        );
+        this.logger.info(`DEVELOPMENT MODE: Auto-confirmed email for user: ${userEmail}`);
       } catch (error) {
-        console.error('Error auto-confirming user:', error);
+        this.logger.error('Error auto-confirming user:', { error });
       }
       
       return { success: true, message: 'Email logged in development mode and user auto-confirmed.' };
@@ -94,22 +91,18 @@ export class EmailService {
     try {
       // Send email
       const info = await Promise.resolve(this.transporter.sendMail(mailOptions)) as Promise<nodemailer.SentMessageInfo>;
-      console.log('Email sent:', String(info));
+      this.logger.info('Email sent:', { info: String(info) });
 
       // Update last email sent timestamp in the database
-      const pool = this.db.getPool();
-      if (pool) {
-        await pool.query(
-          'UPDATE users SET last_email_sent = NOW() WHERE email = $1',
-          [userEmail]
-        );
-      } else {
-        console.warn('Database pool is not available, skipping update of last_email_sent');
-      }
+      const pool = DatabaseConnectionManager.getPool();
+      await pool.query(
+        'UPDATE users SET last_email_sent = NOW() WHERE email = $1',
+        [userEmail]
+      );
 
       return { success: true, message: 'Email sent successfully.' };
     } catch (error) {
-      console.error('Error sending confirmation email:', error);
+      this.logger.error('Error sending confirmation email:', { error });
       return { success: false, message: 'Error sending confirmation email.' };
     }
   }

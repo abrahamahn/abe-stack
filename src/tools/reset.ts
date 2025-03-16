@@ -5,13 +5,12 @@ npm run reset
 
 */
 
-import { Database } from "../server/services/Database"
+import { DatabaseConnectionManager } from "../server/config/database"
 import { QueueDatabase } from "../server/services/QueueDatabase"
 import { config } from "../server/services/ServerConfig"
 
 async function reset() {
-	const db = new Database(config.dbPath)
-	await db.reset()
+	await DatabaseConnectionManager.reset()
 
 	const queue = new QueueDatabase(config.queuePath)
 	await queue.reset()

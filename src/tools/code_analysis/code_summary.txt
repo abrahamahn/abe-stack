@@ -1,7 +1,7 @@
 OVERALL CODEBASE SUMMARY
 ================================================================================
-Total Files Across All Directories: 235
-Total Lines Across All Directories: 29922
+Total Files Across All Directories: 232
+Total Lines Across All Directories: 29653
 
 Breakdown by Directory:
 
@@ -87,10 +87,12 @@ Client:
 │   │   └── Throttle.tsx
 │   ├── Design.tsx
 │   ├── Link.tsx
+│   ├── ProtectedRoute.tsx
 │   └── Root.tsx
 ├── config
 │   └── environment.ts
 ├── contexts
+│   ├── AuthContext.tsx
 │   └── SocialContext.tsx
 ├── helpers
 │   ├── cookieHelpers.ts
@@ -132,30 +134,28 @@ Client:
 │   └── base.test.ts
 ├── utils
 │   └── styleUtils.ts
+├── App.tsx
 ├── index.css
 ├── index.html
 ├── index.tsx
+├── routes.tsx
 ├── service-worker.js
 └── styles.ts
 
-Files: 105
-Lines: 14204
+Files: 109
+Lines: 14423
 ========================================
 
 Server:
 ----------------------------------------
-├── apis
-│   ├── auth.ts
-│   ├── autoindex.ts
-│   ├── hello.ts
-│   └── media.ts
+├── api
+│   └── autoindex.ts
 ├── config
 │   ├── database.ts
 │   ├── email.ts
 │   ├── environment.ts
-│   └── serverConfig.ts
+│   └── server.ts
 ├── controllers
-│   ├── AuthController.ts
 │   ├── media.controller.ts
 │   ├── post.controller.ts
 │   ├── social.controller.ts
@@ -171,28 +171,77 @@ Server:
 │   │   ├── 007_create_social_tables.sql
 │   │   ├── 008_add_email_verification.sql
 │   │   └── 008_update_users_table.sql
-│   ├── BaseRepository.ts
-│   ├── config.ts
-│   ├── migrationConfig.ts
+│   ├── models
+│   │   ├── auth
+│   │   │   ├── TwoFactorAuth.ts
+│   │   │   └── User.ts
+│   │   ├── media
+│   │   │   └── Media.ts
+│   │   ├── music
+│   │   │   ├── Album.ts
+│   │   │   ├── Artist.ts
+│   │   │   ├── Playlist.ts
+│   │   │   ├── PlaylistTrack.ts
+│   │   │   └── Track.ts
+│   │   ├── social
+│   │   │   ├── Comment.ts
+│   │   │   ├── CommentLike.ts
+│   │   │   ├── Follow.ts
+│   │   │   ├── Like.ts
+│   │   │   └── Post.ts
+│   │   └── index.ts
+│   ├── repositories
+│   │   └── BaseRepository.ts
 │   ├── migrationManager.ts
 │   └── transactionManager.ts
 ├── domains
-│   └── media
+│   ├── auth
+│   │   ├── api
+│   │   │   └── index.ts
+│   │   ├── controllers
+│   │   │   └── index.ts
+│   │   ├── errors
+│   │   │   └── unauthorized.error.ts
+│   │   ├── middleware
+│   │   │   ├── auth.middleware.ts
+│   │   │   ├── authJWT.middleware.ts
+│   │   │   └── index.ts
+│   │   ├── models
+│   │   ├── repositories
+│   │   ├── services
+│   │   │   ├── auth-token.service.ts
+│   │   │   └── auth.service.ts
+│   │   ├── index.ts
+│   │   └── routes.ts
+│   ├── media
+│   │   ├── controllers
+│   │   ├── models
+│   │   ├── repositories
+│   │   └── services
+│   ├── music
+│   │   ├── controllers
+│   │   ├── models
+│   │   ├── repositories
+│   │   └── services
+│   ├── social
+│   │   ├── controllers
+│   │   ├── models
+│   │   ├── repositories
+│   │   └── services
+│   └── user
+│       ├── controllers
+│       ├── models
+│       ├── repositories
 │       └── services
-│           └── index.ts
 ├── errors
-│   └── UnauthorizedError.ts
 ├── helpers
 │   ├── fileHelpers.ts
 │   ├── loginHelpers.ts
 │   ├── path.ts
 │   └── signatureHelpers.ts
 ├── lib
-│   ├── database.ts
 │   └── storage.ts
 ├── middleware
-│   ├── auth.ts
-│   ├── authenticateJWT.ts
 │   ├── customValidate.ts
 │   ├── error.ts
 │   ├── errorHandler.ts
@@ -201,25 +250,8 @@ Server:
 │   ├── rateLimiter.ts
 │   ├── upload.ts
 │   └── validate.ts
-├── models
-│   ├── Album.ts
-│   ├── Artist.ts
-│   ├── associations.ts
-│   ├── Comment.ts
-│   ├── CommentLike.ts
-│   ├── Follow.ts
-│   ├── index.ts
-│   ├── Like.ts
-│   ├── Media.ts
-│   ├── Playlist.ts
-│   ├── PlaylistTrack.ts
-│   ├── Post.ts
-│   ├── Track.ts
-│   ├── TwoFactorAuth.ts
-│   └── User.ts
 ├── routes
 │   ├── admin.ts
-│   ├── auth.ts
 │   ├── comments.ts
 │   ├── index.ts
 │   ├── media.ts
@@ -242,9 +274,6 @@ Server:
 │   │   ├── index.ts
 │   │   ├── MediaProcessingService.ts
 │   │   └── VideoProcessor.ts
-│   ├── AuthService.ts
-│   ├── AuthTokenService.ts
-│   ├── Database.ts
 │   ├── EmailService.ts
 │   ├── InMemoryQueue.ts
 │   ├── LoggerService.ts
@@ -274,12 +303,11 @@ Server:
 ├── index.ts
 ├── PubsubServer.ts
 ├── QueueServer.ts
-├── server.ts
 ├── tasks.ts
 └── types.ts
 
-Files: 112
-Lines: 14868
+Files: 105
+Lines: 14381
 ========================================
 
 Shared:
@@ -318,5 +346,5 @@ Tools:
 └── reset.ts
 
 Files: 2
-Lines: 218
+Lines: 217
 ========================================

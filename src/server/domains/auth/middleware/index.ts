@@ -1,0 +1,1 @@
+export { authenticate, authorize } from './auth.middleware'; 

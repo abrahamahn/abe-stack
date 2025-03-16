@@ -6,9 +6,9 @@ import multer from 'multer';
 import { z } from 'zod';
 
 import { MediaController } from '../controllers/media.controller';
-import { authenticate } from '../middleware/auth';
+import { authenticate } from '../domains/auth/middleware/auth.middleware';
 import { validate } from '../middleware/validate';
-import { Media, ProcessingStatus } from '../models/Media';
+import { Media, ProcessingStatus } from '../database/models/media/Media';
 import { Logger } from '../services/LoggerService';
 import { MediaProcessingService } from '../services/media/MediaProcessingService';
 
@@ -16,7 +16,7 @@ import { MediaProcessingService } from '../services/media/MediaProcessingService
 // Extend Request type to include multer's file
 interface MulterRequest extends Request {
   file?: Express.Multer.File;
-  user?: { id: string };
+  user?: { userId: string; role: string };
 }
 
 interface MediaRequest extends Request {

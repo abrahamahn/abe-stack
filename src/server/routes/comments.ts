@@ -1,13 +1,14 @@
 import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
 
-import { authenticate } from '../middleware/auth';
+import { authenticate } from '../domains/auth/middleware';
 import { AppError } from '../middleware/error';
-import { Comment, CommentLike, Post } from '../models';
+import { Comment, CommentLike, Post } from '../database/models';
 
 interface AuthenticatedRequest extends Request {
   user?: {
-    id: string;
+    userId: string;
+    role: string;
   };
   params: {
     postId?: string;
@@ -40,7 +41,7 @@ router.get('/post/:postId', authenticate, async (req: AuthenticatedRequest, res:
       return;
     }
 
-    const userId = req.user.id;
+    const userId = req.user.userId;
     const likedComments = await Promise.all(
       comments.map(c => CommentLike.findByUserAndComment(userId, c.id))
     );
@@ -83,12 +84,12 @@ router.post('/', authenticate, async (req: AuthenticatedRequest, res: Response, 
       }
     }
 
-    if (!req.user || !req.user.id) {
+    if (!req.user || !req.user.userId) {
       throw new AppError('User not authenticated', 401);
     }
 
     const comment = await Comment.create({
-      userId: req.user.id,
+      userId: req.user.userId,
       postId,
       content,
       parentId: parentId || null,
@@ -123,11 +124,11 @@ router.delete('/:commentId', authenticate, async (req: AuthenticatedRequest, res
       throw new AppError('Comment not found', 404);
     }
 
-    if (!req.user || !req.user.id) {
+    if (!req.user || !req.user.userId) {
       throw new AppError('User not authenticated', 401);
     }
 
-    if (comment.userId !== req.user.id) {
+    if (comment.userId !== req.user.userId) {
       throw new AppError('Not authorized to delete this comment', 403);
     }
 
@@ -158,10 +159,10 @@ router.post('/:commentId/like', authenticate, async (req: AuthenticatedRequest, 
     }
 
     // Check if already liked
-    if (!req.user || !req.user.id) {
+    if (!req.user || !req.user.userId) {
       throw new AppError('User not authenticated', 401);
     }
-    const existingLike = await CommentLike.findByUserAndComment(req.user.id, comment.id);
+    const existingLike = await CommentLike.findByUserAndComment(req.user.userId, comment.id);
 
     if (existingLike) {
       throw new AppError('Already liked this comment', 400);
@@ -169,7 +170,7 @@ router.post('/:commentId/like', authenticate, async (req: AuthenticatedRequest, 
 
     // Create like
     await CommentLike.create({
-      userId: req.user.id,
+      userId: req.user.userId,
       commentId: comment.id,
       updatedAt: new Date()
     });
@@ -196,10 +197,10 @@ router.delete('/:commentId/like', authenticate, async (req: AuthenticatedRequest
     }
 
     // Check if liked
-    if (!req.user || !req.user.id) {
+    if (!req.user || !req.user.userId) {
       throw new AppError('User not authenticated', 401);
     }
-    const like = await CommentLike.findByUserAndComment(req.user.id, comment.id);
+    const like = await CommentLike.findByUserAndComment(req.user.userId, comment.id);
 
     if (!like) {
       throw new AppError('Not liked this comment', 400);
@@ -227,7 +228,7 @@ router.get('/:commentId/replies', authenticate, async (req: AuthenticatedRequest
     const replies = await Comment.findReplies(commentId);
 
     // Check if current user liked each reply
-    if (!req.user || !req.user.id) {
+    if (!req.user || !req.user.userId) {
       // If user is not authenticated, return replies without like status
       res.json({
         status: 'success',
@@ -237,7 +238,7 @@ router.get('/:commentId/replies', authenticate, async (req: AuthenticatedRequest
     }
 
     const likedReplies = await Promise.all(
-      replies.map(r => CommentLike.findByUserAndComment(req.user?.id as string, r.id))
+      replies.map(r => CommentLike.findByUserAndComment(req.user?.userId as string, r.id))
     );
 
     const likedReplyIds = new Set(

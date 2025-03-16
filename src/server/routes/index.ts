@@ -1,10 +1,10 @@
 import express from 'express';
 
+import { authRouter } from '../domains/auth/routes';
 import { errorHandler } from '../middleware/errorHandler';
 import { apiLimiter } from '../middleware/rateLimiter';
 
 import { adminRouter } from './admin';
-import { authRouter } from './auth';
 import { mediaRouter } from './media';
 import { moderatorRouter } from './moderator';
 import { socialRouter } from './social';

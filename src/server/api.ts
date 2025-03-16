@@ -1,3 +1,3 @@
-import * as api from "./apis/autoindex"
+import * as api from "./api/autoindex"
 
 export { api }

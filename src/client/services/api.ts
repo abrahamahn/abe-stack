@@ -1,9 +1,9 @@
-import type * as apis from "../../server/apis/autoindex"
+import type * as apis from "../../server/api/autoindex"
 import type { ServerEnvironment } from "../../server/services/ServerEnvironment"
 import { sleep } from "../../shared/sleep"
 
 // Update InputOutput to match the actual handler signature
-type InputOutput<T extends (env: ServerEnvironment, args: unknown) => unknown> = {
+type InputOutput<T extends (env: ServerEnvironment, args: Record<string, never>) => unknown> = {
 	input: Parameters<T>[1]
 	output: ReturnType<T>
 }

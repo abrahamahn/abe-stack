@@ -1,6 +1,5 @@
-import { DatabaseConnectionManager } from '../database/config';
-import { AuthService } from '../services/AuthService';
-import { Database } from '../services/Database';
+import { DatabaseConnectionManager } from '../config/database';
+import { AuthService } from '../domains/auth/services/auth.service';
 
 interface RegistrationResult {
   user: {
@@ -24,10 +23,6 @@ async function testRegistration() {
     // Initialize DatabaseConnectionManager
     await DatabaseConnectionManager.initialize();
     console.log('DatabaseConnectionManager initialized successfully');
-    
-    // Initialize database connection
-    const db = new Database('./db');
-    await db.initialize();
     
     // Create AuthService instance
     const authService = AuthService.getInstance();
@@ -56,26 +51,23 @@ async function testRegistration() {
     console.log('\nVerifying user in database...');
     
     // Query the database directly
-    const pool = db.getPool();
-    if (pool) {
-      const queryResult = await pool.query<UserRow>(
-        'SELECT id, username, email, email_confirmed FROM users WHERE email = $1',
-        [testUser.email]
-      );
-      
-      if (queryResult.rows.length > 0) {
-        console.log('User found in database:');
-        console.log('ID:', queryResult.rows[0].id);
-        console.log('Username:', queryResult.rows[0].username);
-        console.log('Email:', queryResult.rows[0].email);
-        console.log('Email Confirmed:', queryResult.rows[0].email_confirmed);
-      } else {
-        console.log('User NOT found in database!');
-      }
+    const pool = DatabaseConnectionManager.getPool();
+    const queryResult = await pool.query<UserRow>(
+      'SELECT id, username, email, email_confirmed FROM users WHERE email = $1',
+      [testUser.email]
+    );
+    
+    if (queryResult.rows.length > 0) {
+      console.log('User found in database:');
+      console.log('ID:', queryResult.rows[0].id);
+      console.log('Username:', queryResult.rows[0].username);
+      console.log('Email:', queryResult.rows[0].email);
+      console.log('Email Confirmed:', queryResult.rows[0].email_confirmed);
+    } else {
+      console.log('User NOT found in database!');
     }
     
     // Close database connection
-    await db.close();
     await DatabaseConnectionManager.closePool();
     
   } catch (error) {

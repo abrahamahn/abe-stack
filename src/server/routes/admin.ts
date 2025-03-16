@@ -2,12 +2,12 @@ import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 
-import { authenticate, authorize } from '../middleware/auth';
+import { authenticate, authorize } from '../domains/auth/middleware';
 import { NotFoundError } from '../middleware/error';
 import { validate } from '../middleware/validate';
-import { commentRepository } from '../models/Comment';
-import { postRepository } from '../models/Post';
-import { userRepository } from '../models/User';
+import { commentRepository } from '../database/models/social/Comment';
+import { postRepository } from '../database/models/social/Post';
+import { userRepository } from '../database/models/auth/User';
 
 // Validation schemas
 const userRoleSchema = z.object({

@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 
 import { AppError } from '../middleware/error';
-import { Post, Like } from '../models';
+import { Post, Like } from '../database/models';
 import { PostParamRequest } from '../types/request.types';
 
 /**
@@ -19,7 +19,7 @@ export const getPostById = async (req: PostParamRequest, res: Response, next: Ne
     // Check if current user liked the post
     let like = null;
     if (req.user) {
-      like = await Like.findByUserAndPost(req.user.id, post.id);
+      like = await Like.findByUserAndPost(req.user.userId, post.id);
     }
 
     const postData = post.toJSON();
@@ -46,7 +46,7 @@ export const deletePost = async (req: PostParamRequest, res: Response, next: Nex
       throw new AppError('Post not found', 404);
     }
 
-    if (post.userId !== req.user?.id) {
+    if (post.userId !== req.user?.userId) {
       throw new AppError('Not authorized to delete this post', 403);
     }
 

@@ -1,19 +1,13 @@
-import { CookieOptions } from 'express';
+import 'express';
 
+// Augment Express Request interface
 declare module 'express' {
   export interface Request {
     user?: {
-      id: string;
+      userId: string;
+      role: string;
       [key: string]: unknown;
     };
     token?: string;
-    cookies: {
-      refreshToken?: string;
-      [key: string]: string | undefined;
-    };
   }
-
-  export interface Response {
-    cookie(name: string, value: string, options: CookieOptions): this;
-  }
-} 
+}

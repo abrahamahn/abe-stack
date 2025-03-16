@@ -2,9 +2,9 @@ import express from 'express';
 import type { Response, NextFunction } from 'express';
 
 import { followUser, unfollowUser } from '../controllers/social.controller';
-import { authenticate } from '../middleware/auth';
+import { authenticate } from '../domains/auth/middleware/auth.middleware';
 import { AppError } from '../middleware/error';
-import { User, Post, Follow } from '../models';
+import { User, Post, Follow } from '../database/models';
 import { AuthenticatedRequest, UserParamRequest } from '../types/request.types';
 
 interface UserResponse {
@@ -41,7 +41,7 @@ router.get('/:userId', async (req: UserParamRequest, res: Response, next: NextFu
     const posts = await Post.findByUserId(user.id);
 
     // Check if current user is following this user
-    const currentUserId = req.user?.id;
+    const currentUserId = req.user?.userId;
     const isFollowing = currentUserId ? await Follow.findByFollowerAndFollowing(currentUserId, user.id) : null;
 
     const userResponse: UserResponse = {
@@ -60,12 +60,12 @@ router.get('/:userId', async (req: UserParamRequest, res: Response, next: NextFu
 });
 
 // Follow a user
-router.post('/:userId/follow', async (req: UserParamRequest, res: Response) => {
+router.post('/:userId/follow', async (req: AuthenticatedRequest, res: Response) => {
   await followUser(req, res);
 });
 
 // Unfollow a user
-router.delete('/:userId/follow', async (req: UserParamRequest, res: Response) => {
+router.delete('/:userId/follow', async (req: AuthenticatedRequest, res: Response) => {
   await unfollowUser(req, res);
 });
 
@@ -73,7 +73,7 @@ router.delete('/:userId/follow', async (req: UserParamRequest, res: Response) =>
 router.patch('/me', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { displayName, bio, avatar } = req.body as { displayName: string, bio: string, avatar: string };
-    const currentUserId = req.user?.id;
+    const currentUserId = req.user?.userId;
     
     if (!currentUserId) {
       throw new AppError('Authentication required', 401);

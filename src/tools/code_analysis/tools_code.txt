@@ -1,7 +1,7 @@
 TOOLS DIRECTORY SUMMARY
 ================================================================================
 Total Files: 2
-Total Lines: 218
+Total Lines: 217
 ================================================================================
 
 DIRECTORY STRUCTURE:
@@ -212,7 +212,7 @@ if __name__ == "__main__":
     main() 
 ================================================================================
 File: reset.ts
-Lines: 29
+Lines: 28
 --------------------------------------------------------------------------------
 /*
 
@@ -221,13 +221,12 @@ npm run reset
 
 */
 
-import { Database } from "../server/services/Database"
+import { DatabaseConnectionManager } from "../server/config/database"
 import { QueueDatabase } from "../server/services/QueueDatabase"
 import { config } from "../server/services/ServerConfig"
 
 async function reset() {
-	const db = new Database(config.dbPath)
-	await db.reset()
+	await DatabaseConnectionManager.reset()
 
 	const queue = new QueueDatabase(config.queuePath)
 	await queue.reset()

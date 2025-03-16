@@ -32,15 +32,17 @@ export class AppError extends Error {
 }
 
 // Specific error types
-export class NotFoundError extends AppError {
-  constructor(message = 'Resource not found') {
-    super(message, 404);
+export class NotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'NotFoundError';
   }
 }
 
-export class UnauthorizedError extends AppError {
-  constructor(message = 'Unauthorized access') {
-    super(message, 401);
+export class UnauthorizedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'UnauthorizedError';
   }
 }
 

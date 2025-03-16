@@ -13,7 +13,7 @@ import {
   unlikeComment,
   replyToComment
 } from '../controllers/social.controller';
-import { authenticate } from '../middleware/auth';
+import { authenticate } from '../domains/auth/middleware/auth.middleware';
 import { customValidate } from '../middleware/customValidate';
 import {
   createPostSchema,

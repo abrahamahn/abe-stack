@@ -3,7 +3,7 @@ import fs from 'fs';
 import { Request, Response } from 'express';
 import rangeParser from 'range-parser';
 
-import { Track } from '../models';
+import { Track } from '../database/models';
 
 interface TrackModel extends Track {
   playCount: number;

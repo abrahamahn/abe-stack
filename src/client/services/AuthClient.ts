@@ -51,7 +51,7 @@ export class AuthClient {
   }
 
   // Get the base API URL
-  private getApiUrl() {
+  getApiUrl() {
     // In development, use a direct URL to the server
     if (process.env.NODE_ENV === 'development') {
       return `http://localhost:${this.getServerPort()}/api`;
@@ -228,7 +228,7 @@ export function useAuth() {
       setLoading(true);
       setError(null);
       
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch(`${authClient.getApiUrl()}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

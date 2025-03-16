@@ -4,9 +4,8 @@ import { join } from 'path';
 
 import { Pool } from 'pg';
 
+import { DatabaseConnectionManager } from '../config/database';
 import { Logger } from '../services/LoggerService';
-
-import { DatabaseConnectionManager } from './config';
 
 export class MigrationManager {
   private logger: Logger;
@@ -15,7 +14,11 @@ export class MigrationManager {
 
   constructor() {
     this.logger = new Logger('MigrationManager');
-    this.pool = DatabaseConnectionManager.getPool();
+    const pool = DatabaseConnectionManager.getPool();
+    if (!(pool instanceof Pool)) {
+      throw new Error('Migrations require a PostgreSQL database connection');
+    }
+    this.pool = pool;
   }
 
   /**

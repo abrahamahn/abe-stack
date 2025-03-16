@@ -27,7 +27,7 @@
 	  "declaration": true,
 	  "declarationMap": true
 	},
-	"include": ["src/**/*"],
+	"include": ["src/**/*", "migrate_server.js"],
 	"exclude": ["node_modules", "dist", "build", "src/client/**/*"],
 	"references": [
 	  { "path": "./tsconfig.server.json" },

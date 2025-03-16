@@ -5,9 +5,8 @@ import { Request } from 'express';
  */
 export interface AuthenticatedRequest extends Request {
   user?: {
-    id: string;
-    role?: string;
-    [key: string]: unknown;
+    userId: string;
+    role: string;
   };
   token?: string;
 }

@@ -1,12 +1,13 @@
 import { Request, Response } from 'express';
 
+import { Post, Comment, Like, CommentLike, Follow, User } from '../database/models';
+import { UserJSON } from '../database/models/auth/User';
 import { uploadToStorage } from '../lib/storage';
-import { Post, Comment, Like, CommentLike, Follow, User } from '../models';
-import { UserJSON } from '../models/User';
 
 interface AuthenticatedRequest extends Request {
   user?: {
-    id: string;
+    userId: string;
+    role: string;
   };
   params: {
     userId?: string;
@@ -30,7 +31,7 @@ export const getUserProfileHandler = async (req: AuthenticatedRequest, res: Resp
       res.status(400).json({ error: 'User ID is required' });
       return;
     }
-    const currentUserId = req.user?.id;
+    const currentUserId = req.user?.userId;
 
     // Get user with followers
     const user = await User.findWithFollowers(userId);
@@ -110,7 +111,7 @@ export async function getUserProfile(userId: string, currentUserId?: string): Pr
 export const followUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const userId = req.params.userId;
-    const followerId = req.user?.id;
+    const followerId = req.user?.userId;
 
     if (!userId || !followerId) {
       res.status(400).json({ error: 'Missing required parameters' });
@@ -144,7 +145,7 @@ export const followUser = async (req: AuthenticatedRequest, res: Response): Prom
 export const unfollowUser = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const userId = req.params.userId;
-    const followerId = req.user?.id;
+    const followerId = req.user?.userId;
 
     if (!userId || !followerId) {
       res.status(400).json({ error: 'Missing required parameters' });
@@ -168,7 +169,7 @@ export const unfollowUser = async (req: AuthenticatedRequest, res: Response): Pr
 // Feed
 export const getFeed = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     const limit = 10;
 
     // Get following users first
@@ -217,7 +218,7 @@ export const getFeed = async (req: AuthenticatedRequest, res: Response): Promise
 export const createPost = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { content } = req.body;
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
 
     if (!userId) {
       res.status(401).json({ error: 'Authentication required' });
@@ -269,7 +270,7 @@ export const createPost = async (req: AuthenticatedRequest, res: Response): Prom
 export const likePost = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { postId } = req.params;
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
 
     if (!postId || !userId) {
       res.status(400).json({ error: 'Missing required parameters' });
@@ -304,7 +305,7 @@ export const likePost = async (req: AuthenticatedRequest, res: Response): Promis
 export const unlikePost = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { postId } = req.params;
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
 
     if (!postId || !userId) {
       res.status(400).json({ error: 'Missing required parameters' });
@@ -356,7 +357,7 @@ export const sharePost = async (req: AuthenticatedRequest, res: Response): Promi
 export const getComments = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { postId } = req.params;
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
     const limit = 10;
 
     if (!postId) {
@@ -403,7 +404,7 @@ export const createComment = async (req: AuthenticatedRequest, res: Response): P
   try {
     const { postId } = req.params;
     const { content } = req.body;
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
 
     if (!postId || !userId || !content) {
       res.status(400).json({ error: 'Missing required parameters' });
@@ -448,7 +449,7 @@ export const createComment = async (req: AuthenticatedRequest, res: Response): P
 export const likeComment = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { commentId } = req.params;
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
 
     if (!commentId || !userId) {
       res.status(400).json({ error: 'Missing required parameters' });
@@ -483,7 +484,7 @@ export const likeComment = async (req: AuthenticatedRequest, res: Response): Pro
 export const unlikeComment = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const { commentId } = req.params;
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
 
     if (!commentId || !userId) {
       res.status(400).json({ error: 'Missing required parameters' });
@@ -514,7 +515,7 @@ export const replyToComment = async (req: AuthenticatedRequest, res: Response): 
   try {
     const { commentId } = req.params;
     const { content } = req.body;
-    const userId = req.user?.id;
+    const userId = req.user?.userId;
 
     if (!commentId || !userId || !content) {
       res.status(400).json({ error: 'Missing required parameters' });

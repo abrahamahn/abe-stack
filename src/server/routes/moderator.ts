@@ -2,12 +2,12 @@ import express from 'express';
 import type { Request, Response, NextFunction, RequestHandler } from 'express';
 import { z } from 'zod';
 
-import { authenticate, authorize } from '../middleware/auth';
+import { authenticate, authorize } from '../domains/auth/middleware/auth.middleware';
 import { NotFoundError } from '../middleware/error';
 import { validate } from '../middleware/validate';
-import { Post, Comment } from '../models';
-import { commentRepository } from '../models/Comment';
-import { postRepository } from '../models/Post';
+import { Post, Comment } from '../database/models';
+import { commentRepository } from '../database/models/social/Comment';
+import { postRepository } from '../database/models/social/Post';
 
 
 // Validation schemas
@@ -29,7 +29,7 @@ const contentStatusSchema = z.object({
 const router: express.Router = express.Router();
 
 // All routes require authentication and moderator or admin role
-router.use(authenticate, authorize('moderator', 'admin'));
+router.use(authenticate, authorize('moderator'), authorize('admin'));
 
 // Get reported content
 router.get('/reports', async (_req: Request, res: Response, next: NextFunction) => {
@@ -75,7 +75,7 @@ router.patch(
       const updatedPost = await postRepository.update(postId, {
         status,
         moderationReason: reason,
-        moderatedBy: (req.user as { id: string })?.id,
+        moderatedBy: (req.user as { userId: string; role: string })?.userId,
         moderatedAt: new Date()
       });
       
@@ -108,7 +108,7 @@ router.patch(
       const updatedComment = await commentRepository.update(commentId, {
         status,
         moderationReason: reason,
-        moderatedBy: (req.user as { id: string })?.id,
+        moderatedBy: (req.user as { userId: string; role: string })?.userId,
         moderatedAt: new Date()
       });
       

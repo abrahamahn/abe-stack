@@ -2,14 +2,24 @@ import fs from 'fs';
 import path from 'path';
 
 import { Request, Response } from 'express';
+import multer from 'multer';
 import rangeParser from 'range-parser';
 
 import { NotFoundError } from '../middleware/error';
 import { Logger } from '../services/LoggerService';
 import { MediaProcessingService } from '../services/media/MediaProcessingService';
+import { MediaService } from '../services/MediaService';
 
-interface MediaRequest extends Request {
+interface MediaRequest extends Request<Record<string, never>, Record<string, never>, {
+  generateHLS?: string;
+  generateDASH?: string;
+  generateWaveform?: string;
+  quality?: ('1080p' | '720p' | '480p' | '360p' | '240p')[];
+}> {
   file?: Express.Multer.File;
+  protocol: string;
+  get(name: string): string | undefined;
+  get(name: 'set-cookie'): string[] | undefined;
   body: {
     generateHLS?: string;
     generateDASH?: string;
@@ -25,6 +35,7 @@ interface StreamRequest extends Request {
     file?: string;
     quality?: '1080p' | '720p' | '480p' | '360p' | '240p';
     format?: string;
+    filename?: string;
   };
   query: {
     format?: string;
@@ -64,22 +75,70 @@ interface JobRequest extends Request {
   };
 }
 
+// Setup storage
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    const mediaService = new MediaService();
+    cb(null, mediaService['mediaPath']);
+  },
+  filename: (_req, file, cb) => {
+    const mediaService = new MediaService();
+    cb(null, mediaService.generateFilename(file.originalname));
+  }
+});
+
+export const upload = multer({ storage });
+
 /**
  * Controller for handling media uploads and streaming
  */
 export class MediaController {
   private mediaService: MediaProcessingService;
+  private basicMediaService: MediaService;
   private logger: Logger;
   private uploadDir: string;
 
   constructor() {
     this.mediaService = MediaProcessingService.getInstance();
+    this.basicMediaService = new MediaService();
     this.logger = new Logger('MediaController');
     this.uploadDir = path.join(process.cwd(), 'uploads');
   }
 
   /**
-   * Handle image upload
+   * Handle basic media upload
+   */
+  public async uploadMedia(req: MediaRequest, res: Response): Promise<void> {
+    try {
+      const file = req.file;
+      if (!file) {
+        res.status(400).json({ error: 'No file uploaded' });
+        return;
+      }
+
+      const filename = this.basicMediaService.generateFilename(file.originalname);
+      const filePath = path.join(this.basicMediaService['mediaPath'], filename);
+      
+      await fs.promises.writeFile(filePath, file.buffer);
+      
+      const hostHeader = req.get('host');
+      const host = typeof hostHeader === 'string' ? hostHeader : '';
+      const baseUrl = `${req.protocol}://${host}`;
+      const fileUrl = `${baseUrl}/media/${filename}`;
+      
+      res.status(201).json({
+        filename,
+        url: fileUrl,
+        mediaType: this.basicMediaService.getMediaType(file.originalname)
+      });
+    } catch (error) {
+      this.logger.error('Error uploading media:', error);
+      res.status(500).json({ error: 'Failed to upload media' });
+    }
+  }
+
+  /**
+   * Handle image upload with processing
    */
   public async uploadImage(req: MediaRequest, res: Response): Promise<void> {
     try {
@@ -103,7 +162,7 @@ export class MediaController {
   }
 
   /**
-   * Handle video upload
+   * Handle video upload with processing
    */
   public async uploadVideo(req: MediaRequest, res: Response): Promise<void> {
     try {
@@ -135,30 +194,19 @@ export class MediaController {
   }
 
   /**
-   * Handle audio upload
+   * Stream any media file
    */
-  public async uploadAudio(req: MediaRequest, res: Response): Promise<void> {
+  public streamMedia(req: StreamRequest, res: StreamResponse): void {
     try {
-      if (!req.file) {
-        res.status(400).json({ error: 'No file provided' });
+      const { filename } = req.params;
+      if (!filename) {
+        res.status(400).json({ error: 'Filename is required' });
         return;
       }
 
-      const filePath = req.file.path;
-      const generateWaveform = req.body.generateWaveform !== 'false';
-
-      const result = await this.mediaService.processAudio(filePath, {
-        generateWaveform
-      });
-
-      res.status(202).json({
-        message: 'Audio upload accepted and processed',
-        mediaId: result.mediaId,
-        status: 'completed'
-      });
+      this.basicMediaService.streamMedia(req, res, filename);
     } catch (error) {
-      this.logger.error('Error uploading audio:', error);
-      res.status(500).json({ error: 'Failed to upload audio' });
+      this.handleStreamError(error, res);
     }
   }
 
