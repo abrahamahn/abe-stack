@@ -1,18 +1,40 @@
-import { Request, Response } from 'express';
 import fs from 'fs';
+
+import { Request, Response } from 'express';
 import rangeParser from 'range-parser';
+
 import { Track } from '../models';
+
+interface TrackModel extends Track {
+  playCount: number;
+  fileUrl: string;
+  save(): Promise<TrackModel>;
+}
+
+interface StreamRequest extends Request {
+  params: {
+    trackId: string;
+  };
+  headers: {
+    range?: string;
+  };
+}
+
+interface StreamResponse extends Response {
+  set(field: Record<string, string>): this;
+  set(field: string, value?: string | string[]): this;
+}
 
 class StreamController {
   /**
    * Stream an audio file with support for range requests (important for seeking)
    */
-  async streamAudio(req: Request, res: Response): Promise<void> {
+  async streamAudio(req: StreamRequest, res: StreamResponse): Promise<void> {
     try {
       const trackId = req.params.trackId;
       
       // Get track from database
-      const track = await Track.findByPk(trackId);
+      const track = await Track.findByPk(trackId) as TrackModel;
       if (!track) {
         res.status(404).json({ error: 'Track not found' });
         return;
@@ -51,7 +73,7 @@ class StreamController {
         
         // Send partial content
         res.status(206);
-        (res as any).set({
+        res.set({
           'Content-Range': `bytes ${range.start}-${range.end}/${fileSize}`,
           'Accept-Ranges': 'bytes',
           'Content-Length': (range.end - range.start + 1).toString(),
@@ -59,10 +81,10 @@ class StreamController {
         });
           
         // Pipe stream to response
-        stream.pipe(res as any);
+        stream.pipe(res);
       } else {
         // Send full file
-        (res as any).set({
+        res.set({
           'Content-Length': fileSize.toString(),
           'Content-Type': mimeType,
           'Accept-Ranges': 'bytes',
@@ -72,12 +94,12 @@ class StreamController {
         const stream = fs.createReadStream(filePath);
         
         // Pipe stream to response
-        stream.pipe(res as any);
+        stream.pipe(res);
       }
       
       // Update play count
       track.playCount += 1;
-      await (track as any).save();
+      await track.save();
       
     } catch (error) {
       console.error('Error streaming audio:', error);
@@ -88,12 +110,12 @@ class StreamController {
   /**
    * Generate a waveform representation for a track
    */
-  async getWaveform(req: Request, res: Response): Promise<void> {
+  async getWaveform(req: StreamRequest, res: Response): Promise<void> {
     try {
       const trackId = req.params.trackId;
       
       // Get track from database
-      const track = await Track.findByPk(trackId);
+      const track = await Track.findByPk(trackId) as TrackModel;
       if (!track) {
         res.status(404).json({ error: 'Track not found' });
         return;

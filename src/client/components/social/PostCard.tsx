@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { socialService } from '../../services/social';
+
 import { formatDate } from '../../../shared/dateHelpers';
+import { socialService } from '../../services/social';
 
 interface Post {
   id: string;
@@ -155,7 +156,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onCommentClick, onRefr
       }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <button 
-            onClick={handleLikeToggle}
+            onClick={() => void handleLikeToggle()}
             style={{ 
               background: 'none',
               border: 'none',
@@ -192,7 +193,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onCommentClick, onRefr
         
         <div>
           <button 
-            onClick={handleShare}
+            onClick={() => void handleShare()}
             style={{ 
               background: 'none',
               border: 'none',

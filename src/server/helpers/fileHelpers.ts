@@ -1,5 +1,6 @@
-import { createSignature } from "./signatureHelpers"
 import { ServerConfig } from "../services/ServerConfig"
+
+import { createSignature } from "./signatureHelpers"
 
 export type FileSignatureData = {
 	method: "get" | "put"
@@ -10,7 +11,7 @@ export type FileSignatureData = {
 
 export function normalizeFilename(filename: string) {
 	// Replace non-alphanumeric stuff with _.
-	filename = filename.replace(/[^a-zA-Z0-9\s\-_\.]+/g, "_")
+	filename = filename.replace(/[^a-zA-Z0-9\s\-_.]+/g, "_")
 
 	// Lowercase extension because that gets annoying.
 	const [ext, ...rest] = filename.split(".").reverse()
@@ -19,7 +20,7 @@ export function normalizeFilename(filename: string) {
 	return filename
 }
 
-export async function getSignedFileUrl(
+export function getSignedFileUrl(
 	environment: { config: ServerConfig },
 	data: FileSignatureData
 ) {

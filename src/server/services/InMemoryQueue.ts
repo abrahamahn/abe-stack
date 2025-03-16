@@ -1,5 +1,5 @@
-import { EventEmitter } from 'events';
 import crypto from 'crypto';
+import { EventEmitter } from 'events';
 
 // Job status enum
 export enum JobStatus {
@@ -10,7 +10,7 @@ export enum JobStatus {
 }
 
 // Job processor type
-export type JobProcessor<T> = (job: Job<T>) => Promise<any>;
+export type JobProcessor<T> = (job: Job<T>) => Promise<unknown>;
 
 // Job interface
 export interface Job<T> {
@@ -18,7 +18,7 @@ export interface Job<T> {
   data: T;
   status: JobStatus;
   timestamp: number;
-  result?: any;
+  result?: unknown;
   error?: Error;
   progress: number;
   opts: JobOptions;
@@ -53,7 +53,7 @@ export class InMemoryQueue<T> extends EventEmitter {
   /**
    * Add a job to the queue
    */
-  async add(data: T, opts: JobOptions = {}): Promise<Job<T>> {
+  add(data: T, opts: JobOptions = {}): Job<T> {
     const id = crypto.randomUUID();
     const job: Job<T> = {
       id,
@@ -66,14 +66,16 @@ export class InMemoryQueue<T> extends EventEmitter {
       update: async (progress: number) => {
         job.progress = progress;
         this.emit('progress', job, progress);
+        return Promise.resolve();
       },
-      
       remove: async () => {
         this.queue = this.queue.filter(j => j.id !== id);
         if (this.timers.has(id)) {
-          clearTimeout(this.timers.get(id)!);
+          const timer = this.timers.get(id);
+          clearTimeout(timer);
           this.timers.delete(id);
         }
+        return Promise.resolve();
       }
     };
     
@@ -82,13 +84,13 @@ export class InMemoryQueue<T> extends EventEmitter {
       const timer = setTimeout(() => {
         this.queue.push(job);
         this.timers.delete(id);
-        this.processNextJob();
+        void this.processNextJob();
       }, opts.delay);
       
       this.timers.set(id, timer);
     } else {
       this.queue.push(job);
-      this.processNextJob();
+      void this.processNextJob();
     }
     
     this.emit('added', job);
@@ -101,7 +103,7 @@ export class InMemoryQueue<T> extends EventEmitter {
   process(processor: JobProcessor<T>): void {
     this.processor = processor;
     this.isProcessing = true;
-    this.processNextJob();
+    void this.processNextJob();
   }
 
   /**
@@ -112,7 +114,7 @@ export class InMemoryQueue<T> extends EventEmitter {
       return;
     }
     
-    const job = this.queue.shift()!;
+    const job = this.queue.shift() as Job<T>;
     
     if (!job) {
       return this.processNextJob();
@@ -147,20 +149,20 @@ export class InMemoryQueue<T> extends EventEmitter {
     }
     
     // Process next job
-    this.processNextJob();
+    void this.processNextJob();
   }
 
   /**
    * Get a job by ID
    */
-  async getJob(jobId: string): Promise<Job<T> | null> {
+  getJob(jobId: string): Job<T> | null {
     return this.queue.find(job => job.id === jobId) || null;
   }
 
   /**
    * Get all jobs in the queue
    */
-  async getJobs(status?: JobStatus): Promise<Job<T>[]> {
+  getJobs(status?: JobStatus): Job<T>[] {
     if (!status) {
       return this.queue;
     }
@@ -171,7 +173,7 @@ export class InMemoryQueue<T> extends EventEmitter {
   /**
    * Pause the queue
    */
-  async pause(): Promise<void> {
+  pause(): void {
     this.isProcessing = false;
     this.emit('paused');
   }
@@ -179,16 +181,16 @@ export class InMemoryQueue<T> extends EventEmitter {
   /**
    * Resume the queue
    */
-  async resume(): Promise<void> {
+  resume(): void {
     this.isProcessing = true;
-    this.processNextJob();
+    void this.processNextJob();
     this.emit('resumed');
   }
 
   /**
    * Empty the queue
    */
-  async empty(): Promise<void> {
+  empty(): void {
     // Clear all timers
     for (const timer of this.timers.values()) {
       clearTimeout(timer);
@@ -202,15 +204,15 @@ export class InMemoryQueue<T> extends EventEmitter {
   /**
    * Close the queue
    */
-  async close(): Promise<void> {
-    await this.pause();
+  close(): void {
+    this.pause();
     this.emit('closed');
   }
 
   /**
    * Get the count of jobs by status
    */
-  async getJobCounts(): Promise<Record<string, number>> {
+  getJobCounts(): Record<string, number> {
     const counts = {
       waiting: 0,
       active: 0,

@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+
 import { MediaUpload } from '../media/mediaUpload';
 
 interface CreatePostProps {
@@ -48,8 +49,14 @@ export const CreatePost: React.FC<CreatePostProps> = ({
     e.target.style.height = `${e.target.scrollHeight}px`;
   };
 
-  const handleMediaUpload = async (file: File) => {
+  const handleMediaUpload = async (file: File): Promise<void> => {
     setMedia(file);
+    return Promise.resolve();
+  };
+
+  // Void-returning wrapper for handleSubmit
+  const handleSubmitWrapper = (e: React.FormEvent) => {
+    void handleSubmit(e);
   };
 
   const styles = {
@@ -123,7 +130,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({
 
   return (
     <div style={styles.container} className={className}>
-      <form onSubmit={handleSubmit} style={styles.form}>
+      <form onSubmit={handleSubmitWrapper} style={styles.form}>
         <textarea
           ref={textareaRef}
           value={content}

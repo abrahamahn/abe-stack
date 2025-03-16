@@ -1,8 +1,10 @@
 import { Pool } from 'pg';
+
 import { BaseModel, BaseRepository } from '../database/BaseRepository';
 import { DatabaseConnectionManager } from '../database/config';
-import { User } from './User';
-import Album from './Album';
+
+import { Album } from './Album';
+import { userRepository, UserAttributes } from './User';
 
 export interface ArtistAttributes extends BaseModel {
   name: string;
@@ -41,7 +43,7 @@ export class ArtistRepository extends BaseRepository<ArtistAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [userId]);
-      return result.rows[0] || null;
+      return (result.rows[0] || null) as ArtistAttributes | null;
     } catch (error) {
       this.logger.error('Error in findByUserId', { userId, error });
       throw error;
@@ -61,7 +63,7 @@ export class ArtistRepository extends BaseRepository<ArtistAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [verified]);
-      return result.rows;
+      return result.rows as ArtistAttributes[];
     } catch (error) {
       this.logger.error('Error in findByVerified', { verified, error });
       throw error;
@@ -160,7 +162,7 @@ export class Artist implements ArtistAttributes {
       banner_image_url: bannerImageUrl,
       followers_count: followersCount,
       user_id: userId
-    } as any);
+    } as Partial<ArtistAttributes>);
     return new Artist(artist);
   }
 
@@ -174,7 +176,7 @@ export class Artist implements ArtistAttributes {
       ...(followersCount !== undefined && { followers_count: followersCount }),
       ...(userId !== undefined && { user_id: userId })
     };
-    const updated = await artistRepository.update(this.id, updateData as any);
+    const updated = await artistRepository.update(this.id, updateData as Partial<ArtistAttributes>);
     Object.assign(this, updated);
     return this;
   }
@@ -193,9 +195,9 @@ export class Artist implements ArtistAttributes {
     this.followersCount = Math.max(0, this.followersCount - 1);
   }
 
-  async getUser(): Promise<User | null> {
+  async getUser(): Promise<UserAttributes | null> {
     if (!this.userId) return null;
-    return User.findByPk(this.userId);
+    return await userRepository.findById(this.userId);
   }
 
   toJSON() {

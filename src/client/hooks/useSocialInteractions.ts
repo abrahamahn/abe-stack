@@ -1,11 +1,13 @@
 import { useState, useCallback } from 'react';
-import { useSocial } from '../contexts/SocialContext';
+
+import { useSocial, type User } from '../contexts/SocialContext';
 import { socialService } from '../services/social';
 
 interface UseSocialInteractionsProps {
   onError?: (error: Error) => void;
 }
 
+export type { User };
 export const useSocialInteractions = ({ onError }: UseSocialInteractionsProps = {}) => {
   const { currentUser, refreshFeed } = useSocial();
   const [isLoading, setIsLoading] = useState(false);

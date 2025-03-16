@@ -6,7 +6,7 @@ import { ServerEnvironment } from '../services/ServerEnvironment';
 
 // Example export format - add actual handlers as needed
 export const example = {
-  handler: async (_environment: ServerEnvironment, _args: any) => {
+  handler: (_environment: ServerEnvironment, _args: Record<string, never>) => {
     return { success: true };
   },
   input: createValidator((_value: unknown) => true, 'example')

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 
 // TODO: this is very much a work in progress!
 export function CalendarDemo() {

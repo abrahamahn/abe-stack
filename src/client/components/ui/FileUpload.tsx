@@ -1,8 +1,8 @@
-import React, { forwardRef, ComponentPropsWithoutRef, DragEvent, ChangeEvent, useState, useRef } from 'react';
+import React, { ComponentPropsWithoutRef, DragEvent, ChangeEvent, useState, useRef } from 'react';
+
 import { DeferredPromise } from "../../../shared/DeferredPromise"
 import { randomId } from "../../../shared/randomId"
 import { passthroughRef } from "../../helpers/passthroughRef"
-import { useAsync } from "../../hooks/useAsync"
 
 interface Upload {
 	id: string
@@ -10,8 +10,6 @@ interface Upload {
 	promise: DeferredPromise<void>
 	uploaded?: boolean
 }
-
-type DeferredPromiseType = DeferredPromise<void>
 
 interface FileUploadProps extends ComponentPropsWithoutRef<'div'> {
 	onFileSelect: (file: File) => void;
@@ -111,7 +109,7 @@ export function useFileUpload(
 			};
 			setUploads((uploads) => [...uploads, upload]);
 			try {
-				await onUpload(file, (progress) => {
+				await onUpload(file, (_progress) => {
 					// Update progress
 				});
 				upload.uploaded = true;
@@ -213,7 +211,7 @@ export const FileUploadDropZone = passthroughRef(
 	}
 )
 
-async function uploadFile(file: File, url: string, onProgress: (progress: number) => void) {
+export async function uploadFile(file: File, url: string, onProgress: (progress: number) => void) {
 	const xhr = new XMLHttpRequest()
 	xhr.open("PUT", url, true)
 
@@ -249,7 +247,7 @@ async function uploadFile(file: File, url: string, onProgress: (progress: number
 
 const MB = 1024 * 1024
 
-async function renderPreview(file: File) {
+export async function _renderPreview(file: File) {
 	const deferred = new DeferredPromise<string | undefined>()
 
 	if (file.type.startsWith("image/") && file.size <= 10 * MB) {
@@ -272,6 +270,42 @@ export function FileUploadArea(
 		accept?: string
 		multiple?: boolean
 	}
-) {
-	// ... rest of the component ...
+): React.ReactElement {
+	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	const handleClick = () => {
+		fileInputRef.current?.click();
+	};
+
+	const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+		const files = event.target.files;
+		if (files) {
+			props.onFileSelect(files);
+		}
+	};
+
+	return (
+		<div
+			onClick={handleClick}
+			style={{
+				border: "2px dashed var(--border-color)",
+				borderRadius: "0.5rem",
+				padding: "2rem",
+				textAlign: "center",
+				cursor: "pointer",
+				...props.style,
+			}}
+			{...props}
+		>
+			<input
+				ref={fileInputRef}
+				type="file"
+				accept={props.accept}
+				multiple={props.multiple}
+				onChange={handleFileChange}
+				style={{ display: "none" }}
+			/>
+			Click to select files
+		</div>
+	);
 }

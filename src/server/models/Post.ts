@@ -1,6 +1,36 @@
 import { Pool } from 'pg';
+
 import { BaseModel, BaseRepository } from '../database/BaseRepository';
 import { DatabaseConnectionManager } from '../database/config';
+
+interface UserData {
+  id: string;
+  username: string;
+  displayName: string;
+  profileImage: string | null;
+}
+
+interface CommentData {
+  id: string;
+  userId: string;
+  postId: string;
+  parentId: string | null;
+  content: string;
+  likesCount: number;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+  user: UserData;
+}
+
+interface LikeData {
+  id: string;
+  userId: string;
+  postId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  user: UserData;
+}
 
 export interface PostAttributes extends BaseModel {
   userId: string;
@@ -54,7 +84,7 @@ export class PostRepository extends BaseRepository<PostAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [userId, limit, offset]);
-      return result.rows;
+      return result.rows as PostAttributes[];
     } catch (error) {
       this.logger.error('Error in findByUserId', { userId, limit, offset, error });
       throw error;
@@ -75,7 +105,7 @@ export class PostRepository extends BaseRepository<PostAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [limit, offset]);
-      return result.rows;
+      return result.rows as PostAttributes[];
     } catch (error) {
       this.logger.error('Error in findPublic', { limit, offset, error });
       throw error;
@@ -207,7 +237,7 @@ export class PostRepository extends BaseRepository<PostAttributes> {
 
     try {
       const result = await DatabaseConnectionManager.getPool().query(query, [...params, limit, offset]);
-      return result.rows;
+      return result.rows as PostAttributes[];
     } catch (error) {
       this.logger.error('Error in find', { options, error });
       throw error;
@@ -223,7 +253,8 @@ export class PostRepository extends BaseRepository<PostAttributes> {
 
     try {
       const result = await DatabaseConnectionManager.getPool().query(query);
-      return parseInt(result.rows[0].count);
+      const row = result.rows[0] as { count: string };
+      return parseInt(row.count);
     } catch (error) {
       this.logger.error('Error in countLastWeek', { error });
       throw error;
@@ -245,7 +276,7 @@ export class PostRepository extends BaseRepository<PostAttributes> {
 
     try {
       const result = await DatabaseConnectionManager.getPool().query(query, [userIds, limit, offset]);
-      return result.rows;
+      return result.rows as PostAttributes[];
     } catch (error) {
       this.logger.error('Error in findByUserIds', { userIds, options, error });
       throw error;
@@ -255,7 +286,7 @@ export class PostRepository extends BaseRepository<PostAttributes> {
   /**
    * Find posts with user data
    */
-  async findWithUser(id: string, client?: Pool): Promise<(PostAttributes & { user: any }) | null> {
+  async findWithUser(id: string, client?: Pool): Promise<(PostAttributes & { user: UserData }) | null> {
     const query = `
       SELECT 
         p.*,
@@ -277,7 +308,27 @@ export class PostRepository extends BaseRepository<PostAttributes> {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [id]);
       if (!result.rows[0]) return null;
 
-      const row = result.rows[0];
+      const row = result.rows[0] as {
+        id: string;
+        user_id: string;
+        content: string;
+        media: string[];
+        likes_count: number;
+        comments_count: number;
+        shares_count: number;
+        status: string;
+        moderation_reason: string | null;
+        moderated_by: string | null;
+        moderated_at: Date | null;
+        created_at: Date;
+        updated_at: Date;
+        user: {
+          id: string;
+          username: string;
+          displayName: string;
+          profileImage: string | null;
+        };
+      };
       const post = {
         id: row.id,
         userId: row.user_id,
@@ -292,7 +343,12 @@ export class PostRepository extends BaseRepository<PostAttributes> {
         moderatedAt: row.moderated_at,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
-        user: row.user
+        user: {
+          id: row.user.id,
+          username: row.user.username,
+          displayName: row.user.displayName,
+          profileImage: row.user.profileImage
+        } as UserData
       };
 
       return post;
@@ -305,7 +361,7 @@ export class PostRepository extends BaseRepository<PostAttributes> {
   /**
    * Find posts with comments
    */
-  async findWithComments(id: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(PostAttributes & { comments: any[] }) | null> {
+  async findWithComments(id: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(PostAttributes & { comments: CommentData[] }) | null> {
     const query = `
       SELECT 
         p.*,
@@ -347,21 +403,38 @@ export class PostRepository extends BaseRepository<PostAttributes> {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [id, limit, offset]);
       if (!result.rows[0]) return null;
 
+      const row = result.rows[0] as {
+        id: string;
+        user_id: string;
+        content: string;
+        media: string[];
+        likes_count: number;
+        comments_count: number;
+        shares_count: number;
+        status: string;
+        moderation_reason: string | null;
+        moderated_by: string | null;
+        moderated_at: Date | null;
+        created_at: Date;
+        updated_at: Date;
+        comments: CommentData[];
+      };
+
       const post = {
-        id: result.rows[0].id,
-        userId: result.rows[0].user_id,
-        content: result.rows[0].content,
-        media: result.rows[0].media,
-        likesCount: result.rows[0].likes_count,
-        commentsCount: result.rows[0].comments_count,
-        sharesCount: result.rows[0].shares_count,
-        status: result.rows[0].status,
-        moderationReason: result.rows[0].moderation_reason,
-        moderatedBy: result.rows[0].moderated_by,
-        moderatedAt: result.rows[0].moderated_at,
-        createdAt: result.rows[0].created_at,
-        updatedAt: result.rows[0].updated_at,
-        comments: result.rows[0].comments || []
+        id: row.id,
+        userId: row.user_id,
+        content: row.content,
+        media: row.media,
+        likesCount: row.likes_count,
+        commentsCount: row.comments_count,
+        sharesCount: row.shares_count,
+        status: row.status,
+        moderationReason: row.moderation_reason,
+        moderatedBy: row.moderated_by,
+        moderatedAt: row.moderated_at,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        comments: row.comments || []
       };
 
       return post;
@@ -374,7 +447,7 @@ export class PostRepository extends BaseRepository<PostAttributes> {
   /**
    * Find posts with likes
    */
-  async findWithLikes(id: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(PostAttributes & { likes: any[] }) | null> {
+  async findWithLikes(id: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(PostAttributes & { likes: LikeData[] }) | null> {
     const query = `
       SELECT 
         p.*,
@@ -412,21 +485,38 @@ export class PostRepository extends BaseRepository<PostAttributes> {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [id, limit, offset]);
       if (!result.rows[0]) return null;
 
+      const row = result.rows[0] as {
+        id: string;
+        user_id: string;
+        content: string;
+        media: string[];
+        likes_count: number;
+        comments_count: number;
+        shares_count: number;
+        status: string;
+        moderation_reason: string | null;
+        moderated_by: string | null;
+        moderated_at: Date | null;
+        created_at: Date;
+        updated_at: Date;
+        likes: LikeData[];
+      };
+
       const post = {
-        id: result.rows[0].id,
-        userId: result.rows[0].user_id,
-        content: result.rows[0].content,
-        media: result.rows[0].media,
-        likesCount: result.rows[0].likes_count,
-        commentsCount: result.rows[0].comments_count,
-        sharesCount: result.rows[0].shares_count,
-        status: result.rows[0].status,
-        moderationReason: result.rows[0].moderation_reason,
-        moderatedBy: result.rows[0].moderated_by,
-        moderatedAt: result.rows[0].moderated_at,
-        createdAt: result.rows[0].created_at,
-        updatedAt: result.rows[0].updated_at,
-        likes: result.rows[0].likes || []
+        id: row.id,
+        userId: row.user_id,
+        content: row.content,
+        media: row.media,
+        likesCount: row.likes_count,
+        commentsCount: row.comments_count,
+        sharesCount: row.shares_count,
+        status: row.status,
+        moderationReason: row.moderation_reason,
+        moderatedBy: row.moderated_by,
+        moderatedAt: row.moderated_at,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        likes: row.likes || []
       };
 
       return post;
@@ -444,7 +534,7 @@ export class PostRepository extends BaseRepository<PostAttributes> {
     commentsOffset?: number,
     likesLimit?: number,
     likesOffset?: number
-  } = {}, client?: Pool): Promise<(PostAttributes & { user: any, comments: any[], likes: any[] }) | null> {
+  } = {}, client?: Pool): Promise<(PostAttributes & { user: UserData, comments: CommentData[], likes: LikeData[] }) | null> {
     const {
       commentsLimit = 20,
       commentsOffset = 0,
@@ -513,7 +603,28 @@ export class PostRepository extends BaseRepository<PostAttributes> {
       
       if (!result.rows[0]) return null;
 
-      const row = result.rows[0];
+      const row = result.rows[0] as {
+        id: string;
+        user_id: string;
+        content: string;
+        media: string[];
+        likes_count: number;
+        comments_count: number;
+        shares_count: number;
+        status: string;
+        moderation_reason: string | null;
+        moderated_by: string | null;
+        moderated_at: Date | null;
+        created_at: Date;
+        updated_at: Date;
+        'user.id': string;
+        'user.username': string;
+        'user.displayName': string;
+        'user.profileImage': string | null;
+        comments: CommentData[];
+        likes: LikeData[];
+      };
+
       return {
         id: row.id,
         userId: row.user_id,
@@ -533,10 +644,10 @@ export class PostRepository extends BaseRepository<PostAttributes> {
           username: row['user.username'],
           displayName: row['user.displayName'],
           profileImage: row['user.profileImage']
-        },
+        } as UserData,
         comments: row.comments || [],
         likes: row.likes || []
-      } as any;
+      };
     } catch (error) {
       this.logger.error('Error in findComplete', { id, options, error });
       throw error;
@@ -605,7 +716,7 @@ export class Post implements PostAttributes {
       moderation_reason: moderationReason,
       moderated_by: moderatedBy,
       moderated_at: moderatedAt
-    } as any);
+    } as Partial<PostAttributes>);
     return new Post(post);
   }
 
@@ -622,7 +733,7 @@ export class Post implements PostAttributes {
       ...(moderatedBy !== undefined && { moderated_by: moderatedBy }),
       ...(moderatedAt !== undefined && { moderated_at: moderatedAt })
     };
-    const updated = await postRepository.update(this.id, updateData as any);
+    const updated = await postRepository.update(this.id, updateData as Partial<PostAttributes>);
     Object.assign(this, updated);
     return this;
   }

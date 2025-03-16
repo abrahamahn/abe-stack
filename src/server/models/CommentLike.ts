@@ -1,7 +1,9 @@
 import { Pool } from 'pg';
+
 import { BaseModel, BaseRepository } from '../database/BaseRepository';
 import { DatabaseConnectionManager } from '../database/config';
-import User from './User';
+
+import { UserAttributes } from './User';
 
 export interface CommentLikeAttributes extends BaseModel {
   userId: string;
@@ -29,7 +31,7 @@ export class CommentLikeRepository extends BaseRepository<CommentLikeAttributes>
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [userId, commentId]);
-      return result.rows[0] || null;
+      return (result.rows[0] || null) as CommentLikeAttributes | null;
     } catch (error) {
       this.logger.error('Error in findByUserAndComment', { userId, commentId, error });
       throw error;
@@ -41,7 +43,7 @@ export class CommentLikeRepository extends BaseRepository<CommentLikeAttributes>
 export const commentLikeRepository = new CommentLikeRepository();
 
 export class CommentLike implements CommentLikeAttributes {
-  static belongsTo(_User: User, _arg1: { foreignKey: string; as: string; }) {
+  static belongsTo(_User: UserAttributes, _arg1: { foreignKey: string; as: string; }) {
       throw new Error('Method not implemented.');
   }
   id: string;
@@ -74,7 +76,7 @@ export class CommentLike implements CommentLikeAttributes {
     const commentLike = await commentLikeRepository.create({
       user_id: userId,
       comment_id: commentId
-    } as any);
+    } as Partial<CommentLikeAttributes>);
     return new CommentLike(commentLike);
   }
 

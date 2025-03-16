@@ -1,10 +1,12 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+
 import { fuzzyMatch } from "../../../shared/fuzzyMatch"
 import { useRefPrevious } from "../../hooks/useRefPrevious"
 import { isShortcut } from "../../hooks/useShortcut"
-import Button from "./Button"
-import Input from "./Input"
+
+import { Button } from "./Button"
 import { FuzzyString } from "./FuzzyString"
+import { Input } from "./Input"
 import { MenuItem } from "./MenuItem"
 import { Popup, PopupFrame } from "./Popup"
 
@@ -25,7 +27,10 @@ export function ComboBox<T>({ items, renderItem, onSelect, value, placeholder, o
 
 	const filteredItems = items.filter((item) => {
 		const renderedItem = renderItem(item);
-		return renderedItem && renderedItem.toString().toLowerCase().includes(search.toLowerCase());
+		if (typeof renderedItem === 'string') {
+			return renderedItem.toLowerCase().includes(search.toLowerCase());
+		}
+		return true; // Skip filtering for non-string items
 	});
 
 	useEffect(() => {
@@ -95,6 +100,14 @@ export function ComboBoxSelect(props: {
 	onChange: (value: string) => void
 }) {
 	const [open, setOpen] = React.useState(false)
+	const buttonRef = useRef<HTMLButtonElement>(null)
+	const prevOpen = useRefPrevious(open)
+
+	useLayoutEffect(() => {
+		if (prevOpen.current && !open) {
+			buttonRef.current?.focus()
+		}
+	}, [prevOpen, open])
 
 	if (open) {
 		return (
@@ -112,15 +125,6 @@ export function ComboBoxSelect(props: {
 			/>
 		)
 	}
-
-	const buttonRef = useRef<HTMLButtonElement>(null)
-
-	const prevOpen = useRefPrevious(open)
-	useLayoutEffect(() => {
-		if (prevOpen.current && !open) {
-			buttonRef.current?.focus()
-		}
-	}, [open])
 
 	return (
 		<Button ref={buttonRef} onClick={() => setOpen(true)} style={{ textAlign: "left" }}>
@@ -143,15 +147,15 @@ export function ComboBoxSearch(props: {
 
 	useEffect(() => {
 		if (props.autoFocus) inputRef.current?.focus()
-	}, [])
+	}, [props.autoFocus])
 
 	const [text, setText] = useState("")
 
 	const filteredItems = useMemo(() => {
 		return props.items
-			.map((str) => ({ value: str, match: fuzzyMatch(text, str)! }))
+			.map((str) => ({ value: str, match: fuzzyMatch(text, str) || undefined }))
 			.filter(({ match }) => Boolean(match))
-	}, [text])
+	}, [text, props.items])
 
 	const [selectedIndex, setSelectedIndex] = useState(0)
 
@@ -213,6 +217,7 @@ export function ComboBoxSearch(props: {
 					{props.notice}
 					{filteredItems.map((item, i) => (
 						<MenuItem
+							key={item.value}
 							selected={selectedIndex === i}
 							onClick={() => props.onChange(item.value)}
 							onMouseDown={(e) => e.preventDefault()}

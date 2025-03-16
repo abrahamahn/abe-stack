@@ -21,9 +21,14 @@
 	  // Base paths
 	  "baseUrl": ".",
 	  "typeRoots": ["./node_modules/@types", "./src/types"],
-	  "types": ["node"]
+	  "types": ["node", "express"],
+	  
+	  // Needed for project references
+	  "declaration": true,
+	  "declarationMap": true
 	},
-	"exclude": ["node_modules", "dist", "build"],
+	"include": ["src/**/*"],
+	"exclude": ["node_modules", "dist", "build", "src/client/**/*"],
 	"references": [
 	  { "path": "./tsconfig.server.json" },
 	  { "path": "./tsconfig.client.json" },

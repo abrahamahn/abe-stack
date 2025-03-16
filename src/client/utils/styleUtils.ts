@@ -4,7 +4,7 @@
  * @returns Merged style object
  */
 export const mergeStyles = (...styles: (React.CSSProperties | undefined)[]): React.CSSProperties => {
-  return Object.assign({}, ...styles.filter(Boolean));
+  return Object.assign({}, ...styles.filter(Boolean)) as React.CSSProperties;
 };
 
 /**

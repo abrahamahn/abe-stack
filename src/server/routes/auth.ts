@@ -1,9 +1,15 @@
-import Router from 'express';
+import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
-import { User } from '../models';
+
 import { NotFoundError, UnauthorizedError } from '../../shared/errors/ApiError';
+import { AuthController } from '../controllers/AuthController';
 import { authenticate, authorize } from '../middleware/auth';
+import { authenticateJWT } from '../middleware/authenticateJWT';
 import { customValidate } from '../middleware/customValidate';
+import { User, UserAttributes } from '../models/User';
+import { AuthService } from '../services/AuthService';
+import { AuthTokenService, TokenType } from '../services/AuthTokenService';
+import { Logger } from '../services/LoggerService';
 import { 
   registerSchema, 
   loginSchema, 
@@ -12,11 +18,6 @@ import {
   twoFactorVerifySchema,
   twoFactorEnableSchema
 } from '../validators/auth.validator';
-import { TokenService, TokenType } from '../services/TokenService';
-import { TwoFactorAuthService } from '../services/TwoFactorAuthService';
-import { Logger } from '../services/LoggerService';
-import { AuthController } from '../controllers/AuthController';
-import { authenticateJWT } from '../middleware/authenticateJWT';
 
 // Cookie settings
 const REFRESH_TOKEN_COOKIE_OPTIONS = {
@@ -27,47 +28,80 @@ const REFRESH_TOKEN_COOKIE_OPTIONS = {
   path: '/api/auth/refresh'
 } as const;
 
-const router = Router();
-const tokenService = TokenService.getInstance();
-const twoFactorAuthService = TwoFactorAuthService.getInstance();
+// Create router with proper typing
+const router: express.Router = express.Router();
+const tokenService = AuthTokenService.getInstance();
+const authService = AuthService.getInstance();
 const logger = new Logger('AuthRoutes');
 const authController = new AuthController();
 
+// Define a type for the authenticated request
+interface AuthenticatedRequest extends Request {
+  user: {
+    id: string;
+    [key: string]: unknown;
+  };
+  token?: string;
+}
+
 // Register
-router.post('/register', customValidate(registerSchema), (req, res, next) => {
-  console.log('Register route hit with body:', JSON.stringify(req.body, null, 2));
-  return authController.register(req, res, next);
+router.post('/register', customValidate(registerSchema), (req: Request, res: Response, next: NextFunction): void => {
+  void authController.register(req, res, next);
 });
 
 // Login
-router.post('/login', customValidate(loginSchema), authController.login);
+router.post('/login', customValidate(loginSchema), (req: Request, res: Response, next: NextFunction): void => {
+  void authController.login(req, res, next);
+});
 
 // Refresh token
-router.post('/refresh-token', authController.refreshToken);
+router.post('/refresh-token', (req: Request, res: Response, next: NextFunction): void => {
+  void authController.refreshToken(req, res, next);
+});
 
 // Get current user
-router.get('/me', authenticateJWT, authController.getCurrentUser);
+router.get('/me', authenticateJWT, (req: Request, res: Response, next: NextFunction): void => {
+  authController.getCurrentUser(req, res, next);
+});
 
 // Logout
-router.post('/logout', authenticateJWT, authController.logout);
+router.post('/logout', authenticateJWT, (req: Request, res: Response, next: NextFunction): void => {
+  authController.logout(req, res, next);
+});
 
 // Email verification
-router.get('/confirm-email', authController.confirmEmail);
-router.post('/resend-confirmation', authController.resendConfirmationEmail);
+router.get('/confirm-email', (req: Request, res: Response, next: NextFunction): void => {
+  void authController.confirmEmail(req, res, next);
+});
+
+router.post('/resend-confirmation', (req: Request, res: Response, next: NextFunction): void => {
+  void authController.resendConfirmationEmail(req, res, next);
+});
 
 // Update profile
 router.patch('/profile', authenticate, customValidate(updateProfileSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { displayName, bio, avatar } = req.body;
+    const authenticatedReq = req as AuthenticatedRequest;
+    const { displayName, bio, avatar } = req.body as { displayName?: string; bio?: string; avatar?: string };
     
-    const user = await User.findByPk(req.user!.id);
+    if (!authenticatedReq.user) {
+      throw new UnauthorizedError('User not authenticated');
+    }
+    
+    const user = await User.findByPk(authenticatedReq.user.id) as unknown as {
+      id: string;
+      update: (data: Record<string, unknown>) => Promise<unknown>;
+      toJSON: () => Record<string, unknown>;
+      comparePassword?: (password: string) => Promise<boolean>;
+      updatePassword?: (password: string) => Promise<void>;
+    };
     
     if (!user) {
       throw new NotFoundError('User not found');
     }
     
     // Update fields if provided
-    const updates: any = {};
+    const updates: Record<string, unknown> = {};
     if (displayName) updates.displayName = displayName;
     if (bio !== undefined) updates.bio = bio;
     if (avatar) updates.avatar = avatar;
@@ -87,9 +121,18 @@ router.patch('/profile', authenticate, customValidate(updateProfileSchema), asyn
 // Change password
 router.post('/change-password', authenticate, customValidate(changePasswordSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { currentPassword, newPassword } = req.body;
+    const authenticatedReq = req as AuthenticatedRequest;
+    const { currentPassword, newPassword } = req.body as { currentPassword: string; newPassword: string };
     
-    const user = await User.findByPk(req.user!.id);
+    if (!authenticatedReq.user) {
+      throw new UnauthorizedError('User not authenticated');
+    }
+    
+    const user = await User.findByPk(authenticatedReq.user.id) as unknown as {
+      id: string;
+      comparePassword: (password: string) => Promise<boolean>;
+      updatePassword: (password: string) => Promise<void>;
+    };
     
     if (!user) {
       throw new NotFoundError('User not found');
@@ -106,13 +149,17 @@ router.post('/change-password', authenticate, customValidate(changePasswordSchem
     
     // Revoke current token to force re-login with new password
     if (req.token) {
-      await tokenService.revokeToken(req.token, TokenType.ACCESS);
+      tokenService.blacklistToken(req.token, TokenType.ACCESS);
     }
     
     // Revoke refresh token
-    const refreshToken = req.cookies.refreshToken;
+    interface CookieObject {
+      refreshToken?: string;
+    }
+    const cookies = req.cookies as CookieObject;
+    const refreshToken = cookies.refreshToken;
     if (refreshToken) {
-      await tokenService.revokeToken(refreshToken, TokenType.REFRESH);
+      tokenService.blacklistToken(refreshToken, TokenType.REFRESH);
     }
     
     // Clear refresh token cookie
@@ -131,7 +178,9 @@ router.post('/change-password', authenticate, customValidate(changePasswordSchem
 // Admin-only route to get all users
 router.get('/users', authenticate, authorize('admin'), async (_req: Request, res: Response, next: NextFunction) => {
   try {
-    const users = await User.findAll();
+    const users = await User.findAll() as unknown as Array<{
+      toJSON: () => Record<string, unknown>;
+    }>;
     
     // Remove passwords from response
     const usersResponse = users.map(user => {
@@ -153,7 +202,11 @@ router.get('/users', authenticate, authorize('admin'), async (_req: Request, res
 // Generate 2FA secret
 router.post('/2fa/setup', authenticate, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { secret, qrCode } = await twoFactorAuthService.generateSecret(req.user!);
+    const authenticatedReq = req as AuthenticatedRequest;
+    if (!authenticatedReq.user) {
+      throw new Error('User not authenticated');
+    }
+    const { secret, qrCode } = await authService.generate2FASecret(authenticatedReq.user as unknown as UserAttributes);
     
     res.json({
       status: 'success',
@@ -171,9 +224,14 @@ router.post('/2fa/setup', authenticate, async (req: Request, res: Response, next
 // Verify and enable 2FA
 router.post('/2fa/enable', authenticate, customValidate(twoFactorEnableSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { token } = req.body;
+    const authenticatedReq = req as AuthenticatedRequest;
+    const { token } = req.body as { token: string };
     
-    const backupCodes = await twoFactorAuthService.enableTwoFactor(req.user!.id, token);
+    if (!authenticatedReq.user) {
+      throw new UnauthorizedError('User not authenticated');
+    }
+    
+    const backupCodes = await authService.enable2FA(authenticatedReq.user.id, token);
     
     res.json({
       status: 'success',
@@ -191,7 +249,12 @@ router.post('/2fa/enable', authenticate, customValidate(twoFactorEnableSchema), 
 // Disable 2FA
 router.post('/2fa/disable', authenticate, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    await twoFactorAuthService.disableTwoFactor(req.user!.id);
+    const authenticatedReq = req as AuthenticatedRequest;
+    if (!authenticatedReq.user) {
+      throw new UnauthorizedError('User not authenticated');
+    }
+    
+    await authService.disable2FA(authenticatedReq.user.id);
     
     res.json({
       status: 'success',
@@ -206,7 +269,12 @@ router.post('/2fa/disable', authenticate, async (req: Request, res: Response, ne
 // Regenerate backup codes
 router.post('/2fa/backup-codes', authenticate, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const backupCodes = await twoFactorAuthService.regenerateBackupCodes(req.user!.id);
+    const authenticatedReq = req as AuthenticatedRequest;
+    if (!authenticatedReq.user) {
+      throw new UnauthorizedError('User not authenticated');
+    }
+    
+    const backupCodes = await authService.regenerate2FABackupCodes(authenticatedReq.user.id);
     
     res.json({
       status: 'success',
@@ -223,7 +291,12 @@ router.post('/2fa/backup-codes', authenticate, async (req: Request, res: Respons
 // Get 2FA status
 router.get('/2fa/status', authenticate, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const status = await twoFactorAuthService.getTwoFactorStatus(req.user!.id);
+    const authenticatedReq = req as AuthenticatedRequest;
+    if (!authenticatedReq.user) {
+      throw new UnauthorizedError('User not authenticated');
+    }
+    
+    const status = await authService.getTwoFactorStatus(authenticatedReq.user.id);
     
     res.json({
       status: 'success',
@@ -238,23 +311,25 @@ router.get('/2fa/status', authenticate, async (req: Request, res: Response, next
 // Verify 2FA token during login
 router.post('/2fa/verify', customValidate(twoFactorVerifySchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { userId, token } = req.body;
+    const { userId, token } = req.body as { userId: string; token: string };
     
     // Verify token
-    const isValid = await twoFactorAuthService.verifyToken(userId, token);
+    const isValid = await authService.verify2FAToken(userId, token);
     
     if (!isValid) {
       throw new UnauthorizedError('Invalid verification code');
     }
     
     // Get user
-    const user = await User.findByPk(userId);
+    const user = await User.findByPk(userId) as unknown as { 
+      toJSON: () => Record<string, unknown>;
+    };
     if (!user) {
       throw new NotFoundError('User not found');
     }
     
     // Generate tokens
-    const { accessToken, refreshToken, expiresIn } = await tokenService.generateTokens(user);
+    const { accessToken, refreshToken, expiresIn } = tokenService.generateTokens(user as unknown as UserAttributes);
     
     // Set refresh token as HTTP-only cookie
     res.cookie('refreshToken', refreshToken, REFRESH_TOKEN_COOKIE_OPTIONS);
@@ -273,4 +348,5 @@ router.post('/2fa/verify', customValidate(twoFactorVerifySchema), async (req: Re
   }
 });
 
+// Export the router
 export { router as authRouter }; 

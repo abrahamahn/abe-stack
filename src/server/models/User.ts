@@ -1,11 +1,12 @@
 // src/server/models/User.ts
+import bcrypt from 'bcrypt';
 import { Pool } from 'pg';
+
 import { BaseModel, BaseRepository } from '../database/BaseRepository';
 import { DatabaseConnectionManager } from '../database/config';
-import bcrypt from 'bcrypt';
 
 // Mock in-memory storage for development without PostgreSQL
-const mockUsers: Map<string, any> = new Map();
+const mockUsers: Map<string, UserAttributes> = new Map();
 
 export interface UserAttributes extends BaseModel {
   username: string;
@@ -26,7 +27,7 @@ export interface UserAttributes extends BaseModel {
 }
 
 export interface UserJSON extends Omit<User, 'password' | 'update' | 'delete' | 'comparePassword' | 'updatePassword' | 'toJSON' | 'emailToken' | 'emailTokenExpire'> {
-  posts?: any[];
+  posts?: UserAttributes[];
   isFollowing?: boolean;
 }
 
@@ -63,12 +64,8 @@ export class UserRepository extends BaseRepository<UserAttributes> {
       WHERE email = $1
     `;
 
-    try {
-      const result = await (client || DatabaseConnectionManager.getPool()).query(query, [email]);
-      return result.rows[0] || null;
-    } catch (error) {
-      throw error;
-    }
+    const result = await (client || DatabaseConnectionManager.getPool()).query(query, [email]);
+    return (result.rows[0] || null) as UserAttributes | null;
   }
 
   /**
@@ -81,12 +78,8 @@ export class UserRepository extends BaseRepository<UserAttributes> {
       WHERE username = $1
     `;
 
-    try {
-      const result = await (client || DatabaseConnectionManager.getPool()).query(query, [username]);
-      return result.rows[0] || null;
-    } catch (error) {
-      throw error;
-    }
+    const result = await (client || DatabaseConnectionManager.getPool()).query(query, [username]);
+    return (result.rows[0] || null) as UserAttributes | null;
   }
 
   /**
@@ -104,7 +97,7 @@ export class UserRepository extends BaseRepository<UserAttributes> {
       profile_image: profileImage,
       banner_image: bannerImage,
       is_verified: isVerified
-    } as any, client);
+    } as Partial<UserAttributes>, client);
   }
 
   async countByRole(): Promise<Record<string, number>> {
@@ -116,10 +109,13 @@ export class UserRepository extends BaseRepository<UserAttributes> {
 
     try {
       const result = await DatabaseConnectionManager.getPool().query(query);
-      return result.rows.reduce((acc: { [key: string]: number }, row: { count: string; role: string }) => {
-        acc[row.role] = parseInt(row.count);
-        return acc;
-      }, {});
+      const roleCount: Record<string, number> = {};
+      
+      for (const row of result.rows as { role: string; count: string }[]) {
+        roleCount[row.role] = parseInt(row.count);
+      }
+      
+      return roleCount;
     } catch (error) {
       this.logger.error('Error in countByRole', { error });
       throw error;
@@ -129,7 +125,7 @@ export class UserRepository extends BaseRepository<UserAttributes> {
   /**
    * Find user with their posts
    */
-  async findWithPosts(id: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(UserAttributes & { posts: any[] }) | null> {
+  async findWithPosts(id: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(UserAttributes & { posts: UserAttributes[] }) | null> {
     const query = `
       SELECT 
         u.*,
@@ -167,10 +163,13 @@ export class UserRepository extends BaseRepository<UserAttributes> {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [id, limit, offset]);
       if (!result.rows[0]) return null;
 
+      const row = result.rows[0] as {
+        posts: UserAttributes[];
+      } & Omit<UserAttributes, 'posts'>;
       return {
-        ...result.rows[0],
-        posts: result.rows[0].posts || []
-      };
+        ...row,
+        posts: row.posts || []
+      } as (UserAttributes & { posts: UserAttributes[] }) | null;
     } catch (error) {
       console.error('Error in findWithPosts:', error);
       throw error;
@@ -180,7 +179,7 @@ export class UserRepository extends BaseRepository<UserAttributes> {
   /**
    * Find user with their followers
    */
-  async findWithFollowers(id: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(UserAttributes & { followers: any[] }) | null> {
+  async findWithFollowers(id: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(UserAttributes & { followers: UserAttributes[] }) | null> {
     const query = `
       SELECT 
         u.*,
@@ -218,10 +217,11 @@ export class UserRepository extends BaseRepository<UserAttributes> {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [id, limit, offset]);
       if (!result.rows[0]) return null;
 
+      const row = result.rows[0] as { followers: UserAttributes[] } & Omit<UserAttributes, 'followers'>;
       return {
-        ...result.rows[0],
-        followers: result.rows[0].followers || []
-      };
+        ...row,
+        followers: row.followers || []
+      } as (UserAttributes & { followers: UserAttributes[] });
     } catch (error) {
       console.error('Error in findWithFollowers:', error);
       throw error;
@@ -231,7 +231,7 @@ export class UserRepository extends BaseRepository<UserAttributes> {
   /**
    * Find user with their following
    */
-  async findWithFollowing(id: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(UserAttributes & { following: any[] }) | null> {
+  async findWithFollowing(id: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(UserAttributes & { following: UserAttributes[] }) | null> {
     const query = `
       SELECT 
         u.*,
@@ -269,10 +269,13 @@ export class UserRepository extends BaseRepository<UserAttributes> {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [id, limit, offset]);
       if (!result.rows[0]) return null;
 
+      const row = result.rows[0] as {
+        following: UserAttributes[];
+      } & Omit<UserAttributes, 'following'>;
       return {
-        ...result.rows[0],
-        following: result.rows[0].following || []
-      };
+        ...row,
+        following: row.following || []
+      } as (UserAttributes & { following: UserAttributes[] });
     } catch (error) {
       console.error('Error in findWithFollowing:', error);
       throw error;
@@ -289,7 +292,7 @@ export class UserRepository extends BaseRepository<UserAttributes> {
     followersOffset?: number;
     followingLimit?: number;
     followingOffset?: number;
-  } = {}, client?: Pool): Promise<(UserAttributes & { posts: any[], followers: any[], following: any[] }) | null> {
+  } = {}, client?: Pool): Promise<(UserAttributes & { posts: UserAttributes[], followers: UserAttributes[], following: UserAttributes[] }) | null> {
     const {
       postsLimit = 20,
       postsOffset = 0,
@@ -365,12 +368,13 @@ export class UserRepository extends BaseRepository<UserAttributes> {
       
       if (!result.rows[0]) return null;
 
+      const row = result.rows[0] as { posts: UserAttributes[], followers: UserAttributes[], following: UserAttributes[] } & Omit<UserAttributes, 'posts' | 'followers' | 'following'>;
       return {
-        ...result.rows[0],
-        posts: result.rows[0].posts || [],
-        followers: result.rows[0].followers || [],
-        following: result.rows[0].following || []
-      };
+        ...row,
+        posts: row.posts || [],
+        followers: row.followers || [],
+        following: row.following || []
+      } as (UserAttributes & { posts: UserAttributes[], followers: UserAttributes[], following: UserAttributes[] });
     } catch (error) {
       this.logger.error('Error in findComplete', { id, options, error });
       throw error;
@@ -382,7 +386,7 @@ export class UserRepository extends BaseRepository<UserAttributes> {
 export const userRepository = new UserRepository();
 
 // Mock implementation for development without PostgreSQL
-class User implements UserAttributes {
+export class User implements UserAttributes {
   id: string;
   username: string;
   email: string;
@@ -451,250 +455,53 @@ class User implements UserAttributes {
             last_email_sent
           ) VALUES (
             $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
-          ) RETURNING 
-            id, 
-            username, 
-            email, 
-            password, 
-            display_name as "displayName", 
-            first_name as "firstName", 
-            last_name as "lastName", 
-            bio, 
-            profile_image as "profileImage", 
-            banner_image as "bannerImage", 
-            role, 
-            is_verified as "isVerified", 
-            email_confirmed as "emailConfirmed", 
-            email_token as "emailToken", 
-            email_token_expire as "emailTokenExpire", 
-            last_email_sent as "lastEmailSent", 
-            created_at as "createdAt", 
-            updated_at as "updatedAt"
+          ) RETURNING *
         `;
         
-        const values = [
+        const result = await pool.query(query, [
           data.username,
           data.email,
           data.password,
           data.displayName,
           data.firstName,
           data.lastName,
-          data.bio || '',
-          data.profileImage || '',
-          data.bannerImage || '',
-          data.role || 'user',
-          data.isVerified || false,
-          data.emailConfirmed || false,
+          data.bio,
+          data.profileImage,
+          data.bannerImage,
+          data.role,
+          data.isVerified,
+          data.emailConfirmed,
           data.emailToken,
           data.emailTokenExpire,
           data.lastEmailSent
-        ];
+        ]);
         
-        const result = await pool.query(query, values);
-        
-        if (result.rows.length > 0) {
-          console.log('User created in PostgreSQL database:', result.rows[0].id);
-          return new User(result.rows[0]);
-        }
+        return new User(result.rows[0] as UserAttributes);
+      } else {
+        // Mock implementation
+        const user = new User(data);
+        mockUsers.set(user.id, user);
+        return user;
       }
-      
-      // Fall back to mock implementation if database insertion failed
-      console.warn('Falling back to mock user creation');
-      const user = new User(data);
-      mockUsers.set(user.id, user);
-      mockUsers.set(user.email, user); // Index by email for findByEmail
-      return user;
     } catch (error) {
-      console.error('Error creating user:', error);
-      // Mock implementation as fallback
-      const user = new User(data);
-      mockUsers.set(user.id, user);
-      mockUsers.set(user.email, user); // Index by email for findByEmail
-      return user;
+      console.error('Error in User.create', { error });
+      throw error;
     }
   }
 
+  // Static methods that use the repository
   static async findByEmail(email: string): Promise<User | null> {
-    try {
-      // Try to use real database first
-      if (DatabaseConnectionManager.isConnected()) {
-        const pool = DatabaseConnectionManager.getPool();
-        const query = `
-          SELECT 
-            id, 
-            username, 
-            email, 
-            password, 
-            display_name as "displayName", 
-            first_name as "firstName", 
-            last_name as "lastName", 
-            bio, 
-            profile_image as "profileImage", 
-            banner_image as "bannerImage", 
-            role, 
-            is_verified as "isVerified", 
-            email_confirmed as "emailConfirmed", 
-            email_token as "emailToken", 
-            email_token_expire as "emailTokenExpire", 
-            last_email_sent as "lastEmailSent", 
-            created_at as "createdAt", 
-            updated_at as "updatedAt"
-          FROM users 
-          WHERE email = $1
-        `;
-        
-        const result = await pool.query(query, [email]);
-        
-        if (result.rows.length > 0) {
-          return new User(result.rows[0]);
-        }
-      }
-      
-      // Mock implementation as fallback
-      const user = mockUsers.get(email);
-      return user || null;
-    } catch (error) {
-      console.error('Error finding user by email:', error);
-      // Mock implementation as fallback
-      const user = mockUsers.get(email);
-      return user || null;
-    }
-  }
-
-  static async findByUsername(username: string): Promise<User | null> {
-    try {
-      // Try to use real database first
-      if (DatabaseConnectionManager.isConnected()) {
-        const pool = DatabaseConnectionManager.getPool();
-        const query = `
-          SELECT 
-            id, 
-            username, 
-            email, 
-            password, 
-            display_name as "displayName", 
-            first_name as "firstName", 
-            last_name as "lastName", 
-            bio, 
-            profile_image as "profileImage", 
-            banner_image as "bannerImage", 
-            role, 
-            is_verified as "isVerified", 
-            email_confirmed as "emailConfirmed", 
-            email_token as "emailToken", 
-            email_token_expire as "emailTokenExpire", 
-            last_email_sent as "lastEmailSent", 
-            created_at as "createdAt", 
-            updated_at as "updatedAt"
-          FROM users 
-          WHERE username = $1
-        `;
-        
-        const result = await pool.query(query, [username]);
-        
-        if (result.rows.length > 0) {
-          return new User(result.rows[0]);
-        }
-      }
-      
-      // Mock implementation as fallback
-      // Search through all users to find by username
-      for (const user of mockUsers.values()) {
-        if (user.username === username) {
-          return user;
-        }
-      }
-      return null;
-    } catch (error) {
-      console.error('Error finding user by username:', error);
-      // Mock implementation as fallback
-      for (const user of mockUsers.values()) {
-        if (user.username === username) {
-          return user;
-        }
-      }
-      return null;
-    }
+    const user = await userRepository.findByEmail(email);
+    return user ? new User(user) : null;
   }
 
   static async findByPk(id: string): Promise<User | null> {
-    try {
-      // Try to use real database first
-      if (DatabaseConnectionManager.isConnected()) {
-        const pool = DatabaseConnectionManager.getPool();
-        const query = `
-          SELECT 
-            id, 
-            username, 
-            email, 
-            password, 
-            display_name as "displayName", 
-            first_name as "firstName", 
-            last_name as "lastName", 
-            bio, 
-            profile_image as "profileImage", 
-            banner_image as "bannerImage", 
-            role, 
-            is_verified as "isVerified", 
-            email_confirmed as "emailConfirmed", 
-            email_token as "emailToken", 
-            email_token_expire as "emailTokenExpire", 
-            last_email_sent as "lastEmailSent", 
-            created_at as "createdAt", 
-            updated_at as "updatedAt"
-          FROM users 
-          WHERE id = $1
-        `;
-        
-        const result = await pool.query(query, [id]);
-        
-        if (result.rows.length > 0) {
-          return new User(result.rows[0]);
-        }
-      }
-      
-      // Mock implementation as fallback
-      const user = mockUsers.get(id);
-      return user || null;
-    } catch (error) {
-      console.error('Error finding user by ID:', error);
-      // Mock implementation as fallback
-      const user = mockUsers.get(id);
-      return user || null;
-    }
+    const user = await userRepository.findById(id);
+    return user ? new User(user) : null;
   }
 
-  // Instance methods
-  async comparePassword(password: string): Promise<boolean> {
-    return bcrypt.compare(password, this.password);
-  }
-
-  async updatePassword(newPassword: string): Promise<void> {
-    this.password = await bcrypt.hash(newPassword, 10);
-    this.updatedAt = new Date();
-    mockUsers.set(this.id, this);
-    mockUsers.set(this.email, this);
-  }
-
-  async update(data: Partial<UserAttributes>): Promise<User> {
-    Object.assign(this, data);
-    this.updatedAt = new Date();
-    mockUsers.set(this.id, this);
-    mockUsers.set(this.email, this);
-    return this;
-  }
-
-  async delete(): Promise<void> {
-    mockUsers.delete(this.id);
-    mockUsers.delete(this.email);
-  }
-
-  toJSON(): UserJSON {
-    const { password, emailToken, emailTokenExpire, ...userJson } = this;
-    return userJson as unknown as UserJSON;
+  static async findAll(): Promise<User[]> {
+    const users = await userRepository.findAll();
+    return users.map(user => new User(user));
   }
 }
-
-// Export the User class both as default and named export
-export { User };
-export default User;

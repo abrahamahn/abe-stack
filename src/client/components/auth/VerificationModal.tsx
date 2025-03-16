@@ -1,5 +1,23 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+
 import { AuthClient } from '../../services/AuthClient';
+
+// Define response type
+interface VerificationResponse {
+  success: boolean;
+  message?: string;
+}
+
+// Define error response type
+interface ApiError {
+  response?: {
+    status: number;
+    data?: {
+      message?: string;
+    };
+  };
+  message: string;
+}
 
 interface VerificationModalProps {
   isOpen: boolean;
@@ -16,7 +34,7 @@ export function VerificationModal({ isOpen, onClose, email }: VerificationModalP
 
   if (!isOpen) return null;
 
-  const handleResendEmail = async () => {
+  const handleResendEmailAsync = async () => {
     if (isResending || countdown > 0) return;
 
     setIsResending(true);
@@ -24,9 +42,9 @@ export function VerificationModal({ isOpen, onClose, email }: VerificationModalP
     setMessage('');
 
     try {
-      const response = await authClient.resendConfirmationEmail(email);
+      const response = await authClient.resendConfirmationEmail(email) as VerificationResponse;
 
-      if (response.status === 'success') {
+      if (response.success) {
         setResendStatus('success');
         setMessage('Verification email sent! Please check your inbox.');
         
@@ -45,15 +63,16 @@ export function VerificationModal({ isOpen, onClose, email }: VerificationModalP
         setResendStatus('error');
         setMessage(response.message || 'Failed to send verification email. Please try again.');
       }
-    } catch (error: any) {
+    } catch (error) {
+      const err = error as ApiError;
       setResendStatus('error');
       
       // Handle rate limiting error
-      if (error.response?.status === 429) {
+      if (err.response?.status === 429) {
         setMessage('Please wait before requesting another email.');
         
         // Extract time from error message if available
-        const timeMatch = error.response?.data?.message?.match(/(\d+)/);
+        const timeMatch = err.response?.data?.message?.match(/(\d+)/);
         if (timeMatch && timeMatch[1]) {
           const seconds = parseInt(timeMatch[1], 10);
           setCountdown(seconds);
@@ -72,10 +91,15 @@ export function VerificationModal({ isOpen, onClose, email }: VerificationModalP
         setMessage('An error occurred. Please try again later.');
       }
       
-      console.error('Resend verification error:', error);
+      console.error('Resend verification error:', err);
     } finally {
       setIsResending(false);
     }
+  };
+  
+  // Wrapper function that returns void
+  const handleResendEmail = (): void => {
+    void handleResendEmailAsync();
   };
 
   return (
@@ -113,11 +137,11 @@ export function VerificationModal({ isOpen, onClose, email }: VerificationModalP
         
         <div style={{ marginBottom: '20px' }}>
           <p>
-            We've sent a verification email to <strong>{email}</strong>. 
+            We&apos;ve sent a verification email to <strong>{email}</strong>. 
             Please check your inbox and click the verification link to activate your account.
           </p>
           <p>
-            If you don't see the email, please check your spam folder.
+            If you don&apos;t see the email, please check your spam folder.
           </p>
         </div>
         

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { socialFeedStyles } from '../../styles';
-import { mergeStyles, conditionalStyle } from '../../utils/styleUtils';
+
 import { formatRelativeTime } from '../../helpers/formatters';
+import { socialFeedStyles } from '../../styles';
+import { mergeStyles } from '../../utils/styleUtils';
 import AudioPlayer from '../media/AudioPlayer';
-import VideoPlayer from '../media/VideoPlayer';
 import ImageGallery from '../media/ImageGallery';
+import VideoPlayer from '../media/VideoPlayer';
 
 // Types for different media content
 interface TrackData {

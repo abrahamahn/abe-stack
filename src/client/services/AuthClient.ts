@@ -1,5 +1,7 @@
-import { useClientEnvironment } from './ClientEnvironment';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+
+// Remove unused import
+// import { useClientEnvironment } from './ClientEnvironment';
 
 // User types
 export interface User {
@@ -12,6 +14,21 @@ export interface User {
   emailConfirmed: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+// API response types
+interface ApiResponse<T> {
+  status: 'success' | 'error';
+  message?: string;
+  data?: T;
+  requireEmailConfirmation?: boolean;
+}
+
+interface UserResponse {
+  user: User;
+  token?: string;
+  requireTwoFactor?: boolean;
+  userId?: string;
 }
 
 export class AuthClient {
@@ -67,7 +84,7 @@ export class AuthClient {
   }
 
   // Email verification methods
-  async confirmEmail(token: string) {
+  async confirmEmail(token: string): Promise<{ success: boolean }> {
     try {
       const response = await fetch(`${this.getApiUrl()}/auth/confirm-email?token=${token}`, {
         method: 'GET',
@@ -76,7 +93,7 @@ export class AuthClient {
         }
       });
       
-      return await response.json();
+      return await response.json() as Promise<{ success: boolean }>;
     } catch (error) {
       console.error('Error confirming email:', error);
       throw error;
@@ -93,7 +110,7 @@ export class AuthClient {
         body: JSON.stringify({ email })
       });
       
-      return await response.json();
+      return await response.json() as Promise<{ success: boolean }>;
     } catch (error) {
       console.error('Error resending confirmation email:', error);
       throw error;
@@ -106,13 +123,14 @@ export const authClientInstance = new AuthClient();
 
 // React hook for authentication
 export function useAuth() {
-  const environment = useClientEnvironment();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const authClient = new AuthClient();
+  
+  // Memoize the authClient instance
+  const authClient = useMemo(() => new AuthClient(), []);
 
-  const loadUser = async () => {
+  const loadUser = useCallback(async () => {
     if (!authClient.isAuthenticated()) {
       setUser(null);
       setLoading(false);
@@ -130,7 +148,7 @@ export function useAuth() {
         }
       });
       
-      const data = await response.json();
+      const data = await response.json() as ApiResponse<UserResponse>;
       
       if (data.status === 'success' && data.data?.user) {
         setUser(data.data.user);
@@ -148,7 +166,7 @@ export function useAuth() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [authClient]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -163,16 +181,20 @@ export function useAuth() {
         body: JSON.stringify({ email, password })
       });
       
-      const data = await response.json();
+      const data = await response.json() as ApiResponse<UserResponse>;
       
       if (data.status === 'success') {
-        if (data.data.requireTwoFactor) {
+        if (data.data?.requireTwoFactor) {
           // Return the 2FA requirement
           return { requireTwoFactor: true, userId: data.data.userId };
         }
         
-        authClient.setToken(data.data.token);
-        setUser(data.data.user);
+        if (data.data?.token) {
+          authClient.setToken(data.data.token);
+        }
+        if (data.data?.user) {
+          setUser(data.data.user);
+        }
         return { success: true };
       } else if (data.requireEmailConfirmation) {
         // Email not confirmed
@@ -180,14 +202,15 @@ export function useAuth() {
           success: false, 
           requireEmailConfirmation: true, 
           email, 
-          error: data.message 
+          error: data.message || 'Email confirmation required'
         };
       } else {
         throw new Error(data.message || 'Login failed');
       }
-    } catch (err: any) {
-      setError(err.message || 'Login failed');
-      return { success: false, error: err.message || 'Login failed' };
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Login failed';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
@@ -213,22 +236,27 @@ export function useAuth() {
         body: JSON.stringify(userData)
       });
       
-      const data = await response.json();
+      const data = await response.json() as ApiResponse<UserResponse>;
       
-      if (data.status === 'success') {
-        authClient.setToken(data.data.token);
-        setUser(data.data.user);
+      if (data.status === 'success' && data.data) {
+        if (data.data.token) {
+          authClient.setToken(data.data.token);
+        }
+        if (data.data.user) {
+          setUser(data.data.user);
+        }
         return { 
           success: true,
           requireEmailConfirmation: !data.data.user.emailConfirmed,
-          message: data.message
+          message: data.message || 'Registration successful'
         };
       } else {
         throw new Error(data.message || 'Registration failed');
       }
-    } catch (err: any) {
-      setError(err.message || 'Registration failed');
-      return { success: false, error: err.message || 'Registration failed' };
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Registration failed';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
@@ -241,8 +269,8 @@ export function useAuth() {
 
   // Load user on mount and when token changes
   useEffect(() => {
-    loadUser();
-  }, []);
+    void loadUser();
+  }, [loadUser]);
 
   return {
     user,

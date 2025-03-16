@@ -1,4 +1,5 @@
-import { Pool } from 'pg';
+import { Pool, QueryResult } from 'pg';
+
 import { BaseModel, BaseRepository } from '../database/BaseRepository';
 import { DatabaseConnectionManager } from '../database/config';
 
@@ -21,6 +22,22 @@ export interface CommentJSON extends Omit<Comment, 'moderatedAt' | 'createdAt' |
   isLiked?: boolean;
 }
 
+interface UserData {
+  id: string;
+  username: string;
+  displayName: string;
+  profileImage: string | null;
+}
+
+interface CommentLike {
+  id: string;
+  userId: string;
+  commentId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  user: UserData;
+}
+
 export class CommentRepository extends BaseRepository<CommentAttributes> {
   protected tableName = 'comments';
   protected columns = [
@@ -38,8 +55,8 @@ export class CommentRepository extends BaseRepository<CommentAttributes> {
     'updated_at as updatedAt'
   ];
 
-  protected async query(sql: string, params: any[] = []): Promise<any> {
-    return (await DatabaseConnectionManager.getPool()).query(sql, params);
+  protected async query(sql: string, params: unknown[] = []): Promise<QueryResult> {
+    return DatabaseConnectionManager.getPool().query(sql, params);
   }
 
   /**
@@ -74,7 +91,7 @@ export class CommentRepository extends BaseRepository<CommentAttributes> {
 
     try {
       const result = await this.query(query, params);
-      return result.rows;
+      return result.rows as CommentAttributes[];
     } catch (error) {
       this.logger.error('Error in findByPostId', { options, error });
       throw error;
@@ -94,7 +111,7 @@ export class CommentRepository extends BaseRepository<CommentAttributes> {
 
     try {
       const result = await this.query(query, [parentId]);
-      return result.rows;
+      return result.rows as CommentAttributes[];
     } catch (error) {
       this.logger.error('Error in findReplies', { parentId, error });
       throw error;
@@ -140,7 +157,7 @@ export class CommentRepository extends BaseRepository<CommentAttributes> {
   /**
    * Find comment with user data
    */
-  async findWithUser(id: string): Promise<(CommentAttributes & { user: any }) | null> {
+  async findWithUser(id: string): Promise<(CommentAttributes & { user: UserData }) | null> {
     const query = `
       SELECT 
         c.*,
@@ -162,7 +179,23 @@ export class CommentRepository extends BaseRepository<CommentAttributes> {
       const result = await this.query(query, [id]);
       if (!result.rows[0]) return null;
 
-      const row = result.rows[0];
+      const row = result.rows[0] as {
+        id: string;
+        user_id: string;
+        post_id: string;
+        parent_id: string | null;
+        content: string;
+        likes_count: number;
+        status: string;
+        moderation_reason: string | null;
+        moderated_by: string | null;
+        moderated_at: Date | null;
+        created_at: Date;
+        updated_at: Date;
+        username: string;
+        display_name: string;
+        profile_image: string | null;
+      };
       return {
         id: row.id,
         userId: row.user_id,
@@ -176,7 +209,12 @@ export class CommentRepository extends BaseRepository<CommentAttributes> {
         moderatedAt: row.moderated_at,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
-        user: row.user
+        user: {
+          id: row.user_id,
+          username: row.username,
+          displayName: row.display_name,
+          profileImage: row.profile_image
+        }
       };
     } catch (error) {
       console.error('Error in findWithUser:', error);
@@ -187,7 +225,7 @@ export class CommentRepository extends BaseRepository<CommentAttributes> {
   /**
    * Find comment with likes
    */
-  async findWithLikes(id: string, limit: number = 20, offset: number = 0): Promise<(CommentAttributes & { likes: any[] }) | null> {
+  async findWithLikes(id: string, limit: number = 20, offset: number = 0): Promise<(CommentAttributes & { likes: CommentLike[] }) | null> {
     const query = `
       SELECT 
         c.*,
@@ -225,18 +263,33 @@ export class CommentRepository extends BaseRepository<CommentAttributes> {
       const result = await this.query(query, [id, limit, offset]);
       if (!result.rows[0]) return null;
 
+      const row = result.rows[0] as {
+        id: string;
+        user_id: string;
+        post_id: string;
+        parent_id: string | null;
+        content: string;
+        likes_count: number;
+        status: string;
+        moderation_reason: string | null;
+        moderated_by: string | null;
+        moderated_at: Date | null;
+        created_at: Date;
+        updated_at: Date;
+        likes: CommentLike[];
+      };
       return {
-        ...result.rows[0],
-        userId: result.rows[0].user_id,
-        postId: result.rows[0].post_id,
-        parentId: result.rows[0].parent_id,
-        likesCount: result.rows[0].likes_count,
-        moderationReason: result.rows[0].moderation_reason,
-        moderatedBy: result.rows[0].moderated_by,
-        moderatedAt: result.rows[0].moderated_at,
-        createdAt: result.rows[0].created_at,
-        updatedAt: result.rows[0].updated_at,
-        likes: result.rows[0].likes || []
+        ...row,
+        userId: row.user_id,
+        postId: row.post_id,
+        parentId: row.parent_id,
+        likesCount: row.likes_count,
+        moderationReason: row.moderation_reason,
+        moderatedBy: row.moderated_by,
+        moderatedAt: row.moderated_at,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        likes: row.likes || []
       };
     } catch (error) {
       console.error('Error in findWithLikes:', error);
@@ -250,7 +303,7 @@ export class CommentRepository extends BaseRepository<CommentAttributes> {
   async findComplete(id: string, options: {
     likesLimit?: number;
     likesOffset?: number;
-  } = {}, client?: Pool): Promise<(CommentAttributes & { user: any, likes: any[] }) | null> {
+  } = {}, client?: Pool): Promise<(CommentAttributes & { user: UserData, likes: CommentLike[] }) | null> {
     const {
       likesLimit = 20,
       likesOffset = 0
@@ -299,7 +352,20 @@ export class CommentRepository extends BaseRepository<CommentAttributes> {
       
       if (!result.rows[0]) return null;
 
-      const row = result.rows[0];
+      const row = result.rows[0] as {
+        id: string;
+        user_id: string;
+        post_id: string;
+        content: string;
+        likes_count: number;
+        created_at: Date;
+        updated_at: Date;
+        'user.id': string;
+        'user.username': string;
+        'user.displayName': string;
+        'user.profileImage': string | null;
+        likes: CommentLike[];
+      };
       return {
         id: row.id,
         userId: row.user_id,
@@ -315,7 +381,7 @@ export class CommentRepository extends BaseRepository<CommentAttributes> {
           profileImage: row['user.profileImage']
         },
         likes: row.likes || []
-      } as any;
+      } as CommentAttributes & { user: UserData; likes: CommentLike[] };
     } catch (error) {
       this.logger.error('Error in findComplete', { id, options, error });
       throw error;
@@ -325,7 +391,7 @@ export class CommentRepository extends BaseRepository<CommentAttributes> {
   /**
    * Find comments by post ID with user data
    */
-  async findByPostIdWithUser(postId: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(CommentAttributes & { user: any })[]> {
+  async findByPostIdWithUser(postId: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(CommentAttributes & { user: UserData })[]> {
     const query = `
       SELECT 
         c.*,
@@ -342,7 +408,12 @@ export class CommentRepository extends BaseRepository<CommentAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [postId, limit, offset]);
-      return result.rows.map(row => ({
+      return result.rows.map((row: {
+        'user.id': string;
+        'user.username': string;
+        'user.displayName': string;
+        'user.profileImage': string | null;
+      } & CommentAttributes) => ({
         ...row,
         user: {
           id: row['user.id'],
@@ -350,7 +421,7 @@ export class CommentRepository extends BaseRepository<CommentAttributes> {
           displayName: row['user.displayName'],
           profileImage: row['user.profileImage']
         }
-      }));
+      })) as (CommentAttributes & { user: UserData })[];
     } catch (error) {
       this.logger.error('Error in findByPostIdWithUser', { postId, limit, offset, error });
       throw error;
@@ -424,7 +495,7 @@ export class Comment implements CommentAttributes {
       moderation_reason: moderationReason,
       moderated_by: moderatedBy,
       moderated_at: moderatedAt
-    } as any);
+    } as Partial<CommentAttributes>);
     return new Comment(comment);
   }
 
@@ -443,7 +514,7 @@ export class Comment implements CommentAttributes {
       ...(moderatedBy !== undefined && { moderated_by: moderatedBy }),
       ...(moderatedAt !== undefined && { moderated_at: moderatedAt })
     };
-    const updated = await commentRepository.update(this.id, updateData as any);
+    const updated = await commentRepository.update(this.id, updateData as Partial<CommentAttributes>);
     Object.assign(this, updated);
     return this;
   }

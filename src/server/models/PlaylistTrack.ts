@@ -1,9 +1,11 @@
 import { Pool } from 'pg';
+
 import { BaseModel, BaseRepository } from '../database/BaseRepository';
 import { DatabaseConnectionManager } from '../database/config';
-import { User } from './User';
-import { Track } from './Track';
+
 import { Playlist } from './Playlist';
+import { Track } from './Track';
+import { userRepository, UserAttributes } from './User';
 
 export interface PlaylistTrackAttributes extends BaseModel {
   playlistId: string;
@@ -37,7 +39,7 @@ export class PlaylistTrackRepository extends BaseRepository<PlaylistTrackAttribu
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [playlistId]);
-      return result.rows;
+      return result.rows as PlaylistTrackAttributes[];
     } catch (error) {
       this.logger.error('Error in findByPlaylistId', { playlistId, error });
       throw error;
@@ -57,7 +59,7 @@ export class PlaylistTrackRepository extends BaseRepository<PlaylistTrackAttribu
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [trackId]);
-      return result.rows;
+      return result.rows as PlaylistTrackAttributes[];
     } catch (error) {
       this.logger.error('Error in findByTrackId', { trackId, error });
       throw error;
@@ -76,7 +78,8 @@ export class PlaylistTrackRepository extends BaseRepository<PlaylistTrackAttribu
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [playlistId]);
-      return result.rows[0].next_position;
+      const row = result.rows[0] as { next_position: number };
+      return row.next_position;
     } catch (error) {
       this.logger.error('Error in getNextOrderPosition', { playlistId, error });
       throw error;
@@ -100,7 +103,8 @@ export class PlaylistTrackRepository extends BaseRepository<PlaylistTrackAttribu
         WHERE playlist_id = $1 AND track_id = $2
       `;
       const currentResult = await transaction.query(currentQuery, [playlistId, trackId]);
-      const currentPosition = currentResult.rows[0]?.order_position;
+      const row = currentResult.rows[0] as { order_position: number } | undefined;
+      const currentPosition = row?.order_position;
 
       if (currentPosition === undefined) {
         throw new Error('Track not found in playlist');
@@ -191,7 +195,7 @@ export class PlaylistTrack implements PlaylistTrackAttributes {
       track_id: trackId,
       order_position: nextPosition,
       added_by: addedBy
-    } as any);
+    } as Partial<PlaylistTrackAttributes>);
     return new PlaylistTrack(playlistTrack);
   }
 
@@ -205,7 +209,7 @@ export class PlaylistTrack implements PlaylistTrackAttributes {
       ...(orderPosition !== undefined && { order_position: orderPosition }),
       ...(addedBy !== undefined && { added_by: addedBy })
     };
-    const updated = await playlistTrackRepository.update(this.id, updateData as any);
+    const updated = await playlistTrackRepository.update(this.id, updateData as Partial<PlaylistTrackAttributes>);
     Object.assign(this, updated);
     return this;
   }
@@ -227,8 +231,8 @@ export class PlaylistTrack implements PlaylistTrackAttributes {
     return Track.findByPk(this.trackId);
   }
 
-  async getAddedByUser(): Promise<User | null> {
-    return User.findByPk(this.addedBy);
+  async getAddedByUser(): Promise<UserAttributes | null> {
+    return await userRepository.findById(this.addedBy);
   }
 
   toJSON() {

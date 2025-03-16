@@ -1,12 +1,14 @@
-import Router from 'express';
-import type { Request, Response, NextFunction } from 'express';
-import { Post, Comment } from '../models';
-import { postRepository } from '../models/Post';
-import { commentRepository } from '../models/Comment';
+import express from 'express';
+import type { Request, Response, NextFunction, RequestHandler } from 'express';
+import { z } from 'zod';
+
 import { authenticate, authorize } from '../middleware/auth';
 import { NotFoundError } from '../middleware/error';
 import { validate } from '../middleware/validate';
-import { z } from 'zod';
+import { Post, Comment } from '../models';
+import { commentRepository } from '../models/Comment';
+import { postRepository } from '../models/Post';
+
 
 // Validation schemas
 const postIdParamSchema = z.object({
@@ -24,7 +26,7 @@ const contentStatusSchema = z.object({
   reason: z.string().min(1, 'Reason is required').max(500, 'Reason cannot exceed 500 characters')
 });
 
-const router = Router();
+const router: express.Router = express.Router();
 
 // All routes require authentication and moderator or admin role
 router.use(authenticate, authorize('moderator', 'admin'));
@@ -57,12 +59,12 @@ router.get('/reports', async (_req: Request, res: Response, next: NextFunction) 
 // Update post status (hide/show/flag)
 router.patch(
   '/posts/:postId/status',
-  validate(postIdParamSchema, 'params'),
-  validate(contentStatusSchema),
+  validate(postIdParamSchema, 'params') as RequestHandler,
+  validate(contentStatusSchema) as RequestHandler,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { postId } = req.params;
-      const { status, reason } = req.body;
+      const { postId  } = req.params as { postId: string };
+      const { status, reason  } = req.body as { status: string, reason: string };
       
       const post = await Post.findByPk(postId);
       if (!post) {
@@ -73,7 +75,7 @@ router.patch(
       const updatedPost = await postRepository.update(postId, {
         status,
         moderationReason: reason,
-        moderatedBy: req.user!.id,
+        moderatedBy: (req.user as { id: string })?.id,
         moderatedAt: new Date()
       });
       
@@ -90,12 +92,12 @@ router.patch(
 // Update comment status (hide/show/flag)
 router.patch(
   '/comments/:commentId/status',
-  validate(commentIdParamSchema, 'params'),
-  validate(contentStatusSchema),
+  validate(commentIdParamSchema, 'params') as RequestHandler,
+  validate(contentStatusSchema) as RequestHandler,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { commentId } = req.params;
-      const { status, reason } = req.body;
+      const { commentId  } = req.params as { commentId: string };
+      const { status, reason  } = req.body as { status: string, reason: string };
       
       const comment = await Comment.findByPk(commentId);
       if (!comment) {
@@ -106,7 +108,7 @@ router.patch(
       const updatedComment = await commentRepository.update(commentId, {
         status,
         moderationReason: reason,
-        moderatedBy: req.user!.id,
+        moderatedBy: (req.user as { id: string })?.id,
         moderatedAt: new Date()
       });
       

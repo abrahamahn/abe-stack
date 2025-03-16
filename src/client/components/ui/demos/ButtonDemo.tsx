@@ -1,5 +1,4 @@
-import React from "react"
-import Button, { NakedButton, PrimaryButton } from "../Button"
+import { Button } from "../Button"
 
 export function ButtonDemo() {
 	return (
@@ -8,10 +7,10 @@ export function ButtonDemo() {
 				<Button>Default Button</Button>
 			</div>
 			<div style={{ marginBottom: 8 }}>
-				<PrimaryButton>Primary Button</PrimaryButton>
+				<Button variant="primary">Primary Button</Button>
 			</div>
 			<div style={{ marginBottom: 8 }}>
-				<NakedButton>Naked Button</NakedButton>
+				<Button variant="text">Naked Button</Button>
 			</div>
 		</div>
 	)

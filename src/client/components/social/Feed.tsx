@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+
 import { MediaPlayer } from '../media/mediaPlayer';
 
 interface Post {
@@ -17,6 +18,12 @@ interface Post {
   sharesCount: number;
   isLiked: boolean;
   createdAt: string;
+}
+
+// Add API response type definitions
+interface FeedResponse {
+  posts: Post[];
+  hasMore: boolean;
 }
 
 interface FeedProps {
@@ -39,15 +46,51 @@ export const Feed: React.FC<FeedProps> = ({
   const observer = useRef<IntersectionObserver | null>(null);
   const lastPostRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    fetchPosts();
+  const fetchPosts = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      // TODO: Replace with actual API call
+      const response = await fetch(`/api/feed?type=${type}${userId ? `&userId=${userId}` : ''}`);
+      if (!response.ok) throw new Error('Failed to fetch posts');
+      const data = await response.json() as FeedResponse;
+      setPosts(data.posts);
+      setHasMore(data.hasMore);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load posts');
+    } finally {
+      setIsLoading(false);
+    }
   }, [type, userId]);
+
+  const loadMore = useCallback(async () => {
+    if (!hasMore || isLoading) return;
+    
+    try {
+      setIsLoading(true);
+      await onLoadMore?.();
+      // TODO: Replace with actual API call
+      const response = await fetch(`/api/feed?type=${type}${userId ? `&userId=${userId}` : ''}&offset=${posts.length}`);
+      if (!response.ok) throw new Error('Failed to fetch more posts');
+      const data = await response.json() as FeedResponse;
+      setPosts(prev => [...prev, ...data.posts]);
+      setHasMore(data.hasMore);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load more posts');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [hasMore, isLoading, onLoadMore, posts.length, type, userId]);
+
+  useEffect(() => {
+    void fetchPosts();
+  }, [fetchPosts, type, userId]);
 
   useEffect(() => {
     observer.current = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !isLoading) {
-          loadMore();
+          void loadMore();
         }
       },
       { threshold: 0.5 }
@@ -62,43 +105,7 @@ export const Feed: React.FC<FeedProps> = ({
         observer.current.disconnect();
       }
     };
-  }, [hasMore, isLoading]);
-
-  const fetchPosts = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      // TODO: Replace with actual API call
-      const response = await fetch(`/api/feed?type=${type}${userId ? `&userId=${userId}` : ''}`);
-      if (!response.ok) throw new Error('Failed to fetch posts');
-      const data = await response.json();
-      setPosts(data.posts);
-      setHasMore(data.hasMore);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load posts');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loadMore = async () => {
-    if (!hasMore || isLoading) return;
-    
-    try {
-      setIsLoading(true);
-      await onLoadMore?.();
-      // TODO: Replace with actual API call
-      const response = await fetch(`/api/feed?type=${type}${userId ? `&userId=${userId}` : ''}&offset=${posts.length}`);
-      if (!response.ok) throw new Error('Failed to fetch more posts');
-      const data = await response.json();
-      setPosts(prev => [...prev, ...data.posts]);
-      setHasMore(data.hasMore);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load more posts');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [loadMore, hasMore, isLoading]);
 
   const handleLike = async (postId: string) => {
     try {
@@ -268,7 +275,7 @@ export const Feed: React.FC<FeedProps> = ({
                 ...styles.actionButton,
                 ...(post.isLiked && styles.actionButtonLiked),
               }}
-              onClick={() => handleLike(post.id)}
+              onClick={() => void handleLike(post.id)}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >

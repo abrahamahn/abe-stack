@@ -1,5 +1,3 @@
-import React from "react"
-
 export function TokenInputDemo() {
 	return <div>Work in progress</div>
 }

@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+
 import { socialService } from '../services/social';
 
-interface User {
+export interface User {
   id: string;
   username: string;
   displayName: string;
@@ -65,26 +66,7 @@ export const SocialProvider: React.FC<SocialProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    initializeSocial();
-  }, []);
-
-  const initializeSocial = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      // TODO: Replace with actual API call to get current user
-      const user = await socialService.getUserProfile('current');
-      setCurrentUser(user);
-      await refreshFeed();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to initialize social');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const refreshFeed = async () => {
+  const refreshFeed = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -95,7 +77,26 @@ export const SocialProvider: React.FC<SocialProviderProps> = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+  
+  const initializeSocial = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const user = await socialService.getUserProfile('current');
+      setCurrentUser(user);
+      await refreshFeed();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to initialize social');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [refreshFeed]);
+  
+  useEffect(() => {
+    void initializeSocial();
+  }, [initializeSocial]);
+
 
   const followUser = async (userId: string) => {
     try {

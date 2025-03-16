@@ -1,4 +1,3 @@
-import React from "react"
 import { FuzzyMatch } from "../../../shared/fuzzyMatch"
 
 interface FuzzyStringProps {

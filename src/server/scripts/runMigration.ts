@@ -13,4 +13,7 @@ async function runMigrations() {
   }
 }
 
-runMigrations();
+runMigrations().catch(error => {
+  console.error('Migration failed:', error);
+  process.exit(1);
+});

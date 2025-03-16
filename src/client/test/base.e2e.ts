@@ -6,14 +6,14 @@ async function waitFor(page: Page, selector: string) {
 	return element
 }
 
-async function write(page: Page, selector: string, value: string) {
+export async function write(page: Page, selector: string, value: string) {
 	const input = await waitFor(page, selector)
 	await input.fill(value)
 	await input.focus()
 	return input
 }
 
-async function click(page: Page, selector: string) {
+export async function click(page: Page, selector: string) {
 	const button = await waitFor(page, selector)
 	await button.click()
 	return button

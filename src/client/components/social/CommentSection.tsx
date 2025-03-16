@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { socialService } from '../../services/social';
+import React, { useState, useEffect, useCallback } from 'react';
+
 import { formatDate } from '../../../shared/dateHelpers';
+import { socialService } from '../../services/social';
 
 interface Comment {
   id: string;
@@ -26,11 +27,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ postId, onClose 
   const [hasMore, setHasMore] = useState(false);
   const [offset, setOffset] = useState(0);
 
-  useEffect(() => {
-    fetchComments();
-  }, [postId]);
-
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await socialService.getComments(postId, offset);
@@ -45,11 +42,15 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ postId, onClose 
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [postId, offset]);
+
+  useEffect(() => {
+    void fetchComments();
+  }, [fetchComments]);
 
   const handleLoadMore = () => {
     setOffset(prev => prev + 10);
-    fetchComments();
+    void fetchComments();
   };
 
   const handleSubmitComment = async (e: React.FormEvent) => {
@@ -90,6 +91,15 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ postId, onClose 
     } catch (error) {
       console.error('Error toggling comment like:', error);
     }
+  };
+
+  // Create void-returning wrapper functions for event handlers
+  const handleLikeCommentWrapper = (commentId: string, isLiked: boolean) => {
+    void handleLikeComment(commentId, isLiked);
+  };
+
+  const handleSubmitCommentWrapper = (e: React.FormEvent) => {
+    void handleSubmitComment(e);
   };
 
   return (
@@ -173,7 +183,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ postId, onClose 
                 
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   <button 
-                    onClick={() => handleLikeComment(comment.id, comment.isLiked)}
+                    onClick={() => handleLikeCommentWrapper(comment.id, comment.isLiked)}
                     style={{ 
                       background: 'none',
                       border: 'none',
@@ -218,7 +228,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ postId, onClose 
       </div>
 
       <form 
-        onSubmit={handleSubmitComment}
+        onSubmit={handleSubmitCommentWrapper}
         style={{ 
           padding: '16px',
           borderTop: '1px solid #e0e0e0',

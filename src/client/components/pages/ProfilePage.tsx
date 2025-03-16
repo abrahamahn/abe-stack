@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useClientEnvironment } from '../../services/ClientEnvironment';
-import { PageContent } from '../layouts/PageContent';
-import { PostCard } from '../social/PostCard';
-import { CommentSection } from '../social/CommentSection';
+
 import { socialService } from '../../services/social';
+import { PageContent } from '../layouts/PageContent';
+import { CommentSection } from '../social/CommentSection';
+import { PostCard } from '../social/PostCard';
 
 interface User {
   id: string;
@@ -35,108 +35,7 @@ interface Post {
   createdAt: string;
 }
 
-// Profile page styles
-const styles = {
-  container: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '30px',
-    marginTop: '20px'
-  },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '20px'
-  },
-  avatar: {
-    width: '120px',
-    height: '120px',
-    borderRadius: '50%',
-    backgroundColor: 'var(--blue)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: 'white',
-    fontSize: '36px',
-    fontWeight: 'bold'
-  },
-  name: {
-    margin: '0 0 5px 0',
-    color: 'var(--text-primary)'
-  },
-  username: {
-    color: 'var(--text-secondary)'
-  },
-  stats: {
-    marginTop: '10px',
-    display: 'flex',
-    gap: '15px',
-    color: 'var(--text-primary)'
-  },
-  editButton: {
-    marginLeft: 'auto',
-    padding: '8px 16px',
-    backgroundColor: 'var(--blue)',
-    color: 'white',
-    border: 'none',
-    borderRadius: '4px',
-    cursor: 'pointer'
-  },
-  card: {
-    backgroundColor: 'var(--card-bg)',
-    borderRadius: '8px',
-    padding: '20px',
-    boxShadow: 'var(--shadow)',
-    border: '1px solid var(--border-color)'
-  },
-  sectionTitle: {
-    margin: '0 0 15px 0',
-    color: 'var(--text-primary)'
-  },
-  bio: {
-    margin: '0',
-    lineHeight: '1.6',
-    color: 'var(--text-primary)'
-  },
-  detailsGrid: {
-    display: 'grid',
-    gridTemplateColumns: '120px 1fr',
-    rowGap: '15px',
-    color: 'var(--text-primary)'
-  },
-  detailLabel: {
-    fontWeight: 'bold'
-  },
-  activityItem: {
-    padding: '15px',
-    backgroundColor: 'var(--surface)',
-    borderRadius: '8px'
-  },
-  activityHeader: {
-    display: 'flex',
-    justifyContent: 'space-between'
-  },
-  activityTitle: {
-    fontWeight: 'bold',
-    color: 'var(--text-primary)'
-  },
-  activityTime: {
-    color: 'var(--text-secondary)',
-    fontSize: '14px'
-  },
-  activityContent: {
-    margin: '10px 0 0 0',
-    color: 'var(--text-primary)'
-  },
-  flexColumn: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '15px'
-  }
-};
-
 export function ProfilePage() {
-  const environment = useClientEnvironment();
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -152,12 +51,8 @@ export function ProfilePage() {
     ? currentUrl.substring('/profile/'.length) 
     : 'current'; // Default to 'current' if no userId in URL
   
-  useEffect(() => {
-    fetchUserProfile();
-    fetchUserPosts();
-  }, [userId]);
-  
-  const fetchUserProfile = async () => {
+  // Define fetch functions with useCallback to avoid dependency issues
+  const fetchUserProfile = React.useCallback(async () => {
     setIsLoading(true);
     try {
       const userData = await socialService.getUserProfile(userId);
@@ -169,16 +64,21 @@ export function ProfilePage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userId]);
   
-  const fetchUserPosts = async () => {
+  const fetchUserPosts = React.useCallback(async () => {
     try {
       const response = await socialService.getFeed('profile', userId);
       setPosts(response.posts);
     } catch (error) {
       console.error('Error fetching user posts:', error);
     }
-  };
+  }, [userId]);
+  
+  useEffect(() => {
+    void fetchUserProfile();
+    void fetchUserPosts();
+  }, [fetchUserProfile, fetchUserPosts]);
   
   const handleFollowToggle = async () => {
     if (!user) return;
@@ -202,8 +102,13 @@ export function ProfilePage() {
     setActiveCommentPostId(postId);
   };
   
+  // Void-returning wrapper for handleFollowToggle
+  const handleFollowToggleWrapper = () => {
+    void handleFollowToggle();
+  };
+  
   const handleRefresh = () => {
-    fetchUserPosts();
+    void fetchUserPosts();
   };
   
   const filteredPosts = activeTab === 'posts' 
@@ -267,7 +172,7 @@ export function ProfilePage() {
             </div>
             <div>
               <button 
-                onClick={handleFollowToggle}
+                onClick={handleFollowToggleWrapper}
                 style={{ 
                   padding: '10px 20px',
                   backgroundColor: isFollowing ? 'white' : 'var(--accent)',

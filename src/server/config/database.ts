@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+
 import { envConfig } from './environment';
 
 export const db = new Pool({

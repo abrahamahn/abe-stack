@@ -1,5 +1,6 @@
 import React, { useState } from "react"
-import Button from "../Button"
+
+import { Button } from "../Button"
 import { DropdownMenu } from "../DropdownMenu"
 
 export function DropdownDemo() {

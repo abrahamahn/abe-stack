@@ -21,7 +21,7 @@ declare module 'hls.js' {
     constructor(config?: HlsConfig);
     loadSource(source: string): void;
     attachMedia(media: HTMLMediaElement): void;
-    on(event: string, callback: (...args: any[]) => void): void;
+    on(event: string, callback: (...args: unknown[]) => void): void;
     destroy(): void;
     startLoad(): void;
     recoverMediaError(): void;

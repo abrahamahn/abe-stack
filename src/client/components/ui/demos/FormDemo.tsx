@@ -1,6 +1,7 @@
 import React, { useState } from "react"
+
 import { ComboBox } from "../ComboBox"
-import Input from "../Input"
+import { Input } from "../Input"
 
 const colors = [
 	"Red",

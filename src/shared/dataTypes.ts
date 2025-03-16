@@ -29,7 +29,7 @@ export const boolean = (): Validator<boolean> =>
 	createValidator<boolean>((value) => typeof value === 'boolean', 'boolean');
 
 // Complex type validators
-export function object<T extends Record<string, Validator<any>>>(schema: T): Validator<{
+export function object<T extends Record<string, Validator<unknown>>>(schema: T): Validator<{
 	[K in keyof T]: T[K] extends Validator<infer U> ? U : never;
 }> {
 	return {
@@ -38,17 +38,17 @@ export function object<T extends Record<string, Validator<any>>>(schema: T): Val
 				throw new Error(`Invalid object: ${String(value)}`);
 			}
 
-			const result: any = {};
+			const result: Record<string, unknown> = {};
 			for (const key in schema) {
 				if (Object.prototype.hasOwnProperty.call(schema, key)) {
 					try {
-						result[key] = schema[key].validate((value as any)[key]);
+						result[key] = schema[key].validate((value as Record<string, unknown>)[key]);
 					} catch (error) {
 						throw new Error(`Invalid property ${key}: ${(error as Error).message}`);
 					}
 				}
 			}
-			return result;
+			return result as { [K in keyof T]: T[K] extends Validator<infer U> ? U : never };
 		}
 	};
 }
@@ -95,7 +95,7 @@ export function nullable<T>(validator: Validator<T>): Validator<T | null> {
 }
 
 // Union type validator
-export function union<T extends any[]>(...validators: { [K in keyof T]: Validator<T[K]> }): Validator<T[number]> {
+export function union<T extends unknown[]>(...validators: { [K in keyof T]: Validator<T[K]> }): Validator<T[number]> {
 	return {
 		validate(value: unknown): T[number] {
 			for (const validator of validators) {
@@ -132,7 +132,7 @@ export function record<K extends string, V>(
 			for (const key in value) {
 				if (Object.prototype.hasOwnProperty.call(value, key)) {
 					try {
-						result[key] = valueValidator.validate((value as any)[key]);
+						result[key] = valueValidator.validate((value as Record<string, unknown>)[key]);
 					} catch (error) {
 						throw new Error(`Invalid value for key ${key}: ${(error as Error).message}`);
 					}
@@ -144,7 +144,7 @@ export function record<K extends string, V>(
 }
 
 // Tuple validator
-export function tuple<T extends any[]>(...validators: { [K in keyof T]: Validator<T[K]> }): Validator<T> {
+export function tuple<T extends unknown[]>(...validators: { [K in keyof T]: Validator<T[K]> }): Validator<T> {
 	return {
 		validate(value: unknown): T {
 			if (!Array.isArray(value)) {

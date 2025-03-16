@@ -1,7 +1,15 @@
 // src/server/middleware/validate.ts
 import { Request, Response, NextFunction } from 'express';
+import { ParsedQs } from 'qs';
 import { AnyZodObject, ZodError } from 'zod';
+
 import { ValidationFailedError } from './error';
+
+type RequestData = {
+  body: unknown;
+  query: ParsedQs;
+  params: Record<string, string>;
+};
 
 /**
  * Middleware to validate request data against a Zod schema
@@ -14,7 +22,7 @@ export const validate = (
 ) => {
   return async (req: Request, _res: Response, next: NextFunction) => {
     try {
-      let dataToValidate: any;
+      let dataToValidate: unknown;
       
       switch (source) {
         case 'body':
@@ -29,9 +37,9 @@ export const validate = (
         case 'all':
           dataToValidate = {
             body: req.body,
-            query: req.query,
-            params: req.params
-          };
+            query: req.query as ParsedQs,
+            params: req.params as Record<string, string>
+          } as RequestData;
           break;
       }
       
@@ -39,12 +47,13 @@ export const validate = (
       
       // Replace the request data with the validated data
       if (source === 'body') req.body = validatedData;
-      else if (source === 'query') req.query = validatedData;
-      else if (source === 'params') req.params = validatedData;
+      else if (source === 'query') req.query = validatedData as ParsedQs;
+      else if (source === 'params') req.params = validatedData as Record<string, string>;
       else if (source === 'all') {
-        req.body = validatedData.body;
-        req.query = validatedData.query;
-        req.params = validatedData.params;
+        const data = validatedData as RequestData;
+        req.body = data.body;
+        req.query = data.query;
+        req.params = data.params;
       }
       
       next();

@@ -13,7 +13,7 @@ export function Link({ to, onClick, ...props }: LinkProps) {
 		if (onClick) {
 			onClick(event);
 		}
-		navigate(to);
+		void navigate(to);
 	};
 
 	return <a {...props} href={to} onClick={handleClick} />;

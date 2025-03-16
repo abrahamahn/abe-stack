@@ -1,7 +1,9 @@
 import { Pool } from 'pg';
+
 import { BaseModel, BaseRepository } from '../database/BaseRepository';
 import { DatabaseConnectionManager } from '../database/config';
-import Post from './Post';
+
+import { Post } from './Post';
 
 // Media types
 export enum MediaType {
@@ -18,6 +20,10 @@ export enum ProcessingStatus {
   FAILED = 'failed'
 }
 
+interface MediaMetadata {
+  [key: string]: string | number | boolean | null;
+}
+
 export interface MediaAttributes extends BaseModel {
   userId: string;
   type: string;
@@ -32,7 +38,7 @@ export interface MediaAttributes extends BaseModel {
   thumbnailPath: string | null;
   processingStatus: string;
   processingJobId: string | null;
-  metadata: any | null;
+  metadata: MediaMetadata | null;
   isPublic: boolean;
 }
 
@@ -72,7 +78,7 @@ export class MediaRepository extends BaseRepository<MediaAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [userId]);
-      return result.rows;
+      return result.rows as MediaAttributes[];
     } catch (error) {
       this.logger.error('Error in findByUserId', { userId, error });
       throw error;
@@ -93,7 +99,7 @@ export class MediaRepository extends BaseRepository<MediaAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [limit, offset]);
-      return result.rows;
+      return result.rows as MediaAttributes[];
     } catch (error) {
       this.logger.error('Error in findPublic', { limit, offset, error });
       throw error;
@@ -125,7 +131,7 @@ export class Media implements MediaAttributes {
   thumbnailPath: string | null;
   processingStatus: string;
   processingJobId: string | null;
-  metadata: any | null;
+  metadata: MediaMetadata | null;
   isPublic: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -180,7 +186,7 @@ export class Media implements MediaAttributes {
       processing_status: processingStatus,
       processing_job_id: processingJobId,
       is_public: isPublic
-    } as any);
+    } as Partial<MediaAttributes>);
     return new Media(media);
   }
 
@@ -199,7 +205,7 @@ export class Media implements MediaAttributes {
       ...(processingJobId !== undefined && { processing_job_id: processingJobId }),
       ...(isPublic !== undefined && { is_public: isPublic })
     };
-    const updated = await mediaRepository.update(this.id, updateData as any);
+    const updated = await mediaRepository.update(this.id, updateData as Partial<MediaAttributes>);
     Object.assign(this, updated);
     return this;
   }

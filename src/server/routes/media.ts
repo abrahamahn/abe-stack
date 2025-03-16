@@ -1,25 +1,34 @@
-import Router from 'express';
-import multer from 'multer';
 import path from 'path';
-import type { Request, Response } from 'express';;
+
+import express from 'express';
+import type { Request, Response } from 'express';
+import multer from 'multer';
+import { z } from 'zod';
+
+import { MediaController } from '../controllers/media.controller';
 import { authenticate } from '../middleware/auth';
 import { validate } from '../middleware/validate';
-import { MediaController } from '../controllers/media.controller';
-import { EnhancedMediaProcessingService } from '../services/EnhancedMediaProcessingService';
-import { z } from 'zod';
+import { Media, ProcessingStatus } from '../models/Media';
 import { Logger } from '../services/LoggerService';
-import Media from '../models/Media';
+import { MediaProcessingService } from '../services/media/MediaProcessingService';
+
 
 // Extend Request type to include multer's file
 interface MulterRequest extends Request {
   file?: Express.Multer.File;
-  user?: any;
+  user?: { id: string };
 }
 
-const router = Router();
+interface MediaRequest extends Request {
+  params: {
+    mediaId: string;
+  };
+}
+
+const router: express.Router = express.Router();
 const logger = new Logger('MediaRoutes');
 const mediaController = new MediaController();
-const mediaService = new EnhancedMediaProcessingService();
+const mediaService = MediaProcessingService.getInstance();
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -63,7 +72,7 @@ const uploadOptionsSchema = z.object({
   generateHLS: z.boolean().optional(),
   generateDASH: z.boolean().optional(),
   generateWaveform: z.boolean().optional(),
-  quality: z.array(z.enum(['1080p', '720p', '480p', '360p', '240p'])).optional(),
+  quality: z.enum(['low', 'medium', 'high']).optional(),
   isPublic: z.boolean().optional()
 });
 
@@ -78,14 +87,15 @@ router.post('/upload/image',
         return res.status(400).json({ error: 'No file provided' });
       }
 
-      const mediaId = await mediaService.queueImageProcessing(
-        req.file.path,
-        req.user!.id
-      );
+      if (!req.user) {
+        return res.status(400).json({ error: 'User not authenticated' });
+      }
+
+      const result = await mediaService.processImage(req.file.path);
 
       res.status(202).json({
         message: 'Image upload accepted',
-        mediaId,
+        mediaId: result.mediaId,
         status: 'processing'
       });
     } catch (error) {
@@ -105,16 +115,20 @@ router.post('/upload/video',
         return res.status(400).json({ error: 'No file provided' });
       }
 
-      const options = req.body;
-      const mediaId = await mediaService.queueVideoProcessing(
-        req.file.path,
-        req.user!.id,
-        options
-      );
+      if (!req.user) {
+        return res.status(400).json({ error: 'User not authenticated' });
+      }
+
+      const options = req.body as z.infer<typeof uploadOptionsSchema>;
+      const result = await mediaService.processVideo(req.file.path, {
+        generateHLS: options.generateHLS,
+        generateDASH: options.generateDASH,
+        quality: options.quality
+      });
 
       res.status(202).json({
         message: 'Video upload accepted',
-        mediaId,
+        mediaId: result.mediaId,
         status: 'processing'
       });
     } catch (error) {
@@ -134,16 +148,18 @@ router.post('/upload/audio',
         return res.status(400).json({ error: 'No file provided' });
       }
 
-      const options = req.body;
-      const mediaId = await mediaService.queueAudioProcessing(
-        req.file.path,
-        req.user!.id,
-        options.generateWaveform
-      );
+      if (!req.user) {
+        return res.status(400).json({ error: 'User not authenticated' });
+      }
+
+      const options = req.body as z.infer<typeof uploadOptionsSchema>;
+      const result = await mediaService.processAudio(req.file.path, {
+        generateWaveform: options.generateWaveform
+      });
 
       res.status(202).json({
         message: 'Audio upload accepted',
-        mediaId,
+        mediaId: result.mediaId,
         status: 'processing'
       });
     } catch (error) {
@@ -177,14 +193,15 @@ router.get('/stream/audio/:mediaId/waveform',
 // Media info endpoints
 router.get('/:mediaId/status',
   authenticate,
-  async (req: Request, res: Response) => {
+  async (req: MediaRequest, res: Response) => {
     try {
-      const media = await Media.findByPk(req.params.mediaId);
+      const mediaId = req.params.mediaId;
+      const media = await Media.findByPk(mediaId);
       if (!media) {
         return res.status(404).json({ error: 'Media not found' });
       }
       res.json({
-        status: media.processingStatus,
+        status: media.processingStatus as ProcessingStatus,
         metadata: media.metadata
       });
     } catch (error) {
@@ -195,9 +212,10 @@ router.get('/:mediaId/status',
 );
 
 router.get('/:mediaId/info',
-  async (req: Request, res: Response) => {
+  async (req: MediaRequest, res: Response) => {
     try {
-      const media = await Media.findByPk(req.params.mediaId);
+      const mediaId = req.params.mediaId;
+      const media = await Media.findByPk(mediaId);
       if (!media) {
         return res.status(404).json({ error: 'Media not found' });
       }

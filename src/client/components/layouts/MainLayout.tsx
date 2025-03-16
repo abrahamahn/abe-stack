@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from '../ui/Link';
-import { Button } from '../ui/Button';
+
 import { AuthModal, AuthModalType, useAuth } from '../auth';
 import { useTheme } from '../theme';
+import { Button } from '../ui/Button';
+import { Link } from '../ui/Link';
 import './main-layout.css';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
@@ -14,7 +15,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const [authModal, setAuthModal] = useState<{ show: boolean, type: AuthModalType }>({ show: false, type: 'login' });
   
   const { isAuthenticated, user, logout } = useAuth();
-  const { theme, toggleTheme, isUsingSystemTheme, setTheme } = useTheme();
+  const { theme, toggleTheme, isUsingSystemTheme } = useTheme();
 
   // Check if viewport is mobile size
   useEffect(() => {
@@ -128,9 +129,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
                     fontWeight: 'bold'
                   }}
                 >
-                  {user?.name?.charAt(0) || 'U'}
+                  {user?.displayName?.charAt(0) || 'U'}
                 </div>
-                {!isMobile && <span className="username">{user?.name || 'User'}</span>}
+                {!isMobile && <span className="username">{user?.displayName || 'User'}</span>}
                 <Button onClick={handleLogout}>Logout</Button>
               </div>
             ) : (

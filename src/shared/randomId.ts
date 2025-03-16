@@ -15,10 +15,10 @@ export function randomId(seed?: string) {
 
 	// Convert to UUID string format
 	return [
-		hash.slice(0, 4).toString('hex'),
-		hash.slice(4, 6).toString('hex'),
-		hash.slice(6, 8).toString('hex'),
-		hash.slice(8, 10).toString('hex'),
-		hash.slice(10, 16).toString('hex'),
+		hash.subarray(0, 4).toString('hex'),
+		hash.subarray(4, 6).toString('hex'),
+		hash.subarray(6, 8).toString('hex'),
+		hash.subarray(8, 10).toString('hex'),
+		hash.subarray(10, 16).toString('hex'),
 	].join('-')
 }

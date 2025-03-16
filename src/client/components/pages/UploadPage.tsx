@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { useClientEnvironment } from '../../services/ClientEnvironment';
+
 import { PageContent } from '../layouts/PageContent';
 
 export function UploadPage() {
-  const environment = useClientEnvironment();
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);

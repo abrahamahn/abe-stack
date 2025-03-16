@@ -1,6 +1,7 @@
 // src/server/middleware/logger.ts
-import { Request, Response as ExpressResponse, NextFunction } from 'express';
+import { RequestHandler, Request, Response } from 'express';
 import winston from 'winston';
+
 import { env } from '../config/environment';
 
 // Configure winston logger
@@ -14,7 +15,8 @@ const logger = winston.createLogger({
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),
-        winston.format.printf(({ level, message, timestamp, ...rest }) => {
+        winston.format.printf((info) => {
+          const { level, message, timestamp, ...rest } = info;
           // Format the metadata with proper indentation
           let meta = '';
           if (Object.keys(rest).length > 0) {
@@ -29,7 +31,7 @@ const logger = winston.createLogger({
           const separator = level.includes('debug') ? 
             '\n----------------------------------------' : '';
             
-          return `${timestamp} ${level}: ${message}${meta}${separator}`;
+          return `${String(timestamp)} ${String(level)}: ${String(message)}${meta}${separator}`;
         })
       )
     })
@@ -39,14 +41,14 @@ const logger = winston.createLogger({
 /**
  * Helper function to format objects for better readability
  */
-const formatObject = (obj: any): string => {
+const formatObject = (obj: unknown): string => {
   if (!obj) return '';
   
   try {
     // For strings that look like JSON, parse and then stringify with indentation
     if (typeof obj === 'string' && (obj.startsWith('{') || obj.startsWith('['))) {
       try {
-        const parsed = JSON.parse(obj);
+        const parsed = JSON.parse(obj) as Record<string, unknown>;
         return JSON.stringify(parsed, null, 2);
       } catch {
         // If parsing fails, treat as regular string
@@ -62,12 +64,12 @@ const formatObject = (obj: any): string => {
     // For other types, convert to string
     return String(obj);
   } catch (error) {
-    return `[Unformattable object: ${error}]`;
+    return `[Unformattable object: ${(error as Error).message}]`;
   }
 };
 
 // Sanitize sensitive data from objects
-const sanitizeData = (data: any): any => {
+const sanitizeData = (data: Record<string, unknown>): Record<string, unknown> => {
   if (!data) return data;
   const sanitized = { ...data };
   
@@ -81,17 +83,17 @@ const sanitizeData = (data: any): any => {
 };
 
 // Request logger middleware
-export const requestLogger = (req: Request, res: ExpressResponse, next: NextFunction) => {
+export const requestLogger: RequestHandler = (req: Request, res: Response, next) => {
   const start = Date.now();
   
   // Log request
   const logData = {
-    method: req.method,
-    url: req.url,
-    body: sanitizeData(req.body),
-    query: sanitizeData(req.query),
-    ip: req.ip,
-    userAgent: req.get('user-agent')
+    method: String(req.method),
+    url: String(req.url),
+    body: sanitizeData(req.body as Record<string, unknown>),
+    query: sanitizeData(req.query as Record<string, unknown>),
+    ip: String(req.ip ?? ''),
+    userAgent: String((req as { get(name: string): string | undefined }).get('user-agent') ?? '')
   };
 
   // Only log request body in development
@@ -100,9 +102,9 @@ export const requestLogger = (req: Request, res: ExpressResponse, next: NextFunc
   }
 
   // Log response when finished
-  res.on('finish', () => {
+  (res as { on(event: string, handler: () => void): void }).on('finish', (): void => {
     const duration = Date.now() - start;
-    const responseData = {
+    const responseData: Record<string, unknown> = {
       ...logData,
       status: res.statusCode,
       duration: `${duration}ms`,
@@ -121,35 +123,35 @@ export const requestLogger = (req: Request, res: ExpressResponse, next: NextFunc
 };
 
 // Detailed logger middleware for development
-export const detailedLogger = (req: Request, res: ExpressResponse & { send: any, json: any }, next: NextFunction) => {
+export const detailedLogger: RequestHandler = (req: Request, res: Response, next) => {
   // Only log in development
   if (env.NODE_ENV !== 'development') {
     return next();
   }
   
   // Log request headers
-  logger.debug('Request Headers:', { headers: req.headers });
+  logger.debug('Request Headers:', { headers: req.headers as Record<string, string> });
   
-  // Capture original methods
-  const originalSend = res.send;
-  const originalJson = res.json;
+  // Capture original methods with proper typing
+  const originalSend = (res.send as { bind(res: Response): (body: unknown) => Response }).bind(res);
+  const originalJson = (res.json as { bind(res: Response): (body: unknown) => Response }).bind(res);
   
   // Override send method to log response
-  res.send = function(body?: any) {
-    const sanitizedBody = sanitizeData(body);
+  res.send = function(body?: unknown) {
+    const sanitizedBody = sanitizeData(body as Record<string, unknown>);
     logger.debug('Response Body:', { 
       body: typeof sanitizedBody === 'string' ? sanitizedBody : formatObject(sanitizedBody) 
     });
-    return originalSend.call(this, body);
+    return originalSend(body);
   };
   
   // Override json method to log response
-  res.json = function(body?: any) {
-    const sanitizedBody = sanitizeData(body);
+  res.json = function(body?: unknown) {
+    const sanitizedBody = sanitizeData(body as Record<string, unknown>);
     logger.debug('Response JSON:', { 
       body: formatObject(sanitizedBody)
     });
-    return originalJson.call(this, body);
+    return originalJson(body);
   };
   
   next();

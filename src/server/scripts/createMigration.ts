@@ -1,6 +1,7 @@
 // src/server/scripts/createMigration.ts
-import path from 'path';
 import { promises as fsPromises } from 'fs';
+import path from 'path';
+
 import { migrationConfig, createMigrationTemplate } from '../database/migrationConfig';
 
 async function createMigration() {
@@ -17,7 +18,7 @@ async function createMigration() {
   await fsPromises.mkdir(migrationsDir, { recursive: true });
 
   // Generate timestamp for migration filename
-  const timestamp = new Date().toISOString().replace(/[-:\.]/g, '').slice(0, 14);
+  const timestamp = new Date().toISOString().replace(/[-:.]/g, '').slice(0, 14);
   const migrationFilename = `${timestamp}-${migrationName}.ts`;
   const migrationPath = path.join(migrationsDir, migrationFilename);
 

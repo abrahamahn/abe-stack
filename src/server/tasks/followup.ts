@@ -12,6 +12,6 @@ This Task is a template.
 // 	args: {message: "Hey!"},
 // 	run_at: new Date().toISOString()
 // })
-export async function followup(args: { message: string }) {
+export function followup(args: { message: string }) {
 	console.log("Running followup task: " + args.message)
 }

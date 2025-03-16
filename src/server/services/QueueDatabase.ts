@@ -1,7 +1,9 @@
 import fs from 'fs';
+
 import { randomId } from "../../shared/randomId"
 import { Simplify } from "../../shared/typeHelpers"
 import { TaskName, Tasks } from "../tasks"
+
 import { Logger } from "./LoggerService"
 
 type QueueTaskArgs = {
@@ -31,7 +33,7 @@ interface TaskStore {
 	failed: Record<string, Task>; // task id -> task
 }
 
-const debug = (...args: any[]) => console.log("queue:", ...args)
+const debug = (...args: unknown[]) => console.log("queue:", ...args)
 
 export class QueueDatabase {
 	private store: TaskStore = {
@@ -49,7 +51,7 @@ export class QueueDatabase {
 		this.tasksPath = tasksPath;
 		
 		// Load existing tasks if available
-		this.loadTasks()
+		void this.loadTasks()
 		
 		// Create the enqueue proxy
 		this.createEnqueueProxy()
@@ -59,7 +61,7 @@ export class QueueDatabase {
 		try {
 			if (fs.existsSync(this.tasksPath)) {
 				const data = await fs.promises.readFile(this.tasksPath, 'utf8')
-				this.store = JSON.parse(data)
+				this.store = JSON.parse(data) as TaskStore
 				this.logger.info('Tasks loaded successfully');
 			}
 		} catch (error) {
@@ -118,7 +120,7 @@ export class QueueDatabase {
 		if (!taskToRun || !runAtTime) return null
 		
 		// Remove task from waiting queue
-		this.store.waiting[runAtTime] = this.store.waiting[runAtTime].filter(id => id !== taskToRun!.id)
+		this.store.waiting[runAtTime] = this.store.waiting[runAtTime].filter(id => id !== taskToRun.id)
 		if (this.store.waiting[runAtTime].length === 0) {
 			delete this.store.waiting[runAtTime]
 		}
@@ -172,12 +174,11 @@ export class QueueDatabase {
 	}
 
 	private createEnqueueProxy() {
-		const self = this
 		this.enqueue = new Proxy(
 			{},
 			{
-				get(_: any, key: string) {
-					return async (args: any, options?: { runAt: string }) => {
+				get: (_, key: string) => {
+					return async (args: unknown, options?: { runAt: string }) => {
 						let runAt: string
 						if (options?.runAt) {
 							runAt = options.runAt
@@ -191,7 +192,7 @@ export class QueueDatabase {
 							args: args as QueueTaskArgs[TaskName],
 							run_at: runAt,
 						}
-						await self.enqueueTask(task)
+						await this.enqueueTask(task)
 						return task.id
 					}
 				},

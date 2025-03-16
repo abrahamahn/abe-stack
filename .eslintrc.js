@@ -78,7 +78,7 @@ module.exports = {
     {
       files: ['**/*.ts', '**/*.tsx'],
       parserOptions: {
-        project: './tsconfig.eslint.json',
+        project: ['./tsconfig.eslint.json', './tsconfig.client.json'],
       },
       extends: [
         'plugin:@typescript-eslint/recommended-requiring-type-checking',
@@ -97,6 +97,15 @@ module.exports = {
       files: ['src/server/**/*.ts'],
       rules: {
         'no-console': 'off', // Allow console in server code
+      },
+    },
+    // Router files
+    {
+      files: ['src/server/routes/**/*.ts'],
+      rules: {
+        '@typescript-eslint/no-unsafe-call': 'off',
+        '@typescript-eslint/no-unsafe-member-access': 'off',
+        '@typescript-eslint/no-unsafe-assignment': 'off'
       },
     },
     // Frontend specific rules

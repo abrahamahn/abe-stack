@@ -1,5 +1,7 @@
 import { scrypt } from "crypto"
+
 import type { Request, Response } from "express"
+
 import { ServerConfig } from "../services/ServerConfig"
 import { ServerEnvironment } from "../services/ServerEnvironment"
 
@@ -13,7 +15,7 @@ export async function getPasswordHash(environment: { config: ServerConfig }, pas
 	return passwordHash
 }
 
-export async function setAuthCookies(
+export function setAuthCookies(
 	environment: ServerEnvironment,
 	args: {
 		authToken: string
@@ -42,12 +44,12 @@ export async function setAuthCookies(
 	})
 }
 
-export async function getAuthTokenCookie(req: Request) {
-	const authTokenId = req.cookies.authToken as string | undefined
-	return authTokenId
+export function getAuthTokenCookie(req: Request & { cookies: { [key: string]: string | undefined } }): string | undefined {
+	const cookies = req.cookies as { [key: string]: string | undefined };
+	return cookies['authToken'];
 }
 
-export async function clearAuthCookies(res: Response) {
+export function clearAuthCookies(res: Response) {
 	res.clearCookie("authToken")
 	res.clearCookie("userId")
 }

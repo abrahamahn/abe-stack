@@ -1,9 +1,12 @@
 // src/server/database/migrationManager.ts
 import { readdir, readFile } from 'fs/promises';
 import { join } from 'path';
-import { DatabaseConnectionManager } from './config';
-import { Logger } from '../services/LoggerService';
+
 import { Pool } from 'pg';
+
+import { Logger } from '../services/LoggerService';
+
+import { DatabaseConnectionManager } from './config';
 
 export class MigrationManager {
   private logger: Logger;

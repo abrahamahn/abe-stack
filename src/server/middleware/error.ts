@@ -1,7 +1,14 @@
 import { Request as ExpressRequest, Response as ExpressResponse, NextFunction as ExpressNextFunction, ErrorRequestHandler } from 'express';
 import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
-import { Logger } from '../services/LoggerService';
 import { DatabaseError } from 'pg';
+
+import { Logger } from '../services/LoggerService';
+
+interface ErrorResponse {
+  status: string;
+  message: string;
+  errors?: Record<string, string[]>;
+}
 
 const logger = new Logger('ErrorHandler');
 
@@ -79,7 +86,7 @@ export const errorHandler: ErrorRequestHandler = (
 
   // Handle AppError (our custom error)
   if (err instanceof AppError) {
-    const response: any = {
+    const response: ErrorResponse = {
       status: err.status,
       message: err.message
     };

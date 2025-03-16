@@ -21,7 +21,7 @@ export class BatchedQueue<I, O> {
 		const output = new DeferredPromise<O>()
 		this.tasks.push({ input, output })
 
-		setTimeout(this.flush, this.args.delayMs)
+		setTimeout(() => void this.flush(), this.args.delayMs)
 
 		return output.promise
 	}
@@ -48,7 +48,7 @@ export class BatchedQueue<I, O> {
 			}
 		} finally {
 			this.activeBatches -= 1
-			this.flush()
+			void this.flush()
 		}
 	}
 }

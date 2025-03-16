@@ -1,26 +1,48 @@
-import Router from 'express';
+import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
-import { Comment, CommentLike, Post } from '../models';
-import { AppError } from '../middleware/error';
-import { authenticate } from '../middleware/auth';
 
-const router = Router();
+import { authenticate } from '../middleware/auth';
+import { AppError } from '../middleware/error';
+import { Comment, CommentLike, Post } from '../models';
+
+interface AuthenticatedRequest extends Request {
+  user?: {
+    id: string;
+  };
+  params: {
+    postId?: string;
+    commentId?: string;
+  };
+}
+
+const router: express.Router = express.Router();
 
 // Get comments for a post
-router.get('/post/:postId', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+router.get('/post/:postId', authenticate, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const { offset = 0, limit = 10 } = req.query;
+    const { offset = 0, limit = 10 } = req.query as { offset?: number; limit?: number };
+    const postId = req.params.postId as string;
 
     const comments = await Comment.findByPostId({
-      postId: req.params.postId,
+      postId,
       parentId: null, // Only get top-level comments
       limit: Number(limit),
       offset: Number(offset)
     });
 
     // Check if current user liked each comment
+    if (!req.user) {
+      // If user is not authenticated, return comments without like status
+      res.json({
+        status: 'success',
+        data: { comments }
+      });
+      return;
+    }
+
+    const userId = req.user.id;
     const likedComments = await Promise.all(
-      comments.map(c => CommentLike.findByUserAndComment((req.user as any)?.id, c.id))
+      comments.map(c => CommentLike.findByUserAndComment(userId, c.id))
     );
 
     const likedCommentIds = new Set(
@@ -43,9 +65,9 @@ router.get('/post/:postId', authenticate, async (req: Request, res: Response, ne
 });
 
 // Create comment
-router.post('/', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/', authenticate, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const { postId, content, parentId } = req.body;
+    const { postId, content, parentId } = req.body as { postId: string; content: string; parentId?: string };
 
     // Check if post exists
     const post = await Post.findByPk(postId);
@@ -61,11 +83,15 @@ router.post('/', authenticate, async (req: Request, res: Response, next: NextFun
       }
     }
 
+    if (!req.user || !req.user.id) {
+      throw new AppError('User not authenticated', 401);
+    }
+
     const comment = await Comment.create({
-      userId: (req.user as any)?.id,
+      userId: req.user.id,
       postId,
       content,
-      parentId,
+      parentId: parentId || null,
       likesCount: 0,
       status: 'active',
       moderationReason: null,
@@ -88,15 +114,20 @@ router.post('/', authenticate, async (req: Request, res: Response, next: NextFun
 });
 
 // Delete comment
-router.delete('/:commentId', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+router.delete('/:commentId', authenticate, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const comment = await Comment.findByPk(req.params.commentId);
+    const commentId = req.params.commentId as string;
+    const comment = await Comment.findByPk(commentId);
 
     if (!comment) {
       throw new AppError('Comment not found', 404);
     }
 
-    if (comment.userId !== (req.user as any)?.id) {
+    if (!req.user || !req.user.id) {
+      throw new AppError('User not authenticated', 401);
+    }
+
+    if (comment.userId !== req.user.id) {
       throw new AppError('Not authorized to delete this comment', 403);
     }
 
@@ -118,15 +149,19 @@ router.delete('/:commentId', authenticate, async (req: Request, res: Response, n
 });
 
 // Like comment
-router.post('/:commentId/like', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+router.post('/:commentId/like', authenticate, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const comment = await Comment.findByPk(req.params.commentId);
+    const commentId = req.params.commentId as string;
+    const comment = await Comment.findByPk(commentId);
     if (!comment) {
       throw new AppError('Comment not found', 404);
     }
 
     // Check if already liked
-    const existingLike = await CommentLike.findByUserAndComment((req.user as any)?.id, comment.id);
+    if (!req.user || !req.user.id) {
+      throw new AppError('User not authenticated', 401);
+    }
+    const existingLike = await CommentLike.findByUserAndComment(req.user.id, comment.id);
 
     if (existingLike) {
       throw new AppError('Already liked this comment', 400);
@@ -134,7 +169,7 @@ router.post('/:commentId/like', authenticate, async (req: Request, res: Response
 
     // Create like
     await CommentLike.create({
-      userId: (req.user as any)?.id,
+      userId: req.user.id,
       commentId: comment.id,
       updatedAt: new Date()
     });
@@ -152,15 +187,19 @@ router.post('/:commentId/like', authenticate, async (req: Request, res: Response
 });
 
 // Unlike comment
-router.delete('/:commentId/like', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+router.delete('/:commentId/like', authenticate, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const comment = await Comment.findByPk(req.params.commentId);
+    const commentId = req.params.commentId as string;
+    const comment = await Comment.findByPk(commentId);
     if (!comment) {
       throw new AppError('Comment not found', 404);
     }
 
     // Check if liked
-    const like = await CommentLike.findByUserAndComment((req.user as any)?.id, comment.id);
+    if (!req.user || !req.user.id) {
+      throw new AppError('User not authenticated', 401);
+    }
+    const like = await CommentLike.findByUserAndComment(req.user.id, comment.id);
 
     if (!like) {
       throw new AppError('Not liked this comment', 400);
@@ -182,17 +221,27 @@ router.delete('/:commentId/like', authenticate, async (req: Request, res: Respon
 });
 
 // Get replies for a comment
-router.get('/:commentId/replies', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+router.get('/:commentId/replies', authenticate, async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const replies = await Comment.findReplies(req.params.commentId);
+    const commentId = req.params.commentId as string;
+    const replies = await Comment.findReplies(commentId);
 
     // Check if current user liked each reply
+    if (!req.user || !req.user.id) {
+      // If user is not authenticated, return replies without like status
+      res.json({
+        status: 'success',
+        data: { replies }
+      });
+      return;
+    }
+
     const likedReplies = await Promise.all(
-      replies.map(r => CommentLike.findByUserAndComment((req.user as any)?.id, r.id))
+      replies.map(r => CommentLike.findByUserAndComment(req.user?.id as string, r.id))
     );
 
     const likedReplyIds = new Set(
-      likedReplies.filter(like => like !== null).map(like => like!.commentId)
+      likedReplies.filter(like => like !== null).map(like => like.commentId)
     );
 
     const repliesWithLikes = replies.map(reply => {

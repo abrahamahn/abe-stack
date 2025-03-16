@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+
+import { useAuth } from './AuthContext';
 import { LoginModal } from './LoginModal';
 import { RegisterModal } from './RegisterModal';
 import { VerificationModal } from './VerificationModal';
-import { useAuth } from './AuthContext';
 
 export type AuthModalType = 'login' | 'register' | null;
 
@@ -59,6 +60,15 @@ export function AuthModal({ isOpen, modalType, onClose }: AuthModalProps) {
     }
   };
   
+  // Void-returning wrappers for event handlers
+  const handleLoginWrapper = (email: string, password: string): void => {
+    void handleLogin(email, password);
+  };
+  
+  const handleRegisterWrapper = (username: string, firstName: string, lastName: string, email: string, password: string): void => {
+    void handleRegister(username, firstName, lastName, email, password);
+  };
+  
   const handleCloseVerificationModal = () => {
     setShowVerificationModal(false);
     onClose();
@@ -72,14 +82,14 @@ export function AuthModal({ isOpen, modalType, onClose }: AuthModalProps) {
         isOpen={activeModal === 'login' && isOpen} 
         onClose={onClose}
         onSwitchToRegister={handleSwitchToRegister}
-        onLogin={handleLogin}
+        onLogin={handleLoginWrapper}
       />
       
       <RegisterModal 
         isOpen={activeModal === 'register' && isOpen} 
         onClose={onClose}
         onSwitchToLogin={handleSwitchToLogin}
-        onRegister={handleRegister}
+        onRegister={handleRegisterWrapper}
       />
       
       <VerificationModal

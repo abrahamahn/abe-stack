@@ -1,14 +1,16 @@
-// src/server/routes/index.ts
-import Router from 'express';
-import { authRouter } from './auth';
-import { socialRouter } from './social';
-import { adminRouter } from './admin';
-import { moderatorRouter } from './moderator';
-import { mediaRouter } from './media';
-import { apiLimiter } from '../middleware/rateLimiter';
-import { errorHandler } from '../middleware/errorHandler';
+import express from 'express';
 
-const router = Router();
+import { errorHandler } from '../middleware/errorHandler';
+import { apiLimiter } from '../middleware/rateLimiter';
+
+import { adminRouter } from './admin';
+import { authRouter } from './auth';
+import { mediaRouter } from './media';
+import { moderatorRouter } from './moderator';
+import { socialRouter } from './social';
+import { userRouter } from './users';
+
+const router: express.Router = express.Router();
 
 // Apply rate limiter to all API routes
 router.use(apiLimiter);
@@ -17,6 +19,7 @@ router.use(apiLimiter);
 router.use('/auth', authRouter);
 
 // Protected routes (authentication is handled within each router)
+router.use('/users', userRouter);
 router.use('/social', socialRouter);
 router.use('/admin', adminRouter);
 router.use('/moderator', moderatorRouter);

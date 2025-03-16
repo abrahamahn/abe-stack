@@ -1,20 +1,7 @@
-import Router from 'express';
-import { authenticate } from '../middleware/auth';
-import { customValidate } from '../middleware/customValidate';
+import express from 'express';
+
+import { getPostById, deletePost } from '../controllers/post.controller';
 import {
-  createPostSchema,
-  postIdParamSchema,
-  createCommentSchema,
-  commentIdParamSchema,
-  replyToCommentSchema,
-  userIdParamSchema,
-  feedQuerySchema,
-  getCommentsQuerySchema
-} from '../validators/custom-social.validator';
-import {
-  getUserProfileHandler,
-  followUser,
-  unfollowUser,
   getFeed,
   createPost,
   likePost,
@@ -26,22 +13,30 @@ import {
   unlikeComment,
   replyToComment
 } from '../controllers/social.controller';
+import { authenticate } from '../middleware/auth';
+import { customValidate } from '../middleware/customValidate';
+import {
+  createPostSchema,
+  postIdParamSchema,
+  createCommentSchema,
+  commentIdParamSchema,
+  replyToCommentSchema,
+  feedQuerySchema,
+  getCommentsQuerySchema
+} from '../validators/custom-social.validator';
 
-const router = Router();
+const router: express.Router = express.Router();
 
 // All routes require authentication
 router.use(authenticate);
-
-// User profile routes
-router.get('/users/:userId', customValidate(userIdParamSchema, 'params'), getUserProfileHandler);
-router.post('/users/:userId/follow', customValidate(userIdParamSchema, 'params'), followUser);
-router.delete('/users/:userId/follow', customValidate(userIdParamSchema, 'params'), unfollowUser);
 
 // Feed routes
 router.get('/feed', customValidate(feedQuerySchema, 'query'), getFeed);
 
 // Post routes
 router.post('/posts', customValidate(createPostSchema), createPost);
+router.get('/posts/:postId', customValidate(postIdParamSchema, 'params'), getPostById);
+router.delete('/posts/:postId', customValidate(postIdParamSchema, 'params'), deletePost);
 router.post('/posts/:postId/like', customValidate(postIdParamSchema, 'params'), likePost);
 router.delete('/posts/:postId/like', customValidate(postIdParamSchema, 'params'), unlikePost);
 router.post('/posts/:postId/share', customValidate(postIdParamSchema, 'params'), sharePost);
@@ -71,4 +66,4 @@ router.post('/comments/:commentId/reply',
   replyToComment
 );
 
-export const socialRouter = router; 
+export const socialRouter: express.Router = router; 

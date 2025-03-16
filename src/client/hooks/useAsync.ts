@@ -1,9 +1,10 @@
 import { isEqual } from "lodash"
 import { useEffect, useRef, useState } from "react"
+
 import { useRefCurrent } from "./useRefCurrent"
 import { useRefPrevious } from "./useRefPrevious"
 
-export function useAsync<T, Args extends any[]>(fn: (...args: Args) => Promise<T>, args: Args) {
+export function useAsync<T, Args extends unknown[]>(fn: (...args: Args) => Promise<T>, args: Args) {
 	const [state, setState] = useState<T | undefined>(undefined)
 
 	const currentFn = useRefCurrent(fn)
@@ -15,13 +16,13 @@ export function useAsync<T, Args extends any[]>(fn: (...args: Args) => Promise<T
 
 	useEffect(() => {
 		const currentCount = changeCount.current
-		currentFn.current(...args).then((result) => {
+		void currentFn.current(...args).then((result) => {
 			if (changeCount.current === currentCount) {
 				setState(result)
 			}
 		})
 		return
-	}, [changeCount.current])
+	}, [args, currentFn])
 
 	return state
 }

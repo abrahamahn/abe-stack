@@ -1,29 +1,31 @@
 // src/server/middleware/auth.ts
 import { Request, Response, NextFunction } from 'express';
+
 import { UnauthorizedError, ForbiddenError } from '../../shared/errors/ApiError';
-import { User } from '../models';
-import { TokenService } from '../services/TokenService';
+import { userRepository, UserAttributes } from '../models/User';
+import { AuthTokenService } from '../services/AuthTokenService';
 import { Logger } from '../services/LoggerService';
 
-// Extend Express Request type to include user
-declare global {
-  namespace Express {
-    interface Request {
-      user?: User;
-      token?: string;
-    }
-  }
+interface AuthUser extends UserAttributes {
+  role: string;
+}
+
+interface AuthRequest extends Request {
+  headers: {
+    authorization?: string;
+  };
+  user?: AuthUser;
 }
 
 const logger = new Logger('AuthMiddleware');
-const tokenService = TokenService.getInstance();
+const tokenService = AuthTokenService.getInstance();
 
 /**
  * Authentication middleware
  * Verifies the JWT token and attaches the user to the request
  */
 export const authenticate = async (
-  req: Request,
+  req: AuthRequest,
   _res: Response,
   next: NextFunction
 ) => {
@@ -37,10 +39,10 @@ export const authenticate = async (
     const token = authHeader.split(' ')[1];
 
     // Verify token
-    const decoded = await tokenService.verifyAccessToken(token);
+    const decoded = tokenService.verifyAccessToken(token);
 
     // Get user from database
-    const user = await User.findByPk(decoded.userId);
+    const user = await userRepository.findById(decoded.userId);
     if (!user) {
       throw new UnauthorizedError('User not found');
     }
@@ -61,7 +63,7 @@ export const authenticate = async (
  * @param roles Array of allowed roles
  */
 export const authorize = (...roles: string[]) => {
-  return (req: Request, _res: Response, next: NextFunction) => {
+  return (req: AuthRequest, _res: Response, next: NextFunction) => {
     if (!req.user) {
       return next(new UnauthorizedError('Authentication required'));
     }

@@ -1,101 +1,211 @@
-import express from 'express';
-import type { Express, RequestHandler, Request, Response } from 'express';
-import fs from 'fs';
-import { promises as fsPromises } from 'fs';
-import { createWriteStream } from 'fs';
-import { DayS } from "../shared/dateHelpers"
-import { FileSignatureData } from "./helpers/fileHelpers"
-import { path } from "./helpers/path"
-import { verifySignature } from "./helpers/signatureHelpers"
-import { ServerConfig } from "./services/ServerConfig"
+import fs, { promises as fsPromises } from 'fs';
+import path from 'path';
 
-const expressApp = express as unknown as {
-	(): Express;
-	raw: (options?: any) => RequestHandler;
-};
+import express, { Application, Request, Response, NextFunction, RequestHandler } from 'express';
 
-function verifyRequest(
-	environment: { config: ServerConfig },
-	req: Request<{ id: string; filename: string }>,
-	res: Response
-) {
-	const id = req.params.id
-	const filename = req.params.filename
+import { DayS } from "../shared/dateHelpers";
 
-	if (typeof req.query.expiration !== "string") {
-		res.status(400).send("Missing expiration param.")
-		return false
-	}
+import { FileSignatureData } from "./helpers/fileHelpers";
+import { verifySignature } from "./helpers/signatureHelpers";
+import { ServerConfig } from "./services/ServerConfig";
 
-	const expirationMs = parseInt(req.query.expiration)
-	const now = Date.now()
-	if (expirationMs < now) {
-		res.status(400).send("Expired.")
-		return false
-	}
-
-	const signature = req.query.signature
-	if (typeof signature !== "string") {
-		res.status(400).send("Missing signature param.")
-		return false
-	}
-
-	const method = req.method.toLowerCase().trim() as "get" | "put"
-	const data: FileSignatureData = { method, id, filename, expirationMs }
-
-	const secretKey = environment.config.signatureSecret
-	const validSignature = verifySignature({ data, signature, secretKey })
-
-	if (!validSignature) {
-		res.status(400).send("Invalid signature.")
-		return false
-	}
-
-	return true
+// Define interfaces for typed requests
+interface FileParams {
+  id: string;
+  filename: string;
+  [key: string]: string; // Add index signature for compatibility with ParamsDictionary
 }
 
-export function FileServer(environment: { config: ServerConfig }, app: Express) {
-	const uploadDir = path("uploads")
-	fs.mkdirSync(uploadDir, { recursive: true });
+interface FileQueryParams {
+  expiration: string;
+  signature: string;
+  [key: string]: string; // Add index signature for compatibility with ParsedQs
+}
 
-	const MB = 1024 * 1024
+interface FileUploadResponse {
+  message: string;
+  path?: string;
+}
 
-	app.put(
-		`/uploads/:id/:filename`,
-		expressApp.raw({ limit: 100 * MB, type: "*/*" }),
-		async (req: Request<{ id: string; filename: string }>, res: Response) => {
-			if (!verifyRequest(environment, req, res)) return
+/**
+ * Type guard for the file request
+ */
+function isValidFileRequest(
+  req: unknown
+): req is Request<FileParams, unknown, unknown, FileQueryParams> {
+  if (!req || typeof req !== 'object') return false;
+  const typedReq = req as { params?: unknown; query?: unknown };
+  
+  if (!typedReq.params || !typedReq.query || typeof typedReq.params !== 'object' || typeof typedReq.query !== 'object') {
+    return false;
+  }
+  
+  const params = typedReq.params as { id?: unknown; filename?: unknown };
+  const query = typedReq.query as { expiration?: unknown; signature?: unknown };
+  
+  return (
+    typeof params.id === 'string' &&
+    typeof params.filename === 'string' &&
+    typeof query.expiration === 'string' &&
+    typeof query.signature === 'string'
+  );
+}
 
-			const { id, filename } = req.params
-			const fileDir = path.join(uploadDir, id)
-			const filePath = path.join(fileDir, filename)
-			await fsPromises.mkdir(fileDir, { recursive: true });
+/**
+ * Verify the authenticity and validity of the request
+ */
+function verifyRequest(
+  config: ServerConfig,
+  req: Request<FileParams, unknown, unknown, FileQueryParams>,
+  res: Response
+): boolean {
+  const typedReq = req as unknown as { params: FileParams; query: FileQueryParams; method: string };
+  
+  if (!isValidFileRequest(req)) {
+    res.status(400).json({ message: "Invalid request parameters" });
+    return false;
+  }
 
-			const writeStream = createWriteStream(filePath)
-			req.pipe(writeStream)
+  const id = typedReq.params.id;
+  const filename = typedReq.params.filename;
+  const expiration = typedReq.query.expiration;
+  const signature = typedReq.query.signature;
+  
+  // Validate expiration
+  const expirationMs = parseInt(expiration, 10);
+  if (isNaN(expirationMs)) {
+    res.status(400).json({ message: "Invalid expiration format." });
+    return false;
+  }
+  
+  const now = Date.now();
+  if (expirationMs < now) {
+    res.status(400).json({ message: "Request has expired." });
+    return false;
+  }
+  
+  // Validate signature
+  if (!signature) {
+    res.status(400).json({ message: "Missing signature parameter." });
+    return false;
+  }
+  
+  const method = typedReq.method.toLowerCase().trim() as "get" | "put";
+  const data: FileSignatureData = { 
+    method, 
+    id, 
+    filename, 
+    expirationMs 
+  };
+  
+  const secretKey = config.signatureSecret;
+  const validSignature = verifySignature({ 
+    data, 
+    signature, 
+    secretKey 
+  });
+  
+  if (!validSignature) {
+    res.status(400).json({ message: "Invalid signature." });
+    return false;
+  }
+  
+  return true;
+}
 
-			writeStream.on("finish", () => {
-				res.status(200).send("File uploaded.")
-			})
+/**
+ * Middleware to validate file requests
+ */
+function validateFileRequest(
+  config: ServerConfig
+): RequestHandler {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    if (!isValidFileRequest(req as Request<FileParams, unknown, unknown, FileQueryParams>)) {
+      res.status(400).json({ message: "Invalid request parameters." });
+      return;
+    }
+    
+    if (!verifyRequest(config, req as Request<FileParams, unknown, unknown, FileQueryParams>, res)) {
+      return; // Response is already sent in verifyRequest
+    }
+    
+    next();
+  };
+}
 
-			writeStream.on("error", (error) => {
-				console.error(error)
-				res.status(500).send("File upload failed.")
-			})
-		}
-	)
-
-	app.get(`/uploads/:id/:filename`, async (req: Request<{ id: string; filename: string }>, res: Response) => {
-		if (!verifyRequest(environment, req, res)) return
-
-		const { id, filename } = req.params
-		const fileDir = path.join(uploadDir, id)
-		const filePath = path.join(fileDir, filename)
-
-		const expiration = 60 * DayS
-		// Private means it will be cached by the client but not the CDN.
-		// Not sure this works though with signature params...
-		res.setHeader("Cache-Control", `private, max-age=${expiration}`)
-		res.sendFile(filePath)
-	})
+/**
+ * Setup file server routes for uploading and retrieving files
+ */
+export function FileServer(environment: { config: ServerConfig }, app: Application): void {
+  const uploadDir = path.resolve("uploads");
+  fs.mkdirSync(uploadDir, { recursive: true });
+  
+  const MB = 1024 * 1024;
+  const typedApp = app as unknown as { 
+    put: (path: string, ...handlers: RequestHandler[]) => void;
+    get: (path: string, ...handlers: RequestHandler[]) => void;
+  };
+  
+  // File upload endpoint
+  typedApp.put(
+    '/uploads/:id/:filename',
+    (express.raw as unknown as (options: { limit: number; type: string }) => RequestHandler)({ limit: 100 * MB, type: "*/*" }),
+    validateFileRequest(environment.config),
+    async (req: Request, res: Response): Promise<void> => {
+      if (!isValidFileRequest(req as Request<FileParams, unknown, unknown, FileQueryParams>)) {
+        res.status(400).json({ message: "Invalid request parameters" });
+        return;
+      }
+      
+      // Type-safe assignments after validation
+      const id = (req.params as FileParams).id;
+      const filename = (req.params as FileParams).filename;
+      
+      const fileDir = path.join(uploadDir, id);
+      const filePath = path.join(fileDir, filename);
+      
+      try {
+        await fsPromises.mkdir(fileDir, { recursive: true });
+        await fsPromises.writeFile(filePath, req.body as Buffer);
+        res.status(200).json({ 
+          message: "File uploaded successfully", 
+          path: filePath 
+        } as FileUploadResponse);
+      } catch (err) {
+        const error = err as Error;
+        res.status(500).json({ 
+          message: `Upload failed: ${error.message}` 
+        } as FileUploadResponse);
+      }
+    }
+  );
+  
+  // File retrieval endpoint
+  typedApp.get(
+    '/uploads/:id/:filename',
+    validateFileRequest(environment.config),
+    async (req: Request, res: Response & { setHeader: (name: string, value: string) => void; sendFile: (path: string) => void }): Promise<void> => {
+      if (!isValidFileRequest(req as Request<FileParams, unknown, unknown, FileQueryParams>)) {
+        res.status(400).json({ message: "Invalid request parameters" });
+        return;
+      }
+      
+      // Type-safe assignments after validation
+      const params = req.params as FileParams;
+      const id = params.id;
+      const filename = params.filename;
+      
+      const fileDir = path.join(uploadDir, id);
+      const filePath = path.join(fileDir, filename);
+      
+      try {
+        await fsPromises.access(filePath, fs.constants.F_OK);
+        const expiration = 60 * DayS;
+        res.setHeader("Cache-Control", `private, max-age=${expiration}`);
+        res.sendFile(filePath);
+      } catch {
+        res.status(404).json({ message: "File not found." });
+      }
+    }
+  );
 }

@@ -39,7 +39,7 @@ export function Throttle(props: {
 		return () => {
 			canceled = true
 		}
-	}, [showSpinner, props.showSpinner])
+	}, [showDelay, showHold, showSpinner, props.showSpinner])
 
 	const prevChildrenRef = useRef(props.children)
 	const prevChildren = prevChildrenRef.current

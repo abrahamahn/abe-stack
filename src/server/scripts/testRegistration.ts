@@ -1,6 +1,21 @@
-import { Database } from '../services/Database';
-import AuthService from '../services/AuthService';
 import { DatabaseConnectionManager } from '../database/config';
+import { AuthService } from '../services/AuthService';
+import { Database } from '../services/Database';
+
+interface RegistrationResult {
+  user: {
+    id: string;
+    username: string;
+    email: string;
+  };
+}
+
+interface UserRow {
+  id: string;
+  username: string;
+  email: string;
+  email_confirmed: boolean;
+}
 
 async function testRegistration() {
   console.log('Testing user registration...');
@@ -15,7 +30,7 @@ async function testRegistration() {
     await db.initialize();
     
     // Create AuthService instance
-    const authService = new AuthService(db);
+    const authService = AuthService.getInstance();
     
     // Test user data
     const testUser = {
@@ -30,7 +45,7 @@ async function testRegistration() {
     console.log('Registering test user:', testUser.username, testUser.email);
     
     // Register the user
-    const result = await authService.register(testUser);
+    const result = await authService.register(testUser) as RegistrationResult;
     
     console.log('Registration successful!');
     console.log('User ID:', result.user.id);
@@ -43,7 +58,7 @@ async function testRegistration() {
     // Query the database directly
     const pool = db.getPool();
     if (pool) {
-      const queryResult = await pool.query(
+      const queryResult = await pool.query<UserRow>(
         'SELECT id, username, email, email_confirmed FROM users WHERE email = $1',
         [testUser.email]
       );

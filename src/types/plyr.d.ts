@@ -13,14 +13,14 @@ declare module 'plyr' {
   }
 
   export interface Player {
-    on(event: string, callback: (...args: any[]) => void): void;
+    on(event: string, callback: (...args: unknown[]) => void): void;
     destroy(): void;
     currentTime: number;
   }
 
   export default class Plyr {
     constructor(target: HTMLElement, options?: PlyrOptions);
-    on(event: string, callback: (...args: any[]) => void): void;
+    on(event: string, callback: (...args: unknown[]) => void): void;
     destroy(): void;
     currentTime: number;
   }

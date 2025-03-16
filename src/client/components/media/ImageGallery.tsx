@@ -1,6 +1,20 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+
 import { imageGalleryStyles } from '../../styles';
-import { mergeStyles, conditionalStyle } from '../../utils/styleUtils';
+import { mergeStyles, conditionalStyle as _conditionalStyle } from '../../utils/styleUtils';
+
+// Define interface for document with vendor prefixed fullscreen properties
+interface DocumentWithFullscreen extends Document {
+  webkitFullscreenElement?: Element | null;
+  mozFullScreenElement?: Element | null;
+  webkitExitFullscreen?: () => Promise<void>;
+  mozCancelFullScreen?: () => Promise<void>;
+}
+
+interface ElementWithFullscreen extends HTMLElement {
+  webkitRequestFullscreen?: () => Promise<void>;
+  mozRequestFullScreen?: () => Promise<void>;
+}
 
 interface ImageItem {
   src: string;
@@ -48,6 +62,14 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     setCurrentIndex(initialIndex < images.length ? initialIndex : 0);
   }, [images, initialIndex]);
   
+  const goToNextImage = useCallback(() => {
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = (prevIndex + 1) % images.length;
+      if (onImageChange) onImageChange(nextIndex);
+      return nextIndex;
+    });
+  }, [images.length, onImageChange]);
+  
   // Handle autoplay
   useEffect(() => {
     if (autoPlayRef.current) {
@@ -66,7 +88,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
         clearInterval(autoPlayRef.current);
       }
     };
-  }, [autoPlay, autoPlayInterval, currentIndex, images.length]);
+  }, [autoPlay, autoPlayInterval, currentIndex, images.length, goToNextImage]);
   
   // Handle fullscreen changes
   useEffect(() => {
@@ -74,8 +96,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
       setIsFullscreen(
         Boolean(
           document.fullscreenElement ||
-          (document as any).webkitFullscreenElement ||
-          (document as any).mozFullScreenElement
+          (document as DocumentWithFullscreen).webkitFullscreenElement ||
+          (document as DocumentWithFullscreen).mozFullScreenElement
         )
       );
     };
@@ -90,14 +112,6 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
       document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
     };
   }, []);
-  
-  const goToNextImage = () => {
-    setCurrentIndex((prevIndex) => {
-      const nextIndex = (prevIndex + 1) % images.length;
-      if (onImageChange) onImageChange(nextIndex);
-      return nextIndex;
-    });
-  };
   
   const goToPrevImage = () => {
     setCurrentIndex((prevIndex) => {
@@ -152,19 +166,19 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     
     if (isFullscreen) {
       if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if ((document as any).webkitExitFullscreen) {
-        (document as any).webkitExitFullscreen();
-      } else if ((document as any).mozCancelFullScreen) {
-        (document as any).mozCancelFullScreen();
+        void document.exitFullscreen();
+      } else if ((document as DocumentWithFullscreen).webkitExitFullscreen) {
+        void (document as DocumentWithFullscreen).webkitExitFullscreen?.();
+      } else if ((document as DocumentWithFullscreen).mozCancelFullScreen) {
+        void (document as DocumentWithFullscreen).mozCancelFullScreen?.();
       }
     } else {
       if (galleryRef.current.requestFullscreen) {
-        galleryRef.current.requestFullscreen();
-      } else if ((galleryRef.current as any).webkitRequestFullscreen) {
-        (galleryRef.current as any).webkitRequestFullscreen();
-      } else if ((galleryRef.current as any).mozRequestFullScreen) {
-        (galleryRef.current as any).mozRequestFullScreen();
+        void galleryRef.current.requestFullscreen();
+      } else if ((galleryRef.current as ElementWithFullscreen).webkitRequestFullscreen) {
+        void (galleryRef.current as ElementWithFullscreen).webkitRequestFullscreen?.();
+      } else if ((galleryRef.current as ElementWithFullscreen).mozRequestFullScreen) {
+        void (galleryRef.current as ElementWithFullscreen).mozRequestFullScreen?.();
       }
     }
   };
@@ -222,10 +236,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                 onClick={goToPrevImage}
                 aria-label="Previous image"
                 onMouseOver={(e) => {
-                  (e.currentTarget.style.opacity as any) = '1';
+                  e.currentTarget.style.opacity = '1';
                 }}
                 onMouseOut={(e) => {
-                  (e.currentTarget.style.opacity as any) = '0.7';
+                  e.currentTarget.style.opacity = '0.7';
                 }}
               >
                 ◀
@@ -238,10 +252,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                 onClick={goToNextImage}
                 aria-label="Next image"
                 onMouseOver={(e) => {
-                  (e.currentTarget.style.opacity as any) = '1';
+                  e.currentTarget.style.opacity = '1';
                 }}
                 onMouseOut={(e) => {
-                  (e.currentTarget.style.opacity as any) = '0.7';
+                  e.currentTarget.style.opacity = '0.7';
                 }}
               >
                 ▶
@@ -254,10 +268,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
             onClick={toggleFullscreen}
             aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
             onMouseOver={(e) => {
-              (e.currentTarget.style.opacity as any) = '1';
+              e.currentTarget.style.opacity = '1';
             }}
             onMouseOut={(e) => {
-              (e.currentTarget.style.opacity as any) = '0.7';
+              e.currentTarget.style.opacity = '0.7';
             }}
           >
             {isFullscreen ? '↙️' : '↗️'}
@@ -276,12 +290,12 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                 onClick={() => handleThumbnailClick(index)}
                 onMouseOver={(e) => {
                   if (index !== currentIndex) {
-                    (e.currentTarget.style.opacity as any) = '0.9';
+                    e.currentTarget.style.opacity = '0.9';
                   }
                 }}
                 onMouseOut={(e) => {
                   if (index !== currentIndex) {
-                    (e.currentTarget.style.opacity as any) = '0.7';
+                    e.currentTarget.style.opacity = '0.7';
                   }
                 }}
               >

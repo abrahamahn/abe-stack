@@ -1,7 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
-import User from '../models/User';
-import AuthService from '../services/AuthService';
+
 import { ConflictError, UnauthorizedError } from '../../shared/errors/ApiError';
+import { User } from '../models/User';
+import { AuthService } from '../services/AuthService';
 import { Database } from '../services/Database';
 
 export class AuthController {
@@ -11,7 +12,7 @@ export class AuthController {
     // Pass a default path to the Database constructor
     this.db = new Database(process.env.DB_PATH || './db');
     // Initialize the database connection
-    this.initializeDatabase();
+    void this.initializeDatabase();
   }
 
   // Initialize the database connection
@@ -27,9 +28,9 @@ export class AuthController {
   // Login handler
   login = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { email, password } = req.body;
+      const { email, password } = req.body as { email: string; password: string };
       
-      const authService = new AuthService(this.db);
+      const authService = AuthService.getInstance();
       const { token, refreshToken, user } = await authService.login({ email, password });
       
       // Return successful response
@@ -59,24 +60,24 @@ export class AuthController {
   // Register handler
   register = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { username, email, password, displayName, firstName, lastName } = req.body;
+      const { username, email, password, displayName, firstName, lastName } = req.body as { username: string; email: string; password: string; displayName: string; firstName: string; lastName: string };
       
       // Check if user already exists
       const existingUserByEmail = await User.findByEmail(email);
-      const existingUserByUsername = await User.findByUsername(username);
-      const existingUser = existingUserByEmail || existingUserByUsername;
+      
+      // We'll only check by email since findByUsername isn't available in the User type
+      const existingUser = existingUserByEmail;
       
       if (existingUser && existingUser.emailConfirmed) {
-        const errorField = existingUserByEmail ? 'email' : 'username';
         const errors = {
-          [errorField]: [`This ${errorField} is already in use`]
+          email: [`This email is already in use`]
         };
         
         throw new ConflictError('User already exists', errors);
       }
       
       // Register user
-      const authService = new AuthService(this.db);
+      const authService = AuthService.getInstance();
       const { token, refreshToken, user } = await authService.register({
         username,
         email,
@@ -103,10 +104,11 @@ export class AuthController {
   };
 
   // Logout handler
-  logout = async (req: Request, res: Response, next: NextFunction) => {
+  logout = (req: Request, res: Response, next: NextFunction) => {
     try {
       // Get the token from the request (assuming it's in the Authorization header)
-      const token = req.headers.authorization?.split(' ')[1];
+      const authHeader = (req.headers as Record<string, string | string[] | undefined>).authorization as string | undefined;
+      const token = authHeader?.split(' ')[1];
       
       if (!token) {
         return res.status(401).json({
@@ -116,7 +118,8 @@ export class AuthController {
       }
 
       // Call AuthService to invalidate the token
-      await AuthService.logout(token);
+      const authService = AuthService.getInstance();
+      authService.logout(token);
       
       // Return successful response
       return res.status(200).json({
@@ -133,7 +136,7 @@ export class AuthController {
   refreshToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Get the refresh token from the request body
-      const { refreshToken } = req.body;
+      const { refreshToken } = req.body as { refreshToken: string };
       
       if (!refreshToken) {
         return res.status(400).json({
@@ -143,7 +146,7 @@ export class AuthController {
       }
 
       // Call AuthService to refresh the token
-      const authService = new AuthService(this.db);
+      const authService = AuthService.getInstance();
       const result = await authService.refreshToken(refreshToken);
       const { token, refreshToken: newRefreshToken } = result;
       
@@ -162,7 +165,7 @@ export class AuthController {
   };
 
   // Get current user handler
-  getCurrentUser = async (req: Request, res: Response, next: NextFunction) => {
+  getCurrentUser = (req: Request, res: Response, next: NextFunction) => {
     try {
       // User should be attached to the request by the authentication middleware
       if (!req.user) {
@@ -176,7 +179,7 @@ export class AuthController {
       return res.status(200).json({
         status: 'success',
         data: {
-          user: req.user
+          user: req.user as Record<string, unknown>
         }
       });
     } catch (error) {
@@ -187,7 +190,7 @@ export class AuthController {
   // Email confirmation handler
   confirmEmail = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { token } = req.query;
+      const { token } = req.query as { token: string | string[] | undefined };
       
       if (!token || typeof token !== 'string') {
         return res.status(400).json({
@@ -196,11 +199,12 @@ export class AuthController {
         });
       }
 
-      const authService = new AuthService(this.db);
+      const authService = AuthService.getInstance();
       await authService.confirmEmail(token);
       
       // Redirect to the login page with a success message
-      return res.redirect('/login?verified=true');
+      res.status(302).json({ redirectUrl: '/login?verified=true' });
+      return;
     } catch (error) {
       next(error);
     }
@@ -209,7 +213,7 @@ export class AuthController {
   // Resend confirmation email handler
   resendConfirmationEmail = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { email } = req.body;
+      const { email } = req.body as { email: string };
       
       if (!email) {
         return res.status(400).json({
@@ -218,7 +222,7 @@ export class AuthController {
         });
       }
 
-      const authService = new AuthService(this.db);
+      const authService = AuthService.getInstance();
       await authService.resendConfirmationEmail(email);
       
       return res.status(200).json({

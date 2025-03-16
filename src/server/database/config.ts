@@ -1,5 +1,6 @@
 // src/server/database/config.ts
 import { Pool } from 'pg';
+
 import { envConfig } from '../config/environment';
 import { Logger } from '../services/LoggerService';
 

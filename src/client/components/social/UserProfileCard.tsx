@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { socialService } from '../../services/social';
+
 import { useClientEnvironment } from '../../services/ClientEnvironment';
+import { socialService } from '../../services/social';
 
 interface User {
   id: string;
@@ -16,10 +17,9 @@ interface User {
 
 interface UserProfileCardProps {
   user: User;
-  onRefresh: () => void;
 }
 
-export const UserProfileCard: React.FC<UserProfileCardProps> = ({ user, onRefresh }) => {
+export const UserProfileCard: React.FC<UserProfileCardProps> = ({ user }) => {
   const environment = useClientEnvironment();
   const [isFollowing, setIsFollowing] = useState(user.isFollowing);
   const [followersCount, setFollowersCount] = useState(user.followersCount);
@@ -94,7 +94,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({ user, onRefres
         </div>
         <div>
           <button 
-            onClick={handleFollowToggle}
+            onClick={() => void handleFollowToggle()}
             disabled={isLoading}
             style={{ 
               padding: '8px 16px',

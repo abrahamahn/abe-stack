@@ -1,5 +1,5 @@
-import { Logger } from './LoggerService';
 import { InMemoryQueue, Job, JobOptions, JobProcessor } from './InMemoryQueue';
+import { Logger } from './LoggerService';
 
 // Queue types
 export const QueueTypes = {
@@ -17,7 +17,7 @@ export interface ImageProcessingJob {
   mediaId: string;
   filePath: string;
   userId: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string | number | boolean>;
 }
 
 export interface VideoProcessingJob {
@@ -29,7 +29,7 @@ export interface VideoProcessingJob {
     generateDASH?: boolean;
     quality?: ('1080p' | '720p' | '480p' | '360p' | '240p')[];
   };
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string | number | boolean>;
 }
 
 export interface AudioProcessingJob {
@@ -37,14 +37,14 @@ export interface AudioProcessingJob {
   filePath: string;
   userId: string;
   generateWaveform?: boolean;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string | number | boolean>;
 }
 
 export interface NotificationJob {
   userId: string;
   type: string;
   message: string;
-  data?: Record<string, any>;
+  data?: Record<string, string | number | boolean>;
 }
 
 type QueueJobType = {
@@ -54,12 +54,14 @@ type QueueJobType = {
   [QueueTypes.NOTIFICATION]: NotificationJob;
 };
 
+type AllJobTypes = ImageProcessingJob | VideoProcessingJob | AudioProcessingJob | NotificationJob;
+
 /**
  * Service for managing background job queues
  */
 export class QueueService {
   private static instance: QueueService;
-  private queues: Map<QueueTypeValue, InMemoryQueue<any>> = new Map();
+  private queues: Map<QueueTypeValue, InMemoryQueue<AllJobTypes>> = new Map();
   private logger: Logger;
 
   private constructor() {
@@ -72,8 +74,8 @@ export class QueueService {
     this.initializeQueue(QueueTypes.NOTIFICATION);
     
     // Handle process events
-    process.on('SIGTERM', () => this.closeQueues());
-    process.on('SIGINT', () => this.closeQueues());
+    process.on('SIGTERM', () => void this.closeQueues());
+    process.on('SIGINT', () => void this.closeQueues());
   }
 
   /**
@@ -97,15 +99,15 @@ export class QueueService {
       this.logger.error(`Error in ${queueType} queue:`, error);
     });
     
-    queue.on('failed', (job, error) => {
+    queue.on('failed', (job: Job<QueueJobType[K]>, error) => {
       this.logger.error(`Job ${job.id} in ${queueType} queue failed:`, error);
     });
     
-    queue.on('completed', (job) => {
+    queue.on('completed', (job: Job<QueueJobType[K]>) => {
       this.logger.debug(`Job ${job.id} in ${queueType} queue completed`);
     });
     
-    this.queues.set(queueType, queue);
+    this.queues.set(queueType, queue as unknown as InMemoryQueue<AllJobTypes>);
     return queue;
   }
 
@@ -119,10 +121,10 @@ export class QueueService {
   /**
    * Add an image processing job to the queue
    */
-  public async addImageProcessingJob(
+  public addImageProcessingJob(
     data: ImageProcessingJob,
     options?: JobOptions
-  ): Promise<Job<ImageProcessingJob>> {
+  ): Job<ImageProcessingJob> {
     const queue = this.getQueue(QueueTypes.IMAGE_PROCESSING);
     if (!queue) {
       throw new Error(`Queue ${QueueTypes.IMAGE_PROCESSING} not found`);
@@ -133,10 +135,10 @@ export class QueueService {
   /**
    * Add a video processing job to the queue
    */
-  public async addVideoProcessingJob(
+  public addVideoProcessingJob(
     data: VideoProcessingJob,
     options?: JobOptions
-  ): Promise<Job<VideoProcessingJob>> {
+  ): Job<VideoProcessingJob> {
     const queue = this.getQueue(QueueTypes.VIDEO_PROCESSING);
     if (!queue) {
       throw new Error(`Queue ${QueueTypes.VIDEO_PROCESSING} not found`);
@@ -147,10 +149,10 @@ export class QueueService {
   /**
    * Add an audio processing job to the queue
    */
-  public async addAudioProcessingJob(
+  public addAudioProcessingJob(
     data: AudioProcessingJob,
     options?: JobOptions
-  ): Promise<Job<AudioProcessingJob>> {
+  ): Job<AudioProcessingJob> {
     const queue = this.getQueue(QueueTypes.AUDIO_PROCESSING);
     if (!queue) {
       throw new Error(`Queue ${QueueTypes.AUDIO_PROCESSING} not found`);
@@ -161,10 +163,10 @@ export class QueueService {
   /**
    * Add a notification job to the queue
    */
-  public async addNotificationJob(
+  public addNotificationJob(
     data: NotificationJob,
     options?: JobOptions
-  ): Promise<Job<NotificationJob>> {
+  ): Job<NotificationJob> {
     const queue = this.getQueue(QueueTypes.NOTIFICATION);
     if (!queue) {
       throw new Error(`Queue ${QueueTypes.NOTIFICATION} not found`);

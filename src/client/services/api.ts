@@ -1,7 +1,9 @@
 import type * as apis from "../../server/apis/autoindex"
+import type { ServerEnvironment } from "../../server/services/ServerEnvironment"
 import { sleep } from "../../shared/sleep"
 
-type InputOutput<T extends (...any: any[]) => any> = {
+// Update InputOutput to match the actual handler signature
+type InputOutput<T extends (env: ServerEnvironment, args: unknown) => unknown> = {
 	input: Parameters<T>[1]
 	output: ReturnType<T>
 }
@@ -20,7 +22,7 @@ type ApiResponse<T> = {
 	error?: string;
 };
 
-const debug = (...args: any[]) => console.log("api:", ...args)
+const debug = (...args: unknown[]) => console.log("api:", ...args)
 
 export async function apiRequest<T extends keyof ApiSchema>(
 	name: T,
@@ -33,13 +35,24 @@ export async function apiRequest<T extends keyof ApiSchema>(
 	// Control how much loading spinners we see during development.
 	await sleep(400)
 
-	return result as ApiResponse<any>
+	// Convert HttpResponse to ApiResponse
+	if (result.status === 200) {
+		return { 
+			success: true, 
+			data: result.body as Awaited<ApiSchema[T]["output"]> 
+		};
+	} else {
+		return {
+			success: false,
+			error: formatResponseError(result as ErrorResponse)
+		};
+	}
 }
 
 export type ClientApi = {
 	get: <T>(path: string) => Promise<ApiResponse<T>>;
-	post: <T>(path: string, data?: any) => Promise<ApiResponse<T>>;
-	put: <T>(path: string, data?: any) => Promise<ApiResponse<T>>;
+	post: <T>(path: string, data?: Record<string, unknown>) => Promise<ApiResponse<T>>;
+	put: <T>(path: string, data?: Record<string, unknown>) => Promise<ApiResponse<T>>;
 	delete: <T>(path: string) => Promise<ApiResponse<T>>;
 	upload: (path: string, file: File) => Promise<ApiResponse<string>>;
 };
@@ -50,7 +63,7 @@ export function createApi(): ClientApi {
 	async function fetchApi<T>(
 		method: string,
 		path: string,
-		data?: any
+		data?: Record<string, unknown>
 	): Promise<ApiResponse<T>> {
 		const url = `${baseUrl}${path}`;
 		const headers: HeadersInit = {
@@ -65,14 +78,14 @@ export function createApi(): ClientApi {
 			});
 
 			if (!response.ok) {
-				const errorData = await response.json();
+				const errorData = await response.json() as { message?: string };
 				return {
 					success: false,
 					error: errorData.message || `HTTP error ${response.status}`,
 				};
 			}
 
-			const responseData = await response.json();
+			const responseData = await response.json() as T;
 			return {
 				success: true,
 				data: responseData,
@@ -100,14 +113,14 @@ export function createApi(): ClientApi {
 			});
 
 			if (!response.ok) {
-				const errorData = await response.json();
+				const errorData = await response.json() as { message?: string };
 				return {
 					success: false,
 					error: errorData.message || `HTTP error ${response.status}`,
 				};
 			}
 
-			const responseData = await response.json();
+			const responseData = await response.json() as { url: string };
 			return {
 				success: true,
 				data: responseData.url,
@@ -122,8 +135,8 @@ export function createApi(): ClientApi {
 
 	return {
 		get: <T>(path: string) => fetchApi<T>('GET', path),
-		post: <T>(path: string, data?: any) => fetchApi<T>('POST', path, data),
-		put: <T>(path: string, data?: any) => fetchApi<T>('PUT', path, data),
+		post: <T>(path: string, data?: Record<string, unknown>) => fetchApi<T>('POST', path, data),
+		put: <T>(path: string, data?: Record<string, unknown>) => fetchApi<T>('PUT', path, data),
 		delete: <T>(path: string) => fetchApi<T>('DELETE', path),
 		upload: (path: string, file: File) => uploadFile(path, file),
 	};
@@ -144,10 +157,10 @@ export function formatResponseError(response: ErrorResponse) {
 	return `${status}: ${JSON.stringify(body)}`
 }
 
-export type HttpResponse<Body = any> = { status: 200; body: Body } | { status: number; body?: any }
+export type HttpResponse<Body = unknown> = { status: 200; body: Body } | { status: number; body?: unknown }
 
 // Only POST requests for now because this is only used for the API.
-export async function httpRequest(url: string, args: any): Promise<HttpResponse> {
+export async function httpRequest(url: string, args: unknown): Promise<HttpResponse> {
 	let response: Response
 	try {
 		response = await fetch(url, {
@@ -163,16 +176,16 @@ export async function httpRequest(url: string, args: any): Promise<HttpResponse>
 
 	if (response.status === 200) {
 		try {
-			const body = await response.json()
+			const body = await response.json() as unknown;
 			return { status: 200, body }
 		} catch (error) {
 			return { status: 200, body: {} }
 		}
 	}
 
-	let body: any
+	let body: unknown;
 	try {
-		body = await response.json()
+		body = await response.json();
 	} catch (error) {
 		console.warn("Could not parse body of error response.")
 	}

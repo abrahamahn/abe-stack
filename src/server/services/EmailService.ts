@@ -1,6 +1,8 @@
 // Remove the custom type declaration
 import nodemailer from 'nodemailer';
-import emailConfig from '../config/email';
+
+import { emailConfig } from '../config/email';
+
 import { Database } from './Database';
 
 export class EmailService {
@@ -53,7 +55,7 @@ export class EmailService {
     `;
 
     // Prepare email options
-    const mailOptions = {
+    const mailOptions: nodemailer.SendMailOptions = {
       from: `"${emailConfig.appName}" <${emailConfig.user}>`,
       to: userEmail,
       subject: 'Email Confirmation',
@@ -91,8 +93,8 @@ export class EmailService {
 
     try {
       // Send email
-      const info = await this.transporter.sendMail(mailOptions);
-      console.log('Email sent:', info.messageId);
+      const info = await Promise.resolve(this.transporter.sendMail(mailOptions)) as Promise<nodemailer.SentMessageInfo>;
+      console.log('Email sent:', String(info));
 
       // Update last email sent timestamp in the database
       const pool = this.db.getPool();
@@ -143,7 +145,7 @@ export class EmailService {
     `;
 
     // Prepare email options
-    const mailOptions = {
+    const mailOptions: nodemailer.SendMailOptions = {
       from: `"${emailConfig.appName}" <${emailConfig.user}>`,
       to: userEmail,
       subject: 'Password Reset',
@@ -164,8 +166,8 @@ export class EmailService {
 
     try {
       // Send email
-      const info = await this.transporter.sendMail(mailOptions);
-      console.log('Email sent:', info.messageId);
+      const info = await Promise.resolve(this.transporter.sendMail(mailOptions)) as Promise<nodemailer.SentMessageInfo>;
+      console.log('Email sent:', String(info));
       return { success: true, message: 'Email sent successfully.' };
     } catch (error) {
       console.error('Error sending password reset email:', error);

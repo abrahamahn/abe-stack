@@ -1,20 +1,22 @@
 import { Pool } from 'pg';
+
 import { Simplify } from '../../shared/typeHelpers';
+
 import { Logger } from './LoggerService';
 
 const logger = new Logger('Database');
 
 // Simple in-memory database for fallback mode
 class InMemoryDatabase {
-  private data: Map<string, any[]> = new Map();
+  private data: Map<string, Record<string, unknown>[]> = new Map();
   
-  async query(text: string, params: any[] = []): Promise<{ rows: any[] }> {
+  query(text: string, params: unknown[] = []): Promise<{ rows: Record<string, unknown>[] }> {
     logger.debug('In-memory DB query:', { text, params });
     
     // Very basic query parser for development fallback
     if (text.toLowerCase().startsWith('select')) {
       const tableName = this.extractTableName(text);
-      return { rows: this.data.get(tableName) || [] };
+      return Promise.resolve({ rows: this.data.get(tableName) || [] });
     } else if (text.toLowerCase().startsWith('insert')) {
       const tableName = this.extractTableName(text);
       if (!this.data.has(tableName)) {
@@ -22,21 +24,25 @@ class InMemoryDatabase {
       }
       
       // Create a mock record with an ID
-      const mockRecord = {
+      const mockRecord: Record<string, unknown> = {
         id: crypto.randomUUID(),
         ...this.createMockRecord(params)
       };
       
-      this.data.get(tableName)!.push(mockRecord);
-      return { rows: [mockRecord] };
+      const tableData = this.data.get(tableName);
+      if (tableData) {
+        tableData.push(mockRecord);
+      }
+      return Promise.resolve({ rows: [mockRecord] });
     } else if (text.toLowerCase().startsWith('update')) {
-      const tableName = this.extractTableName(text);
+      // Extract table name but we don't need to use it for this mock implementation
+      this.extractTableName(text);
       // For simplicity, just return success
-      return { rows: [] };
+      return Promise.resolve({ rows: [] });
     }
     
     // Default fallback
-    return { rows: [] };
+    return Promise.resolve({ rows: [] });
   }
   
   private extractTableName(query: string): string {
@@ -48,9 +54,9 @@ class InMemoryDatabase {
     return (fromMatch?.[1] || intoMatch?.[1] || updateMatch?.[1] || 'unknown').replace(/['"]/g, '');
   }
   
-  private createMockRecord(params: any[]): any {
+  private createMockRecord(params: unknown[]): Record<string, unknown> {
     // Create a simple object with sequential keys
-    return params.reduce((obj, value, index) => {
+    return params.reduce<Record<string, unknown>>((obj, value, index) => {
       obj[`field${index}`] = value;
       return obj;
     }, {});

@@ -1,15 +1,37 @@
-import Router from 'express';
-import type { Request, Response, NextFunction } from 'express';
-import { User, Post, Follow } from '../models';
-import { AppError } from '../middleware/error';
-import { authenticate } from '../middleware/auth';
+import express from 'express';
+import type { Response, NextFunction } from 'express';
 
-const router = Router();
+import { followUser, unfollowUser } from '../controllers/social.controller';
+import { authenticate } from '../middleware/auth';
+import { AppError } from '../middleware/error';
+import { User, Post, Follow } from '../models';
+import { AuthenticatedRequest, UserParamRequest } from '../types/request.types';
+
+interface UserResponse {
+  id: string;
+  username: string;
+  email: string;
+  displayName: string | null;
+  bio: string | null;
+  profileImage: string | null;
+  posts?: Post[];
+  isFollowing?: boolean;
+}
+
+const router: express.Router = express.Router();
+
+// All routes require authentication
+router.use(authenticate);
 
 // Get user profile
-router.get('/:userId', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+router.get('/:userId', async (req: UserParamRequest, res: Response, next: NextFunction) => {
   try {
-    const user = await User.findByPk(req.params.userId);
+    const { userId } = req.params;
+    if (!userId) {
+      throw new AppError('User ID is required', 400);
+    }
+    
+    const user = await User.findById(userId);
 
     if (!user) {
       throw new AppError('User not found', 404);
@@ -19,11 +41,14 @@ router.get('/:userId', authenticate, async (req: Request, res: Response, next: N
     const posts = await Post.findByUserId(user.id);
 
     // Check if current user is following this user
-    const isFollowing = await Follow.findByFollowerAndFollowing((req.user as any)?.id, user.id);
+    const currentUserId = req.user?.id;
+    const isFollowing = currentUserId ? await Follow.findByFollowerAndFollowing(currentUserId, user.id) : null;
 
-    const userResponse = user.toJSON();
-    userResponse.posts = posts;
-    userResponse.isFollowing = !!isFollowing;
+    const userResponse: UserResponse = {
+      ...user,
+      posts,
+      isFollowing: !!isFollowing
+    };
 
     res.json({
       status: 'success',
@@ -34,87 +59,46 @@ router.get('/:userId', authenticate, async (req: Request, res: Response, next: N
   }
 });
 
-// Update user profile
-router.patch('/me', authenticate, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { displayName, bio, avatar } = req.body;
+// Follow a user
+router.post('/:userId/follow', async (req: UserParamRequest, res: Response) => {
+  await followUser(req, res);
+});
 
-    const user = await User.findByPk((req.user as any)?.id);
+// Unfollow a user
+router.delete('/:userId/follow', async (req: UserParamRequest, res: Response) => {
+  await unfollowUser(req, res);
+});
+
+// Update user profile
+router.patch('/me', async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  try {
+    const { displayName, bio, avatar } = req.body as { displayName: string, bio: string, avatar: string };
+    const currentUserId = req.user?.id;
+    
+    if (!currentUserId) {
+      throw new AppError('Authentication required', 401);
+    }
+
+    const user = await User.findById(currentUserId);
     if (!user) {
       throw new AppError('User not found', 404);
     }
 
     // Update user
-    await user.update({
+    await User.update(currentUserId, {
       displayName,
       bio,
       profileImage: avatar
     });
 
-    res.json({
-      status: 'success',
-      data: { user: user.toJSON() }
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Follow user
-router.post('/:userId/follow', authenticate, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const userToFollow = await User.findByPk(req.params.userId);
-    if (!userToFollow) {
+    const updatedUser = await User.findById(currentUserId);
+    if (!updatedUser) {
       throw new AppError('User not found', 404);
     }
 
-    if (userToFollow.id === (req.user as any)?.id) {
-      throw new AppError('Cannot follow yourself', 400);
-    }
-
-    // Check if already following
-    const existingFollow = await Follow.findByFollowerAndFollowing((req.user as any)?.id, userToFollow.id);
-
-    if (existingFollow) {
-      throw new AppError('Already following this user', 400);
-    }
-
-    // Create follow relationship
-    await Follow.create({
-      followerId: (req.user as any)?.id,
-      followingId: userToFollow.id
-    });
-
     res.json({
       status: 'success',
-      message: 'Successfully followed user'
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-// Unfollow user
-router.delete('/:userId/follow', authenticate, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const userToUnfollow = await User.findByPk(req.params.userId);
-    if (!userToUnfollow) {
-      throw new AppError('User not found', 404);
-    }
-
-    // Check if following
-    const follow = await Follow.findByFollowerAndFollowing((req.user as any)?.id, userToUnfollow.id);
-
-    if (!follow) {
-      throw new AppError('Not following this user', 400);
-    }
-
-    // Remove follow relationship
-    await follow.delete();
-
-    res.json({
-      status: 'success',
-      message: 'Successfully unfollowed user'
+      data: { user: updatedUser }
     });
   } catch (error) {
     next(error);
@@ -122,9 +106,14 @@ router.delete('/:userId/follow', authenticate, async (req: Request, res: Respons
 });
 
 // Get user's followers
-router.get('/:userId/followers', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+router.get('/:userId/followers', async (req: UserParamRequest, res: Response, next: NextFunction) => {
   try {
-    const followers = await Follow.findFollowers(req.params.userId);
+    const { userId } = req.params;
+    if (!userId) {
+      throw new AppError('User ID is required', 400);
+    }
+    
+    const followers = await Follow.findFollowers(userId);
 
     res.json({
       status: 'success',
@@ -136,9 +125,14 @@ router.get('/:userId/followers', authenticate, async (req: Request, res: Respons
 });
 
 // Get user's following
-router.get('/:userId/following', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+router.get('/:userId/following', async (req: UserParamRequest, res: Response, next: NextFunction) => {
   try {
-    const following = await Follow.findFollowing(req.params.userId);
+    const { userId } = req.params;
+    if (!userId) {
+      throw new AppError('User ID is required', 400);
+    }
+    
+    const following = await Follow.findFollowing(userId);
 
     res.json({
       status: 'success',
@@ -149,4 +143,4 @@ router.get('/:userId/following', authenticate, async (req: Request, res: Respons
   }
 });
 
-export const userRouter = router; 
+export const userRouter: express.Router = router; 

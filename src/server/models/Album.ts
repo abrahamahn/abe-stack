@@ -1,6 +1,8 @@
 import { Pool } from 'pg';
+
 import { BaseModel, BaseRepository } from '../database/BaseRepository';
 import { DatabaseConnectionManager } from '../database/config';
+
 import { Artist } from './Artist';
 import { Track } from './Track';
 
@@ -42,7 +44,7 @@ export class AlbumRepository extends BaseRepository<AlbumAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [artistId]);
-      return result.rows;
+      return result.rows as AlbumAttributes[];
     } catch (error) {
       this.logger.error('Error in findByArtistId', { artistId, error });
       throw error;
@@ -62,7 +64,7 @@ export class AlbumRepository extends BaseRepository<AlbumAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [genre]);
-      return result.rows;
+      return result.rows as AlbumAttributes[];
     } catch (error) {
       this.logger.error('Error in findByGenre', { genre, error });
       throw error;
@@ -110,11 +112,11 @@ export class AlbumRepository extends BaseRepository<AlbumAttributes> {
 export const albumRepository = new AlbumRepository();
 
 export class Album implements AlbumAttributes {
-  static belongsTo(_Artist: any, _options: { foreignKey: string; as: string; }) {
-      throw new Error('Method not implemented.');
+  static belongsTo(_Artist: typeof Artist, _options: { foreignKey: string; as: string; }) {
+    throw new Error('Method not implemented.');
   }
-  static hasMany(_Track: any, _options: { foreignKey: string; as: string; }) {
-      throw new Error('Method not implemented.');
+  static hasMany(_Track: typeof Track, _options: { foreignKey: string; as: string; }) {
+    throw new Error('Method not implemented.');
   }
   id: string;
   title: string;
@@ -165,7 +167,7 @@ export class Album implements AlbumAttributes {
       is_public: isPublic,
       track_count: trackCount,
       artist_id: artistId
-    } as any);
+    } as Partial<AlbumAttributes>);
     return new Album(album);
   }
 
@@ -180,7 +182,7 @@ export class Album implements AlbumAttributes {
       ...(trackCount !== undefined && { track_count: trackCount }),
       ...(artistId !== undefined && { artist_id: artistId })
     };
-    const updated = await albumRepository.update(this.id, updateData as any);
+    const updated = await albumRepository.update(this.id, updateData as Partial<AlbumAttributes>);
     Object.assign(this, updated);
     return this;
   }

@@ -1,5 +1,4 @@
-import React, { forwardRef, ComponentPropsWithoutRef } from 'react';
-import { passthroughRef } from "../../helpers/passthroughRef"
+import { forwardRef, ComponentPropsWithoutRef } from 'react';
 
 interface InputProps extends ComponentPropsWithoutRef<'input'> {}
 
@@ -19,6 +18,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
 		/>
 	);
 });
+
+Input.displayName = 'Input';
 
 // Also export as default for backward compatibility
 export default Input;

@@ -1,10 +1,14 @@
 // src/server/apis/media.ts
-import * as t from '../../shared/dataTypes';
-import multer from 'multer';
-import { MediaService } from '../services/MediaService';
-import { Request, Response } from 'express';
-import * as path from 'path';
 import * as fs from 'fs';
+import * as path from 'path';
+
+import { Request, Response } from 'express';
+import multer from 'multer';
+
+import * as t from '../../shared/dataTypes';
+import { MediaService } from '../services/MediaService';
+
+
 
 type RequestWithFile = Request & { 
   file?: Express.Multer.File;
@@ -32,12 +36,15 @@ export const streamInput = t.object({
   filename: t.string()
 });
 
-export async function streamMedia(req: Request, res: Response) {
+export function streamMedia(req: Request, res: Response) {
   try {
-    const { filename } = req.params;
+    const params = streamInput.validate(req.params);
+    if (!params) {
+      return res.status(400).json({ error: 'Invalid filename parameter' });
+    }
     
     const mediaService = new MediaService();
-    mediaService.streamMedia(req, res, filename);
+    mediaService.streamMedia(req, res, params.filename);
   } catch (error) {
     console.error('Error streaming media:', error);
     return res.status(500).json({ error: 'Failed to stream media' });

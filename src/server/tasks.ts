@@ -4,13 +4,13 @@ type Q = typeof queueTasks
 export type TaskName = keyof Q
 
 // Assert proper types.
-export type Tasks = { [K in keyof Q]: Extract<Q[K], { [T in K]: any }>[K] }
+export type Tasks = { [K in keyof Q]: Extract<Q[K], Record<K, unknown>>[K] }
 
-const tasks: Tasks = {} as any
-// Use type assertion to fix the indexing issue
-Object.keys(queueTasks).forEach((taskName) => {
-  const key = taskName as keyof typeof queueTasks;
-  tasks[key] = (queueTasks[key] as any)[key];
-});
+const tasks = Object.fromEntries(
+  Object.entries(queueTasks).map(([key, value]) => [
+    key,
+    value[key as keyof typeof value]
+  ])
+) as Tasks;
 
 export { tasks }

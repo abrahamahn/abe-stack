@@ -17,6 +17,19 @@ interface User {
   updatedAt: string;
 }
 
+// Define API response types
+interface ApiErrorResponse {
+  message: string;
+}
+
+interface ApiAuthResponse {
+  data: {
+    user: User;
+    accessToken: string;
+    requireTwoFactor?: boolean;
+  };
+}
+
 // Define the auth context type
 interface AuthContextType {
   user: User | null;
@@ -92,12 +105,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Check if user is already logged in on mount
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuth = () => {
       try {
         // Try to get user data from localStorage
         const userData = localStorage.getItem('user');
         if (userData) {
-          setUser(JSON.parse(userData));
+          setUser(JSON.parse(userData) as User);
         }
       } catch (error) {
         console.error('Error checking authentication:', error);
@@ -125,11 +138,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json() as ApiErrorResponse;
         throw new Error(errorData.message || 'Login failed');
       }
       
-      const data = await response.json();
+      const data = await response.json() as ApiAuthResponse;
       
       // Check if 2FA is required
       if (data.data && data.data.requireTwoFactor) {
@@ -183,11 +196,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json() as ApiErrorResponse;
         throw new Error(errorData.message || 'Registration failed');
       }
       
-      const data = await response.json();
+      const data = await response.json() as ApiAuthResponse;
       
       // Check if the user needs email verification
       if (data.data.user && !data.data.user.isVerified) {

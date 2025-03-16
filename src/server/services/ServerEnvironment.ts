@@ -1,4 +1,5 @@
 import { WebSocketServer } from 'ws';
+
 import { QueueDatabase } from './QueueDatabase';
 
 export type ServerConfig = {
@@ -25,13 +26,13 @@ export type ServerConfig = {
 };
 
 export type DatabaseApi = {
-	query: <T = any>(text: string, params?: any[]) => Promise<{ rows: T[] }>;
-	getClient: () => Promise<any>;
+	query: <T>(text: string, params?: T[]) => Promise<{ rows: T[] }>;
+	getClient: () => Promise<unknown>;
 };
 
 export type PubsubApi = {
-	broadcast: (key: string, value: any) => void;
-	subscribe: (key: string, callback: (value: any) => void) => () => void;
+	broadcast: (key: string, value: unknown) => void;
+	subscribe: (key: string, callback: (value: unknown) => void) => () => void;
 };
 
 export type ServerEnvironment = {

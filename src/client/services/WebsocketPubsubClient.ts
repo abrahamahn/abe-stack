@@ -1,19 +1,23 @@
-import { ClientPubsubMessage, ServerPubsubMessage } from "../../shared/PubSubTypes"
 import { SecondMs } from "../../shared/dateHelpers"
+import { ClientPubsubMessage, ServerPubsubMessage } from "../../shared/PubSubTypes"
 import { sleep } from "../../shared/sleep"
+
 import { ClientConfig } from "./ClientConfig"
 
-const debug = (...args: any[]) => console.log("pubsub:", ...args)
+// Define a type for pubsub values
+type PubSubValue = unknown;
+
+const debug = (...args: unknown[]) => console.log("pubsub:", ...args)
 
 export class WebsocketPubsubClient {
 	private ws!: WebSocket
 	private reconnectAttempt = 1
-	private subscriptions: Map<string, Set<(value: any) => void>> = new Map()
+	private subscriptions: Map<string, Set<(value: PubSubValue) => void>> = new Map()
 
 	constructor(
 		private args: {
 			config: ClientConfig
-			onChange: (key: string, value: any) => void
+			onChange: (key: string, value: PubSubValue) => void
 			onStart: () => void
 		}
 	) {
@@ -41,7 +45,7 @@ export class WebsocketPubsubClient {
 		}
 
 		this.ws.onmessage = (event) => {
-			const message = JSON.parse(event.data) as ServerPubsubMessage
+			const message = JSON.parse(event.data as string) as ServerPubsubMessage
 			debug("<", message.type, message.key, message.value)
 			
 			// Call the global onChange handler
@@ -62,7 +66,7 @@ export class WebsocketPubsubClient {
 		
 		this.ws.onclose = () => {
 			debug("closed")
-			this.attemptReconnect()
+			void this.attemptReconnect()
 		}
 	}
 
@@ -81,13 +85,13 @@ export class WebsocketPubsubClient {
 		}
 	}
 
-	subscribe(key: string, callback?: (value: any) => void) {
+	subscribe(key: string, callback?: (value: PubSubValue) => void) {
 		// Add to subscriptions map
 		if (callback) {
 			if (!this.subscriptions.has(key)) {
 				this.subscriptions.set(key, new Set())
 			}
-			this.subscriptions.get(key)!.add(callback)
+			this.subscriptions.get(key)?.add(callback)
 		}
 		
 		// Send subscribe message
@@ -97,11 +101,11 @@ export class WebsocketPubsubClient {
 		return () => this.unsubscribe(key, callback)
 	}
 
-	unsubscribe(key: string, callback?: (value: any) => void) {
+	unsubscribe(key: string, callback?: (value: PubSubValue) => void) {
 		// Remove from subscriptions map
 		if (callback && this.subscriptions.has(key)) {
-			this.subscriptions.get(key)!.delete(callback)
-			if (this.subscriptions.get(key)!.size === 0) {
+			this.subscriptions.get(key)?.delete(callback)
+			if ((this.subscriptions.get(key)?.size ?? 0) === 0) {
 				this.subscriptions.delete(key)
 				// Only send unsubscribe if no more callbacks for this key
 				this.send({ type: "unsubscribe", key })

@@ -1,8 +1,10 @@
-import { Pool } from 'pg';
+import { randomUUID } from 'crypto';
 import { readdir, readFile } from 'fs/promises';
 import { join } from 'path';
+
 import * as bcrypt from 'bcrypt';
-import { randomUUID } from 'crypto';
+import { Pool } from 'pg';
+
 
 // Configuration
 const config = {
@@ -154,16 +156,17 @@ async function seedDatabase() {
     } else {
       console.log(`Database ${config.database} already exists`);
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error connecting to PostgreSQL server:');
-    if (error.code === '28P01') {
+    const pgError = error as { code?: string };
+    if (pgError.code === '28P01') {
       console.error('Authentication failed. Please check your PostgreSQL username and password.');
       console.error('You can set them using environment variables DB_USER and DB_PASSWORD.');
       console.error('\nFor example:');
       console.error('  Windows PowerShell: $env:DB_USER="your_username"; $env:DB_PASSWORD="your_password"; npm run seed:demo');
       console.error('  Windows CMD: set DB_USER=your_username && set DB_PASSWORD=your_password && npm run seed:demo');
       console.error('  Linux/macOS: DB_USER=your_username DB_PASSWORD=your_password npm run seed:demo');
-    } else if (error.code === 'ECONNREFUSED') {
+    } else if (pgError.code === 'ECONNREFUSED') {
       console.error('Connection refused. Please check if PostgreSQL is running and accessible.');
       console.error('You can set the host and port using environment variables DB_HOST and DB_PORT.');
     } else {
@@ -236,7 +239,7 @@ async function seedDatabase() {
     }
     
     // Check if users already exist
-    const usersResult = await dbPool.query('SELECT COUNT(*) FROM users');
+    const usersResult = await dbPool.query<{ count: string }>('SELECT COUNT(*) FROM users');
     const userCount = parseInt(usersResult.rows[0].count);
     
     if (userCount > 0) {
@@ -294,8 +297,9 @@ async function seedDatabase() {
           }
         }
       }
-    } catch (error: any) {
-      if (error.code === '42P01') { // relation does not exist
+    } catch (error: unknown) {
+      const pgError = error as { code?: string };
+      if (pgError.code === '42P01') { // relation does not exist
         console.log('Follows table does not exist. Skipping follow relationships.');
         console.log('Please run the migration to create social tables first.');
       } else {
@@ -354,8 +358,9 @@ async function seedDatabase() {
             }
           }
         }
-      } catch (error: any) {
-        if (error.code === '42P01') { // relation does not exist
+      } catch (error: unknown) {
+        const pgError = error as { code?: string };
+        if (pgError.code === '42P01') { // relation does not exist
           console.log('Likes table does not exist. Skipping likes creation.');
           console.log('Please run the migration to create social tables first.');
         } else {
@@ -401,16 +406,18 @@ async function seedDatabase() {
             );
           }
         }
-      } catch (error: any) {
-        if (error.code === '42P01') { // relation does not exist
+      } catch (error: unknown) {
+        const pgError = error as { code?: string };
+        if (pgError.code === '42P01') { // relation does not exist
           console.log('Comments table does not exist. Skipping comments creation.');
           console.log('Please run the migration to create social tables first.');
         } else {
           throw error;
         }
       }
-    } catch (error: any) {
-      if (error.code === '42P01') { // relation does not exist
+    } catch (error: unknown) {
+      const pgError = error as { code?: string };
+      if (pgError.code === '42P01') { // relation does not exist
         console.log('Posts table does not exist. Skipping posts, likes, and comments creation.');
         console.log('Please run the migration to create social tables first.');
       } else {
@@ -424,7 +431,7 @@ async function seedDatabase() {
       console.log(`- Username: ${user.username}, Password: ${user.password}, Role: ${user.role}`);
     });
     
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error seeding database:', error);
     throw error;
   } finally {

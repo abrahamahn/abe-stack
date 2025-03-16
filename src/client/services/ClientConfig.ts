@@ -1,15 +1,26 @@
 // src/client/services/ClientConfig.ts
-import { clientEnv } from '../config/environment';
+// Remove unused import
+// import { clientEnv } from '../config/environment';
 
 export type ClientConfig = {
   production: boolean;
   host: string;
 };
 
-// For Vite, we'll use import.meta.env instead of __CLIENT_CONFIG__
+// Add interface for window with config
+interface WindowWithConfig extends Window {
+  __config: ClientConfig;
+}
+
+// Safely access environment variables
+const isProd = process.env.NODE_ENV === 'production';
+const apiHost = process.env.VITE_API_HOST || window.location.host;
+
+// For Vite, we'll use environment variables instead of import.meta.env
 export const clientConfig: ClientConfig = {
-  production: import.meta.env.PROD,
-  host: import.meta.env.VITE_API_HOST || window.location.host
+  production: isProd,
+  host: apiHost
 };
 
-window["__config"] = clientConfig;
+// Use double assertion for window
+(window as unknown as WindowWithConfig).__config = clientConfig;

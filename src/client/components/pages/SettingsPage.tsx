@@ -1,14 +1,22 @@
-import React from 'react';
 import { PageContent } from '../layouts/PageContent';
 import { useTheme } from '../theme';
 
 export function SettingsPage() {
-  const { theme, toggleTheme, useSystemTheme, isUsingSystemTheme, setTheme } = useTheme();
+  const { theme, toggleTheme, useSystemTheme: enableSystemTheme, isUsingSystemTheme, setTheme } = useTheme();
 
   // Function to disable system theme
   const disableSystemTheme = () => {
     // Keep current theme but disable system theme
     setTheme(theme);
+  };
+  
+  // Handler for system theme toggle
+  const handleSystemThemeToggle = () => {
+    if (isUsingSystemTheme) {
+      disableSystemTheme();
+    } else {
+      enableSystemTheme();
+    }
   };
 
   // Define styles as a TypeScript object
@@ -63,7 +71,7 @@ export function SettingsPage() {
     },
     // Toggle Switch styles
     switch: {
-      position: 'relative',
+      position: 'relative' as const,
       display: 'inline-block',
       width: '60px',
       height: '34px',
@@ -74,7 +82,7 @@ export function SettingsPage() {
       height: 0,
     },
     slider: {
-      position: 'absolute',
+      position: 'absolute' as const,
       cursor: 'pointer',
       top: 0,
       left: 0,
@@ -85,7 +93,7 @@ export function SettingsPage() {
       borderRadius: '34px',
     },
     sliderBefore: {
-      position: 'absolute',
+      position: 'absolute' as const,
       content: '""',
       height: '26px',
       width: '26px',
@@ -126,7 +134,7 @@ export function SettingsPage() {
                   type="checkbox" 
                   id="system-theme"
                   checked={isUsingSystemTheme}
-                  onChange={() => isUsingSystemTheme ? disableSystemTheme() : useSystemTheme()}
+                  onChange={handleSystemThemeToggle}
                   style={styles.switchInput}
                 />
                 <span 

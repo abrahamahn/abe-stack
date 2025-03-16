@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+
 import { BaseModel, BaseRepository } from '../database/BaseRepository';
 import { DatabaseConnectionManager } from '../database/config';
 
@@ -42,7 +43,7 @@ export class TwoFactorAuthRepository extends BaseRepository<TwoFactorAuthAttribu
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [userId]);
-      return result.rows[0] || null;
+      return (result.rows[0] || null) as TwoFactorAuthAttributes | null;
     } catch (error) {
       this.logger.error('Error in findByUserId', { userId, error });
       throw error;
@@ -54,11 +55,11 @@ export class TwoFactorAuthRepository extends BaseRepository<TwoFactorAuthAttribu
 export const twoFactorAuthRepository = new TwoFactorAuthRepository();
 
 export class TwoFactorAuth implements TwoFactorAuthAttributes {
-  static scope(_: any): TwoFactorAuth {
+  static scope(_: undefined): TwoFactorAuth {
     throw new Error('Method not implemented.');
   }
 
-  static belongsTo(_user: any, _options: { foreignKey: string; as: string; }) {
+  static belongsTo(_user: typeof TwoFactorAuth, _options: { foreignKey: string; as: string; }) {
     throw new Error('Method not implemented.');
   }
 
@@ -100,7 +101,7 @@ export class TwoFactorAuth implements TwoFactorAuthAttributes {
       user_id: userId,
       backup_codes: backupCodes,
       last_used: lastUsed
-    } as any);
+    } as Partial<TwoFactorAuthAttributes>);
     return new TwoFactorAuth(twoFactorAuth);
   }
 
@@ -113,7 +114,7 @@ export class TwoFactorAuth implements TwoFactorAuthAttributes {
       ...(backupCodes !== undefined && { backup_codes: backupCodes }),
       ...(lastUsed !== undefined && { last_used: lastUsed })
     };
-    const updated = await twoFactorAuthRepository.update(this.id, updateData as any);
+    const updated = await twoFactorAuthRepository.update(this.id, updateData as Partial<TwoFactorAuthAttributes>);
     Object.assign(this, updated);
     return this;
   }

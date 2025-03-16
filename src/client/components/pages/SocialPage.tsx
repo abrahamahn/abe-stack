@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { useClientEnvironment } from '../../services/ClientEnvironment';
+import { useState, useEffect, useCallback } from 'react';
+
+import { socialService } from '../../services/social';
 import { PageContent } from '../layouts/PageContent';
+import { CommentSection } from '../social/CommentSection';
 import { CreatePostForm } from '../social/CreatePostForm';
 import { PostCard } from '../social/PostCard';
-import { CommentSection } from '../social/CommentSection';
 import { UserProfileCard } from '../social/UserProfileCard';
-import { socialService } from '../../services/social';
 
 interface User {
   id: string;
@@ -37,26 +37,16 @@ interface Post {
   createdAt: string;
 }
 
-interface FeedResponse {
-  posts: Post[];
-  hasMore: boolean;
-}
-
 export function SocialPage() {
-  const environment = useClientEnvironment();
   const [posts, setPosts] = useState<Post[]>([]);
   const [suggestedUsers, setSuggestedUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [offset, setOffset] = useState(0);
   const [activeCommentPostId, setActiveCommentPostId] = useState<string | null>(null);
-  
-  useEffect(() => {
-    fetchFeed();
-    fetchSuggestedUsers();
-  }, []);
-  
-  const fetchFeed = async () => {
+
+    
+  const fetchFeed = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await socialService.getFeed('home', undefined, offset);
@@ -71,9 +61,9 @@ export function SocialPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [offset]);
   
-  const fetchSuggestedUsers = async () => {
+  const fetchSuggestedUsers = useCallback(() => {
     try {
       // This is a mock implementation - in a real app, you'd have an API endpoint for this
       // For now, we'll create some dummy users
@@ -117,17 +107,24 @@ export function SocialPage() {
     } catch (error) {
       console.error('Error fetching suggested users:', error);
     }
-  };
+  }, []);
+  
+  
+  useEffect(() => {
+    void fetchFeed();
+    void fetchSuggestedUsers();
+  }, [fetchFeed, fetchSuggestedUsers]);
+
   
   const handleLoadMore = () => {
     setOffset(prev => prev + 10);
-    fetchFeed();
+    void fetchFeed();
   };
   
   const handleRefresh = () => {
     setOffset(0);
-    fetchFeed();
-    fetchSuggestedUsers();
+    void fetchFeed();
+    void fetchSuggestedUsers();
   };
   
   const handleCommentClick = (postId: string) => {
@@ -208,7 +205,6 @@ export function SocialPage() {
               <UserProfileCard 
                 key={user.id} 
                 user={user} 
-                onRefresh={fetchSuggestedUsers}
               />
             ))}
           </div>

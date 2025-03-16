@@ -44,7 +44,7 @@ export function* iterateNextElement(args: { container: Element; start: Element; 
 
 function prevElement(element: Element): Element | undefined {
 	// If element has a previous sibling, find its last descendant.
-	let prevSibling = element.previousElementSibling
+	const prevSibling = element.previousElementSibling
 	if (prevSibling) {
 		return lastChildElement(prevSibling) || prevSibling
 	}

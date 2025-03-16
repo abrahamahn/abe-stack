@@ -1,4 +1,3 @@
-import React from 'react';
 import { useClientEnvironment } from '../../services/ClientEnvironment';
 import { PageContent } from '../layouts/PageContent';
 
@@ -62,7 +61,7 @@ export function HomePage() {
             It extends the powerful foundation of Chet Stack with additional features, UI components, and ready-to-use patterns.
           </p>
           <p style={{ fontSize: '1.1rem', lineHeight: '1.6', marginBottom: '20px' }}>
-            Whether you're building a social platform, content management system, or any modern web application, ABE Stack provides the essential building blocks 
+            Whether you&apos;re building a social platform, content management system, or any modern web application, ABE Stack provides the essential building blocks 
             so you can focus on your unique business logic rather than reinventing the wheel.
           </p>
         </section>
@@ -176,11 +175,11 @@ export function HomePage() {
             The best way to understand ABE Stack is to explore its features. Use the navigation menu to check out different sections:
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
-            <ExploreCard title="Dashboard" path="/dashboard" description="Overview of application capabilities" onClick={() => handleNavigate('/dashboard')} />
-            <ExploreCard title="Profile" path="/profile" description="User profile management" onClick={() => handleNavigate('/profile')} />
-            <ExploreCard title="Explore" path="/explore" description="Content discovery interface" onClick={() => handleNavigate('/explore')} />
-            <ExploreCard title="Notifications" path="/notifications" description="Notification system demo" onClick={() => handleNavigate('/notifications')} />
-            <ExploreCard title="Settings" path="/settings" description="Application preferences" onClick={() => handleNavigate('/settings')} />
+            <ExploreCard title="Dashboard" _path="/dashboard" description="Overview of application capabilities" onClick={() => handleNavigate('/dashboard')} />
+            <ExploreCard title="Profile" _path="/profile" description="User profile management" onClick={() => handleNavigate('/profile')} />
+            <ExploreCard title="Explore" _path="/explore" description="Content discovery interface" onClick={() => handleNavigate('/explore')} />
+            <ExploreCard title="Notifications" _path="/notifications" description="Notification system demo" onClick={() => handleNavigate('/notifications')} />
+            <ExploreCard title="Settings" _path="/settings" description="Application preferences" onClick={() => handleNavigate('/settings')} />
           </div>
         </section>
 
@@ -240,7 +239,7 @@ function FeatureCard({ title, description }: { title: string; description: strin
 }
 
 // Explore card component for navigation links
-function ExploreCard({ title, path, description, onClick }: { title: string; path: string; description: string; onClick: () => void }) {
+function ExploreCard({ title, _path: _path, description, onClick }: { title: string; _path: string; description: string; onClick: () => void }) {
   return (
     <div 
       onClick={onClick}

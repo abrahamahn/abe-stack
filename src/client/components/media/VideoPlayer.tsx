@@ -1,7 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { videoPlayerStyles } from '../../styles';
-import { mergeStyles, conditionalStyle } from '../../utils/styleUtils';
+
 import { formatDuration } from '../../helpers/formatters';
+import { videoPlayerStyles } from '../../styles';
+import { mergeStyles } from '../../utils/styleUtils';
+
+// Define interface for document with vendor-specific fullscreen properties
+interface DocumentWithFullscreen extends Document {
+  webkitFullscreenElement?: Element | null;
+  mozFullScreenElement?: Element | null;
+  webkitExitFullscreen?: () => Promise<void>;
+  mozCancelFullScreen?: () => Promise<void>;
+}
+
+// Define interface for element with vendor-specific fullscreen methods
+interface ElementWithFullscreen extends HTMLDivElement {
+  webkitRequestFullscreen?: () => Promise<void>;
+  mozRequestFullScreen?: () => Promise<void>;
+}
 
 interface VideoSource {
   src: string;
@@ -117,10 +132,11 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   // Handle fullscreen
   useEffect(() => {
     const handleFullscreenChange = () => {
+      const doc = document as DocumentWithFullscreen;
       setIsFullscreen(Boolean(
         document.fullscreenElement ||
-        (document as any).webkitFullscreenElement ||
-        (document as any).mozFullScreenElement
+        doc.webkitFullscreenElement ||
+        doc.mozFullScreenElement
       ));
     };
     
@@ -141,7 +157,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     if (playing) {
       videoRef.current.pause();
     } else {
-      videoRef.current.play();
+      void videoRef.current.play();
     }
   };
   
@@ -188,20 +204,22 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     if (!playerRef.current) return;
     
     if (isFullscreen) {
+      const doc = document as DocumentWithFullscreen;
       if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if ((document as any).webkitExitFullscreen) {
-        (document as any).webkitExitFullscreen();
-      } else if ((document as any).mozCancelFullScreen) {
-        (document as any).mozCancelFullScreen();
+        void document.exitFullscreen();
+      } else if (doc.webkitExitFullscreen) {
+        void doc.webkitExitFullscreen();
+      } else if (doc.mozCancelFullScreen) {
+        void doc.mozCancelFullScreen();
       }
     } else {
-      if (playerRef.current.requestFullscreen) {
-        playerRef.current.requestFullscreen();
-      } else if ((playerRef.current as any).webkitRequestFullscreen) {
-        (playerRef.current as any).webkitRequestFullscreen();
-      } else if ((playerRef.current as any).mozRequestFullScreen) {
-        (playerRef.current as any).mozRequestFullScreen();
+      const element = playerRef.current as ElementWithFullscreen;
+      if (element.requestFullscreen) {
+        void element.requestFullscreen();
+      } else if (element.webkitRequestFullscreen) {
+        void element.webkitRequestFullscreen();
+      } else if (element.mozRequestFullScreen) {
+        void element.mozRequestFullScreen();
       }
     }
   };
@@ -223,7 +241,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
       if (videoRef.current) {
         videoRef.current.currentTime = currentPlaybackTime;
         if (isPlaying) {
-          videoRef.current.play();
+          void videoRef.current.play();
         }
       }
     }, 0);

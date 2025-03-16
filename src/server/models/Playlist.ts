@@ -1,9 +1,11 @@
 import { Pool } from 'pg';
+
 import { BaseModel, BaseRepository } from '../database/BaseRepository';
 import { DatabaseConnectionManager } from '../database/config';
-import { User } from './User';
-import { Track } from './Track';
+
 import { PlaylistTrack } from './PlaylistTrack';
+import { Track } from './Track';
+import { userRepository, UserAttributes } from './User';
 
 export interface PlaylistAttributes extends BaseModel {
   name: string;
@@ -43,7 +45,7 @@ export class PlaylistRepository extends BaseRepository<PlaylistAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [userId]);
-      return result.rows;
+      return result.rows as PlaylistAttributes[];
     } catch (error) {
       this.logger.error('Error in findByUserId', { userId, error });
       throw error;
@@ -64,7 +66,7 @@ export class PlaylistRepository extends BaseRepository<PlaylistAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [limit, offset]);
-      return result.rows;
+      return result.rows as PlaylistAttributes[];
     } catch (error) {
       this.logger.error('Error in findPublic', { limit, offset, error });
       throw error;
@@ -148,10 +150,10 @@ export class PlaylistRepository extends BaseRepository<PlaylistAttributes> {
 export const playlistRepository = new PlaylistRepository();
 
 export class Playlist implements PlaylistAttributes {
-  static belongsTo(_User: any, _options: { foreignKey: string; as: string; }) {
+  static belongsTo(_User: UserAttributes, _options: { foreignKey: string; as: string; }) {
       throw new Error('Method not implemented.');
   }
-  static belongsToMany(_Track: any, _options: { through: any; foreignKey: string; as: string; }) {
+  static belongsToMany(_Track: Track, _options: { through: PlaylistTrack; foreignKey: string; as: string; }) {
       throw new Error('Method not implemented.');
   }
   id: string;
@@ -206,7 +208,7 @@ export class Playlist implements PlaylistAttributes {
       track_count: trackCount,
       followers_count: followersCount,
       user_id: userId
-    } as any);
+    } as Partial<PlaylistAttributes>);
     return new Playlist(playlist);
   }
 
@@ -224,7 +226,7 @@ export class Playlist implements PlaylistAttributes {
       ...(followersCount !== undefined && { followers_count: followersCount }),
       ...(userId !== undefined && { user_id: userId })
     };
-    const updated = await playlistRepository.update(this.id, updateData as any);
+    const updated = await playlistRepository.update(this.id, updateData as Partial<PlaylistAttributes>);
     Object.assign(this, updated);
     return this;
   }
@@ -253,8 +255,8 @@ export class Playlist implements PlaylistAttributes {
     this.followersCount = Math.max(0, this.followersCount - 1);
   }
 
-  async getUser(): Promise<User | null> {
-    return User.findByPk(this.userId);
+  async getUser(): Promise<UserAttributes | null> {
+    return await userRepository.findById(this.userId);
   }
 
   async getTracks(): Promise<Track[]> {

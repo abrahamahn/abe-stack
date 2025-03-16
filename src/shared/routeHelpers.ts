@@ -31,7 +31,7 @@ export function matchRoutePath(pattern: string, urlPath: string): Record<string,
 		return undefined;
 	}
 
-	let params: Record<string, string> = {}
+	const params: Record<string, string> = {}
 
 	for (let i = 0; i < patternSegments.length; i++) {
 		const patternSegment = patternSegments[i]

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useClientEnvironment } from '../../services/ClientEnvironment';
+import { useState } from 'react';
+
 import { PageContent } from '../layouts/PageContent';
 
 // Notifications page styles
@@ -31,7 +31,7 @@ const styles = {
   },
   empty: {
     padding: '40px 20px',
-    textAlign: 'center',
+    textAlign: 'center' as const,
     backgroundColor: 'var(--surface)',
     borderRadius: '8px',
     color: 'var(--text-secondary)'
@@ -123,7 +123,6 @@ const styles = {
 };
 
 export function NotificationsPage() {
-  const environment = useClientEnvironment();
   const [activeTab, setActiveTab] = useState('all');
   
   // Mock notifications data

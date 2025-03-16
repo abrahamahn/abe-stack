@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 interface Comment {
   id: string;
@@ -10,6 +10,16 @@ interface Comment {
   isLiked: boolean;
   createdAt: string;
   replies?: Comment[];
+}
+
+// Define API response interfaces
+interface CommentsResponse {
+  comments: Comment[];
+  hasMore: boolean;
+}
+
+interface CommentResponse extends Comment {
+  // Extends the Comment interface for single comment responses
 }
 
 interface CommentsProps {
@@ -33,15 +43,51 @@ export const Comments: React.FC<CommentsProps> = ({
   const lastCommentRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    fetchComments();
+  const fetchComments = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      // TODO: Replace with actual API call
+      const response = await fetch(`/api/posts/${postId}/comments`);
+      if (!response.ok) throw new Error('Failed to fetch comments');
+      const data = await response.json() as CommentsResponse;
+      setComments(data.comments);
+      setHasMore(data.hasMore);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load comments');
+    } finally {
+      setIsLoading(false);
+    }
   }, [postId]);
+
+  useEffect(() => {
+    void fetchComments();
+  }, [fetchComments]);
+
+  const loadMore = useCallback(async () => {
+    if (!hasMore || isLoading) return;
+    
+    try {
+      setIsLoading(true);
+      await onLoadMore?.();
+      // TODO: Replace with actual API call
+      const response = await fetch(`/api/posts/${postId}/comments?offset=${comments.length}`);
+      if (!response.ok) throw new Error('Failed to fetch more comments');
+      const data = await response.json() as CommentsResponse;
+      setComments(prev => [...prev, ...data.comments]);
+      setHasMore(data.hasMore);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load more comments');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [hasMore, isLoading, onLoadMore, postId, comments.length]);
 
   useEffect(() => {
     observer.current = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !isLoading) {
-          loadMore();
+          void loadMore();
         }
       },
       { threshold: 0.5 }
@@ -56,43 +102,7 @@ export const Comments: React.FC<CommentsProps> = ({
         observer.current.disconnect();
       }
     };
-  }, [hasMore, isLoading]);
-
-  const fetchComments = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      // TODO: Replace with actual API call
-      const response = await fetch(`/api/posts/${postId}/comments`);
-      if (!response.ok) throw new Error('Failed to fetch comments');
-      const data = await response.json();
-      setComments(data.comments);
-      setHasMore(data.hasMore);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load comments');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loadMore = async () => {
-    if (!hasMore || isLoading) return;
-    
-    try {
-      setIsLoading(true);
-      await onLoadMore?.();
-      // TODO: Replace with actual API call
-      const response = await fetch(`/api/posts/${postId}/comments?offset=${comments.length}`);
-      if (!response.ok) throw new Error('Failed to fetch more comments');
-      const data = await response.json();
-      setComments(prev => [...prev, ...data.comments]);
-      setHasMore(data.hasMore);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load more comments');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [hasMore, isLoading, loadMore]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,7 +122,7 @@ export const Comments: React.FC<CommentsProps> = ({
       
       if (!response.ok) throw new Error('Failed to post comment');
       
-      const comment = await response.json();
+      const comment = await response.json() as CommentResponse;
       setComments(prev => [comment, ...prev]);
       setNewComment('');
       if (textareaRef.current) {
@@ -141,6 +151,16 @@ export const Comments: React.FC<CommentsProps> = ({
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to like comment');
     }
+  };
+
+  // Void-returning wrapper for handleSubmit
+  const handleSubmitWrapper = (e: React.FormEvent) => {
+    void handleSubmit(e);
+  };
+
+  // Void-returning wrapper for handleLike
+  const handleLikeWrapper = (commentId: string) => {
+    void handleLike(commentId);
   };
 
   const formatDate = (dateString: string) => {
@@ -282,7 +302,7 @@ export const Comments: React.FC<CommentsProps> = ({
 
   return (
     <div style={styles.container} className={className}>
-      <form onSubmit={handleSubmit} style={styles.form}>
+      <form onSubmit={handleSubmitWrapper} style={styles.form}>
         <textarea
           ref={textareaRef}
           value={newComment}
@@ -331,7 +351,7 @@ export const Comments: React.FC<CommentsProps> = ({
                   ...styles.actionButton,
                   ...(comment.isLiked && styles.actionButtonLiked),
                 }}
-                onClick={() => handleLike(comment.id)}
+                onClick={() => handleLikeWrapper(comment.id)}
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e9ecef'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
               >
@@ -368,7 +388,7 @@ export const Comments: React.FC<CommentsProps> = ({
                             ...styles.actionButton,
                             ...(reply.isLiked && styles.actionButtonLiked),
                           }}
-                          onClick={() => handleLike(reply.id)}
+                          onClick={() => handleLikeWrapper(reply.id)}
                           onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e9ecef'}
                           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                         >

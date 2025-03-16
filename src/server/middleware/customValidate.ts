@@ -1,9 +1,23 @@
 import express, { Response, NextFunction } from 'express';
-import { Validator } from '../../shared/dataTypes';
-import { ValidationFailedError } from './error';
 import { z } from 'zod';
 
+import { Validator } from '../../shared/dataTypes';
+
+import { ValidationFailedError } from './error';
+
 type ZodValidator<T> = z.ZodType<T>;
+
+interface ValidatedData<T> {
+  body: T;
+  query: Record<string, string>;
+  params: Record<string, string>;
+}
+
+interface ValidatedRequest<T> extends express.Request {
+  body: T;
+  query: Record<string, string>;
+  params: Record<string, string>;
+}
 
 function adaptZodValidator<T>(validator: ZodValidator<T>): Validator<T> {
   return {
@@ -34,10 +48,11 @@ export const customValidate = <T>(
 ) => {
   const validator = schema instanceof z.ZodType ? adaptZodValidator(schema) : schema;
   
-  return async (req: express.Request, _res: Response, next: NextFunction) => {
+  return (req: express.Request, _res: Response, next: NextFunction) => {
     try {
-      const typedReq = req as any;
+      const typedReq = req as ValidatedRequest<T>;
       let validatedData: T;
+      let validatedStructure: ValidatedData<T>;
       
       switch (source) {
         case 'body':
@@ -46,21 +61,22 @@ export const customValidate = <T>(
           break;
         case 'query':
           validatedData = validator.validate(typedReq.query);
-          typedReq.query = validatedData as any;
+          typedReq.query = validatedData as Record<string, string>;
           break;
         case 'params':
           validatedData = validator.validate(typedReq.params);
-          typedReq.params = validatedData as any;
+          typedReq.params = validatedData as Record<string, string>;
           break;
         default:
-          validatedData = validator.validate({
+          validatedStructure = validator.validate({
             body: typedReq.body,
             query: typedReq.query,
             params: typedReq.params
-          });
-          typedReq.body = (validatedData as any).body ?? {};
-          typedReq.query = (validatedData as any).query ?? {};
-          typedReq.params = (validatedData as any).params ?? {};
+          }) as ValidatedData<T>;
+          typedReq.body = validatedStructure.body;
+          typedReq.query = validatedStructure.query;
+          typedReq.params = validatedStructure.params;
+          validatedData = validatedStructure.body;
       }
       
       next();

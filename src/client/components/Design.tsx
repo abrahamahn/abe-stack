@@ -1,4 +1,3 @@
-import React from 'react';
 import { useClientEnvironment } from '../services/ClientEnvironment';
 
 export function Design({ page }: { page: string }) {

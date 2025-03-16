@@ -1,6 +1,8 @@
 import { Pool } from 'pg';
-import { DatabaseConnectionManager } from './config';
+
 import { Logger } from '../services/LoggerService';
+
+import { DatabaseConnectionManager } from './config';
 
 export interface BaseModel {
   id: string;
@@ -20,13 +22,19 @@ export abstract class BaseRepository<T extends BaseModel> {
   /**
    * Convert an object to SQL parameters for prepared statements
    */
-  protected objectToParams(obj: Partial<T>, startIndex: number = 1): [string[], any[]] {
-    const values: any[] = [];
+  protected objectToParams(obj: Partial<T>, startIndex: number = 1): [string[], (string | number | boolean | Date | null)[]] {
+    const values: (string | number | boolean | Date | null)[] = [];
     const placeholders: string[] = [];
     
     Object.entries(obj).forEach(([_key, value], index) => {
-      if (value !== undefined) {
-        values.push(value);
+      if (value !== undefined && (
+        typeof value === 'string' ||
+        typeof value === 'number' ||
+        typeof value === 'boolean' ||
+        value instanceof Date ||
+        value === null
+      )) {
+        values.push(value as string | number | boolean | Date | null);
         placeholders.push(`$${startIndex + index}`);
       }
     });
@@ -45,8 +53,8 @@ export abstract class BaseRepository<T extends BaseModel> {
     `;
 
     try {
-      const result = await (client || DatabaseConnectionManager.getPool()).query(query, [id]);
-      return result.rows[0] || null;
+      const result = await (client || DatabaseConnectionManager.getPool()).query<T>(query, [id]);
+      return result.rows[0] as T | null;
     } catch (error) {
       this.logger.error('Error in findById', { id, error });
       throw error;
@@ -66,14 +74,16 @@ export abstract class BaseRepository<T extends BaseModel> {
     } = {}
   ): Promise<T[]> {
     const conditions: string[] = [];
-    const values: any[] = [];
+    const values: (string | number | boolean | Date | null)[] = [];
     let paramIndex = 1;
 
     Object.entries(where).forEach(([key, value]) => {
       if (value !== undefined) {
         conditions.push(`${key} = $${paramIndex}`);
-        values.push(value);
-        paramIndex++;
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value instanceof Date || value === null) {
+          values.push(value as string | number | boolean | Date | null);
+          paramIndex++;
+        }
       }
     });
 
@@ -90,7 +100,7 @@ export abstract class BaseRepository<T extends BaseModel> {
     if (options.offset) values.push(options.offset);
 
     try {
-      const result = await (options.client || DatabaseConnectionManager.getPool()).query(query, values);
+      const result = await (options.client || DatabaseConnectionManager.getPool()).query<T>(query, values);
       return result.rows;
     } catch (error) {
       this.logger.error('Error in findAll', { where, options, error });
@@ -112,7 +122,7 @@ export abstract class BaseRepository<T extends BaseModel> {
     `;
 
     try {
-      const result = await (client || DatabaseConnectionManager.getPool()).query(query, values);
+      const result = await (client || DatabaseConnectionManager.getPool()).query<T>(query, values);
       return result.rows[0];
     } catch (error) {
       this.logger.error('Error in create', { data, error });
@@ -137,7 +147,7 @@ export abstract class BaseRepository<T extends BaseModel> {
     `;
 
     try {
-      const result = await (client || DatabaseConnectionManager.getPool()).query(query, [...values, id]);
+      const result = await (client || DatabaseConnectionManager.getPool()).query<T>(query, [...values, id]);
       return result.rows[0];
     } catch (error) {
       this.logger.error('Error in update', { id, data, error });
@@ -156,7 +166,7 @@ export abstract class BaseRepository<T extends BaseModel> {
     `;
 
     try {
-      const result = await (client || DatabaseConnectionManager.getPool()).query(query, [id]);
+      const result = await (client || DatabaseConnectionManager.getPool()).query<T>(query, [id]);
       return result.rowCount != null && result.rowCount > 0;
     } catch (error) {
       this.logger.error('Error in delete', { id, error });
@@ -169,14 +179,16 @@ export abstract class BaseRepository<T extends BaseModel> {
    */
   async count(where: Partial<T> = {}, client?: Pool): Promise<number> {
     const conditions: string[] = [];
-    const values: any[] = [];
+    const values: (string | number | boolean | Date | null)[] = [];
     let paramIndex = 1;
 
     Object.entries(where).forEach(([key, value]) => {
       if (value !== undefined) {
         conditions.push(`${key} = $${paramIndex}`);
-        values.push(value);
-        paramIndex++;
+        if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value instanceof Date || value === null) {
+          values.push(value as string | number | boolean | Date | null);
+          paramIndex++;
+        }
       }
     });
 
@@ -187,7 +199,7 @@ export abstract class BaseRepository<T extends BaseModel> {
     `;
 
     try {
-      const result = await (client || DatabaseConnectionManager.getPool()).query(query, values);
+      const result = await (client || DatabaseConnectionManager.getPool()).query<{ count: string }>(query, values);
       return parseInt(result.rows[0].count);
     } catch (error) {
       this.logger.error('Error in count', { where, error });

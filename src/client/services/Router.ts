@@ -15,6 +15,11 @@ export type Route =
 	| { type: 'auth'; url: string; action: string; token?: string }
 	| { type: 'unknown'; url: string };
 
+// Define interface for window with router
+interface WindowWithRouter extends Window {
+	router?: Router;
+}
+
 export class Router {
 	private listeners: Set<() => void> = new Set()
 	private currentRoute: Route
@@ -114,12 +119,12 @@ export class Router {
 export function useRouter(): { route: Route; navigate: (url: string) => void } {
 	const [route, setRoute] = useState<Route>(() => {
 		// Access the router from the window object during development
-		const router = (window as any).router as Router | undefined
+		const router = (window as WindowWithRouter).router
 		return router ? router.getCurrentRoute() : { type: 'unknown', url: window.location.pathname }
 	})
 
 	useEffect(() => {
-		const router = (window as any).router as Router
+		const router = (window as WindowWithRouter).router
 		if (!router) {
 			console.error('Router not found on window object')
 			return
@@ -133,7 +138,7 @@ export function useRouter(): { route: Route; navigate: (url: string) => void } {
 	}, [])
 
 	const navigate = (url: string) => {
-		const router = (window as any).router as Router
+		const router = (window as WindowWithRouter).router
 		if (!router) {
 			console.error('Router not found on window object')
 			return

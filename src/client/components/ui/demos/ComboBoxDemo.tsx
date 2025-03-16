@@ -1,4 +1,5 @@
-import React, { useState } from "react"
+import { useState } from "react"
+
 import { ComboBox } from "../ComboBox"
 
 const items = [

@@ -37,7 +37,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({
     e.stopPropagation();
   }, []);
 
-  const validateFile = (file: File): string | null => {
+  const validateFile = useCallback((file: File): string | null => {
     if (file.size > maxSize) {
       return `File size exceeds ${maxSize / (1024 * 1024)}MB limit`;
     }
@@ -53,7 +53,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({
     }
 
     return null;
-  };
+  }, [maxSize, acceptedTypes]);
 
   const createPreview = (file: File) => {
     const reader = new FileReader();
@@ -62,6 +62,19 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({
     };
     reader.readAsDataURL(file);
   };
+
+  const handleUpload = useCallback(async (file: File) => {
+    try {
+      setIsUploading(true);
+      setProgress(0);
+      await onUpload(file);
+      setProgress(100);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Upload failed');
+    } finally {
+      setIsUploading(false);
+    }
+  }, [onUpload]);
 
   const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
@@ -80,7 +93,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({
     setError(null);
     createPreview(file);
     await handleUpload(file);
-  }, [acceptedTypes, maxSize]);
+  }, [validateFile, handleUpload]);
 
   const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -95,20 +108,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({
     setError(null);
     createPreview(file);
     await handleUpload(file);
-  }, [acceptedTypes, maxSize]);
-
-  const handleUpload = async (file: File) => {
-    try {
-      setIsUploading(true);
-      setProgress(0);
-      await onUpload(file);
-      setProgress(100);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
-    } finally {
-      setIsUploading(false);
-    }
-  };
+  }, [validateFile, handleUpload]);
 
   const getMediaIcon = () => {
     if (!preview) return (
@@ -256,12 +256,12 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
-      onDrop={handleDrop}
+      onDrop={handleDrop as (e: React.DragEvent) => void}
     >
       <input
         type="file"
         accept={acceptedTypes.join(',')}
-        onChange={handleFileSelect}
+        onChange={handleFileSelect as (e: React.ChangeEvent<HTMLInputElement>) => void}
         style={styles.input}
         id="media-upload-input"
       />

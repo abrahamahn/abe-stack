@@ -1,4 +1,5 @@
-import React, { ReactNode, CSSProperties } from 'react';
+import React, { CSSProperties } from 'react';
+
 import { usePopper } from '../../hooks/usePopper';
 
 interface DropdownMenuProps {
@@ -11,12 +12,12 @@ interface DropdownMenuProps {
 }
 
 export function DropdownMenu({ style, items, onClose }: DropdownMenuProps) {
-	const [referenceElement, setReferenceElement] = React.useState<HTMLElement | null>(null);
+	const [referenceElement, _setReferenceElement] = React.useState<HTMLElement | null>(null);
 	const [popperElement, setPopperElement] = React.useState<HTMLElement | null>(null);
 	const [selectedIndex, setSelectedIndex] = React.useState(0);
 	const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
 
-	const { styles, attributes } = usePopper(referenceElement, popperElement, {
+	const popperInstance = usePopper(referenceElement, popperElement, {
 		placement: 'bottom-start',
 		modifiers: [
 			{
@@ -26,7 +27,11 @@ export function DropdownMenu({ style, items, onClose }: DropdownMenuProps) {
 				},
 			},
 		],
-	});
+	}) as unknown as { styles: { popper: CSSProperties }; attributes: { popper: Record<string, string> } };
+
+	// Default empty styles and attributes if they don't exist
+	const styles = popperInstance.styles || {};
+	const attributes = popperInstance.attributes || {};
 
 	React.useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {

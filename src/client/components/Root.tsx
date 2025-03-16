@@ -1,20 +1,31 @@
 import { Suspense} from 'react';
+
 import { ClientEnvironment, ClientEnvironmentProvider } from '../services/ClientEnvironment';
 import { useRoute } from '../services/Router';
-import { Design } from './Design';
-import { HomePage } from './pages/HomePage';
-import { MediaPage } from './pages/MediaPage';
-import { SettingsPage } from './pages/SettingsPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { ProfilePage } from './pages/ProfilePage';
-import { UploadPage } from './pages/UploadPage';
-import { ExplorePage } from './pages/ExplorePage';
-import { NotificationsPage } from './pages/NotificationsPage';
+
 import { AuthProvider } from './auth';
-import { ThemeProvider } from './theme';
-import MainLayout from './layouts/MainLayout';
 import { ConfirmEmail } from './auth/ConfirmEmail';
 import { ResendVerification } from './auth/ResendVerification';
+import { Design } from './Design';
+import MainLayout from './layouts/MainLayout';
+import { DashboardPage } from './pages/DashboardPage';
+import { ExplorePage } from './pages/ExplorePage';
+import { HomePage } from './pages/HomePage';
+import { MediaPage } from './pages/MediaPage';
+import { NotificationsPage } from './pages/NotificationsPage';
+import { ProfilePage } from './pages/ProfilePage';
+import { SettingsPage } from './pages/SettingsPage';
+import { UploadPage } from './pages/UploadPage';
+import { ThemeProvider } from './theme';
+
+type BaseRoute = {
+	url: string;
+};
+
+type Route = 
+	| (BaseRoute & { type: 'root' | 'dashboard' | 'profile' | 'upload' | 'explore' | 'notifications' | 'media' | 'settings' | 'home' | 'social' | 'unknown' })
+	| (BaseRoute & { type: 'design'; page: string })
+	| (BaseRoute & { type: 'auth'; action: string; token?: string });
 
 export function Root(props: { environment: ClientEnvironment }) {
 	return (
@@ -54,7 +65,7 @@ function Router() {
 	);
 }
 
-function renderRouteContent(route: any) {
+function renderRouteContent(route: Route) {
 	switch (route.type) {
 		case 'root':
 			return <HomePage />;

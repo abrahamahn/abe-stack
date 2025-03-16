@@ -1,6 +1,6 @@
 import { intersection, isArray, isPlainObject } from "lodash"
 
-export function shallowEqual(a: any, b: any) {
+export function shallowEqual(a: unknown, b: unknown) {
 	if (a == b) return true
 	if (isArray(a)) {
 		if (!isArray(b)) return false
@@ -9,10 +9,10 @@ export function shallowEqual(a: any, b: any) {
 	}
 	if (isPlainObject(a)) {
 		if (!isPlainObject(b)) return false
-		const keys = Object.keys(a)
-		const sameKeys = intersection(keys, Object.keys(b))
+		const keys = Object.keys(a as Record<string, unknown>)
+		const sameKeys = intersection(keys, Object.keys(b as Record<string, unknown>))
 		if (keys.length !== sameKeys.length) return false
-		return keys.every((key) => a[key] == b[key])
+		return keys.every((key) => (a as Record<string, unknown>)[key] == (b as Record<string, unknown>)[key])
 	}
 	return false
 }

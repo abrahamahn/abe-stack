@@ -1,7 +1,9 @@
+import { EventEmitter } from 'events';
+
 import { Pool, PoolClient } from 'pg';
+
 import { env } from '../config/environment';
 import { Logger } from '../services/LoggerService';
-import { EventEmitter } from 'events';
 
 const logger = new Logger('Database');
 

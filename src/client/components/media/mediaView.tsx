@@ -1,6 +1,3 @@
-// src/client/components/media/MediaView.tsx
-import React from 'react';
-
 interface MediaViewProps {
   filename: string;
   type?: 'audio' | 'video' | 'image';

@@ -71,7 +71,7 @@ class SocialService {
     if (!response.ok) {
       throw new Error('Failed to fetch user profile');
     }
-    return response.json();
+    return response.json() as Promise<User>;
   }
 
   async followUser(userId: string): Promise<void> {
@@ -107,7 +107,7 @@ class SocialService {
     if (!response.ok) {
       throw new Error('Failed to fetch feed');
     }
-    return response.json();
+    return response.json() as Promise<FeedResponse>;
   }
 
   async createPost(content: string, media?: File): Promise<Post> {
@@ -124,7 +124,7 @@ class SocialService {
     if (!response.ok) {
       throw new Error('Failed to create post');
     }
-    return response.json();
+    return response.json() as Promise<Post>;
   }
 
   async likePost(postId: string): Promise<void> {
@@ -165,7 +165,7 @@ class SocialService {
     if (!response.ok) {
       throw new Error('Failed to fetch comments');
     }
-    return response.json();
+    return response.json() as Promise<CommentsResponse>;
   }
 
   async createComment(postId: string, content: string): Promise<Comment> {
@@ -179,7 +179,7 @@ class SocialService {
     if (!response.ok) {
       throw new Error('Failed to create comment');
     }
-    return response.json();
+    return response.json() as Promise<Comment>;
   }
 
   async likeComment(commentId: string): Promise<void> {
@@ -211,7 +211,7 @@ class SocialService {
     if (!response.ok) {
       throw new Error('Failed to create reply');
     }
-    return response.json();
+    return response.json() as Promise<Comment>;
   }
 }
 

@@ -1,13 +1,13 @@
-import Router from 'express';
+import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
-import { User, Post, Comment } from '../models';
+import { z } from 'zod';
+
 import { authenticate, authorize } from '../middleware/auth';
 import { NotFoundError } from '../middleware/error';
 import { validate } from '../middleware/validate';
-import { z } from 'zod';
-import { userRepository } from '../models/User';
-import { postRepository } from '../models/Post';
 import { commentRepository } from '../models/Comment';
+import { postRepository } from '../models/Post';
+import { userRepository } from '../models/User';
 
 // Validation schemas
 const userRoleSchema = z.object({
@@ -28,8 +28,8 @@ const commentIdParamSchema = z.object({
   commentId: z.string().uuid('Invalid comment ID format')
 });
 
-// Create router using Router imported directly
-const router = Router();
+// Create router using our typed router utility
+const router: express.Router = express.Router();
 
 // All routes require authentication and admin role
 router.use(authenticate, authorize('admin'));
@@ -38,7 +38,14 @@ router.use(authenticate, authorize('admin'));
 router.get('/users', async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const users = await userRepository.findAll();
-    const usersResponse = users.map(user => new User(user).toJSON());
+    const usersResponse = users.map(user => {
+      // Convert to unknown first, then to Record<string, unknown>
+      const userData = user as unknown as Record<string, unknown>;
+      return {
+        ...userData,
+        toJSON: () => userData
+      };
+    });
     
     res.json({
       status: 'success',
@@ -56,16 +63,22 @@ router.patch(
   validate(userRoleSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { userId } = req.params;
-      const { role } = req.body;
+      const { userId  } = req.params as { userId: string };
+      const { role  } = req.body as { role: string };
       
-      const user = await User.findByPk(userId);
+      // Use userRepository instead of User model directly
+      const user = await userRepository.findById(userId) as unknown as { 
+        id: string; 
+        update: (data: Record<string, unknown>) => Promise<unknown>;
+        toJSON: () => Record<string, unknown>;
+      };
       if (!user) {
         throw new NotFoundError('User not found');
       }
       
       // Prevent changing own role (admin can't demote themselves)
-      if (user.id === (req.user as any)?.id) {
+      const reqUserId = (req.user as { id: string } | undefined)?.id;
+      if (user.id === reqUserId) {
         throw new Error('Cannot change your own role');
       }
       
@@ -87,15 +100,20 @@ router.delete(
   validate(userIdParamSchema, 'params'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { userId } = req.params;
+      const { userId  } = req.params as { userId: string };
       
-      const user = await User.findByPk(userId);
+      // Use userRepository instead of User model directly
+      const user = await userRepository.findById(userId) as unknown as { 
+        id: string; 
+        delete: () => Promise<unknown>;
+      };
       if (!user) {
         throw new NotFoundError('User not found');
       }
       
       // Prevent deleting own account
-      if (user.id === (req.user as any)?.id) {
+      const reqUserId = (req.user as { id: string } | undefined)?.id;
+      if (user.id === reqUserId) {
         throw new Error('Cannot delete your own account');
       }
       
@@ -114,13 +132,13 @@ router.delete(
 // Get all posts (with filtering options)
 router.get('/posts', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { userId, status } = req.query;
+    const { userId, status  } = req.query as { userId: string, status: string };
     
     const posts = await postRepository.find({ 
       limit: 50,
       filters: {
-        ...(userId && { userId: userId as string }),
-        ...(status && { status: status as string })
+        ...(userId && { userId }),
+        ...(status && { status })
       }
     });
     
@@ -139,9 +157,13 @@ router.delete(
   validate(postIdParamSchema, 'params'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { postId } = req.params;
+      const { postId  } = req.params as { postId: string };
       
-      const post = await Post.findByPk(postId);
+      // Use postRepository instead of Post model directly
+      const post = await postRepository.findById(postId) as unknown as { 
+        id: string; 
+        delete: () => Promise<unknown>;
+      };
       if (!post) {
         throw new NotFoundError('Post not found');
       }
@@ -164,9 +186,13 @@ router.delete(
   validate(commentIdParamSchema, 'params'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { commentId } = req.params;
+      const { commentId  } = req.params as { commentId: string };
       
-      const comment = await Comment.findByPk(commentId);
+      // Use commentRepository instead of Comment model directly
+      const comment = await commentRepository.findById(commentId) as unknown as { 
+        id: string; 
+        delete: () => Promise<unknown>;
+      };
       if (!comment) {
         throw new NotFoundError('Comment not found');
       }
@@ -211,4 +237,5 @@ router.get('/stats', async (_req: Request, res: Response, next: NextFunction) =>
   }
 });
 
-export const adminRouter = router;
+// Export the router
+export { router as adminRouter };

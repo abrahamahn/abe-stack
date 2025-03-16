@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 interface MediaItem {
   id: string;
@@ -24,17 +24,15 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
   className,
 }) => {
   const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [_isFullscreen, setIsFullscreen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const mediaRef = selectedItem?.type === 'video' ? videoRef : audioRef;
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const styles = {
     gallery: {
@@ -204,69 +202,49 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
     }
   }, [selectedItem]);
 
-  useEffect(() => {
-    if (mediaRef.current) {
-      mediaRef.current.addEventListener('timeupdate', handleTimeUpdate);
-      mediaRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
-      mediaRef.current.addEventListener('ended', handleEnded);
-    }
-
-    return () => {
-      if (mediaRef.current) {
-        mediaRef.current.removeEventListener('timeupdate', handleTimeUpdate);
-        mediaRef.current.removeEventListener('loadedmetadata', handleLoadedMetadata);
-        mediaRef.current.removeEventListener('ended', handleEnded);
-      }
-    };
-  }, [mediaRef]);
-
-  const handleTimeUpdate = () => {
+  const handleTimeUpdate = useCallback(() => {
     if (mediaRef.current) {
       setCurrentTime(mediaRef.current.currentTime);
     }
-  };
+  }, [mediaRef]);
 
-  const handleLoadedMetadata = () => {
+  const handleLoadedMetadata = useCallback(() => {
     if (mediaRef.current) {
       setDuration(mediaRef.current.duration);
     }
-  };
+  }, [mediaRef]);
 
-  const handleEnded = () => {
+  const handleEnded = useCallback(() => {
     setIsPlaying(false);
     setCurrentTime(0);
-  };
+  }, []);
+
+  useEffect(() => {
+    const currentMedia = mediaRef.current;
+    
+    if (currentMedia) {
+      currentMedia.addEventListener('timeupdate', handleTimeUpdate);
+      currentMedia.addEventListener('loadedmetadata', handleLoadedMetadata);
+      currentMedia.addEventListener('ended', handleEnded);
+    }
+
+    return () => {
+      if (currentMedia) {
+        currentMedia.removeEventListener('timeupdate', handleTimeUpdate);
+        currentMedia.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        currentMedia.removeEventListener('ended', handleEnded);
+      }
+    };
+  }, [mediaRef, handleTimeUpdate, handleLoadedMetadata, handleEnded]);
 
   const togglePlay = () => {
     if (mediaRef.current) {
       if (isPlaying) {
-        mediaRef.current.pause();
+        void mediaRef.current.pause();
       } else {
-        mediaRef.current.play();
+        void mediaRef.current.play();
       }
       setIsPlaying(!isPlaying);
-    }
-  };
-
-  const handleTimeChange = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (mediaRef.current) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const percentage = x / rect.width;
-      const newTime = percentage * duration;
-      mediaRef.current.currentTime = newTime;
-      setCurrentTime(newTime);
-    }
-  };
-
-  const handleVolumeChange = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (mediaRef.current) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const percentage = Math.max(0, Math.min(1, x / rect.width));
-      mediaRef.current.volume = percentage;
-      setVolume(percentage);
-      setIsMuted(percentage === 0);
     }
   };
 
@@ -274,18 +252,6 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
     if (mediaRef.current) {
       mediaRef.current.muted = !isMuted;
       setIsMuted(!isMuted);
-    }
-  };
-
-  const toggleFullscreen = () => {
-    if (containerRef.current) {
-      if (!isFullscreen) {
-        containerRef.current.requestFullscreen();
-        setIsFullscreen(true);
-      } else {
-        document.exitFullscreen();
-        setIsFullscreen(false);
-      }
     }
   };
 

@@ -7,14 +7,14 @@ export type Placement = 'top' | 'bottom' | 'right' | 'left' |
 
 export interface Options {
   placement?: Placement;
-  modifiers?: any[];
+  modifiers?: Array<{ name: string; options?: Record<string, unknown> }>;
   strategy?: 'absolute' | 'fixed';
 }
 
 export interface Instance {
   destroy: () => void;
-  update: () => Promise<any>;
-  state: any;
+  update: () => Promise<{ placement: Placement }>;
+  state: { placement: Placement };
 }
 
 // Simple positioning function to replace popper.js
@@ -28,7 +28,7 @@ function createSimplePopper(
   
   function update() {
     if (!referenceElement || !popperElement) {
-      return Promise.resolve();
+      return Promise.resolve({ placement });
     }
     
     const refRect = referenceElement.getBoundingClientRect();
@@ -71,7 +71,7 @@ function createSimplePopper(
   }
   
   // Initial positioning
-  update();
+  void update();
   
   // Return an instance similar to popper.js
   return {

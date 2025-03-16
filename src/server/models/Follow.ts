@@ -1,6 +1,29 @@
 import { Pool } from 'pg';
+
 import { BaseModel, BaseRepository } from '../database/BaseRepository';
 import { DatabaseConnectionManager } from '../database/config';
+
+interface UserData {
+  id: string;
+  username: string;
+  displayName: string;
+  profileImage: string | null;
+}
+
+interface FollowWithData extends FollowAttributes {
+  follower: UserData;
+}
+
+interface FollowWithFollowed extends FollowAttributes {
+  followed: UserData;
+}
+
+interface MutualFollower extends UserData {
+  id: string;
+  username: string;
+  displayName: string;
+  profileImage: string | null;
+}
 
 export interface FollowAttributes extends BaseModel {
   followerId: string;
@@ -28,7 +51,7 @@ export class FollowRepository extends BaseRepository<FollowAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [followerId, followingId]);
-      return result.rows[0] || null;
+      return (result.rows[0] || null) as FollowAttributes | null;
     } catch (error) {
       this.logger.error('Error in findByFollowerAndFollowing', { followerId, followingId, error });
       throw error;
@@ -49,7 +72,7 @@ export class FollowRepository extends BaseRepository<FollowAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [followerId, limit, offset]);
-      return result.rows;
+      return result.rows as FollowAttributes[];
     } catch (error) {
       this.logger.error('Error in findFollowing', { followerId, limit, offset, error });
       throw error;
@@ -70,7 +93,7 @@ export class FollowRepository extends BaseRepository<FollowAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [followingId, limit, offset]);
-      return result.rows;
+      return result.rows as FollowAttributes[];
     } catch (error) {
       this.logger.error('Error in findFollowers', { followingId, limit, offset, error });
       throw error;
@@ -80,7 +103,7 @@ export class FollowRepository extends BaseRepository<FollowAttributes> {
   /**
    * Find follow with follower data
    */
-  async findWithFollower(id: string, client?: Pool): Promise<(FollowAttributes & { follower: any }) | null> {
+  async findWithFollower(id: string, client?: Pool): Promise<FollowWithData | null> {
     const query = `
       SELECT 
         f.*,
@@ -102,7 +125,14 @@ export class FollowRepository extends BaseRepository<FollowAttributes> {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [id]);
       if (!result.rows[0]) return null;
 
-      const row = result.rows[0];
+      const row = result.rows[0] as {
+        id: string;
+        follower_id: string;
+        following_id: string;
+        created_at: Date;
+        updated_at: Date;
+        follower: UserData;
+      };
       return {
         id: row.id,
         followerId: row.follower_id,
@@ -120,7 +150,7 @@ export class FollowRepository extends BaseRepository<FollowAttributes> {
   /**
    * Find follow with followed user data
    */
-  async findWithFollowed(id: string, client?: Pool): Promise<(FollowAttributes & { followed: any }) | null> {
+  async findWithFollowed(id: string, client?: Pool): Promise<FollowWithFollowed | null> {
     const query = `
       SELECT 
         f.*,
@@ -142,7 +172,14 @@ export class FollowRepository extends BaseRepository<FollowAttributes> {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [id]);
       if (!result.rows[0]) return null;
 
-      const row = result.rows[0];
+      const row = result.rows[0] as {
+        id: string;
+        follower_id: string;
+        following_id: string;
+        created_at: Date;
+        updated_at: Date;
+        followed: UserData;
+      };
       return {
         id: row.id,
         followerId: row.follower_id,
@@ -160,7 +197,7 @@ export class FollowRepository extends BaseRepository<FollowAttributes> {
   /**
    * Find followers of a user with user data
    */
-  async findFollowersWithData(userId: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<any[]> {
+  async findFollowersWithData(userId: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<FollowWithData[]> {
     const query = `
       SELECT 
         f.*,
@@ -177,7 +214,12 @@ export class FollowRepository extends BaseRepository<FollowAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [userId, limit, offset]);
-      return result.rows.map(row => ({
+      return result.rows.map((row: {
+        'follower.id': string;
+        'follower.username': string;
+        'follower.displayName': string;
+        'follower.profileImage': string | null;
+      } & FollowAttributes) => ({
         ...row,
         follower: {
           id: row['follower.id'],
@@ -185,7 +227,7 @@ export class FollowRepository extends BaseRepository<FollowAttributes> {
           displayName: row['follower.displayName'],
           profileImage: row['follower.profileImage']
         }
-      }));
+      })) as FollowWithData[];
     } catch (error) {
       this.logger.error('Error in findFollowersWithData', { userId, limit, offset, error });
       throw error;
@@ -195,7 +237,7 @@ export class FollowRepository extends BaseRepository<FollowAttributes> {
   /**
    * Find users followed by a user with user data
    */
-  async findFollowingWithData(userId: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<any[]> {
+  async findFollowingWithData(userId: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<FollowWithFollowed[]> {
     const query = `
       SELECT 
         f.*,
@@ -212,7 +254,12 @@ export class FollowRepository extends BaseRepository<FollowAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [userId, limit, offset]);
-      return result.rows.map(row => ({
+      return result.rows.map((row: {
+        'followed.id': string;
+        'followed.username': string;
+        'followed.displayName': string;
+        'followed.profileImage': string | null;
+      } & FollowAttributes) => ({
         ...row,
         followed: {
           id: row['followed.id'],
@@ -220,7 +267,7 @@ export class FollowRepository extends BaseRepository<FollowAttributes> {
           displayName: row['followed.displayName'],
           profileImage: row['followed.profileImage']
         }
-      }));
+      })) as FollowWithFollowed[];
     } catch (error) {
       this.logger.error('Error in findFollowingWithData', { userId, limit, offset, error });
       throw error;
@@ -241,7 +288,8 @@ export class FollowRepository extends BaseRepository<FollowAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [followerId, followedId]);
-      return result.rows[0].is_following;
+      const row = result.rows[0] as { is_following: boolean };
+      return row.is_following;
     } catch (error) {
       this.logger.error('Error in isFollowing', { followerId, followedId, error });
       throw error;
@@ -251,7 +299,7 @@ export class FollowRepository extends BaseRepository<FollowAttributes> {
   /**
    * Get mutual followers between two users
    */
-  async findMutualFollowers(userId1: string, userId2: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<any[]> {
+  async findMutualFollowers(userId1: string, userId2: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<MutualFollower[]> {
     const query = `
       WITH mutual_followers AS (
         SELECT DISTINCT f1.follower_id
@@ -272,7 +320,7 @@ export class FollowRepository extends BaseRepository<FollowAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [userId1, userId2, limit, offset]);
-      return result.rows;
+      return result.rows as MutualFollower[];
     } catch (error) {
       this.logger.error('Error in findMutualFollowers', { userId1, userId2, limit, offset, error });
       throw error;
@@ -324,7 +372,7 @@ export class Follow implements FollowAttributes {
     const follow = await followRepository.create({
       follower_id: followerId,
       following_id: followingId
-    } as any);
+    } as Partial<FollowAttributes>);
     return new Follow(follow);
   }
 

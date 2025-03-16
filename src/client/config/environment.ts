@@ -1,6 +1,16 @@
 // src/client/config/environment.ts
 // Client-side environment configuration
 
+interface ImportMetaEnv {
+  [key: string]: string | undefined;
+}
+
+declare global {
+  interface ImportMeta {
+    env: ImportMetaEnv;
+  }
+}
+
 // Type definitions for client environment variables
 export interface ClientEnv {
     NODE_ENV: 'development' | 'production';
@@ -12,7 +22,7 @@ export interface ClientEnv {
   // Helper function to access environment variables safely
   function getEnvVariable(key: string, defaultValue?: string): string {
     // Access Vite's import.meta.env at build time
-    const envVar = import.meta.env[`VITE_${key}`];
+    const envVar = (import.meta.env as ImportMetaEnv)[`VITE_${key}`];
     if (envVar === undefined && defaultValue === undefined) {
       console.warn(`Environment variable VITE_${key} is not defined`);
       return '';

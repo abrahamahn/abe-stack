@@ -1,5 +1,5 @@
 import { strict as assert } from "assert"
-import { describe, it, expect } from "jest"
+import { describe, it } from "@jest/globals"
 import { fuzzyMatch } from "./fuzzyMatch"
 
 describe("FuzzyMatch", () => {

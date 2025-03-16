@@ -1,9 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { useRouter } from '../../services/Router';
+import React, { useEffect, useState, useMemo } from 'react';
+
 import { AuthClient } from '../../services/AuthClient';
+import { useRouter } from '../../services/Router';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { Spinner } from '../ui/Spinner';
+
+interface ApiResponse {
+  success: boolean;
+  error?: string;
+}
+
+// Define response type
+interface EmailConfirmationResponse {
+  status: 'success' | 'error';
+  message?: string;
+}
 
 /**
  * Email confirmation component
@@ -13,7 +25,9 @@ export const ConfirmEmail: React.FC = () => {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('Verifying your email...');
   const router = useRouter();
-  const authClient = new AuthClient();
+  
+  // Use useMemo to create the authClient instance
+  const authClient = useMemo(() => new AuthClient(), []);
 
   useEffect(() => {
     const confirmEmail = async () => {
@@ -29,9 +43,15 @@ export const ConfirmEmail: React.FC = () => {
         }
 
         // Call API to verify email
-        const response = await authClient.confirmEmail(token);
+        const response = await authClient.confirmEmail(token) as ApiResponse;
         
-        if (response.status === 'success') {
+        // Convert response to expected type
+        const typedResponse: EmailConfirmationResponse = {
+          status: response.success ? 'success' : 'error',
+          message: response.error
+        };
+        
+        if (typedResponse.status === 'success') {
           setStatus('success');
           setMessage('Your email has been verified successfully!');
           
@@ -41,7 +61,7 @@ export const ConfirmEmail: React.FC = () => {
           }, 3000);
         } else {
           setStatus('error');
-          setMessage(response.message || 'Failed to verify email. Please try again.');
+          setMessage(typedResponse.message || 'Failed to verify email. Please try again.');
         }
       } catch (error) {
         setStatus('error');
@@ -50,8 +70,8 @@ export const ConfirmEmail: React.FC = () => {
       }
     };
 
-    confirmEmail();
-  }, [router]);
+    void confirmEmail();
+  }, [router, authClient]);
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
@@ -61,7 +81,9 @@ export const ConfirmEmail: React.FC = () => {
           
           {status === 'loading' && (
             <div className="flex flex-col items-center">
-              <Spinner size="lg" className="mb-4" />
+              <div className="mb-4">
+                <Spinner size="lg" />
+              </div>
               <p>{message}</p>
             </div>
           )}

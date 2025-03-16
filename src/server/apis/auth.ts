@@ -1,8 +1,8 @@
-import * as t from "../../shared/dataTypes"
 import { Request, Response } from "express"
-import AuthService from "../services/AuthService"
-import { tokenBlacklist } from "../services/TokenBlacklist"
-import { Database } from '../services/Database'
+
+import * as t from "../../shared/dataTypes"
+import { AuthService } from "../services/AuthService"
+import { AuthTokenService, TokenType } from "../services/AuthTokenService"
 
 // Register API
 interface RegisterInput {
@@ -41,11 +41,14 @@ const refreshTokenInput = t.object({
   refreshToken: t.string(),
 });
 
-// Create a Database instance with a default path
-const db = new Database(process.env.DB_PATH || './db')
+// Get AuthService instance
+const authService = AuthService.getInstance()
 
-// Pass the database to AuthService
-const authService = new AuthService(db)
+interface AuthRequest extends Request {
+  headers: {
+    authorization?: string;
+  };
+}
 
 export async function register(
   req: Request & { body: RegisterInput },
@@ -85,10 +88,11 @@ export async function login(
 export const getCurrentUserInput = t.object({})
 
 export async function getCurrentUser(
-  req: Request,
+  req: AuthRequest,
   res: Response
 ) {
-  const token = req.headers.authorization?.split(' ')[1];
+  const authHeader = req.headers.authorization;
+  const token = typeof authHeader === 'string' ? authHeader.split(' ')[1] : undefined;
   if (!token) {
     return res.status(401).json({ error: 'No token provided' });
   }
@@ -113,7 +117,8 @@ export async function refreshToken(
 
   try {
     const result = await authService.refreshToken(args.refreshToken);
-    tokenBlacklist.add(args.refreshToken, 7 * 24 * 60 * 60); // 7 days in seconds
+    const tokenService = AuthTokenService.getInstance();
+    tokenService.blacklistToken(args.refreshToken, TokenType.REFRESH);
     return res.status(200).json(result);
   } catch (error) {
     return res.status(401).json({ error: (error as Error).message });

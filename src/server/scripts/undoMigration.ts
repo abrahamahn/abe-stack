@@ -13,4 +13,7 @@ async function undoMigration() {
   }
 }
 
-undoMigration();
+undoMigration().catch(error => {
+  console.error('Migration rollback failed:', error);
+  process.exit(1);
+});

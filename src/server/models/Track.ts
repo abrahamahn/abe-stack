@@ -1,8 +1,12 @@
 import { Pool } from 'pg';
+
 import { BaseModel, BaseRepository } from '../database/BaseRepository';
 import { DatabaseConnectionManager } from '../database/config';
-import { Artist } from './Artist';
+
 import { Album } from './Album';
+import { Artist } from './Artist';
+import { Playlist } from './Playlist';
+import { PlaylistTrack } from './PlaylistTrack';
 
 export interface TrackAttributes extends BaseModel {
   title: string;
@@ -52,7 +56,7 @@ export class TrackRepository extends BaseRepository<TrackAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [artistId]);
-      return result.rows;
+      return result.rows as TrackAttributes[];
     } catch (error) {
       this.logger.error('Error in findByArtistId', { artistId, error });
       throw error;
@@ -72,7 +76,7 @@ export class TrackRepository extends BaseRepository<TrackAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [albumId]);
-      return result.rows;
+      return result.rows as TrackAttributes[];
     } catch (error) {
       this.logger.error('Error in findByAlbumId', { albumId, error });
       throw error;
@@ -92,7 +96,7 @@ export class TrackRepository extends BaseRepository<TrackAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [genre]);
-      return result.rows;
+      return result.rows as TrackAttributes[];
     } catch (error) {
       this.logger.error('Error in findByGenre', { genre, error });
       throw error;
@@ -113,7 +117,7 @@ export class TrackRepository extends BaseRepository<TrackAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [limit]);
-      return result.rows;
+      return result.rows as TrackAttributes[];
     } catch (error) {
       this.logger.error('Error in findTopTracks', { limit, error });
       throw error;
@@ -143,10 +147,10 @@ export class TrackRepository extends BaseRepository<TrackAttributes> {
 export const trackRepository = new TrackRepository();
 
 export class Track implements TrackAttributes {
-  static belongsTo(_Album: any, _options: { foreignKey: string; as: string; }) {
+  static belongsTo(_Album: typeof Album, _options: { foreignKey: string; as: string; }) {
       throw new Error('Method not implemented.');
   }
-  static belongsToMany(_Playlist: any, _options: { through: any; foreignKey: string; as: string; }) {
+  static belongsToMany(_Playlist: typeof Playlist, _options: { through: typeof PlaylistTrack; foreignKey: string; as: string; }) {
       throw new Error('Method not implemented.');
   }
   id: string;
@@ -226,7 +230,7 @@ export class Track implements TrackAttributes {
       play_count: playCount,
       artist_id: artistId,
       album_id: albumId
-    } as any);
+    } as Partial<TrackAttributes>);
     return new Track(track);
   }
 
@@ -249,7 +253,7 @@ export class Track implements TrackAttributes {
       ...(artistId !== undefined && { artist_id: artistId }),
       ...(albumId !== undefined && { album_id: albumId })
     };
-    const updated = await trackRepository.update(this.id, updateData as any);
+    const updated = await trackRepository.update(this.id, updateData as Partial<TrackAttributes>);
     Object.assign(this, updated);
     return this;
   }

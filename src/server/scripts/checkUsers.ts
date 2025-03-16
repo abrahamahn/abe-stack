@@ -1,5 +1,14 @@
 import { Database } from '../services/Database';
 
+interface UserRow {
+  id: string;
+  username: string;
+  email: string;
+  email_confirmed: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
 async function checkUsers() {
   console.log('Checking users in the database...');
   
@@ -15,7 +24,7 @@ async function checkUsers() {
     }
     
     // Query all users
-    const result = await pool.query(`
+    const result = await pool.query<UserRow>(`
       SELECT id, username, email, email_confirmed, created_at, updated_at 
       FROM users 
       ORDER BY created_at DESC
@@ -30,14 +39,14 @@ async function checkUsers() {
     console.log('-----------------------------------');
     
     // Display user information
-    result.rows.forEach((user, index) => {
+    (result.rows as UserRow[]).forEach((user: UserRow, index: number) => {
       console.log(`User #${index + 1}:`);
       console.log(`ID: ${user.id}`);
       console.log(`Username: ${user.username}`);
       console.log(`Email: ${user.email}`);
       console.log(`Email Confirmed: ${user.email_confirmed ? 'Yes' : 'No'}`);
-      console.log(`Created At: ${user.created_at}`);
-      console.log(`Updated At: ${user.updated_at}`);
+      console.log(`Created At: ${user.created_at.toISOString()}`);
+      console.log(`Updated At: ${user.updated_at.toISOString()}`);
       console.log('-----------------------------------');
     });
     

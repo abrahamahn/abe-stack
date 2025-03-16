@@ -19,4 +19,7 @@ async function resetMigrations() {
   }
 }
 
-resetMigrations();
+resetMigrations().catch(error => {
+  console.error('Failed to reset migrations:', error);
+  process.exit(1);
+});

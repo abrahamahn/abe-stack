@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+
 import { socialService } from '../../services/social';
 
 interface CreatePostFormProps {
@@ -68,7 +69,7 @@ export const CreatePostForm: React.FC<CreatePostFormProps> = ({ onPostCreated })
       backgroundColor: 'white',
       boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
     }}>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit as (e: React.FormEvent) => void}>
         <textarea 
           value={content}
           onChange={(e) => setContent(e.target.value)}

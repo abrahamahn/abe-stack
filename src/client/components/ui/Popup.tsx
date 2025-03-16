@@ -1,7 +1,8 @@
-import { Placement, createPopper } from "../../hooks/usePopper"
 import React, { useLayoutEffect, useMemo } from "react"
 import { createPortal } from "react-dom"
+
 import { passthroughRef } from "../../helpers/passthroughRef"
+import { Placement, createPopper } from "../../hooks/usePopper"
 import { useShortcut } from "../../hooks/useShortcut"
 
 export function Popup(props: {
@@ -20,14 +21,14 @@ export function Popup(props: {
 
 	useMemo(() => {
 		container.style.visibility = props.open ? "visible" : "hidden"
-	}, [props.open])
+	}, [container.style, props.open])
 
 	// Cleanup
 	useLayoutEffect(() => {
 		return () => {
 			document.body.removeChild(container)
 		}
-	}, [])
+	}, [container])
 
 	// Render the popup
 	useLayoutEffect(() => {
@@ -52,7 +53,7 @@ export function Popup(props: {
 		return () => {
 			popper.destroy()
 		}
-	}, [props.anchor, props.open])
+	}, [container.children, props.onDismiss, props.placement, props.anchor, props.open])
 
 	const { onDismiss } = props
 

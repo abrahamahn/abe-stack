@@ -1,10 +1,11 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+
 import './index.css';
 import { Root } from './components/Root';
+import { createApi } from './services/api';
 import { Router } from './services/Router';
 import { WebsocketPubsubClient } from './services/WebsocketPubsubClient';
-import { createApi } from './services/api';
 
 // Function to get the server port
 const getServerPort = (): number => {
@@ -92,7 +93,7 @@ const pubsub = new WebsocketPubsubClient({
 });
 
 // Test API connectivity when the app starts
-testApiConnectivity().then(() => {
+void testApiConnectivity().then(() => {
   console.log('API connectivity test completed');
 });
 
@@ -105,10 +106,17 @@ const environment = {
 };
 
 // Make environment available globally for debugging
-(window as any).router = router;
-(window as any).api = api;
-(window as any).pubsub = pubsub;
-(window as any).environment = environment;
+interface WindowWithEnvironment extends Window {
+  router: typeof router;
+  api: typeof api;
+  pubsub: typeof pubsub;
+  environment: typeof environment;
+}
+
+(window as unknown as WindowWithEnvironment).router = router;
+(window as unknown as WindowWithEnvironment).api = api;
+(window as unknown as WindowWithEnvironment).pubsub = pubsub;
+(window as unknown as WindowWithEnvironment).environment = environment;
 
 // Find root element
 const rootElement = document.getElementById('root');

@@ -1,6 +1,6 @@
 export class DeferredPromise<T> {
 	public resolve!: (value: T | PromiseLike<T>) => void;
-	public reject!: (reason?: any) => void;
+	public reject!: (reason?: unknown) => void;
 	public promise: Promise<T>;
 
 	constructor() {

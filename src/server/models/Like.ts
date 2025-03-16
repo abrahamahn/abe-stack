@@ -1,6 +1,23 @@
 import { Pool } from 'pg';
+
 import { BaseModel, BaseRepository } from '../database/BaseRepository';
 import { DatabaseConnectionManager } from '../database/config';
+
+interface UserData {
+  id: string;
+  username: string;
+  displayName: string;
+  profileImage: string | null;
+}
+
+interface PostData {
+  id: string;
+  content: string;
+  media: string | null;
+  likesCount: number;
+  commentsCount: number;
+  createdAt: Date;
+}
 
 export interface LikeAttributes extends BaseModel {
   userId: string;
@@ -28,7 +45,7 @@ export class LikeRepository extends BaseRepository<LikeAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [userId, postId]);
-      return result.rows[0] || null;
+      return (result.rows[0] || null) as LikeAttributes | null;
     } catch (error) {
       this.logger.error('Error in findByUserAndPost', { userId, postId, error });
       throw error;
@@ -47,7 +64,7 @@ export class LikeRepository extends BaseRepository<LikeAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [userId, postIds]);
-      return result.rows;
+      return result.rows as LikeAttributes[];
     } catch (error) {
       this.logger.error('Error in findByUserAndPosts', { userId, postIds, error });
       throw error;
@@ -57,7 +74,7 @@ export class LikeRepository extends BaseRepository<LikeAttributes> {
   /**
    * Find like with user data
    */
-  async findWithUser(id: string, client?: Pool): Promise<(LikeAttributes & { user: any }) | null> {
+  async findWithUser(id: string, client?: Pool): Promise<(LikeAttributes & { user: UserData }) | null> {
     const query = `
       SELECT 
         l.*,
@@ -79,14 +96,26 @@ export class LikeRepository extends BaseRepository<LikeAttributes> {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [id]);
       if (!result.rows[0]) return null;
 
-      const row = result.rows[0];
+      const row = result.rows[0] as {
+        id: string;
+        user_id: string;
+        post_id: string;
+        created_at: Date;
+        updated_at: Date;
+        user: UserData;
+      };
       return {
         id: row.id,
         userId: row.user_id,
         postId: row.post_id,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
-        user: row.user
+        user: {
+          id: row.user.id,
+          username: row.user.username,
+          displayName: row.user.displayName,
+          profileImage: row.user.profileImage
+        }
       };
     } catch (error) {
       console.error('Error in findWithUser:', error);
@@ -97,7 +126,7 @@ export class LikeRepository extends BaseRepository<LikeAttributes> {
   /**
    * Find likes by post ID with user data
    */
-  async findByPostIdWithUser(postId: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(LikeAttributes & { user: any })[]> {
+  async findByPostIdWithUser(postId: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(LikeAttributes & { user: UserData })[]> {
     const query = `
       SELECT 
         l.*,
@@ -114,7 +143,12 @@ export class LikeRepository extends BaseRepository<LikeAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [postId, limit, offset]);
-      return result.rows.map(row => ({
+      return result.rows.map((row: {
+        'user.id': string;
+        'user.username': string;
+        'user.displayName': string;
+        'user.profileImage': string | null;
+      } & LikeAttributes) => ({
         ...row,
         user: {
           id: row['user.id'],
@@ -132,7 +166,7 @@ export class LikeRepository extends BaseRepository<LikeAttributes> {
   /**
    * Find likes by user ID with post data
    */
-  async findByUserIdWithPost(userId: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(LikeAttributes & { post: any })[]> {
+  async findByUserIdWithPost(userId: string, limit: number = 20, offset: number = 0, client?: Pool): Promise<(LikeAttributes & { post: PostData })[]> {
     const query = `
       SELECT 
         l.*,
@@ -151,7 +185,14 @@ export class LikeRepository extends BaseRepository<LikeAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [userId, limit, offset]);
-      return result.rows.map(row => ({
+      return result.rows.map((row: {
+        'post.id': string;
+        'post.content': string;
+        'post.media': string | null;
+        'post.likesCount': number;
+        'post.commentsCount': number;
+        'post.createdAt': Date;
+      } & LikeAttributes  ) => ({
         ...row,
         post: {
           id: row['post.id'],
@@ -182,7 +223,8 @@ export class LikeRepository extends BaseRepository<LikeAttributes> {
 
     try {
       const result = await (client || DatabaseConnectionManager.getPool()).query(query, [userId, postId]);
-      return result.rows[0].has_liked;
+      const row = result.rows[0] as { has_liked: boolean };
+      return row.has_liked;
     } catch (error) {
       this.logger.error('Error in hasUserLikedPost', { userId, postId, error });
       throw error;
@@ -229,7 +271,7 @@ export class Like implements LikeAttributes {
     const like = await likeRepository.create({
       user_id: userId,
       post_id: postId
-    } as any);
+    } as Partial<LikeAttributes>);
     return new Like(like);
   }
 

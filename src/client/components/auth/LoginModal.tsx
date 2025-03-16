@@ -159,7 +159,7 @@ export function LoginModal({ isOpen, onClose, onSwitchToRegister, onLogin }: Log
         
         <div style={{ textAlign: 'center' }}>
           <p>
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <button
               onClick={onSwitchToRegister}
               style={{

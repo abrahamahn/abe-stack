@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 interface User {
   id: string;
@@ -29,24 +29,24 @@ export const UserProfile: React.FC<UserProfileProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchUserProfile();
-  }, [userId]);
-
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = useCallback(async () => {
     try {
       setIsLoading(true);
       // TODO: Replace with actual API call
       const response = await fetch(`/api/users/${userId}`);
       if (!response.ok) throw new Error('Failed to fetch user profile');
-      const data = await response.json();
+      const data = await response.json() as User;
       setUser(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load profile');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userId]);
+  
+  useEffect(() => {
+    void fetchUserProfile();
+  }, [fetchUserProfile]);
 
   const handleFollowToggle = async () => {
     if (!user) return;
@@ -175,7 +175,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
           <p style={styles.bio}>{user.bio}</p>
           <button
             style={styles.followButton}
-            onClick={handleFollowToggle}
+            onClick={() => void handleFollowToggle()}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = user.isFollowing ? '#d0d0d0' : '#1976d2'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = user.isFollowing ? '#e0e0e0' : '#2196f3'}
           >

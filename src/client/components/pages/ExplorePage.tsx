@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useClientEnvironment } from '../../services/ClientEnvironment';
+import { useState } from 'react';
+
 import { PageContent } from '../layouts/PageContent';
 
 // Explore page styles
@@ -144,7 +144,6 @@ const styles = {
 };
 
 export function ExplorePage() {
-  const environment = useClientEnvironment();
   const [activeCategory, setActiveCategory] = useState('all');
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   

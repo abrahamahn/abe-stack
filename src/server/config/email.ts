@@ -1,15 +1,15 @@
-import envConfig from './environment';
+import { env } from './environment';
 
 export const emailConfig = {
-  host: envConfig.EMAIL_HOST,
-  port: envConfig.EMAIL_PORT,
-  secure: envConfig.EMAIL_SECURE,
-  user: envConfig.EMAIL_USER,
-  password: envConfig.EMAIL_PASSWORD,
-  appName: envConfig.APP_NAME,
-  appUrl: envConfig.APP_URL,
-  isDevelopment: envConfig.NODE_ENV === 'development',
-  serverPort: envConfig.PORT
+  host: env.EMAIL_HOST,
+  port: env.EMAIL_PORT,
+  secure: env.EMAIL_SECURE,
+  user: env.EMAIL_USER,
+  password: env.EMAIL_PASSWORD,
+  appName: env.APP_NAME,
+  appUrl: env.APP_URL,
+  isDevelopment: env.NODE_ENV === 'development',
+  serverPort: env.PORT
 };
 
 export default emailConfig; 

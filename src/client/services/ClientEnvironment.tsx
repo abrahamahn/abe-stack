@@ -1,7 +1,8 @@
 import React, { createContext, useContext } from 'react';
+
+import type { ClientApi } from './api';
 import type { Router } from './Router';
 import type { WebsocketPubsubClient } from './WebsocketPubsubClient';
-import type { ClientApi } from './api';
 
 export type ClientConfig = {
 	apiUrl: string;

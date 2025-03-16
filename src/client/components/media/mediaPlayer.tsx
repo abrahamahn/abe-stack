@@ -1,7 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
-import type { Player as Plyr } from 'plyr';
-import type { MediaPlayer as DashPlayer } from 'dashjs';
 import 'plyr/dist/plyr.css';
+
+// Define interfaces for the player types
+interface PlyrInstance {
+  on(event: string, callback: (...args: unknown[]) => void): void;
+  destroy(): void;
+  currentTime?: number;
+}
+
+interface HlsInstance {
+  loadSource(src: string): void;
+  attachMedia(media: HTMLMediaElement): void;
+  on(event: string, callback: (...args: unknown[]) => void): void;
+  startLoad(): void;
+  recoverMediaError(): void;
+  destroy(): void;
+}
 
 // Dynamic imports for the actual implementations
 const loadPlyr = () => import('plyr').then(m => m.default);
@@ -9,7 +23,6 @@ const loadHls = () => import('hls.js').then(m => {
   const Hls = m.default;
   return { Hls, Events: m.Events };
 });
-const loadDash = () => import('dashjs').then(m => m.MediaPlayer);
 
 interface MediaPlayerProps {
   src: string;
@@ -51,19 +64,20 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({
   className
 }: MediaPlayerProps) => {
   const mediaRef = useRef<HTMLVideoElement | HTMLAudioElement>(null);
-  const playerRef = useRef<Plyr | null>(null);
-  const hlsRef = useRef<any>(null);
-  const dashRef = useRef<DashPlayer | null>(null);
+  const playerRef = useRef<PlyrInstance | null>(null);
+  const hlsRef = useRef<HlsInstance | null>(null);
   
-  const [isReady, setIsReady] = useState(false);
+  const [_isReady, setIsReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!mediaRef.current) return;
 
     // Initialize Plyr
-    loadPlyr().then(PlyrConstructor => {
-      playerRef.current = new PlyrConstructor(mediaRef.current!, {
+    void loadPlyr().then(PlyrConstructor => {
+      if (!mediaRef.current) return;
+      
+      playerRef.current = new PlyrConstructor(mediaRef.current, {
         controls: [
           'play-large',
           'play',
@@ -110,14 +124,11 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({
       if (hlsRef.current) {
         hlsRef.current.destroy();
       }
-      if (dashRef.current) {
-        dashRef.current.destroy();
-      }
       if (playerRef.current) {
         playerRef.current.destroy();
       }
     };
-  }, []);
+  }, [onEnded, onError, onPause, onPlay, onReady, onTimeUpdate]);
 
   useEffect(() => {
     if (!mediaRef.current || !src) return;
@@ -127,7 +138,7 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({
       if (Hls.isSupported()) {
         hlsRef.current = new Hls({
           maxLoadingDelay: 4,
-          maxRetryAttempts: 3,
+          maxMaxBufferLength: 30,
           lowLatencyMode: true
         });
 
@@ -143,7 +154,8 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({
             }
           });
 
-          hlsRef.current.on(Events.ERROR, (_: unknown, data: HlsError) => {
+          hlsRef.current.on(Events.ERROR, (...args: unknown[]) => {
+            const data = args[1] as HlsError;
             if (data.fatal) {
               switch (data.type) {
                 case 'networkError':
@@ -166,53 +178,19 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({
       }
     };
 
-    const setupDASH = async () => {
-      if (mediaRef.current) {
-        const DashConstructor = await loadDash();
-        dashRef.current = DashConstructor.create();
-        dashRef.current.initialize(mediaRef.current, src, autoplay);
-        dashRef.current.updateSettings({
-          streaming: {
-            lowLatencyEnabled: true,
-            abr: {
-              initialBitrate: {
-                audio: 128,
-                video: 1000
-              },
-              autoSwitchBitrate: {
-                audio: true,
-                video: true
-              }
-            }
-          }
-        });
-
-        dashRef.current.on('error', (error: unknown) => {
-          setError('DASH playback error');
-          onError?.(error);
-        });
-      }
-    };
-
     // Clean up previous instances
     if (hlsRef.current) {
       hlsRef.current.destroy();
       hlsRef.current = null;
     }
-    if (dashRef.current) {
-      dashRef.current.destroy();
-      dashRef.current = null;
-    }
 
     // Set up new source
     if (src.includes('.m3u8')) {
-      setupHLS();
-    } else if (src.includes('.mpd')) {
-      setupDASH();
+      void setupHLS();
     } else {
       mediaRef.current.src = src;
     }
-  }, [src, autoplay]);
+  }, [src, autoplay, onError]);
 
   const containerStyle: React.CSSProperties = {
     position: 'relative',
@@ -239,20 +217,30 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({
     textAlign: 'center'
   };
 
-  const MediaElement = type === 'video' ? 'video' : 'audio';
-
   return (
     <div style={containerStyle} className={className}>
-      <MediaElement
-        ref={mediaRef as any}
-        poster={type === 'video' ? poster : undefined}
-        muted={muted}
-        crossOrigin={crossOrigin}
-        style={mediaStyle}
-        title={title}
-      >
-        {error && <div style={errorStyle}>{error}</div>}
-      </MediaElement>
+      {type === 'video' ? (
+        <video
+          ref={mediaRef as React.LegacyRef<HTMLVideoElement>}
+          poster={poster}
+          muted={muted}
+          crossOrigin={crossOrigin}
+          style={mediaStyle}
+          title={title}
+        >
+          {error && <div style={errorStyle}>{error}</div>}
+        </video>
+      ) : (
+        <audio
+          ref={mediaRef as React.LegacyRef<HTMLAudioElement>}
+          muted={muted}
+          crossOrigin={crossOrigin}
+          style={mediaStyle}
+          title={title}
+        >
+          {error && <div style={errorStyle}>{error}</div>}
+        </audio>
+      )}
     </div>
   );
 };

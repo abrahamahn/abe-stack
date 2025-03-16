@@ -1,10 +1,6 @@
-import React from 'react';
-import { useClientEnvironment } from '../../services/ClientEnvironment';
 import { PageContent } from '../layouts/PageContent';
 
 export function MediaPage() {
-  const environment = useClientEnvironment();
-  
   return (
     <PageContent
       title="Media Page"

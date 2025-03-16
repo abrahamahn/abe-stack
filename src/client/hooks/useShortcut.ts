@@ -4,6 +4,7 @@
 
 import { capitalize } from "lodash"
 import { useEffect } from "react"
+
 import { useRefCurrent } from "./useRefCurrent"
 
 const base: { [key: number]: string } = {
@@ -249,5 +250,5 @@ export function useShortcut(shortcut: string, fn: () => void) {
 		return () => {
 			window.removeEventListener("keydown", onKeydown)
 		}
-	}, [])
+	}, [fnRef, shortcutRef])
 }

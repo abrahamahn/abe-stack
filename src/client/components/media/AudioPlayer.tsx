@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+
 import { formatDuration } from '../../helpers/formatters';
 
 interface AudioPlayerProps {
@@ -29,6 +30,25 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
+    
+  const playAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+        if (onPlay) onPlay();
+      }).catch(error => {
+        console.error('Play failed:', error);
+      });
+    }
+  }, [onPlay]);
+  
+  const pauseAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+      if (onPause) onPause();
+    }
+  }, [onPause]);
   
   useEffect(() => {
     if (audioRef.current) {
@@ -67,26 +87,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
         audio.removeEventListener('ended', handleEnded);
       };
     }
-  }, [trackUrl, autoplay, volume, onEnded]);
-  
-  const playAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.play().then(() => {
-        setIsPlaying(true);
-        if (onPlay) onPlay();
-      }).catch(error => {
-        console.error('Play failed:', error);
-      });
-    }
-  };
-  
-  const pauseAudio = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-      if (onPause) onPause();
-    }
-  };
+  }, [trackUrl, autoplay, playAudio, pauseAudio, volume, onEnded]);
   
   const togglePlay = () => {
     if (isPlaying) {

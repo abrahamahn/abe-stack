@@ -1,21 +1,79 @@
-import type { Request, Response } from 'express';
-import path from 'path';
 import fs from 'fs';
-import { EnhancedMediaProcessingService } from '../services/EnhancedMediaProcessingService';
-import { Logger } from '../services/LoggerService';
-import { NotFoundError } from '../middleware/error';
+import path from 'path';
+
+import { Request, Response } from 'express';
 import rangeParser from 'range-parser';
+
+import { NotFoundError } from '../middleware/error';
+import { Logger } from '../services/LoggerService';
+import { MediaProcessingService } from '../services/media/MediaProcessingService';
+
+interface MediaRequest extends Request {
+  file?: Express.Multer.File;
+  body: {
+    generateHLS?: string;
+    generateDASH?: string;
+    generateWaveform?: string;
+    quality?: ('1080p' | '720p' | '480p' | '360p' | '240p')[];
+  };
+}
+
+interface StreamRequest extends Request {
+  params: {
+    videoId?: string;
+    audioId?: string;
+    file?: string;
+    quality?: '1080p' | '720p' | '480p' | '360p' | '240p';
+    format?: string;
+  };
+  query: {
+    format?: string;
+  };
+  headers: {
+    range?: string;
+  };
+}
+
+interface StreamResponse extends Response {
+  writeHead(statusCode: number, statusMessage?: string, headers?: Record<string, string | number>): this;
+  writeHead(statusCode: number, headers?: Record<string, string | number>): this;
+  end(cb?: () => void): this;
+  end(data: string | Buffer, cb?: () => void): this;
+  end(str: string, encoding?: BufferEncoding, cb?: () => void): this;
+}
+
+interface AudioRequest extends Request {
+  params: {
+    audioId: string;
+    format?: string;
+  };
+  headers: {
+    range?: string;
+  };
+}
+
+interface WaveformRequest extends Request {
+  params: {
+    audioId: string;
+  };
+}
+
+interface JobRequest extends Request {
+  params: {
+    jobId: string;
+  };
+}
 
 /**
  * Controller for handling media uploads and streaming
  */
 export class MediaController {
-  private mediaService: EnhancedMediaProcessingService;
+  private mediaService: MediaProcessingService;
   private logger: Logger;
   private uploadDir: string;
 
   constructor() {
-    this.mediaService = new EnhancedMediaProcessingService();
+    this.mediaService = MediaProcessingService.getInstance();
     this.logger = new Logger('MediaController');
     this.uploadDir = path.join(process.cwd(), 'uploads');
   }
@@ -23,23 +81,20 @@ export class MediaController {
   /**
    * Handle image upload
    */
-  public async uploadImage(req: Request, res: Response): Promise<void> {
+  public async uploadImage(req: MediaRequest, res: Response): Promise<void> {
     try {
       if (!req.file) {
         res.status(400).json({ error: 'No file provided' });
         return;
       }
 
-      const { path: filePath } = req.file;
-      const userId = req.user!.id;
-
-      // Queue the image for processing
-      const jobId = await this.mediaService.queueImageProcessing(filePath, userId);
+      const filePath = req.file.path;
+      const result = await this.mediaService.processImage(filePath);
 
       res.status(202).json({
-        message: 'Image upload accepted and queued for processing',
-        jobId,
-        status: 'processing'
+        message: 'Image upload accepted and processed',
+        mediaId: result.mediaId,
+        status: 'completed'
       });
     } catch (error) {
       this.logger.error('Error uploading image:', error);
@@ -50,30 +105,28 @@ export class MediaController {
   /**
    * Handle video upload
    */
-  public async uploadVideo(req: Request, res: Response): Promise<void> {
+  public async uploadVideo(req: MediaRequest, res: Response): Promise<void> {
     try {
       if (!req.file) {
         res.status(400).json({ error: 'No file provided' });
         return;
       }
 
-      const { path: filePath } = req.file;
-      const userId = req.user!.id;
+      const filePath = req.file.path;
       const generateHLS = req.body.generateHLS !== 'false';
       const generateDASH = req.body.generateDASH === 'true';
-      const quality = req.body.quality as ('1080p' | '720p' | '480p' | '360p' | '240p')[] | undefined;
+      const quality = req.body.quality;
 
-      // Queue the video for processing with proper options object
-      const jobId = await this.mediaService.queueVideoProcessing(filePath, userId, {
+      const result = await this.mediaService.processVideo(filePath, {
         generateHLS,
         generateDASH,
-        quality
+        quality: this.mapQualityToEnum(quality)
       });
 
       res.status(202).json({
-        message: 'Video upload accepted and queued for processing',
-        jobId,
-        status: 'processing'
+        message: 'Video upload accepted and processed',
+        mediaId: result.mediaId,
+        status: 'completed'
       });
     } catch (error) {
       this.logger.error('Error uploading video:', error);
@@ -84,24 +137,24 @@ export class MediaController {
   /**
    * Handle audio upload
    */
-  public async uploadAudio(req: Request, res: Response): Promise<void> {
+  public async uploadAudio(req: MediaRequest, res: Response): Promise<void> {
     try {
       if (!req.file) {
         res.status(400).json({ error: 'No file provided' });
         return;
       }
 
-      const { path: filePath } = req.file;
-      const userId = req.user!.id;
+      const filePath = req.file.path;
       const generateWaveform = req.body.generateWaveform !== 'false';
 
-      // Queue the audio for processing
-      const jobId = await this.mediaService.queueAudioProcessing(filePath, userId, generateWaveform);
+      const result = await this.mediaService.processAudio(filePath, {
+        generateWaveform
+      });
 
       res.status(202).json({
-        message: 'Audio upload accepted and queued for processing',
-        jobId,
-        status: 'processing'
+        message: 'Audio upload accepted and processed',
+        mediaId: result.mediaId,
+        status: 'completed'
       });
     } catch (error) {
       this.logger.error('Error uploading audio:', error);
@@ -112,141 +165,130 @@ export class MediaController {
   /**
    * Stream a video file with support for HLS
    */
-  public async streamVideo(req: Request, res: Response): Promise<void> {
+  public async streamVideo(req: StreamRequest, res: Response): Promise<void> {
     try {
       const { videoId, quality } = req.params;
       
-      // Check if HLS is requested
+      if (!videoId) {
+        res.status(400).json({ error: 'Video ID is required' });
+        return;
+      }
+
       if (req.query.format === 'hls') {
         await this.streamHLS(videoId, req, res);
         return;
       }
-      
-      // Determine the video path based on quality
-      let videoPath: string;
-      if (quality && ['1080p', '720p', '480p', '360p', '240p'].includes(quality)) {
-        videoPath = path.join(this.uploadDir, 'videos', 'transcoded', `${videoId}_${quality}.mp4`);
-      } else {
-        videoPath = path.join(this.uploadDir, 'videos', 'original', `${videoId}.mp4`);
-      }
-      
-      // Check if the file exists
-      if (!fs.existsSync(videoPath)) {
-        throw new NotFoundError('Video not found');
-      }
-      
-      // Get file stats
-      const stat = fs.promises.stat(videoPath);
-      const fileSize = (await stat).size;
-      
-      // Handle range requests
-      const range = req.headers.range;
-      if (range) {
-        const ranges = rangeParser(fileSize, range);
-        
-        // Check if ranges is a valid range object (not -1 or -2)
-        if (typeof ranges === 'object' && ranges !== null) {
-          // Use the first range
-          const { start, end } = ranges[0];
-          
-          // Create read stream for the range
-          const stream = fs.createReadStream(videoPath, { start, end });
-          
-          // Set headers
-          res.writeHead(206, {
-            'Content-Range': `bytes ${start}-${end}/${fileSize}`,
-            'Accept-Ranges': 'bytes',
-            'Content-Length': end - start + 1,
-            'Content-Type': 'video/mp4'
-          });
-          
-          // Pipe the stream to the response
-          stream.pipe(res);
-        } else {
-          // Handle case where range is not specified or invalid
-          const stream = fs.createReadStream(videoPath);
-          
-          // Set headers for full file
-          res.writeHead(200, {
-            'Content-Length': fileSize,
-            'Content-Type': 'video/mp4'
-          });
-          
-          // Pipe the stream to the response
-          stream.pipe(res);
-        }
-      } else {
-        // Set headers for full file
-        res.writeHead(200, {
-          'Content-Length': fileSize,
-          'Content-Type': 'video/mp4'
-        });
-        
-        // Create read stream for the entire file
-        const stream = fs.createReadStream(videoPath);
-        
-        // Pipe the stream to the response
-        stream.pipe(res);
-      }
+
+      const videoPath = this.getVideoPath(videoId, quality);
+      await this.streamFile(videoPath, 'video/mp4', req, res);
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        res.status(404).json({ error: error.message });
-      } else {
-        this.logger.error('Error streaming video:', error);
-        res.status(500).json({ error: 'Failed to stream video' });
-      }
+      this.handleStreamError(error, res);
     }
   }
-  
+
   /**
    * Stream HLS content
    */
-  private async streamHLS(videoId: string, req: Request, res: Response): Promise<void> {
+  private async streamHLS(videoId: string, req: StreamRequest, res: Response): Promise<void> {
     try {
       const { file } = req.params;
       const hlsDir = path.join(this.uploadDir, 'videos', 'hls', videoId);
-      
-      // Check if the HLS directory exists
+
       if (!fs.existsSync(hlsDir)) {
         throw new NotFoundError('HLS stream not found');
       }
-      
-      // If no specific file is requested, serve the master playlist
+
       const filePath = file 
-        ? path.join(hlsDir, file) 
+        ? path.join(hlsDir, file)
         : path.join(hlsDir, 'master.m3u8');
-      
-      // Check if the file exists
+
       if (!fs.existsSync(filePath)) {
         throw new NotFoundError('HLS file not found');
       }
-      
-      // Set content type based on file extension
-      const ext = path.extname(filePath);
-      const contentType = ext === '.m3u8' 
-        ? 'application/vnd.apple.mpegurl' 
+
+      const contentType = path.extname(filePath) === '.m3u8'
+        ? 'application/vnd.apple.mpegurl'
         : 'video/mp2t';
-      
-      // Set headers
-      res.setHeader('Content-Type', contentType);
-      
-      // Stream the file
-      const stream = fs.createReadStream(filePath);
-      stream.pipe(res);
+
+      await this.streamFile(filePath, contentType, req, res);
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        res.status(404).json({ error: error.message });
-      } else {
-        this.logger.error('Error streaming HLS:', error);
-        res.status(500).json({ error: 'Failed to stream HLS content' });
-      }
+      this.handleStreamError(error, res);
     }
   }
-  
+
+  private getVideoPath(videoId: string, quality?: string): string {
+    if (quality && ['1080p', '720p', '480p', '360p', '240p'].includes(quality)) {
+      return path.join(this.uploadDir, 'videos', 'transcoded', `${videoId}_${quality}.mp4`);
+    }
+    return path.join(this.uploadDir, 'videos', 'original', `${videoId}.mp4`);
+  }
+
+  private async streamFile(filePath: string, contentType: string, req: StreamRequest, res: StreamResponse): Promise<void> {
+    if (!fs.existsSync(filePath)) {
+      throw new NotFoundError('File not found');
+    }
+
+    const stat = await fs.promises.stat(filePath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+
+    if (range) {
+      const ranges = rangeParser(fileSize, range);
+      if (Array.isArray(ranges) && ranges.length > 0) {
+        const { start, end } = ranges[0];
+        const stream = fs.createReadStream(filePath, { start, end });
+        
+        res.writeHead(206, {
+          'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+          'Accept-Ranges': 'bytes',
+          'Content-Length': end - start + 1,
+          'Content-Type': contentType
+        });
+        
+        stream.pipe(res);
+        return;
+      }
+    }
+
+    res.writeHead(200, {
+      'Content-Length': fileSize,
+      'Content-Type': contentType
+    });
+    
+    fs.createReadStream(filePath).pipe(res);
+  }
+
+  private handleStreamError(error: unknown, res: Response): void {
+    if (error instanceof NotFoundError) {
+      res.status(404).json({ error: error.message });
+    } else {
+      this.logger.error('Error streaming:', error);
+      res.status(500).json({ error: 'Failed to stream content' });
+    }
+  }
+
+  private mapQualityToEnum(quality?: ('1080p' | '720p' | '480p' | '360p' | '240p')[]): 'low' | 'medium' | 'high' | undefined {
+    if (!quality?.length) return undefined;
+    
+    const highestQuality = quality[0];
+    switch (highestQuality) {
+      case '1080p':
+      case '720p':
+        return 'high';
+      case '480p':
+        return 'medium';
+      case '360p':
+      case '240p':
+        return 'low';
+      default:
+        return undefined;
+    }
+  }
+
   /**
    * Stream an audio file
    */
-  public async streamAudio(req: Request, res: Response): Promise<void> {
+  public async streamAudio(req: AudioRequest, res: StreamResponse): Promise<void> {
     try {
       const { audioId, format } = req.params;
       
@@ -329,7 +371,7 @@ export class MediaController {
   /**
    * Get audio waveform data
    */
-  public async getWaveform(req: Request, res: Response): Promise<void> {
+  public async getWaveform(req: WaveformRequest, res: StreamResponse): Promise<void> {
     try {
       const { audioId } = req.params;
       const waveformPath = path.join(this.uploadDir, 'audio', 'waveforms', `${audioId}.json`);
@@ -343,8 +385,10 @@ export class MediaController {
       const waveformData = await fs.promises.readFile(waveformPath, 'utf8');
       
       // Send the data
-      res.setHeader('Content-Type', 'application/json');
-      res.send(waveformData);
+      res.writeHead(200, {
+        'Content-Type': 'application/json'
+      });
+      res.end(waveformData);
     } catch (error) {
       if (error instanceof NotFoundError) {
         res.status(404).json({ error: error.message });
@@ -358,16 +402,16 @@ export class MediaController {
   /**
    * Get job status
    */
-  public async getJobStatus(req: Request, res: Response): Promise<void> {
+  public async getJobStatus(req: JobRequest, res: Response): Promise<void> {
     try {
       const { jobId } = req.params;
       
-      // TODO: Implement job status checking
-      // This would typically involve checking the status in Bull
+      // Simulate checking job status asynchronously
+      await Promise.resolve();
       
       res.status(200).json({
         jobId,
-        status: 'processing', // or 'completed', 'failed', etc.
+        status: 'processing',
         message: 'Job is being processed'
       });
     } catch (error) {

@@ -1,11 +1,13 @@
 // src/server/services/MediaService.ts
-import { createReadStream, existsSync, mkdirSync } from 'fs';
-import { join, parse } from 'path';
 import * as crypto from 'crypto';
-import * as mime from 'mime-types';
+import { createReadStream, existsSync, mkdirSync, statSync, Stats } from 'fs';
+import { join, parse } from 'path';
+
 import { Request, Response } from 'express';
-import { path } from '../helpers/path';
+import * as mime from 'mime-types';
+
 import { Simplify } from '../../shared/typeHelpers';
+import { path } from '../helpers/path';
 
 export class MediaService {
   private mediaPath: string;
@@ -31,7 +33,11 @@ export class MediaService {
   /**
    * Stream media file
    */
-  streamMedia(req: Request, res: Response, filename: string): void {
+  streamMedia(req: Request, res: Response & { 
+    writeHead: (statusCode: number, headers?: Record<string, string>) => void;
+    status: (code: number) => Response;
+    send: (body: string) => Response;
+  }, filename: string): void {
     const filepath = join(this.mediaPath, filename);
     
     if (!existsSync(filepath)) {
@@ -39,12 +45,12 @@ export class MediaService {
       return;
     }
     
-    const stat = require('fs').statSync(filepath);
+    const stat: Stats = statSync(filepath);
     const fileSize = stat.size;
     const mimeType = mime.lookup(filepath) || 'application/octet-stream';
     
     // Handle range requests (important for video/audio seeking)
-    const rangeHeader = req.headers.range;
+    const rangeHeader = (req.headers as { range?: string }).range;
     
     if (rangeHeader) {
       const parts = rangeHeader.replace(/bytes=/, '').split('-');
