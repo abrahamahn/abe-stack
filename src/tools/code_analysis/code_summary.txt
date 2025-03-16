@@ -1,0 +1,323 @@
+OVERALL CODEBASE SUMMARY
+================================================================================
+Total Files Across All Directories: 234
+Total Lines Across All Directories: 29921
+
+Breakdown by Directory:
+
+Client:
+----------------------------------------
+├── components
+│   ├── auth
+│   │   ├── AuthContext.tsx
+│   │   ├── AuthModal.tsx
+│   │   ├── ConfirmEmail.tsx
+│   │   ├── index.tsx
+│   │   ├── LoginModal.tsx
+│   │   ├── RegisterModal.tsx
+│   │   ├── ResendVerification.tsx
+│   │   └── VerificationModal.tsx
+│   ├── layouts
+│   │   ├── main-layout.css
+│   │   ├── MainLayout.tsx
+│   │   ├── page-content.css
+│   │   └── PageContent.tsx
+│   ├── media
+│   │   ├── AudioPlayer.tsx
+│   │   ├── ImageGallery.tsx
+│   │   ├── MediaGallery.tsx
+│   │   ├── mediaPlayer.tsx
+│   │   ├── mediaUpload.tsx
+│   │   ├── mediaView.tsx
+│   │   └── VideoPlayer.tsx
+│   ├── pages
+│   │   ├── DashboardPage.tsx
+│   │   ├── DesignPage.tsx
+│   │   ├── ExplorePage.tsx
+│   │   ├── HomePage.tsx
+│   │   ├── MediaPage.tsx
+│   │   ├── NotificationsPage.tsx
+│   │   ├── ProfilePage.tsx
+│   │   ├── SettingsPage.tsx
+│   │   ├── SocialPage.tsx
+│   │   └── UploadPage.tsx
+│   ├── social
+│   │   ├── Comments.tsx
+│   │   ├── CommentSection.tsx
+│   │   ├── CreatePost.tsx
+│   │   ├── CreatePostForm.tsx
+│   │   ├── Feed.tsx
+│   │   ├── PostCard.tsx
+│   │   ├── SocialFeed.tsx
+│   │   ├── UserProfile.tsx
+│   │   └── UserProfileCard.tsx
+│   ├── theme
+│   │   ├── index.ts
+│   │   └── ThemeContext.tsx
+│   ├── ui
+│   │   ├── demos
+│   │   │   ├── autoindex.ts
+│   │   │   ├── BadgeDemo.tsx
+│   │   │   ├── ButtonDemo.tsx
+│   │   │   ├── CalendarDemo.tsx
+│   │   │   ├── ComboBoxDemo.tsx
+│   │   │   ├── DropdownDemo.tsx
+│   │   │   ├── FileUploadDemo.tsx
+│   │   │   ├── FormDemo.tsx
+│   │   │   ├── FuzzyStringDemo.tsx
+│   │   │   ├── ListBoxDemo.tsx
+│   │   │   ├── PopupDemo.tsx
+│   │   │   ├── SpinnerDemo.tsx
+│   │   │   └── TokenInputDemo.tsx
+│   │   ├── Badge.tsx
+│   │   ├── button.css
+│   │   ├── Button.tsx
+│   │   ├── Card.tsx
+│   │   ├── ComboBox.tsx
+│   │   ├── DropdownMenu.tsx
+│   │   ├── FileUpload.tsx
+│   │   ├── FuzzyString.tsx
+│   │   ├── Input.tsx
+│   │   ├── Link.tsx
+│   │   ├── ListBox.tsx
+│   │   ├── MenuItem.tsx
+│   │   ├── OfflineBadge.tsx
+│   │   ├── Popup.tsx
+│   │   ├── Spinner.tsx
+│   │   └── Throttle.tsx
+│   ├── Design.tsx
+│   ├── Link.tsx
+│   └── Root.tsx
+├── config
+│   └── environment.ts
+├── contexts
+│   └── SocialContext.tsx
+├── helpers
+│   ├── cookieHelpers.ts
+│   ├── focusHelpers.ts
+│   ├── formatters.ts
+│   ├── mergeEvents.ts
+│   └── passthroughRef.tsx
+├── hooks
+│   ├── useAsync.ts
+│   ├── useCounter.ts
+│   ├── useOnline.ts
+│   ├── usePopper.ts
+│   ├── useRefCurrent.ts
+│   ├── useRefPrevious.ts
+│   ├── useShortcut.ts
+│   └── useSocialInteractions.ts
+├── public
+│   ├── icons
+│   │   ├── apple-touch-icon.png
+│   │   ├── favicon.ico
+│   │   ├── favicon.svg
+│   │   ├── logo192.png
+│   │   └── logo512.png
+│   ├── favicon.ico
+│   ├── manifest.json
+│   ├── robots.txt
+│   └── service-worker.js
+├── services
+│   ├── api.ts
+│   ├── AuthClient.ts
+│   ├── ClientConfig.ts
+│   ├── ClientEnvironment.tsx
+│   ├── Router.ts
+│   ├── social.ts
+│   ├── types.ts
+│   └── WebsocketPubsubClient.ts
+├── test
+│   ├── base.e2e.ts
+│   └── base.test.ts
+├── utils
+│   └── styleUtils.ts
+├── index.css
+├── index.html
+├── index.tsx
+├── service-worker.js
+└── styles.ts
+
+Files: 105
+Lines: 14204
+========================================
+
+Server:
+----------------------------------------
+├── apis
+│   ├── auth.ts
+│   ├── autoindex.ts
+│   ├── hello.ts
+│   └── media.ts
+├── config
+│   ├── database.ts
+│   ├── email.ts
+│   ├── environment.ts
+│   └── serverConfig.ts
+├── controllers
+│   ├── AuthController.ts
+│   ├── media.controller.ts
+│   ├── post.controller.ts
+│   ├── social.controller.ts
+│   └── stream.controller.ts
+├── database
+│   ├── migrations
+│   │   ├── 001_create_users_table.sql
+│   │   ├── 002_create_artists_table.sql
+│   │   ├── 003_create_albums_table.sql
+│   │   ├── 004_create_tracks_table.sql
+│   │   ├── 005_create_playlists_table.sql
+│   │   ├── 006_create_playlist_tracks_table.sql
+│   │   ├── 007_create_social_tables.sql
+│   │   ├── 008_add_email_verification.sql
+│   │   └── 008_update_users_table.sql
+│   ├── BaseRepository.ts
+│   ├── config.ts
+│   ├── migrationConfig.ts
+│   ├── migrationManager.ts
+│   └── transactionManager.ts
+├── errors
+│   └── UnauthorizedError.ts
+├── helpers
+│   ├── fileHelpers.ts
+│   ├── loginHelpers.ts
+│   ├── path.ts
+│   └── signatureHelpers.ts
+├── lib
+│   ├── database.ts
+│   └── storage.ts
+├── middleware
+│   ├── auth.ts
+│   ├── authenticateJWT.ts
+│   ├── customValidate.ts
+│   ├── error.ts
+│   ├── errorHandler.ts
+│   ├── logger.ts
+│   ├── notFound.ts
+│   ├── rateLimiter.ts
+│   ├── upload.ts
+│   └── validate.ts
+├── models
+│   ├── Album.ts
+│   ├── Artist.ts
+│   ├── associations.ts
+│   ├── Comment.ts
+│   ├── CommentLike.ts
+│   ├── Follow.ts
+│   ├── index.ts
+│   ├── Like.ts
+│   ├── Media.ts
+│   ├── Playlist.ts
+│   ├── PlaylistTrack.ts
+│   ├── Post.ts
+│   ├── Track.ts
+│   ├── TwoFactorAuth.ts
+│   └── User.ts
+├── routes
+│   ├── admin.ts
+│   ├── auth.ts
+│   ├── comments.ts
+│   ├── index.ts
+│   ├── media.ts
+│   ├── moderator.ts
+│   ├── social.ts
+│   └── users.ts
+├── scripts
+│   ├── checkUsers.ts
+│   ├── createMigration.ts
+│   ├── resetMigration.ts
+│   ├── runMigration.ts
+│   ├── seedDemoDatabase.ts
+│   ├── testRegistration.ts
+│   └── undoMigration.ts
+├── services
+│   ├── media
+│   │   ├── AudioProcessor.ts
+│   │   ├── BaseMediaProcessor.ts
+│   │   ├── ImageProcessor.ts
+│   │   ├── index.ts
+│   │   ├── MediaProcessingService.ts
+│   │   └── VideoProcessor.ts
+│   ├── AuthService.ts
+│   ├── AuthTokenService.ts
+│   ├── Database.ts
+│   ├── EmailService.ts
+│   ├── InMemoryQueue.ts
+│   ├── LoggerService.ts
+│   ├── MediaService.ts
+│   ├── QueueDatabase.ts
+│   ├── QueueService.ts
+│   ├── ServerConfig.ts
+│   ├── ServerEnvironment.ts
+│   └── WebsocketPubsubServer.ts
+├── tasks
+│   ├── autoindex.ts
+│   └── followup.ts
+├── types
+│   ├── express.d.ts
+│   ├── index.ts
+│   ├── media.types.ts
+│   └── request.types.ts
+├── utils
+│   └── validation.ts
+├── validators
+│   ├── auth.validator.ts
+│   ├── custom-social.validator.ts
+│   └── social.validator.ts
+├── api.ts
+├── ApiServer.ts
+├── FileServer.ts
+├── index.ts
+├── PubsubServer.ts
+├── QueueServer.ts
+├── server.ts
+├── tasks.ts
+└── types.ts
+
+Files: 111
+Lines: 14867
+========================================
+
+Shared:
+----------------------------------------
+├── errors
+│   └── ApiError.ts
+├── BatchedQueue.ts
+├── dataTypes.ts
+├── dateHelpers.ts
+├── DeferredPromise.ts
+├── errors.ts
+├── fuzzyMatch.test.ts
+├── fuzzyMatch.ts
+├── Logger.ts
+├── PubSubTypes.ts
+├── randomId.ts
+├── routeHelpers.ts
+├── shallowEqual.ts
+├── sleep.ts
+├── typeHelpers.ts
+└── types.ts
+
+Files: 16
+Lines: 632
+========================================
+
+Tools:
+----------------------------------------
+├── code_analysis
+│   ├── client_code.txt
+│   ├── code_summary.txt
+│   ├── server_code.txt
+│   ├── shared_code.txt
+│   └── tools_code.txt
+├── client_code.txt
+├── code_summary.txt
+├── extract_code.py
+├── reset.ts
+├── server_code.txt
+├── shared_code.txt
+└── tools_code.txt
+
+Files: 2
+Lines: 218
+========================================
