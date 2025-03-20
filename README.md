@@ -17,8 +17,21 @@ ABE Stack is a comprehensive boilerplate for building full-stack web application
 - **Background Processing**: Task queue for handling async operations
 - **Responsive UI**: Component library with mobile-first design
 - **End-to-End Testing**: Browser testing with Playwright
-- **Three Processes**: Three processes run at once for easy development
-- **Scalable Architecture**: Designed to break into microservices when needed
+- **Developer Experience**: Comprehensive VS Code integration, code generators, and documentation
+- **Scalable Architecture**: Clean layered architecture designed to break into microservices when needed
+
+## Architecture
+
+ABE Stack follows a clean, multi-layered architecture that separates concerns and promotes maintainability and scalability:
+
+![Architecture Diagram](docs/images/architecture.md)
+
+### Key Layers:
+
+- **Client**: React frontend with component hierarchy, routing, and state management
+- **Server**: Express-based backend with controllers, services, and repositories
+- **Database**: PostgreSQL with models, migrations, and seed data
+- **Infrastructure**: Supporting systems for caching, media storage, and authentication
 
 ## Database Layer
 
@@ -31,6 +44,7 @@ ABE Stack implements a robust database layer following the Repository pattern:
 - **Seeding**: Database seeding for development and testing
 
 The database layer includes repositories for:
+
 - **Auth**: User, Role, Permission, Token management
 - **Social**: Posts, Comments, Likes, Follows, Bookmarks, Notifications
 - **Media**: Media files, Collections, Tags
@@ -52,6 +66,7 @@ The services layer encapsulates business logic and orchestrates operations acros
 - **Analytics Services**: User activity tracking and analytics
 
 Each service follows SOLID principles and includes:
+
 - Proper TypeScript typing
 - Comprehensive error handling
 - Input validation
@@ -61,7 +76,38 @@ Each service follows SOLID principles and includes:
 
 ## Getting Started
 
-### Prerequisites
+### Quick Start
+
+For a quick setup, you can use our automated scripts:
+
+```bash
+# Interactive setup with configuration options
+npm run setup
+
+# Quick start with default settings
+npm run quickstart
+```
+
+### Docker Setup
+
+ABE Stack comes with Docker support for easy development and deployment:
+
+1. **Prerequisites**:
+
+   - [Docker](https://www.docker.com/get-started)
+   - [Docker Compose](https://docs.docker.com/compose/install/)
+
+2. **Start with Docker**:
+   ```bash
+   docker-compose up
+   ```
+   This will start both the application and PostgreSQL database in containers.
+
+### Manual Setup
+
+If you prefer to set up manually:
+
+#### Prerequisites
 
 - Node.js (v18 or higher)
 - PostgreSQL (v14 or higher)
@@ -227,6 +273,11 @@ npm run db:clear        # Clear all data from the database while preserving sche
 npm run migrate         # Run database migrations
 npm run migrate:create  # Create a new migration
 npm run migrate:rollback # Rollback the last migration
+
+# Code Generation
+npm run generate        # Run the interactive code generator
+npm run setup           # Run the interactive setup wizard
+npm run quickstart      # Run the quick start script
 ```
 
 ### Database Commands Explained
@@ -271,6 +322,47 @@ npm run db:clear
 # With custom database connection
 DB_HOST=myhost DB_PORT=5433 DB_USER=myuser DB_PASSWORD=mypassword npm run db:clear
 ```
+
+## Code Generation Tools
+
+ABE Stack comes with powerful code generation tools to accelerate development:
+
+```sh
+npm run generate
+```
+
+This interactive CLI tool helps you generate:
+
+- **React Components**: Create atomic, molecule, or organism components
+- **Repositories**: Generate database repository classes
+- **Services**: Create service classes with business logic
+- **Controllers**: Build API controllers for endpoints
+
+The generator follows best practices and creates files with proper TypeScript typing, documentation, and tests.
+
+## Visual Studio Code Integration
+
+ABE Stack includes comprehensive VS Code integration for an optimal development experience:
+
+- **Extensions**: Recommended extensions for TypeScript, ESLint, Prettier, and more
+- **Snippets**: Custom code snippets for common patterns
+- **Launch Configurations**: Debug configurations for client, server, and tests
+- **Settings**: Optimized workspace settings for the tech stack
+- **Task Definitions**: Custom tasks for development workflows
+
+Enable all recommended extensions when prompted by VS Code for the best experience.
+
+## Documentation
+
+The project includes comprehensive documentation to help you understand and extend the codebase:
+
+- **Architecture**: Overview of the system architecture and design patterns
+- **Tutorials**: Step-by-step guides for common tasks:
+  - Adding API endpoints
+  - Creating React components
+  - Implementing complete features
+- **Database**: Documentation for the database schema, migrations, and transactions
+- **Services**: Guides for using and extending the service layer
 
 ## Code Quality
 
@@ -392,6 +484,9 @@ The application can be configured using the following environment variables:
 ├── src/                    # Source code
 │   ├── client/             # Frontend React application
 │   │   ├── components/     # React components
+│   │   │   ├── atoms/      # Basic building blocks
+│   │   │   ├── molecules/  # Combinations of atoms
+│   │   │   └── organisms/  # Complex UI sections
 │   │   ├── contexts/       # React contexts
 │   │   ├── hooks/          # Custom React hooks
 │   │   ├── layouts/        # Layout components
@@ -439,11 +534,16 @@ The application can be configured using the following environment variables:
 │   │   └── utils/          # Shared utility functions
 │   │
 │   ├── tools/              # Development and build tools
+│   │   ├── generators/     # Code generation templates
+│   │   ├── installation/   # Setup scripts
+│   │   └── quickstart.js   # Quick start script
 │   │
 │   └── types/              # TypeScript type definitions
 │
 ├── dist/                   # Compiled output
 ├── docs/                   # Documentation
+│   ├── images/             # Architecture diagrams
+│   ├── tutorials/          # Step-by-step guides
 │   └── server/             # Server documentation
 │       ├── database/       # Database layer documentation
 │       └── services/       # Services layer documentation
@@ -452,6 +552,12 @@ The application can be configured using the following environment variables:
 ├── node_modules/           # Dependencies
 ├── .env.development        # Development environment variables
 ├── .env.production         # Production environment variables
+├── .vscode/                # VS Code configuration
+│   ├── extensions.json     # Recommended extensions
+│   ├── launch.json         # Debug configurations
+│   ├── settings.json       # Editor settings
+│   └── snippets/           # Code snippets
+│
 └── package.json            # Project manifest
 ```
 
