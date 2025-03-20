@@ -1,4 +1,3 @@
-import fs from "fs";
 import http from "http";
 import path from "path";
 
@@ -234,10 +233,6 @@ async function startServer(): Promise<void> {
   server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
     console.log(`API available at http://localhost:${port}/api`);
-
-    // Write the port to a file so the client can read it
-    const portFilePath = path.join(process.cwd(), ".port");
-    fs.writeFileSync(portFilePath, port.toString());
   });
 }
 
