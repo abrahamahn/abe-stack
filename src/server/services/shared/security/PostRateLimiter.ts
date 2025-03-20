@@ -1,6 +1,6 @@
 import { UserType } from "@models/auth";
-import { MetricsService } from "@services/app/social/monitoring/MetricsService";
 import { PostRateLimitError } from "@services/shared/errors/PostErrors";
+import { MetricsService } from "@services/shared/monitoring";
 
 import { RateLimiter } from "./RateLimiter";
 

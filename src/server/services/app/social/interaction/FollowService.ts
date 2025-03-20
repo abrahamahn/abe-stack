@@ -3,12 +3,12 @@ import { Follow } from "@models/social/Follow";
 import { NotificationType, Notification } from "@models/social/Notification";
 import { UserRepository } from "@repositories/auth/UserRepository";
 import { FollowRepository, NotificationRepository } from "@repositories/social";
-import { MetricsService } from "@services/app/social/monitoring/MetricsService";
 import { BaseService, CacheManager, PaginationOptions } from "@services/shared";
 import {
   ResourceNotFoundError,
   ValidationError,
 } from "@services/shared/errors/ServiceError";
+import { MetricsService } from "@services/shared/monitoring";
 
 const FOLLOW_RATE_LIMIT = 100; // Max follows per hour
 const CACHE_TTL = 3600; // 1 hour

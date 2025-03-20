@@ -2,7 +2,6 @@ import { EntityType } from "@models/shared/EntityTypes";
 import { Notification, NotificationType } from "@models/social";
 import { UserRepository } from "@repositories/auth";
 import { NotificationRepository } from "@repositories/social";
-import { MetricsService } from "@services/app/social/monitoring/MetricsService";
 import {
   BaseService,
   CacheManager,
@@ -10,6 +9,7 @@ import {
   EventEmitter,
 } from "@services/shared";
 import { ResourceNotFoundError } from "@services/shared/errors/ServiceError";
+import { MetricsService } from "@services/shared/monitoring";
 
 const CACHE_TTL = 300; // 5 minutes
 const BATCH_SIZE = 100;

@@ -6,7 +6,6 @@ import {
   NotificationRepository,
   PostRepository,
 } from "@repositories/social";
-import { MetricsService } from "@services/app/social/monitoring/MetricsService";
 import {
   BaseService,
   ContentValidator,
@@ -18,6 +17,7 @@ import {
   ResourceNotFoundError,
   UnauthorizedError,
 } from "@services/shared/errors/ServiceError";
+import { MetricsService } from "@services/shared/monitoring";
 
 const CACHE_TTL = 3600; // 1 hour
 const BATCH_SIZE = 50;
@@ -49,7 +49,7 @@ export class CommentService extends BaseService {
     private contentValidator: ContentValidator,
   ) {
     super("CommentService");
-    this.cacheManager = new CacheManager();
+    this.cacheManager = CacheManager.getInstance();
   }
 
   async createComment(

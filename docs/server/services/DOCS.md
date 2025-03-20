@@ -4,67 +4,6 @@
 
 This document outlines the development plan for the service layer of our PERN stack (PostgreSQL, Express, React, Node.js) social media and multimedia streaming application. The service layer will bridge the gap between the repositories and API controllers, encapsulating business logic and orchestrating operations across multiple repositories.
 
-## Folder Structure
-
-```
-/server
-  /services
-    /core
-      /auth
-        AuthService.ts
-        TokenService.ts
-        PasswordService.ts
-        EmailVerificationService.ts
-      /user
-        UserService.ts
-        ProfileService.ts
-        UserPreferencesService.ts
-      /permission
-        RoleService.ts
-        PermissionService.ts
-    /social
-      /post
-        PostService.ts
-        FeedService.ts
-        PostSchedulingService.ts
-      /comment
-        CommentService.ts
-      /interaction
-        LikeService.ts
-        BookmarkService.ts
-        FollowService.ts
-      /hashtag
-        HashtagService.ts
-    /messaging
-      ConversationService.ts
-      MessageService.ts
-    /media
-      MediaService.ts
-      MediaProcessingService.ts
-      MediaCollectionService.ts
-      MediaTagService.ts
-    /discovery
-      SearchService.ts
-      RecommendationService.ts
-    /notification
-      NotificationService.ts
-      NotificationDeliveryService.ts
-    /moderation
-      ContentModerationService.ts
-      ModerationActionService.ts
-      ReportingService.ts
-    /analytics
-      ActivityLogService.ts
-      InsightsService.ts
-    /community
-      GroupService.ts
-      GroupMemberService.ts
-    /common
-      CacheService.ts
-      EventBusService.ts
-      TransactionService.ts
-```
-
 ## Coding Guidelines
 
 1. **Strict TypeScript**: Use strict mode and proper types for all parameters, return values, and variables

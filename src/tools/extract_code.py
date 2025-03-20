@@ -1,189 +1,137 @@
+#!/usr/bin/env python3
 import os
+import glob
+import re
+import json
+import argparse
 from pathlib import Path
 
-def generate_directory_tree(directory, prefix="", exclude_dirs=None):
-    """Generate a tree-like directory structure string."""
-    if exclude_dirs is None:
-        exclude_dirs = set()
-    
-    tree = []
-    dir_path = Path(directory)
-    
-    # Get all items in directory
-    try:
-        items = list(dir_path.iterdir())
-    except Exception:
-        return []
-    
-    # Sort items (directories first, then files)
-    items.sort(key=lambda x: (not x.is_dir(), x.name.lower()))
-    
-    for index, item in enumerate(items):
-        if item.name in exclude_dirs:
-            continue
-            
-        is_last = index == len(items) - 1
-        current_prefix = "└── " if is_last else "├── "
-        next_prefix = "    " if is_last else "│   "
-        
-        tree.append(prefix + current_prefix + item.name)
-        
-        if item.is_dir():
-            tree.extend(generate_directory_tree(
-                item,
-                prefix + next_prefix,
-                exclude_dirs
-            ))
-    
-    return tree
+"""
+This script extracts all database-related code from /src/server/database
+and saves it to a single text file for review.
+"""
 
-def extract_code_for_directory(base_dir, target_dir):
-    # File extensions to include
-    code_extensions = {
-        '.ts', '.tsx', '.js', '.jsx', '.py', '.json', 
-        '.css', '.scss', '.less', '.html', '.md',
-        '.sql', '.prisma', '.env', '.yml', '.yaml'
-    }
-    
-    # Directories to exclude
-    exclude_dirs = {
-        'node_modules', 'dist', '.git', '__pycache__',
-        'build', 'coverage', '.next', '.cache'
-    }
-    
-    # Store all code content
-    code_content = []
-    total_files = 0
-    total_lines = 0
-    
-    dir_path = os.path.join(base_dir, target_dir)
-    
-    if not os.path.exists(dir_path):
-        return None
-    
-    # Generate directory tree
-    tree = generate_directory_tree(dir_path, exclude_dirs=exclude_dirs)
-    
-    for root, dirs, files in os.walk(dir_path):
-        # Skip excluded directories
-        dirs[:] = [d for d in dirs if d not in exclude_dirs]
-        
-        for file in files:
-            file_path = os.path.join(root, file)
-            extension = os.path.splitext(file)[1].lower()
-            
-            if extension in code_extensions:
-                try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        lines = f.readlines()
-                        line_count = len(lines)
-                        
-                        # Update statistics
-                        total_files += 1
-                        total_lines += line_count
-                        
-                        # Add file separator and content
-                        relative_path = os.path.relpath(file_path, dir_path)
-                        separator = f"\n{'=' * 80}\n"
-                        header = f"File: {relative_path}\nLines: {line_count}\n{'-' * 80}\n"
-                        content = ''.join(lines)
-                        
-                        code_content.append(f"{separator}{header}{content}")
-                        
-                except Exception as e:
-                    print(f"Error reading {file_path}: {str(e)}")
-    
-    if total_files == 0:
-        return None
-        
-    return {
-        'content': ''.join(code_content),
-        'total_files': total_files,
-        'total_lines': total_lines,
-        'tree': tree
-    }
+def parse_args():
+    parser = argparse.ArgumentParser(description='Extract database code files.')
+    parser.add_argument('--ts-only', action='store_true', help='Extract only TypeScript files')
+    parser.add_argument('--extensions', nargs='+', default=['.*'], help='File extensions to extract (default: all)')
+    return parser.parse_args()
 
-def save_code_to_file(code_info, output_file, directory_name):
-    with open(output_file, 'w', encoding='utf-8') as f:
-        # Write summary header
-        f.write(f"{directory_name.upper()} DIRECTORY SUMMARY\n")
-        f.write("=" * 80 + "\n")
-        f.write(f"Total Files: {code_info['total_files']}\n")
-        f.write(f"Total Lines: {code_info['total_lines']}\n")
-        f.write("=" * 80 + "\n\n")
-        
-        # Write directory structure
-        f.write("DIRECTORY STRUCTURE:\n")
-        f.write("-" * 80 + "\n")
-        f.write("\n".join(code_info['tree']))
-        f.write("\n" + "=" * 80 + "\n\n")
-        
-        # Write full code content
-        f.write(code_info['content'])
+# Get the project root directory (2 levels up from the script)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+
+# Configuration with absolute paths
+DATABASE_DIR = os.path.join(PROJECT_ROOT, "server", "services")
+OUTPUT_DIR = os.path.join(SCRIPT_DIR, "code_analysis")
+OUTPUT_FILE = os.path.join(OUTPUT_DIR, "services_code.txt")
+EXCLUDE_PATTERNS = ["node_modules", "dist", ".git"]
+
+# Create output directory if it doesn't exist
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+print(f"Script directory: {SCRIPT_DIR}")
+print(f"Project root: {PROJECT_ROOT}")
+print(f"Database directory: {DATABASE_DIR}")
+print(f"Output directory: {OUTPUT_DIR}")
+print(f"Output file: {OUTPUT_FILE}")
+
+
+def is_excluded(file_path):
+    """Check if a file should be excluded based on patterns."""
+    for pattern in EXCLUDE_PATTERNS:
+        if pattern in file_path:
+            return True
+    return False
+
+
+def extract_files(directory, file_extensions):
+    """Extract all database-related files and their content."""
+    files_data = []
+    
+    if not os.path.exists(directory):
+        print(f"ERROR: Database directory not found: {directory}")
+        return files_data
+    
+    # Get all files with specified extensions
+    for ext in file_extensions:
+        if not ext.startswith('.'):
+            ext = f'.{ext}'
+        if ext == '.*':  # Handle all files case
+            file_pattern = os.path.join(directory, "**", "*")
+        else:
+            file_pattern = os.path.join(directory, "**", f"*{ext}")
+            
+        for file_path in glob.glob(file_pattern, recursive=True):
+            if is_excluded(file_path) or os.path.isdir(file_path):
+                continue
+                
+            relative_path = os.path.relpath(file_path, directory)
+            try:
+                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+                    
+                files_data.append({
+                    "path": relative_path,
+                    "lines": content.count('\n') + 1,
+                    "content": content
+                })
+            except Exception as e:
+                print(f"Error reading {file_path}: {e}")
+                files_data.append({
+                    "path": relative_path,
+                    "lines": 0,
+                    "content": f"ERROR: {e}"
+                })
+    
+    # Sort files by path for consistent output
+    return sorted(files_data, key=lambda x: x["path"])
+
 
 def main():
-    # Get the project root directory and src directory
-    script_dir = Path(__file__).parent
-    project_root = script_dir.parent.parent  # Go up two levels from tools directory
-    src_dir = project_root / 'src'
+    """Main function to extract all database code."""
+    args = parse_args()
     
-    # Create output directory in tools
-    output_dir = script_dir / 'code_analysis'
-    output_dir.mkdir(exist_ok=True)
+    # Use TypeScript only if specified, otherwise use provided extensions
+    file_extensions = ['.ts'] if args.ts_only else args.extensions
     
-    # Directories to process
-    directories = ['client', 'server', 'shared', 'tools']
+    print(f"Extracting database code from {DATABASE_DIR}...")
+    print(f"Using file extensions: {file_extensions}")
     
-    print("Extracting code from directories...")
-    total_files = 0
-    total_lines = 0
+    # Extract all files
+    files_data = extract_files(DATABASE_DIR, file_extensions)
     
-    # Store directory trees for summary
-    all_trees = {}
+    if not files_data:
+        print("No files found or directory does not exist.")
+        return
     
-    # Process each directory
-    for directory in directories:
-        code_info = extract_code_for_directory(src_dir, directory)
+    # Write to a single text file
+    with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
+        # Write header
+        f.write("===========================================================\n")
+        f.write("DATABASE LAYER CODE EXTRACTION\n")
+        f.write("===========================================================\n\n")
         
-        if code_info:
-            output_file = output_dir / f'{directory}_code.txt'
-            save_code_to_file(code_info, output_file, directory)
-            
-            total_files += code_info['total_files']
-            total_lines += code_info['total_lines']
-            all_trees[directory] = code_info['tree']
-            
-            print(f"\n{directory.capitalize()} Directory:")
-            print(f"Files: {code_info['total_files']}")
-            print(f"Lines: {code_info['total_lines']}")
-            print(f"Output saved to: {output_file}")
-    
-    # Create summary file
-    summary_file = output_dir / 'code_summary.txt'
-    with open(summary_file, 'w', encoding='utf-8') as f:
-        f.write("OVERALL CODEBASE SUMMARY\n")
-        f.write("=" * 80 + "\n")
-        f.write(f"Total Files Across All Directories: {total_files}\n")
-        f.write(f"Total Lines Across All Directories: {total_lines}\n")
-        f.write("\nBreakdown by Directory:\n")
+        # Write summary
+        f.write(f"Total Files: {len(files_data)}\n")
+        f.write(f"Total Lines: {sum(file['lines'] for file in files_data)}\n\n")
         
-        for directory in directories:
-            if directory in all_trees:
-                f.write(f"\n{directory.capitalize()}:\n")
-                f.write("-" * 40 + "\n")
-                f.write("\n".join(all_trees[directory]))
-                f.write("\n\n")
-                code_info = extract_code_for_directory(src_dir, directory)
-                if code_info:
-                    f.write(f"Files: {code_info['total_files']}\n")
-                    f.write(f"Lines: {code_info['total_lines']}\n")
-                f.write("=" * 40 + "\n")
+        # Write file listing
+        f.write("File Listing:\n")
+        for i, file in enumerate(files_data, 1):
+            f.write(f"{i}. {file['path']} ({file['lines']} lines)\n")
+        f.write("\n\n")
+        
+        # Write each file with separator
+        for i, file in enumerate(files_data, 1):
+            f.write("===========================================================\n")
+            f.write(f"FILE {i}: {file['path']}\n")
+            f.write("===========================================================\n\n")
+            f.write(file['content'])
+            f.write("\n\n\n")
     
-    print("\nCode Extraction Complete!")
-    print("-" * 50)
-    print(f"Total Files Processed: {total_files}")
-    print(f"Total Lines of Code: {total_lines}")
-    print(f"\nSummary saved to: {summary_file}")
+    print(f"Extraction complete. Database code saved to {OUTPUT_FILE}")
+
 
 if __name__ == "__main__":
     main() 

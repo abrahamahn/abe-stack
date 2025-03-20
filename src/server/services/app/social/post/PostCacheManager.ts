@@ -1,7 +1,7 @@
 import { Post } from "@models/social/Post";
-import { MetricsService } from "@services/app/social/monitoring/MetricsService";
+import { MetricsService } from "@services/shared/monitoring";
 
-import { CacheManager } from "./CacheManager";
+import { CacheManager } from "../../../shared/cache/CacheManager";
 
 export class PostCacheManager extends CacheManager<string, Post> {
   private readonly metrics: MetricsService;

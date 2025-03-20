@@ -1,10 +1,18 @@
 export class CacheManager<K extends string = string, V = unknown> {
+  private static instance: CacheManager;
   private cache = new Map<K, { value: V; expiresAt: number }>();
 
-  constructor(
+  protected constructor(
     protected namespace: string = "",
     protected ttlSeconds: number = 3600,
   ) {}
+
+  public static getInstance(): CacheManager {
+    if (!CacheManager.instance) {
+      CacheManager.instance = new CacheManager();
+    }
+    return CacheManager.instance;
+  }
 
   async get<T extends V>(key: K): Promise<T | null> {
     const entry = this.cache.get(key);

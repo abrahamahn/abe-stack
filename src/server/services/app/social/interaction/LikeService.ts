@@ -10,7 +10,6 @@ import {
   NotificationRepository,
   PostRepository,
 } from "@repositories/social";
-import { MetricsService } from "@services/app/social/monitoring/MetricsService";
 import {
   BaseService,
   CacheManager,
@@ -18,6 +17,7 @@ import {
   PaginationOptions,
 } from "@services/shared";
 import { ResourceNotFoundError } from "@services/shared/errors/ServiceError";
+import { MetricsService } from "@services/shared/monitoring";
 
 const CACHE_TTL = 3600; // 1 hour
 const BATCH_SIZE = 100;
@@ -34,7 +34,7 @@ export class LikeService extends BaseService {
     private rateLimiter: PostRateLimiter,
   ) {
     super("LikeService");
-    this.cacheManager = new CacheManager("likes");
+    this.cacheManager = CacheManager.getInstance();
   }
 
   async likePost(userId: string, postId: string): Promise<Like> {

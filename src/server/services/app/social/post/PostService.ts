@@ -21,7 +21,6 @@ import {
   PostRepository,
 } from "@database/repositories";
 // Service imports
-import { MetricsService } from "@services/app/social/monitoring/MetricsService";
 import {
   BaseService,
   PostCacheManager,
@@ -32,6 +31,7 @@ import {
   PostNotFoundError,
   PostPermissionError,
 } from "@services/shared/errors/PostErrors";
+import { MetricsService } from "@services/shared/monitoring";
 import { PostRateLimiter } from "@services/shared/security/PostRateLimiter";
 
 // Define a simple Event Emitter class as a temporary placeholder

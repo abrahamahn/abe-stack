@@ -1,12 +1,12 @@
 import { Hashtag, HashtagCategory } from "@models/social/Hashtag";
 import { HashtagRepository } from "@repositories/social/HashtagRepository";
 import { PostRepository } from "@repositories/social/PostRepository";
-import { MetricsService } from "@services/app/social/monitoring/MetricsService";
 import { BaseService, CacheManager } from "@services/shared";
 import {
   ResourceNotFoundError,
   ValidationError,
 } from "@services/shared/errors/ServiceError";
+import { MetricsService } from "@services/shared/monitoring";
 
 const CACHE_TTL = 3600; // 1 hour
 const TRENDING_CACHE_TTL = 300; // 5 minutes

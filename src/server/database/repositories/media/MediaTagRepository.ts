@@ -1,7 +1,7 @@
-import { Logger } from "../../../services/dev/logger/LoggerService";
-import { DatabaseConnectionManager } from "../../config";
-import { MediaTag, MediaTagAttributes } from "../../models/media/MediaTag";
-import { BaseRepository } from "../BaseRepository";
+import { DatabaseConnectionManager } from "@database/config";
+import { MediaTag, MediaTagAttributes } from "@models/media/MediaTag";
+import { BaseRepository } from "@repositories/BaseRepository";
+import { Logger } from "@services/dev/logger/LoggerService";
 
 export class MediaTagError extends Error {
   constructor(
@@ -25,53 +25,51 @@ export class MediaTagValidationError extends MediaTagError {
   }
 }
 
-export class MediaTagDuplicateError extends MediaTagError {
-  constructor(slug: string) {
-    super(`Tag with slug '${slug}' already exists`, "TAG_DUPLICATE");
-  }
-}
-
 export class MediaTagRepository extends BaseRepository<MediaTag> {
-  protected logger = new Logger("MediaTagRepository");
+  private static instance: MediaTagRepository;
   protected tableName = "media_tags";
   protected columns = [
     "id",
-    "name",
-    "slug",
-    "description",
-    "category",
-    "is_official as isOfficial",
-    "usage_count as usageCount",
-    "parent_tag_id as parentTagId",
+    "media_id as mediaId",
+    "hashtag_id as hashtagId",
     "created_at as createdAt",
     "updated_at as updatedAt",
   ];
+  protected logger = new Logger("MediaTagRepository");
+
+  private constructor() {
+    super();
+  }
+
+  public static getInstance(): MediaTagRepository {
+    if (!MediaTagRepository.instance) {
+      MediaTagRepository.instance = new MediaTagRepository();
+    }
+    return MediaTagRepository.instance;
+  }
 
   protected mapResultToModel(row: Record<string, unknown>): MediaTag {
     if (!row) return null as unknown as MediaTag;
-    return new MediaTag(row as unknown as MediaTagAttributes);
-  }
-
-  constructor() {
-    super();
+    return new MediaTag({
+      id: row.id as string,
+      mediaId: row.mediaId as string,
+      hashtagId: row.hashtagId as string,
+      createdAt: row.createdAt as Date,
+      updatedAt: row.updatedAt as Date,
+    });
   }
 
   /**
    * Creates a new media tag with validation
    */
-  async create(
-    data: Omit<MediaTagAttributes, "id" | "createdAt" | "updatedAt">,
-  ): Promise<MediaTag> {
+  async create(data: {
+    mediaId: string;
+    hashtagId: string;
+  }): Promise<MediaTag> {
     return this.withTransaction(async (_client) => {
       try {
         const tag = new MediaTag(data);
         tag.validate();
-
-        // Check if tag with same slug already exists
-        const existingTag = await this.findBySlug(tag.slug);
-        if (existingTag) {
-          throw new MediaTagDuplicateError(tag.slug);
-        }
 
         const result = await super.create(tag);
         return new MediaTag(result);
@@ -106,14 +104,6 @@ export class MediaTagRepository extends BaseRepository<MediaTag> {
         const tag = new MediaTag({ ...existing, ...data });
         tag.validate();
 
-        // If slug has changed, check for duplicates
-        if (data.slug || data.name) {
-          const existingWithSlug = await this.findBySlug(tag.slug);
-          if (existingWithSlug && existingWithSlug.id !== id) {
-            throw new MediaTagDuplicateError(tag.slug);
-          }
-        }
-
         const result = await super.update(id, tag);
         if (!result) {
           throw new MediaTagNotFoundError(id);
@@ -131,32 +121,6 @@ export class MediaTagRepository extends BaseRepository<MediaTag> {
         throw new MediaTagError("Failed to update tag", "UPDATE_ERROR");
       }
     });
-  }
-
-  /**
-   * Find a tag by its slug
-   */
-  async findBySlug(slug: string): Promise<MediaTag | null> {
-    try {
-      const query = `
-        SELECT ${this.columns.join(", ")}
-        FROM ${this.tableName}
-        WHERE slug = $1
-      `;
-
-      const { rows } = await DatabaseConnectionManager.getPool().query(query, [
-        slug,
-      ]);
-      if (rows.length === 0) return null;
-
-      return new MediaTag(rows[0]);
-    } catch (error) {
-      this.logger.error("Error finding tag by slug", {
-        slug,
-        error: error instanceof Error ? error.message : error,
-      });
-      throw new MediaTagError("Failed to find tag by slug", "QUERY_ERROR");
-    }
   }
 
   /**
@@ -277,214 +241,6 @@ export class MediaTagRepository extends BaseRepository<MediaTag> {
   }
 
   /**
-   * Increment usage count for a tag
-   */
-  async incrementUsage(id: string, count = 1): Promise<MediaTag | null> {
-    return this.withTransaction(async (_client) => {
-      try {
-        const existing = await this.findById(id);
-        if (!existing) {
-          throw new MediaTagNotFoundError(id);
-        }
-
-        const result = await super.update(id, {
-          usageCount: existing.usageCount + count,
-        });
-        if (!result) {
-          throw new MediaTagNotFoundError(id);
-        }
-        return new MediaTag(result);
-      } catch (error) {
-        if (error instanceof MediaTagError) {
-          throw error;
-        }
-        this.logger.error("Error incrementing tag usage", {
-          id,
-          count,
-          error: error instanceof Error ? error.message : error,
-        });
-        throw new MediaTagError(
-          "Failed to increment tag usage",
-          "UPDATE_ERROR",
-        );
-      }
-    });
-  }
-
-  /**
-   * Decrement usage count for a tag
-   */
-  async decrementUsage(id: string, count = 1): Promise<MediaTag | null> {
-    return this.withTransaction(async (_client) => {
-      try {
-        const existing = await this.findById(id);
-        if (!existing) {
-          throw new MediaTagNotFoundError(id);
-        }
-
-        const result = await super.update(id, {
-          usageCount: Math.max(0, existing.usageCount - count),
-        });
-        if (!result) {
-          throw new MediaTagNotFoundError(id);
-        }
-        return new MediaTag(result);
-      } catch (error) {
-        if (error instanceof MediaTagError) {
-          throw error;
-        }
-        this.logger.error("Error decrementing tag usage", {
-          id,
-          count,
-          error: error instanceof Error ? error.message : error,
-        });
-        throw new MediaTagError(
-          "Failed to decrement tag usage",
-          "UPDATE_ERROR",
-        );
-      }
-    });
-  }
-
-  /**
-   * Find tags by parent tag ID
-   */
-  async findByParentTagId(parentTagId: string): Promise<MediaTag[]> {
-    try {
-      const query = `
-        SELECT ${this.columns.join(", ")}
-        FROM ${this.tableName}
-        WHERE parent_tag_id = $1
-        ORDER BY name ASC
-      `;
-
-      const { rows } = await DatabaseConnectionManager.getPool().query(query, [
-        parentTagId,
-      ]);
-      return rows.map((row) => new MediaTag(row));
-    } catch (error) {
-      this.logger.error("Error finding tags by parent ID", {
-        parentTagId,
-        error: error instanceof Error ? error.message : error,
-      });
-      throw new MediaTagError(
-        "Failed to find tags by parent ID",
-        "QUERY_ERROR",
-      );
-    }
-  }
-
-  /**
-   * Find tags related to the given tag ID (siblings and parents)
-   */
-  async findRelatedTags(tagId: string, limit = 10): Promise<MediaTag[]> {
-    return this.withTransaction(async (_client) => {
-      try {
-        const tag = await this.findById(tagId);
-        if (!tag) {
-          throw new MediaTagNotFoundError(tagId);
-        }
-
-        // Find parent tag if this is a child tag
-        let relatedTags: MediaTag[] = [];
-        if (tag.parentTagId) {
-          const parentTag = await this.findById(tag.parentTagId);
-          if (parentTag) {
-            relatedTags.push(parentTag);
-          }
-        }
-
-        // Find sibling tags (tags with same parent or in same category)
-        let query = "";
-        const params: unknown[] = [];
-
-        if (tag.parentTagId) {
-          query = `
-            SELECT ${this.columns.join(", ")}
-            FROM ${this.tableName}
-            WHERE parent_tag_id = $1 AND id != $2
-            ORDER BY usage_count DESC
-            LIMIT $3
-          `;
-          params.push(tag.parentTagId, tagId, limit.toString());
-        } else if (tag.category) {
-          query = `
-            SELECT ${this.columns.join(", ")}
-            FROM ${this.tableName}
-            WHERE category = $1 AND id != $2
-            ORDER BY usage_count DESC
-            LIMIT $3
-          `;
-          params.push(tag.category, tagId, limit.toString());
-        } else {
-          // Find related by common usage patterns
-          query = `
-            SELECT t.*
-            FROM ${this.tableName} t
-            JOIN media_tag_mappings m1 ON t.id = m1.tag_id
-            JOIN media_tag_mappings m2 ON m1.media_id = m2.media_id
-            WHERE m2.tag_id = $1 AND t.id != $2
-            GROUP BY t.id
-            ORDER BY COUNT(*) DESC, t.usage_count DESC
-            LIMIT $3
-          `;
-          params.push(tagId, tagId, limit.toString());
-        }
-
-        const { rows } = await DatabaseConnectionManager.getPool().query(
-          query,
-          params,
-        );
-        relatedTags = [...relatedTags, ...rows.map((row) => new MediaTag(row))];
-
-        return relatedTags;
-      } catch (error) {
-        if (error instanceof MediaTagError) {
-          throw error;
-        }
-        this.logger.error("Error finding related tags", {
-          tagId,
-          error: error instanceof Error ? error.message : error,
-        });
-        throw new MediaTagError("Failed to find related tags", "QUERY_ERROR");
-      }
-    });
-  }
-
-  /**
-   * Set tag as official or unofficial
-   */
-  async setOfficial(id: string, isOfficial: boolean): Promise<MediaTag | null> {
-    return this.withTransaction(async (_client) => {
-      try {
-        const existing = await this.findById(id);
-        if (!existing) {
-          throw new MediaTagNotFoundError(id);
-        }
-
-        const result = await super.update(id, { isOfficial });
-        if (!result) {
-          throw new MediaTagNotFoundError(id);
-        }
-        return new MediaTag(result);
-      } catch (error) {
-        if (error instanceof MediaTagError) {
-          throw error;
-        }
-        this.logger.error("Error setting tag official status", {
-          id,
-          isOfficial,
-          error: error instanceof Error ? error.message : error,
-        });
-        throw new MediaTagError(
-          "Failed to set tag official status",
-          "UPDATE_ERROR",
-        );
-      }
-    });
-  }
-
-  /**
    * Get tag statistics
    */
   async getTagStatistics(): Promise<{
@@ -544,63 +300,105 @@ export class MediaTagRepository extends BaseRepository<MediaTag> {
     }
   }
 
-  /**
-   * Merge two tags (source into target), transferring all media associations
-   */
-  async mergeTags(
-    sourceId: string,
-    targetId: string,
-  ): Promise<MediaTag | null> {
-    return this.withTransaction(async (client) => {
-      try {
-        const sourceTag = await this.findById(sourceId);
-        const targetTag = await this.findById(targetId);
+  async getMediaTags(mediaId: string): Promise<string[]> {
+    try {
+      const query = `
+        SELECT h.tag
+        FROM ${this.tableName} mt
+        JOIN hashtags h ON mt.hashtag_id = h.id
+        WHERE mt.media_id = $1
+      `;
 
-        if (!sourceTag) {
-          throw new MediaTagNotFoundError(sourceId);
-        }
-        if (!targetTag) {
-          throw new MediaTagNotFoundError(targetId);
-        }
+      const result = await this.executeQuery<{ tag: string }>(query, [mediaId]);
+      return result.rows.map((row) => row.tag);
+    } catch (error) {
+      this.logger.error("Error getting media tags", error);
+      throw new Error(
+        `Failed to get media tags: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
 
-        // Transfer media associations from source to target
-        const transferQuery = `
-          UPDATE media_tag_mappings
-          SET tag_id = $1
-          WHERE tag_id = $2 AND media_id NOT IN (
-            SELECT media_id FROM media_tag_mappings WHERE tag_id = $1
-          )
-        `;
-        await client.query(transferQuery, [targetId, sourceId]);
+  async addTagToMedia(mediaId: string, hashtagId: string): Promise<void> {
+    try {
+      const query = `
+        INSERT INTO ${this.tableName} (media_id, hashtag_id)
+        VALUES ($1, $2)
+        ON CONFLICT (media_id, hashtag_id) DO NOTHING
+      `;
 
-        // Add source tag usage count to target
-        const updatedTarget = await this.update(targetId, {
-          usageCount: targetTag.usageCount + sourceTag.usageCount,
-        });
+      await this.executeQuery(query, [mediaId, hashtagId]);
+    } catch (error) {
+      this.logger.error("Error adding tag to media", error);
+      throw new Error(
+        `Failed to add tag to media: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
 
-        // Delete the source tag
-        const deleteQuery = `
-          DELETE FROM ${this.tableName}
-          WHERE id = $1
-          RETURNING id
-        `;
-        await client.query(deleteQuery, [sourceId]);
+  async removeTagFromMedia(mediaId: string, hashtagId: string): Promise<void> {
+    try {
+      const query = `
+        DELETE FROM ${this.tableName}
+        WHERE media_id = $1 AND hashtag_id = $2
+      `;
 
-        return updatedTarget;
-      } catch (error) {
-        if (error instanceof MediaTagError) {
-          throw error;
-        }
-        this.logger.error("Error merging tags", {
-          sourceId,
-          targetId,
-          error: error instanceof Error ? error.message : error,
-        });
-        throw new MediaTagError("Failed to merge tags", "UPDATE_ERROR");
-      }
-    });
+      await this.executeQuery(query, [mediaId, hashtagId]);
+    } catch (error) {
+      this.logger.error("Error removing tag from media", error);
+      throw new Error(
+        `Failed to remove tag from media: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  async getMediaByTag(
+    tag: string,
+    limit: number = 10,
+    offset: number = 0,
+  ): Promise<string[]> {
+    try {
+      const query = `
+        SELECT mt.media_id
+        FROM ${this.tableName} mt
+        JOIN hashtags h ON mt.hashtag_id = h.id
+        WHERE h.normalized_tag = LOWER($1)
+        LIMIT $2 OFFSET $3
+      `;
+
+      const result = await this.executeQuery<{ media_id: string }>(query, [
+        tag,
+        limit,
+        offset,
+      ]);
+      return result.rows.map((row) => row.media_id);
+    } catch (error) {
+      this.logger.error("Error getting media by tag", error);
+      throw new Error(
+        `Failed to get media by tag: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+
+  async countMediaByTag(tag: string): Promise<number> {
+    try {
+      const query = `
+        SELECT COUNT(*) as count
+        FROM ${this.tableName} mt
+        JOIN hashtags h ON mt.hashtag_id = h.id
+        WHERE h.normalized_tag = LOWER($1)
+      `;
+
+      const result = await this.executeQuery<{ count: string }>(query, [tag]);
+      return parseInt(result.rows[0].count, 10);
+    } catch (error) {
+      this.logger.error("Error counting media by tag", error);
+      throw new Error(
+        `Failed to count media by tag: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 }
 
 // Export a singleton instance
-export const mediaTagRepository = new MediaTagRepository();
+export const mediaTagRepository = MediaTagRepository.getInstance();

@@ -43,4 +43,4 @@ export { SessionManager } from "./session/SessionManager";
 
 // Utilities - Caching
 export { CacheManager } from "./cache/CacheManager";
-export { PostCacheManager } from "./cache/PostCacheManager";
+export { PostCacheManager } from "../app/social/post/PostCacheManager";

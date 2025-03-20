@@ -1,8 +1,9 @@
 // src/database/transactionManager.ts
 import { Pool, PoolClient, QueryResult } from "pg";
 
+import { DatabaseConnectionManager } from "@database/config";
+
 import { Logger } from "../../services/dev/logger/LoggerService";
-import { DatabaseConnectionManager } from "../config";
 
 export type TransactionCallback<T> = (client: PoolClient) => Promise<T>;
 

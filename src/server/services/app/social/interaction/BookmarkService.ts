@@ -1,8 +1,8 @@
 import { Bookmark, EntityType } from "@database/models/social/Bookmark";
 import { BookmarkRepository, PostRepository } from "@repositories/social";
-import { MetricsService } from "@services/app/social/monitoring/MetricsService";
 import { BaseService, CacheManager, PaginationOptions } from "@services/shared";
 import { ResourceNotFoundError } from "@services/shared/errors/ServiceError";
+import { MetricsService } from "@services/shared/monitoring";
 const CACHE_TTL = 3600; // 1 hour
 const BATCH_SIZE = 100;
 

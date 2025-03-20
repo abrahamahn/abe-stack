@@ -4,7 +4,7 @@ import { EntityType } from "@database/models/shared/EntityTypes";
 import {
   NotificationPreferences,
   NotificationQueryOptions,
-} from "@services/app/social/notification/NotificationService";
+} from "@server/services/app/social/notification/NotificationService";
 import { Logger } from "@services/dev/logger/LoggerService";
 
 import {
