@@ -13,13 +13,13 @@ interface WindowWithConfig extends Window {
 }
 
 // Safely access environment variables
-const isProd = process.env.NODE_ENV === 'production';
+const isProd = process.env.NODE_ENV === "production";
 const apiHost = process.env.VITE_API_HOST || window.location.host;
 
 // For Vite, we'll use environment variables instead of import.meta.env
 export const clientConfig: ClientConfig = {
   production: isProd,
-  host: apiHost
+  host: apiHost,
 };
 
 // Use double assertion for window

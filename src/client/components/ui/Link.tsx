@@ -1,7 +1,7 @@
-import React from 'react';
+import React from "react";
 
-import { useClientEnvironment } from '../../services/ClientEnvironment';
-import { useRoute, Route } from '../../services/Router';
+import { useClientEnvironment } from "../../services/ClientEnvironment";
+import { Route, useRoute } from "../../services/Router";
 
 interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   to: string;
@@ -9,13 +9,21 @@ interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   activeClass?: string;
 }
 
-export function Link({ to, activeStyle, activeClass, style, className, onClick, ...props }: LinkProps) {
+export function Link({
+  to,
+  activeStyle,
+  activeClass,
+  style,
+  className,
+  onClick,
+  ...props
+}: LinkProps) {
   const environment = useClientEnvironment();
   const route = useRoute();
-  
+
   // Determine if this link is active based on the current route
   const isActive = isLinkActive(route, to);
-  
+
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     if (onClick) {
@@ -25,64 +33,64 @@ export function Link({ to, activeStyle, activeClass, style, className, onClick, 
   };
 
   return (
-    <a 
-      {...props} 
-      href={to} 
+    <a
+      {...props}
+      href={to}
       onClick={handleClick}
       style={{
         ...style,
-        ...(isActive ? activeStyle : {})
+        ...(isActive ? activeStyle : {}),
       }}
-      className={`${className || ''} ${isActive ? activeClass || '' : ''}`}
+      className={`${className || ""} ${isActive ? activeClass || "" : ""}`}
     />
   );
 }
 
 // Helper function to determine if a link is active based on the current route
 function isLinkActive(route: Route, to: string): boolean {
-  if (to === '/' && route.type === 'root') {
+  if (to === "/" && route.type === "root") {
     return true;
   }
-  
-  if (to === '/home' && route.type === 'home') {
+
+  if (to === "/home" && route.type === "home") {
     return true;
   }
-  
-  if (to === '/media' && route.type === 'media') {
+
+  if (to === "/media" && route.type === "media") {
     return true;
   }
-  
-  if (to === '/social' && route.type === 'social') {
+
+  if (to === "/social" && route.type === "social") {
     return true;
   }
-  
-  if (to === '/settings' && route.type === 'settings') {
+
+  if (to === "/settings" && route.type === "settings") {
     return true;
   }
-  
-  if (to === '/dashboard' && route.type === 'dashboard') {
+
+  if (to === "/dashboard" && route.type === "dashboard") {
     return true;
   }
-  
-  if (to === '/profile' && route.type === 'profile') {
+
+  if (to === "/profile" && route.type === "profile") {
     return true;
   }
-  
-  if (to === '/upload' && route.type === 'upload') {
+
+  if (to === "/upload" && route.type === "upload") {
     return true;
   }
-  
-  if (to === '/explore' && route.type === 'explore') {
+
+  if (to === "/explore" && route.type === "explore") {
     return true;
   }
-  
-  if (to === '/notifications' && route.type === 'notifications') {
+
+  if (to === "/notifications" && route.type === "notifications") {
     return true;
   }
-  
-  if (to.startsWith('/design/') && route.type === 'design') {
-    return to.slice('/design/'.length) === route.page;
+
+  if (to.startsWith("/design/") && route.type === "design") {
+    return to.slice("/design/".length) === route.page;
   }
-  
+
   return false;
-} 
+}

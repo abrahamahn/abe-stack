@@ -1,13 +1,15 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from "react";
 
-import { socialService } from '../../services/social';
+import { socialService } from "../../services/social";
 
 interface CreatePostFormProps {
   onPostCreated: () => void;
 }
 
-export const CreatePostForm: React.FC<CreatePostFormProps> = ({ onPostCreated }) => {
-  const [content, setContent] = useState('');
+export const CreatePostForm: React.FC<CreatePostFormProps> = ({
+  onPostCreated,
+}) => {
+  const [content, setContent] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -17,9 +19,9 @@ export const CreatePostForm: React.FC<CreatePostFormProps> = ({ onPostCreated })
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       setSelectedFile(file);
-      
+
       // Create preview URL for images
-      if (file.type.startsWith('image/')) {
+      if (file.type.startsWith("image/")) {
         const reader = new FileReader();
         reader.onloadend = () => {
           setPreviewUrl(reader.result as string);
@@ -35,7 +37,7 @@ export const CreatePostForm: React.FC<CreatePostFormProps> = ({ onPostCreated })
     setSelectedFile(null);
     setPreviewUrl(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
@@ -46,160 +48,167 @@ export const CreatePostForm: React.FC<CreatePostFormProps> = ({ onPostCreated })
     setIsLoading(true);
     try {
       await socialService.createPost(content, selectedFile || undefined);
-      setContent('');
+      setContent("");
       setSelectedFile(null);
       setPreviewUrl(null);
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
       onPostCreated();
     } catch (error) {
-      console.error('Error creating post:', error);
+      console.error("Error creating post:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div style={{ 
-      border: '1px solid #e0e0e0', 
-      borderRadius: '8px', 
-      padding: '16px', 
-      marginBottom: '24px',
-      backgroundColor: 'white',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-    }}>
+    <div
+      style={{
+        border: "1px solid #e0e0e0",
+        borderRadius: "8px",
+        padding: "16px",
+        marginBottom: "24px",
+        backgroundColor: "white",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+      }}
+    >
       <form onSubmit={handleSubmit as (e: React.FormEvent) => void}>
-        <textarea 
+        <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="What's on your mind?"
-          style={{ 
-            width: '100%',
-            minHeight: '100px',
-            padding: '12px',
-            border: '1px solid #e0e0e0',
-            borderRadius: '8px',
-            resize: 'vertical',
-            marginBottom: '12px'
+          style={{
+            width: "100%",
+            minHeight: "100px",
+            padding: "12px",
+            border: "1px solid #e0e0e0",
+            borderRadius: "8px",
+            resize: "vertical",
+            marginBottom: "12px",
           }}
         />
-        
+
         {previewUrl && (
-          <div style={{ position: 'relative', marginBottom: '12px' }}>
-            <img 
-              src={previewUrl} 
-              alt="Preview" 
-              style={{ 
-                maxWidth: '100%', 
-                maxHeight: '300px', 
-                borderRadius: '8px',
-                objectFit: 'cover'
-              }} 
+          <div style={{ position: "relative", marginBottom: "12px" }}>
+            <img
+              src={previewUrl}
+              alt="Preview"
+              style={{
+                maxWidth: "100%",
+                maxHeight: "300px",
+                borderRadius: "8px",
+                objectFit: "cover",
+              }}
             />
-            <button 
+            <button
               type="button"
               onClick={handleRemoveFile}
-              style={{ 
-                position: 'absolute',
-                top: '8px',
-                right: '8px',
-                width: '24px',
-                height: '24px',
-                borderRadius: '50%',
-                backgroundColor: 'rgba(0,0,0,0.5)',
-                color: 'white',
-                border: 'none',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer'
+              style={{
+                position: "absolute",
+                top: "8px",
+                right: "8px",
+                width: "24px",
+                height: "24px",
+                borderRadius: "50%",
+                backgroundColor: "rgba(0,0,0,0.5)",
+                color: "white",
+                border: "none",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
               }}
             >
               ×
             </button>
           </div>
         )}
-        
+
         {selectedFile && !previewUrl && (
-          <div style={{ 
-            display: 'flex',
-            alignItems: 'center',
-            backgroundColor: '#f5f5f5',
-            padding: '8px 12px',
-            borderRadius: '4px',
-            marginBottom: '12px'
-          }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              backgroundColor: "#f5f5f5",
+              padding: "8px 12px",
+              borderRadius: "4px",
+              marginBottom: "12px",
+            }}
+          >
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 'bold' }}>{selectedFile.name}</div>
-              <div style={{ fontSize: '0.8rem', color: '#666' }}>
+              <div style={{ fontWeight: "bold" }}>{selectedFile.name}</div>
+              <div style={{ fontSize: "0.8rem", color: "#666" }}>
                 {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
               </div>
             </div>
-            <button 
+            <button
               type="button"
               onClick={handleRemoveFile}
-              style={{ 
-                background: 'none',
-                border: 'none',
-                color: '#666',
-                cursor: 'pointer',
-                fontSize: '1.2rem'
+              style={{
+                background: "none",
+                border: "none",
+                color: "#666",
+                cursor: "pointer",
+                fontSize: "1.2rem",
               }}
             >
               ×
             </button>
           </div>
         )}
-        
-        <div style={{ 
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <div>
-            <input 
+            <input
               type="file"
               id="file-input"
               ref={fileInputRef}
               onChange={handleFileChange}
               accept="image/*,video/*,audio/*"
-              style={{ display: 'none' }}
+              style={{ display: "none" }}
             />
-            <button 
+            <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              style={{ 
-                background: 'none',
-                border: 'none',
-                color: 'var(--accent)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center'
+              style={{
+                background: "none",
+                border: "none",
+                color: "var(--accent)",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
               }}
             >
-              <span style={{ marginRight: '4px' }}>📎</span>
+              <span style={{ marginRight: "4px" }}>📎</span>
               Add Media
             </button>
           </div>
-          
-          <button 
+
+          <button
             type="submit"
             disabled={(!content.trim() && !selectedFile) || isLoading}
-            style={{ 
-              padding: '8px 24px',
-              backgroundColor: 'var(--accent)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '20px',
-              cursor: 'pointer',
-              opacity: (!content.trim() && !selectedFile) || isLoading ? 0.7 : 1
+            style={{
+              padding: "8px 24px",
+              backgroundColor: "var(--accent)",
+              color: "white",
+              border: "none",
+              borderRadius: "20px",
+              cursor: "pointer",
+              opacity:
+                (!content.trim() && !selectedFile) || isLoading ? 0.7 : 1,
             }}
           >
-            {isLoading ? 'Posting...' : 'Post'}
+            {isLoading ? "Posting..." : "Post"}
           </button>
         </div>
       </form>
     </div>
   );
-}; 
+};

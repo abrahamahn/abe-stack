@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-import { AuthClient } from '../../services/AuthClient';
-import { Button } from '../ui/Button';
-import { Card } from '../ui/Card';
-import { Input } from '../ui/Input';
-import { Spinner } from '../ui/Spinner';
+import { AuthClient } from "../../services/AuthClient";
+import { Button } from "../ui/Button";
+import { Card } from "../ui/Card";
+import { Input } from "../ui/Input";
+import { Spinner } from "../ui/Spinner";
 
 // Define response type
 interface VerificationResponse {
-  status: 'success' | 'error';
+  status: "success" | "error";
   message?: string;
 }
 
@@ -33,38 +33,42 @@ interface ApiError {
  * Allows users to request a new verification email
  */
 export const ResendVerification: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [message, setMessage] = useState('');
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
+  const [message, setMessage] = useState("");
   const [countdown, setCountdown] = useState(0);
   const authClient = new AuthClient();
 
   const handleSubmitAsync = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email) {
-      setStatus('error');
-      setMessage('Please enter your email address');
+      setStatus("error");
+      setMessage("Please enter your email address");
       return;
     }
 
     try {
-      setStatus('loading');
-      setMessage('Sending verification email...');
-      
-      const response = await authClient.resendConfirmationEmail(email) as ApiResponse;
+      setStatus("loading");
+      setMessage("Sending verification email...");
+
+      const response = (await authClient.resendConfirmationEmail(
+        email,
+      )) as ApiResponse;
       const typedResponse: VerificationResponse = {
-        status: response.success ? 'success' : 'error'
+        status: response.success ? "success" : "error",
       };
-      
-      if (typedResponse.status === 'success') {
-        setStatus('success');
-        setMessage('Verification email sent! Please check your inbox.');
-        
+
+      if (typedResponse.status === "success") {
+        setStatus("success");
+        setMessage("Verification email sent! Please check your inbox.");
+
         // Start countdown for rate limiting (60 seconds)
         setCountdown(60);
         const timer = setInterval(() => {
-          setCountdown(prev => {
+          setCountdown((prev) => {
             if (prev <= 1) {
               clearInterval(timer);
               return 0;
@@ -73,25 +77,28 @@ export const ResendVerification: React.FC = () => {
           });
         }, 1000);
       } else {
-        setStatus('error');
-        setMessage(response.error || 'Failed to send verification email. Please try again.');
+        setStatus("error");
+        setMessage(
+          response.error ||
+            "Failed to send verification email. Please try again.",
+        );
       }
     } catch (error) {
       const err = error as ApiError;
-      setStatus('error');
-      
+      setStatus("error");
+
       // Handle rate limiting error
       if (err.response?.status === 429) {
-        setMessage('Please wait before requesting another email.');
-        
+        setMessage("Please wait before requesting another email.");
+
         // Extract time from error message if available
         const timeMatch = err.response?.data?.message?.match(/(\d+)/);
         if (timeMatch && timeMatch[1]) {
           const seconds = parseInt(timeMatch[1], 10);
           setCountdown(seconds);
-          
+
           const timer = setInterval(() => {
-            setCountdown(prev => {
+            setCountdown((prev) => {
               if (prev <= 1) {
                 clearInterval(timer);
                 return 0;
@@ -101,13 +108,13 @@ export const ResendVerification: React.FC = () => {
           }, 1000);
         }
       } else {
-        setMessage('An error occurred. Please try again later.');
+        setMessage("An error occurred. Please try again later.");
       }
-      
-      console.error('Resend verification error:', err);
+
+      console.error("Resend verification error:", err);
     }
   };
-  
+
   // Wrapper function that returns void
   const handleSubmit = (e: React.FormEvent): void => {
     void handleSubmitAsync(e);
@@ -122,7 +129,7 @@ export const ResendVerification: React.FC = () => {
             Enter your email address to receive a new verification link
           </p>
         </div>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <Input
@@ -130,41 +137,41 @@ export const ResendVerification: React.FC = () => {
               placeholder="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              disabled={status === 'loading' || countdown > 0}
+              disabled={status === "loading" || countdown > 0}
               required
             />
           </div>
-          
-          {status === 'error' && (
+
+          {status === "error" && (
             <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
               {message}
             </div>
           )}
-          
-          {status === 'success' && (
+
+          {status === "success" && (
             <div className="mb-4 p-3 bg-green-100 text-green-700 rounded">
               {message}
             </div>
           )}
-          
+
           <Button
             type="submit"
             variant="primary"
             className="w-full"
-            disabled={status === 'loading' || countdown > 0}
+            disabled={status === "loading" || countdown > 0}
           >
-            {status === 'loading' ? (
+            {status === "loading" ? (
               <div className="mr-2">
                 <Spinner size="sm" />
               </div>
             ) : countdown > 0 ? (
               `Resend (${countdown}s)`
             ) : (
-              'Send Verification Email'
+              "Send Verification Email"
             )}
           </Button>
         </form>
       </Card>
     </div>
   );
-}; 
+};

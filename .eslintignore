@@ -1,20 +1,22 @@
-# Build outputs
+# Build and output directories
 dist/
 build/
 node_modules/
+coverage/
+public/assets/
 
-# Config files
+# Config files (except our own ESLint config)
 *.config.js
-vite.config.ts
+*.config.ts
+!.eslintrc.js
 
 # Generated files
 *.d.ts
 !src/types/**/*.d.ts
 
-# Test files
-**/*.test.ts
-**/*.spec.ts
-**/__tests__/**
+# Test files (these are handled with special rules in .eslintrc.js)
+# We don't completely ignore them, just apply different rules
 
-# Other
-.eslintrc.js 
+# Cache and temporary files
+.cache/
+.temp/ 

@@ -1,7 +1,7 @@
 OVERALL CODEBASE SUMMARY
 ================================================================================
-Total Files Across All Directories: 232
-Total Lines Across All Directories: 29653
+Total Files Across All Directories: 233
+Total Lines Across All Directories: 29017
 
 Breakdown by Directory:
 
@@ -149,17 +149,86 @@ Lines: 14423
 Server:
 ----------------------------------------
 ├── api
-│   └── autoindex.ts
+│   ├── controllers
+│   │   ├── auth
+│   │   │   └── index.ts
+│   │   ├── media
+│   │   │   ├── media.controller.ts
+│   │   │   └── stream.controller.ts
+│   │   ├── music
+│   │   ├── social
+│   │   │   ├── post.controller.ts
+│   │   │   └── social.controller.ts
+│   │   └── user
+│   ├── middleware
+│   │   ├── validation
+│   │   │   ├── auth.validator.ts
+│   │   │   ├── customValidate.ts
+│   │   │   ├── social.custom.validator.ts
+│   │   │   ├── social.validator.ts
+│   │   │   └── validate.ts
+│   │   ├── rateLimiter.ts
+│   │   └── upload.ts
+│   ├── routes
+│   │   ├── admin.ts
+│   │   ├── auth.ts
+│   │   ├── comments.ts
+│   │   ├── index.ts
+│   │   ├── media.ts
+│   │   ├── moderator.ts
+│   │   ├── social.ts
+│   │   └── users.ts
+│   ├── api.ts
+│   ├── ApiServer.ts
+│   ├── autoindex.ts
+│   └── index.ts
 ├── config
 │   ├── database.ts
 │   ├── email.ts
 │   ├── environment.ts
+│   ├── index.ts
 │   └── server.ts
-├── controllers
-│   ├── media.controller.ts
-│   ├── post.controller.ts
-│   ├── social.controller.ts
-│   └── stream.controller.ts
+├── core
+│   ├── helpers
+│   │   ├── authHelpers.ts
+│   │   ├── fileHelpers.ts
+│   │   ├── pathHelpers.ts
+│   │   └── securityHelpers.ts
+│   ├── pubsub
+│   │   ├── PubsubServer.ts
+│   │   └── WebsocketPubsubServer.ts
+│   ├── queue
+│   │   ├── tasks
+│   │   │   ├── autoindex.ts
+│   │   │   └── followup.ts
+│   │   ├── InMemoryQueue.ts
+│   │   ├── QueueDatabase.ts
+│   │   ├── QueueServer.ts
+│   │   └── QueueService.ts
+│   ├── services
+│   │   ├── auth
+│   │   │   ├── auth-token.service.ts
+│   │   │   ├── auth.service.ts
+│   │   │   └── index.ts
+│   │   ├── media
+│   │   │   ├── processors
+│   │   │   │   ├── AudioProcessor.ts
+│   │   │   │   ├── BaseMediaProcessor.ts
+│   │   │   │   ├── ImageProcessor.ts
+│   │   │   │   └── VideoProcessor.ts
+│   │   │   ├── index.ts
+│   │   │   ├── MediaProcessingService.ts
+│   │   │   └── MediaService.ts
+│   │   ├── music
+│   │   ├── social
+│   │   ├── user
+│   │   ├── EmailService.ts
+│   │   ├── index.ts
+│   │   └── LoggerService.ts
+│   ├── storage
+│   │   ├── FileServer.ts
+│   │   └── FileStorage.ts
+│   └── index.ts
 ├── database
 │   ├── migrations
 │   │   ├── 001_create_users_table.sql
@@ -191,123 +260,45 @@ Server:
 │   │   │   └── Post.ts
 │   │   └── index.ts
 │   ├── repositories
-│   │   └── BaseRepository.ts
+│   │   ├── auth
+│   │   │   └── UserRepository.ts
+│   │   ├── media
+│   │   ├── music
+│   │   ├── social
+│   │   ├── BaseRepository.ts
+│   │   └── UserRepository.ts
+│   ├── index.ts
+│   ├── migrationConfig.ts
 │   ├── migrationManager.ts
 │   └── transactionManager.ts
-├── domains
-│   ├── auth
-│   │   ├── api
-│   │   │   └── index.ts
-│   │   ├── controllers
-│   │   │   └── index.ts
-│   │   ├── errors
-│   │   │   └── unauthorized.error.ts
-│   │   ├── middleware
-│   │   │   ├── auth.middleware.ts
-│   │   │   ├── authJWT.middleware.ts
-│   │   │   └── index.ts
-│   │   ├── models
-│   │   ├── repositories
-│   │   ├── services
-│   │   │   ├── auth-token.service.ts
-│   │   │   └── auth.service.ts
-│   │   ├── index.ts
-│   │   └── routes.ts
-│   ├── media
-│   │   ├── controllers
-│   │   ├── models
-│   │   ├── repositories
-│   │   └── services
-│   ├── music
-│   │   ├── controllers
-│   │   ├── models
-│   │   ├── repositories
-│   │   └── services
-│   ├── social
-│   │   ├── controllers
-│   │   ├── models
-│   │   ├── repositories
-│   │   └── services
-│   └── user
-│       ├── controllers
-│       ├── models
-│       ├── repositories
-│       └── services
-├── errors
-├── helpers
-│   ├── fileHelpers.ts
-│   ├── loginHelpers.ts
-│   ├── path.ts
-│   └── signatureHelpers.ts
-├── lib
-│   └── storage.ts
-├── middleware
-│   ├── customValidate.ts
-│   ├── error.ts
-│   ├── errorHandler.ts
-│   ├── logger.ts
-│   ├── notFound.ts
-│   ├── rateLimiter.ts
-│   ├── upload.ts
-│   └── validate.ts
-├── routes
-│   ├── admin.ts
-│   ├── comments.ts
-│   ├── index.ts
-│   ├── media.ts
-│   ├── moderator.ts
-│   ├── social.ts
-│   └── users.ts
 ├── scripts
-│   ├── checkUsers.ts
-│   ├── createMigration.ts
-│   ├── resetMigration.ts
-│   ├── runMigration.ts
-│   ├── seedDemoDatabase.ts
-│   ├── testRegistration.ts
-│   └── undoMigration.ts
-├── services
-│   ├── media
-│   │   ├── AudioProcessor.ts
-│   │   ├── BaseMediaProcessor.ts
-│   │   ├── ImageProcessor.ts
-│   │   ├── index.ts
-│   │   ├── MediaProcessingService.ts
-│   │   └── VideoProcessor.ts
-│   ├── EmailService.ts
-│   ├── InMemoryQueue.ts
-│   ├── LoggerService.ts
-│   ├── MediaService.ts
-│   ├── QueueDatabase.ts
-│   ├── QueueService.ts
-│   ├── ServerConfig.ts
-│   ├── ServerEnvironment.ts
-│   └── WebsocketPubsubServer.ts
-├── tasks
-│   ├── autoindex.ts
-│   └── followup.ts
+│   ├── db
+│   │   ├── checkUsers.ts
+│   │   └── seedDemoDatabase.ts
+│   ├── migrations
+│   │   ├── createMigration.ts
+│   │   ├── resetMigration.ts
+│   │   ├── runMigration.ts
+│   │   └── undoMigration.ts
+│   └── testing
+│       └── testRegistration.ts
 ├── types
-│   ├── express.d.ts
+│   ├── npm
+│   │   ├── dashjs.d.ts
+│   │   ├── express.d.ts
+│   │   ├── helmet.d.ts
+│   │   ├── hls.js.d.ts
+│   │   ├── node.d.ts
+│   │   ├── plyr.d.ts
+│   │   └── sharp.d.ts
 │   ├── index.ts
 │   ├── media.types.ts
-│   └── request.types.ts
-├── utils
-│   └── validation.ts
-├── validators
-│   ├── auth.validator.ts
-│   ├── custom-social.validator.ts
-│   └── social.validator.ts
-├── api.ts
-├── ApiServer.ts
-├── FileServer.ts
-├── index.ts
-├── PubsubServer.ts
-├── QueueServer.ts
-├── tasks.ts
-└── types.ts
+│   ├── request.types.ts
+│   └── server.types.ts
+└── index.ts
 
-Files: 105
-Lines: 14381
+Files: 106
+Lines: 13745
 ========================================
 
 Shared:

@@ -1,15 +1,23 @@
-import { env } from './environment';
+import { parseEnv } from "./environment";
 
-export const emailConfig = {
-  host: env.EMAIL_HOST,
-  port: env.EMAIL_PORT,
-  secure: env.EMAIL_SECURE,
-  user: env.EMAIL_USER,
-  password: env.EMAIL_PASSWORD,
-  appName: env.APP_NAME,
-  appUrl: env.APP_URL,
-  isDevelopment: env.NODE_ENV === 'development',
-  serverPort: env.PORT
+export interface EmailConfig {
+  host: string;
+  port: number;
+  secure: boolean;
+  auth: {
+    user: string;
+    pass: string;
+  };
+  from: string;
+}
+
+export const emailConfig: EmailConfig = {
+  host: parseEnv("SMTP_HOST", "smtp.example.com"),
+  port: parseEnv("SMTP_PORT", 587, (v: string) => parseInt(v, 10)),
+  secure: parseEnv("SMTP_SECURE", false, (v: string) => v === "true"),
+  auth: {
+    user: parseEnv("SMTP_USER", ""),
+    pass: parseEnv("SMTP_PASS", ""),
+  },
+  from: parseEnv("SMTP_FROM", "noreply@example.com"),
 };
-
-export default emailConfig; 

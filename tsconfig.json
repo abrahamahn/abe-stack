@@ -1,37 +1,55 @@
 {
-	"compilerOptions": {
-	  // Base settings
-	  "target": "ES2022",
-	  "module": "NodeNext",
-	  "moduleResolution": "NodeNext",
-	  "strict": true,
-	  "skipLibCheck": true,
-	  "esModuleInterop": true,
-	  "resolveJsonModule": true,
-	  "forceConsistentCasingInFileNames": true,
-	  "sourceMap": true,
-	  
-	  // Strictness settings
-	  "noUnusedLocals": true,
-	  "noUnusedParameters": true,
-	  "noFallthroughCasesInSwitch": true,
-	  "noImplicitAny": true,
-	  "strictNullChecks": true,
-	  
-	  // Base paths
-	  "baseUrl": ".",
-	  "typeRoots": ["./node_modules/@types", "./src/types"],
-	  "types": ["node", "express"],
-	  
-	  // Needed for project references
-	  "declaration": true,
-	  "declarationMap": true
-	},
-	"include": ["src/**/*", "migrate_server.js"],
-	"exclude": ["node_modules", "dist", "build", "src/client/**/*"],
-	"references": [
-	  { "path": "./tsconfig.server.json" },
-	  { "path": "./tsconfig.client.json" },
-	  { "path": "./tsconfig.node.json" }
-	]
-  }
+  "compilerOptions": {
+    // Base settings
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": true,
+    "jsx": "react-jsx",
+
+    // Output settings
+    "outDir": "dist",
+    "rootDir": "src",
+
+    // Strictness settings
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+
+    // Base paths
+    "baseUrl": ".",
+    "paths": {
+      "@server/*": ["src/server/*"],
+      "@client/*": ["src/client/*"],
+      "@shared/*": ["src/shared/*"],
+      "@services/*": ["src/server/services/*"],
+      "@database/*": ["src/server/database/*"],
+      "@models/*": ["src/server/database/models/*"],
+      "@repositories/*": ["src/server/database/repositories/*"],
+      "@api/*": ["src/server/api/*"],
+      "@core/*": ["src/server/core/*"],
+      "@processors/*": ["src/server/processors/*"]
+    },
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+
+    // Needed for project references
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    "src/**/*",
+    "migrate_server.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build"
+  ]
+}

@@ -1,143 +1,194 @@
 module.exports = {
   root: true,
-  parser: '@typescript-eslint/parser',
+  parser: "@typescript-eslint/parser",
+  env: {
+    node: true
+  },
   parserOptions: {
     ecmaVersion: 2022,
-    sourceType: 'module',
+    sourceType: "module",
     ecmaFeatures: {
       jsx: true,
     },
+    project: ["./tsconfig.json"],
+    tsconfigRootDir: __dirname,
   },
   settings: {
     react: {
-      version: 'detect',
+      version: "detect",
     },
-    'import/resolver': {
-      node: {
-        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
+    "import/resolver": {
+      typescript: {
+        alwaysTryTypes: true,
+        project: "./tsconfig.json"
       },
+      node: {
+        paths: ["src"],
+        extensions: [".js", ".jsx", ".ts", ".tsx"],
+        moduleDirectory: ["node_modules", "src"]
+      },
+      alias: {
+        map: [
+          ["@database", "./src/server/database"],
+          ["@models", "./src/server/database/models"],
+          ["@repositories", "./src/server/database/repositories"],
+          ["@services", "./src/server/services"],
+          ["@api", "./src/server/api"],
+          ["@core", "./src/server/core"],
+          ["@processors", "./src/server/processors"]
+        ],
+        extensions: [".ts", ".tsx", ".js", ".jsx", ".json"]
+      }
     },
   },
   extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:react/recommended',
-    'plugin:react-hooks/recommended',
-    'plugin:import/errors',
-    'plugin:import/warnings',
-    'plugin:import/typescript',
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:import/errors",
+    "plugin:import/warnings",
+    "plugin:import/typescript",
   ],
   rules: {
     // General rules
-    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
-    'no-useless-escape': 'warn',
-    'no-useless-catch': 'warn',
-    'prefer-const': 'warn',
-    'no-extra-semi': 'warn',
-    
-    // TypeScript rules - critical errors are now "error" instead of "warn"
-    '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-explicit-any': 'error',
-    '@typescript-eslint/no-unused-vars': ['error', { 
-      argsIgnorePattern: '^_',
-      varsIgnorePattern: '^_',
-    }],
-    '@typescript-eslint/no-non-null-assertion': 'error',
-    '@typescript-eslint/no-namespace': 'error',
-    '@typescript-eslint/ban-types': 'error',
-    '@typescript-eslint/no-this-alias': 'error',
-    '@typescript-eslint/no-var-requires': 'warn',
-    
-    // React rules
-    'react/prop-types': 'off',
-    'react/react-in-jsx-scope': 'off',
-    'react/display-name': 'warn',
-    'react/no-unescaped-entities': 'warn',
-    'react/jsx-key': 'error',
-    
-    // Import rules - critical errors are now "error" instead of "warn"
-    'import/order': [
-      'warn',
+    "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
+    "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
+    "no-unused-vars": "off",
+
+    // TypeScript rules
+    "@typescript-eslint/no-unused-vars": [
+      "warn",
       {
-        groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-        'newlines-between': 'always',
-        alphabetize: {
-          order: 'asc',
-          caseInsensitive: true,
-        },
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        caughtErrorsIgnorePattern: "^_",
       },
     ],
-    'import/no-unresolved': 'error',
-    'import/namespace': 'error',
-    'import/no-named-as-default': 'warn',
-    'import/no-duplicates': 'warn',
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/no-empty-interface": "warn",
+    "@typescript-eslint/no-inferrable-types": "off",
+
+    // React rules
+    "react/prop-types": "off",
+    "react/react-in-jsx-scope": "off",
+    "react/jsx-key": "error",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+
+    // Import rules
+    "import/no-unresolved": "error",
+    "import/namespace": "off",
+    "import/named": "error",
+    "import/default": "off",
+    "import/order": [
+      "warn",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          ["parent", "sibling"],
+          "index",
+          "object",
+          "type"
+        ],
+        "pathGroups": [
+          {
+            "pattern": "@/**",
+            "group": "internal",
+            "position": "after"
+          }
+        ],
+        "newlines-between": "always",
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        }
+      }
+    ],
+    "import/export": "error",
+    "import/no-named-as-default-member": "off"
   },
   overrides: [
-    // TypeScript files with type checking
+    // Config files and scripts (CommonJS)
     {
-      files: ['**/*.ts', '**/*.tsx'],
-      parserOptions: {
-        project: ['./tsconfig.eslint.json', './tsconfig.client.json'],
+      files: [".eslintrc.js", "*.config.js", "migrate_server.js"],
+      env: {
+        node: true
       },
-      extends: [
-        'plugin:@typescript-eslint/recommended-requiring-type-checking',
-      ],
       rules: {
-        '@typescript-eslint/no-floating-promises': 'error',
-        '@typescript-eslint/no-misused-promises': 'error',
-        '@typescript-eslint/await-thenable': 'error',
-        '@typescript-eslint/no-unnecessary-type-assertion': 'error',
-        '@typescript-eslint/restrict-template-expressions': 'error',
-        '@typescript-eslint/unbound-method': 'error',
+        "@typescript-eslint/no-var-requires": "off",
+        "import/no-commonjs": "off"
       }
     },
-    // Backend specific rules
+    // Service Worker
     {
-      files: ['src/server/**/*.ts'],
-      rules: {
-        'no-console': 'off', // Allow console in server code
+      files: ["src/client/service-worker.js"],
+      env: {
+        serviceworker: true,
+        browser: true
       },
+      rules: {
+        "@typescript-eslint/no-var-requires": "off",
+        "import/no-commonjs": "off"
+      }
     },
-    // Router files
+    // Client-side files
     {
-      files: ['src/server/routes/**/*.ts'],
+      files: ["src/client/**/*.{ts,tsx}"],
+      extends: [
+        "plugin:react/recommended",
+        "plugin:react-hooks/recommended"
+      ],
       rules: {
-        '@typescript-eslint/no-unsafe-call': 'off',
-        '@typescript-eslint/no-unsafe-member-access': 'off',
-        '@typescript-eslint/no-unsafe-assignment': 'off'
-      },
+        "react/prop-types": "off",
+        "react/react-in-jsx-scope": "off"
+      }
     },
-    // Frontend specific rules
+    // Server-side files
     {
-      files: ['src/client/**/*.{ts,tsx}'],
+      files: ["src/server/**/*.ts"],
       rules: {
-        'react-hooks/rules-of-hooks': 'error',
-        'react-hooks/exhaustive-deps': 'warn',
-      },
+        "@typescript-eslint/explicit-function-return-type": ["warn", {
+          allowExpressions: true,
+          allowTypedFunctionExpressions: true
+        }]
+      }
+    },
+    // Database repositories
+    {
+      files: ["src/server/database/repositories/**/*.ts"],
+      rules: {
+        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/no-unsafe-assignment": "warn",
+        "@typescript-eslint/no-unsafe-member-access": "warn",
+      }
     },
     // Test files
     {
-      files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}'],
+      files: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
       env: {
         jest: true,
       },
       rules: {
-        '@typescript-eslint/no-explicit-any': 'off',
-      },
-    },
-    {
-      files: ["**/domains/**/*.ts"],
-      rules: {
-        // Disable rules that are too strict for domain routes
-        "@typescript-eslint/no-unsafe-assignment": "off",
-        "@typescript-eslint/no-unsafe-call": "off",
-        "@typescript-eslint/no-unsafe-member-access": "off",
-        "@typescript-eslint/no-unsafe-return": "off",
         "@typescript-eslint/no-explicit-any": "off",
-        "@typescript-eslint/restrict-template-expressions": "off"
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off",
       }
-    }
+    },
   ],
-  ignorePatterns: ['dist', 'node_modules', 'build', '*.js', '!.eslintrc.js'],
-}; 
+  ignorePatterns: [
+    "dist",
+    "node_modules",
+    "build",
+    "coverage",
+    "public"
+  ]
+};

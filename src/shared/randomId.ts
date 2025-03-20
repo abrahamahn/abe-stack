@@ -1,24 +1,27 @@
-import crypto from 'crypto'
+import chunk from "lodash/chunk";
+import md5 from "md5";
+import { v4 as uuid } from "uuid";
 
 /**
- * When you pass a seed string, then the uuid will be deterministic.
+ * Generate a random UUID
+ * @param seed Optional seed string to make the UUID deterministic
+ * @returns A random UUID
  */
-export function randomId(seed?: string) {
-	if (!seed) return crypto.randomUUID()
+export function randomId(seed?: string): string {
+  // When seed is provided, generate deterministic UUID
+  if (seed) {
+    const hash = md5(seed);
+    const hexBytes = chunk(hash, 2).map((pair) => pair.join(""));
+    // Convert to Uint8Array for compatibility with uuid
+    const randomArray = new Uint8Array(16);
+    hexBytes.slice(0, 16).forEach((hex, i) => {
+      randomArray[i] = parseInt(hex, 16);
+    });
+    return uuid({ random: randomArray });
+  }
 
-	// Create a deterministic UUID using the seed
-	const hash = crypto.createHash('md5').update(seed).digest()
-	
-	// Set version (4) and variant bits as per UUID v4 spec
-	hash[6] = (hash[6] & 0x0f) | 0x40 // version 4
-	hash[8] = (hash[8] & 0x3f) | 0x80 // variant 1
-
-	// Convert to UUID string format
-	return [
-		hash.subarray(0, 4).toString('hex'),
-		hash.subarray(4, 6).toString('hex'),
-		hash.subarray(6, 8).toString('hex'),
-		hash.subarray(8, 10).toString('hex'),
-		hash.subarray(10, 16).toString('hex'),
-	].join('-')
+  // Otherwise generate cryptographically secure random UUID
+  const random = new Uint8Array(16);
+  crypto.getRandomValues(random);
+  return uuid({ random });
 }

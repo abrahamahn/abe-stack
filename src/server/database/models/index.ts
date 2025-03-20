@@ -1,25 +1,31 @@
+// Base model
+export { BaseModel } from "./BaseModel";
 
-import TwoFactorAuthModel from './auth/TwoFactorAuth';
-import { userRepository } from './auth/User';
-import AlbumModel from './music/Album';
-import ArtistModel from './music/Artist';
-import TrackModel from './music/Track';
-import CommentModel from './social/Comment';
-import CommentLikeModel from './social/CommentLike';
-import FollowModel from './social/Follow';
-import LikeModel from './social/Like';
-import PostModel from './social/Post';
+// Export all models from subdirectories
 
-// Export models
-export {
-  userRepository as User,
-  PostModel as Post,
-  CommentModel as Comment,
-  LikeModel as Like,
-  CommentLikeModel as CommentLike,
-  FollowModel as Follow,
-  AlbumModel as Album,
-  ArtistModel as Artist,
-  TrackModel as Track,
-  TwoFactorAuthModel as TwoFactorAuth,
-}; 
+// Auth models
+export * from "./auth";
+
+// Social models
+export * from "./social";
+
+// Media models
+export * from "./media";
+
+// Analytics models
+export * from "./analytics";
+
+// Community models
+export * from "./community";
+
+// Discovery models
+export * from "./discovery";
+
+// Moderation models
+export * from "./moderation";
+
+// Messaging models
+export * from "./messaging";
+
+// Shared models
+export * from "./shared";

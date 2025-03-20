@@ -3,7 +3,9 @@
  * @param styles Array of style objects to merge
  * @returns Merged style object
  */
-export const mergeStyles = (...styles: (React.CSSProperties | undefined)[]): React.CSSProperties => {
+export const mergeStyles = (
+  ...styles: (React.CSSProperties | undefined)[]
+): React.CSSProperties => {
   return Object.assign({}, ...styles.filter(Boolean)) as React.CSSProperties;
 };
 
@@ -17,9 +19,9 @@ export const mergeStyles = (...styles: (React.CSSProperties | undefined)[]): Rea
 export const conditionalStyle = (
   condition: boolean,
   trueStyles: React.CSSProperties,
-  falseStyles?: React.CSSProperties
+  falseStyles?: React.CSSProperties,
 ): React.CSSProperties => {
-  return condition ? trueStyles : (falseStyles || {});
+  return condition ? trueStyles : falseStyles || {};
 };
 
 /**
@@ -32,7 +34,7 @@ export const conditionalStyle = (
 export const applyHoverStyles = (
   isHovered: boolean,
   baseStyles: React.CSSProperties,
-  hoverStyles: React.CSSProperties
+  hoverStyles: React.CSSProperties,
 ): React.CSSProperties => {
   return mergeStyles(baseStyles, conditionalStyle(isHovered, hoverStyles));
 };
@@ -42,10 +44,12 @@ export const applyHoverStyles = (
  * @param variables Object containing CSS variable definitions
  * @returns CSS variables as a string
  */
-export const createCSSVariables = (variables: Record<string, string>): string => {
+export const createCSSVariables = (
+  variables: Record<string, string>,
+): string => {
   return Object.entries(variables)
     .map(([key, value]) => `--${key}: ${value};`)
-    .join(' ');
+    .join(" ");
 };
 
 /**
@@ -55,11 +59,11 @@ export const createCSSVariables = (variables: Record<string, string>): string =>
  */
 export const injectGlobalCSSVariables = (
   lightVariables: Record<string, string>,
-  darkVariables: Record<string, string>
+  darkVariables: Record<string, string>,
 ): void => {
   // Create style element
-  const styleElement = document.createElement('style');
-  
+  const styleElement = document.createElement("style");
+
   // Create CSS content
   const cssContent = `
     :root {
@@ -82,10 +86,10 @@ export const injectGlobalCSSVariables = (
       }
     }
   `;
-  
+
   // Set style content
   styleElement.textContent = cssContent;
-  
+
   // Append to head
   document.head.appendChild(styleElement);
 };
@@ -98,15 +102,15 @@ export const injectGlobalCSSVariables = (
  */
 export const classNames = (
   baseClass: string,
-  conditionalClasses: Record<string, boolean> = {}
+  conditionalClasses: Record<string, boolean> = {},
 ): string => {
   const classes = [baseClass];
-  
+
   Object.entries(conditionalClasses).forEach(([className, condition]) => {
     if (condition) {
       classes.push(className);
     }
   });
-  
-  return classes.join(' ');
-}; 
+
+  return classes.join(" ");
+};

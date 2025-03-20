@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 // Remove unused import
 // import { useClientEnvironment } from './ClientEnvironment';
@@ -18,7 +18,7 @@ export interface User {
 
 // API response types
 interface ApiResponse<T> {
-  status: 'success' | 'error';
+  status: "success" | "error";
   message?: string;
   data?: T;
   requireEmailConfirmation?: boolean;
@@ -35,17 +35,17 @@ export class AuthClient {
   // Get the server port
   private getServerPort(): number {
     // In production, use the same port as the client
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === "production") {
       return window.location.port ? parseInt(window.location.port) : 80;
     }
-    
+
     // In development, try to find the server port
     // First, check if we can read the port from localStorage (set by previous successful connections)
-    const savedPort = localStorage.getItem('server_port');
+    const savedPort = localStorage.getItem("server_port");
     if (savedPort) {
       return parseInt(savedPort);
     }
-    
+
     // Default to 8080 for the server in development
     return 8080;
   }
@@ -53,25 +53,25 @@ export class AuthClient {
   // Get the base API URL
   getApiUrl() {
     // In development, use a direct URL to the server
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       return `http://localhost:${this.getServerPort()}/api`;
     }
-    
+
     // In production, use the current window location
     return `${window.location.protocol}//${window.location.host}/api`;
   }
 
   // Store token in localStorage
   setToken(token: string) {
-    localStorage.setItem('auth_token', token);
+    localStorage.setItem("auth_token", token);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('auth_token');
+    return localStorage.getItem("auth_token");
   }
 
   removeToken() {
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem("auth_token");
   }
 
   isAuthenticated(): boolean {
@@ -86,33 +86,39 @@ export class AuthClient {
   // Email verification methods
   async confirmEmail(token: string): Promise<{ success: boolean }> {
     try {
-      const response = await fetch(`${this.getApiUrl()}/auth/confirm-email?token=${token}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      return await response.json() as Promise<{ success: boolean }>;
+      const response = await fetch(
+        `${this.getApiUrl()}/auth/confirm-email?token=${token}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      return (await response.json()) as Promise<{ success: boolean }>;
     } catch (error) {
-      console.error('Error confirming email:', error);
+      console.error("Error confirming email:", error);
       throw error;
     }
   }
 
   async resendConfirmationEmail(email: string) {
     try {
-      const response = await fetch(`${this.getApiUrl()}/auth/resend-confirmation`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+      const response = await fetch(
+        `${this.getApiUrl()}/auth/resend-confirmation`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
         },
-        body: JSON.stringify({ email })
-      });
-      
-      return await response.json() as Promise<{ success: boolean }>;
+      );
+
+      return (await response.json()) as Promise<{ success: boolean }>;
     } catch (error) {
-      console.error('Error resending confirmation email:', error);
+      console.error("Error resending confirmation email:", error);
       throw error;
     }
   }
@@ -126,7 +132,7 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Memoize the authClient instance
   const authClient = useMemo(() => new AuthClient(), []);
 
@@ -141,16 +147,16 @@ export function useAuth() {
       setLoading(true);
       // Use fetch directly to avoid API structure issues
       const token = authClient.getToken();
-      const response = await fetch('/api/auth/me', {
+      const response = await fetch("/api/auth/me", {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
-      
-      const data = await response.json() as ApiResponse<UserResponse>;
-      
-      if (data.status === 'success' && data.data?.user) {
+
+      const data = (await response.json()) as ApiResponse<UserResponse>;
+
+      if (data.status === "success" && data.data?.user) {
         setUser(data.data.user);
       } else {
         // If we get a response but no user, token might be invalid
@@ -158,11 +164,11 @@ export function useAuth() {
         setUser(null);
       }
     } catch (err) {
-      console.error('Failed to load user:', err);
+      console.error("Failed to load user:", err);
       // Clear token on auth error
       authClient.removeToken();
       setUser(null);
-      setError('Failed to authenticate');
+      setError("Failed to authenticate");
     } finally {
       setLoading(false);
     }
@@ -172,23 +178,23 @@ export function useAuth() {
     try {
       setLoading(true);
       setError(null);
-      
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
+
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
       });
-      
-      const data = await response.json() as ApiResponse<UserResponse>;
-      
-      if (data.status === 'success') {
+
+      const data = (await response.json()) as ApiResponse<UserResponse>;
+
+      if (data.status === "success") {
         if (data.data?.requireTwoFactor) {
           // Return the 2FA requirement
           return { requireTwoFactor: true, userId: data.data.userId };
         }
-        
+
         if (data.data?.token) {
           authClient.setToken(data.data.token);
         }
@@ -198,17 +204,17 @@ export function useAuth() {
         return { success: true };
       } else if (data.requireEmailConfirmation) {
         // Email not confirmed
-        return { 
-          success: false, 
-          requireEmailConfirmation: true, 
-          email, 
-          error: data.message || 'Email confirmation required'
+        return {
+          success: false,
+          requireEmailConfirmation: true,
+          email,
+          error: data.message || "Email confirmation required",
         };
       } else {
-        throw new Error(data.message || 'Login failed');
+        throw new Error(data.message || "Login failed");
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Login failed';
+      const errorMessage = err instanceof Error ? err.message : "Login failed";
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
@@ -216,10 +222,10 @@ export function useAuth() {
     }
   };
 
-  const register = async (userData: { 
-    username: string; 
-    email: string; 
-    password: string; 
+  const register = async (userData: {
+    username: string;
+    email: string;
+    password: string;
     displayName?: string;
     firstName: string;
     lastName: string;
@@ -227,34 +233,35 @@ export function useAuth() {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await fetch(`${authClient.getApiUrl()}/auth/register`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(userData)
+        body: JSON.stringify(userData),
       });
-      
-      const data = await response.json() as ApiResponse<UserResponse>;
-      
-      if (data.status === 'success' && data.data) {
+
+      const data = (await response.json()) as ApiResponse<UserResponse>;
+
+      if (data.status === "success" && data.data) {
         if (data.data.token) {
           authClient.setToken(data.data.token);
         }
         if (data.data.user) {
           setUser(data.data.user);
         }
-        return { 
+        return {
           success: true,
           requireEmailConfirmation: !data.data.user.emailConfirmed,
-          message: data.message || 'Registration successful'
+          message: data.message || "Registration successful",
         };
       } else {
-        throw new Error(data.message || 'Registration failed');
+        throw new Error(data.message || "Registration failed");
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Registration failed';
+      const errorMessage =
+        err instanceof Error ? err.message : "Registration failed";
       setError(errorMessage);
       return { success: false, error: errorMessage };
     } finally {
@@ -282,6 +289,7 @@ export function useAuth() {
     isAuthenticated: !!user,
     refreshUser: loadUser,
     confirmEmail: authClient.confirmEmail.bind(authClient),
-    resendConfirmationEmail: authClient.resendConfirmationEmail.bind(authClient)
+    resendConfirmationEmail:
+      authClient.resendConfirmationEmail.bind(authClient),
   };
-} 
+}

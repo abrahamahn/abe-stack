@@ -2,7 +2,7 @@
 
 > A modern TypeScript React boilerplate optimized for social media and multimedia applications
 
-*Based on [Chet Stack](https://github.com/ccorcos/chet-stack) by Chet Corcos*
+_Based on [Chet Stack](https://github.com/ccorcos/chet-stack) by Chet Corcos_
 
 ABE Stack is a comprehensive boilerplate for building full-stack web applications with a focus on social media features and multimedia streaming. It provides everything you need to get started quickly while remaining flexible enough to scale as your application grows.
 
@@ -33,11 +33,13 @@ ABE Stack is a comprehensive boilerplate for building full-stack web application
 Before running the application, you need to set up PostgreSQL:
 
 1. **Install PostgreSQL** if you haven't already:
+
    - [Download PostgreSQL](https://www.postgresql.org/download/)
    - Follow the installation instructions for your operating system
    - Make sure the PostgreSQL service is running
 
 2. **Default Connection Settings**:
+
    - Host: `localhost`
    - Port: `5432`
    - Username: `postgres`
@@ -71,6 +73,7 @@ npm run dev
 ```
 
 The application will be available at:
+
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8080
 
@@ -82,6 +85,7 @@ The application uses environment-specific configuration files:
 2. `.env.production` - Used when running in production mode
 
 These files contain configuration for:
+
 - Database connection settings
 - JWT secrets
 - Server configuration
@@ -100,6 +104,7 @@ npm run seed:demo
 ```
 
 This will:
+
 1. Create a PostgreSQL database named `abe_stack`
 2. Run all migrations to set up the database schema
 3. Insert 5 demo user accounts with the following credentials:
@@ -115,16 +120,19 @@ This will:
 If your PostgreSQL setup uses different credentials, you can specify them using environment variables:
 
 **Windows PowerShell:**
+
 ```sh
 $env:DB_HOST="your_host"; $env:DB_PORT="your_port"; $env:DB_USER="your_username"; $env:DB_PASSWORD="your_password"; npm run seed:demo
 ```
 
 **Windows Command Prompt:**
+
 ```sh
 set DB_HOST=your_host && set DB_PORT=your_port && set DB_USER=your_username && set DB_PASSWORD=your_password && npm run seed:demo
 ```
 
 **Linux/macOS:**
+
 ```sh
 DB_HOST=your_host DB_PORT=your_port DB_USER=your_username DB_PASSWORD=your_password npm run seed:demo
 ```
@@ -192,36 +200,38 @@ The application can be configured using the following environment variables:
 
 ### Server Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NODE_ENV` | Environment mode (development, production) | `development` |
-| `PORT` | Server port | `8080` |
-| `DATABASE_URL` | PostgreSQL connection string | `postgresql://postgres:1083035@localhost:5432/abe_stack` |
-| `DB_HOST` | PostgreSQL host | `localhost` |
-| `DB_PORT` | PostgreSQL port | `5432` |
-| `DB_USER` | PostgreSQL username | `postgres` |
-| `DB_PASSWORD` | PostgreSQL password | `1083035` |
-| `DB_NAME` | PostgreSQL database name | `abe_stack` |
-| `JWT_SECRET` | Secret for JWT tokens | `your-secret-key` |
-| `CORS_ORIGIN` | CORS allowed origins (comma-separated) | `*` |
-| `UPLOAD_DIR` | Directory for file uploads | `./uploads` |
+| Variable       | Description                                | Default                                                  |
+| -------------- | ------------------------------------------ | -------------------------------------------------------- |
+| `NODE_ENV`     | Environment mode (development, production) | `development`                                            |
+| `PORT`         | Server port                                | `8080`                                                   |
+| `DATABASE_URL` | PostgreSQL connection string               | `postgresql://postgres:1083035@localhost:5432/abe_stack` |
+| `DB_HOST`      | PostgreSQL host                            | `localhost`                                              |
+| `DB_PORT`      | PostgreSQL port                            | `5432`                                                   |
+| `DB_USER`      | PostgreSQL username                        | `postgres`                                               |
+| `DB_PASSWORD`  | PostgreSQL password                        | `1083035`                                                |
+| `DB_NAME`      | PostgreSQL database name                   | `abe_stack`                                              |
+| `JWT_SECRET`   | Secret for JWT tokens                      | `your-secret-key`                                        |
+| `CORS_ORIGIN`  | CORS allowed origins (comma-separated)     | `*`                                                      |
+| `UPLOAD_DIR`   | Directory for file uploads                 | `./uploads`                                              |
 
 ### Client Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `API_URL` | API endpoint URL | `/api` |
-| `WS_URL` | WebSocket URL | `ws://localhost:8080/ws` |
+| Variable  | Description      | Default                  |
+| --------- | ---------------- | ------------------------ |
+| `API_URL` | API endpoint URL | `/api`                   |
+| `WS_URL`  | WebSocket URL    | `ws://localhost:8080/ws` |
 
 ## Deployment
 
 ### Deploying to a VPS or Dedicated Server
 
 1. **Prepare your server**:
+
    - Install Node.js, npm, and PostgreSQL
    - Set up a PostgreSQL database
 
 2. **Clone and build the application**:
+
    ```sh
    git clone https://github.com/YOUR-USERNAME/abe-stack.git
    cd abe-stack
@@ -231,6 +241,7 @@ The application can be configured using the following environment variables:
 
 3. **Set environment variables**:
    Create a `.env` file in the root directory with your production settings:
+
    ```
    NODE_ENV=production
    PORT=8080
@@ -240,12 +251,14 @@ The application can be configured using the following environment variables:
    ```
 
 4. **Start the application**:
+
    ```sh
    npm run start
    ```
 
 5. **Set up a process manager** (recommended):
    Use PM2 to keep your application running:
+
    ```sh
    npm install -g pm2
    pm2 start dist/server/index.js --name abe-stack
@@ -263,6 +276,7 @@ The application can be configured using the following environment variables:
 2. **Configure environment variables** in the platform's dashboard
 
 3. **Deploy the application**:
+
    - Connect your GitHub repository, or
    - Use the platform's CLI tools to deploy
 
@@ -310,6 +324,7 @@ src/
 ### Authentication
 
 The application includes a complete authentication system with:
+
 - User registration and login
 - JWT-based authentication with secure cookie storage
 - Password hashing with bcrypt
@@ -318,6 +333,7 @@ The application includes a complete authentication system with:
 ### Theme Support
 
 The application supports light and dark themes with:
+
 - User preference storage
 - System preference detection
 - Real-time theme switching
@@ -325,6 +341,7 @@ The application supports light and dark themes with:
 ### Media Handling
 
 Built-in support for:
+
 - File uploads with multer
 - Image processing with sharp
 - Video streaming with HLS
@@ -333,6 +350,7 @@ Built-in support for:
 ### Social Features
 
 Ready-to-use social media features:
+
 - User profiles
 - Posts and comments
 - Likes and shares
@@ -345,3 +363,101 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 
 [MIT](LICENSE)
+
+# ABE Stack - Repository and Model Improvements
+
+This document describes the architectural improvements made to the ABE Stack's models and repositories for better data integrity, error handling, and maintainability.
+
+## Overview of Changes
+
+The codebase has been updated to follow best practices for modern TypeScript applications, with clear separation of concerns and robust error handling. The primary focus was on:
+
+1. **Data Validation** - Adding validation methods to model classes
+2. **Error Handling** - Introducing custom error types for specific error scenarios
+3. **Type Safety** - Improving TypeScript typing across models and repositories
+4. **Separation of Concerns** - Ensuring models handle data structure/validation while repositories handle data access
+5. **Transaction Support** - Adding transaction support for repository methods that require atomicity
+
+## Components Improved
+
+### Media Module
+
+#### MediaCollection & MediaCollectionRepository
+
+- Added validation methods to ensure data integrity
+- Implemented custom error classes for specific failure scenarios
+- Added methods for managing media items (add/remove)
+- Introduced soft delete functionality
+- Enhanced transaction support for critical operations
+
+#### MediaTag & MediaTagRepository
+
+- Added validation for tag names, slugs, and relationships
+- Implemented hierarchical tagging support
+- Added methods for tag merging and finding related tags
+- Enhanced error handling with specific error types
+
+### Messaging Module
+
+#### Conversation & ConversationRepository
+
+- Added participant roles and permissions
+- Implemented validation for conversations including participant limits
+- Enhanced direct message and group chat functionality
+- Added methods for participant management with role support
+
+#### Message & MessageRepository
+
+- Added validation for message content and relationships
+- Implemented enhanced error handling
+- Added support for message reactions, attachments, and mentions
+- Added methods for threading and conversation management
+
+### Moderation Module
+
+#### ContentReport & ContentReportRepository
+
+- Added validation for report fields based on report type
+- Implemented a comprehensive workflow for report handling
+- Added severity levels and prioritization
+- Enhanced moderation tools with evidence collection and reviewer assignment
+- Added detailed statistics reporting
+
+## Key Architectural Patterns
+
+### Model Pattern
+
+- Models extend BaseModel
+- Include clear interfaces defining attributes
+- Implement validation methods
+- Provide utility methods for common operations
+- Maintain internal consistency
+
+### Repository Pattern
+
+- Singleton implementation for repositories
+- Clear error handling with custom error types
+- Transaction support for multi-step operations
+- Consistent database access patterns
+- Typed return values
+
+## Error Handling
+
+The new error handling approach introduces specific error types:
+
+- `*NotFoundError` - When a requested resource doesn't exist
+- `*ValidationError` - When input data fails validation
+- `*DuplicateError` - When an operation would create a duplicate
+- `*Error` - Base class for all domain-specific errors
+
+This enables more precise error handling in services and controllers.
+
+## Benefits
+
+1. **Better Data Integrity** - Validation happens at the model level before database operations
+2. **Consistent Error Handling** - Standardized approach across repositories
+3. **Enhanced Type Safety** - More precise TypeScript types
+4. **Separation of Concerns** - Clear responsibilities for each component
+5. **Additional Functionality** - New methods for common operations
+6. **Soft Deletion** - Support for recoverable deletion
+7. **Efficient Database Operations** - Transaction support for atomicity

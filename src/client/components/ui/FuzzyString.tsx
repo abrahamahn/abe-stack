@@ -1,28 +1,28 @@
-import { FuzzyMatch } from "../../../shared/fuzzyMatch"
+import { FuzzyMatch } from "../../../shared/fuzzyMatch";
 
 interface FuzzyStringProps {
-	match?: FuzzyMatch;
-	text?: string;
+  match?: FuzzyMatch;
+  text?: string;
 }
 
 export function FuzzyString({ match, text }: FuzzyStringProps) {
-	if (!match) {
-		return <span>{text}</span>;
-	}
+  if (!match) {
+    return <span>{text}</span>;
+  }
 
-	return (
-		<span>
-			{match.map((item, i) => (
-				<span
-					key={i}
-					style={{
-						fontWeight: item.matched ? 'bold' : 'normal',
-						color: item.matched ? '#3b82f6' : 'inherit',
-					}}
-				>
-					{item.text}
-				</span>
-			))}
-		</span>
-	);
+  return (
+    <span>
+      {match.map((item, i) => (
+        <span
+          key={i}
+          style={{
+            fontWeight: "match" in item ? "bold" : "normal",
+            color: "match" in item ? "#3b82f6" : "inherit",
+          }}
+        >
+          {"match" in item ? item.match : item.skip}
+        </span>
+      ))}
+    </span>
+  );
 }

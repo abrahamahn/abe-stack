@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run lint-staged to check files that are being committed
+npm run lint:staged
+
+# Run type checking on staged files
+npm run type-check

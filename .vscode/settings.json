@@ -1,0 +1,50 @@
+{
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "eslint.workingDirectories": [
+    {
+      "mode": "location"
+    }
+  ],
+  "eslint.run": "onType",
+  "eslint.lintTask.enable": true,
+  "eslint.options": {
+    "overrideConfigFile": ".eslintrc.js"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "typescript.tsdk": "node_modules/typescript",
+  "eslint.alwaysShowStatus": true,
+  "eslint.probe": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "editor.formatOnSave": true,
+  "eslint.format.enable": true,
+  "eslint.debug": true,
+  "eslint.trace.server": "messages",
+  "problems.autoReveal": true,
+  "problems.showCurrentInStatus": true,
+  "editor.showUnused": true,
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": true,
+    "strings": true
+  },
+  "files.autoSave": "onFocusChange",
+  "files.watcherExclude": {
+    "**/node_modules/**": false
+  },
+  "search.exclude": {
+    "**/node_modules": false
+  },
+  "eslint.codeActionsOnSave.mode": "all",
+  "eslint.useESLintClass": true
+} 

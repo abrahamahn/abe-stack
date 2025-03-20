@@ -1,6 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
-import { socialService } from '../services/social';
+import { socialService } from "../services/social";
 
 export interface User {
   id: string;
@@ -21,7 +27,7 @@ interface Post {
   userAvatar: string;
   content: string;
   media?: {
-    type: 'image' | 'video' | 'audio';
+    type: "image" | "video" | "audio";
     url: string;
     thumbnail?: string;
   };
@@ -51,7 +57,7 @@ const SocialContext = createContext<SocialContextType | null>(null);
 export const useSocial = () => {
   const context = useContext(SocialContext);
   if (!context) {
-    throw new Error('useSocial must be used within a SocialProvider');
+    throw new Error("useSocial must be used within a SocialProvider");
   }
   return context;
 };
@@ -70,33 +76,34 @@ export const SocialProvider: React.FC<SocialProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
       setError(null);
-      const response = await socialService.getFeed('home');
+      const response = await socialService.getFeed("home");
       setFeed(response.posts);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to refresh feed');
+      setError(err instanceof Error ? err.message : "Failed to refresh feed");
     } finally {
       setIsLoading(false);
     }
   }, []);
-  
+
   const initializeSocial = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const user = await socialService.getUserProfile('current');
+      const user = await socialService.getUserProfile("current");
       setCurrentUser(user);
       await refreshFeed();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to initialize social');
+      setError(
+        err instanceof Error ? err.message : "Failed to initialize social",
+      );
     } finally {
       setIsLoading(false);
     }
   }, [refreshFeed]);
-  
+
   useEffect(() => {
     void initializeSocial();
   }, [initializeSocial]);
-
 
   const followUser = async (userId: string) => {
     try {
@@ -109,7 +116,7 @@ export const SocialProvider: React.FC<SocialProviderProps> = ({ children }) => {
         });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to follow user');
+      setError(err instanceof Error ? err.message : "Failed to follow user");
       throw err;
     }
   };
@@ -125,7 +132,7 @@ export const SocialProvider: React.FC<SocialProviderProps> = ({ children }) => {
         });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to unfollow user');
+      setError(err instanceof Error ? err.message : "Failed to unfollow user");
       throw err;
     }
   };
@@ -134,13 +141,15 @@ export const SocialProvider: React.FC<SocialProviderProps> = ({ children }) => {
     try {
       setError(null);
       await socialService.likePost(postId);
-      setFeed(prev => prev.map(post =>
-        post.id === postId
-          ? { ...post, isLiked: true, likesCount: post.likesCount + 1 }
-          : post
-      ));
+      setFeed((prev) =>
+        prev.map((post) =>
+          post.id === postId
+            ? { ...post, isLiked: true, likesCount: post.likesCount + 1 }
+            : post,
+        ),
+      );
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to like post');
+      setError(err instanceof Error ? err.message : "Failed to like post");
       throw err;
     }
   };
@@ -149,13 +158,15 @@ export const SocialProvider: React.FC<SocialProviderProps> = ({ children }) => {
     try {
       setError(null);
       await socialService.unlikePost(postId);
-      setFeed(prev => prev.map(post =>
-        post.id === postId
-          ? { ...post, isLiked: false, likesCount: post.likesCount - 1 }
-          : post
-      ));
+      setFeed((prev) =>
+        prev.map((post) =>
+          post.id === postId
+            ? { ...post, isLiked: false, likesCount: post.likesCount - 1 }
+            : post,
+        ),
+      );
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to unlike post');
+      setError(err instanceof Error ? err.message : "Failed to unlike post");
       throw err;
     }
   };
@@ -164,13 +175,15 @@ export const SocialProvider: React.FC<SocialProviderProps> = ({ children }) => {
     try {
       setError(null);
       await socialService.sharePost(postId);
-      setFeed(prev => prev.map(post =>
-        post.id === postId
-          ? { ...post, sharesCount: post.sharesCount + 1 }
-          : post
-      ));
+      setFeed((prev) =>
+        prev.map((post) =>
+          post.id === postId
+            ? { ...post, sharesCount: post.sharesCount + 1 }
+            : post,
+        ),
+      );
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to share post');
+      setError(err instanceof Error ? err.message : "Failed to share post");
       throw err;
     }
   };
@@ -179,7 +192,7 @@ export const SocialProvider: React.FC<SocialProviderProps> = ({ children }) => {
     try {
       setError(null);
       const newPost = await socialService.createPost(content, media);
-      setFeed(prev => [newPost, ...prev]);
+      setFeed((prev) => [newPost, ...prev]);
       if (currentUser) {
         setCurrentUser({
           ...currentUser,
@@ -187,7 +200,7 @@ export const SocialProvider: React.FC<SocialProviderProps> = ({ children }) => {
         });
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create post');
+      setError(err instanceof Error ? err.message : "Failed to create post");
       throw err;
     }
   };
@@ -207,8 +220,6 @@ export const SocialProvider: React.FC<SocialProviderProps> = ({ children }) => {
   };
 
   return (
-    <SocialContext.Provider value={value}>
-      {children}
-    </SocialContext.Provider>
+    <SocialContext.Provider value={value}>{children}</SocialContext.Provider>
   );
-}; 
+};

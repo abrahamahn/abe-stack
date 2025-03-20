@@ -1,3 +1,3 @@
-export type Simplify<T> = { [K in keyof T]: T[K] }
+export type Simplify<T> = { [K in keyof T]: T[K] };
 
-export type Assert<_A extends _B, _B> = _A extends _B ? _A : never;
+export type Assert<_A extends B, B> = Record<string, never>;

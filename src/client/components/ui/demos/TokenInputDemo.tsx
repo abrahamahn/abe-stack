@@ -1,5 +1,5 @@
 export function TokenInputDemo() {
-	return <div>Work in progress</div>
+  return <div>Work in progress</div>;
 }
 
 // function TokenInput<T, V>(props: {
