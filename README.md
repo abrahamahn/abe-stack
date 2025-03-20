@@ -195,22 +195,81 @@ npm run build:server    # Build just the server
 
 # Production
 npm run start           # Start the production server
+npm run start:dev       # Start the development server with hot reloading
 
 # Testing
 npm run test            # Run all tests
 npm run type-check      # Check TypeScript types
+npm run type-check:watch # Watch for TypeScript type errors
 
 # Linting
 npm run lint            # Run ESLint on all TypeScript files
-npm run lint:errors     # Run ESLint, showing only errors (used in build)
+npm run lint:server     # Run ESLint on server files only
+npm run lint:client     # Run ESLint on client files only
 npm run lint:fix        # Run ESLint with automatic fixing
-npm run lint:watch      # Run ESLint in watch mode (used in development)
+npm run lint:server:fix # Fix linting issues in server files
+npm run lint:client:fix # Fix linting issues in client files
+npm run lint:count      # Count linting errors and warnings
+npm run lint:staged     # Run linting on staged files (used by husky)
+
+# Formatting
+npm run format          # Format code with Prettier
+npm run format:check    # Check formatting without changing files
+
+# Type checking
+npm run check:all       # Run all checks (linting and type checking)
+npm run check:watch     # Watch for linting and type errors
+npm run fix:types       # Run the type error fixer script
 
 # Database
-npm run seed:demo       # Create and seed a demo database
+npm run seed:demo       # Create and seed the database with demo data
+npm run db:clear        # Clear all data from the database while preserving schema
 npm run migrate         # Run database migrations
 npm run migrate:create  # Create a new migration
 npm run migrate:rollback # Rollback the last migration
+```
+
+### Database Commands Explained
+
+#### Seeding the Database
+
+The `seed:demo` command:
+
+1. Connects to PostgreSQL using environment variables from either `.env.development` or `.env.production`
+2. Creates the database if it doesn't exist
+3. Runs a series of SQL scripts to:
+   - Create the database schema
+   - Seed the database with sample users, posts, comments, etc.
+
+Example:
+
+```sh
+# With default settings
+npm run seed:demo
+
+# With custom database connection
+DB_HOST=myhost DB_PORT=5433 DB_USER=myuser DB_PASSWORD=mypassword npm run seed:demo
+```
+
+#### Clearing the Database
+
+The `db:clear` command:
+
+1. Connects to PostgreSQL using the same environment variables as `seed:demo`
+2. Temporarily disables foreign key constraints
+3. Truncates all tables in the database (except migrations)
+4. Re-enables foreign key constraints
+
+This is useful for resetting the database to a clean state without losing the schema.
+
+Example:
+
+```sh
+# Clear all data with default settings
+npm run db:clear
+
+# With custom database connection
+DB_HOST=myhost DB_PORT=5433 DB_USER=myuser DB_PASSWORD=mypassword npm run db:clear
 ```
 
 ## Code Quality

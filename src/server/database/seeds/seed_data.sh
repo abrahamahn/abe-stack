@@ -1,5 +1,5 @@
 #!/bin/bash
-# clear_data.sh - Script to clear all data from the database while preserving schema
+# seed_data.sh - Script to seed the database with sample data
 
 # Set the current directory to the script's directory
 cd "$(dirname "${BASH_SOURCE[0]}")"
@@ -52,36 +52,40 @@ echo "  User: $DB_USER"
 echo "  Host: $DB_HOST"
 echo "  Port: $DB_PORT"
 
-# Check if database exists
+# Check if database exists, create if it doesn't
 echo "Checking if database $DB_NAME exists..."
 DB_EXISTS=$(PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -t -c "SELECT 1 FROM pg_database WHERE datname='$DB_NAME'" postgres)
 
 if [ -z "$DB_EXISTS" ]; then
-    echo "Database $DB_NAME does not exist. Nothing to clear."
-    exit 0
+    echo "Database $DB_NAME does not exist. Creating it..."
+    PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -c "CREATE DATABASE $DB_NAME;" postgres
+    if [ $? -ne 0 ]; then
+        echo "Failed to create database. Exiting."
+        exit 1
+    fi
+    echo "Database $DB_NAME created successfully."
+else
+    echo "Database $DB_NAME already exists."
 fi
 
-echo "Clearing data from all tables in $DB_NAME database..."
+# Temporarily update run_seed.sh with the correct database details
+TMP_FILE=$(mktemp)
+cat run_seed.sh > $TMP_FILE
+sed -i "s/DB_NAME=\"your_database_name\"/DB_NAME=\"$DB_NAME\"/" run_seed.sh
+sed -i "s/DB_USER=\"your_database_user\"/DB_USER=\"$DB_USER\"/" run_seed.sh
+sed -i "s/DB_PASSWORD=\"your_database_password\"/DB_PASSWORD=\"$DB_PASSWORD\"/" run_seed.sh
+sed -i "s/DB_HOST=\"localhost\"/DB_HOST=\"$DB_HOST\"/" run_seed.sh
+sed -i "s/DB_PORT=\"5432\"/DB_PORT=\"$DB_PORT\"/" run_seed.sh
 
-# Function to execute SQL
-function execute_sql() {
-  PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "$1"
-}
+# Make the script executable
+chmod +x run_seed.sh
 
-# Disable foreign key constraints temporarily
-execute_sql "SET session_replication_role = 'replica';"
+# Run the seed script
+echo "Starting database seeding process..."
+./run_seed.sh
 
-# Get list of tables and truncate them
-# This command gets all tables except for migrations table (if you want to preserve migration history)
-tables=$(PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename != 'migrations';")
+# Restore original run_seed.sh
+cat $TMP_FILE > run_seed.sh
+rm $TMP_FILE
 
-for table in $tables; do
-  echo "Truncating table: $table"
-  execute_sql "TRUNCATE TABLE \"$table\" CASCADE;"
-done
-
-# Re-enable foreign key constraints
-execute_sql "SET session_replication_role = 'origin';"
-
-echo "All tables have been cleared while preserving the schema."
-echo "The database is now empty and ready for development." 
+echo "Database seeding completed!" 
