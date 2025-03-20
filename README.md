@@ -17,8 +17,47 @@ ABE Stack is a comprehensive boilerplate for building full-stack web application
 - **Background Processing**: Task queue for handling async operations
 - **Responsive UI**: Component library with mobile-first design
 - **End-to-End Testing**: Browser testing with Playwright
-- **Single Process**: Everything runs in one process for easy development
+- **Three Processes**: Three processes run at once for easy development
 - **Scalable Architecture**: Designed to break into microservices when needed
+
+## Database Layer
+
+ABE Stack implements a robust database layer following the Repository pattern:
+
+- **Domain Models**: Comprehensive domain models with validation and business logic
+- **Repositories**: Specialized repositories for each domain entity providing CRUD operations
+- **Transaction Support**: Built-in transaction handling for complex operations
+- **Migration System**: Structured database migrations for version control
+- **Seeding**: Database seeding for development and testing
+
+The database layer includes repositories for:
+- **Auth**: User, Role, Permission, Token management
+- **Social**: Posts, Comments, Likes, Follows, Bookmarks, Notifications
+- **Media**: Media files, Collections, Tags
+- **Community**: Groups, Memberships
+- **Messaging**: Conversations, Messages
+- **Moderation**: Content reports, Moderation actions
+
+## Services Layer
+
+The services layer encapsulates business logic and orchestrates operations across multiple repositories:
+
+- **Auth Services**: Authentication, authorization, and user management
+- **Social Services**: Post creation, social interactions, content discovery
+- **Media Services**: Media processing, storage, and delivery
+- **Community Services**: Group management and interactions
+- **Messaging Services**: Conversation and message handling
+- **Moderation Services**: Content moderation workflows
+- **Notification Services**: Event-based notification system
+- **Analytics Services**: User activity tracking and analytics
+
+Each service follows SOLID principles and includes:
+- Proper TypeScript typing
+- Comprehensive error handling
+- Input validation
+- Transaction management
+- Logging
+- Testability
 
 ## Getting Started
 
@@ -169,6 +208,9 @@ npm run lint:watch      # Run ESLint in watch mode (used in development)
 
 # Database
 npm run seed:demo       # Create and seed a demo database
+npm run migrate         # Run database migrations
+npm run migrate:create  # Create a new migration
+npm run migrate:rollback # Rollback the last migration
 ```
 
 ## Code Quality
@@ -287,37 +329,105 @@ The application can be configured using the following environment variables:
 ## Application Structure
 
 ```
-src/
-├── client/                 # Frontend React application
-│   ├── components/         # React components
-│   │   ├── auth/           # Authentication components
+.
+├── src/                    # Source code
+│   ├── client/             # Frontend React application
+│   │   ├── components/     # React components
+│   │   ├── contexts/       # React contexts
+│   │   ├── hooks/          # Custom React hooks
 │   │   ├── layouts/        # Layout components
-│   │   ├── pages/          # Page components
-│   │   ├── social/         # Social media components
-│   │   ├── theme/          # Theme components
-│   │   └── ui/             # UI components
-│   ├── contexts/           # React contexts
-│   ├── hooks/              # Custom React hooks
-│   ├── services/           # Frontend services
-│   └── utils/              # Utility functions
+│   │   ├── services/       # Frontend services
+│   │   ├── utils/          # Utility functions
+│   │   ├── App.tsx         # Main React component
+│   │   ├── index.tsx       # Entry point for React
+│   │   └── routes.tsx      # Application routing
+│   │
+│   ├── server/             # Backend Express server
+│   │   ├── api/            # API-related code
+│   │   │   ├── controllers/# Request controllers
+│   │   │   ├── dtos/       # Data transfer objects
+│   │   │   ├── middleware/ # API-specific middleware
+│   │   │   ├── routes/     # API routes definitions
+│   │   │   └── validators/ # Request validators
+│   │   │
+│   │   ├── core/           # Core server functionality
+│   │   │
+│   │   ├── database/       # Database layer
+│   │   │   ├── models/     # Domain models with validation logic
+│   │   │   ├── repositories/# Repository implementations
+│   │   │   │   ├── auth/   # Auth repositories (User, Role, etc.)
+│   │   │   │   ├── social/ # Social repositories (Post, Comment, etc.)
+│   │   │   │   ├── media/  # Media repositories (Media, Collection, etc.)
+│   │   │   │   ├── messaging/# Messaging repositories (Conversation, Message, etc.)
+│   │   │   │   ├── community/# Community repositories (Group, GroupMember, etc.)
+│   │   │   │   ├── moderation/# Moderation repositories (ContentReport, etc.)
+│   │   │   │   ├── analytics/# Analytics repositories (ActivityLog, etc.)
+│   │   │   │   └── discovery/# Discovery repositories (SearchIndex, etc.)
+│   │   │   ├── migrations/ # Database migrations
+│   │   │   ├── seeds/      # Seed data for development and testing
+│   │   │   └── transactions/# Transaction handling
+│   │   │
+│   │   ├── services/       # Business logic layer
+│   │   │   ├── app/        # Application services
+│   │   │   ├── shared/     # Shared service utilities
+│   │   │   └── dev/        # Development utilities
+│   │   │
+│   │   ├── config/         # Server configuration
+│   │   ├── shared/         # Shared server utilities
+│   │   └── utils/          # Server utilities
+│   │
+│   ├── shared/             # Shared code between client and server
+│   │   └── utils/          # Shared utility functions
+│   │
+│   ├── tools/              # Development and build tools
+│   │
+│   └── types/              # TypeScript type definitions
 │
-├── server/                 # Backend Express server
-│   ├── apis/               # API implementations
-│   ├── controllers/        # Request controllers
-│   ├── database/           # Database setup and migrations
-│   │   └── migrations/     # SQL migration files
-│   ├── middleware/         # Express middleware
-│   ├── models/             # Data models
-│   ├── routes/             # API routes
-│   ├── scripts/            # Utility scripts
-│   │   └── seedDemoDatabase.ts  # Demo database seed script
-│   ├── services/           # Backend services
-│   └── utils/              # Utility functions
+├── dist/                   # Compiled output
+├── docs/                   # Documentation
+│   └── server/             # Server documentation
+│       ├── database/       # Database layer documentation
+│       └── services/       # Services layer documentation
 │
-└── shared/                 # Shared code between client and server
-    ├── types/              # TypeScript type definitions
-    └── utils/              # Shared utility functions
+├── uploads/                # File uploads directory
+├── node_modules/           # Dependencies
+├── .env.development        # Development environment variables
+├── .env.production         # Production environment variables
+└── package.json            # Project manifest
 ```
+
+### Key Components
+
+#### Database Layer
+
+The database layer follows the Repository pattern with a clear separation between domain models and data access:
+
+- **Models**: Define data structure, validation rules, and business logic
+- **Repositories**: Handle database operations (CRUD) with transaction support
+- **Migrations**: Manage database schema changes with versioning
+- **Seeds**: Provide sample data for development and testing
+- **Transactions**: Support atomic operations across multiple repositories
+
+#### Services Layer
+
+The services layer orchestrates business operations and provides an abstraction over repositories:
+
+- **Application Services**: Implement domain-specific business logic
+- **Authentication Services**: Handle user authentication and authorization
+- **Media Services**: Process and manage multimedia content
+- **Social Services**: Implement social media interactions
+- **Notification Services**: Manage user notifications
+- **Caching Services**: Optimize performance through caching
+
+#### API Layer
+
+The API layer exposes services through HTTP endpoints:
+
+- **Controllers**: Handle HTTP requests and responses
+- **Routes**: Define API endpoints and map to controllers
+- **Middleware**: Process requests (authentication, rate limiting, etc.)
+- **Validators**: Validate request data
+- **DTOs**: Define data structures for API requests/responses
 
 ## Key Features Explained
 
@@ -363,101 +473,3 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 
 [MIT](LICENSE)
-# ABE Stack - Repository and Model Improvements
-
-This document describes the architectural improvements made to the ABE Stack's models and repositories for better data integrity, error handling, and maintainability.
-
-## Overview of Changes
-
-The codebase has been updated to follow best practices for modern TypeScript applications, with clear separation of concerns and robust error handling. The primary focus was on:
-
-1. **Data Validation** - Adding validation methods to model classes
-2. **Error Handling** - Introducing custom error types for specific error scenarios
-3. **Type Safety** - Improving TypeScript typing across models and repositories
-4. **Separation of Concerns** - Ensuring models handle data structure/validation while repositories handle data access
-5. **Transaction Support** - Adding transaction support for repository methods that require atomicity
-
-## Components Improved
-
-### Media Module
-
-#### MediaCollection & MediaCollectionRepository
-
-- Added validation methods to ensure data integrity
-- Implemented custom error classes for specific failure scenarios
-- Added methods for managing media items (add/remove)
-- Introduced soft delete functionality
-- Enhanced transaction support for critical operations
-
-#### MediaTag & MediaTagRepository
-
-- Added validation for tag names, slugs, and relationships
-- Implemented hierarchical tagging support
-- Added methods for tag merging and finding related tags
-- Enhanced error handling with specific error types
-
-### Messaging Module
-
-#### Conversation & ConversationRepository
-
-- Added participant roles and permissions
-- Implemented validation for conversations including participant limits
-- Enhanced direct message and group chat functionality
-- Added methods for participant management with role support
-
-#### Message & MessageRepository
-
-- Added validation for message content and relationships
-- Implemented enhanced error handling
-- Added support for message reactions, attachments, and mentions
-- Added methods for threading and conversation management
-
-### Moderation Module
-
-#### ContentReport & ContentReportRepository
-
-- Added validation for report fields based on report type
-- Implemented a comprehensive workflow for report handling
-- Added severity levels and prioritization
-- Enhanced moderation tools with evidence collection and reviewer assignment
-- Added detailed statistics reporting
-
-## Key Architectural Patterns
-
-### Model Pattern
-
-- Models extend BaseModel
-- Include clear interfaces defining attributes
-- Implement validation methods
-- Provide utility methods for common operations
-- Maintain internal consistency
-
-### Repository Pattern
-
-- Singleton implementation for repositories
-- Clear error handling with custom error types
-- Transaction support for multi-step operations
-- Consistent database access patterns
-- Typed return values
-
-## Error Handling
-
-The new error handling approach introduces specific error types:
-
-- `*NotFoundError` - When a requested resource doesn't exist
-- `*ValidationError` - When input data fails validation
-- `*DuplicateError` - When an operation would create a duplicate
-- `*Error` - Base class for all domain-specific errors
-
-This enables more precise error handling in services and controllers.
-
-## Benefits
-
-1. **Better Data Integrity** - Validation happens at the model level before database operations
-2. **Consistent Error Handling** - Standardized approach across repositories
-3. **Enhanced Type Safety** - More precise TypeScript types
-4. **Separation of Concerns** - Clear responsibilities for each component
-5. **Additional Functionality** - New methods for common operations
-6. **Soft Deletion** - Support for recoverable deletion
-7. **Efficient Database Operations** - Transaction support for atomicity
-
