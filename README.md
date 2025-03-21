@@ -4,7 +4,34 @@
 
 _Based on [Chet Stack](https://github.com/ccorcos/chet-stack) by Chet Corcos_
 
+## Overview
+
 ABE Stack is a comprehensive boilerplate for building full-stack web applications with a focus on social media features and multimedia streaming. It provides everything you need to get started quickly while remaining flexible enough to scale as your application grows.
+
+## Table of Contents
+
+- [Features](#features)
+- [Architecture](#architecture)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation Options](#installation-options)
+  - [Environment Configuration](#environment-configuration)
+  - [Demo Database](#demo-database)
+- [Development](#development)
+  - [Development Commands](#development-commands)
+  - [Database Commands](#database-commands)
+  - [VS Code Integration](#vs-code-integration)
+- [Key Components](#key-components)
+  - [Database Layer](#database-layer)
+  - [Services Layer](#services-layer)
+  - [API Layer](#api-layer)
+- [Application Structure](#application-structure)
+- [Deployment](#deployment)
+  - [VPS or Dedicated Server](#vps-or-dedicated-server)
+  - [PaaS Platforms](#paas-platforms)
+- [Environment Variables](#environment-variables)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Features
 
@@ -26,59 +53,27 @@ ABE Stack follows a clean, multi-layered architecture that separates concerns an
 
 ![Architecture Diagram](docs/images/architecture.md)
 
-### Key Layers:
+### Key Layers
 
 - **Client**: React frontend with component hierarchy, routing, and state management
 - **Server**: Express-based backend with controllers, services, and repositories
 - **Database**: PostgreSQL with models, migrations, and seed data
 - **Infrastructure**: Supporting systems for caching, media storage, and authentication
 
-## Database Layer
-
-ABE Stack implements a robust database layer following the Repository pattern:
-
-- **Domain Models**: Comprehensive domain models with validation and business logic
-- **Repositories**: Specialized repositories for each domain entity providing CRUD operations
-- **Transaction Support**: Built-in transaction handling for complex operations
-- **Migration System**: Structured database migrations for version control
-- **Seeding**: Database seeding for development and testing
-
-The database layer includes repositories for:
-
-- **Auth**: User, Role, Permission, Token management
-- **Social**: Posts, Comments, Likes, Follows, Bookmarks, Notifications
-- **Media**: Media files, Collections, Tags
-- **Community**: Groups, Memberships
-- **Messaging**: Conversations, Messages
-- **Moderation**: Content reports, Moderation actions
-
-## Services Layer
-
-The services layer encapsulates business logic and orchestrates operations across multiple repositories:
-
-- **Auth Services**: Authentication, authorization, and user management
-- **Social Services**: Post creation, social interactions, content discovery
-- **Media Services**: Media processing, storage, and delivery
-- **Community Services**: Group management and interactions
-- **Messaging Services**: Conversation and message handling
-- **Moderation Services**: Content moderation workflows
-- **Notification Services**: Event-based notification system
-- **Analytics Services**: User activity tracking and analytics
-
-Each service follows SOLID principles and includes:
-
-- Proper TypeScript typing
-- Comprehensive error handling
-- Input validation
-- Transaction management
-- Logging
-- Testability
-
 ## Getting Started
 
-### Quick Start
+### Prerequisites
 
-For a quick setup, you can use our automated scripts:
+- Node.js (v18 or higher)
+- PostgreSQL (v14 or higher)
+- npm or yarn
+- Docker (optional, for containerized setup)
+
+### Installation Options
+
+#### Quick Start (Automated Setup)
+
+The easiest way to get started:
 
 ```bash
 # Interactive setup with configuration options
@@ -87,116 +82,75 @@ npm run setup
 
 The setup script will:
 
-- Check for and install missing prerequisites (Node.js, PostgreSQL, Docker)
+- Check for and install missing prerequisites
 - Configure your environment automatically
 - Set up the database with sample data
 - Start the development server
 
-### Docker Setup
+#### Docker Setup
 
-ABE Stack comes with Docker support for easy development and deployment:
+ABE Stack comes with Docker support:
 
-1. **Prerequisites**:
-
-   - [Docker](https://www.docker.com/get-started)
-   - [Docker Compose](https://docs.docker.com/compose/install/)
-
-2. **Start with Docker**:
+1. Install [Docker](https://www.docker.com/get-started) and [Docker Compose](https://docs.docker.com/compose/install/)
+2. Start the containers:
    ```bash
    docker-compose up
    ```
-   This will start both the application and PostgreSQL database in containers.
 
-### Manual Setup
+#### Manual Setup
 
-If you prefer to set up manually:
+For those who prefer a manual installation:
 
-#### Prerequisites
+1. **Install PostgreSQL**:
 
-- Node.js (v18 or higher)
-- PostgreSQL (v14 or higher)
-- npm or yarn
+   - **macOS**:
 
-#### Installing PostgreSQL
+     ```sh
+     brew install postgresql@14
+     brew services start postgresql@14
+     ```
 
-We recommend using a package manager to install PostgreSQL:
+   - **Windows**:
 
-- **macOS**: Use Homebrew
+     ```sh
+     choco install postgresql
+     ```
 
-  ```sh
-  brew install postgresql@14
-  brew services start postgresql@14
-  ```
+   - **Linux**:
 
-- **Windows**: Use Chocolatey
+     ```sh
+     # Ubuntu/Debian
+     sudo apt install postgresql
 
-  ```sh
-  choco install postgresql
-  ```
+     # Fedora/RHEL
+     sudo dnf install postgresql-server
+     ```
 
-- **Linux**: Use your distribution's package manager
+2. **Clone and install**:
 
-  ```sh
-  # Ubuntu/Debian
-  sudo apt install postgresql
+   ```sh
+   git clone https://github.com/YOUR-USERNAME/abe-stack.git project
+   cd project
+   npm install
+   ```
 
-  # Fedora/RHEL
-  sudo dnf install postgresql-server
-  ```
-
-### Installation
-
-The easiest way to get started with ABE Stack is to use our interactive setup wizard:
-
-```sh
-# Clone the repository
-git clone https://github.com/YOUR-USERNAME/abe-stack.git project
-cd project
-
-# Run the interactive setup wizard
-npm run setup
-```
-
-The setup wizard will:
-
-1. Check your environment and install missing dependencies (Node.js, npm, Docker, PostgreSQL)
-2. Configure your development environment
-3. Set up Docker containers if Docker is available
-4. Create and seed the database with demo data
-5. Start the development server
-
-You'll be guided through an interactive process with visual indicators for each step. The wizard allows you to:
-
-- Choose between Docker or local PostgreSQL setup
-- Configure database connection settings
-- Set up authentication parameters
-- Install demo data for testing
-
-Once the setup is complete, the application will be available at:
-
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8080
+3. **Start development server**:
+   ```sh
+   npm run dev
+   ```
 
 ### Environment Configuration
 
 The application uses environment-specific configuration files:
 
-1. `.env.development` - Used when running in development mode
-2. `.env.production` - Used when running in production mode
+- `.env.development` - Development mode settings
+- `.env.production` - Production mode settings
 
-These files contain configuration for:
-
-- Database connection settings
-- JWT secrets
-- Server configuration
-- Email settings
-- File storage settings
-
-You can customize these files to match your environment. The application will automatically load the appropriate file based on the `NODE_ENV` environment variable.
+These files contain configuration for database connections, JWT secrets, server settings, etc.
 
 ### Demo Database
 
-The seed script creates a database with sample data for demonstration purposes:
+Create a database with sample data:
 
 ```sh
 # Create a database with sample users, posts, comments, and likes
@@ -206,47 +160,33 @@ npm run seed:demo
 This will:
 
 1. Create a PostgreSQL database named `abe_stack`
-2. Run all migrations to set up the database schema
-3. Insert 5 demo user accounts with the following credentials:
-   - Username: `johndoe`, Password: `password123`, Role: `user`
-   - Username: `janedoe`, Password: `password123`, Role: `user`
-   - Username: `alexsmith`, Password: `password123`, Role: `user`
-   - Username: `sarahwilson`, Password: `password123`, Role: `user`
-   - Username: `admin`, Password: `admin123`, Role: `admin`
-4. Create sample posts, comments, likes, and follow relationships
+2. Run all migrations to set up the schema
+3. Insert demo users with predefined credentials
+4. Create sample content (posts, comments, likes, follows)
 
-#### Custom Database Connection Settings
+#### Custom Database Settings
 
-If your PostgreSQL setup uses different credentials, you can specify them using environment variables:
-
-**Windows PowerShell:**
+You can customize database connection settings with environment variables:
 
 ```sh
+# Linux/macOS
+DB_HOST=your_host DB_PORT=your_port DB_USER=your_username DB_PASSWORD=your_password npm run seed:demo
+
+# Windows PowerShell
 $env:DB_HOST="your_host"; $env:DB_PORT="your_port"; $env:DB_USER="your_username"; $env:DB_PASSWORD="your_password"; npm run seed:demo
-```
 
-**Windows Command Prompt:**
-
-```sh
+# Windows Command Prompt
 set DB_HOST=your_host && set DB_PORT=your_port && set DB_USER=your_username && set DB_PASSWORD=your_password && npm run seed:demo
 ```
 
-**Linux/macOS:**
+## Development
+
+### Development Commands
 
 ```sh
-DB_HOST=your_host DB_PORT=your_port DB_USER=your_username DB_PASSWORD=your_password npm run seed:demo
-```
-
-#### Fallback Mode
-
-If PostgreSQL is not available or the connection fails, the application will automatically fall back to an in-memory database for development purposes. This allows you to run the application without PostgreSQL, but with limited functionality.
-
-## Development Commands
-
-```sh
-# Start development servers
-npm run dev             # Start both client and server in development mode
-npm run dev:client      # Start just the Vite frontend
+# Start development
+npm run dev             # Start both client and server
+npm run dev:client      # Start just the frontend
 npm run dev:server      # Start just the backend
 
 # Building
@@ -255,224 +195,102 @@ npm run build:client    # Build just the client
 npm run build:server    # Build just the server
 
 # Production
-npm run start           # Start the production server
-npm run start:dev       # Start the development server with hot reloading
+npm run start           # Start production server
+npm run start:dev       # Start development server with hot reloading
 
 # Testing
 npm run test            # Run all tests
 npm run type-check      # Check TypeScript types
-npm run type-check:watch # Watch for TypeScript type errors
 
-# Linting
+# Linting and Formatting
 npm run lint            # Run ESLint on all TypeScript files
-npm run lint:server     # Run ESLint on server files only
-npm run lint:client     # Run ESLint on client files only
-npm run lint:fix        # Run ESLint with automatic fixing
-npm run lint:server:fix # Fix linting issues in server files
-npm run lint:client:fix # Fix linting issues in client files
-npm run lint:count      # Count linting errors and warnings
-npm run lint:staged     # Run linting on staged files (used by husky)
-
-# Formatting
+npm run lint:fix        # Fix automatically fixable issues
 npm run format          # Format code with Prettier
-npm run format:check    # Check formatting without changing files
-
-# Type checking
-npm run check:all       # Run all checks (linting and type checking)
-npm run check:watch     # Watch for linting and type errors
-npm run fix:types       # Run the type error fixer script
 
 # Database
 npm run seed:demo       # Create and seed the database with demo data
-npm run db:clear        # Clear all data from the database while preserving schema
+npm run db:clear        # Clear all data while preserving schema
 npm run migrate         # Run database migrations
 npm run migrate:create  # Create a new migration
-npm run migrate:rollback # Rollback the last migration
 
 # Code Generation
 npm run generate        # Run the interactive code generator
-npm run setup           # Run the interactive setup wizard
 ```
 
-### Database Commands Explained
+### Database Commands
 
 #### Seeding the Database
 
 The `seed:demo` command:
 
-1. Connects to PostgreSQL using environment variables from either `.env.development` or `.env.production`
+1. Connects to PostgreSQL using environment variables
 2. Creates the database if it doesn't exist
-3. Runs a series of SQL scripts to:
-   - Create the database schema
-   - Seed the database with sample users, posts, comments, etc.
-
-Example:
-
-```sh
-# With default settings
-npm run seed:demo
-
-# With custom database connection
-DB_HOST=myhost DB_PORT=5433 DB_USER=myuser DB_PASSWORD=mypassword npm run seed:demo
-```
+3. Runs a series of SQL scripts to create the schema and sample data
 
 #### Clearing the Database
 
 The `db:clear` command:
 
-1. Connects to PostgreSQL using the same environment variables as `seed:demo`
-2. Temporarily disables foreign key constraints
-3. Truncates all tables in the database (except migrations)
-4. Re-enables foreign key constraints
+1. Temporarily disables foreign key constraints
+2. Truncates all tables (except migrations)
+3. Re-enables foreign key constraints
 
-This is useful for resetting the database to a clean state without losing the schema.
+This is useful for resetting the database without losing the schema.
 
-Example:
+### VS Code Integration
 
-```sh
-# Clear all data with default settings
-npm run db:clear
+ABE Stack includes comprehensive VS Code integration:
 
-# With custom database connection
-DB_HOST=myhost DB_PORT=5433 DB_USER=myuser DB_PASSWORD=mypassword npm run db:clear
-```
-
-## Visual Studio Code Integration
-
-ABE Stack includes comprehensive VS Code integration for an optimal development experience:
-
-- **Extensions**: Recommended extensions for TypeScript, ESLint, Prettier, and more
+- **Extensions**: Recommended extensions for TypeScript, ESLint, Prettier
 - **Snippets**: Custom code snippets for common patterns
 - **Launch Configurations**: Debug configurations for client, server, and tests
-- **Settings**: Optimized workspace settings for the tech stack
-- **Task Definitions**: Custom tasks for development workflows
+- **Settings**: Optimized workspace settings
 
-Enable all recommended extensions when prompted by VS Code for the best experience.
+## Key Components
 
-## Documentation
+### Database Layer
 
-The project includes comprehensive documentation to help you understand and extend the codebase:
+Follows the Repository pattern with:
 
-- **Architecture**: Overview of the system architecture and design patterns
-- **Tutorials**: Step-by-step guides for common tasks:
-  - Adding API endpoints
-  - Creating React components
-  - Implementing complete features
-- **Database**: Documentation for the database schema, migrations, and transactions
-- **Services**: Guides for using and extending the service layer
+- **Domain Models**: Data structure, validation rules, and business logic
+- **Repositories**: CRUD operations with transaction support
+- **Transaction Support**: Atomic operations across multiple repositories
+- **Migration System**: Structured database schema versioning
+- **Seeding**: Sample data for development and testing
 
-## Code Quality
+Includes repositories for:
 
-### ESLint Configuration
+- Auth (User, Role, Permission, Token)
+- Social (Posts, Comments, Likes, Follows)
+- Media (Media files, Collections, Tags)
+- Community (Groups, Memberships)
+- Messaging (Conversations, Messages)
+- Moderation (Content reports, actions)
 
-The project uses ESLint to enforce code quality and consistency. The configuration includes:
+### Services Layer
 
-- TypeScript-specific rules
-- React and React Hooks rules
-- Import order and module resolution rules
-- Different rule sets for frontend and backend code
+Encapsulates business logic across multiple repositories:
 
-ESLint runs automatically during development (via `npm run dev`) and checks for errors during the build process. You can also run it manually:
+- **Auth Services**: Authentication, authorization, user management
+- **Social Services**: Post creation, social interactions, content discovery
+- **Media Services**: Media processing, storage, delivery
+- **Community Services**: Group management and interactions
+- **Messaging Services**: Conversation and message handling
+- **Moderation Services**: Content moderation workflows
+- **Notification Services**: Event-based notification system
+- **Analytics Services**: User activity tracking and analytics
 
-```sh
-# Check all files
-npm run lint
+Each service follows SOLID principles with TypeScript typing, error handling, input validation, transaction management, logging, and testability.
 
-# Fix automatically fixable issues
-npm run lint:fix
-```
+### API Layer
 
-To customize the ESLint configuration, edit the `.eslintrc.js` file in the project root.
+Exposes services through HTTP endpoints:
 
-## Environment Variables
-
-The application can be configured using the following environment variables:
-
-### Server Environment Variables
-
-| Variable       | Description                                | Default                                                  |
-| -------------- | ------------------------------------------ | -------------------------------------------------------- |
-| `NODE_ENV`     | Environment mode (development, production) | `development`                                            |
-| `PORT`         | Server port                                | `8080`                                                   |
-| `DATABASE_URL` | PostgreSQL connection string               | `postgresql://postgres:1083035@localhost:5432/abe_stack` |
-| `DB_HOST`      | PostgreSQL host                            | `localhost`                                              |
-| `DB_PORT`      | PostgreSQL port                            | `5432`                                                   |
-| `DB_USER`      | PostgreSQL username                        | `postgres`                                               |
-| `DB_PASSWORD`  | PostgreSQL password                        | `1083035`                                                |
-| `DB_NAME`      | PostgreSQL database name                   | `abe_stack`                                              |
-| `JWT_SECRET`   | Secret for JWT tokens                      | `your-secret-key`                                        |
-| `CORS_ORIGIN`  | CORS allowed origins (comma-separated)     | `*`                                                      |
-| `UPLOAD_DIR`   | Directory for file uploads                 | `./uploads`                                              |
-
-### Client Environment Variables
-
-| Variable  | Description      | Default                  |
-| --------- | ---------------- | ------------------------ |
-| `API_URL` | API endpoint URL | `/api`                   |
-| `WS_URL`  | WebSocket URL    | `ws://localhost:8080/ws` |
-
-## Deployment
-
-### Deploying to a VPS or Dedicated Server
-
-1. **Prepare your server**:
-
-   - Install Node.js, npm, and PostgreSQL
-   - Set up a PostgreSQL database
-
-2. **Clone and build the application**:
-
-   ```sh
-   git clone https://github.com/YOUR-USERNAME/abe-stack.git
-   cd abe-stack
-   npm install
-   npm run build
-   ```
-
-3. **Set environment variables**:
-   Create a `.env` file in the root directory with your production settings:
-
-   ```
-   NODE_ENV=production
-   PORT=8080
-   DATABASE_URL=postgresql://username:password@localhost:5432/abe_stack
-   JWT_SECRET=your-secure-secret-key
-   CORS_ORIGIN=https://yourdomain.com
-   ```
-
-4. **Start the application**:
-
-   ```sh
-   npm run start
-   ```
-
-5. **Set up a process manager** (recommended):
-   Use PM2 to keep your application running:
-
-   ```sh
-   npm install -g pm2
-   pm2 start dist/server/index.js --name abe-stack
-   pm2 save
-   pm2 startup
-   ```
-
-6. **Set up a reverse proxy** (recommended):
-   Configure Nginx or Apache to proxy requests to your Node.js application and serve static files.
-
-### Deploying to a PaaS (Heroku, Render, etc.)
-
-1. **Create a new application** on your chosen platform
-
-2. **Configure environment variables** in the platform's dashboard
-
-3. **Deploy the application**:
-
-   - Connect your GitHub repository, or
-   - Use the platform's CLI tools to deploy
-
-4. **Set up a PostgreSQL database**:
-   - Use the platform's database add-on or
-   - Connect to an external PostgreSQL service
+- **Controllers**: Handle HTTP requests and responses
+- **Routes**: Define API endpoints and map to controllers
+- **Middleware**: Authentication, rate limiting, etc.
+- **Validators**: Request data validation
+- **DTOs**: Data structures for API requests/responses
 
 ## Application Structure
 
@@ -480,10 +298,7 @@ The application can be configured using the following environment variables:
 .
 ├── src/                    # Source code
 │   ├── client/             # Frontend React application
-│   │   ├── components/     # React components
-│   │   │   ├── atoms/      # Basic building blocks
-│   │   │   ├── molecules/  # Combinations of atoms
-│   │   │   └── organisms/  # Complex UI sections
+│   │   ├── components/     # React components (atoms, molecules, organisms)
 │   │   ├── contexts/       # React contexts
 │   │   ├── hooks/          # Custom React hooks
 │   │   ├── layouts/        # Layout components
@@ -494,139 +309,94 @@ The application can be configured using the following environment variables:
 │   │   └── routes.tsx      # Application routing
 │   │
 │   ├── server/             # Backend Express server
-│   │   ├── api/            # API-related code
-│   │   │   ├── controllers/# Request controllers
-│   │   │   ├── dtos/       # Data transfer objects
-│   │   │   ├── middleware/ # API-specific middleware
-│   │   │   ├── routes/     # API routes definitions
-│   │   │   └── validators/ # Request validators
-│   │   │
+│   │   ├── api/            # API-related code (controllers, routes, validators)
 │   │   ├── core/           # Core server functionality
-│   │   │
-│   │   ├── database/       # Database layer
-│   │   │   ├── models/     # Domain models with validation logic
-│   │   │   ├── repositories/# Repository implementations
-│   │   │   │   ├── auth/   # Auth repositories (User, Role, etc.)
-│   │   │   │   ├── social/ # Social repositories (Post, Comment, etc.)
-│   │   │   │   ├── media/  # Media repositories (Media, Collection, etc.)
-│   │   │   │   ├── messaging/# Messaging repositories (Conversation, Message, etc.)
-│   │   │   │   ├── community/# Community repositories (Group, GroupMember, etc.)
-│   │   │   │   ├── moderation/# Moderation repositories (ContentReport, etc.)
-│   │   │   │   ├── analytics/# Analytics repositories (ActivityLog, etc.)
-│   │   │   │   └── discovery/# Discovery repositories (SearchIndex, etc.)
-│   │   │   ├── migrations/ # Database migrations
-│   │   │   ├── seeds/      # Seed data for development and testing
-│   │   │   └── transactions/# Transaction handling
-│   │   │
+│   │   ├── database/       # Database layer (models, repositories, migrations)
 │   │   ├── services/       # Business logic layer
-│   │   │   ├── app/        # Application services
-│   │   │   ├── shared/     # Shared service utilities
-│   │   │   └── dev/        # Development utilities
-│   │   │
 │   │   ├── config/         # Server configuration
-│   │   ├── shared/         # Shared server utilities
 │   │   └── utils/          # Server utilities
 │   │
 │   ├── shared/             # Shared code between client and server
-│   │   └── utils/          # Shared utility functions
-│   │
 │   ├── tools/              # Development and build tools
-│   │   ├── generators/     # Code generation templates
-│   │   └── installation/   # Setup scripts
-│   │
 │   └── types/              # TypeScript type definitions
 │
 ├── dist/                   # Compiled output
 ├── docs/                   # Documentation
-│   ├── images/             # Architecture diagrams
-│   ├── tutorials/          # Step-by-step guides
-│   └── server/             # Server documentation
-│       ├── database/       # Database layer documentation
-│       └── services/       # Services layer documentation
-│
 ├── uploads/                # File uploads directory
-├── node_modules/           # Dependencies
 ├── .env.development        # Development environment variables
 ├── .env.production         # Production environment variables
 ├── .vscode/                # VS Code configuration
-│   ├── extensions.json     # Recommended extensions
-│   ├── launch.json         # Debug configurations
-│   ├── settings.json       # Editor settings
-│   └── snippets/           # Code snippets
-│
 └── package.json            # Project manifest
 ```
 
-### Key Components
+## Deployment
 
-#### Database Layer
+### VPS or Dedicated Server
 
-The database layer follows the Repository pattern with a clear separation between domain models and data access:
+1. **Prepare your server**:
 
-- **Models**: Define data structure, validation rules, and business logic
-- **Repositories**: Handle database operations (CRUD) with transaction support
-- **Migrations**: Manage database schema changes with versioning
-- **Seeds**: Provide sample data for development and testing
-- **Transactions**: Support atomic operations across multiple repositories
+   - Install Node.js, npm, and PostgreSQL
+   - Set up a PostgreSQL database
 
-#### Services Layer
+2. **Clone and build**:
 
-The services layer orchestrates business operations and provides an abstraction over repositories:
+   ```sh
+   git clone https://github.com/YOUR-USERNAME/abe-stack.git
+   cd abe-stack
+   npm install
+   npm run build
+   ```
 
-- **Application Services**: Implement domain-specific business logic
-- **Authentication Services**: Handle user authentication and authorization
-- **Media Services**: Process and manage multimedia content
-- **Social Services**: Implement social media interactions
-- **Notification Services**: Manage user notifications
-- **Caching Services**: Optimize performance through caching
+3. **Set environment variables** in a `.env` file
 
-#### API Layer
+4. **Start the application**:
 
-The API layer exposes services through HTTP endpoints:
+   ```sh
+   npm run start
+   ```
 
-- **Controllers**: Handle HTTP requests and responses
-- **Routes**: Define API endpoints and map to controllers
-- **Middleware**: Process requests (authentication, rate limiting, etc.)
-- **Validators**: Validate request data
-- **DTOs**: Define data structures for API requests/responses
+5. **Set up a process manager** (recommended):
 
-## Key Features Explained
+   ```sh
+   npm install -g pm2
+   pm2 start dist/server/index.js --name abe-stack
+   pm2 save
+   pm2 startup
+   ```
 
-### Authentication
+6. **Set up a reverse proxy** with Nginx or Apache
 
-The application includes a complete authentication system with multiple options:
+### PaaS Platforms
 
-- **Cookie-based Authentication** (recommended): Secure, stateful sessions with better protection against XSS and CSRF
-- **JWT Authentication**: For scenarios requiring stateless authentication
-- User registration and login
-- Password hashing with bcrypt
-- Session management
+1. **Create a new application** on your chosen platform
+2. **Configure environment variables** in the platform's dashboard
+3. **Deploy the application** by connecting your GitHub repository or using the platform's CLI
+4. **Set up a PostgreSQL database** using the platform's add-on or an external service
 
-### Theme Support
+## Environment Variables
 
-The application supports light and dark themes with:
+### Server Environment Variables
 
-- User preference storage
-- System preference detection
-- Real-time theme switching
+| Variable       | Description                  | Default                                                  |
+| -------------- | ---------------------------- | -------------------------------------------------------- |
+| `NODE_ENV`     | Environment mode             | `development`                                            |
+| `PORT`         | Server port                  | `8080`                                                   |
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql://postgres:1083035@localhost:5432/abe_stack` |
+| `DB_HOST`      | PostgreSQL host              | `localhost`                                              |
+| `DB_PORT`      | PostgreSQL port              | `5432`                                                   |
+| `DB_USER`      | PostgreSQL username          | `postgres`                                               |
+| `DB_PASSWORD`  | PostgreSQL password          | `postgres`                                               |
+| `DB_NAME`      | PostgreSQL database name     | `abe_stack`                                              |
+| `JWT_SECRET`   | Secret for JWT tokens        | `your-secret-key`                                        |
+| `CORS_ORIGIN`  | CORS allowed origins         | `*`                                                      |
+| `UPLOAD_DIR`   | Directory for file uploads   | `./uploads`                                              |
 
-### Media Handling
+### Client Environment Variables
 
-Built-in support for:
-
-- File uploads with multer
-- Image processing with sharp
-- Video streaming with HLS
-- Audio metadata extraction
-
-### Social Features
-
-Ready-to-use social media features:
-
-- User profiles
-- Posts and comments
-- Likes and shares
-- Notifications
+| Variable  | Description      | Default                  |
+| --------- | ---------------- | ------------------------ |
+| `API_URL` | API endpoint URL | `/api`                   |
+| `WS_URL`  | WebSocket URL    | `ws://localhost:8080/ws` |
 
 ## Contributing
 
