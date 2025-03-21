@@ -9,15 +9,15 @@ ABE Stack is a comprehensive boilerplate for building full-stack web application
 ## Features
 
 - **Modern Tech Stack**: React 19, TypeScript, Vite, Express, PostgreSQL
-- **Authentication System**: Complete JWT-based authentication with login, registration, and session management
+- **Authentication System**: Complete authentication with both cookie-based sessions and JWT options
 - **Theme Support**: Light/dark mode with system preference detection
 - **Media Handling**: Built-in support for media uploads, processing, and streaming
 - **Social Features**: User profiles, posts, comments, and notifications
 - **Real-time Updates**: WebSocket-based pubsub system for live data
 - **Background Processing**: Task queue for handling async operations
 - **Responsive UI**: Component library with mobile-first design
-- **End-to-End Testing**: Browser testing with Playwright
 - **Developer Experience**: Comprehensive VS Code integration, code generators, and documentation
+- **Three Processes**: Built for easy development with frontend, backend, and database processes
 - **Scalable Architecture**: Clean layered architecture designed to break into microservices when needed
 
 ## Architecture
@@ -83,10 +83,14 @@ For a quick setup, you can use our automated scripts:
 ```bash
 # Interactive setup with configuration options
 npm run setup
-
-# Quick start with default settings
-npm run quickstart
 ```
+
+The setup script will:
+
+- Check for and install missing prerequisites (Node.js, PostgreSQL, Docker)
+- Configure your environment automatically
+- Set up the database with sample data
+- Start the development server
 
 ### Docker Setup
 
@@ -113,51 +117,62 @@ If you prefer to set up manually:
 - PostgreSQL (v14 or higher)
 - npm or yarn
 
-### PostgreSQL Setup
+#### Installing PostgreSQL
 
-Before running the application, you need to set up PostgreSQL:
+We recommend using a package manager to install PostgreSQL:
 
-1. **Install PostgreSQL** if you haven't already:
+- **macOS**: Use Homebrew
 
-   - [Download PostgreSQL](https://www.postgresql.org/download/)
-   - Follow the installation instructions for your operating system
-   - Make sure the PostgreSQL service is running
+  ```sh
+  brew install postgresql@14
+  brew services start postgresql@14
+  ```
 
-2. **Default Connection Settings**:
+- **Windows**: Use Chocolatey
 
-   - Host: `localhost`
-   - Port: `5432`
-   - Username: `postgres`
-   - Password: `postgres` (default password, change if needed)
-   - Database: `abe_stack` (will be created by the seed script)
+  ```sh
+  choco install postgresql
+  ```
 
-3. **Create the Database**:
-   You don't need to manually create the database. The seed script will create it for you if it doesn't exist.
+- **Linux**: Use your distribution's package manager
+
+  ```sh
+  # Ubuntu/Debian
+  sudo apt install postgresql
+
+  # Fedora/RHEL
+  sudo dnf install postgresql-server
+  ```
 
 ### Installation
+
+The easiest way to get started with ABE Stack is to use our interactive setup wizard:
 
 ```sh
 # Clone the repository
 git clone https://github.com/YOUR-USERNAME/abe-stack.git project
 cd project
 
-# Install dependencies
-npm install
-
-# Set up environment configuration
-# The application uses environment-specific configuration files:
-# - .env.development for development mode
-# - .env.production for production mode
-# Default files are provided, but you can customize them as needed
-
-# Create and seed the database with demo data
-npm run seed:demo
-
-# Start the development server
-npm run dev
+# Run the interactive setup wizard
+npm run setup
 ```
 
-The application will be available at:
+The setup wizard will:
+
+1. Check your environment and install missing dependencies (Node.js, npm, Docker, PostgreSQL)
+2. Configure your development environment
+3. Set up Docker containers if Docker is available
+4. Create and seed the database with demo data
+5. Start the development server
+
+You'll be guided through an interactive process with visual indicators for each step. The wizard allows you to:
+
+- Choose between Docker or local PostgreSQL setup
+- Configure database connection settings
+- Set up authentication parameters
+- Install demo data for testing
+
+Once the setup is complete, the application will be available at:
 
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8080
@@ -277,7 +292,6 @@ npm run migrate:rollback # Rollback the last migration
 # Code Generation
 npm run generate        # Run the interactive code generator
 npm run setup           # Run the interactive setup wizard
-npm run quickstart      # Run the quick start script
 ```
 
 ### Database Commands Explained
@@ -322,23 +336,6 @@ npm run db:clear
 # With custom database connection
 DB_HOST=myhost DB_PORT=5433 DB_USER=myuser DB_PASSWORD=mypassword npm run db:clear
 ```
-
-## Code Generation Tools
-
-ABE Stack comes with powerful code generation tools to accelerate development:
-
-```sh
-npm run generate
-```
-
-This interactive CLI tool helps you generate:
-
-- **React Components**: Create atomic, molecule, or organism components
-- **Repositories**: Generate database repository classes
-- **Services**: Create service classes with business logic
-- **Controllers**: Build API controllers for endpoints
-
-The generator follows best practices and creates files with proper TypeScript typing, documentation, and tests.
 
 ## Visual Studio Code Integration
 
@@ -535,8 +532,7 @@ The application can be configured using the following environment variables:
 │   │
 │   ├── tools/              # Development and build tools
 │   │   ├── generators/     # Code generation templates
-│   │   ├── installation/   # Setup scripts
-│   │   └── quickstart.js   # Quick start script
+│   │   └── installation/   # Setup scripts
 │   │
 │   └── types/              # TypeScript type definitions
 │
@@ -598,10 +594,11 @@ The API layer exposes services through HTTP endpoints:
 
 ### Authentication
 
-The application includes a complete authentication system with:
+The application includes a complete authentication system with multiple options:
 
+- **Cookie-based Authentication** (recommended): Secure, stateful sessions with better protection against XSS and CSRF
+- **JWT Authentication**: For scenarios requiring stateless authentication
 - User registration and login
-- JWT-based authentication with secure cookie storage
 - Password hashing with bcrypt
 - Session management
 

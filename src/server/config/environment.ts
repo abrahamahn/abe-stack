@@ -173,7 +173,7 @@ export const env: EnvConfig = {
   DB_PASSWORD: parseEnv<string>("DB_PASSWORD", "postgres"),
   DB_CONNECTION_STRING: parseEnv<string>(
     "DATABASE_URL",
-    "postgresql://postgres:postgres@localhost:5432/abe_stack",
+    `postgresql://postgres:postgres@localhost:5432/abe_stack`,
   ),
 
   // Auth

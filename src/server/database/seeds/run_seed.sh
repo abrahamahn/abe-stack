@@ -44,6 +44,18 @@ else
     echo "Warning: Environment file $ENV_FILE not found. Using default values."
 fi
 
+# Check if we're trying to connect to a Docker container
+if [ "$DB_HOST" = "postgres" ]; then
+  echo "Checking if postgres hostname is reachable..."
+  # Try connecting with a short timeout
+  if ! PGPASSWORD="$DB_PASSWORD" psql -h postgres -p "$DB_PORT" -U "$DB_USER" -d postgres -c "SELECT 1" -t >/dev/null 2>&1; then
+    echo "Cannot connect to 'postgres' hostname, falling back to localhost"
+    DB_HOST="localhost"
+  else
+    echo "'postgres' hostname is reachable, using it for connection"
+  fi
+fi
+
 # Display configuration
 echo "Database configuration:"
 echo "  Environment: $NODE_ENV"
