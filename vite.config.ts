@@ -1,25 +1,33 @@
 // vite.config.js
-import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
-import { resolve } from "path";
-import { defineConfig } from "vite";
-import dotenv from "dotenv";
 import fs from "fs";
+import { resolve } from "path";
+
+import react from "@vitejs/plugin-react";
+import dotenv from "dotenv";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
+export default ({ mode }: { mode: string }) => {
   const isDevelopment = mode === "development";
 
   // Load env variables
   const env = process.env;
 
-  // Load environment variables from .env file
-  const envFile = isDevelopment ? ".env.development" : ".env.production";
+  // Load environment variables from correct .env file path
+  const envDir = resolve(__dirname, "src/server/infrastructure/config/.env");
+  const envFile = resolve(
+    envDir,
+    isDevelopment ? ".env.development" : ".env.production",
+  );
+
   if (fs.existsSync(envFile)) {
+    console.log(`Loading Vite env config from: ${envFile}`);
     const envConfig = dotenv.parse(fs.readFileSync(envFile));
     for (const k in envConfig) {
       env[k] = envConfig[k];
     }
+  } else {
+    console.warn(`Environment file not found: ${envFile}`);
   }
 
   // Determine if we're building for Electron
@@ -27,7 +35,12 @@ export default defineConfig(({ mode }) => {
 
   // Get server port from environment or use default
   const serverPort = parseInt(env.PORT || "8080", 10);
-  const clientPort = parseInt(env.CLIENT_PORT || "3000", 10);
+  // Use Vite's default port for development
+  const clientPort = 5173;
+
+  console.log(
+    `Vite config: Server port=${serverPort}, Client port=${clientPort}`,
+  );
 
   return {
     plugins: [react(), tsconfigPaths()],
@@ -48,6 +61,11 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           secure: false,
           ws: true,
+        },
+        "/uploads": {
+          target: `http://localhost:${serverPort}`,
+          changeOrigin: true,
+          secure: false,
         },
       },
     },
@@ -115,4 +133,4 @@ export default defineConfig(({ mode }) => {
       },
     }),
   };
-});
+};

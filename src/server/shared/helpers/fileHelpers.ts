@@ -1,5 +1,5 @@
-import { ServerConfig } from "../../config/environment";
-import { generateSignature } from "../../core/storage/helpers/signatureHelpers";
+import { ServerConfig } from "@server/infrastructure/config/Env";
+import { generateSignature } from "@/server/shared/helpers/signatureHelpers";
 
 export type FileSignatureData = {
   method: "get" | "put";
@@ -26,7 +26,7 @@ export function getSignedFileUrl(
   const secretKey = environment.config.signatureSecret;
 
   const { id, filename, expirationMs } = data;
-  const signature = generateSignature(secretKey, {
+  const signature = generateSignature(secretKey.toString("utf-8"), {
     ...data,
     path: `/uploads/${id}/${filename}`,
     expiration: Math.floor(expirationMs / 1000),

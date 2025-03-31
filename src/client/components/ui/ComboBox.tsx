@@ -11,7 +11,7 @@ import { FuzzyString } from "./FuzzyString";
 import { Input } from "./Input";
 import { MenuItem } from "./MenuItem";
 import { Popup, PopupFrame } from "./Popup";
-import { fuzzyMatch } from "../../../shared/fuzzyMatch";
+import { fuzzyMatch } from "../../../server/shared/utils";
 import { useRefPrevious } from "../../hooks/useRefPrevious";
 import { isShortcut } from "../../hooks/useShortcut";
 

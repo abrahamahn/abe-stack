@@ -77,13 +77,7 @@
   "editor.suggest.localityBonus": true,
   "editor.suggestSelection": "first",
   "editor.guides.bracketPairs": true,
-  "cSpell.words": [
-    "bgcolor",
-    "clsx",
-    "nocheck",
-    "preinstall",
-    "testid"
-  ],
+  "cSpell.words": ["bgcolor", "clsx", "nocheck", "preinstall", "testid"],
   "todo-tree.tree.showScanModeButton": true,
   "todo-tree.general.tags": [
     "TODO",
@@ -134,5 +128,6 @@
       "icon": "eye",
       "iconColour": "#fb8c00"
     }
-  }
-} 
+  },
+  "cursor.composer.shouldAutoSaveNonAgent": false
+}

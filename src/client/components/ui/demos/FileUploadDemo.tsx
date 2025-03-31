@@ -1,4 +1,4 @@
-import { sleep } from "../../../../shared/sleep";
+import { sleep } from "../../../../server/shared/utils";
 import {
   FileUploadDropZone,
   UploadPreview,

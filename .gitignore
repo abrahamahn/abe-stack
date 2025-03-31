@@ -1,21 +1,11 @@
-.DS_Store
 node_modules
 *.log
 dist 
+backup
 
-tmp
-.devcontainer
-playwright-report
-test-results
-TODO.md
-full_code.py
-project-code_dump.txt
 # Environment
 .env
 .env.*
 
 # Dependencies
 package-lock.json
-
-# Environment
-!.env.example

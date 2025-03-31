@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
-import { fuzzyMatch } from "../../../../shared/fuzzyMatch";
+import { fuzzyMatch } from "@/server/shared/utils";
+
 import { FuzzyString } from "../FuzzyString";
 import { Input } from "../Input";
 

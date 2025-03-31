@@ -1,6 +1,9 @@
 import { scrypt } from "crypto";
 
-import { ServerEnvironment, ServerConfig } from "../../config/environment";
+import {
+  ServerEnvironment,
+  ServerConfig,
+} from "@server/infrastructure/config/Env";
 
 import type { Request, Response } from "express";
 

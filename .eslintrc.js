@@ -2,7 +2,7 @@ module.exports = {
   root: true,
   parser: "@typescript-eslint/parser",
   env: {
-    node: true
+    node: true,
   },
   parserOptions: {
     ecmaVersion: 2022,
@@ -18,30 +18,53 @@ module.exports = {
       version: "detect",
     },
     "import/parsers": {
-      "@typescript-eslint/parser": [".ts", ".tsx"]
+      "@typescript-eslint/parser": [".ts", ".tsx"],
     },
     "import/resolver": {
       typescript: {
         alwaysTryTypes: true,
-        project: "./tsconfig.json"
+        project: "./tsconfig.json",
       },
       node: {
         paths: ["src"],
         extensions: [".js", ".jsx", ".ts", ".tsx"],
-        moduleDirectory: ["node_modules", "src"]
+        moduleDirectory: ["node_modules", "src"],
       },
       alias: {
         map: [
-          ["@database", "./src/server/database"],
-          ["@models", "./src/server/database/models"],
-          ["@repositories", "./src/server/database/repositories"],
-          ["@services", "./src/server/services"],
-          ["@api", "./src/server/api"],
-          ["@core", "./src/server/core"],
-          ["@processors", "./src/server/processors"]
+          ["@", "./src"],
+          ["@client", "./src/client"],
+          /* Server */
+          ["@server", "./src/server"],
+          /* Shared */
+          ["@shared", "./src/server/shared"],
+          /* Infrastructure */
+          ["@infrastructure", "./src/server/infrastructure"],
+          ["@cache", "./src/server/infrastructure/cache"],
+          ["@config", "./src/server/infrastructure/config"],
+          ["@database", "./src/server/infrastructure/database"],
+          ["@di", "./src/server/infrastructure/di"],
+          ["@errors", "./src/server/infrastructure/errors"],
+          ["@jobs", "./src/server/infrastructure/jobs"],
+          ["@logging", "./src/server/infrastructure/logging"],
+          ["@middlewares", "./src/server/infrastructure/middlewares"],
+          ["@processors", "./src/server/infrastructure/processors"],
+          ["@pubsub", "./src/server/infrastructure/pubsub"],
+          ["@infra-server", "./src/server/infrastructure/server"],
+          ["@storage", "./src/server/infrastructure/storage"],
+          /* Modules */
+          ["@modules", "./src/server/modules"],
+          ["@auth", "./src/server/modules/auth"],
+          ["@preferences", "./src/server/modules/preferences"],
+          ["@sessions", "./src/server/modules/sessions"],
+          ["@users", "./src/server/modules/users"],
+          /* Tools */
+          ["@tools", "./src/server/tools"],
+          /* Tests */
+          ["@tests", "./src/tests"],
         ],
-        extensions: [".ts", ".tsx", ".js", ".jsx", ".json"]
-      }
+        extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
+      },
     },
   },
   extends: [
@@ -90,77 +113,82 @@ module.exports = {
     "import/order": [
       "warn",
       {
-        "groups": [
+        groups: [
           "builtin",
           "external",
           "internal",
           ["parent", "sibling"],
           "index",
           "object",
-          "type"
+          "type",
         ],
-        "pathGroups": [
+        pathGroups: [
           {
-            "pattern": "@/**",
-            "group": "internal",
-            "position": "after"
-          }
+            pattern: "@/**",
+            group: "internal",
+            position: "after",
+          },
         ],
         "newlines-between": "always",
-        "alphabetize": {
-          "order": "asc",
-          "caseInsensitive": true
-        }
-      }
+        alphabetize: {
+          order: "asc",
+          caseInsensitive: true,
+        },
+      },
     ],
     "import/export": "error",
-    "import/no-named-as-default-member": "off"
+    "import/no-named-as-default-member": "off",
   },
   overrides: [
     // Config files and scripts (CommonJS)
     {
-      files: [".eslintrc.js", "*.config.js", "migrate_server.js"],
+      files: [
+        ".eslintrc.js",
+        "*.config.js",
+        "*.config.ts",
+        "migrate_server.js",
+      ],
       env: {
-        node: true
+        node: true,
       },
       rules: {
         "@typescript-eslint/no-var-requires": "off",
-        "import/no-commonjs": "off"
-      }
+        "import/no-commonjs": "off",
+      },
     },
     // Service Worker
     {
       files: ["src/client/service-worker.js"],
       env: {
         serviceworker: true,
-        browser: true
+        browser: true,
       },
       rules: {
         "@typescript-eslint/no-var-requires": "off",
-        "import/no-commonjs": "off"
-      }
+        "import/no-commonjs": "off",
+      },
     },
     // Client-side files
     {
       files: ["src/client/**/*.{ts,tsx}"],
-      extends: [
-        "plugin:react/recommended",
-        "plugin:react-hooks/recommended"
-      ],
+      extends: ["plugin:react/recommended", "plugin:react-hooks/recommended"],
       rules: {
         "react/prop-types": "off",
-        "react/react-in-jsx-scope": "off"
-      }
+        "react/react-in-jsx-scope": "off",
+      },
     },
     // Server-side files
     {
       files: ["src/server/**/*.ts"],
       rules: {
-        "@typescript-eslint/explicit-function-return-type": ["warn", {
-          allowExpressions: true,
-          allowTypedFunctionExpressions: true
-        }]
-      }
+        "@typescript-eslint/explicit-function-return-type": [
+          "warn",
+          {
+            allowExpressions: true,
+            allowTypedFunctionExpressions: true,
+          },
+        ],
+      },
     },
     // Database repositories
     {
@@ -169,7 +197,7 @@ module.exports = {
         "@typescript-eslint/no-explicit-any": "warn",
         "@typescript-eslint/no-unsafe-assignment": "warn",
         "@typescript-eslint/no-unsafe-member-access": "warn",
-      }
+      },
     },
     // Test files
     {
@@ -181,7 +209,7 @@ module.exports = {
         "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-unsafe-assignment": "off",
         "@typescript-eslint/no-unsafe-member-access": "off",
-      }
+      },
     },
   ],
   ignorePatterns: [
@@ -189,6 +217,8 @@ module.exports = {
     "node_modules",
     "build",
     "coverage",
-    "public"
-  ]
+    "public",
+    "backup/**/*",
+    "backup/unit-backup/**/*",
+  ],
 };

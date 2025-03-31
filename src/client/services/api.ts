@@ -1,18 +1,13 @@
-import { sleep } from "../../shared/sleep";
+import { sleep } from "../../server/shared/utils";
 
-import type * as apis from "../../server/api/autoindex";
-import type { ServerEnvironment } from "../../server/config/environment";
-
-// Update InputOutput to match the actual handler signature
-type InputOutput<
-  T extends (env: ServerEnvironment, args: Record<string, never>) => unknown,
-> = {
-  input: Parameters<T>[1];
-  output: ReturnType<T>;
-};
-
-type Apis = typeof apis;
-type ApiSchema = { [K in keyof Apis]: InputOutput<Apis[K]["handler"]> };
+// Define a minimal API schema type since we don't have a full API setup yet
+type ApiSchema = Record<
+  string,
+  {
+    input: Record<string, unknown>;
+    output: unknown;
+  }
+>;
 
 // https://github.com/microsoft/TypeScript/issues/55095
 type StatusCode = 0 | 200 | 400 | 409 | 424 | 403 | 500;

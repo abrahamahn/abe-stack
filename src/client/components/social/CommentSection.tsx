@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 
-import { formatDate } from "../../../shared/dateHelpers";
+import { formatDate } from "../../../server/shared/date";
 import { socialService } from "../../services/social";
 
 interface Comment {

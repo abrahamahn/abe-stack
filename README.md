@@ -2,7 +2,7 @@
 
 > A modern TypeScript React boilerplate optimized for social media and multimedia applications
 
-_Based on [Chet Stack](https://github.com/ccorcos/chet-stack) by Chet Corcos_
+_Inspired by Chet Corcos's [Chet Stack](https://github.com/ccorcos/chet-stack)_
 
 ## Overview
 
@@ -32,6 +32,9 @@ ABE Stack is a comprehensive boilerplate for building full-stack web application
 - [Environment Variables](#environment-variables)
 - [Contributing](#contributing)
 - [License](#license)
+- [Infrastructure Components](#infrastructure-components)
+  - [Logging Infrastructure](#logging-infrastructure)
+- [Configuration System](#configuration-system)
 
 ## Features
 
@@ -405,3 +408,125 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 
 [MIT](LICENSE)
+
+## Infrastructure Components
+
+### Logging Infrastructure
+
+The enhanced logging infrastructure provides a flexible logging system with:
+
+- Standard log levels (debug, info, warn, error)
+- Structured logging with metadata support
+- Correlation IDs for request tracing
+- Multiple outputs (console, file)
+- Log rotation
+
+See the [Logging Infrastructure README](src/server/infrastructure/logging/README.md) for more details.
+
+#### Examples
+
+Check out the [Logger Examples](src/server/infrastructure/logging/examples/README.md) for working examples of how to use the logging system.
+
+You can run the examples using:
+
+```bash
+npx ts-node src/server/infrastructure/logging/examples/run-examples.ts
+```
+
+## Configuration System
+
+A robust, type-safe configuration management system for server applications.
+
+## Overview
+
+This configuration system provides a flexible way to define, validate, and access application configuration values from various sources. It ensures type safety, validation, and proper error reporting.
+
+## Components
+
+### ConfigSchema
+
+Defines the structure and validation rules for configuration values:
+
+- **Types:** Support for strings, numbers, booleans, arrays, and objects
+- **Validation:** Pattern matching, enum values, min/max values, length constraints
+- **Features:** Default values, required fields, custom validators
+- **Type Conversion:** Automatic conversion from string inputs to appropriate types
+
+### ConfigService
+
+Manages the loading, validation, and access to configuration:
+
+- **Environment-aware:** Loads different configurations based on environment
+- **Secret Management:** Securely handles sensitive configuration values
+- **Cached Access:** Efficient retrieval of validated configuration values
+- **Hierarchical Override:** Values from multiple sources with precedence rules
+
+### Environments
+
+Defines available execution environments and their specific behaviors:
+
+- **Environment Detection:** Automatic detection of current environment
+- **Environment-specific Settings:** Different validation rules per environment
+
+## Usage Examples
+
+### Defining Configuration Schema
+
+```typescript
+const schema: ConfigSchema = {
+  PORT: {
+    type: "number",
+    required: true,
+    min: 1,
+    max: 65535,
+    default: 3000,
+  },
+  DATABASE_URL: {
+    type: "string",
+    required: true,
+    pattern: /^postgresql:\/\/.+$/,
+  },
+  FEATURE_FLAGS: {
+    type: "object",
+    default: {},
+  },
+};
+```
+
+### Accessing Configuration
+
+```typescript
+// Get typed configuration value
+const port = configService.get("PORT"); // Returns number
+
+// Check if configuration exists
+if (configService.has("FEATURE_FLAGS.newFeature")) {
+  // Use the feature
+}
+```
+
+## Validation Features
+
+- **Required Fields:** Ensure critical configuration is provided
+- **Type Safety:** Automatic conversion and validation
+- **Value Constraints:** Range validation for numbers, length validation for strings
+- **Pattern Matching:** Regex validation for string formats
+- **Enum Values:** Restrict values to predefined options
+- **Custom Validators:** Complex validation with custom functions
+
+## Testing
+
+The configuration system is thoroughly tested:
+
+- **Unit Tests:** Verify schema validation, type conversion, and constraints
+- **Integration Tests:** Test loading from various sources and environment detection
+- **Secret Management Tests:** Verify secure handling of sensitive data
+
+## Error Handling
+
+Configuration errors are detected early and provide clear feedback:
+
+- Missing required fields
+- Type conversion failures
+- Validation constraint violations
+- Invalid format errors

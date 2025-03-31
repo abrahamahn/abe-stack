@@ -11,10 +11,12 @@
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true,
     "jsx": "react-jsx",
-
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "types": ["jest", "node"],
     // Output settings
     "outDir": "dist",
-    "rootDir": "src",
+    "isolatedModules": true,
 
     // Strictness settings
     "noUnusedLocals": true,
@@ -26,30 +28,49 @@
     // Base paths
     "baseUrl": ".",
     "paths": {
-      "@server/*": ["src/server/*"],
+      "@/*": ["src/*"],
       "@client/*": ["src/client/*"],
-      "@shared/*": ["src/shared/*"],
-      "@services/*": ["src/server/services/*"],
-      "@database/*": ["src/server/database/*"],
-      "@models/*": ["src/server/database/models/*"],
-      "@repositories/*": ["src/server/database/repositories/*"],
-      "@api/*": ["src/server/api/*"],
-      "@core/*": ["src/server/core/*"],
-      "@processors/*": ["src/server/processors/*"]
+      /* Server */
+      "@server/*": ["src/server/*"],
+      /* Shared */
+      "@shared/*": ["src/server/shared/*"],
+      /* Infrastructure */
+      "@infrastructure/*": ["src/server/infrastructure/*"],
+      "@cache/*": ["src/server/infrastructure/cache/*"],
+      "@config/*": ["src/server/infrastructure/config/*"],
+      "@database/*": ["src/server/infrastructure/database/*"],
+      "@di/*": ["src/server/infrastructure/di/*"],
+      "@errors/*": ["src/server/infrastructure/errors/*"],
+      "@jobs/*": ["src/server/infrastructure/jobs/*"],
+      "@logging/*": ["src/server/infrastructure/logging/*"],
+      "@middlewares/*": ["src/server/infrastructure/middlewares/*"],
+      "@processors/*": ["src/server/infrastructure/processors/*"],
+      "@pubsub/*": ["src/server/infrastructure/pubsub/*"],
+      "@infra-server/*": ["src/server/infrastructure/server/*"],
+      "@storage/*": ["src/server/infrastructure/storage/*"],
+      /* Modules */
+      "@modules/*": ["src/server/modules/*"],
+      "@auth/*": ["src/server/modules/auth/*"],
+      "@preferences/*": ["src/server/modules/preferences/*"],
+      "@sessions/*": ["src/server/modules/sessions/*"],
+      "@users/*": ["src/server/modules/users/*"],
+      /* Tools */
+      "@tools/*": ["src/server/tools/*"],
+      /* Tests */
+      "@tests/*": ["src/tests/*"]
     },
-    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "typeRoots": ["./node_modules/@types"],
 
     // Needed for project references
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "allowJs": true
   },
   "include": [
     "src/**/*",
-    "migrate_server.js"
+    "vite.config.ts",
+    ".eslintrc.js",
+    "playwright.config.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build"
-  ]
+  "exclude": ["node_modules", "dist", "build", "backup/**/*"]
 }

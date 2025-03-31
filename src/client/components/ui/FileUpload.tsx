@@ -6,8 +6,8 @@ import React, {
   useState,
 } from "react";
 
-import { DeferredPromise } from "../../../shared/DeferredPromise";
-import { randomId } from "../../../shared/randomId";
+import { DeferredPromise } from "../../../server/shared/promises";
+import { randomId } from "../../../server/shared/utils";
 import { passthroughRef } from "../../helpers/passthroughRef";
 
 interface Upload {

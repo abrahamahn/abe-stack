@@ -1,7 +1,7 @@
-import { FuzzyMatch } from "../../../shared/fuzzyMatch";
+import { FuzzyMatchResult } from "../../../server/shared/utils";
 
 interface FuzzyStringProps {
-  match?: FuzzyMatch;
+  match?: FuzzyMatchResult[];
   text?: string;
 }
 
