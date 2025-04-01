@@ -1,3 +1,5 @@
+import { describe, it, expect, beforeEach, afterAll, vi } from "vitest";
+
 import { EnvSecretProvider } from "@/server/infrastructure/config/secrets/EnvSecretProvider";
 import type { ILoggerService } from "@/server/infrastructure/logging";
 
@@ -7,26 +9,26 @@ describe("EnvSecretProvider", () => {
 
   // Create mock logger
   const mockLogger: ILoggerService = {
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    createLogger: jest.fn().mockReturnThis(),
-    withContext: jest.fn().mockReturnThis(),
-    debugObj: jest.fn(),
-    infoObj: jest.fn(),
-    warnObj: jest.fn(),
-    errorObj: jest.fn(),
-    addTransport: jest.fn(),
-    setTransports: jest.fn(),
-    setMinLevel: jest.fn(),
-    initialize: jest.fn().mockResolvedValue(undefined),
-    shutdown: jest.fn().mockResolvedValue(undefined),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    createLogger: vi.fn().mockReturnThis(),
+    withContext: vi.fn().mockReturnThis(),
+    debugObj: vi.fn(),
+    infoObj: vi.fn(),
+    warnObj: vi.fn(),
+    errorObj: vi.fn(),
+    addTransport: vi.fn(),
+    setTransports: vi.fn(),
+    setMinLevel: vi.fn(),
+    initialize: vi.fn().mockResolvedValue(undefined),
+    shutdown: vi.fn().mockResolvedValue(undefined),
   };
 
   beforeEach(() => {
     // Reset process.env between tests
-    jest.resetModules();
+    vi.resetModules();
     process.env = {
       SECRET_KEY: "secret-value",
       PREFIX_PREFIXED_SECRET: "prefixed-value",
@@ -34,7 +36,7 @@ describe("EnvSecretProvider", () => {
     };
 
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterAll(() => {

@@ -1,9 +1,9 @@
 // Export interfaces and types
-export * from "./ILogger";
+export * from "./ILoggerService";
 
 // Export implementations
-export { LoggerService } from "./Logger";
-export { LoggingConfig } from "./LoggingConfig";
+export { LoggerService } from "./LoggerService";
+export { ServerLogger } from "./ServerLogger";
 
 // Export transport
-export { ConsoleTransport } from "./transports/ConsoleTransport";
+export { ConsoleTransport } from "./ConsoleTransport";

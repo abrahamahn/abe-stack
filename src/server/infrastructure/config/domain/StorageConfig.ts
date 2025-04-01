@@ -47,6 +47,13 @@ export interface StorageConfig {
   contentDetection: ContentDetectionConfig;
   imageOptimization: ImageOptimizationConfig;
   streaming: StreamConfig;
+  publicDir: string;
+  privateDir: string;
+  maxFileSize: number;
+  maxFilesPerRequest: number;
+  analyzeContent: boolean;
+  acceptedImageTypes: string[];
+  acceptedDocumentTypes: string[];
 }
 
 /**
@@ -175,11 +182,11 @@ export class StorageConfigProvider {
         : undefined;
 
     const cwd = process.cwd();
-    const uploadDir = this.configService.getString("UPLOAD_DIR") || "./uploads";
-    const queuePath = this.configService.getString("QUEUE_PATH") || "./queue";
-    const tempDir = this.configService.getString("TEMP_DIR") || "./temp";
-    const basePath =
-      this.configService.getString("STORAGE_PATH") || "./storage";
+    const uploadDir = this.configService.getString("UPLOAD_DIR") || "uploads";
+    const queuePath =
+      this.configService.getString("QUEUE_PATH") || "uploads/queues";
+    const tempDir = this.configService.getString("TEMP_DIR") || "uploads/temp";
+    const basePath = this.configService.getString("STORAGE_PATH") || "uploads";
 
     // Don't join with cwd if path is absolute
     const resolvePath = (pathStr: string): string =>
@@ -190,30 +197,75 @@ export class StorageConfigProvider {
       queuePath: resolvePath(queuePath),
       tempDir: resolvePath(tempDir),
       basePath: resolvePath(basePath),
-      baseUrl: this.configService.getString("STORAGE_URL"),
+      baseUrl:
+        this.configService.getString("STORAGE_URL") ||
+        "http://localhost:8080/uploads",
       contentDetection: {
-        analyzeContent:
-          this.configService.getBoolean("STORAGE_ANALYZE_CONTENT") || false,
-        maxBytesToAnalyze:
-          this.configService.getNumber("STORAGE_MAX_BYTES_TO_ANALYZE") || 4096,
+        analyzeContent: this.configService.getBoolean(
+          "STORAGE_ANALYZE_CONTENT",
+          false,
+        ),
+        maxBytesToAnalyze: this.configService.getNumber(
+          "STORAGE_MAX_BYTES_TO_ANALYZE",
+          4096,
+        ),
       },
       imageOptimization: {
-        enabled:
-          this.configService.getBoolean("STORAGE_IMAGE_OPTIMIZATION_ENABLED") ||
+        enabled: this.configService.getBoolean(
+          "STORAGE_IMAGE_OPTIMIZATION_ENABLED",
           true,
-        defaultQuality:
-          this.configService.getNumber("STORAGE_IMAGE_DEFAULT_QUALITY") || 80,
+        ),
+        defaultQuality: this.configService.getNumber(
+          "STORAGE_IMAGE_DEFAULT_QUALITY",
+          85,
+        ),
         maxDimensions,
-        defaultFormat: (this.configService.getString(
+        defaultFormat: this.configService.getString(
           "STORAGE_IMAGE_DEFAULT_FORMAT",
-        ) || "webp") as "jpeg" | "png" | "webp" | "avif" | "original",
-        stripMetadata:
-          this.configService.getBoolean("STORAGE_IMAGE_STRIP_METADATA") || true,
+          "webp",
+        ) as "jpeg" | "png" | "webp" | "avif" | "original",
+        stripMetadata: this.configService.getBoolean(
+          "STORAGE_IMAGE_STRIP_METADATA",
+          false,
+        ),
       },
       streaming: {
-        defaultChunkSize: 65536,
-        defaultHighWaterMark: 16384,
+        defaultChunkSize: this.configService.getNumber(
+          "STORAGE_DEFAULT_CHUNK_SIZE",
+          65536,
+        ),
+        defaultHighWaterMark: this.configService.getNumber(
+          "STORAGE_DEFAULT_HIGH_WATER_MARK",
+          16384,
+        ),
       },
+      publicDir: resolvePath("public"),
+      privateDir: resolvePath("private"),
+      maxFileSize: this.configService.getNumber(
+        "MAX_UPLOAD_SIZE",
+        10 * 1024 * 1024,
+      ),
+      maxFilesPerRequest: this.configService.getNumber(
+        "MAX_FILES_PER_REQUEST",
+        10,
+      ),
+      analyzeContent: this.configService.getBoolean(
+        "STORAGE_ANALYZE_CONTENT",
+        false,
+      ),
+      acceptedImageTypes: this.configService.getArray("ALLOWED_MEDIA_TYPES", [
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+      ]),
+      acceptedDocumentTypes: this.configService.getArray(
+        "ALLOWED_DOCUMENT_TYPES",
+        [
+          "application/pdf",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ],
+      ),
     };
   }
 }

@@ -2,55 +2,55 @@ import fs from "fs";
 import path from "path";
 
 import { v4 as uuidv4 } from "uuid";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 
-import {
-  FileUtils,
-  LocalStorageProvider,
-  MediaProcessor,
-} from "@/server/infrastructure/";
+import { FileUtils, LocalStorageProvider } from "@/server/infrastructure/";
 import type { ILoggerService } from "@/server/infrastructure/logging";
+import { MediaProcessor } from "@/server/infrastructure/processor/MediaProcessor";
 // Mock dependencies
-jest.mock("fs");
-jest.mock("uuid");
-jest.mock("@infrastructure/storage/FileUtils");
-jest.mock("@infrastructure/storage/processor/MediaProcessor");
-jest.mock("path", () => ({
-  ...jest.requireActual("path"),
-  join: jest.fn(),
-  dirname: jest.fn(),
-  relative: jest.fn(),
+vi.mock("fs");
+vi.mock("uuid");
+vi.mock("@infrastructure/storage/FileUtils");
+vi.mock("@infrastructure/storage/processor/MediaProcessor");
+vi.mock("path", () => ({
+  ...vi.importActual("path"),
+  join: vi.fn(),
+  dirname: vi.fn(),
+  relative: vi.fn(),
 }));
 
 describe("LocalStorageProvider", () => {
   let storageProvider: LocalStorageProvider;
   let mockLogger: ILoggerService;
-  let mockFileUtils: jest.Mocked<FileUtils>;
-  let mockMediaProcessor: jest.Mocked<MediaProcessor>;
+  let mockFileUtils: any;
+  let mockMediaProcessor: any;
   let mockConfigProvider: any;
 
   beforeEach(() => {
     // Reset mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Mock UUID
-    (uuidv4 as jest.Mock).mockReturnValue("mock-uuid");
+    (uuidv4 as ReturnType<typeof vi.fn>).mockReturnValue("mock-uuid");
 
-    // Mock path.join and path.dirname
-    (path.join as jest.Mock).mockImplementation((...args) => args.join("/"));
-    (path.dirname as jest.Mock).mockImplementation((p) =>
+    // Mock path methods
+    (path.join as ReturnType<typeof vi.fn>).mockImplementation((...args: any) =>
+      args.join("/"),
+    );
+    (path.dirname as ReturnType<typeof vi.fn>).mockImplementation((p: any) =>
       p.substring(0, p.lastIndexOf("/")),
     );
-    (path.relative as jest.Mock).mockImplementation((from, to) =>
-      to.replace(from + "/", ""),
+    (path.relative as ReturnType<typeof vi.fn>).mockImplementation(
+      (from: any, to: any) => to.replace(from + "/", ""),
     );
 
     // Create mock logger
     mockLogger = {
-      createLogger: jest.fn().mockReturnValue({
-        debug: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
-        error: jest.fn(),
+      createLogger: vi.fn().mockReturnValue({
+        debug: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
       }),
     } as unknown as ILoggerService;
 
@@ -68,24 +68,28 @@ describe("LocalStorageProvider", () => {
     };
 
     // Mock fs.existsSync
-    (fs.existsSync as jest.Mock).mockReturnValue(true);
+    (fs.existsSync as ReturnType<typeof vi.fn>).mockReturnValue(true);
 
     // Mock FileUtils and MediaProcessor
-    mockFileUtils = new FileUtils(mockLogger) as jest.Mocked<FileUtils>;
-    mockMediaProcessor = jest.createMockFromModule<MediaProcessor>(
-      "@infrastructure/storage/processor/MediaProcessor",
-    ) as jest.Mocked<MediaProcessor>;
-    mockMediaProcessor.processMedia = jest.fn().mockResolvedValue({
-      path: "/storage/images/photo.jpg",
-      url: "https://example.com/files/images/photo.jpg",
-      contentType: "image/jpeg",
-      size: 12345,
-    });
+    mockFileUtils = new FileUtils(mockLogger) as any;
+    mockMediaProcessor = {
+      processMedia: vi.fn().mockResolvedValue({
+        path: "/storage/images/photo.jpg",
+        url: "https://example.com/files/images/photo.jpg",
+        contentType: "image/jpeg",
+        size: 12345,
+        metadata: {
+          dimensions: { width: 800, height: 600 },
+        },
+      }),
+    };
 
-    (MediaProcessor as jest.Mock).mockImplementation(() => mockMediaProcessor);
-
-    // Mock constructor dependencies
-    (FileUtils as jest.Mock).mockImplementation(() => mockFileUtils);
+    (MediaProcessor as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      () => mockMediaProcessor,
+    );
+    (FileUtils as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      () => mockFileUtils,
+    );
 
     // Create storage provider
     storageProvider = new LocalStorageProvider(mockLogger, mockConfigProvider);
@@ -94,7 +98,7 @@ describe("LocalStorageProvider", () => {
   describe("constructor", () => {
     it("should create instance and respect test environment", () => {
       // Reset existsSync to test directory creation
-      (fs.existsSync as jest.Mock)
+      (fs.existsSync as ReturnType<typeof vi.fn>)
         .mockReturnValueOnce(false)
         .mockReturnValueOnce(false);
 
@@ -128,8 +132,8 @@ describe("LocalStorageProvider", () => {
       expect(mockLogger.createLogger).toHaveBeenCalledWith(
         "LocalStorageProvider",
       );
-      const logger = (mockLogger.createLogger as jest.Mock).mock.results[0]
-        .value;
+      const logger = (mockLogger.createLogger as ReturnType<typeof vi.fn>).mock
+        .results[0].value;
       expect(logger.info).toHaveBeenCalledWith(
         "LocalStorageProvider initialized",
         {
@@ -137,6 +141,104 @@ describe("LocalStorageProvider", () => {
           tempDir: "/tmp",
           baseUrl: "https://example.com/files",
         },
+      );
+    });
+  });
+
+  describe("shutdown", () => {
+    it("should shutdown successfully", async () => {
+      await storageProvider.shutdown();
+      // Verify any cleanup if needed
+    });
+  });
+
+  describe("updateBaseUrl", () => {
+    it("should update base URL", () => {
+      const newBaseUrl = "https://new-example.com/files";
+      storageProvider.updateBaseUrl(newBaseUrl);
+
+      // Verify URL update
+      const result = storageProvider.getFileUrl("test.jpg");
+      expect(result).toBe("https://new-example.com/files/test.jpg");
+    });
+  });
+
+  describe("createDirectory", () => {
+    it("should create directory successfully", async () => {
+      const dirPath = "test/dir";
+      const absolutePath = "/storage/test/dir";
+
+      (path.join as ReturnType<typeof vi.fn>).mockReturnValueOnce(absolutePath);
+      mockFileUtils.ensureDirectory.mockResolvedValue(undefined);
+
+      await storageProvider.createDirectory(dirPath);
+      expect(mockFileUtils.ensureDirectory).toHaveBeenCalledWith(absolutePath);
+    });
+
+    it("should handle directory creation errors", async () => {
+      const dirPath = "test/dir";
+      const absolutePath = "/storage/test/dir";
+      const error = new Error("Failed to create directory");
+
+      (path.join as ReturnType<typeof vi.fn>).mockReturnValueOnce(absolutePath);
+      mockFileUtils.ensureDirectory.mockRejectedValue(error);
+
+      await expect(storageProvider.createDirectory(dirPath)).rejects.toThrow(
+        error,
+      );
+    });
+  });
+
+  describe("getFile", () => {
+    it("should get file successfully", async () => {
+      const filePath = "test/file.txt";
+      const absolutePath = "/storage/test/file.txt";
+      const fileContent = Buffer.from("test content");
+
+      (path.join as ReturnType<typeof vi.fn>).mockReturnValueOnce(absolutePath);
+      mockFileUtils.fileExists.mockResolvedValue(true);
+      mockFileUtils.readFile.mockResolvedValue(fileContent);
+
+      const result = await storageProvider.getFile(filePath);
+      expect(result).toEqual(fileContent);
+    });
+
+    it("should handle non-existent files", async () => {
+      const filePath = "nonexistent.txt";
+      const absolutePath = "/storage/nonexistent.txt";
+
+      (path.join as ReturnType<typeof vi.fn>).mockReturnValueOnce(absolutePath);
+      mockFileUtils.fileExists.mockResolvedValue(false);
+
+      await expect(storageProvider.getFile(filePath)).rejects.toThrow(
+        "File not found",
+      );
+    });
+  });
+
+  describe("getFileStream", () => {
+    it("should get file stream successfully", async () => {
+      const filePath = "test/file.txt";
+      const absolutePath = "/storage/test/file.txt";
+      const mockStream = { on: vi.fn() };
+
+      (path.join as ReturnType<typeof vi.fn>).mockReturnValueOnce(absolutePath);
+      mockFileUtils.fileExists.mockResolvedValue(true);
+      mockFileUtils.createReadStream.mockReturnValue(mockStream);
+
+      const result = await storageProvider.getFileStream(filePath);
+      expect(result).toBe(mockStream);
+    });
+
+    it("should handle non-existent files", async () => {
+      const filePath = "nonexistent.txt";
+      const absolutePath = "/storage/nonexistent.txt";
+
+      (path.join as ReturnType<typeof vi.fn>).mockReturnValueOnce(absolutePath);
+      mockFileUtils.fileExists.mockResolvedValue(false);
+
+      await expect(storageProvider.getFileStream(filePath)).rejects.toThrow(
+        "File not found",
       );
     });
   });
@@ -162,7 +264,7 @@ describe("LocalStorageProvider", () => {
 
       // Mock Date.now
       const originalDateNow = Date.now;
-      Date.now = jest.fn(() => 1000000000000); // Fixed timestamp
+      Date.now = vi.fn(() => 1000000000000); // Fixed timestamp
 
       try {
         const url = await storageProvider.getFileUrl(filePath, expiresIn);
@@ -196,8 +298,10 @@ describe("LocalStorageProvider", () => {
       mockFileUtils.getFileStats.mockResolvedValue(stats as any);
 
       // Mock path.join to return the absolute path
-      (path.join as jest.Mock).mockReturnValueOnce(absolutePath);
-      (path.dirname as jest.Mock).mockReturnValueOnce("/storage/documents");
+      (path.join as ReturnType<typeof vi.fn>).mockReturnValueOnce(absolutePath);
+      (path.dirname as ReturnType<typeof vi.fn>).mockReturnValueOnce(
+        "/storage/documents",
+      );
 
       const result = await storageProvider.saveFile(filePath, fileData);
 
@@ -244,8 +348,10 @@ describe("LocalStorageProvider", () => {
       mockFileUtils.getFileStats.mockResolvedValue(stats as any);
 
       // Mock path.join to return the absolute path
-      (path.join as jest.Mock).mockReturnValueOnce(absolutePath);
-      (path.dirname as jest.Mock).mockReturnValueOnce("/storage/images");
+      (path.join as ReturnType<typeof vi.fn>).mockReturnValueOnce(absolutePath);
+      (path.dirname as ReturnType<typeof vi.fn>).mockReturnValueOnce(
+        "/storage/images",
+      );
 
       // Mock media processor
       mockMediaProcessor.processMedia.mockResolvedValue({
@@ -296,7 +402,7 @@ describe("LocalStorageProvider", () => {
       };
 
       // Mock path.join to return the absolute path
-      (path.join as jest.Mock).mockReturnValueOnce(absolutePath);
+      (path.join as ReturnType<typeof vi.fn>).mockReturnValueOnce(absolutePath);
 
       // Mock file utilities
       mockFileUtils.fileExists.mockResolvedValue(true);
@@ -324,7 +430,7 @@ describe("LocalStorageProvider", () => {
       const absolutePath = "/storage/nonexistent.txt";
 
       // Mock path.join to return the absolute path
-      (path.join as jest.Mock).mockReturnValueOnce(absolutePath);
+      (path.join as ReturnType<typeof vi.fn>).mockReturnValueOnce(absolutePath);
 
       // Mock file utilities
       mockFileUtils.fileExists.mockResolvedValue(false);
@@ -346,7 +452,7 @@ describe("LocalStorageProvider", () => {
       ];
 
       // Mock path.join to return the absolute path
-      (path.join as jest.Mock).mockReturnValueOnce(absolutePath);
+      (path.join as ReturnType<typeof vi.fn>).mockReturnValueOnce(absolutePath);
 
       // Mock file utilities
       mockFileUtils.listFiles.mockResolvedValue(files);

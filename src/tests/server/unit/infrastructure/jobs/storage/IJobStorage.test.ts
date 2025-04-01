@@ -1,26 +1,25 @@
+import { describe, it, expect, beforeEach, vi } from "vitest";
+
 import { JobType } from "@/server/infrastructure/jobs/JobTypes";
-import {
-  IJobStorage,
-  JobData,
-} from "@/server/infrastructure/jobs/storage/IJobStorage";
+import { JobData } from "@/server/infrastructure/jobs/storage/IJobStorage";
 
 describe("IJobStorage", () => {
-  let mockJobStorage: jest.Mocked<IJobStorage>;
+  let mockJobStorage: any;
 
   beforeEach(() => {
     mockJobStorage = {
-      initialize: jest.fn(),
-      saveJob: jest.fn(),
-      getJob: jest.fn(),
-      updateJobStatus: jest.fn(),
-      getJobsByStatus: jest.fn(),
-      getJobsByStatusPrioritized: jest.fn(),
-      checkDependencies: jest.fn(),
-      findDependentJobs: jest.fn(),
-      deleteJob: jest.fn(),
-      getJobCounts: jest.fn(),
-      cleanup: jest.fn(),
-      close: jest.fn(),
+      initialize: vi.fn(),
+      saveJob: vi.fn(),
+      getJob: vi.fn(),
+      updateJobStatus: vi.fn(),
+      getJobsByStatus: vi.fn(),
+      getJobsByStatusPrioritized: vi.fn(),
+      checkDependencies: vi.fn(),
+      findDependentJobs: vi.fn(),
+      deleteJob: vi.fn(),
+      getJobCounts: vi.fn(),
+      cleanup: vi.fn(),
+      close: vi.fn(),
     };
   });
 

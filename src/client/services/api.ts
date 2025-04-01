@@ -1,4 +1,4 @@
-import { sleep } from "../../server/shared/utils";
+import { sleep } from "../../server/infrastructure/lifecycle/sleep";
 
 // Define a minimal API schema type since we don't have a full API setup yet
 type ApiSchema = Record<

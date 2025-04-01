@@ -1,3 +1,5 @@
+import { describe, it, expect } from "vitest";
+
 import {
   ValidationError,
   MissingRequiredFieldError,
@@ -50,6 +52,27 @@ describe("ValidationError", () => {
         entity: undefined,
       });
     });
+
+    it("should maintain stack trace", () => {
+      const error = new ValidationError([{ field: "test", message: "test" }]);
+      expect(error.stack).toBeDefined();
+      expect(error.stack).toContain("ValidationError");
+    });
+
+    it("should handle empty details array", () => {
+      const error = new ValidationError([]);
+      expect(error.details).toEqual([]);
+      expect(error.message).toBe("Validation failed");
+    });
+
+    it("should handle details with custom codes", () => {
+      const details: ValidationErrorDetail[] = [
+        { field: "email", message: "Invalid format", code: "EMAIL_FORMAT" },
+        { field: "password", message: "Too short", code: "PASSWORD_LENGTH" },
+      ];
+      const error = new ValidationError(details);
+      expect(error.details).toEqual(details);
+    });
   });
 
   describe("MissingRequiredFieldError", () => {
@@ -90,6 +113,37 @@ describe("ValidationError", () => {
         },
       ]);
     });
+
+    it("should maintain stack trace", () => {
+      const error = new MissingRequiredFieldError(["test"]);
+      expect(error.stack).toBeDefined();
+      expect(error.stack).toContain("MissingRequiredFieldError");
+    });
+
+    it("should handle empty fields array", () => {
+      const error = new MissingRequiredFieldError([]);
+      expect(error.details).toEqual([]);
+      expect(error.message).toBe("Validation failed");
+    });
+
+    it("should serialize to JSON correctly", () => {
+      const error = new MissingRequiredFieldError(["test"], "Test");
+      const json = error.toJSON();
+
+      expect(json).toEqual({
+        name: "ValidationError",
+        message: "Validation failed for Test",
+        code: "MISSING_REQUIRED_FIELDS",
+        details: [
+          {
+            field: "test",
+            message: "Field is required",
+            code: "REQUIRED_FIELD",
+          },
+        ],
+        entity: "Test",
+      });
+    });
   });
 
   describe("InvalidFieldValueError", () => {
@@ -121,6 +175,36 @@ describe("ValidationError", () => {
           code: "INVALID_VALUE",
         },
       ]);
+    });
+
+    it("should maintain stack trace", () => {
+      const error = new InvalidFieldValueError("test", "test");
+      expect(error.stack).toBeDefined();
+      expect(error.stack).toContain("InvalidFieldValueError");
+    });
+
+    it("should handle empty message", () => {
+      const error = new InvalidFieldValueError("test", "");
+      expect(error.details[0].message).toBe("");
+    });
+
+    it("should serialize to JSON correctly", () => {
+      const error = new InvalidFieldValueError("test", "test", "Test");
+      const json = error.toJSON();
+
+      expect(json).toEqual({
+        name: "ValidationError",
+        message: "Validation failed for Test",
+        code: "INVALID_FIELD_VALUE",
+        details: [
+          {
+            field: "test",
+            message: "test",
+            code: "INVALID_VALUE",
+          },
+        ],
+        entity: "Test",
+      });
     });
   });
 });

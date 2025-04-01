@@ -4,6 +4,11 @@ import { ConfigService, ConfigSchema } from "@/server/infrastructure/config";
 import { TYPES } from "@/server/infrastructure/di/types";
 
 /**
+ * SSL configuration options
+ */
+export type SSLConfig = boolean | { rejectUnauthorized: boolean };
+
+/**
  * Database configuration interface
  */
 export interface DatabaseConfig {
@@ -17,7 +22,7 @@ export interface DatabaseConfig {
   idleTimeout: number;
   connectionTimeout: number;
   statementTimeout: number;
-  ssl?: boolean | { rejectUnauthorized: boolean };
+  ssl?: SSLConfig;
   metricsMaxSamples: number;
 }
 
@@ -128,6 +133,13 @@ export class DatabaseConfigProvider {
           default: false,
           description: "Enable SSL for database connection",
         },
+        DB_SSL_REJECT_UNAUTHORIZED: {
+          type: "boolean",
+          required: false,
+          default: true,
+          description:
+            "Reject unauthorized SSL certificates (only applicable when DB_SSL is true)",
+        },
         DB_METRICS_MAX_SAMPLES: {
           type: "number",
           required: false,
@@ -145,41 +157,95 @@ export class DatabaseConfigProvider {
    * @returns Database configuration
    */
   private loadConfig(): DatabaseConfig {
-    // Load the configuration
-    const config = {
-      connectionString: this.configService.get(
-        "DATABASE_URL",
-        "postgresql://postgres:postgres@localhost:5432/abe_stack",
-      ) as string,
-      host: this.configService.get("DB_HOST", "localhost") as string,
-      port: this.configService.getNumber("DB_PORT", 5432) as number,
-      database: this.configService.get("DB_NAME", "abe_stack") as string,
-      user: this.configService.get("DB_USER", "postgres") as string,
-      password: this.configService.get("DB_PASSWORD", "postgres") as string,
-      maxConnections: this.configService.getNumber(
-        "DB_MAX_CONNECTIONS",
-        20,
-      ) as number,
-      idleTimeout: this.configService.getNumber(
-        "DB_IDLE_TIMEOUT",
-        30000,
-      ) as number,
-      connectionTimeout: this.configService.getNumber(
-        "DB_CONNECTION_TIMEOUT",
-        5000,
-      ) as number,
-      statementTimeout: this.configService.getNumber(
-        "DB_STATEMENT_TIMEOUT",
-        30000,
-      ) as number,
-      ssl: this.configService.getBoolean("DB_SSL", false),
-      metricsMaxSamples: this.configService.getNumber(
-        "DB_METRICS_MAX_SAMPLES",
-        1000,
-      ) as number,
-    };
+    try {
+      // Get values from environment or use defaults
+      const host = this.configService.get("DB_HOST", "localhost") as string;
+      const port = this.configService.getNumber("DB_PORT", 5432);
+      const database = this.configService.get("DB_NAME", "abe_stack") as string;
+      const user = this.configService.get("DB_USER", "postgres") as string;
+      const password = this.configService.get(
+        "DB_PASSWORD",
+        "postgres",
+      ) as string;
+      const sslEnabled = this.configService.getBoolean("DB_SSL", false);
+      const sslRejectUnauthorized = this.configService.getBoolean(
+        "DB_SSL_REJECT_UNAUTHORIZED",
+        true,
+      );
 
-    // Validate required fields
+      // Prepare SSL configuration
+      let ssl: SSLConfig = sslEnabled;
+      if (sslEnabled && typeof sslEnabled === "boolean") {
+        ssl = { rejectUnauthorized: sslRejectUnauthorized };
+      }
+
+      // Encode special characters in connection string components
+      const encodedUser = encodeURIComponent(user);
+      const encodedPassword = encodeURIComponent(password);
+
+      // Construct the default connection string
+      const defaultConnectionString = `postgresql://${encodedUser}:${encodedPassword}@${host}:${port}/${database}`;
+
+      // Fall back to connection string if individual values are not set
+      // Or build the connection string from components if not provided
+      const connectionString = this.configService.get(
+        "DATABASE_URL",
+        defaultConnectionString,
+      ) as string;
+
+      // Validate the connection string format
+      if (!connectionString || !connectionString.startsWith("postgresql://")) {
+        throw new Error(
+          `Invalid connection string format: ${connectionString}`,
+        );
+      }
+
+      // Build the configuration object
+      const config: DatabaseConfig = {
+        connectionString,
+        host,
+        port,
+        database,
+        user,
+        password,
+        maxConnections: this.configService.getNumber("DB_MAX_CONNECTIONS", 20),
+        idleTimeout: this.configService.getNumber("DB_IDLE_TIMEOUT", 30000),
+        connectionTimeout: this.configService.getNumber(
+          "DB_CONNECTION_TIMEOUT",
+          5000,
+        ),
+        statementTimeout: this.configService.getNumber(
+          "DB_STATEMENT_TIMEOUT",
+          30000,
+        ),
+        ssl,
+        metricsMaxSamples: this.configService.getNumber(
+          "DB_METRICS_MAX_SAMPLES",
+          1000,
+        ),
+      };
+
+      // Validate required fields
+      this.validateRequiredFields(config);
+
+      return config;
+    } catch (error) {
+      // Add more context to the error message
+      const errorMessage =
+        error instanceof Error
+          ? `Error loading database configuration: ${error.message}`
+          : "Error loading database configuration";
+      throw new Error(errorMessage);
+    }
+  }
+
+  /**
+   * Validates required fields in the database configuration
+   *
+   * @param config Database configuration to validate
+   * @throws Error if any required fields are missing
+   */
+  private validateRequiredFields(config: DatabaseConfig): void {
     const requiredFields = [
       "connectionString",
       "host",
@@ -200,7 +266,5 @@ export class DatabaseConfigProvider {
         )}`,
       );
     }
-
-    return config;
   }
 }

@@ -1,29 +1,31 @@
+import { describe, it, expect, beforeEach, vi } from "vitest";
+
 import { ConfigService } from "@/server/infrastructure/config/ConfigService";
 import { ServerConfigProvider } from "@/server/infrastructure/config/domain/ServerConfig";
 
 // Mock ConfigService
-jest.mock("@config/ConfigService");
+vi.mock("@config/ConfigService");
 
 describe("ServerConfig", () => {
-  let configService: jest.Mocked<ConfigService>;
+  let configService: any;
   let serverConfigProvider: ServerConfigProvider;
 
   beforeEach(() => {
-    configService = new ConfigService() as jest.Mocked<ConfigService>;
-    configService.get = jest
+    configService = new ConfigService() as any;
+    configService.get = vi
       .fn()
       .mockImplementation((_key, defaultValue) => defaultValue);
-    configService.getNumber = jest
+    configService.getNumber = vi
       .fn()
       .mockImplementation((_key, defaultValue) => defaultValue);
-    configService.getBoolean = jest
+    configService.getBoolean = vi
       .fn()
       .mockImplementation((_key, defaultValue) => defaultValue);
-    configService.getArray = jest.fn().mockReturnValue([]);
-    configService.isDevelopment = jest.fn().mockReturnValue(false);
-    configService.isProduction = jest.fn().mockReturnValue(false);
-    configService.isTest = jest.fn().mockReturnValue(false);
-    configService.ensureValid = jest.fn();
+    configService.getArray = vi.fn().mockReturnValue([]);
+    configService.isDevelopment = vi.fn().mockReturnValue(false);
+    configService.isProduction = vi.fn().mockReturnValue(false);
+    configService.isTest = vi.fn().mockReturnValue(false);
+    configService.ensureValid = vi.fn();
     serverConfigProvider = new ServerConfigProvider(configService);
   });
 
@@ -73,9 +75,9 @@ describe("ServerConfig", () => {
 
   it("should use custom configuration values", () => {
     // Mock implementation for isDevelopment, isProduction, isTest
-    configService.isDevelopment = jest.fn().mockReturnValue(false);
-    configService.isProduction = jest.fn().mockReturnValue(true);
-    configService.isTest = jest.fn().mockReturnValue(false);
+    configService.isDevelopment = vi.fn().mockReturnValue(false);
+    configService.isProduction = vi.fn().mockReturnValue(true);
+    configService.isTest = vi.fn().mockReturnValue(false);
 
     // Mock get and getNumber methods
     configService.get.mockImplementation((key: string, defaultValue?: any) => {

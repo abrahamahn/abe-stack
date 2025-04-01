@@ -377,7 +377,7 @@ export class DatabaseServer implements IDatabaseServer {
             // Support both formats: query(text, values) and query({ text, values })
 
             // If in a test context where we have access to jest, use a mock implementation
-            if (typeof jest !== "undefined") {
+            if (process.env.NODE_ENV === "test") {
               return Promise.resolve({ rows: [], rowCount: 0 });
             }
 

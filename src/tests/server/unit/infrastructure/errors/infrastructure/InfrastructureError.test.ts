@@ -1,3 +1,5 @@
+import { describe, it, expect } from "vitest";
+
 import {
   InfrastructureError,
   CacheError,
@@ -17,6 +19,23 @@ describe("InfrastructureError", () => {
       const error = new InfrastructureError("Test error", "CUSTOM_ERROR");
       expect(error.message).toBe("Test error");
       expect(error.code).toBe("CUSTOM_ERROR");
+    });
+
+    it("should maintain stack trace", () => {
+      const error = new InfrastructureError("Test error");
+      expect(error.stack).toBeDefined();
+      expect(error.stack).toContain("InfrastructureError");
+    });
+
+    it("should serialize to JSON correctly", () => {
+      const error = new InfrastructureError("Test error", "CUSTOM_ERROR");
+      const json = error.toJSON();
+
+      expect(json).toEqual({
+        name: "InfrastructureError",
+        message: "Test error",
+        code: "CUSTOM_ERROR",
+      });
     });
   });
 
@@ -54,6 +73,27 @@ describe("InfrastructureError", () => {
         "Cache operation 'get' for key 'post:789' failed: Key not found",
       );
       expect(error.cause).toBe("Key not found");
+    });
+
+    it("should maintain stack trace", () => {
+      const error = new CacheError("test");
+      expect(error.stack).toBeDefined();
+      expect(error.stack).toContain("CacheError");
+    });
+
+    it("should serialize to JSON correctly", () => {
+      const cause = new Error("Test cause");
+      const error = new CacheError("test", "test:key", cause);
+      const json = error.toJSON();
+
+      expect(json).toEqual({
+        name: "InfrastructureError",
+        message: "Cache operation 'test' for key 'test:key' failed: Test cause",
+        code: "CACHE_ERROR",
+        operation: "test",
+        key: "test:key",
+        cause: "Test cause",
+      });
     });
   });
 
@@ -107,6 +147,28 @@ describe("InfrastructureError", () => {
       );
       expect(error.cause).toBe("Invalid token");
     });
+
+    it("should maintain stack trace", () => {
+      const error = new NetworkError();
+      expect(error.stack).toBeDefined();
+      expect(error.stack).toContain("NetworkError");
+    });
+
+    it("should serialize to JSON correctly", () => {
+      const cause = new Error("Test cause");
+      const error = new NetworkError("https://test.com", 500, cause);
+      const json = error.toJSON();
+
+      expect(json).toEqual({
+        name: "InfrastructureError",
+        message:
+          "Network request to 'https://test.com' failed with status 500: Test cause",
+        code: "NETWORK_ERROR",
+        url: "https://test.com",
+        statusCode: 500,
+        cause: "Test cause",
+      });
+    });
   });
 
   describe("ExternalServiceError", () => {
@@ -147,6 +209,27 @@ describe("InfrastructureError", () => {
         "External service 'EmailService' operation 'sendEmail' failed: SMTP error",
       );
       expect(error.cause).toBe("SMTP error");
+    });
+
+    it("should maintain stack trace", () => {
+      const error = new ExternalServiceError("test", "test");
+      expect(error.stack).toBeDefined();
+      expect(error.stack).toContain("ExternalServiceError");
+    });
+
+    it("should serialize to JSON correctly", () => {
+      const cause = new Error("Test cause");
+      const error = new ExternalServiceError("test", "test", cause);
+      const json = error.toJSON();
+
+      expect(json).toEqual({
+        name: "InfrastructureError",
+        message: "External service 'test' operation 'test' failed: Test cause",
+        code: "EXTERNAL_SERVICE_ERROR",
+        service: "test",
+        operation: "test",
+        cause: "Test cause",
+      });
     });
   });
 });

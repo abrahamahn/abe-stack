@@ -1,6 +1,7 @@
 import path from "path";
 
 import sharp from "sharp";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 
 import type { ILoggerService } from "@/server/infrastructure/logging";
 import {
@@ -11,37 +12,37 @@ import { ImageFormat } from "@/server/infrastructure/storage/ContentTypes";
 import { FileUtils } from "@/server/infrastructure/storage/FileUtils";
 
 // Mock dependencies
-jest.mock("sharp");
-jest.mock("@infrastructure/storage/FileUtils");
+vi.mock("sharp");
+vi.mock("@infrastructure/storage/FileUtils");
 
 describe("ImageProcessor", () => {
   let imageProcessor: ImageProcessor;
   let mockLogger: ILoggerService;
-  let mockFileUtils: jest.Mocked<FileUtils>;
+  let mockFileUtils: any;
 
   beforeEach(() => {
     // Create mock logger
     mockLogger = {
-      createLogger: jest.fn().mockReturnValue({
-        debug: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
-        error: jest.fn(),
+      createLogger: vi.fn().mockReturnValue({
+        debug: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
       }),
     } as unknown as ILoggerService;
 
     // Create mock FileUtils
-    mockFileUtils = new FileUtils(mockLogger) as jest.Mocked<FileUtils>;
+    mockFileUtils = new FileUtils(mockLogger) as any;
 
     // Create ImageProcessor instance
     imageProcessor = new ImageProcessor(mockLogger, mockFileUtils);
 
     // Reset all mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Setup default mocks for sharp
     const mockSharpInstance = {
-      metadata: jest.fn().mockResolvedValue({
+      metadata: vi.fn().mockResolvedValue({
         width: 1920,
         height: 1080,
         format: "jpeg",
@@ -49,20 +50,18 @@ describe("ImageProcessor", () => {
         space: "srgb",
         orientation: 1,
       }),
-      rotate: jest.fn().mockReturnThis(),
-      resize: jest.fn().mockReturnThis(),
-      modulate: jest.fn().mockReturnThis(),
-      sharpen: jest.fn().mockReturnThis(),
-      jpeg: jest.fn().mockReturnThis(),
-      png: jest.fn().mockReturnThis(),
-      webp: jest.fn().mockReturnThis(),
-      avif: jest.fn().mockReturnThis(),
-      toFile: jest.fn().mockResolvedValue(undefined),
+      rotate: vi.fn().mockReturnThis(),
+      resize: vi.fn().mockReturnThis(),
+      modulate: vi.fn().mockReturnThis(),
+      sharpen: vi.fn().mockReturnThis(),
+      jpeg: vi.fn().mockReturnThis(),
+      png: vi.fn().mockReturnThis(),
+      webp: vi.fn().mockReturnThis(),
+      avif: vi.fn().mockReturnThis(),
+      toFile: vi.fn().mockResolvedValue(undefined),
     } as unknown as sharp.Sharp;
 
-    (sharp as unknown as jest.MockedFunction<typeof sharp>).mockReturnValue(
-      mockSharpInstance,
-    );
+    (sharp as unknown as any).mockReturnValue(mockSharpInstance);
   });
 
   describe("isImage", () => {
@@ -140,7 +139,7 @@ describe("ImageProcessor", () => {
       const targetDir = "/path/to";
 
       // Set up mocks
-      jest.spyOn(path, "dirname").mockReturnValue(targetDir);
+      vi.spyOn(path, "dirname").mockReturnValue(targetDir);
 
       const sharpInstance = sharp(sourcePath);
 
@@ -222,6 +221,76 @@ describe("ImageProcessor", () => {
       // Check webp format was used
       expect(sharpInstance.webp).toHaveBeenCalledWith({ quality: 90 });
     });
+
+    it("should handle errors during processing", async () => {
+      const sourcePath = "/path/to/source.jpg";
+      const targetPath = "/path/to/target.jpg";
+      const error = new Error("Processing failed");
+
+      // Mock sharp to throw error
+      const sharpInstance = sharp(sourcePath);
+      (sharpInstance.toFile as any).mockRejectedValue(error);
+
+      await expect(
+        imageProcessor.process(sourcePath, targetPath),
+      ).rejects.toThrow("Processing failed");
+
+      const logger = mockLogger.createLogger("ImageProcessor");
+      expect(logger.error).toHaveBeenCalledWith(
+        `Error processing image: ${sourcePath} to ${targetPath}`,
+        { error: "Processing failed" },
+      );
+    });
+
+    it("should handle different output formats", async () => {
+      const sourcePath = "/path/to/source.jpg";
+      const targetPath = "/path/to/target.png";
+      const options: ImageOptions = {
+        format: ImageFormat.PNG,
+        quality: 90,
+      };
+
+      const sharpInstance = sharp(sourcePath);
+
+      await imageProcessor.process(sourcePath, targetPath, options);
+      expect(sharpInstance.png).toHaveBeenCalledWith({ quality: 90 });
+    });
+
+    it("should handle AVIF format", async () => {
+      const sourcePath = "/path/to/source.jpg";
+      const targetPath = "/path/to/target.avif";
+      const options: ImageOptions = {
+        format: ImageFormat.AVIF,
+        quality: 90,
+      };
+
+      const sharpInstance = sharp(sourcePath);
+
+      await imageProcessor.process(sourcePath, targetPath, options);
+      expect(sharpInstance.avif).toHaveBeenCalledWith({ quality: 90 });
+    });
+
+    it("should preserve original format when specified", async () => {
+      const sourcePath = "/path/to/source.png";
+      const targetPath = "/path/to/target.png";
+      const options: ImageOptions = {
+        format: ImageFormat.ORIGINAL,
+      };
+
+      // Mock metadata to return PNG format
+      const sharpInstance = sharp(sourcePath);
+      (sharpInstance.metadata as any).mockResolvedValue({
+        width: 1920,
+        height: 1080,
+        format: "png",
+        hasAlpha: false,
+        space: "srgb",
+        orientation: 1,
+      });
+
+      await imageProcessor.process(sourcePath, targetPath, options);
+      expect(sharpInstance.png).toHaveBeenCalledWith({ quality: 80 });
+    });
   });
 
   describe("generateThumbnail", () => {
@@ -231,7 +300,7 @@ describe("ImageProcessor", () => {
       const targetDir = "/path/to";
 
       // Set up mocks
-      jest.spyOn(path, "dirname").mockReturnValue(targetDir);
+      vi.spyOn(path, "dirname").mockReturnValue(targetDir);
 
       const sharpInstance = sharp(sourcePath);
 
@@ -269,6 +338,84 @@ describe("ImageProcessor", () => {
         fit: "inside",
         withoutEnlargement: true,
       });
+    });
+
+    it("should handle errors during thumbnail generation", async () => {
+      const sourcePath = "/path/to/source.jpg";
+      const targetPath = "/path/to/thumbnail.jpg";
+      const error = new Error("Thumbnail generation failed");
+
+      // Mock sharp to throw error
+      const sharpInstance = sharp(sourcePath);
+      (sharpInstance.toFile as any).mockRejectedValue(error);
+
+      await expect(
+        imageProcessor.generateThumbnail(sourcePath, targetPath),
+      ).rejects.toThrow("Thumbnail generation failed");
+
+      const logger = mockLogger.createLogger("ImageProcessor");
+      expect(logger.error).toHaveBeenCalledWith(
+        `Error generating thumbnail: ${sourcePath}`,
+        { error: "Thumbnail generation failed" },
+      );
+    });
+  });
+
+  describe("extractExifData", () => {
+    it("should extract EXIF data when available", async () => {
+      const filePath = "/path/to/image.jpg";
+      const mockExif = Buffer.from("mock exif data");
+
+      // Mock metadata to include EXIF data
+      const sharpInstance = sharp(filePath);
+      (sharpInstance.metadata as any).mockResolvedValue({
+        width: 1920,
+        height: 1080,
+        format: "jpeg",
+        hasAlpha: false,
+        space: "srgb",
+        orientation: 1,
+        exif: mockExif,
+      });
+
+      const result = await imageProcessor.extractExifData(filePath);
+      expect(result).toEqual(mockExif);
+    });
+
+    it("should return null when no EXIF data is available", async () => {
+      const filePath = "/path/to/image.jpg";
+
+      // Mock metadata without EXIF data
+      const sharpInstance = sharp(filePath);
+      (sharpInstance.metadata as any).mockResolvedValue({
+        width: 1920,
+        height: 1080,
+        format: "jpeg",
+        hasAlpha: false,
+        space: "srgb",
+        orientation: 1,
+      });
+
+      const result = await imageProcessor.extractExifData(filePath);
+      expect(result).toBeNull();
+    });
+
+    it("should handle errors during EXIF extraction", async () => {
+      const filePath = "/path/to/image.jpg";
+      const error = new Error("EXIF extraction failed");
+
+      // Mock sharp to throw error
+      const sharpInstance = sharp(filePath);
+      (sharpInstance.metadata as any).mockRejectedValue(error);
+
+      const result = await imageProcessor.extractExifData(filePath);
+      expect(result).toBeNull();
+
+      const logger = mockLogger.createLogger("ImageProcessor");
+      expect(logger.error).toHaveBeenCalledWith(
+        `Error extracting EXIF data: ${filePath}`,
+        { error: "EXIF extraction failed" },
+      );
     });
   });
 });

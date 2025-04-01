@@ -1,15 +1,15 @@
+import { describe, it, expect, beforeEach, vi } from "vitest";
+
 import { ConfigService } from "@/server/infrastructure/config/ConfigService";
 import { DatabaseConfigProvider } from "@/server/infrastructure/config/domain/DatabaseConfig";
 import { ConfigValidationError } from "@/server/infrastructure/errors/infrastructure/ConfigValidationError";
 
 // Mock ConfigService
-jest.mock("@config/ConfigService");
-const MockConfigService = ConfigService as jest.MockedClass<
-  typeof ConfigService
->;
+vi.mock("@config/ConfigService");
+const MockConfigService = vi.mocked(ConfigService);
 
 describe("DatabaseConfigProvider", () => {
-  let configService: jest.Mocked<ConfigService>;
+  let configService: any;
   let dbConfigProvider: DatabaseConfigProvider;
 
   beforeEach(() => {
@@ -17,39 +17,45 @@ describe("DatabaseConfigProvider", () => {
     MockConfigService.mockClear();
 
     // Set up default configuration values
-    configService = new MockConfigService() as jest.Mocked<ConfigService>;
-    configService.get.mockImplementation((key, defaultValue) => {
-      const defaults: Record<string, string> = {
-        DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test_db",
-        DB_HOST: "localhost",
-        DB_NAME: "test_db",
-        DB_USER: "postgres",
-        DB_PASSWORD: "postgres",
-      };
-      return defaults[key] || defaultValue;
-    });
+    configService = new MockConfigService() as any;
+    configService.get.mockImplementation(
+      (key: string, defaultValue?: string) => {
+        const defaults: Record<string, string> = {
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test_db",
+          DB_HOST: "localhost",
+          DB_NAME: "test_db",
+          DB_USER: "postgres",
+          DB_PASSWORD: "postgres",
+        };
+        return defaults[key] || defaultValue;
+      },
+    );
 
-    configService.getNumber.mockImplementation((key, defaultValue) => {
-      const defaults: Record<string, number> = {
-        DB_PORT: 5432,
-        DB_MAX_CONNECTIONS: 20,
-        DB_IDLE_TIMEOUT: 30000,
-        DB_CONNECTION_TIMEOUT: 5000,
-        DB_STATEMENT_TIMEOUT: 30000,
-        DB_METRICS_MAX_SAMPLES: 1000,
-      };
-      return defaults[key] ?? defaultValue ?? 0;
-    });
+    configService.getNumber.mockImplementation(
+      (key: string, defaultValue?: number) => {
+        const defaults: Record<string, number> = {
+          DB_PORT: 5432,
+          DB_MAX_CONNECTIONS: 20,
+          DB_IDLE_TIMEOUT: 30000,
+          DB_CONNECTION_TIMEOUT: 5000,
+          DB_STATEMENT_TIMEOUT: 30000,
+          DB_METRICS_MAX_SAMPLES: 1000,
+        };
+        return defaults[key] ?? defaultValue ?? 0;
+      },
+    );
 
-    configService.getBoolean.mockImplementation((key, defaultValue) => {
-      const defaults: Record<string, boolean> = {
-        DB_SSL: false,
-      };
-      return defaults[key] ?? defaultValue ?? false;
-    });
+    configService.getBoolean.mockImplementation(
+      (key: string, defaultValue?: boolean) => {
+        const defaults: Record<string, boolean> = {
+          DB_SSL: false,
+        };
+        return defaults[key] ?? defaultValue ?? false;
+      },
+    );
 
     // Mock getString method if it exists
-    configService.getString = jest
+    configService.getString = vi
       .fn()
       .mockImplementation((key: string, defaultValue?: string) => {
         const result = configService.get(key, defaultValue);
@@ -57,7 +63,7 @@ describe("DatabaseConfigProvider", () => {
       });
 
     // Mock validate to return a successful validation result
-    configService.validate = jest.fn().mockReturnValue({
+    configService.validate = vi.fn().mockReturnValue({
       valid: true,
       errors: [],
       values: {
@@ -71,7 +77,7 @@ describe("DatabaseConfigProvider", () => {
     });
 
     // Mock ensureValid to do nothing
-    configService.ensureValid = jest.fn();
+    configService.ensureValid = vi.fn();
 
     // Create provider
     dbConfigProvider = new DatabaseConfigProvider(configService);
@@ -135,36 +141,42 @@ describe("DatabaseConfigProvider", () => {
 
   it("should use custom configuration values", () => {
     // Change the mock to return different values
-    configService.get.mockImplementation((key, defaultValue) => {
-      const values: Record<string, string> = {
-        DATABASE_URL: "postgresql://user:pass@custom-host:6000/custom_db",
-        DB_HOST: "custom-host",
-        DB_NAME: "custom_db",
-        DB_USER: "user",
-        DB_PASSWORD: "pass",
-      };
-      return values[key] || defaultValue;
-    });
+    configService.get.mockImplementation(
+      (key: string, defaultValue?: string) => {
+        const values: Record<string, string> = {
+          DATABASE_URL: "postgresql://user:pass@custom-host:6000/custom_db",
+          DB_HOST: "custom-host",
+          DB_NAME: "custom_db",
+          DB_USER: "user",
+          DB_PASSWORD: "pass",
+        };
+        return values[key] || defaultValue;
+      },
+    );
 
-    configService.getNumber.mockImplementation((key, defaultValue) => {
-      const values: Record<string, number> = {
-        DB_PORT: 6000,
-        DB_MAX_CONNECTIONS: 50,
-        DB_IDLE_TIMEOUT: 60000,
-      };
-      return values[key] ?? defaultValue ?? 0;
-    });
+    configService.getNumber.mockImplementation(
+      (key: string, defaultValue?: number) => {
+        const values: Record<string, number> = {
+          DB_PORT: 6000,
+          DB_MAX_CONNECTIONS: 50,
+          DB_IDLE_TIMEOUT: 60000,
+        };
+        return values[key] ?? defaultValue ?? 0;
+      },
+    );
 
-    configService.getBoolean.mockImplementation((key, defaultValue) => {
-      const values: Record<string, boolean> = {
-        DB_SSL: true,
-      };
-      return values[key] ?? defaultValue ?? false;
-    });
+    configService.getBoolean.mockImplementation(
+      (key: string, defaultValue?: boolean) => {
+        const values: Record<string, boolean> = {
+          DB_SSL: true,
+        };
+        return values[key] ?? defaultValue ?? false;
+      },
+    );
 
     // Update getString as well
     if (configService.getString) {
-      configService.getString = jest
+      configService.getString = vi
         .fn()
         .mockImplementation((key: string, defaultValue?: string) => {
           const result = configService.get(key, defaultValue);
@@ -187,7 +199,8 @@ describe("DatabaseConfigProvider", () => {
     expect(config.password).toBe("pass");
     expect(config.maxConnections).toBe(50);
     expect(config.idleTimeout).toBe(60000);
-    expect(config.ssl).toBe(true);
+    // When DB_SSL is true, it should be converted to an object with rejectUnauthorized: true
+    expect(config.ssl).toEqual({ rejectUnauthorized: true });
   });
 
   it("should define proper configuration schema", () => {

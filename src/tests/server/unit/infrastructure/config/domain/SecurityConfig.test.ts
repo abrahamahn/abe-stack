@@ -1,15 +1,15 @@
+import { describe, it, expect, beforeEach, vi } from "vitest";
+
 import { ConfigService } from "@/server/infrastructure/config/ConfigService";
 import { SecurityConfigProvider } from "@/server/infrastructure/config/domain/SecurityConfig";
 import { ConfigValidationError } from "@/server/infrastructure/errors/infrastructure/ConfigValidationError";
 
 // Mock ConfigService
-jest.mock("@config/ConfigService");
-const MockConfigService = ConfigService as jest.MockedClass<
-  typeof ConfigService
->;
+vi.mock("@config/ConfigService");
+const MockConfigService = vi.mocked(ConfigService);
 
 describe("SecurityConfig", () => {
-  let configService: jest.Mocked<ConfigService>;
+  let configService: any;
   let securityConfigProvider: SecurityConfigProvider;
 
   const mockRequiredFields: Record<string, string> = {
@@ -24,10 +24,10 @@ describe("SecurityConfig", () => {
     MockConfigService.mockClear();
 
     // Set up configuration service mock
-    configService = new MockConfigService() as jest.Mocked<ConfigService>;
+    configService = new MockConfigService() as any;
 
     // Mock the getRequired method
-    configService.getRequired.mockImplementation((key) => {
+    configService.getRequired.mockImplementation((key: any) => {
       if (key in mockRequiredFields) {
         return mockRequiredFields[key];
       }
@@ -79,7 +79,7 @@ describe("SecurityConfig", () => {
 
   it("should throw when required configuration is missing", () => {
     // Setup the mock to throw on getRequired
-    configService.getRequired.mockImplementation((key) => {
+    configService.getRequired.mockImplementation((key: any) => {
       throw new Error(`Required key not found: ${key}`);
     });
 

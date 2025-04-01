@@ -1,71 +1,74 @@
-import { createServer, Server } from "http";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 
-import { Container } from "inversify";
-
-import {
-  ICacheService,
-  IDatabaseServer,
-  IErrorHandler,
-  IJobService,
-  ILoggerService,
-  ServerManager,
-  IStorageService,
-  TYPES,
-} from "@/server/infrastructure";
+import { ServerManager, TYPES } from "@/server/infrastructure";
 
 describe("ServerManager", () => {
   let serverManager: ServerManager;
-  let mockLogger: jest.Mocked<ILoggerService>;
-  let mockContainer: jest.Mocked<Container>;
-  let mockErrorHandler: jest.Mocked<IErrorHandler>;
-  let mockJobService: jest.Mocked<IJobService>;
-  let mockCacheService: jest.Mocked<ICacheService>;
-  let mockDatabaseService: jest.Mocked<IDatabaseServer>;
-  let mockStorageService: jest.Mocked<IStorageService>;
+  let mockLogger: any;
+  let mockContainer: any;
+  let mockErrorHandler: any;
+  let mockJobService: any;
+  let mockCacheService: any;
+  let mockDatabaseService: any;
+  let mockStorageService: any;
+  let mockConfigService: any;
+  let mockServerLogger: any;
 
   beforeEach(() => {
     mockLogger = {
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      debug: jest.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
+    } as any;
+
+    mockConfigService = {
+      get: vi.fn(),
+      getString: vi.fn(),
+      getNumber: vi.fn(),
     } as any;
 
     mockContainer = {
-      get: jest.fn(),
-      isBound: jest.fn(),
+      get: vi.fn(),
+      isBound: vi.fn(),
     } as any;
 
     mockErrorHandler = {
-      handleError: jest.fn(),
+      handleError: vi.fn(),
     } as any;
 
     mockJobService = {
-      initialize: jest.fn(),
+      initialize: vi.fn(),
     } as any;
 
     mockCacheService = {
-      initialize: jest.fn(),
-      isConnected: jest.fn(),
-      getStats: jest.fn(),
+      initialize: vi.fn(),
+      isConnected: vi.fn(),
+      getStats: vi.fn(),
     } as any;
 
     mockDatabaseService = {
-      initialize: jest.fn(),
-      isConnected: jest.fn(),
-      getStats: jest.fn(),
+      initialize: vi.fn(),
+      isConnected: vi.fn(),
+      getStats: vi.fn(),
     } as any;
 
     mockStorageService = {
-      createDirectory: jest.fn(),
-      listFiles: jest.fn(),
-      saveFile: jest.fn(),
-      getFile: jest.fn(),
-      getFileStream: jest.fn(),
-      getFileMetadata: jest.fn(),
-      deleteFile: jest.fn(),
-      fileExists: jest.fn(),
-      getFileUrl: jest.fn(),
+      initialize: vi.fn(),
+      updateBaseUrl: vi.fn(),
+      createDirectory: vi.fn(),
+      listFiles: vi.fn(),
+      saveFile: vi.fn(),
+      getFile: vi.fn(),
+      getFileStream: vi.fn(),
+      getFileMetadata: vi.fn(),
+      deleteFile: vi.fn(),
+      fileExists: vi.fn(),
+      getFileUrl: vi.fn(),
+    } as any;
+
+    mockServerLogger = {
+      displayServerStatus: vi.fn(),
     } as any;
 
     serverManager = new ServerManager(mockLogger, mockContainer);
@@ -73,10 +76,10 @@ describe("ServerManager", () => {
 
   describe("loadServices", () => {
     it("should load core infrastructure services", async () => {
-      mockContainer.get.mockImplementation((type) => {
+      mockContainer.get.mockImplementation((type: any) => {
         switch (type) {
           case TYPES.ConfigService:
-            return { get: jest.fn() };
+            return mockConfigService;
           case TYPES.DatabaseService:
             return mockDatabaseService;
           case TYPES.CacheService:
@@ -101,6 +104,37 @@ describe("ServerManager", () => {
       expect(mockContainer.get).toHaveBeenCalledWith(TYPES.ErrorHandler);
       expect(mockContainer.get).toHaveBeenCalledWith(TYPES.JobService);
     });
+
+    it("should handle errors when loading services", async () => {
+      mockContainer.get.mockImplementation(() => {
+        throw new Error("Service loading failed");
+      });
+
+      await expect(serverManager.loadServices()).rejects.toThrow(
+        "Service loading failed",
+      );
+      expect(mockLogger.error).toHaveBeenCalled();
+    });
+
+    it("should handle optional business services", async () => {
+      mockContainer.get.mockImplementation((type: any) => {
+        if (type === TYPES.ConfigService) return mockConfigService;
+        if (type === TYPES.DatabaseService) return mockDatabaseService;
+        if (type === TYPES.CacheService) return mockCacheService;
+        if (type === TYPES.StorageService) return mockStorageService;
+        if (type === TYPES.ErrorHandler) return mockErrorHandler;
+        if (type === TYPES.JobService) return mockJobService;
+        return null;
+      });
+
+      mockContainer.isBound.mockReturnValue(false);
+
+      await serverManager.loadServices();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        "Some optional business services are not available",
+        expect.any(Object),
+      );
+    });
   });
 
   describe("configureApp", () => {
@@ -114,13 +148,42 @@ describe("ServerManager", () => {
 
       const app = serverManager.getApp();
       expect(app).toBeDefined();
-      // Add more specific middleware checks as needed
+    });
+
+    it("should apply production settings when isProduction is true", () => {
+      const config = {
+        isProduction: true,
+        storagePath: "/test/storage",
+      };
+
+      serverManager.configureApp(config as any);
+      const app = serverManager.getApp();
+      expect(app._router.stack).toContainEqual(
+        expect.objectContaining({
+          name: "helmetMiddleware",
+        }),
+      );
+    });
+
+    it("should configure static file serving", () => {
+      const config = {
+        isProduction: false,
+        storagePath: "/test/storage",
+      };
+
+      serverManager.configureApp(config as any);
+      const app = serverManager.getApp();
+      expect(app._router.stack).toContainEqual(
+        expect.objectContaining({
+          name: "serveStatic",
+        }),
+      );
     });
   });
 
   describe("initializeServices", () => {
     it("should initialize all core services", async () => {
-      mockContainer.get.mockImplementation((type) => {
+      mockContainer.get.mockImplementation((type: any) => {
         switch (type) {
           case TYPES.DatabaseService:
             return mockDatabaseService;
@@ -140,35 +203,124 @@ describe("ServerManager", () => {
       expect(mockDatabaseService.initialize).toHaveBeenCalled();
       expect(mockCacheService.initialize).toHaveBeenCalled();
       expect(mockJobService.initialize).toHaveBeenCalled();
+      expect(mockStorageService.initialize).toHaveBeenCalled();
+    });
+
+    it("should handle service initialization errors", async () => {
+      mockContainer.get.mockImplementation((type: any) => {
+        switch (type) {
+          case TYPES.DatabaseService:
+            return mockDatabaseService;
+          case TYPES.CacheService:
+            return mockCacheService;
+          case TYPES.StorageService:
+            return mockStorageService;
+          case TYPES.JobService:
+            return mockJobService;
+          default:
+            return null;
+        }
+      });
+
+      mockDatabaseService.initialize.mockRejectedValue(
+        new Error("Database initialization failed"),
+      );
+
+      await expect(serverManager.initializeServices()).rejects.toThrow(
+        "Database initialization failed",
+      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
-  describe("findAvailablePort", () => {
-    it("should find an available port", async () => {
-      const port = await serverManager.findAvailablePort(3000);
-      expect(port).toBeGreaterThanOrEqual(3000);
-      expect(port).toBeLessThan(3010);
+  describe("updateStorageBaseUrl", () => {
+    it("should update storage base URL with correct port", () => {
+      const port = 3000;
+      serverManager["port"] = port;
+
+      serverManager.updateStorageBaseUrl();
+
+      expect(mockStorageService.updateBaseUrl).toHaveBeenCalledWith(
+        `http://localhost:${port}/uploads`,
+      );
     });
 
-    it("should throw error if no ports available", async () => {
-      // Mock all ports as unavailable
-      jest.spyOn({ createServer }, "createServer").mockImplementation(
-        () =>
-          ({
-            on: jest.fn(),
-            listen: jest.fn(),
-            close: jest.fn(),
-          }) as unknown as Server,
-      );
+    it("should handle missing storage service", () => {
+      serverManager["services"].storageService = null;
+      serverManager["port"] = 3000;
 
-      await expect(serverManager.findAvailablePort(3000)).rejects.toThrow(
-        "Could not find an available port",
+      serverManager.updateStorageBaseUrl();
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        "Failed to update storage base URL",
+        expect.any(Object),
       );
     });
   });
 
-  describe("startServer", () => {
-    it("should start server on available port", async () => {
+  describe("displayServerStatus", () => {
+    it("should display server status with all services", () => {
+      serverManager["services"] = {
+        configService: mockConfigService,
+        databaseService: mockDatabaseService,
+        cacheService: mockCacheService,
+        storageService: mockStorageService,
+        errorHandler: mockErrorHandler,
+        jobService: mockJobService,
+        validationService: null,
+        infrastructureServices: {
+          logger: mockLogger,
+          databaseService: mockDatabaseService,
+          cacheService: mockCacheService,
+          storageService: mockStorageService,
+          jobService: mockJobService,
+          errorHandler: mockErrorHandler,
+          wss: { clients: { size: 5 } },
+        },
+        businessServices: {},
+      };
+
+      serverManager.displayServerStatus();
+
+      expect(mockServerLogger.displayServerStatus).toHaveBeenCalled();
+    });
+
+    it("should handle errors during status display", () => {
+      serverManager["services"] = {
+        configService: mockConfigService,
+        databaseService: mockDatabaseService,
+        cacheService: mockCacheService,
+        storageService: mockStorageService,
+        errorHandler: mockErrorHandler,
+        jobService: mockJobService,
+        validationService: null,
+        infrastructureServices: {
+          logger: mockLogger,
+          databaseService: mockDatabaseService,
+          cacheService: mockCacheService,
+          storageService: mockStorageService,
+          jobService: mockJobService,
+          errorHandler: mockErrorHandler,
+          wss: { clients: { size: 5 } },
+        },
+        businessServices: {},
+      };
+
+      mockServerLogger.displayServerStatus.mockImplementation(() => {
+        throw new Error("Status display failed");
+      });
+
+      serverManager.displayServerStatus();
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        "Error during server status display",
+        expect.any(Object),
+      );
+    });
+  });
+
+  describe("initialize", () => {
+    it("should complete full initialization process", async () => {
       const config = {
         port: 3000,
         host: "localhost",
@@ -176,18 +328,59 @@ describe("ServerManager", () => {
         storagePath: "/test/storage",
       };
 
-      const port = await serverManager.startServer(config as any);
-      expect(port).toBeGreaterThanOrEqual(3000);
-      expect(port).toBeLessThan(3010);
+      mockContainer.get.mockImplementation((type: any) => {
+        switch (type) {
+          case TYPES.ConfigService:
+            return mockConfigService;
+          case TYPES.DatabaseService:
+            return mockDatabaseService;
+          case TYPES.CacheService:
+            return mockCacheService;
+          case TYPES.StorageService:
+            return mockStorageService;
+          case TYPES.ErrorHandler:
+            return mockErrorHandler;
+          case TYPES.JobService:
+            return mockJobService;
+          default:
+            return null;
+        }
+      });
+
+      await serverManager.initialize(config as any);
+
+      expect(mockDatabaseService.initialize).toHaveBeenCalled();
+      expect(mockCacheService.initialize).toHaveBeenCalled();
+      expect(mockStorageService.initialize).toHaveBeenCalled();
+      expect(mockJobService.initialize).toHaveBeenCalled();
+      expect(mockStorageService.updateBaseUrl).toHaveBeenCalled();
+    });
+
+    it("should handle initialization errors", async () => {
+      const config = {
+        port: 3000,
+        host: "localhost",
+        isProduction: false,
+        storagePath: "/test/storage",
+      };
+
+      mockContainer.get.mockImplementation(() => {
+        throw new Error("Service loading failed");
+      });
+
+      await expect(serverManager.initialize(config as any)).rejects.toThrow(
+        "Service loading failed",
+      );
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 
   describe("setupGracefulShutdown", () => {
     it("should set up shutdown handlers", () => {
       const mockProcess = {
-        on: jest.fn(),
+        on: vi.fn(),
       };
-      jest.spyOn(process, "on").mockImplementation(mockProcess.on);
+      vi.spyOn(process, "on").mockImplementation(mockProcess.on);
 
       serverManager.setupGracefulShutdown();
 
@@ -199,6 +392,32 @@ describe("ServerManager", () => {
         "SIGINT",
         expect.any(Function),
       );
+    });
+
+    it("should close servers during shutdown", async () => {
+      const mockServer = {
+        close: vi.fn((callback) => callback()),
+      };
+      const mockWss = {
+        close: vi.fn((callback) => callback()),
+      };
+
+      serverManager["server"] = mockServer as any;
+      serverManager["wss"] = mockWss as any;
+
+      vi.spyOn(process, "on").mockImplementation((signal, handler) => {
+        if (signal === "SIGTERM") {
+          handler();
+        }
+        return process;
+      });
+
+      serverManager.setupGracefulShutdown();
+
+      expect(mockServer.close).toHaveBeenCalled();
+      expect(mockWss.close).toHaveBeenCalled();
+      expect(mockLogger.info).toHaveBeenCalledWith("HTTP server closed");
+      expect(mockLogger.info).toHaveBeenCalledWith("WebSocket server closed");
     });
   });
 

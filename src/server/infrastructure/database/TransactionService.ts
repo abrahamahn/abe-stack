@@ -1,7 +1,7 @@
 import { injectable, inject } from "inversify";
 import { PoolClient, QueryResult } from "pg";
 
-import { TYPES } from "@/server/infrastructure/di";
+import { TYPES } from "@/server/infrastructure/di/types";
 import type { ILoggerService } from "@/server/infrastructure/logging";
 
 import type { IDatabaseServer } from "./IDatabaseServer";

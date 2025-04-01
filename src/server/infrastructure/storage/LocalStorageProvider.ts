@@ -13,7 +13,7 @@ import { StreamProcessor } from "@/server/infrastructure/processor/StreamProcess
 
 import { FileUtils } from "./FileUtils";
 import { IStorageProvider } from "./IStorageProvider";
-import { MediaProcessor } from "./processor/MediaProcessor";
+import { MediaProcessor } from "../processor/MediaProcessor";
 
 import type {
   StreamOptions,
@@ -103,6 +103,7 @@ export class LocalStorageProvider implements IStorageProvider {
     this.mediaProcessor = new MediaProcessor(
       logger,
       this.fileUtils,
+      this.basePath,
       this.baseUrl,
     );
 
@@ -255,7 +256,7 @@ export class LocalStorageProvider implements IStorageProvider {
             size: stats.size,
             lastModified: stats.mtime,
             etag: `"${uuidv4()}"`,
-            dimensions: result.dimensions,
+            dimensions: result.metadata.dimensions,
             custom: options?.metadata,
           },
         };
@@ -380,8 +381,8 @@ export class LocalStorageProvider implements IStorageProvider {
           );
 
           // Fix the dimensions extraction
-          if (processResult.dimensions) {
-            metadata.dimensions = processResult.dimensions;
+          if (processResult.metadata.dimensions) {
+            metadata.dimensions = processResult.metadata.dimensions;
           }
         } catch (error) {
           this.logger.warn(`Could not get image dimensions for ${filePath}`, {

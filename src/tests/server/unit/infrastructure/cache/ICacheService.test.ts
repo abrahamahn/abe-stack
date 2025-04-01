@@ -1,3 +1,5 @@
+import { describe, it, expect, beforeEach, vi } from "vitest";
+
 import { ICacheService } from "@/server/infrastructure/cache/ICacheService";
 
 // Define a mock implementation of the ICacheService interface for testing
@@ -304,7 +306,7 @@ describe("ICacheService Interface", () => {
   });
 
   it("should memoize functions", async () => {
-    const expensiveOperation = jest
+    const expensiveOperation = vi
       .fn()
       .mockImplementation(async (a: number, b: number) => {
         return a + b;
@@ -326,7 +328,7 @@ describe("ICacheService Interface", () => {
   });
 
   it("should support custom key function in memoize", async () => {
-    const mockFn = jest
+    const mockFn = vi
       .fn()
       .mockImplementation(async (obj: Record<string, unknown>) => {
         return JSON.stringify(obj);
@@ -356,10 +358,8 @@ describe("ICacheService Interface", () => {
   });
 
   it("should support dynamic TTL function in memoize", async () => {
-    const mockFn = jest.fn().mockImplementation(async (x: number) => x);
-    const ttlFn = jest
-      .fn()
-      .mockImplementation((result: number) => result / 100); // TTL = result/100 seconds
+    const mockFn = vi.fn().mockImplementation(async (x: number) => x);
+    const ttlFn = vi.fn().mockImplementation((result: number) => result / 100); // TTL = result/100 seconds
 
     const memoizedFn = cacheService.memoize(mockFn, { ttl: ttlFn });
 

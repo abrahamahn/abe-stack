@@ -1,5 +1,6 @@
 import { injectable, unmanaged } from "inversify";
 
+import { ConsoleTransport } from "./ConsoleTransport";
 import {
   LogLevel,
   type LogEntry,
@@ -7,8 +8,7 @@ import {
   type ILogTransport,
   type ILogContext,
   type ILoggerService,
-} from "./ILogger";
-import { ConsoleTransport } from "./transports/ConsoleTransport";
+} from "./ILoggerService";
 
 /**
  * A simple logger service implementation

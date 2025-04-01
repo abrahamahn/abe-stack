@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { Container } from "inversify";
 import { Pool, PoolClient } from "pg";
+import { describe, it, expect, beforeEach, afterEach, vi, Mock } from "vitest";
 
 import { DatabaseConfigProvider } from "@infrastructure/config";
 import { DatabaseServer } from "@infrastructure/database";
@@ -17,21 +18,23 @@ const mockQueryResult = {
   fields: [],
 };
 
-// Using let instead of const for mockClient so it can be reassigned
-let mockClient = {
-  query: jest.fn().mockResolvedValue(mockQueryResult),
-  release: jest.fn(),
-} as unknown as PoolClient;
+const mockQuery = vi.fn().mockResolvedValue(mockQueryResult);
 
 // Create mock functions first
-const mockConnect = jest.fn().mockResolvedValue(mockClient);
-const mockQuery = jest.fn().mockResolvedValue(mockQueryResult);
-const mockEnd = jest.fn().mockResolvedValue(undefined);
+const mockEnd = vi.fn().mockResolvedValue(undefined);
+
+// Using let instead of const for mockClient so it can be reassigned
+let mockClient = {
+  query: vi.fn().mockResolvedValue(mockQueryResult),
+  release: vi.fn(),
+} as unknown as PoolClient;
+
+const mockConnect = vi.fn().mockResolvedValue(mockClient);
 
 // Mock pg module with proper mock implementation
-jest.mock("pg", () => {
+vi.mock("pg", () => {
   return {
-    Pool: jest.fn().mockImplementation(() => {
+    Pool: vi.fn().mockImplementation(() => {
       return {
         connect: mockConnect,
         query: mockQuery,
@@ -45,8 +48,8 @@ jest.mock("pg", () => {
         connectionTimeoutMillis: 0,
         application_name: "test",
         ssl: false,
-        on: jest.fn(),
-        once: jest.fn(),
+        on: vi.fn(),
+        once: vi.fn(),
       };
     }),
   };
@@ -54,65 +57,64 @@ jest.mock("pg", () => {
 
 // Mock Logger
 const mockLoggerInstance = {
-  info: jest.fn(),
-  error: jest.fn(),
-  warn: jest.fn(),
-  debug: jest.fn(),
-  debugObj: jest.fn(),
-  infoObj: jest.fn(),
-  warnObj: jest.fn(),
-  errorObj: jest.fn(),
-  createLogger: jest.fn().mockReturnThis(),
-  withContext: jest.fn().mockReturnThis(),
-  addTransport: jest.fn(),
-  setTransports: jest.fn(),
-  setMinLevel: jest.fn(),
-  initialize: jest.fn().mockResolvedValue(undefined),
-  shutdown: jest.fn().mockResolvedValue(undefined),
+  info: vi.fn(),
+  error: vi.fn(),
+  warn: vi.fn(),
+  debug: vi.fn(),
+  debugObj: vi.fn(),
+  infoObj: vi.fn(),
+  warnObj: vi.fn(),
+  errorObj: vi.fn(),
+  createLogger: vi.fn().mockReturnThis(),
+  withContext: vi.fn().mockReturnThis(),
+  addTransport: vi.fn(),
+  setTransports: vi.fn(),
+  setMinLevel: vi.fn(),
+  initialize: vi.fn().mockResolvedValue(undefined),
+  shutdown: vi.fn().mockResolvedValue(undefined),
 };
 
 // Create a complete mock of the logger service
 const mockLoggerService = {
-  createLogger: jest.fn().mockReturnValue(mockLoggerInstance),
-  info: jest.fn(),
-  error: jest.fn(),
-  warn: jest.fn(),
-  debug: jest.fn(),
-  debugObj: jest.fn(),
-  infoObj: jest.fn(),
-  warnObj: jest.fn(),
-  errorObj: jest.fn(),
-  withContext: jest.fn().mockReturnThis(),
-  addTransport: jest.fn(),
-  setTransports: jest.fn(),
-  setMinLevel: jest.fn(),
-  initialize: jest.fn().mockResolvedValue(undefined),
-  shutdown: jest.fn().mockResolvedValue(undefined),
+  createLogger: vi.fn().mockReturnValue(mockLoggerInstance),
+  info: vi.fn(),
+  error: vi.fn(),
+  warn: vi.fn(),
+  debug: vi.fn(),
+  debugObj: vi.fn(),
+  infoObj: vi.fn(),
+  warnObj: vi.fn(),
+  errorObj: vi.fn(),
+  withContext: vi.fn().mockReturnThis(),
+  addTransport: vi.fn(),
+  setTransports: vi.fn(),
+  setMinLevel: vi.fn(),
+  initialize: vi.fn().mockResolvedValue(undefined),
+  shutdown: vi.fn().mockResolvedValue(undefined),
 };
 
 describe("DatabaseServer", () => {
   let container: Container;
   let dbService: DatabaseServer;
-  let mockConfigProvider: jest.Mocked<DatabaseConfigProvider>;
+  let mockConfigProvider: any;
 
   beforeEach(() => {
     // Reset all mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Create mock client
     mockClient = {
-      query: jest.fn().mockResolvedValue(mockQueryResult),
-      release: jest.fn(),
+      query: vi.fn().mockResolvedValue(mockQueryResult),
+      release: vi.fn(),
     } as unknown as PoolClient;
 
     // Reset mock functions
     mockConnect.mockReset().mockResolvedValue(mockClient);
-    mockQuery.mockReset().mockResolvedValue(mockQueryResult);
     mockEnd.mockReset().mockResolvedValue(undefined);
 
     // Setup mock config provider
     mockConfigProvider = {
-      getConfig: jest.fn().mockReturnValue({
+      getConfig: vi.fn().mockReturnValue({
         host: "localhost",
         port: 5432,
         database: "testdb",
@@ -125,11 +127,11 @@ describe("DatabaseServer", () => {
         ssl: false,
         metricsMaxSamples: 1000,
       }),
-      getConfigSchema: jest.fn().mockReturnValue({}),
+      getConfigSchema: vi.fn().mockReturnValue({}),
       config: {},
       configService: {} as any,
-      loadConfig: jest.fn(),
-    } as unknown as jest.Mocked<DatabaseConfigProvider>;
+      loadConfig: vi.fn(),
+    } as unknown as any;
 
     // Setup DI container
     container = new Container();
@@ -146,6 +148,8 @@ describe("DatabaseServer", () => {
 
     // IMPORTANT: Override the logger directly
     (dbService as any).logger = mockLoggerInstance;
+
+    (mockConfigProvider.configService as Mock).mockClear();
   });
 
   afterEach(async () => {
@@ -174,19 +178,23 @@ describe("DatabaseServer", () => {
 
       // We need to override pool before initialize is called
       const originalPool = Pool;
-      (Pool as unknown as jest.Mock).mockImplementationOnce(() => {
+      const mockPoolImplementation = vi.fn().mockImplementationOnce(() => {
         return {
-          connect: jest.fn().mockRejectedValue(error),
-          end: jest.fn().mockResolvedValue(undefined),
-          on: jest.fn(),
+          connect: vi.fn().mockRejectedValue(error),
+          end: vi.fn().mockResolvedValue(undefined),
+          on: vi.fn(),
         };
       });
+
+      (Pool as unknown as typeof mockPoolImplementation).mockImplementationOnce(
+        () => mockPoolImplementation(),
+      );
 
       try {
         // We need to call initialize without skipConnectionTest
         await dbService.initialize(false);
         // Should not reach here
-        fail("Should have thrown an error");
+        throw new Error("Should have thrown an error");
       } catch (e) {
         // Expected to throw
         expect(e).toBe(error);
@@ -198,7 +206,9 @@ describe("DatabaseServer", () => {
       );
 
       // Restore Pool mock
-      (Pool as unknown as jest.Mock).mockImplementation(() => originalPool);
+      (Pool as unknown as typeof mockPoolImplementation).mockImplementation(
+        () => originalPool,
+      );
     });
 
     it("should skip connection test when requested", async () => {
@@ -262,7 +272,7 @@ describe("DatabaseServer", () => {
       // Manually set the pool to use our mockConnect
       (dbService as any).pool = { connect: mockConnect };
 
-      const callback = jest.fn().mockResolvedValue("result");
+      const callback = vi.fn().mockResolvedValue("result");
       const result = await dbService.withClient(callback);
 
       expect(mockConnect).toHaveBeenCalled();
@@ -274,7 +284,7 @@ describe("DatabaseServer", () => {
       await dbService.initialize(true);
 
       const error = new Error("Client error");
-      const callback = jest.fn().mockRejectedValue(error);
+      const callback = vi.fn().mockRejectedValue(error);
 
       await expect(dbService.withClient(callback)).rejects.toThrow(
         "Client error",
@@ -288,8 +298,8 @@ describe("DatabaseServer", () => {
       // Create a mock client with a release method that throws an error
       const releaseError = new Error("Release error");
       mockClient = {
-        query: jest.fn().mockResolvedValue(mockQueryResult),
-        release: jest.fn().mockImplementation(() => {
+        query: vi.fn().mockResolvedValue(mockQueryResult),
+        release: vi.fn().mockImplementation(() => {
           throw releaseError;
         }),
       } as unknown as PoolClient;
@@ -299,7 +309,7 @@ describe("DatabaseServer", () => {
       // Manually set the pool to use our mockConnect
       (dbService as any).pool = { connect: mockConnect };
 
-      const callback = jest.fn().mockResolvedValue("result");
+      const callback = vi.fn().mockResolvedValue("result");
       // The function should complete successfully despite the release error
       const result = await dbService.withClient(callback);
 
@@ -319,7 +329,7 @@ describe("DatabaseServer", () => {
       // Manually set the pool to use our mockConnect
       (dbService as any).pool = { connect: mockConnect };
 
-      const callback = jest.fn().mockResolvedValue("result");
+      const callback = vi.fn().mockResolvedValue("result");
       const result = await dbService.withTransaction(callback);
 
       expect(mockClient.query).toHaveBeenCalledWith(
@@ -338,7 +348,7 @@ describe("DatabaseServer", () => {
       (dbService as any).pool = { connect: mockConnect };
 
       const error = new Error("Transaction error");
-      const callback = jest.fn().mockRejectedValue(error);
+      const callback = vi.fn().mockRejectedValue(error);
 
       await expect(dbService.withTransaction(callback)).rejects.toThrow(
         "Transaction error",
@@ -361,7 +371,7 @@ describe("DatabaseServer", () => {
       (error as any).code = "40P01";
 
       // Second attempt succeeds
-      const callback = jest
+      const callback = vi
         .fn()
         .mockRejectedValueOnce(error)
         .mockResolvedValueOnce("success");
@@ -462,7 +472,7 @@ describe("DatabaseServer", () => {
       // Manually set the pool to use our mockConnect
       (dbService as any).pool = { connect: mockConnect };
 
-      const callback = jest.fn().mockResolvedValue("result");
+      const callback = vi.fn().mockResolvedValue("result");
       await expect(dbService.withClient(callback)).rejects.toThrow(
         "Pool exhausted",
       );
@@ -479,7 +489,7 @@ describe("DatabaseServer", () => {
       // Manually set the pool to use our mockConnect
       (dbService as any).pool = { connect: mockConnect };
 
-      const callback = jest.fn().mockResolvedValue("result");
+      const callback = vi.fn().mockResolvedValue("result");
       await expect(dbService.withClient(callback)).rejects.toThrow(
         "Connection timeout",
       );
@@ -492,8 +502,8 @@ describe("DatabaseServer", () => {
       // Create a mock client with a release method that throws an error
       const releaseError = new Error("Release error");
       const mockErrorClient = {
-        query: jest.fn().mockResolvedValue(mockQueryResult),
-        release: jest.fn().mockImplementation(() => {
+        query: vi.fn().mockResolvedValue(mockQueryResult),
+        release: vi.fn().mockImplementation(() => {
           throw releaseError;
         }),
       } as unknown as PoolClient;
@@ -504,7 +514,7 @@ describe("DatabaseServer", () => {
       // Manually set the pool to use our mockConnect
       (dbService as any).pool = { connect: mockConnect };
 
-      const callback = jest.fn().mockResolvedValue("result");
+      const callback = vi.fn().mockResolvedValue("result");
 
       // The function should complete successfully despite the release error
       const result = await dbService.withClient(callback);
@@ -588,7 +598,7 @@ describe("DatabaseServer", () => {
 
       // Override the getStats method
       const originalGetStats = dbService.getStats;
-      dbService.getStats = jest.fn().mockReturnValue(mockStats);
+      dbService.getStats = vi.fn().mockReturnValue(mockStats);
 
       const stats = dbService.getStats();
       expect(stats.queryCount).toBe(2);
@@ -614,7 +624,7 @@ describe("DatabaseServer", () => {
 
       // Override the getStats method
       const originalGetStats = dbService.getStats;
-      dbService.getStats = jest.fn().mockReturnValue(mockStats);
+      dbService.getStats = vi.fn().mockReturnValue(mockStats);
 
       const stats = dbService.getStats();
       expect(stats.acquireCount).toBe(2);
@@ -716,7 +726,7 @@ describe("DatabaseServer", () => {
       // Manually set the pool to use our mockConnect
       (dbService as any).pool = { connect: mockConnect };
 
-      const callback = jest.fn().mockResolvedValue("result");
+      const callback = vi.fn().mockResolvedValue("result");
       const result = await dbService.withTransaction(callback, {
         isolationLevel: "SERIALIZABLE",
       });
@@ -742,6 +752,536 @@ describe("DatabaseServer", () => {
       expect(queryBuilder.orderBy).toBeInstanceOf(Function);
       expect(queryBuilder.limit).toBeInstanceOf(Function);
       expect(queryBuilder.execute).toBeInstanceOf(Function);
+    });
+
+    it("should handle join clauses", async () => {
+      await dbService.initialize(true);
+      (dbService as any).pool = { query: mockQuery };
+
+      const result = await dbService
+        .createQueryBuilder("users")
+        .select(["users.id", "posts.title"])
+        .join("posts", "posts.user_id = users.id")
+        .where("users.active = ?", true)
+        .execute();
+
+      // Look at the second call since the first is likely setting statement_timeout
+      const call = mockQuery.mock.calls[1][0];
+      expect(call.text).toContain(
+        "SELECT users.id, posts.title FROM users JOIN posts ON posts.user_id = users.id WHERE users.active = $1",
+      );
+      expect(call.values).toEqual([true]);
+      expect(result).toEqual(mockQueryResult);
+    });
+
+    it("should handle left join clauses", async () => {
+      await dbService.initialize(true);
+      (dbService as any).pool = { query: mockQuery };
+
+      const result = await dbService
+        .createQueryBuilder("users")
+        .select(["users.id", "posts.title"])
+        .leftJoin("posts", "posts.user_id = users.id")
+        .where("users.id = ?", 1)
+        .execute();
+
+      // Look at the second call since the first is likely setting statement_timeout
+      const call = mockQuery.mock.calls[1][0];
+      expect(call.text).toContain(
+        "SELECT users.id, posts.title FROM users LEFT JOIN posts ON posts.user_id = users.id WHERE users.id = $1",
+      );
+      expect(call.values).toEqual([1]);
+      expect(result).toEqual(mockQueryResult);
+    });
+
+    it("should handle group by clauses", async () => {
+      await dbService.initialize(true);
+      (dbService as any).pool = { query: mockQuery };
+
+      const result = await dbService
+        .createQueryBuilder("users")
+        .select(["COUNT(*) as count", "status"])
+        .groupBy("status")
+        .execute();
+
+      // Look at the second call since the first is likely setting statement_timeout
+      const call = mockQuery.mock.calls[1][0];
+      expect(call.text).toContain(
+        "SELECT COUNT(*) as count, status FROM users GROUP BY status",
+      );
+      expect(call.values).toEqual([]);
+      expect(result).toEqual(mockQueryResult);
+    });
+
+    it("should handle count operations", async () => {
+      await dbService.initialize(true);
+      (dbService as any).pool = { query: mockQuery };
+
+      // Mock the count query result
+      mockQuery.mockReset().mockResolvedValue({
+        rows: [{ count: "10" }],
+        rowCount: 1,
+        command: "SELECT",
+        oid: 0,
+        fields: [],
+      });
+
+      const count = await dbService
+        .createQueryBuilder("users")
+        .where("active = ?", true)
+        .count();
+
+      // Look at the second call since the first is likely setting statement_timeout
+      const call = mockQuery.mock.calls[1][0];
+      expect(call.text).toContain(
+        "SELECT COUNT(*) as count FROM users WHERE active = $1",
+      );
+      expect(call.values).toEqual([true]);
+      expect(count).toBe(10); // The count method converts the string "10" to number 10
+    });
+
+    it("should retrieve a single record with getOne", async () => {
+      await dbService.initialize(true);
+      (dbService as any).pool = { query: mockQuery };
+
+      // Reset the mock and provide the expected result
+      mockQuery.mockReset().mockResolvedValue({
+        rows: [{ id: 1, name: "Test User" }],
+        rowCount: 1,
+        command: "SELECT",
+        oid: 0,
+        fields: [],
+      });
+
+      const result = await dbService
+        .createQueryBuilder("users")
+        .select(["id", "name"])
+        .where("id = ?", 1)
+        .getOne();
+
+      // Look at the second call since the first is likely setting statement_timeout
+      const call = mockQuery.mock.calls[1][0];
+      expect(call.text).toContain(
+        "SELECT id, name FROM users WHERE id = $1 LIMIT 1",
+      );
+      expect(call.values).toEqual([1]);
+      expect(result).toEqual({ id: 1, name: "Test User" });
+    });
+
+    it("should handle getMany operations", async () => {
+      await dbService.initialize(true);
+      (dbService as any).pool = { query: mockQuery };
+
+      // Reset the mock and provide the expected result
+      mockQuery.mockReset().mockResolvedValue({
+        rows: [
+          { id: 1, name: "User 1" },
+          { id: 2, name: "User 2" },
+        ],
+        rowCount: 2,
+        command: "SELECT",
+        oid: 0,
+        fields: [],
+      });
+
+      const users = await dbService
+        .createQueryBuilder("users")
+        .where("active = ?", true)
+        .getMany();
+
+      // Look at the second call since the first is likely setting statement_timeout
+      const call = mockQuery.mock.calls[1][0];
+      expect(call.text).toContain("SELECT * FROM users WHERE active = $1");
+      expect(call.values).toEqual([true]);
+      expect(users).toEqual([
+        { id: 1, name: "User 1" },
+        { id: 2, name: "User 2" },
+      ]);
+    });
+
+    it("should handle query options", async () => {
+      await dbService.initialize(true);
+      (dbService as any).pool = { query: mockQuery };
+
+      const queryOptions = { tag: "users_query", timeout: 5000 };
+      await dbService
+        .createQueryBuilder("users")
+        .select(["id", "name"])
+        .where("active = ?", true)
+        .execute(queryOptions);
+
+      // First call is likely statement_timeout
+      expect(mockQuery.mock.calls[0][0]).toBe("SET statement_timeout = 5000");
+
+      // Second call is the actual query
+      const call = mockQuery.mock.calls[1][0];
+      expect(call.text).toContain(
+        "SELECT id, name FROM users WHERE active = $1",
+      );
+      expect(call.values).toEqual([true]);
+    });
+
+    it("should handle getSql method", async () => {
+      await dbService.initialize(true);
+
+      const sql = dbService
+        .createQueryBuilder("users")
+        .select(["id", "name"])
+        .where("active = ?", true)
+        .orderBy("name", "ASC")
+        .limit(10)
+        .offset(20)
+        .getSql();
+
+      expect(sql).toContain("SELECT id, name FROM users");
+      expect(sql).toContain("WHERE active = $1");
+      expect(sql).toContain("ORDER BY name ASC");
+      expect(sql).toContain("LIMIT 10");
+      expect(sql).toContain("OFFSET 20");
+    });
+
+    it("should handle null result in getOne", async () => {
+      await dbService.initialize(true);
+      (dbService as any).pool = { query: mockQuery };
+
+      // Most importantly, mock with EMPTY rows array
+      mockQuery.mockReset().mockResolvedValue({
+        rows: [],
+        rowCount: 0,
+        command: "SELECT",
+        oid: 0,
+        fields: [],
+      });
+
+      const user = await dbService
+        .createQueryBuilder("users")
+        .where("id = ?", 9999)
+        .getOne();
+
+      expect(user).toBeNull();
+    });
+
+    it("should retrieve multiple records with getMany", async () => {
+      await dbService.initialize(true);
+      (dbService as any).pool = { query: mockQuery };
+
+      // Reset the mock and provide the expected result
+      mockQuery.mockReset().mockResolvedValue({
+        rows: [
+          { id: 1, name: "User 1" },
+          { id: 2, name: "User 2" },
+        ],
+        rowCount: 2,
+        command: "SELECT",
+        oid: 0,
+        fields: [],
+      });
+
+      const users = await dbService
+        .createQueryBuilder("users")
+        .where("active = ?", true)
+        .getMany();
+
+      // Look at the second call since the first is likely setting statement_timeout
+      const call = mockQuery.mock.calls[1][0];
+      expect(call.text).toContain("SELECT * FROM users WHERE active = $1");
+      expect(call.values).toEqual([true]);
+      expect(users).toEqual([
+        { id: 1, name: "User 1" },
+        { id: 2, name: "User 2" },
+      ]);
+    });
+  });
+
+  // Add tests for query builder functionality
+  describe("query builder implementation", () => {
+    let databaseServer: DatabaseServer;
+    let mockPool: any;
+    let mockConfigProvider: any;
+
+    beforeEach(() => {
+      mockPool = {
+        query: mockQuery,
+        connect: vi.fn().mockResolvedValue({
+          query: mockQuery,
+          release: vi.fn(),
+        }),
+        end: vi.fn().mockResolvedValue(undefined),
+        on: vi.fn(),
+        totalCount: 0,
+        idleCount: 0,
+        waitingCount: 0,
+      };
+
+      // Create a mock config provider with getConfig method
+      mockConfigProvider = {
+        getConfig: vi.fn().mockReturnValue({
+          host: "localhost",
+          port: 5432,
+          database: "test",
+          user: "postgres",
+          password: "postgres",
+          maxConnections: 10,
+          idleTimeout: 10000,
+          connectionTimeout: 30000,
+        }),
+      };
+
+      // Create the DatabaseServer with mocked dependencies
+      databaseServer = new DatabaseServer(
+        mockLoggerService,
+        mockConfigProvider,
+      );
+
+      // Use type assertion to set private properties for testing
+      (databaseServer as any).pool = mockPool;
+      (databaseServer as any).connected = true;
+      (databaseServer as any).logger = mockLoggerInstance;
+    });
+
+    it("should create a query builder", () => {
+      const queryBuilder = databaseServer.createQueryBuilder("users");
+      expect(queryBuilder).toBeDefined();
+    });
+
+    it("should execute a basic select query", async () => {
+      mockQuery.mockResolvedValue({
+        rows: [{ id: 1, name: "Test" }],
+        rowCount: 1,
+      });
+
+      const queryBuilder = databaseServer.createQueryBuilder("users");
+      const result = await queryBuilder
+        .select(["id", "name"])
+        .where("id = ?", 1)
+        .execute();
+
+      expect(mockQuery).toHaveBeenCalledWith({
+        text: expect.stringContaining(
+          "SELECT id, name FROM users WHERE id = $1",
+        ),
+        values: [1],
+      });
+      expect(result.rows).toHaveLength(1);
+      expect(result.rows[0].name).toBe("Test");
+    });
+
+    it("should handle join clauses", async () => {
+      mockQuery.mockResolvedValue({
+        rows: [{ id: 1, name: "Test", order_id: 101 }],
+        rowCount: 1,
+      });
+
+      const queryBuilder = databaseServer.createQueryBuilder("users");
+      const result = await queryBuilder
+        .select(["users.id", "users.name", "orders.id as order_id"])
+        .join("orders", "orders.user_id = users.id")
+        .where("users.id = ?", 1)
+        .execute();
+
+      expect(mockQuery).toHaveBeenCalledWith({
+        text: expect.stringContaining(
+          "JOIN orders ON orders.user_id = users.id",
+        ),
+        values: [1],
+      });
+      expect(result.rows).toHaveLength(1);
+      expect(result.rows[0].order_id).toBe(101);
+    });
+
+    it("should handle left join clauses", async () => {
+      mockQuery.mockResolvedValue({
+        rows: [{ id: 1, name: "Test", profile_id: null }],
+        rowCount: 1,
+      });
+
+      const queryBuilder = databaseServer.createQueryBuilder("users");
+      const result = await queryBuilder
+        .select(["users.id", "users.name", "profiles.id as profile_id"])
+        .leftJoin("profiles", "profiles.user_id = users.id")
+        .where("users.id = ?", 1)
+        .execute();
+
+      expect(mockQuery).toHaveBeenCalledWith({
+        text: expect.stringContaining(
+          "LEFT JOIN profiles ON profiles.user_id = users.id",
+        ),
+        values: [1],
+      });
+      expect(result.rows).toHaveLength(1);
+      expect(result.rows[0].profile_id).toBeNull();
+    });
+
+    it("should handle group by clauses", async () => {
+      mockQuery.mockResolvedValue({
+        rows: [{ category: "A", count: "5" }],
+        rowCount: 1,
+      });
+
+      const queryBuilder = databaseServer.createQueryBuilder("products");
+      const result = await queryBuilder
+        .select(["category", "COUNT(*) as count"])
+        .groupBy("category")
+        .execute();
+
+      expect(mockQuery).toHaveBeenCalledWith({
+        text: expect.stringContaining("GROUP BY category"),
+        values: [],
+      });
+      expect(result.rows).toHaveLength(1);
+      expect(result.rows[0].count).toBe("5");
+    });
+
+    it("should execute count queries", async () => {
+      mockQuery.mockResolvedValue({ rows: [{ count: "10" }], rowCount: 1 });
+
+      const queryBuilder = databaseServer.createQueryBuilder("users");
+      const count = await queryBuilder.where("active = ?", true).count();
+
+      expect(mockQuery).toHaveBeenCalledWith({
+        text: expect.stringContaining(
+          "SELECT COUNT(*) as count FROM users WHERE active = $1",
+        ),
+        values: [true],
+      });
+      expect(count).toBe(10);
+    });
+
+    it("should retrieve a single record with getOne", async () => {
+      // Set up the mock return value
+      mockQuery.mockReset().mockResolvedValue({
+        rows: [{ id: 1, name: "Test User" }],
+        rowCount: 1,
+        command: "SELECT",
+        oid: 0,
+        fields: [],
+      });
+
+      const queryBuilder = databaseServer.createQueryBuilder("users");
+      const result = await queryBuilder
+        .select(["id", "name"])
+        .where("id = ?", 1)
+        .getOne();
+
+      expect(mockQuery).toHaveBeenCalledWith({
+        text: expect.stringContaining(
+          "SELECT id, name FROM users WHERE id = $1 LIMIT 1",
+        ),
+        values: [1],
+      });
+      expect(result).toEqual({ id: 1, name: "Test User" });
+    });
+
+    it("should handle null result in getOne", async () => {
+      mockQuery.mockReset().mockResolvedValue({
+        rows: [],
+        rowCount: 0,
+        command: "SELECT",
+        oid: 0,
+        fields: [],
+      });
+
+      const queryBuilder = databaseServer.createQueryBuilder("users");
+      const user = await queryBuilder
+        .select(["id", "name"])
+        .where("id = ?", 999)
+        .getOne();
+
+      expect(mockQuery).toHaveBeenCalledWith({
+        text: expect.stringContaining(
+          "SELECT id, name FROM users WHERE id = $1 LIMIT 1",
+        ),
+        values: [999],
+      });
+      expect(user).toBeNull();
+    });
+
+    it("should retrieve multiple records with getMany", async () => {
+      mockQuery.mockReset().mockResolvedValue({
+        rows: [
+          { id: 1, name: "User 1" },
+          { id: 2, name: "User 2" },
+        ],
+        rowCount: 2,
+        command: "SELECT",
+        oid: 0,
+        fields: [],
+      });
+
+      const queryBuilder = databaseServer.createQueryBuilder("users");
+      const users = await queryBuilder
+        .select(["id", "name"])
+        .where("active = ?", true)
+        .getMany();
+
+      expect(mockQuery).toHaveBeenCalledWith({
+        text: expect.stringContaining(
+          "SELECT id, name FROM users WHERE active = $1",
+        ),
+        values: [true],
+      });
+      expect(users).toHaveLength(2);
+      expect(users[0].name).toBe("User 1");
+      expect(users[1].name).toBe("User 2");
+    });
+
+    it("should pass query options to the query execution", async () => {
+      mockQuery.mockResolvedValue({ rows: [{ id: 1 }], rowCount: 1 });
+
+      const queryBuilder = databaseServer.createQueryBuilder("users");
+      const queryOptions = { timeout: 5000, tag: "test-query" };
+      await queryBuilder.select(["id"]).execute(queryOptions);
+
+      // Check if second call includes the query with options
+      expect(mockQuery.mock.calls[1][0]).toEqual({
+        text: expect.stringContaining("SELECT id FROM users"),
+        values: [],
+      });
+    });
+
+    it("should generate SQL with getSql method", () => {
+      const queryBuilder = databaseServer.createQueryBuilder("users");
+      const sql = queryBuilder
+        .select(["id", "name"])
+        .where("id = ?", 1)
+        .getSql();
+
+      expect(sql).toContain("SELECT id, name FROM users WHERE id = $1");
+    });
+
+    it("should handle complex queries with multiple clauses", async () => {
+      mockQuery.mockResolvedValue({
+        rows: [{ id: 1, name: "Test" }],
+        rowCount: 1,
+      });
+
+      const queryBuilder = databaseServer.createQueryBuilder("users");
+      await queryBuilder
+        .select(["users.id", "users.name", "COUNT(orders.id) as order_count"])
+        .join("orders", "orders.user_id = users.id")
+        .leftJoin("profiles", "profiles.user_id = users.id")
+        .where("users.active = ?", true)
+        .groupBy("users.id, users.name")
+        .orderBy("users.name", "ASC")
+        .limit(10)
+        .offset(20)
+        .execute();
+
+      const query = mockQuery.mock.calls[0][0];
+
+      expect(query.text).toContain(
+        "SELECT users.id, users.name, COUNT(orders.id) as order_count FROM users",
+      );
+      expect(query.text).toContain("JOIN orders ON orders.user_id = users.id");
+      expect(query.text).toContain(
+        "LEFT JOIN profiles ON profiles.user_id = users.id",
+      );
+      expect(query.text).toContain("WHERE users.active = $1");
+      expect(query.text).toContain("GROUP BY users.id, users.name");
+      expect(query.text).toContain("ORDER BY users.name ASC");
+      expect(query.text).toContain("LIMIT 10");
+      expect(query.text).toContain("OFFSET 20");
+      expect(query.values).toEqual([true]);
     });
   });
 });

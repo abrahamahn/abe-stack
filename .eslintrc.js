@@ -147,6 +147,7 @@ module.exports = {
         "*.config.js",
         "*.config.ts",
         "migrate_server.js",
+        "vitest.config.js",
       ],
       env: {
         node: true,
@@ -154,6 +155,18 @@ module.exports = {
       rules: {
         "@typescript-eslint/no-var-requires": "off",
         "import/no-commonjs": "off",
+      },
+      parserOptions: {
+        project: null,
+      },
+    },
+    // DI container (for circular dependency)
+    {
+      files: ["src/server/infrastructure/di/container.ts"],
+      rules: {
+        "@typescript-eslint/no-var-requires": "off",
+        "import/no-commonjs": "off",
+        "@typescript-eslint/no-require-imports": "off",
       },
     },
     // Service Worker

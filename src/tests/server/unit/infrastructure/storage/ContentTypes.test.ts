@@ -1,3 +1,5 @@
+import { describe, it, expect } from "vitest";
+
 import {
   ContentCategory,
   ImageFormat,
@@ -113,6 +115,9 @@ describe("ContentTypes", () => {
       expect(getMimeType(ImageFormat.SVG, ContentCategory.IMAGE)).toBe(
         "image/svg+xml",
       );
+      expect(getMimeType(ImageFormat.ORIGINAL, ContentCategory.IMAGE)).toBe(
+        "image/jpeg",
+      );
       expect(getMimeType("unknown", ContentCategory.IMAGE)).toBe("image/jpeg"); // Default
     });
 
@@ -128,6 +133,15 @@ describe("ContentTypes", () => {
       );
       expect(getMimeType(VideoFormat.MOV, ContentCategory.VIDEO)).toBe(
         "video/quicktime",
+      );
+      expect(getMimeType(VideoFormat.HLS, ContentCategory.VIDEO)).toBe(
+        "video/mp4",
+      );
+      expect(getMimeType(VideoFormat.DASH, ContentCategory.VIDEO)).toBe(
+        "video/mp4",
+      );
+      expect(getMimeType(VideoFormat.ORIGINAL, ContentCategory.VIDEO)).toBe(
+        "video/mp4",
       );
       expect(getMimeType("unknown", ContentCategory.VIDEO)).toBe("video/mp4"); // Default
     });
@@ -148,6 +162,9 @@ describe("ContentTypes", () => {
       expect(getMimeType(AudioFormat.FLAC, ContentCategory.AUDIO)).toBe(
         "audio/flac",
       );
+      expect(getMimeType(AudioFormat.ORIGINAL, ContentCategory.AUDIO)).toBe(
+        "audio/mpeg",
+      );
       expect(getMimeType("unknown", ContentCategory.AUDIO)).toBe("audio/mpeg"); // Default
     });
 
@@ -160,6 +177,36 @@ describe("ContentTypes", () => {
       );
       expect(getMimeType("anything", ContentCategory.OTHER)).toBe(
         "application/octet-stream",
+      );
+    });
+
+    it("should handle mixed case content types", () => {
+      expect(getContentCategory("IMAGE/JPEG")).toBe(ContentCategory.IMAGE);
+      expect(getContentCategory("VIDEO/MP4")).toBe(ContentCategory.VIDEO);
+      expect(getContentCategory("AUDIO/MPEG")).toBe(ContentCategory.AUDIO);
+      expect(getContentCategory("APPLICATION/PDF")).toBe(
+        ContentCategory.DOCUMENT,
+      );
+      expect(getContentCategory("APPLICATION/ZIP")).toBe(
+        ContentCategory.ARCHIVE,
+      );
+    });
+
+    it("should handle content types with additional parameters", () => {
+      expect(getContentCategory("image/jpeg; charset=utf-8")).toBe(
+        ContentCategory.IMAGE,
+      );
+      expect(getContentCategory("video/mp4; codecs=avc1.42E01E")).toBe(
+        ContentCategory.VIDEO,
+      );
+      expect(getContentCategory("audio/mpeg; bitrate=320")).toBe(
+        ContentCategory.AUDIO,
+      );
+      expect(getContentCategory("application/pdf; version=1.7")).toBe(
+        ContentCategory.DOCUMENT,
+      );
+      expect(getContentCategory("application/zip; compression=deflate")).toBe(
+        ContentCategory.ARCHIVE,
       );
     });
   });

@@ -1,39 +1,55 @@
 import { Container } from "inversify";
-// Use the global TYPES from setup.ts
-const TYPES = (global as any).__TEST_TYPES__;
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 import { CacheService } from "@/server/infrastructure/cache/CacheService";
 import { ILoggerService } from "@/server/infrastructure/logging";
 
+const TYPES = (global as any).__TEST_TYPES__;
+
 describe("CacheService", () => {
   let container: Container;
   let cacheService: CacheService;
-  let mockLogger: jest.Mocked<ILoggerService>;
+  let mockLogger: {
+    info: ReturnType<typeof vi.fn>;
+    error: ReturnType<typeof vi.fn>;
+    warn: ReturnType<typeof vi.fn>;
+    debug: ReturnType<typeof vi.fn>;
+    debugObj: ReturnType<typeof vi.fn>;
+    infoObj: ReturnType<typeof vi.fn>;
+    warnObj: ReturnType<typeof vi.fn>;
+    errorObj: ReturnType<typeof vi.fn>;
+    createLogger: ReturnType<typeof vi.fn>;
+    withContext: ReturnType<typeof vi.fn>;
+    addTransport: ReturnType<typeof vi.fn>;
+    setTransports: ReturnType<typeof vi.fn>;
+    setMinLevel: ReturnType<typeof vi.fn>;
+    initialize: ReturnType<typeof vi.fn>;
+    shutdown: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     container = new Container();
     mockLogger = {
-      info: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      debug: jest.fn(),
-      debugObj: jest.fn(),
-      infoObj: jest.fn(),
-      warnObj: jest.fn(),
-      errorObj: jest.fn(),
-      createLogger: jest.fn(),
-      withContext: jest.fn(),
-      addTransport: jest.fn(),
-      setTransports: jest.fn(),
-      setMinLevel: jest.fn(),
-      initialize: jest.fn(),
-      shutdown: jest.fn(),
+      info: vi.fn(),
+      error: vi.fn(),
+      warn: vi.fn(),
+      debug: vi.fn(),
+      debugObj: vi.fn(),
+      infoObj: vi.fn(),
+      warnObj: vi.fn(),
+      errorObj: vi.fn(),
+      createLogger: vi.fn(),
+      withContext: vi.fn(),
+      addTransport: vi.fn(),
+      setTransports: vi.fn(),
+      setMinLevel: vi.fn(),
+      initialize: vi.fn(),
+      shutdown: vi.fn(),
     };
     container
       .bind<ILoggerService>(TYPES.LoggerService)
-      .toConstantValue(mockLogger);
-    container.bind<CacheService>(TYPES.CacheService).to(CacheService);
-    cacheService = container.get<CacheService>(TYPES.CacheService);
+      .toConstantValue(mockLogger as unknown as ILoggerService);
+    cacheService = new CacheService(mockLogger as unknown as ILoggerService);
   });
 
   afterEach(async () => {
@@ -337,7 +353,7 @@ describe("CacheService", () => {
 
   describe("memoize", () => {
     it("should cache function results", async () => {
-      const mockFn = jest.fn().mockImplementation(async (x: number) => x * 2);
+      const mockFn = vi.fn().mockImplementation(async (x: number) => x * 2);
       const memoized = cacheService.memoize(mockFn);
 
       // First call should execute the function
@@ -354,7 +370,7 @@ describe("CacheService", () => {
     });
 
     it("should respect TTL option", async () => {
-      const mockFn = jest.fn().mockImplementation(async (x: number) => x * 2);
+      const mockFn = vi.fn().mockImplementation(async (x: number) => x * 2);
       const memoized = cacheService.memoize(mockFn, { ttl: 1 });
 
       // First call
@@ -370,7 +386,7 @@ describe("CacheService", () => {
     });
 
     it("should use custom key function", async () => {
-      const mockFn = jest
+      const mockFn = vi
         .fn()
         .mockImplementation(async (obj: Record<string, unknown>) =>
           JSON.stringify(obj),
@@ -400,10 +416,8 @@ describe("CacheService", () => {
     });
 
     it("should support dynamic TTL function", async () => {
-      const mockFn = jest.fn().mockImplementation(async (x: number) => x);
-      const ttlFn = jest
-        .fn()
-        .mockImplementation((result: number) => result / 10);
+      const mockFn = vi.fn().mockImplementation(async (x: number) => x);
+      const ttlFn = vi.fn().mockImplementation((result: number) => result / 10);
 
       const memoized = cacheService.memoize(mockFn, { ttl: ttlFn });
 

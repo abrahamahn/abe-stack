@@ -1,3 +1,5 @@
+import { describe, it, expect } from "vitest";
+
 import { ServiceError } from "@/server/infrastructure/errors/ServiceError";
 
 describe("ServiceError", () => {

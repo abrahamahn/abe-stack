@@ -42,7 +42,6 @@ module.exports = {
       {
         tsconfig: "tsconfig.json",
         diagnostics: false,
-        isolatedModules: true,
         transpileOnly: true,
         esModuleInterop: true,
         allowSyntheticDefaultImports: true,

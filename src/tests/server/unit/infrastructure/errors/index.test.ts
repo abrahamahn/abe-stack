@@ -1,9 +1,11 @@
+import { describe, it, expect } from "vitest";
+
 import * as errors from "@/server/infrastructure/errors";
 
 describe("Error exports", () => {
   it("should export base error classes", () => {
     expect(errors.AppError).toBeDefined();
-    expect(errors.BaseError).toBeDefined();
+    expect(errors.ServiceError).toBeDefined();
   });
 
   it("should export API error classes", () => {
@@ -26,9 +28,6 @@ describe("Error exports", () => {
     expect(errors.EntityNotFoundError).toBeDefined();
     expect(errors.UniqueConstraintError).toBeDefined();
     expect(errors.ForeignKeyConstraintError).toBeDefined();
-    expect(errors.InfrastructureValidationError).toBeDefined();
-    expect(errors.MissingRequiredFieldError).toBeDefined();
-    expect(errors.InvalidFieldValueError).toBeDefined();
   });
 
   it("should export technical error classes", () => {
@@ -40,6 +39,7 @@ describe("Error exports", () => {
 
   it("should export error handler", () => {
     expect(errors.ErrorHandler).toBeDefined();
+    expect(errors.errorHandler).toBeDefined();
   });
 
   it("should export error codes", () => {

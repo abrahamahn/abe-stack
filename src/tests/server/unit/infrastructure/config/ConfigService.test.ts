@@ -1,17 +1,24 @@
 import * as fs from "fs";
 
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+
 import { ConfigSchema } from "@/server/infrastructure/config/ConfigSchema";
 import { ConfigService } from "@/server/infrastructure/config/ConfigService";
 import { InMemorySecretProvider } from "@/server/infrastructure/config/secrets/InMemorySecretProvider";
 import type { ILoggerService } from "@/server/infrastructure/logging";
 
 // Mock filesystem
-jest.mock("fs");
-const mockedFs = fs as jest.Mocked<typeof fs>;
+vi.mock("fs", () => ({
+  existsSync: vi.fn().mockReturnValue(true),
+  readFileSync: vi
+    .fn()
+    .mockReturnValue(Buffer.from("TEST_FROM_FILE=file-value")),
+}));
+const mockedFs = fs as any;
 
 // Mock dotenv
-jest.mock("dotenv", () => ({
-  parse: jest.fn().mockImplementation(() => ({})),
+vi.mock("dotenv", () => ({
+  parse: vi.fn().mockImplementation(() => ({})),
 }));
 
 describe("ConfigService", () => {
@@ -42,28 +49,25 @@ describe("ConfigService", () => {
     // Mock fs.existsSync
     mockedFs.existsSync.mockImplementation(() => true);
 
-    // Mock fs.readFileSync
-    mockedFs.readFileSync.mockImplementation(() =>
-      Buffer.from("TEST_FROM_FILE=file-value"),
-    );
+    // No need to mock fs.readFileSync here again as it's already mocked
 
     // Create a mock logger
     mockLogger = {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      createLogger: jest.fn().mockReturnThis(),
-      withContext: jest.fn().mockReturnThis(),
-      debugObj: jest.fn(),
-      infoObj: jest.fn(),
-      warnObj: jest.fn(),
-      errorObj: jest.fn(),
-      addTransport: jest.fn(),
-      setTransports: jest.fn(),
-      setMinLevel: jest.fn(),
-      initialize: jest.fn().mockResolvedValue(undefined),
-      shutdown: jest.fn().mockResolvedValue(undefined),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      createLogger: vi.fn().mockReturnThis(),
+      withContext: vi.fn().mockReturnThis(),
+      debugObj: vi.fn(),
+      infoObj: vi.fn(),
+      warnObj: vi.fn(),
+      errorObj: vi.fn(),
+      addTransport: vi.fn(),
+      setTransports: vi.fn(),
+      setMinLevel: vi.fn(),
+      initialize: vi.fn().mockResolvedValue(undefined),
+      shutdown: vi.fn().mockResolvedValue(undefined),
     };
 
     // Create a config service
@@ -72,7 +76,7 @@ describe("ConfigService", () => {
 
   afterEach(() => {
     process.env = originalEnv;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("Basic functionality", () => {
@@ -313,6 +317,152 @@ describe("ConfigService", () => {
       // The secret should come from the environment
       const fallbackSecret = await configWithoutSecrets.get("FALLBACK_SECRET");
       expect(fallbackSecret).toBe("env-secret-value");
+    });
+  });
+
+  describe("Data access methods", () => {
+    beforeEach(() => {
+      // Set up some test data
+      configService.set("KEY1", "value1");
+      configService.set("KEY2", "value2");
+      configService.set("KEY3", "value3");
+    });
+
+    it("should check if a key exists", () => {
+      expect(configService.has("KEY1")).toBe(true);
+      expect(configService.has("NON_EXISTENT")).toBe(false);
+    });
+
+    it("should get all keys", () => {
+      const keys = configService.getKeys();
+      expect(keys).toContain("KEY1");
+      expect(keys).toContain("KEY2");
+      expect(keys).toContain("KEY3");
+    });
+
+    it("should get all values", () => {
+      const values = configService.getValues();
+      expect(values).toContain("value1");
+      expect(values).toContain("value2");
+      expect(values).toContain("value3");
+    });
+
+    it("should get all entries", () => {
+      const entries = configService.getEntries();
+      expect(entries).toContainEqual(["KEY1", "value1"]);
+      expect(entries).toContainEqual(["KEY2", "value2"]);
+      expect(entries).toContainEqual(["KEY3", "value3"]);
+    });
+
+    it("should get the size of the config", () => {
+      expect(configService.getSize()).toBeGreaterThanOrEqual(3);
+    });
+
+    it("should check if the config is empty", () => {
+      expect(configService.isEmpty()).toBe(false);
+
+      // Create a new config and clear it to make it truly empty
+      const emptyConfig = new ConfigService(mockLogger);
+      emptyConfig.clear(); // Explicitly clear it to remove env vars
+      expect(emptyConfig.isEmpty()).toBe(true);
+
+      // Alternative approach - check specific keys
+      expect(emptyConfig.has("KEY1")).toBe(false);
+      expect(emptyConfig.has("KEY2")).toBe(false);
+      expect(emptyConfig.has("KEY3")).toBe(false);
+    });
+
+    it("should clone the config", () => {
+      const cloned = configService.clone();
+      expect(cloned).toEqual(
+        expect.objectContaining({
+          KEY1: "value1",
+          KEY2: "value2",
+          KEY3: "value3",
+        }),
+      );
+    });
+
+    it("should convert config to JSON and back", () => {
+      const json = configService.toJSON();
+      expect(typeof json).toBe("string");
+
+      const newConfig = new ConfigService(mockLogger);
+      newConfig.fromJSON(json);
+
+      expect(newConfig.get("KEY1")).toBe("value1");
+      expect(newConfig.get("KEY2")).toBe("value2");
+    });
+
+    it("should merge configs", () => {
+      const additionalConfig = {
+        KEY3: "updated",
+        KEY4: "new value",
+      };
+
+      configService.merge(additionalConfig);
+      expect(configService.get("KEY3")).toBe("updated");
+      expect(configService.get("KEY4")).toBe("new value");
+    });
+
+    it("should find differences between configs", () => {
+      const otherConfig = {
+        KEY1: "value1", // same
+        KEY2: "different", // different
+        KEY4: "new", // not in original
+      };
+
+      const diff = configService.diff(otherConfig);
+      expect(diff).toEqual({
+        KEY2: "different",
+        KEY4: "new",
+      });
+    });
+
+    it("should check equality between configs", () => {
+      const sameConfig = {
+        KEY1: "value1",
+        KEY2: "value2",
+        KEY3: "value3",
+      };
+
+      const differentConfig = {
+        KEY1: "value1",
+        KEY2: "different",
+      };
+
+      expect(configService.equals(sameConfig)).toBe(true);
+      expect(configService.equals(differentConfig)).toBe(false);
+    });
+
+    it("should parse JSON objects", () => {
+      const testObject = { foo: "bar", num: 123 };
+      configService.set("JSON_OBJECT", JSON.stringify(testObject));
+
+      const retrieved = configService.getObject("JSON_OBJECT");
+      expect(retrieved).toEqual(testObject);
+    });
+
+    it("should handle multi-operations", () => {
+      // Test setMultiple
+      configService.setMultiple({
+        MULTI1: "multi-value-1",
+        MULTI2: "multi-value-2",
+      });
+
+      expect(configService.get("MULTI1")).toBe("multi-value-1");
+      expect(configService.get("MULTI2")).toBe("multi-value-2");
+
+      // Test deleteMultiple
+      configService.deleteMultiple(["MULTI1", "MULTI2"]);
+      expect(configService.has("MULTI1")).toBe(false);
+      expect(configService.has("MULTI2")).toBe(false);
+    });
+
+    it("should clear all config values", () => {
+      expect(configService.isEmpty()).toBe(false);
+      configService.clear();
+      expect(configService.isEmpty()).toBe(true);
     });
   });
 });

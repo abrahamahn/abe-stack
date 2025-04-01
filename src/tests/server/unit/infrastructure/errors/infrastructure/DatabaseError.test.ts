@@ -1,9 +1,11 @@
+import { describe, it, expect } from "vitest";
+
 import {
   DatabaseError,
   EntityNotFoundError,
   UniqueConstraintError,
   ForeignKeyConstraintError,
-} from "@/server/infrastructure/errors/infrastructure/DatabaseError";
+} from "@infrastructure/errors/infrastructure/DatabaseError";
 
 describe("DatabaseError", () => {
   describe("DatabaseError", () => {
@@ -50,6 +52,27 @@ describe("DatabaseError", () => {
       );
       expect(error.code).toBe("ACCESS_DENIED");
     });
+
+    it("should maintain stack trace", () => {
+      const error = new DatabaseError("test", "Test");
+      expect(error.stack).toBeDefined();
+      expect(error.stack).toContain("DatabaseError");
+    });
+
+    it("should serialize to JSON correctly", () => {
+      const cause = new Error("Test cause");
+      const error = new DatabaseError("test", "Test", cause);
+      const json = error.toJSON();
+
+      expect(json).toEqual({
+        name: "DatabaseError",
+        message: "Database operation 'test' failed for Test: Test cause",
+        code: "DATABASE_ERROR",
+        operation: "test",
+        entity: "Test",
+        cause: "Test cause",
+      });
+    });
   });
 
   describe("EntityNotFoundError", () => {
@@ -69,6 +92,22 @@ describe("DatabaseError", () => {
         "Database operation 'find' failed for Post with identifier 456 not found",
       );
       expect(error.identifier).toBe(456);
+    });
+
+    it("should serialize to JSON correctly", () => {
+      const error = new EntityNotFoundError("User", "123");
+      const json = error.toJSON();
+
+      expect(json).toEqual({
+        name: "DatabaseError",
+        message:
+          "Database operation 'find' failed for User with identifier 123 not found",
+        code: "ENTITY_NOT_FOUND",
+        operation: "find",
+        entity: "User",
+        cause: "Entity with identifier 123 not found",
+        identifier: "123",
+      });
     });
   });
 
@@ -95,6 +134,28 @@ describe("DatabaseError", () => {
       );
       expect(error.value).toBe(12345);
     });
+
+    it("should serialize to JSON correctly", () => {
+      const error = new UniqueConstraintError(
+        "User",
+        "email",
+        "test@example.com",
+      );
+      const json = error.toJSON();
+
+      expect(json).toEqual({
+        name: "DatabaseError",
+        message:
+          "Database operation 'create/update' failed for User with email 'test@example.com' already exists",
+        code: "UNIQUE_CONSTRAINT_VIOLATION",
+        operation: "create/update",
+        entity: "User",
+        cause:
+          "Unique constraint violation on field 'email' with value 'test@example.com'",
+        field: "email",
+        value: "test@example.com",
+      });
+    });
   });
 
   describe("ForeignKeyConstraintError", () => {
@@ -119,6 +180,28 @@ describe("DatabaseError", () => {
         "Database operation 'create/update' failed for Order violates foreign key constraint 'product_id' with value '999'",
       );
       expect(error.value).toBe(999);
+    });
+
+    it("should serialize to JSON correctly", () => {
+      const error = new ForeignKeyConstraintError(
+        "Comment",
+        "user_id",
+        "invalid_user",
+      );
+      const json = error.toJSON();
+
+      expect(json).toEqual({
+        name: "DatabaseError",
+        message:
+          "Database operation 'create/update' failed for Comment violates foreign key constraint 'user_id' with value 'invalid_user'",
+        code: "FOREIGN_KEY_CONSTRAINT_VIOLATION",
+        operation: "create/update",
+        entity: "Comment",
+        cause:
+          "Foreign key constraint violation on field 'user_id' with value 'invalid_user'",
+        constraint: "user_id",
+        value: "invalid_user",
+      });
     });
   });
 });

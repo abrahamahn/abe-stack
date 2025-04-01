@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 
 import { IErrorHandler } from "@/server/infrastructure/errors/IErrorHandler";
 
@@ -22,8 +23,8 @@ describe("IErrorHandler", () => {
       ip: "127.0.0.1",
     };
     mockResponse = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn().mockReturnThis(),
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn().mockReturnThis(),
     };
   });
 

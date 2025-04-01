@@ -1,16 +1,15 @@
-import {
-  ILogTransport,
-  LogLevel,
-} from "@/server/infrastructure/logging/ILogger";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+
+import { LogLevel } from "@/server/infrastructure/logging/ILoggerService";
 import { LoggerService } from "@/server/infrastructure/logging/LoggerService";
 
 describe("LoggerService", () => {
   let loggerService: LoggerService;
-  let mockTransport: jest.Mocked<ILogTransport>;
+  let mockTransport: any;
 
   beforeEach(() => {
     mockTransport = {
-      log: jest.fn(),
+      log: vi.fn(),
     };
 
     loggerService = new LoggerService("test-context");

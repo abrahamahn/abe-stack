@@ -3,3 +3,4 @@ export type {
   DependencyOrder,
   IApplicationLifecycle,
 } from "./IApplicationLifecycle";
+export * from "./sleep";

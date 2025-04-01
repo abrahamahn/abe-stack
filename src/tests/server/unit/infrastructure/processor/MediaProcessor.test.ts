@@ -1,6 +1,7 @@
 import path from "path";
 
 import ffmpeg from "fluent-ffmpeg";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 
 import {
   ImageProcessor,
@@ -12,23 +13,23 @@ import type { ILoggerService } from "@/server/infrastructure/logging";
 import { FileUtils } from "@/server/infrastructure/storage/FileUtils";
 
 // Mock dependencies
-jest.mock("@infrastructure/processor/ImageProcessor");
-jest.mock("@infrastructure/processor/MediaProcessor");
-jest.mock("@infrastructure/storage/FileUtils");
-jest.mock("fluent-ffmpeg", () => {
+vi.mock("@infrastructure/processor/ImageProcessor");
+vi.mock("@infrastructure/processor/MediaProcessor");
+vi.mock("@infrastructure/storage/FileUtils");
+vi.mock("fluent-ffmpeg", () => {
   const mockFfmpegInstance = {
-    input: jest.fn().mockReturnThis(),
-    outputOptions: jest.fn().mockReturnThis(),
-    output: jest.fn().mockReturnThis(),
-    on: jest.fn().mockImplementation((event, callback) => {
+    input: vi.fn().mockReturnThis(),
+    outputOptions: vi.fn().mockReturnThis(),
+    output: vi.fn().mockReturnThis(),
+    on: vi.fn().mockImplementation((event: any, callback: any) => {
       // Store callbacks to trigger them appropriately
       if (event === "end") {
         setTimeout(() => callback(), 0);
       }
       return mockFfmpegInstance;
     }),
-    run: jest.fn().mockReturnThis(),
-    screenshots: jest.fn().mockImplementation((_options) => {
+    run: vi.fn().mockReturnThis(),
+    screenshots: vi.fn().mockImplementation((_options: any) => {
       // Simulate successful completion
       setTimeout(() => {
         const endCallback = mockFfmpegInstance.on.mock.calls.find(
@@ -38,32 +39,36 @@ jest.mock("fluent-ffmpeg", () => {
       }, 0);
       return mockFfmpegInstance;
     }),
-    videoBitrate: jest.fn().mockReturnThis(),
-    audioBitrate: jest.fn().mockReturnThis(),
-    audioFilters: jest.fn().mockReturnThis(),
+    videoBitrate: vi.fn().mockReturnThis(),
+    audioBitrate: vi.fn().mockReturnThis(),
+    audioFilters: vi.fn().mockReturnThis(),
   };
 
-  const mockFfmpeg = jest.fn(() => mockFfmpegInstance) as jest.Mock & {
-    ffprobe: jest.Mock;
+  const mockFfmpeg = vi.fn(() => mockFfmpegInstance) as ReturnType<
+    typeof vi.fn
+  > & {
+    ffprobe: ReturnType<typeof vi.fn>;
   };
 
   // Add ffprobe method to the mockFfmpeg function directly
-  mockFfmpeg.ffprobe = jest.fn().mockImplementation((_path, callback) => {
-    callback(null, {
-      streams: [
-        {
-          codec_type: "video",
-          width: 1920,
-          height: 1080,
+  mockFfmpeg.ffprobe = vi
+    .fn()
+    .mockImplementation((_path: any, callback: any) => {
+      callback(null, {
+        streams: [
+          {
+            codec_type: "video",
+            width: 1920,
+            height: 1080,
+            duration: 60,
+          },
+        ],
+        format: {
           duration: 60,
+          bit_rate: 5000000,
         },
-      ],
-      format: {
-        duration: 60,
-        bit_rate: 5000000,
-      },
+      });
     });
-  });
 
   return mockFfmpeg;
 });
@@ -71,51 +76,50 @@ jest.mock("fluent-ffmpeg", () => {
 describe("MediaProcessor", () => {
   let mediaProcessor: MediaProcessor;
   let mockLogger: ILoggerService;
-  let mockFileUtils: jest.Mocked<FileUtils>;
-  let mockImageProcessor: jest.Mocked<ImageProcessor>;
+  let mockFileUtils: any;
+  let mockImageProcessor: any;
   const tempDir = "/tmp";
   const baseUrl = "https://example.com/files";
 
   beforeEach(() => {
     // Create mock logger
     mockLogger = {
-      createLogger: jest.fn().mockReturnValue({
-        debug: jest.fn(),
-        info: jest.fn(),
-        warn: jest.fn(),
-        error: jest.fn(),
+      createLogger: vi.fn().mockReturnValue({
+        debug: vi.fn(),
+        info: vi.fn(),
+        warn: vi.fn(),
+        error: vi.fn(),
       }),
     } as unknown as ILoggerService;
 
     // Create mock FileUtils
-    mockFileUtils = new FileUtils(mockLogger) as jest.Mocked<FileUtils>;
+    mockFileUtils = new FileUtils(mockLogger) as any;
 
     // Create mock ImageProcessor
-    mockImageProcessor = new ImageProcessor(
-      mockLogger,
-      mockFileUtils,
-    ) as jest.Mocked<ImageProcessor>;
+    mockImageProcessor = new ImageProcessor(mockLogger, mockFileUtils) as any;
 
     // Mock path methods
-    (path.extname as jest.Mock) = jest.fn().mockImplementation((p) => {
+    vi.spyOn(path, "extname").mockImplementation((p: any) => {
       const ext = p.split(".").pop();
       return ext ? `.${ext}` : "";
     });
 
-    (path.basename as jest.Mock) = jest.fn().mockImplementation((p) => {
+    vi.spyOn(path, "basename").mockImplementation((p: any) => {
       return p.split("/").pop() || "";
     });
 
-    (path.dirname as jest.Mock) = jest.fn().mockImplementation((p) => {
+    vi.spyOn(path, "dirname").mockImplementation((p: any) => {
       return p.substring(0, p.lastIndexOf("/"));
     });
 
-    (path.join as jest.Mock) = jest.fn().mockImplementation((...parts) => {
+    vi.spyOn(path, "join").mockImplementation((...parts: any) => {
       return parts.join("/");
     });
 
     // Setup ImageProcessor constructor mock
-    (ImageProcessor as jest.Mock).mockImplementation(() => mockImageProcessor);
+    (ImageProcessor as unknown as ReturnType<typeof vi.fn>).mockImplementation(
+      () => mockImageProcessor,
+    );
 
     // Create MediaProcessor instance
     mediaProcessor = new MediaProcessor(
@@ -126,7 +130,7 @@ describe("MediaProcessor", () => {
     );
 
     // Reset all mocks
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("processMedia", () => {
@@ -146,7 +150,9 @@ describe("MediaProcessor", () => {
       });
 
       // Call the method
-      const result = await mediaProcessor.processMedia(sourcePath, targetPath);
+      const result = await mediaProcessor.processMedia(sourcePath, {
+        targetPath,
+      });
 
       // Verify result
       expect(result).toEqual({
@@ -174,7 +180,9 @@ describe("MediaProcessor", () => {
       mockFileUtils.getFileStats.mockResolvedValue({ size: 12345 } as any);
 
       // Call the method
-      const result = await mediaProcessor.processMedia(sourcePath, targetPath);
+      const result = await mediaProcessor.processMedia(sourcePath, {
+        targetPath,
+      });
 
       // Verify ffprobe was called to get video metadata
       expect(ffmpeg.ffprobe).toHaveBeenCalledWith(
@@ -208,7 +216,7 @@ describe("MediaProcessor", () => {
       mockFileUtils.getFileStats.mockResolvedValue({ size: 12345 } as any);
 
       // Override ffprobe mock to return audio metadata
-      (ffmpeg.ffprobe as jest.Mock).mockImplementationOnce(
+      (ffmpeg.ffprobe as ReturnType<typeof vi.fn>).mockImplementationOnce(
         (
           _path: string,
           callback: (error: Error | null, metadata: any) => void,
@@ -230,7 +238,9 @@ describe("MediaProcessor", () => {
       );
 
       // Call the method
-      const result = await mediaProcessor.processMedia(sourcePath, targetPath);
+      const result = await mediaProcessor.processMedia(sourcePath, {
+        targetPath,
+      });
 
       // Verify ffprobe was called to get audio metadata
       expect(ffmpeg.ffprobe).toHaveBeenCalledWith(
@@ -263,7 +273,9 @@ describe("MediaProcessor", () => {
       mockFileUtils.getFileStats.mockResolvedValue(stats as any);
 
       // Call the method
-      const result = await mediaProcessor.processMedia(sourcePath, targetPath);
+      const result = await mediaProcessor.processMedia(sourcePath, {
+        targetPath,
+      });
 
       // Verify result
       expect(result).toEqual({
@@ -300,11 +312,10 @@ describe("MediaProcessor", () => {
       mockImageProcessor.generateThumbnail.mockResolvedValue(thumbnailPath);
 
       // Call the method
-      const result = await mediaProcessor.processMedia(
-        sourcePath,
+      const result = await mediaProcessor.processMedia(sourcePath, {
         targetPath,
-        options,
-      );
+        ...options,
+      });
 
       // Verify thumbnail generation
       expect(mockImageProcessor.generateThumbnail).toHaveBeenCalledWith(
@@ -329,7 +340,7 @@ describe("MediaProcessor", () => {
 
       // Verify error handling
       await expect(
-        mediaProcessor.processMedia(sourcePath, targetPath),
+        mediaProcessor.processMedia(sourcePath, { targetPath }),
       ).rejects.toThrow("Processing failed");
 
       // Verify error logging
@@ -338,6 +349,132 @@ describe("MediaProcessor", () => {
         `Error processing media: ${sourcePath}`,
         { error: "Processing failed" },
       );
+    });
+
+    it("should handle video processing errors", async () => {
+      const sourcePath = "/path/to/source.mp4";
+      const targetPath = "/path/to/target.mp4";
+      const contentType = "video/mp4";
+      const error = new Error("Video processing failed");
+
+      // Setup mocks
+      mockFileUtils.detectContentType.mockReturnValue(contentType);
+      mockFileUtils.copyFile.mockResolvedValue(true);
+      mockFileUtils.getFileStats.mockResolvedValue({ size: 12345 } as any);
+      mockFileUtils.ensureDirectory.mockResolvedValue(true);
+
+      // Mock ffmpeg to throw error
+      const mockFfmpegInstance = {
+        output: vi.fn().mockReturnThis(),
+        on: vi.fn().mockImplementation((event: string, callback: any) => {
+          if (event === "error") {
+            callback(error);
+          }
+          return mockFfmpegInstance;
+        }),
+        run: vi.fn(),
+      };
+
+      (ffmpeg as unknown as ReturnType<typeof vi.fn>).mockImplementationOnce(
+        () => mockFfmpegInstance,
+      );
+
+      // Verify error handling
+      await expect(
+        mediaProcessor.processMedia(sourcePath, { targetPath }),
+      ).rejects.toThrow("Video processing failed");
+
+      // Verify error logging
+      const logger = mockLogger.createLogger("MediaProcessor");
+      expect(logger.error).toHaveBeenCalledWith(
+        `Error processing media: ${sourcePath}`,
+        { error: "Video processing failed" },
+      );
+    });
+
+    it("should handle audio processing errors", async () => {
+      const sourcePath = "/path/to/source.mp3";
+      const targetPath = "/path/to/target.mp3";
+      const contentType = "audio/mpeg";
+      const error = new Error("Audio processing failed");
+
+      // Setup mocks
+      mockFileUtils.detectContentType.mockReturnValue(contentType);
+      mockFileUtils.copyFile.mockResolvedValue(true);
+      mockFileUtils.getFileStats.mockResolvedValue({ size: 12345 } as any);
+      mockFileUtils.ensureDirectory.mockResolvedValue(true);
+
+      // Mock ffmpeg to throw error
+      const mockFfmpegInstance = {
+        output: vi.fn().mockReturnThis(),
+        on: vi.fn().mockImplementation((event: string, callback: any) => {
+          if (event === "error") {
+            callback(error);
+          }
+          return mockFfmpegInstance;
+        }),
+        run: vi.fn(),
+      };
+
+      (ffmpeg as unknown as ReturnType<typeof vi.fn>).mockImplementationOnce(
+        () => mockFfmpegInstance,
+      );
+
+      // Verify error handling
+      await expect(
+        mediaProcessor.processMedia(sourcePath, { targetPath }),
+      ).rejects.toThrow("Audio processing failed");
+
+      // Verify error logging
+      const logger = mockLogger.createLogger("MediaProcessor");
+      expect(logger.error).toHaveBeenCalledWith(
+        `Error processing media: ${sourcePath}`,
+        { error: "Audio processing failed" },
+      );
+    });
+
+    it("should handle different content types correctly", async () => {
+      const testCases = [
+        {
+          contentType: "application/pdf",
+          format: "pdf",
+        },
+        {
+          contentType: "text/plain",
+          format: "txt",
+        },
+        {
+          contentType: "application/json",
+          format: "json",
+        },
+      ];
+
+      for (const { contentType, format } of testCases) {
+        const sourcePath = `/path/to/source.${format}`;
+        const targetPath = `/path/to/target.${format}`;
+        const stats = { size: 12345 };
+
+        // Setup mocks
+        mockFileUtils.detectContentType.mockReturnValue(contentType);
+        mockFileUtils.copyFile.mockResolvedValue(true);
+        mockFileUtils.getFileStats.mockResolvedValue(stats as any);
+
+        // Call the method
+        const result = await mediaProcessor.processMedia(sourcePath, {
+          targetPath,
+        });
+
+        // Verify result
+        expect(result).toEqual({
+          path: targetPath,
+          url: `${baseUrl}/path/to/target.${format}`,
+          contentType,
+          size: 12345,
+          metadata: {
+            format,
+          },
+        });
+      }
     });
   });
 });

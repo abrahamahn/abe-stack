@@ -1,15 +1,19 @@
 import path from "path";
+import "reflect-metadata";
 import { container } from "./infrastructure/di";
 import { ServerManager } from "./infrastructure/server";
 import TYPES from "./infrastructure/di/types";
 import { ILoggerService } from "./infrastructure/logging";
 import { ConfigService } from "./infrastructure/config";
 
-async function initializeServer() {
+export async function initializeServer() {
   try {
     console.log("Starting server initialization...");
 
     // Get the existing container
+    if (!container) {
+      throw new Error("DI container not initialized");
+    }
     console.log("Container loaded");
 
     // Initialize logger first

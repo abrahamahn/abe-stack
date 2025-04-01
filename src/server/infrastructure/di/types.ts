@@ -45,6 +45,18 @@ export const TYPES = {
   DatabaseServer: Symbol.for("DatabaseServer"),
   FileJobStorageConfig: Symbol.for("FileJobStorageConfig"),
 
+  // Server management
+  ServerManager: Symbol.for("ServerManager"),
+
+  // Middleware components
+  ValidationMiddleware: Symbol.for("ValidationMiddleware"),
+  RateLimitMiddleware: Symbol.for("RateLimitMiddleware"),
+
+  // Processor components
+  ImageProcessor: Symbol.for("ImageProcessor"),
+  StreamProcessor: Symbol.for("StreamProcessor"),
+  MediaProcessor: Symbol.for("MediaProcessor"),
+
   // DATABASE LAYER
   // Base repository
   BaseRepository: Symbol.for("BaseRepository"),

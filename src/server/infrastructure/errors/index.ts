@@ -3,37 +3,21 @@ import { ILoggerService } from "@/server/infrastructure/logging";
 import { AppError } from "./AppError";
 
 // Base error classes
-export { AppError } from "./AppError";
-export { BaseError } from "./base/BaseError";
+export * from "./AppError";
 export { ServiceError } from "./ServiceError";
 
 // Infrastructure errors
-export {
-  InfrastructureError,
-  CacheError,
-  NetworkError,
-  ExternalServiceError,
-} from "./infrastructure/InfrastructureError";
+export * from "./infrastructure/InfrastructureError";
 export {
   DatabaseError as InfrastructureDatabaseError,
   EntityNotFoundError,
   UniqueConstraintError,
   ForeignKeyConstraintError,
 } from "./infrastructure/DatabaseError";
-export {
-  ValidationError as InfrastructureValidationError,
-  MissingRequiredFieldError,
-  InvalidFieldValueError,
-} from "./infrastructure/ValidationError";
 export type { ValidationErrorDetail } from "./infrastructure/ValidationError";
 
 // Technical errors
-export {
-  TechnicalError,
-  ConfigurationError,
-  InitializationError,
-  SystemError,
-} from "./technical/TechnicalError";
+export * from "./TechnicalError";
 
 // Error handler
 export * from "./ErrorHandler";

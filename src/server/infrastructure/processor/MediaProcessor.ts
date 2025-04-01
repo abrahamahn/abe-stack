@@ -79,6 +79,7 @@ export interface MediaProcessingResult {
     height?: number;
     duration?: number;
     format?: string;
+    dimensions?: { width: number; height: number };
   };
 
   /**
@@ -99,7 +100,7 @@ export class MediaProcessor {
   constructor(
     logger: ILoggerService,
     fileUtils: FileUtils,
-    tempDir: string,
+    basePath: string,
     baseUrl: string = "",
   ) {
     this.logger = logger.createLogger("MediaProcessor");
@@ -107,8 +108,8 @@ export class MediaProcessor {
     this.imageProcessor = new ImageProcessor(logger, fileUtils);
     this.baseUrl = baseUrl;
 
-    // Ensure temp directory exists
-    this.fileUtils.ensureDirectory(tempDir);
+    // Ensure base directory exists
+    this.fileUtils.ensureDirectory(basePath);
   }
 
   /**
@@ -126,61 +127,72 @@ export class MediaProcessor {
 
   /**
    * Process media file based on its type
-   * @param sourcePath Source file path
-   * @param targetPath Target file path
+   * @param filePath Source file path
    * @param options Processing options
    */
   async processMedia(
-    sourcePath: string,
-    targetPath: string,
-    options: MediaOptions = {},
+    filePath: string,
+    options?: {
+      width?: number;
+      height?: number;
+      quality?: number;
+      format?: string;
+      targetPath?: string;
+    },
   ): Promise<MediaProcessingResult> {
     try {
       // Detect content type
-      const contentType = this.fileUtils.detectContentType(sourcePath);
+      const contentType = this.fileUtils.detectContentType(filePath);
       const category = getContentCategory(contentType);
 
       // Process based on media type
       switch (category) {
         case ContentCategory.IMAGE:
           return await this.processImage(
-            sourcePath,
-            targetPath,
+            filePath,
+            options?.targetPath || filePath,
             contentType,
-            options,
+            options as MediaOptions,
           );
         case ContentCategory.VIDEO:
           return await this.processVideo(
-            sourcePath,
-            targetPath,
+            filePath,
+            options?.targetPath || filePath,
             contentType,
-            options,
+            options as MediaOptions,
           );
         case ContentCategory.AUDIO:
           return await this.processAudio(
-            sourcePath,
-            targetPath,
+            filePath,
+            options?.targetPath || filePath,
             contentType,
-            options,
+            options as MediaOptions,
           );
         default: {
           // For other file types, just copy the file
-          await this.fileUtils.copyFile(sourcePath, targetPath);
+          await this.fileUtils.copyFile(
+            filePath,
+            options?.targetPath || filePath,
+          );
 
           // Get file stats
-          const stats = await this.fileUtils.getFileStats(targetPath);
+          const stats = await this.fileUtils.getFileStats(
+            options?.targetPath || filePath,
+          );
 
           return {
-            path: targetPath,
-            url: this.getFileUrl(targetPath),
+            path: options?.targetPath || filePath,
+            url: this.getFileUrl(options?.targetPath || filePath),
             contentType,
             size: stats.size,
-            metadata: { format: path.extname(targetPath).slice(1) },
+            metadata: {
+              format: path.extname(options?.targetPath || filePath).slice(1),
+            },
           };
         }
       }
     } catch (error) {
-      this.logger.error(`Error processing media: ${sourcePath}`, {
+      this.logger.error(`Error processing media: ${filePath}`, {
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;
@@ -228,6 +240,13 @@ export class MediaProcessor {
         width: processedMetadata.width,
         height: processedMetadata.height,
         format: processedMetadata.format,
+        dimensions:
+          processedMetadata.width && processedMetadata.height
+            ? {
+                width: processedMetadata.width,
+                height: processedMetadata.height,
+              }
+            : undefined,
       },
       thumbnail,
     };
@@ -284,6 +303,13 @@ export class MediaProcessor {
         height: metadata.height,
         duration: metadata.duration,
         format: path.extname(targetPath).slice(1),
+        dimensions:
+          metadata.width && metadata.height
+            ? {
+                width: metadata.width,
+                height: metadata.height,
+              }
+            : undefined,
       },
       thumbnail,
     };
@@ -323,6 +349,7 @@ export class MediaProcessor {
       metadata: {
         duration: metadata.duration,
         format: path.extname(targetPath).slice(1),
+        dimensions: { width: 0, height: 0 },
       },
     };
   }

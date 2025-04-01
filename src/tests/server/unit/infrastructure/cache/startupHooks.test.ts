@@ -1,5 +1,6 @@
 // Use the global TYPES from setup.ts
-import { ICacheService } from "@/server/infrastructure/cache/ICacheService";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+
 import {
   initializeCache,
   shutdownCache,
@@ -9,27 +10,30 @@ import { container } from "@/server/infrastructure/di";
 const TYPES = (global as any).__TEST_TYPES__;
 
 // Mock the container
-jest.mock("@/server/infrastructure/di", () => ({
+vi.mock("@/server/infrastructure/di", () => ({
   container: {
-    get: jest.fn(),
+    get: vi.fn(),
   },
 }));
 
 describe("Cache Startup Hooks", () => {
-  let mockCacheService: jest.Mocked<ICacheService>;
+  let mockCacheService: {
+    initialize: ReturnType<typeof vi.fn>;
+    shutdown: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     // Reset all mocks before each test
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Create mock cache service
     mockCacheService = {
-      initialize: jest.fn(),
-      shutdown: jest.fn(),
+      initialize: vi.fn(),
+      shutdown: vi.fn(),
     } as any;
 
     // Setup container mock
-    (container.get as jest.Mock).mockImplementation((type) => {
+    (container.get as ReturnType<typeof vi.fn>).mockImplementation((type) => {
       if (type === TYPES.CacheService) {
         return mockCacheService;
       }

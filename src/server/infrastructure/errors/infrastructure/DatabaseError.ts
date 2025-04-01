@@ -1,8 +1,9 @@
+import { AppError } from "@/server/infrastructure/errors";
+
 /**
  * Base error class for database-related errors
  */
-export class DatabaseError extends Error {
-  public readonly code: string;
+export class DatabaseError extends AppError {
   public readonly operation: string;
   public readonly entity: string;
   public readonly cause?: Error | string;
@@ -16,9 +17,8 @@ export class DatabaseError extends Error {
     const causeMessage = cause instanceof Error ? cause.message : cause;
     super(
       `Database operation '${operation}' failed for ${entity}${causeMessage ? `: ${causeMessage}` : ""}`,
+      code,
     );
-    this.name = "DatabaseError";
-    this.code = code;
     this.operation = operation;
     this.entity = entity;
     this.cause = cause;
@@ -26,9 +26,7 @@ export class DatabaseError extends Error {
 
   toJSON(): Record<string, unknown> {
     return {
-      name: this.name,
-      message: this.message,
-      code: this.code,
+      ...super.toJSON(),
       operation: this.operation,
       entity: this.entity,
       cause: this.cause instanceof Error ? this.cause.message : this.cause,

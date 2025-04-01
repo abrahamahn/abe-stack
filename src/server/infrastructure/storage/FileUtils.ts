@@ -31,7 +31,16 @@ export class FileUtils {
    * @param dirPath Directory path
    */
   async ensureDirectory(dirPath: string): Promise<void> {
-    await mkdir(dirPath, { recursive: true });
+    try {
+      // Normalize path to handle Windows paths correctly
+      const normalizedPath = path.normalize(dirPath);
+      await mkdir(normalizedPath, { recursive: true });
+    } catch (error) {
+      this.logger.error(`Failed to create directory: ${dirPath}`, {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
   }
 
   /**

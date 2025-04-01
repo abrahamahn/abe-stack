@@ -14,9 +14,9 @@ import type { ILoggerService } from "../../logging";
  */
 @injectable()
 export class FileSecretProvider implements SecretProvider {
-  private secrets: Record<string, string> = {};
-  private loaded = false;
-  private logger: ILoggerService;
+  protected secrets: Record<string, string> = {};
+  protected loaded = false;
+  protected logger: ILoggerService;
 
   /**
    * Creates a new FileSecretProvider instance

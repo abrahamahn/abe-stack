@@ -13,7 +13,7 @@
     "jsx": "react-jsx",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "types": ["jest", "node"],
+    "types": ["node"],
     // Output settings
     "outDir": "dist",
     "isolatedModules": true,
@@ -69,8 +69,10 @@
   "include": [
     "src/**/*",
     "vite.config.ts",
+    "vitest.config.js",
     ".eslintrc.js",
-    "playwright.config.ts"
+    "playwright.config.ts",
+    "convert-to-vitest.ts"
   ],
   "exclude": ["node_modules", "dist", "build", "backup/**/*"]
 }

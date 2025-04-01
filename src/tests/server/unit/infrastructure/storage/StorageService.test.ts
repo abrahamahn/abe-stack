@@ -1,8 +1,9 @@
 import { ReadStream } from "fs";
 
+import { describe, it, expect, beforeEach, vi } from "vitest";
+
 import {
   StorageService,
-  IStorageProvider,
   FileMetadata,
   FileSaveResult,
 } from "@infrastructure/storage";
@@ -13,37 +14,38 @@ describe("StorageService", () => {
   let storageService: StorageService;
   let mockLogger: ILoggerService;
   let loggerInstance: any;
-  let mockStorageProvider: jest.Mocked<IStorageProvider>;
+  let mockStorageProvider: any;
 
   beforeEach(() => {
     // Create mock logger instance first
     loggerInstance = {
-      debug: jest.fn(),
-      info: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
     };
 
     // Create mock logger
     mockLogger = {
-      createLogger: jest.fn().mockReturnValue(loggerInstance),
+      createLogger: vi.fn().mockReturnValue(loggerInstance),
     } as unknown as ILoggerService;
 
     // Create mock storage provider
     mockStorageProvider = {
-      initialize: jest.fn(),
-      shutdown: jest.fn(),
-      saveFile: jest.fn(),
-      getFile: jest.fn(),
-      getFileStream: jest.fn(),
-      getFileMetadata: jest.fn(),
-      deleteFile: jest.fn(),
-      fileExists: jest.fn(),
-      listFiles: jest.fn(),
-      copyFile: jest.fn(),
-      moveFile: jest.fn(),
-      getFileUrl: jest.fn(),
-    } as unknown as jest.Mocked<IStorageProvider>;
+      initialize: vi.fn(),
+      shutdown: vi.fn(),
+      saveFile: vi.fn(),
+      getFile: vi.fn(),
+      getFileStream: vi.fn(),
+      getFileMetadata: vi.fn(),
+      deleteFile: vi.fn(),
+      fileExists: vi.fn(),
+      listFiles: vi.fn(),
+      copyFile: vi.fn(),
+      moveFile: vi.fn(),
+      getFileUrl: vi.fn(),
+      createDirectory: vi.fn(),
+    } as unknown as any;
 
     // Create storage service - mockLogger.createLogger will be called during construction
     storageService = new StorageService(mockLogger, mockStorageProvider);
@@ -63,6 +65,17 @@ describe("StorageService", () => {
         "Storage service initialized",
       );
     });
+
+    it("should handle initialization errors", async () => {
+      const error = new Error("Initialization failed");
+      mockStorageProvider.initialize.mockRejectedValue(error);
+
+      await expect(storageService.initialize()).rejects.toThrow(error);
+      expect(loggerInstance.error).toHaveBeenCalledWith(
+        "Failed to initialize storage service",
+        { error: "Initialization failed" },
+      );
+    });
   });
 
   describe("shutdown", () => {
@@ -74,6 +87,67 @@ describe("StorageService", () => {
       expect(mockStorageProvider.shutdown).toHaveBeenCalled();
       expect(loggerInstance.info).toHaveBeenCalledWith(
         "Storage service shutdown",
+      );
+    });
+
+    it("should handle shutdown errors", async () => {
+      const error = new Error("Shutdown failed");
+      mockStorageProvider.shutdown.mockRejectedValue(error);
+
+      await expect(storageService.shutdown()).rejects.toThrow(error);
+      expect(loggerInstance.error).toHaveBeenCalledWith(
+        "Failed to shutdown storage service",
+        { error: "Shutdown failed" },
+      );
+    });
+  });
+
+  describe("createDirectory", () => {
+    it("should create directory successfully", async () => {
+      const dirPath = "test/dir";
+      mockStorageProvider.createDirectory.mockResolvedValue();
+
+      await storageService.createDirectory(dirPath);
+
+      expect(mockStorageProvider.createDirectory).toHaveBeenCalledWith(dirPath);
+    });
+
+    it("should handle directory creation errors", async () => {
+      const dirPath = "test/dir";
+      const error = new Error("Failed to create directory");
+      mockStorageProvider.createDirectory.mockRejectedValue(error);
+
+      await expect(storageService.createDirectory(dirPath)).rejects.toThrow(
+        error,
+      );
+      expect(loggerInstance.error).toHaveBeenCalledWith(
+        "Failed to create directory: test/dir",
+        { error: "Failed to create directory" },
+      );
+    });
+  });
+
+  describe("listFiles", () => {
+    it("should list files successfully", async () => {
+      const directory = "test/dir";
+      const files = ["file1.txt", "file2.pdf"];
+      mockStorageProvider.listFiles.mockResolvedValue(files);
+
+      const result = await storageService.listFiles(directory);
+
+      expect(mockStorageProvider.listFiles).toHaveBeenCalledWith(directory);
+      expect(result).toEqual(files);
+    });
+
+    it("should handle list files errors", async () => {
+      const directory = "test/dir";
+      const error = new Error("Failed to list files");
+      mockStorageProvider.listFiles.mockRejectedValue(error);
+
+      await expect(storageService.listFiles(directory)).rejects.toThrow(error);
+      expect(loggerInstance.error).toHaveBeenCalledWith(
+        "Failed to list files: test/dir",
+        { error: "Failed to list files" },
       );
     });
   });
@@ -170,6 +244,20 @@ describe("StorageService", () => {
       );
       expect(result).toBe(mockStream);
     });
+
+    it("should handle errors when getting a file stream", async () => {
+      const filePath = "test/file.txt";
+      const error = new Error("Failed to get file stream");
+      mockStorageProvider.getFileStream.mockRejectedValue(error);
+
+      await expect(storageService.getFileStream(filePath)).rejects.toThrow(
+        error,
+      );
+      expect(loggerInstance.error).toHaveBeenCalledWith(
+        "Failed to get file stream: test/file.txt",
+        { error: "Failed to get file stream" },
+      );
+    });
   });
 
   describe("getFileMetadata", () => {
@@ -191,6 +279,20 @@ describe("StorageService", () => {
       );
       expect(result).toBe(metadata);
     });
+
+    it("should handle errors when getting file metadata", async () => {
+      const filePath = "test/file.txt";
+      const error = new Error("Failed to get metadata");
+      mockStorageProvider.getFileMetadata.mockRejectedValue(error);
+
+      await expect(storageService.getFileMetadata(filePath)).rejects.toThrow(
+        error,
+      );
+      expect(loggerInstance.error).toHaveBeenCalledWith(
+        "Failed to get file metadata: test/file.txt",
+        { error: "Failed to get metadata" },
+      );
+    });
   });
 
   describe("deleteFile", () => {
@@ -204,6 +306,18 @@ describe("StorageService", () => {
       expect(mockStorageProvider.deleteFile).toHaveBeenCalledWith(filePath);
       expect(result).toBe(true);
     });
+
+    it("should handle errors when deleting a file", async () => {
+      const filePath = "test/file.txt";
+      const error = new Error("Failed to delete file");
+      mockStorageProvider.deleteFile.mockRejectedValue(error);
+
+      await expect(storageService.deleteFile(filePath)).rejects.toThrow(error);
+      expect(loggerInstance.error).toHaveBeenCalledWith(
+        "Failed to delete file: test/file.txt",
+        { error: "Failed to delete file" },
+      );
+    });
   });
 
   describe("fileExists", () => {
@@ -216,6 +330,18 @@ describe("StorageService", () => {
 
       expect(mockStorageProvider.fileExists).toHaveBeenCalledWith(filePath);
       expect(result).toBe(true);
+    });
+
+    it("should handle errors when checking file existence", async () => {
+      const filePath = "test/file.txt";
+      const error = new Error("Failed to check file existence");
+      mockStorageProvider.fileExists.mockRejectedValue(error);
+
+      await expect(storageService.fileExists(filePath)).rejects.toThrow(error);
+      expect(loggerInstance.error).toHaveBeenCalledWith(
+        "Failed to check if file exists: test/file.txt",
+        { error: "Failed to check file existence" },
+      );
     });
   });
 
@@ -234,6 +360,18 @@ describe("StorageService", () => {
         expiresIn,
       );
       expect(result).toBe(url);
+    });
+
+    it("should handle errors when getting file URL", async () => {
+      const filePath = "test/file.txt";
+      const error = new Error("Failed to get file URL");
+      mockStorageProvider.getFileUrl.mockRejectedValue(error);
+
+      await expect(storageService.getFileUrl(filePath)).rejects.toThrow(error);
+      expect(loggerInstance.error).toHaveBeenCalledWith(
+        "Failed to get file URL: test/file.txt",
+        { error: "Failed to get file URL" },
+      );
     });
   });
 });

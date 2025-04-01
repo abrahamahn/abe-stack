@@ -1,12 +1,20 @@
 import "reflect-metadata";
+import { Request, Response, NextFunction } from "express";
 import { Container, injectable, inject } from "inversify";
+import { Schema } from "joi";
+import { describe, it, expect, beforeEach } from "vitest";
 
+import { ICacheService } from "@/server/infrastructure/cache";
+import { IConfigService } from "@/server/infrastructure/config";
+import { IDatabaseServer } from "@/server/infrastructure/database";
 import {
   createContainer,
   container,
-  inject as injectHelper,
-  TYPES,
-} from "@infrastructure/di";
+} from "@/server/infrastructure/di/container";
+import { TYPES } from "@/server/infrastructure/di/types";
+import { IJobService } from "@/server/infrastructure/jobs";
+import { ILoggerService } from "@/server/infrastructure/logging";
+import { IWebSocketService } from "@/server/infrastructure/pubsub";
 
 // Test interfaces and implementations
 interface ITestService {
@@ -33,163 +41,183 @@ class ConfigurableService implements IConfigurableService {
   }
 }
 
-describe("DI Container", () => {
-  let testContainer: Container;
+describe("Container", () => {
+  describe("Infrastructure Type Definitions", () => {
+    it("should have type definitions for all infrastructure components", () => {
+      // Core infrastructure services
+      expect(TYPES.ConfigService).toBeDefined();
+      expect(TYPES.LoggerService).toBeDefined();
+      expect(TYPES.LoggingConfig).toBeDefined();
+      expect(TYPES.StorageService).toBeDefined();
+      expect(TYPES.StorageConfig).toBeDefined();
+      expect(TYPES.StorageProvider).toBeDefined();
+      expect(TYPES.CacheService).toBeDefined();
+      expect(TYPES.ErrorHandler).toBeDefined();
 
-  beforeEach(() => {
-    testContainer = new Container();
+      // Database services
+      expect(TYPES.DatabaseConfig).toBeDefined();
+      expect(TYPES.DatabaseService).toBeDefined();
+
+      // Job system
+      expect(TYPES.JobService).toBeDefined();
+      expect(TYPES.JobStorage).toBeDefined();
+      expect(TYPES.JobStorageConfig).toBeDefined();
+      expect(TYPES.JobServiceConfig).toBeDefined();
+
+      // Application lifecycle
+      expect(TYPES.ApplicationLifecycle).toBeDefined();
+
+      // Processor components
+      expect(TYPES.ImageProcessor).toBeDefined();
+      expect(TYPES.MediaProcessor).toBeDefined();
+      expect(TYPES.StreamProcessor).toBeDefined();
+
+      // Pubsub components
+      expect(TYPES.WebSocketService).toBeDefined();
+
+      // Server components
+      expect(TYPES.ServerManager).toBeDefined();
+
+      // Middleware components
+      expect(TYPES.ValidationMiddleware).toBeDefined();
+      expect(TYPES.RateLimitMiddleware).toBeDefined();
+    });
   });
 
-  afterEach(() => {
-    testContainer.unbindAll();
-  });
-
-  describe("createContainer", () => {
-    it("should create a container with all required services", () => {
-      const container = createContainer();
-
-      // Test core infrastructure services
-      expect(container.isBound(TYPES.ConfigService)).toBe(true);
-      expect(container.isBound(TYPES.LoggerService)).toBe(true);
-      expect(container.isBound(TYPES.StorageService)).toBe(true);
-      expect(container.isBound(TYPES.CacheService)).toBe(true);
-      expect(container.isBound(TYPES.DatabaseService)).toBe(true);
-
-      // Test database services
-      expect(container.isBound(TYPES.DatabaseConfig)).toBe(true);
-
-      // Test job system
-      expect(container.isBound(TYPES.JobService)).toBe(true);
-      expect(container.isBound(TYPES.JobStorage)).toBe(true);
-      expect(container.isBound(TYPES.JobStorageConfig)).toBe(true);
-      expect(container.isBound(TYPES.JobServiceConfig)).toBe(true);
+  describe("Container Factory", () => {
+    it("should create new container when no cache key provided", () => {
+      const container1 = createContainer();
+      const container2 = createContainer();
+      expect(container1).not.toBe(container2);
     });
 
-    it("should create singleton instances", () => {
-      const container = createContainer();
-
-      const service1 = container.get(TYPES.ConfigService);
-      const service2 = container.get(TYPES.ConfigService);
-
-      expect(service1).toBe(service2);
-    });
-  });
-
-  describe("container singleton", () => {
-    it("should maintain singleton instance across imports", () => {
-      const container1 = container;
-      const container2 = container;
-
+    it("should reuse container with same cache key", () => {
+      const container1 = createContainer({ cacheKey: "test" });
+      const container2 = createContainer({ cacheKey: "test" });
       expect(container1).toBe(container2);
     });
 
-    it("should have all required services bound", () => {
-      expect(container.isBound(TYPES.ConfigService)).toBe(true);
-      expect(container.isBound(TYPES.LoggerService)).toBe(true);
-      expect(container.isBound(TYPES.DatabaseService)).toBe(true);
+    it("should create different containers for different cache keys", () => {
+      const container1 = createContainer({ cacheKey: "test1" });
+      const container2 = createContainer({ cacheKey: "test2" });
+      expect(container1).not.toBe(container2);
     });
   });
 
-  describe("inject helper", () => {
-    it("should inject dependencies using the helper function", () => {
-      const service = injectHelper<ITestService>(TYPES.ConfigService);
+  describe("Service Registration", () => {
+    let testContainer: Container;
+
+    beforeEach(() => {
+      testContainer = createContainer();
+    });
+
+    it("should register and resolve configurable service", () => {
+      testContainer
+        .bind<IConfigurableService>("ConfigurableService")
+        .to(ConfigurableService);
+      const service = testContainer.get<IConfigurableService>(
+        "ConfigurableService",
+      );
       expect(service).toBeDefined();
+      expect(service.getConfig).toBeDefined();
     });
 
-    it("should throw error for unbound service", () => {
-      expect(() => {
-        injectHelper<ITestService>(Symbol.for("UnboundService"));
-      }).toThrow();
-    });
-  });
-
-  describe("service registration", () => {
-    it("should register and resolve a service", () => {
-      testContainer.bind<ITestService>(TYPES.ConfigService).to(TestService);
-      const service = testContainer.get<ITestService>(TYPES.ConfigService);
+    it("should register and resolve test service", () => {
+      testContainer.bind<ITestService>("TestService").to(TestService);
+      const service = testContainer.get<ITestService>("TestService");
       expect(service.getValue()).toBe("test value");
     });
 
-    it("should handle nested dependencies", () => {
-      testContainer
-        .bind<IConfigurableService>(TYPES.ConfigService)
-        .to(ConfigurableService);
-      const service = testContainer.get<IConfigurableService>(
-        TYPES.ConfigService,
+    it("should register and resolve core services", () => {
+      expect(() =>
+        testContainer.get<IConfigService>(TYPES.ConfigService),
+      ).not.toThrow();
+      expect(() =>
+        testContainer.get<ILoggerService>(TYPES.LoggerService),
+      ).not.toThrow();
+      expect(() =>
+        testContainer.get<ICacheService>(TYPES.CacheService),
+      ).not.toThrow();
+      expect(() =>
+        testContainer.get<IDatabaseServer>(TYPES.DatabaseService),
+      ).not.toThrow();
+    });
+
+    it("should register services in singleton scope", () => {
+      const logger1 = testContainer.get<ILoggerService>(TYPES.LoggerService);
+      const logger2 = testContainer.get<ILoggerService>(TYPES.LoggerService);
+      expect(logger1).toBe(logger2);
+    });
+
+    it("should register job system components", () => {
+      const jobService = testContainer.get<IJobService>(TYPES.JobService);
+      expect(jobService).toBeDefined();
+      expect(() => testContainer.get(TYPES.JobStorageConfig)).not.toThrow();
+      expect(() => testContainer.get(TYPES.JobServiceConfig)).not.toThrow();
+    });
+  });
+
+  describe("Middleware Registration", () => {
+    let testContainer: Container;
+
+    beforeEach(() => {
+      testContainer = createContainer();
+    });
+
+    it("should register validation middleware", () => {
+      const validateRequest = testContainer.get<
+        (
+          schema: Schema,
+        ) => (req: Request, res: Response, next: NextFunction) => void
+      >(TYPES.ValidationMiddleware);
+      expect(validateRequest).toBeDefined();
+      expect(typeof validateRequest).toBe("function");
+    });
+
+    it("should register rate limit middleware", () => {
+      const rateLimitMiddleware = testContainer.get<
+        (
+          limiterKey: string,
+        ) => (req: Request, res: Response, next: NextFunction) => Promise<void>
+      >(TYPES.RateLimitMiddleware);
+      expect(rateLimitMiddleware).toBeDefined();
+      expect(typeof rateLimitMiddleware).toBe("function");
+    });
+  });
+
+  describe("Circular Dependency Handling", () => {
+    let testContainer: Container;
+
+    beforeEach(() => {
+      testContainer = createContainer();
+    });
+
+    it("should handle WebSocketService circular dependency", () => {
+      const webSocketService = testContainer.get<IWebSocketService>(
+        TYPES.WebSocketService,
       );
-      expect(service.getConfig()).toBeDefined();
+      expect(webSocketService).toBeDefined();
     });
 
-    it("should maintain singleton scope", () => {
-      testContainer
-        .bind<ITestService>(TYPES.ConfigService)
-        .to(TestService)
-        .inSingletonScope();
-      const service1 = testContainer.get<ITestService>(TYPES.ConfigService);
-      const service2 = testContainer.get<ITestService>(TYPES.ConfigService);
-      expect(service1).toBe(service2);
-    });
-
-    it("should create new instances in transient scope", () => {
-      testContainer
-        .bind<ITestService>(TYPES.ConfigService)
-        .to(TestService)
-        .inTransientScope();
-      const service1 = testContainer.get<ITestService>(TYPES.ConfigService);
-      const service2 = testContainer.get<ITestService>(TYPES.ConfigService);
-      expect(service1).not.toBe(service2);
+    it("should create WebSocketService with logger dependency", () => {
+      const webSocketService = testContainer.get<IWebSocketService>(
+        TYPES.WebSocketService,
+      );
+      expect(webSocketService).toBeDefined();
+      // Verify logger was injected (implementation specific check)
+      expect((webSocketService as any).logger).toBeDefined();
     });
   });
 
-  describe("error handling", () => {
-    it("should throw error when resolving unbound service", () => {
-      expect(() => {
-        testContainer.get<ITestService>(Symbol.for("UnboundService"));
-      }).toThrow();
+  describe("Default Container Instance", () => {
+    it("should export a default container instance", () => {
+      expect(container).toBeDefined();
+      expect(container).toBeInstanceOf(Container);
     });
 
-    it("should throw error when resolving service with missing dependencies", () => {
-      testContainer
-        .bind<IConfigurableService>(TYPES.ConfigService)
-        .to(ConfigurableService);
-      expect(() => {
-        testContainer.get<IConfigurableService>(TYPES.ConfigService);
-      }).toThrow();
-    });
-  });
-
-  describe("container lifecycle", () => {
-    it("should unbind all services", () => {
-      testContainer.bind<ITestService>(TYPES.ConfigService).to(TestService);
-      expect(testContainer.isBound(TYPES.ConfigService)).toBe(true);
-
-      testContainer.unbindAll();
-      expect(testContainer.isBound(TYPES.ConfigService)).toBe(false);
-    });
-
-    it("should handle container reset", () => {
-      testContainer.bind<ITestService>(TYPES.ConfigService).to(TestService);
-      const service1 = testContainer.get<ITestService>(TYPES.ConfigService);
-
-      testContainer.unbindAll();
-      testContainer.bind<ITestService>(TYPES.ConfigService).to(TestService);
-      const service2 = testContainer.get<ITestService>(TYPES.ConfigService);
-
-      expect(service1).not.toBe(service2);
-    });
-  });
-
-  describe("service types", () => {
-    it("should have unique symbols for all services", () => {
-      const symbols = Object.values(TYPES);
-      const uniqueSymbols = new Set(symbols);
-      expect(symbols.length).toBe(uniqueSymbols.size);
-    });
-
-    it("should have descriptive service names", () => {
-      expect(TYPES.ConfigService.toString()).toContain("ConfigService");
-      expect(TYPES.LoggerService.toString()).toContain("LoggerService");
-      expect(TYPES.DatabaseService.toString()).toContain("DatabaseService");
+    it("should have the same instance for default cache key", () => {
+      const defaultContainer = createContainer({ cacheKey: "default" });
+      expect(container).toBe(defaultContainer);
     });
   });
 });

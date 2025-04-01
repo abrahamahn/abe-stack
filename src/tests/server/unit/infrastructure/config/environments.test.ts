@@ -1,28 +1,42 @@
 import * as fs from "fs";
 
 import * as dotenv from "dotenv";
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  afterAll,
+  vi,
+} from "vitest";
 
 import {
   loadEnvFiles,
   isDevelopment,
   isProduction,
   isTest,
+  getServerEnvironment,
+  ensureRequiredEnvironmentVariables,
 } from "@/server/infrastructure/config/environments";
 
 // Mock modules
-jest.mock("fs");
-jest.mock("dotenv", () => ({
-  parse: jest.fn().mockImplementation(() => ({})),
-  config: jest.fn().mockImplementation(() => ({ parsed: {} })),
+vi.mock("fs", () => ({
+  existsSync: vi.fn(),
+  readFileSync: vi.fn(),
 }));
-jest.mock("path", () => ({
-  ...jest.requireActual("path"),
-  join: jest.fn().mockImplementation((...args) => args.join("/")),
-  resolve: jest.fn().mockImplementation((...args) => args.join("/")),
+vi.mock("dotenv", () => ({
+  parse: vi.fn().mockImplementation(() => ({})),
+  config: vi.fn().mockImplementation(() => ({ parsed: {} })),
+}));
+vi.mock("path", () => ({
+  ...vi.importActual("path"),
+  join: vi.fn().mockImplementation((...args: any) => args.join("/")),
+  resolve: vi.fn().mockImplementation((...args: any) => args.join("/")),
 }));
 
-const mockedFs = fs as jest.Mocked<typeof fs>;
-const mockedDotenv = dotenv as jest.Mocked<typeof dotenv>;
+const mockedFs = fs as any;
+const mockedDotenv = dotenv as any;
 
 describe("Environments Utils", () => {
   // Keep original process.env
@@ -30,7 +44,7 @@ describe("Environments Utils", () => {
 
   beforeEach(() => {
     // Reset process.env between tests
-    jest.resetModules();
+    vi.resetModules();
     process.env = { ...originalEnv };
 
     // Clear mocks
@@ -92,7 +106,7 @@ describe("Environments Utils", () => {
 
       // Track existsSync calls
       const paths: string[] = [];
-      mockedFs.existsSync.mockImplementation((path) => {
+      mockedFs.existsSync.mockImplementation((path: any) => {
         paths.push(String(path));
         return false;
       });
@@ -171,7 +185,9 @@ describe("Environments Utils", () => {
 
       // Setup fs mock
       mockedFs.existsSync.mockReturnValue(true);
-      mockedFs.readFileSync.mockReturnValue(mockEnvContent);
+      vi.spyOn(fs, "readFileSync").mockImplementation(() =>
+        Buffer.from(mockEnvContent),
+      );
 
       // Setup dotenv to parse our mock content and update process.env
       mockedDotenv.config.mockImplementation(() => {
@@ -208,6 +224,118 @@ describe("Environments Utils", () => {
       expect(process.env.HOST).toBe("localhost");
       expect(process.env.NODE_ENV).toBe("development");
       expect(process.env.LOG_LEVEL).toBe("debug");
+    });
+  });
+
+  describe("getServerEnvironment", () => {
+    it("should return server environment with config values", () => {
+      // Setup environment variables
+      process.env.NODE_ENV = "development";
+      process.env.BASE_URL = "http://localhost:5000";
+      process.env.PORT = "5000";
+      process.env.HOST = "127.0.0.1";
+      process.env.CORS_ORIGIN = "http://localhost:3000";
+      process.env.SIGNATURE_SECRET = "test-signature-secret";
+      process.env.PASSWORD_SALT = "test-password-salt";
+
+      // Get server environment
+      const serverEnv = getServerEnvironment();
+
+      // Verify server environment properties
+      expect(serverEnv.nodeEnv).toBe("development");
+      expect(serverEnv.isDevelopment).toBe(true);
+      expect(serverEnv.isProduction).toBe(false);
+      expect(serverEnv.isTest).toBe(false);
+
+      // Verify config properties
+      expect(serverEnv.config.baseUrl).toBe("http://localhost:5000");
+      expect(serverEnv.config.port).toBe(5000);
+      expect(serverEnv.config.host).toBe("127.0.0.1");
+      expect(serverEnv.config.corsOrigin).toBe("http://localhost:3000");
+      expect(serverEnv.config.signatureSecret.toString()).toContain(
+        "test-signature-secret",
+      );
+      expect(serverEnv.config.passwordSalt).toBe("test-password-salt");
+    });
+
+    it("should use default values when environment variables are not set", () => {
+      // Clear relevant environment variables
+      delete process.env.BASE_URL;
+      delete process.env.PORT;
+      delete process.env.HOST;
+      delete process.env.CORS_ORIGIN;
+      delete process.env.SIGNATURE_SECRET;
+      delete process.env.PASSWORD_SALT;
+
+      // Get server environment with defaults
+      const serverEnv = getServerEnvironment();
+
+      // Verify default config values are used
+      expect(serverEnv.config.baseUrl).toBe("http://localhost:3003");
+      expect(serverEnv.config.port).toBe(3003);
+      expect(serverEnv.config.host).toBe("localhost");
+      expect(serverEnv.config.corsOrigin).toBe("*");
+      expect(serverEnv.config.signatureSecret).toBeDefined();
+      expect(serverEnv.config.passwordSalt).toBe("default-password-salt");
+    });
+  });
+
+  describe("ensureRequiredEnvironmentVariables", () => {
+    const originalNodeEnv = process.env.NODE_ENV;
+
+    afterEach(() => {
+      // Restore NODE_ENV
+      process.env.NODE_ENV = originalNodeEnv;
+    });
+
+    it("should not throw in development environment even with missing variables", () => {
+      // Set development environment
+      process.env.NODE_ENV = "development";
+
+      // Clear required environment variables
+      delete process.env.SIGNATURE_SECRET;
+      delete process.env.PASSWORD_SALT;
+
+      // This should not throw in development
+      expect(() => ensureRequiredEnvironmentVariables()).not.toThrow();
+    });
+
+    it("should not throw in test environment even with missing variables", () => {
+      // Set test environment
+      process.env.NODE_ENV = "test";
+
+      // Clear required environment variables
+      delete process.env.SIGNATURE_SECRET;
+      delete process.env.PASSWORD_SALT;
+
+      // This should not throw in test
+      expect(() => ensureRequiredEnvironmentVariables()).not.toThrow();
+    });
+
+    it("should throw in production when required variables are missing", () => {
+      // Set production environment
+      process.env.NODE_ENV = "production";
+
+      // Clear required environment variables
+      delete process.env.SIGNATURE_SECRET;
+      delete process.env.PASSWORD_SALT;
+
+      // This should throw in production
+      expect(() => ensureRequiredEnvironmentVariables()).toThrow(
+        /Missing required environment variables/,
+      );
+    });
+
+    it("should not throw in production when all required variables are present", () => {
+      // Set production environment
+      process.env.NODE_ENV = "production";
+
+      // Set required environment variables
+      process.env.SIGNATURE_SECRET = "test-secret";
+      process.env.PASSWORD_SALT = "test-salt";
+
+      // This should not throw in production
+      expect(() => ensureRequiredEnvironmentVariables()).not.toThrow();
     });
   });
 });

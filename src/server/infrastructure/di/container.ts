@@ -2,19 +2,23 @@ import "reflect-metadata";
 
 import path from "path";
 
+import { Request, Response, NextFunction } from "express";
 import { Container } from "inversify";
+import { Schema } from "joi";
 
 import { ICacheService, CacheService } from "@/server/infrastructure/cache";
 import {
   ConfigService,
   IConfigService,
   StorageConfigProvider,
+  LoggingConfig,
 } from "@/server/infrastructure/config";
 import {
   DatabaseConfigProvider,
   DatabaseServer,
   IDatabaseServer,
 } from "@/server/infrastructure/database";
+import { TransactionService } from "@/server/infrastructure/database/TransactionService";
 import { TYPES } from "@/server/infrastructure/di/types";
 import { ErrorHandler } from "@/server/infrastructure/errors";
 import {
@@ -26,10 +30,21 @@ import {
   JobService,
 } from "@/server/infrastructure/jobs";
 import {
-  ILoggerService,
-  LoggerService,
-  LoggingConfig,
-} from "@/server/infrastructure/logging";
+  ApplicationLifecycle,
+  IApplicationLifecycle,
+} from "@/server/infrastructure/lifecycle";
+import { ILoggerService, LoggerService } from "@/server/infrastructure/logging";
+import {
+  validateRequest,
+  rateLimitMiddleware,
+} from "@/server/infrastructure/middleware";
+import {
+  ImageProcessor,
+  MediaProcessor,
+  StreamProcessor,
+} from "@/server/infrastructure/processor";
+import { IWebSocketService } from "@/server/infrastructure/pubsub";
+import { ServerManager } from "@/server/infrastructure/server";
 import {
   IStorageProvider,
   LocalStorageProvider,
@@ -37,8 +52,20 @@ import {
   IStorageService,
 } from "@/server/infrastructure/storage";
 
+// Import IWebSocketService here but lazy-load the actual WebSocketService
+// to avoid circular dependencies
+
 // Cache for container instances
 const containerCache = new Map<string, Container>();
+
+// Create a factory to break circular dependency
+class WebSocketServiceFactory {
+  static createInstance(logger: ILoggerService): IWebSocketService {
+    // Dynamic loading to avoid circular dependency
+    const { WebSocketService } = require("../../pubsub/WebSocketService");
+    return new WebSocketService(logger);
+  }
+}
 
 /**
  * Create and configure the DI container
@@ -98,6 +125,58 @@ function registerInfrastructureServices(container: Container): void {
 
   // Register error handler
   container.bind<ErrorHandler>(TYPES.ErrorHandler).to(ErrorHandler);
+
+  // Register application lifecycle
+  container
+    .bind<IApplicationLifecycle>(TYPES.ApplicationLifecycle)
+    .to(ApplicationLifecycle);
+
+  // Register processor components
+  container.bind<ImageProcessor>(TYPES.ImageProcessor).to(ImageProcessor);
+  container.bind<MediaProcessor>(TYPES.MediaProcessor).to(MediaProcessor);
+  container.bind<StreamProcessor>(TYPES.StreamProcessor).to(StreamProcessor);
+
+  // Register server components
+  container.bind<ServerManager>(TYPES.ServerManager).to(ServerManager);
+
+  // Register middleware components - using proper function signatures
+  container
+    .bind<
+      (
+        schema: Schema,
+      ) => (req: Request, res: Response, next: NextFunction) => void
+    >(TYPES.ValidationMiddleware)
+    .toFunction(validateRequest);
+
+  // Export the rateLimiters type for proper typing
+  type RateLimiterKeys =
+    | "login"
+    | "register"
+    | "passwordReset"
+    | "tokenRefresh"
+    | "emailVerification"
+    | "mfaVerify"
+    | "api";
+
+  container
+    .bind<
+      (
+        limiterKey: RateLimiterKeys,
+      ) => (req: Request, res: Response, next: NextFunction) => Promise<void>
+    >(TYPES.RateLimitMiddleware)
+    .toFunction(
+      rateLimitMiddleware as (
+        limiterKey: RateLimiterKeys,
+      ) => (req: Request, res: Response, next: NextFunction) => Promise<void>,
+    );
+
+  // Register WebSocketService lazily to avoid circular dependencies
+  container
+    .bind<IWebSocketService>(TYPES.WebSocketService)
+    .toDynamicValue((context) => {
+      const logger = context.container.get<ILoggerService>(TYPES.LoggerService);
+      return WebSocketServiceFactory.createInstance(logger);
+    });
 }
 
 /**
@@ -112,6 +191,9 @@ function registerDatabaseServices(container: Container): void {
 
   // Register database service
   container.bind<IDatabaseServer>(TYPES.DatabaseService).to(DatabaseServer);
+
+  // Register transaction service
+  container.bind(TYPES.TransactionService).to(TransactionService);
 }
 
 /**

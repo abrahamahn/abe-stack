@@ -1,3 +1,5 @@
+import { describe, it, expect, beforeEach } from "vitest";
+
 import { SecretProvider } from "@/server/infrastructure/config/secrets/SecretProvider";
 
 /**

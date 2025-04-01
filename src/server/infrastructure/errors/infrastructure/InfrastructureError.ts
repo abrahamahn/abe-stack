@@ -1,17 +1,22 @@
-import { BaseError } from "@/server/infrastructure/errors";
+import { AppError } from "@/server/infrastructure/errors";
 
 /**
  * Base class for all infrastructure-related errors
  * This includes errors with databases, caches, external services, etc.
  */
-export class InfrastructureError extends BaseError {
+export class InfrastructureError extends AppError {
   /**
    * Create a new infrastructure error
    * @param message Error message
    * @param code Error code
+   * @param statusCode HTTP status code
    */
-  constructor(message: string, code = "INFRASTRUCTURE_ERROR") {
-    super(message, code);
+  constructor(
+    message: string,
+    code = "INFRASTRUCTURE_ERROR",
+    statusCode = 500,
+  ) {
+    super(message, code, statusCode);
   }
 }
 
@@ -34,6 +39,7 @@ export class CacheError extends InfrastructureError {
     super(
       `Cache operation '${operation}'${key ? ` for key '${key}'` : ""} failed${causeMessage ? `: ${causeMessage}` : ""}`,
       "CACHE_ERROR",
+      500,
     );
     this.operation = operation;
     this.key = key;
@@ -46,7 +52,6 @@ export class CacheError extends InfrastructureError {
  */
 export class NetworkError extends InfrastructureError {
   readonly url?: string;
-  readonly statusCode?: number;
   readonly cause?: Error | string;
 
   /**
@@ -55,14 +60,14 @@ export class NetworkError extends InfrastructureError {
    * @param statusCode Optional HTTP status code
    * @param cause Optional cause of the error
    */
-  constructor(url?: string, statusCode?: number, cause?: Error | string) {
+  constructor(url?: string, statusCode = 500, cause?: Error | string) {
     const causeMessage = cause instanceof Error ? cause.message : cause;
     super(
       `Network request${url ? ` to '${url}'` : ""}${statusCode ? ` failed with status ${statusCode}` : " failed"}${causeMessage ? `: ${causeMessage}` : ""}`,
       "NETWORK_ERROR",
+      statusCode,
     );
     this.url = url;
-    this.statusCode = statusCode;
     this.cause = cause;
   }
 }
@@ -86,6 +91,7 @@ export class ExternalServiceError extends InfrastructureError {
     super(
       `External service '${service}' operation '${operation}' failed${causeMessage ? `: ${causeMessage}` : ""}`,
       "EXTERNAL_SERVICE_ERROR",
+      500,
     );
     this.service = service;
     this.operation = operation;

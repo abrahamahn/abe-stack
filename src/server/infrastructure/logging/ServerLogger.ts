@@ -1,6 +1,6 @@
 import path from "path";
 
-import type { ILoggerService } from "./index";
+import type { ILoggerService } from "./ILoggerService";
 
 // Service interfaces
 interface DatabaseService {

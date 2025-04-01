@@ -261,7 +261,7 @@ export class ImageProcessor {
       // Force garbage collection without unsafe cast
       if (image && typeof image === "object") {
         // Use optional chaining to safely access and modify properties
-        (image as any).options = null;
+        (image as unknown as { options: unknown }).options = null;
       }
 
       return targetPath;

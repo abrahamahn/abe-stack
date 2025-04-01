@@ -7,7 +7,7 @@ import { AppError } from "./AppError";
 import { IErrorHandler } from "./IErrorHandler";
 import { NetworkError } from "./infrastructure/InfrastructureError";
 import { ServiceError } from "./ServiceError";
-import { InitializationError } from "./technical/TechnicalError";
+import { InitializationError } from "./TechnicalError";
 
 import type { ILoggerService } from "../logging";
 

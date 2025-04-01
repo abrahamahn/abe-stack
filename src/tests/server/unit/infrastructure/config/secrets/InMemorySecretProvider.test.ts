@@ -1,3 +1,5 @@
+import { describe, it, expect } from "vitest";
+
 import { InMemorySecretProvider } from "@/server/infrastructure/config/secrets/InMemorySecretProvider";
 
 describe("InMemorySecretProvider", () => {

@@ -1,5 +1,8 @@
-// Selectively export from "./types" to avoid conflicts
-import type {
+/**
+ * Type definitions exports
+ */
+// Selectively export from types to avoid conflicts
+export type {
   PaginationOptions,
   PaginatedResult,
   FuzzyMatchType,
@@ -7,16 +10,6 @@ import type {
   FuzzyMatchOptions,
 } from "./types";
 
-// Export types using 'export type' syntax
-export type {
-  PaginationOptions,
-  PaginatedResult,
-  FuzzyMatchType,
-  FuzzyMatchResultType,
-  FuzzyMatchOptions,
-};
-
 // Export everything else
 export * from "./typeHelpers";
 export * from "./dataTypes";
-export * from "./PubSubTypes";

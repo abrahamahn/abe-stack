@@ -1,19 +1,20 @@
 /**
- * Global Jest setup file.
+ * Global Vitest setup file.
  * Runs before each test file.
  */
 
 // Set default timeout for all tests
-jest.setTimeout(30000);
+import { vi, beforeAll, afterAll } from "vitest";
+vi.setConfig({ testTimeout: 30000 });
 
 // Ensure reflect-metadata is imported for decorators to work
 import "reflect-metadata";
 
 // Set test environment variable to prevent real directory creation
 process.env.NODE_ENV = "test";
-process.env.STORAGE_PATH = "/mock-storage";
-process.env.UPLOAD_DIR = "/mock-uploads";
-process.env.TEMP_DIR = "/mock-temp";
+process.env.STORAGE_PATH = "/storage";
+process.env.UPLOAD_DIR = "/uploads";
+process.env.TEMP_DIR = "/temp";
 process.env.DISABLE_REAL_STORAGE = "true";
 
 // Load TYPES before tests run to avoid circular dependencies
@@ -26,12 +27,12 @@ Object.defineProperty(global, "__TEST_TYPES__", { value: TYPES });
 /*
 global.console = {
   ...console,
-  log: jest.fn(),
-  info: jest.fn(),
-  debug: jest.fn(),
+  log: vi.fn(),
+  info: vi.fn(),
+  debug: vi.fn(),
   // Keep error and warn for test debugging
-  // error: jest.fn(),
-  // warn: jest.fn(),
+  // error: vi.fn(),
+  // warn: vi.fn(),
 };
 */
 
@@ -41,17 +42,17 @@ beforeAll(() => {
 });
 
 // Mock file system operations in tests
-jest.mock("fs", () => {
-  const originalFs = jest.requireActual("fs");
+vi.mock("fs", async () => {
+  const originalFs = await vi.importActual("fs");
   return {
     ...originalFs,
     // Mock mkdir and mkdirSync to avoid actual directory creation in tests
-    mkdir: jest.fn().mockImplementation((_path, _options, callback) => {
+    mkdir: vi.fn().mockImplementation((_path, _options, callback) => {
       if (callback) callback(null);
       return Promise.resolve();
     }),
-    mkdirSync: jest.fn().mockImplementation(() => undefined),
-    existsSync: jest.fn().mockImplementation(() => true),
+    mkdirSync: vi.fn().mockImplementation(() => undefined),
+    existsSync: vi.fn().mockImplementation(() => true),
   };
 });
 

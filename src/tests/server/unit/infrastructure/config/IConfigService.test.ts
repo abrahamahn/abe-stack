@@ -1,3 +1,5 @@
+import { describe, it, expect, beforeEach, vi } from "vitest";
+
 import {
   ConfigSchema,
   ValidatedConfig,
@@ -303,6 +305,22 @@ describe("IConfigService Interface", () => {
       configService.clearErrors();
       expect(configService.hasErrors()).toBe(false);
     });
+
+    it("should return errors with getErrors", () => {
+      const schema: ConfigSchema = {
+        properties: {
+          required_key: {
+            type: "string",
+            required: true,
+          },
+        },
+      };
+
+      configService.ensureValid(schema);
+      const errors = configService.getErrors();
+      expect(errors).toHaveLength(1);
+      expect(errors[0]).toMatch(/Missing required keys/);
+    });
   });
 
   describe("Collection Operations", () => {
@@ -365,11 +383,21 @@ describe("IConfigService Interface", () => {
       configService.set("key2", "different");
       expect(configService.equals(other)).toBe(true);
     });
+
+    it("should handle fromJSON operation", () => {
+      const data = { test: "value", number: 42 };
+      const json = JSON.stringify(data);
+
+      configService.fromJSON(json);
+
+      expect(configService.get("test")).toBe("value");
+      expect(configService.get("number")).toBe(42);
+    });
   });
 
   describe("Watch Operations", () => {
     it("should handle watching values", () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       const unwatch = configService.watch("test", callback);
 
       configService.set("test", "new value");
@@ -381,8 +409,8 @@ describe("IConfigService Interface", () => {
     });
 
     it("should handle multiple watchers", () => {
-      const callback1 = jest.fn();
-      const callback2 = jest.fn();
+      const callback1 = vi.fn();
+      const callback2 = vi.fn();
 
       configService.watch("test", callback1);
       configService.watch("test", callback2);
@@ -393,12 +421,72 @@ describe("IConfigService Interface", () => {
     });
 
     it("should handle unwatchAll", () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       configService.watch("test", callback);
 
       configService.unwatchAll();
       configService.set("test", "value");
       expect(callback).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("Lifecycle Methods", () => {
+    it("should initialize successfully", async () => {
+      // Since our test implementation just returns a resolved promise
+      // we're mostly verifying the method exists and returns a promise
+      const initPromise = configService.initialize();
+      expect(initPromise).toBeInstanceOf(Promise);
+      await expect(initPromise).resolves.toBeUndefined();
+    });
+
+    it("should reset the configuration", () => {
+      // Set some values and errors
+      configService.set("key", "value");
+      configService.ensureValid({
+        properties: {
+          required: {
+            type: "string",
+            required: true,
+          },
+        },
+      });
+
+      // Verify we have content to reset
+      expect(configService.get("key")).toBe("value");
+      expect(configService.hasErrors()).toBe(true);
+
+      // Reset should clear both values and errors
+      configService.reset();
+
+      expect(configService.has("key")).toBe(false);
+      expect(configService.isEmpty()).toBe(true);
+      expect(configService.hasErrors()).toBe(false);
+    });
+
+    it("should reload configuration", async () => {
+      // Set some initial values
+      configService.set("key", "value");
+
+      // Our implementation doesn't actually reload anything but we want
+      // to test the method exists and returns a promise
+      const reloadPromise = configService.reload();
+      expect(reloadPromise).toBeInstanceOf(Promise);
+      await expect(reloadPromise).resolves.toBeUndefined();
+    });
+  });
+
+  describe("Utility Methods", () => {
+    it("should return the complete configuration with getConfig", () => {
+      // Set some test data
+      configService.set("key1", "value1");
+      configService.set("key2", 42);
+
+      const config = configService.getConfig();
+
+      expect(config).toEqual({
+        key1: "value1",
+        key2: 42,
+      });
     });
   });
 });

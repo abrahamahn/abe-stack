@@ -1,12 +1,14 @@
+import { describe, it, expect, beforeEach, vi } from "vitest";
+
 import { ConfigService } from "@/server/infrastructure/config/ConfigService";
 import { EmailConfigProvider } from "@/server/infrastructure/config/domain/EmailConfig";
 import { ConfigValidationError } from "@/server/infrastructure/errors/infrastructure/ConfigValidationError";
 
 // Mock ConfigService
-jest.mock("@config/ConfigService");
+vi.mock("@/server/infrastructure/config/ConfigService");
 
 describe("EmailConfig", () => {
-  let configService: jest.Mocked<ConfigService>;
+  let configService: any;
 
   const mockConfigValues: Record<string, string> = {
     EMAIL_HOST: "smtp.example.com",
@@ -17,34 +19,36 @@ describe("EmailConfig", () => {
 
   beforeEach(() => {
     // Reset mocks
-    (ConfigService as jest.Mock).mockClear();
+    vi.mocked(ConfigService).mockClear();
 
     // Set up configuration service mock
-    configService = new ConfigService() as jest.Mocked<ConfigService>;
+    configService = new ConfigService() as any;
 
     // Mock the get method
-    configService.get = jest.fn().mockImplementation((key, defaultValue) => {
-      return mockConfigValues[key] || defaultValue;
-    });
+    configService.get = vi
+      .fn()
+      .mockImplementation((key: any, defaultValue: any) => {
+        return mockConfigValues[key] || defaultValue;
+      });
 
     // Mock the getNumber method
-    configService.getNumber = jest
+    configService.getNumber = vi
       .fn()
-      .mockImplementation((key, defaultValue): number => {
+      .mockImplementation((key: any, defaultValue: any): number => {
         if (key === "EMAIL_PORT") return 465;
         return defaultValue ?? 0;
       });
 
     // Mock the getBoolean method
-    configService.getBoolean = jest
+    configService.getBoolean = vi
       .fn()
-      .mockImplementation((key, defaultValue): boolean => {
+      .mockImplementation((key: any, defaultValue: any): boolean => {
         if (key === "EMAIL_SECURE") return true;
         return defaultValue ?? false;
       });
 
     // Mock the ensureValid method
-    configService.ensureValid = jest.fn();
+    configService.ensureValid = vi.fn();
   });
 
   it("should load email configuration with defaults", () => {
@@ -120,7 +124,7 @@ describe("EmailConfig", () => {
 
   it("should use custom configuration values", () => {
     // Setup mock with custom values
-    configService.get = jest.fn().mockImplementation((key) => {
+    configService.get = vi.fn().mockImplementation((key: any) => {
       const customValues: Record<string, string> = {
         EMAIL_HOST: "custom.smtp.example.com",
         EMAIL_USER: "custom@example.com",
@@ -130,7 +134,7 @@ describe("EmailConfig", () => {
       return customValues[key]; // Return undefined for any key not in the map
     });
 
-    configService.getNumber = jest.fn().mockImplementation((key) => {
+    configService.getNumber = vi.fn().mockImplementation((key: any) => {
       if (key === "EMAIL_PORT") return 587;
       return undefined; // Return undefined so the || operator in loadConfig works
     });
@@ -138,7 +142,7 @@ describe("EmailConfig", () => {
     // Note: Because of how the implementation works with getBoolean("EMAIL_SECURE") || true,
     // setting getBoolean to return false will still result in true due to the || operator
     // In the real implementation, secure will always be true unless explicitly set to null/undefined
-    configService.getBoolean = jest.fn().mockImplementation((_key) => {
+    configService.getBoolean = vi.fn().mockImplementation((_key: any) => {
       // We can't return false here as the || true in the implementation will override it
       return undefined; // This will result in the default true being used
     });
