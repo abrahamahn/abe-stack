@@ -15,7 +15,9 @@ export function getPath(relativePath: string): string {
     return relativePath;
   }
 
-  // Join with cwd and normalize to forward slashes
+  // Join with cwd and normalize
   const result = join(process.cwd(), relativePath);
+
+  // Convert backslashes to forward slashes for test consistency across operating systems
   return result.replace(/\\/g, "/");
 }

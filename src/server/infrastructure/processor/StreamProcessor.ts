@@ -1,13 +1,10 @@
 // StreamProcessor.ts
 import fs, { ReadStream, WriteStream } from "fs";
 import path from "path";
-import { Transform, Readable, Writable, pipeline } from "stream";
-import { promisify } from "util";
+import process from "process";
+import { Transform, Readable, Writable } from "stream";
 
 import { StreamOptions } from "@/server/infrastructure/storage";
-
-// Promisify pipeline
-const pipelineAsync = promisify(pipeline);
 
 /**
  * Stream processing statistics
@@ -103,19 +100,58 @@ export class StreamProcessor {
     transforms: Transform[] = [],
   ): Promise<StreamStats> {
     const startTime = Date.now();
+    let bytesProcessed = 0;
+    let inputStream: Readable;
+    let outputStream: Writable;
 
-    // Create input stream if string path provided
-    const inputStream =
-      typeof source === "string" ? this.createReadStream(source) : source;
+    // Validate and create streams
+    if (typeof source === "string") {
+      // Check if source file exists
+      if (!fs.existsSync(source)) {
+        throw new Error(`Source file not found: ${source}`);
+      }
+      inputStream = fs.createReadStream(source);
+    } else {
+      inputStream = source;
+    }
 
-    // Create output stream if string path provided
-    const outputStream =
-      typeof destination === "string"
-        ? this.createWriteStream(destination)
-        : destination;
+    if (typeof destination === "string") {
+      // Ensure parent directory exists
+      const dirPath = path.dirname(destination);
+
+      // Check for invalid paths - especially important for Windows
+      // For invalid paths like "/invalid/directory/file.txt", we need special handling
+      if (
+        process.platform === "win32" &&
+        destination.startsWith("/") &&
+        !destination.match(/^\/[a-zA-Z]:/)
+      ) {
+        // This is an invalid Windows path - it starts with / but doesn't have a drive letter after it
+        if (inputStream && typeof source === "string") {
+          inputStream.destroy();
+        }
+        throw new Error(`Invalid Windows path: ${destination}`);
+      }
+
+      try {
+        if (!fs.existsSync(dirPath)) {
+          fs.mkdirSync(dirPath, { recursive: true });
+        }
+        outputStream = fs.createWriteStream(destination);
+      } catch (err: unknown) {
+        // Clean up any resources
+        if (inputStream && typeof source === "string") {
+          inputStream.destroy();
+        }
+        throw new Error(
+          `Failed to create output path: ${destination}. ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+    } else {
+      outputStream = destination;
+    }
 
     // Create metrics tracking transform
-    let bytesProcessed = 0;
     const metricsTransform = new Transform({
       transform(chunk, _encoding, callback) {
         bytesProcessed += chunk.length;
@@ -123,37 +159,68 @@ export class StreamProcessor {
       },
     });
 
-    // Build pipeline stages
-    const stages: [Readable, ...Array<Transform | Writable>] = [inputStream];
+    // Connect the streams manually with error handling
+    return await new Promise((resolve, reject) => {
+      // Set up error handlers for both streams
+      inputStream.on("error", (err) => {
+        cleanupStreams();
+        reject(err);
+      });
 
-    // Add transforms if provided
-    if (transforms.length > 0) {
-      stages.push(...transforms);
-    }
+      outputStream.on("error", (err) => {
+        cleanupStreams();
+        reject(err);
+      });
 
-    // Add metrics transform
-    stages.push(metricsTransform);
+      // Clean up function to prevent memory leaks
+      const cleanupStreams = (): void => {
+        try {
+          if (inputStream && typeof source === "string") {
+            inputStream.destroy();
+          }
+          if (outputStream && typeof destination === "string") {
+            outputStream.destroy();
+          }
+        } catch (e) {
+          console.error("Error during stream cleanup:", e);
+        }
+      };
 
-    // Add output stream
-    stages.push(outputStream);
+      // Set up pipeline with transforms
+      let currentStream: Readable | Transform = inputStream;
 
-    // Run the pipeline
-    await (
-      pipelineAsync as (
-        ...streams: Array<Readable | Transform | Writable>
-      ) => Promise<void>
-    )(inputStream, ...transforms, metricsTransform, outputStream);
+      // Add transforms
+      for (const transform of transforms) {
+        transform.on("error", (err) => {
+          cleanupStreams();
+          reject(err);
+        });
+        currentStream = currentStream.pipe(transform);
+      }
 
-    // Calculate metrics
-    const endTime = Date.now();
-    const durationMs = endTime - startTime;
+      // Add metrics transform
+      metricsTransform.on("error", (err) => {
+        cleanupStreams();
+        reject(err);
+      });
+      currentStream = currentStream.pipe(metricsTransform);
 
-    return {
-      bytesProcessed,
-      durationMs,
-      bytesPerSecond:
-        durationMs > 0 ? Math.floor(bytesProcessed / (durationMs / 1000)) : 0,
-    };
+      // Connect to output and handle completion
+      currentStream.pipe(outputStream);
+
+      outputStream.on("finish", () => {
+        const endTime = Date.now();
+        const durationMs = endTime - startTime;
+        resolve({
+          bytesProcessed,
+          durationMs,
+          bytesPerSecond:
+            durationMs > 0
+              ? Math.floor(bytesProcessed / (durationMs / 1000))
+              : 0,
+        });
+      });
+    });
   }
 
   /**

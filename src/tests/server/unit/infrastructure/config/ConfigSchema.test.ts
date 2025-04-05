@@ -25,9 +25,7 @@ describe("ConfigSchema Validation", () => {
 
       expect(validResult.valid).toBe(true);
       expect(invalidResult.valid).toBe(false);
-      expect(invalidResult.errors).toContain(
-        "Required configuration key missing: REQUIRED_FIELD",
-      );
+      expect(invalidResult.errors).toContain("REQUIRED_FIELD is required");
     });
 
     it("should apply default values", () => {
@@ -340,9 +338,7 @@ describe("ConfigSchema Validation", () => {
       const result = validateConfig({}, schema);
 
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain(
-        "Required configuration key missing: REQUIRED_FIELD",
-      );
+      expect(result.errors).toContain("REQUIRED_FIELD is required");
     });
 
     it("should provide specific error for pattern validation failure", () => {

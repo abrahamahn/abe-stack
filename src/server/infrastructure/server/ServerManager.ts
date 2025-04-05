@@ -1,7 +1,13 @@
 import http from "http";
 import path from "path";
 
-import express, { Express, Request, Response, NextFunction } from "express";
+import express, {
+  Express,
+  Request,
+  Response,
+  NextFunction,
+  RequestHandler,
+} from "express";
 import helmet from "helmet";
 import { Container } from "inversify";
 import { WebSocketServer } from "ws";
@@ -276,11 +282,111 @@ export class ServerManager {
   configureApp(config: ServerConfig): void {
     const { isProduction, storagePath } = config;
 
+    // Body parsing middleware
+    this.app.use(express.json());
+    this.app.use(express.urlencoded({ extended: true }));
+
     // Apply production settings if needed
     if (isProduction) {
       // Basic server hardening settings including CORS
-      const helmetMiddleware = helmet() as unknown as NextFunction;
-      this.app.use(helmetMiddleware);
+      this.app.use(
+        helmet({
+          contentSecurityPolicy: {
+            directives: {
+              defaultSrc: ["'self'"],
+              scriptSrc: ["'self'", "'unsafe-inline'"],
+              styleSrc: ["'self'", "'unsafe-inline'"],
+              imgSrc: ["'self'", "data:"],
+            },
+          },
+          // Force HTTPS in production
+          hsts: {
+            maxAge: 31536000, // 1 year in seconds
+            includeSubDomains: true,
+            preload: true,
+          },
+        }),
+      );
+    }
+
+    // Try to configure cookie parser
+    try {
+      const cookieParserSymbol = Symbol.for("CookieParser");
+      if (this.container.isBound(cookieParserSymbol)) {
+        const cookieParser = this.container.get(cookieParserSymbol);
+        if (typeof cookieParser === "function") {
+          this.app.use(cookieParser as RequestHandler);
+          this.logger.info("Cookie parser middleware configured");
+        }
+      }
+    } catch (err) {
+      this.logger.warn("Failed to configure cookie parser", {
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+
+    // Try to configure CSRF protection
+    try {
+      const securityServiceSymbol = Symbol.for("SecurityService");
+      if (this.container.isBound(securityServiceSymbol)) {
+        const security = this.container.get(securityServiceSymbol);
+
+        // Check if security service has CSRF middleware
+        if (security && typeof security === "object") {
+          const csrfToken = (security as any).csrfToken;
+          const csrfProtection = (security as any).csrfProtection;
+
+          if (
+            typeof csrfToken === "function" &&
+            typeof csrfProtection === "function"
+          ) {
+            // Get CSRF protection config from environment or use defaults
+            const csrfSecret = this.services.configService?.getString(
+              "CSRF_SECRET",
+              "abe-stack-csrf-secret-key",
+            );
+            const csrfSecretBuffer = Buffer.from(
+              csrfSecret || "abe-stack-csrf-secret-key",
+            );
+
+            // Generate CSRF tokens for all routes
+            this.app.use(
+              csrfToken({
+                secretKey: csrfSecretBuffer,
+                cookieName: "abe-csrf-token",
+                headerName: "X-CSRF-Token",
+                expiryMs: isProduction ? 3600000 : 86400000, // 1 hour in prod, 24 hours in dev
+              }) as RequestHandler,
+            );
+            this.logger.info("CSRF token generation middleware configured");
+
+            // Create a router for protected API routes
+            const protectedRoutes = express.Router();
+            protectedRoutes.use(
+              csrfProtection({
+                secretKey: csrfSecretBuffer,
+                cookieName: "abe-csrf-token",
+                headerName: "X-CSRF-Token",
+                ignorePaths: [
+                  "/api/webhook",
+                  "/api/auth/login",
+                  "/api/auth/logout",
+                ],
+              }) as RequestHandler,
+            );
+
+            // Mount protected router at /api
+            this.app.use("/api", protectedRoutes);
+            this.logger.info(
+              "CSRF protection middleware configured for API routes",
+            );
+          }
+        }
+      }
+    } catch (err) {
+      this.logger.warn("Failed to configure CSRF protection", {
+        error: err instanceof Error ? err.message : String(err),
+      });
     }
 
     // Request logging
@@ -288,12 +394,40 @@ export class ServerManager {
       const start = Date.now();
       res.on("finish", () => {
         const duration = Date.now() - start;
-        this.logger.info(
-          `${req.method} ${req.url} ${res.statusCode} ${duration}ms`,
+        const statusCode = res.statusCode;
+        const level =
+          statusCode >= 500 ? "error" : statusCode >= 400 ? "warn" : "info";
+
+        this.logger[level](
+          `${req.method} ${req.url} ${statusCode} ${duration}ms`,
+          {
+            method: req.method,
+            url: req.url,
+            status: statusCode,
+            duration,
+            ip: req.ip || req.socket.remoteAddress,
+            userAgent: req.get("User-Agent") || "unknown",
+          },
         );
       });
       next();
     });
+
+    // Try to configure rate limiting
+    try {
+      const rateLimiterSymbol = Symbol.for("RateLimiter");
+      if (isProduction && this.container.isBound(rateLimiterSymbol)) {
+        const rateLimiter = this.container.get(rateLimiterSymbol);
+        if (typeof rateLimiter === "function") {
+          this.app.use(rateLimiter as RequestHandler);
+          this.logger.info("Rate limiter middleware configured");
+        }
+      }
+    } catch (err) {
+      this.logger.warn("Failed to configure rate limiter", {
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
 
     // Register file server for uploads
     const uploadsPath = path.resolve(storagePath);
@@ -307,7 +441,14 @@ export class ServerManager {
       },
     );
 
-    // Add more middleware and routes as needed
+    // 404 handler for all unmatched routes
+    this.app.use((req: Request, res: Response) => {
+      res.status(404).json({
+        error: "Not Found",
+        message: `The requested resource at ${req.path} was not found`,
+        path: req.path,
+      });
+    });
   }
 
   /**

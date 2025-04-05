@@ -314,7 +314,9 @@ describe("ImageProcessor", () => {
       expect(mockFileUtils.ensureDirectory).toHaveBeenCalledWith(targetDir);
 
       // Check resize was called with default size
-      expect(sharpInstance.resize).toHaveBeenCalledWith(200, 200, {
+      expect(sharpInstance.resize).toHaveBeenCalledWith({
+        width: 200,
+        height: 200,
         fit: "inside",
         withoutEnlargement: true,
       });
@@ -334,7 +336,9 @@ describe("ImageProcessor", () => {
       await imageProcessor.generateThumbnail(sourcePath, targetPath, size);
 
       // Check resize was called with custom size
-      expect(sharpInstance.resize).toHaveBeenCalledWith(100, 100, {
+      expect(sharpInstance.resize).toHaveBeenCalledWith({
+        width: 100,
+        height: 100,
         fit: "inside",
         withoutEnlargement: true,
       });
@@ -366,6 +370,9 @@ describe("ImageProcessor", () => {
       const filePath = "/path/to/image.jpg";
       const mockExif = Buffer.from("mock exif data");
 
+      // Mock fileExists to return true
+      mockFileUtils.fileExists.mockResolvedValue(true);
+
       // Mock metadata to include EXIF data
       const sharpInstance = sharp(filePath);
       (sharpInstance.metadata as any).mockResolvedValue({
@@ -385,6 +392,9 @@ describe("ImageProcessor", () => {
     it("should return null when no EXIF data is available", async () => {
       const filePath = "/path/to/image.jpg";
 
+      // Mock fileExists to return true
+      mockFileUtils.fileExists.mockResolvedValue(true);
+
       // Mock metadata without EXIF data
       const sharpInstance = sharp(filePath);
       (sharpInstance.metadata as any).mockResolvedValue({
@@ -402,11 +412,9 @@ describe("ImageProcessor", () => {
 
     it("should handle errors during EXIF extraction", async () => {
       const filePath = "/path/to/image.jpg";
-      const error = new Error("EXIF extraction failed");
 
-      // Mock sharp to throw error
-      const sharpInstance = sharp(filePath);
-      (sharpInstance.metadata as any).mockRejectedValue(error);
+      // Mock fileExists to return false to trigger the file missing error
+      mockFileUtils.fileExists.mockResolvedValue(false);
 
       const result = await imageProcessor.extractExifData(filePath);
       expect(result).toBeNull();
@@ -414,7 +422,7 @@ describe("ImageProcessor", () => {
       const logger = mockLogger.createLogger("ImageProcessor");
       expect(logger.error).toHaveBeenCalledWith(
         `Error extracting EXIF data: ${filePath}`,
-        { error: "EXIF extraction failed" },
+        { error: `Input file is missing: ${filePath}` },
       );
     });
   });

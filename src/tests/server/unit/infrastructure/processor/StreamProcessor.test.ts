@@ -150,10 +150,25 @@ describe("StreamProcessor", () => {
   });
 
   describe("processStream", () => {
+    beforeEach(() => {
+      // Mock process.platform to be non-Windows for these tests
+      const originalPlatform = process.platform;
+      vi.spyOn(process, "platform", "get").mockReturnValue("linux");
+
+      // Restore after tests
+      return () => {
+        vi.spyOn(process, "platform", "get").mockReturnValue(originalPlatform);
+      };
+    });
+
     it("should process stream with string paths", async () => {
       const sourcePath = "/path/to/source.txt";
       const targetPath = "/path/to/target.txt";
 
+      vi.mocked(fs.existsSync).mockImplementation((path) => {
+        // Return true for source file, and for the target directory
+        return path === sourcePath || path === "/path/to";
+      });
       vi.mocked(fs.createReadStream).mockReturnValue(mockReadStream as any);
       vi.mocked(fs.createWriteStream).mockReturnValue(mockWriteStream as any);
 

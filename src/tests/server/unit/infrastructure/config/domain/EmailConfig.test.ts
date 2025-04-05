@@ -24,31 +24,48 @@ describe("EmailConfig", () => {
     // Set up configuration service mock
     configService = new ConfigService() as any;
 
-    // Mock the get method
+    // Mock the getString method
+    configService.getString = vi
+      .fn()
+      .mockImplementation((key: string, defaultValue: string = "") => {
+        return mockConfigValues[key] || defaultValue;
+      });
+
+    // Mock the get method for compatibility
     configService.get = vi
       .fn()
-      .mockImplementation((key: any, defaultValue: any) => {
+      .mockImplementation((key: string, defaultValue: any) => {
         return mockConfigValues[key] || defaultValue;
       });
 
     // Mock the getNumber method
     configService.getNumber = vi
       .fn()
-      .mockImplementation((key: any, defaultValue: any): number => {
+      .mockImplementation((key: string, defaultValue: number = 0): number => {
         if (key === "EMAIL_PORT") return 465;
-        return defaultValue ?? 0;
+        return defaultValue;
       });
 
     // Mock the getBoolean method
     configService.getBoolean = vi
       .fn()
-      .mockImplementation((key: any, defaultValue: any): boolean => {
-        if (key === "EMAIL_SECURE") return true;
-        return defaultValue ?? false;
-      });
+      .mockImplementation(
+        (key: string, defaultValue: boolean = false): boolean => {
+          if (key === "EMAIL_SECURE") return true;
+          return defaultValue;
+        },
+      );
 
     // Mock the ensureValid method
     configService.ensureValid = vi.fn();
+
+    // Mock the logger
+    configService.logger = {
+      info: vi.fn(),
+      debug: vi.fn(),
+      error: vi.fn(),
+      warn: vi.fn(),
+    };
   });
 
   it("should load email configuration with defaults", () => {
@@ -124,28 +141,31 @@ describe("EmailConfig", () => {
 
   it("should use custom configuration values", () => {
     // Setup mock with custom values
-    configService.get = vi.fn().mockImplementation((key: any) => {
-      const customValues: Record<string, string> = {
-        EMAIL_HOST: "custom.smtp.example.com",
-        EMAIL_USER: "custom@example.com",
-        EMAIL_PASSWORD: "custompassword123",
-        EMAIL_FROM: "custom@example.com",
-      };
-      return customValues[key]; // Return undefined for any key not in the map
-    });
+    configService.getString = vi
+      .fn()
+      .mockImplementation((key: string, defaultValue: string = "") => {
+        const customValues: Record<string, string> = {
+          EMAIL_HOST: "custom.smtp.example.com",
+          EMAIL_USER: "custom@example.com",
+          EMAIL_PASSWORD: "custompassword123",
+          EMAIL_FROM: "custom@example.com",
+        };
+        return customValues[key] || defaultValue;
+      });
 
-    configService.getNumber = vi.fn().mockImplementation((key: any) => {
-      if (key === "EMAIL_PORT") return 587;
-      return undefined; // Return undefined so the || operator in loadConfig works
-    });
+    configService.getNumber = vi
+      .fn()
+      .mockImplementation((key: string, defaultValue: number = 0) => {
+        if (key === "EMAIL_PORT") return 587;
+        return defaultValue;
+      });
 
-    // Note: Because of how the implementation works with getBoolean("EMAIL_SECURE") || true,
-    // setting getBoolean to return false will still result in true due to the || operator
-    // In the real implementation, secure will always be true unless explicitly set to null/undefined
-    configService.getBoolean = vi.fn().mockImplementation((_key: any) => {
-      // We can't return false here as the || true in the implementation will override it
-      return undefined; // This will result in the default true being used
-    });
+    configService.getBoolean = vi
+      .fn()
+      .mockImplementation((key: string, defaultValue: boolean = false) => {
+        if (key === "EMAIL_SECURE") return true;
+        return defaultValue;
+      });
 
     // Create provider with custom configuration
     const emailConfigProvider = new EmailConfigProvider(configService);
@@ -155,7 +175,7 @@ describe("EmailConfig", () => {
     expect(config).toEqual({
       host: "custom.smtp.example.com",
       port: expect.any(Number),
-      secure: true, // Will be true due to the || true in the implementation
+      secure: true,
       auth: {
         user: "custom@example.com",
         pass: "custompassword123",

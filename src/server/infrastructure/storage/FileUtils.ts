@@ -112,21 +112,68 @@ export class FileUtils {
   /**
    * Delete a file
    * @param filePath File path
+   * @param options Options for deletion retry
    */
-  async deleteFile(filePath: string): Promise<boolean> {
-    try {
-      if (!(await this.fileExists(filePath))) {
-        return true; // File doesn't exist, consider it deleted
-      }
+  async deleteFile(
+    filePath: string,
+    options: {
+      retries?: number;
+      retryDelayMs?: number;
+      forceGc?: boolean;
+    } = {},
+  ): Promise<boolean> {
+    const retries = options.retries ?? 3;
+    const retryDelayMs = options.retryDelayMs ?? 100;
 
-      await unlink(filePath);
-      return true;
-    } catch (error) {
-      this.logger.warn(`Failed to delete file ${filePath}`, {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return false;
+    if (!(await this.fileExists(filePath))) {
+      return true; // File doesn't exist, consider it deleted
     }
+
+    for (let attempt = 0; attempt < retries; attempt++) {
+      try {
+        // Close any active handles - this is a workaround for Windows specifically
+        if (attempt > 0) {
+          // Force garbage collection if available and requested (helps release file handles)
+          if (options.forceGc && global.gc) {
+            global.gc();
+          }
+
+          // Wait longer on each retry
+          await new Promise((resolve) =>
+            setTimeout(resolve, retryDelayMs * (attempt + 1)),
+          );
+        }
+
+        await unlink(filePath);
+        return true;
+      } catch (error) {
+        // If this is a "file busy" error, log at debug level and retry
+        // Other errors are logged as warnings
+        const isBusyError =
+          error instanceof Error &&
+          (error as NodeJS.ErrnoException).code === "EBUSY";
+
+        if (isBusyError) {
+          this.logger.debug(
+            `File ${filePath} busy (attempt ${attempt + 1}/${retries}), will retry...`,
+          );
+        } else if (attempt === retries - 1) {
+          // Only log as warning on the last attempt
+          this.logger.warn(
+            `Failed to delete file ${filePath} after ${retries} attempts`,
+            {
+              error: error instanceof Error ? error.message : String(error),
+              code:
+                error instanceof Error
+                  ? (error as NodeJS.ErrnoException).code
+                  : undefined,
+            },
+          );
+        }
+      }
+    }
+
+    return false;
   }
 
   /**
@@ -296,5 +343,119 @@ export class FileUtils {
     };
 
     return contentTypes[extension] || "application/octet-stream";
+  }
+
+  /**
+   * Delete a directory and all its contents recursively
+   * @param dirPath Directory path
+   * @param options Options for deletion retry
+   */
+  async deleteDirectory(
+    dirPath: string,
+    options: {
+      retries?: number;
+      retryDelayMs?: number;
+      forceGc?: boolean;
+      recursive?: boolean;
+    } = {},
+  ): Promise<boolean> {
+    const retries = options.retries ?? 3;
+    const retryDelayMs = options.retryDelayMs ?? 100;
+    const recursive = options.recursive ?? true;
+
+    try {
+      // Check if directory exists
+      if (!(await this.fileExists(dirPath))) {
+        return true; // Directory doesn't exist, consider it deleted
+      }
+
+      // If not recursive, simply try to delete the directory
+      if (!recursive) {
+        try {
+          await promisify(fs.rmdir)(dirPath);
+          return true;
+        } catch (error) {
+          this.logger.warn(`Failed to delete directory ${dirPath}`, {
+            error: error instanceof Error ? error.message : String(error),
+          });
+          return false;
+        }
+      }
+
+      // Get all files and subdirectories
+      const entries = await promisify(fs.readdir)(dirPath, {
+        withFileTypes: true,
+      });
+
+      // Process files first, then directories
+      const files = entries.filter((entry) => entry.isFile());
+      const directories = entries.filter((entry) => entry.isDirectory());
+
+      // Delete all files
+      for (const file of files) {
+        const filePath = path.join(dirPath, file.name);
+        await this.deleteFile(filePath, options);
+      }
+
+      // Delete all subdirectories recursively
+      for (const dir of directories) {
+        const subDirPath = path.join(dirPath, dir.name);
+        await this.deleteDirectory(subDirPath, options);
+      }
+
+      // After all contents are deleted, delete the directory itself
+      // Use retries for this operation too
+      for (let attempt = 0; attempt < retries; attempt++) {
+        try {
+          if (attempt > 0) {
+            // Force garbage collection if available and requested
+            if (options.forceGc && global.gc) {
+              global.gc();
+            }
+
+            // Wait longer on each retry
+            await new Promise((resolve) =>
+              setTimeout(resolve, retryDelayMs * (attempt + 1)),
+            );
+          }
+
+          await promisify(fs.rmdir)(dirPath);
+          return true;
+        } catch (error) {
+          // If this is the last attempt, log a warning
+          if (attempt === retries - 1) {
+            this.logger.warn(
+              `Could not remove directory ${dirPath} after ${retries} attempts`,
+              {
+                error: error instanceof Error ? error.message : String(error),
+                code:
+                  error instanceof Error
+                    ? (error as NodeJS.ErrnoException).code
+                    : undefined,
+              },
+            );
+          } else {
+            // Log debug information for intermediate attempts
+            const isBusyOrNotEmpty =
+              error instanceof Error &&
+              ((error as NodeJS.ErrnoException).code === "EBUSY" ||
+                (error as NodeJS.ErrnoException).code === "ENOTEMPTY");
+
+            if (isBusyOrNotEmpty) {
+              this.logger.debug(
+                `Directory ${dirPath} busy or not empty (attempt ${attempt + 1}/${retries}), will retry...`,
+              );
+            }
+          }
+        }
+      }
+
+      return false;
+    } catch (error) {
+      this.logger.error(`Error during directory deletion: ${dirPath}`, {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return false;
+    }
   }
 }

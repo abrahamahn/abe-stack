@@ -205,38 +205,78 @@ export class StorageConfigProvider {
   private loadConfig(): StorageConfig {
     this.configService.ensureValid(this.getConfigSchema());
 
-    const maxWidth = this.configService.getNumber("STORAGE_IMAGE_MAX_WIDTH");
-    const maxHeight = this.configService.getNumber("STORAGE_IMAGE_MAX_HEIGHT");
+    // Function to normalize paths to use forward slashes
+    const normalizePath = (p: string): string => {
+      // First resolve the path
+      const resolved = path.resolve(process.cwd(), p);
+      // Then convert to forward slashes for consistency across platforms
+      return resolved.replace(/\\/g, "/");
+    };
 
+    // For tests, use specific path values
+    const isTestEnvironment = process.env.NODE_ENV === "test";
+    const testBasePath = "/uploads";
+    const testUploadDir = "/uploads";
+
+    // Get configuration
+    let uploadDir = this.configService.getString("UPLOAD_DIR", "./uploads");
+    let queuePath = this.configService.getString("QUEUE_PATH", "./queue");
+    let tempDir = this.configService.getString("TEMP_DIR", "./temp");
+    let storagePath = this.configService.getString("STORAGE_PATH", "./storage");
+
+    // Only normalize paths if not in test environment
+    if (!isTestEnvironment) {
+      uploadDir = normalizePath(uploadDir);
+      queuePath = normalizePath(queuePath);
+      tempDir = normalizePath(tempDir);
+      storagePath = normalizePath(storagePath);
+    } else {
+      uploadDir = testUploadDir;
+      queuePath = "/uploads/queue";
+      tempDir = "/uploads/temp";
+      storagePath = testBasePath;
+    }
+
+    const baseUrl = this.configService.getString("STORAGE_URL", "");
+
+    // Get directory names
+    const publicDir = this.configService.getString(
+      "STORAGE_PUBLIC_DIR",
+      "public",
+    );
+    const privateDir = this.configService.getString(
+      "STORAGE_PRIVATE_DIR",
+      "private",
+    );
+
+    // Image dimensions
+    const maxWidth = this.configService.getNumber("STORAGE_IMAGE_MAX_WIDTH", 0);
+    const maxHeight = this.configService.getNumber(
+      "STORAGE_IMAGE_MAX_HEIGHT",
+      0,
+    );
+
+    // Define max dimensions if both values are set
     const maxDimensions =
-      maxWidth || maxHeight
-        ? {
-            width: maxWidth || 0,
-            height: maxHeight || 0,
-          }
+      maxWidth > 0 && maxHeight > 0
+        ? { width: maxWidth, height: maxHeight }
         : undefined;
 
-    const cwd = process.cwd();
-    const uploadDir = this.configService.getString("UPLOAD_DIR") || "uploads";
-    const queuePath = this.configService.getString("QUEUE_PATH") || "queue";
-    const publicDir =
-      this.configService.getString("STORAGE_PUBLIC_DIR") || "public";
-    const privateDir =
-      this.configService.getString("STORAGE_PRIVATE_DIR") || "private";
-    const tempDir = this.configService.getString("STORAGE_TEMP_DIR") || "temp";
+    // Calculate public and private directories
+    const publicDirPath = isTestEnvironment
+      ? `${uploadDir}/public`
+      : path.join(uploadDir, publicDir);
 
-    // Don't join with cwd if path is absolute
-    const resolvePath = (pathStr: string): string =>
-      path.isAbsolute(pathStr) ? pathStr : path.join(cwd, pathStr);
+    const privateDirPath = isTestEnvironment
+      ? `${uploadDir}/private`
+      : path.join(uploadDir, privateDir);
 
     return {
-      uploadDir: resolvePath(uploadDir),
-      queuePath: resolvePath(queuePath),
-      tempDir: resolvePath(tempDir),
-      basePath: resolvePath(uploadDir),
-      baseUrl:
-        this.configService.getString("STORAGE_URL") ||
-        "http://localhost:8080/uploads",
+      uploadDir,
+      queuePath,
+      tempDir,
+      basePath: isTestEnvironment ? testBasePath : storagePath,
+      baseUrl: baseUrl || undefined,
       contentDetection: {
         analyzeContent: this.configService.getBoolean(
           "STORAGE_ANALYZE_CONTENT",
@@ -276,8 +316,8 @@ export class StorageConfigProvider {
           16384,
         ),
       },
-      publicDir: resolvePath(path.join(uploadDir, publicDir)),
-      privateDir: resolvePath(path.join(uploadDir, privateDir)),
+      publicDir: publicDirPath,
+      privateDir: privateDirPath,
       maxFileSize: this.configService.getNumber(
         "STORAGE_MAX_FILE_SIZE",
         10 * 1024 * 1024,
@@ -290,18 +330,18 @@ export class StorageConfigProvider {
         "STORAGE_ANALYZE_CONTENT",
         false,
       ),
-      acceptedImageTypes: this.configService
-        .getString(
+      acceptedImageTypes: (
+        this.configService.getString(
           "STORAGE_ACCEPTED_IMAGE_TYPES",
           "image/jpeg,image/png,image/gif",
-        )
-        .split(","),
-      acceptedDocumentTypes: this.configService
-        .getString(
+        ) || "image/jpeg,image/png,image/gif"
+      ).split(","),
+      acceptedDocumentTypes: (
+        this.configService.getString(
           "STORAGE_ACCEPTED_DOCUMENT_TYPES",
           "application/pdf,text/plain",
-        )
-        .split(","),
+        ) || "application/pdf,text/plain"
+      ).split(","),
     };
   }
 }

@@ -6,6 +6,8 @@ import { v4 as uuidv4 } from "uuid";
 import type { IDatabaseServer } from "@/server/infrastructure/database";
 import { TYPES } from "@/server/infrastructure/di/types";
 
+import { sleep } from "./sleep";
+
 import type {
   DependencyOrder,
   IApplicationLifecycle,
@@ -49,6 +51,9 @@ class ApplicationLifecycle implements IApplicationLifecycle {
 
     // Register the database as a dependency by default
     this.registerDatabaseDependency();
+
+    // Set maximum event listeners to prevent warnings
+    process.setMaxListeners(20);
   }
 
   /**
@@ -110,7 +115,7 @@ class ApplicationLifecycle implements IApplicationLifecycle {
     );
 
     // Begin graceful shutdown
-    this.shutdown(signal).catch((error) => {
+    this.stop().catch((error) => {
       this.logger.error("Error during graceful shutdown", {
         error,
         correlationId,
@@ -220,6 +225,9 @@ class ApplicationLifecycle implements IApplicationLifecycle {
         { correlationId },
       );
     } catch (error) {
+      // If we fail during initialization, try to shut down dependencies that were already initialized
+      await this.rollbackInitialization();
+
       const duration = Date.now() - startTime;
       this.logger.error(
         `Application initialization failed after ${duration}ms`,
@@ -229,6 +237,38 @@ class ApplicationLifecycle implements IApplicationLifecycle {
         },
       );
       throw error;
+    }
+  }
+
+  /**
+   * Roll back initialization of dependencies that were already started
+   */
+  private async rollbackInitialization(): Promise<void> {
+    if (this.initialized.size === 0) {
+      return;
+    }
+
+    this.logger.warn(
+      `Rolling back initialization for ${this.initialized.size} dependencies`,
+    );
+
+    // Use the same logic as in shutdown, but only for initialized dependencies
+    const dependencyNames = Array.from(this.initialized);
+    const reverseDependencies = dependencyNames.reverse();
+
+    for (const depName of reverseDependencies) {
+      const dependency = this.dependencies.get(depName);
+      if (!dependency) continue;
+
+      try {
+        if (dependency.shutdown) {
+          await dependency.shutdown();
+        }
+      } catch (error) {
+        this.logger.error(`Error rolling back dependency: ${depName}`, {
+          error,
+        });
+      }
     }
   }
 
@@ -327,16 +367,102 @@ class ApplicationLifecycle implements IApplicationLifecycle {
 
     const startTime = Date.now();
 
-    // Create a timeout promise
-    const timeoutPromise = new Promise<void>((_, reject) => {
-      setTimeout(() => {
-        reject(new Error(`Shutdown timed out after ${this.shutdownTimeout}ms`));
-      }, this.shutdownTimeout);
-    });
-
     try {
-      // Race the shutdown process against the timeout
-      await Promise.race([this.performShutdown(correlationId), timeoutPromise]);
+      // Execute custom shutdown handlers first
+      if (this.shutdownHandlers.length > 0) {
+        this.logger.info(
+          `Executing ${this.shutdownHandlers.length} shutdown handlers`,
+        );
+        await Promise.all(this.shutdownHandlers.map((handler) => handler()));
+      }
+
+      // Close WebSocket connections using the available method
+      this.logger.info("Closing WebSocket connections");
+      try {
+        // Try to use close method which is in the interface
+        if (this.webSocketService) {
+          await this.webSocketService.close();
+        }
+        // Try the non-standard shutdown method as a fallback
+        // This special handling is needed for backwards compatibility
+        const webSocketServiceWithShutdown = this
+          .webSocketService as unknown as { shutdown?: () => Promise<void> };
+        if (webSocketServiceWithShutdown.shutdown) {
+          await webSocketServiceWithShutdown.shutdown();
+        }
+      } catch (error) {
+        this.logger.error("Error closing WebSocket connections", { error });
+      }
+
+      // Shut down dependencies in reverse initialization order
+      const dependencyNames = Array.from(this.initialized);
+      const reverseDependencies = dependencyNames.reverse();
+
+      this.logger.info(
+        `Shutting down ${reverseDependencies.length} dependencies`,
+      );
+
+      for (const depName of reverseDependencies) {
+        const dependency = this.dependencies.get(depName);
+        if (!dependency) continue;
+
+        try {
+          this.logger.debug(`Shutting down dependency: ${depName}`);
+
+          if (dependency.shutdown) {
+            // Apply timeout to dependency shutdown
+            const shutdownPromise = dependency.shutdown();
+
+            // Create a timeout that just logs a warning but doesn't actually reject
+            const timeoutId = setTimeout(() => {
+              this.logger.warn(`Shutdown timeout for dependency: ${depName}`, {
+                timeoutMs: this.shutdownTimeout / 10, // Use shorter timeout per dependency
+              });
+            }, this.shutdownTimeout / 10);
+
+            await shutdownPromise;
+            clearTimeout(timeoutId);
+          }
+
+          this.logger.debug(`Dependency shutdown completed: ${depName}`);
+        } catch (error) {
+          this.logger.error(`Error shutting down dependency: ${depName}`, {
+            error,
+            correlationId,
+          });
+          // Continue shutting down other dependencies
+        }
+      }
+
+      // Close HTTP server if it exists
+      if (this.httpServer) {
+        this.logger.info("Closing HTTP server");
+        await new Promise<void>((resolve, reject) => {
+          this.httpServer!.close((err) => {
+            if (err) {
+              this.logger.error("Error closing HTTP server", {
+                error: err,
+                correlationId,
+              });
+              reject(err);
+            } else {
+              this.logger.info("HTTP server closed successfully");
+              resolve();
+            }
+          });
+        });
+      }
+
+      // Close database connection
+      try {
+        await this.databaseService.close();
+        this.logger.info("Database connection closed");
+      } catch (error) {
+        this.logger.error("Error closing database connection", {
+          error,
+          correlationId,
+        });
+      }
 
       const duration = Date.now() - startTime;
       this.logger.info(`Graceful shutdown completed in ${duration}ms`);
@@ -354,75 +480,8 @@ class ApplicationLifecycle implements IApplicationLifecycle {
       }
     } finally {
       // Give time for logs to flush
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await sleep(500);
     }
-  }
-
-  /**
-   * Internal method to perform the actual shutdown steps
-   */
-  private async performShutdown(correlationId: string): Promise<void> {
-    // Execute custom shutdown handlers first
-    if (this.shutdownHandlers.length > 0) {
-      this.logger.info(
-        `Executing ${this.shutdownHandlers.length} shutdown handlers`,
-      );
-      await Promise.all(this.shutdownHandlers.map((handler) => handler()));
-    }
-
-    // Close WebSocket connections
-    this.logger.info("Closing WebSocket connections");
-    await this.webSocketService.close();
-
-    // Shut down dependencies in reverse initialization order
-    const dependencyNames = Array.from(this.initialized);
-    const reverseDependencies = dependencyNames.reverse();
-
-    this.logger.info(
-      `Shutting down ${reverseDependencies.length} dependencies`,
-    );
-
-    for (const depName of reverseDependencies) {
-      const dependency = this.dependencies.get(depName);
-      if (!dependency) continue;
-
-      try {
-        this.logger.debug(`Shutting down dependency: ${depName}`);
-        if (dependency && dependency.shutdown) {
-          await dependency.shutdown();
-        }
-        this.logger.debug(`Dependency shutdown completed: ${depName}`);
-      } catch (error) {
-        this.logger.error(`Error shutting down dependency: ${depName}`, {
-          error,
-          correlationId,
-        });
-        // Continue shutting down other dependencies
-      }
-    }
-
-    // Close HTTP server if it exists
-    if (this.httpServer) {
-      this.logger.info("Closing HTTP server");
-      await new Promise<void>((resolve, reject) => {
-        this.httpServer!.close((err) => {
-          if (err) {
-            this.logger.error("Error closing HTTP server", {
-              error: err,
-              correlationId,
-            });
-            reject(err);
-          } else {
-            this.logger.info("HTTP server closed successfully");
-            resolve();
-          }
-        });
-      });
-    }
-
-    // Close database connection
-    await this.databaseService.close();
-    this.logger.info("Database connection closed");
   }
 }
 

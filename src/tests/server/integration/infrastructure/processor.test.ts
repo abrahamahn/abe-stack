@@ -1,10 +1,11 @@
 import fs from "fs";
 import path from "path";
+import { Writable } from "stream";
 import { promisify } from "util";
 
 import { Container } from "inversify";
 import sharp from "sharp";
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 import { TYPES } from "@/server/infrastructure/di/types";
 import { LoggerService } from "@/server/infrastructure/logging";
@@ -27,6 +28,67 @@ function getUniqueFilename(base: string, extension: string): string {
   return `${base}_${Date.now()}_${Math.floor(Math.random() * 10000)}.${extension}`;
 }
 
+// Helper to safely delete a file with retry
+async function safeDelete(filePath: string, retries = 3): Promise<void> {
+  if (!fs.existsSync(filePath)) return;
+
+  let lastError;
+  for (let i = 0; i < retries; i++) {
+    try {
+      await unlink(filePath);
+      return;
+    } catch (err) {
+      lastError = err;
+      // Wait a bit before retrying
+      await new Promise((resolve) => setTimeout(resolve, 100 * (i + 1)));
+
+      // Force garbage collection if available (helps with locked files)
+      if (global.gc) {
+        global.gc();
+      }
+    }
+  }
+  console.error(
+    `Failed to delete ${filePath} after ${retries} attempts:`,
+    lastError,
+  );
+}
+
+// Helper to safely delete directory
+async function safeDeleteDir(dirPath: string): Promise<void> {
+  if (!fs.existsSync(dirPath)) return;
+
+  try {
+    // Wait a bit before starting deletion to ensure all operations are complete
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    // Force garbage collection to help release file handles
+    if (global.gc) {
+      global.gc();
+    }
+
+    const files = fs.readdirSync(dirPath);
+    for (const file of files) {
+      await safeDelete(path.join(dirPath, file), 5); // Use more retries for test cleanup
+    }
+
+    // Wait longer to ensure all file handles are released
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    try {
+      // Force GC again before directory removal
+      if (global.gc) {
+        global.gc();
+      }
+      await rmdir(dirPath);
+    } catch (err) {
+      console.error(`Could not remove directory ${dirPath}:`, err);
+    }
+  } catch (err) {
+    console.error(`Error cleaning up directory ${dirPath}:`, err);
+  }
+}
+
 describe("Processor Infrastructure Integration Tests", () => {
   let container: Container;
   let logger: LoggerService;
@@ -43,29 +105,33 @@ describe("Processor Infrastructure Integration Tests", () => {
     // Create test directory
     testDir = path.join(__dirname, "test_files");
     await mkdir(testDir, { recursive: true });
+
+    // Reset any Sharp module state
+    global.gc?.();
   });
 
   afterEach(async () => {
-    // Use a small delay to allow file handles to be released
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // Increase the timeout from 500ms to 2000ms to give more time for file handles to be released
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
-    // Cleanup test directory
-    if (fs.existsSync(testDir)) {
-      try {
-        const files = fs.readdirSync(testDir);
-        for (const file of files) {
-          try {
-            await unlink(path.join(testDir, file));
-          } catch (err) {
-            console.error(`Failed to delete ${file}:`, err);
-          }
-        }
-        await rmdir(testDir);
-      } catch (err) {
-        console.error("Cleanup error:", err);
-      }
+    // Force garbage collection to help release file handles
+    global.gc?.();
+
+    // Use the FileUtils for cleanup if it's available
+    if (fileUtils) {
+      await fileUtils.deleteDirectory(testDir, {
+        retries: 5,
+        retryDelayMs: 200,
+        forceGc: true,
+      });
+    } else {
+      // Fall back to the safe delete function if fileUtils isn't available
+      await safeDeleteDir(testDir);
     }
-  });
+
+    // Force garbage collection again after cleanup
+    global.gc?.();
+  }, 30000); // Increase the hook timeout from default 10000ms to 30000ms
 
   describe("StreamProcessor", () => {
     it("should process stream with metrics", async () => {
@@ -93,8 +159,8 @@ describe("Processor Infrastructure Integration Tests", () => {
       await writeFile(sourcePath, testData);
 
       const throttleTransform = StreamProcessor.createThrottleTransform(
-        10 * 1024,
-      ); // 10KB/s for faster test
+        10 * 1024, // 10KB/s for faster test
+      );
       const stats = await StreamProcessor.processStream(
         sourcePath,
         targetPath,
@@ -129,6 +195,34 @@ describe("Processor Infrastructure Integration Tests", () => {
       expect(progressUpdates.length).toBeGreaterThan(0);
       expect(Math.max(...progressUpdates)).toBe(100);
     });
+
+    it("should handle errors during streaming", async () => {
+      const sourcePath = path.join(testDir, getUniqueFilename("source", "txt"));
+      const targetPath = path.join(testDir, getUniqueFilename("target", "txt"));
+      const testData = "Test Data";
+
+      // Mock an error by providing a non-existent file
+      const nonExistentPath = path.join(testDir, "nonexistent.txt");
+
+      await writeFile(sourcePath, testData);
+
+      // Test with non-existent source
+      await expect(
+        StreamProcessor.processStream(nonExistentPath, targetPath),
+      ).rejects.toThrow();
+
+      // Instead of testing with a potentially valid path on some platforms,
+      // create a writable stream that will throw an error when written to
+      const failingWritable = new Writable({
+        write(_chunk, _encoding, callback) {
+          callback(new Error("Simulated write error"));
+        },
+      });
+
+      await expect(
+        StreamProcessor.processStream(sourcePath, failingWritable),
+      ).rejects.toThrow();
+    });
   });
 
   describe("ImageProcessor", () => {
@@ -136,6 +230,20 @@ describe("Processor Infrastructure Integration Tests", () => {
 
     beforeEach(() => {
       imageProcessor = new ImageProcessor(logger, fileUtils);
+    });
+
+    afterEach(() => {
+      // Explicitly call destroy or clear method on the imageProcessor if it exists
+      // This helps release file handles before directory cleanup
+      if (
+        imageProcessor &&
+        typeof (imageProcessor as any).destroy === "function"
+      ) {
+        (imageProcessor as any).destroy();
+      }
+
+      // Force garbage collection
+      global.gc?.();
     });
 
     it("should process and optimize an image", async () => {
@@ -234,6 +342,72 @@ describe("Processor Infrastructure Integration Tests", () => {
       const exifData = await imageProcessor.extractExifData(sourcePath);
       expect(exifData).toBeDefined();
     });
+
+    it("should correctly identify image content types", async () => {
+      expect(imageProcessor.isImage("image/jpeg")).toBe(true);
+      expect(imageProcessor.isImage("image/png")).toBe(true);
+      expect(imageProcessor.isImage("image/webp")).toBe(true);
+      expect(imageProcessor.isImage("image/gif")).toBe(true);
+
+      // These should not be considered processable images
+      expect(imageProcessor.isImage("image/svg+xml")).toBe(false);
+      expect(imageProcessor.isImage("image/x-icon")).toBe(false);
+      expect(imageProcessor.isImage("text/plain")).toBe(false);
+      expect(imageProcessor.isImage("application/pdf")).toBe(false);
+    });
+
+    it("should convert between image formats", async () => {
+      const sourcePath = path.join(testDir, getUniqueFilename("test", "jpg"));
+      const pngPath = path.join(testDir, getUniqueFilename("test", "png"));
+      const webpPath = path.join(testDir, getUniqueFilename("test", "webp"));
+
+      // Create a test image
+      await sharp({
+        create: {
+          width: 100,
+          height: 100,
+          channels: 4,
+          background: { r: 255, g: 255, b: 0, alpha: 0.5 },
+        },
+      })
+        .jpeg()
+        .toFile(sourcePath);
+
+      // Convert to PNG
+      const pngMetadata = await imageProcessor.process(sourcePath, pngPath, {
+        format: "png",
+      });
+      expect(pngMetadata.format).toBe("png");
+
+      // Convert to WebP
+      const webpMetadata = await imageProcessor.process(sourcePath, webpPath, {
+        format: "webp",
+      });
+      expect(webpMetadata.format).toBe("webp");
+    });
+
+    it("should handle errors gracefully", async () => {
+      const nonExistentFile = path.join(testDir, "nonexistent.jpg");
+      const outputPath = path.join(testDir, getUniqueFilename("output", "jpg"));
+
+      // Test error handling in metadata retrieval
+      const metadata = await imageProcessor.getMetadata(nonExistentFile);
+      expect(metadata).toBeNull();
+
+      // Test error handling in processing
+      await expect(
+        imageProcessor.process(nonExistentFile, outputPath),
+      ).rejects.toThrow();
+
+      // Test error handling in thumbnail generation
+      await expect(
+        imageProcessor.generateThumbnail(nonExistentFile, outputPath),
+      ).rejects.toThrow();
+
+      // Test error handling in EXIF extraction
+      const exifData = await imageProcessor.extractExifData(nonExistentFile);
+      expect(exifData).toBeNull();
+    });
   });
 
   describe("MediaProcessor", () => {
@@ -246,6 +420,17 @@ describe("Processor Infrastructure Integration Tests", () => {
         testDir,
         "http://localhost:3000/uploads",
       );
+    });
+
+    afterEach(() => {
+      // Clean up the MediaProcessor resources
+      mediaProcessor.cleanup();
+
+      // Force garbage collection
+      global.gc?.();
+
+      // Wait a bit to ensure all file handles are released
+      return new Promise<void>((resolve) => setTimeout(resolve, 300));
     });
 
     it("should process image media", async () => {
@@ -273,6 +458,8 @@ describe("Processor Infrastructure Integration Tests", () => {
         quality: 80,
         format: "jpeg",
         targetPath: targetPath,
+        generateThumbnail: true, // Explicitly set to generate thumbnail
+        thumbnailSize: 30,
       });
 
       expect(result.contentType).toBe("image/jpeg");
@@ -280,6 +467,13 @@ describe("Processor Infrastructure Integration Tests", () => {
       expect(result.metadata.width).toBe(50);
       expect(result.metadata.height).toBe(50);
       expect(result.thumbnail).toBeDefined();
+
+      // Verify the thumbnail exists
+      if (result.thumbnail) {
+        const thumbMetadata = await sharp(result.thumbnail).metadata();
+        expect(thumbMetadata.width).toBe(30);
+        expect(thumbMetadata.format).toBe("webp");
+      }
     });
 
     it("should handle base URL updates", async () => {
@@ -298,6 +492,46 @@ describe("Processor Infrastructure Integration Tests", () => {
         targetPath: targetPath,
       });
       expect(result.url.startsWith(newBaseUrl)).toBe(true);
+    });
+
+    it("should process non-media files", async () => {
+      const sourcePath = path.join(testDir, getUniqueFilename("test", "txt"));
+      const targetPath = path.join(testDir, getUniqueFilename("copied", "txt"));
+
+      await writeFile(sourcePath, "This is a text file");
+
+      const result = await mediaProcessor.processMedia(sourcePath, {
+        targetPath: targetPath,
+      });
+
+      expect(result.contentType).toBe("text/plain");
+      expect(result.size).toBeGreaterThan(0);
+      expect(result.metadata.format).toBe("txt");
+      expect(result.url).toBeDefined();
+
+      // Read the file to confirm it was copied correctly
+      const content = await readFile(targetPath, "utf8");
+      expect(content).toBe("This is a text file");
+    });
+
+    it("should handle file processing errors", async () => {
+      const nonExistentFile = path.join(testDir, "nonexistent.jpg");
+      const outputPath = path.join(testDir, getUniqueFilename("output", "jpg"));
+
+      // Mock fileUtils.detectContentType to return an image content type
+      const originalDetectContentType = fileUtils.detectContentType;
+      fileUtils.detectContentType = vi.fn().mockReturnValue("image/jpeg");
+
+      try {
+        await expect(
+          mediaProcessor.processMedia(nonExistentFile, {
+            targetPath: outputPath,
+          }),
+        ).rejects.toThrow();
+      } finally {
+        // Restore original method
+        fileUtils.detectContentType = originalDetectContentType;
+      }
     });
 
     // Note: Video and audio processing tests would go here, but they require

@@ -103,6 +103,140 @@ describe("Environments Utils", () => {
       expect(mockedDotenv.config).toHaveBeenCalled();
     });
 
+    it("should load .env.development in development mode", () => {
+      // Setup NODE_ENV as development
+      process.env.NODE_ENV = "development";
+
+      // Clear mocks
+      mockedFs.existsSync.mockReset();
+      mockedFs.default.existsSync.mockReset();
+      mockedDotenv.config.mockReset();
+
+      // Track which files are being checked
+      const paths: string[] = [];
+      mockedFs.existsSync.mockImplementation((path: string) => {
+        paths.push(path);
+        // Return true for .env.development to simulate it exists
+        return path.includes(".env.development");
+      });
+      mockedFs.default.existsSync.mockImplementation((path: string) => {
+        paths.push(path);
+        // Return true for .env.development to simulate it exists
+        return path.includes(".env.development");
+      });
+
+      // Mock dotenv.config to return empty parsed result
+      mockedDotenv.config.mockReturnValue({ parsed: {} });
+
+      // Call the function directly
+      loadEnvFiles();
+
+      // Get the combined calls
+      const allPaths = [
+        ...paths,
+        ...mockedDotenv.config.mock.calls.map(
+          (call: any[]) => call[0]?.path || "",
+        ),
+      ].filter(Boolean);
+
+      // Verify .env.development was checked
+      expect(allPaths.some((path) => path.includes(".env.development"))).toBe(
+        true,
+      );
+    });
+
+    it("should load .env.production in production mode", () => {
+      // Setup NODE_ENV as production
+      process.env.NODE_ENV = "production";
+
+      // Clear mocks
+      mockedFs.existsSync.mockReset();
+      mockedFs.default.existsSync.mockReset();
+      mockedDotenv.config.mockReset();
+
+      // Track which files are being checked
+      const paths: string[] = [];
+      mockedFs.existsSync.mockImplementation((path: string) => {
+        paths.push(path);
+        // Return true for .env.production to simulate it exists
+        return path.includes(".env.production");
+      });
+      mockedFs.default.existsSync.mockImplementation((path: string) => {
+        paths.push(path);
+        // Return true for .env.production to simulate it exists
+        return path.includes(".env.production");
+      });
+
+      // Mock dotenv.config to return empty parsed result
+      mockedDotenv.config.mockReturnValue({ parsed: {} });
+
+      // Call the function directly
+      loadEnvFiles();
+
+      // Get the combined calls
+      const allPaths = [
+        ...paths,
+        ...mockedDotenv.config.mock.calls.map(
+          (call: any[]) => call[0]?.path || "",
+        ),
+      ].filter(Boolean);
+
+      // Verify .env.production was checked
+      expect(allPaths.some((path) => path.includes(".env.production"))).toBe(
+        true,
+      );
+    });
+
+    it("should load .env.development instead of .env.test in test mode", () => {
+      // Setup NODE_ENV as test
+      process.env.NODE_ENV = "test";
+
+      // Clear mocks
+      mockedFs.existsSync.mockReset();
+      mockedFs.default.existsSync.mockReset();
+      mockedDotenv.config.mockReset();
+
+      // Track which files are being checked
+      const paths: string[] = [];
+      mockedFs.existsSync.mockImplementation((path: string) => {
+        paths.push(path);
+        // Return true for .env.development to simulate it exists
+        return path.includes(".env.development");
+      });
+      mockedFs.default.existsSync.mockImplementation((path: string) => {
+        paths.push(path);
+        // Return true for .env.development to simulate it exists
+        return path.includes(".env.development");
+      });
+
+      // Mock dotenv.config to return empty parsed result
+      mockedDotenv.config.mockReturnValue({ parsed: {} });
+
+      // Call the function directly
+      loadEnvFiles();
+
+      // Get the combined calls
+      const allPaths = [
+        ...paths,
+        ...mockedDotenv.config.mock.calls.map(
+          (call: any[]) => call[0]?.path || "",
+        ),
+      ].filter(Boolean);
+
+      // Verify .env.development was checked
+      expect(allPaths.some((path) => path.includes(".env.development"))).toBe(
+        true,
+      );
+
+      // Verify .env.test was also checked (the implementation uses both)
+      expect(allPaths.some((path) => path.includes(".env.test"))).toBe(true);
+
+      // Verify .env.test.local was NOT checked
+      expect(allPaths.some((path) => path.includes(".env.test.local"))).toBe(
+        false,
+      );
+    });
+
     it("should handle missing environment files gracefully", () => {
       // Setup NODE_ENV
       process.env.NODE_ENV = "production";

@@ -12,7 +12,7 @@ describe("LoggerService", () => {
       log: vi.fn(),
     };
 
-    loggerService = new LoggerService("test-context");
+    loggerService = new LoggerService("Test Context");
   });
 
   describe("constructor", () => {
@@ -34,7 +34,7 @@ describe("LoggerService", () => {
         message: "Test message",
         metadata: undefined,
         correlationId: undefined,
-        service: "test-context",
+        service: "Test Context",
         timestamp: expect.any(String),
       });
     });
@@ -50,7 +50,7 @@ describe("LoggerService", () => {
         message: "Test message",
         metadata: undefined,
         correlationId: undefined,
-        service: "test-context",
+        service: "Test Context",
         timestamp: expect.any(String),
       });
     });
@@ -68,7 +68,7 @@ describe("LoggerService", () => {
         message,
         metadata: context,
         correlationId: undefined,
-        service: "test-context",
+        service: "Test Context",
         timestamp: expect.any(String),
       });
     });
@@ -92,7 +92,7 @@ describe("LoggerService", () => {
         message,
         metadata: context,
         correlationId: undefined,
-        service: "test-context",
+        service: "Test Context",
         timestamp: expect.any(String),
       });
     });
@@ -109,7 +109,7 @@ describe("LoggerService", () => {
         message,
         metadata: context,
         correlationId: undefined,
-        service: "test-context",
+        service: "Test Context",
         timestamp: expect.any(String),
       });
     });
@@ -133,7 +133,7 @@ describe("LoggerService", () => {
           ...context,
         },
         correlationId: undefined,
-        service: "test-context",
+        service: "Test Context",
         timestamp: expect.any(String),
       });
     });

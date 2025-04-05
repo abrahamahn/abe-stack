@@ -53,6 +53,7 @@ export class ConfigService implements IConfigService {
   private namespace?: string;
   private parent?: ConfigService;
   private errors: string[] = [];
+  private watchers = new Map<string, Set<(value: unknown) => void>>();
 
   /**
    * Creates a new ConfigService instance
@@ -130,24 +131,37 @@ export class ConfigService implements IConfigService {
     const NODE_ENV = process.env.NODE_ENV || "development";
     const configDir = path.resolve(__dirname);
     const envDir = path.join(configDir, ".env");
-    const envFiles = [
-      path.join(envDir, `.env.${NODE_ENV}.local`), // highest priority
-      path.join(envDir, `.env.${NODE_ENV}`),
-      path.join(envDir, ".env.local"),
-      path.join(envDir, ".env"), // lowest priority
-    ];
 
-    // Load files in reverse order (lowest priority first)
+    // Define environment files based on current environment
+    let envFiles = [];
+
+    // For each environment, use the appropriate environment file
+    const envFile = path.join(envDir, `.env.${NODE_ENV}`);
+    envFiles = [envFile];
+
+    // Load files
     const loadedFiles = [];
-    for (const file of envFiles.reverse()) {
+    for (const file of envFiles) {
       if (fs.existsSync(file)) {
         this.loadFromFile(file);
         loadedFiles.push(path.basename(file));
       }
     }
 
+    // If no files were loaded for test environment, try development as fallback
+    if (loadedFiles.length === 0 && NODE_ENV === "test") {
+      const fallbackFile = path.join(envDir, ".env.development");
+      if (fs.existsSync(fallbackFile)) {
+        this.loadFromFile(fallbackFile);
+        loadedFiles.push(`${path.basename(fallbackFile)} (fallback)`);
+        this.logger.warn(
+          "Using development environment file as fallback for test environment",
+        );
+      }
+    }
+
     if (loadedFiles.length > 0) {
-      this.logger.info(`Loaded environment files: ${loadedFiles.join(", ")}`);
+      this.logger.info(`Loaded config from ${loadedFiles.join(", ")}`);
     } else {
       this.logger.debug("No environment files found");
     }
@@ -161,7 +175,17 @@ export class ConfigService implements IConfigService {
   loadFromFile(filePath: string): void {
     try {
       if (!fs.existsSync(filePath)) {
-        this.logger.warn(`Config file not found: ${filePath}`);
+        // For development environment files, provide a more informative message
+        // since these are commonly missing in different environments
+        const fileName = path.basename(filePath);
+        if (fileName.startsWith(".env.")) {
+          const env = fileName.replace(".env.", "");
+          this.logger.debug(
+            `Environment config file not found: ${fileName} (normal for non-${env} environments)`,
+          );
+        } else {
+          this.logger.warn(`Config file not found: ${filePath}`);
+        }
         return;
       }
 
@@ -179,47 +203,106 @@ export class ConfigService implements IConfigService {
       );
       this.logger.info(`Loaded config from ${relativePath}`);
     } catch (error) {
-      this.logger.error(
-        `Failed to load config from ${filePath}: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
+      // Check if it's a file not found error - NodeJS errors include a code property
+      if (
+        error instanceof Error &&
+        "code" in error &&
+        (error as NodeJS.ErrnoException).code === "ENOENT"
+      ) {
+        // File not found - provide clearer context
+        const fileName = path.basename(filePath);
+        this.logger.info(
+          `Config file ${fileName} not present (this may be expected in certain environments)`,
+        );
+      } else {
+        // Other errors should still be logged as errors
+        this.logger.error(
+          `Failed to load config from ${filePath}: ${
+            error instanceof Error
+              ? `${error.name}: ${error.message}`
+              : String(error)
+          }`,
+        );
+      }
     }
   }
 
   /**
-   * Sets a configuration value
-   *
-   * @param key Configuration key
-   * @param value Configuration value
+   * Sets a configuration value.
+   * If this is a namespaced config, it will delegate to the parent.
    */
-  set(key: string, value: string): void {
-    if (this.parent) {
-      // If this is a namespaced config, delegate to parent
-      this.parent.set(this.getNamespacedKey(key), value);
+  public set(key: string, value: string): void {
+    // If we're in a namespace, we need to set the value in the parent
+    if (this.parent && this.namespace) {
+      this.parent.set(`${this.namespace}.${key}`, value);
       return;
     }
 
+    // Set the value
     this.values.set(key, value);
+
+    // Notify watchers if the value has changed or if it's a new value
+    if (this.watchers && this.watchers.has(key)) {
+      const callbacks = this.watchers.get(key);
+      if (callbacks) {
+        callbacks.forEach((callback) => {
+          try {
+            callback(value);
+          } catch (error) {
+            this.logger?.error(
+              `Error in config watcher callback for ${key}: ${error instanceof Error ? error.message : String(error)}`,
+            );
+          }
+        });
+      }
+    }
   }
 
   /**
    * Gets a configuration value
    *
    * @param key Configuration key
-   * @param defaultValue Optional default value if key is not found
-   * @returns The configuration value
+   * @param defaultValue Optional default value
+   * @returns The configuration value or undefined if not found
    */
+  get<T>(key: string): T;
+  get<T>(key: string, defaultValue: T): T;
   get<T>(key: string, defaultValue?: T): T {
-    if (this.parent) {
-      return this.parent.get(this.getNamespacedKey(key), defaultValue);
+    // If in a namespace, delegate to parent
+    if (this.parent && this.namespace) {
+      try {
+        return this.parent.get<T>(
+          `${this.namespace}_${key}`,
+          defaultValue as T,
+        );
+      } catch (error) {
+        // If not found in parent, fall back to our own values
+        if (error instanceof Error && error.message.includes("not found")) {
+          // Continue to check our values
+        } else {
+          // Rethrow other errors
+          throw error;
+        }
+      }
     }
 
-    const value = this.values.get(key);
-    if (value === undefined) {
-      return defaultValue as T;
+    // Check if value exists in our values map
+    if (this.values.has(key)) {
+      return this.values.get(key) as unknown as T;
     }
-    return value as T;
+
+    // Check for environment variables if allowed
+    if (process.env[key] !== undefined && process.env[key] !== null) {
+      return process.env[key] as unknown as T;
+    }
+
+    // Return default value or undefined if not found
+    if (defaultValue !== undefined) {
+      return defaultValue;
+    }
+
+    // For backward compatibility, return undefined cast as T
+    return undefined as unknown as T;
   }
 
   /**
@@ -247,16 +330,19 @@ export class ConfigService implements IConfigService {
    * @param defaultValue Optional default value
    * @returns The configuration value as a number or default
    */
-  getNumber(key: string, defaultValue?: number): number {
-    const value = this.get<string>(key);
-    if (value === undefined || value === null || value === "") {
-      return defaultValue ?? 0;
+  getNumber(key: string, defaultValue: number = 0): number {
+    try {
+      const value = this.get<string | number>(key, defaultValue.toString());
+
+      if (typeof value === "number") {
+        return value;
+      }
+
+      const num = Number(value);
+      return num; // Return NaN if the conversion fails
+    } catch (_err) {
+      return defaultValue;
     }
-    const num = Number(value);
-    if (isNaN(num)) {
-      return defaultValue ?? NaN;
-    }
-    return num;
   }
 
   /**
@@ -267,28 +353,27 @@ export class ConfigService implements IConfigService {
    * @returns The configuration value as a boolean or default
    */
   getBoolean(key: string, defaultValue: boolean = false): boolean {
-    const value = this.get<string>(key);
-    if (value === undefined) {
+    try {
+      const value = this.get<string | boolean>(key, defaultValue.toString());
+
+      if (typeof value === "boolean") {
+        return value;
+      }
+
+      if (typeof value === "string") {
+        const lower = value.toLowerCase();
+        if (lower === "true" || lower === "yes" || lower === "1") {
+          return true;
+        }
+        if (lower === "false" || lower === "no" || lower === "0") {
+          return false;
+        }
+      }
+
+      return defaultValue;
+    } catch (_err) {
       return defaultValue;
     }
-    const lowered = value.toLowerCase();
-    if (
-      lowered === "true" ||
-      value === "1" ||
-      lowered === "yes" ||
-      lowered === "y"
-    ) {
-      return true;
-    }
-    if (
-      lowered === "false" ||
-      value === "0" ||
-      lowered === "no" ||
-      lowered === "n"
-    ) {
-      return false;
-    }
-    return defaultValue;
   }
 
   /**
@@ -299,50 +384,89 @@ export class ConfigService implements IConfigService {
    * @param separator Separator character (default: comma)
    * @returns The configuration value as an array or default
    */
-  getArray<T>(
+  getArray<T = string>(
     key: string,
-    defaultValue: T[] = [] as T[],
-    separator = ",",
+    defaultValue: T[] = [] as unknown as T[],
   ): T[] {
-    const value = this.get<string>(key);
-    if (!value) {
+    try {
+      // Try to get the value
+      const value = this.get<string | string[] | null | undefined>(key, null);
+
+      // Return default if value is not available
+      if (value === null || value === undefined) {
+        return defaultValue;
+      }
+
+      // If the value is already an array, return it
+      if (Array.isArray(value)) {
+        return value as T[];
+      }
+
+      // If it's a string, try to parse it as JSON if it starts with [ and ends with ]
+      if (typeof value === "string") {
+        const trimmed = value.trim();
+        if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+          try {
+            const parsed = JSON.parse(trimmed);
+            if (Array.isArray(parsed)) {
+              return parsed as T[];
+            }
+          } catch (_err) {
+            this.logger?.debug(`Failed to parse JSON array: ${value}`);
+            // Fall through to split by separator
+          }
+        }
+
+        // Split by separator (default to comma)
+        const separator = ",";
+        return value.split(separator).map((item: string) => {
+          const trimmed = item.trim();
+          // Convert values to appropriate types if possible
+          if (/^[0-9]+$/.test(trimmed)) {
+            return Number(trimmed) as unknown as T;
+          } else if (trimmed.toLowerCase() === "true") {
+            return true as unknown as T;
+          } else if (trimmed.toLowerCase() === "false") {
+            return false as unknown as T;
+          }
+          return trimmed as unknown as T;
+        });
+      }
+
+      // For any other value, return as single-item array
+      return [value as unknown as T];
+    } catch (_err) {
+      // Return default if there's any error accessing the value
       return defaultValue;
     }
-
-    return value
-      .split(separator)
-      .map((item: string) => item.trim())
-      .filter(Boolean)
-      .map((item) => item as T);
   }
 
   /**
    * Gets a namespaced configuration service
-   *
-   * @param namespace Namespace name
-   * @returns A namespaced configuration service
    */
-  getNamespace(namespace: string): ConfigService {
-    if (!this.namespaces.has(namespace)) {
-      // Create a new namespaced config and initialize it with existing values
-      const namespacedConfig = new ConfigService(this.logger, this, namespace);
-      this.namespaces.set(namespace, namespacedConfig);
-
-      // Copy any existing namespaced values
-      const prefix = `${namespace}_`;
-      for (const [key, value] of this.values.entries()) {
-        if (key.startsWith(prefix)) {
-          namespacedConfig.set(key.substring(prefix.length), value);
-        }
-      }
-
-      // Also copy any environment variables with the namespace prefix
-      for (const [key, value] of Object.entries(process.env)) {
-        if (key.startsWith(prefix) && value !== undefined) {
-          namespacedConfig.set(key.substring(prefix.length), value);
-        }
-      }
+  public getNamespace(namespace: string): ConfigService {
+    if (!namespace) {
+      throw new Error("Namespace cannot be empty");
     }
+
+    // Create namespace once and cache it
+    if (!this.namespaces.has(namespace)) {
+      const namespacedConfig = new ConfigService(this.logger);
+      namespacedConfig.namespace = namespace;
+      namespacedConfig.parent = this;
+
+      // Load any environment variables with the namespace prefix into the namespaced config
+      const prefix = `${namespace}_`;
+      Object.entries(process.env).forEach(([key, value]) => {
+        if (key.startsWith(prefix) && value !== undefined) {
+          const unprefixedKey = key.substring(prefix.length);
+          namespacedConfig.values.set(unprefixedKey, value);
+        }
+      });
+
+      this.namespaces.set(namespace, namespacedConfig);
+    }
+
     return this.namespaces.get(namespace)!;
   }
 
@@ -376,36 +500,33 @@ export class ConfigService implements IConfigService {
   }
 
   /**
-   * Validates the configuration against a schema
-   *
-   * @param schema Schema to validate against
-   * @returns Whether the configuration is valid
+   * Validates the current configuration against a schema
    */
-  validate(schema: ConfigSchema): ValidatedConfig {
-    this.errors = [];
-    const config = this.getAll();
-    if (!config || typeof config !== "object") {
-      return {
-        valid: false,
-        errors: ["Configuration is not a valid object"],
-        values: {},
-      };
-    }
-    const result = validateConfig(config, schema);
-    this.errors = result.errors;
-    return result;
+  public validate(schema: ConfigSchema): ValidatedConfig {
+    const config = this.toObject();
+    const validationResult = validateConfig(
+      config as Record<string, string>,
+      schema,
+    );
+
+    this.clearErrors();
+    validationResult.errors.forEach((error) => {
+      this.errors.push(error);
+    });
+
+    return validationResult;
   }
 
   /**
-   * Check if validation succeeded and throw an error if not
-   *
-   * @param schema Schema to validate against
-   * @throws ConfigValidationError if validation failed
+   * Ensures the configuration is valid, throws otherwise
    */
   public ensureValid(schema: ConfigSchema): void {
-    const result = this.validate(schema);
-    if (!result.valid) {
-      throw new Error(`Invalid configuration:\n${result.errors.join("\n")}`);
+    const validationResult = this.validate(schema);
+
+    if (!validationResult.valid) {
+      const errorMessage = `Configuration validation failed: ${validationResult.errors.join(", ")}`;
+      this.logger?.error(errorMessage);
+      throw new Error(errorMessage);
     }
   }
 
@@ -524,11 +645,19 @@ export class ConfigService implements IConfigService {
     return this.namespace ? `${this.namespace}_${key}` : key;
   }
 
-  getString(key: string, defaultValue?: string): string {
+  public getString(key: string, defaultValue: string = ""): string {
     try {
-      return this.get<string>(key);
-    } catch {
-      return defaultValue || "";
+      const value = this.get(key, defaultValue);
+
+      // Return empty string if null or undefined
+      if (value === null || value === undefined) {
+        return defaultValue;
+      }
+
+      // Convert to string if not already
+      return String(value);
+    } catch (_err) {
+      return defaultValue;
     }
   }
 
@@ -546,21 +675,33 @@ export class ConfigService implements IConfigService {
   }
 
   clearErrors(): void {
-    // Implement error clearing if needed
+    this.errors = [];
   }
 
   hasErrors(): boolean {
-    return false; // Implement error checking if needed
+    return this.errors.length > 0;
   }
 
   getConfig(): Record<string, unknown> {
-    return this.getAll();
+    return this.toObject();
   }
 
-  setMultiple(entries: Record<string, unknown>): void {
-    Object.entries(entries).forEach(([key, value]) => {
+  /**
+   * Sets multiple configuration values at once
+   */
+  public setMultiple(entries: Record<string, unknown>): void {
+    // Validate input
+    if (!entries || typeof entries !== "object") {
+      throw new Error("Entries must be a valid object");
+    }
+
+    // First, clear out all previous values
+    this.values.clear();
+
+    // Set each entry individually
+    for (const [key, value] of Object.entries(entries)) {
       this.set(key, String(value));
-    });
+    }
   }
 
   delete(key: string): void {
@@ -608,16 +749,126 @@ export class ConfigService implements IConfigService {
     return this.values.size === 0;
   }
 
-  clone(): Record<string, unknown> {
-    return { ...this.getAll() };
+  /**
+   * Convert configuration to a plain object
+   * without inheriting from process.env
+   */
+  public toObject(): Record<string, unknown> {
+    // Create a new object with only the explicitly set values, not process.env
+    const result: Record<string, unknown> = {};
+
+    // Copy over values explicitly set in this instance
+    // In test mode, we ONLY want our explicitly set values, not process.env
+    this.values.forEach((value, key) => {
+      result[key] = value;
+    });
+
+    // Copy namespaced configurations (if any)
+    this.namespaces.forEach((namespace, key) => {
+      const nsValues = namespace.toObject();
+      Object.entries(nsValues).forEach(([nsKey, nsValue]) => {
+        result[`${key}.${nsKey}`] = nsValue;
+      });
+    });
+
+    return result;
   }
 
+  /**
+   * Converts to JSON string
+   */
+  public toJSON(): string {
+    // Only include explicitly set values
+    const values = this.toObject();
+    return JSON.stringify(values);
+  }
+
+  /**
+   * Resets the configuration
+   */
+  reset(): void {
+    // Clear all existing values
+    this.values.clear();
+    this.namespaces.clear();
+  }
+
+  reload(): Promise<void> {
+    return this.initialize();
+  }
+
+  /**
+   * Watches for changes to a configuration value.
+   * Returns a function that can be called to stop watching.
+   */
+  public watch(key: string, callback: (value: unknown) => void): () => void {
+    if (!this.watchers) {
+      this.watchers = new Map();
+    }
+
+    if (!this.watchers.has(key)) {
+      this.watchers.set(key, new Set());
+    }
+
+    const callbacks = this.watchers.get(key)!;
+    callbacks.add(callback);
+
+    // Call the callback immediately with the current value (if it exists)
+    if (this.has(key)) {
+      // If we have a value, trigger the callback with the current value
+      const currentValue = this.get(key);
+      callback(currentValue);
+    }
+
+    return () => this.unwatch(key, callback);
+  }
+
+  unwatch(key: string, callback: (value: unknown) => void): void {
+    if (this.watchers.has(key)) {
+      const callbacks = this.watchers.get(key)!;
+      callbacks.delete(callback);
+
+      // Clean up the watcher list if empty
+      if (callbacks.size === 0) {
+        this.watchers.delete(key);
+      }
+    }
+  }
+
+  unwatchAll(): void {
+    if (this.watchers) {
+      this.watchers.clear();
+    }
+  }
+
+  /**
+   * Gets a configuration value with a default fallback
+   *
+   * @param key Configuration key
+   * @param defaultValue Default value to use if key is not found
+   * @returns The configuration value or the default value
+   */
+  getWithDefault<T>(key: string, defaultValue: T): T {
+    const value = this.get<T>(key);
+    return value !== undefined ? value : defaultValue;
+  }
+
+  /**
+   * Merge configuration with another object
+   *
+   * @param other Object to merge with
+   */
   merge(other: Record<string, unknown>): void {
     Object.entries(other).forEach(([key, value]) => {
       this.set(key, String(value));
     });
   }
 
+  /**
+   * Get differences between current config and another object
+   *
+   * @param other Object to compare with
+   * @returns Object containing the differences
+   */
   diff(other: Record<string, unknown>): Record<string, unknown> {
     const result: Record<string, unknown> = {};
     const current = this.getAll();
@@ -629,69 +880,62 @@ export class ConfigService implements IConfigService {
     return result;
   }
 
+  /**
+   * Check if config equals another object
+   *
+   * @param other Object to compare with
+   * @returns True if objects are equal
+   */
   equals(other: Record<string, unknown>): boolean {
     const current = this.getAll();
     return Object.keys(other).every((key) => current[key] === other[key]);
   }
 
+  /**
+   * Convert to string representation
+   */
   toString(): string {
-    return JSON.stringify(this.getAll());
+    return JSON.stringify(this.toObject());
   }
 
-  toJSON(): string {
-    return this.toString();
-  }
-
+  /**
+   * Load config from JSON string
+   *
+   * @param json JSON string to load
+   */
   fromJSON(json: string): void {
     const data = JSON.parse(json);
     this.fromObject(data);
   }
 
+  /**
+   * Load config from object
+   *
+   * @param obj Object to load
+   */
   fromObject(obj: Record<string, unknown>): void {
+    // Clear first to remove any existing values
     this.clear();
     this.setMultiple(obj);
   }
 
-  reset(): void {
-    this.clear();
-    this.loadFromEnvironment();
-    this.loadEnvFiles();
-  }
+  /**
+   * Clone the current configuration state into a new object
+   * Creates a new ConfigService instance with only our explicitly set values
+   */
+  public clone(): Record<string, unknown> {
+    // Create a new ConfigService instance for cloning
+    const cloned = new ConfigService();
 
-  reload(): Promise<void> {
-    return this.initialize();
-  }
+    // Get the explicitly set values
+    const result: Record<string, unknown> = {};
 
-  watch(key: string, callback: (value: unknown) => void): () => void {
-    // Store initial value
-    const initialValue = this.get(key);
-    callback(initialValue);
+    // Only copy values that were explicitly set in this instance
+    this.values.forEach((value, key) => {
+      result[key] = value;
+      cloned.set(key, String(value));
+    });
 
-    // Return cleanup function
-    return () => {
-      // Cleanup if needed
-    };
-  }
-
-  unwatch(key: string, callback: (value: unknown) => void): void {
-    // Get current value before unwatching
-    const currentValue = this.get(key);
-    callback(currentValue);
-  }
-
-  unwatchAll(): void {
-    // Implement unwatchAll if needed
-  }
-
-  getWithDefault<T>(key: string, defaultValue: T): T {
-    try {
-      return this.get<T>(key);
-    } catch {
-      return defaultValue;
-    }
-  }
-
-  toObject(): Record<string, unknown> {
-    return this.getAll();
+    return result;
   }
 }

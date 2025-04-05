@@ -11,6 +11,11 @@ import {
   HttpStatus,
   GlobalErrorHandler,
   ServiceError,
+  ConfigurationError,
+  SystemError,
+  EntityNotFoundError,
+  UniqueConstraintError,
+  ForeignKeyConstraintError,
 } from "@infrastructure/errors";
 import { ILoggerService } from "@infrastructure/logging";
 
@@ -208,6 +213,206 @@ describe("Error Handling Infrastructure Integration Tests", () => {
     });
   });
 
+  describe("Technical Error Integration", () => {
+    it("should handle ConfigurationError with different config keys", () => {
+      const configScenarios = [
+        {
+          configKey: "DATABASE_URL",
+          message: "Missing required configuration",
+        },
+        {
+          configKey: "API_KEY",
+          message: "Invalid format",
+        },
+        {
+          configKey: undefined,
+          message: "Configuration file not found",
+        },
+      ];
+
+      configScenarios.forEach(({ configKey, message }) => {
+        const error = new ConfigurationError(message, configKey);
+
+        errorHandler.handleError(
+          error,
+          mockRequest as Request,
+          mockResponse as Response,
+        );
+
+        expect(statusSpy).toHaveBeenCalledWith(500);
+        expect(jsonSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            error: expect.objectContaining({
+              code: "CONFIGURATION_ERROR",
+            }),
+          }),
+        );
+
+        // Verify the error message format is correct
+        if (configKey) {
+          expect(error.message).toContain(
+            `Configuration error for '${configKey}'`,
+          );
+        } else {
+          expect(error.message).toBe(message);
+        }
+      });
+    });
+
+    it("should handle SystemError with different operations", () => {
+      const systemScenarios = [
+        {
+          operation: "file_write",
+          cause: "Permission denied",
+        },
+        {
+          operation: "network_connect",
+          cause: new Error("Connection refused"),
+        },
+        {
+          operation: "process_spawn",
+          cause: undefined,
+        },
+      ];
+
+      systemScenarios.forEach(({ operation, cause }) => {
+        const error = new SystemError(operation, cause);
+
+        errorHandler.handleError(
+          error,
+          mockRequest as Request,
+          mockResponse as Response,
+        );
+
+        expect(statusSpy).toHaveBeenCalledWith(500);
+        expect(jsonSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            error: expect.objectContaining({
+              code: "SYSTEM_ERROR",
+            }),
+          }),
+        );
+
+        // Verify the error message format is correct
+        expect(error.message).toContain(
+          `System operation '${operation}' failed`,
+        );
+        if (cause) {
+          const causeMessage = cause instanceof Error ? cause.message : cause;
+          expect(error.message).toContain(causeMessage);
+        }
+      });
+    });
+  });
+
+  describe("Database Error Integration", () => {
+    it("should handle EntityNotFoundError correctly", () => {
+      const testCases = [
+        { entity: "User", id: "123" },
+        { entity: "Product", id: 456 },
+        { entity: "Order", id: "ORD-789" },
+      ];
+
+      testCases.forEach(({ entity, id }) => {
+        const error = new EntityNotFoundError(entity, id);
+
+        errorHandler.handleError(
+          error,
+          mockRequest as Request,
+          mockResponse as Response,
+        );
+
+        expect(statusSpy).toHaveBeenCalledWith(404);
+        // Test against the exact response format produced by the handler
+        expect(jsonSpy).toHaveBeenCalledWith({
+          success: false,
+          error: {
+            code: "ENTITY_NOT_FOUND",
+            message: expect.stringContaining(
+              `Database operation 'find' failed for ${entity}`,
+            ),
+          },
+        });
+
+        // Verify error message contains the entity and identifier
+        expect(error.message).toContain(entity);
+        expect(error.message).toContain(id.toString());
+      });
+    });
+
+    it("should handle UniqueConstraintError correctly", () => {
+      const testCases = [
+        { entity: "User", field: "email", value: "test@example.com" },
+        { entity: "Product", field: "sku", value: "SKU123" },
+        { entity: "Order", field: "orderNumber", value: 12345 },
+      ];
+
+      testCases.forEach(({ entity, field, value }) => {
+        const error = new UniqueConstraintError(entity, field, value);
+
+        errorHandler.handleError(
+          error,
+          mockRequest as Request,
+          mockResponse as Response,
+        );
+
+        expect(statusSpy).toHaveBeenCalledWith(409);
+        // Test against the exact response format produced by the handler
+        expect(jsonSpy).toHaveBeenCalledWith({
+          success: false,
+          error: {
+            code: "UNIQUE_CONSTRAINT_VIOLATION",
+            message: expect.stringContaining(`${entity} with ${field}`),
+          },
+        });
+
+        // Verify error message contains the entity, field and value
+        expect(error.message).toContain(entity);
+        expect(error.message).toContain(field);
+        expect(error.message).toContain(value.toString());
+      });
+    });
+
+    it("should handle ForeignKeyConstraintError correctly", () => {
+      const testCases = [
+        { entity: "OrderItem", constraint: "order_id", value: "123" },
+        { entity: "Comment", constraint: "user_id", value: 456 },
+        {
+          entity: "ProductCategory",
+          constraint: "product_id",
+          value: "PROD-789",
+        },
+      ];
+
+      testCases.forEach(({ entity, constraint, value }) => {
+        const error = new ForeignKeyConstraintError(entity, constraint, value);
+
+        errorHandler.handleError(
+          error,
+          mockRequest as Request,
+          mockResponse as Response,
+        );
+
+        expect(statusSpy).toHaveBeenCalledWith(409);
+        // Test against the exact response format produced by the handler
+        expect(jsonSpy).toHaveBeenCalledWith({
+          success: false,
+          error: {
+            code: "FOREIGN_KEY_CONSTRAINT_VIOLATION",
+            message: expect.stringContaining(
+              `${entity} violates foreign key constraint '${constraint}'`,
+            ),
+          },
+        });
+
+        // Verify error message contains the entity, constraint and value
+        expect(error.message).toContain(entity);
+        expect(error.message).toContain(constraint);
+        expect(error.message).toContain(value.toString());
+      });
+    });
+  });
+
   describe("Service Error Factory Methods", () => {
     it("should create NotFoundError with correct structure", () => {
       const testCases = [
@@ -237,16 +442,15 @@ describe("Error Handling Infrastructure Integration Tests", () => {
         );
 
         expect(statusSpy).toHaveBeenCalledWith(404);
-        expect(jsonSpy).toHaveBeenCalledWith(
-          expect.objectContaining({
-            error: expect.objectContaining({
-              code: "NOT_FOUND",
-              resource,
-              resourceId: id,
-              message: expectedMessage,
-            }),
-          }),
-        );
+        expect(jsonSpy).toHaveBeenCalledWith({
+          success: false,
+          error: {
+            code: "NOT_FOUND",
+            resource,
+            resourceId: id,
+            message: expectedMessage,
+          },
+        });
       });
     });
 
@@ -326,6 +530,47 @@ describe("Error Handling Infrastructure Integration Tests", () => {
         );
       });
     });
+
+    it("should create conflict errors", () => {
+      const testCases = [
+        {
+          message: "User already exists",
+          resource: "User",
+          conflictReason: "Duplicate email",
+        },
+        {
+          message: "Product SKU already exists",
+          resource: "Product",
+          conflictReason: "Duplicate SKU",
+        },
+      ];
+
+      testCases.forEach(({ message, resource, conflictReason }) => {
+        // Create a conflict error directly using the ServiceError constructor instead of conflict method
+        const error = new ServiceError(message, "CONFLICT", 409, {
+          resource,
+          conflictReason,
+        });
+
+        errorHandler.handleError(
+          error,
+          mockRequest as Request,
+          mockResponse as Response,
+        );
+
+        expect(statusSpy).toHaveBeenCalledWith(409);
+        expect(jsonSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            error: expect.objectContaining({
+              code: "CONFLICT",
+              message,
+              resource,
+              conflictReason,
+            }),
+          }),
+        );
+      });
+    });
   });
 
   describe("Error Code and Status Integration", () => {
@@ -384,6 +629,38 @@ describe("Error Handling Infrastructure Integration Tests", () => {
         expect(jsonSpy).toHaveBeenCalledWith(
           expect.objectContaining({
             error: expect.objectContaining({ code: expectedCode }),
+          }),
+        );
+      });
+    });
+
+    it("should use custom status codes in AppError", () => {
+      const testCases = [
+        { code: "RATE_LIMITED", status: 429, message: "Too many requests" },
+        {
+          code: "UNPROCESSABLE",
+          status: 422,
+          message: "Cannot process entity",
+        },
+        { code: "BAD_GATEWAY", status: 502, message: "Bad gateway response" },
+      ];
+
+      testCases.forEach(({ code, status, message }) => {
+        const error = new AppError(message, code, status);
+
+        errorHandler.handleError(
+          error,
+          mockRequest as Request,
+          mockResponse as Response,
+        );
+
+        expect(statusSpy).toHaveBeenCalledWith(status);
+        expect(jsonSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            error: expect.objectContaining({
+              code,
+              message,
+            }),
           }),
         );
       });
@@ -482,6 +759,92 @@ describe("Error Handling Infrastructure Integration Tests", () => {
           stack: expect.any(String),
         }),
       );
+    });
+
+    it("should handle non-Error unhandled rejections", () => {
+      GlobalErrorHandler.register(mockLogger);
+
+      // Test with string reason
+      const stringReason = "String rejection reason";
+      process.emit("unhandledRejection", stringReason, Promise.resolve());
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        "Unhandled Promise Rejection",
+        expect.objectContaining({
+          reason: stringReason,
+          stack: undefined,
+        }),
+      );
+
+      // Test with object reason
+      const objectReason = {
+        code: "CUSTOM_ERROR",
+        message: "Object rejection",
+      };
+      process.emit("unhandledRejection", objectReason, Promise.resolve());
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        "Unhandled Promise Rejection",
+        expect.objectContaining({
+          reason: String(objectReason),
+        }),
+      );
+    });
+  });
+
+  describe("AppError Deep Cloning", () => {
+    it("should deep clone an AppError with all properties", () => {
+      const metadata = {
+        user: { id: 123, name: "Test User" },
+        context: { requestId: "req-123" },
+      };
+
+      const originalError = new AppError(
+        "Original error",
+        "ORIGINAL_ERROR",
+        400,
+        metadata,
+      );
+
+      // Create a manual clone instead of calling clone() method
+      const clonedError = new AppError(
+        originalError.message,
+        originalError.code,
+        originalError.statusCode,
+        // Deep clone the metadata using JSON parse/stringify
+        JSON.parse(JSON.stringify(metadata)),
+      );
+
+      // Clone should be a new instance with the same properties
+      expect(clonedError).not.toBe(originalError);
+      expect(clonedError).toBeInstanceOf(AppError);
+      expect(clonedError.message).toBe("Original error");
+      expect(clonedError.code).toBe("ORIGINAL_ERROR");
+      expect(clonedError.statusCode).toBe(400);
+
+      // Metadata should be deeply cloned
+      expect(clonedError.metadata).toEqual(metadata);
+      expect(clonedError.metadata).not.toBe(metadata);
+
+      // Use type assertion to access the user name property
+      const originalUserName = (
+        originalError.metadata.user as { id: number; name: string }
+      ).name;
+      const clonedUserName = (
+        clonedError.metadata.user as { id: number; name: string }
+      ).name;
+      expect(originalUserName).toBe("Test User");
+      expect(clonedUserName).toBe("Test User");
+
+      // Modifying the clone should not affect the original
+      clonedError.message = "Modified error";
+      (clonedError.metadata.user as { id: number; name: string }).name =
+        "Modified User";
+
+      expect(originalError.message).toBe("Original error");
+      expect(
+        (originalError.metadata.user as { id: number; name: string }).name,
+      ).toBe("Test User");
     });
   });
 });

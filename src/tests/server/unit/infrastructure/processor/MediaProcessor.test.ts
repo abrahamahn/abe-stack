@@ -212,7 +212,7 @@ describe("MediaProcessor", () => {
             height: 1080,
           },
         },
-        thumbnail: undefined,
+        thumbnail: "/path/to/target_thumb.webp",
       });
     });
 
@@ -382,6 +382,9 @@ describe("MediaProcessor", () => {
 
       // Mock ffmpeg to throw error
       const mockFfmpegInstance = {
+        screenshots: vi.fn(() => {
+          throw new Error("Video processing failed");
+        }),
         output: vi.fn().mockReturnThis(),
         on: vi.fn().mockImplementation((event: string, callback: any) => {
           if (event === "error") {
@@ -398,7 +401,10 @@ describe("MediaProcessor", () => {
 
       // Verify error handling
       await expect(
-        mediaProcessor.processMedia(sourcePath, { targetPath }),
+        mediaProcessor.processMedia(sourcePath, {
+          targetPath,
+          generateThumbnail: true,
+        }),
       ).rejects.toThrow("Video processing failed");
 
       // Verify error logging

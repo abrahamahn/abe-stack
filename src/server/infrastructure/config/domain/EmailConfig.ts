@@ -93,15 +93,23 @@ export class EmailConfigProvider {
    * @returns Email configuration
    */
   private loadConfig(): EmailConfig {
-    return {
-      host: this.configService.get("EMAIL_HOST") || "smtp.example.com",
-      port: this.configService.getNumber("EMAIL_PORT") || 465,
-      secure: this.configService.getBoolean("EMAIL_SECURE") || true,
-      auth: {
-        user: this.configService.get("EMAIL_USER") || "user@example.com",
-        pass: this.configService.get("EMAIL_PASSWORD") || "password123",
-      },
-      from: this.configService.get("EMAIL_FROM") || "noreply@example.com",
-    };
+    try {
+      return {
+        host: this.configService.getString("EMAIL_HOST", "smtp.example.com"),
+        port: this.configService.getNumber("EMAIL_PORT", 465),
+        secure: this.configService.getBoolean("EMAIL_SECURE", true),
+        auth: {
+          user: this.configService.getString("EMAIL_USER", "user@example.com"),
+          pass: this.configService.getString("EMAIL_PASSWORD", "password123"),
+        },
+        from: this.configService.getString("EMAIL_FROM", "noreply@example.com"),
+      };
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error
+          ? `Failed to load email configuration: ${error.message}`
+          : "Failed to load email configuration";
+      throw new Error(errorMessage);
+    }
   }
 }

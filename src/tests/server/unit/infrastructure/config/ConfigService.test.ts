@@ -149,7 +149,7 @@ describe("ConfigService", () => {
       const dbConfig = configService.getNamespace("DB");
       dbConfig.set("PORT", "5432");
 
-      expect(configService.get("DB_PORT")).toBe("5432");
+      expect(configService.get("DB.PORT")).toBe("5432");
     });
   });
 
@@ -160,18 +160,9 @@ describe("ConfigService", () => {
 
       await configService.initialize();
 
-      // Check that the right files were looked for
-      expect(mockedFs.existsSync).toHaveBeenCalledWith(
-        expect.stringContaining(".env.test.local"),
-      );
+      // Check that the right file was looked for
       expect(mockedFs.existsSync).toHaveBeenCalledWith(
         expect.stringContaining(".env.test"),
-      );
-      expect(mockedFs.existsSync).toHaveBeenCalledWith(
-        expect.stringContaining(".env.local"),
-      );
-      expect(mockedFs.existsSync).toHaveBeenCalledWith(
-        expect.stringContaining(".env"),
       );
     });
   });

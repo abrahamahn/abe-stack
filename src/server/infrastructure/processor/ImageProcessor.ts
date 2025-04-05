@@ -152,6 +152,8 @@ export class ImageProcessor {
     targetPath: string,
     options: ImageOptions = {},
   ): Promise<ImageMetadata> {
+    let image: sharp.Sharp | null = null;
+
     try {
       // Ensure target directory exists
       const targetDir = path.dirname(targetPath);
@@ -161,7 +163,7 @@ export class ImageProcessor {
       const metadata = await sharp(sourcePath).metadata();
 
       // Initialize Sharp instance
-      let image = sharp(sourcePath);
+      image = sharp(sourcePath);
 
       // Apply rotation based on EXIF data
       image = image.rotate();
@@ -229,6 +231,33 @@ export class ImageProcessor {
         },
       );
       throw error;
+    } finally {
+      // Explicitly release resources
+      this.releaseImageResources(image);
+    }
+  }
+
+  /**
+   * Release resources associated with a Sharp instance
+   * This helps prevent file locking issues
+   * @param image Sharp instance to release
+   */
+  private releaseImageResources(image: sharp.Sharp | null): void {
+    if (image) {
+      try {
+        // Close any open input file handles
+        (image as any).options.input = null;
+
+        // This helps release internal buffers
+        if (typeof image.destroy === "function") {
+          image.destroy();
+        }
+      } catch (error) {
+        // Just log at debug level, don't throw
+        this.logger.debug("Error releasing image resources", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
     }
   }
 
@@ -243,26 +272,38 @@ export class ImageProcessor {
     targetPath: string,
     size: number = 200,
   ): Promise<string> {
+    let image: sharp.Sharp | null = null;
+
     try {
       // Ensure target directory exists
       const targetDir = path.dirname(targetPath);
       await this.fileUtils.ensureDirectory(targetDir);
 
-      // Create a new pipeline for processing to ensure resources are closed
-      const image = sharp(sourcePath);
-
-      // Create thumbnail
-      await image
-        .rotate() // Apply rotation based on EXIF
-        .resize(size, size, { fit: "inside", withoutEnlargement: true })
-        .webp({ quality: 80 })
-        .toFile(targetPath);
-
-      // Force garbage collection without unsafe cast
-      if (image && typeof image === "object") {
-        // Use optional chaining to safely access and modify properties
-        (image as unknown as { options: unknown }).options = null;
+      // Get original metadata to calculate aspect ratio
+      const metadata = await sharp(sourcePath).metadata();
+      if (!metadata.width || !metadata.height) {
+        throw new Error("Could not determine image dimensions");
       }
+
+      // Initialize Sharp instance
+      image = sharp(sourcePath);
+
+      // Apply rotation based on EXIF data
+      image = image.rotate();
+
+      // Create thumbnail (resize with aspect ratio)
+      image = image.resize({
+        width: size,
+        height: size,
+        fit: "inside",
+        withoutEnlargement: true,
+      });
+
+      // Convert to WebP for better compression regardless of source format
+      image = image.webp({ quality: 75 });
+
+      // Save the thumbnail
+      await image.toFile(targetPath);
 
       return targetPath;
     } catch (error) {
@@ -270,22 +311,58 @@ export class ImageProcessor {
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;
+    } finally {
+      // Explicitly release resources
+      this.releaseImageResources(image);
     }
   }
 
   /**
    * Extract EXIF data from an image
-   * @param filePath Path to the image file
+   * @param filePath File path
    */
   async extractExifData(filePath: string): Promise<Buffer | null> {
+    let image: sharp.Sharp | null = null;
+
     try {
-      const metadata = await sharp(filePath).metadata();
-      return metadata.exif ? metadata.exif : null;
+      // Check if file exists
+      if (!(await this.fileUtils.fileExists(filePath))) {
+        throw new Error(`Input file is missing: ${filePath}`);
+      }
+
+      // Initialize Sharp instance
+      image = sharp(filePath);
+
+      // Extract the EXIF data
+      const metadata = await image.metadata();
+
+      // Return the EXIF buffer if it exists
+      return metadata.exif || null;
     } catch (error) {
       this.logger.error(`Error extracting EXIF data: ${filePath}`, {
         error: error instanceof Error ? error.message : String(error),
       });
       return null;
+    } finally {
+      // Explicitly release resources
+      this.releaseImageResources(image);
+    }
+  }
+
+  /**
+   * Destroy and release all resources
+   * Call this when you're done using the ImageProcessor
+   */
+  public destroy(): void {
+    try {
+      // Force garbage collection if available
+      if (global.gc) {
+        global.gc();
+      }
+    } catch (error) {
+      this.logger.debug("Error during garbage collection", {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 }

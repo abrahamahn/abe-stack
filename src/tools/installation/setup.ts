@@ -681,11 +681,8 @@ function isDockerAvailable() {
 }
 
 // Add this function
-function createPromptModule() {
-  const inquirerModule = inquirer.createPromptModule({
-    // @ts-expect-error - sigint is a valid property for inquirer but not in the type definition
-    sigint: true, // Ensure SIGINT is properly handled
-  });
+function createPromptModule(): ReturnType<typeof inquirer.createPromptModule> {
+  const inquirerModule = inquirer.createPromptModule();
   return inquirerModule;
 }
 

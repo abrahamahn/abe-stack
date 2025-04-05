@@ -154,6 +154,14 @@ export interface IJobService {
   ): Promise<{ status: string; result?: JobResult; data?: T } | null>;
 
   /**
+   * Cancel a job
+   * @param type The job type
+   * @param jobId The job ID
+   * @returns True if the job was successfully cancelled
+   */
+  cancelJob(type: JobType, jobId: string): Promise<boolean>;
+
+  /**
    * Initialize the job service
    */
   initialize(): Promise<void>;

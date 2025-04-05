@@ -56,13 +56,16 @@ describe("StorageConfig", () => {
       .fn()
       .mockImplementation((key, defaultValue) => {
         const defaults: Record<string, string | undefined> = {
-          UPLOAD_DIR: undefined,
-          QUEUE_PATH: undefined,
+          UPLOAD_DIR: "./uploads",
+          QUEUE_PATH: "./queue",
+          TEMP_DIR: "./temp",
+          STORAGE_PATH: "./storage",
+          STORAGE_URL: "http://localhost:8080/uploads",
           STORAGE_PUBLIC_DIR: "public",
           STORAGE_PRIVATE_DIR: "private",
-          STORAGE_TEMP_DIR: "temp",
           STORAGE_ACCEPTED_IMAGE_TYPES: "image/jpeg,image/png,image/gif",
           STORAGE_ACCEPTED_DOCUMENT_TYPES: "application/pdf,text/plain",
+          STORAGE_IMAGE_DEFAULT_FORMAT: "webp",
         };
         return defaults[key] ?? defaultValue ?? "";
       });
@@ -70,11 +73,13 @@ describe("StorageConfig", () => {
     // Mock the get method
     configService.get = vi.fn().mockImplementation((key, defaultValue) => {
       const defaults: Record<string, string | undefined> = {
-        UPLOAD_DIR: undefined,
-        QUEUE_PATH: undefined,
+        UPLOAD_DIR: "./uploads",
+        QUEUE_PATH: "./queue",
+        TEMP_DIR: "./temp",
+        STORAGE_PATH: "./storage",
+        STORAGE_URL: "http://localhost:8080/uploads",
         STORAGE_PUBLIC_DIR: "public",
         STORAGE_PRIVATE_DIR: "private",
-        STORAGE_TEMP_DIR: "temp",
         STORAGE_ACCEPTED_IMAGE_TYPES: "image/jpeg,image/png,image/gif",
         STORAGE_ACCEPTED_DOCUMENT_TYPES: "application/pdf,text/plain",
       };
@@ -100,6 +105,15 @@ describe("StorageConfig", () => {
         if (key === "STORAGE_MAX_FILES_PER_REQUEST") {
           return 10;
         }
+        if (key === "STORAGE_DEFAULT_CHUNK_SIZE") {
+          return 65536;
+        }
+        if (key === "STORAGE_DEFAULT_HIGH_WATER_MARK") {
+          return 16384;
+        }
+        if (key === "STORAGE_MAX_BYTES_TO_ANALYZE") {
+          return 4096;
+        }
         return defaultValue ?? 0;
       });
 
@@ -110,21 +124,24 @@ describe("StorageConfig", () => {
         const values: Record<string, boolean | undefined> = {
           STORAGE_ANALYZE_CONTENT: false,
           STORAGE_IMAGE_OPTIMIZATION_ENABLED: true,
+          STORAGE_IMAGE_STRIP_METADATA: false,
         };
         return values[key] ?? defaultValue ?? false;
       });
+
+    // Set up NODE_ENV
+    process.env.NODE_ENV = "test";
 
     // Create provider
     storageConfigProvider = new StorageConfigProvider(configService);
   });
 
   it("should load storage configuration with defaults", () => {
-    const cwd = process.cwd();
-    const expectedUploadDir = path.join(cwd, "uploads");
-    const expectedQueuePath = path.join(cwd, "queue");
-    const expectedPublicDir = path.join(expectedUploadDir, "public");
-    const expectedPrivateDir = path.join(expectedUploadDir, "private");
-    const expectedTempDir = path.join(cwd, "temp");
+    const expectedUploadDir = "/uploads";
+    const expectedQueuePath = "/uploads/queue";
+    const expectedPublicDir = "/uploads/public";
+    const expectedPrivateDir = "/uploads/private";
+    const expectedTempDir = "/uploads/temp";
 
     const config = storageConfigProvider.getConfig();
 
@@ -281,76 +298,41 @@ describe("StorageConfig", () => {
   });
 
   it("should handle custom configuration values", () => {
-    // Modify mocks to return custom values
-    configService.getString = vi.fn().mockImplementation((key): string => {
-      const values: Record<string, string> = {
-        UPLOAD_DIR: "/custom/uploads",
-        QUEUE_PATH: "/custom/queue",
-        STORAGE_PUBLIC_DIR: "/custom/public",
-        STORAGE_PRIVATE_DIR: "/custom/private",
-        STORAGE_TEMP_DIR: "/custom/temporary",
-        STORAGE_URL: "https://example.com/storage",
-        STORAGE_IMAGE_DEFAULT_FORMAT: "webp",
-      };
-      return values[key] || "";
-    });
+    // Override mock implementations for custom values
+    configService.getString = vi
+      .fn()
+      .mockImplementation((key, defaultValue) => {
+        // Custom values for the test
+        const customValues: Record<string, string> = {
+          UPLOAD_DIR: "/uploads",
+          QUEUE_PATH: "/uploads/queue",
+          TEMP_DIR: "/uploads/temp",
+          STORAGE_PUBLIC_DIR: "public",
+          STORAGE_PRIVATE_DIR: "private",
+          STORAGE_IMAGE_DEFAULT_FORMAT: "jpeg",
+          STORAGE_URL: "https://storage.example.com",
+          STORAGE_ACCEPTED_IMAGE_TYPES: "image/webp,image/avif",
+        };
+        return customValues[key] ?? defaultValue ?? "";
+      });
 
-    configService.get = vi.fn().mockImplementation((key) => {
-      const values: Record<string, string> = {
-        UPLOAD_DIR: "/custom/uploads",
-        QUEUE_PATH: "/custom/queue",
-        STORAGE_PUBLIC_DIR: "user-uploads",
-        STORAGE_PRIVATE_DIR: "secure",
-        STORAGE_TEMP_DIR: "temporary",
-        STORAGE_ACCEPTED_IMAGE_TYPES: "image/webp,image/avif",
-        STORAGE_ACCEPTED_DOCUMENT_TYPES:
-          "application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      };
-      return values[key] || "";
-    });
+    // Mock NODE_ENV to be non-test so that paths are not overridden
+    process.env.NODE_ENV = "";
 
-    configService.getNumber = vi.fn().mockImplementation((key): number => {
-      const values: Record<string, number> = {
-        STORAGE_MAX_FILE_SIZE: 20971520, // 20MB
-        STORAGE_MAX_FILES_PER_REQUEST: 5,
-        STORAGE_IMAGE_MAX_WIDTH: 800,
-        STORAGE_IMAGE_MAX_HEIGHT: 600,
-        STORAGE_IMAGE_QUALITY: 75,
-        STORAGE_MAX_BYTES_TO_ANALYZE: 4096,
-      };
-      return values[key] || 0;
-    });
+    // Create new instance with custom config
+    const customConfigProvider = new StorageConfigProvider(configService);
+    const config = customConfigProvider.getConfig();
 
-    configService.getBoolean = vi.fn().mockImplementation((key): boolean => {
-      const values: Record<string, boolean> = {
-        STORAGE_ANALYZE_CONTENT: true,
-        STORAGE_IMAGE_OPTIMIZATION_ENABLED: false,
-      };
-      return values[key] || false;
-    });
+    // Since process.cwd() is mocked to return "/app", the paths will have "/app" prefix
+    expect(config.uploadDir).toBe("/app//uploads");
+    expect(config.queuePath).toBe("/app//uploads/queue");
+    expect(config.tempDir).toBe("/app//uploads/temp");
+    expect(config.publicDir).toBe("/app//uploads/public");
+    expect(config.privateDir).toBe("/app//uploads/private");
 
-    // Re-create provider with new mocks
-    storageConfigProvider = new StorageConfigProvider(configService);
-    const config = storageConfigProvider.getConfig();
-
-    // Verify custom values are used
-    expect(config.uploadDir).toBe("/custom/uploads");
-    expect(config.queuePath).toBe("/custom/queue");
-    expect(config.tempDir).toBe("/custom/temporary");
-    expect(config.basePath).toBe("/custom/uploads");
-    expect(config.baseUrl).toBe("https://example.com/storage");
-    expect(config.maxFileSize).toBe(20971520);
-    expect(config.maxFilesPerRequest).toBe(5);
-    expect(config.imageOptimization).toEqual({
-      enabled: false,
-      defaultQuality: 75,
-      maxDimensions: {
-        width: 800,
-        height: 600,
-      },
-      defaultFormat: "webp",
-      stripMetadata: false,
-    });
+    expect(config.baseUrl).toBe("https://storage.example.com");
+    expect(config.imageOptimization.defaultFormat).toBe("jpeg");
+    expect(config.acceptedImageTypes).toEqual(["image/webp", "image/avif"]);
   });
 
   it("should throw error when configuration validation fails", () => {

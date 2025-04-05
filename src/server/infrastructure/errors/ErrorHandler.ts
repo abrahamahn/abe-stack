@@ -35,9 +35,10 @@ export class ErrorHandler implements IErrorHandler {
 
     // Get request information for logging
     const requestInfo = {
-      method: req.method,
-      path: req.path,
-      ip: req.ip,
+      method: req?.method || "[unknown]",
+      path: req?.path || req?.url || "[unknown]",
+      ip: req?.ip || req?.socket?.remoteAddress || "[unknown]",
+      userAgent: req?.get ? req.get("User-Agent") : "[unknown]",
     };
 
     // Handle ServiceError instances
@@ -119,8 +120,11 @@ export class ErrorHandler implements IErrorHandler {
 
     // Handle standard errors
     this.logger.error(`Unhandled error: ${error.message}`, {
-      error: error.message,
-      stack: error.stack,
+      error: {
+        message: error.message,
+        name: error.name,
+        stack: error.stack?.split("\n").slice(0, 5).join("\n"), // Include only first 5 lines of stack
+      },
       request: requestInfo,
     });
 

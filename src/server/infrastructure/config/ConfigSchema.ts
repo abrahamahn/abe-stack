@@ -7,6 +7,7 @@ export interface ConfigSchemaField {
   default?: unknown;
   secret?: boolean;
   description?: string;
+  errorMessage?: string; // Custom error message for validation failures
 
   // Validation rules
   pattern?: RegExp;
@@ -88,7 +89,9 @@ export function validateConfig(
 
     // Check if required
     if (field.required && value === undefined) {
-      result.errors.push(`Required configuration key missing: ${key}`);
+      // Use custom error message if provided, otherwise use default
+      const errorMessage = field.errorMessage || `${key} is required`;
+      result.errors.push(errorMessage);
       result.valid = false;
       continue;
     }
@@ -180,6 +183,14 @@ function convertValue(value: unknown, field: ConfigSchemaField): unknown {
   }
 }
 
+// Helper to create error message with possible custom override
+function createErrorMessage(
+  field: ConfigSchemaField,
+  defaultMessage: string,
+): string {
+  return field.errorMessage || defaultMessage;
+}
+
 /**
  * Validates a field value against validation rules
  *
@@ -200,7 +211,10 @@ function validateFieldValue(
     // Pattern check
     if (field.pattern && !field.pattern.test(value)) {
       result.errors.push(
-        `Value for ${key} does not match pattern ${field.pattern}`,
+        createErrorMessage(
+          field,
+          `Value for ${key} does not match pattern ${field.pattern}`,
+        ),
       );
       result.valid = false;
       return false;
@@ -209,7 +223,10 @@ function validateFieldValue(
     // Enum check
     if (field.enum && !field.enum.includes(value)) {
       result.errors.push(
-        `Value for ${key} must be one of: ${field.enum.join(", ")}`,
+        createErrorMessage(
+          field,
+          `Value for ${key} must be one of: ${field.enum.join(", ")}`,
+        ),
       );
       result.valid = false;
       return false;
@@ -218,7 +235,10 @@ function validateFieldValue(
     // Length checks
     if (field.minLength !== undefined && value.length < field.minLength) {
       result.errors.push(
-        `Value for ${key} is too short (min ${field.minLength} characters)`,
+        createErrorMessage(
+          field,
+          `Value for ${key} is too short (min ${field.minLength} characters)`,
+        ),
       );
       result.valid = false;
       return false;
@@ -226,7 +246,10 @@ function validateFieldValue(
 
     if (field.maxLength !== undefined && value.length > field.maxLength) {
       result.errors.push(
-        `Value for ${key} is too long (max ${field.maxLength} characters)`,
+        createErrorMessage(
+          field,
+          `Value for ${key} is too long (max ${field.maxLength} characters)`,
+        ),
       );
       result.valid = false;
       return false;
@@ -237,13 +260,23 @@ function validateFieldValue(
   if (field.type === "number" && typeof value === "number") {
     // Range checks
     if (field.min !== undefined && value < field.min) {
-      result.errors.push(`Value for ${key} is too small (min ${field.min})`);
+      result.errors.push(
+        createErrorMessage(
+          field,
+          `Value for ${key} is too small (min ${field.min})`,
+        ),
+      );
       result.valid = false;
       return false;
     }
 
     if (field.max !== undefined && value > field.max) {
-      result.errors.push(`Value for ${key} is too large (max ${field.max})`);
+      result.errors.push(
+        createErrorMessage(
+          field,
+          `Value for ${key} is too large (max ${field.max})`,
+        ),
+      );
       result.valid = false;
       return false;
     }
@@ -251,7 +284,10 @@ function validateFieldValue(
     // Enum check
     if (field.enum && !field.enum.includes(value)) {
       result.errors.push(
-        `Value for ${key} must be one of: ${field.enum.join(", ")}`,
+        createErrorMessage(
+          field,
+          `Value for ${key} must be one of: ${field.enum.join(", ")}`,
+        ),
       );
       result.valid = false;
       return false;
@@ -260,7 +296,9 @@ function validateFieldValue(
 
   // Custom validator
   if (field.validator && !field.validator(value)) {
-    result.errors.push(`Invalid value for configuration key: ${key}`);
+    result.errors.push(
+      createErrorMessage(field, `Invalid value for configuration key: ${key}`),
+    );
     result.valid = false;
     return false;
   }

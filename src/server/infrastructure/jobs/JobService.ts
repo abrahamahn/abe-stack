@@ -572,4 +572,56 @@ export class JobService implements IJobService {
       data: job.data,
     };
   }
+
+  /**
+   * Cancel a job
+   * @param type The job type
+   * @param jobId The job ID
+   * @returns True if the job was successfully cancelled
+   */
+  async cancelJob(type: JobType, jobId: string): Promise<boolean> {
+    await this.ensureInitialized();
+
+    try {
+      const job = await this.storage.getJob(type, jobId);
+
+      if (!job) {
+        this.logger.warn("Cannot cancel job: job not found", {
+          jobId,
+          jobType: type,
+        });
+        return false;
+      }
+
+      // Only cancel jobs that are not already completed or failed
+      if (job.status === "completed" || job.status === "failed") {
+        this.logger.info("Job already finished, cannot cancel", {
+          jobId,
+          jobType: type,
+          status: job.status,
+        });
+        return false;
+      }
+
+      // Update status to failed with cancellation message
+      await this.storage.updateJobStatus(type, jobId, "failed", {
+        success: false,
+        error: "Job cancelled by user",
+      });
+
+      this.logger.info("Job cancelled", {
+        jobId,
+        jobType: type,
+      });
+
+      return true;
+    } catch (error) {
+      this.logger.error("Failed to cancel job", {
+        jobId,
+        jobType: type,
+        error,
+      });
+      return false;
+    }
+  }
 }

@@ -14,7 +14,7 @@ declare module "express" {
 }
 
 // Rate limiter configurations for different endpoints
-const rateLimiters = {
+export const rateLimiters = {
   // Login - 5 attempts per minute
   login: new RateLimiterMemory({
     points: 5, // Number of attempts
@@ -65,10 +65,24 @@ const rateLimiters = {
 };
 
 /**
+ * Reset all rate limiters - useful for testing
+ */
+export const resetAllRateLimiters = async (): Promise<void> => {
+  // For testing, clear all limiters
+  for (const limiter of Object.values(rateLimiters)) {
+    // @ts-expect-error - resetKeys exists but isn't in the types
+    if (typeof limiter.resetKeys === "function") {
+      // @ts-expect-error - accessing method that exists at runtime
+      await limiter.resetKeys();
+    }
+  }
+};
+
+/**
  * Get IP address from request
  * Handles various proxy scenarios and header formats
  */
-const getIpAddress = (req: Request): string => {
+export const getIpAddress = (req: Request): string => {
   // Try X-Forwarded-For header first (common in proxy setups)
   const forwardedFor = req.headers["x-forwarded-for"];
   if (forwardedFor) {
@@ -110,17 +124,46 @@ export const rateLimitMiddleware = (limiterKey: keyof typeof rateLimiters) => {
     const key = userId ? `${userId}_${ip}` : ip;
 
     try {
-      await limiter.consume(key);
+      const rateLimitResult = await limiter.consume(key);
+
+      // Set headers for rate limit info
+      if (rateLimitResult) {
+        res.set("X-RateLimit-Limit", String(limiter.points));
+        res.set(
+          "X-RateLimit-Remaining",
+          String(rateLimitResult.remainingPoints),
+        );
+        res.set(
+          "X-RateLimit-Reset",
+          String(
+            Math.round(Date.now() / 1000 + rateLimitResult.msBeforeNext / 1000),
+          ),
+        );
+      }
+
       // If we get here, the request is allowed
       next();
     } catch (error) {
-      // Check if this is a rate limit rejection
-      if (error instanceof Error && error.name === "RateLimiterRes") {
-        const retryAfter =
-          Math.round((error.message as unknown as number) / 1000) || 1;
+      // Check if this is a rate limit rejection (RateLimiterRes)
+      if (
+        error instanceof Error &&
+        (error.name === "RateLimiterRes" ||
+          (typeof error === "object" &&
+            error !== null &&
+            "remainingPoints" in error))
+      ) {
+        // Cast to an object with msBeforeNext
+        const rateLimitError = error as unknown as { msBeforeNext: number };
+        const retryAfter = Math.ceil(rateLimitError.msBeforeNext / 1000) || 1;
 
-        // Set standard retry-after header
+        // Set headers
         res.set("Retry-After", String(retryAfter));
+        res.set("X-RateLimit-Limit", String(limiter.points));
+        res.set("X-RateLimit-Remaining", "0");
+        res.set(
+          "X-RateLimit-Reset",
+          String(Math.round(Date.now() / 1000 + retryAfter)),
+        );
 
         // Return rate limit error
         res.status(429).json({
@@ -129,7 +172,8 @@ export const rateLimitMiddleware = (limiterKey: keyof typeof rateLimiters) => {
           retryAfter: retryAfter,
         });
       } else {
-        // For other errors, just continue
+        // For any other errors, log and continue
+        console.error("Rate limiting error:", error);
         next();
       }
     }
@@ -208,5 +252,16 @@ export class SecurityRateLimiter {
    */
   async resetLimit(key: string): Promise<void> {
     await this.limiter.delete(key);
+  }
+
+  /**
+   * Reset all keys (useful for testing)
+   */
+  async resetAllLimits(): Promise<void> {
+    // @ts-expect-error - resetKeys exists but isn't in the types
+    if (typeof this.limiter.resetKeys === "function") {
+      // @ts-expect-error - accessing method that exists at runtime
+      await this.limiter.resetKeys();
+    }
   }
 }

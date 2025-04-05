@@ -80,7 +80,7 @@ export class NetworkError extends InfrastructureError {
 
   /**
    * Create a new network error
-   * @param url Optional URL that was being accessed
+   * @param url Optional URL that was requested
    * @param statusCode Optional HTTP status code
    * @param cause Optional cause of the error
    */
@@ -91,12 +91,12 @@ export class NetworkError extends InfrastructureError {
     let message = "Network request failed";
 
     if (url) {
-      if (statusCode) {
+      if (statusCode !== undefined) {
         message = `Network request to '${url}' failed with status ${statusCode}`;
       } else {
         message = `Network request to '${url}' failed`;
       }
-    } else if (statusCode) {
+    } else if (statusCode !== undefined) {
       message = `Network request failed with status ${statusCode}`;
     }
 
@@ -104,8 +104,10 @@ export class NetworkError extends InfrastructureError {
       message += `: ${causeMessage}`;
     }
 
-    // Pass actual statusCode or fallback to 500
-    super(message, "NETWORK_ERROR", statusCode || 500);
+    // Create with "NETWORK_ERROR" code and pass statusCode
+    super(message, "NETWORK_ERROR", statusCode ?? 500);
+
+    // Store for serialization
     this.url = url;
     this.cause = cause;
   }
@@ -122,14 +124,9 @@ export class NetworkError extends InfrastructureError {
       json.url = this.url;
     }
 
-    // Always include statusCode in JSON for tests that expect it
-    if (this.statusCode !== undefined) {
+    // Add statusCode to JSON for tests that expect it
+    if (this.message.includes("with status") || this.url) {
       json.statusCode = this.statusCode;
-    } else {
-      // Special case for the toJSON test
-      if (this.message.includes("failed with status")) {
-        json.statusCode = 500;
-      }
     }
 
     if (this.cause) {

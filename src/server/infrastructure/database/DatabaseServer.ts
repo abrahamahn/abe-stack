@@ -240,118 +240,107 @@ export class DatabaseServer implements IDatabaseServer {
     params: unknown[] = [],
     options: QueryOptions = {},
   ): Promise<QueryResult<T>> {
-    await this.ensureInitialized(true);
+    try {
+      await this.ensureInitialized();
 
-    const startTime = Date.now();
-    const tag = options.tag || this.extractQueryTag(text);
-    const maxRetries =
-      typeof options.maxRetries === "number" ? options.maxRetries : 2;
-    let lastError: Error | unknown;
-    let attemptCount = 0;
+      // Validate parameters
+      this.validateQueryParams(params);
 
-    while (attemptCount <= maxRetries) {
-      try {
-        // Set statement timeout if provided
-        if (options.timeout || this.databaseConfig.statementTimeout) {
-          if (this.pool && typeof this.pool.query === "function") {
-            await this.pool!.query(
-              `SET statement_timeout = ${options.timeout || this.databaseConfig.statementTimeout}`,
-            );
-          }
-        }
+      // Normalize options
+      const { maxRetries = 2, tag = this.extractQueryTag(text) } = options;
 
-        const queryConfig: import("pg").QueryConfig<unknown[]> = {
-          text,
-          values: params,
-        };
+      // Stats tracking
+      const startTime = Date.now();
+      let attempt = 0;
+      const maxAttempts = maxRetries + 1;
 
-        // Skip actual query during testing if the pool doesn't have a query method
-        let result: QueryResult<T>;
-        if (this.pool && typeof this.pool.query === "function") {
-          result = await this.pool!.query<T>(queryConfig);
-        } else {
-          // During testing, return a mock result
-          result = {
-            rows: [] as T[],
-            rowCount: 0,
-            command: "SELECT",
-            oid: 0,
-            fields: [],
-          };
-        }
-
-        // Track query metrics
-        this.metrics.queryCount++;
-        const queryTime = Date.now() - startTime;
-        this.metrics.queryTimes.push({ time: queryTime, tag });
-
-        // Track query time by tag if present
-        if (tag) {
-          if (!this.metrics.taggedQueryTimes.has(tag)) {
-            this.metrics.taggedQueryTimes.set(tag, []);
-          }
-          this.metrics.taggedQueryTimes.get(tag)!.push(queryTime);
-        }
-
-        // Cap the number of samples to prevent memory leaks
-        if (
-          this.metrics.queryTimes.length > this.databaseConfig.metricsMaxSamples
-        ) {
-          this.metrics.queryTimes = this.metrics.queryTimes.slice(
-            -this.databaseConfig.metricsMaxSamples,
-          );
-        }
-
-        return result;
-      } catch (error) {
-        lastError = error;
-        this.metrics.queryFailCount++;
+      // Execute query with retries
+      while (attempt < maxAttempts) {
         try {
-          this.logger.error("Query execution failed", {
-            error: error instanceof Error ? error.message : String(error),
-            errorCode:
-              error instanceof Object && "code" in error
-                ? (error as { code: string }).code
-                : undefined,
-            query: text.length > 500 ? text.substring(0, 500) + "..." : text,
-            paramCount: params.length,
-            tag,
-            attempt: attemptCount + 1,
-            maxRetries,
-          });
-        } catch (logError) {
-          // Silently ignore any logger errors
-          console.warn("Logger error:", logError);
-        }
+          attempt++;
 
-        // Check if we should retry
-        if (attemptCount < maxRetries && this.shouldRetryQuery(error)) {
-          attemptCount++;
-          const backoffTime = Math.pow(2, attemptCount) * 100; // Exponential backoff
-
-          try {
-            this.logger.info(
-              `Retrying query (attempt ${attemptCount}/${maxRetries}) after ${backoffTime}ms`,
-              {
-                tag,
-                query:
-                  text.length > 100 ? text.substring(0, 100) + "..." : text,
-              },
-            );
-          } catch (logError) {
-            // Silently ignore any logger errors
-            console.warn("Retry logging error:", logError);
+          // Execute query
+          if (!this.pool) {
+            throw new DatabaseError("Database pool not initialized");
           }
 
-          await this.delay(backoffTime);
-          continue;
+          const query = { text, values: params };
+          const result = await this.pool.query<T>(query);
+
+          // Track successful query
+          const queryTime = Date.now() - startTime;
+          this.metrics.queryCount++;
+          this.metrics.queryTimes.push({ time: queryTime, tag });
+
+          // Track by tag if provided
+          if (tag) {
+            const tagTimes = this.metrics.taggedQueryTimes.get(tag) || [];
+            tagTimes.push(queryTime);
+            this.metrics.taggedQueryTimes.set(tag, tagTimes);
+          }
+
+          // Trim metrics array if it's too long
+          if (
+            this.metrics.queryTimes.length >
+            this.databaseConfig.metricsMaxSamples
+          ) {
+            this.metrics.queryTimes.splice(
+              0,
+              this.metrics.queryTimes.length -
+                this.databaseConfig.metricsMaxSamples,
+            );
+          }
+
+          return result;
+        } catch (error) {
+          // Track failed query
+          this.metrics.queryFailCount++;
+
+          // Check if we should retry
+          const shouldRetry =
+            attempt < maxAttempts && this.shouldRetryQuery(error);
+
+          // Log the error
+          try {
+            if (shouldRetry) {
+              this.logger.warn(
+                `Database query failed, retrying (${attempt}/${maxRetries})`,
+                { error, query: text, params },
+              );
+            } else {
+              this.logger.error("Database query failed", {
+                error,
+                query: text,
+                params,
+              });
+            }
+          } catch (logError) {
+            // Ignore logger errors
+            console.warn("Logger error:", logError);
+          }
+
+          // Throw error if we shouldn't retry
+          if (!shouldRetry) {
+            throw this.formatError(error, `Query failed: ${text}`);
+          }
+
+          // Delay before retrying
+          const delay = Math.min(
+            100 * Math.pow(1.5, attempt - 1),
+            5000, // max 5 seconds
+          );
+          await this.delay(delay);
         }
-
-        throw error;
       }
-    }
 
-    throw lastError;
+      // Throw error at the end - this should be unreachable
+      // This return is needed to satisfy TypeScript's control flow analysis
+      throw new DatabaseError(
+        `Query failed after ${maxAttempts} attempts: ${text}`,
+      );
+    } catch (error) {
+      throw this.formatError(error, `Query failed: ${text}`);
+    }
   }
 
   private shouldRetryQuery(error: unknown): boolean {
@@ -396,10 +385,28 @@ export class DatabaseServer implements IDatabaseServer {
   }
 
   private formatError(error: unknown, context: string): Error {
-    if (error instanceof Error) {
+    // If it's already a DatabaseError, just return it
+    if (error instanceof DatabaseError) {
       return error;
     }
-    return new Error(`${context}: ${String(error)}`);
+
+    if (error instanceof Error) {
+      // Extract Postgres error code if available
+      const pgError = error as {
+        code?: string;
+        query?: string;
+        params?: unknown[];
+      };
+
+      return new DatabaseError(`${context}: ${error.message}`, {
+        code: pgError.code,
+        query: pgError.query,
+        params: pgError.params,
+      });
+    }
+
+    // For non-Error objects
+    return new DatabaseError(`${context}: ${String(error)}`);
   }
 
   private handleError(error: unknown, context: string): never {
@@ -417,103 +424,94 @@ export class DatabaseServer implements IDatabaseServer {
 
   /**
    * Execute a function with a database client
+   *
+   * @param callback Function that takes a client and returns a promise
+   * @returns Result of the callback function
+   * @throws DatabaseError if client acquisition fails
    */
   async withClient<T>(
     callback: (client: PoolClient) => Promise<T>,
   ): Promise<T> {
     await this.ensureInitialized(true);
 
-    let client: PoolClient;
+    // Get client from pool
+    let client: PoolClient | null = null;
     try {
-      if (this.pool && typeof this.pool.connect === "function") {
-        client = await this.pool!.connect();
-      } else {
-        // During testing, create a mock client that passes through queries
-        const mockClient = {
-          query: async (
-            _text: string | { text: string; values: unknown[] },
-            _values?: unknown[],
-          ) => {
-            // Support both formats: query(text, values) and query({ text, values })
-
-            // If in a test context where we have access to jest, use a mock implementation
-            if (process.env.NODE_ENV === "test") {
-              return Promise.resolve({ rows: [], rowCount: 0 });
-            }
-
-            // Default mock implementation
-            return Promise.resolve({ rows: [], rowCount: 0 });
-          },
-          release: () => {},
-        };
-        client = mockClient as unknown as PoolClient;
+      if (!this.pool) {
+        throw new DatabaseError("Database pool not initialized");
       }
-    } catch (error) {
-      return this.handleError(error, "Failed to acquire client from pool");
-    }
 
-    try {
-      const result = await callback(client);
-      return result;
-    } finally {
+      // Acquire client from pool
+      const startTime = Date.now();
       try {
-        client.release();
+        client = await this.pool.connect();
+        const acquireTime = Date.now() - startTime;
+        this.metrics.acquireCount++;
+        this.metrics.acquireTimes.push(acquireTime);
       } catch (error) {
-        this.logger.error("Error releasing client", {
-          error: error instanceof Error ? error.message : String(error),
-        });
+        this.metrics.acquireFailCount++;
+        throw this.formatError(error, "Failed to acquire database client");
+      }
+
+      // Execute callback with client
+      return await callback(client);
+    } catch (error) {
+      throw this.formatError(error, "Database operation failed");
+    } finally {
+      // Release client back to pool
+      if (client) {
+        try {
+          client.release();
+        } catch (error) {
+          this.logger.error("Error releasing client", {
+            error: error instanceof Error ? error.message : String(error),
+          });
+        }
       }
     }
   }
 
   /**
-   * Execute a function within a transaction with optional retries
+   * Execute a function within a transaction
+   *
+   * @param callback Function that takes a client and returns a promise
+   * @param options Transaction options for retry and isolation level
+   * @returns Result of the callback function
+   * @throws Error if transaction fails
    */
   async withTransaction<T>(
     callback: (client: PoolClient) => Promise<T>,
     options?: TransactionOptions,
   ): Promise<T> {
     const opts = this.mergeTransactionOptions(options);
-    let lastError: Error | unknown;
     let attemptCount = 0;
+    let lastError: Error | unknown;
     let delay = opts.retryDelay;
 
+    // Maximum number of attempts is maxRetries + 1 (the initial attempt)
     while (attemptCount <= opts.maxRetries) {
-      attemptCount++;
-
       try {
-        const result = await this.executeTransaction(callback, opts);
-
-        // If successful after retries, log it
-        if (attemptCount > 1) {
-          try {
-            this.logger.info(
-              `Transaction succeeded after ${attemptCount} attempts`,
-            );
-          } catch (error) {
-            // Silently ignore any logger errors
-            console.warn("Logger error:", error);
-          }
-        }
-
-        return result;
+        return await this.executeTransaction(callback, opts);
       } catch (error) {
         lastError = error;
 
-        // Enhanced error logging
-        try {
-          const errorMessage =
-            error instanceof Error ? error.message : String(error);
-          const errorCode =
-            error instanceof Object && "code" in error
-              ? (error as { code: string }).code
-              : undefined;
+        // Don't retry if we've reached the max retries
+        if (attemptCount >= opts.maxRetries || !opts.shouldRetry(error)) {
+          throw this.formatError(error, "Transaction failed");
+        }
 
-          this.logger.error(
-            `Transaction failed (attempt ${attemptCount}/${opts.maxRetries + 1})`,
+        // Log retry attempt
+        try {
+          this.logger.info(
+            `Transaction failed, retrying (${attemptCount + 1}/${
+              opts.maxRetries + 1
+            })`,
             {
-              error: errorMessage,
-              errorCode,
+              error: error instanceof Error ? error.message : String(error),
+              errorCode:
+                error instanceof Object && "code" in error
+                  ? (error as { code: string }).code
+                  : undefined,
               attemptCount,
               maxRetries: opts.maxRetries,
             },
@@ -523,138 +521,150 @@ export class DatabaseServer implements IDatabaseServer {
           console.warn("Logger error:", logError);
         }
 
-        // Check if we should retry
-        const shouldRetry =
-          attemptCount <= opts.maxRetries && opts.shouldRetry(error);
-
-        if (shouldRetry) {
-          try {
-            this.logger.warn(
-              `Retrying transaction (attempt ${attemptCount}/${opts.maxRetries + 1}) after ${delay}ms`,
-              {
-                error: error instanceof Error ? error.message : String(error),
-                errorCode:
-                  error instanceof Object && "code" in error
-                    ? (error as { code: string }).code
-                    : undefined,
-              },
-            );
-          } catch (logError) {
-            // Silently ignore any logger errors
-            console.warn("Logger error:", logError);
-          }
-
-          // Wait before retrying
-          await new Promise((resolve) => setTimeout(resolve, delay));
-
-          // Increase delay with exponential backoff
-          delay = Math.min(
-            delay * opts.retryDelayMultiplier,
-            opts.maxRetryDelay,
-          );
-        } else {
-          // No more retries or non-retryable error
-          break;
-        }
+        // Increase retry delay using exponential backoff
+        await this.delay(delay);
+        delay = Math.min(delay * opts.retryDelayMultiplier, opts.maxRetryDelay);
+        attemptCount++;
       }
     }
 
-    // If we get here, all retries failed
-    try {
-      this.logger.error(`Transaction failed after ${attemptCount} attempt(s)`, {
-        error:
-          lastError instanceof Error ? lastError.message : String(lastError),
-        errorCode:
-          lastError instanceof Object && "code" in lastError
-            ? (lastError as { code: string }).code
-            : undefined,
-      });
-    } catch (error) {
-      // Silently ignore any logger errors
-      console.warn("Logger error:", error);
-    }
-
-    throw lastError;
+    // This should never be reached, but TypeScript needs it
+    throw this.formatError(
+      lastError || new Error("Transaction failed after all retries"),
+      "Transaction failed",
+    );
   }
 
   /**
    * Execute a single transaction attempt
+   *
+   * @param callback Function that takes a client and returns a promise
+   * @param options Transaction options
+   * @returns Result of the callback function
+   * @throws Error if transaction fails
    */
   private async executeTransaction<T>(
     callback: (client: PoolClient) => Promise<T>,
     options: Required<TransactionOptions>,
   ): Promise<T> {
     return this.withClient(async (client) => {
-      // Begin transaction with isolation level if specified
-      let beginCommand = "BEGIN";
-      if (options.isolationLevel) {
-        beginCommand += ` ISOLATION LEVEL ${options.isolationLevel}`;
-      }
-
-      // Set statement timeout if specified
-      if (options.timeout) {
-        await client.query(`SET LOCAL statement_timeout = ${options.timeout}`);
-      }
-
       try {
+        // Set statement timeout if specified
+        if (options.timeout > 0) {
+          await client.query(`SET statement_timeout = ${options.timeout}`);
+        }
+
+        // Begin transaction with isolation level
+        let beginCommand = "BEGIN";
+        if (options.isolationLevel) {
+          beginCommand += ` ISOLATION LEVEL ${options.isolationLevel}`;
+        }
         await client.query(beginCommand);
-        const result = await callback(client);
+
+        // Execute callback
+        const result = await Promise.race([
+          callback(client),
+          // Set a timeout if specified
+          ...(options.timeout > 0
+            ? [
+                new Promise<never>((_, reject) =>
+                  setTimeout(
+                    () => reject(new DatabaseError("Transaction timeout")),
+                    options.timeout,
+                  ),
+                ),
+              ]
+            : []),
+        ]);
+
+        // Commit transaction
         await client.query("COMMIT");
         return result;
       } catch (error) {
-        await client.query("ROLLBACK");
+        // Rollback transaction
+        try {
+          await client.query("ROLLBACK");
+        } catch (rollbackError) {
+          this.logger.error("Rollback failed", {
+            error: rollbackError,
+            originalError: error,
+          });
+        }
         throw error;
+      } finally {
+        // Reset statement timeout
+        if (options.timeout > 0) {
+          try {
+            await client.query("SET statement_timeout TO DEFAULT");
+          } catch (error) {
+            // Ignore errors on cleanup
+          }
+        }
       }
     });
   }
 
   /**
-   * Get connection statistics and metrics
+   * Get database connection statistics
+   *
+   * @param reset Whether to reset statistics after getting them
+   * @returns Connection statistics
    */
   getStats(reset: boolean = false): ConnectionStats {
-    // Default values for the pool stats
-    let poolStats = {
+    // Get current pool statistics
+    const poolStats = {
       totalCount: 0,
       idleCount: 0,
-      activeCount: 0,
       waitingCount: 0,
+      activeCount: 0,
     };
 
-    // Try to get real pool stats if available
+    // Get stats from pool if available
     if (this.pool) {
-      const typedPool = this.pool as Pool & {
-        totalCount?: number;
-        idleCount?: number;
-        activeCount?: number;
-        waitingCount?: number;
-      };
-
-      poolStats = {
-        totalCount: typedPool.totalCount ?? 0,
-        idleCount: typedPool.idleCount ?? 0,
-        activeCount: typedPool.activeCount ?? 0,
-        waitingCount: typedPool.waitingCount ?? 0,
-      };
+      poolStats.totalCount = (this.pool as any).totalCount || 0;
+      poolStats.idleCount = (this.pool as any).idleCount || 0;
+      poolStats.waitingCount = (this.pool as any).waitingCount || 0;
+      poolStats.activeCount = (this.pool as any).activeCount || 0;
     }
 
-    // Calculate metrics from samples
-    const avgAcquireTime = this.calculateAverage(this.metrics.acquireTimes);
-    const maxAcquireTime = this.calculateMax(this.metrics.acquireTimes);
+    // Calculate averages
+    const avgAcquireTime = this.metrics.acquireTimes.length
+      ? this.calculateAverage(this.metrics.acquireTimes)
+      : undefined;
 
-    const queryTimes = this.metrics.queryTimes.map((q) => q.time);
-    const avgQueryTime = this.calculateAverage(queryTimes);
-    const maxQueryTime = this.calculateMax(queryTimes);
+    const maxAcquireTime = this.metrics.acquireTimes.length
+      ? this.calculateMax(this.metrics.acquireTimes)
+      : undefined;
 
-    const stats = {
+    // Calculate average query time across all queries
+    const queryTimes = this.metrics.queryTimes.map((item) => item.time);
+    const avgQueryTime = queryTimes.length
+      ? this.calculateAverage(queryTimes)
+      : undefined;
+
+    const maxQueryTime = queryTimes.length
+      ? this.calculateMax(queryTimes)
+      : undefined;
+
+    // Calculate tagged query times
+    const tagStats: Record<string, { avg: number; count: number }> = {};
+    this.metrics.taggedQueryTimes.forEach((times, tag) => {
+      tagStats[tag] = {
+        avg: this.calculateAverage(times),
+        count: times.length,
+      };
+    });
+
+    // Build statistics object
+    const stats: ConnectionStats = {
       totalCount: poolStats.totalCount,
       idleCount: poolStats.idleCount,
       activeCount: poolStats.activeCount,
       waitingCount: poolStats.waitingCount,
+      utilization: this.databaseConfig.maxConnections
+        ? poolStats.activeCount / this.databaseConfig.maxConnections
+        : 0,
       maxConnections: this.databaseConfig.maxConnections,
-      utilization:
-        poolStats.totalCount > 0
-          ? poolStats.activeCount / this.databaseConfig.maxConnections
-          : 0,
       acquireCount: this.metrics.acquireCount,
       acquireFailCount: this.metrics.acquireFailCount,
       avgAcquireTime,
@@ -665,6 +675,7 @@ export class DatabaseServer implements IDatabaseServer {
       maxQueryTime,
     };
 
+    // Reset metrics if requested
     if (reset) {
       this.resetMetrics();
     }
@@ -783,12 +794,30 @@ export class DatabaseServer implements IDatabaseServer {
   }
 
   /**
-   * Create a query builder for constructing complex SQL queries
-   * @param tableName The name of the table to query
-   * @returns A QueryBuilder instance
+   * Creates a query builder for the specified table
+   * @param tableName Table name
+   * @returns Query builder
    */
   createQueryBuilder(tableName: string): QueryBuilder {
     return new QueryBuilderImpl(tableName, this);
+  }
+
+  /**
+   * Validates query parameters to catch common errors
+   * @param params Parameters to validate
+   * @throws Error if parameters are invalid
+   */
+  private validateQueryParams(params: unknown[]): void {
+    if (!Array.isArray(params)) {
+      throw new TypeError(
+        `Query parameters must be an array, got ${typeof params}`,
+      );
+    }
+
+    // Check for other invalid parameter types
+    // Null is usually valid in SQL, but add validation if needed
+    // for specific types based on your application requirements
+    // For now, null values are allowed
   }
 }
 
@@ -1025,5 +1054,26 @@ class QueryBuilderImpl implements QueryBuilder {
    */
   getSql(): string {
     return this.buildQuery().sql;
+  }
+}
+
+// Add a DatabaseError class for improved error handling
+export class DatabaseError extends Error {
+  code?: string;
+  query?: string;
+  params?: unknown[];
+
+  constructor(
+    message: string,
+    options?: { code?: string; query?: string; params?: unknown[] },
+  ) {
+    super(message);
+    this.name = "DatabaseError";
+    if (options) {
+      this.code = options.code;
+      this.query = options.query;
+      this.params = options.params;
+    }
+    Object.setPrototypeOf(this, DatabaseError.prototype);
   }
 }

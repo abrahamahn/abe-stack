@@ -39,16 +39,31 @@ export function getSignedFileUrl(
   data: FileSignatureData,
 ): URL {
   const secretKey = environment.config.signatureSecret;
-
   const { id, filename, expirationMs } = data;
-  const signature = generateSignature(secretKey.toString("utf-8"), {
-    ...data,
-    path: `/uploads/${id}/${filename}`,
-    expiration: Math.floor(expirationMs / 1000),
-  });
+
+  // Normalize the filename before using it in the URL
+  const normalizedFilename = normalizeFilename(filename);
+
+  // Use the exact expirationMs in the signature to ensure unique signatures
+  // for different expiration times
+  const signature = generateSignature(
+    secretKey.toString("utf-8"),
+    {
+      ...data,
+      filename: normalizedFilename, // Use normalized filename in signature
+      path: `/uploads/${id}/${normalizedFilename}`,
+      expirationMs, // Use the exact millisecond value instead of converting to seconds
+    },
+    {
+      includeTimestamp: true,
+      includeNonce: true, // Ensure nonce is included for unique signatures
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours max age for signatures
+    },
+    true,
+  ) as string;
 
   const url = new URL(
-    `${environment.config.baseUrl}/uploads/${id}/${filename}`,
+    `${environment.config.baseUrl}/uploads/${id}/${normalizedFilename}`,
   );
   url.searchParams.set("expiration", expirationMs.toString());
   url.searchParams.set("signature", signature);

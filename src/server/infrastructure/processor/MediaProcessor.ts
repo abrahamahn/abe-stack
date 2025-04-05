@@ -45,6 +45,11 @@ export interface MediaOptions extends ImageOptions {
    * Thumbnail size
    */
   thumbnailSize?: number;
+
+  /**
+   * Target path for processed file
+   */
+  targetPath?: string;
 }
 
 /**
@@ -96,6 +101,7 @@ export class MediaProcessor {
   private fileUtils: FileUtils;
   private imageProcessor: ImageProcessor;
   private baseUrl: string;
+  private activeProcesses: Set<string> = new Set();
 
   constructor(
     logger: ILoggerService,
@@ -107,9 +113,30 @@ export class MediaProcessor {
     this.fileUtils = fileUtils;
     this.imageProcessor = new ImageProcessor(logger, fileUtils);
     this.baseUrl = baseUrl;
+    this.activeProcesses = new Set();
 
     // Ensure base directory exists
     this.fileUtils.ensureDirectory(basePath);
+  }
+
+  /**
+   * Clean up resources and release file handles
+   * Call this when you're done using the MediaProcessor
+   */
+  public cleanup(): void {
+    // Clear all active processes
+    this.activeProcesses.clear();
+
+    // Force garbage collection if available
+    if (global.gc) {
+      try {
+        global.gc();
+      } catch (error) {
+        this.logger.debug("Error during garbage collection", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
   }
 
   /**
@@ -138,9 +165,21 @@ export class MediaProcessor {
       quality?: number;
       format?: string;
       targetPath?: string;
+      generateThumbnail?: boolean;
+      thumbnailSize?: number;
     },
   ): Promise<MediaProcessingResult> {
+    // Track this process
+    const processId = `${filePath}-${Date.now()}`;
+    this.activeProcesses.add(processId);
+
     try {
+      // Default options
+      const processOptions: MediaOptions = {
+        ...options,
+        generateThumbnail: options?.generateThumbnail !== false, // Default to true for image processing
+      };
+
       // Detect content type
       const contentType = this.fileUtils.detectContentType(filePath);
       const category = getContentCategory(contentType);
@@ -150,43 +189,45 @@ export class MediaProcessor {
         case ContentCategory.IMAGE:
           return await this.processImage(
             filePath,
-            options?.targetPath || filePath,
+            processOptions?.targetPath || filePath,
             contentType,
-            options as MediaOptions,
+            processOptions,
           );
         case ContentCategory.VIDEO:
           return await this.processVideo(
             filePath,
-            options?.targetPath || filePath,
+            processOptions?.targetPath || filePath,
             contentType,
-            options as MediaOptions,
+            processOptions,
           );
         case ContentCategory.AUDIO:
           return await this.processAudio(
             filePath,
-            options?.targetPath || filePath,
+            processOptions?.targetPath || filePath,
             contentType,
-            options as MediaOptions,
+            processOptions,
           );
         default: {
           // For other file types, just copy the file
           await this.fileUtils.copyFile(
             filePath,
-            options?.targetPath || filePath,
+            processOptions?.targetPath || filePath,
           );
 
           // Get file stats
           const stats = await this.fileUtils.getFileStats(
-            options?.targetPath || filePath,
+            processOptions?.targetPath || filePath,
           );
 
           return {
-            path: options?.targetPath || filePath,
-            url: this.getFileUrl(options?.targetPath || filePath),
+            path: processOptions?.targetPath || filePath,
+            url: this.getFileUrl(processOptions?.targetPath || filePath),
             contentType,
             size: stats.size,
             metadata: {
-              format: path.extname(options?.targetPath || filePath).slice(1),
+              format: path
+                .extname(processOptions?.targetPath || filePath)
+                .slice(1),
             },
           };
         }
@@ -196,6 +237,9 @@ export class MediaProcessor {
         error: error instanceof Error ? error.message : String(error),
       });
       throw error;
+    } finally {
+      // Remove from active processes
+      this.activeProcesses.delete(processId);
     }
   }
 

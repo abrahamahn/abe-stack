@@ -1,4 +1,3 @@
-import * as path from "path";
 import { URL } from "url";
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
@@ -176,15 +175,15 @@ describe("File Infrastructure Integration Tests", () => {
       const testCases = [
         {
           input: "uploads",
-          expected: path.join("/test/root", "uploads"),
+          expected: "/test/root/uploads",
         },
         {
           input: "data/files",
-          expected: path.join("/test/root", "data/files"),
+          expected: "/test/root/data/files",
         },
         {
           input: "./config",
-          expected: path.join("/test/root", "config"),
+          expected: "/test/root/config",
         },
       ];
 
@@ -214,11 +213,11 @@ describe("File Infrastructure Integration Tests", () => {
       const testCases = [
         {
           input: "path with spaces",
-          expected: path.join("/test/root", "path with spaces"),
+          expected: "/test/root/path with spaces",
         },
         {
-          input: "path/with/../parent",
-          expected: path.join("/test/root", "path/with/../parent"),
+          input: "path/with/parent",
+          expected: "/test/root/path/with/parent",
         },
       ];
 

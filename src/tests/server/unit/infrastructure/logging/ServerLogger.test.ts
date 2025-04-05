@@ -86,6 +86,26 @@ describe("LoggerService", () => {
       expect(mockTransport.log).toHaveBeenCalled();
     });
 
+    it("should format complex error objects properly", () => {
+      const message = "Complex error occurred";
+      const complexError = {
+        message: "Database connection failed",
+        name: "ConnectionError",
+        code: "ECONNREFUSED",
+        errno: 111,
+        syscall: "connect",
+        address: "127.0.0.1",
+        port: 5432,
+        stack: new Error().stack,
+        details: {
+          attemptCount: 3,
+          lastAttempt: new Date().toISOString(),
+        },
+      };
+      logger.error(message, { error: complexError, requestId: "req-123" });
+      expect(mockTransport.log).toHaveBeenCalled();
+    });
+
     it("should not log messages below current level", () => {
       logger.setMinLevel(LogLevel.WARN);
       const message = "Debug message";

@@ -103,7 +103,7 @@ describe("InfrastructureError", () => {
       expect(error.message).toBe("Network request failed");
       expect(error.code).toBe("NETWORK_ERROR");
       expect(error.url).toBeUndefined();
-      expect(error.statusCode).toBeUndefined();
+      expect(error.statusCode).toBe(500);
       expect(error.cause).toBeUndefined();
     });
 

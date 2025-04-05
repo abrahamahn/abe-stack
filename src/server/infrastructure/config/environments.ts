@@ -13,11 +13,8 @@ import { ServerEnvironment, ServerConfig } from "./ConfigService";
 export function loadEnvFiles(): void {
   const nodeEnv = process.env.NODE_ENV || "development";
 
-  // Only look for the specific environment file and the default .env
-  const envFiles =
-    nodeEnv === "test"
-      ? [`.env.${nodeEnv}`, ".env"]
-      : [`.env.${nodeEnv}`, ".env"];
+  // Define environment file based on NODE_ENV - use the correct file for each environment
+  const envFile = `.env.${nodeEnv}`;
 
   const rootDir = process.cwd();
   const configDir = path.join(
@@ -33,34 +30,25 @@ export function loadEnvFiles(): void {
   const logWarnings = process.env.LOG_ENV_WARNINGS === "true";
 
   try {
-    // Check all three directories: .env directory, config directory, and root directory
-    for (const file of envFiles) {
-      // Try in .env directory first (src/server/infrastructure/config/.env)
-      const envFilePath = path.join(envDir, file);
-      if (fs.existsSync(envFilePath)) {
-        const result = dotenv.config({ path: envFilePath });
-        if (!result.error) {
-          loadedFiles.push(`config/.env/${file}`);
-        }
-        continue;
+    // Check in the .env directory first
+    const envFilePath = path.join(envDir, envFile);
+    if (fs.existsSync(envFilePath)) {
+      const result = dotenv.config({ path: envFilePath });
+      if (!result.error) {
+        loadedFiles.push(`config/.env/${envFile}`);
       }
+    }
 
-      // Then try in config directory
-      const configFilePath = path.join(configDir, file);
-      if (fs.existsSync(configFilePath)) {
-        const result = dotenv.config({ path: configFilePath });
+    // If we didn't find the file and we're in test mode, try the development file as fallback
+    if (loadedFiles.length === 0 && nodeEnv === "test") {
+      const fallbackPath = path.join(envDir, ".env.development");
+      if (fs.existsSync(fallbackPath)) {
+        const result = dotenv.config({ path: fallbackPath });
         if (!result.error) {
-          loadedFiles.push(`config/${file}`);
-        }
-        continue;
-      }
-
-      // Finally try in root directory
-      const rootFilePath = path.join(rootDir, file);
-      if (fs.existsSync(rootFilePath)) {
-        const result = dotenv.config({ path: rootFilePath });
-        if (!result.error) {
-          loadedFiles.push(file);
+          console.log(
+            "WARNING: Using .env.development as fallback for test environment",
+          );
+          loadedFiles.push("config/.env/.env.development (fallback)");
         }
       }
     }
@@ -68,9 +56,7 @@ export function loadEnvFiles(): void {
     if (loadedFiles.length > 0) {
       console.log(`Loaded environment files: ${loadedFiles.join(", ")}`);
     } else if (logWarnings) {
-      console.log(
-        `No environment files found in ${rootDir}, ${configDir}, or ${envDir}`,
-      );
+      console.log(`No environment file ${envFile} found in ${envDir}`);
     }
   } catch (error) {
     console.error("Error loading environment files:", error);
