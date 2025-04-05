@@ -140,7 +140,9 @@ describe("JobTypes", () => {
 
   describe("JobPriority", () => {
     it("should have correct priority levels", () => {
-      expect(JobPriority).toEqual({
+      // TypeScript generates a bidirectional map for enums
+      // So we need to check only the string keys
+      const priorityValues = {
         LOWEST: 20,
         LOW: 10,
         NORMAL: 0,
@@ -148,6 +150,11 @@ describe("JobTypes", () => {
         HIGH: -10,
         CRITICAL: -15,
         URGENT: -20,
+      };
+
+      // Check that all expected values are present
+      Object.entries(priorityValues).forEach(([key, value]) => {
+        expect(JobPriority[key as keyof typeof JobPriority]).toBe(value);
       });
     });
 

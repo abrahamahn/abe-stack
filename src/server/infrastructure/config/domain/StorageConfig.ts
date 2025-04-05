@@ -106,9 +106,9 @@ export class StorageConfigProvider {
           default: true,
           description: "Whether to optimize images",
         },
-        STORAGE_IMAGE_DEFAULT_QUALITY: {
+        STORAGE_IMAGE_QUALITY: {
           type: "number",
-          default: 80,
+          default: 90,
           min: 1,
           max: 100,
           description: "Default image quality (1-100)",
@@ -158,6 +158,41 @@ export class StorageConfigProvider {
           default: "./temp",
           description: "Temporary directory path",
         },
+        STORAGE_PUBLIC_DIR: {
+          type: "string",
+          default: "public",
+          description: "Public directory path",
+        },
+        STORAGE_PRIVATE_DIR: {
+          type: "string",
+          default: "private",
+          description: "Private directory path",
+        },
+        STORAGE_TEMP_DIR: {
+          type: "string",
+          default: "temp",
+          description: "Temporary directory path",
+        },
+        STORAGE_MAX_FILE_SIZE: {
+          type: "number",
+          default: 10 * 1024 * 1024,
+          description: "Maximum file size",
+        },
+        STORAGE_MAX_FILES_PER_REQUEST: {
+          type: "number",
+          default: 10,
+          description: "Maximum number of files per request",
+        },
+        STORAGE_ACCEPTED_IMAGE_TYPES: {
+          type: "string",
+          default: "image/jpeg,image/png,image/gif",
+          description: "Accepted image types",
+        },
+        STORAGE_ACCEPTED_DOCUMENT_TYPES: {
+          type: "string",
+          default: "application/pdf,text/plain",
+          description: "Accepted document types",
+        },
       },
     };
   }
@@ -183,10 +218,12 @@ export class StorageConfigProvider {
 
     const cwd = process.cwd();
     const uploadDir = this.configService.getString("UPLOAD_DIR") || "uploads";
-    const queuePath =
-      this.configService.getString("QUEUE_PATH") || "uploads/queues";
-    const tempDir = this.configService.getString("TEMP_DIR") || "uploads/temp";
-    const basePath = this.configService.getString("STORAGE_PATH") || "uploads";
+    const queuePath = this.configService.getString("QUEUE_PATH") || "queue";
+    const publicDir =
+      this.configService.getString("STORAGE_PUBLIC_DIR") || "public";
+    const privateDir =
+      this.configService.getString("STORAGE_PRIVATE_DIR") || "private";
+    const tempDir = this.configService.getString("STORAGE_TEMP_DIR") || "temp";
 
     // Don't join with cwd if path is absolute
     const resolvePath = (pathStr: string): string =>
@@ -196,7 +233,7 @@ export class StorageConfigProvider {
       uploadDir: resolvePath(uploadDir),
       queuePath: resolvePath(queuePath),
       tempDir: resolvePath(tempDir),
-      basePath: resolvePath(basePath),
+      basePath: resolvePath(uploadDir),
       baseUrl:
         this.configService.getString("STORAGE_URL") ||
         "http://localhost:8080/uploads",
@@ -216,8 +253,8 @@ export class StorageConfigProvider {
           true,
         ),
         defaultQuality: this.configService.getNumber(
-          "STORAGE_IMAGE_DEFAULT_QUALITY",
-          85,
+          "STORAGE_IMAGE_QUALITY",
+          90,
         ),
         maxDimensions,
         defaultFormat: this.configService.getString(
@@ -239,33 +276,32 @@ export class StorageConfigProvider {
           16384,
         ),
       },
-      publicDir: resolvePath("public"),
-      privateDir: resolvePath("private"),
+      publicDir: resolvePath(path.join(uploadDir, publicDir)),
+      privateDir: resolvePath(path.join(uploadDir, privateDir)),
       maxFileSize: this.configService.getNumber(
-        "MAX_UPLOAD_SIZE",
+        "STORAGE_MAX_FILE_SIZE",
         10 * 1024 * 1024,
       ),
       maxFilesPerRequest: this.configService.getNumber(
-        "MAX_FILES_PER_REQUEST",
+        "STORAGE_MAX_FILES_PER_REQUEST",
         10,
       ),
       analyzeContent: this.configService.getBoolean(
         "STORAGE_ANALYZE_CONTENT",
         false,
       ),
-      acceptedImageTypes: this.configService.getArray("ALLOWED_MEDIA_TYPES", [
-        "image/jpeg",
-        "image/png",
-        "image/gif",
-      ]),
-      acceptedDocumentTypes: this.configService.getArray(
-        "ALLOWED_DOCUMENT_TYPES",
-        [
-          "application/pdf",
-          "application/msword",
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        ],
-      ),
+      acceptedImageTypes: this.configService
+        .getString(
+          "STORAGE_ACCEPTED_IMAGE_TYPES",
+          "image/jpeg,image/png,image/gif",
+        )
+        .split(","),
+      acceptedDocumentTypes: this.configService
+        .getString(
+          "STORAGE_ACCEPTED_DOCUMENT_TYPES",
+          "application/pdf,text/plain",
+        )
+        .split(","),
     };
   }
 }

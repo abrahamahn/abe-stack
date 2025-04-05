@@ -1,19 +1,23 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
-import type { IApplicationLifecycle } from "@/server/infrastructure/lifecycle/IApplicationLifecycle";
-
 import type { Server } from "http";
 
 describe("IApplicationLifecycle", () => {
-  let mockLifecycle: IApplicationLifecycle;
+  let mockLifecycle: {
+    start: ReturnType<typeof vi.fn>;
+    stop: ReturnType<typeof vi.fn>;
+    register: ReturnType<typeof vi.fn>;
+    setHttpServer: ReturnType<typeof vi.fn>;
+    registerShutdownHandler: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     mockLifecycle = {
-      setHttpServer: vi.fn(),
+      start: vi.fn().mockResolvedValue(undefined),
+      stop: vi.fn().mockResolvedValue(undefined),
       register: vi.fn(),
+      setHttpServer: vi.fn(),
       registerShutdownHandler: vi.fn(),
-      start: vi.fn(),
-      stop: vi.fn(),
     };
   });
 

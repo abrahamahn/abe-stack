@@ -135,7 +135,10 @@ describe("StorageService", () => {
 
       const result = await storageService.listFiles(directory);
 
-      expect(mockStorageProvider.listFiles).toHaveBeenCalledWith(directory);
+      expect(mockStorageProvider.listFiles).toHaveBeenCalledWith(
+        directory,
+        undefined,
+      );
       expect(result).toEqual(files);
     });
 

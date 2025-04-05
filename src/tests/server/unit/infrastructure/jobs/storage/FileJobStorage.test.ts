@@ -114,12 +114,14 @@ describe("FileJobStorage", () => {
         id: "job123",
         type: JobType.MEDIA_PROCESSING,
         status: "waiting" as JobStatus,
-        priority: 0,
+        data: {
+          imageId: "img123",
+        },
         attempts: 0,
         maxAttempts: 3,
-        data: { imageId: "img123" },
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        priority: 0,
+        createdAt: new Date("2025-04-01T15:20:09.729Z"),
+        updatedAt: new Date("2025-04-01T15:20:09.729Z"),
       };
 
       await storage.saveJob(job);
@@ -136,12 +138,14 @@ describe("FileJobStorage", () => {
         id: "job123",
         type: JobType.MEDIA_PROCESSING,
         status: "waiting" as JobStatus,
-        priority: 0,
+        data: {
+          imageId: "img123",
+        },
         attempts: 0,
         maxAttempts: 3,
-        data: { imageId: "img123" },
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        priority: 0,
+        createdAt: new Date("2025-04-01T15:20:09.729Z"),
+        updatedAt: new Date("2025-04-01T15:20:09.729Z"),
       };
 
       await expect(storage.saveJob(job)).rejects.toThrow("Save failed");
@@ -158,12 +162,14 @@ describe("FileJobStorage", () => {
         id: "job123",
         type: JobType.MEDIA_PROCESSING,
         status: "waiting" as JobStatus,
-        priority: 0,
+        data: {
+          imageId: "img123",
+        },
         attempts: 0,
         maxAttempts: 3,
-        data: { imageId: "img123" },
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        priority: 0,
+        createdAt: new Date("2025-04-01T15:20:09.729Z"),
+        updatedAt: new Date("2025-04-01T15:20:09.729Z"),
       };
 
       mockStorageService.fileExists.mockResolvedValue(true);
@@ -172,7 +178,11 @@ describe("FileJobStorage", () => {
       );
 
       const result = await storage.getJob(JobType.MEDIA_PROCESSING, "job123");
-      expect(result).toEqual(job);
+      expect(result).toEqual({
+        ...job,
+        createdAt: job.createdAt.toISOString(),
+        updatedAt: job.updatedAt.toISOString(),
+      });
     });
 
     it("should return null if job not found", async () => {
@@ -195,12 +205,14 @@ describe("FileJobStorage", () => {
         id: "job123",
         type: JobType.MEDIA_PROCESSING,
         status: "waiting" as JobStatus,
-        priority: 0,
+        data: {
+          imageId: "img123",
+        },
         attempts: 0,
         maxAttempts: 3,
-        data: { imageId: "img123" },
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        priority: 0,
+        createdAt: new Date("2025-04-01T15:20:09.729Z"),
+        updatedAt: new Date("2025-04-01T15:20:09.729Z"),
       };
 
       mockStorageService.fileExists.mockResolvedValue(true);
@@ -236,18 +248,31 @@ describe("FileJobStorage", () => {
     });
 
     it("should list jobs with specific status", async () => {
+      const expectedJob = {
+        id: "job123",
+        type: JobType.MEDIA_PROCESSING,
+        status: "waiting" as JobStatus,
+        data: { imageId: "img123" },
+        attempts: 0,
+        maxAttempts: 3,
+        priority: 0,
+        createdAt: "2023-04-01T15:20:09.729Z",
+        updatedAt: "2023-04-01T15:20:09.729Z",
+      };
+
       const job = {
         id: "job123",
         type: JobType.MEDIA_PROCESSING,
         status: "waiting" as JobStatus,
-        priority: 0,
+        data: { imageId: "img123" },
         attempts: 0,
         maxAttempts: 3,
-        data: { imageId: "img123" },
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        priority: 0,
+        createdAt: new Date("2023-04-01T15:20:09.729Z"),
+        updatedAt: new Date("2023-04-01T15:20:09.729Z"),
       };
 
+      // Setup the mock to properly return file list and job data
       mockStorageService.listFiles.mockResolvedValue([
         "media_processing_job123.json",
       ]);
@@ -255,27 +280,66 @@ describe("FileJobStorage", () => {
         Buffer.from(JSON.stringify(job)),
       );
 
+      await storage.saveJob(job);
       const jobs = await storage.getJobsByStatus(
         JobType.MEDIA_PROCESSING,
         "waiting",
       );
       expect(jobs).toHaveLength(1);
-      expect(jobs[0]).toEqual(job);
+      expect(jobs[0]).toEqual(expectedJob);
     });
 
     it("should respect the limit parameter", async () => {
+      const job1 = {
+        id: "job1",
+        type: JobType.MEDIA_PROCESSING,
+        status: "waiting" as JobStatus,
+        data: { imageId: "img1" },
+        attempts: 0,
+        maxAttempts: 3,
+        priority: 0,
+        createdAt: new Date("2025-04-01T15:20:09.729Z"),
+        updatedAt: new Date("2025-04-01T15:20:09.729Z"),
+      };
+
+      const job2 = {
+        id: "job2",
+        type: JobType.MEDIA_PROCESSING,
+        status: "waiting" as JobStatus,
+        data: { imageId: "img2" },
+        attempts: 0,
+        maxAttempts: 3,
+        priority: 0,
+        createdAt: new Date("2025-04-01T15:20:09.729Z"),
+        updatedAt: new Date("2025-04-01T15:20:09.729Z"),
+      };
+
       mockStorageService.listFiles.mockResolvedValue([
         "media_processing_job1.json",
         "media_processing_job2.json",
         "media_processing_job3.json",
       ]);
 
+      mockStorageService.getFile
+        .mockResolvedValueOnce(Buffer.from(JSON.stringify(job1)))
+        .mockResolvedValueOnce(Buffer.from(JSON.stringify(job2)));
+
       const jobs = await storage.getJobsByStatus(
         JobType.MEDIA_PROCESSING,
         "waiting",
         2,
       );
-      expect(jobs).toHaveLength(0); // Because getFile is not mocked for these files
+      expect(jobs).toHaveLength(2);
+      expect(jobs[0]).toEqual({
+        ...job1,
+        createdAt: job1.createdAt.toISOString(),
+        updatedAt: job1.updatedAt.toISOString(),
+      });
+      expect(jobs[1]).toEqual({
+        ...job2,
+        createdAt: job2.createdAt.toISOString(),
+        updatedAt: job2.updatedAt.toISOString(),
+      });
     });
   });
 

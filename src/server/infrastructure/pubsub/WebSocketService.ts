@@ -2,7 +2,7 @@ import { Server as HttpServer, IncomingMessage } from "http";
 
 import { inject, injectable } from "inversify";
 import { v4 as uuidv4 } from "uuid";
-import WS from "ws";
+import * as WS from "ws";
 
 import { TYPES } from "@/server/infrastructure/di";
 
@@ -50,7 +50,7 @@ export interface UserActivity {
  * Client connection with user information
  */
 interface ClientConnection {
-  ws: WS;
+  ws: WS.WebSocket;
   userId?: string;
   subscriptions: Set<string>;
   clientId: string;
@@ -86,7 +86,7 @@ export interface WebSocketMessage {
  */
 @injectable()
 export class WebSocketService implements IWebSocketService {
-  private wss: WS.Server | null = null;
+  private wss: WS.WebSocketServer | null = null;
   private clients: Map<string, ClientConnection> = new Map();
   private userConnections: Map<string, Set<string>> = new Map();
   private channels: Map<string, Set<string>> = new Map();
@@ -121,9 +121,9 @@ export class WebSocketService implements IWebSocketService {
     this.logger.info("Initializing WebSocket server");
     this.authOptions = authOptions || null;
 
-    this.wss = new WS.Server({ server });
+    this.wss = new WS.WebSocketServer({ server });
 
-    this.wss.on("connection", (ws: WS, req: IncomingMessage) => {
+    this.wss.on("connection", (ws: WS.WebSocket, req: IncomingMessage) => {
       const clientId = uuidv4();
       this.logger.debug(`New client connected: ${clientId}`);
 
@@ -727,7 +727,7 @@ export class WebSocketService implements IWebSocketService {
   /**
    * Send a raw message to a WebSocket
    */
-  private sendMessage(ws: WS, message: WebSocketMessage): boolean {
+  private sendMessage(ws: WS.WebSocket, message: WebSocketMessage): boolean {
     if (ws.readyState === WS.OPEN) {
       try {
         ws.send(JSON.stringify(message));

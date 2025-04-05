@@ -33,10 +33,7 @@ describe("IWebSocketService", () => {
     it("should initialize WebSocket server with default options", () => {
       const server = {} as Server;
       mockWebSocketService.initialize(server);
-      expect(mockWebSocketService.initialize).toHaveBeenCalledWith(
-        server,
-        undefined,
-      );
+      expect(mockWebSocketService.initialize).toHaveBeenCalledWith(server);
     });
 
     it("should initialize WebSocket server with auth options", () => {
@@ -71,7 +68,6 @@ describe("IWebSocketService", () => {
         clientId,
         eventType,
         data,
-        undefined,
       );
     });
 
@@ -120,7 +116,6 @@ describe("IWebSocketService", () => {
         channel,
         eventType,
         data,
-        undefined,
       );
     });
 
@@ -163,7 +158,6 @@ describe("IWebSocketService", () => {
       expect(mockWebSocketService.broadcast).toHaveBeenCalledWith(
         eventType,
         data,
-        undefined,
       );
     });
 
@@ -280,7 +274,7 @@ describe("IWebSocketService", () => {
     it("should authenticate client", async () => {
       const clientId = "test-client";
       const userId = "test-user";
-      const metadata = { device: "mobile" };
+      const metadata = { role: "user" };
       mockWebSocketService.authenticateClient.mockResolvedValue(true);
 
       const result = await mockWebSocketService.authenticateClient(
@@ -309,7 +303,6 @@ describe("IWebSocketService", () => {
       expect(mockWebSocketService.authenticateClient).toHaveBeenCalledWith(
         clientId,
         userId,
-        undefined,
       );
     });
   });
@@ -359,9 +352,7 @@ describe("IWebSocketService", () => {
   describe("disconnectClient", () => {
     it("should disconnect client with reason", () => {
       const clientId = "test-client";
-      const reason = "Client requested disconnect";
-      mockWebSocketService.disconnectClient.mockReturnValue(undefined);
-
+      const reason = "Test reason";
       mockWebSocketService.disconnectClient(clientId, reason);
       expect(mockWebSocketService.disconnectClient).toHaveBeenCalledWith(
         clientId,
@@ -371,12 +362,9 @@ describe("IWebSocketService", () => {
 
     it("should disconnect client without reason", () => {
       const clientId = "test-client";
-      mockWebSocketService.disconnectClient.mockReturnValue(undefined);
-
       mockWebSocketService.disconnectClient(clientId);
       expect(mockWebSocketService.disconnectClient).toHaveBeenCalledWith(
         clientId,
-        undefined,
       );
     });
   });

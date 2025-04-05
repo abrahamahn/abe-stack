@@ -560,18 +560,10 @@ describe("JobService", () => {
 
   describe("Queue Management", () => {
     it("should respect max concurrent jobs limit", async () => {
-      const config = {
+      const jobServiceWithLimit = new JobService(mockLogger, mockJobStorage, {
         maxConcurrentJobs: 2,
-        pollingInterval: 1000,
-      };
+      });
 
-      const jobServiceWithLimit = new JobService(
-        mockLogger,
-        mockJobStorage,
-        config,
-      );
-
-      // Setup three jobs
       const jobs = [
         {
           id: "job1",
@@ -590,16 +582,34 @@ describe("JobService", () => {
         },
       ];
 
+      // Make sure to reset the mock counts before the test
+      mockJobStorage.updateJobStatus.mockClear();
       mockJobStorage.getJobsByStatus.mockResolvedValue(jobs);
+
+      // Register a processor to make sure jobs are processed
+      jobServiceWithLimit.registerProcessor(
+        JobType.MEDIA_PROCESSING,
+        async () => {
+          // Simple processor that does nothing
+        },
+      );
+
+      // Mock the internal processJob method to make it "process" without actually doing anything
+      const processJobSpy = vi
+        .spyOn(jobServiceWithLimit as any, "processJob")
+        .mockResolvedValue(undefined);
 
       // Process batch
       await jobServiceWithLimit["processNextBatch"]();
 
-      // Should only process up to maxConcurrentJobs
-      expect(mockJobStorage.updateJobStatus).toHaveBeenCalledTimes(2);
+      // Assert that processJob was called only twice (max concurrent jobs)
+      expect(processJobSpy).toHaveBeenCalledTimes(2);
     });
 
     it("should handle paused queues", async () => {
+      // Make sure to reset the mock counts before the test
+      mockJobStorage.updateJobStatus.mockClear();
+
       await jobService.pauseQueue(JobType.MEDIA_PROCESSING);
 
       const jobs = [
@@ -612,20 +622,33 @@ describe("JobService", () => {
 
       mockJobStorage.getJobsByStatus.mockResolvedValue(jobs);
 
+      // Register a processor to make sure jobs are processed
+      jobService.registerProcessor(JobType.MEDIA_PROCESSING, async () => {
+        // Simple processor that does nothing
+      });
+
+      // Mock the internal processJob method to make it "process" without errors
+      const processJobSpy = vi
+        .spyOn(jobService as any, "processJob")
+        .mockResolvedValue(undefined);
+
       // Process batch
       await jobService["processNextBatch"]();
 
       // Should not process jobs from paused queue
-      expect(mockJobStorage.updateJobStatus).not.toHaveBeenCalled();
+      expect(processJobSpy).not.toHaveBeenCalled();
 
       // Resume queue
       await jobService.resumeQueue(JobType.MEDIA_PROCESSING);
+
+      // Clear previous mock to get fresh calls
+      processJobSpy.mockClear();
 
       // Process batch again
       await jobService["processNextBatch"]();
 
       // Should now process jobs
-      expect(mockJobStorage.updateJobStatus).toHaveBeenCalled();
+      expect(processJobSpy).toHaveBeenCalled();
     });
   });
 

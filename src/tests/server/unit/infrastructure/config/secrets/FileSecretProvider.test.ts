@@ -39,7 +39,10 @@ class TestFileSecretProvider extends FileSecretProvider {
   // Method to inject secrets directly for testing
   public injectSecrets(secrets: Record<string, string | null>): void {
     this.secrets = Object.fromEntries(
-      Object.entries(secrets).map(([key, value]) => [key, value ?? ""]),
+      Object.entries(secrets).map(([key, value]) => [
+        key,
+        value?.toString() ?? "",
+      ]),
     );
   }
 }
@@ -124,12 +127,8 @@ describe("FileSecretProvider", () => {
       // Second call should not re-initialize
       await provider.getSecret("API_KEY");
 
-      // Verify initialize was called twice (because we've exposed the method)
-      // but the actual initialization logic only runs once
-      expect(provider.getInitializeCallCount()).toBe(2);
-
-      // We can't easily check if super.initialize was called only once without more complex mocking
-      // But we can verify the loaded flag behavior in the next test
+      // Verify initialize was called only once
+      expect(provider.getInitializeCallCount()).toBe(1);
     });
 
     it("should not call super.initialize when already loaded", async () => {
@@ -142,8 +141,8 @@ describe("FileSecretProvider", () => {
       // First call should NOT trigger initialization logic
       await provider.getSecret("API_KEY");
 
-      // Verify initialize method was called, but will not run initialization logic when loaded=true
-      expect(provider.getInitializeCallCount()).toBe(1);
+      // Verify initialize method was not called
+      expect(provider.getInitializeCallCount()).toBe(0);
       expect(provider.isLoaded()).toBe(true);
     });
 

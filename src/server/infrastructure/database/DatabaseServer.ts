@@ -25,13 +25,22 @@ const DEFAULT_TRANSACTION_OPTIONS: Required<TransactionOptions> = {
   timeout: 0,
   shouldRetry: (error: unknown): boolean => {
     if (error instanceof Error) {
-      // Retry on serialization failure (23000) and deadlock (40P01)
+      // Retry on serialization failure and deadlock errors by code
       const errorCode = (error as { code?: string }).code;
-      return (
-        errorCode === "40001" || // serialization_failure
-        errorCode === "40P01" || // deadlock_detected
-        errorCode === "55P03" || // lock_not_available
-        /deadlock|serialize|timeout|connection/i.test(error.message)
+      if (errorCode) {
+        return (
+          errorCode === "40001" || // serialization_failure
+          errorCode === "40P01" || // deadlock_detected
+          errorCode === "55P03" || // lock_not_available
+          errorCode === "57P01" || // admin_shutdown
+          errorCode === "57014" || // query_canceled
+          /^08/.test(errorCode) // connection errors
+        );
+      }
+
+      // Also retry based on error message patterns
+      return /deadlock|serialize|timeout|connection|retry|temporarily unavailable/i.test(
+        error.message,
       );
     }
     return false;
@@ -235,7 +244,8 @@ export class DatabaseServer implements IDatabaseServer {
 
     const startTime = Date.now();
     const tag = options.tag || this.extractQueryTag(text);
-    const maxRetries = options.maxRetries || 2;
+    const maxRetries =
+      typeof options.maxRetries === "number" ? options.maxRetries : 2;
     let lastError: Error | unknown;
     let attemptCount = 0;
 
@@ -299,23 +309,44 @@ export class DatabaseServer implements IDatabaseServer {
         try {
           this.logger.error("Query execution failed", {
             error: error instanceof Error ? error.message : String(error),
-            query: text,
-            params,
+            errorCode:
+              error instanceof Object && "code" in error
+                ? (error as { code: string }).code
+                : undefined,
+            query: text.length > 500 ? text.substring(0, 500) + "..." : text,
+            paramCount: params.length,
             tag,
             attempt: attemptCount + 1,
             maxRetries,
           });
-        } catch (error) {
+        } catch (logError) {
           // Silently ignore any logger errors
-          console.warn("Logger error:", error);
+          console.warn("Logger error:", logError);
         }
 
         // Check if we should retry
         if (attemptCount < maxRetries && this.shouldRetryQuery(error)) {
           attemptCount++;
-          await this.delay(Math.pow(2, attemptCount) * 100); // Exponential backoff
+          const backoffTime = Math.pow(2, attemptCount) * 100; // Exponential backoff
+
+          try {
+            this.logger.info(
+              `Retrying query (attempt ${attemptCount}/${maxRetries}) after ${backoffTime}ms`,
+              {
+                tag,
+                query:
+                  text.length > 100 ? text.substring(0, 100) + "..." : text,
+              },
+            );
+          } catch (logError) {
+            // Silently ignore any logger errors
+            console.warn("Retry logging error:", logError);
+          }
+
+          await this.delay(backoffTime);
           continue;
         }
+
         throw error;
       }
     }
@@ -325,8 +356,37 @@ export class DatabaseServer implements IDatabaseServer {
 
   private shouldRetryQuery(error: unknown): boolean {
     if (error instanceof Error) {
-      // Retry on connection errors and deadlocks
-      return /connection|deadlock|timeout/i.test(error.message);
+      // Extract error code if available
+      const errorCode =
+        error instanceof Object && "code" in error
+          ? (error as { code: string }).code
+          : undefined;
+
+      // Retry on specific PostgreSQL error codes
+      if (errorCode) {
+        // Common retryable PostgreSQL error codes:
+        // 40001: serialization_failure
+        // 40P01: deadlock_detected
+        // 55P03: lock_not_available
+        // 57P01: admin_shutdown
+        // 08***: connection errors
+        // 57014: query_canceled
+        if (
+          errorCode === "40001" || // serialization_failure
+          errorCode === "40P01" || // deadlock_detected
+          errorCode === "55P03" || // lock_not_available
+          errorCode === "57P01" || // admin_shutdown
+          errorCode === "57014" || // query_canceled
+          /^08/.test(errorCode) // connection errors
+        ) {
+          return true;
+        }
+      }
+
+      // Retry based on error message patterns - case insensitive to catch all variants
+      return /connection|deadlock|timeout|serialize|retry|temporarily unavailable/i.test(
+        error.message,
+      );
     }
     return false;
   }
@@ -440,6 +500,29 @@ export class DatabaseServer implements IDatabaseServer {
       } catch (error) {
         lastError = error;
 
+        // Enhanced error logging
+        try {
+          const errorMessage =
+            error instanceof Error ? error.message : String(error);
+          const errorCode =
+            error instanceof Object && "code" in error
+              ? (error as { code: string }).code
+              : undefined;
+
+          this.logger.error(
+            `Transaction failed (attempt ${attemptCount}/${opts.maxRetries + 1})`,
+            {
+              error: errorMessage,
+              errorCode,
+              attemptCount,
+              maxRetries: opts.maxRetries,
+            },
+          );
+        } catch (logError) {
+          // Silently ignore any logger errors
+          console.warn("Logger error:", logError);
+        }
+
         // Check if we should retry
         const shouldRetry =
           attemptCount <= opts.maxRetries && opts.shouldRetry(error);
@@ -447,14 +530,18 @@ export class DatabaseServer implements IDatabaseServer {
         if (shouldRetry) {
           try {
             this.logger.warn(
-              `Transaction failed (attempt ${attemptCount}/${opts.maxRetries + 1}), retrying in ${delay}ms`,
+              `Retrying transaction (attempt ${attemptCount}/${opts.maxRetries + 1}) after ${delay}ms`,
               {
                 error: error instanceof Error ? error.message : String(error),
+                errorCode:
+                  error instanceof Object && "code" in error
+                    ? (error as { code: string }).code
+                    : undefined,
               },
             );
-          } catch (error) {
+          } catch (logError) {
             // Silently ignore any logger errors
-            console.warn("Logger error:", error);
+            console.warn("Logger error:", logError);
           }
 
           // Wait before retrying
@@ -477,6 +564,10 @@ export class DatabaseServer implements IDatabaseServer {
       this.logger.error(`Transaction failed after ${attemptCount} attempt(s)`, {
         error:
           lastError instanceof Error ? lastError.message : String(lastError),
+        errorCode:
+          lastError instanceof Object && "code" in lastError
+            ? (lastError as { code: string }).code
+            : undefined,
       });
     } catch (error) {
       // Silently ignore any logger errors

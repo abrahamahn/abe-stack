@@ -14,9 +14,8 @@ import { FileUtils } from "@/server/infrastructure/storage/FileUtils";
 
 // Mock dependencies
 vi.mock("@infrastructure/processor/ImageProcessor");
-vi.mock("@infrastructure/processor/MediaProcessor");
 vi.mock("@infrastructure/storage/FileUtils");
-vi.mock("fluent-ffmpeg", () => {
+vi.mock("fluent-ffmpeg", async () => {
   const mockFfmpegInstance = {
     input: vi.fn().mockReturnThis(),
     outputOptions: vi.fn().mockReturnThis(),
@@ -70,7 +69,10 @@ vi.mock("fluent-ffmpeg", () => {
       });
     });
 
-  return mockFfmpeg;
+  return {
+    default: mockFfmpeg,
+    __esModule: true,
+  };
 });
 
 describe("MediaProcessor", () => {
@@ -164,6 +166,10 @@ describe("MediaProcessor", () => {
           width: 1920,
           height: 1080,
           format: "jpeg",
+          dimensions: {
+            width: 1920,
+            height: 1080,
+          },
         },
         thumbnail: undefined,
       });
@@ -199,9 +205,14 @@ describe("MediaProcessor", () => {
         metadata: {
           width: 1920,
           height: 1080,
-          duration: 60,
           format: "mp4",
+          duration: 60,
+          dimensions: {
+            width: 1920,
+            height: 1080,
+          },
         },
+        thumbnail: undefined,
       });
     });
 
@@ -215,27 +226,28 @@ describe("MediaProcessor", () => {
       mockFileUtils.copyFile.mockResolvedValue(true);
       mockFileUtils.getFileStats.mockResolvedValue({ size: 12345 } as any);
 
-      // Override ffprobe mock to return audio metadata
-      (ffmpeg.ffprobe as ReturnType<typeof vi.fn>).mockImplementationOnce(
-        (
-          _path: string,
-          callback: (error: Error | null, metadata: any) => void,
-        ) => {
-          callback(null, {
-            streams: [
-              {
-                codec_type: "audio",
+      // Update ffprobe mock for audio
+      ffmpeg.ffprobe = vi
+        .fn()
+        .mockImplementation(
+          (
+            _path: string,
+            callback: (error: Error | null, metadata: any) => void,
+          ) => {
+            callback(null, {
+              streams: [
+                {
+                  codec_type: "audio",
+                  duration: 180,
+                },
+              ],
+              format: {
                 duration: 180,
-                bit_rate: 320000,
+                format_name: "mp3",
               },
-            ],
-            format: {
-              duration: 180,
-              bit_rate: 320000,
-            },
-          });
-        },
-      );
+            });
+          },
+        );
 
       // Call the method
       const result = await mediaProcessor.processMedia(sourcePath, {
@@ -255,9 +267,14 @@ describe("MediaProcessor", () => {
         contentType,
         size: 12345,
         metadata: {
-          duration: 180,
           format: "mp3",
+          duration: 180,
+          dimensions: {
+            width: 0,
+            height: 0,
+          },
         },
+        thumbnail: undefined,
       });
     });
 

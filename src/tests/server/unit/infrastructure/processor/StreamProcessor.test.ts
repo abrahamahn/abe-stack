@@ -6,12 +6,52 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { StreamProcessor } from "@infrastructure/processor";
 
 // Mock fs module
-vi.mock("fs", () => ({
-  createReadStream: vi.fn(),
-  createWriteStream: vi.fn(),
-  existsSync: vi.fn(),
-  mkdirSync: vi.fn(),
-}));
+vi.mock("fs", () => {
+  return {
+    default: {
+      createReadStream: vi.fn(),
+      createWriteStream: vi.fn(),
+      existsSync: vi.fn(),
+      mkdirSync: vi.fn(),
+      mkdir: vi.fn(),
+      access: vi.fn(),
+      stat: vi.fn(),
+      readFile: vi.fn(),
+      writeFile: vi.fn(),
+      readdir: vi.fn(),
+      unlink: vi.fn(),
+      promises: {
+        readFile: vi.fn(),
+        writeFile: vi.fn(),
+        readdir: vi.fn(),
+        mkdir: vi.fn(),
+        access: vi.fn(),
+        stat: vi.fn(),
+        unlink: vi.fn(),
+      },
+    },
+    createReadStream: vi.fn(),
+    createWriteStream: vi.fn(),
+    existsSync: vi.fn(),
+    mkdirSync: vi.fn(),
+    mkdir: vi.fn(),
+    access: vi.fn(),
+    stat: vi.fn(),
+    readFile: vi.fn(),
+    writeFile: vi.fn(),
+    readdir: vi.fn(),
+    unlink: vi.fn(),
+    promises: {
+      readFile: vi.fn(),
+      writeFile: vi.fn(),
+      readdir: vi.fn(),
+      mkdir: vi.fn(),
+      access: vi.fn(),
+      stat: vi.fn(),
+      unlink: vi.fn(),
+    },
+  };
+});
 
 describe("StreamProcessor", () => {
   let mockReadStream: Readable;
@@ -38,6 +78,14 @@ describe("StreamProcessor", () => {
         callback(null, chunk);
       },
     });
+
+    // Configure fs mock functions to return our streams
+    (
+      fs.createReadStream as unknown as ReturnType<typeof vi.fn>
+    ).mockReturnValue(mockReadStream);
+    (
+      fs.createWriteStream as unknown as ReturnType<typeof vi.fn>
+    ).mockReturnValue(mockWriteStream);
 
     // Reset mocks
     vi.clearAllMocks();

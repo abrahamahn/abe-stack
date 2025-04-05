@@ -62,7 +62,6 @@ describe("IJobService", () => {
       expect(mockJobService.addJob).toHaveBeenCalledWith(
         JobType.MEDIA_PROCESSING,
         jobData,
-        undefined,
       );
     });
 
@@ -188,7 +187,6 @@ describe("IJobService", () => {
         JobType.MEDIA_PROCESSING,
         jobData,
         "job123",
-        undefined,
       );
     });
 

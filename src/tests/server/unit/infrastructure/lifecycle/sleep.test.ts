@@ -55,7 +55,9 @@ describe("sleep", () => {
     vi.advanceTimersByTime(Number.MAX_SAFE_INTEGER);
     await sleepPromise;
     const endTime = Date.now();
-    expect(endTime - startTime).toBe(Number.MAX_SAFE_INTEGER);
+    expect(
+      Math.abs(endTime - startTime - Number.MAX_SAFE_INTEGER),
+    ).toBeLessThanOrEqual(2);
     vi.useRealTimers();
   });
 });

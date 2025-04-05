@@ -45,8 +45,19 @@ export function verifySignature(
   data: Record<string, unknown>,
 ): boolean {
   const expectedSignature = generateSignature(secretKey, data);
-  return crypto.timingSafeEqual(
-    Buffer.from(signature, "hex"),
-    Buffer.from(expectedSignature, "hex"),
-  );
+
+  try {
+    // Only compare if signatures have the same length - timingSafeEqual requires same-length buffers
+    if (signature.length !== expectedSignature.length) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(
+      Buffer.from(signature, "hex"),
+      Buffer.from(expectedSignature, "hex"),
+    );
+  } catch (_error) {
+    // If anything goes wrong during verification, consider it invalid
+    return false;
+  }
 }

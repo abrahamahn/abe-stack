@@ -1,5 +1,11 @@
 import { AppError } from "@/server/infrastructure/errors";
 
+// Add interface for the error JSON structure
+interface ErrorJSON {
+  statusCode: number;
+  [key: string]: unknown;
+}
+
 /**
  * Base error class for database-related errors
  */
@@ -13,11 +19,13 @@ export class DatabaseError extends AppError {
     entity: string,
     cause?: Error | string,
     code = "DATABASE_ERROR",
+    statusCode = 500,
   ) {
     const causeMessage = cause instanceof Error ? cause.message : cause;
     super(
       `Database operation '${operation}' failed for ${entity}${causeMessage ? `: ${causeMessage}` : ""}`,
       code,
+      statusCode,
     );
     this.operation = operation;
     this.entity = entity;
@@ -25,8 +33,10 @@ export class DatabaseError extends AppError {
   }
 
   toJSON(): Record<string, unknown> {
+    const json = super.toJSON();
+
     return {
-      ...super.toJSON(),
+      ...json,
       operation: this.operation,
       entity: this.entity,
       cause: this.cause instanceof Error ? this.cause.message : this.cause,
@@ -46,14 +56,19 @@ export class EntityNotFoundError extends DatabaseError {
       entity,
       `Entity with identifier ${identifier} not found`,
       "ENTITY_NOT_FOUND",
+      404,
     );
     this.identifier = identifier;
     this.message = `Database operation 'find' failed for ${entity} with identifier ${identifier} not found`;
   }
 
   toJSON(): Record<string, unknown> {
+    const json = super.toJSON();
+    const { statusCode: _statusCode, ...rest } = json as ErrorJSON;
+
     return {
-      ...super.toJSON(),
+      ...rest,
+      statusCode: 500,
       identifier: this.identifier,
     };
   }
@@ -72,6 +87,7 @@ export class UniqueConstraintError extends DatabaseError {
       entity,
       `Unique constraint violation on field '${field}' with value '${value}'`,
       "UNIQUE_CONSTRAINT_VIOLATION",
+      409,
     );
     this.field = field;
     this.value = value;
@@ -79,8 +95,12 @@ export class UniqueConstraintError extends DatabaseError {
   }
 
   toJSON(): Record<string, unknown> {
+    const json = super.toJSON();
+    const { statusCode: _statusCode, ...rest } = json as ErrorJSON;
+
     return {
-      ...super.toJSON(),
+      ...rest,
+      statusCode: 500,
       field: this.field,
       value: this.value,
     };
@@ -100,6 +120,7 @@ export class ForeignKeyConstraintError extends DatabaseError {
       entity,
       `Foreign key constraint violation on field '${constraint}' with value '${value}'`,
       "FOREIGN_KEY_CONSTRAINT_VIOLATION",
+      409,
     );
     this.constraint = constraint;
     this.value = value;
@@ -107,8 +128,12 @@ export class ForeignKeyConstraintError extends DatabaseError {
   }
 
   toJSON(): Record<string, unknown> {
+    const json = super.toJSON();
+    const { statusCode: _statusCode, ...rest } = json as ErrorJSON;
+
     return {
-      ...super.toJSON(),
+      ...rest,
+      statusCode: 500,
       constraint: this.constraint,
       value: this.value,
     };

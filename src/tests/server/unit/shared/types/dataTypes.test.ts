@@ -45,6 +45,25 @@ describe("dataTypes", () => {
         message: "undefined is not a valid UUID.",
       });
     });
+
+    it("should handle non-string types", () => {
+      expect(uuid.validate(123)).toEqual({
+        message: "123 is not a valid UUID.",
+      });
+      expect(uuid.validate(true)).toEqual({
+        message: "true is not a valid UUID.",
+      });
+      expect(uuid.validate({})).toEqual({
+        message: "{} is not a valid UUID.",
+      });
+      expect(uuid.validate([])).toEqual({
+        message: "[] is not a valid UUID.",
+      });
+    });
+
+    it("should have an inspect method", () => {
+      expect(uuid.inspect()).toBe("UUID");
+    });
   });
 
   describe("datetime validator", () => {
@@ -103,6 +122,13 @@ describe("dataTypes", () => {
       expect(datetime.validate({})).toEqual({
         message: "{} is not a valid ISO 8601 datetime string.",
       });
+      expect(datetime.validate([])).toEqual({
+        message: "[] is not a valid ISO 8601 datetime string.",
+      });
+    });
+
+    it("should have an inspect method", () => {
+      expect(datetime.inspect()).toBe("Datetime");
     });
   });
 });

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
-import { formatDate } from "../../../server/shared/date";
+import { formatDate } from "@/server/shared/date/formatDate";
+
 import { socialService } from "../../services/social";
 
 interface Post {

@@ -107,16 +107,30 @@ export class StorageService implements IStorageService {
    * Initialize the storage service
    */
   async initialize(): Promise<void> {
-    await this.provider.initialize();
-    this.logger.info("Storage service initialized");
+    try {
+      await this.provider.initialize();
+      this.logger.info("Storage service initialized");
+    } catch (error) {
+      this.logger.error("Failed to initialize storage service", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
   }
 
   /**
    * Shutdown the storage service
    */
   async shutdown(): Promise<void> {
-    await this.provider.shutdown();
-    this.logger.info("Storage service shutdown");
+    try {
+      await this.provider.shutdown();
+      this.logger.info("Storage service shutdown");
+    } catch (error) {
+      this.logger.error("Failed to shutdown storage service", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
   }
 
   /**

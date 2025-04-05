@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { Container } from "inversify";
 import { Pool, PoolClient } from "pg";
-import { describe, it, expect, beforeEach, afterEach, vi, Mock } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 
 import { DatabaseConfigProvider } from "@infrastructure/config";
 import { DatabaseServer } from "@infrastructure/database";
@@ -129,7 +129,7 @@ describe("DatabaseServer", () => {
       }),
       getConfigSchema: vi.fn().mockReturnValue({}),
       config: {},
-      configService: {} as any,
+      configService: vi.fn(),
       loadConfig: vi.fn(),
     } as unknown as any;
 
@@ -148,8 +148,6 @@ describe("DatabaseServer", () => {
 
     // IMPORTANT: Override the logger directly
     (dbService as any).logger = mockLoggerInstance;
-
-    (mockConfigProvider.configService as Mock).mockClear();
   });
 
   afterEach(async () => {
@@ -656,7 +654,12 @@ describe("DatabaseServer", () => {
       // Initialize with skipConnectionTest=true
       await dbService.initialize(true);
 
-      // Manually set the pool to use our mockQuery
+      // Reset mock and set success response
+      mockQuery.mockReset();
+      mockQuery.mockImplementation(() => {
+        return Promise.resolve(mockQueryResult);
+      });
+
       (dbService as any).pool = { query: mockQuery };
 
       await dbService.query("SELECT * FROM users WHERE id = $1", [1]);
@@ -716,6 +719,274 @@ describe("DatabaseServer", () => {
       const stats = dbService.getStats();
       expect(stats.queryCount).toBe(1);
     });
+
+    it("should handle join clauses", async () => {
+      await dbService.initialize(true);
+
+      // Reset mock and set success response
+      mockQuery.mockReset();
+      mockQuery.mockImplementation(() => {
+        return Promise.resolve(mockQueryResult);
+      });
+
+      (dbService as any).pool = { query: mockQuery };
+
+      const result = await dbService
+        .createQueryBuilder("users")
+        .select(["users.id", "posts.title"])
+        .join("posts", "posts.user_id = users.id")
+        .where("users.active = ?", true)
+        .execute();
+
+      // Verify the query construction
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining(
+            "SELECT users.id, posts.title FROM users JOIN posts ON posts.user_id = users.id WHERE users.active = $1",
+          ),
+          values: [true],
+        }),
+      );
+      expect(result).toEqual(mockQueryResult);
+    });
+
+    it("should handle left join clauses", async () => {
+      await dbService.initialize(true);
+
+      // Reset mock and set success response
+      mockQuery.mockReset();
+      mockQuery.mockImplementation(() => {
+        return Promise.resolve(mockQueryResult);
+      });
+
+      (dbService as any).pool = { query: mockQuery };
+
+      const result = await dbService
+        .createQueryBuilder("users")
+        .select(["users.id", "posts.title"])
+        .leftJoin("posts", "posts.user_id = users.id")
+        .where("users.id = ?", 1)
+        .execute();
+
+      // Verify the query construction
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining(
+            "SELECT users.id, posts.title FROM users LEFT JOIN posts ON posts.user_id = users.id WHERE users.id = $1",
+          ),
+          values: [1],
+        }),
+      );
+      expect(result).toEqual(mockQueryResult);
+    });
+
+    it("should handle group by clauses", async () => {
+      await dbService.initialize(true);
+
+      // Reset mock and set success response
+      mockQuery.mockReset();
+      mockQuery.mockImplementation(() => {
+        return Promise.resolve(mockQueryResult);
+      });
+
+      (dbService as any).pool = { query: mockQuery };
+
+      const result = await dbService
+        .createQueryBuilder("users")
+        .select(["COUNT(*) as count", "status"])
+        .groupBy("status")
+        .execute();
+
+      // Verify the query construction
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining(
+            "SELECT COUNT(*) as count, status FROM users GROUP BY status",
+          ),
+          values: [],
+        }),
+      );
+      expect(result).toEqual(mockQueryResult);
+    });
+
+    it("should handle count operations", async () => {
+      await dbService.initialize(true);
+      (dbService as any).pool = { query: mockQuery };
+
+      // Mock the count query result
+      mockQuery.mockReset().mockResolvedValue({
+        rows: [{ count: "10" }],
+        rowCount: 1,
+        command: "SELECT",
+        oid: 0,
+        fields: [],
+      });
+
+      const count = await dbService
+        .createQueryBuilder("users")
+        .where("active = ?", true)
+        .count();
+
+      // Look at the second call since the first is likely setting statement_timeout
+      const call = mockQuery.mock.calls[1][0];
+      expect(call.text).toContain(
+        "SELECT COUNT(*) as count FROM users WHERE active = $1",
+      );
+      expect(call.values).toEqual([true]);
+      expect(count).toBe(10); // The count method converts the string "10" to number 10
+    });
+
+    it("should retrieve a single record with getOne", async () => {
+      await dbService.initialize(true);
+      (dbService as any).pool = { query: mockQuery };
+
+      // Reset the mock and provide the expected result
+      mockQuery.mockReset().mockResolvedValue({
+        rows: [{ id: 1, name: "Test User" }],
+        rowCount: 1,
+        command: "SELECT",
+        oid: 0,
+        fields: [],
+      });
+
+      const result = await dbService
+        .createQueryBuilder("users")
+        .select(["id", "name"])
+        .where("id = ?", 1)
+        .getOne();
+
+      // Look at the second call since the first is likely setting statement_timeout
+      const call = mockQuery.mock.calls[1][0];
+      expect(call.text).toContain(
+        "SELECT id, name FROM users WHERE id = $1 LIMIT 1",
+      );
+      expect(call.values).toEqual([1]);
+      expect(result).toEqual({ id: 1, name: "Test User" });
+    });
+
+    it("should handle getMany operations", async () => {
+      await dbService.initialize(true);
+      (dbService as any).pool = { query: mockQuery };
+
+      // Reset the mock and provide the expected result
+      mockQuery.mockReset().mockResolvedValue({
+        rows: [
+          { id: 1, name: "User 1" },
+          { id: 2, name: "User 2" },
+        ],
+        rowCount: 2,
+        command: "SELECT",
+        oid: 0,
+        fields: [],
+      });
+
+      const users = await dbService
+        .createQueryBuilder("users")
+        .where("active = ?", true)
+        .getMany();
+
+      // Look at the second call since the first is likely setting statement_timeout
+      const call = mockQuery.mock.calls[1][0];
+      expect(call.text).toContain("SELECT * FROM users WHERE active = $1");
+      expect(call.values).toEqual([true]);
+      expect(users).toEqual([
+        { id: 1, name: "User 1" },
+        { id: 2, name: "User 2" },
+      ]);
+    });
+
+    it("should handle query options", async () => {
+      await dbService.initialize(true);
+      (dbService as any).pool = { query: mockQuery };
+
+      const queryOptions = { tag: "users_query", timeout: 5000 };
+      await dbService
+        .createQueryBuilder("users")
+        .select(["id", "name"])
+        .where("active = ?", true)
+        .execute(queryOptions);
+
+      // First call is likely statement_timeout
+      expect(mockQuery.mock.calls[0][0]).toBe("SET statement_timeout = 5000");
+
+      // Second call is the actual query
+      const call = mockQuery.mock.calls[1][0];
+      expect(call.text).toContain(
+        "SELECT id, name FROM users WHERE active = $1",
+      );
+      expect(call.values).toEqual([true]);
+    });
+
+    it("should handle getSql method", async () => {
+      await dbService.initialize(true);
+
+      const sql = dbService
+        .createQueryBuilder("users")
+        .select(["id", "name"])
+        .where("active = ?", true)
+        .orderBy("name", "ASC")
+        .limit(10)
+        .offset(20)
+        .getSql();
+
+      expect(sql).toContain("SELECT id, name FROM users");
+      expect(sql).toContain("WHERE active = $1");
+      expect(sql).toContain("ORDER BY name ASC");
+      expect(sql).toContain("LIMIT 10");
+      expect(sql).toContain("OFFSET 20");
+    });
+
+    it("should handle null result in getOne", async () => {
+      await dbService.initialize(true);
+      (dbService as any).pool = { query: mockQuery };
+
+      // Most importantly, mock with EMPTY rows array
+      mockQuery.mockReset().mockResolvedValue({
+        rows: [],
+        rowCount: 0,
+        command: "SELECT",
+        oid: 0,
+        fields: [],
+      });
+
+      const user = await dbService
+        .createQueryBuilder("users")
+        .where("id = ?", 9999)
+        .getOne();
+
+      expect(user).toBeNull();
+    });
+
+    it("should retrieve multiple records with getMany", async () => {
+      await dbService.initialize(true);
+      (dbService as any).pool = { query: mockQuery };
+
+      // Reset the mock and provide the expected result
+      mockQuery.mockReset().mockResolvedValue({
+        rows: [
+          { id: 1, name: "User 1" },
+          { id: 2, name: "User 2" },
+        ],
+        rowCount: 2,
+        command: "SELECT",
+        oid: 0,
+        fields: [],
+      });
+
+      const users = await dbService
+        .createQueryBuilder("users")
+        .where("active = ?", true)
+        .getMany();
+
+      // Look at the second call since the first is likely setting statement_timeout
+      const call = mockQuery.mock.calls[1][0];
+      expect(call.text).toContain("SELECT * FROM users WHERE active = $1");
+      expect(call.values).toEqual([true]);
+      expect(users).toEqual([
+        { id: 1, name: "User 1" },
+        { id: 2, name: "User 2" },
+      ]);
+    });
   });
 
   describe("transaction retry behavior", () => {
@@ -756,6 +1027,13 @@ describe("DatabaseServer", () => {
 
     it("should handle join clauses", async () => {
       await dbService.initialize(true);
+
+      // Reset mock and set success response
+      mockQuery.mockReset();
+      mockQuery.mockImplementation(() => {
+        return Promise.resolve(mockQueryResult);
+      });
+
       (dbService as any).pool = { query: mockQuery };
 
       const result = await dbService
@@ -765,17 +1043,27 @@ describe("DatabaseServer", () => {
         .where("users.active = ?", true)
         .execute();
 
-      // Look at the second call since the first is likely setting statement_timeout
-      const call = mockQuery.mock.calls[1][0];
-      expect(call.text).toContain(
-        "SELECT users.id, posts.title FROM users JOIN posts ON posts.user_id = users.id WHERE users.active = $1",
+      // Verify the query construction
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining(
+            "SELECT users.id, posts.title FROM users JOIN posts ON posts.user_id = users.id WHERE users.active = $1",
+          ),
+          values: [true],
+        }),
       );
-      expect(call.values).toEqual([true]);
       expect(result).toEqual(mockQueryResult);
     });
 
     it("should handle left join clauses", async () => {
       await dbService.initialize(true);
+
+      // Reset mock and set success response
+      mockQuery.mockReset();
+      mockQuery.mockImplementation(() => {
+        return Promise.resolve(mockQueryResult);
+      });
+
       (dbService as any).pool = { query: mockQuery };
 
       const result = await dbService
@@ -785,17 +1073,27 @@ describe("DatabaseServer", () => {
         .where("users.id = ?", 1)
         .execute();
 
-      // Look at the second call since the first is likely setting statement_timeout
-      const call = mockQuery.mock.calls[1][0];
-      expect(call.text).toContain(
-        "SELECT users.id, posts.title FROM users LEFT JOIN posts ON posts.user_id = users.id WHERE users.id = $1",
+      // Verify the query construction
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining(
+            "SELECT users.id, posts.title FROM users LEFT JOIN posts ON posts.user_id = users.id WHERE users.id = $1",
+          ),
+          values: [1],
+        }),
       );
-      expect(call.values).toEqual([1]);
       expect(result).toEqual(mockQueryResult);
     });
 
     it("should handle group by clauses", async () => {
       await dbService.initialize(true);
+
+      // Reset mock and set success response
+      mockQuery.mockReset();
+      mockQuery.mockImplementation(() => {
+        return Promise.resolve(mockQueryResult);
+      });
+
       (dbService as any).pool = { query: mockQuery };
 
       const result = await dbService
@@ -804,12 +1102,15 @@ describe("DatabaseServer", () => {
         .groupBy("status")
         .execute();
 
-      // Look at the second call since the first is likely setting statement_timeout
-      const call = mockQuery.mock.calls[1][0];
-      expect(call.text).toContain(
-        "SELECT COUNT(*) as count, status FROM users GROUP BY status",
+      // Verify the query construction
+      expect(mockQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining(
+            "SELECT COUNT(*) as count, status FROM users GROUP BY status",
+          ),
+          values: [],
+        }),
       );
-      expect(call.values).toEqual([]);
       expect(result).toEqual(mockQueryResult);
     });
 

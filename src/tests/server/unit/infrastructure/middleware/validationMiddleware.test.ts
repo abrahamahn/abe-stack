@@ -164,22 +164,20 @@ describe("Validation Middleware", () => {
       );
       expect(nextFunction).not.toHaveBeenCalled();
       expect(mockRes.status).toHaveBeenCalledWith(400);
-      expect(mockRes.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          success: false,
-          message: "URL parameter validation error",
-          errors: expect.arrayContaining([
-            expect.objectContaining({
-              field: "id",
-              message: expect.stringContaining("uuid"),
-            }),
-            expect.objectContaining({
-              field: "type",
-              message: expect.stringContaining("must be one of"),
-            }),
-          ]),
-        }),
-      );
+      expect(mockRes.json).toHaveBeenCalledWith({
+        success: false,
+        message: "URL parameter validation error",
+        errors: [
+          {
+            field: "id",
+            message: '"id" must be a valid GUID',
+          },
+          {
+            field: "type",
+            message: '"type" must be one of [user, admin]',
+          },
+        ],
+      });
     });
   });
 });

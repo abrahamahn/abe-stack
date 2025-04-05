@@ -25,6 +25,11 @@ describe("routeHelpers", () => {
       expect(route).toEqual({ type: "design", page: "test" });
     });
 
+    it("should parse design route with empty page parameter", () => {
+      const route = parseRoute("http://localhost:3000/design?page=");
+      expect(route).toEqual({ type: "design", page: "" });
+    });
+
     it("should parse unknown route", () => {
       const url = "http://localhost:3000/unknown";
       const route = parseRoute(url);
@@ -39,6 +44,12 @@ describe("routeHelpers", () => {
     it("should handle URLs with different ports", () => {
       const route = parseRoute("http://localhost:8080/");
       expect(route).toEqual({ type: "root" });
+    });
+
+    it("should handle URLs with query parameters on non-design routes", () => {
+      const url = "http://localhost:3000/unknown?param=value";
+      const route = parseRoute(url);
+      expect(route).toEqual({ type: "unknown", url });
     });
   });
 
@@ -66,6 +77,14 @@ describe("routeHelpers", () => {
     it("should handle empty page parameter", () => {
       const route: Route = { type: "design", page: "" };
       expect(formatRoute(route)).toBe("/design?page=");
+    });
+
+    it("should handle complex unknown URLs", () => {
+      const route: Route = {
+        type: "unknown",
+        url: "/path/to/resource?query=value#fragment",
+      };
+      expect(formatRoute(route)).toBe("/path/to/resource?query=value#fragment");
     });
   });
 
@@ -108,6 +127,22 @@ describe("routeHelpers", () => {
       );
       expect(params).toEqual({ threadId: "123" });
     });
+
+    it("should handle parameters with special characters", () => {
+      const params = matchRouteWithParams(
+        "/path/:param",
+        "/path/value-with_special.chars",
+      );
+      expect(params).toEqual({ param: "value-with_special.chars" });
+    });
+
+    it("should handle multiple consecutive parameters", () => {
+      const params = matchRouteWithParams(
+        "/api/:version/:resource/:id",
+        "/api/v1/users/123",
+      );
+      expect(params).toEqual({ version: "v1", resource: "users", id: "123" });
+    });
   });
 
   describe("matchRoute", () => {
@@ -133,6 +168,14 @@ describe("routeHelpers", () => {
 
     it("should handle root path", () => {
       expect(matchRoute("/", "/")).toBe(true);
+    });
+
+    it("should not match substring routes", () => {
+      expect(matchRoute("/thread", "/thread/123")).toBe(false);
+    });
+
+    it("should be case sensitive", () => {
+      expect(matchRoute("/Thread", "/thread")).toBe(false);
     });
   });
 });

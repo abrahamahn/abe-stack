@@ -129,11 +129,11 @@ export class ErrorHandler implements IErrorHandler {
       return res.status(500).json(errorResponse);
     }
 
-    // In development, include more details
+    // In development, include more details but keep the error code consistent
     return res.status(500).json({
-      ...errorResponse,
+      success: false,
       error: {
-        ...errorResponse.error,
+        code: "INTERNAL_ERROR",
         message: error.message,
         stack: error.stack,
       },

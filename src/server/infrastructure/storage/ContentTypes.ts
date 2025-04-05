@@ -55,25 +55,28 @@ export enum AudioFormat {
  * @returns Content category
  */
 export function getContentCategory(contentType: string): ContentCategory {
-  if (contentType.startsWith("image/")) {
+  // Normalize content type: trim, convert to lowercase, and remove parameters
+  const normalizedType = contentType.toLowerCase().split(";")[0].trim();
+
+  if (normalizedType.startsWith("image/")) {
     return ContentCategory.IMAGE;
-  } else if (contentType.startsWith("video/")) {
+  } else if (normalizedType.startsWith("video/")) {
     return ContentCategory.VIDEO;
-  } else if (contentType.startsWith("audio/")) {
+  } else if (normalizedType.startsWith("audio/")) {
     return ContentCategory.AUDIO;
   } else if (
-    contentType.startsWith("text/") ||
-    contentType.startsWith("application/pdf") ||
-    contentType.includes("document") ||
-    contentType.includes("spreadsheet") ||
-    contentType.includes("presentation")
+    normalizedType.startsWith("text/") ||
+    normalizedType.startsWith("application/pdf") ||
+    normalizedType.includes("document") ||
+    normalizedType.includes("spreadsheet") ||
+    normalizedType.includes("presentation")
   ) {
     return ContentCategory.DOCUMENT;
   } else if (
-    contentType.includes("zip") ||
-    contentType.includes("tar") ||
-    contentType.includes("gzip") ||
-    contentType.includes("compressed")
+    normalizedType.includes("zip") ||
+    normalizedType.includes("tar") ||
+    normalizedType.includes("gzip") ||
+    normalizedType.includes("compressed")
   ) {
     return ContentCategory.ARCHIVE;
   } else {

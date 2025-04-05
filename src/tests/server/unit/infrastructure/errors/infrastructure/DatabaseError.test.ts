@@ -60,8 +60,7 @@ describe("DatabaseError", () => {
     });
 
     it("should serialize to JSON correctly", () => {
-      const cause = new Error("Test cause");
-      const error = new DatabaseError("test", "Test", cause);
+      const error = new DatabaseError("test", "Test", "Test cause");
       const json = error.toJSON();
 
       expect(json).toEqual({
@@ -71,6 +70,9 @@ describe("DatabaseError", () => {
         operation: "test",
         entity: "Test",
         cause: "Test cause",
+        metadata: {},
+        stack: expect.any(String),
+        statusCode: 500,
       });
     });
   });
@@ -99,14 +101,17 @@ describe("DatabaseError", () => {
       const json = error.toJSON();
 
       expect(json).toEqual({
-        name: "DatabaseError",
+        name: "EntityNotFoundError",
         message:
           "Database operation 'find' failed for User with identifier 123 not found",
         code: "ENTITY_NOT_FOUND",
         operation: "find",
         entity: "User",
-        cause: "Entity with identifier 123 not found",
         identifier: "123",
+        cause: "Entity with identifier 123 not found",
+        metadata: {},
+        stack: expect.any(String),
+        statusCode: 500,
       });
     });
   });
@@ -144,16 +149,19 @@ describe("DatabaseError", () => {
       const json = error.toJSON();
 
       expect(json).toEqual({
-        name: "DatabaseError",
+        name: "UniqueConstraintError",
         message:
           "Database operation 'create/update' failed for User with email 'test@example.com' already exists",
         code: "UNIQUE_CONSTRAINT_VIOLATION",
         operation: "create/update",
         entity: "User",
-        cause:
-          "Unique constraint violation on field 'email' with value 'test@example.com'",
         field: "email",
         value: "test@example.com",
+        cause:
+          "Unique constraint violation on field 'email' with value 'test@example.com'",
+        metadata: {},
+        stack: expect.any(String),
+        statusCode: 500,
       });
     });
   });
@@ -191,16 +199,19 @@ describe("DatabaseError", () => {
       const json = error.toJSON();
 
       expect(json).toEqual({
-        name: "DatabaseError",
+        name: "ForeignKeyConstraintError",
         message:
           "Database operation 'create/update' failed for Comment violates foreign key constraint 'user_id' with value 'invalid_user'",
         code: "FOREIGN_KEY_CONSTRAINT_VIOLATION",
         operation: "create/update",
         entity: "Comment",
-        cause:
-          "Foreign key constraint violation on field 'user_id' with value 'invalid_user'",
         constraint: "user_id",
         value: "invalid_user",
+        cause:
+          "Foreign key constraint violation on field 'user_id' with value 'invalid_user'",
+        metadata: {},
+        stack: expect.any(String),
+        statusCode: 500,
       });
     });
   });

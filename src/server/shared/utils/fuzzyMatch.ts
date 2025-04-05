@@ -13,135 +13,144 @@ export function fuzzyMatch(
   pattern: string,
   text: string,
 ): Array<{ match?: string; skip?: string }> {
-  const results: Array<{ match?: string; skip?: string }> = [];
-  let currentMatch = "";
-  let currentSkip = "";
-  let patternIndex = 0;
-  let textIndex = 0;
+  if (!pattern) return [{ skip: text }];
+  if (!text) return [];
 
-  while (textIndex < text.length && patternIndex < pattern.length) {
-    const patternChar = pattern[patternIndex].toLowerCase();
-    const textChar = text[textIndex].toLowerCase();
+  // Try to find the best match starting at each position
+  let bestScore = 0;
+  let bestResults: Array<{ match?: string; skip?: string }> = [];
 
-    if (patternChar === textChar) {
-      if (currentSkip) {
-        results.push({ skip: currentSkip });
-        currentSkip = "";
-      }
-      currentMatch += text[textIndex];
-      patternIndex++;
-      textIndex++;
-    } else {
-      if (currentMatch) {
-        results.push({ match: currentMatch });
-        currentMatch = "";
-      }
-      currentSkip += text[textIndex];
-      textIndex++;
+  for (let startIndex = 0; startIndex < text.length; startIndex++) {
+    const results: Array<{ match?: string; skip?: string }> = [];
+    let currentMatch = "";
+    let currentSkip = "";
+    let patternIndex = 0;
+    let textIndex = startIndex;
 
-      // Check if we need to backtrack
-      if (textIndex === text.length && patternIndex < pattern.length) {
-        // Try to find a better match by backtracking
-        let backtrackIndex = textIndex - 1;
-        while (backtrackIndex >= 0) {
-          if (text[backtrackIndex].toLowerCase() === patternChar) {
-            // Found a better match, update results
-            if (currentSkip) {
-              results.push({
-                skip: currentSkip.slice(0, backtrackIndex - textIndex + 1),
-              });
-              currentSkip = currentSkip.slice(backtrackIndex - textIndex + 1);
-            }
-            currentMatch = text[backtrackIndex];
-            patternIndex++;
-            textIndex = backtrackIndex + 1;
-            break;
-          }
-          backtrackIndex--;
+    while (textIndex < text.length && patternIndex < pattern.length) {
+      if (
+        pattern[patternIndex].toLowerCase() === text[textIndex].toLowerCase()
+      ) {
+        // Found a match
+        if (currentSkip) {
+          results.push({ skip: currentSkip });
+          currentSkip = "";
         }
+        currentMatch += text[textIndex];
+        patternIndex++;
+      } else {
+        // No match
+        if (currentMatch) {
+          results.push({ match: currentMatch });
+          currentMatch = "";
+        }
+        currentSkip += text[textIndex];
       }
+      textIndex++;
+    }
+
+    // Handle any remaining match or skip
+    if (currentMatch) {
+      results.push({ match: currentMatch });
+    }
+    if (currentSkip) {
+      results.push({ skip: currentSkip });
+    }
+
+    // Add any remaining text as a skip
+    if (textIndex < text.length) {
+      results.push({ skip: text.slice(textIndex) });
+    }
+
+    // Calculate score for this match
+    const score = fuzzyMatchScore(results);
+    if (score > bestScore) {
+      bestScore = score;
+      bestResults = results;
     }
   }
 
-  // Add any remaining match or skip
-  if (currentMatch) {
-    results.push({ match: currentMatch });
-  }
-  if (currentSkip) {
-    results.push({ skip: currentSkip });
-  }
-
-  // Add any remaining text as skip
-  if (textIndex < text.length) {
-    results.push({ skip: text.slice(textIndex) });
+  // If we found no matches, return the entire text as a skip
+  if (bestScore === 0) {
+    return [{ skip: text }];
   }
 
   // Merge consecutive matches and skips
   const mergedResults: Array<{ match?: string; skip?: string }> = [];
-  let currentResult = results[0];
+  let lastType: "match" | "skip" | undefined;
 
-  for (let i = 1; i < results.length; i++) {
-    const result = results[i];
-    if (result.match && currentResult.match) {
-      currentResult.match += result.match;
-    } else if (result.skip && currentResult.skip) {
-      currentResult.skip += result.skip;
-    } else {
-      mergedResults.push(currentResult);
-      currentResult = result;
+  for (const result of bestResults) {
+    if (result.match) {
+      if (lastType === "match") {
+        // Merge with previous match
+        const lastResult = mergedResults[mergedResults.length - 1];
+        lastResult.match += result.match;
+      } else {
+        mergedResults.push({ match: result.match });
+        lastType = "match";
+      }
+    } else if (result.skip) {
+      if (lastType === "skip") {
+        // Merge with previous skip
+        const lastResult = mergedResults[mergedResults.length - 1];
+        lastResult.skip += result.skip;
+      } else {
+        mergedResults.push({ skip: result.skip });
+        lastType = "skip";
+      }
     }
   }
-  mergedResults.push(currentResult);
 
   return mergedResults;
 }
 
-// TODO: These scoring functions are pretty arbitrary currently...
-
 /**
- * matchedChars^2 / textLength
- * This is ok, but really discounts matching long text.
+ * Calculates a score for fuzzy matching results
+ * @param match Array of match results
+ * @returns Score between 0 and 1
  */
 export function fuzzyMatchScore(match: FuzzyMatchResult[] | undefined): number {
-  if (!match) return 0;
+  if (!match || match.length === 0) return 0;
 
   let matched = 0;
-  let unmatched = 0;
+  let total = 0;
 
   for (const item of match) {
     if (item.match) {
-      matched += 1;
-    } else {
-      unmatched += 1;
+      matched += item.match.length;
     }
+    total += (item.match?.length || 0) + (item.skip?.length || 0);
   }
 
-  const normalizedScore = matched ** 2 / (matched + unmatched);
-
-  return normalizedScore;
+  return total > 0 ? matched / total : 0;
 }
 
 /**
- * sum(matchedChars^2 / distanceFromStart^(1/2))^(1/2)
- * Weighted on bigger matches closer to the beginning of the string.
+ * Calculates a weighted score for fuzzy matching results
+ * @param match Array of match results
+ * @returns Score between 0 and 1
  */
 export function fuzzyMatchScore2(
   match: FuzzyMatchResult[] | undefined,
 ): number {
-  // This scoring is kind of an arbitrary idea.
-  // Quatratic sum of the size of the length of the matches.
-  // Discounted by how far from the beginning the match is.
-
-  if (!match) return 0;
+  if (!match || match.length === 0) return 0;
 
   let score = 0;
+  let position = 0;
+  let total = 0;
 
-  for (let i = 0; i < match.length; i++) {
-    const item = match[i];
+  for (const item of match) {
     if (item.match) {
-      score += 1 / Math.sqrt(i + 1);
+      // Weight matches based on position, earlier matches are worth more
+      const weight = (match.length - position) / match.length;
+      score += item.match.length * weight;
+      total += item.match.length;
     }
+    if (item.skip) {
+      total += item.skip.length;
+    }
+    position++;
   }
 
-  return Math.sqrt(score);
+  return total > 0 ? score / total : 0;
 }

@@ -10,5 +10,12 @@ function rootPath(...str: string[]): string {
 export const path: typeof rootPath & typeof p = Object.assign(rootPath, p);
 
 export function getPath(relativePath: string): string {
-  return join(process.cwd(), relativePath);
+  // If it's an absolute path, just normalize it
+  if (relativePath.startsWith("/")) {
+    return relativePath;
+  }
+
+  // Join with cwd and normalize to forward slashes
+  const result = join(process.cwd(), relativePath);
+  return result.replace(/\\/g, "/");
 }

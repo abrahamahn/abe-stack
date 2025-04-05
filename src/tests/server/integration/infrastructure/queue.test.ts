@@ -78,7 +78,7 @@ describe("Queue Infrastructure Integration Tests", () => {
 
       expect(results).toEqual([2, 4, 6, 8, 10, 12]);
       expect(processedBatches).toHaveLength(3);
-      expect(queue.activeBatches).toBeLessThanOrEqual(2);
+      expect(queue.getActiveBatches()).toBeLessThanOrEqual(2);
     });
 
     it("should handle processing errors", async () => {
@@ -122,6 +122,7 @@ describe("Queue Infrastructure Integration Tests", () => {
 
       expect(results).toEqual(items.map((x) => x * 2));
       expect(processedBatches.length).toBeGreaterThan(1);
+      expect(queue.getActiveBatches()).toBeLessThanOrEqual(2);
     });
 
     it("should respect delay between batches", async () => {
@@ -149,7 +150,7 @@ describe("Queue Infrastructure Integration Tests", () => {
 
       expect(results).toEqual(items.map((x) => x * 2));
       expect(processedBatches.length).toBeGreaterThan(1);
-      expect(queue.activeBatches).toBeLessThanOrEqual(2);
+      expect(queue.getActiveBatches()).toBeLessThanOrEqual(2);
     });
 
     it("should handle large batches efficiently", async () => {

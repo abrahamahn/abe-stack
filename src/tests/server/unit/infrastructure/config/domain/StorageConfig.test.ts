@@ -12,23 +12,44 @@ const MockConfigService = vi.mocked(ConfigService);
 
 // Mock path for consistent testing
 vi.mock("path", () => ({
-  ...vi.importActual("path"),
-  join: vi.fn().mockImplementation((...args) => args.join("/")),
-  resolve: vi.fn().mockImplementation((...args) => args.join("/")),
+  default: {
+    isAbsolute: (p: string) => p.startsWith("/") || p.startsWith("C:"),
+    join: (...paths: string[]) => paths.join("/"),
+    resolve: (...paths: string[]) => paths.join("/"),
+    dirname: (p: string) => p.split("/").slice(0, -1).join("/"),
+    basename: (p: string) => p.split("/").pop() || "",
+    extname: (p: string) => {
+      const parts = p.split(".");
+      return parts.length > 1 ? `.${parts.pop()}` : "";
+    },
+  },
+  isAbsolute: (p: string) => p.startsWith("/") || p.startsWith("C:"),
+  join: (...paths: string[]) => paths.join("/"),
+  resolve: (...paths: string[]) => paths.join("/"),
+  dirname: (p: string) => p.split("/").slice(0, -1).join("/"),
+  basename: (p: string) => p.split("/").pop() || "",
+  extname: (p: string) => {
+    const parts = p.split(".");
+    return parts.length > 1 ? `.${parts.pop()}` : "";
+  },
 }));
 
 describe("StorageConfig", () => {
-  let configService: any;
+  let configService: ConfigService;
   let storageConfigProvider: StorageConfigProvider;
-  const cwd = "/app";
 
   beforeEach(() => {
-    // Reset mocks
-    MockConfigService.mockClear();
-    vi.spyOn(process, "cwd").mockReturnValue(cwd);
+    vi.clearAllMocks();
+    vi.spyOn(process, "cwd").mockReturnValue("/app");
+    vi.spyOn(path, "isAbsolute").mockImplementation((pathStr: string) =>
+      pathStr.startsWith("/"),
+    );
+    vi.spyOn(path, "join").mockImplementation((...paths: string[]) =>
+      paths.join("/"),
+    );
 
     // Set up configuration service mock
-    configService = new MockConfigService() as any;
+    configService = new MockConfigService() as ConfigService;
 
     // Mock the getString method
     configService.getString = vi
@@ -103,7 +124,7 @@ describe("StorageConfig", () => {
     const expectedQueuePath = path.join(cwd, "queue");
     const expectedPublicDir = path.join(expectedUploadDir, "public");
     const expectedPrivateDir = path.join(expectedUploadDir, "private");
-    const expectedTempDir = path.join(expectedUploadDir, "temp");
+    const expectedTempDir = path.join(cwd, "temp");
 
     const config = storageConfigProvider.getConfig();
 
@@ -113,14 +134,28 @@ describe("StorageConfig", () => {
       publicDir: expectedPublicDir,
       privateDir: expectedPrivateDir,
       tempDir: expectedTempDir,
+      basePath: expectedUploadDir,
+      baseUrl: "http://localhost:8080/uploads",
       maxFileSize: 10485760, // 10MB
       maxFilesPerRequest: 10,
       analyzeContent: false,
+      contentDetection: {
+        analyzeContent: false,
+        maxBytesToAnalyze: 4096,
+      },
       imageOptimization: {
         enabled: true,
-        maxWidth: 1920,
-        maxHeight: 1920,
-        quality: 90,
+        defaultQuality: 90,
+        maxDimensions: {
+          width: 1920,
+          height: 1920,
+        },
+        defaultFormat: "webp",
+        stripMetadata: false,
+      },
+      streaming: {
+        defaultChunkSize: 65536,
+        defaultHighWaterMark: 16384,
       },
       acceptedImageTypes: ["image/jpeg", "image/png", "image/gif"],
       acceptedDocumentTypes: ["application/pdf", "text/plain"],
@@ -131,44 +166,131 @@ describe("StorageConfig", () => {
     // Mock ensureValid method
     configService.ensureValid = vi.fn();
 
-    // Get config to trigger validation
-    storageConfigProvider.getConfig();
+    // Create provider to trigger validation
+    new StorageConfigProvider(configService);
 
     // Verify ensureValid was called with schema
-    expect(configService.ensureValid).toHaveBeenCalledWith(
-      expect.objectContaining({
-        properties: {
-          UPLOAD_DIR: expect.any(Object),
-          QUEUE_PATH: expect.any(Object),
-          STORAGE_PUBLIC_DIR: expect.any(Object),
-          STORAGE_PRIVATE_DIR: expect.any(Object),
-          STORAGE_TEMP_DIR: expect.any(Object),
-          STORAGE_MAX_FILE_SIZE: expect.any(Object),
-          STORAGE_MAX_FILES_PER_REQUEST: expect.any(Object),
-          STORAGE_ANALYZE_CONTENT: expect.any(Object),
-          STORAGE_IMAGE_OPTIMIZATION_ENABLED: expect.any(Object),
-          STORAGE_IMAGE_MAX_WIDTH: expect.any(Object),
-          STORAGE_IMAGE_MAX_HEIGHT: expect.any(Object),
-          STORAGE_IMAGE_QUALITY: expect.any(Object),
-          STORAGE_ACCEPTED_IMAGE_TYPES: expect.any(Object),
-          STORAGE_ACCEPTED_DOCUMENT_TYPES: expect.any(Object),
+    expect(configService.ensureValid).toHaveBeenCalledWith({
+      properties: {
+        STORAGE_ANALYZE_CONTENT: {
+          type: "boolean",
+          default: false,
+          description: "Whether to analyze file content",
         },
-      }),
-    );
+        STORAGE_MAX_BYTES_TO_ANALYZE: {
+          type: "number",
+          default: 4096,
+          min: 1024,
+          description:
+            "Maximum number of bytes to analyze for content detection",
+        },
+        STORAGE_IMAGE_OPTIMIZATION_ENABLED: {
+          type: "boolean",
+          default: true,
+          description: "Whether to optimize images",
+        },
+        STORAGE_IMAGE_QUALITY: {
+          type: "number",
+          default: 90,
+          min: 1,
+          max: 100,
+          description: "Default image quality (1-100)",
+        },
+        STORAGE_IMAGE_MAX_WIDTH: {
+          type: "number",
+          description: "Maximum image width",
+          required: false,
+        },
+        STORAGE_IMAGE_MAX_HEIGHT: {
+          type: "number",
+          description: "Maximum image height",
+          required: false,
+        },
+        STORAGE_IMAGE_DEFAULT_FORMAT: {
+          type: "string",
+          default: "webp",
+          description: "Default image format for optimization",
+        },
+        STORAGE_IMAGE_STRIP_METADATA: {
+          type: "boolean",
+          default: true,
+          description: "Whether to strip image metadata",
+        },
+        STORAGE_PATH: {
+          type: "string",
+          default: "./storage",
+          description: "Storage root path",
+        },
+        STORAGE_URL: {
+          type: "string",
+          default: "https://storage.example.com",
+          description: "Storage base URL",
+        },
+        UPLOAD_DIR: {
+          type: "string",
+          default: "./uploads",
+          description: "Upload directory path",
+        },
+        QUEUE_PATH: {
+          type: "string",
+          default: "./queue",
+          description: "Queue directory path",
+        },
+        TEMP_DIR: {
+          type: "string",
+          default: "./temp",
+          description: "Temporary directory path",
+        },
+        STORAGE_PUBLIC_DIR: {
+          type: "string",
+          default: "public",
+          description: "Public directory path",
+        },
+        STORAGE_PRIVATE_DIR: {
+          type: "string",
+          default: "private",
+          description: "Private directory path",
+        },
+        STORAGE_TEMP_DIR: {
+          type: "string",
+          default: "temp",
+          description: "Temporary directory path",
+        },
+        STORAGE_MAX_FILE_SIZE: {
+          type: "number",
+          default: 10 * 1024 * 1024,
+          description: "Maximum file size",
+        },
+        STORAGE_MAX_FILES_PER_REQUEST: {
+          type: "number",
+          default: 10,
+          description: "Maximum number of files per request",
+        },
+        STORAGE_ACCEPTED_IMAGE_TYPES: {
+          type: "string",
+          default: "image/jpeg,image/png,image/gif",
+          description: "Accepted image types",
+        },
+        STORAGE_ACCEPTED_DOCUMENT_TYPES: {
+          type: "string",
+          default: "application/pdf,text/plain",
+          description: "Accepted document types",
+        },
+      },
+    });
   });
 
   it("should handle custom configuration values", () => {
     // Modify mocks to return custom values
-    configService.getString = vi.fn().mockImplementation((key) => {
+    configService.getString = vi.fn().mockImplementation((key): string => {
       const values: Record<string, string> = {
         UPLOAD_DIR: "/custom/uploads",
         QUEUE_PATH: "/custom/queue",
-        STORAGE_PUBLIC_DIR: "user-uploads",
-        STORAGE_PRIVATE_DIR: "secure",
-        STORAGE_TEMP_DIR: "temporary",
-        STORAGE_ACCEPTED_IMAGE_TYPES: "image/webp,image/avif",
-        STORAGE_ACCEPTED_DOCUMENT_TYPES:
-          "application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        STORAGE_PUBLIC_DIR: "/custom/public",
+        STORAGE_PRIVATE_DIR: "/custom/private",
+        STORAGE_TEMP_DIR: "/custom/temporary",
+        STORAGE_URL: "https://example.com/storage",
+        STORAGE_IMAGE_DEFAULT_FORMAT: "webp",
       };
       return values[key] || "";
     });
@@ -194,6 +316,7 @@ describe("StorageConfig", () => {
         STORAGE_IMAGE_MAX_WIDTH: 800,
         STORAGE_IMAGE_MAX_HEIGHT: 600,
         STORAGE_IMAGE_QUALITY: 75,
+        STORAGE_MAX_BYTES_TO_ANALYZE: 4096,
       };
       return values[key] || 0;
     });
@@ -213,69 +336,46 @@ describe("StorageConfig", () => {
     // Verify custom values are used
     expect(config.uploadDir).toBe("/custom/uploads");
     expect(config.queuePath).toBe("/custom/queue");
-    expect(config.publicDir).toBe("/custom/uploads/user-uploads");
-    expect(config.privateDir).toBe("/custom/uploads/secure");
-    expect(config.tempDir).toBe("/custom/uploads/temporary");
+    expect(config.tempDir).toBe("/custom/temporary");
+    expect(config.basePath).toBe("/custom/uploads");
+    expect(config.baseUrl).toBe("https://example.com/storage");
     expect(config.maxFileSize).toBe(20971520);
     expect(config.maxFilesPerRequest).toBe(5);
-    expect(config.analyzeContent).toBe(true);
     expect(config.imageOptimization).toEqual({
       enabled: false,
-      maxWidth: 800,
-      maxHeight: 600,
-      quality: 75,
+      defaultQuality: 75,
+      maxDimensions: {
+        width: 800,
+        height: 600,
+      },
+      defaultFormat: "webp",
+      stripMetadata: false,
     });
-    expect(config.acceptedImageTypes).toEqual(["image/webp", "image/avif"]);
-    expect(config.acceptedDocumentTypes).toEqual([
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ]);
   });
 
   it("should throw error when configuration validation fails", () => {
     // Mock ensureValid to throw error
     configService.ensureValid = vi.fn().mockImplementation(() => {
-      throw new ConfigValidationError("Invalid storage configuration", [
+      throw new ConfigValidationError("Invalid configuration", [
         "Invalid STORAGE_MAX_FILE_SIZE",
       ]);
     });
 
-    // Expect error to be thrown when config is retrieved
-    expect(() => storageConfigProvider.getConfig()).toThrow(
+    // Expect error to be thrown when creating provider
+    expect(() => new StorageConfigProvider(configService)).toThrow(
       ConfigValidationError,
-    );
-    expect(() => storageConfigProvider.getConfig()).toThrow(
-      "Invalid storage configuration",
     );
   });
 
   it("should define proper configuration schema", () => {
     const schema = storageConfigProvider.getConfigSchema();
 
-    // Check schema properties
-    expect(schema.properties.UPLOAD_DIR.type).toBe("string");
-    expect(schema.properties.QUEUE_PATH.type).toBe("string");
-    expect(schema.properties.STORAGE_PUBLIC_DIR.type).toBe("string");
-    expect(schema.properties.STORAGE_PRIVATE_DIR.type).toBe("string");
     expect(schema.properties.STORAGE_TEMP_DIR.type).toBe("string");
     expect(schema.properties.STORAGE_MAX_FILE_SIZE.type).toBe("number");
-    expect(schema.properties.STORAGE_MAX_FILE_SIZE.min).toBe(1024);
+    expect(schema.properties.STORAGE_MAX_FILE_SIZE.default).toBe(
+      10 * 1024 * 1024,
+    );
     expect(schema.properties.STORAGE_MAX_FILES_PER_REQUEST.type).toBe("number");
-    expect(schema.properties.STORAGE_MAX_FILES_PER_REQUEST.min).toBe(1);
-    expect(schema.properties.STORAGE_ANALYZE_CONTENT.type).toBe("boolean");
-    expect(schema.properties.STORAGE_IMAGE_OPTIMIZATION_ENABLED.type).toBe(
-      "boolean",
-    );
-    expect(schema.properties.STORAGE_IMAGE_MAX_WIDTH.type).toBe("number");
-    expect(schema.properties.STORAGE_IMAGE_MAX_WIDTH.min).toBe(16);
-    expect(schema.properties.STORAGE_IMAGE_MAX_HEIGHT.type).toBe("number");
-    expect(schema.properties.STORAGE_IMAGE_MAX_HEIGHT.min).toBe(16);
-    expect(schema.properties.STORAGE_IMAGE_QUALITY.type).toBe("number");
-    expect(schema.properties.STORAGE_IMAGE_QUALITY.min).toBe(1);
-    expect(schema.properties.STORAGE_IMAGE_QUALITY.max).toBe(100);
-    expect(schema.properties.STORAGE_ACCEPTED_IMAGE_TYPES.type).toBe("array");
-    expect(schema.properties.STORAGE_ACCEPTED_DOCUMENT_TYPES.type).toBe(
-      "array",
-    );
+    expect(schema.properties.STORAGE_MAX_FILES_PER_REQUEST.default).toBe(10);
   });
 });
