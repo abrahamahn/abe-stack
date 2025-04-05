@@ -4,8 +4,6 @@ dist
 backup
 
 # Environment
-.env
-.env.*
 
 # Dependencies
 package-lock.json
