@@ -200,7 +200,7 @@ describe("Promises Infrastructure Integration Tests", () => {
 
       try {
         await deferred.promise;
-      } catch (error) {
+      } catch (_error) {
         // Expected rejection
       }
     });

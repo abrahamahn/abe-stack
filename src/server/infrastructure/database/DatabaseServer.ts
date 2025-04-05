@@ -13,6 +13,14 @@ import {
   QueryBuilder,
 } from "./IDatabaseServer";
 
+// Type for pool metrics properties
+type PoolMetrics = {
+  totalCount?: number;
+  idleCount?: number;
+  waitingCount?: number;
+  activeCount?: number;
+};
+
 /**
  * Default transaction retry options
  */
@@ -279,17 +287,8 @@ export class DatabaseServer implements IDatabaseServer {
             this.metrics.taggedQueryTimes.set(tag, tagTimes);
           }
 
-          // Trim metrics array if it's too long
-          if (
-            this.metrics.queryTimes.length >
-            this.databaseConfig.metricsMaxSamples
-          ) {
-            this.metrics.queryTimes.splice(
-              0,
-              this.metrics.queryTimes.length -
-                this.databaseConfig.metricsMaxSamples,
-            );
-          }
+          // Trim metrics arrays to prevent memory leaks
+          this.trimMetrics();
 
           return result;
         } catch (error) {
@@ -596,7 +595,7 @@ export class DatabaseServer implements IDatabaseServer {
         if (options.timeout > 0) {
           try {
             await client.query("SET statement_timeout TO DEFAULT");
-          } catch (error) {
+          } catch (_error) {
             // Ignore errors on cleanup
           }
         }
@@ -621,10 +620,11 @@ export class DatabaseServer implements IDatabaseServer {
 
     // Get stats from pool if available
     if (this.pool) {
-      poolStats.totalCount = (this.pool as any).totalCount || 0;
-      poolStats.idleCount = (this.pool as any).idleCount || 0;
-      poolStats.waitingCount = (this.pool as any).waitingCount || 0;
-      poolStats.activeCount = (this.pool as any).activeCount || 0;
+      const metrics = this.pool as unknown as PoolMetrics;
+      poolStats.totalCount = metrics.totalCount || 0;
+      poolStats.idleCount = metrics.idleCount || 0;
+      poolStats.waitingCount = metrics.waitingCount || 0;
+      poolStats.activeCount = metrics.activeCount || 0;
     }
 
     // Calculate averages
@@ -696,6 +696,39 @@ export class DatabaseServer implements IDatabaseServer {
       queryTimes: [],
       taggedQueryTimes: new Map(),
     };
+  }
+
+  /**
+   * Trim metrics arrays to prevent memory leaks
+   */
+  private trimMetrics(): void {
+    // Trim query times array if it's too long
+    if (
+      this.metrics.queryTimes.length > this.databaseConfig.metricsMaxSamples
+    ) {
+      this.metrics.queryTimes = this.metrics.queryTimes.slice(
+        -this.databaseConfig.metricsMaxSamples,
+      );
+    }
+
+    // Trim acquire times array if it's too long
+    if (
+      this.metrics.acquireTimes.length > this.databaseConfig.metricsMaxSamples
+    ) {
+      this.metrics.acquireTimes = this.metrics.acquireTimes.slice(
+        -this.databaseConfig.metricsMaxSamples,
+      );
+    }
+
+    // Trim tagged query times
+    this.metrics.taggedQueryTimes.forEach((times, tag) => {
+      if (times.length > this.databaseConfig.metricsMaxSamples) {
+        this.metrics.taggedQueryTimes.set(
+          tag,
+          times.slice(-this.databaseConfig.metricsMaxSamples),
+        );
+      }
+    });
   }
 
   /**
@@ -814,10 +847,16 @@ export class DatabaseServer implements IDatabaseServer {
       );
     }
 
-    // Check for other invalid parameter types
-    // Null is usually valid in SQL, but add validation if needed
-    // for specific types based on your application requirements
-    // For now, null values are allowed
+    // Check for undefined values which cause issues with PostgreSQL
+    for (let i = 0; i < params.length; i++) {
+      if (params[i] === undefined) {
+        throw new TypeError(
+          `Query parameter at index ${i} is undefined. Use null for NULL values in SQL.`,
+        );
+      }
+    }
+
+    // Null is usually valid in SQL, so we allow it
   }
 }
 

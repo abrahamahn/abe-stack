@@ -126,7 +126,13 @@ export class CacheService implements ICacheService {
     }
 
     // Validate key
-    if (key === null || key === undefined || key === "") {
+    if (
+      key === null ||
+      key === undefined ||
+      key === "" ||
+      key === "null" ||
+      key === "undefined"
+    ) {
       throw new Error(
         "Cache key cannot be null, undefined, or an empty string",
       );
@@ -213,7 +219,13 @@ export class CacheService implements ICacheService {
 
     // Batch operation instead of multiple async calls
     for (const key in entries) {
-      if (key === null || key === undefined || key === "") {
+      if (
+        key === null ||
+        key === undefined ||
+        key === "" ||
+        key === "null" ||
+        key === "undefined"
+      ) {
         throw new Error(
           "Cache key cannot be null, undefined, or an empty string",
         );

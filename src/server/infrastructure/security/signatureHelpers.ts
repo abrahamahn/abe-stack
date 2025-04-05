@@ -52,7 +52,7 @@ export function serializeSignature(
 export function deserializeSignature(serialized: string): SecuritySignature {
   try {
     return JSON.parse(Buffer.from(serialized, "base64").toString("utf-8"));
-  } catch (error) {
+  } catch (_error) {
     throw new Error("Invalid signature format");
   }
 }

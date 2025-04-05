@@ -11,7 +11,7 @@ declare module "express" {
   interface Request {
     session?: {
       id: string;
-      [key: string]: any;
+      [key: string]: unknown;
     };
   }
 }
@@ -180,7 +180,7 @@ export function csrfToken(options: CsrfMiddlewareOptions) {
     res.cookie(
       mergedOptions.cookieName!,
       token,
-      mergedOptions.cookieOptions as Record<string, any>,
+      mergedOptions.cookieOptions as Record<string, unknown>,
     );
 
     // Make token available in templates

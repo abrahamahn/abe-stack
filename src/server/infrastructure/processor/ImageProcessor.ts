@@ -246,7 +246,8 @@ export class ImageProcessor {
     if (image) {
       try {
         // Close any open input file handles
-        (image as any).options.input = null;
+        // Use unknown for internal properties not exposed in Sharp types
+        (image as unknown as { options: { input: null } }).options.input = null;
 
         // This helps release internal buffers
         if (typeof image.destroy === "function") {

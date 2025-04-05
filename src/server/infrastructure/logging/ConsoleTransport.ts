@@ -10,10 +10,10 @@ import {
  * @param indent Optional indentation
  * @returns JSON string or fallback string if circular references exist
  */
-function safeStringify(obj: any, indent?: number): string {
+function safeStringify(obj: unknown, indent?: number): string {
   try {
     // Handle undefined and functions specifically
-    const replacer = (_key: string, value: any) => {
+    const replacer = (_key: string, value: unknown): unknown => {
       if (typeof value === "undefined") {
         return "[undefined]";
       }
@@ -27,7 +27,7 @@ function safeStringify(obj: any, indent?: number): string {
   } catch (error) {
     // Likely a circular reference, fallback to a simple representation
     if (error instanceof Error && error.message.includes("circular")) {
-      return `[Object with circular references - ${typeof obj === "object" ? Object.keys(obj).join(", ") : typeof obj}]`;
+      return `[Object with circular references - ${typeof obj === "object" && obj !== null ? Object.keys(obj).join(", ") : typeof obj}]`;
     }
     return `[Object that couldn't be serialized: ${error instanceof Error ? error.message : String(error)}]`;
   }
@@ -38,13 +38,13 @@ function safeStringify(obj: any, indent?: number): string {
  * @param error Error object with message and optional stack
  * @returns Formatted error string
  */
-function formatError(error: Record<string, any>): string {
+function formatError(error: Record<string, unknown>): string {
   if (!error) return "[No error details]";
 
   let result = "";
 
   // Show error message prominently
-  if (error.message) {
+  if (error.message && typeof error.message === "string") {
     result += `\x1b[1;31m${error.message}\x1b[0m`;
 
     // Add error code if present
@@ -55,6 +55,7 @@ function formatError(error: Record<string, any>): string {
     // Add error name if different from "Error" and not already in the message
     if (
       error.name &&
+      typeof error.name === "string" &&
       error.name !== "Error" &&
       !error.message.includes(error.name)
     ) {
@@ -71,7 +72,7 @@ function formatError(error: Record<string, any>): string {
         acc[key] = value;
         return acc;
       },
-      {} as Record<string, any>,
+      {} as Record<string, unknown>,
     );
 
   // Add additional properties if any exist
@@ -99,7 +100,7 @@ function formatError(error: Record<string, any>): string {
   }
 
   // Format stack trace if available
-  if (error.stack) {
+  if (error.stack && typeof error.stack === "string") {
     // Clean up the stack trace
     const stackLines = error.stack
       .split("\n")
