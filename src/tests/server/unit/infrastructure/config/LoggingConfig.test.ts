@@ -1,19 +1,18 @@
 import { describe, it, expect } from "vitest";
 
-import { LoggingConfig } from "@infrastructure/config";
 import { LogLevel } from "@infrastructure/logging";
+
+import { LoggingConfigService } from "@/server/infrastructure/config/domain/LoggingConfig";
 
 describe("LoggingConfig", () => {
   it("should be defined", () => {
-    expect(LoggingConfig).toBeDefined();
+    expect(LoggingConfigService).toBeDefined();
   });
 
-  describe("LogLevel", () => {
-    it("should have defined log levels", () => {
-      expect(LogLevel.DEBUG).toBeDefined();
-      expect(LogLevel.INFO).toBeDefined();
-      expect(LogLevel.WARN).toBeDefined();
-      expect(LogLevel.ERROR).toBeDefined();
-    });
+  it("LogLevel > should have defined log levels", () => {
+    expect(LogLevel.DEBUG).toBeDefined();
+    expect(LogLevel.INFO).toBeDefined();
+    expect(LogLevel.WARN).toBeDefined();
+    expect(LogLevel.ERROR).toBeDefined();
   });
 });

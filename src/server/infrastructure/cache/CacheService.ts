@@ -44,7 +44,7 @@ export class CacheService implements ICacheService {
   private cleanupTimer: NodeJS.Timeout | null = null; // Store cleanup timer reference
 
   constructor(
-    @inject(TYPES.LoggerService) private readonly logger: ILoggerService,
+    @inject(TYPES.LoggerService) private readonly logger: ILoggerService
   ) {}
 
   /**
@@ -120,21 +120,15 @@ export class CacheService implements ICacheService {
     if (ttl !== undefined) {
       if (Number.isNaN(ttl) || ttl < 0 || !Number.isFinite(ttl)) {
         throw new Error(
-          `Invalid TTL value: ${ttl}. TTL must be a positive finite number.`,
+          `Invalid TTL value: ${ttl}. TTL must be a positive finite number.`
         );
       }
     }
 
-    // Validate key
-    if (
-      key === null ||
-      key === undefined ||
-      key === "" ||
-      key === "null" ||
-      key === "undefined"
-    ) {
+    // Validate key - only reject actual null/undefined/empty, not string literals
+    if (key === null || key === undefined || key === "") {
       throw new Error(
-        "Cache key cannot be null, undefined, or an empty string",
+        "Cache key cannot be null, undefined, or an empty string"
       );
     }
 
@@ -204,13 +198,13 @@ export class CacheService implements ICacheService {
    */
   public async setMultiple<T>(
     entries: Record<string, T>,
-    ttl?: number,
+    ttl?: number
   ): Promise<boolean> {
     // Validate TTL once for all entries
     if (ttl !== undefined) {
       if (Number.isNaN(ttl) || ttl < 0 || !Number.isFinite(ttl)) {
         throw new Error(
-          `Invalid TTL value: ${ttl}. TTL must be a positive finite number.`,
+          `Invalid TTL value: ${ttl}. TTL must be a positive finite number.`
         );
       }
     }
@@ -219,15 +213,9 @@ export class CacheService implements ICacheService {
 
     // Batch operation instead of multiple async calls
     for (const key in entries) {
-      if (
-        key === null ||
-        key === undefined ||
-        key === "" ||
-        key === "null" ||
-        key === "undefined"
-      ) {
+      if (key === null || key === undefined || key === "") {
         throw new Error(
-          "Cache key cannot be null, undefined, or an empty string",
+          "Cache key cannot be null, undefined, or an empty string"
         );
       }
 
@@ -336,7 +324,7 @@ export class CacheService implements ICacheService {
    */
   public memoize<T extends (...args: unknown[]) => Promise<unknown>>(
     fn: T,
-    options: MemoizeOptions<Awaited<ReturnType<T>>> = {},
+    options: MemoizeOptions<Awaited<ReturnType<T>>> = {}
   ): T {
     return (async (...args: Parameters<T>): Promise<ReturnType<T>> => {
       // Generate cache key
@@ -423,7 +411,7 @@ export class CacheService implements ICacheService {
       hitRatio:
         this.stats.hits + this.stats.misses > 0
           ? Math.round(
-              (this.stats.hits / (this.stats.hits + this.stats.misses)) * 100,
+              (this.stats.hits / (this.stats.hits + this.stats.misses)) * 100
             ) / 100
           : 0,
     };

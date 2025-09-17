@@ -1,5 +1,0 @@
-# Run lint-staged to check files that are being committed
-npm run lint:staged
-
-# Run type checking on staged files
-npm run type-check

@@ -48,7 +48,7 @@ const DEFAULT_TRANSACTION_OPTIONS: Required<TransactionOptions> = {
 
       // Also retry based on error message patterns
       return /deadlock|serialize|timeout|connection|retry|temporarily unavailable/i.test(
-        error.message,
+        error.message
       );
     }
     return false;
@@ -79,7 +79,7 @@ export class DatabaseServer implements IDatabaseServer {
 
   constructor(
     @inject(TYPES.LoggerService) loggerService: ILoggerService,
-    @inject(TYPES.DatabaseConfig) configProvider: DatabaseConfigProvider,
+    @inject(TYPES.DatabaseConfig) configProvider: DatabaseConfigProvider
   ) {
     this.logger = loggerService.createLogger("DatabaseServer");
     this.databaseConfig = configProvider.getConfig();
@@ -116,7 +116,6 @@ export class DatabaseServer implements IDatabaseServer {
         max: this.databaseConfig.maxConnections,
         idleTimeoutMillis: this.databaseConfig.idleTimeout,
         connectionTimeoutMillis: this.databaseConfig.connectionTimeout,
-        statement_timeout: this.databaseConfig.statementTimeout,
         ssl: this.databaseConfig.ssl,
       });
 
@@ -234,7 +233,32 @@ export class DatabaseServer implements IDatabaseServer {
     }
 
     try {
-      return await this.pool.connect();
+      // Acquire client from pool
+      const startTime = Date.now();
+      let client;
+      try {
+        // Add timeout protection for client acquisition
+        const clientPromise = this.pool.connect();
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => {
+            reject(
+              new DatabaseError(
+                `Client acquisition timeout after ${this.databaseConfig.connectionTimeout}ms`
+              )
+            );
+          }, this.databaseConfig.connectionTimeout);
+        });
+
+        client = await Promise.race([clientPromise, timeoutPromise]);
+        const acquireTime = Date.now() - startTime;
+        this.metrics.acquireCount++;
+        this.metrics.acquireTimes.push(acquireTime);
+      } catch (error) {
+        this.metrics.acquireFailCount++;
+        throw this.formatError(error, "Failed to acquire database client");
+      }
+
+      return client;
     } catch (error) {
       return this.handleError(error, "Failed to acquire client from pool");
     }
@@ -246,7 +270,7 @@ export class DatabaseServer implements IDatabaseServer {
   async query<T extends QueryResultRow = QueryResultRow>(
     text: string,
     params: unknown[] = [],
-    options: QueryOptions = {},
+    options: QueryOptions = {}
   ): Promise<QueryResult<T>> {
     try {
       await this.ensureInitialized();
@@ -273,7 +297,20 @@ export class DatabaseServer implements IDatabaseServer {
           }
 
           const query = { text, values: params };
-          const result = await this.pool.query<T>(query);
+
+          // Add timeout protection using Promise.race
+          const queryPromise = this.pool.query<T>(query);
+          const timeoutPromise = new Promise<never>((_, reject) => {
+            setTimeout(() => {
+              reject(
+                new DatabaseError(
+                  `Query timeout after ${this.databaseConfig.statementTimeout}ms: ${text.substring(0, 100)}...`
+                )
+              );
+            }, this.databaseConfig.statementTimeout);
+          });
+
+          const result = await Promise.race([queryPromise, timeoutPromise]);
 
           // Track successful query
           const queryTime = Date.now() - startTime;
@@ -304,7 +341,7 @@ export class DatabaseServer implements IDatabaseServer {
             if (shouldRetry) {
               this.logger.warn(
                 `Database query failed, retrying (${attempt}/${maxRetries})`,
-                { error, query: text, params },
+                { error, query: text, params }
               );
             } else {
               this.logger.error("Database query failed", {
@@ -326,7 +363,7 @@ export class DatabaseServer implements IDatabaseServer {
           // Delay before retrying
           const delay = Math.min(
             100 * Math.pow(1.5, attempt - 1),
-            5000, // max 5 seconds
+            5000 // max 5 seconds
           );
           await this.delay(delay);
         }
@@ -335,7 +372,7 @@ export class DatabaseServer implements IDatabaseServer {
       // Throw error at the end - this should be unreachable
       // This return is needed to satisfy TypeScript's control flow analysis
       throw new DatabaseError(
-        `Query failed after ${maxAttempts} attempts: ${text}`,
+        `Query failed after ${maxAttempts} attempts: ${text}`
       );
     } catch (error) {
       throw this.formatError(error, `Query failed: ${text}`);
@@ -373,7 +410,7 @@ export class DatabaseServer implements IDatabaseServer {
 
       // Retry based on error message patterns - case insensitive to catch all variants
       return /connection|deadlock|timeout|serialize|retry|temporarily unavailable/i.test(
-        error.message,
+        error.message
       );
     }
     return false;
@@ -429,7 +466,7 @@ export class DatabaseServer implements IDatabaseServer {
    * @throws DatabaseError if client acquisition fails
    */
   async withClient<T>(
-    callback: (client: PoolClient) => Promise<T>,
+    callback: (client: PoolClient) => Promise<T>
   ): Promise<T> {
     await this.ensureInitialized(true);
 
@@ -443,7 +480,19 @@ export class DatabaseServer implements IDatabaseServer {
       // Acquire client from pool
       const startTime = Date.now();
       try {
-        client = await this.pool.connect();
+        // Add timeout protection for client acquisition
+        const clientPromise = this.pool.connect();
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => {
+            reject(
+              new DatabaseError(
+                `Client acquisition timeout after ${this.databaseConfig.connectionTimeout}ms`
+              )
+            );
+          }, this.databaseConfig.connectionTimeout);
+        });
+
+        client = await Promise.race([clientPromise, timeoutPromise]);
         const acquireTime = Date.now() - startTime;
         this.metrics.acquireCount++;
         this.metrics.acquireTimes.push(acquireTime);
@@ -480,7 +529,7 @@ export class DatabaseServer implements IDatabaseServer {
    */
   async withTransaction<T>(
     callback: (client: PoolClient) => Promise<T>,
-    options?: TransactionOptions,
+    options?: TransactionOptions
   ): Promise<T> {
     const opts = this.mergeTransactionOptions(options);
     let attemptCount = 0;
@@ -513,7 +562,7 @@ export class DatabaseServer implements IDatabaseServer {
                   : undefined,
               attemptCount,
               maxRetries: opts.maxRetries,
-            },
+            }
           );
         } catch (logError) {
           // Silently ignore any logger errors
@@ -530,7 +579,7 @@ export class DatabaseServer implements IDatabaseServer {
     // This should never be reached, but TypeScript needs it
     throw this.formatError(
       lastError || new Error("Transaction failed after all retries"),
-      "Transaction failed",
+      "Transaction failed"
     );
   }
 
@@ -544,7 +593,7 @@ export class DatabaseServer implements IDatabaseServer {
    */
   private async executeTransaction<T>(
     callback: (client: PoolClient) => Promise<T>,
-    options: Required<TransactionOptions>,
+    options: Required<TransactionOptions>
   ): Promise<T> {
     return this.withClient(async (client) => {
       try {
@@ -569,8 +618,8 @@ export class DatabaseServer implements IDatabaseServer {
                 new Promise<never>((_, reject) =>
                   setTimeout(
                     () => reject(new DatabaseError("Transaction timeout")),
-                    options.timeout,
-                  ),
+                    options.timeout
+                  )
                 ),
               ]
             : []),
@@ -707,7 +756,7 @@ export class DatabaseServer implements IDatabaseServer {
       this.metrics.queryTimes.length > this.databaseConfig.metricsMaxSamples
     ) {
       this.metrics.queryTimes = this.metrics.queryTimes.slice(
-        -this.databaseConfig.metricsMaxSamples,
+        -this.databaseConfig.metricsMaxSamples
       );
     }
 
@@ -716,7 +765,7 @@ export class DatabaseServer implements IDatabaseServer {
       this.metrics.acquireTimes.length > this.databaseConfig.metricsMaxSamples
     ) {
       this.metrics.acquireTimes = this.metrics.acquireTimes.slice(
-        -this.databaseConfig.metricsMaxSamples,
+        -this.databaseConfig.metricsMaxSamples
       );
     }
 
@@ -725,7 +774,7 @@ export class DatabaseServer implements IDatabaseServer {
       if (times.length > this.databaseConfig.metricsMaxSamples) {
         this.metrics.taggedQueryTimes.set(
           tag,
-          times.slice(-this.databaseConfig.metricsMaxSamples),
+          times.slice(-this.databaseConfig.metricsMaxSamples)
         );
       }
     });
@@ -795,7 +844,7 @@ export class DatabaseServer implements IDatabaseServer {
    * Merge provided transaction options with defaults
    */
   private mergeTransactionOptions(
-    options?: TransactionOptions,
+    options?: TransactionOptions
   ): Required<TransactionOptions> {
     if (!options) return DEFAULT_TRANSACTION_OPTIONS;
 
@@ -813,7 +862,7 @@ export class DatabaseServer implements IDatabaseServer {
     const match = sql
       .trim()
       .match(
-        /^(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|TRUNCATE)\s+(?:INTO|FROM|TABLE)?\s+(?:IF\s+EXISTS\s+)?(?:([a-zA-Z0-9_"]+)\.)?([a-zA-Z0-9_"]+)/i,
+        /^(SELECT|INSERT|UPDATE|DELETE|CREATE|ALTER|DROP|TRUNCATE)\s+(?:INTO|FROM|TABLE)?\s+(?:IF\s+EXISTS\s+)?(?:([a-zA-Z0-9_"]+)\.)?([a-zA-Z0-9_"]+)/i
       );
 
     if (match) {
@@ -843,7 +892,7 @@ export class DatabaseServer implements IDatabaseServer {
   private validateQueryParams(params: unknown[]): void {
     if (!Array.isArray(params)) {
       throw new TypeError(
-        `Query parameters must be an array, got ${typeof params}`,
+        `Query parameters must be an array, got ${typeof params}`
       );
     }
 
@@ -851,7 +900,7 @@ export class DatabaseServer implements IDatabaseServer {
     for (let i = 0; i < params.length; i++) {
       if (params[i] === undefined) {
         throw new TypeError(
-          `Query parameter at index ${i} is undefined. Use null for NULL values in SQL.`,
+          `Query parameter at index ${i} is undefined. Use null for NULL values in SQL.`
         );
       }
     }
@@ -928,7 +977,7 @@ class QueryBuilderImpl implements QueryBuilder {
    */
   groupBy(columns: string | string[]): QueryBuilder {
     this.groupByCols = this.groupByCols.concat(
-      Array.isArray(columns) ? columns : [columns],
+      Array.isArray(columns) ? columns : [columns]
     );
     return this;
   }
@@ -966,7 +1015,7 @@ class QueryBuilderImpl implements QueryBuilder {
    * @param options Query options
    */
   async execute<T extends QueryResultRow = QueryResultRow>(
-    options: QueryOptions = {},
+    options: QueryOptions = {}
   ): Promise<QueryResult<T>> {
     const { sql, params } = this.buildQuery();
     return this.db.query<T>(sql, params, options);
@@ -977,7 +1026,7 @@ class QueryBuilderImpl implements QueryBuilder {
    * @param options Query options
    */
   async getOne<T extends QueryResultRow = QueryResultRow>(
-    options: QueryOptions = {},
+    options: QueryOptions = {}
   ): Promise<T | null> {
     const result = await this.limit(1).execute<T>(options);
     return result.rows.length > 0 ? result.rows[0] : null;
@@ -988,7 +1037,7 @@ class QueryBuilderImpl implements QueryBuilder {
    * @param options Query options
    */
   async getMany<T extends QueryResultRow = QueryResultRow>(
-    options: QueryOptions = {},
+    options: QueryOptions = {}
   ): Promise<T[]> {
     const result = await this.execute<T>(options);
     return result.rows;
@@ -1016,7 +1065,7 @@ class QueryBuilderImpl implements QueryBuilder {
       const result = await this.db.query<{ count: string }>(
         sql,
         params,
-        options,
+        options
       );
       return parseInt(result.rows[0]?.count || "0", 10);
     } finally {
@@ -1057,7 +1106,7 @@ class QueryBuilderImpl implements QueryBuilder {
         // Update the condition to use the correct parameter index
         const updatedCondition = condition.replace(
           /\$\d+/g,
-          () => `$${paramCounter++}`,
+          () => `$${paramCounter++}`
         );
         return updatedCondition;
       });
@@ -1104,7 +1153,7 @@ export class DatabaseError extends Error {
 
   constructor(
     message: string,
-    options?: { code?: string; query?: string; params?: unknown[] },
+    options?: { code?: string; query?: string; params?: unknown[] }
   ) {
     super(message);
     this.name = "DatabaseError";

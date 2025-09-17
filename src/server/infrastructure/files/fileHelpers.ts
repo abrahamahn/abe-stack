@@ -1,6 +1,6 @@
 import { ServerConfig } from "@server/infrastructure/config/ConfigService";
 
-import { generateSignature } from "../security/signatureHelpers";
+import { generateSignature } from "@/server/infrastructure/security";
 
 export type FileSignatureData = {
   method: "get" | "put";
@@ -36,7 +36,7 @@ export function normalizeFilename(filename: string): string {
 
 export function getSignedFileUrl(
   environment: { config: ServerConfig },
-  data: FileSignatureData,
+  data: FileSignatureData
 ): URL {
   const secretKey = environment.config.signatureSecret;
   const { id, filename, expirationMs } = data;
@@ -59,11 +59,11 @@ export function getSignedFileUrl(
       includeNonce: true, // Ensure nonce is included for unique signatures
       maxAge: 24 * 60 * 60 * 1000, // 24 hours max age for signatures
     },
-    true,
+    true
   ) as string;
 
   const url = new URL(
-    `${environment.config.baseUrl}/uploads/${id}/${normalizedFilename}`,
+    `${environment.config.baseUrl}/uploads/${id}/${normalizedFilename}`
   );
   url.searchParams.set("expiration", expirationMs.toString());
   url.searchParams.set("signature", signature);

@@ -1,25 +1,19 @@
 import { Response, Request } from "express";
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 
+// Add CsrfOptions interface definition
+
 import {
   ServerEnvironment,
   ServerConfig,
 } from "@/server/infrastructure/config/ConfigService";
-import {
-  getPasswordHash,
-  setAuthCookies,
-  getAuthTokenCookie,
-  clearAuthCookies,
-  validatePasswordStrength,
-} from "@/server/infrastructure/security/authHelpers";
 import {
   createSignature,
   verifySignature as verifySecuritySignature,
   SignatureOptions as StringSignatureOptions,
   generateCsrfToken,
   verifyCsrfToken,
-  CsrfOptions,
-} from "@/server/infrastructure/security/securityHelpers";
+} from "@/server/infrastructure/security";
 import {
   generateSignature,
   verifySignature,
@@ -27,7 +21,15 @@ import {
   deserializeSignature,
   SecuritySignature,
   SignatureOptions as ObjectSignatureOptions,
-} from "@/server/infrastructure/security/signatureHelpers";
+} from "@/server/infrastructure/security";
+import { CSRFOptions } from "@/server/infrastructure/security/csrfUtils";
+import {
+  getPasswordHash,
+  setAuthCookies,
+  getAuthTokenCookie,
+  clearAuthCookies,
+  validatePasswordStrength,
+} from "@/server/modules/core/auth/helpers/auth.helpers";
 
 describe("Security Infrastructure Integration Tests", () => {
   describe("Authentication Helpers", () => {
@@ -102,7 +104,7 @@ describe("Security Infrastructure Integration Tests", () => {
           requireLowercase: false,
           requireNumbers: false,
           requireSpecialChars: false,
-        }).valid,
+        }).valid
       ).toBe(false);
 
       expect(
@@ -112,7 +114,7 @@ describe("Security Infrastructure Integration Tests", () => {
           requireLowercase: false,
           requireNumbers: false,
           requireSpecialChars: false,
-        }).valid,
+        }).valid
       ).toBe(false);
 
       expect(
@@ -122,7 +124,7 @@ describe("Security Infrastructure Integration Tests", () => {
           requireLowercase: true,
           requireNumbers: false,
           requireSpecialChars: false,
-        }).valid,
+        }).valid
       ).toBe(false);
 
       expect(
@@ -132,7 +134,7 @@ describe("Security Infrastructure Integration Tests", () => {
           requireLowercase: false,
           requireNumbers: true,
           requireSpecialChars: false,
-        }).valid,
+        }).valid
       ).toBe(false);
 
       expect(
@@ -142,7 +144,7 @@ describe("Security Infrastructure Integration Tests", () => {
           requireLowercase: false,
           requireNumbers: false,
           requireSpecialChars: true,
-        }).valid,
+        }).valid
       ).toBe(false);
     });
 
@@ -154,7 +156,7 @@ describe("Security Infrastructure Integration Tests", () => {
       setAuthCookies(
         mockEnvironment as ServerEnvironment,
         { authToken, expiration, userId },
-        mockResponse as Response,
+        mockResponse as Response
       );
 
       expect(mockResponse.cookie).toHaveBeenCalledWith(
@@ -165,7 +167,7 @@ describe("Security Infrastructure Integration Tests", () => {
           httpOnly: true,
           expires: expiration,
           sameSite: "strict",
-        }),
+        })
       );
 
       expect(mockResponse.cookie).toHaveBeenCalledWith(
@@ -176,7 +178,7 @@ describe("Security Infrastructure Integration Tests", () => {
           httpOnly: false,
           expires: expiration,
           sameSite: "strict",
-        }),
+        })
       );
     });
 
@@ -195,7 +197,7 @@ describe("Security Infrastructure Integration Tests", () => {
       setAuthCookies(
         prodEnvironment as ServerEnvironment,
         { authToken, expiration, userId },
-        mockResponse as Response,
+        mockResponse as Response
       );
 
       expect(mockResponse.cookie).toHaveBeenCalledWith(
@@ -205,7 +207,7 @@ describe("Security Infrastructure Integration Tests", () => {
           secure: true,
           domain: "http://localhost:3000",
           sameSite: "strict",
-        }),
+        })
       );
     });
 
@@ -216,7 +218,7 @@ describe("Security Infrastructure Integration Tests", () => {
       const result = getAuthTokenCookie(
         mockRequest as Request & {
           cookies: { [key: string]: string | undefined };
-        },
+        }
       );
       expect(result).toBe(authToken);
     });
@@ -226,7 +228,7 @@ describe("Security Infrastructure Integration Tests", () => {
       const result = getAuthTokenCookie(
         mockRequest as Request & {
           cookies: { [key: string]: string | undefined };
-        },
+        }
       );
       expect(result).toBeUndefined();
     });
@@ -234,8 +236,18 @@ describe("Security Infrastructure Integration Tests", () => {
     it("should clear authentication cookies", () => {
       clearAuthCookies(mockResponse as Response);
 
-      expect(mockResponse.clearCookie).toHaveBeenCalledWith("authToken");
-      expect(mockResponse.clearCookie).toHaveBeenCalledWith("userId");
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith("authToken", {
+        secure: false,
+        httpOnly: true,
+        sameSite: "strict",
+        domain: undefined,
+      });
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith("userId", {
+        secure: false,
+        httpOnly: false,
+        sameSite: "strict",
+        domain: undefined,
+      });
     });
   });
 
@@ -271,13 +283,13 @@ describe("Security Infrastructure Integration Tests", () => {
         secretKey,
         testData,
         options,
-        true,
+        true
       ) as string;
       const signature2 = generateSignature(
         secretKey,
         testData,
         options,
-        true,
+        true
       ) as string;
 
       expect(signature1).toBeDefined();
@@ -311,7 +323,7 @@ describe("Security Infrastructure Integration Tests", () => {
         secretKey,
         testData,
         options,
-        true,
+        true
       ) as string;
 
       // Verify with the same options
@@ -329,14 +341,14 @@ describe("Security Infrastructure Integration Tests", () => {
         secretKey,
         testData,
         options,
-        true,
+        true
       ) as string;
       const modifiedData = { ...testData, action: "modified" };
       const isValid = verifySignature(
         secretKey,
         signature,
         modifiedData,
-        options,
+        options
       );
       expect(isValid).toBe(false);
     });
@@ -351,7 +363,7 @@ describe("Security Infrastructure Integration Tests", () => {
         secretKey,
         {},
         options,
-        true,
+        true
       ) as string;
       const isValid = verifySignature(secretKey, signature, {}, options);
       expect(isValid).toBe(true);
@@ -375,13 +387,13 @@ describe("Security Infrastructure Integration Tests", () => {
         secretKey,
         nestedData,
         options,
-        true,
+        true
       ) as string;
       const isValid = verifySignature(
         secretKey,
         signature,
         nestedData,
-        options,
+        options
       );
       expect(isValid).toBe(true);
     });
@@ -389,7 +401,7 @@ describe("Security Infrastructure Integration Tests", () => {
     it("should serialize and deserialize signatures correctly", () => {
       const signature = generateSignature(
         secretKey,
-        testData,
+        testData
       ) as SecuritySignature;
       const serialized = serializeSignature(signature);
 
@@ -416,12 +428,12 @@ describe("Security Infrastructure Integration Tests", () => {
       const signature = generateSignature(
         secretKey,
         testData,
-        options,
+        options
       ) as SecuritySignature;
 
       // Verify with current time (should pass)
       expect(verifySignature(secretKey, signature, testData, options)).toBe(
-        true,
+        true
       );
 
       // Fast-forward time past expiration
@@ -429,7 +441,7 @@ describe("Security Infrastructure Integration Tests", () => {
 
       // Verify again (should fail due to expiration)
       expect(verifySignature(secretKey, signature, testData, options)).toBe(
-        false,
+        false
       );
     });
 
@@ -443,7 +455,7 @@ describe("Security Infrastructure Integration Tests", () => {
       const sigObj = generateSignature(
         secretKey,
         testData,
-        withNonceOptions,
+        withNonceOptions
       ) as SecuritySignature;
       expect(sigObj.nonce).toBeDefined();
       expect(typeof sigObj.nonce).toBe("string");
@@ -460,7 +472,7 @@ describe("Security Infrastructure Integration Tests", () => {
       const sigObj = generateSignature(
         secretKey,
         testData,
-        withoutNonceOptions,
+        withoutNonceOptions
       ) as SecuritySignature;
       expect(sigObj.nonce).toBeUndefined();
     });
@@ -469,7 +481,7 @@ describe("Security Infrastructure Integration Tests", () => {
       // Create a signature object and test serialization/deserialization
       const sigObj = generateSignature(
         secretKey,
-        testData,
+        testData
       ) as SecuritySignature;
       const serialized = serializeSignature(sigObj);
       expect(typeof serialized).toBe("string");
@@ -490,18 +502,18 @@ describe("Security Infrastructure Integration Tests", () => {
         secretKey,
         testData,
         options,
-        true,
+        true
       ) as string;
 
       // Verification should work with same options
       expect(verifySignature(secretKey, rawSignature, testData, options)).toBe(
-        true,
+        true
       );
 
       // Tampering with data should fail verification
       const tamperedData = { ...testData, id: "456" };
       expect(
-        verifySignature(secretKey, rawSignature, tamperedData, options),
+        verifySignature(secretKey, rawSignature, tamperedData, options)
       ).toBe(false);
     });
 
@@ -511,7 +523,7 @@ describe("Security Infrastructure Integration Tests", () => {
 
       // Valid base64 but invalid structure
       const invalidBase64 = Buffer.from('{"not":"valid-signature"}').toString(
-        "base64",
+        "base64"
       );
       expect(() => {
         const result = deserializeSignature(invalidBase64);
@@ -520,10 +532,10 @@ describe("Security Infrastructure Integration Tests", () => {
 
       // Verification should gracefully handle errors
       expect(verifySignature(secretKey, "invalid-signature", testData)).toBe(
-        false,
+        false
       );
       expect(
-        verifySignature(secretKey, { signature: "invalid" }, testData),
+        verifySignature(secretKey, { signature: "invalid" }, testData)
       ).toBe(false);
     });
   });
@@ -642,7 +654,7 @@ describe("Security Infrastructure Integration Tests", () => {
           signature: signature1,
           secretKey,
           options: options1,
-        }),
+        })
       ).toBe(true);
 
       // Test sha384 with base64 output
@@ -667,7 +679,7 @@ describe("Security Infrastructure Integration Tests", () => {
           signature: signature2,
           secretKey,
           options: options2,
-        }),
+        })
       ).toBe(true);
 
       // Verification should fail with mismatched options
@@ -677,7 +689,7 @@ describe("Security Infrastructure Integration Tests", () => {
           signature: signature2,
           secretKey,
           options: options1, // Using sha256/hex options with sha384/base64 signature
-        }),
+        })
       ).toBe(false);
     });
 
@@ -700,7 +712,7 @@ describe("Security Infrastructure Integration Tests", () => {
           signature,
           secretKey,
           options,
-        }),
+        })
       ).toBe(true);
 
       // Fast-forward time past expiration
@@ -720,7 +732,7 @@ describe("Security Infrastructure Integration Tests", () => {
           signature,
           secretKey,
           options,
-        }),
+        })
       ).toBe(false);
 
       // The new signature should be valid
@@ -730,7 +742,7 @@ describe("Security Infrastructure Integration Tests", () => {
           signature: newSignature,
           secretKey,
           options,
-        }),
+        })
       ).toBe(true);
     });
 
@@ -743,7 +755,7 @@ describe("Security Infrastructure Integration Tests", () => {
           data: dataWithNull,
           signature: sigWithNull,
           secretKey,
-        }),
+        })
       ).toBe(true);
 
       // Test nested objects
@@ -761,7 +773,7 @@ describe("Security Infrastructure Integration Tests", () => {
           data: nestedData,
           signature: nestedSig,
           secretKey,
-        }),
+        })
       ).toBe(true);
 
       // Changing nested value should invalidate
@@ -778,7 +790,7 @@ describe("Security Infrastructure Integration Tests", () => {
           data: modifiedNested,
           signature: nestedSig,
           secretKey,
-        }),
+        })
       ).toBe(false);
     });
   });
@@ -786,7 +798,7 @@ describe("Security Infrastructure Integration Tests", () => {
   describe("CSRF token functionality", () => {
     const testKey = Buffer.from(
       "testsecretkeythatislongenoughforcrypto",
-      "utf-8",
+      "utf-8"
     );
     const testSessionId = "user-session-12345";
 
@@ -822,7 +834,7 @@ describe("Security Infrastructure Integration Tests", () => {
 
     it("should respect token expiration", () => {
       // Generate a token with short expiry
-      const options: CsrfOptions = {
+      const options: CSRFOptions = {
         expiryMs: 1, // 1ms expiry
       };
       const token = generateCsrfToken(testSessionId, testKey, options);
@@ -838,7 +850,7 @@ describe("Security Infrastructure Integration Tests", () => {
 
     it("should validate user agent if enabled", () => {
       const userAgent = "Mozilla/5.0 Test Browser";
-      const options: CsrfOptions = {
+      const options: CSRFOptions = {
         includeUserAgent: true,
       };
 
@@ -853,7 +865,7 @@ describe("Security Infrastructure Integration Tests", () => {
         testSessionId,
         testKey,
         options,
-        { userAgent },
+        { userAgent }
       );
       expect(validResult).toBe(true);
 
@@ -863,14 +875,14 @@ describe("Security Infrastructure Integration Tests", () => {
         testSessionId,
         testKey,
         options,
-        { userAgent: "Different Browser" },
+        { userAgent: "Different Browser" }
       );
       expect(invalidResult).toBe(false);
     });
 
     it("should validate origin if enabled", () => {
       const origin = "https://example.com";
-      const options: CsrfOptions = {
+      const options: CSRFOptions = {
         includeOrigin: true,
       };
 
@@ -885,7 +897,7 @@ describe("Security Infrastructure Integration Tests", () => {
         testSessionId,
         testKey,
         options,
-        { origin },
+        { origin }
       );
       expect(validResult).toBe(true);
 
@@ -895,7 +907,7 @@ describe("Security Infrastructure Integration Tests", () => {
         testSessionId,
         testKey,
         options,
-        { origin: "https://evil-site.com" },
+        { origin: "https://evil-site.com" }
       );
       expect(invalidResult).toBe(false);
     });
@@ -913,7 +925,7 @@ describe("Security Infrastructure Integration Tests", () => {
 
       // Re-encode
       const tamperedToken = Buffer.from(JSON.stringify(parsed)).toString(
-        "base64",
+        "base64"
       );
 
       // Verify the tampered token

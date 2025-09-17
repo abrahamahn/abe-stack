@@ -34,6 +34,13 @@ This module serves as the data persistence layer for the application, ensuring r
 - **`migrationAuth`**: Authentication for migration operations
 - Supports versioned migrations with up/down capabilities
 
+### 4️⃣ Query Builder
+
+- **`QueryBuilder`**: Fluent API for constructing complex SQL queries
+- Supports SELECT, WHERE, JOIN, GROUP BY, ORDER BY, LIMIT, and OFFSET operations
+- Type-safe query construction with parameter binding
+- Methods for executing queries: `execute()`, `getOne()`, `getMany()`, `count()`
+
 ## 🛠️ Usage Instructions
 
 ### Basic Query Execution
@@ -74,7 +81,7 @@ class PaymentService {
     amount: number,
   ): Promise<void> {
     // Execute operations in a transaction
-    await this.db.transaction(async (client) => {
+    await this.db.withTransaction(async (client) => {
       // Deduct from source account
       await client.query(
         "UPDATE accounts SET balance = balance - $1 WHERE id = $2",
@@ -93,6 +100,45 @@ class PaymentService {
         [fromAccount, toAccount, amount],
       );
     });
+  }
+}
+```
+
+### Query Builder Usage
+
+```typescript
+import { inject, injectable } from "inversify";
+import { IDatabaseServer } from "@/server/infrastructure/database";
+import { TYPES } from "@/server/infrastructure/di/types";
+
+@injectable()
+class ProductRepository {
+  constructor(@inject(TYPES.DatabaseServer) private db: IDatabaseServer) {}
+
+  async findActiveProducts(categoryId: string, limit: number): Promise<Product[]> {
+    // Use query builder for complex queries
+    const products = await this.db
+      .createQueryBuilder('products')
+      .select(['id', 'name', 'price', 'description'])
+      .join('categories', 'categories.id = products.category_id')
+      .where('products.active = $1 AND categories.id = $2', true, categoryId)
+      .orderBy('products.created_at', 'DESC')
+      .limit(limit)
+      .getMany<Product>();
+
+    return products;
+  }
+
+  async getProductCount(categoryId?: string): Promise<number> {
+    const builder = this.db
+      .createQueryBuilder('products')
+      .where('active = $1', true);
+
+    if (categoryId) {
+      builder.where('category_id = $1', categoryId);
+    }
+
+    return await builder.count();
   }
 }
 ```

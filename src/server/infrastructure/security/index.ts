@@ -1,45 +1,97 @@
-export * from "./authHelpers";
+/**
+ * Security Infrastructure Index
+ *
+ * This file exports all security-related components to simplify imports.
+ */
 
+// Token management
+export { TokenManager, DEFAULT_TOKEN_OPTIONS } from "./TokenManager";
+export type { TokenStorage } from "./TokenStorageService";
+export type { TokenBlacklist } from "./TokenBlacklistService";
+export { InMemoryTokenStorage } from "./InMemoryTokenStorage";
+export { InMemoryTokenBlacklist } from "./InMemoryTokenBlacklist";
+export { TokenType } from "./tokenTypes";
 export {
+  createTokenId,
+  revokeToken,
+  generateSecureToken,
+  hashToken,
+} from "./tokenUtils";
+
+// Authentication and authorization
+export { WebSocketAuthService } from "./WebSocketAuthService";
+export type { WebSocketAuthResult } from "./WebSocketAuthService";
+export {
+  encrypt,
+  decrypt,
+  generateEncryptionKey,
+  hashData,
+  createSignature as createEncryptionSignature,
+  verifySignature as verifyEncryptionSignature,
+} from "./encryptionUtils";
+export {
+  hashPassword,
+  verifyPassword,
+  generateRandomPassword,
+  validatePasswordStrength,
+  DEFAULT_PASSWORD_REQUIREMENTS,
+} from "./passwordUtils";
+export {
+  createSignature,
   generateSignature,
-  verifySignature as verifySignatureWithObject,
+  verifySignature,
+  parseSignature,
   serializeSignature,
   deserializeSignature,
 } from "./signatureHelpers";
 export type {
-  SignatureOptions as ObjectSignatureOptions,
   SecuritySignature,
+  SignatureOptions,
+  StringSignatureOptions,
+  ObjectSignatureOptions,
+  ParsedSignature,
 } from "./signatureHelpers";
-export { DEFAULT_SIGNATURE_OPTIONS as DEFAULT_OBJECT_SIGNATURE_OPTIONS } from "./signatureHelpers";
-
 export {
-  createSignature,
-  verifySignature as verifySignatureWithString,
-  generateCsrfToken,
-  verifyCsrfToken,
+  sanitizeInput,
+  generateSecureRandomString,
+  validateSafeUrl,
+  serialize as serializeObject,
 } from "./securityHelpers";
-export type {
-  SignatureOptions as StringSignatureOptions,
-  CsrfOptions,
-  CsrfPayload,
-} from "./securityHelpers";
+
+// Middleware
 export {
-  DEFAULT_SIGNATURE_OPTIONS as DEFAULT_STRING_SIGNATURE_OPTIONS,
-  DEFAULT_CSRF_OPTIONS,
-} from "./securityHelpers";
+  csrfProtection,
+  csrfToken,
+  SecurityMiddlewareService,
+} from "./middlewareUtils";
+export {
+  validateRequest,
+  validateQuery,
+  validateParams,
+  validateHeaders,
+} from "./validationMiddleware";
+export {
+  createRateLimiter as createRateLimiterMiddleware,
+  rateLimitMiddleware,
+} from "./rateLimitMiddleware";
 
-export { csrfToken, csrfProtection } from "./middleware/csrfMiddleware";
-export type { CsrfMiddlewareOptions } from "./middleware/csrfMiddleware";
-export { DEFAULT_CSRF_MIDDLEWARE_OPTIONS } from "./middleware/csrfMiddleware";
+// CSRF and CORS
+export { generateCsrfToken, verifyCsrfToken } from "./csrfUtils";
+export type { CorsOptions } from "./corsConfig";
+export {
+  validateOrigin,
+  corsWithAuthOptions,
+  createCorsMiddleware,
+} from "./corsConfig";
+export { CorsConfigService } from "./CorsConfigService";
 
-/**
- * Security utilities for robust application protection
- *
- * This module provides a set of tools for strengthening application security:
- *
- * - Authentication: Password hashing, validation, and cookie management
- * - Signatures: Multiple signature generation and verification approaches
- * - Request Protection: CSRF protection and security header utilities
- *
- * Usage examples are available in the tests.
- */
+// Cookies
+export {
+  CookieService,
+  setCookie,
+  getCookie,
+  clearCookie,
+  setAuthCookies,
+  getAuthTokenCookie,
+  clearAuthCookies,
+} from "./cookieUtils";

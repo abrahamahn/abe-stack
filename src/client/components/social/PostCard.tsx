@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { formatDate } from "@/server/shared/date/formatDate";
+import { formatDate } from "@/client/helpers/formatters";
 
 import { socialService } from "../../services/social";
 

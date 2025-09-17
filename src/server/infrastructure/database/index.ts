@@ -8,6 +8,6 @@ export { TransactionService } from "./TransactionService";
 export { IsolationLevel } from "./TransactionService";
 
 // Migration exports
-export * from "./migrationManager";
-export * from "./migrationConfig";
-export * from "./migrationAuth";
+export * from "./migrations/migrationManager";
+export * from "../config/domain/MigrationConfig";
+export * from "./migrations/migrationAuth";

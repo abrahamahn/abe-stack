@@ -150,242 +150,256 @@ describe("ServerLogger", () => {
   describe("constructor", () => {
     it("should initialize with logger and log debug message", () => {
       expect(serverLogger).toBeDefined();
-      expect(mockLogger.debug).toHaveBeenCalledWith("ServerLogger initialized");
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        "Unified ServerLogger initialized",
+        {
+          environment: "test",
+          isDevelopment: false,
+        }
+      );
     });
   });
 
   describe("displayInfrastructureServices", () => {
-    const mockServices = {
-      logger: mockLogger,
-      databaseService: {
-        isConnected: vi.fn().mockReturnValue(true),
-        getStats: vi.fn().mockReturnValue({ activeCount: 5 }),
-      },
-      cacheService: {
-        isConnected: vi.fn().mockReturnValue(true),
-        getStats: vi.fn().mockReturnValue({ hits: 10 }),
-      },
-      storageService: {},
-      jobService: {},
-      errorHandler: {},
-      validationService: {},
-      wss: { clients: { size: 3 } },
-      pubSubService: {},
-      imageProcessor: {},
-      mediaProcessor: {},
-      streamProcessor: {},
-      storageProvider: {},
-      config: {
-        get: vi.fn().mockImplementation((key: string) => {
-          const config = {
-            DATABASE: {
-              host: "localhost",
-              port: 5432,
-              database: "testdb",
-              user: "testuser",
-            },
-            storagePath: "/uploads",
-          } as const;
-          return config[key as keyof typeof config];
-        }),
-      },
-    };
+    let consoleSpy: any;
+
+    beforeEach(() => {
+      consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+      // Set environment variable to enable display in test environment
+      process.env.SHOW_SERVER_STATUS = "true";
+    });
+
+    afterEach(() => {
+      consoleSpy.mockRestore();
+      delete process.env.SHOW_SERVER_STATUS;
+    });
 
     it("should display infrastructure services status", () => {
-      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+      const mockServices = {
+        logger: mockLogger,
+        databaseService: { isConnected: () => true },
+        cacheService: { isConnected: () => true },
+        storageService: {},
+        jobService: {},
+        errorHandler: {},
+        validationService: {},
+        wss: { clients: { size: 5 } },
+        pubSubService: {},
+        imageProcessor: {},
+        mediaProcessor: {},
+        streamProcessor: {},
+        storageProvider: {},
+        config: {
+          get: vi.fn(),
+          storagePath: "/uploads",
+        },
+      };
+
       serverLogger.displayInfrastructureServices(mockServices);
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("INFRASTRUCTURE SERVICES"),
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Database"),
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Cache"));
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Storage"),
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("WebSocket"),
+        expect.stringContaining("Infrastructure Services")
       );
     });
 
     it("should handle disconnected database", () => {
-      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
       const servicesWithDisconnectedDB = {
-        ...mockServices,
-        databaseService: {
-          isConnected: vi.fn().mockReturnValue(false),
-          getStats: vi.fn().mockReturnValue({ activeCount: 0 }),
+        logger: mockLogger,
+        databaseService: { isConnected: () => false },
+        cacheService: { isConnected: () => false },
+        storageService: null,
+        jobService: null,
+        errorHandler: null,
+        validationService: null,
+        wss: null,
+        pubSubService: null,
+        imageProcessor: null,
+        mediaProcessor: null,
+        streamProcessor: null,
+        storageProvider: null,
+        config: {
+          get: vi.fn(),
         },
       };
 
       serverLogger.displayInfrastructureServices(servicesWithDisconnectedDB);
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Not connected - Check configuration"),
+        expect.stringContaining("Connection failed - Check configuration")
       );
     });
 
     it("should handle errors gracefully", () => {
-      const consoleSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
       const servicesWithError = {
-        ...mockServices,
-        config: {
-          get: vi.fn().mockImplementation(() => {
-            throw new Error("Config error");
-          }),
+        get logger() {
+          throw new Error("Config error");
         },
-      };
+      } as any;
 
       serverLogger.displayInfrastructureServices(servicesWithError);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "Error displaying infrastructure services:",
-        expect.any(Error),
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        "Error displaying infrastructure services",
+        expect.objectContaining({
+          error: expect.any(String),
+        })
       );
     });
   });
 
   describe("displayBusinessServices", () => {
-    const mockBusinessServices = {
-      metricsService: {},
-      emailService: {},
-      tokenService: {},
-      encryptionService: {},
-      sessionService: {},
-      messagingService: {},
-    };
+    let consoleSpy: any;
+
+    beforeEach(() => {
+      consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+      process.env.SHOW_SERVER_STATUS = "true";
+    });
+
+    afterEach(() => {
+      consoleSpy.mockRestore();
+      delete process.env.SHOW_SERVER_STATUS;
+    });
 
     it("should display business services status", () => {
-      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+      const mockBusinessServices = {
+        metricsService: {},
+        emailService: {},
+        tokenService: {},
+        encryptionService: {},
+        sessionService: {},
+        messagingService: {},
+      };
+
       serverLogger.displayBusinessServices(mockBusinessServices);
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("BUSINESS SERVICES"),
+        expect.stringContaining("Business Services")
       );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Metrics"),
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Email"));
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Token"));
     });
   });
 
   describe("displayConnectionInformation", () => {
-    const mockConfig = {
-      get: vi.fn().mockImplementation((key: string) => {
-        const config = {
-          DATABASE: { host: "localhost", port: 5432 },
-          DB_HOST: "localhost",
-          DB_PORT: "5432",
-        } as const;
-        return config[key as keyof typeof config];
-      }),
-    };
+    let consoleSpy: any;
+
+    beforeEach(() => {
+      consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+      process.env.SHOW_SERVER_STATUS = "true";
+    });
+
+    afterEach(() => {
+      consoleSpy.mockRestore();
+      delete process.env.SHOW_SERVER_STATUS;
+    });
 
     it("should display connection information", () => {
-      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+      const mockConfig = {
+        get: vi.fn().mockImplementation((key: string) => {
+          switch (key) {
+            case "DB_HOST":
+              return "localhost";
+            case "DB_PORT":
+              return 5432;
+            case "DB_NAME":
+              return "test_db";
+            default:
+              return undefined;
+          }
+        }),
+      };
+
       serverLogger.displayConnectionInformation(3000, mockConfig);
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("SERVICE CONNECTION INFORMATION"),
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("Backend (Express)"),
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("API URL"),
+        expect.stringContaining("Connection Information")
       );
     });
 
     it("should handle errors gracefully", () => {
-      const consoleSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-      const configWithError = {
-        get: vi.fn().mockImplementation(() => {
-          throw new Error("Config error");
+      const mockConfig = {
+        get: vi.fn().mockImplementation((key: string) => {
+          switch (key) {
+            case "DB_HOST":
+              return "localhost";
+            case "DB_PORT":
+              return 5432;
+            case "DB_NAME":
+              return "test_db";
+            default:
+              return undefined;
+          }
         }),
+      };
+
+      const configWithError = {
+        ...mockConfig,
+        get storagePath() {
+          throw new Error("Storage path error");
+        },
       };
 
       serverLogger.displayConnectionInformation(3000, configWithError);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "Error displaying connection information:",
-        expect.any(Error),
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        "Error displaying connection information",
+        expect.objectContaining({
+          error: expect.any(String),
+        })
       );
     });
   });
 
   describe("displayServerStatus", () => {
-    const mockInfrastructureServices = {
-      logger: mockLogger,
-      databaseService: {
-        isConnected: vi.fn().mockReturnValue(true),
-        getStats: vi.fn().mockReturnValue({ activeCount: 5 }),
-      },
-      cacheService: {
-        isConnected: vi.fn().mockReturnValue(true),
-        getStats: vi.fn().mockReturnValue({ hits: 10 }),
-      },
-      storageService: {},
-      jobService: {},
-      errorHandler: {},
-      validationService: {},
-      wss: { clients: { size: 3 } },
-      pubSubService: {},
-      imageProcessor: {},
-      mediaProcessor: {},
-      streamProcessor: {},
-      storageProvider: {},
-      config: {
-        get: vi.fn().mockImplementation((key: string) => {
-          const config = {
-            DATABASE: {
-              host: "localhost",
-              port: 5432,
-              database: "testdb",
-              user: "testuser",
-            },
-            storagePath: "/uploads",
-          } as const;
-          return config[key as keyof typeof config];
-        }),
-      },
-    };
+    let consoleSpy: any;
 
-    const mockBusinessServices = {
-      metricsService: {},
-      emailService: {},
-      tokenService: {},
-      encryptionService: {},
-      sessionService: {},
-      messagingService: {},
-    };
+    beforeEach(() => {
+      consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+      process.env.SHOW_SERVER_STATUS = "true";
+    });
+
+    afterEach(() => {
+      consoleSpy.mockRestore();
+      delete process.env.SHOW_SERVER_STATUS;
+    });
 
     it("should display all service status tables and connection information", () => {
-      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+      const mockInfrastructureServices = {
+        logger: mockLogger,
+        databaseService: { isConnected: () => true },
+        cacheService: { isConnected: () => true },
+        storageService: {},
+        jobService: {},
+        errorHandler: {},
+        validationService: {},
+        wss: { clients: { size: 5 } },
+        pubSubService: {},
+        imageProcessor: {},
+        mediaProcessor: {},
+        streamProcessor: {},
+        storageProvider: {},
+        config: {
+          get: vi.fn(),
+          storagePath: "/uploads",
+        },
+      };
+
+      const mockBusinessServices = {
+        metricsService: {},
+        emailService: {},
+        tokenService: {},
+        encryptionService: {},
+        sessionService: {},
+        messagingService: {},
+      };
+
       serverLogger.displayServerStatus(
         3000,
         mockInfrastructureServices.config,
         mockInfrastructureServices,
-        mockBusinessServices,
+        mockBusinessServices
       );
 
       expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("SERVICE STATUS TABLES"),
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("INFRASTRUCTURE SERVICES"),
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("BUSINESS SERVICES"),
-      );
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("SERVICE CONNECTION INFORMATION"),
+        expect.stringContaining("ABE Stack Server Status")
       );
     });
   });

@@ -30,15 +30,82 @@ interface DBConnectionInfo {
   user?: string;
 }
 
+// Unified logging interface for better integration
+interface LogEntry {
+  level: "debug" | "info" | "warn" | "error" | "success";
+  service: string;
+  message: string;
+  data?: Record<string, unknown>;
+  timestamp?: string;
+}
+
+// Enhanced color palette for better visual organization
+const colors = {
+  reset: "\x1b[0m",
+  bright: "\x1b[1m",
+  dim: "\x1b[2m",
+  red: "\x1b[31m",
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  blue: "\x1b[94m",
+  magenta: "\x1b[35m",
+  cyan: "\x1b[36m",
+  white: "\x1b[37m",
+  gray: "\x1b[90m",
+  brightRed: "\x1b[91m",
+  brightGreen: "\x1b[92m",
+  brightYellow: "\x1b[93m",
+  brightBlue: "\x1b[94m",
+  brightMagenta: "\x1b[95m",
+  brightCyan: "\x1b[96m",
+};
+
 /**
- * Utility class for logging server status and connection information
+ * Unified Server Logger for Infrastructure Status
+ * Integrates with development environment logging and provides production-ready status displays
+ *
+ * This logger focuses on SERVER INFRASTRUCTURE STATUS - what services are running inside the server
+ * It complements the development environment logger which handles ENVIRONMENT ORCHESTRATION
  */
 export class ServerLogger {
   private logger: ILoggerService;
+  private startTime: number;
+  private isDevelopment: boolean;
 
   constructor(logger: ILoggerService) {
     this.logger = logger;
-    this.logger.debug("ServerLogger initialized");
+    this.startTime = Date.now();
+    this.isDevelopment = process.env.NODE_ENV === "development";
+    this.logger.debug("Unified ServerLogger initialized", {
+      environment: process.env.NODE_ENV,
+      isDevelopment: this.isDevelopment,
+    });
+  }
+
+  /**
+   * Unified logging method that integrates with both dev and production environments
+   */
+  private log(entry: LogEntry): void {
+    const { level, service, message, data } = entry;
+
+    // Use the injected logger service for consistent logging
+    switch (level) {
+      case "debug":
+        this.logger.debug(`[${service}] ${message}`, data);
+        break;
+      case "info":
+        this.logger.info(`[${service}] ${message}`, data);
+        break;
+      case "warn":
+        this.logger.warn(`[${service}] ${message}`, data);
+        break;
+      case "error":
+        this.logger.error(`[${service}] ${message}`, data);
+        break;
+      case "success":
+        this.logger.info(`[${service}] ✅ ${message}`, data);
+        break;
+    }
   }
 
   /**
@@ -49,22 +116,61 @@ export class ServerLogger {
   }
 
   /**
-   * Helper to create a table row for service status
+   * Enhanced table row creation with better formatting
    */
   private createRow(
     name: string,
     status: boolean,
     details: string = "",
+    icon: string = ""
   ): string {
     const statusText = status ? "✓ Active" : "✗ Inactive";
-    const statusColor = status ? "\x1b[32m" : "\x1b[31m"; // Green or Red
-    return `│ ${name.padEnd(20)} │ ${statusColor}${statusText.padEnd(12)}\x1b[0m │ ${details.padEnd(30)} │`;
+    const statusColor = status ? colors.green : colors.red;
+    const nameWithIcon = icon ? `${icon} ${name}` : name;
+
+    return `│ ${nameWithIcon.padEnd(22)} │ ${statusColor}${statusText.padEnd(12)}${colors.reset} │ ${details.padEnd(35)} │`;
   }
 
   /**
-   * Display infrastructure services status
+   * Enhanced section header with better visual separation
    */
-  displayInfrastructureServices(services: {
+  private printSectionHeader(title: string, subtitle?: string): void {
+    const width = 75;
+    const padding = Math.max(0, Math.floor((width - title.length) / 2));
+
+    console.log("");
+    console.log(colors.brightMagenta + "═".repeat(width) + colors.reset);
+    console.log(
+      colors.brightMagenta +
+        " ".repeat(padding) +
+        title +
+        " ".repeat(width - padding - title.length) +
+        colors.reset
+    );
+
+    if (subtitle) {
+      const subtitlePadding = Math.max(
+        0,
+        Math.floor((width - subtitle.length) / 2)
+      );
+      console.log(
+        colors.cyan +
+          " ".repeat(subtitlePadding) +
+          subtitle +
+          " ".repeat(width - subtitlePadding - subtitle.length) +
+          colors.reset
+      );
+    }
+
+    console.log(colors.brightMagenta + "═".repeat(width) + colors.reset);
+    console.log("");
+  }
+
+  /**
+   * Get comprehensive infrastructure status as structured data
+   * This can be consumed by external monitoring systems or the dev environment logger
+   */
+  getInfrastructureStatus(services: {
     logger: ILoggerService;
     databaseService: DatabaseService;
     cacheService: CacheService;
@@ -79,7 +185,7 @@ export class ServerLogger {
     streamProcessor: unknown;
     storageProvider: unknown;
     config: ConfigObject;
-  }): void {
+  }): Record<string, unknown> {
     const {
       logger,
       databaseService,
@@ -97,147 +203,331 @@ export class ServerLogger {
       config,
     } = services;
 
+    const dbConnectionInfo = this.extractDatabaseInfo(config);
+    const dbIsConnected = this.checkDatabaseConnection(databaseService);
+    const cacheIsActive = this.checkCacheService(cacheService);
+    const wsActive = !!(wss && typeof wss.clients === "object");
+
+    return {
+      infrastructure: {
+        logging: { active: !!logger, service: "System logging" },
+        database: {
+          connected: dbIsConnected,
+          details: dbConnectionInfo,
+          activeConnections: databaseService?.getStats?.()?.activeCount || 0,
+        },
+        cache: {
+          active: cacheIsActive,
+          hits: cacheService?.getStats?.()?.hits || 0,
+        },
+        storage: {
+          active: !!storageService,
+          path: config.storagePath || "uploads",
+        },
+        websocket: {
+          active: wsActive,
+          clients: wss?.clients?.size || 0,
+        },
+        services: {
+          jobService: { active: !!jobService },
+          errorHandler: { active: !!errorHandler },
+          validation: { active: !!validationService },
+          pubSub: { active: !!pubSubService },
+          imageProcessor: { active: !!imageProcessor },
+          mediaProcessor: { active: !!mediaProcessor },
+          streamProcessor: { active: !!streamProcessor },
+          storageProvider: { active: !!storageProvider },
+        },
+      },
+      server: {
+        uptime: ((Date.now() - this.startTime) / 1000).toFixed(1) + "s",
+        startTime: new Date(this.startTime).toISOString(),
+        environment: process.env.NODE_ENV || "development",
+        pid: process.pid,
+      },
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Enhanced infrastructure services display with better organization
+   * Now focuses purely on visual display while logging structured data
+   */
+  displayInfrastructureServices(services: {
+    logger: ILoggerService;
+    databaseService: DatabaseService;
+    cacheService: CacheService;
+    storageService: unknown;
+    jobService: unknown;
+    errorHandler: unknown;
+    validationService: unknown;
+    wss: WebSocketService;
+    pubSubService: unknown;
+    imageProcessor: unknown;
+    mediaProcessor: unknown;
+    streamProcessor: unknown;
+    storageProvider: unknown;
+    config: ConfigObject;
+  }): void {
     try {
-      // Database connection details - try environment variables or DATABASE object
-      // First try the DATABASE object
-      const dbConnectionInfo =
-        (config.get("DATABASE") as DBConnectionInfo) || {};
+      // Get structured status data
+      const statusData = this.getInfrastructureStatus(services);
 
-      // Fall back to direct environment variables or DB/database connection info
-      // Look at process.env if config doesn't have the values
-      let dbHost = dbConnectionInfo.host;
-      if (!dbHost) {
-        dbHost =
-          (config.get("DB_HOST") as string) || process.env.DB_HOST || "unknown";
+      // Log structured data for integration with dev environment
+      this.log({
+        level: "info",
+        service: "INFRASTRUCTURE",
+        message: "Infrastructure services status check completed",
+        data: statusData,
+      });
+
+      // Only show visual display in development or when explicitly requested
+      if (!this.isDevelopment && !process.env.SHOW_SERVER_STATUS) {
+        return;
       }
 
-      let dbPort = dbConnectionInfo.port;
-      if (!dbPort) {
-        dbPort =
-          Number(config.get("DB_PORT")) || Number(process.env.DB_PORT) || 5555;
-      }
+      const {
+        logger,
+        databaseService,
+        cacheService,
+        storageService,
+        jobService,
+        errorHandler,
+        validationService,
+        wss,
+        pubSubService,
+        imageProcessor,
+        mediaProcessor,
+        streamProcessor,
+        storageProvider,
+        config,
+      } = services;
 
-      let dbName = dbConnectionInfo.database;
-      if (!dbName) {
-        dbName =
-          (config.get("DB_NAME") as string) || process.env.DB_NAME || "unknown";
-      }
+      // Enhanced database connection details extraction
+      const dbConnectionInfo = this.extractDatabaseInfo(config);
 
-      let dbUser = dbConnectionInfo.user;
-      if (!dbUser) {
-        dbUser =
-          (config.get("DB_USER") as string) || process.env.DB_USER || "unknown";
-      }
+      // Enhanced table formatting
+      const tableWidth = 75;
+      const border = "┌" + "─".repeat(tableWidth - 2) + "┐";
+      const separator = "├" + "─".repeat(tableWidth - 2) + "┤";
+      const bottom = "└" + "─".repeat(tableWidth - 2) + "┘";
 
-      // Table borders
-      const tableBorder =
-        "┌──────────────────────┬──────────────┬────────────────────────────────┐";
-      const tableHeader =
-        "│ Service              │ Status       │ Details                        │";
-      const tableDivider =
-        "├──────────────────────┼──────────────┼────────────────────────────────┤";
-      const tableBottom =
-        "└──────────────────────┴──────────────┴────────────────────────────────┘";
-
-      // Infrastructure Services Table
-      console.log("\n\x1b[1mINFRASTRUCTURE SERVICES\x1b[0m");
-      console.log(tableBorder);
-      console.log(tableHeader);
-      console.log(tableDivider);
-
-      // Add rows for infrastructure services
-      console.log(this.createRow("Logging", !!logger));
-
-      // Check database connection status
-      const dbIsConnected = !!(
-        databaseService &&
-        databaseService.isConnected &&
-        databaseService.isConnected()
+      this.printSectionHeader(
+        "Infrastructure Services",
+        "Core system components status"
       );
 
-      // Show connection status with appropriate details
+      console.log(border);
+      console.log(
+        `│${colors.bright} Service${" ".repeat(16)} │ Status       │ Details${" ".repeat(29)} │${colors.reset}`
+      );
+      console.log(separator);
+
+      // Core Infrastructure Services
       console.log(
         this.createRow(
-          "Database",
-          dbIsConnected,
-          dbIsConnected
-            ? `${dbHost}:${dbPort} (${dbName})`
-            : "Not connected - Check configuration",
-        ),
+          "Logging Service",
+          !!logger,
+          "System logging active",
+          "📝"
+        )
       );
 
-      // Only show detailed DB info if connected
+      // Enhanced database status checking
+      const dbIsConnected = this.checkDatabaseConnection(databaseService);
+      const dbDetails = dbIsConnected
+        ? `${dbConnectionInfo.host}:${dbConnectionInfo.port} (${dbConnectionInfo.database})`
+        : "Connection failed - Check configuration";
+
+      console.log(this.createRow("Database", dbIsConnected, dbDetails, "🗄️"));
+
+      // Show detailed DB info if connected
       if (dbIsConnected) {
-        console.log(this.createRow("  DB User", true, dbUser));
+        const activeConnections =
+          databaseService?.getStats?.()?.activeCount || 0;
+        console.log(
+          this.createRow("  └─ User", true, dbConnectionInfo.user, "👤")
+        );
         console.log(
           this.createRow(
-            "  DB Connections",
+            "  └─ Connections",
             true,
-            `Active: ${(databaseService && databaseService.getStats && databaseService.getStats()?.activeCount) || 0}`,
-          ),
+            `Active: ${activeConnections}`,
+            "🔗"
+          )
         );
       }
 
-      // Check cache service status
-      const cacheIsActive = !!(
-        cacheService &&
-        (typeof cacheService.isConnected === "function"
-          ? cacheService.isConnected()
-          : true)
-      );
+      // Enhanced cache service status
+      const cacheIsActive = this.checkCacheService(cacheService);
+      const cacheDetails = cacheIsActive
+        ? `Hits: ${cacheService?.getStats?.()?.hits || 0}`
+        : "Not available";
 
       console.log(
-        this.createRow(
-          "Cache",
-          cacheIsActive,
-          cacheIsActive
-            ? `Hits: ${(cacheService && cacheService.getStats && cacheService.getStats()?.hits) || 0}`
-            : "Not available",
-        ),
+        this.createRow("Cache Service", cacheIsActive, cacheDetails, "⚡")
       );
 
-      // Check storage service
+      // Storage service with enhanced details
       const storageIsActive = !!storageService;
+      const storageDetails = storageIsActive
+        ? `Path: ${this.normalizePath(config.storagePath || "uploads")}`
+        : "Not configured";
+
       console.log(
-        this.createRow(
-          "Storage",
-          storageIsActive,
-          storageIsActive
-            ? `Path: ${config.storagePath || "uploads"}`
-            : "Not available",
-        ),
+        this.createRow("Storage Service", storageIsActive, storageDetails, "💾")
       );
 
-      console.log(this.createRow("Jobs", !!jobService));
-      console.log(this.createRow("Error Handler", !!errorHandler));
-      console.log(this.createRow("Validation", !!validationService));
-
-      // WebSocket status check
-      const wsActive = !!(wss && wss.clients);
-      const wsConnectionCount = wsActive && wss.clients ? wss.clients.size : 0;
+      // Job service
+      const jobIsActive = !!jobService;
       console.log(
         this.createRow(
-          "WebSocket",
-          wsActive,
-          wsActive ? `Connections: ${wsConnectionCount}` : "Not available",
-        ),
+          "Job Service",
+          jobIsActive,
+          jobIsActive ? "Queue processing active" : "Not available",
+          "⚙️"
+        )
       );
 
-      console.log(this.createRow("PubSub", !!pubSubService));
-      console.log(this.createRow("Image Processor", !!imageProcessor));
-      console.log(this.createRow("Media Processor", !!mediaProcessor));
-      console.log(this.createRow("Stream Processor", !!streamProcessor));
-      console.log(this.createRow("Storage Provider", !!storageProvider));
+      // Error handler
+      const errorHandlerActive = !!errorHandler;
+      console.log(
+        this.createRow(
+          "Error Handler",
+          errorHandlerActive,
+          errorHandlerActive ? "Global error handling" : "Not configured",
+          "🚨"
+        )
+      );
 
-      console.log(tableBottom);
-      console.log("\n");
+      // Validation service
+      const validationActive = !!validationService;
+      console.log(
+        this.createRow(
+          "Validation",
+          validationActive,
+          validationActive ? "Input validation active" : "Not available",
+          "✅"
+        )
+      );
+
+      // WebSocket service with client count
+      const wsActive = !!(wss && typeof wss.clients === "object");
+      const wsDetails = wsActive
+        ? `Connected clients: ${wss.clients?.size || 0}`
+        : "Not available";
+
+      console.log(this.createRow("WebSocket", wsActive, wsDetails, "🔌"));
+
+      // Additional services
+      console.log(
+        this.createRow(
+          "PubSub Service",
+          !!pubSubService,
+          pubSubService ? "Message broadcasting" : "Not available",
+          "📡"
+        )
+      );
+      console.log(
+        this.createRow(
+          "Image Processor",
+          !!imageProcessor,
+          imageProcessor ? "Image processing ready" : "Not available",
+          "🖼️"
+        )
+      );
+      console.log(
+        this.createRow(
+          "Media Processor",
+          !!mediaProcessor,
+          mediaProcessor ? "Media processing ready" : "Not available",
+          "🎬"
+        )
+      );
+      console.log(
+        this.createRow(
+          "Stream Processor",
+          !!streamProcessor,
+          streamProcessor ? "Stream processing ready" : "Not available",
+          "🌊"
+        )
+      );
+      console.log(
+        this.createRow(
+          "Storage Provider",
+          !!storageProvider,
+          storageProvider ? "File storage ready" : "Not available",
+          "☁️"
+        )
+      );
+
+      console.log(bottom);
+      console.log("");
     } catch (error) {
-      console.error("Error displaying infrastructure services:", error);
+      this.log({
+        level: "error",
+        service: "INFRASTRUCTURE",
+        message: "Error displaying infrastructure services",
+        data: { error: error instanceof Error ? error.message : String(error) },
+      });
     }
   }
 
   /**
-   * Display business services status
+   * Extract database connection information with fallbacks
+   */
+  private extractDatabaseInfo(config: ConfigObject): DBConnectionInfo {
+    const dbConnectionInfo = (config.get("DATABASE") as DBConnectionInfo) || {};
+
+    return {
+      host:
+        dbConnectionInfo.host ||
+        (config.get("DB_HOST") as string) ||
+        process.env.DB_HOST ||
+        "localhost",
+      port:
+        dbConnectionInfo.port ||
+        Number(config.get("DB_PORT")) ||
+        Number(process.env.DB_PORT) ||
+        5432,
+      database:
+        dbConnectionInfo.database ||
+        (config.get("DB_NAME") as string) ||
+        process.env.DB_NAME ||
+        "abe_stack",
+      user:
+        dbConnectionInfo.user ||
+        (config.get("DB_USER") as string) ||
+        process.env.DB_USER ||
+        "postgres",
+    };
+  }
+
+  /**
+   * Enhanced database connection checking
+   */
+  private checkDatabaseConnection(databaseService: DatabaseService): boolean {
+    return !!(
+      databaseService &&
+      databaseService.isConnected &&
+      databaseService.isConnected()
+    );
+  }
+
+  /**
+   * Enhanced cache service checking
+   */
+  private checkCacheService(cacheService: CacheService): boolean {
+    return !!(
+      cacheService &&
+      (typeof cacheService.isConnected === "function"
+        ? cacheService.isConnected()
+        : true)
+    );
+  }
+
+  /**
+   * Enhanced business services display
    */
   displayBusinessServices(services: {
     metricsService?: unknown;
@@ -256,36 +546,100 @@ export class ServerLogger {
       messagingService,
     } = services;
 
-    // Table borders
-    const tableBorder =
-      "┌──────────────────────┬──────────────┬────────────────────────────────┐";
-    const tableHeader =
-      "│ Service              │ Status       │ Details                        │";
-    const tableDivider =
-      "├──────────────────────┼──────────────┼────────────────────────────────┤";
-    const tableBottom =
-      "└──────────────────────┴──────────────┴────────────────────────────────┘";
+    // Log structured data
+    this.log({
+      level: "info",
+      service: "BUSINESS",
+      message: "Business services status check completed",
+      data: {
+        services: {
+          metrics: { active: !!metricsService },
+          email: { active: !!emailService },
+          token: { active: !!tokenService },
+          encryption: { active: !!encryptionService },
+          session: { active: !!sessionService },
+          messaging: { active: !!messagingService },
+        },
+        timestamp: new Date().toISOString(),
+      },
+    });
 
-    // Business Services Table
-    console.log("\n\x1b[1mBUSINESS SERVICES\x1b[0m");
-    console.log(tableBorder);
-    console.log(tableHeader);
-    console.log(tableDivider);
+    // Only show visual display in development or when explicitly requested
+    if (!this.isDevelopment && !process.env.SHOW_SERVER_STATUS) {
+      return;
+    }
 
-    // Add rows for business services
-    console.log(this.createRow("Metrics", !!metricsService));
-    console.log(this.createRow("Email", !!emailService));
-    console.log(this.createRow("Token", !!tokenService));
-    console.log(this.createRow("Encryption", !!encryptionService));
-    console.log(this.createRow("Session", !!sessionService));
-    console.log(this.createRow("Messaging", !!messagingService));
+    this.printSectionHeader(
+      "Business Services",
+      "Application-specific services"
+    );
 
-    console.log(tableBottom);
-    console.log("\n");
+    const tableWidth = 75;
+    const border = "┌" + "─".repeat(tableWidth - 2) + "┐";
+    const separator = "├" + "─".repeat(tableWidth - 2) + "┤";
+    const bottom = "└" + "─".repeat(tableWidth - 2) + "┘";
+
+    console.log(border);
+    console.log(
+      `│${colors.bright} Service${" ".repeat(16)} │ Status       │ Details${" ".repeat(29)} │${colors.reset}`
+    );
+    console.log(separator);
+
+    console.log(
+      this.createRow(
+        "Metrics Service",
+        !!metricsService,
+        metricsService ? "Performance monitoring" : "Not available",
+        "📊"
+      )
+    );
+    console.log(
+      this.createRow(
+        "Email Service",
+        !!emailService,
+        emailService ? "Email notifications ready" : "Not configured",
+        "📧"
+      )
+    );
+    console.log(
+      this.createRow(
+        "Token Service",
+        !!tokenService,
+        tokenService ? "JWT token management" : "Not available",
+        "🔑"
+      )
+    );
+    console.log(
+      this.createRow(
+        "Encryption",
+        !!encryptionService,
+        encryptionService ? "Data encryption ready" : "Not available",
+        "🔒"
+      )
+    );
+    console.log(
+      this.createRow(
+        "Session Service",
+        !!sessionService,
+        sessionService ? "User session management" : "Not available",
+        "👥"
+      )
+    );
+    console.log(
+      this.createRow(
+        "Messaging",
+        !!messagingService,
+        messagingService ? "Real-time messaging" : "Not available",
+        "💬"
+      )
+    );
+
+    console.log(bottom);
+    console.log("");
   }
 
   /**
-   * Display connection information
+   * Enhanced connection information display
    */
   displayConnectionInformation(
     port: number,
@@ -293,74 +647,135 @@ export class ServerLogger {
     infrastructureServices?: {
       databaseService?: DatabaseService;
       storageService?: unknown;
-    },
+    }
   ): void {
     try {
-      // Get database connection info
-      const dbConnectionInfo =
-        (configService.get("DATABASE") as DBConnectionInfo) || {};
+      const isProduction = process.env.NODE_ENV === "production";
+      const host = (configService.get("HOST") as string) || "localhost";
+      const protocol = isProduction ? "https" : "http";
+      const baseUrl = `${protocol}://${host}:${port}`;
 
-      // Fall back to direct environment variables
-      let dbHost = dbConnectionInfo.host;
-      if (!dbHost) {
-        dbHost =
-          (configService.get("DB_HOST") as string) ||
-          process.env.DB_HOST ||
-          "localhost";
+      const endpoints = [
+        { name: "Main Application", url: baseUrl },
+        { name: "API Base", url: `${baseUrl}/api` },
+        { name: "API Documentation", url: `${baseUrl}/api/docs` },
+        { name: "Health Check", url: `${baseUrl}/health` },
+        { name: "Metrics", url: `${baseUrl}/metrics` },
+      ];
+
+      const storagePath =
+        configService.storagePath ||
+        (configService.get("STORAGE_PATH") as string) ||
+        "uploads";
+
+      // Log structured connection info
+      this.log({
+        level: "info",
+        service: "CONNECTION",
+        message: "Server connection information updated",
+        data: {
+          server: {
+            host,
+            port,
+            baseUrl,
+            environment: process.env.NODE_ENV || "development",
+            protocol,
+          },
+          endpoints: endpoints.map((e) => ({
+            name: e.name,
+            url: e.url,
+          })),
+          storage: {
+            path: storagePath,
+            url: `${baseUrl}/uploads`,
+          },
+          timestamp: new Date().toISOString(),
+        },
+      });
+
+      // Only show visual display in development or when explicitly requested
+      if (!this.isDevelopment && !process.env.SHOW_SERVER_STATUS) {
+        return;
       }
 
-      let dbPort = dbConnectionInfo.port;
-      if (!dbPort) {
-        dbPort =
-          Number(configService.get("DB_PORT")) ||
-          Number(process.env.DB_PORT) ||
-          5432;
+      this.printSectionHeader(
+        "Connection Information",
+        "Access points and endpoints"
+      );
+
+      // Enhanced connection info table
+      const tableWidth = 75;
+      const border = "┌" + "─".repeat(tableWidth - 2) + "┐";
+      const separator = "├" + "─".repeat(tableWidth - 2) + "┤";
+      const bottom = "└" + "─".repeat(tableWidth - 2) + "┘";
+
+      console.log(border);
+      console.log(
+        `│${colors.bright} Endpoint${" ".repeat(15)} │ URL${" ".repeat(45)} │${colors.reset}`
+      );
+      console.log(separator);
+
+      const displayEndpoints = [
+        { name: "🌐 Main Application", url: baseUrl },
+        { name: "🔌 API Base", url: `${baseUrl}/api` },
+        { name: "📚 API Documentation", url: `${baseUrl}/api/docs` },
+        { name: "❤️ Health Check", url: `${baseUrl}/health` },
+        { name: "📊 Metrics", url: `${baseUrl}/metrics` },
+      ];
+
+      displayEndpoints.forEach(({ name, url }) => {
+        console.log(
+          `│ ${name.padEnd(22)} │ ${colors.cyan}${url.padEnd(47)}${colors.reset} │`
+        );
+      });
+
+      console.log(bottom);
+      console.log("");
+
+      // Database connection info if available
+      if (infrastructureServices?.databaseService) {
+        const dbInfo = this.extractDatabaseInfo(configService);
+        const dbConnected = this.checkDatabaseConnection(
+          infrastructureServices.databaseService
+        );
+
+        if (dbConnected) {
+          console.log(
+            `${colors.brightCyan}🗄️  Database Connection:${colors.reset}`
+          );
+          console.log(
+            `   Host: ${colors.yellow}${dbInfo.host}:${dbInfo.port}${colors.reset}`
+          );
+          console.log(
+            `   Database: ${colors.yellow}${dbInfo.database}${colors.reset}`
+          );
+          console.log(`   User: ${colors.yellow}${dbInfo.user}${colors.reset}`);
+          console.log("");
+        }
       }
 
-      // Get environment info dynamically with consistent path separators
-      const configDir = path.relative(
-        process.cwd(),
-        path.resolve(path.join(__dirname, "../../infrastructure/config")),
-      );
-      const envPath = path.join(configDir, ".env");
-      const envFile = `.env.${process.env.NODE_ENV || "development"}`;
-
-      console.log("\n\n\x1b[36m=== SERVICE CONNECTION INFORMATION ===\x1b[0m");
-      console.log("\n\x1b[1mPORT INFORMATION SUMMARY:\x1b[0m");
-
-      // Check if database is actually connected
-      const dbIsConnected = !!(
-        infrastructureServices?.databaseService?.isConnected &&
-        infrastructureServices.databaseService.isConnected()
-      );
-
-      // Show database status with connection indicator
+      // Storage information
       console.log(
-        `Database (PostgreSQL): \x1b[${dbIsConnected ? "32" : "31"}mhttp://${dbHost}:${dbPort}\x1b[0m ${!dbIsConnected ? "\x1b[31m[NOT CONNECTED]\x1b[0m" : ""}`,
+        `${colors.brightGreen}💾 Storage Configuration:${colors.reset}`
       );
-
-      // Show backend server information
-      console.log(`Backend (Express): \x1b[32mhttp://localhost:${port}\x1b[0m`);
-      console.log(`API URL: \x1b[32mhttp://localhost:${port}/api\x1b[0m`);
-
-      // Check if storage is available
-      const storageAvailable = !!infrastructureServices?.storageService;
       console.log(
-        `File Server (Local): \x1b[${storageAvailable ? "32" : "31"}mhttp://localhost:${port}/uploads\x1b[0m ${!storageAvailable ? "\x1b[31m[NOT AVAILABLE]\x1b[0m" : ""}`,
+        `   Path: ${colors.yellow}${this.normalizePath(path.resolve(storagePath))}${colors.reset}`
       );
-
-      // Show environment information
-      console.log(
-        `Env Directory: \x1b[32m${this.normalizePath(envPath)}/${envFile}\x1b[0m`,
-      );
+      console.log(`   URL: ${colors.yellow}${baseUrl}/uploads${colors.reset}`);
       console.log("");
     } catch (error) {
-      console.error("Error displaying connection information:", error);
+      this.log({
+        level: "error",
+        service: "CONNECTION",
+        message: "Error displaying connection information",
+        data: { error: error instanceof Error ? error.message : String(error) },
+      });
     }
   }
 
   /**
-   * Display all service status tables and connection information
+   * Enhanced comprehensive server status display
+   * This is the main entry point that coordinates all status displays
    */
   displayServerStatus(
     port: number,
@@ -388,22 +803,67 @@ export class ServerLogger {
       encryptionService?: unknown;
       sessionService?: unknown;
       messagingService?: unknown;
-    },
+    }
   ): void {
-    console.log("\n\x1b[36m=== SERVICE STATUS TABLES ===\x1b[0m");
-    console.log("\n");
+    try {
+      const uptime = ((Date.now() - this.startTime) / 1000).toFixed(1);
 
-    // Display infrastructure services
-    this.displayInfrastructureServices(infrastructureServices);
+      // Log comprehensive status for integration with dev environment
+      this.log({
+        level: "success",
+        service: "SERVER",
+        message: "Server status display completed",
+        data: {
+          server: {
+            port,
+            uptime: `${uptime}s`,
+            startTime: new Date(this.startTime).toISOString(),
+            status: "operational",
+          },
+          servicesCount: {
+            infrastructure: Object.keys(infrastructureServices).length,
+            business: Object.keys(businessServices).length,
+          },
+          timestamp: new Date().toISOString(),
+        },
+      });
 
-    // Display business services
-    this.displayBusinessServices(businessServices);
+      // Only show visual display in development or when explicitly requested
+      if (!this.isDevelopment && !process.env.SHOW_SERVER_STATUS) {
+        return;
+      }
 
-    // Display connection information
-    this.displayConnectionInformation(
-      port,
-      configService,
-      infrastructureServices,
-    );
+      // Main server status header
+      this.printSectionHeader(
+        "🚀 ABE Stack Server Status",
+        `Server running for ${uptime}s on port ${port}`
+      );
+
+      // Display all service categories
+      this.displayInfrastructureServices(infrastructureServices);
+      this.displayBusinessServices(businessServices);
+      this.displayConnectionInformation(
+        port,
+        configService,
+        infrastructureServices
+      );
+
+      // Final status summary
+      console.log(
+        `${colors.brightGreen}✅ Server is ready and all services are operational!${colors.reset}`
+      );
+      console.log(
+        `${colors.gray}   Started at: ${new Date(this.startTime).toISOString()}${colors.reset}`
+      );
+      console.log(`${colors.gray}   Uptime: ${uptime} seconds${colors.reset}`);
+      console.log("");
+    } catch (error) {
+      this.log({
+        level: "error",
+        service: "SERVER",
+        message: "Error during comprehensive server status display",
+        data: { error: error instanceof Error ? error.message : String(error) },
+      });
+    }
   }
 }

@@ -45,6 +45,18 @@ export const TYPES = {
   DatabaseServer: Symbol.for("DatabaseServer"),
   FileJobStorageConfig: Symbol.for("FileJobStorageConfig"),
 
+  // Security infrastructure services
+  TokenStorage: Symbol.for("TokenStorage"),
+  TokenBlacklist: Symbol.for("TokenBlacklist"),
+  TokenManager: Symbol.for("TokenManager"),
+  AuthStrategies: Symbol.for("AuthStrategies"),
+  SecurityLogger: Symbol.for("SecurityLogger"),
+  SecurityAuditTrail: Symbol.for("SecurityAuditTrail"),
+  CorsConfig: Symbol.for("CorsConfig"),
+  WsAuthentication: Symbol.for("WsAuthentication"),
+  CookieService: Symbol.for("CookieService"),
+  SecurityMiddlewareService: Symbol.for("SecurityMiddlewareService"),
+
   // Server management
   ServerManager: Symbol.for("ServerManager"),
 
@@ -70,6 +82,11 @@ export const TYPES = {
   PermissionRepository: Symbol.for("PermissionRepository"),
   TokenRepository: Symbol.for("TokenRepository"),
   PasswordResetTokenRepository: Symbol.for("PasswordResetTokenRepository"),
+  VerificationTokenRepository: Symbol.for("VerificationTokenRepository"),
+
+  // Auth services
+  VerificationService: Symbol.for("VerificationService"),
+  AuthController: Symbol.for("AuthController"),
 
   // Media repositories
   MediaRepository: Symbol.for("MediaRepository"),
@@ -117,6 +134,7 @@ export const TYPES = {
   AuthenticationService: Symbol.for("AuthenticationService"),
   PermissionService: Symbol.for("PermissionService"),
   RolePermissionService: Symbol.for("RolePermissionService"),
+  MfaService: Symbol.for("MfaService"),
 
   // Social services
   PostService: Symbol.for("PostService"),
@@ -166,7 +184,6 @@ export const TYPES = {
   TaskStorage: Symbol.for("TaskStorage"),
 
   // Controller Layer
-  AuthController: Symbol.for("AuthController"),
   SessionController: Symbol.for("SessionController"),
   UserController: Symbol.for("UserController"),
   RolePermissionController: Symbol.for("RolePermissionController"),
@@ -180,6 +197,9 @@ export const TYPES = {
   // Security services
   SecurityAuditLogger: Symbol.for("SecurityAuditLogger"),
   PasswordService: Symbol.for("PasswordService"),
+
+  // Auth Router
+  AuthRouter: Symbol.for("AuthRouter"),
 };
 
 export default TYPES;

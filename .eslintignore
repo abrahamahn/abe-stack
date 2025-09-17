@@ -1,8 +1,0 @@
-src/server/index.ts
-src/server/shared/helpers/authHelpers.ts
-src/server/shared/helpers/fileHelpers.ts
-node_modules/
-dist/
-public/
-jest.config.js
-.jest/* 

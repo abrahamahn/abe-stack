@@ -25,6 +25,7 @@ Each file contains settings organized by functional area:
 - **Server**: HTTP server configuration, ports, and runtime settings
 - **Security**: Authentication secrets, encryption keys, and security policies
 - **Email**: SMTP server settings and email delivery configuration
+- **Cache**: In-memory or Redis cache configuration and connection settings
 - **Storage**: File storage locations, limits, and image processing options
 - **Media**: Upload restrictions and supported file types
 - **Logging**: Log levels and output configuration
@@ -62,6 +63,40 @@ nano .env
 
 # Start the application
 npm start
+```
+
+## ⚙️ Available Configuration Options
+
+### Database Configuration
+
+```
+DB_HOST=localhost                # Database server hostname
+DB_PORT=5432                     # Database server port
+DB_USER=postgres                 # Database username
+DB_PASSWORD=postgres             # Database password
+DB_NAME=abe_stack                # Database name
+DB_FALLBACK=false                # Whether to use fallback database
+DATABASE_URL=postgresql://...    # Full database connection string
+```
+
+### Cache Configuration
+
+```
+CACHE_PROVIDER=redis             # Cache provider: 'memory' or 'redis'
+CACHE_REDIS_HOST=localhost       # Redis server hostname
+CACHE_REDIS_PORT=6379            # Redis server port
+CACHE_REDIS_PASSWORD=password    # Redis server password (optional)
+CACHE_REDIS_DB=0                 # Redis database number
+CACHE_REDIS_KEY_PREFIX=app-cache: # Prefix for all cache keys
+```
+
+### Storage Configuration
+
+```
+UPLOAD_DIR=uploads               # Directory for file uploads
+TEMP_DIR=uploads/temp            # Directory for temporary files
+STORAGE_PATH=uploads             # Base storage path
+STORAGE_URL=http://localhost:8080/uploads # Public URL for stored files
 ```
 
 ## 🏗️ Architecture Decisions

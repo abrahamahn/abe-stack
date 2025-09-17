@@ -73,7 +73,7 @@ class MockCacheService implements ICacheService {
 
   async setMultiple<T>(
     entries: Record<string, T>,
-    ttl?: number,
+    ttl?: number
   ): Promise<boolean> {
     for (const key in entries) {
       await this.set(key, entries[key], ttl);
@@ -137,7 +137,7 @@ class MockCacheService implements ICacheService {
         | number
         | ((result: Awaited<ReturnType<T>>, executionTime: number) => number);
       keyFn?: (...args: any[]) => string;
-    } = {},
+    } = {}
   ): T {
     return (async (...args: any[]): Promise<any> => {
       const key = options.keyFn
@@ -245,7 +245,7 @@ describe("ICacheService Interface", () => {
 
     // Get multiple
     const retrieved = await cacheService.getMultiple<string>(
-      Object.keys(entries),
+      Object.keys(entries)
     );
     expect(retrieved).toEqual(entries);
 
@@ -340,19 +340,19 @@ describe("ICacheService Interface", () => {
 
     // First call
     expect(await memoizedFn({ id: 1, name: "test" })).toBe(
-      '{"id":1,"name":"test"}',
+      '{"id":1,"name":"test"}'
     );
     expect(mockFn).toHaveBeenCalledTimes(1);
 
     // Different object with same ID should use cache
     expect(await memoizedFn({ id: 1, name: "different" })).toBe(
-      '{"id":1,"name":"test"}',
+      '{"id":1,"name":"test"}'
     );
     expect(mockFn).toHaveBeenCalledTimes(1);
 
     // Different ID should call function again
     expect(await memoizedFn({ id: 2, name: "test" })).toBe(
-      '{"id":2,"name":"test"}',
+      '{"id":2,"name":"test"}'
     );
     expect(mockFn).toHaveBeenCalledTimes(2);
   });

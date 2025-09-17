@@ -3,7 +3,6 @@ import { Request, Response, NextFunction } from "express";
 import {
   generateCsrfToken,
   verifyCsrfToken,
-  CsrfOptions,
 } from "../securityHelpers";
 
 // Extend the Express Request type to include session
@@ -19,7 +18,7 @@ declare module "express" {
 /**
  * Configuration options for CSRF middleware
  */
-export interface CsrfMiddlewareOptions extends CsrfOptions {
+export interface CsrfMiddlewareOptions {
   /** Custom cookie name for the CSRF token (default: 'csrf-token') */
   cookieName?: string;
 
@@ -37,6 +36,15 @@ export interface CsrfMiddlewareOptions extends CsrfOptions {
 
   /** Secret key used for token generation and verification */
   secretKey: Buffer;
+
+  /** Token expiry time in milliseconds */
+  expiryMs?: number;
+
+  /** Include user agent in token generation */
+  includeUserAgent?: boolean;
+
+  /** Include origin in token generation */
+  includeOrigin?: boolean;
 
   /** Cookie options for the CSRF token */
   cookieOptions?: {
@@ -102,9 +110,6 @@ export function csrfProtection(options: CsrfMiddlewareOptions) {
       return next();
     }
 
-    // Get user session ID (assuming auth setup stores this)
-    const sessionId = req.session?.id || req.cookies.authToken || "anonymous";
-
     // Get token from request
     const token = getTokenFromRequest(req, mergedOptions);
 
@@ -115,24 +120,13 @@ export function csrfProtection(options: CsrfMiddlewareOptions) {
       });
     }
 
-    // Context for verification
-    const context = {
-      userAgent: req.headers["user-agent"] as string,
-      origin: (req.headers.origin || req.headers.referer) as string,
-    };
-
     // Verify token
-    const isValid = verifyCsrfToken(
+    const isValid = verifyCsrfToken({
       token,
-      sessionId,
-      mergedOptions.secretKey,
-      {
-        expiryMs: mergedOptions.expiryMs,
-        includeUserAgent: mergedOptions.includeUserAgent,
-        includeOrigin: mergedOptions.includeOrigin,
-      },
-      context,
-    );
+      secretKey: mergedOptions.secretKey,
+      includeUserAgent: mergedOptions.includeUserAgent,
+      includeOrigin: mergedOptions.includeOrigin,
+    });
 
     if (!isValid) {
       return res.status(403).json({
@@ -154,27 +148,14 @@ export function csrfProtection(options: CsrfMiddlewareOptions) {
 export function csrfToken(options: CsrfMiddlewareOptions) {
   const mergedOptions = { ...DEFAULT_CSRF_MIDDLEWARE_OPTIONS, ...options };
 
-  return (req: Request, res: Response, next: NextFunction) => {
-    // Get user session ID (assuming auth setup stores this)
-    const sessionId = req.session?.id || req.cookies.authToken || "anonymous";
-
-    // Context for token generation
-    const context = {
-      userAgent: req.headers["user-agent"] as string,
-      origin: (req.headers.origin || req.headers.referer) as string,
-    };
-
+  return (res: Response, next: NextFunction) => {
     // Generate a new token
-    const token = generateCsrfToken(
-      sessionId,
-      mergedOptions.secretKey,
-      {
-        expiryMs: mergedOptions.expiryMs,
-        includeUserAgent: mergedOptions.includeUserAgent,
-        includeOrigin: mergedOptions.includeOrigin,
-      },
-      context,
-    );
+    const token = generateCsrfToken({
+      secretKey: mergedOptions.secretKey,
+      expiryMs: mergedOptions.expiryMs,
+      includeUserAgent: mergedOptions.includeUserAgent,
+      includeOrigin: mergedOptions.includeOrigin,
+    });
 
     // Set token in cookie for JavaScript access
     res.cookie(
@@ -188,16 +169,12 @@ export function csrfToken(options: CsrfMiddlewareOptions) {
 
     // Attach token generation method to response for dynamic token creation
     res.locals.generateCsrfToken = () => {
-      return generateCsrfToken(
-        sessionId,
-        mergedOptions.secretKey,
-        {
-          expiryMs: mergedOptions.expiryMs,
-          includeUserAgent: mergedOptions.includeUserAgent,
-          includeOrigin: mergedOptions.includeOrigin,
-        },
-        context,
-      );
+      return generateCsrfToken({
+        secretKey: mergedOptions.secretKey,
+        expiryMs: mergedOptions.expiryMs,
+        includeUserAgent: mergedOptions.includeUserAgent,
+        includeOrigin: mergedOptions.includeOrigin,
+      });
     };
 
     next();

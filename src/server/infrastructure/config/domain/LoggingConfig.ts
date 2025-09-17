@@ -1,6 +1,6 @@
 import { injectable } from "inversify";
 
-import { LogLevel } from "@infrastructure/logging";
+import { LogLevel } from "../../logging/ILoggerService";
 
 /**
  * Configuration options for logging
@@ -52,46 +52,64 @@ export interface LoggingOptions {
   };
 }
 
+export interface LoggingConfig {
+  level: LogLevel;
+  prettyPrint: boolean;
+  file?: {
+    enabled: boolean;
+    dir: string;
+    filename: string;
+    maxSize: number;
+    maxFiles: number;
+  };
+}
+
 /**
  * Logging configuration provider
  */
 @injectable()
-export class LoggingConfig {
+export class LoggingConfigService {
   /**
    * Get logging configuration
    */
-  public getConfig(): LoggingOptions {
-    // Parse log level string to enum if needed
-    let minLevel: LogLevel | string = process.env.LOG_LEVEL || "info";
-    if (typeof minLevel === "string") {
-      switch (minLevel.toLowerCase()) {
-        case "debug":
-          minLevel = LogLevel.DEBUG;
-          break;
-        case "info":
-          minLevel = LogLevel.INFO;
-          break;
-        case "warn":
-        case "warning":
-          minLevel = LogLevel.WARN;
-          break;
-        case "error":
-          minLevel = LogLevel.ERROR;
-          break;
-      }
-    }
-
-    return {
-      minLevel,
+  public getConfig(): LoggingConfig {
+    const parsedLevel = this.parseLogLevel(process.env.LOG_LEVEL);
+    const config: LoggingConfig = {
+      level: parsedLevel !== undefined ? parsedLevel : LogLevel.INFO,
       prettyPrint: process.env.NODE_ENV !== "production",
-      console: true,
       file: {
         enabled: process.env.LOG_TO_FILE === "true",
         dir: process.env.LOG_DIR || "logs",
-        filename: process.env.LOG_FILENAME || "app-%DATE%.log",
-        maxSize: process.env.LOG_MAX_SIZE || "10m",
-        maxFiles: parseInt(process.env.LOG_MAX_FILES || "5", 10),
+        filename: process.env.LOG_FILENAME || "app.log",
+        maxSize: this.parseNumber(process.env.LOG_MAX_SIZE, 10485760), // 10MB default
+        maxFiles: this.parseNumber(process.env.LOG_MAX_FILES, 5), // Default to 5 if parsing fails
       },
     };
+
+    return config;
+  }
+
+  private parseLogLevel(level?: string): LogLevel | undefined {
+    if (!level) return undefined;
+
+    switch (level.toLowerCase()) {
+      case "debug":
+        return LogLevel.DEBUG;
+      case "info":
+        return LogLevel.INFO;
+      case "warn":
+      case "warning":
+        return LogLevel.WARN;
+      case "error":
+        return LogLevel.ERROR;
+      default:
+        return undefined;
+    }
+  }
+
+  private parseNumber(value: string | undefined, defaultValue: number): number {
+    if (!value) return defaultValue;
+    const parsed = parseInt(value, 10);
+    return isNaN(parsed) ? defaultValue : parsed;
   }
 }

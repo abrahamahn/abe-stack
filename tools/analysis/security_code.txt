@@ -1,0 +1,4292 @@
+// SUMMARY FOR: infrastructure/security
+// Total files: 19
+// Total lines of code: 4187
+// File extensions included: .ts, .js, .tsx, .jsx
+
+// DIRECTORY STRUCTURE:
+// └── security
+//     ├── CorsConfigService.ts
+//     ├── InMemoryTokenBlacklist.ts
+//     ├── InMemoryTokenStorage.ts
+//     ├── TokenBlacklistService.ts
+//     ├── TokenManager.ts
+//     ├── TokenStorageService.ts
+//     ├── WebSocketAuthService.ts
+//     ├── cookieUtils.ts
+//     ├── corsConfig.ts
+//     ├── csrfUtils.ts
+//     ├── encryptionUtils.ts
+//     ├── index.ts
+//     ├── middlewareUtils.ts
+//     ├── passwordUtils.ts
+//     ├── rateLimitMiddleware.ts
+//     ├── securityHelpers.ts
+//     ├── tokenTypes.ts
+//     ├── tokenUtils.ts
+//     └── validationMiddleware.ts
+// 
+
+// ====================== FILE CONTENTS ======================
+
+
+// ---------------------- infrastructure\security\CorsConfigService.ts (188 lines) ----------------------
+
+/**
+ * CORS Configuration Service
+ *
+ * This service provides CORS configuration with proper error handling, logging,
+ * and dependency injection.
+ */
+
+import { injectable, inject } from "inversify";
+import { CorsOptions } from "../security/corsConfig";
+
+import { TYPES } from "@/server/infrastructure/di/types";
+import type { ILoggerService } from "@/server/infrastructure/logging";
+import type { IConfigService } from "@/server/infrastructure/config";
+import { ServiceError, TechnicalError } from "@/server/infrastructure/errors";
+
+/**
+ * CORS configuration service
+ */
+@injectable()
+export class CorsConfigService {
+  constructor(
+    @inject(TYPES.ConfigService) private configService: IConfigService,
+    @inject(TYPES.SecurityLogger) private logger: ILoggerService
+  ) {
+    this.logger.debug("CorsConfigService initialized");
+  }
+
+  /**
+   * Get CORS configuration for the application
+   * @returns CORS configuration options
+   */
+  getCorsConfiguration(): CorsOptions {
+    try {
+      // Get configuration from service
+      const corsOrigin = this.configService.get("cors.origin") || "*";
+      const corsMaxAge = Number(this.configService.get("cors.maxAge")) || 86400;
+      const allowCredentials = this.parseBooleanConfig(
+        "cors.allowCredentials",
+        true
+      );
+
+      // Build CORS options
+      const corsOptions: CorsOptions = {
+        origin: this.parseOrigin(corsOrigin),
+        methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+        allowedHeaders: [
+          "Content-Type",
+          "Authorization",
+          "X-Requested-With",
+          "X-CSRF-Token",
+          "X-Auth-Token",
+          "Accept",
+          "Origin",
+        ],
+        exposedHeaders: [
+          "Content-Disposition",
+          "X-Pagination-Total-Count",
+          "X-Pagination-Page-Count",
+          "X-Pagination-Current-Page",
+          "X-Pagination-Per-Page",
+        ],
+        credentials: allowCredentials,
+        maxAge: corsMaxAge,
+        preflightContinue: false,
+        optionsSuccessStatus: 204,
+      };
+
+      this.logger.debug("Generated CORS configuration", {
+        origin: corsOrigin,
+        credentials: corsOptions.credentials,
+      });
+
+      return corsOptions;
+    } catch (error) {
+      this.logger.error("Error generating CORS configuration", { error });
+
+      // Provide a reasonable default configuration
+      return this.getDefaultCorsConfig();
+    }
+  }
+
+  /**
+   * Parse the origin configuration value
+   * @param originConfig Origin configuration value
+   * @returns Parsed origin value for CORS
+   */
+  private parseOrigin(
+    originConfig: any
+  ):
+    | string
+    | string[]
+    | RegExp
+    | ((
+        origin: string,
+        callback: (err: Error | null, allow?: boolean | undefined) => void
+      ) => void) {
+    // Handle string configuration - comma or space separated list
+    if (typeof originConfig === "string") {
+      // Check if it's the wildcard
+      if (originConfig === "*") {
+        return "*";
+      }
+
+      // Split by comma or space
+      const origins = originConfig
+        .split(/[,\s]+/)
+        .map((o) => o.trim())
+        .filter((o) => o.length > 0);
+
+      if (origins.length === 0) {
+        return "*"; // Default to wildcard if empty
+      }
+
+      if (origins.length === 1) {
+        return origins[0]; // Return single origin
+      }
+
+      return origins; // Return array of origins
+    }
+
+    // Handle array configuration
+    if (Array.isArray(originConfig)) {
+      return originConfig;
+    }
+
+    // Handle regular expression
+    if (originConfig instanceof RegExp) {
+      return originConfig;
+    }
+
+    // Handle function
+    if (typeof originConfig === "function") {
+      return originConfig;
+    }
+
+    // Default to wildcard
+    return "*";
+  }
+
+  /**
+   * Parse boolean configuration value
+   * @param key Configuration key
+   * @param defaultValue Default value
+   * @returns Parsed boolean value
+   */
+  private parseBooleanConfig(key: string, defaultValue: boolean): boolean {
+    const value = this.configService.get(key);
+
+    if (value === undefined || value === null) {
+      return defaultValue;
+    }
+
+    if (typeof value === "boolean") {
+      return value;
+    }
+
+    if (typeof value === "string") {
+      const lowerValue = value.toLowerCase();
+      return (
+        lowerValue === "true" || lowerValue === "yes" || lowerValue === "1"
+      );
+    }
+
+    if (typeof value === "number") {
+      return value === 1;
+    }
+
+    return defaultValue;
+  }
+
+  /**
+   * Get default CORS configuration (fallback for errors)
+   * @returns Default CORS configuration
+   */
+  private getDefaultCorsConfig(): CorsOptions {
+    this.logger.warn("Using default CORS configuration");
+
+    return {
+      origin: process.env.NODE_ENV === "production" ? false : "*",
+      methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+      credentials: false,
+      maxAge: 86400,
+      preflightContinue: false,
+      optionsSuccessStatus: 204,
+    };
+  }
+}
+
+
+// ---------------------- infrastructure\security\InMemoryTokenBlacklist.ts (173 lines) ----------------------
+
+/**
+ * In-memory token blacklist implementation
+ *
+ * This provides a simple implementation of the TokenBlacklist interface
+ * using in-memory data structures with proper error handling and logging.
+ */
+
+import { inject, injectable } from "inversify";
+
+import { TYPES } from "@/server/infrastructure/di/types";
+import type { ILoggerService } from "@/server/infrastructure/logging";
+import {
+  TokenBlacklist,
+  TokenMetadata,
+  TokenStatus,
+} from "./TokenBlacklistService";
+import { ServiceError } from "@/server/infrastructure/errors";
+
+/**
+ * In-memory implementation of TokenBlacklist
+ */
+@injectable()
+export class InMemoryTokenBlacklist implements TokenBlacklist {
+  private blacklistedTokens = new Map<string, TokenMetadata>();
+
+  constructor(@inject(TYPES.SecurityLogger) private logger: ILoggerService) {
+    this.logger.debug("InMemoryTokenBlacklist initialized");
+  }
+
+  /**
+   * Add a token to the blacklist
+   */
+  async add(tokenId: string, metadata?: TokenMetadata): Promise<boolean> {
+    try {
+      // Check if token is already blacklisted
+      const isBlacklisted = await this.check(tokenId);
+
+      if (isBlacklisted.isBlacklisted) {
+        this.logger.debug("Token already blacklisted", { tokenId });
+        return true;
+      }
+
+      // Create metadata with timestamp
+      const tokenMetadata: TokenMetadata = {
+        ...metadata,
+        addedAt: metadata?.addedAt || new Date().toISOString(),
+      };
+
+      // Add to blacklist
+      this.blacklistedTokens.set(tokenId, tokenMetadata);
+
+      this.logger.debug("Token added to blacklist", {
+        tokenId,
+        userId: tokenMetadata.userId,
+        reason: tokenMetadata.reason || "Not specified",
+      });
+
+      return true;
+    } catch (error) {
+      this.logger.error("Error adding token to blacklist", { tokenId, error });
+      throw new ServiceError(
+        "Token blacklisting error",
+        "TOKEN_BLACKLIST_ERROR",
+        500,
+        { cause: error }
+      );
+    }
+  }
+
+  /**
+   * Remove a token from the blacklist
+   */
+  async remove(tokenId: string): Promise<boolean> {
+    try {
+      const wasPresent = this.blacklistedTokens.has(tokenId);
+
+      if (wasPresent) {
+        this.blacklistedTokens.delete(tokenId);
+        this.logger.debug("Token removed from blacklist", { tokenId });
+      }
+
+      return wasPresent;
+    } catch (error) {
+      this.logger.error("Error removing token from blacklist", {
+        tokenId,
+        error,
+      });
+      throw new ServiceError(
+        "Token blacklist removal error",
+        "TOKEN_BLACKLIST_REMOVAL_ERROR",
+        500,
+        { cause: error }
+      );
+    }
+  }
+
+  /**
+   * Check if a token is blacklisted
+   */
+  async check(tokenId: string): Promise<TokenStatus> {
+    try {
+      const metadata = this.blacklistedTokens.get(tokenId);
+
+      if (!metadata) {
+        return {
+          isBlacklisted: false,
+        };
+      }
+
+      // Check if blacklist entry has expired
+      if (metadata.expiresAt && new Date() > metadata.expiresAt) {
+        // Automatically remove expired entries
+        this.blacklistedTokens.delete(tokenId);
+
+        this.logger.debug("Expired blacklist entry accessed and removed", {
+          tokenId,
+        });
+
+        return {
+          isBlacklisted: false,
+        };
+      }
+
+      return {
+        isBlacklisted: true,
+        metadata,
+      };
+    } catch (error) {
+      this.logger.error("Error checking token blacklist status", {
+        tokenId,
+        error,
+      });
+
+      // Default to considering tokens as not blacklisted if check fails
+      return {
+        isBlacklisted: false,
+      };
+    }
+  }
+
+  /**
+   * Get metadata for a token
+   */
+  async getMetadata(tokenId: string): Promise<TokenMetadata | null> {
+    try {
+      const status = await this.check(tokenId);
+      return status.metadata || null;
+    } catch (error) {
+      this.logger.error("Error retrieving token blacklist metadata", {
+        tokenId,
+        error,
+      });
+      return null;
+    }
+  }
+
+  /**
+   * List all blacklisted tokens
+   */
+  async listAll(): Promise<string[]> {
+    try {
+      return [...this.blacklistedTokens.keys()];
+    } catch (error) {
+      this.logger.error("Error listing blacklisted tokens", { error });
+      throw new ServiceError(
+        "Token blacklist listing error",
+        "TOKEN_BLACKLIST_LISTING_ERROR",
+        500,
+        { cause: error }
+      );
+    }
+  }
+}
+
+
+// ---------------------- infrastructure\security\InMemoryTokenStorage.ts (249 lines) ----------------------
+
+/**
+ * In-memory token storage implementation
+ *
+ * This provides a simple implementation of the TokenStorage interface
+ * using in-memory data structures with proper error handling and logging.
+ */
+
+import { inject, injectable } from "inversify";
+
+import { TYPES } from "@/server/infrastructure/di/types";
+import type { ILoggerService } from "@/server/infrastructure/logging";
+import { TokenData, TokenInfo, TokenStorage } from "./TokenStorageService";
+import { ServiceError } from "@/server/infrastructure/errors";
+
+/**
+ * In-memory implementation of TokenStorage
+ */
+@injectable()
+export class InMemoryTokenStorage implements TokenStorage {
+  private tokens = new Map<string, TokenData>();
+  private userTokens = new Map<string, Set<string>>();
+
+  constructor(@inject(TYPES.SecurityLogger) private logger: ILoggerService) {
+    this.logger.debug("InMemoryTokenStorage initialized");
+  }
+
+  /**
+   * Store a token with associated data
+   */
+  async storeToken(tokenId: string, data: TokenData): Promise<void> {
+    try {
+      // Store token data
+      this.tokens.set(tokenId, { ...data });
+
+      // Add to user's token collection
+      if (!this.userTokens.has(data.userId)) {
+        this.userTokens.set(data.userId, new Set<string>());
+      }
+
+      this.userTokens.get(data.userId)!.add(tokenId);
+
+      this.logger.debug("Token stored", {
+        tokenId,
+        userId: data.userId,
+      });
+    } catch (error) {
+      this.logger.error("Failed to store token", { tokenId, error });
+      throw new ServiceError(
+        "Token storage error",
+        "TOKEN_STORAGE_ERROR",
+        500,
+        { cause: error }
+      );
+    }
+  }
+
+  /**
+   * Retrieve data for a token
+   */
+  async getTokenData(tokenId: string): Promise<TokenData | null> {
+    try {
+      const data = this.tokens.get(tokenId);
+
+      if (!data) {
+        this.logger.debug("Token not found", { tokenId });
+        return null;
+      }
+
+      // Check if token is expired
+      const now = Date.now();
+      const expiryTime = data.createdAt.getTime() + data.expiresIn * 1000;
+
+      if (now > expiryTime) {
+        this.logger.debug("Expired token accessed", { tokenId });
+        // Automatically remove expired tokens when accessed
+        await this.removeToken(tokenId);
+        return null;
+      }
+
+      return { ...data };
+    } catch (error) {
+      this.logger.error("Error retrieving token data", { tokenId, error });
+      return null;
+    }
+  }
+
+  /**
+   * Remove a token from storage
+   */
+  async removeToken(tokenId: string): Promise<void> {
+    try {
+      const tokenData = this.tokens.get(tokenId);
+
+      if (!tokenData) {
+        return;
+      }
+
+      // Remove from user's token collection
+      const userTokens = this.userTokens.get(tokenData.userId);
+      if (userTokens) {
+        userTokens.delete(tokenId);
+
+        // Remove user's entry if no tokens left
+        if (userTokens.size === 0) {
+          this.userTokens.delete(tokenData.userId);
+        }
+      }
+
+      // Remove the token itself
+      this.tokens.delete(tokenId);
+
+      this.logger.debug("Token removed", {
+        tokenId,
+        userId: tokenData.userId,
+      });
+    } catch (error) {
+      this.logger.error("Error removing token", { tokenId, error });
+      throw new ServiceError(
+        "Token removal error",
+        "TOKEN_REMOVAL_ERROR",
+        500,
+        { cause: error }
+      );
+    }
+  }
+
+  /**
+   * Check if a token exists
+   */
+  async hasToken(tokenId: string): Promise<boolean> {
+    try {
+      // Get token data will handle expiration checks
+      const tokenData = await this.getTokenData(tokenId);
+      return tokenData !== null;
+    } catch (error) {
+      this.logger.error("Error checking token existence", { tokenId, error });
+      return false;
+    }
+  }
+
+  /**
+   * Get all tokens for a user
+   */
+  async getAllUserTokens(userId: string): Promise<TokenInfo[]> {
+    try {
+      const userTokenIds = this.userTokens.get(userId);
+
+      if (!userTokenIds || userTokenIds.size === 0) {
+        return [];
+      }
+
+      const result: TokenInfo[] = [];
+
+      // Check each token
+      for (const tokenId of userTokenIds) {
+        const tokenData = await this.getTokenData(tokenId);
+
+        // Only include non-expired tokens
+        if (tokenData) {
+          result.push({
+            tokenId,
+            userId: tokenData.userId,
+            createdAt: tokenData.createdAt,
+            expiresIn: tokenData.expiresIn,
+            metadata: tokenData.metadata,
+          });
+        }
+      }
+
+      return result;
+    } catch (error) {
+      this.logger.error("Error retrieving user tokens", { userId, error });
+      return [];
+    }
+  }
+
+  /**
+   * Remove all tokens for a user
+   */
+  async removeAllUserTokens(userId: string): Promise<void> {
+    try {
+      const userTokenIds = this.userTokens.get(userId);
+
+      if (!userTokenIds || userTokenIds.size === 0) {
+        return;
+      }
+
+      // Create a copy of the set to avoid modification during iteration
+      const tokenIds = [...userTokenIds];
+
+      // Remove each token
+      for (const tokenId of tokenIds) {
+        await this.removeToken(tokenId);
+      }
+
+      // Make sure the user entry is removed
+      this.userTokens.delete(userId);
+
+      this.logger.debug("All user tokens removed", {
+        userId,
+        count: tokenIds.length,
+      });
+    } catch (error) {
+      this.logger.error("Error removing all user tokens", { userId, error });
+      throw new ServiceError(
+        "User tokens removal error",
+        "USER_TOKENS_REMOVAL_ERROR",
+        500,
+        { cause: error }
+      );
+    }
+  }
+
+  /**
+   * Clean up expired tokens
+   */
+  async clearExpiredTokens(): Promise<void> {
+    try {
+      const now = Date.now();
+      const expiredTokenIds: string[] = [];
+
+      // Find all expired tokens
+      for (const [tokenId, data] of this.tokens.entries()) {
+        const expiryTime = data.createdAt.getTime() + data.expiresIn * 1000;
+
+        if (now > expiryTime) {
+          expiredTokenIds.push(tokenId);
+        }
+      }
+
+      // Remove each expired token
+      for (const tokenId of expiredTokenIds) {
+        await this.removeToken(tokenId);
+      }
+
+      this.logger.debug("Expired tokens cleared", {
+        count: expiredTokenIds.length,
+      });
+    } catch (error) {
+      this.logger.error("Error clearing expired tokens", { error });
+      throw new ServiceError(
+        "Token cleanup error",
+        "TOKEN_CLEANUP_ERROR",
+        500,
+        { cause: error }
+      );
+    }
+  }
+}
+
+
+// ---------------------- infrastructure\security\TokenBlacklistService.ts (73 lines) ----------------------
+
+/**
+ * Metadata for blacklisted or whitelisted tokens
+ */
+export interface TokenMetadata {
+  /** User ID associated with the token */
+  userId?: string;
+  /** Reason for blacklisting/whitelisting */
+  reason?: string;
+  /** When the token was added to the list */
+  addedAt?: string;
+  /** When the token should expire */
+  expiresAt?: Date;
+  /** Device information (useful for whitelist) */
+  device?: string;
+  /** IP address information */
+  ipAddress?: string;
+  /** Any additional custom data */
+  [key: string]: any;
+}
+
+/**
+ * Status of a token check
+ */
+export interface TokenStatus {
+  /** Whether the token is blacklisted */
+  isBlacklisted?: boolean;
+  /** Whether the token is whitelisted */
+  isWhitelisted?: boolean;
+  /** Metadata associated with the token */
+  metadata?: TokenMetadata;
+}
+
+/**
+ * Result of a bulk operation
+ */
+export interface BulkOperationResult {
+  /** Whether the operation was successful */
+  success: boolean;
+  /** How many tokens were affected */
+  count: number;
+  /** Any errors that occurred */
+  errors?: Error[];
+}
+
+/**
+ * Interface for token blacklist operations
+ */
+export interface TokenBlacklist {
+  /**
+   * Add a token to the blacklist
+   */
+  add(tokenId: string, metadata?: TokenMetadata): Promise<boolean>;
+
+  /**
+   * Remove a token from the blacklist
+   */
+  remove(tokenId: string): Promise<boolean>;
+
+  /**
+   * Check if a token is blacklisted
+   */
+  check(tokenId: string): Promise<TokenStatus>;
+
+  /**
+   * Get metadata for a token
+   */
+  getMetadata(tokenId: string): Promise<TokenMetadata | null>;
+
+  /**
+   * List all blacklisted tokens
+   */
+  listAll(): Promise<string[]>;
+}
+
+
+// ---------------------- infrastructure\security\TokenManager.ts (712 lines) ----------------------
+
+/**
+ * Token Management Service
+ *
+ * This service handles token operations with proper error handling and logging.
+ * It combines token storage and blacklist functionality.
+ */
+
+import { inject, injectable } from "inversify";
+import jwt from "jsonwebtoken";
+import { v4 as uuidv4 } from "uuid";
+
+import { TYPES } from "@/server/infrastructure/di/types";
+import type { ILoggerService } from "@/server/infrastructure/logging";
+import {
+  AppError,
+  ServiceError,
+  TechnicalError,
+} from "@/server/infrastructure/errors";
+import type {
+  TokenBlacklist,
+  TokenMetadata,
+  TokenStatus,
+} from "./TokenBlacklistService";
+import type { TokenData, TokenInfo, TokenStorage } from "./TokenStorageService";
+import type { IConfigService } from "@/server/infrastructure/config";
+
+/**
+ * Token payload structure
+ */
+export interface TokenPayload {
+  /** Unique user identifier */
+  userId: string;
+  /** User roles */
+  roles?: string[];
+  /** Session identifier */
+  sessionId?: string;
+  /** Token purpose (e.g., 'access', 'refresh', 'passwordReset') */
+  purpose?: string;
+  /** Additional payload data */
+  metadata?: Record<string, any>;
+  /** Standard JWT claims */
+  iat?: number; // Issued at
+  exp?: number; // Expiration time
+  sub?: string; // Subject (typically userId)
+  iss?: string; // Issuer
+  aud?: string; // Audience
+  jti?: string; // JWT ID
+}
+
+/**
+ * Token verification result
+ */
+export interface TokenVerificationResult {
+  /** Whether the token is valid */
+  valid: boolean;
+  /** Error message if token is invalid */
+  error?: string;
+  /** Token payload if token is valid */
+  payload?: TokenPayload;
+  /** Token metadata if available */
+  metadata?: TokenMetadata;
+}
+
+/**
+ * Token generation options
+ */
+export interface TokenOptions {
+  /** Access token expiration time (e.g., '15m', '1h') */
+  accessTokenExpiresIn?: string | number;
+  /** Refresh token expiration time (e.g., '7d', '30d') */
+  refreshTokenExpiresIn?: string | number;
+  /** Token issuer */
+  issuer?: string;
+  /** Token audience */
+  audience?: string;
+  /** Custom token ID */
+  jti?: string;
+  /** Other options to pass to the JWT sign function */
+  [key: string]: any;
+}
+
+/**
+ * Default token options
+ */
+export const DEFAULT_TOKEN_OPTIONS: TokenOptions = {
+  accessTokenExpiresIn: "15m", // 15 minutes
+  refreshTokenExpiresIn: "7d", // 7 days
+  issuer: "api",
+  audience: "webapp",
+};
+
+/**
+ * Token management service
+ * Uses dependency injection for proper error handling and logging
+ */
+@injectable()
+export class TokenManager {
+  constructor(
+    @inject(TYPES.TokenStorage) private tokenStorage: TokenStorage,
+    @inject(TYPES.TokenBlacklist) private tokenBlacklist: TokenBlacklist,
+    @inject(TYPES.SecurityLogger) private logger: ILoggerService,
+    @inject(TYPES.ConfigService) private configService: IConfigService
+  ) {}
+
+  /**
+   * Get the secret key for signing tokens
+   * @returns Buffer containing the signing key
+   * @throws {TechnicalError} if signing key is not configured
+   */
+  private getSigningKey(): Buffer {
+    try {
+      // Try to get signing key from configuration
+      const signingKey = this.configService.get(
+        "security.signatureSecret"
+      ) as string;
+
+      if (!signingKey) {
+        throw new TechnicalError(
+          "Token signing key not configured",
+          "TOKEN_SIGNING_KEY_MISSING",
+          { component: "TokenManager" } as any
+        );
+      }
+
+      return Buffer.from(signingKey);
+    } catch (error) {
+      this.logger.error("Failed to get signing key", { error });
+      throw new TechnicalError(
+        "Failed to get token signing key",
+        "TOKEN_SIGNING_KEY_ERROR",
+        { component: "TokenManager", cause: error } as any
+      );
+    }
+  }
+
+  /**
+   * Issue a new access token
+   * @param payload Token payload
+   * @param options Token options
+   * @returns Generated JWT token
+   */
+  public async issueAccessToken(
+    payload: TokenPayload,
+    options: TokenOptions = {}
+  ): Promise<string> {
+    try {
+      // Merge options with defaults
+      const tokenOptions = { ...DEFAULT_TOKEN_OPTIONS, ...options };
+
+      // Generate token ID
+      const tokenId = options.jti || uuidv4();
+
+      // Prepare the final payload
+      const finalPayload: TokenPayload = {
+        ...payload,
+        purpose: "access",
+        jti: tokenId,
+        iss: tokenOptions.issuer,
+        aud: tokenOptions.audience,
+        sub: payload.userId,
+      };
+
+      // Sign the token with appropriate options
+      const token = jwt.sign(finalPayload, this.getSigningKey(), {
+        expiresIn: String(tokenOptions.accessTokenExpiresIn),
+      });
+
+      // Store token data
+      const expiresIn =
+        typeof tokenOptions.accessTokenExpiresIn === "string"
+          ? this.parseExpiresIn(tokenOptions.accessTokenExpiresIn)
+          : Number(tokenOptions.accessTokenExpiresIn) || 900; // Default 15 minutes in seconds
+
+      const tokenData: TokenData = {
+        userId: payload.userId,
+        createdAt: new Date(),
+        expiresIn,
+        metadata: {
+          type: "access",
+          purpose: payload.purpose,
+          roles: payload.roles,
+          ...payload.metadata,
+        },
+      };
+
+      await this.tokenStorage.storeToken(tokenId, tokenData);
+
+      this.logger.debug("Access token issued", {
+        userId: payload.userId,
+        tokenId,
+      });
+
+      return token;
+    } catch (error) {
+      this.logger.error("Failed to issue access token", {
+        userId: payload.userId,
+        error,
+      });
+
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      throw new ServiceError(
+        "Failed to issue access token",
+        "TOKEN_GENERATION_ERROR",
+        500,
+        { cause: error }
+      );
+    }
+  }
+
+  /**
+   * Issue a new refresh token
+   * @param payload Token payload
+   * @param options Token options
+   * @returns Generated JWT token
+   */
+  public async issueRefreshToken(
+    payload: TokenPayload,
+    options: TokenOptions = {}
+  ): Promise<string> {
+    try {
+      // Merge options with defaults
+      const tokenOptions = { ...DEFAULT_TOKEN_OPTIONS, ...options };
+
+      // Generate token ID
+      const tokenId = options.jti || uuidv4();
+
+      // Prepare the final payload
+      const finalPayload: TokenPayload = {
+        ...payload,
+        purpose: "refresh",
+        jti: tokenId,
+        iss: tokenOptions.issuer,
+        aud: tokenOptions.audience,
+        sub: payload.userId,
+      };
+
+      // Sign the token with appropriate options
+      const token = jwt.sign(finalPayload, this.getSigningKey(), {
+        expiresIn: String(tokenOptions.refreshTokenExpiresIn),
+      });
+
+      // Store token data
+      const expiresIn =
+        typeof tokenOptions.refreshTokenExpiresIn === "string"
+          ? this.parseExpiresIn(tokenOptions.refreshTokenExpiresIn)
+          : Number(tokenOptions.refreshTokenExpiresIn) || 604800; // Default 7 days in seconds
+
+      const tokenData: TokenData = {
+        userId: payload.userId,
+        createdAt: new Date(),
+        expiresIn,
+        metadata: {
+          type: "refresh",
+          purpose: payload.purpose,
+          roles: payload.roles,
+          ...payload.metadata,
+        },
+      };
+
+      await this.tokenStorage.storeToken(tokenId, tokenData);
+
+      this.logger.debug("Refresh token issued", {
+        userId: payload.userId,
+        tokenId,
+      });
+
+      return token;
+    } catch (error) {
+      this.logger.error("Failed to issue refresh token", {
+        userId: payload.userId,
+        error,
+      });
+
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      throw new ServiceError(
+        "Failed to issue refresh token",
+        "TOKEN_GENERATION_ERROR",
+        500,
+        { cause: error }
+      );
+    }
+  }
+
+  /**
+   * Verify an access token
+   * @param token JWT token to verify
+   * @returns Token verification result
+   */
+  public async verifyAccessToken(
+    token: string
+  ): Promise<TokenVerificationResult> {
+    try {
+      // Verify the token signature and expiration
+      const decoded = jwt.verify(token, this.getSigningKey()) as TokenPayload;
+
+      // Check if the token has a valid ID
+      if (!decoded.jti) {
+        return {
+          valid: false,
+          error: "Invalid token: missing token ID",
+        };
+      }
+
+      // Check if token is in the blacklist
+      const blacklistCheck = await this.tokenBlacklist.check(decoded.jti);
+      if (blacklistCheck.isBlacklisted) {
+        this.logger.warn("Token is blacklisted", {
+          tokenId: decoded.jti,
+          userId: decoded.userId,
+          reason: blacklistCheck.metadata?.reason,
+        });
+
+        return {
+          valid: false,
+          error: "Token is revoked",
+          metadata: blacklistCheck.metadata,
+        };
+      }
+
+      // Check if the token exists in storage
+      const exists = await this.tokenStorage.hasToken(decoded.jti);
+      if (!exists) {
+        this.logger.warn("Token not found in storage", {
+          tokenId: decoded.jti,
+          userId: decoded.userId,
+        });
+
+        return {
+          valid: false,
+          error: "Token not found",
+        };
+      }
+
+      // Get token data for additional validation
+      const tokenData = await this.tokenStorage.getTokenData(decoded.jti);
+
+      // Check if token data matches payload
+      if (tokenData && tokenData.userId !== decoded.userId) {
+        this.logger.warn("Token user ID mismatch", {
+          tokenId: decoded.jti,
+          payloadUserId: decoded.userId,
+          storedUserId: tokenData.userId,
+        });
+
+        return {
+          valid: false,
+          error: "Token user ID mismatch",
+        };
+      }
+
+      return {
+        valid: true,
+        payload: decoded,
+        metadata: tokenData?.metadata as TokenMetadata,
+      };
+    } catch (error) {
+      // Handle JWT verification errors
+      if (error instanceof jwt.JsonWebTokenError) {
+        return {
+          valid: false,
+          error: `Invalid token: ${error.message}`,
+        };
+      }
+
+      if (error instanceof jwt.TokenExpiredError) {
+        return {
+          valid: false,
+          error: "Token has expired",
+        };
+      }
+
+      // Log unexpected errors
+      this.logger.error("Token verification error", { error });
+
+      return {
+        valid: false,
+        error: "Token verification failed",
+      };
+    }
+  }
+
+  /**
+   * Verify a refresh token
+   * @param token JWT token to verify
+   * @returns Token verification result
+   */
+  public async verifyRefreshToken(
+    token: string
+  ): Promise<TokenVerificationResult> {
+    try {
+      // Verify the token signature and expiration
+      const decoded = jwt.verify(token, this.getSigningKey()) as TokenPayload;
+
+      // Check if the token has a valid ID
+      if (!decoded.jti) {
+        return {
+          valid: false,
+          error: "Invalid token: missing token ID",
+        };
+      }
+
+      // Check if token is in the blacklist
+      const blacklistCheck = await this.tokenBlacklist.check(decoded.jti);
+      if (blacklistCheck.isBlacklisted) {
+        this.logger.warn("Refresh token is blacklisted", {
+          tokenId: decoded.jti,
+          userId: decoded.userId,
+          reason: blacklistCheck.metadata?.reason,
+        });
+
+        return {
+          valid: false,
+          error: "Token is revoked",
+          metadata: blacklistCheck.metadata,
+        };
+      }
+
+      // Check if the token exists in storage and is a refresh token
+      const tokenData = await this.tokenStorage.getTokenData(decoded.jti);
+      if (!tokenData) {
+        this.logger.warn("Refresh token not found in storage", {
+          tokenId: decoded.jti,
+          userId: decoded.userId,
+        });
+
+        return {
+          valid: false,
+          error: "Token not found",
+        };
+      }
+
+      // Check if token type is correct
+      if (tokenData.metadata?.type !== "refresh") {
+        this.logger.warn("Token is not a refresh token", {
+          tokenId: decoded.jti,
+          userId: decoded.userId,
+          type: tokenData.metadata?.type,
+        });
+
+        return {
+          valid: false,
+          error: "Invalid token type",
+        };
+      }
+
+      // Check if token data matches payload
+      if (tokenData.userId !== decoded.userId) {
+        this.logger.warn("Refresh token user ID mismatch", {
+          tokenId: decoded.jti,
+          payloadUserId: decoded.userId,
+          storedUserId: tokenData.userId,
+        });
+
+        return {
+          valid: false,
+          error: "Token user ID mismatch",
+        };
+      }
+
+      return {
+        valid: true,
+        payload: decoded,
+        metadata: tokenData.metadata as TokenMetadata,
+      };
+    } catch (error) {
+      // Handle JWT verification errors
+      if (error instanceof jwt.JsonWebTokenError) {
+        return {
+          valid: false,
+          error: `Invalid token: ${error.message}`,
+        };
+      }
+
+      if (error instanceof jwt.TokenExpiredError) {
+        return {
+          valid: false,
+          error: "Token has expired",
+        };
+      }
+
+      // Log unexpected errors
+      this.logger.error("Refresh token verification error", { error });
+
+      return {
+        valid: false,
+        error: "Token verification failed",
+      };
+    }
+  }
+
+  /**
+   * Revoke a token by adding it to the blacklist
+   * @param tokenId Token ID to revoke
+   * @param metadata Optional metadata about revocation
+   * @returns Whether the revocation was successful
+   */
+  public async revokeToken(
+    tokenId: string,
+    metadata?: TokenMetadata
+  ): Promise<boolean> {
+    try {
+      // Get token data from storage
+      const tokenData = await this.tokenStorage.getTokenData(tokenId);
+
+      if (!tokenData) {
+        this.logger.warn("Attempted to revoke non-existent token", { tokenId });
+        return false;
+      }
+
+      // Add token to blacklist with metadata
+      const blacklistMetadata: TokenMetadata = {
+        userId: tokenData.userId,
+        reason: metadata?.reason || "Manually revoked",
+        addedAt: new Date().toISOString(),
+        ...metadata,
+      };
+
+      const result = await this.tokenBlacklist.add(tokenId, blacklistMetadata);
+
+      if (result) {
+        this.logger.info("Token revoked", {
+          tokenId,
+          userId: tokenData.userId,
+          reason: blacklistMetadata.reason,
+        });
+      } else {
+        this.logger.warn("Failed to revoke token", { tokenId });
+      }
+
+      return result;
+    } catch (error) {
+      this.logger.error("Error revoking token", { tokenId, error });
+
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      throw new ServiceError(
+        "Failed to revoke token",
+        "TOKEN_REVOCATION_ERROR",
+        500,
+        { cause: error }
+      );
+    }
+  }
+
+  /**
+   * Revoke all tokens for a user
+   * @param userId User ID whose tokens should be revoked
+   * @param reason Reason for revocation
+   * @returns Number of tokens revoked
+   */
+  public async revokeAllUserTokens(
+    userId: string,
+    reason: string = "User session terminated"
+  ): Promise<number> {
+    try {
+      // Get all tokens for the user
+      const userTokens = await this.tokenStorage.getAllUserTokens(userId);
+
+      if (userTokens.length === 0) {
+        this.logger.debug("No tokens found for user", { userId });
+        return 0;
+      }
+
+      // Add each token to the blacklist
+      let revokedCount = 0;
+
+      for (const token of userTokens) {
+        const blacklistMetadata: TokenMetadata = {
+          userId,
+          reason,
+          addedAt: new Date().toISOString(),
+        };
+
+        const result = await this.tokenBlacklist.add(
+          token.tokenId,
+          blacklistMetadata
+        );
+
+        if (result) {
+          revokedCount++;
+        }
+      }
+
+      this.logger.info("Revoked all user tokens", {
+        userId,
+        count: revokedCount,
+        reason,
+      });
+
+      return revokedCount;
+    } catch (error) {
+      this.logger.error("Error revoking user tokens", { userId, error });
+
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      throw new ServiceError(
+        "Failed to revoke user tokens",
+        "USER_TOKENS_REVOCATION_ERROR",
+        500,
+        { cause: error }
+      );
+    }
+  }
+
+  /**
+   * Refresh an access token using a valid refresh token
+   * @param refreshToken Refresh token
+   * @param newPayload Optional additional payload for the new access token
+   * @param options Optional token generation options
+   * @returns New access token or null if refresh failed
+   */
+  public async refreshAccessToken(
+    refreshToken: string,
+    newPayload: Partial<TokenPayload> = {},
+    options: TokenOptions = {}
+  ): Promise<string | null> {
+    try {
+      // Verify the refresh token
+      const verification = await this.verifyRefreshToken(refreshToken);
+
+      if (!verification.valid || !verification.payload) {
+        this.logger.warn("Invalid refresh token", {
+          error: verification.error,
+        });
+        return null;
+      }
+
+      // Create new payload based on refresh token payload
+      const payload: TokenPayload = {
+        ...verification.payload,
+        ...newPayload,
+      };
+
+      // Issue new access token
+      const accessToken = await this.issueAccessToken(payload, options);
+
+      this.logger.debug("Access token refreshed", {
+        userId: payload.userId,
+        refreshTokenId: verification.payload.jti,
+      });
+
+      return accessToken;
+    } catch (error) {
+      this.logger.error("Error refreshing access token", { error });
+
+      if (error instanceof AppError) {
+        throw error;
+      }
+
+      throw new ServiceError(
+        "Failed to refresh access token",
+        "TOKEN_REFRESH_ERROR",
+        500,
+        { cause: error }
+      );
+    }
+  }
+
+  /**
+   * Check if a token is revoked
+   * @param tokenId Token ID to check
+   * @returns Whether the token is revoked
+   */
+  public async isTokenRevoked(tokenId: string): Promise<boolean> {
+    try {
+      const status = await this.tokenBlacklist.check(tokenId);
+      return !!status.isBlacklisted;
+    } catch (error) {
+      this.logger.error("Error checking token revocation status", {
+        tokenId,
+        error,
+      });
+
+      // Default to considering tokens revoked if blacklist check fails
+      // (safer security-wise)
+      return true;
+    }
+  }
+
+  /**
+   * Parse a time string like "1h" or "7d" into seconds
+   * @param timeString Time string to parse
+   * @returns Time in seconds
+   */
+  private parseExpiresIn(timeString: string): number {
+    const value = parseInt(timeString);
+    const unit = timeString.slice(String(value).length);
+
+    switch (unit) {
+      case "s":
+        return value;
+      case "m":
+        return value * 60;
+      case "h":
+        return value * 60 * 60;
+      case "d":
+        return value * 24 * 60 * 60;
+      default:
+        return value;
+    }
+  }
+}
+
+
+// ---------------------- infrastructure\security\TokenStorageService.ts (76 lines) ----------------------
+
+import Redis from "ioredis";
+
+/**
+ * Token metadata interface
+ */
+export interface TokenData {
+  userId: string;
+  createdAt: Date;
+  expiresIn: number; // Expiration time in seconds
+  metadata?: Record<string, any>; // Optional additional metadata
+}
+
+/**
+ * Token info with ID
+ */
+export interface TokenInfo {
+  tokenId: string;
+  userId: string;
+  createdAt: Date;
+  expiresIn: number;
+  metadata?: Record<string, any>;
+}
+
+/**
+ * Options for token storage
+ */
+export interface TokenStorageOptions {
+  prefix?: string;
+  redisUrl?: string;
+  redisOptions?: Redis.RedisOptions;
+}
+
+/**
+ * Abstract interface for token storage
+ */
+export interface TokenStorage {
+  /**
+   * Store a token with associated data
+   */
+  storeToken(tokenId: string, data: TokenData): Promise<void>;
+
+  /**
+   * Retrieve data for a token
+   */
+  getTokenData(tokenId: string): Promise<TokenData | null>;
+
+  /**
+   * Remove a token from storage
+   */
+  removeToken(tokenId: string): Promise<void>;
+
+  /**
+   * Check if a token exists
+   */
+  hasToken(tokenId: string): Promise<boolean>;
+
+  /**
+   * Get all tokens for a user
+   */
+  getAllUserTokens(userId: string): Promise<TokenInfo[]>;
+
+  /**
+   * Remove all tokens for a user
+   */
+  removeAllUserTokens(userId: string): Promise<void>;
+
+  /**
+   * Clean up expired tokens
+   */
+  clearExpiredTokens(): Promise<void>;
+
+  /**
+   * Close any connections (if applicable)
+   */
+  close?(): Promise<void>;
+}
+
+
+// ---------------------- infrastructure\security\WebSocketAuthService.ts (191 lines) ----------------------
+
+/**
+ * WebSocket Authentication Service
+ *
+ * This service handles authentication for WebSocket connections using
+ * the dependency injection pattern with proper error handling and logging.
+ */
+
+import { inject, injectable } from "inversify";
+import { IncomingMessage } from "http";
+import { parse as parseUrl } from "url";
+import { parse as parseCookies } from "cookie";
+
+import { TYPES } from "@/server/infrastructure/di/types";
+import type { ILoggerService } from "@/server/infrastructure/logging";
+import { ServiceError } from "@/server/infrastructure/errors";
+import { TokenManager, TokenPayload } from "./TokenManager";
+
+/**
+ * WebSocket authentication result
+ */
+export interface WebSocketAuthResult {
+  /** Whether authentication was successful */
+  authenticated: boolean;
+  /** User ID if authenticated */
+  userId?: string;
+  /** User roles if authenticated */
+  roles?: string[];
+  /** Error message if authentication failed */
+  error?: string;
+  /** Full token payload if authenticated */
+  payload?: TokenPayload;
+}
+
+/**
+ * WebSocket authentication service
+ */
+@injectable()
+export class WebSocketAuthService {
+  constructor(
+    @inject(TYPES.TokenManager) private tokenManager: TokenManager,
+    @inject(TYPES.SecurityLogger) private logger: ILoggerService
+  ) {}
+
+  /**
+   * Authenticate a WebSocket connection request
+   * @param request The HTTP upgrade request for the WebSocket connection
+   * @returns Authentication result
+   */
+  async authenticateConnection(
+    request: IncomingMessage
+  ): Promise<WebSocketAuthResult> {
+    try {
+      // Get token from query string or cookies
+      const token = this.extractToken(request);
+
+      if (!token) {
+        return {
+          authenticated: false,
+          error: "No authentication token provided",
+        };
+      }
+
+      // Verify the token
+      const verificationResult =
+        await this.tokenManager.verifyAccessToken(token);
+
+      if (!verificationResult.valid || !verificationResult.payload) {
+        this.logger.warn("Invalid token for WebSocket connection", {
+          ip: request.socket.remoteAddress,
+          error: verificationResult.error,
+        });
+
+        return {
+          authenticated: false,
+          error: verificationResult.error || "Invalid authentication token",
+        };
+      }
+
+      // Successfully authenticated
+      const payload = verificationResult.payload;
+
+      this.logger.debug("WebSocket connection authenticated", {
+        userId: payload.userId,
+        ip: request.socket.remoteAddress,
+      });
+
+      return {
+        authenticated: true,
+        userId: payload.userId,
+        roles: payload.roles || [],
+        payload,
+      };
+    } catch (error) {
+      this.logger.error("WebSocket authentication error", {
+        ip: request.socket.remoteAddress,
+        error,
+      });
+
+      return {
+        authenticated: false,
+        error: "Authentication error",
+      };
+    }
+  }
+
+  /**
+   * Extract token from request (query string or cookies)
+   * @param request HTTP request
+   * @returns Token string or null if not found
+   */
+  private extractToken(request: IncomingMessage): string | null {
+    try {
+      // Try to get token from query string
+      if (request.url) {
+        const parsedUrl = parseUrl(request.url, true);
+        const token = parsedUrl.query.token;
+
+        if (token && typeof token === "string") {
+          return token;
+        }
+      }
+
+      // Try to get token from cookies
+      const cookieHeader = request.headers.cookie;
+
+      if (cookieHeader) {
+        const cookies = parseCookies(cookieHeader);
+
+        // Check for token in various cookie names
+        const tokenCookieName = [
+          "access_token",
+          "accessToken",
+          "auth_token",
+          "authToken",
+          "token",
+        ].find((name) => cookies[name]);
+
+        if (tokenCookieName) {
+          return cookies[tokenCookieName];
+        }
+      }
+
+      // Try to get token from Authorization header
+      const authHeader = request.headers.authorization;
+
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        return authHeader.substring(7);
+      }
+
+      return null;
+    } catch (error) {
+      this.logger.error("Error extracting WebSocket auth token", { error });
+      return null;
+    }
+  }
+
+  /**
+   * Validate user permissions for specific WebSocket actions
+   * @param userId User ID
+   * @param requiredPermissions Required permissions
+   * @returns Whether the user has the required permissions
+   */
+  async validatePermissions(
+    userId: string,
+    requiredPermissions: string[]
+  ): Promise<boolean> {
+    try {
+      // This is a placeholder implementation
+      // A real implementation would check user permissions against a database
+      // or call an authorization service
+
+      this.logger.debug("Checking WebSocket permissions", {
+        userId,
+        requiredPermissions,
+      });
+
+      // For this example, we'll just return true
+      // In a real application, this would check against actual permissions
+      return true;
+    } catch (error) {
+      this.logger.error("Error validating WebSocket permissions", {
+        userId,
+        requiredPermissions,
+        error,
+      });
+
+      // Default to denying access on error
+      return false;
+    }
+  }
+}
+
+
+// ---------------------- infrastructure\security\cookieUtils.ts (494 lines) ----------------------
+
+/**
+ * Cookie Utilities
+ *
+ * Core functionality for managing authentication cookies
+ * and cookie-based authentication.
+ */
+
+import { injectable, inject } from "inversify";
+import type { Request, Response } from "express";
+import crypto from "crypto";
+import type { ServerConfig } from "../config/ConfigService";
+import { TYPES } from "@/server/infrastructure/di/types";
+import type { ILoggerService } from "@/server/infrastructure/logging";
+import type { IConfigService } from "@/server/infrastructure/config";
+
+/**
+ * Cookie options interface
+ */
+export interface CookieOptions {
+  /** Whether the cookie is HTTP only (default: true) */
+  httpOnly?: boolean;
+
+  /** Whether the cookie is secure (default: depends on environment) */
+  secure?: boolean;
+
+  /** Cookie same site policy (default: strict) */
+  sameSite?: boolean | "strict" | "lax" | "none";
+
+  /** Cookie path (default: /) */
+  path?: string;
+
+  /** Cookie domain */
+  domain?: string;
+
+  /** Cookie expiration date */
+  expires?: Date;
+
+  /** Cookie max age in milliseconds */
+  maxAge?: number;
+
+  /** Whether to sign the cookie */
+  signed?: boolean;
+}
+
+/**
+ * Default cookie options
+ */
+export const DEFAULT_COOKIE_OPTIONS: CookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "strict",
+  path: "/",
+};
+
+/**
+ * Cookie service handling auth cookies with proper dependency injection
+ */
+@injectable()
+export class CookieService {
+  constructor(
+    @inject(TYPES.ConfigService) private configService: IConfigService,
+    @inject(TYPES.SecurityLogger) private logger: ILoggerService
+  ) {}
+
+  /**
+   * Set authentication cookies on the response
+   */
+  setAuthCookies(
+    args: {
+      authToken: string;
+      expiration: Date;
+      userId: string;
+    },
+    res: Response
+  ): void {
+    try {
+      const { authToken, expiration, userId } = args;
+      const config = this.configService.get("server") as ServerConfig;
+
+      const cookieOptions = {
+        secure: config.production,
+        httpOnly: true,
+        expires: expiration,
+        sameSite: "strict" as const,
+        domain: config.production
+          ? typeof config.corsOrigin === "string"
+            ? config.corsOrigin
+            : undefined
+          : undefined,
+      };
+
+      // Set the cookie on the response.
+      res.cookie("authToken", authToken, cookieOptions);
+
+      // Set the current logged in userId so the client knows.
+      res.cookie("userId", userId, {
+        ...cookieOptions,
+        httpOnly: false,
+      });
+
+      this.logger.debug("Auth cookies set", {
+        userId,
+        expires: expiration.toISOString(),
+        secure: cookieOptions.secure,
+      });
+    } catch (error) {
+      this.logger.error("Failed to set auth cookies", { error });
+      // Continue without setting cookies - the application layer should handle this
+    }
+  }
+
+  /**
+   * Get the authentication token from cookies
+   */
+  getAuthTokenCookie(
+    req: Request & { cookies: { [key: string]: string | undefined } }
+  ): string | undefined {
+    try {
+      const cookies = req.cookies as { [key: string]: string | undefined };
+      const token = cookies["authToken"];
+
+      if (!token) {
+        this.logger.debug("No auth token found in cookies");
+      }
+
+      return token;
+    } catch (error) {
+      this.logger.error("Error retrieving auth token from cookies", { error });
+      return undefined;
+    }
+  }
+
+  /**
+   * Clear authentication cookies
+   */
+  clearAuthCookies(res: Response): void {
+    try {
+      res.clearCookie("authToken");
+      res.clearCookie("userId");
+      this.logger.debug("Auth cookies cleared");
+    } catch (error) {
+      this.logger.error("Failed to clear auth cookies", { error });
+      // Continue despite error - best effort
+    }
+  }
+
+  /**
+   * Sets a cookie with secure defaults
+   *
+   * @param res - Express response object
+   * @param name - Cookie name
+   * @param value - Cookie value
+   * @param options - Cookie options (optional)
+   */
+  setCookie(
+    res: Response,
+    name: string,
+    value: string,
+    options: CookieOptions = {}
+  ): void {
+    try {
+      const mergedOptions = { ...DEFAULT_COOKIE_OPTIONS, ...options };
+      res.cookie(name, value, mergedOptions as Record<string, unknown>);
+
+      this.logger.debug(`Cookie set: ${name}`, {
+        secure: mergedOptions.secure,
+        httpOnly: mergedOptions.httpOnly,
+        sameSite: mergedOptions.sameSite,
+      });
+    } catch (error) {
+      this.logger.error("Error setting cookie", { error, name });
+      throw new Error(`Failed to set cookie: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * Gets a cookie value from the request
+   *
+   * @param req - Express request object
+   * @param name - Cookie name
+   * @returns Cookie value or undefined if not found
+   */
+  getCookie(req: Request, name: string): string | undefined {
+    try {
+      return req.cookies?.[name];
+    } catch (error) {
+      this.logger.error("Error getting cookie", { error, name });
+      return undefined;
+    }
+  }
+
+  /**
+   * Clears a cookie
+   *
+   * @param res - Express response object
+   * @param name - Cookie name
+   * @param options - Cookie options (optional)
+   */
+  clearCookie(
+    res: Response,
+    name: string,
+    options: Omit<CookieOptions, "maxAge"> = {}
+  ): void {
+    try {
+      const clearOptions = {
+        ...DEFAULT_COOKIE_OPTIONS,
+        ...options,
+      };
+
+      res.clearCookie(name, clearOptions as Record<string, unknown>);
+      this.logger.debug(`Cookie cleared: ${name}`);
+    } catch (error) {
+      this.logger.error("Error clearing cookie", { error, name });
+      throw new Error(`Failed to clear cookie: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * Sets a signed cookie
+   *
+   * @param res - Express response object
+   * @param name - Cookie name
+   * @param value - Cookie value
+   * @param secret - Secret key for signing
+   * @param options - Cookie options (optional)
+   */
+  setSignedCookie(
+    res: Response,
+    name: string,
+    value: string,
+    secret: string,
+    options: CookieOptions = {}
+  ): void {
+    try {
+      // Sign the value
+      const hmac = crypto.createHmac("sha256", secret);
+      const signature = hmac.update(value).digest("base64url");
+      const signedValue = `${value}.${signature}`;
+
+      // Set the cookie with the signed value
+      this.setCookie(res, name, signedValue, options);
+    } catch (error) {
+      this.logger.error("Error setting signed cookie", { error, name });
+      throw new Error(
+        `Failed to set signed cookie: ${(error as Error).message}`
+      );
+    }
+  }
+
+  /**
+   * Gets and verifies a signed cookie
+   *
+   * @param req - Express request object
+   * @param name - Cookie name
+   * @param secret - Secret key for verification
+   * @returns Original value if valid, undefined if invalid or not found
+   */
+  getSignedCookie(
+    req: Request,
+    name: string,
+    secret: string
+  ): string | undefined {
+    try {
+      const signedValue = this.getCookie(req, name);
+
+      if (!signedValue) {
+        return undefined;
+      }
+
+      const [value, signature] = signedValue.split(".");
+
+      if (!value || !signature) {
+        this.logger.warn("Invalid signed cookie format", { name });
+        return undefined;
+      }
+
+      // Verify the signature
+      const hmac = crypto.createHmac("sha256", secret);
+      const expectedSignature = hmac.update(value).digest("base64url");
+
+      if (signature === expectedSignature) {
+        return value;
+      }
+
+      this.logger.warn("Cookie signature verification failed", { name });
+      return undefined;
+    } catch (error) {
+      this.logger.error("Error verifying signed cookie", { error, name });
+      return undefined;
+    }
+  }
+
+  /**
+   * Sets an encrypted cookie
+   *
+   * @param res - Express response object
+   * @param name - Cookie name
+   * @param value - Value to encrypt and store
+   * @param encryptionKey - Key for encryption (must be 32 bytes for AES-256)
+   * @param options - Cookie options (optional)
+   */
+  setEncryptedCookie(
+    res: Response,
+    name: string,
+    value: string,
+    encryptionKey: Buffer,
+    options: CookieOptions = {}
+  ): void {
+    try {
+      // Validate key length
+      if (encryptionKey.length !== 32) {
+        throw new Error("Encryption key must be 32 bytes for AES-256-GCM");
+      }
+
+      // Generate a random IV
+      const iv = crypto.randomBytes(16);
+
+      // Create cipher
+      const cipher = crypto.createCipheriv("aes-256-gcm", encryptionKey, iv);
+
+      // Encrypt value
+      let encrypted = cipher.update(value, "utf8", "base64");
+      encrypted += cipher.final("base64");
+
+      // Get authentication tag
+      const authTag = cipher.getAuthTag().toString("base64");
+
+      // Format the cookie value: base64(iv).base64(encrypted).base64(authTag)
+      const cookieValue = `${iv.toString("base64")}.${encrypted}.${authTag}`;
+
+      // Set the cookie
+      this.setCookie(res, name, cookieValue, options);
+    } catch (error) {
+      this.logger.error("Error encrypting cookie", { error, name });
+      throw new Error(`Failed to encrypt cookie: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * Gets and decrypts an encrypted cookie
+   *
+   * @param req - Express request object
+   * @param name - Cookie name
+   * @param encryptionKey - Key for decryption (must be 32 bytes for AES-256)
+   * @returns Decrypted value or undefined if not found or invalid
+   */
+  getEncryptedCookie(
+    req: Request,
+    name: string,
+    encryptionKey: Buffer
+  ): string | undefined {
+    try {
+      // Validate key length
+      if (encryptionKey.length !== 32) {
+        throw new Error("Encryption key must be 32 bytes for AES-256-GCM");
+      }
+
+      const cookieValue = this.getCookie(req, name);
+
+      if (!cookieValue) {
+        return undefined;
+      }
+
+      // Split the cookie value: base64(iv).base64(encrypted).base64(authTag)
+      const parts = cookieValue.split(".");
+
+      if (parts.length !== 3) {
+        this.logger.warn("Invalid encrypted cookie format", { name });
+        return undefined;
+      }
+
+      const [ivBase64, encryptedBase64, authTagBase64] = parts;
+
+      // Decode components
+      const iv = Buffer.from(ivBase64, "base64");
+      const encrypted = encryptedBase64;
+      const authTag = Buffer.from(authTagBase64, "base64");
+
+      // Create decipher
+      const decipher = crypto.createDecipheriv(
+        "aes-256-gcm",
+        encryptionKey,
+        iv
+      );
+      decipher.setAuthTag(authTag);
+
+      // Decrypt value
+      let decrypted = decipher.update(encrypted, "base64", "utf8");
+      decrypted += decipher.final("utf8");
+
+      return decrypted;
+    } catch (error) {
+      this.logger.error("Error decrypting cookie", { error, name });
+      return undefined;
+    }
+  }
+}
+
+// Legacy compatibility function - for backward compatibility
+// These will be deprecated in favor of the injectable service
+export function setAuthCookies(
+  config: ServerConfig,
+  args: {
+    authToken: string;
+    expiration: Date;
+    userId: string;
+  },
+  res: Response
+): void {
+  const { authToken, expiration, userId } = args;
+
+  const cookieOptions = {
+    secure: config.production,
+    httpOnly: true,
+    expires: expiration,
+    sameSite: "strict" as const,
+    domain: config.production
+      ? typeof config.corsOrigin === "string"
+        ? config.corsOrigin
+        : undefined
+      : undefined,
+  };
+
+  // Set the cookie on the response.
+  res.cookie("authToken", authToken, cookieOptions);
+
+  // Set the current logged in userId so the client knows.
+  res.cookie("userId", userId, {
+    ...cookieOptions,
+    httpOnly: false,
+  });
+}
+
+// Legacy compatibility function - for backward compatibility
+export function getAuthTokenCookie(
+  req: Request & { cookies: { [key: string]: string | undefined } }
+): string | undefined {
+  const cookies = req.cookies as { [key: string]: string | undefined };
+  return cookies["authToken"];
+}
+
+// Legacy compatibility function - for backward compatibility
+export function clearAuthCookies(res: Response): void {
+  res.clearCookie("authToken");
+  res.clearCookie("userId");
+}
+
+/**
+ * Sets a cookie with secure defaults
+ *
+ * @param res - Express response object
+ * @param name - Cookie name
+ * @param value - Cookie value
+ * @param options - Cookie options (optional)
+ */
+export function setCookie(
+  res: Response,
+  name: string,
+  value: string,
+  options: CookieOptions = {}
+): void {
+  const mergedOptions = { ...DEFAULT_COOKIE_OPTIONS, ...options };
+  res.cookie(name, value, mergedOptions as Record<string, unknown>);
+}
+
+/**
+ * Gets a cookie value from the request
+ *
+ * @param req - Express request object
+ * @param name - Cookie name
+ * @returns Cookie value or undefined if not found
+ */
+export function getCookie(req: Request, name: string): string | undefined {
+  return req.cookies?.[name];
+}
+
+/**
+ * Clears a cookie
+ *
+ * @param res - Express response object
+ * @param name - Cookie name
+ * @param options - Cookie options (optional)
+ */
+export function clearCookie(
+  res: Response,
+  name: string,
+  options: Omit<CookieOptions, "maxAge"> = {}
+): void {
+  const clearOptions = {
+    ...DEFAULT_COOKIE_OPTIONS,
+    ...options,
+  };
+  res.clearCookie(name, clearOptions as Record<string, unknown>);
+}
+
+
+// ---------------------- infrastructure\security\corsConfig.ts (227 lines) ----------------------
+
+import { Request, Response, NextFunction } from "express";
+
+import { ServerEnvironment } from "../../../infrastructure/config/ConfigService";
+
+/**
+ * Options for CORS with authentication
+ */
+export interface CorsWithAuthOptions {
+  additionalHeaders?: string[];
+  additionalMethods?: string[];
+  preflightSuccessHandler?: (req: Request, res: Response) => void;
+}
+
+/**
+ * CORS options interface
+ */
+export interface CorsOptions {
+  origin?:
+    | boolean
+    | string
+    | RegExp
+    | (string | RegExp)[]
+    | ((
+        origin: string | undefined,
+        callback: (err: Error | null, allow?: boolean) => void
+      ) => void);
+  methods?: string | string[];
+  allowedHeaders?: string | string[];
+  exposedHeaders?: string | string[];
+  credentials?: boolean;
+  maxAge?: number;
+  preflightContinue?: boolean;
+  optionsSuccessStatus?: number;
+  preflightSuccessHandler?: (req: Request, res: Response) => void;
+}
+
+/**
+ * Validate if an origin is allowed based on the configuration
+ */
+export function validateOrigin(
+  env: ServerEnvironment,
+  origin: string | undefined
+): boolean {
+  if (!origin) {
+    return false;
+  }
+
+  const { corsOrigin } = env.config;
+
+  // Allow all origins in development if specified with '*'
+  if (corsOrigin === "*") {
+    return true;
+  }
+
+  // Parse allowed origins from configuration
+  const allowedOrigins =
+    typeof corsOrigin === "string"
+      ? corsOrigin.split(",").map((o: string) => o.trim())
+      : corsOrigin;
+
+  // Extract domain from origin
+  let originDomain = origin;
+  try {
+    const url = new URL(origin);
+    originDomain = url.hostname;
+  } catch (error) {
+    // If it's not a valid URL, use the raw origin
+  }
+
+  // Check if the domain or full origin is in the allowed list
+  return (
+    allowedOrigins.includes(originDomain) ||
+    allowedOrigins.includes(origin) ||
+    allowedOrigins.some((allowedOrigin: string) => {
+      // Support wildcard subdomains
+      if (allowedOrigin.startsWith("*.")) {
+        const baseDomain = allowedOrigin.substring(2);
+        return (
+          originDomain.endsWith(`.${baseDomain}`) || originDomain === baseDomain
+        );
+      }
+      return false;
+    })
+  );
+}
+
+/**
+ * Create CORS options with authentication support
+ */
+export function corsWithAuthOptions(
+  env: ServerEnvironment,
+  options: CorsWithAuthOptions = {}
+): CorsOptions {
+  const defaultHeaders = [
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Accept",
+  ];
+
+  const defaultMethods = ["GET", "POST", "OPTIONS"];
+
+  // Combine default and additional headers/methods
+  const allowedHeaders = [
+    ...defaultHeaders,
+    ...(options.additionalHeaders || []),
+  ];
+
+  const allowedMethods = [
+    ...defaultMethods,
+    ...(options.additionalMethods || []),
+  ];
+
+  return {
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void
+    ) => {
+      if (validateOrigin(env, origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Origin not allowed by CORS"));
+      }
+    },
+    methods: allowedMethods,
+    allowedHeaders,
+    credentials: true, // Allow cookies to be sent with requests
+    maxAge: 86400, // Cache preflight request for 24 hours
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    preflightSuccessHandler: options.preflightSuccessHandler,
+  };
+}
+
+/**
+ * Create a CORS middleware that validates origin and handles preflight requests
+ */
+export function createCorsMiddleware(env: ServerEnvironment) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const origin = req.headers.origin;
+
+    // Check if origin is allowed
+    if (!validateOrigin(env, origin)) {
+      return res.status(403).json({
+        error: "CORS error",
+        message: "This origin is not allowed to access this resource",
+      });
+    }
+
+    // Set CORS headers
+    res.setHeader("Access-Control-Allow-Origin", origin!);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+
+    // Handle preflight requests
+    if (req.method === "OPTIONS") {
+      // This is a preflight request
+      const requestMethod = req.headers["access-control-request-method"];
+      if (requestMethod) {
+        res.setHeader(
+          "Access-Control-Allow-Methods",
+          "GET, POST, OPTIONS, PUT, PATCH, DELETE"
+        );
+      }
+
+      const requestHeaders = req.headers["access-control-request-headers"];
+      if (requestHeaders) {
+        res.setHeader("Access-Control-Allow-Headers", requestHeaders);
+      }
+
+      res.setHeader("Access-Control-Max-Age", "86400"); // 24 hours
+      res.end();
+      return;
+    }
+
+    // Continue processing the request
+    next();
+  };
+}
+
+/**
+ * Handle preflight requests with authentication requirements
+ */
+export function preflightRequestHandler(env: ServerEnvironment) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const origin = req.headers.origin;
+
+    // Handle preflight CORS requests
+    if (req.method === "OPTIONS") {
+      // Check if origin is allowed
+      if (!validateOrigin(env, origin)) {
+        return res.status(403).json({
+          error: "CORS error",
+          message: "This origin is not allowed to access this resource",
+        });
+      }
+
+      // Set CORS headers
+      res.setHeader("Access-Control-Allow-Origin", origin!);
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+
+      // Set allowed methods
+      const requestMethod = req.headers["access-control-request-method"];
+      if (requestMethod) {
+        res.setHeader(
+          "Access-Control-Allow-Methods",
+          "GET, POST, OPTIONS, PUT, PATCH, DELETE"
+        );
+      }
+
+      // Set allowed headers
+      const requestHeaders = req.headers["access-control-request-headers"];
+      if (requestHeaders) {
+        res.setHeader("Access-Control-Allow-Headers", requestHeaders);
+      }
+
+      // Set max age for preflight requests
+      res.setHeader("Access-Control-Max-Age", "86400"); // 24 hours
+
+      // End the request without calling next middleware
+      res.end();
+      return;
+    }
+
+    // Not a preflight request, continue
+    next();
+  };
+}
+
+
+// ---------------------- infrastructure\security\csrfUtils.ts (234 lines) ----------------------
+
+/**
+ * CSRF Protection Utilities
+ *
+ * Core functionality for protecting against Cross-Site Request Forgery attacks.
+ */
+
+import { createHmac, timingSafeEqual, randomBytes } from "crypto";
+import { serialize, Data } from "./encryptionUtils";
+
+/**
+ * CSRF token options
+ */
+export interface CSRFOptions {
+  /** Token expiration in milliseconds (default: 1 hour) */
+  expiryMs?: number;
+
+  /** Whether to include the user agent in the token validation */
+  includeUserAgent?: boolean;
+
+  /** Whether to include the origin/referer in the token validation */
+  includeOrigin?: boolean;
+
+  secret?: string;
+  cookieName?: string;
+  headerName?: string;
+}
+
+/**
+ * Default CSRF options
+ */
+export const DEFAULT_CSRF_OPTIONS: CSRFOptions = {
+  expiryMs: 3600000, // 1 hour
+  includeUserAgent: true,
+  includeOrigin: true,
+  cookieName: "csrf-token",
+  headerName: "X-CSRF-Token",
+};
+
+/**
+ * CSRF token payload structure
+ */
+export interface CsrfPayload {
+  /** Session ID the token is bound to */
+  sessionId: string;
+
+  /** Timestamp when token was created */
+  timestamp: number;
+
+  /** Browser user agent (if enabled) */
+  userAgent?: string;
+
+  /** Origin or referrer URL (if enabled) */
+  origin?: string;
+
+  /** Random nonce to prevent token reuse */
+  nonce: string;
+}
+
+/**
+ * Generate a CSRF token for protecting against CSRF attacks
+ *
+ * @param sessionId - The user's session ID to bind the token to
+ * @param secretKey - Secret key used for signing
+ * @param options - CSRF token generation options
+ * @param context - Additional context like user agent and origin
+ * @returns A CSRF token string that can be included in forms
+ */
+export function generateCsrfToken(
+  sessionId: string,
+  secretKey: Buffer,
+  options: CSRFOptions = DEFAULT_CSRF_OPTIONS,
+  context?: { userAgent?: string; origin?: string }
+): string {
+  // Create the token payload
+  const payload: CsrfPayload = {
+    sessionId,
+    timestamp: Date.now(),
+    nonce: randomBytes(16).toString("hex"),
+  };
+
+  // Include user agent if requested and available
+  if (options.includeUserAgent && context?.userAgent) {
+    payload.userAgent = context.userAgent;
+  }
+
+  // Include origin if requested and available
+  if (options.includeOrigin && context?.origin) {
+    payload.origin = context.origin;
+  }
+
+  // Create the serialized payload - convert to Data type by treating as unknown first
+  const serializedPayload = serialize(payload as unknown as Data);
+
+  // Create a signature for the payload
+  const hmac = createHmac("sha256", secretKey);
+  hmac.update(serializedPayload);
+  const signature = hmac.digest("base64");
+
+  // Combine payload and signature to create the token
+  const token = Buffer.from(
+    JSON.stringify({
+      payload,
+      signature,
+    })
+  ).toString("base64");
+
+  return token;
+}
+
+/**
+ * Verify a CSRF token
+ *
+ * @param token - The CSRF token to verify
+ * @param sessionId - The current user session ID
+ * @param secretKey - Secret key used for signing
+ * @param options - CSRF token verification options
+ * @param context - Additional context like user agent and origin
+ * @returns Boolean indicating whether the token is valid
+ */
+export function verifyCsrfToken(
+  token: string,
+  sessionId: string,
+  secretKey: Buffer,
+  options: CSRFOptions = DEFAULT_CSRF_OPTIONS,
+  context?: { userAgent?: string; origin?: string }
+): boolean {
+  try {
+    // Parse the token
+    const parsed = JSON.parse(Buffer.from(token, "base64").toString("utf-8"));
+    const { payload, signature } = parsed;
+
+    // Validate the token content
+    if (
+      !payload ||
+      !signature ||
+      !payload.sessionId ||
+      !payload.timestamp ||
+      !payload.nonce
+    ) {
+      return false;
+    }
+
+    // Verify token is for the correct session
+    if (payload.sessionId !== sessionId) {
+      return false;
+    }
+
+    // Check if token has expired
+    const now = Date.now();
+    const expiryMs = options.expiryMs || DEFAULT_CSRF_OPTIONS.expiryMs;
+    if (now - payload.timestamp > expiryMs!) {
+      return false;
+    }
+
+    // Verify user agent if required
+    if (options.includeUserAgent && payload.userAgent && context?.userAgent) {
+      if (payload.userAgent !== context.userAgent) {
+        return false;
+      }
+    }
+
+    // Verify origin if required
+    if (options.includeOrigin && payload.origin && context?.origin) {
+      if (payload.origin !== context.origin) {
+        return false;
+      }
+    }
+
+    // Recreate signature and verify
+    const serializedPayload = serialize(payload as unknown as Data);
+    const hmac = createHmac("sha256", secretKey);
+    hmac.update(serializedPayload);
+    const expectedSignature = hmac.digest("base64");
+
+    // Compare signatures using timing-safe comparison
+    return timingSafeEqual(
+      Buffer.from(signature, "utf-8"),
+      Buffer.from(expectedSignature, "utf-8")
+    );
+  } catch (error) {
+    console.error("Error verifying CSRF token:", error);
+    return false;
+  }
+}
+
+/**
+ * Create middleware configuration for CSRF protection
+ */
+export function createCSRFMiddleware(
+  options?: CSRFOptions
+): Record<string, any> {
+  const mergedOptions = { ...DEFAULT_CSRF_OPTIONS, ...options };
+
+  return {
+    cookieName: mergedOptions.cookieName,
+    headerName: mergedOptions.headerName,
+    expiryMinutes: Math.floor((mergedOptions.expiryMs || 3600000) / 60000),
+    includeUserAgent: mergedOptions.includeUserAgent,
+    includeOrigin: mergedOptions.includeOrigin,
+  };
+}
+
+/**
+ * Create a CSRF token pair (token and hash)
+ */
+export function createCSRFTokenPair(secret?: string): {
+  token: string;
+  hash: string;
+} {
+  // Generate a token and its corresponding hash for double submit validation
+  const token = generateCsrfToken(
+    "sessionId",
+    Buffer.from(secret || "default-csrf-secret"),
+    DEFAULT_CSRF_OPTIONS,
+    { userAgent: "userAgent", origin: "origin" }
+  );
+  // In a real implementation, the hash would be a cryptographic hash of the token with the secret
+  const hash = `hash_${token}`;
+
+  return { token, hash };
+}
+
+/**
+ * Verify that a token and hash pair are valid
+ */
+export function verifyCSRFTokenPair(
+  token: string,
+  hash: string,
+  secret?: string
+): boolean {
+  // Verify that the token and hash match
+  // This is a placeholder - actual implementation would validate the hash against the token
+  return hash === `hash_${token}`;
+}
+
+
+// ---------------------- infrastructure\security\encryptionUtils.ts (244 lines) ----------------------
+
+/**
+ * Encryption Utilities
+ *
+ * Core functionality for encrypting and decrypting data securely.
+ */
+
+import { createHmac, timingSafeEqual, randomBytes } from "crypto";
+
+/**
+ * Encryption options
+ */
+export interface EncryptionOptions {
+  algorithm?: string;
+  ivLength?: number;
+}
+
+/**
+ * Type for data that can be signed or encrypted
+ */
+export type Data = {
+  [key: string]: string | number | boolean | object | null | undefined;
+};
+
+/**
+ * Options for creating and verifying signatures
+ */
+export interface SignatureOptions {
+  /**
+   * HMAC algorithm to use (default: sha512)
+   * See Node.js crypto.createHmac() for supported algorithms
+   */
+  algorithm?: "sha256" | "sha384" | "sha512";
+
+  /** Output format for the signature (default: base64) */
+  format?: "base64" | "hex";
+
+  /**
+   * Include a timestamp to prevent replay attacks
+   * Use with verifyMaxAge
+   */
+  addTimestamp?: boolean;
+
+  /** Maximum age (in ms) for signature to be valid */
+  verifyMaxAge?: number;
+}
+
+/**
+ * Default signature options
+ */
+export const DEFAULT_SIGNATURE_OPTIONS: SignatureOptions = {
+  algorithm: "sha512",
+  format: "base64",
+  addTimestamp: false,
+  verifyMaxAge: 3600000, // 1 hour
+};
+
+/**
+ * Encrypt data with a secure algorithm
+ */
+export async function encrypt(
+  data: string,
+  options?: EncryptionOptions
+): Promise<string> {
+  // Implementation will use a secure encryption algorithm like AES
+  // This is a placeholder - actual implementation will integrate with your encryption library
+  return `encrypted_${Buffer.from(data).toString("base64")}_${Date.now()}`;
+}
+
+/**
+ * Decrypt encrypted data
+ */
+export async function decrypt(
+  encryptedData: string,
+  options?: EncryptionOptions
+): Promise<string> {
+  // Implementation will decrypt the data
+  // This is a placeholder - actual implementation will integrate with your encryption library
+  if (encryptedData.startsWith("encrypted_")) {
+    const parts = encryptedData.split("_");
+    if (parts.length >= 2) {
+      return Buffer.from(parts[1], "base64").toString();
+    }
+  }
+  throw new Error("Invalid encrypted data");
+}
+
+/**
+ * Generate a secure encryption key
+ */
+export function generateEncryptionKey(length: number = 32): string {
+  return randomBytes(length).toString("hex");
+}
+
+/**
+ * Hash data with a non-reversible hash function (for non-password data)
+ */
+export function hashData(data: string): string {
+  // Implementation will use a cryptographic hash function
+  const hmac = createHmac("sha256", "static-salt-for-hash");
+  hmac.update(data);
+  return hmac.digest("base64");
+}
+
+/**
+ * Creates a cryptographic signature for data validation
+ *
+ * @param args - Object containing data and secretKey
+ * @param args.data - String or object data to sign
+ * @param args.secretKey - Secret key used for signing
+ * @param args.options - Signature creation options
+ * @returns Signature string in the specified format
+ */
+export function createSignature(args: {
+  data: string | Data;
+  secretKey: Buffer;
+  options?: SignatureOptions;
+}): string {
+  const { data, secretKey } = args;
+  const options = { ...DEFAULT_SIGNATURE_OPTIONS, ...args.options };
+
+  // Create a copy of the data if it's an object, with potential timestamp
+  let dataWithTimestamp: string | Data;
+  if (typeof data === "string") {
+    dataWithTimestamp = data;
+  } else {
+    dataWithTimestamp = { ...data };
+
+    // Add timestamp if requested
+    if (options.addTimestamp) {
+      dataWithTimestamp.__timestamp = Date.now();
+    }
+  }
+
+  const str =
+    typeof dataWithTimestamp === "string"
+      ? dataWithTimestamp
+      : serialize(dataWithTimestamp);
+  const hmac = createHmac(options.algorithm!, secretKey);
+  hmac.update(str);
+  return hmac.digest(options.format!);
+}
+
+/**
+ * Verifies a cryptographic signature
+ *
+ * @param args - Object containing data, signature, and secretKey
+ * @param args.data - String or object data that was signed
+ * @param args.signature - Signature to verify
+ * @param args.secretKey - Secret key used for signing
+ * @param args.options - Signature verification options
+ * @returns Boolean indicating whether signature is valid
+ */
+export function verifySignature(args: {
+  data: string | Data;
+  signature: string;
+  secretKey: Buffer;
+  options?: SignatureOptions;
+}): boolean {
+  const { data, signature, secretKey } = args;
+  const options = { ...DEFAULT_SIGNATURE_OPTIONS, ...args.options };
+
+  try {
+    // Extract timestamp if it exists in data object
+    let timestamp: number | undefined;
+    const dataForVerification: string | Data = data;
+
+    if (typeof data !== "string" && options.addTimestamp && data.__timestamp) {
+      timestamp = data.__timestamp as number;
+
+      // Validate timestamp if maxAge is specified
+      if (options.verifyMaxAge && timestamp) {
+        const now = Date.now();
+        if (now - timestamp > options.verifyMaxAge) {
+          return false; // Signature has expired
+        }
+      }
+    }
+
+    const validSignature = createSignature({
+      data: dataForVerification,
+      secretKey,
+      options,
+    });
+
+    // Convert strings to buffers for timingSafeEqual
+    const validBuffer = Buffer.from(validSignature, "utf8");
+    const signatureBuffer = Buffer.from(signature, "utf8");
+
+    // Ensure buffers are the same length (required by timingSafeEqual)
+    if (validBuffer.length !== signatureBuffer.length) {
+      return false;
+    }
+
+    // Use Node.js's native timing-safe comparison
+    return timingSafeEqual(validBuffer, signatureBuffer);
+  } catch (error) {
+    console.error("Error verifying signature:", error);
+    return false;
+  }
+}
+
+/**
+ * Serializes data to a consistent string representation
+ * Ensures the same data always produces the same string
+ *
+ * @param data - Object to be serialized
+ * @returns Consistent string representation of the data
+ */
+export function serialize(data: Data): string {
+  try {
+    // Sort keys to ensure consistent output
+    const orderedData = Object.keys(data)
+      .sort()
+      .reduce((obj: Data, key) => {
+        const value = data[key];
+
+        // Handle special cases for consistent serialization
+        if (value === undefined) {
+          return obj; // Skip undefined values
+        }
+
+        if (value === null) {
+          obj[key] = null;
+        } else if (typeof value === "object") {
+          // Recursively serialize objects
+          obj[key] = value;
+        } else {
+          obj[key] = value;
+        }
+
+        return obj;
+      }, {});
+
+    // Use stable JSON stringification
+    return JSON.stringify(
+      Object.keys(orderedData)
+        .sort()
+        .map((key) => [key, orderedData[key]])
+    );
+  } catch (error) {
+    console.error("Error serializing data:", error);
+    throw new Error("Failed to serialize data for signature");
+  }
+}
+
+
+// ---------------------- infrastructure\security\index.ts (46 lines) ----------------------
+
+/**
+ * Security Infrastructure Module
+ *
+ * Provides foundational security capabilities including:
+ * - Token generation and validation
+ * - Password hashing and verification
+ * - Encryption utilities
+ * - CSRF protection
+ * - Security helpers
+ */
+
+// Export token interfaces
+export * from "./TokenStorageService";
+export * from "./TokenBlacklistService";
+
+// Export token implementations
+export * from "./InMemoryTokenStorage";
+export * from "./InMemoryTokenBlacklist";
+
+// Export CORS configuration
+export * from "./CorsConfigService";
+
+// Export WebSocket authentication
+export * from "./WebSocketAuthService";
+
+// Export Cookie service
+export * from "./cookieUtils";
+
+// Export token manager class and default options
+import { TokenManager, DEFAULT_TOKEN_OPTIONS } from "./TokenManager";
+export { TokenManager, DEFAULT_TOKEN_OPTIONS };
+
+// Export security utilities
+import * as tokenUtils from "./tokenUtils";
+export { tokenUtils };
+export * from "./encryptionUtils";
+export * from "./securityHelpers";
+export * from "./csrfUtils";
+export * from "./passwordUtils";
+export * from "./middlewareUtils";
+
+// Export CORS configuration
+export * from "./corsConfig";
+
+// Export token types (interfaces are defined here)
+export * from "./tokenTypes";
+
+
+// ---------------------- infrastructure\security\middlewareUtils.ts (484 lines) ----------------------
+
+/**
+ * Security Middleware Utilities
+ *
+ * Core functionality for security middleware components.
+ */
+
+import { injectable, inject } from "inversify";
+import { Request, Response, NextFunction } from "express";
+import { ParsedQs } from "qs";
+import {
+  CSRFOptions,
+  verifyCsrfToken,
+  generateCsrfToken,
+  DEFAULT_CSRF_OPTIONS,
+} from "./csrfUtils";
+import { TYPES } from "@/server/infrastructure/di/types";
+import type { ILoggerService } from "@/server/infrastructure/logging";
+import type { IConfigService } from "@/server/infrastructure/config";
+
+/**
+ * Configuration options for CSRF middleware
+ */
+export interface CSRFMiddlewareOptions extends CSRFOptions {
+  /** Custom cookie name for the CSRF token (default: 'csrf-token') */
+  cookieName?: string;
+
+  /** Header name to look for the CSRF token (default: 'X-CSRF-Token') */
+  headerName?: string;
+
+  /** Form field name to look for the CSRF token (default: '_csrf') */
+  fieldName?: string;
+
+  /** HTTP methods that require CSRF protection (default: POST, PUT, DELETE, PATCH) */
+  protectedMethods?: string[];
+
+  /** Routes to exclude from CSRF protection (e.g. API endpoints with alternative protection) */
+  ignorePaths?: Array<string | RegExp>;
+
+  /** Secret key used for token generation and verification */
+  secretKey: Buffer;
+
+  /** Cookie options for the CSRF token */
+  cookieOptions?: {
+    /** Whether the cookie is HTTP only (default: false) */
+    httpOnly?: boolean;
+
+    /** Whether the cookie is secure (default: false in development, true in production) */
+    secure?: boolean;
+
+    /** Cookie same site policy (default: 'lax') */
+    sameSite?: boolean | "strict" | "lax" | "none";
+
+    /** Cookie path (default: '/') */
+    path?: string;
+
+    /** Cookie domain */
+    domain?: string;
+
+    /** Cookie max age in milliseconds (default: 24 hours) */
+    maxAge?: number;
+  };
+}
+
+/**
+ * Default options for CSRF middleware
+ */
+export const DEFAULT_CSRF_MIDDLEWARE_OPTIONS: Omit<
+  CSRFMiddlewareOptions,
+  "secretKey"
+> = {
+  cookieName: "csrf-token",
+  headerName: "X-CSRF-Token",
+  fieldName: "_csrf",
+  protectedMethods: ["POST", "PUT", "DELETE", "PATCH"],
+  includeUserAgent: true,
+  includeOrigin: true,
+  expiryMs: 86400000, // 24 hours
+  cookieOptions: {
+    httpOnly: false, // Must be accessible to JavaScript
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 86400000, // 24 hours
+  },
+};
+
+/**
+ * Injectable security middleware service
+ */
+@injectable()
+export class SecurityMiddlewareService {
+  constructor(
+    @inject(TYPES.ConfigService) private configService: IConfigService,
+    @inject(TYPES.SecurityLogger) private logger: ILoggerService
+  ) {
+    this.logger.debug("SecurityMiddlewareService initialized");
+  }
+
+  /**
+   * Creates a middleware that validates CSRF tokens
+   */
+  csrfProtection(options: CSRFMiddlewareOptions) {
+    const mergedOptions = { ...DEFAULT_CSRF_MIDDLEWARE_OPTIONS, ...options };
+    const logger = this.logger;
+
+    return (req: Request, res: Response, next: NextFunction) => {
+      try {
+        // Skip CSRF check for non-protected methods or ignored paths
+        const shouldProtect =
+          mergedOptions.protectedMethods!.includes(req.method) &&
+          !this.isPathIgnored(req.path, mergedOptions.ignorePaths);
+
+        if (!shouldProtect) {
+          return next();
+        }
+
+        // Get user session ID (assuming auth setup stores this)
+        const sessionId =
+          (req as any).session?.id || req.cookies?.authToken || "anonymous";
+
+        // Get token from request
+        const token = this.getTokenFromRequest(req, mergedOptions);
+
+        if (!token) {
+          logger.warn("CSRF token missing", {
+            path: req.path,
+            method: req.method,
+            ip: req.ip,
+          });
+
+          return res.status(403).json({
+            error: "CSRF token missing",
+            message: "CSRF token is required for this request",
+          });
+        }
+
+        // Context for verification
+        const context = {
+          userAgent: req.headers["user-agent"] as string,
+          origin: (req.headers.origin || req.headers.referer) as string,
+        };
+
+        // Verify token
+        const isValid = verifyCsrfToken(
+          token,
+          sessionId,
+          mergedOptions.secretKey,
+          {
+            expiryMs: mergedOptions.expiryMs,
+            includeUserAgent: mergedOptions.includeUserAgent,
+            includeOrigin: mergedOptions.includeOrigin,
+          },
+          context
+        );
+
+        if (!isValid) {
+          logger.warn("Invalid CSRF token", {
+            path: req.path,
+            method: req.method,
+            ip: req.ip,
+          });
+
+          return res.status(403).json({
+            error: "Invalid CSRF token",
+            message: "CSRF token validation failed",
+          });
+        }
+
+        next();
+      } catch (error) {
+        logger.error("CSRF validation error", {
+          error,
+          path: req.path,
+          method: req.method,
+        });
+
+        return res.status(500).json({
+          error: "CSRF validation error",
+          message: "An error occurred while validating the CSRF token",
+        });
+      }
+    };
+  }
+
+  /**
+   * Creates a middleware that injects a CSRF token into res.locals and sets a CSRF cookie
+   */
+  csrfToken(options: CSRFMiddlewareOptions) {
+    const mergedOptions = { ...DEFAULT_CSRF_MIDDLEWARE_OPTIONS, ...options };
+    const logger = this.logger;
+
+    return (req: Request, res: Response, next: NextFunction) => {
+      try {
+        // Get user session ID (assuming auth setup stores this)
+        const sessionId =
+          (req as any).session?.id || req.cookies?.authToken || "anonymous";
+
+        // Context for token generation
+        const context = {
+          userAgent: req.headers["user-agent"] as string,
+          origin: (req.headers.origin || req.headers.referer) as string,
+        };
+
+        // Generate a new token
+        const token = generateCsrfToken(
+          sessionId,
+          mergedOptions.secretKey,
+          {
+            expiryMs: mergedOptions.expiryMs,
+            includeUserAgent: mergedOptions.includeUserAgent,
+            includeOrigin: mergedOptions.includeOrigin,
+          },
+          context
+        );
+
+        // Set token in cookie for JavaScript access
+        res.cookie(
+          mergedOptions.cookieName!,
+          token,
+          mergedOptions.cookieOptions as Record<string, unknown>
+        );
+
+        // Make token available in templates
+        res.locals.csrfToken = token;
+
+        // Attach token generation method to response for dynamic token creation
+        res.locals.generateCsrfToken = () => {
+          return generateCsrfToken(
+            sessionId,
+            mergedOptions.secretKey,
+            {
+              expiryMs: mergedOptions.expiryMs,
+              includeUserAgent: mergedOptions.includeUserAgent,
+              includeOrigin: mergedOptions.includeOrigin,
+            },
+            context
+          );
+        };
+
+        logger.debug("CSRF token generated", {
+          path: req.path,
+          method: req.method,
+        });
+
+        next();
+      } catch (error) {
+        logger.error("CSRF token generation error", {
+          error,
+          path: req.path,
+          method: req.method,
+        });
+
+        // Still allow the request to proceed but without CSRF protection
+        next();
+      }
+    };
+  }
+
+  /**
+   * Check if a path is in the ignored paths list
+   */
+  private isPathIgnored(
+    path: string,
+    ignorePaths?: Array<string | RegExp>
+  ): boolean {
+    if (!ignorePaths || ignorePaths.length === 0) {
+      return false;
+    }
+
+    return ignorePaths.some((ignorePath) => {
+      if (typeof ignorePath === "string") {
+        return path === ignorePath || path.startsWith(`${ignorePath}/`);
+      }
+      return ignorePath.test(path);
+    });
+  }
+
+  /**
+   * Extract CSRF token from request
+   */
+  private getTokenFromRequest(
+    req: Request,
+    options: CSRFMiddlewareOptions
+  ): string | undefined {
+    // Check headers first
+    const headerToken = req.headers[options.headerName!.toLowerCase()];
+    if (headerToken) {
+      return Array.isArray(headerToken) ? headerToken[0] : headerToken;
+    }
+
+    // Then check request body
+    if (req.body && options.fieldName! in req.body) {
+      return String(req.body[options.fieldName!]);
+    }
+
+    // Finally check query string
+    if (req.query && options.fieldName! in req.query) {
+      const queryToken = req.query[options.fieldName!];
+      if (Array.isArray(queryToken)) {
+        return queryToken[0] as string;
+      } else if (queryToken !== undefined) {
+        return String(queryToken);
+      }
+    }
+
+    return undefined;
+  }
+}
+
+// Legacy functions for backward compatibility
+// These will eventually be deprecated in favor of the injectable service
+
+/**
+ * Creates a middleware that generates and provides CSRF tokens
+ *
+ * @param options - CSRF middleware configuration options
+ * @returns Express middleware function
+ */
+export function csrfProtection(options: CSRFMiddlewareOptions) {
+  const mergedOptions = { ...DEFAULT_CSRF_MIDDLEWARE_OPTIONS, ...options };
+
+  return (req: Request, res: Response, next: NextFunction) => {
+    // Skip CSRF check for non-protected methods or ignored paths
+    const shouldProtect =
+      mergedOptions.protectedMethods!.includes(req.method) &&
+      !isPathIgnored(req.path, mergedOptions.ignorePaths);
+
+    if (!shouldProtect) {
+      return next();
+    }
+
+    // Get user session ID (assuming auth setup stores this)
+    const sessionId =
+      (req as any).session?.id || req.cookies?.authToken || "anonymous";
+
+    // Get token from request
+    const token = getTokenFromRequest(req, mergedOptions);
+
+    if (!token) {
+      return res.status(403).json({
+        error: "CSRF token missing",
+        message: "CSRF token is required for this request",
+      });
+    }
+
+    // Context for verification
+    const context = {
+      userAgent: req.headers["user-agent"] as string,
+      origin: (req.headers.origin || req.headers.referer) as string,
+    };
+
+    // Verify token
+    const isValid = verifyCsrfToken(
+      token,
+      sessionId,
+      mergedOptions.secretKey,
+      {
+        expiryMs: mergedOptions.expiryMs,
+        includeUserAgent: mergedOptions.includeUserAgent,
+        includeOrigin: mergedOptions.includeOrigin,
+      },
+      context
+    );
+
+    if (!isValid) {
+      return res.status(403).json({
+        error: "Invalid CSRF token",
+        message: "CSRF token validation failed",
+      });
+    }
+
+    next();
+  };
+}
+
+/**
+ * Creates a middleware that injects a CSRF token into res.locals and sets a CSRF cookie
+ *
+ * @param options - CSRF middleware configuration options
+ * @returns Express middleware function
+ */
+export function csrfToken(options: CSRFMiddlewareOptions) {
+  const mergedOptions = { ...DEFAULT_CSRF_MIDDLEWARE_OPTIONS, ...options };
+
+  return (req: Request, res: Response, next: NextFunction) => {
+    // Get user session ID (assuming auth setup stores this)
+    const sessionId =
+      (req as any).session?.id || req.cookies?.authToken || "anonymous";
+
+    // Context for token generation
+    const context = {
+      userAgent: req.headers["user-agent"] as string,
+      origin: (req.headers.origin || req.headers.referer) as string,
+    };
+
+    // Generate a new token
+    const token = generateCsrfToken(
+      sessionId,
+      mergedOptions.secretKey,
+      {
+        expiryMs: mergedOptions.expiryMs,
+        includeUserAgent: mergedOptions.includeUserAgent,
+        includeOrigin: mergedOptions.includeOrigin,
+      },
+      context
+    );
+
+    // Set token in cookie for JavaScript access
+    res.cookie(
+      mergedOptions.cookieName!,
+      token,
+      mergedOptions.cookieOptions as Record<string, unknown>
+    );
+
+    // Make token available in templates
+    res.locals.csrfToken = token;
+
+    // Attach token generation method to response for dynamic token creation
+    res.locals.generateCsrfToken = () => {
+      return generateCsrfToken(
+        sessionId,
+        mergedOptions.secretKey,
+        {
+          expiryMs: mergedOptions.expiryMs,
+          includeUserAgent: mergedOptions.includeUserAgent,
+          includeOrigin: mergedOptions.includeOrigin,
+        },
+        context
+      );
+    };
+
+    next();
+  };
+}
+
+/**
+ * Check if a path is in the ignored paths list
+ */
+function isPathIgnored(
+  path: string,
+  ignorePaths?: Array<string | RegExp>
+): boolean {
+  if (!ignorePaths || ignorePaths.length === 0) {
+    return false;
+  }
+
+  return ignorePaths.some((ignorePath) => {
+    if (typeof ignorePath === "string") {
+      return path === ignorePath || path.startsWith(`${ignorePath}/`);
+    }
+    return ignorePath.test(path);
+  });
+}
+
+/**
+ * Extract CSRF token from request
+ */
+function getTokenFromRequest(
+  req: Request,
+  options: CSRFMiddlewareOptions
+): string | undefined {
+  // Check headers first
+  const headerToken = req.headers[options.headerName!.toLowerCase()];
+  if (headerToken) {
+    return Array.isArray(headerToken) ? headerToken[0] : headerToken;
+  }
+
+  // Then check request body
+  if (req.body && options.fieldName! in req.body) {
+    return String(req.body[options.fieldName!]);
+  }
+
+  // Finally check query string
+  if (req.query && options.fieldName! in req.query) {
+    const queryToken = req.query[options.fieldName!];
+    if (Array.isArray(queryToken)) {
+      return queryToken[0] as string;
+    } else if (queryToken !== undefined) {
+      return String(queryToken);
+    }
+  }
+
+  return undefined;
+}
+
+
+// ---------------------- infrastructure\security\passwordUtils.ts (146 lines) ----------------------
+
+/**
+ * Password Utilities
+ *
+ * Core functionality for secure password handling, including
+ * hashing, verification, and validation.
+ */
+
+import { scrypt, randomBytes } from "crypto";
+
+/**
+ * Password strength requirements
+ */
+export interface PasswordRequirements {
+  minLength: number;
+  requireUppercase: boolean;
+  requireLowercase: boolean;
+  requireNumbers: boolean;
+  requireSpecialChars: boolean;
+}
+
+/**
+ * Default password requirements
+ */
+export const DEFAULT_PASSWORD_REQUIREMENTS: PasswordRequirements = {
+  minLength: 8,
+  requireUppercase: true,
+  requireLowercase: true,
+  requireNumbers: true,
+  requireSpecialChars: true,
+};
+
+/**
+ * Options for password hashing
+ */
+export interface PasswordHashOptions {
+  iterations?: number;
+  memory?: number;
+  parallelism?: number;
+  hashLength?: number;
+  salt?: string;
+}
+
+/**
+ * Generate a secure password hash using scrypt
+ *
+ * @param password - Plain text password to hash
+ * @param salt - Salt for hashing (required)
+ * @param options - Password hashing options
+ * @returns Promise resolving to the hashed password as a base64 string
+ */
+export async function hashPassword(
+  password: string,
+  salt: string,
+  options?: PasswordHashOptions
+): Promise<string> {
+  const iterations = options?.iterations || 16384;
+  const keyLength = options?.hashLength || 64;
+
+  return await new Promise<string>((resolve, reject) => {
+    // Use reasonable scrypt parameters that won't exceed memory limits
+    const scryptOptions = {
+      N: iterations, // CPU/memory cost parameter
+      r: options?.parallelism || 8, // Block size parameter
+      p: options?.memory || 1, // Parallelization parameter
+      maxmem: 128 * 1024 * 1024, // 128MB - adjust based on your environment
+    };
+
+    scrypt(password, salt, keyLength, scryptOptions, (error, hash) => {
+      if (error) return reject(error);
+      else resolve(hash.toString("base64"));
+    });
+  });
+}
+
+/**
+ * Verify a password against a hash
+ */
+export async function verifyPassword(
+  password: string,
+  hash: string,
+  salt: string,
+  options?: PasswordHashOptions
+): Promise<boolean> {
+  const passwordHash = await hashPassword(password, salt, options);
+  return passwordHash === hash;
+}
+
+/**
+ * Generate a secure random password
+ */
+export function generateRandomPassword(length: number = 12): string {
+  const randomBytesBuffer = randomBytes(Math.ceil((length * 3) / 4));
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+  let result = "";
+
+  // Use the random bytes to select characters from our charset
+  for (let i = 0; i < length; i++) {
+    const randomIndex =
+      randomBytesBuffer[i % randomBytesBuffer.length] % chars.length;
+    result += chars.charAt(randomIndex);
+  }
+
+  return result;
+}
+
+/**
+ * Validate password strength against requirements
+ *
+ * @param password - Password to validate
+ * @param requirements - Password requirements (uses default if not provided)
+ * @returns Object with result and any failure reasons
+ */
+export function validatePasswordStrength(
+  password: string,
+  requirements: PasswordRequirements = DEFAULT_PASSWORD_REQUIREMENTS
+): { valid: boolean; reasons: string[] } {
+  const reasons: string[] = [];
+
+  if (password.length < requirements.minLength) {
+    reasons.push(
+      `Password must be at least ${requirements.minLength} characters long`
+    );
+  }
+
+  if (requirements.requireUppercase && !/[A-Z]/.test(password)) {
+    reasons.push("Password must contain at least one uppercase letter");
+  }
+
+  if (requirements.requireLowercase && !/[a-z]/.test(password)) {
+    reasons.push("Password must contain at least one lowercase letter");
+  }
+
+  if (requirements.requireNumbers && !/[0-9]/.test(password)) {
+    reasons.push("Password must contain at least one number");
+  }
+
+  if (requirements.requireSpecialChars && !/[^A-Za-z0-9]/.test(password)) {
+    reasons.push("Password must contain at least one special character");
+  }
+
+  return {
+    valid: reasons.length === 0,
+    reasons,
+  };
+}
+
+
+// ---------------------- infrastructure\security\rateLimitMiddleware.ts (267 lines) ----------------------
+
+import { Request, Response, NextFunction } from "express";
+import { RateLimiterMemory } from "rate-limiter-flexible";
+
+import { TooManyRequestsError } from "@/server/infrastructure/errors";
+
+// Extend Express Request type to include user
+declare module "express" {
+  interface Request {
+    user?: {
+      id: string;
+      [key: string]: unknown;
+    };
+  }
+}
+
+// Rate limiter configurations for different endpoints
+export const rateLimiters = {
+  // Login - 5 attempts per minute
+  login: new RateLimiterMemory({
+    points: 5, // Number of attempts
+    duration: 60, // Per 60 seconds
+    blockDuration: 300, // Block for 5 minutes after too many attempts
+  }),
+
+  // Register - 3 attempts per 5 minutes
+  register: new RateLimiterMemory({
+    points: 3,
+    duration: 300, // Per 5 minutes
+    blockDuration: 600, // Block for 10 minutes after too many attempts
+  }),
+
+  // Password reset - 3 attempts per 30 minutes
+  passwordReset: new RateLimiterMemory({
+    points: 3,
+    duration: 1800, // Per 30 minutes
+    blockDuration: 3600, // Block for 1 hour after too many attempts
+  }),
+
+  // Token refresh - 10 attempts per minute
+  tokenRefresh: new RateLimiterMemory({
+    points: 10,
+    duration: 60,
+    blockDuration: 300,
+  }),
+
+  // Email verification - 5 attempts per hour
+  emailVerification: new RateLimiterMemory({
+    points: 5,
+    duration: 3600, // Per hour
+    blockDuration: 7200, // Block for 2 hours after too many attempts
+  }),
+
+  // MFA verification - 3 attempts per 10 minutes
+  mfaVerify: new RateLimiterMemory({
+    points: 3,
+    duration: 600, // Per 10 minutes
+    blockDuration: 1800, // Block for 30 minutes after too many attempts
+  }),
+
+  // API general limit - 100 requests per minute
+  api: new RateLimiterMemory({
+    points: 100,
+    duration: 60,
+  }),
+};
+
+/**
+ * Reset all rate limiters - useful for testing
+ */
+export const resetAllRateLimiters = async (): Promise<void> => {
+  // For testing, clear all limiters
+  for (const limiter of Object.values(rateLimiters)) {
+    // @ts-expect-error - resetKeys exists but isn't in the types
+    if (typeof limiter.resetKeys === "function") {
+      // @ts-expect-error - accessing method that exists at runtime
+      await limiter.resetKeys();
+    }
+  }
+};
+
+/**
+ * Get IP address from request
+ * Handles various proxy scenarios and header formats
+ */
+export const getIpAddress = (req: Request): string => {
+  // Try X-Forwarded-For header first (common in proxy setups)
+  const forwardedFor = req.headers["x-forwarded-for"];
+  if (forwardedFor) {
+    // If it's a comma separated list, get the first IP which is the client's
+    const ips = Array.isArray(forwardedFor)
+      ? forwardedFor[0]
+      : forwardedFor.split(",")[0].trim();
+    return ips;
+  }
+
+  // Fall back to other headers or the remoteAddress
+  return (
+    (req.headers["x-real-ip"] as string) ||
+    req.connection.remoteAddress ||
+    "unknown"
+  );
+};
+
+/**
+ * Rate limiting middleware
+ * @param limiterKey Key of the rate limiter to use from the rateLimiters object
+ */
+export const rateLimitMiddleware = (limiterKey: keyof typeof rateLimiters) => {
+  return async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    const limiter = rateLimiters[limiterKey];
+
+    if (!limiter) {
+      // If no limiter configured for this key, just pass through
+      return next();
+    }
+
+    // Use IP for anonymous users, userId+IP for authenticated users
+    const userId = req.user?.id;
+    const ip = getIpAddress(req);
+    const key = userId ? `${userId}_${ip}` : ip;
+
+    try {
+      const rateLimitResult = await limiter.consume(key);
+
+      // Set headers for rate limit info
+      if (rateLimitResult) {
+        res.set("X-RateLimit-Limit", String(limiter.points));
+        res.set(
+          "X-RateLimit-Remaining",
+          String(rateLimitResult.remainingPoints),
+        );
+        res.set(
+          "X-RateLimit-Reset",
+          String(
+            Math.round(Date.now() / 1000 + rateLimitResult.msBeforeNext / 1000),
+          ),
+        );
+      }
+
+      // If we get here, the request is allowed
+      next();
+    } catch (error) {
+      // Check if this is a rate limit rejection (RateLimiterRes)
+      if (
+        error instanceof Error &&
+        (error.name === "RateLimiterRes" ||
+          (typeof error === "object" &&
+            error !== null &&
+            "remainingPoints" in error))
+      ) {
+        // Cast to an object with msBeforeNext
+        const rateLimitError = error as unknown as { msBeforeNext: number };
+        const retryAfter = Math.ceil(rateLimitError.msBeforeNext / 1000) || 1;
+
+        // Set headers
+        res.set("Retry-After", String(retryAfter));
+        res.set("X-RateLimit-Limit", String(limiter.points));
+        res.set("X-RateLimit-Remaining", "0");
+        res.set(
+          "X-RateLimit-Reset",
+          String(Math.round(Date.now() / 1000 + retryAfter)),
+        );
+
+        // Return rate limit error
+        res.status(429).json({
+          success: false,
+          message: "Too many requests, please try again later",
+          retryAfter: retryAfter,
+        });
+      } else {
+        // For any other errors, log and continue
+        console.error("Rate limiting error:", error);
+        next();
+      }
+    }
+  };
+};
+
+/**
+ * Create a specialized rate limiter for specific security events
+ * This can be used outside the HTTP middleware context
+ */
+export class SecurityRateLimiter {
+  private limiter: RateLimiterMemory;
+
+  constructor(options: {
+    points: number;
+    duration: number;
+    blockDuration?: number;
+  }) {
+    this.limiter = new RateLimiterMemory(options);
+  }
+
+  /**
+   * Check if an action is allowed
+   * @param key The identifier for this action (userId, IP, etc)
+   * @returns True if allowed, false if rate limited
+   */
+  async isAllowed(key: string): Promise<boolean> {
+    try {
+      await this.limiter.consume(key);
+      return true;
+    } catch (_error) {
+      return false;
+    }
+  }
+
+  /**
+   * Record a failed attempt and throw error if limited
+   * @param key The identifier for this action
+   * @throws TooManyRequestsError if rate limit exceeded
+   */
+  async recordFailedAttempt(key: string): Promise<void> {
+    try {
+      await this.limiter.consume(key);
+    } catch (_error) {
+      throw new TooManyRequestsError(
+        "Too many failed attempts. Please try again later.",
+      );
+    }
+  }
+
+  /**
+   * Get current limit status for a key
+   * @param key The identifier to check
+   * @returns Points remaining and ms until reset
+   */
+  async getLimitStatus(
+    key: string,
+  ): Promise<{ remainingPoints: number; msBeforeNext: number }> {
+    try {
+      const res = await this.limiter.get(key);
+      return {
+        remainingPoints: res ? res.remainingPoints : this.limiter.points,
+        msBeforeNext: res ? res.msBeforeNext : 0,
+      };
+    } catch (_error) {
+      return {
+        remainingPoints: 0,
+        msBeforeNext: 300000, // Default 5 minutes
+      };
+    }
+  }
+
+  /**
+   * Reset rate limit for a key
+   * @param key The identifier to reset
+   */
+  async resetLimit(key: string): Promise<void> {
+    await this.limiter.delete(key);
+  }
+
+  /**
+   * Reset all keys (useful for testing)
+   */
+  async resetAllLimits(): Promise<void> {
+    // @ts-expect-error - resetKeys exists but isn't in the types
+    if (typeof this.limiter.resetKeys === "function") {
+      // @ts-expect-error - accessing method that exists at runtime
+      await this.limiter.resetKeys();
+    }
+  }
+}
+
+
+// ---------------------- infrastructure\security\securityHelpers.ts (171 lines) ----------------------
+
+/**
+ * Security Helpers
+ *
+ * General security utilities and helper functions for
+ * common security operations across the application.
+ */
+
+import { URL } from "url";
+
+/**
+ * Sanitize a string to prevent XSS attacks
+ */
+export function sanitizeInput(input: string): string {
+  return input
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+/**
+ * Generate a secure random string
+ */
+export function generateSecureRandomString(length: number = 32): string {
+  const crypto = require("crypto");
+  return crypto
+    .randomBytes(Math.ceil(length / 2))
+    .toString("hex")
+    .slice(0, length);
+}
+
+/**
+ * Generate a nonce for use in CSP
+ */
+export function generateNonce(): string {
+  return generateSecureRandomString(16);
+}
+
+/**
+ * Create a secure HTTP response headers object
+ */
+export function securityHeaders(): Record<string, string> {
+  return {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "X-XSS-Protection": "1; mode=block",
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+    "Content-Security-Policy": "default-src 'self'",
+    "Referrer-Policy": "no-referrer",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  };
+}
+
+/**
+ * Validate a URL is safe and from an allowed domain
+ */
+export function validateSafeUrl(
+  url: string,
+  allowedDomains: string[] = []
+): boolean {
+  try {
+    const parsedUrl = new URL(url);
+
+    // Check if protocol is http or https
+    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+      return false;
+    }
+
+    // Check if domain is allowed
+    if (allowedDomains.length > 0) {
+      return allowedDomains.some(
+        (domain) =>
+          parsedUrl.hostname === domain ||
+          parsedUrl.hostname.endsWith(`.${domain}`)
+      );
+    }
+
+    return true;
+  } catch (e) {
+    // Invalid URL
+    return false;
+  }
+}
+
+/**
+ * Create a rate limiter configuration
+ */
+export function createRateLimiter(
+  windowMs: number = 15 * 60 * 1000,
+  max: number = 100
+): Record<string, any> {
+  return {
+    windowMs,
+    max,
+    standardHeaders: true,
+    legacyHeaders: false,
+  };
+}
+
+/**
+ * Create a Content Security Policy (CSP) configuration
+ *
+ * @param options - CSP configuration options
+ * @returns CSP policy string
+ */
+export function createCSP(
+  options: {
+    defaultSrc?: string[];
+    scriptSrc?: string[];
+    styleSrc?: string[];
+    imgSrc?: string[];
+    connectSrc?: string[];
+    fontSrc?: string[];
+    objectSrc?: string[];
+    mediaSrc?: string[];
+    frameSrc?: string[];
+    sandbox?: boolean;
+    reportUri?: string;
+  } = {}
+): string {
+  const directives: string[] = [];
+
+  // Set default-src if provided or use 'self'
+  directives.push(`default-src ${options.defaultSrc?.join(" ") || "'self'"}`);
+
+  // Add other directives if specified
+  if (options.scriptSrc)
+    directives.push(`script-src ${options.scriptSrc.join(" ")}`);
+  if (options.styleSrc)
+    directives.push(`style-src ${options.styleSrc.join(" ")}`);
+  if (options.imgSrc) directives.push(`img-src ${options.imgSrc.join(" ")}`);
+  if (options.connectSrc)
+    directives.push(`connect-src ${options.connectSrc.join(" ")}`);
+  if (options.fontSrc) directives.push(`font-src ${options.fontSrc.join(" ")}`);
+  if (options.objectSrc)
+    directives.push(`object-src ${options.objectSrc.join(" ")}`);
+  if (options.mediaSrc)
+    directives.push(`media-src ${options.mediaSrc.join(" ")}`);
+  if (options.frameSrc)
+    directives.push(`frame-src ${options.frameSrc.join(" ")}`);
+
+  // Add sandbox if enabled
+  if (options.sandbox) directives.push("sandbox");
+
+  // Add report-uri if specified
+  if (options.reportUri) directives.push(`report-uri ${options.reportUri}`);
+
+  return directives.join("; ");
+}
+
+/**
+ * Clean and sanitize user input for safe database operations
+ *
+ * @param input - User input to sanitize
+ * @returns Sanitized input safe for database operations
+ */
+export function sanitizeForDatabase(input: string): string {
+  // Remove any SQL injection patterns
+  return input
+    .replace(/['";\\]/g, "") // Remove SQL special characters
+    .replace(/--/g, "") // Remove SQL comments
+    .replace(/\/\*/g, "")
+    .replace(/\*\//g, "")
+    .replace(/union\s+select/gi, "") // Remove UNION SELECT
+    .replace(/select\s+.*\s+from/gi, "") // Remove SELECT FROM
+    .replace(/insert\s+into/gi, "") // Remove INSERT INTO
+    .replace(/drop\s+table/gi, "") // Remove DROP TABLE
+    .replace(/alter\s+table/gi, "") // Remove ALTER TABLE
+    .trim();
+}
+
+
+// ---------------------- infrastructure\security\tokenTypes.ts (65 lines) ----------------------
+
+/**
+ * Token payload interface for JWT tokens
+ */
+export interface TokenPayload {
+  userId: string;
+  email?: string;
+  roles?: string[];
+  sessionId?: string;
+  tokenId?: string;
+  type?: "access" | "refresh" | "temp";
+  deviceInfo?: {
+    ip: string;
+    userAgent: string;
+  };
+}
+
+/**
+ * Token types used in the application
+ */
+export enum TokenType {
+  /** Short-lived token used for API authentication */
+  ACCESS = "access",
+
+  /** Long-lived token used to obtain new access tokens */
+  REFRESH = "refresh",
+
+  /** One-time token for password reset operations */
+  PASSWORD_RESET = "password_reset",
+
+  /** One-time token for email verification */
+  EMAIL_VERIFICATION = "email_verification",
+
+  /** Temporary token for multi-step operations */
+  TEMP = "temp",
+
+  /** Token used for API key authentication */
+  API_KEY = "api_key",
+}
+
+/**
+ * Options for token creation
+ */
+export interface TokenOptions {
+  expiresIn?: string | number;
+  audience?: string | string[];
+  issuer?: string;
+}
+
+/**
+ * Access and refresh token pair
+ */
+export interface TokenPair {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+}
+
+/**
+ * Result of token validation
+ */
+export interface TokenValidationResult {
+  valid: boolean;
+  payload?: TokenPayload;
+  error?: string;
+}
+
+
+// ---------------------- infrastructure\security\tokenUtils.ts (48 lines) ----------------------
+
+/**
+ * Token Utilities
+ *
+ * This file is maintained for compatibility with existing imports.
+ * Most functionality has been moved to token.types.ts and other security modules.
+ */
+
+import { TokenType } from "./tokenTypes";
+
+// Re-export TokenType enum for backward compatibility
+export { TokenType };
+
+// Essential token constants
+export const DEFAULT_TOKEN_EXPIRATION = {
+  [TokenType.ACCESS]: 3600, // 1 hour
+  [TokenType.REFRESH]: 2592000, // 30 days
+  [TokenType.PASSWORD_RESET]: 3600, // 1 hour
+  [TokenType.EMAIL_VERIFICATION]: 86400, // 24 hours
+  [TokenType.TEMP]: 600, // 10 minutes
+  [TokenType.API_KEY]: 31536000, // 1 year
+};
+
+// Minimal interface definitions to maintain compatibility
+export interface TokenPayload {
+  [key: string]: any;
+}
+
+export interface TokenVerificationResult {
+  valid: boolean;
+  payload?: TokenPayload;
+  error?: string;
+}
+
+export interface TokenOptions {
+  expiresIn?: number | string;
+}
+
+// Essential utility functions
+export function createTokenId(token: string): string {
+  return token.substring(0, 16);
+}
+
+export function revokeToken(token: string): Promise<boolean> {
+  return Promise.resolve(true);
+}
+
+// Placeholder for any other imports
+export const placeholder = true;
+
+
+// ---------------------- infrastructure\security\validationMiddleware.ts (99 lines) ----------------------
+
+import { Request, Response, NextFunction } from "express";
+import { Schema, ValidationErrorItem } from "joi";
+
+/**
+ * Middleware for validating request data against provided schema
+ * @param schema Joi validation schema
+ */
+export const validateRequest = (schema: Schema) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const { error } = schema.validate(req.body, {
+      abortEarly: false, // Return all errors, not just the first one
+      stripUnknown: true, // Remove unknown keys
+      allowUnknown: false, // Don't allow unknown keys
+    });
+
+    if (error) {
+      // Format validation errors
+      const formattedErrors = error.details.map(
+        (detail: ValidationErrorItem) => ({
+          field: detail.path.join("."),
+          message: detail.message,
+        }),
+      );
+
+      res.status(400).json({
+        success: false,
+        message: "Validation error",
+        errors: formattedErrors,
+      });
+      return;
+    }
+
+    next();
+  };
+};
+
+/**
+ * Middleware for validating query parameters
+ * @param schema Joi validation schema
+ */
+export const validateQuery = (schema: Schema) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const { error } = schema.validate(req.query, {
+      abortEarly: false,
+      stripUnknown: true,
+      allowUnknown: false,
+    });
+
+    if (error) {
+      const formattedErrors = error.details.map(
+        (detail: ValidationErrorItem) => ({
+          field: detail.path.join("."),
+          message: detail.message,
+        }),
+      );
+
+      res.status(400).json({
+        success: false,
+        message: "Query parameter validation error",
+        errors: formattedErrors,
+      });
+      return;
+    }
+
+    next();
+  };
+};
+
+/**
+ * Middleware for validating URL parameters
+ * @param schema Joi validation schema
+ */
+export const validateParams = (schema: Schema) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const { error } = schema.validate(req.params, {
+      abortEarly: false,
+      stripUnknown: true,
+      allowUnknown: false,
+    });
+
+    if (error) {
+      const formattedErrors = error.details.map(
+        (detail: ValidationErrorItem) => ({
+          field: detail.path.join("."),
+          message: detail.message,
+        }),
+      );
+
+      res.status(400).json({
+        success: false,
+        message: "URL parameter validation error",
+        errors: formattedErrors,
+      });
+      return;
+    }
+
+    next();
+  };
+};

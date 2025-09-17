@@ -1,350 +1,342 @@
-import { createHmac, timingSafeEqual, randomBytes } from "crypto";
+/**
+ * Security Helpers
+ *
+ * General security utilities and helper functions for
+ * common security operations across the application.
+ */
 
-type Data = {
-  [key: string]: string | number | boolean | object | null | undefined;
-};
+import crypto from "crypto";
+import { URL } from "url";
 
 /**
- * Options for creating and verifying signatures
+ * Sanitize a string to prevent XSS attacks
  */
-export interface SignatureOptions {
-  /**
-   * HMAC algorithm to use (default: sha512)
-   * See Node.js crypto.createHmac() for supported algorithms
-   */
-  algorithm?: "sha256" | "sha384" | "sha512";
-
-  /** Output format for the signature (default: base64) */
-  format?: "base64" | "hex";
-
-  /**
-   * Include a timestamp to prevent replay attacks
-   * Use with verifyMaxAge
-   */
-  addTimestamp?: boolean;
-
-  /** Maximum age (in ms) for signature to be valid */
-  verifyMaxAge?: number;
+export function sanitizeInput(input: string): string {
+  return input
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 /**
- * Default signature options
+ * Generate a secure random string
  */
-export const DEFAULT_SIGNATURE_OPTIONS: SignatureOptions = {
-  algorithm: "sha512",
-  format: "base64",
-  addTimestamp: false,
-  verifyMaxAge: 3600000, // 1 hour
-};
-
-/**
- * Creates a cryptographic signature for data validation
- *
- * @param args - Object containing data and secretKey
- * @param args.data - String or object data to sign
- * @param args.secretKey - Secret key used for signing
- * @param args.options - Signature creation options
- * @returns Signature string in the specified format
- */
-export function createSignature(args: {
-  data: string | Data;
-  secretKey: Buffer;
-  options?: SignatureOptions;
-}): string {
-  const { data, secretKey } = args;
-  const options = { ...DEFAULT_SIGNATURE_OPTIONS, ...args.options };
-
-  // Create a copy of the data if it's an object, with potential timestamp
-  let dataWithTimestamp: string | Data;
-  if (typeof data === "string") {
-    dataWithTimestamp = data;
-  } else {
-    dataWithTimestamp = { ...data };
-
-    // Add timestamp if requested
-    if (options.addTimestamp) {
-      dataWithTimestamp.__timestamp = Date.now();
-    }
-  }
-
-  const str =
-    typeof dataWithTimestamp === "string"
-      ? dataWithTimestamp
-      : serialize(dataWithTimestamp);
-  const hmac = createHmac(options.algorithm!, secretKey);
-  hmac.update(str);
-  return hmac.digest(options.format!);
+export function generateSecureRandomString(length: number = 32): string {
+  return crypto
+    .randomBytes(Math.ceil(length / 2))
+    .toString("hex")
+    .slice(0, length);
 }
 
 /**
- * Verifies a cryptographic signature
- *
- * @param args - Object containing data, signature, and secretKey
- * @param args.data - String or object data that was signed
- * @param args.signature - Signature to verify
- * @param args.secretKey - Secret key used for signing
- * @param args.options - Signature verification options
- * @returns Boolean indicating whether signature is valid
+ * Generate a nonce for use in CSP
  */
-export function verifySignature(args: {
-  data: string | Data;
-  signature: string;
-  secretKey: Buffer;
-  options?: SignatureOptions;
-}): boolean {
-  const { data, signature, secretKey } = args;
-  const options = { ...DEFAULT_SIGNATURE_OPTIONS, ...args.options };
+export function generateNonce(): string {
+  return generateSecureRandomString(16);
+}
 
+/**
+ * Create a secure HTTP response headers object
+ */
+export function securityHeaders(): Record<string, string> {
+  return {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "X-XSS-Protection": "1; mode=block",
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+    "Content-Security-Policy": "default-src 'self'",
+    "Referrer-Policy": "no-referrer",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  };
+}
+
+/**
+ * Validate a URL is safe and from an allowed domain
+ */
+export function validateSafeUrl(
+  url: string,
+  allowedDomains: string[] = []
+): boolean {
   try {
-    // Extract timestamp if it exists in data object
-    let timestamp: number | undefined;
-    const dataForVerification: string | Data = data;
+    const parsedUrl = new URL(url);
 
-    if (typeof data !== "string" && options.addTimestamp && data.__timestamp) {
-      timestamp = data.__timestamp as number;
-
-      // Validate timestamp if maxAge is specified
-      if (options.verifyMaxAge && timestamp) {
-        const now = Date.now();
-        if (now - timestamp > options.verifyMaxAge) {
-          return false; // Signature has expired
-        }
-      }
-    }
-
-    const validSignature = createSignature({
-      data: dataForVerification,
-      secretKey,
-      options,
-    });
-
-    // Convert strings to buffers for timingSafeEqual
-    const validBuffer = Buffer.from(validSignature, "utf8");
-    const signatureBuffer = Buffer.from(signature, "utf8");
-
-    // Ensure buffers are the same length (required by timingSafeEqual)
-    if (validBuffer.length !== signatureBuffer.length) {
+    // Check if protocol is http or https
+    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
       return false;
     }
 
-    // Use Node.js's native timing-safe comparison
-    return timingSafeEqual(validBuffer, signatureBuffer);
-  } catch (error) {
-    console.error("Error verifying signature:", error);
+    // Check if domain is allowed
+    if (allowedDomains.length > 0) {
+      return allowedDomains.some(
+        (domain) =>
+          parsedUrl.hostname === domain ||
+          parsedUrl.hostname.endsWith(`.${domain}`)
+      );
+    }
+
+    return true;
+  } catch (e) {
+    // Invalid URL
     return false;
   }
 }
 
 /**
- * Serializes data to a consistent string representation
- * Ensures the same data always produces the same string
- *
- * @param data - Object to be serialized
- * @returns Consistent string representation of the data
+ * Serialize data for consistent signature generation
+ * @param data - Data to serialize (string or object)
+ * @returns Serialized string representation
  */
-function serialize(data: Data): string {
+export function serialize(data: unknown): string {
+  if (typeof data === "string") {
+    return data;
+  }
+
+  if (data && typeof data === "object") {
+    // Sort keys recursively for consistent serialization regardless of key order
+    return JSON.stringify(data, function (_key, value) {
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        // For object values, create a new sorted object
+        return Object.keys(value)
+          .sort()
+          .reduce<Record<string, unknown>>((sorted, key) => {
+            sorted[key] = value[key as keyof typeof value];
+            return sorted;
+          }, {});
+      }
+      return value;
+    });
+  }
+
+  return String(data);
+}
+
+/**
+ * Create a signature for data using HMAC
+ * @param options - Data and secret key for signing
+ * @returns Base64 encoded signature
+ */
+export function createSignature(options: {
+  data: unknown;
+  secretKey: Buffer;
+  algorithm?: string;
+}): string {
+  const { data, secretKey, algorithm = "sha256" } = options;
+
+  // Serialize data for consistent signature generation
+  const serializedData = serialize(data);
+
+  // Create HMAC signature
+  const hmac = crypto.createHmac(algorithm, secretKey);
+  hmac.update(serializedData);
+
+  // Return base64 encoded signature
+  return hmac.digest("base64");
+}
+
+/**
+ * Verify a signature for data
+ * @param options - Data, signature, and secret key for verification
+ * @returns Boolean indicating if signature is valid
+ */
+export function verifySignature(options: {
+  data: unknown;
+  signature: string;
+  secretKey: Buffer;
+  algorithm?: string;
+}): boolean {
+  const { data, signature, secretKey, algorithm = "sha256" } = options;
+
   try {
-    // Sort keys to ensure consistent output
-    const orderedData = Object.keys(data)
-      .sort()
-      .reduce((obj: Data, key) => {
-        const value = data[key];
+    // Generate a new signature for comparison
+    const expectedSignature = createSignature({
+      data,
+      secretKey,
+      algorithm,
+    });
 
-        // Handle special cases for consistent serialization
-        if (value === undefined) {
-          return obj; // Skip undefined values
-        }
-
-        if (value === null) {
-          obj[key] = null;
-        } else if (typeof value === "object") {
-          // Recursively serialize objects
-          obj[key] = value;
-        } else {
-          obj[key] = value;
-        }
-
-        return obj;
-      }, {});
-
-    // Use stable JSON stringification
-    return JSON.stringify(
-      Object.keys(orderedData)
-        .sort()
-        .map((key) => [key, orderedData[key]]),
+    // Use constant-time comparison to prevent timing attacks
+    return crypto.timingSafeEqual(
+      Buffer.from(signature, "base64"),
+      Buffer.from(expectedSignature, "base64")
     );
   } catch (error) {
-    console.error("Error serializing data:", error);
-    throw new Error("Failed to serialize data for signature");
+    // If any error occurs (invalid base64, etc.), signature is invalid
+    return false;
   }
 }
 
 /**
- * Options for CSRF token generation
+ * Create a rate limiter configuration
+ */
+export function createRateLimiter(
+  windowMs: number = 15 * 60 * 1000,
+  max: number = 100
+): Record<string, any> {
+  return {
+    windowMs,
+    max,
+    standardHeaders: true,
+    legacyHeaders: false,
+  };
+}
+
+/**
+ * Create a Content Security Policy (CSP) configuration
+ *
+ * @param options - CSP configuration options
+ * @returns CSP policy string
+ */
+export function createCSP(
+  options: {
+    defaultSrc?: string[];
+    scriptSrc?: string[];
+    styleSrc?: string[];
+    imgSrc?: string[];
+    connectSrc?: string[];
+    fontSrc?: string[];
+    objectSrc?: string[];
+    mediaSrc?: string[];
+    frameSrc?: string[];
+    sandbox?: boolean;
+    reportUri?: string;
+  } = {}
+): string {
+  const directives: string[] = [];
+
+  // Set default-src if provided or use 'self'
+  directives.push(`default-src ${options.defaultSrc?.join(" ") || "'self'"}`);
+
+  // Add other directives if specified
+  if (options.scriptSrc)
+    directives.push(`script-src ${options.scriptSrc.join(" ")}`);
+  if (options.styleSrc)
+    directives.push(`style-src ${options.styleSrc.join(" ")}`);
+  if (options.imgSrc) directives.push(`img-src ${options.imgSrc.join(" ")}`);
+  if (options.connectSrc)
+    directives.push(`connect-src ${options.connectSrc.join(" ")}`);
+  if (options.fontSrc) directives.push(`font-src ${options.fontSrc.join(" ")}`);
+  if (options.objectSrc)
+    directives.push(`object-src ${options.objectSrc.join(" ")}`);
+  if (options.mediaSrc)
+    directives.push(`media-src ${options.mediaSrc.join(" ")}`);
+  if (options.frameSrc)
+    directives.push(`frame-src ${options.frameSrc.join(" ")}`);
+
+  // Add sandbox if enabled
+  if (options.sandbox) directives.push("sandbox");
+
+  // Add report-uri if specified
+  if (options.reportUri) directives.push(`report-uri ${options.reportUri}`);
+
+  return directives.join("; ");
+}
+
+/**
+ * Clean and sanitize user input for safe database operations
+ *
+ * @param input - User input to sanitize
+ * @returns Sanitized input safe for database operations
+ */
+export function sanitizeForDatabase(input: string): string {
+  // Remove any SQL injection patterns
+  return input
+    .replace(/['";\\]/g, "") // Remove SQL special characters
+    .replace(/--/g, "") // Remove SQL comments
+    .replace(/\/\*/g, "")
+    .replace(/\*\//g, "")
+    .replace(/union\s+select/gi, "") // Remove UNION SELECT
+    .replace(/select\s+.*\s+from/gi, "") // Remove SELECT FROM
+    .replace(/insert\s+into/gi, "") // Remove INSERT INTO
+    .replace(/drop\s+table/gi, "") // Remove DROP TABLE
+    .replace(/alter\s+table/gi, "") // Remove ALTER TABLE
+    .trim();
+}
+
+/**
+ * CSRF options interface
  */
 export interface CsrfOptions {
-  /** Token expiration in milliseconds (default: 1 hour) */
   expiryMs?: number;
-
-  /** Whether to include the user agent in the token validation */
   includeUserAgent?: boolean;
-
-  /** Whether to include the origin/referer in the token validation */
   includeOrigin?: boolean;
+  cookieName?: string;
+  headerName?: string;
+  fieldName?: string;
+  protectedMethods?: string[];
+  ignorePaths?: (string | RegExp)[];
+  secretKey: Buffer;
+  cookieOptions?: {
+    httpOnly?: boolean;
+    secure?: boolean;
+    sameSite?: 'strict' | 'lax' | 'none';
+    maxAge?: number;
+  };
 }
 
 /**
- * Default CSRF options
+ * Generate a CSRF token
  */
-export const DEFAULT_CSRF_OPTIONS: CsrfOptions = {
-  expiryMs: 3600000, // 1 hour
-  includeUserAgent: true,
-  includeOrigin: true,
-};
+export function generateCsrfToken(options: {
+  secretKey: Buffer;
+  expiryMs?: number;
+  includeUserAgent?: boolean;
+  includeOrigin?: boolean;
+}): string {
+  const { secretKey, expiryMs = 3600000, includeUserAgent = false, includeOrigin = false } = options;
 
-/**
- * CSRF token payload structure
- */
-export interface CsrfPayload {
-  /** Session ID the token is bound to */
-  sessionId: string;
+  const timestamp = Date.now();
+  const expiry = timestamp + expiryMs;
+  const random = crypto.randomBytes(16).toString('hex');
 
-  /** Timestamp when token was created */
-  timestamp: number;
-
-  /** Browser user agent (if enabled) */
-  userAgent?: string;
-
-  /** Origin or referrer URL (if enabled) */
-  origin?: string;
-
-  /** Random nonce to prevent token reuse */
-  nonce: string;
-}
-
-/**
- * Generate a CSRF token for protecting against CSRF attacks
- *
- * @param sessionId - The user's session ID to bind the token to
- * @param secretKey - Secret key used for signing
- * @param options - CSRF token generation options
- * @param context - Additional context like user agent and origin
- * @returns A CSRF token string that can be included in forms
- */
-export function generateCsrfToken(
-  sessionId: string,
-  secretKey: Buffer,
-  options: CsrfOptions = DEFAULT_CSRF_OPTIONS,
-  context?: { userAgent?: string; origin?: string },
-): string {
-  // Create the token payload
-  const payload: CsrfPayload = {
-    sessionId,
-    timestamp: Date.now(),
-    nonce: randomBytes(16).toString("hex"),
+  const payload = {
+    timestamp,
+    expiry,
+    random,
+    ...(includeUserAgent && { userAgent: true }),
+    ...(includeOrigin && { origin: true })
   };
 
-  // Include user agent if requested and available
-  if (options.includeUserAgent && context?.userAgent) {
-    payload.userAgent = context.userAgent;
-  }
+  const signature = createSignature({
+    data: payload,
+    secretKey
+  });
 
-  // Include origin if requested and available
-  if (options.includeOrigin && context?.origin) {
-    payload.origin = context.origin;
-  }
-
-  // Create the serialized payload - convert to Data type by treating as unknown first
-  const serializedPayload = serialize(payload as unknown as Data);
-
-  // Create a signature for the payload
-  const hmac = createHmac("sha256", secretKey);
-  hmac.update(serializedPayload);
-  const signature = hmac.digest("base64");
-
-  // Combine payload and signature to create the token
-  const token = Buffer.from(
-    JSON.stringify({
-      payload,
-      signature,
-    }),
-  ).toString("base64");
-
-  return token;
+  return Buffer.from(JSON.stringify({ ...payload, signature })).toString('base64');
 }
 
 /**
  * Verify a CSRF token
- *
- * @param token - The CSRF token to verify
- * @param sessionId - The current user session ID
- * @param secretKey - Secret key used for signing
- * @param options - CSRF token verification options
- * @param context - Additional context like user agent and origin
- * @returns Boolean indicating whether the token is valid
  */
-export function verifyCsrfToken(
-  token: string,
-  sessionId: string,
-  secretKey: Buffer,
-  options: CsrfOptions = DEFAULT_CSRF_OPTIONS,
-  context?: { userAgent?: string; origin?: string },
-): boolean {
+export function verifyCsrfToken(options: {
+  token: string;
+  secretKey: Buffer;
+  includeUserAgent?: boolean;
+  includeOrigin?: boolean;
+}): boolean {
+  const { token, secretKey } = options;
+
   try {
-    // Parse the token
-    const parsed = JSON.parse(Buffer.from(token, "base64").toString("utf-8"));
-    const { payload, signature } = parsed;
+    const decoded = JSON.parse(Buffer.from(token, 'base64').toString());
+    const { signature, ...payload } = decoded;
 
-    // Validate the token content
-    if (
-      !payload ||
-      !signature ||
-      !payload.sessionId ||
-      !payload.timestamp ||
-      !payload.nonce
-    ) {
+    // Check expiry
+    if (Date.now() > payload.expiry) {
       return false;
     }
 
-    // Verify token is for the correct session
-    if (payload.sessionId !== sessionId) {
-      return false;
-    }
+    // Verify signature
+    const expectedSignature = createSignature({
+      data: payload,
+      secretKey
+    });
 
-    // Check if token has expired
-    const now = Date.now();
-    const expiryMs = options.expiryMs || DEFAULT_CSRF_OPTIONS.expiryMs;
-    if (now - payload.timestamp > expiryMs!) {
-      return false;
-    }
-
-    // Verify user agent if required
-    if (options.includeUserAgent && payload.userAgent && context?.userAgent) {
-      if (payload.userAgent !== context.userAgent) {
-        return false;
-      }
-    }
-
-    // Verify origin if required
-    if (options.includeOrigin && payload.origin && context?.origin) {
-      if (payload.origin !== context.origin) {
-        return false;
-      }
-    }
-
-    // Recreate signature and verify
-    const serializedPayload = serialize(payload as unknown as Data);
-    const hmac = createHmac("sha256", secretKey);
-    hmac.update(serializedPayload);
-    const expectedSignature = hmac.digest("base64");
-
-    // Compare signatures using timing-safe comparison
-    return timingSafeEqual(
-      Buffer.from(signature, "utf-8"),
-      Buffer.from(expectedSignature, "utf-8"),
+    return crypto.timingSafeEqual(
+      Buffer.from(signature, 'base64'),
+      Buffer.from(expectedSignature, 'base64')
     );
   } catch (error) {
-    console.error("Error verifying CSRF token:", error);
     return false;
   }
 }

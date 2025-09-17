@@ -389,7 +389,7 @@ describe("CacheService", () => {
       const mockFn = vi
         .fn()
         .mockImplementation(async (obj: Record<string, unknown>) =>
-          JSON.stringify(obj),
+          JSON.stringify(obj)
         );
 
       const memoized = cacheService.memoize(mockFn, {
@@ -398,19 +398,19 @@ describe("CacheService", () => {
 
       // First call
       expect(await memoized({ id: 1, name: "test" })).toBe(
-        '{"id":1,"name":"test"}',
+        '{"id":1,"name":"test"}'
       );
       expect(mockFn).toHaveBeenCalledTimes(1);
 
       // Different object with same ID should use cache
       expect(await memoized({ id: 1, name: "different" })).toBe(
-        '{"id":1,"name":"test"}',
+        '{"id":1,"name":"test"}'
       );
       expect(mockFn).toHaveBeenCalledTimes(1);
 
       // Different ID should call function again
       expect(await memoized({ id: 2, name: "test" })).toBe(
-        '{"id":2,"name":"test"}',
+        '{"id":2,"name":"test"}'
       );
       expect(mockFn).toHaveBeenCalledTimes(2);
     });

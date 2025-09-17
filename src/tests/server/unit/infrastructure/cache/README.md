@@ -2,23 +2,25 @@
 
 ## 📋 Overview
 
-This directory contains unit tests for the cache infrastructure components. The tests validate the caching system's ability to store, retrieve, and manage data with appropriate lifetime controls.
+This directory contains unit tests for the cache infrastructure components. The tests validate the caching system's ability to store, retrieve, and manage data with appropriate lifetime controls, supporting both in-memory and Redis-based implementations.
 
 ## 🧩 Test Files
 
-| File                                             | Description                                                                                                      |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| [CacheService.test.ts](./CacheService.test.ts)   | Tests the implementation of the cache service, including storage, retrieval, TTL handling, and memory management |
-| [ICacheService.test.ts](./ICacheService.test.ts) | Tests that implementations of the cache service interface correctly fulfill the contract                         |
-| [startupHooks.test.ts](./startupHooks.test.ts)   | Tests the integration of cache services with application lifecycle hooks                                         |
+| File                                                     | Description                                                                              |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| [CacheService.test.ts](./CacheService.test.ts)           | Tests the in-memory implementation of the cache service                                  |
+| [ICacheService.test.ts](./ICacheService.test.ts)         | Tests that implementations of the cache service interface correctly fulfill the contract |
+| [RedisCacheService.test.ts](./RedisCacheService.test.ts) | Tests the Redis-backed implementation of the cache service                               |
+| [RedisClient.test.ts](./RedisClient.test.ts)             | Tests the Redis client utilities for connection management and configuration             |
+| [startupHooks.test.ts](./startupHooks.test.ts)           | Tests the integration of cache services with application lifecycle hooks                 |
 
 ## 🔍 Key Test Scenarios
 
 ### Storage and Retrieval
 
-- Basic key-value storage
+- Basic key-value storage across cache implementations
 - Object serialization/deserialization
-- Cache hits and misses
+- Cache hits and misses tracking
 - Default values
 
 ### Cache Lifetime Management
@@ -28,25 +30,38 @@ This directory contains unit tests for the cache infrastructure components. The 
 - Manual invalidation
 - Cache clearing
 
+### Cache Implementations
+
+- In-memory cache with efficient local storage
+- Redis-backed cache for distributed environments
+- Implementation-specific optimizations
+
+### Redis Specific Features
+
+- Connection management and error handling
+- Redis transaction support for batch operations
+- Prefix-based namespace isolation
+- Redis configuration options
+
 ### Memory Management
 
-- Memory usage limits
-- LRU (Least Recently Used) eviction
+- Memory usage tracking
 - Cache size constraints
 
-### Concurrency
+### Advanced Features
 
-- Concurrent read/write operations
-- Race condition handling
-- Atomic operations
+- Function result memoization with TTL support
+- Custom key generation for complex data types
+- Batch operations (getMultiple, setMultiple, deleteMultiple)
+- Cache statistics and performance monitoring
 
 ## 🔧 Test Implementation Details
 
 ### Mocks and Stubs
 
 - MockLogger for logging dependency
-- Clock mocking for time-dependent tests
-- Memory monitoring stubs
+- Redis client mocking for isolated testing
+- Time-dependent test utilities
 
 ### Common Patterns
 
@@ -62,11 +77,32 @@ it("should expire items after TTL", async () => {
   await cacheService.set(key, value, ttl);
 
   // Fast-forward time
-  jest.advanceTimersByTime(ttl + 10);
+  await new Promise((resolve) => setTimeout(resolve, ttl + 10));
 
   // Assert
   const result = await cacheService.get(key);
-  expect(result).toBeUndefined();
+  expect(result).toBeNull();
+});
+```
+
+### Redis Testing Approach
+
+```typescript
+// Example of Redis command mocking
+it("should set a value with TTL in Redis", async () => {
+  // Setup Redis mock
+  mockRedisClient.set.mockResolvedValueOnce("OK");
+
+  // Execute the method
+  const result = await redisCacheService.set("test-key", "value", 60);
+
+  // Verify Redis was called correctly
+  expect(mockRedisClient.set).toHaveBeenCalledWith(
+    "cache:test-key",
+    JSON.stringify("value"),
+    { EX: 60 }
+  );
+  expect(result).toBe(true);
 });
 ```
 
@@ -74,3 +110,4 @@ it("should expire items after TTL", async () => {
 
 - [Application Lifecycle](../lifecycle/README.md) - For startup hook testing
 - [Logging](../logging/README.md) - For cache event logging
+- [Configuration](../config/README.md) - For cache configuration loading

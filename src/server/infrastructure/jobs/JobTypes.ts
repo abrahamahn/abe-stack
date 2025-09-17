@@ -145,6 +145,45 @@ export interface MediaProcessingJobData {
 }
 
 /**
+ * Email notification job data
+ */
+export interface EmailNotificationJobData {
+  /**
+   * Optional user ID associated with the email
+   */
+  userId?: string;
+
+  /**
+   * Recipient email address
+   */
+  email: string;
+
+  /**
+   * Template ID to use for the email
+   */
+  templateId: string;
+
+  /**
+   * Email subject
+   */
+  subject: string;
+
+  /**
+   * Variables to use in the email template
+   */
+  variables?: Record<string, any>;
+
+  /**
+   * Optional attachments
+   */
+  attachments?: Array<{
+    filename: string;
+    content: string | Buffer;
+    contentType?: string;
+  }>;
+}
+
+/**
  * Job options interface
  */
 export interface JobOptions {
@@ -218,7 +257,7 @@ export interface JobDataMap {
   [JobType.VIDEO_TRANSCODING]: Record<string, unknown>;
   [JobType.IMAGE_OPTIMIZATION]: Record<string, unknown>;
   [JobType.THUMBNAIL_GENERATION]: Record<string, unknown>;
-  [JobType.EMAIL_NOTIFICATION]: Record<string, unknown>;
+  [JobType.EMAIL_NOTIFICATION]: EmailNotificationJobData;
   [JobType.PUSH_NOTIFICATION]: Record<string, unknown>;
   [JobType.FEED_GENERATION]: Record<string, unknown>;
   [JobType.CONTENT_INDEXING]: Record<string, unknown>;

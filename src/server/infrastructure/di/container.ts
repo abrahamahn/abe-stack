@@ -6,12 +6,18 @@ import { Request, Response, NextFunction } from "express";
 import { Container } from "inversify";
 import { Schema } from "joi";
 
-import { ICacheService, CacheService } from "@/server/infrastructure/cache";
+import {
+  ICacheService,
+  CacheService,
+  RedisCacheService,
+  CacheConfigProvider,
+  CacheProviderType,
+} from "@/server/infrastructure/cache";
 import {
   ConfigService,
   IConfigService,
   StorageConfigProvider,
-  LoggingConfig,
+  LoggingConfigService,
 } from "@/server/infrastructure/config";
 import {
   DatabaseConfigProvider,
@@ -35,15 +41,22 @@ import {
 } from "@/server/infrastructure/lifecycle";
 import { ILoggerService, LoggerService } from "@/server/infrastructure/logging";
 import {
-  validateRequest,
-  rateLimitMiddleware,
-} from "@/server/infrastructure/middleware";
-import {
   ImageProcessor,
   MediaProcessor,
   StreamProcessor,
 } from "@/server/infrastructure/processor";
 import { IWebSocketService } from "@/server/infrastructure/pubsub";
+import {
+  SecurityMiddlewareService,
+} from "@/server/infrastructure/security";
+import { rateLimitMiddleware } from "@/server/infrastructure/security/rateLimitMiddleware";
+import {
+  TokenBlacklist,
+} from "@/server/infrastructure/security/TokenBlacklistService";
+import {
+  TokenStorage,
+} from "@/server/infrastructure/security/TokenStorageService";
+import { validateRequest } from "@/server/infrastructure/security/validationMiddleware";
 import { ServerManager } from "@/server/infrastructure/server";
 import {
   IStorageProvider,
@@ -51,6 +64,10 @@ import {
   StorageService,
   IStorageService,
 } from "@/server/infrastructure/storage";
+
+// Import security interfaces
+
+// Import the SecurityMiddlewareService
 
 // Import IWebSocketService here but lazy-load the actual WebSocketService
 // to avoid circular dependencies
@@ -73,7 +90,7 @@ class WebSocketServiceFactory {
  * @returns The configured container
  */
 export function createContainer(
-  options: { cacheKey?: string } = {},
+  options: { cacheKey?: string } = {}
 ): Container {
   // Check cache if cacheKey is provided
   if (options.cacheKey && containerCache.has(options.cacheKey)) {
@@ -90,6 +107,9 @@ export function createContainer(
 
   // Register job system
   registerJobSystem(container);
+
+  // Register security services
+  registerSecurityServices(container);
 
   // Cache the container if cacheKey is provided
   if (options.cacheKey) {
@@ -109,7 +129,51 @@ function registerInfrastructureServices(container: Container): void {
 
   // Register logging services
   container.bind<ILoggerService>(TYPES.LoggerService).to(LoggerService);
-  container.bind<LoggingConfig>(TYPES.LoggingConfig).to(LoggingConfig);
+  container.bind<LoggingConfigService>(TYPES.LoggingConfig).to(LoggingConfigService);
+
+  // Register email service
+  try {
+    // Import email service directly instead of using require
+    const {
+      EmailService,
+    } = require("../../modules/core/email/services/email.service");
+
+    // Create a factory function that provides better error handling
+    container
+      .bind(TYPES.EmailService)
+      .toDynamicValue((context) => {
+        try {
+          const logger = context.container.get<ILoggerService>(
+            TYPES.LoggerService
+          );
+          const databaseService = context.container.get<any>(
+            TYPES.DatabaseService
+          );
+
+          console.log(
+            "Creating EmailService instance with proper dependencies"
+          );
+          return new EmailService(logger, databaseService);
+        } catch (err) {
+          console.error("Failed to create EmailService instance:", err);
+          // Return a stub implementation to prevent app from crashing
+          return {
+            initialized: true,
+            providerType: "stub",
+            isConnected: () => true,
+            sendEmail: async () => ({
+              success: false,
+              error: "Email service not properly initialized",
+            }),
+          };
+        }
+      })
+      .inSingletonScope();
+
+    console.log("EmailService registered successfully");
+  } catch (error) {
+    console.error("Failed to register EmailService:", error);
+  }
 
   // Register storage service
   container.bind<IStorageService>(TYPES.StorageService).to(StorageService);
@@ -120,8 +184,30 @@ function registerInfrastructureServices(container: Container): void {
     .bind<IStorageProvider>(TYPES.StorageProvider)
     .to(LocalStorageProvider);
 
-  // Register simplified cache service
-  container.bind<ICacheService>(TYPES.CacheService).to(CacheService);
+  // Register cache configuration
+  container
+    .bind<CacheConfigProvider>(TYPES.CacheServiceConfig)
+    .to(CacheConfigProvider);
+
+  // Register cache service based on configuration
+  container
+    .bind<ICacheService>(TYPES.CacheService)
+    .toDynamicValue((context) => {
+      const cacheConfig = context.container.get<CacheConfigProvider>(
+        TYPES.CacheServiceConfig
+      );
+      const config = cacheConfig.getConfig();
+      const logger = context.container.get<ILoggerService>(TYPES.LoggerService);
+
+      if (config.provider === CacheProviderType.REDIS) {
+        const redisCache = new RedisCacheService(logger);
+        return redisCache;
+      } else {
+        const memoryCache = new CacheService(logger);
+        return memoryCache;
+      }
+    })
+    .inSingletonScope();
 
   // Register error handler
   container.bind<ErrorHandler>(TYPES.ErrorHandler).to(ErrorHandler);
@@ -143,7 +229,7 @@ function registerInfrastructureServices(container: Container): void {
   container
     .bind<
       (
-        schema: Schema,
+        schema: Schema
       ) => (req: Request, res: Response, next: NextFunction) => void
     >(TYPES.ValidationMiddleware)
     .toFunction(validateRequest);
@@ -161,13 +247,13 @@ function registerInfrastructureServices(container: Container): void {
   container
     .bind<
       (
-        limiterKey: RateLimiterKeys,
+        limiterKey: RateLimiterKeys
       ) => (req: Request, res: Response, next: NextFunction) => Promise<void>
     >(TYPES.RateLimitMiddleware)
     .toFunction(
       rateLimitMiddleware as (
-        limiterKey: RateLimiterKeys,
-      ) => (req: Request, res: Response, next: NextFunction) => Promise<void>,
+        limiterKey: RateLimiterKeys
+      ) => (req: Request, res: Response, next: NextFunction) => Promise<void>
     );
 
   // Register WebSocketService lazily to avoid circular dependencies
@@ -190,10 +276,18 @@ function registerDatabaseServices(container: Container): void {
     .to(DatabaseConfigProvider);
 
   // Register database service
-  container.bind<IDatabaseServer>(TYPES.DatabaseService).to(DatabaseServer);
+  container.bind<IDatabaseServer>(TYPES.DatabaseServer).to(DatabaseServer);
+
+  // Also bind DatabaseService to use the same implementation
+  container.bind(TYPES.DatabaseService).to(DatabaseServer);
 
   // Register transaction service
-  container.bind(TYPES.TransactionService).to(TransactionService);
+  container
+    .bind<TransactionService>(TYPES.TransactionService)
+    .to(TransactionService);
+
+  // Note: Verification services are now registered in the auth module
+  // to avoid duplicate bindings and dependency conflicts
 }
 
 /**
@@ -207,7 +301,7 @@ function registerJobSystem(container: Container): void {
 
   // Configuration for job storage
   container.bind<FileJobStorageConfig>(TYPES.JobStorageConfig).toConstantValue({
-    basePath: path.join(process.cwd(), "data", "jobs"),
+    basePath: path.join(process.cwd(), "project-data", "jobs"),
     completedJobRetention: 24 * 60 * 60 * 1000, // 24 hours
     failedJobRetention: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
@@ -227,5 +321,96 @@ function registerJobSystem(container: Container): void {
   });
 }
 
+/**
+ * Register security services with proper error handling and logging
+ * @param container The DI container
+ */
+function registerSecurityServices(container: Container): void {
+  try {
+    // Import implementations here to avoid circular dependencies
+    const securityModule = require("../security/index");
+    const {
+      InMemoryTokenStorage,
+      InMemoryTokenBlacklist,
+      TokenManager,
+      CorsConfigService,
+      WebSocketAuthService,
+      CookieService,
+    } = securityModule;
+
+    // Create a dedicated security logger that inherits from main logger
+    container
+      .bind<ILoggerService>(TYPES.SecurityLogger)
+      .toDynamicValue((context) => {
+        const mainLogger = context.container.get<ILoggerService>(
+          TYPES.LoggerService
+        );
+        return mainLogger.createLogger("security");
+      });
+
+    // Register token storage
+    container
+      .bind<TokenStorage>(TYPES.TokenStorage)
+      .to(InMemoryTokenStorage)
+      .inSingletonScope();
+
+    // Register token blacklist
+    container
+      .bind<TokenBlacklist>(TYPES.TokenBlacklist)
+      .to(InMemoryTokenBlacklist)
+      .inSingletonScope();
+
+    // Register token management service with error handling and logging
+    container.bind(TYPES.TokenManager).to(TokenManager).inSingletonScope();
+
+    // Register CORS configuration
+    container.bind(TYPES.CorsConfig).to(CorsConfigService).inSingletonScope();
+
+    // Register WebSocket authentication
+    container
+      .bind(TYPES.WsAuthentication)
+      .to(WebSocketAuthService)
+      .inSingletonScope();
+
+    // Register cookie service
+    container.bind(TYPES.CookieService).to(CookieService).inSingletonScope();
+
+    // Register security middleware service
+    container
+      .bind(TYPES.SecurityMiddlewareService)
+      .to(SecurityMiddlewareService)
+      .inSingletonScope();
+
+    // Register security audit logger
+    container.bind(TYPES.SecurityAuditTrail).toDynamicValue((context) => {
+      const securityLogger = context.container.get<ILoggerService>(
+        TYPES.SecurityLogger
+      );
+      // This will be a specialized logger that adds extra security metadata to each log
+      return securityLogger.withContext({
+        component: "security-audit",
+        auditTrail: true,
+      });
+    });
+  } catch (error) {
+    console.error("Failed to load security services:", error);
+
+    // Register fallback implementations to prevent container from failing
+    container
+      .bind<ILoggerService>(TYPES.SecurityLogger)
+      .toDynamicValue((context) => {
+        const mainLogger = context.container.get<ILoggerService>(
+          TYPES.LoggerService
+        );
+        return mainLogger.createLogger("security");
+      });
+  }
+}
+
 // Create and export a singleton container instance
 export const container = createContainer({ cacheKey: "default" });
+
+// Add testing utility methods
+(container as any).setupCacheInstance = (instance: any) => {
+  container.rebind(TYPES.CacheService).toConstantValue(instance);
+};

@@ -27,10 +27,8 @@ const getServerPort = (): number => {
 
 // Create client configuration
 const clientConfig = {
-  apiUrl:
-    process.env.NODE_ENV === "production"
-      ? "/api"
-      : `${window.location.protocol}//${window.location.hostname}:${getServerPort()}/api`,
+  // Always use relative path in development to leverage Vite's proxy
+  apiUrl: "/api",
   wsUrl:
     process.env.NODE_ENV === "production"
       ? `ws://${window.location.host}/ws`
@@ -49,9 +47,9 @@ const testApiConnectivity = async () => {
   try {
     const response = await fetch(clientConfig.apiUrl);
     if (response.ok) {
-      // Connection successful, save the port
-      const port = new URL(clientConfig.apiUrl).port;
-      localStorage.setItem("server_port", port);
+      const data = await response.json();
+      console.log("✅ Connected to backend API successfully:", data);
+      document.body.style.setProperty("--api-connected", "true");
       return;
     }
   } catch (_error) {
@@ -131,5 +129,5 @@ const root = createRoot(rootElement);
 root.render(
   <React.StrictMode>
     <Root environment={environment} />
-  </React.StrictMode>,
+  </React.StrictMode>
 );

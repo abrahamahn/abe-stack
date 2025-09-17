@@ -1,4 +1,5 @@
 import { ILoggerService } from "@/server/infrastructure/logging";
+import { v4 as uuidv4 } from "uuid";
 
 import { AppError } from "./AppError";
 
@@ -73,7 +74,7 @@ export class ValidationError extends AppError {
       message,
       ErrorCode.VALIDATION_ERROR,
       HttpStatus.BAD_REQUEST,
-      metadata,
+      metadata
     );
   }
 }
@@ -84,7 +85,7 @@ export class ValidationError extends AppError {
 export class AuthenticationError extends AppError {
   constructor(
     message = "Authentication required",
-    metadata: Record<string, unknown> = {},
+    metadata: Record<string, unknown> = {}
   ) {
     super(message, ErrorCode.UNAUTHORIZED, HttpStatus.UNAUTHORIZED, metadata);
   }
@@ -96,7 +97,7 @@ export class AuthenticationError extends AppError {
 export class PermissionError extends AppError {
   constructor(
     message = "Permission denied",
-    metadata: Record<string, unknown> = {},
+    metadata: Record<string, unknown> = {}
   ) {
     super(message, ErrorCode.FORBIDDEN, HttpStatus.FORBIDDEN, metadata);
   }
@@ -108,7 +109,7 @@ export class PermissionError extends AppError {
 export class NotFoundError extends AppError {
   constructor(
     message = "Resource not found",
-    metadata: Record<string, unknown> = {},
+    metadata: Record<string, unknown> = {}
   ) {
     super(message, ErrorCode.NOT_FOUND, HttpStatus.NOT_FOUND, metadata);
   }
@@ -120,7 +121,7 @@ export class NotFoundError extends AppError {
 export class ConflictError extends AppError {
   constructor(
     message = "Resource conflict",
-    metadata: Record<string, unknown> = {},
+    metadata: Record<string, unknown> = {}
   ) {
     super(message, ErrorCode.CONFLICT, HttpStatus.CONFLICT, metadata);
   }
@@ -132,13 +133,13 @@ export class ConflictError extends AppError {
 export class ServiceUnavailableError extends AppError {
   constructor(
     message = "Service unavailable",
-    metadata: Record<string, unknown> = {},
+    metadata: Record<string, unknown> = {}
   ) {
     super(
       message,
       ErrorCode.SERVICE_UNAVAILABLE,
       HttpStatus.SERVICE_UNAVAILABLE,
-      metadata,
+      metadata
     );
   }
 }
@@ -149,13 +150,13 @@ export class ServiceUnavailableError extends AppError {
 export class DatabaseError extends AppError {
   constructor(
     message = "Database error",
-    metadata: Record<string, unknown> = {},
+    metadata: Record<string, unknown> = {}
   ) {
     super(
       message,
       ErrorCode.DATABASE_ERROR,
       HttpStatus.INTERNAL_SERVER_ERROR,
-      metadata,
+      metadata
     );
   }
 }
@@ -169,7 +170,7 @@ export class DatabaseError extends AppError {
  */
 export function createValidationError(
   message: string,
-  metadata?: Record<string, unknown>,
+  metadata?: Record<string, unknown>
 ): ValidationError {
   return new ValidationError(message, metadata);
 }
@@ -179,7 +180,7 @@ export function createValidationError(
  */
 export function createNotFoundError(
   message: string,
-  metadata?: Record<string, unknown>,
+  metadata?: Record<string, unknown>
 ): NotFoundError {
   return new NotFoundError(message, metadata);
 }
@@ -189,7 +190,7 @@ export function createNotFoundError(
  */
 export function createAuthenticationError(
   message: string,
-  metadata?: Record<string, unknown>,
+  metadata?: Record<string, unknown>
 ): AuthenticationError {
   return new AuthenticationError(message, metadata);
 }
@@ -199,7 +200,7 @@ export function createAuthenticationError(
  */
 export function createPermissionError(
   message: string,
-  metadata?: Record<string, unknown>,
+  metadata?: Record<string, unknown>
 ): PermissionError {
   return new PermissionError(message, metadata);
 }
@@ -209,9 +210,16 @@ export function createPermissionError(
  */
 export function createConflictError(
   message: string,
-  metadata?: Record<string, unknown>,
+  metadata?: Record<string, unknown>
 ): ConflictError {
   return new ConflictError(message, metadata);
+}
+
+/**
+ * Generate a unique correlation ID for request tracking
+ */
+export function generateCorrelationId(): string {
+  return uuidv4();
 }
 
 /**
@@ -247,7 +255,7 @@ export const GlobalErrorHandler = {
           reason: reason instanceof Error ? reason.message : String(reason),
           stack: reason instanceof Error ? reason.stack : undefined,
         });
-      },
+      }
     );
   },
 };
@@ -260,7 +268,7 @@ export class ApiError extends Error {
   constructor(
     statusCode: number,
     message: string,
-    errors?: Record<string, string[]>,
+    errors?: Record<string, string[]>
   ) {
     super(message);
     this.statusCode = statusCode;
@@ -314,8 +322,14 @@ export class InternalServerError extends ApiError {
 
 // 429 Too Many Requests - Rate limiting
 export class TooManyRequestsError extends ApiError {
-  constructor(message = "Too many requests") {
+  metadata?: Record<string, unknown>;
+
+  constructor(
+    message = "Too many requests",
+    metadata?: Record<string, unknown>
+  ) {
     super(429, message);
+    this.metadata = metadata;
   }
 }
 
@@ -324,7 +338,7 @@ export const errorHandler = (
   err: Error,
   _req: import("express").Request,
   res: import("express").Response,
-  _next: import("express").NextFunction,
+  _next: import("express").NextFunction
 ): import("express").Response => {
   console.error(err);
 

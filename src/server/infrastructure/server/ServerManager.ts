@@ -114,7 +114,7 @@ export class ServerManager {
 
     // Load optional validation service
     this.services.validationService = this.container.isBound(
-      TYPES.ValidationService,
+      TYPES.ValidationService
     )
       ? this.container.get(TYPES.ValidationService)
       : null;
@@ -124,7 +124,7 @@ export class ServerManager {
 
     try {
       businessServices.metricsService = this.container.isBound(
-        TYPES.MetricsService,
+        TYPES.MetricsService
       )
         ? this.container.get(TYPES.MetricsService)
         : null;
@@ -138,19 +138,19 @@ export class ServerManager {
         : null;
 
       businessServices.encryptionService = this.container.isBound(
-        TYPES.EncryptionService,
+        TYPES.EncryptionService
       )
         ? this.container.get(TYPES.EncryptionService)
         : null;
 
       businessServices.sessionService = this.container.isBound(
-        TYPES.SessionService,
+        TYPES.SessionService
       )
         ? this.container.get(TYPES.SessionService)
         : null;
 
       businessServices.messagingService = this.container.isBound(
-        TYPES.MessagingService,
+        TYPES.MessagingService
       )
         ? this.container.get(TYPES.MessagingService)
         : null;
@@ -177,11 +177,11 @@ export class ServerManager {
 
     try {
       infrastructureServices.pubSubService = this.container.isBound(
-        TYPES["PubSubService" as keyof typeof TYPES] || Symbol("PubSubService"),
+        TYPES["PubSubService" as keyof typeof TYPES] || Symbol("PubSubService")
       )
         ? this.container.get(
             TYPES["PubSubService" as keyof typeof TYPES] ||
-              Symbol("PubSubService"),
+              Symbol("PubSubService")
           )
         : null;
       if (infrastructureServices.pubSubService) {
@@ -195,11 +195,11 @@ export class ServerManager {
 
       infrastructureServices.imageProcessor = this.container.isBound(
         TYPES["ImageProcessor" as keyof typeof TYPES] ||
-          Symbol("ImageProcessor"),
+          Symbol("ImageProcessor")
       )
         ? this.container.get(
             TYPES["ImageProcessor" as keyof typeof TYPES] ||
-              Symbol("ImageProcessor"),
+              Symbol("ImageProcessor")
           )
         : null;
       if (infrastructureServices.imageProcessor) {
@@ -213,11 +213,11 @@ export class ServerManager {
 
       infrastructureServices.mediaProcessor = this.container.isBound(
         TYPES["MediaProcessor" as keyof typeof TYPES] ||
-          Symbol("MediaProcessor"),
+          Symbol("MediaProcessor")
       )
         ? this.container.get(
             TYPES["MediaProcessor" as keyof typeof TYPES] ||
-              Symbol("MediaProcessor"),
+              Symbol("MediaProcessor")
           )
         : null;
       if (infrastructureServices.mediaProcessor) {
@@ -231,11 +231,11 @@ export class ServerManager {
 
       infrastructureServices.streamProcessor = this.container.isBound(
         TYPES["StreamProcessor" as keyof typeof TYPES] ||
-          Symbol("StreamProcessor"),
+          Symbol("StreamProcessor")
       )
         ? this.container.get(
             TYPES["StreamProcessor" as keyof typeof TYPES] ||
-              Symbol("StreamProcessor"),
+              Symbol("StreamProcessor")
           )
         : null;
       if (infrastructureServices.streamProcessor) {
@@ -249,11 +249,11 @@ export class ServerManager {
 
       infrastructureServices.storageProvider = this.container.isBound(
         TYPES["StorageProvider" as keyof typeof TYPES] ||
-          Symbol("StorageProvider"),
+          Symbol("StorageProvider")
       )
         ? this.container.get(
             TYPES["StorageProvider" as keyof typeof TYPES] ||
-              Symbol("StorageProvider"),
+              Symbol("StorageProvider")
           )
         : null;
       if (infrastructureServices.storageProvider) {
@@ -269,7 +269,7 @@ export class ServerManager {
         "Some additional infrastructure services are not available",
         {
           error: err instanceof Error ? err.message : String(err),
-        },
+        }
       );
     }
 
@@ -285,6 +285,108 @@ export class ServerManager {
     // Body parsing middleware
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
+
+    // Add CORS headers to allow cross-origin requests
+    this.app.use((req: Request, res: Response, next: NextFunction) => {
+      // Allow requests from the development server
+      res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+      // Allow credentials (cookies)
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+      // Allow specific methods
+      res.setHeader(
+        "Access-Control-Allow-Methods",
+        "GET, POST, PUT, DELETE, OPTIONS"
+      );
+      // Allow specific headers
+      res.setHeader(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+      );
+
+      // Handle preflight requests
+      if (req.method === "OPTIONS") {
+        return res.status(200).end();
+      }
+
+      next();
+    });
+
+    this.logger.info("CORS headers configured");
+
+    // Add a test endpoint to verify API connectivity
+    this.app.get("/api", (_req, res) => {
+      res.status(200).json({
+        message: "API is working",
+        timestamp: new Date().toISOString(),
+        serverPort: this.port,
+      });
+    });
+
+    // Add health endpoint for monitoring
+    this.app.get("/health", (_req, res) => {
+      try {
+        const dbConnected =
+          this.services.databaseService?.isConnected?.() || false;
+        const cacheConnected =
+          (this.services.cacheService as any)?.isConnected?.() || false;
+
+        const health = {
+          status: dbConnected && cacheConnected ? "ok" : "degraded",
+          timestamp: new Date().toISOString(),
+          uptime: process.uptime(),
+          version: process.env.npm_package_version || "1.0.0",
+          services: {
+            database: dbConnected ? "ok" : "unhealthy",
+            cache: cacheConnected ? "ok" : "unhealthy",
+            storage: this.services.storageService ? "ok" : "unhealthy",
+            jobs: this.services.jobService ? "ok" : "unhealthy",
+          },
+        };
+
+        const statusCode = health.status === "ok" ? 200 : 503;
+        res.status(statusCode).json(health);
+      } catch (error) {
+        res.status(503).json({
+          status: "unhealthy",
+          timestamp: new Date().toISOString(),
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
+    });
+
+    // Add metrics endpoint for monitoring
+    this.app.get("/metrics", (_req, res) => {
+      try {
+        const metrics = {
+          timestamp: new Date().toISOString(),
+          uptime: process.uptime(),
+          memory: process.memoryUsage(),
+          cpu: process.cpuUsage(),
+          database: {
+            connected: this.services.databaseService?.isConnected?.() || false,
+            activeConnections:
+              this.services.databaseService?.getStats?.()?.activeCount || 0,
+          },
+          cache: {
+            connected: (this.services.cacheService as any)?.isConnected?.() || false,
+            hits: this.services.cacheService?.getStats?.()?.hits || 0,
+          },
+          websocket: {
+            clients: this.wss?.clients?.size || 0,
+          },
+        };
+
+        res.status(200).json(metrics);
+      } catch (error) {
+        res.status(500).json({
+          error: "Failed to collect metrics",
+          timestamp: new Date().toISOString(),
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
+      }
+    });
+
+    this.logger.info("Health and metrics endpoints configured");
 
     // Apply production settings if needed
     if (isProduction) {
@@ -305,7 +407,7 @@ export class ServerManager {
             includeSubDomains: true,
             preload: true,
           },
-        }),
+        })
       );
     }
 
@@ -321,6 +423,18 @@ export class ServerManager {
       }
     } catch (err) {
       this.logger.warn("Failed to configure cookie parser", {
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+
+    // Try to set up authentication module
+    try {
+      // Dynamic import to avoid circular dependencies
+      const { setupAuthModule } = require("@/server/modules/core/auth/setup");
+      setupAuthModule(this.app, this.container);
+      this.logger.info("Authentication module configured successfully");
+    } catch (err) {
+      this.logger.warn("Failed to configure authentication module", {
         error: err instanceof Error ? err.message : String(err),
       });
     }
@@ -343,10 +457,10 @@ export class ServerManager {
             // Get CSRF protection config from environment or use defaults
             const csrfSecret = this.services.configService?.getString(
               "CSRF_SECRET",
-              "abe-stack-csrf-secret-key",
+              "abe-stack-csrf-secret-key"
             );
             const csrfSecretBuffer = Buffer.from(
-              csrfSecret || "abe-stack-csrf-secret-key",
+              csrfSecret || "abe-stack-csrf-secret-key"
             );
 
             // Generate CSRF tokens for all routes
@@ -356,7 +470,7 @@ export class ServerManager {
                 cookieName: "abe-csrf-token",
                 headerName: "X-CSRF-Token",
                 expiryMs: isProduction ? 3600000 : 86400000, // 1 hour in prod, 24 hours in dev
-              }) as RequestHandler,
+              }) as RequestHandler
             );
             this.logger.info("CSRF token generation middleware configured");
 
@@ -372,13 +486,13 @@ export class ServerManager {
                   "/api/auth/login",
                   "/api/auth/logout",
                 ],
-              }) as RequestHandler,
+              }) as RequestHandler
             );
 
             // Mount protected router at /api
             this.app.use("/api", protectedRoutes);
             this.logger.info(
-              "CSRF protection middleware configured for API routes",
+              "CSRF protection middleware configured for API routes"
             );
           }
         }
@@ -407,7 +521,7 @@ export class ServerManager {
             duration,
             ip: req.ip || req.socket.remoteAddress,
             userAgent: req.get("User-Agent") || "unknown",
-          },
+          }
         );
       });
       next();
@@ -438,7 +552,7 @@ export class ServerManager {
     this.app.use(
       (err: Error, req: Request, res: Response, _next: NextFunction) => {
         return this.services.errorHandler!.handleError(err, req, res);
-      },
+      }
     );
 
     // 404 handler for all unmatched routes
@@ -466,16 +580,16 @@ export class ServerManager {
     if (this.services.configService) {
       const dbHost = this.services.configService.getString(
         "DB_HOST",
-        "localhost",
+        "localhost"
       );
       const dbPort = this.services.configService.getNumber("DB_PORT", 5432);
       const dbName = this.services.configService.getString(
         "DB_NAME",
-        "abe_stack",
+        "abe_stack"
       );
       const dbUser = this.services.configService.getString(
         "DB_USER",
-        "postgres",
+        "postgres"
       );
 
       this.logger.info("Database configuration for status display:", {
@@ -513,6 +627,50 @@ export class ServerManager {
       ).initialize();
       this.logger.info("Validation service initialized successfully");
     }
+
+    // Initialize email service if available
+    if (this.services.businessServices.emailService) {
+      this.logger.info("Initializing email service...");
+      try {
+        console.log(
+          "ServerManager: Email service found, attempting to initialize"
+        );
+        const emailService = this.services.businessServices
+          .emailService as unknown as {
+          initialize(): Promise<void>;
+          isConnected?: () => boolean;
+          providerType?: any;
+        };
+
+        // Check what properties exist on the email service
+        console.log("Email service properties:", Object.keys(emailService));
+
+        await emailService.initialize();
+
+        // Verify initialization was successful
+        if (typeof emailService.isConnected === "function") {
+          const isConnected = emailService.isConnected();
+          console.log(
+            `ServerManager: Email service initialization complete, isConnected=${isConnected}`
+          );
+          console.log(
+            `ServerManager: Email service provider type: ${emailService.providerType}`
+          );
+        } else {
+          console.log(
+            "ServerManager: Email service doesn't have isConnected method"
+          );
+        }
+
+        this.logger.info("Email service initialized successfully");
+      } catch (error) {
+        this.logger.warn("Failed to initialize email service:", {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    } else {
+      console.log("ServerManager: No email service found in business services");
+    }
   }
 
   /**
@@ -544,7 +702,7 @@ export class ServerManager {
 
     if (!isAvailable) {
       throw new Error(
-        `Could not find an available port starting from ${preferredPort}`,
+        `Could not find an available port starting from ${preferredPort}`
       );
     }
 
@@ -595,9 +753,9 @@ export class ServerManager {
           }
         ).updateBaseUrl(storageUrl);
       }
-    } catch (err) {
+    } catch (error) {
       this.logger.warn("Failed to update storage base URL", {
-        error: err instanceof Error ? err.message : String(err),
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   }
@@ -626,11 +784,11 @@ export class ServerManager {
           storageProvider: unknown;
           config: ConfigObject;
         },
-        this.services.businessServices as Record<string, unknown>,
+        this.services.businessServices as Record<string, unknown>
       );
-    } catch (err) {
+    } catch (error) {
       this.logger.error("Error during server status display", {
-        error: err instanceof Error ? err.message : String(err),
+        error: error instanceof Error ? error.message : String(error),
       });
     }
   }

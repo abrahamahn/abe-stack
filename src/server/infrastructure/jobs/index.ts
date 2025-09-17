@@ -4,7 +4,11 @@
 
 // Core types
 export { JobType, DependencyResolutionStrategy } from "./JobTypes";
-export type { JobPriority, JobOptions } from "./JobTypes";
+export type {
+  JobPriority,
+  JobOptions,
+  EmailNotificationJobData,
+} from "./JobTypes";
 
 // Job service interfaces and implementations
 export type {
@@ -16,6 +20,9 @@ export type {
 } from "./IJobService";
 export { JobService } from "./JobService";
 export type { JobServiceConfig } from "./JobService";
+
+// Job queue types
+export type { Job } from "./JobQueue";
 
 // Storage
 export type { IJobStorage, JobData, JobStatus } from "./storage/IJobStorage";

@@ -1,9 +1,7 @@
-import React, { useState } from "react";
-
-import { fuzzyMatch } from "@/server/shared/utils";
-
+import { useState } from "react";
 import { FuzzyString } from "../FuzzyString";
 import { Input } from "../Input";
+import { fuzzyMatch } from "@/server/shared/utils";
 
 const sampleTexts = [
   "hello world",

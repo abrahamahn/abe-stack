@@ -1,134 +1,280 @@
-# 🏗️ Architecture Overview
+# 🏗️ ABE Stack Architecture Overview
 
 ## 📋 Introduction
 
-The ABE Stack is a modern, scalable application framework built with TypeScript that follows clean architecture principles. This document provides a high-level overview of the system architecture, design philosophy, and key components.
+The ABE Stack is a modern, enterprise-grade application framework built with TypeScript that follows clean architecture principles with advanced dependency injection patterns. This document provides a comprehensive overview of the system architecture, design philosophy, and implementation details.
 
 ## 🔍 Design Philosophy
 
 Our architecture is guided by the following principles:
 
-- **Separation of Concerns**: Clear boundaries between different parts of the application
-- **Dependency Inversion**: High-level modules don't depend on low-level modules
-- **Domain-Driven Design**: Business logic organized around domain concepts
-- **Modularity**: Independently deployable and testable components
-- **Testability**: Design that facilitates automated testing at all levels
-- **Scalability**: Ability to handle increased load through horizontal scaling
-- **Maintainability**: Easy to understand, modify, and extend the codebase
+- **Clean Architecture**: Clear separation between domain, application, and infrastructure layers
+- **Dependency Injection**: Inversify-based DI container with interface-driven design
+- **Domain-Driven Design**: Business logic organized around well-defined domain modules
+- **Repository Pattern**: Data access abstraction with validation and transaction support
+- **Service Layer Pattern**: Business logic encapsulation with comprehensive error handling
+- **Event-Driven Architecture**: Background job processing with pub/sub messaging
+- **Provider Pattern**: Pluggable infrastructure components for maximum flexibility
+- **Testability**: Comprehensive testing strategy with dependency mocking
+- **Scalability**: Designed for horizontal scaling and microservice extraction
 
-## 🏛️ Architectural Style
+## 🏛️ Architectural Patterns
 
-The ABE Stack implements a layered, modular architecture combining aspects of:
+The ABE Stack implements multiple proven architectural patterns:
 
-- **Clean Architecture**: Separation into domain, application, and infrastructure layers
-- **Hexagonal Architecture**: Core business logic isolated from external concerns
-- **Microservices-Ready**: Components designed for potential extraction into microservices
+### Clean Architecture
+```
+┌─────────────────────────────────────┐
+│           API Layer                 │ ← Controllers, Routes, Middleware
+├─────────────────────────────────────┤
+│        Application Layer            │ ← Services, Business Logic
+├─────────────────────────────────────┤
+│         Domain Layer                │ ← Entities, Value Objects, Rules
+├─────────────────────────────────────┤
+│      Infrastructure Layer           │ ← Database, Cache, External APIs
+└─────────────────────────────────────┘
+```
 
-## 📦 System Components
+### Dependency Injection Architecture
+- **Container**: Inversify-based service container with symbol-based type identifiers
+- **Scoping**: Singleton services for performance and state consistency
+- **Interface-Based**: All services implement well-defined interfaces
+- **Constructor Injection**: Dependencies injected through constructors with decorators
 
-The system consists of the following major components:
+### Repository & Service Pattern
+- **Repositories**: Abstract data access with CRUD operations and validation
+- **Services**: Business logic orchestration across multiple repositories
+- **Transaction Support**: Automatic transaction management with retry logic
+- **Error Handling**: Comprehensive error types and handling strategies
 
-### Frontend Layer
+## 📦 System Architecture
 
-- **Client Application**: React-based single-page application
-- **State Management**: Redux for global state management
-- **API Integration**: Axios-based service layer for backend communication
-- **Component Library**: Reusable UI components with consistent design
+### 🎯 Core Infrastructure (`src/server/infrastructure/`)
 
-### Backend Layer
+#### Configuration Management
+- **Multi-Source Configuration**: Environment files, secrets, and runtime configuration
+- **Schema Validation**: Joi-based validation with detailed error reporting
+- **Type Safety**: Strongly typed configuration access with default values
+- **Hot Reloading**: Configuration change notifications for dynamic updates
 
-- **API Layer**: Express.js REST API endpoints
-- **Service Layer**: Business logic and orchestration
-- **Domain Layer**: Core business entities and rules
-- **Infrastructure Layer**: External communication, persistence, and cross-cutting concerns
+#### Database Layer
+- **PostgreSQL**: Advanced connection pooling with configurable parameters
+- **Transaction Management**: Nested transactions with automatic rollback
+- **Query Performance**: Parameter binding, query tagging, and performance monitoring
+- **Retry Logic**: Automatic retry for serialization failures and deadlocks
+- **Health Monitoring**: Real-time connection health and metrics
 
-### Infrastructure Components
+#### Caching Strategy
+- **Multi-Level Caching**: Redis primary with in-memory fallback
+- **Function Memoization**: Automatic caching of expensive operations
+- **TTL Management**: Time-based expiration with background cleanup
+- **Statistics Tracking**: Hit/miss ratios and performance metrics
 
-- **Database**: PostgreSQL for persistent storage
-- **Cache**: Redis for performance optimization
-- **Authentication**: JWT-based authentication and authorization
-- **Messaging**: Event-based communication between services
-- **Logging**: Structured logging for monitoring and debugging
-- **Job Processing**: Background task processing
+#### Security Infrastructure
+- **JWT Management**: Access and refresh tokens with blacklisting support
+- **Password Security**: bcrypt hashing with strength validation
+- **CSRF Protection**: Token-based protection with configurable options
+- **Rate Limiting**: Configurable rate limiting with multiple strategies
+- **Input Validation**: Request validation middleware with sanitization
+- **Encryption**: AES encryption for sensitive data at rest
 
-## 🔄 Request Flow
+#### Background Processing
+- **Job Queue System**: Priority-based job scheduling with persistence
+- **Retry Logic**: Exponential backoff with configurable attempts
+- **Concurrency Control**: Worker concurrency with resource management
+- **Job Dependencies**: Complex job chaining and dependency management
+- **Monitoring**: Real-time job status and performance metrics
 
-A typical request flows through the system as follows:
+#### Logging & Monitoring
+- **Structured Logging**: JSON-formatted logs with rich metadata
+- **Context Propagation**: Hierarchical loggers with inherited context
+- **Correlation IDs**: Request tracking across service boundaries
+- **Performance Metrics**: Built-in timing and performance tracking
 
-1. Client sends a request to the backend API
-2. API layer validates request and authentication
-3. Request is routed to the appropriate service
-4. Service orchestrates domain operations
-5. Domain logic is executed with infrastructure support
-6. Results are returned through the service to the API
-7. API formats the response and sends it to the client
+### 🏢 Domain Modules (`src/server/modules/`)
 
-## 📊 Data Flow
+#### Authentication Module (`core/auth/`)
+**Feature-Based Organization:**
+```
+auth/
+├── api/                     # HTTP Controllers & Routes
+│   ├── controllers/         # Request handlers
+│   ├── routes/             # Route definitions
+│   └── middleware/         # Auth-specific middleware
+├── features/               # Business Logic by Feature
+│   ├── core/               # Login, register, logout
+│   ├── token/              # JWT token management
+│   ├── password/           # Password reset and change
+│   ├── mfa/                # Multi-factor authentication
+│   └── social/             # Social login providers
+├── services/               # Core authentication services
+├── storage/                # Authentication repositories
+└── config/                 # Authentication configuration
+```
 
-Data flows through the system following these patterns:
+#### User Management (`core/users/`)
+- **Complete CRUD Operations**: User profiles, preferences, and connections
+- **Lifecycle Management**: User onboarding with background job processing
+- **Repository Pattern**: Type-safe data access with validation
+- **Event-Driven**: User action events for notification and analytics
 
-- **Command Flow**: User actions trigger commands that modify the system state
-- **Query Flow**: User requests for data are processed through optimized query paths
-- **Event Flow**: System changes emit events that can trigger additional processing
+#### Permission System (`core/permission/`)
+- **Role-Based Access Control**: Hierarchical role and permission system
+- **Permission Middleware**: Route-level permission enforcement
+- **Dynamic Permissions**: Runtime permission checking and caching
+- **Audit Logging**: Permission checks and changes tracking
 
-## 🧩 Dependency Management
+### 🧩 Base Classes & Patterns
 
-We use dependency injection to manage component dependencies, which:
+#### Repository Base Class
+```typescript
+export abstract class BaseRepository<T> {
+  // Common CRUD operations
+  // Validation logic
+  // Transaction support
+  // Error handling
+}
+```
 
-- Makes testing easier through mock implementations
-- Provides flexibility to replace implementations
-- Creates a clear picture of component dependencies
-- Supports the dependency inversion principle
+#### Service Base Patterns
+- **Dependency Injection**: Constructor injection with interface dependencies
+- **Error Handling**: Comprehensive error types and propagation
+- **Logging Integration**: Contextual logging with correlation IDs
+- **Validation**: Input and business rule validation
 
-## 🔄 Modularity and Extension
+## 🔄 Request Lifecycle
 
-The system is designed for modularity through:
+### Typical Request Flow
+```
+1. HTTP Request → Express Server
+2. CORS Middleware → Security Headers
+3. Authentication → Token Validation
+4. Authorization → Permission Checks
+5. Input Validation → Data Sanitization
+6. Controller → Business Logic Delegation
+7. Service Layer → Domain Logic Execution
+8. Repository Layer → Data Persistence
+9. Infrastructure → Cache/Database Operations
+10. Response → Data Transformation & Return
+```
 
-- **Feature Modules**: Business functionality grouped by domain area
-- **Plugin Architecture**: Infrastructure components are pluggable
-- **Extension Points**: Well-defined interfaces for adding new functionality
-- **Configuration-Based Behavior**: Adjustable system behavior without code changes
+### Error Handling Flow
+```
+Infrastructure Error → Repository Error → Service Error → Controller Error → HTTP Response
+                                                                                      ↓
+                                            Error Logger ← Correlation ID ← Request Context
+```
 
-## 💾 Persistence Strategy
+## 💾 Data Management Strategy
 
-Our data persistence approach includes:
+### Database Architecture
+- **Connection Pooling**: Advanced pool management with health monitoring
+- **Transaction Isolation**: Configurable isolation levels with retry logic
+- **Query Optimization**: Prepared statements with parameter binding
+- **Migration System**: Versioned schema changes with rollback support
 
-- **Repository Pattern**: Abstract data access behind interfaces
-- **ORM**: TypeORM for database operations
-- **Migration Support**: Versioned database schema changes
-- **Caching Layer**: Performance optimization for frequently accessed data
+### Caching Architecture
+- **Read-Through Cache**: Automatic cache population on cache misses
+- **Write-Through Cache**: Immediate cache updates on data changes
+- **Cache Invalidation**: Event-driven cache invalidation strategies
+- **Performance Optimization**: Function memoization and query result caching
+
+### Storage Strategy
+- **Provider Pattern**: Pluggable storage backends (local, cloud)
+- **Metadata Management**: Automatic file metadata extraction and indexing
+- **Streaming Support**: Large file handling with stream processing
+- **Security**: Secure file access with time-limited URLs
 
 ## 🔒 Security Architecture
 
-Security is built into the architecture through:
+### Authentication & Authorization
+- **JWT Strategy**: Stateless authentication with refresh token rotation
+- **Role-Based Access**: Hierarchical permission system with inheritance
+- **Session Management**: Secure session handling with configurable expiration
+- **Multi-Factor Authentication**: TOTP and SMS-based MFA support
 
-- **Authentication**: JWT-based user authentication
-- **Authorization**: Role-based access control
-- **Input Validation**: Strict validation at API boundaries
-- **Data Protection**: Encryption for sensitive data
-- **CSRF Protection**: Measures against cross-site request forgery
+### Data Protection
+- **Encryption at Rest**: AES encryption for sensitive database fields
+- **Encryption in Transit**: TLS/SSL for all external communication
+- **Input Validation**: Comprehensive validation with XSS prevention
+- **SQL Injection Prevention**: Parameterized queries and ORM protection
 
-## 📈 Scalability Considerations
+### Security Monitoring
+- **Audit Logging**: Comprehensive security event logging
+- **Rate Limiting**: Adaptive rate limiting with IP-based tracking
+- **Intrusion Detection**: Suspicious activity pattern detection
+- **Security Headers**: Comprehensive security header implementation
 
-The architecture supports scalability through:
+## 📈 Scalability & Performance
 
-- **Stateless Design**: No server-side session state
-- **Horizontal Scaling**: Multiple instances behind a load balancer
-- **Database Scaling**: Read replicas and sharding support
-- **Caching Strategy**: Multi-level caching to reduce database load
-- **Background Processing**: Offloading intensive tasks to worker processes
+### Horizontal Scaling
+- **Stateless Design**: No server-side session state for easy scaling
+- **Load Balancing**: Session-independent request distribution
+- **Database Scaling**: Read replicas and connection pooling
+- **Cache Distribution**: Redis clustering for high availability
 
-## 🔄 Deployment Architecture
+### Performance Optimization
+- **Query Optimization**: Indexed queries with performance monitoring
+- **Background Processing**: CPU-intensive tasks moved to job queues
+- **Caching Strategy**: Multi-level caching with intelligent invalidation
+- **Resource Management**: Connection pooling and resource cleanup
 
-The system supports various deployment models:
+### Monitoring & Observability
+- **Health Checks**: Comprehensive system health monitoring
+- **Performance Metrics**: Real-time performance tracking and alerting
+- **Distributed Tracing**: Request tracing across service boundaries
+- **Error Tracking**: Comprehensive error logging and alerting
 
-- **Monolithic Deployment**: Single application deployment
-- **Service-Based Deployment**: Separate deployments for major components
-- **Containerization**: Docker-based deployment
-- **Cloud-Native**: Support for cloud platform services
+## 🚀 Deployment Architecture
 
-## 📚 Further Reading
+### Environment Management
+- **Multi-Environment**: Separate configurations for dev, staging, production
+- **Configuration Management**: Environment-specific variable management
+- **Secret Management**: Secure handling of sensitive configuration data
+- **Feature Flags**: Runtime feature toggling and A/B testing
 
-- Detailed Layer Architecture (coming soon)
-- Component Interaction (coming soon)
-- [Technology Stack Selection](../adr/0001-tech-stack-selection.md)
+### Container Strategy
+- **Docker Support**: Containerized deployment with optimized images
+- **Health Checks**: Container health monitoring and automatic restart
+- **Resource Limits**: CPU and memory limits for optimal resource usage
+- **Multi-Stage Builds**: Optimized build process for smaller images
+
+### Infrastructure as Code
+- **Database Migrations**: Automated schema deployment and versioning
+- **Configuration Management**: Infrastructure configuration as code
+- **Monitoring Setup**: Automated monitoring and alerting configuration
+- **Backup Strategy**: Automated backup and disaster recovery procedures
+
+## 🧪 Testing Architecture
+
+### Testing Strategy
+- **Unit Tests**: Component-level testing with dependency mocking
+- **Integration Tests**: Service integration and database testing
+- **End-to-End Tests**: Complete user workflow testing
+- **Performance Tests**: Load testing and performance benchmarking
+
+### Test Infrastructure
+- **Mock Services**: Comprehensive mocking of external dependencies
+- **Test Databases**: Isolated test database environments
+- **Test Fixtures**: Reusable test data and setup utilities
+- **Continuous Integration**: Automated testing in CI/CD pipelines
+
+## 📚 Related Documentation
+
+- **[Server Architecture](../../src/server/README.md)** - Detailed server implementation
+- **[API Documentation](../api/overview.md)** - REST API reference
+- **[Security Guidelines](../security/overview.md)** - Security implementation details
+- **[Development Setup](../development/setup.md)** - Development environment setup
+- **[Technology Stack](../adr/0001-tech-stack-selection.md)** - Technology choice rationale
+
+## 🔄 Architecture Evolution
+
+The ABE Stack architecture is designed for evolution:
+
+- **Microservice Ready**: Components can be extracted into independent services
+- **Cloud Native**: Support for cloud platform services and scaling
+- **Event-Driven**: Support for complex event-driven architectures
+- **API Gateway**: Ready for API gateway integration and service mesh
+- **Observability**: Comprehensive monitoring and distributed tracing support
+
+This architecture provides a solid foundation for building scalable, maintainable applications while remaining flexible enough to evolve with changing requirements and technology landscapes.

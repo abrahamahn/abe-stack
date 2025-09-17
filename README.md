@@ -50,16 +50,25 @@ ABE Stack is a comprehensive boilerplate for building full-stack web application
 
 ## 🏗️ Architecture
 
-ABE Stack follows a clean, multi-layered architecture that separates concerns and promotes maintainability and scalability.
+ABE Stack follows a clean, enterprise-grade architecture with dependency injection, layered services, and modular design that separates concerns and promotes maintainability and scalability.
 
-For detailed architecture information, see the [Architecture Overview](docs/architecture/overview.md).
+For detailed architecture information, see the [Architecture Overview](docs/architecture/overview.md) and [Server Architecture](src/server/README.md).
 
-### 🧩 Key Layers
+### 🧩 Key Architectural Patterns
 
-- **Client**: React frontend with component hierarchy, routing, and state management
-- **Server**: Express-based backend with controllers, services, and repositories
-- **Database**: PostgreSQL with models, migrations, and seed data
-- **Infrastructure**: Supporting systems for caching, media storage, and authentication
+- **Clean Architecture**: Clear separation between API, business logic, and infrastructure layers
+- **Dependency Injection**: Inversify-based DI container with interface-driven design
+- **Repository Pattern**: Data access abstraction with validation and transaction support
+- **Service Layer**: Business logic encapsulation with comprehensive error handling
+- **Event-Driven**: Background job processing with pubsub messaging
+- **Provider Pattern**: Pluggable infrastructure components (storage, cache, auth)
+
+### 🏗️ System Layers
+
+- **Frontend (React)**: Modern React 18+ with TypeScript, component architecture, and state management
+- **Backend (Node.js)**: Express-based API with dependency injection, modular services, and comprehensive middleware
+- **Infrastructure**: Cross-cutting concerns including caching, logging, security, job processing, and storage
+- **Database (PostgreSQL)**: Advanced connection pooling, transaction management, and migration system
 
 ## 🚀 Getting Started
 
@@ -108,7 +117,7 @@ For those who prefer a manual installation:
 2. **Clone and install**:
 
    ```sh
-   git clone https://github.com/YOUR-USERNAME/abe-stack.git project
+   git clone https://github.com/abrahamahn/abe-stack.git project
    cd project
    npm install
    ```
@@ -120,12 +129,13 @@ For those who prefer a manual installation:
 
 ### ⚙️ Environment Configuration
 
-The application uses environment-specific configuration files:
+The application uses environment-specific configuration files located in `src/server/infrastructure/config/.env/`:
 
 - `.env.development` - Development mode settings
 - `.env.production` - Production mode settings
+- `.env.test` - Test environment settings
 
-These files contain configuration for database connections, JWT secrets, server settings, etc.
+These files contain configuration for database connections, JWT secrets, server settings, storage paths, and more. The configuration system supports multiple sources with schema validation.
 
 ## 👨‍💻 Development
 
@@ -136,32 +146,44 @@ These files contain configuration for database connections, JWT secrets, server 
 npm run dev             # Start both client and server
 npm run dev:client      # Start just the frontend
 npm run dev:server      # Start just the backend
+npm run dev:clean       # Kill existing processes and start dev
 
 # Building
-npm run build           # Build both client and server
+npm run build           # Build both client and server with checks
+npm run build:check     # Run linting and type checking
+npm run build:compile   # Compile client and server
 npm run build:client    # Build just the client
 npm run build:server    # Build just the server
 
 # Production
-npm run start           # Start production server
+npm run start           # Start production server and client
+npm run start:server    # Start just production server
+npm run start:client    # Start just production client
+npm run preview         # Preview production build
 
 # Testing
-npm run test            # Run all tests
+npm run test            # Run unit tests
 npm run test:unit       # Run unit tests
 npm run test:integration # Run integration tests
-npm run test:e2e        # Run end-to-end tests
+npm run test:e2e        # Run end-to-end tests with Playwright
+npm run test:watch      # Run tests in watch mode
+npm run test:coverage   # Run tests with coverage
+npm run test:all        # Run all test suites
 npm run type-check      # Check TypeScript types
 
-# Linting and Formatting
-npm run lint            # Run ESLint on all TypeScript files
+# Code Quality
+npm run lint            # Run ESLint checks
+npm run lint:strict     # Run ESLint with zero warnings
 npm run lint:fix        # Fix automatically fixable issues
+npm run lint:count      # Show error/warning counts
 npm run format          # Format code with Prettier
+npm run format:check    # Check if code is formatted
 
-# Database
-npm run db:migrate      # Run database migrations
-npm run db:rollback     # Rollback the last migration
-npm run db:reset        # Reset and recreate the database
-npm run db:seed         # Seed the database with sample data
+# Utilities
+npm run clean           # Clean dependencies and build artifacts
+npm run ports:check     # Check if development ports are free
+npm run ports:kill      # Kill existing Node.js processes
+npm run setup           # Interactive project setup
 ```
 
 ### 🧰 VS Code Integration
@@ -210,13 +232,21 @@ For detailed API information, see the [API Overview](docs/api/overview.md).
 .
 ├── src/                    # Source code
 │   ├── client/             # Frontend React application
+│   │   ├── api/            # API client services
 │   │   ├── components/     # React components
-│   │   ├── contexts/       # React contexts
+│   │   │   ├── auth/       # Authentication components
+│   │   │   ├── debug/      # Debug components
+│   │   │   ├── media/      # Media components
+│   │   │   ├── pages/      # Page components
+│   │   │   ├── social/     # Social media components
+│   │   │   ├── theme/      # Theme components
+│   │   │   └── ui/         # UI library components
 │   │   ├── config/         # Frontend configuration
+│   │   ├── contexts/       # React contexts
 │   │   ├── helpers/        # Helper functions
 │   │   ├── hooks/          # Custom React hooks
 │   │   ├── layouts/        # Layout components
-│   │   ├── public/         # Public assets
+│   │   ├── public/         # Public assets and icons
 │   │   ├── services/       # Frontend services
 │   │   ├── test/           # Test utilities
 │   │   ├── utils/          # Utility functions
@@ -229,30 +259,36 @@ For detailed API information, see the [API Overview](docs/api/overview.md).
 │   │
 │   ├── server/             # Backend Express server
 │   │   ├── modules/        # Feature modules
-│   │   │   ├── auth/       # Authentication module
-│   │   │   ├── sessions/   # Session management
-│   │   │   ├── users/      # User management
-│   │   │   └── preferences/# User preferences
+│   │   │   ├── base/       # Base classes and patterns
+│   │   │   ├── core/       # Core business modules
+│   │   │   │   ├── auth/   # Authentication & authorization
+│   │   │   │   ├── email/  # Email services
+│   │   │   │   ├── geo/    # Geolocation services
+│   │   │   │   ├── permission/ # Permission system
+│   │   │   │   ├── preferences/ # User preferences
+│   │   │   │   ├── sessions/   # Session management
+│   │   │   │   └── users/      # User management
+│   │   │   └── reset/      # Reset utilities
 │   │   │
 │   │   ├── infrastructure/ # Cross-cutting concerns
-│   │   │   ├── auth/       # Authentication services
-│   │   │   ├── cache/      # Caching mechanisms
-│   │   │   ├── config/     # Server configuration
+│   │   │   ├── cache/      # Caching layer (Redis, in-memory)
+│   │   │   ├── config/     # Configuration management
 │   │   │   ├── database/   # Database connectivity
 │   │   │   ├── di/         # Dependency injection
 │   │   │   ├── errors/     # Error handling
 │   │   │   ├── files/      # File management
-│   │   │   ├── jobs/       # Background jobs
+│   │   │   ├── jobs/       # Background job processing
 │   │   │   ├── lifecycle/  # Application lifecycle
-│   │   │   ├── logging/    # Logging services
+│   │   │   ├── logging/    # Structured logging
 │   │   │   ├── middleware/ # HTTP middleware
-│   │   │   ├── processor/  # Data processors
+│   │   │   ├── processor/  # Media & stream processing
 │   │   │   ├── promises/   # Promise utilities
-│   │   │   ├── pubsub/     # Pub/Sub system
+│   │   │   ├── pubsub/     # Pub/Sub messaging
 │   │   │   ├── queue/      # Task queues
-│   │   │   ├── security/   # Security features
-│   │   │   ├── server/     # Server components
-│   │   │   ├── storage/    # Storage services
+│   │   │   ├── search/     # Search services
+│   │   │   ├── security/   # Security & authentication
+│   │   │   ├── server/     # HTTP server management
+│   │   │   ├── storage/    # File storage
 │   │   │   └── utils/      # Utility services
 │   │   │
 │   │   ├── shared/         # Shared code within server
@@ -260,18 +296,37 @@ For detailed API information, see the [API Overview](docs/api/overview.md).
 │   │   ├── index.ts        # Server entry point
 │   │   └── README.md       # Server documentation
 │   │
-│   ├── tools/              # Development tools
-│   └── tests/              # Test suite
+│   ├── tests/              # Test suite
+│   │   ├── mocks/          # Test mocks and utilities
+│   │   ├── server/         # Server-side tests
+│   │   │   ├── unit/       # Unit tests
+│   │   │   └── integration/# Integration tests
+│   │   └── types/          # Type tests
+│   │
+│   └── tools/              # Development and build tools
+│       ├── analysis/       # Code analysis tools
+│       ├── dev/            # Development utilities
+│       └── setup/          # Project setup scripts
+│
+├── config/                 # Configuration files
+│   ├── build/              # Build configuration
+│   ├── dev/                # Development configuration
+│   └── test/               # Test configuration
 │
 ├── docs/                   # Documentation
-│   ├── architecture/       # Architecture documentation
+│   ├── adr/                # Architecture Decision Records
 │   ├── api/                # API documentation
+│   ├── architecture/       # Architecture documentation
 │   ├── development/        # Development guides
-│   ├── security/           # Security guidelines
-│   └── adr/                # Architecture Decision Records
+│   └── security/           # Security guidelines
 │
-├── .env.development        # Development environment variables
-├── .env.production         # Production environment variables
+├── project-data/           # Runtime data (gitignored)
+│   ├── storage/            # File storage
+│   ├── temp/               # Temporary files
+│   ├── uploads/            # File uploads
+│   ├── queue/              # Processing queue
+│   └── jobs/               # Background jobs
+│
 └── package.json            # Project manifest
 ```
 

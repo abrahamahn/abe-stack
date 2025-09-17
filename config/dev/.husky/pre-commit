@@ -1,0 +1,5 @@
+# Unified Pre-commit Pipeline
+echo "🚀 Running pre-commit checks..."
+
+# Run the unified pre-commit pipeline
+npm run pre-commit

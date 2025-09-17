@@ -30,5 +30,5 @@ export type {
   SecurityConfigProvider,
 } from "./domain/SecurityConfig";
 export type { EmailConfig, EmailConfigProvider } from "./domain/EmailConfig";
-export type { LoggingOptions } from "./domain/LoggingConfig";
-export { LoggingConfig } from "./domain/LoggingConfig";
+export type { LoggingOptions, LoggingConfig } from "./domain/LoggingConfig";
+export { LoggingConfigService } from "./domain/LoggingConfig";

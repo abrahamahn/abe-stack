@@ -24,6 +24,8 @@ Each domain-specific area has its own configuration interface:
 - **SecurityConfig**: Authentication, authorization, and encryption settings
 - **StorageConfig**: File storage locations and options
 - **LoggingConfig**: Logging levels, formats, and destinations
+- **CacheConfig**: Memory and Redis cache settings
+- **MigrationConfig**: Database migration settings and templates
 
 ### 2️⃣ Configuration Providers
 
@@ -35,6 +37,8 @@ Provider classes that load, validate, and deliver configuration:
 - **SecurityConfigProvider**: Auth and security options
 - **StorageConfigProvider**: File storage settings
 - **LoggingConfigProvider**: Logging system configuration
+- **CacheConfigProvider**: In-memory and Redis cache configuration
+- **MigrationConfigProvider**: Database migration configuration
 
 ### 3️⃣ Module Exports (`index.ts`)
 
@@ -53,7 +57,7 @@ import { TYPES } from "@/server/infrastructure/di/types";
 class YourService {
   constructor(
     @inject(TYPES.DatabaseConfigProvider)
-    private dbConfigProvider: DatabaseConfigProvider,
+    private dbConfigProvider: DatabaseConfigProvider
   ) {}
 
   async connect() {
@@ -61,10 +65,43 @@ class YourService {
 
     // Use typed configuration
     console.log(
-      `Connecting to ${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`,
+      `Connecting to ${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`
     );
 
     // Connection logic...
+  }
+}
+```
+
+### Using Cache Configuration
+
+```typescript
+import { inject, injectable } from "inversify";
+import {
+  CacheConfigProvider,
+  CacheProviderType,
+} from "@/server/infrastructure/config/domain";
+import { TYPES } from "@/server/infrastructure/di/types";
+
+@injectable()
+class CacheConsumer {
+  constructor(
+    @inject(TYPES.CacheServiceConfig)
+    private cacheConfigProvider: CacheConfigProvider
+  ) {}
+
+  setupCache() {
+    const cacheConfig = this.cacheConfigProvider.getConfig();
+
+    if (cacheConfig.provider === CacheProviderType.REDIS) {
+      console.log(
+        `Using Redis cache at ${cacheConfig.redis?.host}:${cacheConfig.redis?.port}`
+      );
+      // Redis setup logic...
+    } else {
+      console.log("Using in-memory cache");
+      // Memory cache setup logic...
+    }
   }
 }
 ```
@@ -81,6 +118,14 @@ DB_NAME=my_database
 DB_USER=postgres
 DB_PASSWORD=secret
 DB_MAX_CONNECTIONS=20
+
+# Cache config example
+CACHE_PROVIDER=redis
+CACHE_REDIS_HOST=localhost
+CACHE_REDIS_PORT=6379
+CACHE_REDIS_PASSWORD=optional-password
+CACHE_REDIS_DB=0
+CACHE_REDIS_KEY_PREFIX=app-cache:
 ```
 
 ## 🏗️ Architecture Decisions
@@ -114,6 +159,12 @@ DB_MAX_CONNECTIONS=20
 - **Decision**: Make all configuration strongly typed through interfaces
 - **Rationale**: Prevents runtime errors by catching configuration type mismatches early
 - **Benefit**: Better IDE support with autocomplete for configuration properties
+
+### Provider-Based Choice Selection
+
+- **Decision**: Use provider types (enums) to select implementations (e.g., cache types)
+- **Rationale**: Makes it easy to switch implementations through configuration
+- **Benefit**: Simplifies testing and environment-specific setups
 
 ## ⚙️ Setup and Configuration Notes
 

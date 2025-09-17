@@ -65,7 +65,7 @@ export class ConfigService implements IConfigService {
   constructor(
     @inject(TYPES.LoggerService) @optional() loggerService?: ILoggerService,
     @unmanaged() parent?: ConfigService,
-    @unmanaged() namespace?: string,
+    @unmanaged() namespace?: string
   ) {
     this.logger = loggerService?.createLogger("ConfigService") || {
       debug: console.debug,
@@ -107,6 +107,10 @@ export class ConfigService implements IConfigService {
     // For root service, ensure environment is loaded
     this.loadEnvFiles();
     this.loadFromEnvironment();
+
+    // Load domain-specific configurations
+    this.loadDomainConfigs();
+
     this.logger.info("ConfigService initialized");
 
     return Promise.resolve();
@@ -155,7 +159,7 @@ export class ConfigService implements IConfigService {
         this.loadFromFile(fallbackFile);
         loadedFiles.push(`${path.basename(fallbackFile)} (fallback)`);
         this.logger.warn(
-          "Using development environment file as fallback for test environment",
+          "Using development environment file as fallback for test environment"
         );
       }
     }
@@ -181,7 +185,7 @@ export class ConfigService implements IConfigService {
         if (fileName.startsWith(".env.")) {
           const env = fileName.replace(".env.", "");
           this.logger.debug(
-            `Environment config file not found: ${fileName} (normal for non-${env} environments)`,
+            `Environment config file not found: ${fileName} (normal for non-${env} environments)`
           );
         } else {
           this.logger.warn(`Config file not found: ${filePath}`);
@@ -199,7 +203,7 @@ export class ConfigService implements IConfigService {
       // Get relative path from src directory
       const relativePath = path.relative(
         path.join(process.cwd(), "src"),
-        fullPath,
+        fullPath
       );
       this.logger.info(`Loaded config from ${relativePath}`);
     } catch (error) {
@@ -212,7 +216,7 @@ export class ConfigService implements IConfigService {
         // File not found - provide clearer context
         const fileName = path.basename(filePath);
         this.logger.info(
-          `Config file ${fileName} not present (this may be expected in certain environments)`,
+          `Config file ${fileName} not present (this may be expected in certain environments)`
         );
       } else {
         // Other errors should still be logged as errors
@@ -221,7 +225,7 @@ export class ConfigService implements IConfigService {
             error instanceof Error
               ? `${error.name}: ${error.message}`
               : String(error)
-          }`,
+          }`
         );
       }
     }
@@ -250,7 +254,7 @@ export class ConfigService implements IConfigService {
             callback(value);
           } catch (error) {
             this.logger?.error(
-              `Error in config watcher callback for ${key}: ${error instanceof Error ? error.message : String(error)}`,
+              `Error in config watcher callback for ${key}: ${error instanceof Error ? error.message : String(error)}`
             );
           }
         });
@@ -273,7 +277,7 @@ export class ConfigService implements IConfigService {
       try {
         return this.parent.get<T>(
           `${this.namespace}_${key}`,
-          defaultValue as T,
+          defaultValue as T
         );
       } catch (error) {
         // If not found in parent, fall back to our own values
@@ -386,7 +390,7 @@ export class ConfigService implements IConfigService {
    */
   getArray<T = string>(
     key: string,
-    defaultValue: T[] = [] as unknown as T[],
+    defaultValue: T[] = [] as unknown as T[]
   ): T[] {
     try {
       // Try to get the value
@@ -506,7 +510,7 @@ export class ConfigService implements IConfigService {
     const config = this.toObject();
     const validationResult = validateConfig(
       config as Record<string, string>,
-      schema,
+      schema
     );
 
     this.clearErrors();
@@ -575,7 +579,7 @@ export class ConfigService implements IConfigService {
               supportError instanceof Error
                 ? supportError.message
                 : String(supportError)
-            }`,
+            }`
           );
           continue; // Skip this provider on error
         }
@@ -592,7 +596,7 @@ export class ConfigService implements IConfigService {
                 secretError instanceof Error
                   ? secretError.message
                   : String(secretError)
-              }`,
+              }`
             );
           }
         }
@@ -600,7 +604,7 @@ export class ConfigService implements IConfigService {
         this.logger.error(
           `Unexpected error with secret provider: ${
             error instanceof Error ? error.message : String(error)
-          }`,
+          }`
         );
       }
     }
@@ -937,5 +941,26 @@ export class ConfigService implements IConfigService {
     });
 
     return result;
+  }
+
+  /**
+   * Load all domain-specific configurations
+   * This ensures that all configuration providers have access to the latest configs
+   */
+  private loadDomainConfigs(): void {
+    try {
+      // Nothing to do here directly
+      // Domain-specific configuration providers will be instantiated by DI
+      // and will access this config service
+      this.logger.debug(
+        "Domain-specific configs will be loaded on demand via providers"
+      );
+    } catch (error) {
+      this.logger.error(
+        `Error loading domain configs: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
   }
 }
