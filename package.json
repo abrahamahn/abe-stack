@@ -71,7 +71,7 @@
     "md5": "^2.3.0",
     "mime-types": "^2.1.35",
     "node-cache": "^5.1.2",
-    "nodemailer": "^6.9.19",
+    "nodemailer": "^7.0.7",
     "pg": "^8.13.1",
     "plyr": "^3.8.3",
     "rate-limiter-flexible": "^5.0.3",
