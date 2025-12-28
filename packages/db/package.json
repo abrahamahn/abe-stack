@@ -15,7 +15,7 @@
   "dependencies": {
     "drizzle-orm": "^0.45.1",
     "postgres": "^3.4.7",
-    "zod": "^4.1.13"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",

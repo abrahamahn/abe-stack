@@ -1,3 +1,4 @@
+import { tokenStore } from '@abe-stack/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createContext, useEffect, useState } from 'react';
 
@@ -25,9 +26,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: ReactNode }): ReactElement {
   const queryClient = useQueryClient();
-  const [token, setToken] = useState<string | null>(() =>
-    typeof window !== 'undefined' ? localStorage.getItem('token') : null,
-  );
+  const [token, setToken] = useState<string | null>(() => tokenStore.get());
 
   const {
     data: user,
@@ -43,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }): ReactElemen
 
   useEffect(() => {
     if (error) {
-      localStorage.removeItem('token');
+      tokenStore.clear();
       setToken(null);
       queryClient.removeQueries({ queryKey: ['auth', 'me'], exact: true });
     }
@@ -51,20 +50,20 @@ export function AuthProvider({ children }: { children: ReactNode }): ReactElemen
 
   const login = async (credentials: LoginRequest): Promise<void> => {
     const response: AuthResponse = await api.login(credentials);
-    localStorage.setItem('token', response.token);
+    tokenStore.set(response.token);
     setToken(response.token);
     queryClient.setQueryData(['auth', 'me'], response.user);
   };
 
   const register = async (data: RegisterRequest): Promise<void> => {
     const response: AuthResponse = await api.register(data);
-    localStorage.setItem('token', response.token);
+    tokenStore.set(response.token);
     setToken(response.token);
     queryClient.setQueryData(['auth', 'me'], response.user);
   };
 
   const logout = async (): Promise<void> => {
-    localStorage.removeItem('token');
+    tokenStore.clear();
     setToken(null);
     queryClient.removeQueries({ queryKey: ['auth', 'me'], exact: true });
     await Promise.resolve();

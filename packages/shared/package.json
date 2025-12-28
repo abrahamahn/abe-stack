@@ -27,7 +27,7 @@
   "dependencies": {
     "@abe-stack/db": "workspace:*",
     "@ts-rest/core": "^3.45.1",
-    "zod": "^4.1.13"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",

@@ -7,18 +7,18 @@ export const errorResponseSchema = z.object({
 });
 
 export const userSchema = z.object({
-  id: z.uuid(),
-  email: z.email(),
+  id: z.string().uuid(),
+  email: z.string().email(),
   name: z.string().nullable(),
 });
 
 export const loginRequestSchema = z.object({
-  email: z.email(),
+  email: z.string().email(),
   password: z.string().min(8),
 });
 
 export const registerRequestSchema = z.object({
-  email: z.email(),
+  email: z.string().email(),
   name: z.string().min(2).optional(),
   password: z.string().min(8),
 });
@@ -35,11 +35,11 @@ export const emailVerificationRequestSchema = z.object({
 
 export const emailVerificationResponseSchema = z.object({
   verified: z.boolean(),
-  userId: z.uuid(),
+  userId: z.string().uuid(),
 });
 
 export const userResponseSchema = userSchema.extend({
-  createdAt: z.iso.datetime(),
+  createdAt: z.string().datetime(),
 });
 
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
