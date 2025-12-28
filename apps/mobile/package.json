@@ -8,7 +8,7 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx --ignore-pattern '*.config.js' --ignore-pattern 'babel.config.js'",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
