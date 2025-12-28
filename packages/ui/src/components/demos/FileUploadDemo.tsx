@@ -1,4 +1,4 @@
-import { sleep } from '../../../../server/infrastructure/lifecycle/sleep';
+import { sleep } from '@abe-stack/shared';
 import { FileUploadDropZone, UploadPreview, useFileUpload } from '../FileUpload';
 
 export function FileUploadDemo() {

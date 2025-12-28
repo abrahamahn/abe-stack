@@ -1,4 +1,4 @@
-import { FuzzyMatchResult } from '../../../server/shared/utils';
+import type { FuzzyMatchResult } from '@abe-stack/shared';
 
 interface FuzzyStringProps {
   match?: FuzzyMatchResult[];

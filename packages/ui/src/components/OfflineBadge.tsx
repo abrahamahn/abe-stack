@@ -1,5 +1,5 @@
 import { Badge } from './Badge';
-import { useOnline } from '../../hooks/useOnline';
+import { useOnline } from '../hooks/useOnline';
 
 export function OfflineBadge() {
   const online = useOnline();

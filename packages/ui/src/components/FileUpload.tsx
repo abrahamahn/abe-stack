@@ -1,10 +1,8 @@
 import React, { useRef, useState } from 'react';
 import type { ChangeEvent, ComponentPropsWithoutRef, DragEvent } from 'react';
 
-import { DeferredPromise } from '@infrastructure/promises';
-import { randomId } from '@infrastructure/utils/randomId';
-
-import { passthroughRef } from '../../helpers/passthroughRef';
+import { DeferredPromise, randomId } from '@abe-stack/shared';
+import { passthroughRef } from '../helpers/passthroughRef';
 
 interface Upload {
   id: string;

@@ -1,7 +1,7 @@
 import React from 'react';
 import type { CSSProperties } from 'react';
 
-import { usePopper } from '../../hooks/usePopper';
+import { usePopper } from '../hooks/usePopper';
 
 interface DropdownMenuProps {
   style?: CSSProperties;

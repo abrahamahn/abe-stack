@@ -1,7 +1,8 @@
 import React from 'react';
 
-import { useClientEnvironment } from '../../services/ClientEnvironment';
-import { Route, useRoute } from '../../services/Router';
+import { useClientEnvironment } from '../services/ClientEnvironment';
+import type { Route } from '../services/Router';
+import { useRoute } from '../services/Router';
 
 interface LinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   to: string;

@@ -5,9 +5,9 @@ import { FuzzyString } from './FuzzyString';
 import { Input } from './Input';
 import { MenuItem } from './MenuItem';
 import { Popup, PopupFrame } from './Popup';
-import { fuzzyMatch } from '../../../server/shared/utils';
-import { useRefPrevious } from '../../hooks/useRefPrevious';
-import { isShortcut } from '../../hooks/useShortcut';
+import { fuzzyMatch } from '@abe-stack/shared';
+import { useRefPrevious } from '../hooks/useRefPrevious';
+import { isShortcut } from '../hooks/useShortcut';
 
 interface ComboBoxProps<T> {
   items: T[];

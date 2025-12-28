@@ -1,9 +1,10 @@
 import React, { useLayoutEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 
-import { passthroughRef } from '../../helpers/passthroughRef';
-import { Placement, createPopper } from '../../hooks/usePopper';
-import { useShortcut } from '../../hooks/useShortcut';
+import { passthroughRef } from '../helpers/passthroughRef';
+import type { Placement } from '../hooks/usePopper';
+import { createPopper } from '../hooks/usePopper';
+import { useShortcut } from '../hooks/useShortcut';
 
 export function Popup(props: {
   open: boolean;
