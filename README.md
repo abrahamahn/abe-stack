@@ -11,7 +11,7 @@ Developer-velocity boilerplate for shipping production-grade apps fast. One Type
 - [Testing](#testing)
 - [Production Deployment](#production-deployment)
 - [Environment Configuration](#environment-configuration)
-- [Contributing](#contributing)
+- [Code Quality](#code-quality)
 
 ## Tech Highlights
 
@@ -135,42 +135,46 @@ pnpm --filter @abe-stack/ui build
 
 ## Testing
 
+**Testing Strategy:**
+
+- **Vitest** - Unit and integration tests (frontend & backend)
+- **Playwright** - End-to-end tests
+
 ### Unit Tests (Vitest)
 
 ```bash
-# Run all tests
+# Run all unit tests
 pnpm test
 
-# Run tests for specific workspace
+# Run tests for specific app
 pnpm test:web
 pnpm test:server
 
-# Run tests in watch mode
-pnpm --filter @abe-stack/shared test -- --watch
-
-# Generate coverage report
+# Run with coverage
 pnpm test -- --coverage
+
+# Watch mode
+pnpm --filter @abe-stack/web test -- --watch
 ```
 
 ### E2E Tests (Playwright)
 
 ```bash
-# Install Playwright browsers (first time only)
+# Install browsers (first time only)
 pnpm exec playwright install
 
 # Run E2E tests
 pnpm test:e2e
 
-# Run E2E tests in UI mode
+# Run in UI mode
 pnpm test:e2e:ui
 ```
 
-### Test Structure
+**Test Files:**
 
-- Unit tests: `**/*.test.{ts,tsx}` or `**/*.spec.{ts,tsx}`
+- Unit tests: `**/*.test.{ts,tsx}`
 - E2E tests: `tests/e2e/**/*.spec.ts`
-- Coverage config: `config/vitest.config.ts`
-- Coverage threshold: 70% (branches, functions, lines, statements)
+- Config: `config/vitest.config.ts` and `config/playwright.config.ts`
 
 ## Production Deployment
 
@@ -251,27 +255,16 @@ Environment variables are validated at server startup using Zod schemas. See `pa
 - Development defaults (containing `dev_` or `change_me`) are rejected in production
 - Missing required variables cause immediate startup failure with helpful error messages
 
-## Contributing
+## Code Quality
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for development guidelines, coding standards, and PR workflow.
+Git hooks automatically ensure code quality:
 
-### Quick Contribution Guide
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Make changes and ensure tests pass: `pnpm test`
-4. Ensure linting passes: `pnpm lint`
-5. Commit with descriptive messages
-6. Push and create a Pull Request
-
-### Code Quality Checks
-
-Pre-commit hooks automatically run:
+**Pre-commit:**
 
 - Prettier formatting check
 - ESLint on changed files
 
-Pre-push hooks automatically run:
+**Pre-push:**
 
 - Full linting
 - TypeScript type checking
@@ -279,9 +272,3 @@ Pre-push hooks automatically run:
 ## License
 
 [Add your license here]
-
-## Support
-
-- **Documentation:** See individual app READMEs in `apps/` directories
-- **Issues:** [GitHub Issues](https://github.com/your-org/abe-stack/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/your-org/abe-stack/discussions)
