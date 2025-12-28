@@ -8,7 +8,7 @@ type GlobalWithDb = typeof globalThis & {
   db?: PostgresJsDatabase<typeof schema>;
 };
 
-export function buildConnectionString(env: DbEnv = process.env): string {
+export function buildConnectionString(env: DbEnv = process.env as DbEnv): string {
   if (env.DATABASE_URL && typeof env.DATABASE_URL === 'string') {
     return env.DATABASE_URL;
   }
@@ -70,7 +70,7 @@ function uniquePorts(ports: Array<number | undefined>): number[] {
  * Updates process.env when it succeeds so downstream consumers share the same port.
  */
 export async function resolveConnectionStringWithFallback(
-  env: DbEnv = process.env,
+  env: DbEnv = process.env as DbEnv,
   fallbackPorts: number[] = [5432, 5433, 5434],
 ): Promise<string> {
   if (env.DATABASE_URL && typeof env.DATABASE_URL === 'string') {
