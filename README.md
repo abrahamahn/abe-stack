@@ -1,3 +1,6 @@
+<!-- markdownlint-disable MD040 -->
+<!-- cspell:ignore Turborepo -->
+
 # ABE Stack
 
 Developer-velocity boilerplate for shipping production-grade apps fast. One TypeScript monorepo powers web (Vite + React), desktop (Electron today, Tauri-ready), and mobile (React Native) with a Fastify/PostgreSQL backend and shared UI/API/util packages. The renderers stay thin; business logic and infrastructure live in shared code to stay framework-agnostic.

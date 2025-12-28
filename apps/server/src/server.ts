@@ -15,7 +15,10 @@ import type { ServerEnv } from '@abe-stack/shared';
  */
 type AppInstance = FastifyInstance;
 
-export async function createServer(env: ServerEnv): Promise<{
+export async function createServer(
+  env: ServerEnv,
+  connectionString?: string,
+): Promise<{
   app: AppInstance;
   db: ReturnType<typeof createDbClient>;
 }> {
@@ -50,7 +53,8 @@ export async function createServer(env: ServerEnv): Promise<{
   await app.register(helmet);
 
   // Initialize database connection
-  const db = createDbClient(buildConnectionString(env));
+  const dbConnectionString = connectionString ?? buildConnectionString(env);
+  const db = createDbClient(dbConnectionString);
 
   // Decorate Fastify instance with db
   app.decorate('db', db);

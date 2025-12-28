@@ -14,8 +14,10 @@ RUN apk update && \
 
 # Enable pnpm via corepack
 ENV PNPM_HOME=/pnpm
+ENV PNPM_STORE_PATH=/pnpm/store
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
+RUN mkdir -p /pnpm/store
 
 WORKDIR /app
 
@@ -34,7 +36,7 @@ COPY packages/api-client/package.json packages/api-client/
 
 # Fetch production dependencies
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    pnpm fetch --prod --filter @abe-stack/server
+    pnpm fetch --prod
 
 # =============================================================================
 # Build Stage - Compile TypeScript and prepare deployment
@@ -44,17 +46,18 @@ FROM base AS build
 WORKDIR /app
 
 # Copy cached pnpm store from deps stage
-COPY --from=deps /pnpm /pnpm
+COPY --from=deps /pnpm/store /pnpm/store
 
 # Copy all source files
 COPY . .
 
 # Install dependencies, build, and deploy to clean directory
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-    pnpm install --offline --frozen-lockfile && \
+    pnpm install --frozen-lockfile && \
+    pnpm --filter @abe-stack/db build && \
     pnpm --filter @abe-stack/shared build && \
     pnpm --filter @abe-stack/server build && \
-    pnpm --filter @abe-stack/server deploy --prod /app/server-deploy
+    pnpm --filter @abe-stack/server deploy --prod --legacy /app/server-deploy
 
 # =============================================================================
 # Production Stage - Minimal runtime image with security hardening

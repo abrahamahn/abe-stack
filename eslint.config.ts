@@ -27,6 +27,7 @@ export default [
       '**/apps/mobile/index.js',
       '**/apps/mobile/metro.config.js',
       'apps/server/drizzle.config.ts',
+      'apps/server/vitest.config.ts',
     ],
   },
   js.configs.recommended,
@@ -151,6 +152,19 @@ export default [
       ],
     },
   },
+  {
+    files: ['tools/setup.ts'],
+    rules: {
+      'no-console': 'off',
+      'no-empty': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+      ],
+      '@typescript-eslint/restrict-template-expressions': 'off',
+    },
+  },
   // Prevent frontend clients from importing server-side code
   {
     files: ['apps/web/**/*', 'apps/desktop/**/*', 'apps/mobile/**/*'],
@@ -192,6 +206,19 @@ export default [
           ],
         },
       ],
+    },
+  },
+  {
+    files: ['tools/setup.ts'],
+    rules: {
+      'no-console': 'off',
+      'no-empty': 'off',
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
+      ],
+      '@typescript-eslint/restrict-template-expressions': 'off',
     },
   },
 ] satisfies Linter.Config[];
