@@ -16,17 +16,18 @@ export function registerRoutes(app: FastifyInstance): void {
     auth: {
       register: async ({ body }) => handleRegister(app, body),
       login: async ({ body }) => handleLogin(app, body),
-      verifyEmail: () => ({
-        status: 404,
-        body: { message: 'Email verification not implemented' },
-      }),
+      verifyEmail: async () =>
+        Promise.resolve({
+          status: 404 as const,
+          body: { message: 'Email verification not implemented' },
+        }),
     },
     users: {
       me: async ({ request }) => handleMe(app, request),
     },
   });
 
-  app.register(router);
+  s.registerRouter(apiContract, router, app);
 }
 
 async function handleRegister(
