@@ -1,1 +1,0 @@
-export { SearchIndexRepository } from "./SearchIndexRepository";

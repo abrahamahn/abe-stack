@@ -39,19 +39,15 @@ const excludedFilePatterns = [
   /^yarn\.lock$/,
 ];
 
-// Directories where we should NOT extract source code content
+// Directories where we should extract source code (now that codebase is minimal)
 const srcDirs = new Set(["src", "__tests__", "test", "tests"]);
 
-// File extensions that are considered source code (to skip in src folders)
+// File extensions that are considered source code (NOW INCLUDE in src folders)
 const srcCodeExtensions = new Set([
   ".ts",
   ".tsx",
   ".js",
   ".jsx",
-  ".css",
-  ".scss",
-  ".sass",
-  ".less",
 ]);
 
 // File patterns to always include (config/setup files)
@@ -96,6 +92,7 @@ function shouldAlwaysInclude(filename) {
 
 /**
  * Check if a file is source code in a src directory
+ * (We now INCLUDE these since the codebase is minimal)
  */
 function isSourceCodeInSrcDir(relPath) {
   const parts = relPath.split(path.sep);
@@ -108,6 +105,14 @@ function isSourceCodeInSrcDir(relPath) {
   const isSourceCode = srcCodeExtensions.has(ext);
 
   return inSrcDir && isSourceCode;
+}
+
+/**
+ * Check if file is a stylesheet (still exclude these)
+ */
+function isStylesheet(relPath) {
+  const ext = path.extname(relPath);
+  return [".css", ".scss", ".sass", ".less"].includes(ext);
 }
 
 /**
@@ -179,14 +184,19 @@ function shouldExtractContent(relPath) {
     return false;
   }
 
+  // Skip stylesheets (too verbose)
+  if (isStylesheet(relPath)) {
+    return false;
+  }
+
   // Always include important config files
   if (shouldAlwaysInclude(filename)) {
     return true;
   }
 
-  // Skip source code in src directories
+  // NOW INCLUDE source code in src directories (minimal codebase)
   if (isSourceCodeInSrcDir(relPath)) {
-    return false;
+    return true;
   }
 
   return false;
