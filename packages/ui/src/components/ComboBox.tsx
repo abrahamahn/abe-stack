@@ -1,19 +1,13 @@
-import React, {
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
-import { Button } from "./Button";
-import { FuzzyString } from "./FuzzyString";
-import { Input } from "./Input";
-import { MenuItem } from "./MenuItem";
-import { Popup, PopupFrame } from "./Popup";
-import { fuzzyMatch } from "../../../server/shared/utils";
-import { useRefPrevious } from "../../hooks/useRefPrevious";
-import { isShortcut } from "../../hooks/useShortcut";
+import { Button } from './Button';
+import { FuzzyString } from './FuzzyString';
+import { Input } from './Input';
+import { MenuItem } from './MenuItem';
+import { Popup, PopupFrame } from './Popup';
+import { fuzzyMatch } from '../../../server/shared/utils';
+import { useRefPrevious } from '../../hooks/useRefPrevious';
+import { isShortcut } from '../../hooks/useShortcut';
 
 interface ComboBoxProps<T> {
   items: T[];
@@ -33,13 +27,13 @@ export function ComboBox<T>({
   onChange,
 }: ComboBoxProps<T>) {
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const filteredItems = items.filter((item) => {
     const renderedItem = renderItem(item);
-    if (typeof renderedItem === "string") {
+    if (typeof renderedItem === 'string') {
       return renderedItem.toLowerCase().includes(search.toLowerCase());
     }
     return true; // Skip filtering for non-string items
@@ -47,17 +41,14 @@ export function ComboBox<T>({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target as Node)
-      ) {
+      if (buttonRef.current && !buttonRef.current.contains(event.target as Node)) {
         setOpen(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -65,38 +56,32 @@ export function ComboBox<T>({
     onSelect(item);
     onChange?.(item);
     setOpen(false);
-    setSearch("");
+    setSearch('');
   };
 
   return (
     <div>
       <Button ref={buttonRef} onClick={() => setOpen(!open)}>
-        {value ? renderItem(value) : placeholder || "Select..."}
+        {value ? renderItem(value) : placeholder || 'Select...'}
       </Button>
       {open && buttonRef.current && (
-        <Popup
-          open={open}
-          anchor={buttonRef.current}
-          onDismiss={() => setOpen(false)}
-        >
+        <Popup open={open} anchor={buttonRef.current} onDismiss={() => setOpen(false)}>
           <div
             style={{
-              padding: "0.5rem",
-              backgroundColor: "white",
-              borderRadius: "0.25rem",
-              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+              padding: '0.5rem',
+              backgroundColor: 'white',
+              borderRadius: '0.25rem',
+              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
             }}
           >
-            <div style={{ marginBottom: "0.5rem" }}>
+            <div style={{ marginBottom: '0.5rem' }}>
               <Input
                 value={search}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setSearch(e.target.value)
-                }
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
                 placeholder="Search..."
               />
             </div>
-            <div style={{ maxHeight: "200px", overflowY: "auto" }}>
+            <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
               {filteredItems.map((item, index) => (
                 <div
                   key={index}
@@ -104,13 +89,11 @@ export function ComboBox<T>({
                   onMouseEnter={() => setHoveredIndex(index)}
                   onMouseLeave={() => setHoveredIndex(null)}
                   style={{
-                    padding: "0.5rem",
-                    cursor: "pointer",
+                    padding: '0.5rem',
+                    cursor: 'pointer',
                     backgroundColor:
-                      value === item || hoveredIndex === index
-                        ? "#e2e8f0"
-                        : "transparent",
-                    transition: "background-color 0.2s ease",
+                      value === item || hoveredIndex === index ? '#e2e8f0' : 'transparent',
+                    transition: 'background-color 0.2s ease',
                   }}
                 >
                   {renderItem(item)}
@@ -158,15 +141,9 @@ export function ComboBoxSelect(props: {
   }
 
   return (
-    <Button
-      ref={buttonRef}
-      onClick={() => setOpen(true)}
-      style={{ textAlign: "left" }}
-    >
-      {props.value || (
-        <span style={{ color: "var(--text-color2" }}>{props.placeholder} </span>
-      )}{" "}
-      <span style={{ fontSize: "0.7rem", verticalAlign: "middle" }}>▼</span>
+    <Button ref={buttonRef} onClick={() => setOpen(true)} style={{ textAlign: 'left' }}>
+      {props.value || <span style={{ color: 'var(--text-color2' }}>{props.placeholder} </span>}{' '}
+      <span style={{ fontSize: '0.7rem', verticalAlign: 'middle' }}>▼</span>
     </Button>
   );
 }
@@ -186,7 +163,7 @@ export function ComboBoxSearch(props: {
     if (props.autoFocus) inputRef.current?.focus();
   }, [props.autoFocus]);
 
-  const [text, setText] = useState("");
+  const [text, setText] = useState('');
 
   const filteredItems = useMemo(() => {
     return props.items
@@ -197,7 +174,7 @@ export function ComboBoxSearch(props: {
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const handleKeydown = (event: React.KeyboardEvent) => {
-    if (isShortcut("down", event.nativeEvent)) {
+    if (isShortcut('down', event.nativeEvent)) {
       event.preventDefault();
       setSelectedIndex((i) => {
         if (i >= filteredItems.length - 1) return filteredItems.length - 1;
@@ -205,7 +182,7 @@ export function ComboBoxSearch(props: {
       });
       return;
     }
-    if (isShortcut("up", event.nativeEvent)) {
+    if (isShortcut('up', event.nativeEvent)) {
       event.preventDefault();
       setSelectedIndex((i) => {
         if (i === 0) return i;
@@ -213,14 +190,14 @@ export function ComboBoxSearch(props: {
       });
       return;
     }
-    if (isShortcut("enter", event.nativeEvent)) {
+    if (isShortcut('enter', event.nativeEvent)) {
       event.preventDefault();
       if (filteredItems[selectedIndex]) {
         props.onChange(filteredItems[selectedIndex].value);
       }
       return;
     }
-    if (isShortcut("escape", event.nativeEvent)) {
+    if (isShortcut('escape', event.nativeEvent)) {
       event.preventDefault();
       props.onDismiss?.();
       return;

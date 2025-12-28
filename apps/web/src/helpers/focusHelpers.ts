@@ -21,11 +21,7 @@ function nextNonChildElement(element: Element): Element | undefined {
 }
 
 /** Does not yield container or start elements. */
-export function* iterateNextElement(args: {
-  container: Element;
-  start: Element;
-  wrap: boolean;
-}) {
+export function* iterateNextElement(args: { container: Element; start: Element; wrap: boolean }) {
   const { container, start, wrap } = args;
 
   let cursor: Element | undefined = start;
@@ -67,11 +63,7 @@ function lastChildElement(element: Element): Element | undefined {
 }
 
 /** Does not yield container or start elements. */
-export function* iteratePrevElement(args: {
-  container: Element;
-  start: Element;
-  wrap: boolean;
-}) {
+export function* iteratePrevElement(args: { container: Element; start: Element; wrap: boolean }) {
   const { container, start, wrap } = args;
 
   let cursor: Element | undefined = start;
@@ -118,10 +110,10 @@ export function prevFocusable(container: Element) {
 }
 
 export function isFocusable(element: Element) {
-  if (element.hasAttribute("tabindex")) return true;
+  if (element.hasAttribute('tabindex')) return true;
   const tagName = element.tagName.toLowerCase();
-  if (tagName === "input") return true;
-  if (tagName === "button") return true;
+  if (tagName === 'input') return true;
+  if (tagName === 'button') return true;
 }
 
 /*

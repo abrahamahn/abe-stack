@@ -1,25 +1,25 @@
-const fs = require("fs");
-const path = require("path");
+const fs = require('fs');
+const path = require('path');
 
-const root = path.resolve(__dirname, "..", "..");
-const outputPath = path.join(root, "tools", "dev", "dev-environment.txt");
+const root = path.resolve(__dirname, '..', '..');
+const outputPath = path.join(root, 'tools', 'dev', 'dev-environment.txt');
 
 // Directories to exclude from file listing
 const excludedDirs = new Set([
-  "node_modules",
-  ".git",
-  ".turbo",
-  ".next",
-  ".cache",
-  "dist",
-  "build",
-  "coverage",
-  "out",
-  ".expo",
-  "android",
-  "ios",
-  ".gradle",
-  "xcuserdata",
+  'node_modules',
+  '.git',
+  '.turbo',
+  '.next',
+  '.cache',
+  'dist',
+  'build',
+  'coverage',
+  'out',
+  '.expo',
+  'android',
+  'ios',
+  '.gradle',
+  'xcuserdata',
 ]);
 
 // File patterns to exclude from content extraction
@@ -27,7 +27,7 @@ const excludedFilePatterns = [
   /\.lock$/,
   /\.log$/,
   /\.map$/,
-  /\.md$/,  // Exclude all markdown documentation
+  /\.md$/, // Exclude all markdown documentation
   /\.(png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/,
   /^\.gitignore$/,
   /^\.npmrc$/,
@@ -40,15 +40,10 @@ const excludedFilePatterns = [
 ];
 
 // Directories where we should extract source code (now that codebase is minimal)
-const srcDirs = new Set(["src", "__tests__", "test", "tests"]);
+const srcDirs = new Set(['src', '__tests__', 'test', 'tests']);
 
 // File extensions that are considered source code (NOW INCLUDE in src folders)
-const srcCodeExtensions = new Set([
-  ".ts",
-  ".tsx",
-  ".js",
-  ".jsx",
-]);
+const srcCodeExtensions = new Set(['.ts', '.tsx', '.js', '.jsx']);
 
 // File patterns to always include (config/setup files)
 const alwaysIncludePatterns = [
@@ -112,13 +107,13 @@ function isSourceCodeInSrcDir(relPath) {
  */
 function isStylesheet(relPath) {
   const ext = path.extname(relPath);
-  return [".css", ".scss", ".sass", ".less"].includes(ext);
+  return ['.css', '.scss', '.sass', '.less'].includes(ext);
 }
 
 /**
  * Recursively list all files
  */
-function listFiles(dir, base = "") {
+function listFiles(dir, base = '') {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   const files = [];
 
@@ -153,15 +148,15 @@ function categorizeFiles(files) {
   };
 
   for (const file of files) {
-    if (file.startsWith("apps" + path.sep)) {
+    if (file.startsWith('apps' + path.sep)) {
       categories.apps.push(file);
-    } else if (file.startsWith("packages" + path.sep)) {
+    } else if (file.startsWith('packages' + path.sep)) {
       categories.packages.push(file);
-    } else if (file.startsWith("config" + path.sep)) {
+    } else if (file.startsWith('config' + path.sep)) {
       categories.config.push(file);
-    } else if (file.startsWith("tools" + path.sep)) {
+    } else if (file.startsWith('tools' + path.sep)) {
       categories.tools.push(file);
-    } else if (file.startsWith("docs" + path.sep)) {
+    } else if (file.startsWith('docs' + path.sep)) {
       categories.docs.push(file);
     } else if (!file.includes(path.sep)) {
       categories.root.push(file);
@@ -232,8 +227,8 @@ function generateFileTree(files) {
 /**
  * Print tree structure
  */
-function printTree(tree, indent = "", output = []) {
-  const entries = Object.keys(tree).filter((k) => k !== "_files");
+function printTree(tree, indent = '', output = []) {
+  const entries = Object.keys(tree).filter((k) => k !== '_files');
   const files = tree._files || [];
 
   // Sort directories and files
@@ -244,10 +239,10 @@ function printTree(tree, indent = "", output = []) {
   for (let i = 0; i < entries.length; i++) {
     const entry = entries[i];
     const isLast = i === entries.length - 1 && files.length === 0;
-    const prefix = isLast ? "└── " : "├── ";
-    const childIndent = indent + (isLast ? "    " : "│   ");
+    const prefix = isLast ? '└── ' : '├── ';
+    const childIndent = indent + (isLast ? '    ' : '│   ');
 
-    output.push(indent + prefix + entry + "/");
+    output.push(indent + prefix + entry + '/');
     printTree(tree[entry], childIndent, output);
   }
 
@@ -255,7 +250,7 @@ function printTree(tree, indent = "", output = []) {
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
     const isLast = i === files.length - 1;
-    const prefix = isLast ? "└── " : "├── ";
+    const prefix = isLast ? '└── ' : '├── ';
     output.push(indent + prefix + file);
   }
 
@@ -266,53 +261,53 @@ function printTree(tree, indent = "", output = []) {
  * Main export function
  */
 function run() {
-  console.log("Generating dev environment snapshot...");
+  console.log('Generating dev environment snapshot...');
 
-  let output = "";
+  let output = '';
 
   // Header
-  output += "# ABE Stack - Development Environment Snapshot\n\n";
+  output += '# ABE Stack - Development Environment Snapshot\n\n';
   output += `Generated: ${new Date().toISOString()}\n\n`;
-  output += "---\n\n";
+  output += '---\n\n';
 
   // 1. Project Structure (Tree View)
-  console.log("Building project structure...");
+  console.log('Building project structure...');
   const allFiles = listFiles(root);
   const tree = generateFileTree(allFiles);
   const treeLines = printTree(tree);
 
-  output += "## 1. Project Structure (Tree View)\n\n";
-  output += "```\n";
-  output += ".\n";
-  output += treeLines.join("\n");
-  output += "\n```\n\n";
-  output += "---\n\n";
+  output += '## 1. Project Structure (Tree View)\n\n';
+  output += '```\n';
+  output += '.\n';
+  output += treeLines.join('\n');
+  output += '\n```\n\n';
+  output += '---\n\n';
 
   // 2. Complete File Listing (Categorized)
-  console.log("Categorizing files...");
+  console.log('Categorizing files...');
   const categorized = categorizeFiles(allFiles);
 
-  output += "## 2. Complete File Listing (Categorized)\n\n";
+  output += '## 2. Complete File Listing (Categorized)\n\n';
   output += `Total files: ${allFiles.length}\n\n`;
 
   for (const [category, files] of Object.entries(categorized)) {
     if (files.length > 0) {
       output += `### ${category.charAt(0).toUpperCase() + category.slice(1)} (${files.length} files)\n\n`;
-      output += "```\n";
-      output += files.join("\n");
-      output += "\n```\n\n";
+      output += '```\n';
+      output += files.join('\n');
+      output += '\n```\n\n';
     }
   }
 
-  output += "---\n\n";
+  output += '---\n\n';
 
   // 3. Configuration Files Content
-  console.log("Extracting configuration files...");
+  console.log('Extracting configuration files...');
   const configFiles = allFiles.filter((f) => shouldExtractContent(f));
 
-  output += "## 3. Configuration Files\n\n";
+  output += '## 3. Configuration Files\n\n';
   output += `Extracted ${configFiles.length} configuration files\n\n`;
-  output += "---\n\n";
+  output += '---\n\n';
 
   const categorizedConfigs = categorizeFiles(configFiles);
 
@@ -326,32 +321,32 @@ function run() {
 
       if (!fs.existsSync(fullPath)) {
         output += `#### ${file}\n\n`;
-        output += "```\n(FILE NOT FOUND)\n```\n\n";
+        output += '```\n(FILE NOT FOUND)\n```\n\n';
         continue;
       }
 
       try {
-        const content = fs.readFileSync(fullPath, "utf8");
-        const ext = path.extname(file).slice(1) || "txt";
+        const content = fs.readFileSync(fullPath, 'utf8');
+        const ext = path.extname(file).slice(1) || 'txt';
 
         output += `#### ${file}\n\n`;
         output += `\`\`\`${ext}\n`;
         output += content;
-        if (!content.endsWith("\n")) {
-          output += "\n";
+        if (!content.endsWith('\n')) {
+          output += '\n';
         }
-        output += "```\n\n";
+        output += '```\n\n';
       } catch (error) {
         output += `#### ${file}\n\n`;
         output += `\`\`\`\n(ERROR READING FILE: ${error.message})\n\`\`\`\n\n`;
       }
     }
 
-    output += "---\n\n";
+    output += '---\n\n';
   }
 
   // 4. Summary Statistics
-  console.log("Generating statistics...");
+  console.log('Generating statistics...');
   const stats = {
     totalFiles: allFiles.length,
     configFiles: configFiles.length,
@@ -362,20 +357,20 @@ function run() {
     })),
   };
 
-  output += "## 4. Statistics\n\n";
-  output += "```\n";
+  output += '## 4. Statistics\n\n';
+  output += '```\n';
   output += `Total Files: ${stats.totalFiles}\n`;
   output += `Configuration Files Extracted: ${stats.configFiles}\n`;
   output += `Source Files (in src/): ${stats.srcFiles}\n\n`;
-  output += "Files by Category:\n";
+  output += 'Files by Category:\n';
   for (const cat of stats.categories) {
     output += `  ${cat.name}: ${cat.count}\n`;
   }
-  output += "```\n\n";
+  output += '```\n\n';
 
   // Write output
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-  fs.writeFileSync(outputPath, output, "utf8");
+  fs.writeFileSync(outputPath, output, 'utf8');
 
   console.log(`\n✅ Dev environment snapshot written to ${outputPath}`);
   console.log(`   Total size: ${(output.length / 1024).toFixed(2)} KB`);

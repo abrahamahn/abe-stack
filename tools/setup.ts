@@ -1,31 +1,31 @@
-import { execSync } from "child_process";
-import { existsSync, readFileSync, writeFileSync } from "fs";
-import path from "path";
-import readline from "readline";
+import { execSync } from 'child_process';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
+import path from 'path';
+import readline from 'readline';
 
 // Simple cross-platform sleep
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // OS detection
 const OS = {
-  WINDOWS: "windows",
-  MACOS: "macos",
-  LINUX: "linux",
-  UNKNOWN: "unknown",
+  WINDOWS: 'windows',
+  MACOS: 'macos',
+  LINUX: 'linux',
+  UNKNOWN: 'unknown',
 } as const;
 
 function detectOS() {
   const platform = process.platform;
-  if (platform === "win32") return OS.WINDOWS;
-  if (platform === "darwin") return OS.MACOS;
-  if (platform === "linux") return OS.LINUX;
+  if (platform === 'win32') return OS.WINDOWS;
+  if (platform === 'darwin') return OS.MACOS;
+  if (platform === 'linux') return OS.LINUX;
   return OS.UNKNOWN;
 }
 
 const currentOS = detectOS();
 
 // Simple console helpers (no dependencies)
-function log(message: string, prefix = "ℹ") {
+function log(message: string, prefix = 'ℹ') {
   console.log(`${prefix} ${message}`);
 }
 
@@ -38,20 +38,20 @@ function logError(message: string) {
 }
 
 function logSection(title: string) {
-  console.log(`\n${"=".repeat(60)}`);
+  console.log(`\n${'='.repeat(60)}`);
   console.log(`  ${title}`);
-  console.log(`${"=".repeat(60)}\n`);
+  console.log(`${'='.repeat(60)}\n`);
 }
 
 // Simple yes/no prompts using native readline
 function askYesNo(question: string): Promise<boolean> {
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   });
 
-  return new Promise(resolve => {
-    rl.question(`${question} (y/n): `, answer => {
+  return new Promise((resolve) => {
+    rl.question(`${question} (y/n): `, (answer) => {
       rl.close();
       resolve(answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes');
     });
@@ -61,13 +61,13 @@ function askYesNo(question: string): Promise<boolean> {
 function askInput(question: string, defaultValue?: string): Promise<string> {
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   });
 
   const prompt = defaultValue ? `${question} [${defaultValue}]: ` : `${question}: `;
 
-  return new Promise(resolve => {
-    rl.question(prompt, answer => {
+  return new Promise((resolve) => {
+    rl.question(prompt, (answer) => {
       rl.close();
       resolve(answer || defaultValue || '');
     });
@@ -78,13 +78,13 @@ function askInput(question: string, defaultValue?: string): Promise<string> {
 function isPrerequisiteInstalled(prerequisite: string): boolean {
   try {
     const commands: Record<string, string> = {
-      node: "node --version",
-      npm: "npm --version",
-      docker: "docker --version",
-      postgresql: currentOS === OS.WINDOWS ? "where psql" : "psql --version",
+      node: 'node --version',
+      npm: 'npm --version',
+      docker: 'docker --version',
+      postgresql: currentOS === OS.WINDOWS ? 'where psql' : 'psql --version',
     };
 
-    execSync(commands[prerequisite] || prerequisite, { stdio: "ignore" });
+    execSync(commands[prerequisite] || prerequisite, { stdio: 'ignore' });
     return true;
   } catch {
     return false;
@@ -93,8 +93,8 @@ function isPrerequisiteInstalled(prerequisite: string): boolean {
 
 function isDockerAvailable(): boolean {
   try {
-    const result = execSync("docker info", { stdio: "pipe", encoding: "utf8" });
-    return !!(result && !result.includes("error") && !result.includes("Cannot connect"));
+    const result = execSync('docker info', { stdio: 'pipe', encoding: 'utf8' });
+    return !!(result && !result.includes('error') && !result.includes('Cannot connect'));
   } catch {
     return false;
   }
@@ -134,14 +134,14 @@ LOG_LEVEL=debug
 
 function ensureEnvFiles() {
   const rootDir = process.cwd();
-  const devEnvPath = path.join(rootDir, ".env.development");
+  const devEnvPath = path.join(rootDir, '.env.development');
 
   if (!existsSync(devEnvPath)) {
-    log("Creating .env.development file...");
+    log('Creating .env.development file...');
     writeFileSync(devEnvPath, envTemplates.development);
-    logSuccess("Created .env.development");
+    logSuccess('Created .env.development');
   } else {
-    logSuccess("Found existing .env.development");
+    logSuccess('Found existing .env.development');
   }
 
   return { devEnvPath };
@@ -151,39 +151,39 @@ function ensureEnvFiles() {
 async function main() {
   console.clear();
 
-  logSection("ABE STACK SETUP");
+  logSection('ABE STACK SETUP');
 
   log(`Operating System: ${currentOS.toUpperCase()}`);
 
   // Check prerequisites
-  logSection("Checking Prerequisites");
-  const hasNode = isPrerequisiteInstalled("node");
-  const hasNpm = isPrerequisiteInstalled("npm");
-  const hasDocker = isPrerequisiteInstalled("docker");
-  const hasPostgres = isPrerequisiteInstalled("postgresql");
+  logSection('Checking Prerequisites');
+  const hasNode = isPrerequisiteInstalled('node');
+  const hasNpm = isPrerequisiteInstalled('npm');
+  const hasDocker = isPrerequisiteInstalled('docker');
+  const hasPostgres = isPrerequisiteInstalled('postgresql');
 
-  log(`Node.js: ${hasNode ? "✓ installed" : "✗ not found"}`);
-  log(`npm: ${hasNpm ? "✓ installed" : "✗ not found"}`);
-  log(`Docker: ${hasDocker ? "✓ installed" : "✗ not found"}`);
-  log(`PostgreSQL: ${hasPostgres ? "✓ installed" : "✗ not found"}`);
+  log(`Node.js: ${hasNode ? '✓ installed' : '✗ not found'}`);
+  log(`npm: ${hasNpm ? '✓ installed' : '✗ not found'}`);
+  log(`Docker: ${hasDocker ? '✓ installed' : '✗ not found'}`);
+  log(`PostgreSQL: ${hasPostgres ? '✓ installed' : '✗ not found'}`);
 
   if (!hasNode || !hasNpm) {
-    logError("Node.js and npm are required. Please install them first.");
+    logError('Node.js and npm are required. Please install them first.');
     process.exit(1);
   }
 
   // Create environment files
-  logSection("Environment Configuration");
+  logSection('Environment Configuration');
   const { devEnvPath } = ensureEnvFiles();
 
   // Install dependencies
-  logSection("Installing Dependencies");
-  log("Running npm install...");
+  logSection('Installing Dependencies');
+  log('Running npm install...');
   try {
-    execSync("npm install", { stdio: "inherit" });
-    logSuccess("Dependencies installed");
+    execSync('npm install', { stdio: 'inherit' });
+    logSuccess('Dependencies installed');
   } catch (error) {
-    logError("Failed to install dependencies");
+    logError('Failed to install dependencies');
     process.exit(1);
   }
 
@@ -192,67 +192,67 @@ async function main() {
   let useDocker = false;
 
   if (dockerAvailable) {
-    logSection("Database Setup");
-    useDocker = await askYesNo("Use Docker for PostgreSQL database?");
+    logSection('Database Setup');
+    useDocker = await askYesNo('Use Docker for PostgreSQL database?');
 
     if (useDocker) {
-      log("Starting Docker containers...");
+      log('Starting Docker containers...');
       try {
-        execSync("docker-compose up -d", { stdio: "inherit" });
-        logSuccess("Docker containers started");
+        execSync('docker-compose up -d', { stdio: 'inherit' });
+        logSuccess('Docker containers started');
 
-        log("Waiting for PostgreSQL to initialize...");
+        log('Waiting for PostgreSQL to initialize...');
         await sleep(5000);
-        logSuccess("Database ready");
+        logSuccess('Database ready');
       } catch (error) {
-        logError("Failed to start Docker containers");
+        logError('Failed to start Docker containers');
         useDocker = false;
       }
     }
   }
 
   // Seed database
-  const shouldSeed = await askYesNo("Install demo data?");
+  const shouldSeed = await askYesNo('Install demo data?');
 
   if (shouldSeed) {
-    logSection("Database Seeding");
-    log("Seeding database with demo data...");
+    logSection('Database Seeding');
+    log('Seeding database with demo data...');
     try {
-      const seedCommand = currentOS === OS.WINDOWS ? "npm run seed:demo:js" : "npm run seed:demo";
-      execSync(seedCommand, { stdio: "inherit" });
-      logSuccess("Database seeded successfully");
+      const seedCommand = currentOS === OS.WINDOWS ? 'npm run seed:demo:js' : 'npm run seed:demo';
+      execSync(seedCommand, { stdio: 'inherit' });
+      logSuccess('Database seeded successfully');
     } catch (error) {
       logError("Failed to seed database. You can run 'npm run seed:demo' manually later.");
     }
   }
 
   // Complete
-  logSection("Setup Complete!");
-  logSuccess("Abe Stack is ready to use");
+  logSection('Setup Complete!');
+  logSuccess('Abe Stack is ready to use');
 
-  const shouldStart = await askYesNo("Start development server now?");
+  const shouldStart = await askYesNo('Start development server now?');
 
   if (shouldStart) {
-    log("\nStarting development server...\n");
-    execSync("npm run dev", { stdio: "inherit" });
+    log('\nStarting development server...\n');
+    execSync('npm run dev', { stdio: 'inherit' });
   } else {
-    log("\nTo start the development server later, run: npm run dev\n");
+    log('\nTo start the development server later, run: npm run dev\n');
   }
 }
 
 // Error handling
-process.on("SIGINT", () => {
-  console.log("\n\nSetup interrupted. Exiting...");
+process.on('SIGINT', () => {
+  console.log('\n\nSetup interrupted. Exiting...');
   process.exit(0);
 });
 
-process.on("uncaughtException", (err) => {
+process.on('uncaughtException', (err) => {
   logError(`Unexpected error: ${err.message}`);
   process.exit(1);
 });
 
 // Run setup
-main().catch(error => {
+main().catch((error) => {
   logError(`Setup failed: ${error.message}`);
   process.exit(1);
 });

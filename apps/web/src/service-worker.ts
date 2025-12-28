@@ -3,29 +3,25 @@
 // Type the service worker global scope
 declare const self: ServiceWorkerGlobalScope;
 
-const ASSETS_CACHE = "app-assets-v1";
-const IMAGES_CACHE = "static-simages-v1"; // TODO
+const ASSETS_CACHE = 'app-assets-v1';
+const IMAGES_CACHE = 'static-simages-v1'; // TODO
 const cacheWhitelist: string[] = [ASSETS_CACHE, IMAGES_CACHE];
 
 // Valid MIME types for caching
-const validMimeTypes: string[] = [
-  "text/html",
-  "application/javascript",
-  "text/css",
-];
+const validMimeTypes: string[] = ['text/html', 'application/javascript', 'text/css'];
 
 // Perform install steps
-self.addEventListener("install", (event: ExtendableEvent): void => {
+self.addEventListener('install', (event: ExtendableEvent): void => {
   event.waitUntil(
     caches.open(ASSETS_CACHE).then((cache: Cache): Promise<void> => {
       // Fetch and cache these assets on the first install.
-      return cache.addAll(["/", "/index.css", "/index.js"]);
-    })
+      return cache.addAll(['/', '/index.css', '/index.js']);
+    }),
   );
 });
 
 // Delete any old caches
-self.addEventListener("activate", (event: ExtendableEvent): void => {
+self.addEventListener('activate', (event: ExtendableEvent): void => {
   event.waitUntil(
     caches.keys().then((cacheNames: string[]): Promise<(boolean | void)[]> => {
       return Promise.all(
@@ -33,9 +29,9 @@ self.addEventListener("activate", (event: ExtendableEvent): void => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
             return caches.delete(cacheName);
           }
-        })
+        }),
       );
-    })
+    }),
   );
 });
 
@@ -44,23 +40,20 @@ self.addEventListener("activate", (event: ExtendableEvent): void => {
 /**
  * Check if response should be cached
  */
-function shouldCacheResponse(
-  response: Response,
-  request: Request
-): boolean {
+function shouldCacheResponse(response: Response, request: Request): boolean {
   // Don't cache bad responses
   if (!response) return false;
   if (response.status !== 200) return false;
-  if (response.type !== "basic") return false;
+  if (response.type !== 'basic') return false;
 
   // Only cache GET requests
-  if (request.method !== "GET") return false;
+  if (request.method !== 'GET') return false;
 
   // Only cache responses from the origin
   // if (!request.url.startsWith(self.origin)) return false;
 
   // Check MIME type
-  const contentType = response.headers.get("Content-Type");
+  const contentType = response.headers.get('Content-Type');
   if (!contentType) return false;
   if (!validMimeTypes.some((mimeType) => contentType.includes(mimeType))) {
     return false;
@@ -72,21 +65,18 @@ function shouldCacheResponse(
 /**
  * Handle offline fallback for navigation requests
  */
-function handleOfflineFallback(
-  request: Request,
-  error: Error
-): Promise<Response> {
+function handleOfflineFallback(request: Request, error: Error): Promise<Response> {
   return caches.match(request).then((cachedResponse: Response | undefined) => {
     if (cachedResponse) return cachedResponse;
 
     // Check if request is for an HTML document (or navigation request)
     // appropriate for HTML5 routing used by single page applications
-    const acceptHeader = request.headers.get("accept");
+    const acceptHeader = request.headers.get('accept');
     if (
-      request.mode === "navigate" ||
-      (request.method === "GET" && acceptHeader?.includes("text/html"))
+      request.mode === 'navigate' ||
+      (request.method === 'GET' && acceptHeader?.includes('text/html'))
     ) {
-      return caches.match("/").then((indexResponse) => {
+      return caches.match('/').then((indexResponse) => {
         if (indexResponse) return indexResponse;
         return Promise.reject(error);
       });
@@ -97,7 +87,7 @@ function handleOfflineFallback(
 }
 
 // Always fetch when online, only use the cache as an offline fallback
-self.addEventListener("fetch", (event: FetchEvent): void => {
+self.addEventListener('fetch', (event: FetchEvent): void => {
   event.respondWith(
     // Fetch from the network in case we're online
     fetch(event.request)
@@ -123,6 +113,6 @@ self.addEventListener("fetch", (event: FetchEvent): void => {
       .catch((error: Error): Promise<Response> => {
         // If we're offline, return the cached response
         return handleOfflineFallback(event.request, error);
-      })
+      }),
   );
 });

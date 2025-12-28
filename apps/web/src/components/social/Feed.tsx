@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { MediaPlayer } from "../media/mediaPlayer";
+import { MediaPlayer } from '../media/mediaPlayer';
 
 interface Post {
   id: string;
@@ -9,7 +9,7 @@ interface Post {
   userAvatar: string;
   content: string;
   media?: {
-    type: "image" | "video" | "audio";
+    type: 'image' | 'video' | 'audio';
     url: string;
     thumbnail?: string;
   };
@@ -27,18 +27,13 @@ interface FeedResponse {
 }
 
 interface FeedProps {
-  type: "home" | "profile" | "explore";
+  type: 'home' | 'profile' | 'explore';
   userId?: string;
   onLoadMore?: () => Promise<void>;
   className?: string;
 }
 
-export const Feed: React.FC<FeedProps> = ({
-  type,
-  userId,
-  onLoadMore,
-  className,
-}) => {
+export const Feed: React.FC<FeedProps> = ({ type, userId, onLoadMore, className }) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -51,15 +46,13 @@ export const Feed: React.FC<FeedProps> = ({
       setIsLoading(true);
       setError(null);
       // TODO: Replace with actual API call
-      const response = await fetch(
-        `/api/feed?type=${type}${userId ? `&userId=${userId}` : ""}`,
-      );
-      if (!response.ok) throw new Error("Failed to fetch posts");
+      const response = await fetch(`/api/feed?type=${type}${userId ? `&userId=${userId}` : ''}`);
+      if (!response.ok) throw new Error('Failed to fetch posts');
       const data = (await response.json()) as FeedResponse;
       setPosts(data.posts);
       setHasMore(data.hasMore);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load posts");
+      setError(err instanceof Error ? err.message : 'Failed to load posts');
     } finally {
       setIsLoading(false);
     }
@@ -73,16 +66,14 @@ export const Feed: React.FC<FeedProps> = ({
       await onLoadMore?.();
       // TODO: Replace with actual API call
       const response = await fetch(
-        `/api/feed?type=${type}${userId ? `&userId=${userId}` : ""}&offset=${posts.length}`,
+        `/api/feed?type=${type}${userId ? `&userId=${userId}` : ''}&offset=${posts.length}`,
       );
-      if (!response.ok) throw new Error("Failed to fetch more posts");
+      if (!response.ok) throw new Error('Failed to fetch more posts');
       const data = (await response.json()) as FeedResponse;
       setPosts((prev) => [...prev, ...data.posts]);
       setHasMore(data.hasMore);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load more posts",
-      );
+      setError(err instanceof Error ? err.message : 'Failed to load more posts');
     } finally {
       setIsLoading(false);
     }
@@ -117,9 +108,9 @@ export const Feed: React.FC<FeedProps> = ({
     try {
       // TODO: Replace with actual API call
       const response = await fetch(`/api/posts/${postId}/like`, {
-        method: "POST",
+        method: 'POST',
       });
-      if (!response.ok) throw new Error("Failed to like post");
+      if (!response.ok) throw new Error('Failed to like post');
 
       setPosts((prev) =>
         prev.map((post) =>
@@ -127,15 +118,13 @@ export const Feed: React.FC<FeedProps> = ({
             ? {
                 ...post,
                 isLiked: !post.isLiked,
-                likesCount: post.isLiked
-                  ? post.likesCount - 1
-                  : post.likesCount + 1,
+                likesCount: post.isLiked ? post.likesCount - 1 : post.likesCount + 1,
               }
             : post,
         ),
       );
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to like post");
+      setError(err instanceof Error ? err.message : 'Failed to like post');
     }
   };
 
@@ -144,7 +133,7 @@ export const Feed: React.FC<FeedProps> = ({
     const now = new Date();
     const diff = now.getTime() - date.getTime();
 
-    if (diff < 60000) return "just now";
+    if (diff < 60000) return 'just now';
     if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
     if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
     return date.toLocaleDateString();
@@ -152,92 +141,92 @@ export const Feed: React.FC<FeedProps> = ({
 
   const styles = {
     container: {
-      display: "flex",
-      flexDirection: "column" as const,
-      gap: "16px",
-      maxWidth: "600px",
-      margin: "0 auto",
-      padding: "16px",
+      display: 'flex',
+      flexDirection: 'column' as const,
+      gap: '16px',
+      maxWidth: '600px',
+      margin: '0 auto',
+      padding: '16px',
     },
     post: {
-      backgroundColor: "#fff",
-      borderRadius: "8px",
-      boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-      overflow: "hidden",
+      backgroundColor: '#fff',
+      borderRadius: '8px',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+      overflow: 'hidden',
     },
     postHeader: {
-      display: "flex",
-      alignItems: "center",
-      padding: "12px",
-      gap: "12px",
+      display: 'flex',
+      alignItems: 'center',
+      padding: '12px',
+      gap: '12px',
     },
     avatar: {
-      width: "40px",
-      height: "40px",
-      borderRadius: "50%",
-      objectFit: "cover" as const,
+      width: '40px',
+      height: '40px',
+      borderRadius: '50%',
+      objectFit: 'cover' as const,
     },
     userInfo: {
       flex: 1,
     },
     username: {
-      fontSize: "16px",
+      fontSize: '16px',
       fontWeight: 600,
-      color: "#1a1a1a",
+      color: '#1a1a1a',
       margin: 0,
     },
     timestamp: {
-      fontSize: "14px",
-      color: "#666",
-      margin: "4px 0 0",
+      fontSize: '14px',
+      color: '#666',
+      margin: '4px 0 0',
     },
     content: {
-      padding: "0 12px 12px",
-      fontSize: "16px",
-      lineHeight: "1.5",
-      color: "#333",
+      padding: '0 12px 12px',
+      fontSize: '16px',
+      lineHeight: '1.5',
+      color: '#333',
     },
     media: {
-      width: "100%",
-      maxHeight: "600px",
-      objectFit: "cover" as const,
+      width: '100%',
+      maxHeight: '600px',
+      objectFit: 'cover' as const,
     },
     actions: {
-      display: "flex",
-      padding: "12px",
-      gap: "16px",
-      borderTop: "1px solid #eee",
+      display: 'flex',
+      padding: '12px',
+      gap: '16px',
+      borderTop: '1px solid #eee',
     },
     actionButton: {
-      display: "flex",
-      alignItems: "center",
-      gap: "8px",
-      background: "none",
-      border: "none",
-      color: "#666",
-      cursor: "pointer",
-      padding: "4px 8px",
-      borderRadius: "4px",
-      transition: "background-color 0.2s",
-      "&:hover": {
-        backgroundColor: "#f5f5f5",
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      background: 'none',
+      border: 'none',
+      color: '#666',
+      cursor: 'pointer',
+      padding: '4px 8px',
+      borderRadius: '4px',
+      transition: 'background-color 0.2s',
+      '&:hover': {
+        backgroundColor: '#f5f5f5',
       },
     },
     actionButtonLiked: {
-      color: "#e91e63",
+      color: '#e91e63',
     },
     actionCount: {
-      fontSize: "14px",
+      fontSize: '14px',
     },
     loading: {
-      textAlign: "center" as const,
-      padding: "24px",
-      color: "#666",
+      textAlign: 'center' as const,
+      padding: '24px',
+      color: '#666',
     },
     error: {
-      color: "#d32f2f",
-      textAlign: "center" as const,
-      padding: "16px",
+      color: '#d32f2f',
+      textAlign: 'center' as const,
+      padding: '16px',
     },
   };
 
@@ -254,11 +243,7 @@ export const Feed: React.FC<FeedProps> = ({
           style={styles.post}
         >
           <div style={styles.postHeader}>
-            <img
-              src={post.userAvatar}
-              alt={post.username}
-              style={styles.avatar}
-            />
+            <img src={post.userAvatar} alt={post.username} style={styles.avatar} />
             <div style={styles.userInfo}>
               <p style={styles.username}>{post.username}</p>
               <p style={styles.timestamp}>{formatDate(post.createdAt)}</p>
@@ -268,7 +253,7 @@ export const Feed: React.FC<FeedProps> = ({
           <p style={styles.content}>{post.content}</p>
 
           {post.media &&
-            (post.media.type === "image" ? (
+            (post.media.type === 'image' ? (
               <img src={post.media.url} alt="Post media" style={styles.media} />
             ) : (
               <MediaPlayer
@@ -285,36 +270,24 @@ export const Feed: React.FC<FeedProps> = ({
                 ...(post.isLiked && styles.actionButtonLiked),
               }}
               onClick={() => void handleLike(post.id)}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = "#f5f5f5")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "transparent")
-              }
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f5f5f5')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
-              {post.isLiked ? "❤️" : "🤍"}
+              {post.isLiked ? '❤️' : '🤍'}
               <span style={styles.actionCount}>{post.likesCount}</span>
             </button>
             <button
               style={styles.actionButton}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = "#f5f5f5")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "transparent")
-              }
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f5f5f5')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
               💬
               <span style={styles.actionCount}>{post.commentsCount}</span>
             </button>
             <button
               style={styles.actionButton}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = "#f5f5f5")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "transparent")
-              }
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f5f5f5')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
               🔄
               <span style={styles.actionCount}>{post.sharesCount}</span>

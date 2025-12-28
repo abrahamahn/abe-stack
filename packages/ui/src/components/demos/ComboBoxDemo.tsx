@@ -1,27 +1,27 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-import { ComboBox } from "../ComboBox";
+import { ComboBox } from '../ComboBox';
 
 const items = [
-  "Apple",
-  "Banana",
-  "Cherry",
-  "Date",
-  "Elderberry",
-  "Fig",
-  "Grape",
-  "Honeydew",
-  "Kiwi",
-  "Lemon",
-  "Mango",
-  "Orange",
-  "Papaya",
-  "Quince",
-  "Raspberry",
-  "Strawberry",
-  "Tangerine",
-  "Ugli fruit",
-  "Watermelon",
+  'Apple',
+  'Banana',
+  'Cherry',
+  'Date',
+  'Elderberry',
+  'Fig',
+  'Grape',
+  'Honeydew',
+  'Kiwi',
+  'Lemon',
+  'Mango',
+  'Orange',
+  'Papaya',
+  'Quince',
+  'Raspberry',
+  'Strawberry',
+  'Tangerine',
+  'Ugli fruit',
+  'Watermelon',
 ];
 
 export function ComboBoxDemo() {
@@ -38,7 +38,7 @@ export function ComboBoxDemo() {
           placeholder="Select a fruit..."
         />
       </div>
-      <div>Selected value: {value || "None"}</div>
+      <div>Selected value: {value || 'None'}</div>
     </div>
   );
 }

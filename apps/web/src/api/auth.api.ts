@@ -1,5 +1,5 @@
 // Base API URL
-const API_URL = "/api";
+const API_URL = '/api';
 
 // Auth API response types
 export interface AuthResponse {
@@ -16,15 +16,15 @@ const authApi = {
   // Login function
   async login(email: string, password: string): Promise<AuthResponse> {
     try {
-      console.log("Attempting login with:", { email });
+      console.log('Attempting login with:', { email });
 
       const response = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
-        credentials: "include",
+        credentials: 'include',
       });
 
       const data = await response.json();
@@ -32,7 +32,7 @@ const authApi = {
       if (!response.ok) {
         return {
           success: false,
-          message: data.error || "Login failed",
+          message: data.error || 'Login failed',
         };
       }
 
@@ -44,10 +44,10 @@ const authApi = {
         message: data.message,
       };
     } catch (error) {
-      console.error("Login error:", error);
+      console.error('Login error:', error);
       return {
         success: false,
-        message: "Unable to connect to server",
+        message: 'Unable to connect to server',
       };
     }
   },
@@ -61,15 +61,15 @@ const authApi = {
     username?: string;
   }): Promise<AuthResponse> {
     try {
-      console.log("Attempting registration with:", userData.email);
+      console.log('Attempting registration with:', userData.email);
 
       const response = await fetch(`${API_URL}/auth/register`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(userData),
-        credentials: "include",
+        credentials: 'include',
       });
 
       const data = await response.json();
@@ -77,7 +77,7 @@ const authApi = {
       if (!response.ok) {
         return {
           success: false,
-          message: data.error || "Registration failed",
+          message: data.error || 'Registration failed',
         };
       }
 
@@ -89,10 +89,10 @@ const authApi = {
         message: data.message,
       };
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error('Registration error:', error);
       return {
         success: false,
-        message: "Unable to connect to server",
+        message: 'Unable to connect to server',
       };
     }
   },
@@ -100,11 +100,11 @@ const authApi = {
   // Logout function
   async logout(): Promise<AuthResponse> {
     try {
-      console.log("Attempting logout");
+      console.log('Attempting logout');
 
       const response = await fetch(`${API_URL}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
+        method: 'POST',
+        credentials: 'include',
       });
 
       const data = await response.json();
@@ -112,19 +112,19 @@ const authApi = {
       if (!response.ok) {
         return {
           success: false,
-          message: data.error || "Logout failed",
+          message: data.error || 'Logout failed',
         };
       }
 
       return {
         success: true,
-        message: data.message || "Logged out successfully",
+        message: data.message || 'Logged out successfully',
       };
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error('Logout error:', error);
       return {
         success: false,
-        message: "Logout failed",
+        message: 'Logout failed',
       };
     }
   },
@@ -132,11 +132,11 @@ const authApi = {
   // Refresh token function
   async refreshToken(): Promise<AuthResponse> {
     try {
-      console.log("Attempting token refresh");
+      console.log('Attempting token refresh');
 
       const response = await fetch(`${API_URL}/auth/refresh-token`, {
-        method: "POST",
-        credentials: "include",
+        method: 'POST',
+        credentials: 'include',
       });
 
       const data = await response.json();
@@ -144,7 +144,7 @@ const authApi = {
       if (!response.ok) {
         return {
           success: false,
-          message: data.error || "Token refresh failed",
+          message: data.error || 'Token refresh failed',
         };
       }
 
@@ -154,10 +154,10 @@ const authApi = {
         message: data.message,
       };
     } catch (error) {
-      console.error("Token refresh error:", error);
+      console.error('Token refresh error:', error);
       return {
         success: false,
-        message: "Token refresh failed",
+        message: 'Token refresh failed',
       };
     }
   },
@@ -165,10 +165,10 @@ const authApi = {
   // Get current user function
   async getCurrentUser(): Promise<AuthResponse> {
     try {
-      console.log("Getting current user");
+      console.log('Getting current user');
 
       const response = await fetch(`${API_URL}/auth/me`, {
-        credentials: "include",
+        credentials: 'include',
       });
 
       const data = await response.json();
@@ -176,7 +176,7 @@ const authApi = {
       if (!response.ok) {
         return {
           success: false,
-          message: data.error || "Not authenticated",
+          message: data.error || 'Not authenticated',
         };
       }
 
@@ -185,10 +185,10 @@ const authApi = {
         user: data,
       };
     } catch (error) {
-      console.error("Get current user error:", error);
+      console.error('Get current user error:', error);
       return {
         success: false,
-        message: "Not authenticated",
+        message: 'Not authenticated',
       };
     }
   },

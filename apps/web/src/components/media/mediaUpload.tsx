@@ -1,5 +1,5 @@
 // src/client/components/media/MediaUpload.tsx
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState } from 'react';
 
 interface MediaUploadProps {
   onUpload: (file: File) => Promise<void>;
@@ -10,7 +10,7 @@ interface MediaUploadProps {
 
 export const MediaUpload: React.FC<MediaUploadProps> = ({
   onUpload,
-  acceptedTypes = ["image/*", "audio/*", "video/*"],
+  acceptedTypes = ['image/*', 'audio/*', 'video/*'],
   maxSize = 100 * 1024 * 1024, // 100MB default
   className,
 }) => {
@@ -45,14 +45,14 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({
 
       if (
         !acceptedTypes.some((type) => {
-          if (type.endsWith("/*")) {
+          if (type.endsWith('/*')) {
             const baseType = type.slice(0, -2);
             return file.type.startsWith(baseType);
           }
           return file.type === type;
         })
       ) {
-        return "File type not accepted";
+        return 'File type not accepted';
       }
 
       return null;
@@ -76,7 +76,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({
         await onUpload(file);
         setProgress(100);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Upload failed");
+        setError(err instanceof Error ? err.message : 'Upload failed');
       } finally {
         setIsUploading(false);
       }
@@ -135,9 +135,9 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({
         </svg>
       );
 
-    const type = preview.split(";")[0].split("/")[0];
+    const type = preview.split(';')[0].split('/')[0];
     switch (type) {
-      case "image":
+      case 'image':
         return (
           <svg className="media-upload-icon" viewBox="0 0 24 24">
             <path
@@ -146,7 +146,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({
             />
           </svg>
         );
-      case "audio":
+      case 'audio':
         return (
           <svg className="media-upload-icon" viewBox="0 0 24 24">
             <path
@@ -155,7 +155,7 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({
             />
           </svg>
         );
-      case "video":
+      case 'video':
         return (
           <svg className="media-upload-icon" viewBox="0 0 24 24">
             <path
@@ -178,104 +178,104 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({
 
   const styles = {
     upload: {
-      border: "2px dashed #ccc",
-      borderRadius: "8px",
-      padding: "24px",
-      textAlign: "center" as const,
-      backgroundColor: "#fff",
-      transition: "all 0.2s ease",
-      position: "relative" as const,
+      border: '2px dashed #ccc',
+      borderRadius: '8px',
+      padding: '24px',
+      textAlign: 'center' as const,
+      backgroundColor: '#fff',
+      transition: 'all 0.2s ease',
+      position: 'relative' as const,
       ...(isDragging && {
-        borderColor: "#2196f3",
-        backgroundColor: "rgba(33, 150, 243, 0.05)",
+        borderColor: '#2196f3',
+        backgroundColor: 'rgba(33, 150, 243, 0.05)',
       }),
     },
     input: {
-      display: "none",
+      display: 'none',
     },
     content: {
-      display: "flex",
-      flexDirection: "column" as const,
-      alignItems: "center",
-      gap: "16px",
+      display: 'flex',
+      flexDirection: 'column' as const,
+      alignItems: 'center',
+      gap: '16px',
     },
     icon: {
-      width: "48px",
-      height: "48px",
-      color: "#666",
+      width: '48px',
+      height: '48px',
+      color: '#666',
     },
     title: {
       margin: 0,
-      fontSize: "1.25rem",
+      fontSize: '1.25rem',
       fontWeight: 500,
-      color: "#333",
+      color: '#333',
     },
     text: {
       margin: 0,
-      color: "#666",
+      color: '#666',
     },
     button: {
-      display: "inline-block",
-      padding: "8px 16px",
-      backgroundColor: "#2196f3",
-      color: "white",
-      borderRadius: "4px",
-      cursor: "pointer",
-      transition: "background-color 0.2s",
+      display: 'inline-block',
+      padding: '8px 16px',
+      backgroundColor: '#2196f3',
+      color: 'white',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      transition: 'background-color 0.2s',
     },
     buttonHover: {
-      backgroundColor: "#1976d2",
+      backgroundColor: '#1976d2',
     },
     hint: {
       margin: 0,
-      fontSize: "0.875rem",
-      color: "#666",
+      fontSize: '0.875rem',
+      color: '#666',
     },
     error: {
       margin: 0,
-      color: "#d32f2f",
+      color: '#d32f2f',
     },
     progress: {
-      width: "100%",
-      maxWidth: "200px",
+      width: '100%',
+      maxWidth: '200px',
     },
     progressBar: {
-      width: "100%",
-      height: "4px",
-      backgroundColor: "#e0e0e0",
-      borderRadius: "2px",
-      overflow: "hidden",
+      width: '100%',
+      height: '4px',
+      backgroundColor: '#e0e0e0',
+      borderRadius: '2px',
+      overflow: 'hidden',
     },
     progressFill: {
-      height: "100%",
-      backgroundColor: "#2196f3",
-      transition: "width 0.2s ease",
+      height: '100%',
+      backgroundColor: '#2196f3',
+      transition: 'width 0.2s ease',
       width: `${progress}%`,
     },
     progressText: {
-      margin: "4px 0 0",
-      fontSize: "0.875rem",
-      color: "#666",
+      margin: '4px 0 0',
+      fontSize: '0.875rem',
+      color: '#666',
     },
     preview: {
-      marginTop: "16px",
-      maxWidth: "100%",
-      maxHeight: "200px",
-      overflow: "hidden",
-      borderRadius: "4px",
+      marginTop: '16px',
+      maxWidth: '100%',
+      maxHeight: '200px',
+      overflow: 'hidden',
+      borderRadius: '4px',
     },
     previewImage: {
-      maxWidth: "100%",
-      maxHeight: "200px",
-      objectFit: "contain" as const,
+      maxWidth: '100%',
+      maxHeight: '200px',
+      objectFit: 'contain' as const,
     },
     previewVideo: {
-      maxWidth: "100%",
-      maxHeight: "200px",
+      maxWidth: '100%',
+      maxHeight: '200px',
     },
     previewAudio: {
-      width: "100%",
-      maxWidth: "300px",
+      width: '100%',
+      maxWidth: '300px',
     },
   };
 
@@ -290,10 +290,8 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({
     >
       <input
         type="file"
-        accept={acceptedTypes.join(",")}
-        onChange={
-          handleFileSelect as (e: React.ChangeEvent<HTMLInputElement>) => void
-        }
+        accept={acceptedTypes.join(',')}
+        onChange={handleFileSelect as (e: React.ChangeEvent<HTMLInputElement>) => void}
         style={styles.input}
         id="media-upload-input"
       />
@@ -301,26 +299,20 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({
       <div style={styles.content}>
         {getMediaIcon()}
 
-        <h3 style={styles.title}>
-          {isUploading ? "Uploading..." : "Drag & drop media here"}
-        </h3>
+        <h3 style={styles.title}>{isUploading ? 'Uploading...' : 'Drag & drop media here'}</h3>
 
         <p style={styles.text}>or</p>
 
         <label
           htmlFor="media-upload-input"
           style={styles.button}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = "#1976d2")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.backgroundColor = "#2196f3")
-          }
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1976d2')}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#2196f3')}
         >
           Select File
         </label>
 
-        <p style={styles.hint}>Supported formats: {acceptedTypes.join(", ")}</p>
+        <p style={styles.hint}>Supported formats: {acceptedTypes.join(', ')}</p>
 
         {error && <p style={styles.error}>{error}</p>}
 
@@ -336,11 +328,11 @@ export const MediaUpload: React.FC<MediaUploadProps> = ({
 
       {preview && !isUploading && (
         <div style={styles.preview}>
-          {preview.startsWith("data:image/") ? (
+          {preview.startsWith('data:image/') ? (
             <img src={preview} alt="Preview" style={styles.previewImage} />
-          ) : preview.startsWith("data:video/") ? (
+          ) : preview.startsWith('data:video/') ? (
             <video src={preview} controls style={styles.previewVideo} />
-          ) : preview.startsWith("data:audio/") ? (
+          ) : preview.startsWith('data:audio/') ? (
             <audio src={preview} controls style={styles.previewAudio} />
           ) : null}
         </div>

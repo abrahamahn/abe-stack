@@ -1,4 +1,4 @@
-import React, { ComponentPropsWithoutRef } from "react";
+import React, { ComponentPropsWithoutRef } from 'react';
 
 interface ListBoxProps<T> {
   items: T[];
@@ -8,7 +8,7 @@ interface ListBoxProps<T> {
   autoFocus?: boolean;
 }
 
-interface ListItemProps extends ComponentPropsWithoutRef<"div"> {
+interface ListItemProps extends ComponentPropsWithoutRef<'div'> {
   selected?: boolean;
 }
 
@@ -29,15 +29,15 @@ export function ListBox<T>({
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     switch (event.key) {
-      case "ArrowDown":
+      case 'ArrowDown':
         event.preventDefault();
         onSelectIndex((selectedIndex + 1) % items.length);
         break;
-      case "ArrowUp":
+      case 'ArrowUp':
         event.preventDefault();
         onSelectIndex((selectedIndex - 1 + items.length) % items.length);
         break;
-      case "Enter":
+      case 'Enter':
         event.preventDefault();
         // Handle selection
         break;
@@ -50,7 +50,7 @@ export function ListBox<T>({
       tabIndex={0}
       onKeyDown={handleKeyDown}
       style={{
-        outline: "none",
+        outline: 'none',
       }}
     >
       {items.map((item, index) =>
@@ -69,9 +69,9 @@ export function ListItem({ selected, style, ...props }: ListItemProps) {
     <div
       {...props}
       style={{
-        cursor: "pointer",
-        backgroundColor: selected ? "#e2e8f0" : "transparent",
-        transition: "background-color 0.2s ease",
+        cursor: 'pointer',
+        backgroundColor: selected ? '#e2e8f0' : 'transparent',
+        transition: 'background-color 0.2s ease',
         ...style,
       }}
     />

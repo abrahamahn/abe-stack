@@ -1,13 +1,10 @@
-import isEqual from "lodash/isEqual";
-import { useEffect, useRef, useState } from "react";
+import isEqual from 'lodash/isEqual';
+import { useEffect, useRef, useState } from 'react';
 
-import { useRefCurrent } from "./useRefCurrent";
-import { useRefPrevious } from "./useRefPrevious";
+import { useRefCurrent } from './useRefCurrent';
+import { useRefPrevious } from './useRefPrevious';
 
-export function useAsync<T, Args extends unknown[]>(
-  fn: (...args: Args) => Promise<T>,
-  args: Args,
-) {
+export function useAsync<T, Args extends unknown[]>(fn: (...args: Args) => Promise<T>, args: Args) {
   const [state, setState] = useState<T | undefined>(undefined);
 
   const currentFn = useRefCurrent(fn);

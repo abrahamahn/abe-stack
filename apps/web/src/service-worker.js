@@ -1,19 +1,19 @@
-const ASSETS_CACHE = "app-assets-v1";
-const IMAGES_CACHE = "static-simages-v1"; // TODO
+const ASSETS_CACHE = 'app-assets-v1';
+const IMAGES_CACHE = 'static-simages-v1'; // TODO
 const cacheWhitelist = [ASSETS_CACHE, IMAGES_CACHE];
 
 // Perform install steps
-self.addEventListener("install", function (event) {
+self.addEventListener('install', function (event) {
   event.waitUntil(
     caches.open(ASSETS_CACHE).then(function (cache) {
       // Fetch and cache these assets on the first install.
-      return cache.addAll(["/", "/index.css", "/index.js"]);
+      return cache.addAll(['/', '/index.css', '/index.js']);
     }),
   );
 });
 
 // Delete any old caches.
-self.addEventListener("activate", function (event) {
+self.addEventListener('activate', function (event) {
   event.waitUntil(
     caches.keys().then(function (cacheNames) {
       return Promise.all(
@@ -30,7 +30,7 @@ self.addEventListener("activate", function (event) {
 // TODO: add a request timeout.
 
 // Always fetch when online, only use the cache as an offline fallback.
-self.addEventListener("fetch", function (event) {
+self.addEventListener('fetch', function (event) {
   event.respondWith(
     // Fetch from the network in case we're online.
     fetch(event.request)
@@ -38,25 +38,20 @@ self.addEventListener("fetch", function (event) {
         // Don't cache bad responses.
         if (!response) return response;
         if (response.status !== 200) return response;
-        if (response.type !== "basic") return response;
+        if (response.type !== 'basic') return response;
 
         // Only cache GET requests.
-        if (event.request.method !== "GET") return response;
+        if (event.request.method !== 'GET') return response;
 
         // Only cache responses from the origin.
         // if (!event.request.url.startsWith(self.origin)) return response
 
         // Only cache the basic website assets.
         // TODO: favicon? fonts?
-        const validMimeTypes = [
-          "text/html",
-          "application/javascript",
-          "text/css",
-        ];
-        const contentType = response.headers.get("Content-Type");
+        const validMimeTypes = ['text/html', 'application/javascript', 'text/css'];
+        const contentType = response.headers.get('Content-Type');
         if (!contentType) return response;
-        if (!validMimeTypes.some((mimeType) => contentType.includes(mimeType)))
-          return response;
+        if (!validMimeTypes.some((mimeType) => contentType.includes(mimeType))) return response;
 
         // IMPORTANT: Clone the response. A response is a stream
         // and because we want the browser to consume the response
@@ -78,11 +73,11 @@ self.addEventListener("fetch", function (event) {
           // Check if request is for an HTML document (or navigation request)
           // appropriate for HTML5 routing used by single page applications.
           if (
-            event.request.mode === "navigate" ||
-            (event.request.method === "GET" &&
-              event.request.headers.get("accept").includes("text/html"))
+            event.request.mode === 'navigate' ||
+            (event.request.method === 'GET' &&
+              event.request.headers.get('accept').includes('text/html'))
           ) {
-            return caches.match("/");
+            return caches.match('/');
           }
 
           return Promise.reject(error);

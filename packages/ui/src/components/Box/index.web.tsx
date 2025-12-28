@@ -1,16 +1,10 @@
-import React from "react";
-import type { BoxProps } from "./types";
+import React from 'react';
+import type { BoxProps } from './types';
 
-export const Box = ({
-  children,
-  style,
-  className,
-  padding,
-  flexDirection,
-}: BoxProps) => {
+export const Box = ({ children, style, className, padding, flexDirection }: BoxProps) => {
   const combinedStyle: React.CSSProperties = {
-    display: "flex",
-    flexDirection: flexDirection || "column",
+    display: 'flex',
+    flexDirection: flexDirection || 'column',
     padding,
     ...style,
   };

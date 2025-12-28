@@ -44,12 +44,10 @@ export const applyHoverStyles = (
  * @param variables Object containing CSS variable definitions
  * @returns CSS variables as a string
  */
-export const createCSSVariables = (
-  variables: Record<string, string>,
-): string => {
+export const createCSSVariables = (variables: Record<string, string>): string => {
   return Object.entries(variables)
     .map(([key, value]) => `--${key}: ${value};`)
-    .join(" ");
+    .join(' ');
 };
 
 /**
@@ -62,7 +60,7 @@ export const injectGlobalCSSVariables = (
   darkVariables: Record<string, string>,
 ): void => {
   // Create style element
-  const styleElement = document.createElement("style");
+  const styleElement = document.createElement('style');
 
   // Create CSS content
   const cssContent = `
@@ -112,5 +110,5 @@ export const classNames = (
     }
   });
 
-  return classes.join(" ");
+  return classes.join(' ');
 };

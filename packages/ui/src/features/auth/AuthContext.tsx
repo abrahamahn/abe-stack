@@ -1,36 +1,30 @@
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
 // Inline auth API to avoid import issues
 const authApi = {
   // Base API URL - use relative path for Vite proxy
-  baseUrl: "/api",
+  baseUrl: '/api',
 
   async login(email: string, password: string) {
-    console.log("Login attempt with:", email);
+    console.log('Login attempt with:', email);
 
     // Try to connect to the backend through the Vite proxy
     try {
       const response = await fetch(`${this.baseUrl}/auth/login`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
-        credentials: "include",
+        credentials: 'include',
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Login failed:", errorData);
+        console.error('Login failed:', errorData);
         return {
           success: false,
-          message: errorData.error || "Login failed",
+          message: errorData.error || 'Login failed',
         };
       }
 
@@ -43,28 +37,28 @@ const authApi = {
         message: data.message,
       };
     } catch (error) {
-      console.error("API connection error:", error);
+      console.error('API connection error:', error);
 
       // Fall back to mock data for development
       return {
         success: true,
-        message: "Using mock data: backend connection failed",
+        message: 'Using mock data: backend connection failed',
         user: {
-          id: "123",
-          username: "testuser",
+          id: '123',
+          username: 'testuser',
           email,
-          displayName: "Test User",
-          firstName: "Test",
-          lastName: "User",
+          displayName: 'Test User',
+          firstName: 'Test',
+          lastName: 'User',
           bio: null,
           profileImage: null,
           bannerImage: null,
-          role: "user",
+          role: 'user',
           isVerified: true,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         },
-        accessToken: "dummy-token-123",
+        accessToken: 'dummy-token-123',
       };
     }
   },
@@ -75,11 +69,11 @@ const authApi = {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Database test failed:", errorData);
+        console.error('Database test failed:', errorData);
         return {
           success: false,
           connected: false,
-          message: errorData.error || "Database test failed",
+          message: errorData.error || 'Database test failed',
         };
       }
 
@@ -90,26 +84,26 @@ const authApi = {
         message: data.message,
       };
     } catch (error) {
-      console.error("Database test error:", error);
+      console.error('Database test error:', error);
       return {
         success: false,
         connected: false,
-        message: error instanceof Error ? error.message : "Connection error",
+        message: error instanceof Error ? error.message : 'Connection error',
       };
     }
   },
 
   async register(userData: any) {
-    console.log("Register attempt with:", userData.email);
+    console.log('Register attempt with:', userData.email);
 
     try {
       // Make actual API call to backend
-      console.log("Registration data:", userData);
+      console.log('Registration data:', userData);
 
       const response = await fetch(`${this.baseUrl}/auth/register`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           email: userData.email,
@@ -123,11 +117,11 @@ const authApi = {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Registration failed");
+        throw new Error(data.message || 'Registration failed');
       }
 
-      console.log("Registration successful:", data);
-      console.log("Verification email sent to:", userData.email);
+      console.log('Registration successful:', data);
+      console.log('Verification email sent to:', userData.email);
 
       return {
         success: data.success,
@@ -136,10 +130,10 @@ const authApi = {
         userId: data.userId,
       };
     } catch (error) {
-      console.error("Registration API error:", error);
+      console.error('Registration API error:', error);
       return {
         success: false,
-        message: error instanceof Error ? error.message : "Registration failed",
+        message: error instanceof Error ? error.message : 'Registration failed',
       };
     }
   },
@@ -149,15 +143,15 @@ const authApi = {
   },
 
   async refreshToken() {
-    return { success: true, accessToken: "new-dummy-token-456" };
+    return { success: true, accessToken: 'new-dummy-token-456' };
   },
 
   async getCurrentUser() {
-    const userData = localStorage.getItem("user");
+    const userData = localStorage.getItem('user');
     if (userData) {
       return { success: true, user: JSON.parse(userData) };
     }
-    return { success: false, message: "Not authenticated" };
+    return { success: false, message: 'Not authenticated' };
   },
 };
 
@@ -189,7 +183,7 @@ interface AuthContextType {
     firstName: string,
     lastName: string,
     email: string,
-    password: string
+    password: string,
   ) => Promise<{ success: boolean; requireVerification: boolean } | void>;
   logout: () => void;
   error: string | null;
@@ -215,12 +209,12 @@ const AuthContext = createContext<AuthContextType>({
   error: null,
   showVerificationModal: false,
   setShowVerificationModal: () => {},
-  verificationEmail: "",
+  verificationEmail: '',
   setVerificationEmail: () => {},
   testDatabaseConnection: async () => ({
     success: false,
     connected: false,
-    message: "",
+    message: '',
   }),
 });
 
@@ -236,7 +230,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
-  const [verificationEmail, setVerificationEmail] = useState("");
+  const [verificationEmail, setVerificationEmail] = useState('');
 
   // Check authentication status on component mount
   useEffect(() => {
@@ -247,33 +241,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
           const response = await fetch(`${authApi.baseUrl}/auth/test`);
           if (response.ok) {
             const data = await response.json();
-            console.log("Auth API connected:", data);
+            console.log('Auth API connected:', data);
           } else {
-            console.warn(
-              "Auth API test failed:",
-              response.status,
-              response.statusText
-            );
+            console.warn('Auth API test failed:', response.status, response.statusText);
           }
         } catch (error) {
-          console.error("Failed to connect to Auth API:", error);
+          console.error('Failed to connect to Auth API:', error);
         }
 
         // Test database connection
         try {
           const dbResult = await authApi.testDatabaseConnection();
-          console.log("Database connection test:", dbResult);
+          console.log('Database connection test:', dbResult);
           if (dbResult.success && dbResult.connected) {
-            console.log("✅ Database connection successful");
+            console.log('✅ Database connection successful');
           } else {
-            console.warn("⚠️ Database connection failed:", dbResult.message);
+            console.warn('⚠️ Database connection failed:', dbResult.message);
           }
         } catch (error) {
-          console.error("Database test error:", error);
+          console.error('Database test error:', error);
         }
 
         // Check if we have a token
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem('token');
         if (!token) {
           setIsLoading(false);
           return;
@@ -284,31 +274,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         if (result.success && result.user) {
           setUser(result.user);
-          localStorage.setItem("user", JSON.stringify(result.user));
+          localStorage.setItem('user', JSON.stringify(result.user));
         } else {
           // Token invalid, try to refresh
           const refreshResult = await authApi.refreshToken();
 
           if (refreshResult.success && refreshResult.accessToken) {
-            localStorage.setItem("token", refreshResult.accessToken);
+            localStorage.setItem('token', refreshResult.accessToken);
 
             // Try to get user data again
             const userResult = await authApi.getCurrentUser();
             if (userResult.success && userResult.user) {
               setUser(userResult.user);
-              localStorage.setItem("user", JSON.stringify(userResult.user));
+              localStorage.setItem('user', JSON.stringify(userResult.user));
             } else {
-              throw new Error("Could not get user data");
+              throw new Error('Could not get user data');
             }
           } else {
-            throw new Error("Token refresh failed");
+            throw new Error('Token refresh failed');
           }
         }
       } catch (error) {
-        console.error("Auth check error:", error);
+        console.error('Auth check error:', error);
         // Clear invalid auth data
-        localStorage.removeItem("user");
-        localStorage.removeItem("token");
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
       } finally {
         setIsLoading(false);
       }
@@ -326,32 +316,26 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const result = await authApi.login(email, password);
 
       if (!result.success) {
-        throw new Error(result.message || "Login failed");
+        throw new Error(result.message || 'Login failed');
       }
 
       // Check if MFA is required
       if (result.requireMfa) {
-        setError(
-          "Multi-factor authentication is required but not implemented in this demo"
-        );
-        throw new Error("Multi-factor authentication required");
+        setError('Multi-factor authentication is required but not implemented in this demo');
+        throw new Error('Multi-factor authentication required');
       }
 
       // Save user data to localStorage
-      localStorage.setItem("user", JSON.stringify(result.user));
+      localStorage.setItem('user', JSON.stringify(result.user));
       if (result.accessToken) {
-        localStorage.setItem("token", result.accessToken);
+        localStorage.setItem('token', result.accessToken);
       }
 
       // Update state
       setUser(result.user);
     } catch (error) {
-      console.error("Login error:", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Login failed. Please try again."
-      );
+      console.error('Login error:', error);
+      setError(error instanceof Error ? error.message : 'Login failed. Please try again.');
       throw error;
     } finally {
       setIsLoading(false);
@@ -364,7 +348,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     firstName: string,
     lastName: string,
     email: string,
-    password: string
+    password: string,
   ) => {
     setIsLoading(true);
     setError(null);
@@ -379,7 +363,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
 
       if (!result.success) {
-        throw new Error(result.message || "Registration failed");
+        throw new Error(result.message || 'Registration failed');
       }
 
       // Always show verification email modal
@@ -388,12 +372,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       return { success: true, requireVerification: true };
     } catch (error) {
-      console.error("Registration error:", error);
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Registration failed. Please try again."
-      );
+      console.error('Registration error:', error);
+      setError(error instanceof Error ? error.message : 'Registration failed. Please try again.');
       throw error;
     } finally {
       setIsLoading(false);
@@ -405,11 +385,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       await authApi.logout();
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error('Logout error:', error);
     } finally {
       // Remove user data from localStorage
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
 
       // Update state
       setUser(null);

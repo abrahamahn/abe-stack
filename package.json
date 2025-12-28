@@ -63,7 +63,7 @@
     "overrides": {
       "esbuild": "^0.25.12",
       "metro-react-native-babel-preset": "npm:@react-native/babel-preset@^0.76.0",
-      "@types/react-native": "^0.76.0"
+      "@types/react-native": "^0.73.0"
     }
   },
   "simple-git-hooks": {

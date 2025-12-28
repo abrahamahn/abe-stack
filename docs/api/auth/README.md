@@ -99,14 +99,12 @@ Permissions are granular and defined as resource + action pairs:
 ## Authentication Flow
 
 1. **Registration**:
-
    - User submits registration form
    - System creates user with hashed password
    - Verification email is sent
    - User is logged in with JWT token
 
 2. **Login**:
-
    - User submits login credentials
    - System verifies credentials
    - If MFA is enabled, a temporary token is issued
@@ -114,7 +112,6 @@ Permissions are granular and defined as resource + action pairs:
    - System issues JWT token and refresh token
 
 3. **Session Management**:
-
    - JWT tokens are short-lived (15 min)
    - Refresh tokens are used to get new JWT tokens
    - User can view and manage active sessions

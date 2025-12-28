@@ -31,11 +31,18 @@
   "peerDependencies": {
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
+    "react-native": "^0.73.0",
     "react-router-dom": "^7.11.0"
+  },
+  "peerDependenciesMeta": {
+    "react-native": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "@types/react-native": "^0.73.0",
     "typescript": "^5.9.3"
   }
 }

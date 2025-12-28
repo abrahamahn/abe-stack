@@ -1,24 +1,24 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
 // Define types similar to what popper.js provides
 export type Placement =
-  | "top"
-  | "bottom"
-  | "right"
-  | "left"
-  | "top-start"
-  | "top-end"
-  | "bottom-start"
-  | "bottom-end"
-  | "right-start"
-  | "right-end"
-  | "left-start"
-  | "left-end";
+  | 'top'
+  | 'bottom'
+  | 'right'
+  | 'left'
+  | 'top-start'
+  | 'top-end'
+  | 'bottom-start'
+  | 'bottom-end'
+  | 'right-start'
+  | 'right-end'
+  | 'left-start'
+  | 'left-end';
 
 export interface Options {
   placement?: Placement;
   modifiers?: Array<{ name: string; options?: Record<string, unknown> }>;
-  strategy?: "absolute" | "fixed";
+  strategy?: 'absolute' | 'fixed';
 }
 
 export interface Instance {
@@ -33,8 +33,8 @@ function createSimplePopper(
   popperElement: HTMLElement,
   options: Options = {},
 ): Instance {
-  const placement = options.placement || "bottom";
-  const strategy = options.strategy || "absolute";
+  const placement = options.placement || 'bottom';
+  const strategy = options.strategy || 'absolute';
 
   function update() {
     if (!referenceElement || !popperElement) {
@@ -47,27 +47,27 @@ function createSimplePopper(
 
     // Basic positioning based on placement
     switch (placement) {
-      case "top":
+      case 'top':
         popperElement.style.bottom = `${window.innerHeight - refRect.top}px`;
         popperElement.style.left = `${refRect.left + refRect.width / 2 - popperElement.offsetWidth / 2}px`;
         break;
-      case "bottom":
+      case 'bottom':
         popperElement.style.top = `${refRect.bottom}px`;
         popperElement.style.left = `${refRect.left + refRect.width / 2 - popperElement.offsetWidth / 2}px`;
         break;
-      case "left":
+      case 'left':
         popperElement.style.right = `${window.innerWidth - refRect.left}px`;
         popperElement.style.top = `${refRect.top + refRect.height / 2 - popperElement.offsetHeight / 2}px`;
         break;
-      case "right":
+      case 'right':
         popperElement.style.left = `${refRect.right}px`;
         popperElement.style.top = `${refRect.top + refRect.height / 2 - popperElement.offsetHeight / 2}px`;
         break;
-      case "bottom-start":
+      case 'bottom-start':
         popperElement.style.top = `${refRect.bottom}px`;
         popperElement.style.left = `${refRect.left}px`;
         break;
-      case "bottom-end":
+      case 'bottom-end':
         popperElement.style.top = `${refRect.bottom}px`;
         popperElement.style.left = `${refRect.right - popperElement.offsetWidth}px`;
         break;
@@ -101,11 +101,7 @@ export function usePopper(
   useEffect(() => {
     if (referenceElement && popperElement) {
       // Create new popper instance
-      popperInstanceRef.current = createSimplePopper(
-        referenceElement,
-        popperElement,
-        options,
-      );
+      popperInstanceRef.current = createSimplePopper(referenceElement, popperElement, options);
 
       // Clean up on unmount
       return () => {

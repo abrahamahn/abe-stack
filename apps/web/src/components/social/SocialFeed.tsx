@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 
-import { formatRelativeTime } from "../../helpers/formatters";
-import { socialFeedStyles } from "../../styles";
-import { mergeStyles } from "../../utils/styleUtils";
-import AudioPlayer from "../media/AudioPlayer";
-import ImageGallery from "../media/ImageGallery";
-import VideoPlayer from "../media/VideoPlayer";
+import { formatRelativeTime } from '../../helpers/formatters';
+import { socialFeedStyles } from '../../styles';
+import { mergeStyles } from '../../utils/styleUtils';
+import AudioPlayer from '../media/AudioPlayer';
+import ImageGallery from '../media/ImageGallery';
+import VideoPlayer from '../media/VideoPlayer';
 
 // Types for different media content
 interface TrackData {
@@ -40,7 +40,7 @@ interface PostData {
   username: string;
   userAvatar: string;
   content: string;
-  mediaType?: "image" | "video" | "audio" | "carousel";
+  mediaType?: 'image' | 'video' | 'audio' | 'carousel';
   track?: TrackData;
   image?: ImageData;
   video?: VideoData;
@@ -71,7 +71,7 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
   onViewPost,
 }) => {
   const [posts, setPosts] = useState<PostData[]>(initialPosts);
-  const [newComment, setNewComment] = useState<string>("");
+  const [newComment, setNewComment] = useState<string>('');
   const [activePostId, setActivePostId] = useState<string | null>(null);
   const [expandedCaption, setExpandedCaption] = useState<string | null>(null);
 
@@ -81,114 +81,112 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
       // Mock data for demonstration
       const mockPosts: PostData[] = [
         {
-          id: "1",
-          userId: "user1",
-          username: "JohnDoe",
-          userAvatar: "/images/avatars/user1.jpg",
-          content:
-            "Check out this awesome new track I discovered! #newmusic #recommended",
-          mediaType: "audio",
+          id: '1',
+          userId: 'user1',
+          username: 'JohnDoe',
+          userAvatar: '/images/avatars/user1.jpg',
+          content: 'Check out this awesome new track I discovered! #newmusic #recommended',
+          mediaType: 'audio',
           track: {
-            id: "track1",
-            title: "Awesome Track",
-            artist: "Amazing Artist",
-            coverArt: "/images/covers/track1.jpg",
-            audioUrl: "/audio/track1.mp3",
+            id: 'track1',
+            title: 'Awesome Track',
+            artist: 'Amazing Artist',
+            coverArt: '/images/covers/track1.jpg',
+            audioUrl: '/audio/track1.mp3',
           },
           likesCount: 42,
           commentsCount: 7,
           sharesCount: 3,
           isLiked: false,
-          tags: ["newmusic", "recommended"],
+          tags: ['newmusic', 'recommended'],
           createdAt: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
         },
         {
-          id: "2",
-          userId: "user2",
-          username: "TravelLover",
-          userAvatar: "/images/avatars/user2.jpg",
-          content:
-            "Amazing view from my hotel this morning! #travel #vacation #sunrise",
-          mediaType: "image",
+          id: '2',
+          userId: 'user2',
+          username: 'TravelLover',
+          userAvatar: '/images/avatars/user2.jpg',
+          content: 'Amazing view from my hotel this morning! #travel #vacation #sunrise',
+          mediaType: 'image',
           image: {
-            src: "/images/posts/travel1.jpg",
+            src: '/images/posts/travel1.jpg',
             width: 1080,
             height: 1350,
-            alt: "Sunrise view from hotel balcony",
+            alt: 'Sunrise view from hotel balcony',
           },
           likesCount: 128,
           commentsCount: 14,
           sharesCount: 5,
           isLiked: true,
-          location: "Bali, Indonesia",
-          tags: ["travel", "vacation", "sunrise"],
+          location: 'Bali, Indonesia',
+          tags: ['travel', 'vacation', 'sunrise'],
           createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
         },
         {
-          id: "3",
-          userId: "user3",
-          username: "FoodieChef",
-          userAvatar: "/images/avatars/user3.jpg",
+          id: '3',
+          userId: 'user3',
+          username: 'FoodieChef',
+          userAvatar: '/images/avatars/user3.jpg',
           content:
-            "Made this delicious pasta dish yesterday! Swipe to see the process 👨‍🍳 #homemade #cooking #pasta",
-          mediaType: "carousel",
+            'Made this delicious pasta dish yesterday! Swipe to see the process 👨‍🍳 #homemade #cooking #pasta',
+          mediaType: 'carousel',
           carousel: [
             {
-              src: "/images/posts/food1.jpg",
+              src: '/images/posts/food1.jpg',
               width: 1080,
               height: 1080,
-              alt: "Finished pasta dish",
+              alt: 'Finished pasta dish',
             },
             {
-              src: "/images/posts/food2.jpg",
+              src: '/images/posts/food2.jpg',
               width: 1080,
               height: 1080,
-              alt: "Cooking process",
+              alt: 'Cooking process',
             },
             {
-              src: "/images/posts/food3.jpg",
+              src: '/images/posts/food3.jpg',
               width: 1080,
               height: 1080,
-              alt: "Ingredients",
+              alt: 'Ingredients',
             },
           ],
           likesCount: 89,
           commentsCount: 9,
           sharesCount: 2,
           isLiked: false,
-          tags: ["homemade", "cooking", "pasta"],
+          tags: ['homemade', 'cooking', 'pasta'],
           createdAt: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
         },
         {
-          id: "4",
-          userId: "user4",
-          username: "FilmCreator",
-          userAvatar: "/images/avatars/user4.jpg",
+          id: '4',
+          userId: 'user4',
+          username: 'FilmCreator',
+          userAvatar: '/images/avatars/user4.jpg',
           content:
-            "Just finished editing my latest short film! Check it out and let me know what you think 🎬 #shortfilm #filmmaker #cinematography",
-          mediaType: "video",
+            'Just finished editing my latest short film! Check it out and let me know what you think 🎬 #shortfilm #filmmaker #cinematography',
+          mediaType: 'video',
           video: {
             sources: [
               {
-                src: "/videos/film1.mp4",
-                quality: "720p",
-                type: "video/mp4",
+                src: '/videos/film1.mp4',
+                quality: '720p',
+                type: 'video/mp4',
               },
               {
-                src: "/videos/film1-480p.mp4",
-                quality: "480p",
-                type: "video/mp4",
+                src: '/videos/film1-480p.mp4',
+                quality: '480p',
+                type: 'video/mp4',
               },
             ],
-            poster: "/images/posts/film1-poster.jpg",
-            title: "My Short Film",
+            poster: '/images/posts/film1-poster.jpg',
+            title: 'My Short Film',
           },
           likesCount: 215,
           commentsCount: 32,
           sharesCount: 18,
           viewsCount: 1240,
           isLiked: false,
-          tags: ["shortfilm", "filmmaker", "cinematography"],
+          tags: ['shortfilm', 'filmmaker', 'cinematography'],
           createdAt: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
         },
       ];
@@ -238,7 +236,7 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
       }),
     );
 
-    setNewComment("");
+    setNewComment('');
     setActivePostId(null);
   };
 
@@ -294,7 +292,7 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
 
   const renderMediaContent = (post: PostData) => {
     switch (post.mediaType) {
-      case "audio":
+      case 'audio':
         if (!post.track) return null;
         return (
           <div className="post-media post-audio">
@@ -308,7 +306,7 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
           </div>
         );
 
-      case "image":
+      case 'image':
         if (!post.image) return null;
         return (
           <div className="post-media post-image">
@@ -322,7 +320,7 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
           </div>
         );
 
-      case "video":
+      case 'video':
         if (!post.video) return null;
         return (
           <div className="post-media post-video">
@@ -333,14 +331,12 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
               onPlay={() => handleView(post.id)}
             />
             {post.viewsCount !== undefined && (
-              <div className="view-count">
-                {post.viewsCount.toLocaleString()} views
-              </div>
+              <div className="view-count">{post.viewsCount.toLocaleString()} views</div>
             )}
           </div>
         );
 
-      case "carousel":
+      case 'carousel':
         if (!post.carousel || post.carousel.length === 0) return null;
         return (
           <div className="post-media post-carousel">
@@ -374,10 +370,10 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
           <button
             style={socialFeedStyles.filterButton as React.CSSProperties}
             onMouseOver={(e) => {
-              e.currentTarget.style.background = "var(--hover)";
+              e.currentTarget.style.background = 'var(--hover)';
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.background = "var(--background2)";
+              e.currentTarget.style.background = 'var(--background2)';
             }}
           >
             Following
@@ -385,10 +381,10 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
           <button
             style={socialFeedStyles.filterButton as React.CSSProperties}
             onMouseOver={(e) => {
-              e.currentTarget.style.background = "var(--hover)";
+              e.currentTarget.style.background = 'var(--hover)';
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.background = "var(--background2)";
+              e.currentTarget.style.background = 'var(--background2)';
             }}
           >
             Popular
@@ -397,32 +393,21 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
       </div>
 
       {posts.length === 0 ? (
-        <div style={socialFeedStyles.emptyFeed as React.CSSProperties}>
-          No posts to display
-        </div>
+        <div style={socialFeedStyles.emptyFeed as React.CSSProperties}>No posts to display</div>
       ) : (
         <div style={socialFeedStyles.postList as React.CSSProperties}>
           {posts.map((post) => (
-            <div
-              key={post.id}
-              style={socialFeedStyles.postCard as React.CSSProperties}
-            >
+            <div key={post.id} style={socialFeedStyles.postCard as React.CSSProperties}>
               <div style={socialFeedStyles.postHeader as React.CSSProperties}>
                 <div style={socialFeedStyles.postAvatar as React.CSSProperties}>
                   <img
                     src={post.userAvatar}
                     alt={`${post.username}'s avatar`}
-                    style={
-                      socialFeedStyles.postAvatarImg as React.CSSProperties
-                    }
+                    style={socialFeedStyles.postAvatarImg as React.CSSProperties}
                   />
                 </div>
-                <div
-                  style={socialFeedStyles.postUserInfo as React.CSSProperties}
-                >
-                  <h3
-                    style={socialFeedStyles.postUsername as React.CSSProperties}
-                  >
+                <div style={socialFeedStyles.postUserInfo as React.CSSProperties}>
+                  <h3 style={socialFeedStyles.postUsername as React.CSSProperties}>
                     {post.username}
                   </h3>
                   <p style={socialFeedStyles.postTime as React.CSSProperties}>
@@ -433,10 +418,10 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
                 <button
                   style={socialFeedStyles.postOptions as React.CSSProperties}
                   onMouseOver={(e) => {
-                    e.currentTarget.style.background = "var(--hover)";
+                    e.currentTarget.style.background = 'var(--hover)';
                   }}
                   onMouseOut={(e) => {
-                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.background = 'transparent';
                   }}
                 >
                   ⋮
@@ -452,14 +437,14 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
               <div style={socialFeedStyles.postContent as React.CSSProperties}>
                 {post.content.length > 150 && expandedCaption !== post.id ? (
                   <>
-                    {post.content.substring(0, 150)}...{" "}
+                    {post.content.substring(0, 150)}...{' '}
                     <button
                       onClick={() => toggleCaption(post.id)}
                       style={{
-                        background: "transparent",
-                        border: "none",
-                        color: "var(--text-color2)",
-                        cursor: "pointer",
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--text-color2)',
+                        cursor: 'pointer',
                         padding: 0,
                       }}
                     >
@@ -473,12 +458,12 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
                       <button
                         onClick={() => toggleCaption(post.id)}
                         style={{
-                          background: "transparent",
-                          border: "none",
-                          color: "var(--text-color2)",
-                          cursor: "pointer",
+                          background: 'transparent',
+                          border: 'none',
+                          color: 'var(--text-color2)',
+                          cursor: 'pointer',
                           padding: 0,
-                          marginLeft: "5px",
+                          marginLeft: '5px',
                         }}
                       >
                         less
@@ -488,9 +473,7 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
                 )}
 
                 {post.tags && post.tags.length > 0 && (
-                  <div style={{ marginTop: "8px" }}>
-                    {renderTags(post.tags)}
-                  </div>
+                  <div style={{ marginTop: '8px' }}>{renderTags(post.tags)}</div>
                 )}
               </div>
 
@@ -498,35 +481,31 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
                 <button
                   style={mergeStyles(
                     socialFeedStyles.postAction as React.CSSProperties,
-                    post.isLiked
-                      ? (socialFeedStyles.postActionLiked as React.CSSProperties)
-                      : {},
+                    post.isLiked ? (socialFeedStyles.postActionLiked as React.CSSProperties) : {},
                   )}
                   onClick={() => handleLike(post.id)}
                   onMouseOver={(e) => {
                     if (!post.isLiked) {
-                      e.currentTarget.style.background = "var(--hover)";
+                      e.currentTarget.style.background = 'var(--hover)';
                     }
                   }}
                   onMouseOut={(e) => {
                     if (!post.isLiked) {
-                      e.currentTarget.style.background = "transparent";
+                      e.currentTarget.style.background = 'transparent';
                     }
                   }}
                 >
-                  {post.isLiked ? "❤️" : "🤍"} {post.likesCount}
+                  {post.isLiked ? '❤️' : '🤍'} {post.likesCount}
                 </button>
 
                 <button
                   style={socialFeedStyles.postAction as React.CSSProperties}
-                  onClick={() =>
-                    setActivePostId(activePostId === post.id ? null : post.id)
-                  }
+                  onClick={() => setActivePostId(activePostId === post.id ? null : post.id)}
                   onMouseOver={(e) => {
-                    e.currentTarget.style.background = "var(--hover)";
+                    e.currentTarget.style.background = 'var(--hover)';
                   }}
                   onMouseOut={(e) => {
-                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.background = 'transparent';
                   }}
                 >
                   💬 {post.commentsCount}
@@ -536,10 +515,10 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
                   style={socialFeedStyles.postAction as React.CSSProperties}
                   onClick={() => handleShare(post.id)}
                   onMouseOver={(e) => {
-                    e.currentTarget.style.background = "var(--hover)";
+                    e.currentTarget.style.background = 'var(--hover)';
                   }}
                   onMouseOut={(e) => {
-                    e.currentTarget.style.background = "transparent";
+                    e.currentTarget.style.background = 'transparent';
                   }}
                 >
                   🔄 {post.sharesCount}
@@ -548,9 +527,9 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
                 {post.viewsCount && (
                   <span
                     style={{
-                      marginLeft: "auto",
-                      color: "var(--text-color2)",
-                      fontSize: "0.9rem",
+                      marginLeft: 'auto',
+                      color: 'var(--text-color2)',
+                      fontSize: '0.9rem',
                     }}
                   >
                     👁️ {post.viewsCount}
@@ -561,10 +540,10 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
               {activePostId === post.id && (
                 <div
                   style={{
-                    padding: "10px 15px",
-                    display: "flex",
-                    gap: "10px",
-                    borderTop: "1px solid var(--separator)",
+                    padding: '10px 15px',
+                    display: 'flex',
+                    gap: '10px',
+                    borderTop: '1px solid var(--separator)',
                   }}
                 >
                   <input
@@ -574,13 +553,13 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
                     onChange={(e) => setNewComment(e.target.value)}
                     style={{
                       flex: 1,
-                      padding: "8px 12px",
-                      borderRadius: "20px",
-                      border: "1px solid var(--separator)",
-                      background: "var(--background3)",
+                      padding: '8px 12px',
+                      borderRadius: '20px',
+                      border: '1px solid var(--separator)',
+                      background: 'var(--background3)',
                     }}
                     onKeyPress={(e) => {
-                      if (e.key === "Enter") {
+                      if (e.key === 'Enter') {
                         handleComment(post.id);
                       }
                     }}
@@ -589,14 +568,12 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
                     onClick={() => handleComment(post.id)}
                     disabled={!newComment.trim()}
                     style={{
-                      padding: "8px 15px",
-                      borderRadius: "20px",
-                      border: "none",
-                      background: newComment.trim()
-                        ? "var(--blue)"
-                        : "var(--gray4)",
-                      color: newComment.trim() ? "white" : "var(--text-color3)",
-                      cursor: newComment.trim() ? "pointer" : "not-allowed",
+                      padding: '8px 15px',
+                      borderRadius: '20px',
+                      border: 'none',
+                      background: newComment.trim() ? 'var(--blue)' : 'var(--gray4)',
+                      color: newComment.trim() ? 'white' : 'var(--text-color3)',
+                      cursor: newComment.trim() ? 'pointer' : 'not-allowed',
                     }}
                   >
                     Post
@@ -612,13 +589,13 @@ const SocialFeed: React.FC<SocialFeedProps> = ({
         style={socialFeedStyles.loadMore as React.CSSProperties}
         onClick={() => {
           // In a real app, this would load more posts
-          console.log("Load more posts");
+          console.log('Load more posts');
         }}
         onMouseOver={(e) => {
-          e.currentTarget.style.background = "var(--hover)";
+          e.currentTarget.style.background = 'var(--hover)';
         }}
         onMouseOut={(e) => {
-          e.currentTarget.style.background = "var(--background2)";
+          e.currentTarget.style.background = 'var(--background2)';
         }}
       >
         Load More

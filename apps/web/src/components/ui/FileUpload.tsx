@@ -1,15 +1,9 @@
-import React, {
-  ChangeEvent,
-  ComponentPropsWithoutRef,
-  DragEvent,
-  useRef,
-  useState,
-} from "react";
+import React, { ChangeEvent, ComponentPropsWithoutRef, DragEvent, useRef, useState } from 'react';
 
-import { DeferredPromise } from "@infrastructure/promises";
-import { randomId } from "@infrastructure/utils/randomId";
+import { DeferredPromise } from '@infrastructure/promises';
+import { randomId } from '@infrastructure/utils/randomId';
 
-import { passthroughRef } from "../../helpers/passthroughRef";
+import { passthroughRef } from '../../helpers/passthroughRef';
 
 interface Upload {
   id: string;
@@ -18,18 +12,13 @@ interface Upload {
   uploaded?: boolean;
 }
 
-interface FileUploadProps extends ComponentPropsWithoutRef<"div"> {
+interface FileUploadProps extends ComponentPropsWithoutRef<'div'> {
   onFileSelect: (file: File) => void;
   accept?: string;
   multiple?: boolean;
 }
 
-export function FileUpload({
-  onFileSelect,
-  accept,
-  multiple,
-  ...props
-}: FileUploadProps) {
+export function FileUpload({ onFileSelect, accept, multiple, ...props }: FileUploadProps) {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -71,13 +60,13 @@ export function FileUpload({
       onDrop={handleDrop}
       onClick={handleClick}
       style={{
-        border: `2px dashed ${isDragging ? "#3b82f6" : "#e2e8f0"}`,
-        borderRadius: "0.5rem",
-        padding: "2rem",
-        textAlign: "center",
-        cursor: "pointer",
-        backgroundColor: isDragging ? "rgba(59, 130, 246, 0.1)" : "transparent",
-        transition: "all 0.2s ease",
+        border: `2px dashed ${isDragging ? '#3b82f6' : '#e2e8f0'}`,
+        borderRadius: '0.5rem',
+        padding: '2rem',
+        textAlign: 'center',
+        cursor: 'pointer',
+        backgroundColor: isDragging ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+        transition: 'all 0.2s ease',
         ...props.style,
       }}
       {...props}
@@ -88,9 +77,9 @@ export function FileUpload({
         accept={accept}
         multiple={multiple}
         onChange={handleFileChange}
-        style={{ display: "none" }}
+        style={{ display: 'none' }}
       />
-      {isDragging ? "Drop files here" : "Click or drag files here to upload"}
+      {isDragging ? 'Drop files here' : 'Click or drag files here to upload'}
     </div>
   );
 }
@@ -98,10 +87,7 @@ export function FileUpload({
 export default FileUpload;
 
 export function useFileUpload(
-  onUpload: (
-    file: File,
-    onProgress: (progress: number) => void,
-  ) => Promise<void>,
+  onUpload: (file: File, onProgress: (progress: number) => void) => Promise<void>,
 ) {
   const [uploads, setUploads] = useState<Upload[]>([]);
 
@@ -147,12 +133,12 @@ export function UploadPreview({ file, uploaded }: Upload) {
   return (
     <div
       style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "1rem",
-        padding: "0.5rem",
-        borderRadius: "0.25rem",
-        backgroundColor: "#f8fafc",
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1rem',
+        padding: '0.5rem',
+        borderRadius: '0.25rem',
+        backgroundColor: '#f8fafc',
       }}
     >
       {preview && (
@@ -160,22 +146,22 @@ export function UploadPreview({ file, uploaded }: Upload) {
           src={preview}
           alt={file.name}
           style={{
-            width: "2rem",
-            height: "2rem",
-            objectFit: "cover",
-            borderRadius: "0.25rem",
+            width: '2rem',
+            height: '2rem',
+            objectFit: 'cover',
+            borderRadius: '0.25rem',
           }}
         />
       )}
       <div style={{ flex: 1 }}>{file.name}</div>
-      <div>{uploaded ? "✅" : "❌"}</div>
+      <div>{uploaded ? '✅' : '❌'}</div>
     </div>
   );
 }
 
 export const FileUploadDropZone = passthroughRef(
   (
-    props: ComponentPropsWithoutRef<"div"> & {
+    props: ComponentPropsWithoutRef<'div'> & {
       selected?: boolean;
     },
   ) => {
@@ -208,9 +194,7 @@ export const FileUploadDropZone = passthroughRef(
         onDragOver={handleDragOver}
         onDrop={handleDrop}
         style={{
-          border: isDragging
-            ? "3px dashed var(--blue)"
-            : "3px solid transparent",
+          border: isDragging ? '3px dashed var(--blue)' : '3px solid transparent',
           ...props.style,
         }}
       />
@@ -218,16 +202,12 @@ export const FileUploadDropZone = passthroughRef(
   },
 );
 
-export async function uploadFile(
-  file: File,
-  url: string,
-  onProgress: (progress: number) => void,
-) {
+export async function uploadFile(file: File, url: string, onProgress: (progress: number) => void) {
   const xhr = new XMLHttpRequest();
-  xhr.open("PUT", url, true);
+  xhr.open('PUT', url, true);
 
   // Update progress
-  xhr.upload.addEventListener("progress", (event) => {
+  xhr.upload.addEventListener('progress', (event) => {
     if (!event.lengthComputable) return;
     const progress = Math.round((event.loaded / event.total) * 100);
     onProgress(progress);
@@ -261,7 +241,7 @@ const MB = 1024 * 1024;
 export async function _renderPreview(file: File) {
   const deferred = new DeferredPromise<string | undefined>();
 
-  if (file.type.startsWith("image/") && file.size <= 10 * MB) {
+  if (file.type.startsWith('image/') && file.size <= 10 * MB) {
     const reader = new FileReader();
     reader.onload = (e) => {
       const preview = e.target?.result as string;
@@ -276,7 +256,7 @@ export async function _renderPreview(file: File) {
 }
 
 export function FileUploadArea(
-  props: ComponentPropsWithoutRef<"div"> & {
+  props: ComponentPropsWithoutRef<'div'> & {
     onFileSelect: (files: FileList) => void;
     accept?: string;
     multiple?: boolean;
@@ -299,11 +279,11 @@ export function FileUploadArea(
     <div
       onClick={handleClick}
       style={{
-        border: "2px dashed var(--border-color)",
-        borderRadius: "0.5rem",
-        padding: "2rem",
-        textAlign: "center",
-        cursor: "pointer",
+        border: '2px dashed var(--border-color)',
+        borderRadius: '0.5rem',
+        padding: '2rem',
+        textAlign: 'center',
+        cursor: 'pointer',
         ...props.style,
       }}
       {...props}
@@ -314,7 +294,7 @@ export function FileUploadArea(
         accept={props.accept}
         multiple={props.multiple}
         onChange={handleFileChange}
-        style={{ display: "none" }}
+        style={{ display: 'none' }}
       />
       Click to select files
     </div>

@@ -1,12 +1,6 @@
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
-type ThemeMode = "light" | "dark";
+type ThemeMode = 'light' | 'dark';
 
 interface ThemeContextType {
   theme: ThemeMode;
@@ -17,7 +11,7 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: "light",
+  theme: 'light',
   toggleTheme: () => {},
   setTheme: () => {},
   useSystemTheme: () => {},
@@ -32,31 +26,28 @@ interface ThemeProviderProps {
 
 // Helper function to get system preference
 const getSystemThemePreference = (): ThemeMode => {
-  if (
-    window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-  ) {
-    return "dark";
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    return 'dark';
   }
-  return "light";
+  return 'light';
 };
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
   // Track if we're using system theme
   const [isUsingSystemTheme, setIsUsingSystemTheme] = useState<boolean>(() => {
-    return localStorage.getItem("useSystemTheme") === "true";
+    return localStorage.getItem('useSystemTheme') === 'true';
   });
 
   // Initialize theme from localStorage or system preference
   const [theme, setThemeState] = useState<ThemeMode>(() => {
     // Check if we should use system theme
-    if (localStorage.getItem("useSystemTheme") === "true") {
+    if (localStorage.getItem('useSystemTheme') === 'true') {
       return getSystemThemePreference();
     }
 
     // Check if theme is stored in localStorage
-    const savedTheme = localStorage.getItem("theme") as ThemeMode;
-    if (savedTheme && (savedTheme === "light" || savedTheme === "dark")) {
+    const savedTheme = localStorage.getItem('theme') as ThemeMode;
+    if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
       return savedTheme;
     }
 
@@ -67,17 +58,17 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
   // Listen for system theme changes
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
     const handleChange = (e: MediaQueryListEvent) => {
       if (isUsingSystemTheme) {
-        setThemeState(e.matches ? "dark" : "light");
+        setThemeState(e.matches ? 'dark' : 'light');
       }
     };
 
     // Modern browsers
     if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener("change", handleChange);
+      mediaQuery.addEventListener('change', handleChange);
     } else {
       // Fallback for older browsers
       mediaQuery.addListener(handleChange);
@@ -85,7 +76,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
     return () => {
       if (mediaQuery.removeEventListener) {
-        mediaQuery.removeEventListener("change", handleChange);
+        mediaQuery.removeEventListener('change', handleChange);
       } else {
         mediaQuery.removeListener(handleChange);
       }
@@ -94,32 +85,32 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
   // Apply theme to document when it changes
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.setAttribute('data-theme', theme);
 
     // Only save to localStorage if not using system theme
     if (!isUsingSystemTheme) {
-      localStorage.setItem("theme", theme);
+      localStorage.setItem('theme', theme);
     }
   }, [theme, isUsingSystemTheme]);
 
   // Toggle between light and dark mode
   const toggleTheme = () => {
     setIsUsingSystemTheme(false);
-    localStorage.setItem("useSystemTheme", "false");
-    setThemeState((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
+    localStorage.setItem('useSystemTheme', 'false');
+    setThemeState((prevTheme) => (prevTheme === 'light' ? 'dark' : 'light'));
   };
 
   // Set theme directly
   const setTheme = (newTheme: ThemeMode) => {
     setIsUsingSystemTheme(false);
-    localStorage.setItem("useSystemTheme", "false");
+    localStorage.setItem('useSystemTheme', 'false');
     setThemeState(newTheme);
   };
 
   // Use system theme
   const useSystemTheme = () => {
     setIsUsingSystemTheme(true);
-    localStorage.setItem("useSystemTheme", "true");
+    localStorage.setItem('useSystemTheme', 'true');
     setThemeState(getSystemThemePreference());
   };
 

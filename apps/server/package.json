@@ -2,6 +2,7 @@
   "name": "@abe-stack/server",
   "version": "1.0.0",
   "description": "Minimal Fastify server for abe-stack",
+  "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx src/index.ts",

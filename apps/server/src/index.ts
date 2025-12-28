@@ -1,26 +1,23 @@
-import Fastify from "fastify";
-import cors from "@fastify/cors";
-import helmet from "@fastify/helmet";
-import {
-  ZodTypeProvider,
-  serializerCompiler,
-  validatorCompiler,
-} from "fastify-type-provider-zod";
-import { z } from "zod";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-import { sql } from "drizzle-orm";
-import dotenvFlow from "dotenv-flow";
-import path from "path";
+import Fastify from 'fastify';
+import cors from '@fastify/cors';
+import helmet from '@fastify/helmet';
+import type { ZodTypeProvider } from 'fastify-type-provider-zod';
+import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
+import { z } from 'zod';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+import { sql } from 'drizzle-orm';
+import dotenvFlow from 'dotenv-flow';
+import path from 'path';
 
 // Load environment variables
 dotenvFlow.config({
-  node_env: process.env.NODE_ENV || "development",
-  path: path.resolve(__dirname, "../../../config/env"),
+  node_env: process.env.NODE_ENV || 'development',
+  path: path.resolve(__dirname, '../../../config/env'),
 });
 
 const DEFAULT_PORT = 8080;
-const DEFAULT_HOST = "0.0.0.0";
+const DEFAULT_HOST = '0.0.0.0';
 
 /**
  * Build PostgreSQL connection string from environment variables
@@ -30,11 +27,11 @@ function buildConnectionString(): string {
     return process.env.DATABASE_URL;
   }
 
-  const user = process.env.POSTGRES_USER || "postgres";
-  const password = process.env.POSTGRES_PASSWORD || "";
-  const host = process.env.POSTGRES_HOST || "localhost";
+  const user = process.env.POSTGRES_USER || 'postgres';
+  const password = process.env.POSTGRES_PASSWORD || '';
+  const host = process.env.POSTGRES_HOST || 'localhost';
   const port = Number(process.env.POSTGRES_PORT || 5432);
-  const database = process.env.POSTGRES_DB || "abe_stack_dev";
+  const database = process.env.POSTGRES_DB || 'abe_stack_dev';
 
   const auth = password ? `${user}:${password}` : user;
   return `postgres://${auth}@${host}:${port}/${database}`;
@@ -46,7 +43,7 @@ function buildConnectionString(): string {
 export async function createServer() {
   const app = Fastify({
     logger: {
-      level: process.env.LOG_LEVEL || "info",
+      level: process.env.LOG_LEVEL || 'info',
     },
   }).withTypeProvider<ZodTypeProvider>();
 
@@ -73,7 +70,7 @@ export async function createServer() {
 
   // Root route
   app.get(
-    "/",
+    '/',
     {
       schema: {
         response: {
@@ -85,14 +82,14 @@ export async function createServer() {
       },
     },
     async () => ({
-      message: "ABE Stack API",
+      message: 'ABE Stack API',
       timestamp: new Date().toISOString(),
-    })
+    }),
   );
 
   // API route
   app.get(
-    "/api",
+    '/api',
     {
       schema: {
         response: {
@@ -105,20 +102,20 @@ export async function createServer() {
       },
     },
     async () => ({
-      message: "ABE Stack API is running",
-      version: "1.0.0",
+      message: 'ABE Stack API is running',
+      version: '1.0.0',
       timestamp: new Date().toISOString(),
-    })
+    }),
   );
 
   // Health check route with database check
   app.get(
-    "/health",
+    '/health',
     {
       schema: {
         response: {
           200: z.object({
-            status: z.enum(["ok", "degraded"]),
+            status: z.enum(['ok', 'degraded']),
             database: z.boolean(),
             timestamp: z.string(),
           }),
@@ -132,19 +129,19 @@ export async function createServer() {
         await db.execute(sql`SELECT 1`);
       } catch (error) {
         dbHealthy = false;
-        app.log.error({ err: error }, "Database health check failed");
+        app.log.error({ err: error }, 'Database health check failed');
       }
 
       return {
-        status: dbHealthy ? ("ok" as const) : ("degraded" as const),
+        status: dbHealthy ? ('ok' as const) : ('degraded' as const),
         database: dbHealthy,
         timestamp: new Date().toISOString(),
       };
-    }
+    },
   );
 
   // Graceful shutdown
-  app.addHook("onClose", async () => {
+  app.addHook('onClose', async () => {
     await sqlClient.end({ timeout: 5 });
   });
 
@@ -164,12 +161,13 @@ async function start() {
     await app.listen({ port, host });
     app.log.info(`Server listening on http://${host}:${port}`);
   } catch (error) {
-    console.error("Failed to start server", error);
+    console.error('Failed to start server', error);
     process.exit(1);
   }
 }
 
 // Start server if this file is run directly
-if (require.main === module) {
+const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+if (isMainModule) {
   start();
 }

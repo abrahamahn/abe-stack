@@ -1,23 +1,19 @@
-import {
-  ClientPubsubMessage,
-  ServerPubsubMessage,
-} from "@infrastructure/pubsub";
+import { ClientPubsubMessage, ServerPubsubMessage } from '@infrastructure/pubsub';
 
-import { sleep } from "@/server/infrastructure/lifecycle/sleep";
+import { sleep } from '@/server/infrastructure/lifecycle/sleep';
 
-import { ClientConfig } from "./ClientConfig";
-import { SecondMs } from "../../server/infrastructure/utils/dateHelpers";
+import { ClientConfig } from './ClientConfig';
+import { SecondMs } from '../../server/infrastructure/utils/dateHelpers';
 
 // Define a type for pubsub values
 type PubSubValue = unknown;
 
-const debug = (...args: unknown[]) => console.log("pubsub:", ...args);
+const debug = (...args: unknown[]) => console.log('pubsub:', ...args);
 
 export class WebsocketPubsubClient {
   private ws!: WebSocket;
   private reconnectAttempt = 1;
-  private subscriptions: Map<string, Set<(value: PubSubValue) => void>> =
-    new Map();
+  private subscriptions: Map<string, Set<(value: PubSubValue) => void>> = new Map();
 
   constructor(
     private args: {
@@ -28,30 +24,30 @@ export class WebsocketPubsubClient {
   ) {
     this.connect();
 
-    window.addEventListener("online", () => {
+    window.addEventListener('online', () => {
       this.reconnectAttempt = 1;
       this.connect();
     });
   }
 
   private connect() {
-    debug("connecting...");
+    debug('connecting...');
     this.ws = new WebSocket(`ws://${this.args.config.host}`);
 
     this.ws.onopen = () => {
-      debug("connected!");
+      debug('connected!');
       this.reconnectAttempt = 1;
       this.args.onStart();
 
       // Resubscribe to all previous subscriptions
       for (const key of this.subscriptions.keys()) {
-        this.send({ type: "subscribe", key });
+        this.send({ type: 'subscribe', key });
       }
     };
 
     this.ws.onmessage = (event) => {
       const message = JSON.parse(event.data as string) as ServerPubsubMessage;
-      debug("<", message.type, message.key, message.value);
+      debug('<', message.type, message.key, message.value);
 
       // Call the global onChange handler
       this.args.onChange(message.key, message.value);
@@ -66,11 +62,11 @@ export class WebsocketPubsubClient {
     };
 
     this.ws.onerror = (error) => {
-      debug("error", error);
+      debug('error', error);
     };
 
     this.ws.onclose = () => {
-      debug("closed");
+      debug('closed');
       void this.attemptReconnect();
     };
   }
@@ -85,7 +81,7 @@ export class WebsocketPubsubClient {
 
   private send(message: ClientPubsubMessage) {
     if (this.ws.readyState === WebSocket.OPEN) {
-      debug(">", message.type, message.key);
+      debug('>', message.type, message.key);
       this.ws.send(JSON.stringify(message));
     }
   }
@@ -100,7 +96,7 @@ export class WebsocketPubsubClient {
     }
 
     // Send subscribe message
-    this.send({ type: "subscribe", key });
+    this.send({ type: 'subscribe', key });
 
     // Return unsubscribe function
     return () => this.unsubscribe(key, callback);
@@ -113,12 +109,12 @@ export class WebsocketPubsubClient {
       if ((this.subscriptions.get(key)?.size ?? 0) === 0) {
         this.subscriptions.delete(key);
         // Only send unsubscribe if no more callbacks for this key
-        this.send({ type: "unsubscribe", key });
+        this.send({ type: 'unsubscribe', key });
       }
     } else if (!callback) {
       // If no callback provided, remove all subscriptions for this key
       this.subscriptions.delete(key);
-      this.send({ type: "unsubscribe", key });
+      this.send({ type: 'unsubscribe', key });
     }
   }
 

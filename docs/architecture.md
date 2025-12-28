@@ -23,6 +23,7 @@ Our architecture is guided by the following principles:
 The ABE Stack implements multiple proven architectural patterns:
 
 ### Clean Architecture
+
 ```
 ┌─────────────────────────────────────┐
 │           API Layer                 │ ← Controllers, Routes, Middleware
@@ -36,12 +37,14 @@ The ABE Stack implements multiple proven architectural patterns:
 ```
 
 ### Dependency Injection Architecture
+
 - **Container**: Inversify-based service container with symbol-based type identifiers
 - **Scoping**: Singleton services for performance and state consistency
 - **Interface-Based**: All services implement well-defined interfaces
 - **Constructor Injection**: Dependencies injected through constructors with decorators
 
 ### Repository & Service Pattern
+
 - **Repositories**: Abstract data access with CRUD operations and validation
 - **Services**: Business logic orchestration across multiple repositories
 - **Transaction Support**: Automatic transaction management with retry logic
@@ -52,12 +55,14 @@ The ABE Stack implements multiple proven architectural patterns:
 ### 🎯 Core Infrastructure (`src/server/infrastructure/`)
 
 #### Configuration Management
+
 - **Multi-Source Configuration**: Environment files, secrets, and runtime configuration
 - **Schema Validation**: Joi-based validation with detailed error reporting
 - **Type Safety**: Strongly typed configuration access with default values
 - **Hot Reloading**: Configuration change notifications for dynamic updates
 
 #### Database Layer
+
 - **PostgreSQL**: Advanced connection pooling with configurable parameters
 - **Transaction Management**: Nested transactions with automatic rollback
 - **Query Performance**: Parameter binding, query tagging, and performance monitoring
@@ -65,12 +70,14 @@ The ABE Stack implements multiple proven architectural patterns:
 - **Health Monitoring**: Real-time connection health and metrics
 
 #### Caching Strategy
+
 - **Multi-Level Caching**: Redis primary with in-memory fallback
 - **Function Memoization**: Automatic caching of expensive operations
 - **TTL Management**: Time-based expiration with background cleanup
 - **Statistics Tracking**: Hit/miss ratios and performance metrics
 
 #### Security Infrastructure
+
 - **JWT Management**: Access and refresh tokens with blacklisting support
 - **Password Security**: bcrypt hashing with strength validation
 - **CSRF Protection**: Token-based protection with configurable options
@@ -79,6 +86,7 @@ The ABE Stack implements multiple proven architectural patterns:
 - **Encryption**: AES encryption for sensitive data at rest
 
 #### Background Processing
+
 - **Job Queue System**: Priority-based job scheduling with persistence
 - **Retry Logic**: Exponential backoff with configurable attempts
 - **Concurrency Control**: Worker concurrency with resource management
@@ -86,6 +94,7 @@ The ABE Stack implements multiple proven architectural patterns:
 - **Monitoring**: Real-time job status and performance metrics
 
 #### Logging & Monitoring
+
 - **Structured Logging**: JSON-formatted logs with rich metadata
 - **Context Propagation**: Hierarchical loggers with inherited context
 - **Correlation IDs**: Request tracking across service boundaries
@@ -94,7 +103,9 @@ The ABE Stack implements multiple proven architectural patterns:
 ### 🏢 Domain Modules (`src/server/modules/`)
 
 #### Authentication Module (`core/auth/`)
+
 **Feature-Based Organization:**
+
 ```
 auth/
 ├── api/                     # HTTP Controllers & Routes
@@ -113,12 +124,14 @@ auth/
 ```
 
 #### User Management (`core/users/`)
+
 - **Complete CRUD Operations**: User profiles, preferences, and connections
 - **Lifecycle Management**: User onboarding with background job processing
 - **Repository Pattern**: Type-safe data access with validation
 - **Event-Driven**: User action events for notification and analytics
 
 #### Permission System (`core/permission/`)
+
 - **Role-Based Access Control**: Hierarchical role and permission system
 - **Permission Middleware**: Route-level permission enforcement
 - **Dynamic Permissions**: Runtime permission checking and caching
@@ -127,6 +140,7 @@ auth/
 ### 🧩 Base Classes & Patterns
 
 #### Repository Base Class
+
 ```typescript
 export abstract class BaseRepository<T> {
   // Common CRUD operations
@@ -137,6 +151,7 @@ export abstract class BaseRepository<T> {
 ```
 
 #### Service Base Patterns
+
 - **Dependency Injection**: Constructor injection with interface dependencies
 - **Error Handling**: Comprehensive error types and propagation
 - **Logging Integration**: Contextual logging with correlation IDs
@@ -145,6 +160,7 @@ export abstract class BaseRepository<T> {
 ## 🔄 Request Lifecycle
 
 ### Typical Request Flow
+
 ```
 1. HTTP Request → Express Server
 2. CORS Middleware → Security Headers
@@ -159,6 +175,7 @@ export abstract class BaseRepository<T> {
 ```
 
 ### Error Handling Flow
+
 ```
 Infrastructure Error → Repository Error → Service Error → Controller Error → HTTP Response
                                                                                       ↓
@@ -168,18 +185,21 @@ Infrastructure Error → Repository Error → Service Error → Controller Error
 ## 💾 Data Management Strategy
 
 ### Database Architecture
+
 - **Connection Pooling**: Advanced pool management with health monitoring
 - **Transaction Isolation**: Configurable isolation levels with retry logic
 - **Query Optimization**: Prepared statements with parameter binding
 - **Migration System**: Versioned schema changes with rollback support
 
 ### Caching Architecture
+
 - **Read-Through Cache**: Automatic cache population on cache misses
 - **Write-Through Cache**: Immediate cache updates on data changes
 - **Cache Invalidation**: Event-driven cache invalidation strategies
 - **Performance Optimization**: Function memoization and query result caching
 
 ### Storage Strategy
+
 - **Provider Pattern**: Pluggable storage backends (local, cloud)
 - **Metadata Management**: Automatic file metadata extraction and indexing
 - **Streaming Support**: Large file handling with stream processing
@@ -188,18 +208,21 @@ Infrastructure Error → Repository Error → Service Error → Controller Error
 ## 🔒 Security Architecture
 
 ### Authentication & Authorization
+
 - **JWT Strategy**: Stateless authentication with refresh token rotation
 - **Role-Based Access**: Hierarchical permission system with inheritance
 - **Session Management**: Secure session handling with configurable expiration
 - **Multi-Factor Authentication**: TOTP and SMS-based MFA support
 
 ### Data Protection
+
 - **Encryption at Rest**: AES encryption for sensitive database fields
 - **Encryption in Transit**: TLS/SSL for all external communication
 - **Input Validation**: Comprehensive validation with XSS prevention
 - **SQL Injection Prevention**: Parameterized queries and ORM protection
 
 ### Security Monitoring
+
 - **Audit Logging**: Comprehensive security event logging
 - **Rate Limiting**: Adaptive rate limiting with IP-based tracking
 - **Intrusion Detection**: Suspicious activity pattern detection
@@ -208,18 +231,21 @@ Infrastructure Error → Repository Error → Service Error → Controller Error
 ## 📈 Scalability & Performance
 
 ### Horizontal Scaling
+
 - **Stateless Design**: No server-side session state for easy scaling
 - **Load Balancing**: Session-independent request distribution
 - **Database Scaling**: Read replicas and connection pooling
 - **Cache Distribution**: Redis clustering for high availability
 
 ### Performance Optimization
+
 - **Query Optimization**: Indexed queries with performance monitoring
 - **Background Processing**: CPU-intensive tasks moved to job queues
 - **Caching Strategy**: Multi-level caching with intelligent invalidation
 - **Resource Management**: Connection pooling and resource cleanup
 
 ### Monitoring & Observability
+
 - **Health Checks**: Comprehensive system health monitoring
 - **Performance Metrics**: Real-time performance tracking and alerting
 - **Distributed Tracing**: Request tracing across service boundaries
@@ -228,18 +254,21 @@ Infrastructure Error → Repository Error → Service Error → Controller Error
 ## 🚀 Deployment Architecture
 
 ### Environment Management
+
 - **Multi-Environment**: Separate configurations for dev, staging, production
 - **Configuration Management**: Environment-specific variable management
 - **Secret Management**: Secure handling of sensitive configuration data
 - **Feature Flags**: Runtime feature toggling and A/B testing
 
 ### Container Strategy
+
 - **Docker Support**: Containerized deployment with optimized images
 - **Health Checks**: Container health monitoring and automatic restart
 - **Resource Limits**: CPU and memory limits for optimal resource usage
 - **Multi-Stage Builds**: Optimized build process for smaller images
 
 ### Infrastructure as Code
+
 - **Database Migrations**: Automated schema deployment and versioning
 - **Configuration Management**: Infrastructure configuration as code
 - **Monitoring Setup**: Automated monitoring and alerting configuration
@@ -248,12 +277,14 @@ Infrastructure Error → Repository Error → Service Error → Controller Error
 ## 🧪 Testing Architecture
 
 ### Testing Strategy
+
 - **Unit Tests**: Component-level testing with dependency mocking
 - **Integration Tests**: Service integration and database testing
 - **End-to-End Tests**: Complete user workflow testing
 - **Performance Tests**: Load testing and performance benchmarking
 
 ### Test Infrastructure
+
 - **Mock Services**: Comprehensive mocking of external dependencies
 - **Test Databases**: Isolated test database environments
 - **Test Fixtures**: Reusable test data and setup utilities

@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { formatDuration } from "../../helpers/formatters";
+import { formatDuration } from '../../helpers/formatters';
 
 interface AudioPlayerProps {
   trackUrl: string;
@@ -40,7 +40,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
           if (onPlay) onPlay();
         })
         .catch((error) => {
-          console.error("Play failed:", error);
+          console.error('Play failed:', error);
         });
     }
   }, [onPlay]);
@@ -71,9 +71,9 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
       };
 
       // Add event listeners
-      audio.addEventListener("loadedmetadata", handleLoadedMetadata);
-      audio.addEventListener("timeupdate", handleTimeUpdate);
-      audio.addEventListener("ended", handleEnded);
+      audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.addEventListener('timeupdate', handleTimeUpdate);
+      audio.addEventListener('ended', handleEnded);
 
       // Set volume
       audio.volume = volume;
@@ -85,9 +85,9 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
 
       // Clean up
       return () => {
-        audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
-        audio.removeEventListener("timeupdate", handleTimeUpdate);
-        audio.removeEventListener("ended", handleEnded);
+        audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+        audio.removeEventListener('timeupdate', handleTimeUpdate);
+        audio.removeEventListener('ended', handleEnded);
       };
     }
   }, [trackUrl, autoplay, playAudio, pauseAudio, volume, onEnded]);
@@ -153,10 +153,10 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
 
             <button
               className="play-pause"
-              aria-label={isPlaying ? "Pause" : "Play"}
+              aria-label={isPlaying ? 'Pause' : 'Play'}
               onClick={togglePlay}
             >
-              {isPlaying ? "⏸️" : "▶️"}
+              {isPlaying ? '⏸️' : '▶️'}
             </button>
 
             <button
@@ -164,10 +164,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
               aria-label="Skip forward 15 seconds"
               onClick={() => {
                 if (audioRef.current) {
-                  audioRef.current.currentTime = Math.min(
-                    duration,
-                    currentTime + 15,
-                  );
+                  audioRef.current.currentTime = Math.min(duration, currentTime + 15);
                 }
               }}
             >
@@ -178,11 +175,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
           <div className="progress-container">
             <div className="time-display">{formatDuration(currentTime)}</div>
 
-            <div
-              className="progress-bar"
-              ref={progressRef}
-              onClick={handleProgressClick}
-            >
+            <div className="progress-bar" ref={progressRef} onClick={handleProgressClick}>
               <div
                 className="progress-fill"
                 style={{ width: `${(currentTime / duration) * 100}%` }}
@@ -212,114 +205,114 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
 
 const styles = {
   audioPlayer: {
-    width: "100%",
-    maxWidth: "600px",
-    background: "var(--background2)",
-    borderRadius: "12px",
-    padding: "20px",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-    margin: "20px auto",
+    width: '100%',
+    maxWidth: '600px',
+    background: 'var(--background2)',
+    borderRadius: '12px',
+    padding: '20px',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+    margin: '20px auto',
   },
   playerContainer: {
-    display: "flex",
-    alignItems: "center",
+    display: 'flex',
+    alignItems: 'center',
   },
   coverArt: {
-    width: "100px",
-    height: "100px",
-    marginRight: "20px",
+    width: '100px',
+    height: '100px',
+    marginRight: '20px',
     flexShrink: 0,
   },
   coverArtImg: {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
-    borderRadius: "8px",
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    borderRadius: '8px',
   },
   playerControls: {
     flexGrow: 1,
   },
   trackTitle: {
-    margin: "0 0 5px 0",
-    fontSize: "18px",
-    color: "var(--text-color)",
+    margin: '0 0 5px 0',
+    fontSize: '18px',
+    color: 'var(--text-color)',
   },
   artistName: {
     margin: 0,
-    fontSize: "14px",
-    color: "var(--text-color2)",
+    fontSize: '14px',
+    color: 'var(--text-color2)',
   },
   controls: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    margin: "15px 0",
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '15px 0',
   },
   controlsButton: {
-    background: "transparent",
-    border: "none",
-    cursor: "pointer",
-    fontSize: "24px",
-    padding: "5px 15px",
-    borderRadius: "50%",
-    transition: "background-color 0.2s",
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '24px',
+    padding: '5px 15px',
+    borderRadius: '50%',
+    transition: 'background-color 0.2s',
   },
   controlsButtonHover: {
-    backgroundColor: "var(--hover)",
+    backgroundColor: 'var(--hover)',
   },
   playPause: {
-    margin: "0 15px",
+    margin: '0 15px',
   },
   progressContainer: {
-    display: "flex",
-    alignItems: "center",
-    marginBottom: "15px",
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: '15px',
   },
   timeDisplay: {
-    fontSize: "12px",
-    color: "var(--text-color2)",
-    width: "45px",
+    fontSize: '12px',
+    color: 'var(--text-color2)',
+    width: '45px',
   },
   progressBar: {
     flexGrow: 1,
-    height: "6px",
-    backgroundColor: "var(--transparent2)",
-    borderRadius: "3px",
-    margin: "0 10px",
-    cursor: "pointer",
-    position: "relative",
+    height: '6px',
+    backgroundColor: 'var(--transparent2)',
+    borderRadius: '3px',
+    margin: '0 10px',
+    cursor: 'pointer',
+    position: 'relative',
   },
   progressFill: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
-    height: "100%",
-    backgroundColor: "var(--blue)",
-    borderRadius: "3px",
+    height: '100%',
+    backgroundColor: 'var(--blue)',
+    borderRadius: '3px',
   },
   volumeControl: {
-    display: "flex",
-    alignItems: "center",
+    display: 'flex',
+    alignItems: 'center',
   },
   volumeIcon: {
-    marginRight: "10px",
-    fontSize: "16px",
+    marginRight: '10px',
+    fontSize: '16px',
   },
   volumeSlider: {
-    "-webkit-appearance": "none",
-    width: "100px",
-    height: "4px",
-    background: "var(--transparent2)",
-    borderRadius: "2px",
-    outline: "none",
+    '-webkit-appearance': 'none',
+    width: '100px',
+    height: '4px',
+    background: 'var(--transparent2)',
+    borderRadius: '2px',
+    outline: 'none',
   },
   volumeSliderThumb: {
-    "-webkit-appearance": "none",
-    width: "12px",
-    height: "12px",
-    borderRadius: "50%",
-    background: "var(--blue)",
-    cursor: "pointer",
+    '-webkit-appearance': 'none',
+    width: '12px',
+    height: '12px',
+    borderRadius: '50%',
+    background: 'var(--blue)',
+    cursor: 'pointer',
   },
 };
 

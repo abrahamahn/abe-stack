@@ -1,8 +1,8 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext } from 'react';
 
-import type { ClientApi } from "./api";
-import type { Router } from "./Router";
-import type { WebsocketPubsubClient } from "./WebsocketPubsubClient";
+import type { ClientApi } from './api';
+import type { Router } from './Router';
+import type { WebsocketPubsubClient } from './WebsocketPubsubClient';
 
 export type ClientConfig = {
   apiUrl: string;
@@ -17,9 +17,7 @@ export type ClientEnvironment = {
   pubsub: WebsocketPubsubClient;
 };
 
-const ClientEnvironmentContext = createContext<ClientEnvironment | undefined>(
-  undefined,
-);
+const ClientEnvironmentContext = createContext<ClientEnvironment | undefined>(undefined);
 
 export function ClientEnvironmentProvider(props: {
   value: ClientEnvironment;
@@ -34,6 +32,6 @@ export function ClientEnvironmentProvider(props: {
 
 export function useClientEnvironment(): ClientEnvironment {
   const clientEnvironment = useContext(ClientEnvironmentContext);
-  if (!clientEnvironment) throw new Error("Missing ClientEnvironment");
+  if (!clientEnvironment) throw new Error('Missing ClientEnvironment');
   return clientEnvironment;
 }

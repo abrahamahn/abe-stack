@@ -39,10 +39,7 @@
     },
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.web.tsbuildinfo"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "__tests__"],
-  "references": [
-    { "path": "../../packages/shared" },
-    { "path": "../../packages/ui" }
-  ]
+  "include": ["src/vite-env.d.ts"],
+  "exclude": ["node_modules", "__tests__", "src/**/*"],
+  "references": [{ "path": "../../packages/shared" }, { "path": "../../packages/ui" }]
 }

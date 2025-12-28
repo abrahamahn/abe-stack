@@ -29,6 +29,7 @@ ABE Stack is a comprehensive TypeScript monorepo boilerplate designed for develo
 ## Tech Stack
 
 ### Backend
+
 - **Runtime**: Node.js 18+
 - **Frameworks**: Express 5 / Fastify 5 (adapter pattern)
 - **Database**: PostgreSQL with Drizzle ORM
@@ -39,6 +40,7 @@ ABE Stack is a comprehensive TypeScript monorepo boilerplate designed for develo
 - **Testing**: Vitest + Supertest
 
 ### Frontend
+
 - **Web**: React 18+ with Vite
 - **Desktop**: Electron (with optional Tauri support)
 - **Mobile**: React Native 0.76+
@@ -46,11 +48,13 @@ ABE Stack is a comprehensive TypeScript monorepo boilerplate designed for develo
 - **API Client**: Type-safe shared API client
 
 ### Shared Packages
+
 - `@abe-stack/shared` - Common types, utilities, and business logic
 - `@abe-stack/ui` - Cross-platform UI components
 - `@abe-stack/api-client` - Type-safe API client
 
 ### DevOps
+
 - **Monorepo**: Turborepo with pnpm workspaces
 - **CI/CD**: GitHub Actions ready
 - **Containerization**: Docker & Docker Compose
@@ -68,17 +72,20 @@ ABE Stack is a comprehensive TypeScript monorepo boilerplate designed for develo
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <your-repo-url> my-project
    cd my-project
    ```
 
 2. **Install dependencies**
+
    ```bash
    pnpm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    # Server/shared config (if not already present)
    cp config/env/.env.example config/env/.env.development
@@ -93,6 +100,7 @@ ABE Stack is a comprehensive TypeScript monorepo boilerplate designed for develo
    ```
 
 4. **Set up the database**
+
    ```bash
    # Generate database schema
    pnpm --filter @abe-stack/server db:generate
@@ -105,6 +113,7 @@ ABE Stack is a comprehensive TypeScript monorepo boilerplate designed for develo
    ```
 
 5. **Start development**
+
    ```bash
    # Start all applications
    pnpm dev
@@ -273,6 +282,7 @@ pnpm --filter @abe-stack/server test:watch        # Run tests in watch mode
 ### Development Workflow
 
 1. **Start development servers**
+
    ```bash
    pnpm dev
    ```
@@ -282,6 +292,7 @@ pnpm --filter @abe-stack/server test:watch        # Run tests in watch mode
 3. **Changes are auto-detected** - Turborepo handles incremental builds and hot reloading
 
 4. **Run tests**
+
    ```bash
    pnpm test
    ```
@@ -332,18 +343,21 @@ REDIS_PORT=6379
 Each app has its own client-side environment variables:
 
 **Web/Desktop** (Vite - `apps/web/.env.local`, `apps/desktop/.env.local`):
+
 ```env
 VITE_API_URL=http://localhost:8080/api
 VITE_APP_NAME=abe-stack-web
 ```
 
 **Mobile** (React Native - `apps/mobile/.env.local`):
+
 ```env
 API_URL=http://localhost:8080/api
 APP_NAME=abe-stack-mobile
 ```
 
 **Setup:**
+
 ```bash
 # Copy example files for each app you're developing
 cp apps/web/.env.example apps/web/.env.local
@@ -368,6 +382,7 @@ pnpm dev:fastify
 ```
 
 Both frameworks share:
+
 - Same business logic layer
 - Same dependency injection container
 - Same middleware/hooks
@@ -383,7 +398,7 @@ The server uses Inversify for clean dependency management:
 class UserService {
   constructor(
     @inject(TYPES.UserRepository) private userRepo: IUserRepository,
-    @inject(TYPES.HashService) private hashService: IHashService
+    @inject(TYPES.HashService) private hashService: IHashService,
   ) {}
 
   async createUser(data: CreateUserDto) {
@@ -406,10 +421,13 @@ export const users = pgTable('users', {
 });
 
 // Use with full type inference
-const newUser = await db.insert(users).values({
-  email: 'user@example.com',
-  passwordHash: await hash(password),
-}).returning();
+const newUser = await db
+  .insert(users)
+  .values({
+    email: 'user@example.com',
+    passwordHash: await hash(password),
+  })
+  .returning();
 ```
 
 ### Shared Code
@@ -522,16 +540,19 @@ Detailed documentation is available in the `/docs` directory:
 ### Adding New Features
 
 1. **Create module in server**
+
    ```bash
    apps/server/src/modules/your-feature/
    ```
 
 2. **Add shared types**
+
    ```bash
    packages/shared/src/types/your-feature.ts
    ```
 
 3. **Create UI components**
+
    ```bash
    packages/ui/src/components/your-feature/
    ```

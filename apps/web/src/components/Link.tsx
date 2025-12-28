@@ -1,7 +1,8 @@
-import React, { ComponentPropsWithoutRef } from "react";
-import { useNavigate } from "react-router-dom";
+import React from 'react';
+import type { ComponentPropsWithoutRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-interface LinkProps extends ComponentPropsWithoutRef<"a"> {
+interface LinkProps extends ComponentPropsWithoutRef<'a'> {
   to: string;
 }
 

@@ -1,9 +1,5 @@
-import { sleep } from "../../../../server/infrastructure/lifecycle/sleep";
-import {
-  FileUploadDropZone,
-  UploadPreview,
-  useFileUpload,
-} from "../FileUpload";
+import { sleep } from '../../../../server/infrastructure/lifecycle/sleep';
+import { FileUploadDropZone, UploadPreview, useFileUpload } from '../FileUpload';
 
 export function FileUploadDemo() {
   const { uploads, handleDrop } = useFileUpload(async (_upload, onProgress) => {
@@ -16,9 +12,9 @@ export function FileUploadDemo() {
   return (
     <FileUploadDropZone
       onDrop={(files) => void handleDrop(files)}
-      style={{ display: "inline-flex", flexWrap: "wrap", gap: 12, padding: 12 }}
+      style={{ display: 'inline-flex', flexWrap: 'wrap', gap: 12, padding: 12 }}
     >
-      {uploads.length === 0 && "Drop files here!"}
+      {uploads.length === 0 && 'Drop files here!'}
       {uploads.map((upload) => (
         <UploadPreview key={upload.id} {...upload} />
       ))}

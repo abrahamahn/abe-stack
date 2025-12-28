@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import { imageGalleryStyles } from "../../styles";
-import { mergeStyles } from "../../utils/styleUtils";
+import { imageGalleryStyles } from '../../styles';
+import { mergeStyles } from '../../utils/styleUtils';
 
 // Define interface for document with vendor prefixed fullscreen properties
 interface DocumentWithFullscreen extends Document {
@@ -96,26 +96,20 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
       setIsFullscreen(
         Boolean(
           document.fullscreenElement ||
-            (document as DocumentWithFullscreen).webkitFullscreenElement ||
-            (document as DocumentWithFullscreen).mozFullScreenElement,
+          (document as DocumentWithFullscreen).webkitFullscreenElement ||
+          (document as DocumentWithFullscreen).mozFullScreenElement,
         ),
       );
     };
 
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
-    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
 
     return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      document.removeEventListener(
-        "webkitfullscreenchange",
-        handleFullscreenChange,
-      );
-      document.removeEventListener(
-        "mozfullscreenchange",
-        handleFullscreenChange,
-      );
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
     };
   }, []);
 
@@ -181,18 +175,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
     } else {
       if (galleryRef.current.requestFullscreen) {
         void galleryRef.current.requestFullscreen();
-      } else if (
-        (galleryRef.current as ElementWithFullscreen).webkitRequestFullscreen
-      ) {
-        void (
-          galleryRef.current as ElementWithFullscreen
-        ).webkitRequestFullscreen?.();
-      } else if (
-        (galleryRef.current as ElementWithFullscreen).mozRequestFullScreen
-      ) {
-        void (
-          galleryRef.current as ElementWithFullscreen
-        ).mozRequestFullScreen?.();
+      } else if ((galleryRef.current as ElementWithFullscreen).webkitRequestFullscreen) {
+        void (galleryRef.current as ElementWithFullscreen).webkitRequestFullscreen?.();
+      } else if ((galleryRef.current as ElementWithFullscreen).mozRequestFullScreen) {
+        void (galleryRef.current as ElementWithFullscreen).mozRequestFullScreen?.();
       }
     }
   };
@@ -201,15 +187,13 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
   if (!images.length) return null;
 
   return (
-    <div style={{ position: "relative", width: "100%", maxWidth: "100%" }}>
+    <div style={{ position: 'relative', width: '100%', maxWidth: '100%' }}>
       <div
         ref={galleryRef}
         style={mergeStyles(
           imageGalleryStyles.imageGallery as React.CSSProperties,
           { aspectRatio: aspectRatio.toString() },
-          isFullscreen
-            ? (imageGalleryStyles.imageGalleryFullscreen as React.CSSProperties)
-            : {},
+          isFullscreen ? (imageGalleryStyles.imageGalleryFullscreen as React.CSSProperties) : {},
         )}
       >
         <div
@@ -221,14 +205,11 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           {images.map((image, index) => (
             <div
               key={index}
-              style={mergeStyles(
-                imageGalleryStyles.galleryImageContainer as React.CSSProperties,
-                {
-                  transform: isSwiping
-                    ? `translateX(calc(-${currentIndex * 100}% + ${swipeDistance}px))`
-                    : `translateX(-${currentIndex * 100}%)`,
-                },
-              )}
+              style={mergeStyles(imageGalleryStyles.galleryImageContainer as React.CSSProperties, {
+                transform: isSwiping
+                  ? `translateX(calc(-${currentIndex * 100}% + ${swipeDistance}px))`
+                  : `translateX(-${currentIndex * 100}%)`,
+              })}
             >
               <img
                 src={image.src}
@@ -254,10 +235,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                 onClick={goToPrevImage}
                 aria-label="Previous image"
                 onMouseOver={(e) => {
-                  e.currentTarget.style.opacity = "1";
+                  e.currentTarget.style.opacity = '1';
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.opacity = "0.7";
+                  e.currentTarget.style.opacity = '0.7';
                 }}
               >
                 ◀
@@ -270,10 +251,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                 onClick={goToNextImage}
                 aria-label="Next image"
                 onMouseOver={(e) => {
-                  e.currentTarget.style.opacity = "1";
+                  e.currentTarget.style.opacity = '1';
                 }}
                 onMouseOut={(e) => {
-                  e.currentTarget.style.opacity = "0.7";
+                  e.currentTarget.style.opacity = '0.7';
                 }}
               >
                 ▶
@@ -284,22 +265,20 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           <button
             style={imageGalleryStyles.galleryFullscreen as React.CSSProperties}
             onClick={toggleFullscreen}
-            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
             onMouseOver={(e) => {
-              e.currentTarget.style.opacity = "1";
+              e.currentTarget.style.opacity = '1';
             }}
             onMouseOut={(e) => {
-              e.currentTarget.style.opacity = "0.7";
+              e.currentTarget.style.opacity = '0.7';
             }}
           >
-            {isFullscreen ? "↙️" : "↗️"}
+            {isFullscreen ? '↙️' : '↗️'}
           </button>
         </div>
 
         {!isSingleImage && showThumbnails && (
-          <div
-            style={imageGalleryStyles.galleryThumbnails as React.CSSProperties}
-          >
+          <div style={imageGalleryStyles.galleryThumbnails as React.CSSProperties}>
             {images.map((image, index) => (
               <div
                 key={index}
@@ -312,21 +291,19 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                 onClick={() => handleThumbnailClick(index)}
                 onMouseOver={(e) => {
                   if (index !== currentIndex) {
-                    e.currentTarget.style.opacity = "0.9";
+                    e.currentTarget.style.opacity = '0.9';
                   }
                 }}
                 onMouseOut={(e) => {
                   if (index !== currentIndex) {
-                    e.currentTarget.style.opacity = "0.7";
+                    e.currentTarget.style.opacity = '0.7';
                   }
                 }}
               >
                 <img
                   src={image.src}
                   alt={`Thumbnail ${index + 1}`}
-                  style={
-                    imageGalleryStyles.galleryThumbnailImg as React.CSSProperties
-                  }
+                  style={imageGalleryStyles.galleryThumbnailImg as React.CSSProperties}
                 />
               </div>
             ))}
@@ -334,9 +311,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
         )}
 
         {!isSingleImage && (
-          <div
-            style={imageGalleryStyles.galleryIndicators as React.CSSProperties}
-          >
+          <div style={imageGalleryStyles.galleryIndicators as React.CSSProperties}>
             {images.map((_, index) => (
               <button
                 key={index}

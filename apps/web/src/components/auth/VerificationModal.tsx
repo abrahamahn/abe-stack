@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-import { AuthClient } from "../../services/AuthClient";
+import { AuthClient } from '../../services/AuthClient';
 
 // Define response type
 interface VerificationResponse {
@@ -25,16 +25,10 @@ interface VerificationModalProps {
   email: string;
 }
 
-export function VerificationModal({
-  isOpen,
-  onClose,
-  email,
-}: VerificationModalProps) {
+export function VerificationModal({ isOpen, onClose, email }: VerificationModalProps) {
   const [isResending, setIsResending] = useState(false);
-  const [resendStatus, setResendStatus] = useState<
-    "idle" | "success" | "error"
-  >("idle");
-  const [message, setMessage] = useState("");
+  const [resendStatus, setResendStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [message, setMessage] = useState('');
   const [countdown, setCountdown] = useState(0);
   const authClient = new AuthClient();
 
@@ -44,17 +38,15 @@ export function VerificationModal({
     if (isResending || countdown > 0) return;
 
     setIsResending(true);
-    setResendStatus("idle");
-    setMessage("");
+    setResendStatus('idle');
+    setMessage('');
 
     try {
-      const response = (await authClient.resendConfirmationEmail(
-        email,
-      )) as VerificationResponse;
+      const response = (await authClient.resendConfirmationEmail(email)) as VerificationResponse;
 
       if (response.success) {
-        setResendStatus("success");
-        setMessage("Verification email sent! Please check your inbox.");
+        setResendStatus('success');
+        setMessage('Verification email sent! Please check your inbox.');
 
         // Start countdown for rate limiting (60 seconds)
         setCountdown(60);
@@ -68,19 +60,16 @@ export function VerificationModal({
           });
         }, 1000);
       } else {
-        setResendStatus("error");
-        setMessage(
-          response.message ||
-            "Failed to send verification email. Please try again.",
-        );
+        setResendStatus('error');
+        setMessage(response.message || 'Failed to send verification email. Please try again.');
       }
     } catch (error) {
       const err = error as ApiError;
-      setResendStatus("error");
+      setResendStatus('error');
 
       // Handle rate limiting error
       if (err.response?.status === 429) {
-        setMessage("Please wait before requesting another email.");
+        setMessage('Please wait before requesting another email.');
 
         // Extract time from error message if available
         const timeMatch = err.response?.data?.message?.match(/(\d+)/);
@@ -99,10 +88,10 @@ export function VerificationModal({
           }, 1000);
         }
       } else {
-        setMessage("An error occurred. Please try again later.");
+        setMessage('An error occurred. Please try again later.');
       }
 
-      console.error("Resend verification error:", err);
+      console.error('Resend verification error:', err);
     } finally {
       setIsResending(false);
     }
@@ -116,15 +105,15 @@ export function VerificationModal({
   return (
     <div
       style={{
-        position: "fixed",
+        position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         zIndex: 1000,
       }}
       onClick={onClose}
@@ -132,53 +121,50 @@ export function VerificationModal({
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          position: "relative",
-          backgroundColor: "var(--surface)",
-          color: "var(--text-primary)",
-          borderRadius: "8px",
-          padding: "24px",
-          width: "400px",
-          maxWidth: "90%",
-          maxHeight: "90vh",
-          overflowY: "auto",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+          position: 'relative',
+          backgroundColor: 'var(--surface)',
+          color: 'var(--text-primary)',
+          borderRadius: '8px',
+          padding: '24px',
+          width: '400px',
+          maxWidth: '90%',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
         }}
       >
-        <h2 style={{ marginTop: 0, color: "var(--accent)" }}>
-          Verify Your Email
-        </h2>
+        <h2 style={{ marginTop: 0, color: 'var(--accent)' }}>Verify Your Email</h2>
 
-        <div style={{ marginBottom: "20px" }}>
+        <div style={{ marginBottom: '20px' }}>
           <p>
-            We&apos;ve sent a verification email to <strong>{email}</strong>.
-            Please check your inbox and click the verification link to activate
-            your account.
+            We&apos;ve sent a verification email to <strong>{email}</strong>. Please check your
+            inbox and click the verification link to activate your account.
           </p>
           <p>If you don&apos;t see the email, please check your spam folder.</p>
         </div>
 
-        {resendStatus === "success" && (
+        {resendStatus === 'success' && (
           <div
             style={{
-              backgroundColor: "rgba(0, 255, 0, 0.1)",
-              color: "green",
-              padding: "10px",
-              borderRadius: "4px",
-              marginBottom: "16px",
+              backgroundColor: 'rgba(0, 255, 0, 0.1)',
+              color: 'green',
+              padding: '10px',
+              borderRadius: '4px',
+              marginBottom: '16px',
             }}
           >
             {message}
           </div>
         )}
 
-        {resendStatus === "error" && (
+        {resendStatus === 'error' && (
           <div
             style={{
-              backgroundColor: "rgba(255, 0, 0, 0.1)",
-              color: "red",
-              padding: "10px",
-              borderRadius: "4px",
-              marginBottom: "16px",
+              backgroundColor: 'rgba(255, 0, 0, 0.1)',
+              color: 'red',
+              padding: '10px',
+              borderRadius: '4px',
+              marginBottom: '16px',
             }}
           >
             {message}
@@ -187,21 +173,21 @@ export function VerificationModal({
 
         <div
           style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginTop: "20px",
+            display: 'flex',
+            justifyContent: 'space-between',
+            marginTop: '20px',
           }}
         >
           <button
             onClick={onClose}
             style={{
-              padding: "10px 16px",
-              borderRadius: "4px",
-              border: "1px solid var(--border-color)",
-              backgroundColor: "transparent",
-              color: "var(--text-primary)",
-              cursor: "pointer",
-              fontSize: "14px",
+              padding: '10px 16px',
+              borderRadius: '4px',
+              border: '1px solid var(--border-color)',
+              backgroundColor: 'transparent',
+              color: 'var(--text-primary)',
+              cursor: 'pointer',
+              fontSize: '14px',
             }}
           >
             Close
@@ -211,23 +197,17 @@ export function VerificationModal({
             onClick={handleResendEmail}
             disabled={isResending || countdown > 0}
             style={{
-              padding: "10px 16px",
-              borderRadius: "4px",
-              border: "none",
+              padding: '10px 16px',
+              borderRadius: '4px',
+              border: 'none',
               backgroundColor:
-                isResending || countdown > 0
-                  ? "var(--accent-disabled)"
-                  : "var(--accent)",
-              color: "white",
-              cursor: isResending || countdown > 0 ? "not-allowed" : "pointer",
-              fontSize: "14px",
+                isResending || countdown > 0 ? 'var(--accent-disabled)' : 'var(--accent)',
+              color: 'white',
+              cursor: isResending || countdown > 0 ? 'not-allowed' : 'pointer',
+              fontSize: '14px',
             }}
           >
-            {isResending
-              ? "Sending..."
-              : countdown > 0
-                ? `Resend (${countdown}s)`
-                : "Resend Email"}
+            {isResending ? 'Sending...' : countdown > 0 ? `Resend (${countdown}s)` : 'Resend Email'}
           </button>
         </div>
       </div>

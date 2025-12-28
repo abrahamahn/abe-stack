@@ -6,11 +6,11 @@ This directory contains essential TypeScript-based development tools and utiliti
 
 ## 🧩 Available Tools
 
-| Tool                  | Description                                                                  |
-| --------------------- | ---------------------------------------------------------------------------- |
-| **start-dev.ts**      | Enhanced development environment launcher with logging and monitoring        |
-| **setup.ts**          | Interactive setup wizard for configuring the development environment         |
-| **restart-db.ts**     | Emergency database connection pool restart utility                           |
+| Tool              | Description                                                           |
+| ----------------- | --------------------------------------------------------------------- |
+| **start-dev.ts**  | Enhanced development environment launcher with logging and monitoring |
+| **setup.ts**      | Interactive setup wizard for configuring the development environment  |
+| **restart-db.ts** | Emergency database connection pool restart utility                    |
 
 ## 🚀 Quick Start
 
@@ -156,6 +156,7 @@ Emergency tool for restarting hanging database connection pools.
 #### When to Use
 
 Use this tool when:
+
 - Database connection pool is exhausted
 - Registration/login operations hang indefinitely
 - You see "connection pool timeout" errors
@@ -314,16 +315,16 @@ chmod +x tools/*.ts  # If needed
 
 Tools respect these environment variables:
 
-| Variable      | Description                    | Default       |
-| ------------- | ------------------------------ | ------------- |
-| `NODE_ENV`    | Environment mode               | `development` |
-| `DB_HOST`     | PostgreSQL host                | `localhost`   |
-| `DB_PORT`     | PostgreSQL port                | `5432`        |
-| `DB_USER`     | PostgreSQL user                | `postgres`    |
-| `DB_PASSWORD` | PostgreSQL password            | `postgres`    |
-| `DB_NAME`     | Database name                  | `abe_stack`   |
-| `PORT`        | Backend server port            | `8080`        |
-| `VITE_PORT`   | Frontend development port      | `5173`        |
+| Variable      | Description               | Default       |
+| ------------- | ------------------------- | ------------- |
+| `NODE_ENV`    | Environment mode          | `development` |
+| `DB_HOST`     | PostgreSQL host           | `localhost`   |
+| `DB_PORT`     | PostgreSQL port           | `5432`        |
+| `DB_USER`     | PostgreSQL user           | `postgres`    |
+| `DB_PASSWORD` | PostgreSQL password       | `postgres`    |
+| `DB_NAME`     | Database name             | `abe_stack`   |
+| `PORT`        | Backend server port       | `8080`        |
+| `VITE_PORT`   | Frontend development port | `5173`        |
 
 ---
 

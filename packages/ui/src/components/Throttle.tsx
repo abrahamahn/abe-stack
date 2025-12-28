@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from 'react';
 
 // TODO: I don't think this thing works very well.
 
@@ -14,8 +14,8 @@ export function Throttle(props: {
   spinner: React.ReactNode;
   children: React.ReactNode;
 }) {
-  const showDelay = typeof props.showDelay === "number" ? props.showDelay : 300;
-  const showHold = typeof props.showHold === "number" ? props.showHold : 300;
+  const showDelay = typeof props.showDelay === 'number' ? props.showDelay : 300;
+  const showHold = typeof props.showHold === 'number' ? props.showHold : 300;
 
   const [showSpinner, setShowSpinner] = useState(false);
 

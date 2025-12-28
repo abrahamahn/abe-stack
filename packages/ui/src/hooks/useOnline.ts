@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 // TODO: an improved online/offline detector would ping the server to see if its online.
 // When the browser is online, but the server is down, this still says online.
@@ -8,11 +8,11 @@ export function useOnline() {
   useEffect(() => {
     const setOnline = () => setState(true);
     const setOffline = () => setState(false);
-    window.addEventListener("online", setOnline);
-    window.addEventListener("offline", setOffline);
+    window.addEventListener('online', setOnline);
+    window.addEventListener('offline', setOffline);
     return () => {
-      window.removeEventListener("online", setOnline);
-      window.removeEventListener("offline", setOffline);
+      window.removeEventListener('online', setOnline);
+      window.removeEventListener('offline', setOffline);
     };
   }, []);
   return state;

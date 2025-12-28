@@ -1,6 +1,6 @@
-import React, { CSSProperties } from "react";
+import React, { CSSProperties } from 'react';
 
-import { usePopper } from "../../hooks/usePopper";
+import { usePopper } from '../../hooks/usePopper';
 
 interface DropdownMenuProps {
   style?: CSSProperties;
@@ -12,19 +12,16 @@ interface DropdownMenuProps {
 }
 
 export function DropdownMenu({ style, items, onClose }: DropdownMenuProps) {
-  const [referenceElement, _setReferenceElement] =
-    React.useState<HTMLElement | null>(null);
-  const [popperElement, setPopperElement] = React.useState<HTMLElement | null>(
-    null,
-  );
+  const [referenceElement, _setReferenceElement] = React.useState<HTMLElement | null>(null);
+  const [popperElement, setPopperElement] = React.useState<HTMLElement | null>(null);
   const [selectedIndex, setSelectedIndex] = React.useState(0);
   const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
 
   const popperInstance = usePopper(referenceElement, popperElement, {
-    placement: "bottom-start",
+    placement: 'bottom-start',
     modifiers: [
       {
-        name: "offset",
+        name: 'offset',
         options: {
           offset: [0, 4],
         },
@@ -51,28 +48,28 @@ export function DropdownMenu({ style, items, onClose }: DropdownMenuProps) {
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [popperElement, referenceElement, onClose]);
 
   const handleKeyDown = (event: React.KeyboardEvent) => {
     switch (event.key) {
-      case "ArrowDown":
+      case 'ArrowDown':
         event.preventDefault();
         setSelectedIndex((i) => (i + 1) % items.length);
         break;
-      case "ArrowUp":
+      case 'ArrowUp':
         event.preventDefault();
         setSelectedIndex((i) => (i - 1 + items.length) % items.length);
         break;
-      case "Enter":
+      case 'Enter':
         event.preventDefault();
         items[selectedIndex].onClick();
         onClose();
         break;
-      case "Escape":
+      case 'Escape':
         event.preventDefault();
         onClose();
         break;
@@ -92,13 +89,11 @@ export function DropdownMenu({ style, items, onClose }: DropdownMenuProps) {
             onMouseEnter={() => setHoveredIndex(i)}
             onMouseLeave={() => setHoveredIndex(null)}
             style={{
-              padding: "0.5rem 1rem",
-              cursor: "pointer",
+              padding: '0.5rem 1rem',
+              cursor: 'pointer',
               backgroundColor:
-                i === selectedIndex || i === hoveredIndex
-                  ? "#e2e8f0"
-                  : "transparent",
-              transition: "background-color 0.2s ease",
+                i === selectedIndex || i === hoveredIndex ? '#e2e8f0' : 'transparent',
+              transition: 'background-color 0.2s ease',
             }}
           >
             {item.label}

@@ -1,16 +1,14 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState } from 'react';
 
-import { useSocial, type User } from "../contexts/SocialContext";
-import { socialService } from "../services/social";
+import { useSocial, type User } from '../contexts/SocialContext';
+import { socialService } from '../services/social';
 
 interface UseSocialInteractionsProps {
   onError?: (error: Error) => void;
 }
 
 export type { User };
-export const useSocialInteractions = ({
-  onError,
-}: UseSocialInteractionsProps = {}) => {
+export const useSocialInteractions = ({ onError }: UseSocialInteractionsProps = {}) => {
   const { currentUser, refreshFeed } = useSocial();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -28,9 +26,7 @@ export const useSocialInteractions = ({
         await socialService.followUser(userId);
         await refreshFeed();
       } catch (error) {
-        handleError(
-          error instanceof Error ? error : new Error("Failed to follow user"),
-        );
+        handleError(error instanceof Error ? error : new Error('Failed to follow user'));
         throw error;
       } finally {
         setIsLoading(false);
@@ -46,9 +42,7 @@ export const useSocialInteractions = ({
         await socialService.unfollowUser(userId);
         await refreshFeed();
       } catch (error) {
-        handleError(
-          error instanceof Error ? error : new Error("Failed to unfollow user"),
-        );
+        handleError(error instanceof Error ? error : new Error('Failed to unfollow user'));
         throw error;
       } finally {
         setIsLoading(false);
@@ -64,9 +58,7 @@ export const useSocialInteractions = ({
         await socialService.likePost(postId);
         await refreshFeed();
       } catch (error) {
-        handleError(
-          error instanceof Error ? error : new Error("Failed to like post"),
-        );
+        handleError(error instanceof Error ? error : new Error('Failed to like post'));
         throw error;
       } finally {
         setIsLoading(false);
@@ -82,9 +74,7 @@ export const useSocialInteractions = ({
         await socialService.unlikePost(postId);
         await refreshFeed();
       } catch (error) {
-        handleError(
-          error instanceof Error ? error : new Error("Failed to unlike post"),
-        );
+        handleError(error instanceof Error ? error : new Error('Failed to unlike post'));
         throw error;
       } finally {
         setIsLoading(false);
@@ -100,9 +90,7 @@ export const useSocialInteractions = ({
         await socialService.sharePost(postId);
         await refreshFeed();
       } catch (error) {
-        handleError(
-          error instanceof Error ? error : new Error("Failed to share post"),
-        );
+        handleError(error instanceof Error ? error : new Error('Failed to share post'));
         throw error;
       } finally {
         setIsLoading(false);
@@ -118,9 +106,7 @@ export const useSocialInteractions = ({
         await socialService.createPost(content, media);
         await refreshFeed();
       } catch (error) {
-        handleError(
-          error instanceof Error ? error : new Error("Failed to create post"),
-        );
+        handleError(error instanceof Error ? error : new Error('Failed to create post'));
         throw error;
       } finally {
         setIsLoading(false);
@@ -136,11 +122,7 @@ export const useSocialInteractions = ({
         await socialService.createComment(postId, content);
         await refreshFeed();
       } catch (error) {
-        handleError(
-          error instanceof Error
-            ? error
-            : new Error("Failed to create comment"),
-        );
+        handleError(error instanceof Error ? error : new Error('Failed to create comment'));
         throw error;
       } finally {
         setIsLoading(false);
@@ -156,9 +138,7 @@ export const useSocialInteractions = ({
         await socialService.likeComment(commentId);
         await refreshFeed();
       } catch (error) {
-        handleError(
-          error instanceof Error ? error : new Error("Failed to like comment"),
-        );
+        handleError(error instanceof Error ? error : new Error('Failed to like comment'));
         throw error;
       } finally {
         setIsLoading(false);
@@ -174,11 +154,7 @@ export const useSocialInteractions = ({
         await socialService.unlikeComment(commentId);
         await refreshFeed();
       } catch (error) {
-        handleError(
-          error instanceof Error
-            ? error
-            : new Error("Failed to unlike comment"),
-        );
+        handleError(error instanceof Error ? error : new Error('Failed to unlike comment'));
         throw error;
       } finally {
         setIsLoading(false);
@@ -194,11 +170,7 @@ export const useSocialInteractions = ({
         await socialService.replyToComment(commentId, content);
         await refreshFeed();
       } catch (error) {
-        handleError(
-          error instanceof Error
-            ? error
-            : new Error("Failed to reply to comment"),
-        );
+        handleError(error instanceof Error ? error : new Error('Failed to reply to comment'));
         throw error;
       } finally {
         setIsLoading(false);

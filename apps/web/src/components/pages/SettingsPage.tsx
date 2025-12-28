@@ -1,5 +1,5 @@
-import { PageContent } from "../../layouts/PageContent";
-import { useTheme } from "../theme";
+import { PageContent } from '../../layouts/PageContent';
+import { useTheme } from '../theme';
 
 export function SettingsPage() {
   const {
@@ -28,59 +28,59 @@ export function SettingsPage() {
   // Define styles as a TypeScript object
   const styles = {
     container: {
-      maxWidth: "800px",
-      margin: "0 auto",
+      maxWidth: '800px',
+      margin: '0 auto',
     },
     section: {
-      backgroundColor: "var(--card-bg)",
-      borderRadius: "8px",
-      padding: "20px",
-      marginBottom: "24px",
-      boxShadow: "var(--shadow)",
-      border: "1px solid var(--border-color)",
+      backgroundColor: 'var(--card-bg)',
+      borderRadius: '8px',
+      padding: '20px',
+      marginBottom: '24px',
+      boxShadow: 'var(--shadow)',
+      border: '1px solid var(--border-color)',
     },
     sectionTitle: {
       marginTop: 0,
-      marginBottom: "16px",
-      color: "var(--text-primary)",
-      fontSize: "1.2rem",
+      marginBottom: '16px',
+      color: 'var(--text-primary)',
+      fontSize: '1.2rem',
       fontWeight: 600,
-      borderBottom: "1px solid var(--border-color)",
-      paddingBottom: "8px",
+      borderBottom: '1px solid var(--border-color)',
+      paddingBottom: '8px',
     },
     option: {
-      marginBottom: "16px",
+      marginBottom: '16px',
     },
     optionLast: {
       marginBottom: 0,
     },
     optionLabel: {
-      display: "block",
-      marginBottom: "8px",
+      display: 'block',
+      marginBottom: '8px',
       fontWeight: 500,
-      color: "var(--text-primary)",
+      color: 'var(--text-primary)',
     },
     toggleContainer: {
-      display: "flex",
-      alignItems: "center",
-      gap: "12px",
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
     },
     themeLabel: {
-      color: "var(--text-secondary)",
-      fontSize: "0.9rem",
+      color: 'var(--text-secondary)',
+      fontSize: '0.9rem',
     },
     systemNote: {
-      color: "var(--text-secondary)",
-      fontSize: "0.8rem",
-      fontStyle: "italic",
-      marginLeft: "4px",
+      color: 'var(--text-secondary)',
+      fontSize: '0.8rem',
+      fontStyle: 'italic',
+      marginLeft: '4px',
     },
     // Toggle Switch styles
     switch: {
-      position: "relative" as const,
-      display: "inline-block",
-      width: "60px",
-      height: "34px",
+      position: 'relative' as const,
+      display: 'inline-block',
+      width: '60px',
+      height: '34px',
     },
     switchInput: {
       opacity: 0,
@@ -88,47 +88,44 @@ export function SettingsPage() {
       height: 0,
     },
     slider: {
-      position: "absolute" as const,
-      cursor: "pointer",
+      position: 'absolute' as const,
+      cursor: 'pointer',
       top: 0,
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: "var(--surface-variant)",
-      transition: ".4s",
-      borderRadius: "34px",
+      backgroundColor: 'var(--surface-variant)',
+      transition: '.4s',
+      borderRadius: '34px',
     },
     sliderBefore: {
-      position: "absolute" as const,
+      position: 'absolute' as const,
       content: '""',
-      height: "26px",
-      width: "26px",
-      left: "4px",
-      bottom: "4px",
-      backgroundColor: "white",
-      transition: ".4s",
-      borderRadius: "50%",
+      height: '26px',
+      width: '26px',
+      left: '4px',
+      bottom: '4px',
+      backgroundColor: 'white',
+      transition: '.4s',
+      borderRadius: '50%',
     },
     sliderChecked: {
-      backgroundColor: "var(--accent)",
+      backgroundColor: 'var(--accent)',
     },
     sliderBeforeChecked: {
-      transform: "translateX(26px)",
+      transform: 'translateX(26px)',
     },
     sliderDisabled: {
       opacity: 0.6,
-      cursor: "not-allowed",
+      cursor: 'not-allowed',
     },
     sliderBeforeDisabled: {
-      backgroundColor: "#f0f0f0",
+      backgroundColor: '#f0f0f0',
     },
   };
 
   return (
-    <PageContent
-      title="Settings"
-      description="Customize your application preferences"
-    >
+    <PageContent title="Settings" description="Customize your application preferences">
       <div style={styles.container}>
         <div style={styles.section}>
           <h2 style={styles.sectionTitle}>Appearance</h2>
@@ -159,9 +156,7 @@ export function SettingsPage() {
                   ></span>
                 </span>
               </label>
-              <span style={styles.themeLabel}>
-                Follow system light/dark preference
-              </span>
+              <span style={styles.themeLabel}>Follow system light/dark preference</span>
             </div>
           </div>
 
@@ -175,7 +170,7 @@ export function SettingsPage() {
                 <input
                   type="checkbox"
                   id="theme-toggle"
-                  checked={theme === "dark"}
+                  checked={theme === 'dark'}
                   onChange={toggleTheme}
                   disabled={isUsingSystemTheme}
                   style={styles.switchInput}
@@ -183,25 +178,21 @@ export function SettingsPage() {
                 <span
                   style={{
                     ...styles.slider,
-                    ...(theme === "dark" ? styles.sliderChecked : {}),
+                    ...(theme === 'dark' ? styles.sliderChecked : {}),
                     ...(isUsingSystemTheme ? styles.sliderDisabled : {}),
                   }}
                 >
                   <span
                     style={{
                       ...styles.sliderBefore,
-                      ...(theme === "dark" ? styles.sliderBeforeChecked : {}),
-                      ...(isUsingSystemTheme
-                        ? styles.sliderBeforeDisabled
-                        : {}),
+                      ...(theme === 'dark' ? styles.sliderBeforeChecked : {}),
+                      ...(isUsingSystemTheme ? styles.sliderBeforeDisabled : {}),
                     }}
                   ></span>
                 </span>
               </label>
               <span style={styles.themeLabel}>Dark</span>
-              {isUsingSystemTheme && (
-                <span style={styles.systemNote}>(Controlled by system)</span>
-              )}
+              {isUsingSystemTheme && <span style={styles.systemNote}>(Controlled by system)</span>}
             </div>
           </div>
         </div>

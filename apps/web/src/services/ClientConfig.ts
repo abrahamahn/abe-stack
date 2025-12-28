@@ -10,10 +10,9 @@ interface WindowWithConfig extends Window {
 }
 
 const env = import.meta.env;
-const isProd = env.MODE === "production";
+const isProd = env.MODE === 'production';
 const apiHost =
-  env.VITE_API_HOST ||
-  (typeof window !== "undefined" ? window.location.host : "localhost:5173");
+  env.VITE_API_HOST || (typeof window !== 'undefined' ? window.location.host : 'localhost:5173');
 
 export const clientConfig: ClientConfig = {
   production: isProd,

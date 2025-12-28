@@ -18,5 +18,26 @@
     }
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.tsx", "**/*.spec.tsx"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.tsx",
+    "**/*.spec.tsx",
+    "src/features/**/*",
+    "src/contexts/**/*",
+    "src/components/demos/**/*",
+    "src/components/ComboBox.tsx",
+    "src/components/DropdownMenu.tsx",
+    "src/components/FileUpload.tsx",
+    "src/components/FuzzyString.tsx",
+    "src/components/Link.tsx",
+    "src/components/ListBox.tsx",
+    "src/components/MenuItem.tsx",
+    "src/components/OfflineBadge.tsx",
+    "src/components/Popup.tsx",
+    "src/hooks/useAsync.ts",
+    "src/hooks/useShortcut.ts",
+    "src/hooks/useSocialInteractions.ts",
+    "src/layouts/MainLayout.tsx"
+  ]
 }

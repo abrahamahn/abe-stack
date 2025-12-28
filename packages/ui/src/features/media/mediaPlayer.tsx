@@ -1,7 +1,7 @@
 // Import built-in modules first, then external packages
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from 'react';
 // Import Plyr CSS
-import "plyr/dist/plyr.css";
+import 'plyr/dist/plyr.css';
 
 // Define interfaces for the player types
 interface PlyrInstance {
@@ -26,21 +26,21 @@ interface HlsConstructor {
 }
 
 // Dynamic imports for the actual implementations
-const loadPlyr = () => import("plyr").then((m) => m.default);
+const loadPlyr = () => import('plyr').then((m) => m.default);
 const loadHls = () =>
-  import("hls.js").then((m) => {
+  import('hls.js').then((m) => {
     const Hls = m.default as unknown as HlsConstructor;
     return { Hls, Events: m.Events };
   });
 
 interface MediaPlayerProps {
   src: string;
-  type: "video" | "audio";
+  type: 'video' | 'audio';
   poster?: string;
   title?: string;
   autoplay?: boolean;
   muted?: boolean;
-  crossOrigin?: "anonymous" | "use-credentials";
+  crossOrigin?: 'anonymous' | 'use-credentials';
   onReady?: () => void;
   onPlay?: () => void;
   onPause?: () => void;
@@ -63,7 +63,7 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({
   title,
   autoplay = false,
   muted = false,
-  crossOrigin = "anonymous",
+  crossOrigin = 'anonymous',
   onReady,
   onPlay,
   onPause,
@@ -88,19 +88,19 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({
 
       playerRef.current = new PlyrConstructor(mediaRef.current, {
         controls: [
-          "play-large",
-          "play",
-          "progress",
-          "current-time",
-          "mute",
-          "volume",
-          "captions",
-          "settings",
-          "pip",
-          "airplay",
-          "fullscreen",
+          'play-large',
+          'play',
+          'progress',
+          'current-time',
+          'mute',
+          'volume',
+          'captions',
+          'settings',
+          'pip',
+          'airplay',
+          'fullscreen',
         ],
-        settings: ["quality", "speed", "loop"],
+        settings: ['quality', 'speed', 'loop'],
         quality: {
           default: 720,
           options: [1080, 720, 480, 360, 240],
@@ -112,19 +112,19 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({
       });
 
       // Set up event listeners
-      playerRef.current.on("ready", () => {
+      playerRef.current.on('ready', () => {
         setIsReady(true);
         onReady?.();
       });
 
-      playerRef.current.on("play", () => onPlay?.());
-      playerRef.current.on("pause", () => onPause?.());
-      playerRef.current.on("ended", () => onEnded?.());
-      playerRef.current.on("timeupdate", () => {
+      playerRef.current.on('play', () => onPlay?.());
+      playerRef.current.on('pause', () => onPause?.());
+      playerRef.current.on('ended', () => onEnded?.());
+      playerRef.current.on('timeupdate', () => {
         onTimeUpdate?.(playerRef.current?.currentTime || 0);
       });
-      playerRef.current.on("error", (error: unknown) => {
-        setError(error instanceof Error ? error.message : "Unknown error");
+      playerRef.current.on('error', (error: unknown) => {
+        setError(error instanceof Error ? error.message : 'Unknown error');
         onError?.(error);
       });
     });
@@ -167,23 +167,21 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({
             const data = args[1] as HlsError;
             if (data.fatal) {
               switch (data.type) {
-                case "networkError":
+                case 'networkError':
                   hlsRef.current?.startLoad();
                   break;
-                case "mediaError":
+                case 'mediaError':
                   hlsRef.current?.recoverMediaError();
                   break;
                 default:
-                  setError("Fatal HLS error");
+                  setError('Fatal HLS error');
                   onError?.(data);
                   break;
               }
             }
           });
         }
-      } else if (
-        mediaRef.current?.canPlayType("application/vnd.apple.mpegurl")
-      ) {
+      } else if (mediaRef.current?.canPlayType('application/vnd.apple.mpegurl')) {
         // Native HLS support (Safari)
         mediaRef.current.src = src;
       }
@@ -196,7 +194,7 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({
     }
 
     // Set up new source
-    if (src.includes(".m3u8")) {
+    if (src.includes('.m3u8')) {
       void setupHLS();
     } else {
       mediaRef.current.src = src;
@@ -204,33 +202,33 @@ export const MediaPlayer: React.FC<MediaPlayerProps> = ({
   }, [src, autoplay, onError]);
 
   const containerStyle: React.CSSProperties = {
-    position: "relative",
-    width: "100%",
-    maxWidth: "100%",
-    backgroundColor: "#000",
-    aspectRatio: type === "video" ? "16/9" : "auto",
+    position: 'relative',
+    width: '100%',
+    maxWidth: '100%',
+    backgroundColor: '#000',
+    aspectRatio: type === 'video' ? '16/9' : 'auto',
   };
 
   const mediaStyle: React.CSSProperties = {
-    width: "100%",
-    height: type === "video" ? "100%" : "auto",
+    width: '100%',
+    height: type === 'video' ? '100%' : 'auto',
   };
 
   const errorStyle: React.CSSProperties = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    color: "#fff",
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    padding: "1rem",
-    borderRadius: "4px",
-    textAlign: "center",
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    color: '#fff',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    padding: '1rem',
+    borderRadius: '4px',
+    textAlign: 'center',
   };
 
   return (
     <div style={containerStyle} className={className}>
-      {type === "video" ? (
+      {type === 'video' ? (
         <video
           ref={mediaRef as React.LegacyRef<HTMLVideoElement>}
           poster={poster}

@@ -1,4 +1,4 @@
-import { FuzzyMatchResult } from "../../../server/shared/utils";
+import { FuzzyMatchResult } from '../../../server/shared/utils';
 
 interface FuzzyStringProps {
   match?: FuzzyMatchResult[];
@@ -16,11 +16,11 @@ export function FuzzyString({ match, text }: FuzzyStringProps) {
         <span
           key={i}
           style={{
-            fontWeight: "match" in item ? "bold" : "normal",
-            color: "match" in item ? "#3b82f6" : "inherit",
+            fontWeight: 'match' in item ? 'bold' : 'normal',
+            color: 'match' in item ? '#3b82f6' : 'inherit',
           }}
         >
-          {"match" in item ? item.match : item.skip}
+          {'match' in item ? item.match : item.skip}
         </span>
       ))}
     </span>

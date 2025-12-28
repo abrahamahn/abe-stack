@@ -1,8 +1,8 @@
-import { Page, test } from "@playwright/test";
+import { Page, test } from '@playwright/test';
 
 async function waitFor(page: Page, selector: string) {
   const element = await page.waitForSelector(selector);
-  if (!element) throw new Error("Element not found: " + selector);
+  if (!element) throw new Error('Element not found: ' + selector);
   return element;
 }
 
@@ -19,9 +19,9 @@ export async function click(page: Page, selector: string) {
   return button;
 }
 
-test("Smoke Test", async ({ browser }) => {
+test('Smoke Test', async ({ browser }) => {
   const context = await browser.newContext();
   const page = await context.newPage();
-  await page.goto("/");
-  await waitFor(page, "body");
+  await page.goto('/');
+  await waitFor(page, 'body');
 });

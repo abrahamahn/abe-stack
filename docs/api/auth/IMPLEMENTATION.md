@@ -283,72 +283,58 @@ Make sure to implement these security practices for production:
 Implement comprehensive logging for authentication events:
 
 ```typescript
-import winston from "winston";
-import { Request, Response, NextFunction } from "express";
+import winston from 'winston';
+import { Request, Response, NextFunction } from 'express';
 
 // Create a structured logger for auth events
 const authLogger = winston.createLogger({
-  level: "info",
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json(),
-  ),
-  defaultMeta: { service: "auth-service" },
+  level: 'info',
+  format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
+  defaultMeta: { service: 'auth-service' },
   transports: [
     new winston.transports.File({
-      filename: "logs/auth-error.log",
-      level: "error",
+      filename: 'logs/auth-error.log',
+      level: 'error',
     }),
-    new winston.transports.File({ filename: "logs/auth.log" }),
+    new winston.transports.File({ filename: 'logs/auth.log' }),
   ],
 });
 
 // Add console output during development
-if (process.env.NODE_ENV !== "production") {
+if (process.env.NODE_ENV !== 'production') {
   authLogger.add(
     new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple(),
-      ),
+      format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
     }),
   );
 }
 
 // Auth event middleware
-export const authEventLogger = (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+export const authEventLogger = (req: Request, res: Response, next: NextFunction) => {
   // Capture original end method
   const originalEnd = res.end;
 
   // Override end method
-  res.end = function (
-    chunk?: any,
-    encoding?: BufferEncoding,
-    callback?: Function,
-  ): any {
+  res.end = function (chunk?: any, encoding?: BufferEncoding, callback?: Function): any {
     // Capture authenticated user if available
-    const userId = (req as any).user?.id || "anonymous";
+    const userId = (req as any).user?.id || 'anonymous';
 
     // Log authentication events
-    if (req.path.startsWith("/api/auth/")) {
-      const eventType = req.path.split("/").pop();
+    if (req.path.startsWith('/api/auth/')) {
+      const eventType = req.path.split('/').pop();
       const status = res.statusCode;
       const ip = req.ip;
-      const userAgent = req.headers["user-agent"] || "unknown";
+      const userAgent = req.headers['user-agent'] || 'unknown';
 
-      let logLevel = "info";
+      let logLevel = 'info';
 
       // Use error level for failed auth attempts
       if (status >= 400) {
-        logLevel = "error";
+        logLevel = 'error';
       }
 
       // Log the auth event
-      authLogger.log(logLevel, "Auth event", {
+      authLogger.log(logLevel, 'Auth event', {
         userId,
         eventType,
         method: req.method,
@@ -543,10 +529,10 @@ Create controllers and routes for auth operations:
 ### AuthController.ts
 
 ```typescript
-import { Request, Response, NextFunction } from "express";
-import { AuthService } from "@services/core/auth/AuthService";
-import { container } from "@server/infrastructure/di/container";
-import TYPES from "@server/infrastructure/di/types";
+import { Request, Response, NextFunction } from 'express';
+import { AuthService } from '@services/core/auth/AuthService';
+import { container } from '@server/infrastructure/di/container';
+import TYPES from '@server/infrastructure/di/types';
 
 export class AuthController {
   private authService: AuthService;
@@ -556,17 +542,13 @@ export class AuthController {
   }
 
   // Register a new user
-  public async register(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
+  public async register(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { username, email, password, firstName, lastName } = req.body;
 
       const deviceInfo = {
         ip: req.ip,
-        userAgent: req.headers["user-agent"] || "",
+        userAgent: req.headers['user-agent'] || '',
         deviceId: req.body.deviceId,
       };
 
@@ -576,7 +558,7 @@ export class AuthController {
       );
 
       res.status(201).json({
-        message: "User registered successfully",
+        message: 'User registered successfully',
         user: result.user,
         token: result.token,
         refreshToken: result.refreshToken,
@@ -587,27 +569,20 @@ export class AuthController {
   }
 
   // Login user
-  public async login(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
+  public async login(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email, password, mfaToken } = req.body;
 
       const deviceInfo = {
         ip: req.ip,
-        userAgent: req.headers["user-agent"] || "",
+        userAgent: req.headers['user-agent'] || '',
         deviceId: req.body.deviceId,
       };
 
-      const result = await this.authService.login(
-        { email, password, mfaToken },
-        deviceInfo,
-      );
+      const result = await this.authService.login({ email, password, mfaToken }, deviceInfo);
 
       res.json({
-        message: "Login successful",
+        message: 'Login successful',
         user: result.user,
         token: result.token,
         refreshToken: result.refreshToken,
@@ -620,11 +595,7 @@ export class AuthController {
   }
 
   // Refresh access token
-  public async refreshToken(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
+  public async refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { refreshToken } = req.body;
       const result = await this.authService.refreshToken(refreshToken);
@@ -638,11 +609,7 @@ export class AuthController {
   }
 
   // Setup MFA
-  public async setupMFA(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
+  public async setupMFA(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user.id; // From auth middleware
       const result = await this.authService.setupMFA(userId);
@@ -657,11 +624,7 @@ export class AuthController {
   }
 
   // Verify and enable MFA
-  public async verifyMFA(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
+  public async verifyMFA(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user.id; // From auth middleware
       const { token } = req.body;
@@ -670,7 +633,7 @@ export class AuthController {
 
       res.json({
         success: result,
-        message: "MFA enabled successfully",
+        message: 'MFA enabled successfully',
       });
     } catch (error) {
       next(error);
@@ -678,11 +641,7 @@ export class AuthController {
   }
 
   // Disable MFA
-  public async disableMFA(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
+  public async disableMFA(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user.id; // From auth middleware
       const { token } = req.body;
@@ -691,7 +650,7 @@ export class AuthController {
 
       res.json({
         success: result,
-        message: "MFA disabled successfully",
+        message: 'MFA disabled successfully',
       });
     } catch (error) {
       next(error);
@@ -710,8 +669,7 @@ export class AuthController {
 
       // Always return success, even if email not found (security best practice)
       res.json({
-        message:
-          "If your email exists in our system, you will receive a password reset link",
+        message: 'If your email exists in our system, you will receive a password reset link',
       });
     } catch (error) {
       next(error);
@@ -719,17 +677,13 @@ export class AuthController {
   }
 
   // Reset password with token
-  public async resetPassword(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
+  public async resetPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { token, newPassword } = req.body;
       await this.authService.resetPassword({ token, newPassword });
 
       res.json({
-        message: "Password reset successful",
+        message: 'Password reset successful',
       });
     } catch (error) {
       next(error);
@@ -737,22 +691,18 @@ export class AuthController {
   }
 
   // Verify email
-  public async verifyEmail(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
+  public async verifyEmail(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { token } = req.query;
 
-      if (!token || typeof token !== "string") {
-        throw new Error("Invalid token");
+      if (!token || typeof token !== 'string') {
+        throw new Error('Invalid token');
       }
 
       await this.authService.verifyEmail({ token });
 
       res.json({
-        message: "Email verified successfully",
+        message: 'Email verified successfully',
       });
     } catch (error) {
       next(error);
@@ -760,11 +710,7 @@ export class AuthController {
   }
 
   // Get user sessions
-  public async getUserSessions(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
+  public async getUserSessions(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user.id; // From auth middleware
       const sessions = await this.authService.getUserSessions(userId);
@@ -778,11 +724,7 @@ export class AuthController {
   }
 
   // Terminate session
-  public async terminateSession(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
+  public async terminateSession(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user.id; // From auth middleware
       const { sessionId } = req.params;
@@ -791,7 +733,7 @@ export class AuthController {
 
       res.json({
         success: result,
-        message: "Session terminated successfully",
+        message: 'Session terminated successfully',
       });
     } catch (error) {
       next(error);
@@ -808,14 +750,11 @@ export class AuthController {
       const userId = req.user.id; // From auth middleware
       const currentSessionId = req.user.sessionId; // From auth middleware
 
-      const result = await this.authService.terminateOtherSessions(
-        userId,
-        currentSessionId,
-      );
+      const result = await this.authService.terminateOtherSessions(userId, currentSessionId);
 
       res.json({
         success: result,
-        message: "All other sessions terminated successfully",
+        message: 'All other sessions terminated successfully',
       });
     } catch (error) {
       next(error);
@@ -827,58 +766,36 @@ export class AuthController {
 ### Auth Routes
 
 ```typescript
-import { Router } from "express";
-import { AuthController } from "@controllers/AuthController";
-import { authMiddleware } from "@middleware/authMiddleware";
+import { Router } from 'express';
+import { AuthController } from '@controllers/AuthController';
+import { authMiddleware } from '@middleware/authMiddleware';
 
 const router = Router();
 const authController = new AuthController();
 
 // Public routes
-router.post("/register", authController.register.bind(authController));
-router.post("/login", authController.login.bind(authController));
-router.post("/refresh-token", authController.refreshToken.bind(authController));
-router.post(
-  "/request-password-reset",
-  authController.requestPasswordReset.bind(authController),
-);
-router.post(
-  "/reset-password",
-  authController.resetPassword.bind(authController),
-);
-router.get("/verify-email", authController.verifyEmail.bind(authController));
+router.post('/register', authController.register.bind(authController));
+router.post('/login', authController.login.bind(authController));
+router.post('/refresh-token', authController.refreshToken.bind(authController));
+router.post('/request-password-reset', authController.requestPasswordReset.bind(authController));
+router.post('/reset-password', authController.resetPassword.bind(authController));
+router.get('/verify-email', authController.verifyEmail.bind(authController));
 
 // Protected routes (require authentication)
-router.get(
-  "/sessions",
-  authMiddleware,
-  authController.getUserSessions.bind(authController),
-);
+router.get('/sessions', authMiddleware, authController.getUserSessions.bind(authController));
 router.delete(
-  "/sessions/:sessionId",
+  '/sessions/:sessionId',
   authMiddleware,
   authController.terminateSession.bind(authController),
 );
 router.delete(
-  "/sessions",
+  '/sessions',
   authMiddleware,
   authController.terminateOtherSessions.bind(authController),
 );
-router.post(
-  "/mfa/setup",
-  authMiddleware,
-  authController.setupMFA.bind(authController),
-);
-router.post(
-  "/mfa/verify",
-  authMiddleware,
-  authController.verifyMFA.bind(authController),
-);
-router.post(
-  "/mfa/disable",
-  authMiddleware,
-  authController.disableMFA.bind(authController),
-);
+router.post('/mfa/setup', authMiddleware, authController.setupMFA.bind(authController));
+router.post('/mfa/verify', authMiddleware, authController.verifyMFA.bind(authController));
+router.post('/mfa/disable', authMiddleware, authController.disableMFA.bind(authController));
 
 export default router;
 ```
@@ -888,11 +805,11 @@ export default router;
 Create middleware for authentication and authorization:
 
 ```typescript
-import { Request, Response, NextFunction } from "express";
-import { TokenService } from "@services/core/auth/TokenService";
-import { container } from "@server/infrastructure/di/container";
-import TYPES from "@server/infrastructure/di/types";
-import { UnauthorizedError } from "@services/shared";
+import { Request, Response, NextFunction } from 'express';
+import { TokenService } from '@services/core/auth/TokenService';
+import { container } from '@server/infrastructure/di/container';
+import TYPES from '@server/infrastructure/di/types';
+import { UnauthorizedError } from '@services/shared';
 
 export interface AuthRequest extends Request {
   user?: {
@@ -912,11 +829,11 @@ export const authMiddleware = async (
     // Get the token from the Authorization header
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      throw new UnauthorizedError("No token provided");
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new UnauthorizedError('No token provided');
     }
 
-    const token = authHeader.split(" ")[1];
+    const token = authHeader.split(' ')[1];
 
     // Verify the token
     const tokenService = container.get<TokenService>(TYPES.TokenService);
@@ -932,7 +849,7 @@ export const authMiddleware = async (
 
     next();
   } catch (error) {
-    next(new UnauthorizedError("Invalid or expired token"));
+    next(new UnauthorizedError('Invalid or expired token'));
   }
 };
 
@@ -941,15 +858,13 @@ export const requireRole = (roles: string | string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction): void => {
     try {
       if (!req.user) {
-        throw new UnauthorizedError("Authentication required");
+        throw new UnauthorizedError('Authentication required');
       }
 
       const allowedRoles = Array.isArray(roles) ? roles : [roles];
 
       if (!allowedRoles.includes(req.user.role)) {
-        throw new UnauthorizedError(
-          `Required role: ${allowedRoles.join(" or ")}`,
-        );
+        throw new UnauthorizedError(`Required role: ${allowedRoles.join(' or ')}`);
       }
 
       next();
@@ -966,52 +881,37 @@ Make sure auth services are registered in your DI container:
 
 ```typescript
 // Update in your container.ts file
-import { Container } from "inversify";
-import TYPES from "./types";
+import { Container } from 'inversify';
+import TYPES from './types';
 
 // Auth Services
-import { AuthService } from "@services/core/auth/AuthService";
-import { TokenService } from "@services/core/auth/TokenService";
-import { PasswordService } from "@services/core/auth/PasswordService";
-import { EmailVerificationService } from "@services/core/auth/EmailVerificationService";
-import { MFAService } from "@services/core/auth/MFAService";
-import { RolePermissionService } from "@services/core/auth/RolePermissionService";
+import { AuthService } from '@services/core/auth/AuthService';
+import { TokenService } from '@services/core/auth/TokenService';
+import { PasswordService } from '@services/core/auth/PasswordService';
+import { EmailVerificationService } from '@services/core/auth/EmailVerificationService';
+import { MFAService } from '@services/core/auth/MFAService';
+import { RolePermissionService } from '@services/core/auth/RolePermissionService';
 
 // Repositories
-import {
-  UserRepository,
-  userRepository,
-} from "@repositories/auth/UserRepository";
-import {
-  RoleRepository,
-  roleRepository,
-} from "@repositories/auth/RoleRepository";
+import { UserRepository, userRepository } from '@repositories/auth/UserRepository';
+import { RoleRepository, roleRepository } from '@repositories/auth/RoleRepository';
 import {
   PermissionRepository,
   permissionRepository,
-} from "@repositories/auth/PermissionRepository";
-import {
-  TokenRepository,
-  tokenRepository,
-} from "@repositories/auth/TokenRepository";
-import { RolePermissionRepository } from "@repositories/auth/RolePermissionRepository";
-import { PasswordResetTokenRepository } from "@repositories/auth/PasswordResetTokenRepository";
+} from '@repositories/auth/PermissionRepository';
+import { TokenRepository, tokenRepository } from '@repositories/auth/TokenRepository';
+import { RolePermissionRepository } from '@repositories/auth/RolePermissionRepository';
+import { PasswordResetTokenRepository } from '@repositories/auth/PasswordResetTokenRepository';
 
 const container = new Container();
 
 // Register repositories
-container
-  .bind<UserRepository>(TYPES.UserRepository)
-  .toConstantValue(userRepository);
-container
-  .bind<RoleRepository>(TYPES.RoleRepository)
-  .toConstantValue(roleRepository);
+container.bind<UserRepository>(TYPES.UserRepository).toConstantValue(userRepository);
+container.bind<RoleRepository>(TYPES.RoleRepository).toConstantValue(roleRepository);
 container
   .bind<PermissionRepository>(TYPES.PermissionRepository)
   .toConstantValue(permissionRepository);
-container
-  .bind<TokenRepository>(TYPES.TokenRepository)
-  .toConstantValue(tokenRepository);
+container.bind<TokenRepository>(TYPES.TokenRepository).toConstantValue(tokenRepository);
 container
   .bind<RolePermissionRepository>(TYPES.RolePermissionRepository)
   .toConstantValue(new RolePermissionRepository());
@@ -1020,23 +920,14 @@ container
   .toConstantValue(new PasswordResetTokenRepository());
 
 // Register auth services
-container
-  .bind<PasswordService>(TYPES.PasswordService)
-  .to(PasswordService)
-  .inSingletonScope();
-container
-  .bind<TokenService>(TYPES.TokenService)
-  .to(TokenService)
-  .inSingletonScope();
+container.bind<PasswordService>(TYPES.PasswordService).to(PasswordService).inSingletonScope();
+container.bind<TokenService>(TYPES.TokenService).to(TokenService).inSingletonScope();
 container.bind<MFAService>(TYPES.MFAService).to(MFAService).inSingletonScope();
 container
   .bind<EmailVerificationService>(TYPES.EmailVerificationService)
   .to(EmailVerificationService)
   .inSingletonScope();
-container
-  .bind<AuthService>(TYPES.AuthService)
-  .to(AuthService)
-  .inSingletonScope();
+container.bind<AuthService>(TYPES.AuthService).to(AuthService).inSingletonScope();
 container
   .bind<RolePermissionService>(TYPES.RolePermissionService)
   .to(RolePermissionService)
@@ -1050,27 +941,22 @@ export { container };
 Implement a proper error handler middleware:
 
 ```typescript
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from 'express';
 import {
   ValidationError,
   NotFoundError,
   UnauthorizedError,
   ConflictError,
   TooManyRequestsError,
-} from "@services/shared";
+} from '@services/shared';
 
-export const errorHandler = (
-  err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): void => {
-  console.error("Error:", err);
+export const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction): void => {
+  console.error('Error:', err);
 
   // Handle specific error types
   if (err instanceof ValidationError) {
     res.status(400).json({
-      error: "Validation Error",
+      error: 'Validation Error',
       message: err.message,
       details: err.details,
     });
@@ -1079,7 +965,7 @@ export const errorHandler = (
 
   if (err instanceof NotFoundError) {
     res.status(404).json({
-      error: "Not Found",
+      error: 'Not Found',
       message: err.message,
     });
     return;
@@ -1087,7 +973,7 @@ export const errorHandler = (
 
   if (err instanceof UnauthorizedError) {
     res.status(401).json({
-      error: "Unauthorized",
+      error: 'Unauthorized',
       message: err.message,
     });
     return;
@@ -1095,7 +981,7 @@ export const errorHandler = (
 
   if (err instanceof ConflictError) {
     res.status(409).json({
-      error: "Conflict",
+      error: 'Conflict',
       message: err.message,
     });
     return;
@@ -1103,7 +989,7 @@ export const errorHandler = (
 
   if (err instanceof TooManyRequestsError) {
     res.status(429).json({
-      error: "Too Many Requests",
+      error: 'Too Many Requests',
       message: err.message,
     });
     return;
@@ -1111,8 +997,8 @@ export const errorHandler = (
 
   // Default to 500 internal server error
   res.status(500).json({
-    error: "Internal Server Error",
-    message: "An unexpected error occurred",
+    error: 'Internal Server Error',
+    message: 'An unexpected error occurred',
   });
 };
 ```
@@ -1124,23 +1010,23 @@ Create unit tests for auth components:
 ### AuthService.test.ts
 
 ```typescript
-import { AuthService } from "@services/core/auth/AuthService";
-import { TokenService } from "@services/core/auth/TokenService";
-import { PasswordService } from "@services/core/auth/PasswordService";
-import { EmailVerificationService } from "@services/core/auth/EmailVerificationService";
-import { MFAService } from "@services/core/auth/MFAService";
-import { UserRepository } from "@repositories/auth/UserRepository";
-import { UnauthorizedError, DuplicateResourceError } from "@services/shared";
-import { User } from "@models/auth/User";
+import { AuthService } from '@services/core/auth/AuthService';
+import { TokenService } from '@services/core/auth/TokenService';
+import { PasswordService } from '@services/core/auth/PasswordService';
+import { EmailVerificationService } from '@services/core/auth/EmailVerificationService';
+import { MFAService } from '@services/core/auth/MFAService';
+import { UserRepository } from '@repositories/auth/UserRepository';
+import { UnauthorizedError, DuplicateResourceError } from '@services/shared';
+import { User } from '@models/auth/User';
 
 // Mock dependencies
-jest.mock("@repositories/auth/UserRepository");
-jest.mock("@services/core/auth/TokenService");
-jest.mock("@services/core/auth/PasswordService");
-jest.mock("@services/core/auth/EmailVerificationService");
-jest.mock("@services/core/auth/MFAService");
+jest.mock('@repositories/auth/UserRepository');
+jest.mock('@services/core/auth/TokenService');
+jest.mock('@services/core/auth/PasswordService');
+jest.mock('@services/core/auth/EmailVerificationService');
+jest.mock('@services/core/auth/MFAService');
 
-describe("AuthService", () => {
+describe('AuthService', () => {
   let authService: AuthService;
   let userRepository: jest.Mocked<UserRepository>;
   let tokenService: jest.Mocked<TokenService>;
@@ -1168,38 +1054,36 @@ describe("AuthService", () => {
     );
   });
 
-  describe("register", () => {
-    it("should register a new user successfully", async () => {
+  describe('register', () => {
+    it('should register a new user successfully', async () => {
       // Setup
       const registerData = {
-        username: "testuser",
-        email: "test@example.com",
-        password: "Password123!",
+        username: 'testuser',
+        email: 'test@example.com',
+        password: 'Password123!',
       };
 
       const deviceInfo = {
-        ip: "127.0.0.1",
-        userAgent: "jest-test",
+        ip: '127.0.0.1',
+        userAgent: 'jest-test',
       };
 
-      const hashedPassword = "hashedpassword";
+      const hashedPassword = 'hashedpassword';
       const user = new User({
         ...registerData,
         password: hashedPassword,
-        id: "user-id",
+        id: 'user-id',
       });
 
-      const token = "access-token";
-      const refreshToken = "refresh-token";
-      const verificationToken = "verification-token";
+      const token = 'access-token';
+      const refreshToken = 'refresh-token';
+      const verificationToken = 'verification-token';
 
       // Mock implementations
       userRepository.findByEmail.mockResolvedValue(null);
       passwordService.hashPassword.mockResolvedValue(hashedPassword);
       userRepository.createWithHashedPassword.mockResolvedValue(user);
-      emailVerificationService.generateVerificationToken.mockResolvedValue(
-        verificationToken,
-      );
+      emailVerificationService.generateVerificationToken.mockResolvedValue(verificationToken);
       emailVerificationService.sendVerificationEmail.mockResolvedValue();
       tokenService.generateToken.mockReturnValue(token);
       tokenService.generateRefreshToken.mockReturnValue(refreshToken);
@@ -1208,19 +1092,14 @@ describe("AuthService", () => {
       const result = await authService.register(registerData, deviceInfo);
 
       // Verify
-      expect(userRepository.findByEmail).toHaveBeenCalledWith(
-        registerData.email,
-      );
-      expect(passwordService.hashPassword).toHaveBeenCalledWith(
-        registerData.password,
-      );
+      expect(userRepository.findByEmail).toHaveBeenCalledWith(registerData.email);
+      expect(passwordService.hashPassword).toHaveBeenCalledWith(registerData.password);
       expect(userRepository.createWithHashedPassword).toHaveBeenCalled();
-      expect(
-        emailVerificationService.generateVerificationToken,
-      ).toHaveBeenCalledWith(user);
-      expect(
-        emailVerificationService.sendVerificationEmail,
-      ).toHaveBeenCalledWith(user, verificationToken);
+      expect(emailVerificationService.generateVerificationToken).toHaveBeenCalledWith(user);
+      expect(emailVerificationService.sendVerificationEmail).toHaveBeenCalledWith(
+        user,
+        verificationToken,
+      );
       expect(tokenService.generateToken).toHaveBeenCalled();
       expect(tokenService.generateRefreshToken).toHaveBeenCalled();
 
@@ -1233,55 +1112,55 @@ describe("AuthService", () => {
       });
     });
 
-    it("should throw DuplicateResourceError if email already exists", async () => {
+    it('should throw DuplicateResourceError if email already exists', async () => {
       // Setup
       const registerData = {
-        username: "testuser",
-        email: "existing@example.com",
-        password: "Password123!",
+        username: 'testuser',
+        email: 'existing@example.com',
+        password: 'Password123!',
       };
 
       const deviceInfo = {
-        ip: "127.0.0.1",
-        userAgent: "jest-test",
+        ip: '127.0.0.1',
+        userAgent: 'jest-test',
       };
 
       const existingUser = new User({
         ...registerData,
-        id: "existing-id",
+        id: 'existing-id',
       });
 
       // Mock implementations
       userRepository.findByEmail.mockResolvedValue(existingUser);
 
       // Execute & Verify
-      await expect(
-        authService.register(registerData, deviceInfo),
-      ).rejects.toThrow(DuplicateResourceError);
+      await expect(authService.register(registerData, deviceInfo)).rejects.toThrow(
+        DuplicateResourceError,
+      );
     });
   });
 
-  describe("login", () => {
-    it("should login user successfully", async () => {
+  describe('login', () => {
+    it('should login user successfully', async () => {
       // Setup
       const loginData = {
-        email: "test@example.com",
-        password: "Password123!",
+        email: 'test@example.com',
+        password: 'Password123!',
       };
 
       const deviceInfo = {
-        ip: "127.0.0.1",
-        userAgent: "jest-test",
+        ip: '127.0.0.1',
+        userAgent: 'jest-test',
       };
 
       const user = new User({
         email: loginData.email,
-        password: "hashedpassword",
-        id: "user-id",
+        password: 'hashedpassword',
+        id: 'user-id',
       });
 
-      const token = "access-token";
-      const refreshToken = "refresh-token";
+      const token = 'access-token';
+      const refreshToken = 'refresh-token';
 
       // Mock implementations
       userRepository.findByEmail.mockResolvedValue(user);
@@ -1310,43 +1189,41 @@ describe("AuthService", () => {
       });
     });
 
-    it("should throw UnauthorizedError if user not found", async () => {
+    it('should throw UnauthorizedError if user not found', async () => {
       // Setup
       const loginData = {
-        email: "nonexistent@example.com",
-        password: "Password123!",
+        email: 'nonexistent@example.com',
+        password: 'Password123!',
       };
 
       const deviceInfo = {
-        ip: "127.0.0.1",
-        userAgent: "jest-test",
+        ip: '127.0.0.1',
+        userAgent: 'jest-test',
       };
 
       // Mock implementations
       userRepository.findByEmail.mockResolvedValue(null);
 
       // Execute & Verify
-      await expect(authService.login(loginData, deviceInfo)).rejects.toThrow(
-        UnauthorizedError,
-      );
+      await expect(authService.login(loginData, deviceInfo)).rejects.toThrow(UnauthorizedError);
     });
 
-    it("should throw UnauthorizedError if password is incorrect", async () => {
+    it('should throw UnauthorizedError if password is incorrect', async () => {
       // Setup
       const loginData = {
-        email: "test@example.com",
-        password: "WrongPassword123!",
+        email: 'test@example.com',
+        password: 'WrongPassword123!',
       };
 
       const deviceInfo = {
-        ip: "127.0.0.1",
-        userAgent: "jest-test",
+        ip: '127.0.0.1',
+        userAgent: 'jest-test',
       };
 
       const user = new User({
         email: loginData.email,
-        password: "hashedpassword",
-        id: "user-id",
+        password: 'hashedpassword',
+        id: 'user-id',
       });
 
       // Mock implementations
@@ -1354,9 +1231,7 @@ describe("AuthService", () => {
       passwordService.comparePassword.mockResolvedValue(false);
 
       // Execute & Verify
-      await expect(authService.login(loginData, deviceInfo)).rejects.toThrow(
-        UnauthorizedError,
-      );
+      await expect(authService.login(loginData, deviceInfo)).rejects.toThrow(UnauthorizedError);
     });
   });
 
@@ -1369,13 +1244,13 @@ describe("AuthService", () => {
 Create integration tests that test the complete auth flow:
 
 ```typescript
-import request from "supertest";
-import app from "../app"; // Your Express app
-import { container } from "@server/infrastructure/di/container";
-import { UserRepository } from "@repositories/auth/UserRepository";
-import TYPES from "@server/infrastructure/di/types";
+import request from 'supertest';
+import app from '../app'; // Your Express app
+import { container } from '@server/infrastructure/di/container';
+import { UserRepository } from '@repositories/auth/UserRepository';
+import TYPES from '@server/infrastructure/di/types';
 
-describe("Auth API Integration Tests", () => {
+describe('Auth API Integration Tests', () => {
   let userRepository: UserRepository;
 
   beforeAll(() => {
@@ -1387,281 +1262,258 @@ describe("Auth API Integration Tests", () => {
     // await db.truncate(['users', 'tokens', ...]);
   });
 
-  describe("POST /api/auth/register", () => {
-    it("should register a new user successfully", async () => {
+  describe('POST /api/auth/register', () => {
+    it('should register a new user successfully', async () => {
       const userData = {
-        username: "testuser",
-        email: "test@example.com",
-        password: "Password123!",
-        firstName: "Test",
-        lastName: "User",
+        username: 'testuser',
+        email: 'test@example.com',
+        password: 'Password123!',
+        firstName: 'Test',
+        lastName: 'User',
       };
 
-      const response = await request(app)
-        .post("/api/auth/register")
-        .send(userData)
-        .expect(201);
+      const response = await request(app).post('/api/auth/register').send(userData).expect(201);
 
-      expect(response.body).toHaveProperty(
-        "message",
-        "User registered successfully",
-      );
-      expect(response.body).toHaveProperty("user");
-      expect(response.body).toHaveProperty("token");
-      expect(response.body).toHaveProperty("refreshToken");
+      expect(response.body).toHaveProperty('message', 'User registered successfully');
+      expect(response.body).toHaveProperty('user');
+      expect(response.body).toHaveProperty('token');
+      expect(response.body).toHaveProperty('refreshToken');
       expect(response.body.user.email).toBe(userData.email);
       expect(response.body.user.username).toBe(userData.username);
-      expect(response.body.user).not.toHaveProperty("password");
+      expect(response.body.user).not.toHaveProperty('password');
     });
 
-    it("should return 400 when required fields are missing", async () => {
+    it('should return 400 when required fields are missing', async () => {
       const userData = {
-        email: "test@example.com",
+        email: 'test@example.com',
         // Missing username and password
       };
 
-      const response = await request(app)
-        .post("/api/auth/register")
-        .send(userData)
-        .expect(400);
+      const response = await request(app).post('/api/auth/register').send(userData).expect(400);
 
-      expect(response.body).toHaveProperty("error", "Validation Error");
+      expect(response.body).toHaveProperty('error', 'Validation Error');
     });
 
-    it("should return 409 when email already exists", async () => {
+    it('should return 409 when email already exists', async () => {
       // Setup - create a user first
       const userData = {
-        username: "existinguser",
-        email: "existing@example.com",
-        password: "Password123!",
+        username: 'existinguser',
+        email: 'existing@example.com',
+        password: 'Password123!',
       };
 
       await userRepository.createWithHashedPassword(userData);
 
       // Try to register with the same email
       const response = await request(app)
-        .post("/api/auth/register")
+        .post('/api/auth/register')
         .send({
-          username: "newuser",
-          email: "existing@example.com",
-          password: "Password123!",
+          username: 'newuser',
+          email: 'existing@example.com',
+          password: 'Password123!',
         })
         .expect(409);
 
-      expect(response.body).toHaveProperty("error", "Conflict");
+      expect(response.body).toHaveProperty('error', 'Conflict');
     });
   });
 
-  describe("POST /api/auth/login", () => {
+  describe('POST /api/auth/login', () => {
     beforeEach(async () => {
       // Create a test user for login tests
       const userData = {
-        username: "loginuser",
-        email: "login@example.com",
-        password: "Password123!",
+        username: 'loginuser',
+        email: 'login@example.com',
+        password: 'Password123!',
         emailConfirmed: true,
-        accountStatus: "active",
+        accountStatus: 'active',
       };
 
       // Create the user with the password hash
       await userRepository.createWithHashedPassword(userData);
     });
 
-    it("should login successfully with correct credentials", async () => {
+    it('should login successfully with correct credentials', async () => {
       const loginData = {
-        email: "login@example.com",
-        password: "Password123!",
+        email: 'login@example.com',
+        password: 'Password123!',
       };
 
-      const response = await request(app)
-        .post("/api/auth/login")
-        .send(loginData)
-        .expect(200);
+      const response = await request(app).post('/api/auth/login').send(loginData).expect(200);
 
-      expect(response.body).toHaveProperty("message", "Login successful");
-      expect(response.body).toHaveProperty("user");
-      expect(response.body).toHaveProperty("token");
-      expect(response.body).toHaveProperty("refreshToken");
+      expect(response.body).toHaveProperty('message', 'Login successful');
+      expect(response.body).toHaveProperty('user');
+      expect(response.body).toHaveProperty('token');
+      expect(response.body).toHaveProperty('refreshToken');
       expect(response.body.user.email).toBe(loginData.email);
     });
 
-    it("should return 401 with incorrect password", async () => {
+    it('should return 401 with incorrect password', async () => {
       const loginData = {
-        email: "login@example.com",
-        password: "WrongPassword123!",
+        email: 'login@example.com',
+        password: 'WrongPassword123!',
       };
 
-      const response = await request(app)
-        .post("/api/auth/login")
-        .send(loginData)
-        .expect(401);
+      const response = await request(app).post('/api/auth/login').send(loginData).expect(401);
 
-      expect(response.body).toHaveProperty("error", "Unauthorized");
+      expect(response.body).toHaveProperty('error', 'Unauthorized');
     });
 
-    it("should return 401 with non-existent email", async () => {
+    it('should return 401 with non-existent email', async () => {
       const loginData = {
-        email: "nonexistent@example.com",
-        password: "Password123!",
+        email: 'nonexistent@example.com',
+        password: 'Password123!',
       };
 
-      const response = await request(app)
-        .post("/api/auth/login")
-        .send(loginData)
-        .expect(401);
+      const response = await request(app).post('/api/auth/login').send(loginData).expect(401);
 
-      expect(response.body).toHaveProperty("error", "Unauthorized");
+      expect(response.body).toHaveProperty('error', 'Unauthorized');
     });
   });
 
-  describe("POST /api/auth/refresh-token", () => {
+  describe('POST /api/auth/refresh-token', () => {
     let refreshToken: string;
 
     beforeEach(async () => {
       // Setup - create a user and get a refresh token
       const userData = {
-        username: "refreshuser",
-        email: "refresh@example.com",
-        password: "Password123!",
+        username: 'refreshuser',
+        email: 'refresh@example.com',
+        password: 'Password123!',
         emailConfirmed: true,
-        accountStatus: "active",
+        accountStatus: 'active',
       };
 
       await userRepository.createWithHashedPassword(userData);
 
-      const loginResponse = await request(app).post("/api/auth/login").send({
-        email: "refresh@example.com",
-        password: "Password123!",
+      const loginResponse = await request(app).post('/api/auth/login').send({
+        email: 'refresh@example.com',
+        password: 'Password123!',
       });
 
       refreshToken = loginResponse.body.refreshToken;
     });
 
-    it("should refresh token successfully", async () => {
+    it('should refresh token successfully', async () => {
       const response = await request(app)
-        .post("/api/auth/refresh-token")
+        .post('/api/auth/refresh-token')
         .send({ refreshToken })
         .expect(200);
 
-      expect(response.body).toHaveProperty("token");
+      expect(response.body).toHaveProperty('token');
     });
 
-    it("should return 401 with invalid refresh token", async () => {
+    it('should return 401 with invalid refresh token', async () => {
       const response = await request(app)
-        .post("/api/auth/refresh-token")
-        .send({ refreshToken: "invalid-token" })
+        .post('/api/auth/refresh-token')
+        .send({ refreshToken: 'invalid-token' })
         .expect(401);
 
-      expect(response.body).toHaveProperty("error", "Unauthorized");
+      expect(response.body).toHaveProperty('error', 'Unauthorized');
     });
   });
 
-  describe("GET /api/auth/verify-email", () => {
-    it("should verify email successfully", async () => {
+  describe('GET /api/auth/verify-email', () => {
+    it('should verify email successfully', async () => {
       // Setup - create a user with verification token
       const userData = {
-        username: "verifyuser",
-        email: "verify@example.com",
-        password: "Password123!",
-        emailToken: "valid-verification-token",
+        username: 'verifyuser',
+        email: 'verify@example.com',
+        password: 'Password123!',
+        emailToken: 'valid-verification-token',
         emailTokenExpire: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours in the future
       };
 
       await userRepository.createWithHashedPassword(userData);
 
       const response = await request(app)
-        .get("/api/auth/verify-email")
-        .query({ token: "valid-verification-token" })
+        .get('/api/auth/verify-email')
+        .query({ token: 'valid-verification-token' })
         .expect(200);
 
-      expect(response.body).toHaveProperty(
-        "message",
-        "Email verified successfully",
-      );
+      expect(response.body).toHaveProperty('message', 'Email verified successfully');
 
       // Verify the user's email is now confirmed
-      const user = await userRepository.findByEmail("verify@example.com");
+      const user = await userRepository.findByEmail('verify@example.com');
       expect(user?.emailConfirmed).toBe(true);
     });
 
-    it("should return 400 with invalid token", async () => {
+    it('should return 400 with invalid token', async () => {
       const response = await request(app)
-        .get("/api/auth/verify-email")
-        .query({ token: "invalid-token" })
+        .get('/api/auth/verify-email')
+        .query({ token: 'invalid-token' })
         .expect(400);
 
-      expect(response.body).toHaveProperty("error", "Validation Error");
+      expect(response.body).toHaveProperty('error', 'Validation Error');
     });
   });
 
   // Tests for protected routes using auth middleware
-  describe("Protected Routes", () => {
+  describe('Protected Routes', () => {
     let authToken: string;
     let userId: string;
 
     beforeEach(async () => {
       // Setup - create a user and get authentication token
       const userData = {
-        username: "protecteduser",
-        email: "protected@example.com",
-        password: "Password123!",
+        username: 'protecteduser',
+        email: 'protected@example.com',
+        password: 'Password123!',
         emailConfirmed: true,
-        accountStatus: "active",
+        accountStatus: 'active',
       };
 
       const user = await userRepository.createWithHashedPassword(userData);
       userId = user.id;
 
-      const loginResponse = await request(app).post("/api/auth/login").send({
-        email: "protected@example.com",
-        password: "Password123!",
+      const loginResponse = await request(app).post('/api/auth/login').send({
+        email: 'protected@example.com',
+        password: 'Password123!',
       });
 
       authToken = loginResponse.body.token;
     });
 
-    describe("GET /api/auth/sessions", () => {
-      it("should return user sessions when authenticated", async () => {
+    describe('GET /api/auth/sessions', () => {
+      it('should return user sessions when authenticated', async () => {
         const response = await request(app)
-          .get("/api/auth/sessions")
-          .set("Authorization", `Bearer ${authToken}`)
+          .get('/api/auth/sessions')
+          .set('Authorization', `Bearer ${authToken}`)
           .expect(200);
 
-        expect(response.body).toHaveProperty("sessions");
+        expect(response.body).toHaveProperty('sessions');
         expect(Array.isArray(response.body.sessions)).toBe(true);
       });
 
-      it("should return 401 when not authenticated", async () => {
-        const response = await request(app)
-          .get("/api/auth/sessions")
-          .expect(401);
+      it('should return 401 when not authenticated', async () => {
+        const response = await request(app).get('/api/auth/sessions').expect(401);
 
-        expect(response.body).toHaveProperty("error", "Unauthorized");
+        expect(response.body).toHaveProperty('error', 'Unauthorized');
       });
     });
 
-    describe("MFA Routes", () => {
-      it("should setup MFA when authenticated", async () => {
+    describe('MFA Routes', () => {
+      it('should setup MFA when authenticated', async () => {
         const response = await request(app)
-          .post("/api/auth/mfa/setup")
-          .set("Authorization", `Bearer ${authToken}`)
+          .post('/api/auth/mfa/setup')
+          .set('Authorization', `Bearer ${authToken}`)
           .expect(200);
 
-        expect(response.body).toHaveProperty("secret");
-        expect(response.body).toHaveProperty("qrCode");
+        expect(response.body).toHaveProperty('secret');
+        expect(response.body).toHaveProperty('qrCode');
       });
 
-      it("should verify MFA when authenticated", async () => {
+      it('should verify MFA when authenticated', async () => {
         // This test requires a valid MFA token, which is hard to generate in a test
         // In a real test, you might mock the MFA service
         // This is just a structural example
         const response = await request(app)
-          .post("/api/auth/mfa/verify")
-          .set("Authorization", `Bearer ${authToken}`)
-          .send({ token: "123456" }) // This would be a valid token in real scenario
+          .post('/api/auth/mfa/verify')
+          .set('Authorization', `Bearer ${authToken}`)
+          .send({ token: '123456' }) // This would be a valid token in real scenario
           .expect(400); // Expect 400 because the token is invalid
 
-        expect(response.body).toHaveProperty("error");
+        expect(response.body).toHaveProperty('error');
       });
     });
   });
@@ -1683,7 +1535,7 @@ Create email templates for verification and password reset:
     <title>Verify Your Email</title>
     <style>
       body {
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         line-height: 1.6;
         color: #333;
         max-width: 600px;
@@ -1723,20 +1575,13 @@ Create email templates for verification and password reset:
   <body>
     <div class="container">
       <div class="header">
-        <img
-          src="https://yourapp.com/logo.png"
-          alt="Your App Logo"
-          class="logo"
-        />
+        <img src="https://yourapp.com/logo.png" alt="Your App Logo" class="logo" />
         <h1>Verify Your Email Address</h1>
       </div>
 
       <p>Hi {{username}},</p>
 
-      <p>
-        Thanks for signing up! Please verify your email address by clicking the
-        button below:
-      </p>
+      <p>Thanks for signing up! Please verify your email address by clicking the button below:</p>
 
       <div style="text-align: center;">
         <a href="{{verificationUrl}}" class="button">Verify Email Address</a>
@@ -1770,7 +1615,7 @@ Create email templates for verification and password reset:
     <title>Reset Your Password</title>
     <style>
       body {
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         line-height: 1.6;
         color: #333;
         max-width: 600px;
@@ -1810,19 +1655,15 @@ Create email templates for verification and password reset:
   <body>
     <div class="container">
       <div class="header">
-        <img
-          src="https://yourapp.com/logo.png"
-          alt="Your App Logo"
-          class="logo"
-        />
+        <img src="https://yourapp.com/logo.png" alt="Your App Logo" class="logo" />
         <h1>Reset Your Password</h1>
       </div>
 
       <p>Hi {{username}},</p>
 
       <p>
-        We received a request to reset your password. Click the button below to
-        create a new password:
+        We received a request to reset your password. Click the button below to create a new
+        password:
       </p>
 
       <div style="text-align: center;">
@@ -1835,10 +1676,7 @@ Create email templates for verification and password reset:
 
       <p>This link will expire in {{expiryHours}} hours.</p>
 
-      <p>
-        If you didn't request a password reset, you can safely ignore this
-        email.
-      </p>
+      <p>If you didn't request a password reset, you can safely ignore this email.</p>
 
       <div class="footer">
         <p>&copy; 2023 Your App. All rights reserved.</p>
@@ -1856,14 +1694,8 @@ Create React components for auth-related features:
 ### AuthContext.tsx
 
 ```tsx
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
-import { AuthService } from "../services/AuthService";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { AuthService } from '../services/AuthService';
 
 interface User {
   id: string;
@@ -1877,20 +1709,14 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string, mfaToken?: string) => Promise<void>;
-  register: (
-    username: string,
-    email: string,
-    password: string,
-  ) => Promise<void>;
+  register: (username: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   refreshToken: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const authService = new AuthService();
@@ -1899,7 +1725,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     // Check if user is already logged in
     const checkAuth = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem('token');
 
         if (token) {
           // Verify token validity or refresh if needed
@@ -1908,8 +1734,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         }
       } catch (error) {
         // Token invalid - remove from storage
-        localStorage.removeItem("token");
-        localStorage.removeItem("refreshToken");
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
       } finally {
         setIsLoading(false);
       }
@@ -1926,29 +1752,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
       if (result.requiresMFA) {
         // Handle MFA flow
-        localStorage.setItem("tempToken", result.tempToken!);
-        throw new Error("MFA_REQUIRED");
+        localStorage.setItem('tempToken', result.tempToken!);
+        throw new Error('MFA_REQUIRED');
       }
 
-      localStorage.setItem("token", result.token);
-      localStorage.setItem("refreshToken", result.refreshToken);
+      localStorage.setItem('token', result.token);
+      localStorage.setItem('refreshToken', result.refreshToken);
       setUser(result.user);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const register = async (
-    username: string,
-    email: string,
-    password: string,
-  ) => {
+  const register = async (username: string, email: string, password: string) => {
     setIsLoading(true);
 
     try {
       const result = await authService.register(username, email, password);
-      localStorage.setItem("token", result.token);
-      localStorage.setItem("refreshToken", result.refreshToken);
+      localStorage.setItem('token', result.token);
+      localStorage.setItem('refreshToken', result.refreshToken);
       setUser(result.user);
     } finally {
       setIsLoading(false);
@@ -1956,13 +1778,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
     setUser(null);
   };
 
   const refreshToken = async () => {
-    const refreshToken = localStorage.getItem("refreshToken");
+    const refreshToken = localStorage.getItem('refreshToken');
 
     if (!refreshToken) {
       return;
@@ -1970,7 +1792,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
     try {
       const result = await authService.refreshToken(refreshToken);
-      localStorage.setItem("token", result.token);
+      localStorage.setItem('token', result.token);
     } catch (error) {
       // If refresh fails, log out
       logout();
@@ -2000,7 +1822,7 @@ export const useAuth = () => {
   const context = useContext(AuthContext);
 
   if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error('useAuth must be used within an AuthProvider');
   }
 
   return context;
@@ -2010,31 +1832,31 @@ export const useAuth = () => {
 ### LoginForm.tsx
 
 ```tsx
-import React, { useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const LoginForm: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [mfaToken, setMfaToken] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [mfaToken, setMfaToken] = useState('');
   const [showMfa, setShowMfa] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError('');
 
     try {
       await login(email, password, showMfa ? mfaToken : undefined);
-      navigate("/dashboard");
+      navigate('/dashboard');
     } catch (error) {
-      if (error instanceof Error && error.message === "MFA_REQUIRED") {
+      if (error instanceof Error && error.message === 'MFA_REQUIRED') {
         setShowMfa(true);
       } else {
-        setError("Invalid email or password");
+        setError('Invalid email or password');
       }
     }
   };
@@ -2079,14 +1901,12 @@ const LoginForm: React.FC = () => {
               placeholder="Enter 6-digit code"
               required
             />
-            <small>
-              Enter the verification code from your authenticator app
-            </small>
+            <small>Enter the verification code from your authenticator app</small>
           </div>
         )}
 
         <button type="submit" disabled={isLoading}>
-          {isLoading ? "Loading..." : "Login"}
+          {isLoading ? 'Loading...' : 'Login'}
         </button>
       </form>
 
@@ -2104,36 +1924,36 @@ export default LoginForm;
 ### RegisterForm.tsx
 
 ```tsx
-import React, { useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const RegisterForm: React.FC = () => {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
   const { register, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError('');
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      setError('Passwords do not match');
       return;
     }
 
     try {
       await register(username, email, password);
-      navigate("/email-verification-sent");
+      navigate('/email-verification-sent');
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message);
       } else {
-        setError("An error occurred during registration");
+        setError('An error occurred during registration');
       }
     }
   };
@@ -2177,8 +1997,8 @@ const RegisterForm: React.FC = () => {
             required
           />
           <small>
-            Password must be at least 8 characters and include uppercase,
-            lowercase, number, and special character
+            Password must be at least 8 characters and include uppercase, lowercase, number, and
+            special character
           </small>
         </div>
 
@@ -2194,7 +2014,7 @@ const RegisterForm: React.FC = () => {
         </div>
 
         <button type="submit" disabled={isLoading}>
-          {isLoading ? "Creating Account..." : "Register"}
+          {isLoading ? 'Creating Account...' : 'Register'}
         </button>
       </form>
 
@@ -2257,7 +2077,7 @@ paths:
                   type: string
                   example: Doe
       responses:
-        "201":
+        '201':
           description: User registered successfully
           content:
             application/json:
@@ -2268,17 +2088,17 @@ paths:
                     type: string
                     example: User registered successfully
                   user:
-                    $ref: "#/components/schemas/User"
+                    $ref: '#/components/schemas/User'
                   token:
                     type: string
                   refreshToken:
                     type: string
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "500":
-          $ref: "#/components/responses/ServerError"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/ServerError'
 
   /auth/login:
     post:
@@ -2306,9 +2126,9 @@ paths:
                 mfaToken:
                   type: string
                   description: Required if MFA is enabled
-                  example: "123456"
+                  example: '123456'
       responses:
-        "200":
+        '200':
           description: Login successful
           content:
             application/json:
@@ -2319,7 +2139,7 @@ paths:
                     type: string
                     example: Login successful
                   user:
-                    $ref: "#/components/schemas/User"
+                    $ref: '#/components/schemas/User'
                   token:
                     type: string
                   refreshToken:
@@ -2328,12 +2148,12 @@ paths:
                     type: boolean
                   tempToken:
                     type: string
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "429":
-          $ref: "#/components/responses/TooManyRequests"
-        "500":
-          $ref: "#/components/responses/ServerError"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
 
   /auth/refresh-token:
     post:
@@ -2352,7 +2172,7 @@ paths:
                 refreshToken:
                   type: string
       responses:
-        "200":
+        '200':
           description: Token refreshed successfully
           content:
             application/json:
@@ -2361,10 +2181,10 @@ paths:
                 properties:
                   token:
                     type: string
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "500":
-          $ref: "#/components/responses/ServerError"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
 
   /auth/verify-email:
     get:
@@ -2378,7 +2198,7 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Email verified successfully
           content:
             application/json:
@@ -2388,10 +2208,10 @@ paths:
                   message:
                     type: string
                     example: Email verified successfully
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "500":
-          $ref: "#/components/responses/ServerError"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
 
   /auth/request-password-reset:
     post:
@@ -2411,7 +2231,7 @@ paths:
                   type: string
                   format: email
       responses:
-        "200":
+        '200':
           description: Password reset requested
           content:
             application/json:
@@ -2421,10 +2241,10 @@ paths:
                   message:
                     type: string
                     example: If your email exists in our system, you will receive a password reset link
-        "429":
-          $ref: "#/components/responses/TooManyRequests"
-        "500":
-          $ref: "#/components/responses/ServerError"
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+        '500':
+          $ref: '#/components/responses/ServerError'
 
   /auth/reset-password:
     post:
@@ -2447,7 +2267,7 @@ paths:
                   type: string
                   format: password
       responses:
-        "200":
+        '200':
           description: Password reset successful
           content:
             application/json:
@@ -2457,12 +2277,12 @@ paths:
                   message:
                     type: string
                     example: Password reset successful
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "500":
-          $ref: "#/components/responses/ServerError"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
 
   /auth/sessions:
     get:
@@ -2472,7 +2292,7 @@ paths:
       security:
         - BearerAuth: []
       responses:
-        "200":
+        '200':
           description: User sessions retrieved
           content:
             application/json:
@@ -2482,11 +2302,11 @@ paths:
                   sessions:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Session"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "500":
-          $ref: "#/components/responses/ServerError"
+                      $ref: '#/components/schemas/Session'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
     delete:
       summary: Terminate all other sessions
       tags:
@@ -2494,7 +2314,7 @@ paths:
       security:
         - BearerAuth: []
       responses:
-        "200":
+        '200':
           description: All other sessions terminated
           content:
             application/json:

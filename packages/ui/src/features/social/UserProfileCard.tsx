@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import { useClientEnvironment } from "../../services/ClientEnvironment";
-import { socialService } from "../../services/social";
+import { useClientEnvironment } from '../../services/ClientEnvironment';
+import { socialService } from '../../services/social';
 
 interface User {
   id: string;
@@ -40,7 +40,7 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({ user }) => {
         setFollowersCount((prev) => prev + 1);
       }
     } catch (error) {
-      console.error("Error toggling follow:", error);
+      console.error('Error toggling follow:', error);
     } finally {
       setIsLoading(false);
     }
@@ -53,49 +53,47 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({ user }) => {
   return (
     <div
       style={{
-        border: "1px solid #e0e0e0",
-        borderRadius: "8px",
-        padding: "16px",
-        marginBottom: "16px",
-        backgroundColor: "white",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+        border: '1px solid #e0e0e0',
+        borderRadius: '8px',
+        padding: '16px',
+        marginBottom: '16px',
+        backgroundColor: 'white',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
       }}
     >
-      <div style={{ display: "flex", alignItems: "center" }}>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
         <img
-          src={user.avatar || "/default-avatar.png"}
+          src={user.avatar || '/default-avatar.png'}
           alt={user.displayName}
           style={{
-            width: "80px",
-            height: "80px",
-            borderRadius: "50%",
-            marginRight: "16px",
-            objectFit: "cover",
-            cursor: "pointer",
+            width: '80px',
+            height: '80px',
+            borderRadius: '50%',
+            marginRight: '16px',
+            objectFit: 'cover',
+            cursor: 'pointer',
           }}
           onClick={navigateToProfile}
         />
         <div style={{ flex: 1 }}>
           <div
             style={{
-              fontWeight: "bold",
-              fontSize: "1.2rem",
-              cursor: "pointer",
+              fontWeight: 'bold',
+              fontSize: '1.2rem',
+              cursor: 'pointer',
             }}
             onClick={navigateToProfile}
           >
             {user.displayName}
           </div>
-          <div style={{ color: "#666", marginBottom: "8px" }}>
-            @{user.username}
-          </div>
-          <div style={{ marginBottom: "12px" }}>{user.bio}</div>
+          <div style={{ color: '#666', marginBottom: '8px' }}>@{user.username}</div>
+          <div style={{ marginBottom: '12px' }}>{user.bio}</div>
           <div
             style={{
-              display: "flex",
-              gap: "16px",
-              color: "#666",
-              fontSize: "0.9rem",
+              display: 'flex',
+              gap: '16px',
+              color: '#666',
+              fontSize: '0.9rem',
             }}
           >
             <div>
@@ -114,17 +112,17 @@ export const UserProfileCard: React.FC<UserProfileCardProps> = ({ user }) => {
             onClick={() => void handleFollowToggle()}
             disabled={isLoading}
             style={{
-              padding: "8px 16px",
-              backgroundColor: isFollowing ? "white" : "var(--accent)",
-              color: isFollowing ? "var(--accent)" : "white",
-              border: isFollowing ? "1px solid var(--accent)" : "none",
-              borderRadius: "20px",
-              cursor: "pointer",
-              fontWeight: "bold",
+              padding: '8px 16px',
+              backgroundColor: isFollowing ? 'white' : 'var(--accent)',
+              color: isFollowing ? 'var(--accent)' : 'white',
+              border: isFollowing ? '1px solid var(--accent)' : 'none',
+              borderRadius: '20px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
               opacity: isLoading ? 0.7 : 1,
             }}
           >
-            {isLoading ? "..." : isFollowing ? "Unfollow" : "Follow"}
+            {isLoading ? '...' : isFollowing ? 'Unfollow' : 'Follow'}
           </button>
         </div>
       </div>

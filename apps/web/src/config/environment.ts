@@ -11,24 +11,21 @@ declare global {
   }
 }
 
-type NodeEnv = "development" | "production";
+type NodeEnv = 'development' | 'production';
 
 const env = import.meta.env;
 
 const API_URL =
   env.VITE_API_URL ||
-  (typeof window !== "undefined"
+  (typeof window !== 'undefined'
     ? `${window.location.protocol}//${window.location.host}/api`
-    : "/api");
+    : '/api');
 
 const WS_URL =
   env.VITE_WS_URL ||
-  (typeof window !== "undefined"
-    ? (window.location.protocol === "https:" ? "wss:" : "ws:") +
-      "//" +
-      window.location.host +
-      "/ws"
-    : "ws://localhost:8080/ws");
+  (typeof window !== 'undefined'
+    ? (window.location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + window.location.host + '/ws'
+    : 'ws://localhost:8080/ws');
 
 export interface ClientEnv {
   NODE_ENV: NodeEnv;
@@ -38,10 +35,10 @@ export interface ClientEnv {
 }
 
 export const clientEnv: ClientEnv = {
-  NODE_ENV: (env.MODE as NodeEnv) || "development",
+  NODE_ENV: (env.MODE as NodeEnv) || 'development',
   API_URL,
   WS_URL,
-  APP_TITLE: env.VITE_APP_TITLE || "ABE Stack Application",
+  APP_TITLE: env.VITE_APP_TITLE || 'ABE Stack Application',
 };
 
 // Freeze the config object to prevent modifications

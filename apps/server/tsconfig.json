@@ -5,9 +5,9 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "target": "ES2020",
-    "module": "commonjs",
+    "module": "NodeNext",
     "lib": ["ES2020"],
-    "moduleResolution": "node",
+    "moduleResolution": "NodeNext",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "baseUrl": ".",
@@ -39,7 +39,5 @@
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "__tests__"],
-  "references": [
-    { "path": "../../packages/shared" }
-  ]
+  "references": [{ "path": "../../packages/shared" }]
 }

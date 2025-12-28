@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
 export function useRefPrevious<T>(value: T) {
   const ref = useRef<T>(value);

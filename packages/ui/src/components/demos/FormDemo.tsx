@@ -1,14 +1,14 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import { ComboBox } from "../ComboBox";
-import { Input } from "../Input";
+import { ComboBox } from '../ComboBox';
+import { Input } from '../Input';
 
-const colors = ["Red", "Orange", "Yellow", "Green", "Blue", "Indigo", "Violet"];
+const colors = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Indigo', 'Violet'];
 
 // TODO: this is very much a work in progress!
 export function FormDemo() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [color, setColor] = useState<string>();
 
   return (
@@ -18,9 +18,7 @@ export function FormDemo() {
           Name:
           <Input
             value={name}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setName(e.target.value)
-            }
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
             placeholder="Enter your name"
           />
         </label>
@@ -31,9 +29,7 @@ export function FormDemo() {
           <Input
             type="email"
             value={email}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setEmail(e.target.value)
-            }
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
             placeholder="Enter your email"
           />
         </label>
@@ -51,9 +47,9 @@ export function FormDemo() {
         </label>
       </div>
       <div>
-        <div>Name: {name || "Not set"}</div>
-        <div>Email: {email || "Not set"}</div>
-        <div>Favorite Color: {color || "Not set"}</div>
+        <div>Name: {name || 'Not set'}</div>
+        <div>Email: {email || 'Not set'}</div>
+        <div>Favorite Color: {color || 'Not set'}</div>
       </div>
     </div>
   );

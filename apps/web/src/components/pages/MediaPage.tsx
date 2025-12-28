@@ -1,4 +1,4 @@
-import { PageContent } from "../../layouts/PageContent";
+import { PageContent } from '../../layouts/PageContent';
 
 export function MediaPage() {
   return (
@@ -6,7 +6,7 @@ export function MediaPage() {
       title="Media Page"
       description="This page demonstrates the multimedia capabilities of the ABE Stack."
     >
-      <div style={{ marginTop: "20px" }}>
+      <div style={{ marginTop: '20px' }}>
         <h2>Media Features</h2>
         <ul>
           <li>Video streaming with HLS/DASH support</li>
@@ -21,18 +21,18 @@ export function MediaPage() {
       {/* Example media player placeholder */}
       <div
         style={{
-          width: "100%",
-          maxWidth: "640px",
-          height: "360px",
-          backgroundColor: "#222",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginTop: "20px",
-          borderRadius: "8px",
+          width: '100%',
+          maxWidth: '640px',
+          height: '360px',
+          backgroundColor: '#222',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginTop: '20px',
+          borderRadius: '8px',
         }}
       >
-        <p style={{ color: "white" }}>Media Player Placeholder</p>
+        <p style={{ color: 'white' }}>Media Player Placeholder</p>
       </div>
     </PageContent>
   );

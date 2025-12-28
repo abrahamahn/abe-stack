@@ -15,7 +15,8 @@
   "sideEffects": false,
   "dependencies": {
     "@tanstack/react-query": "^5.59.9",
-    "@abe-stack/shared": "workspace:*"
+    "@abe-stack/shared": "workspace:*",
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

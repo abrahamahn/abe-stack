@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import { useAuth } from "./AuthContext";
-import { LoginModal } from "./LoginModal";
-import { RegisterModal } from "./RegisterModal";
-import { VerificationModal } from "./VerificationModal";
+import { useAuth } from './AuthContext';
+import { LoginModal } from './LoginModal';
+import { RegisterModal } from './RegisterModal';
+import { VerificationModal } from './VerificationModal';
 
-export type AuthModalType = "login" | "register" | null;
+export type AuthModalType = 'login' | 'register' | null;
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -15,13 +15,8 @@ interface AuthModalProps {
 
 export function AuthModal({ isOpen, modalType, onClose }: AuthModalProps) {
   const [activeModal, setActiveModal] = useState<AuthModalType>(modalType);
-  const {
-    login,
-    register,
-    showVerificationModal,
-    setShowVerificationModal,
-    verificationEmail,
-  } = useAuth();
+  const { login, register, showVerificationModal, setShowVerificationModal, verificationEmail } =
+    useAuth();
 
   // Reset active modal when props change
   React.useEffect(() => {
@@ -29,11 +24,11 @@ export function AuthModal({ isOpen, modalType, onClose }: AuthModalProps) {
   }, [modalType]);
 
   const handleSwitchToLogin = () => {
-    setActiveModal("login");
+    setActiveModal('login');
   };
 
   const handleSwitchToRegister = () => {
-    setActiveModal("register");
+    setActiveModal('register');
   };
 
   const handleLogin = async (email: string, password: string) => {
@@ -42,7 +37,7 @@ export function AuthModal({ isOpen, modalType, onClose }: AuthModalProps) {
       onClose();
     } catch (error) {
       // Error is handled in the AuthContext
-      console.error("Login failed:", error);
+      console.error('Login failed:', error);
     }
   };
 
@@ -62,7 +57,7 @@ export function AuthModal({ isOpen, modalType, onClose }: AuthModalProps) {
       }
     } catch (error) {
       // Error is handled in the AuthContext
-      console.error("Registration failed:", error);
+      console.error('Registration failed:', error);
     }
   };
 
@@ -91,14 +86,14 @@ export function AuthModal({ isOpen, modalType, onClose }: AuthModalProps) {
   return (
     <>
       <LoginModal
-        isOpen={activeModal === "login" && isOpen}
+        isOpen={activeModal === 'login' && isOpen}
         onClose={onClose}
         onSwitchToRegister={handleSwitchToRegister}
         onLogin={handleLoginWrapper}
       />
 
       <RegisterModal
-        isOpen={activeModal === "register" && isOpen}
+        isOpen={activeModal === 'register' && isOpen}
         onClose={onClose}
         onSwitchToLogin={handleSwitchToLogin}
         onRegister={handleRegisterWrapper}

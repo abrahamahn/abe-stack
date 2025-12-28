@@ -1,16 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 
-import { AuthModal, AuthModalType, useAuth } from "../components/auth";
-import { useTheme } from "../components/theme";
-import { Button } from "../components/ui/Button";
-import { Link } from "../components/ui/Link";
-import "./main-layout.css";
+import { AuthModal, AuthModalType, useAuth } from '../components/auth';
+import { useTheme } from '../components/theme';
+import { Button } from '../components/ui/Button';
+import { Link } from '../components/ui/Link';
+import './main-layout.css';
 
-export default function MainLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [showSidebar, setShowSidebar] = useState(true);
   const [showRightPanel, setShowRightPanel] = useState(false);
   const [showTopbar, setShowTopbar] = useState(true);
@@ -21,7 +17,7 @@ export default function MainLayout({
     type: AuthModalType;
   }>({
     show: false,
-    type: "login",
+    type: 'login',
   });
 
   const { isAuthenticated, user, logout } = useAuth();
@@ -43,18 +39,18 @@ export default function MainLayout({
     checkIfMobile();
 
     // Add event listener
-    window.addEventListener("resize", checkIfMobile);
+    window.addEventListener('resize', checkIfMobile);
 
     // Cleanup
-    return () => window.removeEventListener("resize", checkIfMobile);
+    return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
 
   const openLoginModal = () => {
-    setAuthModal({ show: true, type: "login" });
+    setAuthModal({ show: true, type: 'login' });
   };
 
   const openRegisterModal = () => {
-    setAuthModal({ show: true, type: "register" });
+    setAuthModal({ show: true, type: 'register' });
   };
 
   const closeAuthModal = () => {
@@ -68,9 +64,9 @@ export default function MainLayout({
   // Get the appropriate theme icon
   const getThemeIcon = () => {
     if (isUsingSystemTheme) {
-      return "🖥️";
+      return '🖥️';
     } else {
-      return theme === "light" ? "🌙" : "☀️";
+      return theme === 'light' ? '🌙' : '☀️';
     }
   };
 
@@ -94,7 +90,7 @@ export default function MainLayout({
             <button
               className="mobile-menu-toggle"
               onClick={toggleMobileSidebar}
-              aria-label={showSidebar ? "Close menu" : "Open menu"}
+              aria-label={showSidebar ? 'Close menu' : 'Open menu'}
             >
               <span></span>
               <span></span>
@@ -104,26 +100,26 @@ export default function MainLayout({
           <Link
             to="/"
             style={{
-              textDecoration: "none",
-              display: "flex",
-              alignItems: "center",
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
             }}
           >
             <div className="logo">ABE Stack</div>
           </Link>
           <div className="top-bar-actions">
             <button
-              className={`theme-toggle-btn ${isUsingSystemTheme ? "system-theme" : ""}`}
+              className={`theme-toggle-btn ${isUsingSystemTheme ? 'system-theme' : ''}`}
               onClick={handleThemeButtonClick}
               aria-label={
                 isUsingSystemTheme
-                  ? "Using system theme preference"
-                  : `Switch to ${theme === "light" ? "dark" : "light"} mode`
+                  ? 'Using system theme preference'
+                  : `Switch to ${theme === 'light' ? 'dark' : 'light'} mode`
               }
               title={
                 isUsingSystemTheme
-                  ? "Using system theme preference (change in settings)"
-                  : `Switch to ${theme === "light" ? "dark" : "light"} mode`
+                  ? 'Using system theme preference (change in settings)'
+                  : `Switch to ${theme === 'light' ? 'dark' : 'light'} mode`
               }
             >
               {getThemeIcon()}
@@ -132,24 +128,20 @@ export default function MainLayout({
               <div className="user-profile">
                 <div
                   style={{
-                    width: "32px",
-                    height: "32px",
-                    borderRadius: "50%",
-                    backgroundColor: "var(--accent)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "white",
-                    fontWeight: "bold",
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    backgroundColor: 'var(--accent)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontWeight: 'bold',
                   }}
                 >
-                  {user?.displayName?.charAt(0) || "U"}
+                  {user?.displayName?.charAt(0) || 'U'}
                 </div>
-                {!isMobile && (
-                  <span className="username">
-                    {user?.displayName || "User"}
-                  </span>
-                )}
+                {!isMobile && <span className="username">{user?.displayName || 'User'}</span>}
                 <Button onClick={handleLogout}>Logout</Button>
               </div>
             ) : (
@@ -164,7 +156,7 @@ export default function MainLayout({
 
       <div className="content-area">
         {showSidebar && (
-          <div className={`left-panel ${isMobile ? "mobile" : ""}`}>
+          <div className={`left-panel ${isMobile ? 'mobile' : ''}`}>
             <nav className="main-nav">
               {isMobile && (
                 <div className="mobile-nav-header">
@@ -177,34 +169,19 @@ export default function MainLayout({
                   </button>
                 </div>
               )}
-              <Link
-                to="/"
-                onClick={isMobile ? () => setShowSidebar(false) : undefined}
-              >
+              <Link to="/" onClick={isMobile ? () => setShowSidebar(false) : undefined}>
                 Home
               </Link>
-              <Link
-                to="/dashboard"
-                onClick={isMobile ? () => setShowSidebar(false) : undefined}
-              >
+              <Link to="/dashboard" onClick={isMobile ? () => setShowSidebar(false) : undefined}>
                 Dashboard
               </Link>
-              <Link
-                to="/profile"
-                onClick={isMobile ? () => setShowSidebar(false) : undefined}
-              >
+              <Link to="/profile" onClick={isMobile ? () => setShowSidebar(false) : undefined}>
                 Profile
               </Link>
-              <Link
-                to="/upload"
-                onClick={isMobile ? () => setShowSidebar(false) : undefined}
-              >
+              <Link to="/upload" onClick={isMobile ? () => setShowSidebar(false) : undefined}>
                 Upload
               </Link>
-              <Link
-                to="/explore"
-                onClick={isMobile ? () => setShowSidebar(false) : undefined}
-              >
+              <Link to="/explore" onClick={isMobile ? () => setShowSidebar(false) : undefined}>
                 Explore
               </Link>
               <Link
@@ -213,16 +190,10 @@ export default function MainLayout({
               >
                 Notifications
               </Link>
-              <Link
-                to="/media"
-                onClick={isMobile ? () => setShowSidebar(false) : undefined}
-              >
+              <Link to="/media" onClick={isMobile ? () => setShowSidebar(false) : undefined}>
                 Media
               </Link>
-              <Link
-                to="/settings"
-                onClick={isMobile ? () => setShowSidebar(false) : undefined}
-              >
+              <Link to="/settings" onClick={isMobile ? () => setShowSidebar(false) : undefined}>
                 Settings
               </Link>
             </nav>
@@ -235,8 +206,8 @@ export default function MainLayout({
           <div className="right-panel">
             <h3>Additional Info</h3>
             <p>
-              This panel can contain contextual information, notifications, or
-              other supplementary content.
+              This panel can contain contextual information, notifications, or other supplementary
+              content.
             </p>
           </div>
         )}
@@ -248,34 +219,25 @@ export default function MainLayout({
           {!isMobile && (
             <div className="layout-controls">
               <button onClick={() => setShowSidebar(!showSidebar)}>
-                {showSidebar ? "Hide" : "Show"} Left Panel
+                {showSidebar ? 'Hide' : 'Show'} Left Panel
               </button>
               <button onClick={() => setShowRightPanel(!showRightPanel)}>
-                {showRightPanel ? "Hide" : "Show"} Right Panel
+                {showRightPanel ? 'Hide' : 'Show'} Right Panel
               </button>
               <button onClick={() => setShowTopbar(!showTopbar)}>
-                {showTopbar ? "Hide" : "Show"} Top Bar
+                {showTopbar ? 'Hide' : 'Show'} Top Bar
               </button>
-              <button onClick={() => setShowBottomBar(!showBottomBar)}>
-                Hide Bottom Bar
-              </button>
+              <button onClick={() => setShowBottomBar(!showBottomBar)}>Hide Bottom Bar</button>
             </div>
           )}
         </div>
       )}
 
       {isMobile && showSidebar && (
-        <div
-          className="mobile-overlay"
-          onClick={() => setShowSidebar(false)}
-        ></div>
+        <div className="mobile-overlay" onClick={() => setShowSidebar(false)}></div>
       )}
 
-      <AuthModal
-        isOpen={authModal.show}
-        modalType={authModal.type}
-        onClose={closeAuthModal}
-      />
+      <AuthModal isOpen={authModal.show} modalType={authModal.type} onClose={closeAuthModal} />
     </div>
   );
 }

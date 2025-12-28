@@ -2,87 +2,83 @@
 // The shift keycode map was removed so we can use Shift as a modifier.
 // For example: "Shift-]" instead of "}
 
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
-import { useRefCurrent } from "./useRefCurrent";
+import { useRefCurrent } from './useRefCurrent';
 
 // Simple capitalize utility (replaces lodash/capitalize)
 const capitalize = (str: string): string =>
   str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 
 const base: { [key: number]: string } = {
-  8: "Backspace",
-  9: "Tab",
-  10: "Enter",
-  12: "NumLock",
-  13: "Enter",
-  16: "Shift",
-  17: "Control",
-  18: "Alt",
-  20: "CapsLock",
-  27: "Escape",
-  32: " ",
-  33: "PageUp",
-  34: "PageDown",
-  35: "End",
-  36: "Home",
-  37: "ArrowLeft",
-  38: "ArrowUp",
-  39: "ArrowRight",
-  40: "ArrowDown",
-  44: "PrintScreen",
-  45: "Insert",
-  46: "Delete",
-  59: ";",
-  61: "=",
-  91: "Meta",
-  92: "Meta",
-  106: "*",
-  107: "+",
-  108: ",",
-  109: "-",
-  110: ".",
-  111: "/",
-  144: "NumLock",
-  145: "ScrollLock",
-  160: "Shift",
-  161: "Shift",
-  162: "Control",
-  163: "Control",
-  164: "Alt",
-  165: "Alt",
-  173: "-",
-  186: ";",
-  187: "=",
-  188: ",",
-  189: "-",
-  190: ".",
-  191: "/",
-  192: "`",
-  219: "[",
-  220: "\\",
-  221: "]",
+  8: 'Backspace',
+  9: 'Tab',
+  10: 'Enter',
+  12: 'NumLock',
+  13: 'Enter',
+  16: 'Shift',
+  17: 'Control',
+  18: 'Alt',
+  20: 'CapsLock',
+  27: 'Escape',
+  32: ' ',
+  33: 'PageUp',
+  34: 'PageDown',
+  35: 'End',
+  36: 'Home',
+  37: 'ArrowLeft',
+  38: 'ArrowUp',
+  39: 'ArrowRight',
+  40: 'ArrowDown',
+  44: 'PrintScreen',
+  45: 'Insert',
+  46: 'Delete',
+  59: ';',
+  61: '=',
+  91: 'Meta',
+  92: 'Meta',
+  106: '*',
+  107: '+',
+  108: ',',
+  109: '-',
+  110: '.',
+  111: '/',
+  144: 'NumLock',
+  145: 'ScrollLock',
+  160: 'Shift',
+  161: 'Shift',
+  162: 'Control',
+  163: 'Control',
+  164: 'Alt',
+  165: 'Alt',
+  173: '-',
+  186: ';',
+  187: '=',
+  188: ',',
+  189: '-',
+  190: '.',
+  191: '/',
+  192: '`',
+  219: '[',
+  220: '\\',
+  221: ']',
   222: "'",
 };
 
-const chrome =
-  typeof navigator != "undefined" && /Chrome\/(\d+)/.exec(navigator.userAgent);
-const safari =
-  typeof navigator != "undefined" && /Apple Computer/.test(navigator.vendor);
-const gecko =
-  typeof navigator != "undefined" && /Gecko\/\d+/.test(navigator.userAgent);
-const mac = typeof navigator != "undefined" && /Mac/.test(navigator.platform);
+const chrome = typeof navigator != 'undefined' && /Chrome\/(\d+)/.exec(navigator.userAgent);
+const safari = typeof navigator != 'undefined' && /Apple Computer/.test(navigator.vendor);
+const gecko = typeof navigator != 'undefined' && /Gecko\/\d+/.test(navigator.userAgent);
+const mac = typeof navigator != 'undefined' && /Mac/.test(navigator.platform);
 const ie =
-  typeof navigator != "undefined" &&
+  typeof navigator != 'undefined' &&
   /MSIE \d|Trident\/(?:[7-9]|\d{2,})\..*rv:(\d+)/.exec(navigator.userAgent);
-const brokenModifierNames =
-  (chrome && (mac || +chrome[1] < 57)) || (gecko && mac);
+const brokenModifierNames = (chrome && (mac || +chrome[1] < 57)) || (gecko && mac);
 
 // Fill in the digit keys
 for (let i = 0; i < 10; i++) base[48 + i] = base[96 + i] = String(i);
 
 // The function keys
-for (let i = 1; i <= 24; i++) base[i + 111] = "F" + i;
+for (let i = 1; i <= 24; i++) base[i + 111] = 'F' + i;
 
 // And the alphabetic keys
 for (let i = 65; i <= 90; i++) {
@@ -93,36 +89,32 @@ function keyName(event: KeyboardEvent) {
   const ignoreKey =
     (brokenModifierNames && (event.ctrlKey || event.altKey || event.metaKey)) ||
     ((safari || ie) && event.shiftKey && event.key && event.key.length == 1);
-  let name =
-    (!ignoreKey && event.key) ||
-    base[event.keyCode] ||
-    event.key ||
-    "Unidentified";
+  let name = (!ignoreKey && event.key) || base[event.keyCode] || event.key || 'Unidentified';
   // Edge sometimes produces wrong names (Issue #3)
-  if (name == "Esc") name = "Escape";
-  if (name == "Del") name = "Delete";
+  if (name == 'Esc') name = 'Escape';
+  if (name == 'Del') name = 'Delete';
   // https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/8860571/
-  if (name == "Left") name = "ArrowLeft";
-  if (name == "Up") name = "ArrowUp";
-  if (name == "Right") name = "ArrowRight";
-  if (name == "Down") name = "ArrowDown";
+  if (name == 'Left') name = 'ArrowLeft';
+  if (name == 'Up') name = 'ArrowUp';
+  if (name == 'Right') name = 'ArrowRight';
+  if (name == 'Down') name = 'ArrowDown';
   return name;
 }
 
 // Aliases for various keyboard events, allowing shortcuts to be defined
 // using some more colloquial terms.
 const keyboardAliases: Record<string, string | undefined> = {
-  ctrl: "control",
-  mod: "meta",
-  cmd: "meta",
-  " ": "space",
-  left: "arrowleft",
-  right: "arrowright",
-  down: "arrowdown",
-  up: "arrowup",
-  option: "alt",
-  opt: "alt",
-  delete: "backspace",
+  ctrl: 'control',
+  mod: 'meta',
+  cmd: 'meta',
+  ' ': 'space',
+  left: 'arrowleft',
+  right: 'arrowright',
+  down: 'arrowdown',
+  up: 'arrowup',
+  option: 'alt',
+  opt: 'alt',
+  delete: 'backspace',
 };
 
 // Used for view test keyboard event mocking
@@ -134,18 +126,17 @@ export function shortcutToEvent(shortcut: string) {
 
   const parsed: ParsedShortcut = {};
   for (const key of keys) {
-    if (key === "meta") parsed.metaKey = true;
-    else if (key === "control") parsed.ctrlKey = true;
-    else if (key === "alt") parsed.altKey = true;
-    else if (key === "shift") parsed.shiftKey = true;
+    if (key === 'meta') parsed.metaKey = true;
+    else if (key === 'control') parsed.ctrlKey = true;
+    else if (key === 'alt') parsed.altKey = true;
+    else if (key === 'shift') parsed.shiftKey = true;
     // Used to emulate the behavior that all non-alphabetic keys in keyboard events
     // are capitalized:
     // https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values
-    else
-      parsed.key = key.length === 1 ? key : key[0].toUpperCase() + key.slice(1);
+    else parsed.key = key.length === 1 ? key : key[0].toUpperCase() + key.slice(1);
   }
 
-  return new KeyboardEvent("keydown", parsed);
+  return new KeyboardEvent('keydown', parsed);
 }
 
 interface ParsedShortcut {
@@ -164,10 +155,10 @@ function parseShortcut(shortcut: string) {
 
   const parsed: ParsedShortcut = {};
   for (const key of keys) {
-    if (key === "meta") parsed.metaKey = true;
-    else if (key === "control") parsed.ctrlKey = true;
-    else if (key === "alt") parsed.altKey = true;
-    else if (key === "shift") parsed.shiftKey = true;
+    if (key === 'meta') parsed.metaKey = true;
+    else if (key === 'control') parsed.ctrlKey = true;
+    else if (key === 'alt') parsed.altKey = true;
+    else if (key === 'shift') parsed.shiftKey = true;
     else parsed.key = key.toLowerCase();
   }
   return parsed;
@@ -175,16 +166,16 @@ function parseShortcut(shortcut: string) {
 
 function formatShortcutKeys(parsed: ParsedShortcut) {
   const keys: Array<string> = [];
-  if (parsed.shiftKey) keys.push("shift");
-  if (parsed.altKey) keys.push("alt");
-  if (parsed.ctrlKey) keys.push("control");
-  if (parsed.metaKey) keys.push("meta");
+  if (parsed.shiftKey) keys.push('shift');
+  if (parsed.altKey) keys.push('alt');
+  if (parsed.ctrlKey) keys.push('control');
+  if (parsed.metaKey) keys.push('meta');
   if (parsed.key) keys.push(parsed.key);
   return keys;
 }
 
 function formatShortcut(parsed: ParsedShortcut) {
-  return formatShortcutKeys(parsed).join("-");
+  return formatShortcutKeys(parsed).join('-');
 }
 
 function normalizeShortcut(shortcut: string) {
@@ -192,14 +183,14 @@ function normalizeShortcut(shortcut: string) {
 }
 
 const modifierCodes = new Set([
-  "ControlLeft",
-  "ControlRight",
-  "ShiftLeft",
-  "ShiftRight",
-  "AltLeft",
-  "AltRight",
-  "MetaLeft",
-  "MetaRight",
+  'ControlLeft',
+  'ControlRight',
+  'ShiftLeft',
+  'ShiftRight',
+  'AltLeft',
+  'AltRight',
+  'MetaLeft',
+  'MetaRight',
 ]);
 
 function parseKeyboardEvent(event: KeyboardEvent) {
@@ -223,16 +214,16 @@ export function isShortcut(shortcut: string, event: KeyboardEvent) {
 const isMac = true as boolean; // process.platform === "darwin"
 
 const shortKeys: Record<string, string> = {
-  meta: isMac ? "⌘" : "^",
-  control: "^",
-  alt: "⌥",
-  shift: "⇧",
-  enter: "↵",
-  tab: "⇥",
-  arrowleft: "←",
-  arrowright: "→",
-  arrowup: "↑",
-  arrowdown: "↓",
+  meta: isMac ? '⌘' : '^',
+  control: '^',
+  alt: '⌥',
+  shift: '⇧',
+  enter: '↵',
+  tab: '⇥',
+  arrowleft: '←',
+  arrowright: '→',
+  arrowup: '↑',
+  arrowdown: '↓',
 };
 
 export function displayShortcut(shortcut: string) {
@@ -241,7 +232,7 @@ export function displayShortcut(shortcut: string) {
   return keys
     .map((char) => shortKeys[char] || char)
     .map((char) => capitalize(char))
-    .join("");
+    .join('');
 }
 
 type KeyboardEventHandler = (event: KeyboardEvent) => void;
@@ -258,9 +249,9 @@ export function useShortcut(shortcut: string, fn: () => void) {
         fnRef.current();
       }
     };
-    window.addEventListener("keydown", onKeydown);
+    window.addEventListener('keydown', onKeydown);
     return () => {
-      window.removeEventListener("keydown", onKeydown);
+      window.removeEventListener('keydown', onKeydown);
     };
   }, [fnRef, shortcutRef]);
 }
