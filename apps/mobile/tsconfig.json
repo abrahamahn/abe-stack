@@ -12,7 +12,7 @@
     "strict": true,
     "resolveJsonModule": true,
     "baseUrl": ".",
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "5.0",
     "paths": {
       "@/*": ["./src/*"],
       "@abe-stack/shared": ["../../packages/shared/src"],
