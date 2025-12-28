@@ -64,8 +64,9 @@ async function start(): Promise<void> {
   const portCandidates = uniquePorts([apiPortPreference, ...API_PORT_FALLBACKS]);
 
   try {
-    const connectionString = await resolveConnectionStringWithFallback(env);
-    const { app } = await createServer(env, connectionString);
+    const connectionString: string = await resolveConnectionStringWithFallback(env);
+    const server = await createServer(env, connectionString);
+    const app = server.app;
 
     const port = await listenWithFallback(app, host, portCandidates);
     app.log.info(`Server listening on http://${host}:${String(port)}`);

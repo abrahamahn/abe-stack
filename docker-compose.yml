@@ -1,3 +1,5 @@
+name: abe-stack
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -41,6 +43,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: abe-stack-api
     env_file:
       - ./config/.env.development
     environment:
@@ -61,6 +64,7 @@ services:
   web:
     image: node:20
     working_dir: /app
+    container_name: abe-stack-web
     env_file:
       - ./config/.env.development
     environment:
