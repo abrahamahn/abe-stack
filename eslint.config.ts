@@ -1,14 +1,21 @@
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { configs as jsConfigs } from '@eslint/js';
 import eslintPluginImport from 'eslint-plugin-import';
 import tseslint from 'typescript-eslint';
 
 import type { Linter } from 'eslint';
 
 const tsconfigRootDir: string = path.dirname(fileURLToPath(import.meta.url));
-const jsParser: Linter.Parser | undefined = jsConfigs.recommended.languageOptions?.parser;
+const require = createRequire(import.meta.url);
+let jsConfigs: { recommended?: { languageOptions?: { parser?: Linter.Parser } } } = {};
+try {
+  jsConfigs = require('@eslint/js').configs;
+} catch {
+  jsConfigs = {};
+}
+const jsParser: Linter.Parser | undefined = jsConfigs.recommended?.languageOptions?.parser;
 
 export default [
   {
@@ -29,7 +36,7 @@ export default [
       'apps/server/vitest.config.ts',
     ],
   },
-  jsConfigs.recommended,
+  jsConfigs.recommended ?? {},
   ...tseslint.configs.strictTypeChecked,
   // Ensure TypeScript-ESLint has an explicit root in monorepos.
   {
