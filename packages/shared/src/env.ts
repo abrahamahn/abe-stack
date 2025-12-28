@@ -57,9 +57,9 @@ export const serverEnvSchema = z
     // Auto-construct DATABASE_URL if not provided
     DATABASE_URL:
       env.DATABASE_URL ||
-      `postgresql://${env.POSTGRES_USER}:${env.POSTGRES_PASSWORD}@${env.POSTGRES_HOST}:${env.POSTGRES_PORT}/${env.POSTGRES_DB}`,
-    // Auto-construct REDIS_URL if not provided
-    REDIS_URL: env.REDIS_URL || `redis://${env.REDIS_HOST}:${env.REDIS_PORT}`,
+      `postgresql://${env.POSTGRES_USER}:${env.POSTGRES_PASSWORD}@${env.POSTGRES_HOST}:${String(env.POSTGRES_PORT)}/${env.POSTGRES_DB}`,
+
+    REDIS_URL: env.REDIS_URL || `redis://${env.REDIS_HOST}:${String(env.REDIS_PORT)}`,
   }))
   .refine(
     (env) => {

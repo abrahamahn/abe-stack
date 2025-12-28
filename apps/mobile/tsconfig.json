@@ -11,8 +11,6 @@
     "skipLibCheck": true,
     "strict": true,
     "resolveJsonModule": true,
-    "baseUrl": ".",
-    "ignoreDeprecations": "5.0",
     "paths": {
       "@/*": ["./src/*"],
       "@abe-stack/shared": ["../../packages/shared/src"],

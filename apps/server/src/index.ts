@@ -26,7 +26,7 @@ async function start(): Promise<void> {
   const host = process.env.HOST || DEFAULT_HOST;
 
   try {
-    const { app } = await createServer();
+    const { app } = await createServer(env);
 
     await app.listen({ port, host });
     app.log.info(`Server listening on http://${host}:${String(port)}`);

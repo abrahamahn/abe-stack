@@ -28,6 +28,7 @@ export function registerRoutes(app: FastifyInstance): void {
   });
 
   s.registerRouter(apiContract, router, app);
+  app.register(router as unknown as Parameters<FastifyInstance['register']>[0]);
 }
 
 async function handleRegister(

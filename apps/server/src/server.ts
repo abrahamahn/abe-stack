@@ -6,6 +6,8 @@ import Fastify, { type FastifyInstance } from 'fastify';
 
 import { registerRoutes } from './routes';
 
+import type { ServerEnv } from '@abe-stack/shared';
+
 /**
  * Create and configure Fastify server
  * This function is pure - it only creates the server without starting it
@@ -13,7 +15,7 @@ import { registerRoutes } from './routes';
  */
 type AppInstance = FastifyInstance;
 
-export async function createServer(): Promise<{
+export async function createServer(env: ServerEnv): Promise<{
   app: AppInstance;
   db: ReturnType<typeof createDbClient>;
 }> {
@@ -48,7 +50,7 @@ export async function createServer(): Promise<{
   await app.register(helmet);
 
   // Initialize database connection
-  const db = createDbClient(buildConnectionString(process.env));
+  const db = createDbClient(buildConnectionString(env));
 
   // Decorate Fastify instance with db
   app.decorate('db', db);

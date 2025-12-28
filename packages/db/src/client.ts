@@ -3,16 +3,18 @@ import postgres from 'postgres';
 
 import * as schema from './schema';
 
-export function buildConnectionString(env: NodeJS.ProcessEnv = process.env): string {
-  if (env.DATABASE_URL) {
+type DbEnv = Record<string, string | number | undefined>;
+
+export function buildConnectionString(env: DbEnv = process.env): string {
+  if (env.DATABASE_URL && typeof env.DATABASE_URL === 'string') {
     return env.DATABASE_URL;
   }
 
-  const user = env.POSTGRES_USER || env.DB_USER || 'postgres';
-  const password = env.POSTGRES_PASSWORD ?? env.DB_PASSWORD ?? '';
-  const host = env.POSTGRES_HOST || env.DB_HOST || 'localhost';
+  const user = String(env.POSTGRES_USER || env.DB_USER || 'postgres');
+  const password = String(env.POSTGRES_PASSWORD || env.DB_PASSWORD || '');
+  const host = String(env.POSTGRES_HOST || env.DB_HOST || 'localhost');
   const port = String(env.POSTGRES_PORT || env.DB_PORT || 5432);
-  const database = env.POSTGRES_DB || env.DB_NAME || 'abe_stack_dev';
+  const database = String(env.POSTGRES_DB || env.DB_NAME || 'abe_stack_dev');
 
   const auth = password ? `${user}:${password}` : user;
   return `postgres://${auth}@${host}:${port}/${database}`;
