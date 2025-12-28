@@ -1,0 +1,57 @@
+{
+  "name": "@abe-stack/desktop",
+  "version": "1.0.0",
+  "description": "Electron desktop application for abe-stack",
+  "main": "dist/electron/main.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:renderer\" \"npm run dev:electron\"",
+    "dev:renderer": "vite --config vite.config.ts",
+    "dev:electron": "tsc -p electron/tsconfig.json && electron dist/electron/main.js",
+    "build": "npm run build:renderer && npm run build:electron",
+    "build:renderer": "vite build --config vite.config.ts",
+    "build:electron": "tsc -p electron/tsconfig.json",
+    "start": "electron dist/electron/main.js",
+    "package": "electron-builder",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@abe-stack/shared": "workspace:*",
+    "@abe-stack/ui": "workspace:*",
+    "@tanstack/react-query": "^5.59.9",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "concurrently": "^9.2.1",
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.0",
+    "vite-plugin-electron": "^0.29.0"
+  },
+  "build": {
+    "appId": "com.abe-stack.desktop",
+    "productName": "Abe Stack",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "public/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}

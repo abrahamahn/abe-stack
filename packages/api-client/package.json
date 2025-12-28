@@ -1,0 +1,23 @@
+{
+  "name": "@abe-stack/api-client",
+  "version": "1.0.0",
+  "description": "Shared API client utilities for abe-stack (web/desktop/mobile)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "dev": "tsc --watch --project tsconfig.json",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit"
+  },
+  "author": "",
+  "license": "ISC",
+  "sideEffects": false,
+  "dependencies": {
+    "@tanstack/react-query": "^5.59.9",
+    "@abe-stack/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

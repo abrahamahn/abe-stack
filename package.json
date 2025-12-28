@@ -1,0 +1,87 @@
+{
+  "name": "@abe-stack/root",
+  "version": "1.0.0",
+  "description": "A modern full-stack monorepo with PERN stack - Web, Desktop, Mobile, and Server",
+  "private": true,
+  "engines": {
+    "node": ">=18.19 <25"
+  },
+  "scripts": {
+    "_development": "=== Development Commands ===",
+    "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=@abe-stack/web",
+    "dev:server": "turbo run dev --filter=@abe-stack/server",
+    "dev:desktop": "turbo run dev --filter=@abe-stack/desktop",
+    "dev:mobile": "turbo run dev --filter=@abe-stack/mobile",
+    "_build": "=== Build Commands ===",
+    "build": "turbo run build",
+    "build:web": "turbo run build --filter=@abe-stack/web",
+    "build:server": "turbo run build --filter=@abe-stack/server",
+    "build:desktop": "turbo run build --filter=@abe-stack/desktop",
+    "build:shared": "turbo run build --filter=@abe-stack/shared",
+    "build:ui": "turbo run build --filter=@abe-stack/ui",
+    "_test": "=== Testing Commands ===",
+    "test": "turbo run test",
+    "test:web": "turbo run test --filter=@abe-stack/web",
+    "test:server": "turbo run test --filter=@abe-stack/server",
+    "test:desktop": "turbo run test --filter=@abe-stack/desktop",
+    "_quality": "=== Code Quality Commands ===",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "type-check": "turbo run type-check",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "_utilities": "=== Utility Commands ===",
+    "clean": "turbo run clean && rm -rf node_modules .turbo",
+    "clean:build": "rm -rf apps/*/dist packages/*/dist",
+    "ports:check": "node -e \"const net = require('net'); const ports = [8080, 5173, 5432]; ports.forEach(port => { const server = net.createServer(); server.listen(port, () => { console.log(`Port ${port} is free`); server.close(); }).on('error', () => console.log(`Port ${port} is in use`)); });\"",
+    "dev:start": "tsx tools/start-dev.ts",
+    "dev:start:quiet": "tsx tools/start-dev.ts --quiet",
+    "dev:start:verbose": "tsx tools/start-dev.ts --verbose",
+    "dev:start:force": "tsx tools/start-dev.ts --force",
+    "dev:export-configs": "node tools/dev/export-dev-env.js",
+    "db:restart": "tsx tools/restart-db.ts",
+    "setup": "tsx tools/setup.ts",
+    "prepare": "simple-git-hooks",
+    "test:coverage": "turbo run test -- --coverage"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^25.0.3",
+    "cross-env": "^10.1.0",
+    "eslint": "^9.39.2",
+    "eslint-plugin-import": "^2.32.0",
+    "prettier": "^3.7.4",
+    "simple-git-hooks": "^2.11.1",
+    "lint-staged": "^15.2.10",
+    "tsx": "^4.21.0",
+    "turbo": "^2.7.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.50.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "esbuild": "^0.25.12",
+      "metro-react-native-babel-preset": "npm:@react-native/babel-preset@^0.76.0",
+      "@types/react-native": "^0.76.0"
+    }
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged",
+    "pre-push": "pnpm lint && pnpm type-check"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,css,scss,md}": [
+      "pnpm prettier --check"
+    ],
+    "apps/**/{ts,tsx}": [
+      "pnpm lint --filter @abe-stack/web",
+      "pnpm lint --filter @abe-stack/desktop",
+      "pnpm lint --filter @abe-stack/mobile"
+    ],
+    "apps/server/**/*.{ts,tsx}": [
+      "pnpm lint --filter @abe-stack/server"
+    ]
+  },
+  "packageManager": "pnpm@9.0.0"
+}

@@ -1,0 +1,90 @@
+.btn {
+  font-family: inherit;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    color 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid transparent;
+  outline: none;
+}
+
+.btn:focus {
+  box-shadow: 0 0 0 3px var(--transparent1);
+}
+
+/* Button variants */
+.btn-primary {
+  background-color: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.btn-primary:hover {
+  background-color: var(--blue);
+  border-color: var(--blue);
+}
+
+.btn-primary:active {
+  background-color: var(--blue);
+  border-color: var(--blue);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--transparent1);
+  border-color: var(--text-secondary);
+}
+
+.btn-secondary:active {
+  background-color: var(--transparent2);
+  border-color: var(--text-secondary);
+}
+
+.btn-text {
+  background-color: transparent;
+  color: var(--accent);
+  border-color: transparent;
+  padding: 0;
+}
+
+.btn-text:hover {
+  color: var(--blue);
+  text-decoration: underline;
+}
+
+.btn-text:active {
+  color: var(--blue);
+}
+
+/* Button sizes */
+.btn-small {
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  height: 32px;
+}
+
+.btn-medium {
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  height: 40px;
+}
+
+.btn-large {
+  font-size: 1.125rem;
+  padding: 0.75rem 1.5rem;
+  height: 48px;
+}
