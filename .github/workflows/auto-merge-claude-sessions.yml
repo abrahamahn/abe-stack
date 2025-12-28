@@ -31,15 +31,6 @@ jobs:
           echo "current=$CURRENT_BRANCH" >> $GITHUB_OUTPUT
           echo "Current Claude branch: $CURRENT_BRANCH"
 
-      - name: Delete old claude-latest branch (if exists)
-        run: |
-          if git show-ref --verify --quiet refs/remotes/origin/claude-latest; then
-            echo "Deleting old claude-latest branch..."
-            git push origin --delete claude-latest || true
-          else
-            echo "No existing claude-latest branch to delete"
-          fi
-
       - name: Create dev branch if it doesn't exist
         run: |
           git fetch origin
@@ -80,20 +71,6 @@ jobs:
           git push origin dev
           echo "✅ Dev branch updated (GROUND TRUTH)"
 
-      - name: Rename current branch to claude-latest
-        if: steps.merge.outputs.status == 'success'
-        run: |
-          echo "Renaming ${{ steps.branch.outputs.current }} to claude-latest..."
-          git push origin ${{ steps.branch.outputs.current }}:claude-latest
-          echo "✅ Branch renamed to claude-latest"
-
-      - name: Delete original Claude session branch
-        if: steps.merge.outputs.status == 'success'
-        run: |
-          echo "Deleting original branch ${{ steps.branch.outputs.current }}..."
-          git push origin --delete ${{ steps.branch.outputs.current }} || true
-          echo "✅ Original session branch deleted"
-
       - name: Summary
         if: steps.merge.outputs.status == 'success'
         run: |
@@ -102,9 +79,11 @@ jobs:
           echo "════════════════════════════════════════════════════════"
           echo ""
           echo "Branch State:"
-          echo "  • Original: ${{ steps.branch.outputs.current }} (deleted)"
-          echo "  • Latest:   claude-latest (ephemeral, kept for reference)"
+          echo "  • Session:      ${{ steps.branch.outputs.current }} (active, kept alive)"
           echo "  • Ground Truth: dev (updated and pushed)"
+          echo ""
+          echo "This allows multiple pushes to the same Claude session branch."
+          echo "The session branch will be cleaned up when the session ends."
           echo ""
           echo "Next Steps:"
           echo "  → Pull latest: git checkout dev && git pull origin dev"
@@ -126,7 +105,8 @@ jobs:
           echo "  git add ."
           echo "  git commit -m 'chore: merge Claude session with conflict resolution'"
           echo "  git push origin dev"
-          echo "  git push origin --delete ${{ steps.branch.outputs.current }}"
+          echo ""
+          echo "The Claude session branch remains active for continued work."
           echo ""
           echo "════════════════════════════════════════════════════════"
           exit 1
