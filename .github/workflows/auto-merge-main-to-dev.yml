@@ -1,0 +1,54 @@
+name: Sync main -> dev
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-main-to-dev
+  cancel-in-progress: false
+
+jobs:
+  merge-main-into-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Ensure dev exists
+        run: |
+          git fetch origin
+          if ! git show-ref --verify --quiet refs/remotes/origin/dev; then
+            echo "Creating dev from main..."
+            git checkout -b dev origin/main
+            git push -u origin dev
+          fi
+
+      - name: Merge main into dev
+        run: |
+          git checkout dev
+          git pull origin dev
+
+          # Merge the latest main
+          git fetch origin main
+          if git merge --no-ff origin/main -m "chore: sync main -> dev"; then
+            echo "✅ Merge successful"
+          else
+            echo "❌ Merge conflict: main -> dev requires manual resolution"
+            git merge --abort
+            exit 1
+          fi
+
+      - name: Push dev
+        run: git push origin dev

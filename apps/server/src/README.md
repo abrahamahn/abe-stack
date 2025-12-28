@@ -555,6 +555,7 @@ describe('UserService', () => {
    ```
 
 4. **Register with DI Container:**
+
    ```typescript
    container.bind<IPaymentService>(TYPES.PaymentService).to(PaymentService);
    ```
@@ -659,3 +660,6 @@ When contributing to the server codebase:
 6. Ensure proper error handling and logging
 
 The ABE Stack server provides a solid foundation for building scalable, maintainable backend applications with enterprise-level patterns and practices.
+
+<!-- markdownlint-disable MD036 MD040 -->
+<!-- cspell:ignore Millis -->

@@ -1,6 +1,8 @@
 import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
 
+export * from './native';
+
 // Shared schemas
 export const errorResponseSchema = z.object({
   message: z.string(),

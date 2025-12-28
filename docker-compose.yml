@@ -1,17 +1,17 @@
-version: '3.9'
-
 services:
   postgres:
     image: postgres:16-alpine
     container_name: abe-stack-postgres
     env_file:
-      - ./config/env/.env.development
+      - ./config/.env.development
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - '${POSTGRES_PORT}:5432'
+      - '5432:5432'
+      - '5433:5432'
+      - '5434:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -25,9 +25,9 @@ services:
     image: redis:7-alpine
     container_name: abe-stack-redis
     env_file:
-      - ./config/env/.env.development
-    ports:
-      - '${REDIS_PORT}:6379'
+      - ./config/.env.development
+    expose:
+      - '6379'
     volumes:
       - redis_data:/data
     healthcheck:
@@ -36,6 +36,50 @@ services:
       timeout: 3s
       retries: 5
     restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - ./config/.env.development
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8080
+      API_PORT: 8080
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+      NODE_ENV: production
+      PNPM_WORKSPACE_ROOT: /app
+    working_dir: /app
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - '8080:8080'
+
+  web:
+    image: node:20
+    working_dir: /app
+    env_file:
+      - ./config/.env.development
+    environment:
+      APP_PORT: 5173
+      API_PORT: 8080
+      VITE_HOST: 0.0.0.0
+      CI: 'true'
+      PNPM_WORKSPACE_ROOT: /app
+    volumes:
+      - ./:/app
+    command: >
+      sh -c "corepack enable &&
+             pnpm install --frozen-lockfile &&
+             pnpm --filter @abe-stack/web build &&
+             pnpm --filter @abe-stack/web preview --host 0.0.0.0 --port 4173"
+    depends_on:
+      - api
+    ports:
+      - '4173:4173'
 
 volumes:
   postgres_data:

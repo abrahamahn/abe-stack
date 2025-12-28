@@ -32,7 +32,10 @@
     "export": "node tools/export-code.ts",
     "db:restart": "tsx tools/restart-db.ts",
     "setup": "tsx tools/setup.ts",
-    "prepare": "simple-git-hooks"
+    "prepare": "simple-git-hooks",
+    "docker:up": "docker compose --env-file config/.env.development up --build",
+    "docker:down": "docker compose --env-file config/.env.development down",
+    "docker:logs": "docker compose --env-file config/.env.development logs -f"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",

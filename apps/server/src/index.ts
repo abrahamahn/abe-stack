@@ -1,5 +1,6 @@
 import path from 'path';
 
+import { resolveConnectionStringWithFallback } from '@abe-stack/db';
 import { loadServerEnv } from '@abe-stack/shared';
 import dotenvFlow from 'dotenv-flow';
 
@@ -16,22 +17,66 @@ const env = loadServerEnv(process.env);
 
 const DEFAULT_PORT = 8080;
 const DEFAULT_HOST = '0.0.0.0';
+const API_PORT_FALLBACKS = [DEFAULT_PORT, DEFAULT_PORT + 1, DEFAULT_PORT + 2, DEFAULT_PORT + 3];
+
+function uniquePorts(ports: Array<number | undefined>): number[] {
+  return Array.from(new Set(ports.filter((port): port is number => Number.isFinite(port))));
+}
+
+async function listenWithFallback(
+  app: Awaited<ReturnType<typeof createServer>>['app'],
+  host: string,
+  ports: number[],
+): Promise<number> {
+  const formatPort = (port: number): string => String(port);
+
+  for (const port of ports) {
+    try {
+      await app.listen({ port, host });
+      process.env.API_PORT = String(port);
+
+      if (port !== ports[0]) {
+        app.log.warn(`Default port in use. Fallback to ${formatPort(port)}.`);
+      }
+
+      return port;
+    } catch (error: unknown) {
+      if (isAddrInUse(error)) {
+        app.log.warn(`Port ${formatPort(port)} is in use, trying the next one...`);
+        continue;
+      }
+      throw error;
+    }
+  }
+
+  throw new Error(`No available API ports found from list: ${ports.join(', ')}`);
+}
 
 /**
  * Start the server - this is the only entry point
  * Server creation logic is in ./server.ts for testability
  */
 async function start(): Promise<void> {
-  const port = Number(process.env.API_PORT || env.PORT || DEFAULT_PORT);
   const host = process.env.HOST || DEFAULT_HOST;
+  const apiPortPreference = Number(
+    process.env.API_PORT || env.API_PORT || env.PORT || DEFAULT_PORT,
+  );
+  const portCandidates = uniquePorts([apiPortPreference, ...API_PORT_FALLBACKS]);
 
   try {
-    const { app } = await createServer();
+    const connectionString = await resolveConnectionStringWithFallback(env);
+    const { app } = await createServer(env, connectionString);
 
-    await app.listen({ port, host });
+    const port = await listenWithFallback(app, host, portCandidates);
     app.log.info(`Server listening on http://${host}:${String(port)}`);
-  } catch (error) {
-    process.stderr.write(`Failed to start server ${String(error)}\n`);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      process.stderr.write(`Failed to start server ${error.message}\n`);
+    } else if (typeof error === 'string') {
+      process.stderr.write(`Failed to start server ${error}\n`);
+    } else {
+      process.stderr.write('Failed to start server\n');
+    }
     process.exit(1);
   }
 }
@@ -39,4 +84,13 @@ async function start(): Promise<void> {
 // Start server if this file is run directly
 if (require.main === module) {
   void start();
+}
+
+function isAddrInUse(error: unknown): error is NodeJS.ErrnoException {
+  return Boolean(
+    error &&
+    typeof error === 'object' &&
+    'code' in error &&
+    (error as Partial<NodeJS.ErrnoException>).code === 'EADDRINUSE',
+  );
 }

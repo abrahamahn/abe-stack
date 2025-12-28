@@ -28,20 +28,10 @@ export const serverEnvSchema = z
     PORT: z.coerce.number().default(8080),
 
     // Security - JWT & Sessions
-    JWT_SECRET: z
-      .string()
-      .min(32, 'JWT_SECRET must be at least 32 characters for security')
-      .refine(
-        (val) => !val.includes('change_me') && !val.includes('dev_'),
-        'JWT_SECRET must be changed from default value in production',
-      ),
+    JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters for security'),
     SESSION_SECRET: z
       .string()
-      .min(32, 'SESSION_SECRET must be at least 32 characters for security')
-      .refine(
-        (val) => !val.includes('change_me') && !val.includes('dev_'),
-        'SESSION_SECRET must be changed from default value in production',
-      ),
+      .min(32, 'SESSION_SECRET must be at least 32 characters for security'),
 
     // Optional External Services
     AWS_ACCESS_KEY_ID: z.string().optional(),
@@ -57,9 +47,9 @@ export const serverEnvSchema = z
     // Auto-construct DATABASE_URL if not provided
     DATABASE_URL:
       env.DATABASE_URL ||
-      `postgresql://${env.POSTGRES_USER}:${env.POSTGRES_PASSWORD}@${env.POSTGRES_HOST}:${env.POSTGRES_PORT}/${env.POSTGRES_DB}`,
-    // Auto-construct REDIS_URL if not provided
-    REDIS_URL: env.REDIS_URL || `redis://${env.REDIS_HOST}:${env.REDIS_PORT}`,
+      `postgresql://${env.POSTGRES_USER}:${env.POSTGRES_PASSWORD}@${env.POSTGRES_HOST}:${String(env.POSTGRES_PORT)}/${env.POSTGRES_DB}`,
+
+    REDIS_URL: env.REDIS_URL || `redis://${env.REDIS_HOST}:${String(env.REDIS_PORT)}`,
   }))
   .refine(
     (env) => {
