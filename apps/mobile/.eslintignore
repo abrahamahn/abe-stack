@@ -1,0 +1,10 @@
+# Configuration files that use CommonJS
+babel.config.js
+metro.config.js
+
+# Build output
+android/
+ios/
+.expo/
+dist/
+node_modules/
