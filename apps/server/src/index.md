@@ -21,28 +21,28 @@ The core function that handles the server initialization process:
 ```typescript
 export async function initializeServer() {
   try {
-    console.log("Starting server initialization...");
+    console.log('Starting server initialization...');
 
     // Get the existing container
     if (!container) {
-      throw new Error("DI container not initialized");
+      throw new Error('DI container not initialized');
     }
-    console.log("Container loaded");
+    console.log('Container loaded');
 
     // Initialize logger first
     const logger = container.get<ILoggerService>(TYPES.LoggerService);
-    console.log("Logger service initialized");
-    logger.info("Logger service initialized successfully");
+    console.log('Logger service initialized');
+    logger.info('Logger service initialized successfully');
 
     // Get config from container
     const configService = container.get<ConfigService>(TYPES.ConfigService);
     const config = {
-      port: configService.getNumber("PORT") || 8080,
-      host: configService.getString("HOST") || "localhost",
-      isProduction: process.env.NODE_ENV === "production",
+      port: configService.getNumber('PORT') || 8080,
+      host: configService.getString('HOST') || 'localhost',
+      isProduction: process.env.NODE_ENV === 'production',
       storagePath: path.resolve(
         process.cwd(),
-        configService.getString("STORAGE_PATH") || "uploads",
+        configService.getString('STORAGE_PATH') || 'uploads',
       ),
     };
 
@@ -55,9 +55,9 @@ export async function initializeServer() {
     // Initialize the server
     await serverManager.initialize(config);
 
-    logger.info("Server initialization completed successfully");
+    logger.info('Server initialization completed successfully');
   } catch (error) {
-    console.error("Failed to start server:", error);
+    console.error('Failed to start server:', error);
     process.exit(1);
   }
 }
@@ -68,22 +68,18 @@ export async function initializeServer() {
 The server initialization follows this sequence:
 
 1. **DI Container Verification**
-
    - Ensures the dependency injection container is properly initialized
 
 2. **Logger Initialization**
-
    - Gets the logger service from the DI container
    - Enables structured logging for all subsequent operations
 
 3. **Configuration Loading**
-
    - Retrieves configuration settings via the config service
    - Sets up server port, host, environment mode, and storage paths
    - Provides fallback values for any missing configuration
 
 4. **Server Manager Setup**
-
    - Creates the server manager instance with required dependencies
    - Sets up graceful shutdown handlers for clean termination
    - Initializes the HTTP server with the loaded configuration
@@ -110,7 +106,7 @@ The file automatically executes the server initialization when imported:
 ```typescript
 // Start the server
 initializeServer().catch((error) => {
-  console.error("Failed to start server:", error);
+  console.error('Failed to start server:', error);
   process.exit(1);
 });
 ```
@@ -124,13 +120,13 @@ This design allows the server to start immediately when the entry point is execu
 The file depends on several core modules:
 
 ```typescript
-import path from "path";
-import "reflect-metadata";
-import { container } from "./infrastructure/di";
-import { ServerManager } from "./infrastructure/server";
-import TYPES from "./infrastructure/di/types";
-import { ILoggerService } from "./infrastructure/logging";
-import { ConfigService } from "./infrastructure/config";
+import path from 'path';
+import 'reflect-metadata';
+import { container } from './infrastructure/di';
+import { ServerManager } from './infrastructure/server';
+import TYPES from './infrastructure/di/types';
+import { ILoggerService } from './infrastructure/logging';
+import { ConfigService } from './infrastructure/config';
 ```
 
 - `reflect-metadata`: Required for the dependency injection system
@@ -160,9 +156,9 @@ Any uncaught errors during initialization will:
 When testing the server, you can import and call `initializeServer` manually:
 
 ```typescript
-import { initializeServer } from "../src/server";
+import { initializeServer } from '../src/server';
 
-describe("Server Integration", () => {
+describe('Server Integration', () => {
   let server;
 
   beforeAll(async () => {
@@ -175,7 +171,7 @@ describe("Server Integration", () => {
     await server.shutdown();
   });
 
-  it("should respond to health check", async () => {
+  it('should respond to health check', async () => {
     // Test API endpoints...
   });
 });

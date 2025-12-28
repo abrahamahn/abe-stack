@@ -7,6 +7,7 @@ The ABE Stack server is a comprehensive, enterprise-grade backend implementation
 ## 🏗️ Architectural Principles
 
 ### Clean Architecture Pattern
+
 The server follows clean architecture principles with clear separation of concerns:
 
 ```
@@ -22,6 +23,7 @@ The server follows clean architecture principles with clear separation of concer
 ```
 
 ### Dependency Injection Architecture
+
 - **Framework**: Inversify with TypeScript decorators
 - **Pattern**: Constructor injection with interface-based design
 - **Scope**: Singleton services for performance and state consistency
@@ -77,7 +79,7 @@ src/server/
 ConfigService.load({
   environment: process.env.NODE_ENV,
   sources: ['file', 'env', 'secrets'],
-  validation: true
+  validation: true,
 });
 
 // Type-safe configuration access
@@ -87,6 +89,7 @@ const features = configService.getArray('ENABLED_FEATURES');
 ```
 
 **Key Features:**
+
 - **Environment-based**: `.env.{environment}` files in `config/.env/`
 - **Secret Management**: Pluggable providers (File, Environment, Memory)
 - **Schema Validation**: Joi-based validation with detailed error reporting
@@ -109,18 +112,22 @@ const dbServer = new DatabaseServer({
     max: 20,
     acquireTimeoutMillis: 30000,
     createTimeoutMillis: 30000,
-    idleTimeoutMillis: 30000
-  }
+    idleTimeoutMillis: 30000,
+  },
 });
 
 // Transaction support with retry logic
-await dbServer.transaction(async (client) => {
-  await client.query('INSERT INTO users...');
-  await client.query('INSERT INTO profiles...');
-}, { retryOnSerializationFailure: true });
+await dbServer.transaction(
+  async (client) => {
+    await client.query('INSERT INTO users...');
+    await client.query('INSERT INTO profiles...');
+  },
+  { retryOnSerializationFailure: true },
+);
 ```
 
 **Key Features:**
+
 - **Connection Pooling**: Advanced pool management with metrics
 - **Transaction Support**: Nested transactions with rollback handling
 - **Query Builder**: Parameter binding and SQL injection prevention
@@ -137,17 +144,18 @@ await dbServer.transaction(async (client) => {
 const cache = new RedisCacheService({
   host: 'localhost',
   port: 6379,
-  fallback: new MemoryCacheService()
+  fallback: new MemoryCacheService(),
 });
 
 // Function memoization
 const memoizedFunction = cache.memoize(expensiveOperation, {
   ttl: 300, // 5 minutes
-  keyGenerator: (args) => `operation:${args.id}`
+  keyGenerator: (args) => `operation:${args.id}`,
 });
 ```
 
 **Key Features:**
+
 - **Multiple Backends**: Redis, in-memory with provider pattern
 - **TTL Management**: Automatic expiration with background cleanup
 - **Memoization**: Function result caching
@@ -168,11 +176,12 @@ logger.info('Payment processed', {
   userId: user.id,
   amount: payment.amount,
   correlationId: req.correlationId,
-  duration: performance.now() - startTime
+  duration: performance.now() - startTime,
 });
 ```
 
 **Key Features:**
+
 - **Structured Logging**: JSON-formatted logs with metadata
 - **Context Inheritance**: Child loggers inherit parent context
 - **Correlation IDs**: Request tracking across services
@@ -188,18 +197,21 @@ logger.info('Payment processed', {
 const tokenManager = new TokenManager({
   accessTokenTTL: '15m',
   refreshTokenTTL: '7d',
-  algorithm: 'HS256'
+  algorithm: 'HS256',
 });
 
 // CSRF protection
-app.use(csrfMiddleware({
-  secretKey: Buffer.from(process.env.CSRF_SECRET, 'hex'),
-  cookieName: 'csrf-token',
-  headerName: 'X-CSRF-Token'
-}));
+app.use(
+  csrfMiddleware({
+    secretKey: Buffer.from(process.env.CSRF_SECRET, 'hex'),
+    cookieName: 'csrf-token',
+    headerName: 'X-CSRF-Token',
+  }),
+);
 ```
 
 **Security Features:**
+
 - **JWT Management**: Access/refresh token handling with blacklisting
 - **Password Security**: Strength validation, hashing with bcrypt
 - **CSRF Protection**: Token-based CSRF protection
@@ -220,8 +232,8 @@ await jobService.submit({
   priority: JobPriority.HIGH,
   retryOptions: {
     maxAttempts: 3,
-    backoffStrategy: 'exponential'
-  }
+    backoffStrategy: 'exponential',
+  },
 });
 
 // Job processing with concurrency control
@@ -230,6 +242,7 @@ await processor.start({ concurrency: 5 });
 ```
 
 **Key Features:**
+
 - **Priority Queuing**: Priority-based job scheduling
 - **Retry Logic**: Exponential backoff with configurable attempts
 - **Concurrency Control**: Configurable worker concurrency
@@ -246,7 +259,7 @@ await processor.start({ concurrency: 5 });
 const storage = new LocalStorageProvider({
   basePath: './storage',
   baseUrl: 'https://api.example.com/files',
-  tempDir: './temp'
+  tempDir: './temp',
 });
 
 // File operations with metadata
@@ -255,12 +268,13 @@ const result = await storage.save({
   path: 'users/avatars',
   options: {
     generateThumbnail: true,
-    extractMetadata: true
-  }
+    extractMetadata: true,
+  },
 });
 ```
 
 **Key Features:**
+
 - **Provider Pattern**: Extensible to cloud storage (S3, GCS, Azure)
 - **Metadata Extraction**: Automatic file metadata extraction
 - **Streaming Support**: Large file handling with streams
@@ -294,6 +308,7 @@ auth/
 ```
 
 **Implementation Pattern:**
+
 ```typescript
 @injectable()
 export class AuthService {
@@ -301,17 +316,14 @@ export class AuthService {
     @inject(TYPES.UserRepository) private userRepo: IUserRepository,
     @inject(TYPES.TokenManager) private tokenManager: ITokenManager,
     @inject(TYPES.PasswordService) private passwordService: IPasswordService,
-    @inject(TYPES.LoggerService) private logger: ILoggerService
+    @inject(TYPES.LoggerService) private logger: ILoggerService,
   ) {}
 
   async authenticate(credentials: LoginDto): Promise<AuthResult> {
     const user = await this.userRepo.findByEmail(credentials.email);
     if (!user) throw new AuthenticationError('Invalid credentials');
 
-    const isValid = await this.passwordService.verify(
-      credentials.password,
-      user.passwordHash
-    );
+    const isValid = await this.passwordService.verify(credentials.password, user.passwordHash);
     if (!isValid) throw new AuthenticationError('Invalid credentials');
 
     const tokens = await this.tokenManager.generateTokenPair(user);
@@ -335,7 +347,7 @@ export class UserService {
     const user = await this.userRepo.create(userData);
     await this.jobService.submit({
       type: 'user-onboarding',
-      data: { userId: user.id }
+      data: { userId: user.id },
     });
     return user;
   }
@@ -358,10 +370,7 @@ export class UserService {
 export const requirePermission = (permission: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
-    const hasPermission = await permissionService.userHasPermission(
-      user.id,
-      permission
-    );
+    const hasPermission = await permissionService.userHasPermission(user.id, permission);
 
     if (!hasPermission) {
       throw new ForbiddenError(`Permission required: ${permission}`);
@@ -372,10 +381,7 @@ export const requirePermission = (permission: string) => {
 };
 
 // Usage in routes
-router.post('/admin/users',
-  requirePermission('users:create'),
-  userController.createUser
-);
+router.post('/admin/users', requirePermission('users:create'), userController.createUser);
 ```
 
 ### Base Classes (`modules/base/`)
@@ -387,14 +393,11 @@ router.post('/admin/users',
 export abstract class BaseRepository<T> {
   constructor(
     @inject(TYPES.DatabaseServer) protected db: IDatabaseServer,
-    @inject(TYPES.LoggerService) protected logger: ILoggerService
+    @inject(TYPES.LoggerService) protected logger: ILoggerService,
   ) {}
 
   async findById(id: string): Promise<T | null> {
-    const result = await this.db.query(
-      `SELECT * FROM ${this.tableName} WHERE id = $1`,
-      [id]
-    );
+    const result = await this.db.query(`SELECT * FROM ${this.tableName} WHERE id = $1`, [id]);
     return result.rows[0] || null;
   }
 
@@ -461,7 +464,7 @@ export class UserService {
     // 4. Background processing
     await this.jobService.submit({
       type: 'welcome-email',
-      data: { userId: user.id }
+      data: { userId: user.id },
     });
 
     return user;
@@ -497,11 +500,7 @@ describe('UserService', () => {
     mockUserRepo = new MockUserRepository();
     mockJobService = new MockJobService();
 
-    userService = new UserService(
-      mockUserRepo,
-      mockJobService,
-      mockLogger
-    );
+    userService = new UserService(mockUserRepo, mockJobService, mockLogger);
   });
 
   it('should create user and trigger onboarding', async () => {
@@ -517,8 +516,8 @@ describe('UserService', () => {
     expect(mockJobService.submit).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'user-onboarding',
-        data: { userId: '123' }
-      })
+        data: { userId: '123' },
+      }),
     );
   });
 });
@@ -529,11 +528,13 @@ describe('UserService', () => {
 ### Adding New Features
 
 1. **Create Module Structure:**
+
    ```bash
    mkdir -p src/server/modules/payments/{api,services,repositories,models}
    ```
 
 2. **Define Interfaces:**
+
    ```typescript
    export interface IPaymentService {
      processPayment(request: PaymentRequest): Promise<Payment>;
@@ -542,12 +543,13 @@ describe('UserService', () => {
    ```
 
 3. **Implement Services:**
+
    ```typescript
    @injectable()
    export class PaymentService implements IPaymentService {
      constructor(
        @inject(TYPES.PaymentRepository) private repo: IPaymentRepository,
-       @inject(TYPES.PaymentGateway) private gateway: IPaymentGateway
+       @inject(TYPES.PaymentGateway) private gateway: IPaymentGateway,
      ) {}
    }
    ```
@@ -564,15 +566,13 @@ describe('UserService', () => {
 const paymentConfigSchema = {
   PAYMENT_GATEWAY_URL: { type: 'string', required: true },
   PAYMENT_TIMEOUT_MS: { type: 'number', default: 30000 },
-  PAYMENT_RETRY_ATTEMPTS: { type: 'number', default: 3 }
+  PAYMENT_RETRY_ATTEMPTS: { type: 'number', default: 3 },
 };
 
 // Use in service
 @injectable()
 export class PaymentService {
-  constructor(
-    @inject(TYPES.ConfigService) private config: IConfigService
-  ) {
+  constructor(@inject(TYPES.ConfigService) private config: IConfigService) {
     this.gatewayUrl = this.config.getString('PAYMENT_GATEWAY_URL');
     this.timeout = this.config.getNumber('PAYMENT_TIMEOUT_MS');
   }
@@ -609,8 +609,8 @@ app.get('/health', async (req, res) => {
     services: {
       database: await dbService.isHealthy(),
       cache: await cacheService.isHealthy(),
-      queue: await queueService.isHealthy()
-    }
+      queue: await queueService.isHealthy(),
+    },
   };
 
   const isHealthy = Object.values(health.services).every(Boolean);
@@ -631,7 +631,7 @@ export const performanceMiddleware = (req: Request, res: Response, next: NextFun
       method: req.method,
       url: req.url,
       statusCode: res.statusCode,
-      duration: `${duration.toFixed(2)}ms`
+      duration: `${duration.toFixed(2)}ms`,
     });
   });
 

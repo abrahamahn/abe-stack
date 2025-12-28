@@ -14,7 +14,6 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@abe-stack/shared": ["../../packages/shared/src"],
@@ -30,10 +29,7 @@
     },
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.desktop.tsbuildinfo"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "electron", "dist", "__tests__"],
-  "references": [
-    { "path": "../../packages/shared" },
-    { "path": "../../packages/ui" }
-  ]
+  "include": ["src/**/*", "electron/**/*", "vite.config.ts"],
+  "exclude": ["node_modules", "dist", "__tests__"],
+  "references": [{ "path": "../../packages/shared" }, { "path": "../../packages/ui" }]
 }

@@ -4,7 +4,7 @@
   "cacheDir": ".cache/turbo",
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": ["^build", "type-check"],
       "outputs": ["dist/**", "build/**", ".next/**"],
       "cache": true,
       "env": ["NODE_ENV", "DATABASE_URL"]
@@ -15,6 +15,10 @@
       "dependsOn": ["^build"]
     },
     "lint": {
+      "outputs": [],
+      "cache": true
+    },
+    "format:check": {
       "outputs": [],
       "cache": true
     },
@@ -40,9 +44,5 @@
       "cache": false
     }
   },
-  "globalDependencies": [
-    "tsconfig.json",
-    ".env",
-    ".env.local"
-  ]
+  "globalDependencies": ["tsconfig.json", ".env", ".env.local"]
 }

@@ -5,7 +5,8 @@
     "module": "ESNext",
     "lib": ["ES2020"],
     "jsx": "react-native",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
+    "ignoreDeprecations": "5.0",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -26,7 +27,5 @@
   },
   "include": ["src/**/*", "index.js"],
   "exclude": ["node_modules", "android", "ios", "__tests__"],
-  "references": [
-    { "path": "../../packages/shared" }
-  ]
+  "references": [{ "path": "../../packages/shared" }]
 }

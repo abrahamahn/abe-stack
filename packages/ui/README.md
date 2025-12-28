@@ -490,28 +490,28 @@ Refactor platform code to shared when patterns emerge.
 
 ## Benefits
 
-| Benefit | Description |
-|---------|-------------|
-| **80-90% Code Reuse** | Write once, use everywhere |
-| **Single Source of Truth** | One place for UI components |
-| **Faster Development** | Build features once, deploy to all platforms |
-| **Easier Maintenance** | Fix bugs in one place |
-| **Consistent UX** | Same components across platforms |
-| **Independent Optimization** | Each platform can optimize separately |
-| **Clear Boundaries** | Separation between shared and platform-specific |
-| **Better Testing** | Test components in isolation |
+| Benefit                      | Description                                     |
+| ---------------------------- | ----------------------------------------------- |
+| **80-90% Code Reuse**        | Write once, use everywhere                      |
+| **Single Source of Truth**   | One place for UI components                     |
+| **Faster Development**       | Build features once, deploy to all platforms    |
+| **Easier Maintenance**       | Fix bugs in one place                           |
+| **Consistent UX**            | Same components across platforms                |
+| **Independent Optimization** | Each platform can optimize separately           |
+| **Clear Boundaries**         | Separation between shared and platform-specific |
+| **Better Testing**           | Test components in isolation                    |
 
 ---
 
 ## Trade-offs
 
-| Aspect | Benefit | Cost |
-|--------|---------|------|
-| Code Reuse | 80-90% shared | Need discipline to keep code in packages |
-| Architecture | Clean separation | More initial setup |
-| Maintenance | Fix once | Need to maintain shared package |
-| Performance | Platform-specific optimizations | Shared code must work for all |
-| Team | Clear ownership boundaries | Requires coordination |
+| Aspect       | Benefit                         | Cost                                     |
+| ------------ | ------------------------------- | ---------------------------------------- |
+| Code Reuse   | 80-90% shared                   | Need discipline to keep code in packages |
+| Architecture | Clean separation                | More initial setup                       |
+| Maintenance  | Fix once                        | Need to maintain shared package          |
+| Performance  | Platform-specific optimizations | Shared code must work for all            |
+| Team         | Clear ownership boundaries      | Requires coordination                    |
 
 ---
 

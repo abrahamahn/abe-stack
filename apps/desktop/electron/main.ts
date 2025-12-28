@@ -1,9 +1,10 @@
-import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
+
+import { app, BrowserWindow } from 'electron';
 
 let mainWindow: BrowserWindow | null = null;
 
-const createWindow = () => {
+const createWindow = (): void => {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
@@ -16,10 +17,10 @@ const createWindow = () => {
 
   // Load the app
   if (process.env.NODE_ENV === 'development') {
-    mainWindow.loadURL('http://localhost:5173');
+    void mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+    void mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
   }
 
   mainWindow.on('closed', () => {

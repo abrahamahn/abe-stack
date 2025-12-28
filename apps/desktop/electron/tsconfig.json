@@ -7,7 +7,10 @@
     "module": "commonjs",
     "lib": ["ES2020"],
     "moduleResolution": "node",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": ["*.ts"],
   "exclude": ["node_modules"]
