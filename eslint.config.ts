@@ -1,15 +1,14 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import js from '@eslint/js';
+import { configs as jsConfigs } from '@eslint/js';
 import eslintPluginImport from 'eslint-plugin-import';
 import tseslint from 'typescript-eslint';
 
 import type { Linter } from 'eslint';
 
 const tsconfigRootDir: string = path.dirname(fileURLToPath(import.meta.url));
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-const jsParser: Linter.Parser | undefined = js.configs.recommended.languageOptions?.parser;
+const jsParser: Linter.Parser | undefined = jsConfigs.recommended.languageOptions?.parser;
 
 export default [
   {
@@ -30,7 +29,7 @@ export default [
       'apps/server/vitest.config.ts',
     ],
   },
-  js.configs.recommended,
+  jsConfigs.recommended,
   ...tseslint.configs.strictTypeChecked,
   // Ensure TypeScript-ESLint has an explicit root in monorepos.
   {
@@ -219,6 +218,13 @@ export default [
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
       ],
       '@typescript-eslint/restrict-template-expressions': 'off',
+    },
+  },
+  {
+    files: ['eslint.config.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
     },
   },
 ] satisfies Linter.Config[];
