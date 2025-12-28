@@ -21,7 +21,7 @@
       "@utils/*": ["./src/utils/*"],
       "@api/*": ["./src/api/*"]
     },
-    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.mobile.tsbuildinfo"
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
   },
   "include": ["src/**/*", "index.js"],
   "exclude": ["node_modules", "android", "ios", "__tests__"],

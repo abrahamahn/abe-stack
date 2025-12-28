@@ -56,6 +56,13 @@ async function listenWithFallback(
  * Start the server - this is the only entry point
  * Server creation logic is in ./server.ts for testability
  */
+
+type DbEnv = Record<string, string | number | undefined>;
+
+async function getDbConnectionString(env: DbEnv): Promise<string> {
+  const result = await resolveConnectionStringWithFallback(env);
+  return result;
+}
 async function start(): Promise<void> {
   const host = process.env.HOST || DEFAULT_HOST;
   const apiPortPreference = Number(
@@ -64,7 +71,8 @@ async function start(): Promise<void> {
   const portCandidates = uniquePorts([apiPortPreference, ...API_PORT_FALLBACKS]);
 
   try {
-    const connectionString: string = await resolveConnectionStringWithFallback(env);
+    const connectionString = await getDbConnectionString(env);
+
     const server = await createServer(env, connectionString);
     const app = server.app;
 
@@ -88,10 +96,9 @@ if (require.main === module) {
 }
 
 function isAddrInUse(error: unknown): error is NodeJS.ErrnoException {
-  return Boolean(
-    error &&
-    typeof error === 'object' &&
-    'code' in error &&
-    (error as Partial<NodeJS.ErrnoException>).code === 'EADDRINUSE',
-  );
+  if (error && typeof error === 'object' && 'code' in error) {
+    const err = error as { code?: unknown }; // Safe: only adding optional 'code' of type unknown
+    return err.code === 'EADDRINUSE';
+  }
+  return false;
 }
