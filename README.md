@@ -5,10 +5,25 @@
 
 Developer-velocity boilerplate for shipping production-grade apps fast. One TypeScript monorepo powers web (Vite + React), desktop (Electron today, Tauri-ready), and mobile (React Native) with a Fastify/PostgreSQL backend and shared UI/API/util packages. The renderers stay thin; business logic and infrastructure live in shared code to stay framework-agnostic.
 
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)
+![Turborepo](https://img.shields.io/badge/Turborepo-cached-orange)
+![Docker](https://img.shields.io/badge/Docker-ready-blue)
+[![Docs](https://img.shields.io/badge/docs-INDEX-blue)](./docs/INDEX.md)
+
+## Why ABE Stack?
+
+- **One codebase** → web, desktop, mobile, API with shared logic
+- **No framework lock-in** → React is just a renderer; business logic lives in `shared/`
+- **Monorepo speed** → Turborepo cached builds, parallel tasks
+- **Production-ready by default** → Zod env validation, secure defaults, Docker
+- **Developer joy** → strict but fast feedback loops, minimal config churn
+
 ## Table of Contents
 
 - [Tech Highlights](#tech-highlights)
 - [Repository Layout](#repository-layout)
+- [Architecture Philosophy](#architecture-philosophy)
+- [Documentation](#documentation)
 - [Quick Start](#quick-start)
 - [Development Workflows](#development-workflows)
 - [Testing](#testing)
@@ -54,7 +69,49 @@ abe-stack/
 └── .github/          # CI/CD workflows
 ```
 
+## Architecture Philosophy
+
+```
+apps/*     → Thin renderers (React, Electron, RN)
+            ↓
+packages/  → Real logic lives here
+   ├── shared/      → Business rules, types, validation (framework-agnostic)
+   ├── ui/          → Reusable components
+   ├── api-client/  → Type-safe contract
+   └── db/          → Drizzle schemas & queries
+```
+
+Change UI frameworks by touching `apps/` only.
+
+## Documentation
+
+Quick links into the docs structure:
+
+- Essentials: `docs/CLAUDE.md`
+- Agent guide: `docs/AGENTS.md`
+- Doc index: `docs/INDEX.md`
+- Dev references: `docs/dev/`
+- Agent workflows: `docs/agent/`
+- Logs: `docs/log/`
+
 ## Quick Start
+
+## First Run in < 5 Minutes (Docker Recommended)
+
+Want to see it running instantly? Use the built-in dev stack:
+
+```bash
+git clone <repository-url>
+cd abe-stack
+docker compose up --build
+```
+
+Now open:
+
+- Web app: http://localhost:3000
+- API server: http://localhost:8080
+
+No Node/pnpm/Postgres/Redis install required.
 
 ### Prerequisites
 
@@ -104,6 +161,11 @@ pnpm dev:desktop   # Electron desktop app
 pnpm dev:mobile    # React Native mobile app
 ```
 
+### Fast vs Full Startup
+
+- **Fast:** `pnpm install` → `pnpm dev`
+- **Full:** `pnpm install` → `pnpm dev` → `pnpm format` → `pnpm lint` → `pnpm type-check` → `pnpm test`
+
 ## Development Workflows
 
 ### Common Commands
@@ -142,6 +204,8 @@ pnpm --filter @abe-stack/ui build
 
 - **Vitest** - Unit and integration tests (frontend & backend)
 - **Playwright** - End-to-end tests
+
+**Note:** `apps/web` currently has no unit test files, so `pnpm test` fails until tests are added or the Vitest config is adjusted.
 
 ### Unit Tests (Vitest)
 
@@ -271,6 +335,10 @@ Git hooks automatically ensure code quality:
 
 - Full linting
 - TypeScript type checking
+
+### Contributing Guardrails
+
+- If format/lint/type-check/test failures are pre-existing or unrelated, do not auto-fix them; report them clearly and keep scope focused.
 
 ## License
 

@@ -57,7 +57,7 @@ async function listenWithFallback(
  * Server creation logic is in ./server.ts for testability
  */
 
-type DbEnv = Record<string, string | number | undefined>;
+type DbEnv = Record<string, string | number | boolean | undefined>;
 
 async function getDbConnectionString(env: DbEnv): Promise<string> {
   const result = await resolveConnectionStringWithFallback(env);

@@ -41,6 +41,21 @@ export const serverEnvSchema = z
 
     // Host configuration
     HOST: z.string().default('0.0.0.0'),
+
+    // Storage
+    STORAGE_PROVIDER: z.enum(['local', 's3']).default('local'),
+    STORAGE_ROOT_PATH: z.string().default('./uploads'),
+    STORAGE_PUBLIC_BASE_URL: z.string().optional(),
+    S3_BUCKET: z.string().optional(),
+    S3_REGION: z.string().optional(),
+    S3_ACCESS_KEY_ID: z.string().optional(),
+    S3_SECRET_ACCESS_KEY: z.string().optional(),
+    S3_ENDPOINT: z.string().optional(),
+    S3_FORCE_PATH_STYLE: z
+      .enum(['true', 'false'])
+      .optional()
+      .transform((v) => v === 'true'),
+    S3_PRESIGN_EXPIRES_IN_SECONDS: z.coerce.number().optional(),
   })
   .transform((env) => ({
     ...env,

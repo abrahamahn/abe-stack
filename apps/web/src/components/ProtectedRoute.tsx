@@ -1,3 +1,4 @@
+import { Spinner, Text } from '@abe-stack/ui';
 import { Navigate, Outlet } from 'react-router-dom';
 
 import { useAuth } from '../hooks/useAuth';
@@ -8,7 +9,12 @@ export const ProtectedRoute = ({ children }: { children?: ReactNode }): ReactEle
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <Spinner />
+        <Text>Loading...</Text>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {

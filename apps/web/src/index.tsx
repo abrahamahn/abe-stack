@@ -3,6 +3,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { App } from './App';
+import '@abe-stack/ui/primitives/primitives.css';
 import './index.css';
 
 const queryClient = new QueryClient();

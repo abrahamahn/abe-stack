@@ -56,7 +56,7 @@ const c = initContract();
 export const authContract = c.router({
   register: {
     method: 'POST',
-    path: '/auth/register',
+    path: '/api/auth/register',
     body: registerRequestSchema,
     responses: {
       201: authResponseSchema,
@@ -67,7 +67,7 @@ export const authContract = c.router({
   },
   login: {
     method: 'POST',
-    path: '/auth/login',
+    path: '/api/auth/login',
     body: loginRequestSchema,
     responses: {
       200: authResponseSchema,
@@ -78,7 +78,7 @@ export const authContract = c.router({
   },
   verifyEmail: {
     method: 'POST',
-    path: '/auth/verify-email',
+    path: '/api/auth/verify-email',
     body: emailVerificationRequestSchema,
     responses: {
       200: emailVerificationResponseSchema,
@@ -92,7 +92,7 @@ export const authContract = c.router({
 export const usersContract = c.router({
   me: {
     method: 'GET',
-    path: '/users/me',
+    path: '/api/users/me',
     responses: {
       200: userResponseSchema,
       401: errorResponseSchema,

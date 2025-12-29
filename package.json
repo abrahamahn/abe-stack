@@ -13,12 +13,13 @@
     "dev:desktop": "turbo run dev --filter=@abe-stack/desktop",
     "dev:mobile": "turbo run dev --filter=@abe-stack/mobile",
     "dev:start": "tsx tools/start-dev.ts",
-    "build": "pnpm lint && turbo run build",
+    "build": "pnpm lint && pnpm theme:build && turbo run build",
     "build:web": "turbo run build --filter=@abe-stack/web",
     "build:server": "turbo run build --filter=@abe-stack/server",
     "build:desktop": "turbo run build --filter=@abe-stack/desktop",
     "build:shared": "turbo run build --filter=@abe-stack/shared",
     "build:ui": "turbo run build --filter=@abe-stack/ui",
+    "theme:build": "node --import tsx tools/build-theme-css.ts",
     "test": "turbo run test",
     "test:web": "turbo run test --filter=@abe-stack/web",
     "test:server": "turbo run test --filter=@abe-stack/server",
@@ -30,6 +31,7 @@
     "format:check": "prettier --check .",
     "clean": "turbo run clean && rm -rf node_modules .turbo",
     "export": "node tools/export-code.ts",
+    "export:ui": "node tools/export-ui-code.cjs",
     "db:restart": "tsx tools/restart-db.ts",
     "setup": "tsx tools/setup.ts",
     "prepare": "simple-git-hooks",
@@ -66,7 +68,14 @@
       "@types/react-native": "^0.76.0"
     },
     "onlyBuiltDependencies": [
-      "bcrypt"
+      "bcrypt",
+      "electron"
+    ],
+    "ignoredBuiltDependencies": [
+      "electron-winstaller",
+      "esbuild",
+      "simple-git-hooks",
+      "unrs-resolver"
     ]
   },
   "simple-git-hooks": {

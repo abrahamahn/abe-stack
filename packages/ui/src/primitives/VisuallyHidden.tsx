@@ -1,0 +1,11 @@
+import { forwardRef, type ComponentPropsWithoutRef } from 'react';
+import './primitives.css';
+
+type VisuallyHiddenProps = ComponentPropsWithoutRef<'span'>;
+
+export const VisuallyHidden = forwardRef<HTMLSpanElement, VisuallyHiddenProps>((props, ref) => {
+  const { className = '', ...rest } = props;
+  return <span ref={ref} className={`ui-visually-hidden ${className}`.trim()} {...rest} />;
+});
+
+VisuallyHidden.displayName = 'VisuallyHidden';
