@@ -3,8 +3,8 @@ import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { Dropdown } from '../primitives/Dropdown';
-import { MenuItem } from '../primitives/MenuItem';
+import { Dropdown } from '../Dropdown';
+import { MenuItem } from '../MenuItem';
 
 describe('Dropdown', () => {
   it('opens on trigger click and renders menu items', () => {

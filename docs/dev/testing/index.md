@@ -26,6 +26,15 @@ Primary goal: reliable refactoring with fast, focused tests.
 | Full suite  | Required checks before completion  | `dev/testing/commands.md` |
 | Test levels | Unit/integration/E2E guidance      | `dev/testing/levels.md`   |
 
+## Edge Case & Error Handling
+
+**All tests must verify more than just the happy path:**
+
+- **Boundary Conditions:** Test empty states, maximum limits, and threshold values.
+- **Invalid Inputs:** Test malformed data, wrong types, and unexpected characters.
+- **Error States:** Test network failures, API errors, and null/undefined handling.
+- **Regression:** Ensure previously fixed bugs have regression tests.
+
 ## Balanced Testing Matrix (30% Fast / 70% Full)
 
 Fast loop (30% of runs):

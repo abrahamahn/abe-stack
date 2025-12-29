@@ -3,7 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { Dialog } from '../primitives/Dialog';
+import { Dialog } from '../Dialog';
 
 describe('Dialog', () => {
   it('opens via trigger and closes via overlay/close button', () => {

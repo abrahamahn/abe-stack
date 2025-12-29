@@ -3,7 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { Popover } from '../primitives/Popover';
+import { Popover } from '../Popover';
 
 describe('Popover', () => {
   it('opens on trigger click and closes on Escape, returning focus', () => {

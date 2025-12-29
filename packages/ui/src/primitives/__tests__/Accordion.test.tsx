@@ -3,7 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { Accordion } from '../primitives/Accordion';
+import { Accordion } from '../Accordion';
 
 const items = [
   { id: 'one', title: 'Section One', content: 'Content One' },

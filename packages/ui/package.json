@@ -14,7 +14,8 @@
     "build": "tsc --project tsconfig.json",
     "dev": "tsc --watch --project tsconfig.json",
     "clean": "rm -rf dist",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run"
   },
   "keywords": [
     "abe-stack",

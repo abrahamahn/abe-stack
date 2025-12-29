@@ -3,7 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Checkbox } from '../primitives/Checkbox';
+import { Checkbox } from '../Checkbox';
 
 describe('Checkbox', () => {
   it('toggles on click and space key', () => {

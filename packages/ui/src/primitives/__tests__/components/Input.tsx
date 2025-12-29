@@ -4,8 +4,8 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 // React import kept for JSX transform in test
-import { InputPrimitive } from '../../primitives/InputPrimitive';
-import { Text } from '../../primitives/Text';
+import { InputPrimitive } from '../../InputPrimitive';
+import { Text } from '../../Text';
 
 describe('InputPrimitive', () => {
   it('renders with label', () => {

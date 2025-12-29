@@ -3,7 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Radio } from '../primitives/Radio';
+import { Radio } from '../Radio';
 
 describe('Radio', () => {
   it('selects and re-selects via keyboard', () => {

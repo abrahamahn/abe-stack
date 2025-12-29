@@ -25,7 +25,7 @@
 **Checkpoint structure** (details in agent-self-check.md):
 
 ```
-Implement → Verify (format, lint, type-check, test) → Commit → Report
+Implement → Create/Update Tests → Verify (format, lint, type-check, test) → Commit → Report
 ```
 
 ---
