@@ -220,3 +220,4 @@
 2025-12-29 (Session 19)
 
 - Updated TODO to include demo docs display requirement for `/demo`.
+- Tests: `pnpm format`, `pnpm lint`, `pnpm type-check` (pass); `pnpm test` fails in `apps/web` (no test files found).
