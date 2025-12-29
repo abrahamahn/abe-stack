@@ -11,7 +11,25 @@ Guide to make the monorepo production-ready while keeping the renderer-agnostic 
 - [ ] Wire CI (lint, type-check, test, build) via GitHub Actions (or target CI).
 - [ ] Cache strategy for Turbo/PNPM in CI.
 
-## 2) Backend (Fastify + Drizzle + Postgres)
+## 2) Frontend (Web + Shared UI)
+
+### packages/ui (Reusable UI Library)
+
+- [ ] Audit and align primitives/components with industry best practices (accessibility, keyboard nav, ARIA, focus management).
+- [ ] Standardize component APIs (controlled/uncontrolled patterns, polymorphic typing where needed).
+- [ ] Expand documentation examples for each component (usage, props, do/don't).
+- [ ] Add missing UI tests for critical behaviors (a11y, keyboard interactions, focus traps).
+- [ ] Ensure theme tokens cover spacing, typography, color, and motion consistently.
+- [ ] Publishable DX: consistent exports, tree-shakeable entrypoints, and clear versioning notes.
+
+### Demo Surface (Live UI Gallery)
+
+- [ ] Implement a dedicated `/demo` page that showcases every `packages/ui` component in live, interactive states.
+- [ ] Cover primary/secondary/disabled/loading states for each component.
+- [ ] Include layout and theme examples (light/dark, density, responsive).
+- [ ] Display relevant documentation content alongside demos for user understanding.
+
+## 3) Backend (Fastify + Drizzle + Postgres)
 
 - [ ] Serve routes via `@ts-rest/fastify` using the shared contract to keep server/client in lockstep.
 - [ ] Define DB schema in `packages/db/src/schema` (users, sessions, verification tokens, audit tables).
@@ -100,6 +118,7 @@ Guide to make the monorepo production-ready while keeping the renderer-agnostic 
 - [x] 2025-12-29 Clarify agent vs dev doc scope in INDEX.md.
 - [x] 2025-12-29 Refresh README with doc links, startup paths, guardrails, and test caveat.
 - [x] 2025-12-29 Add README Why/5-minute Docker run/architecture diagram/badges.
+- [x] 2025-12-29 Add velocity tips, index template, examples index, and expand AGENTS guide.
 
 ## 11) Delivery Checklist
 

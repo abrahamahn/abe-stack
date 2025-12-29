@@ -8,6 +8,7 @@ Developer-velocity boilerplate for shipping production-grade apps fast. One Type
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)
 ![Turborepo](https://img.shields.io/badge/Turborepo-cached-orange)
 ![Docker](https://img.shields.io/badge/Docker-ready-blue)
+[![Docs](https://img.shields.io/badge/docs-INDEX-blue)](./docs/INDEX.md)
 
 ## Why ABE Stack?
 

@@ -12,11 +12,19 @@ Primary goal: reliable refactoring with fast, focused tests.
 
 ## Modules
 
-- `dev/testing/overview.md`
-- `dev/testing/levels.md`
-- `dev/testing/organization.md`
-- `dev/testing/commands.md`
-- `dev/testing/examples.md`
+- `dev/testing/overview.md` → Strategy summary and priorities.
+- `dev/testing/levels.md` → Unit/integration/E2E expectations.
+- `dev/testing/organization.md` → Where tests live and why.
+- `dev/testing/commands.md` → Fast loop vs full suite commands.
+- `dev/testing/examples.md` → Example tests and patterns.
+
+## Key Patterns/Commands
+
+| Name        | Description                        | Link                      |
+| ----------- | ---------------------------------- | ------------------------- |
+| Fast loop   | Package-scoped checks during edits | `dev/testing/commands.md` |
+| Full suite  | Required checks before completion  | `dev/testing/commands.md` |
+| Test levels | Unit/integration/E2E guidance      | `dev/testing/levels.md`   |
 
 ## Balanced Testing Matrix (30% Fast / 70% Full)
 

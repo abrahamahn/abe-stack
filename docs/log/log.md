@@ -208,3 +208,15 @@
 - Tests: `pnpm format`, `pnpm lint`, `pnpm type-check` (pass); `pnpm test` fails in `apps/web` (no test files found).
 - Tests re-run: `pnpm format`, `pnpm lint`, `pnpm type-check` (pass); `pnpm test` still fails in `apps/web` (no test files found).
 - Tests re-run again: `pnpm format`, `pnpm lint`, `pnpm type-check` (pass); `pnpm test` still fails in `apps/web` (no test files found).
+
+2025-12-29 (Session 18)
+
+- Added velocity tips to `docs/INDEX.md`.
+- Standardized dev index files with Quick Summary/Modules/Key Patterns/See Also.
+- Added `docs/dev/templates/index-template.md` and `docs/dev/examples.md`.
+- Expanded `docs/AGENTS.md` to a full agent guide.
+- Tests: `pnpm format`, `pnpm lint`, `pnpm type-check` (pass); `pnpm test` fails in `apps/web` (no test files found).
+
+2025-12-29 (Session 19)
+
+- Updated TODO to include demo docs display requirement for `/demo`.

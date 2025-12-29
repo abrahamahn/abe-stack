@@ -1,12 +1,27 @@
-# Agent Guide
+# Agent Guide for ABE Stack
 
-Quick entry point for AI agent workflows and references.
+ABE Stack is optimized for agentic workflows (Codex, Claude Code, Gemini CLI, etc.).
 
 ## Start Here
 
 - Essentials: `CLAUDE.md`
-- Docs index: `INDEX.md`
+- Docs router: `INDEX.md`
 - Agent workflows: `agent/`
+
+## Core Rules (Always Follow)
+
+- Load `INDEX.md` first, then fetch only the modules you need.
+- Classify tasks via `dev/workflows/classification.md`.
+- For medium/complex tasks, use `agent/complex-tasks.md` and templates in `agent/agent-prompts.md`.
+- Run checkpoints using `agent/agent-self-check.md`.
+- Resume long tasks with `agent/session-bridge.md`.
+
+## Stack-Specific Tips
+
+- DB changes → `packages/db` first, then migrations.
+- API changes → update shared contracts before server/client.
+- UI changes → prefer `packages/ui` and reuse primitives.
+- Logic changes → keep framework-agnostic code in `packages/shared`.
 
 ## Agent Workflow Docs
 

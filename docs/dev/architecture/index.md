@@ -10,13 +10,21 @@ Concrete implementation overview for ABE Stack's layered architecture and packag
 
 ## Modules
 
-- `dev/architecture/layers.md`
-- `dev/architecture/dependencies.md`
-- `dev/architecture/structure.md`
-- `dev/architecture/patterns.md`
-- `dev/architecture/env.md`
-- `dev/architecture/testing.md`
-- `dev/architecture/appendix-examples.md`
+- `dev/architecture/layers.md` → Layer responsibilities and boundaries.
+- `dev/architecture/dependencies.md` → Dependency direction rules.
+- `dev/architecture/structure.md` → Package layout and naming.
+- `dev/architecture/patterns.md` → Structural patterns in practice.
+- `dev/architecture/env.md` → Environment config shape and flow.
+- `dev/architecture/testing.md` → Architecture-aware test organization.
+- `dev/architecture/appendix-examples.md` → Concrete code examples.
+
+## Key Patterns/Commands
+
+| Name             | Description                   | Link                               |
+| ---------------- | ----------------------------- | ---------------------------------- |
+| Layer boundaries | What belongs where            | `dev/architecture/layers.md`       |
+| Dependency flow  | Enforced direction of imports | `dev/architecture/dependencies.md` |
+| Structure map    | Folder and naming conventions | `dev/architecture/structure.md`    |
 
 See Also:
 

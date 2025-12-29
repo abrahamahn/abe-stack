@@ -2,7 +2,30 @@
 
 Comprehensive coding standards including TypeScript usage, naming conventions, import order, error handling, and code documentation.
 
-**Quick Reference:** See [CLAUDE.md](../CLAUDE.md) for essentials.
+**Quick Reference:** See [CLAUDE.md](../../CLAUDE.md) for essentials.
+
+Quick Summary:
+
+- Strict TypeScript, no `any` without justification.
+- Validate inputs at boundaries with Zod.
+- Favor clarity and explicit error handling.
+
+## Modules
+
+- None. This page is the canonical coding standards reference.
+
+## Key Patterns/Commands
+
+| Name             | Description                | Link                    |
+| ---------------- | -------------------------- | ----------------------- |
+| TypeScript rules | Strict typing expectations | `#typescript-standards` |
+| Error handling   | Required error patterns    | `#error-handling`       |
+| Naming           | File and symbol naming     | `#file-naming`          |
+
+See Also:
+
+- `dev/patterns/index.md`
+- `dev/anti-patterns/index.md`
 
 ---
 

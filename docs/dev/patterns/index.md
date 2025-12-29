@@ -2,6 +2,18 @@
 
 Table-first summary for quick lookup. Full examples live in the appendix.
 
+Quick Summary:
+
+- Use shared contracts and clients to avoid drift.
+- Prefer Zod validation before IO boundaries.
+- Keep patterns framework-agnostic in `packages/shared`.
+
+## Modules
+
+- `dev/patterns/appendix-examples.md` → Full pattern examples.
+
+## Key Patterns/Commands
+
 | Pattern          | When to Use        | Core Rule                               | Example                             |
 | ---------------- | ------------------ | --------------------------------------- | ----------------------------------- |
 | API client split | Any network access | Framework-agnostic client + React hooks | `dev/patterns/appendix-examples.md` |

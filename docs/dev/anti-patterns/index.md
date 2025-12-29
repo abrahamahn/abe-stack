@@ -2,6 +2,18 @@
 
 Table-first summary for quick lookup. Full examples live in the appendix.
 
+Quick Summary:
+
+- Keep business logic out of UI components.
+- Avoid cross-app imports; move shared code to packages.
+- Preserve type safety; no `any` without justification.
+
+## Modules
+
+- `dev/anti-patterns/appendix-examples.md` → Full anti-pattern examples.
+
+## Key Patterns/Commands
+
 | Anti-Pattern                 | Risk                       | Fix                       | Example                                  |
 | ---------------------------- | -------------------------- | ------------------------- | ---------------------------------------- |
 | Business logic in components | Hard to test, not reusable | Move to `packages/shared` | `dev/anti-patterns/appendix-examples.md` |

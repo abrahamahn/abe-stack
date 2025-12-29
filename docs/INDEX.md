@@ -17,8 +17,9 @@ Use this index to load only what you need.
 
 ## Quick Starts
 
-- Essentials: `CLAUDE.md`
-- Agent guide: `AGENTS.md`
+- Claude Code guide & Index (single source of truth): `CLAUDE.md`
+- Codex CLI guide: `AGENTS.md`
+- Gemini CLI guide: `GEMINI.md`
 - Developer docs: `dev/`
 - Agent workflows: `agent/`
 - Logs: `log/`
@@ -36,6 +37,14 @@ Use this index to load only what you need.
 - Use `agent/...` for agent workflows.
 - Prefer specific modules over overviews when precision is needed.
 
+## Velocity Tips (Read This First)
+
+- Start with `pnpm dev` after a clean install to get feedback quickly.
+- New feature flow: `shared` → `db` → `server` → `api-client` → `ui` → `apps`.
+- Stuck on a pattern? Check the nearest `appendix-examples.md` first.
+- Fast edits: use the 30% fast loop in `dev/testing/commands.md`.
+- Agent tip: load this `INDEX.md` first, then fetch only the modules you need.
+
 ## Core
 
 - Principles: `dev/principles/index.md`
@@ -44,6 +53,7 @@ Use this index to load only what you need.
 - Architecture overview: `dev/architecture/index.md`
 - Testing overview: `dev/testing/index.md`
 - Workflows overview: `dev/workflows/index.md`
+- Examples index: `dev/examples.md`
 
 ## Keyword Routing
 
@@ -55,6 +65,7 @@ Use this index to load only what you need.
 - testing commands: `dev/testing/commands.md`
 - api client pattern: `dev/patterns/appendix-examples.md`
 - anti-pattern examples: `dev/anti-patterns/appendix-examples.md`
+- examples index: `dev/examples.md`
 - resume session: `agent/session-bridge.md`
 
 ## Architecture Modules

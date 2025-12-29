@@ -2,7 +2,30 @@
 
 Detailed use cases with example prompts for common development tasks. Learn how to effectively use Claude Code for various scenarios.
 
-**Quick Reference:** See [CLAUDE.md](../CLAUDE.md) for essentials.
+**Quick Reference:** See [CLAUDE.md](../../CLAUDE.md) for essentials.
+
+Quick Summary:
+
+- Copy-paste prompts to speed common workflows.
+- Prefer targeted, context-aware questions.
+- Use structured asks for refactors and migrations.
+
+## Modules
+
+- None. This page is the canonical use-case prompt library.
+
+## Key Patterns/Commands
+
+| Name               | Description                      | Link                                         |
+| ------------------ | -------------------------------- | -------------------------------------------- |
+| Code understanding | Navigate unfamiliar code quickly | `#use-case-1-code-understanding--navigation` |
+| Refactors          | Multi-file changes with patterns | `#use-case-2-refactoring--migrations`        |
+| Performance        | Bottleneck discovery and fixes   | `#use-case-3-performance-optimization`       |
+
+See Also:
+
+- `dev/workflows/index.md`
+- `dev/patterns/index.md`
 
 ---
 

@@ -2,7 +2,30 @@
 
 Techniques and best practices for optimizing database queries, frontend performance, and overall application speed.
 
-**Quick Reference:** See [CLAUDE.md](../CLAUDE.md) for essentials.
+**Quick Reference:** See [CLAUDE.md](../../CLAUDE.md) for essentials.
+
+Quick Summary:
+
+- Fix data access patterns before UI micro-optimizations.
+- Use caching and batching to reduce network and DB load.
+- Prefer observable wins over speculative tweaks.
+
+## Modules
+
+- None. This page is the canonical performance reference.
+
+## Key Patterns/Commands
+
+| Name           | Description           | Link                    |
+| -------------- | --------------------- | ----------------------- |
+| N+1 fixes      | Batch or join queries | `#database-performance` |
+| Indexing       | Improve query plans   | `#database-performance` |
+| Code splitting | Load UI on demand     | `#frontend-performance` |
+
+See Also:
+
+- `dev/architecture/index.md`
+- `dev/testing/index.md`
 
 ---
 
