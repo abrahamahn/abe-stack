@@ -3,7 +3,7 @@ import postgres from 'postgres';
 
 import * as schema from './schema';
 
-type DbEnv = Record<string, string | number | undefined>;
+type DbEnv = Record<string, string | number | boolean | undefined>;
 type GlobalWithDb = typeof globalThis & {
   db?: PostgresJsDatabase<typeof schema>;
 };

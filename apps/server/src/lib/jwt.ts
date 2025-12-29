@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production';
 const TOKEN_EXPIRY = '7d';
 
 export interface TokenPayload {
@@ -8,11 +7,19 @@ export interface TokenPayload {
   email: string;
 }
 
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error('JWT_SECRET is missing or too short; ensure env is loaded before startup');
+  }
+  return secret;
+}
+
 export function createToken(userId: string, email: string): string {
   const payload: TokenPayload = { userId, email };
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
+  return jwt.sign(payload, getJwtSecret(), { expiresIn: TOKEN_EXPIRY });
 }
 
 export function verifyToken(token: string): TokenPayload {
-  return jwt.verify(token, JWT_SECRET) as TokenPayload;
+  return jwt.verify(token, getJwtSecret()) as TokenPayload;
 }

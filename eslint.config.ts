@@ -32,7 +32,8 @@ export default [
       '**/babel.config.js',
       '**/apps/mobile/index.js',
       '**/apps/mobile/metro.config.js',
-      'apps/server/drizzle.config.ts',
+      'tools/export-ui-code.js',
+      'packages/db/drizzle.config.ts',
       'apps/server/vitest.config.ts',
     ],
   },
@@ -76,7 +77,7 @@ export default [
     },
   },
   {
-    files: ['apps/server/drizzle.config.ts'],
+    files: ['packages/db/drizzle.config.ts'],
     languageOptions: {
       parserOptions: {
         project: false,
@@ -215,16 +216,9 @@ export default [
     },
   },
   {
-    files: ['tools/setup.ts'],
+    files: ['apps/server/src/scripts/**/*.{ts,tsx,cts,mts}', 'tools/**/*.{ts,tsx,cts,mts}'],
     rules: {
       'no-console': 'off',
-      'no-empty': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
-      ],
-      '@typescript-eslint/restrict-template-expressions': 'off',
     },
   },
   {

@@ -34,22 +34,12 @@ async function pickAvailablePort(ports: number[], host: string): Promise<number>
   throw new Error(`No available desktop dev ports found in list: ${ports.join(', ')}`);
 }
 
-export default defineConfig(async () => {
+export default defineConfig(async ({ command }) => {
   const host = process.env.VITE_HOST || '0.0.0.0';
-  const rendererPortPreference = Number(process.env.DESKTOP_PORT || process.env.VITE_PORT || 5173);
-  const rendererPort = await pickAvailablePort([rendererPortPreference, 5173, 5174, 5175], host);
 
-  // Share the chosen port with the Electron process
-  process.env.DESKTOP_RENDERER_PORT = String(rendererPort);
-
-  return {
+  const baseConfig = {
     plugins: [react()],
     base: './',
-    server: {
-      host,
-      port: rendererPort,
-      strictPort: true,
-    },
     build: {
       outDir: 'dist/renderer',
     },
@@ -67,6 +57,25 @@ export default defineConfig(async () => {
         '@utils': path.resolve(__dirname, './src/utils'),
         '@api': path.resolve(__dirname, './src/api'),
       },
+    },
+  };
+
+  if (command === 'build') {
+    return baseConfig;
+  }
+
+  const rendererPortPreference = Number(process.env.DESKTOP_PORT || process.env.VITE_PORT || 5173);
+  const rendererPort = await pickAvailablePort([rendererPortPreference, 5173, 5174, 5175], host);
+
+  // Share the chosen port with the Electron process
+  process.env.DESKTOP_RENDERER_PORT = String(rendererPort);
+
+  return {
+    ...baseConfig,
+    server: {
+      host,
+      port: rendererPort,
+      strictPort: true,
     },
   };
 });

@@ -11,12 +11,10 @@ async function main(): Promise<void> {
 
   try {
     await sql`select 1`;
-    // eslint-disable-next-line no-console
     console.log('Database health check: OK');
     await sql.end({ timeout: 1 });
     process.exit(0);
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error('Database health check failed:', error);
     await sql.end({ timeout: 1 });
     process.exit(1);

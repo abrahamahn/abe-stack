@@ -3,6 +3,7 @@ import type { LoginRequest, RegisterRequest, AuthResponse, UserResponse } from '
 export interface ApiClientConfig {
   baseUrl: string;
   getToken?: () => string | null;
+  fetchImpl?: typeof fetch;
 }
 
 export interface ApiClient {
@@ -11,8 +12,11 @@ export interface ApiClient {
   getCurrentUser: () => Promise<UserResponse>;
 }
 
+const API_PREFIX = '/api';
+
 export function createApiClient(config: ApiClientConfig): ApiClient {
-  const baseUrl = config.baseUrl;
+  const baseUrl = config.baseUrl.replace(/\/+$/, ''); // trim trailing slashes
+  const fetcher = config.fetchImpl ?? fetch;
 
   const request = async <T>(path: string, options?: RequestInit): Promise<T> => {
     const headers = new Headers(options?.headers);
@@ -21,7 +25,7 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     const token = config.getToken?.();
     if (token) headers.set('Authorization', `Bearer ${token}`);
 
-    const response = await fetch(baseUrl + path, {
+    const response = await fetcher(`${baseUrl}${API_PREFIX}${path}`, {
       ...options,
       headers,
     });

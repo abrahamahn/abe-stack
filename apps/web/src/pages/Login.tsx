@@ -1,6 +1,7 @@
-import { Input, Button } from '@abe-stack/ui';
+import { Button, Card, Heading, Input, PageContainer, Text } from '@abe-stack/ui';
 import { useState } from 'react';
 
+import { useHistoryNav } from '../contexts/HistoryContext';
 import { useAuth } from '../hooks/useAuth';
 
 import type { ChangeEvent, FormEvent, JSX } from 'react';
@@ -10,19 +11,19 @@ export function LoginPage(): JSX.Element {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { login, isLoading } = useAuth();
+  const { goBack, canGoBack } = useHistoryNav();
 
   const handleEmailChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    setEmail(String(event.target.value));
+    setEmail(event.target.value);
   };
 
   const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    setPassword(String(event.target.value));
+    setPassword(event.target.value);
   };
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setError('');
-
     try {
       await login({ email, password });
     } catch (err) {
@@ -31,56 +32,75 @@ export function LoginPage(): JSX.Element {
   };
 
   return (
-    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px' }}>
-      <h1>Login</h1>
+    <PageContainer maxWidth={440}>
+      <Card>
+        <div style={{ display: 'grid', gap: 12 }}>
+          <Heading as="h1" size="lg">
+            Login
+          </Heading>
 
-      <form
-        onSubmit={(e) => {
-          void handleLogin(e);
-        }}
-      >
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="email" style={{ display: 'block', marginBottom: '5px' }}>
-            Email
-          </label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={handleEmailChange}
-            placeholder="you@example.com"
-            required
-            style={{ width: '100%' }}
-          />
+          <form
+            onSubmit={(e) => {
+              void handleLogin(e);
+            }}
+            style={{ display: 'grid', gap: 12 }}
+          >
+            <div>
+              <label htmlFor="email" style={{ display: 'block', marginBottom: '6px' }}>
+                Email
+              </label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={handleEmailChange}
+                placeholder="you@example.com"
+                required
+                style={{ width: '100%' }}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" style={{ display: 'block', marginBottom: '6px' }}>
+                Password
+              </label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={handlePasswordChange}
+                placeholder="••••••••"
+                required
+                style={{ width: '100%' }}
+              />
+            </div>
+
+            {error && <Text tone="danger">{error}</Text>}
+
+            <Button
+              type="submit"
+              disabled={isLoading}
+              style={{ width: '100%', marginBottom: '8px' }}
+            >
+              {isLoading ? 'Logging in...' : 'Login'}
+            </Button>
+
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={!canGoBack}
+              onClick={goBack}
+              style={{ width: '100%' }}
+            >
+              Back
+            </Button>
+          </form>
         </div>
+      </Card>
 
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="password" style={{ display: 'block', marginBottom: '5px' }}>
-            Password
-          </label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={handlePasswordChange}
-            placeholder="••••••••"
-            required
-            style={{ width: '100%' }}
-          />
-        </div>
-
-        {error && (
-          <div style={{ color: 'red', marginBottom: '15px', fontSize: '14px' }}>{error}</div>
-        )}
-
-        <Button type="submit" disabled={isLoading} style={{ width: '100%' }}>
-          {isLoading ? 'Logging in...' : 'Login'}
-        </Button>
-      </form>
-
-      <p style={{ marginTop: '20px', textAlign: 'center', fontSize: '14px' }}>
+      <Text tone="muted" style={{ textAlign: 'center', fontSize: '14px' }}>
         Don't have an account? Register coming soon...
-      </p>
-    </div>
+      </Text>
+    </PageContainer>
   );
 }

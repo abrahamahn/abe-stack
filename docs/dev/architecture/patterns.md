@@ -1,0 +1,29 @@
+# Architecture Patterns
+
+## DRY Enforcement
+
+- Extract shared logic to `packages/shared`.
+- Use `packages/ui` only for reusable UI components.
+- Keep API contracts in shared and consume from server/client.
+
+## Framework-Agnostic Core
+
+- Shared logic must not import React or platform APIs.
+- Provide React hooks in `packages/api-client` or app layers.
+
+## API Client Split
+
+- Framework-agnostic client in `packages/api-client/src`.
+- React Query hooks in `packages/api-client/src/react-query`.
+
+## Import Order
+
+1. External dependencies
+2. Internal packages
+3. Relative imports
+4. Styles
+
+See Also:
+
+- `dev/architecture/appendix-examples.md`
+- `dev/architecture/env.md`

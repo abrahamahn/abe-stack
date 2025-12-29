@@ -14,8 +14,8 @@ export function registerRoutes(app: FastifyInstance): void {
 
   const router = s.router(apiContract, {
     auth: {
-      register: async ({ body }) => handleRegister(app, body),
-      login: async ({ body }) => handleLogin(app, body),
+      register: async ({ body }: { body: RegisterRequest }) => handleRegister(app, body),
+      login: async ({ body }: { body: LoginRequest }) => handleLogin(app, body),
       verifyEmail: async () =>
         Promise.resolve({
           status: 404 as const,
@@ -23,7 +23,7 @@ export function registerRoutes(app: FastifyInstance): void {
         }),
     },
     users: {
-      me: async ({ request }) => handleMe(app, request),
+      me: async ({ request }: { request: FastifyRequest }) => handleMe(app, request),
     },
   });
 

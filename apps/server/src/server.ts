@@ -1,4 +1,6 @@
 import { buildConnectionString, createDbClient } from '@abe-stack/db';
+import { toStorageConfig } from '@abe-stack/shared/storageConfig';
+import { createStorage } from '@abe-stack/storage';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import { sql } from 'drizzle-orm';
@@ -58,6 +60,7 @@ export async function createServer(
 
   // Decorate Fastify instance with db
   app.decorate('db', db);
+  app.decorate('storage', createStorage(toStorageConfig(env)));
 
   // Root route
   app.get('/', {}, () => ({

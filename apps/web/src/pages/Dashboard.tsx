@@ -1,4 +1,4 @@
-import { Button } from '@abe-stack/ui';
+import { Button, Card, Heading, PageContainer, Text } from '@abe-stack/ui';
 import { useNavigate, type NavigateFunction } from 'react-router-dom';
 
 import { useAuth } from '../hooks/useAuth';
@@ -16,9 +16,11 @@ export function DashboardPage(): JSX.Element {
   };
 
   return (
-    <div style={{ maxWidth: '800px', margin: '50px auto', padding: '20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1>Dashboard</h1>
+    <PageContainer>
+      <section style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Heading as="h1" size="xl">
+          Dashboard
+        </Heading>
         <Button
           onClick={() => {
             void handleLogout();
@@ -26,37 +28,34 @@ export function DashboardPage(): JSX.Element {
         >
           Logout
         </Button>
-      </div>
+      </section>
 
-      <div
-        style={{
-          marginTop: '30px',
-          padding: '20px',
-          backgroundColor: '#f5f5f5',
-          borderRadius: '8px',
-        }}
-      >
-        <h2>Your Profile</h2>
-        <div style={{ marginTop: '15px' }}>
-          <p>
+      <Card>
+        <Heading as="h2" size="md" style={{ marginBottom: 8 }}>
+          Your Profile
+        </Heading>
+        <div style={{ display: 'grid', gap: 6 }}>
+          <Text>
             <strong>Email:</strong> {user?.email}
-          </p>
-          <p>
+          </Text>
+          <Text>
             <strong>Name:</strong> {user?.name || 'Not provided'}
-          </p>
-          <p>
+          </Text>
+          <Text>
             <strong>User ID:</strong> {user?.id}
-          </p>
+          </Text>
         </div>
-      </div>
+      </Card>
 
-      <div style={{ marginTop: '30px' }}>
-        <h3>Welcome to your dashboard!</h3>
-        <p style={{ lineHeight: '1.6', color: '#666' }}>
+      <Card>
+        <Heading as="h3" size="sm" style={{ marginBottom: 4 }}>
+          Welcome to your dashboard!
+        </Heading>
+        <Text tone="muted">
           This is a protected route that requires authentication. You can only access this page when
           logged in with a valid JWT token.
-        </p>
-      </div>
-    </div>
+        </Text>
+      </Card>
+    </PageContainer>
   );
 }

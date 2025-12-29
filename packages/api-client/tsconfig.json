@@ -6,6 +6,7 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
+    "lib": ["ES2023", "DOM"],
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
