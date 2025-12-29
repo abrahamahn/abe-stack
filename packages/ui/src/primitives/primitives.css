@@ -897,3 +897,125 @@ a:focus-visible {
 .ui-resizable-separator.dragging {
   user-select: none;
 }
+
+/* Table */
+.ui-table-container {
+  width: 100%;
+  overflow: auto;
+}
+
+.ui-table {
+  width: 100%;
+  caption-side: bottom;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.ui-table-header {
+  background: var(--ui-color-surface);
+}
+
+.ui-table-body:last-child {
+  border-bottom: 0;
+}
+
+.ui-table-footer {
+  background: var(--ui-color-surface-strong);
+  color: var(--ui-color-text-inverse);
+  font-weight: 500;
+}
+
+.ui-table-footer > tr > td {
+  color: inherit;
+}
+
+.ui-table-row {
+  border-bottom: 1px solid var(--ui-color-border);
+  transition: background-color 0.2s;
+}
+
+.ui-table-row:hover {
+  background: var(--ui-color-surface);
+}
+
+.ui-table-row[data-state='selected'] {
+  background: var(--ui-color-surface);
+}
+
+.ui-table-head {
+  height: 48px;
+  padding: 0 16px;
+  text-align: left;
+  vertical-align: middle;
+  font-weight: 500;
+  color: var(--ui-color-text-muted);
+}
+
+.ui-table-head:has([role='checkbox']) {
+  padding-right: 0;
+}
+
+.ui-table-cell {
+  padding: 16px;
+  vertical-align: middle;
+}
+
+.ui-table-cell:has([role='checkbox']) {
+  padding-right: 0;
+}
+
+.ui-table-caption {
+  margin-top: 16px;
+  color: var(--ui-color-text-muted);
+  font-size: 14px;
+}
+
+/* AppShell */
+.ui-app-shell {
+  display: grid;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  grid-template-areas:
+    'header header header'
+    'sidebar main aside'
+    'footer footer footer';
+  grid-template-columns: var(--ui-sidebar-width, auto) 1fr var(--ui-aside-width, auto);
+  grid-template-rows: var(--ui-header-height, auto) 1fr var(--ui-footer-height, auto);
+}
+
+.ui-app-shell-header {
+  grid-area: header;
+  z-index: 50;
+  background: var(--ui-color-bg);
+  border-bottom: 1px solid var(--ui-color-border);
+}
+
+.ui-app-shell-sidebar {
+  grid-area: sidebar;
+  z-index: 40;
+  background: var(--ui-color-bg);
+  border-right: 1px solid var(--ui-color-border);
+  overflow-y: auto;
+}
+
+.ui-app-shell-main {
+  grid-area: main;
+  overflow-y: auto;
+  position: relative;
+}
+
+.ui-app-shell-aside {
+  grid-area: aside;
+  z-index: 40;
+  background: var(--ui-color-bg);
+  border-left: 1px solid var(--ui-color-border);
+  overflow-y: auto;
+}
+
+.ui-app-shell-footer {
+  grid-area: footer;
+  z-index: 50;
+  background: var(--ui-color-bg);
+  border-top: 1px solid var(--ui-color-border);
+}

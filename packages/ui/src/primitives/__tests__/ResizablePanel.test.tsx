@@ -4,7 +4,6 @@ import { describe, it, expect } from 'vitest';
 
 import { ResizablePanelGroup, ResizablePanel } from '../ResizablePanel';
 
-
 describe('ResizablePanel', () => {
   it('renders panel group with children', () => {
     render(

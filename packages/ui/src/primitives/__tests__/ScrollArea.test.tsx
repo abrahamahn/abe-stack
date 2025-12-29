@@ -4,7 +4,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import { ScrollArea } from '../ScrollArea';
 
-
 describe('ScrollArea', () => {
   beforeEach(() => {
     vi.useFakeTimers();

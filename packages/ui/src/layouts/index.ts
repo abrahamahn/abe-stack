@@ -3,3 +3,4 @@ export { AuthLayout } from './AuthLayout';
 export { SidebarLayout } from './SidebarLayout';
 export { StackedLayout } from './StackedLayout';
 export { PageContainer } from './PageContainer';
+export { AppShell } from './AppShell';

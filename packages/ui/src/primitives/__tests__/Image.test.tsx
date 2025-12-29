@@ -4,7 +4,6 @@ import { describe, it, expect } from 'vitest';
 
 import { Image } from '../Image';
 
-
 describe('Image', () => {
   it('renders image with src and alt', () => {
     render(<Image src="/test.jpg" alt="Test Image" />);
