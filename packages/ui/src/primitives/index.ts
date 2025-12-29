@@ -27,3 +27,4 @@ export { Toast, ToastContainer } from './Toast';
 export { Tooltip } from './Tooltip';
 export { VisuallyHidden } from './VisuallyHidden';
 export { Dialog } from './Dialog';
+export { Image } from './Image';
