@@ -20,12 +20,12 @@ This documentation provides a complete architecture for building **Google Docs-s
 
 ## 📚 Documentation
 
-| File | Description |
-|------|-------------|
+| File                                                       | Description                                      |
+| ---------------------------------------------------------- | ------------------------------------------------ |
 | **[REALTIME_ARCHITECTURE.md](./REALTIME_ARCHITECTURE.md)** | Complete system architecture and design patterns |
-| **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)** | Step-by-step implementation guide (5 phases) |
-| **[REALTIME_PATTERNS.md](./REALTIME_PATTERNS.md)** | Common patterns with real-world examples |
-| **This file** | Quick start and overview |
+| **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)**   | Step-by-step implementation guide (5 phases)     |
+| **[REALTIME_PATTERNS.md](./REALTIME_PATTERNS.md)**         | Common patterns with real-world examples         |
+| **This file**                                              | Quick start and overview                         |
 
 ---
 
@@ -34,6 +34,7 @@ This documentation provides a complete architecture for building **Google Docs-s
 ### 1. Read the Architecture
 
 Start with **[REALTIME_ARCHITECTURE.md](./REALTIME_ARCHITECTURE.md)** to understand:
+
 - How real-time synchronization works
 - Database schema patterns (version fields)
 - Operation-based transactions
@@ -45,31 +46,37 @@ Start with **[REALTIME_ARCHITECTURE.md](./REALTIME_ARCHITECTURE.md)** to underst
 **[IMPLEMENTATION_GUIDE.md](./IMPLEMENTATION_GUIDE.md)** provides 5 phases:
 
 **Phase 1: Foundation (Week 1-2)**
+
 - Add `version` fields to database tables
 - Create transaction operation types
 - Implement RecordCache (in-memory)
 - Add server endpoints
 
 **Phase 2: Real-time Sync (Week 3-4)**
+
 - WebSocket server + client
 - Pub/sub system
 - Version-based updates
 
 **Phase 3: Offline Support (Week 5-6)**
+
 - IndexedDB persistence
 - Transaction queue
 - Stale-while-revalidate
 
 **Phase 4: Undo/Redo (Week 7)**
+
 - Operation inversion
 - Keyboard shortcuts
 
 **Phase 5: Permissions (Week 8)**
+
 - Row-level access control
 
 ### 3. Use the Patterns
 
 **[REALTIME_PATTERNS.md](./REALTIME_PATTERNS.md)** shows how to:
+
 - Create/update/delete records
 - Add comments and threads
 - Upload files
@@ -85,12 +92,12 @@ Start with **[REALTIME_ARCHITECTURE.md](./REALTIME_ARCHITECTURE.md)** to underst
 
 ```typescript
 // Change task status (real-time sync + offline support)
-const write = useWrite()
+const write = useWrite();
 
 await write([
   { type: 'set', table: 'tasks', id: taskId, key: 'status', value: 'done' },
-  { type: 'set-now', table: 'tasks', id: taskId, key: 'updatedAt' }
-])
+  { type: 'set-now', table: 'tasks', id: taskId, key: 'updatedAt' },
+]);
 ```
 
 ### Note-Taking (Notion/Evernote)
@@ -100,9 +107,9 @@ await write([
 const debouncedWrite = useDebouncedCallback((content: string) => {
   write([
     { type: 'set', table: 'notes', id: noteId, key: 'content', value: content },
-    { type: 'set-now', table: 'notes', id: noteId, key: 'updatedAt' }
-  ])
-}, 500)
+    { type: 'set-now', table: 'notes', id: noteId, key: 'updatedAt' },
+  ]);
+}, 500);
 ```
 
 ### Kanban Boards (Jira/GitHub Projects)
@@ -111,8 +118,8 @@ const debouncedWrite = useDebouncedCallback((content: string) => {
 // Drag task between columns
 await write([
   { type: 'set', table: 'tasks', id: taskId, key: 'status', value: newColumn },
-  { type: 'set-now', table: 'tasks', id: taskId, key: 'updatedAt' }
-])
+  { type: 'set-now', table: 'tasks', id: taskId, key: 'updatedAt' },
+]);
 ```
 
 ---
@@ -151,23 +158,23 @@ const operation = {
   table: 'tasks',
   id: 'task-123',
   key: 'status',
-  value: 'done'
-}
+  value: 'done',
+};
 ```
 
 ### 2. Apply Optimistically (Instant UI)
 
 ```typescript
 // Update local cache immediately
-const newTask = applyOperation(oldTask, operation)
-recordCache.write('tasks', newTask) // UI updates now!
+const newTask = applyOperation(oldTask, operation);
+recordCache.write('tasks', newTask); // UI updates now!
 ```
 
 ### 3. Queue for Server (Offline-Safe)
 
 ```typescript
 // Save to localStorage, will retry when online
-transactionQueue.enqueue(transaction)
+transactionQueue.enqueue(transaction);
 ```
 
 ### 4. Server Validates & Saves
@@ -175,19 +182,19 @@ transactionQueue.enqueue(transaction)
 ```typescript
 // Check version (conflict detection)
 if (task.version !== expectedVersion) {
-  return { status: 409 } // Conflict - client retries
+  return { status: 409 }; // Conflict - client retries
 }
 
 // Check permissions
 if (!canEdit(user, task)) {
-  return { status: 403 } // Denied
+  return { status: 403 }; // Denied
 }
 
 // Save to PostgreSQL
-await db.update(tasks).set({ status: 'done', version: version + 1 })
+await db.update(tasks).set({ status: 'done', version: version + 1 });
 
 // Notify other users via WebSocket
-pubsub.publish([{ key: 'task:task-123', version: newVersion }])
+pubsub.publish([{ key: 'task:task-123', version: newVersion }]);
 ```
 
 ### 5. Other Users Get Update
@@ -196,12 +203,13 @@ pubsub.publish([{ key: 'task:task-123', version: newVersion }])
 // WebSocket message: task:task-123 version 5
 if (cachedVersion < 5) {
   // Fetch updated task
-  const task = await api.getRecords([{ table: 'tasks', id: 'task-123' }])
-  recordCache.write('tasks', task) // Their UI updates!
+  const task = await api.getRecords([{ table: 'tasks', id: 'task-123' }]);
+  recordCache.write('tasks', task); // Their UI updates!
 }
 ```
 
 **Total Latency:**
+
 - Initiating user: **0ms** (optimistic)
 - Server confirms: **50-200ms**
 - Other users: **100-500ms**
@@ -223,7 +231,7 @@ export const tasks = pgTable('tasks', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   deleted: timestamp('deleted'), // Soft delete for undo
-})
+});
 ```
 
 ---
@@ -233,7 +241,7 @@ export const tasks = pgTable('tasks', {
 ### useRecord - Subscribe to Single Record
 
 ```typescript
-const task = useRecord<Task>('tasks', taskId)
+const task = useRecord<Task>('tasks', taskId);
 
 // Automatically updates when record changes (locally or from server)
 ```
@@ -241,26 +249,24 @@ const task = useRecord<Task>('tasks', taskId)
 ### useRecords - Subscribe to Multiple Records
 
 ```typescript
-const tasks = useRecords<Task>('tasks', { boardId: 'board-123' })
+const tasks = useRecords<Task>('tasks', { boardId: 'board-123' });
 
 // Filters deleted records
-const activeTasks = tasks.filter(t => !t.deleted)
+const activeTasks = tasks.filter((t) => !t.deleted);
 ```
 
 ### useWrite - Optimistic Updates
 
 ```typescript
-const write = useWrite()
+const write = useWrite();
 
-await write([
-  { type: 'set', table: 'tasks', id: taskId, key: 'status', value: 'done' }
-])
+await write([{ type: 'set', table: 'tasks', id: taskId, key: 'status', value: 'done' }]);
 ```
 
 ### useUndoRedo - Operation History
 
 ```typescript
-const { undo, redo, canUndo, canRedo } = useUndoRedo()
+const { undo, redo, canUndo, canRedo } = useUndoRedo();
 
 // Automatically handles Cmd+Z / Cmd+Shift+Z
 ```
@@ -279,16 +285,19 @@ const { undo, redo, canUndo, canRedo } = useUndoRedo()
 ### Scaling
 
 **MVP (100s of users)**
+
 - Single server
 - In-memory pub/sub
 - PostgreSQL
 
 **Production (1000s of users)**
+
 - Multiple stateless API servers
 - Redis pub/sub
 - PostgreSQL with connection pooling
 
 **Large Scale (10,000s of users)**
+
 - Load balancer
 - Database sharding by workspace/organization
 - Redis cluster
@@ -299,15 +308,18 @@ const { undo, redo, canUndo, canRedo } = useUndoRedo()
 ## 🔒 Security
 
 ### Authentication
+
 - JWT tokens (existing ABE-STACK auth)
 - WebSocket auth via token
 
 ### Authorization
+
 - Row-level permissions on all operations
 - Validate read access before returning data
 - Validate write access before saving changes
 
 ### Data Validation
+
 - Zod schemas for all API inputs
 - Version number checks (optimistic concurrency)
 - File size limits
@@ -321,33 +333,33 @@ const { undo, redo, canUndo, canRedo } = useUndoRedo()
 ```typescript
 describe('Transaction operations', () => {
   it('should apply set operation', () => {
-    const record = { id: '1', version: 1, status: 'todo' }
-    const op = { type: 'set', table: 'tasks', id: '1', key: 'status', value: 'done' }
+    const record = { id: '1', version: 1, status: 'todo' };
+    const op = { type: 'set', table: 'tasks', id: '1', key: 'status', value: 'done' };
 
-    const result = applyOperation(record, op)
+    const result = applyOperation(record, op);
 
-    expect(result.status).toBe('done')
-    expect(result.version).toBe(2)
-  })
-})
+    expect(result.status).toBe('done');
+    expect(result.version).toBe(2);
+  });
+});
 ```
 
 ### E2E Tests
 
 ```typescript
 test('real-time collaboration', async ({ browser }) => {
-  const user1 = await browser.newPage()
-  const user2 = await browser.newPage()
+  const user1 = await browser.newPage();
+  const user2 = await browser.newPage();
 
-  await user1.goto('/tasks/task-1')
-  await user2.goto('/tasks/task-1')
+  await user1.goto('/tasks/task-1');
+  await user2.goto('/tasks/task-1');
 
   // User 1 changes status
-  await user1.selectOption('[name=status]', 'done')
+  await user1.selectOption('[name=status]', 'done');
 
   // User 2 sees update within 2 seconds
-  await expect(user2.locator('[name=status]')).toHaveValue('done', { timeout: 2000 })
-})
+  await expect(user2.locator('[name=status]')).toHaveValue('done', { timeout: 2000 });
+});
 ```
 
 ---
@@ -363,19 +375,19 @@ test('real-time collaboration', async ({ browser }) => {
 
 ## 🤝 What You Get vs. ABE-STACK (Original)
 
-| Feature | ABE-STACK (Original) | With Real-Time Architecture |
-|---------|----------------------|----------------------------|
-| Multi-platform | ✅ Web/Desktop/Mobile | ✅ Web/Desktop/Mobile |
-| Type-safe API | ✅ ts-rest | ✅ ts-rest |
-| PostgreSQL | ✅ Drizzle ORM | ✅ Drizzle ORM + versions |
-| Authentication | ✅ JWT | ✅ JWT |
-| Real-time sync | ❌ | ✅ WebSocket pub/sub |
-| Offline support | ❌ | ✅ IndexedDB + queue |
-| Optimistic updates | ❌ | ✅ 0ms perceived latency |
-| Undo/redo | ❌ | ✅ Full history |
-| Collaboration | ❌ | ✅ Multi-user editing |
-| Conflict resolution | ❌ | ✅ Version-based |
-| Row-level permissions | ❌ | ✅ Full validation |
+| Feature               | ABE-STACK (Original)  | With Real-Time Architecture |
+| --------------------- | --------------------- | --------------------------- |
+| Multi-platform        | ✅ Web/Desktop/Mobile | ✅ Web/Desktop/Mobile       |
+| Type-safe API         | ✅ ts-rest            | ✅ ts-rest                  |
+| PostgreSQL            | ✅ Drizzle ORM        | ✅ Drizzle ORM + versions   |
+| Authentication        | ✅ JWT                | ✅ JWT                      |
+| Real-time sync        | ❌                    | ✅ WebSocket pub/sub        |
+| Offline support       | ❌                    | ✅ IndexedDB + queue        |
+| Optimistic updates    | ❌                    | ✅ 0ms perceived latency    |
+| Undo/redo             | ❌                    | ✅ Full history             |
+| Collaboration         | ❌                    | ✅ Multi-user editing       |
+| Conflict resolution   | ❌                    | ✅ Version-based            |
+| Row-level permissions | ❌                    | ✅ Full validation          |
 
 ---
 
@@ -384,6 +396,7 @@ test('real-time collaboration', async ({ browser }) => {
 This architecture combines the best of:
 
 **ABE-STACK**
+
 - Modern monorepo (Turborepo)
 - Production database (PostgreSQL + Drizzle)
 - Type-safe APIs (ts-rest)
@@ -391,6 +404,7 @@ This architecture combines the best of:
 - DevOps tooling (Docker, CI/CD)
 
 **CHET-STACK**
+
 - Real-time WebSocket sync
 - Offline support (IndexedDB)
 - Operation-based transactions

@@ -821,3 +821,41 @@ a:focus-visible {
 .ui-slider {
   width: 100%;
 }
+
+/* ScrollArea */
+.ui-scroll-area {
+  scrollbar-gutter: stable;
+}
+
+/* WebKit browsers (Chrome, Safari, Edge) */
+.ui-scroll-area::-webkit-scrollbar {
+  width: var(--scrollbar-size, 10px);
+  height: var(--scrollbar-size, 10px);
+}
+
+.ui-scroll-area::-webkit-scrollbar-track {
+  background: var(--gray2, #f3f4f6);
+  border-radius: 10px;
+}
+
+.ui-scroll-area::-webkit-scrollbar-thumb {
+  background: var(--gray6, #9ca3af);
+  border-radius: 10px;
+  opacity: var(--scrollbar-opacity, 1);
+  transition:
+    opacity 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.ui-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: var(--gray7, #6b7280);
+}
+
+/* Auto-hide scrollbar */
+.ui-scroll-area[data-scrollbar-visible='false']::-webkit-scrollbar-thumb {
+  opacity: 0;
+}
+
+.ui-scroll-area[data-scrollbar-visible='true']::-webkit-scrollbar-thumb {
+  opacity: 1;
+}

@@ -28,3 +28,4 @@ export { Tooltip } from './Tooltip';
 export { VisuallyHidden } from './VisuallyHidden';
 export { Dialog } from './Dialog';
 export { Image } from './Image';
+export { ScrollArea } from './ScrollArea';
