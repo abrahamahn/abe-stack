@@ -859,3 +859,41 @@ a:focus-visible {
 .ui-scroll-area[data-scrollbar-visible='true']::-webkit-scrollbar-thumb {
   opacity: 1;
 }
+
+/* ResizablePanel */
+.ui-resizable-panel-group {
+  position: relative;
+}
+
+.ui-resizable-panel {
+  position: relative;
+  min-height: 0;
+  min-width: 0;
+}
+
+.ui-resizable-separator {
+  position: relative;
+  flex-shrink: 0;
+  background: var(--gray3, #e5e7eb);
+  transition: background-color 0.2s ease;
+  z-index: 10;
+}
+
+.ui-resizable-separator[data-direction='horizontal'] {
+  width: 4px;
+  cursor: col-resize;
+}
+
+.ui-resizable-separator[data-direction='vertical'] {
+  height: 4px;
+  cursor: row-resize;
+}
+
+.ui-resizable-separator:hover,
+.ui-resizable-separator.dragging {
+  background: var(--ui-color-primary, #3b82f6);
+}
+
+.ui-resizable-separator.dragging {
+  user-select: none;
+}

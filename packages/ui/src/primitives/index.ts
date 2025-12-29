@@ -29,3 +29,4 @@ export { VisuallyHidden } from './VisuallyHidden';
 export { Dialog } from './Dialog';
 export { Image } from './Image';
 export { ScrollArea } from './ScrollArea';
+export { ResizablePanel, ResizablePanelGroup, ResizableSeparator } from './ResizablePanel';
