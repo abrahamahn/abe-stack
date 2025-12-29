@@ -1,4 +1,5 @@
 import { cn } from '../utils/cn';
+import '../theme/theme.css';
 
 import type { ComponentPropsWithoutRef, ReactElement } from 'react';
 
@@ -21,7 +22,12 @@ export function Container({
   return (
     <div
       className={cn('ui-container', className)}
-      style={{ margin: '0 auto', maxWidth: maxWidths[size], padding: '0 16px', ...style }}
+      style={{
+        margin: '0 auto',
+        maxWidth: maxWidths[size],
+        padding: '0 var(--ui-gap-lg)',
+        ...style,
+      }}
       {...rest}
     />
   );

@@ -49,4 +49,26 @@ describe('Modal', () => {
     fireEvent.keyDown(document.body, { key: 'Escape' });
     expect(handleClose).toHaveBeenCalledTimes(1);
   });
+
+  it('wires up aria-labelledby/aria-describedby and moves focus inside', () => {
+    render(
+      <Modal.Root open>
+        <Modal.Header>
+          <Modal.Title>Modal Title</Modal.Title>
+        </Modal.Header>
+        <Modal.Description>Modal Description</Modal.Description>
+        <Modal.Body>
+          <button type="button">Continue</button>
+        </Modal.Body>
+      </Modal.Root>,
+    );
+
+    const dialog = screen.getByRole('dialog');
+    const title = screen.getByText('Modal Title');
+    const description = screen.getByText('Modal Description');
+
+    expect(dialog).toHaveAttribute('aria-labelledby', title.getAttribute('id'));
+    expect(dialog).toHaveAttribute('aria-describedby', description.getAttribute('id'));
+    expect(screen.getByRole('button', { name: 'Continue' })).toHaveFocus();
+  });
 });

@@ -1,4 +1,5 @@
 import { cn } from '../utils/cn';
+import '../theme/theme.css';
 
 import type { ReactElement, ReactNode } from 'react';
 
@@ -18,13 +19,17 @@ export function SidebarLayout({
   return (
     <div
       className={cn('ui-sidebar-layout', className)}
-      style={{ display: 'grid', gridTemplateColumns: '280px 1fr', minHeight: '100vh' }}
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'var(--ui-sidebar-width, 280px) 1fr',
+        minHeight: '100vh',
+      }}
     >
       <aside
         style={{
-          borderRight: '1px solid var(--gray3, #e5e7eb)',
-          padding: '16px',
-          background: 'var(--gray1, #f9fafb)',
+          borderRight: '1px solid var(--ui-color-border)',
+          padding: 'var(--ui-gap-lg)',
+          background: 'var(--ui-color-surface)',
         }}
       >
         {sidebar}
@@ -33,15 +38,15 @@ export function SidebarLayout({
         {header ? (
           <div
             style={{
-              borderBottom: '1px solid var(--gray3, #e5e7eb)',
-              padding: '16px',
-              background: 'var(--surface, #fff)',
+              borderBottom: '1px solid var(--ui-color-border)',
+              padding: 'var(--ui-gap-lg)',
+              background: 'var(--ui-color-bg)',
             }}
           >
             {header}
           </div>
         ) : null}
-        <div style={{ padding: '24px' }}>{children}</div>
+        <div style={{ padding: 'var(--ui-gap-xl)' }}>{children}</div>
       </main>
     </div>
   );

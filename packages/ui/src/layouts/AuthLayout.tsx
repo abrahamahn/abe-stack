@@ -1,4 +1,5 @@
 import { Container } from './Container';
+import '../theme/theme.css';
 
 import type { ReactElement, ReactNode } from 'react';
 
@@ -14,15 +15,21 @@ export function AuthLayout({ title, description, children }: AuthLayoutProps): R
       <Container size="sm">
         <div
           style={{
-            padding: '32px',
-            borderRadius: '12px',
-            border: '1px solid var(--gray3, #e5e7eb)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
+            padding: 'calc(var(--ui-gap-lg) * 2)',
+            borderRadius: 'var(--ui-radius-md)',
+            border: '1px solid var(--ui-color-border)',
+            boxShadow: 'var(--ui-color-shadow)',
           }}
         >
-          {title ? <h1 style={{ margin: 0, marginBottom: 8 }}>{title}</h1> : null}
+          {title ? <h1 style={{ margin: 0, marginBottom: 'var(--ui-gap-sm)' }}>{title}</h1> : null}
           {description ? (
-            <p style={{ margin: 0, marginBottom: 16, color: 'var(--gray7, #6b7280)' }}>
+            <p
+              style={{
+                margin: 0,
+                marginBottom: 'var(--ui-gap-lg)',
+                color: 'var(--ui-color-text-muted)',
+              }}
+            >
               {description}
             </p>
           ) : null}

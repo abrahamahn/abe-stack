@@ -18,4 +18,19 @@ describe('Popover', () => {
     expect(screen.queryByText(/popover content/i)).not.toBeInTheDocument();
     expect(trigger).toHaveFocus();
   });
+
+  it('toggles via keyboard and updates aria-expanded', () => {
+    render(<Popover trigger={<span>Show</span>}>Popover content</Popover>);
+
+    const trigger = screen.getByRole('button', { name: 'Show' });
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.keyDown(trigger, { key: 'Enter' });
+    expect(screen.getByText(/popover content/i)).toBeInTheDocument();
+    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+
+    fireEvent.keyDown(trigger, { key: ' ' });
+    expect(screen.queryByText(/popover content/i)).not.toBeInTheDocument();
+    expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  });
 });

@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactElement, ReactNode } from 'react';
+import '../theme/theme.css';
 
 type LayoutProps = {
   top?: ReactNode;
@@ -19,7 +20,7 @@ export function Layout({
   left,
   right,
   children,
-  gap = '1rem',
+  gap = 'var(--ui-gap-lg)',
   minLeftWidth = '220px',
   minRightWidth = '260px',
   style,

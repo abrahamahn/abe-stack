@@ -55,4 +55,20 @@ describe('Dropdown', () => {
     expect(screen.queryByText('Item 1')).not.toBeInTheDocument();
     expect(trigger).toHaveFocus();
   });
+
+  it('opens via keyboard and moves focus to the first item with ArrowDown', () => {
+    render(
+      <Dropdown trigger={<span>Open</span>}>
+        <MenuItem>First</MenuItem>
+        <MenuItem>Second</MenuItem>
+      </Dropdown>,
+    );
+
+    const trigger = screen.getByRole('button', { name: 'Open' });
+    fireEvent.keyDown(trigger, { key: 'Enter' });
+    expect(screen.getByText('First')).toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: 'ArrowDown' });
+    expect(screen.getByRole('button', { name: 'First' })).toHaveFocus();
+  });
 });

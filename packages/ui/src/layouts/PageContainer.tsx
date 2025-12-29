@@ -4,13 +4,13 @@ import '../primitives/primitives.css';
 type PageContainerProps = ComponentPropsWithoutRef<'main'> & {
   maxWidth?: number;
   padding?: string;
-  gap?: number;
+  gap?: number | string;
 };
 
 export function PageContainer({
   maxWidth = 960,
-  padding = '32px 24px 40px',
-  gap = 16,
+  padding = 'calc(var(--ui-gap-lg) * 2) var(--ui-gap-xl) calc(var(--ui-gap-xl) + var(--ui-gap-lg))',
+  gap = 'var(--ui-gap-lg)',
   style,
   children,
   ...rest

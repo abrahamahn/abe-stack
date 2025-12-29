@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import { format } from 'prettier';
 
 import { colors } from '../packages/ui/src/theme/colors';
+import { motion } from '../packages/ui/src/theme/motion';
 import { spacing } from '../packages/ui/src/theme/spacing';
 import { typography } from '../packages/ui/src/theme/typography';
 
@@ -56,12 +57,35 @@ function toCssVars(): string {
     '--ui-radius-sm': spacing.xs,
     '--ui-radius-md': '10px',
     '--ui-radius-lg': '16px',
-    '--ui-font-size-base': typography.sizes.sm,
-    '--ui-line-height-base': typography.lineHeights.normal.toString(),
+    '--ui-gap-xs': spacing.xs,
     '--ui-gap-sm': spacing.sm,
     '--ui-gap-md': spacing.md,
     '--ui-gap-lg': spacing.lg,
+    '--ui-gap-xl': spacing.xl,
+    '--ui-motion-duration-fast': motion.durations.fast,
+    '--ui-motion-duration-base': motion.durations.base,
+    '--ui-motion-duration-slow': motion.durations.slow,
+    '--ui-motion-duration-slower': motion.durations.slower,
+    '--ui-motion-duration-shimmer': motion.durations.shimmer,
+    '--ui-motion-ease-standard': motion.easing.standard,
+    '--ui-motion-ease-in': motion.easing.in,
+    '--ui-motion-ease-out': motion.easing.out,
+    '--ui-font-family': typography.fontFamily,
+    '--ui-font-size-base': typography.sizes.sm,
+    '--ui-font-size-xs': typography.sizes.xs,
+    '--ui-font-size-sm': typography.sizes.sm,
+    '--ui-font-size-md': typography.sizes.md,
+    '--ui-font-size-lg': typography.sizes.lg,
+    '--ui-font-size-xl': typography.sizes.xl,
+    '--ui-font-weight-regular': typography.weights.regular.toString(),
+    '--ui-font-weight-medium': typography.weights.medium.toString(),
+    '--ui-font-weight-bold': typography.weights.bold.toString(),
+    '--ui-line-height-base': typography.lineHeights.normal.toString(),
+    '--ui-line-height-tight': typography.lineHeights.tight.toString(),
+    '--ui-line-height-normal': typography.lineHeights.normal.toString(),
+    '--ui-line-height-loose': typography.lineHeights.loose.toString(),
     '--ui-color-primary': colors.primary,
+    '--ui-color-accent': colors.primary,
     '--ui-color-primary-muted': colors.primaryMuted,
     '--ui-color-danger': colors.danger,
     '--ui-color-success': colors.success,
