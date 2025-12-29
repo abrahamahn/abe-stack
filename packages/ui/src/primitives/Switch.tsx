@@ -1,23 +1,35 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
+
+import { useControllableState } from '../hooks/useControllableState';
 import './primitives.css';
 
 type SwitchProps = ComponentPropsWithoutRef<'button'> & {
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
+  checked?: boolean;
+  defaultChecked?: boolean;
+  onChange?: (checked: boolean) => void;
 };
 
 export const Switch = forwardRef<HTMLButtonElement, SwitchProps>((props, ref) => {
-  const { checked, onCheckedChange, className = '', type = 'button', ...rest } = props;
+  const { checked, defaultChecked, onChange, className = '', type = 'button', ...rest } = props;
+
+  const [currentChecked, setChecked] = useControllableState<boolean>({
+    value: checked,
+    defaultValue: defaultChecked ?? false,
+    onChange,
+  });
+
+  const isChecked = currentChecked ?? false;
+
   return (
     <button
       ref={ref}
       type={type}
       role="switch"
-      aria-checked={checked}
+      aria-checked={isChecked}
       className={`ui-switch ${className}`.trim()}
-      data-checked={checked}
+      data-checked={isChecked}
       onClick={() => {
-        onCheckedChange(!checked);
+        setChecked(!isChecked);
       }}
       {...rest}
     >

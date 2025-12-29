@@ -15,6 +15,7 @@ export { Pagination } from './Pagination';
 export { Popover } from './Popover';
 export { Progress } from './Progress';
 export { Radio } from './Radio';
+export { RadioGroup } from './RadioGroup';
 export { Select } from './Select';
 export { Skeleton } from './Skeleton';
 export { Slider } from './Slider';

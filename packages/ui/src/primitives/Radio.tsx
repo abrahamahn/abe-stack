@@ -1,34 +1,46 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
+
+import { useControllableState } from '../hooks/useControllableState';
 import './primitives.css';
 
 type RadioProps = Omit<ComponentPropsWithoutRef<'input'>, 'type' | 'onChange'> & {
-  checked: boolean;
-  onCheckedChange: () => void;
+  checked?: boolean;
+  defaultChecked?: boolean;
+  onChange?: (checked: boolean) => void;
   label?: React.ReactNode;
   name: string;
 };
 
 export const Radio = forwardRef<HTMLInputElement, RadioProps>((props, ref) => {
-  const { checked, onCheckedChange, label, className = '', name, ...rest } = props;
+  const { checked, defaultChecked, onChange, label, className = '', name, ...rest } = props;
+
+  const [currentChecked, setChecked] = useControllableState<boolean>({
+    value: checked,
+    defaultValue: defaultChecked ?? false,
+    onChange,
+  });
+
+  const isChecked = currentChecked ?? false;
 
   return (
     <label className={`ui-radio ${className}`.trim()}>
-      <span className="ui-radio-circle" data-checked={checked}>
-        {checked ? <span className="ui-radio-dot" /> : null}
+      <span
+        className="ui-radio-circle"
+        data-checked={isChecked}
+        aria-checked={isChecked}
+        role="radio"
+      >
+        {isChecked ? <span className="ui-radio-dot" /> : null}
       </span>
       <input
         ref={ref}
         type="radio"
         name={name}
-        checked={checked}
-        onChange={onCheckedChange}
-        style={{
-          position: 'absolute',
-          opacity: 0,
-          pointerEvents: 'none',
-          width: 1,
-          height: 1,
+        checked={isChecked}
+        onChange={(e) => {
+          setChecked(e.target.checked);
         }}
+        className="ui-radio-input"
         {...rest}
       />
       {label ? <span>{label}</span> : null}

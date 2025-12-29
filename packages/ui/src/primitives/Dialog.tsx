@@ -41,7 +41,7 @@ type DialogRootProps = {
   children: ReactNode;
   open?: boolean;
   defaultOpen?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  onChange?: (open: boolean) => void;
   closeOnEscape?: boolean;
   closeOnOverlayClick?: boolean;
 };
@@ -50,14 +50,14 @@ export function DialogRoot({
   children,
   open,
   defaultOpen = false,
-  onOpenChange,
+  onChange,
   closeOnEscape = true,
   closeOnOverlayClick = true,
 }: DialogRootProps): ReactElement {
   const [currentOpen, setCurrentOpen] = useControllableState<boolean>({
     value: open,
     defaultValue: defaultOpen,
-    onChange: onOpenChange,
+    onChange,
   });
   const isOpen = currentOpen ?? false;
 

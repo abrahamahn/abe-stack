@@ -47,7 +47,7 @@ async function findRendererPort(host: string, ports: number[]): Promise<number> 
   }
 
   // Fallback to the first configured port even if we could not detect it
-  return first ?? 5173;
+  return first ?? 5174;
 }
 
 const createWindow = async (): Promise<void> => {
@@ -64,12 +64,12 @@ const createWindow = async (): Promise<void> => {
   // Load the app
   if (process.env.NODE_ENV === 'development') {
     const rendererPortPreference = Number(
-      process.env.DESKTOP_RENDERER_PORT || process.env.VITE_PORT || 5173,
+      process.env.DESKTOP_RENDERER_PORT || process.env.VITE_PORT || 5174,
     );
     const rendererPort = await findRendererPort('localhost', [
       rendererPortPreference,
-      5173,
       5174,
+      5173,
       5175,
     ]);
 

@@ -10,7 +10,8 @@ type DropdownProps = {
   placement?: Placement;
   children: ReactNode | ((close: () => void) => ReactNode);
   open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  defaultOpen?: boolean;
+  onChange?: (open: boolean) => void;
 };
 
 export function Dropdown({
@@ -18,23 +19,41 @@ export function Dropdown({
   placement = 'bottom',
   children,
   open,
-  onOpenChange,
+  defaultOpen,
+  onChange,
 }: DropdownProps): ReactElement {
-  const { isOpen, toggle, close, setOpen } = useDisclosure({
-    defaultOpen: false,
-    isOpen: open,
-    onOpenChange,
+  const {
+    open: isOpen,
+    toggle,
+    close,
+    setOpen,
+  } = useDisclosure({
+    open,
+    defaultOpen: defaultOpen ?? false,
+    onChange,
   });
-  const triggerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect((): (() => void) | undefined => {
     if (!isOpen) return undefined;
+
     const onKey = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') {
         close();
         triggerRef.current?.focus();
+      } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        // Focus first/last focusable element in menu
+        const menuItems = menuRef.current?.querySelectorAll<HTMLElement>(
+          'button, a, [tabindex]:not([tabindex="-1"])',
+        );
+        if (menuItems && menuItems.length > 0) {
+          const target = e.key === 'ArrowDown' ? menuItems[0] : menuItems[menuItems.length - 1];
+          target?.focus();
+        }
       }
     };
+
     window.addEventListener('keydown', onKey);
     return (): void => {
       window.removeEventListener('keydown', onKey);
@@ -43,12 +62,11 @@ export function Dropdown({
 
   return (
     <div className="ui-dropdown" data-placement={placement}>
-      <div
+      <button
         ref={triggerRef}
+        type="button"
         aria-haspopup="menu"
         aria-expanded={isOpen}
-        role="button"
-        tabIndex={0}
         className="ui-trigger-reset"
         onClick={() => {
           toggle();
@@ -58,16 +76,18 @@ export function Dropdown({
             e.preventDefault();
             toggle();
           }
-          if (e.key === 'ArrowDown') {
+          if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
             e.preventDefault();
-            if (!isOpen) setOpen(true);
+            if (!isOpen) {
+              setOpen(true);
+            }
           }
         }}
       >
         {trigger}
-      </div>
+      </button>
       {isOpen ? (
-        <div className="ui-dropdown-menu" role="menu" data-placement={placement}>
+        <div ref={menuRef} className="ui-dropdown-menu" role="menu" data-placement={placement}>
           {typeof children === 'function'
             ? (children as (close: () => void) => ReactNode)(() => {
                 close();

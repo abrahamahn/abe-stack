@@ -14,7 +14,7 @@ import './primitives.css';
 type SelectProps = Omit<ComponentPropsWithoutRef<'button'>, 'value' | 'defaultValue'> & {
   value?: string;
   defaultValue?: string;
-  onValueChange?: (value: string) => void;
+  onChange?: (value: string) => void;
   children: ReactNode;
 };
 
@@ -26,7 +26,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>((props, ref) => {
     children,
     value,
     defaultValue,
-    onValueChange,
+    onChange,
     onBlur,
     name,
     disabled,
@@ -53,14 +53,24 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>((props, ref) => {
   const currentValue = value ?? internalValue;
   const currentLabel = options.find((opt) => opt.value === currentValue)?.label ?? currentValue;
 
-  const { isOpen, toggle, close, setOpen } = useDisclosure({ defaultOpen: false });
+  const { open: isOpen, toggle, close, setOpen } = useDisclosure({ defaultOpen: false });
+  const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
 
   const handleSelect = (next: string): void => {
     if (value === undefined) {
       setInternalValue(next);
     }
-    onValueChange?.(next);
+    onChange?.(next);
     close();
+  };
+
+  const moveHighlight = (direction: 1 | -1): void => {
+    setHighlightedIndex((prev) => {
+      const next = prev + direction;
+      if (next < 0) return 0;
+      if (next >= options.length) return options.length - 1;
+      return next;
+    });
   };
 
   return (
@@ -70,6 +80,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>((props, ref) => {
         className="ui-select ui-select-trigger"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
+        aria-controls={isOpen ? 'select-listbox' : undefined}
         disabled={disabled}
         onClick={() => {
           toggle();
@@ -77,7 +88,38 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>((props, ref) => {
         onKeyDown={(e) => {
           if (e.key === 'ArrowDown') {
             e.preventDefault();
-            setOpen(true);
+            if (!isOpen) {
+              setOpen(true);
+              setHighlightedIndex(options.findIndex((opt) => opt.value === currentValue));
+            } else {
+              moveHighlight(1);
+            }
+          } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (isOpen) {
+              moveHighlight(-1);
+            }
+          } else if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            if (isOpen) {
+              const highlighted = options[highlightedIndex];
+              if (highlighted) {
+                handleSelect(highlighted.value);
+              }
+            } else {
+              setOpen(true);
+            }
+          } else if (e.key === 'Escape') {
+            e.preventDefault();
+            close();
+          } else if (e.key === 'Tab') {
+            close();
+          } else if (e.key === 'Home' && isOpen) {
+            e.preventDefault();
+            setHighlightedIndex(0);
+          } else if (e.key === 'End' && isOpen) {
+            e.preventDefault();
+            setHighlightedIndex(options.length - 1);
           }
         }}
         onBlur={onBlur}
@@ -88,21 +130,25 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>((props, ref) => {
         <span className="ui-select-label">{currentLabel}</span>
       </button>
       {isOpen ? (
-        <div className="ui-select-menu" role="listbox">
-          {options.map((opt) => (
-            <button
+        <div id="select-listbox" className="ui-select-menu" role="listbox">
+          {options.map((opt, index) => (
+            <div
               key={opt.value}
-              type="button"
+              id={`select-option-${String(index)}`}
               role="option"
               aria-selected={opt.value === currentValue}
               className="ui-select-option"
               data-selected={opt.value === currentValue}
+              data-highlighted={index === highlightedIndex}
               onClick={() => {
                 handleSelect(opt.value);
               }}
+              onMouseEnter={() => {
+                setHighlightedIndex(index);
+              }}
             >
               {opt.label}
-            </button>
+            </div>
           ))}
         </div>
       ) : null}

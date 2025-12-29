@@ -9,13 +9,13 @@ type TabItem = {
 
 type TabsProps = {
   items: TabItem[];
-  defaultId?: string;
   value?: string;
-  onValueChange?: (id: string) => void;
+  defaultValue?: string;
+  onChange?: (id: string) => void;
 };
 
-export function Tabs({ items, defaultId, value, onValueChange }: TabsProps): ReactElement {
-  const [activeId, setActiveId] = useState<string>(() => defaultId ?? items[0]?.id ?? '');
+export function Tabs({ items, value, defaultValue, onChange }: TabsProps): ReactElement {
+  const [activeId, setActiveId] = useState<string>(() => defaultValue ?? items[0]?.id ?? '');
   const currentId = value ?? activeId;
 
   const active = items.find((item) => item.id === currentId) ?? items[0];
@@ -28,39 +28,70 @@ export function Tabs({ items, defaultId, value, onValueChange }: TabsProps): Rea
     const nextItem = items[nextIndex];
     if (nextItem) {
       if (value === undefined) setActiveId(nextItem.id);
-      onValueChange?.(nextItem.id);
+      onChange?.(nextItem.id);
+    }
+  };
+
+  const jumpTo = (index: number): void => {
+    const item = items[index];
+    if (item) {
+      if (value === undefined) setActiveId(item.id);
+      onChange?.(item.id);
     }
   };
 
   return (
     <div className="ui-tabs">
       <div className="ui-tab-list" role="tablist">
-        {items.map((item) => (
-          <button
-            key={item.id}
-            className="ui-tab"
-            role="tab"
-            aria-selected={item.id === active?.id}
-            data-active={item.id === active?.id}
-            onClick={() => {
-              setActiveId(item.id);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'ArrowRight') {
-                e.preventDefault();
-                move(1);
-              } else if (e.key === 'ArrowLeft') {
-                e.preventDefault();
-                move(-1);
-              }
-            }}
-          >
-            {item.label}
-          </button>
-        ))}
+        {items.map((item) => {
+          const isActive = item.id === active?.id;
+          const tabId = `tab-${item.id}`;
+          const panelId = `tabpanel-${item.id}`;
+
+          return (
+            <button
+              key={item.id}
+              id={tabId}
+              className="ui-tab"
+              role="tab"
+              type="button"
+              aria-selected={isActive}
+              aria-controls={panelId}
+              tabIndex={isActive ? 0 : -1}
+              data-active={isActive}
+              onClick={() => {
+                setActiveId(item.id);
+                onChange?.(item.id);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowRight') {
+                  e.preventDefault();
+                  move(1);
+                } else if (e.key === 'ArrowLeft') {
+                  e.preventDefault();
+                  move(-1);
+                } else if (e.key === 'Home') {
+                  e.preventDefault();
+                  jumpTo(0);
+                } else if (e.key === 'End') {
+                  e.preventDefault();
+                  jumpTo(items.length - 1);
+                }
+              }}
+            >
+              {item.label}
+            </button>
+          );
+        })}
       </div>
       {active ? (
-        <div className="ui-tab-panel" role="tabpanel">
+        <div
+          id={`tabpanel-${active.id}`}
+          className="ui-tab-panel"
+          role="tabpanel"
+          aria-labelledby={`tab-${active.id}`}
+          tabIndex={0}
+        >
           {active.content}
         </div>
       ) : null}

@@ -10,7 +10,8 @@ type PopoverProps = {
   placement?: Placement;
   children: ReactNode;
   open?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  defaultOpen?: boolean;
+  onChange?: (open: boolean) => void;
 };
 
 export function Popover({
@@ -18,12 +19,17 @@ export function Popover({
   placement = 'bottom',
   children,
   open,
-  onOpenChange,
+  defaultOpen,
+  onChange,
 }: PopoverProps): ReactElement {
-  const { isOpen, toggle, close } = useDisclosure({
-    defaultOpen: false,
-    isOpen: open,
-    onOpenChange,
+  const {
+    open: isOpen,
+    toggle,
+    close,
+  } = useDisclosure({
+    open,
+    defaultOpen: defaultOpen ?? false,
+    onChange,
   });
   const triggerRef = useRef<HTMLDivElement>(null);
 
