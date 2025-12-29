@@ -1,27 +1,28 @@
 import React from 'react';
+import '../primitives/primitives.css';
+
+type BadgeTone = 'success' | 'danger' | 'warning' | 'neutral';
 
 export function Badge(props: {
   children: React.ReactNode;
+  tone?: BadgeTone;
+  className?: string;
   style?: React.CSSProperties;
   onClick?: React.MouseEventHandler;
   onKeyDown?: React.KeyboardEventHandler;
   tabIndex?: 0 | -1;
 }): React.ReactElement {
+  const { tone, className, style, children, onClick, onKeyDown, tabIndex } = props;
   return (
     <div
-      style={{
-        display: 'inline-block',
-        fontSize: '0.8em',
-        padding: '0.2em 0.4em',
-        borderRadius: '0.2em',
-        backgroundColor: 'var(--gray3)',
-        ...props.style,
-      }}
-      tabIndex={props.tabIndex}
-      onClick={props.onClick}
-      onKeyDown={props.onKeyDown}
+      className={`ui-badge ${className ?? ''}`.trim()}
+      data-tone={tone}
+      style={style}
+      tabIndex={tabIndex}
+      onClick={onClick}
+      onKeyDown={onKeyDown}
     >
-      {props.children}
+      {children}
     </div>
   );
 }

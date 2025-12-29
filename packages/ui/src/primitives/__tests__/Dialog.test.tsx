@@ -1,11 +1,32 @@
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { Dialog } from '../Dialog';
 
 describe('Dialog', () => {
+  it('applies accessible labelling from title and description', async () => {
+    render(
+      <Dialog.Root defaultOpen>
+        <Dialog.Content>
+          <Dialog.Title>Dialog Title</Dialog.Title>
+          <Dialog.Description>Dialog Description</Dialog.Description>
+          <button type="button">Confirm</button>
+        </Dialog.Content>
+      </Dialog.Root>,
+    );
+
+    const dialog = screen.getByRole('dialog');
+    const title = screen.getByText('Dialog Title');
+    const description = screen.getByText('Dialog Description');
+
+    await waitFor(() => {
+      expect(dialog).toHaveAttribute('aria-labelledby', title.getAttribute('id'));
+      expect(dialog).toHaveAttribute('aria-describedby', description.getAttribute('id'));
+    });
+  });
+
   it('opens via trigger and closes via overlay/close button', () => {
     render(
       <Dialog.Root>
@@ -55,5 +76,26 @@ describe('Dialog', () => {
 
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('focuses the first focusable element and restores focus to the trigger on close', () => {
+    render(
+      <Dialog.Root>
+        <Dialog.Trigger>Open</Dialog.Trigger>
+        <Dialog.Content title="Title">
+          <button type="button">Primary Action</button>
+        </Dialog.Content>
+      </Dialog.Root>,
+    );
+
+    const trigger = screen.getByRole('button', { name: 'Open' });
+    trigger.focus();
+    fireEvent.click(trigger);
+
+    const action = screen.getByRole('button', { name: 'Primary Action' });
+    expect(action).toHaveFocus();
+
+    fireEvent.click(screen.getByLabelText('Close dialog'));
+    expect(trigger).toHaveFocus();
   });
 });

@@ -22,8 +22,8 @@ Guide to make the monorepo production-ready while keeping the renderer-agnostic 
   - [ ] Create accessibility examples/demos
 - [x] Standardize component APIs (controlled/uncontrolled patterns, polymorphic typing where needed).
 - [ ] Expand documentation examples for each component (usage, props, do/don't).
-- [ ] Add missing UI tests for critical behaviors (a11y, keyboard interactions, focus traps).
-- [ ] Ensure theme tokens cover spacing, typography, color, and motion consistently.
+- [x] Add missing UI tests for critical behaviors (a11y, keyboard interactions, focus traps).
+- [x] Ensure theme tokens cover spacing, typography, color, and motion consistently.
 - [ ] Publishable DX: consistent exports, tree-shakeable entrypoints, and clear versioning notes.
 
 ### Demo Surface (Live UI Gallery)
@@ -127,7 +127,7 @@ Guide to make the monorepo production-ready while keeping the renderer-agnostic 
 ## 11) Delivery Checklist
 
 - [ ] Clean install + `pnpm dev` smoke test passes across apps.
-- [ ] `pnpm build` succeeds across workspace.
-- [ ] `pnpm test`/`pnpm lint`/`pnpm type-check` green locally and in CI.
+- [x] `pnpm build` succeeds across workspace.
+- [x] `pnpm test`/`pnpm lint`/`pnpm type-check` green locally and in CI.
 - [ ] Example environment variables populated for demo auth/email flows.
 - [ ] Publish starter `full_code.txt` or similar export for sharing (kept gitignored).

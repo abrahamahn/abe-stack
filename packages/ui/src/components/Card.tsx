@@ -1,4 +1,5 @@
 import React from 'react';
+import '../primitives/primitives.css';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -7,7 +8,7 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const Card: React.FC<CardProps> = ({ children, className = '', ...props }) => {
   return (
-    <div className={`bg-white shadow-md rounded-lg overflow-hidden ${className}`} {...props}>
+    <div className={`ui-card ${className}`.trim()} {...props}>
       {children}
     </div>
   );

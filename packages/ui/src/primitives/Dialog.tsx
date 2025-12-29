@@ -168,16 +168,15 @@ export function DialogContent(props: DialogContentProps): ReactElement | null {
   const titleId = useId();
   const contentRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect((): (() => void) => {
-    setLabelledBy(title ? titleId : undefined);
+  useEffect((): (() => void) | undefined => {
+    if (!title) return undefined;
+    setLabelledBy(titleId);
     return (): void => {
       setLabelledBy(undefined);
     };
   }, [setLabelledBy, title, titleId]);
 
   useEffect((): (() => void) => {
-    // Clear describedBy on mount/unmount; will be set by DialogDescription if present
-    setDescribedBy(undefined);
     return (): void => {
       setDescribedBy(undefined);
     };
@@ -192,12 +191,16 @@ export function DialogContent(props: DialogContentProps): ReactElement | null {
   if (!open) return null;
 
   return (
-    <div className={`ui-modal`} role="dialog" aria-modal="true">
+    <div
+      className="ui-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={title ? titleId : labelledBy}
+      aria-describedby={describedBy}
+    >
       <FocusTrap>
         <div
           className={`ui-modal-card ${className}`.trim()}
-          aria-labelledby={title ? titleId : labelledBy}
-          aria-describedby={describedBy}
           {...rest}
           ref={(node) => {
             contentRef.current = node;

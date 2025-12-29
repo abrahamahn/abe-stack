@@ -17,9 +17,15 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
   const errorId = error ? `${inputId}-err` : undefined;
 
   return (
-    <div style={{ display: 'grid', gap: 6 }}>
+    <div style={{ display: 'grid', gap: 'var(--ui-gap-sm)' }}>
       {label ? (
-        <label htmlFor={inputId} style={{ fontWeight: 600, fontSize: '14px' }}>
+        <label
+          htmlFor={inputId}
+          style={{
+            fontWeight: 'var(--ui-font-weight-medium)',
+            fontSize: 'var(--ui-font-size-sm)',
+          }}
+        >
           {label}
         </label>
       ) : null}
@@ -33,12 +39,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
         {...rest}
       />
       {description ? (
-        <Text id={descId} tone="muted" style={{ fontSize: '12px' }}>
+        <Text id={descId} tone="muted" style={{ fontSize: 'var(--ui-font-size-xs)' }}>
           {description}
         </Text>
       ) : null}
       {error ? (
-        <Text id={errorId} tone="danger" style={{ fontSize: '12px' }}>
+        <Text id={errorId} tone="danger" style={{ fontSize: 'var(--ui-font-size-xs)' }}>
           {error}
         </Text>
       ) : null}
