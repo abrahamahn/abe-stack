@@ -29,5 +29,14 @@ export { VisuallyHidden } from './VisuallyHidden';
 export { Dialog } from './Dialog';
 export { Image } from './Image';
 export { ScrollArea } from './ScrollArea';
-export { Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from './Table';
+export {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from './Table';
 export { ResizablePanel, ResizablePanelGroup, ResizableSeparator } from './ResizablePanel';

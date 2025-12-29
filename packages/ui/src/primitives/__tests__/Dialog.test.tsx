@@ -33,4 +33,27 @@ describe('Dialog', () => {
     }
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
+
+  it('closes when the close button is clicked', () => {
+    render(
+      <Dialog.Root defaultOpen>
+        <Dialog.Content title="Title">Body</Dialog.Content>
+      </Dialog.Root>,
+    );
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Close dialog'));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('closes on Escape when enabled', () => {
+    render(
+      <Dialog.Root defaultOpen>
+        <Dialog.Content title="Title">Body</Dialog.Content>
+      </Dialog.Root>,
+    );
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
 });

@@ -88,7 +88,7 @@
       "pnpm prettier --check"
     ],
     "**/*.{ts,tsx,js,jsx}": [
-      "pnpm exec eslint --ignore-pattern config/** --no-warn-ignored --max-warnings=0"
+      "pnpm exec eslint --cache --cache-location .cache/eslint/.cache --ignore-pattern config/** --no-warn-ignored --max-warnings=0"
     ]
   },
   "packageManager": "pnpm@10.26.2"

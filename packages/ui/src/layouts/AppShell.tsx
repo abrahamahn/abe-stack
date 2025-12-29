@@ -79,32 +79,27 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(
     ref,
   ) => {
     const cssVars = {
-      '--ui-header-height': typeof headerHeight === 'number' ? `${headerHeight}px` : headerHeight,
-      '--ui-footer-height': typeof footerHeight === 'number' ? `${footerHeight}px` : footerHeight,
+      '--ui-header-height':
+        typeof headerHeight === 'number' ? `${String(headerHeight)}px` : headerHeight,
+      '--ui-footer-height':
+        typeof footerHeight === 'number' ? `${String(footerHeight)}px` : footerHeight,
       '--ui-sidebar-width': sidebarCollapsed
         ? '0px'
         : typeof sidebarWidth === 'number'
-          ? `${sidebarWidth}px`
+          ? `${String(sidebarWidth)}px`
           : sidebarWidth,
       '--ui-aside-width': asideCollapsed
         ? '0px'
         : typeof asideWidth === 'number'
-          ? `${asideWidth}px`
+          ? `${String(asideWidth)}px`
           : asideWidth,
       ...style,
     } as CSSProperties;
 
     return (
-      <div
-        ref={ref}
-        className={`ui-app-shell ${className}`.trim()}
-        style={cssVars}
-        {...props}
-      >
+      <div ref={ref} className={`ui-app-shell ${className}`.trim()} style={cssVars} {...props}>
         {header && <header className="ui-app-shell-header">{header}</header>}
-        {sidebar && !sidebarCollapsed && (
-          <aside className="ui-app-shell-sidebar">{sidebar}</aside>
-        )}
+        {sidebar && !sidebarCollapsed && <aside className="ui-app-shell-sidebar">{sidebar}</aside>}
         <main className="ui-app-shell-main">{children}</main>
         {aside && !asideCollapsed && <aside className="ui-app-shell-aside">{aside}</aside>}
         {footer && <footer className="ui-app-shell-footer">{footer}</footer>}

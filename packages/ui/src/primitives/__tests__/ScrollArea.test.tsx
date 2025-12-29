@@ -1,6 +1,6 @@
-import { render, screen, fireEvent, act } from '@testing-library/react';
-import React from 'react';
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+/** @vitest-environment jsdom */
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ScrollArea } from '../ScrollArea';
 
@@ -82,5 +82,10 @@ describe('ScrollArea', () => {
 
     fireEvent.mouseLeave(container.firstChild as Element);
     expect(container.firstChild).toHaveAttribute('data-scrollbar-visible', 'false');
+  });
+
+  it('keeps scrollbar visible when hideDelay is 0', () => {
+    const { container } = render(<ScrollArea hideDelay={0}>Content</ScrollArea>);
+    expect(container.firstChild).toHaveAttribute('data-scrollbar-visible', 'true');
   });
 });

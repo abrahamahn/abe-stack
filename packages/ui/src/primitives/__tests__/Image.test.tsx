@@ -1,6 +1,6 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react';
-import { describe, it, expect } from 'vitest';
+/** @vitest-environment jsdom */
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
 import { Image } from '../Image';
 
@@ -25,25 +25,39 @@ describe('Image', () => {
   });
 
   it('hides fallback and shows image on load', () => {
+    const handleLoad = vi.fn();
     render(
-      <Image src="/test.jpg" alt="Test" fallback={<div data-testid="fallback">Loading...</div>} />,
+      <Image
+        src="/test.jpg"
+        alt="Test"
+        fallback={<div data-testid="fallback">Loading...</div>}
+        onLoad={handleLoad}
+      />,
     );
 
     const img = screen.getByRole('img', { hidden: true });
     fireEvent.load(img);
 
+    expect(handleLoad).toHaveBeenCalled();
     expect(screen.queryByTestId('fallback')).not.toBeInTheDocument();
     expect(img).toHaveStyle({ display: 'block' });
   });
 
   it('shows fallback on error', () => {
+    const handleError = vi.fn();
     render(
-      <Image src="/invalid.jpg" alt="Test" fallback={<div data-testid="fallback">Error</div>} />,
+      <Image
+        src="/invalid.jpg"
+        alt="Test"
+        fallback={<div data-testid="fallback">Error</div>}
+        onError={handleError}
+      />,
     );
 
     const img = screen.getByRole('img', { hidden: true });
     fireEvent.error(img);
 
+    expect(handleError).toHaveBeenCalled();
     expect(screen.getByTestId('fallback')).toBeInTheDocument();
     expect(img).toHaveStyle({ display: 'none' });
   });

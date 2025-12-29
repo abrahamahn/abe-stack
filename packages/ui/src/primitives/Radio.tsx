@@ -37,8 +37,8 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>((props, ref) => {
         type="radio"
         name={name}
         checked={isChecked}
-        onChange={(e) => {
-          setChecked(e.target.checked);
+        onChange={() => {
+          setChecked(true);
         }}
         className="ui-radio-input"
         {...rest}

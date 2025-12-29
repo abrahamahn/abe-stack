@@ -33,10 +33,9 @@ export function createDbClient(connectionString: string): PostgresJsDatabase<typ
   if (process.env.NODE_ENV !== 'production') {
     const globalWithDb = globalThis as GlobalWithDb;
 
-    if (!globalWithDb.db) {
-      globalWithDb.db = drizzle(client, { schema });
-    }
-    return globalWithDb.db;
+    const cachedDb = globalWithDb.db ?? drizzle(client, { schema });
+    globalWithDb.db = cachedDb;
+    return cachedDb;
   }
 
   return drizzle(client, { schema });

@@ -1,5 +1,7 @@
+/** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
+
 import {
   Table,
   TableBody,
@@ -38,7 +40,7 @@ describe('Table', () => {
             <TableCell>$250.00</TableCell>
           </TableRow>
         </TableFooter>
-      </Table>
+      </Table>,
     );
 
     expect(screen.getByText('A list of invoices.')).toBeInTheDocument();
@@ -55,7 +57,7 @@ describe('Table', () => {
             <TableCell className="custom-cell">Cell</TableCell>
           </TableRow>
         </TableBody>
-      </Table>
+      </Table>,
     );
 
     // Note: Table renders a wrapper div, the table element is inside

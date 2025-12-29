@@ -1,5 +1,7 @@
+/** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
+
 import { AppShell } from '../AppShell';
 
 describe('AppShell', () => {
@@ -11,7 +13,7 @@ describe('AppShell', () => {
         footer={<div>Footer Content</div>}
       >
         <div>Main Content</div>
-      </AppShell>
+      </AppShell>,
     );
 
     expect(screen.getByText('Header Content')).toBeInTheDocument();
@@ -22,38 +24,29 @@ describe('AppShell', () => {
 
   it('hides sidebar when sidebarCollapsed is true', () => {
     render(
-      <AppShell
-        sidebar={<div>Sidebar Content</div>}
-        sidebarCollapsed={true}
-      >
+      <AppShell sidebar={<div>Sidebar Content</div>} sidebarCollapsed={true}>
         Main
-      </AppShell>
+      </AppShell>,
     );
     expect(screen.queryByText('Sidebar Content')).not.toBeInTheDocument();
   });
 
   it('hides aside when asideCollapsed is true', () => {
     render(
-      <AppShell
-        aside={<div>Aside Content</div>}
-        asideCollapsed={true}
-      >
+      <AppShell aside={<div>Aside Content</div>} asideCollapsed={true}>
         Main
-      </AppShell>
+      </AppShell>,
     );
     expect(screen.queryByText('Aside Content')).not.toBeInTheDocument();
   });
 
   it('applies style variables', () => {
     const { container } = render(
-      <AppShell
-        headerHeight={100}
-        sidebarWidth={300}
-      >
+      <AppShell headerHeight={100} sidebarWidth={300}>
         Main
-      </AppShell>
+      </AppShell>,
     );
-    
+
     // Note: styles applied to the container
     expect(container.firstChild).toHaveStyle({
       '--ui-header-height': '100px',

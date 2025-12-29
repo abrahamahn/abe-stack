@@ -1,9 +1,10 @@
 # ABE Stack Testing Strategy
 
-Primary goal: reliable refactoring with fast, focused tests.
+Primary goal: reliable refactoring with fast, focused tests driven by TDD.
 
 ## Quick Summary
 
+- Use TDD: write failing tests first, then fix code to pass.
 - Test business logic thoroughly, test React sparingly.
 - Use unit tests for shared logic.
 - Use contract tests to validate ts-rest contracts.
@@ -34,6 +35,21 @@ Primary goal: reliable refactoring with fast, focused tests.
 - **Invalid Inputs:** Test malformed data, wrong types, and unexpected characters.
 - **Error States:** Test network failures, API errors, and null/undefined handling.
 - **Regression:** Ensure previously fixed bugs have regression tests.
+
+## TDD Non-Negotiables
+
+- Write tests to reflect real usage flows and edge cases.
+- Include negative paths that would break code if not handled (invalid inputs, boundary values, error states).
+- Confirm the test fails before changing implementation.
+- Fix the code to pass the test; do not change tests to make failures disappear unless the requirement changed.
+
+## File Header Convention (New Files)
+
+All newly created files must start with a first-line comment containing the
+workspace-relative path. Examples:
+
+- `// packages/ui/src/primitives/__tests__/Switch.test.tsx`
+- `<!-- docs/dev/testing/index.md -->`
 
 ## Balanced Testing Matrix (30% Fast / 70% Full)
 

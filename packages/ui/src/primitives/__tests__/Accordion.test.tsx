@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { Accordion } from '../Accordion';
 
@@ -25,5 +25,19 @@ describe('Accordion', () => {
     fireEvent.click(headerOne);
     expect(screen.queryByText('Content One')).not.toBeInTheDocument();
     expect(headerOne).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('switches the open panel and calls onChange', () => {
+    const onChange = vi.fn();
+    render(<Accordion items={items} onChange={onChange} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /section one/i }));
+    expect(onChange).toHaveBeenCalledWith('one');
+    expect(screen.getByText('Content One')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /section two/i }));
+    expect(onChange).toHaveBeenCalledWith('two');
+    expect(screen.queryByText('Content One')).not.toBeInTheDocument();
+    expect(screen.getByText('Content Two')).toBeInTheDocument();
   });
 });

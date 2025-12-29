@@ -1,5 +1,7 @@
 import {
+  Children,
   createContext,
+  isValidElement,
   useRef,
   useCallback,
   useContext,
@@ -108,14 +110,21 @@ export function DialogRoot({
     triggerRef,
   };
 
+  const contentChildren = Children.toArray(children).filter((child) => {
+    return isValidElement(child) && child.type === DialogContent;
+  });
+  const nonContentChildren = Children.toArray(children).filter((child) => {
+    return !isValidElement(child) || child.type !== DialogContent;
+  });
+
   return (
     <DialogContext.Provider value={value}>
-      {children}
+      {nonContentChildren}
       {isOpen && mounted
         ? createPortal(
             <>
               <DialogOverlay onClick={closeOnOverlayClick ? handleOverlayClick : undefined} />
-              <DialogContent />
+              {contentChildren}
             </>,
             document.body,
           )

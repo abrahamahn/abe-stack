@@ -26,12 +26,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref)
 
   return (
     <label className={`ui-checkbox ${className}`.trim()}>
-      <span
-        className="ui-checkbox-box"
-        data-checked={isChecked}
-        aria-checked={isChecked}
-        role="checkbox"
-      >
+      <span className="ui-checkbox-box" data-checked={isChecked}>
         {isChecked ? '✓' : ''}
       </span>
       <input
@@ -40,6 +35,12 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref)
         checked={isChecked}
         onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
           setChecked(event.target.checked);
+        }}
+        onKeyDown={(event) => {
+          if (event.key === ' ' || event.key === 'Enter') {
+            event.preventDefault();
+            setChecked(!isChecked);
+          }
         }}
         className="ui-checkbox-input"
         {...rest}

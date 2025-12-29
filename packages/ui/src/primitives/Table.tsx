@@ -1,4 +1,4 @@
-import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
+import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import './primitives.css';
 
 /**
@@ -55,9 +55,10 @@ export const TableCell = forwardRef<HTMLTableCellElement, ComponentPropsWithoutR
 );
 TableCell.displayName = 'TableCell';
 
-export const TableCaption = forwardRef<HTMLTableCaptionElement, ComponentPropsWithoutRef<'caption'>>(
-  ({ className = '', ...props }, ref) => (
-    <caption ref={ref} className={`ui-table-caption ${className}`.trim()} {...props} />
-  ),
-);
+export const TableCaption = forwardRef<
+  HTMLTableCaptionElement,
+  ComponentPropsWithoutRef<'caption'>
+>(({ className = '', ...props }, ref) => (
+  <caption ref={ref} className={`ui-table-caption ${className}`.trim()} {...props} />
+));
 TableCaption.displayName = 'TableCaption';

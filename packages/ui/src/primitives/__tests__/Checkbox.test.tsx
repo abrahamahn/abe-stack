@@ -1,22 +1,35 @@
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { useState, type ReactElement } from 'react';
+import { describe, expect, it } from 'vitest';
 
 import { Checkbox } from '../Checkbox';
 
+function CheckboxHarness(): ReactElement {
+  const [checked, setChecked] = useState(false);
+  return <Checkbox checked={checked} onChange={setChecked} label="Check me" />;
+}
+
 describe('Checkbox', () => {
   it('toggles on click and space key', () => {
-    const onChange = vi.fn();
-    render(<Checkbox checked={false} onCheckedChange={onChange} label="Check me" />);
+    render(<CheckboxHarness />);
 
-    const label = screen.getByText(/check me/i);
-    fireEvent.click(label);
-    expect(onChange).toHaveBeenCalledWith(true);
+    const input = screen.getByLabelText(/check me/i);
+    fireEvent.click(input);
+    expect(input).toBeChecked();
 
-    const input = screen.getByRole('checkbox');
     input.focus();
     fireEvent.keyDown(input, { key: ' ' });
-    expect(onChange).toHaveBeenCalledWith(false);
+    expect(input).not.toBeChecked();
+  });
+
+  it('uses defaultChecked when uncontrolled', () => {
+    render(<Checkbox defaultChecked label="Default" />);
+    const input = screen.getByRole('checkbox');
+    if (!(input instanceof HTMLInputElement)) {
+      throw new Error('Expected checkbox input element');
+    }
+    expect(input.checked).toBe(true);
   });
 });

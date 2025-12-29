@@ -6,6 +6,8 @@ Quick Summary:
 
 - DRY and separation of concerns are non-negotiable.
 - Keep business logic framework-agnostic in `packages/shared`.
+- Use TDD: failing tests drive fixes, not the other way around.
+- New files must start with a path header comment.
 - Optimize for developer velocity without sacrificing correctness.
 
 ## Modules

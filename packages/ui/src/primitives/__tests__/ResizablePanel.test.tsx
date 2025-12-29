@@ -1,6 +1,6 @@
-import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react';
-import { describe, it, expect } from 'vitest';
+/** @vitest-environment jsdom */
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
 import { ResizablePanelGroup, ResizablePanel } from '../ResizablePanel';
 
@@ -62,5 +62,22 @@ describe('ResizablePanel', () => {
 
     fireEvent.mouseUp(document);
     expect(separator).not.toHaveClass('dragging');
+  });
+
+  it('calls onResize when dragging the separator', () => {
+    const handleResize = vi.fn();
+    render(
+      <ResizablePanelGroup>
+        <ResizablePanel onResize={handleResize}>Panel 1</ResizablePanel>
+      </ResizablePanelGroup>,
+    );
+
+    const separator = screen.getByRole('separator');
+    fireEvent.mouseDown(separator, { clientX: 0 });
+    fireEvent.mouseMove(document, { clientX: 10 });
+
+    expect(handleResize).toHaveBeenCalled();
+    const nextSize = handleResize.mock.calls[0]?.[0] as number;
+    expect(nextSize).toBeGreaterThan(50);
   });
 });

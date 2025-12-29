@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { Tabs } from '../Tabs';
 
@@ -12,7 +12,7 @@ const items = [
 
 describe('Tabs', () => {
   it('renders default tab and switches on click', () => {
-    render(<Tabs items={items} defaultId="a" />);
+    render(<Tabs items={items} defaultValue="a" />);
 
     expect(screen.getByRole('tab', { name: /tab a/i })).toHaveAttribute('data-active', 'true');
     expect(screen.getByText('Content A')).toBeInTheDocument();
@@ -25,7 +25,7 @@ describe('Tabs', () => {
   });
 
   it('moves focus/active with arrow keys', () => {
-    render(<Tabs items={items} defaultId="a" />);
+    render(<Tabs items={items} defaultValue="a" />);
 
     const tabA = screen.getByRole('tab', { name: /tab a/i });
     const tabB = screen.getByRole('tab', { name: /tab b/i });
@@ -38,5 +38,18 @@ describe('Tabs', () => {
     fireEvent.keyDown(tabB, { key: 'ArrowLeft' });
     expect(tabA).toHaveAttribute('data-active', 'true');
     expect(screen.getByText('Content A')).toBeInTheDocument();
+  });
+
+  it('calls onChange for keyboard navigation', () => {
+    const onChange = vi.fn();
+    render(<Tabs items={items} defaultValue="a" onChange={onChange} />);
+
+    const tabA = screen.getByRole('tab', { name: /tab a/i });
+    fireEvent.keyDown(tabA, { key: 'End' });
+    expect(onChange).toHaveBeenCalledWith('b');
+
+    const tabB = screen.getByRole('tab', { name: /tab b/i });
+    fireEvent.keyDown(tabB, { key: 'Home' });
+    expect(onChange).toHaveBeenCalledWith('a');
   });
 });
