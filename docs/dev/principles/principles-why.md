@@ -182,15 +182,15 @@ Foundational principles and technical vision for the ABE Stack. Learn the "why" 
 
 ## Development Philosophy
 
-### Principle 7: Test Business Logic, Not React
+### Principle 7: TDD With Real Usage and Edge Cases
 
-**Why we focus on business logic tests:**
+**Why we require TDD and real usage tests:**
 
-- **Fast feedback loop** - unit tests run in milliseconds
-- **High value** - business logic is where bugs hide
-- **Easy to write** - pure functions are trivial to test
-- **Long-lasting** - business logic tests survive framework changes
-- **Coverage that matters** - test what actually breaks
+- **Fast feedback loop** - failing tests pinpoint missing behavior
+- **High value** - real usage and edge cases reveal true breakpoints
+- **Regression protection** - every bug gets a failing test first
+- **Long-lasting** - behavior-focused tests survive refactors
+- **Confidence to refactor** - tests drive the correct fixes
 
 **Testing strategy:**
 
@@ -204,6 +204,13 @@ Foundational principles and technical vision for the ABE Stack. Learn the "why" 
 - React tests are brittle (break on UI refactors)
 - React is already tested by the React team
 - Most React components are just rendering logic
+
+**TDD rules:**
+
+- Write the failing test first.
+- Confirm the failure before touching production code.
+- Fix the production code; do not rewrite tests to make failures disappear unless the requirement changed.
+- Include failure modes and boundary conditions as first-class tests.
 
 **Trade-offs we accept:**
 
@@ -230,6 +237,11 @@ Foundational principles and technical vision for the ABE Stack. Learn the "why" 
 - `dev/testing/index.md` - Testing patterns documented
 - `CLAUDE.md` - Coding standards updated
 - JSDoc for complex functions
+
+**File header convention:**
+
+New files must begin with a first-line comment containing the workspace-relative
+path. This improves reviewability and file provenance when reading in isolation.
 
 **Trade-offs we accept:**
 
@@ -578,7 +590,7 @@ _Build simple, typed, tested systems that ship fast and scale confidently._
 3. **Type Safety** - TypeScript strict + Zod validation everywhere
 4. **Framework-Agnostic** - Business logic independent of React
 5. **Minimal Deps** - Only add when necessary
-6. **Test Smart** - Test business logic, not React
+6. **Test-Driven** - Real usage and edge cases drive fixes
 7. **Document** - log/log.md, TODO.md, dev/testing/index.md updated every session
 8. **Quality Gates** - format + lint + type-check + test must pass
 9. **Production-Ready** - Security, auth, validation included by default

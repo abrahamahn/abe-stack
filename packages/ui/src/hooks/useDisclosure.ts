@@ -3,25 +3,25 @@ import { useCallback } from 'react';
 import { useControllableState } from './useControllableState';
 
 export type UseDisclosureProps = {
-  isOpen?: boolean;
+  open?: boolean;
   defaultOpen?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  onChange?: (open: boolean) => void;
 };
 
-export function useDisclosure({ isOpen, defaultOpen = false, onOpenChange }: UseDisclosureProps): {
-  isOpen: boolean;
-  open: () => void;
+export function useDisclosure({ open, defaultOpen = false, onChange }: UseDisclosureProps): {
+  open: boolean;
+  openFn: () => void;
   close: () => void;
   toggle: () => void;
   setOpen: (open: boolean) => void;
 } {
   const [openState, setOpen] = useControllableState<boolean>({
-    value: isOpen,
+    value: open,
     defaultValue: defaultOpen,
-    onChange: onOpenChange,
+    onChange,
   });
 
-  const open = useCallback((): void => {
+  const openFn = useCallback((): void => {
     setOpen(true);
   }, [setOpen]);
   const close = useCallback((): void => {
@@ -32,8 +32,8 @@ export function useDisclosure({ isOpen, defaultOpen = false, onOpenChange }: Use
   }, [openState, setOpen]);
 
   return {
-    isOpen: Boolean(openState),
-    open,
+    open: Boolean(openState),
+    openFn,
     close,
     toggle,
     setOpen,

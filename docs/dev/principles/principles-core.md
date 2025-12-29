@@ -22,18 +22,19 @@ ABE Stack is a production-ready, developer-velocity-first monorepo that teams ca
 4. Framework-agnostic core in shared
 5. Minimal dependencies
 6. Type safety everywhere
-7. Test business logic, not React
+7. TDD: write failing tests for real usage and edge cases, then fix code
 8. Documentation as code
-9. Quality gates are mandatory
-10. Production-ready defaults
-11. Respect monorepo boundaries
-12. Colocate related code
-13. Prefer explicit over implicit
-14. Security by default
-15. Optimize for developer experience first
-16. Comments explain why, code explains what
-17. Decisions must be documented
-18. Security and privacy principles (data handling, validation)
+9. New files start with a path header comment
+10. Quality gates are mandatory
+11. Production-ready defaults
+12. Respect monorepo boundaries
+13. Colocate related code
+14. Prefer explicit over implicit
+15. Security by default
+16. Optimize for developer experience first
+17. Comments explain why, code explains what
+18. Decisions must be documented
+19. Security and privacy principles (data handling, validation)
 
 See Also:
 

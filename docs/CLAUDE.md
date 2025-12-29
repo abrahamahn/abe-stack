@@ -105,11 +105,19 @@ apps → packages/db → packages/shared
 **Before marking ANY task complete, ALL must pass:**
 
 ```bash
+# 1. Ensure tests exist and are up-to-date
+# - New files: tests created
+# - Updated files: tests updated or created
+
+# 2. Run quality checks (ALL must pass)
 pnpm format      # Format code
 pnpm lint:fix    # Fix auto-fixable issues
 pnpm lint        # Check for errors
 pnpm type-check  # TypeScript validation
 pnpm test        # Run all tests
+
+# Note: pnpm build runs: format:check + lint + type-check + theme:build + turbo build
+# (format:check is read-only, so run pnpm format separately if changes needed)
 ```
 
 **If ANY fail:**
@@ -118,6 +126,12 @@ pnpm test        # Run all tests
 - ❌ DO NOT commit
 - ✅ If the failure is caused by your changes, FIX immediately and re-run all checks
 - ✅ If the failure is pre-existing/unrelated, DO NOT fix automatically; report it clearly and proceed only with requested scope
+
+**Testing is MANDATORY:**
+
+- Every new file MUST have corresponding tests
+- Every updated file MUST have updated tests (or create if missing)
+- Tests must verify actual behavior, not just existence
 
 ---
 
@@ -210,20 +224,33 @@ Success:
 After EVERY checkpoint:
 
 ```bash
-# 1. Code Quality (automated)
+# 1. Write/Update Tests (MANDATORY before quality checks)
+# For newly created files: Create corresponding test file
+# For updated files: Update existing tests OR create if missing
+# Test files location: same directory as source with .test.ts/.test.tsx extension
+# OR in __tests__ subdirectory
+
+# 2. Code Quality (automated - ALL must pass)
 pnpm format && pnpm lint && pnpm type-check && pnpm test
 
-# 2. Self-Assessment (manual - see agent/agent-self-check.md)
+# 3. Self-Assessment (manual - see agent/agent-self-check.md)
 - Scope adherence
 - Pattern consistency
-- Testing completeness
+- Testing completeness (tests exist AND are meaningful)
 
-# 3. Commit
+# 4. Commit
 git commit -m "checkpoint: [what this achieves]"
 
-# 4. Report Progress
+# 5. Report Progress
 "✅ Checkpoint N: [description] - [commit hash]"
 ```
+
+**Testing Requirements:**
+
+- **New files**: MUST create tests before running quality checks
+- **Updated files**: MUST update tests OR create if none exist
+- **Test quality**: Tests must verify actual behavior, not just "it renders"
+- **Test location**: Co-located with source OR in `__tests__` directory
 
 ### STEP 4: Stop Conditions
 

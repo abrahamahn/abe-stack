@@ -19,6 +19,22 @@ This file defines mandatory self-checks that AI agents must perform during task 
 
 ## Self-Check Protocol
 
+### Level 0: Test Creation (Pre-Quality)
+
+**Before running any quality checks, you MUST ensure tests exist:**
+
+1. **New Files:**
+   - [ ] Created corresponding test file (e.g., `component.test.tsx` or `__tests__/component.test.tsx`)
+   - [ ] Included happy path tests
+   - [ ] Included edge case/error tests
+
+2. **Updated Files:**
+   - [ ] Updated existing tests to reflect changes
+   - [ ] Created tests if they were missing
+   - [ ] verified tests fail without the changes (if applicable)
+
+**STOP if tests are missing.** Do not proceed to Level 1 until tests are written.
+
 ### Level 1: Code Quality Checks (Automated)
 
 **Run these commands in sequence. ALL must pass.**
@@ -91,6 +107,7 @@ Attempt 1: [what I'll try to fix it]
 4. **Testing:**
    - [ ] Tests exist for new functionality
    - [ ] Tests actually verify the behavior (not just "renders")
+   - [ ] Edge cases and error states are tested
    - [ ] Tests pass locally
 
 5. **Dependencies:**

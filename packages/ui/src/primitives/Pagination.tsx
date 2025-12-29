@@ -1,18 +1,34 @@
 import { type ReactElement } from 'react';
+
+import { useControllableState } from '../hooks/useControllableState';
 import './primitives.css';
 
 type PaginationProps = {
-  page: number;
+  value?: number;
+  defaultValue?: number;
   totalPages: number;
-  onChange: (page: number) => void;
+  onChange?: (value: number) => void;
 };
 
-export function Pagination({ page, totalPages, onChange }: PaginationProps): ReactElement {
+export function Pagination({
+  value,
+  defaultValue,
+  totalPages,
+  onChange,
+}: PaginationProps): ReactElement {
+  const [currentPage, setPage] = useControllableState<number>({
+    value,
+    defaultValue: defaultValue ?? 1,
+    onChange,
+  });
+
+  const page = currentPage ?? 1;
+
   const prev = (): void => {
-    onChange(Math.max(1, page - 1));
+    setPage(Math.max(1, page - 1));
   };
   const next = (): void => {
-    onChange(Math.min(totalPages, page + 1));
+    setPage(Math.min(totalPages, page + 1));
   };
 
   return (
@@ -26,7 +42,7 @@ export function Pagination({ page, totalPages, onChange }: PaginationProps): Rea
           className="ui-pagination-button"
           data-active={p === page}
           onClick={() => {
-            onChange(p);
+            setPage(p);
           }}
         >
           {p}

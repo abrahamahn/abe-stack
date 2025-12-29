@@ -3,7 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { Dialog } from '../primitives/Dialog';
+import { Dialog } from '../Dialog';
 
 describe('Dialog', () => {
   it('opens via trigger and closes via overlay/close button', () => {
@@ -31,6 +31,29 @@ describe('Dialog', () => {
     if (overlay) {
       fireEvent.click(overlay);
     }
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('closes when the close button is clicked', () => {
+    render(
+      <Dialog.Root defaultOpen>
+        <Dialog.Content title="Title">Body</Dialog.Content>
+      </Dialog.Root>,
+    );
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Close dialog'));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('closes on Escape when enabled', () => {
+    render(
+      <Dialog.Root defaultOpen>
+        <Dialog.Content title="Title">Body</Dialog.Content>
+      </Dialog.Root>,
+    );
+
+    fireEvent.keyDown(window, { key: 'Escape' });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });

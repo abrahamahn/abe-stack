@@ -2,3 +2,8 @@ export { useMediaQuery } from './useMediaQuery';
 export { useDisclosure } from './useDisclosure';
 export { useClickOutside } from './useClickOutside';
 export { useControllableState } from './useControllableState';
+export { useDebounce } from './useDebounce';
+export { useLocalStorage } from './useLocalStorage';
+export { useWindowSize } from './useWindowSize';
+export { useOnScreen } from './useOnScreen';
+export { useCopyToClipboard } from './useCopyToClipboard';

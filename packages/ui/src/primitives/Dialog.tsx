@@ -1,5 +1,7 @@
 import {
+  Children,
   createContext,
+  isValidElement,
   useRef,
   useCallback,
   useContext,
@@ -41,7 +43,7 @@ type DialogRootProps = {
   children: ReactNode;
   open?: boolean;
   defaultOpen?: boolean;
-  onOpenChange?: (open: boolean) => void;
+  onChange?: (open: boolean) => void;
   closeOnEscape?: boolean;
   closeOnOverlayClick?: boolean;
 };
@@ -50,14 +52,14 @@ export function DialogRoot({
   children,
   open,
   defaultOpen = false,
-  onOpenChange,
+  onChange,
   closeOnEscape = true,
   closeOnOverlayClick = true,
 }: DialogRootProps): ReactElement {
   const [currentOpen, setCurrentOpen] = useControllableState<boolean>({
     value: open,
     defaultValue: defaultOpen,
-    onChange: onOpenChange,
+    onChange,
   });
   const isOpen = currentOpen ?? false;
 
@@ -108,14 +110,21 @@ export function DialogRoot({
     triggerRef,
   };
 
+  const contentChildren = Children.toArray(children).filter((child) => {
+    return isValidElement(child) && child.type === DialogContent;
+  });
+  const nonContentChildren = Children.toArray(children).filter((child) => {
+    return !isValidElement(child) || child.type !== DialogContent;
+  });
+
   return (
     <DialogContext.Provider value={value}>
-      {children}
+      {nonContentChildren}
       {isOpen && mounted
         ? createPortal(
             <>
               <DialogOverlay onClick={closeOnOverlayClick ? handleOverlayClick : undefined} />
-              <DialogContent />
+              {contentChildren}
             </>,
             document.body,
           )

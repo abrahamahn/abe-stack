@@ -15,6 +15,7 @@ export { Pagination } from './Pagination';
 export { Popover } from './Popover';
 export { Progress } from './Progress';
 export { Radio } from './Radio';
+export { RadioGroup } from './RadioGroup';
 export { Select } from './Select';
 export { Skeleton } from './Skeleton';
 export { Slider } from './Slider';
@@ -26,3 +27,16 @@ export { Toast, ToastContainer } from './Toast';
 export { Tooltip } from './Tooltip';
 export { VisuallyHidden } from './VisuallyHidden';
 export { Dialog } from './Dialog';
+export { Image } from './Image';
+export { ScrollArea } from './ScrollArea';
+export {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from './Table';
+export { ResizablePanel, ResizablePanelGroup, ResizableSeparator } from './ResizablePanel';

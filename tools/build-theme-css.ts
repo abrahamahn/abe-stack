@@ -2,6 +2,8 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import { format } from 'prettier';
+
 import { colors } from '../packages/ui/src/theme/colors';
 import { spacing } from '../packages/ui/src/theme/spacing';
 import { typography } from '../packages/ui/src/theme/typography';
@@ -154,7 +156,8 @@ function toCssVars(): string {
 
 async function build(): Promise<void> {
   const css = toCssVars();
-  await fs.writeFile(themeCssPath, css, 'utf8');
+  const formatted = await format(css, { parser: 'css' });
+  await fs.writeFile(themeCssPath, formatted, 'utf8');
 
   console.log(`Generated theme CSS at ${themeCssPath}`);
 }

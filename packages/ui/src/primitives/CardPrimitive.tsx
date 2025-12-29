@@ -1,15 +1,23 @@
-import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 'react';
+import {
+  forwardRef,
+  type ComponentPropsWithoutRef,
+  type ElementType,
+  type ReactElement,
+} from 'react';
 import './primitives.css';
 
-type CardRootProps = ComponentPropsWithoutRef<'div'>;
+type CardRootProps = ComponentPropsWithoutRef<'div'> & {
+  as?: ElementType;
+};
 type CardSectionProps = ComponentPropsWithoutRef<'div'>;
 
-const CardRoot = forwardRef<HTMLDivElement, CardRootProps>((props, ref) => {
-  const { className = '', children, ...rest } = props;
+const CardRoot = forwardRef<HTMLElement, CardRootProps>((props, ref) => {
+  const { as = 'div', className = '', children, ...rest } = props;
+  const Component: ElementType = as;
   return (
-    <div ref={ref} className={`ui-card ${className}`.trim()} {...rest}>
+    <Component ref={ref} className={`ui-card ${className}`.trim()} {...rest}>
       {children}
-    </div>
+    </Component>
   );
 });
 CardRoot.displayName = 'CardPrimitive.Root';

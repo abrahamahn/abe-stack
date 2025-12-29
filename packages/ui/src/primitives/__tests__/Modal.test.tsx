@@ -3,7 +3,7 @@ import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Modal } from '../primitives/Modal';
+import { Modal } from '../Modal';
 
 describe('Modal', () => {
   it('renders nothing when closed', () => {
@@ -17,7 +17,7 @@ describe('Modal', () => {
 
   it('shows dialog when open and closes on overlay click', () => {
     const handleClose = vi.fn();
-    const { container } = render(
+    render(
       <Modal.Root open onClose={handleClose}>
         <Modal.Header>
           <span>Hello</span>
@@ -30,11 +30,23 @@ describe('Modal', () => {
     expect(screen.getByText('Hello')).toBeInTheDocument();
     expect(screen.getByText('Content')).toBeInTheDocument();
 
-    const overlay = container.querySelector('.ui-overlay');
+    const overlay = document.body.querySelector('.ui-overlay');
     expect(overlay).toBeInTheDocument();
     if (overlay) {
       fireEvent.click(overlay);
     }
+    expect(handleClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('closes on Escape when onClose is provided', () => {
+    const handleClose = vi.fn();
+    render(
+      <Modal.Root open onClose={handleClose}>
+        <Modal.Body>Content</Modal.Body>
+      </Modal.Root>,
+    );
+
+    fireEvent.keyDown(document.body, { key: 'Escape' });
     expect(handleClose).toHaveBeenCalledTimes(1);
   });
 });

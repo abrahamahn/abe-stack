@@ -11,40 +11,57 @@ type AccordionItem = {
 
 type AccordionProps = {
   items: AccordionItem[];
-  defaultOpenId?: string | null;
   value?: string | null;
-  onValueChange?: (id: string | null) => void;
+  defaultValue?: string | null;
+  onChange?: (id: string | null) => void;
 };
 
 export function Accordion({
   items,
-  defaultOpenId = null,
   value,
-  onValueChange,
+  defaultValue = null,
+  onChange,
 }: AccordionProps): ReactElement {
   const [openId, setOpenId] = useControllableState<string | null>({
     value: value ?? undefined,
-    defaultValue: defaultOpenId,
-    onChange: onValueChange,
+    defaultValue,
+    onChange,
   });
 
   return (
     <div className="ui-accordion">
       {items.map((item) => {
         const isOpen = item.id === openId;
+        const headerId = `accordion-header-${item.id}`;
+        const panelId = `accordion-panel-${item.id}`;
+
         return (
           <div className="ui-accordion-item" key={item.id}>
-            <button
-              className="ui-accordion-header"
-              aria-expanded={isOpen}
-              onClick={() => {
-                setOpenId(isOpen ? null : item.id);
-              }}
-            >
-              <span>{item.title}</span>
-              <span>{isOpen ? '−' : '+'}</span>
-            </button>
-            {isOpen ? <div className="ui-accordion-content">{item.content}</div> : null}
+            <h3 className="ui-accordion-heading">
+              <button
+                type="button"
+                id={headerId}
+                className="ui-accordion-header"
+                aria-expanded={isOpen}
+                aria-controls={panelId}
+                onClick={() => {
+                  setOpenId(isOpen ? null : item.id);
+                }}
+              >
+                <span>{item.title}</span>
+                <span aria-hidden="true">{isOpen ? '−' : '+'}</span>
+              </button>
+            </h3>
+            {isOpen ? (
+              <div
+                id={panelId}
+                role="region"
+                aria-labelledby={headerId}
+                className="ui-accordion-content"
+              >
+                {item.content}
+              </div>
+            ) : null}
           </div>
         );
       })}

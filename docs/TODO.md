@@ -4,19 +4,23 @@ Guide to make the monorepo production-ready while keeping the renderer-agnostic 
 
 ## 1) Foundations & DX
 
-- [ ] Confirm Node/pnpm versions align with repo policy (`>=18.19 <25`, `pnpm@10.26.2`).
-- [ ] Harden env loading (`dotenv-flow`) and examples (`config/.env.*`) with required keys for server, email, DB, and client origins.
-- [ ] Ensure `pnpm install` succeeds on clean checkout (no optional native deps breaking CI).
-- [ ] Add dev bootstrap script to start DB (docker-compose) and run migrations/seed.
-- [ ] Wire CI (lint, type-check, test, build) via GitHub Actions (or target CI).
-- [ ] Cache strategy for Turbo/PNPM in CI.
+- [x] Confirm Node/pnpm versions align with repo policy (`>=18.19 <25`, `pnpm@10.26.2`).
+- [x] Harden env loading (`dotenv-flow`) and examples (`config/.env.*`) with required keys for server, email, DB, and client origins.
+- [x] Ensure `pnpm install` succeeds on clean checkout (no optional native deps breaking CI).
+- [x] Add dev bootstrap script to start DB (docker-compose) and run migrations/seed.
+- [x] Wire CI (lint, type-check, test, build) via GitHub Actions (or target CI).
+- [x] Cache strategy for Turbo/PNPM in CI.
 
 ## 2) Frontend (Web + Shared UI)
 
 ### packages/ui (Reusable UI Library)
 
-- [ ] Audit and align primitives/components with industry best practices (accessibility, keyboard nav, ARIA, focus management).
-- [ ] Standardize component APIs (controlled/uncontrolled patterns, polymorphic typing where needed).
+- [x] Audit and align primitives/components with industry best practices (accessibility, keyboard nav, ARIA, focus management).
+- [ ] Accessibility Audit:
+  - [ ] Create keyboard interaction documentation
+  - [ ] Add accessibility testing utilities
+  - [ ] Create accessibility examples/demos
+- [x] Standardize component APIs (controlled/uncontrolled patterns, polymorphic typing where needed).
 - [ ] Expand documentation examples for each component (usage, props, do/don't).
 - [ ] Add missing UI tests for critical behaviors (a11y, keyboard interactions, focus traps).
 - [ ] Ensure theme tokens cover spacing, typography, color, and motion consistently.

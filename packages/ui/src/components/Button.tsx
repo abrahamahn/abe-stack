@@ -1,16 +1,25 @@
-import { forwardRef, type ComponentPropsWithoutRef } from 'react';
+import { forwardRef, type ComponentPropsWithoutRef, type ElementType } from 'react';
 import './Button.css';
 
-interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
+type ButtonProps = ComponentPropsWithoutRef<'button'> & {
+  as?: ElementType;
   variant?: 'primary' | 'secondary' | 'text';
   size?: 'small' | 'medium' | 'large';
-}
+};
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
-  const { variant = 'primary', size = 'medium', className = '', ...rest } = props;
+const Button = forwardRef<HTMLElement, ButtonProps>((props, ref) => {
+  const {
+    as = 'button',
+    variant = 'primary',
+    size = 'medium',
+    className = '',
+    type = 'button',
+    ...rest
+  } = props;
+  const Component: ElementType = as;
   const buttonClass = `btn btn-${variant} btn-${size} ${className}`;
 
-  return <button ref={ref} className={buttonClass} {...rest} />;
+  return <Component ref={ref} type={type} className={buttonClass} {...rest} />;
 });
 
 Button.displayName = 'Button';

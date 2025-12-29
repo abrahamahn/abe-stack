@@ -166,26 +166,30 @@ Every table that needs real-time sync must have a `version` field:
 // Example: Task Management App Schema
 
 // packages/db/src/schema/workspaces.ts
-import { pgTable, uuid, text, timestamp, integer, jsonb, boolean } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, timestamp, integer, jsonb, boolean } from 'drizzle-orm/pg-core';
 
 export const workspaces = pgTable('workspaces', {
   id: uuid('id').primaryKey().defaultRandom(),
   version: integer('version').notNull().default(1), // Required for sync
 
   name: text('name').notNull(),
-  ownerId: uuid('owner_id').notNull().references(() => users.id),
+  ownerId: uuid('owner_id')
+    .notNull()
+    .references(() => users.id),
   memberIds: jsonb('member_ids').$type<string[]>().notNull().default([]),
 
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   deleted: timestamp('deleted'), // Soft delete for undo support
-})
+});
 
 export const boards = pgTable('boards', {
   id: uuid('id').primaryKey().defaultRandom(),
   version: integer('version').notNull().default(1),
 
-  workspaceId: uuid('workspace_id').notNull().references(() => workspaces.id),
+  workspaceId: uuid('workspace_id')
+    .notNull()
+    .references(() => workspaces.id),
   name: text('name').notNull(),
   color: text('color').default('#3b82f6'),
   orderIndex: integer('order_index').notNull().default(0),
@@ -193,13 +197,15 @@ export const boards = pgTable('boards', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   deleted: timestamp('deleted'),
-})
+});
 
 export const tasks = pgTable('tasks', {
   id: uuid('id').primaryKey().defaultRandom(),
   version: integer('version').notNull().default(1),
 
-  boardId: uuid('board_id').notNull().references(() => boards.id),
+  boardId: uuid('board_id')
+    .notNull()
+    .references(() => boards.id),
   title: text('title').notNull(),
   description: text('description'),
   status: text('status').$type<'todo' | 'in_progress' | 'done'>().notNull().default('todo'),
@@ -211,29 +217,35 @@ export const tasks = pgTable('tasks', {
   orderIndex: integer('order_index').notNull().default(0),
   tags: jsonb('tags').$type<string[]>().notNull().default([]),
 
-  createdBy: uuid('created_by').notNull().references(() => users.id),
+  createdBy: uuid('created_by')
+    .notNull()
+    .references(() => users.id),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   deleted: timestamp('deleted'),
-})
+});
 
 export const comments = pgTable('comments', {
   id: uuid('id').primaryKey().defaultRandom(),
   version: integer('version').notNull().default(1),
 
-  taskId: uuid('task_id').notNull().references(() => tasks.id),
-  authorId: uuid('author_id').notNull().references(() => users.id),
+  taskId: uuid('task_id')
+    .notNull()
+    .references(() => tasks.id),
+  authorId: uuid('author_id')
+    .notNull()
+    .references(() => users.id),
   text: text('text').notNull(),
 
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   deleted: timestamp('deleted'),
-})
+});
 
-export type Workspace = typeof workspaces.$inferSelect
-export type Board = typeof boards.$inferSelect
-export type Task = typeof tasks.$inferSelect
-export type Comment = typeof comments.$inferSelect
+export type Workspace = typeof workspaces.$inferSelect;
+export type Board = typeof boards.$inferSelect;
+export type Task = typeof tasks.$inferSelect;
+export type Comment = typeof comments.$inferSelect;
 ```
 
 ### Alternative Example: Note-Taking App
@@ -245,30 +257,36 @@ export const notebooks = pgTable('notebooks', {
   version: integer('version').notNull().default(1),
 
   name: text('name').notNull(),
-  ownerId: uuid('owner_id').notNull().references(() => users.id),
+  ownerId: uuid('owner_id')
+    .notNull()
+    .references(() => users.id),
   sharedWith: jsonb('shared_with').$type<string[]>().notNull().default([]),
 
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   deleted: timestamp('deleted'),
-})
+});
 
 export const notes = pgTable('notes', {
   id: uuid('id').primaryKey().defaultRandom(),
   version: integer('version').notNull().default(1),
 
-  notebookId: uuid('notebook_id').notNull().references(() => notebooks.id),
+  notebookId: uuid('notebook_id')
+    .notNull()
+    .references(() => notebooks.id),
   title: text('title').notNull(),
   content: text('content').notNull(), // Rich text / Markdown
 
   tags: jsonb('tags').$type<string[]>().notNull().default([]),
   isPinned: boolean('is_pinned').notNull().default(false),
 
-  createdBy: uuid('created_by').notNull().references(() => users.id),
+  createdBy: uuid('created_by')
+    .notNull()
+    .references(() => users.id),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   deleted: timestamp('deleted'),
-})
+});
 ```
 
 ---
@@ -283,49 +301,49 @@ Instead of sending full records, send **operations** that describe atomic change
 // packages/realtime/src/transactions.ts
 
 export type Operation =
-  | SetOperation        // Set a field value
-  | SetNowOperation     // Set field to current timestamp
+  | SetOperation // Set a field value
+  | SetNowOperation // Set field to current timestamp
   | ListInsertOperation // Add item to array
-  | ListRemoveOperation // Remove item from array
+  | ListRemoveOperation; // Remove item from array
 
 export type SetOperation = {
-  type: 'set'
-  table: string    // e.g., 'tasks', 'comments', 'notes'
-  id: string       // Record UUID
-  key: string      // Field path (supports dot notation: 'status', 'metadata.color')
-  value: unknown   // New value
-}
+  type: 'set';
+  table: string; // e.g., 'tasks', 'comments', 'notes'
+  id: string; // Record UUID
+  key: string; // Field path (supports dot notation: 'status', 'metadata.color')
+  value: unknown; // New value
+};
 
 export type SetNowOperation = {
-  type: 'set-now'
-  table: string
-  id: string
-  key: string      // Typically 'updatedAt'
-}
+  type: 'set-now';
+  table: string;
+  id: string;
+  key: string; // Typically 'updatedAt'
+};
 
 export type ListInsertOperation = {
-  type: 'listInsert'
-  table: string
-  id: string
-  key: string      // Path to array field: 'tags', 'memberIds'
-  value: unknown   // Item to insert
-  position: 'prepend' | 'append' | { before: unknown } | { after: unknown }
-}
+  type: 'listInsert';
+  table: string;
+  id: string;
+  key: string; // Path to array field: 'tags', 'memberIds'
+  value: unknown; // Item to insert
+  position: 'prepend' | 'append' | { before: unknown } | { after: unknown };
+};
 
 export type ListRemoveOperation = {
-  type: 'listRemove'
-  table: string
-  id: string
-  key: string
-  value: unknown   // Item to remove
-}
+  type: 'listRemove';
+  table: string;
+  id: string;
+  key: string;
+  value: unknown; // Item to remove
+};
 
 export type Transaction = {
-  txId: string           // UUID
-  authorId: string       // User ID
-  operations: Operation[]
-  clientTimestamp: number
-}
+  txId: string; // UUID
+  authorId: string; // User ID
+  operations: Operation[];
+  clientTimestamp: number;
+};
 ```
 
 ### Common Operation Examples
@@ -394,6 +412,7 @@ export type Transaction = {
 ### Example: User Changes Task Status
 
 **1. Client (Optimistic Update)**
+
 ```typescript
 // User clicks "Mark as Done" button
 
@@ -402,92 +421,99 @@ const operation: SetOperation = {
   table: 'tasks',
   id: 'task-123',
   key: 'status',
-  value: 'done'
-}
+  value: 'done',
+};
 
 // Apply locally IMMEDIATELY
-const oldTask = recordCache.get('tasks', 'task-123')
-const newTask = applyOperation(oldTask, operation)
+const oldTask = recordCache.get('tasks', 'task-123');
+const newTask = applyOperation(oldTask, operation);
 
-recordCache.write('tasks', newTask) // UI updates instantly!
+recordCache.write('tasks', newTask); // UI updates instantly!
 ```
 
 **2. Queue for Server (Offline-Safe)**
+
 ```typescript
 const transaction: Transaction = {
   txId: crypto.randomUUID(),
   authorId: currentUserId,
   operations: [operation],
-  clientTimestamp: Date.now()
-}
+  clientTimestamp: Date.now(),
+};
 
-transactionQueue.enqueue(transaction)
+transactionQueue.enqueue(transaction);
 // Saved to localStorage - works offline!
 ```
 
 **3. Server Processing**
+
 ```typescript
 // POST /api/realtime/write
 
 async function handleWrite(transaction: Transaction) {
   // 1. Load current task from PostgreSQL
   const task = await db.query.tasks.findFirst({
-    where: eq(tasks.id, 'task-123')
-  })
+    where: eq(tasks.id, 'task-123'),
+  });
 
   // 2. Validate version (detect conflicts)
   if (task.version !== oldTask.version) {
-    return { status: 409 } // Conflict - client will retry
+    return { status: 409 }; // Conflict - client will retry
   }
 
   // 3. Check permissions
   const board = await db.query.boards.findFirst({
-    where: eq(boards.id, task.boardId)
-  })
+    where: eq(boards.id, task.boardId),
+  });
 
   if (!canEditBoard(currentUserId, board)) {
-    return { status: 403 } // Permission denied
+    return { status: 403 }; // Permission denied
   }
 
   // 4. Apply operation
-  const updatedTask = applyOperation(task, operation)
+  const updatedTask = applyOperation(task, operation);
 
   // 5. Save to database
-  await db.update(tasks)
+  await db
+    .update(tasks)
     .set({ status: 'done', version: updatedTask.version })
-    .where(eq(tasks.id, 'task-123'))
+    .where(eq(tasks.id, 'task-123'));
 
   // 6. Notify other users via WebSocket
-  pubsub.publish([{
-    key: 'task:task-123',
-    version: updatedTask.version
-  }])
+  pubsub.publish([
+    {
+      key: 'task:task-123',
+      version: updatedTask.version,
+    },
+  ]);
 
-  return { status: 200, body: { recordMap: { tasks: { 'task-123': updatedTask } } } }
+  return { status: 200, body: { recordMap: { tasks: { 'task-123': updatedTask } } } };
 }
 ```
 
 **4. Other Clients (Real-Time Update)**
+
 ```typescript
 // WebSocket message received
 // { type: 'updates', updates: [{ key: 'task:task-123', version: 5 }] }
 
-const cachedTask = recordCache.get('tasks', 'task-123')
+const cachedTask = recordCache.get('tasks', 'task-123');
 
 if (!cachedTask || cachedTask.version < 5) {
   // Fetch updated task
   const response = await api.getRecords({
-    pointers: [{ table: 'tasks', id: 'task-123' }]
-  })
+    pointers: [{ table: 'tasks', id: 'task-123' }],
+  });
 
-  const updatedTask = response.recordMap.tasks['task-123']
+  const updatedTask = response.recordMap.tasks['task-123'];
 
-  recordCache.write('tasks', updatedTask) // UI updates reactively!
-  recordStorage.write('tasks', updatedTask) // Save to IndexedDB
+  recordCache.write('tasks', updatedTask); // UI updates reactively!
+  recordStorage.write('tasks', updatedTask); // Save to IndexedDB
 }
 ```
 
 **Total Latency:**
+
 - Initiating user: **0ms** (optimistic)
 - Server confirms: **50-200ms**
 - Other users see change: **100-500ms**
@@ -498,61 +524,60 @@ if (!cachedTask || cachedTask.version < 5) {
 
 ```typescript
 // apps/web/src/hooks/useRecord.ts
-import { useSyncExternalStore } from 'react'
-import { useRealtime } from '../contexts/RealtimeContext'
+import { useSyncExternalStore } from 'react';
+import { useRealtime } from '../contexts/RealtimeContext';
 
 export function useRecord<T>(table: string, id: string): T | undefined {
-  const { recordCache } = useRealtime()
+  const { recordCache } = useRealtime();
 
   return useSyncExternalStore(
-    (callback) => recordCache.subscribe((t, i) => {
-      if (t === table && i === id) callback()
-    }),
+    (callback) =>
+      recordCache.subscribe((t, i) => {
+        if (t === table && i === id) callback();
+      }),
     () => recordCache.get(table, id) as T | undefined,
-    () => undefined
-  )
+    () => undefined,
+  );
 }
 
 // apps/web/src/hooks/useRecords.ts
-export function useRecords<T>(
-  table: string,
-  filters: Record<string, unknown> = {}
-): T[] {
-  const { recordCache } = useRealtime()
+export function useRecords<T>(table: string, filters: Record<string, unknown> = {}): T[] {
+  const { recordCache } = useRealtime();
 
   return useSyncExternalStore(
-    (callback) => recordCache.subscribe((t) => {
-      if (t === table) callback()
-    }),
+    (callback) =>
+      recordCache.subscribe((t) => {
+        if (t === table) callback();
+      }),
     () => recordCache.query(table, filters) as T[],
-    () => []
-  )
+    () => [],
+  );
 }
 
 // apps/web/src/hooks/useWrite.ts
 export function useWrite() {
-  const { recordCache, transactionQueue, userId } = useRealtime()
+  const { recordCache, transactionQueue, userId } = useRealtime();
 
   return async (operations: Operation[]) => {
     const transaction: Transaction = {
       txId: crypto.randomUUID(),
       authorId: userId,
       operations,
-      clientTimestamp: Date.now()
-    }
+      clientTimestamp: Date.now(),
+    };
 
     // Optimistic update
     for (const op of operations) {
-      const record = recordCache.get(op.table, op.id)
+      const record = recordCache.get(op.table, op.id);
       if (record) {
-        const newRecord = applyOperation(record, op)
-        recordCache.write(op.table, newRecord)
+        const newRecord = applyOperation(record, op);
+        recordCache.write(op.table, newRecord);
       }
     }
 
     // Queue for server
-    transactionQueue.enqueue(transaction)
-  }
+    transactionQueue.enqueue(transaction);
+  };
 }
 ```
 
@@ -767,35 +792,35 @@ export function UndoRedoButtons() {
 
 ```typescript
 // apps/server/src/lib/permissions.ts
-import type { RecordMap } from '@abe-stack/realtime'
+import type { RecordMap } from '@abe-stack/realtime';
 
 export async function validateRead(
   table: string,
   record: any,
   userId: string,
-  recordMap: RecordMap
+  recordMap: RecordMap,
 ): Promise<boolean> {
   switch (table) {
     case 'workspaces':
       // Can read if owner or member
-      return record.ownerId === userId || record.memberIds.includes(userId)
+      return record.ownerId === userId || record.memberIds.includes(userId);
 
     case 'boards':
       // Can read if has access to workspace
-      const workspace = recordMap.workspaces?.[record.workspaceId]
-      return workspace && validateRead('workspaces', workspace, userId, recordMap)
+      const workspace = recordMap.workspaces?.[record.workspaceId];
+      return workspace && validateRead('workspaces', workspace, userId, recordMap);
 
     case 'tasks':
       // Can read if has access to board
-      const board = recordMap.boards?.[record.boardId]
-      return board && validateRead('boards', board, userId, recordMap)
+      const board = recordMap.boards?.[record.boardId];
+      return board && validateRead('boards', board, userId, recordMap);
 
     case 'notes':
       // Can read if creator or shared with
-      return record.createdBy === userId || record.sharedWith?.includes(userId)
+      return record.createdBy === userId || record.sharedWith?.includes(userId);
 
     default:
-      return false
+      return false;
   }
 }
 
@@ -804,33 +829,30 @@ export async function validateWrite(
   beforeRecord: any,
   afterRecord: any,
   userId: string,
-  recordMap: RecordMap
+  recordMap: RecordMap,
 ): Promise<boolean> {
   // Must have read access
-  if (!await validateRead(table, beforeRecord, userId, recordMap)) {
-    return false
+  if (!(await validateRead(table, beforeRecord, userId, recordMap))) {
+    return false;
   }
 
   switch (table) {
     case 'workspaces':
       // Only owner can modify workspace
-      return beforeRecord.ownerId === userId
+      return beforeRecord.ownerId === userId;
 
     case 'tasks':
       // Any workspace member can edit tasks
-      const board = recordMap.boards?.[beforeRecord.boardId]
-      const workspace = board && recordMap.workspaces?.[board.workspaceId]
-      return workspace && (
-        workspace.ownerId === userId ||
-        workspace.memberIds.includes(userId)
-      )
+      const board = recordMap.boards?.[beforeRecord.boardId];
+      const workspace = board && recordMap.workspaces?.[board.workspaceId];
+      return workspace && (workspace.ownerId === userId || workspace.memberIds.includes(userId));
 
     case 'comments':
       // Only comment author can edit
-      return beforeRecord.authorId === userId
+      return beforeRecord.authorId === userId;
 
     default:
-      return false
+      return false;
   }
 }
 ```
@@ -850,11 +872,13 @@ export async function validateWrite(
 ### Scaling Strategy
 
 **Single Server (MVP)**
+
 - In-memory PubSub
 - Single PostgreSQL instance
 - Works for 100s of concurrent users
 
 **Horizontal Scaling**
+
 ```
 Load Balancer
 ├── API Server 1 (stateless)
@@ -867,6 +891,7 @@ S3 (file storage)
 ```
 
 **Database Sharding (Large Scale)**
+
 - Shard by workspace ID or organization ID
 - Each shard is independent
 - Route requests based on shard key
@@ -876,6 +901,7 @@ S3 (file storage)
 ## 🎯 Next Steps
 
 See the companion guides:
+
 - **IMPLEMENTATION_GUIDE.md** - Step-by-step implementation (8 phases)
 - **REALTIME_PATTERNS.md** - Common patterns and best practices
 
