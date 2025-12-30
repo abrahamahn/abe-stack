@@ -4,7 +4,7 @@ const config: UserConfig = {
   test: {
     globals: true,
     environment: 'node',
-    include: ['**/tests/unit/**/*.{test,spec}.{js,ts}', '**/src/**/*.{test,spec}.{js,ts}'],
+    include: ['**/tests/unit/**/*.{test,spec}.{js,ts,tsx}', '**/src/**/*.{test,spec}.{js,ts,tsx}'],
     exclude: [
       '**/node_modules/**',
       '**/dist/**',

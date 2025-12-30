@@ -24,7 +24,7 @@ Guide to make the monorepo production-ready while keeping the renderer-agnostic 
 
 ### Demo Surface (Live UI Gallery)
 
-- [ ] Implement a dedicated `/demo` page, with a main render area
+- [ ] Implement a dedicated `/demo` page that showcases every `packages/ui` component in live, interactive states.
 - [ ] Build a resizable pane layout shell (top/bottom/left/right/center) with mouse drag handles and toggles per pane; persist sizes per user.
 - [ ] Center pane renders the active demo; side panes host component docs, prop tables, and usage notes.
 - [ ] Top bar: category tabs (primitives, components, hooks, layouts, test, theme, utils) that filter the catalog.

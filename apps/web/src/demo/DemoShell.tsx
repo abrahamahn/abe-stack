@@ -19,7 +19,6 @@ export const DemoShell: React.FC = () => {
   const [paneConfig, setPaneConfig] = useState<DemoPaneConfig>(DEFAULT_PANE_CONFIG);
   const [activeCategory, setActiveCategory] = useState<string>('primitives');
   const [selectedComponent, setSelectedComponent] = useState<ComponentDemo | null>(null);
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
   const categories = getAllCategories();
   const componentsInCategory = getComponentsByCategory(activeCategory);
@@ -39,7 +38,7 @@ export const DemoShell: React.FC = () => {
   };
 
   return (
-    <div className={`demo-shell demo-shell-theme-${theme}`} style={{ height: '100vh' }}>
+    <div className="demo-shell" style={{ height: '100vh' }}>
       {/* Top Bar */}
       {paneConfig.top.visible && (
         <div
@@ -172,7 +171,7 @@ export const DemoShell: React.FC = () => {
                       togglePane('bottom');
                     }}
                   >
-                    🎨 Theme
+                    ⚙️ Controls
                   </Button>
                 )}
               </div>
@@ -298,7 +297,7 @@ export const DemoShell: React.FC = () => {
         >
           <div className="demo-pane-header">
             <Heading as="h3" size="sm">
-              Theme Controls
+              Panel Controls
             </Heading>
             <Button
               size="small"
@@ -312,27 +311,9 @@ export const DemoShell: React.FC = () => {
           </div>
           <div className="demo-theme-controls">
             <div className="demo-theme-control">
-              <Text>Theme:</Text>
-              <div className="demo-theme-buttons">
-                <Button
-                  size="small"
-                  variant={theme === 'light' ? 'primary' : 'secondary'}
-                  onClick={() => {
-                    setTheme('light');
-                  }}
-                >
-                  ☀️ Light
-                </Button>
-                <Button
-                  size="small"
-                  variant={theme === 'dark' ? 'primary' : 'secondary'}
-                  onClick={() => {
-                    setTheme('dark');
-                  }}
-                >
-                  🌙 Dark
-                </Button>
-              </div>
+              <Text tone="muted" style={{ fontSize: '14px' }}>
+                💡 Theme follows your system's color scheme preference
+              </Text>
             </div>
             <div className="demo-theme-control">
               <Text>Panel Visibility:</Text>
