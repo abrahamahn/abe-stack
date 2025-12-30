@@ -1,5 +1,21 @@
 import type { ServerEnv } from './env';
-import type { StorageConfig } from '@abe-stack/storage';
+
+type StorageConfig =
+  | {
+      provider: 'local';
+      rootPath: string;
+      publicBaseUrl?: string;
+    }
+  | {
+      provider: 's3';
+      bucket: string;
+      region: string;
+      accessKeyId: string;
+      secretAccessKey: string;
+      endpoint?: string;
+      forcePathStyle?: boolean;
+      presignExpiresInSeconds?: number;
+    };
 
 export function toStorageConfig(env: ServerEnv): StorageConfig {
   if (env.STORAGE_PROVIDER === 's3') {
