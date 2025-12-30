@@ -126,14 +126,8 @@ apps → packages/db → packages/shared
 # - Updated files: tests updated or created
 
 # 2. Run quality checks (ALL must pass)
-pnpm format      # Format code
-pnpm lint:fix    # Fix auto-fixable issues
-pnpm lint        # Check for errors
-pnpm type-check  # TypeScript validation
-pnpm test        # Run all tests
+pnpm build       # Full battery: format, lint, test, type-check, and build
 
-# Note: pnpm build runs: format:check + lint + type-check + theme:build + turbo build
-# (format:check is read-only, so run pnpm format separately if changes needed)
 ```
 
 **If ANY fail:**
