@@ -20,7 +20,7 @@
     "build:desktop": "turbo run build --filter=@abe-stack/desktop",
     "build:shared": "turbo run build --filter=@abe-stack/shared",
     "build:ui": "turbo run build --filter=@abe-stack/ui",
-    "theme:build": "node --import tsx tools/build-theme-css.ts",
+    "theme:build": "node --import tsx tools/packages/build-theme-css.ts",
     "test": "turbo run test",
     "test:web": "turbo run test --filter=@abe-stack/web",
     "test:server": "turbo run test --filter=@abe-stack/server",

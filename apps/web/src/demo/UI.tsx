@@ -51,7 +51,7 @@ export const UIPage: React.FC = () => {
           <Checkbox
             checked
             label="Check me"
-            onChange={(checked) => {
+            onChange={(checked: boolean) => {
               void checked;
             }}
           />
@@ -59,16 +59,11 @@ export const UIPage: React.FC = () => {
             name="r1"
             checked
             label="Radio"
-            onChange={(checked) => {
+            onChange={(checked: boolean) => {
               void checked;
             }}
           />
-          <Switch
-            checked
-            onChange={(checked) => {
-              void checked;
-            }}
-          />
+          <Switch checked />
         </div>
       </section>
 
