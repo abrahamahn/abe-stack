@@ -8,6 +8,7 @@
 
 - agent-prompts.md - Actual templates to use
 - agent-self-check.md - Verification procedures
+- ../dev/principles/index.md - Core architecture principles (MANDATORY READ)
 
 ---
 

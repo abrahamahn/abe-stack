@@ -16,7 +16,7 @@
 
 ## Task Classification & Routing (START HERE)
 
-**Before ANY task, use this decision tree:**
+**Before ANY task, follow this decision tree:**
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -52,19 +52,35 @@
                     │                               │
                     ▼                               ▼
               MEDIUM TASK                    COMPLEX TASK
-              Read: docs/agent/complex-tasks.md    Read: docs/agent/complex-tasks.md
-              Use: Template 1 (Feature)                Use: Template 4 (Architecture)
-              Checkpointed execution         Multi-phase + Human supervision
-
-┌─────────────────────────────────────────────────┐
-│ STEP 2: Select Documentation & Template        │
-└─────────────────────────────────────────────────┘
-
-SIMPLE → Continue with this file (AGENTS.md)
-MEDIUM → Read docs/agent/complex-tasks.md → Use docs/agent/agent-prompts.md Template 1
-COMPLEX → Read docs/agent/complex-tasks.md → Use docs/agent/agent-prompts.md Template 4
-                                           → Use docs/agent/agent-self-check.md
 ```
+
+### STEP 2: Context Loading Protocol (MANDATORY)
+
+**You MUST read the documentation corresponding to your task's domain.**
+**Do not generate code until you have read these files.**
+
+| If your task involves... | Read these files...                                              | Why?                                            |
+| :----------------------- | :--------------------------------------------------------------- | :---------------------------------------------- |
+| **Any Code Change**      | `docs/dev/principles/index.md`                                   | Align with core design philosophy (DRY, Layers) |
+| **New Patterns**         | `docs/dev/patterns/index.md`                                     | Copy-paste correct implementations              |
+| **Refactoring**          | `docs/dev/anti-patterns/index.md`                                | Avoid introducing known bad practices           |
+| **Architecture/Deps**    | `docs/dev/architecture/index.md`                                 | Understand boundaries & dependency flow         |
+| **Testing/QA**           | `docs/dev/testing/index.md`                                      | Know where to put tests & how to run them       |
+| **Medium/Complex**       | `docs/agent/complex-tasks.md` <br> `docs/agent/agent-prompts.md` | Get the execution templates                     |
+
+### STEP 3: Execution Protocol
+
+**SIMPLE:**
+
+1.  Read `docs/dev/principles/index.md`.
+2.  Execute.
+3.  Verify (`pnpm test`).
+
+**MEDIUM/COMPLEX:**
+
+1.  Read `docs/agent/complex-tasks.md` AND `docs/dev/principles/index.md`.
+2.  Select Template from `docs/agent/agent-prompts.md`.
+3.  Execute with Checkpoints.
 
 ---
 
