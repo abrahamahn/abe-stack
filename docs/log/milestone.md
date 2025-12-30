@@ -13,7 +13,7 @@ Backend (Fastify + ts-rest + Drizzle)
 - Fastify server with CORS, Helmet, health checks, root/api ping routes.
 - Auth routes: register/login/me with JWT issuance/verification.
 - DB: Drizzle schema for users; connection builder; server decorates Fastify with `db`.
-- Storage: pluggable storage providers (`@abe-stack/storage`) with local filesystem and S3 + presigned URLs; storage config derived from env and injected into Fastify.
+- Storage: pluggable storage providers (`@aahn/storage`) with local filesystem and S3 + presigned URLs; storage config derived from env and injected into Fastify.
 - JWT handling: lazy secret read with validation; no dev fallback.
 - Scripts: seed and DB health-check placeholders.
 - Tests: auth contract/integration tests using `fastify.inject`.

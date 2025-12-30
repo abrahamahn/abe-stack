@@ -1,6 +1,6 @@
 {
-  "name": "@abe-stack/shared",
-  "version": "1.0.0",
+  "name": "@aahn/shared",
+  "version": "1.1.0",
   "description": "Shared utilities, types, and constants for abe-stack",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,7 +14,23 @@
       "import": "./dist/storageConfig.js",
       "require": "./dist/storageConfig.js",
       "types": "./dist/storageConfig.d.ts"
-    }
+    },
+    "./contracts": {
+      "import": "./dist/contracts/index.js",
+      "require": "./dist/contracts/index.js",
+      "types": "./dist/contracts/index.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils/index.js",
+      "require": "./dist/utils/index.js",
+      "types": "./dist/utils/index.d.ts"
+    },
+    "./env": {
+      "import": "./dist/env.js",
+      "require": "./dist/env.js",
+      "types": "./dist/env.d.ts"
+    },
+    "./package.json": "./package.json"
   },
   "scripts": {
     "build": "tsc --project tsconfig.json",
@@ -29,10 +45,23 @@
   ],
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abrahamahn/abe-stack.git",
+    "directory": "packages/shared"
+  },
+  "bugs": {
+    "url": "https://github.com/abrahamahn/abe-stack/issues"
+  },
+  "homepage": "https://github.com/abrahamahn/abe-stack#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "sideEffects": false,
   "dependencies": {
     "@ts-rest/core": "^3.45.1",
-    "@abe-stack/storage": "workspace:*",
+    "@aahn/storage": "workspace:*",
     "zod": "^3.22.4"
   },
   "devDependencies": {

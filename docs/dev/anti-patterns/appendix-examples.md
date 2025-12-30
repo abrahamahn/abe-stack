@@ -73,8 +73,8 @@ export const calculateOrderTotal = (items: Item[]): number => {
 
 // ✅ GOOD: Component only renders
 // apps/web/src/components/OrderSummary.tsx
-import { calculateOrderTotal } from '@abe-stack/shared';
-import { formatCurrency } from '@abe-stack/shared';
+import { calculateOrderTotal } from '@aahn/shared';
+import { formatCurrency } from '@aahn/shared';
 
 function OrderSummary({ items }: Props) {
   const total = calculateOrderTotal(items);
@@ -125,7 +125,7 @@ export interface User {
 }
 
 // Everyone imports from shared
-import { User } from '@abe-stack/shared';
+import { User } from '@aahn/shared';
 ```
 
 ### ❌ Anti-Pattern 3: Cross-App Imports
@@ -139,7 +139,7 @@ import { formatUserName } from '../../../server/src/utils/user';
 import { Settings } from '../../../desktop/src/config';
 
 // ✅ GOOD: Import from shared package
-import { formatUserName } from '@abe-stack/shared';
+import { formatUserName } from '@aahn/shared';
 ```
 
 ### ❌ Anti-Pattern 4: Prop Drilling
