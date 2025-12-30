@@ -1,7 +1,8 @@
 // apps/web/src/demo/DemoShell.tsx
 import { Button, Heading, ResizablePanel, ResizablePanelGroup, Text } from '@abe-stack/ui';
-import React, { useState } from 'react';
+import React, { type ReactElement, useState } from 'react';
 
+import { getComponentDocs, parseMarkdown } from './docs';
 import { getAllCategories, getComponentsByCategory } from './registry';
 
 import type { ComponentDemo, DemoPaneConfig } from './types';
@@ -45,36 +46,10 @@ export const DemoShell: React.FC = () => {
           className="demo-pane demo-pane-top"
           style={{ height: `${String(paneConfig.top.size)}vh` }}
         >
-          <div className="demo-pane-header">
+          <div className="demo-pane-header" style={{ justifyContent: 'center' }}>
             <Heading as="h1" size="lg">
               ABE Stack UI Component Gallery
             </Heading>
-            <div className="demo-pane-controls">
-              <Button
-                size="small"
-                variant="text"
-                onClick={() => {
-                  togglePane('top');
-                }}
-              >
-                ✕
-              </Button>
-            </div>
-          </div>
-
-          {/* Category Tabs */}
-          <div className="demo-category-tabs">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                className={`demo-tab ${activeCategory === cat ? 'active' : ''}`}
-                onClick={() => {
-                  setActiveCategory(cat);
-                }}
-              >
-                {cat.charAt(0).toUpperCase() + cat.slice(1)}
-              </button>
-            ))}
           </div>
         </div>
       )}
@@ -85,6 +60,22 @@ export const DemoShell: React.FC = () => {
         style={{ height: `${String(100 - paneConfig.top.size)}vh` }}
       >
         <ResizablePanelGroup direction="horizontal">
+          {/* Category Sidebar - 50px fixed */}
+          <div className="demo-category-sidebar">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                className={`demo-category-item ${activeCategory === cat ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveCategory(cat);
+                }}
+                title={cat.charAt(0).toUpperCase() + cat.slice(1)}
+              >
+                {cat.charAt(0).toUpperCase()}
+              </button>
+            ))}
+          </div>
+
           {/* Left Sidebar - Component List */}
           {paneConfig.left.visible && (
             <ResizablePanel
@@ -246,38 +237,42 @@ export const DemoShell: React.FC = () => {
                 <div className="demo-docs-content">
                   {selectedComponent ? (
                     <>
-                      <section>
-                        <Heading as="h3" size="sm">
-                          Description
-                        </Heading>
-                        <Text>{selectedComponent.description}</Text>
-                      </section>
-                      <section>
-                        <Heading as="h3" size="sm">
-                          Category
-                        </Heading>
-                        <Text>{selectedComponent.category}</Text>
-                      </section>
-                      <section>
-                        <Heading as="h3" size="sm">
-                          Variants
-                        </Heading>
-                        <Text>{selectedComponent.variants.length} available</Text>
-                      </section>
-                      {selectedComponent.relatedDocs && (
-                        <section>
-                          <Heading as="h3" size="sm">
-                            Related Documentation
-                          </Heading>
-                          <ul>
-                            {selectedComponent.relatedDocs.map((doc, idx) => (
-                              <li key={idx}>
-                                <Text>{doc}</Text>
-                              </li>
-                            ))}
-                          </ul>
-                        </section>
-                      )}
+                      {((): ReactElement => {
+                        const docs = getComponentDocs(
+                          selectedComponent.id,
+                          selectedComponent.category,
+                        );
+                        if (docs) {
+                          return (
+                            <div
+                              className="demo-markdown-content"
+                              dangerouslySetInnerHTML={{ __html: parseMarkdown(docs) }}
+                            />
+                          );
+                        }
+                        return (
+                          <>
+                            <section>
+                              <Heading as="h3" size="sm">
+                                Description
+                              </Heading>
+                              <Text>{selectedComponent.description}</Text>
+                            </section>
+                            <section>
+                              <Heading as="h3" size="sm">
+                                Category
+                              </Heading>
+                              <Text>{selectedComponent.category}</Text>
+                            </section>
+                            <section>
+                              <Heading as="h3" size="sm">
+                                Variants
+                              </Heading>
+                              <Text>{selectedComponent.variants.length} available</Text>
+                            </section>
+                          </>
+                        );
+                      })()}
                     </>
                   ) : (
                     <Text tone="muted">Select a component to view documentation</Text>
@@ -289,73 +284,16 @@ export const DemoShell: React.FC = () => {
         </ResizablePanelGroup>
       </div>
 
-      {/* Bottom Panel - Theme Controls */}
+      {/* Bottom Panel - Controls */}
       {paneConfig.bottom.visible && (
         <div
           className="demo-pane demo-pane-bottom"
           style={{ height: `${String(paneConfig.bottom.size)}vh` }}
         >
-          <div className="demo-pane-header">
-            <Heading as="h3" size="sm">
-              Panel Controls
-            </Heading>
-            <Button
-              size="small"
-              variant="text"
-              onClick={() => {
-                togglePane('bottom');
-              }}
-            >
-              ✕
-            </Button>
-          </div>
-          <div className="demo-theme-controls">
-            <div className="demo-theme-control">
-              <Text tone="muted" style={{ fontSize: '14px' }}>
-                💡 Theme follows your system's color scheme preference
-              </Text>
-            </div>
-            <div className="demo-theme-control">
-              <Text>Panel Visibility:</Text>
-              <div className="demo-theme-buttons">
-                <Button
-                  size="small"
-                  variant={paneConfig.top.visible ? 'primary' : 'secondary'}
-                  onClick={() => {
-                    togglePane('top');
-                  }}
-                >
-                  Top
-                </Button>
-                <Button
-                  size="small"
-                  variant={paneConfig.left.visible ? 'primary' : 'secondary'}
-                  onClick={() => {
-                    togglePane('left');
-                  }}
-                >
-                  Left
-                </Button>
-                <Button
-                  size="small"
-                  variant={paneConfig.right.visible ? 'primary' : 'secondary'}
-                  onClick={() => {
-                    togglePane('right');
-                  }}
-                >
-                  Right
-                </Button>
-                <Button
-                  size="small"
-                  variant="primary"
-                  onClick={() => {
-                    togglePane('bottom');
-                  }}
-                >
-                  Bottom
-                </Button>
-              </div>
-            </div>
+          <div className="demo-theme-controls" style={{ alignItems: 'center' }}>
+            <Text tone="muted" style={{ fontSize: '14px' }}>
+              💡 Theme follows your system's color scheme preference
+            </Text>
           </div>
         </div>
       )}
