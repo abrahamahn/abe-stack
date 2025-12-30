@@ -823,26 +823,33 @@ a:focus-visible {
 
 /* WebKit browsers (Chrome, Safari, Edge) */
 .ui-scroll-area::-webkit-scrollbar {
-  width: var(--scrollbar-size, 10px);
-  height: var(--scrollbar-size, 10px);
+  width: var(--scrollbar-size, 6px);
+  height: var(--scrollbar-size, 6px);
 }
 
+/* Remove arrows */
+.ui-scroll-area::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* Transparent background */
 .ui-scroll-area::-webkit-scrollbar-track {
-  background: var(--ui-color-surface);
-  border-radius: 10px;
+  background: transparent;
 }
 
+/* Minimal, edgy scrollbar thumb */
 .ui-scroll-area::-webkit-scrollbar-thumb {
-  background: var(--ui-color-text-muted);
-  border-radius: 10px;
-  opacity: var(--scrollbar-opacity, 1);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  opacity: var(--scrollbar-opacity, 0.5);
   transition:
-    opacity var(--ui-motion-duration-base) var(--ui-motion-ease-standard),
-    background-color var(--ui-motion-duration-base) var(--ui-motion-ease-standard);
+    opacity var(--ui-motion-duration-fast) var(--ui-motion-ease-standard),
+    background-color var(--ui-motion-duration-fast) var(--ui-motion-ease-standard);
 }
 
 .ui-scroll-area::-webkit-scrollbar-thumb:hover {
-  background: var(--ui-color-text);
+  background: rgba(255, 255, 255, 0.2);
+  opacity: 1;
 }
 
 /* Auto-hide scrollbar */
@@ -851,6 +858,10 @@ a:focus-visible {
 }
 
 .ui-scroll-area[data-scrollbar-visible='true']::-webkit-scrollbar-thumb {
+  opacity: 0.5;
+}
+
+.ui-scroll-area[data-scrollbar-visible='true']::-webkit-scrollbar-thumb:hover {
   opacity: 1;
 }
 
