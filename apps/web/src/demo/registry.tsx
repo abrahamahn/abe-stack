@@ -7,6 +7,7 @@ import {
   Button,
   Card,
   Checkbox,
+  Container,
   Dialog,
   Divider,
   Dropdown,
@@ -15,6 +16,7 @@ import {
   Input,
   Modal,
   Overlay,
+  PageContainer,
   Pagination,
   Popover,
   Progress,
@@ -925,6 +927,180 @@ export const componentRegistry: Record<string, ComponentDemo> = {
             alt="Placeholder image"
             style={{ borderRadius: '8px' }}
           />
+        ),
+      },
+    ],
+  },
+
+  // Layouts
+  container: {
+    id: 'container',
+    name: 'Container',
+    category: 'layouts',
+    description: 'Responsive container with size variants (sm, md, lg)',
+    variants: [
+      {
+        name: 'Small (640px)',
+        description: 'Container with small max-width',
+        code: `<Container size="sm">
+  <Heading as="h2">Small Container</Heading>
+  <Text>Content with 640px max-width</Text>
+</Container>`,
+        render: (): JSX.Element => (
+          <div style={{ border: '1px solid #ddd', padding: '20px', backgroundColor: '#f9f9f9' }}>
+            <Container size="sm">
+              <Card>
+                <Heading as="h3" size="sm">
+                  Small Container (640px)
+                </Heading>
+                <Text>
+                  This container has a max-width of 640px. Great for narrow content like forms or
+                  reading material.
+                </Text>
+              </Card>
+            </Container>
+          </div>
+        ),
+      },
+      {
+        name: 'Medium (960px)',
+        description: 'Container with medium max-width (default)',
+        code: `<Container size="md">
+  <Heading as="h2">Medium Container</Heading>
+  <Text>Content with 960px max-width (default)</Text>
+</Container>`,
+        render: (): JSX.Element => (
+          <div style={{ border: '1px solid #ddd', padding: '20px', backgroundColor: '#f9f9f9' }}>
+            <Container size="md">
+              <Card>
+                <Heading as="h3" size="sm">
+                  Medium Container (960px)
+                </Heading>
+                <Text>
+                  This is the default container size with 960px max-width. Ideal for most content
+                  layouts.
+                </Text>
+              </Card>
+            </Container>
+          </div>
+        ),
+      },
+      {
+        name: 'Large (1200px)',
+        description: 'Container with large max-width',
+        code: `<Container size="lg">
+  <Heading as="h2">Large Container</Heading>
+  <Text>Content with 1200px max-width</Text>
+</Container>`,
+        render: (): JSX.Element => (
+          <div style={{ border: '1px solid #ddd', padding: '20px', backgroundColor: '#f9f9f9' }}>
+            <Container size="lg">
+              <Card>
+                <Heading as="h3" size="sm">
+                  Large Container (1200px)
+                </Heading>
+                <Text>
+                  This container has a max-width of 1200px. Perfect for wide layouts and dashboards.
+                </Text>
+              </Card>
+            </Container>
+          </div>
+        ),
+      },
+      {
+        name: 'Comparison',
+        description: 'Side-by-side comparison of all sizes',
+        code: `<>
+  <Container size="sm">Small (640px)</Container>
+  <Container size="md">Medium (960px)</Container>
+  <Container size="lg">Large (1200px)</Container>
+</>`,
+        render: (): JSX.Element => (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <Container size="sm">
+              <div
+                style={{
+                  backgroundColor: '#e3f2fd',
+                  padding: '16px',
+                  border: '2px solid #2196f3',
+                }}
+              >
+                <Text>Small (640px)</Text>
+              </div>
+            </Container>
+            <Container size="md">
+              <div
+                style={{
+                  backgroundColor: '#f3e5f5',
+                  padding: '16px',
+                  border: '2px solid #9c27b0',
+                }}
+              >
+                <Text>Medium (960px)</Text>
+              </div>
+            </Container>
+            <Container size="lg">
+              <div
+                style={{
+                  backgroundColor: '#fff3e0',
+                  padding: '16px',
+                  border: '2px solid #ff9800',
+                }}
+              >
+                <Text>Large (1200px)</Text>
+              </div>
+            </Container>
+          </div>
+        ),
+      },
+    ],
+  },
+  pageContainer: {
+    id: 'pageContainer',
+    name: 'PageContainer',
+    category: 'layouts',
+    description: 'Page container layout with max-width and padding',
+    variants: [
+      {
+        name: 'Basic',
+        description: 'Basic page container with default settings',
+        code: `<PageContainer>
+  <Heading as="h1">Page Title</Heading>
+  <Text>Page content with consistent padding and max-width</Text>
+</PageContainer>`,
+        render: (): JSX.Element => (
+          <div style={{ border: '1px solid #ddd', minHeight: '200px' }}>
+            <PageContainer>
+              <Heading as="h2" size="md">
+                Page Title
+              </Heading>
+              <Text>
+                This content is wrapped in a PageContainer which provides consistent padding and a
+                max-width for readability.
+              </Text>
+              <Card>
+                <Text>Cards and other components work well inside PageContainer</Text>
+              </Card>
+            </PageContainer>
+          </div>
+        ),
+      },
+      {
+        name: 'Custom Max Width',
+        description: 'PageContainer with custom max-width',
+        code: `<PageContainer maxWidth={600}>
+  <Heading as="h2">Narrow Content</Heading>
+  <Text>Content with narrower max-width</Text>
+</PageContainer>`,
+        render: (): JSX.Element => (
+          <div style={{ border: '1px solid #ddd', minHeight: '150px' }}>
+            <PageContainer maxWidth={600}>
+              <Heading as="h3" size="sm">
+                Narrow Content
+              </Heading>
+              <Text>This PageContainer has a custom max-width of 600px for narrower content.</Text>
+            </PageContainer>
+          </div>
         ),
       },
     ],
