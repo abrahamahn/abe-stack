@@ -15,7 +15,8 @@ function run(command: string, args: string[], cwd?: string, env?: NodeJS.Process
   });
 
   if (result.status !== 0) {
-    console.error(`❌ Command failed with status ${result.status}`);
+    const status = result.status ?? -1;
+    console.error(`❌ Command failed with status ${String(status)}`);
     process.exit(1);
   }
 }
@@ -70,7 +71,7 @@ while (retries > 0) {
       healthy = true;
       break;
     }
-  } catch (_e: unknown) {
+  } catch {
     // ignore and retry
   }
 
