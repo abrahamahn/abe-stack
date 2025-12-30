@@ -1,6 +1,4 @@
 // apps/web/src/demo/registry.tsx
-import React from 'react';
-
 import {
   Accordion,
   Alert,
@@ -40,9 +38,10 @@ import {
   Text,
   TextArea,
   Toast,
-  ToastContainer,
   Tooltip,
 } from '@abe-stack/ui';
+import React from 'react';
+
 import type { ComponentDemo } from './types';
 
 export const componentRegistry: Record<string, ComponentDemo> = {
@@ -392,16 +391,32 @@ export const componentRegistry: Record<string, ComponentDemo> = {
         name: 'Basic',
         description: 'Basic modal',
         code: '<Modal open={true} onClose={() => {}}>...</Modal>',
-        render: () => {
+        render: (): JSX.Element => {
           const [open, setOpen] = React.useState(false);
           return (
             <>
-              <Button onClick={() => setOpen(true)}>Open Modal</Button>
-              <Modal open={open} onClose={() => setOpen(false)}>
+              <Button
+                onClick={() => {
+                  setOpen(true);
+                }}
+              >
+                Open Modal
+              </Button>
+              <Modal
+                open={open}
+                onClose={() => {
+                  setOpen(false);
+                }}
+              >
                 <div style={{ padding: '24px' }}>
                   <Heading as="h2">Modal Title</Heading>
                   <Text>Modal content goes here</Text>
-                  <Button onClick={() => setOpen(false)} style={{ marginTop: '16px' }}>
+                  <Button
+                    onClick={() => {
+                      setOpen(false);
+                    }}
+                    style={{ marginTop: '16px' }}
+                  >
                     Close
                   </Button>
                 </div>
@@ -422,12 +437,23 @@ export const componentRegistry: Record<string, ComponentDemo> = {
         name: 'Basic',
         description: 'Basic overlay',
         code: '<Overlay visible={true} />',
-        render: () => {
+        render: (): JSX.Element => {
           const [visible, setVisible] = React.useState(false);
           return (
             <>
-              <Button onClick={() => setVisible(!visible)}>Toggle Overlay</Button>
-              <Overlay visible={visible} onClick={() => setVisible(false)} />
+              <Button
+                onClick={() => {
+                  setVisible(!visible);
+                }}
+              >
+                Toggle Overlay
+              </Button>
+              <Overlay
+                visible={visible}
+                onClick={() => {
+                  setVisible(false);
+                }}
+              />
             </>
           );
         },
@@ -847,16 +873,32 @@ export const componentRegistry: Record<string, ComponentDemo> = {
         name: 'Basic',
         description: 'Basic dialog',
         code: '<Dialog open={true} onClose={() => {}}>...</Dialog>',
-        render: () => {
+        render: (): JSX.Element => {
           const [open, setOpen] = React.useState(false);
           return (
             <>
-              <Button onClick={() => setOpen(true)}>Open Dialog</Button>
-              <Dialog open={open} onClose={() => setOpen(false)}>
+              <Button
+                onClick={() => {
+                  setOpen(true);
+                }}
+              >
+                Open Dialog
+              </Button>
+              <Dialog
+                open={open}
+                onClose={() => {
+                  setOpen(false);
+                }}
+              >
                 <div style={{ padding: '24px' }}>
                   <Heading as="h3">Dialog Title</Heading>
                   <Text>Dialog content</Text>
-                  <Button onClick={() => setOpen(false)} style={{ marginTop: '16px' }}>
+                  <Button
+                    onClick={() => {
+                      setOpen(false);
+                    }}
+                    style={{ marginTop: '16px' }}
+                  >
                     Close
                   </Button>
                 </div>
@@ -884,333 +926,6 @@ export const componentRegistry: Record<string, ComponentDemo> = {
             style={{ borderRadius: '8px' }}
           />
         ),
-      },
-    ],
-  },
-
-  // Hooks
-  useDisclosure: {
-    id: 'useDisclosure',
-    name: 'useDisclosure',
-    category: 'hooks',
-    description: 'Hook for managing disclosure state (open/close)',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Basic disclosure state management',
-        code: `const { isOpen, open, close, toggle } = useDisclosure();
-return (
-  <>
-    <Button onClick={toggle}>Toggle</Button>
-    {isOpen && <Text>Visible content</Text>}
-  </>
-);`,
-        render: () => {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const { useDisclosure } = require('@abe-stack/ui');
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          const { isOpen, toggle } = useDisclosure();
-          return (
-            <>
-              <Button onClick={toggle}>Toggle Disclosure</Button>
-              {isOpen && (
-                <Card style={{ marginTop: '12px' }}>
-                  <Text>This content is toggled by useDisclosure</Text>
-                </Card>
-              )}
-            </>
-          );
-        },
-      },
-    ],
-  },
-  useMediaQuery: {
-    id: 'useMediaQuery',
-    name: 'useMediaQuery',
-    category: 'hooks',
-    description: 'Hook for responsive media queries',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Detect screen size with media query',
-        code: `const isMobile = useMediaQuery('(max-width: 768px)');
-return <Text>{isMobile ? 'Mobile' : 'Desktop'}</Text>;`,
-        render: () => {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const { useMediaQuery } = require('@abe-stack/ui');
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          const isMobile = useMediaQuery('(max-width: 768px)');
-          return (
-            <Card>
-              <Text>Current view: {isMobile ? 'Mobile' : 'Desktop'}</Text>
-              <Text tone="muted" style={{ fontSize: '12px' }}>
-                Resize window to see change
-              </Text>
-            </Card>
-          );
-        },
-      },
-    ],
-  },
-  useLocalStorage: {
-    id: 'useLocalStorage',
-    name: 'useLocalStorage',
-    category: 'hooks',
-    description: 'Hook for syncing state with localStorage',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Persist state to localStorage',
-        code: `const [value, setValue] = useLocalStorage('key', 'default');
-return (
-  <Input value={value} onChange={e => setValue(e.target.value)} />
-);`,
-        render: () => {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const { useLocalStorage } = require('@abe-stack/ui');
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          const [value, setValue] = useLocalStorage('demo-storage', '');
-          return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <Input
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                placeholder="Type something..."
-              />
-              <Text tone="muted" style={{ fontSize: '12px' }}>
-                Value persists in localStorage
-              </Text>
-            </div>
-          );
-        },
-      },
-    ],
-  },
-  useDebounce: {
-    id: 'useDebounce',
-    name: 'useDebounce',
-    category: 'hooks',
-    description: 'Hook for debouncing values',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Debounce input value',
-        code: `const [value, setValue] = useState('');
-const debouncedValue = useDebounce(value, 500);
-return <Input value={value} onChange={e => setValue(e.target.value)} />;`,
-        render: () => {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const { useDebounce } = require('@abe-stack/ui');
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          const [value, setValue] = React.useState('');
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          const debouncedValue = useDebounce(value, 500);
-          return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <Input
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                placeholder="Type to see debounce..."
-              />
-              <Text>Current: {value}</Text>
-              <Text>Debounced (500ms): {debouncedValue}</Text>
-            </div>
-          );
-        },
-      },
-    ],
-  },
-  useCopyToClipboard: {
-    id: 'useCopyToClipboard',
-    name: 'useCopyToClipboard',
-    category: 'hooks',
-    description: 'Hook for copying text to clipboard',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Copy text to clipboard',
-        code: `const { copy, isCopied } = useCopyToClipboard();
-return (
-  <Button onClick={() => copy('text')}>
-    {isCopied ? 'Copied!' : 'Copy'}
-  </Button>
-);`,
-        render: () => {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const { useCopyToClipboard } = require('@abe-stack/ui');
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          const { copy, isCopied } = useCopyToClipboard();
-          return (
-            <Button onClick={() => copy('Hello from ABE Stack!')}>
-              {isCopied ? '✓ Copied!' : 'Copy to Clipboard'}
-            </Button>
-          );
-        },
-      },
-    ],
-  },
-
-  // Layouts
-  container: {
-    id: 'container',
-    name: 'Container',
-    category: 'layouts',
-    description: 'Container layout with max-width',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Basic container',
-        code: `import { Container } from '@abe-stack/ui';
-<Container>
-  <Text>Centered content with max-width</Text>
-</Container>`,
-        render: () => {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const { Container } = require('@abe-stack/ui');
-          return (
-            <Container>
-              <Card>
-                <Text>Content inside a Container layout</Text>
-                <Text tone="muted" style={{ fontSize: '12px' }}>
-                  Container provides max-width and centering
-                </Text>
-              </Card>
-            </Container>
-          );
-        },
-      },
-    ],
-  },
-  pageContainer: {
-    id: 'pageContainer',
-    name: 'PageContainer',
-    category: 'layouts',
-    description: 'Page container with padding',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Basic page container',
-        code: `import { PageContainer } from '@abe-stack/ui';
-<PageContainer>
-  <Heading as="h1">Page Title</Heading>
-  <Text>Page content</Text>
-</PageContainer>`,
-        render: () => {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const { PageContainer } = require('@abe-stack/ui');
-          return (
-            <PageContainer>
-              <Heading as="h2" size="md">
-                Page Title
-              </Heading>
-              <Text>Content with consistent page padding</Text>
-            </PageContainer>
-          );
-        },
-      },
-    ],
-  },
-  authLayout: {
-    id: 'authLayout',
-    name: 'AuthLayout',
-    category: 'layouts',
-    description: 'Layout for authentication pages',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Auth layout with centered card',
-        code: `import { AuthLayout } from '@abe-stack/ui';
-<AuthLayout>
-  <Card>Login form here</Card>
-</AuthLayout>`,
-        render: () => {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const { AuthLayout } = require('@abe-stack/ui');
-          return (
-            <div style={{ height: '300px' }}>
-              <AuthLayout>
-                <Card>
-                  <Heading as="h3" size="sm">
-                    Login
-                  </Heading>
-                  <Text tone="muted">Centered authentication layout</Text>
-                </Card>
-              </AuthLayout>
-            </div>
-          );
-        },
-      },
-    ],
-  },
-  stackedLayout: {
-    id: 'stackedLayout',
-    name: 'StackedLayout',
-    category: 'layouts',
-    description: 'Stacked layout with header',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Layout with header and content',
-        code: `import { StackedLayout } from '@abe-stack/ui';
-<StackedLayout header={<Header />}>
-  <Text>Main content</Text>
-</StackedLayout>`,
-        render: () => {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const { StackedLayout } = require('@abe-stack/ui');
-          return (
-            <div style={{ height: '300px', border: '1px solid #ddd' }}>
-              <StackedLayout
-                header={
-                  <div style={{ padding: '16px', background: '#f5f5f5' }}>
-                    <Heading as="h3" size="sm">
-                      Header
-                    </Heading>
-                  </div>
-                }
-              >
-                <div style={{ padding: '16px' }}>
-                  <Text>Main content area in stacked layout</Text>
-                </div>
-              </StackedLayout>
-            </div>
-          );
-        },
-      },
-    ],
-  },
-  sidebarLayout: {
-    id: 'sidebarLayout',
-    name: 'SidebarLayout',
-    category: 'layouts',
-    description: 'Layout with sidebar',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Layout with sidebar and main content',
-        code: `import { SidebarLayout } from '@abe-stack/ui';
-<SidebarLayout sidebar={<Nav />}>
-  <Text>Main content</Text>
-</SidebarLayout>`,
-        render: () => {
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          const { SidebarLayout } = require('@abe-stack/ui');
-          return (
-            <div style={{ height: '300px', border: '1px solid #ddd' }}>
-              <SidebarLayout
-                sidebar={
-                  <div style={{ padding: '16px', background: '#f5f5f5', height: '100%' }}>
-                    <Text>Sidebar</Text>
-                  </div>
-                }
-              >
-                <div style={{ padding: '16px' }}>
-                  <Text>Main content with sidebar layout</Text>
-                </div>
-              </SidebarLayout>
-            </div>
-          );
-        },
       },
     ],
   },

@@ -1,10 +1,10 @@
 // apps/web/src/demo/DemoShell.tsx
+import { Button, Heading, ResizablePanel, ResizablePanelGroup, Text } from '@abe-stack/ui';
 import React, { useState } from 'react';
 
-import { Button, Heading, ResizablePanel, ResizablePanelGroup, Text } from '@abe-stack/ui';
+import { getAllCategories, getComponentsByCategory } from './registry';
 
-import { componentRegistry, getAllCategories, getComponentsByCategory } from './registry';
-import type { ComponentCategory, ComponentDemo, DemoPaneConfig } from './types';
+import type { ComponentDemo, DemoPaneConfig } from './types';
 
 import './DemoShell.css';
 
@@ -42,13 +42,22 @@ export const DemoShell: React.FC = () => {
     <div className={`demo-shell demo-shell-theme-${theme}`} style={{ height: '100vh' }}>
       {/* Top Bar */}
       {paneConfig.top.visible && (
-        <div className="demo-pane demo-pane-top" style={{ height: `${paneConfig.top.size}vh` }}>
+        <div
+          className="demo-pane demo-pane-top"
+          style={{ height: `${String(paneConfig.top.size)}vh` }}
+        >
           <div className="demo-pane-header">
             <Heading as="h1" size="lg">
               ABE Stack UI Component Gallery
             </Heading>
             <div className="demo-pane-controls">
-              <Button size="small" variant="text" onClick={() => togglePane('top')}>
+              <Button
+                size="small"
+                variant="text"
+                onClick={() => {
+                  togglePane('top');
+                }}
+              >
                 ✕
               </Button>
             </div>
@@ -60,7 +69,9 @@ export const DemoShell: React.FC = () => {
               <button
                 key={cat}
                 className={`demo-tab ${activeCategory === cat ? 'active' : ''}`}
-                onClick={() => setActiveCategory(cat)}
+                onClick={() => {
+                  setActiveCategory(cat);
+                }}
               >
                 {cat.charAt(0).toUpperCase() + cat.slice(1)}
               </button>
@@ -70,7 +81,10 @@ export const DemoShell: React.FC = () => {
       )}
 
       {/* Main Content Area */}
-      <div className="demo-main-container" style={{ height: `${100 - paneConfig.top.size}vh` }}>
+      <div
+        className="demo-main-container"
+        style={{ height: `${String(100 - paneConfig.top.size)}vh` }}
+      >
         <ResizablePanelGroup direction="horizontal">
           {/* Left Sidebar - Component List */}
           {paneConfig.left.visible && (
@@ -78,14 +92,22 @@ export const DemoShell: React.FC = () => {
               defaultSize={paneConfig.left.size}
               minSize={15}
               maxSize={40}
-              onResize={(size) => handlePaneResize('left', size)}
+              onResize={(size: number) => {
+                handlePaneResize('left', size);
+              }}
             >
               <div className="demo-pane demo-pane-left">
                 <div className="demo-pane-header">
                   <Heading as="h2" size="md">
                     Components
                   </Heading>
-                  <Button size="small" variant="text" onClick={() => togglePane('left')}>
+                  <Button
+                    size="small"
+                    variant="text"
+                    onClick={() => {
+                      togglePane('left');
+                    }}
+                  >
                     ✕
                   </Button>
                 </div>
@@ -94,11 +116,14 @@ export const DemoShell: React.FC = () => {
                     <button
                       key={comp.id}
                       className={`demo-component-item ${selectedComponent?.id === comp.id ? 'active' : ''}`}
-                      onClick={() => setSelectedComponent(comp)}
+                      onClick={() => {
+                        setSelectedComponent(comp);
+                      }}
                     >
                       <Text>{comp.name}</Text>
                       <Text tone="muted" style={{ fontSize: '12px' }}>
-                        {comp.variants.length} variant{comp.variants.length !== 1 ? 's' : ''}
+                        {String(comp.variants.length)} variant
+                        {comp.variants.length !== 1 ? 's' : ''}
                       </Text>
                     </button>
                   ))}
@@ -118,17 +143,35 @@ export const DemoShell: React.FC = () => {
               </div>
               <div className="demo-pane-controls">
                 {!paneConfig.left.visible && (
-                  <Button size="small" variant="secondary" onClick={() => togglePane('left')}>
+                  <Button
+                    size="small"
+                    variant="secondary"
+                    onClick={() => {
+                      togglePane('left');
+                    }}
+                  >
                     ☰ List
                   </Button>
                 )}
                 {!paneConfig.right.visible && (
-                  <Button size="small" variant="secondary" onClick={() => togglePane('right')}>
+                  <Button
+                    size="small"
+                    variant="secondary"
+                    onClick={() => {
+                      togglePane('right');
+                    }}
+                  >
                     📖 Docs
                   </Button>
                 )}
                 {!paneConfig.bottom.visible && (
-                  <Button size="small" variant="secondary" onClick={() => togglePane('bottom')}>
+                  <Button
+                    size="small"
+                    variant="secondary"
+                    onClick={() => {
+                      togglePane('bottom');
+                    }}
+                  >
                     🎨 Theme
                   </Button>
                 )}
@@ -182,14 +225,22 @@ export const DemoShell: React.FC = () => {
               defaultSize={paneConfig.right.size}
               minSize={15}
               maxSize={40}
-              onResize={(size) => handlePaneResize('right', size)}
+              onResize={(size: number) => {
+                handlePaneResize('right', size);
+              }}
             >
               <div className="demo-pane demo-pane-right">
                 <div className="demo-pane-header">
                   <Heading as="h2" size="md">
                     Documentation
                   </Heading>
-                  <Button size="small" variant="text" onClick={() => togglePane('right')}>
+                  <Button
+                    size="small"
+                    variant="text"
+                    onClick={() => {
+                      togglePane('right');
+                    }}
+                  >
                     ✕
                   </Button>
                 </div>
@@ -243,13 +294,19 @@ export const DemoShell: React.FC = () => {
       {paneConfig.bottom.visible && (
         <div
           className="demo-pane demo-pane-bottom"
-          style={{ height: `${paneConfig.bottom.size}vh` }}
+          style={{ height: `${String(paneConfig.bottom.size)}vh` }}
         >
           <div className="demo-pane-header">
             <Heading as="h3" size="sm">
               Theme Controls
             </Heading>
-            <Button size="small" variant="text" onClick={() => togglePane('bottom')}>
+            <Button
+              size="small"
+              variant="text"
+              onClick={() => {
+                togglePane('bottom');
+              }}
+            >
               ✕
             </Button>
           </div>
@@ -260,14 +317,18 @@ export const DemoShell: React.FC = () => {
                 <Button
                   size="small"
                   variant={theme === 'light' ? 'primary' : 'secondary'}
-                  onClick={() => setTheme('light')}
+                  onClick={() => {
+                    setTheme('light');
+                  }}
                 >
                   ☀️ Light
                 </Button>
                 <Button
                   size="small"
                   variant={theme === 'dark' ? 'primary' : 'secondary'}
-                  onClick={() => setTheme('dark')}
+                  onClick={() => {
+                    setTheme('dark');
+                  }}
                 >
                   🌙 Dark
                 </Button>
@@ -279,28 +340,36 @@ export const DemoShell: React.FC = () => {
                 <Button
                   size="small"
                   variant={paneConfig.top.visible ? 'primary' : 'secondary'}
-                  onClick={() => togglePane('top')}
+                  onClick={() => {
+                    togglePane('top');
+                  }}
                 >
                   Top
                 </Button>
                 <Button
                   size="small"
                   variant={paneConfig.left.visible ? 'primary' : 'secondary'}
-                  onClick={() => togglePane('left')}
+                  onClick={() => {
+                    togglePane('left');
+                  }}
                 >
                   Left
                 </Button>
                 <Button
                   size="small"
                   variant={paneConfig.right.visible ? 'primary' : 'secondary'}
-                  onClick={() => togglePane('right')}
+                  onClick={() => {
+                    togglePane('right');
+                  }}
                 >
                   Right
                 </Button>
                 <Button
                   size="small"
-                  variant={paneConfig.bottom.visible ? 'primary' : 'secondary'}
-                  onClick={() => togglePane('bottom')}
+                  variant="primary"
+                  onClick={() => {
+                    togglePane('bottom');
+                  }}
                 >
                   Bottom
                 </Button>
