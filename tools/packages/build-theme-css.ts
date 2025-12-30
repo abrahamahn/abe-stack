@@ -4,10 +4,10 @@ import { fileURLToPath } from 'url';
 
 import { format } from 'prettier';
 
-import { colors } from '../packages/ui/src/theme/colors';
-import { motion } from '../packages/ui/src/theme/motion';
-import { spacing } from '../packages/ui/src/theme/spacing';
-import { typography } from '../packages/ui/src/theme/typography';
+import { colors } from '../../packages/ui/src/theme/colors';
+import { motion } from '../../packages/ui/src/theme/motion';
+import { spacing } from '../../packages/ui/src/theme/spacing';
+import { typography } from '../../packages/ui/src/theme/typography';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const themeCssPath = path.resolve(__dirname, '../packages/ui/src/theme/theme.css');
