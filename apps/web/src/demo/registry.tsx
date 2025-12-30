@@ -343,7 +343,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
         code: '<Dropdown trigger={<Button>Menu</Button>}>...</Dropdown>',
         render: () => (
           <Dropdown trigger={<Button>Open Menu</Button>}>
-            {(close) => (
+            {(close: () => void) => (
               <div style={{ padding: '8px', display: 'grid', gap: '4px' }}>
                 <Button variant="text" onClick={close}>
                   Item 1
