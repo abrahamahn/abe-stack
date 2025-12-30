@@ -2,6 +2,7 @@
 import {
   Accordion,
   Alert,
+  AppShell,
   AuthLayout,
   Avatar,
   Badge,
@@ -27,9 +28,11 @@ import {
   ResizablePanelGroup,
   ScrollArea,
   Select,
+  SidebarLayout,
   Skeleton,
   Slider,
   Spinner,
+  StackedLayout,
   Switch,
   Table,
   TableBody,
@@ -1188,6 +1191,394 @@ export const componentRegistry: Record<string, ComponentDemo> = {
               </Heading>
               <Text>This PageContainer has a custom max-width of 600px for narrower content.</Text>
             </PageContainer>
+          </div>
+        ),
+      },
+    ],
+  },
+  sidebarLayout: {
+    id: 'sidebarLayout',
+    name: 'SidebarLayout',
+    category: 'layouts',
+    description: 'Two-column layout with left sidebar and main content area',
+    variants: [
+      {
+        name: 'Basic',
+        description: 'Basic sidebar layout with navigation',
+        code: `<SidebarLayout
+  sidebar={<nav>Navigation items</nav>}
+>
+  <Heading as="h1">Main Content</Heading>
+  <Text>Your page content goes here</Text>
+</SidebarLayout>`,
+        render: (): JSX.Element => (
+          <div style={{ border: '1px solid #ddd', minHeight: '300px' }}>
+            <SidebarLayout
+              sidebar={
+                <div>
+                  <Heading as="h4" size="sm" style={{ marginBottom: '16px' }}>
+                    Navigation
+                  </Heading>
+                  <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <Button variant="text" style={{ justifyContent: 'flex-start' }}>
+                      Dashboard
+                    </Button>
+                    <Button variant="text" style={{ justifyContent: 'flex-start' }}>
+                      Settings
+                    </Button>
+                    <Button variant="text" style={{ justifyContent: 'flex-start' }}>
+                      Profile
+                    </Button>
+                  </nav>
+                </div>
+              }
+            >
+              <Heading as="h2" size="md">
+                Main Content Area
+              </Heading>
+              <Text>This is the main content area with a fixed-width sidebar on the left.</Text>
+              <Card style={{ marginTop: '16px' }}>
+                <Text>Content cards and other components work well in the main area.</Text>
+              </Card>
+            </SidebarLayout>
+          </div>
+        ),
+      },
+      {
+        name: 'With Header',
+        description: 'Sidebar layout with optional header',
+        code: `<SidebarLayout
+  sidebar={<nav>Navigation</nav>}
+  header={<Heading as="h1">Page Title</Heading>}
+>
+  <Text>Main content</Text>
+</SidebarLayout>`,
+        render: (): JSX.Element => (
+          <div style={{ border: '1px solid #ddd', minHeight: '300px' }}>
+            <SidebarLayout
+              sidebar={
+                <div>
+                  <Heading as="h4" size="sm" style={{ marginBottom: '16px' }}>
+                    Menu
+                  </Heading>
+                  <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <Button variant="text" size="small" style={{ justifyContent: 'flex-start' }}>
+                      Home
+                    </Button>
+                    <Button variant="text" size="small" style={{ justifyContent: 'flex-start' }}>
+                      About
+                    </Button>
+                  </nav>
+                </div>
+              }
+              header={
+                <div>
+                  <Heading as="h3" size="sm">
+                    Dashboard
+                  </Heading>
+                  <Text tone="muted" style={{ fontSize: '14px' }}>
+                    Welcome back!
+                  </Text>
+                </div>
+              }
+            >
+              <Text>Main content area with header bar above.</Text>
+              <Card style={{ marginTop: '16px' }}>
+                <Text>The header appears above the main content.</Text>
+              </Card>
+            </SidebarLayout>
+          </div>
+        ),
+      },
+    ],
+  },
+  stackedLayout: {
+    id: 'stackedLayout',
+    name: 'StackedLayout',
+    category: 'layouts',
+    description: 'Simple stacked layout with optional hero section',
+    variants: [
+      {
+        name: 'Basic',
+        description: 'Basic stacked layout without hero',
+        code: `<StackedLayout>
+  <Heading as="h1">Page Title</Heading>
+  <Text>Your content goes here</Text>
+</StackedLayout>`,
+        render: (): JSX.Element => (
+          <div style={{ border: '1px solid #ddd', backgroundColor: '#f9f9f9' }}>
+            <StackedLayout>
+              <Heading as="h2" size="md">
+                Content Title
+              </Heading>
+              <Text>
+                StackedLayout provides a simple stacked layout with a centered container and
+                padding.
+              </Text>
+              <Card style={{ marginTop: '16px' }}>
+                <Text>Content is centered with a medium-width container.</Text>
+              </Card>
+            </StackedLayout>
+          </div>
+        ),
+      },
+      {
+        name: 'With Hero',
+        description: 'Stacked layout with hero section',
+        code: `<StackedLayout
+  hero={
+    <div>
+      <Heading as="h1">Welcome</Heading>
+      <Text>Hero section content</Text>
+    </div>
+  }
+>
+  <Text>Main content</Text>
+</StackedLayout>`,
+        render: (): JSX.Element => (
+          <div style={{ border: '1px solid #ddd', backgroundColor: '#f9f9f9' }}>
+            <StackedLayout
+              hero={
+                <div
+                  style={{
+                    padding: '24px',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    borderRadius: '8px',
+                    color: 'white',
+                  }}
+                >
+                  <Heading as="h2" size="md" style={{ color: 'white', marginBottom: '8px' }}>
+                    Welcome to Our Platform
+                  </Heading>
+                  <Text style={{ color: 'white', opacity: 0.9 }}>
+                    This is the hero section - perfect for landing pages.
+                  </Text>
+                </div>
+              }
+            >
+              <Heading as="h3" size="sm">
+                Main Content
+              </Heading>
+              <Text>The hero section appears above with extra spacing.</Text>
+              <Card style={{ marginTop: '16px' }}>
+                <Text>Regular content follows the hero section.</Text>
+              </Card>
+            </StackedLayout>
+          </div>
+        ),
+      },
+    ],
+  },
+  appShell: {
+    id: 'appShell',
+    name: 'AppShell',
+    category: 'layouts',
+    description:
+      'Comprehensive app layout with header, footer, sidebar, aside, and adjustable sizes',
+    variants: [
+      {
+        name: 'Full Layout',
+        description: 'Complete app shell with all sections',
+        code: `<AppShell
+  header={<div>Header</div>}
+  sidebar={<nav>Sidebar Navigation</nav>}
+  aside={<div>Right Panel</div>}
+  footer={<div>Footer</div>}
+>
+  <Heading as="h1">Main Content</Heading>
+</AppShell>`,
+        render: (): JSX.Element => (
+          <div style={{ border: '1px solid #ddd', height: '400px' }}>
+            <AppShell
+              header={
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Heading as="h3" size="sm">
+                    My App
+                  </Heading>
+                  <Button size="small">Profile</Button>
+                </div>
+              }
+              sidebar={
+                <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <Text style={{ fontWeight: 600, marginBottom: '8px' }}>Navigation</Text>
+                  <Button variant="text" size="small" style={{ justifyContent: 'flex-start' }}>
+                    Dashboard
+                  </Button>
+                  <Button variant="text" size="small" style={{ justifyContent: 'flex-start' }}>
+                    Projects
+                  </Button>
+                  <Button variant="text" size="small" style={{ justifyContent: 'flex-start' }}>
+                    Team
+                  </Button>
+                </nav>
+              }
+              aside={
+                <div>
+                  <Text style={{ fontWeight: 600, marginBottom: '12px' }}>Activity</Text>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <Card>
+                      <Text style={{ fontSize: '12px' }}>Recent activity item</Text>
+                    </Card>
+                    <Card>
+                      <Text style={{ fontSize: '12px' }}>Another update</Text>
+                    </Card>
+                  </div>
+                </div>
+              }
+              footer={
+                <div style={{ textAlign: 'center' }}>
+                  <Text tone="muted" style={{ fontSize: '12px' }}>
+                    © 2024 My App. All rights reserved.
+                  </Text>
+                </div>
+              }
+              headerHeight="64px"
+              footerHeight="48px"
+              sidebarWidth={220}
+              asideWidth={220}
+            >
+              <Heading as="h2" size="md">
+                Main Content
+              </Heading>
+              <Text>
+                AppShell provides a complete application layout with header, footer, left sidebar,
+                right aside panel, and main content area.
+              </Text>
+              <Card style={{ marginTop: '16px' }}>
+                <Text>All sections are optional and sizes are customizable.</Text>
+              </Card>
+            </AppShell>
+          </div>
+        ),
+      },
+      {
+        name: 'Collapsible Panels',
+        description: 'App shell with collapsible sidebar and aside',
+        code: `const [sidebarOpen, setSidebarOpen] = useState(true);
+const [asideOpen, setAsideOpen] = useState(true);
+
+<AppShell
+  header={<Button onClick={() => setSidebarOpen(!sidebarOpen)}>Toggle</Button>}
+  sidebar={<nav>Sidebar</nav>}
+  aside={<div>Aside</div>}
+  sidebarCollapsed={!sidebarOpen}
+  asideCollapsed={!asideOpen}
+>
+  Main Content
+</AppShell>`,
+        render: (): JSX.Element => {
+          const [sidebarOpen, setSidebarOpen] = React.useState(true);
+          const [asideOpen, setAsideOpen] = React.useState(false);
+
+          return (
+            <div style={{ border: '1px solid #ddd', height: '350px' }}>
+              <AppShell
+                header={
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <Heading as="h4" size="sm">
+                      Collapsible Layout
+                    </Heading>
+                    <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
+                      <Button
+                        size="small"
+                        onClick={() => {
+                          setSidebarOpen(!sidebarOpen);
+                        }}
+                      >
+                        {sidebarOpen ? '← Hide' : '→ Show'} Sidebar
+                      </Button>
+                      <Button
+                        size="small"
+                        onClick={() => {
+                          setAsideOpen(!asideOpen);
+                        }}
+                      >
+                        {asideOpen ? 'Hide →' : '← Show'} Panel
+                      </Button>
+                    </div>
+                  </div>
+                }
+                sidebar={
+                  <div>
+                    <Text style={{ fontWeight: 600 }}>Sidebar</Text>
+                    <Text style={{ fontSize: '12px', marginTop: '8px' }}>This can be toggled</Text>
+                  </div>
+                }
+                aside={
+                  <div>
+                    <Text style={{ fontWeight: 600 }}>Aside Panel</Text>
+                    <Text style={{ fontSize: '12px', marginTop: '8px' }}>
+                      This can also be toggled
+                    </Text>
+                  </div>
+                }
+                sidebarCollapsed={!sidebarOpen}
+                asideCollapsed={!asideOpen}
+                headerHeight="56px"
+                sidebarWidth={200}
+                asideWidth={200}
+              >
+                <Heading as="h3" size="sm">
+                  Main Content
+                </Heading>
+                <Text>
+                  Click the buttons in the header to toggle the sidebar and aside panels. The layout
+                  automatically adjusts.
+                </Text>
+              </AppShell>
+            </div>
+          );
+        },
+      },
+      {
+        name: 'Custom Sizes',
+        description: 'App shell with custom panel sizes',
+        code: `<AppShell
+  header={<div>Header</div>}
+  sidebar={<div>Wide Sidebar</div>}
+  headerHeight="80px"
+  sidebarWidth={350}
+>
+  Main Content
+</AppShell>`,
+        render: (): JSX.Element => (
+          <div style={{ border: '1px solid #ddd', height: '300px' }}>
+            <AppShell
+              header={
+                <div>
+                  <Heading as="h3" size="sm">
+                    Custom Sizes
+                  </Heading>
+                  <Text tone="muted" style={{ fontSize: '12px' }}>
+                    Header height: 80px, Sidebar width: 350px
+                  </Text>
+                </div>
+              }
+              sidebar={
+                <div>
+                  <Text style={{ fontWeight: 600, marginBottom: '12px' }}>Wide Sidebar</Text>
+                  <Text style={{ fontSize: '14px' }}>
+                    This sidebar is 350px wide instead of the default 250px. All dimensions are
+                    customizable.
+                  </Text>
+                </div>
+              }
+              headerHeight="80px"
+              sidebarWidth={350}
+            >
+              <Heading as="h3" size="sm">
+                Main Content
+              </Heading>
+              <Text>
+                You can customize headerHeight, footerHeight, sidebarWidth, and asideWidth props.
+              </Text>
+            </AppShell>
           </div>
         ),
       },
