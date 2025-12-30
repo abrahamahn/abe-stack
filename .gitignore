@@ -10,6 +10,10 @@ out/
 *.tsbuildinfo
 *.txt
 
+# Allow Vite config for web build
+!config/build/
+!config/build/vite.config.ts
+
 # Electron specific
 release/
 

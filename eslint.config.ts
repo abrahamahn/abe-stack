@@ -35,6 +35,13 @@ export default [
       'tools/export-ui-code.js',
       'packages/db/drizzle.config.ts',
       'apps/server/vitest.config.ts',
+      'apps/web/e2e/**',
+      'apps/web/vitest.config.ts',
+      'packages/ui/**/__tests__/**',
+      'packages/ui/vitest.config.ts',
+      'tools/packages/build-theme-css.ts',
+      'packages/storage/src/**/*.js',
+      'packages/storage/src/**/*.d.ts',
     ],
   },
   jsConfigs.recommended ?? {},
@@ -56,6 +63,64 @@ export default [
         project: ['./apps/server/tsconfig.json'],
         tsconfigRootDir,
       },
+    },
+  },
+  {
+    files: ['apps/web/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./apps/web/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['apps/mobile/**/*.{ts,tsx,cts,mts,js,jsx}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./apps/mobile/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['apps/web/e2e/**/*', 'apps/web/vitest.config.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: null,
+      },
+    },
+    rules: {
+      // Allow running lint without a dedicated TS project for Vitest and e2e specs
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+    },
+  },
+  {
+    files: ['packages/ui/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/ui/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['tools/packages/build-theme-css.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: null,
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/await-thenable': 'off',
+      '@typescript-eslint/no-floating-promises': 'off',
     },
   },
   {
