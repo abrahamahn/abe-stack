@@ -65,7 +65,7 @@ export function killPorts(ports: number[]): void {
 if (require.main === module) {
   const ports = process.argv.slice(2).map(Number);
   if (ports.length === 0) {
-    console.error('Usage: tsx tools/kill-port.ts <port1> [port2] [port3] ...');
+    console.error('Usage: tsx tools/dev/kill-port.ts <port1> [port2] [port3] ...');
     process.exit(1);
   }
   killPorts(ports);

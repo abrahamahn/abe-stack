@@ -110,10 +110,10 @@ export const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>((props, re
         overflow: 'auto',
         position: 'relative',
         scrollbarWidth: scrollbarWidth === 'thin' ? 'thin' : 'auto',
-        scrollbarColor: 'var(--gray6, #9ca3af) var(--gray2, #f3f4f6)',
+        scrollbarColor: 'rgba(255, 255, 255, 0.1) transparent',
         // Custom scrollbar styles for WebKit browsers
         ['--scrollbar-size' as string]: scrollbarSize,
-        ['--scrollbar-opacity' as string]: showScrollbar ? '1' : '0',
+        ['--scrollbar-opacity' as string]: showScrollbar ? '0.5' : '0',
         ...style,
       }}
       {...rest}

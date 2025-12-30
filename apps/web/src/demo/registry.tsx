@@ -46,7 +46,7 @@ import {
   Toast,
   Tooltip,
 } from '@abe-stack/ui';
-import React from 'react';
+import React, { type ReactElement } from 'react';
 
 import type { ComponentDemo } from './types';
 
@@ -232,26 +232,26 @@ export const componentRegistry: Record<string, ComponentDemo> = {
       {
         name: 'Info',
         description: 'Info alert',
-        code: '<Alert variant="info">Information message</Alert>',
-        render: () => <Alert variant="info">Information message</Alert>,
+        code: '<Alert tone="info">Information message</Alert>',
+        render: () => <Alert tone="info">Information message</Alert>,
       },
       {
         name: 'Success',
         description: 'Success alert',
-        code: '<Alert variant="success">Success message</Alert>',
-        render: () => <Alert variant="success">Success message</Alert>,
+        code: '<Alert tone="success">Success message</Alert>',
+        render: () => <Alert tone="success">Success message</Alert>,
       },
       {
         name: 'Warning',
         description: 'Warning alert',
-        code: '<Alert variant="warning">Warning message</Alert>',
-        render: () => <Alert variant="warning">Warning message</Alert>,
+        code: '<Alert tone="warning">Warning message</Alert>',
+        render: () => <Alert tone="warning">Warning message</Alert>,
       },
       {
         name: 'Error',
         description: 'Error alert',
-        code: '<Alert variant="error">Error message</Alert>',
-        render: () => <Alert variant="error">Error message</Alert>,
+        code: '<Alert tone="danger">Error message</Alert>',
+        render: () => <Alert tone="danger">Error message</Alert>,
       },
     ],
   },
@@ -264,20 +264,20 @@ export const componentRegistry: Record<string, ComponentDemo> = {
       {
         name: 'With Initials',
         description: 'Avatar with initials',
-        code: '<Avatar name="John Doe" />',
-        render: () => <Avatar name="John Doe" />,
+        code: '<Avatar fallback="JD" />',
+        render: () => <Avatar fallback="JD" />,
       },
       {
-        name: 'Small',
-        description: 'Small avatar',
-        code: '<Avatar name="JD" size="small" />',
-        render: () => <Avatar name="JD" size="small" />,
+        name: 'With Image',
+        description: 'Avatar with image',
+        code: '<Avatar src="https://via.placeholder.com/40" alt="User" />',
+        render: () => <Avatar src="https://via.placeholder.com/40" alt="User" />,
       },
       {
-        name: 'Large',
-        description: 'Large avatar',
-        code: '<Avatar name="JD" size="large" />',
-        render: () => <Avatar name="JD" size="large" />,
+        name: 'With Custom Fallback',
+        description: 'Avatar with custom fallback',
+        code: '<Avatar fallback="AB" />',
+        render: () => <Avatar fallback="AB" />,
       },
     ],
   },
@@ -314,20 +314,16 @@ export const componentRegistry: Record<string, ComponentDemo> = {
     description: 'Visual divider line',
     variants: [
       {
-        name: 'Horizontal',
+        name: 'Basic',
         description: 'Horizontal divider',
         code: '<Divider />',
         render: () => <Divider />,
       },
       {
-        name: 'Vertical',
-        description: 'Vertical divider',
-        code: '<Divider orientation="vertical" />',
-        render: () => (
-          <div style={{ height: '50px', display: 'flex', alignItems: 'center' }}>
-            <Divider orientation="vertical" />
-          </div>
-        ),
+        name: 'With Custom Style',
+        description: 'Divider with custom styling',
+        code: '<Divider style={{ margin: "20px 0" }} />',
+        render: () => <Divider style={{ margin: '20px 0' }} />,
       },
     ],
   },
@@ -396,8 +392,8 @@ export const componentRegistry: Record<string, ComponentDemo> = {
       {
         name: 'Basic',
         description: 'Basic modal',
-        code: '<Modal open={true} onClose={() => {}}>...</Modal>',
-        render: (): JSX.Element => {
+        code: '<Modal.Root open={open} onClose={onClose}>...</Modal.Root>',
+        render: (): ReactElement => {
           const [open, setOpen] = React.useState(false);
           return (
             <>
@@ -408,25 +404,20 @@ export const componentRegistry: Record<string, ComponentDemo> = {
               >
                 Open Modal
               </Button>
-              <Modal
+              <Modal.Root
                 open={open}
                 onClose={() => {
                   setOpen(false);
                 }}
               >
                 <div style={{ padding: '24px' }}>
-                  <Heading as="h2">Modal Title</Heading>
+                  <Modal.Title>Modal Title</Modal.Title>
                   <Text>Modal content goes here</Text>
-                  <Button
-                    onClick={() => {
-                      setOpen(false);
-                    }}
-                    style={{ marginTop: '16px' }}
-                  >
-                    Close
-                  </Button>
+                  <Modal.Close>
+                    <Button style={{ marginTop: '16px' }}>Close</Button>
+                  </Modal.Close>
                 </div>
-              </Modal>
+              </Modal.Root>
             </>
           );
         },
@@ -442,22 +433,22 @@ export const componentRegistry: Record<string, ComponentDemo> = {
       {
         name: 'Basic',
         description: 'Basic overlay',
-        code: '<Overlay visible={true} />',
-        render: (): JSX.Element => {
-          const [visible, setVisible] = React.useState(false);
+        code: '<Overlay open={true} />',
+        render: (): ReactElement => {
+          const [open, setOpen] = React.useState(false);
           return (
             <>
               <Button
                 onClick={() => {
-                  setVisible(!visible);
+                  setOpen(!open);
                 }}
               >
                 Toggle Overlay
               </Button>
               <Overlay
-                visible={visible}
+                open={open}
                 onClick={() => {
-                  setVisible(false);
+                  setOpen(false);
                 }}
               />
             </>
@@ -475,8 +466,8 @@ export const componentRegistry: Record<string, ComponentDemo> = {
       {
         name: 'Basic',
         description: 'Basic pagination',
-        code: '<Pagination currentPage={1} totalPages={10} onPageChange={() => {}} />',
-        render: () => <Pagination currentPage={1} totalPages={10} onPageChange={() => {}} />,
+        code: '<Pagination value={1} totalPages={10} onChange={() => {}} />',
+        render: () => <Pagination value={1} totalPages={10} onChange={() => {}} />,
       },
     ],
   },
@@ -561,17 +552,13 @@ export const componentRegistry: Record<string, ComponentDemo> = {
       {
         name: 'Basic',
         description: 'Basic radio group',
-        code: '<RadioGroup options={[...]} value="1" onChange={() => {}} />',
+        code: '<RadioGroup name="group"><Radio>Option 1</Radio></RadioGroup>',
         render: () => (
-          <RadioGroup
-            options={[
-              { value: '1', label: 'Option 1' },
-              { value: '2', label: 'Option 2' },
-              { value: '3', label: 'Option 3' },
-            ]}
-            value="1"
-            onChange={() => {}}
-          />
+          <RadioGroup name="demo-group" value="1" onValueChange={() => {}}>
+            <Radio name="demo-group" value="1" label="Option 1" onChange={() => {}} />
+            <Radio name="demo-group" value="2" label="Option 2" onChange={() => {}} />
+            <Radio name="demo-group" value="3" label="Option 3" onChange={() => {}} />
+          </RadioGroup>
         ),
       },
     ],
@@ -713,10 +700,16 @@ export const componentRegistry: Record<string, ComponentDemo> = {
         render: () => <Text tone="muted">Muted text</Text>,
       },
       {
-        name: 'Brand',
-        description: 'Brand text',
-        code: '<Text tone="brand">Brand text</Text>',
-        render: () => <Text tone="brand">Brand text</Text>,
+        name: 'Success',
+        description: 'Success text',
+        code: '<Text tone="success">Success text</Text>',
+        render: () => <Text tone="success">Success text</Text>,
+      },
+      {
+        name: 'Danger',
+        description: 'Danger text',
+        code: '<Text tone="danger">Danger text</Text>',
+        render: () => <Text tone="danger">Danger text</Text>,
       },
     ],
   },
@@ -801,22 +794,28 @@ export const componentRegistry: Record<string, ComponentDemo> = {
     description: 'Toast notification component',
     variants: [
       {
-        name: 'Info',
-        description: 'Info toast',
-        code: '<Toast variant="info" onClose={() => {}}>Message</Toast>',
-        render: () => <Toast variant="info">Information message</Toast>,
+        name: 'Basic',
+        description: 'Basic toast',
+        code: '<Toast message={{ id: "1", title: "Title", description: "Description" }} />',
+        render: () => (
+          <Toast
+            message={{ id: '1', title: 'Notification', description: 'This is a toast message' }}
+          />
+        ),
       },
       {
-        name: 'Success',
-        description: 'Success toast',
-        code: '<Toast variant="success" onClose={() => {}}>Success!</Toast>',
-        render: () => <Toast variant="success">Success message</Toast>,
+        name: 'With Title Only',
+        description: 'Toast with only title',
+        code: '<Toast message={{ id: "2", title: "Success!" }} />',
+        render: () => <Toast message={{ id: '2', title: 'Success!' }} />,
       },
       {
-        name: 'Error',
-        description: 'Error toast',
-        code: '<Toast variant="error" onClose={() => {}}>Error!</Toast>',
-        render: () => <Toast variant="error">Error message</Toast>,
+        name: 'With Description',
+        description: 'Toast with title and description',
+        code: '<Toast message={{ id: "3", title: "Error", description: "Something went wrong" }} />',
+        render: () => (
+          <Toast message={{ id: '3', title: 'Error', description: 'Something went wrong' }} />
+        ),
       },
     ],
   },
@@ -878,38 +877,17 @@ export const componentRegistry: Record<string, ComponentDemo> = {
       {
         name: 'Basic',
         description: 'Basic dialog',
-        code: '<Dialog open={true} onClose={() => {}}>...</Dialog>',
-        render: (): JSX.Element => {
-          const [open, setOpen] = React.useState(false);
+        code: '<Dialog.Root><Dialog.Trigger>Open</Dialog.Trigger><Dialog.Content>...</Dialog.Content></Dialog.Root>',
+        render: (): ReactElement => {
           return (
-            <>
-              <Button
-                onClick={() => {
-                  setOpen(true);
-                }}
-              >
-                Open Dialog
-              </Button>
-              <Dialog
-                open={open}
-                onClose={() => {
-                  setOpen(false);
-                }}
-              >
-                <div style={{ padding: '24px' }}>
-                  <Heading as="h3">Dialog Title</Heading>
-                  <Text>Dialog content</Text>
-                  <Button
-                    onClick={() => {
-                      setOpen(false);
-                    }}
-                    style={{ marginTop: '16px' }}
-                  >
-                    Close
-                  </Button>
-                </div>
-              </Dialog>
-            </>
+            <Dialog.Root>
+              <Dialog.Trigger>
+                <Button>Open Dialog</Button>
+              </Dialog.Trigger>
+              <Dialog.Content title="Dialog Title">
+                <Text>This is the dialog content</Text>
+              </Dialog.Content>
+            </Dialog.Root>
           );
         },
       },
@@ -950,7 +928,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Heading as="h2">Small Container</Heading>
   <Text>Content with 640px max-width</Text>
 </Container>`,
-        render: (): JSX.Element => (
+        render: (): ReactElement => (
           <div style={{ border: '1px solid #ddd', padding: '20px', backgroundColor: '#f9f9f9' }}>
             <Container size="sm">
               <Card>
@@ -973,7 +951,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Heading as="h2">Medium Container</Heading>
   <Text>Content with 960px max-width (default)</Text>
 </Container>`,
-        render: (): JSX.Element => (
+        render: (): ReactElement => (
           <div style={{ border: '1px solid #ddd', padding: '20px', backgroundColor: '#f9f9f9' }}>
             <Container size="md">
               <Card>
@@ -996,7 +974,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Heading as="h2">Large Container</Heading>
   <Text>Content with 1200px max-width</Text>
 </Container>`,
-        render: (): JSX.Element => (
+        render: (): ReactElement => (
           <div style={{ border: '1px solid #ddd', padding: '20px', backgroundColor: '#f9f9f9' }}>
             <Container size="lg">
               <Card>
@@ -1019,7 +997,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Container size="md">Medium (960px)</Container>
   <Container size="lg">Large (1200px)</Container>
 </>`,
-        render: (): JSX.Element => (
+        render: (): ReactElement => (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <Container size="sm">
               <div
@@ -1076,7 +1054,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Input type="password" placeholder="Password" />
   <Button variant="primary">Sign In</Button>
 </AuthLayout>`,
-        render: (): JSX.Element => (
+        render: (): ReactElement => (
           <div style={{ minHeight: '400px', backgroundColor: '#f5f5f5' }}>
             <AuthLayout title="Welcome Back" description="Sign in to your account to continue">
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -1101,7 +1079,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Checkbox>I agree to the terms and conditions</Checkbox>
   <Button variant="primary">Create Account</Button>
 </AuthLayout>`,
-        render: (): JSX.Element => (
+        render: (): ReactElement => (
           <div style={{ minHeight: '450px', backgroundColor: '#f5f5f5' }}>
             <AuthLayout title="Create Account" description="Sign up to get started">
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -1127,7 +1105,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Input placeholder="Email" />
   <Button variant="primary">Send Reset Link</Button>
 </AuthLayout>`,
-        render: (): JSX.Element => (
+        render: (): ReactElement => (
           <div style={{ minHeight: '350px', backgroundColor: '#f5f5f5' }}>
             <AuthLayout>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -1159,7 +1137,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Heading as="h1">Page Title</Heading>
   <Text>Page content with consistent padding and max-width</Text>
 </PageContainer>`,
-        render: (): JSX.Element => (
+        render: (): ReactElement => (
           <div style={{ border: '1px solid #ddd', minHeight: '200px' }}>
             <PageContainer>
               <Heading as="h2" size="md">
@@ -1183,7 +1161,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Heading as="h2">Narrow Content</Heading>
   <Text>Content with narrower max-width</Text>
 </PageContainer>`,
-        render: (): JSX.Element => (
+        render: (): ReactElement => (
           <div style={{ border: '1px solid #ddd', minHeight: '150px' }}>
             <PageContainer maxWidth={600}>
               <Heading as="h3" size="sm">
@@ -1211,7 +1189,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Heading as="h1">Main Content</Heading>
   <Text>Your page content goes here</Text>
 </SidebarLayout>`,
-        render: (): JSX.Element => (
+        render: (): ReactElement => (
           <div style={{ border: '1px solid #ddd', minHeight: '300px' }}>
             <SidebarLayout
               sidebar={
@@ -1253,7 +1231,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
 >
   <Text>Main content</Text>
 </SidebarLayout>`,
-        render: (): JSX.Element => (
+        render: (): ReactElement => (
           <div style={{ border: '1px solid #ddd', minHeight: '300px' }}>
             <SidebarLayout
               sidebar={
@@ -1305,7 +1283,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Heading as="h1">Page Title</Heading>
   <Text>Your content goes here</Text>
 </StackedLayout>`,
-        render: (): JSX.Element => (
+        render: (): ReactElement => (
           <div style={{ border: '1px solid #ddd', backgroundColor: '#f9f9f9' }}>
             <StackedLayout>
               <Heading as="h2" size="md">
@@ -1335,7 +1313,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
 >
   <Text>Main content</Text>
 </StackedLayout>`,
-        render: (): JSX.Element => (
+        render: (): ReactElement => (
           <div style={{ border: '1px solid #ddd', backgroundColor: '#f9f9f9' }}>
             <StackedLayout
               hero={
@@ -1387,7 +1365,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
 >
   <Heading as="h1">Main Content</Heading>
 </AppShell>`,
-        render: (): JSX.Element => (
+        render: (): ReactElement => (
           <div style={{ border: '1px solid #ddd', height: '400px' }}>
             <AppShell
               header={
@@ -1472,7 +1450,7 @@ const [asideOpen, setAsideOpen] = useState(true);
 >
   Main Content
 </AppShell>`,
-        render: (): JSX.Element => {
+        render: (): ReactElement => {
           const [sidebarOpen, setSidebarOpen] = React.useState(true);
           const [asideOpen, setAsideOpen] = React.useState(false);
 
@@ -1547,7 +1525,7 @@ const [asideOpen, setAsideOpen] = useState(true);
 >
   Main Content
 </AppShell>`,
-        render: (): JSX.Element => (
+        render: (): ReactElement => (
           <div style={{ border: '1px solid #ddd', height: '300px' }}>
             <AppShell
               header={

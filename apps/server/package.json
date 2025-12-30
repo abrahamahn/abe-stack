@@ -4,7 +4,7 @@
   "description": "Minimal Fastify server for abe-stack",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "tsx ../../tools/kill-port.ts 8080 8081 8082 8083 && cross-env NODE_ENV=development tsx src/index.ts",
+    "dev": "tsx ../../tools/dev/kill-port.ts 8080 8081 8082 8083 && cross-env NODE_ENV=development tsx src/index.ts",
     "start": "cross-env NODE_ENV=production node dist/index.js",
     "build": "tsc",
     "type-check": "tsc --noEmit",
