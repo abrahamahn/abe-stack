@@ -76,10 +76,10 @@ importers:
 
   apps/desktop:
     dependencies:
-      '@aahn/shared':
+      '@abeahn/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@aahn/ui':
+      '@abeahn/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@tanstack/react-query':
@@ -128,7 +128,7 @@ importers:
 
   apps/mobile:
     dependencies:
-      '@aahn/shared':
+      '@abeahn/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       '@react-navigation/native':
@@ -183,13 +183,13 @@ importers:
 
   apps/server:
     dependencies:
-      '@aahn/db':
+      '@abeahn/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@aahn/shared':
+      '@abeahn/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@aahn/storage':
+      '@abeahn/storage':
         specifier: workspace:*
         version: link:../../packages/storage
       '@fastify/cors':
@@ -250,13 +250,13 @@ importers:
 
   apps/web:
     dependencies:
-      '@aahn/api-client':
+      '@abeahn/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
-      '@aahn/shared':
+      '@abeahn/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@aahn/ui':
+      '@abeahn/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@tanstack/react-query':
@@ -314,7 +314,7 @@ importers:
 
   packages/api-client:
     dependencies:
-      '@aahn/shared':
+      '@abeahn/shared':
         specifier: workspace:*
         version: link:../shared
       '@tanstack/react-query':
@@ -355,7 +355,7 @@ importers:
 
   packages/shared:
     dependencies:
-      '@aahn/storage':
+      '@abeahn/storage':
         specifier: workspace:*
         version: link:../storage
       '@ts-rest/core':
@@ -393,7 +393,7 @@ importers:
 
   packages/ui:
     dependencies:
-      '@aahn/shared':
+      '@abeahn/shared':
         specifier: workspace:*
         version: link:../shared
       react:
