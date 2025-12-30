@@ -402,7 +402,7 @@ Rollback available:
 
 ### Code Standards
 
-- [ ] Follows ABE Stack patterns (checked CLAUDE.md)
+- [ ] Follows ABE Stack patterns (checked AGENTS.md)
 - [ ] Code in correct layers (React/Server/Shared/DB)
 - [ ] No anti-patterns detected (ran anti-pattern scan)
 - [ ] Dependencies flow correctly (apps → packages → shared)
@@ -555,7 +555,7 @@ Deleted:
 
 4. **Check for staleness:**
    - [ ] Code patterns still current
-   - [ ] No new guidelines in CLAUDE.md since last session
+   - [ ] No new guidelines in AGENTS.md since last session
    - [ ] No conflicting changes by others
 
 5. **Refocus:**
@@ -654,4 +654,4 @@ If stuck after 3 attempts → STOP, report to human
 ---
 
 _Last Updated: 2025-12-29_
-_See also: complex-tasks.md, agent-prompts.md, CLAUDE.md_
+_See also: complex-tasks.md, agent-prompts.md, AGENTS.md_

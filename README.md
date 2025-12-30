@@ -87,8 +87,7 @@ Change UI frameworks by touching `apps/` only.
 
 Quick links into the docs structure:
 
-- Essentials: `docs/CLAUDE.md`
-- Agent guide: `docs/AGENTS.md`
+- Agent guide: `/AGENTS.md`
 - Doc index: `docs/INDEX.md`
 - Dev references: `docs/dev/`
 - Agent workflows: `docs/agent/`

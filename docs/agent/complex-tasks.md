@@ -2,7 +2,7 @@
 
 **Purpose:** Strategies for breaking down complex tasks into manageable checkpoints.
 
-**When to read:** When `CLAUDE.md` classifies your task as MEDIUM or COMPLEX.
+**When to read:** When `AGENTS.md` classifies your task as MEDIUM or COMPLEX.
 
 **Related docs:**
 

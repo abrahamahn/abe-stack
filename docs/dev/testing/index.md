@@ -21,11 +21,11 @@ Primary goal: reliable refactoring with fast, focused tests driven by TDD.
 
 ## Key Patterns/Commands
 
-| Name        | Description                        | Link                      |
-| ----------- | ---------------------------------- | ------------------------- |
-| Fast loop   | Package-scoped checks during edits | `./commands.md`           |
-| Full suite  | Required checks before completion  | `./commands.md`           |
-| Test levels | Unit/integration/E2E guidance      | `./levels.md`             |
+| Name        | Description                        | Link            |
+| ----------- | ---------------------------------- | --------------- |
+| Fast loop   | Package-scoped checks during edits | `./commands.md` |
+| Full suite  | Required checks before completion  | `./commands.md` |
+| Test levels | Unit/integration/E2E guidance      | `./levels.md`   |
 
 ## Edge Case & Error Handling
 

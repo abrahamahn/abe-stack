@@ -2,7 +2,7 @@
 
 Detailed use cases with example prompts for common development tasks. Learn how to effectively use Claude Code for various scenarios.
 
-**Quick Reference:** See [CLAUDE.md](../../CLAUDE.md) for essentials.
+**Quick Reference:** See [CLAUDE.md](../../../AGENTS.md) for essentials.
 
 Quick Summary:
 

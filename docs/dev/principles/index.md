@@ -17,10 +17,10 @@ Quick Summary:
 
 ## Key Patterns/Commands
 
-| Name       | Description                   | Link                                |
-| ---------- | ----------------------------- | ----------------------------------- |
-| Core rules | One-screen principles summary | `./principles-core.md`              |
-| Rationale  | The why behind each rule      | `./principles-why.md`               |
+| Name       | Description                   | Link                   |
+| ---------- | ----------------------------- | ---------------------- |
+| Core rules | One-screen principles summary | `./principles-core.md` |
+| Rationale  | The why behind each rule      | `./principles-why.md`  |
 
 See Also:
 

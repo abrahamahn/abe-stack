@@ -2,7 +2,7 @@
 
 Comprehensive coding standards including TypeScript usage, naming conventions, import order, error handling, and code documentation.
 
-**Quick Reference:** See [CLAUDE.md](../../CLAUDE.md) for essentials.
+**Quick Reference:** See [AGENTS.md](../../../AGENTS.md) for essentials.
 
 Quick Summary:
 

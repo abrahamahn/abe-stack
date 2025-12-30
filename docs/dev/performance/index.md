@@ -2,7 +2,7 @@
 
 Techniques and best practices for optimizing database queries, frontend performance, and overall application speed.
 
-**Quick Reference:** See [CLAUDE.md](../../CLAUDE.md) for essentials.
+**Quick Reference:** See [CLAUDE.md](../../../AGENTS.md) for essentials.
 
 Quick Summary:
 

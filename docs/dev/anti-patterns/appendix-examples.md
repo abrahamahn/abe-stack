@@ -2,7 +2,7 @@
 
 What to avoid and how to fix common mistakes. Learn from bad examples and apply the correct patterns.
 
-**Quick Reference:** See [CLAUDE.md](../../CLAUDE.md) for essentials.
+**Quick Reference:** See [AGENTS.md](../../../AGENTS.md) for essentials.
 
 ---
 

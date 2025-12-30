@@ -19,11 +19,11 @@ This file is a short index. Detailed workflows are split into focused modules.
 
 ## Key Patterns/Commands
 
-| Name                  | Description                 | Link                              |
-| --------------------- | --------------------------- | --------------------------------- |
-| Task classification   | Decide simple vs complex    | `./classification.md`             |
-| Pre-completion checks | Format/lint/type-check/test | `./precompletion.md`              |
-| Command list          | Common workflow commands    | `./commands.md`                   |
+| Name                  | Description                 | Link                  |
+| --------------------- | --------------------------- | --------------------- |
+| Task classification   | Decide simple vs complex    | `./classification.md` |
+| Pre-completion checks | Format/lint/type-check/test | `./precompletion.md`  |
+| Command list          | Common workflow commands    | `./commands.md`       |
 
 See Also:
 

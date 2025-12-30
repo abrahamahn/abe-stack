@@ -20,11 +20,11 @@ Concrete implementation overview for ABE Stack's layered architecture and packag
 
 ## Key Patterns/Commands
 
-| Name             | Description                   | Link                               |
-| ---------------- | ----------------------------- | ---------------------------------- |
-| Layer boundaries | What belongs where            | `./layers.md`                      |
-| Dependency flow  | Enforced direction of imports | `./dependencies.md`                |
-| Structure map    | Folder and naming conventions | `./structure.md`                   |
+| Name             | Description                   | Link                |
+| ---------------- | ----------------------------- | ------------------- |
+| Layer boundaries | What belongs where            | `./layers.md`       |
+| Dependency flow  | Enforced direction of imports | `./dependencies.md` |
+| Structure map    | Folder and naming conventions | `./structure.md`    |
 
 See Also:
 
