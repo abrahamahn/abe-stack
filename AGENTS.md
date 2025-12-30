@@ -1,4 +1,4 @@
-# Claude Code Guide - ABE Stack (Optimized)
+# Guide - ABE Stack (Optimized)
 
 > **This is your primary reference. Always loaded. Start here.**
 
@@ -39,7 +39,7 @@
         │                           │
         ▼                           ▼
    SIMPLE TASK            ┌─────────────────┐
-   âœ… Execute directly     │ Further classify│
+   ✅ Execute directly     │ Further classify│
    Use standard workflow  └─────────────────┘
                                     │
                     ┌───────────────┴───────────────┐
@@ -52,7 +52,7 @@
                     │                               │
                     ▼                               ▼
               MEDIUM TASK                    COMPLEX TASK
-              Read: agent/complex-tasks.md         Read: agent/complex-tasks.md
+              Read: docs/agent/complex-tasks.md    Read: docs/agent/complex-tasks.md
               Use: Template 1 (Feature)                Use: Template 4 (Architecture)
               Checkpointed execution         Multi-phase + Human supervision
 
@@ -60,10 +60,10 @@
 │ STEP 2: Select Documentation & Template        │
 └─────────────────────────────────────────────────┘
 
-SIMPLE → Continue with this file (CLAUDE.md)
-MEDIUM → Read agent/complex-tasks.md → Use agent/agent-prompts.md Template 1
-COMPLEX → Read agent/complex-tasks.md → Use agent/agent-prompts.md Template 4
-                                      → Use agent/agent-self-check.md
+SIMPLE → Continue with this file (AGENTS.md)
+MEDIUM → Read docs/agent/complex-tasks.md → Use docs/agent/agent-prompts.md Template 1
+COMPLEX → Read docs/agent/complex-tasks.md → Use docs/agent/agent-prompts.md Template 4
+                                           → Use docs/agent/agent-self-check.md
 ```
 
 ---
@@ -203,14 +203,14 @@ Success:
 
 ```bash
 # MANDATORY - Read these in order:
-1. agent/complex-tasks.md - Understanding decomposition
-2. agent/agent-prompts.md - Select appropriate template
-3. agent/agent-self-check.md - Verification protocol
+1. docs/agent/complex-tasks.md - Understanding decomposition
+2. docs/agent/agent-prompts.md - Select appropriate template
+3. docs/agent/agent-self-check.md - Verification protocol
 ```
 
 ### STEP 2: Create Decomposition Plan
 
-**Use appropriate template from agent/agent-prompts.md:**
+**Use appropriate template from docs/agent/agent-prompts.md:**
 
 - Template 1: Feature Task (CRUD operations)
 - Template 2: Refactoring Task (pattern changes)
@@ -233,7 +233,7 @@ After EVERY checkpoint:
 # 2. Code Quality (automated - ALL must pass)
 pnpm format && pnpm lint && pnpm type-check && pnpm test
 
-# 3. Self-Assessment (manual - see agent/agent-self-check.md)
+# 3. Self-Assessment (manual - see docs/agent/agent-self-check.md)
 - Scope adherence
 - Pattern consistency
 - Testing completeness (tests exist AND are meaningful)
@@ -296,7 +296,7 @@ export const createUserSchema = z.object({ ... });
 const result = createUserSchema.safeParse(formData);
 ```
 
-**→ For all patterns with examples, see `dev/patterns/index.md`**
+**→ For all patterns with examples, see `docs/dev/patterns/index.md`**
 
 ---
 
@@ -307,7 +307,7 @@ const result = createUserSchema.safeParse(formData);
 ❌ Cross-app imports → Use `packages/shared`
 ❌ Using `any` type → Proper types with Zod validation
 
-**→ For all anti-patterns with fixes, see `dev/anti-patterns/index.md`**
+**→ For all anti-patterns with fixes, see `docs/dev/anti-patterns/index.md`**
 
 ---
 
@@ -334,24 +334,26 @@ pnpm format && pnpm lint && pnpm type-check && pnpm test
 
 **Core Reference (always loaded):**
 
-- `CLAUDE.md` (this file) - Quick reference & routing
+- `AGENTS.md` (this file) - Quick reference & routing
 
 **Read When Needed:**
 
-| Doc                           | When to Read            | Purpose                     |
-| ----------------------------- | ----------------------- | --------------------------- |
-| agent/complex-tasks.md        | Medium/Complex tasks    | Decomposition strategies    |
-| agent/agent-prompts.md        | Medium/Complex tasks    | Task templates              |
-| agent/agent-self-check.md     | Every checkpoint        | Verification protocol       |
-| dev/architecture/index.md     | Understanding structure | Layer details               |
-| dev/principles/index.md       | Understanding "why"     | Design rationale            |
-| dev/workflows/index.md        | Step-by-step processes  | Development flows           |
-| dev/coding-standards/index.md | Code style questions    | TypeScript, naming, imports |
-| dev/patterns/index.md         | Implementation help     | Full code examples          |
-| dev/anti-patterns/index.md    | Avoiding mistakes       | What not to do              |
-| dev/testing/index.md          | Writing tests           | Test strategies             |
-| dev/performance/index.md      | Optimization            | Performance techniques      |
-| dev/use-cases/index.md        | Example prompts         | Common scenarios            |
+Under `/docs` folder.
+
+| Doc                                | When to Read            | Purpose                     |
+| ---------------------------------- | ----------------------- | --------------------------- |
+| docs/agent/complex-tasks.md        | Medium/Complex tasks    | Decomposition strategies    |
+| docs/agent/agent-prompts.md        | Medium/Complex tasks    | Task templates              |
+| docs/agent/agent-self-check.md     | Every checkpoint        | Verification protocol       |
+| docs/dev/architecture/index.md     | Understanding structure | Layer details               |
+| docs/dev/principles/index.md       | Understanding "why"     | Design rationale            |
+| docs/dev/workflows/index.md        | Step-by-step processes  | Development flows           |
+| docs/dev/coding-standards/index.md | Code style questions    | TypeScript, naming, imports |
+| docs/dev/patterns/index.md         | Implementation help     | Full code examples          |
+| docs/dev/anti-patterns/index.md    | Avoiding mistakes       | What not to do              |
+| docs/dev/testing/index.md          | Writing tests           | Test strategies             |
+| docs/dev/performance/index.md      | Optimization            | Performance techniques      |
+| docs/dev/use-cases/index.md        | Example prompts         | Common scenarios            |
 
 ---
 
@@ -392,5 +394,5 @@ pnpm format && pnpm lint && pnpm type-check && pnpm test
 
 ---
 
-_Last Updated: 2025-12-29_
+_Last Updated: 2025-12-30_
 _Philosophy: DRY • Typed • Tested • Framework-agnostic • Lean & production-ready_

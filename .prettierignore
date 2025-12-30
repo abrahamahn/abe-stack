@@ -14,3 +14,7 @@ out
 # lockfiles and pnpm store
 pnpm-lock.yaml
 .pnpm-store
+
+# agent config symlinks
+.claude/
+.gemini/
