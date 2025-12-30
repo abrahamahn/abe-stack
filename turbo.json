@@ -31,7 +31,6 @@
       "env": ["NODE_ENV"]
     },
     "test": {
-      "outputs": ["coverage/**"],
       "cache": true,
       "env": ["NODE_ENV", "DATABASE_URL"]
     },
