@@ -6,6 +6,7 @@ Write once, use everywhere. This package contains all shared UI components that 
 
 ## Table of Contents
 
+- [Documentation](#documentation)
 - [Overview](#overview)
 - [Architecture](#architecture)
 - [Directory Structure](#directory-structure)
@@ -17,6 +18,27 @@ Write once, use everywhere. This package contains all shared UI components that 
 - [Platform Adaptations](#platform-adaptations)
 - [Testing](#testing)
 - [Best Practices](#best-practices)
+
+---
+
+## Documentation
+
+**📚 [View Complete Component Documentation](./docs/README.md)**
+
+Comprehensive documentation for all 46 components including:
+
+- Detailed usage examples (basic to advanced)
+- Complete props reference with TypeScript types
+- Accessibility guidelines and ARIA patterns
+- Keyboard navigation tables
+- Do's and Don'ts
+- Related components and cross-references
+
+**Quick links:**
+
+- [Components](./docs/README.md#components) - Core UI components (8 components)
+- [Primitives](./docs/README.md#primitives) - Low-level primitives (32 components)
+- [Layouts](./docs/README.md#layouts) - Layout components (6 layouts)
 
 ---
 
