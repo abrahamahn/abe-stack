@@ -1,5 +1,5 @@
 {
-  "name": "@aahn/storage",
+  "name": "@abeahn/storage",
   "version": "1.1.0",
   "description": "Pluggable storage providers (local & S3) for ABE Stack",
   "main": "dist/index.js",

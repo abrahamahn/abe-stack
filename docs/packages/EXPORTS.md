@@ -2,21 +2,21 @@
 
 ## Overview
 
-All @aahn packages support granular imports for optimal tree-shaking and bundle size optimization. This guide covers all available export paths and their usage.
+All @abeahn packages support granular imports for optimal tree-shaking and bundle size optimization. This guide covers all available export paths and their usage.
 
 ## Table of Contents
 
-- [@aahn/ui](#abe-stackui)
-- [@aahn/shared](#abe-stackshared)
-- [@aahn/api-client](#abe-stackapi-client)
-- [@aahn/storage](#abe-stackstorage)
-- [@aahn/db](#abe-stackdb)
+- [@abeahn/ui](#abe-stackui)
+- [@abeahn/shared](#abe-stackshared)
+- [@abeahn/api-client](#abe-stackapi-client)
+- [@abeahn/storage](#abe-stackstorage)
+- [@abeahn/db](#abe-stackdb)
 - [Best Practices](#best-practices)
 - [TypeScript Configuration](#typescript-configuration)
 
 ---
 
-## @aahn/ui
+## @abeahn/ui
 
 The UI package provides the most benefit from granular imports due to its size (~120KB for full package).
 
@@ -25,7 +25,7 @@ The UI package provides the most benefit from granular imports due to its size (
 Import everything from the UI package:
 
 ```typescript
-import { Button, Card, useMediaQuery } from '@aahn/ui';
+import { Button, Card, useMediaQuery } from '@abeahn/ui';
 ```
 
 **Use when:** You need components from multiple categories.
@@ -37,7 +37,7 @@ Import only specific categories for better tree-shaking:
 #### Components
 
 ```typescript
-import { Button, Card, Input, Heading, Text, Image, PageContainer } from '@aahn/ui/components';
+import { Button, Card, Input, Heading, Text, Image, PageContainer } from '@abeahn/ui/components';
 ```
 
 **Includes:** 7 core components
@@ -55,7 +55,7 @@ import {
   Popover,
   Select,
   Table,
-} from '@aahn/ui/primitives';
+} from '@abeahn/ui/primitives';
 ```
 
 **Includes:** 35+ Radix UI primitives
@@ -71,7 +71,7 @@ import {
   AuthLayout,
   PageLayout,
   ResizablePanel,
-} from '@aahn/ui/layouts';
+} from '@abeahn/ui/layouts';
 ```
 
 **Includes:** 6 layout components
@@ -86,7 +86,7 @@ import {
   useDisclosure,
   useDebounce,
   useThrottle,
-} from '@aahn/ui/hooks';
+} from '@abeahn/ui/hooks';
 ```
 
 **Includes:** 9 custom hooks
@@ -95,7 +95,7 @@ import {
 #### Theme
 
 ```typescript
-import { colors, spacing, typography, motion } from '@aahn/ui/theme';
+import { colors, spacing, typography, motion } from '@abeahn/ui/theme';
 ```
 
 **Includes:** Design tokens and theme configuration
@@ -104,7 +104,7 @@ import { colors, spacing, typography, motion } from '@aahn/ui/theme';
 #### Utils
 
 ```typescript
-import { cn } from '@aahn/ui/utils';
+import { cn } from '@abeahn/ui/utils';
 ```
 
 **Includes:** Utility functions
@@ -112,42 +112,42 @@ import { cn } from '@aahn/ui/utils';
 
 ### Bundle Size Comparison
 
-| Import Style      | Estimated Bundle Size | Use Case                           |
-| ----------------- | --------------------- | ---------------------------------- |
-| Full (`@aahn/ui`) | ~120KB                | Importing from multiple categories |
-| Components only   | ~40KB                 | Only using core components         |
-| Primitives only   | ~60KB                 | Only using Radix primitives        |
-| Layouts only      | ~30KB                 | Only using layout components       |
-| Hooks only        | ~8KB                  | Only using custom hooks            |
-| Theme only        | ~4KB                  | Only using design tokens           |
-| Utils only        | ~2KB                  | Only using utilities               |
+| Import Style        | Estimated Bundle Size | Use Case                           |
+| ------------------- | --------------------- | ---------------------------------- |
+| Full (`@abeahn/ui`) | ~120KB                | Importing from multiple categories |
+| Components only     | ~40KB                 | Only using core components         |
+| Primitives only     | ~60KB                 | Only using Radix primitives        |
+| Layouts only        | ~30KB                 | Only using layout components       |
+| Hooks only          | ~8KB                  | Only using custom hooks            |
+| Theme only          | ~4KB                  | Only using design tokens           |
+| Utils only          | ~2KB                  | Only using utilities               |
 
 ### Example: Optimized Login Page
 
 **Before (v1.0.0 - still works):**
 
 ```typescript
-import { Button, Card, Input, useDisclosure } from '@aahn/ui';
+import { Button, Card, Input, useDisclosure } from '@abeahn/ui';
 // Bundle size: ~120KB (entire UI package)
 ```
 
 **After (v1.1.0 - recommended):**
 
 ```typescript
-import { Button, Card, Input } from '@aahn/ui/components';
-import { useDisclosure } from '@aahn/ui/hooks';
+import { Button, Card, Input } from '@abeahn/ui/components';
+import { useDisclosure } from '@abeahn/ui/hooks';
 // Bundle size: ~48KB (components + hooks only)
 // Savings: 60%
 ```
 
 ---
 
-## @aahn/shared
+## @abeahn/shared
 
 ### Main Export (All Utilities)
 
 ```typescript
-import { apiContract, tokenStore, type ServerEnv } from '@aahn/shared';
+import { apiContract, tokenStore, type ServerEnv } from '@abeahn/shared';
 ```
 
 ### Granular Exports
@@ -157,8 +157,8 @@ import { apiContract, tokenStore, type ServerEnv } from '@aahn/shared';
 Import only API contracts:
 
 ```typescript
-import { apiContract } from '@aahn/shared/contracts';
-import type { LoginRequest, AuthResponse } from '@aahn/shared/contracts';
+import { apiContract } from '@abeahn/shared/contracts';
+import type { LoginRequest, AuthResponse } from '@abeahn/shared/contracts';
 ```
 
 **Includes:** ts-rest API contracts for authentication, users, etc.
@@ -168,7 +168,7 @@ import type { LoginRequest, AuthResponse } from '@aahn/shared/contracts';
 Import only utility functions:
 
 ```typescript
-import { tokenStore } from '@aahn/shared/utils';
+import { tokenStore } from '@abeahn/shared/utils';
 ```
 
 **Includes:** Token storage, helpers
@@ -178,7 +178,7 @@ import { tokenStore } from '@aahn/shared/utils';
 Import only environment validation:
 
 ```typescript
-import { clientEnvSchema, serverEnvSchema, type ServerEnv } from '@aahn/shared/env';
+import { clientEnvSchema, serverEnvSchema, type ServerEnv } from '@abeahn/shared/env';
 ```
 
 **Includes:** Zod schemas for env validation
@@ -188,7 +188,7 @@ import { clientEnvSchema, serverEnvSchema, type ServerEnv } from '@aahn/shared/e
 Import storage configuration helper:
 
 ```typescript
-import { toStorageConfig } from '@aahn/shared/storageConfig';
+import { toStorageConfig } from '@abeahn/shared/storageConfig';
 ```
 
 **Includes:** Convert env to storage config
@@ -198,26 +198,26 @@ import { toStorageConfig } from '@aahn/shared/storageConfig';
 **Server-side (needs contracts + env):**
 
 ```typescript
-import { apiContract } from '@aahn/shared/contracts';
-import { serverEnvSchema } from '@aahn/shared/env';
-import { toStorageConfig } from '@aahn/shared/storageConfig';
+import { apiContract } from '@abeahn/shared/contracts';
+import { serverEnvSchema } from '@abeahn/shared/env';
+import { toStorageConfig } from '@abeahn/shared/storageConfig';
 ```
 
 **Client-side (needs contracts + utils):**
 
 ```typescript
-import { apiContract } from '@aahn/shared/contracts';
-import { tokenStore } from '@aahn/shared/utils';
+import { apiContract } from '@abeahn/shared/contracts';
+import { tokenStore } from '@abeahn/shared/utils';
 ```
 
 ---
 
-## @aahn/api-client
+## @abeahn/api-client
 
 ### Main Export (All Features)
 
 ```typescript
-import { createApiClient, type ApiClient } from '@aahn/api-client';
+import { createApiClient, type ApiClient } from '@abeahn/api-client';
 ```
 
 ### Granular Exports
@@ -227,7 +227,7 @@ import { createApiClient, type ApiClient } from '@aahn/api-client';
 Import only TypeScript types:
 
 ```typescript
-import type { ApiClient, ApiClientConfig } from '@aahn/api-client/types';
+import type { ApiClient, ApiClientConfig } from '@abeahn/api-client/types';
 ```
 
 **Use when:** You only need types for declarations.
@@ -237,7 +237,7 @@ import type { ApiClient, ApiClientConfig } from '@aahn/api-client/types';
 Import only the API client factory:
 
 ```typescript
-import { createApiClient } from '@aahn/api-client/client';
+import { createApiClient } from '@abeahn/api-client/client';
 ```
 
 **Use when:** You don't need React Query integration.
@@ -248,7 +248,7 @@ import { createApiClient } from '@aahn/api-client/client';
 Import only React Query integration:
 
 ```typescript
-import { useApiQuery, useApiMutation } from '@aahn/api-client/react-query';
+import { useApiQuery, useApiMutation } from '@abeahn/api-client/react-query';
 ```
 
 **Use when:** You only need React Query hooks.
@@ -259,22 +259,22 @@ If you're using the API client in a Node.js script or non-React environment:
 
 ```typescript
 // Before: Bundles React Query unnecessarily
-import { createApiClient } from '@aahn/api-client';
+import { createApiClient } from '@abeahn/api-client';
 
 // After: Only bundles ts-rest client
-import { createApiClient } from '@aahn/api-client/client';
+import { createApiClient } from '@abeahn/api-client/client';
 ```
 
 ---
 
-## @aahn/storage
+## @abeahn/storage
 
 The storage package benefits significantly from granular imports to avoid bundling unused providers.
 
 ### Main Export (All Providers)
 
 ```typescript
-import { createStorage, LocalStorageProvider, S3StorageProvider } from '@aahn/storage';
+import { createStorage, LocalStorageProvider, S3StorageProvider } from '@abeahn/storage';
 ```
 
 **Warning:** Imports AWS SDK (~300KB) even if you only use local storage.
@@ -286,7 +286,7 @@ import { createStorage, LocalStorageProvider, S3StorageProvider } from '@aahn/st
 Import only TypeScript interfaces:
 
 ```typescript
-import type { StorageProvider, StorageConfig } from '@aahn/storage/types';
+import type { StorageProvider, StorageConfig } from '@abeahn/storage/types';
 ```
 
 #### Local Storage Provider
@@ -294,7 +294,7 @@ import type { StorageProvider, StorageConfig } from '@aahn/storage/types';
 Import only local file system provider:
 
 ```typescript
-import { LocalStorageProvider } from '@aahn/storage/local';
+import { LocalStorageProvider } from '@abeahn/storage/local';
 ```
 
 **Bundle size:** ~5KB
@@ -305,7 +305,7 @@ import { LocalStorageProvider } from '@aahn/storage/local';
 Import only AWS S3 provider:
 
 ```typescript
-import { S3StorageProvider } from '@aahn/storage/s3';
+import { S3StorageProvider } from '@abeahn/storage/s3';
 ```
 
 **Bundle size:** ~305KB (includes AWS SDK)
@@ -316,7 +316,7 @@ import { S3StorageProvider } from '@aahn/storage/s3';
 Import storage factory function:
 
 ```typescript
-import { createStorage } from '@aahn/storage/factory';
+import { createStorage } from '@abeahn/storage/factory';
 ```
 
 ### Critical Example: Browser vs Server
@@ -325,37 +325,37 @@ import { createStorage } from '@aahn/storage/factory';
 
 ```typescript
 // WRONG: Bundles AWS SDK in browser (~300KB wasted)
-import { LocalStorageProvider } from '@aahn/storage';
+import { LocalStorageProvider } from '@abeahn/storage';
 
 // CORRECT: Only bundles local provider
-import { LocalStorageProvider } from '@aahn/storage/local';
+import { LocalStorageProvider } from '@abeahn/storage/local';
 ```
 
 **Server (Node.js) - Both providers OK:**
 
 ```typescript
 // Server can import both efficiently
-import { S3StorageProvider } from '@aahn/storage/s3';
-import { LocalStorageProvider } from '@aahn/storage/local';
+import { S3StorageProvider } from '@abeahn/storage/s3';
+import { LocalStorageProvider } from '@abeahn/storage/local';
 ```
 
 ### Bundle Size Impact
 
-| Import Style           | Bundle Size | Use Case                    |
-| ---------------------- | ----------- | --------------------------- |
-| Full (`@aahn/storage`) | ~310KB      | Server using both providers |
-| Local only (`/local`)  | ~5KB        | Local file storage only     |
-| S3 only (`/s3`)        | ~305KB      | S3 cloud storage only       |
-| Types only (`/types`)  | <1KB        | Type definitions only       |
+| Import Style             | Bundle Size | Use Case                    |
+| ------------------------ | ----------- | --------------------------- |
+| Full (`@abeahn/storage`) | ~310KB      | Server using both providers |
+| Local only (`/local`)    | ~5KB        | Local file storage only     |
+| S3 only (`/s3`)          | ~305KB      | S3 cloud storage only       |
+| Types only (`/types`)    | <1KB        | Type definitions only       |
 
 ---
 
-## @aahn/db
+## @abeahn/db
 
 ### Main Export (All Features)
 
 ```typescript
-import { users, createDbClient, buildConnectionString } from '@aahn/db';
+import { users, createDbClient, buildConnectionString } from '@abeahn/db';
 ```
 
 ### Granular Exports
@@ -365,7 +365,7 @@ import { users, createDbClient, buildConnectionString } from '@aahn/db';
 Import only Drizzle schema definitions:
 
 ```typescript
-import { users, sessions, schema } from '@aahn/db/schema';
+import { users, sessions, schema } from '@abeahn/db/schema';
 ```
 
 **Use when:** You only need table schemas for types or queries.
@@ -375,7 +375,7 @@ import { users, sessions, schema } from '@aahn/db/schema';
 Import only database client utilities:
 
 ```typescript
-import { createDbClient, buildConnectionString } from '@aahn/db/client';
+import { createDbClient, buildConnectionString } from '@abeahn/db/client';
 ```
 
 **Use when:** You only need connection utilities.
@@ -386,10 +386,10 @@ Useful for applications that only need type definitions:
 
 ```typescript
 // Before: Imports client and connection utilities
-import { users } from '@aahn/db';
+import { users } from '@abeahn/db';
 
 // After: Only imports schema
-import { users } from '@aahn/db/schema';
+import { users } from '@abeahn/db/schema';
 ```
 
 ---
@@ -402,10 +402,10 @@ When you need multiple components from the same category:
 
 ```typescript
 // Good: Import from category
-import { Button, Card, Input } from '@aahn/ui/components';
+import { Button, Card, Input } from '@abeahn/ui/components';
 
 // Avoid: Import from main when only using one category
-import { Button, Card, Input } from '@aahn/ui';
+import { Button, Card, Input } from '@abeahn/ui';
 ```
 
 ### 2. Avoid Mixing Main and Secondary Imports
@@ -414,12 +414,12 @@ For consistency and clarity, don't mix import styles for the same package:
 
 ```typescript
 // Bad: Mixing import styles
-import { Button } from '@aahn/ui';
-import { useMediaQuery } from '@aahn/ui/hooks';
+import { Button } from '@abeahn/ui';
+import { useMediaQuery } from '@abeahn/ui/hooks';
 
 // Good: Consistent style
-import { Button } from '@aahn/ui/components';
-import { useMediaQuery } from '@aahn/ui/hooks';
+import { Button } from '@abeahn/ui/components';
+import { useMediaQuery } from '@abeahn/ui/hooks';
 ```
 
 ### 3. Storage Provider Imports Are Critical
@@ -428,7 +428,7 @@ Always use granular imports for storage providers to avoid bundling AWS SDK unne
 
 ```typescript
 // Critical for browser apps
-import { LocalStorageProvider } from '@aahn/storage/local';
+import { LocalStorageProvider } from '@abeahn/storage/local';
 ```
 
 ### 4. Type-Only Imports
@@ -436,8 +436,8 @@ import { LocalStorageProvider } from '@aahn/storage/local';
 Use TypeScript's `type` keyword for type-only imports:
 
 ```typescript
-import type { ApiClient } from '@aahn/api-client/types';
-import type { StorageProvider } from '@aahn/storage/types';
+import type { ApiClient } from '@abeahn/api-client/types';
+import type { StorageProvider } from '@abeahn/storage/types';
 ```
 
 ### 5. Import What You Need
@@ -446,10 +446,10 @@ The more specific your imports, the better the tree-shaking:
 
 ```typescript
 // Less specific: Imports entire category
-import * from '@aahn/ui/components';
+import * from '@abeahn/ui/components';
 
 // More specific: Imports only what you need
-import { Button, Card } from '@aahn/ui/components';
+import { Button, Card } from '@abeahn/ui/components';
 ```
 
 ---
@@ -475,7 +475,7 @@ Ensure your `tsconfig.json` supports package exports:
 
 ### Troubleshooting
 
-If you see errors like `Cannot find module '@aahn/ui/components'`:
+If you see errors like `Cannot find module '@abeahn/ui/components'`:
 
 1. Check TypeScript version: `tsc --version` (must be 4.7+)
 2. Verify `moduleResolution` in tsconfig.json

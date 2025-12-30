@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to @aahn/db will be documented in this file.
+All notable changes to @abeahn/db will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -12,15 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Secondary export paths for granular imports:
-  - `@aahn/db/schema` - Import only Drizzle schema definitions
-  - `@aahn/db/client` - Import only database client factory
+  - `@abeahn/db/schema` - Import only Drizzle schema definitions
+  - `@abeahn/db/client` - Import only database client factory
 - Explicit `exports` field in package.json for better module resolution
 - Publishing configuration for npm
 - Repository and package metadata
 
 ### Changed
 
-- Main export `@aahn/db` continues to work as before (100% backward compatible)
+- Main export `@abeahn/db` continues to work as before (100% backward compatible)
 
 ### Migration Guide
 
@@ -29,14 +29,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Before (v1.0.0 style - still works):**
 
 ```typescript
-import { users, createDbClient, buildConnectionString } from '@aahn/db';
+import { users, createDbClient, buildConnectionString } from '@abeahn/db';
 ```
 
 **After (v1.1.0 style - optional for granular imports):**
 
 ```typescript
-import { users } from '@aahn/db/schema';
-import { createDbClient, buildConnectionString } from '@aahn/db/client';
+import { users } from '@abeahn/db/schema';
+import { createDbClient, buildConnectionString } from '@abeahn/db/client';
 ```
 
 **Benefits:**
@@ -49,7 +49,7 @@ import { createDbClient, buildConnectionString } from '@aahn/db/client';
 
 ### Added
 
-- Initial release of @aahn/db
+- Initial release of @abeahn/db
 - Drizzle ORM integration with PostgreSQL
 - Database schema definitions (users, sessions, etc.)
 - Database client factory with connection pooling

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Version 1.1.0 adds granular export paths to all @aahn packages for better tree-shaking and bundle optimization.
+Version 1.1.0 adds granular export paths to all @abeahn packages for better tree-shaking and bundle optimization.
 
 **Important:** This release has **NO BREAKING CHANGES**. All existing code continues to work exactly as before.
 
@@ -19,13 +19,13 @@ Version 1.1.0 adds granular export paths to all @aahn packages for better tree-s
 
 All five publishable packages now support granular imports:
 
-| Package          | New Exports                                                            | Primary Benefit                               |
-| ---------------- | ---------------------------------------------------------------------- | --------------------------------------------- |
-| @aahn/ui         | `/components`, `/primitives`, `/layouts`, `/hooks`, `/theme`, `/utils` | 20-60% bundle size reduction                  |
-| @aahn/shared     | `/contracts`, `/utils`, `/env`                                         | Better separation of client/server code       |
-| @aahn/api-client | `/types`, `/client`, `/react-query`                                    | Exclude React Query in non-React environments |
-| @aahn/storage    | `/types`, `/local`, `/s3`, `/factory`                                  | Avoid bundling AWS SDK in browser apps        |
-| @aahn/db         | `/schema`, `/client`                                                   | Import schema without client dependencies     |
+| Package            | New Exports                                                            | Primary Benefit                               |
+| ------------------ | ---------------------------------------------------------------------- | --------------------------------------------- |
+| @abeahn/ui         | `/components`, `/primitives`, `/layouts`, `/hooks`, `/theme`, `/utils` | 20-60% bundle size reduction                  |
+| @abeahn/shared     | `/contracts`, `/utils`, `/env`                                         | Better separation of client/server code       |
+| @abeahn/api-client | `/types`, `/client`, `/react-query`                                    | Exclude React Query in non-React environments |
+| @abeahn/storage    | `/types`, `/local`, `/s3`, `/factory`                                  | Avoid bundling AWS SDK in browser apps        |
+| @abeahn/db         | `/schema`, `/client`                                                   | Import schema without client dependencies     |
 
 ---
 
@@ -37,9 +37,9 @@ All five publishable packages now support granular imports:
 
 ```typescript
 // v1.0.0 style - still works perfectly in v1.1.0
-import { Button, Card } from '@aahn/ui';
-import { apiContract } from '@aahn/shared';
-import { createApiClient } from '@aahn/api-client';
+import { Button, Card } from '@abeahn/ui';
+import { apiContract } from '@abeahn/shared';
+import { createApiClient } from '@abeahn/api-client';
 ```
 
 **When to use:** Existing code that works well, no performance issues.
@@ -63,7 +63,7 @@ Update all imports to use granular exports:
 
 ## Package-Specific Migration
 
-### @aahn/ui
+### @abeahn/ui
 
 **Largest impact** - UI package is ~120KB, optimizations can save 20-60%.
 
@@ -71,10 +71,10 @@ Update all imports to use granular exports:
 
 ```typescript
 // Before (v1.0.0)
-import { Button, Card, Input } from '@aahn/ui';
+import { Button, Card, Input } from '@abeahn/ui';
 
 // After (v1.1.0 - recommended)
-import { Button, Card, Input } from '@aahn/ui/components';
+import { Button, Card, Input } from '@abeahn/ui/components';
 ```
 
 **Savings:** ~80KB if only using components (no primitives/layouts)
@@ -83,10 +83,10 @@ import { Button, Card, Input } from '@aahn/ui/components';
 
 ```typescript
 // Before
-import { useMediaQuery, useLocalStorage } from '@aahn/ui';
+import { useMediaQuery, useLocalStorage } from '@abeahn/ui';
 
 // After
-import { useMediaQuery, useLocalStorage } from '@aahn/ui/hooks';
+import { useMediaQuery, useLocalStorage } from '@abeahn/ui/hooks';
 ```
 
 **Savings:** ~112KB if only using hooks (no components)
@@ -97,14 +97,14 @@ If you need components AND hooks:
 
 ```typescript
 // Before
-import { Button, useMediaQuery } from '@aahn/ui';
+import { Button, useMediaQuery } from '@abeahn/ui';
 
 // After (option 1: multiple imports)
-import { Button } from '@aahn/ui/components';
-import { useMediaQuery } from '@aahn/ui/hooks';
+import { Button } from '@abeahn/ui/components';
+import { useMediaQuery } from '@abeahn/ui/hooks';
 
 // After (option 2: keep main import if using multiple categories)
-import { Button, useMediaQuery } from '@aahn/ui';
+import { Button, useMediaQuery } from '@abeahn/ui';
 ```
 
 **Recommendation:** If importing from 3+ categories, use main import. Otherwise, use category imports.
@@ -113,45 +113,45 @@ import { Button, useMediaQuery } from '@aahn/ui';
 
 ```typescript
 // Before (v1.0.0) - ~120KB
-import { Button, Card, Input, Heading, Text, useDisclosure } from '@aahn/ui';
+import { Button, Card, Input, Heading, Text, useDisclosure } from '@abeahn/ui';
 
 // After (v1.1.0) - ~48KB
-import { Button, Card, Input, Heading, Text } from '@aahn/ui/components';
-import { useDisclosure } from '@aahn/ui/hooks';
+import { Button, Card, Input, Heading, Text } from '@abeahn/ui/components';
+import { useDisclosure } from '@abeahn/ui/hooks';
 
 // Savings: 72KB (60%)
 ```
 
-### @aahn/shared
+### @abeahn/shared
 
 #### API Contracts
 
 ```typescript
 // Before
-import { apiContract } from '@aahn/shared';
+import { apiContract } from '@abeahn/shared';
 
 // After
-import { apiContract } from '@aahn/shared/contracts';
+import { apiContract } from '@abeahn/shared/contracts';
 ```
 
 #### Environment Validation
 
 ```typescript
 // Before
-import { clientEnvSchema, serverEnvSchema } from '@aahn/shared';
+import { clientEnvSchema, serverEnvSchema } from '@abeahn/shared';
 
 // After
-import { clientEnvSchema, serverEnvSchema } from '@aahn/shared/env';
+import { clientEnvSchema, serverEnvSchema } from '@abeahn/shared/env';
 ```
 
 #### Token Storage
 
 ```typescript
 // Before
-import { tokenStore } from '@aahn/shared';
+import { tokenStore } from '@abeahn/shared';
 
 // After
-import { tokenStore } from '@aahn/shared/utils';
+import { tokenStore } from '@abeahn/shared/utils';
 ```
 
 #### Storage Config (No Change)
@@ -160,10 +160,10 @@ Already has secondary export:
 
 ```typescript
 // v1.0.0 and v1.1.0 - same
-import { toStorageConfig } from '@aahn/shared/storageConfig';
+import { toStorageConfig } from '@abeahn/shared/storageConfig';
 ```
 
-### @aahn/api-client
+### @abeahn/api-client
 
 #### Client Only (No React Query)
 
@@ -171,10 +171,10 @@ import { toStorageConfig } from '@aahn/shared/storageConfig';
 
 ```typescript
 // Before - bundles React Query unnecessarily
-import { createApiClient } from '@aahn/api-client';
+import { createApiClient } from '@abeahn/api-client';
 
 // After - excludes @tanstack/react-query
-import { createApiClient } from '@aahn/api-client/client';
+import { createApiClient } from '@abeahn/api-client/client';
 ```
 
 **Savings:** ~50KB (React Query excluded)
@@ -183,23 +183,23 @@ import { createApiClient } from '@aahn/api-client/client';
 
 ```typescript
 // Before
-import { useApiQuery, useApiMutation } from '@aahn/api-client';
+import { useApiQuery, useApiMutation } from '@abeahn/api-client';
 
 // After
-import { useApiQuery, useApiMutation } from '@aahn/api-client/react-query';
+import { useApiQuery, useApiMutation } from '@abeahn/api-client/react-query';
 ```
 
 #### Type-Only Imports
 
 ```typescript
 // Before
-import { type ApiClient } from '@aahn/api-client';
+import { type ApiClient } from '@abeahn/api-client';
 
 // After
-import type { ApiClient } from '@aahn/api-client/types';
+import type { ApiClient } from '@abeahn/api-client/types';
 ```
 
-### @aahn/storage
+### @abeahn/storage
 
 **CRITICAL MIGRATION** - Avoids bundling AWS SDK (~300KB) in browser apps.
 
@@ -207,10 +207,10 @@ import type { ApiClient } from '@aahn/api-client/types';
 
 ```typescript
 // Before - WRONG: Bundles AWS SDK in browser
-import { LocalStorageProvider } from '@aahn/storage';
+import { LocalStorageProvider } from '@abeahn/storage';
 
 // After - CORRECT: Only bundles local provider
-import { LocalStorageProvider } from '@aahn/storage/local';
+import { LocalStorageProvider } from '@abeahn/storage/local';
 ```
 
 **Savings:** ~305KB (AWS SDK excluded)
@@ -223,33 +223,33 @@ Server can use both providers, but granular imports are still recommended:
 
 ```typescript
 // Before
-import { createStorage, S3StorageProvider } from '@aahn/storage';
+import { createStorage, S3StorageProvider } from '@abeahn/storage';
 
 // After (recommended)
-import { createStorage } from '@aahn/storage/factory';
-import { S3StorageProvider } from '@aahn/storage/s3';
+import { createStorage } from '@abeahn/storage/factory';
+import { S3StorageProvider } from '@abeahn/storage/s3';
 ```
 
 #### Types Only
 
 ```typescript
 // Before
-import { type StorageProvider } from '@aahn/storage';
+import { type StorageProvider } from '@abeahn/storage';
 
 // After
-import type { StorageProvider } from '@aahn/storage/types';
+import type { StorageProvider } from '@abeahn/storage/types';
 ```
 
-### @aahn/db
+### @abeahn/db
 
 #### Schema Only
 
 ```typescript
 // Before
-import { users, sessions } from '@aahn/db';
+import { users, sessions } from '@abeahn/db';
 
 // After
-import { users, sessions } from '@aahn/db/schema';
+import { users, sessions } from '@abeahn/db/schema';
 ```
 
 **Use when:** Only need table schemas for types or queries.
@@ -258,10 +258,10 @@ import { users, sessions } from '@aahn/db/schema';
 
 ```typescript
 // Before
-import { createDbClient, buildConnectionString } from '@aahn/db';
+import { createDbClient, buildConnectionString } from '@abeahn/db';
 
 // After
-import { createDbClient, buildConnectionString } from '@aahn/db/client';
+import { createDbClient, buildConnectionString } from '@abeahn/db/client';
 ```
 
 ---
@@ -274,14 +274,14 @@ Real-world examples from typical applications:
 
 ```typescript
 // Before: ~150KB total
-import { Button, Input } from '@aahn/ui';
-import { apiContract } from '@aahn/shared';
-import { createApiClient } from '@aahn/api-client';
+import { Button, Input } from '@abeahn/ui';
+import { apiContract } from '@abeahn/shared';
+import { createApiClient } from '@abeahn/api-client';
 
 // After: ~60KB total
-import { Button, Input } from '@aahn/ui/components';
-import { apiContract } from '@aahn/shared/contracts';
-import { createApiClient } from '@aahn/api-client/client';
+import { Button, Input } from '@abeahn/ui/components';
+import { apiContract } from '@abeahn/shared/contracts';
+import { createApiClient } from '@abeahn/api-client/client';
 
 // Savings: 90KB (60%)
 ```
@@ -290,14 +290,14 @@ import { createApiClient } from '@aahn/api-client/client';
 
 ```typescript
 // Before: ~250KB total
-import { Button, Card, useMediaQuery, colors } from '@aahn/ui';
-import { LocalStorageProvider } from '@aahn/storage';
+import { Button, Card, useMediaQuery, colors } from '@abeahn/ui';
+import { LocalStorageProvider } from '@abeahn/storage';
 
 // After: ~55KB total
-import { Button, Card } from '@aahn/ui/components';
-import { useMediaQuery } from '@aahn/ui/hooks';
-import { colors } from '@aahn/ui/theme';
-import { LocalStorageProvider } from '@aahn/storage/local';
+import { Button, Card } from '@abeahn/ui/components';
+import { useMediaQuery } from '@abeahn/ui/hooks';
+import { colors } from '@abeahn/ui/theme';
+import { LocalStorageProvider } from '@abeahn/storage/local';
 
 // Savings: 195KB (78%)
 ```
@@ -331,15 +331,15 @@ Use your editor's find/replace to update imports:
 **Pattern 1: UI Components**
 
 ```
-Find: from ['"]@aahn/ui['"]
-Replace: from '@aahn/ui/components'
+Find: from ['"]@abeahn/ui['"]
+Replace: from '@abeahn/ui/components'
 ```
 
 **Pattern 2: Storage (Browser)**
 
 ```
-Find: from ['"]@aahn/storage['"]
-Replace: from '@aahn/storage/local'
+Find: from ['"]@abeahn/storage['"]
+Replace: from '@abeahn/storage/local'
 ```
 
 **Note:** Manual review recommended - automated replacement may not handle mixed imports correctly.
@@ -350,7 +350,7 @@ A codemod for automated migration is planned but not yet available:
 
 ```bash
 # Coming soon
-npx @aahn/codemod migrate-imports
+npx @abeahn/codemod migrate-imports
 ```
 
 ---
@@ -389,7 +389,7 @@ pnpm vite-bundle-visualizer  # if installed
 
 ## Common Issues
 
-### Issue: "Cannot find module '@aahn/ui/components'"
+### Issue: "Cannot find module '@abeahn/ui/components'"
 
 **Cause:** TypeScript version too old or incorrect moduleResolution
 
@@ -448,7 +448,7 @@ No code changes needed - just use main exports:
 
 ```typescript
 // This works in both v1.0.0 and v1.1.0
-import { Button } from '@aahn/ui';
+import { Button } from '@abeahn/ui';
 ```
 
 ### Package Rollback
@@ -456,8 +456,8 @@ import { Button } from '@aahn/ui';
 To downgrade packages (not recommended):
 
 ```bash
-pnpm add @aahn/ui@1.0.0
-pnpm add @aahn/shared@1.0.0
+pnpm add @abeahn/ui@1.0.0
+pnpm add @abeahn/shared@1.0.0
 # ... etc
 ```
 
@@ -468,8 +468,8 @@ pnpm add @aahn/shared@1.0.0
 ### For New Code
 
 - Always use granular imports
-- Especially critical for `@aahn/storage` in browser apps
-- Use category imports for `@aahn/ui`
+- Especially critical for `@abeahn/storage` in browser apps
+- Use category imports for `@abeahn/ui`
 
 ### For Existing Code
 
@@ -479,11 +479,11 @@ pnpm add @aahn/shared@1.0.0
 
 ### For Libraries
 
-If you're building a library that depends on @aahn packages:
+If you're building a library that depends on @abeahn packages:
 
 - Use granular imports to avoid bundling unnecessary code
 - Re-export only what your library needs
-- Document which @aahn packages users need to install
+- Document which @abeahn packages users need to install
 
 ---
 

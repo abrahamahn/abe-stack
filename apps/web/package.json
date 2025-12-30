@@ -13,9 +13,9 @@
     "lint": "eslint src --ext ts,tsx"
   },
   "dependencies": {
-    "@aahn/api-client": "workspace:*",
-    "@aahn/shared": "workspace:*",
-    "@aahn/ui": "workspace:*",
+    "@abeahn/api-client": "workspace:*",
+    "@abeahn/shared": "workspace:*",
+    "@abeahn/ui": "workspace:*",
     "@ts-rest/react-query": "^3.52.1",
     "@tanstack/react-query": "^5.59.9",
     "nanoid": "^5.0.7",

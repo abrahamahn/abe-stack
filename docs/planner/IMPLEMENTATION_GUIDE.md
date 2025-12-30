@@ -202,7 +202,7 @@ cd packages/realtime
 ```json
 // packages/realtime/package.json (NEW FILE)
 {
-  "name": "@aahn/realtime",
+  "name": "@abeahn/realtime",
   "version": "0.1.0",
   "type": "module",
   "main": "./src/index.ts",
@@ -583,9 +583,9 @@ export const realtimeContract = c.router({
 // apps/server/src/routes/realtime-impl.ts (NEW FILE)
 import { initServer } from '@ts-rest/fastify';
 import { realtimeContract } from './realtime';
-import { db } from '@aahn/db';
-import { applyOperation } from '@aahn/realtime';
-import type { Operation, RecordMap } from '@aahn/realtime';
+import { db } from '@abeahn/db';
+import { applyOperation } from '@abeahn/realtime';
+import type { Operation, RecordMap } from '@abeahn/realtime';
 
 const s = initServer();
 
@@ -686,7 +686,7 @@ async function loadRecords(operations: Operation[]): Promise<RecordMap> {
     let records: any[] = [];
 
     // Example: Dynamically load based on table name
-    const schema = await import(`@aahn/db/schema`);
+    const schema = await import(`@abeahn/db/schema`);
     const tableSchema = schema[table];
 
     if (tableSchema) {
@@ -708,7 +708,7 @@ async function loadRecords(operations: Operation[]): Promise<RecordMap> {
 async function saveRecords(recordMap: RecordMap): Promise<void> {
   for (const [table, records] of Object.entries(recordMap)) {
     for (const record of Object.values(records)) {
-      const schema = await import(`@aahn/db/schema`);
+      const schema = await import(`@abeahn/db/schema`);
       const tableSchema = schema[table];
 
       if (tableSchema) {
@@ -743,7 +743,7 @@ app.register(realtimeRouter);
 
 ```bash
 # Start server
-pnpm --filter @aahn/server dev
+pnpm --filter @abeahn/server dev
 
 # Test write endpoint
 curl -X POST http://localhost:8080/api/realtime/write \
@@ -835,7 +835,7 @@ export class WebSocketPubSubServer {
 
 ```typescript
 // apps/server/src/index.ts (MODIFY)
-import { WebSocketPubSubServer } from '@aahn/realtime';
+import { WebSocketPubSubServer } from '@abeahn/realtime';
 
 const server = app.listen(port, () => {
   console.log(`Server running on port ${port}`);
@@ -956,7 +956,7 @@ export class WebSocketPubSubClient {
 ```typescript
 // apps/web/src/contexts/RealtimeContext.tsx (NEW FILE)
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { RecordCache, WebSocketPubSubClient } from '@aahn/realtime'
+import { RecordCache, WebSocketPubSubClient } from '@abeahn/realtime'
 
 type RealtimeContextValue = {
   recordCache: RecordCache

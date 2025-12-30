@@ -1,6 +1,6 @@
 # Publishing Guide
 
-This guide covers the process for publishing @aahn packages to npm.
+This guide covers the process for publishing @abeahn packages to npm.
 
 ## Table of Contents
 
@@ -105,7 +105,7 @@ Before publishing any package, complete all items in this checklist:
   npm whoami
   ```
 
-- [ ] Have publish permissions for @aahn organization
+- [ ] Have publish permissions for @abeahn organization
 - [ ] 2FA enabled for npm account (required for publishing)
 
 ---
@@ -150,11 +150,11 @@ pnpm publish --access public
 
 If you must publish individually, follow this order to respect dependencies:
 
-1. `@aahn/storage` (no internal dependencies)
-2. `@aahn/shared` (depends on storage)
-3. `@aahn/db` (no internal dependencies)
-4. `@aahn/api-client` (depends on shared)
-5. `@aahn/ui` (depends on shared)
+1. `@abeahn/storage` (no internal dependencies)
+2. `@abeahn/shared` (depends on storage)
+3. `@abeahn/db` (no internal dependencies)
+4. `@abeahn/api-client` (depends on shared)
+5. `@abeahn/ui` (depends on shared)
 
 ### What Gets Published?
 
@@ -216,11 +216,11 @@ Example release notes:
 
 All packages bumped to v1.1.0:
 
-- @aahn/ui
-- @aahn/shared
-- @aahn/api-client
-- @aahn/storage
-- @aahn/db
+- @abeahn/ui
+- @abeahn/shared
+- @abeahn/api-client
+- @abeahn/storage
+- @abeahn/db
 
 ## 📖 Documentation
 
@@ -231,7 +231,7 @@ All packages bumped to v1.1.0:
 ## 🔗 Links
 
 - [Full Changelog](./packages/ui/CHANGELOG.md)
-- [npm Package](https://www.npmjs.com/package/@aahn/ui)
+- [npm Package](https://www.npmjs.com/package/@abeahn/ui)
 ```
 
 ### 3. Verification
@@ -240,18 +240,18 @@ Verify packages are published correctly:
 
 ```bash
 # Check package on npm
-npm view @aahn/ui version
-npm view @aahn/shared version
-npm view @aahn/api-client version
-npm view @aahn/storage version
-npm view @aahn/db version
+npm view @abeahn/ui version
+npm view @abeahn/shared version
+npm view @abeahn/api-client version
+npm view @abeahn/storage version
+npm view @abeahn/db version
 
 # Test installation in a fresh project
 mkdir /tmp/test-install
 cd /tmp/test-install
 npm init -y
-npm install @aahn/ui@latest
-npm install @aahn/shared@latest
+npm install @abeahn/ui@latest
+npm install @abeahn/shared@latest
 # Verify imports work
 ```
 
@@ -275,7 +275,7 @@ Announce the release:
 Example announcement:
 
 ```
-🎉 @aahn v1.1.0 is now available!
+🎉 @abeahn v1.1.0 is now available!
 
 ✨ New: Granular imports for better tree-shaking
 📦 Potential 20-60% bundle size reduction
@@ -283,7 +283,7 @@ Example announcement:
 
 Learn more: https://github.com/abrahamahn/abe-stack
 
-npm install @aahn/ui@latest
+npm install @abeahn/ui@latest
 ```
 
 ---
@@ -296,10 +296,10 @@ npm install @aahn/ui@latest
 
 ```bash
 # Unpublish specific version
-npm unpublish @aahn/ui@1.1.0
+npm unpublish @abeahn/ui@1.1.0
 
 # Unpublish all versions (DANGEROUS - requires justification)
-npm unpublish @aahn/ui --force
+npm unpublish @abeahn/ui --force
 ```
 
 **When to unpublish:**
@@ -360,7 +360,7 @@ For critical bugs in production:
 To mark a version as deprecated:
 
 ```bash
-npm deprecate @aahn/ui@1.1.0 "Security vulnerability, please upgrade to 1.1.1"
+npm deprecate @abeahn/ui@1.1.0 "Security vulnerability, please upgrade to 1.1.1"
 ```
 
 ---
@@ -379,7 +379,7 @@ npm login
 npm whoami
 
 # Verify org membership
-npm org ls @aahn
+npm org ls @abeahn
 ```
 
 ### Issue: "Version already exists"
@@ -388,7 +388,7 @@ npm org ls @aahn
 
 ```bash
 # Check current version on npm
-npm view @aahn/ui version
+npm view @abeahn/ui version
 
 # Update to next version
 # Edit package.json: "version": "1.1.1"
@@ -429,11 +429,11 @@ tar -tzf abe-stack-ui-1.1.0.tgz
 npm cache clean --force
 
 # Reinstall package
-rm -rf node_modules/@aahn
-npm install @aahn/ui@latest
+rm -rf node_modules/@abeahn
+npm install @abeahn/ui@latest
 
 # Verify package.json exports field is correct
-npm view @aahn/ui exports
+npm view @abeahn/ui exports
 ```
 
 ---
@@ -456,7 +456,7 @@ Publish:
 ☐ Dry run (pnpm -r publish --dry-run)
 ☐ Review dry run output
 ☐ Publish (pnpm -r publish --access public)
-☐ Verify on npm (npm view @aahn/ui version)
+☐ Verify on npm (npm view @abeahn/ui version)
 
 Post-Publish:
 ☐ Git tag (git tag v1.1.0 && git push --tags)

@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to @aahn/shared will be documented in this file.
+All notable changes to @abeahn/shared will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -12,15 +12,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - New secondary export paths for granular imports:
-  - `@aahn/shared/contracts` - Import only API contracts (ts-rest)
-  - `@aahn/shared/utils` - Import only utility functions (tokenStore)
-  - `@aahn/shared/env` - Import only environment validation
+  - `@abeahn/shared/contracts` - Import only API contracts (ts-rest)
+  - `@abeahn/shared/utils` - Import only utility functions (tokenStore)
+  - `@abeahn/shared/env` - Import only environment validation
 - Publishing configuration for npm
 - Repository and package metadata
 
 ### Changed
 
-- Main export `@aahn/shared` continues to work as before (100% backward compatible)
+- Main export `@abeahn/shared` continues to work as before (100% backward compatible)
 - Existing `./storageConfig` secondary export unchanged
 
 ### Migration Guide
@@ -30,23 +30,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Before (v1.0.0 style - still works):**
 
 ```typescript
-import { apiContract, tokenStore } from '@aahn/shared';
-import { toStorageConfig } from '@aahn/shared/storageConfig';
+import { apiContract, tokenStore } from '@abeahn/shared';
+import { toStorageConfig } from '@abeahn/shared/storageConfig';
 ```
 
 **After (v1.1.0 style - optional for granular imports):**
 
 ```typescript
-import { apiContract } from '@aahn/shared/contracts';
-import { tokenStore } from '@aahn/shared/utils';
-import { toStorageConfig } from '@aahn/shared/storageConfig';
+import { apiContract } from '@abeahn/shared/contracts';
+import { tokenStore } from '@abeahn/shared/utils';
+import { toStorageConfig } from '@abeahn/shared/storageConfig';
 ```
 
 ## [1.0.0] - 2025-XX-XX
 
 ### Added
 
-- Initial release of @aahn/shared
+- Initial release of @abeahn/shared
 - API contracts with ts-rest for type-safe client-server communication
 - Authentication contracts (login, register, refresh, logout)
 - User management contracts

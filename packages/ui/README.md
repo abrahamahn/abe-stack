@@ -1,4 +1,4 @@
-# @aahn/ui - Shared UI Package
+# @abeahn/ui - Shared UI Package
 
 **Shared React components for web, desktop, and mobile platforms.**
 
@@ -136,8 +136,8 @@ packages/ui/src/
 
 ```typescript
 // apps/web/src/pages/SomePage.tsx
-import { Button, Card, Input } from '@aahn/ui';
-import { useAuth } from '@aahn/ui';
+import { Button, Card, Input } from '@abeahn/ui';
+import { useAuth } from '@abeahn/ui';
 
 function WebPage() {
   const { user } = useAuth();
@@ -156,12 +156,12 @@ function WebPage() {
 
 ```typescript
 // apps/desktop/src/pages/SomePage.tsx
-import { Button, Card, Input } from '@aahn/ui';
-import { useAuth } from '@aahn/ui';
+import { Button, Card, Input } from '@abeahn/ui';
+import { useAuth } from '@abeahn/ui';
 import { useFileSystem } from '../native/hooks/useFileSystem';
 
 function DesktopPage() {
-  const { user } = useAuth(); // Shared hook from @aahn/ui
+  const { user } = useAuth(); // Shared hook from @abeahn/ui
   const { openFile } = useFileSystem(); // Desktop-only
 
   return (
@@ -177,8 +177,8 @@ function DesktopPage() {
 
 ```typescript
 // apps/mobile/src/screens/SomeScreen.tsx
-import { Button, Card } from '@aahn/ui';
-import { useAuth } from '@aahn/ui';
+import { Button, Card } from '@abeahn/ui';
+import { useAuth } from '@abeahn/ui';
 import { View } from 'react-native';
 
 function MobileScreen() {
@@ -229,7 +229,7 @@ apps/web/src/
 │   ├── hooks/
 │   ├── services/
 │   └── components/
-├── App.tsx           # Imports from @aahn/ui
+├── App.tsx           # Imports from @abeahn/ui
 └── main.tsx          # Web entry point
 ```
 
@@ -256,7 +256,7 @@ apps/desktop/src/
 ├── electron/         # Electron main process
 │   ├── main.ts
 │   └── preload.ts
-├── App.tsx          # Imports from @aahn/ui
+├── App.tsx          # Imports from @abeahn/ui
 └── main.tsx         # Desktop entry point
 ```
 
@@ -279,7 +279,7 @@ apps/mobile/src/
 │   ├── hooks/
 │   ├── navigation/
 │   └── modules/
-├── App.tsx         # Imports from @aahn/ui
+├── App.tsx         # Imports from @abeahn/ui
 └── index.js        # Mobile entry point
 ```
 
@@ -364,7 +364,7 @@ export { default as MyButton } from './MyButton';
 
 ```typescript
 // In any app (web, desktop, mobile)
-import { MyButton } from '@aahn/ui';
+import { MyButton } from '@abeahn/ui';
 
 <MyButton label="Click Me" variant="primary" />
 ```
@@ -520,7 +520,7 @@ Refactor platform code to shared when patterns emerge.
 - **React** (peer dependency)
 - **React DOM** (peer dependency)
 - **React Router DOM** (peer dependency)
-- **@aahn/shared** (workspace dependency for utilities)
+- **@abeahn/shared** (workspace dependency for utilities)
 
 Avoid adding platform-specific dependencies (Electron, React Native modules) to this package.
 
@@ -556,7 +556,7 @@ export function MusicPlayer({ track, onPlay, onPause }: MusicPlayerProps) {
 
 ```typescript
 // apps/web/src/pages/PlayerPage.tsx
-import { MusicPlayer } from '@aahn/ui';
+import { MusicPlayer } from '@abeahn/ui';
 import { useWebAnalytics } from '../web-only/hooks/useAnalytics';
 
 function PlayerPage() {
@@ -574,7 +574,7 @@ function PlayerPage() {
 
 ```typescript
 // apps/desktop/src/pages/PlayerPage.tsx
-import { MusicPlayer } from '@aahn/ui';
+import { MusicPlayer } from '@abeahn/ui';
 import { useNotifications } from '../native/hooks/useNotifications';
 
 function PlayerPage() {
@@ -592,7 +592,7 @@ function PlayerPage() {
 
 ```typescript
 // apps/mobile/src/screens/PlayerScreen.tsx
-import { MusicPlayer } from '@aahn/ui';
+import { MusicPlayer } from '@abeahn/ui';
 import { Haptics } from 'react-native-haptic-feedback';
 
 function PlayerScreen() {
@@ -619,13 +619,13 @@ function PlayerScreen() {
 2. **Build the UI package:**
 
    ```bash
-   pnpm --filter @aahn/ui build
+   pnpm --filter @abeahn/ui build
    ```
 
 3. **Import in your apps:**
 
    ```typescript
-   import { Button, Card, Input } from '@aahn/ui';
+   import { Button, Card, Input } from '@abeahn/ui';
    ```
 
 4. **Add platform-specific features:**

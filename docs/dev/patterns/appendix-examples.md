@@ -15,7 +15,7 @@ Common implementation patterns with full examples for API clients, forms, enviro
 ```typescript
 // packages/api-client/src/client.ts (framework-agnostic)
 import { initClient } from '@ts-rest/core';
-import { contract } from '@aahn/shared/contracts';
+import { contract } from '@abeahn/shared/contracts';
 
 export const apiClient = initClient(contract, {
   baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:3000',
@@ -85,8 +85,8 @@ export type CreateUserInput = z.infer<typeof createUserSchema>;
 
 // apps/web/src/components/CreateUserForm.tsx
 import { useState } from 'react';
-import { createUserSchema, type CreateUserInput } from '@aahn/shared';
-import { useCreateUser } from '@aahn/api-client';
+import { createUserSchema, type CreateUserInput } from '@abeahn/shared';
+import { useCreateUser } from '@abeahn/api-client';
 
 function CreateUserForm() {
   const [formData, setFormData] = useState<CreateUserInput>({
@@ -181,7 +181,7 @@ export const env = envSchema.parse(process.env);
 // env.REDIS_URL is string | undefined
 
 // apps/server/src/index.ts
-import { env } from '@aahn/shared';
+import { env } from '@abeahn/shared';
 
 const server = Fastify({
   logger: {

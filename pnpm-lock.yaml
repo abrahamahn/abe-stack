@@ -76,10 +76,10 @@ importers:
 
   apps/desktop:
     dependencies:
-      '@abe-stack/shared':
+      '@aahn/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@abe-stack/ui':
+      '@aahn/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@tanstack/react-query':
@@ -128,7 +128,7 @@ importers:
 
   apps/mobile:
     dependencies:
-      '@abe-stack/shared':
+      '@aahn/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       '@react-navigation/native':
@@ -183,13 +183,13 @@ importers:
 
   apps/server:
     dependencies:
-      '@abe-stack/db':
+      '@aahn/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@abe-stack/shared':
+      '@aahn/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@abe-stack/storage':
+      '@aahn/storage':
         specifier: workspace:*
         version: link:../../packages/storage
       '@fastify/cors':
@@ -250,13 +250,13 @@ importers:
 
   apps/web:
     dependencies:
-      '@abe-stack/api-client':
+      '@aahn/api-client':
         specifier: workspace:*
         version: link:../../packages/api-client
-      '@abe-stack/shared':
+      '@aahn/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@abe-stack/ui':
+      '@aahn/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       '@tanstack/react-query':
@@ -314,7 +314,7 @@ importers:
 
   packages/api-client:
     dependencies:
-      '@abe-stack/shared':
+      '@aahn/shared':
         specifier: workspace:*
         version: link:../shared
       '@tanstack/react-query':
@@ -355,7 +355,7 @@ importers:
 
   packages/shared:
     dependencies:
-      '@abe-stack/storage':
+      '@aahn/storage':
         specifier: workspace:*
         version: link:../storage
       '@ts-rest/core':
@@ -393,7 +393,7 @@ importers:
 
   packages/ui:
     dependencies:
-      '@abe-stack/shared':
+      '@aahn/shared':
         specifier: workspace:*
         version: link:../shared
       react:
