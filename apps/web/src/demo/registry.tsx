@@ -2,6 +2,7 @@
 import {
   Accordion,
   Alert,
+  AuthLayout,
   Avatar,
   Badge,
   Button,
@@ -1050,6 +1051,93 @@ export const componentRegistry: Record<string, ComponentDemo> = {
                 <Text>Large (1200px)</Text>
               </div>
             </Container>
+          </div>
+        ),
+      },
+    ],
+  },
+  authLayout: {
+    id: 'authLayout',
+    name: 'AuthLayout',
+    category: 'layouts',
+    description: 'Centered authentication layout with optional title and description',
+    variants: [
+      {
+        name: 'Login Form',
+        description: 'Authentication layout with login form',
+        code: `<AuthLayout
+  title="Welcome Back"
+  description="Sign in to your account to continue"
+>
+  <Input placeholder="Email" />
+  <Input type="password" placeholder="Password" />
+  <Button variant="primary">Sign In</Button>
+</AuthLayout>`,
+        render: (): JSX.Element => (
+          <div style={{ minHeight: '400px', backgroundColor: '#f5f5f5' }}>
+            <AuthLayout title="Welcome Back" description="Sign in to your account to continue">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <Input placeholder="Email" type="email" />
+                <Input placeholder="Password" type="password" />
+                <Button variant="primary">Sign In</Button>
+              </div>
+            </AuthLayout>
+          </div>
+        ),
+      },
+      {
+        name: 'Sign Up Form',
+        description: 'Authentication layout with registration form',
+        code: `<AuthLayout
+  title="Create Account"
+  description="Sign up to get started"
+>
+  <Input placeholder="Full Name" />
+  <Input placeholder="Email" />
+  <Input type="password" placeholder="Password" />
+  <Checkbox>I agree to the terms and conditions</Checkbox>
+  <Button variant="primary">Create Account</Button>
+</AuthLayout>`,
+        render: (): JSX.Element => (
+          <div style={{ minHeight: '450px', backgroundColor: '#f5f5f5' }}>
+            <AuthLayout title="Create Account" description="Sign up to get started">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <Input placeholder="Full Name" />
+                <Input placeholder="Email" type="email" />
+                <Input placeholder="Password" type="password" />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Checkbox />
+                  <Text style={{ fontSize: '14px' }}>I agree to the terms and conditions</Text>
+                </div>
+                <Button variant="primary">Create Account</Button>
+              </div>
+            </AuthLayout>
+          </div>
+        ),
+      },
+      {
+        name: 'Minimal',
+        description: 'Authentication layout without title or description',
+        code: `<AuthLayout>
+  <Heading as="h2" size="md">Reset Password</Heading>
+  <Text>Enter your email to receive reset instructions</Text>
+  <Input placeholder="Email" />
+  <Button variant="primary">Send Reset Link</Button>
+</AuthLayout>`,
+        render: (): JSX.Element => (
+          <div style={{ minHeight: '350px', backgroundColor: '#f5f5f5' }}>
+            <AuthLayout>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <Heading as="h3" size="sm">
+                  Reset Password
+                </Heading>
+                <Text tone="muted" style={{ fontSize: '14px' }}>
+                  Enter your email to receive reset instructions
+                </Text>
+                <Input placeholder="Email" type="email" />
+                <Button variant="primary">Send Reset Link</Button>
+              </div>
+            </AuthLayout>
           </div>
         ),
       },
