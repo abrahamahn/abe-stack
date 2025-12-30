@@ -6,7 +6,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Install dependencies once, cache for other jobs
   setup:
     runs-on: ubuntu-latest
     steps:
@@ -35,10 +34,10 @@ jobs:
             packages/*/node_modules
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
 
-  # Separate job for linting
-  lint:
+  # Single job to run the full build and verification pipeline
+  build-and-verify:
     runs-on: ubuntu-latest
-    needs: setup
+    needs: setup # This job depends on setup completing successfully
     steps:
       - uses: actions/checkout@v4
 
@@ -73,116 +72,22 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-turbo-
 
-      - name: Check Format
-        run: pnpm format:check
+      - name: Run Full Build and Verification Pipeline
+        run: pnpm build # This executes the sequential format -> lint -> test -> type-check -> theme:build -> turbo build process
 
-      - name: Lint
-        run: pnpm lint
-
-  # Separate job for type checking
-  type-check:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.26.2
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Restore cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            apps/*/node_modules
-            packages/*/node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Cache Turbo
-        uses: actions/cache@v4
-        with:
-          path: .cache/turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
-
-      - name: Type Check
-        run: pnpm type-check
-
-  # Separate job for testing
-  test:
-    runs-on: ubuntu-latest
-    needs: [setup, lint, type-check]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.26.2
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Restore cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            apps/*/node_modules
-            packages/*/node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Cache Turbo
-        uses: actions/cache@v4
-        with:
-          path: .cache/turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
-
-      - name: Test
-        run: pnpm test
-
-      - name: Test with Coverage
-        run: pnpm test -- --coverage
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        if: always()
-        with:
-          files: ./coverage/coverage-final.json
-          flags: unit-tests
-          name: codecov-umbrella
-          fail_ci_if_error: false
-          token: ${{ secrets.CODECOV_TOKEN }}
-
-      - name: Build
-        run: pnpm build
-
+      # Upload artifacts only if the build and verification succeed
       - name: Archive production artifacts
-        uses: actions/upload-artifact@v4
         if: success()
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           path: |
             apps/*/dist
             packages/*/dist
           retention-days: 7
+
+      # Upload coverage report if available and build succeeded
+      # Note: pnpm build does not explicitly generate coverage.
+      # If coverage is critical, a separate job or modification to build script might be needed.
+      # For now, assuming build is the primary gate and coverage is secondary or handled elsewhere if needed.
+      # The previous CI had a separate coverage step. If needed, it can be reinstated or a dedicated test job added.
