@@ -156,9 +156,9 @@ import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 
 // 2. Internal packages (alphabetical)
-import { formatUserName, isUserAdmin } from '@abe-stack/shared';
-import { Button, Card } from '@abe-stack/ui';
-import { useUser } from '@abe-stack/api-client';
+import { formatUserName, isUserAdmin } from '@abeahn/shared';
+import { Button, Card } from '@abeahn/ui';
+import { useUser } from '@abeahn/api-client';
 
 // 3. Relative imports (grouped by distance from current file)
 import { useAuth } from '../../hooks/useAuth';

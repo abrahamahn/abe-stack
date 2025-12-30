@@ -590,7 +590,7 @@ export function useWrite() {
 ```typescript
 // apps/web/src/components/TaskCard.tsx
 import { useRecord, useWrite } from '../hooks'
-import type { Task } from '@abe-stack/db/schema'
+import type { Task } from '@abeahn/db/schema'
 
 export function TaskCard({ taskId }: { taskId: string }) {
   const task = useRecord<Task>('tasks', taskId)
@@ -640,7 +640,7 @@ export function TaskCard({ taskId }: { taskId: string }) {
 import { useState, useEffect } from 'react'
 import { useRecord, useWrite } from '../hooks'
 import { useDebouncedCallback } from 'use-debounce'
-import type { Note } from '@abe-stack/db/schema'
+import type { Note } from '@abeahn/db/schema'
 
 export function NoteEditor({ noteId }: { noteId: string }) {
   const note = useRecord<Note>('notes', noteId)
@@ -694,7 +694,7 @@ export function NoteEditor({ noteId }: { noteId: string }) {
 ```typescript
 // apps/web/src/components/KanbanBoard.tsx
 import { useRecords, useWrite } from '../hooks'
-import type { Task } from '@abe-stack/db/schema'
+import type { Task } from '@abeahn/db/schema'
 
 export function KanbanBoard({ boardId }: { boardId: string }) {
   const tasks = useRecords<Task>('tasks', { boardId })
@@ -792,7 +792,7 @@ export function UndoRedoButtons() {
 
 ```typescript
 // apps/server/src/lib/permissions.ts
-import type { RecordMap } from '@abe-stack/realtime';
+import type { RecordMap } from '@abeahn/realtime';
 
 export async function validateRead(
   table: string,

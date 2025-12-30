@@ -11,9 +11,9 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@abe-stack/db": "workspace:*",
-    "@abe-stack/shared": "workspace:*",
-    "@abe-stack/storage": "workspace:*",
+    "abeahn-db": "workspace:*",
+    "abeahn-shared": "workspace:*",
+    "abeahn-storage": "workspace:*",
     "@ts-rest/fastify": "^3.52.1",
     "@fastify/cors": "^11.2.0",
     "@fastify/helmet": "^13.0.2",

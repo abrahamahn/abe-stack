@@ -119,7 +119,7 @@ Actions:
 - [ ] Run: pnpm db:generate
 - [ ] Run: pnpm db:migrate
 - [ ] Add read queries to packages/db/queries/[entity].ts
-      Verification: pnpm --filter @abe-stack/db test
+      Verification: pnpm --filter @abeahn/db test
       Commit: "checkpoint: add [entity] database schema"
 
 ### Checkpoint 3: API GET Routes [~30 min]
@@ -131,7 +131,7 @@ Actions:
 - [ ] Define GET /api/[entities]/:id contract
 - [ ] Implement route handlers
 - [ ] Write contract tests
-      Verification: pnpm --filter @abe-stack/server test
+      Verification: pnpm --filter @abeahn/server test
       Commit: "checkpoint: add [entity] GET endpoints"
 
 ### Checkpoint 4: API Client [~20 min]
@@ -143,7 +143,7 @@ Actions:
 - [ ] Add use[Entities]() hook
 - [ ] Add use[Entity](id) hook
 - [ ] Write tests
-      Verification: pnpm --filter @abe-stack/api-client test
+      Verification: pnpm --filter @abeahn/api-client test
       Commit: "checkpoint: add [entity] API client"
 
 ### Checkpoint 5: UI Display [~30 min]
@@ -170,7 +170,7 @@ Actions:
 - [ ] Define POST /api/[entities] contract
 - [ ] Implement create handler
 - [ ] Write tests
-      Verification: pnpm --filter @abe-stack/server test
+      Verification: pnpm --filter @abeahn/server test
       Commit: "checkpoint: add [entity] create endpoint"
 
 ### Checkpoint 7: Create UI [~40 min]

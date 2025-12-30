@@ -3,9 +3,9 @@
 2024-12-29
 
 - Aligned API prefixing under `/api`, kept client base URL host-only, added optional `fetchImpl` to api-client, and enforced lazy JWT secret loading without dev fallback.
-- Introduced `@abe-stack/storage` with local and S3 providers; mapped storage env via `packages/shared/src/storageConfig.ts`; decorated Fastify with `storage` and updated types.
+- Introduced `@abeahn/storage` with local and S3 providers; mapped storage env via `packages/shared/src/storageConfig.ts`; decorated Fastify with `storage` and updated types.
 - Cleaned unused auth middleware duplication; ESLint fixes (drizzle ignore path, deduped rules, console allowed for scripts); added auth route tests and Playwright auth scaffold gated by `E2E_BASE_URL`.
-- Added UI primitives (`Flex`, `Stack`, `Text`, `Heading`, `Surface`) with shared `primitives.css`, exported via `@abe-stack/ui`.
+- Added UI primitives (`Flex`, `Stack`, `Text`, `Heading`, `Surface`) with shared `primitives.css`, exported via `@abeahn/ui`.
 - Expanded UI primitives with `Divider`, `Spacer`, `Grid`, `Container`, `VisuallyHidden` to cover layout, spacing, and accessibility basics.
 - Added more UI primitives: `Kbd`, `Code`, `Tag`, `List` for shortcuts, inline code, pill labels, and styled lists.
 - Further expanded UI primitives with `Icon`, `Avatar`, `IconButton`, `Chip`, `BadgePrimitive` for iconography, avatars, compact actions, pill chips, and badges.
@@ -37,7 +37,7 @@
 
 2024-12-31
 
-- Added UI infra folders: hooks (useDisclosure, useControllableState, useClickOutside, useMediaQuery), theme tokens (colors, spacing, typography), layouts (Container, AuthLayout, SidebarLayout, StackedLayout), and utils (cn) exported via @abe-stack/ui.
+- Added UI infra folders: hooks (useDisclosure, useControllableState, useClickOutside, useMediaQuery), theme tokens (colors, spacing, typography), layouts (Container, AuthLayout, SidebarLayout, StackedLayout), and utils (cn) exported via @abeahn/ui.
 - Refactored Accordion/Dropdown/Popover/Dialog to use new controlled-state hooks and disclosure helper; Dropdown supports function children for close handling.
 - Added ComponentGallery page and /components route in apps/web to visualize primitives; added Toaster + toast store (zustand/nanoid) and global ApiProvider using @ts-rest/react-query with error interception and 401 logout.
 - Added export:ui script writing ui_code.txt at repo root; eslint ignores export script.

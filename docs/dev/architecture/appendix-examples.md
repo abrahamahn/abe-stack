@@ -46,8 +46,8 @@ export const useUser = (id: string) => useQuery({ ... });
 import React from 'react';
 import { z } from 'zod';
 
-import { formatUserName } from '@abe-stack/shared';
-import { Button } from '@abe-stack/ui';
+import { formatUserName } from '@abeahn/shared';
+import { Button } from '@abeahn/ui';
 
 import { useAuth } from '../../hooks/useAuth';
 import './UserProfile.css';

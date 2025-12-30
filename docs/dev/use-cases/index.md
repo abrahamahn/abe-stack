@@ -91,7 +91,7 @@ Codex/Claude Code excels at changes that span multiple files or packages - espec
 
 "Convert all instances of var to const/let following ESLint best practices."
 
-"Update all imports from @company/utils to @abe-stack/shared."
+"Update all imports from @company/utils to @abeahn/shared."
 ```
 
 **From Anthropic's Backend Engineer:**
