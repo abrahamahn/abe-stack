@@ -12,17 +12,17 @@ Quick Summary:
 
 ## Modules
 
-- `dev/principles/principles-core.md` → The core rules, short form.
-- `dev/principles/principles-why.md` → Rationale and trade-offs.
+- `./principles-core.md` → The core rules, short form.
+- `./principles-why.md` → Rationale and trade-offs.
 
 ## Key Patterns/Commands
 
-| Name       | Description                   | Link                                |
-| ---------- | ----------------------------- | ----------------------------------- |
-| Core rules | One-screen principles summary | `dev/principles/principles-core.md` |
-| Rationale  | The why behind each rule      | `dev/principles/principles-why.md`  |
+| Name       | Description                   | Link                   |
+| ---------- | ----------------------------- | ---------------------- |
+| Core rules | One-screen principles summary | `./principles-core.md` |
+| Rationale  | The why behind each rule      | `./principles-why.md`  |
 
 See Also:
 
-- `dev/architecture/index.md`
-- `../INDEX.md`
+- `../architecture/index.md`
+- `../../INDEX.md`

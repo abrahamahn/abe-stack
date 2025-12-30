@@ -3,6 +3,8 @@ node_modules/
 .pnpm-store/
 .cache/
 
+# Agents
+
 # Build outputs
 dist/
 build/

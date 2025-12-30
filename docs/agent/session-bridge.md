@@ -26,5 +26,5 @@ Resume Mode:
 
 See Also:
 
-- `dev/workflows/classification.md`
-- `agent/agent-self-check.md`
+- `../dev/workflows/classification.md`
+- `./agent-self-check.md`

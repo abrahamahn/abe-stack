@@ -2,7 +2,7 @@
 
 Foundational principles and technical vision for the ABE Stack. Learn the "why" behind architectural decisions.
 
-**Quick Reference:** See [CLAUDE.md](../../CLAUDE.md) for essentials.
+**Quick Reference:** See [CLAUDE.md](../../../AGENTS.md) for essentials.
 **Implementation Details:** See [dev/architecture/index.md](../architecture/index.md) for the "how".
 
 ---

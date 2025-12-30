@@ -2,7 +2,7 @@
 
 Common implementation patterns with full examples for API clients, forms, environment variables, database queries, and more.
 
-**Quick Reference:** See [CLAUDE.md](../../CLAUDE.md) for essentials.
+**Quick Reference:** See [AGENTS.md](../../../AGENTS.md) for essentials.
 
 ---
 

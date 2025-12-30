@@ -1,4 +1,4 @@
-# Claude Code Guide - ABE Stack (Optimized)
+# Guide - ABE Stack (Optimized)
 
 > **This is your primary reference. Always loaded. Start here.**
 
@@ -16,7 +16,7 @@
 
 ## Task Classification & Routing (START HERE)
 
-**Before ANY task, use this decision tree:**
+**Before ANY task, follow this decision tree:**
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -39,7 +39,7 @@
         │                           │
         ▼                           ▼
    SIMPLE TASK            ┌─────────────────┐
-   âœ… Execute directly     │ Further classify│
+   ✅ Execute directly     │ Further classify│
    Use standard workflow  └─────────────────┘
                                     │
                     ┌───────────────┴───────────────┐
@@ -52,19 +52,36 @@
                     │                               │
                     ▼                               ▼
               MEDIUM TASK                    COMPLEX TASK
-              Read: agent/complex-tasks.md         Read: agent/complex-tasks.md
-              Use: Template 1 (Feature)                Use: Template 4 (Architecture)
-              Checkpointed execution         Multi-phase + Human supervision
-
-┌─────────────────────────────────────────────────┐
-│ STEP 2: Select Documentation & Template        │
-└─────────────────────────────────────────────────┘
-
-SIMPLE → Continue with this file (CLAUDE.md)
-MEDIUM → Read agent/complex-tasks.md → Use agent/agent-prompts.md Template 1
-COMPLEX → Read agent/complex-tasks.md → Use agent/agent-prompts.md Template 4
-                                      → Use agent/agent-self-check.md
 ```
+
+### STEP 2: Context Loading Protocol (MANDATORY)
+
+**You MUST read the documentation corresponding to your task's domain.**
+**Do not generate code until you have read these files.**
+**Because every session must keep tests and docs in sync, treat `docs/dev/testing/*.md` as required context when tests or documentation updates are expected.**
+
+| If your task involves... | Read these files...                                              | Why?                                            |
+| :----------------------- | :--------------------------------------------------------------- | :---------------------------------------------- |
+| **Any Code Change**      | `docs/dev/principles/index.md`                                   | Align with core design philosophy (DRY, Layers) |
+| **New Patterns**         | `docs/dev/patterns/index.md`                                     | Copy-paste correct implementations              |
+| **Refactoring**          | `docs/dev/anti-patterns/index.md`                                | Avoid introducing known bad practices           |
+| **Architecture/Deps**    | `docs/dev/architecture/index.md`                                 | Understand boundaries & dependency flow         |
+| **Testing/QA**           | `docs/dev/testing/index.md` and relevant `docs/dev/testing/*.md` | Know where to put tests & how to run them       |
+| **Medium/Complex**       | `docs/agent/complex-tasks.md` <br> `docs/agent/agent-prompts.md` | Get the execution templates                     |
+
+### STEP 3: Execution Protocol
+
+**SIMPLE:**
+
+1.  Read `docs/dev/principles/index.md`.
+2.  Execute.
+3.  Verify (`pnpm test`).
+
+**MEDIUM/COMPLEX:**
+
+1.  Read `docs/agent/complex-tasks.md` AND `docs/dev/principles/index.md`.
+2.  Select Template from `docs/agent/agent-prompts.md`.
+3.  Execute with Checkpoints.
 
 ---
 
@@ -105,19 +122,16 @@ apps → packages/db → packages/shared
 **Before marking ANY task complete, ALL must pass:**
 
 ```bash
-# 1. Ensure tests exist and are up-to-date
-# - New files: tests created
-# - Updated files: tests updated or created
+# 1. Ensure tests exist and are up-to-date (see Testing Requirements)
 
-# 2. Run quality checks (ALL must pass)
-pnpm format      # Format code
-pnpm lint:fix    # Fix auto-fixable issues
-pnpm lint        # Check for errors
-pnpm type-check  # TypeScript validation
-pnpm test        # Run all tests
+# 2. Update documentation (if relevant to changes)
+# - docs/log/log.md
+# - README.md
+# - Fix existing docs when appropriate; ask before creating new docs
 
-# Note: pnpm build runs: format:check + lint + type-check + theme:build + turbo build
-# (format:check is read-only, so run pnpm format separately if changes needed)
+# 3. Run quality checks (ALL must pass)
+pnpm build       # Full battery: format, lint, test, type-check, and build
+
 ```
 
 **If ANY fail:**
@@ -132,6 +146,13 @@ pnpm test        # Run all tests
 - Every new file MUST have corresponding tests
 - Every updated file MUST have updated tests (or create if missing)
 - Tests must verify actual behavior, not just existence
+- For new UI-only components, tests are required only when behavior is non-trivial; pure presentational components do not require new tests
+- When code changes affect existing behavior, update existing test files to match the new behavior
+
+**End of Session Requirements:**
+
+- Update or add tests when needed, then update docs and logs before running `pnpm build`
+- Keep fixing tests or code until `pnpm build` succeeds; if failures are unrelated, report them clearly
 
 ---
 
@@ -203,14 +224,14 @@ Success:
 
 ```bash
 # MANDATORY - Read these in order:
-1. agent/complex-tasks.md - Understanding decomposition
-2. agent/agent-prompts.md - Select appropriate template
-3. agent/agent-self-check.md - Verification protocol
+1. docs/agent/complex-tasks.md - Understanding decomposition
+2. docs/agent/agent-prompts.md - Select appropriate template
+3. docs/agent/agent-self-check.md - Verification protocol
 ```
 
 ### STEP 2: Create Decomposition Plan
 
-**Use appropriate template from agent/agent-prompts.md:**
+**Use appropriate template from docs/agent/agent-prompts.md:**
 
 - Template 1: Feature Task (CRUD operations)
 - Template 2: Refactoring Task (pattern changes)
@@ -230,10 +251,15 @@ After EVERY checkpoint:
 # Test files location: same directory as source with .test.ts/.test.tsx extension
 # OR in __tests__ subdirectory
 
-# 2. Code Quality (automated - ALL must pass)
+# 2. Update documentation (if relevant to changes)
+# - docs/log/log.md
+# - README.md
+# - Fix existing docs when appropriate; ask before creating new docs
+
+# 3. Code Quality (automated - ALL must pass)
 pnpm format && pnpm lint && pnpm type-check && pnpm test
 
-# 3. Self-Assessment (manual - see agent/agent-self-check.md)
+# 3. Self-Assessment (manual - see docs/agent/agent-self-check.md)
 - Scope adherence
 - Pattern consistency
 - Testing completeness (tests exist AND are meaningful)
@@ -251,6 +277,7 @@ git commit -m "checkpoint: [what this achieves]"
 - **Updated files**: MUST update tests OR create if none exist
 - **Test quality**: Tests must verify actual behavior, not just "it renders"
 - **Test location**: Co-located with source OR in `__tests__` directory
+- **UI-only components**: Tests required only when behavior is non-trivial; pure presentational components do not require new tests
 
 ### STEP 4: Stop Conditions
 
@@ -296,7 +323,7 @@ export const createUserSchema = z.object({ ... });
 const result = createUserSchema.safeParse(formData);
 ```
 
-**→ For all patterns with examples, see `dev/patterns/index.md`**
+**→ For all patterns with examples, see `docs/dev/patterns/index.md`**
 
 ---
 
@@ -307,7 +334,7 @@ const result = createUserSchema.safeParse(formData);
 ❌ Cross-app imports → Use `packages/shared`
 ❌ Using `any` type → Proper types with Zod validation
 
-**→ For all anti-patterns with fixes, see `dev/anti-patterns/index.md`**
+**→ For all anti-patterns with fixes, see `docs/dev/anti-patterns/index.md`**
 
 ---
 
@@ -323,6 +350,7 @@ const result = createUserSchema.safeParse(formData);
 **Before completing:**
 
 ```bash
+# Tests and docs must be updated before quality checks.
 pnpm format && pnpm lint && pnpm type-check && pnpm test
 ```
 
@@ -334,24 +362,43 @@ pnpm format && pnpm lint && pnpm type-check && pnpm test
 
 **Core Reference (always loaded):**
 
-- `CLAUDE.md` (this file) - Quick reference & routing
+- `AGENTS.md` (this file) - Quick reference & routing
 
 **Read When Needed:**
 
-| Doc                           | When to Read            | Purpose                     |
-| ----------------------------- | ----------------------- | --------------------------- |
-| agent/complex-tasks.md        | Medium/Complex tasks    | Decomposition strategies    |
-| agent/agent-prompts.md        | Medium/Complex tasks    | Task templates              |
-| agent/agent-self-check.md     | Every checkpoint        | Verification protocol       |
-| dev/architecture/index.md     | Understanding structure | Layer details               |
-| dev/principles/index.md       | Understanding "why"     | Design rationale            |
-| dev/workflows/index.md        | Step-by-step processes  | Development flows           |
-| dev/coding-standards/index.md | Code style questions    | TypeScript, naming, imports |
-| dev/patterns/index.md         | Implementation help     | Full code examples          |
-| dev/anti-patterns/index.md    | Avoiding mistakes       | What not to do              |
-| dev/testing/index.md          | Writing tests           | Test strategies             |
-| dev/performance/index.md      | Optimization            | Performance techniques      |
-| dev/use-cases/index.md        | Example prompts         | Common scenarios            |
+Under `/docs` folder.
+
+| Doc                                | When to Read            | Purpose                     |
+| ---------------------------------- | ----------------------- | --------------------------- |
+| docs/agent/complex-tasks.md        | Medium/Complex tasks    | Decomposition strategies    |
+| docs/agent/agent-prompts.md        | Medium/Complex tasks    | Task templates              |
+| docs/agent/agent-self-check.md     | Every checkpoint        | Verification protocol       |
+| docs/agent/session-bridge.md       | Multi-session tasks     | Resuming context            |
+| docs/dev/architecture/index.md     | Understanding structure | Layer details               |
+| docs/dev/principles/index.md       | Understanding "why"     | Design rationale            |
+| docs/dev/workflows/index.md        | Step-by-step processes  | Development flows           |
+| docs/dev/coding-standards/index.md | Code style questions    | TypeScript, naming, imports |
+| docs/dev/patterns/index.md         | Implementation help     | Full code examples          |
+| docs/dev/anti-patterns/index.md    | Avoiding mistakes       | What not to do              |
+| docs/dev/testing/index.md          | Writing tests           | Test strategies             |
+| docs/dev/performance/index.md      | Optimization            | Performance techniques      |
+| docs/dev/use-cases/index.md        | Example prompts         | Common scenarios            |
+
+---
+
+## Extended Reference Index (All Docs)
+
+- **docs/agent**: `docs/agent/complex-tasks.md`, `docs/agent/agent-prompts.md`, `docs/agent/agent-self-check.md`, `docs/agent/session-bridge.md`
+- **docs/dev/anti-patterns**: `docs/dev/anti-patterns/index.md`, `docs/dev/anti-patterns/appendix-examples.md`
+- **docs/dev/architecture**: `docs/dev/architecture/index.md`, `docs/dev/architecture/structure.md`, `docs/dev/architecture/layers.md`, `docs/dev/architecture/dependencies.md`, `docs/dev/architecture/patterns.md`, `docs/dev/architecture/testing.md`, `docs/dev/architecture/env.md`, `docs/dev/architecture/appendix-examples.md`
+- **docs/dev/coding-standards**: `docs/dev/coding-standards/index.md`
+- **docs/dev/patterns**: `docs/dev/patterns/index.md`, `docs/dev/patterns/appendix-examples.md`
+- **docs/dev/performance**: `docs/dev/performance/index.md`
+- **docs/dev/principles**: `docs/dev/principles/index.md`, `docs/dev/principles/principles-core.md`, `docs/dev/principles/principles-why.md`
+- **docs/dev/templates**: `docs/dev/templates/index-template.md`
+- **docs/dev/testing**: `docs/dev/testing/index.md`, `docs/dev/testing/overview.md`, `docs/dev/testing/levels.md`, `docs/dev/testing/organization.md`, `docs/dev/testing/examples.md`, `docs/dev/testing/commands.md`
+- **docs/dev/use-cases**: `docs/dev/use-cases/index.md`
+- **docs/dev/workflows**: `docs/dev/workflows/index.md`, `docs/dev/workflows/classification.md`, `docs/dev/workflows/development.md`, `docs/dev/workflows/commands.md`, `docs/dev/workflows/communication.md`, `docs/dev/workflows/precompletion.md`, `docs/dev/workflows/appendix-examples.md`
 
 ---
 
@@ -392,5 +439,5 @@ pnpm format && pnpm lint && pnpm type-check && pnpm test
 
 ---
 
-_Last Updated: 2025-12-29_
+_Last Updated: 2025-12-30_
 _Philosophy: DRY • Typed • Tested • Framework-agnostic • Lean & production-ready_

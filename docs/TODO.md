@@ -24,10 +24,20 @@ Guide to make the monorepo production-ready while keeping the renderer-agnostic 
 
 ### Demo Surface (Live UI Gallery)
 
-- [ ] Implement a dedicated `/demo` page that showcases every `packages/ui` component in live, interactive states.
-- [ ] Cover primary/secondary/disabled/loading states for each component.
-- [ ] Include layout and theme examples (light/dark, density, responsive).
-- [ ] Display relevant documentation content alongside demos for user understanding.
+- [ ] Implement a dedicated `/demo` page, with a main render area
+- [ ] Build a resizable pane layout shell (top/bottom/left/right/center) with mouse drag handles and toggles per pane; persist sizes per user.
+- [ ] Center pane renders the active demo; side panes host component docs, prop tables, and usage notes.
+- [ ] Top bar: category tabs (primitives, components, hooks, layouts, test, theme, utils) that filter the catalog.
+- [ ] Component registry: map each component to demos, states, props schema, and related docs.
+- [ ] Demo cards include live controls (props knobs), copyable snippets, and notes for do/don't.
+- [ ] Cover primary/secondary/disabled/loading/error/empty states for each component where applicable.
+- [ ] Include layout variations (stack, split, grid, dock, modal, drawer, sheet, tabs) and responsive breakpoints.
+- [ ] Add interactive UX examples that combine components (forms, search, data table, wizard, auth, notifications).
+- [ ] Theme controls: light/dark and density toggles; place the theme switch in the bottom pane with live preview.
+- [ ] Keyboard accessibility pass for demo navigation and resize handles; document shortcuts.
+- [ ] In-app docs panel links to related `docs/dev` guidance where relevant.
+
+### IMPORTANT: Every single components in packages/ui should be presented in an interactive ui/ux and with toggleable/resizeable top/left/right/bottom bar and main render area on the center.
 
 ## 3) Backend (Fastify + Drizzle + Postgres)
 

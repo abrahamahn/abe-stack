@@ -2,7 +2,7 @@
 
 **Purpose:** Copy-paste templates for giving structured tasks to AI agents.
 
-**When to use:** When `CLAUDE.md` classifies task as MEDIUM or COMPLEX.
+**When to use:** When `AGENTS.md` classifies task as MEDIUM or COMPLEX.
 
 **Related docs:**
 
@@ -20,15 +20,18 @@
 
 ### After Every Checkpoint
 
-````bash
-# 1. Code Quality (automated - ALL must pass)
-pnpm format && pnpm lint && pnpm type-check && pnpm test [relevant-tests]
+```bash
+# 1. Code Quality & Build (automated - ALL must pass)
+# This runs: format, lint, test, type-check, and build
+pnpm build
 
 # 2. Self-Assessment (manual - see agent-self-check.md Level 2)
 # 3. Commit
 git commit -m "checkpoint: [description]"
+```
 
 # 4. Report
+
 "✅ Checkpoint N: [description] - [commit-hash]"
 
 If checks fail due to pre-existing/unrelated issues, do not fix automatically. Report them and proceed only with requested scope.
@@ -39,11 +42,12 @@ Append this to every checkpoint report:
 
 ```markdown
 State Summary:
+
 - Goal: [one sentence]
 - Progress: [completed checkpoints + outcomes]
 - Next: [immediate next step]
 - Risks: [open risks or blockers]
-````
+```
 
 ````
 
@@ -72,7 +76,7 @@ Question: [specific question]
 
 | Complexity | Template                 | Duration  | Files | Use When                   |
 | ---------- | ------------------------ | --------- | ----- | -------------------------- |
-| Simple     | (Use `CLAUDE.md`)        | 5-10 min  | 1-2   | Known pattern, <100 lines  |
+| Simple     | (Use `AGENTS.md`)        | 5-10 min  | 1-2   | Known pattern, <100 lines  |
 | Medium     | Template 1: Feature      | 30-60 min | 3-8   | Standard CRUD              |
 | Medium     | Template 2: Refactoring  | 1-2 hours | 5-20  | Pattern changes            |
 | Medium     | Template 3: Bug Fix      | 15-30 min | 2-5   | Reproducible issue         |
@@ -569,10 +573,8 @@ Every checkpoint includes:
 ```markdown
 Verification after this checkpoint:
 
-1. pnpm format && pnpm lint
-2. pnpm type-check
-3. pnpm test [specific-tests]
-4. Manual test: [specific action]
+1. pnpm build (runs format, lint, test, type-check, build)
+2. Manual test: [specific action]
 
 If ANY fail: fix before proceeding to next checkpoint
 ```
