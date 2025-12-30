@@ -16,15 +16,11 @@ Guide to make the monorepo production-ready while keeping the renderer-agnostic 
 ### packages/ui (Reusable UI Library)
 
 - [x] Audit and align primitives/components with industry best practices (accessibility, keyboard nav, ARIA, focus management).
-- [ ] Accessibility Audit:
-  - [ ] Create keyboard interaction documentation
-  - [ ] Add accessibility testing utilities
-  - [ ] Create accessibility examples/demos
 - [x] Standardize component APIs (controlled/uncontrolled patterns, polymorphic typing where needed).
 - [ ] Expand documentation examples for each component (usage, props, do/don't).
 - [x] Add missing UI tests for critical behaviors (a11y, keyboard interactions, focus traps).
 - [x] Ensure theme tokens cover spacing, typography, color, and motion consistently.
-- [ ] Publishable DX: consistent exports, tree-shakeable entrypoints, and clear versioning notes.
+- [x] Publishable DX: consistent exports, tree-shakeable entrypoints, and clear versioning notes.
 
 ### Demo Surface (Live UI Gallery)
 
