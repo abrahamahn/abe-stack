@@ -345,6 +345,7 @@ Under `/docs` folder.
 | docs/agent/complex-tasks.md        | Medium/Complex tasks    | Decomposition strategies    |
 | docs/agent/agent-prompts.md        | Medium/Complex tasks    | Task templates              |
 | docs/agent/agent-self-check.md     | Every checkpoint        | Verification protocol       |
+| docs/agent/session-bridge.md       | Multi-session tasks     | Resuming context            |
 | docs/dev/architecture/index.md     | Understanding structure | Layer details               |
 | docs/dev/principles/index.md       | Understanding "why"     | Design rationale            |
 | docs/dev/workflows/index.md        | Step-by-step processes  | Development flows           |

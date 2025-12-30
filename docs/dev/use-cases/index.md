@@ -464,7 +464,7 @@ Use our design system from packages/ui where possible."
 
 Instead of informal prompts, use structured templates from:
 
-**→ [agent-prompts.md](../agent/agent-prompts.md)** - Task templates by complexity
+**→ [agent-prompts.md](../../agent/agent-prompts.md)** - Task templates by complexity
 
 - Template 1: Simple Task (Direct Execution)
 - Template 2: Feature Task (Checkpointed)
@@ -482,8 +482,8 @@ Instead of informal prompts, use structured templates from:
 
 **Also see:**
 
-- [complex-tasks.md](../agent/complex-tasks.md) - Decomposition strategies
-- [agent-self-check.md](../agent/agent-self-check.md) - Self-verification protocol
+- [complex-tasks.md](../../agent/complex-tasks.md) - Decomposition strategies
+- [agent-self-check.md](../../agent/agent-self-check.md) - Self-verification protocol
 
 ---
 
