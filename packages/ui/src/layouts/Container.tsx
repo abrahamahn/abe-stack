@@ -1,5 +1,5 @@
 import { cn } from '../utils/cn';
-import './layouts.css';
+import '../styles/layouts.css';
 
 import type { ComponentPropsWithoutRef, ReactElement } from 'react';
 

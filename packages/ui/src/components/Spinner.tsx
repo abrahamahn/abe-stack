@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactElement } from 'react';
 
-import './components.css';
+import '../styles/components.css';
 
 /** Consider using <Loading/> instead. */
 export function Spinner(props: { size?: string }): ReactElement {

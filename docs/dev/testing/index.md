@@ -56,7 +56,7 @@ Primary goal: reliable refactoring with fast, focused tests driven by TDD.
 All newly created files must start with a first-line comment containing the
 workspace-relative path. Examples:
 
-- `// packages/ui/src/primitives/__tests__/Switch.test.tsx`
+- `// packages/ui/src/elements/__tests__/Switch.test.tsx`
 - `<!-- docs/dev/testing/index.md -->`
 
 ## Balanced Testing Matrix (30% Fast / 70% Full)

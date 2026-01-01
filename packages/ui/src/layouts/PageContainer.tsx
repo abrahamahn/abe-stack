@@ -1,6 +1,6 @@
 import { cn } from '../utils/cn';
 
-import './layouts.css';
+import '../styles/layouts.css';
 import type { CSSProperties, ComponentPropsWithoutRef, ReactElement } from 'react';
 
 type PageContainerProps = ComponentPropsWithoutRef<'main'> & {

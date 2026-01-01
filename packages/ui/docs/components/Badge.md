@@ -4,7 +4,7 @@
 
 A badge component for displaying status labels, counts, or tags with different visual tones and optional interactivity.
 
-**Note:** This is different from the [primitive Badge](../primitives/Badge.md) which is polymorphic and supports ref forwarding. Use this component version for simpler cases with interaction support.
+**Note:** This is different from the [element Badge](../elements/Badge.md) which is polymorphic and supports ref forwarding. Use this component version for simpler cases with interaction support.
 
 ## Import
 
@@ -169,7 +169,7 @@ const getStatusTone = (status: string) => {
 - Keep badge text concise (1-3 words or a number)
 - Add keyboard support for interactive badges (onClick)
 - Use `aria-label` for badges with only numbers or icons
-- Consider using [primitive Badge](../primitives/Badge.md) for more advanced use cases
+- Consider using [element Badge](../elements/Badge.md) for more advanced use cases
 
 ### Don't
 
@@ -179,9 +179,9 @@ const getStatusTone = (status: string) => {
 - Don't override tone colors to mean something different
 - Don't use nested interactive elements
 
-## Differences from Primitive Badge
+## Differences from Element Badge
 
-| Feature                 | Component Badge                               | Primitive Badge                            |
+| Feature                 | Component Badge                               | Element Badge                              |
 | ----------------------- | --------------------------------------------- | ------------------------------------------ |
 | Polymorphic (`as` prop) | ❌ No                                         | ✅ Yes                                     |
 | Ref forwarding          | ❌ No                                         | ✅ Yes                                     |
@@ -191,8 +191,8 @@ const getStatusTone = (status: string) => {
 
 ## Related Components
 
-- [Badge (Primitive)](../primitives/Badge.md) - Polymorphic badge with ref forwarding
-- [Text](../primitives/Text.md) - For regular text content
+- [Badge (Element)](../elements/Badge.md) - Polymorphic badge with ref forwarding
+- [Text](../elements/Text.md) - For regular text content
 - [Button](./Button.md) - For primary actions
 
 ## References

@@ -1,5 +1,5 @@
 import { Container } from './Container';
-import './layouts.css';
+import '../styles/layouts.css';
 
 import type { ReactElement, ReactNode } from 'react';
 

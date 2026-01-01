@@ -188,7 +188,7 @@ import { Card } from 'abeahn-ui/components';
 ## Related Components
 
 - [Box](./Box.md) - For simpler flex-based containers
-- [Divider](../primitives/Divider.md) - For separating card sections
+- [Divider](../elements/Divider.md) - For separating card sections
 - [Button](./Button.md) - For card actions
 
 ## References

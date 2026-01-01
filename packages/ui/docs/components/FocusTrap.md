@@ -142,9 +142,9 @@ FocusTrap recognizes these elements as focusable:
 
 ## Related Components
 
-- [Modal](../primitives/Modal.md) - Uses FocusTrap internally
-- [Dialog](../primitives/Dialog.md) - Uses FocusTrap internally
-- [Dropdown](../primitives/Dropdown.md) - Could benefit from FocusTrap
+- [Modal](../elements/Modal.md) - Uses FocusTrap internally
+- [Dialog](../elements/Dialog.md) - Uses FocusTrap internally
+- [Dropdown](../elements/Dropdown.md) - Could benefit from FocusTrap
 
 ## References
 

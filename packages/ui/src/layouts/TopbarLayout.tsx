@@ -1,5 +1,5 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
-import './layouts.css';
+import '../styles/layouts.css';
 
 export interface TopbarLayoutProps extends ComponentPropsWithoutRef<'div'> {
   /**

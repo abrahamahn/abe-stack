@@ -5,21 +5,21 @@
 - Aligned API prefixing under `/api`, kept client base URL host-only, added optional `fetchImpl` to api-client, and enforced lazy JWT secret loading without dev fallback.
 - Introduced `@abeahn/storage` with local and S3 providers; mapped storage env via `packages/shared/src/storageConfig.ts`; decorated Fastify with `storage` and updated types.
 - Cleaned unused auth middleware duplication; ESLint fixes (drizzle ignore path, deduped rules, console allowed for scripts); added auth route tests and Playwright auth scaffold gated by `E2E_BASE_URL`.
-- Added UI primitives (`Flex`, `Stack`, `Text`, `Heading`, `Surface`) with shared `primitives.css`, exported via `@abeahn/ui`.
-- Expanded UI primitives with `Divider`, `Spacer`, `Grid`, `Container`, `VisuallyHidden` to cover layout, spacing, and accessibility basics.
-- Added more UI primitives: `Kbd`, `Code`, `Tag`, `List` for shortcuts, inline code, pill labels, and styled lists.
-- Further expanded UI primitives with `Icon`, `Avatar`, `IconButton`, `Chip`, `BadgePrimitive` for iconography, avatars, compact actions, pill chips, and badges.
-- Added Tooltip, CardPrimitive, Pill, and Link primitives with supporting styles.
-- Namespaced UI exports to avoid Badge name clashes (`components` vs `primitives`).
-- Added Tabs, Accordion, Toast, LinkButton primitives and enhanced styles for link, card, and navigation patterns.
-- Added Overlay, Modal, Drawer, Progress, Skeleton, Breadcrumbs to round out core layout/feedback primitives.
-- Added Alert, InputPrimitive, TextArea, Select to cover form and status primitives.
-- Added Dropdown/MenuItem, Pagination, Table, Steps, Slider primitives to round out data display and navigation controls.
-- Added Popover, Timeline, Tree, ContextMenu primitives and supporting styles.
-- Added Switch, Checkbox, Radio, FormField primitives and form/control styling updates.
-- Added BadgeDot and Stat primitives for status dots and KPI summaries.
-- Pruned primitives to a lean, Radix-style set (~25): Accordion, Alert, Avatar, Badge, CardPrimitive, Checkbox, Divider, Dropdown/MenuItem, Heading, InputPrimitive/TextArea, Modal/Overlay, Pagination, Popover, Progress, Radio, Select, Skeleton, Slider, Switch, Tabs, Text, Toast, Tooltip, VisuallyHidden.
-- Added initial UI primitive tests for Accordion (toggle/aria-expanded) and Modal (open/close via overlay).
+- Added UI elements (`Flex`, `Stack`, `Text`, `Heading`, `Surface`) with shared `elements.css`, exported via `@abeahn/ui`.
+- Expanded UI elements with `Divider`, `Spacer`, `Grid`, `Container`, `VisuallyHidden` to cover layout, spacing, and accessibility basics.
+- Added more UI elements: `Kbd`, `Code`, `Tag`, `List` for shortcuts, inline code, pill labels, and styled lists.
+- Further expanded UI elements with `Icon`, `Avatar`, `IconButton`, `Chip`, `BadgeElement` for iconography, avatars, compact actions, pill chips, and badges.
+- Added Tooltip, CardElement, Pill, and Link elements with supporting styles.
+- Namespaced UI exports to avoid Badge name clashes (`components` vs `elements`).
+- Added Tabs, Accordion, Toast, LinkButton elements and enhanced styles for link, card, and navigation patterns.
+- Added Overlay, Modal, Drawer, Progress, Skeleton, Breadcrumbs to round out core layout/feedback elements.
+- Added Alert, InputElement, TextArea, Select to cover form and status elements.
+- Added Dropdown/MenuItem, Pagination, Table, Steps, Slider elements to round out data display and navigation controls.
+- Added Popover, Timeline, Tree, ContextMenu elements and supporting styles.
+- Added Switch, Checkbox, Radio, FormField elements and form/control styling updates.
+- Added BadgeDot and Stat elements for status dots and KPI summaries.
+- Pruned elements to a lean, Radix-style set (~25): Accordion, Alert, Avatar, Badge, CardElement, Checkbox, Divider, Dropdown/MenuItem, Heading, InputElement/TextArea, Modal/Overlay, Pagination, Popover, Progress, Radio, Select, Skeleton, Slider, Switch, Tabs, Text, Toast, Tooltip, VisuallyHidden.
+- Added initial UI element tests for Accordion (toggle/aria-expanded) and Modal (open/close via overlay).
 - Added Dialog compound API (Root, Trigger, Overlay, Content, Title, Description) with initial RTL tests.
 - Added RTL tests for Tabs, Dropdown, Select.
 - Tabs now support arrow key navigation; Dropdown test covers selection close.
@@ -30,7 +30,7 @@
 2024-12-30
 
 - Fixed import ordering in server bootstrap/types and hardened storage factory exhaustiveness without unused locals.
-- Standardized UI primitives to use `ReactElement` return types, resolved JSX namespace noise, and re-exported core components/primitives directly for app imports.
+- Standardized UI elements to use `ReactElement` return types, resolved JSX namespace noise, and re-exported core components/elements directly for app imports.
 - Adjusted DB env typing to allow boolean flags (S3 path style) and aligned server env typing.
 - Updated Vite configs (web/desktop) to skip port discovery during builds and moved web build output to `apps/web/build` to avoid permission issues.
 - Cleaned auth route tests to use DbClient-compatible stubs and ensured pnpm build now passes end-to-end.
@@ -39,13 +39,13 @@
 
 - Added UI infra folders: hooks (useDisclosure, useControllableState, useClickOutside, useMediaQuery), theme tokens (colors, spacing, typography), layouts (Container, AuthLayout, SidebarLayout, StackedLayout), and utils (cn) exported via @abeahn/ui.
 - Refactored Accordion/Dropdown/Popover/Dialog to use new controlled-state hooks and disclosure helper; Dropdown supports function children for close handling.
-- Added ComponentGallery page and /components route in apps/web to visualize primitives; added Toaster + toast store (zustand/nanoid) and global ApiProvider using @ts-rest/react-query with error interception and 401 logout.
+- Added ComponentGallery page and /components route in apps/web to visualize elements; added Toaster + toast store (zustand/nanoid) and global ApiProvider using @ts-rest/react-query with error interception and 401 logout.
 - Added export:ui script writing ui_code.txt at repo root; eslint ignores export script.
-- Consolidated ComponentGallery/StyleGuide into a single demo view under apps/web/src/demo with a /demo route to keep showcase code isolated from the main app.
-- Refined primitives CSS with polished tokens, light/dark theme via prefers-color-scheme, and variable-driven tones for badges/alerts/progress/switch to improve consistency.
-- Increased dark-mode text contrast for better readability across all primitives.
+- Consolidated ComponentGallery/StyleGuide into a single demo view under apps/web/src/features/demo with a /features/demo route to keep showcase code isolated from the main app.
+- Refined elements CSS with polished tokens, light/dark theme via prefers-color-scheme, and variable-driven tones for badges/alerts/progress/switch to improve consistency.
+- Increased dark-mode text contrast for better readability across all elements.
 - Portaled dialog overlay/content to body, wrapped dialogs in FocusTrap for a11y, simplified cn helper, and added polymorphic Text/Heading typing for better DX.
-- Applied UI theme variables globally in web entry by importing primitives.css and aligning base body styles to theme colors; cleaned legacy index.css styling.
+- Applied UI theme variables globally in web entry by importing elements.css and aligning base body styles to theme colors; cleaned legacy index.css styling.
 
 2025-12-29 (Session 1)
 
@@ -153,7 +153,7 @@
 
 2025-12-29 (Session 8)
 
-- Fixed lint and type-check issues in history navigation, UI primitives, and tooling scripts (types, cleanup returns, and safe value handling).
+- Fixed lint and type-check issues in history navigation, UI elements, and tooling scripts (types, cleanup returns, and safe value handling).
 
 2025-12-29 (Session 9)
 
@@ -219,14 +219,14 @@
 
 2025-12-29 (Session 19)
 
-- Updated TODO to include demo docs display requirement for `/demo`.
+- Updated TODO to include demo docs display requirement for `/features/demo`.
 - Tests: `pnpm format`, `pnpm lint`, `pnpm type-check` (pass); `pnpm test` fails in `apps/web` (no test files found).
 
 2025-12-30 (Session 20)
 
 - Added collapsed panel styling/animation support and separator drag callbacks for `ResizablePanel`.
 - Updated ResizablePanel docs and tests to cover collapsed behavior and new props.
-- Tests: `pnpm build` failed at `pnpm lint` due to pre-existing `@typescript-eslint/no-confusing-void-expression` errors in `apps/web/src/demo/DemoShell.tsx`.
+- Tests: `pnpm build` failed at `pnpm lint` due to pre-existing `@typescript-eslint/no-confusing-void-expression` errors in `apps/web/src/features/demo/DemoShell.tsx`.
 
 2025-12-30 (Session 21)
 
@@ -434,9 +434,9 @@
 
 2026-01-01 (Session 2)
 
-- **TDD Enhancement: Primitive Component Tests**
-  - Created comprehensive test audit (`docs/dev/testing/primitive-test-audit.md`):
-    - Audited all 33 primitive components for test coverage
+- **TDD Enhancement: Element Component Tests**
+  - Created comprehensive test audit (`docs/dev/testing/element-test-audit.md`):
+    - Audited all 33 element components for test coverage
     - Identified 12 components with missing tests (36%)
     - Identified 15 components using outdated `fireEvent` (71% of tested)
     - Created detailed enhancement plan prioritizing interactive components
@@ -500,7 +500,7 @@
     - Components with accessibility checks: 4/21 (19%, up from 0%)
     - Components with edge case coverage: 10/21 (48%, up from 24%)
   - **Updated Documentation:**
-    - Updated `docs/dev/testing/primitive-test-audit.md` with progress tracker
+    - Updated `docs/dev/testing/element-test-audit.md` with progress tracker
     - Added "Completed Enhancements" section documenting Switch, Accordion, Checkbox, and Dialog results
     - Updated summary metrics to reflect current state
     - Added context note explaining this is a production UI library requiring comprehensive tests
@@ -517,8 +517,8 @@
     - `--with-tests`: Auto-include corresponding test files for each exported file
   - Examples:
     - `tsx tools/dev/export-ui-code.ts --include-tests` (exports all UI code with tests)
-    - `tsx tools/dev/export-ui-code.ts --path packages/ui/src/primitives --include-tests` (specific directory with tests)
-    - `tsx tools/dev/export-ui-code.ts --path packages/ui/src/primitives/Image.tsx --with-tests` (single file with its test)
+    - `tsx tools/dev/export-ui-code.ts --path packages/ui/src/elements --include-tests` (specific directory with tests)
+    - `tsx tools/dev/export-ui-code.ts --path packages/ui/src/elements/Image.tsx --with-tests` (single file with its test)
   - Added better output formatting (file count, size, line count)
 
 - **TDD Enhancement: Dropdown.test.tsx** (4 → 39 tests):
@@ -565,7 +565,7 @@
   - **MAJOR MILESTONE**: Found first real component bug through TDD! 🎯
 
 - **Updated Documentation:**
-  - Updated `docs/dev/testing/primitive-test-audit.md` with Dropdown and Image results
+  - Updated `docs/dev/testing/element-test-audit.md` with Dropdown and Image results
   - Added detailed bug findings for Image component
   - Updated summary metrics and total progress tracker
   - Documented that Image bug demonstrates TDD value for production-ready UI library
@@ -650,7 +650,7 @@
   - Components with edge case coverage: 16/21 (76%, up from 57%)
 
 - **Updated Documentation:**
-  - Updated `docs/dev/testing/primitive-test-audit.md` with all 4 component results
+  - Updated `docs/dev/testing/element-test-audit.md` with all 4 component results
   - Added Pagination and Popover findings to Key Learnings section
   - Updated summary metrics and total progress tracker
 
@@ -699,7 +699,7 @@
   - Components with edge case coverage: 18/21 (86%, up from 76%)
 
 - **Updated Documentation:**
-  - Updated `docs/dev/testing/primitive-test-audit.md` with Radio and RadioGroup results.
+  - Updated `docs/dev/testing/element-test-audit.md` with Radio and RadioGroup results.
   - Documented context propagation and improved keyboard navigation logic.
 
 - Tests: All 610 tests in packages/ui passing (excluding unrelated pre-existing failure in Progress.test.tsx) ✅
@@ -735,14 +735,14 @@
   - Components with edge case coverage: 19/21 (90%, up from 86%)
 
 - **Updated Documentation:**
-  - Updated `docs/dev/testing/primitive-test-audit.md` with Select results.
+  - Updated `docs/dev/testing/element-test-audit.md` with Select results.
 
 - Tests: All 628 tests in packages/ui passing (excluding unrelated pre-existing failure in Progress.test.tsx) ✅
 - Next components in queue: Slider → Tabs → Tooltip
 
 2026-01-01 (Session 7)
 
-- Added RTL unit tests for primitives: Alert, Avatar, Badge, CardPrimitive, Divider, Heading, InputPrimitive, MenuItem, Skeleton, Text, TextArea, VisuallyHidden.
+- Added RTL unit tests for elements: Alert, Avatar, Badge, CardElement, Divider, Heading, InputElement, MenuItem, Skeleton, Text, TextArea, VisuallyHidden.
 - Covered defaults, ref/className forwarding, tone/size data attributes, custom elements, and style overrides.
 - Tests: All 702 tests in packages/ui passing ✅
 
@@ -770,14 +770,14 @@
 
 2026-01-01 (Session 12)
 
-- Moved layout class styles into `layouts.css` and removed layout rules from `primitives.css`.
+- Moved layout class styles into `layouts.css` and removed layout rules from `elements.css`.
 - Replaced layout inline styles with layout-specific classes and CSS variables where needed.
 - Updated layout tests for class-based styling expectations.
 
 2026-01-01 (Session 13)
 
 - Centralized component layout styles (Box, Input, Layout, Spinner) in `components.css` and shifted remaining inline styles to CSS variables.
-- Ensured all components import `components.css`, leaving primitives/layouts styles in their respective consolidated stylesheets.
+- Ensured all components import `components.css`, leaving elements/layouts styles in their respective consolidated stylesheets.
 - Documented shared component/layout styles in `packages/ui/docs/README.md`.
 
 2026-01-01 (Session 14)
@@ -790,3 +790,15 @@
 
 - Expanded hooks test coverage with edge cases across click outside, debounce, media query, on-screen, window size, disclosure, and local storage.
 - Hardened clipboard hook to clear timeouts between copies and added error-path tests.
+
+2026-01-01 (Session 16)
+
+- Added unit tests for UI theme tokens (colors, spacing, motion, typography) and re-export validation.
+- Added tests for MSW handlers/server wiring and test setup lifecycle callbacks.
+- Expanded utils coverage to include cn edge cases and index re-export checks.
+- Removed index re-export tests for theme and utils at user request.
+
+2026-01-01 (Session 17)
+
+- Relocated UI stylesheets into `packages/ui/src/styles` and updated component/layout/element imports.
+- Switched shared element styles to `elements.css` naming and updated build-theme output path.

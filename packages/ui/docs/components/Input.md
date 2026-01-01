@@ -2,7 +2,7 @@
 
 ## Overview
 
-A higher-level input component that wraps InputPrimitive with integrated label, description, and error message support for complete form fields.
+A higher-level input component that wraps InputElement with integrated label, description, and error message support for complete form fields.
 
 ## Import
 
@@ -212,15 +212,15 @@ const validatePassword = (value: string) => {
 
 ## Related Components
 
-- [InputPrimitive](../primitives/InputPrimitive.md) - Lower-level input component
-- [TextArea](../primitives/TextArea.md) - For multi-line input
-- [Checkbox](../primitives/Checkbox.md) - For boolean inputs
-- [Select](../primitives/Select.md) - For dropdown selections
+- [InputElement](../elements/InputElement.md) - Lower-level input component
+- [TextArea](../elements/TextArea.md) - For multi-line input
+- [Checkbox](../elements/Checkbox.md) - For boolean inputs
+- [Select](../elements/Select.md) - For dropdown selections
 - [Button](./Button.md) - For form submission
 
 ## References
 
 - [Source](../../src/components/Input.tsx)
-- [InputPrimitive Source](../../src/primitives/InputPrimitive.tsx)
+- [InputElement Source](../../src/elements/InputElement.tsx)
 - [WCAG: Labels or Instructions](https://www.w3.org/WAI/WCAG21/Understanding/labels-or-instructions.html)
 - [WCAG: Error Identification](https://www.w3.org/WAI/WCAG21/Understanding/error-identification.html)

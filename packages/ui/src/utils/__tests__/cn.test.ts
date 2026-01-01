@@ -11,4 +11,12 @@ describe('cn', () => {
   it('filters falsey values', () => {
     expect(cn('a', false, null, undefined, 'b')).toBe('a b');
   });
+
+  it('drops empty strings', () => {
+    expect(cn('a', '', 'b')).toBe('a b');
+  });
+
+  it('returns an empty string when no truthy values exist', () => {
+    expect(cn(false, null, undefined, '')).toBe('');
+  });
 });

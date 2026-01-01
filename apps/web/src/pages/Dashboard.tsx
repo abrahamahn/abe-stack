@@ -1,9 +1,9 @@
 import { Button, Card, Heading, PageContainer, Text } from '@abe-stack/ui';
 import { useNavigate, type NavigateFunction } from 'react-router-dom';
 
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../features/auth/useAuth';
 
-import type { User } from '../contexts/AuthContext';
+import type { User } from '../features/auth/AuthContext';
 import type { JSX } from 'react';
 
 export function DashboardPage(): JSX.Element {

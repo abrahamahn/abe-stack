@@ -1,6 +1,6 @@
 import { useEffect, useRef, type ReactElement, type ReactNode } from 'react';
 
-import './components.css';
+import '../styles/components.css';
 
 const FOCUSABLE = [
   'a[href]',

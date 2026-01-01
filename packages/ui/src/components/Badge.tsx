@@ -1,6 +1,6 @@
 import React from 'react';
 
-import './components.css';
+import '../styles/components.css';
 
 type BadgeTone = 'success' | 'danger' | 'warning' | 'neutral';
 

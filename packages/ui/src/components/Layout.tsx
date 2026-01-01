@@ -1,6 +1,6 @@
 import { cn } from '../utils/cn';
 
-import './components.css';
+import '../styles/components.css';
 import type { CSSProperties, ReactElement, ReactNode } from 'react';
 
 type LayoutProps = {

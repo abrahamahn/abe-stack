@@ -12,8 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Secondary export paths for better tree-shaking and granular imports:
-  - `@abeahn/ui/components` - Import only component primitives (Button, Card, Input, etc.)
-  - `@abeahn/ui/primitives` - Import only primitive components (Accordion, Alert, Avatar, etc.)
+  - `@abeahn/ui/components` - Import only component elements (Button, Card, Input, etc.)
+  - `@abeahn/ui/elements` - Import only element components (Accordion, Alert, Avatar, etc.)
   - `@abeahn/ui/layouts` - Import only layout components (Container, AppShell, SidebarLayout, etc.)
   - `@abeahn/ui/hooks` - Import only React hooks (useMediaQuery, useDisclosure, etc.)
   - `@abeahn/ui/theme` - Import only theme tokens (colors, spacing, typography, etc.)
@@ -58,7 +58,7 @@ import { useMediaQuery, useDisclosure } from '@abeahn/ui/hooks';
 
 - Initial release of @abeahn/ui
 - 7 core components: Button, Card, Heading, Input, PageContainer, Text, Image
-- 35+ primitive components from Radix UI
+- 35+ element components from Radix UI
 - 6 layout components: Container, AppShell, SidebarLayout, AuthLayout, etc.
 - 9 custom React hooks: useMediaQuery, useLocalStorage, useDisclosure, etc.
 - Theme system with design tokens (colors, spacing, typography, motion)

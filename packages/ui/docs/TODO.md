@@ -48,13 +48,13 @@ Last Review: Code review of UI packages and demo page implementation
 - Related components
 - References (source, tests)
 
-**Reference:** Follow structure of `packages/ui/docs/primitives/ResizablePanel.md`
+**Reference:** Follow structure of `packages/ui/docs/elements/ResizablePanel.md`
 
 ---
 
 ### 3. Add New Layouts to Demo Registry
 
-**File:** `apps/web/src/demo/registry.tsx`
+**File:** `apps/web/src/features/demo/registry.tsx`
 
 **Action Items:**
 
@@ -86,7 +86,7 @@ topbarLayout: {
 
 ### 4. Split Large Registry File
 
-**Current Issue:** `apps/web/src/demo/registry.tsx` is 1500+ lines
+**Current Issue:** `apps/web/src/features/demo/registry.tsx` is 1500+ lines
 
 - Violates single responsibility principle
 - Hard to maintain and navigate
@@ -95,9 +95,9 @@ topbarLayout: {
 **Proposed Structure:**
 
 ```
-apps/web/src/demo/registry/
+apps/web/src/features/demo/registry/
   ├── index.ts          # Re-exports and aggregates
-  ├── primitives.tsx    # Accordion, Alert, Avatar, etc.
+  ├── elements.tsx    # Accordion, Alert, Avatar, etc.
   ├── components.tsx    # Box, Button, Card, Input, etc.
   └── layouts.tsx       # All layout components
 ```
@@ -113,7 +113,7 @@ apps/web/src/demo/registry/
 
 ### 5. Extract Inline Styles to Theme Variables
 
-**File:** `apps/web/src/demo/DemoShell.tsx`
+**File:** `apps/web/src/features/demo/DemoShell.tsx`
 
 **Current Issues:**
 
@@ -139,13 +139,13 @@ className="demo-panel"
 
 **Files to Create:**
 
-- `apps/web/src/demo/DemoShell.css` (or use existing styles)
+- `apps/web/src/features/demo/DemoShell.css` (or use existing styles)
 
 ---
 
 ### 6. Extract Business Logic from Demo
 
-**File:** `apps/web/src/demo/docs.ts`
+**File:** `apps/web/src/features/demo/docs.ts`
 
 **Current Issue:**
 
@@ -169,7 +169,7 @@ packages/shared/src/utils/docs.ts
 
 ### 7. Accessibility: Keyboard Support for ResizablePanel
 
-**File:** `packages/ui/src/primitives/ResizablePanel.tsx`
+**File:** `packages/ui/src/elements/ResizablePanel.tsx`
 **Docs Note:** Line 144 in `ResizablePanel.md` mentions this is missing
 
 **Implementation:**
@@ -204,7 +204,7 @@ packages/shared/src/utils/docs.ts
 
 ### 8. Memoize Expensive Operations
 
-**File:** `apps/web/src/demo/DemoShell.tsx` (line ~358)
+**File:** `apps/web/src/features/demo/DemoShell.tsx` (line ~358)
 
 **Issue:** Markdown parsing happens on every render
 
@@ -258,7 +258,7 @@ Component.displayName = 'Component';
 
 ### 10. Performance: Lazy Load Registry
 
-**File:** `apps/web/src/demo/registry.tsx`
+**File:** `apps/web/src/features/demo/registry.tsx`
 
 **Issue:** All 1500+ lines of component demos load immediately
 
@@ -267,7 +267,7 @@ Component.displayName = 'Component';
 ```tsx
 // registry/index.ts
 const registries = {
-  primitives: () => import('./primitives'),
+  elements: () => import('./elements'),
   components: () => import('./components'),
   layouts: () => import('./layouts'),
 };

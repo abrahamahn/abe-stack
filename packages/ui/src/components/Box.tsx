@@ -1,6 +1,6 @@
 import { cn } from '../utils/cn';
 
-import './components.css';
+import '../styles/components.css';
 import type { ReactNode, CSSProperties, ReactElement } from 'react';
 
 export interface BoxProps {

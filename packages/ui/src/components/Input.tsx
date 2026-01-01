@@ -1,9 +1,9 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ElementType } from 'react';
 
-import { InputPrimitive } from '../primitives/InputPrimitive';
-import { Text } from '../primitives/Text';
+import { InputElement } from '../elements/InputElement';
+import { Text } from '../elements/Text';
 
-import './components.css';
+import '../styles/components.css';
 
 type InputProps = ComponentPropsWithoutRef<'input'> & {
   as?: ElementType;
@@ -25,7 +25,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
           {label}
         </label>
       ) : null}
-      <InputPrimitive
+      <InputElement
         as={as}
         id={inputId}
         ref={ref}

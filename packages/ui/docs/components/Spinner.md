@@ -122,7 +122,7 @@ const [loading, setLoading] = useState(true);
 - Use appropriate size for context
 - Show spinner while async operations are in progress
 - Center spinner in its container
-- Consider using with [Progress](../primitives/Progress.md) for determinate operations
+- Consider using with [Progress](../elements/Progress.md) for determinate operations
 
 ### Don't
 
@@ -135,8 +135,8 @@ const [loading, setLoading] = useState(true);
 
 ## Related Components
 
-- [Progress](../primitives/Progress.md) - For determinate progress (0-100%)
-- [Skeleton](../primitives/Skeleton.md) - For content loading placeholders
+- [Progress](../elements/Progress.md) - For determinate progress (0-100%)
+- [Skeleton](../elements/Skeleton.md) - For content loading placeholders
 
 ## References
 

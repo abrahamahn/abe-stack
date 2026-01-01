@@ -27,7 +27,7 @@ Frontend
 
 - Web (Vite + React) wired to api-client/tokenStore; pages (Home, Dashboard, Login), AuthContext/useAuth, ProtectedRoute.
 - Playwright auth happy-path scaffold (gated by `E2E_BASE_URL`).
-- UI package: web/electron-oriented primitives (Button, Card, Input, Badge, Spinner, Layout, Box).
+- UI package: web/electron-oriented elements (Button, Card, Input, Badge, Spinner, Layout, Box).
 - Desktop: Electron renderer shell wiring UI components.
 - Mobile: React Native starter app.
 
@@ -65,14 +65,14 @@ Docs & Developer Experience
 
 UI Package Enhancements (2024-12-31)
 
-- **Primitives (~25 lean components)**: Accordion, Alert, Avatar, Badge, Card, Checkbox, Divider, Dropdown/MenuItem, Heading, Input/TextArea, Modal/Overlay/Dialog, Pagination, Popover, Progress, Radio, Select, Skeleton, Slider, Switch, Tabs, Text, Toast, Tooltip, VisuallyHidden
+- **elements (~25 lean components)**: Accordion, Alert, Avatar, Badge, Card, Checkbox, Divider, Dropdown/MenuItem, Heading, Input/TextArea, Modal/Overlay/Dialog, Pagination, Popover, Progress, Radio, Select, Skeleton, Slider, Switch, Tabs, Text, Toast, Tooltip, VisuallyHidden
 - **Infrastructure**:
   - Hooks: useDisclosure, useControllableState, useClickOutside, useMediaQuery
   - Theme: colors, spacing, typography tokens with light/dark mode
   - Layouts: Container, AuthLayout, SidebarLayout, StackedLayout
   - Utils: cn (classname merging)
 - **Testing**: RTL tests for keyboard navigation, focus management, accessibility (ARIA)
-- **Demo**: Component gallery at `/demo` route in apps/web showcasing all primitives with live examples
+- **Demo**: Component gallery at `/features/demo` route in apps/web showcasing all elements with live examples
 - **DX Improvements**: Polymorphic Text/Heading typing, FocusTrap for modals, portal-based overlays
 
 Infra/Ops

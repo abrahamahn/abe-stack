@@ -1,7 +1,7 @@
-# Primitive Component Test Audit
+# Element Component Test Audit
 
 **Date:** 2026-01-01
-**Purpose:** Comprehensive audit of all primitive component tests to identify gaps and plan TDD improvements
+**Purpose:** Comprehensive audit of all element component tests to identify gaps and plan TDD improvements
 
 **Context:** ABE Stack UI is a **production-ready UI library** designed for reuse across multiple production applications. Comprehensive testing (25-50 tests per component) is industry-standard for libraries of this nature (see Radix UI, React Aria, Chakra UI).
 
@@ -209,7 +209,7 @@ it('has no accessibility violations', async () => {
 
 ### High Priority (User-facing, interactive)
 
-1. **InputPrimitive.tsx** 🔴 HIGH
+1. **InputElement.tsx** 🔴 HIGH
    - Form input - critical for user input
    - Needs: value changes, validation, focus/blur, keyboard events, edge cases
 
@@ -235,7 +235,7 @@ it('has no accessibility violations', async () => {
 
 ### Medium Priority (Layout/Typography)
 
-7. **CardPrimitive.tsx** 🟡 MEDIUM
+7. **CardElement.tsx** 🟡 MEDIUM
    - Card container - layout component
    - Needs: content rendering, className forwarding
 
@@ -306,7 +306,7 @@ export interface SwitchProps {
 
 ### Phase 2: Add Missing High Priority Tests
 
-**Order:** InputPrimitive → TextArea → Alert → Badge → Avatar → MenuItem
+**Order:** InputElement → TextArea → Alert → Badge → Avatar → MenuItem
 
 **For each:**
 
@@ -319,7 +319,7 @@ export interface SwitchProps {
 
 ### Phase 3: Add Missing Low Priority Tests
 
-**Order:** CardPrimitive → Heading → Text → Divider → Skeleton → VisuallyHidden
+**Order:** CardElement → Heading → Text → Divider → Skeleton → VisuallyHidden
 
 ---
 
@@ -384,7 +384,7 @@ Use this for ALL components (existing and new):
    - Enhance with TDD, userEvent, edge cases, accessibility
    - Use as template for other enhancements
 
-2. **Move to InputPrimitive** (no test yet)
+2. **Move to InputElement** (no test yet)
    - Write from scratch using TDD
    - Demonstrate full Red-Green-Refactor cycle
 
