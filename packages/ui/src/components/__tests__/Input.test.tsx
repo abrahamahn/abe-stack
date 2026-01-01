@@ -23,4 +23,31 @@ describe('Input', () => {
     expect(input).toHaveAttribute('aria-invalid', 'true');
     expect(input).toHaveAttribute('aria-describedby', error.id);
   });
+
+  it('prefers error over description for aria-describedby', () => {
+    render(<Input id="email" label="Email" description="Helper" error="Required" />);
+
+    const input = screen.getByLabelText('Email');
+    const description = screen.getByText('Helper');
+    const error = screen.getByText('Required');
+
+    expect(description).toHaveAttribute('id', 'email-desc');
+    expect(error).toHaveAttribute('id', 'email-err');
+    expect(input).toHaveAttribute('aria-describedby', 'email-err');
+  });
+
+  it('renders without a label', () => {
+    render(<Input placeholder="No label" />);
+
+    const input = screen.getByPlaceholderText('No label');
+    expect(input).toBeInTheDocument();
+    expect(screen.queryByLabelText('No label')).not.toBeInTheDocument();
+  });
+
+  it('supports custom element types', () => {
+    render(<Input as="textarea" label="Notes" />);
+
+    const input = screen.getByLabelText('Notes');
+    expect(input.tagName.toLowerCase()).toBe('textarea');
+  });
 });

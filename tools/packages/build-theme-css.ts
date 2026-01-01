@@ -9,7 +9,7 @@ import { spacing } from '../../packages/ui/src/theme/spacing';
 import { typography } from '../../packages/ui/src/theme/typography';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const themeCssPath = path.resolve(__dirname, '../../packages/ui/src/theme/theme.css');
+const themeCssPath = path.resolve(__dirname, '../../packages/ui/src/styles/theme.css');
 
 const darkOverrides = {
   primary: '#3b82f6',
@@ -61,6 +61,7 @@ function toCssVars(): string {
     '--ui-gap-md': spacing.md,
     '--ui-gap-lg': spacing.lg,
     '--ui-gap-xl': spacing.xl,
+    '--ui-border-width': '1px',
     '--ui-motion-duration-fast': motion.durations.fast,
     '--ui-motion-duration-base': motion.durations.base,
     '--ui-motion-duration-slow': motion.durations.slow,
@@ -95,6 +96,7 @@ function toCssVars(): string {
     '--ui-color-surface': '#f7f7f8',
     '--ui-color-surface-strong': '#0f172a',
     '--ui-color-border': '#e2e5e9',
+    '--ui-layout-border': 'var(--ui-border-width) solid var(--ui-color-border)',
     '--ui-color-shadow': '0 10px 30px rgba(18, 38, 63, 0.08)',
     '--ui-color-text': '#0f172a',
     '--ui-color-text-muted': '#4b5563',
@@ -138,6 +140,7 @@ function toCssVars(): string {
     '--ui-color-surface': darkOverrides.surface,
     '--ui-color-surface-strong': darkOverrides.surfaceStrong,
     '--ui-color-border': darkOverrides.border,
+    '--ui-layout-border': 'var(--ui-border-width) solid var(--ui-color-border)',
     '--ui-color-shadow': '0 16px 48px rgba(0, 0, 0, 0.45)',
     '--ui-color-text': darkOverrides.text,
     '--ui-color-text-muted': darkOverrides.textMuted,

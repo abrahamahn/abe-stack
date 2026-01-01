@@ -22,7 +22,7 @@ export function HomePage(): JSX.Element {
         <Link to="/dashboard">
           <Button variant="secondary">Dashboard</Button>
         </Link>
-        <Link to="/demo">
+        <Link to="/features/demo">
           <Button variant="secondary">Demo</Button>
         </Link>
       </section>

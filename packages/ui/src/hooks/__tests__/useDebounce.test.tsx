@@ -33,4 +33,32 @@ describe('useDebounce', () => {
 
     vi.useRealTimers();
   });
+
+  it('uses the latest value after rapid updates', () => {
+    vi.useFakeTimers();
+    const { rerender } = render(<DebounceHarness value="a" delay={200} />);
+
+    rerender(<DebounceHarness value="b" delay={200} />);
+    rerender(<DebounceHarness value="c" delay={200} />);
+
+    act(() => {
+      vi.advanceTimersByTime(200);
+    });
+    expect(screen.getByTestId('value')).toHaveTextContent('c');
+
+    vi.useRealTimers();
+  });
+
+  it('handles zero delay', () => {
+    vi.useFakeTimers();
+    const { rerender } = render(<DebounceHarness value="start" delay={0} />);
+
+    rerender(<DebounceHarness value="next" delay={0} />);
+    act(() => {
+      vi.advanceTimersByTime(0);
+    });
+    expect(screen.getByTestId('value')).toHaveTextContent('next');
+
+    vi.useRealTimers();
+  });
 });

@@ -1,7 +1,7 @@
 import { Spinner, Text } from '@abe-stack/ui';
 import { Navigate, Outlet } from 'react-router-dom';
 
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../features/auth/useAuth';
 
 import type { ReactElement, ReactNode } from 'react';
 

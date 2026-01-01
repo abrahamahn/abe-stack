@@ -21,3 +21,12 @@ body {
 #root {
   min-height: 100vh;
 }
+
+.demo-copy-button.btn-text {
+  text-decoration: none;
+}
+
+.demo-copy-button.btn-text:hover,
+.demo-copy-button.btn-text:active {
+  text-decoration: none;
+}

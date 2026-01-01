@@ -1,7 +1,9 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ElementType } from 'react';
 
-import { InputPrimitive } from '../primitives/InputPrimitive';
-import { Text } from '../primitives/Text';
+import { InputElement } from '../elements/InputElement';
+import { Text } from '../elements/Text';
+
+import '../styles/components.css';
 
 type InputProps = ComponentPropsWithoutRef<'input'> & {
   as?: ElementType;
@@ -17,19 +19,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
   const errorId = error ? `${inputId}-err` : undefined;
 
   return (
-    <div style={{ display: 'grid', gap: 'var(--ui-gap-sm)' }}>
+    <div className="ui-input-field">
       {label ? (
-        <label
-          htmlFor={inputId}
-          style={{
-            fontWeight: 'var(--ui-font-weight-medium)',
-            fontSize: 'var(--ui-font-size-sm)',
-          }}
-        >
+        <label htmlFor={inputId} className="ui-input-label">
           {label}
         </label>
       ) : null}
-      <InputPrimitive
+      <InputElement
         as={as}
         id={inputId}
         ref={ref}
@@ -39,12 +35,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
         {...rest}
       />
       {description ? (
-        <Text id={descId} tone="muted" style={{ fontSize: 'var(--ui-font-size-xs)' }}>
+        <Text id={descId} tone="muted" className="ui-input-description">
           {description}
         </Text>
       ) : null}
       {error ? (
-        <Text id={errorId} tone="danger" style={{ fontSize: 'var(--ui-font-size-xs)' }}>
+        <Text id={errorId} tone="danger" className="ui-input-error">
           {error}
         </Text>
       ) : null}

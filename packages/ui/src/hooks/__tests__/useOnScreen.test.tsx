@@ -42,4 +42,36 @@ describe('useOnScreen', () => {
 
     window.IntersectionObserver = originalObserver;
   });
+
+  it('stays false when intersection observer reports not visible', () => {
+    const originalObserver = window.IntersectionObserver;
+    class HiddenIntersectionObserver {
+      private callback: ObserverCallback;
+      constructor(callback: ObserverCallback) {
+        this.callback = callback;
+      }
+      observe(): void {
+        this.callback([{ isIntersecting: false }]);
+      }
+      disconnect(): void {}
+    }
+    // @ts-expect-error intersection observer is stubbed for unit tests
+    window.IntersectionObserver = HiddenIntersectionObserver;
+
+    render(<OnScreenHarness />);
+    expect(screen.getByTestId('visible')).toHaveTextContent('false');
+
+    window.IntersectionObserver = originalObserver;
+  });
+
+  it('remains false when IntersectionObserver is unavailable', () => {
+    const originalObserver = window.IntersectionObserver;
+    // @ts-expect-error simulate missing observer
+    window.IntersectionObserver = undefined;
+
+    render(<OnScreenHarness />);
+    expect(screen.getByTestId('visible')).toHaveTextContent('false');
+
+    window.IntersectionObserver = originalObserver;
+  });
 });

@@ -236,8 +236,8 @@ Communicate loading to screen readers:
 
 ## Related Components
 
-- [MenuItem](../primitives/MenuItem.md) - For menu buttons
-- [Switch](../primitives/Switch.md) - For toggle actions
+- [MenuItem](../elements/MenuItem.md) - For menu buttons
+- [Switch](../elements/Switch.md) - For toggle actions
 
 ## References
 

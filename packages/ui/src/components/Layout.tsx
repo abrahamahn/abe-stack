@@ -1,5 +1,7 @@
+import { cn } from '../utils/cn';
+
+import '../styles/components.css';
 import type { CSSProperties, ReactElement, ReactNode } from 'react';
-import '../theme/theme.css';
 
 type LayoutProps = {
   top?: ReactNode;
@@ -37,34 +39,27 @@ export function Layout({
     .filter(Boolean)
     .join(' ');
 
-  return (
-    <div
-      className={className}
-      style={{
-        display: 'grid',
-        gridTemplateRows: `${top ? 'auto' : ''} minmax(0, 1fr) ${bottom ? 'auto' : ''}`.trim(),
-        gap,
-        minHeight: '100vh',
-        ...style,
-      }}
-    >
-      {top ? <header>{top}</header> : null}
+  const cssVars = {
+    '--ui-layout-gap': gap,
+    '--ui-layout-columns': columns || 'minmax(0, 1fr)',
+    '--ui-layout-left-min-width': minLeftWidth,
+    '--ui-layout-right-min-width': minRightWidth,
+    '--ui-layout-top-row': top ? 'auto' : '0px',
+    '--ui-layout-bottom-row': bottom ? 'auto' : '0px',
+    ...style,
+  } as CSSProperties;
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: columns,
-          gap,
-          alignItems: 'stretch',
-          minHeight: 0,
-        }}
-      >
-        {hasLeft ? <aside style={{ minWidth: minLeftWidth }}>{left}</aside> : null}
-        <main style={{ minWidth: 0 }}>{children}</main>
-        {hasRight ? <aside style={{ minWidth: minRightWidth }}>{right}</aside> : null}
+  return (
+    <div className={cn('ui-layout', className)} style={cssVars}>
+      {top ? <header className="ui-layout-header">{top}</header> : null}
+
+      <div className="ui-layout-main-grid">
+        {hasLeft ? <aside className="ui-layout-left">{left}</aside> : null}
+        <main className="ui-layout-content">{children}</main>
+        {hasRight ? <aside className="ui-layout-right">{right}</aside> : null}
       </div>
 
-      {bottom ? <footer>{bottom}</footer> : null}
+      {bottom ? <footer className="ui-layout-footer">{bottom}</footer> : null}
     </div>
   );
 }

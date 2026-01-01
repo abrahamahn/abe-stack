@@ -2,22 +2,30 @@
 
 Primary goal: reliable refactoring with fast, focused tests driven by TDD.
 
+## Quick Start
+
+**New to testing React components?** Start with `./best-practices.md` for a comprehensive modern guide.
+
 ## Quick Summary
 
 - Use TDD: write failing tests first, then fix code to pass.
-- Test business logic thoroughly, test React sparingly.
-- Use unit tests for shared logic.
+- Test user behavior, not implementation details.
+- Use unit tests for shared logic (utils, validators).
+- Use component/integration tests for React (70% of tests).
 - Use contract tests to validate ts-rest contracts.
 - Use integration tests for routes + DB.
-- Use E2E tests for critical user flows only.
+- Use E2E tests for critical user flows only (~10% of tests).
 
 ## Modules
 
+- `./best-practices.md` → Modern React testing guide (START HERE)
+- `./setup.md` → Testing framework setup and configuration (Vitest, RTL, MSW, Playwright)
 - `./overview.md` → Strategy summary and priorities.
 - `./levels.md` → Unit/integration/E2E expectations.
 - `./organization.md` → Where tests live and why.
 - `./commands.md` → Fast loop vs full suite commands.
 - `./examples.md` → Example tests and patterns.
+- `./edge-cases.md` → Edge case testing and TDD conventions (REQUIRED READING).
 
 ## Key Patterns/Commands
 
@@ -48,7 +56,7 @@ Primary goal: reliable refactoring with fast, focused tests driven by TDD.
 All newly created files must start with a first-line comment containing the
 workspace-relative path. Examples:
 
-- `// packages/ui/src/primitives/__tests__/Switch.test.tsx`
+- `// packages/ui/src/elements/__tests__/Switch.test.tsx`
 - `<!-- docs/dev/testing/index.md -->`
 
 ## Balanced Testing Matrix (30% Fast / 70% Full)

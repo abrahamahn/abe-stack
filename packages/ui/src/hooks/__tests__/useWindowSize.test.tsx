@@ -36,4 +36,32 @@ describe('useWindowSize', () => {
     expect(screen.getByTestId('size')).toHaveTextContent('1024x768');
     vi.useRealTimers();
   });
+
+  it('uses the latest size after rapid resize bursts', () => {
+    vi.useFakeTimers();
+    Object.defineProperty(window, 'innerWidth', { value: 500, writable: true });
+    Object.defineProperty(window, 'innerHeight', { value: 400, writable: true });
+
+    render(<WindowSizeHarness />);
+    expect(screen.getByTestId('size')).toHaveTextContent('500x400');
+
+    act(() => {
+      window.innerWidth = 640;
+      window.innerHeight = 480;
+      window.dispatchEvent(new Event('resize'));
+      window.innerWidth = 800;
+      window.innerHeight = 600;
+      window.dispatchEvent(new Event('resize'));
+      vi.advanceTimersByTime(149);
+    });
+
+    expect(screen.getByTestId('size')).toHaveTextContent('500x400');
+
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+
+    expect(screen.getByTestId('size')).toHaveTextContent('800x600');
+    vi.useRealTimers();
+  });
 });

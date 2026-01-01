@@ -13,9 +13,9 @@
       "import": "./dist/components/index.js",
       "types": "./dist/components/index.d.ts"
     },
-    "./primitives": {
-      "import": "./dist/primitives/index.js",
-      "types": "./dist/primitives/index.d.ts"
+    "./elements": {
+      "import": "./dist/elements/index.js",
+      "types": "./dist/elements/index.d.ts"
     },
     "./layouts": {
       "import": "./dist/layouts/index.js",

@@ -37,7 +37,7 @@ Comprehensive documentation for all 46 components including:
 **Quick links:**
 
 - [Components](./docs/README.md#components) - Core UI components (8 components)
-- [Primitives](./docs/README.md#primitives) - Low-level primitives (32 components)
+- [elements](./docs/README.md#elements) - Low-level elements (32 components)
 - [Layouts](./docs/README.md#layouts) - Layout components (6 layouts)
 
 ---

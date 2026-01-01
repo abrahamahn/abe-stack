@@ -1,11 +1,12 @@
+import { ScrollArea } from '@abe-stack/ui';
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Toaster } from './components/Toaster';
-import { AuthProvider } from './contexts/AuthContext';
 import { HistoryProvider } from './contexts/HistoryContext';
-import { DemoPage } from './demo';
+import { AuthProvider } from './features/auth/AuthContext';
+import { DemoPage } from './features/demo';
 import { DashboardPage } from './pages/Dashboard';
 import { HomePage } from './pages/Home';
 import { LoginPage } from './pages/Login';
@@ -17,21 +18,23 @@ export const App: React.FC = () => {
       <BrowserRouter>
         <ApiProvider>
           <HistoryProvider>
-            <div className="ui-theme">
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/demo" element={<DemoPage />} />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="/clean" element={<HomePage />} />
-              </Routes>
+            <div className="ui-theme" style={{ height: '100vh' }}>
+              <ScrollArea style={{ height: '100%' }}>
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/features/demo" element={<DemoPage />} />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <DashboardPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="/clean" element={<HomePage />} />
+                </Routes>
+              </ScrollArea>
               <Toaster />
             </div>
           </HistoryProvider>

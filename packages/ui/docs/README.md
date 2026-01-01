@@ -5,14 +5,16 @@ Complete documentation for all components in the @abeahn/ui package.
 ## Quick Navigation
 
 - [Components](#components) - Core UI components
-- [Primitives](#primitives) - Low-level primitive components
+- [elements](#elements) - Low-level element components
 - [Layouts](#layouts) - Layout components
 - [Getting Started](#getting-started)
 - [Import Patterns](#import-patterns)
 
 ## Components
 
-Core UI components built on top of primitives.
+Core UI components built on top of elements.
+
+Styles: Components load shared styling from `packages/ui/src/styles/components.css`.
 
 | Component                              | Description                             | Import                  |
 | -------------------------------------- | --------------------------------------- | ----------------------- |
@@ -25,48 +27,50 @@ Core UI components built on top of primitives.
 | [Layout](./components/Layout.md)       | Generic layout wrapper                  | `@abeahn/ui/components` |
 | [Spinner](./components/Spinner.md)     | Loading indicator                       | `@abeahn/ui/components` |
 
-## Primitives
+## elements
 
-Low-level primitive components from Radix UI and custom implementations.
+Low-level element components from Radix UI and custom implementations.
 
-| Component                                        | Description                  | Import                  |
-| ------------------------------------------------ | ---------------------------- | ----------------------- |
-| [Accordion](./primitives/Accordion.md)           | Collapsible content sections | `@abeahn/ui/primitives` |
-| [Alert](./primitives/Alert.md)                   | Display important messages   | `@abeahn/ui/primitives` |
-| [Avatar](./primitives/Avatar.md)                 | User profile image display   | `@abeahn/ui/primitives` |
-| [BadgePrimitive](./primitives/Badge.md)          | Primitive badge component    | `@abeahn/ui/primitives` |
-| [Checkbox](./primitives/Checkbox.md)             | Boolean input control        | `@abeahn/ui/primitives` |
-| [Dialog](./primitives/Dialog.md)                 | Modal dialog window          | `@abeahn/ui/primitives` |
-| [Divider](./primitives/Divider.md)               | Visual content separator     | `@abeahn/ui/primitives` |
-| [Dropdown](./primitives/Dropdown.md)             | Dropdown menu                | `@abeahn/ui/primitives` |
-| [Heading](./primitives/Heading.md)               | Semantic heading text        | `@abeahn/ui/primitives` |
-| [Image](./primitives/Image.md)                   | Lazy-loaded image component  | `@abeahn/ui/primitives` |
-| [InputPrimitive](./primitives/InputPrimitive.md) | Primitive input component    | `@abeahn/ui/primitives` |
-| [MenuItem](./primitives/MenuItem.md)             | Menu item element            | `@abeahn/ui/primitives` |
-| [Modal](./primitives/Modal.md)                   | Modal overlay with portal    | `@abeahn/ui/primitives` |
-| [Overlay](./primitives/Overlay.md)               | Background overlay           | `@abeahn/ui/primitives` |
-| [Pagination](./primitives/Pagination.md)         | Page navigation controls     | `@abeahn/ui/primitives` |
-| [Popover](./primitives/Popover.md)               | Floating content container   | `@abeahn/ui/primitives` |
-| [Progress](./primitives/Progress.md)             | Progress indicator           | `@abeahn/ui/primitives` |
-| [Radio](./primitives/Radio.md)                   | Single radio button          | `@abeahn/ui/primitives` |
-| [RadioGroup](./primitives/RadioGroup.md)         | Group of radio buttons       | `@abeahn/ui/primitives` |
-| [ResizablePanel](./primitives/ResizablePanel.md) | Resizable panel container    | `@abeahn/ui/primitives` |
-| [ScrollArea](./primitives/ScrollArea.md)         | Custom scrollable area       | `@abeahn/ui/primitives` |
-| [Select](./primitives/Select.md)                 | Dropdown selection input     | `@abeahn/ui/primitives` |
-| [Skeleton](./primitives/Skeleton.md)             | Loading placeholder          | `@abeahn/ui/primitives` |
-| [Slider](./primitives/Slider.md)                 | Range input slider           | `@abeahn/ui/primitives` |
-| [Switch](./primitives/Switch.md)                 | Toggle switch control        | `@abeahn/ui/primitives` |
-| [Table](./primitives/Table.md)                   | Data table component         | `@abeahn/ui/primitives` |
-| [Tabs](./primitives/Tabs.md)                     | Tabbed content interface     | `@abeahn/ui/primitives` |
-| [Text](./primitives/Text.md)                     | Semantic text element        | `@abeahn/ui/primitives` |
-| [TextArea](./primitives/TextArea.md)             | Multi-line text input        | `@abeahn/ui/primitives` |
-| [Toast](./primitives/Toast.md)                   | Notification message         | `@abeahn/ui/primitives` |
-| [Tooltip](./primitives/Tooltip.md)               | Hover information display    | `@abeahn/ui/primitives` |
-| [VisuallyHidden](./primitives/VisuallyHidden.md) | Screen-reader only content   | `@abeahn/ui/primitives` |
+| Component                                      | Description                  | Import                |
+| ---------------------------------------------- | ---------------------------- | --------------------- |
+| [Accordion](./elements/Accordion.md)           | Collapsible content sections | `@abeahn/ui/elements` |
+| [Alert](./elements/Alert.md)                   | Display important messages   | `@abeahn/ui/elements` |
+| [Avatar](./elements/Avatar.md)                 | User profile image display   | `@abeahn/ui/elements` |
+| [BadgeElement](./elements/Badge.md)            | Element badge component      | `@abeahn/ui/elements` |
+| [Checkbox](./elements/Checkbox.md)             | Boolean input control        | `@abeahn/ui/elements` |
+| [Dialog](./elements/Dialog.md)                 | Modal dialog window          | `@abeahn/ui/elements` |
+| [Divider](./elements/Divider.md)               | Visual content separator     | `@abeahn/ui/elements` |
+| [Dropdown](./elements/Dropdown.md)             | Dropdown menu                | `@abeahn/ui/elements` |
+| [Heading](./elements/Heading.md)               | Semantic heading text        | `@abeahn/ui/elements` |
+| [Image](./elements/Image.md)                   | Lazy-loaded image component  | `@abeahn/ui/elements` |
+| [InputElement](./elements/InputElement.md)     | Element input component      | `@abeahn/ui/elements` |
+| [MenuItem](./elements/MenuItem.md)             | Menu item element            | `@abeahn/ui/elements` |
+| [Modal](./elements/Modal.md)                   | Modal overlay with portal    | `@abeahn/ui/elements` |
+| [Overlay](./elements/Overlay.md)               | Background overlay           | `@abeahn/ui/elements` |
+| [Pagination](./elements/Pagination.md)         | Page navigation controls     | `@abeahn/ui/elements` |
+| [Popover](./elements/Popover.md)               | Floating content container   | `@abeahn/ui/elements` |
+| [Progress](./elements/Progress.md)             | Progress indicator           | `@abeahn/ui/elements` |
+| [Radio](./elements/Radio.md)                   | Single radio button          | `@abeahn/ui/elements` |
+| [RadioGroup](./elements/RadioGroup.md)         | Group of radio buttons       | `@abeahn/ui/elements` |
+| [ResizablePanel](./elements/ResizablePanel.md) | Resizable panel container    | `@abeahn/ui/elements` |
+| [ScrollArea](./elements/ScrollArea.md)         | Custom scrollable area       | `@abeahn/ui/elements` |
+| [Select](./elements/Select.md)                 | Dropdown selection input     | `@abeahn/ui/elements` |
+| [Skeleton](./elements/Skeleton.md)             | Loading placeholder          | `@abeahn/ui/elements` |
+| [Slider](./elements/Slider.md)                 | Range input slider           | `@abeahn/ui/elements` |
+| [Switch](./elements/Switch.md)                 | Toggle switch control        | `@abeahn/ui/elements` |
+| [Table](./elements/Table.md)                   | Data table component         | `@abeahn/ui/elements` |
+| [Tabs](./elements/Tabs.md)                     | Tabbed content interface     | `@abeahn/ui/elements` |
+| [Text](./elements/Text.md)                     | Semantic text element        | `@abeahn/ui/elements` |
+| [TextArea](./elements/TextArea.md)             | Multi-line text input        | `@abeahn/ui/elements` |
+| [Toast](./elements/Toast.md)                   | Notification message         | `@abeahn/ui/elements` |
+| [Tooltip](./elements/Tooltip.md)               | Hover information display    | `@abeahn/ui/elements` |
+| [VisuallyHidden](./elements/VisuallyHidden.md) | Screen-reader only content   | `@abeahn/ui/elements` |
 
 ## Layouts
 
 Layout components for page structure and composition.
+
+Styles: Layouts load shared styling from `packages/ui/src/styles/layouts.css`.
 
 | Component                                   | Description                | Import               |
 | ------------------------------------------- | -------------------------- | -------------------- |
@@ -89,7 +93,7 @@ pnpm add @abeahn/ui @abeahn/shared
 
 ```tsx
 import { Button, Card } from '@abeahn/ui/components';
-import { Input } from '@abeahn/ui/primitives';
+import { Input } from '@abeahn/ui/elements';
 
 export function MyComponent() {
   return (
@@ -119,8 +123,8 @@ import { Button, Card, Input } from '@abeahn/ui';
 // Import only components
 import { Button, Card } from '@abeahn/ui/components';
 
-// Import only primitives
-import { Input, Select } from '@abeahn/ui/primitives';
+// Import only elements
+import { Input, Select } from '@abeahn/ui/elements';
 
 // Import only layouts
 import { AppShell, Container } from '@abeahn/ui/layouts';
@@ -141,7 +145,7 @@ import { cn } from '@abeahn/ui/utils';
 | ----------------------------------------- | ----------------------- |
 | Full (`@abeahn/ui`)                       | ~120KB (all components) |
 | Components only (`@abeahn/ui/components`) | ~40KB                   |
-| Primitives only (`@abeahn/ui/primitives`) | ~80KB                   |
+| elements only (`@abeahn/ui/elements`)     | ~80KB                   |
 | Layouts only (`@abeahn/ui/layouts`)       | ~30KB                   |
 | Hooks only (`@abeahn/ui/hooks`)           | ~8KB                    |
 | Theme only (`@abeahn/ui/theme`)           | ~4KB                    |

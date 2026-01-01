@@ -1,3 +1,6 @@
+import { cn } from '../utils/cn';
+
+import '../styles/components.css';
 import type { ReactNode, CSSProperties, ReactElement } from 'react';
 
 export interface BoxProps {
@@ -15,15 +18,15 @@ export const Box = ({
   padding,
   flexDirection,
 }: BoxProps): ReactElement => {
+  const boxPadding = typeof padding === 'number' ? `${String(padding)}px` : padding;
   const combinedStyle: CSSProperties = {
-    display: 'flex',
-    flexDirection: flexDirection || 'column',
-    padding,
+    ...(flexDirection ? { '--ui-box-direction': flexDirection } : {}),
+    ...(boxPadding ? { '--ui-box-padding': boxPadding } : {}),
     ...style,
   };
 
   return (
-    <div className={className} style={combinedStyle}>
+    <div className={cn('ui-box', className)} style={combinedStyle}>
       {children}
     </div>
   );

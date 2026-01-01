@@ -15,7 +15,7 @@ Guide to make the monorepo production-ready while keeping the renderer-agnostic 
 
 ### packages/ui (Reusable UI Library)
 
-- [x] Audit and align primitives/components with industry best practices (accessibility, keyboard nav, ARIA, focus management).
+- [x] Audit and align elements/components with industry best practices (accessibility, keyboard nav, ARIA, focus management).
 - [x] Standardize component APIs (controlled/uncontrolled patterns, polymorphic typing where needed).
 - [x] Expand documentation examples for each component (usage, props, do/don't).
 - [x] Add missing UI tests for critical behaviors (a11y, keyboard interactions, focus traps).
@@ -24,10 +24,10 @@ Guide to make the monorepo production-ready while keeping the renderer-agnostic 
 
 ### Demo Surface (Live UI Gallery)
 
-- [ ] Implement a dedicated `/demo` page that showcases every `packages/ui` component in live, interactive states.
+- [ ] Implement a dedicated `/features/demo` page that showcases every `packages/ui` component in live, interactive states.
 - [ ] Build a resizable pane layout shell (top/bottom/left/right/center) with mouse drag handles and toggles per pane; persist sizes per user.
 - [ ] Center pane renders the active demo; side panes host component docs, prop tables, and usage notes.
-- [ ] Top bar: category tabs (primitives, components, hooks, layouts, test, theme, utils) that filter the catalog.
+- [ ] Top bar: category tabs (elements, components, hooks, layouts, test, theme, utils) that filter the catalog.
 - [ ] Component registry: map each component to demos, states, props schema, and related docs.
 - [ ] Demo cards include live controls (props knobs), copyable snippets, and notes for do/don't.
 - [ ] Cover primary/secondary/disabled/loading/error/empty states for each component where applicable.
@@ -80,7 +80,7 @@ Guide to make the monorepo production-ready while keeping the renderer-agnostic 
 ## 6) Shared Packages
 
 - [ ] `packages/api-client`: align with server routes, re-export types, handle auth headers/refresh, response normalization.
-- [ ] `packages/ui`: shared components (buttons, inputs, layout primitives, pane resizers), theme tokens, dark/light support.
+- [ ] `packages/ui`: shared components (buttons, inputs, layout elements, pane resizers), theme tokens, dark/light support.
 - [ ] `packages/shared`: domain types, validation schemas, utilities (date, money, feature flags), logging helpers.
 - [ ] `packages/db`: ensure schema exports are tree-shakeable; publish/consume pattern documented.
 - [ ] Generate fetch/React Query clients from the shared ts-rest contract for web/desktop/mobile consumption.

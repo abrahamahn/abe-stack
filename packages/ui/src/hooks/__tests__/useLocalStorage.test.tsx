@@ -60,4 +60,59 @@ describe('useLocalStorage', () => {
     render(<LocalStorageHarness storageKey="bad-key" initialValue="initial" />);
     expect(screen.getByTestId('value')).toHaveTextContent('initial');
   });
+
+  it('supports functional updates', () => {
+    function FunctionalHarness(): ReactElement {
+      const [value, setValue] = useLocalStorage<string>('fn-key', 'base');
+      return (
+        <button
+          type="button"
+          onClick={() => {
+            setValue((prev) => `${prev}-next`);
+          }}
+        >
+          {value}
+        </button>
+      );
+    }
+
+    render(<FunctionalHarness />);
+    fireEvent.click(screen.getByText('base'));
+    expect(screen.getByText('base-next')).toBeInTheDocument();
+  });
+
+  it('ignores storage events for other keys or null values', () => {
+    render(<LocalStorageHarness storageKey="key-a" initialValue="initial" />);
+
+    act(() => {
+      window.dispatchEvent(
+        new StorageEvent('storage', {
+          key: 'key-b',
+          newValue: JSON.stringify('other'),
+        }),
+      );
+      window.dispatchEvent(
+        new StorageEvent('storage', {
+          key: 'key-a',
+          newValue: null,
+        }),
+      );
+    });
+
+    expect(screen.getByTestId('value')).toHaveTextContent('initial');
+  });
+
+  it('does not crash when localStorage throws', () => {
+    const originalSetItem = window.localStorage.setItem;
+    window.localStorage.setItem = (): void => {
+      throw new Error('Storage blocked');
+    };
+
+    render(<LocalStorageHarness storageKey="blocked-key" initialValue="initial" />);
+    expect(() => {
+      fireEvent.click(screen.getByText('Set'));
+    }).not.toThrow();
+
+    window.localStorage.setItem = originalSetItem;
+  });
 });

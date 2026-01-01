@@ -1,0 +1,114 @@
+/** @vitest-environment jsdom */
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+
+import { ResizablePanelGroup, ResizablePanel } from '../ResizablePanel';
+
+describe('ResizablePanel', () => {
+  it('renders panel group with children', () => {
+    render(
+      <ResizablePanelGroup>
+        <ResizablePanel>Panel 1</ResizablePanel>
+        <ResizablePanel>Panel 2</ResizablePanel>
+      </ResizablePanelGroup>,
+    );
+    expect(screen.getByText('Panel 1')).toBeInTheDocument();
+    expect(screen.getByText('Panel 2')).toBeInTheDocument();
+  });
+
+  it('renders vertical layout', () => {
+    const { container } = render(
+      <ResizablePanelGroup direction="vertical">
+        <ResizablePanel>Panel 1</ResizablePanel>
+      </ResizablePanelGroup>,
+    );
+    expect(container.firstChild).toHaveStyle({ flexDirection: 'column' });
+  });
+
+  it('renders separator', () => {
+    render(
+      <ResizablePanelGroup>
+        <ResizablePanel>Panel 1</ResizablePanel>
+      </ResizablePanelGroup>,
+    );
+    // The component implementation adds a separator after the panel automatically
+    const separator = screen.getByRole('separator');
+    expect(separator).toBeInTheDocument();
+  });
+
+  it('initializes with default size', () => {
+    render(
+      <ResizablePanelGroup>
+        <ResizablePanel defaultSize={30}>Panel 1</ResizablePanel>
+      </ResizablePanelGroup>,
+    );
+    // Check if flex-basis is set correctly
+    // Note: implementation details might vary, but flexBasis should be 30%
+    const panel = screen.getByText('Panel 1').closest('.ui-resizable-panel');
+    expect(panel).toHaveStyle({ flexBasis: '30%' });
+  });
+
+  it('applies collapsed styles and size', () => {
+    render(
+      <ResizablePanelGroup>
+        <ResizablePanel collapsed>Panel 1</ResizablePanel>
+      </ResizablePanelGroup>,
+    );
+    const panel = screen.getByText('Panel 1').closest('.ui-resizable-panel');
+    expect(panel).toHaveStyle({ flexBasis: '0%' });
+    const inlineStyle = panel?.getAttribute('style') ?? '';
+    expect(inlineStyle).toMatch(/padding:\s*0/);
+    expect(inlineStyle).toContain('overflow: hidden');
+  });
+
+  // Basic interaction test (mocking layout behavior is hard in JSDOM)
+  it('handles mouse events on separator', () => {
+    render(
+      <ResizablePanelGroup>
+        <ResizablePanel>Panel 1</ResizablePanel>
+      </ResizablePanelGroup>,
+    );
+    const separator = screen.getByRole('separator');
+
+    fireEvent.mouseDown(separator);
+    expect(separator).toHaveClass('dragging');
+
+    fireEvent.mouseUp(document);
+    expect(separator).not.toHaveClass('dragging');
+  });
+
+  it('calls onResize when dragging the separator', () => {
+    const handleResize = vi.fn();
+    render(
+      <ResizablePanelGroup>
+        <ResizablePanel onResize={handleResize}>Panel 1</ResizablePanel>
+      </ResizablePanelGroup>,
+    );
+
+    const separator = screen.getByRole('separator');
+    fireEvent.mouseDown(separator, { clientX: 0 });
+    fireEvent.mouseMove(document, { clientX: 10 });
+
+    expect(handleResize).toHaveBeenCalled();
+    const nextSize = handleResize.mock.calls[0]?.[0] as number;
+    expect(nextSize).toBeGreaterThan(50);
+  });
+
+  it('inverts resize direction when invertResize is true', () => {
+    const handleResize = vi.fn();
+    render(
+      <ResizablePanelGroup>
+        <ResizablePanel invertResize onResize={handleResize}>
+          Panel 1
+        </ResizablePanel>
+      </ResizablePanelGroup>,
+    );
+
+    const separator = screen.getByRole('separator');
+    fireEvent.mouseDown(separator, { clientX: 0 });
+    fireEvent.mouseMove(document, { clientX: 20 });
+
+    const nextSize = handleResize.mock.calls[0]?.[0] as number;
+    expect(nextSize).toBeLessThan(50);
+  });
+});

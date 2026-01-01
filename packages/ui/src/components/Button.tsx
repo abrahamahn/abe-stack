@@ -1,5 +1,6 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ElementType } from 'react';
-import './Button.css';
+
+import '../styles/components.css';
 
 type ButtonProps = ComponentPropsWithoutRef<'button'> & {
   as?: ElementType;

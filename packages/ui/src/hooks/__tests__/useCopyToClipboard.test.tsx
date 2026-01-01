@@ -72,4 +72,68 @@ describe('useCopyToClipboard', () => {
     });
     vi.useRealTimers();
   });
+
+  it('sets error when clipboard write fails', async () => {
+    const originalClipboard = navigator.clipboard;
+    const writeText = vi.fn().mockRejectedValue(new Error('Write failed'));
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+    });
+
+    render(<CopyHarness />);
+    await act(async () => {
+      fireEvent.click(screen.getByText('Copy'));
+      await Promise.resolve();
+    });
+
+    expect(screen.getByTestId('error')).toHaveTextContent('Write failed');
+    expect(screen.getByTestId('copied')).toHaveTextContent('false');
+
+    Object.defineProperty(navigator, 'clipboard', {
+      value: originalClipboard,
+      configurable: true,
+    });
+  });
+
+  it('keeps copied true until the latest timeout', async () => {
+    vi.useFakeTimers();
+    const originalClipboard = navigator.clipboard;
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+    });
+
+    render(<CopyHarness />);
+    await act(async () => {
+      fireEvent.click(screen.getByText('Copy'));
+      await Promise.resolve();
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByText('Copy'));
+      await Promise.resolve();
+    });
+    expect(screen.getByTestId('copied')).toHaveTextContent('true');
+
+    act(() => {
+      vi.advanceTimersByTime(1500);
+    });
+    expect(screen.getByTestId('copied')).toHaveTextContent('true');
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    expect(screen.getByTestId('copied')).toHaveTextContent('false');
+
+    Object.defineProperty(navigator, 'clipboard', {
+      value: originalClipboard,
+      configurable: true,
+    });
+    vi.useRealTimers();
+  });
 });
