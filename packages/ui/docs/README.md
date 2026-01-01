@@ -14,6 +14,8 @@ Complete documentation for all components in the @abeahn/ui package.
 
 Core UI components built on top of primitives.
 
+Styles: Components load shared styling from `packages/ui/src/components/components.css`.
+
 | Component                              | Description                             | Import                  |
 | -------------------------------------- | --------------------------------------- | ----------------------- |
 | [Badge](./components/Badge.md)         | Display status or category indicators   | `@abeahn/ui/components` |
@@ -67,6 +69,8 @@ Low-level primitive components from Radix UI and custom implementations.
 ## Layouts
 
 Layout components for page structure and composition.
+
+Styles: Layouts load shared styling from `packages/ui/src/layouts/layouts.css`.
 
 | Component                                   | Description                | Import               |
 | ------------------------------------------- | -------------------------- | -------------------- |

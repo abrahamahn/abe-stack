@@ -31,43 +31,45 @@ export const UIPage: React.FC = () => {
   ];
 
   return (
-    <div>
-      <section style={{ marginBottom: '16px' }}>
+    <div style={{ display: 'grid', gap: '32px' }}>
+      <section>
         <Heading as="h2">Buttons</Heading>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '12px' }}>
           <Button>Primary</Button>
           <Button disabled>Disabled</Button>
         </div>
       </section>
 
-      <section style={{ marginBottom: '16px' }}>
+      <section>
         <Heading as="h2">Inputs</Heading>
-        <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'grid', gap: '12px' }}>
           <Input placeholder="Text input" />
           <Select aria-label="Select example">
             <option>One</option>
             <option>Two</option>
           </Select>
-          <Checkbox
-            checked
-            label="Check me"
-            onChange={(checked: boolean) => {
-              void checked;
-            }}
-          />
-          <Radio
-            name="r1"
-            checked
-            label="Radio"
-            onChange={(checked: boolean) => {
-              void checked;
-            }}
-          />
-          <Switch checked />
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <Checkbox
+              checked
+              label="Check me"
+              onChange={(checked: boolean) => {
+                void checked;
+              }}
+            />
+            <Radio
+              name="r1"
+              checked
+              label="Radio"
+              onChange={(checked: boolean) => {
+                void checked;
+              }}
+            />
+            <Switch checked />
+          </div>
         </div>
       </section>
 
-      <section style={{ marginBottom: '16px' }}>
+      <section>
         <Heading as="h2">Feedback</Heading>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <Badge tone="success">Success</Badge>
@@ -77,32 +79,36 @@ export const UIPage: React.FC = () => {
         </div>
       </section>
 
-      <section style={{ marginBottom: '16px' }}>
+      <section>
         <Heading as="h2">Navigation</Heading>
         <Tabs items={tabs} />
-        <Accordion items={accordionItems} />
+        <div style={{ marginTop: '16px' }}>
+          <Accordion items={accordionItems} />
+        </div>
       </section>
 
-      <section style={{ marginBottom: '16px' }}>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+      <section>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <Tooltip content="Hello tooltip">
             <Button>Tooltip</Button>
           </Tooltip>
           <Dropdown trigger={<Button>Dropdown</Button>}>
             {(close: () => void) => (
-              <div style={{ display: 'grid', gap: 8 }}>
+              <div style={{ display: 'grid', gap: '8px', padding: '8px' }}>
                 <Button onClick={close}>Item One</Button>
                 <Button onClick={close}>Item Two</Button>
               </div>
             )}
           </Dropdown>
           <Popover trigger={<Button>Popover</Button>}>
-            <Text>Popover content</Text>
+            <div style={{ padding: '12px' }}>
+              <Text>Popover content</Text>
+            </div>
           </Popover>
         </div>
       </section>
 
-      <section style={{ marginBottom: '16px' }}>
+      <section>
         <Heading as="h2">Card</Heading>
         <Card>
           <Text>

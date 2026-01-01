@@ -1,22 +1,29 @@
 // apps/web/src/demo/DemoShell.tsx
-import { Button, Heading, ResizablePanel, ResizablePanelGroup, Text } from '@abe-stack/ui';
+import {
+  Button,
+  Heading,
+  ResizablePanel,
+  ResizablePanelGroup,
+  ScrollArea,
+  Text,
+} from '@abe-stack/ui';
 import React, { type ReactElement, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { getComponentDocs, parseMarkdown } from './docs';
 import { getAllCategories, getComponentsByCategory } from './registry';
 
 import type { ComponentDemo, DemoPaneConfig } from './types';
 
-import './DemoShell.css';
-
 const DEFAULT_PANE_CONFIG: DemoPaneConfig = {
-  top: { visible: true, size: 10 },
-  left: { visible: true, size: 20 },
-  right: { visible: true, size: 25 },
-  bottom: { visible: true, size: 15 },
+  top: { visible: true, size: 10 }, // %
+  left: { visible: true, size: 18 }, // %
+  right: { visible: true, size: 25 }, // %
+  bottom: { visible: true, size: 15 }, // %
 };
 
 export const DemoShell: React.FC = () => {
+  const navigate = useNavigate();
   const [paneConfig, setPaneConfig] = useState<DemoPaneConfig>(DEFAULT_PANE_CONFIG);
   const [activeCategory, setActiveCategory] = useState<string>('primitives');
   const [selectedComponent, setSelectedComponent] = useState<ComponentDemo | null>(null);
@@ -38,265 +45,484 @@ export const DemoShell: React.FC = () => {
     }));
   };
 
+  const layoutToggles: Array<{ key: keyof DemoPaneConfig; label: string; icon: string }> = [
+    { key: 'top', label: 'Top bar', icon: 'T' },
+    { key: 'left', label: 'Left panel', icon: 'L' },
+    { key: 'right', label: 'Right panel', icon: 'R' },
+    { key: 'bottom', label: 'Bottom bar', icon: 'B' },
+  ];
+  const layoutBorder = 'var(--ui-layout-border, 1px solid var(--ui-color-border))';
+  const closeButtonStyle = {
+    textDecoration: 'none',
+    padding: 0,
+    minWidth: 'auto',
+    alignSelf: 'flex-start',
+    marginTop: '-2px',
+    marginRight: '-4px',
+    lineHeight: 1,
+  };
+
   return (
-    <div className="demo-shell" style={{ height: '100vh' }}>
-      {/* Top Bar */}
-      {paneConfig.top.visible && (
-        <div
-          className="demo-pane demo-pane-top"
-          style={{ height: `${String(paneConfig.top.size)}vh` }}
+    <div style={{ height: '100vh', width: '100vw', overflow: 'hidden' }}>
+      <ResizablePanelGroup direction="vertical">
+        {/* Top Bar */}
+        <ResizablePanel
+          defaultSize={paneConfig.top.size}
+          minSize={6}
+          maxSize={20}
+          direction="vertical"
+          collapsed={!paneConfig.top.visible}
+          onResize={(size) => {
+            handlePaneResize('top', size);
+          }}
+          style={{ borderBottom: layoutBorder, overflow: 'hidden' }}
+          data-testid="demo-top-panel"
         >
-          <div className="demo-pane-header" style={{ justifyContent: 'center' }}>
-            <Heading as="h1" size="lg">
-              ABE Stack UI Component Gallery
-            </Heading>
+          <div
+            style={{
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '0 16px',
+              background: 'var(--ui-color-bg)',
+            }}
+          >
+            <Button
+              variant="text"
+              size="small"
+              onClick={() => {
+                void navigate('/');
+              }}
+              aria-label="Back to home"
+              style={{ minWidth: '88px' }}
+            >
+              ← Back
+            </Button>
+            <div style={{ flex: 1, textAlign: 'center' }}>
+              <Heading as="h1" size="lg">
+                ABE Stack UI Component Gallery
+              </Heading>
+            </div>
+            <div style={{ minWidth: '88px' }} />
           </div>
-        </div>
-      )}
+        </ResizablePanel>
 
-      {/* Main Content Area */}
-      <div
-        className="demo-main-container"
-        style={{ height: `${String(100 - paneConfig.top.size)}vh` }}
-      >
-        <ResizablePanelGroup direction="horizontal">
-          {/* Category Sidebar - 50px fixed */}
-          <div className="demo-category-sidebar">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                className={`demo-category-item ${activeCategory === cat ? 'active' : ''}`}
-                onClick={() => {
-                  setActiveCategory(cat);
-                }}
-                title={cat.charAt(0).toUpperCase() + cat.slice(1)}
-              >
-                {cat.charAt(0).toUpperCase()}
-              </button>
-            ))}
-          </div>
-
-          {/* Left Sidebar - Component List */}
-          {paneConfig.left.visible && (
-            <ResizablePanel
-              defaultSize={paneConfig.left.size}
-              minSize={15}
-              maxSize={40}
-              onResize={(size: number) => {
-                handlePaneResize('left', size);
+        {/* Middle + Bottom Area */}
+        <ResizablePanelGroup
+          direction="vertical"
+          style={{ flex: 1, minHeight: 0, flexDirection: 'column-reverse' }}
+        >
+          {/* Bottom Bar */}
+          <ResizablePanel
+            defaultSize={paneConfig.bottom.size}
+            minSize={8}
+            maxSize={25}
+            direction="vertical"
+            collapsed={!paneConfig.bottom.visible}
+            invertResize
+            onResize={(size) => {
+              handlePaneResize('bottom', size);
+            }}
+            style={{ borderTop: layoutBorder, overflow: 'hidden' }}
+            data-testid="demo-bottom-panel"
+          >
+            <div
+              style={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: '16px',
+                background: 'var(--ui-color-bg)',
               }}
             >
-              <div className="demo-pane demo-pane-left">
-                <div className="demo-pane-header">
-                  <Heading as="h2" size="md">
-                    Components
-                  </Heading>
+              <Text tone="muted" style={{ fontSize: '14px' }}>
+                💡 Theme follows your system's color scheme preference
+              </Text>
+            </div>
+          </ResizablePanel>
+
+          {/* Middle Area */}
+          <div style={{ flex: 1, minHeight: 0, display: 'flex' }}>
+            <ResizablePanelGroup direction="horizontal" style={{ flex: 1, minWidth: 0 }}>
+              {/* Category Sidebar - Fixed Width */}
+              <div
+                style={{
+                  width: '50px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '4px',
+                  padding: '8px',
+                  flexShrink: 0,
+                  borderRight: layoutBorder,
+                  background: 'var(--ui-color-bg)',
+                }}
+              >
+                {categories.map((cat) => (
                   <Button
-                    size="small"
-                    variant="text"
+                    key={cat}
+                    variant={activeCategory === cat ? 'primary' : 'secondary'}
                     onClick={() => {
-                      togglePane('left');
+                      setActiveCategory(cat);
                     }}
+                    title={cat.charAt(0).toUpperCase() + cat.slice(1)}
+                    style={{ width: '100%', height: '40px', padding: 0 }}
                   >
-                    ✕
+                    {cat.charAt(0).toUpperCase()}
                   </Button>
-                </div>
-                <div className="demo-component-list">
-                  {componentsInCategory.map((comp) => (
-                    <button
-                      key={comp.id}
-                      className={`demo-component-item ${selectedComponent?.id === comp.id ? 'active' : ''}`}
+                ))}
+                <div
+                  style={{
+                    marginTop: 'auto',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '4px',
+                    paddingTop: '8px',
+                  }}
+                >
+                  {layoutToggles.map((toggle) => (
+                    <Button
+                      key={toggle.key}
+                      variant={paneConfig[toggle.key].visible ? 'primary' : 'secondary'}
                       onClick={() => {
-                        setSelectedComponent(comp);
+                        togglePane(toggle.key);
                       }}
+                      title={`Toggle ${toggle.label}`}
+                      aria-label={`Toggle ${toggle.label}`}
+                      style={{ width: '100%', height: '36px', padding: 0 }}
                     >
-                      <Text>{comp.name}</Text>
-                      <Text tone="muted" style={{ fontSize: '12px' }}>
-                        {String(comp.variants.length)} variant
-                        {comp.variants.length !== 1 ? 's' : ''}
-                      </Text>
-                    </button>
+                      {toggle.icon}
+                    </Button>
                   ))}
                 </div>
               </div>
-            </ResizablePanel>
-          )}
 
-          {/* Center Panel - Main Render Area */}
-          <div className="demo-pane demo-pane-center" style={{ flex: 1, overflow: 'auto' }}>
-            <div className="demo-pane-header">
-              <div>
-                <Heading as="h2" size="md">
-                  {selectedComponent ? selectedComponent.name : 'Select a component'}
-                </Heading>
-                {selectedComponent && <Text tone="muted">{selectedComponent.description}</Text>}
-              </div>
-              <div className="demo-pane-controls">
-                {!paneConfig.left.visible && (
-                  <Button
-                    size="small"
-                    variant="secondary"
-                    onClick={() => {
-                      togglePane('left');
+              {/* Left Sidebar - Component List */}
+              <ResizablePanel
+                defaultSize={paneConfig.left.size}
+                minSize={10}
+                maxSize={28}
+                collapsed={!paneConfig.left.visible}
+                onResize={(size) => {
+                  handlePaneResize('left', size);
+                }}
+                style={{
+                  background: 'var(--ui-color-bg)',
+                }}
+                data-testid="demo-left-panel"
+              >
+                <div
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden',
+                    height: '100%',
+                    borderRight: layoutBorder,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '16px',
                     }}
                   >
-                    ☰ List
-                  </Button>
-                )}
-                {!paneConfig.right.visible && (
-                  <Button
-                    size="small"
-                    variant="secondary"
-                    onClick={() => {
-                      togglePane('right');
-                    }}
-                  >
-                    📖 Docs
-                  </Button>
-                )}
-                {!paneConfig.bottom.visible && (
-                  <Button
-                    size="small"
-                    variant="secondary"
-                    onClick={() => {
-                      togglePane('bottom');
-                    }}
-                  >
-                    ⚙️ Controls
-                  </Button>
-                )}
-              </div>
-            </div>
+                    <Heading as="h2" size="md">
+                      Components
+                    </Heading>
+                    <Button
+                      size="small"
+                      variant="text"
+                      aria-label="Collapse left panel"
+                      onClick={() => {
+                        togglePane('left');
+                      }}
+                      style={closeButtonStyle}
+                    >
+                      ✕
+                    </Button>
+                  </div>
+                  <ScrollArea style={{ flex: 1, minHeight: 0 }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '4px',
+                        padding: '8px',
+                      }}
+                    >
+                      {componentsInCategory.map((comp) => (
+                        <button
+                          key={comp.id}
+                          onClick={() => {
+                            setSelectedComponent(comp);
+                          }}
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '4px',
+                            padding: '12px',
+                            textAlign: 'left',
+                            background:
+                              selectedComponent?.id === comp.id
+                                ? 'rgba(0,0,0,0.05)'
+                                : 'transparent',
+                            border: '1px solid transparent',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <Text>{comp.name}</Text>
+                          <Text tone="muted" style={{ fontSize: '12px' }}>
+                            {comp.variants.length} variant{comp.variants.length !== 1 ? 's' : ''}
+                          </Text>
+                        </button>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              </ResizablePanel>
 
-            {selectedComponent ? (
-              <div className="demo-variants-container">
-                {selectedComponent.variants.map((variant, idx) => (
-                  <div key={idx} className="demo-variant-card">
-                    <div className="demo-variant-header">
-                      <div>
-                        <Heading as="h3" size="sm">
-                          {variant.name}
-                        </Heading>
-                        <Text tone="muted" style={{ fontSize: '14px' }}>
-                          {variant.description}
-                        </Text>
-                      </div>
+              <ResizablePanelGroup
+                direction="horizontal"
+                style={{ flex: 1, minWidth: 0, flexDirection: 'row-reverse' }}
+              >
+                {/* Right Sidebar - Documentation */}
+                <ResizablePanel
+                  defaultSize={paneConfig.right.size}
+                  minSize={5}
+                  maxSize={100}
+                  collapsed={!paneConfig.right.visible}
+                  invertResize
+                  onResize={(size) => {
+                    handlePaneResize('right', size);
+                  }}
+                  style={{
+                    background: 'var(--ui-color-bg)',
+                  }}
+                  data-testid="demo-right-panel"
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      overflow: 'hidden',
+                      height: '100%',
+                      borderLeft: layoutBorder,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '16px',
+                      }}
+                    >
+                      <Heading as="h2" size="md">
+                        Documentation
+                      </Heading>
                       <Button
                         size="small"
                         variant="text"
+                        aria-label="Collapse right panel"
                         onClick={() => {
-                          void navigator.clipboard.writeText(variant.code);
+                          togglePane('right');
                         }}
-                        title="Copy code"
+                        style={closeButtonStyle}
                       >
-                        📋
+                        ✕
                       </Button>
                     </div>
-                    <div className="demo-variant-render">{variant.render()}</div>
-                    <details className="demo-variant-code">
-                      <summary>View Code</summary>
-                      <pre>
-                        <code>{variant.code}</code>
-                      </pre>
-                    </details>
+                    <div
+                      style={{
+                        padding: '16px',
+                        overflowY: 'auto',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '16px',
+                      }}
+                    >
+                      {selectedComponent ? (
+                        <>
+                          {((): ReactElement => {
+                            const docs = getComponentDocs(
+                              selectedComponent.id,
+                              selectedComponent.category,
+                              selectedComponent.name,
+                            );
+                            if (docs) {
+                              return (
+                                <div dangerouslySetInnerHTML={{ __html: parseMarkdown(docs) }} />
+                              );
+                            }
+                            return (
+                              <>
+                                <section>
+                                  <Heading as="h3" size="sm">
+                                    Description
+                                  </Heading>
+                                  <Text>{selectedComponent.description}</Text>
+                                </section>
+                                <section>
+                                  <Heading as="h3" size="sm">
+                                    Category
+                                  </Heading>
+                                  <Text>{selectedComponent.category}</Text>
+                                </section>
+                                <section>
+                                  <Heading as="h3" size="sm">
+                                    Variants
+                                  </Heading>
+                                  <Text>{selectedComponent.variants.length} available</Text>
+                                </section>
+                              </>
+                            );
+                          })()}
+                        </>
+                      ) : (
+                        <Text tone="muted">Select a component to view documentation</Text>
+                      )}
+                    </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="demo-empty-state">
-                <Text tone="muted">Select a component from the left sidebar to view demos</Text>
-              </div>
-            )}
-          </div>
+                </ResizablePanel>
 
-          {/* Right Sidebar - Documentation */}
-          {paneConfig.right.visible && (
-            <ResizablePanel
-              defaultSize={paneConfig.right.size}
-              minSize={15}
-              maxSize={40}
-              onResize={(size: number) => {
-                handlePaneResize('right', size);
-              }}
-            >
-              <div className="demo-pane demo-pane-right">
-                <div className="demo-pane-header">
-                  <Heading as="h2" size="md">
-                    Documentation
-                  </Heading>
-                  <Button
-                    size="small"
-                    variant="text"
-                    onClick={() => {
-                      togglePane('right');
-                    }}
-                  >
-                    ✕
-                  </Button>
-                </div>
-                <div className="demo-docs-content">
-                  {selectedComponent ? (
-                    <>
-                      {((): ReactElement => {
-                        const docs = getComponentDocs(
-                          selectedComponent.id,
-                          selectedComponent.category,
-                        );
-                        if (docs) {
-                          return (
+                {/* Center Panel - Main Render Area */}
+                <div
+                  style={{
+                    flex: 1,
+                    minWidth: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <ScrollArea style={{ flex: 1, minHeight: 0 }}>
+                    <div
+                      style={{
+                        minHeight: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '16px',
+                        }}
+                      >
+                        <div>
+                          <Heading as="h2" size="md">
+                            {selectedComponent ? selectedComponent.name : 'Select a component'}
+                          </Heading>
+                          {selectedComponent && (
+                            <Text tone="muted">{selectedComponent.description}</Text>
+                          )}
+                        </div>
+                      </div>
+
+                      {selectedComponent ? (
+                        <div
+                          style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+                            gap: '24px',
+                            padding: '24px',
+                            alignContent: 'start',
+                          }}
+                        >
+                          {selectedComponent.variants.map((variant, idx) => (
                             <div
-                              className="demo-markdown-content"
-                              dangerouslySetInnerHTML={{ __html: parseMarkdown(docs) }}
-                            />
-                          );
-                        }
-                        return (
-                          <>
-                            <section>
-                              <Heading as="h3" size="sm">
-                                Description
-                              </Heading>
-                              <Text>{selectedComponent.description}</Text>
-                            </section>
-                            <section>
-                              <Heading as="h3" size="sm">
-                                Category
-                              </Heading>
-                              <Text>{selectedComponent.category}</Text>
-                            </section>
-                            <section>
-                              <Heading as="h3" size="sm">
-                                Variants
-                              </Heading>
-                              <Text>{selectedComponent.variants.length} available</Text>
-                            </section>
-                          </>
-                        );
-                      })()}
-                    </>
-                  ) : (
-                    <Text tone="muted">Select a component to view documentation</Text>
-                  )}
+                              key={idx}
+                              style={{
+                                border: '1px solid currentColor',
+                                borderRadius: '8px',
+                                padding: '16px',
+                              }}
+                            >
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  marginBottom: '16px',
+                                }}
+                              >
+                                <div>
+                                  <Heading as="h3" size="sm">
+                                    {variant.name}
+                                  </Heading>
+                                  <Text tone="muted" style={{ fontSize: '14px' }}>
+                                    {variant.description}
+                                  </Text>
+                                </div>
+                                <Button
+                                  size="small"
+                                  variant="text"
+                                  className="demo-copy-button"
+                                  onClick={() => {
+                                    void navigator.clipboard.writeText(variant.code);
+                                  }}
+                                  title="Copy code"
+                                >
+                                  📋
+                                </Button>
+                              </div>
+                              <div
+                                style={{
+                                  padding: '24px',
+                                  border: '1px dashed currentColor',
+                                  borderRadius: '4px',
+                                  marginBottom: '16px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  minHeight: '80px',
+                                  gap: '16px',
+                                  flexWrap: 'wrap',
+                                }}
+                              >
+                                {variant.render()}
+                              </div>
+                              <details style={{ marginTop: '16px' }}>
+                                <summary style={{ cursor: 'pointer', padding: '8px' }}>
+                                  View Code
+                                </summary>
+                                <pre
+                                  style={{ margin: '8px 0 0', padding: '12px', overflowX: 'auto' }}
+                                >
+                                  <code>{variant.code}</code>
+                                </pre>
+                              </details>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            height: '100%',
+                            padding: '48px',
+                            textAlign: 'center',
+                          }}
+                        >
+                          <Text tone="muted">
+                            Select a component from the left sidebar to view demos
+                          </Text>
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
                 </div>
-              </div>
-            </ResizablePanel>
-          )}
-        </ResizablePanelGroup>
-      </div>
-
-      {/* Bottom Panel - Controls */}
-      {paneConfig.bottom.visible && (
-        <div
-          className="demo-pane demo-pane-bottom"
-          style={{ height: `${String(paneConfig.bottom.size)}vh` }}
-        >
-          <div className="demo-theme-controls" style={{ alignItems: 'center' }}>
-            <Text tone="muted" style={{ fontSize: '14px' }}>
-              💡 Theme follows your system's color scheme preference
-            </Text>
+              </ResizablePanelGroup>
+            </ResizablePanelGroup>
           </div>
-        </div>
-      )}
+        </ResizablePanelGroup>
+      </ResizablePanelGroup>
     </div>
   );
 };

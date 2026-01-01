@@ -30,13 +30,14 @@ export function Accordion({
 
   return (
     <div className="ui-accordion">
-      {items.map((item) => {
+      {items.map((item, index) => {
+        const domId = `${item.id}-${String(index)}`;
         const isOpen = item.id === openId;
-        const headerId = `accordion-header-${item.id}`;
-        const panelId = `accordion-panel-${item.id}`;
+        const headerId = `accordion-header-${domId}`;
+        const panelId = `accordion-panel-${domId}`;
 
         return (
-          <div className="ui-accordion-item" key={item.id}>
+          <div className="ui-accordion-item" key={domId}>
             <h3 className="ui-accordion-heading">
               <button
                 type="button"

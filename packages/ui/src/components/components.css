@@ -1,4 +1,5 @@
-@import '../theme/theme.css';
+/* packages/ui/src/components/components.css */
+@import '../primitives/primitives.css';
 
 .btn {
   font-family: var(--ui-font-family);
@@ -104,4 +105,68 @@
   font-size: var(--ui-font-size-md);
   padding: var(--ui-gap-md) var(--ui-gap-lg);
   min-height: calc(var(--ui-gap-lg) * 2 + var(--ui-gap-sm));
+}
+
+.ui-box {
+  display: flex;
+  flex-direction: var(--ui-box-direction, column);
+  padding: var(--ui-box-padding, 0);
+}
+
+.ui-input-field {
+  display: grid;
+  gap: var(--ui-gap-sm);
+}
+
+.ui-input-label {
+  font-weight: var(--ui-font-weight-medium);
+  font-size: var(--ui-font-size-sm);
+}
+
+.ui-input-description,
+.ui-input-error {
+  font-size: var(--ui-font-size-xs);
+}
+
+.ui-spinner {
+  width: var(--ui-spinner-size, var(--ui-gap-lg));
+  height: var(--ui-spinner-size, var(--ui-gap-lg));
+}
+
+.ui-layout {
+  display: grid;
+  grid-template-rows:
+    var(--ui-layout-top-row, 0px)
+    minmax(0, 1fr)
+    var(--ui-layout-bottom-row, 0px);
+  gap: var(--ui-layout-gap, var(--ui-gap-lg));
+  min-height: 100vh;
+}
+
+.ui-layout-header {
+  align-self: start;
+}
+
+.ui-layout-footer {
+  align-self: end;
+}
+
+.ui-layout-main-grid {
+  display: grid;
+  grid-template-columns: var(--ui-layout-columns, minmax(0, 1fr));
+  gap: var(--ui-layout-gap, var(--ui-gap-lg));
+  align-items: stretch;
+  min-height: 0;
+}
+
+.ui-layout-left {
+  min-width: var(--ui-layout-left-min-width, 220px);
+}
+
+.ui-layout-right {
+  min-width: var(--ui-layout-right-min-width, 260px);
+}
+
+.ui-layout-content {
+  min-width: 0;
 }

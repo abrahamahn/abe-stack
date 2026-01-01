@@ -48,6 +48,19 @@ describe('ResizablePanel', () => {
     expect(panel).toHaveStyle({ flexBasis: '30%' });
   });
 
+  it('applies collapsed styles and size', () => {
+    render(
+      <ResizablePanelGroup>
+        <ResizablePanel collapsed>Panel 1</ResizablePanel>
+      </ResizablePanelGroup>,
+    );
+    const panel = screen.getByText('Panel 1').closest('.ui-resizable-panel');
+    expect(panel).toHaveStyle({ flexBasis: '0%' });
+    const inlineStyle = panel?.getAttribute('style') ?? '';
+    expect(inlineStyle).toMatch(/padding:\s*0/);
+    expect(inlineStyle).toContain('overflow: hidden');
+  });
+
   // Basic interaction test (mocking layout behavior is hard in JSDOM)
   it('handles mouse events on separator', () => {
     render(
@@ -79,5 +92,23 @@ describe('ResizablePanel', () => {
     expect(handleResize).toHaveBeenCalled();
     const nextSize = handleResize.mock.calls[0]?.[0] as number;
     expect(nextSize).toBeGreaterThan(50);
+  });
+
+  it('inverts resize direction when invertResize is true', () => {
+    const handleResize = vi.fn();
+    render(
+      <ResizablePanelGroup>
+        <ResizablePanel invertResize onResize={handleResize}>
+          Panel 1
+        </ResizablePanel>
+      </ResizablePanelGroup>,
+    );
+
+    const separator = screen.getByRole('separator');
+    fireEvent.mouseDown(separator, { clientX: 0 });
+    fireEvent.mouseMove(document, { clientX: 20 });
+
+    const nextSize = handleResize.mock.calls[0]?.[0] as number;
+    expect(nextSize).toBeLessThan(50);
   });
 });

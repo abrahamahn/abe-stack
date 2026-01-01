@@ -58,4 +58,20 @@ describe('useControllableState', () => {
     expect(screen.getByTestId('value')).toHaveTextContent('5');
     expect(onChange).toHaveBeenCalledWith(6);
   });
+
+  it('reflects controlled value changes from the parent', () => {
+    const { rerender } = render(<ControllableStateHarness value={1} />);
+    expect(screen.getByTestId('value')).toHaveTextContent('1');
+
+    rerender(<ControllableStateHarness value={9} />);
+    expect(screen.getByTestId('value')).toHaveTextContent('9');
+  });
+
+  it('updates with undefined default value', () => {
+    render(<ControllableStateHarness />);
+    expect(screen.getByTestId('value')).toHaveTextContent('undefined');
+
+    fireEvent.click(screen.getByText('Increment'));
+    expect(screen.getByTestId('value')).toHaveTextContent('1');
+  });
 });

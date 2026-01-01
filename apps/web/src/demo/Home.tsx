@@ -11,16 +11,14 @@ type HomeProps = {
 export function HomePage({ onNavigate }: HomeProps): JSX.Element {
   return (
     <PageContainer>
-      <section style={{ display: 'grid', gap: 12 }}>
+      <section style={{ display: 'grid', gap: '16px' }}>
         <Heading as="h1" size="xl">
           Welcome to ABE Stack
         </Heading>
-        <Text style={{ fontSize: '16px' }}>
-          A minimal, ground-up full-stack TypeScript monorepo with authentication.
-        </Text>
+        <Text>A minimal, ground-up full-stack TypeScript monorepo with authentication.</Text>
       </section>
 
-      <section style={{ display: 'flex', gap: '10px' }}>
+      <section style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
         <Button onClick={() => onNavigate?.('login')}>Login</Button>
         <Button variant="secondary" onClick={() => onNavigate?.('dashboard')}>
           Dashboard
@@ -30,37 +28,27 @@ export function HomePage({ onNavigate }: HomeProps): JSX.Element {
         </Button>
       </section>
 
-      <Card>
-        <div style={{ display: 'grid', gap: 6 }}>
-          <Heading as="h3" size="md">
-            Tech Stack
-          </Heading>
-          <ul
-            style={{
-              display: 'grid',
-              gap: 4,
-              paddingLeft: '16px',
-              lineHeight: 1.4,
-              fontSize: '14px',
-            }}
-          >
-            <li>
-              <Text tone="muted">Database: PostgreSQL + Drizzle ORM</Text>
-            </li>
-            <li>
-              <Text tone="muted">Backend: Fastify + TypeScript</Text>
-            </li>
-            <li>
-              <Text tone="muted">Frontend: React 19 + Vite</Text>
-            </li>
-            <li>
-              <Text tone="muted">Auth: JWT + bcrypt</Text>
-            </li>
-            <li>
-              <Text tone="muted">Validation: Zod</Text>
-            </li>
-          </ul>
-        </div>
+      <Card style={{ marginTop: '24px' }}>
+        <Heading as="h3" size="md">
+          Tech Stack
+        </Heading>
+        <ul style={{ paddingLeft: '20px' }}>
+          <li>
+            <Text tone="muted">Database: PostgreSQL + Drizzle ORM</Text>
+          </li>
+          <li>
+            <Text tone="muted">Backend: Fastify + TypeScript</Text>
+          </li>
+          <li>
+            <Text tone="muted">Frontend: React 19 + Vite</Text>
+          </li>
+          <li>
+            <Text tone="muted">Auth: JWT + bcrypt</Text>
+          </li>
+          <li>
+            <Text tone="muted">Validation: Zod</Text>
+          </li>
+        </ul>
       </Card>
     </PageContainer>
   );

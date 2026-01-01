@@ -1,43 +1,365 @@
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { Select } from '../Select';
 
 describe('Select', () => {
-  it('changes value on selection', () => {
-    const handleChange = vi.fn();
-    render(
-      <Select aria-label="Simple Select" onChange={handleChange} defaultValue="one">
-        <option value="one">One</option>
-        <option value="two">Two</option>
-      </Select>,
-    );
+  describe('happy path', () => {
+    it('renders with trigger and extracted label', () => {
+      render(
+        <Select aria-label="Fruit" defaultValue="apple">
+          <option value="apple">Apple</option>
+          <option value="banana">Banana</option>
+        </Select>,
+      );
 
-    const trigger = screen.getByRole('button', { name: /simple select/i });
-    fireEvent.click(trigger);
+      const trigger = screen.getByRole('button', { name: /fruit/i });
+      expect(trigger).toBeInTheDocument();
+      expect(trigger).toHaveTextContent('Apple');
+    });
 
-    const option = screen.getByRole('option', { name: 'Two' });
-    fireEvent.click(option);
+    it('opens menu on click and displays options', async () => {
+      const user = userEvent.setup();
+      render(
+        <Select aria-label="Fruit" defaultValue="apple">
+          <option value="apple">Apple</option>
+          <option value="banana">Banana</option>
+        </Select>,
+      );
 
-    expect(handleChange).toHaveBeenCalledWith('two');
-    expect(trigger).toHaveTextContent('Two');
+      const trigger = screen.getByRole('button', { name: /fruit/i });
+      await user.click(trigger);
+
+      expect(screen.getByRole('listbox')).toBeInTheDocument();
+      expect(screen.getAllByRole('option')).toHaveLength(2);
+      expect(screen.getByRole('option', { name: 'Apple' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Banana' })).toBeInTheDocument();
+    });
+
+    it('changes selection on option click', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      render(
+        <Select aria-label="Fruit" defaultValue="apple" onChange={onChange}>
+          <option value="apple">Apple</option>
+          <option value="banana">Banana</option>
+        </Select>,
+      );
+
+      const trigger = screen.getByRole('button', { name: /fruit/i });
+      await user.click(trigger);
+      await user.click(screen.getByRole('option', { name: 'Banana' }));
+
+      expect(onChange).toHaveBeenCalledWith('banana');
+      expect(trigger).toHaveTextContent('Banana');
+      expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    });
   });
 
-  it('supports keyboard selection when open', () => {
-    const handleChange = vi.fn();
-    render(
-      <Select aria-label="Keyboard Select" onChange={handleChange} defaultValue="one">
-        <option value="one">One</option>
-        <option value="two">Two</option>
-      </Select>,
-    );
+  describe('keyboard navigation', () => {
+    it('opens menu with ArrowDown and highlights current value', async () => {
+      const user = userEvent.setup();
+      render(
+        <Select aria-label="Fruit" defaultValue="banana">
+          <option value="apple">Apple</option>
+          <option value="banana">Banana</option>
+        </Select>,
+      );
 
-    const trigger = screen.getByRole('button', { name: /keyboard select/i });
-    fireEvent.keyDown(trigger, { key: 'ArrowDown' });
-    fireEvent.keyDown(trigger, { key: 'Enter' });
+      const trigger = screen.getByRole('button', { name: /fruit/i });
+      trigger.focus();
+      await user.keyboard('{ArrowDown}');
 
-    expect(handleChange).toHaveBeenCalledWith('one');
+      expect(screen.getByRole('listbox')).toBeInTheDocument();
+      const bananaOption = screen.getByRole('option', { name: 'Banana' });
+      expect(bananaOption).toHaveAttribute('data-highlighted', 'true');
+    });
+
+    it('navigates through options with ArrowDown/ArrowUp', async () => {
+      const user = userEvent.setup();
+      render(
+        <Select aria-label="Fruit" defaultValue="apple">
+          <option value="apple">Apple</option>
+          <option value="banana">Banana</option>
+          <option value="cherry">Cherry</option>
+        </Select>,
+      );
+
+      const trigger = screen.getByRole('button', { name: /fruit/i });
+      trigger.focus();
+      await user.keyboard('{ArrowDown}'); // Open
+
+      const banana = screen.getByRole('option', { name: 'Banana' });
+      const cherry = screen.getByRole('option', { name: 'Cherry' });
+
+      await user.keyboard('{ArrowDown}');
+      expect(banana).toHaveAttribute('data-highlighted', 'true');
+
+      await user.keyboard('{ArrowDown}');
+      expect(cherry).toHaveAttribute('data-highlighted', 'true');
+
+      await user.keyboard('{ArrowUp}');
+      expect(banana).toHaveAttribute('data-highlighted', 'true');
+    });
+
+    it('selects highlighted option with Enter', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      render(
+        <Select aria-label="Fruit" defaultValue="apple" onChange={onChange}>
+          <option value="apple">Apple</option>
+          <option value="banana">Banana</option>
+        </Select>,
+      );
+
+      const trigger = screen.getByRole('button', { name: /fruit/i });
+      trigger.focus();
+      await user.keyboard('{ArrowDown}'); // Open
+      await user.keyboard('{ArrowDown}'); // Highlight Banana
+      await user.keyboard('{Enter}');
+
+      expect(onChange).toHaveBeenCalledWith('banana');
+      expect(trigger).toHaveTextContent('Banana');
+      expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    });
+
+    it('closes menu with Escape and restores focus', async () => {
+      const user = userEvent.setup();
+      render(
+        <Select aria-label="Fruit" defaultValue="apple">
+          <option value="apple">Apple</option>
+        </Select>,
+      );
+
+      const trigger = screen.getByRole('button', { name: /fruit/i });
+      await user.click(trigger);
+      expect(screen.getByRole('listbox')).toBeInTheDocument();
+
+      await user.keyboard('{Escape}');
+      expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+      expect(trigger).toHaveFocus();
+    });
+
+    it('navigates to Home and End of list', async () => {
+      const user = userEvent.setup();
+      render(
+        <Select aria-label="Fruit" defaultValue="banana">
+          <option value="apple">Apple</option>
+          <option value="banana">Banana</option>
+          <option value="cherry">Cherry</option>
+        </Select>,
+      );
+
+      const trigger = screen.getByRole('button', { name: /fruit/i });
+      await user.click(trigger);
+
+      await user.keyboard('{End}');
+      expect(screen.getByRole('option', { name: 'Cherry' })).toHaveAttribute(
+        'data-highlighted',
+        'true',
+      );
+
+      await user.keyboard('{Home}');
+      expect(screen.getByRole('option', { name: 'Apple' })).toHaveAttribute(
+        'data-highlighted',
+        'true',
+      );
+    });
+  });
+
+  describe('edge cases', () => {
+    it('handles empty children gracefully', () => {
+      render(<Select aria-label="Empty">{null}</Select>);
+      const trigger = screen.getByRole('button', { name: /empty/i });
+      expect(trigger).toBeInTheDocument();
+    });
+
+    it('ignores non-option children', () => {
+      render(
+        <Select aria-label="Mixed" defaultValue="valid">
+          <div>Invalid</div>
+          <option value="valid">Valid</option>
+          <span>Also Invalid</span>
+        </Select>,
+      );
+
+      const trigger = screen.getByRole('button', { name: /mixed/i });
+      expect(trigger).toHaveTextContent('Valid');
+    });
+
+    it('handles options without explicit value prop (uses children as value)', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      render(
+        <Select aria-label="Fruit" onChange={onChange}>
+          <option>Apple</option>
+          <option>Banana</option>
+        </Select>,
+      );
+
+      await user.click(screen.getByRole('button', { name: /fruit/i }));
+      await user.click(screen.getByRole('option', { name: 'Banana' }));
+
+      expect(onChange).toHaveBeenCalledWith('Banana');
+    });
+
+    it('respects disabled prop on trigger', () => {
+      render(
+        <Select aria-label="Disabled" disabled defaultValue="one">
+          <option value="one">One</option>
+        </Select>,
+      );
+
+      const trigger = screen.getByRole('button', { name: /disabled/i });
+      expect(trigger).toBeDisabled();
+    });
+
+    it('skips disabled options in keyboard navigation', async () => {
+      const user = userEvent.setup();
+      render(
+        <Select aria-label="Fruit" defaultValue="apple">
+          <option value="apple">Apple</option>
+          <option value="banana" disabled>
+            Banana
+          </option>
+          <option value="cherry">Cherry</option>
+        </Select>,
+      );
+
+      const trigger = screen.getByRole('button', { name: /fruit/i });
+      await user.click(trigger); // Open, Apple (selected) should be highlighted
+
+      const apple = screen.getByRole('option', { name: 'Apple' });
+      expect(apple).toHaveAttribute('data-highlighted', 'true');
+
+      await user.keyboard('{ArrowDown}'); // Should skip Banana, highlight Cherry
+
+      expect(screen.getByRole('option', { name: 'Cherry' })).toHaveAttribute(
+        'data-highlighted',
+        'true',
+      );
+    });
+
+    it('handles rapid toggling without breaking state', async () => {
+      const user = userEvent.setup();
+      render(
+        <Select aria-label="Rapid">
+          <option value="1">1</option>
+        </Select>,
+      );
+
+      const trigger = screen.getByRole('button', { name: /rapid/i });
+      for (let i = 0; i < 10; i++) {
+        user.click(trigger);
+      }
+
+      await waitFor(() => {
+        expect(trigger).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('controlled vs uncontrolled', () => {
+    it('works in uncontrolled mode with defaultValue', async () => {
+      const user = userEvent.setup();
+      render(
+        <Select aria-label="Fruit" defaultValue="apple">
+          <option value="apple">Apple</option>
+          <option value="banana">Banana</option>
+        </Select>,
+      );
+
+      const trigger = screen.getByRole('button', { name: /fruit/i });
+      expect(trigger).toHaveTextContent('Apple');
+
+      await user.click(trigger);
+      await user.click(screen.getByRole('option', { name: 'Banana' }));
+      expect(trigger).toHaveTextContent('Banana');
+    });
+
+    it('works in controlled mode with value and onChange', async () => {
+      const user = userEvent.setup();
+      function ControlledSelect() {
+        const [val, setVal] = useState('apple');
+        return (
+          <Select aria-label="Fruit" value={val} onChange={setVal}>
+            <option value="apple">Apple</option>
+            <option value="banana">Banana</option>
+          </Select>
+        );
+      }
+
+      render(<ControlledSelect />);
+      const trigger = screen.getByRole('button', { name: /fruit/i });
+      expect(trigger).toHaveTextContent('Apple');
+
+      await user.click(trigger);
+      await user.click(screen.getByRole('option', { name: 'Banana' }));
+      expect(trigger).toHaveTextContent('Banana');
+    });
+  });
+
+  describe('accessibility', () => {
+    it('has required ARIA attributes on trigger', () => {
+      render(
+        <Select aria-label="Fruit" defaultValue="apple">
+          <option value="apple">Apple</option>
+        </Select>,
+      );
+
+      const trigger = screen.getByRole('button', { name: /fruit/i });
+      expect(trigger).toHaveAttribute('aria-haspopup', 'listbox');
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    });
+
+    it('updates aria-expanded when open', async () => {
+      const user = userEvent.setup();
+      render(
+        <Select aria-label="Fruit" defaultValue="apple">
+          <option value="apple">Apple</option>
+        </Select>,
+      );
+
+      const trigger = screen.getByRole('button', { name: /fruit/i });
+      await user.click(trigger);
+      expect(trigger).toHaveAttribute('aria-expanded', 'true');
+    });
+
+    it('uses role="listbox" and role="option"', async () => {
+      const user = userEvent.setup();
+      render(
+        <Select aria-label="Fruit" defaultValue="apple">
+          <option value="apple">Apple</option>
+        </Select>,
+      );
+
+      await user.click(screen.getByRole('button', { name: /fruit/i }));
+      expect(screen.getByRole('listbox')).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Apple' })).toBeInTheDocument();
+    });
+
+    it('marks selected option with aria-selected', async () => {
+      const user = userEvent.setup();
+      render(
+        <Select aria-label="Fruit" defaultValue="apple">
+          <option value="apple">Apple</option>
+          <option value="banana">Banana</option>
+        </Select>,
+      );
+
+      await user.click(screen.getByRole('button', { name: /fruit/i }));
+      expect(screen.getByRole('option', { name: 'Apple' })).toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+      expect(screen.getByRole('option', { name: 'Banana' })).toHaveAttribute(
+        'aria-selected',
+        'false',
+      );
+    });
   });
 });

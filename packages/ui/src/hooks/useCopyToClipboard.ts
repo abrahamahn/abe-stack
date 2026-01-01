@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type CopyToClipboardResult = {
   copied: boolean;
@@ -15,6 +15,16 @@ type CopyToClipboardResult = {
 export function useCopyToClipboard(): CopyToClipboardResult {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return (): void => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
+  }, []);
 
   const copy = async (text: string): Promise<void> => {
     if (typeof navigator === 'undefined' || typeof navigator.clipboard === 'undefined') {
@@ -29,7 +39,10 @@ export function useCopyToClipboard(): CopyToClipboardResult {
       setError(null);
 
       // Reset copied state after 2 seconds
-      setTimeout((): void => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout((): void => {
         setCopied(false);
       }, 2000);
     } catch (err) {

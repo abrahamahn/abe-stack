@@ -1,5 +1,6 @@
 import React from 'react';
-import '../primitives/primitives.css';
+
+import './components.css';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;

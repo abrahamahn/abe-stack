@@ -1,5 +1,6 @@
 import React from 'react';
-import '../primitives/primitives.css';
+
+import './components.css';
 
 type BadgeTone = 'success' | 'danger' | 'warning' | 'neutral';
 

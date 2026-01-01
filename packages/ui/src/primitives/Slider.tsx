@@ -32,6 +32,24 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>((props, ref) => 
 
   const sliderValue = currentValue ?? min;
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>): void => {
+    if (props.disabled) return;
+
+    let nextValue = sliderValue;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
+      nextValue = Math.min(max, sliderValue + step);
+    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
+      nextValue = Math.max(min, sliderValue - step);
+    } else {
+      return;
+    }
+
+    if (nextValue !== sliderValue) {
+      event.preventDefault();
+      setValue(nextValue);
+    }
+  };
+
   return (
     <input
       ref={ref}
@@ -41,6 +59,7 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>((props, ref) => 
       max={max}
       step={step}
       value={sliderValue}
+      onKeyDown={handleKeyDown}
       onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
         setValue(Number(event.target.value));
       }}

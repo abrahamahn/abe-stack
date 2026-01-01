@@ -60,4 +60,29 @@ describe('useDisclosure', () => {
     fireEvent.click(screen.getByText('Toggle'));
     expect(onChange).toHaveBeenCalledWith(true);
   });
+
+  it('respects defaultOpen when uncontrolled', () => {
+    render(<DisclosureHarness defaultOpen={true} />);
+    expect(screen.getByTestId('state')).toHaveTextContent('true');
+  });
+
+  it('toggles controlled state without mutating UI', () => {
+    const onChange = vi.fn();
+    render(<DisclosureHarness open={true} onChange={onChange} />);
+
+    fireEvent.click(screen.getByText('Toggle'));
+    expect(screen.getByTestId('state')).toHaveTextContent('true');
+    expect(onChange).toHaveBeenCalledWith(false);
+  });
+
+  it('supports direct setOpen calls', () => {
+    const onChange = vi.fn();
+    render(<DisclosureHarness defaultOpen={false} onChange={onChange} />);
+
+    fireEvent.click(screen.getByText('Open'));
+    fireEvent.click(screen.getByText('Close'));
+
+    expect(onChange).toHaveBeenCalledWith(true);
+    expect(onChange).toHaveBeenCalledWith(false);
+  });
 });

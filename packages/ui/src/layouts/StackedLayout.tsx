@@ -1,5 +1,5 @@
 import { Container } from './Container';
-import '../theme/theme.css';
+import './layouts.css';
 
 import type { ReactElement, ReactNode } from 'react';
 
@@ -10,10 +10,10 @@ type StackedLayoutProps = {
 
 export function StackedLayout({ hero, children }: StackedLayoutProps): ReactElement {
   return (
-    <div style={{ padding: 'calc(var(--ui-gap-xl) * 2) 0' }}>
+    <div className="ui-stacked-layout">
       <Container size="md">
-        {hero ? <div style={{ marginBottom: 'calc(var(--ui-gap-lg) * 2)' }}>{hero}</div> : null}
-        <div>{children}</div>
+        {hero ? <div className="ui-stacked-layout-hero">{hero}</div> : null}
+        <div className="ui-stacked-layout-body">{children}</div>
       </Container>
     </div>
   );

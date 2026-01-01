@@ -55,27 +55,37 @@ export const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>((props, re
     maxHeight,
     maxWidth,
     scrollbarWidth = 'thin',
-    hideDelay = 1000,
+    hideDelay = 2000,
     showOnHover = true,
     className = '',
     style,
     ...rest
   } = props;
 
-  const [isScrolling, setIsScrolling] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const [isHoveringScrollbar, setIsHoveringScrollbar] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const hoverRef = useRef(false);
+
+  const clearHideTimer = (): void => {
+    clearTimeout(timeoutRef.current);
+  };
+
+  const scheduleHide = (): void => {
+    if (hideDelay <= 0) {
+      return;
+    }
+
+    clearHideTimer();
+
+    timeoutRef.current = setTimeout((): void => {
+      setIsActive(false);
+    }, hideDelay);
+  };
 
   const handleScroll = (): void => {
-    setIsScrolling(true);
-
-    clearTimeout(timeoutRef.current);
-
-    if (hideDelay > 0) {
-      timeoutRef.current = setTimeout((): void => {
-        setIsScrolling(false);
-      }, hideDelay);
-    }
+    setIsActive(true);
+    scheduleHide();
   };
 
   useEffect(() => {
@@ -85,35 +95,74 @@ export const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>((props, re
   }, []);
 
   const scrollbarSize = {
-    thin: '6px',
-    normal: '10px',
-    thick: '14px',
+    thin: '4px',
+    normal: '8px',
+    thick: '12px',
   }[scrollbarWidth];
 
-  const showScrollbar = !hideDelay || isScrolling || (showOnHover && isHovered);
+  const scrollbarSizePx = Number.parseFloat(scrollbarSize);
+  const showScrollbar = hideDelay === 0 || isActive;
 
   return (
     <div
       ref={ref}
       className={`ui-scroll-area ${className}`.trim()}
       onScroll={handleScroll}
-      onMouseEnter={(): void => {
-        setIsHovered(true);
+      onMouseMove={(event): void => {
+        if (!showOnHover) {
+          return;
+        }
+
+        const element = event.currentTarget;
+        const rect = element.getBoundingClientRect();
+        const isVertical = element.scrollHeight > element.clientHeight;
+        const isHorizontal = element.scrollWidth > element.clientWidth;
+        const overVertical =
+          isVertical &&
+          event.clientX >= rect.right - scrollbarSizePx &&
+          event.clientX <= rect.right &&
+          event.clientY >= rect.top &&
+          event.clientY <= rect.bottom;
+        const overHorizontal =
+          isHorizontal &&
+          event.clientY >= rect.bottom - scrollbarSizePx &&
+          event.clientY <= rect.bottom &&
+          event.clientX >= rect.left &&
+          event.clientX <= rect.right;
+        const hovering = overVertical || overHorizontal;
+
+        if (hovering !== hoverRef.current) {
+          hoverRef.current = hovering;
+          setIsHoveringScrollbar(hovering);
+
+          if (hovering) {
+            clearHideTimer();
+            setIsActive(true);
+          } else {
+            scheduleHide();
+          }
+        }
       }}
       onMouseLeave={(): void => {
-        setIsHovered(false);
+        if (!showOnHover) {
+          return;
+        }
+
+        if (hoverRef.current) {
+          hoverRef.current = false;
+          setIsHoveringScrollbar(false);
+          scheduleHide();
+        }
       }}
       data-scrollbar-visible={showScrollbar}
+      data-scrollbar-hover={isHoveringScrollbar}
       style={{
         maxHeight,
         maxWidth,
         overflow: 'auto',
         position: 'relative',
-        scrollbarWidth: scrollbarWidth === 'thin' ? 'thin' : 'auto',
-        scrollbarColor: 'rgba(255, 255, 255, 0.1) transparent',
         // Custom scrollbar styles for WebKit browsers
         ['--scrollbar-size' as string]: scrollbarSize,
-        ['--scrollbar-opacity' as string]: showScrollbar ? '0.5' : '0',
         ...style,
       }}
       {...rest}

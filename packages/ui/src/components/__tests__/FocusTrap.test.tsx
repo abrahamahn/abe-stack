@@ -54,4 +54,37 @@ describe('FocusTrap', () => {
     unmount();
     expect(outside).toHaveFocus();
   });
+
+  it('does nothing when no focusable children exist', () => {
+    render(<button type="button">Outside</button>);
+    const outside = screen.getByText('Outside');
+    outside.focus();
+
+    const { container } = render(
+      <FocusTrap>
+        <div>No focusables</div>
+      </FocusTrap>,
+    );
+
+    expect(container.firstElementChild).toBeInTheDocument();
+    expect(outside).toHaveFocus();
+  });
+
+  it('keeps focus on the only focusable element when tabbing', () => {
+    const { container } = render(
+      <FocusTrap>
+        <button type="button">Only</button>
+      </FocusTrap>,
+    );
+
+    const root = container.firstElementChild;
+    const only = screen.getByText('Only');
+    only.focus();
+
+    fireEvent.keyDown(root ?? only, { key: 'Tab' });
+    expect(only).toHaveFocus();
+
+    fireEvent.keyDown(root ?? only, { key: 'Tab', shiftKey: true });
+    expect(only).toHaveFocus();
+  });
 });

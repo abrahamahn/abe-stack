@@ -7,6 +7,7 @@
   --ui-gap-md: 12px;
   --ui-gap-lg: 16px;
   --ui-gap-xl: 24px;
+  --ui-border-width: 1px;
   --ui-motion-duration-fast: 120ms;
   --ui-motion-duration-base: 180ms;
   --ui-motion-duration-slow: 240ms;
@@ -41,6 +42,7 @@
   --ui-color-surface: #f7f7f8;
   --ui-color-surface-strong: #0f172a;
   --ui-color-border: #e2e5e9;
+  --ui-layout-border: var(--ui-border-width) solid var(--ui-color-border);
   --ui-color-shadow: 0 10px 30px rgba(18, 38, 63, 0.08);
   --ui-color-text: #0f172a;
   --ui-color-text-muted: #4b5563;
@@ -81,6 +83,7 @@
     --ui-gap-md: 12px;
     --ui-gap-lg: 16px;
     --ui-gap-xl: 24px;
+    --ui-border-width: 1px;
     --ui-motion-duration-fast: 120ms;
     --ui-motion-duration-base: 180ms;
     --ui-motion-duration-slow: 240ms;
@@ -115,6 +118,7 @@
     --ui-color-surface: #111827;
     --ui-color-surface-strong: #0f172a;
     --ui-color-border: #1f2937;
+    --ui-layout-border: var(--ui-border-width) solid var(--ui-color-border);
     --ui-color-shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
     --ui-color-text: #f8fafc;
     --ui-color-text-muted: #d5dde7;

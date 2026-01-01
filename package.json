@@ -32,7 +32,7 @@
     "format:check": "prettier --check .",
     "clean": "turbo run clean && rm -rf node_modules .turbo",
     "export": "node tools/dev/export-code.ts",
-    "export:ui": "node tools/dev/export-ui-code.cjs",
+    "export:ui": "node tools/dev/export-ui-code.ts",
     "db:restart": "tsx tools/restart-db.ts",
     "setup": "tsx tools/setup.ts",
     "prepare": "simple-git-hooks",
@@ -44,6 +44,7 @@
     "@playwright/test": "^1.57.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^25.0.3",
     "@vitejs/plugin-react": "^5.1.2",
     "@vitest/coverage-v8": "^4.0.16",
@@ -53,6 +54,7 @@
     "jiti": "^2.6.1",
     "jsdom": "^27.4.0",
     "lint-staged": "^15.2.10",
+    "msw": "^2.12.7",
     "prettier": "^3.7.4",
     "simple-git-hooks": "^2.11.1",
     "tsx": "^4.21.0",
@@ -60,7 +62,8 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.50.1",
     "vite": "^7.3.0",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.16",
+    "vitest-axe": "^0.1.0"
   },
   "pnpm": {
     "overrides": {

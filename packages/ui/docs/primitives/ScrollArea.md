@@ -18,8 +18,8 @@ import { ScrollArea } from 'abeahn-ui/primitives';
 | maxHeight      | `string \| number`                | -        | Maximum height of the scroll area              |
 | maxWidth       | `string \| number`                | -        | Maximum width of the scroll area               |
 | scrollbarWidth | `'thin' \| 'normal' \| 'thick'`   | `'thin'` | Scrollbar width                                |
-| hideDelay      | `number`                          | `1000`   | Auto-hide delay in milliseconds (0 to disable) |
-| showOnHover    | `boolean`                         | `true`   | Show scrollbar on hover                        |
+| hideDelay      | `number`                          | `2000`   | Auto-hide delay in milliseconds (0 to disable) |
+| showOnHover    | `boolean`                         | `true`   | Show scrollbar on scrollbar hover              |
 | className      | `string`                          | `''`     | Additional CSS classes to apply                |
 | style          | `CSSProperties`                   | -        | Inline styles                                  |
 | ...rest        | `ComponentPropsWithoutRef<'div'>` | -        | All standard HTML `<div>` attributes           |
@@ -137,6 +137,7 @@ import { ScrollArea } from 'abeahn-ui/primitives';
 ## Behavior
 
 - Scrollbar auto-hides after `hideDelay` milliseconds of inactivity
+- Uses WebKit scrollbar styling in Chromium/WebKit browsers; Firefox falls back to native scrollbars
 - Scrollbar shows on hover if `showOnHover={true}`
 - Scrollbar always visible during active scrolling
 - Uses native scrolling behavior

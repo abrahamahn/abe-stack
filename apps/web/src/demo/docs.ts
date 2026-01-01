@@ -5,6 +5,8 @@
 
 type DocsMap = Record<string, string>;
 
+const normalizeKey = (value: string): string => value.toLowerCase().replace(/[^a-z0-9]/g, '');
+
 // Vite glob imports - these will be resolved at build time
 const primitiveDocsModules = import.meta.glob('../../../packages/ui/docs/primitives/*.md', {
   query: '?raw',
@@ -26,38 +28,58 @@ const layoutDocsModules = import.meta.glob('../../../packages/ui/docs/layouts/*.
 
 // Create normalized maps
 const primitiveDocs: DocsMap = Object.fromEntries(
-  Object.entries(primitiveDocsModules).map(([path, content]) => {
-    const filename = path.split('/').pop()?.replace('.md', '').toLowerCase() || '';
-    return [filename, String(content)];
+  Object.entries(primitiveDocsModules).flatMap(([path, content]) => {
+    const filename = path.split('/').pop()?.replace('.md', '') || '';
+    const normalized = normalizeKey(filename);
+    const raw = filename.toLowerCase();
+    return [
+      [raw, String(content)],
+      [normalized, String(content)],
+    ];
   }),
 );
 
 const componentDocs: DocsMap = Object.fromEntries(
-  Object.entries(componentDocsModules).map(([path, content]) => {
-    const filename = path.split('/').pop()?.replace('.md', '').toLowerCase() || '';
-    return [filename, String(content)];
+  Object.entries(componentDocsModules).flatMap(([path, content]) => {
+    const filename = path.split('/').pop()?.replace('.md', '') || '';
+    const normalized = normalizeKey(filename);
+    const raw = filename.toLowerCase();
+    return [
+      [raw, String(content)],
+      [normalized, String(content)],
+    ];
   }),
 );
 
 const layoutDocs: DocsMap = Object.fromEntries(
-  Object.entries(layoutDocsModules).map(([path, content]) => {
-    const filename = path.split('/').pop()?.replace('.md', '').toLowerCase() || '';
-    return [filename, String(content)];
+  Object.entries(layoutDocsModules).flatMap(([path, content]) => {
+    const filename = path.split('/').pop()?.replace('.md', '') || '';
+    const normalized = normalizeKey(filename);
+    const raw = filename.toLowerCase();
+    return [
+      [raw, String(content)],
+      [normalized, String(content)],
+    ];
   }),
 );
 
 /**
  * Get documentation for a component by ID
  */
-export function getComponentDocs(componentId: string, category: string): string | null {
-  const id = componentId.toLowerCase();
+export function getComponentDocs(
+  componentId: string,
+  category: string,
+  componentName?: string,
+): string | null {
+  const id = normalizeKey(componentId);
+  const fallbackName = componentName ? normalizeKey(componentName) : '';
 
   if (category === 'primitives') {
-    return primitiveDocs[id] || null;
+    return primitiveDocs[id] ?? (fallbackName ? (primitiveDocs[fallbackName] ?? null) : null);
   } else if (category === 'components') {
-    return componentDocs[id] || null;
+    return componentDocs[id] ?? (fallbackName ? (componentDocs[fallbackName] ?? null) : null);
   } else if (category === 'layouts') {
-    return layoutDocs[id] || null;
+    return layoutDocs[id] ?? (fallbackName ? (layoutDocs[fallbackName] ?? null) : null);
   }
 
   return null;

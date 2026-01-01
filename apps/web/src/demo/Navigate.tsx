@@ -29,20 +29,18 @@ export const Navigate: React.FC = () => {
 
   return (
     <PageContainer>
-      <section style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          <Button variant="secondary" onClick={goBack} disabled={!canGoBack}>
-            Back
-          </Button>
-          <Button
-            variant="primary"
-            onClick={() => {
-              setView('ui');
-            }}
-          >
-            UI
-          </Button>
-        </div>
+      <section style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
+        <Button variant="secondary" onClick={goBack} disabled={!canGoBack}>
+          Back
+        </Button>
+        <Button
+          variant="primary"
+          onClick={() => {
+            setView('ui');
+          }}
+        >
+          UI
+        </Button>
       </section>
 
       {renderView()}

@@ -2,7 +2,7 @@
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { act, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { useMediaQuery } from '../useMediaQuery';
 
@@ -14,21 +14,25 @@ function createMatchMedia(initialMatches: boolean): {
   matchMedia: (query: string) => MediaQueryList;
   setMatches: (next: boolean) => void;
   fireChange: () => void;
+  addEventListener: ReturnType<typeof vi.fn>;
+  removeEventListener: ReturnType<typeof vi.fn>;
 } {
   let matches = initialMatches;
   let listener: MatchMediaListener | null = null;
+  const addEventListener = vi.fn((_event: string, cb: MatchMediaListener) => {
+    listener = cb;
+  });
+  const removeEventListener = vi.fn(() => {
+    listener = null;
+  });
   const mql = {
     get matches() {
       return matches;
     },
     media: '',
     onchange: null,
-    addEventListener: (_event: string, cb: MatchMediaListener) => {
-      listener = cb;
-    },
-    removeEventListener: () => {
-      listener = null;
-    },
+    addEventListener,
+    removeEventListener,
     dispatchEvent: () => {
       listener?.();
       return true;
@@ -45,6 +49,8 @@ function createMatchMedia(initialMatches: boolean): {
     fireChange: (): void => {
       listener?.();
     },
+    addEventListener,
+    removeEventListener,
   };
 }
 
@@ -68,6 +74,23 @@ describe('useMediaQuery', () => {
     });
     rerender(<MediaQueryHarness query="(min-width: 600px)" />);
     expect(screen.getByTestId('matches')).toHaveTextContent('true');
+
+    window.matchMedia = originalMatchMedia;
+  });
+
+  it('cleans up event listeners on unmount and query change', () => {
+    const originalMatchMedia = window.matchMedia;
+    const media = createMatchMedia(true);
+    window.matchMedia = media.matchMedia;
+
+    const { rerender, unmount } = render(<MediaQueryHarness query="(min-width: 600px)" />);
+    expect(media.addEventListener).toHaveBeenCalledTimes(1);
+
+    rerender(<MediaQueryHarness query="(max-width: 800px)" />);
+    expect(media.removeEventListener).toHaveBeenCalledTimes(1);
+
+    unmount();
+    expect(media.removeEventListener).toHaveBeenCalledTimes(2);
 
     window.matchMedia = originalMatchMedia;
   });

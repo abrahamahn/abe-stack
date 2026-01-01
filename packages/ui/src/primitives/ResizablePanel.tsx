@@ -15,25 +15,39 @@ type ResizablePanelProps = ComponentPropsWithoutRef<'div'> & {
    */
   children: ReactNode;
   /**
-   * Default size as percentage (0-100)
+   * Default size as percentage (0-100) or pixels
    * @default 50
    */
   defaultSize?: number;
   /**
-   * Minimum size as percentage (0-100)
+   * Minimum size as percentage (0-100) or pixels
    * @default 10
    */
   minSize?: number;
   /**
-   * Maximum size as percentage (0-100)
+   * Maximum size as percentage (0-100) or pixels
    * @default 90
    */
   maxSize?: number;
+  /**
+   * Unit for size values ('%' or 'px')
+   * @default '%'
+   */
+  unit?: '%' | 'px';
+  /**
+   * Whether the panel is collapsed
+   */
+  collapsed?: boolean;
   /**
    * Resize direction
    * @default 'horizontal'
    */
   direction?: 'horizontal' | 'vertical';
+  /**
+   * Reverse the resize delta direction
+   * @default false
+   */
+  invertResize?: boolean;
   /**
    * Callback when panel size changes
    */
@@ -61,6 +75,14 @@ type ResizableSeparatorProps = ComponentPropsWithoutRef<'div'> & {
    * Handler callback for resize
    */
   onResize?: (delta: number) => void;
+  /**
+   * Callback when drag starts
+   */
+  onDragStart?: () => void;
+  /**
+   * Callback when drag ends
+   */
+  onDragEnd?: () => void;
 };
 
 /**
@@ -68,13 +90,21 @@ type ResizableSeparatorProps = ComponentPropsWithoutRef<'div'> & {
  */
 export const ResizableSeparator = forwardRef<HTMLDivElement, ResizableSeparatorProps>(
   (props, ref) => {
-    const { direction = 'horizontal', onResize, className = '', ...rest } = props;
+    const {
+      direction = 'horizontal',
+      onResize,
+      onDragStart,
+      onDragEnd,
+      className = '',
+      ...rest
+    } = props;
     const [isDragging, setIsDragging] = useState(false);
     const startPosRef = useRef<number>(0);
 
     const handleMouseDown = (e: MouseEvent<HTMLDivElement>): void => {
       e.preventDefault();
       setIsDragging(true);
+      onDragStart?.();
       startPosRef.current = direction === 'horizontal' ? e.clientX : e.clientY;
     };
 
@@ -90,6 +120,7 @@ export const ResizableSeparator = forwardRef<HTMLDivElement, ResizableSeparatorP
 
       const handleMouseUp = (): void => {
         setIsDragging(false);
+        onDragEnd?.();
       };
 
       document.addEventListener('mousemove', handleMouseMove);
@@ -99,7 +130,7 @@ export const ResizableSeparator = forwardRef<HTMLDivElement, ResizableSeparatorP
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
       };
-    }, [isDragging, direction, onResize]);
+    }, [isDragging, direction, onResize, onDragEnd]);
 
     return (
       <div
@@ -126,7 +157,10 @@ export const ResizablePanel = forwardRef<HTMLDivElement, ResizablePanelProps>((p
     defaultSize = 50,
     minSize = 10,
     maxSize = 90,
+    unit = '%',
+    collapsed = false,
     direction = 'horizontal',
+    invertResize = false,
     onResize,
     className = '',
     style,
@@ -134,36 +168,59 @@ export const ResizablePanel = forwardRef<HTMLDivElement, ResizablePanelProps>((p
   } = props;
 
   const [size, setSize] = useState(defaultSize);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleResize = (delta: number): void => {
+    const adjustedDelta = invertResize ? -delta : delta;
     setSize((prevSize) => {
-      const container = direction === 'horizontal' ? window.innerWidth : window.innerHeight;
-      const deltaPercent = (delta / container) * 100;
-      const newSize = Math.max(minSize, Math.min(maxSize, prevSize + deltaPercent));
+      let newSize: number;
+
+      if (unit === 'px') {
+        newSize = Math.max(minSize, Math.min(maxSize, prevSize + adjustedDelta));
+      } else {
+        const container = direction === 'horizontal' ? window.innerWidth : window.innerHeight;
+        const deltaPercent = (adjustedDelta / container) * 100;
+        newSize = Math.max(minSize, Math.min(maxSize, prevSize + deltaPercent));
+      }
+
       onResize?.(newSize);
       return newSize;
     });
   };
 
-  const flexBasis = `${size.toString()}%`;
+  const currentSize = collapsed ? 0 : size;
+  const flexBasis = unit === 'px' ? `${String(currentSize)}px` : `${String(currentSize)}%`;
+  const panelStyle = {
+    flexBasis,
+    flexShrink: 0,
+    flexGrow: 0,
+    transition: isDragging ? 'none' : 'flex-basis 0.3s ease',
+    ...style,
+    ...(collapsed ? { border: 'none', padding: 0, overflow: 'hidden' } : {}),
+  };
 
   return (
     <>
       <div
         ref={ref}
         className={`ui-resizable-panel ${className}`.trim()}
-        style={{
-          flexBasis,
-          flexShrink: 0,
-          flexGrow: 0,
-          overflow: 'auto',
-          ...style,
-        }}
+        style={panelStyle}
         {...rest}
       >
         {children}
       </div>
-      <ResizableSeparator direction={direction} onResize={handleResize} />
+      {!collapsed && (
+        <ResizableSeparator
+          direction={direction}
+          onResize={handleResize}
+          onDragStart={() => {
+            setIsDragging(true);
+          }}
+          onDragEnd={() => {
+            setIsDragging(false);
+          }}
+        />
+      )}
     </>
   );
 });

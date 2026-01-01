@@ -35,7 +35,7 @@ describe('ScrollArea', () => {
   it('applies scrollbarWidth prop', () => {
     const { container } = render(<ScrollArea scrollbarWidth="thick">Content</ScrollArea>);
     // Checked via style because class implementation might vary
-    expect(container.firstChild).toHaveStyle({ '--scrollbar-size': '14px' });
+    expect(container.firstChild).toHaveStyle({ '--scrollbar-size': '12px' });
   });
 
   it('applies maxHeight and maxWidth styles', () => {
@@ -74,14 +74,36 @@ describe('ScrollArea', () => {
     expect(container.firstChild).toHaveAttribute('data-scrollbar-visible', 'false');
   });
 
-  it('shows scrollbar on hover', () => {
+  it('shows scrollbar on hover over the scrollbar area', () => {
     const { container } = render(<ScrollArea showOnHover={true}>Content</ScrollArea>);
+    const element = container.firstChild as HTMLElement;
 
-    fireEvent.mouseEnter(container.firstChild as Element);
-    expect(container.firstChild).toHaveAttribute('data-scrollbar-visible', 'true');
+    Object.defineProperty(element, 'scrollHeight', { value: 200, configurable: true });
+    Object.defineProperty(element, 'clientHeight', { value: 100, configurable: true });
+    element.getBoundingClientRect = (): DOMRect =>
+      ({
+        left: 0,
+        right: 100,
+        top: 0,
+        bottom: 100,
+        width: 100,
+        height: 100,
+        x: 0,
+        y: 0,
+        toJSON: () => '',
+      }) as DOMRect;
 
-    fireEvent.mouseLeave(container.firstChild as Element);
-    expect(container.firstChild).toHaveAttribute('data-scrollbar-visible', 'false');
+    fireEvent.mouseMove(element, { clientX: 99, clientY: 50 });
+    expect(element).toHaveAttribute('data-scrollbar-visible', 'true');
+
+    fireEvent.mouseMove(element, { clientX: 50, clientY: 50 });
+    expect(element).toHaveAttribute('data-scrollbar-visible', 'true');
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(element).toHaveAttribute('data-scrollbar-visible', 'false');
   });
 
   it('keeps scrollbar visible when hideDelay is 0', () => {

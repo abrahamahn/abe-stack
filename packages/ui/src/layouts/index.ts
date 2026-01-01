@@ -4,3 +4,5 @@ export { SidebarLayout } from './SidebarLayout';
 export { StackedLayout } from './StackedLayout';
 export { PageContainer } from './PageContainer';
 export { AppShell } from './AppShell';
+export { TopbarLayout } from './TopbarLayout';
+export { BottombarLayout } from './BottombarLayout';

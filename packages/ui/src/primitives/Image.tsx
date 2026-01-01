@@ -1,4 +1,10 @@
-import { forwardRef, useState, type ComponentPropsWithoutRef, type ReactNode } from 'react';
+import {
+  forwardRef,
+  useEffect,
+  useState,
+  type ComponentPropsWithoutRef,
+  type ReactNode,
+} from 'react';
 import './primitives.css';
 
 type ImageProps = Omit<ComponentPropsWithoutRef<'img'>, 'loading'> & {
@@ -60,6 +66,12 @@ export const Image = forwardRef<HTMLImageElement, ImageProps>((props, ref) => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+
+  // Reset loading state when src changes
+  useEffect(() => {
+    setIsLoading(true);
+    setHasError(false);
+  }, [src]);
 
   const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>): void => {
     setIsLoading(false);

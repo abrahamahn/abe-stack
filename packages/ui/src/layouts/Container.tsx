@@ -1,5 +1,5 @@
 import { cn } from '../utils/cn';
-import '../theme/theme.css';
+import './layouts.css';
 
 import type { ComponentPropsWithoutRef, ReactElement } from 'react';
 
@@ -7,28 +7,13 @@ type ContainerProps = ComponentPropsWithoutRef<'div'> & {
   size?: 'sm' | 'md' | 'lg';
 };
 
-const maxWidths: Record<NonNullable<ContainerProps['size']>, string> = {
-  sm: '640px',
-  md: '960px',
-  lg: '1200px',
+const sizeClasses: Record<NonNullable<ContainerProps['size']>, string> = {
+  sm: 'ui-container--sm',
+  md: 'ui-container--md',
+  lg: 'ui-container--lg',
 };
 
-export function Container({
-  size = 'md',
-  className,
-  style,
-  ...rest
-}: ContainerProps): ReactElement {
-  return (
-    <div
-      className={cn('ui-container', className)}
-      style={{
-        margin: '0 auto',
-        maxWidth: maxWidths[size],
-        padding: '0 var(--ui-gap-lg)',
-        ...style,
-      }}
-      {...rest}
-    />
-  );
+export function Container({ size = 'md', className, ...rest }: ContainerProps): ReactElement {
+  const sizeClass = size in sizeClasses ? sizeClasses[size] : undefined;
+  return <div className={cn('ui-container', sizeClass, className)} {...rest} />;
 }

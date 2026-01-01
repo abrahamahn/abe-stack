@@ -1,5 +1,7 @@
 import { useEffect, useRef, type ReactElement, type ReactNode } from 'react';
 
+import './components.css';
+
 const FOCUSABLE = [
   'a[href]',
   'button:not([disabled])',

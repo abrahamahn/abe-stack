@@ -1,3 +1,4 @@
+import { ScrollArea } from '@abe-stack/ui';
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
@@ -17,21 +18,23 @@ export const App: React.FC = () => {
       <BrowserRouter>
         <ApiProvider>
           <HistoryProvider>
-            <div className="ui-theme">
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/demo" element={<DemoPage />} />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <DashboardPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route path="/clean" element={<HomePage />} />
-              </Routes>
+            <div className="ui-theme" style={{ height: '100vh' }}>
+              <ScrollArea style={{ height: '100%' }}>
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/demo" element={<DemoPage />} />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <DashboardPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route path="/clean" element={<HomePage />} />
+                </Routes>
+              </ScrollArea>
               <Toaster />
             </div>
           </HistoryProvider>

@@ -2,12 +2,13 @@
 import {
   Accordion,
   Alert,
-  AppShell,
   AuthLayout,
   Avatar,
   Badge,
+  Box,
   Button,
   Card,
+  CardPrimitive,
   Checkbox,
   Container,
   Dialog,
@@ -16,6 +17,8 @@ import {
   Heading,
   Image,
   Input,
+  Layout,
+  MenuItem,
   Modal,
   Overlay,
   PageContainer,
@@ -45,6 +48,7 @@ import {
   TextArea,
   Toast,
   Tooltip,
+  VisuallyHidden,
 } from '@abe-stack/ui';
 import React, { type ReactElement } from 'react';
 
@@ -52,6 +56,36 @@ import type { ComponentDemo } from './types';
 
 export const componentRegistry: Record<string, ComponentDemo> = {
   // Components
+  box: {
+    id: 'box',
+    name: 'Box',
+    category: 'components',
+    description: 'Generic flex container with padding and direction controls',
+    variants: [
+      {
+        name: 'Vertical (Column)',
+        description: 'Default vertical layout',
+        code: '<Box padding="16px" style={{ gap: "8px" }}><Button>1</Button><Button>2</Button></Box>',
+        render: () => (
+          <Box padding="16px" style={{ gap: '8px', border: '1px dashed #ccc' }}>
+            <Button>Item 1</Button>
+            <Button>Item 2</Button>
+          </Box>
+        ),
+      },
+      {
+        name: 'Horizontal (Row)',
+        description: 'Horizontal row layout',
+        code: '<Box flexDirection="row" padding="16px" style={{ gap: "8px" }}><Button>1</Button><Button>2</Button></Box>',
+        render: () => (
+          <Box flexDirection="row" padding="16px" style={{ gap: '8px', border: '1px dashed #ccc' }}>
+            <Button>Item 1</Button>
+            <Button>Item 2</Button>
+          </Box>
+        ),
+      },
+    ],
+  },
   button: {
     id: 'button',
     name: 'Button',
@@ -164,6 +198,44 @@ export const componentRegistry: Record<string, ComponentDemo> = {
         description: 'Basic loading spinner',
         code: '<Spinner />',
         render: () => <Spinner />,
+      },
+    ],
+  },
+  genericLayout: {
+    id: 'genericLayout',
+    name: 'Layout (Generic)',
+    category: 'components',
+    description: 'A flexible grid-based layout component with five slots',
+    variants: [
+      {
+        name: 'Full Layout',
+        description: 'All slots provided',
+        code: '<Layout top="..." bottom="..." left="..." right="...">Content</Layout>',
+        render: () => (
+          <div style={{ height: '300px', border: '1px solid #ddd', overflow: 'hidden' }}>
+            <Layout
+              top={
+                <div style={{ background: '#eee', padding: '8px', textAlign: 'center' }}>
+                  Header
+                </div>
+              }
+              bottom={
+                <div style={{ background: '#eee', padding: '8px', textAlign: 'center' }}>
+                  Footer
+                </div>
+              }
+              left={
+                <div style={{ background: '#f9f9f9', padding: '8px', width: '100px' }}>Left</div>
+              }
+              right={
+                <div style={{ background: '#f9f9f9', padding: '8px', width: '100px' }}>Right</div>
+              }
+              style={{ minHeight: '100%' }}
+            >
+              <div style={{ padding: '16px' }}>Main Content</div>
+            </Layout>
+          </div>
+        ),
       },
     ],
   },
@@ -281,6 +353,34 @@ export const componentRegistry: Record<string, ComponentDemo> = {
       },
     ],
   },
+  cardPrimitive: {
+    id: 'cardPrimitive',
+    name: 'Card (Advanced)',
+    category: 'primitives',
+    description: 'Structured card with header, body, and footer slots',
+    variants: [
+      {
+        name: 'Full Card',
+        description: 'Card with all sections',
+        code: '<CardPrimitive.Root><CardPrimitive.Header>...</CardPrimitive.Header>...</CardPrimitive.Root>',
+        render: () => (
+          <CardPrimitive.Root style={{ width: '300px' }}>
+            <CardPrimitive.Header>
+              <Heading as="h4" size="sm">
+                Header
+              </Heading>
+            </CardPrimitive.Header>
+            <CardPrimitive.Body>
+              <Text>Main body content goes here.</Text>
+            </CardPrimitive.Body>
+            <CardPrimitive.Footer>
+              <Button size="small">Action</Button>
+            </CardPrimitive.Footer>
+          </CardPrimitive.Root>
+        ),
+      },
+    ],
+  },
   checkbox: {
     id: 'checkbox',
     name: 'Checkbox',
@@ -380,6 +480,25 @@ export const componentRegistry: Record<string, ComponentDemo> = {
         description: 'Level 3 heading',
         code: '<Heading as="h3">Heading 3</Heading>',
         render: () => <Heading as="h3">Heading 3</Heading>,
+      },
+    ],
+  },
+  menuItem: {
+    id: 'menuItem',
+    name: 'MenuItem',
+    category: 'primitives',
+    description: 'Base component for menu items',
+    variants: [
+      {
+        name: 'Basic',
+        description: 'Default menu item',
+        code: '<MenuItem>Item Content</MenuItem>',
+        render: () => (
+          <div style={{ width: '200px', border: '1px solid #eee', padding: '4px' }}>
+            <MenuItem>Menu Item 1</MenuItem>
+            <MenuItem>Menu Item 2</MenuItem>
+          </div>
+        ),
       },
     ],
   },
@@ -622,14 +741,14 @@ export const componentRegistry: Record<string, ComponentDemo> = {
       {
         name: 'Basic',
         description: 'Basic slider',
-        code: '<Slider value={50} onChange={() => {}} />',
-        render: () => <Slider value={50} onChange={() => {}} />,
+        code: '<Slider defaultValue={50} />',
+        render: () => <Slider defaultValue={50} />,
       },
       {
         name: 'With Min/Max',
         description: 'Slider with min and max',
-        code: '<Slider min={0} max={200} value={100} onChange={() => {}} />',
-        render: () => <Slider min={0} max={200} value={100} onChange={() => {}} />,
+        code: '<Slider min={0} max={200} defaultValue={100} />',
+        render: () => <Slider min={0} max={200} defaultValue={100} />,
       },
     ],
   },
@@ -642,14 +761,14 @@ export const componentRegistry: Record<string, ComponentDemo> = {
       {
         name: 'Off',
         description: 'Switch off',
-        code: '<Switch checked={false} onChange={() => {}} />',
-        render: () => <Switch checked={false} onChange={() => {}} />,
+        code: '<Switch defaultChecked={false} />',
+        render: () => <Switch defaultChecked={false} />,
       },
       {
         name: 'On',
         description: 'Switch on',
-        code: '<Switch checked={true} onChange={() => {}} />',
-        render: () => <Switch checked={true} onChange={() => {}} />,
+        code: '<Switch defaultChecked={true} />',
+        render: () => <Switch defaultChecked={true} />,
       },
       {
         name: 'Disabled',
@@ -710,6 +829,26 @@ export const componentRegistry: Record<string, ComponentDemo> = {
         description: 'Danger text',
         code: '<Text tone="danger">Danger text</Text>',
         render: () => <Text tone="danger">Danger text</Text>,
+      },
+    ],
+  },
+  visuallyHidden: {
+    id: 'visuallyHidden',
+    name: 'VisuallyHidden',
+    category: 'primitives',
+    description: 'Hides content visually while keeping it accessible to screen readers',
+    variants: [
+      {
+        name: 'Basic',
+        description: 'Hidden content',
+        code: '<VisuallyHidden>Hidden from sight but not from screen readers</VisuallyHidden>',
+        render: () => (
+          <div>
+            <Text>There is hidden text below this line:</Text>
+            <VisuallyHidden>I am here for accessibility!</VisuallyHidden>
+            <Text tone="muted">(Inspect the DOM to see it)</Text>
+          </div>
+        ),
       },
     ],
   },
@@ -881,9 +1020,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
         render: (): ReactElement => {
           return (
             <Dialog.Root>
-              <Dialog.Trigger>
-                <Button>Open Dialog</Button>
-              </Dialog.Trigger>
+              <Dialog.Trigger className="btn btn-primary btn-medium">Open Dialog</Dialog.Trigger>
               <Dialog.Content title="Dialog Title">
                 <Text>This is the dialog content</Text>
               </Dialog.Content>
@@ -929,7 +1066,13 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Text>Content with 640px max-width</Text>
 </Container>`,
         render: (): ReactElement => (
-          <div style={{ border: '1px solid #ddd', padding: '20px', backgroundColor: '#f9f9f9' }}>
+          <div
+            style={{
+              border: '1px solid var(--ui-color-border)',
+              padding: '20px',
+              backgroundColor: 'var(--ui-color-surface)',
+            }}
+          >
             <Container size="sm">
               <Card>
                 <Heading as="h3" size="sm">
@@ -952,7 +1095,13 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Text>Content with 960px max-width (default)</Text>
 </Container>`,
         render: (): ReactElement => (
-          <div style={{ border: '1px solid #ddd', padding: '20px', backgroundColor: '#f9f9f9' }}>
+          <div
+            style={{
+              border: '1px solid var(--ui-color-border)',
+              padding: '20px',
+              backgroundColor: 'var(--ui-color-surface)',
+            }}
+          >
             <Container size="md">
               <Card>
                 <Heading as="h3" size="sm">
@@ -975,7 +1124,13 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Text>Content with 1200px max-width</Text>
 </Container>`,
         render: (): ReactElement => (
-          <div style={{ border: '1px solid #ddd', padding: '20px', backgroundColor: '#f9f9f9' }}>
+          <div
+            style={{
+              border: '1px solid var(--ui-color-border)',
+              padding: '20px',
+              backgroundColor: 'var(--ui-color-surface)',
+            }}
+          >
             <Container size="lg">
               <Card>
                 <Heading as="h3" size="sm">
@@ -1055,7 +1210,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Button variant="primary">Sign In</Button>
 </AuthLayout>`,
         render: (): ReactElement => (
-          <div style={{ minHeight: '400px', backgroundColor: '#f5f5f5' }}>
+          <div style={{ minHeight: '400px', backgroundColor: 'var(--ui-color-surface)' }}>
             <AuthLayout title="Welcome Back" description="Sign in to your account to continue">
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <Input placeholder="Email" type="email" />
@@ -1080,7 +1235,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Button variant="primary">Create Account</Button>
 </AuthLayout>`,
         render: (): ReactElement => (
-          <div style={{ minHeight: '450px', backgroundColor: '#f5f5f5' }}>
+          <div style={{ minHeight: '450px', backgroundColor: 'var(--ui-color-surface)' }}>
             <AuthLayout title="Create Account" description="Sign up to get started">
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <Input placeholder="Full Name" />
@@ -1106,7 +1261,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Button variant="primary">Send Reset Link</Button>
 </AuthLayout>`,
         render: (): ReactElement => (
-          <div style={{ minHeight: '350px', backgroundColor: '#f5f5f5' }}>
+          <div style={{ minHeight: '350px', backgroundColor: 'var(--ui-color-surface)' }}>
             <AuthLayout>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <Heading as="h3" size="sm">
@@ -1138,7 +1293,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Text>Page content with consistent padding and max-width</Text>
 </PageContainer>`,
         render: (): ReactElement => (
-          <div style={{ border: '1px solid #ddd', minHeight: '200px' }}>
+          <div style={{ border: '1px solid var(--ui-color-border)', minHeight: '200px' }}>
             <PageContainer>
               <Heading as="h2" size="md">
                 Page Title
@@ -1162,7 +1317,7 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Text>Content with narrower max-width</Text>
 </PageContainer>`,
         render: (): ReactElement => (
-          <div style={{ border: '1px solid #ddd', minHeight: '150px' }}>
+          <div style={{ border: '1px solid var(--ui-color-border)', minHeight: '150px' }}>
             <PageContainer maxWidth={600}>
               <Heading as="h3" size="sm">
                 Narrow Content
@@ -1284,7 +1439,12 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Text>Your content goes here</Text>
 </StackedLayout>`,
         render: (): ReactElement => (
-          <div style={{ border: '1px solid #ddd', backgroundColor: '#f9f9f9' }}>
+          <div
+            style={{
+              border: '1px solid var(--ui-color-border)',
+              backgroundColor: 'var(--ui-color-surface)',
+            }}
+          >
             <StackedLayout>
               <Heading as="h2" size="md">
                 Content Title
@@ -1314,7 +1474,12 @@ export const componentRegistry: Record<string, ComponentDemo> = {
   <Text>Main content</Text>
 </StackedLayout>`,
         render: (): ReactElement => (
-          <div style={{ border: '1px solid #ddd', backgroundColor: '#f9f9f9' }}>
+          <div
+            style={{
+              border: '1px solid var(--ui-color-border)',
+              backgroundColor: 'var(--ui-color-surface)',
+            }}
+          >
             <StackedLayout
               hero={
                 <div
@@ -1342,221 +1507,6 @@ export const componentRegistry: Record<string, ComponentDemo> = {
                 <Text>Regular content follows the hero section.</Text>
               </Card>
             </StackedLayout>
-          </div>
-        ),
-      },
-    ],
-  },
-  appShell: {
-    id: 'appShell',
-    name: 'AppShell',
-    category: 'layouts',
-    description:
-      'Comprehensive app layout with header, footer, sidebar, aside, and adjustable sizes',
-    variants: [
-      {
-        name: 'Full Layout',
-        description: 'Complete app shell with all sections',
-        code: `<AppShell
-  header={<div>Header</div>}
-  sidebar={<nav>Sidebar Navigation</nav>}
-  aside={<div>Right Panel</div>}
-  footer={<div>Footer</div>}
->
-  <Heading as="h1">Main Content</Heading>
-</AppShell>`,
-        render: (): ReactElement => (
-          <div style={{ border: '1px solid #ddd', height: '400px' }}>
-            <AppShell
-              header={
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Heading as="h3" size="sm">
-                    My App
-                  </Heading>
-                  <Button size="small">Profile</Button>
-                </div>
-              }
-              sidebar={
-                <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <Text style={{ fontWeight: 600, marginBottom: '8px' }}>Navigation</Text>
-                  <Button variant="text" size="small" style={{ justifyContent: 'flex-start' }}>
-                    Dashboard
-                  </Button>
-                  <Button variant="text" size="small" style={{ justifyContent: 'flex-start' }}>
-                    Projects
-                  </Button>
-                  <Button variant="text" size="small" style={{ justifyContent: 'flex-start' }}>
-                    Team
-                  </Button>
-                </nav>
-              }
-              aside={
-                <div>
-                  <Text style={{ fontWeight: 600, marginBottom: '12px' }}>Activity</Text>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <Card>
-                      <Text style={{ fontSize: '12px' }}>Recent activity item</Text>
-                    </Card>
-                    <Card>
-                      <Text style={{ fontSize: '12px' }}>Another update</Text>
-                    </Card>
-                  </div>
-                </div>
-              }
-              footer={
-                <div style={{ textAlign: 'center' }}>
-                  <Text tone="muted" style={{ fontSize: '12px' }}>
-                    © 2024 My App. All rights reserved.
-                  </Text>
-                </div>
-              }
-              headerHeight="64px"
-              footerHeight="48px"
-              sidebarWidth={220}
-              asideWidth={220}
-            >
-              <Heading as="h2" size="md">
-                Main Content
-              </Heading>
-              <Text>
-                AppShell provides a complete application layout with header, footer, left sidebar,
-                right aside panel, and main content area.
-              </Text>
-              <Card style={{ marginTop: '16px' }}>
-                <Text>All sections are optional and sizes are customizable.</Text>
-              </Card>
-            </AppShell>
-          </div>
-        ),
-      },
-      {
-        name: 'Collapsible Panels',
-        description: 'App shell with collapsible sidebar and aside',
-        code: `const [sidebarOpen, setSidebarOpen] = useState(true);
-const [asideOpen, setAsideOpen] = useState(true);
-
-<AppShell
-  header={<Button onClick={() => setSidebarOpen(!sidebarOpen)}>Toggle</Button>}
-  sidebar={<nav>Sidebar</nav>}
-  aside={<div>Aside</div>}
-  sidebarCollapsed={!sidebarOpen}
-  asideCollapsed={!asideOpen}
->
-  Main Content
-</AppShell>`,
-        render: (): ReactElement => {
-          const [sidebarOpen, setSidebarOpen] = React.useState(true);
-          const [asideOpen, setAsideOpen] = React.useState(false);
-
-          return (
-            <div style={{ border: '1px solid #ddd', height: '350px' }}>
-              <AppShell
-                header={
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                    <Heading as="h4" size="sm">
-                      Collapsible Layout
-                    </Heading>
-                    <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
-                      <Button
-                        size="small"
-                        onClick={() => {
-                          setSidebarOpen(!sidebarOpen);
-                        }}
-                      >
-                        {sidebarOpen ? '← Hide' : '→ Show'} Sidebar
-                      </Button>
-                      <Button
-                        size="small"
-                        onClick={() => {
-                          setAsideOpen(!asideOpen);
-                        }}
-                      >
-                        {asideOpen ? 'Hide →' : '← Show'} Panel
-                      </Button>
-                    </div>
-                  </div>
-                }
-                sidebar={
-                  <div>
-                    <Text style={{ fontWeight: 600 }}>Sidebar</Text>
-                    <Text style={{ fontSize: '12px', marginTop: '8px' }}>This can be toggled</Text>
-                  </div>
-                }
-                aside={
-                  <div>
-                    <Text style={{ fontWeight: 600 }}>Aside Panel</Text>
-                    <Text style={{ fontSize: '12px', marginTop: '8px' }}>
-                      This can also be toggled
-                    </Text>
-                  </div>
-                }
-                sidebarCollapsed={!sidebarOpen}
-                asideCollapsed={!asideOpen}
-                headerHeight="56px"
-                sidebarWidth={200}
-                asideWidth={200}
-              >
-                <Heading as="h3" size="sm">
-                  Main Content
-                </Heading>
-                <Text>
-                  Click the buttons in the header to toggle the sidebar and aside panels. The layout
-                  automatically adjusts.
-                </Text>
-              </AppShell>
-            </div>
-          );
-        },
-      },
-      {
-        name: 'Custom Sizes',
-        description: 'App shell with custom panel sizes',
-        code: `<AppShell
-  header={<div>Header</div>}
-  sidebar={<div>Wide Sidebar</div>}
-  headerHeight="80px"
-  sidebarWidth={350}
->
-  Main Content
-</AppShell>`,
-        render: (): ReactElement => (
-          <div style={{ border: '1px solid #ddd', height: '300px' }}>
-            <AppShell
-              header={
-                <div>
-                  <Heading as="h3" size="sm">
-                    Custom Sizes
-                  </Heading>
-                  <Text tone="muted" style={{ fontSize: '12px' }}>
-                    Header height: 80px, Sidebar width: 350px
-                  </Text>
-                </div>
-              }
-              sidebar={
-                <div>
-                  <Text style={{ fontWeight: 600, marginBottom: '12px' }}>Wide Sidebar</Text>
-                  <Text style={{ fontSize: '14px' }}>
-                    This sidebar is 350px wide instead of the default 250px. All dimensions are
-                    customizable.
-                  </Text>
-                </div>
-              }
-              headerHeight="80px"
-              sidebarWidth={350}
-            >
-              <Heading as="h3" size="sm">
-                Main Content
-              </Heading>
-              <Text>
-                You can customize headerHeight, footerHeight, sidebarWidth, and asideWidth props.
-              </Text>
-            </AppShell>
           </div>
         ),
       },

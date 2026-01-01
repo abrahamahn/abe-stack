@@ -25,23 +25,28 @@ Container for resizable panels.
 
 Individual resizable panel.
 
-| Prop        | Type                         | Default        | Description                        |
-| ----------- | ---------------------------- | -------------- | ---------------------------------- |
-| children    | `ReactNode` (required)       | -              | Panel content                      |
-| defaultSize | `number`                     | `50`           | Default size as percentage (0-100) |
-| minSize     | `number`                     | `10`           | Minimum size as percentage         |
-| maxSize     | `number`                     | `90`           | Maximum size as percentage         |
-| direction   | `'horizontal' \| 'vertical'` | `'horizontal'` | Resize direction                   |
-| onResize    | `(size: number) => void`     | -              | Callback when size changes         |
+| Prop         | Type                         | Default        | Description                                  |
+| ------------ | ---------------------------- | -------------- | -------------------------------------------- |
+| children     | `ReactNode` (required)       | -              | Panel content                                |
+| defaultSize  | `number`                     | `50`           | Default size as percentage (0-100) or pixels |
+| minSize      | `number`                     | `10`           | Minimum size as percentage or pixels         |
+| maxSize      | `number`                     | `90`           | Maximum size as percentage or pixels         |
+| unit         | `'%' \| 'px'`                | `'%'`          | Unit for size values                         |
+| collapsed    | `boolean`                    | `false`        | Collapse panel to zero with animation        |
+| direction    | `'horizontal' \| 'vertical'` | `'horizontal'` | Resize direction                             |
+| invertResize | `boolean`                    | `false`        | Reverse resize delta direction               |
+| onResize     | `(size: number) => void`     | -              | Callback when size changes                   |
 
 ### ResizableSeparator
 
 Draggable separator between panels (auto-added by ResizablePanel).
 
-| Prop      | Type                         | Default        | Description           |
-| --------- | ---------------------------- | -------------- | --------------------- |
-| direction | `'horizontal' \| 'vertical'` | `'horizontal'` | Separator orientation |
-| onResize  | `(delta: number) => void`    | -              | Resize handler        |
+| Prop        | Type                         | Default        | Description            |
+| ----------- | ---------------------------- | -------------- | ---------------------- |
+| direction   | `'horizontal' \| 'vertical'` | `'horizontal'` | Separator orientation  |
+| onResize    | `(delta: number) => void`    | -              | Resize handler         |
+| onDragStart | `() => void`                 | -              | Callback on drag start |
+| onDragEnd   | `() => void`                 | -              | Callback on drag end   |
 
 ## Usage
 
@@ -167,7 +172,7 @@ const [leftSize, setLeftSize] = useState(() => {
 ### Don't
 
 - Don't make panels too small (<100px)
-- Don't allow panels to completely collapse
+- Don't collapse panels without a recovery control (button or toggle)
 - Don't forget mobile considerations (touch may not work well)
 - Don't nest too many resizable layouts
 - Don't use for simple two-column layouts (use CSS Grid)

@@ -1,5 +1,5 @@
 import { forwardRef, type CSSProperties, type ReactNode } from 'react';
-import '../primitives/primitives.css';
+import './layouts.css';
 
 export interface AppShellProps {
   /**

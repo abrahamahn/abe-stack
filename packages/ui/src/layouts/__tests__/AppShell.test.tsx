@@ -22,6 +22,28 @@ describe('AppShell', () => {
     expect(screen.getByText('Main Content')).toBeInTheDocument();
   });
 
+  it('renders main content even without optional slots', () => {
+    render(<AppShell>Body</AppShell>);
+
+    expect(screen.getByText('Body')).toBeInTheDocument();
+    expect(screen.queryByRole('banner')).not.toBeInTheDocument();
+    expect(screen.queryByRole('contentinfo')).not.toBeInTheDocument();
+  });
+
+  it('forwards className, style, and ref to root', () => {
+    const ref = { current: null };
+    const { container } = render(
+      <AppShell ref={ref} className="custom-shell" style={{ margin: '12px' }}>
+        Main
+      </AppShell>,
+    );
+
+    expect(container.firstChild).toHaveClass('ui-app-shell');
+    expect(container.firstChild).toHaveClass('custom-shell');
+    expect(container.firstChild).toHaveStyle({ margin: '12px' });
+    expect(ref.current).toBeInstanceOf(HTMLDivElement);
+  });
+
   it('hides sidebar when sidebarCollapsed is true', () => {
     render(
       <AppShell sidebar={<div>Sidebar Content</div>} sidebarCollapsed={true}>
@@ -51,6 +73,24 @@ describe('AppShell', () => {
     expect(container.firstChild).toHaveStyle({
       '--ui-header-height': '100px',
       '--ui-sidebar-width': '300px',
+    });
+  });
+
+  it('sets collapsed widths to 0px', () => {
+    const { container } = render(
+      <AppShell
+        sidebar={<div>Sidebar</div>}
+        aside={<div>Aside</div>}
+        sidebarCollapsed
+        asideCollapsed
+      >
+        Main
+      </AppShell>,
+    );
+
+    expect(container.firstChild).toHaveStyle({
+      '--ui-sidebar-width': '0px',
+      '--ui-aside-width': '0px',
     });
   });
 });
