@@ -15,19 +15,21 @@ describe('InputElement', () => {
     expect(input).toHaveClass('ui-input');
   });
 
-  it('supports custom element', () => {
+  it('renders as different element with as prop', () => {
     render(<InputElement as="textarea" placeholder="Notes" />);
 
     const textarea = screen.getByPlaceholderText('Notes');
     expect(textarea.tagName).toBe('TEXTAREA');
+    expect(textarea).toHaveClass('ui-input');
   });
 
-  it('forwards className and ref', () => {
+  it('merges className and forwards ref', () => {
     const ref = { current: null };
-    render(<InputElement ref={ref} className="custom-input" aria-label="Email" />);
+    render(<InputElement ref={ref} className="custom" aria-label="Email" />);
 
     const input = screen.getByRole('textbox', { name: 'Email' });
-    expect(input).toHaveClass('custom-input');
-    expect(ref.current).toBeInstanceOf(HTMLElement);
+    expect(input).toHaveClass('ui-input');
+    expect(input).toHaveClass('custom');
+    expect(ref.current).toBeInstanceOf(HTMLInputElement);
   });
 });

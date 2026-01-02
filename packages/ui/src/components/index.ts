@@ -5,4 +5,5 @@ export { Input } from './Input';
 export { Spinner } from './Spinner';
 export { Box } from './Box';
 export { Layout } from './Layout';
+export { LoadingContainer } from './LoadingContainer';
 export { FocusTrap } from './FocusTrap';

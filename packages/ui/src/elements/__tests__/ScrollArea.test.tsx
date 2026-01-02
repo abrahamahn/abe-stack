@@ -110,4 +110,72 @@ describe('ScrollArea', () => {
     const { container } = render(<ScrollArea hideDelay={0}>Content</ScrollArea>);
     expect(container.firstChild).toHaveAttribute('data-scrollbar-visible', 'true');
   });
+
+  it('forwards ref to scroll container', () => {
+    const ref = { current: null };
+    render(<ScrollArea ref={ref}>Content</ScrollArea>);
+    expect(ref.current).toBeInstanceOf(HTMLDivElement);
+  });
+
+  it('applies default scrollbar width (thin)', () => {
+    const { container } = render(<ScrollArea>Content</ScrollArea>);
+    expect(container.firstChild).toHaveStyle({ '--scrollbar-size': '4px' });
+  });
+
+  it('applies normal scrollbar width', () => {
+    const { container } = render(<ScrollArea scrollbarWidth="normal">Content</ScrollArea>);
+    expect(container.firstChild).toHaveStyle({ '--scrollbar-size': '8px' });
+  });
+
+  it('does not show scrollbar on hover when showOnHover is false', () => {
+    const { container } = render(<ScrollArea showOnHover={false}>Content</ScrollArea>);
+    const element = container.firstChild as HTMLElement;
+
+    fireEvent.mouseMove(element, { clientX: 99, clientY: 50 });
+
+    // Should not change visibility when showOnHover is disabled
+    expect(element).toHaveAttribute('data-scrollbar-hover', 'false');
+  });
+
+  it('cleans up timeout on unmount', () => {
+    const { unmount } = render(<ScrollArea hideDelay={1000}>Content</ScrollArea>);
+    unmount();
+    // No error should occur after unmount
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+  });
+
+  it('hides scrollbar on mouseLeave after hover', () => {
+    const { container } = render(<ScrollArea showOnHover={true}>Content</ScrollArea>);
+    const element = container.firstChild as HTMLElement;
+
+    Object.defineProperty(element, 'scrollHeight', { value: 200, configurable: true });
+    Object.defineProperty(element, 'clientHeight', { value: 100, configurable: true });
+    element.getBoundingClientRect = (): DOMRect =>
+      ({
+        left: 0,
+        right: 100,
+        top: 0,
+        bottom: 100,
+        width: 100,
+        height: 100,
+        x: 0,
+        y: 0,
+        toJSON: () => '',
+      }) as DOMRect;
+
+    // Hover over scrollbar area
+    fireEvent.mouseMove(element, { clientX: 99, clientY: 50 });
+    expect(element).toHaveAttribute('data-scrollbar-visible', 'true');
+
+    // Leave the element
+    fireEvent.mouseLeave(element);
+
+    act(() => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(element).toHaveAttribute('data-scrollbar-visible', 'false');
+  });
 });

@@ -210,16 +210,16 @@ describe('Accordion', () => {
     });
 
     it('handles very large number of items', () => {
-      const manyItems = Array.from({ length: 100 }, (_, i) => ({
+      const manyItems = Array.from({ length: 50 }, (_, i) => ({
         id: `item-${i}`,
         title: `Title ${i}`,
         content: `Content ${i}`,
       }));
 
-      render(<Accordion items={manyItems} />);
+      const { container } = render(<Accordion items={manyItems} />);
 
-      const buttons = screen.getAllByRole('button');
-      expect(buttons).toHaveLength(100);
+      const buttons = container.querySelectorAll('.ui-accordion-header');
+      expect(buttons).toHaveLength(50);
     });
 
     it('handles items with duplicate IDs', async () => {

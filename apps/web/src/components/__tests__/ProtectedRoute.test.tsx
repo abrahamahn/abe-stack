@@ -10,13 +10,15 @@ import { ProtectedRoute } from '../ProtectedRoute';
 // Mock the useAuth hook
 const mockUseAuth = vi.fn();
 vi.mock('../../features/auth/useAuth', () => ({
-  useAuth: () => mockUseAuth(),
+  useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
 }));
 
 // Mock UI components
 vi.mock('@abe-stack/ui', () => ({
-  Spinner: () => <div data-testid="spinner">Loading Spinner</div>,
-  Text: ({ children }: { children: React.ReactNode }) => <span>{children}</span>,
+  Spinner: (): React.ReactElement => <div data-testid="spinner">Loading Spinner</div>,
+  Text: ({ children }: { children: React.ReactNode }): React.ReactElement => (
+    <span>{children}</span>
+  ),
 }));
 
 describe('ProtectedRoute', () => {
@@ -32,7 +34,7 @@ describe('ProtectedRoute', () => {
           <ProtectedRoute>
             <div>Protected Content</div>
           </ProtectedRoute>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(screen.getByTestId('spinner')).toBeInTheDocument();
@@ -51,7 +53,7 @@ describe('ProtectedRoute', () => {
           <ProtectedRoute>
             <div>Protected Content</div>
           </ProtectedRoute>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(screen.getByText('Loading...')).toBeInTheDocument();
@@ -68,7 +70,7 @@ describe('ProtectedRoute', () => {
           <ProtectedRoute>
             <div>Protected Content</div>
           </ProtectedRoute>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       const loadingDiv = container.querySelector('div[style*="padding"]');
@@ -104,7 +106,7 @@ describe('ProtectedRoute', () => {
               path="/login"
               element={
                 <div
-                  ref={(el) => {
+                  ref={(el): void => {
                     if (el) currentLocation = '/login';
                   }}
                 >
@@ -113,7 +115,7 @@ describe('ProtectedRoute', () => {
               }
             />
           </Routes>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(screen.getByText('Login Page')).toBeInTheDocument();
@@ -140,7 +142,7 @@ describe('ProtectedRoute', () => {
             />
             <Route path="/login" element={<div>Login</div>} />
           </Routes>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(screen.queryByText('Secret Data')).not.toBeInTheDocument();
@@ -159,7 +161,7 @@ describe('ProtectedRoute', () => {
           <ProtectedRoute>
             <div>Protected Content</div>
           </ProtectedRoute>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(screen.getByText('Protected Content')).toBeInTheDocument();
@@ -178,7 +180,7 @@ describe('ProtectedRoute', () => {
             <div>Second Child</div>
             <div>Third Child</div>
           </ProtectedRoute>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(screen.getByText('First Child')).toBeInTheDocument();
@@ -201,7 +203,7 @@ describe('ProtectedRoute', () => {
               <button>Action</button>
             </div>
           </ProtectedRoute>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
@@ -224,7 +226,7 @@ describe('ProtectedRoute', () => {
               <Route path="dashboard" element={<div>Dashboard from Outlet</div>} />
             </Route>
           </Routes>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(screen.getByText('Dashboard from Outlet')).toBeInTheDocument();
@@ -244,7 +246,7 @@ describe('ProtectedRoute', () => {
               <Route path="settings" element={<div>Settings</div>} />
             </Route>
           </Routes>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(screen.getByText('User Profile')).toBeInTheDocument();
@@ -263,7 +265,7 @@ describe('ProtectedRoute', () => {
           <ProtectedRoute>
             <div>Protected Content</div>
           </ProtectedRoute>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(screen.getByTestId('spinner')).toBeInTheDocument();
@@ -279,7 +281,7 @@ describe('ProtectedRoute', () => {
           <ProtectedRoute>
             <div>Protected Content</div>
           </ProtectedRoute>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(screen.queryByTestId('spinner')).not.toBeInTheDocument();
@@ -305,7 +307,7 @@ describe('ProtectedRoute', () => {
             />
             <Route path="/login" element={<div>Login Page</div>} />
           </Routes>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(screen.getByTestId('spinner')).toBeInTheDocument();
@@ -329,7 +331,7 @@ describe('ProtectedRoute', () => {
             />
             <Route path="/login" element={<div>Login Page</div>} />
           </Routes>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(screen.queryByTestId('spinner')).not.toBeInTheDocument();
@@ -347,7 +349,7 @@ describe('ProtectedRoute', () => {
       render(
         <MemoryRouter>
           <ProtectedRoute>{null}</ProtectedRoute>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       // Should not crash
@@ -367,7 +369,7 @@ describe('ProtectedRoute', () => {
               <Route index element={<div>Index Route</div>} />
             </Route>
           </Routes>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(container).toBeInTheDocument();
@@ -384,7 +386,7 @@ describe('ProtectedRoute', () => {
           <ProtectedRoute>
             <div>Protected Content</div>
           </ProtectedRoute>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       // Should show loading even if authenticated is true
@@ -413,7 +415,7 @@ describe('ProtectedRoute', () => {
             />
             <Route path="/login" element={<div>Login</div>} />
           </Routes>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(screen.getByText('Login')).toBeInTheDocument();
@@ -437,7 +439,7 @@ describe('ProtectedRoute', () => {
               }
             />
           </Routes>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       expect(screen.getByText('Admin Dashboard')).toBeInTheDocument();
@@ -456,10 +458,12 @@ describe('ProtectedRoute', () => {
           <ProtectedRoute>
             <div>Content</div>
           </ProtectedRoute>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
-      expect(() => unmount()).not.toThrow();
+      expect(() => {
+        unmount();
+      }).not.toThrow();
     });
 
     it('should handle rapid re-renders', () => {
@@ -473,7 +477,7 @@ describe('ProtectedRoute', () => {
           <ProtectedRoute>
             <div>Content</div>
           </ProtectedRoute>
-        </MemoryRouter>
+        </MemoryRouter>,
       );
 
       for (let i = 0; i < 10; i++) {
@@ -482,7 +486,7 @@ describe('ProtectedRoute', () => {
             <ProtectedRoute>
               <div>Content</div>
             </ProtectedRoute>
-          </MemoryRouter>
+          </MemoryRouter>,
         );
       }
 

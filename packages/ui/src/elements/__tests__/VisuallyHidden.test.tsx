@@ -7,24 +7,26 @@ import { describe, expect, it } from 'vitest';
 import { VisuallyHidden } from '../VisuallyHidden';
 
 describe('VisuallyHidden', () => {
-  it('renders a hidden span with class', () => {
-    render(<VisuallyHidden>Hidden label</VisuallyHidden>);
+  it('renders a span with ui-visually-hidden class', () => {
+    render(<VisuallyHidden>Hidden text</VisuallyHidden>);
 
-    const hidden = screen.getByText('Hidden label');
-    expect(hidden.tagName).toBe('SPAN');
-    expect(hidden).toHaveClass('ui-visually-hidden');
+    const span = screen.getByText('Hidden text');
+    expect(span.tagName).toBe('SPAN');
+    expect(span).toHaveClass('ui-visually-hidden');
   });
 
-  it('forwards className and ref', () => {
-    const ref = { current: null };
-    render(
-      <VisuallyHidden ref={ref} className="custom-hidden">
-        Hidden
-      </VisuallyHidden>,
-    );
+  it('merges custom className with base class', () => {
+    render(<VisuallyHidden className="custom">Content</VisuallyHidden>);
 
-    const hidden = screen.getByText('Hidden');
-    expect(hidden).toHaveClass('custom-hidden');
+    const span = screen.getByText('Content');
+    expect(span).toHaveClass('ui-visually-hidden');
+    expect(span).toHaveClass('custom');
+  });
+
+  it('forwards ref to span element', () => {
+    const ref = { current: null };
+    render(<VisuallyHidden ref={ref}>Text</VisuallyHidden>);
+
     expect(ref.current).toBeInstanceOf(HTMLSpanElement);
   });
 });

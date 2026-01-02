@@ -15,7 +15,12 @@ type ResizablePanelProps = ComponentPropsWithoutRef<'div'> & {
    */
   children: ReactNode;
   /**
-   * Default size as percentage (0-100) or pixels
+   * Controlled size as percentage (0-100) or pixels
+   * When provided, component is controlled
+   */
+  size?: number;
+  /**
+   * Default size as percentage (0-100) or pixels (uncontrolled mode)
    * @default 50
    */
   defaultSize?: number;
@@ -154,6 +159,7 @@ ResizableSeparator.displayName = 'ResizableSeparator';
 export const ResizablePanel = forwardRef<HTMLDivElement, ResizablePanelProps>((props, ref) => {
   const {
     children,
+    size: controlledSize,
     defaultSize = 50,
     minSize = 10,
     maxSize = 90,
@@ -167,25 +173,29 @@ export const ResizablePanel = forwardRef<HTMLDivElement, ResizablePanelProps>((p
     ...rest
   } = props;
 
-  const [size, setSize] = useState(defaultSize);
+  const isControlled = controlledSize !== undefined;
+  const [internalSize, setInternalSize] = useState(defaultSize);
   const [isDragging, setIsDragging] = useState(false);
+
+  const size = isControlled ? controlledSize : internalSize;
 
   const handleResize = (delta: number): void => {
     const adjustedDelta = invertResize ? -delta : delta;
-    setSize((prevSize) => {
-      let newSize: number;
+    const prevSize = size;
 
-      if (unit === 'px') {
-        newSize = Math.max(minSize, Math.min(maxSize, prevSize + adjustedDelta));
-      } else {
-        const container = direction === 'horizontal' ? window.innerWidth : window.innerHeight;
-        const deltaPercent = (adjustedDelta / container) * 100;
-        newSize = Math.max(minSize, Math.min(maxSize, prevSize + deltaPercent));
-      }
+    let newSize: number;
+    if (unit === 'px') {
+      newSize = Math.max(minSize, Math.min(maxSize, prevSize + adjustedDelta));
+    } else {
+      const container = direction === 'horizontal' ? window.innerWidth : window.innerHeight;
+      const deltaPercent = (adjustedDelta / container) * 100;
+      newSize = Math.max(minSize, Math.min(maxSize, prevSize + deltaPercent));
+    }
 
-      onResize?.(newSize);
-      return newSize;
-    });
+    if (!isControlled) {
+      setInternalSize(newSize);
+    }
+    onResize?.(newSize);
   };
 
   const currentSize = collapsed ? 0 : size;

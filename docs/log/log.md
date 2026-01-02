@@ -802,3 +802,40 @@
 
 - Relocated UI stylesheets into `packages/ui/src/styles` and updated component/layout/element imports.
 - Switched shared element styles to `elements.css` naming and updated build-theme output path.
+
+2026-01-02 (Session 18)
+
+- Enhanced DemoShell bottom bar with version info (v1.1.0), environment badge (DEV/PROD), and component count.
+- Added keyboard shortcuts display in bottom bar: L (toggle left panel), R (toggle right panel), T (cycle theme), Esc (deselect component).
+- Implemented keyboard shortcuts handler with proper event delegation (skips input/textarea fields).
+- Fixed panel size persistence: added controlled mode (`size` prop) to ResizablePanel so localStorage-saved sizes are applied on page load.
+- Added `getTotalComponentCount()` utility to registry for component count display.
+- Reduced bottom bar size from 15% to 8% for a more compact status bar layout.
+- Updated DemoShell tests for new bottom bar content, keyboard shortcuts, and panel size expectations.
+- Fixed lint errors in test setup (matchMedia mock return types) and ApiProvider tests (non-null assertions).
+- Build: `pnpm build` passing ✅
+
+2026-01-02 (Session 19)
+
+- **Component Extraction from apps/web to packages/ui:**
+  - Extracted `Kbd` component for keyboard key display with size variants (sm/md).
+  - Extracted `FormField` component with label, error message, helper text, and required indicator support.
+  - Extracted `LoadingContainer` component combining Spinner and Text for loading states.
+  - Extracted `EnvironmentBadge` component for environment status display (development/production/staging/test).
+  - Extracted `VersionBadge` component for version display with optional prefix.
+- **New Hooks:**
+  - `useKeyboardShortcuts` - Global keyboard shortcuts with modifier key support (ctrl/shift/alt), input field exclusion, and cleanup.
+  - `useThemeMode` - Theme mode management (system/light/dark) with localStorage persistence, cycleMode helper, and resolved theme state.
+  - `usePanelConfig` - Panel configuration management for resizable layouts with localStorage persistence, toggle/resize/reset helpers.
+- **CSS Utilities:**
+  - Created `utilities.css` with reusable utility classes for flex, gap, padding, margin, typography, borders, and backgrounds.
+  - All utilities prefixed with `ui-` and use theme tokens (e.g., `ui-flex-center`, `ui-gap-3`, `ui-p-4`, `ui-text-sm`).
+- **Documentation Updates:**
+  - Updated CLAUDE.md with iterative testing strategy: run targeted tests during iterations, full build at session end.
+  - Added example commands for running specific test files during development iterations.
+- **Tests Added:**
+  - Kbd: 6 tests (size variants, ref/className forwarding).
+  - FormField: 9 tests (label, error, helper text, required indicator, ref forwarding).
+  - LoadingContainer: 5 tests (default/custom text, spinner, className, props).
+  - useKeyboardShortcuts: 10 tests (key matching, modifiers, input exclusion, cleanup).
+- Build: All 578 tests passing ✅

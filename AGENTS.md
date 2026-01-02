@@ -149,6 +149,28 @@ pnpm build       # Full battery: format, lint, test, type-check, and build
 - For new UI-only components, tests are required only when behavior is non-trivial; pure presentational components do not require new tests
 - When code changes affect existing behavior, update existing test files to match the new behavior
 
+**Iterative Testing Strategy (During Session):**
+
+During session iterations, running the full test suite is time-consuming. Instead:
+
+- **During iterations**: Run ONLY tests for files you updated or added
+- **At session end**: Run full `pnpm build` which includes all tests
+
+```bash
+# Run specific test files during iterations (fast feedback)
+pnpm test -- --run path/to/specific.test.tsx path/to/another.test.tsx
+
+# Examples:
+pnpm test -- --run src/elements/__tests__/Kbd.test.tsx
+pnpm test -- --run src/hooks/__tests__/useKeyboardShortcuts.test.tsx
+
+# Run multiple specific tests
+pnpm test -- --run src/elements/__tests__/*.test.tsx
+
+# Only at END of session - run full build
+pnpm build
+```
+
 **End of Session Requirements:**
 
 - Update or add tests when needed, then update docs and logs before running `pnpm build`
@@ -256,18 +278,23 @@ After EVERY checkpoint:
 # - README.md
 # - Fix existing docs when appropriate; ask before creating new docs
 
-# 3. Code Quality (automated - ALL must pass)
-pnpm format && pnpm lint && pnpm type-check && pnpm test
+# 3. Code Quality (automated)
+# During iterations: Run targeted tests only (fast feedback)
+pnpm format && pnpm lint && pnpm type-check
+pnpm test -- --run path/to/your/updated.test.tsx
 
-# 3. Self-Assessment (manual - see docs/agent/agent-self-check.md)
+# At session end: Run full build
+pnpm build
+
+# 4. Self-Assessment (manual - see docs/agent/agent-self-check.md)
 - Scope adherence
 - Pattern consistency
 - Testing completeness (tests exist AND are meaningful)
 
-# 4. Commit
+# 5. Commit
 git commit -m "checkpoint: [what this achieves]"
 
-# 5. Report Progress
+# 6. Report Progress
 "✅ Checkpoint N: [description] - [commit hash]"
 ```
 
@@ -350,8 +377,12 @@ const result = createUserSchema.safeParse(formData);
 **Before completing:**
 
 ```bash
-# Tests and docs must be updated before quality checks.
-pnpm format && pnpm lint && pnpm type-check && pnpm test
+# During iterations: Run targeted tests for fast feedback
+pnpm format && pnpm lint && pnpm type-check
+pnpm test -- --run path/to/your/changed.test.tsx
+
+# At session end: Run full build (ALL must pass)
+pnpm build
 ```
 
 **All must pass. No exceptions.**
@@ -439,5 +470,5 @@ Under `/docs` folder.
 
 ---
 
-_Last Updated: 2025-12-30_
+_Last Updated: 2026-01-02_
 _Philosophy: DRY • Typed • Tested • Framework-agnostic • Lean & production-ready_

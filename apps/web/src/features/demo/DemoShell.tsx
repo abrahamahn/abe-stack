@@ -6,37 +6,151 @@ import {
   ResizablePanelGroup,
   ScrollArea,
   Text,
+  useLocalStorage,
+  useMediaQuery,
 } from '@abe-stack/ui';
-import React, { type ReactElement, useState } from 'react';
+import React, { type ReactElement, useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { getComponentDocs, parseMarkdown } from './docs';
-import { getAllCategories, getComponentsByCategory } from './registry';
+import { getAllCategories, getComponentsByCategory, getTotalComponentCount } from './registry';
 
 import type { ComponentDemo, DemoPaneConfig } from './types';
+
+type ThemeMode = 'system' | 'light' | 'dark';
+
+// Version from package - in a real app, inject via build process
+const UI_VERSION = '1.1.0';
+const ENV = import.meta.env.MODE;
 
 const DEFAULT_PANE_CONFIG: DemoPaneConfig = {
   top: { visible: true, size: 10 }, // %
   left: { visible: true, size: 18 }, // %
   right: { visible: true, size: 25 }, // %
-  bottom: { visible: true, size: 15 }, // %
+  bottom: { visible: true, size: 8 }, // %
 };
+
+const MOBILE_PANE_CONFIG: DemoPaneConfig = {
+  top: { visible: true, size: 10 },
+  left: { visible: false, size: 18 },
+  right: { visible: false, size: 25 },
+  bottom: { visible: true, size: 8 },
+};
+
+const KEYBOARD_SHORTCUTS = [
+  { key: 'L', description: 'Toggle left panel' },
+  { key: 'R', description: 'Toggle right panel' },
+  { key: 'T', description: 'Cycle theme' },
+  { key: 'Esc', description: 'Deselect component' },
+] as const;
 
 export const DemoShell: React.FC = () => {
   const navigate = useNavigate();
-  const [paneConfig, setPaneConfig] = useState<DemoPaneConfig>(DEFAULT_PANE_CONFIG);
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const [paneConfig, setPaneConfig] = useLocalStorage<DemoPaneConfig>(
+    'demo-pane-config',
+    DEFAULT_PANE_CONFIG,
+  );
+  const [themeMode, setThemeMode] = useLocalStorage<ThemeMode>('demo-theme-mode', 'system');
   const [activeCategory, setActiveCategory] = useState<string>('elements');
   const [selectedComponent, setSelectedComponent] = useState<ComponentDemo | null>(null);
+  const [hasInitialized, setHasInitialized] = useState(false);
+
+  // Apply mobile defaults on first load if on mobile
+  useEffect(() => {
+    if (!hasInitialized && isMobile) {
+      setPaneConfig(MOBILE_PANE_CONFIG);
+    }
+    setHasInitialized(true);
+  }, [isMobile, hasInitialized, setPaneConfig]);
+
+  // Apply theme mode to document
+  useEffect(() => {
+    const root = document.documentElement;
+    root.removeAttribute('data-theme');
+
+    if (themeMode === 'light') {
+      root.setAttribute('data-theme', 'light');
+    } else if (themeMode === 'dark') {
+      root.setAttribute('data-theme', 'dark');
+    }
+    // 'system' = no attribute, CSS handles it via prefers-color-scheme
+  }, [themeMode]);
+
+  const cycleTheme = (): void => {
+    setThemeMode((prev) => {
+      if (prev === 'system') return 'light';
+      if (prev === 'light') return 'dark';
+      return 'system';
+    });
+  };
+
+  const getThemeIcon = (): string => {
+    if (themeMode === 'light') return '☀️';
+    if (themeMode === 'dark') return '🌙';
+    return '💻';
+  };
+
+  const getThemeLabel = (): string => {
+    if (themeMode === 'light') return 'Light';
+    if (themeMode === 'dark') return 'Dark';
+    return 'System';
+  };
+
+  const resetLayout = (): void => {
+    setPaneConfig(isMobile ? MOBILE_PANE_CONFIG : DEFAULT_PANE_CONFIG);
+  };
+
+  const togglePane = useCallback(
+    (pane: keyof DemoPaneConfig): void => {
+      setPaneConfig((prev) => ({
+        ...prev,
+        [pane]: { ...prev[pane], visible: !prev[pane].visible },
+      }));
+    },
+    [setPaneConfig],
+  );
 
   const categories = getAllCategories();
   const componentsInCategory = getComponentsByCategory(activeCategory);
+  const totalComponents = getTotalComponentCount();
 
-  const togglePane = (pane: keyof DemoPaneConfig): void => {
-    setPaneConfig((prev) => ({
-      ...prev,
-      [pane]: { ...prev[pane], visible: !prev[pane].visible },
-    }));
-  };
+  // Keyboard shortcuts handler
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      switch (e.key.toUpperCase()) {
+        case 'L':
+          e.preventDefault();
+          togglePane('left');
+          break;
+        case 'R':
+          e.preventDefault();
+          togglePane('right');
+          break;
+        case 'T':
+          e.preventDefault();
+          cycleTheme();
+          break;
+        case 'ESCAPE':
+          e.preventDefault();
+          setSelectedComponent(null);
+          break;
+      }
+    },
+    [cycleTheme, togglePane],
+  );
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return (): void => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleKeyDown]);
 
   const handlePaneResize = (pane: keyof DemoPaneConfig, size: number): void => {
     setPaneConfig((prev) => ({
@@ -67,7 +181,7 @@ export const DemoShell: React.FC = () => {
       <ResizablePanelGroup direction="vertical">
         {/* Top Bar */}
         <ResizablePanel
-          defaultSize={paneConfig.top.size}
+          size={paneConfig.top.size}
           minSize={6}
           maxSize={20}
           direction="vertical"
@@ -115,9 +229,9 @@ export const DemoShell: React.FC = () => {
         >
           {/* Bottom Bar */}
           <ResizablePanel
-            defaultSize={paneConfig.bottom.size}
-            minSize={8}
-            maxSize={25}
+            size={paneConfig.bottom.size}
+            minSize={4}
+            maxSize={20}
             direction="vertical"
             collapsed={!paneConfig.bottom.visible}
             invertResize
@@ -131,16 +245,77 @@ export const DemoShell: React.FC = () => {
               style={{
                 height: '100%',
                 display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
                 alignItems: 'center',
-                padding: '16px',
+                padding: isMobile ? '8px 12px' : '8px 16px',
+                gap: '12px',
                 background: 'var(--ui-color-bg)',
+                fontSize: '12px',
               }}
             >
-              <Text tone="muted" style={{ fontSize: '14px' }}>
-                💡 Theme follows your system's color scheme preference
-              </Text>
+              {/* Left: Version & Environment */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <Text tone="muted" style={{ fontSize: '12px' }}>
+                  <strong>v{UI_VERSION}</strong>
+                </Text>
+                <Text
+                  tone="muted"
+                  style={{
+                    fontSize: '10px',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    background:
+                      ENV === 'development' ? 'var(--ui-color-warning)' : 'var(--ui-color-success)',
+                    color: 'var(--ui-color-text-inverse)',
+                    textTransform: 'uppercase',
+                    fontWeight: 600,
+                  }}
+                >
+                  {ENV === 'development' ? 'DEV' : 'PROD'}
+                </Text>
+                {!isMobile && (
+                  <Text tone="muted" style={{ fontSize: '12px' }}>
+                    {totalComponents} components
+                  </Text>
+                )}
+              </div>
+
+              {/* Center: Keyboard Shortcuts (desktop only) */}
+              {!isMobile && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  {KEYBOARD_SHORTCUTS.map((shortcut) => (
+                    <Text key={shortcut.key} tone="muted" style={{ fontSize: '11px' }}>
+                      <kbd
+                        style={{
+                          padding: '2px 5px',
+                          borderRadius: '3px',
+                          border: '1px solid var(--ui-color-border)',
+                          background: 'var(--ui-color-surface)',
+                          fontFamily: 'monospace',
+                          fontSize: '10px',
+                        }}
+                      >
+                        {shortcut.key}
+                      </kbd>{' '}
+                      {shortcut.description}
+                    </Text>
+                  ))}
+                </div>
+              )}
+
+              {/* Right: Theme Toggle */}
+              <Button
+                variant="secondary"
+                size="small"
+                onClick={cycleTheme}
+                title={`Theme: ${getThemeLabel()} (click to change)`}
+                aria-label={`Theme: ${getThemeLabel()}, click to change`}
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 8px' }}
+              >
+                <span>{getThemeIcon()}</span>
+                {!isMobile && <span style={{ fontSize: '12px' }}>{getThemeLabel()}</span>}
+              </Button>
             </div>
           </ResizablePanel>
 
@@ -150,11 +325,11 @@ export const DemoShell: React.FC = () => {
               {/* Category Sidebar - Fixed Width */}
               <div
                 style={{
-                  width: '50px',
+                  width: isMobile ? '42px' : '50px',
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '4px',
-                  padding: '8px',
+                  padding: isMobile ? '4px' : '8px',
                   flexShrink: 0,
                   borderRight: layoutBorder,
                   background: 'var(--ui-color-bg)',
@@ -196,12 +371,21 @@ export const DemoShell: React.FC = () => {
                       {toggle.icon}
                     </Button>
                   ))}
+                  <Button
+                    variant="secondary"
+                    onClick={resetLayout}
+                    title="Reset layout"
+                    aria-label="Reset layout"
+                    style={{ width: '100%', height: '36px', padding: 0, marginTop: '4px' }}
+                  >
+                    ↺
+                  </Button>
                 </div>
               </div>
 
               {/* Left Sidebar - Component List */}
               <ResizablePanel
-                defaultSize={paneConfig.left.size}
+                size={paneConfig.left.size}
                 minSize={10}
                 maxSize={28}
                 collapsed={!paneConfig.left.visible}
@@ -291,7 +475,7 @@ export const DemoShell: React.FC = () => {
               >
                 {/* Right Sidebar - Documentation */}
                 <ResizablePanel
-                  defaultSize={paneConfig.right.size}
+                  size={paneConfig.right.size}
                   minSize={5}
                   maxSize={100}
                   collapsed={!paneConfig.right.visible}
@@ -428,9 +612,11 @@ export const DemoShell: React.FC = () => {
                         <div
                           style={{
                             display: 'grid',
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-                            gap: '24px',
-                            padding: '24px',
+                            gridTemplateColumns: isMobile
+                              ? '1fr'
+                              : 'repeat(auto-fit, minmax(320px, 1fr))',
+                            gap: isMobile ? '16px' : '24px',
+                            padding: isMobile ? '16px' : '24px',
                             alignContent: 'start',
                           }}
                         >

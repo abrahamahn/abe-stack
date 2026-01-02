@@ -170,3 +170,12 @@
 .ui-layout-content {
   min-width: 0;
 }
+
+/* LoadingContainer - Centered loading state with spinner */
+.ui-loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ui-gap-md);
+  padding: var(--ui-gap-xl);
+}
