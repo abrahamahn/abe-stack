@@ -72,7 +72,7 @@ playwright-report/
 
 # IDE & Editors
 .idea/
-.vscode/settings.local.json
+.vscode/
 *.swp
 *.swo
 *~

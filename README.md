@@ -8,7 +8,6 @@ Developer-velocity boilerplate for shipping production-grade apps fast. One Type
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)
 ![Turborepo](https://img.shields.io/badge/Turborepo-cached-orange)
 ![Docker](https://img.shields.io/badge/Docker-ready-blue)
-[![Docs](https://img.shields.io/badge/docs-INDEX-blue)](./docs/INDEX.md)
 
 ## Why ABE Stack?
 
@@ -85,12 +84,7 @@ Change UI frameworks by touching `apps/` only.
 
 ## Documentation
 
-Quick links into the docs structure:
-
-- Agent guide: `/AGENTS.md`
-- Doc index: `docs/INDEX.md`
 - Dev references: `docs/dev/`
-- Agent workflows: `docs/agent/`
 - Logs: `docs/log/`
 
 ## Quick Start
