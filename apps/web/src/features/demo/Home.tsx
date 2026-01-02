@@ -8,7 +8,43 @@ type HomeProps = {
   onNavigate?: (view: DemoView) => void;
 };
 
+// Runtime validation for DemoView
+const VALID_VIEWS: readonly DemoView[] = ['home', 'dashboard', 'login', 'gallery'];
+
+function isValidDemoView(view: string): view is DemoView {
+  return VALID_VIEWS.includes(view as DemoView);
+}
+
 export function HomePage({ onNavigate }: HomeProps): JSX.Element {
+  const handleNavigate = (view: DemoView): void => {
+    // Runtime validation
+    if (!isValidDemoView(view)) {
+      const error = new Error(
+        `Invalid view: ${String(view)}. Expected one of: ${VALID_VIEWS.join(', ')}`,
+      );
+      // eslint-disable-next-line no-console
+      console.error('Navigation error:', error);
+      throw error;
+    }
+
+    try {
+      onNavigate?.(view);
+    } catch (error) {
+      // Error handling - log to error tracking service in production
+      // eslint-disable-next-line no-console
+      console.error('Navigation error:', error);
+      // Don't re-throw - handle gracefully to prevent app crash
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, view: DemoView): void => {
+    // Handle Enter and Space keys for accessibility
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleNavigate(view);
+    }
+  };
+
   return (
     <PageContainer>
       <section style={{ display: 'grid', gap: '16px' }}>
@@ -19,11 +55,36 @@ export function HomePage({ onNavigate }: HomeProps): JSX.Element {
       </section>
 
       <section style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-        <Button onClick={() => onNavigate?.('login')}>Login</Button>
-        <Button variant="secondary" onClick={() => onNavigate?.('dashboard')}>
+        <Button
+          onClick={() => {
+            handleNavigate('login');
+          }}
+          onKeyDown={(e) => {
+            handleKeyDown(e, 'login');
+          }}
+        >
+          Login
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            handleNavigate('dashboard');
+          }}
+          onKeyDown={(e) => {
+            handleKeyDown(e, 'dashboard');
+          }}
+        >
           Dashboard
         </Button>
-        <Button variant="secondary" onClick={() => onNavigate?.('gallery')}>
+        <Button
+          variant="secondary"
+          onClick={() => {
+            handleNavigate('gallery');
+          }}
+          onKeyDown={(e) => {
+            handleKeyDown(e, 'gallery');
+          }}
+        >
           Gallery
         </Button>
       </section>
