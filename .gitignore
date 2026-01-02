@@ -6,8 +6,10 @@ node_modules/
 # Agents
 .claude/
 .gemini/
-AGENTS.md
-INDEX.md
+docs/AGENTS.md
+docs/INDEX.md
+docs/GEMINI.md
+docs/CLAUDE.md
 docs/agent/*.md
 
 # Build outputs
