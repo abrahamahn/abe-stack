@@ -7,3 +7,5 @@ export { Box } from './Box';
 export { Layout } from './Layout';
 export { LoadingContainer } from './LoadingContainer';
 export { FocusTrap } from './FocusTrap';
+export { ProtectedRoute, type ProtectedRouteProps } from './ProtectedRoute';
+export { Toaster, type ToasterProps } from './Toaster';

@@ -4,6 +4,11 @@ node_modules/
 .cache/
 
 # Agents
+.claude/
+.gemini/
+AGENTS.md
+INDEX.md
+docs/agent/*.md
 
 # Build outputs
 dist/
@@ -68,7 +73,6 @@ playwright-report/
 # IDE & Editors
 .idea/
 .vscode/settings.local.json
-.claude/settings.local.json
 *.swp
 *.swo
 *~

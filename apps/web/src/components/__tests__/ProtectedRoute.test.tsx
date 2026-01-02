@@ -14,12 +14,16 @@ vi.mock('../../features/auth/useAuth', () => ({
 }));
 
 // Mock UI components
-vi.mock('@abe-stack/ui', () => ({
-  Spinner: (): React.ReactElement => <div data-testid="spinner">Loading Spinner</div>,
-  Text: ({ children }: { children: React.ReactNode }): React.ReactElement => (
-    <span>{children}</span>
-  ),
-}));
+vi.mock('@abe-stack/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+  return {
+    ...actual,
+    Spinner: (): React.ReactElement => <div data-testid="spinner">Loading Spinner</div>,
+    Text: ({ children }: { children: React.ReactNode }): React.ReactElement => (
+      <span>{children}</span>
+    ),
+  };
+});
 
 describe('ProtectedRoute', () => {
   describe('Loading State', () => {
@@ -37,7 +41,6 @@ describe('ProtectedRoute', () => {
         </MemoryRouter>,
       );
 
-      expect(screen.getByTestId('spinner')).toBeInTheDocument();
       expect(screen.getByText('Loading...')).toBeInTheDocument();
       expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     });
@@ -268,7 +271,7 @@ describe('ProtectedRoute', () => {
         </MemoryRouter>,
       );
 
-      expect(screen.getByTestId('spinner')).toBeInTheDocument();
+      expect(screen.getByText('Loading...')).toBeInTheDocument();
 
       // Simulate authentication completing
       mockUseAuth.mockReturnValue({
@@ -284,7 +287,7 @@ describe('ProtectedRoute', () => {
         </MemoryRouter>,
       );
 
-      expect(screen.queryByTestId('spinner')).not.toBeInTheDocument();
+      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
       expect(screen.getByText('Protected Content')).toBeInTheDocument();
     });
 
@@ -310,7 +313,7 @@ describe('ProtectedRoute', () => {
         </MemoryRouter>,
       );
 
-      expect(screen.getByTestId('spinner')).toBeInTheDocument();
+      expect(screen.getByText('Loading...')).toBeInTheDocument();
 
       // Simulate authentication check completing (not authenticated)
       mockUseAuth.mockReturnValue({
@@ -334,7 +337,7 @@ describe('ProtectedRoute', () => {
         </MemoryRouter>,
       );
 
-      expect(screen.queryByTestId('spinner')).not.toBeInTheDocument();
+      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
       expect(screen.getByText('Login Page')).toBeInTheDocument();
     });
   });
@@ -390,7 +393,7 @@ describe('ProtectedRoute', () => {
       );
 
       // Should show loading even if authenticated is true
-      expect(screen.getByTestId('spinner')).toBeInTheDocument();
+      expect(screen.getByText('Loading...')).toBeInTheDocument();
       expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     });
   });

@@ -10,3 +10,4 @@ export { useOnScreen } from './useOnScreen';
 export { usePanelConfig } from './usePanelConfig';
 export { useThemeMode } from './useThemeMode';
 export { useCopyToClipboard } from './useCopyToClipboard';
+export { useHistoryNav, HistoryProvider, type HistoryContextValue } from './useHistoryNav';

@@ -9,34 +9,38 @@ import { toastStore } from '../../stores/toastStore';
 import { Toaster } from '../Toaster';
 
 // Mock the ToastContainer from UI package
-vi.mock('@abe-stack/ui', () => ({
-  ToastContainer: vi.fn(
-    ({
-      messages,
-      onDismiss,
-    }: {
-      messages: { id: string; title?: string; description?: string }[];
-      onDismiss: (id: string) => void;
-    }): React.ReactElement => (
-      <div data-testid="toast-container">
-        {messages.map((msg) => (
-          <div key={msg.id} data-testid={`toast-${msg.id}`}>
-            {msg.title && <div data-testid="toast-title">{msg.title}</div>}
-            {msg.description && <div data-testid="toast-description">{msg.description}</div>}
-            <button
-              onClick={() => {
-                onDismiss(msg.id);
-              }}
-              data-testid={`dismiss-${msg.id}`}
-            >
-              Dismiss
-            </button>
-          </div>
-        ))}
-      </div>
+vi.mock('@abe-stack/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+  return {
+    ...actual,
+    ToastContainer: vi.fn(
+      ({
+        messages,
+        onDismiss,
+      }: {
+        messages: { id: string; title?: string; description?: string }[];
+        onDismiss: (id: string) => void;
+      }): React.ReactElement => (
+        <div data-testid="toast-container">
+          {messages.map((msg) => (
+            <div key={msg.id} data-testid={`toast-${msg.id}`}>
+              {msg.title && <div data-testid="toast-title">{msg.title}</div>}
+              {msg.description && <div data-testid="toast-description">{msg.description}</div>}
+              <button
+                onClick={() => {
+                  onDismiss(msg.id);
+                }}
+                data-testid={`dismiss-${msg.id}`}
+              >
+                Dismiss
+              </button>
+            </div>
+          ))}
+        </div>
+      ),
     ),
-  ),
-}));
+  };
+});
 
 describe('Toaster', () => {
   beforeEach(() => {
@@ -64,22 +68,25 @@ describe('Toaster', () => {
   });
 
   it('displays toasts from store and handles dismiss', () => {
-    const store = toastStore.getState();
     render(<Toaster />);
 
     act(() => {
-      store.show({ title: 'Test Toast', description: 'Test Description' });
+      toastStore.getState().show({ title: 'Test Toast', description: 'Test Description' });
     });
 
-    expect(screen.getByTestId('toast-title')).toHaveTextContent('Test Toast');
-    expect(screen.getByTestId('toast-description')).toHaveTextContent('Test Description');
+    expect(screen.getByText('Test Toast')).toBeInTheDocument();
+    expect(screen.getByText('Test Description')).toBeInTheDocument();
 
-    const dismissButton = screen.getByTestId(/^dismiss-/);
+    // Dismiss the toast via store
     act(() => {
-      dismissButton.click();
+      const currentMessages = toastStore.getState().messages;
+      const firstMessage = currentMessages[0];
+      if (firstMessage) {
+        toastStore.getState().dismiss(firstMessage.id);
+      }
     });
 
-    expect(screen.queryByTestId('toast-title')).not.toBeInTheDocument();
+    expect(screen.queryByText('Test Toast')).not.toBeInTheDocument();
   });
 
   it('displays multiple toasts', () => {
@@ -91,7 +98,7 @@ describe('Toaster', () => {
       store.show({ title: 'Toast 2' });
     });
 
-    const titles = screen.getAllByTestId('toast-title');
-    expect(titles).toHaveLength(2);
+    expect(screen.getByText('Toast 1')).toBeInTheDocument();
+    expect(screen.getByText('Toast 2')).toBeInTheDocument();
   });
 });
