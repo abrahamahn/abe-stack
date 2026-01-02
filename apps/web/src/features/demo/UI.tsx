@@ -17,18 +17,26 @@ import {
   Text,
   Tooltip,
 } from '@abe-stack/ui';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 export const UIPage: React.FC = () => {
-  const tabs = [
-    { id: 'one', label: 'Tab One', content: <div>Content One</div> },
-    { id: 'two', label: 'Tab Two', content: <div>Content Two</div> },
-  ];
+  // Memoize tabs array to avoid recreation on every render
+  const tabs = useMemo(
+    () => [
+      { id: 'one', label: 'Tab One', content: <div>Content One</div> },
+      { id: 'two', label: 'Tab Two', content: <div>Content Two</div> },
+    ],
+    [],
+  );
 
-  const accordionItems = [
-    { id: 'a1', title: 'First', content: 'First content' },
-    { id: 'a2', title: 'Second', content: 'Second content' },
-  ];
+  // Memoize accordion items to avoid recreation on every render
+  const accordionItems = useMemo(
+    () => [
+      { id: 'a1', title: 'First', content: 'First content' },
+      { id: 'a2', title: 'Second', content: 'Second content' },
+    ],
+    [],
+  );
 
   return (
     <div style={{ display: 'grid', gap: '32px' }}>
@@ -92,7 +100,7 @@ export const UIPage: React.FC = () => {
           <Tooltip content="Hello tooltip">
             <Button>Tooltip</Button>
           </Tooltip>
-          <Dropdown trigger={<Button>Dropdown</Button>}>
+          <Dropdown trigger="Dropdown">
             {(close: () => void) => (
               <div style={{ display: 'grid', gap: '8px', padding: '8px' }}>
                 <Button onClick={close}>Item One</Button>
@@ -100,7 +108,7 @@ export const UIPage: React.FC = () => {
               </div>
             )}
           </Dropdown>
-          <Popover trigger={<Button>Popover</Button>}>
+          <Popover trigger="Popover">
             <div style={{ padding: '12px' }}>
               <Text>Popover content</Text>
             </div>
