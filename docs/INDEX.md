@@ -17,8 +17,8 @@ Use this index to load only what you need.
 
 ## Quick Starts
 
-- Guide & Index (single source of truth): `AGENTS.md`
-- Claude CLI guide: `.claude/CLAUDE.md`
+- Guide & Index (single source of truth): `./AGENTS.md`
+- Codex CLI guide: `.claude/`
 - Gemini CLI guide: `.gemini/GEMINI.md`
 - Developer docs: `dev/`
 - Agent workflows: `agent/`
