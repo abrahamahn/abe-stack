@@ -5,8 +5,9 @@ Complete documentation for all components in the @abeahn/ui package.
 ## Quick Navigation
 
 - [Components](#components) - Core UI components
-- [elements](#elements) - Low-level element components
+- [Elements](#elements) - Low-level element components
 - [Layouts](#layouts) - Layout components
+- [Hooks](#hooks) - React hooks
 - [Getting Started](#getting-started)
 - [Import Patterns](#import-patterns)
 
@@ -16,16 +17,18 @@ Core UI components built on top of elements.
 
 Styles: Components load shared styling from `packages/ui/src/styles/components.css`.
 
-| Component                              | Description                             | Import                  |
-| -------------------------------------- | --------------------------------------- | ----------------------- |
-| [Badge](./components/Badge.md)         | Display status or category indicators   | `@abeahn/ui/components` |
-| [Box](./components/Box.md)             | Generic container with flexible styling | `@abeahn/ui/components` |
-| [Button](./components/Button.md)       | Interactive button element              | `@abeahn/ui/components` |
-| [Card](./components/Card.md)           | Container for related content           | `@abeahn/ui/components` |
-| [FocusTrap](./components/FocusTrap.md) | Trap focus within a container           | `@abeahn/ui/components` |
-| [Input](./components/Input.md)         | Text input field                        | `@abeahn/ui/components` |
-| [Layout](./components/Layout.md)       | Generic layout wrapper                  | `@abeahn/ui/components` |
-| [Spinner](./components/Spinner.md)     | Loading indicator                       | `@abeahn/ui/components` |
+| Component                                        | Description                             | Import                  |
+| ------------------------------------------------ | --------------------------------------- | ----------------------- |
+| [Badge](./components/Badge.md)                   | Display status or category indicators   | `@abeahn/ui/components` |
+| [Box](./components/Box.md)                       | Generic container with flexible styling | `@abeahn/ui/components` |
+| [Button](./components/Button.md)                 | Interactive button element              | `@abeahn/ui/components` |
+| [Card](./components/Card.md)                     | Container for related content           | `@abeahn/ui/components` |
+| [FocusTrap](./components/FocusTrap.md)           | Trap focus within a container           | `@abeahn/ui/components` |
+| [Input](./components/Input.md)                   | Text input field                        | `@abeahn/ui/components` |
+| [Layout](./components/Layout.md)                 | Generic layout wrapper                  | `@abeahn/ui/components` |
+| [ProtectedRoute](./components/ProtectedRoute.md) | Auth-protected route wrapper            | `@abeahn/ui/components` |
+| [Spinner](./components/Spinner.md)               | Loading indicator                       | `@abeahn/ui/components` |
+| [Toaster](./components/Toaster.md)               | Toast notification container            | `@abeahn/ui/components` |
 
 ## elements
 
@@ -80,6 +83,26 @@ Styles: Layouts load shared styling from `packages/ui/src/styles/layouts.css`.
 | [PageContainer](./layouts/PageContainer.md) | Page wrapper container     | `@abeahn/ui/layouts` |
 | [SidebarLayout](./layouts/SidebarLayout.md) | Layout with sidebar        | `@abeahn/ui/layouts` |
 | [StackedLayout](./layouts/StackedLayout.md) | Vertically stacked layout  | `@abeahn/ui/layouts` |
+
+## Hooks
+
+React hooks for common UI patterns and state management.
+
+| Hook                                      | Description                                  | Import             |
+| ----------------------------------------- | -------------------------------------------- | ------------------ |
+| [useHistoryNav](./hooks/useHistoryNav.md) | Browser history navigation with React Router | `@abeahn/ui/hooks` |
+| useClickOutside                           | Detect clicks outside an element             | `@abeahn/ui/hooks` |
+| useControllableState                      | Controlled/uncontrolled state pattern        | `@abeahn/ui/hooks` |
+| useCopyToClipboard                        | Copy text to clipboard                       | `@abeahn/ui/hooks` |
+| useDebounce                               | Debounce value changes                       | `@abeahn/ui/hooks` |
+| useDisclosure                             | Open/close state management                  | `@abeahn/ui/hooks` |
+| useKeyboardShortcuts                      | Global keyboard shortcut handling            | `@abeahn/ui/hooks` |
+| useLocalStorage                           | Persist state to localStorage                | `@abeahn/ui/hooks` |
+| useMediaQuery                             | Responsive media query detection             | `@abeahn/ui/hooks` |
+| useOnScreen                               | Intersection observer hook                   | `@abeahn/ui/hooks` |
+| usePanelConfig                            | Panel layout configuration                   | `@abeahn/ui/hooks` |
+| useThemeMode                              | Theme mode (light/dark/system)               | `@abeahn/ui/hooks` |
+| useWindowSize                             | Window dimensions tracking                   | `@abeahn/ui/hooks` |
 
 ## Getting Started
 

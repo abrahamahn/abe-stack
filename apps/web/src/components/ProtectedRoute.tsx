@@ -1,25 +1,19 @@
-import { Spinner, Text } from '@abe-stack/ui';
-import { Navigate, Outlet } from 'react-router-dom';
+import { ProtectedRoute as ProtectedRouteBase } from '@abe-stack/ui';
 
 import { useAuth } from '../features/auth/useAuth';
 
 import type { ReactElement, ReactNode } from 'react';
 
+/**
+ * App-specific ProtectedRoute that uses the local useAuth hook.
+ * Wraps the generic ProtectedRoute from @abe-stack/ui.
+ */
 export const ProtectedRoute = ({ children }: { children?: ReactNode }): ReactElement => {
   const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading) {
-    return (
-      <div style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <Spinner />
-        <Text>Loading...</Text>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return children ? <>{children}</> : <Outlet />;
+  return (
+    <ProtectedRouteBase isAuthenticated={isAuthenticated} isLoading={isLoading} redirectTo="/login">
+      {children}
+    </ProtectedRouteBase>
+  );
 };

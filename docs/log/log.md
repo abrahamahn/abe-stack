@@ -839,3 +839,29 @@
   - LoadingContainer: 5 tests (default/custom text, spinner, className, props).
   - useKeyboardShortcuts: 10 tests (key matching, modifiers, input exclusion, cleanup).
 - Build: All 578 tests passing ✅
+
+2026-01-02 (Session 20)
+
+- **Component Extraction from apps/web to packages:**
+  - **toastStore** → `packages/shared/src/stores/toastStore.ts`
+    - Zustand-based toast notification state management with show/dismiss methods.
+    - Added vitest and test script to packages/shared.
+    - 9 tests covering show, dismiss, unique IDs, and edge cases.
+  - **HistoryProvider/useHistoryNav** → `packages/ui/src/hooks/useHistoryNav.tsx`
+    - React Router history tracking with goBack/goForward and canGoBack/canGoForward indicators.
+    - 8 tests covering provider rendering, error handling, and navigation functions.
+  - **ProtectedRoute** → `packages/ui/src/components/ProtectedRoute.tsx`
+    - Generic auth route wrapper accepting `isAuthenticated`, `isLoading`, `redirectTo` props.
+    - Supports custom loading component and Outlet rendering for nested routes.
+    - 12 tests covering loading state, authentication, redirection, and edge cases.
+  - **Toaster** → `packages/ui/src/components/Toaster.tsx`
+    - Fixed-position toast container with configurable position (top-right/top-left/bottom-right/bottom-left).
+    - 9 tests covering positioning, message rendering, and dismiss callback.
+- **Apps/Web Updates:**
+  - Re-exported extracted components for backwards compatibility.
+  - App-specific wrappers connect to local stores/hooks (useAuth, toastStore).
+  - Updated test mocks to use importOriginal for partial mocking.
+- **Package Exports:**
+  - packages/shared: Added `./stores` export path in package.json.
+  - packages/ui: Added ProtectedRoute, Toaster, HistoryProvider, useHistoryNav exports.
+- Build: All 641 tests passing ✅

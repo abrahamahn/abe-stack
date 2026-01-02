@@ -444,18 +444,22 @@ export const DemoShell: React.FC = () => {
                           onClick={() => {
                             setSelectedComponent(comp);
                           }}
+                          className="demo-menu-item"
                           style={{
                             display: 'flex',
                             flexDirection: 'column',
                             gap: '4px',
                             padding: '12px',
                             textAlign: 'left',
+                            width: '100%',
                             background:
                               selectedComponent?.id === comp.id
-                                ? 'rgba(0,0,0,0.05)'
+                                ? 'var(--ui-color-surface-hover, rgba(0,0,0,0.08))'
                                 : 'transparent',
-                            border: '1px solid transparent',
+                            border: 'none',
+                            borderRadius: '6px',
                             cursor: 'pointer',
+                            transition: 'background 0.15s ease',
                           }}
                         >
                           <Text>{comp.name}</Text>
