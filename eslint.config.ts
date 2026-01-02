@@ -109,6 +109,15 @@ export default [
     },
   },
   {
+    files: ['packages/ui/src/test/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/ui/tsconfig.test.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
     files: ['tools/packages/build-theme-css.ts'],
     languageOptions: {
       parserOptions: {
