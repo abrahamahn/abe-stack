@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import { Divider } from '../Divider';
 
 describe('Divider', () => {
-  it('renders an hr with separator role', () => {
+  it('renders an hr element with separator role', () => {
     render(<Divider />);
 
     const divider = screen.getByRole('separator');
@@ -15,12 +15,18 @@ describe('Divider', () => {
     expect(divider).toHaveClass('ui-divider');
   });
 
-  it('forwards className, ref, and attributes', () => {
-    const ref = { current: null };
-    render(<Divider ref={ref} className="custom-divider" data-testid="divider" />);
+  it('merges custom className with base class', () => {
+    render(<Divider className="custom-divider" />);
 
-    const divider = screen.getByTestId('divider');
+    const divider = screen.getByRole('separator');
+    expect(divider).toHaveClass('ui-divider');
     expect(divider).toHaveClass('custom-divider');
+  });
+
+  it('forwards ref to hr element', () => {
+    const ref = { current: null };
+    render(<Divider ref={ref} />);
+
     expect(ref.current).toBeInstanceOf(HTMLHRElement);
   });
 });

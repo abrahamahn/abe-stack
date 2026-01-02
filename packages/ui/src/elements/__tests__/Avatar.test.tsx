@@ -7,26 +7,32 @@ import { describe, expect, it } from 'vitest';
 import { Avatar } from '../Avatar';
 
 describe('Avatar', () => {
-  it('renders an image when src is provided', () => {
-    render(<Avatar src="/avatar.png" alt="User avatar" />);
+  it('renders fallback when no src provided', () => {
+    render(<Avatar fallback="AB" data-testid="avatar" />);
 
-    const img = screen.getByRole('img', { name: 'User avatar' });
-    expect(img).toHaveAttribute('src', '/avatar.png');
-  });
-
-  it('renders fallback text when src is missing', () => {
-    render(<Avatar fallback="AB" />);
-
+    const avatar = screen.getByTestId('avatar');
+    expect(avatar).toHaveClass('ui-avatar');
     expect(screen.getByText('AB')).toBeInTheDocument();
+    expect(avatar.querySelector('img')).not.toBeInTheDocument();
   });
 
-  it('forwards className and ref', () => {
-    const ref = { current: null };
-    render(<Avatar ref={ref} className="custom-avatar" fallback="CD" data-testid="avatar" />);
+  it('renders image when src provided', () => {
+    render(<Avatar src="/avatar.jpg" alt="User" data-testid="avatar" />);
 
-    const wrapper = screen.getByTestId('avatar');
-    expect(wrapper).toHaveClass('ui-avatar');
-    expect(wrapper).toHaveClass('custom-avatar');
+    const avatar = screen.getByTestId('avatar');
+    const img = avatar.querySelector('img');
+    expect(img).toBeInTheDocument();
+    expect(img).toHaveAttribute('src', '/avatar.jpg');
+    expect(img).toHaveAttribute('alt', 'User');
+  });
+
+  it('merges className and forwards ref', () => {
+    const ref = { current: null };
+    render(<Avatar ref={ref} fallback="X" className="custom" data-testid="avatar" />);
+
+    const avatar = screen.getByTestId('avatar');
+    expect(avatar).toHaveClass('ui-avatar');
+    expect(avatar).toHaveClass('custom');
     expect(ref.current).toBeInstanceOf(HTMLDivElement);
   });
 });

@@ -111,4 +111,78 @@ describe('ResizablePanel', () => {
     const nextSize = handleResize.mock.calls[0]?.[0] as number;
     expect(nextSize).toBeLessThan(50);
   });
+
+  it('supports pixel units and respects min/max size', () => {
+    const handleResize = vi.fn();
+    render(
+      <ResizablePanelGroup>
+        <ResizablePanel
+          unit="px"
+          defaultSize={100}
+          minSize={50}
+          maxSize={200}
+          onResize={handleResize}
+        >
+          Panel 1
+        </ResizablePanel>
+      </ResizablePanelGroup>,
+    );
+
+    const panel = screen.getByText('Panel 1').closest('.ui-resizable-panel');
+    expect(panel).toHaveStyle({ flexBasis: '100px' });
+  });
+
+  it('handles vertical direction resize', () => {
+    const handleResize = vi.fn();
+    render(
+      <ResizablePanelGroup direction="vertical">
+        <ResizablePanel direction="vertical" onResize={handleResize}>
+          Panel 1
+        </ResizablePanel>
+      </ResizablePanelGroup>,
+    );
+
+    const separator = screen.getByRole('separator');
+    expect(separator).toHaveAttribute('data-direction', 'vertical');
+    expect(separator).toHaveAttribute('aria-orientation', 'horizontal');
+
+    fireEvent.mouseDown(separator, { clientY: 0 });
+    fireEvent.mouseMove(document, { clientY: 10 });
+    expect(handleResize).toHaveBeenCalled();
+  });
+
+  it('hides separator when panel is collapsed', () => {
+    render(
+      <ResizablePanelGroup>
+        <ResizablePanel collapsed>Panel 1</ResizablePanel>
+      </ResizablePanelGroup>,
+    );
+
+    expect(screen.queryByRole('separator')).not.toBeInTheDocument();
+  });
+
+  it('forwards ref to panel and group', () => {
+    const panelRef = { current: null };
+    const groupRef = { current: null };
+
+    render(
+      <ResizablePanelGroup ref={groupRef}>
+        <ResizablePanel ref={panelRef}>Panel 1</ResizablePanel>
+      </ResizablePanelGroup>,
+    );
+
+    expect(panelRef.current).toBeInstanceOf(HTMLDivElement);
+    expect(groupRef.current).toBeInstanceOf(HTMLDivElement);
+  });
+
+  it('merges className on panel and group', () => {
+    const { container } = render(
+      <ResizablePanelGroup className="custom-group">
+        <ResizablePanel className="custom-panel">Panel 1</ResizablePanel>
+      </ResizablePanelGroup>,
+    );
+
+    expect(container.querySelector('.ui-resizable-panel-group')).toHaveClass('custom-group');
+    expect(container.querySelector('.ui-resizable-panel')).toHaveClass('custom-panel');
+  });
 });

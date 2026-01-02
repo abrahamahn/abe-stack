@@ -93,4 +93,53 @@ describe('AppShell', () => {
       '--ui-aside-width': '0px',
     });
   });
+
+  it('renders aside content when provided', () => {
+    render(<AppShell aside={<div>Aside Content</div>}>Main</AppShell>);
+    expect(screen.getByText('Aside Content')).toBeInTheDocument();
+  });
+
+  it('accepts string values for dimensions', () => {
+    const { container } = render(
+      <AppShell headerHeight="80px" footerHeight="60px" sidebarWidth="20rem" asideWidth="15rem">
+        Main
+      </AppShell>,
+    );
+
+    expect(container.firstChild).toHaveStyle({
+      '--ui-header-height': '80px',
+      '--ui-footer-height': '60px',
+      '--ui-sidebar-width': '20rem',
+      '--ui-aside-width': '15rem',
+    });
+  });
+
+  it('uses semantic HTML elements for layout regions', () => {
+    render(
+      <AppShell
+        header={<div>Header</div>}
+        sidebar={<div>Sidebar</div>}
+        aside={<div>Aside</div>}
+        footer={<div>Footer</div>}
+      >
+        Main
+      </AppShell>,
+    );
+
+    expect(document.querySelector('header.ui-app-shell-header')).toBeInTheDocument();
+    expect(document.querySelector('main.ui-app-shell-main')).toBeInTheDocument();
+    expect(document.querySelector('footer.ui-app-shell-footer')).toBeInTheDocument();
+    expect(document.querySelectorAll('aside')).toHaveLength(2);
+  });
+
+  it('applies default dimension values', () => {
+    const { container } = render(<AppShell>Main</AppShell>);
+
+    expect(container.firstChild).toHaveStyle({
+      '--ui-header-height': '64px',
+      '--ui-footer-height': 'auto',
+      '--ui-sidebar-width': '250px',
+      '--ui-aside-width': '250px',
+    });
+  });
 });

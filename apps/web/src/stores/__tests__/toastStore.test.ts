@@ -1,5 +1,5 @@
 // apps/web/src/stores/__tests__/toastStore.test.ts
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { toastStore } from '../toastStore';
@@ -7,19 +7,18 @@ import { toastStore } from '../toastStore';
 // Mock nanoid to have predictable unique IDs
 let idCounter = 0;
 vi.mock('nanoid', () => ({
-  nanoid: () => `test-id-${++idCounter}`,
+  nanoid: (): string => `test-id-${String(++idCounter)}`,
 }));
 
 describe('toastStore', () => {
   beforeEach(() => {
     // Reset ID counter and clear store before each test
     idCounter = 0;
-    const store = toastStore.getState();
-    act(() => {
-      // Clear all messages
-      while (store.messages.length > 0) {
-        store.dismiss(store.messages[0].id);
-      }
+    // Clear all messages by getting current state and dismissing each
+    const state = toastStore.getState();
+    const ids = state.messages.map((m) => m.id);
+    ids.forEach((id) => {
+      toastStore.getState().dismiss(id);
     });
   });
 
@@ -37,33 +36,29 @@ describe('toastStore', () => {
   });
 
   describe('show()', () => {
-    it('should add a message with title only', async () => {
+    it('should add a message with title only', () => {
       const { result } = renderHook(() => toastStore());
 
       act(() => {
         result.current.show({ title: 'Test Title' });
       });
 
-      await waitFor(() => {
-        expect(result.current.messages).toHaveLength(1);
-        expect(result.current.messages[0].title).toBe('Test Title');
-      });
+      expect(result.current.messages).toHaveLength(1);
+      expect(result.current.messages[0]?.title).toBe('Test Title');
     });
 
-    it('should add a message with description', async () => {
+    it('should add a message with description', () => {
       const { result } = renderHook(() => toastStore());
 
       act(() => {
         result.current.show({ description: 'Test Description' });
       });
 
-      await waitFor(() => {
-        expect(result.current.messages).toHaveLength(1);
-        expect(result.current.messages[0].description).toBe('Test Description');
-      });
+      expect(result.current.messages).toHaveLength(1);
+      expect(result.current.messages[0]?.description).toBe('Test Description');
     });
 
-    it('should add multiple messages', async () => {
+    it('should add multiple messages', () => {
       const { result } = renderHook(() => toastStore());
 
       act(() => {
@@ -71,12 +66,10 @@ describe('toastStore', () => {
         result.current.show({ title: 'Message 2' });
       });
 
-      await waitFor(() => {
-        expect(result.current.messages).toHaveLength(2);
-      });
+      expect(result.current.messages).toHaveLength(2);
     });
 
-    it('should generate unique IDs', async () => {
+    it('should generate unique IDs', () => {
       const { result } = renderHook(() => toastStore());
 
       act(() => {
@@ -84,46 +77,40 @@ describe('toastStore', () => {
         result.current.show({ title: 'Test 2' });
       });
 
-      await waitFor(() => {
-        const ids = result.current.messages.map((m) => m.id);
-        expect(new Set(ids).size).toBe(2); // All unique
-      });
+      const ids = result.current.messages.map((m) => m.id);
+      expect(new Set(ids).size).toBe(2); // All unique
     });
   });
 
   describe('dismiss()', () => {
-    it('should remove a message by ID', async () => {
+    it('should remove a message by ID', () => {
       const { result } = renderHook(() => toastStore());
 
       act(() => {
         result.current.show({ title: 'Test' });
       });
 
-      await waitFor(() => {
-        expect(result.current.messages).toHaveLength(1);
-      });
+      expect(result.current.messages).toHaveLength(1);
 
-      const messageId = result.current.messages[0].id;
+      const messageId = result.current.messages[0]?.id;
 
       act(() => {
-        result.current.dismiss(messageId);
+        if (messageId) {
+          result.current.dismiss(messageId);
+        }
       });
 
-      await waitFor(() => {
-        expect(result.current.messages).toHaveLength(0);
-      });
+      expect(result.current.messages).toHaveLength(0);
     });
 
-    it('should handle dismissing non-existent ID', async () => {
+    it('should handle dismissing non-existent ID', () => {
       const { result } = renderHook(() => toastStore());
 
       act(() => {
         result.current.show({ title: 'Test' });
       });
 
-      await waitFor(() => {
-        expect(result.current.messages).toHaveLength(1);
-      });
+      expect(result.current.messages).toHaveLength(1);
 
       act(() => {
         result.current.dismiss('non-existent-id');
@@ -135,7 +122,7 @@ describe('toastStore', () => {
   });
 
   describe('State Persistence', () => {
-    it('should share state between multiple hook instances', async () => {
+    it('should share state between multiple hook instances', () => {
       const { result: result1 } = renderHook(() => toastStore());
       const { result: result2 } = renderHook(() => toastStore());
 
@@ -143,12 +130,10 @@ describe('toastStore', () => {
         result1.current.show({ title: 'Shared Message' });
       });
 
-      await waitFor(() => {
-        expect(result1.current.messages).toHaveLength(1);
-        expect(result2.current.messages).toHaveLength(1);
-        expect(result1.current.messages[0].title).toBe('Shared Message');
-        expect(result2.current.messages[0].title).toBe('Shared Message');
-      });
+      expect(result1.current.messages).toHaveLength(1);
+      expect(result2.current.messages).toHaveLength(1);
+      expect(result1.current.messages[0]?.title).toBe('Shared Message');
+      expect(result2.current.messages[0]?.title).toBe('Shared Message');
     });
   });
 });

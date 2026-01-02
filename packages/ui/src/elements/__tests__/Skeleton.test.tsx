@@ -17,22 +17,30 @@ describe('Skeleton', () => {
     expect(skeleton).toHaveStyle('border-radius: 8px');
   });
 
-  it('accepts numeric dimensions and radius', () => {
-    render(<Skeleton data-testid="skeleton" width={120} height={10} radius={4} />);
+  it('accepts numeric and string dimensions', () => {
+    render(<Skeleton data-testid="skeleton" width={120} height="2rem" radius={4} />);
 
     const skeleton = screen.getByTestId('skeleton');
     expect(skeleton).toHaveStyle('width: 120px');
-    expect(skeleton).toHaveStyle('height: 10px');
+    expect(skeleton).toHaveStyle('height: 2rem');
     expect(skeleton).toHaveStyle('border-radius: 4px');
   });
 
-  it('allows style overrides', () => {
+  it('allows style overrides and merges className', () => {
     render(
-      <Skeleton data-testid="skeleton" width="40%" style={{ width: '50%', height: '20px' }} />,
+      <Skeleton data-testid="skeleton" width="40%" className="custom" style={{ width: '50%' }} />,
     );
 
     const skeleton = screen.getByTestId('skeleton');
     expect(skeleton).toHaveStyle('width: 50%');
-    expect(skeleton).toHaveStyle('height: 20px');
+    expect(skeleton).toHaveClass('ui-skeleton');
+    expect(skeleton).toHaveClass('custom');
+  });
+
+  it('forwards ref to div element', () => {
+    const ref = { current: null };
+    render(<Skeleton ref={ref} />);
+
+    expect(ref.current).toBeInstanceOf(HTMLDivElement);
   });
 });

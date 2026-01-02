@@ -1521,3 +1521,7 @@ export const getComponentsByCategory = (category: string): ComponentDemo[] => {
 export const getAllCategories = (): string[] => {
   return Array.from(new Set(Object.values(componentRegistry).map((comp) => comp.category)));
 };
+
+export const getTotalComponentCount = (): number => {
+  return Object.keys(componentRegistry).length;
+};

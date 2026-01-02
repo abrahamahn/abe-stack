@@ -1014,3 +1014,100 @@ a:focus-visible {
     transform: rotate(360deg);
   }
 }
+
+/* Kbd - Keyboard key display */
+.ui-kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid var(--ui-color-border);
+  background: var(--ui-color-surface);
+  font-family: var(--ui-font-family-mono, monospace);
+  font-size: var(--ui-font-size-xs);
+  line-height: 1.4;
+  color: var(--ui-color-text);
+  box-shadow: 0 1px 0 var(--ui-color-border);
+}
+
+.ui-kbd[data-size='sm'] {
+  padding: 1px 4px;
+  font-size: 10px;
+}
+
+.ui-kbd[data-size='md'] {
+  padding: 2px 6px;
+  font-size: var(--ui-font-size-xs);
+}
+
+/* FormField - Form field wrapper with label and error support */
+.ui-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-gap-xs);
+}
+
+.ui-form-field-label {
+  font-size: var(--ui-font-size-sm);
+  font-weight: var(--ui-font-weight-medium);
+  color: var(--ui-color-text);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.ui-form-field-required {
+  color: var(--ui-color-danger);
+}
+
+.ui-form-field-input {
+  display: flex;
+  flex-direction: column;
+}
+
+.ui-form-field-error {
+  font-size: var(--ui-font-size-xs);
+  color: var(--ui-color-danger);
+}
+
+.ui-form-field-helper {
+  font-size: var(--ui-font-size-xs);
+  color: var(--ui-color-text-muted);
+}
+
+/* EnvironmentBadge - Environment status display */
+.ui-environment-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ui-environment-badge[data-environment='development'] {
+  background: var(--ui-color-warning);
+  color: var(--ui-color-text-inverse);
+}
+
+.ui-environment-badge[data-environment='production'] {
+  background: var(--ui-color-success);
+  color: var(--ui-color-text-inverse);
+}
+
+.ui-environment-badge[data-environment='staging'] {
+  background: var(--ui-color-primary);
+  color: var(--ui-color-text-inverse);
+}
+
+.ui-environment-badge[data-environment='test'] {
+  background: var(--ui-color-muted);
+  color: var(--ui-color-text-inverse);
+}
+
+/* VersionBadge - Version display */
+.ui-version-badge {
+  font-size: var(--ui-font-size-xs);
+  font-weight: var(--ui-font-weight-bold);
+  color: var(--ui-color-text-muted);
+}

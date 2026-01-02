@@ -362,4 +362,101 @@ describe('Select', () => {
       );
     });
   });
+
+  describe('additional behaviors', () => {
+    it('selects with Space key', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      render(
+        <Select aria-label="Fruit" defaultValue="apple" onChange={onChange}>
+          <option value="apple">Apple</option>
+          <option value="banana">Banana</option>
+        </Select>,
+      );
+
+      const trigger = screen.getByRole('button', { name: /fruit/i });
+      trigger.focus();
+      await user.keyboard(' '); // Open with Space
+      await user.keyboard('{ArrowDown}'); // Highlight Banana
+      await user.keyboard(' '); // Select with Space
+
+      expect(onChange).toHaveBeenCalledWith('banana');
+    });
+
+    it('closes menu on Tab without selecting', async () => {
+      const user = userEvent.setup();
+      const onChange = vi.fn();
+      render(
+        <Select aria-label="Fruit" defaultValue="apple" onChange={onChange}>
+          <option value="apple">Apple</option>
+          <option value="banana">Banana</option>
+        </Select>,
+      );
+
+      await user.click(screen.getByRole('button', { name: /fruit/i }));
+      expect(screen.getByRole('listbox')).toBeInTheDocument();
+
+      await user.keyboard('{Tab}');
+      expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
+    it('highlights option on mouse enter', async () => {
+      const user = userEvent.setup();
+      render(
+        <Select aria-label="Fruit" defaultValue="apple">
+          <option value="apple">Apple</option>
+          <option value="banana">Banana</option>
+        </Select>,
+      );
+
+      await user.click(screen.getByRole('button', { name: /fruit/i }));
+
+      const banana = screen.getByRole('option', { name: 'Banana' });
+      await user.hover(banana);
+
+      expect(banana).toHaveAttribute('data-highlighted', 'true');
+    });
+
+    it('forwards ref to container', () => {
+      const ref = { current: null };
+      render(
+        <Select ref={ref} aria-label="Fruit">
+          <option value="apple">Apple</option>
+        </Select>,
+      );
+
+      expect(ref.current).toBeInstanceOf(HTMLDivElement);
+    });
+
+    it('merges className with base class', () => {
+      const { container } = render(
+        <Select aria-label="Fruit" className="custom-select">
+          <option value="apple">Apple</option>
+        </Select>,
+      );
+
+      expect(container.firstChild).toHaveClass('ui-select-custom');
+      expect(container.firstChild).toHaveClass('custom-select');
+    });
+
+    it('does not highlight disabled options on mouse enter', async () => {
+      const user = userEvent.setup();
+      render(
+        <Select aria-label="Fruit" defaultValue="apple">
+          <option value="apple">Apple</option>
+          <option value="banana" disabled>
+            Banana
+          </option>
+        </Select>,
+      );
+
+      await user.click(screen.getByRole('button', { name: /fruit/i }));
+
+      const banana = screen.getByRole('option', { name: 'Banana' });
+      await user.hover(banana);
+
+      expect(banana).not.toHaveAttribute('data-highlighted', 'true');
+    });
+  });
 });
