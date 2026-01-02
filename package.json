@@ -25,8 +25,8 @@
     "test:web": "turbo run test --filter=@abe-stack/web",
     "test:server": "turbo run test --filter=@abe-stack/server",
     "test:desktop": "turbo run test --filter=@abe-stack/desktop",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.cjs,.mjs,.cts,.mts --ignore-pattern config/** --no-warn-ignored --report-unused-disable-directives --max-warnings=0",
-    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx,.cjs,.mjs,.cts,.mts --ignore-pattern config/** --no-warn-ignored --fix",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.cjs,.mjs,.cts,.mts --report-unused-disable-directives --max-warnings=0",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx,.cjs,.mjs,.cts,.mts --fix",
     "type-check": "turbo run type-check",
     "format": "prettier --config config/.prettierrc --ignore-path config/.prettierignore --write .",
     "format:check": "prettier --config config/.prettierrc --ignore-path config/.prettierignore --check .",
@@ -91,7 +91,7 @@
       "pnpm prettier --config config/.prettierrc --ignore-path config/.prettierignore --check"
     ],
     "**/*.{ts,tsx,js,jsx}": [
-      "pnpm exec eslint --cache --cache-location .cache/eslint/.cache --ignore-pattern config/** --no-warn-ignored --max-warnings=0"
+      "pnpm exec eslint --cache --cache-location .cache/eslint/.cache --max-warnings=0"
     ]
   },
   "packageManager": "pnpm@10.26.2"
