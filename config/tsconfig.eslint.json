@@ -3,7 +3,7 @@
   "compilerOptions": {
     "noEmit": true,
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "baseUrl": ".",
+    "baseUrl": "..",
     "paths": {
       "@abe-stack/api-client": ["./packages/api-client/src"],
       "@abe-stack/shared": ["./packages/shared/src"],
@@ -13,6 +13,6 @@
       "@abe-stack/storage": ["./packages/storage/src"]
     }
   },
-  "include": ["apps/**/*", "packages/**/*", "tools/**/*", "*.ts", "*.tsx"],
-  "exclude": ["node_modules", "dist", "build", ".turbo", ".next", "coverage"]
+  "include": ["../apps/**/*", "../packages/**/*", "../tools/**/*", "../*.ts", "../*.tsx"],
+  "exclude": ["../node_modules", "../dist", "../build", "../.turbo", "../.next", "../coverage"]
 }

@@ -96,7 +96,7 @@ Want to see it running instantly? Use the built-in dev stack:
 ```bash
 git clone <repository-url>
 cd abe-stack
-docker compose up --build
+docker compose -f config/docker/docker-compose.yml up --build
 ```
 
 Now open:
@@ -244,7 +244,7 @@ The included multi-stage Dockerfile builds an optimized production image:
 
 ```bash
 # Build production image
-docker build -t abe-stack-server .
+docker build -f config/docker/Dockerfile -t abe-stack-server .
 
 # Run with environment variables
 docker run -p 8080:8080 \

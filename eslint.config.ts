@@ -52,7 +52,7 @@ export default [
     languageOptions: {
       parserOptions: {
         tsconfigRootDir,
-        project: ['./tsconfig.eslint.json'],
+        project: ['./config/tsconfig.eslint.json'],
       },
     },
   },
