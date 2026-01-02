@@ -6,20 +6,24 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { HomePage } from '../Home';
 
-import type { DemoView } from '../Home';
-
 describe('HomePage', () => {
   describe('Rendering', () => {
     it('renders the main heading', () => {
       render(<HomePage />);
 
-      expect(screen.getByRole('heading', { name: /welcome to abe stack/i, level: 1 })).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: /welcome to abe stack/i, level: 1 }),
+      ).toBeInTheDocument();
     });
 
     it('renders the welcome description', () => {
       render(<HomePage />);
 
-      expect(screen.getByText(/A minimal, ground-up full-stack TypeScript monorepo with authentication/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          /A minimal, ground-up full-stack TypeScript monorepo with authentication/i,
+        ),
+      ).toBeInTheDocument();
     });
 
     it('renders Tech Stack section', () => {
@@ -120,14 +124,14 @@ describe('HomePage', () => {
 
   describe('Component Structure', () => {
     it('renders PageContainer wrapper', () => {
-      const { container } = render(<HomePage />);
+      render(<HomePage />);
 
-      // PageContainer should be the main wrapper
-      expect(container.firstChild).toBeInTheDocument();
+      // PageContainer should be the main wrapper - check by heading presence
+      expect(screen.getByRole('heading', { name: /welcome to abe stack/i })).toBeInTheDocument();
     });
 
     it('renders Card component with content', () => {
-      const { container } = render(<HomePage />);
+      render(<HomePage />);
 
       // Check if Card is rendered by looking for the Tech Stack section
       const techStackHeading = screen.getByRole('heading', { name: /tech stack/i });

@@ -1,4 +1,5 @@
 // apps/web/src/features/demo/__tests__/UI.test.tsx
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';
@@ -113,15 +114,15 @@ describe('UIPage Component', () => {
     it('checkbox is checked by default', () => {
       render(<UIPage />);
 
-      const checkbox = screen.getByLabelText(/check me/i) as HTMLInputElement;
-      expect(checkbox.checked).toBe(true);
+      const checkbox = screen.getByLabelText(/check me/i);
+      expect(checkbox).toBeChecked();
     });
 
     it('radio is checked by default', () => {
       render(<UIPage />);
 
-      const radio = screen.getByLabelText(/^radio$/i) as HTMLInputElement;
-      expect(radio.checked).toBe(true);
+      const radio = screen.getByLabelText(/^radio$/i);
+      expect(radio).toBeChecked();
     });
   });
 
@@ -205,7 +206,9 @@ describe('UIPage Component', () => {
     it('renders card with content', () => {
       render(<UIPage />);
 
-      expect(screen.getByText(/Use this gallery to visually verify component states/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Use this gallery to visually verify component states/i),
+      ).toBeInTheDocument();
     });
   });
 
