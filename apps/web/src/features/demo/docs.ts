@@ -136,7 +136,11 @@ function parseMarkdownToHtml(markdown: string): string {
  */
 export function parseMarkdown(markdown: string): string {
   const html = parseMarkdownToHtml(markdown);
-  return DOMPurify.sanitize(html, {
+  // Type assertion needed due to DOMPurify type resolution issues with ESM
+  const purify = DOMPurify as unknown as {
+    sanitize: (html: string, options?: Record<string, unknown>) => string;
+  };
+  return purify.sanitize(html, {
     ALLOWED_TAGS: ['h1', 'h2', 'h3', 'p', 'br', 'strong', 'em', 'code', 'pre', 'a'],
     ALLOWED_ATTR: ['href'],
   });
