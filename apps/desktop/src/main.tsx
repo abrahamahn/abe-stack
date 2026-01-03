@@ -1,5 +1,5 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
 
 import App from './App';
 
@@ -9,10 +9,10 @@ if (!container) {
   throw new Error('Root container not found');
 }
 
-const root = ReactDOM.createRoot(container);
+const root = createRoot(container);
 
 root.render(
-  <React.StrictMode>
+  <StrictMode>
     <App />
-  </React.StrictMode>,
+  </StrictMode>,
 );

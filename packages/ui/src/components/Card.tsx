@@ -1,13 +1,13 @@
-import React from 'react';
-
 import '../styles/components.css';
 
-interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  children: React.ReactNode;
+import type { FC, HTMLAttributes, ReactNode } from 'react';
+
+interface CardProps extends HTMLAttributes<HTMLDivElement> {
+  children: ReactNode;
   className?: string;
 }
 
-export const Card: React.FC<CardProps> = ({ children, className = '', ...props }) => {
+export const Card: FC<CardProps> = ({ children, className = '', ...props }) => {
   return (
     <div className={`ui-card ${className}`.trim()} {...props}>
       {children}
