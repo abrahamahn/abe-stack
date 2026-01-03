@@ -91,7 +91,7 @@
       "pnpm prettier --config config/.prettierrc --ignore-path config/.prettierignore --check"
     ],
     "**/*.{ts,tsx,js,jsx}": [
-      "pnpm exec eslint --cache --cache-location .cache/eslint/.cache --max-warnings=0"
+      "pnpm exec eslint --cache --cache-location .cache/eslint/.cache --max-warnings=0 --no-warn-ignored"
     ]
   },
   "packageManager": "pnpm@10.26.2"

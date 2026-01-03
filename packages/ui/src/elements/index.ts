@@ -1,4 +1,5 @@
 export { Accordion } from './Accordion';
+export { FocusTrap } from './FocusTrap';
 export { Alert } from './Alert';
 export { Avatar } from './Avatar';
 export { Badge } from './Badge';
