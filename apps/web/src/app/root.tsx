@@ -1,5 +1,4 @@
 import { ScrollArea } from '@abe-stack/ui';
-import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import { LoginPage, ProtectedRoute } from '../features/auth';
@@ -10,7 +9,9 @@ import { HomePage } from '../pages/Home';
 
 import { AppProviders } from './providers';
 
-export const App: React.FC = () => {
+import type { ReactElement } from 'react';
+
+export function App(): ReactElement {
   return (
     <AppProviders>
       <BrowserRouter>
@@ -36,4 +37,4 @@ export const App: React.FC = () => {
       </BrowserRouter>
     </AppProviders>
   );
-};
+}

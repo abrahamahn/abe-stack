@@ -1,5 +1,7 @@
 // apps/web/src/features/demo/docs.ts
 
+import DOMPurify from 'dompurify';
+
 // Import markdown files as raw strings using Vite's glob import
 // https://vitejs.dev/guide/features.html#glob-import
 
@@ -90,7 +92,7 @@ export function getComponentDocs(
  * Parse markdown into simple HTML
  * Basic parser for common markdown syntax
  */
-export function parseMarkdown(markdown: string): string {
+function parseMarkdownToHtml(markdown: string): string {
   if (!markdown) return '';
 
   let html = markdown;
@@ -126,4 +128,20 @@ export function parseMarkdown(markdown: string): string {
   html = '<p>' + html + '</p>';
 
   return html;
+}
+
+/**
+ * Parse markdown into sanitized HTML
+ * Uses DOMPurify to prevent XSS attacks
+ */
+export function parseMarkdown(markdown: string): string {
+  const html = parseMarkdownToHtml(markdown);
+  // Type assertion needed due to DOMPurify type resolution issues with ESM
+  const purify = DOMPurify as unknown as {
+    sanitize: (html: string, options?: Record<string, unknown>) => string;
+  };
+  return purify.sanitize(html, {
+    ALLOWED_TAGS: ['h1', 'h2', 'h3', 'p', 'br', 'strong', 'em', 'code', 'pre', 'a'],
+    ALLOWED_ATTR: ['href'],
+  });
 }

@@ -1,7 +1,7 @@
 // Foundational UI Components
-export { Button } from './Button';
+export { Button, type ButtonProps } from './Button';
 export { Card } from './Card';
-export { Input } from './Input';
+export { Input, type InputProps } from './Input';
 export { Spinner } from './Spinner';
 export { Box } from './Box';
 export { Layout } from './Layout';
