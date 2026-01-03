@@ -3,13 +3,13 @@ import { cn } from '../utils/cn';
 import '../styles/components.css';
 import type { ReactNode, CSSProperties, ReactElement } from 'react';
 
-export interface BoxProps {
+export type BoxProps = {
   children?: ReactNode;
   style?: CSSProperties;
   className?: string;
   padding?: number | string;
   flexDirection?: 'row' | 'column';
-}
+};
 
 export const Box = ({
   children,

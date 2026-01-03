@@ -2,10 +2,10 @@ import '../styles/components.css';
 
 import type { FC, HTMLAttributes, ReactNode } from 'react';
 
-interface CardProps extends HTMLAttributes<HTMLDivElement> {
+type CardProps = HTMLAttributes<HTMLDivElement> & {
   children: ReactNode;
   className?: string;
-}
+};
 
 export const Card: FC<CardProps> = ({ children, className = '', ...props }) => {
   return (

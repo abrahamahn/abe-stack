@@ -9,7 +9,7 @@ export type ThemeContextValue = UseThemeModeReturn;
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-export interface ThemeProviderProps {
+export type ThemeProviderProps = {
   /**
    * The children to render within the theme provider
    */
@@ -24,7 +24,7 @@ export interface ThemeProviderProps {
    * @default 'system'
    */
   defaultMode?: ThemeMode;
-}
+};
 
 /**
  * ThemeProvider wraps your app to provide theme context and styling.
