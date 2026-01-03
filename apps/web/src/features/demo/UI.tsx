@@ -57,21 +57,8 @@ export const UIPage: React.FC = () => {
             <option>Two</option>
           </Select>
           <div style={{ display: 'flex', gap: '16px' }}>
-            <Checkbox
-              checked
-              label="Check me"
-              onChange={(checked: boolean) => {
-                void checked;
-              }}
-            />
-            <Radio
-              name="r1"
-              checked
-              label="Radio"
-              onChange={(checked: boolean) => {
-                void checked;
-              }}
-            />
+            <Checkbox checked label="Check me" onChange={(_checked: boolean) => {}} />
+            <Radio name="r1" checked label="Radio" onChange={(_checked: boolean) => {}} />
             <Switch checked />
           </div>
         </div>
