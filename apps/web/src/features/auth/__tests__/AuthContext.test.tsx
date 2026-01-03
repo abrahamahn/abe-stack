@@ -316,14 +316,18 @@ describe('AuthProvider', () => {
         wrapper: createWrapper(),
       });
 
-      // Start multiple concurrent logins
-      const loginPromises = [
-        result.current.login({ email: 'test1@example.com', password: 'password' }),
-        result.current.login({ email: 'test2@example.com', password: 'password' }),
-        result.current.login({ email: 'test3@example.com', password: 'password' }),
-      ];
+      // Start multiple concurrent logins wrapped in act()
+      await act(async () => {
+        const loginPromises = [
+          result.current.login({ email: 'test1@example.com', password: 'password' }),
+          result.current.login({ email: 'test2@example.com', password: 'password' }),
+          result.current.login({ email: 'test3@example.com', password: 'password' }),
+        ];
 
-      await expect(Promise.all(loginPromises)).resolves.toBeDefined();
+        await Promise.all(loginPromises);
+      });
+
+      expect(mockApi.login).toHaveBeenCalledTimes(3);
     });
 
     it('should handle login with empty credentials', async () => {

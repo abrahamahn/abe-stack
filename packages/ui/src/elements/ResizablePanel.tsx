@@ -206,7 +206,16 @@ export const ResizablePanel = forwardRef<HTMLDivElement, ResizablePanelProps>((p
     flexGrow: 0,
     transition: isDragging ? 'none' : 'flex-basis 0.3s ease',
     ...style,
-    ...(collapsed ? { border: 'none', padding: 0, overflow: 'hidden' } : {}),
+    ...(collapsed
+      ? {
+          borderTop: 'none',
+          borderBottom: 'none',
+          borderLeft: 'none',
+          borderRight: 'none',
+          padding: 0,
+          overflow: 'hidden',
+        }
+      : {}),
   };
 
   return (
