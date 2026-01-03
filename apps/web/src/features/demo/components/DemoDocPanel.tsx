@@ -1,4 +1,5 @@
 import { Button, Heading, Text } from '@abe-stack/ui';
+import DOMPurify from 'dompurify';
 
 import { getComponentDocs, parseMarkdown } from '../docs';
 
@@ -80,7 +81,7 @@ function DocumentationContent({ component }: { component: ComponentDemo }): Reac
   const docs = getComponentDocs(component.id, component.category, component.name);
 
   if (docs) {
-    return <div dangerouslySetInnerHTML={{ __html: parseMarkdown(docs) }} />;
+    return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(parseMarkdown(docs)) }} />;
   }
 
   return (
