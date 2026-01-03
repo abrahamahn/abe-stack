@@ -15,10 +15,9 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 
+import { FocusTrap } from '../elements/FocusTrap';
 import { useControllableState } from '../hooks/useControllableState';
 import '../styles/elements.css';
-
-import { FocusTrap } from './FocusTrap';
 
 type DialogContextValue = {
   open: boolean;
