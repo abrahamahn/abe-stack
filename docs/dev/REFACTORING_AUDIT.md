@@ -12,13 +12,13 @@ This audit identifies 40+ refactoring opportunities across the ABE Stack codebas
 
 ### Quick Stats
 
-| Metric | apps/web | packages |
-|--------|----------|----------|
-| Source Files | 27 | 75 |
-| Test Files | 20 | 69 |
-| Test Coverage | ~74% | ~92% (3 packages at 0%) |
-| Largest File | 1,527 lines | 279 lines |
-| Code Duplication Issues | 12 patterns | 6 patterns |
+| Metric                  | apps/web    | packages                |
+| ----------------------- | ----------- | ----------------------- |
+| Source Files            | 27          | 75                      |
+| Test Files              | 20          | 69                      |
+| Test Coverage           | ~74%        | ~92% (3 packages at 0%) |
+| Largest File            | 1,527 lines | 279 lines               |
+| Code Duplication Issues | 12 patterns | 6 patterns              |
 
 ---
 
@@ -39,13 +39,14 @@ This audit identifies 40+ refactoring opportunities across the ABE Stack codebas
 
 **Impact:** High - No safety net for refactoring or bug fixes
 
-| Package | Source Files | Test Files | Risk Level |
-|---------|-------------|------------|------------|
-| `packages/api-client` | 4 | **0** | HIGH |
-| `packages/db` | 3 | **0** | HIGH |
-| `packages/storage` | 7 | **0** | HIGH |
+| Package               | Source Files | Test Files | Risk Level |
+| --------------------- | ------------ | ---------- | ---------- |
+| `packages/api-client` | 4            | **0**      | HIGH       |
+| `packages/db`         | 3            | **0**      | HIGH       |
+| `packages/storage`    | 7            | **0**      | HIGH       |
 
 **Files to create:**
+
 - [ ] `packages/api-client/src/__tests__/client.test.ts`
 - [ ] `packages/api-client/src/__tests__/react-query.test.ts`
 - [ ] `packages/db/src/__tests__/client.test.ts`
@@ -61,15 +62,18 @@ This audit identifies 40+ refactoring opportunities across the ABE Stack codebas
 **Impact:** Medium - Could cause subtle bugs in role comparisons
 
 **Files:**
+
 - `packages/db/src/schema/users.ts` (line 4): `['admin', 'moderator', 'user']`
 - `packages/shared/src/contracts/index.ts` (line 7): `['user', 'admin', 'moderator']`
 
 **Issue:** Arrays have different ordering. While functionally equivalent for most uses, this could cause issues with:
+
 - Array index-based comparisons
 - Role hierarchy assumptions
 - Serialization consistency
 
 **Recommendation:** Align both to same order. Prefer DB as source of truth:
+
 ```typescript
 // Both files should use:
 export const USER_ROLES = ['user', 'admin', 'moderator'] as const;
@@ -81,13 +85,13 @@ export const USER_ROLES = ['user', 'admin', 'moderator'] as const;
 
 **Impact:** Medium - Hard to maintain, test, and understand
 
-| File | Lines | Primary Issue |
-|------|-------|---------------|
-| `apps/web/src/features/demo/registry.tsx` | 1,527 | Data-heavy registry, no separation |
-| `apps/web/src/features/demo/DemoShell.tsx` | 718 | 5+ state concerns, mixed responsibilities |
-| `packages/ui/src/elements/ResizablePanel.tsx` | 279 | Multiple exported components |
-| `packages/ui/src/elements/Dialog.tsx` | 279 | Complex composition pattern |
-| `packages/ui/src/elements/Select.tsx` | 234 | Complex keyboard/mouse handling |
+| File                                          | Lines | Primary Issue                             |
+| --------------------------------------------- | ----- | ----------------------------------------- |
+| `apps/web/src/features/demo/registry.tsx`     | 1,527 | Data-heavy registry, no separation        |
+| `apps/web/src/features/demo/DemoShell.tsx`    | 718   | 5+ state concerns, mixed responsibilities |
+| `packages/ui/src/elements/ResizablePanel.tsx` | 279   | Multiple exported components              |
+| `packages/ui/src/elements/Dialog.tsx`         | 279   | Complex composition pattern               |
+| `packages/ui/src/elements/Select.tsx`         | 234   | Complex keyboard/mouse handling           |
 
 ---
 
@@ -96,10 +100,12 @@ export const USER_ROLES = ['user', 'admin', 'moderator'] as const;
 ### 2.1 Token Management Duplication
 
 **Files:**
+
 - `packages/api-client/src/client.ts` (lines 34-35)
 - `packages/api-client/src/react-query.ts` (lines 35-37)
 
 **Current Code (duplicated):**
+
 ```typescript
 // client.ts
 const token = config.getToken?.();
@@ -112,6 +118,7 @@ if (token) nextHeaders.set('Authorization', `Bearer ${token}`);
 ```
 
 **Recommendation:** Extract to `packages/shared/src/utils/index.ts`:
+
 ```typescript
 export function addAuthHeader(headers: Headers, token?: string | null): Headers {
   if (token) {
@@ -128,6 +135,7 @@ export function addAuthHeader(headers: Headers, token?: string | null): Headers 
 **Issue:** Mixed default/named exports across components
 
 **Files with default exports (inconsistent):**
+
 - `packages/ui/src/components/Button.tsx` (line 28-29)
 - `packages/ui/src/components/Input.tsx`
 - `packages/ui/src/elements/Tabs.tsx`
@@ -135,6 +143,7 @@ export function addAuthHeader(headers: Headers, token?: string | null): Headers 
 **All other components:** Named exports only
 
 **Recommendation:** Remove default exports for consistency:
+
 ```typescript
 // Before
 export const Button = ...;
@@ -154,6 +163,7 @@ export const Button = ...;
 **Scope:** 150+ instances across `apps/web`
 
 **Common patterns found:**
+
 ```typescript
 style={{ display: 'flex', gap: '8px' }}
 style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}
@@ -163,12 +173,14 @@ style={{ marginBottom: '6px' }}
 ```
 
 **Files most affected:**
+
 - `apps/web/src/features/demo/DemoShell.tsx` (50+ instances)
 - `apps/web/src/features/demo/registry.tsx` (30+ instances)
 - `apps/web/src/features/auth/pages/Login.tsx` (15+ instances)
 - `apps/web/src/pages/Home.tsx` (10+ instances)
 
 **Recommendation:** Create CSS utility classes or style constants:
+
 ```typescript
 // Create: apps/web/src/styles/utils.ts
 export const flexRow = { display: 'flex', flexDirection: 'row' as const };
@@ -178,11 +190,22 @@ export const gap16 = { gap: '16px' };
 ```
 
 Or use CSS classes in `apps/web/src/styles/global.css`:
+
 ```css
-.flex-row { display: flex; flex-direction: row; }
-.flex-col { display: flex; flex-direction: column; }
-.gap-8 { gap: 8px; }
-.gap-16 { gap: 16px; }
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+.gap-8 {
+  gap: 8px;
+}
+.gap-16 {
+  gap: 16px;
+}
 ```
 
 ---
@@ -192,11 +215,13 @@ Or use CSS classes in `apps/web/src/styles/global.css`:
 **File:** `apps/web/src/providers/ApiProvider.tsx` (line 10)
 
 **Current:**
+
 ```typescript
 type ApiContextValue = Record<string, unknown>; // Loses all type information!
 ```
 
 **Recommendation:**
+
 ```typescript
 import type { ReactQueryClient } from '@abe-stack/api-client';
 
@@ -210,6 +235,7 @@ type ApiContextValue = ReturnType<typeof createReactQueryClient>;
 **File:** `apps/web/src/features/demo/DemoShell.tsx` (line 546)
 
 **Current:**
+
 ```tsx
 <div dangerouslySetInnerHTML={{ __html: parseMarkdown(docs) }} />
 ```
@@ -217,8 +243,10 @@ type ApiContextValue = ReturnType<typeof createReactQueryClient>;
 **Security Risk:** XSS vulnerabilities if markdown contains malicious content
 
 **Recommendation:**
+
 1. Use a safe markdown renderer like `react-markdown`
 2. Or sanitize HTML with DOMPurify before rendering:
+
 ```typescript
 import DOMPurify from 'dompurify';
 
@@ -234,6 +262,7 @@ import DOMPurify from 'dompurify';
 **File:** `apps/web/src/features/demo/DemoShell.tsx` (718 lines)
 
 **Current responsibilities:**
+
 1. Theme management (lines 80-98)
 2. Keyboard shortcuts (lines 119-146)
 3. Pane configuration (lines 104-112, 155-160)
@@ -284,10 +313,12 @@ apps/web/src/features/demo/registry/
 ### 3.3 Potential Circular Dependency Risk
 
 **Current cross-references:**
+
 - `packages/ui/src/elements/Dialog.tsx` imports `../components/FocusTrap`
 - `packages/ui/src/components/ProtectedRoute.tsx` imports `../elements/Text`
 
 **Recommendation:** Define clear dependency hierarchy:
+
 ```
 components/ → can import from → elements/, hooks/, utils/
 elements/   → can import from → hooks/, utils/
@@ -302,10 +333,12 @@ Consider moving `FocusTrap` to `elements/` or creating `primitives/` folder.
 ### 3.4 Inconsistent Package Naming
 
 **Mixed namespace usage:**
+
 - Package names: `abeahn-*` prefix
 - Import paths: Sometimes `@abe-stack/*`
 
 **Examples:**
+
 ```typescript
 // packages/storage/src/configFromEnv.ts
 import type { ServerEnv } from '@abe-stack/shared';
@@ -323,16 +356,16 @@ import { toastStore } from 'abeahn-shared';
 **File:** `apps/web/src/features/auth/pages/Login.tsx` (lines 47-75)
 
 **Repeated pattern:**
+
 ```tsx
 <div style={{ marginBottom: '16px' }}>
-  <label style={{ display: 'block', marginBottom: '6px' }}>
-    Email
-  </label>
+  <label style={{ display: 'block', marginBottom: '6px' }}>Email</label>
   <Input type="email" style={{ width: '100%' }} />
 </div>
 ```
 
 **Recommendation:** Create `FormField` component in `packages/ui`:
+
 ```tsx
 // packages/ui/src/elements/FormField.tsx
 export interface FormFieldProps {
@@ -361,6 +394,7 @@ export function FormField({ label, error, required, children }: FormFieldProps) 
 ### 3.6 Missing vitest Configuration for Some Packages
 
 **Packages without vitest.config.ts:**
+
 - `packages/api-client/`
 - `packages/db/`
 - `packages/storage/`
@@ -375,10 +409,12 @@ export function FormField({ label, error, required, children }: FormFieldProps) 
 ### 4.1 Storage Key Normalization Duplication
 
 **Files:**
+
 - `packages/storage/src/localStorageProvider.ts` (line 12)
 - `packages/storage/src/s3StorageProvider.ts` (line 28)
 
 **Current:**
+
 ```typescript
 // localStorageProvider.ts
 const safeKey = key.replace(/^\//, '').replace(/\.\./g, '');
@@ -388,6 +424,7 @@ const key = params.key.replace(/^\//, '');
 ```
 
 **Recommendation:** Extract to utility:
+
 ```typescript
 // packages/storage/src/utils/normalizeKey.ts
 export function normalizeStorageKey(key: string, stripParentRefs = true): string {
@@ -404,6 +441,7 @@ export function normalizeStorageKey(key: string, stripParentRefs = true): string
 ### 4.2 Unnecessary React Imports
 
 **Files importing React unnecessarily (React 17+ JSX transform):**
+
 - `apps/web/src/main.tsx` (line 1)
 - `apps/web/src/app/root.tsx` (line 2)
 - `apps/web/src/app/providers.tsx` (line 3)
@@ -419,6 +457,7 @@ export function normalizeStorageKey(key: string, stripParentRefs = true): string
 **Current:** Only `packages/ui` uses path aliases
 
 **Recommendation:** Add to other packages:
+
 ```json
 // tsconfig.json
 {
@@ -438,19 +477,20 @@ export function normalizeStorageKey(key: string, stripParentRefs = true): string
 
 ```typescript
 // Pattern A: interface
-export interface ButtonProps { }
+export interface ButtonProps {}
 
 // Pattern B: type
-type ButtonProps = { }
+type ButtonProps = {};
 
 // Pattern C: inline with HTML extension
-interface CardProps extends React.HTMLAttributes<HTMLDivElement> { }
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 // Pattern D: ComponentPropsWithoutRef
-type CardRootProps = ComponentPropsWithoutRef<'div'> & { }
+type CardRootProps = ComponentPropsWithoutRef<'div'> & {};
 ```
 
 **Recommendation:** Standardize:
+
 - Use `interface` for component props
 - Use `ComponentPropsWithoutRef<'element'>` for HTML element extensions
 - Always export Props types
@@ -460,10 +500,12 @@ type CardRootProps = ComponentPropsWithoutRef<'div'> & { }
 ### 4.5 Void Expressions for Unused Handlers
 
 **Files with void expressions:**
+
 - `apps/web/src/features/demo/UI.tsx` (lines 63-65, 71-73)
 - Pattern: `void checked;`
 
 **Recommendation:** Use underscore prefix for unused params:
+
 ```typescript
 // Before
 onChange={(checked) => { void checked; }}
@@ -481,6 +523,7 @@ onChange={(_checked) => { /* intentionally unused */ }}
 **Issue:** App-specific component in shared UI package
 
 **Recommendation:** Consider:
+
 1. Move to `apps/web/src/components/`
 2. Or make more generic (accept auth check function as prop)
 
@@ -489,12 +532,14 @@ onChange={(_checked) => { /* intentionally unused */ }}
 ## 5. Todo Checklist
 
 ### Critical Priority
+
 - [ ] Add tests for `packages/api-client` (4 source files)
 - [ ] Add tests for `packages/db` (3 source files)
 - [ ] Add tests for `packages/storage` (7 source files)
 - [ ] Align USER_ROLES order between db and shared packages
 
 ### High Priority
+
 - [ ] Extract token management to shared utility
 - [ ] Remove default exports from Button, Input, Tabs
 - [ ] Fix ApiContextValue type in ApiProvider.tsx
@@ -502,6 +547,7 @@ onChange={(_checked) => { /* intentionally unused */ }}
 - [ ] Create CSS utility classes for common inline styles
 
 ### Medium Priority
+
 - [ ] Split DemoShell.tsx into smaller components
   - [ ] Extract useDemoTheme hook
   - [ ] Extract useDemoKeyboard hook
@@ -520,6 +566,7 @@ onChange={(_checked) => { /* intentionally unused */ }}
 - [ ] Add vitest.config.ts to missing packages
 
 ### Low Priority
+
 - [ ] Extract storage key normalization utility
 - [ ] Remove unnecessary React imports
 - [ ] Add path aliases to non-UI packages
@@ -532,6 +579,7 @@ onChange={(_checked) => { /* intentionally unused */ }}
 ## 6. Implementation Roadmap
 
 ### Phase 1: Foundation (Week 1)
+
 **Goal:** Establish testing baseline and fix critical issues
 
 1. **Day 1-2:** Add test infrastructure
@@ -550,6 +598,7 @@ onChange={(_checked) => { /* intentionally unused */ }}
    - Review and sanitize any other innerHTML usage
 
 ### Phase 2: Consistency (Week 2)
+
 **Goal:** Standardize patterns across codebase
 
 1. **Day 1-2:** Export pattern standardization
@@ -567,6 +616,7 @@ onChange={(_checked) => { /* intentionally unused */ }}
    - Update tsconfig paths if needed
 
 ### Phase 3: Refactoring (Week 3)
+
 **Goal:** Break down large components
 
 1. **Day 1-3:** DemoShell.tsx refactoring
@@ -580,6 +630,7 @@ onChange={(_checked) => { /* intentionally unused */ }}
    - Verify all demos still work
 
 ### Phase 4: Polish (Week 4)
+
 **Goal:** Address remaining low-priority items
 
 1. Clean up unused imports
@@ -627,4 +678,4 @@ packages/ui/src/elements/Select.tsx             (234 lines)
 
 ---
 
-*Last updated: 2026-01-03*
+_Last updated: 2026-01-03_
