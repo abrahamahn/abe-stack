@@ -1,6 +1,5 @@
+import { Spinner } from '../elements/Spinner';
 import { Text } from '../elements/Text';
-
-import { Spinner } from './Spinner';
 
 import type { ComponentPropsWithoutRef, ReactElement } from 'react';
 import '../styles/components.css';
