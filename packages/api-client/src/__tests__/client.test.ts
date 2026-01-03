@@ -54,7 +54,8 @@ describe('createApiClient', () => {
 
     await client.getCurrentUser();
 
-    const calledHeaders = mockFetch.mock.calls[0][1].headers as Headers;
+    const callArgs = mockFetch.mock.calls[0] as [string, RequestInit];
+    const calledHeaders = callArgs[1].headers as Headers;
     expect(calledHeaders.get('Authorization')).toBe('Bearer my-token');
   });
 
