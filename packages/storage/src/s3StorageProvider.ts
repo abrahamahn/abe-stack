@@ -2,6 +2,8 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { fromEnv } from '@aws-sdk/credential-providers';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
+import { normalizeStorageKey } from './utils/normalizeKey';
+
 import type { S3StorageConfig, StorageProvider, UploadParams } from './types';
 
 export class S3StorageProvider implements StorageProvider {
@@ -25,7 +27,7 @@ export class S3StorageProvider implements StorageProvider {
   }
 
   async upload(params: UploadParams): Promise<{ key: string }> {
-    const key = params.key.replace(/^\//, '');
+    const key = normalizeStorageKey(params.key);
     await this.client.send(
       new PutObjectCommand({
         Bucket: this.config.bucket,
@@ -40,7 +42,7 @@ export class S3StorageProvider implements StorageProvider {
   async getSignedUrl(key: string, expiresInSeconds?: number): Promise<string> {
     const command = new PutObjectCommand({
       Bucket: this.config.bucket,
-      Key: key.replace(/^\//, ''),
+      Key: normalizeStorageKey(key),
     });
     return getSignedUrl(this.client, command, {
       expiresIn: expiresInSeconds ?? this.defaultExpires,
