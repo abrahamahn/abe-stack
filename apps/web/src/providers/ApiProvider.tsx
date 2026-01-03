@@ -5,13 +5,16 @@ import { useNavigate } from 'react-router-dom';
 
 import { toastStore } from '../features/toast';
 
+import type { ReactQueryClientInstance } from '@abe-stack/api-client';
 import type { ReactElement, ReactNode } from 'react';
 
-type ApiContextValue = Record<string, unknown>;
+const ApiContext = createContext<ReactQueryClientInstance | null>(null);
 
-const ApiContext = createContext<ApiContextValue | null>(null);
-
-export const useApi = (): ApiContextValue => {
+/**
+ * Hook to access the typed API client.
+ * Must be used within ApiProvider.
+ */
+export const useApi = (): ReactQueryClientInstance => {
   const ctx = useContext(ApiContext);
   if (!ctx) throw new Error('useApi must be used within ApiProvider');
   return ctx;
@@ -28,7 +31,7 @@ interface ApiProviderProps {
 export function ApiProvider({ children }: ApiProviderProps): ReactElement {
   const navigate = useNavigate();
 
-  const api = useMemo<ApiContextValue>(() => {
+  const api = useMemo<ReactQueryClientInstance>(() => {
     const env = (import.meta as unknown as { env?: { VITE_API_URL?: string } }).env;
     const baseUrl = (env?.VITE_API_URL ?? 'http://localhost:8080').replace(/\/+$/, '');
     return createReactQueryClient({
@@ -44,7 +47,7 @@ export function ApiProvider({ children }: ApiProviderProps): ReactElement {
           description: message ?? 'Something went wrong',
         });
       },
-    }) as ApiContextValue;
+    });
   }, [navigate]);
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;

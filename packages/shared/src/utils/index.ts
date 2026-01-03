@@ -4,6 +4,19 @@ export type TokenStore = {
   clear: () => void;
 };
 
+/**
+ * Adds an Authorization Bearer header to a Headers object if a token is provided.
+ * @param headers - The Headers object to modify
+ * @param token - The token to add, or null/undefined to skip
+ * @returns The same Headers object (for chaining)
+ */
+export function addAuthHeader(headers: Headers, token: string | null | undefined): Headers {
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+  return headers;
+}
+
 const createMemoryTokenStore = (): TokenStore => {
   let token: string | null = null;
   return {

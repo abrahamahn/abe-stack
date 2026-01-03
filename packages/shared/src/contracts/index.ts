@@ -3,8 +3,8 @@ import { z } from 'zod';
 
 export * from './native';
 
-// User roles
-export const USER_ROLES = ['user', 'admin'] as const;
+// User roles - kept in sync with packages/db/src/schema/users.ts
+export const USER_ROLES = ['user', 'admin', 'moderator'] as const;
 export const userRoleSchema = z.enum(USER_ROLES);
 export type UserRole = z.infer<typeof userRoleSchema>;
 
