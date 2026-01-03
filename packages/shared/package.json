@@ -33,7 +33,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "tsc --project tsconfig.json",
+    "build": "tsc --build",
     "dev": "tsc --watch --project tsconfig.json",
     "clean": "rm -rf dist",
     "type-check": "tsc --noEmit",
