@@ -177,7 +177,7 @@ export const DemoShell: React.FC = () => {
   };
 
   return (
-    <div style={{ height: '100vh', width: '100vw', overflow: 'hidden' }}>
+    <div className="h-screen w-screen overflow-hidden">
       <ResizablePanelGroup direction="vertical">
         {/* Top Bar */}
         <ResizablePanel
@@ -213,7 +213,7 @@ export const DemoShell: React.FC = () => {
             >
               ← Back
             </Button>
-            <div style={{ flex: 1, textAlign: 'center' }}>
+            <div className="flex-1 text-center">
               <Heading as="h1" size="lg">
                 ABE Stack UI Component Gallery
               </Heading>
@@ -255,7 +255,7 @@ export const DemoShell: React.FC = () => {
               }}
             >
               {/* Left: Version & Environment */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div className="d-flex items-center gap-4">
                 <Text tone="muted" style={{ fontSize: '12px' }}>
                   <strong>v{UI_VERSION}</strong>
                 </Text>
@@ -283,7 +283,7 @@ export const DemoShell: React.FC = () => {
 
               {/* Center: Keyboard Shortcuts (desktop only) */}
               {!isMobile && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div className="d-flex items-center gap-5">
                   {KEYBOARD_SHORTCUTS.map((shortcut) => (
                     <Text key={shortcut.key} tone="muted" style={{ fontSize: '11px' }}>
                       <kbd
@@ -320,8 +320,8 @@ export const DemoShell: React.FC = () => {
           </ResizablePanel>
 
           {/* Middle Area */}
-          <div style={{ flex: 1, minHeight: 0, display: 'flex' }}>
-            <ResizablePanelGroup direction="horizontal" style={{ flex: 1, minWidth: 0 }}>
+          <div className="flex-1 min-h-0 d-flex">
+            <ResizablePanelGroup direction="horizontal" className="flex-1 min-w-0">
               {/* Category Sidebar - Fixed Width */}
               <div
                 style={{
