@@ -1,4 +1,4 @@
-// packages/ui/src/elements/__tests__/RadioGroup.test.tsx
+// packages/ui/src/compounds/__tests__/RadioGroup.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';
@@ -6,7 +6,7 @@ import userEvent from '@testing-library/user-event';
 import { useState, type ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Radio } from '../Radio';
+import { Radio } from '../../elements/Radio';
 import { RadioGroup } from '../RadioGroup';
 
 function RadioGroupHarness(): ReactElement {

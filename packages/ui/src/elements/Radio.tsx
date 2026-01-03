@@ -1,8 +1,7 @@
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 
+import { useRadioGroupContext } from '../compounds/RadioGroup';
 import { useControllableState } from '../hooks/useControllableState';
-
-import { useRadioGroupContext } from './RadioGroup';
 import '../styles/elements.css';
 
 type RadioProps = Omit<ComponentPropsWithoutRef<'input'>, 'type' | 'onChange' | 'name'> & {

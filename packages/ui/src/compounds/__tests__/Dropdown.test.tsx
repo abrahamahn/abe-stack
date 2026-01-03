@@ -1,11 +1,11 @@
-// packages/ui/src/elements/__tests__/Dropdown.test.tsx
+// packages/ui/src/compounds/__tests__/Dropdown.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
+import { MenuItem } from '../../elements/MenuItem';
 import { Dropdown } from '../Dropdown';
-import { MenuItem } from '../MenuItem';
 
 describe('Dropdown', () => {
   describe('happy path', () => {
