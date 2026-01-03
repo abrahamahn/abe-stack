@@ -6,6 +6,6 @@ export { Spinner } from './Spinner';
 export { Box } from './Box';
 export { Layout } from './Layout';
 export { LoadingContainer } from './LoadingContainer';
-export { FocusTrap } from './FocusTrap';
+export { FocusTrap } from '../elements/FocusTrap';
 export { ProtectedRoute, type ProtectedRouteProps } from './ProtectedRoute';
 export { Toaster, type ToasterProps } from './Toaster';

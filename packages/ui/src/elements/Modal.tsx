@@ -10,10 +10,10 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 
-import { FocusTrap } from '../components/FocusTrap';
-
-import { Overlay } from './Overlay';
 import '../styles/elements.css';
+
+import { FocusTrap } from './FocusTrap';
+import { Overlay } from './Overlay';
 
 type ModalContextValue = {
   onClose?: () => void;
