@@ -31,7 +31,8 @@
     "build": "tsc --project tsconfig.json",
     "dev": "tsc --watch --project tsconfig.json",
     "clean": "rm -rf dist",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run"
   },
   "author": "",
   "license": "ISC",
@@ -56,6 +57,7 @@
     "abeahn-shared": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
   }
 }

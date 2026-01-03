@@ -1,9 +1,10 @@
 import { Button, PageContainer, useHistoryNav } from '@abe-stack/ui';
-import React from 'react';
 
 import { UIPage } from './UI';
 
-export const Navigate: React.FC = () => {
+import type { ReactElement } from 'react';
+
+export function Navigate(): ReactElement {
   const { goBack, canGoBack } = useHistoryNav();
 
   return (
@@ -17,4 +18,4 @@ export const Navigate: React.FC = () => {
       <UIPage />
     </PageContainer>
   );
-};
+}

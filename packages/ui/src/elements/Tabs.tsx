@@ -1,13 +1,13 @@
 import { useState, type ReactElement, type ReactNode } from 'react';
 import '../styles/elements.css';
 
-type TabItem = {
+export type TabItem = {
   id: string;
   label: string;
   content: ReactNode;
 };
 
-type TabsProps = {
+export type TabsProps = {
   items: TabItem[];
   value?: string;
   defaultValue?: string;

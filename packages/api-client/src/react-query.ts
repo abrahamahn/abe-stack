@@ -1,4 +1,4 @@
-import { apiContract } from '@abe-stack/shared';
+import { addAuthHeader, apiContract } from '@abe-stack/shared';
 import { initQueryClient } from '@ts-rest/react-query';
 
 type ApiCallArgs = {
@@ -17,12 +17,11 @@ export type CreateApiOptions = {
   fetchImpl?: typeof fetch;
 };
 
-export type ReactQueryClientInstance = unknown;
-
-export function createReactQueryClient(options: CreateApiOptions): ReactQueryClientInstance {
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+function createClient(options: CreateApiOptions) {
   const { baseUrl, getToken, onUnauthorized, onServerError, fetchImpl = fetch } = options;
 
-  const client = initQueryClient(apiContract, {
+  return initQueryClient(apiContract, {
     baseUrl,
     baseHeaders: {},
     api: async ({
@@ -32,9 +31,8 @@ export function createReactQueryClient(options: CreateApiOptions): ReactQueryCli
       body,
       credentials,
     }: ApiCallArgs): Promise<{ status: number; body: unknown; headers: Headers }> => {
-      const token = getToken?.();
       const nextHeaders = new Headers(headers);
-      if (token) nextHeaders.set('Authorization', `Bearer ${token}`);
+      addAuthHeader(nextHeaders, getToken?.());
       nextHeaders.set('Content-Type', 'application/json');
 
       const res = await fetchImpl(path, {
@@ -69,6 +67,11 @@ export function createReactQueryClient(options: CreateApiOptions): ReactQueryCli
       };
     },
   });
+}
 
-  return client as ReactQueryClientInstance;
+/** Typed React Query client based on the API contract */
+export type ReactQueryClientInstance = ReturnType<typeof createClient>;
+
+export function createReactQueryClient(options: CreateApiOptions): ReactQueryClientInstance {
+  return createClient(options);
 }
