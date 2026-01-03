@@ -1,7 +1,7 @@
 import { pgTable, uuid, text, timestamp } from 'drizzle-orm/pg-core';
 
-// User roles - kept in sync with packages/shared
-export const USER_ROLES = ['admin', 'moderator', 'user'] as const;
+// User roles - kept in sync with packages/shared/src/contracts/index.ts
+export const USER_ROLES = ['user', 'admin', 'moderator'] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
 export const users = pgTable('users', {

@@ -1,3 +1,5 @@
+import { addAuthHeader } from '@abe-stack/shared';
+
 import type {
   AuthResponse,
   LoginRequest,
@@ -30,9 +32,7 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
   const request = async <T>(path: string, options?: RequestInit): Promise<T> => {
     const headers = new Headers(options?.headers);
     headers.set('Content-Type', 'application/json');
-
-    const token = config.getToken?.();
-    if (token) headers.set('Authorization', `Bearer ${token}`);
+    addAuthHeader(headers, config.getToken?.());
 
     const response = await fetcher(`${baseUrl}${API_PREFIX}${path}`, {
       ...options,

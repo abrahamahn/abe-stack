@@ -37,7 +37,7 @@ export {
   TableHeader,
   TableRow,
 } from './Table';
-export { Tabs } from './Tabs';
+export { Tabs, type TabsProps, type TabItem } from './Tabs';
 export { Text } from './Text';
 export { TextArea } from './TextArea';
 export { Toast, ToastContainer } from './Toast';
