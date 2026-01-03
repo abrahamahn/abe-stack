@@ -1,14 +1,30 @@
 # Pre-Completion Checklist
 
-Run these commands in order before marking any task complete:
+## During Iterations - Targeted Checks
+
+Run these for ONLY the files you changed or created:
 
 ```bash
-pnpm format
-pnpm lint:fix
-pnpm lint
-pnpm type-check
-pnpm test
-pnpm build # for production changes
+# Format changed files
+npx prettier --config config/.prettierrc --write path/to/file.ts path/to/file2.tsx
+
+# Lint changed files
+npx eslint path/to/file.ts path/to/file2.tsx
+
+# Type-check affected package
+pnpm --filter @abe-stack/web type-check    # for apps/web changes
+pnpm --filter abeahn-ui type-check         # for packages/ui changes
+
+# Test changed files
+pnpm test -- --run path/to/specific.test.tsx
+```
+
+## End of Session - Full Suite
+
+Before marking any task complete, run full build:
+
+```bash
+pnpm build  # Runs format, lint, test, type-check, and build
 ```
 
 If any step fails:
@@ -16,19 +32,28 @@ If any step fails:
 - If the failure is caused by your changes, fix and re-run all checks.
 - If the failure is pre-existing/unrelated, do not fix automatically; report it clearly and proceed only with requested scope.
 
-## Balanced Testing Matrix (30% Fast / 70% Full)
+## Package Filter Names
 
-Fast loop (30% of runs):
+- Apps: `@abe-stack/web`, `@abe-stack/server`, `@abe-stack/desktop`, `@abe-stack/mobile`
+- Packages: `abeahn-ui`, `abeahn-shared`, `abeahn-api-client`, `abeahn-db`, `abeahn-storage`
 
-- `pnpm type-check --filter <package>`
-- `pnpm lint --filter <package>`
-- `pnpm test --filter <package>` or `pnpm test <focused-test>`
+## Example Workflow
 
-Full suite (70% of runs):
+After editing `packages/ui/src/elements/Button.tsx`:
 
-- `pnpm format`
-- `pnpm lint`
-- `pnpm type-check`
-- `pnpm test`
+```bash
+# 1. Format changed files
+npx prettier --config config/.prettierrc --write packages/ui/src/elements/Button.tsx packages/ui/src/elements/__tests__/Button.test.tsx
 
-Rule: fast loop during edits, full suite before marking complete.
+# 2. Lint changed files
+npx eslint packages/ui/src/elements/Button.tsx packages/ui/src/elements/__tests__/Button.test.tsx
+
+# 3. Type-check the package
+pnpm --filter abeahn-ui type-check
+
+# 4. Run relevant tests
+pnpm test -- --run packages/ui/src/elements/__tests__/Button.test.tsx
+
+# 5. At end of session only
+pnpm build
+```

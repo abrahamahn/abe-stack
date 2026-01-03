@@ -11,7 +11,12 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": "./",
+    "paths": {
+      "@abe-stack/shared": ["../shared/dist"],
+      "@abe-stack/shared/*": ["../shared/dist/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": [
@@ -22,5 +27,6 @@
     "**/*.spec.ts",
     "**/*.spec.tsx",
     "**/__tests__/**"
-  ]
+  ],
+  "references": [{ "path": "../shared" }]
 }

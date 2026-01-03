@@ -3,6 +3,11 @@ import { z } from 'zod';
 
 export * from './native';
 
+// User roles
+export const USER_ROLES = ['user', 'admin'] as const;
+export const userRoleSchema = z.enum(USER_ROLES);
+export type UserRole = z.infer<typeof userRoleSchema>;
+
 // Shared schemas
 export const errorResponseSchema = z.object({
   message: z.string(),
@@ -12,6 +17,7 @@ export const userSchema = z.object({
   id: z.string().uuid(),
   email: z.string().email(),
   name: z.string().nullable(),
+  role: userRoleSchema,
 });
 
 export const loginRequestSchema = z.object({
@@ -27,8 +33,15 @@ export const registerRequestSchema = z.object({
 
 export const authResponseSchema = z.object({
   token: z.string(),
-  refreshToken: z.string().optional(),
   user: userSchema,
+});
+
+export const refreshResponseSchema = z.object({
+  token: z.string(),
+});
+
+export const logoutResponseSchema = z.object({
+  message: z.string(),
 });
 
 export const emailVerificationRequestSchema = z.object({
@@ -47,6 +60,8 @@ export const userResponseSchema = userSchema.extend({
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
 export type RegisterRequest = z.infer<typeof registerRequestSchema>;
 export type AuthResponse = z.infer<typeof authResponseSchema>;
+export type RefreshResponse = z.infer<typeof refreshResponseSchema>;
+export type LogoutResponse = z.infer<typeof logoutResponseSchema>;
 export type EmailVerificationRequest = z.infer<typeof emailVerificationRequestSchema>;
 export type EmailVerificationResponse = z.infer<typeof emailVerificationResponseSchema>;
 export type UserResponse = z.infer<typeof userResponseSchema>;
@@ -75,6 +90,26 @@ export const authContract = c.router({
       401: errorResponseSchema,
     },
     summary: 'Login an existing user',
+  },
+  refresh: {
+    method: 'POST',
+    path: '/api/auth/refresh',
+    body: z.object({}),
+    responses: {
+      200: refreshResponseSchema,
+      401: errorResponseSchema,
+    },
+    summary: 'Refresh access token using refresh token cookie',
+  },
+  logout: {
+    method: 'POST',
+    path: '/api/auth/logout',
+    body: z.object({}),
+    responses: {
+      200: logoutResponseSchema,
+      401: errorResponseSchema,
+    },
+    summary: 'Logout and invalidate refresh token',
   },
   verifyEmail: {
     method: 'POST',

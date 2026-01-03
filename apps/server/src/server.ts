@@ -1,6 +1,6 @@
 import { buildConnectionString, createDbClient } from '@abe-stack/db';
-import { toStorageConfig } from '@abe-stack/shared/storageConfig';
-import { createStorage } from '@abe-stack/storage';
+import { createStorage, toStorageConfig } from '@abe-stack/storage';
+import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import { sql } from 'drizzle-orm';
@@ -53,6 +53,13 @@ export async function createServer(
   });
 
   await app.register(helmet);
+
+  // Cookie plugin for refresh tokens
+  await app.register(cookie, {
+    secret: process.env.COOKIE_SECRET || process.env.JWT_SECRET,
+    hook: 'onRequest',
+    parseOptions: {},
+  });
 
   // Initialize database connection
   const dbConnectionString = connectionString ?? buildConnectionString(env);

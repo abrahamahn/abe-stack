@@ -53,7 +53,7 @@ vi.mock('@abe-stack/shared', () => ({
   },
 }));
 
-vi.mock('../../stores/toastStore', () => ({
+vi.mock('../../features/toast', () => ({
   toastStore: {
     getState: (): { show: typeof mockShowToast } => ({
       show: mockShowToast,
