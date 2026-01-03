@@ -1,11 +1,10 @@
 import { HistoryProvider } from '@abe-stack/ui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
 
 import { AuthProvider } from '../features/auth/AuthContext';
 import { ApiProvider } from '../providers/ApiProvider';
 
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 // Create QueryClient outside component to prevent recreation on re-renders
 const queryClient = new QueryClient({
@@ -26,7 +25,7 @@ interface AppProvidersProps {
  * Order matters: QueryClient must wrap Auth (which uses useQuery),
  * Auth must wrap Api (which may need auth context).
  */
-export function AppProviders({ children }: AppProvidersProps): React.ReactElement {
+export function AppProviders({ children }: AppProvidersProps): ReactElement {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
