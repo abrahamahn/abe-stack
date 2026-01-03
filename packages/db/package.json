@@ -25,6 +25,7 @@
   "scripts": {
     "build": "tsc",
     "type-check": "tsc --noEmit",
+    "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
@@ -56,6 +57,7 @@
     "bcrypt": "^5.1.1",
     "drizzle-kit": "^0.31.8",
     "tsx": "^4.19.4",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
   }
 }
