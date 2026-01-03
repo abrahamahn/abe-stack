@@ -1,6 +1,7 @@
-import React from 'react';
 // Import shared UI components from the shared package
 // import { Button, Card, Spinner } from '@abe-stack/ui';
+
+import type { ReactElement } from 'react';
 
 declare global {
   interface Window {
@@ -21,7 +22,7 @@ declare global {
  * - Native menus
  * - Auto-updates
  */
-function App(): React.ReactElement {
+function App(): ReactElement {
   // Example: Desktop-specific feature detection
   const isElectron =
     typeof window !== 'undefined' && 'electronAPI' in window && Boolean(window.electronAPI);

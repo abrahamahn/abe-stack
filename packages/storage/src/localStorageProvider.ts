@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
-import { join, dirname } from 'node:path';
+import { dirname, join } from 'node:path';
+
+import { normalizeStorageKey } from './utils/normalizeKey';
 
 import type { LocalStorageConfig, StorageProvider, UploadParams } from './types';
 
@@ -8,8 +10,8 @@ export class LocalStorageProvider implements StorageProvider {
   constructor(private readonly config: LocalStorageConfig) {}
 
   private resolveKey(key: string): string {
-    // Prevent path traversal
-    const safeKey = key.replace(/^\//, '').replace(/\.\./g, '');
+    // Prevent path traversal by stripping leading slashes and parent refs
+    const safeKey = normalizeStorageKey(key, true);
     return join(this.config.rootPath, safeKey);
   }
 

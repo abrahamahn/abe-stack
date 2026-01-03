@@ -1,7 +1,7 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
 import '../styles/layouts.css';
 
-export interface TopbarLayoutProps extends ComponentPropsWithoutRef<'div'> {
+export type TopbarLayoutProps = ComponentPropsWithoutRef<'div'> & {
   /**
    * Top navigation bar content
    */
@@ -15,7 +15,7 @@ export interface TopbarLayoutProps extends ComponentPropsWithoutRef<'div'> {
    * @default '64px'
    */
   headerHeight?: string | number;
-}
+};
 
 /**
  * Layout with a fixed top navigation bar and scrollable content.
