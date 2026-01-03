@@ -89,7 +89,20 @@ Change UI frameworks by touching `apps/` only.
 
 ## Quick Start
 
-## First Run in < 5 Minutes (Docker Recommended)
+### Create a New Project
+
+The fastest way to get started:
+
+```bash
+npx create-abe-app my-project
+cd my-project
+pnpm install
+pnpm dev
+```
+
+This scaffolds a new project with your custom package names and a fresh git history.
+
+### First Run in < 5 Minutes (Docker Recommended)
 
 Want to see it running instantly? Use the built-in dev stack:
 

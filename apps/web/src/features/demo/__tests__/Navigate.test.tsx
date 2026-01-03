@@ -12,25 +12,29 @@ vi.mock('../UI', () => ({
   UIPage: (): React.ReactElement => <div data-testid="ui-page">UI Page Content</div>,
 }));
 
-// Mock history context
+// Mock @abe-stack/ui to provide useHistoryNav
 const mockGoBack = vi.fn();
-vi.mock('../../../contexts/HistoryContext', () => ({
-  useHistoryNav: (): {
-    goBack: typeof mockGoBack;
-    canGoBack: boolean;
-    history: string[];
-    index: number;
-    canGoForward: boolean;
-    goForward: ReturnType<typeof vi.fn>;
-  } => ({
-    goBack: mockGoBack,
-    canGoBack: true,
-    history: ['/'],
-    index: 1,
-    canGoForward: false,
-    goForward: vi.fn(),
-  }),
-}));
+vi.mock('@abe-stack/ui', async () => {
+  const actual = await vi.importActual('@abe-stack/ui');
+  return {
+    ...actual,
+    useHistoryNav: (): {
+      goBack: typeof mockGoBack;
+      canGoBack: boolean;
+      history: string[];
+      index: number;
+      canGoForward: boolean;
+      goForward: ReturnType<typeof vi.fn>;
+    } => ({
+      goBack: mockGoBack,
+      canGoBack: true,
+      history: ['/'],
+      index: 1,
+      canGoForward: false,
+      goForward: vi.fn(),
+    }),
+  };
+});
 
 describe('Navigate', () => {
   const renderNavigate = (initialPath = '/features/demo'): ReturnType<typeof render> => {
@@ -52,13 +56,7 @@ describe('Navigate', () => {
       expect(screen.getByRole('button', { name: /back/i })).toBeInTheDocument();
     });
 
-    it('should render the UI button', () => {
-      renderNavigate();
-
-      expect(screen.getByRole('button', { name: /^ui$/i })).toBeInTheDocument();
-    });
-
-    it('should render the UIPage component by default', () => {
+    it('should render the UIPage component', () => {
       renderNavigate();
 
       expect(screen.getByTestId('ui-page')).toBeInTheDocument();
@@ -74,21 +72,10 @@ describe('Navigate', () => {
 
       expect(mockGoBack).toHaveBeenCalled();
     });
-
-    it('should render UI view when UI button is clicked', () => {
-      renderNavigate();
-
-      const uiButton = screen.getByRole('button', { name: /^ui$/i });
-      fireEvent.click(uiButton);
-
-      expect(screen.getByTestId('ui-page')).toBeInTheDocument();
-    });
   });
 
   describe('Button States', () => {
     it('should have Back button that can be disabled', () => {
-      // Note: This test verifies the button exists and has the disabled prop mechanism
-      // The actual disabled state depends on the mocked canGoBack value
       renderNavigate();
 
       const backButton = screen.getByRole('button', { name: /back/i });

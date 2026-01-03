@@ -24,7 +24,7 @@ vi.mock('@abe-stack/shared', () => ({
   tokenStore: mockTokenStore,
 }));
 
-vi.mock('../../../lib/api', () => ({
+vi.mock('../../../api/client', () => ({
   api: mockApi,
 }));
 

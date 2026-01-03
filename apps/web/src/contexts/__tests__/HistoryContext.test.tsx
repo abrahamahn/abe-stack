@@ -1,12 +1,11 @@
 // apps/web/src/contexts/__tests__/HistoryContext.test.tsx
 /** @vitest-environment jsdom */
+import { HistoryProvider, useHistoryNav } from '@abe-stack/ui';
 import '@testing-library/jest-dom/vitest';
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { HistoryProvider, useHistoryNav } from '../HistoryContext';
 
 // Mock useNavigate
 const mockNavigate = vi.fn();

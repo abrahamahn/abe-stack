@@ -10,12 +10,13 @@ import { useAuth } from '../useAuth';
 
 describe('useAuth', () => {
   const mockAuthContext: AuthContextType = {
-    user: { id: '1', email: 'test@example.com', name: 'Test User' },
+    user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'user' },
     isLoading: false,
     isAuthenticated: true,
     login: vi.fn(),
     register: vi.fn(),
     logout: vi.fn(),
+    refreshToken: vi.fn(),
   };
 
   const createWrapper = (
@@ -43,6 +44,7 @@ describe('useAuth', () => {
       id: '1',
       email: 'test@example.com',
       name: 'Test User',
+      role: 'user',
     });
   });
 

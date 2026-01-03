@@ -865,3 +865,93 @@
   - packages/shared: Added `./stores` export path in package.json.
   - packages/ui: Added ProtectedRoute, Toaster, HistoryProvider, useHistoryNav exports.
 - Build: All 641 tests passing ✅
+
+2026-01-03 (Session 21 - Part 1)
+
+- **Architectural Patterns Implementation for apps/web:**
+  - Created `apps/web/src/app/providers.tsx` with consolidated `AppProviders` component.
+    - Wraps QueryClientProvider, AuthProvider, ApiProvider, and HistoryProvider in correct order.
+    - QueryClient created outside component to prevent recreation on re-renders.
+    - Configured with default options (5-minute staleTime, 1 retry).
+  - Updated `apps/web/src/app/root.tsx` to use AppProviders wrapper.
+    - Simplified component structure with single provider wrapper.
+    - Maintains BrowserRouter, routing, ScrollArea, and Toaster at root level.
+  - Updated `apps/web/src/main.tsx` - simplified since QueryClientProvider moved to AppProviders.
+  - Created `apps/web/src/app/__tests__/providers.test.tsx`:
+    - 5 tests covering children rendering, provider wrapping, and correct nesting order.
+  - Updated `apps/web/src/app/__tests__/root.test.tsx`:
+    - Updated mocks to use AppProviders instead of individual providers.
+    - 10 tests for basic rendering and route verification.
+- Build: All 641 tests passing ✅
+
+2026-01-03 (Session 21 - Part 2)
+
+- **ThemeProvider Component for packages/ui:**
+  - Created `packages/ui/src/theme/provider.tsx` with `ThemeProvider` and `useTheme` hook.
+    - Wraps children in `ui-theme` class for styling.
+    - Provides theme context with mode, setMode, cycleMode, isDark, isLight, resolvedTheme.
+    - Uses existing `useThemeMode` hook for localStorage persistence and data-theme attribute.
+    - Configurable storage key via `storageKey` prop.
+  - Updated `packages/ui/src/theme/index.ts` to export ThemeProvider, useTheme, and types.
+  - Created `packages/ui/src/theme/__tests__/provider.test.tsx`:
+    - 21 tests covering rendering, context, cycling, setMode, localStorage persistence, data-theme attribute, error handling, and edge cases.
+- Build: All 662 tests passing ✅
+
+2026-01-03 (Session 21 - Part 3)
+
+- **Complete Auth System with Refresh Tokens and Roles:**
+  - **Database Schema Updates (packages/db/src/schema/users.ts):**
+    - Added `role` field to users table with `user` and `admin` values.
+    - Created `refreshTokens` table for secure token storage (userId, token, expiresAt).
+    - Added `USER_ROLES` constant and `UserRole` type export.
+  - **Shared Contract Updates (packages/shared/src/contracts/index.ts):**
+    - Added `userRoleSchema` and `UserRole` type.
+    - Added `role` field to `userSchema`.
+    - Added `refresh` and `logout` endpoints to `authContract`.
+    - Created `RefreshResponse` and `LogoutResponse` types.
+  - **Server JWT Library Updates (apps/server/src/lib/jwt.ts):**
+    - Access tokens now expire in 15 minutes (was longer).
+    - Added 7-day refresh token support with secure random generation.
+    - Added `createAccessToken`, `createRefreshToken`, `getRefreshTokenExpiry` functions.
+    - Token payload now includes user role.
+  - **Server Route Updates (apps/server/src/routes/index.ts):**
+    - Register/Login: Create and store refresh tokens in database, set HTTP-only cookies.
+    - Refresh: Validate token from cookie, rotate tokens (delete old, create new), return new access token.
+    - Logout: Delete refresh token from database, clear cookie.
+    - Uses `@fastify/cookie` plugin for cookie management.
+  - **Role-Based Middleware (apps/server/src/lib/auth.ts):**
+    - `extractTokenPayload` - extracts JWT from Authorization header.
+    - `requireAuth` - guard that validates token and sets request.user.
+    - `requireRole` - factory for role-based access control.
+    - `isAdmin` - helper to check admin role.
+  - **API Client Updates (packages/api-client/src/client.ts):**
+    - Added `refresh()` and `logout()` methods.
+    - Added `credentials: 'include'` for cookie support in all requests.
+  - **Frontend Auth Updates (apps/web/src/features/auth/AuthContext.tsx):**
+    - User interface now includes `role` field.
+    - Added `refreshToken` function to context.
+    - Auto-refresh interval (13 minutes) when authenticated.
+    - Logout now calls server endpoint to invalidate refresh token.
+- **Tests Updated:**
+  - `useAuth.test.tsx` - Updated mock user with role and refreshToken function.
+- Build: 331 web tests + 624 UI tests + 9 shared tests passing ✅
+
+2026-01-03 (Session 21 - Part 4)
+
+- **DB Seeds + Dev Experience:**
+  - **Seed Script (packages/db/scripts/seed.ts):**
+    - Creates test users: admin@example.com, user@example.com, demo@example.com
+    - All use password: `password123`
+    - Uses bcrypt for secure password hashing
+    - Handles existing users gracefully with `onConflictDoNothing`
+  - **Package Updates (packages/db/package.json):**
+    - Added `db:seed` script: `tsx scripts/seed.ts`
+    - Added devDependencies: bcrypt, @types/bcrypt, tsx
+  - **Environment Documentation (config/.env.example):**
+    - Added DATABASE_URL option for connection string
+    - Added DB pool settings (max connections, timeouts)
+    - Added JWT/auth settings (access/refresh token expiry)
+    - Added Storage section (local/S3 provider configs)
+    - Added external services (Stripe, SendGrid)
+    - Added development tools section
+- Build: All tests passing ✅

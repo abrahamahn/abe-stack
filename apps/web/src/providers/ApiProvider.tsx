@@ -1,10 +1,11 @@
 import { createReactQueryClient } from '@abe-stack/api-client';
 import { tokenStore } from '@abe-stack/shared';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { toastStore } from '../stores/toastStore';
+import { toastStore } from '../features/toast';
+
+import type { ReactElement, ReactNode } from 'react';
 
 type ApiContextValue = Record<string, unknown>;
 
@@ -16,13 +17,16 @@ export const useApi = (): ApiContextValue => {
   return ctx;
 };
 
-type ApiProviderProps = {
-  children: React.ReactNode;
-};
+interface ApiProviderProps {
+  children: ReactNode;
+}
 
-export function ApiProvider({ children }: ApiProviderProps): React.ReactElement {
+/**
+ * ApiProvider creates a configured API client with auth token management.
+ * Must be used within QueryClientProvider (provided by AppProviders).
+ */
+export function ApiProvider({ children }: ApiProviderProps): ReactElement {
   const navigate = useNavigate();
-  const [queryClient] = useState(() => new QueryClient());
 
   const api = useMemo<ApiContextValue>(() => {
     const env = (import.meta as unknown as { env?: { VITE_API_URL?: string } }).env;
@@ -43,9 +47,5 @@ export function ApiProvider({ children }: ApiProviderProps): React.ReactElement 
     }) as ApiContextValue;
   }, [navigate]);
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ApiContext.Provider value={api}>{children}</ApiContext.Provider>
-    </QueryClientProvider>
-  );
+  return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
 }

@@ -1,4 +1,11 @@
-import type { LoginRequest, RegisterRequest, AuthResponse, UserResponse } from '@abe-stack/shared';
+import type {
+  AuthResponse,
+  LoginRequest,
+  LogoutResponse,
+  RefreshResponse,
+  RegisterRequest,
+  UserResponse,
+} from '@abe-stack/shared';
 
 export interface ApiClientConfig {
   baseUrl: string;
@@ -9,6 +16,8 @@ export interface ApiClientConfig {
 export interface ApiClient {
   login: (data: LoginRequest) => Promise<AuthResponse>;
   register: (data: RegisterRequest) => Promise<AuthResponse>;
+  refresh: () => Promise<RefreshResponse>;
+  logout: () => Promise<LogoutResponse>;
   getCurrentUser: () => Promise<UserResponse>;
 }
 
@@ -28,6 +37,7 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     const response = await fetcher(`${baseUrl}${API_PREFIX}${path}`, {
       ...options,
       headers,
+      credentials: 'include', // Include cookies for refresh token
     });
 
     const data = (await response.json().catch(() => ({}))) as { message?: string };
@@ -51,6 +61,18 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
       return request<AuthResponse>('/auth/register', {
         method: 'POST',
         body: JSON.stringify(data),
+      });
+    },
+    async refresh(): Promise<RefreshResponse> {
+      return request<RefreshResponse>('/auth/refresh', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+    },
+    async logout(): Promise<LogoutResponse> {
+      return request<LogoutResponse>('/auth/logout', {
+        method: 'POST',
+        body: JSON.stringify({}),
       });
     },
     async getCurrentUser(): Promise<UserResponse> {
