@@ -1,7 +1,7 @@
 import { forwardRef, type CSSProperties, type ReactNode } from 'react';
 import '../styles/layouts.css';
 
-export interface AppShellProps {
+export type AppShellProps = {
   /**
    * Header content
    */
@@ -52,7 +52,7 @@ export interface AppShellProps {
   asideCollapsed?: boolean;
   className?: string;
   style?: CSSProperties;
-}
+};
 
 /**
  * A responsive app shell layout with header, footer, sidebar, and aside slots.

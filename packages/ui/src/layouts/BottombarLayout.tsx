@@ -1,7 +1,7 @@
 import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
 import '../styles/layouts.css';
 
-export interface BottombarLayoutProps extends ComponentPropsWithoutRef<'div'> {
+export type BottombarLayoutProps = ComponentPropsWithoutRef<'div'> & {
   /**
    * Bottom navigation bar content
    */
@@ -15,7 +15,7 @@ export interface BottombarLayoutProps extends ComponentPropsWithoutRef<'div'> {
    * @default '64px'
    */
   footerHeight?: string | number;
-}
+};
 
 /**
  * Layout with a fixed bottom navigation bar and scrollable content.
