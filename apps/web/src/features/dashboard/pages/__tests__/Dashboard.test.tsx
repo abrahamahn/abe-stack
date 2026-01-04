@@ -33,7 +33,7 @@ const mockUseAuth = vi.fn(() => ({
   logout: mockLogout,
 }));
 
-vi.mock('../../../auth/useAuth', () => ({
+vi.mock('../../../auth', () => ({
   useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
 }));
 
@@ -183,7 +183,7 @@ describe('DashboardPage', () => {
 
       const section = container.querySelector('section');
       expect(section).toBeInTheDocument();
-      expect(section).toHaveStyle({ display: 'flex' });
+      expect(section).toHaveClass('flex-between');
     });
   });
 

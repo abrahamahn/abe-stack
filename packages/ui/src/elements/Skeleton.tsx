@@ -1,4 +1,4 @@
-import { forwardRef, type ComponentPropsWithoutRef } from 'react';
+import { forwardRef, type ComponentPropsWithoutRef, type CSSProperties } from 'react';
 import '../styles/elements.css';
 
 type SkeletonProps = ComponentPropsWithoutRef<'div'> & {
@@ -8,12 +8,24 @@ type SkeletonProps = ComponentPropsWithoutRef<'div'> & {
 };
 
 export const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>((props, ref) => {
-  const { width = '100%', height = '16px', radius = '8px', className = '', style, ...rest } = props;
+  const { width, height, radius, className = '', style, ...rest } = props;
+  const cssVars = {
+    ...(width !== undefined && {
+      '--skeleton-width': typeof width === 'number' ? `${String(width)}px` : width,
+    }),
+    ...(height !== undefined && {
+      '--skeleton-height': typeof height === 'number' ? `${String(height)}px` : height,
+    }),
+    ...(radius !== undefined && {
+      '--skeleton-radius': typeof radius === 'number' ? `${String(radius)}px` : radius,
+    }),
+  } as CSSProperties;
+
   return (
     <div
       ref={ref}
-      className={`ui-skeleton ${className}`.trim()}
-      style={{ width, height, borderRadius: radius, ...style }}
+      className={`skeleton ${className}`.trim()}
+      style={{ ...cssVars, ...style }}
       {...rest}
     />
   );

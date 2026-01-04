@@ -1,8 +1,9 @@
 import { HistoryProvider } from '@abe-stack/ui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter } from 'react-router-dom';
 
-import { AuthProvider } from '../features/auth/AuthContext';
-import { ApiProvider } from '../providers/ApiProvider';
+import { ApiProvider } from '../api';
+import { AuthProvider } from '../features/auth';
 
 import type { ReactElement, ReactNode } from 'react';
 
@@ -24,15 +25,18 @@ interface AppProvidersProps {
  * AppProviders consolidates all application providers into a single wrapper.
  * Order matters: QueryClient must wrap Auth (which uses useQuery),
  * Auth must wrap Api (which may need auth context).
+ * BrowserRouter must wrap ApiProvider (which uses useNavigate).
  */
 export function AppProviders({ children }: AppProvidersProps): ReactElement {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ApiProvider>
-          <HistoryProvider>{children}</HistoryProvider>
-        </ApiProvider>
-      </AuthProvider>
+      <BrowserRouter>
+        <AuthProvider>
+          <ApiProvider>
+            <HistoryProvider>{children}</HistoryProvider>
+          </ApiProvider>
+        </AuthProvider>
+      </BrowserRouter>
     </QueryClientProvider>
   );
 }

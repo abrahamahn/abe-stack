@@ -13,7 +13,7 @@ describe('Text', () => {
     const text = screen.getByText('Body');
     expect(text.tagName).toBe('P');
     expect(text).toHaveAttribute('data-tone', 'default');
-    expect(text).toHaveClass('ui-text');
+    expect(text).toHaveClass('text');
   });
 
   it('supports custom element and tone', () => {

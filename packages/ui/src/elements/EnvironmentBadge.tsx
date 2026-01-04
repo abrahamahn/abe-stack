@@ -39,7 +39,7 @@ export const EnvironmentBadge = forwardRef<HTMLSpanElement, EnvironmentBadgeProp
   return (
     <span
       ref={ref}
-      className={`ui-environment-badge ${className}`.trim()}
+      className={`environment-badge ${className}`.trim()}
       data-environment={environment}
       {...rest}
     >

@@ -13,7 +13,7 @@ describe('Heading', () => {
     const heading = screen.getByRole('heading', { name: 'Title' });
     expect(heading.tagName).toBe('H2');
     expect(heading).toHaveAttribute('data-size', 'lg');
-    expect(heading).toHaveClass('ui-heading');
+    expect(heading).toHaveClass('heading');
   });
 
   it('supports custom element and size', () => {

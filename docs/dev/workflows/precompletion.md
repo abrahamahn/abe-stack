@@ -13,7 +13,7 @@ npx eslint path/to/file.ts path/to/file2.tsx
 
 # Type-check affected package
 pnpm --filter @abe-stack/web type-check    # for apps/web changes
-pnpm --filter abeahn-ui type-check         # for packages/ui changes
+pnpm --filter @abe-stack/ui type-check      # for packages/ui changes
 
 # Test changed files
 pnpm test -- --run path/to/specific.test.tsx
@@ -34,8 +34,8 @@ If any step fails:
 
 ## Package Filter Names
 
-- Apps: `@abe-stack/web`, `@abe-stack/server`, `@abe-stack/desktop`, `@abe-stack/mobile`
-- Packages: `abeahn-ui`, `abeahn-shared`, `abeahn-api-client`, `abeahn-db`, `abeahn-storage`
+- Apps: `@abe-stack/web`, `@abe-stack/server`, `@abe-stack/desktop`
+- Packages: `@abe-stack/ui`, `@abe-stack/shared`, `@abe-stack/api-client`, `@abe-stack/db`, `@abe-stack/storage`
 
 ## Example Workflow
 
@@ -49,7 +49,7 @@ npx prettier --config config/.prettierrc --write packages/ui/src/elements/Button
 npx eslint packages/ui/src/elements/Button.tsx packages/ui/src/elements/__tests__/Button.test.tsx
 
 # 3. Type-check the package
-pnpm --filter abeahn-ui type-check
+pnpm --filter @abe-stack/ui type-check
 
 # 4. Run relevant tests
 pnpm test -- --run packages/ui/src/elements/__tests__/Button.test.tsx

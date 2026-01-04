@@ -5,7 +5,7 @@ type MenuItemProps = ComponentPropsWithoutRef<'button'>;
 
 export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>((props, ref) => {
   const { className = '', type = 'button', ...rest } = props;
-  return <button ref={ref} type={type} className={`ui-menu-item ${className}`.trim()} {...rest} />;
+  return <button ref={ref} type={type} className={`menu-item ${className}`.trim()} {...rest} />;
 });
 
 MenuItem.displayName = 'MenuItem';

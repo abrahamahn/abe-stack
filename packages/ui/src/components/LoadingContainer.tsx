@@ -1,6 +1,5 @@
+import { Spinner } from '../elements/Spinner';
 import { Text } from '../elements/Text';
-
-import { Spinner } from './Spinner';
 
 import type { ComponentPropsWithoutRef, ReactElement } from 'react';
 import '../styles/components.css';
@@ -19,9 +18,9 @@ type LoadingContainerProps = ComponentPropsWithoutRef<'div'> & {
 };
 
 const spinnerSizes = {
-  sm: '16px',
-  md: '24px',
-  lg: '32px',
+  sm: '1rem',
+  md: '1.5rem',
+  lg: '2rem',
 };
 
 /**
@@ -41,7 +40,7 @@ export function LoadingContainer({
   ...rest
 }: LoadingContainerProps): ReactElement {
   return (
-    <div className={`ui-loading-container ${className}`.trim()} {...rest}>
+    <div className={`loading-container ${className}`.trim()} {...rest}>
       <Spinner size={spinnerSizes[size]} />
       {text ? <Text tone="muted">{text}</Text> : null}
     </div>

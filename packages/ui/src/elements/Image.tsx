@@ -88,19 +88,13 @@ export const Image = forwardRef<HTMLImageElement, ImageProps>((props, ref) => {
 
   return (
     <div
-      className={`ui-image-container ${className}`.trim()}
+      className={`image-container ${className}`.trim()}
       style={{
-        position: 'relative',
         aspectRatio: aspectRatio || 'auto',
-        overflow: 'hidden',
         ...style,
       }}
     >
-      {showFallback ? (
-        <div className="ui-image-fallback" style={{ width: '100%', height: '100%' }}>
-          {fallback}
-        </div>
-      ) : null}
+      {showFallback ? <div className="image-fallback">{fallback}</div> : null}
       <img
         ref={ref}
         src={src}
@@ -108,10 +102,8 @@ export const Image = forwardRef<HTMLImageElement, ImageProps>((props, ref) => {
         loading={loading}
         onLoad={handleLoad}
         onError={handleError}
-        className="ui-image"
+        className="image"
         style={{
-          width: '100%',
-          height: '100%',
           objectFit,
           display: showFallback ? 'none' : 'block',
         }}

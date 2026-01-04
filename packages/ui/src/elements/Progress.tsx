@@ -1,4 +1,4 @@
-import { forwardRef, type ComponentPropsWithoutRef } from 'react';
+import { forwardRef, type ComponentPropsWithoutRef, type CSSProperties } from 'react';
 import '../styles/elements.css';
 
 type ProgressProps = ComponentPropsWithoutRef<'div'> & {
@@ -14,7 +14,7 @@ export const Progress = forwardRef<HTMLDivElement, ProgressProps>((props, ref) =
   return (
     <div
       ref={ref}
-      className={`ui-progress ${className}`.trim()}
+      className={`progress ${className}`.trim()}
       style={style}
       role="progressbar"
       aria-valuenow={clamped}
@@ -22,7 +22,10 @@ export const Progress = forwardRef<HTMLDivElement, ProgressProps>((props, ref) =
       aria-valuemax={100}
       {...rest}
     >
-      <div className="ui-progress-bar" style={{ width: `${String(clamped)}%` }} />
+      <div
+        className="progress-bar"
+        style={{ '--progress-value': `${String(clamped)}%` } as CSSProperties}
+      />
     </div>
   );
 });

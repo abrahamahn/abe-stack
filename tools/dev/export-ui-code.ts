@@ -49,7 +49,7 @@ async function main(): Promise<void> {
   } else {
     // Default behavior: export packages/ui and apps/web/src/features/demo
     const uiDir = path.resolve(repoRoot, 'packages', 'ui');
-    const demoDir = path.resolve(repoRoot, 'apps', 'web', 'src', 'demo');
+    const demoDir = path.resolve(repoRoot, 'apps', 'web', 'src', 'features', 'demo');
     await collectFiles(uiDir, files, options);
     await collectFiles(demoDir, files, options);
   }

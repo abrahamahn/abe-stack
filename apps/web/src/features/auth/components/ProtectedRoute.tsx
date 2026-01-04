@@ -1,6 +1,5 @@
 import { ProtectedRoute as ProtectedRouteBase } from '@abe-stack/ui';
-
-import { useAuth } from '../useAuth';
+import { useAuth } from '@auth/hooks';
 
 import type { ReactElement, ReactNode } from 'react';
 

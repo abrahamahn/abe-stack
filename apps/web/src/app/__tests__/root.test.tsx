@@ -3,10 +3,11 @@
 import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 // Mock all page components
-vi.mock('../../pages/Home', () => ({
+vi.mock('../../pages/HomePage', () => ({
   HomePage: (): React.ReactElement => <div data-testid="home-page">Home Page</div>,
 }));
 
@@ -26,19 +27,24 @@ vi.mock('../../features/auth', () => ({
   ),
 }));
 
-// Mock toast feature (Toaster)
-vi.mock('../../features/toast', () => ({
-  Toaster: (): React.ReactElement => <div data-testid="toaster">Toaster</div>,
+// Mock @abe-stack/shared toastStore
+vi.mock('@abe-stack/shared', () => ({
+  toastStore: (): { messages: never[]; dismiss: () => void } => ({
+    messages: [],
+    dismiss: vi.fn(),
+  }),
 }));
 
-// Mock AppProviders to pass through children (avoids needing real QueryClient, Auth, etc.)
+// Mock AppProviders to pass through children with a MemoryRouter (for Routes to work)
 vi.mock('../providers', () => ({
   AppProviders: ({ children }: { children: React.ReactNode }): React.ReactElement => (
-    <div data-testid="app-providers">{children}</div>
+    <MemoryRouter>
+      <div data-testid="app-providers">{children}</div>
+    </MemoryRouter>
   ),
 }));
 
-// Mock @abe-stack/ui ScrollArea
+// Mock @abe-stack/ui ScrollArea and Toaster
 vi.mock('@abe-stack/ui', async () => {
   const actual = await vi.importActual('@abe-stack/ui');
   return {
@@ -46,6 +52,7 @@ vi.mock('@abe-stack/ui', async () => {
     ScrollArea: ({ children }: { children: React.ReactNode }): React.ReactElement => (
       <div>{children}</div>
     ),
+    Toaster: (): React.ReactElement => <div data-testid="toaster">Toaster</div>,
   };
 });
 
@@ -64,17 +71,17 @@ describe('App', () => {
       }).not.toThrow();
     });
 
-    it('should render the ui-theme container', () => {
+    it('should render the theme container', () => {
       const { container } = render(<App />);
 
-      const themeContainer = container.querySelector('.ui-theme');
+      const themeContainer = container.querySelector('.theme');
       expect(themeContainer).toBeInTheDocument();
     });
 
     it('should have full viewport height', () => {
       const { container } = render(<App />);
 
-      const themeContainer = container.querySelector('.ui-theme');
+      const themeContainer = container.querySelector('.theme');
       expect(themeContainer).toHaveStyle({ height: '100vh' });
     });
 

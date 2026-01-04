@@ -33,7 +33,7 @@ describe('Tooltip', () => {
       </Tooltip>,
     );
 
-    const wrapper = screen.getByText('Hover me').closest('.ui-tooltip')!;
+    const wrapper = screen.getByText('Hover me').closest('.tooltip')!;
 
     fireEvent.mouseEnter(wrapper);
     expect(screen.getByText('Tooltip text')).toBeInTheDocument();
@@ -52,10 +52,7 @@ describe('Tooltip', () => {
       </Tooltip>,
     );
 
-    expect(screen.getByText('Text').closest('.ui-tooltip')).toHaveAttribute(
-      'data-placement',
-      'top',
-    );
+    expect(screen.getByText('Text').closest('.tooltip')).toHaveAttribute('data-placement', 'top');
 
     rerender(
       <Tooltip content="Info" placement="bottom">
@@ -63,7 +60,7 @@ describe('Tooltip', () => {
       </Tooltip>,
     );
 
-    expect(screen.getByText('Text').closest('.ui-tooltip')).toHaveAttribute(
+    expect(screen.getByText('Text').closest('.tooltip')).toHaveAttribute(
       'data-placement',
       'bottom',
     );

@@ -11,7 +11,7 @@ describe('Avatar', () => {
     render(<Avatar fallback="AB" data-testid="avatar" />);
 
     const avatar = screen.getByTestId('avatar');
-    expect(avatar).toHaveClass('ui-avatar');
+    expect(avatar).toHaveClass('avatar');
     expect(screen.getByText('AB')).toBeInTheDocument();
     expect(avatar.querySelector('img')).not.toBeInTheDocument();
   });
@@ -31,7 +31,7 @@ describe('Avatar', () => {
     render(<Avatar ref={ref} fallback="X" className="custom" data-testid="avatar" />);
 
     const avatar = screen.getByTestId('avatar');
-    expect(avatar).toHaveClass('ui-avatar');
+    expect(avatar).toHaveClass('avatar');
     expect(avatar).toHaveClass('custom');
     expect(ref.current).toBeInstanceOf(HTMLDivElement);
   });

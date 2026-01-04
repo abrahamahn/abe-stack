@@ -2,7 +2,7 @@
 
 Current stack
 
-- Monorepo: Turborepo + pnpm workspaces; TS project refs; apps (web, server, desktop, mobile) and packages (shared, db, api-client, ui, storage).
+- Monorepo: Turborepo + pnpm workspaces; TS project refs; apps (web, server, desktop) and packages (shared, db, api-client, ui, storage).
 - Tooling: ESLint strict/type-aware, Prettier, simple-git-hooks (pre-commit lint-staged, pre-push lint+type-check), Turbo pipelines.
 - TypeScript config: strict mode, incremental builds, shared base config.
 - Env: Zod-validated server env (database, JWT, storage, etc.), dotenv-flow.

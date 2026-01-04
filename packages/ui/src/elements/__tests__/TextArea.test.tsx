@@ -12,14 +12,14 @@ describe('TextArea', () => {
 
     const textarea = screen.getByPlaceholderText('Enter text');
     expect(textarea.tagName).toBe('TEXTAREA');
-    expect(textarea).toHaveClass('ui-textarea');
+    expect(textarea).toHaveClass('textarea');
   });
 
   it('merges custom className with base class', () => {
     render(<TextArea className="custom" data-testid="ta" />);
 
     const textarea = screen.getByTestId('ta');
-    expect(textarea).toHaveClass('ui-textarea');
+    expect(textarea).toHaveClass('textarea');
     expect(textarea).toHaveClass('custom');
   });
 

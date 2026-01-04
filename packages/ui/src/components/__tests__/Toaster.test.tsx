@@ -7,16 +7,12 @@ import { Toaster } from '../Toaster';
 
 describe('Toaster', () => {
   describe('rendering', () => {
-    it('should render with fixed positioning at top-right by default', () => {
+    it('should render with toaster class and top-right position by default', () => {
       const { container } = render(<Toaster messages={[]} onDismiss={vi.fn()} />);
 
       const wrapper = container.firstChild as HTMLElement;
-      expect(wrapper).toHaveStyle({
-        position: 'fixed',
-        top: '16px',
-        right: '16px',
-        zIndex: '9999',
-      });
+      expect(wrapper).toHaveClass('toaster');
+      expect(wrapper).toHaveAttribute('data-position', 'top-right');
     });
 
     it('should render at top-left position', () => {
@@ -25,11 +21,8 @@ describe('Toaster', () => {
       );
 
       const wrapper = container.firstChild as HTMLElement;
-      expect(wrapper).toHaveStyle({
-        position: 'fixed',
-        top: '16px',
-        left: '16px',
-      });
+      expect(wrapper).toHaveClass('toaster');
+      expect(wrapper).toHaveAttribute('data-position', 'top-left');
     });
 
     it('should render at bottom-right position', () => {
@@ -38,11 +31,8 @@ describe('Toaster', () => {
       );
 
       const wrapper = container.firstChild as HTMLElement;
-      expect(wrapper).toHaveStyle({
-        position: 'fixed',
-        bottom: '16px',
-        right: '16px',
-      });
+      expect(wrapper).toHaveClass('toaster');
+      expect(wrapper).toHaveAttribute('data-position', 'bottom-right');
     });
 
     it('should render at bottom-left position', () => {
@@ -51,11 +41,8 @@ describe('Toaster', () => {
       );
 
       const wrapper = container.firstChild as HTMLElement;
-      expect(wrapper).toHaveStyle({
-        position: 'fixed',
-        bottom: '16px',
-        left: '16px',
-      });
+      expect(wrapper).toHaveClass('toaster');
+      expect(wrapper).toHaveAttribute('data-position', 'bottom-left');
     });
   });
 

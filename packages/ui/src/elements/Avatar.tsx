@@ -11,7 +11,7 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>((props, ref) => {
   const { src, alt, fallback, className = '', ...rest } = props;
 
   return (
-    <div ref={ref} className={`ui-avatar ${className}`.trim()} {...rest}>
+    <div ref={ref} className={`avatar ${className}`.trim()} {...rest}>
       {src ? <img src={src} alt={alt} /> : fallback || null}
     </div>
   );

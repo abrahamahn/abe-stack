@@ -62,10 +62,10 @@ describe('Table', () => {
 
     // Note: Table renders a wrapper div, the table element is inside
     const table = container.querySelector('table');
-    expect(table).toHaveClass('ui-table');
+    expect(table).toHaveClass('table');
     expect(table).toHaveClass('custom-table');
-    expect(container.querySelector('.ui-table-row')).toHaveClass('custom-row');
-    expect(container.querySelector('.ui-table-cell')).toHaveClass('custom-cell');
+    expect(container.querySelector('.table-row')).toHaveClass('custom-row');
+    expect(container.querySelector('.table-cell')).toHaveClass('custom-cell');
   });
 
   it('wraps table in container div', () => {
@@ -79,8 +79,8 @@ describe('Table', () => {
       </Table>,
     );
 
-    expect(container.querySelector('.ui-table-container')).toBeInTheDocument();
-    expect(container.querySelector('.ui-table-container table')).toBeInTheDocument();
+    expect(container.querySelector('.table-container')).toBeInTheDocument();
+    expect(container.querySelector('.table-container table')).toBeInTheDocument();
   });
 
   it('forwards refs to all table elements', () => {
@@ -146,14 +146,14 @@ describe('Table', () => {
       </Table>,
     );
 
-    expect(container.querySelector('.ui-table')).toBeInTheDocument();
-    expect(container.querySelector('.ui-table-caption')).toBeInTheDocument();
-    expect(container.querySelector('.ui-table-header')).toBeInTheDocument();
-    expect(container.querySelector('.ui-table-body')).toBeInTheDocument();
-    expect(container.querySelector('.ui-table-footer')).toBeInTheDocument();
-    expect(container.querySelector('.ui-table-row')).toBeInTheDocument();
-    expect(container.querySelector('.ui-table-head')).toBeInTheDocument();
-    expect(container.querySelector('.ui-table-cell')).toBeInTheDocument();
+    expect(container.querySelector('.table')).toBeInTheDocument();
+    expect(container.querySelector('.table-caption')).toBeInTheDocument();
+    expect(container.querySelector('.table-header')).toBeInTheDocument();
+    expect(container.querySelector('.table-body')).toBeInTheDocument();
+    expect(container.querySelector('.table-footer')).toBeInTheDocument();
+    expect(container.querySelector('.table-row')).toBeInTheDocument();
+    expect(container.querySelector('.table-head')).toBeInTheDocument();
+    expect(container.querySelector('.table-cell')).toBeInTheDocument();
   });
 
   it('supports HTML attributes on all components', () => {

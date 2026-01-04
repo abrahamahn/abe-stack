@@ -42,8 +42,8 @@ pnpm test -- --run path/to/file.test.tsx
 
 ## Package Filter Names
 
-- Apps: `@abe-stack/web`, `@abe-stack/server`, `@abe-stack/desktop`, `@abe-stack/mobile`
-- Packages: `abeahn-ui`, `abeahn-shared`, `abeahn-api-client`, `abeahn-db`, `abeahn-storage`
+- Apps: `@abe-stack/web`, `@abe-stack/server`, `@abe-stack/desktop`
+- Packages: `@abe-stack/ui`, `@abe-stack/shared`, `@abe-stack/api-client`, `@abe-stack/db`, `@abe-stack/storage`
 
 ## TDD Loop (Required)
 

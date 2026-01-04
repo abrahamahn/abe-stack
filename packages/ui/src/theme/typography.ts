@@ -1,11 +1,12 @@
 export const typography = {
   fontFamily: 'system-ui, -apple-system, Segoe UI, sans-serif',
   sizes: {
-    xs: '12px',
-    sm: '14px',
-    md: '16px',
-    lg: '20px',
-    xl: '24px',
+    '2xs': '0.625rem', // 10px
+    xs: '0.75rem', // 12px
+    sm: '0.875rem', // 14px
+    md: '1rem', // 16px
+    lg: '1.25rem', // 20px
+    xl: '1.5rem', // 24px
   },
   weights: {
     regular: 400,
@@ -18,3 +19,5 @@ export const typography = {
     loose: 1.7,
   },
 } as const;
+
+export type Typography = typeof typography;

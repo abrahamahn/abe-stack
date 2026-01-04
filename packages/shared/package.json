@@ -1,5 +1,5 @@
 {
-  "name": "abeahn-shared",
+  "name": "@abe-stack/shared",
   "version": "1.1.0",
   "description": "Shared utilities, types, and constants for abe-stack",
   "main": "dist/index.js",

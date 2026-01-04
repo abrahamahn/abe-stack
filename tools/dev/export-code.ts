@@ -3,7 +3,7 @@ import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const root = path.resolve(__dirname, '..');
+const root = path.resolve(__dirname, '..', '..'); // Go up two levels: tools/dev -> tools -> root
 const outputPath = path.join(root, 'full_code.txt');
 
 const excludedDirs = new Set<string>([
@@ -39,8 +39,7 @@ const excludedFilePatterns: RegExp[] = [
   /^yarn\.lock$/,
 ];
 
-const srcDirs = new Set<string>(['src', '__tests__', 'test', 'tests']);
-const srcCodeExtensions = new Set<string>(['.ts', '.tsx', '.js', '.jsx']);
+const srcCodeExtensions = new Set<string>(['.ts', '.tsx', '.js', '.jsx', '.json', '.yaml', '.yml']);
 
 const alwaysIncludePatterns: RegExp[] = [
   /package\.json$/,
@@ -92,12 +91,9 @@ const shouldExcludeFile = (filename: string): boolean =>
 const shouldAlwaysInclude = (filename: string): boolean =>
   alwaysIncludePatterns.some((pattern) => pattern.test(filename));
 
-const isSourceCodeInSrcDir = (relPath: string): boolean => {
-  const parts = relPath.split(path.sep);
+const isSourceCode = (relPath: string): boolean => {
   const ext = path.extname(relPath);
-  const inSrcDir = parts.some((part) => srcDirs.has(part));
-  const isSourceCode = srcCodeExtensions.has(ext);
-  return inSrcDir && isSourceCode;
+  return srcCodeExtensions.has(ext);
 };
 
 const isStylesheet = (relPath: string): boolean => {
@@ -163,7 +159,7 @@ const shouldExtractContent = (relPath: string): boolean => {
   if (shouldExcludeFile(filename)) return false;
   if (isStylesheet(relPath)) return false;
   if (shouldAlwaysInclude(filename)) return true;
-  if (isSourceCodeInSrcDir(relPath)) return true;
+  if (isSourceCode(relPath)) return true;
 
   return false;
 };
@@ -252,11 +248,11 @@ const run = (): void => {
 
   output += '---\n\n';
 
-  log('Extracting configuration and source files...');
+  log('Extracting code files...');
   const configFiles = allFiles.filter((file) => shouldExtractContent(file));
 
-  output += '## 3. Configuration Files\n\n';
-  output += `Extracted ${String(configFiles.length)} configuration files\n\n`;
+  output += '## 3. Code Files\n\n';
+  output += `Extracted ${String(configFiles.length)} code files\n\n`;
   output += '---\n\n';
 
   const categorizedConfigs = categorizeFiles(configFiles);
@@ -264,7 +260,7 @@ const run = (): void => {
   for (const [category, files] of Object.entries(categorizedConfigs)) {
     if (files.length === 0) continue;
 
-    output += `### ${category.charAt(0).toUpperCase() + category.slice(1)} Configuration\n\n`;
+    output += `### ${category.charAt(0).toUpperCase() + category.slice(1)}\n\n`;
 
     for (const file of files) {
       const fullPath = path.join(root, file);
@@ -299,7 +295,7 @@ const run = (): void => {
   const stats = {
     totalFiles: allFiles.length,
     configFiles: configFiles.length,
-    srcFiles: allFiles.filter((file) => isSourceCodeInSrcDir(file)).length,
+    srcFiles: allFiles.filter((file) => isSourceCode(file)).length,
     categories: Object.entries(categorized).map(([name, files]) => ({
       name,
       count: files.length,
@@ -309,8 +305,8 @@ const run = (): void => {
   output += '## 4. Statistics\n\n';
   output += '```\n';
   output += `Total Files: ${String(stats.totalFiles)}\n`;
-  output += `Configuration Files Extracted: ${String(stats.configFiles)}\n`;
-  output += `Source Files (in src/): ${String(stats.srcFiles)}\n\n`;
+  output += `Code Files Extracted: ${String(stats.configFiles)}\n`;
+  output += `Source Code Files: ${String(stats.srcFiles)}\n\n`;
   output += 'Files by Category:\n';
   for (const category of stats.categories) {
     output += `  ${category.name}: ${String(category.count)}\n`;
@@ -323,7 +319,7 @@ const run = (): void => {
   log(`\n✅ Code snapshot written to ${outputPath}`);
   log(`   Total size: ${(output.length / 1024).toFixed(2)} KB`);
   log(`   Files listed: ${String(stats.totalFiles)}`);
-  log(`   Configs extracted: ${String(stats.configFiles)}`);
+  log(`   Code files extracted: ${String(stats.configFiles)}`);
 };
 
 const isMain = import.meta.url === pathToFileURL(process.argv[1]).href;

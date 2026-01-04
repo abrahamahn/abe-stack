@@ -19,7 +19,6 @@ Use this index to load only what you need.
 
 - Guide & Index (single source of truth): `./AGENTS.md`
 - Codex CLI guide: `.claude/`
-- Gemini CLI guide: `.gemini/GEMINI.md`
 - Developer docs: `dev/`
 - Agent workflows: `agent/`
 - Logs: `log/`
@@ -67,6 +66,10 @@ Use this index to load only what you need.
 - anti-pattern examples: `dev/anti-patterns/appendix-examples.md`
 - examples index: `dev/examples.md`
 - resume session: `agent/session-bridge.md`
+- file organization: `AGENTS.md` (Section 5: File Organization Conventions)
+- path aliases: `AGENTS.md` (Section 5: Available Aliases)
+- barrel exports: `AGENTS.md` (Section 5: Barrel Exports)
+- index.ts convention: `AGENTS.md` (Section 5)
 
 ## Architecture Modules
 

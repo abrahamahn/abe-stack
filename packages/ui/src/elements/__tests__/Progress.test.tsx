@@ -11,7 +11,7 @@ describe('Progress', () => {
     render(<Progress value={50} />);
 
     const progress = screen.getByRole('progressbar');
-    expect(progress).toHaveClass('ui-progress');
+    expect(progress).toHaveClass('progress');
     expect(progress).toHaveAttribute('aria-valuenow', '50');
     expect(progress).toHaveAttribute('aria-valuemin', '0');
     expect(progress).toHaveAttribute('aria-valuemax', '100');
@@ -36,7 +36,7 @@ describe('Progress', () => {
     render(<Progress ref={ref} value={25} className="custom" />);
 
     const progress = screen.getByRole('progressbar');
-    expect(progress).toHaveClass('ui-progress');
+    expect(progress).toHaveClass('progress');
     expect(progress).toHaveClass('custom');
     expect(ref.current).toBeInstanceOf(HTMLDivElement);
   });

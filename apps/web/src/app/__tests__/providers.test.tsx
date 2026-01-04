@@ -17,14 +17,14 @@ vi.mock('@abe-stack/ui', async () => {
 });
 
 // Mock AuthProvider
-vi.mock('../../features/auth/AuthContext', () => ({
+vi.mock('../../features/auth', () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }): React.ReactElement => (
     <div data-testid="auth-provider">{children}</div>
   ),
 }));
 
 // Mock ApiProvider
-vi.mock('../../providers/ApiProvider', () => ({
+vi.mock('../../api', () => ({
   ApiProvider: ({ children }: { children: React.ReactNode }): React.ReactElement => (
     <div data-testid="api-provider">{children}</div>
   ),

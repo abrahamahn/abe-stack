@@ -33,7 +33,7 @@ describe('Alert', () => {
     );
 
     const alert = screen.getByRole('status');
-    expect(alert).toHaveClass('ui-alert');
+    expect(alert).toHaveClass('alert');
     expect(alert).toHaveClass('custom-alert');
     expect(ref.current).toBeInstanceOf(HTMLDivElement);
   });

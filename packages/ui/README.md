@@ -1,6 +1,6 @@
 # @abeahn/ui - Shared UI Package
 
-**Shared React components for web, desktop, and mobile platforms.**
+**Shared React components for web and desktop platforms.**
 
 Write once, use everywhere. This package contains all shared UI components that achieve **80-90% code reuse** across platforms.
 
@@ -62,7 +62,6 @@ By centralizing UI components in this package, we achieve:
 
 - ✅ **Web app** (`apps/web`) - Renders in browser
 - ✅ **Desktop app** (`apps/desktop`) - Renders in Electron/Tauri
-- ✅ **Mobile app** (`apps/mobile`) - Adapts for React Native
 
 ---
 
@@ -75,20 +74,20 @@ By centralizing UI components in this package, we achieve:
 │                      abe-stack Monorepo                         │
 └─────────────────────────────────────────────────────────────────┘
 
-┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
-│  apps/web    │  │apps/desktop  │  │apps/mobile   │  │apps/server   │
-│              │  │              │  │              │  │              │
-│  Web-only    │  │Desktop-only  │  │Mobile-only   │  │Backend API   │
-│  features    │  │features      │  │features      │  │              │
-│              │  │              │  │              │  │              │
-│  ├─ src/     │  │ ├─ electron/ │  │ ├─ android/  │  │ ├─ src/      │
-│  │  ├─ web-  │  │ ├─ native/   │  │ ├─ ios/      │  │ │  ├─adapters│
-│  │  │  only/ │  │ │  (desktop) │  │ └─ native/   │  │ │  ├─ core/  │
-│  │  └─App.tsx│  │ └─App.tsx    │  │    (mobile)  │  │ │  └─modules/│
-└──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────────────┘
-       │                 │                 │
-       │                 │                 │
-       └─────────────────┼─────────────────┘
+┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+│  apps/web    │  │apps/desktop  │  │apps/server   │
+│              │  │              │  │              │
+│  Web-only    │  │Desktop-only  │  │Backend API   │
+│  features    │  │features      │  │              │
+│              │  │              │  │              │
+│  ├─ src/     │  │ ├─ electron/ │  │ ├─ src/      │
+│  │  ├─ web-  │  │ ├─ native/   │  │ │  ├─adapters│
+│  │  │  only/ │  │ │  (desktop) │  │ │  ├─ core/  │
+│  │  └─App.tsx│  │ └─App.tsx    │  │ │  └─modules/│
+└──────┬───────┘  └──────┬───────┘  └──────────────┘
+       │                 │
+       │                 │
+       └────────┬────────┘
                          │
                          ▼
               ┌──────────────────────┐
@@ -143,7 +142,6 @@ packages/ui/src/
 
 - **Desktop**: File system, system tray, native menus → `apps/desktop/src/native/`
 - **Web**: Service workers, web-only APIs → `apps/web/src/web-only/`
-- **Mobile**: Native modules, device APIs → `apps/mobile/src/native/`
 
 **Other:**
 
@@ -191,28 +189,6 @@ function DesktopPage() {
       <h1>Welcome {user.name}</h1>
       <Button onClick={openFile}>Open File (Desktop Only)</Button>
     </Card>
-  );
-}
-```
-
-### In Mobile App
-
-```typescript
-// apps/mobile/src/screens/SomeScreen.tsx
-import { Button, Card } from '@abeahn/ui';
-import { useAuth } from '@abeahn/ui';
-import { View } from 'react-native';
-
-function MobileScreen() {
-  const { user } = useAuth(); // Shared hook
-
-  return (
-    <View>
-      <Card> {/* Shared component, adapted for React Native */}
-        <h1>Welcome {user.name}</h1>
-        <Button>Sign In</Button>
-      </Card>
-    </View>
   );
 }
 ```
@@ -282,29 +258,6 @@ apps/desktop/src/
 └── main.tsx         # Desktop entry point
 ```
 
-### 📱 apps/mobile (10-20% mobile-specific)
-
-**What's unique to mobile:**
-
-- React Native navigation
-- Native modules (Camera, Push, etc.)
-- Mobile gestures
-- Deep linking
-- App state management
-- Platform-specific UI adaptations
-
-**File structure:**
-
-```
-apps/mobile/src/
-├── native/          # Mobile-specific features
-│   ├── hooks/
-│   ├── navigation/
-│   └── modules/
-├── App.tsx         # Imports from @abeahn/ui
-└── index.js        # Mobile entry point
-```
-
 ---
 
 ## Decision Flow: Where Should Code Go?
@@ -329,12 +282,12 @@ apps/mobile/src/
 
 ### Questions to Ask
 
-1. **Will this be used in web, desktop, AND mobile?**
+1. **Will this be used in web AND desktop?**
    - YES → `packages/ui`
    - NO → Continue...
 
 2. **Does it use platform-specific APIs?**
-   - File system, Electron API, React Native modules?
+   - File system, Electron API?
    - YES → `apps/{platform}/src/native/`
    - NO → `packages/ui`
 
@@ -544,7 +497,7 @@ Refactor platform code to shared when patterns emerge.
 - **React Router DOM** (peer dependency)
 - **@abeahn/shared** (workspace dependency for utilities)
 
-Avoid adding platform-specific dependencies (Electron, React Native modules) to this package.
+Avoid adding platform-specific dependencies (Electron modules) to this package.
 
 ---
 
@@ -610,22 +563,6 @@ function PlayerPage() {
 }
 ```
 
-### Mobile Usage
-
-```typescript
-// apps/mobile/src/screens/PlayerScreen.tsx
-import { MusicPlayer } from '@abeahn/ui';
-import { Haptics } from 'react-native-haptic-feedback';
-
-function PlayerScreen() {
-  const handlePlay = () => {
-    Haptics.trigger('impactLight'); // Mobile-specific
-  };
-
-  return <MusicPlayer track={track} onPlay={handlePlay} />;
-}
-```
-
 **Result:** Same `MusicPlayer` component, platform-specific enhancements!
 
 ---
@@ -653,7 +590,6 @@ function PlayerScreen() {
 4. **Add platform-specific features:**
    - Web: `apps/web/src/web-only/`
    - Desktop: `apps/desktop/src/native/`
-   - Mobile: `apps/mobile/src/native/`
 
 ---
 

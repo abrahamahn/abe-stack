@@ -1,17 +1,17 @@
 import { useLocalStorage, useMediaQuery } from '@abe-stack/ui';
 import { useCallback, useEffect, useState } from 'react';
 
-import type { DemoPaneConfig } from '../types';
+import type { DemoPaneConfig } from '@demo/types';
 
 const DEFAULT_PANE_CONFIG: DemoPaneConfig = {
-  top: { visible: true, size: 10 },
+  top: { visible: true, size: 6 },
   left: { visible: true, size: 18 },
   right: { visible: true, size: 25 },
   bottom: { visible: true, size: 8 },
 };
 
 const MOBILE_PANE_CONFIG: DemoPaneConfig = {
-  top: { visible: true, size: 10 },
+  top: { visible: true, size: 6 },
   left: { visible: false, size: 18 },
   right: { visible: false, size: 25 },
   bottom: { visible: true, size: 8 },
@@ -19,7 +19,6 @@ const MOBILE_PANE_CONFIG: DemoPaneConfig = {
 
 interface UseDemoPanesResult {
   paneConfig: DemoPaneConfig;
-  isMobile: boolean;
   togglePane: (pane: keyof DemoPaneConfig) => void;
   handlePaneResize: (pane: keyof DemoPaneConfig, size: number) => void;
   resetLayout: () => void;
@@ -64,7 +63,6 @@ export function useDemoPanes(): UseDemoPanesResult {
 
   return {
     paneConfig,
-    isMobile,
     togglePane,
     handlePaneResize,
     resetLayout,

@@ -19,7 +19,7 @@ npx eslint path/to/file.ts path/to/file2.tsx
 
 # Type-check specific package
 pnpm --filter @abe-stack/web type-check
-pnpm --filter abeahn-ui type-check
+pnpm --filter @abe-stack/ui type-check
 
 # Test specific files
 pnpm test -- --run path/to/specific.test.tsx
@@ -36,8 +36,8 @@ pnpm test -- --run path/to/specific.test.tsx
 
 ## Package Filter Names
 
-- Apps: `@abe-stack/web`, `@abe-stack/server`, `@abe-stack/desktop`, `@abe-stack/mobile`
-- Packages: `abeahn-ui`, `abeahn-shared`, `abeahn-api-client`, `abeahn-db`, `abeahn-storage`
+- Apps: `@abe-stack/web`, `@abe-stack/server`, `@abe-stack/desktop`
+- Packages: `@abe-stack/ui`, `@abe-stack/shared`, `@abe-stack/api-client`, `@abe-stack/db`, `@abe-stack/storage`
 
 ## Build
 

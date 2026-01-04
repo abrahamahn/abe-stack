@@ -68,14 +68,14 @@ describe('ThemeProvider', () => {
       expect(screen.getByText('Content')).toBeInTheDocument();
     });
 
-    it('should apply ui-theme class to wrapper', () => {
+    it('should apply theme class to wrapper', () => {
       const { container } = render(
         <ThemeProvider>
           <div>Content</div>
         </ThemeProvider>,
       );
 
-      expect(container.querySelector('.ui-theme')).toBeInTheDocument();
+      expect(container.querySelector('.theme')).toBeInTheDocument();
     });
 
     it('should set wrapper to full height and width', () => {
@@ -85,7 +85,7 @@ describe('ThemeProvider', () => {
         </ThemeProvider>,
       );
 
-      const wrapper = container.querySelector('.ui-theme');
+      const wrapper = container.querySelector('.theme');
       expect(wrapper).toHaveStyle({ height: '100%', width: '100%' });
     });
   });

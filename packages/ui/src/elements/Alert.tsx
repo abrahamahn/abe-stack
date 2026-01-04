@@ -12,16 +12,10 @@ type AlertProps = ComponentPropsWithoutRef<'div'> & {
 export const Alert = forwardRef<HTMLDivElement, AlertProps>((props, ref) => {
   const { tone = 'info', icon, title, children, className = '', ...rest } = props;
   return (
-    <div
-      ref={ref}
-      className={`ui-alert ${className}`.trim()}
-      data-tone={tone}
-      role="status"
-      {...rest}
-    >
+    <div ref={ref} className={`alert ${className}`.trim()} data-tone={tone} role="status" {...rest}>
       {icon ? <span>{icon}</span> : null}
       <div>
-        {title ? <div style={{ fontWeight: 700, marginBottom: 4 }}>{title}</div> : null}
+        {title ? <div className="alert-title">{title}</div> : null}
         <div>{children}</div>
       </div>
     </div>

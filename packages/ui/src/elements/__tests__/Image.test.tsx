@@ -130,7 +130,7 @@ describe('Image', () => {
       const { container } = render(<Image src="/test.jpg" alt="Test" className="custom-class" />);
 
       const wrapper = container.firstChild as HTMLElement;
-      expect(wrapper).toHaveClass('ui-image-container');
+      expect(wrapper).toHaveClass('image-container');
       expect(wrapper).toHaveClass('custom-class');
     });
 
@@ -147,7 +147,7 @@ describe('Image', () => {
         <Image src="/test.jpg" alt="Test" style={{ border: '1px solid red' }} />,
       );
 
-      const wrapper = container.querySelector('.ui-image-container') as HTMLElement;
+      const wrapper = container.querySelector('.image-container') as HTMLElement;
       expect(wrapper).toBeInTheDocument();
 
       // Check if border style is in the computed style
@@ -173,14 +173,14 @@ describe('Image', () => {
       render(<Image src="/test.jpg" alt="Test" fallback={null} />);
 
       // Should not show fallback
-      const container = document.querySelector('.ui-image-fallback');
+      const container = document.querySelector('.image-fallback');
       expect(container).not.toBeInTheDocument();
     });
 
     it('handles undefined fallback', () => {
       render(<Image src="/test.jpg" alt="Test" fallback={undefined} />);
 
-      const container = document.querySelector('.ui-image-fallback');
+      const container = document.querySelector('.image-fallback');
       expect(container).not.toBeInTheDocument();
     });
 
@@ -426,8 +426,8 @@ describe('Image', () => {
       const { container } = render(<Image src="/test.jpg" alt="Test" className="" />);
 
       const wrapper = container.firstChild as HTMLElement;
-      expect(wrapper).toHaveClass('ui-image-container');
-      expect(wrapper.className).toBe('ui-image-container');
+      expect(wrapper).toHaveClass('image-container');
+      expect(wrapper.className).toBe('image-container');
     });
   });
 
@@ -453,7 +453,7 @@ describe('Image', () => {
 
       const wrapper = container.firstChild as HTMLElement;
       expect(wrapper.tagName).toBe('DIV');
-      expect(wrapper).toHaveClass('ui-image-container');
+      expect(wrapper).toHaveClass('image-container');
     });
 
     it('image is accessible via role', () => {

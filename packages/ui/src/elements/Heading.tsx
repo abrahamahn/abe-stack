@@ -16,7 +16,7 @@ type HeadingProps = ComponentPropsWithoutRef<'h2'> & {
 export const Heading = forwardRef<HTMLElement, HeadingProps>((props, ref): ReactElement => {
   const { as = 'h2', size = 'lg', className, ...rest } = props;
   const Component: ElementType = as;
-  const cls = `ui-heading ${className ?? ''}`.trim();
+  const cls = `heading ${className ?? ''}`.trim();
   return <Component ref={ref} className={cls} data-size={size} {...rest} />;
 });
 

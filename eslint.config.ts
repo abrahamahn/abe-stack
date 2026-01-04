@@ -30,12 +30,11 @@ export default [
       '**/.turbo/**',
       '**/coverage/**',
       '**/babel.config.js',
-      '**/apps/mobile/index.js',
-      '**/apps/mobile/metro.config.js',
       'tools/export-ui-code.js',
       'packages/db/drizzle.config.ts',
       'apps/server/vitest.config.ts',
       'apps/web/e2e/**',
+      'apps/web/vite.config.ts',
       'apps/web/vitest.config.ts',
       'packages/ui/**/__tests__/**',
       'packages/ui/vitest.config.ts',
@@ -70,15 +69,6 @@ export default [
     languageOptions: {
       parserOptions: {
         project: ['./apps/web/tsconfig.json'],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['apps/mobile/**/*.{ts,tsx,cts,mts,js,jsx}'],
-    languageOptions: {
-      parserOptions: {
-        project: ['./apps/mobile/tsconfig.json'],
         tsconfigRootDir,
       },
     },
@@ -248,7 +238,7 @@ export default [
   },
   // Prevent frontend clients from importing server-side code
   {
-    files: ['apps/web/**/*', 'apps/desktop/**/*', 'apps/mobile/**/*'],
+    files: ['apps/web/**/*', 'apps/desktop/**/*'],
     rules: {
       'no-restricted-imports': [
         'error',
@@ -266,7 +256,7 @@ export default [
   },
   // Prevent UI from reaching into DB/infra directly; rely on contracts/API.
   {
-    files: ['apps/web/**/*', 'apps/desktop/**/*', 'apps/mobile/**/*'],
+    files: ['apps/web/**/*', 'apps/desktop/**/*'],
     rules: {
       'no-restricted-imports': [
         'error',

@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 
-import type { DemoPaneConfig } from '../types';
+import type { DemoPaneConfig } from '@demo/types';
 
 export const KEYBOARD_SHORTCUTS = [
   { key: 'L', description: 'Toggle left panel' },

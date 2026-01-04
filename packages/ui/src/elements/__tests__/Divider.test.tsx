@@ -12,14 +12,14 @@ describe('Divider', () => {
 
     const divider = screen.getByRole('separator');
     expect(divider.tagName).toBe('HR');
-    expect(divider).toHaveClass('ui-divider');
+    expect(divider).toHaveClass('divider');
   });
 
   it('merges custom className with base class', () => {
     render(<Divider className="custom-divider" />);
 
     const divider = screen.getByRole('separator');
-    expect(divider).toHaveClass('ui-divider');
+    expect(divider).toHaveClass('divider');
     expect(divider).toHaveClass('custom-divider');
   });
 

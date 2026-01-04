@@ -18,12 +18,12 @@ describe('LoadingContainer', () => {
 
   it('renders spinner', () => {
     render(<LoadingContainer />);
-    expect(document.querySelector('.ui-spinner')).toBeInTheDocument();
+    expect(document.querySelector('.spinner')).toBeInTheDocument();
   });
 
   it('applies className', () => {
     render(<LoadingContainer className="custom-loading" />);
-    const container = document.querySelector('.ui-loading-container');
+    const container = document.querySelector('.loading-container');
     expect(container).toHaveClass('custom-loading');
   });
 

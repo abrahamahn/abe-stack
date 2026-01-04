@@ -120,7 +120,6 @@ function transformProject(config: ProjectConfig): void {
     ['apps/web/package.json', `${packageScope}/web`],
     ['apps/server/package.json', `${packageScope}/server`],
     ['apps/desktop/package.json', `${packageScope}/desktop`],
-    ['apps/mobile/package.json', `${packageScope}/mobile`],
   ];
 
   for (const [file, name] of appMappings) {
@@ -135,7 +134,6 @@ function transformProject(config: ProjectConfig): void {
     'apps/web/package.json',
     'apps/server/package.json',
     'apps/desktop/package.json',
-    'apps/mobile/package.json',
     'turbo.json',
   ];
 

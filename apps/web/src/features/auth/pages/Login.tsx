@@ -1,7 +1,6 @@
 import { Button, Card, Heading, Input, PageContainer, Text, useHistoryNav } from '@abe-stack/ui';
+import { useAuth } from '@auth/hooks';
 import { useState } from 'react';
-
-import { useAuth } from '../useAuth';
 
 import type { ChangeEvent, FormEvent, JSX } from 'react';
 

@@ -22,7 +22,7 @@ export const Kbd = forwardRef<HTMLElement, KbdProps>((props, ref) => {
   const { size = 'md', className = '', children, ...rest } = props;
 
   return (
-    <kbd ref={ref} className={`ui-kbd ${className}`.trim()} data-size={size} {...rest}>
+    <kbd ref={ref} className={`kbd ${className}`.trim()} data-size={size} {...rest}>
       {children}
     </kbd>
   );

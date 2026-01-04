@@ -3,7 +3,6 @@ import { createRoot } from 'react-dom/client';
 
 import '@abe-stack/ui/styles/elements.css';
 import { App } from './app/root';
-import './styles/global.css';
 
 type GetElementById = (elementId: string) => HTMLElement | null;
 

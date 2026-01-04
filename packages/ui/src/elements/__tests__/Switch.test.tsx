@@ -57,7 +57,7 @@ describe('Switch', () => {
     render(<Switch ref={ref} className="custom" />);
 
     const switchElement = screen.getByRole('switch');
-    expect(switchElement).toHaveClass('ui-switch');
+    expect(switchElement).toHaveClass('switch');
     expect(switchElement).toHaveClass('custom');
     expect(ref.current).toBeInstanceOf(HTMLButtonElement);
   });

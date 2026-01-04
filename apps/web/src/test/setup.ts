@@ -1,6 +1,7 @@
+// Test setup file
 import '@testing-library/jest-dom/vitest';
 
-// Mock matchMedia for components that use useMediaQuery
+// Mock window.matchMedia for tests
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: (query: string): MediaQueryList => ({

@@ -26,7 +26,7 @@ export const VersionBadge = forwardRef<HTMLSpanElement, VersionBadgeProps>((prop
   const { version, prefix = 'v', className = '', ...rest } = props;
 
   return (
-    <span ref={ref} className={`ui-version-badge ${className}`.trim()} {...rest}>
+    <span ref={ref} className={`version-badge ${className}`.trim()} {...rest}>
       {prefix}
       {version}
     </span>

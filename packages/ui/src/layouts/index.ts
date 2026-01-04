@@ -1,8 +1,10 @@
-export { Container } from './Container';
-export { AuthLayout } from './AuthLayout';
-export { SidebarLayout } from './SidebarLayout';
-export { StackedLayout } from './StackedLayout';
-export { PageContainer } from './PageContainer';
-export { AppShell } from './AppShell';
-export { TopbarLayout } from './TopbarLayout';
-export { BottombarLayout } from './BottombarLayout';
+// Layouts - Page and section layout components
+
+// Shells - App-level structural layouts
+export * from './shells';
+
+// Containers - Content wrapper layouts
+export * from './containers';
+
+// Layers - Overlay and positioning components
+export * from './layers';

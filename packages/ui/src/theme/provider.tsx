@@ -28,7 +28,7 @@ export type ThemeProviderProps = {
 
 /**
  * ThemeProvider wraps your app to provide theme context and styling.
- * Applies the `ui-theme` class and manages light/dark mode.
+ * Applies the `theme` class and manages light/dark mode.
  *
  * @example
  * ```tsx
@@ -66,7 +66,7 @@ export function ThemeProvider({
 
   return (
     <ThemeContext.Provider value={themeState}>
-      <div className="ui-theme" style={{ height: '100%', width: '100%' }}>
+      <div className="theme" style={{ height: '100%', width: '100%' }}>
         {children}
       </div>
     </ThemeContext.Provider>

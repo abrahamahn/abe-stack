@@ -1,8 +1,8 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
+import { Spinner } from '../elements/Spinner';
 import { Text } from '../elements/Text';
-
-import { Spinner } from './Spinner';
+import '../styles/components.css';
 
 import type { ReactElement, ReactNode } from 'react';
 
@@ -48,7 +48,7 @@ export const ProtectedRoute = ({
 }: ProtectedRouteProps): ReactElement => {
   if (isLoading) {
     return (loadingComponent ?? (
-      <div style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: 8 }}>
+      <div className="loading-container">
         <Spinner />
         <Text>Loading...</Text>
       </div>

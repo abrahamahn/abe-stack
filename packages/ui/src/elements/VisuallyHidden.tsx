@@ -5,7 +5,7 @@ type VisuallyHiddenProps = ComponentPropsWithoutRef<'span'>;
 
 export const VisuallyHidden = forwardRef<HTMLSpanElement, VisuallyHiddenProps>((props, ref) => {
   const { className = '', ...rest } = props;
-  return <span ref={ref} className={`ui-visually-hidden ${className}`.trim()} {...rest} />;
+  return <span ref={ref} className={`visually-hidden ${className}`.trim()} {...rest} />;
 });
 
 VisuallyHidden.displayName = 'VisuallyHidden';

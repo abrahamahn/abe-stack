@@ -7,19 +7,19 @@ import { describe, expect, it } from 'vitest';
 import { VisuallyHidden } from '../VisuallyHidden';
 
 describe('VisuallyHidden', () => {
-  it('renders a span with ui-visually-hidden class', () => {
+  it('renders a span with visually-hidden class', () => {
     render(<VisuallyHidden>Hidden text</VisuallyHidden>);
 
     const span = screen.getByText('Hidden text');
     expect(span.tagName).toBe('SPAN');
-    expect(span).toHaveClass('ui-visually-hidden');
+    expect(span).toHaveClass('visually-hidden');
   });
 
   it('merges custom className with base class', () => {
     render(<VisuallyHidden className="custom">Content</VisuallyHidden>);
 
     const span = screen.getByText('Content');
-    expect(span).toHaveClass('ui-visually-hidden');
+    expect(span).toHaveClass('visually-hidden');
     expect(span).toHaveClass('custom');
   });
 

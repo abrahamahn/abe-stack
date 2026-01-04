@@ -9,7 +9,7 @@ import { ProtectedRoute } from '../ProtectedRoute';
 
 // Mock the useAuth hook
 const mockUseAuth = vi.fn();
-vi.mock('../../useAuth', () => ({
+vi.mock('../../hooks/useAuth', () => ({
   useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
 }));
 
@@ -76,12 +76,9 @@ describe('ProtectedRoute', () => {
         </MemoryRouter>,
       );
 
-      const loadingDiv = container.querySelector('div[style*="padding"]');
-      expect(loadingDiv).toHaveStyle({
-        padding: '24px',
-        display: 'flex',
-        alignItems: 'center',
-      });
+      const loadingDiv = container.querySelector('.loading-container');
+      expect(loadingDiv).toBeInTheDocument();
+      expect(loadingDiv).toHaveClass('loading-container');
     });
   });
 

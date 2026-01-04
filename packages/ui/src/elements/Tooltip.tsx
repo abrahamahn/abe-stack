@@ -35,9 +35,9 @@ export function Tooltip({ content, placement = 'top', children }: TooltipProps):
   };
 
   return (
-    <span className="ui-tooltip" data-placement={placement} onMouseEnter={show} onMouseLeave={hide}>
+    <span className="tooltip" data-placement={placement} onMouseEnter={show} onMouseLeave={hide}>
       {children}
-      {open ? <span className="ui-tooltip-content">{content}</span> : null}
+      {open ? <span className="tooltip-content">{content}</span> : null}
     </span>
   );
 }

@@ -3,17 +3,17 @@ import { describe, expect, it } from 'vitest';
 
 import { spacing } from '../spacing';
 
-const spacingPattern = /^\d+px$/;
+const spacingPattern = /^[\d.]+rem$/;
 
 describe('spacing', () => {
   it('exposes the expected spacing keys', () => {
-    expect(Object.keys(spacing)).toEqual(['xs', 'sm', 'md', 'lg', 'xl']);
+    expect(Object.keys(spacing)).toEqual(['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl']);
   });
 
-  it('uses px values with positive numbers', () => {
+  it('uses rem values with positive numbers', () => {
     Object.values(spacing).forEach((value) => {
       expect(value).toMatch(spacingPattern);
-      expect(Number.parseInt(value.replace('px', ''), 10)).toBeGreaterThan(0);
+      expect(Number.parseFloat(value.replace('rem', ''))).toBeGreaterThan(0);
     });
   });
 });

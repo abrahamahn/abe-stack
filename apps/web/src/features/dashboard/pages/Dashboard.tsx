@@ -1,9 +1,7 @@
 import { Button, Card, Heading, PageContainer, Text } from '@abe-stack/ui';
+import { useAuth, type User } from '@auth';
 import { useNavigate, type NavigateFunction } from 'react-router-dom';
 
-import { useAuth } from '../../auth/useAuth';
-
-import type { User } from '../../auth/AuthContext';
 import type { JSX } from 'react';
 
 export function DashboardPage(): JSX.Element {
@@ -17,7 +15,7 @@ export function DashboardPage(): JSX.Element {
 
   return (
     <PageContainer>
-      <section style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <section className="flex-between">
         <Heading as="h1" size="xl">
           Dashboard
         </Heading>
@@ -31,10 +29,10 @@ export function DashboardPage(): JSX.Element {
       </section>
 
       <Card>
-        <Heading as="h2" size="md" style={{ marginBottom: 8 }}>
+        <Heading as="h2" size="md" className="mb-2">
           Your Profile
         </Heading>
-        <div style={{ display: 'grid', gap: 6 }}>
+        <div className="grid gap-2">
           <Text>
             <strong>Email:</strong> {user?.email}
           </Text>
@@ -48,7 +46,7 @@ export function DashboardPage(): JSX.Element {
       </Card>
 
       <Card>
-        <Heading as="h3" size="sm" style={{ marginBottom: 4 }}>
+        <Heading as="h3" size="sm" className="mb-1">
           Welcome to your dashboard!
         </Heading>
         <Text tone="muted">

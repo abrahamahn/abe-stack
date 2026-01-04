@@ -3,17 +3,17 @@ import { describe, expect, it } from 'vitest';
 
 import { typography } from '../typography';
 
-const sizePattern = /^\d+px$/;
+const sizePattern = /^[\d.]+rem$/;
 
 describe('typography', () => {
   it('includes a system font fallback', () => {
     expect(typography.fontFamily).toContain('system-ui');
   });
 
-  it('uses px font sizes', () => {
+  it('uses rem font sizes', () => {
     Object.values(typography.sizes).forEach((value) => {
       expect(value).toMatch(sizePattern);
-      expect(Number.parseInt(value.replace('px', ''), 10)).toBeGreaterThan(0);
+      expect(Number.parseFloat(value.replace('rem', ''))).toBeGreaterThan(0);
     });
   });
 

@@ -26,14 +26,14 @@ export const Switch = forwardRef<HTMLButtonElement, SwitchProps>((props, ref) =>
       type={type}
       role="switch"
       aria-checked={isChecked}
-      className={`ui-switch ${className}`.trim()}
+      className={`switch ${className}`.trim()}
       data-checked={isChecked}
       onClick={() => {
         setChecked(!isChecked);
       }}
       {...rest}
     >
-      <span className="ui-switch-thumb" />
+      <span className="switch-thumb" />
     </button>
   );
 });

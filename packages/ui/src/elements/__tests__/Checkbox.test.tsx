@@ -56,8 +56,8 @@ describe('Checkbox', () => {
     const ref = { current: null };
     render(<Checkbox ref={ref} className="custom" />);
 
-    const label = document.querySelector('.ui-checkbox');
-    expect(label).toHaveClass('ui-checkbox');
+    const label = document.querySelector('.checkbox');
+    expect(label).toHaveClass('checkbox');
     expect(label).toHaveClass('custom');
     expect(ref.current).toBeInstanceOf(HTMLInputElement);
   });
@@ -66,7 +66,7 @@ describe('Checkbox', () => {
     const user = userEvent.setup();
     render(<Checkbox />);
 
-    const indicator = document.querySelector('.ui-checkbox-box');
+    const indicator = document.querySelector('.checkbox-box');
     expect(indicator).toHaveAttribute('data-checked', 'false');
 
     await user.click(screen.getByRole('checkbox'));

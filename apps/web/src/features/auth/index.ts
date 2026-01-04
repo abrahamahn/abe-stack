@@ -1,5 +1,5 @@
 // Auth feature - authentication and authorization
 export { ProtectedRoute } from './components';
-export { AuthProvider } from './AuthContext';
-export { useAuth } from './useAuth';
+export { AuthContext, AuthProvider, type AuthContextType, type User } from './contexts';
+export { useAuth } from './hooks';
 export { LoginPage } from './pages';

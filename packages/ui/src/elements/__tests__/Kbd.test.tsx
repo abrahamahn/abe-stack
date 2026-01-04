@@ -10,7 +10,7 @@ describe('Kbd', () => {
     render(<Kbd>Ctrl</Kbd>);
     const kbd = screen.getByText('Ctrl');
     expect(kbd).toBeInTheDocument();
-    expect(kbd).toHaveClass('ui-kbd');
+    expect(kbd).toHaveClass('kbd');
     expect(kbd).toHaveAttribute('data-size', 'md');
   });
 
@@ -23,7 +23,7 @@ describe('Kbd', () => {
   it('forwards className', () => {
     render(<Kbd className="custom-kbd">Enter</Kbd>);
     const kbd = screen.getByText('Enter');
-    expect(kbd).toHaveClass('ui-kbd');
+    expect(kbd).toHaveClass('kbd');
     expect(kbd).toHaveClass('custom-kbd');
   });
 

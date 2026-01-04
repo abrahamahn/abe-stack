@@ -7,8 +7,7 @@ abe-stack/
 ├── apps/
 │   ├── web/
 │   ├── server/
-│   ├── desktop/
-│   └── mobile/
+│   └── desktop/
 ├── packages/
 │   ├── shared/
 │   ├── ui/

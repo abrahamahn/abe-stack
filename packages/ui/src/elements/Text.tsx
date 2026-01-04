@@ -16,7 +16,7 @@ type TextProps = ComponentPropsWithoutRef<'p'> & {
 export const Text = forwardRef<HTMLElement, TextProps>((props, ref): ReactElement => {
   const { as, tone = 'default', className, ...rest } = props;
   const Component: ElementType = as ?? 'p';
-  const cls = `ui-text ${className ?? ''}`.trim();
+  const cls = `text ${className ?? ''}`.trim();
   return <Component ref={ref} className={cls} data-tone={tone} {...rest} />;
 });
 

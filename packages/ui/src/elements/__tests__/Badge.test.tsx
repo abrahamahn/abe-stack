@@ -13,7 +13,7 @@ describe('Badge', () => {
     const badge = screen.getByText('New');
     expect(badge.tagName).toBe('SPAN');
     expect(badge).toHaveAttribute('data-tone', 'info');
-    expect(badge).toHaveClass('ui-badge');
+    expect(badge).toHaveClass('badge');
   });
 
   it('supports custom element with tone', () => {

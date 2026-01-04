@@ -19,7 +19,7 @@ const mockUseAuth = vi.fn(() => ({
   logout: vi.fn(),
 }));
 
-vi.mock('../../useAuth', () => ({
+vi.mock('../../hooks/useAuth', () => ({
   useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
 }));
 

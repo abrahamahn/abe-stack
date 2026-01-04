@@ -12,7 +12,7 @@ describe('MenuItem', () => {
 
     const button = screen.getByRole('button', { name: 'Item' });
     expect(button).toHaveAttribute('type', 'button');
-    expect(button).toHaveClass('ui-menu-item');
+    expect(button).toHaveClass('menu-item');
   });
 
   it('respects custom type and merges className', () => {
@@ -24,7 +24,7 @@ describe('MenuItem', () => {
 
     const button = screen.getByRole('button', { name: 'Submit' });
     expect(button).toHaveAttribute('type', 'submit');
-    expect(button).toHaveClass('ui-menu-item');
+    expect(button).toHaveClass('menu-item');
     expect(button).toHaveClass('custom-item');
   });
 

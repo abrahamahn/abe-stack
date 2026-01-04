@@ -5,7 +5,7 @@ type TextAreaProps = ComponentPropsWithoutRef<'textarea'>;
 
 export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>((props, ref) => {
   const { className = '', ...rest } = props;
-  return <textarea ref={ref} className={`ui-textarea ${className}`.trim()} {...rest} />;
+  return <textarea ref={ref} className={`textarea ${className}`.trim()} {...rest} />;
 });
 
 TextArea.displayName = 'TextArea';
