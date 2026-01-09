@@ -1,4 +1,5 @@
-import { Container } from '../containers/Container';
+// packages/ui/src/layouts/containers/AuthLayout.tsx
+import { Container } from './Container';
 import '../../styles/layouts.css';
 
 import type { ReactElement, ReactNode } from 'react';

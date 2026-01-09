@@ -1,3 +1,4 @@
+// tools/dev/export-ui-code.ts
 import { promises as fs, type Dirent } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';

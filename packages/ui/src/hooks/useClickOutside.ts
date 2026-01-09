@@ -1,3 +1,4 @@
+// packages/ui/src/hooks/useClickOutside.ts
 import { useEffect } from 'react';
 
 import type React from 'react';

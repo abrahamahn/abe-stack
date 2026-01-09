@@ -1,3 +1,4 @@
+// packages/api-client/src/react-query.ts
 import { addAuthHeader, apiContract } from '@abe-stack/shared';
 import { initQueryClient } from '@ts-rest/react-query';
 

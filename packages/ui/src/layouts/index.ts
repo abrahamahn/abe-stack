@@ -1,3 +1,4 @@
+// packages/ui/src/layouts/index.ts
 // Layouts - Page and section layout components
 
 // Shells - App-level structural layouts

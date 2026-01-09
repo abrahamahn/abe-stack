@@ -1,3 +1,4 @@
+// apps/web/src/app/providers.tsx
 import { HistoryProvider } from '@abe-stack/ui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';

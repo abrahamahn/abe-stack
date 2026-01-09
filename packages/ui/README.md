@@ -25,7 +25,7 @@ Write once, use everywhere. This package contains all shared UI components that 
 
 **📚 [View Complete Component Documentation](./docs/README.md)**
 
-Comprehensive documentation for all 46 components including:
+Comprehensive documentation for all 57 components including:
 
 - Detailed usage examples (basic to advanced)
 - Complete props reference with TypeScript types
@@ -36,9 +36,10 @@ Comprehensive documentation for all 46 components including:
 
 **Quick links:**
 
-- [Components](./docs/README.md#components) - Core UI components (8 components)
-- [elements](./docs/README.md#elements) - Low-level elements (32 components)
-- [Layouts](./docs/README.md#layouts) - Layout components (6 layouts)
+- [Components](./docs/README.md#components) - Stateful multi-part components (16)
+- [Elements](./docs/README.md#elements) - Low-level primitive elements (24)
+- [Layouts](./docs/README.md#layouts) - Layout components (14)
+- [Hooks](./docs/README.md#hooks) - React hooks (13)
 
 ---
 
@@ -115,11 +116,16 @@ By centralizing UI components in this package, we achieve:
 
 ```
 packages/ui/src/
-├── components/       # Base UI components (Button, Input, Card, etc.)
-├── features/         # Feature modules (auth, media, player, etc.)
-├── layouts/          # Page layouts and templates
+├── components/       # Stateful multi-part components (Accordion, Dialog, Tabs, etc.)
+├── elements/         # Low-level primitive elements (Button, Input, Badge, etc.)
 ├── hooks/            # Shared React hooks
-├── contexts/         # React contexts for state management
+├── layouts/          # Page layouts and templates
+│   ├── containers/   # Content wrapper layouts (Container, AuthLayout)
+│   ├── layers/       # Overlay components (Modal, Overlay, ScrollArea)
+│   └── shells/       # App-level layouts (AppShell, Topbar, Sidebar)
+├── styles/           # CSS architecture (theme, elements, components, layouts)
+├── theme/            # Theme configuration (colors, spacing, typography)
+├── utils/            # Utility functions
 └── index.ts          # Barrel export for easy imports
 ```
 

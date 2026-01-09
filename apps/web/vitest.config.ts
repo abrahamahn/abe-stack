@@ -16,6 +16,7 @@ export default mergeConfig(
       globals: true,
       passWithNoTests: true,
       setupFiles: ['./src/test/setup.ts'],
+      exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**', '**/*.spec.ts', '**/*.e2e.ts'],
     },
     resolve: {
       alias: {

@@ -1,3 +1,4 @@
+// apps/server/src/routes/index.ts
 import { refreshTokens, users } from '@abe-stack/db';
 import { apiContract } from '@abe-stack/shared';
 import { initServer } from '@ts-rest/fastify';
@@ -10,7 +11,7 @@ import {
   REFRESH_TOKEN_EXPIRY_DAYS,
   verifyToken,
 } from '../lib/jwt';
-import { comparePassword, hashPassword } from '../lib/password';
+import { hashPassword, verifyPassword } from '../lib/password';
 
 import type {
   AuthResponse,
@@ -148,7 +149,7 @@ async function handleLogin(
       return { status: 401, body: { message: 'Invalid email or password' } };
     }
 
-    const isValid = await comparePassword(body.password, user.passwordHash);
+    const isValid = await verifyPassword(body.password, user.passwordHash);
 
     if (!isValid) {
       return { status: 401, body: { message: 'Invalid email or password' } };

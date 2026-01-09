@@ -1,3 +1,4 @@
+// packages/ui/src/hooks/index.ts
 export { useMediaQuery } from './useMediaQuery';
 export { useDisclosure } from './useDisclosure';
 export { useKeyboardShortcuts } from './useKeyboardShortcuts';

@@ -1,30 +1,21 @@
 // apps/web/src/features/demo/catalog/elementCatalog.tsx
 import {
-  Accordion,
   Alert,
   Avatar,
+  Badge,
+  Box,
   Button,
-  Card,
   Checkbox,
-  Dialog,
+  CloseButton,
   Divider,
-  Dropdown,
+  EnvironmentBadge,
   Heading,
-  Image,
+  Input,
+  Kbd,
   MenuItem,
-  Modal,
-  Overlay,
-  Pagination,
-  Popover,
   Progress,
-  Radio,
-  RadioGroup,
-  ResizablePanel,
-  ResizablePanelGroup,
-  ScrollArea,
-  Select,
   Skeleton,
-  Slider,
+  Spinner,
   Switch,
   Table,
   TableBody,
@@ -32,45 +23,22 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  Tabs,
   Text,
   TextArea,
-  Toast,
+  Toaster,
   Tooltip,
+  VersionBadge,
   VisuallyHidden,
 } from '@abe-stack/ui';
-import React, { type ReactElement } from 'react';
 
 import type { ComponentDemo } from '../types';
 
 export const elementCatalog: Record<string, ComponentDemo> = {
-  accordion: {
-    id: 'accordion',
-    name: 'Accordion',
-    category: 'elements',
-    description: 'Expandable accordion component',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Basic accordion with items',
-        code: '<Accordion items={[...]} />',
-        render: () => (
-          <Accordion
-            items={[
-              { id: '1', title: 'Section 1', content: 'Content for section 1' },
-              { id: '2', title: 'Section 2', content: 'Content for section 2' },
-              { id: '3', title: 'Section 3', content: 'Content for section 3' },
-            ]}
-          />
-        ),
-      },
-    ],
-  },
   alert: {
     id: 'alert',
     name: 'Alert',
     category: 'elements',
-    description: 'Alert message component',
+    description: 'Alert message component for feedback',
     variants: [
       {
         name: 'Info',
@@ -91,8 +59,8 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         render: () => <Alert tone="warning">Warning message</Alert>,
       },
       {
-        name: 'Error',
-        description: 'Error alert',
+        name: 'Danger',
+        description: 'Danger alert',
         code: '<Alert tone="danger">Error message</Alert>',
         render: () => <Alert tone="danger">Error message</Alert>,
       },
@@ -102,7 +70,7 @@ export const elementCatalog: Record<string, ComponentDemo> = {
     id: 'avatar',
     name: 'Avatar',
     category: 'elements',
-    description: 'User avatar component',
+    description: 'User avatar with image or initials fallback',
     variants: [
       {
         name: 'With Initials',
@@ -116,39 +84,111 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         code: '<Avatar src="https://via.placeholder.com/40" alt="User" />',
         render: () => <Avatar src="https://via.placeholder.com/40" alt="User" />,
       },
+    ],
+  },
+  badge: {
+    id: 'badge',
+    name: 'Badge',
+    category: 'elements',
+    description: 'Small badge component for labels and counts',
+    variants: [
       {
-        name: 'With Custom Fallback',
-        description: 'Avatar with custom fallback',
-        code: '<Avatar fallback="AB" />',
-        render: () => <Avatar fallback="AB" />,
+        name: 'Default',
+        description: 'Default badge',
+        code: '<Badge>Default</Badge>',
+        render: () => <Badge>Default</Badge>,
+      },
+      {
+        name: 'Success',
+        description: 'Success tone badge',
+        code: '<Badge tone="success">Success</Badge>',
+        render: () => <Badge tone="success">Success</Badge>,
+      },
+      {
+        name: 'Danger',
+        description: 'Danger tone badge',
+        code: '<Badge tone="danger">Danger</Badge>',
+        render: () => <Badge tone="danger">Danger</Badge>,
+      },
+      {
+        name: 'Warning',
+        description: 'Warning tone badge',
+        code: '<Badge tone="warning">Warning</Badge>',
+        render: () => <Badge tone="warning">Warning</Badge>,
       },
     ],
   },
-  card: {
-    id: 'card',
-    name: 'Card',
+  box: {
+    id: 'box',
+    name: 'Box',
     category: 'elements',
-    description: 'Structured card with header, body, and footer slots',
+    description: 'Generic flex container with padding and direction controls',
     variants: [
       {
-        name: 'Full Card',
-        description: 'Card with all sections',
-        code: '<Card><Card.Header>...</Card.Header>...</Card>',
+        name: 'Column',
+        description: 'Vertical layout',
+        code: '<Box padding="16px">...</Box>',
         render: () => (
-          <Card style={{ width: '300px' }}>
-            <Card.Header>
-              <Heading as="h4" size="sm">
-                Header
-              </Heading>
-            </Card.Header>
-            <Card.Body>
-              <Text>Main body content goes here.</Text>
-            </Card.Body>
-            <Card.Footer>
-              <Button size="small">Action</Button>
-            </Card.Footer>
-          </Card>
+          <Box padding="16px" style={{ gap: '8px', border: '1px dashed #ccc' }}>
+            <Button>Item 1</Button>
+            <Button>Item 2</Button>
+          </Box>
         ),
+      },
+      {
+        name: 'Row',
+        description: 'Horizontal layout',
+        code: '<Box flexDirection="row" padding="16px">...</Box>',
+        render: () => (
+          <Box flexDirection="row" padding="16px" style={{ gap: '8px', border: '1px dashed #ccc' }}>
+            <Button>Item 1</Button>
+            <Button>Item 2</Button>
+          </Box>
+        ),
+      },
+    ],
+  },
+  button: {
+    id: 'button',
+    name: 'Button',
+    category: 'elements',
+    description: 'Interactive button component with variants and sizes',
+    variants: [
+      {
+        name: 'Primary',
+        description: 'Default primary button',
+        code: '<Button>Primary Button</Button>',
+        render: () => <Button>Primary Button</Button>,
+      },
+      {
+        name: 'Secondary',
+        description: 'Secondary button variant',
+        code: '<Button variant="secondary">Secondary</Button>',
+        render: () => <Button variant="secondary">Secondary Button</Button>,
+      },
+      {
+        name: 'Text',
+        description: 'Text button variant',
+        code: '<Button variant="text">Text Button</Button>',
+        render: () => <Button variant="text">Text Button</Button>,
+      },
+      {
+        name: 'Small',
+        description: 'Small size button',
+        code: '<Button size="small">Small</Button>',
+        render: () => <Button size="small">Small Button</Button>,
+      },
+      {
+        name: 'Large',
+        description: 'Large size button',
+        code: '<Button size="large">Large</Button>',
+        render: () => <Button size="large">Large Button</Button>,
+      },
+      {
+        name: 'Disabled',
+        description: 'Disabled state',
+        code: '<Button disabled>Disabled</Button>',
+        render: () => <Button disabled>Disabled Button</Button>,
       },
     ],
   },
@@ -178,6 +218,20 @@ export const elementCatalog: Record<string, ComponentDemo> = {
       },
     ],
   },
+  closeButton: {
+    id: 'closeButton',
+    name: 'CloseButton',
+    category: 'elements',
+    description: 'Close button with X icon',
+    variants: [
+      {
+        name: 'Default',
+        description: 'Default close button',
+        code: '<CloseButton onClick={() => {}} />',
+        render: () => <CloseButton onClick={() => {}} aria-label="Close" />,
+      },
+    ],
+  },
   divider: {
     id: 'divider',
     name: 'Divider',
@@ -190,41 +244,31 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         code: '<Divider />',
         render: () => <Divider />,
       },
-      {
-        name: 'With Custom Style',
-        description: 'Divider with custom styling',
-        code: '<Divider style={{ margin: "20px 0" }} />',
-        render: () => <Divider style={{ margin: '20px 0' }} />,
-      },
     ],
   },
-  dropdown: {
-    id: 'dropdown',
-    name: 'Dropdown',
+  environmentBadge: {
+    id: 'environmentBadge',
+    name: 'EnvironmentBadge',
     category: 'elements',
-    description: 'Dropdown menu component',
+    description: 'Badge showing current environment (dev, staging, prod)',
     variants: [
       {
-        name: 'Basic',
-        description: 'Basic dropdown',
-        code: '<Dropdown trigger={<Button>Menu</Button>}>...</Dropdown>',
-        render: () => (
-          <Dropdown trigger={<Button>Open Menu</Button>}>
-            {(close: () => void) => (
-              <div style={{ padding: '8px', display: 'grid', gap: '4px' }}>
-                <Button variant="text" onClick={close}>
-                  Item 1
-                </Button>
-                <Button variant="text" onClick={close}>
-                  Item 2
-                </Button>
-                <Button variant="text" onClick={close}>
-                  Item 3
-                </Button>
-              </div>
-            )}
-          </Dropdown>
-        ),
+        name: 'Development',
+        description: 'Development environment',
+        code: '<EnvironmentBadge environment="development" />',
+        render: () => <EnvironmentBadge environment="development" />,
+      },
+      {
+        name: 'Staging',
+        description: 'Staging environment',
+        code: '<EnvironmentBadge environment="staging" />',
+        render: () => <EnvironmentBadge environment="staging" />,
+      },
+      {
+        name: 'Production',
+        description: 'Production environment',
+        code: '<EnvironmentBadge environment="production" />',
+        render: () => <EnvironmentBadge environment="production" />,
       },
     ],
   },
@@ -254,6 +298,58 @@ export const elementCatalog: Record<string, ComponentDemo> = {
       },
     ],
   },
+  input: {
+    id: 'input',
+    name: 'Input',
+    category: 'elements',
+    description: 'Text input field component',
+    variants: [
+      {
+        name: 'Basic',
+        description: 'Basic text input',
+        code: '<Input placeholder="Enter text" />',
+        render: () => <Input placeholder="Enter text" />,
+      },
+      {
+        name: 'Email',
+        description: 'Email input',
+        code: '<Input type="email" placeholder="Email" />',
+        render: () => <Input type="email" placeholder="Email" />,
+      },
+      {
+        name: 'Disabled',
+        description: 'Disabled input',
+        code: '<Input disabled placeholder="Disabled" />',
+        render: () => <Input disabled placeholder="Disabled" />,
+      },
+    ],
+  },
+  kbd: {
+    id: 'kbd',
+    name: 'Kbd',
+    category: 'elements',
+    description: 'Keyboard key indicator',
+    variants: [
+      {
+        name: 'Single Key',
+        description: 'Single keyboard key',
+        code: '<Kbd>⌘</Kbd>',
+        render: () => <Kbd>⌘</Kbd>,
+      },
+      {
+        name: 'Shortcut',
+        description: 'Keyboard shortcut',
+        code: '<><Kbd>⌘</Kbd> + <Kbd>K</Kbd></>',
+        render: () => (
+          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Kbd>⌘</Kbd>
+            <span>+</span>
+            <Kbd>K</Kbd>
+          </span>
+        ),
+      },
+    ],
+  },
   menuItem: {
     id: 'menuItem',
     name: 'MenuItem',
@@ -269,114 +365,6 @@ export const elementCatalog: Record<string, ComponentDemo> = {
             <MenuItem>Menu Item 1</MenuItem>
             <MenuItem>Menu Item 2</MenuItem>
           </div>
-        ),
-      },
-    ],
-  },
-  modal: {
-    id: 'modal',
-    name: 'Modal',
-    category: 'elements',
-    description: 'Modal dialog component',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Basic modal',
-        code: '<Modal.Root open={open} onClose={onClose}>...</Modal.Root>',
-        render: (): ReactElement => {
-          const [open, setOpen] = React.useState(false);
-          return (
-            <>
-              <Button
-                onClick={() => {
-                  setOpen(true);
-                }}
-              >
-                Open Modal
-              </Button>
-              <Modal.Root
-                open={open}
-                onClose={() => {
-                  setOpen(false);
-                }}
-              >
-                <div style={{ padding: '24px' }}>
-                  <Modal.Title>Modal Title</Modal.Title>
-                  <Text>Modal content goes here</Text>
-                  <Modal.Close>
-                    <Button style={{ marginTop: '16px' }}>Close</Button>
-                  </Modal.Close>
-                </div>
-              </Modal.Root>
-            </>
-          );
-        },
-      },
-    ],
-  },
-  overlay: {
-    id: 'overlay',
-    name: 'Overlay',
-    category: 'elements',
-    description: 'Overlay backdrop component',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Basic overlay',
-        code: '<Overlay open={true} />',
-        render: (): ReactElement => {
-          const [open, setOpen] = React.useState(false);
-          return (
-            <>
-              <Button
-                onClick={() => {
-                  setOpen(!open);
-                }}
-              >
-                Toggle Overlay
-              </Button>
-              <Overlay
-                open={open}
-                onClick={() => {
-                  setOpen(false);
-                }}
-              />
-            </>
-          );
-        },
-      },
-    ],
-  },
-  pagination: {
-    id: 'pagination',
-    name: 'Pagination',
-    category: 'elements',
-    description: 'Pagination component',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Basic pagination',
-        code: '<Pagination value={1} totalPages={10} onChange={() => {}} />',
-        render: () => <Pagination value={1} totalPages={10} onChange={() => {}} />,
-      },
-    ],
-  },
-  popover: {
-    id: 'popover',
-    name: 'Popover',
-    category: 'elements',
-    description: 'Popover component',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Basic popover',
-        code: '<Popover trigger={<Button>Click</Button>}>Content</Popover>',
-        render: () => (
-          <Popover trigger={<Button>Open Popover</Button>}>
-            <div style={{ padding: '12px' }}>
-              <Text>Popover content here</Text>
-            </div>
-          </Popover>
         ),
       },
     ],
@@ -400,86 +388,10 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         render: () => <Progress value={50} />,
       },
       {
-        name: '75%',
-        description: 'Progress at 75%',
-        code: '<Progress value={75} />',
-        render: () => <Progress value={75} />,
-      },
-      {
         name: '100%',
         description: 'Progress at 100%',
         code: '<Progress value={100} />',
         render: () => <Progress value={100} />,
-      },
-    ],
-  },
-  radio: {
-    id: 'radio',
-    name: 'Radio',
-    category: 'elements',
-    description: 'Radio button component',
-    variants: [
-      {
-        name: 'Unchecked',
-        description: 'Unchecked radio',
-        code: '<Radio name="radio" label="Option" onChange={() => {}} />',
-        render: () => <Radio name="demo-radio" label="Unchecked" onChange={() => {}} />,
-      },
-      {
-        name: 'Checked',
-        description: 'Checked radio',
-        code: '<Radio checked name="radio" label="Option" onChange={() => {}} />',
-        render: () => <Radio checked name="demo-radio-2" label="Checked" onChange={() => {}} />,
-      },
-    ],
-  },
-  radioGroup: {
-    id: 'radioGroup',
-    name: 'RadioGroup',
-    category: 'elements',
-    description: 'Radio button group component',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Basic radio group',
-        code: '<RadioGroup name="group"><Radio>Option 1</Radio></RadioGroup>',
-        render: () => (
-          <RadioGroup name="demo-group" value="1" onValueChange={() => {}}>
-            <Radio name="demo-group" value="1" label="Option 1" onChange={() => {}} />
-            <Radio name="demo-group" value="2" label="Option 2" onChange={() => {}} />
-            <Radio name="demo-group" value="3" label="Option 3" onChange={() => {}} />
-          </RadioGroup>
-        ),
-      },
-    ],
-  },
-  select: {
-    id: 'select',
-    name: 'Select',
-    category: 'elements',
-    description: 'Select dropdown component',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Basic select',
-        code: '<Select><option>One</option><option>Two</option></Select>',
-        render: () => (
-          <Select aria-label="Select option">
-            <option>Option 1</option>
-            <option>Option 2</option>
-            <option>Option 3</option>
-          </Select>
-        ),
-      },
-      {
-        name: 'Disabled',
-        description: 'Disabled select',
-        code: '<Select disabled><option>One</option></Select>',
-        render: () => (
-          <Select disabled aria-label="Disabled select">
-            <option>Disabled</option>
-          </Select>
-        ),
       },
     ],
   },
@@ -503,23 +415,17 @@ export const elementCatalog: Record<string, ComponentDemo> = {
       },
     ],
   },
-  slider: {
-    id: 'slider',
-    name: 'Slider',
+  spinner: {
+    id: 'spinner',
+    name: 'Spinner',
     category: 'elements',
-    description: 'Range slider component',
+    description: 'Loading spinner component',
     variants: [
       {
         name: 'Basic',
-        description: 'Basic slider',
-        code: '<Slider defaultValue={50} />',
-        render: () => <Slider defaultValue={50} />,
-      },
-      {
-        name: 'With Min/Max',
-        description: 'Slider with min and max',
-        code: '<Slider min={0} max={200} defaultValue={100} />',
-        render: () => <Slider min={0} max={200} defaultValue={100} />,
+        description: 'Basic loading spinner',
+        code: '<Spinner />',
+        render: () => <Spinner />,
       },
     ],
   },
@@ -546,118 +452,6 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         description: 'Disabled switch',
         code: '<Switch disabled onChange={() => {}} />',
         render: () => <Switch disabled onChange={() => {}} />,
-      },
-    ],
-  },
-  tabs: {
-    id: 'tabs',
-    name: 'Tabs',
-    category: 'elements',
-    description: 'Tabbed navigation component',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Basic tabs',
-        code: '<Tabs items={[...]} />',
-        render: () => (
-          <Tabs
-            items={[
-              { id: 'tab1', label: 'Tab 1', content: <div>Content 1</div> },
-              { id: 'tab2', label: 'Tab 2', content: <div>Content 2</div> },
-              { id: 'tab3', label: 'Tab 3', content: <div>Content 3</div> },
-            ]}
-          />
-        ),
-      },
-    ],
-  },
-  text: {
-    id: 'text',
-    name: 'Text',
-    category: 'elements',
-    description: 'Text component with tones',
-    variants: [
-      {
-        name: 'Default',
-        description: 'Default text',
-        code: '<Text>Default text</Text>',
-        render: () => <Text>Default text</Text>,
-      },
-      {
-        name: 'Muted',
-        description: 'Muted text',
-        code: '<Text tone="muted">Muted text</Text>',
-        render: () => <Text tone="muted">Muted text</Text>,
-      },
-      {
-        name: 'Success',
-        description: 'Success text',
-        code: '<Text tone="success">Success text</Text>',
-        render: () => <Text tone="success">Success text</Text>,
-      },
-      {
-        name: 'Danger',
-        description: 'Danger text',
-        code: '<Text tone="danger">Danger text</Text>',
-        render: () => <Text tone="danger">Danger text</Text>,
-      },
-    ],
-  },
-  visuallyHidden: {
-    id: 'visuallyHidden',
-    name: 'VisuallyHidden',
-    category: 'elements',
-    description: 'Hides content visually while keeping it accessible to screen readers',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Hidden content',
-        code: '<VisuallyHidden>Hidden from sight but not from screen readers</VisuallyHidden>',
-        render: () => (
-          <div>
-            <Text>There is hidden text below this line:</Text>
-            <VisuallyHidden>I am here for accessibility!</VisuallyHidden>
-            <Text tone="muted">(Inspect the DOM to see it)</Text>
-          </div>
-        ),
-      },
-    ],
-  },
-  textarea: {
-    id: 'textarea',
-    name: 'TextArea',
-    category: 'elements',
-    description: 'Multi-line text input',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Basic textarea',
-        code: '<TextArea placeholder="Enter text" />',
-        render: () => <TextArea placeholder="Enter multiple lines of text" />,
-      },
-      {
-        name: 'With Rows',
-        description: 'Textarea with custom rows',
-        code: '<TextArea rows={5} placeholder="Enter text" />',
-        render: () => <TextArea rows={5} placeholder="Enter text" />,
-      },
-    ],
-  },
-  tooltip: {
-    id: 'tooltip',
-    name: 'Tooltip',
-    category: 'elements',
-    description: 'Tooltip component',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Basic tooltip',
-        code: '<Tooltip content="Tooltip text"><Button>Hover</Button></Tooltip>',
-        render: () => (
-          <Tooltip content="This is a helpful tooltip">
-            <Button>Hover me</Button>
-          </Tooltip>
-        ),
       },
     ],
   },
@@ -697,126 +491,131 @@ export const elementCatalog: Record<string, ComponentDemo> = {
       },
     ],
   },
-  toast: {
-    id: 'toast',
-    name: 'Toast',
+  text: {
+    id: 'text',
+    name: 'Text',
     category: 'elements',
-    description: 'Toast notification component',
+    description: 'Text component with tones',
     variants: [
       {
-        name: 'Basic',
-        description: 'Basic toast',
-        code: '<Toast message={{ id: "1", title: "Title", description: "Description" }} />',
-        render: () => (
-          <Toast
-            message={{ id: '1', title: 'Notification', description: 'This is a toast message' }}
-          />
-        ),
+        name: 'Default',
+        description: 'Default text',
+        code: '<Text>Default text</Text>',
+        render: () => <Text>Default text</Text>,
       },
       {
-        name: 'With Title Only',
-        description: 'Toast with only title',
-        code: '<Toast message={{ id: "2", title: "Success!" }} />',
-        render: () => <Toast message={{ id: '2', title: 'Success!' }} />,
+        name: 'Muted',
+        description: 'Muted text',
+        code: '<Text tone="muted">Muted text</Text>',
+        render: () => <Text tone="muted">Muted text</Text>,
       },
       {
-        name: 'With Description',
-        description: 'Toast with title and description',
-        code: '<Toast message={{ id: "3", title: "Error", description: "Something went wrong" }} />',
-        render: () => (
-          <Toast message={{ id: '3', title: 'Error', description: 'Something went wrong' }} />
-        ),
+        name: 'Success',
+        description: 'Success text',
+        code: '<Text tone="success">Success text</Text>',
+        render: () => <Text tone="success">Success text</Text>,
+      },
+      {
+        name: 'Danger',
+        description: 'Danger text',
+        code: '<Text tone="danger">Danger text</Text>',
+        render: () => <Text tone="danger">Danger text</Text>,
       },
     ],
   },
-  resizablePanel: {
-    id: 'resizablePanel',
-    name: 'ResizablePanel',
+  textarea: {
+    id: 'textarea',
+    name: 'TextArea',
     category: 'elements',
-    description: 'Resizable panel layout',
-    variants: [
-      {
-        name: 'Horizontal',
-        description: 'Horizontal resizable panels',
-        code: '<ResizablePanelGroup>...</ResizablePanelGroup>',
-        render: () => (
-          <ResizablePanelGroup direction="horizontal" style={{ height: '200px' }}>
-            <ResizablePanel defaultSize={50}>
-              <div style={{ padding: '16px' }}>
-                <Text>Left Panel</Text>
-              </div>
-            </ResizablePanel>
-            <div style={{ padding: '16px' }}>
-              <Text>Right Panel</Text>
-            </div>
-          </ResizablePanelGroup>
-        ),
-      },
-    ],
-  },
-  scrollArea: {
-    id: 'scrollArea',
-    name: 'ScrollArea',
-    category: 'elements',
-    description: 'Custom scrollable area',
+    description: 'Multi-line text input',
     variants: [
       {
         name: 'Basic',
-        description: 'Basic scroll area',
-        code: '<ScrollArea style={{ height: 200 }}>...</ScrollArea>',
+        description: 'Basic textarea',
+        code: '<TextArea placeholder="Enter text" />',
+        render: () => <TextArea placeholder="Enter multiple lines of text" />,
+      },
+      {
+        name: 'With Rows',
+        description: 'Textarea with custom rows',
+        code: '<TextArea rows={5} placeholder="Enter text" />',
+        render: () => <TextArea rows={5} placeholder="Enter text" />,
+      },
+    ],
+  },
+  toaster: {
+    id: 'toaster',
+    name: 'Toaster',
+    category: 'elements',
+    description: 'Toast notification container',
+    variants: [
+      {
+        name: 'Basic',
+        description: 'Toaster component (renders toast container)',
+        code: '<Toaster messages={messages} onDismiss={dismiss} />',
         render: () => (
-          <ScrollArea style={{ height: 200, border: '1px solid #ddd', padding: '12px' }}>
-            <div>
-              {Array.from({ length: 20 }, (_, i) => (
-                <Text key={i} style={{ display: 'block', marginBottom: '8px' }}>
-                  Scrollable content line {i + 1}
-                </Text>
-              ))}
-            </div>
-          </ScrollArea>
+          <div style={{ position: 'relative', height: '60px' }}>
+            <Text tone="muted">Toaster renders a container for toast notifications.</Text>
+            <Toaster messages={[]} onDismiss={() => {}} />
+          </div>
         ),
       },
     ],
   },
-  dialog: {
-    id: 'dialog',
-    name: 'Dialog',
+  tooltip: {
+    id: 'tooltip',
+    name: 'Tooltip',
     category: 'elements',
-    description: 'Dialog component',
+    description: 'Tooltip component',
     variants: [
       {
         name: 'Basic',
-        description: 'Basic dialog',
-        code: '<Dialog.Root><Dialog.Trigger>Open</Dialog.Trigger><Dialog.Content>...</Dialog.Content></Dialog.Root>',
-        render: (): ReactElement => {
-          return (
-            <Dialog.Root>
-              <Dialog.Trigger className="btn btn-primary btn-medium">Open Dialog</Dialog.Trigger>
-              <Dialog.Content title="Dialog Title">
-                <Text>This is the dialog content</Text>
-              </Dialog.Content>
-            </Dialog.Root>
-          );
-        },
+        description: 'Basic tooltip',
+        code: '<Tooltip content="Tooltip text"><Button>Hover</Button></Tooltip>',
+        render: () => (
+          <Tooltip content="This is a helpful tooltip">
+            <Button>Hover me</Button>
+          </Tooltip>
+        ),
       },
     ],
   },
-  image: {
-    id: 'image',
-    name: 'Image',
+  versionBadge: {
+    id: 'versionBadge',
+    name: 'VersionBadge',
     category: 'elements',
-    description: 'Image component',
+    description: 'Badge showing version number',
     variants: [
       {
         name: 'Basic',
-        description: 'Basic image',
-        code: '<Image src="..." alt="Description" />',
+        description: 'Version badge',
+        code: '<VersionBadge version="1.0.0" />',
+        render: () => <VersionBadge version="1.0.0" />,
+      },
+      {
+        name: 'Beta',
+        description: 'Beta version',
+        code: '<VersionBadge version="2.0.0-beta.1" />',
+        render: () => <VersionBadge version="2.0.0-beta.1" />,
+      },
+    ],
+  },
+  visuallyHidden: {
+    id: 'visuallyHidden',
+    name: 'VisuallyHidden',
+    category: 'elements',
+    description: 'Hides content visually while keeping it accessible',
+    variants: [
+      {
+        name: 'Basic',
+        description: 'Hidden content',
+        code: '<VisuallyHidden>Hidden text</VisuallyHidden>',
         render: () => (
-          <Image
-            src="https://via.placeholder.com/150"
-            alt="Placeholder image"
-            style={{ borderRadius: '8px' }}
-          />
+          <div>
+            <Text>There is hidden text below this line:</Text>
+            <VisuallyHidden>I am here for accessibility!</VisuallyHidden>
+            <Text tone="muted">(Inspect the DOM to see it)</Text>
+          </div>
         ),
       },
     ],

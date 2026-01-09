@@ -1,3 +1,4 @@
+// packages/ui/src/hooks/useMediaQuery.ts
 import { useEffect, useState } from 'react';
 
 export function useMediaQuery(query: string): boolean {

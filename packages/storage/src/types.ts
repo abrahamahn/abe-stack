@@ -1,3 +1,4 @@
+// packages/storage/src/types.ts
 export type StorageProviderName = 'local' | 's3';
 
 export interface StorageConfigBase {

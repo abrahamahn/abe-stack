@@ -1,3 +1,4 @@
+// packages/ui/src/layouts/shells/LeftSidebarLayout.tsx
 import { forwardRef, type CSSProperties, type ReactNode } from 'react';
 import '../../styles/layouts.css';
 

@@ -1,3 +1,4 @@
+// packages/ui/src/components/Pagination.tsx
 import { type ReactElement } from 'react';
 
 import { useControllableState } from '../hooks/useControllableState';

@@ -1,3 +1,4 @@
+// packages/ui/src/theme/spacing.ts
 export const spacing = {
   xs: '0.25rem', // 4px
   sm: '0.5rem', // 8px

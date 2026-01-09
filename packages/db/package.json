@@ -47,14 +47,13 @@
   },
   "sideEffects": false,
   "dependencies": {
+    "argon2": "^0.44.0",
     "drizzle-orm": "^0.45.1",
     "postgres": "^3.4.7",
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/bcrypt": "^5.0.2",
     "@types/node": "^25.0.3",
-    "bcrypt": "^5.1.1",
     "drizzle-kit": "^0.31.8",
     "tsx": "^4.19.4",
     "typescript": "^5.9.3",

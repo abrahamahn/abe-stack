@@ -1,3 +1,4 @@
+// packages/ui/src/elements/__tests__/Spinner.test.tsx
 // packages/ui/src/components/__tests__/Spinner.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';

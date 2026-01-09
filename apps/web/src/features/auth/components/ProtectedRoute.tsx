@@ -1,3 +1,4 @@
+// apps/web/src/features/auth/components/ProtectedRoute.tsx
 import { ProtectedRoute as ProtectedRouteBase } from '@abe-stack/ui';
 import { useAuth } from '@auth/hooks';
 

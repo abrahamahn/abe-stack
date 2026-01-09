@@ -1,3 +1,4 @@
+// packages/ui/src/theme/typography.ts
 export const typography = {
   fontFamily: 'system-ui, -apple-system, Segoe UI, sans-serif',
   sizes: {

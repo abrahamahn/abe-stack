@@ -1,3 +1,4 @@
+// apps/server/src/server.ts
 import { buildConnectionString, createDbClient } from '@abe-stack/db';
 import { createStorage, toStorageConfig } from '@abe-stack/storage';
 import cookie from '@fastify/cookie';

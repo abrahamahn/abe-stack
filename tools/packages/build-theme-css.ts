@@ -1,3 +1,4 @@
+// tools/packages/build-theme-css.ts
 /**
  * Build theme.css from TypeScript theme source files
  *

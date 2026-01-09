@@ -1,3 +1,4 @@
+// packages/ui/src/layouts/containers/__tests__/StackedLayout.test.tsx
 // packages/ui/src/layouts/__tests__/StackedLayout.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';

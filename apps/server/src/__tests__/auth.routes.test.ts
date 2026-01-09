@@ -1,3 +1,4 @@
+// apps/server/src/__tests__/auth.routes.test.ts
 import { randomUUID } from 'crypto';
 
 import Fastify from 'fastify';

@@ -71,7 +71,7 @@
       "esbuild": "^0.25.12"
     },
     "onlyBuiltDependencies": [
-      "bcrypt",
+      "argon2",
       "electron"
     ],
     "ignoredBuiltDependencies": [

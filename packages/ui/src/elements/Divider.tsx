@@ -1,3 +1,4 @@
+// packages/ui/src/elements/Divider.tsx
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import '../styles/elements.css';
 

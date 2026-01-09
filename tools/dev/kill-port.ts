@@ -1,4 +1,5 @@
 #!/usr/bin/env tsx
+// tools/dev/kill-port.ts
 import { execSync } from 'node:child_process';
 
 /**

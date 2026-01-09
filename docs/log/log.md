@@ -955,3 +955,69 @@
     - Added external services (Stripe, SendGrid)
     - Added development tools section
 - Build: All tests passing ✅
+
+2026-01-04 (Session 22)
+
+- **ResizablePanelGroup Enhancement:**
+  - Added `reverse` prop to `ResizablePanelGroup` component (`packages/ui/src/components/ResizablePanel.tsx:72-76`).
+  - Enables proper `column-reverse` and `row-reverse` flex direction via inline styles (CSS classes were being overridden).
+  - Returns appropriate flexDirection based on direction and reverse props.
+
+- **DemoPage Layout Fixes:**
+  - Fixed bottom bar positioning - now correctly appears at bottom of screen.
+  - Fixed right bar positioning - now correctly appears at right side of screen.
+  - Used `reverse` prop instead of CSS class `flex-col-reverse` / `flex-row-reverse`.
+  - Added `invertResize` to bottom and right panels for correct drag direction with reversed flex.
+  - Fixed topbar header centering - wrapped left/right sections in equal-width containers (5.5rem).
+  - Removed margin from Heading component in topbar for proper vertical centering.
+  - Changed default top panel size from 10% to 6% (matching minSize).
+
+- **Tests Updated:**
+  - Updated `useDemoPanes.test.tsx` - Changed expected default top size from 10 to 6.
+  - Updated `DemoPage.test.tsx` - Changed expected flexBasis from '10%' to '6%' for top panel.
+
+- Build: All 337 web tests + UI tests passing ✅
+
+- **Docs Reorganization to Match Src Structure:**
+  - Deleted `docs/compounds/` folder - was inconsistent with src (no `src/compounds/` exists).
+  - Moved 12 compound docs from `docs/compounds/` to `docs/components/` (Accordion, Dialog, Dropdown, FocusTrap, FormField, Pagination, Popover, RadioGroup, ResizablePanel, Select, Tabs, Toast).
+  - Created `docs/layouts/` subfolders: `containers/`, `layers/`, `shells/`.
+  - Moved Modal, ScrollArea, Overlay docs to `docs/layouts/layers/`.
+  - Moved shell layout docs to `docs/layouts/shells/` (AppShell, AuthLayout, BottombarLayout, LeftSidebarLayout, RightSidebarLayout, TopbarLayout).
+  - Moved container docs to `docs/layouts/containers/` (Container, PageContainer, StackedLayout).
+  - Moved 7 misplaced element docs from `docs/components/` to `docs/elements/` (Box, Button, Card, EnvironmentBadge, Input, Spinner, VersionBadge).
+  - Moved Radio and Slider docs from `docs/elements/` to `docs/components/` (they're in `src/components/`).
+  - Deleted obsolete docs: CardElement.md, InputPrimitive.md, Layout.md.
+  - Created missing docs: `docs/elements/CloseButton.md`, `docs/theme/ThemeProvider.md`.
+  - Final structure: 68 doc files matching src structure exactly (17 components, 25 elements, 13 hooks, 12 layouts, 1 theme).
+
+2026-01-04 (Session 23)
+
+- **File Reorganization to Improve Component Classification:**
+  - Moved `Image.tsx` and `Card.tsx` from `elements/` to `components/` (have state/compound patterns).
+  - Moved `Toaster.tsx` from `components/` to `elements/` (simple wrapper around ToastContainer).
+  - Moved `ResizablePanel.tsx` from `components/` to `layouts/shells/` (layout-level component).
+  - Moved `ProtectedRoute.tsx` from `components/` to `layouts/layers/` (routing layer component).
+  - Moved `AuthLayout.tsx` from `layouts/shells/` to `layouts/containers/` (card-like container pattern).
+  - Fixed import paths in all moved files to reflect new locations.
+  - Moved corresponding test files to match source file locations.
+
+- **Path Aliases Setup for packages/ui:**
+  - Added path aliases to `tsconfig.json`: @components, @elements, @hooks, @layouts, @styles, @test, @theme, @utils.
+  - Updated `vitest.config.ts` with matching resolve.alias configuration.
+
+- **Documentation Updates:**
+  - Moved 8 doc files to match new source locations (Card, Image, Toaster, ResizablePanel, ProtectedRoute, AuthLayout, EnvironmentBadge, VersionBadge).
+  - Updated `packages/ui/docs/README.md` with current structure (16 components, 24 elements, 14 layouts, 13 hooks).
+  - Updated `packages/ui/README.md` with correct directory structure and component counts.
+  - Updated `packages/ui/docs/TODO.md` with completed items and current priorities.
+
+- **Final Structure:**
+  - Components (16): Accordion, Card, Dialog, Dropdown, FocusTrap, FormField, Image, LoadingContainer, Pagination, Popover, Radio, RadioGroup, Select, Slider, Tabs, Toast
+  - Elements (24): Alert, Avatar, Badge, Box, Button, Checkbox, CloseButton, Divider, EnvironmentBadge, Heading, Input, Kbd, MenuItem, Progress, Skeleton, Spinner, Switch, Table, Text, TextArea, Toaster, Tooltip, VersionBadge, VisuallyHidden
+  - Layouts/Shells (6): AppShell, BottombarLayout, LeftSidebarLayout, ResizablePanel, RightSidebarLayout, TopbarLayout
+  - Layouts/Containers (4): AuthLayout, Container, PageContainer, StackedLayout
+  - Layouts/Layers (4): Modal, Overlay, ProtectedRoute, ScrollArea
+  - Hooks (13): useClickOutside, useControllableState, useCopyToClipboard, useDebounce, useDisclosure, useHistoryNav, useKeyboardShortcuts, useLocalStorage, useMediaQuery, useOnScreen, usePanelConfig, useThemeMode, useWindowSize
+
+- Build: All 717 tests passing ✅

@@ -1,3 +1,4 @@
+// apps/web/src/features/demo/hooks/__tests__/useDemoPanes.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { act, renderHook } from '@testing-library/react';

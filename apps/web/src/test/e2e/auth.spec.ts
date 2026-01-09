@@ -1,3 +1,4 @@
+// apps/web/src/test/e2e/auth.spec.ts
 import { expect, test } from '@playwright/test';
 
 const baseURL = process.env.E2E_BASE_URL || 'http://localhost:5173';

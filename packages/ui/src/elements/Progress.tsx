@@ -1,3 +1,4 @@
+// packages/ui/src/elements/Progress.tsx
 import { forwardRef, type ComponentPropsWithoutRef, type CSSProperties } from 'react';
 import '../styles/elements.css';
 

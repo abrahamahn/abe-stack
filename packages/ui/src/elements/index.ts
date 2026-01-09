@@ -1,16 +1,15 @@
+// packages/ui/src/elements/index.ts
 // Elements - Atomic UI building blocks
 export { Alert } from './Alert';
 export { Avatar } from './Avatar';
 export { Badge } from './Badge';
 export { Box } from './Box';
 export { Button } from './Button';
-export { Card } from './Card';
 export { Checkbox } from './Checkbox';
 export { CloseButton } from './CloseButton';
 export { Divider } from './Divider';
 export { EnvironmentBadge } from './EnvironmentBadge';
 export { Heading } from './Heading';
-export { Image } from './Image';
 export { Input } from './Input';
 export { Kbd } from './Kbd';
 export { MenuItem } from './MenuItem';
@@ -30,6 +29,7 @@ export {
 } from './Table';
 export { Text } from './Text';
 export { TextArea } from './TextArea';
+export { Toaster } from './Toaster';
 export { Tooltip } from './Tooltip';
 export { VersionBadge } from './VersionBadge';
 export { VisuallyHidden } from './VisuallyHidden';

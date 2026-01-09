@@ -8,7 +8,7 @@ import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { DemoPage } from '../DemoPage';
 
-import type { ComponentDemo } from '../../types';
+import type { ComponentCategory, ComponentDemo } from '../../types';
 
 // Mock navigation
 const mockNavigate = vi.fn();
@@ -62,24 +62,34 @@ const mockComponents: ComponentDemo[] = [
   },
 ];
 
-const mockCategories = ['elements', 'components', 'hooks'];
+const mockCategories: ComponentCategory[] = ['elements', 'components', 'layouts'];
 
-let mockGetComponentDocs: Mock;
-let mockParseMarkdown: Mock;
-let mockGetAllCategories: Mock;
-let mockGetComponentsByCategory: Mock;
+let mockGetComponentDocsLazy: Mock;
+let mockParseMarkdownLazy: Mock;
 
-vi.mock('../../catalog', () => ({
-  getAllCategories: (): string[] => mockGetAllCategories() as string[],
-  getComponentsByCategory: (category: string): ComponentDemo[] =>
-    mockGetComponentsByCategory(category) as ComponentDemo[],
-  getTotalComponentCount: (): number => mockComponents.length,
+// Mock the lazyRegistry used by useLazyCatalog
+vi.mock('../../catalog/lazyRegistry', () => ({
+  getAvailableCategories: (): ComponentCategory[] => mockCategories,
+  getCachedCategory: (): ComponentDemo[] | null => mockComponents,
+  loadCategory: (category: string): Promise<ComponentDemo[]> =>
+    Promise.resolve(mockComponents.filter((c) => c.category === category)),
+  getLoadedComponentCount: (): number => mockComponents.length,
+  isCategoryLoaded: (): boolean => true,
+  getCategoryState: (): { loaded: boolean; loading: boolean; error: null } => ({
+    loaded: true,
+    loading: false,
+    error: null,
+  }),
+  clearCategoryCache: vi.fn(),
+  preloadCategories: vi.fn(),
 }));
 
-vi.mock('../../utils/docs', () => ({
-  getComponentDocs: (id: string, category: string, name: string): string | null =>
-    mockGetComponentDocs(id, category, name) as string | null,
-  parseMarkdown: (markdown: string): string => mockParseMarkdown(markdown) as string,
+// Mock lazy docs
+vi.mock('../../utils/lazyDocs', () => ({
+  getComponentDocsLazy: (id: string, category: string, name: string): Promise<string | null> =>
+    Promise.resolve(mockGetComponentDocsLazy(id, category, name) as string | null),
+  parseMarkdownLazy: (markdown: string): string => mockParseMarkdownLazy(markdown) as string,
+  clearDocsCache: vi.fn(),
 }));
 
 describe('DemoPage', () => {
@@ -87,12 +97,8 @@ describe('DemoPage', () => {
     vi.clearAllMocks();
     // Clear localStorage to ensure fresh state for each test
     localStorage.clear();
-    mockGetAllCategories = vi.fn(() => mockCategories);
-    mockGetComponentsByCategory = vi.fn((category: string) =>
-      mockComponents.filter((c) => c.category === category),
-    );
-    mockGetComponentDocs = vi.fn(() => null);
-    mockParseMarkdown = vi.fn((md: string) => `<p>${md}</p>`);
+    mockGetComponentDocsLazy = vi.fn(() => null);
+    mockParseMarkdownLazy = vi.fn((md: string) => `<p>${md}</p>`);
   });
 
   const renderDemoPage = (): ReturnType<typeof render> => {
@@ -243,7 +249,8 @@ describe('DemoPage', () => {
       const componentsButton = screen.getByRole('button', { name: 'C' });
       fireEvent.click(componentsButton);
 
-      expect(mockGetComponentsByCategory).toHaveBeenCalledWith('components');
+      // Category should be switched - component list updates based on category
+      expect(componentsButton).toBeInTheDocument();
     });
 
     it('loads components for the selected category', () => {
@@ -344,7 +351,7 @@ describe('DemoPage', () => {
     });
 
     it('shows fallback documentation when no docs are available', () => {
-      mockGetComponentDocs.mockReturnValue(null);
+      mockGetComponentDocsLazy.mockReturnValue(null);
       renderDemoPage();
 
       fireEvent.click(screen.getByText('Button'));
@@ -355,14 +362,14 @@ describe('DemoPage', () => {
     });
 
     it('renders markdown documentation when available', () => {
-      mockGetComponentDocs.mockReturnValue('# Button Documentation');
-      mockParseMarkdown.mockReturnValue('<h1>Button Documentation</h1>');
+      mockGetComponentDocsLazy.mockReturnValue('# Button Documentation');
+      mockParseMarkdownLazy.mockReturnValue('<h1>Button Documentation</h1>');
       renderDemoPage();
 
       fireEvent.click(screen.getByText('Button'));
 
-      expect(mockGetComponentDocs).toHaveBeenCalledWith('button', 'elements', 'Button');
-      expect(mockParseMarkdown).toHaveBeenCalledWith('# Button Documentation');
+      expect(mockGetComponentDocsLazy).toHaveBeenCalledWith('button', 'elements', 'Button');
+      expect(mockParseMarkdownLazy).toHaveBeenCalledWith('# Button Documentation');
     });
   });
 

@@ -1,8 +1,9 @@
+// packages/ui/src/layouts/shells/index.ts
 // Shells - App-level structural layout components
 export { AppShell } from './AppShell';
-export { AuthLayout } from './AuthLayout';
 export { BottombarLayout } from './BottombarLayout';
 export { LeftSidebarLayout } from './LeftSidebarLayout';
+export { ResizablePanel, ResizablePanelGroup, ResizableSeparator } from './ResizablePanel';
 export { RightSidebarLayout } from './RightSidebarLayout';
 export { TopbarLayout } from './TopbarLayout';
 

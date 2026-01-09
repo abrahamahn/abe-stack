@@ -1,3 +1,4 @@
+// apps/desktop/src/App.tsx
 // Import shared UI components from the shared package
 // import { Button, Card, Spinner } from '@abe-stack/ui';
 

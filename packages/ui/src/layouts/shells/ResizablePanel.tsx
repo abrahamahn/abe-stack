@@ -1,3 +1,4 @@
+// packages/ui/src/layouts/shells/ResizablePanel.tsx
 import {
   forwardRef,
   useEffect,
@@ -7,7 +8,7 @@ import {
   type MouseEvent,
   type ReactNode,
 } from 'react';
-import '../styles/components.css';
+import '../../styles/components.css';
 
 type ResizablePanelProps = ComponentPropsWithoutRef<'div'> & {
   /**

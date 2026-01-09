@@ -1,3 +1,4 @@
+// apps/web/src/features/demo/hooks/useDemoPanes.ts
 import { useLocalStorage, useMediaQuery } from '@abe-stack/ui';
 import { useCallback, useEffect, useState } from 'react';
 

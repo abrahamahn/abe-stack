@@ -340,10 +340,6 @@
   margin-bottom: calc(var(--ui-gap-lg) * 2);
 }
 
-.stacked-layout-body {
-  /* Structural wrapper - no specific styles needed */
-}
-
 /* ============================================
    AuthLayout - Centered auth card
    ============================================ */

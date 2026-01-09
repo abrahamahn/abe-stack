@@ -1,3 +1,4 @@
+// packages/ui/src/elements/Badge.tsx
 import { forwardRef, type ComponentPropsWithoutRef, type ElementType } from 'react';
 import '../styles/elements.css';
 

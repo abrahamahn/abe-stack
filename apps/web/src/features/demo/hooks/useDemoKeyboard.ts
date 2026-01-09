@@ -1,3 +1,4 @@
+// apps/web/src/features/demo/hooks/useDemoKeyboard.ts
 import { useCallback, useEffect } from 'react';
 
 import type { DemoPaneConfig } from '@demo/types';

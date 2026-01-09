@@ -1,3 +1,4 @@
+// packages/ui/src/components/__tests__/Image.test.tsx
 // packages/ui/src/elements/__tests__/Image.test.tsx
 /** @vitest-environment jsdom */
 import { act, render, screen } from '@testing-library/react';

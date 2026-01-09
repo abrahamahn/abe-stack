@@ -5,7 +5,7 @@ import { layoutCatalog as layouts } from './layoutCatalog';
 
 import type { ComponentDemo } from '../types';
 
-// Combine all catalogs into a single catalog
+// Combine all catalogs into a single catalog (eager loading - for backwards compatibility)
 export const componentCatalog: Record<string, ComponentDemo> = {
   ...components,
   ...elements,
@@ -23,3 +23,15 @@ export const getAllCategories = (): string[] => {
 export const getTotalComponentCount = (): number => {
   return Object.keys(componentCatalog).length;
 };
+
+// Lazy loading exports
+export {
+  clearCategoryCache,
+  getAvailableCategories,
+  getCachedCategory,
+  getCategoryState,
+  getLoadedComponentCount,
+  isCategoryLoaded,
+  loadCategory,
+  preloadCategories,
+} from './lazyRegistry';

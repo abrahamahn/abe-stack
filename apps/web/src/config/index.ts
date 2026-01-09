@@ -1,3 +1,4 @@
+// apps/web/src/config/index.ts
 // Centralized app configuration
 // All environment variables and app-level constants in one place
 

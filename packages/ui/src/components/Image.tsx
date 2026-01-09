@@ -1,3 +1,4 @@
+// packages/ui/src/components/Image.tsx
 import {
   forwardRef,
   useEffect,

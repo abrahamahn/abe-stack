@@ -1,3 +1,4 @@
+// packages/db/src/client.ts
 import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 

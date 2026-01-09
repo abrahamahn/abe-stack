@@ -1,3 +1,4 @@
+// apps/server/src/lib/auth.ts
 import { verifyToken, type TokenPayload } from './jwt';
 
 import type { UserRole } from '@abe-stack/shared';

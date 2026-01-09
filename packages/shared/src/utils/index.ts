@@ -1,3 +1,4 @@
+// packages/shared/src/utils/index.ts
 export type TokenStore = {
   get: () => string | null;
   set: (token: string) => void;

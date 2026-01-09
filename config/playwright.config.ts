@@ -4,8 +4,8 @@ const CI = Boolean(process.env.CI);
 const DB_PATH = `db/data-${String(Math.round(Math.random() * 1e10))}.json`;
 
 export default defineConfig({
-  // Look for test files in the "tests" directory, relative to this configuration file.
-  testDir: '../apps/web/e2e',
+  // Look for test files in the e2e directory, relative to this configuration file.
+  testDir: '../apps/web/src/test/e2e',
   testMatch: /.*\.e2e\.(ts|tsx)/,
   reporter: [['list'], ['html', { open: CI ? 'never' : 'on-failure' }], CI ? ['github'] : ['line']],
   fullyParallel: !CI, // Enable parallel execution in development

@@ -1,3 +1,4 @@
+// apps/desktop/electron/main.ts
 import net from 'node:net';
 import * as path from 'path';
 

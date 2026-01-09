@@ -33,7 +33,7 @@ export default [
       'tools/export-ui-code.js',
       'packages/db/drizzle.config.ts',
       'apps/server/vitest.config.ts',
-      'apps/web/e2e/**',
+      'apps/web/src/test/e2e/**',
       'apps/web/vite.config.ts',
       'apps/web/vitest.config.ts',
       'packages/ui/**/__tests__/**',
@@ -74,7 +74,7 @@ export default [
     },
   },
   {
-    files: ['apps/web/e2e/**/*', 'apps/web/vitest.config.ts'],
+    files: ['apps/web/src/test/e2e/**/*', 'apps/web/vitest.config.ts'],
     languageOptions: {
       parserOptions: {
         project: null,

@@ -1,3 +1,4 @@
+// apps/web/src/test/e2e/auth.e2e.ts
 import { test, expect } from '@playwright/test';
 
 test.describe('Authentication Flow', () => {

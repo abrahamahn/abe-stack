@@ -1,3 +1,4 @@
+// tools/dev/setup.ts
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';

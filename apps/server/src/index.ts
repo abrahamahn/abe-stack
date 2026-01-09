@@ -1,3 +1,4 @@
+// apps/server/src/index.ts
 import path from 'path';
 
 import { resolveConnectionStringWithFallback } from '@abe-stack/db';

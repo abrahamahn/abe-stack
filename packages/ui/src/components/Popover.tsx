@@ -1,3 +1,4 @@
+// packages/ui/src/components/Popover.tsx
 import { useEffect, useRef, type ReactElement, type ReactNode } from 'react';
 
 import { useDisclosure } from '../hooks/useDisclosure';

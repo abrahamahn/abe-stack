@@ -1,3 +1,4 @@
+// apps/web/src/features/demo/components/DemoPreviewArea.tsx
 import { Button, Heading, ScrollArea, Text } from '@abe-stack/ui';
 
 import type { ComponentDemo } from '@demo/types';

@@ -1,3 +1,4 @@
+// packages/ui/src/hooks/useWindowSize.ts
 import { useEffect, useState } from 'react';
 
 type WindowSize = {

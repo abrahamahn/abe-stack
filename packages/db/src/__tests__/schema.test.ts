@@ -1,3 +1,4 @@
+// packages/db/src/__tests__/schema.test.ts
 import { describe, it, expect } from 'vitest';
 
 import { USER_ROLES, users, refreshTokens } from '../schema/users';

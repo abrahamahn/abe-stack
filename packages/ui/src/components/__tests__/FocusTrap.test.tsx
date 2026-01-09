@@ -1,3 +1,4 @@
+// packages/ui/src/components/__tests__/FocusTrap.test.tsx
 // packages/ui/src/elements/__tests__/FocusTrap.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';

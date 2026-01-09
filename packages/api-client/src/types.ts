@@ -1,3 +1,4 @@
+// packages/api-client/src/types.ts
 // Re-export types from shared
 export type { LoginRequest, RegisterRequest, AuthResponse, UserResponse } from '@abe-stack/shared';
 

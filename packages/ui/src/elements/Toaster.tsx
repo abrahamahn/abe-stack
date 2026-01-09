@@ -1,5 +1,6 @@
-import '../styles/components.css';
-import { ToastContainer } from './Toast';
+// packages/ui/src/elements/Toaster.tsx
+import '../styles/elements.css';
+import { ToastContainer } from '../components/Toast';
 
 import type { ToastMessage } from '@abe-stack/shared';
 import type { FC } from 'react';

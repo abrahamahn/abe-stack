@@ -1,3 +1,4 @@
+// packages/ui/src/hooks/useKeyboardShortcuts.ts
 import { useCallback, useEffect } from 'react';
 
 export type KeyboardShortcut = {

@@ -1,3 +1,4 @@
+// packages/db/scripts/seed.ts
 /**
  * Database Seed Script
  *
@@ -11,12 +12,18 @@
 
 /* eslint-disable no-console */
 
-import bcrypt from 'bcrypt';
+import argon2 from 'argon2';
 
 import { buildConnectionString, createDbClient } from '../src/client';
 import { users } from '../src/schema/users';
 
-const SALT_ROUNDS = 10;
+// Argon2id configuration (OWASP recommended)
+const ARGON2_OPTIONS: argon2.Options = {
+  type: argon2.argon2id,
+  memoryCost: 19456, // 19 MiB
+  timeCost: 2,
+  parallelism: 1,
+};
 
 interface SeedUser {
   email: string;
@@ -47,7 +54,7 @@ const TEST_USERS: SeedUser[] = [
 ];
 
 async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, SALT_ROUNDS);
+  return argon2.hash(password, ARGON2_OPTIONS);
 }
 
 async function seed(): Promise<void> {

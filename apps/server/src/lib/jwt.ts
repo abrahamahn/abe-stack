@@ -1,3 +1,4 @@
+// apps/server/src/lib/jwt.ts
 import crypto from 'node:crypto';
 
 import jwt from 'jsonwebtoken';

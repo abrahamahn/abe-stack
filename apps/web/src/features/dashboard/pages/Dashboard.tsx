@@ -1,3 +1,4 @@
+// apps/web/src/features/dashboard/pages/Dashboard.tsx
 import { Button, Card, Heading, PageContainer, Text } from '@abe-stack/ui';
 import { useAuth, type User } from '@auth';
 import { useNavigate, type NavigateFunction } from 'react-router-dom';

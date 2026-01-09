@@ -1,3 +1,4 @@
+// apps/web/src/app/root.tsx
 import { toastStore } from '@abe-stack/shared';
 import { ScrollArea, Toaster } from '@abe-stack/ui';
 import { AppProviders } from '@app/providers';

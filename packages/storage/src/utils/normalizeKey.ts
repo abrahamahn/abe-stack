@@ -1,3 +1,4 @@
+// packages/storage/src/utils/normalizeKey.ts
 /**
  * Normalizes a storage key by stripping leading slashes and optionally removing path traversal sequences.
  *

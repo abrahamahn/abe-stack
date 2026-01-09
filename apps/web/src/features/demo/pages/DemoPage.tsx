@@ -1,3 +1,4 @@
+// apps/web/src/features/demo/pages/DemoPage.tsx
 import {
   Button,
   CloseButton,
@@ -7,16 +8,22 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
   ScrollArea,
+  Spinner,
   Text,
   VersionBadge,
 } from '@abe-stack/ui';
 import { config } from '@config';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { getAllCategories, getComponentsByCategory, getTotalComponentCount } from '../catalog';
 import { DemoDocContent, DemoPreviewArea } from '../components';
-import { KEYBOARD_SHORTCUTS, useDemoKeyboard, useDemoPanes, useDemoTheme } from '../hooks';
+import {
+  KEYBOARD_SHORTCUTS,
+  useDemoKeyboard,
+  useDemoPanes,
+  useDemoTheme,
+  useLazyCatalog,
+} from '../hooks';
 
 import type { DemoPaneConfig } from '../types';
 import type { ComponentDemo } from '../types';
@@ -38,8 +45,18 @@ export function DemoPage(): React.ReactElement {
   const navigate = useNavigate();
   const { cycleTheme, getThemeIcon, getThemeLabel } = useDemoTheme();
   const { paneConfig, togglePane, handlePaneResize, resetLayout } = useDemoPanes();
-  const [activeCategory, setActiveCategory] = useState<string>('elements');
   const [selectedComponent, setSelectedComponent] = useState<ComponentDemo | null>(null);
+
+  // Use lazy loading for catalog
+  const {
+    components: componentsInCategory,
+    isLoading,
+    categories,
+    activeCategory,
+    setActiveCategory,
+    totalLoaded,
+    preload,
+  } = useLazyCatalog('elements');
 
   useDemoKeyboard({
     togglePane,
@@ -49,9 +66,20 @@ export function DemoPage(): React.ReactElement {
     },
   });
 
-  const categories = getAllCategories();
-  const componentsInCategory = getComponentsByCategory(activeCategory);
-  const totalComponents = getTotalComponentCount();
+  // Preload adjacent categories for smoother navigation
+  useEffect(() => {
+    const categoryIndex = categories.indexOf(activeCategory);
+    // Preload next category
+    const nextCategory = categories[categoryIndex + 1];
+    if (categoryIndex < categories.length - 1 && nextCategory) {
+      preload(nextCategory);
+    }
+    // Preload previous category
+    const prevCategory = categories[categoryIndex - 1];
+    if (categoryIndex > 0 && prevCategory) {
+      preload(prevCategory);
+    }
+  }, [activeCategory, categories, preload]);
 
   return (
     <div className="h-screen w-screen overflow-hidden">
@@ -116,7 +144,7 @@ export function DemoPage(): React.ReactElement {
                 <VersionBadge version={config.uiVersion} />
                 <EnvironmentBadge environment={config.isDev ? 'development' : 'production'} />
                 <Text tone="muted" className="text-xs hide-mobile">
-                  {totalComponents} components
+                  {totalLoaded} components loaded
                 </Text>
               </div>
 
@@ -215,21 +243,27 @@ export function DemoPage(): React.ReactElement {
                   </div>
                   <ScrollArea className="scroll-flex">
                     <div className="flex-col gap-1 p-2">
-                      {componentsInCategory.map((comp) => (
-                        <button
-                          key={comp.id}
-                          onClick={() => {
-                            setSelectedComponent(comp);
-                          }}
-                          className="menu-item"
-                          data-selected={selectedComponent?.id === comp.id}
-                        >
-                          <Text>{comp.name}</Text>
-                          <Text tone="muted" className="text-xs">
-                            {comp.variants.length} variant{comp.variants.length !== 1 ? 's' : ''}
-                          </Text>
-                        </button>
-                      ))}
+                      {isLoading ? (
+                        <div className="flex items-center justify-center p-4">
+                          <Spinner size="sm" />
+                        </div>
+                      ) : (
+                        componentsInCategory.map((comp) => (
+                          <button
+                            key={comp.id}
+                            onClick={() => {
+                              setSelectedComponent(comp);
+                            }}
+                            className="menu-item"
+                            data-selected={selectedComponent?.id === comp.id}
+                          >
+                            <Text>{comp.name}</Text>
+                            <Text tone="muted" className="text-xs">
+                              {comp.variants.length} variant{comp.variants.length !== 1 ? 's' : ''}
+                            </Text>
+                          </button>
+                        ))
+                      )}
                     </div>
                   </ScrollArea>
                 </div>

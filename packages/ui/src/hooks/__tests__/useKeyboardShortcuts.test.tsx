@@ -1,3 +1,4 @@
+// packages/ui/src/hooks/__tests__/useKeyboardShortcuts.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
