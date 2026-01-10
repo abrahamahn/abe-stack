@@ -19,14 +19,6 @@
     }
   },
   "include": ["src/**/*"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/*.spec.ts",
-    "**/*.spec.tsx",
-    "**/__tests__/**"
-  ],
+  "exclude": ["node_modules", "dist"],
   "references": [{ "path": "../shared" }]
 }

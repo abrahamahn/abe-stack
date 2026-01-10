@@ -1,7 +1,5 @@
 // apps/server/src/lib/__tests__/refresh-token.test.ts
-
-import { refreshTokenFamilies, refreshTokens, users } from '@abe-stack/db';
-import { eq } from 'drizzle-orm';
+import { refreshTokenFamilies, refreshTokens } from '@abe-stack/db';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { authConfig } from '../../config/auth';
@@ -15,30 +13,53 @@ import {
 
 import type { DbClient } from '@abe-stack/db';
 
+interface TokenFamily {
+  id: string;
+  userId: string;
+  createdAt: Date;
+  revokedAt: Date | null;
+  revokeReason: string | null;
+}
+
+interface Token {
+  id: string;
+  userId: string;
+  familyId: string | null;
+  token: string;
+  expiresAt: Date;
+  createdAt: Date;
+}
+
+interface MockUser {
+  id: string;
+  email: string;
+  role: 'user' | 'admin' | 'moderator';
+}
+
+interface InsertData {
+  userId?: string;
+  familyId?: string;
+  token?: string;
+  expiresAt?: Date;
+}
+
+interface UpdateData {
+  revokedAt?: Date;
+  revokeReason?: string;
+}
+
 // Mock database
-const createMockDb = () => {
-  const tokenFamilies: Array<{
-    id: string;
-    userId: string;
-    createdAt: Date;
-    revokedAt: Date | null;
-    revokeReason: string | null;
-  }> = [];
+function createMockDb(): {
+  db: DbClient;
+  tokenFamilies: TokenFamily[];
+  tokens: Token[];
+  mockUsers: MockUser[];
+} {
+  const tokenFamilies: TokenFamily[] = [];
 
-  const tokens: Array<{
-    id: string;
-    userId: string;
-    familyId: string | null;
-    token: string;
-    expiresAt: Date;
-    createdAt: Date;
-  }> = [];
+  const tokens: Token[] = [];
 
-  const mockUsers: Array<{
-    id: string;
-    email: string;
-    role: 'user' | 'admin' | 'moderator';
-  }> = [
+  const mockUsers: MockUser[] = [
     {
       id: 'user-123',
       email: 'test@example.com',
@@ -46,96 +67,97 @@ const createMockDb = () => {
     },
   ];
 
-  return {
-    tokenFamilies,
-    tokens,
-    mockUsers,
-    db: {
-      insert: (table: any) => ({
-        values: (data: any) => {
-          if (table === refreshTokenFamilies) {
-            const family = {
-              id: `family-${tokenFamilies.length + 1}`,
-              userId: data.userId,
-              createdAt: new Date(),
-              revokedAt: null,
-              revokeReason: null,
-            };
-            tokenFamilies.push(family);
-            return {
-              returning: () => Promise.resolve([family]),
-            };
-          } else if (table === refreshTokens) {
-            const token = {
-              id: `token-${tokens.length + 1}`,
-              userId: data.userId,
-              familyId: data.familyId || null,
-              token: data.token,
-              expiresAt: data.expiresAt,
-              createdAt: new Date(),
-            };
-            tokens.push(token);
-            return Promise.resolve();
+  const db = {
+    insert: (
+      table: typeof refreshTokenFamilies | typeof refreshTokens,
+    ): {
+      values: (data: InsertData) => { returning: () => Promise<TokenFamily[]> } | Promise<void>;
+    } => ({
+      values: (data: InsertData): { returning: () => Promise<TokenFamily[]> } | Promise<void> => {
+        if (table === refreshTokenFamilies) {
+          const family: TokenFamily = {
+            id: `family-${String(tokenFamilies.length + 1)}`,
+            userId: data.userId ?? '',
+            createdAt: new Date(),
+            revokedAt: null,
+            revokeReason: null,
+          };
+          tokenFamilies.push(family);
+          return {
+            returning: (): Promise<TokenFamily[]> => Promise.resolve([family]),
+          };
+        } else if (table === refreshTokens) {
+          const token: Token = {
+            id: `token-${String(tokens.length + 1)}`,
+            userId: data.userId ?? '',
+            familyId: data.familyId ?? null,
+            token: data.token ?? '',
+            expiresAt: data.expiresAt ?? new Date(),
+            createdAt: new Date(),
+          };
+          tokens.push(token);
+          return Promise.resolve();
+        }
+        return Promise.resolve();
+      },
+    }),
+    query: {
+      refreshTokens: {
+        findFirst: ({
+          orderBy: _orderBy,
+        }: {
+          where?: unknown;
+          orderBy?: unknown;
+        }): Promise<Token | null> => {
+          const filtered = tokens.filter((t) => t.expiresAt > new Date());
+
+          if (filtered.length > 0) {
+            filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+          }
+
+          return Promise.resolve(filtered[0] ?? null);
+        },
+      },
+      refreshTokenFamilies: {
+        findFirst: (_args: { where?: unknown }): Promise<TokenFamily | null> => {
+          return Promise.resolve(tokenFamilies[0] ?? null);
+        },
+      },
+      users: {
+        findFirst: (_args: { where?: unknown }): Promise<MockUser | null> => {
+          return Promise.resolve(mockUsers[0] ?? null);
+        },
+      },
+    },
+    delete: (
+      table: typeof refreshTokens,
+    ): { where: (_condition: unknown) => Promise<Token[]> } => ({
+      where: (_condition: unknown): Promise<Token[]> => {
+        if (table === refreshTokens) {
+          tokens.length = 0; // Simplified deletion
+          return Promise.resolve(tokens);
+        }
+        return Promise.resolve([]);
+      },
+    }),
+    update: (
+      table: typeof refreshTokenFamilies,
+    ): { set: (data: UpdateData) => { where: (_condition: unknown) => Promise<void> } } => ({
+      set: (data: UpdateData): { where: (_condition: unknown) => Promise<void> } => ({
+        where: (_condition: unknown): Promise<void> => {
+          const firstFamily = tokenFamilies[0];
+          if (table === refreshTokenFamilies && firstFamily !== undefined) {
+            firstFamily.revokedAt = data.revokedAt ?? null;
+            firstFamily.revokeReason = data.revokeReason ?? null;
           }
           return Promise.resolve();
         },
       }),
-      query: {
-        refreshTokens: {
-          findFirst: ({ where, orderBy }: any) => {
-            let filtered = tokens.filter((t) => t.expiresAt > new Date());
+    }),
+  } as unknown as DbClient;
 
-            // Simple filtering logic
-            if (where) {
-              // This is a simplified mock - in reality, Drizzle uses more complex structures
-              filtered = filtered.filter((t) => {
-                // Mock the token matching
-                return true; // Simplified for testing
-              });
-            }
-
-            if (orderBy && filtered.length > 0) {
-              filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-            }
-
-            return Promise.resolve(filtered[0] || null);
-          },
-        },
-        refreshTokenFamilies: {
-          findFirst: ({ where }: any) => {
-            return Promise.resolve(tokenFamilies[0] || null);
-          },
-        },
-        users: {
-          findFirst: ({ where }: any) => {
-            return Promise.resolve(mockUsers[0] || null);
-          },
-        },
-      },
-      delete: (table: any) => ({
-        where: (condition: any) => {
-          if (table === refreshTokens) {
-            const before = tokens.length;
-            tokens.length = 0; // Simplified deletion
-            return Promise.resolve(tokens);
-          }
-          return Promise.resolve([]);
-        },
-      }),
-      update: (table: any) => ({
-        set: (data: any) => ({
-          where: (condition: any) => {
-            if (table === refreshTokenFamilies && tokenFamilies.length > 0) {
-              tokenFamilies[0].revokedAt = data.revokedAt;
-              tokenFamilies[0].revokeReason = data.revokeReason;
-            }
-            return Promise.resolve();
-          },
-        }),
-      }),
-    } as unknown as DbClient,
-  };
-};
+  return { db, tokenFamilies, tokens, mockUsers };
+}
 
 describe('Refresh Token Rotation', () => {
   beforeEach(() => {
@@ -152,9 +174,13 @@ describe('Refresh Token Rotation', () => {
       expect(result).toHaveProperty('token');
       expect(result.token).toBeTruthy();
       expect(tokenFamilies).toHaveLength(1);
-      expect(tokenFamilies[0].userId).toBe('user-123');
+      const firstFamily = tokenFamilies[0];
+      if (firstFamily === undefined) throw new Error('Expected token family');
+      expect(firstFamily.userId).toBe('user-123');
       expect(tokens).toHaveLength(1);
-      expect(tokens[0].familyId).toBe(result.familyId);
+      const firstToken = tokens[0];
+      if (firstToken === undefined) throw new Error('Expected token');
+      expect(firstToken.familyId).toBe(result.familyId);
     });
 
     test('should generate unique tokens', async () => {
@@ -175,23 +201,27 @@ describe('Refresh Token Rotation', () => {
       expect(tokens).toHaveLength(1);
       const expiryDays = authConfig.refreshTokenExpiryDays;
       const expectedExpiry = Date.now() + expiryDays * 24 * 60 * 60 * 1000;
+      const firstToken = tokens[0];
+      if (firstToken === undefined) throw new Error('Expected token');
 
       // Allow 1 second margin
-      expect(tokens[0].expiresAt.getTime()).toBeGreaterThan(expectedExpiry - 1000);
-      expect(tokens[0].expiresAt.getTime()).toBeLessThan(expectedExpiry + 1000);
+      expect(firstToken.expiresAt.getTime()).toBeGreaterThan(expectedExpiry - 1000);
+      expect(firstToken.expiresAt.getTime()).toBeLessThan(expectedExpiry + 1000);
     });
   });
 
   describe('rotateRefreshToken', () => {
     test('should rotate a valid token', async () => {
-      const { db, tokens, tokenFamilies } = createMockDb();
+      const { db, tokens } = createMockDb();
 
       // Create initial family
       const initial = await createRefreshTokenFamily(db, 'user-123');
 
       // Simulate existing token
+      const existingToken = tokens[0];
+      if (existingToken === undefined) throw new Error('Expected token');
       tokens[0] = {
-        ...tokens[0],
+        ...existingToken,
         token: 'old-token',
         familyId: initial.familyId,
       };
@@ -218,9 +248,11 @@ describe('Refresh Token Rotation', () => {
 
       // Create expired token
       await createRefreshTokenFamily(db, 'user-123');
-      tokens[0].expiresAt = new Date(Date.now() - 1000); // Expired
+      const firstToken = tokens[0];
+      if (firstToken === undefined) throw new Error('Expected token');
+      firstToken.expiresAt = new Date(Date.now() - 1000); // Expired
 
-      const result = await rotateRefreshToken(db, tokens[0].token);
+      const result = await rotateRefreshToken(db, firstToken.token);
 
       expect(result).toBeNull();
     });
@@ -232,8 +264,10 @@ describe('Refresh Token Rotation', () => {
       const initial = await createRefreshTokenFamily(db, 'user-123');
 
       // Mark family as revoked
-      tokenFamilies[0].revokedAt = new Date();
-      tokenFamilies[0].revokeReason = 'Token reuse detected';
+      const firstFamily = tokenFamilies[0];
+      if (firstFamily === undefined) throw new Error('Expected token family');
+      firstFamily.revokedAt = new Date();
+      firstFamily.revokeReason = 'Token reuse detected';
 
       const result = await rotateRefreshToken(db, initial.token);
 
@@ -247,12 +281,14 @@ describe('Refresh Token Rotation', () => {
 
       // Create initial family
       await createRefreshTokenFamily(db, 'user-123');
-      const familyId = tokenFamilies[0].id;
+      const firstFamily = tokenFamilies[0];
+      if (firstFamily === undefined) throw new Error('Expected token family');
+      const familyId = firstFamily.id;
 
       await revokeTokenFamily(db, familyId, 'Security concern');
 
-      expect(tokenFamilies[0].revokedAt).toBeInstanceOf(Date);
-      expect(tokenFamilies[0].revokeReason).toBe('Security concern');
+      expect(firstFamily.revokedAt).toBeInstanceOf(Date);
+      expect(firstFamily.revokeReason).toBe('Security concern');
     });
 
     test('should delete all tokens in family', async () => {
@@ -260,7 +296,9 @@ describe('Refresh Token Rotation', () => {
 
       // Create family with multiple tokens
       await createRefreshTokenFamily(db, 'user-123');
-      const familyId = tokenFamilies[0].id;
+      const firstFamily = tokenFamilies[0];
+      if (firstFamily === undefined) throw new Error('Expected token family');
+      const familyId = firstFamily.id;
 
       const initialCount = tokens.length;
 
@@ -346,10 +384,12 @@ describe('Refresh Token Rotation', () => {
       // Simulate recent token (within grace period)
       const now = Date.now();
       const gracePeriod = authConfig.refreshTokenGracePeriodSeconds * 1000;
-      tokens[0].createdAt = new Date(now - gracePeriod / 2);
+      const firstToken = tokens[0];
+      if (firstToken === undefined) throw new Error('Expected token');
+      firstToken.createdAt = new Date(now - gracePeriod / 2);
 
       // This should be allowed within grace period
-      const result = await rotateRefreshToken(db, tokens[0].token);
+      const result = await rotateRefreshToken(db, firstToken.token);
 
       // Should either return new token or handle gracefully
       expect(result).toBeDefined();
@@ -363,12 +403,16 @@ describe('Refresh Token Rotation', () => {
 
       // Simulate old token (outside grace period)
       const gracePeriod = authConfig.refreshTokenGracePeriodSeconds * 1000;
-      tokens[0].createdAt = new Date(Date.now() - gracePeriod * 2);
+      const firstToken = tokens[0];
+      if (firstToken === undefined) throw new Error('Expected token');
+      firstToken.createdAt = new Date(Date.now() - gracePeriod * 2);
 
       // Mark family as revoked (reuse detected)
-      tokenFamilies[0].revokedAt = new Date();
+      const firstFamily = tokenFamilies[0];
+      if (firstFamily === undefined) throw new Error('Expected token family');
+      firstFamily.revokedAt = new Date();
 
-      const result = await rotateRefreshToken(db, tokens[0].token);
+      const result = await rotateRefreshToken(db, firstToken.token);
 
       expect(result).toBeNull();
     });

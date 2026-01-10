@@ -66,11 +66,11 @@ export async function validatePassword(
 
   // Length checks
   if (password.length < config.minLength) {
-    errors.push(`Password must be at least ${config.minLength} characters`);
+    errors.push(`Password must be at least ${String(config.minLength)} characters`);
   }
 
   if (password.length > config.maxLength) {
-    errors.push(`Password must be at most ${config.maxLength} characters`);
+    errors.push(`Password must be at most ${String(config.maxLength)} characters`);
   }
 
   // If basic length checks fail, return early
@@ -93,7 +93,9 @@ export async function validatePassword(
 
   // Check score
   if (result.score < config.minScore) {
-    errors.push(`Password is too weak (score: ${result.score}/${config.minScore} required)`);
+    errors.push(
+      `Password is too weak (score: ${String(result.score)}/${String(config.minScore)} required)`,
+    );
   }
 
   return {
@@ -102,7 +104,7 @@ export async function validatePassword(
     errors,
     feedback: {
       warning: result.feedback.warning || '',
-      suggestions: result.feedback.suggestions || [],
+      suggestions: result.feedback.suggestions,
     },
     crackTimeDisplay: result.crack_times_display.offline_slow_hashing_1e4_per_second as string,
   };
@@ -119,11 +121,11 @@ export function validatePasswordBasic(
   const errors: string[] = [];
 
   if (password.length < config.minLength) {
-    errors.push(`Password must be at least ${config.minLength} characters`);
+    errors.push(`Password must be at least ${String(config.minLength)} characters`);
   }
 
   if (password.length > config.maxLength) {
-    errors.push(`Password must be at most ${config.maxLength} characters`);
+    errors.push(`Password must be at most ${String(config.maxLength)} characters`);
   }
 
   // Check for common weak patterns (not comprehensive, just quick checks)

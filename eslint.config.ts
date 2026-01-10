@@ -37,10 +37,13 @@ export default [
       'apps/web/vite.config.ts',
       'apps/web/vitest.config.ts',
       'packages/ui/**/__tests__/**',
-      'packages/ui/vitest.config.ts',
+      '**/vitest.config.ts',
+      '**/vitest.config.js',
       'tools/packages/build-theme-css.ts',
       'packages/storage/src/**/*.js',
       'packages/storage/src/**/*.d.ts',
+      'packages/db/scripts/**/*.js',
+      'packages/db/scripts/**/*.d.ts',
     ],
   },
   jsConfigs.recommended ?? {},
@@ -103,6 +106,52 @@ export default [
     languageOptions: {
       parserOptions: {
         project: ['./packages/ui/tsconfig.test.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  // Package configurations - use main tsconfig which includes all src files
+  {
+    files: ['packages/api-client/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/api-client/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['packages/db/src/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/db/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['packages/db/scripts/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/db/tsconfig.scripts.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['packages/shared/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/shared/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['packages/storage/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./packages/storage/tsconfig.json'],
         tsconfigRootDir,
       },
     },

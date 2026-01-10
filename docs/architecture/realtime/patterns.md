@@ -1,6 +1,8 @@
-# REAL-TIME PATTERNS & EXAMPLES
+# Real-Time Patterns & Examples
 
-**Common Patterns for Collaborative Applications**
+**Last Updated: January 10, 2026**
+
+Common patterns for collaborative applications.
 
 This guide shows **real-world examples** of how to use the real-time architecture for common features.
 

@@ -19,8 +19,12 @@ describe('toastStore', () => {
 
       const messages = toastStore.getState().messages;
       expect(messages).toHaveLength(1);
-      expect(messages[0].title).toBe('Test Title');
-      expect(messages[0].id).toBeDefined();
+      const firstMessage = messages[0];
+      if (firstMessage === undefined) {
+        throw new Error('Expected message to exist');
+      }
+      expect(firstMessage.title).toBe('Test Title');
+      expect(firstMessage.id).toBeDefined();
     });
 
     it('should add a message with title and description', () => {
@@ -28,8 +32,12 @@ describe('toastStore', () => {
       state.show({ title: 'Title', description: 'Description' });
 
       const messages = toastStore.getState().messages;
-      expect(messages[0].title).toBe('Title');
-      expect(messages[0].description).toBe('Description');
+      const firstMessage = messages[0];
+      if (firstMessage === undefined) {
+        throw new Error('Expected message to exist');
+      }
+      expect(firstMessage.title).toBe('Title');
+      expect(firstMessage.description).toBe('Description');
     });
 
     it('should add multiple messages', () => {
@@ -40,9 +48,13 @@ describe('toastStore', () => {
 
       const messages = toastStore.getState().messages;
       expect(messages).toHaveLength(3);
-      expect(messages[0].title).toBe('First');
-      expect(messages[1].title).toBe('Second');
-      expect(messages[2].title).toBe('Third');
+      const [first, second, third] = messages;
+      if (first === undefined || second === undefined || third === undefined) {
+        throw new Error('Expected all messages to exist');
+      }
+      expect(first.title).toBe('First');
+      expect(second.title).toBe('Second');
+      expect(third.title).toBe('Third');
     });
 
     it('should generate unique ids for each message', () => {
@@ -51,7 +63,11 @@ describe('toastStore', () => {
       state.show({ title: 'Second' });
 
       const messages = toastStore.getState().messages;
-      expect(messages[0].id).not.toBe(messages[1].id);
+      const [first, second] = messages;
+      if (first === undefined || second === undefined) {
+        throw new Error('Expected both messages to exist');
+      }
+      expect(first.id).not.toBe(second.id);
     });
   });
 
@@ -60,8 +76,11 @@ describe('toastStore', () => {
       const state = toastStore.getState();
       state.show({ title: 'To Remove' });
 
-      const messageId = toastStore.getState().messages[0].id;
-      state.dismiss(messageId);
+      const firstMessage = toastStore.getState().messages[0];
+      if (firstMessage === undefined) {
+        throw new Error('Expected message to exist');
+      }
+      state.dismiss(firstMessage.id);
 
       expect(toastStore.getState().messages).toHaveLength(0);
     });
@@ -73,13 +92,20 @@ describe('toastStore', () => {
       state.show({ title: 'Third' });
 
       const messages = toastStore.getState().messages;
-      const secondId = messages[1].id;
-      state.dismiss(secondId);
+      const secondMessage = messages[1];
+      if (secondMessage === undefined) {
+        throw new Error('Expected second message to exist');
+      }
+      state.dismiss(secondMessage.id);
 
       const remaining = toastStore.getState().messages;
       expect(remaining).toHaveLength(2);
-      expect(remaining[0].title).toBe('First');
-      expect(remaining[1].title).toBe('Third');
+      const [first, third] = remaining;
+      if (first === undefined || third === undefined) {
+        throw new Error('Expected remaining messages to exist');
+      }
+      expect(first.title).toBe('First');
+      expect(third.title).toBe('Third');
     });
 
     it('should handle dismissing non-existent id gracefully', () => {

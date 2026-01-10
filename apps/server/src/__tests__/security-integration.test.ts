@@ -27,25 +27,56 @@ type TestLoginAttempt = {
   failureReason: string | null;
 };
 
+interface WhereCondition {
+  right?: { value?: string };
+}
+
+interface TableMeta {
+  _: { name: string };
+}
+
+interface InsertValues {
+  id?: string;
+  email?: string;
+  passwordHash?: string;
+  name?: string | null;
+  createdAt?: Date;
+  success?: boolean;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  failureReason?: string | null;
+  userId?: string;
+}
+
 // Create mock database with login attempts tracking
-function createTestDb(seedUsers: TestUser[] = []) {
+function createTestDb(seedUsers: TestUser[] = []): {
+  db: DbClient;
+  users: TestUser[];
+  loginAttempts: TestLoginAttempt[];
+} {
   const users = [...seedUsers];
   const loginAttempts: TestLoginAttempt[] = [];
-  const tokens: any[] = [];
-  const tokenFamilies: any[] = [];
+  const tokens: InsertValues[] = [];
+  const tokenFamilies: {
+    id: string;
+    userId: string;
+    createdAt: Date;
+    revokedAt: null;
+    revokeReason: null;
+  }[] = [];
 
   const getEmailFromWhere = (where: unknown): string | undefined => {
     if (where && typeof where === 'object') {
-      const rightValue = (where as { right?: { value?: string } }).right?.value;
+      const rightValue = (where as WhereCondition).right?.value;
       if (typeof rightValue === 'string') return rightValue;
     }
     return undefined;
   };
 
-  const db: any = {
+  const db = {
     query: {
       users: {
-        findFirst: ({ where }: any) => {
+        findFirst: ({ where }: { where: unknown }): Promise<TestUser | undefined> => {
           const email = getEmailFromWhere(where);
           if (email) {
             return Promise.resolve(users.find((u) => u.email === email));
@@ -54,11 +85,15 @@ function createTestDb(seedUsers: TestUser[] = []) {
         },
       },
       refreshTokens: {
-        findFirst: () => Promise.resolve(null),
+        findFirst: (): Promise<null> => Promise.resolve(null),
       },
     },
-    insert: (table: any) => ({
-      values: (values: any) => {
+    insert: (
+      table: TableMeta,
+    ): {
+      values: (values: InsertValues) => { returning: () => Promise<unknown[]> } | Promise<void>;
+    } => ({
+      values: (values: InsertValues): { returning: () => Promise<unknown[]> } | Promise<void> => {
         if (table._.name === 'users') {
           const user: TestUser = {
             id: values.id ?? randomUUID(),
@@ -69,29 +104,29 @@ function createTestDb(seedUsers: TestUser[] = []) {
           };
           users.push(user);
           return {
-            returning: () => Promise.resolve([user]),
+            returning: (): Promise<TestUser[]> => Promise.resolve([user]),
           };
         } else if (table._.name === 'login_attempts') {
           loginAttempts.push({
-            email: values.email,
-            success: values.success,
+            email: values.email ?? '',
+            success: values.success ?? false,
             createdAt: new Date(),
-            ipAddress: values.ipAddress || null,
-            userAgent: values.userAgent || null,
-            failureReason: values.failureReason || null,
+            ipAddress: values.ipAddress ?? null,
+            userAgent: values.userAgent ?? null,
+            failureReason: values.failureReason ?? null,
           });
           return Promise.resolve();
         } else if (table._.name === 'refresh_token_families') {
           const family = {
             id: randomUUID(),
-            userId: values.userId,
+            userId: values.userId ?? '',
             createdAt: new Date(),
             revokedAt: null,
             revokeReason: null,
           };
           tokenFamilies.push(family);
           return {
-            returning: () => Promise.resolve([family]),
+            returning: (): Promise<(typeof family)[]> => Promise.resolve([family]),
           };
         } else if (table._.name === 'refresh_tokens') {
           tokens.push(values);
@@ -100,9 +135,11 @@ function createTestDb(seedUsers: TestUser[] = []) {
         return Promise.resolve();
       },
     }),
-    select: () => ({
-      from: () => ({
-        where: (condition: any) => {
+    select: (): {
+      from: () => { where: (_condition: unknown) => Promise<{ count: number }[]> };
+    } => ({
+      from: (): { where: (_condition: unknown) => Promise<{ count: number }[]> } => ({
+        where: (_condition: unknown): Promise<{ count: number }[]> => {
           // Count failed login attempts
           const recent = loginAttempts.filter(
             (attempt) =>
@@ -112,7 +149,7 @@ function createTestDb(seedUsers: TestUser[] = []) {
         },
       }),
     }),
-    execute: () => Promise.resolve(),
+    execute: (): Promise<void> => Promise.resolve(),
   };
 
   return { db: db as unknown as DbClient, users, loginAttempts };
@@ -184,8 +221,10 @@ describe('Security Integration Tests', () => {
       });
 
       expect(loginAttempts).toHaveLength(1);
-      expect(loginAttempts[0].failureReason).toBe('User not found');
-      expect(loginAttempts[0].success).toBe(false);
+      const firstAttempt = loginAttempts[0];
+      if (firstAttempt === undefined) throw new Error('Expected login attempt');
+      expect(firstAttempt.failureReason).toBe('User not found');
+      expect(firstAttempt.success).toBe(false);
 
       await app.close();
     });
@@ -203,7 +242,9 @@ describe('Security Integration Tests', () => {
       });
 
       expect(loginAttempts).toHaveLength(1);
-      expect(loginAttempts[0].userAgent).toBeTruthy();
+      const firstAttempt = loginAttempts[0];
+      if (firstAttempt === undefined) throw new Error('Expected login attempt');
+      expect(firstAttempt.userAgent).toBeTruthy();
 
       await app.close();
     });
@@ -291,7 +332,7 @@ describe('Security Integration Tests', () => {
           method: 'POST',
           url: '/api/auth/register',
           payload: {
-            email: `strong-${Math.random()}@example.com`,
+            email: `strong-${String(Math.random())}@example.com`,
             password,
             name: 'Strong User',
           },

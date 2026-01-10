@@ -1,6 +1,8 @@
-# REAL-TIME IMPLEMENTATION GUIDE
+# Real-Time Implementation Guide
 
-**Step-by-Step Guide to Building Collaborative Applications**
+**Last Updated: January 10, 2026**
+
+Step-by-step guide to building collaborative applications.
 
 This guide provides a **phased implementation plan** for adding real-time collaboration, offline support, and optimistic updates to any application.
 

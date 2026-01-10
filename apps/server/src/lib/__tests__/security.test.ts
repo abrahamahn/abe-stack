@@ -1,8 +1,6 @@
 // apps/server/src/lib/__tests__/security.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { loginAttempts } from '@abe-stack/db';
-
 import { authConfig } from '../../config/auth';
 import {
   applyProgressiveDelay,
@@ -13,32 +11,49 @@ import {
 
 import type { DbClient } from '@abe-stack/db';
 
+interface LoginAttempt {
+  email: string;
+  success: boolean;
+  createdAt: Date;
+  ipAddress: string | null;
+  userAgent: string | null;
+  failureReason: string | null;
+}
+
+interface InsertValues {
+  email: string;
+  success: boolean;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  failureReason?: string | null;
+}
+
 // Mock database
-const createMockDb = () => {
-  const attempts: Array<{
-    email: string;
-    success: boolean;
-    createdAt: Date;
-    ipAddress: string | null;
-    userAgent: string | null;
-    failureReason: string | null;
-  }> = [];
+function createMockDb(): {
+  attempts: LoginAttempt[];
+  db: DbClient;
+} {
+  const attempts: LoginAttempt[] = [];
 
   return {
     attempts,
     db: {
-      insert: () => ({
-        values: (data: any) => {
+      insert: (): { values: (data: InsertValues) => Promise<void> } => ({
+        values: (data: InsertValues): Promise<void> => {
           attempts.push({
-            ...data,
+            email: data.email,
+            success: data.success,
             createdAt: new Date(),
+            ipAddress: data.ipAddress ?? null,
+            userAgent: data.userAgent ?? null,
+            failureReason: data.failureReason ?? null,
           });
           return Promise.resolve();
         },
       }),
-      select: () => ({
-        from: () => ({
-          where: () =>
+      select: (): { from: () => { where: () => Promise<{ count: number }[]> } } => ({
+        from: (): { where: () => Promise<{ count: number }[]> } => ({
+          where: (): Promise<{ count: number }[]> =>
             Promise.resolve([
               {
                 count: attempts.filter(
@@ -53,7 +68,7 @@ const createMockDb = () => {
       }),
     } as unknown as DbClient,
   };
-};
+}
 
 describe('Security Module', () => {
   beforeEach(() => {

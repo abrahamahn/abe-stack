@@ -62,10 +62,8 @@ class SmtpEmailService implements EmailService {
 
     try {
       // Dynamic import to avoid requiring nodemailer in dev
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const nodemailer = await import('nodemailer');
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       this.transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
         port: parseInt(process.env.SMTP_PORT ?? '587', 10),

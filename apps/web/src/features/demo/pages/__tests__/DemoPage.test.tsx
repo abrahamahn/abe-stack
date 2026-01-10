@@ -1,7 +1,7 @@
 // apps/web/src/features/demo/pages/__tests__/DemoPage.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
@@ -350,25 +350,29 @@ describe('DemoPage', () => {
       expect(screen.getByText('Select a component to view documentation')).toBeInTheDocument();
     });
 
-    it('shows fallback documentation when no docs are available', () => {
+    it('shows fallback documentation when no docs are available', async () => {
       mockGetComponentDocsLazy.mockReturnValue(null);
       renderDemoPage();
 
       fireEvent.click(screen.getByText('Button'));
 
-      expect(screen.getByRole('heading', { name: 'Description' })).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: 'Description' })).toBeInTheDocument();
+      });
       expect(screen.getByRole('heading', { name: 'Category' })).toBeInTheDocument();
       expect(screen.getByRole('heading', { name: 'Variants' })).toBeInTheDocument();
     });
 
-    it('renders markdown documentation when available', () => {
+    it('renders markdown documentation when available', async () => {
       mockGetComponentDocsLazy.mockReturnValue('# Button Documentation');
       mockParseMarkdownLazy.mockReturnValue('<h1>Button Documentation</h1>');
       renderDemoPage();
 
       fireEvent.click(screen.getByText('Button'));
 
-      expect(mockGetComponentDocsLazy).toHaveBeenCalledWith('button', 'elements', 'Button');
+      await waitFor(() => {
+        expect(mockGetComponentDocsLazy).toHaveBeenCalledWith('button', 'elements', 'Button');
+      });
       expect(mockParseMarkdownLazy).toHaveBeenCalledWith('# Button Documentation');
     });
   });
