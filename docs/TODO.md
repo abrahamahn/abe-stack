@@ -1,12 +1,587 @@
 # ABE-Stack Master TODO
 
-This document contains two parts:
-- **Part A**: Pure Architecture Transformation (adopting chet-stack patterns)
-- **Part B**: Boilerplate Delivery Plan (production readiness checklist)
+This document contains three parts:
+- **Part A**: Single Entry Point Configuration (immediate priority)
+- **Part B**: Pure Architecture Transformation (adopting chet-stack patterns)
+- **Part C**: Boilerplate Delivery Plan (production readiness checklist)
 
 ---
 
-# Part A: Pure Architecture Transformation
+# Part A: Single Entry Point Configuration
+
+## Overview
+
+The goal is to transform abe-stack from a scattered, multi-package architecture into a **single entry point** pattern like chet-stack. This makes the codebase easier to understand, debug, and maintain.
+
+### Current State (Complex)
+
+```
+apps/server/
+├── src/index.ts           # Entry point - loads env, creates server
+├── src/server.ts          # Creates Fastify, decorates db/storage separately
+├── src/routes/index.ts    # Routes with ts-rest
+└── src/lib/*.ts           # Scattered utilities
+
+apps/web/
+├── src/main.tsx           # Entry point - just renders <App/>
+├── src/app/root.tsx       # Routes and providers
+├── src/app/providers.tsx  # 4 nested providers (Query, Auth, Api, History)
+└── src/providers/*.tsx    # More scattered providers
+
+packages/ (11 packages!)
+├── shared/               # env, contracts, utils
+├── db/                   # drizzle client, schema
+├── api-client/           # fetch wrapper
+├── storage/              # file storage
+├── ui/                   # components
+└── ...
+```
+
+### Target State (Simple - like chet-stack)
+
+```
+apps/server/
+├── src/index.ts           # Entry point - creates ServerEnvironment, starts
+└── src/api/*.ts           # API handlers (receive env explicitly)
+
+apps/web/
+├── src/main.tsx           # Entry point - creates ClientEnvironment, renders
+└── src/app/*.tsx          # Components (access env via single hook)
+
+packages/core/             # Single package for all shared code
+├── src/schema.ts          # THE source of truth
+├── src/server/
+│   └── ServerEnvironment.ts
+├── src/client/
+│   └── ClientEnvironment.ts
+└── src/shared/            # Contracts, utils, types
+```
+
+---
+
+## A.1 ServerEnvironment Pattern
+
+### What chet-stack does:
+
+```typescript
+// chet-stack: Single environment object passed everywhere
+const environment: ServerEnvironment = { config, db, queue, pubsub }
+
+// Every API handler receives it explicitly
+export function handleLogin(env: ServerEnvironment, body: LoginRequest) {
+  const user = await env.db.query.users.findFirst(...)
+  await env.pubsub.publish('user:login', user.id)
+  return { success: true }
+}
+```
+
+### How to transform abe-stack:
+
+**Step 1: Create ServerEnvironment type** (`packages/core/src/server/ServerEnvironment.ts`)
+
+```typescript
+import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
+import type { StorageProvider } from '../storage'
+import type * as schema from '../db/schema'
+
+export type ServerConfig = {
+  port: number
+  host: string
+  cookieSecret: string
+  sessionMaxAge: number  // milliseconds
+  env: 'development' | 'production' | 'test'
+  corsOrigin: string | boolean
+}
+
+export type ServerEnvironment = {
+  config: ServerConfig
+  db: PostgresJsDatabase<typeof schema>
+  storage: StorageProvider
+  // Phase 4: pubsub: PubsubServer
+  // Phase 6: queue: QueueServer
+}
+
+// Factory function - explicit, testable
+export function createServerEnvironment(
+  config: ServerConfig,
+  db: PostgresJsDatabase<typeof schema>,
+  storage: StorageProvider
+): ServerEnvironment {
+  return { config, db, storage }
+}
+```
+
+**Step 2: Simplify server entry point** (`apps/server/src/index.ts`)
+
+```typescript
+// BEFORE (current): 110 lines, multiple concerns mixed
+// AFTER (target): ~40 lines, single responsibility
+
+import http from 'http'
+import Fastify from 'fastify'
+import cookie from '@fastify/cookie'
+import cors from '@fastify/cors'
+import { createDbClient } from '@abe/core/db'
+import { createStorage } from '@abe/core/storage'
+import { createServerEnvironment, type ServerEnvironment } from '@abe/core/server'
+import { loadServerEnv } from '@abe/core/env'
+import { registerApi } from './api'
+
+// Validate env at startup
+const config = loadServerEnv(process.env)
+
+// Create environment (single source of all dependencies)
+const db = createDbClient(config.DATABASE_URL)
+const storage = createStorage(config)
+const env = createServerEnvironment(config, db, storage)
+
+// Create Fastify app
+const app = Fastify({ logger: true })
+
+// Register minimal plugins
+await app.register(cors, { origin: config.corsOrigin, credentials: true })
+await app.register(cookie, { secret: config.cookieSecret })
+
+// Single decoration - the environment
+app.decorate('env', env)
+
+// Register all API routes (passing env explicitly)
+registerApi(app, env)
+
+// Create HTTP server (needed for WebSocket in Phase 4)
+const server = http.createServer(app.server)
+
+// Start
+server.listen(config.port, config.host, () => {
+  app.log.info(`Server listening on http://${config.host}:${config.port}`)
+})
+```
+
+**Step 3: Refactor API handlers** (`apps/server/src/api/auth.ts`)
+
+```typescript
+// BEFORE (current): Handlers access app.db, app.storage directly
+async function handleLogin(app: FastifyInstance, body: LoginRequest, reply) {
+  const user = await app.db.query.users.findFirst(...)
+  // ...
+}
+
+// AFTER (target): Handlers receive environment explicitly
+export function createAuthApi(env: ServerEnvironment) {
+  return {
+    async login(body: LoginRequest) {
+      const user = await env.db.query.users.findFirst(...)
+      // ...
+    },
+    async logout(sessionToken: string) {
+      await env.db.delete(sessions).where(eq(sessions.token, sessionToken))
+      // ...
+    }
+  }
+}
+```
+
+### Tasks for ServerEnvironment
+
+- [ ] **A.1.1** Create `packages/core/src/server/ServerEnvironment.ts`
+- [ ] **A.1.2** Create `packages/core/src/server/index.ts` (exports)
+- [ ] **A.1.3** Simplify `apps/server/src/index.ts` to ~40 lines
+- [ ] **A.1.4** Create `apps/server/src/api/index.ts` (registers all routes)
+- [ ] **A.1.5** Refactor `apps/server/src/routes/index.ts` → `apps/server/src/api/auth.ts`
+- [ ] **A.1.6** Add TypeScript declaration for Fastify env decoration
+- [ ] **A.1.7** Remove individual `app.decorate('db', ...)` and `app.decorate('storage', ...)`
+- [ ] **A.1.8** Verify all routes work with new pattern
+
+---
+
+## A.2 ClientEnvironment Pattern
+
+### What chet-stack does:
+
+```typescript
+// chet-stack: Single environment object with ALL client dependencies
+const environment: ClientEnvironment = {
+  config,
+  router,
+  api,
+  recordCache,
+  recordStorage,
+  subscriptionCache,
+  loaderCache,
+  pubsub,
+  transactionQueue,
+  undoRedo,
+}
+
+// Single provider at app root
+ReactDOM.render(
+  <Container environment={environment} />,
+  document.getElementById('root')
+)
+
+// Components access via single hook
+function MyComponent() {
+  const env = useEnvironment()
+  await env.api.login(email, password)
+  env.recordCache.set('user', user)
+}
+```
+
+### How to transform abe-stack:
+
+**Step 1: Create ClientEnvironment type** (`packages/core/src/client/ClientEnvironment.ts`)
+
+```typescript
+import type { ApiClient } from '../api/client'
+import type { QueryClient } from '@tanstack/react-query'
+
+export type ClientConfig = {
+  apiUrl: string
+  wsUrl: string  // Phase 4
+  env: 'development' | 'production' | 'test'
+}
+
+export type AuthState = {
+  user: User | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  login: (email: string, password: string) => Promise<void>
+  logout: () => Promise<void>
+  refresh: () => Promise<void>
+}
+
+export type ClientEnvironment = {
+  config: ClientConfig
+  api: ApiClient
+  auth: AuthState
+  queryClient: QueryClient
+  // Phase 4:
+  // pubsub: PubsubClient
+  // subscriptionCache: SubscriptionCache
+  // Phase 5:
+  // recordCache: RecordCache
+  // recordStorage: RecordStorage
+  // transactionQueue: TransactionQueue
+  // Phase 6:
+  // undoRedo: UndoRedoStack
+}
+```
+
+**Step 2: Create EnvironmentProvider** (`packages/core/src/client/EnvironmentProvider.tsx`)
+
+```typescript
+import { createContext, useContext, useMemo, useState, useCallback } from 'react'
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
+import { createApiClient } from '../api/client'
+import type { ClientEnvironment, ClientConfig, AuthState, User } from './ClientEnvironment'
+
+const EnvironmentContext = createContext<ClientEnvironment | null>(null)
+
+export function useEnvironment(): ClientEnvironment {
+  const env = useContext(EnvironmentContext)
+  if (!env) {
+    throw new Error('useEnvironment must be used within EnvironmentProvider')
+  }
+  return env
+}
+
+// Convenience hooks
+export function useApi() { return useEnvironment().api }
+export function useAuth() { return useEnvironment().auth }
+
+type Props = {
+  config: ClientConfig
+  children: React.ReactNode
+}
+
+export function EnvironmentProvider({ config, children }: Props) {
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  const queryClient = useMemo(() => new QueryClient({
+    defaultOptions: { queries: { staleTime: 5 * 60 * 1000, retry: 1 } }
+  }), [])
+
+  const api = useMemo(() => createApiClient({
+    baseUrl: config.apiUrl,
+    getToken: () => null, // Cookies handle auth
+  }), [config.apiUrl])
+
+  const auth: AuthState = useMemo(() => ({
+    user,
+    isAuthenticated: !!user,
+    isLoading,
+    login: async (email, password) => {
+      const result = await api.login({ email, password })
+      setUser(result.user)
+    },
+    logout: async () => {
+      await api.logout()
+      setUser(null)
+      queryClient.clear()
+    },
+    refresh: async () => {
+      try {
+        await api.refresh()
+        const userData = await api.getCurrentUser()
+        setUser(userData)
+      } catch {
+        setUser(null)
+      } finally {
+        setIsLoading(false)
+      }
+    },
+  }), [user, isLoading, api, queryClient])
+
+  const environment: ClientEnvironment = useMemo(() => ({
+    config,
+    api,
+    auth,
+    queryClient,
+  }), [config, api, auth, queryClient])
+
+  // Debug access
+  if (typeof window !== 'undefined') {
+    (window as any).env = environment
+  }
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <EnvironmentContext.Provider value={environment}>
+        {children}
+      </EnvironmentContext.Provider>
+    </QueryClientProvider>
+  )
+}
+```
+
+**Step 3: Simplify client entry point** (`apps/web/src/main.tsx`)
+
+```typescript
+// BEFORE (current): Just renders <App/>
+// App has nested: QueryClientProvider > AuthProvider > ApiProvider > HistoryProvider
+
+// AFTER (target): Create environment, single provider
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import { EnvironmentProvider } from '@abe/core/client'
+import { App } from './app/App'
+
+const config = {
+  apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:8080',
+  wsUrl: import.meta.env.VITE_WS_URL || 'ws://localhost:8080',
+  env: import.meta.env.MODE as 'development' | 'production',
+}
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <EnvironmentProvider config={config}>
+      <App />
+    </EnvironmentProvider>
+  </StrictMode>
+)
+```
+
+**Step 4: Simplify App component** (`apps/web/src/app/App.tsx`)
+
+```typescript
+// BEFORE (current - root.tsx):
+// Wrapped in 4 providers, auth logic scattered across files
+
+// AFTER (target):
+import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { useEnvironment } from '@abe/core/client'
+import { HomePage } from '../pages/Home'
+import { LoginPage } from '../pages/Login'
+import { DashboardPage } from '../pages/Dashboard'
+import { ProtectedRoute } from '../components/ProtectedRoute'
+
+export function App() {
+  const { auth } = useEnvironment()
+
+  // Restore session on mount
+  useEffect(() => {
+    auth.refresh()
+  }, [])
+
+  if (auth.isLoading) {
+    return <div>Loading...</div>
+  }
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  )
+}
+```
+
+### Tasks for ClientEnvironment
+
+- [ ] **A.2.1** Create `packages/core/src/client/ClientEnvironment.ts`
+- [ ] **A.2.2** Create `packages/core/src/client/EnvironmentProvider.tsx`
+- [ ] **A.2.3** Create `packages/core/src/client/index.ts` (exports)
+- [ ] **A.2.4** Update `apps/web/src/main.tsx` to create environment
+- [ ] **A.2.5** Simplify `apps/web/src/app/root.tsx` → `apps/web/src/app/App.tsx`
+- [ ] **A.2.6** Delete `apps/web/src/app/providers.tsx` (merged into EnvironmentProvider)
+- [ ] **A.2.7** Delete `apps/web/src/providers/ApiProvider.tsx`
+- [ ] **A.2.8** Delete `apps/web/src/features/auth/AuthContext.tsx` (merged into EnvironmentProvider)
+- [ ] **A.2.9** Update all components to use `useEnvironment()` hook
+- [ ] **A.2.10** Verify auth flow works with new pattern
+
+---
+
+## A.3 Package Consolidation
+
+### Current: 11 packages
+```
+packages/shared/      → env, contracts, utils, stores
+packages/db/          → schema, client, migrations
+packages/api-client/  → fetch wrapper, react-query hooks
+packages/storage/     → local, s3 storage
+packages/ui/          → components (KEEP SEPARATE)
+packages/setup/       → CLI tool (KEEP SEPARATE)
+```
+
+### Target: 3 packages
+```
+packages/core/        → EVERYTHING except UI and CLI
+├── src/
+│   ├── schema.ts              # Single source of truth
+│   ├── env.ts                 # Environment validation
+│   ├── server/
+│   │   ├── ServerEnvironment.ts
+│   │   └── index.ts
+│   ├── client/
+│   │   ├── ClientEnvironment.ts
+│   │   ├── EnvironmentProvider.tsx
+│   │   └── index.ts
+│   ├── db/
+│   │   ├── schema.ts          # Drizzle tables
+│   │   ├── client.ts
+│   │   └── index.ts
+│   ├── api/
+│   │   ├── client.ts
+│   │   ├── contracts.ts       # ts-rest contracts
+│   │   └── index.ts
+│   ├── storage/
+│   │   ├── factory.ts
+│   │   ├── local.ts
+│   │   ├── s3.ts
+│   │   └── index.ts
+│   └── utils/
+│       ├── token.ts
+│       ├── dates.ts
+│       └── index.ts
+├── package.json
+└── tsconfig.json
+
+packages/ui/          → KEEP (design system)
+packages/setup/       → KEEP (CLI tool)
+```
+
+### Tasks for Package Consolidation
+
+- [ ] **A.3.1** Create `packages/core/` directory structure
+- [ ] **A.3.2** Move `packages/shared/src/*` → `packages/core/src/`
+- [ ] **A.3.3** Move `packages/db/src/*` → `packages/core/src/db/`
+- [ ] **A.3.4** Move `packages/api-client/src/*` → `packages/core/src/api/`
+- [ ] **A.3.5** Move `packages/storage/src/*` → `packages/core/src/storage/`
+- [ ] **A.3.6** Create `packages/core/package.json` with correct exports
+- [ ] **A.3.7** Update all imports in `apps/web`, `apps/server`, `apps/desktop`, `apps/mobile`
+  ```typescript
+  // BEFORE
+  import { serverEnvSchema } from '@abe-stack/shared'
+  import { createDbClient } from '@abe-stack/db'
+  import { createApiClient } from '@abe-stack/api-client'
+  import { createStorage } from '@abe-stack/storage'
+
+  // AFTER
+  import { serverEnvSchema, createDbClient, createApiClient, createStorage } from '@abe/core'
+  // OR with subpaths:
+  import { createDbClient } from '@abe/core/db'
+  import { createServerEnvironment } from '@abe/core/server'
+  import { EnvironmentProvider } from '@abe/core/client'
+  ```
+- [ ] **A.3.8** Delete old packages: `packages/shared`, `packages/db`, `packages/api-client`, `packages/storage`
+- [ ] **A.3.9** Update `pnpm-workspace.yaml`
+- [ ] **A.3.10** Update root `package.json` scripts
+- [ ] **A.3.11** Run `pnpm build` and fix all issues
+- [ ] **A.3.12** Run `pnpm test` and fix all issues
+
+---
+
+## A.4 Complete File Structure After Transformation
+
+```
+abe-stack/
+├── apps/
+│   ├── server/
+│   │   └── src/
+│   │       ├── index.ts           # ~40 lines: create env, start server
+│   │       └── api/
+│   │           ├── index.ts       # registerApi(app, env)
+│   │           ├── auth.ts        # createAuthApi(env)
+│   │           ├── users.ts       # createUsersApi(env)
+│   │           └── health.ts      # createHealthApi(env)
+│   ├── web/
+│   │   └── src/
+│   │       ├── main.tsx           # ~20 lines: create env, render
+│   │       └── app/
+│   │           └── App.tsx        # Routes only (no providers)
+│   ├── desktop/
+│   └── mobile/
+├── packages/
+│   ├── core/                      # All shared code
+│   │   ├── src/
+│   │   │   ├── schema.ts          # THE source of truth
+│   │   │   ├── env.ts
+│   │   │   ├── server/
+│   │   │   ├── client/
+│   │   │   ├── db/
+│   │   │   ├── api/
+│   │   │   ├── storage/
+│   │   │   └── utils/
+│   │   └── package.json
+│   └── ui/                        # Design system (unchanged)
+└── config/
+    └── .env.development
+```
+
+---
+
+## Summary: Key Differences from chet-stack
+
+| Aspect | chet-stack | abe-stack (after transform) |
+|--------|------------|----------------------------|
+| HTTP Framework | Express | Fastify (keep - better DX) |
+| Database | Custom SQL | Drizzle ORM (keep - type safety) |
+| Router (client) | Custom | React Router (keep - ecosystem) |
+| Query Layer | Custom | React Query (keep - caching) |
+| Schema | Single schema.ts | Single schema.ts ✅ |
+| Entry Points | Single env objects | Single env objects ✅ |
+| Package Structure | Single src/ | Single @abe/core ✅ |
+| Auth | Cookie sessions | Cookie sessions (Phase 3) |
+| Real-time | WebSocket PubSub | WebSocket PubSub (Phase 4) |
+| Offline | IndexedDB + Queue | IndexedDB + Queue (Phase 5) |
+
+---
+
+# Part B: Pure Architecture Transformation
+
+> **Note:** Part A (Single Entry Point Configuration) should be completed first. It provides the foundation for Phases 1-2 below.
 
 ## Vision
 
@@ -25,485 +600,32 @@ Transform ABE-stack from a complex monorepo into a **pure, minimal, powerful** a
 ## Phase Overview
 
 ```
-Phase 1: Simplify Structure (Week 1)
-    ├── 1.1 Merge packages
-    ├── 1.2 Consolidate schemas
-    └── 1.3 Reduce config files
+Phase 1: Package Consolidation (Part A covers this)
+    → See Part A.3 Package Consolidation
 
-Phase 2: Environment Pattern (Week 1-2)
-    ├── 2.1 ServerEnvironment
-    └── 2.2 ClientEnvironment
+Phase 2: Environment Pattern (Part A covers this)
+    → See Part A.1 ServerEnvironment
+    → See Part A.2 ClientEnvironment
 
-Phase 3: Cookie Sessions (Week 2)
+Phase 3: Cookie Sessions
     ├── 3.1 Replace JWT with cookies
     └── 3.2 Simplify auth flow
 
-Phase 4: WebSocket PubSub (Week 2-3)
+Phase 4: WebSocket PubSub
     ├── 4.1 Server PubSub
     └── 4.2 Client PubSub
 
-Phase 5: Offline Support (Week 3-4)
+Phase 5: Offline Support
     ├── 5.1 RecordCache
     ├── 5.2 RecordStorage (IndexedDB)
     ├── 5.3 TransactionQueue
     └── 5.4 Service Worker
 
-Phase 6: Additional Features (Week 4+)
+Phase 6: Additional Features
     ├── 6.1 Undo/Redo
     ├── 6.2 Background Job Queue
     └── 6.3 Auto-indexed APIs (optional)
 ```
-
----
-
-# Phase 1: Simplify Structure
-
-## 1.1 Merge Packages
-
-### Current State (11 packages)
-```
-packages/
-├── shared/        → Keep (expand as core)
-├── ui/            → Keep (design system)
-├── db/            → Merge into shared
-├── api-client/    → Merge into shared
-├── storage/       → Merge into shared
-└── create-abe-app → Keep separate
-```
-
-### Target State (3 packages)
-```
-packages/
-├── core/          → shared + db + api-client + storage (NEW)
-├── ui/            → Keep as-is
-└── create-abe-app → Keep as-is
-```
-
-### Tasks
-
-- [ ] **1.1.1** Create `packages/core/` directory structure
-  ```
-  packages/core/
-  ├── src/
-  │   ├── schema.ts           # THE source of truth
-  │   ├── env.ts              # Environment validation
-  │   ├── contracts/          # API contracts (from shared)
-  │   ├── db/                 # Database (from db package)
-  │   │   ├── client.ts
-  │   │   ├── schema.ts       # Generated from core schema.ts
-  │   │   └── migrations/
-  │   ├── storage/            # Storage (from storage package)
-  │   │   ├── factory.ts
-  │   │   ├── local.ts
-  │   │   └── s3.ts
-  │   ├── api/                # API client (from api-client)
-  │   │   ├── client.ts
-  │   │   └── react-query.ts
-  │   ├── services/           # Shared services (NEW)
-  │   │   ├── ServerEnvironment.ts
-  │   │   └── ClientEnvironment.ts
-  │   └── utils/              # Utilities
-  │       ├── token.ts
-  │       ├── dates.ts
-  │       └── ids.ts
-  ├── package.json
-  └── tsconfig.json
-  ```
-
-- [ ] **1.1.2** Move `packages/db/` contents to `packages/core/src/db/`
-- [ ] **1.1.3** Move `packages/storage/` contents to `packages/core/src/storage/`
-- [ ] **1.1.4** Move `packages/api-client/` contents to `packages/core/src/api/`
-- [ ] **1.1.5** Move `packages/shared/` contents to `packages/core/src/`
-- [ ] **1.1.6** Update all imports in `apps/web`, `apps/server`, `apps/desktop`, `apps/mobile`
-- [ ] **1.1.7** Delete old packages: `packages/db`, `packages/storage`, `packages/api-client`, `packages/shared`
-- [ ] **1.1.8** Update `pnpm-workspace.yaml`
-- [ ] **1.1.9** Update root `package.json` scripts
-- [ ] **1.1.10** Run build and fix any issues
-
----
-
-## 1.2 Consolidate Schemas
-
-### Current State (Scattered)
-```
-packages/db/src/schema/users.ts          # Drizzle schema
-packages/shared/src/contracts/index.ts   # Zod schemas in contracts
-packages/shared/src/env.ts               # Env validation
-```
-
-### Target State (Single Source)
-```
-packages/core/src/schema.ts              # THE source of truth
-```
-
-### Tasks
-
-- [ ] **1.2.1** Create unified `packages/core/src/schema.ts`
-  ```typescript
-  // packages/core/src/schema.ts
-  import { z } from 'zod'
-
-  // =============================================================
-  // CORE SCHEMA - Single Source of Truth
-  // =============================================================
-  // All records MUST have: id, version, createdAt
-  // This enables: real-time sync, offline, undo/redo
-  // =============================================================
-
-  // Base record (all records extend this)
-  export const BaseRecordSchema = z.object({
-    id: z.string(),
-    version: z.number().default(1),
-    createdAt: z.date().default(() => new Date()),
-    updatedAt: z.date().default(() => new Date()),
-  })
-
-  // User
-  export const UserSchema = BaseRecordSchema.extend({
-    email: z.string().email(),
-    name: z.string().optional(),
-    role: z.enum(['user', 'admin', 'moderator']).default('user'),
-  })
-  export type User = z.infer<typeof UserSchema>
-
-  // Password (separate for security)
-  export const PasswordSchema = z.object({
-    id: z.string(),
-    userId: z.string(),
-    hash: z.string(),
-  })
-  export type Password = z.infer<typeof PasswordSchema>
-
-  // Session (cookie-based auth)
-  export const SessionSchema = BaseRecordSchema.extend({
-    userId: z.string(),
-    token: z.string(),
-    expiresAt: z.date(),
-  })
-  export type Session = z.infer<typeof SessionSchema>
-
-  // =============================================================
-  // TABLE MAPPING (for type-safe access)
-  // =============================================================
-  export const Tables = {
-    user: UserSchema,
-    password: PasswordSchema,
-    session: SessionSchema,
-  } as const
-
-  export type TableName = keyof typeof Tables
-  export type TableToRecord = {
-    user: User
-    password: Password
-    session: Session
-  }
-  export type RecordValue<T extends TableName> = TableToRecord[T]
-
-  // =============================================================
-  // RECORD MAP (for caching, sync)
-  // =============================================================
-  export type RecordMap = {
-    [T in TableName]?: {
-      [id: string]: RecordValue<T>
-    }
-  }
-
-  export type VersionMap = {
-    [T in TableName]?: {
-      [id: string]: number
-    }
-  }
-
-  // =============================================================
-  // VALIDATION
-  // =============================================================
-  export function validateRecord<T extends TableName>(
-    table: T,
-    record: unknown
-  ): RecordValue<T> {
-    return Tables[table].parse(record) as RecordValue<T>
-  }
-  ```
-
-- [ ] **1.2.2** Create Drizzle schema generator from core schema
-  ```typescript
-  // packages/core/src/db/schema.ts
-  // Auto-generate from core schema.ts
-  import { pgTable, text, timestamp, integer } from 'drizzle-orm/pg-core'
-  import type { User, Password, Session } from '../schema'
-
-  export const users = pgTable('users', {
-    id: text('id').primaryKey(),
-    version: integer('version').notNull().default(1),
-    email: text('email').notNull().unique(),
-    name: text('name'),
-    role: text('role').notNull().default('user'),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-    updatedAt: timestamp('updated_at').notNull().defaultNow(),
-  })
-
-  export const passwords = pgTable('passwords', {
-    id: text('id').primaryKey(),
-    userId: text('user_id').notNull().references(() => users.id),
-    hash: text('hash').notNull(),
-  })
-
-  export const sessions = pgTable('sessions', {
-    id: text('id').primaryKey(),
-    version: integer('version').notNull().default(1),
-    userId: text('user_id').notNull().references(() => users.id),
-    token: text('token').notNull().unique(),
-    expiresAt: timestamp('expires_at').notNull(),
-    createdAt: timestamp('created_at').notNull().defaultNow(),
-    updatedAt: timestamp('updated_at').notNull().defaultNow(),
-  })
-  ```
-
-- [ ] **1.2.3** Update API contracts to use core schemas
-- [ ] **1.2.4** Remove duplicate schema definitions
-- [ ] **1.2.5** Run type check across all packages
-
----
-
-## 1.3 Reduce Config Files
-
-### Current State
-```
-config/
-├── build/vite.config.ts
-├── docker/docker-compose.yml
-├── playwright/playwright.config.ts
-└── vitest/vitest.config.ts
-tsconfig.json (root)
-apps/web/tsconfig.json
-apps/server/tsconfig.json
-packages/*/tsconfig.json (x6)
-```
-
-### Target State
-```
-config/
-├── docker-compose.yml        # Keep (necessary)
-├── vite.config.ts            # Simplified
-├── vitest.config.ts          # Simplified
-└── playwright.config.ts      # Simplified
-tsconfig.json                 # Single root config
-tsconfig.app.json             # Extends root (for apps)
-tsconfig.package.json         # Extends root (for packages)
-```
-
-### Tasks
-
-- [ ] **1.3.1** Create single root `tsconfig.json` with all paths
-- [ ] **1.3.2** Create `tsconfig.app.json` that extends root
-- [ ] **1.3.3** Create `tsconfig.package.json` that extends root
-- [ ] **1.3.4** Update app tsconfigs to extend `tsconfig.app.json`
-- [ ] **1.3.5** Update package tsconfigs to extend `tsconfig.package.json`
-- [ ] **1.3.6** Move and simplify vite config
-- [ ] **1.3.7** Move and simplify vitest config
-- [ ] **1.3.8** Remove redundant configs
-- [ ] **1.3.9** Verify builds still work
-
----
-
-# Phase 2: Environment Pattern
-
-## 2.1 ServerEnvironment
-
-### Target
-```typescript
-// Single object containing all server dependencies
-// Passed explicitly to every function (no magic)
-
-export type ServerEnvironment = {
-  config: ServerConfig
-  db: DatabaseClient
-  storage: StorageProvider
-  pubsub: PubsubServer
-  queue: QueueServer
-}
-```
-
-### Tasks
-
-- [ ] **2.1.1** Create `packages/core/src/services/ServerEnvironment.ts`
-  ```typescript
-  import type { DatabaseClient } from '../db/client'
-  import type { StorageProvider } from '../storage/factory'
-
-  export type ServerConfig = {
-    port: number
-    host: string
-    cookieSecret: string
-    sessionMaxAge: number // 7 days default
-    env: 'development' | 'production' | 'test'
-  }
-
-  export type ServerEnvironment = {
-    config: ServerConfig
-    db: DatabaseClient
-    storage: StorageProvider
-    pubsub: PubsubServer | null  // null until Phase 4
-    queue: QueueServer | null    // null until Phase 6
-  }
-
-  export function createServerEnvironment(
-    config: ServerConfig,
-    db: DatabaseClient,
-    storage: StorageProvider
-  ): ServerEnvironment {
-    return {
-      config,
-      db,
-      storage,
-      pubsub: null,
-      queue: null,
-    }
-  }
-  ```
-
-- [ ] **2.1.2** Refactor `apps/server/src/server.ts` to use environment
-  ```typescript
-  import http from 'http'
-  import Fastify from 'fastify'
-  import { createServerEnvironment } from '@abe/core'
-
-  export async function createServer() {
-    const app = Fastify({ logger: true })
-
-    // Create environment
-    const env = createServerEnvironment(config, db, storage)
-
-    // Decorate with environment (single decoration)
-    app.decorate('env', env)
-
-    // Wrap with http for WebSocket support (Phase 4)
-    const server = http.createServer(app.server)
-
-    return { app, server, env }
-  }
-  ```
-
-- [ ] **2.1.3** Update all route handlers to use `request.server.env`
-- [ ] **2.1.4** Remove individual Fastify decorations (`db`, `storage`)
-- [ ] **2.1.5** Add TypeScript declaration for Fastify
-  ```typescript
-  // apps/server/src/types/fastify.d.ts
-  import type { ServerEnvironment } from '@abe/core'
-
-  declare module 'fastify' {
-    interface FastifyInstance {
-      env: ServerEnvironment
-    }
-  }
-  ```
-
----
-
-## 2.2 ClientEnvironment
-
-### Target
-```typescript
-// Single object containing all client dependencies
-// Accessed via React context (single provider)
-
-export type ClientEnvironment = {
-  config: ClientConfig
-  api: ApiClient
-  router: Router
-  auth: AuthState
-  recordCache: RecordCache       // Phase 5
-  recordStorage: RecordStorage   // Phase 5
-  transactionQueue: TransactionQueue  // Phase 5
-  subscriptionCache: SubscriptionCache // Phase 4
-  pubsub: PubsubClient           // Phase 4
-  undoRedo: UndoRedoStack        // Phase 6
-}
-```
-
-### Tasks
-
-- [ ] **2.2.1** Create `packages/core/src/services/ClientEnvironment.ts`
-  ```typescript
-  export type ClientConfig = {
-    apiUrl: string
-    wsUrl: string
-    env: 'development' | 'production' | 'test'
-  }
-
-  export type ClientEnvironment = {
-    config: ClientConfig
-    api: ApiClient
-    router: Router | null  // null if using React Router
-    auth: AuthState
-    // These are null until implemented in later phases
-    recordCache: RecordCache | null
-    recordStorage: RecordStorage | null
-    transactionQueue: TransactionQueue | null
-    subscriptionCache: SubscriptionCache | null
-    pubsub: PubsubClient | null
-    undoRedo: UndoRedoStack | null
-  }
-  ```
-
-- [ ] **2.2.2** Create `EnvironmentProvider` React component
-  ```typescript
-  // packages/core/src/react/EnvironmentProvider.tsx
-  import { createContext, useContext } from 'react'
-  import type { ClientEnvironment } from '../services/ClientEnvironment'
-
-  const EnvironmentContext = createContext<ClientEnvironment | null>(null)
-
-  export function EnvironmentProvider({
-    environment,
-    children,
-  }: {
-    environment: ClientEnvironment
-    children: React.ReactNode
-  }) {
-    return (
-      <EnvironmentContext.Provider value={environment}>
-        {children}
-      </EnvironmentContext.Provider>
-    )
-  }
-
-  export function useEnvironment(): ClientEnvironment {
-    const env = useContext(EnvironmentContext)
-    if (!env) throw new Error('useEnvironment must be used within EnvironmentProvider')
-    return env
-  }
-  ```
-
-- [ ] **2.2.3** Refactor `apps/web/src/app/providers.tsx`
-  ```typescript
-  // BEFORE: Multiple nested providers
-  <QueryClientProvider>
-    <AuthProvider>
-      <ApiProvider>
-        <HistoryProvider>
-          {children}
-        </HistoryProvider>
-      </ApiProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-
-  // AFTER: Single environment provider
-  <QueryClientProvider client={queryClient}>
-    <EnvironmentProvider environment={environment}>
-      {children}
-    </EnvironmentProvider>
-  </QueryClientProvider>
-  ```
-
-- [ ] **2.2.4** Update components to use `useEnvironment()` hook
-- [ ] **2.2.5** Remove old providers (`AuthProvider`, `ApiProvider`, `HistoryProvider`)
-- [ ] **2.2.6** Expose environment on window for debugging
-  ```typescript
-  if (typeof window !== 'undefined') {
-    (window as any).env = environment
-  }
-  ```
 
 ---
 
@@ -822,7 +944,7 @@ After completing all phases:
 ---
 ---
 
-# Part B: Boilerplate Delivery Plan
+# Part C: Boilerplate Delivery Plan
 
 Guide to make the monorepo production-ready while keeping the renderer-agnostic philosophy (React/React Native/Electron-Tauri as view layers only).
 
