@@ -1,0 +1,39 @@
+@import './utilities.css';
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--ui-color-bg);
+  color: var(--ui-color-text);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.demo-copy-button.btn-text {
+  text-decoration: none;
+}
+
+.demo-copy-button.btn-text:hover,
+.demo-copy-button.btn-text:active {
+  text-decoration: none;
+}
+
+.demo-menu-item:hover {
+  background: var(--ui-color-surface-hover, rgba(0, 0, 0, 0.05)) !important;
+  cursor: pointer;
+}
