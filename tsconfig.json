@@ -1,11 +1,53 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./apps/web" },
-    { "path": "./apps/mobile" },
-    { "path": "./apps/desktop" },
-    { "path": "./apps/server" },
-    { "path": "./packages/shared" },
-    { "path": "./packages/ui" }
+  "extends": "./config/tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "outDir": "dist",
+    "rootDir": ".",
+    "jsx": "react-jsx",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "paths": {
+      "@ui": ["shared/ui"],
+      "@ui/*": ["shared/ui/*"],
+      "@contracts": ["shared/contracts"],
+      "@contracts/*": ["shared/contracts/*"],
+      "@api-client": ["shared/api-client"],
+      "@api-client/*": ["shared/api-client/*"],
+      "@stores": ["shared/stores"],
+      "@stores/*": ["shared/stores/*"],
+      "@utils": ["shared/utils"],
+      "@utils/*": ["shared/utils/*"],
+      "@db": ["backend/db"],
+      "@db/*": ["backend/db/*"],
+      "@storage": ["backend/storage"],
+      "@storage/*": ["backend/storage/*"],
+      "@server": ["backend/server"],
+      "@server/*": ["backend/server/*"],
+      "@web": ["frontend/web"],
+      "@web/*": ["frontend/web/*"],
+      "@desktop": ["frontend/desktop"],
+      "@desktop/*": ["frontend/desktop/*"],
+      "@mobile": ["frontend/mobile"],
+      "@mobile/*": ["frontend/mobile/*"],
+      "@shared": ["shared"],
+      "@shared/*": ["shared/*"],
+      "@backend": ["backend"],
+      "@backend/*": ["backend/*"],
+      "@frontend": ["frontend"],
+      "@frontend/*": ["frontend/*"]
+    }
+  },
+  "include": [
+    "backend/**/*.ts",
+    "frontend/**/*.ts",
+    "frontend/**/*.tsx",
+    "shared/**/*.ts",
+    "shared/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "apps",
+    "packages"
   ]
 }

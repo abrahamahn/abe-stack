@@ -1,5 +1,3 @@
-packages:
-  # Applications
-  - 'apps/*'
-  # Shared packages
-  - 'packages/*'
+# V5 Architecture: Single package.json, no workspace packages needed
+# Keep this file for pnpm compatibility, but no packages are defined
+packages: []
