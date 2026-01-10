@@ -12,15 +12,17 @@
       "@storage/*": ["./backend/storage/*"],
       "@server": ["./backend/server"],
       "@server/*": ["./backend/server/*"],
-      "@contracts": ["./shared/contracts"],
-      "@contracts/*": ["./shared/contracts/*"],
+      "@api": ["./backend/api"],
+      "@api/*": ["./backend/api/*"],
+      "@shared": ["./shared"],
+      "@shared/*": ["./shared/*"],
       "@utils": ["./shared/utils"],
       "@utils/*": ["./shared/utils/*"]
     }
   },
   "include": [
     "./**/*.ts",
-    "../shared/contracts/**/*.ts",
+    "../shared/env/**/*.ts",
     "../shared/utils/**/*.ts",
     "../shared/schema.ts",
     "../shared/config.ts"
