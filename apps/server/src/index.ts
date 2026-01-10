@@ -5,6 +5,7 @@ import { resolveConnectionStringWithFallback } from '@abe-stack/db';
 import { loadServerEnv } from '@abe-stack/shared';
 import dotenvFlow from 'dotenv-flow';
 
+import { validateEnvironment } from './lib/env-validator';
 import { createServer } from './server';
 
 // Load environment variables
@@ -12,6 +13,9 @@ dotenvFlow.config({
   node_env: process.env.NODE_ENV || 'development',
   path: path.resolve(__dirname, '../../../config'),
 });
+
+// Validate environment variables at startup
+validateEnvironment();
 
 // Validate required env once at startup
 const env = loadServerEnv(process.env);

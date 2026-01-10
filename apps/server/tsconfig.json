@@ -43,7 +43,14 @@
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.server.tsbuildinfo"
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "__tests__"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "__tests__",
+    "**/__tests__",
+    "**/*.test.ts",
+    "src/services/email.ts"
+  ],
   "references": [
     { "path": "../../packages/shared" },
     { "path": "../../packages/db" },

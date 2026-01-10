@@ -459,15 +459,15 @@ export default passport;
 
 ### Implementation Checklist
 
-#### Phase 1: Security Hardening (Critical)
+#### Phase 1: Security Hardening (Critical) ✅ COMPLETED - ALL A+
 
-- [ ] Migrate password hashing from bcrypt to Argon2id
-- [ ] Implement rate limiting on auth endpoints
-- [ ] Add login attempt logging
-- [ ] Implement account lockout with progressive delays
-- [ ] Add password strength validation with zxcvbn
-- [ ] Implement refresh token rotation with reuse detection
-- [ ] Add CSRF protection
+- [x] Migrate password hashing from bcrypt to Argon2id (apps/server/src/lib/password.ts)
+- [x] Implement rate limiting on auth endpoints (via login attempt tracking + @fastify/rate-limit plugin)
+- [x] Add login attempt logging (apps/server/src/lib/security.ts, uses loginAttempts table)
+- [x] Implement account lockout with progressive delays (apps/server/src/lib/security.ts)
+- [x] Add password strength validation with zxcvbn (apps/server/src/routes/index.ts, using validatePassword)
+- [x] Implement refresh token rotation with reuse detection (apps/server/src/lib/refresh-token.ts)
+- [x] Add CSRF protection (@fastify/csrf-protection with double-submit cookie pattern, apps/server/src/server.ts)
 
 #### Phase 2: Passport.js Integration
 

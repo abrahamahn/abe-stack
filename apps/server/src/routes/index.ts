@@ -1,17 +1,23 @@
 // apps/server/src/routes/index.ts
-import { refreshTokens, users } from '@abe-stack/db';
-import { apiContract } from '@abe-stack/shared';
+import { refreshTokens, users, withTransaction } from '@abe-stack/db';
+import { apiContract, validatePassword } from '@abe-stack/shared';
 import { initServer } from '@ts-rest/fastify';
-import { and, eq, gt } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
+import { getRefreshCookieOptions } from '../config/auth';
+import { ERROR_MESSAGES, REFRESH_COOKIE_NAME, SUCCESS_MESSAGES } from '../lib/constants';
+import { createAccessToken, verifyToken } from '../lib/jwt';
+import { hashPassword, needsRehash, verifyPasswordSafe } from '../lib/password';
+import { createRefreshTokenFamily, rotateRefreshToken } from '../lib/refresh-token';
+import { extractRequestInfo } from '../lib/request-utils';
 import {
-  createAccessToken,
-  createRefreshToken,
-  getRefreshTokenExpiry,
-  REFRESH_TOKEN_EXPIRY_DAYS,
-  verifyToken,
-} from '../lib/jwt';
-import { hashPassword, verifyPassword } from '../lib/password';
+  applyProgressiveDelay,
+  getAccountLockoutStatus,
+  isAccountLocked,
+  logLoginAttempt,
+  unlockAccount,
+} from '../lib/security';
+import { logAccountLockedEvent } from '../lib/security-events';
 
 import type {
   AuthResponse,
@@ -19,9 +25,11 @@ import type {
   LogoutResponse,
   RefreshResponse,
   RegisterRequest,
+  UnlockAccountRequest,
+  UnlockAccountResponse,
   UserResponse,
 } from '@abe-stack/shared';
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
 
 // Reply type that supports cookie operations
 interface ReplyWithCookies {
@@ -36,15 +44,9 @@ interface RequestWithCookies {
   user?: { userId: string; email: string; role: string };
 }
 
-// Cookie configuration for refresh token
-const REFRESH_COOKIE_NAME = 'refreshToken';
-const COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
-  path: '/',
-  maxAge: REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60, // days to seconds
-};
+// Cookie options helper
+const getCookieOptions = (): ReturnType<typeof getRefreshCookieOptions> =>
+  getRefreshCookieOptions();
 
 export function registerRoutes(app: FastifyInstance): void {
   const s = initServer();
@@ -52,17 +54,20 @@ export function registerRoutes(app: FastifyInstance): void {
   const router = s.router(apiContract, {
     auth: {
       register: async ({ body, reply }) => handleRegister(app, body, reply),
-      login: async ({ body, reply }) => handleLogin(app, body, reply),
+      login: async ({ body, request, reply }) => handleLogin(app, body, request, reply),
       refresh: async ({ request, reply }) => handleRefresh(app, request, reply),
       logout: async ({ request, reply }) => handleLogout(app, request, reply),
       verifyEmail: async () =>
         Promise.resolve({
           status: 404 as const,
-          body: { message: 'Email verification not implemented' },
+          body: { message: SUCCESS_MESSAGES.EMAIL_VERIFICATION_NOT_IMPLEMENTED },
         }),
     },
     users: {
       me: async ({ request }) => handleMe(app, request),
+    },
+    admin: {
+      unlockAccount: async ({ body, request }) => handleAdminUnlock(app, body, request),
     },
   });
 
@@ -82,38 +87,56 @@ async function handleRegister(
     });
 
     if (existingUser) {
-      return { status: 409, body: { message: 'Email already registered' } };
+      return { status: 409, body: { message: ERROR_MESSAGES.EMAIL_ALREADY_REGISTERED } };
+    }
+
+    // Validate password strength
+    const passwordValidation = await validatePassword(body.password, [body.email, body.name || '']);
+
+    if (!passwordValidation.isValid) {
+      // Don't leak password policy details to potential attackers
+      // Log detailed errors server-side, return generic message to client
+      app.log.warn(
+        { email: body.email, errors: passwordValidation.errors },
+        'Password validation failed during registration',
+      );
+      return {
+        status: 400,
+        body: {
+          message: ERROR_MESSAGES.WEAK_PASSWORD,
+        },
+      };
     }
 
     const passwordHash = await hashPassword(body.password);
 
-    const [user] = await app.db
-      .insert(users)
-      .values({
-        email: body.email,
-        name: body.name || null,
-        passwordHash,
-        role: 'user',
-      })
-      .returning();
+    // Use transaction to ensure user + token family are created atomically
+    const { user, refreshToken } = await withTransaction(app.db, async (tx) => {
+      const [newUser] = await tx
+        .insert(users)
+        .values({
+          email: body.email,
+          name: body.name || null,
+          passwordHash,
+          role: 'user',
+        })
+        .returning();
 
-    if (!user) {
-      return { status: 500, body: { message: 'Failed to create user' } };
-    }
+      if (!newUser) {
+        throw new Error('Failed to create user');
+      }
+
+      // Create refresh token family within same transaction
+      const { token } = await createRefreshTokenFamily(tx, newUser.id);
+
+      return { user: newUser, refreshToken: token };
+    });
 
     // Create access token
     const accessToken = createAccessToken(user.id, user.email, user.role);
 
-    // Create and store refresh token
-    const refreshToken = createRefreshToken();
-    await app.db.insert(refreshTokens).values({
-      userId: user.id,
-      token: refreshToken,
-      expiresAt: getRefreshTokenExpiry(),
-    });
-
     // Set refresh token as HTTP-only cookie
-    reply.setCookie(REFRESH_COOKIE_NAME, refreshToken, COOKIE_OPTIONS);
+    reply.setCookie(REFRESH_COOKIE_NAME, refreshToken, getCookieOptions());
 
     return {
       status: 201,
@@ -129,45 +152,110 @@ async function handleRegister(
     };
   } catch (error) {
     app.log.error(error);
-    return { status: 500, body: { message: 'Internal server error' } };
+    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
 async function handleLogin(
   app: FastifyInstance,
   body: LoginRequest,
+  request: RequestWithCookies,
   reply: ReplyWithCookies,
 ): Promise<
-  { status: 200; body: AuthResponse } | { status: 400 | 401 | 500; body: { message: string } }
+  { status: 200; body: AuthResponse } | { status: 400 | 401 | 429 | 500; body: { message: string } }
 > {
+  // Extract request info for security logging
+  const { ipAddress, userAgent } = extractRequestInfo(request as unknown as FastifyRequest);
+
   try {
+    // Check if account is locked out
+    const locked = await isAccountLocked(app.db, body.email);
+    if (locked) {
+      await logLoginAttempt(app.db, body.email, false, ipAddress, userAgent, 'Account locked');
+      return {
+        status: 429,
+        body: {
+          message: ERROR_MESSAGES.ACCOUNT_LOCKED,
+        },
+      };
+    }
+
+    // Apply progressive delay based on recent failed attempts
+    await applyProgressiveDelay(app.db, body.email);
+
+    // Fetch user (may be null)
     const user = await app.db.query.users.findFirst({
       where: eq(users.email, body.email),
     });
 
+    // Timing-safe password verification (always performs hash even if user doesn't exist)
+    const isValid = await verifyPasswordSafe(body.password, user?.passwordHash);
+
     if (!user) {
-      return { status: 401, body: { message: 'Invalid email or password' } };
+      await logLoginAttempt(app.db, body.email, false, ipAddress, userAgent, 'User not found');
+
+      // Check if this failure caused account lockout
+      const lockoutStatus = await getAccountLockoutStatus(app.db, body.email);
+      if (lockoutStatus.isLocked) {
+        await logAccountLockedEvent(
+          app.db,
+          body.email,
+          lockoutStatus.failedAttempts,
+          ipAddress,
+          userAgent,
+        );
+      }
+
+      return { status: 401, body: { message: ERROR_MESSAGES.INVALID_CREDENTIALS } };
     }
 
-    const isValid = await verifyPassword(body.password, user.passwordHash);
-
     if (!isValid) {
-      return { status: 401, body: { message: 'Invalid email or password' } };
+      await logLoginAttempt(app.db, body.email, false, ipAddress, userAgent, 'Invalid password');
+
+      // Check if this failure caused account lockout
+      const lockoutStatus = await getAccountLockoutStatus(app.db, body.email);
+      if (lockoutStatus.isLocked) {
+        await logAccountLockedEvent(
+          app.db,
+          body.email,
+          lockoutStatus.failedAttempts,
+          ipAddress,
+          userAgent,
+        );
+      }
+
+      return { status: 401, body: { message: ERROR_MESSAGES.INVALID_CREDENTIALS } };
+    }
+
+    // Create tokens and log success atomically
+    const { refreshToken } = await withTransaction(app.db, async (tx) => {
+      // Log successful login
+      await logLoginAttempt(tx, body.email, true, ipAddress, userAgent);
+
+      // Create refresh token family within transaction
+      const { token } = await createRefreshTokenFamily(tx, user.id);
+
+      return { refreshToken: token };
+    });
+
+    // Check if password hash needs upgrading (e.g., from bcrypt to Argon2, or old Argon2 params)
+    // Done outside transaction since it's non-critical
+    if (needsRehash(user.passwordHash)) {
+      try {
+        const newHash = await hashPassword(body.password);
+        await app.db.update(users).set({ passwordHash: newHash }).where(eq(users.id, user.id));
+        app.log.info({ userId: user.id }, 'Password hash upgraded');
+      } catch (error) {
+        // Non-critical - log but don't fail login
+        app.log.error({ userId: user.id, error }, 'Failed to upgrade password hash');
+      }
     }
 
     // Create access token
     const accessToken = createAccessToken(user.id, user.email, user.role);
 
-    // Create and store refresh token
-    const refreshToken = createRefreshToken();
-    await app.db.insert(refreshTokens).values({
-      userId: user.id,
-      token: refreshToken,
-      expiresAt: getRefreshTokenExpiry(),
-    });
-
     // Set refresh token as HTTP-only cookie
-    reply.setCookie(REFRESH_COOKIE_NAME, refreshToken, COOKIE_OPTIONS);
+    reply.setCookie(REFRESH_COOKIE_NAME, refreshToken, getCookieOptions());
 
     return {
       status: 200,
@@ -183,7 +271,7 @@ async function handleLogin(
     };
   } catch (error) {
     app.log.error(error);
-    return { status: 500, body: { message: 'Internal server error' } };
+    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
@@ -195,48 +283,29 @@ async function handleRefresh(
   { status: 200; body: RefreshResponse } | { status: 401 | 500; body: { message: string } }
 > {
   try {
-    const refreshToken = request.cookies[REFRESH_COOKIE_NAME];
+    const oldRefreshToken = request.cookies[REFRESH_COOKIE_NAME];
 
-    if (!refreshToken) {
-      return { status: 401, body: { message: 'No refresh token provided' } };
+    if (!oldRefreshToken) {
+      return { status: 401, body: { message: ERROR_MESSAGES.NO_REFRESH_TOKEN } };
     }
 
-    // Find valid refresh token in database
-    const storedToken = await app.db.query.refreshTokens.findFirst({
-      where: and(eq(refreshTokens.token, refreshToken), gt(refreshTokens.expiresAt, new Date())),
-    });
+    // Extract request info for security logging
+    const { ipAddress, userAgent } = extractRequestInfo(request as unknown as FastifyRequest);
 
-    if (!storedToken) {
-      // Clear invalid cookie
+    // Rotate the refresh token with reuse detection
+    const result = await rotateRefreshToken(app.db, oldRefreshToken, ipAddress, userAgent);
+
+    if (!result) {
+      // Token invalid, expired, or reuse detected
       reply.clearCookie(REFRESH_COOKIE_NAME, { path: '/' });
-      return { status: 401, body: { message: 'Invalid or expired refresh token' } };
+      return { status: 401, body: { message: ERROR_MESSAGES.INVALID_TOKEN } };
     }
 
-    // Get user
-    const user = await app.db.query.users.findFirst({
-      where: eq(users.id, storedToken.userId),
-    });
-
-    if (!user) {
-      return { status: 401, body: { message: 'User not found' } };
-    }
-
-    // Delete old refresh token
-    await app.db.delete(refreshTokens).where(eq(refreshTokens.id, storedToken.id));
-
-    // Create new tokens (token rotation for security)
-    const newAccessToken = createAccessToken(user.id, user.email, user.role);
-    const newRefreshToken = createRefreshToken();
-
-    // Store new refresh token
-    await app.db.insert(refreshTokens).values({
-      userId: user.id,
-      token: newRefreshToken,
-      expiresAt: getRefreshTokenExpiry(),
-    });
+    // Create new access token
+    const newAccessToken = createAccessToken(result.userId, result.email, result.role);
 
     // Set new refresh token cookie
-    reply.setCookie(REFRESH_COOKIE_NAME, newRefreshToken, COOKIE_OPTIONS);
+    reply.setCookie(REFRESH_COOKIE_NAME, result.token, getCookieOptions());
 
     return {
       status: 200,
@@ -246,7 +315,7 @@ async function handleRefresh(
     };
   } catch (error) {
     app.log.error(error);
-    return { status: 500, body: { message: 'Internal server error' } };
+    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
@@ -270,11 +339,11 @@ async function handleLogout(
 
     return {
       status: 200,
-      body: { message: 'Logged out successfully' },
+      body: { message: SUCCESS_MESSAGES.LOGGED_OUT },
     };
   } catch (error) {
     app.log.error(error);
-    return { status: 500, body: { message: 'Internal server error' } };
+    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
@@ -287,14 +356,14 @@ async function handleMe(
   try {
     const authHeader = request.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
-      return { status: 401, body: { message: 'Missing or invalid authorization header' } };
+      return { status: 401, body: { message: ERROR_MESSAGES.MISSING_AUTH_HEADER } };
     }
 
     const token = authHeader.substring(7);
     const payload = verifyToken(token);
     request.user = payload;
   } catch {
-    return { status: 401, body: { message: 'Invalid or expired token' } };
+    return { status: 401, body: { message: ERROR_MESSAGES.INVALID_OR_EXPIRED_TOKEN } };
   }
 
   try {
@@ -303,7 +372,7 @@ async function handleMe(
     });
 
     if (!user) {
-      return { status: 404, body: { message: 'User not found' } };
+      return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
     return {
@@ -318,6 +387,62 @@ async function handleMe(
     };
   } catch (error) {
     app.log.error(error);
-    return { status: 500, body: { message: 'Internal server error' } };
+    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+  }
+}
+
+async function handleAdminUnlock(
+  app: FastifyInstance,
+  body: UnlockAccountRequest,
+  request: RequestWithCookies,
+): Promise<
+  | { status: 200; body: UnlockAccountResponse }
+  | { status: 401 | 403 | 404 | 500; body: { message: string } }
+> {
+  try {
+    // Verify admin authentication
+    const authHeader = request.headers.authorization;
+    if (!authHeader?.startsWith('Bearer ')) {
+      return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
+    }
+
+    const token = authHeader.substring(7);
+    const payload = verifyToken(token);
+
+    // Check if user is admin
+    if (payload.role !== 'admin') {
+      return { status: 403, body: { message: ERROR_MESSAGES.FORBIDDEN } };
+    }
+
+    // Check if the target user exists
+    const targetUser = await app.db.query.users.findFirst({
+      where: eq(users.email, body.email),
+    });
+
+    if (!targetUser) {
+      return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
+    }
+
+    // Extract request info for audit logging
+    const { ipAddress, userAgent } = extractRequestInfo(request as unknown as FastifyRequest);
+
+    // Unlock the account
+    await unlockAccount(app.db, body.email, payload.userId, ipAddress, userAgent);
+
+    app.log.info(
+      { adminId: payload.userId, targetEmail: body.email },
+      'Admin unlocked user account',
+    );
+
+    return {
+      status: 200,
+      body: {
+        message: SUCCESS_MESSAGES.ACCOUNT_UNLOCKED,
+        email: body.email,
+      },
+    };
+  } catch (error) {
+    app.log.error(error);
+    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }

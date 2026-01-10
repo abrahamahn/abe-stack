@@ -179,3 +179,41 @@ test('rejects login with bad password', async () => {
 
   await app.close();
 });
+
+test('rejects weak password during registration', async () => {
+  process.env.JWT_SECRET = 'super-secret-test-key-should-be-long';
+  const { app } = await createTestApp();
+
+  const response = await app.inject({
+    method: 'POST',
+    url: '/api/auth/register',
+    payload: { email: 'weak@example.com', password: '123', name: 'Weak Password' },
+  });
+
+  expect(response.statusCode).toBe(400);
+  const body = response.json<{ message: string }>();
+  expect(body.message).toContain('Password');
+
+  await app.close();
+});
+
+test('accepts strong password during registration', async () => {
+  process.env.JWT_SECRET = 'super-secret-test-key-should-be-long';
+  const { app } = await createTestApp();
+
+  const response = await app.inject({
+    method: 'POST',
+    url: '/api/auth/register',
+    payload: {
+      email: 'strong@example.com',
+      password: 'MySecureP@ssw0rd!2024',
+      name: 'Strong Password',
+    },
+  });
+
+  expect(response.statusCode).toBe(201);
+  const body = response.json<{ token?: string }>();
+  expect(body.token).toBeDefined();
+
+  await app.close();
+});

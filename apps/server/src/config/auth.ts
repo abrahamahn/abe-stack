@@ -17,7 +17,7 @@ export interface AuthConfig {
   };
 
   // Token expiry
-  accessTokenExpiry: string;
+  accessTokenExpiry: string | number;
   refreshTokenExpiryDays: number;
   refreshTokenGracePeriodSeconds: number;
 
@@ -54,6 +54,13 @@ export interface AuthConfig {
     secure: boolean;
     sameSite: 'strict' | 'lax' | 'none';
     path: string;
+  };
+
+  // Proxy configuration for IP extraction
+  proxy: {
+    trustProxy: boolean;
+    trustedProxies: string[];
+    maxProxyDepth: number;
   };
 
   // OAuth providers (only loaded if strategy enabled)
@@ -161,6 +168,15 @@ export const authConfig: AuthConfig = {
     secure: isProduction,
     sameSite: isProduction ? 'strict' : 'lax',
     path: '/',
+  },
+
+  // Proxy configuration
+  proxy: {
+    trustProxy: process.env.TRUST_PROXY === 'true',
+    trustedProxies: process.env.TRUSTED_PROXIES
+      ? process.env.TRUSTED_PROXIES.split(',').map((ip) => ip.trim())
+      : [],
+    maxProxyDepth: parseInt(process.env.MAX_PROXY_DEPTH || '1', 10),
   },
 
   // OAuth providers (loaded from env if strategy enabled)

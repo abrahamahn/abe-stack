@@ -74,6 +74,32 @@ export const emailVerificationTokens = pgTable(
   (table) => [index('email_verification_tokens_user_id_idx').on(table.userId)],
 );
 
+/**
+ * Security events for audit trail and monitoring
+ * Tracks critical security events like token reuse, account lockouts, etc.
+ */
+export const securityEvents = pgTable(
+  'security_events',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }), // Nullable - some events may be for non-existent users
+    email: text('email'), // Store email for user-less events
+    eventType: text('event_type').notNull(), // 'token_reuse', 'account_locked', 'account_unlocked', etc.
+    severity: text('severity').notNull(), // 'low', 'medium', 'high', 'critical'
+    ipAddress: inet('ip_address'),
+    userAgent: text('user_agent'),
+    metadata: text('metadata'), // JSON string for additional context
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('security_events_user_id_idx').on(table.userId),
+    index('security_events_email_idx').on(table.email),
+    index('security_events_event_type_idx').on(table.eventType),
+    index('security_events_severity_idx').on(table.severity),
+    index('security_events_created_at_idx').on(table.createdAt),
+  ],
+);
+
 // Inferred types
 export type RefreshTokenFamily = typeof refreshTokenFamilies.$inferSelect;
 export type NewRefreshTokenFamily = typeof refreshTokenFamilies.$inferInsert;
@@ -83,3 +109,5 @@ export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 export type NewPasswordResetToken = typeof passwordResetTokens.$inferInsert;
 export type EmailVerificationToken = typeof emailVerificationTokens.$inferSelect;
 export type NewEmailVerificationToken = typeof emailVerificationTokens.$inferInsert;
+export type SecurityEvent = typeof securityEvents.$inferSelect;
+export type NewSecurityEvent = typeof securityEvents.$inferInsert;
