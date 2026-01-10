@@ -4,7 +4,7 @@ import { createContext, useCallback, useEffect, useRef, useState } from 'react';
 
 import { api } from '../../api/client';
 
-import type { AuthResponse, LoginRequest, RegisterRequest, UserRole } from '@contracts';
+import type { AuthResponse, LoginRequest, RegisterRequest, UserRole } from '../../api';
 import type { ReactElement, ReactNode } from 'react';
 
 export interface User {

@@ -1,5 +1,5 @@
 import type { StorageConfig } from './types';
-import type { ServerEnv } from '@contracts/env';
+import type { ServerEnv } from '../api';
 
 /**
  * Convert server environment variables to StorageConfig

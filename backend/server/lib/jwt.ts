@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 
 import jwt from 'jsonwebtoken';
 
-import type { UserRole } from '@contracts';
+import type { UserRole } from '../../api';
 
 // Access token: short-lived (15 minutes)
 const ACCESS_TOKEN_EXPIRY = '15m';
