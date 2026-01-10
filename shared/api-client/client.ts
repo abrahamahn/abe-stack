@@ -1,4 +1,4 @@
-import { addAuthHeader } from '../contracts';
+import { addAuthHeader } from '../utils';
 
 import type {
   AuthResponse,

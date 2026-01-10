@@ -32,7 +32,7 @@ vi.mock('react-router-dom', async () => {
 });
 
 // Mock dependencies - use inline object since vi.mock is hoisted
-vi.mock('@abe-stack/api-client', () => ({
+vi.mock('@api-client', () => ({
   createReactQueryClient: vi.fn(
     (config: {
       getToken?: () => string | null;
@@ -45,7 +45,7 @@ vi.mock('@abe-stack/api-client', () => ({
   ),
 }));
 
-vi.mock('@abe-stack/shared', () => ({
+vi.mock('@stores', () => ({
   tokenStore: {
     get: mockTokenGet,
     set: vi.fn(),

@@ -1,6 +1,6 @@
 import { ToastContainer } from '../elements/Toast';
 
-import type { ToastMessage } from '../contracts';
+import type { ToastMessage } from '../../stores';
 import type { CSSProperties, FC } from 'react';
 
 export type ToasterProps = {

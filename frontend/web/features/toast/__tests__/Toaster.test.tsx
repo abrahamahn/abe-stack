@@ -9,8 +9,8 @@ import { Toaster } from '../Toaster';
 import { toastStore } from '../toastStore';
 
 // Mock the ToastContainer from UI package
-vi.mock('@abe-stack/ui', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+vi.mock('@ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@ui')>();
   return {
     ...actual,
     ToastContainer: vi.fn(

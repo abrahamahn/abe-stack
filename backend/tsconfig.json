@@ -1,22 +1,29 @@
 {
-  "extends": "../config/tsconfig.base.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "baseUrl": "..",
     "outDir": "./dist",
     "rootDir": "..",
     "lib": ["ES2023"],
     "paths": {
-      "@/*": ["./*"]
+      "@db": ["./backend/db"],
+      "@db/*": ["./backend/db/*"],
+      "@storage": ["./backend/storage"],
+      "@storage/*": ["./backend/storage/*"],
+      "@server": ["./backend/server"],
+      "@server/*": ["./backend/server/*"],
+      "@contracts": ["./shared/contracts"],
+      "@contracts/*": ["./shared/contracts/*"],
+      "@utils": ["./shared/utils"],
+      "@utils/*": ["./shared/utils/*"]
     }
   },
   "include": [
     "./**/*.ts",
-    "../shared/**/*.ts"
+    "../shared/contracts/**/*.ts",
+    "../shared/utils/**/*.ts",
+    "../shared/schema.ts",
+    "../shared/config.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.test.ts",
-    "**/*.spec.ts"
-  ]
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts", "**/__tests__/**"]
 }

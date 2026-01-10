@@ -18,8 +18,8 @@ describe('toastStore', () => {
 
       const messages = toastStore.getState().messages;
       expect(messages).toHaveLength(1);
-      expect(messages[0].title).toBe('Test Title');
-      expect(messages[0].id).toBeDefined();
+      expect(messages[0]!.title).toBe('Test Title');
+      expect(messages[0]!.id).toBeDefined();
     });
 
     it('should add a message with title and description', () => {
@@ -27,8 +27,8 @@ describe('toastStore', () => {
       state.show({ title: 'Title', description: 'Description' });
 
       const messages = toastStore.getState().messages;
-      expect(messages[0].title).toBe('Title');
-      expect(messages[0].description).toBe('Description');
+      expect(messages[0]!.title).toBe('Title');
+      expect(messages[0]!.description).toBe('Description');
     });
 
     it('should add multiple messages', () => {
@@ -39,9 +39,9 @@ describe('toastStore', () => {
 
       const messages = toastStore.getState().messages;
       expect(messages).toHaveLength(3);
-      expect(messages[0].title).toBe('First');
-      expect(messages[1].title).toBe('Second');
-      expect(messages[2].title).toBe('Third');
+      expect(messages[0]!.title).toBe('First');
+      expect(messages[1]!.title).toBe('Second');
+      expect(messages[2]!.title).toBe('Third');
     });
 
     it('should generate unique ids for each message', () => {
@@ -50,7 +50,7 @@ describe('toastStore', () => {
       state.show({ title: 'Second' });
 
       const messages = toastStore.getState().messages;
-      expect(messages[0].id).not.toBe(messages[1].id);
+      expect(messages[0]!.id).not.toBe(messages[1]!.id);
     });
   });
 
@@ -59,7 +59,7 @@ describe('toastStore', () => {
       const state = toastStore.getState();
       state.show({ title: 'To Remove' });
 
-      const messageId = toastStore.getState().messages[0].id;
+      const messageId = toastStore.getState().messages[0]!.id;
       state.dismiss(messageId);
 
       expect(toastStore.getState().messages).toHaveLength(0);
@@ -72,13 +72,13 @@ describe('toastStore', () => {
       state.show({ title: 'Third' });
 
       const messages = toastStore.getState().messages;
-      const secondId = messages[1].id;
+      const secondId = messages[1]!.id;
       state.dismiss(secondId);
 
       const remaining = toastStore.getState().messages;
       expect(remaining).toHaveLength(2);
-      expect(remaining[0].title).toBe('First');
-      expect(remaining[1].title).toBe('Third');
+      expect(remaining[0]!.title).toBe('First');
+      expect(remaining[1]!.title).toBe('Third');
     });
 
     it('should handle dismissing non-existent id gracefully', () => {

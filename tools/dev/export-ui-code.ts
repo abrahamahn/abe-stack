@@ -86,6 +86,7 @@ function parseArgs(args: string[]): ExportOptions {
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
+    if (arg === undefined) continue;
 
     if (arg === '--include-tests') {
       options.includeTests = true;

@@ -155,10 +155,7 @@ export type RecordMap = {
 /**
  * Validate a record against its schema
  */
-export function validateRecord<T extends TableName>(
-  table: T,
-  data: unknown
-): TableRecord<T> {
+export function validateRecord<T extends TableName>(table: T, data: unknown): TableRecord<T> {
   return Tables[table].parse(data) as TableRecord<T>;
 }
 
@@ -167,7 +164,7 @@ export function validateRecord<T extends TableName>(
  */
 export function safeValidateRecord<T extends TableName>(
   table: T,
-  data: unknown
+  data: unknown,
 ): z.SafeParseReturnType<unknown, TableRecord<T>> {
   return Tables[table].safeParse(data) as z.SafeParseReturnType<unknown, TableRecord<T>>;
 }

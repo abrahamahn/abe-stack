@@ -1,9 +1,9 @@
 import { buildConnectionString, createDbClient } from '@db/client';
-import { createStorage } from '@storage/storageFactory';
-import { toStorageConfig } from '@storage/configFromEnv';
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
+import { toStorageConfig } from '@storage/configFromEnv';
+import { createStorage } from '@storage/storageFactory';
 import { sql } from 'drizzle-orm';
 import Fastify, { type FastifyInstance } from 'fastify';
 

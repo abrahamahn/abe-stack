@@ -1,2 +1,2 @@
-// Re-export from shared package for backwards compatibility
-export { toastStore, type ToastMessage } from '@contracts';
+// Re-export from shared stores
+export { toastStore, type ToastMessage } from '@stores';

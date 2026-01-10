@@ -1,6 +1,7 @@
 # ABE-Stack Master TODO
 
 This document contains three parts:
+
 - **Part A**: Single Entry Point Configuration (immediate priority)
 - **Part B**: Pure Architecture Transformation (adopting chet-stack patterns)
 - **Part C**: Boilerplate Delivery Plan (production readiness checklist)
@@ -80,34 +81,34 @@ export function handleLogin(env: ServerEnvironment, body: LoginRequest) {
 **Step 1: Create ServerEnvironment type** (`packages/core/src/server/ServerEnvironment.ts`)
 
 ```typescript
-import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js'
-import type { StorageProvider } from '../storage'
-import type * as schema from '../db/schema'
+import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import type { StorageProvider } from '../storage';
+import type * as schema from '../db/schema';
 
 export type ServerConfig = {
-  port: number
-  host: string
-  cookieSecret: string
-  sessionMaxAge: number  // milliseconds
-  env: 'development' | 'production' | 'test'
-  corsOrigin: string | boolean
-}
+  port: number;
+  host: string;
+  cookieSecret: string;
+  sessionMaxAge: number; // milliseconds
+  env: 'development' | 'production' | 'test';
+  corsOrigin: string | boolean;
+};
 
 export type ServerEnvironment = {
-  config: ServerConfig
-  db: PostgresJsDatabase<typeof schema>
-  storage: StorageProvider
+  config: ServerConfig;
+  db: PostgresJsDatabase<typeof schema>;
+  storage: StorageProvider;
   // Phase 4: pubsub: PubsubServer
   // Phase 6: queue: QueueServer
-}
+};
 
 // Factory function - explicit, testable
 export function createServerEnvironment(
   config: ServerConfig,
   db: PostgresJsDatabase<typeof schema>,
-  storage: StorageProvider
+  storage: StorageProvider,
 ): ServerEnvironment {
-  return { config, db, storage }
+  return { config, db, storage };
 }
 ```
 
@@ -117,44 +118,44 @@ export function createServerEnvironment(
 // BEFORE (current): 110 lines, multiple concerns mixed
 // AFTER (target): ~40 lines, single responsibility
 
-import http from 'http'
-import Fastify from 'fastify'
-import cookie from '@fastify/cookie'
-import cors from '@fastify/cors'
-import { createDbClient } from '@abe/core/db'
-import { createStorage } from '@abe/core/storage'
-import { createServerEnvironment, type ServerEnvironment } from '@abe/core/server'
-import { loadServerEnv } from '@abe/core/env'
-import { registerApi } from './api'
+import http from 'http';
+import Fastify from 'fastify';
+import cookie from '@fastify/cookie';
+import cors from '@fastify/cors';
+import { createDbClient } from '@abe/core/db';
+import { createStorage } from '@abe/core/storage';
+import { createServerEnvironment, type ServerEnvironment } from '@abe/core/server';
+import { loadServerEnv } from '@abe/core/env';
+import { registerApi } from './api';
 
 // Validate env at startup
-const config = loadServerEnv(process.env)
+const config = loadServerEnv(process.env);
 
 // Create environment (single source of all dependencies)
-const db = createDbClient(config.DATABASE_URL)
-const storage = createStorage(config)
-const env = createServerEnvironment(config, db, storage)
+const db = createDbClient(config.DATABASE_URL);
+const storage = createStorage(config);
+const env = createServerEnvironment(config, db, storage);
 
 // Create Fastify app
-const app = Fastify({ logger: true })
+const app = Fastify({ logger: true });
 
 // Register minimal plugins
-await app.register(cors, { origin: config.corsOrigin, credentials: true })
-await app.register(cookie, { secret: config.cookieSecret })
+await app.register(cors, { origin: config.corsOrigin, credentials: true });
+await app.register(cookie, { secret: config.cookieSecret });
 
 // Single decoration - the environment
-app.decorate('env', env)
+app.decorate('env', env);
 
 // Register all API routes (passing env explicitly)
-registerApi(app, env)
+registerApi(app, env);
 
 // Create HTTP server (needed for WebSocket in Phase 4)
-const server = http.createServer(app.server)
+const server = http.createServer(app.server);
 
 // Start
 server.listen(config.port, config.host, () => {
-  app.log.info(`Server listening on http://${config.host}:${config.port}`)
-})
+  app.log.info(`Server listening on http://${config.host}:${config.port}`);
+});
 ```
 
 **Step 3: Refactor API handlers** (`apps/server/src/api/auth.ts`)
@@ -232,29 +233,29 @@ function MyComponent() {
 **Step 1: Create ClientEnvironment type** (`packages/core/src/client/ClientEnvironment.ts`)
 
 ```typescript
-import type { ApiClient } from '../api/client'
-import type { QueryClient } from '@tanstack/react-query'
+import type { ApiClient } from '../api/client';
+import type { QueryClient } from '@tanstack/react-query';
 
 export type ClientConfig = {
-  apiUrl: string
-  wsUrl: string  // Phase 4
-  env: 'development' | 'production' | 'test'
-}
+  apiUrl: string;
+  wsUrl: string; // Phase 4
+  env: 'development' | 'production' | 'test';
+};
 
 export type AuthState = {
-  user: User | null
-  isAuthenticated: boolean
-  isLoading: boolean
-  login: (email: string, password: string) => Promise<void>
-  logout: () => Promise<void>
-  refresh: () => Promise<void>
-}
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  refresh: () => Promise<void>;
+};
 
 export type ClientEnvironment = {
-  config: ClientConfig
-  api: ApiClient
-  auth: AuthState
-  queryClient: QueryClient
+  config: ClientConfig;
+  api: ApiClient;
+  auth: AuthState;
+  queryClient: QueryClient;
   // Phase 4:
   // pubsub: PubsubClient
   // subscriptionCache: SubscriptionCache
@@ -264,7 +265,7 @@ export type ClientEnvironment = {
   // transactionQueue: TransactionQueue
   // Phase 6:
   // undoRedo: UndoRedoStack
-}
+};
 ```
 
 **Step 2: Create EnvironmentProvider** (`packages/core/src/client/EnvironmentProvider.tsx`)
@@ -446,6 +447,7 @@ export function App() {
 ## A.3 Package Consolidation
 
 ### Current: 11 packages
+
 ```
 packages/shared/      → env, contracts, utils, stores
 packages/db/          → schema, client, migrations
@@ -456,6 +458,7 @@ packages/setup/       → CLI tool (KEEP SEPARATE)
 ```
 
 ### Target: 3 packages
+
 ```
 packages/core/        → EVERYTHING except UI and CLI
 ├── src/
@@ -501,20 +504,22 @@ packages/setup/       → KEEP (CLI tool)
 - [ ] **A.3.5** Move `packages/storage/src/*` → `packages/core/src/storage/`
 - [ ] **A.3.6** Create `packages/core/package.json` with correct exports
 - [ ] **A.3.7** Update all imports in `apps/web`, `apps/server`, `apps/desktop`, `apps/mobile`
+
   ```typescript
   // BEFORE
-  import { serverEnvSchema } from '@abe-stack/shared'
-  import { createDbClient } from '@abe-stack/db'
-  import { createApiClient } from '@abe-stack/api-client'
-  import { createStorage } from '@abe-stack/storage'
+  import { serverEnvSchema } from '@abe-stack/shared';
+  import { createDbClient } from '@abe-stack/db';
+  import { createApiClient } from '@abe-stack/api-client';
+  import { createStorage } from '@abe-stack/storage';
 
   // AFTER
-  import { serverEnvSchema, createDbClient, createApiClient, createStorage } from '@abe/core'
+  import { serverEnvSchema, createDbClient, createApiClient, createStorage } from '@abe/core';
   // OR with subpaths:
-  import { createDbClient } from '@abe/core/db'
-  import { createServerEnvironment } from '@abe/core/server'
-  import { EnvironmentProvider } from '@abe/core/client'
+  import { createDbClient } from '@abe/core/db';
+  import { createServerEnvironment } from '@abe/core/server';
+  import { EnvironmentProvider } from '@abe/core/client';
   ```
+
 - [ ] **A.3.8** Delete old packages: `packages/shared`, `packages/db`, `packages/api-client`, `packages/storage`
 - [ ] **A.3.9** Update `pnpm-workspace.yaml`
 - [ ] **A.3.10** Update root `package.json` scripts
@@ -564,18 +569,18 @@ abe-stack/
 
 ## Summary: Key Differences from chet-stack
 
-| Aspect | chet-stack | abe-stack (after transform) |
-|--------|------------|----------------------------|
-| HTTP Framework | Express | Fastify (keep - better DX) |
-| Database | Custom SQL | Drizzle ORM (keep - type safety) |
-| Router (client) | Custom | React Router (keep - ecosystem) |
-| Query Layer | Custom | React Query (keep - caching) |
-| Schema | Single schema.ts | Single schema.ts ✅ |
-| Entry Points | Single env objects | Single env objects ✅ |
-| Package Structure | Single src/ | Single @abe/core ✅ |
-| Auth | Cookie sessions | Cookie sessions (Phase 3) |
-| Real-time | WebSocket PubSub | WebSocket PubSub (Phase 4) |
-| Offline | IndexedDB + Queue | IndexedDB + Queue (Phase 5) |
+| Aspect            | chet-stack         | abe-stack (after transform)      |
+| ----------------- | ------------------ | -------------------------------- |
+| HTTP Framework    | Express            | Fastify (keep - better DX)       |
+| Database          | Custom SQL         | Drizzle ORM (keep - type safety) |
+| Router (client)   | Custom             | React Router (keep - ecosystem)  |
+| Query Layer       | Custom             | React Query (keep - caching)     |
+| Schema            | Single schema.ts   | Single schema.ts ✅              |
+| Entry Points      | Single env objects | Single env objects ✅            |
+| Package Structure | Single src/        | Single @abe/core ✅              |
+| Auth              | Cookie sessions    | Cookie sessions (Phase 3)        |
+| Real-time         | WebSocket PubSub   | WebSocket PubSub (Phase 4)       |
+| Offline           | IndexedDB + Queue  | IndexedDB + Queue (Phase 5)      |
 
 ---
 
@@ -634,6 +639,7 @@ Phase 6: Additional Features
 ## 3.1 Replace JWT with Cookie Sessions
 
 ### Current State (Complex)
+
 ```
 Login → JWT access token (15 min, in memory)
       → Refresh token (7 days, HTTP-only cookie)
@@ -642,6 +648,7 @@ Login → JWT access token (15 min, in memory)
 ```
 
 ### Target State (Simple)
+
 ```
 Login → Session token (HTTP-only cookie)
       → Server validates on each request
@@ -653,57 +660,46 @@ Login → Session token (HTTP-only cookie)
 - [ ] **3.1.1** Add sessions table to schema (done in 1.2.1)
 
 - [ ] **3.1.2** Create session service
+
   ```typescript
   // packages/core/src/services/session.ts
-  import { nanoid } from 'nanoid'
-  import type { ServerEnvironment } from './ServerEnvironment'
+  import { nanoid } from 'nanoid';
+  import type { ServerEnvironment } from './ServerEnvironment';
 
-  const SESSION_MAX_AGE = 7 * 24 * 60 * 60 * 1000 // 7 days
+  const SESSION_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-  export async function createSession(
-    env: ServerEnvironment,
-    userId: string
-  ): Promise<string> {
-    const token = nanoid(32)
-    const expiresAt = new Date(Date.now() + SESSION_MAX_AGE)
+  export async function createSession(env: ServerEnvironment, userId: string): Promise<string> {
+    const token = nanoid(32);
+    const expiresAt = new Date(Date.now() + SESSION_MAX_AGE);
 
     await env.db.insert(sessions).values({
       id: nanoid(),
       userId,
       token,
       expiresAt,
-    })
+    });
 
-    return token
+    return token;
   }
 
   export async function validateSession(
     env: ServerEnvironment,
-    token: string
+    token: string,
   ): Promise<{ userId: string } | null> {
     const session = await env.db.query.sessions.findFirst({
-      where: (s, { eq, gt, and }) => and(
-        eq(s.token, token),
-        gt(s.expiresAt, new Date())
-      ),
-    })
+      where: (s, { eq, gt, and }) => and(eq(s.token, token), gt(s.expiresAt, new Date())),
+    });
 
-    if (!session) return null
-    return { userId: session.userId }
+    if (!session) return null;
+    return { userId: session.userId };
   }
 
-  export async function deleteSession(
-    env: ServerEnvironment,
-    token: string
-  ): Promise<void> {
-    await env.db.delete(sessions).where(eq(sessions.token, token))
+  export async function deleteSession(env: ServerEnvironment, token: string): Promise<void> {
+    await env.db.delete(sessions).where(eq(sessions.token, token));
   }
 
-  export async function deleteUserSessions(
-    env: ServerEnvironment,
-    userId: string
-  ): Promise<void> {
-    await env.db.delete(sessions).where(eq(sessions.userId, userId))
+  export async function deleteUserSessions(env: ServerEnvironment, userId: string): Promise<void> {
+    await env.db.delete(sessions).where(eq(sessions.userId, userId));
   }
   ```
 
@@ -728,6 +724,7 @@ Login → Session token (HTTP-only cookie)
 ### Tasks
 
 - [ ] **4.1.1** Install ws package
+
   ```bash
   pnpm add ws
   pnpm add -D @types/ws
@@ -810,26 +807,31 @@ Login → Session token (HTTP-only cookie)
 ## Phase-Specific Tests
 
 ### Phase 1 Tests
+
 - [ ] Imports resolve correctly after package merge
 - [ ] Schema types are consistent across packages
 
 ### Phase 2 Tests
+
 - [ ] ServerEnvironment is accessible in all routes
 - [ ] ClientEnvironment is accessible via hook
 
 ### Phase 3 Tests
+
 - [ ] Login sets cookie
 - [ ] Logout clears cookie
 - [ ] Protected routes check cookie
 - [ ] Session expires correctly
 
 ### Phase 4 Tests
+
 - [ ] WebSocket connects
 - [ ] Subscribe/unsubscribe works
 - [ ] Updates propagate to subscribers
 - [ ] Reconnection works
 
 ### Phase 5 Tests
+
 - [ ] Records cache in memory
 - [ ] Records persist to IndexedDB
 - [ ] Offline changes queue
@@ -837,6 +839,7 @@ Login → Session token (HTTP-only cookie)
 - [ ] Service worker caches assets
 
 ### Phase 6 Tests
+
 - [ ] Undo/redo works
 - [ ] Jobs process correctly
 - [ ] Failed jobs retry
@@ -846,45 +849,50 @@ Login → Session token (HTTP-only cookie)
 # Migration Guide
 
 ## Import Changes
+
 ```typescript
 // BEFORE
-import { apiContract } from '@abe-stack/shared'
-import { db } from '@abe-stack/db'
-import { createStorage } from '@abe-stack/storage'
-import { createApiClient } from '@abe-stack/api-client'
+import { apiContract } from '@abe-stack/shared';
+import { db } from '@abe-stack/db';
+import { createStorage } from '@abe-stack/storage';
+import { createApiClient } from '@abe-stack/api-client';
 
 // AFTER
-import { apiContract, db, createStorage, createApiClient } from '@abe/core'
+import { apiContract, db, createStorage, createApiClient } from '@abe/core';
 ```
 
 ## Auth Changes
+
 ```typescript
 // BEFORE (JWT)
-const token = localStorage.getItem('token')
-headers: { Authorization: `Bearer ${token}` }
+const token = localStorage.getItem('token');
+headers: {
+  Authorization: `Bearer ${token}`;
+}
 
 // AFTER (Cookies)
-credentials: 'include' // That's it!
+credentials: 'include'; // That's it!
 ```
 
 ## Environment Access
+
 ```typescript
 // BEFORE (Server)
-request.server.db
-request.server.storage
+request.server.db;
+request.server.storage;
 
 // AFTER (Server)
-request.server.env.db
-request.server.env.storage
+request.server.env.db;
+request.server.env.storage;
 
 // BEFORE (Client)
-useAuth()
-useApi()
+useAuth();
+useApi();
 
 // AFTER (Client)
-const env = useEnvironment()
-env.auth
-env.api
+const env = useEnvironment();
+env.auth;
+env.api;
 ```
 
 ---
@@ -892,6 +900,7 @@ env.api
 # Dependencies
 
 ## To Add
+
 ```bash
 # Phase 4 - WebSocket
 pnpm add ws
@@ -905,6 +914,7 @@ pnpm add nanoid
 ```
 
 ## To Remove (After Migration)
+
 ```bash
 # After Phase 3 - Remove JWT
 pnpm remove jsonwebtoken @types/jsonwebtoken
@@ -914,14 +924,14 @@ pnpm remove jsonwebtoken @types/jsonwebtoken
 
 # Estimated Timeline
 
-| Phase | Duration | Dependencies |
-|-------|----------|--------------|
-| Phase 1 | 3-5 days | None |
-| Phase 2 | 2-3 days | Phase 1 |
-| Phase 3 | 2-3 days | Phase 2 |
-| Phase 4 | 3-5 days | Phase 2 |
-| Phase 5 | 5-7 days | Phase 4 |
-| Phase 6 | 3-5 days | Phase 5 |
+| Phase   | Duration | Dependencies |
+| ------- | -------- | ------------ |
+| Phase 1 | 3-5 days | None         |
+| Phase 2 | 2-3 days | Phase 1      |
+| Phase 3 | 2-3 days | Phase 2      |
+| Phase 4 | 3-5 days | Phase 2      |
+| Phase 5 | 5-7 days | Phase 4      |
+| Phase 6 | 3-5 days | Phase 5      |
 
 **Total: 3-4 weeks**
 
@@ -941,7 +951,9 @@ After completing all phases:
 - [ ] **Multi-platform**: Web, desktop, mobile still supported
 
 ---
+
 ---
+
 ---
 
 # Part C: Boilerplate Delivery Plan

@@ -6,19 +6,20 @@ This document provides a deep comparison between **chet-stack** (ccorcos/chet-st
 
 ### Philosophy Comparison
 
-| Aspect | Chet Stack | ABE Stack |
-|--------|------------|-----------|
-| **Philosophy** | "Boilerplate, not a framework" - minimal abstractions, maximum control | Full-featured monorepo with abstraction layers |
-| **Complexity** | Simple, single-process, ~18 shared files | Complex, multi-package monorepo with 11 packages |
-| **Scaling Approach** | Start simple, break out services when needed | Pre-optimized for scale from the start |
-| **Dependencies** | Minimal, battle-tested libraries | Rich ecosystem with many specialized packages |
-| **Target** | Developers who want to understand every line | Teams wanting productivity with conventions |
+| Aspect               | Chet Stack                                                             | ABE Stack                                        |
+| -------------------- | ---------------------------------------------------------------------- | ------------------------------------------------ |
+| **Philosophy**       | "Boilerplate, not a framework" - minimal abstractions, maximum control | Full-featured monorepo with abstraction layers   |
+| **Complexity**       | Simple, single-process, ~18 shared files                               | Complex, multi-package monorepo with 11 packages |
+| **Scaling Approach** | Start simple, break out services when needed                           | Pre-optimized for scale from the start           |
+| **Dependencies**     | Minimal, battle-tested libraries                                       | Rich ecosystem with many specialized packages    |
+| **Target**           | Developers who want to understand every line                           | Teams wanting productivity with conventions      |
 
 ---
 
 ## 1. Project Structure Comparison
 
 ### Chet Stack Structure (Pure & Simple)
+
 ```
 chet-stack/
 ├── src/
@@ -54,6 +55,7 @@ chet-stack/
 ```
 
 ### ABE Stack Structure (Feature-Rich Monorepo)
+
 ```
 abe-stack/
 ├── apps/
@@ -88,16 +90,18 @@ abe-stack/
 ### Chet Stack: Environment Object Pattern (Pure)
 
 **Server Side** (`ServerEnvironment.ts`):
+
 ```typescript
 export type ServerEnvironment = {
-  config: ServerConfig
-  db: DatabaseApi
-  pubsub: PubsubApi
-  queue: QueueDatabaseApi
-}
+  config: ServerConfig;
+  db: DatabaseApi;
+  pubsub: PubsubApi;
+  queue: QueueDatabaseApi;
+};
 ```
 
 **Client Side** (`ClientEnvironment`):
+
 ```typescript
 const environment = {
   router: new Router(),
@@ -108,7 +112,7 @@ const environment = {
   subscriptionCache: new SubscriptionCache(),
   transactionQueue: new TransactionQueue(),
   undoRedo: new UndoRedoStack(),
-}
+};
 ```
 
 **Philosophy**: All dependencies bundled into a single "environment" object that flows through the entire application. No magic, no decorators, just plain objects.
@@ -116,13 +120,15 @@ const environment = {
 ### ABE Stack: Decorated/Provider Pattern
 
 **Server Side** (Fastify decoration):
+
 ```typescript
-app.decorate('db', db)
-app.decorate('storage', storage)
+app.decorate('db', db);
+app.decorate('storage', storage);
 // Accessed via request.server.db
 ```
 
 **Client Side** (React Context providers):
+
 ```typescript
 <QueryClientProvider>
   <AuthProvider>
@@ -142,19 +148,19 @@ app.decorate('storage', storage)
 ```typescript
 // shared/environment.ts
 export type ClientEnvironment = {
-  api: ApiClient
-  auth: AuthService
-  router: Router
-  cache: RecordCache
-  storage: RecordStorage
-}
+  api: ApiClient;
+  auth: AuthService;
+  router: Router;
+  cache: RecordCache;
+  storage: RecordStorage;
+};
 
 export type ServerEnvironment = {
-  config: ServerConfig
-  db: DatabaseClient
-  storage: StorageProvider
-  pubsub: PubsubServer
-}
+  config: ServerConfig;
+  db: DatabaseClient;
+  storage: StorageProvider;
+  pubsub: PubsubServer;
+};
 ```
 
 ---
@@ -164,41 +170,43 @@ export type ServerEnvironment = {
 ### Chet Stack: Single Schema File (Pure)
 
 **`shared/schema.ts`** - One file defines ALL data types:
+
 ```typescript
 // Every record has id + version (for sync)
 export type UserRecord = {
-  id: string
-  version: number
-  username: string
-  created_at: string
-}
+  id: string;
+  version: number;
+  username: string;
+  created_at: string;
+};
 
 export type MessageRecord = {
-  id: string
-  version: number
-  thread_id: string
-  user_id: string
-  content: string
-  created_at: string
-}
+  id: string;
+  version: number;
+  thread_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+};
 
 // Type mapping
 export type TableToRecord = {
-  user: UserRecord
-  message: MessageRecord
+  user: UserRecord;
+  message: MessageRecord;
   // ...
-}
+};
 
 // Runtime validation
 export const recordSchemas = {
   user: validateUserRecord,
   message: validateMessageRecord,
-}
+};
 ```
 
 ### ABE Stack: Distributed Schemas
 
 **Multiple locations**:
+
 - `packages/db/src/schema/users.ts` - Drizzle ORM schema
 - `packages/shared/src/contracts/index.ts` - ts-rest API contracts
 - Zod schemas scattered across contracts
@@ -209,7 +217,7 @@ export const recordSchemas = {
 
 ```typescript
 // packages/shared/src/schema.ts - THE source of truth
-import { z } from 'zod'
+import { z } from 'zod';
 
 // Define schemas once
 export const UserSchema = z.object({
@@ -219,9 +227,9 @@ export const UserSchema = z.object({
   name: z.string().optional(),
   role: z.enum(['user', 'admin', 'moderator']),
   createdAt: z.date(),
-})
+});
 
-export type User = z.infer<typeof UserSchema>
+export type User = z.infer<typeof UserSchema>;
 
 // Generate Drizzle schema FROM this
 // Generate API contracts FROM this
@@ -237,19 +245,20 @@ export type User = z.infer<typeof UserSchema>
 // server/apis/login.ts - Just create a file!
 export async function login(
   environment: ServerEnvironment,
-  args: { username: string; password: string }
+  args: { username: string; password: string },
 ) {
-  const user = await environment.db.getUser(args.username)
+  const user = await environment.db.getUser(args.username);
   // ... authentication logic
-  return { userId: user.id, token: token }
+  return { userId: user.id, token: token };
 }
 ```
 
 The `autoindex` package automatically discovers and wires up APIs. No manual routing needed.
 
 **Client calls**:
+
 ```typescript
-const result = await environment.api.login({ username, password })
+const result = await environment.api.login({ username, password });
 ```
 
 ### ABE Stack: ts-rest Contracts
@@ -268,7 +277,7 @@ export const apiContract = c.router({
       },
     },
   },
-})
+});
 
 // apps/server/src/routes/index.ts
 // Must manually implement each route
@@ -276,16 +285,17 @@ export const apiContract = c.router({
 
 ### Trade-off Analysis
 
-| Aspect | Chet Stack | ABE Stack |
-|--------|------------|-----------|
-| Boilerplate | Very low (auto-indexed) | Medium (contracts + implementations) |
-| Type Safety | Manual types | Full end-to-end types |
-| Documentation | Implicit | Explicit (contracts are self-documenting) |
-| Validation | Manual | Automatic (Zod) |
+| Aspect        | Chet Stack              | ABE Stack                                 |
+| ------------- | ----------------------- | ----------------------------------------- |
+| Boilerplate   | Very low (auto-indexed) | Medium (contracts + implementations)      |
+| Type Safety   | Manual types            | Full end-to-end types                     |
+| Documentation | Implicit                | Explicit (contracts are self-documenting) |
+| Validation    | Manual                  | Automatic (Zod)                           |
 
 ### Recommendation for Purity
 
 Keep ts-rest for type safety but simplify the structure:
+
 - Move contracts closer to implementations
 - Consider code generation for boilerplate reduction
 
@@ -296,18 +306,20 @@ Keep ts-rest for type safety but simplify the structure:
 ### Chet Stack: Custom Implementation (Pure)
 
 **RecordCache** - In-memory database:
+
 ```typescript
 class RecordCache {
-  private records: RecordMap = {}
-  private listeners: Set<Listener> = new Set()
+  private records: RecordMap = {};
+  private listeners: Set<Listener> = new Set();
 
-  get<T extends TableName>(table: T, id: string): RecordValue<T> | undefined
-  set<T extends TableName>(table: T, id: string, record: RecordValue<T>): void
-  subscribe(listener: Listener): () => void
+  get<T extends TableName>(table: T, id: string): RecordValue<T> | undefined;
+  set<T extends TableName>(table: T, id: string, record: RecordValue<T>): void;
+  subscribe(listener: Listener): () => void;
 }
 ```
 
 **RecordStorage** - IndexedDB persistence:
+
 ```typescript
 class RecordStorage {
   // Mirrors RecordCache structure in IndexedDB
@@ -316,6 +328,7 @@ class RecordStorage {
 ```
 
 **LoaderCache** - Request deduplication for React Suspense:
+
 ```typescript
 class LoaderCache {
   // Tracks loading states
@@ -331,17 +344,18 @@ class LoaderCache {
 
 ### Trade-off Analysis
 
-| Aspect | Chet Stack | ABE Stack |
-|--------|------------|-----------|
-| Offline Support | Built-in (IndexedDB + TransactionQueue) | Not built-in |
-| Bundle Size | Smaller (custom code) | Larger (libraries) |
-| Learning Curve | Higher (custom APIs) | Lower (standard libraries) |
-| Maintenance | You maintain it | Community maintains it |
-| Real-time Sync | Built-in pubsub | Would need to add |
+| Aspect          | Chet Stack                              | ABE Stack                  |
+| --------------- | --------------------------------------- | -------------------------- |
+| Offline Support | Built-in (IndexedDB + TransactionQueue) | Not built-in               |
+| Bundle Size     | Smaller (custom code)                   | Larger (libraries)         |
+| Learning Curve  | Higher (custom APIs)                    | Lower (standard libraries) |
+| Maintenance     | You maintain it                         | Community maintains it     |
+| Real-time Sync  | Built-in pubsub                         | Would need to add          |
 
 ### Recommendation for Purity
 
 For a "pure" approach like chet-stack, consider:
+
 1. Keep React Query for caching (it's excellent)
 2. Add IndexedDB persistence layer
 3. Implement proper offline queue
@@ -354,19 +368,21 @@ For a "pure" approach like chet-stack, consider:
 ### Chet Stack: First-Class Citizens
 
 **PubSub System**:
+
 ```typescript
 // Server publishes updates
-environment.pubsub.publish({ table: 'message', id: messageId, version: newVersion })
+environment.pubsub.publish({ table: 'message', id: messageId, version: newVersion });
 
 // Client subscribes
 environment.subscriptionCache.subscribe('message', messageId, (update) => {
   if (update.version > localVersion) {
     // Fetch and update cache
   }
-})
+});
 ```
 
 **Offline Queue**:
+
 ```typescript
 class TransactionQueue {
   // Persists to localStorage
@@ -376,6 +392,7 @@ class TransactionQueue {
 ```
 
 **Service Worker**:
+
 ```typescript
 // Network-first with cache fallback
 // Always tries fresh content first
@@ -393,27 +410,29 @@ class TransactionQueue {
 This is a **major gap** in abe-stack. To achieve chet-stack purity:
 
 1. **Add PubSub Server**:
+
 ```typescript
 // apps/server/src/services/PubsubServer.ts
 export class PubsubServer {
-  private wss: WebSocketServer
-  private subscriptions: Map<string, Set<WebSocket>>
+  private wss: WebSocketServer;
+  private subscriptions: Map<string, Set<WebSocket>>;
 
-  publish(key: string, data: any): void
-  subscribe(ws: WebSocket, key: string): void
+  publish(key: string, data: any): void;
+  subscribe(ws: WebSocket, key: string): void;
 }
 ```
 
 2. **Add Transaction Queue**:
+
 ```typescript
 // packages/shared/src/services/TransactionQueue.ts
 export class TransactionQueue {
-  private queue: Transaction[] = []
+  private queue: Transaction[] = [];
 
-  enqueue(transaction: Transaction): void
-  dequeue(): Promise<void>
-  persist(): void  // to localStorage
-  restore(): void  // from localStorage
+  enqueue(transaction: Transaction): void;
+  dequeue(): Promise<void>;
+  persist(): void; // to localStorage
+  restore(): void; // from localStorage
 }
 ```
 
@@ -446,17 +465,18 @@ const session = await db.getAuthToken(token)
 
 ### Trade-off Analysis
 
-| Aspect | Chet Stack | ABE Stack |
-|--------|------------|-----------|
-| Simplicity | Very simple | More complex |
-| Stateless | No (server stores tokens) | Yes (JWT is stateless) |
-| Revocation | Easy (delete from DB) | Hard (need blocklist) |
-| Token Size | Small (UUID) | Large (JWT payload) |
-| XSS Protection | Full (HTTP-only) | Partial (access token exposed) |
+| Aspect         | Chet Stack                | ABE Stack                      |
+| -------------- | ------------------------- | ------------------------------ |
+| Simplicity     | Very simple               | More complex                   |
+| Stateless      | No (server stores tokens) | Yes (JWT is stateless)         |
+| Revocation     | Easy (delete from DB)     | Hard (need blocklist)          |
+| Token Size     | Small (UUID)              | Large (JWT payload)            |
+| XSS Protection | Full (HTTP-only)          | Partial (access token exposed) |
 
 ### Recommendation for Purity
 
 Chet-stack's approach is simpler and more secure. Consider:
+
 - Switch to pure cookie-based sessions
 - Store session tokens in database
 - Remove JWT complexity
@@ -469,14 +489,14 @@ Chet-stack's approach is simpler and more secure. Consider:
 
 ```typescript
 // tools/build.ts - One file handles everything
-import estrella from 'estrella'
+import estrella from 'estrella';
 
 estrella.build({
   entry: 'src/client/index.tsx',
   outfile: 'build/client.js',
   bundle: true,
   // ...
-})
+});
 ```
 
 **Single `npm start`** runs everything.
@@ -492,22 +512,24 @@ estrella.build({
 
 ### Trade-off Analysis
 
-| Aspect | Chet Stack | ABE Stack |
-|--------|------------|-----------|
-| Build Speed | Fast (esbuild) | Fast (Vite + Turbo cache) |
-| Complexity | Very low | High |
-| Caching | No | Yes (Turbo) |
-| Parallelization | No | Yes (Turbo) |
-| Monorepo Support | No | Yes |
+| Aspect           | Chet Stack     | ABE Stack                 |
+| ---------------- | -------------- | ------------------------- |
+| Build Speed      | Fast (esbuild) | Fast (Vite + Turbo cache) |
+| Complexity       | Very low       | High                      |
+| Caching          | No             | Yes (Turbo)               |
+| Parallelization  | No             | Yes (Turbo)               |
+| Monorepo Support | No             | Yes                       |
 
 ### Recommendation for Purity
 
 If you want chet-stack purity:
+
 - Consider collapsing to a single package
 - Use esbuild directly instead of Vite
 - Single tsconfig.json with paths
 
 If you need monorepo:
+
 - Keep Turborepo but simplify configs
 - Reduce number of packages
 
@@ -520,11 +542,11 @@ If you need monorepo:
 ```typescript
 // Start with file-based storage
 class Database {
-  private data: Record<string, Record<string, any>> = {}
+  private data: Record<string, Record<string, any>> = {};
 
-  get(table: string, id: string): any
-  set(table: string, id: string, record: any): void
-  save(): void  // Write to file
+  get(table: string, id: string): any;
+  set(table: string, id: string, record: any): void;
+  save(): void; // Write to file
 }
 
 // Migrate to SQLite/Postgres when needed
@@ -539,21 +561,22 @@ export const users = pgTable('users', {
   email: text('email').notNull().unique(),
   passwordHash: text('password_hash').notNull(),
   // ...
-})
+});
 ```
 
 ### Trade-off Analysis
 
-| Aspect | Chet Stack | ABE Stack |
-|--------|------------|-----------|
-| Initial Setup | Zero (JSON file) | Complex (Docker + Postgres) |
-| Production Ready | No (file-based) | Yes |
-| Migrations | Manual | drizzle-kit |
-| Type Safety | Manual | Inferred from schema |
+| Aspect           | Chet Stack       | ABE Stack                   |
+| ---------------- | ---------------- | --------------------------- |
+| Initial Setup    | Zero (JSON file) | Complex (Docker + Postgres) |
+| Production Ready | No (file-based)  | Yes                         |
+| Migrations       | Manual           | drizzle-kit                 |
+| Type Safety      | Manual           | Inferred from schema        |
 
 ### Recommendation
 
 ABE Stack's database approach is more production-ready. Keep Drizzle ORM but:
+
 - Simplify migration workflow
 - Consider SQLite for development (like chet-stack suggests)
 
@@ -562,6 +585,7 @@ ABE Stack's database approach is more production-ready. Keep Drizzle ORM but:
 ## 10. Summary: Path to Purity
 
 ### What ABE Stack Does Well
+
 1. ✅ Type-safe API contracts (ts-rest)
 2. ✅ Production-ready database (Drizzle + Postgres)
 3. ✅ Multi-platform support (web, desktop, mobile)
@@ -569,6 +593,7 @@ ABE Stack's database approach is more production-ready. Keep Drizzle ORM but:
 5. ✅ Build caching (Turborepo)
 
 ### What Chet Stack Does Better (Purity)
+
 1. ✨ **Single environment object** for dependency injection
 2. ✨ **Single schema file** as source of truth
 3. ✨ **Auto-indexed APIs** - just create a file
@@ -581,6 +606,7 @@ ABE Stack's database approach is more production-ready. Keep Drizzle ORM but:
 ### Recommended Changes for ABE Stack
 
 #### Priority 1: Architectural Purity
+
 1. **Create unified Environment pattern**
    - `ClientEnvironment` and `ServerEnvironment` types
    - Pass environment through functions, not decorators
@@ -594,6 +620,7 @@ ABE Stack's database approach is more production-ready. Keep Drizzle ORM but:
    - Consider merging `db`, `storage` into one
 
 #### Priority 2: Missing Features
+
 4. **Add PubSub infrastructure**
    - WebSocket server for real-time updates
    - Client subscription management
@@ -604,6 +631,7 @@ ABE Stack's database approach is more production-ready. Keep Drizzle ORM but:
    - Service worker for assets
 
 #### Priority 3: Simplification
+
 6. **Simplify authentication**
    - Consider cookie-based sessions
    - Remove JWT complexity if not needed
@@ -616,31 +644,31 @@ ABE Stack's database approach is more production-ready. Keep Drizzle ORM but:
 
 ## Appendix: Feature Comparison Matrix
 
-| Feature | Chet Stack | ABE Stack |
-|---------|------------|-----------|
-| **Structure** | | |
-| Monorepo | ❌ Single package | ✅ 11 packages |
-| Build Tool | esbuild/estrella | Vite + Turborepo |
-| Package Manager | npm | pnpm |
-| **Frontend** | | |
-| Framework | React 18 | React 19 |
-| Router | Custom | React Router 7 |
-| State (Server) | Custom RecordCache | React Query |
-| State (Client) | Custom | Zustand |
-| Offline | ✅ IndexedDB | ❌ None |
-| Real-time | ✅ WebSocket PubSub | ❌ None |
-| **Backend** | | |
-| Framework | Express | Fastify |
-| Database | JSON file → SQLite | PostgreSQL + Drizzle |
-| Auth | Cookie sessions | JWT + Refresh tokens |
-| File Storage | ✅ FileServer | ✅ Storage package |
-| Background Jobs | ✅ QueueServer | ❌ None |
-| **DevEx** | | |
-| Type Safety | Manual | ts-rest + Zod |
-| API Discovery | Auto-indexed | Manual |
-| Testing | Mocha + Playwright | Vitest + Playwright |
-| Hot Reload | livereload | Vite HMR |
-| **Philosophy** | | |
-| Abstraction Level | Low (understand everything) | High (productivity) |
-| Dependency Count | ~30 | ~150+ |
-| Framework Lock-in | None | Moderate |
+| Feature           | Chet Stack                  | ABE Stack            |
+| ----------------- | --------------------------- | -------------------- |
+| **Structure**     |                             |                      |
+| Monorepo          | ❌ Single package           | ✅ 11 packages       |
+| Build Tool        | esbuild/estrella            | Vite + Turborepo     |
+| Package Manager   | npm                         | pnpm                 |
+| **Frontend**      |                             |                      |
+| Framework         | React 18                    | React 19             |
+| Router            | Custom                      | React Router 7       |
+| State (Server)    | Custom RecordCache          | React Query          |
+| State (Client)    | Custom                      | Zustand              |
+| Offline           | ✅ IndexedDB                | ❌ None              |
+| Real-time         | ✅ WebSocket PubSub         | ❌ None              |
+| **Backend**       |                             |                      |
+| Framework         | Express                     | Fastify              |
+| Database          | JSON file → SQLite          | PostgreSQL + Drizzle |
+| Auth              | Cookie sessions             | JWT + Refresh tokens |
+| File Storage      | ✅ FileServer               | ✅ Storage package   |
+| Background Jobs   | ✅ QueueServer              | ❌ None              |
+| **DevEx**         |                             |                      |
+| Type Safety       | Manual                      | ts-rest + Zod        |
+| API Discovery     | Auto-indexed                | Manual               |
+| Testing           | Mocha + Playwright          | Vitest + Playwright  |
+| Hot Reload        | livereload                  | Vite HMR             |
+| **Philosophy**    |                             |                      |
+| Abstraction Level | Low (understand everything) | High (productivity)  |
+| Dependency Count  | ~30                         | ~150+                |
+| Framework Lock-in | None                        | Moderate             |

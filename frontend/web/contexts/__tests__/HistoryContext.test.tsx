@@ -1,8 +1,8 @@
 // apps/web/src/contexts/__tests__/HistoryContext.test.tsx
 /** @vitest-environment jsdom */
-import { HistoryProvider, useHistoryNav } from '@ui';
 import '@testing-library/jest-dom/vitest';
 import { act, renderHook } from '@testing-library/react';
+import { HistoryProvider, useHistoryNav } from '@ui';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

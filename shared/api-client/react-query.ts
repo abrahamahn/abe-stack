@@ -1,5 +1,7 @@
-import { addAuthHeader, apiContract } from '../contracts';
 import { initQueryClient } from '@ts-rest/react-query';
+
+import { apiContract } from '../contracts';
+import { addAuthHeader } from '../utils';
 
 type ApiCallArgs = {
   path: string;

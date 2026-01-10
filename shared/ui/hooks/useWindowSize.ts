@@ -25,7 +25,7 @@ export function useWindowSize(): WindowSize {
   useEffect((): (() => void) | undefined => {
     if (typeof window === 'undefined') return;
 
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const handleResize = (): void => {
       clearTimeout(timeoutId);

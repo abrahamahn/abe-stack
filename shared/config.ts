@@ -7,7 +7,8 @@
 
 // Detect environment
 const isDev = process.env.NODE_ENV !== 'production';
-const isServer = typeof window === 'undefined';
+// Use globalThis for isomorphic window check (works in Node.js and browser)
+const isServer = typeof (globalThis as { window?: unknown }).window === 'undefined';
 
 /**
  * API Configuration
@@ -49,7 +50,8 @@ export const serverConfig = {
   /** CORS origin */
   corsOrigin: process.env.CORS_ORIGIN || true,
   /** Cookie secret */
-  cookieSecret: process.env.COOKIE_SECRET || process.env.JWT_SECRET || 'dev-secret-change-in-production',
+  cookieSecret:
+    process.env.COOKIE_SECRET || process.env.JWT_SECRET || 'dev-secret-change-in-production',
 } as const;
 
 /**

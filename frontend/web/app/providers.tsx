@@ -1,5 +1,5 @@
-import { HistoryProvider } from '@ui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { HistoryProvider } from '@ui';
 
 import { AuthProvider } from '../features/auth/AuthContext';
 import { ApiProvider } from '../providers/ApiProvider';

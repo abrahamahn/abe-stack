@@ -28,7 +28,7 @@ export function killPort(port: number): void {
       const pids = new Set<string>();
       for (const line of lines) {
         const match = line.trim().match(/\s+(\d+)\s*$/);
-        if (match) {
+        if (match?.[1]) {
           pids.add(match[1]);
         }
       }
