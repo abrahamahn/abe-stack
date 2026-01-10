@@ -1,5 +1,14 @@
 packages:
+  # === Current Structure (V4) ===
   # Applications
   - 'apps/*'
   # Shared packages
   - 'packages/*'
+
+  # === New Structure (V5) ===
+  # Frontend layer - browser/app code
+  - 'frontend/*'
+  # Backend layer - server code
+  - 'backend/*'
+  # Shared layer - cross-layer contracts & types
+  - 'shared/*'

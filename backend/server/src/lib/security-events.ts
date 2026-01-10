@@ -1,8 +1,8 @@
 // apps/server/src/lib/security-events.ts
-import { securityEvents } from '@abe-stack/db';
+import { securityEvents } from '@db';
 import { eq, gte } from 'drizzle-orm';
 
-import type { DbClient } from '@abe-stack/db';
+import type { DbClient } from '@db';
 
 /**
  * Security event types

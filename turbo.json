@@ -40,6 +40,20 @@
     },
     "clean": {
       "cache": false
+    },
+    "shared#build": {
+      "outputs": ["dist/**"],
+      "cache": true
+    },
+    "frontend#build": {
+      "dependsOn": ["shared#build"],
+      "outputs": ["dist/**", "build/**"],
+      "cache": true
+    },
+    "backend#build": {
+      "dependsOn": ["shared#build"],
+      "outputs": ["dist/**"],
+      "cache": true
     }
   },
   "globalDependencies": ["tsconfig.json", ".env", ".env.local"]

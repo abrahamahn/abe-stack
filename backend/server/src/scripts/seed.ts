@@ -1,5 +1,5 @@
 // apps/server/src/scripts/seed.ts
-import { createDbClient, resolveConnectionStringWithFallback, users } from '@abe-stack/db';
+import { createDbClient, resolveConnectionStringWithFallback, users } from '@db';
 import dotenvFlow from 'dotenv-flow';
 
 dotenvFlow.config({ path: '.env' });

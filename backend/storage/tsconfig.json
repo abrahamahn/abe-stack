@@ -14,11 +14,11 @@
     "skipLibCheck": true,
     "baseUrl": "./",
     "paths": {
-      "@abe-stack/shared": ["../shared/dist"],
-      "@abe-stack/shared/*": ["../shared/dist/*"]
+      "@abe-stack/shared": ["../../packages/shared/dist"],
+      "@abe-stack/shared/*": ["../../packages/shared/dist/*"]
     }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],
-  "references": [{ "path": "../shared" }]
+  "references": [{ "path": "../../packages/shared" }]
 }

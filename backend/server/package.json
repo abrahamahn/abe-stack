@@ -1,5 +1,5 @@
 {
-  "name": "@abe-stack/server",
+  "name": "@server",
   "version": "1.0.0",
   "description": "Minimal Fastify server for abe-stack",
   "main": "dist/index.js",
@@ -11,9 +11,9 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@abe-stack/db": "workspace:*",
+    "@db": "workspace:*",
+    "@storage": "workspace:*",
     "@abe-stack/shared": "workspace:*",
-    "@abe-stack/storage": "workspace:*",
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.2.0",
     "@fastify/csrf-protection": "^7.1.0",

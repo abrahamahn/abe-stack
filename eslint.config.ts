@@ -32,6 +32,7 @@ export default [
       '**/babel.config.js',
       'tools/export-ui-code.js',
       'packages/db/drizzle.config.ts',
+      'backend/db/drizzle.config.ts',
       'apps/server/vitest.config.ts',
       'apps/web/src/test/e2e/**',
       'apps/web/vite.config.ts',
@@ -42,8 +43,12 @@ export default [
       'tools/packages/build-theme-css.ts',
       'packages/storage/src/**/*.js',
       'packages/storage/src/**/*.d.ts',
+      'backend/storage/src/**/*.js',
+      'backend/storage/src/**/*.d.ts',
       'packages/db/scripts/**/*.js',
       'packages/db/scripts/**/*.d.ts',
+      'backend/db/scripts/**/*.js',
+      'backend/db/scripts/**/*.d.ts',
     ],
   },
   jsConfigs.recommended ?? {},
@@ -152,6 +157,43 @@ export default [
     languageOptions: {
       parserOptions: {
         project: ['./packages/storage/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  // Backend packages (V5 structure)
+  {
+    files: ['backend/server/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./backend/server/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['backend/db/src/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./backend/db/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['backend/db/scripts/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./backend/db/tsconfig.scripts.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['backend/storage/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./backend/storage/tsconfig.json'],
         tsconfigRootDir,
       },
     },
@@ -329,7 +371,11 @@ export default [
     },
   },
   {
-    files: ['apps/server/src/scripts/**/*.{ts,tsx,cts,mts}', 'tools/**/*.{ts,tsx,cts,mts}'],
+    files: [
+      'apps/server/src/scripts/**/*.{ts,tsx,cts,mts}',
+      'backend/server/src/scripts/**/*.{ts,tsx,cts,mts}',
+      'tools/**/*.{ts,tsx,cts,mts}',
+    ],
     rules: {
       'no-console': 'off',
     },

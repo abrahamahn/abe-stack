@@ -1,5 +1,5 @@
 // apps/server/src/lib/refresh-token.ts
-import { refreshTokenFamilies, refreshTokens, type UserRole, withTransaction } from '@abe-stack/db';
+import { refreshTokenFamilies, refreshTokens, type UserRole, withTransaction } from '@db';
 import { and, eq, gt, lt } from 'drizzle-orm';
 
 import { authConfig } from '../config/auth';
@@ -7,7 +7,7 @@ import { authConfig } from '../config/auth';
 import { createRefreshToken, getRefreshTokenExpiry } from './jwt';
 import { logTokenFamilyRevokedEvent, logTokenReuseEvent } from './security-events';
 
-import type { DbClient } from '@abe-stack/db';
+import type { DbClient } from '@db';
 
 /**
  * Create a new refresh token family

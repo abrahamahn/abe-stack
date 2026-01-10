@@ -9,7 +9,7 @@ import {
   logLoginAttempt,
 } from '../security';
 
-import type { DbClient } from '@abe-stack/db';
+import type { DbClient } from '@db';
 
 interface LoginAttempt {
   email: string;

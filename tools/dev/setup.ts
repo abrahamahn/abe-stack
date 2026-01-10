@@ -90,15 +90,15 @@ if (!healthy) {
 
 // 4. Build DB Package (Required because server uses it from dist/ in this setup)
 console.log('\n📦 Building DB Package...');
-run('pnpm', ['build', '--filter', '@abe-stack/db'], undefined, envVars);
+run('pnpm', ['build', '--filter', '@db'], undefined, envVars);
 
 // 5. Push Schema (Migrations)
 console.log('\n🔄 Syncing Database Schema...');
-run('pnpm', ['--filter', '@abe-stack/db', 'db:push'], undefined, envVars);
+run('pnpm', ['--filter', '@db', 'db:push'], undefined, envVars);
 
 // 6. Seed Database
 console.log('\n🌱 Seeding Database...');
-run('tsx', ['apps/server/src/scripts/seed.ts'], undefined, envVars);
+run('tsx', ['backend/server/src/scripts/seed.ts'], undefined, envVars);
 
 console.log('\n🎉 Setup Complete! You are ready to code.');
 console.log('Run "pnpm dev" to start the development servers.');

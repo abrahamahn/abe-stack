@@ -15,10 +15,10 @@
       "@/*": ["./src/*"],
       "@abe-stack/shared": ["../../packages/shared/dist"],
       "@abe-stack/shared/*": ["../../packages/shared/dist/*"],
-      "@abe-stack/db": ["../../packages/db/dist"],
-      "@abe-stack/db/*": ["../../packages/db/dist/*"],
-      "@abe-stack/storage": ["../../packages/storage/dist"],
-      "@abe-stack/storage/*": ["../../packages/storage/dist/*"],
+      "@db": ["../db/dist"],
+      "@db/*": ["../db/dist/*"],
+      "@storage": ["../storage/dist"],
+      "@storage/*": ["../storage/dist/*"],
       "@modules/*": ["./src/modules/*"],
       "@cache/*": ["./src/infrastructure/cache/*"],
       "@config/*": ["./src/infrastructure/config/*"],
@@ -35,18 +35,14 @@
       "@pubsub/*": ["./src/infrastructure/pubsub/*"],
       "@queue/*": ["./src/infrastructure/queue/*"],
       "@search/*": ["./src/infrastructure/search/*"],
-      "@security/*": ["./src/infrastructure/security/*"],
-      "@server/*": ["./src/infrastructure/server/*"],
-      "@storage/*": ["./src/infrastructure/storage/*"],
+      "@infra-security/*": ["./src/infrastructure/security/*"],
+      "@infra-server/*": ["./src/infrastructure/server/*"],
+      "@infra-storage/*": ["./src/infrastructure/storage/*"],
       "@utils/*": ["./src/infrastructure/utils/*"]
     },
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.server.tsbuildinfo"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],
-  "references": [
-    { "path": "../../packages/shared" },
-    { "path": "../../packages/db" },
-    { "path": "../../packages/storage" }
-  ]
+  "references": [{ "path": "../../packages/shared" }, { "path": "../db" }, { "path": "../storage" }]
 }

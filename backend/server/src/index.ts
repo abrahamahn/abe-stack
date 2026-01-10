@@ -1,8 +1,8 @@
 // apps/server/src/index.ts
 import path from 'path';
 
-import { resolveConnectionStringWithFallback } from '@abe-stack/db';
 import { loadServerEnv } from '@abe-stack/shared';
+import { resolveConnectionStringWithFallback } from '@db';
 import dotenvFlow from 'dotenv-flow';
 
 import { validateEnvironment } from './lib/env-validator';

@@ -1,5 +1,5 @@
 // apps/server/src/lib/security.ts
-import { loginAttempts, users } from '@abe-stack/db';
+import { loginAttempts, users } from '@db';
 import { and, count, eq, gte } from 'drizzle-orm';
 
 import { authConfig } from '../config/auth';
@@ -7,7 +7,7 @@ import { authConfig } from '../config/auth';
 import { MAX_PROGRESSIVE_DELAY_MS, PROGRESSIVE_DELAY_WINDOW_MS } from './constants';
 import { logAccountUnlockedEvent } from './security-events';
 
-import type { DbClient } from '@abe-stack/db';
+import type { DbClient } from '@db';
 
 /**
  * Account lockout status information

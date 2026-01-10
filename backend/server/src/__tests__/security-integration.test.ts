@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, test } from 'vitest';
 import { hashPassword } from '../lib/password';
 import { registerRoutes } from '../routes';
 
-import type { DbClient } from '@abe-stack/db';
+import type { DbClient } from '@db';
 import type { FastifyInstance } from 'fastify';
 
 type TestUser = {

@@ -23,18 +23,20 @@ Restructure from role-based (`apps/`, `packages/`) to layer-based (`frontend/`, 
 
 ### Phase 1: Preparation
 
-- [ ] Create new directory structure: `frontend/`, `backend/`, `shared/`
-- [ ] Update path aliases in all tsconfig.json files
-- [ ] Update Turborepo pipeline configuration
-- [ ] Document migration strategy for each package
+- [x] Create new directory structure: `frontend/`, `backend/`, `shared/`
+- [x] Update path aliases in all tsconfig.json files
+- [x] Update Turborepo pipeline configuration
+- [x] Document migration strategy for each package
+
+See [V5 Migration Guide](./architecture/v5-migration-guide.md) for detailed per-package migration steps.
 
 ### Phase 2: Backend Migration
 
-- [ ] Move `apps/server/` to `backend/server/`
-- [ ] Move `packages/db/` to `backend/db/`
-- [ ] Move `packages/storage/` to `backend/storage/`
-- [ ] Update all import paths (e.g., `@db` → `backend/db`)
-- [ ] Verify server builds and tests pass
+- [x] Move `apps/server/` to `backend/server/`
+- [x] Move `packages/db/` to `backend/db/`
+- [x] Move `packages/storage/` to `backend/storage/`
+- [x] Update all import paths to use new aliases (`@db`, `@storage`, `@server`)
+- [x] Verify server builds and tests pass
 
 ### Phase 3: Frontend Migration
 

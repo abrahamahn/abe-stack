@@ -1,11 +1,11 @@
 // apps/server/src/server.ts
-import { buildConnectionString, createDbClient } from '@abe-stack/db';
-import { createStorage, toStorageConfig } from '@abe-stack/storage';
+import { buildConnectionString, createDbClient } from '@db';
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import csrfProtection from '@fastify/csrf-protection';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
+import { createStorage, toStorageConfig } from '@storage';
 import { sql } from 'drizzle-orm';
 import Fastify, { type FastifyInstance } from 'fastify';
 

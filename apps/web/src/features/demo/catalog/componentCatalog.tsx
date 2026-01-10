@@ -33,9 +33,7 @@ function DialogDemo(): ReactElement {
   const [open, setOpen] = useState(false);
   return (
     <Dialog.Root open={open} onChange={setOpen}>
-      <Dialog.Trigger>
-        <Button>Open Dialog</Button>
-      </Dialog.Trigger>
+      <Dialog.Trigger className="button button-primary">Open Dialog</Dialog.Trigger>
       <Dialog.Content title="Dialog Title">
         <Text>This is the dialog content. Press Escape or click outside to close.</Text>
       </Dialog.Content>
@@ -174,7 +172,7 @@ export const componentCatalog: Record<string, ComponentDemo> = {
         name: 'Basic',
         description: 'Basic dialog with trigger',
         code: `<Dialog.Root>
-  <Dialog.Trigger><Button>Open</Button></Dialog.Trigger>
+  <Dialog.Trigger className="button button-primary">Open</Dialog.Trigger>
   <Dialog.Content title="Dialog Title">
     <Text>Dialog content</Text>
   </Dialog.Content>
@@ -192,12 +190,12 @@ export const componentCatalog: Record<string, ComponentDemo> = {
       {
         name: 'Basic',
         description: 'Basic dropdown menu',
-        code: `<Dropdown trigger={<Button>Open Menu</Button>}>
+        code: `<Dropdown trigger="Open Menu">
   <MenuItem>Option 1</MenuItem>
   <MenuItem>Option 2</MenuItem>
 </Dropdown>`,
         render: () => (
-          <Dropdown trigger={<Button>Open Menu</Button>}>
+          <Dropdown trigger="Open Menu">
             <MenuItem>Edit</MenuItem>
             <MenuItem>Duplicate</MenuItem>
             <MenuItem>Delete</MenuItem>
@@ -207,9 +205,9 @@ export const componentCatalog: Record<string, ComponentDemo> = {
       {
         name: 'Right Placement',
         description: 'Dropdown with right placement',
-        code: `<Dropdown placement="right" trigger={...}>...</Dropdown>`,
+        code: `<Dropdown placement="right" trigger="Open Right">...</Dropdown>`,
         render: () => (
-          <Dropdown placement="right" trigger={<Button>Open Right</Button>}>
+          <Dropdown placement="right" trigger="Open Right">
             <MenuItem>Action 1</MenuItem>
             <MenuItem>Action 2</MenuItem>
           </Dropdown>

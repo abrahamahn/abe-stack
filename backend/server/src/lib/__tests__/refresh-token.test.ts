@@ -1,5 +1,5 @@
 // apps/server/src/lib/__tests__/refresh-token.test.ts
-import { refreshTokenFamilies, refreshTokens } from '@abe-stack/db';
+import { refreshTokenFamilies, refreshTokens } from '@db';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { authConfig } from '../../config/auth';
@@ -11,7 +11,7 @@ import {
   rotateRefreshToken,
 } from '../refresh-token';
 
-import type { DbClient } from '@abe-stack/db';
+import type { DbClient } from '@db';
 
 interface TokenFamily {
   id: string;
