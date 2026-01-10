@@ -91,8 +91,14 @@ async function start(): Promise<void> {
   }
 }
 
-// Start server if this file is run directly
-if (require.main === module) {
+// Start server if this file is run directly (ESM-safe check)
+const entryPoint = process.argv[1] ?? '';
+const isMainModule =
+  import.meta.url === `file://${entryPoint}` ||
+  entryPoint.endsWith('index.ts') ||
+  entryPoint.endsWith('index.js');
+
+if (isMainModule) {
   void start();
 }
 

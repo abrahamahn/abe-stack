@@ -6,5 +6,6 @@
 // Schemas and types
 export * from './schemas';
 
-// Server environment
-export * from './env';
+// Re-export env from shared (single source of truth)
+export { loadServerEnv, serverEnvSchema } from '@shared/env';
+export type { ServerEnv } from '@shared/env';

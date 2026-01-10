@@ -1,6 +1,6 @@
 /**
- * Server environment validation
- * Lives in backend because it's server-only
+ * Server Environment - Backend Only
+ * Zod validation for all server-side env vars
  */
 import { z } from 'zod';
 
@@ -9,7 +9,7 @@ export const serverEnvSchema = z
     // Node Environment
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 
-    // Database Configuration
+    // Database
     POSTGRES_HOST: z.string().default('localhost'),
     POSTGRES_PORT: z.coerce.number().default(5432),
     POSTGRES_DB: z.string().min(1, 'Database name is required'),
@@ -17,30 +17,23 @@ export const serverEnvSchema = z
     POSTGRES_PASSWORD: z.string().min(1, 'Database password is required'),
     DATABASE_URL: z.string().url().optional(),
 
-    // Redis Configuration
+    // Redis
     REDIS_HOST: z.string().default('localhost'),
     REDIS_PORT: z.coerce.number().default(6379),
     REDIS_URL: z.string().url().optional(),
 
-    // Application Ports
+    // Ports
     API_PORT: z.coerce.number().default(8080),
     APP_PORT: z.coerce.number().default(3000),
     PORT: z.coerce.number().default(8080),
 
-    // Security - JWT & Sessions
-    JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters for security'),
-    SESSION_SECRET: z
-      .string()
-      .min(32, 'SESSION_SECRET must be at least 32 characters for security'),
+    // Security
+    JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
+    SESSION_SECRET: z.string().min(32, 'SESSION_SECRET must be at least 32 characters'),
 
-    // Optional External Services
-    AWS_ACCESS_KEY_ID: z.string().optional(),
-    AWS_SECRET_ACCESS_KEY: z.string().optional(),
-    STRIPE_SECRET_KEY: z.string().optional(),
-    SENDGRID_API_KEY: z.string().optional(),
-
-    // Host configuration
+    // Host
     HOST: z.string().default('0.0.0.0'),
+    CORS_ORIGIN: z.string().optional(),
 
     // Storage
     STORAGE_PROVIDER: z.enum(['local', 's3']).default('local'),
@@ -56,6 +49,12 @@ export const serverEnvSchema = z
       .optional()
       .transform((v) => v === 'true'),
     S3_PRESIGN_EXPIRES_IN_SECONDS: z.coerce.number().optional(),
+
+    // Optional Services
+    AWS_ACCESS_KEY_ID: z.string().optional(),
+    AWS_SECRET_ACCESS_KEY: z.string().optional(),
+    STRIPE_SECRET_KEY: z.string().optional(),
+    SENDGRID_API_KEY: z.string().optional(),
   })
   .transform((env) => ({
     ...env,
@@ -71,14 +70,15 @@ export const serverEnvSchema = z
       }
       return true;
     },
-    {
-      message:
-        'Production environment detected: JWT_SECRET and SESSION_SECRET must not use development values',
-    },
+    { message: 'Production: JWT_SECRET and SESSION_SECRET must not use dev values' },
   );
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
 
+/**
+ * Load and validate server environment
+ * Call once at server startup
+ */
 export function loadServerEnv(raw: Record<string, unknown>): ServerEnv {
   const parsed = serverEnvSchema.safeParse(raw);
   if (!parsed.success) {
