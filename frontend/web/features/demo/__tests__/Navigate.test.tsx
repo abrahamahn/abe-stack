@@ -14,8 +14,8 @@ vi.mock('../UI', () => ({
 
 // Mock @abe-stack/ui to provide useHistoryNav
 const mockGoBack = vi.fn();
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+vi.mock('@ui', async () => {
+  const actual = await vi.importActual('@ui');
   return {
     ...actual,
     useHistoryNav: (): {

@@ -6,8 +6,8 @@ import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 // Mock @abe-stack/ui's HistoryProvider
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+vi.mock('@ui', async () => {
+  const actual = await vi.importActual('@ui');
   return {
     ...actual,
     HistoryProvider: ({ children }: { children: React.ReactNode }): React.ReactElement => (

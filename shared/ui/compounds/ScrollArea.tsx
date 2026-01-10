@@ -64,7 +64,7 @@ export const ScrollArea = forwardRef<HTMLDivElement, ScrollAreaProps>((props, re
 
   const [isActive, setIsActive] = useState(false);
   const [isHoveringScrollbar, setIsHoveringScrollbar] = useState(false);
-  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const hoverRef = useRef(false);
 
   const clearHideTimer = (): void => {

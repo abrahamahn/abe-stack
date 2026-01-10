@@ -3,13 +3,13 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { format } from 'prettier';
-import { colors } from '../../packages/ui/src/theme/colors';
-import { motion } from '../../packages/ui/src/theme/motion';
-import { spacing } from '../../packages/ui/src/theme/spacing';
-import { typography } from '../../packages/ui/src/theme/typography';
+import { colors } from '../../shared/ui/theme/colors';
+import { motion } from '../../shared/ui/theme/motion';
+import { spacing } from '../../shared/ui/theme/spacing';
+import { typography } from '../../shared/ui/theme/typography';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const themeCssPath = path.resolve(__dirname, '../../packages/ui/src/styles/theme.css');
+const themeCssPath = path.resolve(__dirname, '../../shared/ui/styles/theme.css');
 
 const darkOverrides = {
   primary: '#3b82f6',

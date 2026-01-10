@@ -177,6 +177,7 @@ const generateFileTree = (files: string[]): FileTree => {
 
     for (let i = 0; i < parts.length; i += 1) {
       const part = parts[i];
+      if (part === undefined) continue;
       if (i === parts.length - 1) {
         if (!current._files) current._files = [];
         current._files.push(part);
@@ -326,7 +327,8 @@ const run = (): void => {
   log(`   Configs extracted: ${String(stats.configFiles)}`);
 };
 
-const isMain = import.meta.url === pathToFileURL(process.argv[1]).href;
+const scriptPath = process.argv[1];
+const isMain = scriptPath !== undefined && import.meta.url === pathToFileURL(scriptPath).href;
 
 if (isMain) {
   run();

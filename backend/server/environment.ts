@@ -11,13 +11,14 @@
  * - Single place to understand all server dependencies
  */
 
-import { config, serverConfig, dbConfig, storageConfig } from '../../shared/config';
 import { createDbClient, buildConnectionString } from '@db/client';
 import { createStorage } from '@storage/storageFactory';
 
-import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import { config, serverConfig, dbConfig, storageConfig } from '../../shared/config';
+
 import type * as schema from '@db/schema';
 import type { StorageProvider } from '@storage/types';
+import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 
 // =============================================================================
 // TYPES
@@ -70,7 +71,7 @@ export type ServerEnvironment = {
  * }
  * ```
  */
-export async function createServerEnvironment(): Promise<ServerEnvironment> {
+export function createServerEnvironment(): ServerEnvironment {
   // Build config from global config
   const serverCfg: ServerConfig = {
     port: serverConfig.port,
@@ -81,13 +82,15 @@ export async function createServerEnvironment(): Promise<ServerEnvironment> {
   };
 
   // Build database connection string
-  const dbUrl = dbConfig.url || buildConnectionString({
-    POSTGRES_HOST: dbConfig.host,
-    POSTGRES_PORT: dbConfig.port,
-    POSTGRES_DB: dbConfig.database,
-    POSTGRES_USER: dbConfig.user,
-    POSTGRES_PASSWORD: dbConfig.password,
-  });
+  const dbUrl =
+    dbConfig.url ||
+    buildConnectionString({
+      POSTGRES_HOST: dbConfig.host,
+      POSTGRES_PORT: dbConfig.port,
+      POSTGRES_DB: dbConfig.database,
+      POSTGRES_USER: dbConfig.user,
+      POSTGRES_PASSWORD: dbConfig.password,
+    });
 
   // Create database client
   const db = createDbClient(dbUrl);
@@ -108,7 +111,7 @@ export async function createServerEnvironment(): Promise<ServerEnvironment> {
           provider: 'local',
           rootPath: storageConfig.localPath,
           publicBaseUrl: storageConfig.publicBaseUrl,
-        }
+        },
   );
 
   return {
@@ -122,7 +125,7 @@ export async function createServerEnvironment(): Promise<ServerEnvironment> {
  * Create ServerEnvironment for testing
  */
 export function createTestServerEnvironment(
-  overrides: Partial<ServerEnvironment> = {}
+  overrides: Partial<ServerEnvironment> = {},
 ): ServerEnvironment {
   return {
     config: {

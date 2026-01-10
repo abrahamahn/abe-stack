@@ -7,6 +7,7 @@
  * - Background sync
  */
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   createContext,
   useContext,
@@ -16,8 +17,9 @@ import {
   useCallback,
   type ReactNode,
 } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
 import { config, apiConfig } from '../../shared/config';
+
 import type { User } from '../../shared/schema';
 
 // =============================================================================
@@ -44,7 +46,11 @@ export type AuthState = {
 
 export type ApiClient = {
   login: (data: { email: string; password: string }) => Promise<{ token: string; user: User }>;
-  register: (data: { email: string; password: string; name?: string }) => Promise<{ token: string; user: User }>;
+  register: (data: {
+    email: string;
+    password: string;
+    name?: string;
+  }) => Promise<{ token: string; user: User }>;
   refresh: () => Promise<{ token: string }>;
   logout: () => Promise<{ message: string }>;
   getCurrentUser: () => Promise<User>;
@@ -89,19 +95,36 @@ export function useConfig(): ClientConfig {
 // API CLIENT (mobile version - could add token header instead of cookies)
 // =============================================================================
 
+type ErrorResponse = { message?: string };
+
+function normalizeHeaders(headers?: HeadersInit): Record<string, string> {
+  if (!headers) return {};
+  if (headers instanceof Headers) {
+    const result: Record<string, string> = {};
+    headers.forEach((value, key) => {
+      result[key] = value;
+    });
+    return result;
+  }
+  if (Array.isArray(headers)) {
+    return Object.fromEntries(headers);
+  }
+  return headers;
+}
+
 function createApiClient(baseUrl: string, getToken?: () => string | null): ApiClient {
   const url = baseUrl.replace(/\/+$/, '');
 
   async function request<T>(path: string, options?: RequestInit): Promise<T> {
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options?.headers,
+      ...normalizeHeaders(options?.headers),
     };
 
     // Mobile may use Bearer token instead of cookies
     const token = getToken?.();
     if (token) {
-      (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+      headers['Authorization'] = `Bearer ${token}`;
     }
 
     const response = await fetch(`${url}${path}`, {
@@ -109,10 +132,11 @@ function createApiClient(baseUrl: string, getToken?: () => string | null): ApiCl
       headers,
     });
 
-    const data = await response.json().catch(() => ({}));
+    const data: unknown = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      throw new Error((data as { message?: string }).message || `HTTP ${response.status}`);
+      const errorData = data as ErrorResponse;
+      throw new Error(errorData.message ?? `HTTP ${String(response.status)}`);
     }
 
     return data as T;
@@ -120,7 +144,8 @@ function createApiClient(baseUrl: string, getToken?: () => string | null): ApiCl
 
   return {
     login: (data) => request('/api/auth/login', { method: 'POST', body: JSON.stringify(data) }),
-    register: (data) => request('/api/auth/register', { method: 'POST', body: JSON.stringify(data) }),
+    register: (data) =>
+      request('/api/auth/register', { method: 'POST', body: JSON.stringify(data) }),
     refresh: () => request('/api/auth/refresh', { method: 'POST', body: '{}' }),
     logout: () => request('/api/auth/logout', { method: 'POST', body: '{}' }),
     getCurrentUser: () => request('/api/users/me'),
@@ -136,41 +161,60 @@ type ProviderProps = {
   configOverride?: Partial<ClientConfig>;
 };
 
-export function EnvironmentProvider({ children, configOverride }: ProviderProps) {
+export function EnvironmentProvider({
+  children,
+  configOverride,
+}: ProviderProps): React.ReactElement {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
 
-  const clientConfig: ClientConfig = useMemo(() => ({
-    apiUrl: apiConfig.url,
-    wsUrl: apiConfig.wsUrl,
-    env: config.app.env,
-    useSecureStorage: true, // Mobile uses SecureStore by default
-    ...configOverride,
-  }), [configOverride]);
+  const clientConfig: ClientConfig = useMemo(
+    () => ({
+      apiUrl: apiConfig.url,
+      wsUrl: apiConfig.wsUrl,
+      env: config.app.env,
+      useSecureStorage: true, // Mobile uses SecureStore by default
+      ...configOverride,
+    }),
+    [configOverride],
+  );
 
-  const queryClient = useMemo(() => new QueryClient({
-    defaultOptions: {
-      queries: { staleTime: 5 * 60 * 1000, retry: 1 },
-    },
-  }), []);
+  const queryClient = useMemo(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: { staleTime: 5 * 60 * 1000, retry: 1 },
+        },
+      }),
+    [],
+  );
 
   const getToken = useCallback(() => token, [token]);
-  const api = useMemo(() => createApiClient(clientConfig.apiUrl, getToken), [clientConfig.apiUrl, getToken]);
+  const api = useMemo(
+    () => createApiClient(clientConfig.apiUrl, getToken),
+    [clientConfig.apiUrl, getToken],
+  );
 
-  const login = useCallback(async (email: string, password: string) => {
-    const result = await api.login({ email, password });
-    setToken(result.token);
-    setUser(result.user);
-    // TODO: Store token in SecureStore
-  }, [api]);
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const result = await api.login({ email, password });
+      setToken(result.token);
+      setUser(result.user);
+      // TODO: Store token in SecureStore
+    },
+    [api],
+  );
 
-  const register = useCallback(async (email: string, password: string, name?: string) => {
-    const result = await api.register({ email, password, name });
-    setToken(result.token);
-    setUser(result.user);
-    // TODO: Store token in SecureStore
-  }, [api]);
+  const register = useCallback(
+    async (email: string, password: string, name?: string) => {
+      const result = await api.register({ email, password, name });
+      setToken(result.token);
+      setUser(result.user);
+      // TODO: Store token in SecureStore
+    },
+    [api],
+  );
 
   const logout = useCallback(async () => {
     await api.logout();
@@ -195,32 +239,36 @@ export function EnvironmentProvider({ children, configOverride }: ProviderProps)
     }
   }, [api]);
 
-  const auth: AuthState = useMemo(() => ({
-    user,
-    isAuthenticated: !!user,
-    isLoading,
-    login,
-    register,
-    logout,
-    refresh,
-  }), [user, isLoading, login, register, logout, refresh]);
+  const auth: AuthState = useMemo(
+    () => ({
+      user,
+      isAuthenticated: !!user,
+      isLoading,
+      login,
+      register,
+      logout,
+      refresh,
+    }),
+    [user, isLoading, login, register, logout, refresh],
+  );
 
   useEffect(() => {
-    refresh();
+    void refresh();
   }, [refresh]);
 
-  const environment: ClientEnvironment = useMemo(() => ({
-    config: clientConfig,
-    api,
-    auth,
-    queryClient,
-  }), [clientConfig, api, auth, queryClient]);
+  const environment: ClientEnvironment = useMemo(
+    () => ({
+      config: clientConfig,
+      api,
+      auth,
+      queryClient,
+    }),
+    [clientConfig, api, auth, queryClient],
+  );
 
   return (
     <QueryClientProvider client={queryClient}>
-      <EnvironmentContext.Provider value={environment}>
-        {children}
-      </EnvironmentContext.Provider>
+      <EnvironmentContext.Provider value={environment}>{children}</EnvironmentContext.Provider>
     </QueryClientProvider>
   );
 }

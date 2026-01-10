@@ -17,7 +17,7 @@ try {
 }
 const jsParser: Linter.Parser | undefined = jsConfigs.recommended?.languageOptions?.parser;
 
-export default [
+const config: Linter.Config[] = [
   {
     ignores: [
       '**/node_modules/**',
@@ -30,18 +30,18 @@ export default [
       '**/.turbo/**',
       '**/coverage/**',
       '**/babel.config.js',
-      '**/apps/mobile/index.js',
-      '**/apps/mobile/metro.config.js',
+      '**/frontend/mobile/index.js',
+      '**/frontend/mobile/metro.config.js',
       'tools/export-ui-code.js',
-      'packages/db/drizzle.config.ts',
-      'apps/server/vitest.config.ts',
-      'apps/web/e2e/**',
-      'apps/web/vitest.config.ts',
-      'packages/ui/**/__tests__/**',
-      'packages/ui/vitest.config.ts',
+      'backend/db/drizzle.config.ts',
+      'backend/server/vitest.config.ts',
+      'frontend/web/e2e/**',
+      'frontend/web/vitest.config.ts',
+      'shared/ui/**/__tests__/**',
+      'shared/ui/vitest.config.ts',
       'tools/packages/build-theme-css.ts',
-      'packages/storage/src/**/*.js',
-      'packages/storage/src/**/*.d.ts',
+      'backend/storage/**/*.js',
+      'backend/storage/**/*.d.ts',
     ],
   },
   jsConfigs.recommended ?? {},
@@ -52,39 +52,39 @@ export default [
     languageOptions: {
       parserOptions: {
         tsconfigRootDir,
-        project: ['./config/tsconfig.eslint.json'],
+        project: ['./tsconfig.json'],
       },
     },
   },
   {
-    files: ['apps/server/**/*.{ts,tsx,cts,mts}'],
+    files: ['backend/server/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./apps/server/tsconfig.json'],
+        project: ['./tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['apps/web/**/*.{ts,tsx,cts,mts}'],
+    files: ['frontend/web/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./apps/web/tsconfig.json'],
+        project: ['./tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['apps/mobile/**/*.{ts,tsx,cts,mts,js,jsx}'],
+    files: ['frontend/mobile/**/*.{ts,tsx,cts,mts,js,jsx}'],
     languageOptions: {
       parserOptions: {
-        project: ['./apps/mobile/tsconfig.json'],
+        project: ['./tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['apps/web/e2e/**/*', 'apps/web/vitest.config.ts'],
+    files: ['frontend/web/e2e/**/*', 'frontend/web/vitest.config.ts'],
     languageOptions: {
       parserOptions: {
         project: null,
@@ -100,19 +100,19 @@ export default [
     },
   },
   {
-    files: ['packages/ui/**/*.{ts,tsx,cts,mts}'],
+    files: ['shared/ui/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/ui/tsconfig.json'],
+        project: ['./tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/ui/src/test/**/*.{ts,tsx,cts,mts}'],
+    files: ['shared/ui/test/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/ui/tsconfig.test.json'],
+        project: ['./tsconfig.json'],
         tsconfigRootDir,
       },
     },
@@ -133,25 +133,25 @@ export default [
     },
   },
   {
-    files: ['apps/desktop/**/*.{ts,tsx,cts,mts}'],
+    files: ['frontend/desktop/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./apps/desktop/tsconfig.json'],
+        project: ['./tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['apps/desktop/electron/**/*.{ts,tsx,cts,mts}', 'apps/desktop/vite.config.ts'],
+    files: ['frontend/desktop/electron/**/*.{ts,tsx,cts,mts}', 'frontend/desktop/vite.config.ts'],
     languageOptions: {
       parserOptions: {
-        project: ['./apps/desktop/tsconfig.json'],
+        project: ['./tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/db/drizzle.config.ts'],
+    files: ['backend/db/drizzle.config.ts'],
     languageOptions: {
       parserOptions: {
         project: false,
@@ -248,14 +248,14 @@ export default [
   },
   // Prevent frontend clients from importing server-side code
   {
-    files: ['apps/web/**/*', 'apps/desktop/**/*', 'apps/mobile/**/*'],
+    files: ['frontend/web/**/*', 'frontend/desktop/**/*', 'frontend/mobile/**/*'],
     rules: {
       'no-restricted-imports': [
         'error',
         {
           patterns: [
             {
-              group: ['**/apps/server/**', '@/server/**', '@abe-stack/server', '@server/*'],
+              group: ['**/backend/server/**', '@server/**', '@server/*'],
               message:
                 'Frontend code must not import backend/server modules. Add an API layer or shared contract instead.',
             },
@@ -266,7 +266,7 @@ export default [
   },
   // Prevent UI from reaching into DB/infra directly; rely on contracts/API.
   {
-    files: ['apps/web/**/*', 'apps/desktop/**/*', 'apps/mobile/**/*'],
+    files: ['frontend/web/**/*', 'frontend/desktop/**/*', 'frontend/mobile/**/*'],
     rules: {
       'no-restricted-imports': [
         'error',
@@ -279,7 +279,7 @@ export default [
                 'drizzle-orm',
                 'postgres',
                 'pg',
-                '@/server/**',
+                '@db/**',
               ],
               message:
                 'UI must not import database or backend internals. Use API clients or shared contracts instead.',
@@ -290,7 +290,7 @@ export default [
     },
   },
   {
-    files: ['apps/server/src/scripts/**/*.{ts,tsx,cts,mts}', 'tools/**/*.{ts,tsx,cts,mts}'],
+    files: ['backend/server/scripts/**/*.{ts,tsx,cts,mts}', 'tools/**/*.{ts,tsx,cts,mts}'],
     rules: {
       'no-console': 'off',
     },
@@ -302,4 +302,21 @@ export default [
       '@typescript-eslint/no-unsafe-member-access': 'off',
     },
   },
-] satisfies Linter.Config[];
+  // Test files - allow non-null assertions and console
+  {
+    files: ['**/__tests__/**/*', '**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      'no-console': 'off',
+    },
+  },
+  // CLI/validation scripts - allow console for user feedback
+  {
+    files: ['shared/contracts/env.ts'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+];
+
+export default config;

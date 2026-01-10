@@ -28,7 +28,7 @@ function parseEnv(path: string): Record<string, string> {
     const env: Record<string, string> = {};
     for (const line of content.split('\n')) {
       const match = line.match(/^([^=:#]+?)[=:](.*)/);
-      if (match) {
+      if (match?.[1] && match[2] !== undefined) {
         // Remove quotes if present
         const value = match[2].trim().replace(/^['"](.*)['"]$/, '$1');
         env[match[1].trim()] = value;

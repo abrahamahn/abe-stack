@@ -39,8 +39,8 @@ vi.mock('../providers', () => ({
 }));
 
 // Mock @abe-stack/ui ScrollArea
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+vi.mock('@ui', async () => {
+  const actual = await vi.importActual('@ui');
   return {
     ...actual,
     ScrollArea: ({ children }: { children: React.ReactNode }): React.ReactElement => (

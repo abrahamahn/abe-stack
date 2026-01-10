@@ -14,8 +14,8 @@ vi.mock('../../useAuth', () => ({
 }));
 
 // Mock UI components
-vi.mock('@abe-stack/ui', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+vi.mock('@ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@ui')>();
   return {
     ...actual,
     Spinner: (): React.ReactElement => <div data-testid="spinner">Loading Spinner</div>,

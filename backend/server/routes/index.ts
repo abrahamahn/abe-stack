@@ -1,5 +1,5 @@
-import { refreshTokens, users } from '@db/schema';
 import { apiContract } from '@contracts';
+import { refreshTokens, users } from '@db/schema';
 import { initServer } from '@ts-rest/fastify';
 import { and, eq, gt } from 'drizzle-orm';
 

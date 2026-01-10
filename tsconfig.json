@@ -1,11 +1,42 @@
 {
-  "extends": "./config/tsconfig.base.json",
   "compilerOptions": {
+    /* Build Performance */
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "incremental": true,
+
+    /* Language Fundamentals */
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "jsx": "react-jsx",
+
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+
+    /* Module Safety */
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "ignoreDeprecations": "5.0",
+
+    /* Paths */
     "baseUrl": ".",
     "outDir": "dist",
     "rootDir": ".",
-    "jsx": "react-jsx",
-    "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "paths": {
       "@ui": ["shared/ui"],
       "@ui/*": ["shared/ui/*"],
@@ -42,12 +73,9 @@
     "frontend/**/*.ts",
     "frontend/**/*.tsx",
     "shared/**/*.ts",
-    "shared/**/*.tsx"
+    "shared/**/*.tsx",
+    "tools/**/*.ts",
+    "eslint.config.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "apps",
-    "packages"
-  ]
+  "exclude": ["node_modules", "dist", "coverage", "build"]
 }

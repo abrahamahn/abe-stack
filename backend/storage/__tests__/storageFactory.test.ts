@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 
-import { createStorage } from '@storageFactory';
+import { createStorage } from '../storageFactory';
 
 import type { LocalStorageConfig, S3StorageConfig } from '../types';
 
