@@ -82,36 +82,16 @@ pnpm dev
 
 ---
 
-## Documentation Index
+## Documentation
 
-### Architecture
+For full documentation, see [INDEX.md](./INDEX.md) - the complete navigation guide.
 
-- [Architecture Overview](./architecture/index.md) - Current structure and design principles
-- [V5 Architecture Proposal](./architecture/v5-proposal.md) - Proposed layer-based restructure
-- [CHET-Stack Comparison](./architecture/chet-comparison.md) - Real-time collaboration features
-- [Realtime Overview](./architecture/realtime/overview.md) - WebSocket pub/sub system
-- [Realtime Architecture](./architecture/realtime/architecture.md) - Detailed sync architecture
-- [Realtime Implementation](./architecture/realtime/implementation-guide.md) - Step-by-step guide
-- [Realtime Patterns](./architecture/realtime/patterns.md) - Common patterns and examples
+Key sections:
 
-### Security
-
-- [Phase 1 Complete](./security/phase-1-complete.md) - Auth security implementation
-- [Phase 2 Roadmap](./security/phase-2-roadmap.md) - Future security enhancements
-
-### Development
-
-- [Testing Guide](./dev/testing.md) - Testing strategy and setup
-- [Workflows](./dev/workflows.md) - CI/CD and development workflows
-- [Roadmap](./ROADMAP.md) - Project roadmap and milestones
-
-### UI
-
-- [UI Priorities](./ui/todo.md) - UI component priorities and remaining work
-
-### Logs
-
-- [Changelog](./CHANGELOG.md) - Detailed change history
+- **[Architecture](./architecture/index.md)** - System design and structure
+- **[Security](./security/index.md)** - Auth implementation and roadmap
+- **[Roadmap](./ROADMAP.md)** - Project milestones and tasks
+- **[Changelog](./CHANGELOG.md)** - Change history
 
 ---
 

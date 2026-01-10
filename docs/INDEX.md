@@ -39,6 +39,7 @@ Token Budget Tips:
 | `architecture/index.md`                         | Architecture overview and principles |
 | `architecture/v5-proposal.md`                   | V5 layer-based restructure proposal  |
 | `architecture/chet-comparison.md`               | CHET-Stack feature comparison        |
+| `architecture/realtime/index.md`                | Real-time section overview           |
 | `architecture/realtime/overview.md`             | Real-time features quick start       |
 | `architecture/realtime/architecture.md`         | Real-time sync architecture          |
 | `architecture/realtime/implementation-guide.md` | Step-by-step implementation          |
@@ -50,6 +51,7 @@ Token Budget Tips:
 
 | Document                       | Purpose                   |
 | ------------------------------ | ------------------------- |
+| `security/index.md`            | Security overview         |
 | `security/phase-1-complete.md` | Phase 1 completion report |
 | `security/phase-2-roadmap.md`  | Phase 2 roadmap and tasks |
 
