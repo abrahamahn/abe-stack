@@ -1,6 +1,6 @@
-import type { UserConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config';
 
-const config: UserConfig = {
+export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
@@ -36,6 +36,4 @@ const config: UserConfig = {
     testTimeout: 10000,
     hookTimeout: 10000,
   },
-};
-
-export default config;
+});

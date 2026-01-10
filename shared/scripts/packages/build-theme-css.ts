@@ -2,14 +2,15 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+
+import { colors } from '@ui/theme/colors';
+import { motion } from '@ui/theme/motion';
+import { spacing } from '@ui/theme/spacing';
+import { typography } from '@ui/theme/typography';
 import { format } from 'prettier';
-import { colors } from '../../shared/ui/theme/colors';
-import { motion } from '../../shared/ui/theme/motion';
-import { spacing } from '../../shared/ui/theme/spacing';
-import { typography } from '../../shared/ui/theme/typography';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const themeCssPath = path.resolve(__dirname, '../../shared/ui/styles/theme.css');
+const themeCssPath = path.resolve(__dirname, '../../../frontend/shared/ui/styles/theme.css');
 
 const darkOverrides = {
   primary: '#3b82f6',
