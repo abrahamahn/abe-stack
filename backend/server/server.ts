@@ -9,7 +9,7 @@ import Fastify, { type FastifyInstance } from 'fastify';
 
 import { registerRoutes } from './routes';
 
-import type { ServerEnv } from '@contracts/env';
+import type { ServerEnv } from '../api';
 
 /**
  * Create and configure Fastify server

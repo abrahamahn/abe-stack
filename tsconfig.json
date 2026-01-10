@@ -40,10 +40,8 @@
     "paths": {
       "@ui": ["shared/ui"],
       "@ui/*": ["shared/ui/*"],
-      "@contracts": ["shared/contracts"],
-      "@contracts/*": ["shared/contracts/*"],
-      "@api-client": ["shared/api-client"],
-      "@api-client/*": ["shared/api-client/*"],
+      "@api": ["backend/api"],
+      "@api/*": ["backend/api/*"],
       "@stores": ["shared/stores"],
       "@stores/*": ["shared/stores/*"],
       "@utils": ["shared/utils"],

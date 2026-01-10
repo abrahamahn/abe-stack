@@ -1,8 +1,9 @@
 import path from 'path';
 
-import { loadServerEnv } from '@contracts/env';
 import { resolveConnectionStringWithFallback } from '@db/client';
 import dotenvFlow from 'dotenv-flow';
+
+import { loadServerEnv } from '../api';
 
 import { createServer } from './server';
 

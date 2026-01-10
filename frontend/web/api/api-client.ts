@@ -1,4 +1,8 @@
-import { addAuthHeader } from '../utils';
+/**
+ * Simple API client for frontend
+ * Types imported from backend API (type-only, no runtime dependency)
+ */
+import { addAuthHeader } from './utils';
 
 import type {
   AuthResponse,
@@ -7,7 +11,7 @@ import type {
   RefreshResponse,
   RegisterRequest,
   UserResponse,
-} from '../contracts';
+} from '../../../backend/api';
 
 export interface ApiClientConfig {
   baseUrl: string;
@@ -26,7 +30,7 @@ export interface ApiClient {
 const API_PREFIX = '/api';
 
 export function createApiClient(config: ApiClientConfig): ApiClient {
-  const baseUrl = config.baseUrl.replace(/\/+$/, ''); // trim trailing slashes
+  const baseUrl = config.baseUrl.replace(/\/+$/, '');
   const fetcher = config.fetchImpl ?? fetch;
 
   const request = async <T>(path: string, options?: RequestInit): Promise<T> => {
@@ -37,7 +41,7 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     const response = await fetcher(`${baseUrl}${API_PREFIX}${path}`, {
       ...options,
       headers,
-      credentials: 'include', // Include cookies for refresh token
+      credentials: 'include',
     });
 
     const data = (await response.json().catch(() => ({}))) as { message?: string };

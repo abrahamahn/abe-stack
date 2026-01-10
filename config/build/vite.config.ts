@@ -23,8 +23,7 @@ export default defineConfig({
     alias: {
       // Path aliases - vite-tsconfig-paths handles most, but explicit for clarity
       '@ui': path.join(projectRoot, 'shared/ui'),
-      '@contracts': path.join(projectRoot, 'shared/contracts'),
-      '@api-client': path.join(projectRoot, 'shared/api-client'),
+      '@api': path.join(projectRoot, 'backend/api'),
       '@stores': path.join(projectRoot, 'shared/stores'),
       '@utils': path.join(projectRoot, 'shared/utils'),
       '@shared': path.join(projectRoot, 'shared'),

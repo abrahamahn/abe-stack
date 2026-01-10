@@ -1,7 +1,14 @@
+/**
+ * React Query client with ts-rest integration
+ * Types imported from backend API (type-only)
+ */
 import { initQueryClient } from '@ts-rest/react-query';
 
-import { apiContract } from '../contracts';
-import { addAuthHeader } from '../utils';
+import { apiContract } from '../../../backend/api';
+
+import { addAuthHeader } from './utils';
+
+import type { ApiContract } from '../../../backend/api';
 
 type ApiCallArgs = {
   path: string;
@@ -18,6 +25,13 @@ export type CreateApiOptions = {
   onServerError?: (message?: string) => void;
   fetchImpl?: typeof fetch;
 };
+
+// Helper to extract the return type
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+const _typeHelper = (contract: typeof apiContract) => initQueryClient(contract, { baseUrl: '' });
+
+/** Typed React Query client based on the API contract */
+export type ReactQueryClientInstance = ReturnType<typeof _typeHelper>;
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function createClient(options: CreateApiOptions) {
@@ -71,9 +85,9 @@ function createClient(options: CreateApiOptions) {
   });
 }
 
-/** Typed React Query client based on the API contract */
-export type ReactQueryClientInstance = ReturnType<typeof createClient>;
-
 export function createReactQueryClient(options: CreateApiOptions): ReactQueryClientInstance {
   return createClient(options);
 }
+
+// Re-export for convenience
+export type { ApiContract };

@@ -1,6 +1,6 @@
 import { verifyToken, type TokenPayload } from './jwt';
 
-import type { UserRole } from '@contracts';
+import type { UserRole } from '../../api';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 /**

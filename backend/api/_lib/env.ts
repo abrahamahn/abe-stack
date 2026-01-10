@@ -1,9 +1,9 @@
+/**
+ * Server environment validation
+ * Lives in backend because it's server-only
+ */
 import { z } from 'zod';
 
-/**
- * Comprehensive environment variable schema for server configuration
- * Validates all required and optional environment variables with proper types
- */
 export const serverEnvSchema = z
   .object({
     // Node Environment
@@ -59,16 +59,13 @@ export const serverEnvSchema = z
   })
   .transform((env) => ({
     ...env,
-    // Auto-construct DATABASE_URL if not provided
     DATABASE_URL:
       env.DATABASE_URL ||
       `postgresql://${env.POSTGRES_USER}:${env.POSTGRES_PASSWORD}@${env.POSTGRES_HOST}:${String(env.POSTGRES_PORT)}/${env.POSTGRES_DB}`,
-
     REDIS_URL: env.REDIS_URL || `redis://${env.REDIS_HOST}:${String(env.REDIS_PORT)}`,
   }))
   .refine(
     (env) => {
-      // In production, ensure secrets are not defaults
       if (env.NODE_ENV === 'production') {
         return !env.JWT_SECRET.includes('dev_') && !env.SESSION_SECRET.includes('dev_');
       }
@@ -82,17 +79,14 @@ export const serverEnvSchema = z
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
 
-/**
- * Load and validate server environment variables
- * @param raw - Raw environment object (typically process.env)
- * @returns Validated and typed environment configuration
- * @throws Exits process with error code 1 if validation fails
- */
 export function loadServerEnv(raw: Record<string, unknown>): ServerEnv {
   const parsed = serverEnvSchema.safeParse(raw);
   if (!parsed.success) {
+    // eslint-disable-next-line no-console
     console.error('❌ Invalid server environment variables:');
+    // eslint-disable-next-line no-console
     console.error(JSON.stringify(parsed.error.format(), null, 2));
+    // eslint-disable-next-line no-console
     console.error('\n💡 Tip: Check your .env files in the config/ directory');
     process.exit(1);
   }

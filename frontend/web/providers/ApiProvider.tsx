@@ -1,11 +1,11 @@
-import { createReactQueryClient } from '@api-client';
 import { tokenStore } from '@stores';
 import { createContext, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { createReactQueryClient } from '../api';
 import { toastStore } from '../features/toast';
 
-import type { ReactQueryClientInstance } from '@api-client';
+import type { ReactQueryClientInstance } from '../api';
 import type { ReactElement, ReactNode } from 'react';
 
 const ApiContext = createContext<ReactQueryClientInstance | null>(null);
