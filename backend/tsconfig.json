@@ -15,15 +15,12 @@
       "@api": ["./backend/api"],
       "@api/*": ["./backend/api/*"],
       "@shared": ["./shared"],
-      "@shared/*": ["./shared/*"],
-      "@utils": ["./shared/utils"],
-      "@utils/*": ["./shared/utils/*"]
+      "@shared/*": ["./shared/*"]
     }
   },
   "include": [
     "./**/*.ts",
     "../shared/env/**/*.ts",
-    "../shared/utils/**/*.ts",
     "../shared/schema.ts",
     "../shared/config.ts"
   ],

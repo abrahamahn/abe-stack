@@ -9,12 +9,11 @@
   },
   "scripts": {
     "dev": "concurrently \"pnpm dev:server\" \"pnpm dev:web\"",
-    "dev:web": "tsx tools/dev/kill-port.ts 5173 && vite --config config/build/vite.config.ts --open",
-    "dev:server": "tsx tools/dev/kill-port.ts 8080 && cross-env NODE_ENV=development tsx backend/server/index.ts",
-    "dev:desktop": "tsx tools/dev/kill-port.ts 5174 && concurrently \"vite --config frontend/desktop/vite.config.ts --port 5174\" \"tsc -p frontend/desktop/electron/tsconfig.json && electron frontend/desktop/dist/electron/main.js\"",
-    "dev:mobile": "cd frontend/mobile && react-native start",
+    "dev:web": "tsx shared/scripts/dev/kill-port.ts 5173 && vite --config shared/config/build/vite.config.ts --open",
+    "dev:server": "tsx shared/scripts/dev/kill-port.ts 8080 && cross-env NODE_ENV=development tsx backend/server/index.ts",
+    "dev:desktop": "tsx shared/scripts/dev/kill-port.ts 5174 && concurrently \"vite --config frontend/desktop/vite.config.ts --port 5174\" \"tsc -p frontend/desktop/electron/tsconfig.json && electron frontend/desktop/dist/electron/main.js\"",
     "build": "pnpm type-check && pnpm build:server && pnpm build:web",
-    "build:web": "vite build --config config/build/vite.config.ts",
+    "build:web": "vite build --config shared/config/build/vite.config.ts",
     "build:server": "tsc -p backend/tsconfig.json",
     "build:desktop": "vite build --config frontend/desktop/vite.config.ts && tsc -p frontend/desktop/electron/tsconfig.json",
     "start:server": "cross-env NODE_ENV=production node backend/server/dist/index.js",
@@ -23,20 +22,20 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.cjs,.mjs,.cts,.mts --report-unused-disable-directives --max-warnings=0",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx,.cjs,.mjs,.cts,.mts --fix",
     "type-check": "tsc --noEmit",
-    "format": "prettier --config config/.prettierrc --ignore-path config/.prettierignore --write .",
-    "format:check": "prettier --config config/.prettierrc --ignore-path config/.prettierignore --check .",
+    "format": "prettier --config shared/config/.prettierrc --ignore-path shared/config/.prettierignore --write .",
+    "format:check": "prettier --config shared/config/.prettierrc --ignore-path shared/config/.prettierignore --check .",
     "clean": "rm -rf dist node_modules/.cache backend/server/dist frontend/web/dist frontend/desktop/dist",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:seed": "tsx backend/db/scripts/seed.ts",
-    "db:restart": "tsx tools/restart-db.ts",
-    "setup": "tsx tools/setup.ts",
+    "db:restart": "tsx shared/scripts/restart-db.ts",
+    "setup": "tsx shared/scripts/dev/setup.ts",
     "prepare": "simple-git-hooks",
-    "docker:up": "docker compose -f config/docker/docker-compose.yml up --build",
-    "docker:down": "docker compose -f config/docker/docker-compose.yml down",
-    "docker:logs": "docker compose -f config/docker/docker-compose.yml logs -f"
+    "docker:up": "docker compose -f shared/config/docker/docker-compose.yml up --build",
+    "docker:down": "docker compose -f shared/config/docker/docker-compose.yml down",
+    "docker:logs": "docker compose -f shared/config/docker/docker-compose.yml logs -f"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.677.0",
@@ -137,7 +136,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,json,css,scss,md}": [
-      "pnpm prettier --config config/.prettierrc --ignore-path config/.prettierignore --check"
+      "pnpm prettier --config shared/config/.prettierrc --ignore-path shared/config/.prettierignore --check"
     ],
     "**/*.{ts,tsx,js,jsx}": [
       "pnpm exec eslint --cache --cache-location .cache/eslint/.cache --max-warnings=0 --no-warn-ignored"

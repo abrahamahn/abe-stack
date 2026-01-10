@@ -19,13 +19,13 @@ function ThemeConsumer(): React.ReactElement {
       <button data-testid="cycle" onClick={cycleMode}>
         Cycle
       </button>
-      <button data-testid="set-dark" onClick={() => setMode('dark')}>
+      <button data-testid="set-dark" onClick={() => { setMode('dark'); }}>
         Dark
       </button>
-      <button data-testid="set-light" onClick={() => setMode('light')}>
+      <button data-testid="set-light" onClick={() => { setMode('light'); }}>
         Light
       </button>
-      <button data-testid="set-system" onClick={() => setMode('system')}>
+      <button data-testid="set-system" onClick={() => { setMode('system'); }}>
         System
       </button>
     </div>

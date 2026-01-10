@@ -12,8 +12,8 @@ function RadioHarness(): ReactElement {
   const [value, setValue] = useState<'a' | 'b'>('a');
   return (
     <div>
-      <Radio name="group" label="Option A" checked={value === 'a'} onChange={() => setValue('a')} />
-      <Radio name="group" label="Option B" checked={value === 'b'} onChange={() => setValue('b')} />
+      <Radio name="group" label="Option A" checked={value === 'a'} onChange={() => { setValue('a'); }} />
+      <Radio name="group" label="Option B" checked={value === 'b'} onChange={() => { setValue('b'); }} />
     </div>
   );
 }
