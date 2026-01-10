@@ -10,14 +10,14 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import { format } from 'prettier';
-import { darkColors, lightColors } from '../../packages/ui/src/theme/colors';
-import { motion } from '../../packages/ui/src/theme/motion';
-import { radius } from '../../packages/ui/src/theme/radius';
-import { spacing } from '../../packages/ui/src/theme/spacing';
-import { typography } from '../../packages/ui/src/theme/typography';
+import { darkColors, lightColors } from '../../frontend/shared/ui/src/theme/colors';
+import { motion } from '../../frontend/shared/ui/src/theme/motion';
+import { radius } from '../../frontend/shared/ui/src/theme/radius';
+import { spacing } from '../../frontend/shared/ui/src/theme/spacing';
+import { typography } from '../../frontend/shared/ui/src/theme/typography';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const themeCssPath = path.resolve(__dirname, '../../packages/ui/src/styles/theme.css');
+const themeCssPath = path.resolve(__dirname, '../../frontend/shared/ui/src/styles/theme.css');
 
 /** Color theme structure */
 type ColorTheme = {

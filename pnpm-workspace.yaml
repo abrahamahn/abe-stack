@@ -8,6 +8,8 @@ packages:
   # === New Structure (V5) ===
   # Frontend layer - browser/app code
   - 'frontend/*'
+  # Frontend shared packages (ui, api-client)
+  - 'frontend/shared/*'
   # Backend layer - server code
   - 'backend/*'
   # Shared layer - cross-layer contracts & types

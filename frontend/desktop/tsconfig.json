@@ -1,0 +1,36 @@
+{
+  "extends": "../../config/tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@abe-stack/shared": ["../../packages/shared/src"],
+      "@ui": ["../shared/ui/src"],
+      "@ui/*": ["../shared/ui/src/*"],
+      "@components/*": ["./src/components/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@services/*": ["./src/services/*"],
+      "@config/*": ["./src/config/*"],
+      "@layouts/*": ["./src/layouts/*"],
+      "@routes/*": ["./src/routes/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@api/*": ["./src/api/*"]
+    },
+    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.desktop.tsbuildinfo"
+  },
+  "include": ["src/**/*", "electron/**/*", "vite.config.ts"],
+  "exclude": ["node_modules", "dist", "__tests__"],
+  "references": [{ "path": "../../packages/shared" }, { "path": "../shared/ui" }]
+}

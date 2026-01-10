@@ -37,7 +37,11 @@ export default [
       'apps/web/src/test/e2e/**',
       'apps/web/vite.config.ts',
       'apps/web/vitest.config.ts',
+      'frontend/web/src/test/e2e/**',
+      'frontend/web/vite.config.ts',
+      'frontend/web/vitest.config.ts',
       'packages/ui/**/__tests__/**',
+      'frontend/shared/ui/**/__tests__/**',
       '**/vitest.config.ts',
       '**/vitest.config.js',
       'tools/packages/build-theme-css.ts',
@@ -198,6 +202,77 @@ export default [
       },
     },
   },
+  // Frontend packages (V5 structure)
+  {
+    files: ['frontend/web/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./frontend/web/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['frontend/web/src/test/e2e/**/*', 'frontend/web/vitest.config.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: null,
+      },
+    },
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+    },
+  },
+  {
+    files: ['frontend/desktop/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./frontend/desktop/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['frontend/desktop/electron/**/*.{ts,tsx,cts,mts}', 'frontend/desktop/vite.config.ts'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./frontend/desktop/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  // Frontend shared packages (V5 structure)
+  {
+    files: ['frontend/shared/ui/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./frontend/shared/ui/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['frontend/shared/ui/src/test/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./frontend/shared/ui/tsconfig.test.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['frontend/shared/api-client/**/*.{ts,tsx,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./frontend/shared/api-client/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
   {
     files: ['tools/packages/build-theme-css.ts'],
     languageOptions: {
@@ -329,14 +404,25 @@ export default [
   },
   // Prevent frontend clients from importing server-side code
   {
-    files: ['apps/web/**/*', 'apps/desktop/**/*'],
+    files: ['apps/web/**/*', 'apps/desktop/**/*', 'frontend/web/**/*', 'frontend/desktop/**/*'],
     rules: {
       'no-restricted-imports': [
         'error',
         {
           patterns: [
             {
-              group: ['**/apps/server/**', '@/server/**', '@abe-stack/server', '@server/*'],
+              group: [
+                '**/apps/server/**',
+                '**/backend/**',
+                '@/server/**',
+                '@abe-stack/server',
+                '@server',
+                '@server/*',
+                '@db',
+                '@db/*',
+                '@storage',
+                '@storage/*',
+              ],
               message:
                 'Frontend code must not import backend/server modules. Add an API layer or shared contract instead.',
             },
@@ -347,7 +433,7 @@ export default [
   },
   // Prevent UI from reaching into DB/infra directly; rely on contracts/API.
   {
-    files: ['apps/web/**/*', 'apps/desktop/**/*'],
+    files: ['apps/web/**/*', 'apps/desktop/**/*', 'frontend/web/**/*', 'frontend/desktop/**/*'],
     rules: {
       'no-restricted-imports': [
         'error',
