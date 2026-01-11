@@ -3,4 +3,4 @@
  * Auth module utilities
  */
 
-export * from './refresh-token';
+export * from "./refresh-token";

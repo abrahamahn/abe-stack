@@ -78,14 +78,14 @@ src/server/
 // Multi-environment configuration loading
 ConfigService.load({
   environment: process.env.NODE_ENV,
-  sources: ['file', 'env', 'secrets'],
+  sources: ["file", "env", "secrets"],
   validation: true,
 });
 
 // Type-safe configuration access
-const port = configService.getNumber('PORT', 8080);
-const dbUrl = configService.getString('DATABASE_URL');
-const features = configService.getArray('ENABLED_FEATURES');
+const port = configService.getNumber("PORT", 8080);
+const dbUrl = configService.getString("DATABASE_URL");
+const features = configService.getArray("ENABLED_FEATURES");
 ```
 
 **Key Features:**
@@ -104,9 +104,9 @@ const features = configService.getArray('ENABLED_FEATURES');
 ```typescript
 // Advanced connection pooling
 const dbServer = new DatabaseServer({
-  host: 'localhost',
+  host: "localhost",
   port: 5432,
-  database: 'abe_stack',
+  database: "abe_stack",
   pool: {
     min: 2,
     max: 20,
@@ -119,8 +119,8 @@ const dbServer = new DatabaseServer({
 // Transaction support with retry logic
 await dbServer.transaction(
   async (client) => {
-    await client.query('INSERT INTO users...');
-    await client.query('INSERT INTO profiles...');
+    await client.query("INSERT INTO users...");
+    await client.query("INSERT INTO profiles...");
   },
   { retryOnSerializationFailure: true },
 );
@@ -142,7 +142,7 @@ await dbServer.transaction(
 ```typescript
 // Redis-backed caching with fallback
 const cache = new RedisCacheService({
-  host: 'localhost',
+  host: "localhost",
   port: 6379,
   fallback: new MemoryCacheService(),
 });
@@ -168,11 +168,11 @@ const memoizedFunction = cache.memoize(expensiveOperation, {
 
 ```typescript
 // Hierarchical logger creation
-const userLogger = logger.createLogger('UserService');
-const paymentLogger = userLogger.createLogger('PaymentProcessor');
+const userLogger = logger.createLogger("UserService");
+const paymentLogger = userLogger.createLogger("PaymentProcessor");
 
 // Rich metadata logging
-logger.info('Payment processed', {
+logger.info("Payment processed", {
   userId: user.id,
   amount: payment.amount,
   correlationId: req.correlationId,
@@ -195,17 +195,17 @@ logger.info('Payment processed', {
 ```typescript
 // JWT token management with refresh
 const tokenManager = new TokenManager({
-  accessTokenTTL: '15m',
-  refreshTokenTTL: '7d',
-  algorithm: 'HS256',
+  accessTokenTTL: "15m",
+  refreshTokenTTL: "7d",
+  algorithm: "HS256",
 });
 
 // CSRF protection
 app.use(
   csrfMiddleware({
-    secretKey: Buffer.from(process.env.CSRF_SECRET, 'hex'),
-    cookieName: 'csrf-token',
-    headerName: 'X-CSRF-Token',
+    secretKey: Buffer.from(process.env.CSRF_SECRET, "hex"),
+    cookieName: "csrf-token",
+    headerName: "X-CSRF-Token",
   }),
 );
 ```
@@ -227,12 +227,12 @@ app.use(
 ```typescript
 // Job submission with priority and retry
 await jobService.submit({
-  type: 'email-notification',
+  type: "email-notification",
   data: { userId, templateId, variables },
   priority: JobPriority.HIGH,
   retryOptions: {
     maxAttempts: 3,
-    backoffStrategy: 'exponential',
+    backoffStrategy: "exponential",
   },
 });
 
@@ -257,15 +257,15 @@ await processor.start({ concurrency: 5 });
 ```typescript
 // Local storage with automatic directory creation
 const storage = new LocalStorageProvider({
-  basePath: './storage',
-  baseUrl: 'https://api.example.com/files',
-  tempDir: './temp',
+  basePath: "./storage",
+  baseUrl: "https://api.example.com/files",
+  tempDir: "./temp",
 });
 
 // File operations with metadata
 const result = await storage.save({
   file: uploadedFile,
-  path: 'users/avatars',
+  path: "users/avatars",
   options: {
     generateThumbnail: true,
     extractMetadata: true,
@@ -321,13 +321,16 @@ export class AuthService {
 
   async authenticate(credentials: LoginDto): Promise<AuthResult> {
     const user = await this.userRepo.findByEmail(credentials.email);
-    if (!user) throw new AuthenticationError('Invalid credentials');
+    if (!user) throw new AuthenticationError("Invalid credentials");
 
-    const isValid = await this.passwordService.verify(credentials.password, user.passwordHash);
-    if (!isValid) throw new AuthenticationError('Invalid credentials');
+    const isValid = await this.passwordService.verify(
+      credentials.password,
+      user.passwordHash,
+    );
+    if (!isValid) throw new AuthenticationError("Invalid credentials");
 
     const tokens = await this.tokenManager.generateTokenPair(user);
-    this.logger.info('User authenticated', { userId: user.id });
+    this.logger.info("User authenticated", { userId: user.id });
 
     return { user, tokens };
   }
@@ -346,16 +349,22 @@ export class UserService {
     // Validation, creation, and onboarding job
     const user = await this.userRepo.create(userData);
     await this.jobService.submit({
-      type: 'user-onboarding',
+      type: "user-onboarding",
       data: { userId: user.id },
     });
     return user;
   }
 
-  async updateProfile(userId: string, updates: ProfileUpdateDto): Promise<User> {
+  async updateProfile(
+    userId: string,
+    updates: ProfileUpdateDto,
+  ): Promise<User> {
     // Profile updates with audit logging
     const updated = await this.userRepo.update(userId, updates);
-    this.logger.info('Profile updated', { userId, changes: Object.keys(updates) });
+    this.logger.info("Profile updated", {
+      userId,
+      changes: Object.keys(updates),
+    });
     return updated;
   }
 }
@@ -370,7 +379,10 @@ export class UserService {
 export const requirePermission = (permission: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
-    const hasPermission = await permissionService.userHasPermission(user.id, permission);
+    const hasPermission = await permissionService.userHasPermission(
+      user.id,
+      permission,
+    );
 
     if (!hasPermission) {
       throw new ForbiddenError(`Permission required: ${permission}`);
@@ -381,7 +393,11 @@ export const requirePermission = (permission: string) => {
 };
 
 // Usage in routes
-router.post('/admin/users', requirePermission('users:create'), userController.createUser);
+router.post(
+  "/admin/users",
+  requirePermission("users:create"),
+  userController.createUser,
+);
 ```
 
 ### Base Classes (`modules/base/`)
@@ -397,7 +413,10 @@ export abstract class BaseRepository<T> {
   ) {}
 
   async findById(id: string): Promise<T | null> {
-    const result = await this.db.query(`SELECT * FROM ${this.tableName} WHERE id = $1`, [id]);
+    const result = await this.db.query(
+      `SELECT * FROM ${this.tableName} WHERE id = $1`,
+      [id],
+    );
     return result.rows[0] || null;
   }
 
@@ -443,7 +462,7 @@ export class UserController {
     const user = await this.userService.createUser(userData);
 
     // 3. Event emission
-    await this.eventService.emit('user.registered', { user });
+    await this.eventService.emit("user.registered", { user });
 
     // 4. Response
     res.status(201).json(this.transformUser(user));
@@ -463,7 +482,7 @@ export class UserService {
 
     // 4. Background processing
     await this.jobService.submit({
-      type: 'welcome-email',
+      type: "welcome-email",
       data: { userId: user.id },
     });
 
@@ -491,7 +510,7 @@ tests/
 
 ```typescript
 // Unit test with dependency injection mocking
-describe('UserService', () => {
+describe("UserService", () => {
   let userService: UserService;
   let mockUserRepo: MockUserRepository;
   let mockJobService: MockJobService;
@@ -503,20 +522,20 @@ describe('UserService', () => {
     userService = new UserService(mockUserRepo, mockJobService, mockLogger);
   });
 
-  it('should create user and trigger onboarding', async () => {
+  it("should create user and trigger onboarding", async () => {
     // Arrange
-    const userData = { email: 'test@example.com', name: 'Test User' };
-    mockUserRepo.create.resolves({ id: '123', ...userData });
+    const userData = { email: "test@example.com", name: "Test User" };
+    mockUserRepo.create.resolves({ id: "123", ...userData });
 
     // Act
     const result = await userService.createUser(userData);
 
     // Assert
-    expect(result.id).toBe('123');
+    expect(result.id).toBe("123");
     expect(mockJobService.submit).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: 'user-onboarding',
-        data: { userId: '123' },
+        type: "user-onboarding",
+        data: { userId: "123" },
       }),
     );
   });
@@ -565,17 +584,17 @@ describe('UserService', () => {
 ```typescript
 // Define configuration schema
 const paymentConfigSchema = {
-  PAYMENT_GATEWAY_URL: { type: 'string', required: true },
-  PAYMENT_TIMEOUT_MS: { type: 'number', default: 30000 },
-  PAYMENT_RETRY_ATTEMPTS: { type: 'number', default: 3 },
+  PAYMENT_GATEWAY_URL: { type: "string", required: true },
+  PAYMENT_TIMEOUT_MS: { type: "number", default: 30000 },
+  PAYMENT_RETRY_ATTEMPTS: { type: "number", default: 3 },
 };
 
 // Use in service
 @injectable()
 export class PaymentService {
   constructor(@inject(TYPES.ConfigService) private config: IConfigService) {
-    this.gatewayUrl = this.config.getString('PAYMENT_GATEWAY_URL');
-    this.timeout = this.config.getNumber('PAYMENT_TIMEOUT_MS');
+    this.gatewayUrl = this.config.getString("PAYMENT_GATEWAY_URL");
+    this.timeout = this.config.getNumber("PAYMENT_TIMEOUT_MS");
   }
 }
 ```
@@ -603,9 +622,9 @@ LOG_LEVEL=warn
 
 ```typescript
 // Health check endpoint
-app.get('/health', async (req, res) => {
+app.get("/health", async (req, res) => {
   const health = {
-    status: 'healthy',
+    status: "healthy",
     timestamp: new Date().toISOString(),
     services: {
       database: await dbService.isHealthy(),
@@ -623,12 +642,16 @@ app.get('/health', async (req, res) => {
 
 ```typescript
 // Request performance middleware
-export const performanceMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const performanceMiddleware = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const start = performance.now();
 
-  res.on('finish', () => {
+  res.on("finish", () => {
     const duration = performance.now() - start;
-    logger.info('Request completed', {
+    logger.info("Request completed", {
       method: req.method,
       url: req.url,
       statusCode: res.statusCode,
