@@ -12,7 +12,7 @@ import { extractRequestInfo } from '../../../common/middleware/request-utils';
 import { logAccountUnlockedEvent } from '../../../infra/logger/security-events';
 
 import type { FastifyRequest, FastifyInstance } from 'fastify';
-import type { ServerEnvironment } from '../../../infra/ctx';
+import type { ServerEnvironment } from '../../../env';
 import type { RequestWithCookies } from '../../../common/types';
 import type { UnlockAccountRequest, UnlockAccountResponse } from '@abe-stack/shared';
 
@@ -61,7 +61,7 @@ export async function handleAdminUnlock(
     // Extract request info for audit logging
     const { ipAddress, userAgent } = extractRequestInfo(
       request as unknown as FastifyRequest,
-      env.authConfig,
+      env.config,
     );
 
     // Unlock the account
@@ -70,7 +70,7 @@ export async function handleAdminUnlock(
       body.email,
       payload.userId,
       async (userId, email, adminUserId, ip, ua) => {
-        await logAccountUnlockedEvent(env.db, userId, email, adminUserId, ip, ua);
+        await logAccountUnlockedEvent(env.db, userId, email, adminUserId, ip ?? undefined, ua ?? undefined);
       },
       ipAddress,
       userAgent,

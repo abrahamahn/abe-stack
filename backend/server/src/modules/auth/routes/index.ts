@@ -11,7 +11,7 @@ import { SUCCESS_MESSAGES } from '../../../common/constants';
 import { handleRegister, handleLogin, handleRefresh, handleLogout } from '../services/auth.service';
 
 import type { FastifyInstance } from 'fastify';
-import type { ServerEnvironment } from '../../../infra/ctx';
+import type { ServerEnvironment } from '../../../env';
 import type { ReplyWithCookies, RequestWithCookies } from '../../../common/types';
 
 /**

@@ -5,15 +5,11 @@ import Fastify from 'fastify';
 import { beforeEach, describe, expect, test } from 'vitest';
 
 import { registerRoutes } from '../routes/routes';
-import { createAuthConfig } from '../infra/config/auth';
-import { createSecurityService, type SecurityService } from '../infra/security';
+import { createMockEnv, type ServerEnvironment } from '../env';
 
-import type { ServerEnvironment } from '../infra/ctx';
-
-// Create a security service for test setup (hashing passwords before tests)
-const testAuthConfig = createAuthConfig(false);
-const testSecurity: SecurityService = createSecurityService(testAuthConfig);
-const hashPassword = (password: string): Promise<string> => testSecurity.hashPassword(password);
+// Create a test environment for hashing passwords before tests
+const testEnv = createMockEnv();
+const hashPassword = (password: string): Promise<string> => testEnv.security.hashPassword(password);
 
 import type { DbClient } from '@db';
 import type { FastifyInstance } from 'fastify';
@@ -163,18 +159,8 @@ function createTestDb(seedUsers: TestUser[] = []): {
   return { db: db as unknown as DbClient, users, loginAttempts };
 }
 
-function createMockEnv(db: DbClient): ServerEnvironment {
-  const authConfig = createAuthConfig(false);
-  const security = createSecurityService(authConfig);
-  return {
-    config: {} as ServerEnvironment['config'],
-    authConfig,
-    db,
-    storage: {} as ServerEnvironment['storage'],
-    mailer: {} as ServerEnvironment['mailer'],
-    security,
-    isProduction: false,
-  };
+function createTestEnv(db: DbClient): ServerEnvironment {
+  return createMockEnv({ db });
 }
 
 async function createTestApp(
@@ -182,7 +168,7 @@ async function createTestApp(
 ): Promise<{ app: FastifyInstance; users: TestUser[]; loginAttempts: TestLoginAttempt[] }> {
   const app = Fastify({ logger: false });
   const { db, users, loginAttempts } = createTestDb(seedUsers);
-  const env = createMockEnv(db);
+  const env = createTestEnv(db);
   app.decorate('db', db);
   registerRoutes(app, env);
   await app.ready();

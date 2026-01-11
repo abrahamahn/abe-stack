@@ -10,7 +10,7 @@ import { eq } from 'drizzle-orm';
 import { ERROR_MESSAGES } from '../../../common/constants';
 
 import type { FastifyInstance } from 'fastify';
-import type { ServerEnvironment } from '../../../infra/ctx';
+import type { ServerEnvironment } from '../../../env';
 import type { RequestWithCookies } from '../../../common/types';
 import type { UserResponse } from '@abe-stack/shared';
 

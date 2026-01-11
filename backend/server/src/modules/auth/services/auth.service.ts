@@ -10,12 +10,12 @@ import { eq } from 'drizzle-orm';
 
 import { ERROR_MESSAGES, SUCCESS_MESSAGES, REFRESH_COOKIE_NAME } from '../../../common/constants';
 import { logAccountLockedEvent } from '../../../infra/logger/security-events';
-import { getRefreshCookieOptions } from '../../../infra/config/auth';
+import { getRefreshCookieOptions } from '../../../env';
 import { extractRequestInfo } from '../../../common/middleware/request-utils';
 import { createRefreshTokenFamily, rotateRefreshToken } from '../utils/refresh-token';
 
 import type { FastifyRequest, FastifyInstance } from 'fastify';
-import type { ServerEnvironment } from '../../../infra/ctx';
+import type { ServerEnvironment } from '../../../env';
 import type { ReplyWithCookies, RequestWithCookies } from '../../../common/types';
 import type {
   AuthResponse,
@@ -89,7 +89,7 @@ export async function handleRegister(
     const accessToken = env.security.createAccessToken(user.id, user.email, user.role);
 
     // Set refresh token as HTTP-only cookie
-    reply.setCookie(REFRESH_COOKIE_NAME, refreshToken, getRefreshCookieOptions(env.authConfig));
+    reply.setCookie(REFRESH_COOKIE_NAME, refreshToken, getRefreshCookieOptions(env.config));
 
     return {
       status: 201,
@@ -122,7 +122,7 @@ export async function handleLogin(
   // Extract request info for security logging
   const { ipAddress, userAgent } = extractRequestInfo(
     request as unknown as FastifyRequest,
-    env.authConfig,
+    env.config,
   );
 
   try {
@@ -224,7 +224,7 @@ export async function handleLogin(
     const accessToken = env.security.createAccessToken(user.id, user.email, user.role);
 
     // Set refresh token as HTTP-only cookie
-    reply.setCookie(REFRESH_COOKIE_NAME, refreshToken, getRefreshCookieOptions(env.authConfig));
+    reply.setCookie(REFRESH_COOKIE_NAME, refreshToken, getRefreshCookieOptions(env.config));
 
     return {
       status: 200,
@@ -262,13 +262,13 @@ export async function handleRefresh(
 
     const { ipAddress, userAgent } = extractRequestInfo(
       request as unknown as FastifyRequest,
-      env.authConfig,
+      env.config,
     );
 
     // Rotate the refresh token with reuse detection
     const result = await rotateRefreshToken(
       env.db,
-      env.authConfig,
+      env.config,
       env.security,
       oldRefreshToken,
       ipAddress,
@@ -284,7 +284,7 @@ export async function handleRefresh(
     const newAccessToken = env.security.createAccessToken(result.userId, result.email, result.role);
 
     // Set new refresh token cookie
-    reply.setCookie(REFRESH_COOKIE_NAME, result.token, getRefreshCookieOptions(env.authConfig));
+    reply.setCookie(REFRESH_COOKIE_NAME, result.token, getRefreshCookieOptions(env.config));
 
     return {
       status: 200,

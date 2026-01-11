@@ -5,7 +5,7 @@
  */
 
 import type { FastifyRequest } from 'fastify';
-import type { AuthConfig } from '../../infra/config/auth';
+import type { ServerConfig } from '../../env';
 import type { RequestInfo } from '../types';
 
 /**
@@ -58,8 +58,8 @@ function isValidIp(ip: string): boolean {
  * - Validates proxy chain depth to prevent spoofing
  * - Validates IP format to prevent injection
  */
-function extractIpAddress(request: FastifyRequest, authConfig: AuthConfig): string | undefined {
-  const { trustProxy, trustedProxies, maxProxyDepth } = authConfig.proxy;
+function extractIpAddress(request: FastifyRequest, config: ServerConfig): string | undefined {
+  const { trustProxy, trustedProxies, maxProxyDepth } = config.proxy;
 
   // If we don't trust proxies, use direct connection IP only
   if (!trustProxy) {
@@ -133,9 +133,9 @@ function extractUserAgent(request: FastifyRequest): string | undefined {
 /**
  * Extract request information for logging and security
  */
-export function extractRequestInfo(request: FastifyRequest, authConfig: AuthConfig): RequestInfo {
+export function extractRequestInfo(request: FastifyRequest, config: ServerConfig): RequestInfo {
   return {
-    ipAddress: extractIpAddress(request, authConfig),
+    ipAddress: extractIpAddress(request, config),
     userAgent: extractUserAgent(request),
   };
 }

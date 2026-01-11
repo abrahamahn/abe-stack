@@ -4,7 +4,7 @@
  */
 
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import type { ServerEnvironment } from '../../infra/ctx';
+import type { ServerEnvironment } from '../../env';
 
 /**
  * Request information extracted for logging and security purposes

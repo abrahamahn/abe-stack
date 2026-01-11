@@ -13,8 +13,7 @@ import {
 } from '../../../infra/logger/security-events';
 
 import type { DbClient } from '@db';
-import type { AuthConfig } from '../../../infra/config/auth';
-import type { SecurityService } from '../../../infra/security';
+import type { ServerConfig, SecurityService } from '../../../env';
 
 /**
  * Create a new refresh token family
@@ -58,13 +57,13 @@ export async function createRefreshTokenFamily(
  */
 export async function rotateRefreshToken(
   db: DbClient,
-  authConfig: AuthConfig,
+  config: ServerConfig,
   security: SecurityService,
   oldToken: string,
   ipAddress?: string,
   userAgent?: string,
 ): Promise<{ token: string; userId: string; email: string; role: UserRole } | null> {
-  const gracePeriod = authConfig.refreshTokenGracePeriodSeconds * 1000; // Convert to ms
+  const gracePeriod = config.auth.refreshTokenGracePeriodSeconds * 1000; // Convert to ms
   const graceWindowStart = new Date(Date.now() - gracePeriod);
 
   // Find the old token
