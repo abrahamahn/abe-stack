@@ -8,6 +8,6 @@
  * - Admin: Administrative operations
  */
 
-export * from './auth';
-export * from './user';
-export * from './admin';
+export * from "./auth";
+export * from "./user";
+export * from "./admin";

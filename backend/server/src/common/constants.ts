@@ -28,8 +28,8 @@ export const PROGRESSIVE_DELAY_WINDOW_MS = 5 * MS_PER_MINUTE; // 5 minutes
 export const MAX_PROGRESSIVE_DELAY_MS = 30 * MS_PER_SECOND; // 30 seconds
 
 // Cookie names - should match authConfig.cookie.name
-export const REFRESH_COOKIE_NAME = 'refreshToken';
-export const CSRF_COOKIE_NAME = '_csrf';
+export const REFRESH_COOKIE_NAME = "refreshToken";
+export const CSRF_COOKIE_NAME = "_csrf";
 
 // HTTP status codes (for clarity)
 export const HTTP_STATUS = {
@@ -46,36 +46,36 @@ export const HTTP_STATUS = {
 
 // Error messages (for consistency and i18n readiness)
 export const ERROR_MESSAGES = {
-  INTERNAL_ERROR: 'Internal server error',
-  INVALID_CREDENTIALS: 'Invalid email or password',
-  EMAIL_ALREADY_REGISTERED: 'Email already registered',
-  USER_NOT_FOUND: 'User not found',
+  INTERNAL_ERROR: "Internal server error",
+  INVALID_CREDENTIALS: "Invalid email or password",
+  EMAIL_ALREADY_REGISTERED: "Email already registered",
+  USER_NOT_FOUND: "User not found",
   ACCOUNT_LOCKED:
-    'Account temporarily locked due to too many failed attempts. Please try again later.',
-  WEAK_PASSWORD: 'Password is too weak',
-  INVALID_TOKEN: 'Invalid or expired token',
-  NO_REFRESH_TOKEN: 'No refresh token provided',
-  FAILED_USER_CREATION: 'Failed to create user',
-  FAILED_TOKEN_FAMILY: 'Failed to create refresh token family',
-  UNAUTHORIZED: 'Unauthorized',
-  FORBIDDEN: 'Forbidden - insufficient permissions',
-  MISSING_AUTH_HEADER: 'Missing or invalid authorization header',
-  INVALID_OR_EXPIRED_TOKEN: 'Invalid or expired token',
+    "Account temporarily locked due to too many failed attempts. Please try again later.",
+  WEAK_PASSWORD: "Password is too weak",
+  INVALID_TOKEN: "Invalid or expired token",
+  NO_REFRESH_TOKEN: "No refresh token provided",
+  FAILED_USER_CREATION: "Failed to create user",
+  FAILED_TOKEN_FAMILY: "Failed to create refresh token family",
+  UNAUTHORIZED: "Unauthorized",
+  FORBIDDEN: "Forbidden - insufficient permissions",
+  MISSING_AUTH_HEADER: "Missing or invalid authorization header",
+  INVALID_OR_EXPIRED_TOKEN: "Invalid or expired token",
 } as const;
 
 // Success messages
 export const SUCCESS_MESSAGES = {
-  LOGGED_OUT: 'Logged out successfully',
-  ACCOUNT_UNLOCKED: 'Account unlocked successfully',
-  EMAIL_VERIFICATION_NOT_IMPLEMENTED: 'Email verification not implemented',
+  LOGGED_OUT: "Logged out successfully",
+  ACCOUNT_UNLOCKED: "Account unlocked successfully",
+  EMAIL_VERIFICATION_NOT_IMPLEMENTED: "Email verification not implemented",
 } as const;
 
 // Lockout failure reasons (for audit logging)
 export const FAILURE_REASONS = {
-  ACCOUNT_LOCKED: 'Account locked',
-  USER_NOT_FOUND: 'User not found',
-  INVALID_PASSWORD: 'Invalid password',
-  TOKEN_EXPIRED: 'Token expired',
-  TOKEN_REUSED: 'Token reuse detected',
-  TOKEN_REVOKED: 'Token family revoked',
+  ACCOUNT_LOCKED: "Account locked",
+  USER_NOT_FOUND: "User not found",
+  INVALID_PASSWORD: "Invalid password",
+  TOKEN_EXPIRED: "Token expired",
+  TOKEN_REUSED: "Token reuse detected",
+  TOKEN_REVOKED: "Token family revoked",
 } as const;

@@ -6,28 +6,31 @@
  * and injects the ServerEnvironment into all handlers.
  */
 
-import { apiContract } from '@abe-stack/shared';
-import { initServer } from '@ts-rest/fastify';
+import { apiContract } from "@abe-stack/shared";
+import { initServer } from "@ts-rest/fastify";
 
-import { SUCCESS_MESSAGES } from '../common/constants';
+import { SUCCESS_MESSAGES } from "../common/constants";
+import { handleAdminUnlock } from "../modules/admin/services/admin.service";
 import {
   handleRegister,
   handleLogin,
   handleRefresh,
   handleLogout,
-} from '../modules/auth/services/auth.service';
-import { handleMe } from '../modules/user/services/user.service';
-import { handleAdminUnlock } from '../modules/admin/services/admin.service';
+} from "../modules/auth/services/auth.service";
+import { handleMe } from "../modules/user/services/user.service";
 
-import type { FastifyInstance } from 'fastify';
-import type { ServerEnvironment } from '../env';
-import type { ReplyWithCookies, RequestWithCookies } from '../common/types';
+import type { ReplyWithCookies, RequestWithCookies } from "../common/types";
+import type { ServerEnvironment } from "../env";
+import type { FastifyInstance } from "fastify";
 
 /**
  * Register all application routes
  * All handlers receive the ServerEnvironment via closure
  */
-export function registerRoutes(app: FastifyInstance, env: ServerEnvironment): void {
+export function registerRoutes(
+  app: FastifyInstance,
+  env: ServerEnvironment,
+): void {
   const s = initServer();
 
   const router = s.router(apiContract, {
@@ -63,17 +66,25 @@ export function registerRoutes(app: FastifyInstance, env: ServerEnvironment): vo
       verifyEmail: async () =>
         Promise.resolve({
           status: 404 as const,
-          body: { message: SUCCESS_MESSAGES.EMAIL_VERIFICATION_NOT_IMPLEMENTED },
+          body: {
+            message: SUCCESS_MESSAGES.EMAIL_VERIFICATION_NOT_IMPLEMENTED,
+          },
         }),
     },
 
     users: {
-      me: async ({ request }) => handleMe(env, app, request as unknown as RequestWithCookies),
+      me: async ({ request }) =>
+        handleMe(env, app, request as unknown as RequestWithCookies),
     },
 
     admin: {
       unlockAccount: async ({ body, request }) =>
-        handleAdminUnlock(env, app, body, request as unknown as RequestWithCookies),
+        handleAdminUnlock(
+          env,
+          app,
+          body,
+          request as unknown as RequestWithCookies,
+        ),
     },
   });
 

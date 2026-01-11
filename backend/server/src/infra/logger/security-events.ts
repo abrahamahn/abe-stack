@@ -4,27 +4,27 @@
  * Creates an audit trail for security-critical actions
  */
 
-import { securityEvents } from '@db';
-import { eq, gte } from 'drizzle-orm';
+import { securityEvents } from "@db";
+import { eq, gte } from "drizzle-orm";
 
-import type { DbClient } from '@db';
+import type { DbClient } from "@db";
 
 /**
  * Security event types
  */
 export type SecurityEventType =
-  | 'token_reuse_detected'
-  | 'token_family_revoked'
-  | 'account_locked'
-  | 'account_unlocked'
-  | 'suspicious_login'
-  | 'password_changed'
-  | 'email_changed';
+  | "token_reuse_detected"
+  | "token_family_revoked"
+  | "account_locked"
+  | "account_unlocked"
+  | "suspicious_login"
+  | "password_changed"
+  | "email_changed";
 
 /**
  * Security event severity levels
  */
-export type SecurityEventSeverity = 'low' | 'medium' | 'high' | 'critical';
+export type SecurityEventSeverity = "low" | "medium" | "high" | "critical";
 
 /**
  * Security event metadata structure
@@ -57,8 +57,19 @@ export interface LogSecurityEventParams {
  * Log a security event to the database
  * Creates an audit trail for security-critical actions
  */
-export async function logSecurityEvent(params: LogSecurityEventParams): Promise<void> {
-  const { db, userId, email, eventType, severity, ipAddress, userAgent, metadata } = params;
+export async function logSecurityEvent(
+  params: LogSecurityEventParams,
+): Promise<void> {
+  const {
+    db,
+    userId,
+    email,
+    eventType,
+    severity,
+    ipAddress,
+    userAgent,
+    metadata,
+  } = params;
 
   await db.insert(securityEvents).values({
     userId: userId || null,
@@ -87,13 +98,13 @@ export async function logTokenReuseEvent(
     db,
     userId,
     email,
-    eventType: 'token_reuse_detected',
-    severity: 'critical',
+    eventType: "token_reuse_detected",
+    severity: "critical",
     ipAddress,
     userAgent,
     metadata: {
       familyId,
-      reason: 'Refresh token used after rotation',
+      reason: "Refresh token used after rotation",
     },
   });
 }
@@ -115,8 +126,8 @@ export async function logTokenFamilyRevokedEvent(
     db,
     userId,
     email,
-    eventType: 'token_family_revoked',
-    severity: 'high',
+    eventType: "token_family_revoked",
+    severity: "high",
     ipAddress,
     userAgent,
     metadata: {
@@ -140,13 +151,13 @@ export async function logAccountLockedEvent(
   await logSecurityEvent({
     db,
     email,
-    eventType: 'account_locked',
-    severity: 'medium',
+    eventType: "account_locked",
+    severity: "medium",
     ipAddress,
     userAgent,
     metadata: {
       failedAttempts,
-      reason: 'Too many failed login attempts',
+      reason: "Too many failed login attempts",
     },
   });
 }
@@ -167,13 +178,13 @@ export async function logAccountUnlockedEvent(
     db,
     userId,
     email,
-    eventType: 'account_unlocked',
-    severity: 'low',
+    eventType: "account_unlocked",
+    severity: "low",
     ipAddress,
     userAgent,
     metadata: {
       adminUserId,
-      reason: 'Manually unlocked by admin',
+      reason: "Manually unlocked by admin",
     },
   });
 }
@@ -186,7 +197,9 @@ export async function getUserSecurityEvents(
   db: DbClient,
   userId: string,
   limit: number = 50,
-): Promise<Array<{ id: string; eventType: string; severity: string; createdAt: Date }>> {
+): Promise<
+  Array<{ id: string; eventType: string; severity: string; createdAt: Date }>
+> {
   const events = await db.query.securityEvents.findMany({
     where: eq(securityEvents.userId, userId),
     orderBy: (table, { desc }) => [desc(table.createdAt)],
@@ -223,9 +236,15 @@ export async function getSecurityEventMetrics(
     },
   });
 
-  const tokenReuseCount = events.filter((e) => e.eventType === 'token_reuse_detected').length;
-  const accountLockedCount = events.filter((e) => e.eventType === 'account_locked').length;
-  const criticalEventCount = events.filter((e) => e.severity === 'critical').length;
+  const tokenReuseCount = events.filter(
+    (e) => e.eventType === "token_reuse_detected",
+  ).length;
+  const accountLockedCount = events.filter(
+    (e) => e.eventType === "account_locked",
+  ).length;
+  const criticalEventCount = events.filter(
+    (e) => e.severity === "critical",
+  ).length;
 
   return {
     tokenReuseCount,

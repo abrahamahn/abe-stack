@@ -4,17 +4,20 @@
  * Business logic for administrative operations
  */
 
-import { users } from '@db';
-import { eq } from 'drizzle-orm';
+import { users } from "@db";
+import { eq } from "drizzle-orm";
 
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../../../common/constants';
-import { extractRequestInfo } from '../../../common/middleware/request-utils';
-import { logAccountUnlockedEvent } from '../../../infra/logger/security-events';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../../../common/constants";
+import { extractRequestInfo } from "../../../common/middleware/request-utils";
+import { logAccountUnlockedEvent } from "../../../infra/logger/security-events";
 
-import type { FastifyRequest, FastifyInstance } from 'fastify';
-import type { ServerEnvironment } from '../../../env';
-import type { RequestWithCookies } from '../../../common/types';
-import type { UnlockAccountRequest, UnlockAccountResponse } from '@abe-stack/shared';
+import type { RequestWithCookies } from "../../../common/types";
+import type { ServerEnvironment } from "../../../env";
+import type {
+  UnlockAccountRequest,
+  UnlockAccountResponse,
+} from "@abe-stack/shared";
+import type { FastifyRequest, FastifyInstance } from "fastify";
 
 type AdminResult<T> =
   | { status: 200; body: T }
@@ -32,7 +35,7 @@ export async function handleAdminUnlock(
   try {
     // Verify admin authentication
     const authHeader = request.headers.authorization;
-    if (!authHeader?.startsWith('Bearer ')) {
+    if (!authHeader?.startsWith("Bearer ")) {
       return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
     }
 
@@ -41,11 +44,14 @@ export async function handleAdminUnlock(
     try {
       payload = env.security.verifyToken(token);
     } catch {
-      return { status: 401, body: { message: ERROR_MESSAGES.INVALID_OR_EXPIRED_TOKEN } };
+      return {
+        status: 401,
+        body: { message: ERROR_MESSAGES.INVALID_OR_EXPIRED_TOKEN },
+      };
     }
 
     // Check if user is admin
-    if (payload.role !== 'admin') {
+    if (payload.role !== "admin") {
       return { status: 403, body: { message: ERROR_MESSAGES.FORBIDDEN } };
     }
 
@@ -70,7 +76,14 @@ export async function handleAdminUnlock(
       body.email,
       payload.userId,
       async (userId, email, adminUserId, ip, ua) => {
-        await logAccountUnlockedEvent(env.db, userId, email, adminUserId, ip ?? undefined, ua ?? undefined);
+        await logAccountUnlockedEvent(
+          env.db,
+          userId,
+          email,
+          adminUserId,
+          ip ?? undefined,
+          ua ?? undefined,
+        );
       },
       ipAddress,
       userAgent,
@@ -78,7 +91,7 @@ export async function handleAdminUnlock(
 
     app.log.info(
       { adminId: payload.userId, targetEmail: body.email },
-      'Admin unlocked user account',
+      "Admin unlocked user account",
     );
 
     return {

@@ -1,10 +1,10 @@
 // backend/server/src/types/fastify.d.ts
-import 'fastify';
-import type { TokenPayload } from '../env';
-import type { DbClient } from '@db';
-import type { StorageProvider } from '@storage';
+import "fastify";
+import type { TokenPayload } from "../env";
+import type { DbClient } from "@db";
+import type { StorageProvider } from "@storage";
 
-declare module 'fastify' {
+declare module "fastify" {
   interface FastifyInstance {
     db: DbClient;
     storage: StorageProvider;

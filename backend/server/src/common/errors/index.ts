@@ -4,7 +4,7 @@
  * Provides structured error handling with HTTP status codes
  */
 
-import { HTTP_STATUS } from '../constants';
+import { HTTP_STATUS } from "../constants";
 
 /**
  * Base application error
@@ -34,7 +34,10 @@ export class AppError extends Error {
  * Authentication error (401)
  */
 export class UnauthorizedError extends AppError {
-  constructor(message: string = 'Unauthorized', details?: Record<string, unknown>) {
+  constructor(
+    message: string = "Unauthorized",
+    details?: Record<string, unknown>,
+  ) {
     super(message, HTTP_STATUS.UNAUTHORIZED, details);
   }
 }
@@ -43,7 +46,10 @@ export class UnauthorizedError extends AppError {
  * Authorization error (403)
  */
 export class ForbiddenError extends AppError {
-  constructor(message: string = 'Forbidden', details?: Record<string, unknown>) {
+  constructor(
+    message: string = "Forbidden",
+    details?: Record<string, unknown>,
+  ) {
     super(message, HTTP_STATUS.FORBIDDEN, details);
   }
 }
@@ -52,7 +58,10 @@ export class ForbiddenError extends AppError {
  * Resource not found error (404)
  */
 export class NotFoundError extends AppError {
-  constructor(message: string = 'Not found', details?: Record<string, unknown>) {
+  constructor(
+    message: string = "Not found",
+    details?: Record<string, unknown>,
+  ) {
     super(message, HTTP_STATUS.NOT_FOUND, details);
   }
 }
@@ -63,7 +72,11 @@ export class NotFoundError extends AppError {
 export class ValidationError extends AppError {
   readonly field?: string;
 
-  constructor(message: string, field?: string, details?: Record<string, unknown>) {
+  constructor(
+    message: string,
+    field?: string,
+    details?: Record<string, unknown>,
+  ) {
     super(message, HTTP_STATUS.BAD_REQUEST, details);
     this.field = field;
   }
@@ -73,7 +86,7 @@ export class ValidationError extends AppError {
  * Conflict error (409) - e.g., duplicate email
  */
 export class ConflictError extends AppError {
-  constructor(message: string = 'Conflict', details?: Record<string, unknown>) {
+  constructor(message: string = "Conflict", details?: Record<string, unknown>) {
     super(message, HTTP_STATUS.CONFLICT, details);
   }
 }
@@ -85,7 +98,7 @@ export class TooManyRequestsError extends AppError {
   readonly retryAfter?: number;
 
   constructor(
-    message: string = 'Too many requests',
+    message: string = "Too many requests",
     retryAfter?: number,
     details?: Record<string, unknown>,
   ) {
@@ -119,7 +132,7 @@ export function toErrorResponse(error: unknown): {
 
   // Don't expose internal error details
   return {
-    message: 'Internal server error',
+    message: "Internal server error",
     statusCode: HTTP_STATUS.INTERNAL_SERVER_ERROR,
   };
 }

@@ -6,17 +6,17 @@
  * Receives ServerEnvironment (DI container) from the caller.
  */
 
-import cookie from '@fastify/cookie';
-import cors from '@fastify/cors';
-import csrfProtection from '@fastify/csrf-protection';
-import helmet from '@fastify/helmet';
-import rateLimit from '@fastify/rate-limit';
-import { sql } from 'drizzle-orm';
-import Fastify, { type FastifyInstance } from 'fastify';
+import cookie from "@fastify/cookie";
+import cors from "@fastify/cors";
+import csrfProtection from "@fastify/csrf-protection";
+import helmet from "@fastify/helmet";
+import rateLimit from "@fastify/rate-limit";
+import { sql } from "drizzle-orm";
+import Fastify, { type FastifyInstance } from "fastify";
 
-import { registerRoutes } from './routes/routes';
+import { registerRoutes } from "./routes/routes";
 
-import type { ServerEnvironment } from './env';
+import type { ServerEnvironment } from "./env";
 
 // ============================================================================
 // Types
@@ -31,21 +31,23 @@ export interface CreateServerResult {
 // Server Factory
 // ============================================================================
 
-export async function createServer(env: ServerEnvironment): Promise<CreateServerResult> {
+export async function createServer(
+  env: ServerEnvironment,
+): Promise<CreateServerResult> {
   const { isProduction } = env.config;
 
   // Logger configuration
   const loggerConfig = isProduction
-    ? { level: process.env.LOG_LEVEL || 'info' }
+    ? { level: process.env.LOG_LEVEL || "info" }
     : {
-        level: process.env.LOG_LEVEL || 'info',
+        level: process.env.LOG_LEVEL || "info",
         transport: {
-          target: 'pino-pretty',
+          target: "pino-pretty",
           options: {
             colorize: true,
-            translateTime: 'HH:MM:ss',
+            translateTime: "HH:MM:ss",
             singleLine: true,
-            ignore: 'pid,hostname',
+            ignore: "pid,hostname",
           },
         },
       };
@@ -59,9 +61,9 @@ export async function createServer(env: ServerEnvironment): Promise<CreateServer
 
   // CORS
   await app.register(cors, {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   });
 
   // Security headers
@@ -71,18 +73,18 @@ export async function createServer(env: ServerEnvironment): Promise<CreateServer
   await app.register(rateLimit, {
     global: false,
     max: 100,
-    timeWindow: '1 minute',
+    timeWindow: "1 minute",
     addHeaders: {
-      'x-ratelimit-limit': true,
-      'x-ratelimit-remaining': true,
-      'x-ratelimit-reset': true,
+      "x-ratelimit-limit": true,
+      "x-ratelimit-remaining": true,
+      "x-ratelimit-reset": true,
     },
   });
 
   // Cookies for refresh tokens
   await app.register(cookie, {
     secret: process.env.COOKIE_SECRET || process.env.JWT_SECRET,
-    hook: 'onRequest',
+    hook: "onRequest",
     parseOptions: {},
   });
 
@@ -90,45 +92,45 @@ export async function createServer(env: ServerEnvironment): Promise<CreateServer
   await app.register(csrfProtection, {
     cookieOpts: {
       signed: true,
-      sameSite: isProduction ? 'strict' : 'lax',
+      sameSite: isProduction ? "strict" : "lax",
       httpOnly: true,
       secure: isProduction,
     },
-    sessionPlugin: '@fastify/cookie',
+    sessionPlugin: "@fastify/cookie",
   });
 
   // ============================================================================
   // Decorate for Legacy Compatibility
   // ============================================================================
 
-  app.decorate('db', env.db);
-  app.decorate('storage', env.storage);
+  app.decorate("db", env.db);
+  app.decorate("storage", env.storage);
 
   // ============================================================================
   // Core Routes
   // ============================================================================
 
-  app.get('/', {}, () => ({
-    message: 'ABE Stack API',
+  app.get("/", {}, () => ({
+    message: "ABE Stack API",
     timestamp: new Date().toISOString(),
   }));
 
-  app.get('/api', {}, () => ({
-    message: 'ABE Stack API is running',
-    version: '1.0.0',
+  app.get("/api", {}, () => ({
+    message: "ABE Stack API is running",
+    version: "1.0.0",
     timestamp: new Date().toISOString(),
   }));
 
-  app.get('/health', {}, async () => {
+  app.get("/health", {}, async () => {
     let dbHealthy = true;
     try {
       await env.db.execute(sql`SELECT 1`);
     } catch (error) {
       dbHealthy = false;
-      app.log.error({ err: error }, 'Database health check failed');
+      app.log.error({ err: error }, "Database health check failed");
     }
     return {
-      status: dbHealthy ? ('ok' as const) : ('degraded' as const),
+      status: dbHealthy ? ("ok" as const) : ("degraded" as const),
       database: dbHealthy,
       timestamp: new Date().toISOString(),
     };

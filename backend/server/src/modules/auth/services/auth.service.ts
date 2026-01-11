@@ -4,30 +4,43 @@
  * Business logic for user authentication
  */
 
-import { refreshTokens, users, withTransaction } from '@db';
-import { validatePassword } from '@abe-stack/shared';
-import { eq } from 'drizzle-orm';
+import { validatePassword } from "@abe-stack/shared";
+import { refreshTokens, users, withTransaction } from "@db";
+import { eq } from "drizzle-orm";
 
-import { ERROR_MESSAGES, SUCCESS_MESSAGES, REFRESH_COOKIE_NAME } from '../../../common/constants';
-import { logAccountLockedEvent } from '../../../infra/logger/security-events';
-import { getRefreshCookieOptions } from '../../../env';
-import { extractRequestInfo } from '../../../common/middleware/request-utils';
-import { createRefreshTokenFamily, rotateRefreshToken } from '../utils/refresh-token';
+import {
+  ERROR_MESSAGES,
+  SUCCESS_MESSAGES,
+  REFRESH_COOKIE_NAME,
+} from "../../../common/constants";
+import { extractRequestInfo } from "../../../common/middleware/request-utils";
+import { getRefreshCookieOptions } from "../../../env";
+import { logAccountLockedEvent } from "../../../infra/logger/security-events";
+import {
+  createRefreshTokenFamily,
+  rotateRefreshToken,
+} from "../utils/refresh-token";
 
-import type { FastifyRequest, FastifyInstance } from 'fastify';
-import type { ServerEnvironment } from '../../../env';
-import type { ReplyWithCookies, RequestWithCookies } from '../../../common/types';
+import type {
+  ReplyWithCookies,
+  RequestWithCookies,
+} from "../../../common/types";
+import type { ServerEnvironment } from "../../../env";
 import type {
   AuthResponse,
   LoginRequest,
   LogoutResponse,
   RefreshResponse,
   RegisterRequest,
-} from '@abe-stack/shared';
+} from "@abe-stack/shared";
+import type { FastifyRequest, FastifyInstance } from "fastify";
 
 type AuthResult<T> =
   | { status: 200 | 201; body: T }
-  | { status: 400 | 401 | 403 | 404 | 409 | 429 | 500; body: { message: string } };
+  | {
+      status: 400 | 401 | 403 | 404 | 409 | 429 | 500;
+      body: { message: string };
+    };
 
 /**
  * Handle user registration
@@ -44,16 +57,22 @@ export async function handleRegister(
     });
 
     if (existingUser) {
-      return { status: 409, body: { message: ERROR_MESSAGES.EMAIL_ALREADY_REGISTERED } };
+      return {
+        status: 409,
+        body: { message: ERROR_MESSAGES.EMAIL_ALREADY_REGISTERED },
+      };
     }
 
     // Validate password strength
-    const passwordValidation = await validatePassword(body.password, [body.email, body.name || '']);
+    const passwordValidation = await validatePassword(body.password, [
+      body.email,
+      body.name || "",
+    ]);
 
     if (!passwordValidation.isValid) {
       app.log.warn(
         { email: body.email, errors: passwordValidation.errors },
-        'Password validation failed during registration',
+        "Password validation failed during registration",
       );
       return {
         status: 400,
@@ -71,25 +90,37 @@ export async function handleRegister(
           email: body.email,
           name: body.name || null,
           passwordHash,
-          role: 'user',
+          role: "user",
         })
         .returning();
 
       if (!newUser) {
-        throw new Error('Failed to create user');
+        throw new Error("Failed to create user");
       }
 
       // Create refresh token family within same transaction
-      const { token } = await createRefreshTokenFamily(tx, env.security, newUser.id);
+      const { token } = await createRefreshTokenFamily(
+        tx,
+        env.security,
+        newUser.id,
+      );
 
       return { user: newUser, refreshToken: token };
     });
 
     // Create access token
-    const accessToken = env.security.createAccessToken(user.id, user.email, user.role);
+    const accessToken = env.security.createAccessToken(
+      user.id,
+      user.email,
+      user.role,
+    );
 
     // Set refresh token as HTTP-only cookie
-    reply.setCookie(REFRESH_COOKIE_NAME, refreshToken, getRefreshCookieOptions(env.config));
+    reply.setCookie(
+      REFRESH_COOKIE_NAME,
+      refreshToken,
+      getRefreshCookieOptions(env.config),
+    );
 
     return {
       status: 201,
@@ -135,7 +166,7 @@ export async function handleLogin(
         false,
         ipAddress,
         userAgent,
-        'Account locked',
+        "Account locked",
       );
       return {
         status: 429,
@@ -152,7 +183,10 @@ export async function handleLogin(
     });
 
     // Timing-safe password verification
-    const isValid = await env.security.verifyPasswordSafe(body.password, user?.passwordHash);
+    const isValid = await env.security.verifyPasswordSafe(
+      body.password,
+      user?.passwordHash,
+    );
 
     if (!user) {
       await env.security.logLoginAttempt(
@@ -161,10 +195,13 @@ export async function handleLogin(
         false,
         ipAddress,
         userAgent,
-        'User not found',
+        "User not found",
       );
 
-      const lockoutStatus = await env.security.getAccountLockoutStatus(env.db, body.email);
+      const lockoutStatus = await env.security.getAccountLockoutStatus(
+        env.db,
+        body.email,
+      );
       if (lockoutStatus.isLocked) {
         await logAccountLockedEvent(
           env.db,
@@ -175,7 +212,10 @@ export async function handleLogin(
         );
       }
 
-      return { status: 401, body: { message: ERROR_MESSAGES.INVALID_CREDENTIALS } };
+      return {
+        status: 401,
+        body: { message: ERROR_MESSAGES.INVALID_CREDENTIALS },
+      };
     }
 
     if (!isValid) {
@@ -185,10 +225,13 @@ export async function handleLogin(
         false,
         ipAddress,
         userAgent,
-        'Invalid password',
+        "Invalid password",
       );
 
-      const lockoutStatus = await env.security.getAccountLockoutStatus(env.db, body.email);
+      const lockoutStatus = await env.security.getAccountLockoutStatus(
+        env.db,
+        body.email,
+      );
       if (lockoutStatus.isLocked) {
         await logAccountLockedEvent(
           env.db,
@@ -199,13 +242,26 @@ export async function handleLogin(
         );
       }
 
-      return { status: 401, body: { message: ERROR_MESSAGES.INVALID_CREDENTIALS } };
+      return {
+        status: 401,
+        body: { message: ERROR_MESSAGES.INVALID_CREDENTIALS },
+      };
     }
 
     // Create tokens and log success atomically
     const { refreshToken } = await withTransaction(env.db, async (tx) => {
-      await env.security.logLoginAttempt(tx, body.email, true, ipAddress, userAgent);
-      const { token } = await createRefreshTokenFamily(tx, env.security, user.id);
+      await env.security.logLoginAttempt(
+        tx,
+        body.email,
+        true,
+        ipAddress,
+        userAgent,
+      );
+      const { token } = await createRefreshTokenFamily(
+        tx,
+        env.security,
+        user.id,
+      );
       return { refreshToken: token };
     });
 
@@ -213,18 +269,32 @@ export async function handleLogin(
     if (env.security.needsRehash(user.passwordHash)) {
       try {
         const newHash = await env.security.hashPassword(body.password);
-        await env.db.update(users).set({ passwordHash: newHash }).where(eq(users.id, user.id));
-        app.log.info({ userId: user.id }, 'Password hash upgraded');
+        await env.db
+          .update(users)
+          .set({ passwordHash: newHash })
+          .where(eq(users.id, user.id));
+        app.log.info({ userId: user.id }, "Password hash upgraded");
       } catch (error) {
-        app.log.error({ userId: user.id, error }, 'Failed to upgrade password hash');
+        app.log.error(
+          { userId: user.id, error },
+          "Failed to upgrade password hash",
+        );
       }
     }
 
     // Create access token
-    const accessToken = env.security.createAccessToken(user.id, user.email, user.role);
+    const accessToken = env.security.createAccessToken(
+      user.id,
+      user.email,
+      user.role,
+    );
 
     // Set refresh token as HTTP-only cookie
-    reply.setCookie(REFRESH_COOKIE_NAME, refreshToken, getRefreshCookieOptions(env.config));
+    reply.setCookie(
+      REFRESH_COOKIE_NAME,
+      refreshToken,
+      getRefreshCookieOptions(env.config),
+    );
 
     return {
       status: 200,
@@ -257,7 +327,10 @@ export async function handleRefresh(
     const oldRefreshToken = request.cookies[REFRESH_COOKIE_NAME];
 
     if (!oldRefreshToken) {
-      return { status: 401, body: { message: ERROR_MESSAGES.NO_REFRESH_TOKEN } };
+      return {
+        status: 401,
+        body: { message: ERROR_MESSAGES.NO_REFRESH_TOKEN },
+      };
     }
 
     const { ipAddress, userAgent } = extractRequestInfo(
@@ -276,15 +349,23 @@ export async function handleRefresh(
     );
 
     if (!result) {
-      reply.clearCookie(REFRESH_COOKIE_NAME, { path: '/' });
+      reply.clearCookie(REFRESH_COOKIE_NAME, { path: "/" });
       return { status: 401, body: { message: ERROR_MESSAGES.INVALID_TOKEN } };
     }
 
     // Create new access token
-    const newAccessToken = env.security.createAccessToken(result.userId, result.email, result.role);
+    const newAccessToken = env.security.createAccessToken(
+      result.userId,
+      result.email,
+      result.role,
+    );
 
     // Set new refresh token cookie
-    reply.setCookie(REFRESH_COOKIE_NAME, result.token, getRefreshCookieOptions(env.config));
+    reply.setCookie(
+      REFRESH_COOKIE_NAME,
+      result.token,
+      getRefreshCookieOptions(env.config),
+    );
 
     return {
       status: 200,
@@ -309,10 +390,12 @@ export async function handleLogout(
     const refreshToken = request.cookies[REFRESH_COOKIE_NAME];
 
     if (refreshToken) {
-      await env.db.delete(refreshTokens).where(eq(refreshTokens.token, refreshToken));
+      await env.db
+        .delete(refreshTokens)
+        .where(eq(refreshTokens.token, refreshToken));
     }
 
-    reply.clearCookie(REFRESH_COOKIE_NAME, { path: '/' });
+    reply.clearCookie(REFRESH_COOKIE_NAME, { path: "/" });
 
     return {
       status: 200,

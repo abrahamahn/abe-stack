@@ -4,20 +4,31 @@
  * Registers authentication endpoints with the Fastify app
  */
 
-import { apiContract } from '@abe-stack/shared';
-import { initServer } from '@ts-rest/fastify';
+import { apiContract } from "@abe-stack/shared";
+import { initServer } from "@ts-rest/fastify";
 
-import { SUCCESS_MESSAGES } from '../../../common/constants';
-import { handleRegister, handleLogin, handleRefresh, handleLogout } from '../services/auth.service';
+import { SUCCESS_MESSAGES } from "../../../common/constants";
+import {
+  handleRegister,
+  handleLogin,
+  handleRefresh,
+  handleLogout,
+} from "../services/auth.service";
 
-import type { FastifyInstance } from 'fastify';
-import type { ServerEnvironment } from '../../../env';
-import type { ReplyWithCookies, RequestWithCookies } from '../../../common/types';
+import type {
+  ReplyWithCookies,
+  RequestWithCookies,
+} from "../../../common/types";
+import type { ServerEnvironment } from "../../../env";
+import type { FastifyInstance } from "fastify";
 
 /**
  * Register auth routes with dependency injection
  */
-export function registerAuthRoutes(app: FastifyInstance, env: ServerEnvironment): void {
+export function registerAuthRoutes(
+  app: FastifyInstance,
+  env: ServerEnvironment,
+): void {
   const s = initServer();
 
   const router = s.router(apiContract, {
@@ -53,17 +64,25 @@ export function registerAuthRoutes(app: FastifyInstance, env: ServerEnvironment)
       verifyEmail: async () =>
         Promise.resolve({
           status: 404 as const,
-          body: { message: SUCCESS_MESSAGES.EMAIL_VERIFICATION_NOT_IMPLEMENTED },
+          body: {
+            message: SUCCESS_MESSAGES.EMAIL_VERIFICATION_NOT_IMPLEMENTED,
+          },
         }),
     },
     // Placeholder - these will be handled by their respective modules
     users: {
       me: async () =>
-        Promise.resolve({ status: 401 as const, body: { message: 'Not implemented' } }),
+        Promise.resolve({
+          status: 401 as const,
+          body: { message: "Not implemented" },
+        }),
     },
     admin: {
       unlockAccount: async () =>
-        Promise.resolve({ status: 401 as const, body: { message: 'Not implemented' } }),
+        Promise.resolve({
+          status: 401 as const,
+          body: { message: "Not implemented" },
+        }),
     },
   });
 

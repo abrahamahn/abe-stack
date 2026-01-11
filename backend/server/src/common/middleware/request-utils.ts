@@ -4,9 +4,9 @@
  * Handles IP extraction and user agent parsing with proxy support
  */
 
-import type { FastifyRequest } from 'fastify';
-import type { ServerConfig } from '../../env';
-import type { RequestInfo } from '../types';
+import type { ServerConfig } from "../../env";
+import type { RequestInfo } from "../types";
+import type { FastifyRequest } from "fastify";
 
 /**
  * Check if an IP is in the trusted proxy list
@@ -24,10 +24,10 @@ function isTrustedProxy(ip: string, trustedProxies: string[]): boolean {
     }
 
     // Simple subnet matching for common cases
-    if (trusted.includes('/')) {
-      const [subnet] = trusted.split('/');
+    if (trusted.includes("/")) {
+      const [subnet] = trusted.split("/");
       if (subnet) {
-        const lastDotIndex = subnet.lastIndexOf('.');
+        const lastDotIndex = subnet.lastIndexOf(".");
         if (lastDotIndex > 0) {
           return ip.startsWith(subnet.substring(0, lastDotIndex));
         }
@@ -58,7 +58,10 @@ function isValidIp(ip: string): boolean {
  * - Validates proxy chain depth to prevent spoofing
  * - Validates IP format to prevent injection
  */
-function extractIpAddress(request: FastifyRequest, config: ServerConfig): string | undefined {
+function extractIpAddress(
+  request: FastifyRequest,
+  config: ServerConfig,
+): string | undefined {
   const { trustProxy, trustedProxies, maxProxyDepth } = config.proxy;
 
   // If we don't trust proxies, use direct connection IP only
@@ -71,11 +74,13 @@ function extractIpAddress(request: FastifyRequest, config: ServerConfig): string
   }
 
   // Check x-forwarded-for header (set by reverse proxies)
-  const forwardedFor = request.headers['x-forwarded-for'];
+  const forwardedFor = request.headers["x-forwarded-for"];
   if (forwardedFor) {
     // x-forwarded-for can contain multiple IPs: "client, proxy1, proxy2"
-    const ipsString = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor;
-    const ips = ipsString?.split(',').map((ip) => ip.trim()) || [];
+    const ipsString = Array.isArray(forwardedFor)
+      ? forwardedFor[0]
+      : forwardedFor;
+    const ips = ipsString?.split(",").map((ip) => ip.trim()) || [];
 
     // Validate chain depth to prevent spoofing
     if (ips.length > maxProxyDepth) {
@@ -119,9 +124,9 @@ function extractIpAddress(request: FastifyRequest, config: ServerConfig): string
  * Extract user agent from request headers
  */
 function extractUserAgent(request: FastifyRequest): string | undefined {
-  const userAgent = request.headers['user-agent'];
+  const userAgent = request.headers["user-agent"];
 
-  if (!userAgent || typeof userAgent !== 'string') {
+  if (!userAgent || typeof userAgent !== "string") {
     return undefined;
   }
 
@@ -133,7 +138,10 @@ function extractUserAgent(request: FastifyRequest): string | undefined {
 /**
  * Extract request information for logging and security
  */
-export function extractRequestInfo(request: FastifyRequest, config: ServerConfig): RequestInfo {
+export function extractRequestInfo(
+  request: FastifyRequest,
+  config: ServerConfig,
+): RequestInfo {
   return {
     ipAddress: extractIpAddress(request, config),
     userAgent: extractUserAgent(request),

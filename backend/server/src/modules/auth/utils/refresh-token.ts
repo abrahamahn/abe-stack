@@ -4,16 +4,21 @@
  * Handles token families, rotation, and reuse detection
  */
 
-import { refreshTokenFamilies, refreshTokens, type UserRole, withTransaction } from '@db';
-import { and, eq, gt, lt } from 'drizzle-orm';
+import {
+  refreshTokenFamilies,
+  refreshTokens,
+  type UserRole,
+  withTransaction,
+} from "@db";
+import { and, eq, gt, lt } from "drizzle-orm";
 
 import {
   logTokenFamilyRevokedEvent,
   logTokenReuseEvent,
-} from '../../../infra/logger/security-events';
+} from "../../../infra/logger/security-events";
 
-import type { DbClient } from '@db';
-import type { ServerConfig, SecurityService } from '../../../env';
+import type { ServerConfig, SecurityService } from "../../../env";
+import type { DbClient } from "@db";
 
 /**
  * Create a new refresh token family
@@ -33,7 +38,7 @@ export async function createRefreshTokenFamily(
     .returning();
 
   if (!family) {
-    throw new Error('Failed to create refresh token family');
+    throw new Error("Failed to create refresh token family");
   }
 
   // Create the first token in the family
@@ -62,13 +67,21 @@ export async function rotateRefreshToken(
   oldToken: string,
   ipAddress?: string,
   userAgent?: string,
-): Promise<{ token: string; userId: string; email: string; role: UserRole } | null> {
+): Promise<{
+  token: string;
+  userId: string;
+  email: string;
+  role: UserRole;
+} | null> {
   const gracePeriod = config.auth.refreshTokenGracePeriodSeconds * 1000; // Convert to ms
   const graceWindowStart = new Date(Date.now() - gracePeriod);
 
   // Find the old token
   const storedToken = await db.query.refreshTokens.findFirst({
-    where: and(eq(refreshTokens.token, oldToken), gt(refreshTokens.expiresAt, new Date())),
+    where: and(
+      eq(refreshTokens.token, oldToken),
+      gt(refreshTokens.expiresAt, new Date()),
+    ),
   });
 
   if (!storedToken) {
@@ -105,7 +118,7 @@ export async function rotateRefreshToken(
       }
 
       // Delete all tokens in this family
-      await revokeTokenFamily(db, storedToken.familyId, 'Token reuse detected');
+      await revokeTokenFamily(db, storedToken.familyId, "Token reuse detected");
       return null;
     }
   }
@@ -131,7 +144,11 @@ export async function rotateRefreshToken(
     : null;
 
   // If there's a newer token in the family within grace period, allow it (network retry)
-  if (recentTokenInFamily && recentTokenInFamily.token !== oldToken && isWithinGracePeriod) {
+  if (
+    recentTokenInFamily &&
+    recentTokenInFamily.token !== oldToken &&
+    isWithinGracePeriod
+  ) {
     return {
       token: recentTokenInFamily.token,
       userId: user.id,
@@ -141,15 +158,26 @@ export async function rotateRefreshToken(
   }
 
   // If token was used more than grace period ago, this is a reuse attack
-  if (recentTokenInFamily && recentTokenInFamily.token !== oldToken && !isWithinGracePeriod) {
+  if (
+    recentTokenInFamily &&
+    recentTokenInFamily.token !== oldToken &&
+    !isWithinGracePeriod
+  ) {
     if (storedToken.familyId) {
-      await logTokenReuseEvent(db, user.id, user.email, storedToken.familyId, ipAddress, userAgent);
+      await logTokenReuseEvent(
+        db,
+        user.id,
+        user.email,
+        storedToken.familyId,
+        ipAddress,
+        userAgent,
+      );
       await logTokenFamilyRevokedEvent(
         db,
         user.id,
         user.email,
         storedToken.familyId,
-        'Token reuse detected outside grace period',
+        "Token reuse detected outside grace period",
         ipAddress,
         userAgent,
       );
@@ -157,7 +185,7 @@ export async function rotateRefreshToken(
       await revokeTokenFamily(
         db,
         storedToken.familyId,
-        'Token reuse detected outside grace period',
+        "Token reuse detected outside grace period",
       );
 
       return null;
@@ -213,13 +241,16 @@ export async function revokeTokenFamily(
 /**
  * Revoke all refresh tokens for a user (used on logout all devices)
  */
-export async function revokeAllUserTokens(db: DbClient, userId: string): Promise<void> {
+export async function revokeAllUserTokens(
+  db: DbClient,
+  userId: string,
+): Promise<void> {
   // Revoke all families
   await db
     .update(refreshTokenFamilies)
     .set({
       revokedAt: new Date(),
-      revokeReason: 'User logged out from all devices',
+      revokeReason: "User logged out from all devices",
     })
     .where(eq(refreshTokenFamilies.userId, userId));
 
@@ -231,6 +262,8 @@ export async function revokeAllUserTokens(db: DbClient, userId: string): Promise
  * Clean up expired tokens (run periodically)
  */
 export async function cleanupExpiredTokens(db: DbClient): Promise<number> {
-  const result = await db.delete(refreshTokens).where(lt(refreshTokens.expiresAt, new Date()));
+  const result = await db
+    .delete(refreshTokens)
+    .where(lt(refreshTokens.expiresAt, new Date()));
   return Array.isArray(result) ? result.length : 0;
 }

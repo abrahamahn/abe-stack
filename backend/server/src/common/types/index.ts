@@ -3,8 +3,8 @@
  * Shared types for the application
  */
 
-import type { FastifyRequest, FastifyReply } from 'fastify';
-import type { ServerEnvironment } from '../../env';
+import type { ServerEnvironment } from "../../env";
+import type { FastifyRequest, FastifyReply } from "fastify";
 
 /**
  * Request information extracted for logging and security purposes
@@ -18,7 +18,11 @@ export interface RequestInfo {
  * Reply type that supports cookie operations
  */
 export interface ReplyWithCookies {
-  setCookie: (name: string, value: string, options: Record<string, unknown>) => void;
+  setCookie: (
+    name: string,
+    value: string,
+    options: Record<string, unknown>,
+  ) => void;
   clearCookie: (name: string, options: Record<string, unknown>) => void;
 }
 
@@ -43,7 +47,9 @@ export interface RouteContext {
 /**
  * Result type for operations that can fail
  */
-export type Result<T, E = Error> = { success: true; data: T } | { success: false; error: E };
+export type Result<T, E = Error> =
+  | { success: true; data: T }
+  | { success: false; error: E };
 
 /**
  * Create a success result
