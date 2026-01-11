@@ -1,4 +1,11 @@
-// apps/server/src/server.ts
+// backend/server/src/server.ts
+/**
+ * Fastify server creation and configuration
+ *
+ * This function is pure - it only creates the server without starting it.
+ * Perfect for testing and dependency injection.
+ */
+
 import { buildConnectionString, createDbClient } from '@db';
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
@@ -9,25 +16,37 @@ import { createStorage, toStorageConfig } from '@storage';
 import { sql } from 'drizzle-orm';
 import Fastify, { type FastifyInstance } from 'fastify';
 
-import { registerRoutes } from './routes';
+import { createEnvironment } from './infra/factory';
+import { registerRoutes } from './routes/routes';
 
 import type { ServerEnv } from '@abe-stack/shared';
+import type { ServerEnvironment } from './infra/ctx';
 
-/**
- * Create and configure Fastify server
- * This function is pure - it only creates the server without starting it
- * Perfect for testing and dependency injection
- */
 type AppInstance = FastifyInstance;
 
-export async function createServer(
-  env: ServerEnv,
-  connectionString?: string,
-): Promise<{
+export interface CreateServerResult {
   app: AppInstance;
+  env: ServerEnvironment;
+  /** @deprecated Use env.db instead */
   db: ReturnType<typeof createDbClient>;
-}> {
+}
+
+/**
+ * Create and configure Fastify server with ServerEnvironment
+ *
+ * The ServerEnvironment is the central dependency container that provides:
+ * - Database client
+ * - Storage provider
+ * - Email service
+ * - Security utilities
+ * - Auth configuration
+ */
+export async function createServer(
+  serverEnv: ServerEnv,
+  connectionString?: string,
+): Promise<CreateServerResult> {
   const isProd = process.env.NODE_ENV === 'production';
+
   const loggerConfig = isProd
     ? {
         level: process.env.LOG_LEVEL || 'info',
@@ -92,12 +111,21 @@ export async function createServer(
   });
 
   // Initialize database connection
-  const dbConnectionString = connectionString ?? buildConnectionString(env);
+  const dbConnectionString = connectionString ?? buildConnectionString(serverEnv);
   const db = createDbClient(dbConnectionString);
 
-  // Decorate Fastify instance with db
+  // Create ServerEnvironment - the central dependency container
+  // This replaces direct imports of singletons
+  const env = await createEnvironment({
+    env: serverEnv,
+    connectionString: dbConnectionString,
+    db,
+  });
+
+  // Decorate Fastify instance for legacy compatibility
+  // New code should use env.db and env.storage instead
   app.decorate('db', db);
-  app.decorate('storage', createStorage(toStorageConfig(env)));
+  app.decorate('storage', createStorage(toStorageConfig(serverEnv)));
 
   // Root route
   app.get('/', {}, () => ({
@@ -117,7 +145,7 @@ export async function createServer(
     let dbHealthy = true;
 
     try {
-      await app.db.execute(sql`SELECT 1`);
+      await env.db.execute(sql`SELECT 1`);
     } catch (error) {
       dbHealthy = false;
       app.log.error({ err: error }, 'Database health check failed');
@@ -130,13 +158,14 @@ export async function createServer(
     };
   });
 
-  // Register application routes
-  registerRoutes(app);
+  // Register application routes with ServerEnvironment
+  // All handlers receive the environment via closure
+  registerRoutes(app, env);
 
   // NOTE: Rate limiting is implemented through login attempt tracking and account lockout
-  // in the security module (lib/security.ts). This provides fine-grained control per email/IP
+  // in the security module (infra/security). This provides fine-grained control per email/IP
   // and includes progressive delays and lockout mechanisms.
   // The @fastify/rate-limit plugin is registered for future use if needed for global limits.
 
-  return { app, db };
+  return { app, env, db };
 }
