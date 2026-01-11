@@ -5,7 +5,7 @@ import { loadServerEnv } from '@abe-stack/shared';
 import { resolveConnectionStringWithFallback } from '@db';
 import dotenvFlow from 'dotenv-flow';
 
-import { validateEnvironment } from './lib/env-validator';
+import { validateEnvironment } from './infra/config/validator';
 import { createServer } from './server';
 
 // Load environment variables
