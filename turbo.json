@@ -14,10 +14,12 @@
       "persistent": true
     },
     "lint": {
+      "inputs": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "**/*.cjs", "**/*.mjs"],
       "outputs": [],
       "cache": true
     },
     "format:check": {
+      "inputs": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "**/*.json", "**/*.css", "**/*.md"],
       "outputs": [],
       "cache": true
     },
@@ -26,11 +28,14 @@
     },
     "type-check": {
       "dependsOn": ["^build"],
+      "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"],
       "outputs": [],
       "cache": true,
       "env": ["NODE_ENV"]
     },
     "test": {
+      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.ts", "**/*.test.tsx", "vitest.config.*"],
+      "outputs": [],
       "cache": true,
       "env": ["NODE_ENV", "DATABASE_URL"]
     },
@@ -40,7 +45,18 @@
     },
     "clean": {
       "cache": false
+    },
+    "validate": {
+      "dependsOn": ["lint", "type-check", "test"],
+      "outputs": [],
+      "cache": true
     }
   },
-  "globalDependencies": ["tsconfig.json", ".env", ".env.local"]
+  "globalDependencies": [
+    "tsconfig.json",
+    ".env",
+    ".env.local",
+    "config/.prettierrc",
+    "eslint.config.mjs"
+  ]
 }
