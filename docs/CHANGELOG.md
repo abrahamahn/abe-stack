@@ -1,8 +1,77 @@
 # ABE Stack Changelog
 
-**Last Updated: January 10, 2026**
+**Last Updated: January 12, 2026**
 
 All notable changes to this project are documented here. Format follows semantic versioning principles.
+
+---
+
+## 2026-01-12
+
+### Session - ServerEnvironment Pattern & Custom Error Types
+
+**Part 1: ServerEnvironment Context Object Pattern (chet-stack inspired)**
+
+Following the pattern from chet-stack, implemented a single `ServerEnvironment` object that acts as an entry point for all server dependencies. This is the "Context Object" pattern, standard in GraphQL (Apollo) and Go backend services.
+
+- **New Files:**
+  - `apps/server/src/services/ServerEnvironment.ts` - Type definition
+  - `apps/server/src/services/index.ts` - Barrel exports
+
+- **Pattern Change:**
+  - Before: Services decorated on Fastify (`app.db`, `app.storage`)
+  - After: Single `ServerEnvironment` passed to handlers (`env.db`, `env.log`)
+
+- **Benefits:**
+  - Explicit dependencies (handler signature shows what it needs)
+  - Easy to test (pass mock env object)
+  - Framework agnostic (handlers don't depend on Fastify)
+  - Single source of truth for all services
+
+- **ServerEnvironment Type:**
+
+  ```typescript
+  type ServerEnvironment = {
+    config: ServerEnv;
+    db: DbClient;
+    storage: StorageProvider;
+    email: EmailService;
+    log: FastifyBaseLogger;
+  };
+  ```
+
+- **Updated Files:**
+  - `apps/server/src/server.ts` - Creates environment, passes to routes
+  - `apps/server/src/routes/index.ts` - All handlers now receive `env: ServerEnvironment`
+  - `apps/server/src/services/email.ts` - Exported `ConsoleEmailService` and `SmtpEmailService` classes
+  - `apps/server/src/types/fastify.d.ts` - Removed storage decoration (kept db for health check)
+  - Test files updated with mock ServerEnvironment
+
+**Part 2: Custom HTTP Error Types**
+
+Added type-safe custom error classes with HTTP status codes to `packages/shared`:
+
+- **New File:** `packages/shared/src/errors.ts`
+
+- **Error Classes:**
+  - `HttpError` - Abstract base class
+  - `ValidationError` (400) - Invalid input
+  - `UnauthorizedError` (401) - Missing/invalid auth
+  - `PermissionError` (403) - Lacks permission
+  - `NotFoundError` (404) - Resource not found
+  - `ConflictError` (409) - Transaction conflict
+  - `UnprocessableError` (422) - Semantic validation error
+  - `BrokenError` (424) - Server-side invariant broken
+  - `RateLimitError` (429) - Rate limited
+
+- **Utilities:**
+  - `isHttpError()` - Type guard
+  - `getSafeErrorMessage()` - Safe message for API responses
+  - `getErrorStatusCode()` - Get status code from error
+
+**Part 3: Configuration Fix**
+
+- Renamed `.npmrc` to `.pnpmrc` to fix npm warning about unknown `store-dir` config
 
 ---
 

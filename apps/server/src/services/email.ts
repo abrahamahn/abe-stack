@@ -28,7 +28,7 @@ export interface EmailService {
  * Console email service for development
  * Logs email content to console instead of sending
  */
-class ConsoleEmailService implements EmailService {
+export class ConsoleEmailService implements EmailService {
   send(options: EmailOptions): Promise<EmailResult> {
     const messageId = `dev-${String(Date.now())}-${Math.random().toString(36).slice(2, 11)}`;
 
@@ -52,7 +52,7 @@ class ConsoleEmailService implements EmailService {
  * SMTP email service for production
  * Requires nodemailer to be installed: pnpm add nodemailer @types/nodemailer
  */
-class SmtpEmailService implements EmailService {
+export class SmtpEmailService implements EmailService {
   private transporter: unknown = null;
   private initialized = false;
 
@@ -111,12 +111,6 @@ class SmtpEmailService implements EmailService {
     }
   }
 }
-
-// Select email service based on environment
-const isProduction = process.env.NODE_ENV === 'production';
-export const emailService: EmailService = isProduction
-  ? new SmtpEmailService()
-  : new ConsoleEmailService();
 
 /**
  * Email templates
@@ -236,48 +230,3 @@ If you did not change your password, please contact support immediately.
     };
   },
 };
-
-/**
- * Send password reset email
- */
-export async function sendPasswordResetEmail(
-  email: string,
-  resetToken: string,
-): Promise<EmailResult> {
-  const baseUrl = process.env.APP_URL ?? 'http://localhost:5173';
-  const resetUrl = `${baseUrl}/auth/reset-password?token=${resetToken}`;
-
-  const template = emailTemplates.passwordReset(resetUrl);
-  return emailService.send({
-    ...template,
-    to: email,
-  });
-}
-
-/**
- * Send email verification email
- */
-export async function sendVerificationEmail(
-  email: string,
-  verificationToken: string,
-): Promise<EmailResult> {
-  const baseUrl = process.env.APP_URL ?? 'http://localhost:5173';
-  const verifyUrl = `${baseUrl}/auth/verify-email?token=${verificationToken}`;
-
-  const template = emailTemplates.emailVerification(verifyUrl);
-  return emailService.send({
-    ...template,
-    to: email,
-  });
-}
-
-/**
- * Send password changed notification
- */
-export async function sendPasswordChangedEmail(email: string): Promise<EmailResult> {
-  const template = emailTemplates.passwordChanged();
-  return emailService.send({
-    ...template,
-    to: email,
-  });
-}

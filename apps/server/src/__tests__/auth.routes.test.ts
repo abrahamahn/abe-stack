@@ -6,7 +6,9 @@ import { expect, test } from 'vitest';
 
 import { hashPassword } from '../lib/password';
 import { registerRoutes } from '../routes';
+import { ConsoleEmailService } from '../services';
 
+import type { ServerEnvironment } from '../services';
 import type { DbClient } from '@abe-stack/db';
 import type { FastifyInstance } from 'fastify';
 
@@ -83,7 +85,17 @@ async function createTestApp(
   const app = Fastify({ logger: false });
   const { db, users } = createTestDb(seed);
   app.decorate('db', db as unknown as DbClient);
-  registerRoutes(app);
+
+  // Create mock ServerEnvironment for testing
+  const env: ServerEnvironment = {
+    config: {} as ServerEnvironment['config'],
+    db: db as unknown as DbClient,
+    storage: {} as ServerEnvironment['storage'],
+    email: new ConsoleEmailService(),
+    log: app.log,
+  };
+
+  registerRoutes(app, env);
   await app.ready();
   return { app, users };
 }

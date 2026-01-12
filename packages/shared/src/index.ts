@@ -6,6 +6,9 @@ export * from './contracts';
 export * from './utils';
 export * from './env';
 
+// Errors
+export * from './errors';
+
 // Stores
 export * from './stores';
 

@@ -10,7 +10,9 @@ import { sql } from 'drizzle-orm';
 import Fastify, { type FastifyInstance } from 'fastify';
 
 import { registerRoutes } from './routes';
+import { ConsoleEmailService, SmtpEmailService } from './services';
 
+import type { ServerEnvironment } from './services';
 import type { ServerEnv } from '@abe-stack/shared';
 
 /**
@@ -95,9 +97,17 @@ export async function createServer(
   const dbConnectionString = connectionString ?? buildConnectionString(env);
   const db = createDbClient(dbConnectionString);
 
-  // Decorate Fastify instance with db
+  // Create ServerEnvironment - single context object for all services
+  const serverEnv: ServerEnvironment = {
+    config: env,
+    db,
+    storage: createStorage(toStorageConfig(env)),
+    email: isProd ? new SmtpEmailService() : new ConsoleEmailService(),
+    log: app.log,
+  };
+
+  // Keep db decoration for health check route
   app.decorate('db', db);
-  app.decorate('storage', createStorage(toStorageConfig(env)));
 
   // Root route
   app.get('/', {}, () => ({
@@ -130,8 +140,8 @@ export async function createServer(
     };
   });
 
-  // Register application routes
-  registerRoutes(app);
+  // Register application routes with ServerEnvironment
+  registerRoutes(app, serverEnv);
 
   // NOTE: Rate limiting is implemented through login attempt tracking and account lockout
   // in the security module (lib/security.ts). This provides fine-grained control per email/IP
