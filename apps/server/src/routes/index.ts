@@ -19,6 +19,7 @@ import {
 } from '../lib/security';
 import { logAccountLockedEvent } from '../lib/security-events';
 
+import type { ServerEnvironment } from '../services';
 import type {
   AuthResponse,
   LoginRequest,
@@ -48,15 +49,15 @@ interface RequestWithCookies {
 const getCookieOptions = (): ReturnType<typeof getRefreshCookieOptions> =>
   getRefreshCookieOptions();
 
-export function registerRoutes(app: FastifyInstance): void {
+export function registerRoutes(app: FastifyInstance, env: ServerEnvironment): void {
   const s = initServer();
 
   const router = s.router(apiContract, {
     auth: {
-      register: async ({ body, reply }) => handleRegister(app, body, reply),
-      login: async ({ body, request, reply }) => handleLogin(app, body, request, reply),
-      refresh: async ({ request, reply }) => handleRefresh(app, request, reply),
-      logout: async ({ request, reply }) => handleLogout(app, request, reply),
+      register: async ({ body, reply }) => handleRegister(env, body, reply),
+      login: async ({ body, request, reply }) => handleLogin(env, body, request, reply),
+      refresh: async ({ request, reply }) => handleRefresh(env, request, reply),
+      logout: async ({ request, reply }) => handleLogout(env, request, reply),
       verifyEmail: async () =>
         Promise.resolve({
           status: 404 as const,
@@ -64,10 +65,10 @@ export function registerRoutes(app: FastifyInstance): void {
         }),
     },
     users: {
-      me: async ({ request }) => handleMe(app, request),
+      me: async ({ request }) => handleMe(env, request),
     },
     admin: {
-      unlockAccount: async ({ body, request }) => handleAdminUnlock(app, body, request),
+      unlockAccount: async ({ body, request }) => handleAdminUnlock(env, body, request),
     },
   });
 
@@ -75,14 +76,14 @@ export function registerRoutes(app: FastifyInstance): void {
 }
 
 async function handleRegister(
-  app: FastifyInstance,
+  env: ServerEnvironment,
   body: RegisterRequest,
   reply: ReplyWithCookies,
 ): Promise<
   { status: 201; body: AuthResponse } | { status: 400 | 409 | 500; body: { message: string } }
 > {
   try {
-    const existingUser = await app.db.query.users.findFirst({
+    const existingUser = await env.db.query.users.findFirst({
       where: eq(users.email, body.email),
     });
 
@@ -96,7 +97,7 @@ async function handleRegister(
     if (!passwordValidation.isValid) {
       // Don't leak password policy details to potential attackers
       // Log detailed errors server-side, return generic message to client
-      app.log.warn(
+      env.log.warn(
         { email: body.email, errors: passwordValidation.errors },
         'Password validation failed during registration',
       );
@@ -111,7 +112,7 @@ async function handleRegister(
     const passwordHash = await hashPassword(body.password);
 
     // Use transaction to ensure user + token family are created atomically
-    const { user, refreshToken } = await withTransaction(app.db, async (tx) => {
+    const { user, refreshToken } = await withTransaction(env.db, async (tx) => {
       const [newUser] = await tx
         .insert(users)
         .values({
@@ -151,13 +152,13 @@ async function handleRegister(
       },
     };
   } catch (error) {
-    app.log.error(error);
+    env.log.error(error);
     return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
 async function handleLogin(
-  app: FastifyInstance,
+  env: ServerEnvironment,
   body: LoginRequest,
   request: RequestWithCookies,
   reply: ReplyWithCookies,
@@ -169,9 +170,9 @@ async function handleLogin(
 
   try {
     // Check if account is locked out
-    const locked = await isAccountLocked(app.db, body.email);
+    const locked = await isAccountLocked(env.db, body.email);
     if (locked) {
-      await logLoginAttempt(app.db, body.email, false, ipAddress, userAgent, 'Account locked');
+      await logLoginAttempt(env.db, body.email, false, ipAddress, userAgent, 'Account locked');
       return {
         status: 429,
         body: {
@@ -181,10 +182,10 @@ async function handleLogin(
     }
 
     // Apply progressive delay based on recent failed attempts
-    await applyProgressiveDelay(app.db, body.email);
+    await applyProgressiveDelay(env.db, body.email);
 
     // Fetch user (may be null)
-    const user = await app.db.query.users.findFirst({
+    const user = await env.db.query.users.findFirst({
       where: eq(users.email, body.email),
     });
 
@@ -192,13 +193,13 @@ async function handleLogin(
     const isValid = await verifyPasswordSafe(body.password, user?.passwordHash);
 
     if (!user) {
-      await logLoginAttempt(app.db, body.email, false, ipAddress, userAgent, 'User not found');
+      await logLoginAttempt(env.db, body.email, false, ipAddress, userAgent, 'User not found');
 
       // Check if this failure caused account lockout
-      const lockoutStatus = await getAccountLockoutStatus(app.db, body.email);
+      const lockoutStatus = await getAccountLockoutStatus(env.db, body.email);
       if (lockoutStatus.isLocked) {
         await logAccountLockedEvent(
-          app.db,
+          env.db,
           body.email,
           lockoutStatus.failedAttempts,
           ipAddress,
@@ -210,13 +211,13 @@ async function handleLogin(
     }
 
     if (!isValid) {
-      await logLoginAttempt(app.db, body.email, false, ipAddress, userAgent, 'Invalid password');
+      await logLoginAttempt(env.db, body.email, false, ipAddress, userAgent, 'Invalid password');
 
       // Check if this failure caused account lockout
-      const lockoutStatus = await getAccountLockoutStatus(app.db, body.email);
+      const lockoutStatus = await getAccountLockoutStatus(env.db, body.email);
       if (lockoutStatus.isLocked) {
         await logAccountLockedEvent(
-          app.db,
+          env.db,
           body.email,
           lockoutStatus.failedAttempts,
           ipAddress,
@@ -228,7 +229,7 @@ async function handleLogin(
     }
 
     // Create tokens and log success atomically
-    const { refreshToken } = await withTransaction(app.db, async (tx) => {
+    const { refreshToken } = await withTransaction(env.db, async (tx) => {
       // Log successful login
       await logLoginAttempt(tx, body.email, true, ipAddress, userAgent);
 
@@ -243,11 +244,11 @@ async function handleLogin(
     if (needsRehash(user.passwordHash)) {
       try {
         const newHash = await hashPassword(body.password);
-        await app.db.update(users).set({ passwordHash: newHash }).where(eq(users.id, user.id));
-        app.log.info({ userId: user.id }, 'Password hash upgraded');
+        await env.db.update(users).set({ passwordHash: newHash }).where(eq(users.id, user.id));
+        env.log.info({ userId: user.id }, 'Password hash upgraded');
       } catch (error) {
         // Non-critical - log but don't fail login
-        app.log.error({ userId: user.id, error }, 'Failed to upgrade password hash');
+        env.log.error({ userId: user.id, error }, 'Failed to upgrade password hash');
       }
     }
 
@@ -270,13 +271,13 @@ async function handleLogin(
       },
     };
   } catch (error) {
-    app.log.error(error);
+    env.log.error(error);
     return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
 async function handleRefresh(
-  app: FastifyInstance,
+  env: ServerEnvironment,
   request: RequestWithCookies,
   reply: ReplyWithCookies,
 ): Promise<
@@ -293,7 +294,7 @@ async function handleRefresh(
     const { ipAddress, userAgent } = extractRequestInfo(request as unknown as FastifyRequest);
 
     // Rotate the refresh token with reuse detection
-    const result = await rotateRefreshToken(app.db, oldRefreshToken, ipAddress, userAgent);
+    const result = await rotateRefreshToken(env.db, oldRefreshToken, ipAddress, userAgent);
 
     if (!result) {
       // Token invalid, expired, or reuse detected
@@ -314,13 +315,13 @@ async function handleRefresh(
       },
     };
   } catch (error) {
-    app.log.error(error);
+    env.log.error(error);
     return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
 async function handleLogout(
-  app: FastifyInstance,
+  env: ServerEnvironment,
   request: RequestWithCookies,
   reply: ReplyWithCookies,
 ): Promise<
@@ -331,7 +332,7 @@ async function handleLogout(
 
     if (refreshToken) {
       // Delete refresh token from database
-      await app.db.delete(refreshTokens).where(eq(refreshTokens.token, refreshToken));
+      await env.db.delete(refreshTokens).where(eq(refreshTokens.token, refreshToken));
     }
 
     // Clear the cookie
@@ -342,13 +343,13 @@ async function handleLogout(
       body: { message: SUCCESS_MESSAGES.LOGGED_OUT },
     };
   } catch (error) {
-    app.log.error(error);
+    env.log.error(error);
     return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
 async function handleMe(
-  app: FastifyInstance,
+  env: ServerEnvironment,
   request: RequestWithCookies,
 ): Promise<
   { status: 200; body: UserResponse } | { status: 401 | 404 | 500; body: { message: string } }
@@ -367,7 +368,7 @@ async function handleMe(
   }
 
   try {
-    const user = await app.db.query.users.findFirst({
+    const user = await env.db.query.users.findFirst({
       where: eq(users.id, request.user.userId),
     });
 
@@ -386,13 +387,13 @@ async function handleMe(
       },
     };
   } catch (error) {
-    app.log.error(error);
+    env.log.error(error);
     return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
 
 async function handleAdminUnlock(
-  app: FastifyInstance,
+  env: ServerEnvironment,
   body: UnlockAccountRequest,
   request: RequestWithCookies,
 ): Promise<
@@ -415,7 +416,7 @@ async function handleAdminUnlock(
     }
 
     // Check if the target user exists
-    const targetUser = await app.db.query.users.findFirst({
+    const targetUser = await env.db.query.users.findFirst({
       where: eq(users.email, body.email),
     });
 
@@ -427,9 +428,9 @@ async function handleAdminUnlock(
     const { ipAddress, userAgent } = extractRequestInfo(request as unknown as FastifyRequest);
 
     // Unlock the account
-    await unlockAccount(app.db, body.email, payload.userId, ipAddress, userAgent);
+    await unlockAccount(env.db, body.email, payload.userId, ipAddress, userAgent);
 
-    app.log.info(
+    env.log.info(
       { adminId: payload.userId, targetEmail: body.email },
       'Admin unlocked user account',
     );
@@ -442,7 +443,7 @@ async function handleAdminUnlock(
       },
     };
   } catch (error) {
-    app.log.error(error);
+    env.log.error(error);
     return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
 }
