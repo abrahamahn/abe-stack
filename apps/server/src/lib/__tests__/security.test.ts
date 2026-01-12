@@ -1,4 +1,5 @@
 // apps/server/src/lib/__tests__/security.test.ts
+// Re-running tests from infra/security for backwards compatibility
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { authConfig } from '../../config/auth';
@@ -7,7 +8,7 @@ import {
   getProgressiveDelay,
   isAccountLocked,
   logLoginAttempt,
-} from '../security';
+} from '../../infra/security';
 
 import type { DbClient } from '@abe-stack/db';
 

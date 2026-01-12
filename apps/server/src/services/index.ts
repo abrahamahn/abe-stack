@@ -1,4 +1,5 @@
 // apps/server/src/services/index.ts
-export type { ServerEnvironment } from './ServerEnvironment';
-export type { EmailService } from './email';
-export { ConsoleEmailService, SmtpEmailService, emailTemplates } from './email';
+// Re-export from infra for backwards compatibility
+// New code should import from '../infra' directly
+export type { ServerEnvironment, EmailService } from '../infra';
+export { ConsoleEmailService, SmtpEmailService, emailTemplates } from '../infra';

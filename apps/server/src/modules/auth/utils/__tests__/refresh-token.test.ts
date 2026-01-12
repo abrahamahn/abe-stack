@@ -1,16 +1,15 @@
-// apps/server/src/lib/__tests__/refresh-token.test.ts
-// Re-running tests from modules/auth for backwards compatibility
+// apps/server/src/modules/auth/utils/__tests__/refresh-token.test.ts
 import { refreshTokenFamilies, refreshTokens } from '@abe-stack/db';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { authConfig } from '../../config/auth';
 import {
   cleanupExpiredTokens,
   createRefreshTokenFamily,
   revokeAllUserTokens,
   revokeTokenFamily,
   rotateRefreshToken,
-} from '../../modules/auth/utils/refresh-token';
+} from '..';
+import { authConfig } from '../../../../config/auth';
 
 import type { DbClient } from '@abe-stack/db';
 

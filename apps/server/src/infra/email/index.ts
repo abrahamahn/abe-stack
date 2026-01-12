@@ -1,4 +1,4 @@
-// apps/server/src/services/email.ts
+// apps/server/src/infra/email/index.ts
 /**
  * Email service abstraction
  * In development, logs emails to console

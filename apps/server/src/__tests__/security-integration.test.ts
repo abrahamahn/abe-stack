@@ -4,11 +4,10 @@ import { randomUUID } from 'crypto';
 import Fastify from 'fastify';
 import { beforeEach, describe, expect, test } from 'vitest';
 
+import { createMockEnvironment } from '../infra';
 import { hashPassword } from '../lib/password';
 import { registerRoutes } from '../routes';
-import { ConsoleEmailService } from '../services';
 
-import type { ServerEnvironment } from '../services';
 import type { DbClient } from '@abe-stack/db';
 import type { FastifyInstance } from 'fastify';
 
@@ -164,14 +163,11 @@ async function createTestApp(
   const { db, users, loginAttempts } = createTestDb(seedUsers);
   app.decorate('db', db);
 
-  // Create mock ServerEnvironment for testing
-  const env: ServerEnvironment = {
-    config: {} as ServerEnvironment['config'],
+  // Create mock ServerEnvironment using factory
+  const env = createMockEnvironment({
     db,
-    storage: {} as ServerEnvironment['storage'],
-    email: new ConsoleEmailService(),
     log: app.log,
-  };
+  });
 
   registerRoutes(app, env);
   await app.ready();

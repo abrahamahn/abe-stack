@@ -1,4 +1,4 @@
-// apps/server/src/services/ServerEnvironment.ts
+// apps/server/src/infra/ctx.ts
 /**
  * ServerEnvironment - Context Object Pattern
  *
@@ -18,6 +18,11 @@ import type { DbClient } from '@abe-stack/db';
 import type { ServerEnv } from '@abe-stack/shared';
 import type { StorageProvider } from '@abe-stack/storage';
 import type { FastifyBaseLogger } from 'fastify';
+
+// Import EmailService from infra/email
+
+// Re-export for convenience
+export type { EmailService };
 
 export type ServerEnvironment = {
   config: ServerEnv;

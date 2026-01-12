@@ -1,8 +1,7 @@
-// apps/server/src/lib/__tests__/password.test.ts
-// Re-running tests from modules/auth for backwards compatibility
+// apps/server/src/modules/auth/utils/__tests__/password.test.ts
 import { describe, expect, test } from 'vitest';
 
-import { hashPassword, needsRehash, verifyPassword } from '../../modules/auth/utils/password';
+import { hashPassword, needsRehash, verifyPassword } from '..';
 
 describe('Password Module (Argon2id)', () => {
   describe('hashPassword', () => {

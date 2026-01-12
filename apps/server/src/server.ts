@@ -1,6 +1,5 @@
 // apps/server/src/server.ts
 import { buildConnectionString, createDbClient } from '@abe-stack/db';
-import { createStorage, toStorageConfig } from '@abe-stack/storage';
 import cookie from '@fastify/cookie';
 import cors from '@fastify/cors';
 import csrfProtection from '@fastify/csrf-protection';
@@ -9,10 +8,9 @@ import rateLimit from '@fastify/rate-limit';
 import { sql } from 'drizzle-orm';
 import Fastify, { type FastifyInstance } from 'fastify';
 
+import { createEnvironment } from './infra';
 import { registerRoutes } from './routes';
-import { ConsoleEmailService, SmtpEmailService } from './services';
 
-import type { ServerEnvironment } from './services';
 import type { ServerEnv } from '@abe-stack/shared';
 
 /**
@@ -97,14 +95,13 @@ export async function createServer(
   const dbConnectionString = connectionString ?? buildConnectionString(env);
   const db = createDbClient(dbConnectionString);
 
-  // Create ServerEnvironment - single context object for all services
-  const serverEnv: ServerEnvironment = {
+  // Create ServerEnvironment using factory
+  const serverEnv = createEnvironment({
     config: env,
-    db,
-    storage: createStorage(toStorageConfig(env)),
-    email: isProd ? new SmtpEmailService() : new ConsoleEmailService(),
+    connectionString: dbConnectionString,
     log: app.log,
-  };
+    db, // Pass the already-created db client
+  });
 
   // Keep db decoration for health check route
   app.decorate('db', db);
