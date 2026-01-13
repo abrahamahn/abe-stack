@@ -15,7 +15,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.59.9",
     "@ts-rest/react-query": "^3.52.1",
-    "@abe-stack/api-client": "workspace:*",
+    "@abe-stack/sdk": "workspace:*",
     "@abe-stack/shared": "workspace:*",
     "@abe-stack/ui": "workspace:*",
     "dompurify": "^3.3.1",

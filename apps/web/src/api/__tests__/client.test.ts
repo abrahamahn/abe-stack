@@ -5,7 +5,7 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 let capturedConfig: { baseUrl: string; getToken: () => string | null } | null = null;
 
 // Mock dependencies before importing the module
-vi.mock('@abe-stack/api-client', () => ({
+vi.mock('@abe-stack/sdk', () => ({
   createApiClient: vi.fn((config: { baseUrl: string; getToken: () => string | null }) => {
     capturedConfig = config;
     return {
@@ -48,7 +48,7 @@ describe('api', () => {
 
     it('should use the configured base URL from environment', async () => {
       await import('../client');
-      const { createApiClient } = await import('@abe-stack/api-client');
+      const { createApiClient } = await import('@abe-stack/sdk');
 
       expect(createApiClient).toHaveBeenCalled();
       expect(capturedConfig).not.toBeNull();

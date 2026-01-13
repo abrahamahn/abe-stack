@@ -1,11 +1,11 @@
 // apps/web/src/api/ApiProvider.tsx
-import { createReactQueryClient } from '@abe-stack/api-client';
+import { createReactQueryClient } from '@abe-stack/sdk';
 import { toastStore, tokenStore } from '@abe-stack/shared';
 import { config } from '@config';
 import { createContext, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import type { ReactQueryClientInstance } from '@abe-stack/api-client';
+import type { ReactQueryClientInstance } from '@abe-stack/sdk';
 import type { ReactElement, ReactNode } from 'react';
 
 const ApiContext = createContext<ReactQueryClientInstance | null>(null);

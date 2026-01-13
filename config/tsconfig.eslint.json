@@ -5,7 +5,7 @@
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "baseUrl": "..",
     "paths": {
-      "@abe-stack/api-client": ["./packages/api-client/src"],
+      "@abe-stack/sdk": ["./packages/sdk/src"],
       "@abe-stack/shared": ["./packages/shared/src"],
       "@abe-stack/shared/*": ["./packages/shared/src/*"],
       "@abe-stack/ui": ["./packages/ui/src"]
