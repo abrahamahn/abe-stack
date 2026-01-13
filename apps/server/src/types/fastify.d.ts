@@ -1,7 +1,8 @@
 // apps/server/src/types/fastify.d.ts
 import 'fastify';
-import type { TokenPayload } from '../lib/jwt';
-import type { DbClient } from '@abe-stack/db';
+
+import type { DbClient } from '../infra/database';
+import type { TokenPayload } from '../modules/auth/utils/jwt';
 
 declare module 'fastify' {
   interface FastifyInstance {

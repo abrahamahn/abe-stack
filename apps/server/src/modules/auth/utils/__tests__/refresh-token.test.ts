@@ -1,17 +1,17 @@
 // apps/server/src/modules/auth/utils/__tests__/refresh-token.test.ts
-import { refreshTokenFamilies, refreshTokens } from '@abe-stack/db';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
+import { authConfig } from '../../../../config/auth';
+import { refreshTokenFamilies, refreshTokens } from '../../../../infra/database';
 import {
   cleanupExpiredTokens,
   createRefreshTokenFamily,
   revokeAllUserTokens,
   revokeTokenFamily,
   rotateRefreshToken,
-} from '..';
-import { authConfig } from '../../../../config/auth';
+} from '../index';
 
-import type { DbClient } from '@abe-stack/db';
+import type { DbClient } from '../../../../infra/database';
 
 interface TokenFamily {
   id: string;

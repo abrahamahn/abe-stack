@@ -1,4 +1,11 @@
 // apps/server/src/modules/auth/middleware.ts
+/**
+ * Authentication Middleware
+ *
+ * These functions are designed to be used as Fastify preHandler hooks.
+ * They require the JWT secret to be passed when creating the guards.
+ */
+
 import { verifyToken, type TokenPayload } from './utils/jwt';
 
 import type { UserRole } from '@abe-stack/shared';
@@ -7,7 +14,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 /**
  * Extract and verify token from Authorization header
  */
-export function extractTokenPayload(request: FastifyRequest): TokenPayload | null {
+export function extractTokenPayload(request: FastifyRequest, secret: string): TokenPayload | null {
   const authHeader = request.headers.authorization;
   if (!authHeader?.startsWith('Bearer ')) {
     return null;
@@ -15,33 +22,34 @@ export function extractTokenPayload(request: FastifyRequest): TokenPayload | nul
 
   try {
     const token = authHeader.substring(7);
-    return verifyToken(token);
+    return verifyToken(token, secret);
   } catch {
     return null;
   }
 }
 
 /**
- * Authentication guard - requires valid access token
+ * Create an authentication guard that requires a valid access token
  */
-export function requireAuth(request: FastifyRequest, reply: FastifyReply): void {
-  const payload = extractTokenPayload(request);
+export function createRequireAuth(secret: string) {
+  return (request: FastifyRequest, reply: FastifyReply): void => {
+    const payload = extractTokenPayload(request, secret);
 
-  if (!payload) {
-    reply.status(401).send({ message: 'Unauthorized' });
-    return;
-  }
+    if (!payload) {
+      reply.status(401).send({ message: 'Unauthorized' });
+      return;
+    }
 
-  request.user = payload;
+    request.user = payload;
+  };
 }
 
 /**
- * Role-based authorization guard
- * Use after requireAuth to check user roles
+ * Create a role-based authorization guard
  */
-export function requireRole(...allowedRoles: UserRole[]) {
+export function createRequireRole(secret: string, ...allowedRoles: UserRole[]) {
   return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
-    const payload = extractTokenPayload(request);
+    const payload = extractTokenPayload(request, secret);
 
     if (!payload) {
       void reply.status(401).send({ message: 'Unauthorized' });
@@ -69,9 +77,9 @@ type AuthHandler = (request: FastifyRequest, reply: FastifyReply) => void | Prom
 /**
  * Create a preHandler hook that requires authentication and specific roles
  */
-export function authGuard(...allowedRoles: UserRole[]): AuthHandler {
+export function createAuthGuard(secret: string, ...allowedRoles: UserRole[]): AuthHandler {
   if (allowedRoles.length === 0) {
-    return requireAuth;
+    return createRequireAuth(secret);
   }
-  return requireRole(...allowedRoles);
+  return createRequireRole(secret, ...allowedRoles);
 }

@@ -1,13 +1,23 @@
 // apps/server/src/modules/auth/utils/refresh-token.ts
-import { refreshTokenFamilies, refreshTokens, type UserRole, withTransaction } from '@abe-stack/db';
+/**
+ * Refresh Token Management
+ *
+ * Implements refresh token rotation with family tracking
+ * to detect and prevent token reuse attacks.
+ */
+
 import { and, eq, gt, lt } from 'drizzle-orm';
 
-import { authConfig } from '../../../config/auth';
-import { logTokenFamilyRevokedEvent, logTokenReuseEvent } from '../../../lib/security-events';
+import { refreshTokenFamilies, refreshTokens, withTransaction } from '../../../infra/database';
+import { logTokenFamilyRevokedEvent, logTokenReuseEvent } from '../../../infra/security/events';
 
 import { createRefreshToken, getRefreshTokenExpiry } from './jwt';
 
-import type { DbClient } from '@abe-stack/db';
+import type { DbClient, UserRole } from '../../../infra/database';
+
+// ============================================================================
+// Token Family Management
+// ============================================================================
 
 /**
  * Create a new refresh token family
@@ -16,26 +26,20 @@ import type { DbClient } from '@abe-stack/db';
 export async function createRefreshTokenFamily(
   db: DbClient,
   userId: string,
+  expiryDays: number = 7,
 ): Promise<{ familyId: string; token: string }> {
-  // Create a new family
-  const [family] = await db
-    .insert(refreshTokenFamilies)
-    .values({
-      userId,
-    })
-    .returning();
+  const [family] = await db.insert(refreshTokenFamilies).values({ userId }).returning();
 
   if (!family) {
     throw new Error('Failed to create refresh token family');
   }
 
-  // Create the first token in the family
   const token = createRefreshToken();
   await db.insert(refreshTokens).values({
     userId,
     familyId: family.id,
     token,
-    expiresAt: getRefreshTokenExpiry(),
+    expiresAt: getRefreshTokenExpiry(expiryDays),
   });
 
   return {
@@ -53,8 +57,10 @@ export async function rotateRefreshToken(
   oldToken: string,
   ipAddress?: string,
   userAgent?: string,
+  expiryDays: number = 7,
+  gracePeriodSeconds: number = 30,
 ): Promise<{ token: string; userId: string; email: string; role: UserRole } | null> {
-  const gracePeriod = authConfig.refreshTokenGracePeriodSeconds * 1000; // Convert to ms
+  const gracePeriod = gracePeriodSeconds * 1000;
   const graceWindowStart = new Date(Date.now() - gracePeriod);
 
   // Find the old token
@@ -63,7 +69,6 @@ export async function rotateRefreshToken(
   });
 
   if (!storedToken) {
-    // Token not found or expired
     return null;
   }
 
@@ -78,13 +83,10 @@ export async function rotateRefreshToken(
     });
 
     if (family?.revokedAt) {
-      // SECURITY: Family was revoked, possible token reuse attack
-      // Get user info for logging
       const user = await db.query.users.findFirst({
         where: eq(refreshTokens.userId, storedToken.userId),
       });
 
-      // Log the token reuse attempt
       if (user) {
         await logTokenReuseEvent(
           db,
@@ -96,7 +98,6 @@ export async function rotateRefreshToken(
         );
       }
 
-      // Delete all tokens in this family
       await revokeTokenFamily(db, storedToken.familyId, 'Token reuse detected');
       return null;
     }
@@ -124,7 +125,6 @@ export async function rotateRefreshToken(
 
   // If there's a newer token in the family within grace period, allow it (network retry)
   if (recentTokenInFamily && recentTokenInFamily.token !== oldToken && isWithinGracePeriod) {
-    // This is likely a network retry, return the newer token
     return {
       token: recentTokenInFamily.token,
       userId: user.id,
@@ -135,10 +135,7 @@ export async function rotateRefreshToken(
 
   // If token was used more than grace period ago, this is a reuse attack
   if (recentTokenInFamily && recentTokenInFamily.token !== oldToken && !isWithinGracePeriod) {
-    // SECURITY: Token reuse detected outside grace period
-    // familyId is guaranteed to exist here since recentTokenInFamily exists
     if (storedToken.familyId) {
-      // Log the security event
       await logTokenReuseEvent(db, user.id, user.email, storedToken.familyId, ipAddress, userAgent);
       await logTokenFamilyRevokedEvent(
         db,
@@ -149,29 +146,25 @@ export async function rotateRefreshToken(
         ipAddress,
         userAgent,
       );
-
       await revokeTokenFamily(
         db,
         storedToken.familyId,
         'Token reuse detected outside grace period',
       );
-
       return null;
     }
   }
 
   // Atomically delete old token and create new one
   const newToken = await withTransaction(db, async (tx) => {
-    // Delete the old token
     await tx.delete(refreshTokens).where(eq(refreshTokens.id, storedToken.id));
 
-    // Create new token in the same family
     const token = createRefreshToken();
     await tx.insert(refreshTokens).values({
       userId: storedToken.userId,
       familyId: storedToken.familyId,
       token,
-      expiresAt: getRefreshTokenExpiry(),
+      expiresAt: getRefreshTokenExpiry(expiryDays),
     });
 
     return token;
@@ -185,16 +178,18 @@ export async function rotateRefreshToken(
   };
 }
 
+// ============================================================================
+// Token Revocation
+// ============================================================================
+
 /**
  * Revoke an entire token family (all tokens created from the same initial login)
- * This is used when token reuse is detected
  */
 export async function revokeTokenFamily(
   db: DbClient,
   familyId: string,
   reason: string,
 ): Promise<void> {
-  // Mark family as revoked
   await db
     .update(refreshTokenFamilies)
     .set({
@@ -203,7 +198,6 @@ export async function revokeTokenFamily(
     })
     .where(eq(refreshTokenFamilies.id, familyId));
 
-  // Delete all tokens in this family
   await db.delete(refreshTokens).where(eq(refreshTokens.familyId, familyId));
 }
 
@@ -211,7 +205,6 @@ export async function revokeTokenFamily(
  * Revoke all refresh tokens for a user (used on logout all devices)
  */
 export async function revokeAllUserTokens(db: DbClient, userId: string): Promise<void> {
-  // Revoke all families
   await db
     .update(refreshTokenFamilies)
     .set({
@@ -220,17 +213,13 @@ export async function revokeAllUserTokens(db: DbClient, userId: string): Promise
     })
     .where(eq(refreshTokenFamilies.userId, userId));
 
-  // Delete all tokens
   await db.delete(refreshTokens).where(eq(refreshTokens.userId, userId));
 }
 
 /**
  * Clean up expired tokens (run periodically)
- * FIXED: Changed from gt (greater than) to lt (less than) to delete EXPIRED tokens
  */
 export async function cleanupExpiredTokens(db: DbClient): Promise<number> {
   const result = await db.delete(refreshTokens).where(lt(refreshTokens.expiresAt, new Date()));
-
-  // Drizzle returns an array, we return the length
   return Array.isArray(result) ? result.length : 0;
 }

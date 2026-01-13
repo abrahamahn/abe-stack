@@ -1,11 +1,17 @@
 // apps/server/src/infra/email/index.ts
 /**
- * Email service abstraction
- * In development, logs emails to console
- * In production, can be configured to use SMTP, SendGrid, etc.
+ * Email Service Infrastructure
+ *
+ * Provides email sending capabilities with multiple providers.
+ * In development, logs emails to console.
+ * In production, sends via SMTP.
  */
 
-/* eslint-disable no-console */
+import type { EmailConfig } from '../../config';
+
+// ============================================================================
+// Types
+// ============================================================================
 
 export interface EmailOptions {
   to: string;
@@ -24,6 +30,10 @@ export interface EmailService {
   send(options: EmailOptions): Promise<EmailResult>;
 }
 
+// ============================================================================
+// Console Email Service (Development)
+// ============================================================================
+
 /**
  * Console email service for development
  * Logs email content to console instead of sending
@@ -32,6 +42,7 @@ export class ConsoleEmailService implements EmailService {
   send(options: EmailOptions): Promise<EmailResult> {
     const messageId = `dev-${String(Date.now())}-${Math.random().toString(36).slice(2, 11)}`;
 
+    /* eslint-disable no-console */
     console.log('\n📧 ═══════════════════════════════════════════════════════════');
     console.log('  EMAIL (Development Mode - Not Sent)');
     console.log('═══════════════════════════════════════════════════════════════');
@@ -40,6 +51,7 @@ export class ConsoleEmailService implements EmailService {
     console.log('───────────────────────────────────────────────────────────────');
     console.log(options.text);
     console.log('═══════════════════════════════════════════════════════════════\n');
+    /* eslint-enable no-console */
 
     return Promise.resolve({
       success: true,
@@ -48,33 +60,43 @@ export class ConsoleEmailService implements EmailService {
   }
 }
 
+// ============================================================================
+// SMTP Email Service (Production)
+// ============================================================================
+
 /**
  * SMTP email service for production
- * Requires nodemailer to be installed: pnpm add nodemailer @types/nodemailer
+ * Uses nodemailer for sending emails
  */
 export class SmtpEmailService implements EmailService {
   private transporter: unknown = null;
   private initialized = false;
+  private config: EmailConfig;
+
+  constructor(config: EmailConfig) {
+    this.config = config;
+  }
 
   private async initTransporter(): Promise<void> {
     if (this.initialized) return;
     this.initialized = true;
 
     try {
-      // Dynamic import to avoid requiring nodemailer in dev
       const nodemailer = await import('nodemailer');
 
       this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT ?? '587', 10),
-        secure: process.env.SMTP_SECURE === 'true',
+        host: this.config.smtp.host,
+        port: this.config.smtp.port,
+        secure: this.config.smtp.secure,
         auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
+          user: this.config.smtp.auth.user,
+          pass: this.config.smtp.auth.pass,
         },
       });
     } catch {
-      console.warn('Nodemailer not installed. Email sending will fail in production.');
+      /* eslint-disable no-console */
+      console.warn('Nodemailer not installed. Email sending will fail.');
+      /* eslint-enable no-console */
     }
   }
 
@@ -89,9 +111,9 @@ export class SmtpEmailService implements EmailService {
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+      /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any */
       const info = await (this.transporter as any).sendMail({
-        from: process.env.SMTP_FROM ?? 'noreply@example.com',
+        from: `"${this.config.from.name}" <${this.config.from.address}>`,
         to: options.to,
         subject: options.subject,
         text: options.text,
@@ -100,9 +122,9 @@ export class SmtpEmailService implements EmailService {
 
       return {
         success: true,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
         messageId: info.messageId,
       };
+      /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any */
     } catch (error) {
       return {
         success: false,
@@ -112,17 +134,18 @@ export class SmtpEmailService implements EmailService {
   }
 }
 
-/**
- * Email templates
- */
+// ============================================================================
+// Email Templates
+// ============================================================================
+
 export const emailTemplates = {
   /**
    * Password reset email
    */
-  passwordReset(resetUrl: string, expiresInMinutes: number = 15): EmailOptions & { to: '' } {
+  passwordReset(resetUrl: string, expiresInMinutes = 15): EmailOptions & { to: '' } {
     const expiry = String(expiresInMinutes);
     return {
-      to: '', // Set by caller
+      to: '',
       subject: 'Reset Your Password',
       text: `
 You requested to reset your password.
@@ -158,12 +181,51 @@ If you did not request this, please ignore this email.
   },
 
   /**
-   * Email verification email
+   * Magic link email
    */
-  emailVerification(verifyUrl: string, expiresInMinutes: number = 60): EmailOptions & { to: '' } {
+  magicLink(loginUrl: string, expiresInMinutes = 15): EmailOptions & { to: '' } {
     const expiry = String(expiresInMinutes);
     return {
-      to: '', // Set by caller
+      to: '',
+      subject: 'Sign in to your account',
+      text: `
+Click the link below to sign in to your account:
+${loginUrl}
+
+This link will expire in ${expiry} minutes and can only be used once.
+
+If you did not request this, please ignore this email.
+      `.trim(),
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Sign In</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto;">
+  <h2 style="color: #333;">Sign in to your account</h2>
+  <p>Click the button below to sign in:</p>
+  <p>
+    <a href="${loginUrl}" style="display: inline-block; padding: 12px 24px; background-color: #0066cc; color: white; text-decoration: none; border-radius: 6px;">
+      Sign In
+    </a>
+  </p>
+  <p style="color: #666; font-size: 14px;">This link will expire in ${expiry} minutes and can only be used once.</p>
+  <p style="color: #999; font-size: 12px;">If you did not request this, please ignore this email.</p>
+</body>
+</html>
+      `.trim(),
+    };
+  },
+
+  /**
+   * Email verification
+   */
+  emailVerification(verifyUrl: string, expiresInMinutes = 60): EmailOptions & { to: '' } {
+    const expiry = String(expiresInMinutes);
+    return {
+      to: '',
       subject: 'Verify Your Email Address',
       text: `
 Welcome! Please verify your email address.
@@ -203,7 +265,7 @@ If you did not create an account, please ignore this email.
    */
   passwordChanged(): EmailOptions & { to: '' } {
     return {
-      to: '', // Set by caller
+      to: '',
       subject: 'Your Password Was Changed',
       text: `
 Your password was recently changed.

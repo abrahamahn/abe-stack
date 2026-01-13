@@ -31,7 +31,6 @@ export default [
       '**/coverage/**',
       '**/babel.config.js',
       'tools/export-ui-code.js',
-      'packages/db/drizzle.config.ts',
       'apps/server/vitest.config.ts',
       'apps/web/src/test/e2e/**',
       'apps/web/vite.config.ts',
@@ -40,10 +39,7 @@ export default [
       '**/vitest.config.ts',
       '**/vitest.config.js',
       'tools/packages/build-theme-css.ts',
-      'packages/storage/src/**/*.js',
-      'packages/storage/src/**/*.d.ts',
-      'packages/db/scripts/**/*.js',
-      'packages/db/scripts/**/*.d.ts',
+      'apps/server/drizzle.config.ts',
     ],
   },
   jsConfigs.recommended ?? {},
@@ -121,37 +117,10 @@ export default [
     },
   },
   {
-    files: ['packages/db/src/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: ['./packages/db/tsconfig.json'],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['packages/db/scripts/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: ['./packages/db/tsconfig.scripts.json'],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
     files: ['packages/shared/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
         project: ['./packages/shared/tsconfig.json'],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['packages/storage/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: ['./packages/storage/tsconfig.json'],
         tsconfigRootDir,
       },
     },
@@ -187,21 +156,6 @@ export default [
         project: ['./apps/desktop/tsconfig.json'],
         tsconfigRootDir,
       },
-    },
-  },
-  {
-    files: ['packages/db/drizzle.config.ts'],
-    languageOptions: {
-      parserOptions: {
-        project: false,
-        tsconfigRootDir,
-      },
-    },
-    rules: {
-      '@typescript-eslint/await-thenable': 'off',
-      '@typescript-eslint/no-floating-promises': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
     },
   },
   {

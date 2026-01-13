@@ -15,10 +15,6 @@
       "@/*": ["./src/*"],
       "@abe-stack/shared": ["../../packages/shared/dist"],
       "@abe-stack/shared/*": ["../../packages/shared/dist/*"],
-      "@abe-stack/db": ["../../packages/db/dist"],
-      "@abe-stack/db/*": ["../../packages/db/dist/*"],
-      "@abe-stack/storage": ["../../packages/storage/dist"],
-      "@abe-stack/storage/*": ["../../packages/storage/dist/*"],
       "@modules/*": ["./src/modules/*"],
       "@cache/*": ["./src/infrastructure/cache/*"],
       "@config/*": ["./src/infrastructure/config/*"],
@@ -44,9 +40,5 @@
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],
-  "references": [
-    { "path": "../../packages/shared" },
-    { "path": "../../packages/db" },
-    { "path": "../../packages/storage" }
-  ]
+  "references": [{ "path": "../../packages/shared" }]
 }

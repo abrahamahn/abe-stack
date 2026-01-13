@@ -8,9 +8,7 @@
       "@abe-stack/api-client": ["./packages/api-client/src"],
       "@abe-stack/shared": ["./packages/shared/src"],
       "@abe-stack/shared/*": ["./packages/shared/src/*"],
-      "@abe-stack/ui": ["./packages/ui/src"],
-      "@abe-stack/db": ["./packages/db/src"],
-      "@abe-stack/storage": ["./packages/storage/src"]
+      "@abe-stack/ui": ["./packages/ui/src"]
     }
   },
   "include": ["../apps/**/*", "../packages/**/*", "../tools/**/*", "../*.ts", "../*.tsx"],

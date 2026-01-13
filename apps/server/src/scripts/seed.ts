@@ -1,36 +1,111 @@
 // apps/server/src/scripts/seed.ts
-import { createDbClient, resolveConnectionStringWithFallback, users } from '@abe-stack/db';
+/**
+ * Database Seed Script
+ *
+ * Seeds the database with test data for development.
+ * Run with: pnpm db:seed
+ *
+ * Default test users:
+ * - admin@example.com / password123 (admin role)
+ * - user@example.com / password123 (user role)
+ * - demo@example.com / password123 (user role)
+ */
+
+import path from 'path';
+
+import argon2 from 'argon2';
 import dotenvFlow from 'dotenv-flow';
 
-dotenvFlow.config({ path: '.env' });
-dotenvFlow.config({ path: '../../.env' });
+import { buildConnectionString, createDbClient, users } from '../infra/database';
 
-async function main(): Promise<void> {
-  const connectionString = await resolveConnectionStringWithFallback(process.env);
-  const db = createDbClient(connectionString);
+// Load environment variables
+dotenvFlow.config({
+  node_env: process.env.NODE_ENV || 'development',
+  path: path.resolve(__dirname, '../../../../config'),
+});
 
-  console.log(`🌱 Connected to database (port ${process.env.POSTGRES_PORT || 'unknown'})`);
+// Argon2id configuration (OWASP recommended)
+const ARGON2_OPTIONS: argon2.Options = {
+  type: argon2.argon2id,
+  memoryCost: 19456, // 19 MiB
+  timeCost: 2,
+  parallelism: 1,
+};
 
-  try {
-    const existing = await db.select().from(users).limit(1);
-    if (existing.length === 0) {
-      console.log('Creating default user...');
-      await db.insert(users).values({
-        email: 'admin@abestack.com',
-        passwordHash: '$2b$10$EpWaTgiFJcCNi078F/8OBOd0.o.Jq1b1/2C1.t1.1.1.1.1.1.1.1', // "password" hash
-        name: 'Admin User',
-      });
-      console.log('✅ Default user created: admin@abestack.com / password');
-    } else {
-      console.log('ℹ️ Users already exist, skipping creation.');
-    }
-  } catch (error) {
-    console.error('❌ Seed script failed:', error);
-    process.exit(1);
-  } finally {
-    console.log('✨ Seed complete');
-    process.exit(0);
-  }
+interface SeedUser {
+  email: string;
+  password: string;
+  name: string;
+  role: 'user' | 'admin';
 }
 
-void main();
+const TEST_USERS: SeedUser[] = [
+  {
+    email: 'admin@example.com',
+    password: 'password123',
+    name: 'Admin User',
+    role: 'admin',
+  },
+  {
+    email: 'user@example.com',
+    password: 'password123',
+    name: 'Test User',
+    role: 'user',
+  },
+  {
+    email: 'demo@example.com',
+    password: 'password123',
+    name: 'Demo User',
+    role: 'user',
+  },
+];
+
+async function hashPassword(password: string): Promise<string> {
+  return argon2.hash(password, ARGON2_OPTIONS);
+}
+
+async function seed(): Promise<void> {
+  console.log('🌱 Starting database seed...\n');
+
+  const connectionString = buildConnectionString();
+  const db = createDbClient(connectionString);
+
+  console.log('📦 Seeding users...');
+
+  for (const user of TEST_USERS) {
+    const passwordHash = await hashPassword(user.password);
+
+    try {
+      await db
+        .insert(users)
+        .values({
+          email: user.email,
+          passwordHash,
+          name: user.name,
+          role: user.role,
+        })
+        .onConflictDoNothing({ target: users.email });
+
+      console.log(`  ✓ ${user.email} (${user.role})`);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('unique')) {
+        console.log(`  ⊘ ${user.email} (already exists)`);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  console.log('\n✅ Database seeded successfully!\n');
+  console.log('Test credentials:');
+  console.log('  Email: admin@example.com');
+  console.log('  Password: password123');
+  console.log('');
+
+  process.exit(0);
+}
+
+seed().catch((error: unknown) => {
+  console.error('❌ Seed failed:', error);
+  process.exit(1);
+});

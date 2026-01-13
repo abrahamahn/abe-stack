@@ -1,56 +1,82 @@
 // apps/server/src/modules/auth/utils/password.ts
-import argon2 from 'argon2';
+/**
+ * Password Hashing Utilities
+ *
+ * Uses Argon2id (OWASP recommended) for secure password hashing.
+ * All functions accept configuration parameters for testability.
+ */
 
-import { authConfig } from '../../../config/auth';
+import argon2 from 'argon2';
 
 import type { Options } from 'argon2';
 
-/**
- * Get Argon2 options from config
- * Centralized to ensure consistency across hashing and rehash checks
- */
-function getArgon2Options(): Options {
-  return {
-    type: authConfig.argon2.type,
-    memoryCost: authConfig.argon2.memoryCost,
-    timeCost: authConfig.argon2.timeCost,
-    parallelism: authConfig.argon2.parallelism,
-  };
+// ============================================================================
+// Types
+// ============================================================================
+
+export interface Argon2Config {
+  type: 0 | 1 | 2;
+  memoryCost: number;
+  timeCost: number;
+  parallelism: number;
 }
+
+// Default config matching OWASP recommendations
+const DEFAULT_ARGON2_CONFIG: Argon2Config = {
+  type: 2, // argon2id
+  memoryCost: 19456, // 19 MiB
+  timeCost: 2,
+  parallelism: 1,
+};
+
+// ============================================================================
+// Hash Functions
+// ============================================================================
 
 /**
  * Hash a password using Argon2id (OWASP recommended)
- * @param password - Plain text password
- * @returns Promise<string> - Hashed password
  */
-export async function hashPassword(password: string): Promise<string> {
-  return argon2.hash(password, getArgon2Options());
+export async function hashPassword(
+  password: string,
+  config: Argon2Config = DEFAULT_ARGON2_CONFIG,
+): Promise<string> {
+  const options: Options = {
+    type: config.type,
+    memoryCost: config.memoryCost,
+    timeCost: config.timeCost,
+    parallelism: config.parallelism,
+  };
+  return argon2.hash(password, options);
 }
 
 /**
  * Verify a password against a hash
  * Uses constant-time comparison to prevent timing attacks
- * @param password - Plain text password
- * @param hash - Stored hash
- * @returns Promise<boolean> - True if password matches
  */
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
   try {
     return await argon2.verify(hash, password);
   } catch {
-    // Invalid hash format or other error
     return false;
   }
 }
 
 /**
  * Check if a hash needs to be rehashed (e.g., params changed)
- * @param hash - Stored hash
- * @returns boolean - True if rehash is needed
  */
-export function needsRehash(hash: string): boolean {
-  return argon2.needsRehash(hash, getArgon2Options());
+export function needsRehash(hash: string, config: Argon2Config = DEFAULT_ARGON2_CONFIG): boolean {
+  const options: Options = {
+    type: config.type,
+    memoryCost: config.memoryCost,
+    timeCost: config.timeCost,
+    parallelism: config.parallelism,
+  };
+  return argon2.needsRehash(hash, options);
 }
+
+// ============================================================================
+// Timing-Safe Verification
+// ============================================================================
 
 /**
  * Dummy hash for timing attack prevention
@@ -62,9 +88,6 @@ const DUMMY_HASH =
 /**
  * Verify password with timing attack protection
  * Always performs hash verification even if user doesn't exist
- * @param password - Plain text password
- * @param hash - Stored hash (or null/undefined if user doesn't exist)
- * @returns Promise<boolean> - True if password matches
  */
 export async function verifyPasswordSafe(
   password: string,
@@ -72,6 +95,5 @@ export async function verifyPasswordSafe(
 ): Promise<boolean> {
   const hashToVerify = hash || DUMMY_HASH;
   const isValid = await verifyPassword(password, hashToVerify);
-  // If hash was dummy, always return false
   return hash ? isValid : false;
 }

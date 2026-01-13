@@ -1,14 +1,31 @@
 // apps/server/src/infra/index.ts
-// Infrastructure layer - technical capabilities
+/**
+ * Infrastructure Layer
+ *
+ * Technical capabilities organized by concern:
+ * - database: Database client, schema, transactions
+ * - storage: File storage providers (local, S3)
+ * - email: Email sending services
+ * - pubsub: Real-time subscription management
+ * - security: Login tracking, lockout, audit logging
+ *
+ * Note: HTTP server setup is in app.ts
+ */
 
-export type { ServerEnvironment } from './ctx';
-export { createEnvironment, createMockEnvironment } from './factory';
-export type { CreateEnvironmentOptions } from './factory';
+// Database
+export * from './database';
 
-// Email infrastructure
+// Storage
+export * from './storage';
+
+// Email
 export type { EmailService, EmailOptions, EmailResult } from './email';
 export { ConsoleEmailService, SmtpEmailService, emailTemplates } from './email';
 
-// Security infrastructure
+// PubSub
+export { SubscriptionManager, SubKeys, publishAfterWrite } from './pubsub';
+export type { SubscriptionKey, RecordKey, ListKey } from './pubsub';
+
+// Security
 export * from './security';
 export * from './security/events';

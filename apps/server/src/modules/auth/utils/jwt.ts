@@ -1,12 +1,22 @@
 // apps/server/src/modules/auth/utils/jwt.ts
+/**
+ * JWT Token Utilities
+ *
+ * Functions for creating and verifying JWT tokens.
+ * All functions accept configuration parameters for testability.
+ */
+
 import crypto from 'node:crypto';
 
 import jwt, { type SignOptions } from 'jsonwebtoken';
 
-import { authConfig } from '../../../config/auth';
-import { MIN_JWT_SECRET_LENGTH, REFRESH_TOKEN_BYTES } from '../../../lib/constants';
+import { MIN_JWT_SECRET_LENGTH, REFRESH_TOKEN_BYTES } from '../../../shared/constants';
 
 import type { UserRole } from '@abe-stack/shared';
+
+// ============================================================================
+// Types
+// ============================================================================
 
 export interface TokenPayload {
   userId: string;
@@ -14,31 +24,49 @@ export interface TokenPayload {
   role: UserRole;
 }
 
-function getJwtSecret(): string {
-  const secret = process.env.JWT_SECRET;
-  if (!secret || secret.length < MIN_JWT_SECRET_LENGTH) {
-    throw new Error(
-      `JWT_SECRET is missing or too short (minimum ${String(MIN_JWT_SECRET_LENGTH)} characters); ensure env is loaded before startup`,
-    );
-  }
-  return secret;
-}
+// ============================================================================
+// Access Token Functions
+// ============================================================================
 
 /**
  * Create a short-lived access token
- * Duration configured via authConfig.accessTokenExpiry
  */
-export function createAccessToken(userId: string, email: string, role: UserRole): string {
+export function createAccessToken(
+  userId: string,
+  email: string,
+  role: UserRole,
+  secret: string,
+  expiresIn: string | number = '15m',
+): string {
+  if (!secret || secret.length < MIN_JWT_SECRET_LENGTH) {
+    throw new Error(`JWT secret must be at least ${String(MIN_JWT_SECRET_LENGTH)} characters`);
+  }
+
   const payload: TokenPayload = { userId, email, role };
   const options: SignOptions = {
-    expiresIn: authConfig.accessTokenExpiry as SignOptions['expiresIn'],
+    expiresIn: expiresIn as SignOptions['expiresIn'],
   };
-  return jwt.sign(payload, getJwtSecret(), options);
+
+  return jwt.sign(payload, secret, options);
 }
 
 /**
+ * Verify an access token and return the payload
+ */
+export function verifyToken(token: string, secret: string): TokenPayload {
+  if (!secret || secret.length < MIN_JWT_SECRET_LENGTH) {
+    throw new Error(`JWT secret must be at least ${String(MIN_JWT_SECRET_LENGTH)} characters`);
+  }
+
+  return jwt.verify(token, secret) as TokenPayload;
+}
+
+// ============================================================================
+// Refresh Token Functions
+// ============================================================================
+
+/**
  * Create a secure random refresh token
- * This is stored in the database and sent as HTTP-only cookie
  * Uses REFRESH_TOKEN_BYTES (64 bytes = 512 bits) for cryptographic strength
  */
 export function createRefreshToken(): string {
@@ -46,23 +74,10 @@ export function createRefreshToken(): string {
 }
 
 /**
- * Verify an access token and return the payload
- */
-export function verifyToken(token: string): TokenPayload {
-  return jwt.verify(token, getJwtSecret()) as TokenPayload;
-}
-
-/**
  * Calculate refresh token expiry date
- * Uses authConfig.refreshTokenExpiryDays
  */
-export function getRefreshTokenExpiry(): Date {
+export function getRefreshTokenExpiry(expiryDays: number): Date {
   const expiry = new Date();
-  expiry.setDate(expiry.getDate() + authConfig.refreshTokenExpiryDays);
+  expiry.setDate(expiry.getDate() + expiryDays);
   return expiry;
-}
-
-// Backwards compatibility - maps to createAccessToken with default role
-export function createToken(userId: string, email: string, role: UserRole = 'user'): string {
-  return createAccessToken(userId, email, role);
 }
