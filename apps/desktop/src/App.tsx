@@ -55,7 +55,7 @@ function App(): ReactElement {
             ✅ Shared UI from <code>@abe-stack/ui</code>
           </li>
           <li>
-            ✅ Shared logic from <code>@abe-stack/shared</code>
+            ✅ Shared logic from <code>@abe-stack/core</code>
           </li>
           <li>
             ✅ Desktop-specific features in <code>apps/desktop/src/native/</code>

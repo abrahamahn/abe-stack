@@ -6,7 +6,7 @@
  * Each handler receives AppContext and returns a typed response.
  */
 
-import { validatePassword } from '@abe-stack/shared';
+import { validatePassword } from '@abe-stack/core';
 import { eq } from 'drizzle-orm';
 
 import { getRefreshCookieOptions } from '../../config';
@@ -32,7 +32,7 @@ import type {
   LogoutResponse,
   RefreshResponse,
   RegisterRequest,
-} from '@abe-stack/shared';
+} from '@abe-stack/core';
 import type { FastifyRequest } from 'fastify';
 
 // ============================================================================

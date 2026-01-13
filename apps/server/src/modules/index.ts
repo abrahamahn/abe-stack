@@ -9,7 +9,7 @@
  * - utils: Module-specific utilities
  */
 
-import { apiContract } from '@abe-stack/shared';
+import { apiContract } from '@abe-stack/core';
 import { initServer } from '@ts-rest/fastify';
 import { eq } from 'drizzle-orm';
 
@@ -28,7 +28,7 @@ import { extractRequestInfo } from './auth/utils/request';
 
 import type { ReplyWithCookies, RequestWithCookies } from './auth/handlers';
 import type { AppContext } from '../shared/types';
-import type { UnlockAccountRequest, UnlockAccountResponse, UserResponse } from '@abe-stack/shared';
+import type { UnlockAccountRequest, UnlockAccountResponse, UserResponse } from '@abe-stack/core';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 
 // Re-export modules

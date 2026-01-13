@@ -18,8 +18,8 @@ pnpm install
 pnpm dev
 
 # Start specific app
-pnpm --filter @abeahn/web dev
-pnpm --filter @abeahn/server dev
+pnpm --filter @abe-stack/web dev
+pnpm --filter @abe-stack/server dev
 ```
 
 ### Environment Setup
@@ -217,7 +217,7 @@ pnpm vitest watch packages/ui/src/components/__tests__/Button.test.tsx
 pnpm vitest run -t "Button"
 
 # Type-check single package
-pnpm --filter @abeahn/ui type-check
+pnpm --filter @abe-stack/ui type-check
 ```
 
 ### Before Committing

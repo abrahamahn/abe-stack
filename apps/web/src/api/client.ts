@@ -1,6 +1,6 @@
 // apps/web/src/api/client.ts
-import { createApiClient } from '@abe-stack/api-client';
-import { tokenStore } from '@abe-stack/shared';
+import { tokenStore } from '@abe-stack/core';
+import { createApiClient } from '@abe-stack/sdk';
 
 import { config } from '../config';
 

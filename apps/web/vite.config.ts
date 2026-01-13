@@ -14,8 +14,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.join(__dirname, 'src'),
-      '@abe-stack/api-client': path.resolve(__dirname, '../../packages/api-client/src'),
-      '@abe-stack/shared': path.resolve(__dirname, '../../packages/shared/src'),
+      '@abe-stack/sdk': path.resolve(__dirname, '../../packages/sdk/src'),
+      '@abe-stack/core': path.resolve(__dirname, '../../packages/core/src'),
       '@abe-stack/ui': path.resolve(__dirname, '../../packages/ui/src'),
       '@api': path.join(__dirname, 'src/api'),
       '@app': path.join(__dirname, 'src/app'),

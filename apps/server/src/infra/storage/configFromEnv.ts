@@ -1,6 +1,6 @@
 // apps/server/src/infra/storage/configFromEnv.ts
 import type { StorageConfig } from './types';
-import type { ServerEnv } from '@abe-stack/shared';
+import type { ServerEnv } from '@abe-stack/core';
 
 /**
  * Convert server environment variables to StorageConfig

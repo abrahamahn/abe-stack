@@ -1,6 +1,6 @@
 # ABE Stack Documentation
 
-**Last Updated: January 10, 2026**
+**Last Updated: January 13, 2026**
 
 A full-stack TypeScript boilerplate for shipping real apps fast. Web, desktop, mobile, and backend from a single monorepo.
 
@@ -23,17 +23,18 @@ A full-stack TypeScript boilerplate for shipping real apps fast. Web, desktop, m
 ```
 abe-stack/
 ├── apps/
-│   ├── web/          # Vite + React web app
-│   ├── desktop/      # Electron (Tauri-ready)
-│   └── server/       # Fastify API
+│   ├── web/           # Vite + React web app
+│   ├── desktop/       # Electron (Tauri-ready)
+│   └── server/        # Fastify API server
+│       └── src/
+│           ├── modules/   # Feature modules (auth, users)
+│           └── infra/     # Database, storage, security, pubsub
 ├── packages/
-│   ├── ui/           # Shared component library (700+ tests)
-│   ├── api-client/   # Type-safe ts-rest client
-│   ├── db/           # Drizzle ORM + PostgreSQL
-│   ├── shared/       # Utils, types, validation
-│   └── storage/      # S3/local file storage
-├── config/           # Docker, env, test configs
-└── tools/            # Dev scripts
+│   ├── core/          # Contracts, validation, stores, utils
+│   ├── ui/            # Shared component library (700+ tests)
+│   └── sdk/           # Type-safe ts-rest client
+├── config/            # Docker, env, test configs
+└── tools/             # Dev scripts
 ```
 
 ### Tech Stack
@@ -99,10 +100,9 @@ Key sections:
 
 See the [Roadmap](./ROADMAP.md) for the full implementation plan:
 
-1. **V5 Migration** - Restructure to `frontend/`, `backend/`, `shared/` layers
-2. **CHET-Stack Features** - Add pub/sub, WebSockets, offline support
-3. **Security Phase 2** - Enhanced auth, rate limiting, audit logging
-4. **UI Polish** - Remaining component tests and accessibility
+1. **CHET-Stack Features** - Add pub/sub, WebSockets, offline support
+2. **Security Phase 2** - Enhanced auth, rate limiting, audit logging
+3. **UI Polish** - Remaining component tests and accessibility
 
 ---
 

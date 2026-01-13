@@ -108,19 +108,19 @@ export default [
   },
   // Package configurations - use main tsconfig which includes all src files
   {
-    files: ['packages/api-client/**/*.{ts,tsx,cts,mts}'],
+    files: ['packages/sdk/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/api-client/tsconfig.json'],
+        project: ['./packages/sdk/tsconfig.json'],
         tsconfigRootDir,
       },
     },
   },
   {
-    files: ['packages/shared/**/*.{ts,tsx,cts,mts}'],
+    files: ['packages/core/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/shared/tsconfig.json'],
+        project: ['./packages/core/tsconfig.json'],
         tsconfigRootDir,
       },
     },

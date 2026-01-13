@@ -15,8 +15,8 @@ All notable changes to this project are documented here. Format follows semantic
 Following the pattern from chet-stack, implemented a single `ServerEnvironment` object that acts as an entry point for all server dependencies. This is the "Context Object" pattern, standard in GraphQL (Apollo) and Go backend services.
 
 - **New Files:**
-  - `apps/server/src/services/ServerEnvironment.ts` - Type definition
-  - `apps/server/src/services/index.ts` - Barrel exports
+  - `apps/server/src/infra/ServerEnvironment.ts` - Type definition
+  - `apps/server/src/infra/index.ts` - Barrel exports
 
 - **Pattern Change:**
   - Before: Services decorated on Fastify (`app.db`, `app.storage`)
@@ -42,16 +42,16 @@ Following the pattern from chet-stack, implemented a single `ServerEnvironment` 
 
 - **Updated Files:**
   - `apps/server/src/server.ts` - Creates environment, passes to routes
-  - `apps/server/src/routes/index.ts` - All handlers now receive `env: ServerEnvironment`
-  - `apps/server/src/services/email.ts` - Exported `ConsoleEmailService` and `SmtpEmailService` classes
+  - `apps/server/src/modules/index.ts` - All handlers now receive `env: ServerEnvironment`
+  - `apps/server/src/infra/email.ts` - Exported `ConsoleEmailService` and `SmtpEmailService` classes
   - `apps/server/src/types/fastify.d.ts` - Removed storage decoration (kept db for health check)
   - Test files updated with mock ServerEnvironment
 
 **Part 2: Custom HTTP Error Types**
 
-Added type-safe custom error classes with HTTP status codes to `packages/shared`:
+Added type-safe custom error classes with HTTP status codes to `packages/core`:
 
-- **New File:** `packages/shared/src/errors.ts`
+- **New File:** `packages/core/src/errors.ts`
 
 - **Error Classes:**
   - `HttpError` - Abstract base class
@@ -153,7 +153,7 @@ Added type-safe custom error classes with HTTP status codes to `packages/shared`
 
 ### Session 19 - toastStore & HistoryProvider Extraction
 
-- Moved `toastStore` to `packages/shared/src/stores/toastStore.ts`
+- Moved `toastStore` to `packages/core/src/stores/toastStore.ts`
 - Moved `HistoryProvider/useHistoryNav` to `packages/ui/src/hooks/useHistoryNav.tsx`
 - Moved `ProtectedRoute` to `packages/ui/src/components/ProtectedRoute.tsx`
 - Moved `Toaster` to `packages/ui/src/components/Toaster.tsx`
@@ -244,7 +244,7 @@ Added type-safe custom error classes with HTTP status codes to `packages/shared`
 ### Foundation Work
 
 - Aligned API prefixing under `/api`
-- Introduced `@abeahn/storage` with local and S3 providers
+- Introduced `@abe-stack/server` with local and S3 providers
 - Added UI elements: Flex, Stack, Text, Heading, Surface, and more
 - Auth route tests and Playwright auth scaffold
 

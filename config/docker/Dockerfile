@@ -29,10 +29,9 @@ FROM base AS deps
 # Copy only package files for better layer caching
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .npmrc ./
 COPY apps/server/package.json apps/server/
-COPY packages/shared/package.json packages/shared/
+COPY packages/core/package.json packages/core/
 COPY packages/ui/package.json packages/ui/
-COPY packages/db/package.json packages/db/
-COPY packages/api-client/package.json packages/api-client/
+COPY packages/sdk/package.json packages/sdk/
 
 # Fetch production dependencies
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
@@ -54,8 +53,7 @@ COPY . .
 # Install dependencies, build, and deploy to clean directory
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile && \
-    pnpm --filter @abe-stack/db build && \
-    pnpm --filter @abe-stack/shared build && \
+    pnpm --filter @abe-stack/core build && \
     pnpm --filter @abe-stack/server build && \
     pnpm --filter @abe-stack/server deploy --prod --legacy /app/server-deploy
 

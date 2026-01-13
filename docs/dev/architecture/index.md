@@ -6,7 +6,7 @@ Concrete implementation overview for ABE Stack's layered architecture and packag
 
 - Four layers: Presentation, State, Business Logic, Data.
 - One-way dependencies: apps -> packages -> shared.
-- Framework-agnostic core in `packages/shared`.
+- Framework-agnostic core in `packages/core`.
 
 ## Modules
 

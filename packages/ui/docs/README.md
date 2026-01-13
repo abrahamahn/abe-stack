@@ -139,7 +139,7 @@ Theme configuration and providers.
 ### Installation
 
 ```bash
-pnpm add @abe-stack/ui @abe-stack/shared
+pnpm add @abe-stack/ui @abe-stack/core
 ```
 
 ### Basic Usage

@@ -5,7 +5,7 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 let capturedConfig: { baseUrl: string; getToken: () => string | null } | null = null;
 
 // Mock dependencies before importing the module
-vi.mock('@abe-stack/api-client', () => ({
+vi.mock('@abe-stack/sdk', () => ({
   createApiClient: vi.fn((config: { baseUrl: string; getToken: () => string | null }) => {
     capturedConfig = config;
     return {
@@ -16,7 +16,7 @@ vi.mock('@abe-stack/api-client', () => ({
   }),
 }));
 
-vi.mock('@abe-stack/shared', () => ({
+vi.mock('@abe-stack/core', () => ({
   tokenStore: {
     get: vi.fn(() => 'mock-token'),
     set: vi.fn(),
@@ -48,7 +48,7 @@ describe('api', () => {
 
     it('should use the configured base URL from environment', async () => {
       await import('../client');
-      const { createApiClient } = await import('@abe-stack/api-client');
+      const { createApiClient } = await import('@abe-stack/sdk');
 
       expect(createApiClient).toHaveBeenCalled();
       expect(capturedConfig).not.toBeNull();
@@ -63,7 +63,7 @@ describe('api', () => {
     });
 
     it('should get token from tokenStore', async () => {
-      const { tokenStore } = await import('@abe-stack/shared');
+      const { tokenStore } = await import('@abe-stack/core');
       await import('../client');
 
       expect(capturedConfig).not.toBeNull();
@@ -96,7 +96,7 @@ describe('api', () => {
     });
 
     it('should return null token when tokenStore returns null', async () => {
-      const shared = await import('@abe-stack/shared');
+      const shared = await import('@abe-stack/core');
       vi.mocked(shared.tokenStore.get).mockReturnValueOnce(null);
 
       await import('../client');

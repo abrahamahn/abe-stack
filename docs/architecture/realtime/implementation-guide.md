@@ -69,13 +69,13 @@ Secure access control
 **Goal:** Every table that needs real-time sync must have a `version` field.
 
 ```bash
-cd packages/db
+cd apps/server/src/infra/database
 ```
 
 #### Update Existing Tables
 
 ```typescript
-// packages/db/src/schema/users.ts (MODIFY)
+// apps/server/src/infra/database/schema/users.ts (MODIFY)
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
   version: integer('version').notNull().default(1), // ADD THIS
@@ -92,7 +92,7 @@ export const users = pgTable('users', {
 Example for a **Task Management App**:
 
 ```typescript
-// packages/db/src/schema/workspaces.ts (NEW FILE)
+// apps/server/src/infra/database/schema/workspaces.ts (NEW FILE)
 import { pgTable, uuid, text, timestamp, integer, jsonb } from 'drizzle-orm/pg-core';
 import { users } from './users';
 
@@ -141,7 +141,7 @@ export type Task = typeof tasks.$inferSelect;
 **Or for a Note-Taking App:**
 
 ```typescript
-// packages/db/src/schema/notes.ts (NEW FILE)
+// apps/server/src/infra/database/schema/notes.ts (NEW FILE)
 export const notebooks = pgTable('notebooks', {
   id: uuid('id').primaryKey().defaultRandom(),
   version: integer('version').notNull().default(1),
@@ -204,7 +204,7 @@ cd packages/realtime
 ```json
 // packages/realtime/package.json (NEW FILE)
 {
-  "name": "@abeahn/realtime",
+  "name": "@abe-stack/realtime",
   "version": "0.1.0",
   "type": "module",
   "main": "./src/index.ts",
@@ -500,7 +500,7 @@ export * from './RecordCache';
 ### Step 1.5: Add Server Endpoints
 
 ```typescript
-// apps/server/src/routes/realtime.ts (NEW FILE)
+// apps/server/src/modules/realtime.ts (NEW FILE)
 import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
 
@@ -582,12 +582,12 @@ export const realtimeContract = c.router({
 ```
 
 ```typescript
-// apps/server/src/routes/realtime-impl.ts (NEW FILE)
+// apps/server/src/modules/realtime-impl.ts (NEW FILE)
 import { initServer } from '@ts-rest/fastify';
 import { realtimeContract } from './realtime';
-import { db } from '@abeahn/db';
-import { applyOperation } from '@abeahn/realtime';
-import type { Operation, RecordMap } from '@abeahn/realtime';
+import { db } from '@abe-stack/server';
+import { applyOperation } from '@abe-stack/realtime';
+import type { Operation, RecordMap } from '@abe-stack/realtime';
 
 const s = initServer();
 
@@ -688,7 +688,7 @@ async function loadRecords(operations: Operation[]): Promise<RecordMap> {
     let records: any[] = [];
 
     // Example: Dynamically load based on table name
-    const schema = await import(`@abeahn/db/schema`);
+    const schema = await import(`@abe-stack/server/schema`);
     const tableSchema = schema[table];
 
     if (tableSchema) {
@@ -710,7 +710,7 @@ async function loadRecords(operations: Operation[]): Promise<RecordMap> {
 async function saveRecords(recordMap: RecordMap): Promise<void> {
   for (const [table, records] of Object.entries(recordMap)) {
     for (const record of Object.values(records)) {
-      const schema = await import(`@abeahn/db/schema`);
+      const schema = await import(`@abe-stack/server/schema`);
       const tableSchema = schema[table];
 
       if (tableSchema) {
@@ -730,7 +730,7 @@ function cloneRecordMap(recordMap: RecordMap): RecordMap {
 
 ```typescript
 // apps/server/src/index.ts (MODIFY - add router)
-import { realtimeRouter } from './routes/realtime-impl';
+import { realtimeRouter } from './modules/realtime';
 
 // ... existing code ...
 
@@ -745,7 +745,7 @@ app.register(realtimeRouter);
 
 ```bash
 # Start server
-pnpm --filter @abeahn/server dev
+pnpm --filter @abe-stack/server dev
 
 # Test write endpoint
 curl -X POST http://localhost:8080/api/realtime/write \
@@ -837,7 +837,7 @@ export class WebSocketPubSubServer {
 
 ```typescript
 // apps/server/src/index.ts (MODIFY)
-import { WebSocketPubSubServer } from '@abeahn/realtime';
+import { WebSocketPubSubServer } from '@abe-stack/realtime';
 
 const server = app.listen(port, () => {
   console.log(`Server running on port ${port}`);
@@ -848,7 +848,7 @@ export const pubsub = new WebSocketPubSubServer(server);
 ```
 
 ```typescript
-// apps/server/src/routes/realtime-impl.ts (MODIFY)
+// apps/server/src/modules/realtime-impl.ts (MODIFY)
 import { pubsub } from '../index';
 
 // In write endpoint, after saving records:
@@ -958,7 +958,7 @@ export class WebSocketPubSubClient {
 ```typescript
 // apps/web/src/contexts/RealtimeContext.tsx (NEW FILE)
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { RecordCache, WebSocketPubSubClient } from '@abeahn/realtime'
+import { RecordCache, WebSocketPubSubClient } from '@abe-stack/realtime'
 
 type RealtimeContextValue = {
   recordCache: RecordCache

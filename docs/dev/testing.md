@@ -83,7 +83,7 @@ pnpm test:watch
 pnpm test:coverage
 
 # Run specific package tests
-pnpm --filter @abeahn/ui test
+pnpm --filter @abe-stack/ui test
 
 # Run specific test file
 pnpm vitest run packages/ui/src/components/__tests__/Button.test.tsx
@@ -94,11 +94,11 @@ pnpm test:e2e
 
 ### Coverage Requirements
 
-| Package         | Target |
-| --------------- | ------ |
-| packages/ui     | 80%+   |
-| packages/shared | 90%+   |
-| apps/server     | 70%+   |
+| Package       | Target |
+| ------------- | ------ |
+| packages/ui   | 80%+   |
+| packages/core | 90%+   |
+| apps/server   | 70%+   |
 
 ---
 
@@ -268,12 +268,12 @@ afterAll(() => server.close());
 
 As of January 2026:
 
-| Package         | Tests | Coverage |
-| --------------- | ----- | -------- |
-| packages/ui     | 724+  | ~85%     |
-| packages/shared | 9+    | ~70%     |
-| apps/web        | 337+  | ~60%     |
-| apps/server     | WIP   | ~40%     |
+| Package       | Tests | Coverage |
+| ------------- | ----- | -------- |
+| packages/ui   | 724+  | ~85%     |
+| packages/core | 9+    | ~70%     |
+| apps/web      | 337+  | ~60%     |
+| apps/server   | WIP   | ~40%     |
 
 ---
 

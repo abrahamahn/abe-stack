@@ -21,8 +21,8 @@ export default mergeConfig(
     resolve: {
       alias: {
         '@': path.join(appRoot, 'src'),
-        '@abe-stack/api-client': path.resolve(appRoot, '../../packages/api-client/src'),
-        '@abe-stack/shared': path.resolve(appRoot, '../../packages/shared/src'),
+        '@abe-stack/sdk': path.resolve(appRoot, '../../packages/sdk/src'),
+        '@abe-stack/core': path.resolve(appRoot, '../../packages/core/src'),
         '@abe-stack/ui': path.resolve(appRoot, '../../packages/ui/src'),
         '@api': path.join(appRoot, 'src/api'),
         '@app': path.join(appRoot, 'src/app'),

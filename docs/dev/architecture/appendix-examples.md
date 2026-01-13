@@ -33,10 +33,10 @@ function UserProfile({ userId }: Props) {
 ## API Client Split
 
 ```typescript
-// packages/api-client/src/client.ts
+// packages/sdk/src/client.ts
 export const apiClient = initClient(contract, { baseUrl: ... });
 
-// packages/api-client/src/react-query.ts
+// packages/sdk/src/react-query.ts
 export const useUser = (id: string) => useQuery({ ... });
 ```
 
@@ -46,8 +46,8 @@ export const useUser = (id: string) => useQuery({ ... });
 import React from 'react';
 import { z } from 'zod';
 
-import { formatUserName } from '@abeahn/shared';
-import { Button } from '@abeahn/ui';
+import { formatUserName } from '@abe-stack/core';
+import { Button } from '@abe-stack/ui';
 
 import { useAuth } from '../../hooks/useAuth';
 import './UserProfile.css';

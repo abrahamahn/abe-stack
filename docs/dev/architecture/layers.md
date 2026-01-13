@@ -53,7 +53,7 @@ Avoid:
 
 ## Cross-Layer Notes
 
-- React is a renderer only. Keep logic in `packages/shared`.
+- React is a renderer only. Keep logic in `packages/core`.
 - API client is the boundary between UI and server.
 - Keep validation in shared to enforce contracts across apps.
 
