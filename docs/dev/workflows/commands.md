@@ -37,7 +37,7 @@ pnpm test -- --run path/to/specific.test.tsx
 ## Package Filter Names
 
 - Apps: `@abe-stack/web`, `@abe-stack/server`, `@abe-stack/desktop`
-- Packages: `@abe-stack/ui`, `@abe-stack/shared`, `@abe-stack/sdk`
+- Packages: `@abe-stack/ui`, `@abe-stack/core`, `@abe-stack/sdk`
 
 ## Build
 

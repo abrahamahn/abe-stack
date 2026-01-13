@@ -120,9 +120,9 @@ abe-stack/
 │   │
 │   └── server/                 # Fastify backend
 │       └── src/
-│           ├── routes/         # realtime, files, custom routes
-│           ├── services/       # WebSocketServer, TaskQueue
-│           └── lib/            # permissions, validation helpers
+│           ├── modules/        # Feature modules (realtime, files, custom)
+│           ├── infra/          # WebSocketServer, TaskQueue, Database, Storage
+│           └── shared/         # permissions, validation helpers
 │
 ├── packages/
 │   ├── realtime/               # NEW: Real-time sync engine
@@ -135,20 +135,14 @@ abe-stack/
 │   │       ├── WebSocketServer.ts  # Server WebSocket
 │   │       └── transactions.ts     # Operation types
 │   │
-│   ├── db/                     # PostgreSQL + Drizzle ORM
-│   │   └── src/
-│   │       └── schema/
-│   │           ├── users.ts        # Enhanced with version
-│   │           └── your-models.ts  # Your app's data models
-│   │
-│   ├── shared/                 # Shared types & contracts
+│   ├── core/                   # Shared types & contracts
 │   │   └── src/
 │   │       ├── contracts/      # ts-rest API contracts
-│   │       └── types/          # Shared TypeScript types
+│   │       ├── types/          # Shared TypeScript types
+│   │       └── validation/     # Zod schemas
 │   │
-│   ├── storage/                # File storage (existing)
 │   ├── ui/                     # Reusable UI components (existing)
-│   └── api-client/             # Type-safe API client (existing)
+│   └── sdk/                    # Type-safe API client (existing)
 │
 └── docs/
     ├── REALTIME_ARCHITECTURE.md        # This file
@@ -167,7 +161,7 @@ Every table that needs real-time sync must have a `version` field:
 ```typescript
 // Example: Task Management App Schema
 
-// packages/db/src/schema/workspaces.ts
+// apps/server/src/infra/database/schema/workspaces.ts
 import { pgTable, uuid, text, timestamp, integer, jsonb, boolean } from 'drizzle-orm/pg-core';
 
 export const workspaces = pgTable('workspaces', {
@@ -253,7 +247,7 @@ export type Comment = typeof comments.$inferSelect;
 ### Alternative Example: Note-Taking App
 
 ```typescript
-// packages/db/src/schema/notes.ts
+// apps/server/src/infra/database/schema/notes.ts
 export const notebooks = pgTable('notebooks', {
   id: uuid('id').primaryKey().defaultRandom(),
   version: integer('version').notNull().default(1),
@@ -592,7 +586,7 @@ export function useWrite() {
 ```typescript
 // apps/web/src/components/TaskCard.tsx
 import { useRecord, useWrite } from '../hooks'
-import type { Task } from '@abeahn/db/schema'
+import type { Task } from '@abe-stack/server/schema'
 
 export function TaskCard({ taskId }: { taskId: string }) {
   const task = useRecord<Task>('tasks', taskId)
@@ -642,7 +636,7 @@ export function TaskCard({ taskId }: { taskId: string }) {
 import { useState, useEffect } from 'react'
 import { useRecord, useWrite } from '../hooks'
 import { useDebouncedCallback } from 'use-debounce'
-import type { Note } from '@abeahn/db/schema'
+import type { Note } from '@abe-stack/server/schema'
 
 export function NoteEditor({ noteId }: { noteId: string }) {
   const note = useRecord<Note>('notes', noteId)
@@ -696,7 +690,7 @@ export function NoteEditor({ noteId }: { noteId: string }) {
 ```typescript
 // apps/web/src/components/KanbanBoard.tsx
 import { useRecords, useWrite } from '../hooks'
-import type { Task } from '@abeahn/db/schema'
+import type { Task } from '@abe-stack/server/schema'
 
 export function KanbanBoard({ boardId }: { boardId: string }) {
   const tasks = useRecords<Task>('tasks', { boardId })
@@ -793,8 +787,8 @@ export function UndoRedoButtons() {
 ## 🔒 Permission Patterns
 
 ```typescript
-// apps/server/src/lib/permissions.ts
-import type { RecordMap } from '@abeahn/realtime';
+// apps/server/src/shared/permissions.ts
+import type { RecordMap } from '@abe-stack/realtime';
 
 export async function validateRead(
   table: string,

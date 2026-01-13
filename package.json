@@ -18,7 +18,7 @@
     "build:web": "turbo run build --filter=@abe-stack/web",
     "build:server": "turbo run build --filter=@abe-stack/server",
     "build:desktop": "turbo run build --filter=@abe-stack/desktop",
-    "build:shared": "turbo run build --filter=@abe-stack/shared",
+    "build:core": "turbo run build --filter=@abe-stack/core",
     "build:ui": "turbo run build --filter=@abe-stack/ui",
     "theme:build": "node --import tsx tools/packages/build-theme-css.ts",
     "test": "turbo run test",
@@ -90,7 +90,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,json,css,scss,md}": [
-      "pnpm prettier --config config/.prettierrc --ignore-path config/.prettierignore --check"
+      "pnpm prettier --config config/.prettierrc --ignore-path config/.prettierignore --write"
     ],
     "**/*.{ts,tsx,js,jsx}": [
       "pnpm exec eslint --max-warnings=0 --no-warn-ignored"

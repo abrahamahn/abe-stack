@@ -6,7 +6,7 @@ Quick Summary:
 
 - Use shared contracts and clients to avoid drift.
 - Prefer Zod validation before IO boundaries.
-- Keep patterns framework-agnostic in `packages/shared`.
+- Keep patterns framework-agnostic in `packages/core`.
 
 ## Modules
 

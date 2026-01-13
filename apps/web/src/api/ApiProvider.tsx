@@ -1,6 +1,6 @@
 // apps/web/src/api/ApiProvider.tsx
+import { toastStore, tokenStore } from '@abe-stack/core';
 import { createReactQueryClient } from '@abe-stack/sdk';
-import { toastStore, tokenStore } from '@abe-stack/shared';
 import { config } from '@config';
 import { createContext, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';

@@ -45,7 +45,7 @@ vi.mock('@abe-stack/sdk', () => ({
   ),
 }));
 
-vi.mock('@abe-stack/shared', () => ({
+vi.mock('@abe-stack/core', () => ({
   tokenStore: {
     get: mockTokenGet,
     set: vi.fn(),

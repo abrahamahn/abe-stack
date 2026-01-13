@@ -37,8 +37,8 @@ Phase 1 Security Hardening has been successfully completed, delivering a product
 
 **Files:**
 
-- [apps/server/src/lib/password.ts](../apps/server/src/lib/password.ts) - Core implementation
-- [apps/server/src/lib/**tests**/password.test.ts](../apps/server/src/lib/__tests__/password.test.ts) - Tests
+- [apps/server/src/shared/password.ts](../apps/server/src/shared/password.ts) - Core implementation
+- [apps/server/src/shared/**tests**/password.test.ts](../apps/server/src/shared/__tests__/password.test.ts) - Tests
 
 ---
 
@@ -53,9 +53,9 @@ Phase 1 Security Hardening has been successfully completed, delivering a product
 
 **Files:**
 
-- [apps/server/src/lib/security.ts](../apps/server/src/lib/security.ts) - Lockout logic
-- [apps/server/src/lib/request-utils.ts](../apps/server/src/lib/request-utils.ts) - IP extraction
-- [apps/server/src/lib/**tests**/security.test.ts](../apps/server/src/lib/__tests__/security.test.ts) - Tests
+- [apps/server/src/shared/security.ts](../apps/server/src/shared/security.ts) - Lockout logic
+- [apps/server/src/shared/request-utils.ts](../apps/server/src/shared/request-utils.ts) - IP extraction
+- [apps/server/src/shared/**tests**/security.test.ts](../apps/server/src/shared/__tests__/security.test.ts) - Tests
 
 ---
 
@@ -70,8 +70,8 @@ Phase 1 Security Hardening has been successfully completed, delivering a product
 
 **Files:**
 
-- [apps/server/src/lib/refresh-token.ts](../apps/server/src/lib/refresh-token.ts) - Token rotation
-- [apps/server/src/lib/**tests**/refresh-token.test.ts](../apps/server/src/lib/__tests__/refresh-token.test.ts) - Tests
+- [apps/server/src/shared/refresh-token.ts](../apps/server/src/shared/refresh-token.ts) - Token rotation
+- [apps/server/src/shared/**tests**/refresh-token.test.ts](../apps/server/src/shared/__tests__/refresh-token.test.ts) - Tests
 
 ---
 
@@ -87,8 +87,8 @@ Phase 1 Security Hardening has been successfully completed, delivering a product
 **Files:**
 
 - [apps/server/src/server.ts](../apps/server/src/server.ts) - Security plugins
-- [apps/server/src/lib/env-validator.ts](../apps/server/src/lib/env-validator.ts) - Startup validation
-- [apps/server/src/lib/constants.ts](../apps/server/src/lib/constants.ts) - Constants
+- [apps/server/src/shared/env-validator.ts](../apps/server/src/shared/env-validator.ts) - Startup validation
+- [apps/server/src/shared/constants.ts](../apps/server/src/shared/constants.ts) - Constants
 
 ---
 
@@ -245,7 +245,7 @@ export const ERROR_MESSAGES = {
 ### Security Utilities
 
 ```typescript
-// apps/server/src/lib/
+// apps/server/src/shared/
 ├── password.ts          // Argon2id + timing protection
 ├── security.ts          // Lockout + progressive delays
 ├── refresh-token.ts     // Token families + rotation
@@ -301,7 +301,7 @@ PASSWORD_MIN_SCORE=3
 
 ```bash
 # Run migrations to create auth tables
-pnpm --filter @abe-stack/db migrate
+pnpm --filter @/infra/database migrate
 ```
 
 ### Verification
@@ -347,21 +347,21 @@ See [SECURITY-PHASE-2.md](./SECURITY-PHASE-2.md) for complete roadmap.
 
 ### New Files (7)
 
-- `apps/server/src/lib/constants.ts` - Centralized constants
-- `apps/server/src/lib/env-validator.ts` - Startup validation
-- `apps/server/src/lib/request-utils.ts` - IP extraction
-- `apps/server/src/lib/__tests__/password.test.ts` - Password tests
-- `apps/server/src/lib/__tests__/security.test.ts` - Security tests
-- `apps/server/src/lib/__tests__/refresh-token.test.ts` - Token tests
+- `apps/server/src/shared/constants.ts` - Centralized constants
+- `apps/server/src/shared/env-validator.ts` - Startup validation
+- `apps/server/src/shared/request-utils.ts` - IP extraction
+- `apps/server/src/shared/__tests__/password.test.ts` - Password tests
+- `apps/server/src/shared/__tests__/security.test.ts` - Security tests
+- `apps/server/src/shared/__tests__/refresh-token.test.ts` - Token tests
 - `apps/server/src/__tests__/security-integration.test.ts` - Integration tests
 
 ### Modified Files (10)
 
-- `apps/server/src/lib/password.ts` - Added timing protection, rehash support
-- `apps/server/src/lib/security.ts` - Added lockout status, admin unlock
-- `apps/server/src/lib/refresh-token.ts` - Fixed cleanup bug
-- `apps/server/src/lib/jwt.ts` - Centralized config
-- `apps/server/src/routes/index.ts` - Added security features, sanitized errors
+- `apps/server/src/shared/password.ts` - Added timing protection, rehash support
+- `apps/server/src/shared/security.ts` - Added lockout status, admin unlock
+- `apps/server/src/shared/refresh-token.ts` - Fixed cleanup bug
+- `apps/server/src/shared/jwt.ts` - Centralized config
+- `apps/server/src/modules/index.ts` - Added security features, sanitized errors
 - `apps/server/src/server.ts` - Fixed CORS, added CSRF
 - `apps/server/src/index.ts` - Added env validation
 - `apps/server/src/config/auth.ts` - Type updates
@@ -371,7 +371,7 @@ See [SECURITY-PHASE-2.md](./SECURITY-PHASE-2.md) for complete roadmap.
 ### Configuration Files
 
 - `.env.example` - Updated with all security vars
-- `packages/db/src/schema/auth.ts` - Auth tables schema
+- `apps/server/src/infra/database/schema/auth.ts` - Auth tables schema
 
 ---
 

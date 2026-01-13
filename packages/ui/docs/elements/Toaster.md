@@ -44,11 +44,11 @@ const handleDismiss = (id) => {
 <Toaster messages={messages} onDismiss={handleDismiss} />;
 ```
 
-### With toastStore (from packages/shared)
+### With toastStore (from packages/core)
 
 ```tsx
 import { Toaster } from '@abe-stack/ui';
-import { toastStore } from '@abe-stack/shared';
+import { toastStore } from '@abe-stack/core';
 
 const MyToaster = () => {
   const { messages, dismiss } = toastStore();
@@ -87,7 +87,7 @@ export const Toaster = () => {
 ### Showing Toasts
 
 ```tsx
-import { toastStore } from '@abe-stack/shared';
+import { toastStore } from '@abe-stack/core';
 
 // Show a toast with title only
 toastStore.getState().show({ title: 'Changes saved' });
@@ -140,7 +140,7 @@ toastStore.getState().show({
 ## Related Components
 
 - [Toast](../elements/Toast.md) - Individual toast element
-- [toastStore](../../packages/shared/src/stores/toastStore.ts) - Zustand store for toast state
+- [toastStore](../../packages/core/src/stores/toastStore.ts) - Zustand store for toast state
 
 ## References
 

@@ -27,7 +27,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@abe-stack/sdk": ["../../packages/sdk/src"],
-      "@abe-stack/shared": ["../../packages/shared/src"],
+      "@abe-stack/core": ["../../packages/core/src"],
       "@abe-stack/ui": ["../../packages/ui/src"],
       "@api": ["./src/api"],
       "@api/*": ["./src/api/*"],
@@ -54,7 +54,7 @@
   "exclude": ["node_modules", "__tests__"],
   "references": [
     { "path": "../../packages/sdk" },
-    { "path": "../../packages/shared" },
+    { "path": "../../packages/core" },
     { "path": "../../packages/ui" }
   ]
 }

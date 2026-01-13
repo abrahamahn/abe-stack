@@ -6,8 +6,8 @@
     "baseUrl": "..",
     "paths": {
       "@abe-stack/sdk": ["./packages/sdk/src"],
-      "@abe-stack/shared": ["./packages/shared/src"],
-      "@abe-stack/shared/*": ["./packages/shared/src/*"],
+      "@abe-stack/core": ["./packages/core/src"],
+      "@abe-stack/core/*": ["./packages/core/src/*"],
       "@abe-stack/ui": ["./packages/ui/src"]
     }
   },

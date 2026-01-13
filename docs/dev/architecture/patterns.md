@@ -2,19 +2,19 @@
 
 ## DRY Enforcement
 
-- Extract shared logic to `packages/shared`.
+- Extract shared logic to `packages/core`.
 - Use `packages/ui` only for reusable UI components.
 - Keep API contracts in shared and consume from server/client.
 
 ## Framework-Agnostic Core
 
 - Shared logic must not import React or platform APIs.
-- Provide React hooks in `packages/api-client` or app layers.
+- Provide React hooks in `packages/sdk` or app layers.
 
 ## API Client Split
 
-- Framework-agnostic client in `packages/api-client/src`.
-- React Query hooks in `packages/api-client/src/react-query`.
+- Framework-agnostic client in `packages/sdk/src`.
+- React Query hooks in `packages/sdk/src/react-query`.
 
 ## Import Order
 

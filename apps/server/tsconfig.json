@@ -13,8 +13,8 @@
     "emitDecoratorMetadata": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@abe-stack/shared": ["../../packages/shared/dist"],
-      "@abe-stack/shared/*": ["../../packages/shared/dist/*"],
+      "@abe-stack/core": ["../../packages/core/dist"],
+      "@abe-stack/core/*": ["../../packages/core/dist/*"],
       "@modules/*": ["./src/modules/*"],
       "@cache/*": ["./src/infrastructure/cache/*"],
       "@config/*": ["./src/infrastructure/config/*"],
@@ -40,5 +40,5 @@
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"],
-  "references": [{ "path": "../../packages/shared" }]
+  "references": [{ "path": "../../packages/core" }]
 }

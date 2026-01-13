@@ -31,8 +31,8 @@ Restructure from role-based (`apps/`, `packages/`) to layer-based (`frontend/`, 
 ### Phase 2: Backend Migration
 
 - [ ] Move `apps/server/` to `backend/server/`
-- [ ] Move `packages/db/` to `backend/db/`
-- [ ] Move `packages/storage/` to `backend/storage/`
+- [ ] Move `apps/server/src/infra/database/` to `backend/db/`
+- [ ] Move `apps/server/src/infra/storage/` to `backend/storage/`
 - [ ] Update all import paths (e.g., `@db` → `backend/db`)
 - [ ] Verify server builds and tests pass
 
@@ -42,13 +42,13 @@ Restructure from role-based (`apps/`, `packages/`) to layer-based (`frontend/`, 
 - [ ] Move `apps/desktop/` to `frontend/desktop/`
 - [ ] Move `apps/mobile/` to `frontend/mobile/`
 - [ ] Move `packages/ui/` to `frontend/ui/`
-- [ ] Move `packages/api-client/` to `frontend/api-client/`
+- [ ] Move `packages/sdk/` to `frontend/sdk/`
 - [ ] Update all import paths
 - [ ] Verify all frontend apps build and tests pass
 
 ### Phase 4: Shared Layer
 
-- [ ] Move `packages/shared/` to `shared/`
+- [ ] Move `packages/core/` to `shared/`
 - [ ] Ensure contracts and types are accessible from both layers
 - [ ] Update documentation paths and examples
 

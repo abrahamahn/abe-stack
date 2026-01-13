@@ -1,11 +1,11 @@
 // apps/web/src/features/auth/contexts/AuthContext.tsx
-import { tokenStore } from '@abe-stack/shared';
+import { tokenStore } from '@abe-stack/core';
 import { api } from '@api/client';
 import { config } from '@config';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createContext, useCallback, useEffect, useRef, useState } from 'react';
 
-import type { AuthResponse, LoginRequest, RegisterRequest, UserRole } from '@abe-stack/shared';
+import type { AuthResponse, LoginRequest, RegisterRequest, UserRole } from '@abe-stack/core';
 import type { ReactElement, ReactNode } from 'react';
 
 export type User = {

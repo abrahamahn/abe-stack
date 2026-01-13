@@ -82,7 +82,7 @@ async function getUsersWithOrganizations() {
 **Add indexes for frequently queried columns:**
 
 ```typescript
-// packages/db/schema/users.ts
+// apps/server/src/infra/database/schema/users.ts
 import { pgTable, uuid, text, timestamp, index } from 'drizzle-orm/pg-core';
 
 export const users = pgTable(

@@ -5,7 +5,7 @@ This file is a short index. Use the modules below for fast checks or full ration
 Quick Summary:
 
 - DRY and separation of concerns are non-negotiable.
-- Keep business logic framework-agnostic in `packages/shared`.
+- Keep business logic framework-agnostic in `packages/core`.
 - Use TDD: failing tests drive fixes, not the other way around.
 - New files must start with a path header comment.
 - Optimize for developer velocity without sacrificing correctness.

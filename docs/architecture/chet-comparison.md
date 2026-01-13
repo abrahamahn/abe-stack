@@ -43,8 +43,8 @@ CHET-Stack (by Steve Ruiz, creator of tldraw) is a production-ready architecture
 
 ```typescript
 // Uses global imports
-import { db } from '@abeahn/db';
-import { storage } from '@abeahn/storage';
+import { db } from '@abe-stack/server';
+import { storage } from '@abe-stack/server';
 
 async function handleRequest(req) {
   const user = await db.query.users.findFirst(...);
@@ -161,7 +161,7 @@ while (queue.hasNext()) {
 Update server handlers to receive environment:
 
 ```typescript
-// apps/server/src/routes/index.ts
+// apps/server/src/modules/index.ts
 import type { Environment } from './types';
 
 export function createRoutes(env: Environment) {

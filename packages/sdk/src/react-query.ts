@@ -1,5 +1,5 @@
 // packages/api-client/src/react-query.ts
-import { addAuthHeader, apiContract } from '@abe-stack/shared';
+import { addAuthHeader, apiContract } from '@abe-stack/core';
 import { initQueryClient } from '@ts-rest/react-query';
 
 type ApiCallArgs = {

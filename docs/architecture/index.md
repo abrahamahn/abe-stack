@@ -1,8 +1,8 @@
 # Architecture Overview
 
-**Last Updated: January 10, 2026**
+**Last Updated: January 13, 2026**
 
-ABE Stack architecture principles, current structure, and proposed evolution.
+ABE Stack architecture principles, current structure, and design decisions.
 
 ---
 
@@ -44,15 +44,27 @@ abe-stack/
 │   ├── web/              # Vite + React web application
 │   │   └── src/
 │   │       ├── app/      # App setup (providers, routes)
-│   │       ├── features/ # Feature modules
+│   │       ├── features/ # Feature modules (auth, dashboard)
+│   │       ├── api/      # API client setup
 │   │       └── pages/    # Route pages
 │   ├── desktop/          # Electron application
 │   └── server/           # Fastify API server
 │       └── src/
-│           ├── routes/   # API route handlers
-│           ├── lib/      # Server utilities
-│           └── services/ # Business logic
+│           ├── modules/  # Feature modules (auth, users, admin)
+│           ├── infra/    # Infrastructure layer
+│           │   ├── database/  # Drizzle ORM, schemas, migrations
+│           │   ├── storage/   # S3/local file storage
+│           │   ├── pubsub/    # WebSocket subscriptions
+│           │   ├── security/  # Auth, lockout, audit logging
+│           │   └── email/     # Email service
+│           └── shared/   # Server constants, types
 ├── packages/
+│   ├── core/             # Shared contracts, validation, stores
+│   │   └── src/
+│   │       ├── contracts/   # ts-rest API contracts
+│   │       ├── validation/  # Zod schemas
+│   │       ├── stores/      # Zustand stores (toast, etc.)
+│   │       └── utils/       # Shared utilities
 │   ├── ui/               # Shared UI library
 │   │   └── src/
 │   │       ├── components/  # Stateful components
@@ -60,52 +72,31 @@ abe-stack/
 │   │       ├── layouts/     # Layout patterns
 │   │       ├── hooks/       # React hooks
 │   │       └── theme/       # Styling tokens
-│   ├── api-client/       # Type-safe API client
-│   ├── db/               # Drizzle ORM + schemas
-│   ├── shared/           # Types, validation, utilities
-│   └── storage/          # File storage abstraction
+│   └── sdk/              # Type-safe API client
+│       └── src/
+│           ├── client.ts       # Framework-agnostic client
+│           ├── react-query.ts  # React Query integration
+│           └── types.ts        # Re-exported types
 ├── config/               # Docker, env, test configs
 └── tools/                # Dev scripts
 ```
 
 ### Package Responsibilities
 
-| Package              | Purpose                | Key Exports                          |
-| -------------------- | ---------------------- | ------------------------------------ |
-| `@abeahn/ui`         | Reusable UI components | Components, elements, hooks, layouts |
-| `@abeahn/api-client` | Type-safe API calls    | `createApiClient`, response types    |
-| `@abeahn/db`         | Database layer         | Schemas, migrations, queries         |
-| `@abeahn/shared`     | Shared utilities       | Contracts, types, validation         |
-| `@abeahn/storage`    | File storage           | S3/local providers, signed URLs      |
+| Package           | Purpose                | Key Exports                                 |
+| ----------------- | ---------------------- | ------------------------------------------- |
+| `@abe-stack/core` | Shared business logic  | Contracts, validation, stores, utilities    |
+| `@abe-stack/ui`   | Reusable UI components | Components, elements, hooks, layouts        |
+| `@abe-stack/sdk`  | Type-safe API calls    | `createApiClient`, `createReactQueryClient` |
 
----
+### Server Infrastructure
 
-## Proposed V5 Structure
-
-Layer-based organization for clearer separation. See [V5 Proposal](./v5-proposal.md) for migration details.
-
-```
-abe-stack/
-├── frontend/
-│   ├── web/          # Web app (Vite + React)
-│   ├── desktop/      # Desktop app (Electron)
-│   ├── mobile/       # Mobile app (React Native)
-│   ├── ui/           # Shared UI library
-│   └── api-client/   # Frontend API client
-├── backend/
-│   ├── server/       # API server (Fastify)
-│   ├── db/           # Database layer
-│   └── storage/      # File storage
-├── shared/           # Cross-layer types and contracts
-└── config/           # Environment and tooling
-```
-
-### Benefits of V5
-
-- **Clear Boundaries**: Frontend can't accidentally import backend code
-- **Better Tree-Shaking**: Bundlers can optimize per-layer
-- **Simpler Mental Model**: "Where does this go?" has obvious answers
-- **Easier Onboarding**: New developers understand structure immediately
+| Module                           | Purpose          | Key Features                        |
+| -------------------------------- | ---------------- | ----------------------------------- |
+| `apps/server/src/infra/database` | Data persistence | Drizzle ORM, PostgreSQL, migrations |
+| `apps/server/src/infra/storage`  | File storage     | S3/local providers, signed URLs     |
+| `apps/server/src/infra/security` | Auth & security  | JWT, lockout, audit logging         |
+| `apps/server/src/infra/pubsub`   | Real-time        | WebSocket subscriptions             |
 
 ---
 
@@ -136,7 +127,6 @@ packages/realtime/     # Real-time sync engine
 
 ## Related Documentation
 
-- [V5 Architecture Proposal](./v5-proposal.md) - Detailed migration plan
 - [CHET-Stack Comparison](./chet-comparison.md) - Feature comparison and adoption plan
 - [Realtime Overview](./realtime/overview.md) - Quick start for real-time features
 - [Realtime Architecture](./realtime/architecture.md) - Detailed sync system design
@@ -148,19 +138,27 @@ packages/realtime/     # Real-time sync engine
 ## Dependency Flow
 
 ```
-     frontend/*
-         │
-         ▼
-     shared/*
-         │
-         ▼
-     backend/*  (server imports db, storage)
+    apps/web, apps/desktop
+            │
+            ▼
+    packages/ui, packages/sdk
+            │
+            ▼
+       packages/core
+
+    apps/server
+            │
+            ▼
+    apps/server/src/infra/*
+            │
+            ▼
+       packages/core
 ```
 
 **Rules:**
 
-- Frontend can import shared, never backend
-- Backend can import shared
-- Shared imports nothing from frontend or backend
-- Within frontend: ui → api-client → apps
-- Within backend: server → db, storage
+- Apps can import from packages, never from other apps
+- `packages/core` is framework-agnostic (no React)
+- `packages/ui` and `packages/sdk` can import from `packages/core`
+- Server infra modules are internal to the server app
+- All packages use `packages/core` for shared contracts/types

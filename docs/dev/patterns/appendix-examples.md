@@ -13,9 +13,9 @@ Common implementation patterns with full examples for API clients, forms, enviro
 **Framework-agnostic client + React-specific hooks:**
 
 ```typescript
-// packages/api-client/src/client.ts (framework-agnostic)
+// packages/sdk/src/client.ts (framework-agnostic)
 import { initClient } from '@ts-rest/core';
-import { contract } from '@abeahn/shared/contracts';
+import { contract } from '@abe-stack/core/contracts';
 
 export const apiClient = initClient(contract, {
   baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:3000',
@@ -24,7 +24,7 @@ export const apiClient = initClient(contract, {
   },
 });
 
-// packages/api-client/src/react-query.ts (React-specific)
+// packages/sdk/src/react-query.ts (React-specific)
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from './client';
 
@@ -66,7 +66,7 @@ export const useCreateUser = () => {
 **Validation-first forms with Zod:**
 
 ```typescript
-// packages/shared/src/validation/user.ts
+// packages/core/src/validation/user.ts
 import { z } from 'zod';
 
 export const createUserSchema = z.object({
@@ -85,8 +85,8 @@ export type CreateUserInput = z.infer<typeof createUserSchema>;
 
 // apps/web/src/components/CreateUserForm.tsx
 import { useState } from 'react';
-import { createUserSchema, type CreateUserInput } from '@abeahn/shared';
-import { useCreateUser } from '@abeahn/api-client';
+import { createUserSchema, type CreateUserInput } from '@abe-stack/core';
+import { useCreateUser } from '@abe-stack/sdk';
 
 function CreateUserForm() {
   const [formData, setFormData] = useState<CreateUserInput>({
@@ -159,7 +159,7 @@ function CreateUserForm() {
 **Type-safe environment variables with Zod:**
 
 ```typescript
-// packages/shared/src/env.ts
+// packages/core/src/env.ts
 import { z } from 'zod';
 
 // Define schema for environment variables
@@ -181,7 +181,7 @@ export const env = envSchema.parse(process.env);
 // env.REDIS_URL is string | undefined
 
 // apps/server/src/index.ts
-import { env } from '@abeahn/shared';
+import { env } from '@abe-stack/core';
 
 const server = Fastify({
   logger: {
@@ -207,7 +207,7 @@ await server.listen({
 **Drizzle ORM with type-safe queries:**
 
 ```typescript
-// packages/db/queries/users.ts
+// apps/server/src/infra/database/queries/users.ts
 import { eq, and, desc } from 'drizzle-orm';
 import { db } from '../client';
 import { users } from '../schema/users';

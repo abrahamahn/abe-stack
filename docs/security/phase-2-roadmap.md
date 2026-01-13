@@ -37,7 +37,7 @@ Phase 2 focuses on data integrity, advanced security features, and operational e
 **Implementation:**
 
 ```typescript
-// packages/db/src/transaction.ts
+// apps/server/src/infra/database/transaction.ts
 export async function withTransaction<T>(
   db: DbClient,
   callback: (tx: DbClient) => Promise<T>,
@@ -50,9 +50,9 @@ export async function withTransaction<T>(
 
 **Files to Update:**
 
-- `packages/db/src/index.ts` - Export transaction helper
-- `apps/server/src/routes/index.ts` - Wrap registration, login, token rotation
-- `apps/server/src/lib/refresh-token.ts` - Use transactions for rotation
+- `apps/server/src/infra/database/index.ts` - Export transaction helper
+- `apps/server/src/modules/index.ts` - Wrap registration, login, token rotation
+- `apps/server/src/shared/refresh-token.ts` - Use transactions for rotation
 - Test mocks - Add transaction simulation
 
 **Success Criteria:**
@@ -78,7 +78,7 @@ export async function withTransaction<T>(
 **Implementation:**
 
 ```typescript
-// apps/server/src/lib/security-events.ts
+// apps/server/src/shared/security-events.ts
 export interface SecurityEvent {
   type: 'TOKEN_REUSE_DETECTED' | 'ACCOUNT_LOCKED' | 'PASSWORD_RESET' | 'ADMIN_UNLOCK';
   userId: string;
@@ -94,9 +94,9 @@ export async function notifyUserOfSecurityEvent(email: string, eventType: string
 
 **Files to Update:**
 
-- Create `apps/server/src/lib/security-events.ts`
-- Create `packages/db/src/schema/security-events.ts` - New table
-- Update `apps/server/src/lib/refresh-token.ts` - Log reuse detection
+- Create `apps/server/src/shared/security-events.ts`
+- Create `apps/server/src/infra/database/schema/security-events.ts` - New table
+- Update `apps/server/src/shared/refresh-token.ts` - Log reuse detection
 - Add email notification integration (when email service ready)
 
 **Success Criteria:**
@@ -117,7 +117,7 @@ export async function notifyUserOfSecurityEvent(email: string, eventType: string
 **Enhancement Needed:**
 
 ```typescript
-// apps/server/src/lib/request-utils.ts
+// apps/server/src/shared/request-utils.ts
 export interface ProxyConfig {
   trustProxy: boolean;
   trustedProxies: string[]; // List of trusted proxy IPs
@@ -137,7 +137,7 @@ function validateForwardedFor(
 
 **Files to Update:**
 
-- `apps/server/src/lib/request-utils.ts` - Add proxy validation
+- `apps/server/src/shared/request-utils.ts` - Add proxy validation
 - `apps/server/src/config/auth.ts` - Add proxy config
 - Update tests for proxy scenarios
 
@@ -175,7 +175,7 @@ ALTER TABLE users ADD COLUMN lockout_count INTEGER DEFAULT 0;
 
 **Remaining:**
 
-- [ ] Audit all error returns in routes/index.ts
+- [ ] Audit all error returns in modules/auth/
 - [ ] Ensure handleMe() uses constants (currently inline strings)
 - [ ] Create error sanitization helper
 - [ ] Document which errors are safe to expose
@@ -228,7 +228,7 @@ function getDummyHash(): string {
 **Solution:**
 
 ```typescript
-// apps/server/src/lib/maintenance.ts
+// apps/server/src/shared/maintenance.ts
 export async function cleanupOldLoginAttempts(
   db: DbClient,
   retentionDays: number = 90,

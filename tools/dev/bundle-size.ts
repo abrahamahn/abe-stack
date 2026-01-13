@@ -260,9 +260,9 @@ function main(): void {
       name: '@abe-stack/ui',
       distPath: path.join(ROOT_DIR, 'packages/ui/dist'),
     },
-    shared: {
-      name: '@abe-stack/shared',
-      distPath: path.join(ROOT_DIR, 'packages/shared/dist'),
+    core: {
+      name: '@abe-stack/core',
+      distPath: path.join(ROOT_DIR, 'packages/core/dist'),
     },
     sdk: {
       name: '@abe-stack/sdk',

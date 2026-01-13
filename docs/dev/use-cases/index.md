@@ -91,7 +91,7 @@ Codex/Claude Code excels at changes that span multiple files or packages - espec
 
 "Convert all instances of var to const/let following ESLint best practices."
 
-"Update all imports from @company/utils to @abeahn/shared."
+"Update all imports from @company/utils to @abe-stack/core."
 ```
 
 **From Anthropic's Backend Engineer:**
@@ -390,11 +390,11 @@ Contract (use ts-rest):
 - Errors: 400 (validation), 401 (unauthorized), 404 (org not found)
 
 Implementation:
-1. Define contract in packages/shared/contracts/projects.ts
+1. Define contract in packages/core/contracts/projects.ts
 2. Add Zod validation schema
-3. Implement route handler in apps/server/src/routes/projects.ts
-4. Add database query in packages/db/queries/projects.ts
-5. Update API client in packages/api-client
+3. Implement route handler in apps/server/src/modules/projects.ts
+4. Add database query in apps/server/src/infra/database/queries/projects.ts
+5. Update API client in packages/sdk
 6. Write integration tests
 
 Follow our existing patterns in /api/organizations"

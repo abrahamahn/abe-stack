@@ -194,7 +194,7 @@ Foundational principles and technical vision for the ABE Stack. Learn the "why" 
 
 **Testing strategy:**
 
-- 70% unit tests (business logic in `packages/shared`)
+- 70% unit tests (business logic in `packages/core`)
 - 20% integration tests (API routes + DB)
 - 10% E2E tests (critical user flows)
 

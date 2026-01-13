@@ -46,7 +46,7 @@ function OrderSummary({ items }: Props) {
 
 ```typescript
 // ✅ GOOD: Business logic in shared package
-// packages/shared/src/utils/order.ts
+// packages/core/src/utils/order.ts
 
 export const calculateDiscount = (item: Item): number => {
   if (!item.onSale) return 0;
@@ -73,8 +73,8 @@ export const calculateOrderTotal = (items: Item[]): number => {
 
 // ✅ GOOD: Component only renders
 // apps/web/src/components/OrderSummary.tsx
-import { calculateOrderTotal } from '@abeahn/shared';
-import { formatCurrency } from '@abeahn/shared';
+import { calculateOrderTotal } from '@abe-stack/core';
+import { formatCurrency } from '@abe-stack/core';
 
 function OrderSummary({ items }: Props) {
   const total = calculateOrderTotal(items);
@@ -106,7 +106,7 @@ export interface User {
   name: string;
 }
 
-// packages/api-client/src/types.ts
+// packages/sdk/src/types.ts
 export interface User {
   id: string;
   email: string;
@@ -114,7 +114,7 @@ export interface User {
 }
 
 // ✅ GOOD: Single source of truth
-// packages/shared/src/types/user.ts
+// packages/core/src/types/user.ts
 export interface User {
   id: string;
   email: string;
@@ -125,7 +125,7 @@ export interface User {
 }
 
 // Everyone imports from shared
-import { User } from '@abeahn/shared';
+import { User } from '@abe-stack/core';
 ```
 
 ### ❌ Anti-Pattern 3: Cross-App Imports
@@ -139,7 +139,7 @@ import { formatUserName } from '../../../server/src/utils/user';
 import { Settings } from '../../../desktop/src/config';
 
 // ✅ GOOD: Import from shared package
-import { formatUserName } from '@abeahn/shared';
+import { formatUserName } from '@abe-stack/core';
 ```
 
 ### ❌ Anti-Pattern 4: Prop Drilling

@@ -117,10 +117,10 @@ export default [
     },
   },
   {
-    files: ['packages/shared/**/*.{ts,tsx,cts,mts}'],
+    files: ['packages/core/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/shared/tsconfig.json'],
+        project: ['./packages/core/tsconfig.json'],
         tsconfigRootDir,
       },
     },

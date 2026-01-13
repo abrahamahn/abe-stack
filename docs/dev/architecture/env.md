@@ -2,7 +2,7 @@
 
 ## Type-Safe Env Vars
 
-- Define schemas with Zod in `packages/shared/src/env.ts`.
+- Define schemas with Zod in `packages/core/src/env.ts`.
 - Validate at startup for server apps.
 - Use explicit defaults only when safe.
 

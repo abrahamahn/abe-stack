@@ -324,7 +324,7 @@ fastify.route({
 
 ### 4.2 Contract Organization by Domain
 
-- [ ] Reorganize contracts in `packages/shared/src/contracts/`
+- [ ] Reorganize contracts in `packages/core/src/contracts/`
   ```
   contracts/
   ├── auth.contract.ts
@@ -427,7 +427,7 @@ apps/server/src/
 │       ├── index.ts                    # Queue exports
 │       └── tasks/                      # Task definitions
 
-packages/shared/src/
+packages/core/src/
 ├── pubsub-keys.ts                      # Subscription key helpers
 └── contracts/
     ├── auth.contract.ts                # Auth domain contract
@@ -443,7 +443,7 @@ packages/db/src/
 
 ```
 packages/db/src/schema/auth.ts          # Add version columns
-packages/shared/src/contracts/index.ts  # Add version to schemas, 409 responses
+packages/core/src/contracts/index.ts  # Add version to schemas, 409 responses
 apps/server/src/infra/ctx.ts            # Add pubsub to ServerEnvironment
 apps/server/src/infra/factory.ts        # Initialize pubsub
 apps/server/src/server.ts               # Register WebSocket plugin

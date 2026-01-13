@@ -105,7 +105,7 @@ By centralizing UI components in this package, we achieve:
                          │
                          ▼
               ┌──────────────────────┐
-              │  packages/shared     │◄─── Business logic
+              │  packages/core     │◄─── Business logic
               │  packages/config     │◄─── Shared configs
               └──────────────────────┘
 ```
@@ -299,7 +299,7 @@ apps/desktop/src/
 
 3. **Is it pure UI or business logic?**
    - Pure UI → `packages/ui`
-   - Business logic → `packages/shared`
+   - Business logic → `packages/core`
    - Backend logic → `apps/server`
 
 ---
