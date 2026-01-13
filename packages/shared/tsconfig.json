@@ -7,10 +7,7 @@
     "declaration": true,
     "declarationMap": true,
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
-    "baseUrl": "./",
-    "paths": {
-      "@abe-stack/storage": ["../storage/src"]
-    }
+    "baseUrl": "./"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

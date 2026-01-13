@@ -1,7 +1,8 @@
 // apps/server/src/scripts/dbHealthCheck.ts
-import { buildConnectionString } from '@abe-stack/db';
 import dotenvFlow from 'dotenv-flow';
 import postgres from 'postgres';
+
+import { buildConnectionString } from '../infra/database';
 
 dotenvFlow.config({ path: '.env' });
 dotenvFlow.config({ path: '../../.env' });
