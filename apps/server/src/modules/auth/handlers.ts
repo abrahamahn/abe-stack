@@ -1,38 +1,38 @@
 // apps/server/src/modules/auth/handlers.ts
 /**
- * Auth Route Handlers
+ * Auth Handlers
  *
- * Pure functions that handle authentication requests.
- * Each handler receives AppContext and returns a typed response.
+ * Thin HTTP layer that calls services and formats responses.
  */
 
-import { validatePassword } from '@abe-stack/core';
-import { eq } from 'drizzle-orm';
-
 import { getRefreshCookieOptions } from '../../config';
-import { refreshTokens, users, withTransaction } from '../../infra/database';
 import {
-  applyProgressiveDelay,
-  getAccountLockoutStatus,
-  isAccountLocked,
-  logLoginAttempt,
-} from '../../infra/security';
-import { logAccountLockedEvent } from '../../infra/security/events';
-import { ERROR_MESSAGES, REFRESH_COOKIE_NAME, SUCCESS_MESSAGES } from '../../shared/constants';
+  ERROR_MESSAGES,
+  REFRESH_COOKIE_NAME,
+  SUCCESS_MESSAGES,
+  type AppContext,
+} from '../../shared';
 
-import { createAccessToken, verifyToken as verifyJwtToken, type TokenPayload } from './utils/jwt';
-import { hashPassword, needsRehash, verifyPasswordSafe } from './utils/password';
-import { createRefreshTokenFamily, rotateRefreshToken } from './utils/refresh-token';
-import { extractRequestInfo } from './utils/request';
+import {
+  AccountLockedError,
+  authenticateUser,
+  EmailAlreadyExistsError,
+  InvalidCredentialsError,
+  InvalidRefreshTokenError,
+  logoutUser,
+  refreshUserTokens,
+  registerUser,
+  WeakPasswordError,
+} from './service';
+import { extractRequestInfo, verifyToken as verifyJwtToken, type TokenPayload } from './utils';
 
-import type { AppContext } from '../../shared/types';
 import type {
   AuthResponse,
   LoginRequest,
   LogoutResponse,
   RefreshResponse,
   RegisterRequest,
-} from '@abe-stack/core';
+} from '@abe-stack/contracts';
 import type { FastifyRequest } from 'fastify';
 
 // ============================================================================
@@ -62,79 +62,41 @@ export async function handleRegister(
   { status: 201; body: AuthResponse } | { status: 400 | 409 | 500; body: { message: string } }
 > {
   try {
-    const existingUser = await ctx.db.query.users.findFirst({
-      where: eq(users.email, body.email),
-    });
-
-    if (existingUser) {
-      return { status: 409, body: { message: ERROR_MESSAGES.EMAIL_ALREADY_REGISTERED } };
-    }
-
-    // Validate password strength
-    const passwordValidation = await validatePassword(body.password, [body.email, body.name || '']);
-
-    if (!passwordValidation.isValid) {
-      ctx.log.warn(
-        { email: body.email, errors: passwordValidation.errors },
-        'Password validation failed during registration',
-      );
-      return {
-        status: 400,
-        body: { message: ERROR_MESSAGES.WEAK_PASSWORD },
-      };
-    }
-
-    const passwordHash = await hashPassword(body.password, ctx.config.auth.argon2);
-
-    // Use transaction to ensure user + token family are created atomically
-    const { user, refreshToken } = await withTransaction(ctx.db, async (tx) => {
-      const [newUser] = await tx
-        .insert(users)
-        .values({
-          email: body.email,
-          name: body.name || null,
-          passwordHash,
-          role: 'user',
-        })
-        .returning();
-
-      if (!newUser) {
-        throw new Error('Failed to create user');
-      }
-
-      const { token } = await createRefreshTokenFamily(
-        tx,
-        newUser.id,
-        ctx.config.auth.refreshToken.expiryDays,
-      );
-      return { user: newUser, refreshToken: token };
-    });
-
-    // Create access token
-    const accessToken = createAccessToken(
-      user.id,
-      user.email,
-      user.role,
-      ctx.config.auth.jwt.secret,
-      ctx.config.auth.jwt.accessTokenExpiry,
+    const result = await registerUser(
+      ctx.db,
+      ctx.config.auth,
+      body.email,
+      body.password,
+      body.name,
     );
 
     // Set refresh token as HTTP-only cookie
-    reply.setCookie(REFRESH_COOKIE_NAME, refreshToken, getRefreshCookieOptions(ctx.config.auth));
+    reply.setCookie(
+      REFRESH_COOKIE_NAME,
+      result.refreshToken,
+      getRefreshCookieOptions(ctx.config.auth),
+    );
 
     return {
       status: 201,
       body: {
-        token: accessToken,
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        },
+        token: result.accessToken,
+        user: result.user,
       },
     };
   } catch (error) {
+    if (error instanceof EmailAlreadyExistsError) {
+      return { status: 409, body: { message: ERROR_MESSAGES.EMAIL_ALREADY_REGISTERED } };
+    }
+
+    if (error instanceof WeakPasswordError) {
+      ctx.log.warn(
+        { email: body.email, errors: error.errors },
+        'Password validation failed during registration',
+      );
+      return { status: 400, body: { message: ERROR_MESSAGES.WEAK_PASSWORD } };
+    }
+
     ctx.log.error(error);
     return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
@@ -151,104 +113,45 @@ export async function handleLogin(
   const { ipAddress, userAgent } = extractRequestInfo(request as unknown as FastifyRequest);
 
   try {
-    // Check if account is locked out
-    const locked = await isAccountLocked(ctx.db, body.email);
-    if (locked) {
-      await logLoginAttempt(ctx.db, body.email, false, ipAddress, userAgent, 'Account locked');
-      return {
-        status: 429,
-        body: { message: ERROR_MESSAGES.ACCOUNT_LOCKED },
-      };
-    }
-
-    // Apply progressive delay based on recent failed attempts
-    await applyProgressiveDelay(ctx.db, body.email);
-
-    // Fetch user (may be null)
-    const user = await ctx.db.query.users.findFirst({
-      where: eq(users.email, body.email),
-    });
-
-    // Timing-safe password verification
-    const isValid = await verifyPasswordSafe(body.password, user?.passwordHash);
-
-    if (!user) {
-      await logLoginAttempt(ctx.db, body.email, false, ipAddress, userAgent, 'User not found');
-      const lockoutStatus = await getAccountLockoutStatus(ctx.db, body.email);
-      if (lockoutStatus.isLocked) {
-        await logAccountLockedEvent(
-          ctx.db,
-          body.email,
-          lockoutStatus.failedAttempts,
-          ipAddress,
-          userAgent,
-        );
-      }
-      return { status: 401, body: { message: ERROR_MESSAGES.INVALID_CREDENTIALS } };
-    }
-
-    if (!isValid) {
-      await logLoginAttempt(ctx.db, body.email, false, ipAddress, userAgent, 'Invalid password');
-      const lockoutStatus = await getAccountLockoutStatus(ctx.db, body.email);
-      if (lockoutStatus.isLocked) {
-        await logAccountLockedEvent(
-          ctx.db,
-          body.email,
-          lockoutStatus.failedAttempts,
-          ipAddress,
-          userAgent,
-        );
-      }
-      return { status: 401, body: { message: ERROR_MESSAGES.INVALID_CREDENTIALS } };
-    }
-
-    // Create tokens and log success atomically
-    const { refreshToken } = await withTransaction(ctx.db, async (tx) => {
-      await logLoginAttempt(tx, body.email, true, ipAddress, userAgent);
-      const { token } = await createRefreshTokenFamily(
-        tx,
-        user.id,
-        ctx.config.auth.refreshToken.expiryDays,
-      );
-      return { refreshToken: token };
-    });
-
-    // Check if password hash needs upgrading
-    if (needsRehash(user.passwordHash)) {
-      try {
-        const newHash = await hashPassword(body.password, ctx.config.auth.argon2);
-        await ctx.db.update(users).set({ passwordHash: newHash }).where(eq(users.id, user.id));
-        ctx.log.info({ userId: user.id }, 'Password hash upgraded');
-      } catch (error) {
-        ctx.log.error({ userId: user.id, error }, 'Failed to upgrade password hash');
-      }
-    }
-
-    // Create access token
-    const accessToken = createAccessToken(
-      user.id,
-      user.email,
-      user.role,
-      ctx.config.auth.jwt.secret,
-      ctx.config.auth.jwt.accessTokenExpiry,
+    const result = await authenticateUser(
+      ctx.db,
+      ctx.config.auth,
+      body.email,
+      body.password,
+      ipAddress,
+      userAgent,
+      (userId, error) => {
+        if (error) {
+          ctx.log.error({ userId, error }, 'Failed to upgrade password hash');
+        } else {
+          ctx.log.info({ userId }, 'Password hash upgraded');
+        }
+      },
     );
 
     // Set refresh token as HTTP-only cookie
-    reply.setCookie(REFRESH_COOKIE_NAME, refreshToken, getRefreshCookieOptions(ctx.config.auth));
+    reply.setCookie(
+      REFRESH_COOKIE_NAME,
+      result.refreshToken,
+      getRefreshCookieOptions(ctx.config.auth),
+    );
 
     return {
       status: 200,
       body: {
-        token: accessToken,
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        },
+        token: result.accessToken,
+        user: result.user,
       },
     };
   } catch (error) {
+    if (error instanceof AccountLockedError) {
+      return { status: 429, body: { message: ERROR_MESSAGES.ACCOUNT_LOCKED } };
+    }
+
+    if (error instanceof InvalidCredentialsError) {
+      return { status: 401, body: { message: ERROR_MESSAGES.INVALID_CREDENTIALS } };
+    }
+
     ctx.log.error(error);
     return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
@@ -261,47 +164,40 @@ export async function handleRefresh(
 ): Promise<
   { status: 200; body: RefreshResponse } | { status: 401 | 500; body: { message: string } }
 > {
+  const oldRefreshToken = request.cookies[REFRESH_COOKIE_NAME];
+
+  if (!oldRefreshToken) {
+    return { status: 401, body: { message: ERROR_MESSAGES.NO_REFRESH_TOKEN } };
+  }
+
+  const { ipAddress, userAgent } = extractRequestInfo(request as unknown as FastifyRequest);
+
   try {
-    const oldRefreshToken = request.cookies[REFRESH_COOKIE_NAME];
-
-    if (!oldRefreshToken) {
-      return { status: 401, body: { message: ERROR_MESSAGES.NO_REFRESH_TOKEN } };
-    }
-
-    const { ipAddress, userAgent } = extractRequestInfo(request as unknown as FastifyRequest);
-
-    // Rotate the refresh token with reuse detection
-    const result = await rotateRefreshToken(
+    const result = await refreshUserTokens(
       ctx.db,
+      ctx.config.auth,
       oldRefreshToken,
       ipAddress,
       userAgent,
-      ctx.config.auth.refreshToken.expiryDays,
-      ctx.config.auth.refreshToken.gracePeriodSeconds,
     );
 
-    if (!result) {
+    // Set new refresh token cookie
+    reply.setCookie(
+      REFRESH_COOKIE_NAME,
+      result.refreshToken,
+      getRefreshCookieOptions(ctx.config.auth),
+    );
+
+    return {
+      status: 200,
+      body: { token: result.accessToken },
+    };
+  } catch (error) {
+    if (error instanceof InvalidRefreshTokenError) {
       reply.clearCookie(REFRESH_COOKIE_NAME, { path: '/' });
       return { status: 401, body: { message: ERROR_MESSAGES.INVALID_TOKEN } };
     }
 
-    // Create new access token
-    const newAccessToken = createAccessToken(
-      result.userId,
-      result.email,
-      result.role,
-      ctx.config.auth.jwt.secret,
-      ctx.config.auth.jwt.accessTokenExpiry,
-    );
-
-    // Set new refresh token cookie
-    reply.setCookie(REFRESH_COOKIE_NAME, result.token, getRefreshCookieOptions(ctx.config.auth));
-
-    return {
-      status: 200,
-      body: { token: newAccessToken },
-    };
-  } catch (error) {
     ctx.log.error(error);
     return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }
@@ -316,10 +212,7 @@ export async function handleLogout(
 > {
   try {
     const refreshToken = request.cookies[REFRESH_COOKIE_NAME];
-
-    if (refreshToken) {
-      await ctx.db.delete(refreshTokens).where(eq(refreshTokens.token, refreshToken));
-    }
+    await logoutUser(ctx.db, refreshToken);
 
     reply.clearCookie(REFRESH_COOKIE_NAME, { path: '/' });
 

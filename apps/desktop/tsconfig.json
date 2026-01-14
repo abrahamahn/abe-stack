@@ -16,7 +16,7 @@
     "strict": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@abe-stack/core": ["../../packages/core/src"],
+      "@abe-stack/contracts": ["../../packages/core/src"],
       "@abe-stack/ui": ["../../packages/ui/src"],
       "@components/*": ["./src/components/*"],
       "@hooks/*": ["./src/hooks/*"],

@@ -8,7 +8,7 @@
 
 import { verifyToken, type TokenPayload } from './utils/jwt';
 
-import type { UserRole } from '@abe-stack/core';
+import type { UserRole } from '@abe-stack/contracts';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 /**

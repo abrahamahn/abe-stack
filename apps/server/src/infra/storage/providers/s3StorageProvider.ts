@@ -3,9 +3,9 @@ import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { fromEnv } from '@aws-sdk/credential-providers';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-import { normalizeStorageKey } from './utils/normalizeKey';
+import { normalizeStorageKey } from '../utils/normalizeKey';
 
-import type { S3StorageConfig, StorageProvider, UploadParams } from './types';
+import type { S3StorageConfig, StorageProvider, UploadParams } from '../types';
 
 export class S3StorageProvider implements StorageProvider {
   private readonly client: S3Client;

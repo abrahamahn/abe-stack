@@ -1,6 +1,6 @@
 // apps/server/src/infra/storage/storageFactory.ts
-import { LocalStorageProvider } from './localStorageProvider';
-import { S3StorageProvider } from './s3StorageProvider';
+import { LocalStorageProvider } from './providers/localStorageProvider';
+import { S3StorageProvider } from './providers/s3StorageProvider';
 
 import type { StorageConfig, StorageProvider } from './types';
 

@@ -1,5 +1,5 @@
 // apps/web/src/api/ApiProvider.tsx
-import { toastStore, tokenStore } from '@abe-stack/core';
+import { toastStore, tokenStore } from '@abe-stack/contracts';
 import { createReactQueryClient } from '@abe-stack/sdk';
 import { config } from '@config';
 import { createContext, useContext, useMemo } from 'react';

@@ -1,7 +1,7 @@
 {
-  "name": "@abe-stack/core",
+  "name": "@abe-stack/contracts",
   "version": "1.1.0",
-  "description": "Core utilities, contracts, and constants for abe-stack",
+  "description": "API contracts, shared types, and validation schemas for abe-stack",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {

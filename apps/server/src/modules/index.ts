@@ -1,44 +1,36 @@
 // apps/server/src/modules/index.ts
 /**
- * Domain Modules
+ * Route Registration
  *
- * Business logic organized by feature.
- * Each module contains:
- * - routes: HTTP handlers
- * - service: Business logic (if complex)
- * - utils: Module-specific utilities
+ * This is the single place where all modules connect to the HTTP layer.
+ * Uses ts-rest for type-safe routing.
  */
 
-import { apiContract } from '@abe-stack/core';
+import { apiContract } from '@abe-stack/contracts';
 import { initServer } from '@ts-rest/fastify';
-import { eq } from 'drizzle-orm';
 
-import { users } from '../infra/database';
-import { unlockAccount } from '../infra/security';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES } from '../shared/constants';
+import { SUCCESS_MESSAGES, type AppContext } from '../shared';
 
+import { handleAdminUnlock } from './admin';
 import {
   handleLogin,
   handleLogout,
   handleRefresh,
   handleRegister,
-  verifyToken,
-} from './auth/handlers';
-import { extractRequestInfo } from './auth/utils/request';
+  type ReplyWithCookies,
+  type RequestWithCookies,
+} from './auth';
+import { handleMe } from './users';
 
-import type { ReplyWithCookies, RequestWithCookies } from './auth/handlers';
-import type { AppContext } from '../shared/types';
-import type { UnlockAccountRequest, UnlockAccountResponse, UserResponse } from '@abe-stack/core';
-import type { FastifyInstance, FastifyRequest } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 
 // Re-export modules
+export * as admin from './admin';
 export * as auth from './auth';
+export * as users from './users';
 
 /**
  * Register all application routes
- *
- * This is the single place where all modules connect to the HTTP layer.
- * Uses ts-rest for type-safe routing.
  */
 export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
   const s = initServer();
@@ -68,112 +60,4 @@ export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
   });
 
   s.registerRouter(apiContract, router, app);
-}
-
-// ============================================================================
-// User Handlers
-// ============================================================================
-
-async function handleMe(
-  ctx: AppContext,
-  request: RequestWithCookies,
-): Promise<
-  { status: 200; body: UserResponse } | { status: 401 | 404 | 500; body: { message: string } }
-> {
-  try {
-    const authHeader = request.headers.authorization;
-    if (!authHeader?.startsWith('Bearer ')) {
-      return { status: 401, body: { message: ERROR_MESSAGES.MISSING_AUTH_HEADER } };
-    }
-
-    const token = authHeader.substring(7);
-    const payload = verifyToken(token, ctx.config.auth.jwt.secret);
-    request.user = payload;
-  } catch {
-    return { status: 401, body: { message: ERROR_MESSAGES.INVALID_OR_EXPIRED_TOKEN } };
-  }
-
-  try {
-    const user = await ctx.db.query.users.findFirst({
-      where: eq(users.id, request.user.userId),
-    });
-
-    if (!user) {
-      return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
-    }
-
-    return {
-      status: 200,
-      body: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        createdAt: user.createdAt.toISOString(),
-      },
-    };
-  } catch (error) {
-    ctx.log.error(error);
-    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
-  }
-}
-
-// ============================================================================
-// Admin Handlers
-// ============================================================================
-
-async function handleAdminUnlock(
-  ctx: AppContext,
-  body: UnlockAccountRequest,
-  request: RequestWithCookies,
-): Promise<
-  | { status: 200; body: UnlockAccountResponse }
-  | { status: 401 | 403 | 404 | 500; body: { message: string } }
-> {
-  try {
-    // Verify admin authentication
-    const authHeader = request.headers.authorization;
-    if (!authHeader?.startsWith('Bearer ')) {
-      return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
-    }
-
-    const token = authHeader.substring(7);
-    const payload = verifyToken(token, ctx.config.auth.jwt.secret);
-
-    // Check if user is admin
-    if (payload.role !== 'admin') {
-      return { status: 403, body: { message: ERROR_MESSAGES.FORBIDDEN } };
-    }
-
-    // Check if the target user exists
-    const targetUser = await ctx.db.query.users.findFirst({
-      where: eq(users.email, body.email),
-    });
-
-    if (!targetUser) {
-      return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
-    }
-
-    // Extract request info for audit logging
-    const { ipAddress, userAgent } = extractRequestInfo(request as unknown as FastifyRequest);
-
-    // Unlock the account
-    await unlockAccount(ctx.db, body.email, payload.userId, ipAddress, userAgent);
-
-    ctx.log.info(
-      { adminId: payload.userId, targetEmail: body.email },
-      'Admin unlocked user account',
-    );
-
-    return {
-      status: 200,
-      body: {
-        message: SUCCESS_MESSAGES.ACCOUNT_UNLOCKED,
-        email: body.email,
-      },
-    };
-  } catch (error) {
-    ctx.log.error(error);
-    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
-  }
 }

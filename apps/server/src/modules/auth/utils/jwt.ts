@@ -12,7 +12,7 @@ import jwt, { type SignOptions } from 'jsonwebtoken';
 
 import { MIN_JWT_SECRET_LENGTH, REFRESH_TOKEN_BYTES } from '../../../shared/constants';
 
-import type { UserRole } from '@abe-stack/core';
+import type { UserRole } from '@abe-stack/contracts';
 
 // ============================================================================
 // Types

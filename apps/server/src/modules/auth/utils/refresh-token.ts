@@ -8,12 +8,17 @@
 
 import { and, eq, gt, lt } from 'drizzle-orm';
 
-import { refreshTokenFamilies, refreshTokens, withTransaction } from '../../../infra/database';
-import { logTokenFamilyRevokedEvent, logTokenReuseEvent } from '../../../infra/security/events';
+import {
+  logTokenFamilyRevokedEvent,
+  logTokenReuseEvent,
+  refreshTokenFamilies,
+  refreshTokens,
+  withTransaction,
+  type DbClient,
+  type UserRole,
+} from '../../../infra';
 
 import { createRefreshToken, getRefreshTokenExpiry } from './jwt';
-
-import type { DbClient, UserRole } from '../../../infra/database';
 
 // ============================================================================
 // Token Family Management

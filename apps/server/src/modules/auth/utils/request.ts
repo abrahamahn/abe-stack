@@ -3,6 +3,8 @@
  * Request utilities for extracting client information
  */
 
+import { verifyToken, type TokenPayload } from './jwt';
+
 import type { FastifyRequest } from 'fastify';
 
 export interface RequestInfo {
@@ -67,4 +69,25 @@ export function extractRequestInfo(request: FastifyRequest): RequestInfo {
     ipAddress: extractIpAddress(request),
     userAgent: extractUserAgent(request),
   };
+}
+
+/**
+ * Extract and verify Bearer token from Authorization header
+ * Returns the token payload if valid, null otherwise
+ */
+export function extractAndVerifyToken(
+  request: { headers: { authorization?: string } },
+  secret: string,
+): TokenPayload | null {
+  const authHeader = request.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) {
+    return null;
+  }
+
+  try {
+    const token = authHeader.substring(7);
+    return verifyToken(token, secret);
+  } catch {
+    return null;
+  }
 }

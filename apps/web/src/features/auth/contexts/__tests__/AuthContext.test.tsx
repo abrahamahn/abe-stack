@@ -20,7 +20,7 @@ const { mockTokenStore, mockApi } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock('@abe-stack/core', () => ({
+vi.mock('@abe-stack/contracts', () => ({
   tokenStore: mockTokenStore,
 }));
 

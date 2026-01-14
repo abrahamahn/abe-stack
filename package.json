@@ -18,7 +18,7 @@
     "build:web": "turbo run build --filter=@abe-stack/web",
     "build:server": "turbo run build --filter=@abe-stack/server",
     "build:desktop": "turbo run build --filter=@abe-stack/desktop",
-    "build:core": "turbo run build --filter=@abe-stack/core",
+    "build:contracts": "turbo run build --filter=@abe-stack/contracts",
     "build:ui": "turbo run build --filter=@abe-stack/ui",
     "theme:build": "node --import tsx tools/packages/build-theme-css.ts",
     "test": "turbo run test",
