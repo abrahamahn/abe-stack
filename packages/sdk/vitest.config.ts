@@ -5,7 +5,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   resolve: {
     alias: {
-      '@abe-stack/core': path.resolve(__dirname, '../core/src'),
+      '@abe-stack/contracts': path.resolve(__dirname, '../core/src'),
     },
   },
   test: {

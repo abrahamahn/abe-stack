@@ -261,7 +261,7 @@ function main(): void {
       distPath: path.join(ROOT_DIR, 'packages/ui/dist'),
     },
     core: {
-      name: '@abe-stack/core',
+      name: '@abe-stack/contracts',
       distPath: path.join(ROOT_DIR, 'packages/core/dist'),
     },
     sdk: {

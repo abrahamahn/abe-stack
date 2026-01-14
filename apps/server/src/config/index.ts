@@ -10,21 +10,30 @@ import { loadAuthConfig } from './auth.config';
 import { loadDatabaseConfig } from './database.config';
 import { loadEmailConfig } from './email.config';
 import { loadServerConfig } from './server.config';
+import { loadStorageConfig } from './storage.config';
 
 import type { AuthConfig } from './auth.config';
 import type { DatabaseConfig } from './database.config';
 import type { EmailConfig } from './email.config';
 import type { ServerConfig } from './server.config';
+import type { StorageConfig } from './storage.config';
 
 // Re-export individual configs for type access
 export type { AuthConfig, AuthStrategy, OAuthProviderConfig } from './auth.config';
 export type { DatabaseConfig } from './database.config';
 export type { EmailConfig } from './email.config';
 export type { ServerConfig } from './server.config';
+export type {
+  StorageConfig,
+  StorageProviderName,
+  LocalStorageConfig,
+  S3StorageConfig,
+} from './storage.config';
 
 // Re-export helpers
 export { isStrategyEnabled, getRefreshCookieOptions } from './auth.config';
 export { buildConnectionString } from './database.config';
+export { loadStorageConfig } from './storage.config';
 
 /**
  * Complete application configuration
@@ -36,6 +45,7 @@ export interface AppConfig {
   database: DatabaseConfig;
   auth: AuthConfig;
   email: EmailConfig;
+  storage: StorageConfig;
 }
 
 /**
@@ -54,6 +64,7 @@ export function loadConfig(env: Record<string, string | undefined>): AppConfig {
     database: loadDatabaseConfig(env),
     auth: loadAuthConfig(env),
     email: loadEmailConfig(env),
+    storage: loadStorageConfig(env),
   };
 
   // Validate critical settings

@@ -46,7 +46,7 @@ export default defineConfig(async ({ command }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
-        '@abe-stack/core': path.resolve(__dirname, '../../packages/core/src'),
+        '@abe-stack/contracts': path.resolve(__dirname, '../../packages/core/src'),
         '@abe-stack/ui': path.resolve(__dirname, '../../packages/ui/src'),
         '@components': path.resolve(__dirname, './src/components'),
         '@hooks': path.resolve(__dirname, './src/hooks'),

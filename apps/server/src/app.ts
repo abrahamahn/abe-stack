@@ -12,26 +12,22 @@
  * - Single entry point for the application
  */
 
-import cookie from '@fastify/cookie';
-import cors from '@fastify/cors';
-import csrfProtection from '@fastify/csrf-protection';
-import helmet from '@fastify/helmet';
-import rateLimit from '@fastify/rate-limit';
-import { sql } from 'drizzle-orm';
-import Fastify from 'fastify';
-
-import { buildConnectionString } from './config';
-import { createDbClient } from './infra/database';
-import { ConsoleEmailService, SmtpEmailService } from './infra/email';
-import { SubscriptionManager } from './infra/pubsub';
-import { createStorage } from './infra/storage';
+import { buildConnectionString, type AppConfig } from './config';
+import {
+  ConsoleEmailService,
+  createDbClient,
+  createStorage,
+  SmtpEmailService,
+  SubscriptionManager,
+  type DbClient,
+  type EmailService,
+  type StorageConfig,
+  type StorageProvider,
+} from './infra';
 import { registerRoutes } from './modules';
+import { createServer, listen } from './server';
+import { type AppContext } from './shared';
 
-import type { AppConfig } from './config';
-import type { DbClient } from './infra/database';
-import type { EmailService } from './infra/email';
-import type { StorageConfig, StorageProvider } from './infra/storage';
-import type { AppContext } from './shared/types';
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
 
 // ============================================================================
@@ -58,16 +54,15 @@ export class App {
 
   // HTTP server (Fastify)
   private _server: FastifyInstance | null = null;
-  private _connectionString: string;
 
   constructor(options: AppOptions) {
     this.config = options.config;
 
     // Build connection string
-    this._connectionString = buildConnectionString(this.config.database);
+    const connectionString = buildConnectionString(this.config.database);
 
     // Initialize infrastructure services
-    this.db = options.db ?? createDbClient(this._connectionString);
+    this.db = options.db ?? createDbClient(connectionString);
     this.email = options.email ?? this.createEmailService();
     this.storage = options.storage ?? this.createStorageService();
     this.pubsub = new SubscriptionManager();
@@ -83,13 +78,17 @@ export class App {
    */
   async start(): Promise<void> {
     // Create Fastify instance
-    this._server = await this.createServer();
+    this._server = await createServer({
+      config: this.config,
+      db: this.db,
+      pubsub: this.pubsub,
+    });
 
     // Register routes with context
     registerRoutes(this._server, this.context);
 
-    // Try to bind to port with fallback
-    await this.listen();
+    // Start listening
+    await listen(this._server, this.config);
   }
 
   /**
@@ -161,160 +160,6 @@ export class App {
       rootPath: './uploads',
     };
     return createStorage(storageConfig);
-  }
-
-  private async createServer(): Promise<FastifyInstance> {
-    const isProd = this.config.env === 'production';
-
-    // Logger configuration
-    const loggerConfig = isProd
-      ? { level: this.config.server.logLevel }
-      : {
-          level: this.config.server.logLevel,
-          transport: {
-            target: 'pino-pretty',
-            options: {
-              colorize: true,
-              translateTime: 'HH:MM:ss',
-              singleLine: true,
-              ignore: 'pid,hostname',
-            },
-          },
-        };
-
-    const app = Fastify({ logger: loggerConfig });
-
-    // Register core plugins
-    await this.registerPlugins(app);
-
-    // Decorate with db for health check
-    app.decorate('db', this.db);
-    app.decorate('pubsub', this.pubsub);
-
-    // Register core routes
-    this.registerCoreRoutes(app);
-
-    return app;
-  }
-
-  private async registerPlugins(app: FastifyInstance): Promise<void> {
-    const isProd = this.config.env === 'production';
-
-    // CORS
-    await app.register(cors, {
-      origin: this.config.server.cors.origin,
-      credentials: this.config.server.cors.credentials,
-      methods: this.config.server.cors.methods,
-    });
-
-    // Security headers
-    await app.register(helmet);
-
-    // Rate limiting (global config, routes can override)
-    await app.register(rateLimit, {
-      global: false,
-      max: 100,
-      timeWindow: '1 minute',
-      addHeaders: {
-        'x-ratelimit-limit': true,
-        'x-ratelimit-remaining': true,
-        'x-ratelimit-reset': true,
-      },
-    });
-
-    // Cookies
-    await app.register(cookie, {
-      secret: this.config.auth.cookie.secret,
-      hook: 'onRequest',
-      parseOptions: {},
-    });
-
-    // CSRF protection
-    await app.register(csrfProtection, {
-      cookieOpts: {
-        signed: true,
-        sameSite: isProd ? 'strict' : 'lax',
-        httpOnly: true,
-        secure: isProd,
-      },
-      sessionPlugin: '@fastify/cookie',
-    });
-
-    // Note: WebSocket pub/sub can be added when @fastify/websocket types are installed
-  }
-
-  private registerCoreRoutes(app: FastifyInstance): void {
-    // Root route
-    app.get('/', {}, () => ({
-      message: 'ABE Stack API',
-      timestamp: new Date().toISOString(),
-    }));
-
-    // API info route
-    app.get('/api', {}, () => ({
-      message: 'ABE Stack API is running',
-      version: '1.0.0',
-      timestamp: new Date().toISOString(),
-    }));
-
-    // Health check with database check
-    app.get('/health', {}, async () => {
-      let dbHealthy = true;
-
-      try {
-        await this.db.execute(sql`SELECT 1`);
-      } catch (error) {
-        dbHealthy = false;
-        app.log.error({ err: error }, 'Database health check failed');
-      }
-
-      return {
-        status: dbHealthy ? ('ok' as const) : ('degraded' as const),
-        database: dbHealthy,
-        timestamp: new Date().toISOString(),
-      };
-    });
-  }
-
-  private async listen(): Promise<void> {
-    if (!this._server) {
-      throw new Error('Server not initialized');
-    }
-    const app = this._server;
-    const { host, port, portFallbacks } = this.config.server;
-
-    // Build unique port list
-    const ports = [...new Set([port, ...portFallbacks])];
-
-    for (const p of ports) {
-      try {
-        await app.listen({ port: p, host });
-
-        if (p !== port) {
-          app.log.warn(`Default port ${String(port)} in use. Using fallback port ${String(p)}.`);
-        }
-
-        app.log.info(`Server listening on http://${host}:${String(p)}`);
-        return;
-      } catch (error: unknown) {
-        if (this.isAddrInUse(error)) {
-          app.log.warn(`Port ${String(p)} is in use, trying next...`);
-          continue;
-        }
-        throw error;
-      }
-    }
-
-    throw new Error(`No available ports found from: ${ports.join(', ')}`);
-  }
-
-  private isAddrInUse(error: unknown): boolean {
-    return (
-      error !== null &&
-      typeof error === 'object' &&
-      'code' in error &&
-      (error as { code: string }).code === 'EADDRINUSE'
-    );
   }
 }
 
@@ -389,6 +234,10 @@ export function createTestApp(
       provider: 'console',
       smtp: { host: '', port: 587, secure: false, auth: { user: '', pass: '' } },
       from: { name: 'Test', address: 'test@test.com' },
+    },
+    storage: {
+      provider: 'local',
+      rootPath: './test-uploads',
     },
     ...configOverrides,
   };

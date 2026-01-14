@@ -27,8 +27,8 @@ vi.mock('../../features/auth', () => ({
   ),
 }));
 
-// Mock @abe-stack/core toastStore
-vi.mock('@abe-stack/core', () => ({
+// Mock @abe-stack/contracts toastStore
+vi.mock('@abe-stack/contracts', () => ({
   toastStore: (): { messages: never[]; dismiss: () => void } => ({
     messages: [],
     dismiss: vi.fn(),

@@ -65,7 +65,7 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "@abe-stack/core": "workspace:*"
+    "@abe-stack/contracts": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19.2.3",

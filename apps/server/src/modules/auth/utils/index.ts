@@ -18,3 +18,5 @@ export {
   revokeAllUserTokens,
   cleanupExpiredTokens,
 } from './refresh-token';
+
+export { extractRequestInfo, extractAndVerifyToken } from './request';

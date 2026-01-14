@@ -83,7 +83,7 @@ importers:
 
   apps/desktop:
     dependencies:
-      '@abe-stack/core':
+      '@abe-stack/contracts':
         specifier: workspace:*
         version: link:../../packages/core
       '@abe-stack/ui':
@@ -135,7 +135,7 @@ importers:
 
   apps/server:
     dependencies:
-      '@abe-stack/core':
+      '@abe-stack/contracts':
         specifier: workspace:*
         version: link:../../packages/core
       '@aws-sdk/client-s3':
@@ -220,7 +220,7 @@ importers:
 
   apps/web:
     dependencies:
-      '@abe-stack/core':
+      '@abe-stack/contracts':
         specifier: workspace:*
         version: link:../../packages/core
       '@abe-stack/sdk':
@@ -321,7 +321,7 @@ importers:
 
   packages/sdk:
     dependencies:
-      '@abe-stack/core':
+      '@abe-stack/contracts':
         specifier: workspace:*
         version: link:../core
       '@tanstack/react-query':
@@ -343,7 +343,7 @@ importers:
 
   packages/ui:
     dependencies:
-      '@abe-stack/core':
+      '@abe-stack/contracts':
         specifier: workspace:*
         version: link:../core
       react:

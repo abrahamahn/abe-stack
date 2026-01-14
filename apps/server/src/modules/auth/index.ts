@@ -25,5 +25,22 @@ export {
   type RequestWithCookies,
 } from './handlers';
 
+// Service (business logic)
+export {
+  registerUser,
+  authenticateUser,
+  refreshUserTokens,
+  logoutUser,
+  // Errors
+  EmailAlreadyExistsError,
+  WeakPasswordError,
+  InvalidCredentialsError,
+  AccountLockedError,
+  InvalidRefreshTokenError,
+  // Types
+  type AuthResult,
+  type RefreshResult,
+} from './service';
+
 // Utils (for direct use if needed)
 export * from './utils';

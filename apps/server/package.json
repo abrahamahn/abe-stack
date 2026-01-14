@@ -15,7 +15,7 @@
     "db:seed": "tsx src/scripts/seed.ts"
   },
   "dependencies": {
-    "@abe-stack/core": "workspace:*",
+    "@abe-stack/contracts": "workspace:*",
     "@aws-sdk/client-s3": "^3.677.0",
     "@aws-sdk/credential-providers": "^3.677.0",
     "@aws-sdk/s3-request-presigner": "^3.677.0",
