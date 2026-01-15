@@ -1,9 +1,8 @@
 import websocketPlugin from '@fastify/websocket';
+import { verifyToken } from '@modules/auth/utils/jwt';
 
-import { verifyToken } from '../../modules/auth/utils/jwt';
-
-import type { AppContext } from '../../shared';
-import type { WebSocket as PubSubWebSocket } from '../pubsub/types';
+import type { WebSocket as PubSubWebSocket } from '@pubsub/types';
+import type { AppContext } from '@shared';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { WebSocket } from 'ws';
 
@@ -66,6 +65,8 @@ function handleConnection(socket: WebSocket, req: FastifyRequest, ctx: AppContex
     ctx.log.debug({ userId: user.userId }, 'WebSocket client connected');
 
     // 2. Setup handlers
+    const pubsub = ctx.pubsub;
+
     socket.on('message', (data: Buffer | ArrayBuffer | Buffer[]) => {
       // Forward to subscription manager
       // We assume text messages for now
@@ -79,19 +80,19 @@ function handleConnection(socket: WebSocket, req: FastifyRequest, ctx: AppContex
         message = Buffer.from(data).toString();
       }
 
-      ctx.pubsub.handleMessage(socket as unknown as PubSubWebSocket, message, (key) => {
+      pubsub.handleMessage(socket as unknown as PubSubWebSocket, message, (key: string) => {
         void sendInitialData(ctx, socket, key);
       });
     });
 
     socket.on('close', () => {
       ctx.log.debug({ userId: user.userId }, 'WebSocket client disconnected');
-      ctx.pubsub.cleanup(socket as unknown as PubSubWebSocket);
+      pubsub.cleanup(socket as unknown as PubSubWebSocket);
     });
 
     socket.on('error', (err: Error) => {
       ctx.log.error({ err, userId: user.userId }, 'WebSocket error');
-      ctx.pubsub.cleanup(socket as unknown as PubSubWebSocket);
+      pubsub.cleanup(socket as unknown as PubSubWebSocket);
     });
   } catch {
     socket.close(1008, 'Invalid token');

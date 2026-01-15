@@ -45,9 +45,9 @@ function parseEnv(path: string): Record<string, string> {
 console.log('🚀 Starting ABE Stack Setup...');
 
 // 1. Load Environment Variables
-const envPath = resolve(process.cwd(), 'config/.env.development');
+const envPath = resolve(process.cwd(), 'config/.env/.env.development');
 const envVars = parseEnv(envPath);
-console.log('✅ Loaded environment variables from config/.env.development');
+console.log('✅ Loaded environment variables from config/.env/.env.development');
 
 // 2. Start Docker Containers
 console.log('\n🐳 Starting Docker containers...');

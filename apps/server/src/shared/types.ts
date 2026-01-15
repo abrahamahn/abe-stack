@@ -132,10 +132,10 @@ export interface StorageService {
 // Service Container Interface (Composition Root)
 // ============================================================================
 
-import type { AppConfig } from '../config';
-import type { DbClient } from '../infra/database';
-import type { SubscriptionManager } from '../infra/pubsub';
-import type { StorageProvider } from '../infra/storage';
+import type { AppConfig } from '@config';
+import type { DbClient } from '@database';
+import type { SubscriptionManager } from '@pubsub';
+import type { StorageProvider } from '@storage';
 import type { FastifyBaseLogger } from 'fastify';
 
 /**

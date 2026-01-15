@@ -28,15 +28,15 @@
     },
     "type-check": {
       "dependsOn": ["^build"],
-      "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"],
+      "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json", "config/ts/*.json"],
       "outputs": [],
       "cache": true,
       "env": ["NODE_ENV"]
     },
     "test": {
-      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.ts", "**/*.test.tsx", "vitest.config.*"],
+      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.ts", "**/*.test.tsx", "config/vitest.config.ts"],
       "outputs": [],
-      "cache": true,
+      "cache": false,
       "env": ["NODE_ENV", "DATABASE_URL"]
     },
     "test:watch": {
@@ -54,9 +54,9 @@
   },
   "globalDependencies": [
     "tsconfig.json",
-    ".env",
-    ".env.local",
+    "config/.env/.env.development",
     "config/.prettierrc",
-    "eslint.config.mjs"
+    "config/ts/*.json",
+    "eslint.config.ts"
   ]
 }

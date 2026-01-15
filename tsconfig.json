@@ -5,6 +5,7 @@
     { "path": "./apps/desktop" },
     { "path": "./apps/server" },
     { "path": "./packages/core" },
+    { "path": "./packages/sdk" },
     { "path": "./packages/ui" }
   ]
 }

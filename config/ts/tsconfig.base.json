@@ -9,7 +9,7 @@
 
     /* 2. Language Fundamentals (Platform Agnostic) */
     "target": "ES2022",
-    "lib": ["ES2023"],
+    "lib": ["ES2022"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,

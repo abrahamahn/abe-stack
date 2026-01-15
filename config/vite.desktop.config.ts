@@ -1,8 +1,9 @@
 import net from 'node:net';
-import path from 'path';
 
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+
+import { desktopRoot, getDesktopAliases } from './aliases';
 
 function uniquePorts(ports: Array<number | undefined>): number[] {
   return Array.from(new Set(ports.filter((port): port is number => Number.isFinite(port))));
@@ -41,22 +42,10 @@ export default defineConfig(async ({ command }) => {
     plugins: [react()],
     base: './',
     build: {
-      outDir: 'dist/renderer',
+      outDir: `${desktopRoot}/dist/renderer`,
     },
     resolve: {
-      alias: {
-        '@': path.resolve(__dirname, './src'),
-        '@abe-stack/core': path.resolve(__dirname, '../../packages/core/src'),
-        '@abe-stack/ui': path.resolve(__dirname, '../../packages/ui/src'),
-        '@components': path.resolve(__dirname, './src/components'),
-        '@hooks': path.resolve(__dirname, './src/hooks'),
-        '@services': path.resolve(__dirname, './src/services'),
-        '@config': path.resolve(__dirname, './src/config'),
-        '@layouts': path.resolve(__dirname, './src/layouts'),
-        '@routes': path.resolve(__dirname, './src/routes'),
-        '@utils': path.resolve(__dirname, './src/utils'),
-        '@api': path.resolve(__dirname, './src/api'),
-      },
+      alias: getDesktopAliases(),
     },
   };
 
@@ -67,7 +56,6 @@ export default defineConfig(async ({ command }) => {
   const rendererPortPreference = Number(process.env.DESKTOP_PORT || process.env.VITE_PORT || 5173);
   const rendererPort = await pickAvailablePort([rendererPortPreference, 5173, 5174, 5175], host);
 
-  // Share the chosen port with the Electron process
   process.env.DESKTOP_RENDERER_PORT = String(rendererPort);
 
   return {

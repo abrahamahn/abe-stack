@@ -5,8 +5,8 @@
  * Thin HTTP layer that calls services and formats responses.
  */
 
-import { ERROR_MESSAGES, SUCCESS_MESSAGES, type AppContext } from '../../shared';
-import { extractRequestInfo, type RequestWithCookies } from '../auth';
+import { extractRequestInfo, type RequestWithCookies } from '@modules/auth';
+import { ERROR_MESSAGES, SUCCESS_MESSAGES, type AppContext } from '@shared';
 
 import { unlockUserAccount, UserNotFoundError } from './service';
 

@@ -13,9 +13,9 @@
  * - demo@example.com / password123 (user role)
  */
 
-import { loadConfig } from '../config';
-import { buildConnectionString, createDbClient, users } from '../infra/database';
-import { hashPassword } from '../modules/auth/utils/password';
+import { loadConfig } from '@config';
+import { buildConnectionString, createDbClient, users } from '@database';
+import { hashPassword } from '@modules/auth/utils/password';
 
 interface SeedUser {
   email: string;

@@ -10,25 +10,15 @@ This guide provides a **phased implementation plan** for adding real-time collab
 
 ## 🎯 Implementation Phases Overview
 
-### Phase 1: Foundation (Week 1-2)
+### Phase 1 & 2: Foundation & Real-time Sync (Frontend + Backend, Complete)
 
-Set up the core infrastructure
+✅ Database schema with version fields
+✅ Transaction operation types
+✅ WebSocket server + client
+✅ Pub/sub system with Postgres
+✅ Server endpoints for write/getRecords
 
-- Database schema with version fields
-- Transaction operation types
-- Basic RecordCache (in-memory)
-- Server endpoints for write/getRecords
-
-### Phase 2: Real-time Sync (Week 3-4)
-
-Enable live collaboration
-
-- WebSocket server + client
-- Pub/sub system
-- Version-based update notifications
-- Client subscription management
-
-### Phase 3: Offline Support (Week 5-6)
+### Phase 3: Offline Support (Frontend, Week 5-6)
 
 Work without internet
 
@@ -37,7 +27,7 @@ Work without internet
 - Stale-while-revalidate loaders
 - Service worker for assets
 
-### Phase 4: Undo/Redo (Week 7)
+### Phase 4: Undo/Redo (Frontend, Week 7)
 
 Full operation history
 
@@ -45,7 +35,7 @@ Full operation history
 - Operation inversion logic
 - Keyboard shortcuts
 
-### Phase 5: Permissions (Week 8)
+### Phase 5: Permissions (Backend, Week 8)
 
 Secure access control
 
@@ -53,7 +43,7 @@ Secure access control
 - Row-level write validation
 - Permission records loading
 
-### Phase 6-8: Optional Enhancements
+### Phase 6-8: Optional Enhancements (Backend-heavy)
 
 - File uploads with S3
 - Background job queue
@@ -62,9 +52,13 @@ Secure access control
 
 ---
 
-## 📝 PHASE 1: Foundation
+## 📝 PHASE 3: Offline Support
 
-### Step 1.1: Add Version Fields to Database
+### Step 3.1: RecordStorage (IndexedDB) (Frontend)
+
+(Remaining content...)
+
+### Step 1.1: Add Version Fields to Database (Backend)
 
 **Goal:** Every table that needs real-time sync must have a `version` field.
 
@@ -193,7 +187,7 @@ pnpm db:migrate
 
 ---
 
-### Step 1.2: Create Realtime Package
+### Step 1.2: Create Realtime Package (Frontend + Backend)
 
 ```bash
 # Create package directory
@@ -225,7 +219,7 @@ pnpm install
 
 ---
 
-### Step 1.3: Implement Transaction Types
+### Step 1.3: Implement Transaction Types (Frontend + Backend)
 
 ```typescript
 // packages/realtime/src/transactions.ts (NEW FILE)
@@ -402,7 +396,7 @@ function deepEqual(a: unknown, b: unknown): boolean {
 
 ---
 
-### Step 1.4: Implement RecordCache
+### Step 1.4: Implement RecordCache (Frontend)
 
 ```typescript
 // packages/realtime/src/RecordCache.ts (NEW FILE)
@@ -497,7 +491,7 @@ export * from './RecordCache';
 
 ---
 
-### Step 1.5: Add Server Endpoints
+### Step 1.5: Add Server Endpoints (Backend)
 
 ```typescript
 // apps/server/src/modules/realtime.ts (NEW FILE)
@@ -770,7 +764,7 @@ curl -X POST http://localhost:8080/api/realtime/write \
 
 ## 📝 PHASE 2: Real-time Sync
 
-### Step 2.1: WebSocket Server
+### Step 2.1: WebSocket Server (Backend)
 
 ```typescript
 // packages/realtime/src/WebSocketServer.ts (NEW FILE)
@@ -865,7 +859,7 @@ setImmediate(() => {
 
 ---
 
-### Step 2.2: WebSocket Client
+### Step 2.2: WebSocket Client (Frontend)
 
 ```typescript
 // packages/realtime/src/WebSocketClient.ts (NEW FILE)
@@ -953,7 +947,7 @@ export class WebSocketPubSubClient {
 
 ---
 
-### Step 2.3: Client Context
+### Step 2.3: Client Context (Frontend)
 
 ```typescript
 // apps/web/src/contexts/RealtimeContext.tsx (NEW FILE)
@@ -1054,9 +1048,9 @@ You now have **real-time synchronization**! Changes from one user instantly appe
 
 Due to length, the remaining phases follow the same pattern as the original guide:
 
-- **Phase 3**: RecordStorage (IndexedDB) + TransactionQueue
-- **Phase 4**: UndoRedoStack
-- **Phase 5**: Permission validation
+- **Phase 3** (Frontend): RecordStorage (IndexedDB) + TransactionQueue
+- **Phase 4** (Frontend): UndoRedoStack
+- **Phase 5** (Backend): Permission validation
 
 See [Architecture](./architecture.md) for detailed code examples.
 
@@ -1110,7 +1104,7 @@ test('real-time collaboration', async ({ browser }) => {
 
 ## 🎯 Next Steps
 
-1. **Complete Phase 1** - Get foundation working
+1. **Complete Phase 1 (Frontend + Backend)** - Get foundation working
 2. **Test thoroughly** - Write tests for each phase
 3. **Deploy incrementally** - Ship after each phase
 4. **Build your app** - Use the patterns to build your specific features

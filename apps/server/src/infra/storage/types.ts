@@ -12,7 +12,7 @@ export type {
   StorageProviderName,
   LocalStorageConfig,
   S3StorageConfig,
-} from '../../config/storage.config';
+} from '@config/storage.config';
 
 export interface UploadParams {
   key: string;

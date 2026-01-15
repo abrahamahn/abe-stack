@@ -7,8 +7,6 @@
  */
 
 import { validatePassword, type UserRole } from '@abe-stack/core';
-import { eq } from 'drizzle-orm';
-
 import {
   applyProgressiveDelay,
   getAccountLockoutStatus,
@@ -19,22 +17,15 @@ import {
   users,
   withTransaction,
   type DbClient,
-} from '../../infra';
+} from '@infra';
 import {
   AccountLockedError,
   EmailAlreadyExistsError,
   InvalidCredentialsError,
-  InvalidTokenError as InvalidRefreshTokenError,
+  InvalidTokenError,
   WeakPasswordError,
-} from '../../shared';
-
-export {
-  AccountLockedError,
-  EmailAlreadyExistsError,
-  InvalidCredentialsError,
-  InvalidRefreshTokenError,
-  WeakPasswordError,
-};
+} from '@shared';
+import { eq } from 'drizzle-orm';
 
 import {
   createAccessToken,
@@ -45,7 +36,7 @@ import {
   verifyPasswordSafe,
 } from './utils';
 
-import type { AuthConfig } from '../../config';
+import type { AuthConfig } from '@config';
 
 // ============================================================================
 // Types
@@ -240,7 +231,7 @@ export async function refreshUserTokens(
   );
 
   if (!result) {
-    throw new InvalidRefreshTokenError();
+    throw new InvalidTokenError();
   }
 
   // Create new access token

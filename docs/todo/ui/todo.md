@@ -16,14 +16,14 @@ Remaining work for packages/ui. These items are lower priority than V5 migration
 
 ## High Priority
 
-### 1. Accessibility: Keyboard Support for ResizablePanel
+### 1. Accessibility: Keyboard Support for ResizablePanel (Frontend)
 
 - [ ] Add arrow key navigation for resize handles
 - [ ] Handle Home/End keys for min/max sizes
 - [ ] Update ARIA attributes for screen readers
 - [ ] Add keyboard shortcut documentation
 
-### 2. Missing Layout Tests
+### 2. Missing Layout Tests (Frontend)
 
 - [ ] `LeftSidebarLayout.test.tsx` - comprehensive tests
 - [ ] `RightSidebarLayout.test.tsx` - comprehensive tests
@@ -32,7 +32,7 @@ Remaining work for packages/ui. These items are lower priority than V5 migration
 
 ## Medium Priority
 
-### 3. Demo Registry Split
+### 3. Demo Registry Split (Frontend)
 
 Current `apps/web/src/features/demo/registry.tsx` is 1500+ lines.
 
@@ -47,7 +47,7 @@ apps/web/src/features/demo/registry/
 └── hooks.tsx          # Hook demos
 ```
 
-### 4. Performance: Lazy Load Registry
+### 4. Performance: Lazy Load Registry (Frontend)
 
 - [ ] Lazy load demo components by category
 - [ ] Add loading states for demo cards
@@ -57,19 +57,19 @@ apps/web/src/features/demo/registry/
 
 ## Low Priority
 
-### 5. Code Consistency
+### 5. Code Consistency (Frontend)
 
 - [ ] Standardize on arrow functions with forwardRef pattern
 - [ ] Ensure consistent prop naming across components
 - [ ] Add JSDoc comments to all public APIs
 
-### 6. Documentation
+### 6. Documentation (Frontend)
 
 - [ ] Add usage examples to all component docs
 - [ ] Add prop tables with types and defaults
 - [ ] Add do/don't examples for common mistakes
 
-### 7. Theme Enhancements
+### 7. Theme Enhancements (Frontend)
 
 - [ ] Add density variants (compact/normal/comfortable)
 - [ ] Add high-contrast mode support

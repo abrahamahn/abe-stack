@@ -5,25 +5,20 @@
  * Thin HTTP layer that calls services and formats responses.
  */
 
-import { getRefreshCookieOptions } from '../../config';
-import {
-  ERROR_MESSAGES,
-  REFRESH_COOKIE_NAME,
-  SUCCESS_MESSAGES,
-  type AppContext,
-} from '../../shared';
-
+import { getRefreshCookieOptions } from '@config';
 import {
   AccountLockedError,
-  authenticateUser,
   EmailAlreadyExistsError,
+  ERROR_MESSAGES,
   InvalidCredentialsError,
-  InvalidRefreshTokenError,
-  logoutUser,
-  refreshUserTokens,
-  registerUser,
+  InvalidTokenError,
+  SUCCESS_MESSAGES,
   WeakPasswordError,
-} from './service';
+  type AppContext,
+} from '@shared';
+import { REFRESH_COOKIE_NAME } from '@shared/constants';
+
+import { authenticateUser, logoutUser, refreshUserTokens, registerUser } from './service';
 import { extractRequestInfo, verifyToken as verifyJwtToken, type TokenPayload } from './utils';
 
 import type {
@@ -193,7 +188,7 @@ export async function handleRefresh(
       body: { token: result.accessToken },
     };
   } catch (error) {
-    if (error instanceof InvalidRefreshTokenError) {
+    if (error instanceof InvalidTokenError) {
       reply.clearCookie(REFRESH_COOKIE_NAME, { path: '/' });
       return { status: 401, body: { message: ERROR_MESSAGES.INVALID_TOKEN } };
     }

@@ -13,12 +13,11 @@
  * 5. Client refetches and retries (or shows conflict UI)
  */
 
+import { users } from '@database/schema';
 import { and, eq, sql } from 'drizzle-orm';
 
-import { users } from '../schema';
-
-import type { DbClient } from '../client';
-import type { User } from '../schema';
+import type { DbClient } from '@database/client';
+import type { User } from '@database/schema';
 
 /**
  * Error thrown when optimistic lock fails (version mismatch)

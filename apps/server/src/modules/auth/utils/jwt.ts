@@ -8,8 +8,8 @@
 
 import crypto from 'node:crypto';
 
-import { jwtSign, jwtVerify, JwtError } from '../../../infra/crypto';
-import { MIN_JWT_SECRET_LENGTH, REFRESH_TOKEN_BYTES } from '../../../shared/constants';
+import { jwtSign, jwtVerify, JwtError } from '@crypto';
+import { MIN_JWT_SECRET_LENGTH, REFRESH_TOKEN_BYTES } from '@shared/constants';
 
 import type { UserRole } from '@abe-stack/core';
 

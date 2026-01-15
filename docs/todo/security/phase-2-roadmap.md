@@ -23,7 +23,7 @@ Phase 2 focuses on data integrity, advanced security features, and operational e
 
 ## CRITICAL PRIORITY (14 hours estimated)
 
-### 1. Database Transaction Support ⚠️ HIGHEST IMPACT
+### 1. Database Transaction Support ⚠️ HIGHEST IMPACT (Backend)
 
 **Effort:** 4 hours | **Impact:** Critical
 
@@ -64,7 +64,7 @@ export async function withTransaction<T>(
 
 ---
 
-### 2. Token Reuse Detection - Security Event Logging
+### 2. Token Reuse Detection - Security Event Logging (Backend)
 
 **Effort:** 3 hours | **Impact:** High
 
@@ -108,7 +108,7 @@ export async function notifyUserOfSecurityEvent(email: string, eventType: string
 
 ---
 
-### 3. IP Address Extraction - Proxy Header Validation
+### 3. IP Address Extraction - Proxy Header Validation (Backend)
 
 **Effort:** 2 hours | **Impact:** Medium
 
@@ -143,7 +143,7 @@ function validateForwardedFor(
 
 ---
 
-### 4. Account Lockout - Edge Case Handling
+### 4. Account Lockout - Edge Case Handling (Backend)
 
 **Effort:** 2 hours | **Impact:** Medium
 
@@ -167,7 +167,7 @@ ALTER TABLE users ADD COLUMN lockout_count INTEGER DEFAULT 0;
 
 ---
 
-### 5. Error Message Sanitization - Complete Audit
+### 5. Error Message Sanitization - Complete Audit (Backend)
 
 **Effort:** 1 hour | **Impact:** High
 
@@ -184,7 +184,7 @@ ALTER TABLE users ADD COLUMN lockout_count INTEGER DEFAULT 0;
 
 ## HIGH PRIORITY (11 hours estimated)
 
-### 6. Dummy Hash Cryptographic Improvement
+### 6. Dummy Hash Cryptographic Improvement (Backend)
 
 **Effort:** 1 hour | **Impact:** Medium
 
@@ -215,7 +215,7 @@ function getDummyHash(): string {
 
 ---
 
-### 7. Login Attempt Cleanup & Retention
+### 7. Login Attempt Cleanup & Retention (Backend)
 
 **Effort:** 2 hours | **Impact:** Medium
 
@@ -245,7 +245,7 @@ export async function cleanupOldLoginAttempts(
 
 ---
 
-### 8. JWT Secret Rotation Support
+### 8. JWT Secret Rotation Support (Backend)
 
 **Effort:** 2 hours | **Impact:** Medium
 
@@ -276,7 +276,7 @@ export function verifyToken(token: string): TokenPayload {
 
 ---
 
-### 9. Logout All Devices Endpoint
+### 9. Logout All Devices Endpoint (Backend)
 
 **Effort:** 2 hours | **Impact:** High
 
@@ -305,7 +305,7 @@ async function handleLogoutAll(
 
 ---
 
-### 10. Test Coverage - Critical Paths
+### 10. Test Coverage - Critical Paths (Backend)
 
 **Effort:** 4 hours | **Impact:** High
 
@@ -335,7 +335,7 @@ async function handleLogoutAll(
 
 ## MEDIUM PRIORITY (17 hours estimated)
 
-### 11. Fastify Type Safety
+### 11. Fastify Type Safety (Backend)
 
 **Effort:** 1 hour
 
@@ -352,7 +352,7 @@ declare module 'fastify' {
 
 ---
 
-### 12. Database Indexes for Performance
+### 12. Database Indexes for Performance (Backend)
 
 **Effort:** 2 hours
 
@@ -374,7 +374,7 @@ CREATE INDEX idx_refresh_tokens_expires_at
 
 ---
 
-### 13. Auth Config Validation
+### 13. Auth Config Validation (Backend)
 
 **Effort:** 1 hour
 
@@ -394,7 +394,7 @@ export function validateAuthConfig(config: AuthConfig): void {
 
 ---
 
-### 14. Security Decision Documentation
+### 14. Security Decision Documentation (Backend)
 
 **Effort:** 3 hours
 
@@ -410,7 +410,7 @@ Create `docs/SECURITY.md`:
 
 ## LOW PRIORITY (13.5 hours estimated)
 
-### 15. Request Correlation IDs
+### 15. Request Correlation IDs (Backend)
 
 **Effort:** 2 hours
 
@@ -427,7 +427,7 @@ app.log.error({ requestId: req.id, userId, error }, 'Error message');
 
 ---
 
-### 16. Per-Endpoint Rate Limiting
+### 16. Per-Endpoint Rate Limiting (Backend)
 
 **Effort:** 2 hours
 
@@ -450,7 +450,7 @@ app.post(
 
 ---
 
-### 17. Query Optimization
+### 17. Query Optimization (Backend)
 
 **Effort:** 3 hours
 
@@ -461,7 +461,7 @@ app.post(
 
 ---
 
-### 18. Metrics & Observability
+### 18. Metrics & Observability (Backend)
 
 **Effort:** 4 hours
 

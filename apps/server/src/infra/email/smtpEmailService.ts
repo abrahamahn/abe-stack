@@ -9,7 +9,7 @@
 import nodemailer from 'nodemailer';
 
 import type { EmailOptions, EmailResult, EmailService } from './types';
-import type { EmailConfig } from '../../config';
+import type { EmailConfig } from '@config';
 
 export class SmtpEmailService implements EmailService {
   private transporter: nodemailer.Transporter;

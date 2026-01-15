@@ -77,7 +77,7 @@ Open [http://localhost:3000](http://localhost:3000)
 corepack enable && corepack prepare pnpm@10.26.2 --activate
 git clone https://github.com/abrahamahn/abe-stack.git
 cd abe-stack && pnpm install
-cp config/.env.example config/.env.development
+cp config/.env/.env.example config/.env/.env.development
 pnpm dev
 ```
 

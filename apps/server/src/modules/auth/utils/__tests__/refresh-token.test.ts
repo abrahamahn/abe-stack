@@ -1,7 +1,7 @@
 // apps/server/src/modules/auth/utils/__tests__/refresh-token.test.ts
+import { refreshTokenFamilies, refreshTokens } from '@database';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { refreshTokenFamilies, refreshTokens } from '../../../../infra/database';
 import {
   cleanupExpiredTokens,
   createRefreshTokenFamily,
@@ -10,7 +10,7 @@ import {
   rotateRefreshToken,
 } from '../index';
 
-import type { DbClient } from '../../../../infra/database';
+import type { DbClient } from '@database';
 
 // Test configuration (matches defaults from auth.config.ts)
 const TEST_REFRESH_TOKEN_EXPIRY_DAYS = 7;
@@ -51,16 +51,19 @@ interface UpdateData {
   revokeReason?: string;
 }
 
+type TransactionCallback<T> = (tx: DbClient) => Promise<T>;
+
 // Mock database
 function createMockDb(): {
   db: DbClient;
   tokenFamilies: TokenFamily[];
   tokens: Token[];
   mockUsers: MockUser[];
+  setDeleteMode: (mode: 'all' | 'expired') => void;
 } {
   const tokenFamilies: TokenFamily[] = [];
-
   const tokens: Token[] = [];
+  let deleteMode: 'all' | 'expired' = 'all';
 
   const mockUsers: MockUser[] = [
     {
@@ -71,6 +74,9 @@ function createMockDb(): {
   ];
 
   const db = {
+    transaction: async <T>(callback: TransactionCallback<T>): Promise<T> => {
+      return callback(db);
+    },
     insert: (
       table: typeof refreshTokenFamilies | typeof refreshTokens,
     ): {
@@ -137,8 +143,18 @@ function createMockDb(): {
     ): { where: (_condition: unknown) => Promise<Token[]> } => ({
       where: (_condition: unknown): Promise<Token[]> => {
         if (table === refreshTokens) {
+          if (deleteMode === 'expired') {
+            const now = new Date();
+            const expiredTokens = tokens.filter((t) => t.expiresAt < now);
+            const validTokens = tokens.filter((t) => t.expiresAt >= now);
+            tokens.length = 0;
+            tokens.push(...validTokens);
+            return Promise.resolve(expiredTokens);
+          }
+
+          const deleted = [...tokens];
           tokens.length = 0; // Simplified deletion
-          return Promise.resolve(tokens);
+          return Promise.resolve(deleted);
         }
         return Promise.resolve([]);
       },
@@ -148,10 +164,11 @@ function createMockDb(): {
     ): { set: (data: UpdateData) => { where: (_condition: unknown) => Promise<void> } } => ({
       set: (data: UpdateData): { where: (_condition: unknown) => Promise<void> } => ({
         where: (_condition: unknown): Promise<void> => {
-          const firstFamily = tokenFamilies[0];
-          if (table === refreshTokenFamilies && firstFamily !== undefined) {
-            firstFamily.revokedAt = data.revokedAt ?? null;
-            firstFamily.revokeReason = data.revokeReason ?? null;
+          if (table === refreshTokenFamilies) {
+            tokenFamilies.forEach((f) => {
+              f.revokedAt = data.revokedAt ?? f.revokedAt;
+              f.revokeReason = data.revokeReason ?? f.revokeReason;
+            });
           }
           return Promise.resolve();
         },
@@ -159,7 +176,15 @@ function createMockDb(): {
     }),
   } as unknown as DbClient;
 
-  return { db, tokenFamilies, tokens, mockUsers };
+  return {
+    db,
+    tokenFamilies,
+    tokens,
+    mockUsers,
+    setDeleteMode: (mode: 'all' | 'expired'): void => {
+      deleteMode = mode;
+    },
+  };
 }
 
 describe('Refresh Token Rotation', () => {
@@ -347,7 +372,8 @@ describe('Refresh Token Rotation', () => {
 
   describe('cleanupExpiredTokens', () => {
     test('should remove expired tokens', async () => {
-      const { db, tokens } = createMockDb();
+      const { db, tokens, setDeleteMode } = createMockDb();
+      setDeleteMode('expired');
 
       // Create mix of valid and expired tokens
       await createRefreshTokenFamily(db, 'user-123');
@@ -366,7 +392,8 @@ describe('Refresh Token Rotation', () => {
     });
 
     test('should not remove valid tokens', async () => {
-      const { db } = createMockDb();
+      const { db, setDeleteMode } = createMockDb();
+      setDeleteMode('expired');
 
       // Create only valid tokens
       await createRefreshTokenFamily(db, 'user-123');

@@ -1,7 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const CI = Boolean(process.env.CI);
-const DB_PATH = `db/data-${String(Math.round(Math.random() * 1e10))}.json`;
 
 export default defineConfig({
   // Look for test files in the e2e directory, relative to this configuration file.
@@ -22,7 +21,7 @@ export default defineConfig({
     headless: CI, // Run headless in CI, headful in development
 
     // Base URL to use in actions like `await page.goto('/')`.
-    baseURL: 'http://localhost:8080',
+    baseURL: 'http://localhost:5173',
 
     // Collect trace when retrying the failed test.
     trace: 'on-first-retry',
@@ -38,8 +37,8 @@ export default defineConfig({
   ],
   // Run your local dev server before starting the tests.
   webServer: {
-    command: `DB_PATH='${DB_PATH}' npm start`,
-    url: 'http://localhost:8080',
-    // reuseExistingServer: !CI,
+    command: 'pnpm dev:web',
+    url: 'http://localhost:5173',
+    reuseExistingServer: !CI,
   },
 });

@@ -65,6 +65,11 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
  * Check if a hash needs to be rehashed (e.g., params changed)
  */
 export function needsRehash(hash: string, config: Argon2Config = DEFAULT_ARGON2_CONFIG): boolean {
+  // If it's not an argon2 hash, it definitely needs rehashing
+  if (!hash.startsWith('$argon2')) {
+    return true;
+  }
+
   const options: Options = {
     type: config.type,
     memoryCost: config.memoryCost,
