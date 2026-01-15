@@ -54,10 +54,9 @@
   },
   "globalDependencies": [
     "tsconfig.json",
-    ".env",
-    ".env.local",
+    "config/.env/.env.development",
     "config/.prettierrc",
     "config/ts/*.json",
-    "eslint.config.mjs"
+    "eslint.config.ts"
   ]
 }

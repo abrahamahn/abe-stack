@@ -150,15 +150,6 @@ export default [
     },
   },
   {
-    files: ['apps/desktop/electron/**/*.{ts,tsx,cts,mts}', 'apps/desktop/vite.config.ts'],
-    languageOptions: {
-      parserOptions: {
-        project: ['./apps/desktop/tsconfig.json'],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
     // TypeScript-specific rules (only run on TS files with type info)
     files: ['**/*.{ts,tsx,cts,mts}'],
     rules: {
@@ -239,7 +230,7 @@ export default [
       '@typescript-eslint/restrict-template-expressions': 'off',
     },
   },
-  // Prevent frontend clients from importing server-side code
+  // Prevent frontend clients from importing server-side code or DB internals
   {
     files: ['apps/web/**/*', 'apps/desktop/**/*'],
     rules: {
@@ -252,28 +243,8 @@ export default [
               message:
                 'Frontend code must not import backend/server modules. Add an API layer or shared contract instead.',
             },
-          ],
-        },
-      ],
-    },
-  },
-  // Prevent UI from reaching into DB/infra directly; rely on contracts/API.
-  {
-    files: ['apps/web/**/*', 'apps/desktop/**/*'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
             {
-              group: [
-                '**/infrastructure/**',
-                '**/database/**',
-                'drizzle-orm',
-                'postgres',
-                'pg',
-                '@/server/**',
-              ],
+              group: ['**/infrastructure/**', '**/database/**', 'drizzle-orm', 'postgres', 'pg'],
               message:
                 'UI must not import database or backend internals. Use API clients or shared contracts instead.',
             },

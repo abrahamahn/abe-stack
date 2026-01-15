@@ -44,6 +44,8 @@ FROM base AS build
 
 WORKDIR /app
 
+ENV CI=true
+
 # Copy cached pnpm store from deps stage
 COPY --from=deps /pnpm/store /pnpm/store
 
@@ -96,4 +98,4 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 ENTRYPOINT ["dumb-init", "--"]
 
 # Start the application
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/main.js"]

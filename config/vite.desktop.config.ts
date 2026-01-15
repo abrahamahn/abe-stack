@@ -1,8 +1,9 @@
 import net from 'node:net';
-import path from 'node:path';
 
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
+
+import { desktopRoot, getDesktopAliases } from './aliases';
 
 function uniquePorts(ports: Array<number | undefined>): number[] {
   return Array.from(new Set(ports.filter((port): port is number => Number.isFinite(port))));
@@ -34,9 +35,6 @@ async function pickAvailablePort(ports: number[], host: string): Promise<number>
   throw new Error(`No available desktop dev ports found in list: ${ports.join(', ')}`);
 }
 
-const repoRoot = path.resolve(__dirname, '..');
-const appRoot = path.join(repoRoot, 'apps/desktop');
-
 export default defineConfig(async ({ command }) => {
   const host = process.env.VITE_HOST || '0.0.0.0';
 
@@ -44,22 +42,10 @@ export default defineConfig(async ({ command }) => {
     plugins: [react()],
     base: './',
     build: {
-      outDir: path.join(appRoot, 'dist/renderer'),
+      outDir: `${desktopRoot}/dist/renderer`,
     },
     resolve: {
-      alias: {
-        '@': path.join(appRoot, 'src'),
-        '@abe-stack/core': path.join(repoRoot, 'packages/core/src'),
-        '@abe-stack/ui': path.join(repoRoot, 'packages/ui/src'),
-        '@components': path.join(appRoot, 'src/components'),
-        '@hooks': path.join(appRoot, 'src/hooks'),
-        '@services': path.join(appRoot, 'src/services'),
-        '@config': path.join(appRoot, 'src/config'),
-        '@layouts': path.join(appRoot, 'src/layouts'),
-        '@routes': path.join(appRoot, 'src/routes'),
-        '@utils': path.join(appRoot, 'src/utils'),
-        '@api': path.join(appRoot, 'src/api'),
-      },
+      alias: getDesktopAliases(),
     },
   };
 

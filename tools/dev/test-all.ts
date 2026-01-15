@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 // tools/dev/test-all.ts
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
 type VitestSummary = {
@@ -119,18 +119,34 @@ function summarizeVitestReport(name: string, report: unknown): VitestSummary {
 
 function runTarget(target: TestTarget): VitestSummary {
   const outputFile = path.join(RESULTS_DIR, `${target.name}.json`);
-  const args = ['test', '--', '--reporter=json', '--outputFile', outputFile];
+  // Run vitest directly with pnpm exec to avoid pnpm's -- arg handling issues
+  const args = [
+    'exec',
+    'vitest',
+    'run',
+    '--config',
+    '../../config/vitest.config.ts',
+    '--reporter=default',
+    '--reporter=json',
+    `--outputFile.json=${outputFile}`,
+  ];
 
   const result = spawnSync('pnpm', args, {
     cwd: target.cwd,
     stdio: 'inherit',
-    shell: true,
+    env: { ...process.env, VITEST_TARGET: target.name },
   });
 
   if (result.status !== 0) {
     const status = result.status ?? 1;
     console.error(`❌ Tests failed for ${target.name}.`);
     process.exit(status);
+  }
+
+  // Handle case where JSON file wasn't created
+  if (!existsSync(outputFile)) {
+    console.warn(`⚠️  No JSON output for ${target.name}, using empty summary`);
+    return { name: target.name, total: 0, passed: 0, failed: 0, skipped: 0, todo: 0, pending: 0 };
   }
 
   const report = readJson(outputFile);

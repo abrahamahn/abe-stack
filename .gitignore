@@ -49,17 +49,18 @@ pnpm-debug.log*
 project-data/
 
 # Environment files - Hybrid approach:
-# - Shared/server config: config/env/ (tracked: .env.example, .env.development, .env.production)
+# - Shared/server config: config/.env/ (tracked: .env.example, .env.development)
 # - App-specific config: apps/*/.env.local (ignored, use .env.example as template)
+# - Production env should NEVER be committed - use secrets manager
 
 # Root level env files (should not exist)
 .env
 .env.local
 .env.*.local
 
-# Shared/server environment (ignore local overrides only)
-config/env/.env.local
-config/env/.env
+# Shared/server environment
+config/.env/.env.local
+config/.env/.env.production
 
 # App-level environment files (keep .env.example, ignore .env.local)
 apps/*/.env.local

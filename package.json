@@ -37,6 +37,7 @@
     "format:check": "prettier --config config/.prettierrc --ignore-path config/.prettierignore --cache --cache-location .cache/prettier/.cache --check .",
     "validate": "turbo run validate",
     "clean": "turbo run clean && rm -rf node_modules .turbo .cache",
+    "clean:cache": "rm -rf .turbo .cache packages/*/tsconfig.tsbuildinfo apps/*/tsconfig.tsbuildinfo packages/*/.cache apps/*/.cache",
     "export": "node tools/dev/export-code.ts",
     "export:ui": "node tools/dev/export-ui-code.ts",
     "db:restart": "tsx tools/restart-db.ts",
