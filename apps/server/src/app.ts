@@ -14,12 +14,11 @@
 
 import { buildConnectionString, type AppConfig } from './config';
 import {
-  ConsoleEmailService,
   createDbClient,
+  createEmailService,
   createPostgresPubSub,
   createStorage,
   registerWebSocket,
-  SmtpEmailService,
   SubscriptionManager,
   type DbClient,
   type EmailService,
@@ -68,8 +67,8 @@ export class App implements IServiceContainer {
 
     // Initialize infrastructure services
     this.db = options.db ?? createDbClient(connectionString);
-    this.email = options.email ?? this.createEmailService();
-    this.storage = options.storage ?? this.createStorageService();
+    this.email = options.email ?? createEmailService(this.config.email);
+    this.storage = options.storage ?? createStorage(this.config.storage);
 
     // Initialize Pub/Sub with horizontal scaling if connection string is available
     this.pubsub = new SubscriptionManager();
@@ -181,21 +180,6 @@ export class App implements IServiceContainer {
   get log(): FastifyBaseLogger {
     return this.server.log;
   }
-
-  // ============================================================================
-  // Private Methods
-  // ============================================================================
-
-  private createEmailService(): EmailService {
-    if (this.config.email.provider === 'smtp') {
-      return new SmtpEmailService(this.config.email);
-    }
-    return new ConsoleEmailService();
-  }
-
-  private createStorageService(): StorageProvider {
-    return createStorage(this.config.storage);
-  }
 }
 
 // ============================================================================
@@ -286,7 +270,7 @@ export function createTestApp(
 
   return new App({
     config: testConfig,
-    email: serviceOverrides.email ?? new ConsoleEmailService(),
+    email: serviceOverrides.email ?? createEmailService(testConfig.email),
     ...serviceOverrides,
   });
 }

@@ -72,7 +72,7 @@ export {
 
 // Email
 export type { EmailService, EmailOptions, EmailResult } from './email';
-export { ConsoleEmailService, SmtpEmailService, emailTemplates } from './email';
+export { ConsoleEmailService, createEmailService, emailTemplates, SmtpEmailService } from './email';
 
 // PubSub
 export {
