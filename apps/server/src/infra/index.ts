@@ -6,7 +6,8 @@
  * - database: Database client, schema, transactions
  * - storage: File storage providers (local, S3)
  * - email: Email sending services
- * - pubsub: Real-time subscription management
+ * - pubsub: Real-time subscription management (with Postgres NOTIFY/LISTEN)
+ * - rbac: Role/attribute-based access control (custom Ability system)
  * - security: Login tracking, lockout, audit logging
  * - http: Security headers, CORS middleware
  * - rate-limit: Token Bucket rate limiter
@@ -74,8 +75,43 @@ export type { EmailService, EmailOptions, EmailResult } from './email';
 export { ConsoleEmailService, SmtpEmailService, emailTemplates } from './email';
 
 // PubSub
-export { SubscriptionManager, SubKeys, publishAfterWrite } from './pubsub';
-export type { SubscriptionKey, RecordKey, ListKey } from './pubsub';
+export {
+  SubscriptionManager,
+  SubKeys,
+  publishAfterWrite,
+  PostgresPubSub,
+  createPostgresPubSub,
+} from './pubsub';
+export type {
+  SubscriptionKey,
+  RecordKey,
+  ListKey,
+  SubscriptionManagerOptions,
+  PostgresPubSubOptions,
+  PubSubMessage,
+} from './pubsub';
+
+// RBAC (Role-Based Access Control)
+export {
+  Ability,
+  defineAbility,
+  createEmptyAbility,
+  createAdminAbility,
+  attachAbility,
+  requireAbility,
+  assertAbility,
+  defaultAbilityFactory,
+} from './rbac';
+export type {
+  Action,
+  Subject,
+  Condition,
+  Rule,
+  AbilityBuilder,
+  AbilityDefiner,
+  AbilityUser,
+  AbilityFactory,
+} from './rbac';
 
 // Security
 export {

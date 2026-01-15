@@ -24,8 +24,8 @@ Quick Summary:
 
 See Also:
 
-- `dev/workflows/index.md`
-- `dev/patterns/index.md`
+- [Workflows](../workflows/index.md)
+- [Patterns & Standards](../principles/index.md)
 
 ---
 

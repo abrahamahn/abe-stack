@@ -1,19 +1,46 @@
 // apps/server/src/infra/pubsub/subscriptionManager.ts
 /**
- * In-memory Subscription Manager
+ * Subscription Manager
  *
  * Adopted from Chet-stack's WebSocket subscription pattern.
  * Enables optimistic UI by notifying clients when data changes.
  *
- * For horizontal scaling, replace with Redis Pub/Sub adapter.
- * Current implementation is perfect for single-server deployments.
+ * Supports horizontal scaling via PostgresPubSub adapter:
+ * - Local subscriptions tracked in-memory
+ * - Cross-instance messaging via Postgres NOTIFY/LISTEN
  */
 
+import type { PostgresPubSub } from './postgresPubSub';
 import type { ClientMessage, ServerMessage, SubscriptionKey, WebSocket } from './types';
+
+// ============================================================================
+// Types
+// ============================================================================
+
+export interface SubscriptionManagerOptions {
+  /** PostgresPubSub adapter for horizontal scaling (optional) */
+  adapter?: PostgresPubSub;
+}
+
+// ============================================================================
+// SubscriptionManager Class
+// ============================================================================
 
 export class SubscriptionManager {
   private subscriptions = new Map<SubscriptionKey, Set<WebSocket>>();
   private socketSubscriptions = new WeakMap<WebSocket, Set<SubscriptionKey>>();
+  private adapter: PostgresPubSub | null = null;
+
+  constructor(options: SubscriptionManagerOptions = {}) {
+    this.adapter = options.adapter ?? null;
+  }
+
+  /**
+   * Set the adapter (for deferred initialization)
+   */
+  setAdapter(adapter: PostgresPubSub): void {
+    this.adapter = adapter;
+  }
 
   /**
    * Subscribe a socket to a key
@@ -50,10 +77,10 @@ export class SubscriptionManager {
   }
 
   /**
-   * Publish an update to all subscribers
-   * Called after successful database writes
+   * Publish an update to all subscribers (local only)
+   * Used internally and by PostgresPubSub for cross-instance messages
    */
-  publish(key: SubscriptionKey, version: number): void {
+  publishLocal(key: SubscriptionKey, version: number): void {
     const sockets = this.subscriptions.get(key);
     if (!sockets || sockets.size === 0) return;
 
@@ -65,6 +92,23 @@ export class SubscriptionManager {
         // WebSocket.OPEN
         socket.send(payload);
       }
+    }
+  }
+
+  /**
+   * Publish an update to all subscribers (local + cross-instance)
+   * Called after successful database writes
+   */
+  publish(key: SubscriptionKey, version: number): void {
+    // Always publish locally first
+    this.publishLocal(key, version);
+
+    // If adapter is configured, also publish to other instances
+    if (this.adapter) {
+      // Fire and forget - don't block the response
+      this.adapter.publish(key, version).catch(() => {
+        // Errors are handled by adapter's onError callback
+      });
     }
   }
 

@@ -19,7 +19,7 @@ The roadmap is organized into four major milestones:
 
 ## Milestone 1: V5 Architecture Migration
 
-Restructure from role-based (`apps/`, `packages/`) to layer-based (`frontend/`, `backend/`, `shared/`) architecture. See [V5 Proposal](./architecture/v5-proposal.md) for full details.
+Restructure from role-based (`apps/`, `packages/`) to layer-based (`frontend/`, `backend/`, `shared/`) architecture. See [Architecture](./dev/architecture/index.md) for details.
 
 ### Phase 1: Preparation
 
@@ -63,7 +63,7 @@ Restructure from role-based (`apps/`, `packages/`) to layer-based (`frontend/`, 
 
 ## Milestone 2: CHET-Stack Real-Time Features
 
-Add real-time collaboration, offline support, and optimistic updates. See [Realtime Architecture](./architecture/realtime/architecture.md) and [Implementation Guide](./architecture/realtime/implementation-guide.md).
+Add real-time collaboration, offline support, and optimistic updates. See [Architecture](./dev/architecture/index.md#future-real-time-features).
 
 ### Phase 1: Foundation
 

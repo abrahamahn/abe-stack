@@ -7,11 +7,14 @@
  */
 import 'fastify';
 
+import type { Ability } from '../infra/rbac';
 import type { TokenPayload } from '../modules/auth/utils/jwt';
 
 declare module 'fastify' {
   interface FastifyRequest {
     /** Authenticated user payload (set by auth middleware) */
     user?: TokenPayload;
+    /** RBAC ability (set by attachAbility middleware) */
+    ability?: Ability;
   }
 }
