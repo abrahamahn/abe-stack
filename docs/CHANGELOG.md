@@ -185,7 +185,7 @@ Added type-safe custom error classes with HTTP status codes to `packages/core`:
 - Created consolidated README.md, CHANGELOG.md, and ROADMAP.md
 - Organized architecture docs under `docs/architecture/`
 - Moved realtime docs to `docs/architecture/realtime/`
-- Security docs now under `docs/security/`
+- Security docs now under `docs/todo/security/`
 - Development guides under `docs/dev/`
 - Fixed TypeScript strict mode errors in test files
 - Added proper null checks to array access in tests

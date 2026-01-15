@@ -80,6 +80,9 @@ export class PostgresPubSub {
         max: 1,
         idle_timeout: 0, // Never timeout - keep connection open
         connect_timeout: 10000,
+        onclose: () => {
+          this.onError(new Error('Postgres PubSub connection closed (attempting reconnection)'));
+        },
       });
 
       // Create separate connection for NOTIFY (can be shared)

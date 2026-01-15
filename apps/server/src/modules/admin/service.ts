@@ -9,6 +9,9 @@
 import { eq } from 'drizzle-orm';
 
 import { unlockAccount as infraUnlockAccount, users, type DbClient } from '../../infra';
+import { UserNotFoundError } from '../../shared';
+
+export { UserNotFoundError };
 
 /**
  * Unlock a user account
@@ -27,21 +30,11 @@ export async function unlockUserAccount(
   });
 
   if (!targetUser) {
-    throw new UserNotFoundError(email);
+    throw new UserNotFoundError(`User not found: ${email}`);
   }
 
   // Unlock the account
   await infraUnlockAccount(db, email, adminUserId, ipAddress, userAgent);
 
   return { email };
-}
-
-/**
- * Error thrown when user is not found
- */
-export class UserNotFoundError extends Error {
-  constructor(public readonly email: string) {
-    super(`User not found: ${email}`);
-    this.name = 'UserNotFoundError';
-  }
 }

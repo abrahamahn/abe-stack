@@ -7,7 +7,7 @@ _Last Updated: January 15, 2026_
 1. Load this file first - it routes everything.
 2. Use specific paths only when needed.
 3. Never load full folders - prefer index.md tables for overviews.
-4. For complex tasks: Load agent/session-bridge.md + dev/workflows/classification.md next.
+4. For complex tasks: Load agent/session-bridge.md + agent/workflows.md next.
 
 Token Budget Tips:
 
@@ -19,34 +19,34 @@ Token Budget Tips:
 
 ## Quick Navigation
 
-| Area         | Entry Point                    | Purpose                          |
-| ------------ | ------------------------------ | -------------------------------- |
-| Overview     | `README.md`                    | Project overview and quick start |
-| Roadmap      | `ROADMAP.md`                   | Milestones and task tracking     |
-| Changelog    | `CHANGELOG.md`                 | Detailed change history          |
-| Agent Guide  | `AGENTS.md`                    | AI agent development guide       |
-| Architecture | `dev/architecture/index.md`    | System design and structure      |
-| Security     | `security/phase-1-complete.md` | Security implementation          |
-| Dev Guide    | `dev/`                         | Developer reference docs         |
-| UI Package   | `ui/todo.md`                   | UI component priorities          |
+| Area         | Entry Point                         | Purpose                          |
+| ------------ | ----------------------------------- | -------------------------------- |
+| Overview     | `README.md`                         | Project overview and quick start |
+| Roadmap      | `ROADMAP.md`                        | Milestones and task tracking     |
+| Changelog    | `CHANGELOG.md`                      | Detailed change history          |
+| Agent Guide  | `AGENTS.md`                         | AI agent development guide       |
+| Architecture | `dev/architecture.md`               | System design and structure      |
+| Security     | `todo/security/phase-1-complete.md` | Security implementation          |
+| Dev Guide    | `dev/`                              | Developer reference docs         |
+| UI Package   | `ui/todo.md`                        | UI component priorities          |
 
 ---
 
 ## Architecture Documentation
 
-| Document                    | Purpose                              |
-| --------------------------- | ------------------------------------ |
-| `dev/architecture/index.md` | Architecture overview (consolidated) |
+| Document              | Purpose                              |
+| --------------------- | ------------------------------------ |
+| `dev/architecture.md` | Architecture overview (consolidated) |
 
 ---
 
 ## Security Documentation
 
-| Document                       | Purpose                   |
-| ------------------------------ | ------------------------- |
-| `security/index.md`            | Security overview         |
-| `security/phase-1-complete.md` | Phase 1 completion report |
-| `security/phase-2-roadmap.md`  | Phase 2 roadmap and tasks |
+| Document                            | Purpose                   |
+| ----------------------------------- | ------------------------- |
+| `todo/security/index.md`            | Security overview         |
+| `todo/security/phase-1-complete.md` | Phase 1 completion report |
+| `todo/security/phase-2-roadmap.md`  | Phase 2 roadmap and tasks |
 
 ---
 
@@ -54,29 +54,17 @@ Token Budget Tips:
 
 ### Principles & Architecture
 
-- `dev/principles/index.md` - Principles, patterns, anti-patterns, standards (consolidated)
-- `dev/architecture/index.md` - Technical architecture (consolidated)
+- `dev/principles.md` - Principles, patterns, anti-patterns, standards (consolidated)
+- `dev/architecture.md` - Technical architecture (consolidated)
 
 ### Testing
 
-- `dev/testing/index.md` - Testing overview
-- `dev/testing/overview.md` - Testing philosophy
-- `dev/testing/levels.md` - Test levels (unit/integration/E2E)
-- `dev/testing/commands.md` - Test commands
-- `dev/testing/examples.md` - Test examples
-
-### Workflows
-
-- `dev/workflows/index.md` - Workflow overview
-- `dev/workflows/classification.md` - Task classification
-- `dev/workflows/precompletion.md` - Pre-completion checks
-- `dev/workflows/development.md` - Development flow
-- `dev/workflows/commands.md` - Workflow commands
+- `dev/testing.md` - Consolidated testing strategy
 
 ### Other
 
-- `dev/performance/index.md` - Performance guidelines
-- `dev/use-cases/index.md` - Common use cases
+- `dev/performance.md` - Performance guidelines
+- `dev/use-cases.md` - Common use cases
 
 ---
 
@@ -88,43 +76,44 @@ Token Budget Tips:
 | `agent/agent-self-check.md` | Self-verification checklist |
 | `agent/complex-tasks.md`    | Complex task guidance       |
 | `agent/session-bridge.md`   | Session continuation        |
+| `agent/workflows.md`        | Agent workflows             |
 
 ---
 
 ## Keyword Routing
 
-| Keyword                | Document                          |
-| ---------------------- | --------------------------------- |
-| task classification    | `dev/workflows/classification.md` |
-| pre-completion checks  | `dev/workflows/precompletion.md`  |
-| dependency rules       | `dev/architecture/index.md`       |
-| layer boundaries       | `dev/architecture/index.md`       |
-| hexagonal architecture | `dev/architecture/index.md`       |
-| import order           | `dev/principles/index.md`         |
-| testing commands       | `dev/testing/commands.md`         |
-| patterns               | `dev/principles/index.md`         |
-| anti-patterns          | `dev/principles/index.md`         |
-| coding standards       | `dev/principles/index.md`         |
-| resume session         | `agent/session-bridge.md`         |
-| file organization      | `AGENTS.md` (Section 5)           |
-| path aliases           | `AGENTS.md` (Section 5)           |
-| v5 migration           | `dev/architecture/index.md`       |
-| real-time sync         | `dev/architecture/index.md`       |
-| security phase 2       | `security/phase-2-roadmap.md`     |
-| roadmap                | `ROADMAP.md`                      |
+| Keyword                | Document                           |
+| ---------------------- | ---------------------------------- |
+| task classification    | `agent/workflows.md`               |
+| pre-completion checks  | `agent/workflows.md`               |
+| dependency rules       | `dev/architecture.md`              |
+| layer boundaries       | `dev/architecture.md`              |
+| hexagonal architecture | `dev/architecture.md`              |
+| import order           | `dev/principles.md`                |
+| testing commands       | `dev/testing.md`                   |
+| patterns               | `dev/principles.md`                |
+| anti-patterns          | `dev/principles.md`                |
+| coding standards       | `dev/principles.md`                |
+| resume session         | `agent/session-bridge.md`          |
+| file organization      | `AGENTS.md` (Section 5)            |
+| path aliases           | `AGENTS.md` (Section 5)            |
+| v5 migration           | `dev/architecture.md`              |
+| real-time sync         | `dev/architecture.md`              |
+| security phase 2       | `todo/security/phase-2-roadmap.md` |
+| roadmap                | `ROADMAP.md`                       |
 
 ---
 
 ## Scope Guide
 
 - `agent/` - AI agent workflow and behavior docs only
-- `dev/` - Shared technical reference (architecture, principles, testing, workflows)
+- `dev/` - Shared technical reference (architecture, principles, testing)
 - `security/` - Security implementation and roadmap
 - `ui/` - UI package priorities and todos
 
 ## Reference Convention
 
 - All paths are relative to `docs/`
-- Use `dev/...` for technical docs (architecture, principles, testing, workflows)
+- Use `dev/...` for technical docs (architecture, principles, testing)
 - Use `agent/...` for agent workflows
 - Prefer specific modules over overviews when precision is needed

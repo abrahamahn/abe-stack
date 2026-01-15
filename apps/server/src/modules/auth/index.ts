@@ -63,5 +63,4 @@ export {
   cleanupExpiredTokens,
   // Request utilities
   extractRequestInfo,
-  extractAndVerifyToken,
 } from './utils';

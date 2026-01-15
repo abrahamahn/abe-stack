@@ -20,4 +20,4 @@ export {
   cleanupExpiredTokens,
 } from './refresh-token';
 
-export { extractRequestInfo, extractAndVerifyToken } from './request';
+export { extractRequestInfo } from './request';

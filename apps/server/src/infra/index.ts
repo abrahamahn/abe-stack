@@ -91,28 +91,6 @@ export type {
   PubSubMessage,
 } from './pubsub';
 
-// RBAC (Role-Based Access Control)
-export {
-  Ability,
-  defineAbility,
-  createEmptyAbility,
-  createAdminAbility,
-  attachAbility,
-  requireAbility,
-  assertAbility,
-  defaultAbilityFactory,
-} from './rbac';
-export type {
-  Action,
-  Subject,
-  Condition,
-  Rule,
-  AbilityBuilder,
-  AbilityDefiner,
-  AbilityUser,
-  AbilityFactory,
-} from './rbac';
-
 // Security
 export {
   logLoginAttempt,
@@ -143,6 +121,9 @@ export {
 
 // HTTP (Security headers, CORS)
 export { applySecurityHeaders, applyCors, handlePreflight, type CorsOptions } from './http';
+
+// WebSocket
+export { registerWebSocket } from './websocket';
 
 // Rate Limiting
 export {

@@ -37,8 +37,8 @@ Phase 1 Security Hardening has been successfully completed, delivering a product
 
 **Files:**
 
-- [apps/server/src/shared/password.ts](../apps/server/src/shared/password.ts) - Core implementation
-- [apps/server/src/shared/**tests**/password.test.ts](../apps/server/src/shared/__tests__/password.test.ts) - Tests
+- [apps/server/src/modules/auth/utils/password.ts](../../../apps/server/src/modules/auth/utils/password.ts) - Core implementation
+- [apps/server/src/shared/**tests**/password.test.ts](../../../apps/server/src/modules/auth/utils/__tests__/password.test.ts) - Tests
 
 ---
 
@@ -53,9 +53,9 @@ Phase 1 Security Hardening has been successfully completed, delivering a product
 
 **Files:**
 
-- [apps/server/src/shared/security.ts](../apps/server/src/shared/security.ts) - Lockout logic
-- [apps/server/src/shared/request-utils.ts](../apps/server/src/shared/request-utils.ts) - IP extraction
-- [apps/server/src/shared/**tests**/security.test.ts](../apps/server/src/shared/__tests__/security.test.ts) - Tests
+- [apps/server/src/modules/auth/service.ts](../../../apps/server/src/modules/auth/service.ts) - Lockout logic
+- [apps/server/src/modules/auth/utils/request.ts](../../../apps/server/src/modules/auth/utils/request.ts) - IP extraction
+- [apps/server/src/shared/**tests**/security.test.ts](../../../apps/server/src/modules/auth/utils/__tests__/password.test.ts) - Tests
 
 ---
 
@@ -70,8 +70,8 @@ Phase 1 Security Hardening has been successfully completed, delivering a product
 
 **Files:**
 
-- [apps/server/src/shared/refresh-token.ts](../apps/server/src/shared/refresh-token.ts) - Token rotation
-- [apps/server/src/shared/**tests**/refresh-token.test.ts](../apps/server/src/shared/__tests__/refresh-token.test.ts) - Tests
+- [apps/server/src/modules/auth/utils/refresh-token.ts](../../../apps/server/src/modules/auth/utils/refresh-token.ts) - Token rotation
+- [apps/server/src/shared/**tests**/refresh-token.test.ts](../../../apps/server/src/modules/auth/utils/__tests__/refresh-token.test.ts) - Tests
 
 ---
 
@@ -86,9 +86,9 @@ Phase 1 Security Hardening has been successfully completed, delivering a product
 
 **Files:**
 
-- [apps/server/src/server.ts](../apps/server/src/server.ts) - Security plugins
-- [apps/server/src/shared/env-validator.ts](../apps/server/src/shared/env-validator.ts) - Startup validation
-- [apps/server/src/shared/constants.ts](../apps/server/src/shared/constants.ts) - Constants
+- [apps/server/src/server.ts](../../../apps/server/src/server.ts) - Security plugins
+- [apps/server/src/config/loader.ts](../../../apps/server/src/config/loader.ts) - Startup validation
+- [apps/server/src/shared/constants.ts](../../../apps/server/src/shared/constants.ts) - Constants
 
 ---
 
@@ -122,9 +122,12 @@ Phase 1 Security Hardening has been successfully completed, delivering a product
 
 ## Test Coverage
 
-### Integration Tests (12 tests)
+### Auth Utility Tests
 
-**File:** [apps/server/src/**tests**/security-integration.test.ts](../apps/server/src/__tests__/security-integration.test.ts)
+**Files:**
+
+- [apps/server/src/modules/auth/utils/**tests**/password.test.ts](../../../apps/server/src/modules/auth/utils/__tests__/password.test.ts)
+- [apps/server/src/modules/auth/utils/**tests**/refresh-token.test.ts](../../../apps/server/src/modules/auth/utils/__tests__/refresh-token.test.ts)
 
 - Account lockout flow with 12 failed attempts
 - Failure reason logging (user not found, invalid password)
@@ -339,7 +342,7 @@ pnpm --filter @abe-stack/server test
    - Impact: Low (workaround: change password)
    - Planned: Phase 2, Week 2
 
-See [SECURITY-PHASE-2.md](./SECURITY-PHASE-2.md) for complete roadmap.
+See [SECURITY-PHASE-2.md](./phase-2-roadmap.md) for complete roadmap.
 
 ---
 
@@ -348,19 +351,19 @@ See [SECURITY-PHASE-2.md](./SECURITY-PHASE-2.md) for complete roadmap.
 ### New Files (7)
 
 - `apps/server/src/shared/constants.ts` - Centralized constants
-- `apps/server/src/shared/env-validator.ts` - Startup validation
-- `apps/server/src/shared/request-utils.ts` - IP extraction
-- `apps/server/src/shared/__tests__/password.test.ts` - Password tests
-- `apps/server/src/shared/__tests__/security.test.ts` - Security tests
-- `apps/server/src/shared/__tests__/refresh-token.test.ts` - Token tests
+- `apps/server/src/config/loader.ts` - Startup validation
+- `apps/server/src/modules/auth/utils/request.ts` - IP extraction
+- `apps/server/src/modules/auth/utils/__tests__/password.test.ts` - Password tests
+- `apps/server/src/modules/auth/utils/__tests__/password.test.ts` - Security tests
+- `apps/server/src/modules/auth/utils/__tests__/refresh-token.test.ts` - Token tests
 - `apps/server/src/__tests__/security-integration.test.ts` - Integration tests
 
 ### Modified Files (10)
 
-- `apps/server/src/shared/password.ts` - Added timing protection, rehash support
-- `apps/server/src/shared/security.ts` - Added lockout status, admin unlock
-- `apps/server/src/shared/refresh-token.ts` - Fixed cleanup bug
-- `apps/server/src/shared/jwt.ts` - Centralized config
+- `apps/server/src/modules/auth/utils/password.ts` - Added timing protection, rehash support
+- `apps/server/src/modules/auth/service.ts` - Added lockout status, admin unlock
+- `apps/server/src/modules/auth/utils/refresh-token.ts` - Fixed cleanup bug
+- `apps/server/src/modules/auth/utils/jwt.ts` - Centralized config
 - `apps/server/src/modules/index.ts` - Added security features, sanitized errors
 - `apps/server/src/server.ts` - Fixed CORS, added CSRF
 - `apps/server/src/index.ts` - Added env validation
@@ -447,7 +450,7 @@ All Phase 1 goals achieved:
 
 1. **Deploy to Production** - All requirements met
 2. **Monitor Metrics** - Set up alerts for security events
-3. **Plan Phase 2** - Review [SECURITY-PHASE-2.md](./SECURITY-PHASE-2.md)
+3. **Plan Phase 2** - Review [SECURITY-PHASE-2.md](./phase-2-roadmap.md)
 4. **User Testing** - Verify UX of lockout/delays
 5. **Security Audit** - Optional third-party review
 
@@ -462,5 +465,5 @@ Phase 1 Security Hardening delivers enterprise-grade authentication security sui
 For questions or issues, refer to:
 
 - This document for Phase 1 details
-- [SECURITY-PHASE-2.md](./SECURITY-PHASE-2.md) for future work
+- [SECURITY-PHASE-2.md](./phase-2-roadmap.md) for future work
 - Code documentation in implementation files

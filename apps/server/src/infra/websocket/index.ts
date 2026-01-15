@@ -1,0 +1,1 @@
+export { registerWebSocket } from './websocket';

@@ -3,11 +3,9 @@
  * Pub/Sub Helpers
  */
 
-import { SubscriptionManager } from './subscriptionManager';
 import { SubKeys } from './types';
 
-// Singleton for simple usage (can be replaced with DI)
-export const pubsub = new SubscriptionManager();
+import type { SubscriptionManager } from './subscriptionManager';
 
 /**
  * Helper to publish after a database write
@@ -15,9 +13,14 @@ export const pubsub = new SubscriptionManager();
  *
  * @example
  * const user = await db.update(users).set(data).returning();
- * publishAfterWrite('users', user.id, user.version);
+ * publishAfterWrite(ctx.pubsub, 'users', user.id, user.version);
  */
-export function publishAfterWrite(table: string, id: string, version: number): void {
+export function publishAfterWrite(
+  pubsub: SubscriptionManager,
+  table: string,
+  id: string,
+  version: number,
+): void {
   setImmediate(() => {
     pubsub.publish(SubKeys.record(table, id), version);
   });

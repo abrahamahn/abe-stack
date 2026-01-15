@@ -16,12 +16,14 @@ import { buildConnectionString, type AppConfig } from './config';
 import {
   ConsoleEmailService,
   createDbClient,
+  createPostgresPubSub,
   createStorage,
+  registerWebSocket,
   SmtpEmailService,
   SubscriptionManager,
   type DbClient,
   type EmailService,
-  type StorageConfig,
+  type PostgresPubSub,
   type StorageProvider,
 } from './infra';
 import { registerRoutes } from './modules';
@@ -52,6 +54,9 @@ export class App implements IServiceContainer {
   readonly storage: StorageProvider;
   readonly pubsub: SubscriptionManager;
 
+  // Horizontal scaling adapter
+  private _pgPubSub: PostgresPubSub | null = null;
+
   // HTTP server (Fastify)
   private _server: FastifyInstance | null = null;
 
@@ -65,7 +70,29 @@ export class App implements IServiceContainer {
     this.db = options.db ?? createDbClient(connectionString);
     this.email = options.email ?? this.createEmailService();
     this.storage = options.storage ?? this.createStorageService();
+
+    // Initialize Pub/Sub with horizontal scaling if connection string is available
     this.pubsub = new SubscriptionManager();
+    const pubsubConnString = this.config.database.connectionString || connectionString;
+
+    if (pubsubConnString && this.config.env !== 'test') {
+      this._pgPubSub = createPostgresPubSub({
+        connectionString: pubsubConnString,
+        onMessage: (key, version) => {
+          this.pubsub.publishLocal(key, version);
+        },
+        onError: (err) => {
+          // Use server logger if available, otherwise fallback to console
+          if (this._server) {
+            this.log.error({ err }, 'PostgresPubSub error');
+          } else {
+            // eslint-disable-next-line no-console
+            console.error('PostgresPubSub error:', err);
+          }
+        },
+      });
+      this.pubsub.setAdapter(this._pgPubSub);
+    }
   }
 
   // ============================================================================
@@ -77,6 +104,11 @@ export class App implements IServiceContainer {
    * Initializes the HTTP server and starts listening
    */
   async start(): Promise<void> {
+    // Start horizontal scaling if configured
+    if (this._pgPubSub) {
+      await this._pgPubSub.start();
+    }
+
     // Create Fastify instance
     this._server = await createServer({
       config: this.config,
@@ -85,6 +117,9 @@ export class App implements IServiceContainer {
 
     // Register routes with context
     registerRoutes(this._server, this.context);
+
+    // Register WebSocket support
+    await registerWebSocket(this._server, this.context);
 
     // Start listening
     await listen(this._server, this.config);
@@ -95,6 +130,11 @@ export class App implements IServiceContainer {
    * Gracefully shuts down all services
    */
   async stop(): Promise<void> {
+    // Stop horizontal scaling
+    if (this._pgPubSub) {
+      await this._pgPubSub.stop();
+    }
+
     if (this._server) {
       await this._server.close();
       this._server = null;
@@ -154,12 +194,7 @@ export class App implements IServiceContainer {
   }
 
   private createStorageService(): StorageProvider {
-    // Create local storage config - S3 can be added via config extension
-    const storageConfig: StorageConfig = {
-      provider: 'local',
-      rootPath: './uploads',
-    };
-    return createStorage(storageConfig);
+    return createStorage(this.config.storage);
   }
 }
 

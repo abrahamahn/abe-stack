@@ -6,7 +6,7 @@
  */
 
 import { ERROR_MESSAGES, type AppContext } from '../../shared';
-import { extractAndVerifyToken, type RequestWithCookies } from '../auth';
+import { type RequestWithCookies } from '../auth';
 
 import { getUserById } from './service';
 
@@ -21,13 +21,13 @@ export async function handleMe(
 ): Promise<
   { status: 200; body: UserResponse } | { status: 401 | 404 | 500; body: { message: string } }
 > {
-  const payload = extractAndVerifyToken(request, ctx.config.auth.jwt.secret);
-  if (!payload) {
-    return { status: 401, body: { message: ERROR_MESSAGES.INVALID_OR_EXPIRED_TOKEN } };
+  // User is already verified by middleware
+  if (!request.user) {
+    return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
   try {
-    const user = await getUserById(ctx.db, payload.userId);
+    const user = await getUserById(ctx.db, request.user.userId);
 
     if (!user) {
       return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };

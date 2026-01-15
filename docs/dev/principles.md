@@ -192,9 +192,9 @@ pnpm test        # Vitest
 
 ## See Also
 
-- [Architecture Overview](../architecture/index.md)
-- [Testing Guide](../testing/index.md)
-- [Workflows](../workflows/index.md)
+- [Architecture Overview](./architecture.md)
+- [Testing Guide](./testing.md)
+- [Workflows](../agent/workflows.md)
 
 ---
 

@@ -91,7 +91,7 @@ export async function handleRegister(
 
     if (error instanceof WeakPasswordError) {
       ctx.log.warn(
-        { email: body.email, errors: error.errors },
+        { email: body.email, errors: error.details?.errors },
         'Password validation failed during registration',
       );
       return { status: 400, body: { message: ERROR_MESSAGES.WEAK_PASSWORD } };

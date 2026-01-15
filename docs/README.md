@@ -89,8 +89,8 @@ For full documentation, see [INDEX.md](./INDEX.md) - the complete navigation gui
 
 Key sections:
 
-- **[Architecture](./architecture/index.md)** - System design and structure
-- **[Security](./security/index.md)** - Auth implementation and roadmap
+- **[Architecture](./dev/architecture.md)** - System design and structure
+- **[Security](./todo/security/index.md)** - Auth implementation and roadmap
 - **[Roadmap](./ROADMAP.md)** - Project milestones and tasks
 - **[Changelog](./CHANGELOG.md)** - Change history
 

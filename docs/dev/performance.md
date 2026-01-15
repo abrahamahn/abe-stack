@@ -2,7 +2,7 @@
 
 Techniques and best practices for optimizing database queries, frontend performance, and overall application speed.
 
-**Quick Reference:** See [CLAUDE.md](../../../AGENTS.md) for essentials.
+**Quick Reference:** See [CLAUDE.md](../AGENTS.md) for essentials.
 
 Quick Summary:
 
@@ -24,8 +24,8 @@ Quick Summary:
 
 See Also:
 
-- `dev/architecture/index.md`
-- `dev/testing/index.md`
+- `./architecture.md`
+- `./testing.md`
 
 ---
 

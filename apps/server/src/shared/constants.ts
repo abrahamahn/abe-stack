@@ -97,6 +97,9 @@ export const ERROR_MESSAGES = {
   MAGIC_LINK_INVALID: 'Invalid magic link',
   MAGIC_LINK_ALREADY_USED: 'Magic link has already been used',
 
+  // Email
+  EMAIL_VERIFICATION_NOT_IMPLEMENTED: 'Email verification not implemented',
+
   // TOTP
   TOTP_INVALID_CODE: 'Invalid verification code',
   TOTP_ALREADY_ENABLED: '2FA is already enabled',
@@ -111,7 +114,6 @@ export const ERROR_MESSAGES = {
 export const SUCCESS_MESSAGES = {
   LOGGED_OUT: 'Logged out successfully',
   ACCOUNT_UNLOCKED: 'Account unlocked successfully',
-  EMAIL_VERIFICATION_NOT_IMPLEMENTED: 'Email verification not implemented',
   PASSWORD_RESET_SENT: 'Password reset email sent',
   MAGIC_LINK_SENT: 'Magic link sent to your email',
   TOTP_ENABLED: 'Two-factor authentication enabled',
