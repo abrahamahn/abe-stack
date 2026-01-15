@@ -80,6 +80,24 @@ Token Budget Tips:
 
 ---
 
+## Recommended Reading Paths
+
+### Agent Work
+
+1. `agent/workflows.md`
+2. `agent/complex-tasks.md`
+3. `agent/agent-prompts.md`
+4. `agent/agent-self-check.md`
+5. `agent/session-bridge.md`
+
+### Development Work
+
+1. `dev/principles.md`
+2. `dev/architecture.md`
+3. `dev/testing.md`
+4. `dev/performance.md`
+5. `dev/use-cases.md`
+
 ## Keyword Routing
 
 | Keyword                | Document                           |

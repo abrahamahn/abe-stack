@@ -9,10 +9,7 @@
 
 // Types
 export type { EmailService, EmailOptions, EmailResult } from './types';
-
-// Services
 export { ConsoleEmailService } from './consoleEmailService';
 export { SmtpEmailService } from './smtpEmailService';
-
-// Templates
 export { emailTemplates } from './templates';
+export { createEmailService } from './factory';

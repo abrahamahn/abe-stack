@@ -131,13 +131,18 @@ export class SubscriptionManager {
   /**
    * Handle incoming client message
    */
-  handleMessage(socket: WebSocket, data: string): void {
+  handleMessage(
+    socket: WebSocket,
+    data: string,
+    onSubscribe?: (key: SubscriptionKey) => void,
+  ): void {
     try {
       const message = JSON.parse(data) as ClientMessage;
 
       switch (message.type) {
         case 'subscribe':
           this.subscribe(message.key, socket);
+          onSubscribe?.(message.key);
           break;
         case 'unsubscribe':
           this.unsubscribe(message.key, socket);

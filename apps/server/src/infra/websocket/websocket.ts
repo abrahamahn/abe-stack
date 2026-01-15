@@ -79,7 +79,9 @@ function handleConnection(socket: WebSocket, req: FastifyRequest, ctx: AppContex
         message = Buffer.from(data).toString();
       }
 
-      ctx.pubsub.handleMessage(socket as unknown as PubSubWebSocket, message);
+      ctx.pubsub.handleMessage(socket as unknown as PubSubWebSocket, message, (key) => {
+        void sendInitialData(ctx, socket, key);
+      });
     });
 
     socket.on('close', () => {
@@ -93,5 +95,32 @@ function handleConnection(socket: WebSocket, req: FastifyRequest, ctx: AppContex
     });
   } catch {
     socket.close(1008, 'Invalid token');
+  }
+}
+
+async function sendInitialData(ctx: AppContext, socket: WebSocket, key: string): Promise<void> {
+  const parts = key.split(':');
+  // Expected format: record:{table}:{id}
+  if (parts.length !== 3 || parts[0] !== 'record') return;
+
+  const [, table, id] = parts;
+  if (!table || !id) return;
+
+  try {
+    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
+    const queryBuilder = (ctx.db.query as any)[table];
+    if (!queryBuilder) return;
+
+    const record = await queryBuilder.findFirst({
+      where: (t: any, { eq }: any) => eq(t.id, id),
+      columns: { version: true },
+    });
+
+    if (record) {
+      socket.send(JSON.stringify({ type: 'update', key, version: record.version }));
+    }
+    /* eslint-enable */
+  } catch (err) {
+    ctx.log.warn({ err, key }, 'Failed to fetch initial data for subscription');
   }
 }

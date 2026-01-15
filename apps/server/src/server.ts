@@ -7,13 +7,17 @@
  * from the application's DI container and lifecycle management.
  */
 
+import path from 'node:path';
+
 import cookie from '@fastify/cookie';
 import csrfProtection from '@fastify/csrf-protection';
+import fastifyStatic from '@fastify/static';
 import { sql } from 'drizzle-orm';
 import Fastify from 'fastify';
 
 import { applyCors, applySecurityHeaders, handlePreflight } from './infra/http';
 import { RateLimiter } from './infra/rate-limit';
+import { isAppError, type ApiErrorResponse } from './shared/errors';
 
 import type { AppConfig } from './config';
 import type { DbClient } from './infra';
@@ -131,6 +135,56 @@ async function registerPlugins(server: FastifyInstance, config: AppConfig): Prom
     },
     sessionPlugin: '@fastify/cookie',
   });
+
+  // Global error handler
+  server.setErrorHandler((error, _request, reply) => {
+    // Log the error
+    server.log.error(error);
+
+    let statusCode = 500;
+    let code = 'INTERNAL_ERROR';
+    let message = 'Internal server error';
+    let details: Record<string, unknown> | undefined;
+
+    if (isAppError(error)) {
+      statusCode = error.statusCode;
+      code = error.code || 'INTERNAL_ERROR';
+      message = error.message;
+      details = error.details;
+    } else if (error instanceof Error) {
+      message = error.message;
+      // Check for Fastify error properties
+      const fastifyError = error as Error & { statusCode?: number; code?: string };
+      if (typeof fastifyError.statusCode === 'number') {
+        statusCode = fastifyError.statusCode;
+      }
+      if (typeof fastifyError.code === 'string') {
+        code = fastifyError.code;
+      }
+    }
+
+    const response: ApiErrorResponse = {
+      ok: false,
+      error: {
+        code,
+        message,
+        details,
+      },
+    };
+
+    void reply.status(statusCode).send(response);
+  });
+
+  // Static file serving (only if using local storage)
+  if (config.storage.provider === 'local') {
+    const rootPath = path.resolve(config.storage.rootPath);
+    await server.register(fastifyStatic, {
+      root: rootPath,
+      prefix: '/uploads/', // Mount point
+      decorateReply: false, // Avoid conflict if multiple static plugins used
+    });
+    server.log.info({ rootPath }, 'Serving static files from local storage');
+  }
 }
 
 // ============================================================================

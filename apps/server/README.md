@@ -2,7 +2,7 @@
 
 ## Overview
 
-The ABE Stack server is a TypeScript backend built with **Fastify 5.x**, **PostgreSQL**, **Drizzle ORM**, and **ts-rest** contracts. It follows a hybrid **infra/modules** architecture with explicit dependency injection via a service container pattern.
+The ABE Stack server is a TypeScript backend built with **Fastify 5.x**, **PostgreSQL**, **Drizzle ORM**, and **ts-rest** contracts. It follows a hybrid **infra/modules** architecture with an `App` dependency injection container.
 
 ## Architecture
 
@@ -21,7 +21,7 @@ The ABE Stack server is a TypeScript backend built with **Fastify 5.x**, **Postg
 │  Constants, errors, types                                       │
 ├─────────────────────────────────────────────────────────────────┤
 │                      Infrastructure Layer                       │
-│  Database, storage, email, pubsub, security                     │
+│  Database, storage, email, pubsub, websocket, security           │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -30,8 +30,8 @@ The ABE Stack server is a TypeScript backend built with **Fastify 5.x**, **Postg
 ```
 apps/server/src/
 ├── main.ts              # Application entry point
-├── app.ts               # Fastify app factory, service container
-├── server.ts            # Route registration, ts-rest integration
+├── app.ts               # App DI container + lifecycle
+├── server.ts            # Fastify server factory + listeners
 │
 ├── config/              # Configuration
 │   ├── index.ts         # loadConfig() entry point
@@ -50,14 +50,13 @@ apps/server/src/
 │   │   ├── schema/          # Drizzle schemas
 │   │   │   ├── users.ts     # users, refreshTokens tables
 │   │   │   └── auth.ts      # refreshTokenFamilies, loginAttempts, etc.
-│   │   └── utils/
-│   │       └── optimistic-lock.ts  # Version-based locking
+│   │   ├── utils/
+│   │   │   └── optimistic-lock.ts  # Version-based locking
+│   │   └── index.ts         # Database exports
 │   ├── storage/
 │   │   ├── storageFactory.ts    # createStorage()
 │   │   ├── types.ts
-│   │   └── providers/
-│   │       ├── localStorageProvider.ts
-│   │       └── s3StorageProvider.ts
+│   │   └── index.ts
 │   ├── email/
 │   │   ├── consoleEmailService.ts
 │   │   ├── smtpEmailService.ts
@@ -65,11 +64,16 @@ apps/server/src/
 │   │   └── types.ts
 │   ├── pubsub/
 │   │   ├── subscriptionManager.ts  # In-memory pub/sub
+│   │   ├── postgresPubSub.ts        # Postgres adapter
 │   │   ├── helpers.ts              # publishAfterWrite
 │   │   └── types.ts
+│   ├── websocket/
+│   │   ├── websocket.ts             # WebSocket server wiring
+│   │   └── index.ts
 │   ├── security/
 │   │   ├── lockout.ts     # Login attempt tracking, account lockout
-│   │   └── events.ts      # Security event logging
+│   │   ├── events.ts      # Security event logging
+│   │   └── types.ts
 │   ├── crypto/
 │   │   └── jwt.ts         # JWT utilities
 │   ├── http/
@@ -88,7 +92,8 @@ apps/server/src/
 │   │       ├── jwt.ts         # Token generation/verification
 │   │       ├── password.ts    # Argon2id hashing
 │   │       ├── refresh-token.ts  # Token rotation, family detection
-│   │       └── request.ts     # IP extraction, user agent parsing
+│   │       ├── request.ts     # IP extraction, user agent parsing
+│   │       └── __tests__/     # Utility unit tests
 │   ├── users/
 │   │   ├── handlers.ts  # User CRUD handlers
 │   │   └── service.ts   # UserService
@@ -107,17 +112,13 @@ apps/server/src/
 │
 ├── types/
 │   └── fastify.d.ts     # Fastify type augmentation
-│
-└── __tests__/           # Integration tests
-    ├── auth.routes.test.ts
-    └── security-integration.test.ts
 ```
 
 ## Key Concepts
 
-### Service Container (App Class)
+### App Dependency Container
 
-The `App` class in `app.ts` implements the service container pattern:
+The `App` class in `app.ts` implements the dependency container:
 
 ```typescript
 interface IServiceContainer {
@@ -165,8 +166,16 @@ const config = loadConfig(process.env);
 - **JWT rotation** with token family tracking
 - **Account lockout** after failed attempts (progressive delay)
 - **Security event logging** (token reuse, lockouts, suspicious activity)
+- **Auth middleware** (`requireAuth`, `requireRole`) for protected routes
+- **Request utilities** for IP/user-agent extraction and audit logging
 - **Rate limiting** (token bucket algorithm)
 - **CORS** and security headers
+
+### Real-Time Infrastructure
+
+- **SubscriptionManager** for in-memory publish/subscribe
+- **Postgres PubSub adapter** for horizontal scaling
+- **WebSocket wiring** for real-time client updates
 
 ## API Contracts
 
@@ -237,7 +246,7 @@ Tests use Vitest with a test database:
 pnpm --filter @abe-stack/server test
 
 # Run specific test file
-pnpm test -- --run apps/server/src/__tests__/auth.routes.test.ts
+pnpm test -- --run apps/server/src/modules/auth/utils/__tests__/password.test.ts
 ```
 
 Test utilities create mock `AppContext` for unit testing handlers.

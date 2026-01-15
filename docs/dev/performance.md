@@ -2,6 +2,17 @@
 
 Techniques and best practices for optimizing database queries, frontend performance, and overall application speed.
 
+## When to Read
+
+- When you observe slow queries, slow UI updates, or high resource usage.
+- Before shipping a feature with new data access patterns.
+
+## How to Use This Guide
+
+1. Start with **Quick Summary** to prioritize fixes.
+2. Apply **Database Performance** before UI micro-optimizations.
+3. Re-test after each change to confirm measurable gains.
+
 **Quick Reference:** See [CLAUDE.md](../AGENTS.md) for essentials.
 
 Quick Summary:

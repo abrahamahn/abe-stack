@@ -4,6 +4,17 @@
 
 Comprehensive architecture documentation for ABE Stack's layered architecture and package layout.
 
+## When to Read
+
+- When adding new dependencies or cross-package integrations.
+- When you need to understand layering or server `infra/modules` boundaries.
+
+## How to Use This Guide
+
+1. Start with **Quick Summary** and **Monorepo Structure**.
+2. Confirm **Dependency Flow** before adding imports.
+3. Review **Hexagonal Architecture** if touching server modules.
+
 ---
 
 ## Quick Summary
