@@ -1,4 +1,4 @@
-# ABE Stack
+# ABE Stack - The Fastest, Serious Full-Stack Starter You’ve Seen.
 
 **A full-stack TypeScript boilerplate for shipping real apps — fast.**
 
