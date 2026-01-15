@@ -27,7 +27,7 @@ WORKDIR /app
 FROM base AS deps
 
 # Copy only package files for better layer caching
-COPY pnpm-lock.yaml pnpm-workspace.yaml package.json .npmrc ./
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/server/package.json apps/server/
 COPY packages/core/package.json packages/core/
 COPY packages/ui/package.json packages/ui/

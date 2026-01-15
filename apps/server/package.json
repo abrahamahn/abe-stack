@@ -8,7 +8,7 @@
     "start": "node --env-file=../../config/.env/.env.production dist/main.js",
     "build": "tsc",
     "type-check": "tsc --noEmit",
-    "test": "VITEST_TARGET=server vitest run",
+    "test": "VITEST_TARGET=server vitest run --config ../../config/vitest.config.ts",
     "db:generate": "drizzle-kit generate --config ../../config/drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config ../../config/drizzle.config.ts",
     "db:push": "drizzle-kit push --config ../../config/drizzle.config.ts",
