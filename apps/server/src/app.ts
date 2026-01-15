@@ -26,7 +26,7 @@ import {
 } from './infra';
 import { registerRoutes } from './modules';
 import { createServer, listen } from './server';
-import { type AppContext } from './shared';
+import { type AppContext, type IServiceContainer } from './shared';
 
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
 
@@ -42,11 +42,11 @@ export interface AppOptions {
   storage?: StorageProvider;
 }
 
-export class App {
+export class App implements IServiceContainer {
   // Configuration
   readonly config: AppConfig;
 
-  // Infrastructure services
+  // Infrastructure services (IServiceContainer implementation)
   readonly db: DbClient;
   readonly email: EmailService;
   readonly storage: StorageProvider;
@@ -81,7 +81,6 @@ export class App {
     this._server = await createServer({
       config: this.config,
       db: this.db,
-      pubsub: this.pubsub,
     });
 
     // Register routes with context
@@ -120,6 +119,7 @@ export class App {
       db: this.db,
       email: this.email,
       storage: this.storage,
+      pubsub: this.pubsub,
       log: this._server.log,
     };
   }
@@ -211,7 +211,14 @@ export function createTestApp(
       refreshToken: { expiryDays: 7, gracePeriodSeconds: 30 },
       argon2: { type: 2, memoryCost: 1024, timeCost: 1, parallelism: 1 },
       password: { minLength: 8, maxLength: 64, minZxcvbnScore: 2 },
-      lockout: { maxAttempts: 10, durationMs: 1800000, progressiveDelay: false, baseDelayMs: 0 },
+      lockout: {
+        maxAttempts: 10,
+        lockoutDurationMs: 1800000,
+        progressiveDelay: false,
+        baseDelayMs: 0,
+      },
+      bffMode: false,
+      proxy: { trustProxy: false, trustedProxies: [], maxProxyDepth: 1 },
       rateLimit: {
         login: { max: 100, windowMs: 60000 },
         register: { max: 100, windowMs: 60000 },

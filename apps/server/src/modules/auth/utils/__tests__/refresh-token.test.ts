@@ -1,7 +1,6 @@
 // apps/server/src/modules/auth/utils/__tests__/refresh-token.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { authConfig } from '../../../../config/auth';
 import { refreshTokenFamilies, refreshTokens } from '../../../../infra/database';
 import {
   cleanupExpiredTokens,
@@ -12,6 +11,10 @@ import {
 } from '../index';
 
 import type { DbClient } from '../../../../infra/database';
+
+// Test configuration (matches defaults from auth.config.ts)
+const TEST_REFRESH_TOKEN_EXPIRY_DAYS = 7;
+const TEST_REFRESH_TOKEN_GRACE_PERIOD_SECONDS = 30;
 
 interface TokenFamily {
   id: string;
@@ -199,7 +202,7 @@ describe('Refresh Token Rotation', () => {
       await createRefreshTokenFamily(db, 'user-123');
 
       expect(tokens).toHaveLength(1);
-      const expiryDays = authConfig.refreshTokenExpiryDays;
+      const expiryDays = TEST_REFRESH_TOKEN_EXPIRY_DAYS;
       const expectedExpiry = Date.now() + expiryDays * 24 * 60 * 60 * 1000;
       const firstToken = tokens[0];
       if (firstToken === undefined) throw new Error('Expected token');
@@ -383,7 +386,7 @@ describe('Refresh Token Rotation', () => {
 
       // Simulate recent token (within grace period)
       const now = Date.now();
-      const gracePeriod = authConfig.refreshTokenGracePeriodSeconds * 1000;
+      const gracePeriod = TEST_REFRESH_TOKEN_GRACE_PERIOD_SECONDS * 1000;
       const firstToken = tokens[0];
       if (firstToken === undefined) throw new Error('Expected token');
       firstToken.createdAt = new Date(now - gracePeriod / 2);
@@ -402,7 +405,7 @@ describe('Refresh Token Rotation', () => {
       await createRefreshTokenFamily(db, 'user-123');
 
       // Simulate old token (outside grace period)
-      const gracePeriod = authConfig.refreshTokenGracePeriodSeconds * 1000;
+      const gracePeriod = TEST_REFRESH_TOKEN_GRACE_PERIOD_SECONDS * 1000;
       const firstToken = tokens[0];
       if (firstToken === undefined) throw new Error('Expected token');
       firstToken.createdAt = new Date(Date.now() - gracePeriod * 2);

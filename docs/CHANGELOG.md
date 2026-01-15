@@ -1,12 +1,79 @@
 # ABE Stack Changelog
 
-**Last Updated: January 12, 2026**
+**Last Updated: January 15, 2026**
 
 All notable changes to this project are documented here. Format follows semantic versioning principles.
 
 ---
 
+## 2026-01-15
+
+### Server Architecture Refactoring (In Progress)
+
+Major refactoring of the server application with improved separation of concerns:
+
+- **New Config System:**
+  - `config/loader.ts` - Centralized configuration loading
+  - `config/types.ts` - Configuration type definitions
+  - Split config files: `auth.config.ts`, `database.config.ts`, `email.config.ts`, `server.config.ts`, `storage.config.ts`
+
+- **Database Infrastructure:**
+  - `infra/database/client.ts` - Database client management
+  - `infra/database/schema/` - Schema definitions (auth.ts, users.ts)
+  - `infra/database/utils/` - Database utilities (optimistic locking)
+
+- **New Modules:**
+  - `modules/admin/` - Admin handlers and service
+  - `modules/users/` - User handlers and service
+  - Enhanced `modules/auth/service.ts` - Auth business logic extracted from handlers
+
+- **Shared Layer:**
+  - `shared/constants.ts` - Centralized constants
+  - `shared/errors.ts` - Custom error types
+  - `shared/types.ts` - Shared type definitions
+
+- **Infrastructure Enhancements:**
+  - `infra/pubsub/` - PubSub infrastructure with subscription manager
+  - `infra/email/` - Email service with templates
+  - `infra/storage/` - Storage providers with factory pattern
+  - `infra/security/` - Security lockout and types
+
+- **Entry Points:**
+  - `main.ts` - Application entry point
+  - `app.ts` - Fastify app configuration
+  - `server.ts` - Server initialization
+
+---
+
+## 2026-01-13
+
+### Session - Build Tooling & Codebase Simplification
+
+- **Pre-commit Type-check:** Added TypeScript type-checking to pre-commit hooks
+- **pnpm Update:** Updated pnpm lockfile
+- **Codebase Refactoring:** General code simplification and cleanup
+- **Linting:** Applied lint fixes and formatting
+
+---
+
 ## 2026-01-12
+
+### Session - Hybrid Infra/Modules Architecture
+
+Adopted a hybrid architecture separating infrastructure from business modules:
+
+- **Infrastructure Layer (`infra/`):**
+  - `ctx.ts` - ServerEnvironment type definition
+  - `factory.ts` - createEnvironment, createMockEnvironment factories
+  - `email/` - ConsoleEmailService, SmtpEmailService implementations
+  - `security/` - Login lockout, security events
+
+- **Modules Layer (`modules/`):**
+  - `auth/` - Authentication middleware, handlers, utilities (JWT, password, refresh-token)
+
+- **Pattern Change:**
+  - Routes now import handlers from `modules/auth`
+  - Backwards-compatible re-exports maintained in `lib/` and `services/`
 
 ### Session - ServerEnvironment Pattern & Custom Error Types
 
@@ -72,6 +139,57 @@ Added type-safe custom error classes with HTTP status codes to `packages/core`:
 **Part 3: Configuration Fix**
 
 - Renamed `.npmrc` to `.pnpmrc` to fix npm warning about unknown `store-dir` config
+
+---
+
+## 2026-01-10
+
+### Session - Phase 2 Security Hardening Complete
+
+**Database Transaction Support:**
+
+- Created transaction wrapper utilities with `withTransaction()` helper
+- Applied atomic transactions to registration, login, and token rotation
+- Prevents orphaned database records during auth operations
+
+**Token Reuse Security Event Logging:**
+
+- Added `security_events` table with comprehensive indexing
+- Created security event logging infrastructure with severity levels
+- Logs token reuse attempts, family revocations, account lockouts, admin unlocks
+- Added metrics and user activity query functions
+
+**IP Extraction Proxy Validation:**
+
+- Enhanced IP extraction with proxy validation
+- Only trusts x-forwarded-for when `TRUST_PROXY=true`
+- Validates immediate proxy against `TRUSTED_PROXIES` list
+- Limits proxy chain depth to prevent spoofing
+- Supports CIDR notation for trusted proxy ranges
+
+**Admin Unlock Endpoint:**
+
+- Added `POST /api/admin/auth/unlock` endpoint
+- Requires admin role with JWT authentication
+- Logs unlock events with admin user ID for audit trail
+
+**Error Message Audit:**
+
+- Centralized all error messages in constants
+- Removed inline error strings from route handlers
+- Prepared for future internationalization (i18n)
+
+### Session - Documentation Reorganization
+
+- Reorganized documentation into hierarchical structure under `docs/`
+- Created consolidated README.md, CHANGELOG.md, and ROADMAP.md
+- Organized architecture docs under `docs/architecture/`
+- Moved realtime docs to `docs/architecture/realtime/`
+- Security docs now under `docs/security/`
+- Development guides under `docs/dev/`
+- Fixed TypeScript strict mode errors in test files
+- Added proper null checks to array access in tests
+- Installed `@types/nodemailer` for email service
 
 ---
 
@@ -220,6 +338,24 @@ Added type-safe custom error classes with HTTP status codes to `packages/core`:
 
 ## 2025-12-30
 
+### Package Releases - v1.1.0
+
+**@abe-stack/core (formerly @abeahn/shared) v1.1.0:**
+
+- New secondary export paths for granular imports:
+  - `@abe-stack/core/contracts` - Import only API contracts (ts-rest)
+  - `@abe-stack/core/utils` - Import only utility functions (tokenStore)
+  - `@abe-stack/core/env` - Import only environment validation
+- Main export continues to work (100% backward compatible)
+
+**@abe-stack/sdk (formerly @abeahn/api-client) v1.1.0:**
+
+- Secondary export paths for granular imports:
+  - `@abe-stack/sdk/types` - Import only TypeScript types
+  - `@abe-stack/sdk/client` - Import only the API client factory
+  - `@abe-stack/sdk/react-query` - Import only React Query integration
+- Better tree-shaking for type-only imports
+
 ### UI Refinements (Sessions 20-52)
 
 - ResizablePanel: collapsed styling, separator drag callbacks, invertResize support
@@ -260,3 +396,164 @@ Added type-safe custom error classes with HTTP status codes to `packages/core`:
 - **API Client:** Type-safe client with bearer token injection
 - **Testing:** Vitest config, Playwright scaffold
 - **Infrastructure:** Docker, db restart scripts, export:ui script
+
+---
+
+## Package Release History
+
+### @abe-stack/ui
+
+#### [1.1.0] - 2026-01-03
+
+**Added:**
+
+- `ThemeProvider` component with `useTheme` hook for theme context
+- `useKeyboardShortcuts` hook for global keyboard shortcuts with modifier support
+- `useThemeMode` hook for theme mode management (system/light/dark)
+- `usePanelConfig` hook for panel configuration with localStorage persistence
+- `Kbd` component for keyboard key display with size variants
+- `FormField` component with label, error message, helper text support
+- `LoadingContainer` component combining Spinner and Text
+- `EnvironmentBadge` component for environment status display
+- `VersionBadge` component for version display
+- `ProtectedRoute` component for auth-protected routes
+- `Toaster` component for toast notifications
+- `HistoryProvider` and `useHistoryNav` hook for history navigation
+- CSS utilities in `utilities.css` for flex, gap, padding, margin, typography
+
+**Changed:**
+
+- `ResizablePanel` now supports controlled mode with `size` prop
+- `ResizablePanelGroup` now supports `reverse` prop for flex direction
+- Consolidated component styles into `components.css`
+- Moved layout styles into `layouts.css`
+
+**Fixed:**
+
+- `Image` component now resets loading/error state when `src` prop changes
+- `ResizablePanel` collapsed panel styling and animation
+- `ScrollArea` scrollbar visibility and fade behavior
+- Dark mode contrast improvements for toast, tooltip, and text elements
+
+#### [1.0.0] - 2026-01-01
+
+**Added:**
+
+- Modern React testing stack (user-event, msw, vitest-axe)
+- Comprehensive test coverage for 21+ element components
+- MSW configuration for network mocking
+- Accessibility testing with vitest-axe
+
+**Changed:**
+
+- Enhanced component tests with userEvent instead of fireEvent
+- Added edge case coverage for all interactive components
+
+**Fixed:**
+
+- `Image` component state reset on src change (found through TDD)
+- `Select` keyboard navigation now skips disabled options
+- `RadioGroup` context propagation for name/value sharing
+
+#### [0.9.0] - 2025-12-31
+
+**Added:**
+
+- Hooks: useDisclosure, useControllableState, useClickOutside, useMediaQuery
+- Theme tokens: colors, spacing, typography
+- Layout components: Container, AuthLayout, SidebarLayout, StackedLayout
+- Utils: cn (classname utility)
+- ComponentGallery page, Toaster with zustand, FocusTrap, Polymorphic Text/Heading
+
+#### [0.8.0] - 2025-12-30
+
+**Added:**
+
+- Overlay, Modal, Drawer, Progress, Skeleton components
+- Alert, InputElement, TextArea, Select elements
+- Dropdown/MenuItem, Pagination, Table, Popover, Switch, Checkbox, Radio elements
+
+#### [0.7.0] - 2025-12-29
+
+**Added:**
+
+- Dialog compound API (Root, Trigger, Overlay, Content, Title, Description)
+- RTL tests for Tabs, Dropdown, Select
+- Keyboard/focus tests for interactive components
+- Dialog focus trap and focus restoration
+
+#### [0.6.0] - 2025-12-29
+
+**Added:**
+
+- Initial UI element tests for Accordion and Modal
+- Accordion toggle/aria-expanded tests
+- Modal open/close via overlay tests
+
+#### [0.5.0] - 2025-12-29
+
+**Added:**
+
+- Pruned elements to lean Radix-style set (~25 components)
+- Accordion, Alert, Avatar, Badge, Card, Checkbox, Divider, and more
+
+#### [0.4.0] - 2025-12-29
+
+**Added:**
+
+- Tooltip, Card, Pill, Link, Tabs, Accordion, Toast elements
+- Icon, Avatar, IconButton, Chip, Badge, Kbd, Code elements
+- Divider, Spacer, Grid, Container, VisuallyHidden elements
+
+---
+
+### @abe-stack/core (formerly @abeahn/shared)
+
+#### [1.1.0] - 2025-12-30
+
+**Added:**
+
+- Secondary export paths for granular imports:
+  - `@abe-stack/core/contracts` - API contracts (ts-rest)
+  - `@abe-stack/core/utils` - Utility functions (tokenStore)
+  - `@abe-stack/core/env` - Environment validation
+- Publishing configuration for npm
+
+**Migration:** No breaking changes - all existing imports continue to work.
+
+#### [1.0.0] - Initial Release
+
+**Added:**
+
+- API contracts with ts-rest for type-safe client-server communication
+- Authentication contracts (login, register, refresh, logout)
+- User management contracts
+- Storage configuration utilities
+- Token store for client-side token management
+- Environment validation with Zod schemas
+
+---
+
+### @abe-stack/sdk (formerly @abeahn/api-client)
+
+#### [1.1.0] - 2025-12-30
+
+**Added:**
+
+- Secondary export paths for granular imports:
+  - `@abe-stack/sdk/types` - TypeScript types only
+  - `@abe-stack/sdk/client` - API client factory only
+  - `@abe-stack/sdk/react-query` - React Query integration only
+- Explicit `exports` field in package.json
+
+**Migration:** No breaking changes - separating React Query from base client reduces bundle size in non-React environments.
+
+#### [1.0.0] - Initial Release
+
+**Added:**
+
+- Type-safe API client using ts-rest
+- React Query integration with custom hooks
+- Automatic request/response typing
+- Token-based authentication support
+- Error handling utilities

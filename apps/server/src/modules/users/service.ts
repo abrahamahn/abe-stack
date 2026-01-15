@@ -10,7 +10,7 @@ import { eq } from 'drizzle-orm';
 
 import { users, type DbClient } from '../../infra';
 
-import type { UserRole } from '@abe-stack/contracts';
+import type { UserRole } from '@abe-stack/core';
 
 export interface User {
   id: string;

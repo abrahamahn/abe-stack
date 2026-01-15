@@ -1,5 +1,5 @@
 // packages/api-client/src/client.ts
-import { addAuthHeader } from '@abe-stack/contracts';
+import { addAuthHeader } from '@abe-stack/core';
 
 import type {
   AuthResponse,
@@ -8,7 +8,7 @@ import type {
   RefreshResponse,
   RegisterRequest,
   UserResponse,
-} from '@abe-stack/contracts';
+} from '@abe-stack/core';
 
 export interface ApiClientConfig {
   baseUrl: string;

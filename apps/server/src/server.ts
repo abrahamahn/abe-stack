@@ -8,15 +8,15 @@
  */
 
 import cookie from '@fastify/cookie';
-import cors from '@fastify/cors';
 import csrfProtection from '@fastify/csrf-protection';
-import helmet from '@fastify/helmet';
-import rateLimit from '@fastify/rate-limit';
 import { sql } from 'drizzle-orm';
 import Fastify from 'fastify';
 
+import { applyCors, applySecurityHeaders, handlePreflight } from './infra/http';
+import { RateLimiter } from './infra/rate-limit';
+
 import type { AppConfig } from './config';
-import type { DbClient, SubscriptionManager } from './infra';
+import type { DbClient } from './infra';
 import type { FastifyInstance } from 'fastify';
 
 // ============================================================================
@@ -26,7 +26,6 @@ import type { FastifyInstance } from 'fastify';
 export interface ServerDependencies {
   config: AppConfig;
   db: DbClient;
-  pubsub: SubscriptionManager;
 }
 
 // ============================================================================
@@ -37,7 +36,7 @@ export interface ServerDependencies {
  * Create and configure a Fastify server instance
  */
 export async function createServer(deps: ServerDependencies): Promise<FastifyInstance> {
-  const { config, db, pubsub } = deps;
+  const { config, db } = deps;
   const isProd = config.env === 'production';
 
   // Logger configuration
@@ -61,43 +60,55 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
   // Register plugins
   await registerPlugins(server, config);
 
-  // Decorate with services for routes that need direct access
-  server.decorate('db', db);
-  server.decorate('pubsub', pubsub);
-
-  // Register core routes
+  // Register core routes (health check needs db for connectivity test)
   registerCoreRoutes(server, db);
 
   return server;
 }
 
 // ============================================================================
-// Plugins
+// Plugins & Middleware
 // ============================================================================
 
 async function registerPlugins(server: FastifyInstance, config: AppConfig): Promise<void> {
   const isProd = config.env === 'production';
 
-  // CORS
-  await server.register(cors, {
-    origin: config.server.cors.origin,
-    credentials: config.server.cors.credentials,
-    methods: config.server.cors.methods,
-  });
+  // Rate limiter instance (Token Bucket algorithm)
+  const limiter = new RateLimiter({ windowMs: 60_000, max: 100 });
 
-  // Security headers
-  await server.register(helmet);
+  // Security headers, CORS, and rate limiting
+  server.addHook('onRequest', async (req, res) => {
+    // Security headers (replaces @fastify/helmet)
+    applySecurityHeaders(res);
 
-  // Rate limiting (global config, routes can override)
-  await server.register(rateLimit, {
-    global: false,
-    max: 100,
-    timeWindow: '1 minute',
-    addHeaders: {
-      'x-ratelimit-limit': true,
-      'x-ratelimit-remaining': true,
-      'x-ratelimit-reset': true,
-    },
+    // CORS (replaces @fastify/cors)
+    applyCors(req, res, {
+      origin: config.server.cors.origin,
+      credentials: config.server.cors.credentials,
+      allowedMethods: config.server.cors.methods,
+    });
+
+    // Handle CORS preflight requests (skip rate limiting for OPTIONS)
+    if (handlePreflight(req, res)) {
+      return;
+    }
+
+    // Rate limiting (replaces @fastify/rate-limit)
+    const rateLimitInfo = limiter.check(req.ip);
+
+    // Set rate limit headers
+    res.header('X-RateLimit-Limit', String(rateLimitInfo.limit));
+    res.header('X-RateLimit-Remaining', String(rateLimitInfo.remaining));
+    res.header('X-RateLimit-Reset', String(Math.ceil(rateLimitInfo.resetMs / 1000)));
+
+    if (!rateLimitInfo.allowed) {
+      res.status(429).send({
+        error: 'Too Many Requests',
+        message: 'Rate limit exceeded. Please try again later.',
+        retryAfter: Math.ceil(rateLimitInfo.resetMs / 1000),
+      });
+      return;
+    }
   });
 
   // Cookies

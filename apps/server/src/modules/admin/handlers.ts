@@ -10,7 +10,7 @@ import { extractAndVerifyToken, extractRequestInfo, type RequestWithCookies } fr
 
 import { unlockUserAccount, UserNotFoundError } from './service';
 
-import type { UnlockAccountRequest, UnlockAccountResponse } from '@abe-stack/contracts';
+import type { UnlockAccountRequest, UnlockAccountResponse } from '@abe-stack/core';
 import type { FastifyRequest } from 'fastify';
 
 /**

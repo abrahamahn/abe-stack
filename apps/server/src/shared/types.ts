@@ -129,22 +129,54 @@ export interface StorageService {
 }
 
 // ============================================================================
-// App Context (DI Container Output)
+// Service Container Interface (Composition Root)
 // ============================================================================
 
 import type { AppConfig } from '../config';
 import type { DbClient } from '../infra/database';
+import type { SubscriptionManager } from '../infra/pubsub';
 import type { StorageProvider } from '../infra/storage';
 import type { FastifyBaseLogger } from 'fastify';
 
 /**
- * Application context passed to all handlers
- * This is what handlers receive - a clean interface to all services
+ * Service Container Interface
+ *
+ * Defines the contract for the application's dependency injection container.
+ * The App class implements this interface, providing a single source of truth
+ * for all infrastructure services.
+ *
+ * Benefits:
+ * - Testable: Mock individual services in tests
+ * - Explicit: All dependencies are visible and typed
+ * - Portable: Framework-agnostic interface (only logger is Fastify-specific)
  */
-export interface AppContext {
-  config: AppConfig;
-  db: DbClient;
-  email: EmailService;
-  storage: StorageProvider;
+export interface IServiceContainer {
+  /** Application configuration */
+  readonly config: AppConfig;
+
+  /** Database client */
+  readonly db: DbClient;
+
+  /** Email service for sending notifications */
+  readonly email: EmailService;
+
+  /** Storage provider for file uploads */
+  readonly storage: StorageProvider;
+
+  /** Pub/sub manager for real-time subscriptions */
+  readonly pubsub: SubscriptionManager;
+}
+
+// ============================================================================
+// App Context (Handler Interface)
+// ============================================================================
+
+/**
+ * Application context passed to all handlers
+ * This is what handlers receive - a clean interface to all services.
+ * Extends IServiceContainer with runtime-specific dependencies (logger).
+ */
+export interface AppContext extends IServiceContainer {
+  /** Logger instance (from Fastify) */
   log: FastifyBaseLogger;
 }

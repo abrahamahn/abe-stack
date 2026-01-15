@@ -1,5 +1,5 @@
 {
-  "name": "@abe-stack/contracts",
+  "name": "@abe-stack/core",
   "version": "1.1.0",
   "description": "API contracts, shared types, and validation schemas for abe-stack",
   "main": "dist/index.js",

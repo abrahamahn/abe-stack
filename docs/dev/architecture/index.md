@@ -1,32 +1,263 @@
-# ABE Stack Architecture Guide
+# ABE Stack Architecture
 
-Concrete implementation overview for ABE Stack's layered architecture and package layout. This file is intentionally short. Use the modules below for details.
+**Last Updated: January 15, 2026**
+
+Comprehensive architecture documentation for ABE Stack's layered architecture and package layout.
+
+---
 
 ## Quick Summary
 
-- Four layers: Presentation, State, Business Logic, Data.
-- One-way dependencies: apps -> packages -> shared.
-- Framework-agnostic core in `packages/core`.
+- **Four layers**: Presentation → State → Business Logic → Data
+- **One-way dependencies**: `apps` → `packages` → `core`
+- **Framework-agnostic core** in `packages/core`
+- **Hexagonal architecture** on server with `infra/modules` separation
 
-## Modules
+---
 
-- `./layers.md` → Layer responsibilities and boundaries.
-- `./dependencies.md` → Dependency direction rules.
-- `./structure.md` → Package layout and naming.
-- `./patterns.md` → Structural patterns in practice.
-- `./env.md` → Environment config shape and flow.
-- `./testing.md` → Architecture-aware test organization.
-- `./appendix-examples.md` → Concrete code examples.
+## Monorepo Structure
 
-## Key Patterns/Commands
+```
+abe-stack/
+├── apps/
+│   ├── web/              # Vite + React frontend
+│   │   └── src/
+│   │       ├── features/     # Feature modules (auth, dashboard)
+│   │       ├── pages/        # Standalone pages
+│   │       ├── api/          # API client setup
+│   │       ├── app/          # App root and providers
+│   │       └── config/       # App configuration
+│   ├── server/           # Fastify API server
+│   │   └── src/
+│   │       ├── modules/      # Feature modules (auth, users, admin)
+│   │       ├── infra/        # Infrastructure layer
+│   │       │   ├── database/ # Drizzle ORM, schemas
+│   │       │   ├── storage/  # S3/local file storage
+│   │       │   ├── pubsub/   # Pub/sub subscriptions
+│   │       │   ├── security/ # Lockout, audit logging
+│   │       │   ├── email/    # Email service
+│   │       │   ├── crypto/   # JWT utilities
+│   │       │   ├── http/     # HTTP utilities
+│   │       │   └── rate-limit/
+│   │       ├── config/       # Server configuration
+│   │       └── shared/       # Server-specific shared code
+│   └── desktop/          # Electron desktop app
+├── packages/
+│   ├── core/             # Shared contracts, validation, stores
+│   ├── ui/               # Reusable React components
+│   └── sdk/              # Type-safe API client + React Query hooks
+├── config/               # Shared configs (tsconfig, prettier)
+└── docs/                 # Documentation
+```
 
-| Name             | Description                   | Link                |
-| ---------------- | ----------------------------- | ------------------- |
-| Layer boundaries | What belongs where            | `./layers.md`       |
-| Dependency flow  | Enforced direction of imports | `./dependencies.md` |
-| Structure map    | Folder and naming conventions | `./structure.md`    |
+### Folder Conventions
 
-See Also:
+| Location                  | Purpose                                      |
+| ------------------------- | -------------------------------------------- |
+| `apps/web/src/features`   | Feature modules (auth, dashboard)            |
+| `apps/web/src/pages`      | Standalone pages                             |
+| `apps/server/src/modules` | API feature modules                          |
+| `apps/server/src/infra`   | Infrastructure (database, storage, security) |
+| `packages/core/src`       | Shared contracts, validation, stores         |
+| `packages/ui/src`         | Reusable UI components                       |
+| `packages/sdk/src`        | Type-safe API client + React Query hooks     |
 
-- `../principles/index.md`
-- `../patterns/index.md`
+---
+
+## Layers
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                   Presentation Layer                     │
+│         (React Components, UI Elements, Hooks)          │
+├─────────────────────────────────────────────────────────┤
+│                     State Layer                          │
+│           (React Query, Context, Local State)           │
+├─────────────────────────────────────────────────────────┤
+│                  Business Logic Layer                    │
+│          (Services, Validators, Transformers)           │
+├─────────────────────────────────────────────────────────┤
+│                     Data Layer                           │
+│         (API Client, Database, Storage, Cache)          │
+└─────────────────────────────────────────────────────────┘
+```
+
+| Layer              | Responsibilities                                               | Avoid                         |
+| ------------------ | -------------------------------------------------------------- | ----------------------------- |
+| **Presentation**   | Render UI, handle interactions, UI-only state                  | Business logic, data fetching |
+| **State**          | Server state caching, loading/error states, optimistic updates | Business rules, DB logic      |
+| **Business Logic** | Domain rules, validation (Zod), transformations                | React hooks, UI concerns      |
+| **Data**           | API routes, auth, DB schemas, queries                          | UI rendering                  |
+
+### Cross-Layer Rules
+
+- React is a renderer only → Keep logic in `packages/core`
+- API client is the boundary between UI and server
+- Keep validation in shared to enforce contracts across apps
+
+---
+
+## Dependency Flow
+
+```
+Frontend Apps (web, desktop)
+        │
+        ▼
+packages/ui, packages/sdk
+        │
+        ▼
+   packages/core
+
+Backend App (server)
+        │
+        ▼
+apps/server/src/infra/*
+        │
+        ▼
+   packages/core
+```
+
+### Rules
+
+| Rule                    | Description                                      |
+| ----------------------- | ------------------------------------------------ |
+| No reverse deps         | `packages/*` cannot import from `apps`           |
+| No cross-app imports    | `web` cannot import from `server`                |
+| Shared in `core`        | Contracts and validation live in `packages/core` |
+| Server infra internal   | `infra/*` modules are internal to `apps/server`  |
+| Framework-agnostic core | `packages/core` has no React imports             |
+
+### Package Dependencies
+
+| Package           | Can Import From    |
+| ----------------- | ------------------ |
+| `@abe-stack/core` | External deps only |
+| `@abe-stack/ui`   | `@abe-stack/core`  |
+| `@abe-stack/sdk`  | `@abe-stack/core`  |
+| `apps/web`        | All packages       |
+| `apps/server`     | `@abe-stack/core`  |
+
+---
+
+## Hexagonal Architecture (Server)
+
+The server implements **hexagonal architecture** (ports & adapters) to isolate business logic from infrastructure concerns.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        modules/                              │
+│   (Business Logic: auth, users, admin - the "core")         │
+├─────────────────────────────────────────────────────────────┤
+│                         infra/                               │
+│   (Adapters: database, email, storage, pubsub, security)    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+| Layer        | Purpose                                 | Examples                                     |
+| ------------ | --------------------------------------- | -------------------------------------------- |
+| **modules/** | Business logic, use cases, domain rules | `auth/service.ts`, `users/routes.ts`         |
+| **infra/**   | External system adapters                | `database/`, `email/`, `storage/`, `pubsub/` |
+
+**Key benefits**:
+
+- Swap infrastructure without changing business logic (e.g., switch email providers)
+- Test business logic in isolation with mocked adapters
+- Clear boundaries prevent infrastructure concerns from leaking into domain code
+
+**Rules**:
+
+- `modules/` can import from `infra/` (dependency flows inward)
+- `infra/` never imports from `modules/`
+- Each `infra/` module exports a clean interface via `index.ts`
+
+---
+
+## Key Patterns
+
+### DRY Enforcement
+
+- Extract shared logic to `packages/core`
+- Use `packages/ui` only for reusable UI components
+- Keep API contracts in shared, consume from server/client
+
+### Framework-Agnostic Core
+
+- Shared logic must not import React or platform APIs
+- Provide React hooks in `packages/sdk` or app layers
+
+### API Client Split
+
+- Framework-agnostic client: `packages/sdk/src/client.ts`
+- React Query hooks: `packages/sdk/src/react-query.ts`
+
+### Environment Configuration
+
+- Define schemas with Zod in `packages/core/src/env.ts`
+- Validate at startup for server apps
+- Use `VITE_`-prefixed variables for web client
+- Keep secrets server-side only
+
+---
+
+## Testing Organization
+
+| Test Type         | Location                    | Purpose             |
+| ----------------- | --------------------------- | ------------------- |
+| Unit tests        | `packages/core/__tests__`   | Business logic      |
+| Integration tests | `apps/server/__tests__`     | Routes + DB         |
+| Component tests   | `apps/web/src/**/__tests__` | UI components       |
+| E2E tests         | `apps/web/src/test/e2e`     | Critical user flows |
+
+**Colocation**: Tests live in `__tests__` folders next to source files.
+
+---
+
+## Future: V5 Proposal
+
+**Status**: Proposed
+
+Restructure from role-based to layer-based organization:
+
+```
+abe-stack/
+├── frontend/         # web, desktop, ui, sdk
+├── backend/          # server, jobs
+├── shared/           # contracts, types, validation
+└── config/
+```
+
+**Benefits**: Clear layer separation, build optimization, enforced boundaries.
+
+**Migration**: 5 PRs (structure → frontend → backend → shared → cleanup).
+
+---
+
+## Future: Real-Time Features
+
+Based on CHET-Stack patterns. **Phase 1 (Environment Objects) already complete** via `AppContext`.
+
+| Phase | Feature                          | Status      |
+| ----- | -------------------------------- | ----------- |
+| 1     | Environment objects (AppContext) | ✅ Complete |
+| 2     | Operation types                  | Planned     |
+| 3     | Record cache + hooks             | Planned     |
+| 4     | WebSocket sync                   | Planned     |
+| 5     | Offline support                  | Planned     |
+
+**Key patterns to adopt**:
+
+- Operation-based sync (send operations, not full records)
+- Record cache with subscriptions
+- Offline queue with IndexedDB
+
+---
+
+## See Also
+
+- [Principles & Standards](../principles/index.md)
+- [Testing Guide](../testing/index.md)
+- [Workflows](../workflows/index.md)
+
+---
+
+_Last Updated: January 15, 2026_

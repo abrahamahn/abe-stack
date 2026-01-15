@@ -2,7 +2,7 @@
 import '../styles/elements.css';
 import { ToastContainer } from '../components/Toast';
 
-import type { ToastMessage } from '@abe-stack/contracts';
+import type { ToastMessage } from '@abe-stack/core';
 import type { FC } from 'react';
 
 export type ToasterProps = {

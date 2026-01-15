@@ -15,7 +15,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@abe-stack/contracts": "workspace:*",
+    "@abe-stack/core": "workspace:*",
     "@abe-stack/ui": "workspace:*",
     "@tanstack/react-query": "^5.59.9",
     "react": "^19.2.3",
