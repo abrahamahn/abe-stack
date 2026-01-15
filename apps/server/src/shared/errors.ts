@@ -203,3 +203,21 @@ export function toAppError(error: unknown): AppError {
 
   return new InternalError('An unexpected error occurred');
 }
+
+// ============================================================================
+// Response Types
+// ============================================================================
+
+export type ApiErrorResponse = {
+  ok: false;
+  error: {
+    code: string;
+    message: string;
+    details?: Record<string, unknown>;
+    retryAfter?: number;
+  };
+};
+
+export type ApiSuccessResponse<T> = { ok: true; data: T };
+
+export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;

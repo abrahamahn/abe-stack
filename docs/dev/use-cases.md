@@ -10,6 +10,12 @@ Quick Summary:
 - Prefer targeted, context-aware questions.
 - Use structured asks for refactors and migrations.
 
+## How to Use This Guide
+
+- Pick the use case closest to your task.
+- Copy the example prompt and replace placeholders with real files and goals.
+- Add required constraints (tests, tooling, deadlines) up front.
+
 ## Modules
 
 - None. This page is the canonical use-case prompt library.

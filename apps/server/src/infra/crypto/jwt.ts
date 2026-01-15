@@ -140,14 +140,38 @@ export function sign(payload: object, secret: string, options?: SignOptions): st
  * Throws JwtError if token is invalid, expired, or signature doesn't match
  */
 export function verify(token: string, secret: string): JwtPayload {
+  if (typeof token !== 'string') {
+    throw new JwtError('Token must be a string', 'INVALID_TOKEN');
+  }
+
   // Split token into parts
   const parts = token.split('.');
-  const encodedHeader = parts[0];
-  const encodedPayload = parts[1];
-  const signature = parts[2];
+  if (parts.length !== 3) {
+    throw new JwtError('Invalid token format', 'MALFORMED_TOKEN');
+  }
+
+  const [encodedHeader, encodedPayload, signature] = parts;
 
   if (!encodedHeader || !encodedPayload || !signature) {
     throw new JwtError('Invalid token format', 'MALFORMED_TOKEN');
+  }
+
+  // 1. Verify Header first to ensure alg is HS256
+  // This prevents "none" algorithm attacks
+  let header: unknown;
+  try {
+    header = JSON.parse(base64UrlDecode(encodedHeader));
+  } catch {
+    throw new JwtError('Invalid header', 'MALFORMED_TOKEN');
+  }
+
+  if (
+    !header ||
+    typeof header !== 'object' ||
+    (header as Record<string, unknown>).alg !== 'HS256' ||
+    (header as Record<string, unknown>).typ !== 'JWT'
+  ) {
+    throw new JwtError('Algorithm not supported', 'INVALID_TOKEN');
   }
 
   // Verify signature using constant-time comparison

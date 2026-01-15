@@ -16,6 +16,14 @@ Primary goal: reliable refactoring with fast, focused tests driven by TDD.
 - Use integration tests for routes + DB.
 - Use E2E tests for critical user flows only (~10% of tests).
 
+## How to Use This Guide
+
+1. Read **Testing Overview** and **Testing Levels** for strategy.
+2. Use **Testing Organization** to place new tests correctly.
+3. Follow **Testing Commands and Workflow** while iterating.
+4. Reference **Testing Setup & Configuration** when wiring tools.
+5. Use **Best Practices** and **Edge Cases** to expand coverage.
+
 ## Testing Overview
 
 Goal: reliable refactoring with fast, focused tests guided by TDD.

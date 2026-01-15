@@ -4,6 +4,17 @@
 
 Comprehensive guide to principles, coding standards, patterns, and anti-patterns.
 
+## When to Read
+
+- Before any code change or refactor.
+- When creating new patterns or shared utilities.
+
+## How to Apply
+
+1. Review **Principles** for non-negotiables.
+2. Use **Coding Standards** for implementation details.
+3. Check **Patterns** and **Anti-Patterns** before writing new code.
+
 ---
 
 ## Vision
