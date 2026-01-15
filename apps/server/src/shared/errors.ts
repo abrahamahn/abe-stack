@@ -118,14 +118,14 @@ export class WeakPasswordError extends BadRequestError {
 }
 
 export class EmailAlreadyExistsError extends ConflictError {
-  constructor() {
-    super('Email already registered', 'EMAIL_EXISTS');
+  constructor(message = 'Email already registered') {
+    super(message, 'EMAIL_EXISTS');
   }
 }
 
 export class UserNotFoundError extends NotFoundError {
-  constructor() {
-    super('User not found', 'USER_NOT_FOUND');
+  constructor(message = 'User not found') {
+    super(message, 'USER_NOT_FOUND');
   }
 }
 

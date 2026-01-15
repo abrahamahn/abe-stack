@@ -30,13 +30,13 @@ The real-time system provides:
 
 ## Status
 
-These features are planned for implementation after the V5 architecture migration. See [ROADMAP.md](../../../ROADMAP.md) for timeline.
+These features are planned for implementation after the V5 architecture migration. See [ROADMAP.md](../../ROADMAP.md) for timeline.
 
 ## See Also
 
-- [Architecture Overview](../index.md)
-- [CHET-Stack Comparison](../chet-comparison.md)
-- [V5 Proposal](../v5-proposal.md)
+- [Architecture Overview](../../dev/architecture.md)
+- [Real-Time Features](../../dev/architecture.md#future-real-time-features)
+- [V5 Proposal](../../dev/architecture.md#future-v5-proposal)
 
 ---
 

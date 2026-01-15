@@ -102,6 +102,6 @@ apps/web/src/features/demo/registry/
 
 ## Related Documentation
 
-- [Roadmap](../ROADMAP.md) - Full project roadmap
-- [Testing Guide](../dev/testing.md) - Testing patterns
-- [Changelog](../CHANGELOG.md) - Recent changes
+- [Roadmap](../../ROADMAP.md) - Full project roadmap
+- [Testing Strategy](../../dev/testing.md) - Testing patterns
+- [Changelog](../../CHANGELOG.md) - Recent changes

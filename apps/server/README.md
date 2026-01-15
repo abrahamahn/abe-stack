@@ -215,7 +215,6 @@ DATABASE_URL=postgresql://user:pass@localhost:5432/abe_stack
 
 # Auth
 JWT_SECRET=your-secret-key
-JWT_REFRESH_SECRET=your-refresh-secret
 
 # Email (optional)
 EMAIL_PROVIDER=console  # or smtp
@@ -226,7 +225,7 @@ SMTP_PASS=pass
 
 # Storage (optional)
 STORAGE_PROVIDER=local  # or s3
-STORAGE_LOCAL_PATH=./storage
+STORAGE_ROOT_PATH=./storage
 ```
 
 ## Testing

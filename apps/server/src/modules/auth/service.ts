@@ -20,6 +20,21 @@ import {
   withTransaction,
   type DbClient,
 } from '../../infra';
+import {
+  AccountLockedError,
+  EmailAlreadyExistsError,
+  InvalidCredentialsError,
+  InvalidTokenError as InvalidRefreshTokenError,
+  WeakPasswordError,
+} from '../../shared';
+
+export {
+  AccountLockedError,
+  EmailAlreadyExistsError,
+  InvalidCredentialsError,
+  InvalidRefreshTokenError,
+  WeakPasswordError,
+};
 
 import {
   createAccessToken,
@@ -53,45 +68,6 @@ export interface RefreshResult {
 }
 
 // ============================================================================
-// Errors
-// ============================================================================
-
-export class EmailAlreadyExistsError extends Error {
-  constructor(public readonly email: string) {
-    super(`Email already registered: ${email}`);
-    this.name = 'EmailAlreadyExistsError';
-  }
-}
-
-export class WeakPasswordError extends Error {
-  constructor(public readonly errors: string[]) {
-    super('Password does not meet requirements');
-    this.name = 'WeakPasswordError';
-  }
-}
-
-export class InvalidCredentialsError extends Error {
-  constructor() {
-    super('Invalid email or password');
-    this.name = 'InvalidCredentialsError';
-  }
-}
-
-export class AccountLockedError extends Error {
-  constructor(public readonly email: string) {
-    super(`Account is locked: ${email}`);
-    this.name = 'AccountLockedError';
-  }
-}
-
-export class InvalidRefreshTokenError extends Error {
-  constructor() {
-    super('Invalid or expired refresh token');
-    this.name = 'InvalidRefreshTokenError';
-  }
-}
-
-// ============================================================================
 // Service Functions
 // ============================================================================
 
@@ -112,13 +88,13 @@ export async function registerUser(
   });
 
   if (existingUser) {
-    throw new EmailAlreadyExistsError(email);
+    throw new EmailAlreadyExistsError(`Email already registered: ${email}`);
   }
 
   // Validate password strength
   const passwordValidation = await validatePassword(password, [email, name || '']);
   if (!passwordValidation.isValid) {
-    throw new WeakPasswordError(passwordValidation.errors);
+    throw new WeakPasswordError({ errors: passwordValidation.errors });
   }
 
   const passwordHash = await hashPassword(password, config.argon2);
@@ -186,7 +162,7 @@ export async function authenticateUser(
   const locked = await isAccountLocked(db, email, config.lockout);
   if (locked) {
     await logLoginAttempt(db, email, false, ipAddress, userAgent, 'Account locked');
-    throw new AccountLockedError(email);
+    throw new AccountLockedError();
   }
 
   // Apply progressive delay based on recent failed attempts

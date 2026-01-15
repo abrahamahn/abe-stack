@@ -175,8 +175,8 @@ Each phase is independently useful. You can ship after Phase 1 for basic sync, a
 
 ## Related Documentation
 
-- [Architecture Overview](../index.md)
-- [CHET-Stack Comparison](../chet-comparison.md)
+- [Architecture Overview](../../dev/architecture.md)
+- [Real-Time Features](../../dev/architecture.md#future-real-time-features)
 - [Realtime Architecture](./architecture.md)
 - [Implementation Guide](./implementation-guide.md)
 - [Patterns](./patterns.md)

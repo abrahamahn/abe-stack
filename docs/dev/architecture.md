@@ -254,9 +254,9 @@ Based on CHET-Stack patterns. **Phase 1 (Environment Objects) already complete**
 
 ## See Also
 
-- [Principles & Standards](../principles/index.md)
-- [Testing Guide](../testing/index.md)
-- [Workflows](../workflows/index.md)
+- [Principles & Standards](./principles.md)
+- [Testing Guide](./testing.md)
+- [Workflows](../agent/workflows.md)
 
 ---
 

@@ -2,7 +2,7 @@
 
 Detailed use cases with example prompts for common development tasks. Learn how to effectively use Claude Code for various scenarios.
 
-**Quick Reference:** See [CLAUDE.md](../../../AGENTS.md) for essentials.
+**Quick Reference:** See [CLAUDE.md](../AGENTS.md) for essentials.
 
 Quick Summary:
 
@@ -24,8 +24,8 @@ Quick Summary:
 
 See Also:
 
-- [Workflows](../workflows/index.md)
-- [Patterns & Standards](../principles/index.md)
+- [Workflows](../agent/workflows.md)
+- [Patterns & Standards](./principles.md)
 
 ---
 
@@ -464,7 +464,7 @@ Use our design system from packages/ui where possible."
 
 Instead of informal prompts, use structured templates from:
 
-**→ [agent-prompts.md](../../agent/agent-prompts.md)** - Task templates by complexity
+**→ [agent-prompts.md](../agent/agent-prompts.md)** - Task templates by complexity
 
 - Template 1: Simple Task (Direct Execution)
 - Template 2: Feature Task (Checkpointed)
@@ -482,8 +482,8 @@ Instead of informal prompts, use structured templates from:
 
 **Also see:**
 
-- [complex-tasks.md](../../agent/complex-tasks.md) - Decomposition strategies
-- [agent-self-check.md](../../agent/agent-self-check.md) - Self-verification protocol
+- [complex-tasks.md](../agent/complex-tasks.md) - Decomposition strategies
+- [agent-self-check.md](../agent/agent-self-check.md) - Self-verification protocol
 
 ---
 

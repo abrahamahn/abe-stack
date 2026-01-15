@@ -55,7 +55,10 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
         },
       };
 
-  const server = Fastify({ logger: loggerConfig });
+  const server = Fastify({
+    logger: loggerConfig,
+    trustProxy: config.server.trustProxy,
+  });
 
   // Register plugins
   await registerPlugins(server, config);
@@ -94,7 +97,7 @@ async function registerPlugins(server: FastifyInstance, config: AppConfig): Prom
     }
 
     // Rate limiting (replaces @fastify/rate-limit)
-    const rateLimitInfo = limiter.check(req.ip);
+    const rateLimitInfo = await limiter.check(req.ip);
 
     // Set rate limit headers
     res.header('X-RateLimit-Limit', String(rateLimitInfo.limit));

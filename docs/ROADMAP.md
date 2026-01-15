@@ -19,7 +19,7 @@ The roadmap is organized into four major milestones:
 
 ## Milestone 1: V5 Architecture Migration
 
-Restructure from role-based (`apps/`, `packages/`) to layer-based (`frontend/`, `backend/`, `shared/`) architecture. See [Architecture](./dev/architecture/index.md) for details.
+Restructure from role-based (`apps/`, `packages/`) to layer-based (`frontend/`, `backend/`, `shared/`) architecture. See [Architecture](./dev/architecture.md) for details.
 
 ### Phase 1: Preparation
 
@@ -63,7 +63,7 @@ Restructure from role-based (`apps/`, `packages/`) to layer-based (`frontend/`, 
 
 ## Milestone 2: CHET-Stack Real-Time Features
 
-Add real-time collaboration, offline support, and optimistic updates. See [Architecture](./dev/architecture/index.md#future-real-time-features).
+Add real-time collaboration, offline support, and optimistic updates. See [Architecture](./dev/architecture.md#future-real-time-features).
 
 ### Phase 1: Foundation
 
@@ -114,7 +114,7 @@ Add real-time collaboration, offline support, and optimistic updates. See [Archi
 
 ## Milestone 3: Security Phase 2
 
-Enhanced authentication with Passport.js and additional security hardening. See [Security Phase 2 Roadmap](./security/phase-2-roadmap.md).
+Enhanced authentication with Passport.js and additional security hardening. See [Security Phase 2 Roadmap](./todo/security/phase-2-roadmap.md).
 
 ### Phase 1: Security Hardening (COMPLETED)
 

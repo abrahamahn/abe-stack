@@ -22,6 +22,8 @@ export interface RateLimitConfig {
   max: number;
   /** Cleanup interval in milliseconds (default: 60000) */
   cleanupIntervalMs?: number;
+  /** Storage backend (defaults to MemoryStore) */
+  store?: RateLimitStore;
 }
 
 export interface RateLimitInfo {
@@ -35,9 +37,71 @@ export interface RateLimitInfo {
   resetMs: number;
 }
 
-interface ClientRecord {
+export interface ClientRecord {
   tokens: number;
   lastRefill: number;
+}
+
+/**
+ * Interface for rate limit storage backends.
+ * Allows swapping in-memory map for Redis/Postgres in production.
+ */
+export interface RateLimitStore {
+  /** Get record for a client */
+  get(key: string): Promise<ClientRecord | undefined> | ClientRecord | undefined;
+  /** Set record for a client */
+  set(key: string, record: ClientRecord): Promise<void> | void;
+  /** Delete record for a client */
+  delete(key: string): Promise<void> | void;
+  /** Clean up expired records (optional) */
+  cleanup?(expireThreshold: number): Promise<void> | void;
+  /** Destroy the store connection/timers */
+  destroy(): Promise<void> | void;
+}
+
+// ============================================================================
+// Memory Store (Default)
+// ============================================================================
+
+export class MemoryStore implements RateLimitStore {
+  private hits = new Map<string, ClientRecord>();
+  private cleanupTimer: ReturnType<typeof setInterval> | null = null;
+
+  constructor(cleanupIntervalMs = 60000) {
+    this.cleanupTimer = setInterval(() => {
+      this.cleanup(cleanupIntervalMs * 2);
+    }, cleanupIntervalMs);
+    this.cleanupTimer.unref();
+  }
+
+  get(key: string): ClientRecord | undefined {
+    return this.hits.get(key);
+  }
+
+  set(key: string, record: ClientRecord): void {
+    this.hits.set(key, record);
+  }
+
+  delete(key: string): void {
+    this.hits.delete(key);
+  }
+
+  cleanup(expireThreshold: number): void {
+    const now = Date.now();
+    for (const [key, record] of this.hits.entries()) {
+      if (now - record.lastRefill > expireThreshold) {
+        this.hits.delete(key);
+      }
+    }
+  }
+
+  destroy(): void {
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer);
+      this.cleanupTimer = null;
+    }
+    this.hits.clear();
+  }
 }
 
 // ============================================================================
@@ -45,31 +109,22 @@ interface ClientRecord {
 // ============================================================================
 
 export class RateLimiter {
-  private hits = new Map<string, ClientRecord>();
-  private cleanupTimer: ReturnType<typeof setInterval> | null = null;
+  private readonly store: RateLimitStore;
   private readonly refillRate: number;
 
   constructor(private config: RateLimitConfig) {
     // Calculate tokens per millisecond
     this.refillRate = config.max / config.windowMs;
-
-    // Start cleanup interval to prevent memory leaks
-    const cleanupInterval = config.cleanupIntervalMs ?? 60000;
-    this.cleanupTimer = setInterval(() => {
-      this.cleanup();
-    }, cleanupInterval);
-
-    // Ensure cleanup timer doesn't prevent process exit
-    this.cleanupTimer.unref();
+    this.store = config.store ?? new MemoryStore(config.cleanupIntervalMs);
   }
 
   /**
    * Check if a request from the given key (usually IP) is allowed.
    * Consumes one token if allowed.
    */
-  check(key: string): RateLimitInfo {
+  async check(key: string): Promise<RateLimitInfo> {
     const now = Date.now();
-    const record = this.getOrCreateRecord(key, now);
+    const record = (await this.store.get(key)) ?? { tokens: this.config.max, lastRefill: now };
 
     // Refill tokens based on time passed
     this.refillTokens(record, now);
@@ -81,7 +136,7 @@ export class RateLimiter {
       record.tokens -= 1;
     }
 
-    this.hits.set(key, record);
+    await this.store.set(key, record);
 
     return {
       allowed,
@@ -94,9 +149,9 @@ export class RateLimiter {
   /**
    * Get rate limit info without consuming a token.
    */
-  peek(key: string): RateLimitInfo {
+  async peek(key: string): Promise<RateLimitInfo> {
     const now = Date.now();
-    const record = this.hits.get(key);
+    const record = await this.store.get(key);
 
     if (!record) {
       return {
@@ -123,27 +178,15 @@ export class RateLimiter {
   /**
    * Reset rate limit for a specific key.
    */
-  reset(key: string): void {
-    this.hits.delete(key);
+  async reset(key: string): Promise<void> {
+    await this.store.delete(key);
   }
 
   /**
    * Stop the cleanup timer (for graceful shutdown).
    */
-  destroy(): void {
-    if (this.cleanupTimer) {
-      clearInterval(this.cleanupTimer);
-      this.cleanupTimer = null;
-    }
-    this.hits.clear();
-  }
-
-  private getOrCreateRecord(key: string, now: number): ClientRecord {
-    const existing = this.hits.get(key);
-    if (existing) {
-      return existing;
-    }
-    return { tokens: this.config.max, lastRefill: now };
+  async destroy(): Promise<void> {
+    await this.store.destroy();
   }
 
   private refillTokens(record: ClientRecord, now: number): void {
@@ -160,17 +203,6 @@ export class RateLimiter {
     // Time until fully refilled
     const tokensNeeded = this.config.max - record.tokens;
     return Math.ceil(tokensNeeded / this.refillRate);
-  }
-
-  private cleanup(): void {
-    const now = Date.now();
-    const expireThreshold = this.config.windowMs * 2; // Keep records for 2x window
-
-    for (const [key, record] of this.hits.entries()) {
-      if (now - record.lastRefill > expireThreshold) {
-        this.hits.delete(key);
-      }
-    }
   }
 }
 

@@ -30,4 +30,4 @@ export { PostgresPubSub, createPostgresPubSub } from './postgresPubSub';
 export type { PostgresPubSubOptions, PubSubMessage } from './postgresPubSub';
 
 // Helpers
-export { pubsub, publishAfterWrite } from './helpers';
+export { publishAfterWrite } from './helpers';

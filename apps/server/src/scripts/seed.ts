@@ -13,17 +13,9 @@
  * - demo@example.com / password123 (user role)
  */
 
-import argon2 from 'argon2';
-
+import { loadConfig } from '../config';
 import { buildConnectionString, createDbClient, users } from '../infra/database';
-
-// Argon2id configuration (OWASP recommended)
-const ARGON2_OPTIONS: argon2.Options = {
-  type: argon2.argon2id,
-  memoryCost: 19456, // 19 MiB
-  timeCost: 2,
-  parallelism: 1,
-};
+import { hashPassword } from '../modules/auth/utils/password';
 
 interface SeedUser {
   email: string;
@@ -53,12 +45,11 @@ const TEST_USERS: SeedUser[] = [
   },
 ];
 
-async function hashPassword(password: string): Promise<string> {
-  return argon2.hash(password, ARGON2_OPTIONS);
-}
-
 async function seed(): Promise<void> {
   console.log('🌱 Starting database seed...\n');
+
+  // Load configuration to get Argon2 options
+  const config = loadConfig(process.env);
 
   const connectionString = buildConnectionString();
   const db = createDbClient(connectionString);
@@ -66,7 +57,7 @@ async function seed(): Promise<void> {
   console.log('📦 Seeding users...');
 
   for (const user of TEST_USERS) {
-    const passwordHash = await hashPassword(user.password);
+    const passwordHash = await hashPassword(user.password, config.auth.argon2);
 
     try {
       await db

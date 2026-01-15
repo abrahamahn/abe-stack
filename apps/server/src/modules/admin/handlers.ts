@@ -6,7 +6,7 @@
  */
 
 import { ERROR_MESSAGES, SUCCESS_MESSAGES, type AppContext } from '../../shared';
-import { extractAndVerifyToken, extractRequestInfo, type RequestWithCookies } from '../auth';
+import { extractRequestInfo, type RequestWithCookies } from '../auth';
 
 import { unlockUserAccount, UserNotFoundError } from './service';
 
@@ -24,15 +24,9 @@ export async function handleAdminUnlock(
   | { status: 200; body: UnlockAccountResponse }
   | { status: 401 | 403 | 404 | 500; body: { message: string } }
 > {
-  // Verify admin authentication
-  const payload = extractAndVerifyToken(request, ctx.config.auth.jwt.secret);
-  if (!payload) {
+  // User and role are already verified by middleware
+  if (!request.user) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
-  }
-
-  // Check if user is admin
-  if (payload.role !== 'admin') {
-    return { status: 403, body: { message: ERROR_MESSAGES.FORBIDDEN } };
   }
 
   try {
@@ -41,13 +35,13 @@ export async function handleAdminUnlock(
     const result = await unlockUserAccount(
       ctx.db,
       body.email,
-      payload.userId,
+      request.user.userId,
       ipAddress,
       userAgent,
     );
 
     ctx.log.info(
-      { adminId: payload.userId, targetEmail: body.email },
+      { adminId: request.user.userId, targetEmail: body.email },
       'Admin unlocked user account',
     );
 
