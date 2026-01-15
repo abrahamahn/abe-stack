@@ -37,7 +37,7 @@
     "dev": "tsc --watch --project tsconfig.json",
     "clean": "rm -rf dist",
     "type-check": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "VITEST_TARGET=core vitest run --config ../../config/vitest.config.ts"
   },
   "keywords": [
     "abe-stack",

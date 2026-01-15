@@ -1,18 +1,10 @@
 {
-  "extends": "../../config/tsconfig.base.json",
+  "extends": "../../config/ts/tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "composite": true,
-    "declaration": true,
-    "declarationMap": true,
     "lib": ["ES2023", "DOM"],
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "skipLibCheck": true,
     "baseUrl": "./",
     "paths": {
       "@abe-stack/core": ["../core/dist"],

@@ -1,0 +1,33 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "baseUrl": "../..",
+    "paths": {
+      "@abe-stack/sdk": ["./packages/sdk/src"],
+      "@abe-stack/core": ["./packages/core/src"],
+      "@abe-stack/core/*": ["./packages/core/src/*"],
+      "@abe-stack/ui": ["./packages/ui/src"]
+    }
+  },
+  "include": [
+    "../../apps/**/*",
+    "../../packages/**/*",
+    "../../tools/**/*",
+    "../../*.ts",
+    "../../*.tsx"
+  ],
+  "exclude": [
+    "../../node_modules",
+    "../../dist",
+    "../../build",
+    "../../.turbo",
+    "../../.next",
+    "../../coverage",
+    "../../**/__tests__",
+    "../../**/*.test.ts",
+    "../../**/*.test.tsx",
+    "../../apps/server/src/services/email.ts"
+  ]
+}

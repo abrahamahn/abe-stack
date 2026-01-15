@@ -88,11 +88,11 @@ Comprehensive guide to principles, coding standards, patterns, and anti-patterns
 
 ### File Naming
 
-| Convention | Use For                     | Examples                             |
-| ---------- | --------------------------- | ------------------------------------ |
-| PascalCase | Components, Classes, Types  | `UserProfile.tsx`, `ApiClient.ts`    |
-| camelCase  | Functions, hooks, utilities | `formatCurrency.ts`, `useUser.ts`    |
-| kebab-case | Configuration files         | `vite.config.ts`, `.env.development` |
+| Convention | Use For                     | Examples                                         |
+| ---------- | --------------------------- | ------------------------------------------------ |
+| PascalCase | Components, Classes, Types  | `UserProfile.tsx`, `ApiClient.ts`                |
+| camelCase  | Functions, hooks, utilities | `formatCurrency.ts`, `useUser.ts`                |
+| kebab-case | Configuration files         | `vite.config.ts`, `config/.env/.env.development` |
 
 ### Import Order
 

@@ -6,10 +6,9 @@
  * No HTTP awareness - returns domain objects or throws errors.
  */
 
+import { unlockAccount as infraUnlockAccount, users, type DbClient } from '@infra';
+import { UserNotFoundError } from '@shared';
 import { eq } from 'drizzle-orm';
-
-import { unlockAccount as infraUnlockAccount, users, type DbClient } from '../../infra';
-import { UserNotFoundError } from '../../shared';
 
 export { UserNotFoundError };
 

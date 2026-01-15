@@ -5,7 +5,7 @@ services:
     image: postgres:16-alpine
     container_name: abe-stack-postgres
     env_file:
-      - ../.env.development
+      - ../.env/.env.development
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -27,7 +27,7 @@ services:
     image: redis:7-alpine
     container_name: abe-stack-redis
     env_file:
-      - ../.env.development
+      - ../.env/.env.development
     expose:
       - '6379'
     volumes:
@@ -45,7 +45,7 @@ services:
       dockerfile: config/docker/Dockerfile
     container_name: abe-stack-api
     env_file:
-      - ../.env.development
+      - ../.env/.env.development
     environment:
       HOST: 0.0.0.0
       PORT: 8080
@@ -66,7 +66,7 @@ services:
     working_dir: /app
     container_name: abe-stack-web
     env_file:
-      - ../.env.development
+      - ../.env/.env.development
     environment:
       APP_PORT: 5173
       API_PORT: 8080

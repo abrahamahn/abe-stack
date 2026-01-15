@@ -28,13 +28,13 @@
     },
     "type-check": {
       "dependsOn": ["^build"],
-      "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"],
+      "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json", "config/ts/*.json"],
       "outputs": [],
       "cache": true,
       "env": ["NODE_ENV"]
     },
     "test": {
-      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.ts", "**/*.test.tsx", "vitest.config.*"],
+      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.ts", "**/*.test.tsx", "config/vitest.config.ts"],
       "outputs": [],
       "cache": true,
       "env": ["NODE_ENV", "DATABASE_URL"]
@@ -57,6 +57,7 @@
     ".env",
     ".env.local",
     "config/.prettierrc",
+    "config/ts/*.json",
     "eslint.config.mjs"
   ]
 }

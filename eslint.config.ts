@@ -39,7 +39,7 @@ export default [
       '**/vitest.config.ts',
       '**/vitest.config.js',
       'tools/packages/build-theme-css.ts',
-      'apps/server/drizzle.config.ts',
+      'config/drizzle.config.ts',
     ],
   },
   jsConfigs.recommended ?? {},
@@ -50,7 +50,7 @@ export default [
     languageOptions: {
       parserOptions: {
         tsconfigRootDir,
-        project: ['./config/tsconfig.eslint.json'],
+        project: ['./config/ts/tsconfig.eslint.json'],
       },
     },
   },

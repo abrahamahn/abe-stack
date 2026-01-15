@@ -27,17 +27,10 @@ export {
 
 // Service (business logic)
 export {
-  registerUser,
   authenticateUser,
-  refreshUserTokens,
   logoutUser,
-  // Errors
-  EmailAlreadyExistsError,
-  WeakPasswordError,
-  InvalidCredentialsError,
-  AccountLockedError,
-  InvalidRefreshTokenError,
-  // Types
+  refreshUserTokens,
+  registerUser,
   type AuthResult,
   type RefreshResult,
 } from './service';

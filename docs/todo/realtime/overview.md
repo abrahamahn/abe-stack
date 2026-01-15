@@ -153,13 +153,13 @@ function TaskCard({ taskId }: { taskId: string }) {
 
 ## Implementation Phases
 
-| Phase | Description | Deliverable                                                |
-| ----- | ----------- | ---------------------------------------------------------- |
-| 1     | Foundation  | Database versions, RecordCache, write/getRecords endpoints |
-| 2     | Real-time   | WebSocket server/client, pub/sub, subscriptions            |
-| 3     | Offline     | IndexedDB storage, transaction queue, sync on reconnect    |
-| 4     | Undo/Redo   | Operation history, inversion, keyboard shortcuts           |
-| 5     | Permissions | Row-level read/write validation                            |
+| Phase | Description                     | Deliverable                                                |
+| ----- | ------------------------------- | ---------------------------------------------------------- |
+| 1     | Foundation (Frontend + Backend) | Database versions, RecordCache, write/getRecords endpoints |
+| 2     | Real-time (Frontend + Backend)  | WebSocket server/client, pub/sub, subscriptions            |
+| 3     | Offline (Frontend)              | IndexedDB storage, transaction queue, sync on reconnect    |
+| 4     | Undo/Redo (Frontend)            | Operation history, inversion, keyboard shortcuts           |
+| 5     | Permissions (Backend)           | Row-level read/write validation                            |
 
 Each phase is independently useful. You can ship after Phase 1 for basic sync, add more phases as needed.
 

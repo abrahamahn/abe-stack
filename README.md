@@ -85,7 +85,7 @@ git clone https://github.com/abrahamahn/abe-stack.git
 cd abe-stack
 pnpm install
 
-cp config/.env.example config/.env.development
+cp config/.env/.env.example config/.env/.env.development
 # Edit with your DB/Redis creds and secrets
 
 pnpm dev

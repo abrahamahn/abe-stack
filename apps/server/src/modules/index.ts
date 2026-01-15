@@ -7,9 +7,8 @@
  */
 
 import { apiContract } from '@abe-stack/core';
+import { ERROR_MESSAGES, type AppContext } from '@shared';
 import { initServer } from '@ts-rest/fastify';
-
-import { ERROR_MESSAGES, type AppContext } from '../shared';
 
 import { handleAdminUnlock } from './admin';
 import {

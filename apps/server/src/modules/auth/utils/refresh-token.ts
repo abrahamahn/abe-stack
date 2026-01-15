@@ -6,8 +6,6 @@
  * to detect and prevent token reuse attacks.
  */
 
-import { and, eq, gt, lt } from 'drizzle-orm';
-
 import {
   logTokenFamilyRevokedEvent,
   logTokenReuseEvent,
@@ -16,7 +14,8 @@ import {
   withTransaction,
   type DbClient,
   type UserRole,
-} from '../../../infra';
+} from '@infra';
+import { and, eq, gt, lt } from 'drizzle-orm';
 
 import { createRefreshToken, getRefreshTokenExpiry } from './jwt';
 

@@ -326,19 +326,19 @@ pnpm --filter @abe-stack/server test
 
 ### ⚠️ Important Notes
 
-1. **No Database Transactions** - Multi-step operations not atomic
+1. **No Database Transactions** (Backend) - Multi-step operations not atomic
    - Impact: Low (rare failure scenario)
    - Planned: Phase 2, Week 1
 
-2. **Token Reuse - Silent Detection** - No user notification
+2. **Token Reuse - Silent Detection** (Backend) - No user notification
    - Impact: Medium (security event not visible)
    - Planned: Phase 2, Week 1
 
-3. **Login Attempts - No Cleanup** - Table grows indefinitely
+3. **Login Attempts - No Cleanup** (Backend) - Table grows indefinitely
    - Impact: Low (only issue after months/years)
    - Planned: Phase 2, Week 2
 
-4. **Single Device Logout Only** - No "logout all devices" endpoint
+4. **Single Device Logout Only** (Backend) - No "logout all devices" endpoint
    - Impact: Low (workaround: change password)
    - Planned: Phase 2, Week 2
 
@@ -373,7 +373,7 @@ See [SECURITY-PHASE-2.md](./phase-2-roadmap.md) for complete roadmap.
 
 ### Configuration Files
 
-- `.env.example` - Updated with all security vars
+- `config/.env/.env.example` - Updated with all security vars
 - `apps/server/src/infra/database/schema/auth.ts` - Auth tables schema
 
 ---

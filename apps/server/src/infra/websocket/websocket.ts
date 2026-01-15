@@ -1,9 +1,8 @@
 import websocketPlugin from '@fastify/websocket';
+import { verifyToken } from '@modules/auth/utils/jwt';
 
-import { verifyToken } from '../../modules/auth/utils/jwt';
-
-import type { AppContext } from '../../shared';
-import type { WebSocket as PubSubWebSocket } from '../pubsub/types';
+import type { WebSocket as PubSubWebSocket } from '@pubsub/types';
+import type { AppContext } from '@shared';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { WebSocket } from 'ws';
 

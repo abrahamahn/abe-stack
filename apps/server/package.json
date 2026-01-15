@@ -4,15 +4,16 @@
   "description": "Minimal Fastify server for abe-stack",
   "main": "dist/main.js",
   "scripts": {
-    "dev": "tsx ../../tools/dev/kill-port.ts 8080 8081 8082 8083 && tsx --env-file=../../config/.env.development src/main.ts",
-    "start": "node --env-file=../../config/.env.production dist/main.js",
+    "dev": "tsx ../../tools/dev/kill-port.ts 8080 8081 8082 8083 && tsx --env-file=../../config/.env/.env.development src/main.ts",
+    "start": "node --env-file=../../config/.env/.env.production dist/main.js",
     "build": "tsc",
     "type-check": "tsc --noEmit",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio",
-    "db:seed": "tsx --env-file=../../config/.env.development src/scripts/seed.ts"
+    "test": "VITEST_TARGET=server vitest run",
+    "db:generate": "drizzle-kit generate --config ../../config/drizzle.config.ts",
+    "db:migrate": "drizzle-kit migrate --config ../../config/drizzle.config.ts",
+    "db:push": "drizzle-kit push --config ../../config/drizzle.config.ts",
+    "db:studio": "drizzle-kit studio --config ../../config/drizzle.config.ts",
+    "db:seed": "tsx --env-file=../../config/.env/.env.development src/scripts/seed.ts"
   },
   "dependencies": {
     "@abe-stack/core": "workspace:*",

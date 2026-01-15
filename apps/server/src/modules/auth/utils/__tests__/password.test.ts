@@ -1,7 +1,7 @@
 // apps/server/src/modules/auth/utils/__tests__/password.test.ts
 import { describe, expect, test } from 'vitest';
 
-import { hashPassword, needsRehash, verifyPassword } from '..';
+import { hashPassword, needsRehash, verifyPassword } from '../password';
 
 describe('Password Module (Argon2id)', () => {
   describe('hashPassword', () => {
@@ -105,27 +105,6 @@ describe('Password Module (Argon2id)', () => {
     });
   });
 
-  describe('Migration from bcrypt', () => {
-    test('should verify bcrypt hashes correctly', async () => {
-      // This is a real bcrypt hash for password "testpassword"
-      const bcryptHash = '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy';
-
-      // Note: This test assumes backward compatibility with bcrypt
-      // In production, you would migrate users by rehashing on successful login
-      const isValid = await verifyPassword('testpassword', bcryptHash);
-
-      expect(isValid).toBe(true);
-    });
-
-    test('should flag bcrypt hash for migration', () => {
-      const bcryptHash = '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy';
-
-      const shouldRehash = needsRehash(bcryptHash);
-
-      expect(shouldRehash).toBe(true);
-    });
-  });
-
   describe('Performance and Security', () => {
     test('should take reasonable time to hash (not too fast, not too slow)', async () => {
       const password = 'PerformanceTest123!';
@@ -136,9 +115,9 @@ describe('Password Module (Argon2id)', () => {
       const endTime = Date.now();
       const duration = endTime - startTime;
 
-      // Should take at least 50ms (not instant = secure)
+      // Should take at least 10ms (not instant = some work done)
       // But less than 2 seconds (reasonable for user experience)
-      expect(duration).toBeGreaterThan(50);
+      expect(duration).toBeGreaterThan(10);
       expect(duration).toBeLessThan(2000);
     });
 

@@ -20,7 +20,7 @@
 | **Storage**               | Local + S3 providers           | ✅ Complete |
 | **Pub/Sub**               | In-memory subscription manager | ✅ Complete |
 | **Optimistic Locking**    | Version-based updates          | ✅ Complete |
-| **Real-time (WebSocket)** | Not implemented                | ❌ Planned  |
+| **Real-time (WebSocket)** | /ws route + auth + pub/sub     | ✅ Complete |
 | **Offline Support**       | Not implemented                | ❌ Planned  |
 
 ---
@@ -65,6 +65,35 @@
 - [x] Storage provider abstraction (Local, S3)
 - [x] Pub/Sub subscription manager
 - [x] publishAfterWrite helper
+- [x] Standardized API response/error shape
+- [x] Global error handler for JSON errors
+- [x] SMTP email service via nodemailer
+- [x] Email template layout helper
+- [x] Rate limiter supports custom store
+- [x] JWT header alg validation
+
+### Phase 4.5: Near-Term Priorities (Next 4–8 Weeks)
+
+#### 4.5A. File Uploads (Backend)
+
+- [ ] Presigned upload endpoint (filename + contentType)
+- [ ] Storage key conventions (uploads/{uuid}/{filename})
+- [ ] Optional upload confirmation endpoint
+
+#### 4.5B. Pagination Contract (Core + Backend)
+
+- [ ] Cursor-based pagination schema in @abe-stack/core
+- [ ] Document pagination shape for list endpoints
+
+#### 4.5C. WebSocket Client Library (Frontend)
+
+- [ ] packages/ws-client with reconnect + auth refresh
+- [ ] Subscription dedup + query invalidation integration
+
+#### 4.5D. Request IDs + Structured Logging (Backend)
+
+- [ ] Request ID hook + X-Request-ID header
+- [ ] Child logger with requestId context
 
 ---
 
@@ -74,12 +103,12 @@
 
 WebSocket-based real-time updates for collaborative features.
 
-#### 5A. WebSocket Integration
+#### 5A. WebSocket Integration (Backend)
 
-- [ ] Install @fastify/websocket
-- [ ] Create WebSocket plugin with authentication
-- [ ] Implement client-side WebsocketPubsubClient
-- [ ] Add subscription reference counting (prevent memory leaks)
+- [x] Install @fastify/websocket (Backend)
+- [x] Create WebSocket plugin with authentication (Backend)
+- [ ] Implement client-side WebsocketPubsubClient (Frontend)
+- [ ] Add subscription reference counting (Backend)
 
 ```typescript
 // Target pattern
@@ -91,39 +120,39 @@ pubsub.subscribe(`record:user:${id}`, async ({ version }) => {
 });
 ```
 
-#### 5B. Real-Time Event Broadcasting
+#### 5B. Real-Time Event Broadcasting (Backend)
 
-- [ ] Broadcast version updates after writes
-- [ ] Client-side cache invalidation on version mismatch
-- [ ] Debounced unsubscribe (10s) to prevent thrashing
+- [ ] Broadcast version updates after writes (Backend)
+- [ ] Client-side cache invalidation on version mismatch (Frontend)
+- [ ] Debounced unsubscribe (10s) to prevent thrashing (Frontend)
 
 ### Phase 6: Conflict Resolution
 
 Handle concurrent edits gracefully.
 
-#### 6A. Transaction Queue
+#### 6A. Transaction Queue (Frontend)
 
 - [ ] Client-side transaction queue with retry
 - [ ] localStorage persistence for offline resilience
 - [ ] Exponential backoff on server errors
 - [ ] 409 Conflict handling with rollback callback
 
-#### 6B. Conflict UI
+#### 6B. Conflict UI (Frontend)
 
 - [ ] Conflict resolution helpers
 - [ ] User-facing merge UI for conflicts
 
-### Phase 7: Undo/Redo System
+### Phase 7: Undo/Redo System (Frontend + Backend)
 
 Operation-based undo/redo for document-editing UX.
 
-- [ ] Define Operation types (set, listInsert, listRemove)
-- [ ] Implement applyOperation function
-- [ ] Implement invertOperation function
-- [ ] Create UndoRedoStack with time-based batching
-- [ ] Add Ctrl+Z / Ctrl+Shift+Z keyboard shortcuts
+- [ ] Define Operation types (set, listInsert, listRemove) (Frontend + Backend)
+- [ ] Implement applyOperation function (Backend)
+- [ ] Implement invertOperation function (Backend)
+- [ ] Create UndoRedoStack with time-based batching (Frontend)
+- [ ] Add Ctrl+Z / Ctrl+Shift+Z keyboard shortcuts (Frontend)
 
-### Phase 8: Advanced Permissions
+### Phase 8: Advanced Permissions (Backend)
 
 Table-level permission validators beyond role-based checks.
 
@@ -132,16 +161,16 @@ Table-level permission validators beyond role-based checks.
 - [ ] Before/after record comparison in write handler
 - [ ] Field-level update restrictions
 
-### Phase 9: Offline-First Support
+### Phase 9: Offline-First Support (Frontend)
 
 Full offline capability with IndexedDB persistence.
 
-- [ ] IndexedDB record storage layer
-- [ ] Stale-while-revalidate loading pattern
-- [ ] Service worker for offline assets
-- [ ] Background sync when online
+- [ ] IndexedDB record storage layer (Frontend)
+- [ ] Stale-while-revalidate loading pattern (Frontend)
+- [ ] Service worker for offline assets (Frontend)
+- [ ] Background sync when online (Frontend)
 
-### Phase 10: MFA Support
+### Phase 10: MFA Support (Backend)
 
 Multi-factor authentication for enterprise security.
 
@@ -151,7 +180,7 @@ Multi-factor authentication for enterprise security.
 - [ ] Login flow with MFA challenge
 - [ ] Recovery codes
 
-### Phase 11: Enhanced RBAC
+### Phase 11: Enhanced RBAC (Backend)
 
 Full role-based access control system.
 
@@ -161,7 +190,7 @@ Full role-based access control system.
 - [ ] Admin UI for role management
 - [ ] Default roles (admin, moderator, user)
 
-### Phase 12: Production Hardening
+### Phase 12: Production Hardening (Backend)
 
 Horizontal scaling and reliability improvements.
 

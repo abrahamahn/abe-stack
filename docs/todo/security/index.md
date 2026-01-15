@@ -27,10 +27,10 @@ This section covers the security implementation and roadmap for ABE Stack.
 
 ## Planned Features (Phase 2)
 
-- Enhanced rate limiting
-- Audit logging
-- Session management UI
-- Two-factor authentication
-- Security headers hardening
+- Enhanced rate limiting (Backend)
+- Audit logging (Backend)
+- Session management UI (Frontend)
+- Two-factor authentication (Backend)
+- Security headers hardening (Backend)
 
 See [Phase 2 Roadmap](./phase-2-roadmap.md) for details.
