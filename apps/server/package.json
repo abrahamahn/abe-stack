@@ -21,6 +21,7 @@
     "@aws-sdk/s3-request-presigner": "^3.677.0",
     "@fastify/cookie": "^11.0.2",
     "@fastify/csrf-protection": "^7.1.0",
+    "@fastify/static": "^9.0.0",
     "@fastify/websocket": "^11.0.2",
     "@ts-rest/fastify": "^3.52.1",
     "argon2": "^0.44.0",

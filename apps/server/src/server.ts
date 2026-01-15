@@ -7,8 +7,11 @@
  * from the application's DI container and lifecycle management.
  */
 
+import path from 'node:path';
+
 import cookie from '@fastify/cookie';
 import csrfProtection from '@fastify/csrf-protection';
+import fastifyStatic from '@fastify/static';
 import { sql } from 'drizzle-orm';
 import Fastify from 'fastify';
 
@@ -131,6 +134,17 @@ async function registerPlugins(server: FastifyInstance, config: AppConfig): Prom
     },
     sessionPlugin: '@fastify/cookie',
   });
+
+  // Static file serving (only if using local storage)
+  if (config.storage.provider === 'local') {
+    const rootPath = path.resolve(config.storage.rootPath);
+    await server.register(fastifyStatic, {
+      root: rootPath,
+      prefix: '/uploads/', // Mount point
+      decorateReply: false, // Avoid conflict if multiple static plugins used
+    });
+    server.log.info({ rootPath }, 'Serving static files from local storage');
+  }
 }
 
 // ============================================================================

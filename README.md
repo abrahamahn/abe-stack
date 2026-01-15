@@ -4,7 +4,7 @@
 
 I got tired of spending weeks on every new project just setting up the same things: monorepo config, auth, database, UI components, testing, Docker, CI... only to finally start building what actually mattered.
 
-So I built **ABE Stack** — one clean, production-ready foundation that powers web, desktop, mobile, and backend from a single repo. The goal? Let you (and me) go from idea to deployed app in days instead of months.
+So I built **ABE Stack** — one clean, production-ready foundation that powers web, desktop, and backend from a single repo. The goal? Let you (and me) go from idea to deployed app in days instead of months.
 
 Whether you're building a personal fitness coach, a music production tool, a bookkeeping app, or your next startup — this stack gets the boring (but critical) stuff out of the way so you can focus on what makes your product unique.
 
@@ -12,7 +12,7 @@ https://github.com/abrahamahn/abe-stack
 
 ### Why I Built This
 
-- **One codebase, multiple platforms** → Web (Vite + React), Desktop (Electron, Tauri-ready), and a proper Fastify backend.
+- **One codebase, multiple platforms** → Web (Vite + React), Desktop (Electron, Tauri-ready), and a Fastify backend.
 - **No framework lock-in** → React is just the renderer. All real logic lives in shared packages — swap UI layers later if you want.
 - **Speed without chaos** → Turborepo caching, parallel builds, minimal config.
 - **Production-ready from day one** → Secure defaults, Docker, strict types, env validation.
@@ -24,14 +24,14 @@ https://github.com/abrahamahn/abe-stack
 
 - Monorepo powered by Turborepo + pnpm workspaces
 - Frontend: React 19 (web via Vite, desktop via Electron)
-- Backend: Fastify + Drizzle ORM + PostgreSQL + Redis
+- Backend: Fastify + Drizzle ORM + PostgreSQL
 - API: Type-safe contracts with `ts-rest` + Zod
-- Auth: JWT foundation with bcrypt and email verification hooks
+- Auth: JWT foundation with Argon2id hashing, refresh tokens, and role-based access
 
 **Quality & Developer Experience**
 
 - Full TypeScript strict mode with end-to-end safety
-- 1000+ tests (Vitest + Playwright)
+- Comprehensive test coverage (Vitest + Playwright)
 - ESLint + Prettier + git hooks (no bad code slips through)
 - Comprehensive shared UI library with interactive demo at `/demo`
 - State: React Query for server state
@@ -47,9 +47,8 @@ abe-stack/
 │   └── server/       # Fastify API
 ├── packages/
 │   ├── ui/           # Shared component library + demo
-│   ├── api-client/   # Type-safe client
-│   ├── db/           # Drizzle schemas & migrations
-│   └── shared/       # Utils, types, validation
+│   ├── sdk/          # Type-safe API client
+│   └── core/         # Contracts, validation, shared logic
 ├── config/           # Docker, env, test configs
 └── tools/            # Dev scripts
 ```
@@ -94,8 +93,6 @@ pnpm dev
 
 ### Coming Very Soon
 
-- Full E2E auth flows (register, login, passwordless)
-- Session management with secure cookies
 - MFA support
 - Rate limiting & security headers
 - Logging and audit trails

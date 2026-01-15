@@ -8,6 +8,13 @@ All notable changes to this project are documented here. Format follows semantic
 
 ## 2026-01-15
 
+### Documentation Consolidation & Infrastructure Additions
+
+- Consolidated documentation sections and refreshed indices
+- Added RBAC scaffolding and Postgres PubSub infrastructure
+- Added WebSocket infrastructure for real-time updates
+- Expanded auth middleware and request utilities for security logging
+
 ### Server Architecture Refactoring (In Progress)
 
 Major refactoring of the server application with improved separation of concerns:
