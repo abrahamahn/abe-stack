@@ -1,6 +1,6 @@
 # V5 Architecture Proposal
 
-**Last Updated: January 13, 2026**
+**Last Updated: January 15, 2026**
 
 Proposal for restructuring ABE Stack from role-based to layer-based organization.
 
@@ -262,4 +262,8 @@ Waiting for:
 
 - [Architecture Overview](./index.md)
 - [CHET-Stack Comparison](./chet-comparison.md)
-- [Roadmap](../ROADMAP.md)
+- [Roadmap](../../ROADMAP.md)
+
+---
+
+_Last Updated: January 15, 2026_

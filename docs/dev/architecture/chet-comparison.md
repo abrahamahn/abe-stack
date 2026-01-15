@@ -1,6 +1,6 @@
 # CHET-Stack Comparison
 
-**Last Updated: January 10, 2026**
+**Last Updated: January 15, 2026**
 
 Comparison between ABE Stack and CHET-Stack, with adoption recommendations for real-time collaboration features.
 
@@ -20,58 +20,54 @@ CHET-Stack (by Steve Ruiz, creator of tldraw) is a production-ready architecture
 
 ## Feature Comparison
 
-| Feature                | ABE Stack (Current)  | CHET-Stack            | ABE Stack (Proposed)       |
-| ---------------------- | -------------------- | --------------------- | -------------------------- |
-| **Architecture**       | Monorepo, role-based | Monorepo, layer-based | Monorepo, layer-based (V5) |
-| **Frontend**           | React, Vite          | React, Vite           | Same                       |
-| **Backend**            | Fastify, ts-rest     | Fastify/Express       | Same                       |
-| **Database**           | PostgreSQL, Drizzle  | PostgreSQL, Drizzle   | Same                       |
-| **Auth**               | JWT, refresh tokens  | JWT, sessions         | Same + Passport.js         |
-| **Real-time**          | None                 | WebSocket pub/sub     | Adopt WebSocket pub/sub    |
-| **Offline**            | None                 | IndexedDB + queue     | Adopt IndexedDB pattern    |
-| **Optimistic Updates** | None                 | Operation-based       | Adopt operation pattern    |
-| **Undo/Redo**          | None                 | Operation history     | Adopt undo/redo stack      |
-| **Collaboration**      | None                 | Multi-user sync       | Adopt sync protocol        |
+| Feature                 | ABE Stack (Current)         | CHET-Stack            | ABE Stack (Proposed)    |
+| ----------------------- | --------------------------- | --------------------- | ----------------------- |
+| **Architecture**        | Monorepo, infra/modules     | Monorepo, layer-based | Layer-based (V5)        |
+| **Frontend**            | React, Vite                 | React, Vite           | Same                    |
+| **Backend**             | Fastify, ts-rest            | Fastify/Express       | Same                    |
+| **Database**            | PostgreSQL, Drizzle         | PostgreSQL, Drizzle   | Same                    |
+| **Auth**                | JWT, refresh tokens         | JWT, sessions         | Same                    |
+| **Environment Pattern** | ✅ AppContext (implemented) | Environment objects   | Already adopted         |
+| **Real-time**           | In-memory pub/sub (basic)   | WebSocket pub/sub     | Adopt WebSocket pub/sub |
+| **Offline**             | None                        | IndexedDB + queue     | Adopt IndexedDB pattern |
+| **Optimistic Updates**  | None                        | Operation-based       | Adopt operation pattern |
+| **Undo/Redo**           | None                        | Operation history     | Adopt undo/redo stack   |
+| **Collaboration**       | None                        | Multi-user sync       | Adopt sync protocol     |
 
 ---
 
-## Key CHET-Stack Patterns to Adopt
+## Key CHET-Stack Patterns
 
-### 1. Environment Objects
+### 1. Environment Objects ✅ (Already Adopted)
 
-**Current ABE Stack:**
+ABE Stack already uses the environment/service container pattern via `AppContext`:
+
+**Current ABE Stack Implementation:**
 
 ```typescript
-// Uses global imports
-import { db } from '@abe-stack/server';
-import { storage } from '@abe-stack/server';
+// apps/server/src/shared/types.ts
+interface IServiceContainer {
+  readonly config: AppConfig;
+  readonly db: DbClient;
+  readonly email: EmailService;
+  readonly storage: StorageProvider;
+  readonly pubsub: SubscriptionManager;
+}
 
-async function handleRequest(req) {
-  const user = await db.query.users.findFirst(...);
-  const file = await storage.getFile(...);
+interface AppContext extends IServiceContainer {
+  log: FastifyBaseLogger;
+}
+
+// Handlers receive context with all dependencies
+async function handleLogin(ctx: AppContext, req: LoginRequest) {
+  const user = await ctx.db.query.users.findFirst(...);
+  await ctx.email.send(...);
 }
 ```
 
-**CHET-Stack Pattern:**
+**Benefits (already realized):**
 
-```typescript
-// Environment passed through context
-type Environment = {
-  db: DbClient;
-  storage: StorageProvider;
-  pubsub: PubSubServer;
-  userId: string;
-};
-
-async function handleRequest(env: Environment, req: Request) {
-  const user = await env.db.query.users.findFirst(...);
-  const file = await env.storage.getFile(...);
-}
-```
-
-**Benefits:**
-
-- Easier testing (mock environment)
+- Easier testing (mock context)
 - No hidden dependencies
 - Clear function signatures
 - Better type inference
@@ -156,26 +152,12 @@ while (queue.hasNext()) {
 
 ## Adoption Plan
 
-### Phase 1: Environment Objects
+### Phase 1: Environment Objects ✅ COMPLETE
 
-Update server handlers to receive environment:
+ABE Stack already implements this pattern via `AppContext` in `apps/server/src/shared/types.ts`.
+All handlers receive context with db, email, storage, pubsub dependencies injected.
 
-```typescript
-// apps/server/src/modules/index.ts
-import type { Environment } from './types';
-
-export function createRoutes(env: Environment) {
-  return {
-    async getUser({ params }) {
-      return env.db.query.users.findFirst({
-        where: eq(users.id, params.id),
-      });
-    },
-  };
-}
-```
-
-### Phase 2: Operation Types
+### Phase 2: Operation Types (Planned)
 
 Add `packages/realtime` with operation definitions:
 
@@ -253,13 +235,13 @@ Some CHET-Stack patterns don't fit ABE Stack's goals:
 
 ## Timeline
 
-| Phase | Description          | Priority           |
-| ----- | -------------------- | ------------------ |
-| 1     | Environment objects  | After V5 migration |
-| 2     | Operation types      | After Phase 1      |
-| 3     | Record cache + hooks | After Phase 2      |
-| 4     | WebSocket sync       | After Phase 3      |
-| 5     | Offline support      | After Phase 4      |
+| Phase | Description          | Status        |
+| ----- | -------------------- | ------------- |
+| 1     | Environment objects  | ✅ Complete   |
+| 2     | Operation types      | Planned       |
+| 3     | Record cache + hooks | After Phase 2 |
+| 4     | WebSocket sync       | After Phase 3 |
+| 5     | Offline support      | After Phase 4 |
 
 Each phase is independently useful - you can stop at any point and have a working system.
 
@@ -273,3 +255,7 @@ Each phase is independently useful - you can stop at any point and have a workin
 - [Realtime Architecture](./realtime/architecture.md)
 - [Realtime Implementation Guide](./realtime/implementation-guide.md)
 - [Realtime Patterns](./realtime/patterns.md)
+
+---
+
+_Last Updated: January 15, 2026_

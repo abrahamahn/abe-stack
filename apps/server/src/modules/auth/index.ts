@@ -43,4 +43,25 @@ export {
 } from './service';
 
 // Utils (for direct use if needed)
-export * from './utils';
+export {
+  // JWT
+  createAccessToken,
+  createRefreshToken,
+  getRefreshTokenExpiry,
+  JwtError,
+  type TokenPayload,
+  // Password
+  hashPassword,
+  verifyPassword,
+  verifyPasswordSafe,
+  needsRehash,
+  // Refresh token management
+  createRefreshTokenFamily,
+  rotateRefreshToken,
+  revokeTokenFamily,
+  revokeAllUserTokens,
+  cleanupExpiredTokens,
+  // Request utilities
+  extractRequestInfo,
+  extractAndVerifyToken,
+} from './utils';

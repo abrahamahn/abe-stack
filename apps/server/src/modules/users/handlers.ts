@@ -10,7 +10,7 @@ import { extractAndVerifyToken, type RequestWithCookies } from '../auth';
 
 import { getUserById } from './service';
 
-import type { UserResponse } from '@abe-stack/contracts';
+import type { UserResponse } from '@abe-stack/core';
 
 /**
  * Get current authenticated user's profile

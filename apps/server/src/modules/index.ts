@@ -6,7 +6,7 @@
  * Uses ts-rest for type-safe routing.
  */
 
-import { apiContract } from '@abe-stack/contracts';
+import { apiContract } from '@abe-stack/core';
 import { initServer } from '@ts-rest/fastify';
 
 import { SUCCESS_MESSAGES, type AppContext } from '../shared';

@@ -25,5 +25,5 @@
 
 See Also:
 
-- `dev/architecture/appendix-examples.md`
-- `dev/architecture/env.md`
+- [Examples](./appendix-examples.md)
+- [Environment](./env.md)

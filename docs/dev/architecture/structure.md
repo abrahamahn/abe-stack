@@ -6,16 +6,29 @@
 abe-stack/
 ├── apps/
 │   ├── web/           # Vite + React frontend
+│   │   └── src/
+│   │       ├── features/      # Feature modules (auth, dashboard, demo)
+│   │       ├── pages/         # Standalone pages
+│   │       ├── api/           # API client setup
+│   │       ├── app/           # App root and providers
+│   │       ├── config/        # App configuration
+│   │       └── test/          # Test utilities, e2e
 │   ├── server/        # Fastify API server
 │   │   └── src/
-│   │       ├── modules/       # Feature modules (auth, users, etc.)
+│   │       ├── modules/       # Feature modules (auth, users, admin)
 │   │       ├── infra/         # Infrastructure layer
-│   │       │   ├── database/  # Drizzle ORM, schemas, migrations
+│   │       │   ├── database/  # Drizzle ORM, schemas, utils
 │   │       │   ├── storage/   # S3/local file storage
-│   │       │   ├── pubsub/    # WebSocket subscriptions
-│   │       │   ├── security/  # Auth, lockout, audit logging
-│   │       │   └── email/     # Email service
-│   │       └── shared/        # Server-specific shared code
+│   │       │   ├── pubsub/    # Pub/sub subscriptions
+│   │       │   ├── security/  # Lockout, audit logging
+│   │       │   ├── email/     # Email service
+│   │       │   ├── crypto/    # JWT utilities
+│   │       │   ├── http/      # HTTP utilities
+│   │       │   └── rate-limit/# Rate limiting
+│   │       ├── config/        # Server configuration
+│   │       ├── shared/        # Server-specific shared code
+│   │       ├── types/         # TypeScript declarations
+│   │       └── scripts/       # Utility scripts (seed, etc.)
 │   └── desktop/       # Electron desktop app
 ├── packages/
 │   ├── core/          # Shared contracts, validation, stores, utils
@@ -49,5 +62,5 @@ Packages:
 
 See Also:
 
-- `dev/architecture/patterns.md`
-- `dev/architecture/testing.md`
+- [Patterns](./patterns.md)
+- [Testing](./testing.md)

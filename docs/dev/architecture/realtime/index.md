@@ -1,6 +1,6 @@
 # Real-time Architecture
 
-_Last Updated: January 10, 2026_
+_Last Updated: January 15, 2026_
 
 This section covers the real-time collaboration features planned for ABE Stack, based on CHET-Stack patterns.
 
@@ -30,4 +30,14 @@ The real-time system provides:
 
 ## Status
 
-These features are planned for implementation after the V5 architecture migration. See [ROADMAP.md](../../ROADMAP.md) for timeline.
+These features are planned for implementation after the V5 architecture migration. See [ROADMAP.md](../../../ROADMAP.md) for timeline.
+
+## See Also
+
+- [Architecture Overview](../index.md)
+- [CHET-Stack Comparison](../chet-comparison.md)
+- [V5 Proposal](../v5-proposal.md)
+
+---
+
+_Last Updated: January 15, 2026_

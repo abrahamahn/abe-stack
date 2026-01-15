@@ -6,6 +6,7 @@ export {
   createRefreshToken,
   verifyToken,
   getRefreshTokenExpiry,
+  JwtError,
   type TokenPayload,
 } from './jwt';
 

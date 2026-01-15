@@ -1058,7 +1058,7 @@ Due to length, the remaining phases follow the same pattern as the original guid
 - **Phase 4**: UndoRedoStack
 - **Phase 5**: Permission validation
 
-See `REALTIME_ARCHITECTURE.md` for detailed code examples.
+See [Architecture](./architecture.md) for detailed code examples.
 
 ---
 

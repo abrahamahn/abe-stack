@@ -1,6 +1,6 @@
 # Architecture Layers
 
-This file describes the four layers, their responsibilities, and boundaries. Keep examples minimal here. See `dev/architecture/appendix-examples.md` for code.
+This file describes the four layers, their responsibilities, and boundaries. Keep examples minimal here. See [Examples](./appendix-examples.md) for code.
 
 ## Layer 1: Presentation (React Components)
 
@@ -59,5 +59,5 @@ Avoid:
 
 See Also:
 
-- `dev/architecture/dependencies.md`
-- `dev/architecture/appendix-examples.md`
+- [Dependencies](./dependencies.md)
+- [Examples](./appendix-examples.md)

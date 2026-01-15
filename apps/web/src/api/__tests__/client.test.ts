@@ -16,7 +16,7 @@ vi.mock('@abe-stack/sdk', () => ({
   }),
 }));
 
-vi.mock('@abe-stack/contracts', () => ({
+vi.mock('@abe-stack/core', () => ({
   tokenStore: {
     get: vi.fn(() => 'mock-token'),
     set: vi.fn(),
@@ -63,7 +63,7 @@ describe('api', () => {
     });
 
     it('should get token from tokenStore', async () => {
-      const { tokenStore } = await import('@abe-stack/contracts');
+      const { tokenStore } = await import('@abe-stack/core');
       await import('../client');
 
       expect(capturedConfig).not.toBeNull();
@@ -96,7 +96,7 @@ describe('api', () => {
     });
 
     it('should return null token when tokenStore returns null', async () => {
-      const shared = await import('@abe-stack/contracts');
+      const shared = await import('@abe-stack/core');
       vi.mocked(shared.tokenStore.get).mockReturnValueOnce(null);
 
       await import('../client');

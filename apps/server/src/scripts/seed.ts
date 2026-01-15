@@ -5,24 +5,17 @@
  * Seeds the database with test data for development.
  * Run with: pnpm db:seed
  *
+ * Environment variables are loaded via Node's native --env-file flag in package.json scripts.
+ *
  * Default test users:
  * - admin@example.com / password123 (admin role)
  * - user@example.com / password123 (user role)
  * - demo@example.com / password123 (user role)
  */
 
-import path from 'path';
-
 import argon2 from 'argon2';
-import dotenvFlow from 'dotenv-flow';
 
 import { buildConnectionString, createDbClient, users } from '../infra/database';
-
-// Load environment variables
-dotenvFlow.config({
-  node_env: process.env.NODE_ENV || 'development',
-  path: path.resolve(__dirname, '../../../../config'),
-});
 
 // Argon2id configuration (OWASP recommended)
 const ARGON2_OPTIONS: argon2.Options = {

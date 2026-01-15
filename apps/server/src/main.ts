@@ -3,21 +3,11 @@
  * Application Entry Point
  *
  * This is the single entry point for the server.
- * It loads environment variables, creates the App, and starts it.
+ * Environment variables are loaded via Node's native --env-file flag in package.json scripts.
  */
-
-import path from 'path';
-
-import dotenvFlow from 'dotenv-flow';
 
 import { createApp } from './app';
 import { loadConfig } from './config';
-
-// Load environment variables
-dotenvFlow.config({
-  node_env: process.env.NODE_ENV || 'development',
-  path: path.resolve(__dirname, '../../../config'),
-});
 
 async function main(): Promise<void> {
   try {

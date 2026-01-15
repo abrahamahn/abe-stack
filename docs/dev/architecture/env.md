@@ -13,5 +13,5 @@
 
 See Also:
 
-- `dev/patterns/index.md`
-- `dev/architecture/dependencies.md`
+- [Patterns Guide](../patterns/index.md)
+- [Dependencies](./dependencies.md)

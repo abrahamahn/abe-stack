@@ -8,11 +8,10 @@
 
 import crypto from 'node:crypto';
 
-import jwt, { type SignOptions } from 'jsonwebtoken';
-
+import { jwtSign, jwtVerify, JwtError } from '../../../infra/crypto';
 import { MIN_JWT_SECRET_LENGTH, REFRESH_TOKEN_BYTES } from '../../../shared/constants';
 
-import type { UserRole } from '@abe-stack/contracts';
+import type { UserRole } from '@abe-stack/core';
 
 // ============================================================================
 // Types
@@ -23,6 +22,9 @@ export interface TokenPayload {
   email: string;
   role: UserRole;
 }
+
+// Re-export JwtError for consumers
+export { JwtError };
 
 // ============================================================================
 // Access Token Functions
@@ -43,11 +45,8 @@ export function createAccessToken(
   }
 
   const payload: TokenPayload = { userId, email, role };
-  const options: SignOptions = {
-    expiresIn: expiresIn as SignOptions['expiresIn'],
-  };
 
-  return jwt.sign(payload, secret, options);
+  return jwtSign(payload, secret, { expiresIn });
 }
 
 /**
@@ -58,7 +57,7 @@ export function verifyToken(token: string, secret: string): TokenPayload {
     throw new Error(`JWT secret must be at least ${String(MIN_JWT_SECRET_LENGTH)} characters`);
   }
 
-  return jwt.verify(token, secret) as TokenPayload;
+  return jwtVerify(token, secret) as unknown as TokenPayload;
 }
 
 // ============================================================================

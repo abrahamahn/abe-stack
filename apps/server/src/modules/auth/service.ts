@@ -6,7 +6,7 @@
  * No HTTP awareness - returns domain objects or throws errors.
  */
 
-import { validatePassword, type UserRole } from '@abe-stack/contracts';
+import { validatePassword, type UserRole } from '@abe-stack/core';
 import { eq } from 'drizzle-orm';
 
 import {
@@ -183,14 +183,14 @@ export async function authenticateUser(
   onPasswordRehash?: (userId: string, error?: Error) => void,
 ): Promise<AuthResult> {
   // Check if account is locked
-  const locked = await isAccountLocked(db, email);
+  const locked = await isAccountLocked(db, email, config.lockout);
   if (locked) {
     await logLoginAttempt(db, email, false, ipAddress, userAgent, 'Account locked');
     throw new AccountLockedError(email);
   }
 
   // Apply progressive delay based on recent failed attempts
-  await applyProgressiveDelay(db, email);
+  await applyProgressiveDelay(db, email, config.lockout);
 
   // Fetch user (may be null)
   const user = await db.query.users.findFirst({
@@ -201,12 +201,12 @@ export async function authenticateUser(
   const isValid = await verifyPasswordSafe(password, user?.passwordHash);
 
   if (!user) {
-    await handleFailedLogin(db, email, 'User not found', ipAddress, userAgent);
+    await handleFailedLogin(db, config, email, 'User not found', ipAddress, userAgent);
     throw new InvalidCredentialsError();
   }
 
   if (!isValid) {
-    await handleFailedLogin(db, email, 'Invalid password', ipAddress, userAgent);
+    await handleFailedLogin(db, config, email, 'Invalid password', ipAddress, userAgent);
     throw new InvalidCredentialsError();
   }
 
@@ -297,13 +297,14 @@ export async function logoutUser(db: DbClient, refreshToken?: string): Promise<v
 
 async function handleFailedLogin(
   db: DbClient,
+  config: AuthConfig,
   email: string,
   reason: string,
   ipAddress?: string,
   userAgent?: string,
 ): Promise<void> {
   await logLoginAttempt(db, email, false, ipAddress, userAgent, reason);
-  const lockoutStatus = await getAccountLockoutStatus(db, email);
+  const lockoutStatus = await getAccountLockoutStatus(db, email, config.lockout);
   if (lockoutStatus.isLocked) {
     await logAccountLockedEvent(db, email, lockoutStatus.failedAttempts, ipAddress, userAgent);
   }

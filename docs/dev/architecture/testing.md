@@ -6,4 +6,4 @@
 
 See Also:
 
-- `dev/testing/index.md`
+- [Testing Guide](../testing/index.md)

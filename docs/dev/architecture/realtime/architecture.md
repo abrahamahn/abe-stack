@@ -144,10 +144,10 @@ abe-stack/
 │   ├── ui/                     # Reusable UI components (existing)
 │   └── sdk/                    # Type-safe API client (existing)
 │
-└── docs/
-    ├── REALTIME_ARCHITECTURE.md        # This file
-    ├── IMPLEMENTATION_GUIDE.md         # Step-by-step guide
-    └── REALTIME_PATTERNS.md            # Common patterns & examples
+└── docs/dev/architecture/realtime/
+    ├── architecture.md                 # This file
+    ├── implementation-guide.md         # Step-by-step guide
+    └── patterns.md                     # Common patterns & examples
 ```
 
 ---
@@ -898,8 +898,8 @@ S3 (file storage)
 
 See the companion guides:
 
-- **IMPLEMENTATION_GUIDE.md** - Step-by-step implementation (8 phases)
-- **REALTIME_PATTERNS.md** - Common patterns and best practices
+- [Implementation Guide](./implementation-guide.md) - Step-by-step implementation (8 phases)
+- [Patterns](./patterns.md) - Common patterns and best practices
 
 ---
 

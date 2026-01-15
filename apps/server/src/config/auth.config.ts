@@ -55,9 +55,19 @@ export interface AuthConfig {
   // Account lockout
   lockout: {
     maxAttempts: number;
-    durationMs: number;
+    lockoutDurationMs: number;
     progressiveDelay: boolean;
     baseDelayMs: number;
+  };
+
+  // BFF mode (tokens never sent to browser)
+  bffMode: boolean;
+
+  // Proxy configuration for IP extraction
+  proxy: {
+    trustProxy: boolean;
+    trustedProxies: string[];
+    maxProxyDepth: number;
   };
 
   // Rate limiting per endpoint
@@ -152,9 +162,19 @@ export function loadAuthConfig(env: Record<string, string | undefined>): AuthCon
 
     lockout: {
       maxAttempts: parseInt(env.LOCKOUT_MAX_ATTEMPTS || '10', 10),
-      durationMs: parseInt(env.LOCKOUT_DURATION_MS || '1800000', 10), // 30 minutes
+      lockoutDurationMs: parseInt(env.LOCKOUT_DURATION_MS || '1800000', 10), // 30 minutes
       progressiveDelay: true,
       baseDelayMs: 1000,
+    },
+
+    bffMode: env.AUTH_BFF_MODE === 'true',
+
+    proxy: {
+      trustProxy: env.TRUST_PROXY === 'true',
+      trustedProxies: env.TRUSTED_PROXIES
+        ? env.TRUSTED_PROXIES.split(',').map((ip) => ip.trim())
+        : [],
+      maxProxyDepth: parseInt(env.MAX_PROXY_DEPTH || '1', 10),
     },
 
     rateLimit: {

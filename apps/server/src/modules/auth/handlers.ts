@@ -32,7 +32,7 @@ import type {
   LogoutResponse,
   RefreshResponse,
   RegisterRequest,
-} from '@abe-stack/contracts';
+} from '@abe-stack/core';
 import type { FastifyRequest } from 'fastify';
 
 // ============================================================================

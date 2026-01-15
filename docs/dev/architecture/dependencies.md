@@ -47,5 +47,5 @@ apps/server/src/infra/*
 
 See Also:
 
-- `dev/architecture/patterns.md`
-- `dev/architecture/structure.md`
+- [Patterns](./patterns.md)
+- [Structure](./structure.md)
