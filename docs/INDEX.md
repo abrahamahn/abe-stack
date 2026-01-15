@@ -4,10 +4,10 @@ _Last Updated: January 15, 2026_
 
 **Agent Loading Order (Critical for Token Efficiency):**
 
-1. Load this file first - it routes everything.
+1. Agents start with `AGENTS.md`, then this file.
 2. Use specific paths only when needed.
 3. Never load full folders - prefer index.md tables for overviews.
-4. For complex tasks: Load agent/session-bridge.md + agent/workflows.md next.
+4. For complex tasks: Load `agent/workflows.md` next.
 
 Token Budget Tips:
 
@@ -70,13 +70,11 @@ Token Budget Tips:
 
 ## Agent Documentation (agent/)
 
-| Document                    | Purpose                     |
-| --------------------------- | --------------------------- |
-| `agent/agent-prompts.md`    | Agent prompt templates      |
-| `agent/agent-self-check.md` | Self-verification checklist |
-| `agent/complex-tasks.md`    | Complex task guidance       |
-| `agent/session-bridge.md`   | Session continuation        |
-| `agent/workflows.md`        | Agent workflows             |
+| Document                 | Purpose                                           |
+| ------------------------ | ------------------------------------------------- |
+| `agent/agent-prompts.md` | Agent prompt templates                            |
+| `agent/complex-tasks.md` | Complex task guidance                             |
+| `agent/workflows.md`     | Agent workflows (incl. self-check/session bridge) |
 
 ---
 
@@ -87,8 +85,6 @@ Token Budget Tips:
 1. `agent/workflows.md`
 2. `agent/complex-tasks.md`
 3. `agent/agent-prompts.md`
-4. `agent/agent-self-check.md`
-5. `agent/session-bridge.md`
 
 ### Development Work
 
@@ -112,7 +108,7 @@ Token Budget Tips:
 | patterns               | `dev/principles.md`                |
 | anti-patterns          | `dev/principles.md`                |
 | coding standards       | `dev/principles.md`                |
-| resume session         | `agent/session-bridge.md`          |
+| resume session         | `agent/workflows.md`               |
 | file organization      | `AGENTS.md` (Section 5)            |
 | path aliases           | `AGENTS.md` (Section 5)            |
 | v5 migration           | `dev/architecture.md`              |

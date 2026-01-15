@@ -15,40 +15,36 @@ All notable changes to this project are documented here. Format follows semantic
 - Added WebSocket infrastructure for real-time updates
 - Expanded auth middleware and request utilities for security logging
 
-### Server Architecture Refactoring (In Progress)
+### Server Architecture Refactoring & Real-time Features (Complete)
 
-Major refactoring of the server application with improved separation of concerns:
+Major refactoring of the server application completed, including real-time capabilities and security hardening:
+
+- **Real-Time Infrastructure:**
+  - `infra/websocket/` - WebSocket server with `@fastify/websocket`
+  - `infra/pubsub/` - Postgres-based PubSub for horizontal scaling
+  - `infra/pubsub/subscriptionManager.ts` - Subscription handling
+  - Initial data push on subscription (Chet-stack pattern)
+
+- **Security Hardening:**
+  - **Trust Proxy:** Enabled `trustProxy` for correct IP detection behind proxies
+  - **Safe IP Extraction:** Removed manual `x-forwarded-for` parsing
+  - **JWT:** Strict algorithm (`HS256`) and format validation
+  - **Error Handling:** Standardized `ApiErrorResponse` shape and global error handler
 
 - **New Config System:**
   - `config/loader.ts` - Centralized configuration loading
   - `config/types.ts` - Configuration type definitions
   - Split config files: `auth.config.ts`, `database.config.ts`, `email.config.ts`, `server.config.ts`, `storage.config.ts`
 
-- **Database Infrastructure:**
-  - `infra/database/client.ts` - Database client management
-  - `infra/database/schema/` - Schema definitions (auth.ts, users.ts)
-  - `infra/database/utils/` - Database utilities (optimistic locking)
-
-- **New Modules:**
-  - `modules/admin/` - Admin handlers and service
-  - `modules/users/` - User handlers and service
-  - Enhanced `modules/auth/service.ts` - Auth business logic extracted from handlers
-
-- **Shared Layer:**
-  - `shared/constants.ts` - Centralized constants
-  - `shared/errors.ts` - Custom error types
-  - `shared/types.ts` - Shared type definitions
-
 - **Infrastructure Enhancements:**
-  - `infra/pubsub/` - PubSub infrastructure with subscription manager
-  - `infra/email/` - Email service with templates
-  - `infra/storage/` - Storage providers with factory pattern
+  - `infra/database/client.ts` - Database client management
+  - `infra/email/` - Refactored email service with shared templates
+  - `infra/storage/` - Storage providers (Local/S3) with static file serving for local dev
   - `infra/security/` - Security lockout and types
 
-- **Entry Points:**
-  - `main.ts` - Application entry point
-  - `app.ts` - Fastify app configuration
-  - `server.ts` - Server initialization
+- **Module Refactoring:**
+  - `modules/` - Handlers refactored to use centralized `preHandler` middleware for auth
+  - Removed duplicate error classes in favor of `shared/errors.ts`
 
 ---
 
