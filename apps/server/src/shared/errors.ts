@@ -6,7 +6,7 @@
  * and consistent API responses.
  */
 
-import { HTTP_STATUS } from './constants';
+import { HTTP_STATUS } from '@shared/constants';
 
 /**
  * Base application error

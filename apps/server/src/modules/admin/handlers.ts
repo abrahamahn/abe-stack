@@ -5,10 +5,10 @@
  * Thin HTTP layer that calls services and formats responses.
  */
 
+
+import { unlockUserAccount, UserNotFoundError } from '@admin/service';
 import { extractRequestInfo, type RequestWithCookies } from '@modules/auth';
 import { ERROR_MESSAGES, SUCCESS_MESSAGES, type AppContext } from '@shared';
-
-import { unlockUserAccount, UserNotFoundError } from './service';
 
 import type { UnlockAccountRequest, UnlockAccountResponse } from '@abe-stack/core';
 import type { FastifyRequest } from 'fastify';
@@ -32,18 +32,10 @@ export async function handleAdminUnlock(
   try {
     const { ipAddress, userAgent } = extractRequestInfo(request as unknown as FastifyRequest);
 
-    const result = await unlockUserAccount(
-      ctx.db,
-      body.email,
-      request.user.userId,
-      ipAddress,
-      userAgent,
-    );
+    const { email } = body;
+    const result = await unlockUserAccount(ctx.db, email, request.user.userId, ipAddress, userAgent);
 
-    ctx.log.info(
-      { adminId: request.user.userId, targetEmail: body.email },
-      'Admin unlocked user account',
-    );
+    ctx.log.info({ adminId: request.user.userId, targetEmail: email }, 'Admin unlocked user account');
 
     return {
       status: 200,

@@ -10,8 +10,8 @@
  * - Cross-instance messaging via Postgres NOTIFY/LISTEN
  */
 
-import type { PostgresPubSub } from './postgresPubSub';
-import type { ClientMessage, ServerMessage, SubscriptionKey, WebSocket } from './types';
+import type { PostgresPubSub } from '@pubsub/postgresPubSub';
+import type { ClientMessage, ServerMessage, SubscriptionKey, WebSocket } from '@pubsub/types';
 
 // ============================================================================
 // Types
@@ -158,5 +158,12 @@ export class SubscriptionManager {
    */
   getSubscriberCount(key: SubscriptionKey): number {
     return this.subscriptions.get(key)?.size ?? 0;
+  }
+
+  /**
+   * Get total subscription count across all keys (useful for health checks)
+   */
+  getSubscriptionCount(): number {
+    return this.subscriptions.size;
   }
 }

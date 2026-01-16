@@ -31,7 +31,7 @@ import {
   VisuallyHidden,
 } from '@abe-stack/ui';
 
-import type { ComponentDemo } from '../types';
+import type { ComponentDemo } from '@demo/types';
 
 export const elementCatalog: Record<string, ComponentDemo> = {
   alert: {

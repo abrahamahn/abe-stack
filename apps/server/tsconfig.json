@@ -6,43 +6,142 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@abe-stack/core": ["../../packages/core/src/index.ts"],
-      "@abe-stack/core/*": ["../../packages/core/src/*"],
-      "@config": ["./src/config/index.ts"],
-      "@config/*": ["./src/config/*"],
-      "@modules": ["./src/modules/index.ts"],
-      "@modules/*": ["./src/modules/*"],
-      "@scripts": ["./src/scripts/index.ts"],
-      "@scripts/*": ["./src/scripts/*"],
-      "@shared": ["./src/shared/index.ts"],
-      "@shared/*": ["./src/shared/*"],
-      "@types": ["./src/types/index.ts"],
-      "@types/*": ["./src/types/*"],
-      "@infra": ["./src/infra/index.ts"],
-      "@infra/*": ["./src/infra/*"],
-      "@crypto": ["./src/infra/crypto/index.ts"],
-      "@crypto/*": ["./src/infra/crypto/*"],
-      "@database": ["./src/infra/database/index.ts"],
-      "@database/*": ["./src/infra/database/*"],
-      "@email": ["./src/infra/email/index.ts"],
-      "@email/*": ["./src/infra/email/*"],
-      "@http": ["./src/infra/http/index.ts"],
-      "@http/*": ["./src/infra/http/*"],
-      "@pubsub": ["./src/infra/pubsub/index.ts"],
-      "@pubsub/*": ["./src/infra/pubsub/*"],
-      "@rate-limit": ["./src/infra/rate-limit/index.ts"],
-      "@rate-limit/*": ["./src/infra/rate-limit/*"],
-      "@security": ["./src/infra/security/index.ts"],
-      "@security/*": ["./src/infra/security/*"],
-      "@storage": ["./src/infra/storage/index.ts"],
-      "@storage/*": ["./src/infra/storage/*"],
-      "@websocket": ["./src/infra/websocket/index.ts"],
-      "@websocket/*": ["./src/infra/websocket/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@admin": [
+        "./src/modules/admin"
+      ],
+      "@admin/*": [
+        "./src/modules/admin/*"
+      ],
+      "@auth": [
+        "./src/modules/auth"
+      ],
+      "@auth/*": [
+        "./src/modules/auth/*"
+      ],
+      "@config": [
+        "./src/config"
+      ],
+      "@config/*": [
+        "./src/config/*"
+      ],
+      "@crypto": [
+        "./src/infra/crypto"
+      ],
+      "@crypto/*": [
+        "./src/infra/crypto/*"
+      ],
+      "@database": [
+        "./src/infra/database"
+      ],
+      "@database/*": [
+        "./src/infra/database/*"
+      ],
+      "@email": [
+        "./src/infra/email"
+      ],
+      "@email/*": [
+        "./src/infra/email/*"
+      ],
+      "@health": [
+        "./src/infra/health"
+      ],
+      "@health/*": [
+        "./src/infra/health/*"
+      ],
+      "@http": [
+        "./src/infra/http"
+      ],
+      "@http/*": [
+        "./src/infra/http/*"
+      ],
+      "@infra": [
+        "./src/infra"
+      ],
+      "@infra/*": [
+        "./src/infra/*"
+      ],
+      "@modules": [
+        "./src/modules"
+      ],
+      "@modules/*": [
+        "./src/modules/*"
+      ],
+      "@providers": [
+        "./src/infra/storage/providers"
+      ],
+      "@providers/*": [
+        "./src/infra/storage/providers/*"
+      ],
+      "@pubsub": [
+        "./src/infra/pubsub"
+      ],
+      "@pubsub/*": [
+        "./src/infra/pubsub/*"
+      ],
+      "@rate-limit": [
+        "./src/infra/rate-limit"
+      ],
+      "@rate-limit/*": [
+        "./src/infra/rate-limit/*"
+      ],
+      "@schema": [
+        "./src/infra/database/schema"
+      ],
+      "@schema/*": [
+        "./src/infra/database/schema/*"
+      ],
+      "@security": [
+        "./src/infra/security"
+      ],
+      "@security/*": [
+        "./src/infra/security/*"
+      ],
+      "@shared": [
+        "./src/shared"
+      ],
+      "@shared/*": [
+        "./src/shared/*"
+      ],
+      "@storage": [
+        "./src/infra/storage"
+      ],
+      "@storage/*": [
+        "./src/infra/storage/*"
+      ],
+      "@users": [
+        "./src/modules/users"
+      ],
+      "@users/*": [
+        "./src/modules/users/*"
+      ],
+      "@utils": [
+        "./src/infra/database/utils"
+      ],
+      "@utils/*": [
+        "./src/infra/database/utils/*"
+      ],
+      "@websocket": [
+        "./src/infra/websocket"
+      ],
+      "@websocket/*": [
+        "./src/infra/websocket/*"
+      ]
     },
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.server.tsbuildinfo"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"],
-  "references": [{ "path": "../../packages/core" }]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
+  "references": [
+    {
+      "path": "../../packages/core"
+    }
+  ]
 }

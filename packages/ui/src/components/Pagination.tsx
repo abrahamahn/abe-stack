@@ -1,7 +1,7 @@
 // packages/ui/src/components/Pagination.tsx
+import { useControllableState } from '@hooks/useControllableState';
 import { type ReactElement } from 'react';
 
-import { useControllableState } from '../hooks/useControllableState';
 import '../styles/components.css';
 
 type PaginationProps = {

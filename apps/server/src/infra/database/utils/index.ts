@@ -3,4 +3,4 @@ export {
   OptimisticLockError,
   updateUserWithVersion,
   isOptimisticLockError,
-} from './optimistic-lock';
+} from '@database/utils/optimistic-lock';

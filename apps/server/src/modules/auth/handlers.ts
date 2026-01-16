@@ -5,6 +5,7 @@
  * Thin HTTP layer that calls services and formats responses.
  */
 
+import { authenticateUser, logoutUser, refreshUserTokens, registerUser } from '@auth/service';
 import { getRefreshCookieOptions } from '@config';
 import {
   AccountLockedError,
@@ -17,9 +18,7 @@ import {
   type AppContext,
 } from '@shared';
 import { REFRESH_COOKIE_NAME } from '@shared/constants';
-
-import { authenticateUser, logoutUser, refreshUserTokens, registerUser } from './service';
-import { extractRequestInfo, verifyToken as verifyJwtToken, type TokenPayload } from './utils';
+import { extractRequestInfo, verifyToken as verifyJwtToken, type TokenPayload } from '@utils/index';
 
 import type {
   AuthResponse,
@@ -57,12 +56,13 @@ export async function handleRegister(
   { status: 201; body: AuthResponse } | { status: 400 | 409 | 500; body: { message: string } }
 > {
   try {
+    const { email, password, name } = body;
     const result = await registerUser(
       ctx.db,
       ctx.config.auth,
-      body.email,
-      body.password,
-      body.name,
+      email,
+      password,
+      name,
     );
 
     // Set refresh token as HTTP-only cookie
@@ -108,11 +108,12 @@ export async function handleLogin(
   const { ipAddress, userAgent } = extractRequestInfo(request as unknown as FastifyRequest);
 
   try {
+    const { email, password } = body;
     const result = await authenticateUser(
       ctx.db,
       ctx.config.auth,
-      body.email,
-      body.password,
+      email,
+      password,
       ipAddress,
       userAgent,
       (userId, error) => {

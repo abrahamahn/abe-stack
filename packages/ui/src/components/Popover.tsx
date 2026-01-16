@@ -1,7 +1,7 @@
 // packages/ui/src/components/Popover.tsx
+import { useDisclosure } from '@hooks/useDisclosure';
 import { useEffect, useRef, type ReactElement, type ReactNode } from 'react';
 
-import { useDisclosure } from '../hooks/useDisclosure';
 import '../styles/components.css';
 
 type Placement = 'bottom' | 'right';

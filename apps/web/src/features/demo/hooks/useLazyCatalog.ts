@@ -1,14 +1,13 @@
 // apps/web/src/features/demo/hooks/useLazyCatalog.ts
-import { useCallback, useEffect, useState } from 'react';
-
 import {
   getAvailableCategories,
   getCachedCategory,
   getLoadedComponentCount,
   loadCategory,
-} from '../catalog/lazyRegistry';
+} from '@catalog/lazyRegistry';
+import { useCallback, useEffect, useState } from 'react';
 
-import type { ComponentCategory, ComponentDemo } from '../types';
+import type { ComponentCategory, ComponentDemo } from '@demo/types';
 
 type UseLazyCatalogResult = {
   /** Components for the active category */

@@ -33,7 +33,7 @@ export {
   ERROR_MESSAGES,
   SUCCESS_MESSAGES,
   FAILURE_REASONS,
-} from './constants';
+} from '@shared/constants';
 
 // Errors
 export {
@@ -66,7 +66,7 @@ export {
   // Helpers
   isAppError,
   toAppError,
-} from './errors';
+} from '@shared/errors';
 
 // Types
 export type {
@@ -93,4 +93,4 @@ export type {
   // DI Container
   IServiceContainer,
   AppContext,
-} from './types';
+} from '@shared/types';

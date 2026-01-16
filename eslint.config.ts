@@ -22,6 +22,7 @@ export default [
     ignores: [
       '**/node_modules/**',
       '**/.cache/**',
+      '**/.pnpm-store/**',
       '**/.next/**',
       '**/out/**',
       '**/dist/**',

@@ -12,7 +12,7 @@ export {
   createRequireRole,
   createAuthGuard,
   isAdmin,
-} from './middleware';
+} from '@auth/middleware';
 
 // Handlers
 export {
@@ -23,7 +23,7 @@ export {
   verifyToken,
   type ReplyWithCookies,
   type RequestWithCookies,
-} from './handlers';
+} from '@auth/handlers';
 
 // Service (business logic)
 export {
@@ -33,7 +33,7 @@ export {
   registerUser,
   type AuthResult,
   type RefreshResult,
-} from './service';
+} from '@auth/service';
 
 // Utils (for direct use if needed)
 export {
@@ -56,4 +56,4 @@ export {
   cleanupExpiredTokens,
   // Request utilities
   extractRequestInfo,
-} from './utils';
+} from '@utils/index';

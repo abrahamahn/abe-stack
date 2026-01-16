@@ -1,7 +1,7 @@
 // packages/ui/src/components/Accordion.tsx
+import { useControllableState } from '@hooks/useControllableState';
 import { type ReactElement, type ReactNode } from 'react';
 
-import { useControllableState } from '../hooks/useControllableState';
 import '../styles/components.css';
 
 type AccordionItem = {

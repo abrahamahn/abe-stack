@@ -6,7 +6,7 @@
  * Use this in development to see email output without SMTP.
  */
 
-import type { EmailOptions, EmailResult, EmailService } from './types';
+import type { EmailOptions, EmailResult, EmailService } from '@email/types';
 
 export class ConsoleEmailService implements EmailService {
   send(options: EmailOptions): Promise<EmailResult> {

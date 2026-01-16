@@ -57,6 +57,22 @@ export interface RateLimitStore {
   cleanup?(expireThreshold: number): Promise<void> | void;
   /** Destroy the store connection/timers */
   destroy(): Promise<void> | void;
+  /** Get store statistics (optional) */
+  getStats?(): MemoryStoreStats;
+}
+
+export interface MemoryStoreStats {
+  /** Number of clients being tracked */
+  trackedClients: number;
+  /** Number of clients currently rate limited (tokens < 1) */
+  limitedClients: number;
+}
+
+export interface RateLimiterStats {
+  /** Rate limiter configuration */
+  config: { windowMs: number; max: number };
+  /** Store statistics if available */
+  store?: MemoryStoreStats;
 }
 
 // ============================================================================
@@ -101,6 +117,19 @@ export class MemoryStore implements RateLimitStore {
       this.cleanupTimer = null;
     }
     this.hits.clear();
+  }
+
+  getStats(): MemoryStoreStats {
+    let limitedClients = 0;
+    for (const record of this.hits.values()) {
+      if (record.tokens < 1) {
+        limitedClients++;
+      }
+    }
+    return {
+      trackedClients: this.hits.size,
+      limitedClients,
+    };
   }
 }
 
@@ -203,6 +232,25 @@ export class RateLimiter {
     // Time until fully refilled
     const tokensNeeded = this.config.max - record.tokens;
     return Math.ceil(tokensNeeded / this.refillRate);
+  }
+
+  /**
+   * Get rate limiter statistics for health checks.
+   */
+  getStats(): RateLimiterStats {
+    const stats: RateLimiterStats = {
+      config: {
+        windowMs: this.config.windowMs,
+        max: this.config.max,
+      },
+    };
+
+    // Include store stats if available
+    if (this.store.getStats) {
+      stats.store = this.store.getStats();
+    }
+
+    return stats;
   }
 }
 

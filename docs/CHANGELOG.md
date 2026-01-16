@@ -1,8 +1,59 @@
 # ABE Stack Changelog
 
-**Last Updated: January 15, 2026**
+**Last Updated: January 17, 2026**
 
 All notable changes to this project are documented here. Format follows semantic versioning principles.
+
+---
+
+## 2026-01-17
+
+### Path Alias & Build Configuration Fixes
+
+- **Vitest/Vite Alias Fixes:**
+  - Added `@utils` to `uiInternalAliases` for UI package internal imports compatibility
+  - Added `@catalog` alias pointing to `src/features/demo/catalog` for web app
+  - Added `@shells`, `@containers`, `@layers` to `getUiAliases()` for UI test resolution
+  - Removed conflicting `@utils` → core override in web aliases (UI's `@utils` takes precedence)
+
+- **TypeScript Path Fixes:**
+  - Fixed `apps/web/tsconfig.json`: `@pages` now points to `./src/pages` (was incorrectly pointing to `./src/features/auth/pages`)
+  - Fixed `apps/server/tsconfig.json`: `@utils` now points to `./src/modules/auth/utils` (was incorrectly pointing to `./src/infra/database/utils`)
+
+- **Code Fixes:**
+  - Fixed `apps/web/src/features/demo/utils/lazyDocs.ts`: Changed glob imports from package alias (`@abe-stack/ui/docs/...`) to relative paths (`../../../../../../packages/ui/docs/...`) since UI package exports don't include docs folder
+  - Fixed `apps/server/src/infra/security/events.ts`: Added explicit types for `orderBy` callback and filter callbacks to resolve implicit `any` type errors
+
+### Core Package Constants
+
+- Added `packages/core/src/constants/` module with shared constants:
+  - `time.ts` - Time conversion constants (MS_PER_SECOND, SECONDS_PER_MINUTE, etc.)
+  - `http.ts` - HTTP status codes (HTTP_STATUS object with typed values)
+  - `index.ts` - Barrel exports for constants
+
+### Health Monitoring & Infrastructure Validation
+
+- **Health Check Endpoints:**
+  - `GET /health/detailed` - Full service status with latencies for all infrastructure components
+  - `GET /health/routes` - Route tree view using Fastify's `printRoutes()`
+  - `GET /health/ready` - Kubernetes-style readiness probe (returns 503 if database is down)
+  - `GET /health/live` - Kubernetes-style liveness probe (always returns 200 with uptime)
+
+- **Startup Validation Summary:**
+  - Server now logs a formatted startup summary showing all service statuses
+  - Displays database, email, storage, pubsub, websocket, and rate-limit status
+  - Shows environment, listening URL, and route count
+
+- **Infrastructure Improvements:**
+  - Added `getSubscriptionCount()` to SubscriptionManager for health monitoring
+  - Created `apps/server/src/infra/health/` module with reusable health check utilities
+  - Storage default path changed to `../../uploads` (repo root level)
+
+### Development Automation Suite
+
+- Added sync tooling for path aliases, file headers, import aliases, test folders, and barrel exports
+- `pnpm dev:start` runs the sync watchers automatically during development
+- CI now validates the sync outputs via `sync:*:check` scripts
 
 ---
 

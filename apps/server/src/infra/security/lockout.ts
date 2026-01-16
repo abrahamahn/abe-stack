@@ -6,13 +6,13 @@
  */
 
 import { loginAttempts, users } from '@database';
+import { logAccountUnlockedEvent } from '@security/events';
 import { MAX_PROGRESSIVE_DELAY_MS, PROGRESSIVE_DELAY_WINDOW_MS } from '@shared/constants';
 import { and, count, eq, gte } from 'drizzle-orm';
 
-import { logAccountUnlockedEvent } from './events';
 
-import type { LockoutConfig, LockoutStatus } from './types';
 import type { DbClient } from '@database';
+import type { LockoutConfig, LockoutStatus } from '@security/types';
 
 /**
  * Count failed login attempts for an email within a time window

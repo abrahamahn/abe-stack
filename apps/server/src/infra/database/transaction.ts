@@ -1,5 +1,5 @@
 // apps/server/src/infra/database/transaction.ts
-import type { DbClient } from './client';
+import type { DbClient } from '@database/client';
 
 /**
  * Execute a callback within a database transaction

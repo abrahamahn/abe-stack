@@ -1,6 +1,6 @@
 // packages/ui/src/components/LoadingContainer.tsx
-import { Spinner } from '../elements/Spinner';
-import { Text } from '../elements/Text';
+import { Spinner } from '@elements/Spinner';
+import { Text } from '@elements/Text';
 
 import type { ComponentPropsWithoutRef, ReactElement } from 'react';
 import '../styles/components.css';

@@ -1,2 +1,2 @@
-// packages/shared/src/validation/index.ts
+// packages/core/src/validation/index.ts
 export * from './password';

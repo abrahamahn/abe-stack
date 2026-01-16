@@ -54,7 +54,7 @@ export {
   type SecurityEvent,
   type NewSecurityEvent,
   type DbClient,
-} from './database';
+} from './database/index';
 
 // Storage
 export {
@@ -68,11 +68,11 @@ export {
   type S3StorageConfig,
   type UploadParams,
   type StorageProvider,
-} from './storage';
+} from './storage/index';
 
 // Email
-export type { EmailService, EmailOptions, EmailResult } from './email';
-export { ConsoleEmailService, createEmailService, emailTemplates, SmtpEmailService } from './email';
+export type { EmailService, EmailOptions, EmailResult } from './email/index';
+export { ConsoleEmailService, createEmailService, emailTemplates, SmtpEmailService } from './email/index';
 
 // PubSub
 export {
@@ -81,7 +81,7 @@ export {
   publishAfterWrite,
   PostgresPubSub,
   createPostgresPubSub,
-} from './pubsub';
+} from './pubsub/index';
 export type {
   SubscriptionKey,
   RecordKey,
@@ -89,7 +89,7 @@ export type {
   SubscriptionManagerOptions,
   PostgresPubSubOptions,
   PubSubMessage,
-} from './pubsub';
+} from './pubsub/index';
 
 // Security
 export {
@@ -102,7 +102,7 @@ export {
   unlockAccount,
   type LockoutConfig,
   type LockoutStatus,
-} from './security';
+} from './security/index';
 
 // Security Events
 export {
@@ -120,19 +120,22 @@ export {
 } from './security/events';
 
 // HTTP (Security headers, CORS)
-export { applySecurityHeaders, applyCors, handlePreflight, type CorsOptions } from './http';
+export { applySecurityHeaders, applyCors, handlePreflight, type CorsOptions } from './http/index';
 
 // WebSocket
-export { registerWebSocket } from './websocket';
+export { registerWebSocket, getWebSocketStats, type WebSocketStats } from './websocket/index';
 
 // Rate Limiting
 export {
   RateLimiter,
+  MemoryStore,
   createRateLimiter,
   RateLimitPresets,
   type RateLimitConfig,
   type RateLimitInfo,
-} from './rate-limit';
+  type RateLimiterStats,
+  type MemoryStoreStats,
+} from './rate-limit/index';
 
 // Crypto (Native JWT)
 export {
@@ -144,4 +147,24 @@ export {
   type JwtHeader,
   type JwtPayload,
   type JwtSignOptions,
-} from './crypto';
+} from './crypto/index';
+
+// Health Checks
+export {
+  checkDatabase,
+  checkEmail,
+  checkStorage,
+  checkPubSub,
+  checkWebSocket,
+  checkRateLimit,
+  getDetailedHealth,
+  logStartupSummary,
+  type ServiceStatus,
+  type OverallStatus,
+  type ServiceHealth,
+  type DetailedHealthResponse,
+  type ReadyResponse,
+  type LiveResponse,
+  type RoutesResponse,
+  type StartupSummaryOptions,
+} from './health/index';

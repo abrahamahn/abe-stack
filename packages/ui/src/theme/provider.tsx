@@ -1,9 +1,9 @@
 // packages/ui/src/theme/provider.tsx
+import { useThemeMode } from '@hooks/useThemeMode';
 import { createContext, useContext } from 'react';
 
-import { useThemeMode } from '../hooks/useThemeMode';
 
-import type { ThemeMode, UseThemeModeReturn } from '../hooks/useThemeMode';
+import type { ThemeMode, UseThemeModeReturn } from '@hooks/useThemeMode';
 import type { ReactNode, ReactElement } from 'react';
 
 export type ThemeContextValue = UseThemeModeReturn;

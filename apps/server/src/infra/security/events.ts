@@ -1,6 +1,6 @@
 // apps/server/src/infra/security/events.ts
 import { securityEvents } from '@database';
-import { eq, gte } from 'drizzle-orm';
+import { desc, eq, gte } from 'drizzle-orm';
 
 import type { DbClient } from '@database';
 
@@ -201,7 +201,7 @@ export async function getUserSecurityEvents(
 ): Promise<Array<{ id: string; eventType: string; severity: string; createdAt: Date }>> {
   const events = await db.query.securityEvents.findMany({
     where: eq(securityEvents.userId, userId),
-    orderBy: (table, { desc }) => [desc(table.createdAt)],
+    orderBy: [desc(securityEvents.createdAt)],
     limit,
     columns: {
       id: true,
@@ -239,9 +239,15 @@ export async function getSecurityEventMetrics(
     },
   });
 
-  const tokenReuseCount = events.filter((e) => e.eventType === 'token_reuse_detected').length;
-  const accountLockedCount = events.filter((e) => e.eventType === 'account_locked').length;
-  const criticalEventCount = events.filter((e) => e.severity === 'critical').length;
+  const tokenReuseCount = events.filter(
+    (e: { eventType: string; severity: string }) => e.eventType === 'token_reuse_detected',
+  ).length;
+  const accountLockedCount = events.filter(
+    (e: { eventType: string; severity: string }) => e.eventType === 'account_locked',
+  ).length;
+  const criticalEventCount = events.filter(
+    (e: { eventType: string; severity: string }) => e.severity === 'critical',
+  ).length;
 
   return {
     tokenReuseCount,

@@ -7,24 +7,24 @@
  */
 
 // Main config loader
-export { loadConfig } from './loader';
+export { loadConfig } from '@config/loader';
 
 // App config type
-export type { AppConfig } from './types';
+export type { AppConfig } from '@config/types';
 
 // Auth config
-export type { AuthConfig, AuthStrategy, OAuthProviderConfig } from './auth.config';
-export { isStrategyEnabled, getRefreshCookieOptions } from './auth.config';
+export type { AuthConfig, AuthStrategy, OAuthProviderConfig } from '@config/auth.config';
+export { isStrategyEnabled, getRefreshCookieOptions } from '@config/auth.config';
 
 // Database config
-export type { DatabaseConfig } from './database.config';
-export { buildConnectionString } from './database.config';
+export type { DatabaseConfig } from '@config/database.config';
+export { buildConnectionString } from '@config/database.config';
 
 // Email config
-export type { EmailConfig } from './email.config';
+export type { EmailConfig } from '@config/email.config';
 
 // Server config
-export type { ServerConfig } from './server.config';
+export type { ServerConfig } from '@config/server.config';
 
 // Storage config
 export type {
@@ -32,5 +32,5 @@ export type {
   StorageProviderName,
   LocalStorageConfig,
   S3StorageConfig,
-} from './storage.config';
-export { loadStorageConfig } from './storage.config';
+} from '@config/storage.config';
+export { loadStorageConfig } from '@config/storage.config';

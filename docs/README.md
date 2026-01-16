@@ -1,6 +1,6 @@
 # ABE Stack Documentation
 
-**Last Updated: January 13, 2026**
+**Last Updated: January 17, 2026**
 
 A full-stack TypeScript boilerplate for shipping real apps fast. Web, desktop, mobile, and backend from a single monorepo.
 
@@ -93,6 +93,16 @@ Key sections:
 - **[Security](./todo/security/index.md)** - Auth implementation and roadmap
 - **[Roadmap](./ROADMAP.md)** - Project milestones and tasks
 - **[Changelog](./CHANGELOG.md)** - Change history
+
+---
+
+## Keyword Routing
+
+- Automation, sync tools, dev watchers → [docs/dev/architecture.md](./dev/architecture.md)
+- Path aliases, import aliases → [docs/dev/principles.md](./dev/principles.md)
+- File headers, code conventions → [docs/dev/principles.md](./dev/principles.md)
+- Barrel exports, `index.ts` patterns → [docs/dev/architecture.md](./dev/architecture.md)
+- `__tests__` folders, test structure → [docs/dev/architecture.md](./dev/architecture.md)
 
 ---
 

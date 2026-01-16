@@ -1,8 +1,8 @@
 // packages/ui/src/layouts/shells/AppShell.tsx
+import { ResizablePanel, ResizablePanelGroup } from '@shells/ResizablePanel';
 import { forwardRef, type CSSProperties, type ReactNode } from 'react';
 
 import '../../styles/layouts.css';
-import { ResizablePanel, ResizablePanelGroup } from './ResizablePanel';
 
 export type AppShellProps = {
   /** Header content - pass any ReactNode (e.g., TopbarLayout) */

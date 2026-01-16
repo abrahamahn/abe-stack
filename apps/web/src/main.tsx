@@ -1,9 +1,9 @@
 // apps/web/src/main.tsx
+import { App } from '@app/root';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import '@abe-stack/ui/styles/elements.css';
-import { App } from './app/root';
 
 type GetElementById = (elementId: string) => HTMLElement | null;
 

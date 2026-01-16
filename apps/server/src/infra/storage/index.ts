@@ -1,7 +1,7 @@
 // apps/server/src/infra/storage/index.ts
 
 // Factory
-export { createStorage } from './storageFactory';
+export { createStorage } from '@storage/storageFactory';
 
 // Types
 export type {
@@ -11,10 +11,10 @@ export type {
   S3StorageConfig,
   UploadParams,
   StorageProvider,
-} from './types';
+} from '@storage/types';
 
 // Providers (re-exported for direct access if needed)
-export { LocalStorageProvider, S3StorageProvider } from './providers';
+export { LocalStorageProvider, S3StorageProvider } from '@providers/index';
 
 // Utils
-export { normalizeStorageKey } from './utils';
+export { normalizeStorageKey } from '@storage/utils';

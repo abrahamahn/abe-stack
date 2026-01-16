@@ -1,3 +1,4 @@
+// apps/server/src/infra/email/smtpEmailService.ts
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 // apps/server/src/infra/email/smtpEmailService.ts
 /**
@@ -8,8 +9,8 @@
 
 import nodemailer from 'nodemailer';
 
-import type { EmailOptions, EmailResult, EmailService } from './types';
 import type { EmailConfig } from '@config';
+import type { EmailOptions, EmailResult, EmailService } from '@email/types';
 
 export class SmtpEmailService implements EmailService {
   private transporter: nodemailer.Transporter;

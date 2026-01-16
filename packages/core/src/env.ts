@@ -1,4 +1,4 @@
-// packages/shared/src/env.ts
+// packages/core/src/env.ts
 import { z } from 'zod';
 
 /**

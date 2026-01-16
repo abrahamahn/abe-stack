@@ -1,6 +1,6 @@
 # ABE Stack Architecture
 
-**Last Updated: January 15, 2026**
+**Last Updated: January 17, 2026**
 
 Comprehensive architecture documentation for ABE Stack's layered architecture and package layout.
 
@@ -183,6 +183,17 @@ The server implements **hexagonal architecture** (ports & adapters) to isolate b
 
 ---
 
+## Development Automation (tools/dev/)
+
+- `sync-path-aliases` keeps TS path aliases aligned with directories that have `index.ts` barrels
+- `sync-file-headers` prepends `// path/to/file.ts` headers to new or updated files
+- `sync-import-aliases` replaces deep relative imports with path aliases
+- `sync-test-folders` creates `__tests__/` folders for code directories (skips barrel-only folders)
+- `sync-barrel-exports` generates and updates explicit named exports in `index.ts`
+- `pnpm dev:start` runs all sync tools in watch mode alongside `pnpm dev`
+
+---
+
 ## Key Patterns
 
 ### DRY Enforcement
@@ -271,4 +282,4 @@ Based on CHET-Stack patterns. **Phase 1 (Environment Objects) already complete**
 
 ---
 
-_Last Updated: January 15, 2026_
+_Last Updated: January 17, 2026_

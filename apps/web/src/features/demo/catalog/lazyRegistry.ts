@@ -1,5 +1,5 @@
 // apps/web/src/features/demo/catalog/lazyRegistry.ts
-import type { ComponentCategory, ComponentDemo } from '../types';
+import type { ComponentCategory, ComponentDemo } from '@demo/types';
 
 type CategoryLoader = () => Promise<Record<string, ComponentDemo>>;
 
@@ -14,9 +14,9 @@ const categoryCache = new Map<ComponentCategory, CategoryCache>();
 
 // Category loaders using dynamic imports for code-splitting
 const categoryLoaders: Record<ComponentCategory, CategoryLoader> = {
-  elements: () => import('./elementCatalog').then((m) => m.elementCatalog),
-  components: () => import('./componentCatalog').then((m) => m.componentCatalog),
-  layouts: () => import('./layoutCatalog').then((m) => m.layoutCatalog),
+  elements: () => import('@demo/catalog/elementCatalog').then((m) => m.elementCatalog),
+  components: () => import('@demo/catalog/componentCatalog').then((m) => m.componentCatalog),
+  layouts: () => import('@demo/catalog/layoutCatalog').then((m) => m.layoutCatalog),
   hooks: () => Promise.resolve({}),
   theme: () => Promise.resolve({}),
   utils: () => Promise.resolve({}),

@@ -1,39 +1,118 @@
 {
   "extends": "../../config/ts/tsconfig.react.json",
   "compilerOptions": {
-    "types": ["vite/client", "react", "react-dom"],
-
+    "types": [
+      "vite/client",
+      "react",
+      "react-dom"
+    ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@abe-stack/sdk": ["../../packages/sdk/src"],
-      "@abe-stack/core": ["../../packages/core/src"],
-      "@abe-stack/ui": ["../../packages/ui/src"],
-      "@api": ["./src/api"],
-      "@api/*": ["./src/api/*"],
-      "@app": ["./src/app"],
-      "@app/*": ["./src/app/*"],
-      "@config": ["./src/config"],
-      "@config/*": ["./src/config/*"],
-      "@features": ["./src/features"],
-      "@features/*": ["./src/features/*"],
-      "@auth": ["./src/features/auth"],
-      "@auth/*": ["./src/features/auth/*"],
-      "@dashboard": ["./src/features/dashboard"],
-      "@dashboard/*": ["./src/features/dashboard/*"],
-      "@demo": ["./src/features/demo"],
-      "@demo/*": ["./src/features/demo/*"],
-      "@pages": ["./src/pages"],
-      "@pages/*": ["./src/pages/*"],
-      "@test": ["./src/test"],
-      "@test/*": ["./src/test/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@api": [
+        "./src/api"
+      ],
+      "@api/*": [
+        "./src/api/*"
+      ],
+      "@app": [
+        "./src/app"
+      ],
+      "@app/*": [
+        "./src/app/*"
+      ],
+      "@auth": [
+        "./src/features/auth"
+      ],
+      "@auth/*": [
+        "./src/features/auth/*"
+      ],
+      "@catalog": [
+        "./src/features/demo/catalog"
+      ],
+      "@catalog/*": [
+        "./src/features/demo/catalog/*"
+      ],
+      "@components": [
+        "./src/features/auth/components"
+      ],
+      "@components/*": [
+        "./src/features/auth/components/*"
+      ],
+      "@config": [
+        "./src/config"
+      ],
+      "@config/*": [
+        "./src/config/*"
+      ],
+      "@contexts": [
+        "./src/features/auth/contexts"
+      ],
+      "@contexts/*": [
+        "./src/features/auth/contexts/*"
+      ],
+      "@dashboard": [
+        "./src/features/dashboard"
+      ],
+      "@dashboard/*": [
+        "./src/features/dashboard/*"
+      ],
+      "@demo": [
+        "./src/features/demo"
+      ],
+      "@demo/*": [
+        "./src/features/demo/*"
+      ],
+      "@features": [
+        "./src/features"
+      ],
+      "@features/*": [
+        "./src/features/*"
+      ],
+      "@hooks": [
+        "./src/features/auth/hooks"
+      ],
+      "@hooks/*": [
+        "./src/features/auth/hooks/*"
+      ],
+      "@pages": [
+        "./src/pages"
+      ],
+      "@pages/*": [
+        "./src/pages/*"
+      ],
+      "@types": [
+        "./src/features/demo/types"
+      ],
+      "@types/*": [
+        "./src/features/demo/types/*"
+      ],
+      "@utils": [
+        "./src/features/demo/utils"
+      ],
+      "@utils/*": [
+        "./src/features/demo/utils/*"
+      ]
     },
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.web.tsbuildinfo"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "__tests__"],
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "__tests__"
+  ],
   "references": [
-    { "path": "../../packages/sdk" },
-    { "path": "../../packages/core" },
-    { "path": "../../packages/ui" }
+    {
+      "path": "../../packages/sdk"
+    },
+    {
+      "path": "../../packages/core"
+    },
+    {
+      "path": "../../packages/ui"
+    }
   ]
 }

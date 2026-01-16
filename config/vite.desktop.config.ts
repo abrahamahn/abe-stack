@@ -1,3 +1,4 @@
+// config/vite.desktop.config.ts
 import net from 'node:net';
 
 import react from '@vitejs/plugin-react';

@@ -14,4 +14,4 @@ export {
   type JwtHeader,
   type JwtPayload,
   type SignOptions as JwtSignOptions,
-} from './jwt';
+} from '@crypto/jwt';

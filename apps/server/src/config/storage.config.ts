@@ -61,7 +61,7 @@ export function loadStorageConfig(env: Record<string, string | undefined>): Stor
 
   return {
     provider: 'local',
-    rootPath: env.STORAGE_ROOT_PATH ?? './uploads',
+    rootPath: env.STORAGE_ROOT_PATH ?? '../../uploads',
     publicBaseUrl: env.STORAGE_PUBLIC_BASE_URL,
   };
 }

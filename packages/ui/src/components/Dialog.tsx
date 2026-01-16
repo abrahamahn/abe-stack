@@ -1,4 +1,6 @@
 // packages/ui/src/components/Dialog.tsx
+import { FocusTrap } from '@components/FocusTrap';
+import { useControllableState } from '@hooks/useControllableState';
 import {
   Children,
   createContext,
@@ -16,10 +18,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 
-import { useControllableState } from '../hooks/useControllableState';
 import '../styles/components.css';
-
-import { FocusTrap } from './FocusTrap';
 
 type DialogContextValue = {
   open: boolean;

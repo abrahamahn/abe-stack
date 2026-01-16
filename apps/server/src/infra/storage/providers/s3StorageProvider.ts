@@ -1,4 +1,4 @@
-// apps/server/src/infra/storage/s3StorageProvider.ts
+// apps/server/src/infra/storage/providers/s3StorageProvider.ts
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { fromEnv } from '@aws-sdk/credential-providers';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';

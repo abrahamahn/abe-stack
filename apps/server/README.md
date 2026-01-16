@@ -78,8 +78,10 @@ apps/server/src/
 │   │   └── jwt.ts         # JWT utilities
 │   ├── http/
 │   │   └── security.ts    # CORS, security headers
-│   └── rate-limit/
-│       └── limiter.ts     # Token bucket rate limiter
+│   ├── rate-limit/
+│   │   └── limiter.ts     # Token bucket rate limiter
+│   └── health/
+│       └── index.ts       # Health checks, startup summary
 │
 ├── modules/             # Business modules (features)
 │   ├── index.ts         # registerRoutes() - all routes
@@ -261,4 +263,4 @@ Test utilities create mock `AppContext` for unit testing handlers.
 
 ---
 
-_Last Updated: 2026-01-15_
+_Last Updated: 2026-01-17_

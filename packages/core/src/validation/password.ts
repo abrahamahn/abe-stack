@@ -1,4 +1,4 @@
-// packages/shared/src/validation/password.ts
+// packages/core/src/validation/password.ts
 import type zxcvbn from 'zxcvbn';
 
 type ZxcvbnFn = typeof zxcvbn;

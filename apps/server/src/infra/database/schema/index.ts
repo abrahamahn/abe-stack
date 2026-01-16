@@ -10,7 +10,7 @@ export {
   type NewUser,
   type RefreshToken,
   type NewRefreshToken,
-} from './users';
+} from '@schema/users';
 
 // Auth schema
 export {
@@ -29,4 +29,4 @@ export {
   type NewEmailVerificationToken,
   type SecurityEvent,
   type NewSecurityEvent,
-} from './auth';
+} from '@schema/auth';

@@ -1,4 +1,6 @@
 // packages/ui/src/layouts/layers/Modal.tsx
+import { FocusTrap } from '@components/FocusTrap';
+import { Overlay } from '@layers/Overlay';
 import {
   createContext,
   useContext,
@@ -12,10 +14,6 @@ import {
 import { createPortal } from 'react-dom';
 
 import '../../styles/components.css';
-
-import { FocusTrap } from '../../components/FocusTrap';
-
-import { Overlay } from './Overlay';
 
 type ModalContextValue = {
   onClose?: () => void;

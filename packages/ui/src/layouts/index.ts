@@ -2,10 +2,10 @@
 // Layouts - Page and section layout components
 
 // Shells - App-level structural layouts
-export * from './shells';
+export * from './shells/index';
 
 // Containers - Content wrapper layouts
-export * from './containers';
+export * from './containers/index';
 
 // Layers - Overlay and positioning components
-export * from './layers';
+export * from './layers/index';

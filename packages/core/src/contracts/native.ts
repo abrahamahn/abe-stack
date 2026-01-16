@@ -1,4 +1,4 @@
-// packages/shared/src/contracts/native.ts
+// packages/core/src/contracts/native.ts
 export interface NativeBridge {
   getPlatform: () => Promise<string>;
   sendNotification: (title: string, body: string) => void;

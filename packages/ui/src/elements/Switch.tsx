@@ -1,7 +1,7 @@
 // packages/ui/src/elements/Switch.tsx
+import { useControllableState } from '@hooks/useControllableState';
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 
-import { useControllableState } from '../hooks/useControllableState';
 import '../styles/elements.css';
 
 type SwitchProps = ComponentPropsWithoutRef<'button'> & {

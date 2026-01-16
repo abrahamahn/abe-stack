@@ -1,4 +1,4 @@
-// packages/api-client/src/client.ts
+// packages/sdk/src/client.ts
 import { addAuthHeader } from '@abe-stack/core';
 
 import type {
