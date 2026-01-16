@@ -1,3 +1,4 @@
+// config/playwright.config.ts
 import { defineConfig, devices } from '@playwright/test';
 
 const CI = Boolean(process.env.CI);

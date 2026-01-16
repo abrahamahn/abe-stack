@@ -1,6 +1,9 @@
-// packages/shared/src/index.ts
+// packages/core/src/index.ts
 // API contract (single source of truth)
 export * from './contracts';
+
+// Constants
+export * from './constants';
 
 // Utilities
 export * from './utils';

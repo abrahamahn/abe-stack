@@ -7,8 +7,7 @@
 
 import { type RequestWithCookies } from '@modules/auth';
 import { ERROR_MESSAGES, type AppContext } from '@shared';
-
-import { getUserById } from './service';
+import { getUserById } from '@users/service';
 
 import type { UserResponse } from '@abe-stack/core';
 

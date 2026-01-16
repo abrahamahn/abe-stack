@@ -6,13 +6,13 @@
  * Call once at startup.
  */
 
-import { loadAuthConfig } from './auth.config';
-import { loadDatabaseConfig } from './database.config';
-import { loadEmailConfig } from './email.config';
-import { loadServerConfig } from './server.config';
-import { loadStorageConfig } from './storage.config';
+import { loadAuthConfig } from '@config/auth.config';
+import { loadDatabaseConfig } from '@config/database.config';
+import { loadEmailConfig } from '@config/email.config';
+import { loadServerConfig } from '@config/server.config';
+import { loadStorageConfig } from '@config/storage.config';
 
-import type { AppConfig } from './types';
+import type { AppConfig } from '@config/types';
 
 /**
  * Load all configuration from environment variables.

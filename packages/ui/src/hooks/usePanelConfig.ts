@@ -1,7 +1,7 @@
 // packages/ui/src/hooks/usePanelConfig.ts
+import { useLocalStorage } from '@hooks/useLocalStorage';
 import { useCallback } from 'react';
 
-import { useLocalStorage } from './useLocalStorage';
 
 export type PanelState = {
   visible: boolean;

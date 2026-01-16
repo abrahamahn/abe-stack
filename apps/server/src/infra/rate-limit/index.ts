@@ -7,8 +7,11 @@
 
 export {
   RateLimiter,
+  MemoryStore,
   createRateLimiter,
   RateLimitPresets,
   type RateLimitConfig,
   type RateLimitInfo,
-} from './limiter';
+  type RateLimiterStats,
+  type MemoryStoreStats,
+} from '@rate-limit/limiter';

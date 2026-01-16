@@ -37,6 +37,18 @@ https://github.com/abrahamahn/abe-stack
 - State: React Query for server state
 - Theming, hooks, layouts, resizable panels — all reusable
 
+### Development Automation
+
+`pnpm dev:start` runs all sync tools in watch mode (quiet by default).
+
+| Tool                  | Purpose                                                        |
+| --------------------- | -------------------------------------------------------------- |
+| `sync-path-aliases`   | Auto-generates TS path aliases when directories add `index.ts` |
+| `sync-file-headers`   | Adds `// path/to/file.ts` headers on new files                 |
+| `sync-import-aliases` | Converts deep relative imports to path aliases                 |
+| `sync-test-folders`   | Creates `__tests__/` folders for code directories              |
+| `sync-barrel-exports` | Auto-creates and updates `index.ts` barrels                    |
+
 ### Repository Layout
 
 ```
@@ -91,12 +103,18 @@ cp config/.env/.env.example config/.env/.env.development
 pnpm dev
 ```
 
-### Coming Very Soon
+### Infrastructure & Health Monitoring
 
-- MFA support
-- Rate limiting & security headers
-- Logging and audit trails
-- GDPR/HIPAA-ready templates
+- **Rate Limiting:** Token bucket algorithm with customizable limits
+- **Security Headers:** Comprehensive HTTP security headers (CSP, HSTS, X-Frame-Options, etc.)
+- **Audit Logging:** Security events table for token reuse, lockouts, and admin actions
+- **Health Endpoints:** Detailed service status, readiness/liveness probes, route listing
+- **Startup Validation:** Formatted summary showing all service statuses on server start
+
+### Coming Soon
+
+- MFA support (TOTP with authenticator apps)
+- GDPR/HIPAA-ready data handling templates
 
 ### Contributing
 

@@ -1,5 +1,5 @@
 // packages/ui/src/layouts/containers/PageContainer.tsx
-import { cn } from '../../utils/cn';
+import { cn } from '@utils/cn';
 
 import '../../styles/layouts.css';
 import type { CSSProperties, ComponentPropsWithoutRef, ReactElement } from 'react';

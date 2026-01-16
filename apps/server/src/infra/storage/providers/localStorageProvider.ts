@@ -1,4 +1,4 @@
-// apps/server/src/infra/storage/localStorageProvider.ts
+// apps/server/src/infra/storage/providers/localStorageProvider.ts
 import { randomUUID } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';

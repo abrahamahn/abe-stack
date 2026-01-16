@@ -1,4 +1,7 @@
 // packages/ui/src/components/Select.tsx
+
+import { useControllableState } from '@hooks/useControllableState';
+import { useDisclosure } from '@hooks/useDisclosure';
 import {
   Children,
   forwardRef,
@@ -10,9 +13,6 @@ import {
   type ComponentPropsWithoutRef,
   type ReactNode,
 } from 'react';
-
-import { useControllableState } from '../hooks/useControllableState';
-import { useDisclosure } from '../hooks/useDisclosure';
 import '../styles/components.css';
 
 type SelectProps = Omit<

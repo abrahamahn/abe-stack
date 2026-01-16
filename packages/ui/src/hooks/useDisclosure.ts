@@ -1,7 +1,7 @@
 // packages/ui/src/hooks/useDisclosure.ts
+import { useControllableState } from '@hooks/useControllableState';
 import { useCallback } from 'react';
 
-import { useControllableState } from './useControllableState';
 
 export type UseDisclosureProps = {
   open?: boolean;

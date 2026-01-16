@@ -1,10 +1,9 @@
 // packages/ui/src/components/Radio.tsx
+import { useRadioGroupContext } from '@components/RadioGroup';
+import { useControllableState } from '@hooks/useControllableState';
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 
-import { useControllableState } from '../hooks/useControllableState';
 import '../styles/components.css';
-
-import { useRadioGroupContext } from './RadioGroup';
 
 type RadioProps = Omit<ComponentPropsWithoutRef<'input'>, 'type' | 'onChange' | 'name'> & {
   checked?: boolean;

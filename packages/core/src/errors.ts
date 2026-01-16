@@ -1,4 +1,4 @@
-// packages/shared/src/errors.ts
+// packages/core/src/errors.ts
 /**
  * Custom Error Types with HTTP Status Codes
  *

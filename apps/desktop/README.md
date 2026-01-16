@@ -1,28 +1,40 @@
 # Abe Stack Desktop App
 
-Electron desktop application for abe-stack.
+Electron wrapper for the ABE Stack web application.
 
-## Features
+## Architecture
 
-- Built with Electron and React
-- TypeScript support
-- Hot reload in development
-- Cross-platform (Windows, macOS, Linux)
+The desktop app is a thin Electron wrapper that loads the web application:
+
+- **Development**: Loads from `http://localhost:5173` (web dev server)
+- **Production**: Loads bundled web app from `dist/renderer/`
+
+This approach means:
+- No code duplication between web and desktop
+- Full feature parity with the web app
+- Desktop-specific features can be added via Electron APIs
 
 ## Development
 
 ```bash
-# Install dependencies
-pnpm install
+# Run with web dev server (recommended - run from monorepo root)
+pnpm dev:start
 
-# Run in development mode
-pnpm dev
+# Run desktop standalone (starts its own renderer)
+pnpm --filter @abe-stack/desktop dev:standalone
 
-# Build for production
-pnpm build
+# Run just the electron shell (requires web server already running)
+pnpm --filter @abe-stack/desktop dev
+```
 
-# Package the app
-pnpm package
+## Production Build
+
+```bash
+# Build the desktop app (includes web bundle)
+pnpm --filter @abe-stack/desktop build
+
+# Package for distribution
+pnpm --filter @abe-stack/desktop package
 ```
 
 ## Project Structure
@@ -30,16 +42,18 @@ pnpm package
 ```
 desktop/
 ├── electron/           # Electron main process
-│   ├── main.ts        # Main process entry
-│   └── preload.ts     # Preload script
-├── src/               # React renderer process
-│   ├── App.tsx
-│   └── main.tsx
+│   ├── main.ts        # Main process entry, creates BrowserWindow
+│   ├── preload.ts     # Preload script for IPC
+│   └── tsconfig.json  # Electron-specific TS config
+├── src/               # Minimal renderer bootstrap
+│   └── main.tsx       # Entry point (loads web app or dev server)
 ├── public/            # Static assets
 └── dist/              # Build output
+    ├── electron/      # Compiled main process
+    └── renderer/      # Bundled web app (production)
 ```
 
-## Building
+## Packaging
 
 The app can be built for multiple platforms:
 
@@ -47,10 +61,18 @@ The app can be built for multiple platforms:
 - **macOS**: Creates DMG
 - **Linux**: Creates AppImage
 
-## Next Steps
+## Adding Desktop-Specific Features
 
-1. Implement your desktop app features in `src/`
-2. Add IPC communication between main and renderer processes
-3. Configure auto-updates
-4. Add application menu
-5. Implement native features (notifications, system tray, etc.)
+1. Add IPC handlers in `electron/main.ts`
+2. Expose APIs via `electron/preload.ts`
+3. Use from renderer via `window.electronAPI`
+
+Examples:
+- Native file dialogs
+- System notifications
+- Menu bar integration
+- Auto-updates
+
+---
+
+_Last Updated: 2026-01-17_

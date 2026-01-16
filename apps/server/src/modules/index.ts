@@ -7,10 +7,7 @@
  */
 
 import { apiContract } from '@abe-stack/core';
-import { ERROR_MESSAGES, type AppContext } from '@shared';
-import { initServer } from '@ts-rest/fastify';
-
-import { handleAdminUnlock } from './admin';
+import { handleAdminUnlock } from '@admin/index';
 import {
   createAuthGuard,
   handleLogin,
@@ -19,8 +16,10 @@ import {
   handleRegister,
   type ReplyWithCookies,
   type RequestWithCookies,
-} from './auth';
-import { handleMe } from './users';
+} from '@auth/index';
+import { ERROR_MESSAGES, type AppContext } from '@shared';
+import { initServer } from '@ts-rest/fastify';
+import { handleMe } from '@users/index';
 
 import type { FastifyInstance } from 'fastify';
 

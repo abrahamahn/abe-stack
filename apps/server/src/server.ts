@@ -12,15 +12,14 @@ import path from 'node:path';
 import cookie from '@fastify/cookie';
 import csrfProtection from '@fastify/csrf-protection';
 import fastifyStatic from '@fastify/static';
+import { applyCors, applySecurityHeaders, handlePreflight } from '@http/index';
+import { RateLimiter } from '@rate-limit/index';
+import { isAppError, type ApiErrorResponse } from '@shared/errors';
 import { sql } from 'drizzle-orm';
 import Fastify from 'fastify';
 
-import { applyCors, applySecurityHeaders, handlePreflight } from './infra/http';
-import { RateLimiter } from './infra/rate-limit';
-import { isAppError, type ApiErrorResponse } from './shared/errors';
-
-import type { AppConfig } from './config';
-import type { DbClient } from './infra';
+import type { AppConfig } from '@config/index';
+import type { DbClient } from '@infra/index';
 import type { FastifyInstance } from 'fastify';
 
 // ============================================================================
@@ -259,7 +258,10 @@ export async function listen(server: FastifyInstance, config: AppConfig): Promis
   throw new Error(`No available ports found from: ${ports.join(', ')}`);
 }
 
-function isAddrInUse(error: unknown): boolean {
+/**
+ * Check if an error indicates address is already in use
+ */
+export function isAddrInUse(error: unknown): boolean {
   return (
     error !== null &&
     typeof error === 'object' &&

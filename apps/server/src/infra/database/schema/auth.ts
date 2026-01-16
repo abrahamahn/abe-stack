@@ -1,7 +1,7 @@
 // apps/server/src/infra/database/schema/auth.ts
+import { users } from '@schema/users';
 import { boolean, index, inet, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
-import { users } from './users';
 
 /**
  * Refresh token families for reuse detection

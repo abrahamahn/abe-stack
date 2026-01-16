@@ -1,3 +1,4 @@
+// apps/server/src/infra/websocket/websocket.ts
 import websocketPlugin from '@fastify/websocket';
 import { verifyToken } from '@modules/auth/utils/jwt';
 
@@ -6,12 +7,35 @@ import type { AppContext } from '@shared';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { WebSocket } from 'ws';
 
+// ============================================================================
+// Connection Tracking
+// ============================================================================
+
+export interface WebSocketStats {
+  activeConnections: number;
+  pluginRegistered: boolean;
+}
+
+let activeConnections = 0;
+let pluginRegistered = false;
+
+/**
+ * Get WebSocket statistics for health checks
+ */
+export function getWebSocketStats(): WebSocketStats {
+  return {
+    activeConnections,
+    pluginRegistered,
+  };
+}
+
 /**
  * Register WebSocket support
  */
 export async function registerWebSocket(server: FastifyInstance, ctx: AppContext): Promise<void> {
   // Register the plugin
   await server.register(websocketPlugin);
+  pluginRegistered = true;
 
   // Register the websocket route
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,7 +86,9 @@ function handleConnection(socket: WebSocket, req: FastifyRequest, ctx: AppContex
   try {
     const user = verifyToken(token, ctx.config.auth.jwt.secret);
 
-    ctx.log.debug({ userId: user.userId }, 'WebSocket client connected');
+    // Track connection
+    activeConnections++;
+    ctx.log.debug({ userId: user.userId, activeConnections }, 'WebSocket client connected');
 
     // 2. Setup handlers
     const pubsub = ctx.pubsub;
@@ -86,12 +112,14 @@ function handleConnection(socket: WebSocket, req: FastifyRequest, ctx: AppContex
     });
 
     socket.on('close', () => {
-      ctx.log.debug({ userId: user.userId }, 'WebSocket client disconnected');
+      activeConnections--;
+      ctx.log.debug({ userId: user.userId, activeConnections }, 'WebSocket client disconnected');
       pubsub.cleanup(socket as unknown as PubSubWebSocket);
     });
 
     socket.on('error', (err: Error) => {
-      ctx.log.error({ err, userId: user.userId }, 'WebSocket error');
+      activeConnections--;
+      ctx.log.error({ err, userId: user.userId, activeConnections }, 'WebSocket error');
       pubsub.cleanup(socket as unknown as PubSubWebSocket);
     });
   } catch {

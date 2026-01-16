@@ -1,7 +1,10 @@
+// config/vitest.config.ts
 import react from '@vitejs/plugin-react';
 import { defineConfig, mergeConfig } from 'vitest/config';
 
 import {
+  getCoreAliases,
+  getSdkAliases,
   getServerAliases,
   getUiAliases,
   getWebAliases,
@@ -92,6 +95,9 @@ export const webConfig = mergeConfig(
 );
 
 export const coreConfig = defineConfig({
+  resolve: {
+    alias: getCoreAliases(),
+  },
   test: {
     globals: true,
     environment: 'node',
@@ -107,6 +113,8 @@ export const sdkConfig = defineConfig({
   resolve: {
     alias: {
       '@abe-stack/core': packageAliases['@abe-stack/core'],
+      ...getCoreAliases(),
+      ...getSdkAliases(),
     },
   },
   test: {

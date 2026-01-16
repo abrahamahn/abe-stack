@@ -64,6 +64,21 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Check path aliases
+        run: pnpm sync:aliases:check
+
+      - name: Check file headers
+        run: pnpm sync:headers:check
+
+      - name: Check import aliases
+        run: pnpm sync:imports:check
+
+      - name: Check test folders
+        run: pnpm sync:tests:check
+
+      - name: Check barrel exports
+        run: pnpm sync:barrels:check
+
       - name: Cache Turbo
         uses: actions/cache@v4
         with:

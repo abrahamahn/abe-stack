@@ -1,8 +1,8 @@
 // apps/server/src/infra/database/client.ts
+import * as schema from '@schema/index';
 import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 
-import * as schema from './schema';
 
 type DbEnv = Record<string, string | number | boolean | undefined>;
 type GlobalWithDb = typeof globalThis & {

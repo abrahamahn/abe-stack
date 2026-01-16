@@ -1,0 +1,220 @@
+// packages/core/src/__tests__/env.test.ts
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+
+import { loadServerEnv, serverEnvSchema } from '../env';
+
+describe('serverEnvSchema', () => {
+  const validEnv = {
+    POSTGRES_DB: 'testdb',
+    POSTGRES_USER: 'testuser',
+    POSTGRES_PASSWORD: 'testpassword',
+    JWT_SECRET: 'this-is-a-very-long-jwt-secret-key-for-testing',
+    SESSION_SECRET: 'this-is-a-very-long-session-secret-for-testing',
+  };
+
+  describe('required fields', () => {
+    test('should validate with all required fields', () => {
+      const result = serverEnvSchema.safeParse(validEnv);
+      expect(result.success).toBe(true);
+    });
+
+    test('should fail without POSTGRES_DB', () => {
+      const { POSTGRES_DB: _, ...env } = validEnv;
+      const result = serverEnvSchema.safeParse(env);
+      expect(result.success).toBe(false);
+    });
+
+    test('should fail without POSTGRES_USER', () => {
+      const { POSTGRES_USER: _, ...env } = validEnv;
+      const result = serverEnvSchema.safeParse(env);
+      expect(result.success).toBe(false);
+    });
+
+    test('should fail without POSTGRES_PASSWORD', () => {
+      const { POSTGRES_PASSWORD: _, ...env } = validEnv;
+      const result = serverEnvSchema.safeParse(env);
+      expect(result.success).toBe(false);
+    });
+
+    test('should fail without JWT_SECRET', () => {
+      const { JWT_SECRET: _, ...env } = validEnv;
+      const result = serverEnvSchema.safeParse(env);
+      expect(result.success).toBe(false);
+    });
+
+    test('should fail without SESSION_SECRET', () => {
+      const { SESSION_SECRET: _, ...env } = validEnv;
+      const result = serverEnvSchema.safeParse(env);
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('default values', () => {
+    test('should set default NODE_ENV to development', () => {
+      const result = serverEnvSchema.safeParse(validEnv);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.NODE_ENV).toBe('development');
+      }
+    });
+
+    test('should set default POSTGRES_HOST to localhost', () => {
+      const result = serverEnvSchema.safeParse(validEnv);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.POSTGRES_HOST).toBe('localhost');
+      }
+    });
+
+    test('should set default POSTGRES_PORT to 5432', () => {
+      const result = serverEnvSchema.safeParse(validEnv);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.POSTGRES_PORT).toBe(5432);
+      }
+    });
+
+    test('should set default API_PORT to 8080', () => {
+      const result = serverEnvSchema.safeParse(validEnv);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.API_PORT).toBe(8080);
+      }
+    });
+
+    test('should set default STORAGE_PROVIDER to local', () => {
+      const result = serverEnvSchema.safeParse(validEnv);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.STORAGE_PROVIDER).toBe('local');
+      }
+    });
+  });
+
+  describe('auto-constructed URLs', () => {
+    test('should auto-construct DATABASE_URL when not provided', () => {
+      const result = serverEnvSchema.safeParse(validEnv);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.DATABASE_URL).toBe(
+          'postgresql://testuser:testpassword@localhost:5432/testdb',
+        );
+      }
+    });
+
+    test('should use provided DATABASE_URL when given', () => {
+      const env = { ...validEnv, DATABASE_URL: 'postgresql://custom:url@host:5432/db' };
+      const result = serverEnvSchema.safeParse(env);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.DATABASE_URL).toBe('postgresql://custom:url@host:5432/db');
+      }
+    });
+
+    test('should auto-construct REDIS_URL when not provided', () => {
+      const result = serverEnvSchema.safeParse(validEnv);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.REDIS_URL).toBe('redis://localhost:6379');
+      }
+    });
+  });
+
+  describe('validation rules', () => {
+    test('should reject JWT_SECRET shorter than 32 characters', () => {
+      const env = { ...validEnv, JWT_SECRET: 'short' };
+      const result = serverEnvSchema.safeParse(env);
+      expect(result.success).toBe(false);
+    });
+
+    test('should reject SESSION_SECRET shorter than 32 characters', () => {
+      const env = { ...validEnv, SESSION_SECRET: 'short' };
+      const result = serverEnvSchema.safeParse(env);
+      expect(result.success).toBe(false);
+    });
+
+    test('should accept valid NODE_ENV values', () => {
+      for (const nodeEnv of ['development', 'production', 'test']) {
+        const result = serverEnvSchema.safeParse({ ...validEnv, NODE_ENV: nodeEnv });
+        expect(result.success).toBe(true);
+      }
+    });
+
+    test('should reject invalid NODE_ENV values', () => {
+      const result = serverEnvSchema.safeParse({ ...validEnv, NODE_ENV: 'invalid' });
+      expect(result.success).toBe(false);
+    });
+
+    test('should coerce string port to number', () => {
+      const env = { ...validEnv, POSTGRES_PORT: '5433' };
+      const result = serverEnvSchema.safeParse(env);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.POSTGRES_PORT).toBe(5433);
+      }
+    });
+  });
+
+  describe('production refinement', () => {
+    test('should reject dev_ prefixed secrets in production', () => {
+      const env = {
+        ...validEnv,
+        NODE_ENV: 'production',
+        JWT_SECRET: 'dev_this-is-a-very-long-jwt-secret',
+      };
+      const result = serverEnvSchema.safeParse(env);
+      expect(result.success).toBe(false);
+    });
+
+    test('should allow non-dev secrets in production', () => {
+      const env = {
+        ...validEnv,
+        NODE_ENV: 'production',
+        JWT_SECRET: 'production-very-long-jwt-secret-key-here',
+        SESSION_SECRET: 'production-very-long-session-secret-here',
+      };
+      const result = serverEnvSchema.safeParse(env);
+      expect(result.success).toBe(true);
+    });
+  });
+});
+
+describe('loadServerEnv', () => {
+  const validEnv = {
+    POSTGRES_DB: 'testdb',
+    POSTGRES_USER: 'testuser',
+    POSTGRES_PASSWORD: 'testpassword',
+    JWT_SECRET: 'this-is-a-very-long-jwt-secret-key-for-testing',
+    SESSION_SECRET: 'this-is-a-very-long-session-secret-for-testing',
+  };
+
+  let mockExit: ReturnType<typeof vi.spyOn>;
+  let mockConsoleError: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    mockExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    mockExit.mockRestore();
+    mockConsoleError.mockRestore();
+  });
+
+  test('should return validated env on success', () => {
+    const result = loadServerEnv(validEnv);
+    expect(result.POSTGRES_DB).toBe('testdb');
+    expect(result.POSTGRES_USER).toBe('testuser');
+    expect(result.DATABASE_URL).toContain('postgresql://');
+  });
+
+  test('should exit with code 1 on validation failure', () => {
+    loadServerEnv({});
+    expect(mockExit).toHaveBeenCalledWith(1);
+  });
+
+  test('should log error on validation failure', () => {
+    loadServerEnv({});
+    expect(mockConsoleError).toHaveBeenCalled();
+  });
+});

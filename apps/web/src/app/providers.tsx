@@ -1,10 +1,9 @@
 // apps/web/src/app/providers.tsx
 import { HistoryProvider } from '@abe-stack/ui';
+import { ApiProvider } from '@api/index';
+import { AuthProvider } from '@auth/index';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter } from 'react-router-dom';
-
-import { ApiProvider } from '../api';
-import { AuthProvider } from '../features/auth';
 
 import type { ReactElement, ReactNode } from 'react';
 

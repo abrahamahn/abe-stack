@@ -1,4 +1,4 @@
-// packages/shared/src/stores/toastStore.ts
+// packages/core/src/stores/toastStore.ts
 import { nanoid } from 'nanoid';
 import { create } from 'zustand';
 

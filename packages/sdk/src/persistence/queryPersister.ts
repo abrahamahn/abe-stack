@@ -6,7 +6,7 @@
  * Queries are automatically restored when the app loads.
  */
 
-import { idbStorage } from './storage';
+import { idbStorage } from '@persistence/storage';
 
 import type { PersistedClient, Persister } from '@tanstack/query-persist-client-core';
 

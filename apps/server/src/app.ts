@@ -12,24 +12,32 @@
  * - Single entry point for the application
  */
 
-import { buildConnectionString, type AppConfig } from './config';
+import { buildConnectionString, type AppConfig } from '@config/index';
 import {
   createDbClient,
   createEmailService,
   createPostgresPubSub,
   createStorage,
+  getDetailedHealth,
+  logStartupSummary,
   registerWebSocket,
   SubscriptionManager,
   type DbClient,
+  type DetailedHealthResponse,
   type EmailService,
+  type LiveResponse,
   type PostgresPubSub,
+  type ReadyResponse,
+  type RoutesResponse,
   type StorageProvider,
-} from './infra';
-import { registerRoutes } from './modules';
-import { createServer, listen } from './server';
-import { type AppContext, type IServiceContainer } from './shared';
+} from '@infra/index';
+import { registerRoutes } from '@modules/index';
+import { type AppContext, type IServiceContainer } from '@shared/index';
+import { sql } from 'drizzle-orm';
 
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
+
+import { createServer, listen } from '@/server';
 
 // ============================================================================
 // App Class
@@ -58,6 +66,14 @@ export class App implements IServiceContainer {
 
   // HTTP server (Fastify)
   private _server: FastifyInstance | null = null;
+
+  // Module info for startup summary
+  private readonly moduleInfo = {
+    auth: { routes: 5 },
+    users: { routes: 1 },
+    admin: { routes: 1 },
+    health: { routes: 4 }, // detailed, routes, ready, live
+  };
 
   constructor(options: AppOptions) {
     this.config = options.config;
@@ -120,8 +136,72 @@ export class App implements IServiceContainer {
     // Register WebSocket support
     await registerWebSocket(this._server, this.context);
 
+    // Register health endpoints
+    this.registerHealthEndpoints();
+
     // Start listening
     await listen(this._server, this.config);
+
+    // Log startup summary
+    const routeCount = Object.values(this.moduleInfo).reduce((sum, m) => sum + m.routes, 0);
+    await logStartupSummary(this.context, {
+      host: this.config.server.host,
+      port: this.config.server.port,
+      routeCount,
+    });
+  }
+
+  /**
+   * Register health check endpoints
+   */
+  private registerHealthEndpoints(): void {
+    if (!this._server) return;
+
+    // Detailed health check
+    this._server.get<{ Reply: DetailedHealthResponse }>(
+      '/health/detailed',
+      {},
+      async (): Promise<DetailedHealthResponse> => {
+        return getDetailedHealth(this.context);
+      },
+    );
+
+    // Route tree view
+    this._server.get<{ Reply: RoutesResponse }>(
+      '/health/routes',
+      {},
+      (): RoutesResponse => {
+        const routes = this._server?.printRoutes({ commonPrefix: false }) ?? '';
+        return {
+          routes,
+          timestamp: new Date().toISOString(),
+        };
+      },
+    );
+
+    // Readiness probe (503 if DB is down)
+    this._server.get<{ Reply: ReadyResponse }>(
+      '/health/ready',
+      {},
+      async (_request, reply): Promise<ReadyResponse> => {
+        try {
+          await this.db.execute(sql`SELECT 1`);
+          return { status: 'ready', timestamp: new Date().toISOString() };
+        } catch {
+          void reply.status(503);
+          return { status: 'not_ready', timestamp: new Date().toISOString() };
+        }
+      },
+    );
+
+    // Liveness probe (always 200)
+    this._server.get<{ Reply: LiveResponse }>(
+      '/health/live',
+      {},
+      (): LiveResponse => {
+        return { status: 'alive', uptime: Math.round(process.uptime()) };
+      },
+    );
   }
 
   /**

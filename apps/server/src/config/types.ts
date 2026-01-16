@@ -3,11 +3,11 @@
  * Application Configuration Types
  */
 
-import type { AuthConfig } from './auth.config';
-import type { DatabaseConfig } from './database.config';
-import type { EmailConfig } from './email.config';
-import type { ServerConfig } from './server.config';
-import type { StorageConfig } from './storage.config';
+import type { AuthConfig } from '@config/auth.config';
+import type { DatabaseConfig } from '@config/database.config';
+import type { EmailConfig } from '@config/email.config';
+import type { ServerConfig } from '@config/server.config';
+import type { StorageConfig } from '@config/storage.config';
 
 /**
  * Complete application configuration

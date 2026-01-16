@@ -1,3 +1,4 @@
+// config/drizzle.config.ts
 import path from 'node:path';
 
 import { defineConfig } from 'drizzle-kit';

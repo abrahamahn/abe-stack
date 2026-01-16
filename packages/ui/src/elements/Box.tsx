@@ -1,5 +1,5 @@
 // packages/ui/src/elements/Box.tsx
-import { cn } from '../utils/cn';
+import { cn } from '@utils/cn';
 
 import '../styles/elements.css';
 import type { ReactNode, CSSProperties, ReactElement } from 'react';

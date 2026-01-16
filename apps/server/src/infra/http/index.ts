@@ -6,3 +6,4 @@
  */
 
 export { applySecurityHeaders, applyCors, handlePreflight, type CorsOptions } from './security';
+export { registerStaticServe, type StaticServeOptions } from './static';

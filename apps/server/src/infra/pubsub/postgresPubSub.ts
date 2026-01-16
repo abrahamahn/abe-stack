@@ -14,7 +14,7 @@
 
 import postgres from 'postgres';
 
-import type { SubscriptionKey } from './types';
+import type { SubscriptionKey } from '@pubsub/types';
 
 // ============================================================================
 // Types

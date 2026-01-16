@@ -1,7 +1,7 @@
 // packages/ui/src/elements/Checkbox.tsx
+import { useControllableState } from '@hooks/useControllableState';
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 
-import { useControllableState } from '../hooks/useControllableState';
 
 import type React from 'react';
 

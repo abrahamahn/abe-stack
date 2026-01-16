@@ -3,9 +3,9 @@
  * Pub/Sub Helpers
  */
 
-import { SubKeys } from './types';
+import { SubKeys } from '@pubsub/types';
 
-import type { SubscriptionManager } from './subscriptionManager';
+import type { SubscriptionManager } from '@pubsub/subscriptionManager';
 
 /**
  * Helper to publish after a database write

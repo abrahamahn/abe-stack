@@ -9,7 +9,7 @@
  * 4. If offline, waits for online event to flush queue
  */
 
-import { localStorageQueue } from './storage';
+import { localStorageQueue } from '@persistence/storage';
 
 // ============================================================================
 // Types

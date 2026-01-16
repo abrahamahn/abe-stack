@@ -13,20 +13,18 @@ import {
   VersionBadge,
 } from '@abe-stack/ui';
 import { config } from '@config';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-import { DemoDocContent, DemoPreviewArea } from '../components';
+import { DemoDocContent, DemoPreviewArea } from '@demo/components';
 import {
   KEYBOARD_SHORTCUTS,
   useDemoKeyboard,
   useDemoPanes,
   useDemoTheme,
   useLazyCatalog,
-} from '../hooks';
+} from '@demo/hooks';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import type { DemoPaneConfig } from '../types';
-import type { ComponentDemo } from '../types';
+import type { ComponentDemo, DemoPaneConfig } from '@demo/types';
 
 type LayoutToggle = {
   key: keyof DemoPaneConfig;

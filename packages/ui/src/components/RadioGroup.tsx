@@ -1,4 +1,5 @@
 // packages/ui/src/components/RadioGroup.tsx
+import { useControllableState } from '@hooks/useControllableState';
 import {
   createContext,
   useContext,
@@ -9,7 +10,6 @@ import {
   type ReactNode,
 } from 'react';
 
-import { useControllableState } from '../hooks/useControllableState';
 import '../styles/components.css';
 
 export type RadioGroupProps = {

@@ -123,15 +123,18 @@ export {
 export { applySecurityHeaders, applyCors, handlePreflight, type CorsOptions } from './http';
 
 // WebSocket
-export { registerWebSocket } from './websocket';
+export { registerWebSocket, getWebSocketStats, type WebSocketStats } from './websocket';
 
 // Rate Limiting
 export {
   RateLimiter,
+  MemoryStore,
   createRateLimiter,
   RateLimitPresets,
   type RateLimitConfig,
   type RateLimitInfo,
+  type RateLimiterStats,
+  type MemoryStoreStats,
 } from './rate-limit';
 
 // Crypto (Native JWT)
@@ -145,3 +148,23 @@ export {
   type JwtPayload,
   type JwtSignOptions,
 } from './crypto';
+
+// Health Checks
+export {
+  checkDatabase,
+  checkEmail,
+  checkStorage,
+  checkPubSub,
+  checkWebSocket,
+  checkRateLimit,
+  getDetailedHealth,
+  logStartupSummary,
+  type ServiceStatus,
+  type OverallStatus,
+  type ServiceHealth,
+  type DetailedHealthResponse,
+  type ReadyResponse,
+  type LiveResponse,
+  type RoutesResponse,
+  type StartupSummaryOptions,
+} from './health';

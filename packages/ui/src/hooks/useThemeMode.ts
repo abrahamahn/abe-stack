@@ -1,8 +1,8 @@
 // packages/ui/src/hooks/useThemeMode.ts
-import { useCallback, useEffect } from 'react';
 
-import { useLocalStorage } from './useLocalStorage';
-import { useMediaQuery } from './useMediaQuery';
+import { useLocalStorage } from '@hooks/useLocalStorage';
+import { useMediaQuery } from '@hooks/useMediaQuery';
+import { useCallback, useEffect } from 'react';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
 

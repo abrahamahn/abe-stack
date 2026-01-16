@@ -2,7 +2,7 @@
 
 import DOMPurify from 'dompurify';
 
-import type { ComponentCategory } from '../types';
+import type { ComponentCategory } from '@demo/types';
 
 type DocsLoader = () => Promise<string>;
 type DocsModules = Record<string, DocsLoader>;
@@ -13,18 +13,25 @@ const docsCache = new Map<string, string>();
 const normalizeKey = (value: string): string => value.toLowerCase().replace(/[^a-z0-9]/g, '');
 
 // Lazy glob imports - these will be code-split and loaded on demand
-const elementDocsModules: DocsModules = import.meta.glob('@abe-stack/ui/docs/elements/*.md', {
-  query: '?raw',
-  import: 'default',
-}) as DocsModules;
+// Note: Using relative paths because package exports don't include docs folder
+const elementDocsModules: DocsModules = import.meta.glob(
+  '../../../../../../packages/ui/docs/elements/*.md',
+  {
+    query: '?raw',
+    import: 'default',
+  },
+) as DocsModules;
 
-const componentDocsModules: DocsModules = import.meta.glob('@abe-stack/ui/docs/components/*.md', {
-  query: '?raw',
-  import: 'default',
-}) as DocsModules;
+const componentDocsModules: DocsModules = import.meta.glob(
+  '../../../../../../packages/ui/docs/components/*.md',
+  {
+    query: '?raw',
+    import: 'default',
+  },
+) as DocsModules;
 
 const layoutDocsModules: DocsModules = import.meta.glob(
-  '../../../packages/ui/docs/layouts/**/*.md',
+  '../../../../../../packages/ui/docs/layouts/**/*.md',
   {
     query: '?raw',
     import: 'default',
