@@ -32,7 +32,7 @@ import {
   needsRehash,
   rotateRefreshToken as rotateRefreshTokenUtil,
   verifyPasswordSafe,
-} from '@utils/index';
+} from './utils';
 import { eq } from 'drizzle-orm';
 
 

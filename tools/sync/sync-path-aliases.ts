@@ -53,6 +53,9 @@ const PROJECTS: ProjectConfig[] = [
 
 const SKIP_DIRS = new Set(['node_modules', '__tests__', 'dist', '.turbo', '.cache', 'build', 'coverage', '.git']);
 
+// Directory names that are too common to create aliases for (use relative imports instead)
+const EXCLUDED_ALIAS_NAMES = new Set(['utils', 'helpers', 'types', 'constants']);
+
 // Maximum depth for path aliases (relative to srcDir)
 // Level 1: src/features, Level 2: src/features/auth, Level 3: src/features/auth/components
 const MAX_ALIAS_DEPTH = 3;
@@ -110,6 +113,10 @@ function generatePaths(project: ProjectConfig): Record<string, string[]> {
 
   for (const dir of sortedDirs) {
     const dirName = path.basename(dir);
+
+    // Skip commonly named directories that would cause conflicts
+    if (EXCLUDED_ALIAS_NAMES.has(dirName)) continue;
+
     const relativePath = './' + path.relative(path.dirname(project.tsconfigPath), dir).replace(/\\/g, '/');
 
     const aliasKey = `${project.aliasPrefix}${dirName}`;

@@ -178,7 +178,7 @@ function isBarrelFile(filePath: string): boolean {
 
     // Re-exports
     if (/^export\s+(type\s+)?\{[^}]*\}\s+from\s+['"]/.test(trimmed)) continue;
-    if (/^export\s+(type\s+)?\*\s+from\s+['"]/.test(trimmed)) continue;
+    if (/^export\s+(type\s+)?\*\s+(as\s+\w+\s+)?from\s+['"]/.test(trimmed)) continue;
     if (/^export\s+(type\s+)?\{/.test(trimmed) && !trimmed.includes('}')) {
       inMultiLineExport = true;
       continue;
@@ -195,6 +195,15 @@ function isBarrelFile(filePath: string): boolean {
   return true;
 }
 
+function isReExportLine(line: string): boolean {
+  const trimmed = line.trim();
+  // export { ... } from '...'
+  if (/^export\s+(type\s+)?\{[^}]*\}\s+from\s+['"]/.test(trimmed)) return true;
+  // export * from '...' or export * as name from '...'
+  if (/^export\s+(type\s+)?\*\s+(as\s+\w+\s+)?from\s+['"]/.test(trimmed)) return true;
+  return false;
+}
+
 function replaceImports(
   content: string,
   filePath: string,
@@ -203,11 +212,12 @@ function replaceImports(
   updated: string;
   changed: number;
 } {
-  // Skip barrel files - they should use relative imports for re-exports
+  // Skip barrel files entirely - they should use relative imports for re-exports
   if (isBarrelFile(filePath)) {
     return { updated: content, changed: 0 };
   }
 
+  const isIndexFile = path.basename(filePath).startsWith('index.');
   let changeCount = 0;
 
   const replaceSpec = (full: string, prefix: string, spec: string, suffix: string): string => {
@@ -222,10 +232,26 @@ function replaceImports(
     return `${prefix}${alias}${suffix}`;
   };
 
-  const staticRegex = /(from\s+['"])([^'"]+)(['"])/g;
   const dynamicRegex = /(import\(\s*['"])([^'"]+)(['"]\s*\))/g;
   const requireRegex = /(require\(\s*['"])([^'"]+)(['"]\s*\))/g;
 
+  // For index.ts files, process line by line to preserve re-exports
+  if (isIndexFile) {
+    const lines = content.split('\n');
+    const updatedLines = lines.map((line) => {
+      // Skip re-export lines - they should keep relative imports
+      if (isReExportLine(line)) return line;
+      // Only convert import lines and dynamic imports
+      let updated = line.replace(/(from\s+['"])([^'"]+)(['"])/g, replaceSpec);
+      updated = updated.replace(dynamicRegex, replaceSpec);
+      updated = updated.replace(requireRegex, replaceSpec);
+      return updated;
+    });
+    return { updated: updatedLines.join('\n'), changed: changeCount };
+  }
+
+  // For non-index files, convert everything
+  const staticRegex = /(from\s+['"])([^'"]+)(['"])/g;
   let updated = content.replace(staticRegex, replaceSpec);
   updated = updated.replace(dynamicRegex, replaceSpec);
   updated = updated.replace(requireRegex, replaceSpec);

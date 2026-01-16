@@ -6,7 +6,7 @@
  * They require the JWT secret to be passed when creating the guards.
  */
 
-import { verifyToken, type TokenPayload } from '@utils/jwt';
+import { verifyToken, type TokenPayload } from '@auth/utils/jwt';
 
 import type { UserRole } from '@abe-stack/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';

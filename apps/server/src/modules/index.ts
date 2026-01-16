@@ -24,9 +24,9 @@ import { handleMe } from '@users/index';
 import type { FastifyInstance } from 'fastify';
 
 // Re-export modules
-export * as admin from '@admin/index';
-export * as auth from '@auth/index';
-export * as users from '@users/index';
+export * as admin from './admin';
+export * as auth from './auth';
+export * as users from './users';
 
 /**
  * Register all application routes

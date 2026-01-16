@@ -18,7 +18,7 @@ import {
   type AppContext,
 } from '@shared';
 import { REFRESH_COOKIE_NAME } from '@shared/constants';
-import { extractRequestInfo, verifyToken as verifyJwtToken, type TokenPayload } from '@utils/index';
+import { extractRequestInfo, verifyToken as verifyJwtToken, type TokenPayload } from './utils';
 
 import type {
   AuthResponse,
