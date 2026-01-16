@@ -1,7 +1,17 @@
 // apps/server/src/infra/email/__tests__/email.test.ts
-import { describe, test, expect, vi, beforeEach } from 'vitest';
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
-// Mock nodemailer before imports
+import { ConsoleEmailService } from '@email/consoleEmailService';
+import { createEmailService } from '@email/factory';
+import { SmtpEmailService } from '@email/smtpEmailService';
+import { emailTemplates } from '@email/templates';
+import nodemailer from 'nodemailer';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+
+import type { EmailConfig } from '@config';
+import type { EmailOptions } from '@email/types';
+
+// Mock nodemailer
 vi.mock('nodemailer', () => ({
   default: {
     createTransport: vi.fn(() => ({
@@ -9,16 +19,6 @@ vi.mock('nodemailer', () => ({
     })),
   },
 }));
-
-import nodemailer from 'nodemailer';
-
-import { ConsoleEmailService } from '@email/consoleEmailService';
-import { createEmailService } from '@email/factory';
-import { SmtpEmailService } from '@email/smtpEmailService';
-import { emailTemplates } from '@email/templates';
-
-import type { EmailConfig } from '@config';
-import type { EmailOptions } from '@email/types';
 
 // ============================================================================
 // Test Fixtures
@@ -75,7 +75,7 @@ describe('ConsoleEmailService', () => {
     await consoleService.send(testEmailOptions);
 
     expect(consoleSpy).toHaveBeenCalled();
-    const logCalls = consoleSpy.mock.calls.flat().join(' ');
+    const logCalls = (consoleSpy.mock.calls as string[][]).flat().join(' ');
     expect(logCalls).toContain(testEmailOptions.to);
     expect(logCalls).toContain(testEmailOptions.subject);
     expect(logCalls).toContain(testEmailOptions.text);
@@ -103,7 +103,7 @@ describe('SmtpEmailService', () => {
     mockSendMail = vi.fn().mockResolvedValue({ messageId: 'smtp-123' });
     vi.mocked(nodemailer.createTransport).mockReturnValue({
       sendMail: mockSendMail,
-    } as unknown as nodemailer.Transporter);
+    } as unknown as ReturnType<typeof nodemailer.createTransport>);
     smtpService = new SmtpEmailService(config);
   });
 

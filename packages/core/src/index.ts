@@ -1,19 +1,19 @@
 // packages/core/src/index.ts
 // API contract (single source of truth)
-export * from './contracts/index';
+export * from './contracts';
 
 // Constants
-export * from './constants/index';
+export * from './constants';
 
 // Utilities
-export * from './utils/index';
+export * from './utils';
 export * from './env';
 
 // Errors
 export * from './errors';
 
 // Stores
-export * from './stores/index';
+export * from './stores';
 
 // Validation
-export * from './validation/index';
+export * from './validation';

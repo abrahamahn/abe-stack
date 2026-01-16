@@ -1,11 +1,9 @@
 // apps/server/src/infra/pubsub/__tests__/pubsub.test.ts
+import { createPostgresPubSub, publishAfterWrite, SubKeys, SubscriptionManager } from '@pubsub';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { SubscriptionManager } from '@pubsub/subscriptionManager';
-import { SubKeys } from '@pubsub/types';
 
-import type { PostgresPubSub } from '@pubsub/postgresPubSub';
-import type { SubscriptionKey, WebSocket } from '@pubsub/types';
+import type { PostgresPubSub, SubscriptionKey, WebSocket } from '@pubsub';
 
 // ============================================================================
 // SubKeys Tests
@@ -56,7 +54,7 @@ describe('SubscriptionManager', () => {
       id,
       readyState: 1, // WebSocket.OPEN
       sent: [] as string[],
-      send(data: string) {
+      send(data: string): void {
         this.sent.push(data);
       },
     };
@@ -134,7 +132,9 @@ describe('SubscriptionManager', () => {
     test('should handle unsubscribe for non-existent subscription', () => {
       const key: SubscriptionKey = 'record:users:123';
       // Should not throw
-      expect(() => manager.unsubscribe(key, mockSocket)).not.toThrow();
+      expect(() => {
+        manager.unsubscribe(key, mockSocket);
+      }).not.toThrow();
     });
   });
 
@@ -181,7 +181,9 @@ describe('SubscriptionManager', () => {
 
     test('should not throw when publishing to non-existent key', () => {
       const key: SubscriptionKey = 'record:users:123';
-      expect(() => manager.publishLocal(key, 5)).not.toThrow();
+      expect(() => {
+        manager.publishLocal(key, 5);
+      }).not.toThrow();
     });
   });
 
@@ -196,7 +198,7 @@ describe('SubscriptionManager', () => {
       expect(socket.sent).toHaveLength(1);
     });
 
-    test('should call adapter.publish when adapter is set', async () => {
+    test('should call adapter.publish when adapter is set', () => {
       const mockAdapter = {
         publish: vi.fn().mockResolvedValue(undefined),
       } as unknown as PostgresPubSub;
@@ -209,7 +211,7 @@ describe('SubscriptionManager', () => {
       expect(mockAdapter.publish).toHaveBeenCalledWith(key, 5);
     });
 
-    test('should not throw when adapter.publish fails', async () => {
+    test('should not throw when adapter.publish fails', () => {
       const mockAdapter = {
         publish: vi.fn().mockRejectedValue(new Error('Connection failed')),
       } as unknown as PostgresPubSub;
@@ -219,7 +221,9 @@ describe('SubscriptionManager', () => {
       const key: SubscriptionKey = 'record:users:123';
 
       // Should not throw
-      expect(() => manager.publish(key, 5)).not.toThrow();
+      expect(() => {
+        manager.publish(key, 5);
+      }).not.toThrow();
     });
   });
 
@@ -257,7 +261,9 @@ describe('SubscriptionManager', () => {
     });
 
     test('should handle cleanup for socket with no subscriptions', () => {
-      expect(() => manager.cleanup(mockSocket)).not.toThrow();
+      expect(() => {
+        manager.cleanup(mockSocket);
+      }).not.toThrow();
     });
   });
 
@@ -301,12 +307,16 @@ describe('SubscriptionManager', () => {
     });
 
     test('should ignore invalid JSON messages', () => {
-      expect(() => manager.handleMessage(mockSocket, 'not-json')).not.toThrow();
+      expect(() => {
+        manager.handleMessage(mockSocket, 'not-json');
+      }).not.toThrow();
     });
 
     test('should ignore messages with unknown type', () => {
       const message = JSON.stringify({ type: 'unknown', key: 'record:users:123' });
-      expect(() => manager.handleMessage(mockSocket, message)).not.toThrow();
+      expect(() => {
+        manager.handleMessage(mockSocket, message);
+      }).not.toThrow();
     });
   });
 
@@ -384,9 +394,6 @@ describe('publishAfterWrite', () => {
   });
 
   test('should call publish with record key', async () => {
-    // Import after mocks are set up
-    const { publishAfterWrite } = await import('@pubsub/helpers');
-
     publishAfterWrite(mockPubsub, 'users', 'abc-123', 5);
 
     // setImmediate is used, so we need to advance timers
@@ -396,8 +403,6 @@ describe('publishAfterWrite', () => {
   });
 
   test('should not block execution (uses setImmediate)', async () => {
-    const { publishAfterWrite } = await import('@pubsub/helpers');
-
     publishAfterWrite(mockPubsub, 'users', 'abc-123', 5);
 
     // publish should not be called immediately
@@ -410,16 +415,12 @@ describe('publishAfterWrite', () => {
 });
 
 // ============================================================================
-// PostgresPubSub Tests (testable parts)
+// PostgresPubSub Tests (testable parts without actual Postgres)
 // ============================================================================
 
 describe('PostgresPubSub', () => {
-  // We test the parts that don't require actual Postgres connections
-
   describe('createPostgresPubSub', () => {
-    test('should create instance with required options', async () => {
-      const { createPostgresPubSub } = await import('@pubsub/postgresPubSub');
-
+    test('should create instance with required options', () => {
       const pubsub = createPostgresPubSub({
         connectionString: 'postgres://test:test@localhost:5432/test',
       });
@@ -428,9 +429,7 @@ describe('PostgresPubSub', () => {
       expect(pubsub.isActive).toBe(false);
     });
 
-    test('should create instance with custom channel', async () => {
-      const { createPostgresPubSub } = await import('@pubsub/postgresPubSub');
-
+    test('should create instance with custom channel', () => {
       const pubsub = createPostgresPubSub({
         connectionString: 'postgres://test:test@localhost:5432/test',
         channel: 'custom_channel',
@@ -439,9 +438,7 @@ describe('PostgresPubSub', () => {
       expect(pubsub).toBeDefined();
     });
 
-    test('should generate unique instance ID', async () => {
-      const { createPostgresPubSub } = await import('@pubsub/postgresPubSub');
-
+    test('should generate unique instance ID', () => {
       const pubsub1 = createPostgresPubSub({
         connectionString: 'postgres://test:test@localhost:5432/test',
       });
@@ -455,22 +452,18 @@ describe('PostgresPubSub', () => {
       expect(pubsub1.id).not.toBe(pubsub2.id);
     });
 
-    test('should have id in expected format (timestamp-random)', async () => {
-      const { createPostgresPubSub } = await import('@pubsub/postgresPubSub');
-
+    test('should have id in expected format (timestamp-random)', () => {
       const pubsub = createPostgresPubSub({
         connectionString: 'postgres://test:test@localhost:5432/test',
       });
 
-      // ID format: {timestamp in base36}-{random 6 chars}
+      // ID format: {timestamp in base36}-{random chars}
       expect(pubsub.id).toMatch(/^[a-z0-9]+-[a-z0-9]+$/);
     });
   });
 
   describe('isActive property', () => {
-    test('should return false before start', async () => {
-      const { createPostgresPubSub } = await import('@pubsub/postgresPubSub');
-
+    test('should return false before start', () => {
       const pubsub = createPostgresPubSub({
         connectionString: 'postgres://test:test@localhost:5432/test',
       });
@@ -481,8 +474,6 @@ describe('PostgresPubSub', () => {
 
   describe('publish without start', () => {
     test('should throw error when publishing before start', async () => {
-      const { createPostgresPubSub } = await import('@pubsub/postgresPubSub');
-
       const pubsub = createPostgresPubSub({
         connectionString: 'postgres://test:test@localhost:5432/test',
       });

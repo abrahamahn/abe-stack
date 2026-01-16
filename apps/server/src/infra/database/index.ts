@@ -27,7 +27,7 @@ export {
   type NewEmailVerificationToken,
   type SecurityEvent,
   type NewSecurityEvent,
-} from './schema/index';
+} from './schema';
 
 // Client exports
 export {

@@ -1,6 +1,5 @@
 // apps/server/src/modules/auth/__tests__/handlers.test.ts
-import { beforeEach, describe, expect, test, vi } from 'vitest';
-
+import { authenticateUser, logoutUser, refreshUserTokens, registerUser } from '@auth/service';
 import {
   AccountLockedError,
   EmailAlreadyExistsError,
@@ -11,10 +10,13 @@ import {
   WeakPasswordError,
 } from '@shared';
 import { REFRESH_COOKIE_NAME } from '@shared/constants';
+import { verifyToken as verifyJwtToken } from '@utils/index';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { handleLogin, handleLogout, handleRefresh, handleRegister, verifyToken } from '@auth/handlers';
 
 import type { AppContext } from '@shared';
+import type { ReplyWithCookies, RequestWithCookies } from '@auth/handlers';
 
 // ============================================================================
 // Mock Dependencies
@@ -47,10 +49,6 @@ vi.mock('@utils/index', () => ({
   verifyToken: vi.fn(),
 }));
 
-// Import the mocked functions for assertions
-import { authenticateUser, logoutUser, refreshUserTokens, registerUser } from '@auth/service';
-import { verifyToken as verifyJwtToken } from '@utils/index';
-
 // ============================================================================
 // Test Helpers
 // ============================================================================
@@ -75,14 +73,16 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
   };
 }
 
-function createMockReply() {
+function createMockReply(): ReplyWithCookies {
   return {
     setCookie: vi.fn(),
     clearCookie: vi.fn(),
   };
 }
 
-function createMockRequest(cookies: Record<string, string | undefined> = {}) {
+function createMockRequest(
+  cookies: Record<string, string | undefined> = {},
+): RequestWithCookies {
   return {
     cookies,
     headers: { authorization: undefined },

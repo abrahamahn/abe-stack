@@ -14,7 +14,7 @@ export type {
 } from './types';
 
 // Providers (re-exported for direct access if needed)
-export { LocalStorageProvider, S3StorageProvider } from './providers/index';
+export { LocalStorageProvider, S3StorageProvider } from './providers';
 
 // Utils
 export { normalizeStorageKey } from './utils';

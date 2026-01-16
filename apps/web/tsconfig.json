@@ -81,18 +81,6 @@
       ],
       "@pages/*": [
         "./src/pages/*"
-      ],
-      "@types": [
-        "./src/features/demo/types"
-      ],
-      "@types/*": [
-        "./src/features/demo/types/*"
-      ],
-      "@utils": [
-        "./src/features/demo/utils"
-      ],
-      "@utils/*": [
-        "./src/features/demo/utils/*"
       ]
     },
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.web.tsbuildinfo"

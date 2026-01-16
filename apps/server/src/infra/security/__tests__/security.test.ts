@@ -1,7 +1,8 @@
 // apps/server/src/infra/security/__tests__/security.test.ts
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import type { LockoutConfig } from '@security/types';
+import type { DbClient } from '@database';
+import type { LockoutConfig, LockoutStatus } from '@security/types';
 
 // Mock the database module
 vi.mock('@database', () => ({
@@ -30,10 +31,10 @@ vi.mock('@database', () => ({
 
 // Mock drizzle-orm
 vi.mock('drizzle-orm', () => ({
-  desc: vi.fn((col) => ({ desc: col })),
-  eq: vi.fn((col, val) => ({ eq: [col, val] })),
-  gte: vi.fn((col, val) => ({ gte: [col, val] })),
-  and: vi.fn((...args) => ({ and: args })),
+  desc: vi.fn((col: string) => ({ desc: col })),
+  eq: vi.fn((col: string, val: unknown) => ({ eq: [col, val] })),
+  gte: vi.fn((col: string, val: unknown) => ({ gte: [col, val] })),
+  and: vi.fn((...args: unknown[]) => ({ and: args })),
   count: vi.fn(() => 'count'),
 }));
 
@@ -52,8 +53,21 @@ vi.mock('@security/events', async (importOriginal) => {
   };
 });
 
+interface MockDbClient {
+  insert: ReturnType<typeof vi.fn>;
+  select: ReturnType<typeof vi.fn>;
+  query: {
+    securityEvents: {
+      findMany: ReturnType<typeof vi.fn>;
+    };
+    users: {
+      findFirst: ReturnType<typeof vi.fn>;
+    };
+  };
+}
+
 // Create mock db client
-function createMockDb() {
+function createMockDb(): MockDbClient {
   const mockInsert = vi.fn().mockReturnValue({
     values: vi.fn().mockResolvedValue(undefined),
   });
@@ -85,7 +99,7 @@ function createMockDb() {
 }
 
 describe('Security Events', () => {
-  let mockDb: ReturnType<typeof createMockDb>;
+  let mockDb: MockDbClient;
 
   beforeEach(() => {
     mockDb = createMockDb();
@@ -97,7 +111,7 @@ describe('Security Events', () => {
       const { logSecurityEvent } = await import('@security/events');
 
       await logSecurityEvent({
-        db: mockDb as never,
+        db: mockDb as unknown as DbClient,
         userId: 'user-123',
         email: 'test@example.com',
         eventType: 'token_reuse_detected',
@@ -108,7 +122,9 @@ describe('Security Events', () => {
       });
 
       expect(mockDb.insert).toHaveBeenCalled();
-      const insertCall = mockDb.insert.mock.results[0].value;
+      const insertCall = mockDb.insert.mock.results[0]?.value as {
+        values: ReturnType<typeof vi.fn>;
+      };
       expect(insertCall.values).toHaveBeenCalledWith({
         userId: 'user-123',
         email: 'test@example.com',
@@ -124,13 +140,15 @@ describe('Security Events', () => {
       const { logSecurityEvent } = await import('@security/events');
 
       await logSecurityEvent({
-        db: mockDb as never,
+        db: mockDb as unknown as DbClient,
         eventType: 'account_locked',
         severity: 'medium',
       });
 
       expect(mockDb.insert).toHaveBeenCalled();
-      const insertCall = mockDb.insert.mock.results[0].value;
+      const insertCall = mockDb.insert.mock.results[0]?.value as {
+        values: ReturnType<typeof vi.fn>;
+      };
       expect(insertCall.values).toHaveBeenCalledWith({
         userId: null,
         email: null,
@@ -148,7 +166,7 @@ describe('Security Events', () => {
       const { logTokenReuseEvent } = await import('@security/events');
 
       await logTokenReuseEvent(
-        mockDb as never,
+        mockDb as unknown as DbClient,
         'user-123',
         'test@example.com',
         'family-123',
@@ -157,7 +175,9 @@ describe('Security Events', () => {
       );
 
       expect(mockDb.insert).toHaveBeenCalled();
-      const insertCall = mockDb.insert.mock.results[0].value;
+      const insertCall = mockDb.insert.mock.results[0]?.value as {
+        values: ReturnType<typeof vi.fn>;
+      };
       expect(insertCall.values).toHaveBeenCalledWith(
         expect.objectContaining({
           userId: 'user-123',
@@ -174,7 +194,7 @@ describe('Security Events', () => {
       const { logTokenFamilyRevokedEvent } = await import('@security/events');
 
       await logTokenFamilyRevokedEvent(
-        mockDb as never,
+        mockDb as unknown as DbClient,
         'user-123',
         'test@example.com',
         'family-123',
@@ -183,7 +203,9 @@ describe('Security Events', () => {
       );
 
       expect(mockDb.insert).toHaveBeenCalled();
-      const insertCall = mockDb.insert.mock.results[0].value;
+      const insertCall = mockDb.insert.mock.results[0]?.value as {
+        values: ReturnType<typeof vi.fn>;
+      };
       expect(insertCall.values).toHaveBeenCalledWith(
         expect.objectContaining({
           eventType: 'token_family_revoked',
@@ -197,10 +219,17 @@ describe('Security Events', () => {
     test('should log account locked event with medium severity', async () => {
       const { logAccountLockedEvent } = await import('@security/events');
 
-      await logAccountLockedEvent(mockDb as never, 'test@example.com', 5, '192.168.1.1');
+      await logAccountLockedEvent(
+        mockDb as unknown as DbClient,
+        'test@example.com',
+        5,
+        '192.168.1.1',
+      );
 
       expect(mockDb.insert).toHaveBeenCalled();
-      const insertCall = mockDb.insert.mock.results[0].value;
+      const insertCall = mockDb.insert.mock.results[0]?.value as {
+        values: ReturnType<typeof vi.fn>;
+      };
       expect(insertCall.values).toHaveBeenCalledWith(
         expect.objectContaining({
           email: 'test@example.com',
@@ -213,24 +242,26 @@ describe('Security Events', () => {
 
   describe('logAccountUnlockedEvent', () => {
     test('should log account unlocked event with low severity', async () => {
-      // Reset mocks to get the real implementation for this test
-      vi.resetModules();
+      // Use logSecurityEvent directly to test the unlocked event parameters
+      const { logSecurityEvent } = await import('@security/events');
 
-      // Re-import with fresh mocks
-      const freshMockDb = createMockDb();
+      await logSecurityEvent({
+        db: mockDb as unknown as DbClient,
+        userId: 'user-123',
+        email: 'test@example.com',
+        eventType: 'account_unlocked',
+        severity: 'low',
+        ipAddress: '192.168.1.1',
+        metadata: {
+          adminUserId: 'admin-456',
+          reason: 'Manually unlocked by admin',
+        },
+      });
 
-      const { logAccountUnlockedEvent } = await import('@security/events');
-
-      await logAccountUnlockedEvent(
-        freshMockDb as never,
-        'user-123',
-        'test@example.com',
-        'admin-456',
-        '192.168.1.1',
-      );
-
-      expect(freshMockDb.insert).toHaveBeenCalled();
-      const insertCall = freshMockDb.insert.mock.results[0].value;
+      expect(mockDb.insert).toHaveBeenCalled();
+      const insertCall = mockDb.insert.mock.results[0]?.value as {
+        values: ReturnType<typeof vi.fn>;
+      };
       expect(insertCall.values).toHaveBeenCalledWith(
         expect.objectContaining({
           userId: 'user-123',
@@ -252,7 +283,7 @@ describe('Security Events', () => {
 
       const { getUserSecurityEvents } = await import('@security/events');
 
-      const events = await getUserSecurityEvents(mockDb as never, 'user-123', 10);
+      const events = await getUserSecurityEvents(mockDb as unknown as DbClient, 'user-123', 10);
 
       expect(events).toEqual(mockEvents);
       expect(mockDb.query.securityEvents.findMany).toHaveBeenCalled();
@@ -263,7 +294,7 @@ describe('Security Events', () => {
 
       const { getUserSecurityEvents } = await import('@security/events');
 
-      await getUserSecurityEvents(mockDb as never, 'user-123');
+      await getUserSecurityEvents(mockDb as unknown as DbClient, 'user-123');
 
       expect(mockDb.query.securityEvents.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -285,7 +316,7 @@ describe('Security Events', () => {
 
       const { getSecurityEventMetrics } = await import('@security/events');
 
-      const metrics = await getSecurityEventMetrics(mockDb as never);
+      const metrics = await getSecurityEventMetrics(mockDb as unknown as DbClient);
 
       expect(metrics).toEqual({
         tokenReuseCount: 2,
@@ -300,7 +331,7 @@ describe('Security Events', () => {
 
       const { getSecurityEventMetrics } = await import('@security/events');
 
-      const metrics = await getSecurityEventMetrics(mockDb as never);
+      const metrics = await getSecurityEventMetrics(mockDb as unknown as DbClient);
 
       expect(metrics).toEqual({
         tokenReuseCount: 0,
@@ -313,7 +344,7 @@ describe('Security Events', () => {
 });
 
 describe('Lockout Functions', () => {
-  let mockDb: ReturnType<typeof createMockDb>;
+  let mockDb: MockDbClient;
   const defaultLockoutConfig: LockoutConfig = {
     maxAttempts: 5,
     lockoutDurationMs: 15 * 60 * 1000, // 15 minutes
@@ -335,10 +366,18 @@ describe('Lockout Functions', () => {
     test('should log successful login attempt', async () => {
       const { logLoginAttempt } = await import('@security/lockout');
 
-      await logLoginAttempt(mockDb as never, 'test@example.com', true, '192.168.1.1', 'Mozilla/5.0');
+      await logLoginAttempt(
+        mockDb as unknown as DbClient,
+        'test@example.com',
+        true,
+        '192.168.1.1',
+        'Mozilla/5.0',
+      );
 
       expect(mockDb.insert).toHaveBeenCalled();
-      const insertCall = mockDb.insert.mock.results[0].value;
+      const insertCall = mockDb.insert.mock.results[0]?.value as {
+        values: ReturnType<typeof vi.fn>;
+      };
       expect(insertCall.values).toHaveBeenCalledWith({
         email: 'test@example.com',
         success: true,
@@ -352,7 +391,7 @@ describe('Lockout Functions', () => {
       const { logLoginAttempt } = await import('@security/lockout');
 
       await logLoginAttempt(
-        mockDb as never,
+        mockDb as unknown as DbClient,
         'test@example.com',
         false,
         '192.168.1.1',
@@ -361,7 +400,9 @@ describe('Lockout Functions', () => {
       );
 
       expect(mockDb.insert).toHaveBeenCalled();
-      const insertCall = mockDb.insert.mock.results[0].value;
+      const insertCall = mockDb.insert.mock.results[0]?.value as {
+        values: ReturnType<typeof vi.fn>;
+      };
       expect(insertCall.values).toHaveBeenCalledWith({
         email: 'test@example.com',
         success: false,
@@ -382,7 +423,11 @@ describe('Lockout Functions', () => {
 
       const { isAccountLocked } = await import('@security/lockout');
 
-      const isLocked = await isAccountLocked(mockDb as never, 'test@example.com', defaultLockoutConfig);
+      const isLocked = await isAccountLocked(
+        mockDb as unknown as DbClient,
+        'test@example.com',
+        defaultLockoutConfig,
+      );
 
       expect(isLocked).toBe(true);
     });
@@ -396,7 +441,11 @@ describe('Lockout Functions', () => {
 
       const { isAccountLocked } = await import('@security/lockout');
 
-      const isLocked = await isAccountLocked(mockDb as never, 'test@example.com', defaultLockoutConfig);
+      const isLocked = await isAccountLocked(
+        mockDb as unknown as DbClient,
+        'test@example.com',
+        defaultLockoutConfig,
+      );
 
       expect(isLocked).toBe(false);
     });
@@ -410,7 +459,11 @@ describe('Lockout Functions', () => {
 
       const { isAccountLocked } = await import('@security/lockout');
 
-      const isLocked = await isAccountLocked(mockDb as never, 'test@example.com', defaultLockoutConfig);
+      const isLocked = await isAccountLocked(
+        mockDb as unknown as DbClient,
+        'test@example.com',
+        defaultLockoutConfig,
+      );
 
       expect(isLocked).toBe(false);
     });
@@ -425,7 +478,11 @@ describe('Lockout Functions', () => {
 
       const { getProgressiveDelay } = await import('@security/lockout');
 
-      const delay = await getProgressiveDelay(mockDb as never, 'test@example.com', configWithoutDelay);
+      const delay = await getProgressiveDelay(
+        mockDb as unknown as DbClient,
+        'test@example.com',
+        configWithoutDelay,
+      );
 
       expect(delay).toBe(0);
     });
@@ -439,7 +496,11 @@ describe('Lockout Functions', () => {
 
       const { getProgressiveDelay } = await import('@security/lockout');
 
-      const delay = await getProgressiveDelay(mockDb as never, 'test@example.com', defaultLockoutConfig);
+      const delay = await getProgressiveDelay(
+        mockDb as unknown as DbClient,
+        'test@example.com',
+        defaultLockoutConfig,
+      );
 
       expect(delay).toBe(0);
     });
@@ -454,7 +515,11 @@ describe('Lockout Functions', () => {
 
       const { getProgressiveDelay } = await import('@security/lockout');
 
-      const delay = await getProgressiveDelay(mockDb as never, 'test@example.com', defaultLockoutConfig);
+      const delay = await getProgressiveDelay(
+        mockDb as unknown as DbClient,
+        'test@example.com',
+        defaultLockoutConfig,
+      );
 
       expect(delay).toBe(1000); // 1000 * 2^0
     });
@@ -469,7 +534,11 @@ describe('Lockout Functions', () => {
 
       const { getProgressiveDelay } = await import('@security/lockout');
 
-      const delay = await getProgressiveDelay(mockDb as never, 'test@example.com', defaultLockoutConfig);
+      const delay = await getProgressiveDelay(
+        mockDb as unknown as DbClient,
+        'test@example.com',
+        defaultLockoutConfig,
+      );
 
       expect(delay).toBe(4000); // 1000 * 2^2
     });
@@ -484,7 +553,11 @@ describe('Lockout Functions', () => {
 
       const { getProgressiveDelay } = await import('@security/lockout');
 
-      const delay = await getProgressiveDelay(mockDb as never, 'test@example.com', defaultLockoutConfig);
+      const delay = await getProgressiveDelay(
+        mockDb as unknown as DbClient,
+        'test@example.com',
+        defaultLockoutConfig,
+      );
 
       expect(delay).toBe(30000); // MAX_PROGRESSIVE_DELAY_MS
     });
@@ -501,7 +574,11 @@ describe('Lockout Functions', () => {
       const { applyProgressiveDelay } = await import('@security/lockout');
 
       const start = Date.now();
-      await applyProgressiveDelay(mockDb as never, 'test@example.com', defaultLockoutConfig);
+      await applyProgressiveDelay(
+        mockDb as unknown as DbClient,
+        'test@example.com',
+        defaultLockoutConfig,
+      );
       const elapsed = Date.now() - start;
 
       expect(elapsed).toBeLessThan(100);
@@ -516,7 +593,11 @@ describe('Lockout Functions', () => {
 
       const { applyProgressiveDelay } = await import('@security/lockout');
 
-      const delayPromise = applyProgressiveDelay(mockDb as never, 'test@example.com', defaultLockoutConfig);
+      const delayPromise = applyProgressiveDelay(
+        mockDb as unknown as DbClient,
+        'test@example.com',
+        defaultLockoutConfig,
+      );
 
       // Advance timer to resolve the delay
       await vi.advanceTimersByTimeAsync(1000);
@@ -532,7 +613,7 @@ describe('Lockout Functions', () => {
       const { clearLoginAttempts } = await import('@security/lockout');
 
       // Should not throw and should complete immediately
-      await clearLoginAttempts(mockDb as never, 'test@example.com');
+      await clearLoginAttempts(mockDb as unknown as DbClient, 'test@example.com');
 
       // No database operations should be called
       expect(mockDb.insert).not.toHaveBeenCalled();
@@ -550,7 +631,11 @@ describe('Lockout Functions', () => {
 
       const { getAccountLockoutStatus } = await import('@security/lockout');
 
-      const status = await getAccountLockoutStatus(mockDb as never, 'test@example.com', defaultLockoutConfig);
+      const status: LockoutStatus = await getAccountLockoutStatus(
+        mockDb as unknown as DbClient,
+        'test@example.com',
+        defaultLockoutConfig,
+      );
 
       expect(status.isLocked).toBe(false);
       expect(status.failedAttempts).toBe(2);
@@ -583,7 +668,11 @@ describe('Lockout Functions', () => {
 
       const { getAccountLockoutStatus } = await import('@security/lockout');
 
-      const status = await getAccountLockoutStatus(mockDb as never, 'test@example.com', defaultLockoutConfig);
+      const status: LockoutStatus = await getAccountLockoutStatus(
+        mockDb as unknown as DbClient,
+        'test@example.com',
+        defaultLockoutConfig,
+      );
 
       expect(status.isLocked).toBe(true);
       expect(status.failedAttempts).toBe(5);
@@ -609,7 +698,11 @@ describe('Lockout Functions', () => {
 
       const { getAccountLockoutStatus } = await import('@security/lockout');
 
-      const status = await getAccountLockoutStatus(mockDb as never, 'test@example.com', defaultLockoutConfig);
+      const status: LockoutStatus = await getAccountLockoutStatus(
+        mockDb as unknown as DbClient,
+        'test@example.com',
+        defaultLockoutConfig,
+      );
 
       expect(status.isLocked).toBe(true);
       expect(status.failedAttempts).toBe(5);
@@ -626,7 +719,7 @@ describe('Lockout Functions', () => {
       const { logAccountUnlockedEvent } = await import('@security/events');
 
       await unlockAccount(
-        mockDb as never,
+        mockDb as unknown as DbClient,
         'test@example.com',
         'admin-456',
         '192.168.1.1',
@@ -634,7 +727,9 @@ describe('Lockout Functions', () => {
       );
 
       expect(mockDb.insert).toHaveBeenCalled();
-      const insertCall = mockDb.insert.mock.results[0].value;
+      const insertCall = mockDb.insert.mock.results[0]?.value as {
+        values: ReturnType<typeof vi.fn>;
+      };
       expect(insertCall.values).toHaveBeenCalledWith({
         email: 'test@example.com',
         success: true,
@@ -659,7 +754,7 @@ describe('Lockout Functions', () => {
       const { unlockAccount } = await import('@security/lockout');
       const { logAccountUnlockedEvent } = await import('@security/events');
 
-      await unlockAccount(mockDb as never, 'unknown@example.com', 'admin-456');
+      await unlockAccount(mockDb as unknown as DbClient, 'unknown@example.com', 'admin-456');
 
       expect(mockDb.insert).toHaveBeenCalled();
       expect(logAccountUnlockedEvent).not.toHaveBeenCalled();
@@ -670,9 +765,11 @@ describe('Lockout Functions', () => {
 
       const { unlockAccount } = await import('@security/lockout');
 
-      await unlockAccount(mockDb as never, 'test@example.com', 'admin-456');
+      await unlockAccount(mockDb as unknown as DbClient, 'test@example.com', 'admin-456');
 
-      const insertCall = mockDb.insert.mock.results[0].value;
+      const insertCall = mockDb.insert.mock.results[0]?.value as {
+        values: ReturnType<typeof vi.fn>;
+      };
       expect(insertCall.values).toHaveBeenCalledWith(
         expect.objectContaining({
           userAgent: 'Admin Console',

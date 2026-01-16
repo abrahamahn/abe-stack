@@ -29,10 +29,11 @@ const mockLayoutModules: Record<string, () => Promise<string>> = {
     Promise.resolve('# Container\n\nA layout container.'),
 };
 
-// Mock the Vite glob imports
-vi.mock('../lazyDocs', async () => {
-  const docsCache = new Map<string, string>();
+// Cache state for mocking
+let mockDocsCache: Map<string, string>;
 
+// Mock the lazyDocs module - use path alias to match linter-converted imports
+vi.mock('@demo/utils/lazyDocs', () => {
   const normalizeKey = (value: string): string =>
     value.toLowerCase().replace(/[^a-z0-9]/g, '');
 
@@ -91,6 +92,9 @@ vi.mock('../lazyDocs', async () => {
 
     return html;
   };
+
+  // Use module-level cache that can be reset
+  const docsCache = new Map<string, string>();
 
   return {
     getComponentDocsLazy: async (
@@ -163,62 +167,69 @@ vi.mock('../lazyDocs', async () => {
   };
 });
 
-const { clearDocsCache, getComponentDocsLazy, parseMarkdownLazy } = await import(
-  '@utils/lazyDocs'
-);
-
 describe('lazyDocs', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    const { clearDocsCache } = await import('@demo/utils/lazyDocs');
     clearDocsCache();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    const { clearDocsCache } = await import('@demo/utils/lazyDocs');
     clearDocsCache();
   });
 
   describe('getComponentDocsLazy', () => {
     it('returns docs for elements category', async () => {
+      const { getComponentDocsLazy } = await import('@demo/utils/lazyDocs');
       const result = await getComponentDocsLazy('button', 'elements');
       expect(result).toBe('# Button\n\nA clickable button element.');
     });
 
     it('returns docs for components category', async () => {
+      const { getComponentDocsLazy } = await import('@demo/utils/lazyDocs');
       const result = await getComponentDocsLazy('card', 'components');
       expect(result).toBe('# Card\n\nA card container.');
     });
 
     it('returns docs for layouts category', async () => {
+      const { getComponentDocsLazy } = await import('@demo/utils/lazyDocs');
       const result = await getComponentDocsLazy('container', 'layouts');
       expect(result).toBe('# Container\n\nA layout container.');
     });
 
     it('returns null for unknown category', async () => {
+      const { getComponentDocsLazy } = await import('@demo/utils/lazyDocs');
       const result = await getComponentDocsLazy('button', 'unknown');
       expect(result).toBeNull();
     });
 
     it('returns null for unknown component', async () => {
+      const { getComponentDocsLazy } = await import('@demo/utils/lazyDocs');
       const result = await getComponentDocsLazy('nonexistent', 'elements');
       expect(result).toBeNull();
     });
 
     it('normalizes component ID (case insensitive)', async () => {
+      const { getComponentDocsLazy } = await import('@demo/utils/lazyDocs');
       const result = await getComponentDocsLazy('BUTTON', 'elements');
       expect(result).toBe('# Button\n\nA clickable button element.');
     });
 
     it('uses fallback component name if ID not found', async () => {
+      const { getComponentDocsLazy } = await import('@demo/utils/lazyDocs');
       const result = await getComponentDocsLazy('btn', 'elements', 'Button');
       expect(result).toBe('# Button\n\nA clickable button element.');
     });
 
     it('caches results for subsequent calls', async () => {
+      const { getComponentDocsLazy } = await import('@demo/utils/lazyDocs');
       const first = await getComponentDocsLazy('button', 'elements');
       const second = await getComponentDocsLazy('button', 'elements');
       expect(first).toBe(second);
     });
 
     it('caches null results for missing docs', async () => {
+      const { getComponentDocsLazy } = await import('@demo/utils/lazyDocs');
       const first = await getComponentDocsLazy('nonexistent', 'elements');
       const second = await getComponentDocsLazy('nonexistent', 'elements');
       expect(first).toBeNull();
@@ -227,67 +238,80 @@ describe('lazyDocs', () => {
   });
 
   describe('parseMarkdownLazy', () => {
-    it('returns empty string for empty input', () => {
+    it('returns empty string for empty input', async () => {
+      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
       expect(parseMarkdownLazy('')).toBe('');
     });
 
-    it('parses h1 headers', () => {
+    it('parses h1 headers', async () => {
+      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
       const result = parseMarkdownLazy('# Header 1');
       expect(result).toContain('<h1>Header 1</h1>');
     });
 
-    it('parses h2 headers', () => {
+    it('parses h2 headers', async () => {
+      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
       const result = parseMarkdownLazy('## Header 2');
       expect(result).toContain('<h2>Header 2</h2>');
     });
 
-    it('parses h3 headers', () => {
+    it('parses h3 headers', async () => {
+      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
       const result = parseMarkdownLazy('### Header 3');
       expect(result).toContain('<h3>Header 3</h3>');
     });
 
-    it('parses bold text', () => {
+    it('parses bold text', async () => {
+      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
       const result = parseMarkdownLazy('**bold text**');
       expect(result).toContain('<strong>bold text</strong>');
     });
 
-    it('parses italic text', () => {
+    it('parses italic text', async () => {
+      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
       const result = parseMarkdownLazy('*italic text*');
       expect(result).toContain('<em>italic text</em>');
     });
 
-    it('parses inline code', () => {
+    it('parses inline code', async () => {
+      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
       const result = parseMarkdownLazy('Use `code` here');
       expect(result).toContain('<code>code</code>');
     });
 
-    it('parses code blocks', () => {
+    it('parses code blocks', async () => {
+      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
       const result = parseMarkdownLazy('```javascript\nconst x = 1;\n```');
       expect(result).toContain('<pre><code>');
       expect(result).toContain('const x = 1;');
     });
 
-    it('parses links', () => {
+    it('parses links', async () => {
+      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
       const result = parseMarkdownLazy('[Link](https://example.com)');
       expect(result).toContain('<a href="https://example.com">Link</a>');
     });
 
-    it('wraps content in paragraphs', () => {
+    it('wraps content in paragraphs', async () => {
+      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
       const result = parseMarkdownLazy('Some text');
       expect(result).toMatch(/^<p>.*<\/p>$/);
     });
 
-    it('converts double newlines to paragraph breaks', () => {
+    it('converts double newlines to paragraph breaks', async () => {
+      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
       const result = parseMarkdownLazy('Para 1\n\nPara 2');
       expect(result).toContain('</p><p>');
     });
 
-    it('converts single newlines to br tags', () => {
+    it('converts single newlines to br tags', async () => {
+      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
       const result = parseMarkdownLazy('Line 1\nLine 2');
       expect(result).toContain('<br>');
     });
 
-    it('handles combined markdown syntax', () => {
+    it('handles combined markdown syntax', async () => {
+      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
       const markdown = `# Title
 
 This is **bold** and *italic* text.
@@ -313,6 +337,8 @@ const x = 1;
 
   describe('clearDocsCache', () => {
     it('clears the docs cache', async () => {
+      const { clearDocsCache, getComponentDocsLazy } = await import('@demo/utils/lazyDocs');
+
       // Load docs into cache
       await getComponentDocsLazy('button', 'elements');
 

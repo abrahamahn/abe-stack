@@ -117,12 +117,6 @@
       "@users/*": [
         "./src/modules/users/*"
       ],
-      "@utils": [
-        "./src/infra/database/utils"
-      ],
-      "@utils/*": [
-        "./src/infra/database/utils/*"
-      ],
       "@websocket": [
         "./src/infra/websocket"
       ],

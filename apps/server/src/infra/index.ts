@@ -54,7 +54,7 @@ export {
   type SecurityEvent,
   type NewSecurityEvent,
   type DbClient,
-} from './database/index';
+} from './database';
 
 // Storage
 export {
@@ -68,11 +68,11 @@ export {
   type S3StorageConfig,
   type UploadParams,
   type StorageProvider,
-} from './storage/index';
+} from './storage';
 
 // Email
-export type { EmailService, EmailOptions, EmailResult } from './email/index';
-export { ConsoleEmailService, createEmailService, emailTemplates, SmtpEmailService } from './email/index';
+export type { EmailService, EmailOptions, EmailResult } from './email';
+export { ConsoleEmailService, createEmailService, emailTemplates, SmtpEmailService } from './email';
 
 // PubSub
 export {
@@ -81,7 +81,7 @@ export {
   publishAfterWrite,
   PostgresPubSub,
   createPostgresPubSub,
-} from './pubsub/index';
+} from './pubsub';
 export type {
   SubscriptionKey,
   RecordKey,
@@ -89,7 +89,7 @@ export type {
   SubscriptionManagerOptions,
   PostgresPubSubOptions,
   PubSubMessage,
-} from './pubsub/index';
+} from './pubsub';
 
 // Security
 export {
@@ -102,7 +102,7 @@ export {
   unlockAccount,
   type LockoutConfig,
   type LockoutStatus,
-} from './security/index';
+} from './security';
 
 // Security Events
 export {
@@ -120,10 +120,10 @@ export {
 } from './security/events';
 
 // HTTP (Security headers, CORS)
-export { applySecurityHeaders, applyCors, handlePreflight, type CorsOptions } from './http/index';
+export { applySecurityHeaders, applyCors, handlePreflight, type CorsOptions } from './http';
 
 // WebSocket
-export { registerWebSocket, getWebSocketStats, type WebSocketStats } from './websocket/index';
+export { registerWebSocket, getWebSocketStats, type WebSocketStats } from './websocket';
 
 // Rate Limiting
 export {
@@ -135,7 +135,7 @@ export {
   type RateLimitInfo,
   type RateLimiterStats,
   type MemoryStoreStats,
-} from './rate-limit/index';
+} from './rate-limit';
 
 // Crypto (Native JWT)
 export {
@@ -147,7 +147,7 @@ export {
   type JwtHeader,
   type JwtPayload,
   type JwtSignOptions,
-} from './crypto/index';
+} from './crypto';
 
 // Health Checks
 export {
@@ -167,4 +167,4 @@ export {
   type LiveResponse,
   type RoutesResponse,
   type StartupSummaryOptions,
-} from './health/index';
+} from './health';

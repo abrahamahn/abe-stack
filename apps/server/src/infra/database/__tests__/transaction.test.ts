@@ -1,7 +1,10 @@
 // apps/server/src/infra/database/__tests__/transaction.test.ts
+import { isInTransaction, withTransaction } from '@database/transaction';
 import { describe, expect, test, vi } from 'vitest';
 
-import { isInTransaction, withTransaction } from '@database/transaction';
+import type { DbClient } from '@database/client';
+
+type TransactionCallback<T> = (tx: DbClient) => Promise<T>;
 
 describe('withTransaction', () => {
   test('should execute callback within transaction and return result', async () => {
@@ -9,8 +12,8 @@ describe('withTransaction', () => {
     const callback = vi.fn().mockResolvedValue(expectedResult);
 
     const mockTx = { query: vi.fn() };
-    const mockTransaction = vi.fn().mockImplementation(async (cb) => {
-      return await cb(mockTx);
+    const mockTransaction = vi.fn().mockImplementation(async (cb: TransactionCallback<unknown>) => {
+      return cb(mockTx as unknown as DbClient);
     });
     const mockDb = {
       transaction: mockTransaction,
@@ -27,8 +30,8 @@ describe('withTransaction', () => {
     const error = new Error('Database operation failed');
     const callback = vi.fn().mockRejectedValue(error);
 
-    const mockTransaction = vi.fn().mockImplementation(async (cb) => {
-      return await cb({});
+    const mockTransaction = vi.fn().mockImplementation(async (cb: TransactionCallback<unknown>) => {
+      return cb({} as unknown as DbClient);
     });
     const mockDb = {
       transaction: mockTransaction,
@@ -42,8 +45,8 @@ describe('withTransaction', () => {
       throw new Error('Sync error');
     });
 
-    const mockTransaction = vi.fn().mockImplementation(async (cb) => {
-      return await cb({});
+    const mockTransaction = vi.fn().mockImplementation(async (cb: TransactionCallback<unknown>) => {
+      return cb({} as unknown as DbClient);
     });
     const mockDb = {
       transaction: mockTransaction,
@@ -59,13 +62,13 @@ describe('withTransaction', () => {
       delete: vi.fn(),
       select: vi.fn(),
     };
-    const callback = vi.fn().mockImplementation(async (tx) => {
+    const callback = vi.fn().mockImplementation((tx: unknown) => {
       expect(tx).toBe(mockTx);
-      return 'success';
+      return Promise.resolve('success');
     });
 
-    const mockTransaction = vi.fn().mockImplementation(async (cb) => {
-      return await cb(mockTx);
+    const mockTransaction = vi.fn().mockImplementation(async (cb: TransactionCallback<unknown>) => {
+      return cb(mockTx as unknown as DbClient);
     });
     const mockDb = {
       transaction: mockTransaction,
@@ -79,8 +82,8 @@ describe('withTransaction', () => {
   test('should handle null return from callback', async () => {
     const callback = vi.fn().mockResolvedValue(null);
 
-    const mockTransaction = vi.fn().mockImplementation(async (cb) => {
-      return await cb({});
+    const mockTransaction = vi.fn().mockImplementation(async (cb: TransactionCallback<unknown>) => {
+      return cb({} as unknown as DbClient);
     });
     const mockDb = {
       transaction: mockTransaction,
@@ -94,8 +97,8 @@ describe('withTransaction', () => {
   test('should handle undefined return from callback', async () => {
     const callback = vi.fn().mockResolvedValue(undefined);
 
-    const mockTransaction = vi.fn().mockImplementation(async (cb) => {
-      return await cb({});
+    const mockTransaction = vi.fn().mockImplementation(async (cb: TransactionCallback<unknown>) => {
+      return cb({} as unknown as DbClient);
     });
     const mockDb = {
       transaction: mockTransaction,
@@ -114,8 +117,8 @@ describe('withTransaction', () => {
     };
     const callback = vi.fn().mockResolvedValue(complexResult);
 
-    const mockTransaction = vi.fn().mockImplementation(async (cb) => {
-      return await cb({});
+    const mockTransaction = vi.fn().mockImplementation(async (cb: TransactionCallback<unknown>) => {
+      return cb({} as unknown as DbClient);
     });
     const mockDb = {
       transaction: mockTransaction,
@@ -147,7 +150,7 @@ describe('isInTransaction', () => {
     ];
 
     mocks.forEach((mockDb) => {
-      const result = isInTransaction(mockDb as Parameters<typeof isInTransaction>[0]);
+      const result = isInTransaction(mockDb as unknown as Parameters<typeof isInTransaction>[0]);
       expect(result).toBe(true);
     });
   });

@@ -3,18 +3,32 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import type { S3StorageConfig } from '@config/storage.config';
 
-// Mock AWS SDK modules
-const mockSend = vi.fn().mockResolvedValue({});
-const mockS3Client = vi.fn(() => ({
-  send: mockSend,
-}));
-const mockPutObjectCommand = vi.fn((params) => ({ ...params, _type: 'PutObjectCommand' }));
-const mockGetSignedUrl = vi.fn().mockResolvedValue('https://signed-url.example.com');
-const mockFromEnv = vi.fn(() => ({ accessKeyId: 'env-key', secretAccessKey: 'env-secret' }));
+// Use vi.hoisted to ensure mocks are created before vi.mock hoisting
+const { mockSend, MockS3Client, MockPutObjectCommand, mockGetSignedUrl, mockFromEnv } = vi.hoisted(
+  () => {
+    const sendMock = vi.fn().mockResolvedValue({});
+    // Create mock classes that can be instantiated with `new`
+    const S3ClientMock = vi.fn().mockImplementation(function (this: { send: typeof sendMock }) {
+      this.send = sendMock;
+    }) as unknown as typeof vi.fn & { new (...args: unknown[]): { send: typeof sendMock } };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const PutObjectCommandMock = vi.fn().mockImplementation(function (this: any, params: any) {
+      Object.assign(this, params);
+      this._type = 'PutObjectCommand';
+    });
+    return {
+      mockSend: sendMock,
+      MockS3Client: S3ClientMock,
+      MockPutObjectCommand: PutObjectCommandMock,
+      mockGetSignedUrl: vi.fn().mockResolvedValue('https://signed-url.example.com'),
+      mockFromEnv: vi.fn(() => ({ accessKeyId: 'env-key', secretAccessKey: 'env-secret' })),
+    };
+  },
+);
 
 vi.mock('@aws-sdk/client-s3', () => ({
-  S3Client: mockS3Client,
-  PutObjectCommand: mockPutObjectCommand,
+  S3Client: MockS3Client,
+  PutObjectCommand: MockPutObjectCommand,
 }));
 
 vi.mock('@aws-sdk/s3-request-presigner', () => ({
@@ -44,7 +58,7 @@ describe('S3StorageProvider', () => {
     it('should create S3Client with explicit credentials when provided', () => {
       new S3StorageProvider(baseConfig);
 
-      expect(mockS3Client).toHaveBeenCalledWith({
+      expect(MockS3Client).toHaveBeenCalledWith({
         region: 'us-east-1',
         endpoint: undefined,
         forcePathStyle: undefined,
@@ -65,7 +79,7 @@ describe('S3StorageProvider', () => {
       new S3StorageProvider(configWithoutCreds);
 
       expect(mockFromEnv).toHaveBeenCalled();
-      expect(mockS3Client).toHaveBeenCalledWith(
+      expect(MockS3Client).toHaveBeenCalledWith(
         expect.objectContaining({
           credentials: expect.objectContaining({
             accessKeyId: 'env-key',
@@ -83,7 +97,7 @@ describe('S3StorageProvider', () => {
 
       new S3StorageProvider(configWithEndpoint);
 
-      expect(mockS3Client).toHaveBeenCalledWith(
+      expect(MockS3Client).toHaveBeenCalledWith(
         expect.objectContaining({
           endpoint: 'https://minio.local:9000',
           forcePathStyle: true,
@@ -120,7 +134,7 @@ describe('S3StorageProvider', () => {
       const result = await provider.upload(params);
 
       expect(result.key).toBe('uploads/test-file.txt');
-      expect(mockPutObjectCommand).toHaveBeenCalledWith({
+      expect(MockPutObjectCommand).toHaveBeenCalledWith({
         Bucket: 'test-bucket',
         Key: 'uploads/test-file.txt',
         Body: params.body,
@@ -140,7 +154,7 @@ describe('S3StorageProvider', () => {
       const result = await provider.upload(params);
 
       expect(result.key).toBe('leading/slash/file.txt');
-      expect(mockPutObjectCommand).toHaveBeenCalledWith(
+      expect(MockPutObjectCommand).toHaveBeenCalledWith(
         expect.objectContaining({
           Key: 'leading/slash/file.txt',
         }),
@@ -157,7 +171,7 @@ describe('S3StorageProvider', () => {
 
       await provider.upload(params);
 
-      expect(mockPutObjectCommand).toHaveBeenCalledWith(
+      expect(MockPutObjectCommand).toHaveBeenCalledWith(
         expect.objectContaining({
           Body: 'string content',
         }),
@@ -175,7 +189,7 @@ describe('S3StorageProvider', () => {
 
       await provider.upload(params);
 
-      expect(mockPutObjectCommand).toHaveBeenCalledWith(
+      expect(MockPutObjectCommand).toHaveBeenCalledWith(
         expect.objectContaining({
           Body: body,
         }),

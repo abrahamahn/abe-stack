@@ -1,5 +1,5 @@
 // packages/core/src/utils/__tests__/utils.test.ts
-import { beforeEach, describe, expect, test } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 import { addAuthHeader, createTokenStore } from '@utils/index';
 

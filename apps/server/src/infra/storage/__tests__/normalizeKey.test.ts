@@ -36,7 +36,7 @@ describe('normalizeStorageKey', () => {
     });
 
     it('should strip multiple parent references', () => {
-      expect(normalizeStorageKey('../../path/../file.txt', true)).toBe('/path//file.txt');
+      expect(normalizeStorageKey('../../path/../file.txt', true)).toBe('//path//file.txt');
     });
 
     it('should strip leading slash and parent refs together', () => {

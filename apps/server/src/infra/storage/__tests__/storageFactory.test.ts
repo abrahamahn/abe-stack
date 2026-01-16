@@ -3,27 +3,38 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import type { LocalStorageConfig, S3StorageConfig, StorageConfig } from '@config/storage.config';
 
-// Mock the provider modules
+// Use vi.hoisted for class mocks
+const { MockLocalStorageProvider, MockS3StorageProvider } = vi.hoisted(() => {
+  class MockLocalStorageProvider {
+    _type = 'LocalStorageProvider';
+    config: LocalStorageConfig;
+    constructor(config: LocalStorageConfig) {
+      this.config = config;
+    }
+    upload = vi.fn();
+    getSignedUrl = vi.fn();
+  }
+
+  class MockS3StorageProvider {
+    _type = 'S3StorageProvider';
+    config: S3StorageConfig;
+    constructor(config: S3StorageConfig) {
+      this.config = config;
+    }
+    upload = vi.fn();
+    getSignedUrl = vi.fn();
+  }
+
+  return { MockLocalStorageProvider, MockS3StorageProvider };
+});
+
 vi.mock('@providers/localStorageProvider', () => ({
-  LocalStorageProvider: vi.fn().mockImplementation((config) => ({
-    _type: 'LocalStorageProvider',
-    config,
-    upload: vi.fn(),
-    getSignedUrl: vi.fn(),
-  })),
+  LocalStorageProvider: MockLocalStorageProvider,
 }));
 
 vi.mock('@providers/s3StorageProvider', () => ({
-  S3StorageProvider: vi.fn().mockImplementation((config) => ({
-    _type: 'S3StorageProvider',
-    config,
-    upload: vi.fn(),
-    getSignedUrl: vi.fn(),
-  })),
+  S3StorageProvider: MockS3StorageProvider,
 }));
-
-import { LocalStorageProvider } from '@providers/localStorageProvider';
-import { S3StorageProvider } from '@providers/s3StorageProvider';
 
 import { createStorage } from '@storage/storageFactory';
 
@@ -41,7 +52,7 @@ describe('createStorage', () => {
 
       const provider = createStorage(config);
 
-      expect(LocalStorageProvider).toHaveBeenCalledWith(config);
+      expect(provider).toBeInstanceOf(MockLocalStorageProvider);
       expect(provider).toHaveProperty('_type', 'LocalStorageProvider');
     });
 
@@ -52,9 +63,10 @@ describe('createStorage', () => {
         publicBaseUrl: 'https://cdn.example.com',
       };
 
-      createStorage(config);
+      const provider = createStorage(config);
 
-      expect(LocalStorageProvider).toHaveBeenCalledWith(config);
+      expect(provider).toBeInstanceOf(MockLocalStorageProvider);
+      expect((provider as InstanceType<typeof MockLocalStorageProvider>).config).toEqual(config);
     });
   });
 
@@ -70,7 +82,7 @@ describe('createStorage', () => {
 
       const provider = createStorage(config);
 
-      expect(S3StorageProvider).toHaveBeenCalledWith(config);
+      expect(provider).toBeInstanceOf(MockS3StorageProvider);
       expect(provider).toHaveProperty('_type', 'S3StorageProvider');
     });
 
@@ -86,9 +98,10 @@ describe('createStorage', () => {
         presignExpiresInSeconds: 3600,
       };
 
-      createStorage(config);
+      const provider = createStorage(config);
 
-      expect(S3StorageProvider).toHaveBeenCalledWith(config);
+      expect(provider).toBeInstanceOf(MockS3StorageProvider);
+      expect((provider as InstanceType<typeof MockS3StorageProvider>).config).toEqual(config);
     });
   });
 
