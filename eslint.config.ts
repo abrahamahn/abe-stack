@@ -38,7 +38,7 @@ export default [
       'apps/web/vitest.config.ts',
       '**/vitest.config.ts',
       '**/vitest.config.js',
-      'tools/packages/build-theme-css.ts',
+      'tools/sync/sync-css-theme.ts',
       'config/drizzle.config.ts',
     ],
   },
@@ -117,7 +117,7 @@ export default [
     },
   },
   {
-    files: ['tools/packages/build-theme-css.ts'],
+    files: ['tools/sync/sync-css-theme.ts'],
     languageOptions: {
       parserOptions: {
         project: null,

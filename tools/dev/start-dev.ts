@@ -111,6 +111,7 @@ async function main(): Promise<void> {
     startWatcher('tools/sync/sync-import-aliases.ts'),
     startWatcher('tools/sync/sync-test-folders.ts'),
     startWatcher('tools/sync/sync-barrel-exports.ts'),
+    startWatcher('tools/sync/sync-css-theme.ts'),
   ];
 
   // Give watchers a moment to do initial sync
