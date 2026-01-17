@@ -195,31 +195,10 @@ export function registerCookies(server: FastifyInstance, options: CookiePluginOp
     null as unknown as (value: string) => { valid: boolean; value: string | null },
   );
 
-  // Decorate reply with cookie methods
+  // Decorate reply with cookie methods (use function to bind Fastify reply)
   server.decorateReply(
     'setCookie',
-    null as unknown as (name: string, value: string, options?: CookieOptions) => FastifyReply,
-  );
-  server.decorateReply(
-    'clearCookie',
-    null as unknown as (name: string, options?: CookieOptions) => FastifyReply,
-  );
-
-  // Parse cookies on each request
-  server.addHook('onRequest', (req: FastifyRequest, reply: FastifyReply) => {
-    // Parse cookies from header
-    req.cookies = parseCookies(req.headers.cookie);
-
-    // Add unsign method bound to secret
-    req.unsignCookie = (value: string): ReturnType<typeof unsignCookie> =>
-      unsignCookie(value, secret);
-
-    // Add setCookie method
-    reply.setCookie = function (
-      name: string,
-      value: string,
-      opts: CookieOptions = {},
-    ): FastifyReply {
+    function (this: FastifyReply, name: string, value: string, opts: CookieOptions = {}) {
       let cookieValue = value;
 
       // Sign if requested
@@ -239,15 +218,28 @@ export function registerCookies(server: FastifyInstance, options: CookiePluginOp
       }
 
       return this;
-    };
-
-    // Add clearCookie method
-    reply.clearCookie = function (name: string, opts: CookieOptions = {}): FastifyReply {
+    },
+  );
+  server.decorateReply(
+    'clearCookie',
+    function (this: FastifyReply, name: string, opts: CookieOptions = {}) {
       return this.setCookie(name, '', {
         ...opts,
         expires: new Date(0),
         maxAge: 0,
       });
-    };
+    },
+  );
+
+  // Parse cookies on each request
+  server.addHook('onRequest', async (req: FastifyRequest, reply: FastifyReply) => {
+    // Parse cookies from header
+    req.cookies = parseCookies(req.headers.cookie);
+
+    // Add unsign method bound to secret
+    req.unsignCookie = (value: string): ReturnType<typeof unsignCookie> =>
+      unsignCookie(value, secret);
+
+    void reply;
   });
 }

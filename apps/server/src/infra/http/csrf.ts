@@ -108,26 +108,21 @@ export function registerCsrf(server: FastifyInstance, options: CsrfOptions): voi
     signed = true,
   } = cookieOpts;
 
-  // Decorate reply with generateCsrf method (placeholder, set in hook)
-  server.decorateReply('generateCsrf', null as unknown as () => string);
+  // Decorate reply with generateCsrf method
+  server.decorateReply('generateCsrf', function (this: FastifyReply): string {
+    const token = generateToken();
+    const signedToken = signed ? signToken(token, secret) : token;
 
-  // Add generateCsrf method in onRequest (early, for token generation)
-  server.addHook('onRequest', async (_req: FastifyRequest, reply: FastifyReply) => {
-    reply.generateCsrf = function (): string {
-      const token = generateToken();
-      const signedToken = signed ? signToken(token, secret) : token;
+    // Set the CSRF cookie
+    this.setCookie(cookieName, signedToken, {
+      path,
+      httpOnly,
+      secure,
+      sameSite,
+      signed: false, // We handle signing ourselves
+    });
 
-      // Set the CSRF cookie
-      reply.setCookie(cookieName, signedToken, {
-        path,
-        httpOnly,
-        secure,
-        sameSite,
-        signed: false, // We handle signing ourselves
-      });
-
-      return token;
-    };
+    return token;
   });
 
   // Validate CSRF in preHandler (after body parsing)
