@@ -21,6 +21,8 @@
     "build:ui": "turbo run build --filter=@abe-stack/ui",
     "theme:build": "node --import tsx tools/sync/sync-css-theme.ts",
     "theme:watch": "node --import tsx tools/sync/sync-css-theme.ts --watch",
+    "sync:theme": "node --import tsx tools/sync/sync-css-theme.ts",
+    "sync:theme:watch": "node --import tsx tools/sync/sync-css-theme.ts --watch",
     "test": "turbo run test",
     "test:all": "tsx tools/dev/test-all.ts",
     "test:web": "turbo run test --filter=@abe-stack/web",
@@ -62,7 +64,8 @@
     "docker:down": "docker compose --env-file config/.env/.env.development -f config/docker/docker-compose.yml down",
     "docker:logs": "docker compose --env-file config/.env/.env.development -f config/docker/docker-compose.yml logs -f",
     "bundle-size": "tsx tools/dev/bundle-size.ts",
-    "bundle-size:save": "tsx tools/dev/bundle-size.ts --save"
+    "bundle-size:save": "tsx tools/dev/bundle-size.ts --save",
+    "pre-commit": "pnpm sync:aliases && pnpm sync:headers && pnpm sync:imports && pnpm sync:tests && pnpm sync:barrels && pnpm sync:theme && pnpm lint-staged && pnpm type-check"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
@@ -106,7 +109,7 @@
     ]
   },
   "simple-git-hooks": {
-    "pre-commit": "pnpm sync:aliases:check && pnpm sync:headers:check && pnpm sync:imports:check && pnpm sync:tests:check && pnpm sync:barrels:check && pnpm lint-staged && pnpm type-check",
+    "pre-commit": "pnpm pre-commit",
     "pre-push": "pnpm build"
   },
   "lint-staged": {

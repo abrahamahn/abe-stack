@@ -15,6 +15,8 @@ All notable changes to this project are documented here. Format follows semantic
 - Added a theme CSS watcher for dev that rebuilds on theme token edits
 - Documented sync tooling (including theme CSS watcher) in root README
 - Fixed theme CSS generator typing to support both light and dark token sets
+- Fixed sync-import-aliases JSON helper typing and cleaned AGENTS markdown lint issues
+- Pre-commit hooks now run sync scripts (including theme sync) before linting and type-checks
 
 ### Comprehensive Server Test Coverage
 

@@ -45,8 +45,8 @@ interface AliasMapping {
   targetDir: string;
 }
 
-function readJson(filePath: string): Record<string, unknown> {
-  return JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Record<string, unknown>;
+function readJson(filePath: string): unknown {
+  return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
 }
 
 function listProjectConfigs(): ProjectConfig[] {
@@ -67,7 +67,7 @@ function listProjectConfigs(): ProjectConfig[] {
 }
 
 function loadAliasMappings(project: ProjectConfig): AliasMapping[] {
-  const tsconfig = readJson<Record<string, unknown>>(project.tsconfigPath);
+  const tsconfig = readJson(project.tsconfigPath) as Record<string, unknown>;
   const compilerOptions = (tsconfig.compilerOptions ?? {}) as Record<string, unknown>;
   const paths = (compilerOptions.paths ?? {}) as Record<string, string[]>;
   const mappings: AliasMapping[] = [];
