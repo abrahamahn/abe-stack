@@ -48,10 +48,10 @@ const mockLayoutComponents: ComponentDemo[] = [
 let mockCache: Map<ComponentCategory, ComponentDemo[] | null>;
 let mockLoadedCount: number;
 
-const mockLoadCategory = vi.fn<[ComponentCategory], Promise<ComponentDemo[]>>();
-const mockGetCachedCategory = vi.fn<[ComponentCategory], ComponentDemo[] | null>();
-const mockGetLoadedComponentCount = vi.fn<[], number>();
-const mockGetAvailableCategories = vi.fn<[], ComponentCategory[]>();
+const mockLoadCategory = vi.fn<(category: ComponentCategory) => Promise<ComponentDemo[]>>();
+const mockGetCachedCategory = vi.fn<(category: ComponentCategory) => ComponentDemo[] | null>();
+const mockGetLoadedComponentCount = vi.fn<() => number>();
+const mockGetAvailableCategories = vi.fn<() => ComponentCategory[]>();
 
 vi.mock('@catalog/lazyRegistry', () => ({
   loadCategory: (category: ComponentCategory): Promise<ComponentDemo[]> =>
@@ -76,11 +76,13 @@ describe('useLazyCatalog', () => {
     // Default mock implementations
     mockGetAvailableCategories.mockReturnValue(['elements', 'components', 'layouts']);
 
-    mockGetCachedCategory.mockImplementation((category: ComponentCategory) => mockCache.get(category) ?? null);
+    mockGetCachedCategory.mockImplementation(
+      (category: ComponentCategory) => mockCache.get(category) ?? null,
+    );
 
     mockGetLoadedComponentCount.mockImplementation(() => mockLoadedCount);
 
-    mockLoadCategory.mockImplementation(async (category: ComponentCategory) => {
+    mockLoadCategory.mockImplementation((category: ComponentCategory) => {
       let components: ComponentDemo[] = [];
       if (category === 'elements') {
         components = mockElementComponents;
@@ -93,7 +95,7 @@ describe('useLazyCatalog', () => {
         mockLoadedCount += mockLayoutComponents.length;
       }
       mockCache.set(category, components);
-      return components;
+      return Promise.resolve(components);
     });
   });
 
@@ -284,11 +286,11 @@ describe('useLazyCatalog', () => {
       });
 
       // Reset mock to succeed
-      mockLoadCategory.mockImplementation(async (category: ComponentCategory) => {
+      mockLoadCategory.mockImplementation((category: ComponentCategory) => {
         const components =
           category === 'components' ? mockComponentComponents : mockElementComponents;
         mockCache.set(category, components);
-        return components;
+        return Promise.resolve(components);
       });
 
       act(() => {

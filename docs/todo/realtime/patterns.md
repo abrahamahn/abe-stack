@@ -1,6 +1,6 @@
 # Real-Time Patterns & Examples
 
-**Last Updated: January 10, 2026**
+**Last Updated: January 17, 2026**
 
 Common patterns for collaborative applications.
 

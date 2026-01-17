@@ -7,7 +7,7 @@
     "dev": "tsx ../../tools/dev/kill-port.ts 8080 8081 8082 8083 && tsx --env-file=../../config/.env/.env.development src/main.ts",
     "start": "node --env-file=../../config/.env/.env.production dist/main.js",
     "build": "tsc",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc --project tsconfig.json --noEmit",
     "test": "VITEST_TARGET=server vitest run --config ../../config/vitest.config.ts",
     "db:generate": "drizzle-kit generate --config ../../config/drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config ../../config/drizzle.config.ts",

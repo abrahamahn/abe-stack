@@ -1,7 +1,7 @@
 // apps/web/src/features/demo/catalog/index.ts
-import { componentCatalog as components } from '@demo/catalog/componentCatalog';
-import { elementCatalog as elements } from '@demo/catalog/elementCatalog';
-import { layoutCatalog as layouts } from '@demo/catalog/layoutCatalog';
+import { componentCatalog as components } from './componentCatalog';
+import { elementCatalog as elements } from './elementCatalog';
+import { layoutCatalog as layouts } from './layoutCatalog';
 
 import type { ComponentDemo } from '@demo/types';
 
@@ -34,4 +34,4 @@ export {
   isCategoryLoaded,
   loadCategory,
   preloadCategories,
-} from '@demo/catalog/lazyRegistry';
+} from './lazyRegistry';

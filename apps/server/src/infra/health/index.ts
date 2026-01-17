@@ -8,7 +8,7 @@
  * - Startup validation summary
  */
 
-import { getWebSocketStats } from '@websocket';
+import { getWebSocketStats } from '@websocket/index';
 import { sql } from 'drizzle-orm';
 
 import type { AppContext } from '@shared/types';

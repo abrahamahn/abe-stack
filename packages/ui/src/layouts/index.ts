@@ -1,11 +1,22 @@
 // packages/ui/src/layouts/index.ts
-// Layouts - Page and section layout components
+// @auto-generated - Do not edit manually
 
-// Shells - App-level structural layouts
-export * from './shells';
-
-// Containers - Content wrapper layouts
-export * from './containers';
-
-// Layers - Overlay and positioning components
-export * from './layers';
+export { AuthLayout, Container, PageContainer, StackedLayout } from './containers';
+export { Modal, Overlay, ProtectedRoute, ScrollArea } from './layers';
+export {
+  AppShell,
+  BottombarLayout,
+  LeftSidebarLayout,
+  ResizablePanel,
+  ResizablePanelGroup,
+  ResizableSeparator,
+  RightSidebarLayout,
+  TopbarLayout,
+} from './shells';
+export type {
+  AppShellProps,
+  BottombarLayoutProps,
+  LeftSidebarLayoutProps,
+  RightSidebarLayoutProps,
+  TopbarLayoutProps,
+} from './shells';

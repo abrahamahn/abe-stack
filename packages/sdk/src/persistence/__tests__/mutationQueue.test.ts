@@ -3,7 +3,12 @@ import { createMutationQueue, MutationQueue } from '@persistence/mutationQueue';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 // Mock localStorage
-const mockLocalStorage = (() => {
+const mockLocalStorage = ((): {
+  getItem: (key: string) => string | null;
+  setItem: (key: string, value: string) => void;
+  removeItem: (key: string) => void;
+  clear: () => void;
+} => {
   let store: Record<string, string> = {};
   return {
     getItem: (key: string): string | null => store[key] ?? null,
@@ -40,7 +45,7 @@ describe('MutationQueue', () => {
   });
 
   afterEach(() => {
-    queue?.destroy();
+    queue.destroy();
     vi.useRealTimers();
   });
 
@@ -88,7 +93,7 @@ describe('MutationQueue', () => {
       const stored = mockLocalStorage.getItem('abe-stack-mutation-queue');
       expect(stored).not.toBeNull();
       if (stored) {
-        const parsed = JSON.parse(stored);
+        const parsed = JSON.parse(stored) as unknown[];
         expect(parsed).toHaveLength(1);
       }
     });
@@ -205,7 +210,7 @@ describe('MutationQueue', () => {
     test('should retry on failure', async () => {
       vi.useRealTimers(); // Use real timers for async processing tests
       let callCount = 0;
-      const onProcess = vi.fn().mockImplementation(async () => {
+      const onProcess = vi.fn().mockImplementation(() => {
         callCount++;
         if (callCount < 2) {
           throw new Error('Temporary failure');

@@ -1,11 +1,10 @@
 // packages/ui/src/components/__tests__/Accordion.test.tsx
 // packages/ui/src/elements/__tests__/Accordion.test.tsx
 /** @vitest-environment jsdom */
+import { Accordion } from '@components/Accordion';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-
-import { Accordion } from '../Accordion';
 
 const items = [
   { id: 'one', title: 'Section One', content: 'Content One' },
@@ -212,9 +211,9 @@ describe('Accordion', () => {
 
     it('handles very large number of items', () => {
       const manyItems = Array.from({ length: 50 }, (_, i) => ({
-        id: `item-${i}`,
-        title: `Title ${i}`,
-        content: `Content ${i}`,
+        id: `item-${String(i)}`,
+        title: `Title ${String(i)}`,
+        content: `Content ${String(i)}`,
       }));
 
       const { container } = render(<Accordion items={manyItems} />);

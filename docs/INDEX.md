@@ -1,6 +1,6 @@
 # Documentation Index
 
-_Last Updated: January 15, 2026_
+_Last Updated: January 17, 2026_
 
 **Agent Loading Order (Critical for Token Efficiency):**
 
@@ -28,7 +28,7 @@ Token Budget Tips:
 | Architecture | `dev/architecture.md`               | System design and structure      |
 | Security     | `todo/security/phase-1-complete.md` | Security implementation          |
 | Dev Guide    | `dev/`                              | Developer reference docs         |
-| UI Package   | `ui/todo.md`                        | UI component priorities          |
+| UI Package   | `todo/ui/todo.md`                   | UI component priorities          |
 
 ---
 
@@ -64,7 +64,7 @@ Token Budget Tips:
 ### Other
 
 - `dev/performance.md` - Performance guidelines
-- `dev/use-cases.md` - Common use cases
+- `dev/examples.md` - Code examples
 
 ---
 
@@ -75,6 +75,7 @@ Token Budget Tips:
 | `agent/agent-prompts.md` | Agent prompt templates                            |
 | `agent/complex-tasks.md` | Complex task guidance                             |
 | `agent/workflows.md`     | Agent workflows (incl. self-check/session bridge) |
+| `agent/use-cases.md`     | Common use cases and scenarios                    |
 
 ---
 
@@ -92,7 +93,7 @@ Token Budget Tips:
 2. `dev/architecture.md`
 3. `dev/testing.md`
 4. `dev/performance.md`
-5. `dev/use-cases.md`
+5. `dev/examples.md`
 
 ## Keyword Routing
 
@@ -122,8 +123,9 @@ Token Budget Tips:
 
 - `agent/` - AI agent workflow and behavior docs only
 - `dev/` - Shared technical reference (architecture, principles, testing)
-- `security/` - Security implementation and roadmap
-- `ui/` - UI package priorities and todos
+- `todo/security/` - Security implementation and roadmap
+- `todo/ui/` - UI package priorities and todos
+- `todo/realtime/` - Real-time features documentation
 
 ## Reference Convention
 

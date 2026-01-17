@@ -36,7 +36,7 @@
     "build": "tsc --build && tsc-alias",
     "dev": "tsc --watch --project tsconfig.json",
     "clean": "rm -rf dist",
-    "type-check": "tsc --project tsconfig.json --noEmit && tsc --project tsconfig.test.json --noEmit",
+    "type-check": "tsc --project tsconfig.json --noEmit",
     "test": "VITEST_TARGET=core vitest run --config ../../config/vitest.config.ts"
   },
   "keywords": [

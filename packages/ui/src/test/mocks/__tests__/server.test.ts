@@ -5,7 +5,7 @@ let setupServerMock = vi.fn();
 let handlersStub: Array<unknown> = [];
 
 vi.mock('msw/node', () => ({
-  setupServer: (...args: Array<unknown>) => setupServerMock(...args),
+  setupServer: (...args: Array<unknown>): unknown => setupServerMock(...args),
 }));
 
 vi.mock('../handlers', () => ({

@@ -1,2 +1,11 @@
 // packages/core/src/validation/index.ts
-export * from './password';
+// @auto-generated - Do not edit manually
+
+export {
+  defaultPasswordConfig,
+  getStrengthColor,
+  getStrengthLabel,
+  validatePassword,
+  validatePasswordBasic,
+} from './password';
+export type { PasswordConfig, PasswordValidationResult } from './password';

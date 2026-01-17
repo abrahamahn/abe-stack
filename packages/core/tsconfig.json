@@ -4,6 +4,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
+    "types": ["node", "vitest/globals"],
     "baseUrl": "./",
     "paths": {
       "@contracts": ["./src/contracts"],
@@ -17,14 +18,5 @@
     }
   },
   "include": ["src/**/*"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/*.spec.ts",
-    "**/*.spec.tsx",
-    "**/__tests__/**",
-    "src/test/**"
-  ]
+  "exclude": ["node_modules", "dist"]
 }

@@ -1,7 +1,7 @@
 {
   "extends": "../../config/ts/tsconfig.react.json",
   "compilerOptions": {
-    "types": ["vite/client", "react", "react-dom"],
+    "types": ["vite/client", "react", "react-dom", "vitest/globals"],
     "paths": {
       "@/*": ["./src/*"],
       "@api": ["./src/api"],
@@ -27,16 +27,12 @@
       "@hooks": ["./src/features/auth/hooks"],
       "@hooks/*": ["./src/features/auth/hooks/*"],
       "@pages": ["./src/pages"],
-      "@pages/*": ["./src/pages/*"],
-      "@types": ["./src/features/demo/types"],
-      "@types/*": ["./src/features/demo/types/*"],
-      "@utils": ["./src/features/demo/utils"],
-      "@utils/*": ["./src/features/demo/utils/*"]
+      "@pages/*": ["./src/pages/*"]
     },
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.web.tsbuildinfo"
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "__tests__"],
+  "exclude": ["node_modules"],
   "references": [
     {
       "path": "../../packages/sdk"

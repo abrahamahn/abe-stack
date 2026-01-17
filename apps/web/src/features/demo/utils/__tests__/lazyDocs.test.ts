@@ -193,7 +193,8 @@ describe('lazyDocs', () => {
 
     it('returns null for unknown category', async () => {
       const { getComponentDocsLazy } = await import('@demo/utils/lazyDocs');
-      const result = await getComponentDocsLazy('button', 'unknown');
+      // Test invalid category input
+      const result = await getComponentDocsLazy('button', 'unknown' as never);
       expect(result).toBeNull();
     });
 

@@ -39,14 +39,14 @@ abe-stack/
 
 ### Tech Stack
 
-| Layer    | Technology                                        |
-| -------- | ------------------------------------------------- |
-| Frontend | React 19, Vite, TanStack Query                    |
-| Backend  | Fastify, ts-rest, Zod                             |
-| Database | PostgreSQL, Drizzle ORM                           |
-| Auth     | JWT (access + refresh tokens), bcrypt, role-based |
-| Testing  | Vitest (1000+ tests), Playwright E2E              |
-| Tooling  | Turborepo, pnpm, ESLint, Prettier                 |
+| Layer    | Technology                                          |
+| -------- | --------------------------------------------------- |
+| Frontend | React 19, Vite, TanStack Query                      |
+| Backend  | Fastify, ts-rest, Zod                               |
+| Database | PostgreSQL, Drizzle ORM                             |
+| Auth     | JWT (access + refresh tokens), Argon2id, role-based |
+| Testing  | Vitest (1900+ tests), Playwright E2E                |
+| Tooling  | Turborepo, pnpm, ESLint, Prettier                   |
 
 ### What's Built
 
@@ -110,9 +110,9 @@ Key sections:
 
 See the [Roadmap](./ROADMAP.md) for the full implementation plan:
 
-1. **CHET-Stack Features** - Add pub/sub, WebSockets, offline support
-2. **Security Phase 2** - Enhanced auth, rate limiting, audit logging
-3. **UI Polish** - Remaining component tests and accessibility
+1. **CHET-Stack Features** - Real-time collaboration, offline support, undo/redo
+2. **Security Phase 2** - Passport.js integration, OAuth providers, MFA
+3. **V5 Architecture** - Migration to layer-based structure
 
 ---
 

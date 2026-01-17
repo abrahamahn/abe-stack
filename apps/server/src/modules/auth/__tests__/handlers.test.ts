@@ -17,8 +17,9 @@ import {
   WeakPasswordError,
 } from '@shared';
 import { REFRESH_COOKIE_NAME } from '@shared/constants';
-import { verifyToken as verifyJwtToken } from '@utils/index';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+
+import { verifyToken as verifyJwtToken } from '../utils';
 
 import type { ReplyWithCookies, RequestWithCookies } from '@auth/handlers';
 import type { AppContext } from '@shared';
@@ -46,7 +47,7 @@ vi.mock('@config', () => ({
 }));
 
 // Mock utilities
-vi.mock('@utils/index', () => ({
+vi.mock('../utils', () => ({
   extractRequestInfo: vi.fn(() => ({
     ipAddress: '127.0.0.1',
     userAgent: 'test-agent',
@@ -73,9 +74,9 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
       warn: vi.fn(),
       error: vi.fn(),
       debug: vi.fn(),
-    } as unknown as AppContext['log'],
+    },
     ...overrides,
-  };
+  } as unknown as AppContext;
 }
 
 function createMockReply(): ReplyWithCookies {
@@ -113,7 +114,7 @@ describe('handleRegister', () => {
       user: { id: 'user-123', email: 'test@example.com', name: 'Test User', role: 'user' as const },
     };
 
-    vi.mocked(registerUser as vi.Mock).mockResolvedValue(mockResult);
+    vi.mocked(registerUser).mockResolvedValue(mockResult);
 
     const result = await handleRegister(ctx, body, reply);
 
@@ -134,7 +135,7 @@ describe('handleRegister', () => {
     const reply = createMockReply();
     const body = { email: 'existing@example.com', password: 'StrongPass123!' };
 
-    vi.mocked(registerUser as vi.Mock).mockRejectedValue(
+    vi.mocked(registerUser).mockRejectedValue(
       new EmailAlreadyExistsError('Email already registered'),
     );
 
@@ -150,7 +151,7 @@ describe('handleRegister', () => {
     const reply = createMockReply();
     const body = { email: 'test@example.com', password: 'weak' };
 
-    vi.mocked(registerUser as vi.Mock).mockRejectedValue(
+    vi.mocked(registerUser).mockRejectedValue(
       new WeakPasswordError({ errors: ['Password too short'] }),
     );
 
@@ -166,7 +167,7 @@ describe('handleRegister', () => {
     const reply = createMockReply();
     const body = { email: 'test@example.com', password: 'StrongPass123!' };
 
-    vi.mocked(registerUser as vi.Mock).mockRejectedValue(new Error('Database connection failed'));
+    vi.mocked(registerUser).mockRejectedValue(new Error('Database connection failed'));
 
     const result = await handleRegister(ctx, body, reply);
 
@@ -197,7 +198,7 @@ describe('handleLogin', () => {
       user: { id: 'user-123', email: 'test@example.com', name: 'Test', role: 'user' as const },
     };
 
-    vi.mocked(authenticateUser as vi.Mock).mockResolvedValue(mockResult);
+    vi.mocked(authenticateUser).mockResolvedValue(mockResult);
 
     const result = await handleLogin(ctx, body, request, reply);
 
@@ -228,7 +229,7 @@ describe('handleLogin', () => {
     const reply = createMockReply();
     const body = { email: 'test@example.com', password: 'wrongpassword' };
 
-    vi.mocked(authenticateUser as vi.Mock).mockRejectedValue(new InvalidCredentialsError());
+    vi.mocked(authenticateUser).mockRejectedValue(new InvalidCredentialsError());
 
     const result = await handleLogin(ctx, body, request, reply);
 
@@ -243,7 +244,7 @@ describe('handleLogin', () => {
     const reply = createMockReply();
     const body = { email: 'locked@example.com', password: 'password123' };
 
-    vi.mocked(authenticateUser as vi.Mock).mockRejectedValue(new AccountLockedError());
+    vi.mocked(authenticateUser).mockRejectedValue(new AccountLockedError());
 
     const result = await handleLogin(ctx, body, request, reply);
 
@@ -257,7 +258,7 @@ describe('handleLogin', () => {
     const reply = createMockReply();
     const body = { email: 'test@example.com', password: 'password123' };
 
-    vi.mocked(authenticateUser as vi.Mock).mockRejectedValue(new Error('Unexpected error'));
+    vi.mocked(authenticateUser).mockRejectedValue(new Error('Unexpected error'));
 
     const result = await handleLogin(ctx, body, request, reply);
 
@@ -286,7 +287,7 @@ describe('handleRefresh', () => {
       refreshToken: 'new-refresh-token',
     };
 
-    vi.mocked(refreshUserTokens as vi.Mock).mockResolvedValue(mockResult);
+    vi.mocked(refreshUserTokens).mockResolvedValue(mockResult);
 
     const result = await handleRefresh(ctx, request, reply);
 
@@ -316,7 +317,7 @@ describe('handleRefresh', () => {
     const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'invalid-token' });
     const reply = createMockReply();
 
-    vi.mocked(refreshUserTokens as vi.Mock).mockRejectedValue(new InvalidTokenError());
+    vi.mocked(refreshUserTokens).mockRejectedValue(new InvalidTokenError());
 
     const result = await handleRefresh(ctx, request, reply);
 
@@ -330,7 +331,7 @@ describe('handleRefresh', () => {
     const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'valid-token' });
     const reply = createMockReply();
 
-    vi.mocked(refreshUserTokens as vi.Mock).mockRejectedValue(new Error('Database error'));
+    vi.mocked(refreshUserTokens).mockRejectedValue(new Error('Database error'));
 
     const result = await handleRefresh(ctx, request, reply);
 
@@ -354,7 +355,7 @@ describe('handleLogout', () => {
     const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'refresh-token' });
     const reply = createMockReply();
 
-    vi.mocked(logoutUser as vi.Mock).mockResolvedValue(undefined);
+    vi.mocked(logoutUser).mockResolvedValue(undefined);
 
     const result = await handleLogout(ctx, request, reply);
 
@@ -369,7 +370,7 @@ describe('handleLogout', () => {
     const request = createMockRequest(); // No cookies
     const reply = createMockReply();
 
-    vi.mocked(logoutUser as vi.Mock).mockResolvedValue(undefined);
+    vi.mocked(logoutUser).mockResolvedValue(undefined);
 
     const result = await handleLogout(ctx, request, reply);
 
@@ -384,7 +385,7 @@ describe('handleLogout', () => {
     const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'refresh-token' });
     const reply = createMockReply();
 
-    vi.mocked(logoutUser as vi.Mock).mockRejectedValue(new Error('Database error'));
+    vi.mocked(logoutUser).mockRejectedValue(new Error('Database error'));
 
     const result = await handleLogout(ctx, request, reply);
 
@@ -410,7 +411,7 @@ describe('verifyToken', () => {
       role: 'user' as const,
     };
 
-    vi.mocked(verifyJwtToken as vi.Mock).mockReturnValue(mockPayload);
+    vi.mocked(verifyJwtToken).mockReturnValue(mockPayload);
 
     const result = verifyToken('valid-token', 'secret-key-32-characters-long!!');
 
@@ -419,7 +420,7 @@ describe('verifyToken', () => {
   });
 
   test('should throw error for invalid token', () => {
-    vi.mocked(verifyJwtToken as vi.Mock).mockImplementation(() => {
+    vi.mocked(verifyJwtToken).mockImplementation(() => {
       throw new Error('Invalid token');
     });
 

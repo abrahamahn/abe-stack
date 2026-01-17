@@ -1,12 +1,11 @@
 // packages/ui/src/components/__tests__/Select.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
+import { Select } from '@components/Select';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-
-import { Select } from '../Select';
 
 describe('Select', () => {
   describe('happy path', () => {
@@ -255,7 +254,7 @@ describe('Select', () => {
 
       const trigger = screen.getByRole('button', { name: /rapid/i });
       for (let i = 0; i < 10; i++) {
-        user.click(trigger);
+        await user.click(trigger);
       }
 
       await waitFor(() => {
@@ -284,7 +283,7 @@ describe('Select', () => {
 
     it('works in controlled mode with value and onChange', async () => {
       const user = userEvent.setup();
-      function ControlledSelect() {
+      function ControlledSelect(): React.ReactElement {
         const [val, setVal] = useState('apple');
         return (
           <Select aria-label="Fruit" value={val} onChange={setVal}>

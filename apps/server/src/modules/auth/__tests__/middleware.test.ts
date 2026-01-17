@@ -6,6 +6,7 @@ import {
   extractTokenPayload,
   isAdmin,
 } from '@auth/middleware';
+import { verifyToken } from '@auth/utils/jwt';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { UserRole } from '@abe-stack/core';
@@ -19,8 +20,6 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 vi.mock('@auth/utils/jwt', () => ({
   verifyToken: vi.fn(),
 }));
-
-import { verifyToken } from '@auth/utils/jwt';
 
 // ============================================================================
 // Test Constants
@@ -129,7 +128,7 @@ describe('createRequireAuth', () => {
     vi.clearAllMocks();
   });
 
-  test('should set user on request when token is valid', async () => {
+  test('should set user on request when token is valid', () => {
     const mockPayload = { userId: 'user-123', email: 'test@example.com', role: 'user' as const };
     vi.mocked(verifyToken).mockReturnValue(mockPayload);
 
@@ -137,26 +136,26 @@ describe('createRequireAuth', () => {
     const reply = createMockReply();
     const requireAuth = createRequireAuth(TEST_SECRET);
 
-    await requireAuth(request as FastifyRequest, reply as unknown as FastifyReply);
+    requireAuth(request as FastifyRequest, reply as unknown as FastifyReply);
 
     expect(request.user).toEqual(mockPayload);
     expect(reply.status).not.toHaveBeenCalled();
     expect(reply.send).not.toHaveBeenCalled();
   });
 
-  test('should return 401 when no token is provided', async () => {
+  test('should return 401 when no token is provided', () => {
     const request = createMockRequest();
     const reply = createMockReply();
     const requireAuth = createRequireAuth(TEST_SECRET);
 
-    await requireAuth(request as FastifyRequest, reply as unknown as FastifyReply);
+    requireAuth(request as FastifyRequest, reply as unknown as FastifyReply);
 
     expect(reply.status).toHaveBeenCalledWith(401);
     expect(reply.send).toHaveBeenCalledWith({ message: 'Unauthorized' });
     expect(request.user).toBeUndefined();
   });
 
-  test('should return 401 when token is invalid', async () => {
+  test('should return 401 when token is invalid', () => {
     vi.mocked(verifyToken).mockImplementation(() => {
       throw new Error('Invalid token');
     });
@@ -165,7 +164,7 @@ describe('createRequireAuth', () => {
     const reply = createMockReply();
     const requireAuth = createRequireAuth(TEST_SECRET);
 
-    await requireAuth(request as FastifyRequest, reply as unknown as FastifyReply);
+    requireAuth(request as FastifyRequest, reply as unknown as FastifyReply);
 
     expect(reply.status).toHaveBeenCalledWith(401);
     expect(reply.send).toHaveBeenCalledWith({ message: 'Unauthorized' });

@@ -1,6 +1,6 @@
 # ABE Stack Roadmap
 
-**Last Updated: January 10, 2026**
+**Last Updated: January 17, 2026**
 
 Single source of truth for project milestones and implementation priorities. Organized by milestone with checkboxes for task tracking.
 
@@ -159,10 +159,10 @@ Enhanced authentication with Passport.js and additional security hardening. See 
 
 ### Database Schema Updates Required
 
-- [ ] `refresh_token_families` table (reuse detection)
+- [x] `refresh_token_families` table (reuse detection) ✅
 - [ ] `webauthn_credentials` table (passkeys)
 - [ ] `magic_link_tokens` table
-- [ ] `login_attempts` table
+- [x] `login_attempts` table ✅
 - [ ] `oauth_connections` table
 
 ---
@@ -171,10 +171,10 @@ Enhanced authentication with Passport.js and additional security hardening. See 
 
 ### Backend
 
-- [ ] Email service abstraction (provider-agnostic with local stub)
-- [ ] Input validation with Zod; consistent error envelope
+- [x] Email service abstraction (provider-agnostic with local stub) ✅
+- [x] Input validation with Zod; consistent error envelope ✅
 - [ ] API versioning and OpenAPI/typed client generation
-- [ ] Health checks and readiness endpoints
+- [x] Health checks and readiness endpoints ✅
 - [ ] Generate fetch/React Query clients from ts-rest contract
 
 ### Frontend (Web)
@@ -185,7 +185,7 @@ Enhanced authentication with Passport.js and additional security hardening. See 
 
 ### Infrastructure
 
-- [ ] Dockerfile/docker-compose for server + Postgres + maildev
+- [x] Dockerfile/docker-compose for server + Postgres + maildev ✅
 - [ ] Production Postgres settings (connection pooling, SSL)
 - [ ] Secrets management documentation (env, Vault, SSM)
 - [ ] Observability hooks (request logs, metrics, error reporting)
@@ -195,7 +195,7 @@ Enhanced authentication with Passport.js and additional security hardening. See 
 
 - [ ] Integration tests for API routes (vitest + fastify inject)
 - [ ] Playwright E2E for auth + layout resize persistence
-- [ ] Unit tests for Argon2id hashing and bcrypt migration
+- [x] Unit tests for Argon2id hashing ✅ (password.test.ts)
 - [ ] Integration tests for each Passport strategy
 - [ ] Security audit: OWASP testing guide compliance
 

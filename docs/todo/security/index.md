@@ -1,6 +1,6 @@
 # Security Documentation
 
-_Last Updated: January 10, 2026_
+_Last Updated: January 17, 2026_
 
 This section covers the security implementation and roadmap for ABE Stack.
 
@@ -15,22 +15,25 @@ This section covers the security implementation and roadmap for ABE Stack.
 
 ---
 
-## Current Security Features (Phase 1)
+## Current Security Features (Phase 1 Complete)
 
-- **JWT Authentication** - Access + refresh token rotation
-- **Password Security** - bcrypt hashing, strength validation
+- **JWT Authentication** - Access + refresh token rotation with reuse detection
+- **Password Security** - Argon2id hashing (OWASP parameters), strength validation
 - **Account Protection** - Login attempt tracking, progressive delays, account lockout
 - **Role-Based Access** - User/admin/moderator roles with middleware guards
 - **Input Validation** - Zod schemas on all endpoints
+- **Rate Limiting** - Token bucket algorithm with configurable limits
+- **Audit Logging** - Security events table for token reuse, lockouts, admin actions
+- **Security Headers** - Comprehensive HTTP security headers (CSP, HSTS, etc.)
 
 ---
 
 ## Planned Features (Phase 2)
 
-- Enhanced rate limiting (Backend)
-- Audit logging (Backend)
+- Passport.js integration (Backend)
+- OAuth providers - Google, GitHub, Apple (Backend)
+- Magic links authentication (Backend)
+- Two-factor authentication / TOTP (Backend)
 - Session management UI (Frontend)
-- Two-factor authentication (Backend)
-- Security headers hardening (Backend)
 
 See [Phase 2 Roadmap](./phase-2-roadmap.md) for details.

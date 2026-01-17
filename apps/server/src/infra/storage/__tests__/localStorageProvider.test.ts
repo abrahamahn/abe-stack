@@ -1,4 +1,7 @@
 // apps/server/src/infra/storage/__tests__/localStorageProvider.test.ts
+import { mkdir, writeFile } from 'node:fs/promises';
+
+import { LocalStorageProvider } from '@providers/localStorageProvider';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import type { LocalStorageConfig } from '@config/storage.config';
@@ -13,10 +16,6 @@ vi.mock('node:fs/promises', () => ({
   mkdir: vi.fn().mockResolvedValue(undefined),
   writeFile: vi.fn().mockResolvedValue(undefined),
 }));
-
-import { mkdir, writeFile } from 'node:fs/promises';
-
-import { LocalStorageProvider } from '@providers/localStorageProvider';
 
 describe('LocalStorageProvider', () => {
   const baseConfig: LocalStorageConfig = {

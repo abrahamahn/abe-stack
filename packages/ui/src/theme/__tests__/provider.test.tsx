@@ -3,10 +3,9 @@
 import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { ThemeProvider, useTheme } from '@theme/provider';
 import React from 'react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-
-import { ThemeProvider, useTheme } from '../provider';
 
 // Helper component to access theme context
 function ThemeConsumer(): React.ReactElement {
@@ -20,13 +19,28 @@ function ThemeConsumer(): React.ReactElement {
       <button data-testid="cycle" onClick={cycleMode}>
         Cycle
       </button>
-      <button data-testid="set-dark" onClick={() => setMode('dark')}>
+      <button
+        data-testid="set-dark"
+        onClick={() => {
+          setMode('dark');
+        }}
+      >
         Dark
       </button>
-      <button data-testid="set-light" onClick={() => setMode('light')}>
+      <button
+        data-testid="set-light"
+        onClick={() => {
+          setMode('light');
+        }}
+      >
         Light
       </button>
-      <button data-testid="set-system" onClick={() => setMode('system')}>
+      <button
+        data-testid="set-system"
+        onClick={() => {
+          setMode('system');
+        }}
+      >
         System
       </button>
     </div>

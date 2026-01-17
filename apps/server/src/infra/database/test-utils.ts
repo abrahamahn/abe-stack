@@ -1,9 +1,10 @@
 // apps/server/src/infra/database/test-utils.ts
 import { vi } from 'vitest';
 
-import type { DbClient } from '@database';
-
-export interface MockDbClient extends DbClient {
+// MockDbClient represents a minimal mock of DbClient for testing
+// It doesn't extend DbClient to avoid type errors from missing properties
+// Tests cast to this type and use `as never` when passing to functions expecting DbClient
+export interface MockDbClient {
   insert: ReturnType<typeof vi.fn>;
   select: ReturnType<typeof vi.fn>;
   query: {
@@ -13,8 +14,27 @@ export interface MockDbClient extends DbClient {
     users: {
       findFirst: ReturnType<typeof vi.fn>;
     };
+    refreshTokens?: {
+      findFirst: ReturnType<typeof vi.fn>;
+      findMany: ReturnType<typeof vi.fn>;
+    };
+    refreshTokenFamilies?: {
+      findFirst: ReturnType<typeof vi.fn>;
+    };
+    loginAttempts?: {
+      findMany: ReturnType<typeof vi.fn>;
+    };
+    passwordResetTokens?: {
+      findFirst: ReturnType<typeof vi.fn>;
+    };
+    emailVerificationTokens?: {
+      findFirst: ReturnType<typeof vi.fn>;
+    };
   };
 }
+
+// Type alias for using MockDbClient where DbClient is expected
+export type MockDbClientAsDb = MockDbClient & { _brand: 'db' };
 
 // Create mock db client
 export function createMockDb(): MockDbClient {

@@ -5,6 +5,7 @@
     "rootDir": "./src",
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["react", "react-dom", "vitest/globals"],
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
     "baseUrl": "./",
     "paths": {
@@ -29,14 +30,5 @@
     }
   },
   "include": ["src/**/*"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "**/*.test.ts",
-    "**/*.test.tsx",
-    "**/*.spec.ts",
-    "**/*.spec.tsx",
-    "**/__tests__/**",
-    "src/test/**"
-  ]
+  "exclude": ["node_modules", "dist"]
 }

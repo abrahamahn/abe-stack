@@ -1,4 +1,4 @@
-# @abeahn/ui - Shared UI Package
+# @abe-stack/ui - Shared UI Package
 
 **Shared React components for web and desktop platforms.**
 
@@ -162,8 +162,8 @@ packages/ui/src/
 
 ```typescript
 // apps/web/src/pages/SomePage.tsx
-import { Button, Card, Input } from '@abeahn/ui';
-import { useAuth } from '@abeahn/ui';
+import { Button, Card, Input } from '@abe-stack/ui';
+import { useAuth } from '@abe-stack/ui';
 
 function WebPage() {
   const { user } = useAuth();
@@ -182,12 +182,12 @@ function WebPage() {
 
 ```typescript
 // apps/desktop/src/pages/SomePage.tsx
-import { Button, Card, Input } from '@abeahn/ui';
-import { useAuth } from '@abeahn/ui';
+import { Button, Card, Input } from '@abe-stack/ui';
+import { useAuth } from '@abe-stack/ui';
 import { useFileSystem } from '../native/hooks/useFileSystem';
 
 function DesktopPage() {
-  const { user } = useAuth(); // Shared hook from @abeahn/ui
+  const { user } = useAuth(); // Shared hook from @abe-stack/ui
   const { openFile } = useFileSystem(); // Desktop-only
 
   return (
@@ -233,7 +233,7 @@ apps/web/src/
 │   ├── hooks/
 │   ├── services/
 │   └── components/
-├── App.tsx           # Imports from @abeahn/ui
+├── App.tsx           # Imports from @abe-stack/ui
 └── main.tsx          # Web entry point
 ```
 
@@ -260,7 +260,7 @@ apps/desktop/src/
 ├── electron/         # Electron main process
 │   ├── main.ts
 │   └── preload.ts
-├── App.tsx          # Imports from @abeahn/ui
+├── App.tsx          # Imports from @abe-stack/ui
 └── main.tsx         # Desktop entry point
 ```
 
@@ -345,7 +345,7 @@ export { default as MyButton } from './MyButton';
 
 ```typescript
 // In any app (web, desktop, mobile)
-import { MyButton } from '@abeahn/ui';
+import { MyButton } from '@abe-stack/ui';
 
 <MyButton label="Click Me" variant="primary" />
 ```
@@ -398,26 +398,29 @@ export default function AdaptiveButton({
 
 ## Testing
 
-Test components in isolation:
+Test components in isolation using Vitest and React Testing Library:
 
 ```typescript
 // packages/ui/src/components/__tests__/Button.test.tsx
-import { render, fireEvent } from '@testing-library/react';
-import Button from '../Button';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
+
+import { Button } from '../Button';
 
 describe('Button', () => {
   it('renders correctly', () => {
-    const { getByText } = render(<Button>Click Me</Button>);
-    expect(getByText('Click Me')).toBeInTheDocument();
+    render(<Button>Click Me</Button>);
+    expect(screen.getByText('Click Me')).toBeInTheDocument();
   });
 
-  it('handles click', () => {
-    const onClick = jest.fn();
-    const { getByText } = render(
-      <Button onClick={onClick}>Click Me</Button>
-    );
+  it('handles click', async () => {
+    const onClick = vi.fn();
+    const user = userEvent.setup();
 
-    fireEvent.click(getByText('Click Me'));
+    render(<Button onClick={onClick}>Click Me</Button>);
+
+    await user.click(screen.getByText('Click Me'));
     expect(onClick).toHaveBeenCalled();
   });
 });
@@ -501,7 +504,7 @@ Refactor platform code to shared when patterns emerge.
 - **React** (peer dependency)
 - **React DOM** (peer dependency)
 - **React Router DOM** (peer dependency)
-- **@abeahn/shared** (workspace dependency for utilities)
+- **@abe-stack/core** (workspace dependency for utilities)
 
 Avoid adding platform-specific dependencies (Electron modules) to this package.
 
@@ -537,7 +540,7 @@ export function MusicPlayer({ track, onPlay, onPause }: MusicPlayerProps) {
 
 ```typescript
 // apps/web/src/pages/PlayerPage.tsx
-import { MusicPlayer } from '@abeahn/ui';
+import { MusicPlayer } from '@abe-stack/ui';
 import { useWebAnalytics } from '../web-only/hooks/useAnalytics';
 
 function PlayerPage() {
@@ -555,7 +558,7 @@ function PlayerPage() {
 
 ```typescript
 // apps/desktop/src/pages/PlayerPage.tsx
-import { MusicPlayer } from '@abeahn/ui';
+import { MusicPlayer } from '@abe-stack/ui';
 import { useNotifications } from '../native/hooks/useNotifications';
 
 function PlayerPage() {
@@ -584,13 +587,13 @@ function PlayerPage() {
 2. **Build the UI package:**
 
    ```bash
-   pnpm --filter @abeahn/ui build
+   pnpm --filter @abe-stack/ui build
    ```
 
 3. **Import in your apps:**
 
    ```typescript
-   import { Button, Card, Input } from '@abeahn/ui';
+   import { Button, Card, Input } from '@abe-stack/ui';
    ```
 
 4. **Add platform-specific features:**

@@ -163,7 +163,7 @@ function syncProject(
   }
 
   const content = fs.readFileSync(project.tsconfigPath, 'utf-8');
-  const tsconfig: TsConfig = JSON.parse(content);
+  const tsconfig = JSON.parse(content) as TsConfig;
 
   const currentPaths = tsconfig.compilerOptions?.paths ?? {};
   const expectedPaths = generatePaths(project);

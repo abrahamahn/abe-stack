@@ -1,9 +1,8 @@
 // packages/ui/src/hooks/__tests__/usePanelConfig.test.ts
 /** @vitest-environment jsdom */
+import { usePanelConfig, type PanelConfig } from '@hooks/usePanelConfig';
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { usePanelConfig, type PanelConfig } from '../usePanelConfig';
 
 type TestPanelKeys = 'left' | 'right' | 'bottom';
 
@@ -110,7 +109,9 @@ describe('usePanelConfig', () => {
         result.current.togglePane('left');
       });
 
-      const stored = JSON.parse(localStorage.getItem(storageKey) ?? '{}');
+      const stored = JSON.parse(
+        localStorage.getItem(storageKey) ?? '{}',
+      ) as PanelConfig<TestPanelKeys>;
       expect(stored.left.visible).toBe(false);
     });
 
@@ -174,7 +175,9 @@ describe('usePanelConfig', () => {
         result.current.resizePane('right', 45);
       });
 
-      const stored = JSON.parse(localStorage.getItem(storageKey) ?? '{}');
+      const stored = JSON.parse(
+        localStorage.getItem(storageKey) ?? '{}',
+      ) as PanelConfig<TestPanelKeys>;
       expect(stored.right.size).toBe(45);
     });
 
@@ -230,7 +233,9 @@ describe('usePanelConfig', () => {
         result.current.resetConfig();
       });
 
-      const stored = JSON.parse(localStorage.getItem(storageKey) ?? '{}');
+      const stored = JSON.parse(
+        localStorage.getItem(storageKey) ?? '{}',
+      ) as PanelConfig<TestPanelKeys>;
       expect(stored).toEqual(defaultConfig);
     });
   });
@@ -265,7 +270,9 @@ describe('usePanelConfig', () => {
         result.current.setConfig(newConfig);
       });
 
-      const stored = JSON.parse(localStorage.getItem(storageKey) ?? '{}');
+      const stored = JSON.parse(
+        localStorage.getItem(storageKey) ?? '{}',
+      ) as PanelConfig<TestPanelKeys>;
       expect(stored).toEqual(newConfig);
     });
   });

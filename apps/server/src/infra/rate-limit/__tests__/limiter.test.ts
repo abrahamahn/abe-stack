@@ -1,9 +1,6 @@
 // apps/server/src/infra/rate-limit/__tests__/limiter.test.ts
-import { createRateLimiter, MemoryStore, RateLimitPresets } from '@rate-limit/limiter';
+import { createRateLimiter, MemoryStore, RateLimiter, RateLimitPresets } from '@rate-limit';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-
-import type { RateLimiter} from '@rate-limit/limiter';
-
 
 describe('MemoryStore', () => {
   let store: MemoryStore;
@@ -101,7 +98,7 @@ describe('RateLimiter', () => {
 
   describe('check', () => {
     test('should allow requests under the limit', async () => {
-      limiter = new (await import('@rate-limit/limiter')).RateLimiter({ windowMs: 60000, max: 10 });
+      limiter = new RateLimiter({ windowMs: 60000, max: 10 });
 
       const result = await limiter.check('client-1');
 
@@ -111,7 +108,7 @@ describe('RateLimiter', () => {
     });
 
     test('should deny requests when limit is exceeded', async () => {
-      limiter = new (await import('@rate-limit/limiter')).RateLimiter({ windowMs: 60000, max: 2 });
+      limiter = new RateLimiter({ windowMs: 60000, max: 2 });
 
       await limiter.check('client-1');
       await limiter.check('client-1');
@@ -122,7 +119,7 @@ describe('RateLimiter', () => {
     });
 
     test('should track different clients separately', async () => {
-      limiter = new (await import('@rate-limit/limiter')).RateLimiter({ windowMs: 60000, max: 2 });
+      limiter = new RateLimiter({ windowMs: 60000, max: 2 });
 
       await limiter.check('client-1');
       await limiter.check('client-1');
@@ -135,7 +132,7 @@ describe('RateLimiter', () => {
     });
 
     test('should refill tokens over time', async () => {
-      limiter = new (await import('@rate-limit/limiter')).RateLimiter({ windowMs: 1000, max: 10 }); // 10 per second
+      limiter = new RateLimiter({ windowMs: 1000, max: 10 }); // 10 per second
 
       // Exhaust tokens
       for (let i = 0; i < 10; i++) {
@@ -155,7 +152,7 @@ describe('RateLimiter', () => {
     });
 
     test('should not exceed max tokens when refilling', async () => {
-      limiter = new (await import('@rate-limit/limiter')).RateLimiter({ windowMs: 1000, max: 10 });
+      limiter = new RateLimiter({ windowMs: 1000, max: 10 });
 
       // Just wait without using any tokens
       vi.advanceTimersByTime(5000); // 5 seconds
@@ -169,7 +166,7 @@ describe('RateLimiter', () => {
 
   describe('peek', () => {
     test('should return info without consuming token', async () => {
-      limiter = new (await import('@rate-limit/limiter')).RateLimiter({ windowMs: 60000, max: 10 });
+      limiter = new RateLimiter({ windowMs: 60000, max: 10 });
 
       const result = await limiter.peek('client-1');
 
@@ -177,7 +174,7 @@ describe('RateLimiter', () => {
     });
 
     test('should return full capacity for new client', async () => {
-      limiter = new (await import('@rate-limit/limiter')).RateLimiter({ windowMs: 60000, max: 10 });
+      limiter = new RateLimiter({ windowMs: 60000, max: 10 });
 
       const result = await limiter.peek('new-client');
 
@@ -188,7 +185,7 @@ describe('RateLimiter', () => {
     });
 
     test('should reflect current token count with time refill', async () => {
-      limiter = new (await import('@rate-limit/limiter')).RateLimiter({ windowMs: 1000, max: 10 });
+      limiter = new RateLimiter({ windowMs: 1000, max: 10 });
 
       // Use all tokens
       for (let i = 0; i < 10; i++) {
@@ -207,7 +204,7 @@ describe('RateLimiter', () => {
 
   describe('reset', () => {
     test('should reset client limit', async () => {
-      limiter = new (await import('@rate-limit/limiter')).RateLimiter({ windowMs: 60000, max: 10 });
+      limiter = new RateLimiter({ windowMs: 60000, max: 10 });
 
       // Use up some tokens
       await limiter.check('client-1');
@@ -225,7 +222,7 @@ describe('RateLimiter', () => {
 
   describe('getStats', () => {
     test('should return config and store stats', async () => {
-      limiter = new (await import('@rate-limit/limiter')).RateLimiter({ windowMs: 60000, max: 100 });
+      limiter = new RateLimiter({ windowMs: 60000, max: 100 });
 
       await limiter.check('client-1');
       await limiter.check('client-2');
@@ -234,10 +231,11 @@ describe('RateLimiter', () => {
 
       expect(stats.config.windowMs).toBe(60000);
       expect(stats.config.max).toBe(100);
-      expect(stats.store.trackedClients).toBe(2);
+      expect(stats.store).toBeDefined();
+      expect(stats.store?.trackedClients).toBe(2);
     });
 
-    test('should not include store stats if store does not support it', async () => {
+    test('should not include store stats if store does not support it', () => {
       const customStore = {
         get: vi.fn(),
         set: vi.fn(),
@@ -245,7 +243,7 @@ describe('RateLimiter', () => {
         destroy: vi.fn(),
       };
 
-      limiter = new (await import('@rate-limit/limiter')).RateLimiter({ windowMs: 60000, max: 100, store: customStore });
+      limiter = new RateLimiter({ windowMs: 60000, max: 100, store: customStore });
 
       const stats = limiter.getStats();
 
@@ -259,7 +257,7 @@ describe('createRateLimiter', () => {
   test('should create a RateLimiter instance', async () => {
     const limiter = createRateLimiter({ windowMs: 60000, max: 100 });
 
-    expect(limiter).toBeInstanceOf((await import('@rate-limit/limiter')).RateLimiter);
+    expect(limiter).toBeInstanceOf(RateLimiter);
 
     await limiter.destroy();
   });

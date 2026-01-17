@@ -148,7 +148,9 @@ describe('SubscriptionManager', () => {
       manager.publishLocal(key, 5);
 
       expect(socket.sent).toHaveLength(1);
-      expect(JSON.parse(socket.sent[0])).toEqual({
+      const firstSent = socket.sent[0];
+      expect(firstSent).toBeDefined();
+      expect(JSON.parse(firstSent as string)).toEqual({
         type: 'update',
         key: 'record:users:123',
         version: 5,
@@ -200,8 +202,9 @@ describe('SubscriptionManager', () => {
     });
 
     test('should call adapter.publish when adapter is set', () => {
+      const publishMock = vi.fn().mockResolvedValue(undefined);
       const mockAdapter = {
-        publish: vi.fn().mockResolvedValue(undefined),
+        publish: publishMock,
       } as unknown as PostgresPubSub;
 
       manager.setAdapter(mockAdapter);
@@ -209,7 +212,7 @@ describe('SubscriptionManager', () => {
       const key: SubscriptionKey = 'record:users:123';
       manager.publish(key, 5);
 
-      expect(mockAdapter.publish).toHaveBeenCalledWith(key, 5);
+      expect(publishMock).toHaveBeenCalledWith(key, 5);
     });
 
     test('should not throw when adapter.publish fails', () => {
@@ -351,27 +354,29 @@ describe('SubscriptionManager', () => {
 
   describe('setAdapter', () => {
     test('should set adapter for cross-instance messaging', () => {
+      const publishMock = vi.fn().mockResolvedValue(undefined);
       const mockAdapter = {
-        publish: vi.fn().mockResolvedValue(undefined),
+        publish: publishMock,
       } as unknown as PostgresPubSub;
 
       manager.setAdapter(mockAdapter);
       manager.publish('record:users:123', 5);
 
-      expect(mockAdapter.publish).toHaveBeenCalled();
+      expect(publishMock).toHaveBeenCalled();
     });
   });
 
   describe('constructor with options', () => {
     test('should accept adapter in constructor options', () => {
+      const publishMock = vi.fn().mockResolvedValue(undefined);
       const mockAdapter = {
-        publish: vi.fn().mockResolvedValue(undefined),
+        publish: publishMock,
       } as unknown as PostgresPubSub;
 
       const managerWithAdapter = new SubscriptionManager({ adapter: mockAdapter });
       managerWithAdapter.publish('record:users:123', 5);
 
-      expect(mockAdapter.publish).toHaveBeenCalled();
+      expect(publishMock).toHaveBeenCalled();
     });
   });
 });
@@ -382,11 +387,13 @@ describe('SubscriptionManager', () => {
 
 describe('publishAfterWrite', () => {
   let mockPubsub: SubscriptionManager;
+  let publishMock: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.useFakeTimers();
+    publishMock = vi.fn();
     mockPubsub = {
-      publish: vi.fn(),
+      publish: publishMock,
     } as unknown as SubscriptionManager;
   });
 
@@ -400,18 +407,18 @@ describe('publishAfterWrite', () => {
     // setImmediate is used, so we need to advance timers
     await vi.runAllTimersAsync();
 
-    expect(mockPubsub.publish).toHaveBeenCalledWith('record:users:abc-123', 5);
+    expect(publishMock).toHaveBeenCalledWith('record:users:abc-123', 5);
   });
 
   test('should not block execution (uses setImmediate)', async () => {
     publishAfterWrite(mockPubsub, 'users', 'abc-123', 5);
 
     // publish should not be called immediately
-    expect(mockPubsub.publish).not.toHaveBeenCalled();
+    expect(publishMock).not.toHaveBeenCalled();
 
     // After timers advance, it should be called
     await vi.runAllTimersAsync();
-    expect(mockPubsub.publish).toHaveBeenCalled();
+    expect(publishMock).toHaveBeenCalled();
   });
 });
 

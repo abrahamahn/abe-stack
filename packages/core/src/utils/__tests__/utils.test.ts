@@ -104,7 +104,7 @@ describe('utils', () => {
         localStorageMock.store[key] = value;
       }),
       removeItem: vi.fn((key: string) => {
-        delete localStorageMock.store[key];
+        Reflect.deleteProperty(localStorageMock.store, key);
       }),
       clear: vi.fn(() => {
         localStorageMock.store = {};

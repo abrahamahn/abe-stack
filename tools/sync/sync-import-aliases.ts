@@ -197,11 +197,23 @@ function isBarrelFile(filePath: string): boolean {
 
 function isReExportLine(line: string): boolean {
   const trimmed = line.trim();
-  // export { ... } from '...'
+  // Single-line: export { ... } from '...'
   if (/^export\s+(type\s+)?\{[^}]*\}\s+from\s+['"]/.test(trimmed)) return true;
   // export * from '...' or export * as name from '...'
   if (/^export\s+(type\s+)?\*\s+(as\s+\w+\s+)?from\s+['"]/.test(trimmed)) return true;
   return false;
+}
+
+function isMultiLineExportStart(line: string): boolean {
+  const trimmed = line.trim();
+  // Start of multi-line export: export { or export type {
+  return /^export\s+(type\s+)?\{/.test(trimmed) && !trimmed.includes('}');
+}
+
+function isMultiLineExportEnd(line: string): boolean {
+  const trimmed = line.trim();
+  // End of multi-line export: } from '...'
+  return /^\}\s+from\s+['"]/.test(trimmed);
 }
 
 function replaceImports(
@@ -238,8 +250,20 @@ function replaceImports(
   // For index.ts files, process line by line to preserve re-exports
   if (isIndexFile) {
     const lines = content.split('\n');
+    let inMultiLineExport = false;
     const updatedLines = lines.map((line) => {
-      // Skip re-export lines - they should keep relative imports
+      // Track multi-line exports
+      if (isMultiLineExportStart(line)) {
+        inMultiLineExport = true;
+        return line;
+      }
+      if (inMultiLineExport) {
+        if (isMultiLineExportEnd(line)) {
+          inMultiLineExport = false;
+        }
+        return line; // Skip all lines in multi-line export
+      }
+      // Skip single-line re-export lines - they should keep relative imports
       if (isReExportLine(line)) return line;
       // Only convert import lines and dynamic imports
       let updated = line.replace(/(from\s+['"])([^'"]+)(['"])/g, replaceSpec);

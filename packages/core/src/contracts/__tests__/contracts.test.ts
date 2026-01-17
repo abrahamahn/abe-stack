@@ -1,6 +1,4 @@
 // packages/core/src/contracts/__tests__/contracts.test.ts
-import { describe, expect, it } from 'vitest';
-
 import {
   authContract,
   authResponseSchema,
@@ -16,6 +14,7 @@ import {
   userRoleSchema,
   userSchema,
 } from '@contracts/index';
+import { describe, expect, it } from 'vitest';
 
 describe('contracts', () => {
   describe('USER_ROLES', () => {
@@ -44,11 +43,15 @@ describe('contracts', () => {
     });
 
     it('should reject invalid email', () => {
-      expect(() => loginRequestSchema.parse({ email: 'invalid', password: 'password123' })).toThrow();
+      expect(() =>
+        loginRequestSchema.parse({ email: 'invalid', password: 'password123' }),
+      ).toThrow();
     });
 
     it('should reject short password', () => {
-      expect(() => loginRequestSchema.parse({ email: 'test@example.com', password: 'short' })).toThrow();
+      expect(() =>
+        loginRequestSchema.parse({ email: 'test@example.com', password: 'short' }),
+      ).toThrow();
     });
   });
 
@@ -65,7 +68,11 @@ describe('contracts', () => {
 
     it('should reject name that is too short', () => {
       expect(() =>
-        registerRequestSchema.parse({ email: 'test@example.com', password: 'password123', name: 'A' }),
+        registerRequestSchema.parse({
+          email: 'test@example.com',
+          password: 'password123',
+          name: 'A',
+        }),
       ).toThrow();
     });
   });

@@ -5,6 +5,7 @@
     "rootDir": "./src",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "types": ["node", "vitest/globals"],
     "paths": {
       "@/*": ["./src/*"],
       "@admin": ["./src/modules/admin"],
@@ -43,8 +44,6 @@
       "@storage/*": ["./src/infra/storage/*"],
       "@users": ["./src/modules/users"],
       "@users/*": ["./src/modules/users/*"],
-      "@utils": ["./src/infra/database/utils"],
-      "@utils/*": ["./src/infra/database/utils/*"],
       "@websocket": ["./src/infra/websocket"],
       "@websocket/*": ["./src/infra/websocket/*"]
     },

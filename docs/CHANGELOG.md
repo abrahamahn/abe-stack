@@ -8,6 +8,59 @@ All notable changes to this project are documented here. Format follows semantic
 
 ## 2026-01-17
 
+### Comprehensive Server Test Coverage
+
+Added 508+ unit tests covering all server modules and infrastructure:
+
+- **Config Tests (91 tests):**
+  - `loader.test.ts` - Configuration loading and validation (15 tests)
+  - `auth.config.test.ts` - Auth config with JWT, refresh tokens, Argon2, OAuth (27 tests)
+  - `database.config.test.ts` - Database config and connection string building (12 tests)
+  - `email.config.test.ts` - Email provider selection and SMTP settings (9 tests)
+  - `server.config.test.ts` - Server, CORS, and logging configuration (12 tests)
+  - `storage.config.test.ts` - Storage provider configuration (7 tests)
+
+- **Infrastructure Tests:**
+  - `infra/crypto/jwt.test.ts` - Native JWT implementation (21 tests)
+  - `infra/http/security.test.ts` - HTTP security headers and middleware (17 tests)
+  - `infra/http/static.test.ts` - Static file serving (11 tests)
+  - `infra/security/security.test.ts` - Account lockout and security events (29 tests)
+  - `infra/pubsub/pubsub.test.ts` - Postgres PubSub messaging (44 tests)
+  - `infra/rate-limit/limiter.test.ts` - Rate limiting (23 tests)
+  - `infra/storage/*.test.ts` - Storage providers (48 tests total)
+  - `infra/database/*.test.ts` - Transactions and optimistic locking (24 tests)
+  - `infra/websocket/websocket.test.ts` - WebSocket connections (8 tests)
+  - `infra/health/health.test.ts` - Health check endpoints (9 tests)
+  - `infra/email/email.test.ts` - Email service providers (20 tests)
+
+- **Module Tests:**
+  - `modules/auth/handlers.test.ts` - Auth route handlers (17 tests)
+  - `modules/auth/service.test.ts` - Auth business logic (14 tests)
+  - `modules/auth/middleware.test.ts` - Auth middleware (21 tests)
+  - `modules/auth/utils/*.test.ts` - JWT, password, refresh tokens (35 tests)
+  - `modules/admin/*.test.ts` - Admin handlers and service (8 tests)
+  - `modules/users/*.test.ts` - User handlers and service (8 tests)
+
+- **Shared Tests:**
+  - `shared/constants.test.ts` - Constants validation (13 tests)
+  - `shared/errors.test.ts` - Error classes and utilities (29 tests)
+
+### Test Infrastructure Improvements
+
+- **Database Test Utilities:**
+  - Added `asMockDb()` helper for type-safe mock database casting
+  - Created standardized mock patterns for Drizzle ORM queries
+
+- **TypeScript Configuration:**
+  - Consolidated test configs into main tsconfig.json files
+  - Removed separate tsconfig.test.json files (core, sdk, ui packages)
+  - Added proper path aliases for test file resolution
+
+- **Test Fixes:**
+  - Fixed JWT algorithm validation test (non-empty fake signature for format check)
+  - Fixed security test internal function spy assertions
+  - Updated vitest mock patterns to v4.x API (`vi.fn<() => T>()` syntax)
+
 ### Sync Scripts Improvements
 
 - **Path Alias Generation (`sync-path-aliases.ts`):**
@@ -44,6 +97,18 @@ All notable changes to this project are documented here. Format follows semantic
 - **Code Fixes:**
   - Fixed `apps/web/src/features/demo/utils/lazyDocs.ts`: Changed glob imports from package alias (`@abe-stack/ui/docs/...`) to relative paths (`../../../../../../packages/ui/docs/...`) since UI package exports don't include docs folder
   - Fixed `apps/server/src/infra/security/events.ts`: Added explicit types for `orderBy` callback and filter callbacks to resolve implicit `any` type errors
+
+### Test File Type-Check Fixes
+
+- **Server Test Files:**
+  - `handlers.test.ts`: Fixed import paths from `@utils/index` to relative `../utils`; removed unnecessary `vi.Mock` type casts from `vi.mocked()` calls; fixed `createMockContext()` to properly cast return value as `AppContext`
+  - `service.test.ts`: Fixed import paths from `@utils/index` to relative `../utils`; fixed `TEST_CONFIG` type casting with `as unknown as AuthConfig`; removed `extends DbClient` from mock interface; added missing `feedback` and `crackTimeDisplay` properties to `PasswordValidationResult` mocks
+  - `websocket.test.ts`: Added `.js` extensions to all relative imports (required by node16/nodenext module resolution); added proper type imports and aliases for dynamic imports
+  - `security.test.ts`: Added non-null assertions for mock result access; applied `asMockDb()` helper consistently to all function calls expecting `DbClient`
+
+- **Web Test Files:**
+  - `useLazyCatalog.test.tsx`: Updated `vi.fn` generic type syntax from two-parameter form `vi.fn<[Args], Return>()` to function type form `vi.fn<(args: Args) => Return>()` (vitest 4.x API)
+  - `lazyDocs.test.ts`: Cast invalid test input `'unknown'` as `never` to suppress type error for intentional invalid category test
 
 ### Core Package Constants
 

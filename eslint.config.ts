@@ -36,7 +36,6 @@ export default [
       'apps/web/src/test/e2e/**',
       'apps/web/vite.config.ts',
       'apps/web/vitest.config.ts',
-      'packages/ui/**/__tests__/**',
       '**/vitest.config.ts',
       '**/vitest.config.js',
       'tools/packages/build-theme-css.ts',
@@ -94,15 +93,6 @@ export default [
     languageOptions: {
       parserOptions: {
         project: ['./packages/ui/tsconfig.json'],
-        tsconfigRootDir,
-      },
-    },
-  },
-  {
-    files: ['packages/ui/src/test/**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      parserOptions: {
-        project: ['./packages/ui/tsconfig.test.json'],
         tsconfigRootDir,
       },
     },

@@ -1,14 +1,21 @@
 // apps/server/src/infra/websocket/__tests__/websocket.test.ts
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
+import type * as JwtModule from '../../../modules/auth/utils/jwt.js';
+import type * as WebSocketModule from '../websocket.js';
+
 // Mock external dependencies
 vi.mock('@fastify/websocket', () => ({
   default: vi.fn(),
 }));
 
-vi.mock('@modules/auth/utils/jwt', () => ({
+vi.mock('../../../modules/auth/utils/jwt.js', () => ({
   verifyToken: vi.fn(() => ({ userId: 'test-user-123' })),
 }));
+
+// Types for dynamic imports
+type WebSocketModuleType = typeof WebSocketModule;
+type JwtModuleType = typeof JwtModule;
 
 describe('WebSocket Module', () => {
   beforeEach(() => {
@@ -22,7 +29,7 @@ describe('WebSocket Module', () => {
 
   describe('getWebSocketStats', () => {
     test('should return initial stats with zero connections', async () => {
-      const { getWebSocketStats } = await import('@websocket/websocket');
+      const { getWebSocketStats } = (await import('../websocket.js')) as WebSocketModuleType;
       const stats = getWebSocketStats();
 
       expect(stats).toEqual({
@@ -32,7 +39,8 @@ describe('WebSocket Module', () => {
     });
 
     test('should report pluginRegistered as true after registerWebSocket', async () => {
-      const { getWebSocketStats, registerWebSocket } = await import('@websocket/websocket');
+      const { getWebSocketStats, registerWebSocket } =
+        (await import('../websocket.js')) as WebSocketModuleType;
 
       const mockServer = {
         register: vi.fn().mockResolvedValue(undefined),
@@ -67,7 +75,7 @@ describe('WebSocket Module', () => {
 
   describe('registerWebSocket', () => {
     test('should register websocket plugin', async () => {
-      const { registerWebSocket } = await import('@websocket/websocket');
+      const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
 
       const mockServer = {
         register: vi.fn().mockResolvedValue(undefined),
@@ -99,7 +107,7 @@ describe('WebSocket Module', () => {
     });
 
     test('should register /ws route with websocket option', async () => {
-      const { registerWebSocket } = await import('@websocket/websocket');
+      const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
 
       const mockServer = {
         register: vi.fn().mockResolvedValue(undefined),
@@ -127,23 +135,19 @@ describe('WebSocket Module', () => {
 
       await registerWebSocket(mockServer as never, mockCtx as never);
 
-      expect(mockServer.get).toHaveBeenCalledWith(
-        '/ws',
-        { websocket: true },
-        expect.any(Function),
-      );
+      expect(mockServer.get).toHaveBeenCalledWith('/ws', { websocket: true }, expect.any(Function));
     });
   });
 
   describe('handleConnection (via route handler)', () => {
     test('should close socket if no token provided', async () => {
-      const { registerWebSocket } = await import('@websocket/websocket');
+      const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
 
       let routeHandler: (connection: unknown, req: unknown) => void = () => {};
 
       const mockServer = {
         register: vi.fn().mockResolvedValue(undefined),
-        get: vi.fn((path: string, options: unknown, handler: typeof routeHandler) => {
+        get: vi.fn((_path: string, _options: unknown, handler: typeof routeHandler) => {
           routeHandler = handler;
         }),
       };
@@ -188,14 +192,14 @@ describe('WebSocket Module', () => {
     });
 
     test('should accept connection with token in query param', async () => {
-      const { registerWebSocket } = await import('@websocket/websocket');
-      const { verifyToken } = await import('@modules/auth/utils/jwt');
+      const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
+      const { verifyToken } = (await import('../../../modules/auth/utils/jwt.js')) as JwtModuleType;
 
       let routeHandler: (connection: unknown, req: unknown) => void = () => {};
 
       const mockServer = {
         register: vi.fn().mockResolvedValue(undefined),
-        get: vi.fn((path: string, options: unknown, handler: typeof routeHandler) => {
+        get: vi.fn((_path: string, _options: unknown, handler: typeof routeHandler) => {
           routeHandler = handler;
         }),
       };
@@ -244,14 +248,14 @@ describe('WebSocket Module', () => {
     });
 
     test('should accept connection with token in cookie', async () => {
-      const { registerWebSocket } = await import('@websocket/websocket');
-      const { verifyToken } = await import('@modules/auth/utils/jwt');
+      const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
+      const { verifyToken } = (await import('../../../modules/auth/utils/jwt.js')) as JwtModuleType;
 
       let routeHandler: (connection: unknown, req: unknown) => void = () => {};
 
       const mockServer = {
         register: vi.fn().mockResolvedValue(undefined),
-        get: vi.fn((path: string, options: unknown, handler: typeof routeHandler) => {
+        get: vi.fn((_path: string, _options: unknown, handler: typeof routeHandler) => {
           routeHandler = handler;
         }),
       };
@@ -297,8 +301,8 @@ describe('WebSocket Module', () => {
     });
 
     test('should close socket if token is invalid', async () => {
-      const { registerWebSocket } = await import('@websocket/websocket');
-      const { verifyToken } = await import('@modules/auth/utils/jwt');
+      const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
+      const { verifyToken } = (await import('../../../modules/auth/utils/jwt.js')) as JwtModuleType;
 
       (verifyToken as ReturnType<typeof vi.fn>).mockImplementation(() => {
         throw new Error('Invalid token');
@@ -308,7 +312,7 @@ describe('WebSocket Module', () => {
 
       const mockServer = {
         register: vi.fn().mockResolvedValue(undefined),
-        get: vi.fn((path: string, options: unknown, handler: typeof routeHandler) => {
+        get: vi.fn((_path: string, _options: unknown, handler: typeof routeHandler) => {
           routeHandler = handler;
         }),
       };

@@ -1,6 +1,6 @@
 // packages/ui/src/layouts/shells/__tests__/LeftSidebarLayout.test.tsx
-import { createRef } from 'react';
 import { render, screen } from '@testing-library/react';
+import { createRef } from 'react';
 import { describe, it, expect } from 'vitest';
 
 import { LeftSidebarLayout } from '../LeftSidebarLayout';

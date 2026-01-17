@@ -5,19 +5,8 @@
  * Tests the auth service business logic by mocking database and utility functions.
  * These tests verify the orchestration logic, error handling, and token management.
  */
-import {
-  authenticateUser,
-  logoutUser,
-  refreshUserTokens,
-  registerUser,
-} from '@auth/service';
-import {
-  AccountLockedError,
-  EmailAlreadyExistsError,
-  InvalidCredentialsError,
-  InvalidTokenError,
-  WeakPasswordError,
-} from '@shared';
+import { validatePassword } from '@abe-stack/core';
+import { authenticateUser, logoutUser, refreshUserTokens, registerUser } from '@auth/service';
 import {
   createAccessToken,
   createRefreshTokenFamily,
@@ -25,7 +14,22 @@ import {
   needsRehash,
   rotateRefreshToken,
   verifyPasswordSafe,
-} from '@utils/index';
+} from '@auth/utils';
+import {
+  applyProgressiveDelay,
+  getAccountLockoutStatus,
+  isAccountLocked,
+  logAccountLockedEvent,
+  logLoginAttempt,
+  withTransaction,
+} from '@infra';
+import {
+  AccountLockedError,
+  EmailAlreadyExistsError,
+  InvalidCredentialsError,
+  InvalidTokenError,
+  WeakPasswordError,
+} from '@shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { AuthConfig } from '@config';
@@ -52,8 +56,8 @@ vi.mock('@infra', () => ({
   withTransaction: vi.fn(),
 }));
 
-// Mock @utils/index
-vi.mock('@utils/index', () => ({
+// Mock ../utils
+vi.mock('../utils', () => ({
   createAccessToken: vi.fn(),
   createRefreshTokenFamily: vi.fn(),
   hashPassword: vi.fn(),
@@ -64,25 +68,14 @@ vi.mock('@utils/index', () => ({
 
 // Mock drizzle-orm
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args) => args),
+  eq: vi.fn((...args: unknown[]) => args),
 }));
-
-// Import mocked functions
-import { validatePassword } from '@abe-stack/core';
-import {
-  applyProgressiveDelay,
-  getAccountLockoutStatus,
-  isAccountLocked,
-  logAccountLockedEvent,
-  logLoginAttempt,
-  withTransaction,
-} from '@infra';
 
 // ============================================================================
 // Test Constants
 // ============================================================================
 
-const TEST_CONFIG: AuthConfig = {
+const TEST_CONFIG = {
   jwt: {
     secret: 'test-secret-32-characters-long!!',
     accessTokenExpiry: '15m',
@@ -101,7 +94,7 @@ const TEST_CONFIG: AuthConfig = {
     windowMinutes: 15,
     durationMinutes: 30,
   },
-} as AuthConfig;
+} as unknown as AuthConfig;
 
 // ============================================================================
 // Test Helpers
@@ -123,7 +116,7 @@ interface MockDbDeleteResult {
   where: ReturnType<typeof vi.fn>;
 }
 
-interface MockDbClientExtended extends DbClient {
+interface MockDbClientExtended {
   query: {
     users: MockDbQueryResult;
   };
@@ -132,7 +125,7 @@ interface MockDbClientExtended extends DbClient {
   delete: ReturnType<typeof vi.fn> & ((...args: unknown[]) => MockDbDeleteResult);
 }
 
-function createMockDb(): MockDbClientExtended {
+function createMockDb(): MockDbClientExtended & DbClient {
   const mockInsert = vi.fn(() => ({
     values: vi.fn(() => ({
       returning: vi.fn(() => Promise.resolve([])),
@@ -158,7 +151,7 @@ function createMockDb(): MockDbClientExtended {
     insert: mockInsert,
     update: mockUpdate,
     delete: mockDelete,
-  } as unknown as MockDbClientExtended;
+  } as unknown as MockDbClientExtended & DbClient;
 }
 
 // ============================================================================
@@ -180,7 +173,13 @@ describe('registerUser', () => {
     vi.mocked(db.query.users.findFirst).mockResolvedValue(null);
 
     // Mock: password validation passes
-    vi.mocked(validatePassword).mockResolvedValue({ isValid: true, errors: [], score: 4 });
+    vi.mocked(validatePassword).mockResolvedValue({
+      isValid: true,
+      errors: [],
+      score: 4,
+      feedback: { warning: '', suggestions: [] },
+      crackTimeDisplay: 'centuries',
+    });
 
     // Mock: password hashing
     vi.mocked(hashPassword).mockResolvedValue('hashed-password');
@@ -246,6 +245,8 @@ describe('registerUser', () => {
       isValid: false,
       errors: ['Password is too short', 'Password needs uppercase'],
       score: 1,
+      feedback: { warning: 'Too weak', suggestions: ['Add uppercase'] },
+      crackTimeDisplay: 'instant',
     });
 
     await expect(registerUser(db, TEST_CONFIG, email, password)).rejects.toThrow(WeakPasswordError);
@@ -548,14 +549,15 @@ describe('logoutUser', () => {
     const db = createMockDb();
     const refreshToken = 'valid-refresh-token';
 
+    const whereMock = vi.fn().mockResolvedValue(undefined);
     vi.mocked(db.delete).mockReturnValue({
-      where: vi.fn().mockResolvedValue(undefined),
+      where: whereMock,
     });
 
     await logoutUser(db, refreshToken);
 
     expect(db.delete).toHaveBeenCalled();
-    expect(db.delete().where).toHaveBeenCalled();
+    expect(whereMock).toHaveBeenCalled();
   });
 
   test('should not delete anything when no token provided', async () => {

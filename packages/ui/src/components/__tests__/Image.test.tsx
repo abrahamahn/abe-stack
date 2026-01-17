@@ -1,26 +1,25 @@
 // packages/ui/src/components/__tests__/Image.test.tsx
 // packages/ui/src/elements/__tests__/Image.test.tsx
 /** @vitest-environment jsdom */
+import { Image } from '@components/Image';
 import { act, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Image } from '../Image';
-
 // Helper to trigger image load event
-const triggerLoad = (img: HTMLImageElement) => {
+function triggerLoad(img: HTMLElement): void {
   act(() => {
     const event = new Event('load', { bubbles: true });
     img.dispatchEvent(event);
   });
-};
+}
 
 // Helper to trigger image error event
-const triggerError = (img: HTMLImageElement) => {
+function triggerError(img: HTMLElement): void {
   act(() => {
     const event = new Event('error', { bubbles: true });
     img.dispatchEvent(event);
   });
-};
+}
 
 describe('Image', () => {
   describe('happy path', () => {
@@ -72,7 +71,7 @@ describe('Image', () => {
         />,
       );
 
-      const img = screen.getByRole('img', { hidden: true }) as HTMLImageElement;
+      const img = screen.getByRole('img', { hidden: true });
       triggerLoad(img);
 
       expect(onLoad).toHaveBeenCalled();
@@ -91,7 +90,7 @@ describe('Image', () => {
         />,
       );
 
-      const img = screen.getByRole('img', { hidden: true }) as HTMLImageElement;
+      const img = screen.getByRole('img', { hidden: true });
       triggerError(img);
 
       expect(onError).toHaveBeenCalled();
@@ -213,7 +212,7 @@ describe('Image', () => {
       // @ts-expect-error Testing invalid prop
       render(<Image src="/test.jpg" alt="Test" onLoad={null} />);
 
-      const img = screen.getByRole('img', { hidden: true }) as HTMLImageElement;
+      const img = screen.getByRole('img', { hidden: true });
 
       expect(() => {
         triggerLoad(img);
@@ -224,7 +223,7 @@ describe('Image', () => {
       // @ts-expect-error Testing invalid prop
       render(<Image src="/test.jpg" alt="Test" onError={null} />);
 
-      const img = screen.getByRole('img', { hidden: true }) as HTMLImageElement;
+      const img = screen.getByRole('img', { hidden: true });
 
       expect(() => {
         triggerError(img);
@@ -266,7 +265,7 @@ describe('Image', () => {
     it('handles src change after successful load', () => {
       const { rerender } = render(<Image src="/first.jpg" alt="Test" />);
 
-      const img = screen.getByRole('img', { hidden: true }) as HTMLImageElement;
+      const img = screen.getByRole('img', { hidden: true });
       triggerLoad(img);
 
       expect(img).toHaveStyle({ display: 'block' });
@@ -289,7 +288,7 @@ describe('Image', () => {
         <Image src="/bad.jpg" alt="Test" fallback={<div data-testid="fallback">Error</div>} />,
       );
 
-      const img = screen.getByRole('img', { hidden: true }) as HTMLImageElement;
+      const img = screen.getByRole('img', { hidden: true });
       triggerError(img);
 
       expect(screen.getByTestId('fallback')).toBeInTheDocument();
@@ -306,7 +305,7 @@ describe('Image', () => {
       // Should show loading fallback
       expect(screen.getByTestId('fallback')).toBeInTheDocument();
 
-      const newImg = screen.getByRole('img', { hidden: true }) as HTMLImageElement;
+      const newImg = screen.getByRole('img', { hidden: true });
       triggerLoad(newImg);
 
       // Should hide fallback after successful load
@@ -318,7 +317,7 @@ describe('Image', () => {
 
       // Rapidly change src 10 times
       for (let i = 2; i <= 10; i++) {
-        rerender(<Image src={`/img${i}.jpg`} alt="Test" />);
+        rerender(<Image src={`/img${String(i)}.jpg`} alt="Test" />);
       }
 
       const img = screen.getByRole('img', { hidden: true });
@@ -331,7 +330,7 @@ describe('Image', () => {
 
       render(<Image src="/test.jpg" alt="Test" onLoad={onLoad} onError={onError} />);
 
-      const img = screen.getByRole('img', { hidden: true }) as HTMLImageElement;
+      const img = screen.getByRole('img', { hidden: true });
 
       // Trigger error first
       triggerError(img);
@@ -363,7 +362,7 @@ describe('Image', () => {
     it('cleans up properly on unmount after load', () => {
       const { unmount } = render(<Image src="/test.jpg" alt="Test" />);
 
-      const img = screen.getByRole('img', { hidden: true }) as HTMLImageElement;
+      const img = screen.getByRole('img', { hidden: true });
       triggerLoad(img);
 
       expect(img).toHaveStyle({ display: 'block' });
@@ -378,7 +377,7 @@ describe('Image', () => {
         <Image src="/test.jpg" alt="Test" fallback={<div data-testid="fallback">Error</div>} />,
       );
 
-      const img = screen.getByRole('img', { hidden: true }) as HTMLImageElement;
+      const img = screen.getByRole('img', { hidden: true });
       triggerError(img);
 
       expect(screen.getByTestId('fallback')).toBeInTheDocument();
@@ -485,7 +484,7 @@ describe('Image', () => {
       const onLoad = vi.fn();
       render(<Image src="/test.jpg" alt="Test" onLoad={onLoad} />);
 
-      const img = screen.getByRole('img', { hidden: true }) as HTMLImageElement;
+      const img = screen.getByRole('img', { hidden: true });
 
       // Spam load 20 times
       for (let i = 0; i < 20; i++) {
@@ -507,7 +506,7 @@ describe('Image', () => {
         />,
       );
 
-      const img = screen.getByRole('img', { hidden: true }) as HTMLImageElement;
+      const img = screen.getByRole('img', { hidden: true });
 
       // Spam error 20 times
       for (let i = 0; i < 20; i++) {
@@ -531,7 +530,7 @@ describe('Image', () => {
         />,
       );
 
-      const img = screen.getByRole('img', { hidden: true }) as HTMLImageElement;
+      const img = screen.getByRole('img', { hidden: true });
 
       // Alternate between load and error
       for (let i = 0; i < 10; i++) {

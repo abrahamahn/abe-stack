@@ -1,13 +1,12 @@
 // packages/ui/src/components/__tests__/RadioGroup.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
+import { Radio } from '@components/Radio';
+import { RadioGroup } from '@components/RadioGroup';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState, type ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-
-import { Radio } from '../Radio';
-import { RadioGroup } from '../RadioGroup';
 
 function RadioGroupHarness(): ReactElement {
   const [value, setValue] = useState<'a' | 'b' | 'c'>('a');
@@ -454,7 +453,7 @@ describe('RadioGroup', () => {
       for (let i = 0; i < 10; i++) {
         const { unmount } = render(
           <RadioGroup name="test" aria-label="Test">
-            <Radio name="test" label={`Option ${i}`} />
+            <Radio name="test" label={`Option ${String(i)}`} />
           </RadioGroup>,
         );
 

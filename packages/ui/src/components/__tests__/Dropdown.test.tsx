@@ -6,7 +6,6 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { MenuItem } from '../../elements/MenuItem';
-
 import { Dropdown } from '../Dropdown';
 
 describe('Dropdown', () => {
