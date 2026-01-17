@@ -1,58 +1,17 @@
-// tools/packages/build-theme-css.ts
+// packages/ui/src/theme/buildThemeCss.ts
 /**
- * Build theme.css from TypeScript theme source files
+ * Theme CSS generator for UI tokens.
  *
- * This script generates CSS custom properties from the theme source files.
- * All values come from the source files - no hardcoded values here.
+ * Used by tooling to generate theme.css from the TypeScript theme sources.
  */
-import { promises as fs } from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-import { format } from 'prettier';
-import { darkColors, lightColors } from '../../packages/ui/src/theme/colors';
-import { motion } from '../../packages/ui/src/theme/motion';
-import { radius } from '../../packages/ui/src/theme/radius';
-import { spacing } from '../../packages/ui/src/theme/spacing';
-import { typography } from '../../packages/ui/src/theme/typography';
+import { darkColors, lightColors, type DarkColors, type LightColors } from './colors';
+import { motion } from './motion';
+import { radius } from './radius';
+import { spacing } from './spacing';
+import { typography } from './typography';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const themeCssPath = path.resolve(__dirname, '../../packages/ui/src/styles/theme.css');
-
-/** Color theme structure */
-type ColorTheme = {
-  primary: string;
-  accent: string;
-  primaryMuted: string;
-  danger: string;
-  success: string;
-  warning: string;
-  neutral: string;
-  muted: string;
-  bg: string;
-  surface: string;
-  surfaceStrong: string;
-  border: string;
-  text: string;
-  textMuted: string;
-  textInverse: string;
-  controlThumb: string;
-  shadow: string;
-  focus: string;
-  alert: {
-    info: { bg: string; border: string; text: string };
-    success: { bg: string; border: string; text: string };
-    danger: { bg: string; border: string; text: string };
-    warning: { bg: string; border: string; text: string };
-  };
-  badge: {
-    primary: { bg: string; border: string };
-    success: { bg: string; border: string };
-    danger: { bg: string; border: string };
-    warning: { bg: string; border: string };
-    neutral: { bg: string; border: string };
-  };
-};
+type ColorTheme = LightColors | DarkColors;
 
 /** Generate CSS custom properties from theme tokens */
 function buildThemeTokens(colors: ColorTheme): Record<string, string> {
@@ -175,22 +134,9 @@ function serializeTokens(tokens: Record<string, string>): string {
 }
 
 /** Generate complete theme CSS */
-function generateThemeCss(): string {
+export function generateThemeCss(): string {
   const lightTokens = buildThemeTokens(lightColors);
   const darkTokens = buildThemeTokens(darkColors);
 
   return `:root {\n${serializeTokens(lightTokens)}\n}\n\n@media (prefers-color-scheme: dark) {\n  :root {\n${serializeTokens(darkTokens)}\n  }\n}\n`;
 }
-
-async function build(): Promise<void> {
-  const css = generateThemeCss();
-  const formatted = await format(css, { parser: 'css' });
-  await fs.writeFile(themeCssPath, formatted, 'utf8');
-
-  console.log(`Generated theme CSS at ${themeCssPath}`);
-}
-
-build().catch((err: unknown) => {
-  console.error('Failed to build theme.css', err);
-  process.exitCode = 1;
-});

@@ -8,6 +8,14 @@ All notable changes to this project are documented here. Format follows semantic
 
 ## 2026-01-17
 
+### Build and Test Caching
+
+- Added a cached theme CSS build step that skips regeneration when theme inputs are unchanged
+- Enabled Turbo cache for the `test` task to reuse results when sources are unchanged
+- Added a theme CSS watcher for dev that rebuilds on theme token edits
+- Documented sync tooling (including theme CSS watcher) in root README
+- Fixed theme CSS generator typing to support both light and dark token sets
+
 ### Comprehensive Server Test Coverage
 
 Added 508+ unit tests covering all server modules and infrastructure:

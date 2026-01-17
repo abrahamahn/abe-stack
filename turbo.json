@@ -36,7 +36,7 @@
     "test": {
       "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.ts", "**/*.test.tsx", "config/vitest.config.ts"],
       "outputs": [],
-      "cache": false,
+      "cache": true,
       "env": ["NODE_ENV", "DATABASE_URL"]
     },
     "test:watch": {

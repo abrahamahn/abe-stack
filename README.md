@@ -39,7 +39,7 @@ https://github.com/abrahamahn/abe-stack
 
 ### Development Automation
 
-`pnpm dev:start` runs all sync tools in watch mode (quiet by default).
+`pnpm dev` runs all sync tools in watch mode (quiet by default).
 
 | Tool                  | Purpose                                                        |
 | --------------------- | -------------------------------------------------------------- |
@@ -48,6 +48,7 @@ https://github.com/abrahamahn/abe-stack
 | `sync-import-aliases` | Converts deep relative imports to path aliases                 |
 | `sync-test-folders`   | Creates `__tests__/` folders for code directories              |
 | `sync-barrel-exports` | Auto-creates and updates `index.ts` barrels                    |
+| `sync-css-theme`      | Rebuilds `theme.css` when theme tokens change                  |
 
 **Path alias configuration:**
 
