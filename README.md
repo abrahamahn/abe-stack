@@ -27,28 +27,33 @@ https://github.com/abrahamahn/abe-stack
 - Backend: Fastify + Drizzle ORM + PostgreSQL
 - API: Type-safe contracts with `ts-rest` + Zod
 - Auth: JWT foundation with Argon2id hashing, refresh tokens, and role-based access
+- Password Strength: zxcvbn-based validation with feedback and crack time estimates
 
 **Quality & Developer Experience**
 
 - Full TypeScript strict mode with end-to-end safety
-- Comprehensive test coverage (Vitest + Playwright)
+- 1900+ tests (Vitest unit tests + Playwright E2E)
 - ESLint + Prettier + git hooks (no bad code slips through)
-- Comprehensive shared UI library with interactive demo at `/demo`
-- State: React Query for server state
+- Comprehensive shared UI library (16 components, 24 elements, 13 hooks) with interactive demo at `/demo`
+- State: React Query for server state, offline mutation queue
 - Theming, hooks, layouts, resizable panels — all reusable
 
 ### Development Automation
 
-`pnpm dev` runs all sync tools in watch mode (quiet by default).
+`pnpm dev` runs all sync watchers in watch mode (quiet by default).
 
-| Tool                  | Purpose                                                        |
-| --------------------- | -------------------------------------------------------------- |
-| `sync-path-aliases`   | Auto-generates TS path aliases when directories add `index.ts` |
-| `sync-file-headers`   | Adds `// path/to/file.ts` headers on new files                 |
-| `sync-import-aliases` | Converts deep relative imports to path aliases                 |
-| `sync-test-folders`   | Creates `__tests__/` folders for code directories              |
-| `sync-barrel-exports` | Auto-creates and updates `index.ts` barrels                    |
-| `sync-css-theme`      | Rebuilds `theme.css` when theme tokens change                  |
+| Tool                  | Purpose                                                          |
+| --------------------- | ---------------------------------------------------------------- |
+| `sync-path-aliases`   | Auto-generates TS path aliases when directories add `index.ts`   |
+| `sync-file-headers`   | Adds `// path/to/file.ts` headers on new files                   |
+| `sync-import-aliases` | Converts deep relative imports to path aliases                   |
+| `sync-test-folders`   | Creates `__tests__/` folders for code directories                |
+| `sync-barrel-exports` | Auto-creates and updates `index.ts` barrels                      |
+| `sync-tsconfig`       | Auto-generates TypeScript project references                     |
+| `sync-linting`        | Syncs linting config to `package.json` + `.vscode/settings.json` |
+| `sync-css-theme`      | Rebuilds `theme.css` when theme tokens change                    |
+
+`sync-tsconfig` and `sync-linting` run on demand (and in pre-commit) to keep references and linting aligned.
 
 **Path alias configuration:**
 
@@ -63,14 +68,29 @@ abe-stack/
 ├── apps/
 │   ├── web/          # Vite + React web app
 │   ├── desktop/      # Electron (Tauri-ready)
-│   └── server/       # Fastify API
+│   └── server/       # Fastify API (infra/ + modules/)
 ├── packages/
-│   ├── ui/           # Shared component library + demo
-│   ├── sdk/          # Type-safe API client
-│   └── core/         # Contracts, validation, shared logic
+│   ├── ui/           # 16 components, 24 elements, 13 hooks, 6 layouts
+│   ├── sdk/          # Type-safe API client + React Query + offline support
+│   └── core/         # Contracts, validation, stores, constants, errors
 ├── config/           # Docker, env, test configs
-└── tools/            # Dev scripts
+└── tools/            # Dev scripts (sync watchers)
 ```
+
+### SDK Features
+
+- **Type-safe API Client:** Built on `ts-rest` with automatic request/response typing
+- **React Query Integration:** Custom hooks for data fetching with caching
+- **Offline Mutation Queue:** Queue mutations when offline, auto-sync when back online
+- **Query Persister:** Persist React Query cache to localStorage for instant hydration
+
+### Core Package
+
+- **API Contracts:** Type-safe contracts with `ts-rest` for client-server communication
+- **Validation Schemas:** Zod schemas for runtime validation (auth, user, environment)
+- **Shared Stores:** Framework-agnostic stores (toastStore, tokenStore)
+- **Constants:** Time conversions, HTTP status codes
+- **Error Types:** Custom HTTP error classes with utilities
 
 ### Architecture Philosophy
 
@@ -112,11 +132,49 @@ pnpm dev
 
 ### Infrastructure & Health Monitoring
 
-- **Rate Limiting:** Token bucket algorithm with customizable limits
+- **Rate Limiting:** Token bucket algorithm with customizable limits and pluggable store (Memory → Redis)
 - **Security Headers:** Comprehensive HTTP security headers (CSP, HSTS, X-Frame-Options, etc.)
 - **Audit Logging:** Security events table for token reuse, lockouts, and admin actions
-- **Health Endpoints:** Detailed service status, readiness/liveness probes, route listing
+- **Health Endpoints:** Detailed service status, readiness/liveness probes (`/health/ready`, `/health/live`), route listing
 - **Startup Validation:** Formatted summary showing all service statuses on server start
+- **Database Transactions:** Atomic transaction wrapper for auth operations (registration, login, token rotation)
+- **Optimistic Locking:** Version-based concurrency control for collaborative editing (409 Conflict on mismatch)
+- **Storage Providers:** Pluggable local and S3 storage with static file serving
+- **Structured Logging:** Pino logger with request context and child loggers
+
+### Real-Time Infrastructure
+
+- **WebSocket Server:** Built on `@fastify/websocket` for real-time updates
+- **Postgres PubSub:** Horizontal scaling via Postgres LISTEN/NOTIFY
+- **Subscription Manager:** Handles subscriptions with initial data push (Chet-stack pattern)
+- **publishAfterWrite:** Helper to broadcast version updates after database writes
+
+### Security Hardening
+
+- **Token Reuse Detection:** Automatic family revocation on refresh token reuse
+- **Account Lockout:** Progressive delays after failed login attempts
+- **IP Validation:** Proxy-aware IP extraction with CIDR support for trusted proxies
+- **Admin Unlock:** `POST /api/admin/auth/unlock` endpoint with audit trail
+- **Strict JWT:** Algorithm validation (HS256 only), format checks, proper error handling
+
+### Email Service
+
+- **Multiple Providers:** Console (dev) and SMTP (production) email services
+- **HTML Templates:** Shared email templates for verification, password reset, magic links
+- **Layout Helper:** Consistent HTML email structure with reusable styles
+
+### Error Handling
+
+- **Type-safe HTTP Errors:** Custom error classes (`ValidationError`, `UnauthorizedError`, `NotFoundError`, etc.)
+- **Standardized Responses:** Consistent `ApiErrorResponse` shape across all endpoints
+- **Error Utilities:** `isHttpError()`, `getSafeErrorMessage()`, `getErrorStatusCode()`
+
+### Server Architecture
+
+- **App Class (DI Container):** Single entry point managing all services and lifecycle (start/stop)
+- **ServerEnvironment Pattern:** Single context object for all dependencies (framework-agnostic handlers)
+- **Centralized Config:** Split config files (auth, database, email, server, storage) with Zod validation
+- **Hybrid Architecture:** Clean separation between `infra/` (infrastructure) and `modules/` (business logic)
 
 ### Coming Soon
 

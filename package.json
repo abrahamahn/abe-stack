@@ -34,9 +34,14 @@
     "lint": "eslint . --cache --cache-location .cache/eslint/.cache --ext .js,.jsx,.ts,.tsx,.cjs,.mjs,.cts,.mts --report-unused-disable-directives --max-warnings=0",
     "lint:fix": "eslint . --cache --cache-location .cache/eslint/.cache --ext .js,.jsx,.ts,.tsx,.cjs,.mjs,.cts,.mts --fix",
     "lint:changed": "eslint --cache --cache-location .cache/eslint/.cache --max-warnings=0",
+    "lint:staged": "eslint --cache --cache-location .cache/eslint/.cache --report-unused-disable-directives --max-warnings=0 --no-warn-ignored",
+    "sync:linting": "tsx tools/sync/sync-linting.ts",
+    "sync:linting:check": "tsx tools/sync/sync-linting.ts --check",
     "sync:aliases": "tsx tools/sync/sync-path-aliases.ts",
     "sync:aliases:check": "tsx tools/sync/sync-path-aliases.ts --check",
     "sync:aliases:watch": "tsx tools/sync/sync-path-aliases.ts --watch",
+    "sync:tsconfig": "tsx tools/sync/sync-tsconfig.ts",
+    "sync:tsconfig:check": "tsx tools/sync/sync-tsconfig.ts --check",
     "sync:headers": "tsx tools/sync/sync-file-headers.ts",
     "sync:headers:check": "tsx tools/sync/sync-file-headers.ts --check",
     "sync:headers:watch": "tsx tools/sync/sync-file-headers.ts --watch",
@@ -65,7 +70,7 @@
     "docker:logs": "docker compose --env-file config/.env/.env.development -f config/docker/docker-compose.yml logs -f",
     "bundle-size": "tsx tools/dev/bundle-size.ts",
     "bundle-size:save": "tsx tools/dev/bundle-size.ts --save",
-    "pre-commit": "pnpm sync:aliases && pnpm sync:headers && pnpm sync:imports && pnpm sync:tests && pnpm sync:barrels && pnpm sync:theme && pnpm lint-staged && pnpm type-check"
+    "pre-commit": "pnpm sync:linting && pnpm sync:tsconfig && pnpm sync:aliases && pnpm sync:headers && pnpm sync:imports && pnpm sync:tests && pnpm sync:barrels && pnpm sync:theme && pnpm lint-staged && pnpm type-check"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
@@ -73,11 +78,15 @@
     "@testing-library/react": "^16.3.1",
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^25.0.3",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
     "@vitest/coverage-v8": "^4.0.16",
     "@vitest/ui": "^4.0.16",
     "eslint": "^9.39.2",
     "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "jiti": "^2.6.1",
     "jsdom": "^27.4.0",
     "lint-staged": "^15.2.10",
@@ -113,11 +122,11 @@
     "pre-push": "pnpm build"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx,json,css,scss,md}": [
+    "*.{ts,tsx,js,jsx,cjs,mjs,cts,mts,json,css,scss,md}": [
       "pnpm prettier --config config/.prettierrc --ignore-path config/.prettierignore --write"
     ],
-    "**/*.{ts,tsx,js,jsx}": [
-      "pnpm exec eslint --max-warnings=0 --no-warn-ignored"
+    "**/*.{ts,tsx,js,jsx,cjs,mjs,cts,mts}": [
+      "pnpm lint:staged"
     ]
   },
   "packageManager": "pnpm@10.26.2"

@@ -1,11 +1,17 @@
 // apps/server/src/infra/websocket/websocket.ts
-import websocketPlugin from '@fastify/websocket';
+/**
+ * WebSocket Support
+ *
+ * Manual WebSocket handling using ws directly. Replaces @fastify/websocket.
+ */
+
 import { verifyToken } from '@modules/auth/utils/jwt';
+import { WebSocketServer, type WebSocket } from 'ws';
 
 import type { WebSocket as PubSubWebSocket } from '@pubsub/types';
 import type { AppContext } from '@shared';
-import type { FastifyInstance, FastifyRequest } from 'fastify';
-import type { WebSocket } from 'ws';
+import type { FastifyInstance } from 'fastify';
+import type { IncomingMessage } from 'node:http';
 
 // ============================================================================
 // Connection Tracking
@@ -29,26 +35,66 @@ export function getWebSocketStats(): WebSocketStats {
   };
 }
 
+// ============================================================================
+// Cookie Parsing (for WebSocket auth)
+// ============================================================================
+
+function parseCookies(cookieHeader: string | undefined): Record<string, string> {
+  const cookies: Record<string, string> = {};
+  if (!cookieHeader) return cookies;
+
+  const pairs = cookieHeader.split(';');
+  for (const pair of pairs) {
+    const eqIdx = pair.indexOf('=');
+    if (eqIdx < 0) continue;
+    const key = pair.slice(0, eqIdx).trim();
+    let value = pair.slice(eqIdx + 1).trim();
+    if (value.startsWith('"') && value.endsWith('"')) {
+      value = value.slice(1, -1);
+    }
+    try {
+      cookies[key] = decodeURIComponent(value);
+    } catch {
+      cookies[key] = value;
+    }
+  }
+  return cookies;
+}
+
+// ============================================================================
+// WebSocket Registration
+// ============================================================================
+
 /**
  * Register WebSocket support
  */
-export async function registerWebSocket(server: FastifyInstance, ctx: AppContext): Promise<void> {
-  // Register the plugin
-  await server.register(websocketPlugin);
+export function registerWebSocket(server: FastifyInstance, ctx: AppContext): void {
+  // Create WebSocket server without HTTP server (we'll handle upgrade manually)
+  const wss = new WebSocketServer({ noServer: true });
   pluginRegistered = true;
 
-  // Register the websocket route
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  server.get('/ws', { websocket: true }, (connection: any, req) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    handleConnection(connection.socket as WebSocket, req, ctx);
+  // Handle upgrade requests
+  server.server.on('upgrade', (request: IncomingMessage, socket, head) => {
+    const url = new URL(request.url ?? '/', `http://${request.headers.host ?? 'localhost'}`);
+
+    // Only handle /ws path
+    if (url.pathname !== '/ws') {
+      socket.destroy();
+      return;
+    }
+
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      handleConnection(ws, request, ctx);
+    });
   });
+
+  ctx.log.info('WebSocket support registered on /ws');
 }
 
 /**
  * Handle a new WebSocket connection
  */
-function handleConnection(socket: WebSocket, req: FastifyRequest, ctx: AppContext): void {
+function handleConnection(socket: WebSocket, req: IncomingMessage, ctx: AppContext): void {
   // 1. Authentication
   // WebSockets don't support custom headers in browsers, so we check:
   // - 'sec-websocket-protocol' header (standard workaround)
@@ -57,25 +103,27 @@ function handleConnection(socket: WebSocket, req: FastifyRequest, ctx: AppContex
 
   let token: string | undefined;
 
+  // Parse URL for query params
+  const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
+
   // Check query param
-  const query = req.query as { token?: string };
-  if (query.token) {
-    token = query.token;
+  const queryToken = url.searchParams.get('token');
+  if (queryToken) {
+    token = queryToken;
   }
 
   // Check protocol header (subprotocol)
-  // Client: new WebSocket(url, ['graphql', 'token']) -> Server sees 'graphql, token'
-  // We expect just the token as a subprotocol or alongside others
   if (!token && req.headers['sec-websocket-protocol']) {
     const protocols = req.headers['sec-websocket-protocol'].split(',').map((p) => p.trim());
-    // Assume the token is one of the protocols. We try to verify each.
-    // This is a heuristic.
     token = protocols.find((p) => !['graphql', 'json'].includes(p));
   }
 
   // Check cookies
-  if (!token && req.cookies.accessToken) {
-    token = req.cookies.accessToken;
+  if (!token) {
+    const cookies = parseCookies(req.headers.cookie);
+    if (cookies.accessToken) {
+      token = cookies.accessToken;
+    }
   }
 
   if (!token) {
@@ -95,14 +143,12 @@ function handleConnection(socket: WebSocket, req: FastifyRequest, ctx: AppContex
 
     socket.on('message', (data: Buffer | ArrayBuffer | Buffer[]) => {
       // Forward to subscription manager
-      // We assume text messages for now
       let message = '';
       if (Buffer.isBuffer(data)) {
         message = data.toString();
       } else if (Array.isArray(data)) {
         message = Buffer.concat(data).toString();
       } else {
-        // ArrayBuffer
         message = Buffer.from(data).toString();
       }
 

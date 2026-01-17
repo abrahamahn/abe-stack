@@ -4,6 +4,56 @@
 
 ---
 
+## Essential High-Impact Improvements (2025-2026)
+
+**Here are the truly essential, high-impact improvements**  
+(ones that give the most value for the least added complexity / maintenance cost in a modern monorepo boilerplate in 2025-2026)
+
+### Top Priority (Do these first - they matter the most)
+
+| Priority | Improvement                                                                                                                  | Why it's essential                                                               | Difficulty | Approx. effort            |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ---------- | ------------------------- |
+| 1        | **Automate tsconfig project references**                                                                                     | Prevents the most painful and silent type errors in monorepos                    | ★★☆        | 1-2 days                  |
+| 2        | **Zod schema + runtime validation for all environment variables**                                                            | Catches configuration mistakes extremely early (dev, CI, prod)                   | ★☆☆        | 4-8 hours                 |
+| 3        | **Merge the most frequently triggering sync scripts** (mainly aliases + imports + barrels)                                   | Dramatically reduces watcher overhead and CPU usage during `pnpm dev`            | ★★☆        | 1-2 days                  |
+| 4        | **Better documentation of "changed since X" / affected packages workflows**                                                  | Saves huge amounts of time for reviewers and new contributors in large monorepos | ★☆☆        | 2-4 hours                 |
+| 5        | **Enforce domain-folder naming convention** across at least server and core packages (domain / application / infrastructure) | Makes architecture intention much clearer as the project grows                   | ★★☆        | 1 day + gradual migration |
+
+### Very strong second tier (do when you have bandwidth)
+
+- Add **integration/API tests** layer for the server (supertest/jest or vitest + actual DB or testcontainer)
+  - closes the biggest testing gap in most full-stack monorepos
+- Make **sync scripts configurable** (via small config file) instead of many hard-coded exclusions
+  - future-proofs automation without much cost now
+- **Dynamic/conditional Vite config** based on `mode` (dev vs build vs preview)
+  - small but meaningful quality-of-life and performance improvement
+
+### Things you can safely postpone / probably never need in most real projects
+
+- Redis just for the sake of having advanced caching
+- Full DDD folder structure in every single package/app
+- Combining all 6 sync scripts into one mega-script
+- Separate tsconfig just for vitest
+- Auto-generating theme docs with typedoc/etc
+- Pre-bundling shared deps in Vite optimizeDeps (modern Vite usually does fine)
+- Matrix-parallelized CI (unless you have >40-50 min CI times already)
+
+### Quick recommended order (realistic next 2-4 weeks)
+
+1. Add proper env + config Zod validation + loading (huge safety net)
+2. Automate tsconfig references generation (saves the most pain long-term)
+3. Merge alias/import/barrel sync scripts + reduce watchers
+4. Write good documentation/examples for useful turbo commands  
+   (`--filter`, `--since`, `--graph`, `--dry`)
+5. Gradually introduce consistent domain folder naming in server and core
+
+These 5 things will give you ~80-85% of the architectural and DX value  
+while keeping the boilerplate relatively simple and easy to maintain/evolve.
+
+Everything else is nice-to-have polish that becomes valuable mainly when the team grows past 5-8 active developers or when the product becomes significantly more complex.
+
+---
+
 ## Missing Unit Tests
 
 - [x] `apps/server/src/app.ts` ✅ (app.test.ts created)

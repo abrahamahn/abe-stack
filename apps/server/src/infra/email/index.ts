@@ -11,5 +11,6 @@
 export type { EmailService, EmailOptions, EmailResult } from './types';
 export { ConsoleEmailService } from './consoleEmailService';
 export { SmtpEmailService } from './smtpEmailService';
+export { SmtpClient, type SmtpConfig, type SmtpMessage, type SmtpResult } from './smtp';
 export { emailTemplates } from './templates';
 export { createEmailService } from './factory';

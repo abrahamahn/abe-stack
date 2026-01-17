@@ -1,22 +1,21 @@
 // apps/server/src/infra/email/__tests__/email.test.ts
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
 import { ConsoleEmailService } from '@email/consoleEmailService';
 import { createEmailService } from '@email/factory';
 import { SmtpEmailService } from '@email/smtpEmailService';
 import { emailTemplates } from '@email/templates';
-import nodemailer from 'nodemailer';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { EmailConfig } from '@config';
 import type { EmailOptions } from '@email/types';
 
-// Mock nodemailer
-vi.mock('nodemailer', () => ({
-  default: {
-    createTransport: vi.fn(() => ({
-      sendMail: vi.fn(),
-    })),
+// Mock the SmtpClient
+const mockSend = vi.fn().mockResolvedValue({ success: true, messageId: 'smtp-123' });
+
+vi.mock('../smtp.js', () => ({
+  SmtpClient: class MockSmtpClient {
+    send = mockSend;
+    constructor(public config: unknown) {}
   },
 }));
 
@@ -75,7 +74,8 @@ describe('ConsoleEmailService', () => {
     await consoleService.send(testEmailOptions);
 
     expect(consoleSpy).toHaveBeenCalled();
-    const logCalls = (consoleSpy.mock.calls as string[][]).flat().join(' ');
+    const calls = (consoleSpy as unknown as { mock: { calls: unknown[][] } }).mock.calls;
+    const logCalls = calls.flat().map(String).join(' ');
     expect(logCalls).toContain(testEmailOptions.to);
     expect(logCalls).toContain(testEmailOptions.subject);
     expect(logCalls).toContain(testEmailOptions.text);
@@ -94,35 +94,19 @@ describe('ConsoleEmailService', () => {
 // ============================================================================
 
 describe('SmtpEmailService', () => {
-  let mockSendMail: ReturnType<typeof vi.fn>;
   let smtpService: SmtpEmailService;
   const config = createMockEmailConfig('smtp');
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSendMail = vi.fn().mockResolvedValue({ messageId: 'smtp-123' });
-    vi.mocked(nodemailer.createTransport).mockReturnValue({
-      sendMail: mockSendMail,
-    } as unknown as ReturnType<typeof nodemailer.createTransport>);
+    mockSend.mockResolvedValue({ success: true, messageId: 'smtp-123' });
     smtpService = new SmtpEmailService(config);
-  });
-
-  test('should create transporter with correct config', () => {
-    expect(nodemailer.createTransport).toHaveBeenCalledWith({
-      host: config.smtp.host,
-      port: config.smtp.port,
-      secure: config.smtp.secure,
-      auth: {
-        user: config.smtp.auth.user,
-        pass: config.smtp.auth.pass,
-      },
-    });
   });
 
   test('should send email with correct parameters', async () => {
     await smtpService.send(testEmailOptions);
 
-    expect(mockSendMail).toHaveBeenCalledWith({
+    expect(mockSend).toHaveBeenCalledWith({
       from: `"${config.from.name}" <${config.from.address}>`,
       to: testEmailOptions.to,
       subject: testEmailOptions.subject,
@@ -139,21 +123,12 @@ describe('SmtpEmailService', () => {
   });
 
   test('should return error result when send fails', async () => {
-    mockSendMail.mockRejectedValueOnce(new Error('SMTP connection failed'));
+    mockSend.mockResolvedValueOnce({ success: false, error: 'SMTP connection failed' });
 
     const result = await smtpService.send(testEmailOptions);
 
     expect(result.success).toBe(false);
     expect(result.error).toBe('SMTP connection failed');
-  });
-
-  test('should handle non-Error exceptions', async () => {
-    mockSendMail.mockRejectedValueOnce('Unknown failure');
-
-    const result = await smtpService.send(testEmailOptions);
-
-    expect(result.success).toBe(false);
-    expect(result.error).toBe('Unknown error');
   });
 });
 

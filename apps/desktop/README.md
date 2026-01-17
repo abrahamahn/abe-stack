@@ -19,7 +19,7 @@ This approach means:
 
 ```bash
 # Run with web dev server (recommended - run from monorepo root)
-pnpm dev:start
+pnpm dev
 
 # Run desktop standalone (starts its own renderer)
 pnpm --filter @abe-stack/desktop dev:standalone
@@ -42,17 +42,42 @@ pnpm --filter @abe-stack/desktop package
 
 ```
 desktop/
-├── electron/           # Electron main process
-│   ├── main.ts        # Main process entry, creates BrowserWindow
-│   ├── preload.ts     # Preload script for IPC
-│   └── tsconfig.json  # Electron-specific TS config
-├── src/               # Minimal renderer bootstrap
-│   └── main.tsx       # Entry point (loads web app or dev server)
-├── public/            # Static assets
-└── dist/              # Build output
-    ├── electron/      # Compiled main process
-    └── renderer/      # Bundled web app (production)
+├── src/
+│   ├── electron/           # Electron main process
+│   │   ├── main.ts         # Main process entry, creates BrowserWindow
+│   │   ├── preload.ts      # Preload script for IPC
+│   │   └── tsconfig.json   # Node/CommonJS config for electron
+│   ├── App.tsx             # Root React component
+│   └── main.tsx            # Renderer entry point
+├── tsconfig.json           # React/Vite config for renderer
+├── public/                 # Static assets
+└── dist/                   # Build output
+    ├── electron/           # Compiled main process (CommonJS)
+    └── renderer/           # Bundled web app (ESM)
 ```
+
+## TypeScript Configuration
+
+The desktop app uses two separate TypeScript configs due to different runtime environments:
+
+### Renderer (`tsconfig.json`)
+
+For React code running in Chromium (browser-like environment):
+
+- Extends `tsconfig.react.json` base config
+- Uses Vite for bundling (ESM)
+- Path alias `@/*` maps to `./src/*`
+- Excludes `src/electron/` (handled separately)
+- References `@abe-stack/core` and `@abe-stack/ui` packages
+
+### Electron Main (`src/electron/tsconfig.json`)
+
+For Node.js code running in Electron's main process:
+
+- Extends `tsconfig.node.json` base config
+- Outputs CommonJS to `dist/electron/`
+- Uses Node module resolution
+- Only includes `*.ts` files in the electron directory
 
 ## Packaging
 
@@ -64,8 +89,8 @@ The app can be built for multiple platforms:
 
 ## Adding Desktop-Specific Features
 
-1. Add IPC handlers in `electron/main.ts`
-2. Expose APIs via `electron/preload.ts`
+1. Add IPC handlers in `src/electron/main.ts`
+2. Expose APIs via `src/electron/preload.ts`
 3. Use from renderer via `window.electronAPI`
 
 Examples:

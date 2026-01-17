@@ -27,7 +27,6 @@
     "../../coverage",
     "../../**/__tests__",
     "../../**/*.test.ts",
-    "../../**/*.test.tsx",
-    "../../apps/server/src/services/email.ts"
+    "../../**/*.test.tsx"
   ]
 }

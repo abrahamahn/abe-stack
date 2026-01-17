@@ -33,9 +33,7 @@ function DialogDemo(): ReactElement {
   const [open, setOpen] = useState(false);
   return (
     <Dialog.Root open={open} onChange={setOpen}>
-      <Dialog.Trigger>
-        <Button>Open Dialog</Button>
-      </Dialog.Trigger>
+      <Dialog.Trigger className="btn btn-primary btn-medium">Open Dialog</Dialog.Trigger>
       <Dialog.Content title="Dialog Title">
         <Text>This is the dialog content. Press Escape or click outside to close.</Text>
       </Dialog.Content>

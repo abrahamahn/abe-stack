@@ -8,6 +8,193 @@ All notable changes to this project are documented here. Format follows semantic
 
 ## 2026-01-17
 
+### Linting Config Single Source of Truth
+
+- Added `config/linting.json` as the canonical linting configuration
+- Added `tools/sync/sync-linting.ts` to sync `package.json` and `.vscode/settings.json`
+- Wired `pnpm sync:linting` into `pre-commit` to keep lint-staged and editor settings consistent
+
+### TypeScript Project Reference Automation
+
+- Added `tools/sync/sync-tsconfig.ts` to auto-generate project references
+- Added `pnpm sync:tsconfig` and `pnpm sync:tsconfig:check` scripts
+- Hooked `pnpm sync:tsconfig` into `pre-commit` to keep references consistent
+
+### Build System Improvements
+
+Fixed incremental build caching issues that caused stale builds when `dist` was deleted but `tsconfig.tsbuildinfo` remained:
+
+- **Smart build scripts** - All package build scripts now auto-clean orphaned tsbuildinfo:
+  - Added `[ -d dist ] || rm -f tsconfig.tsbuildinfo` check before `tsc --build`
+  - Applies to: `packages/core`, `packages/sdk`, `packages/ui`
+
+- **Consistent clean scripts** - All packages now remove both `dist` and `tsconfig.tsbuildinfo`
+
+- **Server build/type-check separation** - Created `tsconfig.build.json` for builds (excludes tests) while `tsconfig.json` includes tests for type-checking. Fixed mock type error in `smtp.test.ts`
+
+- **Desktop package reduction** - Reduced devDependencies from 7 to 2 (`electron`, `electron-builder`)
+
+- **Web package reduction** - Reduced devDependencies from 8 to 1 (`@types/dompurify`)
+
+- **Shared types hoisting** - Moved `@types/react` and `@types/react-dom` to root package.json
+
+### Documentation Refactor
+
+Refactored the large `config-setup.md` (1633 lines) into three focused documents:
+
+- **`docs/dev/config-setup.md`** (~725 lines) - Core configuration:
+  - Monorepo structure, pnpm workspace, dependency flow
+  - TypeScript configuration hierarchy and project references
+  - Path alias system and centralization
+  - Build system with Turborepo pipeline
+  - Package exports (subpath exports), tsc-alias
+  - Vite configuration (web and desktop)
+  - Caching strategy (Turbo, ESLint, Prettier, TypeScript)
+  - Database configuration (Drizzle ORM)
+  - Server domain configuration pattern
+  - Quick reference with 25+ config file locations
+
+- **`docs/dev/sync-scripts.md`** (~450 lines) - DX automation scripts:
+  - Execution modes (sync, check, watch) and automation triggers
+  - `sync-path-aliases.ts`: Scope tables, depth limits, excluded names
+  - `sync-file-headers.ts`: File extensions, shebang handling
+  - `sync-import-aliases.ts`: Barrel file detection, re-export preservation
+  - `sync-test-folders.ts`: Code detection vs barrel-only directories
+  - `sync-barrel-exports.ts`: Export parsing, auto-generated markers
+  - `sync-css-theme.ts`: Hash-based caching, Prettier formatting
+  - Manual vs automatic execution summary table
+
+- **`docs/dev/dev-environment.md`** (~350 lines) - Development & CI:
+  - Development workflow and `pnpm dev` internals
+  - Testing configuration (Vitest)
+  - E2E testing (Playwright)
+  - Linting & formatting (ESLint, Prettier)
+  - Git hooks (simple-git-hooks, lint-staged)
+  - Docker configuration
+  - CI/CD configuration (GitHub Actions)
+  - Troubleshooting guide and debug commands
+
+Updated `docs/INDEX.md` with new document references and keyword routing.
+
+### Documentation Review & Consistency Fixes
+
+Comprehensive review of all 36 markdown files to ensure consistency with current codebase:
+
+- **Package Naming Fixes:**
+  - Fixed `@abeahn/ui` → `@abe-stack/ui` in `packages/ui/README.md`
+  - Fixed `@abeahn/shared` → `@abe-stack/core` in `packages/ui/README.md`
+  - Fixed `@abeahn-ui` → `@abe-stack/ui` in `docs/dev/testing.md`
+  - Fixed `@abeahn/ui` → `@abe-stack/ui` in `packages/ui/docs/_TEMPLATE.md`
+
+- **Security Documentation Updates:**
+  - Fixed bcrypt → Argon2id in `docs/README.md` (reflects actual implementation)
+  - Updated `docs/todo/security/index.md` to reflect completed Phase 1 features
+  - Updated password hashing references throughout security docs
+
+- **Test Count Updates:**
+  - Updated test count from `1000+` to `1900+` in `docs/README.md`
+  - Updated test coverage table in `docs/dev/testing.md`:
+    - packages/ui: 78 files, 772+ tests
+    - packages/core: 8 files, 280+ tests
+    - packages/sdk: 5 files, 48+ tests
+    - apps/web: 25 files, 337+ tests
+    - apps/server: 36 files, 508+ tests
+
+- **Path Reference Fixes in `docs/INDEX.md`:**
+  - Fixed `dev/use-cases.md` → `agent/use-cases.md`
+  - Fixed `ui/todo.md` → `todo/ui/todo.md`
+  - Updated Scope Guide with correct directory descriptions
+
+- **Date Updates:**
+  - Updated all outdated dates (January 10/15) to January 17, 2026 across:
+    - `docs/ROADMAP.md`
+    - `docs/INDEX.md`
+    - `docs/todo/security/*.md`
+    - `docs/todo/realtime/*.md`
+    - `docs/todo/ui/todo.md`
+
+- **Testing Documentation:**
+  - Updated test example syntax from Jest to Vitest in `packages/ui/README.md`
+  - Added `vi.fn()`, `vi.mock()` patterns to examples
+
+### Build & Cache Fixes
+
+- **Vite Glob Import Fix:**
+  - Fixed `apps/web/src/features/demo/utils/docs.ts` glob imports
+  - Changed from package paths (`@abe-stack/ui/docs/...`) to relative paths (`../../../../../../packages/ui/docs/...`)
+  - Package exports don't include docs folder, so relative paths are required for Vite glob imports
+
+- **Desktop Build Fix:**
+  - Cleaned up stray compiled `.js` and `.js.map` files from `apps/desktop/src/`
+  - These files were causing Rollup to fail with "default is not exported by src/App.js"
+  - Added patterns to `.gitignore` to prevent future accidental commits
+
+- **Turbo Cache Fix:**
+  - Cleared stale `.turbo` cache that was caching build errors
+  - Full rebuild passes: 18/18 tasks successful, 1900+ tests passing
+
+### Documentation Consolidation
+
+- **Deleted `apps/server/TODO.md`:**
+  - Completed items (Phases 1-4, MVP) were already documented in CHANGELOG
+  - Uncompleted items are covered by `docs/TODO.md` (more detailed product roadmap)
+  - Advanced features (CHET-Stack) are in `docs/ROADMAP.md` Milestone 2
+  - Security features (MFA, RBAC) are in `docs/ROADMAP.md` Milestone 3
+  - Single source of truth: `docs/TODO.md` for product features, `docs/ROADMAP.md` for architectural milestones
+
+### Barrel Export Conversion to Explicit Named Exports
+
+Converted all `export * from` barrel exports to explicit named exports across the codebase for better tree-shaking and clearer dependency tracking.
+
+- **Sync Script Improvements (`sync-barrel-exports.ts`):**
+  - Now processes package `src` directories (skips app `src` directories)
+  - Added support for parsing async functions (`export async function`)
+  - Added support for parsing re-exports (`export { ... } from '...'`)
+  - Fixed duplicate export detection when building parent barrels
+
+- **Sync Script Improvements (`sync-import-aliases.ts`):**
+  - Added multi-line export tracking to preserve re-exports in index files
+  - Added `isMultiLineExportStart()` and `isMultiLineExportEnd()` helpers
+  - Re-export lines in index.ts files now keep relative imports instead of being converted to path aliases
+
+- **Converted Index Files:**
+  - `packages/core/src/index.ts` - All exports now explicit
+  - `packages/core/src/contracts/index.ts` - All exports now explicit
+  - `packages/core/src/validation/index.ts` - All exports now explicit
+  - `packages/sdk/src/index.ts` - All exports now explicit
+  - `packages/ui/src/index.ts` - Manually converted (preserves namespace exports like `export * as elements`)
+  - `packages/ui/src/layouts/index.ts` - All exports now explicit
+  - `apps/web/src/features/index.ts` - All exports now explicit
+  - `apps/web/src/features/demo/index.ts` - All exports now explicit
+
+- **ESLint and Build Fixes:**
+  - Added `apps/desktop/src/**/*.js` and `*.js.map` to ESLint ignore (compiled output)
+  - Added same patterns to `.gitignore` to prevent accidental commits of compiled files
+  - Fixed `MockInstance` type imports in test files for proper type safety
+
+### Lint Error Fixes
+
+Fixed all lint errors throughout the codebase (reduced from 90 to 0 errors):
+
+- **Non-null Assertion Fixes:**
+  - `jwt.test.ts` - Replaced `!` assertions with proper conditional checks
+  - `static.test.ts` - Added proper null checks for mock call results
+  - `security.test.ts` - Used optional chaining with conditional blocks
+
+- **Unsafe Type Fixes:**
+  - `security.test.ts` - Added proper type assertions for mock function results
+  - `service.test.ts` (auth) - Typed drizzle mock arguments as `unknown[]`
+  - `users/service.test.ts` - Typed drizzle mock parameters as `unknown`
+
+- **Import Order Fixes:**
+  - `middleware.test.ts` - Moved mocked imports before vitest imports
+  - `service.test.ts` (auth) - Reorganized imports in proper order
+
+- **Desktop Build Configuration:**
+  - Created separate `src/electron/tsconfig.json` for electron files
+  - Updated `eslint.config.ts` to use electron-specific tsconfig
+  - Simplified build scripts to use the new tsconfig
+
 ### Build and Test Caching
 
 - Added a cached theme CSS build step that skips regeneration when theme inputs are unchanged
@@ -17,6 +204,8 @@ All notable changes to this project are documented here. Format follows semantic
 - Fixed theme CSS generator typing to support both light and dark token sets
 - Fixed sync-import-aliases JSON helper typing and cleaned AGENTS markdown lint issues
 - Pre-commit hooks now run sync scripts (including theme sync) before linting and type-checks
+- Moved desktop Electron sources under `apps/desktop/src/electron` and removed the extra tsconfig
+- Disabled auto-opening DevTools in desktop dev to avoid Autofill protocol warnings
 
 ### Comprehensive Server Test Coverage
 
@@ -185,9 +374,20 @@ Major refactoring of the server application completed, including real-time capab
 
 - **Infrastructure Enhancements:**
   - `infra/database/client.ts` - Database client management
+  - `infra/database/` - Optimistic locking utilities for version-based concurrent updates
   - `infra/email/` - Refactored email service with shared templates
+  - `infra/email/` - Email template layout helper for consistent HTML emails
   - `infra/storage/` - Storage providers (Local/S3) with static file serving for local dev
   - `infra/security/` - Security lockout and types
+  - `infra/pubsub/` - `publishAfterWrite` helper for post-write notifications
+  - `infra/rate-limit/` - Rate limiter with custom store support
+
+- **Authentication Enhancements:**
+  - Password strength validation with feedback (zxcvbn-based scoring)
+  - Service container pattern (`App` class) for dependency management
+
+- **Logging:**
+  - Pino structured logging with request context
 
 - **Module Refactoring:**
   - `modules/` - Handlers refactored to use centralized `preHandler` middleware for auth

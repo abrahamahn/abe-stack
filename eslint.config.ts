@@ -40,6 +40,8 @@ export default [
       '**/vitest.config.js',
       'tools/sync/sync-css-theme.ts',
       'config/drizzle.config.ts',
+      'apps/desktop/src/**/*.js',
+      'apps/desktop/src/**/*.js.map',
     ],
   },
   jsConfigs.recommended ?? {},
@@ -133,9 +135,19 @@ export default [
   },
   {
     files: ['apps/desktop/**/*.{ts,tsx,cts,mts}'],
+    ignores: ['apps/desktop/src/electron/**/*'],
     languageOptions: {
       parserOptions: {
         project: ['./apps/desktop/tsconfig.json'],
+        tsconfigRootDir,
+      },
+    },
+  },
+  {
+    files: ['apps/desktop/src/electron/**/*.{ts,cts,mts}'],
+    languageOptions: {
+      parserOptions: {
+        project: ['./apps/desktop/src/electron/tsconfig.json'],
         tsconfigRootDir,
       },
     },

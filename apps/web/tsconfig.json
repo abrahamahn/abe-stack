@@ -35,10 +35,10 @@
   "exclude": ["node_modules"],
   "references": [
     {
-      "path": "../../packages/sdk"
+      "path": "../../packages/core"
     },
     {
-      "path": "../../packages/core"
+      "path": "../../packages/sdk"
     },
     {
       "path": "../../packages/ui"

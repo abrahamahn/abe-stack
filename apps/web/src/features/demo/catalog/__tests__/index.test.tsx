@@ -1,59 +1,44 @@
 // apps/web/src/features/demo/catalog/__tests__/index.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import {
-  componentCatalog,
-  getAllCategories,
-  getComponentsByCategory,
-  getTotalComponentCount,
+  clearCategoryCache,
+  getAvailableCategories,
+  getCachedCategory,
+  getCategoryState,
+  getLoadedComponentCount,
+  isCategoryLoaded,
+  loadCategory,
+  preloadCategories,
 } from '../index';
 
-import type { ComponentDemo } from '@demo/types';
+import type { ComponentCategory, ComponentDemo } from '@demo/types';
 
-describe('Catalog Index', () => {
-  describe('componentCatalog', () => {
-    it('exports a valid component catalog object', () => {
-      expect(componentCatalog).toBeDefined();
-      expect(typeof componentCatalog).toBe('object');
-    });
-
-    it('combines all catalog types', () => {
-      const components = getComponentsByCategory('components');
-      const elements = getComponentsByCategory('elements');
-      const layouts = getComponentsByCategory('layouts');
-
-      expect(components.length).toBeGreaterThan(0);
-      expect(elements.length).toBeGreaterThan(0);
-      expect(layouts.length).toBeGreaterThan(0);
-    });
+describe('Catalog Index (Lazy Loading)', () => {
+  afterEach(() => {
+    clearCategoryCache();
   });
 
-  describe('getAllCategories', () => {
+  describe('getAvailableCategories', () => {
     it('returns an array of categories', () => {
-      const categories = getAllCategories();
+      const categories = getAvailableCategories();
       expect(Array.isArray(categories)).toBe(true);
       expect(categories.length).toBeGreaterThan(0);
     });
 
-    it('returns unique categories', () => {
-      const categories = getAllCategories();
-      const uniqueCategories = [...new Set(categories)];
-      expect(categories).toEqual(uniqueCategories);
-    });
-
     it('includes expected categories', () => {
-      const categories = getAllCategories();
-      expect(categories).toContain('components');
+      const categories = getAvailableCategories();
       expect(categories).toContain('elements');
+      expect(categories).toContain('components');
       expect(categories).toContain('layouts');
     });
   });
 
-  describe('getComponentsByCategory', () => {
-    it('returns components for "components" category', () => {
-      const components = getComponentsByCategory('components');
+  describe('loadCategory', () => {
+    it('loads components category', async () => {
+      const components = await loadCategory('components');
       expect(Array.isArray(components)).toBe(true);
       expect(components.length).toBeGreaterThan(0);
       components.forEach((component: ComponentDemo) => {
@@ -61,8 +46,8 @@ describe('Catalog Index', () => {
       });
     });
 
-    it('returns components for "elements" category', () => {
-      const elements = getComponentsByCategory('elements');
+    it('loads elements category', async () => {
+      const elements = await loadCategory('elements');
       expect(Array.isArray(elements)).toBe(true);
       expect(elements.length).toBeGreaterThan(0);
       elements.forEach((component: ComponentDemo) => {
@@ -70,8 +55,8 @@ describe('Catalog Index', () => {
       });
     });
 
-    it('returns components for "layouts" category', () => {
-      const layouts = getComponentsByCategory('layouts');
+    it('loads layouts category', async () => {
+      const layouts = await loadCategory('layouts');
       expect(Array.isArray(layouts)).toBe(true);
       expect(layouts.length).toBeGreaterThan(0);
       layouts.forEach((component: ComponentDemo) => {
@@ -79,32 +64,82 @@ describe('Catalog Index', () => {
       });
     });
 
-    it('returns empty array for invalid category', () => {
-      const components = getComponentsByCategory('nonexistent');
-      expect(Array.isArray(components)).toBe(true);
-      expect(components.length).toBe(0);
+    it('caches loaded categories', async () => {
+      await loadCategory('elements');
+      expect(isCategoryLoaded('elements')).toBe(true);
+      expect(getCachedCategory('elements')).not.toBeNull();
+    });
+
+    it('returns cached data on subsequent calls', async () => {
+      const first = await loadCategory('elements');
+      const second = await loadCategory('elements');
+      expect(first).toBe(second); // Same reference
     });
   });
 
-  describe('getTotalComponentCount', () => {
-    it('returns the total count of all components', () => {
-      const totalCount = getTotalComponentCount();
-      expect(typeof totalCount).toBe('number');
-      expect(totalCount).toBeGreaterThan(0);
+  describe('preloadCategories', () => {
+    it('preloads multiple categories', async () => {
+      await preloadCategories(['elements', 'components']);
+      expect(isCategoryLoaded('elements')).toBe(true);
+      expect(isCategoryLoaded('components')).toBe(true);
+    });
+  });
+
+  describe('getCategoryState', () => {
+    it('returns unloaded state initially', () => {
+      const state = getCategoryState('elements');
+      expect(state.loaded).toBe(false);
+      expect(state.loading).toBe(false);
+      expect(state.error).toBeNull();
     });
 
-    it('equals the sum of all category counts', () => {
-      const totalCount = getTotalComponentCount();
-      const components = getComponentsByCategory('components');
-      const elements = getComponentsByCategory('elements');
-      const layouts = getComponentsByCategory('layouts');
+    it('returns loaded state after loading', async () => {
+      await loadCategory('elements');
+      const state = getCategoryState('elements');
+      expect(state.loaded).toBe(true);
+      expect(state.loading).toBe(false);
+      expect(state.error).toBeNull();
+    });
+  });
 
-      expect(totalCount).toBe(components.length + elements.length + layouts.length);
+  describe('getLoadedComponentCount', () => {
+    it('returns 0 when no categories loaded', () => {
+      expect(getLoadedComponentCount()).toBe(0);
     });
 
-    it('equals the number of keys in componentCatalog', () => {
-      const totalCount = getTotalComponentCount();
-      expect(totalCount).toBe(Object.keys(componentCatalog).length);
+    it('returns count after loading categories', async () => {
+      await loadCategory('elements');
+      expect(getLoadedComponentCount()).toBeGreaterThan(0);
+    });
+
+    it('accumulates count across categories', async () => {
+      await loadCategory('elements');
+      const elementsCount = getLoadedComponentCount();
+
+      await loadCategory('components');
+      const totalCount = getLoadedComponentCount();
+
+      expect(totalCount).toBeGreaterThan(elementsCount);
+    });
+  });
+
+  describe('clearCategoryCache', () => {
+    it('clears specific category', async () => {
+      await loadCategory('elements');
+      expect(isCategoryLoaded('elements')).toBe(true);
+
+      clearCategoryCache('elements');
+      expect(isCategoryLoaded('elements')).toBe(false);
+    });
+
+    it('clears all categories when no argument', async () => {
+      await preloadCategories(['elements', 'components'] as ComponentCategory[]);
+      expect(isCategoryLoaded('elements')).toBe(true);
+      expect(isCategoryLoaded('components')).toBe(true);
+
+      clearCategoryCache();
+      expect(isCategoryLoaded('elements')).toBe(false);
+      expect(isCategoryLoaded('components')).toBe(false);
     });
   });
 });
