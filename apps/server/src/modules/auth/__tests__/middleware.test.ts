@@ -1,6 +1,4 @@
 // apps/server/src/modules/auth/__tests__/middleware.test.ts
-import { beforeEach, describe, expect, test, vi } from 'vitest';
-
 import {
   createAuthGuard,
   createRequireAuth,
@@ -8,6 +6,8 @@ import {
   extractTokenPayload,
   isAdmin,
 } from '@auth/middleware';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+
 
 import type { UserRole } from '@abe-stack/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';

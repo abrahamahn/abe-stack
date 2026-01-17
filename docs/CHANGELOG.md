@@ -8,6 +8,27 @@ All notable changes to this project are documented here. Format follows semantic
 
 ## 2026-01-17
 
+### Sync Scripts Improvements
+
+- **Path Alias Generation (`sync-path-aliases.ts`):**
+  - Added `MAX_ALIAS_DEPTH=3` to limit alias depth (prevents overly nested aliases)
+  - Added `EXCLUDED_ALIAS_NAMES` set to skip common directory names that cause conflicts:
+    - `utils`, `helpers`, `types`, `constants` are now excluded from alias generation
+  - Shallower directories now take priority for duplicate directory names
+  - Fixed recursive scanning to properly handle nested directories
+
+- **Import Alias Handling:**
+  - Auth module now uses relative imports (`./utils`) instead of `@utils` alias
+  - Barrel files (index.ts) skip alias conversion to maintain relative re-exports
+  - Same-directory imports (`./foo`) are preserved as relative
+
+- **All Sync Scripts Exclude `dist` Folders:**
+  - `sync-path-aliases.ts` - `SKIP_DIRS` includes `dist`
+  - `sync-barrel-exports.ts` - `EXCLUDED_DIRS` includes `dist`
+  - `sync-import-aliases.ts` - `EXCLUDED_DIRS` includes `dist`
+  - `sync-test-folders.ts` - `EXCLUDED_DIRS` includes `dist`
+  - `sync-file-headers.ts` - `EXCLUDE_DIRS` includes `dist`
+
 ### Path Alias & Build Configuration Fixes
 
 - **Vitest/Vite Alias Fixes:**
@@ -18,7 +39,7 @@ All notable changes to this project are documented here. Format follows semantic
 
 - **TypeScript Path Fixes:**
   - Fixed `apps/web/tsconfig.json`: `@pages` now points to `./src/pages` (was incorrectly pointing to `./src/features/auth/pages`)
-  - Fixed `apps/server/tsconfig.json`: `@utils` now points to `./src/modules/auth/utils` (was incorrectly pointing to `./src/infra/database/utils`)
+  - Removed `@utils` alias from server tsconfig (now excluded by sync script)
 
 - **Code Fixes:**
   - Fixed `apps/web/src/features/demo/utils/lazyDocs.ts`: Changed glob imports from package alias (`@abe-stack/ui/docs/...`) to relative paths (`../../../../../../packages/ui/docs/...`) since UI package exports don't include docs folder

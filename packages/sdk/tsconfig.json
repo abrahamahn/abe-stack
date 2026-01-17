@@ -3,34 +3,18 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "lib": [
-      "ES2022",
-      "DOM"
-    ],
+    "lib": ["ES2022", "DOM"],
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
     "baseUrl": "./",
     "paths": {
-      "@abe-stack/core": [
-        "../core/src"
-      ],
-      "@abe-stack/core/*": [
-        "../core/src/*"
-      ],
-      "@persistence": [
-        "./src/persistence"
-      ],
-      "@persistence/*": [
-        "./src/persistence/*"
-      ]
+      "@abe-stack/core": ["../core/src"],
+      "@abe-stack/core/*": ["../core/src/*"],
+      "@persistence": ["./src/persistence"],
+      "@persistence/*": ["./src/persistence/*"]
     }
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ],
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
   "references": [
     {
       "path": "../core"

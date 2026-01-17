@@ -2,7 +2,6 @@
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { useCallback } from 'react';
 
-
 export type PanelState = {
   visible: boolean;
   size: number;

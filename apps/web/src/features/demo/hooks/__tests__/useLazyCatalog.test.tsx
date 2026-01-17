@@ -329,9 +329,7 @@ describe('useLazyCatalog', () => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.totalLoaded).toBe(
-        initialCount + mockComponentComponents.length,
-      );
+      expect(result.current.totalLoaded).toBe(initialCount + mockComponentComponents.length);
     });
   });
 
@@ -387,9 +385,7 @@ describe('useLazyCatalog', () => {
       });
 
       await waitFor(() => {
-        expect(result.current.totalLoaded).toBe(
-          initialCount + mockLayoutComponents.length,
-        );
+        expect(result.current.totalLoaded).toBe(initialCount + mockLayoutComponents.length);
       });
     });
   });

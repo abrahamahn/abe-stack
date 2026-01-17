@@ -84,10 +84,7 @@ describe('LocalStorageProvider', () => {
       await provider.upload(params);
 
       // The normalizeStorageKey with stripParentRefs=true removes ".." sequences
-      expect(writeFile).toHaveBeenCalledWith(
-        expect.not.stringContaining('..'),
-        params.body,
-      );
+      expect(writeFile).toHaveBeenCalledWith(expect.not.stringContaining('..'), params.body);
     });
 
     it('should handle string body', async () => {

@@ -2,7 +2,6 @@
 import { users } from '@schema/users';
 import { boolean, index, inet, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
-
 /**
  * Refresh token families for reuse detection
  * When a refresh token is reused after rotation, we revoke the entire family

@@ -1,7 +1,7 @@
 // packages/sdk/src/persistence/__tests__/mutationQueue.test.ts
+import { createMutationQueue, MutationQueue } from '@persistence/mutationQueue';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { createMutationQueue, MutationQueue } from '@persistence/mutationQueue';
 
 // Mock localStorage
 const mockLocalStorage = (() => {
@@ -53,7 +53,9 @@ describe('MutationQueue', () => {
     });
 
     test('should restore queue from localStorage', () => {
-      const existingQueue = [{ id: '1', type: 'test', data: {}, timestamp: Date.now(), retries: 0 }];
+      const existingQueue = [
+        { id: '1', type: 'test', data: {}, timestamp: Date.now(), retries: 0 },
+      ];
       mockLocalStorage.setItem('abe-stack-mutation-queue', JSON.stringify(existingQueue));
 
       queue = new MutationQueue();

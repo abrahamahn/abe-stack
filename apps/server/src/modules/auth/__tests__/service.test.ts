@@ -5,8 +5,7 @@
  * Tests the auth service business logic by mocking database and utility functions.
  * These tests verify the orchestration logic, error handling, and token management.
  */
-import { beforeEach, describe, expect, test, vi } from 'vitest';
-
+import { authenticateUser, logoutUser, refreshUserTokens, registerUser } from '@auth/service';
 import {
   AccountLockedError,
   EmailAlreadyExistsError,
@@ -14,8 +13,17 @@ import {
   InvalidTokenError,
   WeakPasswordError,
 } from '@shared';
+import {
+  createAccessToken,
+  createRefreshTokenFamily,
+  hashPassword,
+  needsRehash,
+  rotateRefreshToken,
+  verifyPasswordSafe,
+} from '@utils/index';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { authenticateUser, logoutUser, refreshUserTokens, registerUser } from '@auth/service';
+
 
 import type { AuthConfig } from '@config';
 import type { DbClient } from '@infra';
@@ -66,14 +74,6 @@ import {
   logLoginAttempt,
   withTransaction,
 } from '@infra';
-import {
-  createAccessToken,
-  createRefreshTokenFamily,
-  hashPassword,
-  needsRehash,
-  rotateRefreshToken,
-  verifyPasswordSafe,
-} from '@utils/index';
 
 // ============================================================================
 // Test Constants
@@ -312,9 +312,9 @@ describe('authenticateUser', () => {
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
     vi.mocked(getAccountLockoutStatus).mockResolvedValue({ isLocked: false, failedAttempts: 1 });
 
-    await expect(
-      authenticateUser(db, TEST_CONFIG, email, password, ipAddress),
-    ).rejects.toThrow(InvalidCredentialsError);
+    await expect(authenticateUser(db, TEST_CONFIG, email, password, ipAddress)).rejects.toThrow(
+      InvalidCredentialsError,
+    );
   });
 
   test('should throw InvalidCredentialsError when password is wrong', async () => {

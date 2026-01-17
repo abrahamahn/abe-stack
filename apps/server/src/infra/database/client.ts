@@ -3,7 +3,6 @@ import * as schema from '@schema/index';
 import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 
-
 type DbEnv = Record<string, string | number | boolean | undefined>;
 type GlobalWithDb = typeof globalThis & {
   db?: PostgresJsDatabase<typeof schema>;

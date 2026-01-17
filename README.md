@@ -49,6 +49,11 @@ https://github.com/abrahamahn/abe-stack
 | `sync-test-folders`   | Creates `__tests__/` folders for code directories              |
 | `sync-barrel-exports` | Auto-creates and updates `index.ts` barrels                    |
 
+**Path alias configuration:**
+- Max depth: 3 levels from `src/` (e.g., `src/features/auth/components`)
+- Excluded names: `utils`, `helpers`, `types`, `constants` (use relative imports instead)
+- Shallower directories win for duplicate names
+
 ### Repository Layout
 
 ```

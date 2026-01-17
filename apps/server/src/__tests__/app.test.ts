@@ -71,9 +71,10 @@ vi.mock('@/server', () => ({
   listen: vi.fn(() => Promise.resolve()),
 }));
 
+import type { AppConfig } from '@config/index';
+
 import { App, createApp } from '@/app';
 
-import type { AppConfig } from '@config/index';
 
 describe('App', () => {
   const mockConfig: AppConfig = {

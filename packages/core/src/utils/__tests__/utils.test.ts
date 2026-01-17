@@ -1,7 +1,7 @@
 // packages/core/src/utils/__tests__/utils.test.ts
+import { addAuthHeader, createTokenStore } from '@utils/index';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
-import { addAuthHeader, createTokenStore } from '@utils/index';
 
 describe('addAuthHeader', () => {
   test('should add Authorization header when token is provided', () => {

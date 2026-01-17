@@ -1,7 +1,7 @@
 // packages/sdk/src/persistence/__tests__/storage.test.ts
+import { localStorageQueue } from '@persistence/storage';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { localStorageQueue } from '@persistence/storage';
 
 // Mock localStorage
 const createMockLocalStorage = () => {
@@ -70,7 +70,7 @@ describe('localStorageQueue', () => {
         configurable: true,
       });
       // Should not throw
-      expect(() => localStorageQueue.set('test')).not.toThrow();
+      expect(() => { localStorageQueue.set('test'); }).not.toThrow();
     });
   });
 
@@ -88,7 +88,7 @@ describe('localStorageQueue', () => {
         configurable: true,
       });
       // Should not throw
-      expect(() => localStorageQueue.remove()).not.toThrow();
+      expect(() => { localStorageQueue.remove(); }).not.toThrow();
     });
   });
 });

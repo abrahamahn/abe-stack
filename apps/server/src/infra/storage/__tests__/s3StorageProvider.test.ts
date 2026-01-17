@@ -231,11 +231,9 @@ describe('S3StorageProvider', () => {
 
       await provider.getSignedUrl('file.txt', 7200);
 
-      expect(mockGetSignedUrl).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        { expiresIn: 7200 },
-      );
+      expect(mockGetSignedUrl).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
+        expiresIn: 7200,
+      });
     });
 
     it('should use configured default expiration', async () => {
@@ -247,11 +245,9 @@ describe('S3StorageProvider', () => {
 
       await provider.getSignedUrl('file.txt');
 
-      expect(mockGetSignedUrl).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        { expiresIn: 1800 },
-      );
+      expect(mockGetSignedUrl).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
+        expiresIn: 1800,
+      });
     });
 
     it('should normalize keys by stripping leading slashes', async () => {

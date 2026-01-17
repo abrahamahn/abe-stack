@@ -2,7 +2,6 @@
 import { useThemeMode } from '@hooks/useThemeMode';
 import { createContext, useContext } from 'react';
 
-
 import type { ThemeMode, UseThemeModeReturn } from '@hooks/useThemeMode';
 import type { ReactNode, ReactElement } from 'react';
 

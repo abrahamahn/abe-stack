@@ -34,12 +34,9 @@ let mockDocsCache: Map<string, string>;
 
 // Mock the lazyDocs module - use path alias to match linter-converted imports
 vi.mock('@demo/utils/lazyDocs', () => {
-  const normalizeKey = (value: string): string =>
-    value.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const normalizeKey = (value: string): string => value.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-  const buildPathLookup = (
-    modules: Record<string, () => Promise<string>>,
-  ): Map<string, string> => {
+  const buildPathLookup = (modules: Record<string, () => Promise<string>>): Map<string, string> => {
     const lookup = new Map<string, string>();
     for (const path of Object.keys(modules)) {
       const filename = path.split('/').pop()?.replace('.md', '') || '';

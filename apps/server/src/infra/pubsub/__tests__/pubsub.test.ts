@@ -2,7 +2,6 @@
 import { createPostgresPubSub, publishAfterWrite, SubKeys, SubscriptionManager } from '@pubsub';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-
 import type { PostgresPubSub, SubscriptionKey, WebSocket } from '@pubsub';
 
 // ============================================================================

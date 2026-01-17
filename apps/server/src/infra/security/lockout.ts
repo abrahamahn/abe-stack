@@ -10,7 +10,6 @@ import { logAccountUnlockedEvent } from '@security/events';
 import { MAX_PROGRESSIVE_DELAY_MS, PROGRESSIVE_DELAY_WINDOW_MS } from '@shared/constants';
 import { and, count, eq, gte } from 'drizzle-orm';
 
-
 import type { DbClient } from '@database';
 import type { LockoutConfig, LockoutStatus } from '@security/types';
 

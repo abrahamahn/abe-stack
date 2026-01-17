@@ -1,21 +1,18 @@
 // apps/server/src/infra/websocket/__tests__/websocket.test.ts
-import type { FastifyInstance, FastifyRequest } from 'fastify';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import websocketPlugin from '@fastify/websocket';
 import { verifyToken } from '@modules/auth/utils/jwt';
-import type { AppContext } from '@shared';
-
 import { registerWebSocket } from '@websocket/websocket';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+
+import type { AppContext } from '@shared';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
 
 // Types for mock socket handlers
 type SocketEventHandler = (data?: unknown) => void;
 type MockOnCalls = Array<[string, SocketEventHandler]>;
 
-function getMockHandler(
-  mockCalls: MockOnCalls,
-  eventName: string,
-): SocketEventHandler {
+function getMockHandler(mockCalls: MockOnCalls, eventName: string): SocketEventHandler {
   const found = mockCalls.find((call) => call[0] === eventName);
   if (!found) throw new Error(`Handler for '${eventName}' not found`);
   return found[1];

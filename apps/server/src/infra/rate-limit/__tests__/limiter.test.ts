@@ -1,12 +1,7 @@
 // apps/server/src/infra/rate-limit/__tests__/limiter.test.ts
+import { createRateLimiter, MemoryStore, RateLimiter, RateLimitPresets } from '@rate-limit/limiter';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import {
-  createRateLimiter,
-  MemoryStore,
-  RateLimiter,
-  RateLimitPresets,
-} from '@rate-limit/limiter';
 
 describe('MemoryStore', () => {
   let store: MemoryStore;

@@ -2,21 +2,12 @@
   "extends": "../../config/ts/tsconfig.react.json",
   "compilerOptions": {
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     },
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.desktop.tsbuildinfo"
   },
-  "include": [
-    "src/**/*",
-    "electron/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "__tests__"
-  ],
+  "include": ["src/**/*", "electron/**/*"],
+  "exclude": ["node_modules", "dist", "__tests__"],
   "references": [
     {
       "path": "../../packages/core"
