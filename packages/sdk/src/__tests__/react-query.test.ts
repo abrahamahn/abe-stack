@@ -3,22 +3,25 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { createReactQueryClient } from '../react-query';
 
+import type { ApiContract } from '@abe-stack/core';
+import type { TsRestReactQueryClient } from '@ts-rest/react-query';
+
 // Mock @ts-rest/react-query
 vi.mock('@ts-rest/react-query', () => ({
-  initQueryClient: vi.fn((contract, options) => {
+  initQueryClient: vi.fn((contract: ApiContract, options: object) => {
     // Return a mock client that captures the api function
     return {
       _contract: contract,
       _options: options,
       // Expose api for testing
       _api: options.api,
-    };
+    } as unknown as TsRestReactQueryClient<ApiContract>;
   }),
 }));
 
 // Mock @abe-stack/core
 vi.mock('@abe-stack/core', () => ({
-  addAuthHeader: vi.fn((headers, token) => {
+  addAuthHeader: vi.fn((headers: Headers, token: string | null | undefined) => {
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
     }
@@ -63,7 +66,7 @@ describe('createReactQueryClient', () => {
         path: '/users',
         method: 'GET',
         headers: {},
-      });
+      } as Parameters<typeof client.api>[0]);
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/users',
@@ -91,7 +94,7 @@ describe('createReactQueryClient', () => {
         path: '/users',
         method: 'GET',
         headers: {},
-      });
+      } as Parameters<typeof client.api>[0]);
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/users',
@@ -100,7 +103,7 @@ describe('createReactQueryClient', () => {
         }),
       );
 
-      const calledHeaders = mockFetch.mock.calls[0][1].headers as Headers;
+      const calledHeaders = (mockFetch.mock.calls[0][1] as RequestInit).headers as Headers;
       expect(calledHeaders.get('Authorization')).toBe('Bearer my-token');
     });
 
@@ -121,9 +124,9 @@ describe('createReactQueryClient', () => {
         path: '/users',
         method: 'GET',
         headers: {},
-      });
+      } as Parameters<typeof client.api>[0]);
 
-      const calledHeaders = mockFetch.mock.calls[0][1].headers as Headers;
+      const calledHeaders = (mockFetch.mock.calls[0][1] as RequestInit).headers as Headers;
       expect(calledHeaders.get('Content-Type')).toBe('application/json');
     });
 
@@ -145,7 +148,7 @@ describe('createReactQueryClient', () => {
         method: 'POST',
         headers: {},
         body: { name: 'John' },
-      });
+      } as Parameters<typeof client.api>[0]);
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/users',
@@ -174,7 +177,7 @@ describe('createReactQueryClient', () => {
         path: '/users',
         method: 'GET',
         headers: {},
-      });
+      } as Parameters<typeof client.api>[0]);
 
       expect(onUnauthorized).toHaveBeenCalled();
     });
@@ -199,7 +202,7 @@ describe('createReactQueryClient', () => {
         path: '/users',
         method: 'GET',
         headers: {},
-      });
+      } as Parameters<typeof client.api>[0]);
 
       expect(onServerError).toHaveBeenCalledWith('Database error');
     });
@@ -224,7 +227,7 @@ describe('createReactQueryClient', () => {
         path: '/users',
         method: 'GET',
         headers: {},
-      });
+      } as Parameters<typeof client.api>[0]);
 
       expect(onServerError).toHaveBeenCalledWith('Service Unavailable');
     });
@@ -247,7 +250,7 @@ describe('createReactQueryClient', () => {
         path: '/users/1',
         method: 'GET',
         headers: {},
-      });
+      } as Parameters<typeof client.api>[0]);
 
       expect(result.status).toBe(200);
       expect(result.body).toEqual(responseBody);
@@ -271,7 +274,7 @@ describe('createReactQueryClient', () => {
         path: '/users/1',
         method: 'DELETE',
         headers: {},
-      });
+      } as Parameters<typeof client.api>[0]);
 
       expect(result.status).toBe(204);
       expect(result.body).toBeUndefined();

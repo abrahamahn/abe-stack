@@ -76,11 +76,11 @@ describe('useLazyCatalog', () => {
     // Default mock implementations
     mockGetAvailableCategories.mockReturnValue(['elements', 'components', 'layouts']);
 
-    mockGetCachedCategory.mockImplementation((category) => mockCache.get(category) ?? null);
+    mockGetCachedCategory.mockImplementation((category: ComponentCategory) => mockCache.get(category) ?? null);
 
     mockGetLoadedComponentCount.mockImplementation(() => mockLoadedCount);
 
-    mockLoadCategory.mockImplementation(async (category) => {
+    mockLoadCategory.mockImplementation(async (category: ComponentCategory) => {
       let components: ComponentDemo[] = [];
       if (category === 'elements') {
         components = mockElementComponents;
@@ -284,7 +284,7 @@ describe('useLazyCatalog', () => {
       });
 
       // Reset mock to succeed
-      mockLoadCategory.mockImplementation(async (category) => {
+      mockLoadCategory.mockImplementation(async (category: ComponentCategory) => {
         const components =
           category === 'components' ? mockComponentComponents : mockElementComponents;
         mockCache.set(category, components);
@@ -322,14 +322,14 @@ describe('useLazyCatalog', () => {
       const initialCount = result.current.totalLoaded;
 
       act(() => {
-        result.current.setActiveCategory('components');
+        result.current.setActiveCategory('layouts');
       });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
       });
 
-      expect(result.current.totalLoaded).toBe(initialCount + mockComponentComponents.length);
+      expect(result.current.totalLoaded).toBe(initialCount + mockLayoutComponents.length);
     });
   });
 

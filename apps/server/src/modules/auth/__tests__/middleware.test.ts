@@ -8,7 +8,6 @@ import {
 } from '@auth/middleware';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-
 import type { UserRole } from '@abe-stack/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
@@ -130,7 +129,7 @@ describe('createRequireAuth', () => {
     vi.clearAllMocks();
   });
 
-  test('should set user on request when token is valid', () => {
+  test('should set user on request when token is valid', async () => {
     const mockPayload = { userId: 'user-123', email: 'test@example.com', role: 'user' as const };
     vi.mocked(verifyToken).mockReturnValue(mockPayload);
 
@@ -138,26 +137,26 @@ describe('createRequireAuth', () => {
     const reply = createMockReply();
     const requireAuth = createRequireAuth(TEST_SECRET);
 
-    requireAuth(request as FastifyRequest, reply as unknown as FastifyReply);
+    await requireAuth(request as FastifyRequest, reply as unknown as FastifyReply);
 
     expect(request.user).toEqual(mockPayload);
     expect(reply.status).not.toHaveBeenCalled();
     expect(reply.send).not.toHaveBeenCalled();
   });
 
-  test('should return 401 when no token is provided', () => {
+  test('should return 401 when no token is provided', async () => {
     const request = createMockRequest();
     const reply = createMockReply();
     const requireAuth = createRequireAuth(TEST_SECRET);
 
-    requireAuth(request as FastifyRequest, reply as unknown as FastifyReply);
+    await requireAuth(request as FastifyRequest, reply as unknown as FastifyReply);
 
     expect(reply.status).toHaveBeenCalledWith(401);
     expect(reply.send).toHaveBeenCalledWith({ message: 'Unauthorized' });
     expect(request.user).toBeUndefined();
   });
 
-  test('should return 401 when token is invalid', () => {
+  test('should return 401 when token is invalid', async () => {
     vi.mocked(verifyToken).mockImplementation(() => {
       throw new Error('Invalid token');
     });
@@ -166,7 +165,7 @@ describe('createRequireAuth', () => {
     const reply = createMockReply();
     const requireAuth = createRequireAuth(TEST_SECRET);
 
-    requireAuth(request as FastifyRequest, reply as unknown as FastifyReply);
+    await requireAuth(request as FastifyRequest, reply as unknown as FastifyReply);
 
     expect(reply.status).toHaveBeenCalledWith(401);
     expect(reply.send).toHaveBeenCalledWith({ message: 'Unauthorized' });
@@ -306,7 +305,7 @@ describe('createAuthGuard', () => {
     vi.clearAllMocks();
   });
 
-  test('should create requireAuth guard when no roles are specified', () => {
+  test('should create requireAuth guard when no roles are specified', async () => {
     const mockPayload = { userId: 'user-123', email: 'test@example.com', role: 'user' as const };
     vi.mocked(verifyToken).mockReturnValue(mockPayload);
 
@@ -314,7 +313,7 @@ describe('createAuthGuard', () => {
     const reply = createMockReply();
     const guard = createAuthGuard(TEST_SECRET);
 
-    guard(request as FastifyRequest, reply as unknown as FastifyReply);
+    await guard(request as FastifyRequest, reply as unknown as FastifyReply);
 
     expect(request.user).toEqual(mockPayload);
     expect(reply.status).not.toHaveBeenCalled();
@@ -348,12 +347,12 @@ describe('createAuthGuard', () => {
     expect(reply.status).not.toHaveBeenCalled();
   });
 
-  test('should return 401 when no token provided with empty roles', () => {
+  test('should return 401 when no token provided with empty roles', async () => {
     const request = createMockRequest();
     const reply = createMockReply();
     const guard = createAuthGuard(TEST_SECRET);
 
-    guard(request as FastifyRequest, reply as unknown as FastifyReply);
+    await guard(request as FastifyRequest, reply as unknown as FastifyReply);
 
     expect(reply.status).toHaveBeenCalledWith(401);
     expect(reply.send).toHaveBeenCalledWith({ message: 'Unauthorized' });

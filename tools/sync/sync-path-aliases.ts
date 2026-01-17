@@ -146,6 +146,12 @@ function generatePaths(project: ProjectConfig): Record<string, string[]> {
   return sortedPaths;
 }
 
+interface TsConfig {
+  compilerOptions?: {
+    paths?: Record<string, string[]>;
+  };
+}
+
 function syncProject(
   project: ProjectConfig,
   checkOnly: boolean,
@@ -157,7 +163,7 @@ function syncProject(
   }
 
   const content = fs.readFileSync(project.tsconfigPath, 'utf-8');
-  const tsconfig = JSON.parse(content);
+  const tsconfig: TsConfig = JSON.parse(content);
 
   const currentPaths = tsconfig.compilerOptions?.paths ?? {};
   const expectedPaths = generatePaths(project);

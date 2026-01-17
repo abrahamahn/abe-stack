@@ -10,12 +10,12 @@ const { mockSend, MockS3Client, MockPutObjectCommand, mockGetSignedUrl, mockFrom
     // Create mock classes that can be instantiated with `new`
     const S3ClientMock = vi.fn().mockImplementation(function (this: { send: typeof sendMock }) {
       this.send = sendMock;
-    }) as unknown as typeof vi.fn & { new (...args: unknown[]): { send: typeof sendMock } };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const PutObjectCommandMock = vi.fn().mockImplementation(function (this: any, params: any) {
+    }) as unknown as { new (...args: unknown[]): { send: typeof sendMock } };
+     
+    const PutObjectCommandMock = vi.fn().mockImplementation(function (this: { _type: string } & Record<string, unknown>, params: Record<string, unknown>) {
       Object.assign(this, params);
       this._type = 'PutObjectCommand';
-    });
+    }) as unknown as { new (params: Record<string, unknown>): { _type: string } & Record<string, unknown> };
     return {
       mockSend: sendMock,
       MockS3Client: S3ClientMock,

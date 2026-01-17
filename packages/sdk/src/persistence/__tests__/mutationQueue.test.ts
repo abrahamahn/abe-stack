@@ -2,19 +2,19 @@
 import { createMutationQueue, MutationQueue } from '@persistence/mutationQueue';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-
 // Mock localStorage
 const mockLocalStorage = (() => {
   let store: Record<string, string> = {};
   return {
-    getItem: (key: string) => store[key] ?? null,
-    setItem: (key: string, value: string) => {
+    getItem: (key: string): string | null => store[key] ?? null,
+    setItem: (key: string, value: string): void => {
       store[key] = value;
     },
-    removeItem: (key: string) => {
-      delete store[key];
+    removeItem: (key: string): void => {
+      const { [key]: _, ...rest } = store;
+      store = rest;
     },
-    clear: () => {
+    clear: (): void => {
       store = {};
     },
   };
@@ -70,7 +70,7 @@ describe('MutationQueue', () => {
 
       expect(id).toBeDefined();
       expect(queue.getPending()).toHaveLength(1);
-      expect(queue.getPending()[0].type).toBe('createPost');
+      expect(queue.getPending()[0]?.type).toBe('createPost');
     });
 
     test('should generate unique IDs', () => {
@@ -87,8 +87,10 @@ describe('MutationQueue', () => {
 
       const stored = mockLocalStorage.getItem('abe-stack-mutation-queue');
       expect(stored).not.toBeNull();
-      const parsed = JSON.parse(stored!);
-      expect(parsed).toHaveLength(1);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        expect(parsed).toHaveLength(1);
+      }
     });
 
     test('should call onStatusChange', () => {
@@ -177,7 +179,9 @@ describe('MutationQueue', () => {
       queue.clear();
 
       const stored = mockLocalStorage.getItem('abe-stack-mutation-queue');
-      expect(JSON.parse(stored!)).toHaveLength(0);
+      if (stored) {
+        expect(JSON.parse(stored)).toHaveLength(0);
+      }
     });
   });
 

@@ -49,7 +49,7 @@ describe('SubscriptionManager', () => {
   let mockSocket2: WebSocket;
 
   function createMockSocket(id: string): WebSocket & { id: string; sent: string[] } {
-    return {
+    const socket = {
       id,
       readyState: 1, // WebSocket.OPEN
       sent: [] as string[],
@@ -57,6 +57,8 @@ describe('SubscriptionManager', () => {
         this.sent.push(data);
       },
     };
+    socket.send = socket.send.bind(socket);
+    return socket;
   }
 
   beforeEach(() => {

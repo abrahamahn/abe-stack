@@ -135,14 +135,14 @@ function parseMarkdownToHtml(markdown: string): string {
   // Italic
   html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
 
-  // Code inline
-  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-
-  // Code blocks
+  // Code blocks (must run before inline code to prevent interference)
   html = html.replace(/```[\s\S]*?```/g, (match) => {
     const code = match.replace(/```(\w+)?\n?/, '').replace(/```$/, '');
     return `<pre><code>${code}</code></pre>`;
   });
+
+  // Code inline
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
 
   // Links
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');

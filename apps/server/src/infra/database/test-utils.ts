@@ -1,6 +1,7 @@
 // apps/server/src/infra/database/test-utils.ts
-import type { DbClient } from '@database';
 import { vi } from 'vitest';
+
+import type { DbClient } from '@database';
 
 export interface MockDbClient extends DbClient {
   insert: ReturnType<typeof vi.fn>;

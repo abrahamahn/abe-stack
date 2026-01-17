@@ -188,8 +188,8 @@ describe('loadServerEnv', () => {
     SESSION_SECRET: 'this-is-a-very-long-session-secret-for-testing',
   };
 
-  let mockExit: ReturnType<typeof vi.spyOn>;
-  let mockConsoleError: ReturnType<typeof vi.spyOn>;
+  let mockExit: vi.SpiedFunction<typeof process.exit>;
+  let mockConsoleError: vi.SpiedFunction<typeof console.error>;
 
   beforeEach(() => {
     mockExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
