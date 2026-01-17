@@ -1,11 +1,10 @@
 // packages/ui/src/components/__tests__/Dialog.test.tsx
 // packages/ui/src/elements/__tests__/Dialog.test.tsx
 /** @vitest-environment jsdom */
+import { Dialog } from '@components/Dialog';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-
-import { Dialog } from '../Dialog';
 
 describe('Dialog', () => {
   describe('happy path', () => {
@@ -91,7 +90,7 @@ describe('Dialog', () => {
       const overlay = document.querySelector('.overlay');
       expect(overlay).toBeInTheDocument();
 
-      await user.click(overlay!);
+      if (overlay) await user.click(overlay);
 
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
@@ -286,7 +285,7 @@ describe('Dialog', () => {
       const overlay = document.querySelector('.overlay');
       expect(overlay).toBeInTheDocument();
 
-      await user.click(overlay!);
+      if (overlay) await user.click(overlay);
 
       // Dialog should still be open
       expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -530,7 +529,7 @@ describe('Dialog', () => {
       const overlay = document.querySelector('.overlay');
       expect(overlay).toBeInTheDocument();
 
-      await user.dblClick(overlay!);
+      if (overlay) await user.dblClick(overlay);
 
       // Should close on first click of double-click
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();

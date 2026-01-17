@@ -269,12 +269,13 @@ pnpm test -- --run path/to/file.test.tsx
 
 As of January 2026:
 
-| Package       | Tests | Coverage |
-| ------------- | ----- | -------- |
-| packages/ui   | 724+  | ~85%     |
-| packages/core | 9+    | ~70%     |
-| apps/web      | 337+  | ~60%     |
-| apps/server   | WIP   | ~40%     |
+| Package       | Test Files | Tests | Coverage |
+| ------------- | ---------- | ----- | -------- |
+| packages/ui   | 77         | 724+  | ~85%     |
+| packages/core | 8          | 280+  | ~80%     |
+| packages/sdk  | 5          | 50+   | ~70%     |
+| apps/web      | 25         | 337+  | ~60%     |
+| apps/server   | 36         | 508+  | ~70%     |
 
 ## Testing Setup & Configuration
 
@@ -508,13 +509,13 @@ describe('LoginForm - Accessibility', () => {
 
 ```bash
 # Run tests for specific package
-pnpm test --filter abeahn-ui
+pnpm test --filter @abe-stack/ui
 
 # Watch mode
-pnpm test --filter abeahn-ui -- --watch
+pnpm test --filter @abe-stack/ui -- --watch
 
 # Run specific test file
-pnpm test --filter abeahn-ui -- Button.test.tsx
+pnpm test --filter @abe-stack/ui -- Button.test.tsx
 ```
 
 #### Full Suite (Before Completion)
@@ -531,7 +532,7 @@ pnpm test -- --coverage
 
 ```bash
 # Open Vitest UI
-pnpm test --filter abeahn-ui -- --ui
+pnpm test --filter @abe-stack/ui -- --ui
 ```
 
 ### Best Practices

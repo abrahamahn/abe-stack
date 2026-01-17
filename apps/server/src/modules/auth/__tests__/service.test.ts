@@ -5,8 +5,24 @@
  * Tests the auth service business logic by mocking database and utility functions.
  * These tests verify the orchestration logic, error handling, and token management.
  */
-import { beforeEach, describe, expect, test, vi } from 'vitest';
-
+import { validatePassword } from '@abe-stack/core';
+import { authenticateUser, logoutUser, refreshUserTokens, registerUser } from '@auth/service';
+import {
+  createAccessToken,
+  createRefreshTokenFamily,
+  hashPassword,
+  needsRehash,
+  rotateRefreshToken,
+  verifyPasswordSafe,
+} from '@auth/utils';
+import {
+  applyProgressiveDelay,
+  getAccountLockoutStatus,
+  isAccountLocked,
+  logAccountLockedEvent,
+  logLoginAttempt,
+  withTransaction,
+} from '@infra';
 import {
   AccountLockedError,
   EmailAlreadyExistsError,
@@ -14,8 +30,7 @@ import {
   InvalidTokenError,
   WeakPasswordError,
 } from '@shared';
-
-import { authenticateUser, logoutUser, refreshUserTokens, registerUser } from '@auth/service';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { AuthConfig } from '@config';
 import type { DbClient } from '@infra';
@@ -41,8 +56,8 @@ vi.mock('@infra', () => ({
   withTransaction: vi.fn(),
 }));
 
-// Mock @utils/index
-vi.mock('@utils/index', () => ({
+// Mock ../utils
+vi.mock('../utils', () => ({
   createAccessToken: vi.fn(),
   createRefreshTokenFamily: vi.fn(),
   hashPassword: vi.fn(),
@@ -53,33 +68,14 @@ vi.mock('@utils/index', () => ({
 
 // Mock drizzle-orm
 vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args) => args),
+  eq: vi.fn((...args: unknown[]) => args),
 }));
-
-// Import mocked functions
-import { validatePassword } from '@abe-stack/core';
-import {
-  applyProgressiveDelay,
-  getAccountLockoutStatus,
-  isAccountLocked,
-  logAccountLockedEvent,
-  logLoginAttempt,
-  withTransaction,
-} from '@infra';
-import {
-  createAccessToken,
-  createRefreshTokenFamily,
-  hashPassword,
-  needsRehash,
-  rotateRefreshToken,
-  verifyPasswordSafe,
-} from '@utils/index';
 
 // ============================================================================
 // Test Constants
 // ============================================================================
 
-const TEST_CONFIG: AuthConfig = {
+const TEST_CONFIG = {
   jwt: {
     secret: 'test-secret-32-characters-long!!',
     accessTokenExpiry: '15m',
@@ -98,25 +94,64 @@ const TEST_CONFIG: AuthConfig = {
     windowMinutes: 15,
     durationMinutes: 30,
   },
-} as AuthConfig;
+} as unknown as AuthConfig;
 
 // ============================================================================
 // Test Helpers
 // ============================================================================
 
-function createMockDb(): DbClient {
+interface MockDbQueryResult {
+  findFirst: ReturnType<typeof vi.fn>;
+}
+
+interface MockDbInsertResult {
+  values: ReturnType<typeof vi.fn>;
+}
+
+interface MockDbUpdateResult {
+  set: ReturnType<typeof vi.fn>;
+}
+
+interface MockDbDeleteResult {
+  where: ReturnType<typeof vi.fn>;
+}
+
+interface MockDbClientExtended {
+  query: {
+    users: MockDbQueryResult;
+  };
+  insert: ReturnType<typeof vi.fn> & ((...args: unknown[]) => MockDbInsertResult);
+  update: ReturnType<typeof vi.fn> & ((...args: unknown[]) => MockDbUpdateResult);
+  delete: ReturnType<typeof vi.fn> & ((...args: unknown[]) => MockDbDeleteResult);
+}
+
+function createMockDb(): MockDbClientExtended & DbClient {
+  const mockInsert = vi.fn(() => ({
+    values: vi.fn(() => ({
+      returning: vi.fn(() => Promise.resolve([])),
+    })),
+  }));
+
+  const mockUpdate = vi.fn(() => ({
+    set: vi.fn(() => ({
+      where: vi.fn(() => Promise.resolve()),
+    })),
+  }));
+
+  const mockDelete = vi.fn(() => ({
+    where: vi.fn(() => Promise.resolve()),
+  }));
+
   return {
     query: {
       users: {
         findFirst: vi.fn(),
       },
     },
-    insert: vi.fn(),
-    update: vi.fn(),
-    delete: vi.fn().mockReturnValue({
-      where: vi.fn(),
-    }),
-  } as unknown as DbClient;
+    insert: mockInsert,
+    update: mockUpdate,
+    delete: mockDelete,
+  } as unknown as MockDbClientExtended & DbClient;
 }
 
 // ============================================================================
@@ -138,7 +173,13 @@ describe('registerUser', () => {
     vi.mocked(db.query.users.findFirst).mockResolvedValue(null);
 
     // Mock: password validation passes
-    vi.mocked(validatePassword).mockResolvedValue({ isValid: true, errors: [], score: 4 });
+    vi.mocked(validatePassword).mockResolvedValue({
+      isValid: true,
+      errors: [],
+      score: 4,
+      feedback: { warning: '', suggestions: [] },
+      crackTimeDisplay: 'centuries',
+    });
 
     // Mock: password hashing
     vi.mocked(hashPassword).mockResolvedValue('hashed-password');
@@ -154,12 +195,11 @@ describe('registerUser', () => {
     });
 
     // Mock insert to return the user
-    const insertMock = vi.fn().mockReturnValue({
+    vi.mocked(db.insert).mockReturnValue({
       values: vi.fn().mockReturnValue({
         returning: vi.fn().mockResolvedValue([mockUser]),
       }),
     });
-    (db as unknown as { insert: typeof insertMock }).insert = insertMock;
 
     // Mock: access token creation
     vi.mocked(createAccessToken).mockReturnValue('access-token-123');
@@ -205,6 +245,8 @@ describe('registerUser', () => {
       isValid: false,
       errors: ['Password is too short', 'Password needs uppercase'],
       score: 1,
+      feedback: { warning: 'Too weak', suggestions: ['Add uppercase'] },
+      crackTimeDisplay: 'instant',
     });
 
     await expect(registerUser(db, TEST_CONFIG, email, password)).rejects.toThrow(WeakPasswordError);
@@ -312,9 +354,9 @@ describe('authenticateUser', () => {
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
     vi.mocked(getAccountLockoutStatus).mockResolvedValue({ isLocked: false, failedAttempts: 1 });
 
-    await expect(
-      authenticateUser(db, TEST_CONFIG, email, password, ipAddress),
-    ).rejects.toThrow(InvalidCredentialsError);
+    await expect(authenticateUser(db, TEST_CONFIG, email, password, ipAddress)).rejects.toThrow(
+      InvalidCredentialsError,
+    );
   });
 
   test('should throw InvalidCredentialsError when password is wrong', async () => {
@@ -421,10 +463,11 @@ describe('authenticateUser', () => {
     vi.mocked(hashPassword).mockResolvedValue('new-hash');
 
     // Setup mock for db.update chain
-    const updateWhereMock = vi.fn().mockResolvedValue(undefined);
-    const updateSetMock = vi.fn().mockReturnValue({ where: updateWhereMock });
-    const updateMock = vi.fn().mockReturnValue({ set: updateSetMock });
-    (db as unknown as { update: typeof updateMock }).update = updateMock;
+    vi.mocked(db.update).mockReturnValue({
+      set: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue(undefined),
+      }),
+    });
 
     const onRehash = vi.fn();
 
@@ -507,37 +550,38 @@ describe('logoutUser', () => {
     const refreshToken = 'valid-refresh-token';
 
     const whereMock = vi.fn().mockResolvedValue(undefined);
-    const deleteMock = vi.fn().mockReturnValue({ where: whereMock });
-    (db as unknown as { delete: typeof deleteMock }).delete = deleteMock;
+    vi.mocked(db.delete).mockReturnValue({
+      where: whereMock,
+    });
 
     await logoutUser(db, refreshToken);
 
-    expect(deleteMock).toHaveBeenCalled();
+    expect(db.delete).toHaveBeenCalled();
     expect(whereMock).toHaveBeenCalled();
   });
 
   test('should not delete anything when no token provided', async () => {
     const db = createMockDb();
 
-    const whereMock = vi.fn().mockResolvedValue(undefined);
-    const deleteMock = vi.fn().mockReturnValue({ where: whereMock });
-    (db as unknown as { delete: typeof deleteMock }).delete = deleteMock;
+    vi.mocked(db.delete).mockReturnValue({
+      where: vi.fn().mockResolvedValue(undefined),
+    });
 
     await logoutUser(db, undefined);
 
-    expect(deleteMock).not.toHaveBeenCalled();
+    expect(db.delete).not.toHaveBeenCalled();
   });
 
   test('should handle empty string token', async () => {
     const db = createMockDb();
 
-    const whereMock = vi.fn().mockResolvedValue(undefined);
-    const deleteMock = vi.fn().mockReturnValue({ where: whereMock });
-    (db as unknown as { delete: typeof deleteMock }).delete = deleteMock;
+    vi.mocked(db.delete).mockReturnValue({
+      where: vi.fn().mockResolvedValue(undefined),
+    });
 
     await logoutUser(db, '');
 
     // Empty string is falsy, so should not delete
-    expect(deleteMock).not.toHaveBeenCalled();
+    expect(db.delete).not.toHaveBeenCalled();
   });
 });

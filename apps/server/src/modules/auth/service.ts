@@ -25,6 +25,8 @@ import {
   InvalidTokenError,
   WeakPasswordError,
 } from '@shared';
+import { eq } from 'drizzle-orm';
+
 import {
   createAccessToken,
   createRefreshTokenFamily,
@@ -33,8 +35,6 @@ import {
   rotateRefreshToken as rotateRefreshTokenUtil,
   verifyPasswordSafe,
 } from './utils';
-import { eq } from 'drizzle-orm';
-
 
 import type { AuthConfig } from '@config';
 

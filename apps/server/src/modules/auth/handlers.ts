@@ -18,6 +18,7 @@ import {
   type AppContext,
 } from '@shared';
 import { REFRESH_COOKIE_NAME } from '@shared/constants';
+
 import { extractRequestInfo, verifyToken as verifyJwtToken, type TokenPayload } from './utils';
 
 import type {
@@ -57,13 +58,7 @@ export async function handleRegister(
 > {
   try {
     const { email, password, name } = body;
-    const result = await registerUser(
-      ctx.db,
-      ctx.config.auth,
-      email,
-      password,
-      name,
-    );
+    const result = await registerUser(ctx.db, ctx.config.auth, email, password, name);
 
     // Set refresh token as HTTP-only cookie
     reply.setCookie(

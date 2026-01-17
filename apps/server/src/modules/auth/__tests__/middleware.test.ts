@@ -1,6 +1,4 @@
 // apps/server/src/modules/auth/__tests__/middleware.test.ts
-import { beforeEach, describe, expect, test, vi } from 'vitest';
-
 import {
   createAuthGuard,
   createRequireAuth,
@@ -8,6 +6,8 @@ import {
   extractTokenPayload,
   isAdmin,
 } from '@auth/middleware';
+import { verifyToken } from '@auth/utils/jwt';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { UserRole } from '@abe-stack/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';
@@ -20,8 +20,6 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 vi.mock('@auth/utils/jwt', () => ({
   verifyToken: vi.fn(),
 }));
-
-import { verifyToken } from '@auth/utils/jwt';
 
 // ============================================================================
 // Test Constants
@@ -306,7 +304,7 @@ describe('createAuthGuard', () => {
     vi.clearAllMocks();
   });
 
-  test('should create requireAuth guard when no roles are specified', () => {
+  test('should create requireAuth guard when no roles are specified', async () => {
     const mockPayload = { userId: 'user-123', email: 'test@example.com', role: 'user' as const };
     vi.mocked(verifyToken).mockReturnValue(mockPayload);
 
@@ -314,7 +312,7 @@ describe('createAuthGuard', () => {
     const reply = createMockReply();
     const guard = createAuthGuard(TEST_SECRET);
 
-    guard(request as FastifyRequest, reply as unknown as FastifyReply);
+    await guard(request as FastifyRequest, reply as unknown as FastifyReply);
 
     expect(request.user).toEqual(mockPayload);
     expect(reply.status).not.toHaveBeenCalled();
@@ -348,12 +346,12 @@ describe('createAuthGuard', () => {
     expect(reply.status).not.toHaveBeenCalled();
   });
 
-  test('should return 401 when no token provided with empty roles', () => {
+  test('should return 401 when no token provided with empty roles', async () => {
     const request = createMockRequest();
     const reply = createMockReply();
     const guard = createAuthGuard(TEST_SECRET);
 
-    guard(request as FastifyRequest, reply as unknown as FastifyReply);
+    await guard(request as FastifyRequest, reply as unknown as FastifyReply);
 
     expect(reply.status).toHaveBeenCalledWith(401);
     expect(reply.send).toHaveBeenCalledWith({ message: 'Unauthorized' });

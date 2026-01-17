@@ -7,7 +7,7 @@
     "dev": "tsx ../../tools/dev/kill-port.ts 5173 && vite --config ../../config/vite.web.config.ts --open",
     "build": "vite build --config ../../config/vite.web.config.ts",
     "preview": "vite preview --config ../../config/vite.web.config.ts",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc --project tsconfig.json --noEmit",
     "test": "VITEST_TARGET=web vitest run --config ../../config/vitest.config.ts",
     "test:watch": "VITEST_TARGET=web vitest --config ../../config/vitest.config.ts",
     "lint": "eslint src --ext ts,tsx"

@@ -1,10 +1,9 @@
 // packages/ui/src/elements/__tests__/Tooltip.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
+import { Tooltip } from '@elements/Tooltip';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { Tooltip } from '../Tooltip';
 
 describe('Tooltip', () => {
   beforeEach(() => {
@@ -33,7 +32,9 @@ describe('Tooltip', () => {
       </Tooltip>,
     );
 
-    const wrapper = screen.getByText('Hover me').closest('.tooltip')!;
+    const wrapper = screen.getByText('Hover me').closest('.tooltip');
+    expect(wrapper).toBeDefined();
+    if (!wrapper) return;
 
     fireEvent.mouseEnter(wrapper);
     expect(screen.getByText('Tooltip text')).toBeInTheDocument();
@@ -73,7 +74,9 @@ describe('Tooltip', () => {
       </Tooltip>,
     );
 
-    const wrapper = screen.getByText('Trigger').parentElement!;
+    const wrapper = screen.getByText('Trigger').parentElement;
+    expect(wrapper).toBeDefined();
+    if (!wrapper) return;
 
     fireEvent.mouseEnter(wrapper);
     fireEvent.mouseLeave(wrapper);

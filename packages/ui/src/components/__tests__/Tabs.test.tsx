@@ -130,7 +130,13 @@ describe('Tabs', () => {
         const [value, setValue] = useState('a');
         return (
           <>
-            <button onClick={() => setValue('b')}>Set B</button>
+            <button
+              onClick={() => {
+                setValue('b');
+              }}
+            >
+              Set B
+            </button>
             <Tabs items={items} value={value} onChange={setValue} />
           </>
         );

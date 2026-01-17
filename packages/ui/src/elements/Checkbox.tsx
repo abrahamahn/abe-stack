@@ -2,7 +2,6 @@
 import { useControllableState } from '@hooks/useControllableState';
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 
-
 import type React from 'react';
 
 import '../styles/elements.css';

@@ -1,7 +1,7 @@
 // apps/server/src/infra/storage/__tests__/normalizeKey.test.ts
+import { normalizeStorageKey } from '@storage/utils/normalizeKey';
 import { describe, it, expect } from 'vitest';
 
-import { normalizeStorageKey } from '@storage/utils/normalizeKey';
 
 describe('normalizeStorageKey', () => {
   describe('leading slash removal', () => {

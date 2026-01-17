@@ -51,7 +51,16 @@ const PROJECTS: ProjectConfig[] = [
   },
 ];
 
-const SKIP_DIRS = new Set(['node_modules', '__tests__', 'dist', '.turbo', '.cache', 'build', 'coverage', '.git']);
+const SKIP_DIRS = new Set([
+  'node_modules',
+  '__tests__',
+  'dist',
+  '.turbo',
+  '.cache',
+  'build',
+  'coverage',
+  '.git',
+]);
 
 // Directory names that are too common to create aliases for (use relative imports instead)
 const EXCLUDED_ALIAS_NAMES = new Set(['utils', 'helpers', 'types', 'constants']);
@@ -62,8 +71,7 @@ const MAX_ALIAS_DEPTH = 3;
 
 function hasIndexFile(dirPath: string): boolean {
   return (
-    fs.existsSync(path.join(dirPath, 'index.ts')) ||
-    fs.existsSync(path.join(dirPath, 'index.tsx'))
+    fs.existsSync(path.join(dirPath, 'index.ts')) || fs.existsSync(path.join(dirPath, 'index.tsx'))
   );
 }
 
@@ -117,7 +125,8 @@ function generatePaths(project: ProjectConfig): Record<string, string[]> {
     // Skip commonly named directories that would cause conflicts
     if (EXCLUDED_ALIAS_NAMES.has(dirName)) continue;
 
-    const relativePath = './' + path.relative(path.dirname(project.tsconfigPath), dir).replace(/\\/g, '/');
+    const relativePath =
+      './' + path.relative(path.dirname(project.tsconfigPath), dir).replace(/\\/g, '/');
 
     const aliasKey = `${project.aliasPrefix}${dirName}`;
 
@@ -137,7 +146,16 @@ function generatePaths(project: ProjectConfig): Record<string, string[]> {
   return sortedPaths;
 }
 
-function syncProject(project: ProjectConfig, checkOnly: boolean): { updated: boolean; name: string } {
+interface TsConfig {
+  compilerOptions?: {
+    paths?: Record<string, string[]>;
+  };
+}
+
+function syncProject(
+  project: ProjectConfig,
+  checkOnly: boolean,
+): { updated: boolean; name: string } {
   const name = path.relative(ROOT, path.dirname(project.tsconfigPath));
 
   if (!fs.existsSync(project.tsconfigPath)) {
@@ -145,7 +163,7 @@ function syncProject(project: ProjectConfig, checkOnly: boolean): { updated: boo
   }
 
   const content = fs.readFileSync(project.tsconfigPath, 'utf-8');
-  const tsconfig = JSON.parse(content);
+  const tsconfig = JSON.parse(content) as TsConfig;
 
   const currentPaths = tsconfig.compilerOptions?.paths ?? {};
   const expectedPaths = generatePaths(project);

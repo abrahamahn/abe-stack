@@ -57,7 +57,11 @@ interface BarrelResult {
 function shouldSkipDir(dirPath: string): boolean {
   const base = path.basename(dirPath);
   if (EXCLUDED_DIRS.has(base)) return true;
-  if (dirPath.endsWith(`${path.sep}src`)) return true;
+  // Skip app src directories - apps don't need auto-generated root barrels
+  // But allow package src directories (packages/core/src, packages/ui/src, etc.)
+  if (dirPath.endsWith(`${path.sep}apps${path.sep}web${path.sep}src`)) return true;
+  if (dirPath.endsWith(`${path.sep}apps${path.sep}server${path.sep}src`)) return true;
+  if (dirPath.endsWith(`${path.sep}apps${path.sep}desktop${path.sep}src`)) return true;
   if (dirPath.includes(`${path.sep}tools${path.sep}dev${path.sep}export`)) return true;
   if (dirPath.includes(`${path.sep}tools${path.sep}packages`)) return true;
   if (dirPath.includes(`${path.sep}src${path.sep}test`)) return true;
@@ -112,7 +116,7 @@ function parseExports(filePath: string): ExportEntry[] {
 
   const namedRegexes: Array<{ regex: RegExp; isType: boolean }> = [
     { regex: /export\s+const\s+([A-Za-z0-9_]+)/g, isType: false },
-    { regex: /export\s+function\s+([A-Za-z0-9_]+)/g, isType: false },
+    { regex: /export\s+(?:async\s+)?function\s+([A-Za-z0-9_]+)/g, isType: false },
     { regex: /export\s+class\s+([A-Za-z0-9_]+)/g, isType: false },
     { regex: /export\s+enum\s+([A-Za-z0-9_]+)/g, isType: false },
     { regex: /export\s+interface\s+([A-Za-z0-9_]+)/g, isType: true },
@@ -126,7 +130,7 @@ function parseExports(filePath: string): ExportEntry[] {
     }
   }
 
-  // Handle inline exports: export { Foo, Bar }
+  // Handle inline exports: export { Foo, Bar } (without from)
   const inlineExportRegex = /export\s*\{([^}]+)\}(?!\s*from)/g;
   let match: RegExpExecArray | null = null;
   while ((match = inlineExportRegex.exec(content)) !== null) {
@@ -145,9 +149,41 @@ function parseExports(filePath: string): ExportEntry[] {
     }
   }
 
-  // Handle explicit type exports: export type { Foo, Bar }
+  // Handle explicit type exports: export type { Foo, Bar } (without from)
   const inlineTypeExportRegex = /export\s+type\s*\{([^}]+)\}(?!\s*from)/g;
   while ((match = inlineTypeExportRegex.exec(content)) !== null) {
+    const names = match[1]
+      .split(',')
+      .map((n) => n.trim())
+      .filter(Boolean);
+    for (const name of names) {
+      const parts = name.split(/\s+as\s+/i).map((part) => part.trim());
+      const exportName = parts.length > 1 ? parts[1] : parts[0];
+      if (!exportName) continue;
+      pushUnique({ name: exportName, isType: true, isDefault: false });
+    }
+  }
+
+  // Handle re-exports: export { Foo, Bar } from '...'
+  const reExportRegex = /export\s*\{([^}]+)\}\s*from\s*['"][^'"]+['"]/g;
+  while ((match = reExportRegex.exec(content)) !== null) {
+    const names = match[1]
+      .split(',')
+      .map((n) => n.trim())
+      .filter(Boolean);
+    for (const name of names) {
+      const parts = name.split(/\s+as\s+/i).map((part) => part.trim());
+      const exportName = parts.length > 1 ? parts[1] : parts[0];
+      if (!exportName) continue;
+      // Check if this is a known type from the file
+      const isType = typeNames.has(exportName);
+      pushUnique({ name: exportName, isType, isDefault: false });
+    }
+  }
+
+  // Handle explicit type re-exports: export type { Foo, Bar } from '...'
+  const typeReExportRegex = /export\s+type\s*\{([^}]+)\}\s*from\s*['"][^'"]+['"]/g;
+  while ((match = typeReExportRegex.exec(content)) !== null) {
     const names = match[1]
       .split(',')
       .map((n) => n.trim())

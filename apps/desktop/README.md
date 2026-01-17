@@ -10,6 +10,7 @@ The desktop app is a thin Electron wrapper that loads the web application:
 - **Production**: Loads bundled web app from `dist/renderer/`
 
 This approach means:
+
 - No code duplication between web and desktop
 - Full feature parity with the web app
 - Desktop-specific features can be added via Electron APIs
@@ -68,6 +69,7 @@ The app can be built for multiple platforms:
 3. Use from renderer via `window.electronAPI`
 
 Examples:
+
 - Native file dialogs
 - System notifications
 - Menu bar integration

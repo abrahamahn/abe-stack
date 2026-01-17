@@ -108,7 +108,7 @@ describe('useThemeMode', () => {
         result.current.setMode('dark');
       });
 
-      const stored = JSON.parse(localStorage.getItem(storageKey) ?? '""');
+      const stored = JSON.parse(localStorage.getItem(storageKey) ?? '""') as string;
       expect(stored).toBe('dark');
     });
   });

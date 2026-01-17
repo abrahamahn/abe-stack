@@ -167,17 +167,13 @@ export class App implements IServiceContainer {
     );
 
     // Route tree view
-    this._server.get<{ Reply: RoutesResponse }>(
-      '/health/routes',
-      {},
-      (): RoutesResponse => {
-        const routes = this._server?.printRoutes({ commonPrefix: false }) ?? '';
-        return {
-          routes,
-          timestamp: new Date().toISOString(),
-        };
-      },
-    );
+    this._server.get<{ Reply: RoutesResponse }>('/health/routes', {}, (): RoutesResponse => {
+      const routes = this._server?.printRoutes({ commonPrefix: false }) ?? '';
+      return {
+        routes,
+        timestamp: new Date().toISOString(),
+      };
+    });
 
     // Readiness probe (503 if DB is down)
     this._server.get<{ Reply: ReadyResponse }>(
@@ -195,13 +191,9 @@ export class App implements IServiceContainer {
     );
 
     // Liveness probe (always 200)
-    this._server.get<{ Reply: LiveResponse }>(
-      '/health/live',
-      {},
-      (): LiveResponse => {
-        return { status: 'alive', uptime: Math.round(process.uptime()) };
-      },
-    );
+    this._server.get<{ Reply: LiveResponse }>('/health/live', {}, (): LiveResponse => {
+      return { status: 'alive', uptime: Math.round(process.uptime()) };
+    });
   }
 
   /**

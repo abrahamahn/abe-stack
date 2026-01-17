@@ -1,10 +1,9 @@
 // packages/ui/src/hooks/__tests__/useLocalStorage.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
+import { useLocalStorage } from '@hooks/useLocalStorage';
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it } from 'vitest';
-
-import { useLocalStorage } from '../useLocalStorage';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ReactElement } from 'react';
 
@@ -103,10 +102,11 @@ describe('useLocalStorage', () => {
   });
 
   it('does not crash when localStorage throws', () => {
-    const originalSetItem = window.localStorage.setItem;
-    window.localStorage.setItem = (): void => {
+    const setItemMock = vi.fn(() => {
       throw new Error('Storage blocked');
-    };
+    });
+    const originalSetItem = window.localStorage.setItem.bind(window.localStorage);
+    window.localStorage.setItem = setItemMock as unknown as (key: string, value: string) => void;
 
     render(<LocalStorageHarness storageKey="blocked-key" initialValue="initial" />);
     expect(() => {

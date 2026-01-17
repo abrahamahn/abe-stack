@@ -1,5 +1,5 @@
 // packages/core/src/__tests__/env.test.ts
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, type MockInstance, test, vi } from 'vitest';
 
 import { loadServerEnv, serverEnvSchema } from '../env';
 
@@ -188,8 +188,8 @@ describe('loadServerEnv', () => {
     SESSION_SECRET: 'this-is-a-very-long-session-secret-for-testing',
   };
 
-  let mockExit: ReturnType<typeof vi.spyOn>;
-  let mockConsoleError: ReturnType<typeof vi.spyOn>;
+  let mockExit: MockInstance<(code?: number) => never>;
+  let mockConsoleError: MockInstance;
 
   beforeEach(() => {
     mockExit = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);

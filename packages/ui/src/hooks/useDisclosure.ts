@@ -2,7 +2,6 @@
 import { useControllableState } from '@hooks/useControllableState';
 import { useCallback } from 'react';
 
-
 export type UseDisclosureProps = {
   open?: boolean;
   defaultOpen?: boolean;

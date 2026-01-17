@@ -10,20 +10,23 @@ type DocsMap = Record<string, string>;
 const normalizeKey = (value: string): string => value.toLowerCase().replace(/[^a-z0-9]/g, '');
 
 // Vite glob imports - these will be resolved at build time
-const elementDocsModules = import.meta.glob('@abe-stack/ui/docs/elements/*.md', {
-  query: '?raw',
-
-  import: 'default',
-  eager: true,
-});
-
-const componentDocsModules = import.meta.glob('@abe-stack/ui/docs/components/*.md', {
+// Using relative paths to reach packages/ui/docs from apps/web/src/features/demo/utils
+const elementDocsModules = import.meta.glob('../../../../../../packages/ui/docs/elements/*.md', {
   query: '?raw',
   import: 'default',
   eager: true,
 });
 
-const layoutDocsModules = import.meta.glob('../../../packages/ui/docs/layouts/*.md', {
+const componentDocsModules = import.meta.glob(
+  '../../../../../../packages/ui/docs/components/*.md',
+  {
+    query: '?raw',
+    import: 'default',
+    eager: true,
+  },
+);
+
+const layoutDocsModules = import.meta.glob('../../../../../../packages/ui/docs/layouts/**/*.md', {
   query: '?raw',
   import: 'default',
   eager: true,

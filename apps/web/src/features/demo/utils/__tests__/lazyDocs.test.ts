@@ -29,17 +29,11 @@ const mockLayoutModules: Record<string, () => Promise<string>> = {
     Promise.resolve('# Container\n\nA layout container.'),
 };
 
-// Cache state for mocking
-let mockDocsCache: Map<string, string>;
-
 // Mock the lazyDocs module - use path alias to match linter-converted imports
 vi.mock('@demo/utils/lazyDocs', () => {
-  const normalizeKey = (value: string): string =>
-    value.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const normalizeKey = (value: string): string => value.toLowerCase().replace(/[^a-z0-9]/g, '');
 
-  const buildPathLookup = (
-    modules: Record<string, () => Promise<string>>,
-  ): Map<string, string> => {
+  const buildPathLookup = (modules: Record<string, () => Promise<string>>): Map<string, string> => {
     const lookup = new Map<string, string>();
     for (const path of Object.keys(modules)) {
       const filename = path.split('/').pop()?.replace('.md', '') || '';
@@ -71,14 +65,14 @@ vi.mock('@demo/utils/lazyDocs', () => {
     // Italic
     html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
 
-    // Code inline
-    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-
-    // Code blocks
+    // Code blocks (must run before inline code to prevent interference)
     html = html.replace(/```[\s\S]*?```/g, (match) => {
       const code = match.replace(/```(\w+)?\n?/, '').replace(/```$/, '');
       return `<pre><code>${code}</code></pre>`;
     });
+
+    // Code inline
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
 
     // Links
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
@@ -199,7 +193,8 @@ describe('lazyDocs', () => {
 
     it('returns null for unknown category', async () => {
       const { getComponentDocsLazy } = await import('@demo/utils/lazyDocs');
-      const result = await getComponentDocsLazy('button', 'unknown');
+      // Test invalid category input
+      const result = await getComponentDocsLazy('button', 'unknown' as never);
       expect(result).toBeNull();
     });
 
@@ -312,17 +307,19 @@ describe('lazyDocs', () => {
 
     it('handles combined markdown syntax', async () => {
       const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
-      const markdown = `# Title
-
-This is **bold** and *italic* text.
-
-Use \`code\` inline.
-
-\`\`\`js
-const x = 1;
-\`\`\`
-
-[Link](https://test.com)`;
+      const markdown = [
+        '# Title',
+        '',
+        'This is **bold** and *italic* text.',
+        '',
+        'Use `code` inline.',
+        '',
+        '```js',
+        'const x = 1;',
+        '```',
+        '',
+        '[Link](https://test.com)',
+      ].join('\n');
 
       const result = parseMarkdownLazy(markdown);
 

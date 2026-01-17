@@ -7,7 +7,7 @@ Brief description (1-2 sentences) of what the component does and when to use it.
 ## Import
 
 ```tsx
-import { ComponentName } from '@abeahn/ui/category';
+import { ComponentName } from '@abe-stack/ui';
 ```
 
 ## Props

@@ -1,20 +1,25 @@
 // packages/sdk/src/persistence/__tests__/mutationQueue.test.ts
+import { createMutationQueue, MutationQueue } from '@persistence/mutationQueue';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { createMutationQueue, MutationQueue } from '@persistence/mutationQueue';
-
 // Mock localStorage
-const mockLocalStorage = (() => {
+const mockLocalStorage = ((): {
+  getItem: (key: string) => string | null;
+  setItem: (key: string, value: string) => void;
+  removeItem: (key: string) => void;
+  clear: () => void;
+} => {
   let store: Record<string, string> = {};
   return {
-    getItem: (key: string) => store[key] ?? null,
-    setItem: (key: string, value: string) => {
+    getItem: (key: string): string | null => store[key] ?? null,
+    setItem: (key: string, value: string): void => {
       store[key] = value;
     },
-    removeItem: (key: string) => {
-      delete store[key];
+    removeItem: (key: string): void => {
+      const { [key]: _, ...rest } = store;
+      store = rest;
     },
-    clear: () => {
+    clear: (): void => {
       store = {};
     },
   };
@@ -40,7 +45,7 @@ describe('MutationQueue', () => {
   });
 
   afterEach(() => {
-    queue?.destroy();
+    queue.destroy();
     vi.useRealTimers();
   });
 
@@ -53,7 +58,9 @@ describe('MutationQueue', () => {
     });
 
     test('should restore queue from localStorage', () => {
-      const existingQueue = [{ id: '1', type: 'test', data: {}, timestamp: Date.now(), retries: 0 }];
+      const existingQueue = [
+        { id: '1', type: 'test', data: {}, timestamp: Date.now(), retries: 0 },
+      ];
       mockLocalStorage.setItem('abe-stack-mutation-queue', JSON.stringify(existingQueue));
 
       queue = new MutationQueue();
@@ -68,7 +75,7 @@ describe('MutationQueue', () => {
 
       expect(id).toBeDefined();
       expect(queue.getPending()).toHaveLength(1);
-      expect(queue.getPending()[0].type).toBe('createPost');
+      expect(queue.getPending()[0]?.type).toBe('createPost');
     });
 
     test('should generate unique IDs', () => {
@@ -85,8 +92,10 @@ describe('MutationQueue', () => {
 
       const stored = mockLocalStorage.getItem('abe-stack-mutation-queue');
       expect(stored).not.toBeNull();
-      const parsed = JSON.parse(stored!);
-      expect(parsed).toHaveLength(1);
+      if (stored) {
+        const parsed = JSON.parse(stored) as unknown[];
+        expect(parsed).toHaveLength(1);
+      }
     });
 
     test('should call onStatusChange', () => {
@@ -175,7 +184,9 @@ describe('MutationQueue', () => {
       queue.clear();
 
       const stored = mockLocalStorage.getItem('abe-stack-mutation-queue');
-      expect(JSON.parse(stored!)).toHaveLength(0);
+      if (stored) {
+        expect(JSON.parse(stored)).toHaveLength(0);
+      }
     });
   });
 
@@ -199,7 +210,7 @@ describe('MutationQueue', () => {
     test('should retry on failure', async () => {
       vi.useRealTimers(); // Use real timers for async processing tests
       let callCount = 0;
-      const onProcess = vi.fn().mockImplementation(async () => {
+      const onProcess = vi.fn().mockImplementation(() => {
         callCount++;
         if (callCount < 2) {
           throw new Error('Temporary failure');

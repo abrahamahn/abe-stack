@@ -1,8 +1,8 @@
 // packages/sdk/src/persistence/__tests__/queryPersister.test.ts
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { clearQueryCache, createQueryPersister } from '@persistence/queryPersister';
 import { idbStorage } from '@persistence/storage';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 // Mock idbStorage
 vi.mock('@persistence/storage', () => ({

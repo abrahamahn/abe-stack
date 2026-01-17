@@ -1,4 +1,5 @@
 // apps/server/src/infra/storage/__tests__/storageFactory.test.ts
+import { createStorage } from '@storage/storageFactory';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import type { LocalStorageConfig, S3StorageConfig, StorageConfig } from '@config/storage.config';
@@ -35,8 +36,6 @@ vi.mock('@providers/localStorageProvider', () => ({
 vi.mock('@providers/s3StorageProvider', () => ({
   S3StorageProvider: MockS3StorageProvider,
 }));
-
-import { createStorage } from '@storage/storageFactory';
 
 describe('createStorage', () => {
   beforeEach(() => {

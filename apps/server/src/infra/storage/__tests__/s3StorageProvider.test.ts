@@ -1,4 +1,5 @@
 // apps/server/src/infra/storage/__tests__/s3StorageProvider.test.ts
+import { S3StorageProvider } from '@providers/s3StorageProvider';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import type { S3StorageConfig } from '@config/storage.config';
@@ -10,12 +11,17 @@ const { mockSend, MockS3Client, MockPutObjectCommand, mockGetSignedUrl, mockFrom
     // Create mock classes that can be instantiated with `new`
     const S3ClientMock = vi.fn().mockImplementation(function (this: { send: typeof sendMock }) {
       this.send = sendMock;
-    }) as unknown as typeof vi.fn & { new (...args: unknown[]): { send: typeof sendMock } };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const PutObjectCommandMock = vi.fn().mockImplementation(function (this: any, params: any) {
+    }) as unknown as { new (...args: unknown[]): { send: typeof sendMock } };
+
+    const PutObjectCommandMock = vi.fn().mockImplementation(function (
+      this: { _type: string } & Record<string, unknown>,
+      params: Record<string, unknown>,
+    ) {
       Object.assign(this, params);
       this._type = 'PutObjectCommand';
-    });
+    }) as unknown as {
+      new (params: Record<string, unknown>): { _type: string } & Record<string, unknown>;
+    };
     return {
       mockSend: sendMock,
       MockS3Client: S3ClientMock,
@@ -38,8 +44,6 @@ vi.mock('@aws-sdk/s3-request-presigner', () => ({
 vi.mock('@aws-sdk/credential-providers', () => ({
   fromEnv: mockFromEnv,
 }));
-
-import { S3StorageProvider } from '@providers/s3StorageProvider';
 
 describe('S3StorageProvider', () => {
   const baseConfig: S3StorageConfig = {
@@ -83,7 +87,7 @@ describe('S3StorageProvider', () => {
         expect.objectContaining({
           credentials: expect.objectContaining({
             accessKeyId: 'env-key',
-          }),
+          }) as { accessKeyId: string },
         }),
       );
     });
@@ -231,11 +235,9 @@ describe('S3StorageProvider', () => {
 
       await provider.getSignedUrl('file.txt', 7200);
 
-      expect(mockGetSignedUrl).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        { expiresIn: 7200 },
-      );
+      expect(mockGetSignedUrl).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
+        expiresIn: 7200,
+      });
     });
 
     it('should use configured default expiration', async () => {
@@ -247,11 +249,9 @@ describe('S3StorageProvider', () => {
 
       await provider.getSignedUrl('file.txt');
 
-      expect(mockGetSignedUrl).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.anything(),
-        { expiresIn: 1800 },
-      );
+      expect(mockGetSignedUrl).toHaveBeenCalledWith(expect.anything(), expect.anything(), {
+        expiresIn: 1800,
+      });
     });
 
     it('should normalize keys by stripping leading slashes', async () => {

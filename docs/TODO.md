@@ -6,9 +6,9 @@
 
 ## Missing Unit Tests
 
-- [ ] `apps/server/src/app.ts`
+- [x] `apps/server/src/app.ts` ✅ (app.test.ts created)
 - [ ] `apps/server/src/infra/database/schema/users.ts`
-- [ ] `packages/core/src/contracts/native.ts`
+- [x] `packages/core/src/contracts/native.ts` ✅ (covered by contracts.test.ts)
 
 ## Foundation Status ✅
 
@@ -802,6 +802,6 @@ If no to all three, it goes in `docs/ROADMAP.md`.
 
 ---
 
-_Last Updated: 2026-01-15_
+_Last Updated: 2026-01-17_
 
 _Philosophy: Foundation is done. Ship products. Copy utilities from legacy when needed._

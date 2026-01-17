@@ -1,11 +1,10 @@
 // packages/ui/src/layouts/layers/__tests__/Modal.test.tsx
 // packages/ui/src/elements/__tests__/Modal.test.tsx
 /** @vitest-environment jsdom */
+import { Modal } from '@layers/Modal';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-
-import { Modal } from '../Modal';
 
 describe('Modal', () => {
   describe('happy path', () => {
@@ -117,7 +116,7 @@ describe('Modal', () => {
   });
 
   describe('edge cases - missing/invalid props', () => {
-    it('handles null onClose gracefully', async () => {
+    it('handles null onClose gracefully', () => {
       const user = userEvent.setup();
 
       render(
@@ -250,7 +249,7 @@ describe('Modal', () => {
       expect(handleClose).toHaveBeenCalledTimes(5);
     });
 
-    it('handles rapid prop changes', async () => {
+    it('handles rapid prop changes', () => {
       const { rerender } = render(
         <Modal.Root open>
           <Modal.Body>Content 1</Modal.Body>
@@ -405,7 +404,7 @@ describe('Modal', () => {
       );
 
       // Add custom event listener to verify preventDefault is called
-      const handleKeyDown = (e: KeyboardEvent) => {
+      const handleKeyDown = (e: KeyboardEvent): void => {
         if (e.key === 'Escape') {
           preventDefaultSpy();
         }

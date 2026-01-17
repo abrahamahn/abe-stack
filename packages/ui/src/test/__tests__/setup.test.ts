@@ -14,13 +14,13 @@ vi.mock('vitest', async () => {
 
   return {
     ...actual,
-    beforeAll: (callback: () => void) => {
+    beforeAll: (callback: () => void): void => {
       beforeAllMock(callback);
     },
-    afterEach: (callback: () => void) => {
+    afterEach: (callback: () => void): void => {
       afterEachMock(callback);
     },
-    afterAll: (callback: () => void) => {
+    afterAll: (callback: () => void): void => {
       afterAllMock(callback);
     },
   };
@@ -38,9 +38,15 @@ vi.mock('@testing-library/react', async () => {
 
 vi.mock('../mocks/server', () => ({
   server: {
-    listen: (...args: Array<unknown>) => listenMock(...args),
-    resetHandlers: (...args: Array<unknown>) => resetHandlersMock(...args),
-    close: (...args: Array<unknown>) => closeMock(...args),
+    listen: (...args: Array<unknown>): void => {
+      listenMock(...args);
+    },
+    resetHandlers: (...args: Array<unknown>): void => {
+      resetHandlersMock(...args);
+    },
+    close: (...args: Array<unknown>): void => {
+      closeMock(...args);
+    },
   },
 }));
 
@@ -61,22 +67,22 @@ describe('test setup', () => {
     expect(afterEachMock).toHaveBeenCalledTimes(1);
     expect(afterAllMock).toHaveBeenCalledTimes(1);
 
-    const beforeAllCallback = beforeAllMock.mock.calls[0]?.[0];
-    const afterEachCallback = afterEachMock.mock.calls[0]?.[0];
-    const afterAllCallback = afterAllMock.mock.calls[0]?.[0];
+    const beforeAllCallback = beforeAllMock.mock.calls[0]?.[0] as unknown;
+    const afterEachCallback = afterEachMock.mock.calls[0]?.[0] as unknown;
+    const afterAllCallback = afterAllMock.mock.calls[0]?.[0] as unknown;
 
     if (!beforeAllCallback || !afterEachCallback || !afterAllCallback) {
       throw new Error('Expected test setup hooks to be registered.');
     }
 
-    beforeAllCallback();
+    (beforeAllCallback as () => void)();
     expect(listenMock).toHaveBeenCalledWith({ onUnhandledRequest: 'warn' });
 
-    afterEachCallback();
+    (afterEachCallback as () => void)();
     expect(cleanupMock).toHaveBeenCalledTimes(1);
     expect(resetHandlersMock).toHaveBeenCalledTimes(1);
 
-    afterAllCallback();
+    (afterAllCallback as () => void)();
     expect(closeMock).toHaveBeenCalledTimes(1);
   });
 });
