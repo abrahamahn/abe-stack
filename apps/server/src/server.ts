@@ -9,10 +9,14 @@
 
 import path from 'node:path';
 
-import cookie from '@fastify/cookie';
-import csrfProtection from '@fastify/csrf-protection';
-import fastifyStatic from '@fastify/static';
-import { applyCors, applySecurityHeaders, handlePreflight } from '@http/index';
+import {
+  applyCors,
+  applySecurityHeaders,
+  handlePreflight,
+  registerCookies,
+  registerCsrf,
+  registerStaticServe,
+} from '@http/index';
 import { RateLimiter } from '@rate-limit/index';
 import { isAppError, type ApiErrorResponse } from '@shared/errors';
 import { sql } from 'drizzle-orm';
@@ -64,7 +68,7 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
   });
 
   // Register plugins
-  await registerPlugins(server, config);
+  registerPlugins(server, config);
 
   // Register core routes (health check needs db for connectivity test)
   registerCoreRoutes(server, db);
@@ -76,7 +80,7 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
 // Plugins & Middleware
 // ============================================================================
 
-async function registerPlugins(server: FastifyInstance, config: AppConfig): Promise<void> {
+function registerPlugins(server: FastifyInstance, config: AppConfig): void {
   const isProd = config.env === 'production';
 
   // Rate limiter instance (Token Bucket algorithm)
@@ -117,22 +121,20 @@ async function registerPlugins(server: FastifyInstance, config: AppConfig): Prom
     }
   });
 
-  // Cookies
-  await server.register(cookie, {
+  // Cookies (manual implementation)
+  registerCookies(server, {
     secret: config.auth.cookie.secret,
-    hook: 'onRequest',
-    parseOptions: {},
   });
 
-  // CSRF protection
-  await server.register(csrfProtection, {
+  // CSRF protection (manual implementation)
+  registerCsrf(server, {
+    secret: config.auth.cookie.secret,
     cookieOpts: {
       signed: true,
       sameSite: isProd ? 'strict' : 'lax',
       httpOnly: true,
       secure: isProd,
     },
-    sessionPlugin: '@fastify/cookie',
   });
 
   // Global error handler
@@ -177,12 +179,10 @@ async function registerPlugins(server: FastifyInstance, config: AppConfig): Prom
   // Static file serving (only if using local storage)
   if (config.storage.provider === 'local') {
     const rootPath = path.resolve(config.storage.rootPath);
-    await server.register(fastifyStatic, {
+    registerStaticServe(server, {
       root: rootPath,
-      prefix: '/uploads/', // Mount point
-      decorateReply: false, // Avoid conflict if multiple static plugins used
+      prefix: '/uploads/',
     });
-    server.log.info({ rootPath }, 'Serving static files from local storage');
   }
 }
 

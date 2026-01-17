@@ -57,6 +57,12 @@ Token Budget Tips:
 - `dev/principles.md` - Principles, patterns, anti-patterns, standards (consolidated)
 - `dev/architecture.md` - Technical architecture (consolidated)
 
+### Configuration & Build
+
+- `dev/config-setup.md` - Core monorepo configuration (TypeScript, path aliases, build system, Vite, caching)
+- `dev/sync-scripts.md` - DX automation scripts (path aliases, barrel exports, file headers, etc.)
+- `dev/dev-environment.md` - Development workflow, testing, CI/CD, Git hooks, Docker
+
 ### Testing
 
 - `dev/testing.md` - Consolidated testing strategy
@@ -111,7 +117,13 @@ Token Budget Tips:
 | coding standards       | `dev/principles.md`                |
 | resume session         | `agent/workflows.md`               |
 | file organization      | `AGENTS.md` (Section 5)            |
-| path aliases           | `AGENTS.md` (Section 5)            |
+| path aliases           | `dev/config-setup.md`              |
+| sync scripts           | `dev/sync-scripts.md`              |
+| barrel exports         | `dev/sync-scripts.md`              |
+| DX automation          | `dev/sync-scripts.md`              |
+| CI/CD                  | `dev/dev-environment.md`           |
+| git hooks              | `dev/dev-environment.md`           |
+| docker                 | `dev/dev-environment.md`           |
 | v5 migration           | `dev/architecture.md`              |
 | real-time sync         | `dev/architecture.md`              |
 | security phase 2       | `todo/security/phase-2-roadmap.md` |

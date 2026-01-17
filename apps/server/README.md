@@ -2,7 +2,9 @@
 
 ## Overview
 
-The ABE Stack server is a TypeScript backend built with **Fastify 5.x**, **PostgreSQL**, **Drizzle ORM**, and **ts-rest** contracts. It follows a hybrid **infra/modules** architecture with an `App` dependency injection container.
+The ABE Stack server is a TypeScript backend built with **Fastify 5.x**, **PostgreSQL**, **Drizzle ORM**, and **ts-rest** contracts. It follows a **hexagonal architecture** with clear separation between infrastructure and business logic.
+
+**Stats:** 79 source files | 39 test files | 557 tests passing
 
 ## Architecture
 
@@ -11,17 +13,18 @@ The ABE Stack server is a TypeScript backend built with **Fastify 5.x**, **Postg
 │                      Entry Points                               │
 │  main.ts → app.ts → server.ts                                   │
 ├─────────────────────────────────────────────────────────────────┤
-│                      Config Layer                               │
+│                      Config Layer (8 files)                     │
 │  Zod-validated environment configuration                        │
 ├─────────────────────────────────────────────────────────────────┤
-│                      Modules Layer                              │
+│                      Modules Layer (16 files)                   │
 │  Business features: auth, users, admin                          │
 ├─────────────────────────────────────────────────────────────────┤
-│                      Shared Layer                               │
+│                      Shared Layer (4 files)                     │
 │  Constants, errors, types                                       │
 ├─────────────────────────────────────────────────────────────────┤
-│                      Infrastructure Layer                       │
-│  Database, storage, email, pubsub, websocket, security           │
+│                      Infrastructure Layer (46 files)            │
+│  database, storage, email, pubsub, websocket, security,         │
+│  http, rate-limit, crypto, health                               │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -31,108 +34,138 @@ The ABE Stack server is a TypeScript backend built with **Fastify 5.x**, **Postg
 apps/server/src/
 ├── main.ts              # Application entry point
 ├── app.ts               # App DI container + lifecycle
-├── server.ts            # Fastify server factory + listeners
+├── server.ts            # Fastify server factory + plugins
 │
-├── config/              # Configuration
+├── config/              # Configuration (8 files)
 │   ├── index.ts         # loadConfig() entry point
 │   ├── loader.ts        # Environment loading utilities
 │   ├── types.ts         # AppConfig type definition
-│   ├── auth.config.ts   # JWT, password, lockout settings
+│   ├── auth.config.ts   # JWT, password, lockout, OAuth, TOTP
 │   ├── database.config.ts
 │   ├── email.config.ts
 │   ├── server.config.ts
 │   └── storage.config.ts
 │
-├── infra/               # Infrastructure (technical capabilities)
-│   ├── database/
-│   │   ├── client.ts        # createDbClient, connection string
+├── infra/               # Infrastructure (46 files, 10 modules)
+│   ├── database/        # Drizzle ORM client + schemas
+│   │   ├── client.ts        # createDbClient, connection pooling
 │   │   ├── transaction.ts   # withTransaction wrapper
-│   │   ├── schema/          # Drizzle schemas
-│   │   │   ├── users.ts     # users, refreshTokens tables
-│   │   │   └── auth.ts      # refreshTokenFamilies, loginAttempts, etc.
-│   │   ├── utils/
-│   │   │   └── optimistic-lock.ts  # Version-based locking
-│   │   └── index.ts         # Database exports
-│   ├── storage/
-│   │   ├── storageFactory.ts    # createStorage()
-│   │   ├── types.ts
-│   │   └── index.ts
-│   ├── email/
+│   │   ├── schema/          # Database schemas
+│   │   │   ├── users.ts     # users table
+│   │   │   └── auth.ts      # refreshTokens, loginAttempts, etc.
+│   │   └── utils/
+│   │       └── optimistic-lock.ts
+│   │
+│   ├── storage/         # File storage abstraction
+│   │   ├── storageFactory.ts    # Provider factory
+│   │   └── providers/
+│   │       ├── localStorageProvider.ts
+│   │       └── s3StorageProvider.ts
+│   │
+│   ├── email/           # Email service
+│   │   ├── factory.ts           # Provider factory
 │   │   ├── consoleEmailService.ts
 │   │   ├── smtpEmailService.ts
-│   │   ├── templates.ts
-│   │   └── types.ts
-│   ├── pubsub/
+│   │   ├── smtp.ts              # Raw SMTP client
+│   │   └── templates.ts
+│   │
+│   ├── pubsub/          # Real-time subscriptions
 │   │   ├── subscriptionManager.ts  # In-memory pub/sub
-│   │   ├── postgresPubSub.ts        # Postgres adapter
-│   │   ├── helpers.ts              # publishAfterWrite
-│   │   └── types.ts
-│   ├── websocket/
-│   │   ├── websocket.ts             # WebSocket server wiring
-│   │   └── index.ts
-│   ├── security/
-│   │   ├── lockout.ts     # Login attempt tracking, account lockout
-│   │   ├── events.ts      # Security event logging
-│   │   └── types.ts
-│   ├── crypto/
-│   │   └── jwt.ts         # JWT utilities
-│   ├── http/
-│   │   └── security.ts    # CORS, security headers
-│   ├── rate-limit/
-│   │   └── limiter.ts     # Token bucket rate limiter
-│   └── health/
-│       └── index.ts       # Health checks, startup summary
+│   │   ├── postgresPubSub.ts       # Postgres NOTIFY/LISTEN
+│   │   └── helpers.ts              # SubKeys, publishAfterWrite
+│   │
+│   ├── security/        # Security infrastructure
+│   │   ├── lockout.ts   # Login attempt tracking, account lockout
+│   │   └── events.ts    # Security event audit logging
+│   │
+│   ├── http/            # HTTP middleware
+│   │   ├── security.ts  # Security headers, CORS
+│   │   ├── cookie.ts    # HMAC-SHA256 signed cookies
+│   │   ├── csrf.ts      # CSRF protection
+│   │   └── static.ts    # Static file serving
+│   │
+│   ├── crypto/          # Cryptographic utilities
+│   │   └── jwt.ts       # Native HS256 JWT (no external lib)
+│   │
+│   ├── rate-limit/      # Rate limiting
+│   │   └── limiter.ts   # Token bucket algorithm
+│   │
+│   ├── websocket/       # WebSocket support
+│   │   └── websocket.ts
+│   │
+│   └── health/          # Health checks
+│       └── index.ts     # Per-service health validation
 │
-├── modules/             # Business modules (features)
-│   ├── index.ts         # registerRoutes() - all routes
-│   ├── auth/
-│   │   ├── index.ts     # Exports
-│   │   ├── handlers.ts  # Route handlers
+├── modules/             # Business modules (16 files, 3 modules)
+│   ├── index.ts         # registerRoutes() - route registration
+│   │
+│   ├── auth/            # Authentication (10 files)
+│   │   ├── handlers.ts  # register, login, refresh, logout
 │   │   ├── service.ts   # AuthService business logic
-│   │   ├── middleware.ts  # requireAuth, requireRole
+│   │   ├── middleware.ts  # requireAuth, requireRole guards
 │   │   └── utils/
-│   │       ├── jwt.ts         # Token generation/verification
+│   │       ├── jwt.ts         # Token generation
 │   │       ├── password.ts    # Argon2id hashing
 │   │       ├── refresh-token.ts  # Token rotation, family detection
-│   │       ├── request.ts     # IP extraction, user agent parsing
-│   │       └── __tests__/     # Utility unit tests
-│   ├── users/
-│   │   ├── handlers.ts  # User CRUD handlers
+│   │       └── request.ts     # IP/user-agent extraction
+│   │
+│   ├── users/           # User management (3 files)
+│   │   ├── handlers.ts  # GET /me
 │   │   └── service.ts   # UserService
-│   └── admin/
-│       ├── handlers.ts  # Admin operations
+│   │
+│   └── admin/           # Admin operations (3 files)
+│       ├── handlers.ts  # Admin unlock endpoint
 │       └── service.ts   # AdminService
 │
-├── shared/              # Shared utilities
-│   ├── index.ts
-│   ├── constants.ts     # Error messages, config defaults
-│   ├── errors.ts        # Custom error classes
-│   └── types.ts         # AppContext, service interfaces
+├── shared/              # Shared kernel (4 files)
+│   ├── constants.ts     # Time constants, HTTP status, messages
+│   ├── errors.ts        # AppError classes (BadRequest, Unauthorized, etc.)
+│   └── types.ts         # User, Token, AppContext interfaces
 │
 ├── scripts/
 │   └── seed.ts          # Database seeding
 │
-├── types/
-│   └── fastify.d.ts     # Fastify type augmentation
+└── types/
+    └── fastify.d.ts     # Fastify type augmentation
 ```
+
+## Dependencies
+
+**Production (9 packages):**
+
+- `@abe-stack/core` - Shared contracts and validation
+- `fastify` - Web framework
+- `drizzle-orm` + `postgres` - Database
+- `argon2` - Password hashing
+- `ws` - WebSocket
+- `@aws-sdk/*` (3 packages) - S3 storage
+
+**Development (3 packages):**
+
+- `@types/ws` - WebSocket types
+- `drizzle-kit` - Database migrations
+- `pino-pretty` - Log formatting
 
 ## Key Concepts
 
 ### App Dependency Container
 
-The `App` class in `app.ts` implements the dependency container:
+The `App` class manages all services and lifecycle:
 
 ```typescript
-interface IServiceContainer {
+class App implements IServiceContainer {
   readonly config: AppConfig;
   readonly db: DbClient;
   readonly email: EmailService;
   readonly storage: StorageProvider;
   readonly pubsub: SubscriptionManager;
+
+  async start(): Promise<void>; // Initialize and listen
+  async stop(): Promise<void>; // Graceful shutdown
 }
 ```
 
-Handlers receive an `AppContext` with all dependencies:
+Handlers receive `AppContext` with all dependencies:
 
 ```typescript
 interface AppContext extends IServiceContainer {
@@ -142,14 +175,14 @@ interface AppContext extends IServiceContainer {
 
 ### Configuration
 
-All configuration is loaded from environment variables and validated with Zod:
+All configuration loaded from environment and validated with Zod:
 
 ```typescript
 const config = loadConfig(process.env);
-// Returns typed AppConfig with nested objects:
-// - config.server (port, host, env)
-// - config.database (url, poolSize)
-// - config.auth (jwt secrets, expiry, lockout)
+// Returns typed AppConfig:
+// - config.server (port, host, env, cors, trustProxy)
+// - config.database (url, poolSize, fallbackHosts)
+// - config.auth (jwt, password, lockout, oauth, totp)
 // - config.email (provider, smtp settings)
 // - config.storage (provider, local/s3 settings)
 ```
@@ -158,59 +191,94 @@ const config = loadConfig(process.env);
 
 1. **Register/Login** → Creates user, generates access + refresh tokens
 2. **Access Token** → Short-lived JWT (15 min), used for API requests
-3. **Refresh Token** → Long-lived (7 days), stored in database with family ID
+3. **Refresh Token** → Long-lived (7 days), stored in DB with family ID
 4. **Token Rotation** → On refresh, old token invalidated, new one issued
 5. **Reuse Detection** → If old token reused, entire family revoked
 
 ### Security Features
 
-- **Argon2id** password hashing (OWASP parameters)
-- **JWT rotation** with token family tracking
-- **Account lockout** after failed attempts (progressive delay)
-- **Security event logging** (token reuse, lockouts, suspicious activity)
-- **Auth middleware** (`requireAuth`, `requireRole`) for protected routes
-- **Request utilities** for IP/user-agent extraction and audit logging
-- **Rate limiting** (token bucket algorithm)
-- **CORS** and security headers
+| Feature          | Implementation                                |
+| ---------------- | --------------------------------------------- |
+| Password Hashing | Argon2id (OWASP parameters)                   |
+| JWT              | Native HS256 (no external library)            |
+| Token Rotation   | Family-based tracking, reuse detection        |
+| Account Lockout  | Progressive delay after failed attempts       |
+| Audit Logging    | Security events (login, lockout, token reuse) |
+| Rate Limiting    | Token bucket algorithm                        |
+| CSRF Protection  | Signed double-submit cookies                  |
+| Security Headers | CSP, X-Frame-Options, etc.                    |
 
-### Real-Time Infrastructure
+### Infrastructure Modules
 
-- **SubscriptionManager** for in-memory publish/subscribe
-- **Postgres PubSub adapter** for horizontal scaling
-- **WebSocket wiring** for real-time client updates
+| Module       | Purpose                                       |
+| ------------ | --------------------------------------------- |
+| `database`   | Drizzle ORM, transactions, optimistic locking |
+| `storage`    | Local filesystem or S3 abstraction            |
+| `email`      | Console or SMTP email service                 |
+| `pubsub`     | In-memory + Postgres NOTIFY for scaling       |
+| `security`   | Login lockout, audit logging                  |
+| `http`       | Security headers, CORS, cookies, CSRF, static |
+| `crypto`     | Native JWT signing/verification               |
+| `rate-limit` | Token bucket rate limiter                     |
+| `websocket`  | Real-time connection support                  |
+| `health`     | Per-service health checks                     |
 
-## API Contracts
+## API Routes
 
-Routes are defined using **ts-rest** contracts in `packages/core`:
+```
+POST /api/auth/register     # User registration
+POST /api/auth/login        # Email/password login
+POST /api/auth/refresh      # Token refresh (via cookie)
+POST /api/auth/logout       # Logout (revoke tokens)
+POST /api/auth/verify-email # Email verification (not implemented)
 
-```typescript
-// packages/core/src/contracts/auth.ts
-export const authContract = c.router({
-  register: { method: 'POST', path: '/auth/register', ... },
-  login: { method: 'POST', path: '/auth/login', ... },
-  refresh: { method: 'POST', path: '/auth/refresh', ... },
-  logout: { method: 'POST', path: '/auth/logout', ... },
-});
+GET  /api/users/me          # Current user profile (protected)
+
+POST /api/admin/auth/unlock # Unlock account (admin only)
+
+GET  /health                # Basic health check
+GET  /health/detailed       # Detailed service status
+GET  /health/routes         # Registered routes list
+GET  /health/ready          # Kubernetes readiness
+GET  /health/live           # Kubernetes liveness
 ```
 
-The server implements these contracts with full type safety.
+## Database Schema
+
+```sql
+-- Core tables
+users                    # User accounts (id, email, name, role, passwordHash)
+
+-- Auth tables
+refresh_tokens           # Active refresh tokens
+refresh_token_families   # Token family tracking (for reuse detection)
+login_attempts           # Failed login tracking (for lockout)
+password_reset_tokens    # Password reset flow
+email_verification_tokens # Email verification flow
+security_events          # Audit log
+```
 
 ## Running the Server
 
 ```bash
-# Development
-pnpm --filter @abe-stack/server dev
+# Development (with hot reload via tsx)
+pnpm dev:server
 
 # Production build
 pnpm --filter @abe-stack/server build
 pnpm --filter @abe-stack/server start
 
-# Run tests
+# Tests
 pnpm --filter @abe-stack/server test
+
+# Type checking (includes tests)
+pnpm --filter @abe-stack/server type-check
 
 # Database operations
 pnpm --filter @abe-stack/server db:generate  # Generate migrations
 pnpm --filter @abe-stack/server db:migrate   # Run migrations
+pnpm --filter @abe-stack/server db:push      # Push schema changes
+pnpm --filter @abe-stack/server db:studio    # Open Drizzle Studio
 pnpm --filter @abe-stack/server db:seed      # Seed test data
 ```
 
@@ -225,7 +293,9 @@ NODE_ENV=development
 DATABASE_URL=postgresql://user:pass@localhost:5432/abe_stack
 
 # Auth
-JWT_SECRET=your-secret-key
+JWT_SECRET=your-secret-key-min-32-chars
+JWT_ACCESS_EXPIRY=15m
+JWT_REFRESH_EXPIRY=7d
 
 # Email (optional)
 EMAIL_PROVIDER=console  # or smtp
@@ -237,29 +307,61 @@ SMTP_PASS=pass
 # Storage (optional)
 STORAGE_PROVIDER=local  # or s3
 STORAGE_ROOT_PATH=./storage
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+AWS_S3_BUCKET=...
+AWS_S3_REGION=...
 ```
 
-## Testing
+## Build Configuration
 
-Tests use Vitest with a test database:
-
-```bash
-# Run all server tests
-pnpm --filter @abe-stack/server test
-
-# Run specific test file
-pnpm test -- --run apps/server/src/modules/auth/utils/__tests__/password.test.ts
+```
+tsconfig.json        # Type-checking (includes tests)
+tsconfig.build.json  # Build output (excludes tests)
+vitest.config.ts     # Re-exports shared config
 ```
 
-Test utilities create mock `AppContext` for unit testing handlers.
+**Build command:** `tsc -p tsconfig.build.json`
+**Type-check command:** `tsc --project tsconfig.json --noEmit`
 
 ## Adding New Features
 
-1. **Create module** in `src/modules/your-feature/`
-2. **Define contract** in `packages/core/src/contracts/`
-3. **Implement handlers** that receive `AppContext`
-4. **Register routes** in `src/modules/index.ts`
-5. **Add tests** in `src/modules/your-feature/__tests__/`
+1. **Define contract** in `packages/core/src/contracts/`
+2. **Create module** in `src/modules/your-feature/`
+   - `handlers.ts` - Route handlers
+   - `service.ts` - Business logic
+   - `index.ts` - Barrel exports
+3. **Register routes** in `src/modules/index.ts`
+4. **Add tests** in `src/modules/your-feature/__tests__/`
+
+### Handler Pattern
+
+```typescript
+export async function handleYourFeature(
+  ctx: AppContext,
+  body: YourInput,
+  req: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const result = await yourService(ctx, body);
+  return { status: 200, body: result };
+}
+```
+
+### Route Registration
+
+```typescript
+// In src/modules/index.ts
+instance.route({
+  method: 'POST',
+  url: '/api/your-feature',
+  preHandler: [authGuard], // Optional auth
+  handler: async (req, reply) => {
+    const result = await handleYourFeature(ctx, req.body, req, reply);
+    return reply.status(result.status).send(result.body);
+  },
+});
+```
 
 ---
 

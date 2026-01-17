@@ -1,4 +1,4 @@
-// apps/desktop/electron/preload.ts
+// apps/desktop/src/electron/preload.ts
 import { contextBridge } from 'electron';
 
 /**

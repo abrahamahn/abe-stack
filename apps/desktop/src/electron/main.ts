@@ -1,4 +1,4 @@
-// apps/desktop/electron/main.ts
+// apps/desktop/src/electron/main.ts
 import net from 'node:net';
 import * as path from 'path';
 
@@ -76,7 +76,6 @@ const createWindow = async (): Promise<void> => {
 
     const rendererPortString = String(rendererPort);
     await mainWindow.loadURL(`http://localhost:${rendererPortString}`);
-    mainWindow.webContents.openDevTools();
   } else {
     void mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
   }

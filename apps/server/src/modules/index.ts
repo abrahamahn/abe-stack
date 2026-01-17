@@ -2,13 +2,16 @@
 /**
  * Route Registration
  *
- * This is the single place where all modules connect to the HTTP layer.
- * Uses ts-rest for type-safe routing.
+ * Manual Fastify route registration with Zod validation.
+ * Replaces @ts-rest/fastify for minimal dependencies.
  */
 
-import { apiContract } from '@abe-stack/core';
+import {
+  loginRequestSchema,
+  registerRequestSchema,
+  unlockAccountRequestSchema,
+} from '@abe-stack/core';
 import { ERROR_MESSAGES, type AppContext } from '@shared/index';
-import { initServer } from '@ts-rest/fastify';
 
 import { handleAdminUnlock } from './admin';
 import {
@@ -22,61 +25,118 @@ import {
 } from './auth';
 import { handleMe } from './users';
 
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 // Re-export modules
-export * as admin from './admin';
-export * as auth from './auth';
-export * as users from './users';
+export { handleAdminUnlock } from './admin';
+export {
+  createAuthGuard,
+  handleLogin,
+  handleLogout,
+  handleRefresh,
+  handleRegister,
+  type ReplyWithCookies,
+  type RequestWithCookies,
+} from './auth';
+export { handleMe } from './users';
 
 /**
  * Register all application routes
  */
 export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
-  const s = initServer();
-
   // Middleware guards
   const authGuard = createAuthGuard(ctx.config.auth.jwt.secret);
   const adminGuard = createAuthGuard(ctx.config.auth.jwt.secret, 'admin');
 
-  // 1. Auth Module (Public)
-  const authRouter = s.router(apiContract.auth, {
-    register: async ({ body, reply }) => handleRegister(ctx, body, reply as ReplyWithCookies),
-    login: async ({ body, request, reply }) =>
-      handleLogin(ctx, body, request as RequestWithCookies, reply as ReplyWithCookies),
-    refresh: async ({ request, reply }) =>
-      handleRefresh(ctx, request as RequestWithCookies, reply as ReplyWithCookies),
-    logout: async ({ request, reply }) =>
-      handleLogout(ctx, request as RequestWithCookies, reply as ReplyWithCookies),
-    verifyEmail: async () =>
-      Promise.resolve({
-        status: 404 as const,
-        body: { message: ERROR_MESSAGES.EMAIL_VERIFICATION_NOT_IMPLEMENTED },
-      }),
+  // ============================================================================
+  // Auth Routes (Public)
+  // ============================================================================
+
+  app.post('/api/auth/register', async (req: FastifyRequest, reply: FastifyReply) => {
+    const parsed = registerRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return reply
+        .status(400)
+        .send({ message: parsed.error.issues[0]?.message ?? 'Invalid input' });
+    }
+
+    const result = await handleRegister(ctx, parsed.data, reply as unknown as ReplyWithCookies);
+    return reply.status(result.status).send(result.body);
   });
 
-  s.registerRouter(apiContract.auth, authRouter, app);
+  app.post('/api/auth/login', async (req: FastifyRequest, reply: FastifyReply) => {
+    const parsed = loginRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return reply
+        .status(400)
+        .send({ message: parsed.error.issues[0]?.message ?? 'Invalid input' });
+    }
 
-  // 2. Users Module (Protected)
-  const usersRouter = s.router(apiContract.users, {
-    me: async ({ request }) => handleMe(ctx, request as RequestWithCookies),
+    const result = await handleLogin(
+      ctx,
+      parsed.data,
+      req as unknown as RequestWithCookies,
+      reply as unknown as ReplyWithCookies,
+    );
+    return reply.status(result.status).send(result.body);
   });
 
-  void app.register((instance, _opts, done) => {
+  app.post('/api/auth/refresh', async (req: FastifyRequest, reply: FastifyReply) => {
+    const result = await handleRefresh(
+      ctx,
+      req as unknown as RequestWithCookies,
+      reply as unknown as ReplyWithCookies,
+    );
+    return reply.status(result.status).send(result.body);
+  });
+
+  app.post('/api/auth/logout', async (req: FastifyRequest, reply: FastifyReply) => {
+    const result = await handleLogout(
+      ctx,
+      req as unknown as RequestWithCookies,
+      reply as unknown as ReplyWithCookies,
+    );
+    return reply.status(result.status).send(result.body);
+  });
+
+  app.post('/api/auth/verify-email', (_req: FastifyRequest, reply: FastifyReply) => {
+    return reply.status(404).send({ message: ERROR_MESSAGES.EMAIL_VERIFICATION_NOT_IMPLEMENTED });
+  });
+
+  // ============================================================================
+  // Users Routes (Protected)
+  // ============================================================================
+
+  void app.register((instance) => {
     instance.addHook('preHandler', authGuard);
-    s.registerRouter(apiContract.users, usersRouter, instance);
-    done();
+
+    instance.get('/api/users/me', async (req: FastifyRequest, reply: FastifyReply) => {
+      const result = await handleMe(ctx, req as unknown as RequestWithCookies);
+      return reply.status(result.status).send(result.body);
+    });
   });
 
-  // 3. Admin Module (Protected + Admin Role)
-  const adminRouter = s.router(apiContract.admin, {
-    unlockAccount: async ({ body, request }) =>
-      handleAdminUnlock(ctx, body, request as RequestWithCookies),
-  });
+  // ============================================================================
+  // Admin Routes (Protected + Admin Role)
+  // ============================================================================
 
-  void app.register((instance, _opts, done) => {
+  void app.register((instance) => {
     instance.addHook('preHandler', adminGuard);
-    s.registerRouter(apiContract.admin, adminRouter, instance);
-    done();
+
+    instance.post('/api/admin/auth/unlock', async (req: FastifyRequest, reply: FastifyReply) => {
+      const parsed = unlockAccountRequestSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return reply
+          .status(400)
+          .send({ message: parsed.error.issues[0]?.message ?? 'Invalid input' });
+      }
+
+      const result = await handleAdminUnlock(
+        ctx,
+        parsed.data,
+        req as unknown as RequestWithCookies,
+      );
+      return reply.status(result.status).send(result.body);
+    });
   });
 }

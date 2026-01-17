@@ -1,30 +1,9 @@
 // apps/web/src/features/demo/catalog/index.ts
-import { componentCatalog as components } from './componentCatalog';
-import { elementCatalog as elements } from './elementCatalog';
-import { layoutCatalog as layouts } from './layoutCatalog';
+// Note: Individual catalogs (componentCatalog, elementCatalog, layoutCatalog) are not
+// exported eagerly to enable proper code-splitting via lazyRegistry.ts.
+// Tests can import directly from the catalog files if needed.
 
-import type { ComponentDemo } from '@demo/types';
-
-// Combine all catalogs into a single catalog (eager loading - for backwards compatibility)
-export const componentCatalog: Record<string, ComponentDemo> = {
-  ...components,
-  ...elements,
-  ...layouts,
-};
-
-export const getComponentsByCategory = (category: string): ComponentDemo[] => {
-  return Object.values(componentCatalog).filter((comp) => comp.category === category);
-};
-
-export const getAllCategories = (): string[] => {
-  return Array.from(new Set(Object.values(componentCatalog).map((comp) => comp.category)));
-};
-
-export const getTotalComponentCount = (): number => {
-  return Object.keys(componentCatalog).length;
-};
-
-// Lazy loading exports
+// Re-export lazy loading functions
 export {
   clearCategoryCache,
   getAvailableCategories,
@@ -35,3 +14,6 @@ export {
   loadCategory,
   preloadCategories,
 } from './lazyRegistry';
+
+// Re-export types
+export type { ComponentCategory, ComponentDemo, ComponentVariant } from '@demo/types';

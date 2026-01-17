@@ -19,6 +19,10 @@ out/
 *.tsbuildinfo
 *.txt
 
+# Compiled JS in src (should go to dist)
+apps/*/src/**/*.js
+apps/*/src/**/*.js.map
+
 # Allow Vite config for web build
 !config/build/
 !config/build/vite.config.ts

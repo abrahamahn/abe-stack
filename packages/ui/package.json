@@ -6,38 +6,38 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./components": {
-      "import": "./dist/components/index.js",
-      "types": "./dist/components/index.d.ts"
+      "types": "./dist/components/index.d.ts",
+      "import": "./dist/components/index.js"
     },
     "./elements": {
-      "import": "./dist/elements/index.js",
-      "types": "./dist/elements/index.d.ts"
+      "types": "./dist/elements/index.d.ts",
+      "import": "./dist/elements/index.js"
     },
     "./layouts": {
-      "import": "./dist/layouts/index.js",
-      "types": "./dist/layouts/index.d.ts"
+      "types": "./dist/layouts/index.d.ts",
+      "import": "./dist/layouts/index.js"
     },
     "./hooks": {
-      "import": "./dist/hooks/index.js",
-      "types": "./dist/hooks/index.d.ts"
+      "types": "./dist/hooks/index.d.ts",
+      "import": "./dist/hooks/index.js"
     },
     "./theme": {
-      "import": "./dist/theme/index.js",
-      "types": "./dist/theme/index.d.ts"
+      "types": "./dist/theme/index.d.ts",
+      "import": "./dist/theme/index.js"
     },
     "./utils": {
-      "import": "./dist/utils/index.js",
-      "types": "./dist/utils/index.d.ts"
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.js"
     },
     "./styles/*.css": "./src/styles/*.css",
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "tsc --build && tsc-alias && cp -r src/styles dist/",
+    "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build && tsc-alias && cp -r src/styles dist/",
     "dev": "tsc --watch --project tsconfig.json",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "type-check": "tsc --project tsconfig.json --noEmit",
