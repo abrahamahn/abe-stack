@@ -17,6 +17,9 @@
       "path": "./packages/sdk"
     },
     {
+      "path": "./packages/tests"
+    },
+    {
       "path": "./packages/ui"
     }
   ]

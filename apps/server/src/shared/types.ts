@@ -84,11 +84,33 @@ export interface RequestInfo {
 }
 
 // ============================================================================
+// Fastify Request/Reply Extensions
+// ============================================================================
+
+export interface ReplyWithCookies {
+  setCookie: (name: string, value: string, options: Record<string, unknown>) => void;
+  clearCookie: (name: string, options: Record<string, unknown>) => void;
+}
+
+export interface RequestWithCookies {
+  cookies: Record<string, string | undefined>;
+  headers: { authorization?: string };
+  user?: { userId: string; email: string; role: string };
+}
+
+// ============================================================================
 // Service Interfaces (Ports)
 // ============================================================================
 
 /**
  * Logger interface - abstracts away the actual logger implementation
+ *
+ * @deprecated Use Logger from '@infra/logger' for new code.
+ * The infra/logger module provides a more complete interface with:
+ * - trace, fatal levels
+ * - child() method for scoped logging
+ * - Correlation ID support
+ * - Request context integration
  */
 export interface Logger {
   info(msg: string, data?: Record<string, unknown>): void;

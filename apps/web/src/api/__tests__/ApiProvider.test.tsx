@@ -1,11 +1,16 @@
 // apps/web/src/api/__tests__/ApiProvider.test.tsx
 /** @vitest-environment jsdom */
+import { ClientEnvironmentProvider } from '@app';
+import { QueryClient } from '@tanstack/react-query';
 import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ApiProvider, useApi } from '../ApiProvider';
+
+import type { ClientConfig, ClientEnvironment } from '@app';
+import type { AuthService } from '@features/auth';
 
 // Track callback handlers captured by createReactQueryClient
 let capturedCallbacks: {
@@ -31,19 +36,30 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Mock dependencies - use inline object since vi.mock is hoisted
-vi.mock('@abe-stack/sdk', () => ({
-  createReactQueryClient: vi.fn(
-    (config: {
-      getToken?: () => string | null;
-      onUnauthorized?: () => void;
-      onServerError?: (message?: string) => void;
-    }) => {
-      capturedCallbacks = config;
-      return { someApiMethod: vi.fn() };
-    },
-  ),
-}));
+// Mock dependencies - use importOriginal for partial mocking
+vi.mock('@abe-stack/sdk', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/sdk')>();
+  return {
+    ...actual,
+    createReactQueryClient: vi.fn(
+      (config: {
+        getToken?: () => string | null;
+        onUnauthorized?: () => void;
+        onServerError?: (message?: string) => void;
+      }) => {
+        capturedCallbacks = config;
+        return { someApiMethod: vi.fn() };
+      },
+    ),
+    createApiClient: vi.fn(() => ({
+      login: vi.fn(),
+      register: vi.fn(),
+      logout: vi.fn(),
+      refresh: vi.fn(),
+      getCurrentUser: vi.fn(),
+    })),
+  };
+});
 
 vi.mock('@abe-stack/core', () => ({
   tokenStore: {
@@ -58,12 +74,45 @@ vi.mock('@abe-stack/core', () => ({
   },
 }));
 
+// Create mock environment for tests
+function createMockEnvironment(): ClientEnvironment {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  });
+
+  const mockConfig: ClientConfig = {
+    mode: 'test',
+    isDev: false,
+    isProd: false,
+    apiUrl: 'http://localhost:8080',
+    tokenRefreshInterval: 13 * 60 * 1000,
+    uiVersion: '1.0.0',
+  };
+
+  const mockAuth = {
+    getState: () => ({ user: null, isLoading: false, isAuthenticated: false }),
+    subscribe: () => () => {},
+    login: vi.fn(),
+    register: vi.fn(),
+    logout: vi.fn(),
+    refreshToken: vi.fn(),
+    fetchCurrentUser: vi.fn(),
+    destroy: vi.fn(),
+  } as unknown as AuthService;
+
+  return {
+    config: mockConfig,
+    queryClient,
+    auth: mockAuth,
+  };
+}
+
 // Test component that uses the API context
 function TestConsumer(): React.ReactElement {
-  const api = useApi();
-  // useApi throws if null, so if we reach here, api is always available
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  return <div data-testid="api-consumer">{api ? 'API Available' : 'No API'}</div>;
+  useApi();
+  return <div data-testid="api-consumer">API Available</div>;
 }
 
 describe('ApiProvider', () => {
@@ -73,12 +122,15 @@ describe('ApiProvider', () => {
   });
 
   const renderWithProvider = (): ReturnType<typeof render> => {
+    const mockEnv = createMockEnvironment();
     return render(
-      <MemoryRouter>
-        <ApiProvider>
-          <TestConsumer />
-        </ApiProvider>
-      </MemoryRouter>,
+      <ClientEnvironmentProvider value={mockEnv}>
+        <MemoryRouter>
+          <ApiProvider>
+            <TestConsumer />
+          </ApiProvider>
+        </MemoryRouter>
+      </ClientEnvironmentProvider>,
     );
   };
 
@@ -154,6 +206,7 @@ describe('ApiProvider', () => {
 
 describe('useApi', () => {
   it('should throw error when used outside ApiProvider', () => {
+    const mockEnv = createMockEnvironment();
     const TestComponent = (): React.ReactElement => {
       useApi();
       return <div>Test</div>;
@@ -164,9 +217,11 @@ describe('useApi', () => {
 
     expect(() =>
       render(
-        <MemoryRouter>
-          <TestComponent />
-        </MemoryRouter>,
+        <ClientEnvironmentProvider value={mockEnv}>
+          <MemoryRouter>
+            <TestComponent />
+          </MemoryRouter>
+        </ClientEnvironmentProvider>,
       ),
     ).toThrow('useApi must be used within ApiProvider');
 

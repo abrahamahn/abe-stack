@@ -1,12 +1,9 @@
 // packages/ui/src/components/Toast.tsx
 import { useEffect, type ReactElement } from 'react';
-import '../styles/components.css';
 
-type ToastMessage = {
-  id: string;
-  title?: string;
-  description?: string;
-};
+import type { ToastMessage } from '@abe-stack/core';
+
+import '../styles/components.css';
 
 type ToastProps = {
   message: ToastMessage;

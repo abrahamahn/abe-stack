@@ -1,5 +1,14 @@
 // apps/web/src/features/auth/pages/Login.tsx
-import { Button, Card, Heading, Input, PageContainer, Text, useHistoryNav } from '@abe-stack/ui';
+import {
+  Button,
+  Card,
+  Heading,
+  Input,
+  PageContainer,
+  PasswordInput,
+  Text,
+  useHistoryNav,
+} from '@abe-stack/ui';
 import { useAuth } from '@auth/hooks';
 import { useState } from 'react';
 
@@ -59,20 +68,15 @@ export function LoginPage(): JSX.Element {
               />
             </div>
 
-            <div>
-              <label htmlFor="password" style={{ display: 'block', marginBottom: '6px' }}>
-                Password
-              </label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={handlePasswordChange}
-                placeholder="••••••••"
-                required
-                style={{ width: '100%' }}
-              />
-            </div>
+            <PasswordInput
+              id="password"
+              label="Password"
+              value={password}
+              onChange={handlePasswordChange}
+              placeholder="••••••••"
+              required
+              showToggle
+            />
 
             {error && <Text tone="danger">{error}</Text>}
 
@@ -98,7 +102,7 @@ export function LoginPage(): JSX.Element {
       </Card>
 
       <Text tone="muted" style={{ textAlign: 'center', fontSize: '14px' }}>
-        Don't have an account? Register coming soon...
+        Don't have an account? <a href="/register">Register</a>
       </Text>
     </PageContainer>
   );

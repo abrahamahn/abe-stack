@@ -18,7 +18,7 @@ import {
   registerStaticServe,
 } from '@http/index';
 import { RateLimiter } from '@rate-limit/index';
-import { isAppError, type ApiErrorResponse } from '@shared/errors';
+import { isAppError, type ApiErrorResponse } from '@shared/index';
 import { sql } from 'drizzle-orm';
 import Fastify from 'fastify';
 

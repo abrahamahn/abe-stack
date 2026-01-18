@@ -1,7 +1,14 @@
 // apps/web/src/api/ApiProvider.tsx
+/**
+ * ApiProvider - Provides React Query API client to components.
+ *
+ * Uses ClientEnvironment's config for base URL and token management.
+ * Creates a React Query client wrapper with navigation callbacks.
+ */
+
 import { toastStore, tokenStore } from '@abe-stack/core';
 import { createReactQueryClient } from '@abe-stack/sdk';
-import { config } from '@config';
+import { useClientEnvironment } from '@app';
 import { createContext, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,7 +19,7 @@ const ApiContext = createContext<ReactQueryClientInstance | null>(null);
 
 /**
  * Hook to access the typed API client.
- * Must be used within ApiProvider.
+ * Must be used within ApiProvider (which is inside ClientEnvironmentProvider).
  */
 export const useApi = (): ReactQueryClientInstance => {
   const ctx = useContext(ApiContext);
@@ -26,9 +33,10 @@ type ApiProviderProps = {
 
 /**
  * ApiProvider creates a configured API client with auth token management.
- * Must be used within QueryClientProvider (provided by AppProviders).
+ * Must be used within ClientEnvironmentProvider.
  */
 export function ApiProvider({ children }: ApiProviderProps): ReactElement {
+  const { config } = useClientEnvironment();
   const navigate = useNavigate();
 
   const api = useMemo<ReactQueryClientInstance>(() => {
@@ -46,7 +54,7 @@ export function ApiProvider({ children }: ApiProviderProps): ReactElement {
         });
       },
     });
-  }, [navigate]);
+  }, [config.apiUrl, navigate]);
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
 }

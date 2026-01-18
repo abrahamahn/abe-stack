@@ -1,5 +1,4 @@
 // packages/ui/src/layouts/layers/ProtectedRoute.tsx
-
 import { Spinner } from '@elements/Spinner';
 import { Text } from '@elements/Text';
 import { Navigate, Outlet } from 'react-router-dom';

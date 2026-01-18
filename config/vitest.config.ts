@@ -11,7 +11,7 @@ import {
   packageAliases,
   uiRoot,
   webRoot,
-} from './aliases';
+} from './schema/runtime';
 
 // Shared coverage exclusions
 const coverageExclude = [

@@ -7,21 +7,21 @@
  */
 
 import {
-  loginRequestSchema,
-  registerRequestSchema,
-  unlockAccountRequestSchema,
+    loginRequestSchema,
+    registerRequestSchema,
+    unlockAccountRequestSchema,
 } from '@abe-stack/core';
 import { ERROR_MESSAGES, type AppContext } from '@shared/index';
 
 import { handleAdminUnlock } from './admin';
 import {
-  createAuthGuard,
-  handleLogin,
-  handleLogout,
-  handleRefresh,
-  handleRegister,
-  type ReplyWithCookies,
-  type RequestWithCookies,
+    createAuthGuard,
+    handleLogin,
+    handleLogout,
+    handleRefresh,
+    handleRegister,
+    type ReplyWithCookies,
+    type RequestWithCookies,
 } from './auth';
 import { handleMe } from './users';
 
@@ -30,15 +30,31 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 // Re-export modules
 export { handleAdminUnlock } from './admin';
 export {
-  createAuthGuard,
-  handleLogin,
-  handleLogout,
-  handleRefresh,
-  handleRegister,
-  type ReplyWithCookies,
-  type RequestWithCookies,
+    createAuthGuard,
+    handleLogin,
+    handleLogout,
+    handleRefresh,
+    handleRegister,
+    type ReplyWithCookies,
+    type RequestWithCookies
 } from './auth';
 export { handleMe } from './users';
+
+// Generic route registration (Chet-stack pattern)
+export {
+    protectedRoute,
+    publicRoute,
+    registerRouteMap,
+    type HttpMethod,
+    type ProtectedHandler,
+    type PublicHandler,
+    type RouteDefinition,
+    type RouteHandler,
+    type RouteMap,
+    type RouteResult,
+    type RouterOptions,
+    type ValidationSchema,
+} from '@infra/router';
 
 /**
  * Register all application routes

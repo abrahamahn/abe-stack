@@ -12,7 +12,7 @@ import {
   Text,
   VersionBadge,
 } from '@abe-stack/ui';
-import { config } from '@config';
+import { clientConfig } from '@config';
 import { DemoDocContent, DemoPreviewArea } from '@demo/components';
 import {
   KEYBOARD_SHORTCUTS,
@@ -139,8 +139,8 @@ export function DemoPage(): React.ReactElement {
             <div className="bar">
               {/* Left: Version & Environment */}
               <div className="bar-section">
-                <VersionBadge version={config.uiVersion} />
-                <EnvironmentBadge environment={config.isDev ? 'development' : 'production'} />
+                <VersionBadge version={clientConfig.uiVersion} />
+                <EnvironmentBadge environment={clientConfig.isDev ? 'development' : 'production'} />
                 <Text tone="muted" className="text-xs hide-mobile">
                   {totalLoaded} components loaded
                 </Text>

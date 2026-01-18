@@ -1,8 +1,5 @@
 // packages/core/src/validation/password.ts
-import type zxcvbn from 'zxcvbn';
-
-type ZxcvbnFn = typeof zxcvbn;
-type ZxcvbnResult = ReturnType<ZxcvbnFn>;
+import { estimatePasswordStrength } from './passwordStrength';
 
 /**
  * Password validation configuration
@@ -37,27 +34,13 @@ export interface PasswordValidationResult {
 }
 
 /**
- * Dynamically import zxcvbn to avoid bundling on client if not needed
- * Note: On server, this is used for registration validation
- */
-let zxcvbnFn: ZxcvbnFn | null = null;
-
-async function getZxcvbn(): Promise<ZxcvbnFn> {
-  if (!zxcvbnFn) {
-    const mod = await import('zxcvbn');
-    zxcvbnFn = mod.default;
-  }
-  return zxcvbnFn;
-}
-
-/**
- * Validate password strength using zxcvbn
+ * Validate password strength using custom entropy-based estimation
  * @param password - Password to validate
  * @param userInputs - Optional array of user-specific words to penalize (email, name, etc.)
  * @param config - Password configuration
  * @returns PasswordValidationResult
  */
-export async function validatePassword(
+export function validatePassword(
   password: string,
   userInputs: string[] = [],
   config: PasswordConfig = defaultPasswordConfig,
@@ -75,7 +58,7 @@ export async function validatePassword(
 
   // If basic length checks fail, return early
   if (errors.length > 0) {
-    return {
+    return Promise.resolve({
       isValid: false,
       score: 0,
       errors,
@@ -84,12 +67,11 @@ export async function validatePassword(
         suggestions: [],
       },
       crackTimeDisplay: 'instant',
-    };
+    });
   }
 
-  // Use zxcvbn for strength analysis
-  const zxcvbn = await getZxcvbn();
-  const result: ZxcvbnResult = zxcvbn(password, userInputs);
+  // Use custom strength estimation
+  const result = estimatePasswordStrength(password, userInputs);
 
   // Check score
   if (result.score < config.minScore) {
@@ -98,21 +80,21 @@ export async function validatePassword(
     );
   }
 
-  return {
+  return Promise.resolve({
     isValid: errors.length === 0,
     score: result.score,
     errors,
     feedback: {
-      warning: result.feedback.warning || '',
+      warning: result.feedback.warning,
       suggestions: result.feedback.suggestions,
     },
-    crackTimeDisplay: result.crack_times_display.offline_slow_hashing_1e4_per_second as string,
-  };
+    crackTimeDisplay: result.crackTimeDisplay,
+  });
 }
 
 /**
- * Synchronous password validation (basic checks only, no zxcvbn)
- * Use for quick client-side validation before full async check
+ * Synchronous password validation (basic checks only)
+ * Use for quick client-side validation before full strength check
  */
 export function validatePasswordBasic(
   password: string,

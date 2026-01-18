@@ -1,8 +1,493 @@
 # ABE Stack Changelog
 
-**Last Updated: January 17, 2026**
+**Last Updated: January 18, 2026**
 
 All notable changes to this project are documented here. Format follows semantic versioning principles.
+
+---
+
+## 2026-01-18
+
+
+### Desktop App Simplification
+
+- Removed unnecessary `App.tsx` file - content moved directly into `main.tsx`
+- Added `types.d.ts` for Window interface declaration (electronAPI)
+- Simplified desktop app structure for cleaner architecture
+
+### ClientEnvironment Lazy Initialization
+
+- Fixed circular dependency issue between `createEnvironment.ts` and `ClientEnvironment.tsx`
+- Changed from module-level initialization to lazy initialization pattern
+- Environment and persister are now created on first access (when AppProvider renders)
+- This fixes test failures caused by TDZ (Temporal Dead Zone) errors during module loading
+
+### Auth Import Fix
+
+- Changed `AuthContext.tsx` to import `useAuth` via `@auth/hooks/useAuth` instead of `@hooks/useAuth`
+- Resolves alias conflict where `@hooks` in web tests pointed to UI package hooks instead of auth hooks
+
+### Unit Test Refactoring (Individual Test Files)
+
+Refactored consolidated test files into individual test files for better maintainability and file-by-file coverage.
+
+**apps/server (`apps/server/src/infra/`):**
+
+| New Test File | Tests | Description |
+|---------------|-------|-------------|
+| `logger/__tests__/middleware.test.ts` | 15 | Logging middleware, correlation IDs, request context |
+| `queue/__tests__/memoryStore.test.ts` | 28 | MemoryQueueStore CRUD, dequeue, status tracking |
+| `security/__tests__/events.test.ts` | 21 | Security event logging, metrics, queries |
+| `security/__tests__/lockout.test.ts` | 23 | Account lockout, progressive delays, unlock |
+| `email/__tests__/consoleEmailService.test.ts` | 8 | Console email provider |
+| `email/__tests__/smtpEmailService.test.ts` | 9 | SMTP email provider |
+| `email/__tests__/templates.test.ts` | 20 | Email templates (passwordReset, magicLink, etc.) |
+| `email/__tests__/factory.test.ts` | 9 | createEmailService factory |
+| `pubsub/__tests__/subscriptionManager.test.ts` | 31 | Subscription manager operations |
+| `pubsub/__tests__/helpers.test.ts` | 13 | SubKeys and publishAfterWrite |
+| `pubsub/__tests__/postgresPubSub.test.ts` | 9 | PostgresPubSub creation |
+
+**apps/web:**
+
+| New Test File | Description |
+|---------------|-------------|
+| `app/__tests__/AuthService.test.ts` | AuthService class: login, logout, refresh, state management |
+| `app/__tests__/ClientEnvironment.test.tsx` | ClientEnvironmentProvider and useClientEnvironment hook |
+| `app/__tests__/createEnvironment.test.ts` | Environment factory, singleton pattern, cleanup |
+| `features/auth/pages/__tests__/Register.test.tsx` | RegisterPage form validation, submission, error handling |
+
+**packages/sdk:**
+
+| New Test File | Description |
+|---------------|-------------|
+| `persistence/__tests__/idb.test.ts` | IndexedDB wrapper createStore function |
+
+**packages/core:**
+
+| New Test File | Tests | Description |
+|---------------|-------|-------------|
+| `contracts/__tests__/auth.test.ts` | 24 | Auth schemas, authContract endpoints |
+| `contracts/__tests__/common.test.ts` | 23 | USER_ROLES, userSchema, errorResponseSchema |
+| `errors/__tests__/base.test.ts` | 31 | AppError, isAppError, toAppError, helpers |
+| `errors/__tests__/http.test.ts` | 29 | HTTP error classes (400-500 range) |
+| `errors/__tests__/auth.test.ts` | 31 | Auth errors (credentials, tokens, OAuth, 2FA) |
+| `errors/__tests__/validation.test.ts` | 12 | ValidationError with field-level details |
+
+**Test Count Update:**
+- **@abe-stack/server**: 806 tests (53 files)
+- **@abe-stack/web**: 506 tests (28 files)
+- **@abe-stack/ui**: 772 tests (78 files)
+- **@abe-stack/core**: 327 tests (15 files)
+- **@abe-stack/sdk**: 57 tests (6 files)
+- **Total**: ~2,468 tests
+
+---
+
+### Chet-Stack Pattern Adoptions
+
+Adopted three key patterns from Chet-stack to improve server architecture:
+
+#### 1. Background Job Queue (`infra/queue/`)
+
+Polling-based job queue with PostgreSQL persistence for background task processing.
+
+**New Files:**
+
+- `apps/server/src/infra/queue/types.ts` - Task, TaskResult, TaskHandler types
+- `apps/server/src/infra/queue/queueServer.ts` - Main queue processor with retry/backoff
+- `apps/server/src/infra/queue/postgresStore.ts` - PostgreSQL persistence with `SELECT FOR UPDATE SKIP LOCKED`
+- `apps/server/src/infra/queue/memoryStore.ts` - In-memory store for testing
+- `apps/server/src/infra/queue/index.ts` - Barrel exports
+
+**Features:**
+
+- Concurrent-safe dequeue with PostgreSQL's `FOR UPDATE SKIP LOCKED`
+- Configurable retry with exponential backoff and jitter
+- Graceful shutdown support
+- Task tracking with pending/completed/failed states
+- In-memory store for testing
+
+**Usage:**
+
+```typescript
+// Define handlers
+const handlers: TaskHandlers = {
+  'send-email': async (args: { to: string }) => { /* ... */ },
+  'process-upload': async (args: { fileId: string }) => { /* ... */ },
+};
+
+// Create and start queue
+const queue = createQueueServer({
+  store: createPostgresQueueStore(db),
+  handlers,
+  log: server.log,
+});
+queue.start();
+
+// Enqueue tasks
+await queue.enqueue('send-email', { to: 'user@example.com' });
+
+// Graceful shutdown
+await queue.stop();
+```
+
+#### 2. Unified Write Pattern (`infra/write/`)
+
+Transaction-aware write system with automatic PubSub publishing after commit.
+
+**New Files:**
+
+- `apps/server/src/infra/write/types.ts` - WriteOperation, WriteBatch, WriteResult types
+- `apps/server/src/infra/write/writeService.ts` - Unified write with optimistic locking
+- `apps/server/src/infra/write/index.ts` - Barrel exports
+
+**Features:**
+
+- Atomic batch operations in a single transaction
+- Automatic version bumping for optimistic locking
+- PubSub publishing after commit (non-blocking)
+- Extensible hooks for validation and side effects
+- Conflict detection with version mismatch errors
+
+**Usage:**
+
+```typescript
+const writer = createWriteService({
+  db: ctx.db,
+  pubsub: ctx.pubsub,
+  log: ctx.log,
+});
+
+// Single operation
+const result = await writer.writeOne(userId, {
+  type: 'update',
+  table: 'users',
+  id: userId,
+  data: { name: 'New Name' },
+  expectedVersion: 1,
+});
+
+// Batch operations (atomic)
+const batchResult = await writer.write({
+  txId: crypto.randomUUID(),
+  authorId: userId,
+  operations: [
+    { type: 'create', table: 'messages', id: msgId, data: { content: 'Hello' } },
+    { type: 'update', table: 'threads', id: threadId, data: { replied_at: new Date() } },
+  ],
+});
+```
+
+#### 3. Generic Route Registration (`modules/router/`)
+
+DRY route registration pattern that eliminates repetitive boilerplate.
+
+**New Files:**
+
+- `apps/server/src/modules/router/types.ts` - RouteDefinition, RouteMap, handler types
+- `apps/server/src/modules/router/router.ts` - registerRouteMap, publicRoute, protectedRoute
+- `apps/server/src/modules/router/index.ts` - Barrel exports
+
+**Features:**
+
+- Declarative route definitions with schema validation
+- Automatic auth guard application based on route config
+- Type-safe handler signatures
+- Groups routes by auth requirement (public/user/admin)
+
+**Usage:**
+
+```typescript
+const routes: RouteMap = {
+  'auth/login': {
+    method: 'POST',
+    schema: loginRequestSchema,
+    handler: handleLogin,
+  },
+  'users/me': {
+    method: 'GET',
+    auth: 'user',
+    handler: handleMe,
+  },
+  'admin/unlock': {
+    method: 'POST',
+    schema: unlockSchema,
+    auth: 'admin',
+    handler: handleUnlock,
+  },
+};
+
+registerRouteMap(app, ctx, routes, {
+  prefix: '/api',
+  jwtSecret: config.auth.jwt.secret,
+});
+```
+
+**Benefits over manual registration:**
+
+- ~50% less code per route
+- Consistent validation and error handling
+- Auth guards automatically applied by role
+- Easy to add new routes
+
+---
+
+### Centralized Config Management System
+
+Implemented a single source of truth for all configuration files with automatic generation. Edit schema files once, configs regenerate everywhere.
+
+**Architecture:**
+
+```
+config/
+├── schema/              # Single source of truth (edit here)
+│   ├── typescript.ts    # Compiler options, paths, references
+│   ├── build.ts         # Vite/Vitest settings, alias definitions
+│   ├── lint.ts          # Prettier, lint-staged, VS Code settings
+│   ├── packages.ts      # Package.json scripts
+│   ├── runtime.ts       # Generated runtime helpers for Vite/Vitest
+│   └── index.ts         # Main schema entry point
+│
+├── generators/          # Scripts that generate config files
+│   ├── tsconfig.gen.ts  # Generates all tsconfig.json files
+│   ├── vite.gen.ts      # Generates schema/runtime.ts
+│   ├── vitest.gen.ts    # Generates vitest configs
+│   ├── prettier.gen.ts  # Generates .prettierrc, .prettierignore
+│   ├── vscode.gen.ts    # Generates .vscode/settings.json
+│   ├── package.gen.ts   # Updates package.json scripts
+│   ├── utils.ts         # Shared utilities
+│   └── index.ts         # Main entry with watch mode
+│
+└── lint/                # Custom lint/transform scripts (moved from tools/sync/)
+    ├── sync-file-headers.ts    # Adds // path/file.ts headers
+    ├── sync-import-aliases.ts  # Converts relative to alias imports
+    ├── sync-test-folders.ts    # Creates __tests__/ directories
+    ├── sync-barrel-exports.ts  # Auto-generates index.ts exports
+    └── sync-css-theme.ts       # Generates CSS from theme tokens
+```
+
+**New Commands:**
+
+- `pnpm config:generate` - Generate all configs from schema
+- `pnpm config:generate:check` - Verify configs match schema (for CI)
+- `pnpm config:generate:watch` - Watch mode for development
+
+**Watch Mode Integration:**
+
+- `pnpm dev` now runs config generator in watch mode automatically
+- Watches `apps/*/src` and `packages/*/src` for new directories (auto-discovers path aliases)
+- Watches `config/schema/` for manual schema edits
+- Replaces the old `sync-path-aliases.ts` watcher in `tools/dev/start-dev.ts`
+
+**Generated Files (have "DO NOT EDIT" headers):**
+
+- All `tsconfig.json` files (with JSONC section comments in base config)
+- `config/schema/runtime.ts` - Vite/Vitest path aliases and runtime helpers
+- `config/.prettierrc` and `config/.prettierignore`
+- `.vscode/settings.json`
+- `config/ts/tsconfig.*.json` base configs
+
+**Removed (replaced by generators):**
+
+- `tools/sync/sync-path-aliases.ts` → `tsconfig.gen.ts` + `vite.gen.ts`
+- `tools/sync/sync-tsconfig.ts` → `tsconfig.gen.ts`
+- `tools/sync/sync-linting.ts` → `prettier.gen.ts` + `vscode.gen.ts`
+- `config/linting.json` → `config/schema/lint.ts`
+
+**Moved (consolidated under config/):**
+
+- `tools/sync/*.ts` → `config/lint/*.ts` (custom lint/transform scripts)
+- `config/aliases.ts` → `config/schema/runtime.ts` (generated runtime helpers)
+
+**Workflow:**
+
+1. Edit `config/schema/*.ts` to change settings
+2. Run `pnpm config:generate` (or let watch mode handle it during `pnpm dev`)
+3. All config files regenerate with consistent settings
+4. Pre-commit hook validates configs match schema
+
+### Package Minimization (Continued)
+
+**Removed nanoid dependency:**
+
+- Replaced `nanoid` with native `crypto.randomUUID()` in `packages/core/src/stores/toastStore.ts`
+- Removed `nanoid` from `packages/core/package.json`
+- Removed `nanoid` from `apps/web/package.json` (was redundant)
+- Zero external dependencies for UUID generation
+
+### Documentation Reorganization
+
+Reorganized TODO.md and ROADMAP.md with clear scope boundaries and created legacy reference guide:
+
+**Scope Boundaries Established:**
+
+- **TODO.md** (In-Scope): Solo dev → small team (3-5 engineers), 50,000+ users, up to Series A
+- **ROADMAP.md** (Deferred): Post-Series A, enterprise customers, large teams (5+ engineers)
+
+**New File: `docs/dev/legacy.md` (417 lines):**
+
+Reference guide for migrating utilities from `../../abe-stack-legacy`:
+
+- Migration effort estimates table (~240-310h savings, ~60-85h work)
+- Backend utilities table (77 items with legacy paths)
+- Frontend utilities table (31 items with legacy paths)
+- Frontend components table (13 items with legacy paths)
+- Potential migrations sections: Request Handling, Structured Logging, Session Management, User Management, Security Utilities, Token Utilities, Common Utilities, File Utilities, Cookie Utilities, Error Classes, Database Utilities, Frontend Hooks, Frontend Formatters, DOM Utilities, Style Utilities, React Contexts, UI Components, Auth Components, Auth DTOs, Social Components, Media Components, Client Services, Layout Components, Infrastructure, Base Classes, Repository Layer
+
+**Reorganized `docs/TODO.md` (298 lines):**
+
+- Foundation Status (completed items)
+- High-Priority Improvements (5 items with legacy ref)
+- Core Product Features: File Uploads, Pagination, WebSocket, Background Jobs, Push Notifications, Cache Layer, Search & Filtering
+- Authentication Enhancements: OAuth (direct integration), Magic Links
+- Infrastructure & Quality: Backend, Frontend, Infrastructure, Testing, Documentation, UI Package
+- Code Quality, Architecture, Success Metrics
+
+**Reorganized `docs/ROADMAP.md` (383 lines):**
+
+- V5 Architecture Migration (5 phases)
+- CHET-Stack Real-Time Features (6 phases)
+- Security Phase 2: Passport.js, Additional Auth Methods, Social/OAuth (Passport.js), Advanced Features
+- Product-Specific Features: Messenger/Social, Music Streaming/Marketplace, AI Fitness Coach, Calendar Aggregator
+- Infrastructure Improvements: Repository Layer, Base Classes, Interface-First Services, Error Handling Middleware, Advanced Architecture
+- Things You Can Safely Postpone, Second Tier Improvements, Geolocation, Redis Implementation
+
+**Legacy Cross-References Added:**
+
+- 15 legacy references in TODO.md linking to specific utilities
+- 22 legacy references in ROADMAP.md linking to specific utilities
+- All anchors validated against legacy.md sections
+
+**Fixes:**
+
+- Removed duplicate "Add request ID middleware" task (was in Backend and Code Quality)
+- Clarified OAuth: TODO.md has "direct integration", ROADMAP.md has "Passport.js strategies"
+- Added missing legacy references: Zod validators, Interface-First Services, CHET-Stack Phase 1
+
+### Error Handling Consolidation
+
+Consolidated two parallel error systems into a single, feature-rich error module in `@abe-stack/core`.
+
+**Problem Solved:**
+
+- `packages/core/src/errors.ts` had simple `HttpError` class (8 error types, no code/details)
+- `apps/server/src/shared/errors.ts` had rich `AppError` class (17+ error types with code, details, toJSON())
+- Duplicate definitions led to inconsistent error handling
+
+**New Structure (`packages/core/src/errors/`):**
+
+- `base.ts` - `AppError` class with statusCode, code, details, toJSON(), helper functions
+- `http.ts` - HTTP errors (BadRequest, Unauthorized, Forbidden, NotFound, Conflict, TooManyRequests, Internal)
+- `auth.ts` - Auth errors (InvalidCredentials, AccountLocked, InvalidToken, TokenReuse, WeakPassword, EmailAlreadyExists, UserNotFound, OAuth, TOTP)
+- `validation.ts` - ValidationError with field-level details
+- `response.ts` - ApiResponse, ApiErrorResponse, ApiSuccessResponse types
+- `index.ts` - Barrel exports
+
+**Updated:**
+
+- `packages/core/src/contracts/common.ts` - `errorResponseSchema` now includes error, code, details fields
+- `apps/server/src/shared/index.ts` - Re-exports errors from `@abe-stack/core`
+- Moved tests from server to core package
+
+**Deleted:**
+
+- `packages/core/src/errors.ts` (old HttpError system)
+- `apps/server/src/shared/errors.ts` (duplicate definitions)
+- `apps/server/src/shared/__tests__/errors.test.ts` (moved to core)
+
+**Backward Compatibility:**
+
+- `PermissionError` alias for `ForbiddenError`
+- `RateLimitError` alias for `TooManyRequestsError`
+
+### Test Infrastructure Package
+
+Created `@abe-stack/tests` package with shared mock factories to reduce test boilerplate duplication.
+
+**New Package: `packages/tests/`**
+
+- `src/mocks/logger.ts` - `createMockLogger()`, `createCapturingLogger()` for test assertions
+- `src/mocks/user.ts` - `createMockUser()`, `createMockUserWithPassword()`, `createMockAdmin()`
+- `src/mocks/http.ts` - `createMockRequest()`, `createMockReply()`, `createMockRequestInfo()`
+- `src/mocks/database.ts` - `createMockDb()`, `configureMockQuery()` for Drizzle mocks
+- `src/mocks/context.ts` - `createMockContext()`, `createSpyContext()` for AppContext mocks
+- `src/constants/index.ts` - `TEST_USER`, `TEST_TOKENS`, `TEST_JWT_CONFIG`, `TEST_IDS`, etc.
+
+**Usage:**
+```typescript
+import { createMockContext, createMockUser, TEST_USER } from '@abe-stack/tests';
+```
+
+### Logging Service with Correlation IDs
+
+Implemented proper logging service with request correlation ID support.
+
+**New Files: `apps/server/src/infra/logger/`**
+
+- `types.ts` - `Logger`, `LogData`, `RequestContext`, `LogLevel` interfaces
+- `logger.ts` - `createLogger()`, `createRequestLogger()`, `generateCorrelationId()`, `getOrCreateCorrelationId()`
+- `middleware.ts` - `registerLoggingMiddleware()`, `createJobLogger()` for Fastify integration
+- `index.ts` - Barrel exports
+
+**Features:**
+
+- Correlation ID extraction from headers (`x-correlation-id`, `x-request-id`, `traceparent`)
+- Request-scoped logging with automatic context propagation
+- Child logger support with merged bindings
+- W3C Trace Context (traceparent) support for distributed tracing
+- Background job logging with `createJobLogger()`
+
+**Integration:**
+```typescript
+// In request handlers, use request.log
+request.log.info('Processing request', { userId: request.user.id });
+
+// For background jobs
+const log = createJobLogger(server.log, 'email-sender', jobId);
+log.info('Sending email', { to: email });
+```
+
+**Updated:**
+- `apps/server/src/shared/types.ts` - Deprecated old `Logger` interface, reference new one in `@infra/logger`
+- `apps/server/src/infra/index.ts` - Export all logger utilities
+
+### Package Minimization
+
+Replaced large dependencies with lightweight custom implementations to reduce bundle size:
+
+- **Replaced zxcvbn (~800KB) with custom password strength checker**
+  - Created `packages/core/src/validation/passwordStrength.ts` (~5KB)
+  - Implements entropy-based scoring (0-4 scale)
+  - Detects common passwords (200+ entries with l33t speak variants)
+  - Detects keyboard patterns, repeated/sequential characters
+  - Provides user input penalization and crack time estimation
+  - Added comprehensive tests in `passwordStrength.test.ts`
+
+- **Replaced idb-keyval with native IndexedDB wrapper**
+  - Created `packages/sdk/src/persistence/idb.ts` (~100 lines)
+  - Provides `createStore`, `get`, `set`, `del`, `clear`, `keys` functions
+  - Zero external dependencies, same API surface
+
+### Dependency Cleanup
+
+Hoisted common devDependencies to root and removed duplicates:
+
+- **packages/core**: Removed typescript, vitest, tsc-alias, @types/node
+- **packages/sdk**: Removed typescript, vitest, idb-keyval
+- **packages/ui**: Removed typescript, tsc-alias, @types/react, @types/react-dom
+- **Root**: Added tsc-alias (^1.8.16)
+
+### Version Alignment
+
+Fixed version mismatches across packages:
+
+- **@ts-rest/core**: Aligned to ^3.52.1 (was 3.45.1 in packages/core)
+- **zustand**: Aligned to ^5.0.9 (was 5.0.3 in apps/web)
+
+### Lint Fixes
+
+- **smtp.ts**: Fixed template literal type errors by extracting `Date.now()` and `Math.random()` to typed variables
+- **cookie.ts**: Added explicit `: FastifyReply` return types to `setCookie` and `clearCookie` decorator functions
 
 ---
 

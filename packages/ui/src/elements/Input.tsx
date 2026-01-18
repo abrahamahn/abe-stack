@@ -1,6 +1,7 @@
 // packages/ui/src/elements/Input.tsx
-import { Text } from '@elements/Text';
 import { forwardRef, type ComponentPropsWithoutRef, type ElementType } from 'react';
+
+import { Text } from './Text';
 
 import '../styles/elements.css';
 

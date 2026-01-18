@@ -18,7 +18,6 @@ vi.mock('@abe-stack/ui', () => ({
     _key: string,
     defaultValue: DemoPaneConfig,
   ): [DemoPaneConfig, typeof mockSetPaneConfig] => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!mockPaneConfig) mockPaneConfig = defaultValue;
     return [mockPaneConfig, mockSetPaneConfig];
   },
