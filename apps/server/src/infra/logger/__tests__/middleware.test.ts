@@ -42,10 +42,7 @@ function createMockFastify() {
   return instance as unknown as FastifyInstance & { hooks: typeof hooks };
 }
 
-function getHook(
-  server: ReturnType<typeof createMockFastify>,
-  hook: keyof HookMap,
-): HookHandler {
+function getHook(server: ReturnType<typeof createMockFastify>, hook: keyof HookMap): HookHandler {
   const handler = server.hooks[hook][0];
   if (!handler) {
     throw new Error(`Missing ${hook} hook`);
@@ -270,10 +267,7 @@ describe('createJobLogger', () => {
       child: vi.fn().mockReturnThis(),
     };
 
-    const logger = createJobLogger(
-      mockBaseLogger as unknown as FastifyInstance['log'],
-      'test-job',
-    );
+    const logger = createJobLogger(mockBaseLogger as unknown as FastifyInstance['log'], 'test-job');
 
     expect(logger).toBeDefined();
     expect(typeof logger.info).toBe('function');

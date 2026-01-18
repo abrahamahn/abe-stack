@@ -38,10 +38,18 @@
 
 // Types
 export type {
-  AfterWriteHook, BeforeValidateHook, OperationResult, OperationType, WriteBatch, WriteContext, WriteError, WriteHooks, WriteOperation, WriteResult
+  AfterWriteHook,
+  BeforeValidateHook,
+  OperationResult,
+  OperationType,
+  WriteBatch,
+  WriteContext,
+  WriteError,
+  WriteHooks,
+  WriteOperation,
+  WriteResult,
 } from './types';
 
 // Write Service
 export { createWriteService, WriteService } from './writeService';
 export type { WriteServiceOptions } from './writeService';
-

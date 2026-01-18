@@ -131,6 +131,7 @@
 .form-field-input {
   display: flex;
   flex-direction: column;
+  gap: var(--ui-gap-xs);
 }
 
 .form-field-error {
@@ -166,11 +167,12 @@
 .modal-card {
   pointer-events: auto;
   background: var(--ui-color-bg);
+  color: var(--ui-color-text);
   border-radius: var(--ui-radius-lg);
   border: 1px solid var(--ui-color-border);
   box-shadow: var(--ui-color-shadow);
   min-width: 20rem;
-  max-width: 35rem;
+  max-width: 26rem;
   padding: var(--ui-gap-xl);
 }
 
@@ -221,8 +223,9 @@
 }
 
 .pagination-button[data-active='true'] {
-  background: var(--ui-color-surface-strong);
-  color: var(--ui-color-text-inverse);
+  background: var(--ui-color-primary);
+  color: #ffffff;
+  border-color: var(--ui-color-primary);
 }
 
 /* Popover */
@@ -279,6 +282,8 @@
   align-items: center;
   gap: var(--ui-gap-sm);
   cursor: pointer;
+  font-size: var(--ui-font-size-sm);
+  line-height: var(--ui-line-height-normal);
 }
 
 .radio-input {
@@ -325,6 +330,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--ui-gap-sm);
+  font-size: var(--ui-font-size-sm);
 }
 
 /* ResizablePanel */
@@ -616,7 +622,7 @@
 .toast {
   display: flex;
   flex-direction: column;
-  gap: var(--ui-gap-sm);
+  gap: var(--ui-gap-xs);
 }
 
 .toast-card {
@@ -624,12 +630,14 @@
   max-width: 22.5rem;
   background: var(--ui-color-surface-strong);
   color: var(--ui-color-text-inverse);
-  padding: var(--ui-gap-md) var(--ui-gap-lg);
+  padding: var(--ui-gap-sm) var(--ui-gap-md);
   border-radius: var(--ui-radius-lg);
   box-shadow: var(--ui-color-shadow);
   display: flex;
   align-items: center;
   gap: var(--ui-gap-sm);
+  font-size: var(--ui-font-size-sm);
+  line-height: var(--ui-line-height-tight);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -639,11 +647,12 @@
 }
 
 .toast-title {
-  font-weight: 700;
+  font-weight: var(--ui-font-weight-semibold);
 }
 
 .toast-description {
-  opacity: 0.8;
+  opacity: 0.85;
+  font-size: var(--ui-font-size-xs);
 }
 
 /* Toaster */

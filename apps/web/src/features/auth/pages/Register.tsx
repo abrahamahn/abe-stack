@@ -58,7 +58,7 @@ export function RegisterPage(): JSX.Element {
   return (
     <PageContainer maxWidth={440}>
       <Card>
-        <div style={{ display: 'grid', gap: 12 }}>
+        <div className="grid gap-3">
           <Heading as="h1" size="lg">
             Create Account
           </Heading>
@@ -67,7 +67,7 @@ export function RegisterPage(): JSX.Element {
             onSubmit={(e) => {
               void handleRegister(e);
             }}
-            style={{ display: 'grid', gap: 12 }}
+            className="grid gap-3"
           >
             <Input.Field
               id="name"
@@ -120,7 +120,7 @@ export function RegisterPage(): JSX.Element {
             <Button
               type="submit"
               disabled={isLoading || password !== confirmPassword}
-              style={{ width: '100%', marginTop: '8px' }}
+              className="w-full mt-2"
             >
               {isLoading ? 'Creating account...' : 'Create Account'}
             </Button>
@@ -130,7 +130,7 @@ export function RegisterPage(): JSX.Element {
               variant="secondary"
               disabled={!canGoBack}
               onClick={goBack}
-              style={{ width: '100%' }}
+              className="w-full"
             >
               Back
             </Button>
@@ -138,7 +138,7 @@ export function RegisterPage(): JSX.Element {
         </div>
       </Card>
 
-      <Text tone="muted" style={{ textAlign: 'center', fontSize: '14px' }}>
+      <Text tone="muted" className="text-center text-sm">
         Already have an account? <a href="/login">Login</a>
       </Text>
     </PageContainer>

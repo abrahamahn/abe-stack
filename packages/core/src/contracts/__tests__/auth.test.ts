@@ -34,15 +34,11 @@ describe('auth contracts', () => {
     });
 
     it('should reject empty email', () => {
-      expect(() =>
-        loginRequestSchema.parse({ email: '', password: 'password123' }),
-      ).toThrow();
+      expect(() => loginRequestSchema.parse({ email: '', password: 'password123' })).toThrow();
     });
 
     it('should reject empty password', () => {
-      expect(() =>
-        loginRequestSchema.parse({ email: 'test@example.com', password: '' }),
-      ).toThrow();
+      expect(() => loginRequestSchema.parse({ email: 'test@example.com', password: '' })).toThrow();
     });
   });
 

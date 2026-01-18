@@ -40,12 +40,7 @@ export const authRoutes: RouteMap = {
       req: RequestWithCookies,
       reply: ReplyWithCookies,
     ): Promise<RouteResult<AuthResponse | { message: string }>> => {
-      return handleLogin(
-        ctx,
-        body,
-        req,
-        reply,
-      );
+      return handleLogin(ctx, body, req, reply);
     },
     loginRequestSchema,
   ),

@@ -7,53 +7,62 @@
  */
 
 import {
-    loginRequestSchema,
-    registerRequestSchema,
-    unlockAccountRequestSchema,
+  emailVerificationRequestSchema,
+  forgotPasswordRequestSchema,
+  loginRequestSchema,
+  registerRequestSchema,
+  resetPasswordRequestSchema,
+  unlockAccountRequestSchema,
 } from '@abe-stack/core';
-import { ERROR_MESSAGES, type AppContext } from '@shared/index';
 
 import { handleAdminUnlock } from './admin';
 import {
-    createAuthGuard,
-    handleLogin,
-    handleLogout,
-    handleRefresh,
-    handleRegister,
-    type ReplyWithCookies,
-    type RequestWithCookies,
+  createAuthGuard,
+  handleForgotPassword,
+  handleLogin,
+  handleLogout,
+  handleRefresh,
+  handleRegister,
+  handleResetPassword,
+  handleVerifyEmail,
+  type ReplyWithCookies,
+  type RequestWithCookies,
 } from './auth';
 import { handleMe } from './users';
 
+import type { AppContext } from '@shared/index';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 // Re-export modules
 export { handleAdminUnlock } from './admin';
 export {
-    createAuthGuard,
-    handleLogin,
-    handleLogout,
-    handleRefresh,
-    handleRegister,
-    type ReplyWithCookies,
-    type RequestWithCookies
+  createAuthGuard,
+  handleForgotPassword,
+  handleLogin,
+  handleLogout,
+  handleRefresh,
+  handleRegister,
+  handleResetPassword,
+  handleVerifyEmail,
+  type ReplyWithCookies,
+  type RequestWithCookies,
 } from './auth';
 export { handleMe } from './users';
 
 // Generic route registration (Chet-stack pattern)
 export {
-    protectedRoute,
-    publicRoute,
-    registerRouteMap,
-    type HttpMethod,
-    type ProtectedHandler,
-    type PublicHandler,
-    type RouteDefinition,
-    type RouteHandler,
-    type RouteMap,
-    type RouteResult,
-    type RouterOptions,
-    type ValidationSchema,
+  protectedRoute,
+  publicRoute,
+  registerRouteMap,
+  type HttpMethod,
+  type ProtectedHandler,
+  type PublicHandler,
+  type RouteDefinition,
+  type RouteHandler,
+  type RouteMap,
+  type RouteResult,
+  type RouterOptions,
+  type ValidationSchema,
 } from '@infra/router';
 
 /**
@@ -115,8 +124,40 @@ export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
     return reply.status(result.status).send(result.body);
   });
 
-  app.post('/api/auth/verify-email', (_req: FastifyRequest, reply: FastifyReply) => {
-    return reply.status(404).send({ message: ERROR_MESSAGES.EMAIL_VERIFICATION_NOT_IMPLEMENTED });
+  app.post('/api/auth/forgot-password', async (req: FastifyRequest, reply: FastifyReply) => {
+    const parsed = forgotPasswordRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return reply
+        .status(400)
+        .send({ message: parsed.error.issues[0]?.message ?? 'Invalid input' });
+    }
+
+    const result = await handleForgotPassword(ctx, parsed.data);
+    return reply.status(result.status).send(result.body);
+  });
+
+  app.post('/api/auth/reset-password', async (req: FastifyRequest, reply: FastifyReply) => {
+    const parsed = resetPasswordRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return reply
+        .status(400)
+        .send({ message: parsed.error.issues[0]?.message ?? 'Invalid input' });
+    }
+
+    const result = await handleResetPassword(ctx, parsed.data);
+    return reply.status(result.status).send(result.body);
+  });
+
+  app.post('/api/auth/verify-email', async (req: FastifyRequest, reply: FastifyReply) => {
+    const parsed = emailVerificationRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return reply
+        .status(400)
+        .send({ message: parsed.error.issues[0]?.message ?? 'Invalid input' });
+    }
+
+    const result = await handleVerifyEmail(ctx, parsed.data);
+    return reply.status(result.status).send(result.body);
   });
 
   // ============================================================================

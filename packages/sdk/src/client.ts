@@ -3,10 +3,16 @@ import { addAuthHeader } from '@abe-stack/core';
 
 import type {
   AuthResponse,
+  EmailVerificationRequest,
+  EmailVerificationResponse,
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
   LoginRequest,
   LogoutResponse,
   RefreshResponse,
   RegisterRequest,
+  ResetPasswordRequest,
+  ResetPasswordResponse,
   UserResponse,
 } from '@abe-stack/core';
 
@@ -22,6 +28,9 @@ export interface ApiClient {
   refresh: () => Promise<RefreshResponse>;
   logout: () => Promise<LogoutResponse>;
   getCurrentUser: () => Promise<UserResponse>;
+  forgotPassword: (data: ForgotPasswordRequest) => Promise<ForgotPasswordResponse>;
+  resetPassword: (data: ResetPasswordRequest) => Promise<ResetPasswordResponse>;
+  verifyEmail: (data: EmailVerificationRequest) => Promise<EmailVerificationResponse>;
 }
 
 const API_PREFIX = '/api';
@@ -78,6 +87,24 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     },
     async getCurrentUser(): Promise<UserResponse> {
       return request<UserResponse>('/users/me');
+    },
+    async forgotPassword(data: ForgotPasswordRequest): Promise<ForgotPasswordResponse> {
+      return request<ForgotPasswordResponse>('/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    async resetPassword(data: ResetPasswordRequest): Promise<ResetPasswordResponse> {
+      return request<ResetPasswordResponse>('/auth/reset-password', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    async verifyEmail(data: EmailVerificationRequest): Promise<EmailVerificationResponse> {
+      return request<EmailVerificationResponse>('/auth/verify-email', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
     },
   };
 }

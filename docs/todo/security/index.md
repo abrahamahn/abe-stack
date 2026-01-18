@@ -1,6 +1,6 @@
 # Security Documentation
 
-_Last Updated: January 17, 2026_
+_Last Updated: January 19, 2026_
 
 This section covers the security implementation and roadmap for ABE Stack.
 
@@ -18,13 +18,17 @@ This section covers the security implementation and roadmap for ABE Stack.
 ## Current Security Features (Phase 1 Complete)
 
 - **JWT Authentication** - Access + refresh token rotation with reuse detection
-- **Password Security** - Argon2id hashing (OWASP parameters), strength validation
+- **Password Security** - Argon2id hashing (OWASP parameters), custom strength validation
+- **Password Reset** - Secure token-based reset with Argon2id hashed tokens
+- **Email Verification** - Token-based verification with 24h expiry
 - **Account Protection** - Login attempt tracking, progressive delays, account lockout
 - **Role-Based Access** - User/admin/moderator roles with middleware guards
 - **Input Validation** - Zod schemas on all endpoints
 - **Rate Limiting** - Token bucket algorithm with configurable limits
 - **Audit Logging** - Security events table for token reuse, lockouts, admin actions
 - **Security Headers** - Comprehensive HTTP security headers (CSP, HSTS, etc.)
+- **Token Storage** - Memory-based by default (XSS protection), HTTP-only cookies for refresh
+- **WebSocket Auth** - Subprotocol header or cookie-based (no query params)
 
 ---
 

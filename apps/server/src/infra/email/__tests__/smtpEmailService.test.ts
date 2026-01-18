@@ -98,18 +98,22 @@ describe('SmtpEmailService', () => {
 
       await smtpService.send(textOnly);
 
-      expect(mockSend).toHaveBeenCalledWith(expect.objectContaining({
-        text: 'Plain text body',
-        html: undefined,
-      }));
+      expect(mockSend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: 'Plain text body',
+          html: undefined,
+        }),
+      );
     });
 
     test('should format from address correctly', async () => {
       await smtpService.send(testEmailOptions);
 
-      expect(mockSend).toHaveBeenCalledWith(expect.objectContaining({
-        from: '"Test App" <noreply@example.com>',
-      }));
+      expect(mockSend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          from: '"Test App" <noreply@example.com>',
+        }),
+      );
     });
 
     test('should handle smtp timeout error', async () => {

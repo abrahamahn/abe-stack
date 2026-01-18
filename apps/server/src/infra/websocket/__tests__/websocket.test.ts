@@ -284,8 +284,11 @@ describe('WebSocket Module', () => {
       );
 
       const mockRequest = {
-        url: '/ws?token=valid-token',
-        headers: { host: 'localhost' },
+        url: '/ws',
+        headers: {
+          host: 'localhost',
+          'sec-websocket-protocol': 'valid-token',
+        },
       };
 
       mockHttpServer.emit('upgrade', mockRequest, mockSocket, Buffer.alloc(0));
@@ -418,8 +421,11 @@ describe('WebSocket Module', () => {
       );
 
       const mockRequest = {
-        url: '/ws?token=invalid-token',
-        headers: { host: 'localhost' },
+        url: '/ws',
+        headers: {
+          host: 'localhost',
+          'sec-websocket-protocol': 'invalid-token',
+        },
       };
 
       mockHttpServer.emit('upgrade', mockRequest, mockSocket, Buffer.alloc(0));

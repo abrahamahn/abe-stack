@@ -8,16 +8,19 @@ import {
 import '../styles/elements.css';
 
 type Tone = 'default' | 'muted' | 'danger' | 'success';
+type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 type TextProps = ComponentPropsWithoutRef<'p'> & {
   as?: ElementType;
   tone?: Tone;
+  size?: Size;
 };
 
 export const Text = forwardRef<HTMLElement, TextProps>((props, ref): ReactElement => {
-  const { as, tone = 'default', className, ...rest } = props;
+  const { as, tone = 'default', size, className, ...rest } = props;
   const Component: ElementType = as ?? 'p';
-  const cls = `text ${className ?? ''}`.trim();
+  const sizeClass = size ? `text-${size}` : '';
+  const cls = `text ${sizeClass} ${className ?? ''}`.trim();
   return <Component ref={ref} className={cls} data-tone={tone} {...rest} />;
 });
 

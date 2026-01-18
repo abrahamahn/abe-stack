@@ -1,9 +1,17 @@
 // config/vite.web.config.ts
+import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
-import { coreRoot, sdkRoot, uiRoot, webRoot } from './schema/runtime';
+const repoRoot = path.resolve(__dirname, '..');
+const packagesRoot = path.join(repoRoot, 'packages');
+const appsRoot = path.join(repoRoot, 'apps');
+
+const webRoot = path.join(appsRoot, 'web');
+const coreRoot = path.join(packagesRoot, 'core');
+const sdkRoot = path.join(packagesRoot, 'sdk');
+const uiRoot = path.join(packagesRoot, 'ui');
 
 export default defineConfig({
   plugins: [

@@ -1,10 +1,30 @@
 // config/vite.desktop.config.ts
 import net from 'node:net';
+import path from 'node:path';
 
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-import { desktopRoot, getDesktopAliases } from './schema/runtime';
+const repoRoot = path.resolve(__dirname, '..');
+const appsRoot = path.join(repoRoot, 'apps');
+const packagesRoot = path.join(repoRoot, 'packages');
+
+const desktopRoot = path.join(appsRoot, 'desktop');
+
+function getDesktopAliases(): Record<string, string> {
+  return {
+    '@': path.join(desktopRoot, 'src'),
+    '@services': path.join(desktopRoot, 'src/services'),
+    '@routes': path.join(desktopRoot, 'src/routes'),
+    '@api': path.join(desktopRoot, 'src/api'),
+    '@abe-stack/core': path.join(repoRoot, 'packages/core/src'),
+    '@abe-stack/sdk': path.join(repoRoot, 'packages/sdk/src'),
+    '@abe-stack/ui': path.join(repoRoot, 'packages/ui/src'),
+    '@contracts': path.join(repoRoot, 'packages/core/src/contracts'),
+    '@stores': path.join(repoRoot, 'packages/core/src/stores'),
+    '@validation': path.join(repoRoot, 'packages/core/src/validation'),
+  };
+}
 
 function uniquePorts(ports: Array<number | undefined>): number[] {
   return Array.from(new Set(ports.filter((port): port is number => Number.isFinite(port))));

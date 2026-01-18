@@ -37,6 +37,23 @@ export const emailVerificationResponseSchema = z.object({
   userId: z.string().uuid(),
 });
 
+export const forgotPasswordRequestSchema = z.object({
+  email: z.string().email(),
+});
+
+export const forgotPasswordResponseSchema = z.object({
+  message: z.string(),
+});
+
+export const resetPasswordRequestSchema = z.object({
+  token: z.string(),
+  password: z.string().min(8),
+});
+
+export const resetPasswordResponseSchema = z.object({
+  message: z.string(),
+});
+
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
 export type RegisterRequest = z.infer<typeof registerRequestSchema>;
 export type AuthResponse = z.infer<typeof authResponseSchema>;
@@ -44,6 +61,10 @@ export type RefreshResponse = z.infer<typeof refreshResponseSchema>;
 export type LogoutResponse = z.infer<typeof logoutResponseSchema>;
 export type EmailVerificationRequest = z.infer<typeof emailVerificationRequestSchema>;
 export type EmailVerificationResponse = z.infer<typeof emailVerificationResponseSchema>;
+export type ForgotPasswordRequest = z.infer<typeof forgotPasswordRequestSchema>;
+export type ForgotPasswordResponse = z.infer<typeof forgotPasswordResponseSchema>;
+export type ResetPasswordRequest = z.infer<typeof resetPasswordRequestSchema>;
+export type ResetPasswordResponse = z.infer<typeof resetPasswordResponseSchema>;
 
 const c = initContract();
 
@@ -100,5 +121,25 @@ export const authContract = c.router({
       404: errorResponseSchema,
     },
     summary: 'Verify email with a token',
+  },
+  forgotPassword: {
+    method: 'POST',
+    path: '/api/auth/forgot-password',
+    body: forgotPasswordRequestSchema,
+    responses: {
+      200: forgotPasswordResponseSchema,
+      400: errorResponseSchema,
+    },
+    summary: 'Request password reset',
+  },
+  resetPassword: {
+    method: 'POST',
+    path: '/api/auth/reset-password',
+    body: resetPasswordRequestSchema,
+    responses: {
+      200: resetPasswordResponseSchema,
+      400: errorResponseSchema,
+    },
+    summary: 'Reset password with token',
   },
 });

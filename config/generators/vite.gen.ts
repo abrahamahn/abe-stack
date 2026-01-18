@@ -206,28 +206,10 @@ export function generateViteAliases(
   const log = createLogger(quiet);
   const result: GeneratorResult = { generated: [], unchanged: [], errors: [] };
 
-  log.log('\nGenerating Vite aliases...');
+  log.log('\nVite aliases now inlined in config files - no generation needed.');
 
-  const runtimePath = path.join(ROOT, 'config/schema/runtime.ts');
-  const content = generateAliasesContent();
-
-  if (checkOnly) {
-    const existing = fs.existsSync(runtimePath) ? fs.readFileSync(runtimePath, 'utf-8') : '';
-    // Compare with full content including header (same as writeTsFile would produce)
-    const fullContent = TS_HEADER + '\n' + content;
-    if (existing !== fullContent) {
-      result.generated.push(runtimePath);
-    } else {
-      result.unchanged.push(runtimePath);
-    }
-  } else {
-    if (writeTsFile(runtimePath, content)) {
-      result.generated.push(runtimePath);
-      log.log(`  Generated: ${path.relative(ROOT, runtimePath)}`);
-    } else {
-      result.unchanged.push(runtimePath);
-    }
-  }
+  // Runtime.ts has been removed - aliases are now inlined in each config file
+  // This avoids import issues during development
 
   return result;
 }

@@ -7,41 +7,33 @@ import type { JSX } from 'react';
 export function HomePage(): JSX.Element {
   return (
     <PageContainer>
-      <section style={{ display: 'grid', gap: 12 }}>
+      <section className="grid gap-3">
         <Heading as="h1" size="xl">
           Welcome to ABE Stack
         </Heading>
-        <Text style={{ fontSize: '16px' }}>
+        <Text className="text-md">
           A minimal, ground-up full-stack TypeScript monorepo with authentication.
         </Text>
       </section>
 
-      <section style={{ display: 'flex', gap: '10px' }}>
+      <section className="flex gap-2">
         <Link to="/login">
           <Button>Login</Button>
         </Link>
         <Link to="/dashboard">
           <Button variant="secondary">Dashboard</Button>
         </Link>
-        <Link to="/features/demo">
+        <Link to="/demo">
           <Button variant="secondary">Demo</Button>
         </Link>
       </section>
 
       <Card>
-        <div style={{ display: 'grid', gap: 6 }}>
+        <div className="grid gap-2">
           <Heading as="h3" size="md">
             Tech Stack
           </Heading>
-          <ul
-            style={{
-              display: 'grid',
-              gap: 4,
-              paddingLeft: '16px',
-              lineHeight: 1.4,
-              fontSize: '14px',
-            }}
-          >
+          <ul className="grid gap-1 pl-4 leading-normal text-sm">
             <li>
               <Text tone="muted">Database: PostgreSQL + Drizzle ORM</Text>
             </li>

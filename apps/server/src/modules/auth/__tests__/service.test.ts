@@ -5,8 +5,19 @@
  * Tests the auth service business logic by mocking database and utility functions.
  * These tests verify the orchestration logic, error handling, and token management.
  */
+import { randomBytes } from 'crypto';
+
 import { validatePassword } from '@abe-stack/core';
-import { authenticateUser, logoutUser, refreshUserTokens, registerUser } from '@auth/service';
+import {
+  authenticateUser,
+  createEmailVerificationToken,
+  logoutUser,
+  refreshUserTokens,
+  registerUser,
+  requestPasswordReset,
+  resetPassword,
+  verifyEmail,
+} from '@auth/service';
 import {
   createAccessToken,
   createRefreshTokenFamily,
@@ -51,14 +62,21 @@ vi.mock('@infra', () => ({
   isAccountLocked: vi.fn(),
   logAccountLockedEvent: vi.fn(),
   logLoginAttempt: vi.fn(),
+  passwordResetTokens: { tokenHash: 'tokenHash', expiresAt: 'expiresAt', usedAt: 'usedAt' },
+  emailVerificationTokens: { tokenHash: 'tokenHash', expiresAt: 'expiresAt', usedAt: 'usedAt' },
   refreshTokens: { token: 'token' },
-  users: { email: 'email', id: 'id' },
+  users: { email: 'email', id: 'id', passwordHash: 'passwordHash', emailVerified: 'emailVerified' },
   withTransaction: vi.fn(),
 }));
 
 // Mock ../utils
 vi.mock('../utils', () => ({
   createAccessToken: vi.fn(),
+  createAuthResponse: vi.fn((accessToken, refreshToken, user) => ({
+    accessToken,
+    refreshToken,
+    user: { id: user.id, email: user.email, name: user.name, role: user.role },
+  })),
   createRefreshTokenFamily: vi.fn(),
   hashPassword: vi.fn(),
   needsRehash: vi.fn(),
@@ -69,6 +87,14 @@ vi.mock('../utils', () => ({
 // Mock drizzle-orm
 vi.mock('drizzle-orm', () => ({
   eq: vi.fn((...args: unknown[]) => args),
+  and: vi.fn((...args: unknown[]) => args),
+  gt: vi.fn((...args: unknown[]) => args),
+  isNull: vi.fn((...args: unknown[]) => args),
+}));
+
+// Mock crypto
+vi.mock('crypto', () => ({
+  randomBytes: vi.fn<(size: number) => Buffer>(),
 }));
 
 // ============================================================================
@@ -119,6 +145,8 @@ interface MockDbDeleteResult {
 interface MockDbClientExtended {
   query: {
     users: MockDbQueryResult;
+    passwordResetTokens: MockDbQueryResult;
+    emailVerificationTokens: MockDbQueryResult;
   };
   insert: ReturnType<typeof vi.fn> & ((...args: unknown[]) => MockDbInsertResult);
   update: ReturnType<typeof vi.fn> & ((...args: unknown[]) => MockDbUpdateResult);
@@ -147,11 +175,40 @@ function createMockDb(): MockDbClientExtended & DbClient {
       users: {
         findFirst: vi.fn(),
       },
+      passwordResetTokens: {
+        findFirst: vi.fn(),
+      },
+      emailVerificationTokens: {
+        findFirst: vi.fn(),
+      },
     },
     insert: mockInsert,
     update: mockUpdate,
     delete: mockDelete,
   } as unknown as MockDbClientExtended & DbClient;
+}
+
+function createMockConfig() {
+  return {
+    jwt: {
+      secret: 'test-secret-32-characters-long!!',
+      accessTokenExpiry: '15m',
+    },
+    argon2: {
+      memoryCost: 65536,
+      timeCost: 3,
+      parallelism: 4,
+    },
+    refreshToken: {
+      expiryDays: 7,
+      gracePeriodSeconds: 30,
+    },
+    lockout: {
+      maxAttempts: 5,
+      windowMinutes: 15,
+      durationMinutes: 30,
+    },
+  } as unknown as AuthConfig;
 }
 
 // ============================================================================
@@ -583,5 +640,263 @@ describe('logoutUser', () => {
 
     // Empty string is falsy, so should not delete
     expect(db.delete).not.toHaveBeenCalled();
+  });
+});
+
+// ============================================================================
+
+describe('requestPasswordReset', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  test('should create reset token and log URL for existing user', async () => {
+    const db = createMockDb();
+    const email = 'user@example.com';
+    const baseUrl = 'http://localhost:8080';
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    // Mock user exists
+    const mockUser = { id: 'user-id', email };
+    vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
+
+    // Mock token generation - create a 32-byte buffer from hex so .toString('hex') returns the same value
+    const mockTokenHex = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+    (vi.mocked(randomBytes) as ReturnType<typeof vi.fn>).mockReturnValue(
+      Buffer.from(mockTokenHex, 'hex'),
+    );
+    vi.mocked(hashPassword).mockResolvedValue('hashed-token');
+
+    // Mock database insert
+    vi.mocked(db.insert).mockReturnValue({
+      values: vi.fn().mockReturnValue({
+        returning: vi.fn().mockResolvedValue([{}]),
+      }),
+    });
+
+    await requestPasswordReset(db, email, baseUrl);
+
+    expect(db.query.users.findFirst).toHaveBeenCalledWith({
+      where: expect.any(Object),
+    });
+    expect(randomBytes).toHaveBeenCalledWith(32);
+    expect(hashPassword).toHaveBeenCalledWith(mockTokenHex, {
+      type: 2,
+      memoryCost: 8192,
+      timeCost: 1,
+      parallelism: 1,
+    });
+    expect(db.insert).toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith(`[PASSWORD RESET] Email sent to: ${email}`);
+    expect(consoleSpy).toHaveBeenCalledWith(
+      `[PASSWORD RESET] Reset URL: http://localhost:8080/auth/reset-password?token=${mockTokenHex}`,
+    );
+  });
+
+  test('should handle non-existing user gracefully', async () => {
+    const db = createMockDb();
+    const email = 'nonexistent@example.com';
+    const baseUrl = 'http://localhost:8080';
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    // Mock user does not exist
+    vi.mocked(db.query.users.findFirst).mockResolvedValue(null);
+
+    await requestPasswordReset(db, email, baseUrl);
+
+    expect(db.query.users.findFirst).toHaveBeenCalledWith({
+      where: expect.any(Object),
+    });
+    expect(db.insert).not.toHaveBeenCalled();
+    expect(consoleSpy).toHaveBeenCalledWith(`[PASSWORD RESET] Mock email sent to: ${email}`);
+  });
+});
+
+// ============================================================================
+
+describe('resetPassword', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  test('should reset password with valid token', async () => {
+    const db = createMockDb();
+    const config = createMockConfig();
+    const token = 'valid-reset-token';
+    const newPassword = 'newSecurePassword123!';
+
+    // Mock password validation
+    vi.mocked(validatePassword).mockResolvedValue({
+      isValid: true,
+      score: 4,
+      errors: [],
+      feedback: { warning: '', suggestions: [] },
+      crackTimeDisplay: 'centuries',
+    });
+
+    // Mock token hashing and lookup
+    vi.mocked(hashPassword).mockResolvedValueOnce('hashed-token'); // For token hash
+    vi.mocked(hashPassword).mockResolvedValueOnce('hashed-password'); // For password hash
+
+    // Mock token record exists and is valid
+    const mockTokenRecord = {
+      id: 'token-id',
+      userId: 'user-id',
+      tokenHash: 'hashed-token',
+      expiresAt: new Date(Date.now() + 1000000),
+      usedAt: null,
+    };
+    vi.mocked(db.query.passwordResetTokens.findFirst).mockResolvedValue(mockTokenRecord);
+
+    // Mock transaction
+    vi.mocked(withTransaction).mockImplementation(async (db, fn) => fn(db));
+
+    // Mock user update
+    vi.mocked(db.update).mockReturnValue({
+      set: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue(undefined),
+      }),
+    });
+
+    await resetPassword(db, config, token, newPassword);
+
+    expect(validatePassword).toHaveBeenCalledWith(newPassword, []);
+    expect(hashPassword).toHaveBeenCalledWith(token, {
+      type: 2,
+      memoryCost: 8192,
+      timeCost: 1,
+      parallelism: 1,
+    });
+    expect(db.query.passwordResetTokens.findFirst).toHaveBeenCalled();
+    expect(hashPassword).toHaveBeenCalledWith(newPassword, config.argon2);
+    expect(withTransaction).toHaveBeenCalled();
+  });
+
+  test('should throw error for weak password', async () => {
+    const db = createMockDb();
+    const config = createMockConfig();
+    const token = 'valid-token';
+    const weakPassword = '123';
+
+    vi.mocked(validatePassword).mockResolvedValue({
+      isValid: false,
+      score: 0,
+      errors: ['Password too weak'],
+      feedback: { warning: 'Password is too weak', suggestions: ['Add more characters'] },
+      crackTimeDisplay: 'instant',
+    });
+
+    await expect(resetPassword(db, config, token, weakPassword)).rejects.toThrow(WeakPasswordError);
+  });
+
+  test('should throw error for invalid or expired token', async () => {
+    const db = createMockDb();
+    const config = createMockConfig();
+    const token = 'invalid-token';
+    const newPassword = 'newSecurePassword123!';
+
+    vi.mocked(validatePassword).mockResolvedValue({
+      isValid: true,
+      score: 4,
+      errors: [],
+      feedback: { warning: '', suggestions: [] },
+      crackTimeDisplay: 'centuries',
+    });
+    vi.mocked(hashPassword).mockResolvedValue('hashed-token');
+    vi.mocked(db.query.passwordResetTokens.findFirst).mockResolvedValue(null);
+
+    await expect(resetPassword(db, config, token, newPassword)).rejects.toThrow(InvalidTokenError);
+  });
+});
+
+// ============================================================================
+
+describe('createEmailVerificationToken', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  test('should create verification token', async () => {
+    const db = createMockDb();
+    const userId = 'user-id';
+
+    // Mock token generation - create a 32-byte buffer from hex so .toString('hex') returns the same value
+    const mockTokenHex = 'fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210';
+    (vi.mocked(randomBytes) as ReturnType<typeof vi.fn>).mockReturnValue(
+      Buffer.from(mockTokenHex, 'hex'),
+    );
+    vi.mocked(hashPassword).mockResolvedValue('hashed-verification-token');
+
+    vi.mocked(db.insert).mockReturnValue({
+      values: vi.fn().mockReturnValue({
+        returning: vi.fn().mockResolvedValue([{}]),
+      }),
+    });
+
+    const result = await createEmailVerificationToken(db, userId);
+
+    expect(randomBytes).toHaveBeenCalledWith(32);
+    expect(hashPassword).toHaveBeenCalledWith(mockTokenHex, {
+      type: 2,
+      memoryCost: 8192,
+      timeCost: 1,
+      parallelism: 1,
+    });
+    expect(db.insert).toHaveBeenCalled();
+    expect(result).toBe(mockTokenHex);
+  });
+});
+
+// ============================================================================
+
+describe('verifyEmail', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  test('should verify email with valid token', async () => {
+    const db = createMockDb();
+    const token = 'valid-verification-token';
+
+    vi.mocked(hashPassword).mockResolvedValue('hashed-token');
+
+    const mockTokenRecord = {
+      id: 'token-id',
+      userId: 'user-id',
+      tokenHash: 'hashed-token',
+      expiresAt: new Date(Date.now() + 1000000),
+      usedAt: null,
+    };
+    vi.mocked(db.query.emailVerificationTokens.findFirst).mockResolvedValue(mockTokenRecord);
+
+    vi.mocked(withTransaction).mockImplementation(async (db, fn) => fn(db));
+
+    vi.mocked(db.update).mockReturnValue({
+      set: vi.fn().mockReturnValue({
+        where: vi.fn().mockResolvedValue(undefined),
+      }),
+    });
+
+    const result = await verifyEmail(db, token);
+
+    expect(hashPassword).toHaveBeenCalledWith(token, {
+      type: 2,
+      memoryCost: 8192,
+      timeCost: 1,
+      parallelism: 1,
+    });
+    expect(db.query.emailVerificationTokens.findFirst).toHaveBeenCalled();
+    expect(withTransaction).toHaveBeenCalled();
+    expect(result).toEqual({ userId: 'user-id' });
+  });
+
+  test('should throw error for invalid token', async () => {
+    const db = createMockDb();
+    const token = 'invalid-token';
+
+    vi.mocked(hashPassword).mockResolvedValue('hashed-token');
+    vi.mocked(db.query.emailVerificationTokens.findFirst).mockResolvedValue(null);
+
+    await expect(verifyEmail(db, token)).rejects.toThrow(InvalidTokenError);
   });
 });

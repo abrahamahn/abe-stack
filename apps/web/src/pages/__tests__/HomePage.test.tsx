@@ -1,11 +1,10 @@
 // apps/web/src/pages/__tests__/HomePage.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
+import { HomePage } from '@pages/HomePage';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
-
-import { HomePage } from '../HomePage';
 
 describe('HomePage (pages)', () => {
   const renderWithRouter = (): ReturnType<typeof render> => {
@@ -71,11 +70,11 @@ describe('HomePage (pages)', () => {
       expect(dashboardLink).toHaveAttribute('href', '/dashboard');
     });
 
-    it('should have demo link pointing to /features/demo', () => {
+    it('should have demo link pointing to /demo', () => {
       renderWithRouter();
 
       const demoLink = screen.getByRole('link', { name: /demo/i });
-      expect(demoLink).toHaveAttribute('href', '/features/demo');
+      expect(demoLink).toHaveAttribute('href', '/demo');
     });
   });
 

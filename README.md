@@ -26,8 +26,8 @@ https://github.com/abrahamahn/abe-stack
 - Frontend: React 19 (web via Vite, desktop via Electron)
 - Backend: Fastify + Drizzle ORM + PostgreSQL
 - API: Type-safe contracts with `ts-rest` + Zod
-- Auth: JWT foundation with Argon2id hashing, refresh tokens, and role-based access
-- Password Strength: zxcvbn-based validation with feedback and crack time estimates
+- Auth: JWT with refresh rotation, password reset, email verification, role-based access
+- Password Strength: Custom validator (~5KB) with entropy scoring and common password detection
 
 **Quality & Developer Experience**
 
@@ -159,6 +159,9 @@ pnpm dev
 - **IP Validation:** Proxy-aware IP extraction with CIDR support for trusted proxies
 - **Admin Unlock:** `POST /api/admin/auth/unlock` endpoint with audit trail
 - **Strict JWT:** Algorithm validation (HS256 only), format checks, proper error handling
+- **Memory Token Storage:** Access tokens stored in memory (not localStorage) to prevent XSS
+- **Secure Password Reset:** Argon2id-hashed tokens with 24h expiry and single-use enforcement
+- **WebSocket Auth:** Subprotocol header or HTTP-only cookie (no URL query params)
 
 ### Email Service
 

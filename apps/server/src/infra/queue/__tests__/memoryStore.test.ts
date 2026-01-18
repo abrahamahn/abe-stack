@@ -306,11 +306,19 @@ describe('MemoryQueueStore', () => {
       });
 
       await store.dequeue(now);
-      await store.fail('task-1', { name: 'TestError', message: 'Test failure', stack: 'stack trace' });
+      await store.fail('task-1', {
+        name: 'TestError',
+        message: 'Test failure',
+        stack: 'stack trace',
+      });
 
       const all = store.getAll();
       const failed = all.find((t) => t.id === 'task-1');
-      expect(failed?.error).toEqual({ name: 'TestError', message: 'Test failure', stack: 'stack trace' });
+      expect(failed?.error).toEqual({
+        name: 'TestError',
+        message: 'Test failure',
+        stack: 'stack trace',
+      });
     });
 
     test('should handle non-existent task gracefully', async () => {

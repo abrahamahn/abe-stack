@@ -100,9 +100,7 @@ describe('QueueServer', () => {
       server.start();
       server.start(); // Second call should be no-op
 
-      const startCalls = logSpy.mock.calls.filter(
-        (call) => call[0] === 'Queue server started',
-      );
+      const startCalls = logSpy.mock.calls.filter((call) => call[0] === 'Queue server started');
       expect(startCalls).toHaveLength(1);
 
       void server.stop();

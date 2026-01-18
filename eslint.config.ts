@@ -42,6 +42,8 @@ export default [
       'config/drizzle.config.ts',
       'apps/desktop/src/**/*.js',
       'apps/desktop/src/**/*.js.map',
+      '**/*.d.ts',
+      '**/*.d.ts.map',
     ],
   },
   jsConfigs.recommended ?? {},

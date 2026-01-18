@@ -9,7 +9,6 @@
 import type { LogData, Logger, LogLevel, RequestContext } from './types';
 import type { FastifyBaseLogger } from 'fastify';
 
-
 /**
  * Create a logger that wraps Fastify's pino logger
  */

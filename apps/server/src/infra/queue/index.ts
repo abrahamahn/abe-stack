@@ -40,9 +40,12 @@
 // Types
 export type {
   QueueConfig,
-  QueueStore, Task, TaskError,
+  QueueStore,
+  Task,
+  TaskError,
   TaskHandler,
-  TaskHandlers, TaskResult
+  TaskHandlers,
+  TaskResult,
 } from './types';
 
 // Queue Server

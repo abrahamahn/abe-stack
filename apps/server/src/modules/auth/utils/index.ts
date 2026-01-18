@@ -21,3 +21,5 @@ export {
 } from './refresh-token';
 
 export { extractRequestInfo } from './request';
+
+export { createAuthResponse, type AuthResponseData, type AuthUser } from './response';

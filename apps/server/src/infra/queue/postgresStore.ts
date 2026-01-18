@@ -61,7 +61,7 @@ export class PostgresQueueStore implements QueueStore {
 
   async dequeue(now: string): Promise<Task | null> {
     // Use FOR UPDATE SKIP LOCKED to safely dequeue in concurrent environments
-    const result = await this.db.execute(sql`
+    const result = (await this.db.execute(sql`
       UPDATE job_queue
       SET status = 'processing', attempts = attempts + 1
       WHERE id = (
@@ -72,15 +72,17 @@ export class PostgresQueueStore implements QueueStore {
         FOR UPDATE SKIP LOCKED
       )
       RETURNING id, name, args, scheduled_at, attempts, max_attempts, created_at
-    `) as unknown as { rows: Array<{
-      id: string;
-      name: string;
-      args: unknown;
-      scheduled_at: string;
-      attempts: number;
-      max_attempts: number;
-      created_at: string;
-    }> };
+    `)) as unknown as {
+      rows: Array<{
+        id: string;
+        name: string;
+        args: unknown;
+        scheduled_at: string;
+        attempts: number;
+        max_attempts: number;
+        created_at: string;
+      }>;
+    };
 
     if (result.rows.length === 0) return null;
 
@@ -134,19 +136,21 @@ export class PostgresQueueStore implements QueueStore {
   }
 
   async get(taskId: string): Promise<Task | null> {
-    const result = await this.db.execute(sql`
+    const result = (await this.db.execute(sql`
       SELECT id, name, args, scheduled_at, attempts, max_attempts, created_at
       FROM job_queue
       WHERE id = ${taskId}
-    `) as unknown as { rows: Array<{
-      id: string;
-      name: string;
-      args: unknown;
-      scheduled_at: string;
-      attempts: number;
-      max_attempts: number;
-      created_at: string;
-    }> };
+    `)) as unknown as {
+      rows: Array<{
+        id: string;
+        name: string;
+        args: unknown;
+        scheduled_at: string;
+        attempts: number;
+        max_attempts: number;
+        created_at: string;
+      }>;
+    };
 
     if (result.rows.length === 0) return null;
 
@@ -165,26 +169,26 @@ export class PostgresQueueStore implements QueueStore {
   }
 
   async getPendingCount(): Promise<number> {
-    const result = await this.db.execute(sql`
+    const result = (await this.db.execute(sql`
       SELECT COUNT(*) as count FROM job_queue WHERE status = 'pending'
-    `) as unknown as { rows: Array<{ count: string }> };
+    `)) as unknown as { rows: Array<{ count: string }> };
     const row = result.rows[0];
     return row ? parseInt(row.count, 10) : 0;
   }
 
   async getFailedCount(): Promise<number> {
-    const result = await this.db.execute(sql`
+    const result = (await this.db.execute(sql`
       SELECT COUNT(*) as count FROM job_queue WHERE status = 'failed'
-    `) as unknown as { rows: Array<{ count: string }> };
+    `)) as unknown as { rows: Array<{ count: string }> };
     const row = result.rows[0];
     return row ? parseInt(row.count, 10) : 0;
   }
 
   async clearCompleted(before: string): Promise<number> {
-    const result = await this.db.execute(sql`
+    const result = (await this.db.execute(sql`
       DELETE FROM job_queue
       WHERE status = 'completed' AND completed_at < ${before}::timestamptz
-    `) as unknown as { rowCount: number | null };
+    `)) as unknown as { rowCount: number | null };
     return result.rowCount ?? 0;
   }
 }

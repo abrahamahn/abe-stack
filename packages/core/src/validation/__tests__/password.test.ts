@@ -8,7 +8,6 @@ import {
 } from '@validation/password';
 import { describe, expect, test } from 'vitest';
 
-
 describe('defaultPasswordConfig', () => {
   test('should have minLength of 8', () => {
     expect(defaultPasswordConfig.minLength).toBe(8);

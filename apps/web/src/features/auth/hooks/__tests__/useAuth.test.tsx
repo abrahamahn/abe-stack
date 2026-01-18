@@ -13,7 +13,9 @@ import type { ClientConfig, ClientEnvironment } from '@app';
 import type { AuthService } from '@features/auth';
 
 // Create a mock AuthService
-function createMockAuthService(overrides?: Partial<ReturnType<AuthService['getState']>>): AuthService {
+function createMockAuthService(
+  overrides?: Partial<ReturnType<AuthService['getState']>>,
+): AuthService {
   const state = {
     user: overrides?.user ?? null,
     isLoading: overrides?.isLoading ?? false,
@@ -38,7 +40,9 @@ function createMockAuthService(overrides?: Partial<ReturnType<AuthService['getSt
 }
 
 // Create mock environment
-function createMockEnvironment(authOverrides?: Partial<ReturnType<AuthService['getState']>>): ClientEnvironment {
+function createMockEnvironment(
+  authOverrides?: Partial<ReturnType<AuthService['getState']>>,
+): ClientEnvironment {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -64,9 +68,7 @@ function createMockEnvironment(authOverrides?: Partial<ReturnType<AuthService['g
 describe('useAuth', () => {
   const mockUser = { id: '1', email: 'test@example.com', name: 'Test User', role: 'user' as const };
 
-  const createWrapper = (
-    env: ClientEnvironment,
-  ): React.FC<{ children: React.ReactNode }> => {
+  const createWrapper = (env: ClientEnvironment): React.FC<{ children: React.ReactNode }> => {
     return ({ children }: { children: React.ReactNode }): React.ReactElement => (
       <ClientEnvironmentProvider value={env}>{children}</ClientEnvironmentProvider>
     );
@@ -146,7 +148,7 @@ describe('useAuth', () => {
 
     expect(() => {
       renderHook(() => useAuth());
-    }).toThrow('useClientEnvironment must be used within AppProvider');
+    }).toThrow('useClientEnvironment must be used within ClientEnvironmentProvider');
 
     consoleSpy.mockRestore();
   });

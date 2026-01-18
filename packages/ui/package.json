@@ -38,7 +38,7 @@
   },
   "scripts": {
     "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build && tsc-alias && cp -r src/styles dist/",
-    "dev": "tsc --watch --project tsconfig.json",
+    "dev": "echo 'UI package uses source files directly - no build needed for dev'",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "type-check": "tsc --project tsconfig.json --noEmit",
     "test": "VITEST_TARGET=ui vitest run --config ../../config/vitest.config.ts"
@@ -73,6 +73,5 @@
     "react-dom": "^19.2.3",
     "react-router-dom": "^7.11.0"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }

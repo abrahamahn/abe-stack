@@ -15,7 +15,13 @@ import {
   WeakPasswordError,
 } from '../auth';
 import { AppError } from '../base';
-import { BadRequestError, ConflictError, NotFoundError, TooManyRequestsError, UnauthorizedError } from '../http';
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+  TooManyRequestsError,
+  UnauthorizedError,
+} from '../http';
 
 // ============================================================================
 // Auth Errors Tests

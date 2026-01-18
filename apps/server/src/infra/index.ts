@@ -19,25 +19,56 @@
 export {
   // Client
   buildConnectionString,
-  createDbClient, emailVerificationTokens, isInTransaction, isOptimisticLockError, loginAttempts,
+  createDbClient,
+  emailVerificationTokens,
+  isInTransaction,
+  isOptimisticLockError,
+  loginAttempts,
   // Optimistic locking
-  OptimisticLockError, passwordResetTokens,
+  OptimisticLockError,
+  passwordResetTokens,
   // Schema - Auth
-  refreshTokenFamilies, refreshTokens, resolveConnectionStringWithFallback, securityEvents, updateUserWithVersion,
+  refreshTokenFamilies,
+  refreshTokens,
+  resolveConnectionStringWithFallback,
+  securityEvents,
+  updateUserWithVersion,
   // Schema - Users
   USER_ROLES,
   users,
   // Transaction
-  withTransaction, type DbClient, type EmailVerificationToken, type LoginAttempt, type NewEmailVerificationToken, type NewLoginAttempt, type NewPasswordResetToken, type NewRefreshToken, type NewRefreshTokenFamily, type NewSecurityEvent, type NewUser, type PasswordResetToken, type RefreshToken, type RefreshTokenFamily, type SecurityEvent, type User,
+  withTransaction,
+  type DbClient,
+  type EmailVerificationToken,
+  type LoginAttempt,
+  type NewEmailVerificationToken,
+  type NewLoginAttempt,
+  type NewPasswordResetToken,
+  type NewRefreshToken,
+  type NewRefreshTokenFamily,
+  type NewSecurityEvent,
+  type NewUser,
+  type PasswordResetToken,
+  type RefreshToken,
+  type RefreshTokenFamily,
+  type SecurityEvent,
+  type User,
   // Types
-  type UserRole
+  type UserRole,
 } from './database';
 
 // Storage
 export {
   createStorage,
-  LocalStorageProvider, normalizeStorageKey, S3StorageProvider, type LocalStorageConfig,
-  type S3StorageConfig, type StorageConfig, type StorageProvider, type StorageProviderName, type UploadParams
+  LocalStorageProvider,
+  normalizeStorageKey,
+  S3StorageProvider,
+  type LocalStorageConfig,
+  type S3StorageConfig,
+  type StorageConfig,
+  type StorageProvider,
+  type StorageProviderName,
+  type UploadParams,
 } from './storage';
 
 // Email
@@ -46,26 +77,47 @@ export type { EmailOptions, EmailResult, EmailService } from './email';
 
 // PubSub
 export {
-  createPostgresPubSub, PostgresPubSub, publishAfterWrite, SubKeys, SubscriptionManager
+  createPostgresPubSub,
+  PostgresPubSub,
+  publishAfterWrite,
+  SubKeys,
+  SubscriptionManager,
 } from './pubsub';
 export type {
-  ListKey, PostgresPubSubOptions,
-  PubSubMessage, RecordKey, SubscriptionKey, SubscriptionManagerOptions
+  ListKey,
+  PostgresPubSubOptions,
+  PubSubMessage,
+  RecordKey,
+  SubscriptionKey,
+  SubscriptionManagerOptions,
 } from './pubsub';
 
 // Security
 export {
   applyProgressiveDelay,
   clearLoginAttempts,
-  getAccountLockoutStatus, getProgressiveDelay, isAccountLocked, logLoginAttempt, unlockAccount,
+  getAccountLockoutStatus,
+  getProgressiveDelay,
+  isAccountLocked,
+  logLoginAttempt,
+  unlockAccount,
   type LockoutConfig,
-  type LockoutStatus
+  type LockoutStatus,
 } from './security';
 
 // Security Events
 export {
-  getSecurityEventMetrics, getUserSecurityEvents, logAccountLockedEvent,
-  logAccountUnlockedEvent, logSecurityEvent, logTokenFamilyRevokedEvent, logTokenReuseEvent, type LogSecurityEventParams, type SecurityEventMetadata, type SecurityEventSeverity, type SecurityEventType
+  getSecurityEventMetrics,
+  getUserSecurityEvents,
+  logAccountLockedEvent,
+  logAccountUnlockedEvent,
+  logSecurityEvent,
+  logTokenFamilyRevokedEvent,
+  logTokenReuseEvent,
+  type LogSecurityEventParams,
+  type SecurityEventMetadata,
+  type SecurityEventSeverity,
+  type SecurityEventType,
 } from './security/events';
 
 // HTTP (Security headers, CORS)
@@ -76,32 +128,56 @@ export { getWebSocketStats, registerWebSocket, type WebSocketStats } from './web
 
 // Rate Limiting
 export {
-  createRateLimiter, MemoryStore, RateLimiter, RateLimitPresets, type MemoryStoreStats, type RateLimitConfig, type RateLimiterStats, type RateLimitInfo
+  createRateLimiter,
+  MemoryStore,
+  RateLimiter,
+  RateLimitPresets,
+  type MemoryStoreStats,
+  type RateLimitConfig,
+  type RateLimiterStats,
+  type RateLimitInfo,
 } from './rate-limit';
 
 // Crypto (Native JWT)
 export {
   jwtDecode,
-  JwtError, jwtSign,
-  jwtVerify, type JwtErrorCode,
+  JwtError,
+  jwtSign,
+  jwtVerify,
+  type JwtErrorCode,
   type JwtHeader,
   type JwtPayload,
-  type JwtSignOptions
+  type JwtSignOptions,
 } from './crypto';
 
 // Health Checks
 export {
   checkDatabase,
-  checkEmail, checkPubSub, checkRateLimit, checkStorage, checkWebSocket, getDetailedHealth,
-  logStartupSummary, type DetailedHealthResponse, type LiveResponse, type OverallStatus, type ReadyResponse, type RoutesResponse, type ServiceHealth, type ServiceStatus, type StartupSummaryOptions
+  checkEmail,
+  checkPubSub,
+  checkRateLimit,
+  checkStorage,
+  checkWebSocket,
+  getDetailedHealth,
+  logStartupSummary,
+  type DetailedHealthResponse,
+  type LiveResponse,
+  type OverallStatus,
+  type ReadyResponse,
+  type RoutesResponse,
+  type ServiceHealth,
+  type ServiceStatus,
+  type StartupSummaryOptions,
 } from './health';
 
 // Logger
 export {
   createJobCorrelationId,
-  createJobLogger, createLogger,
+  createJobLogger,
+  createLogger,
   createRequestContext,
-  createRequestLogger, generateCorrelationId,
+  createRequestLogger,
+  generateCorrelationId,
   getOrCreateCorrelationId,
   LOG_LEVELS,
   registerLoggingMiddleware,
@@ -110,19 +186,42 @@ export {
   type Logger,
   type LoggerConfig,
   type LogLevel,
-  type RequestContext
+  type RequestContext,
 } from './logger';
 
 // Queue (Background Jobs)
 export {
-  createMemoryQueueStore, createPostgresQueueStore, createQueueServer, MemoryQueueStore, PostgresQueueStore, QueueServer, type QueueConfig, type QueueServerOptions, type QueueStore, type Task, type TaskError,
+  createMemoryQueueStore,
+  createPostgresQueueStore,
+  createQueueServer,
+  MemoryQueueStore,
+  PostgresQueueStore,
+  QueueServer,
+  type QueueConfig,
+  type QueueServerOptions,
+  type QueueStore,
+  type Task,
+  type TaskError,
   type TaskHandler,
-  type TaskHandlers, type TaskResult
+  type TaskHandlers,
+  type TaskResult,
 } from './queue';
 
 // Write (Unified Write Pattern)
 export {
-  createWriteService, WriteService, type AfterWriteHook, type BeforeValidateHook, type OperationResult, type OperationType, type WriteBatch, type WriteContext, type WriteError, type WriteHooks, type WriteOperation, type WriteResult, type WriteServiceOptions
+  createWriteService,
+  WriteService,
+  type AfterWriteHook,
+  type BeforeValidateHook,
+  type OperationResult,
+  type OperationType,
+  type WriteBatch,
+  type WriteContext,
+  type WriteError,
+  type WriteHooks,
+  type WriteOperation,
+  type WriteResult,
+  type WriteServiceOptions,
 } from './write';
 
 // Router (Generic Route Registration)

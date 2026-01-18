@@ -10,7 +10,6 @@ import {
 } from '@infra/logger/logger';
 import { describe, expect, test, vi, type Mock } from 'vitest';
 
-
 interface MockBaseLogger {
   trace: Mock;
   debug: Mock;

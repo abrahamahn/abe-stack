@@ -6,13 +6,17 @@
  * No HTTP awareness - returns domain objects or throws errors.
  */
 
+import { randomBytes } from 'node:crypto';
+
 import { validatePassword, type UserRole } from '@abe-stack/core';
 import {
   applyProgressiveDelay,
+  emailVerificationTokens,
   getAccountLockoutStatus,
   isAccountLocked,
   logAccountLockedEvent,
   logLoginAttempt,
+  passwordResetTokens,
   refreshTokens,
   users,
   withTransaction,
@@ -25,8 +29,9 @@ import {
   InvalidTokenError,
   WeakPasswordError,
 } from '@shared';
-import { eq } from 'drizzle-orm';
+import { and, eq, gt, isNull } from 'drizzle-orm';
 
+import { createAuthResponse } from './utils';
 import {
   createAccessToken,
   createRefreshTokenFamily,
@@ -124,16 +129,7 @@ export async function registerUser(
     config.jwt.accessTokenExpiry,
   );
 
-  return {
-    accessToken,
-    refreshToken,
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-    },
-  };
+  return createAuthResponse(accessToken, refreshToken, user);
 }
 
 /**
@@ -198,16 +194,7 @@ export async function authenticateUser(
     config.jwt.accessTokenExpiry,
   );
 
-  return {
-    accessToken,
-    refreshToken,
-    user: {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-    },
-  };
+  return createAuthResponse(accessToken, refreshToken, user);
 }
 
 /**
@@ -291,4 +278,161 @@ function rehashPassword(
     .catch((error: unknown) =>
       callback?.(userId, error instanceof Error ? error : new Error(String(error))),
     );
+}
+
+// ============================================================================
+// Password Reset & Email Verification
+// ============================================================================
+
+/**
+ * Lightweight Argon2 config for token hashing
+ * Tokens are already high-entropy, so we use minimal params
+ */
+const TOKEN_HASH_CONFIG = {
+  type: 2 as const, // argon2id
+  memoryCost: 8192, // 8 MiB (lighter than password hashing)
+  timeCost: 1,
+  parallelism: 1,
+};
+
+const TOKEN_EXPIRY_HOURS = 24;
+
+/**
+ * Generate a random token and return both plain and hashed versions
+ */
+async function generateSecureToken(): Promise<{ plain: string; hash: string }> {
+  const plain = randomBytes(32).toString('hex');
+  const hash = await hashPassword(plain, TOKEN_HASH_CONFIG);
+  return { plain, hash };
+}
+
+/**
+ * Request a password reset email
+ * Always returns success to prevent user enumeration
+ */
+export async function requestPasswordReset(
+  db: DbClient,
+  email: string,
+  baseUrl: string,
+): Promise<void> {
+  const user = await db.query.users.findFirst({
+    where: eq(users.email, email),
+  });
+
+  if (!user) {
+    // Log but don't reveal user doesn't exist
+    // eslint-disable-next-line no-console
+    console.log(`[PASSWORD RESET] Mock email sent to: ${email}`);
+    return;
+  }
+
+  const { plain, hash } = await generateSecureToken();
+  const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
+
+  await db.insert(passwordResetTokens).values({
+    userId: user.id,
+    tokenHash: hash,
+    expiresAt,
+  });
+
+  // In production, this would send an actual email
+  const resetUrl = `${baseUrl}/auth/reset-password?token=${plain}`;
+  // eslint-disable-next-line no-console
+  console.log(`[PASSWORD RESET] Email sent to: ${email}`);
+  // eslint-disable-next-line no-console
+  console.log(`[PASSWORD RESET] Reset URL: ${resetUrl}`);
+}
+
+/**
+ * Reset password using a valid token
+ */
+export async function resetPassword(
+  db: DbClient,
+  config: AuthConfig,
+  token: string,
+  newPassword: string,
+): Promise<void> {
+  // Validate password strength first
+  const passwordValidation = await validatePassword(newPassword, []);
+  if (!passwordValidation.isValid) {
+    throw new WeakPasswordError({ errors: passwordValidation.errors });
+  }
+
+  // Hash the token to look it up
+  const tokenHash = await hashPassword(token, TOKEN_HASH_CONFIG);
+
+  // Find valid token (not expired, not used)
+  const tokenRecord = await db.query.passwordResetTokens.findFirst({
+    where: and(
+      eq(passwordResetTokens.tokenHash, tokenHash),
+      gt(passwordResetTokens.expiresAt, new Date()),
+      isNull(passwordResetTokens.usedAt),
+    ),
+  });
+
+  if (!tokenRecord) {
+    throw new InvalidTokenError('Invalid or expired reset token');
+  }
+
+  // Hash the new password
+  const passwordHash = await hashPassword(newPassword, config.argon2);
+
+  // Update password and mark token as used atomically
+  await withTransaction(db, async (tx) => {
+    await tx.update(users).set({ passwordHash }).where(eq(users.id, tokenRecord.userId));
+
+    await tx
+      .update(passwordResetTokens)
+      .set({ usedAt: new Date() })
+      .where(eq(passwordResetTokens.id, tokenRecord.id));
+  });
+}
+
+/**
+ * Create an email verification token for a user
+ */
+export async function createEmailVerificationToken(db: DbClient, userId: string): Promise<string> {
+  const { plain, hash } = await generateSecureToken();
+  const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
+
+  await db.insert(emailVerificationTokens).values({
+    userId,
+    tokenHash: hash,
+    expiresAt,
+  });
+
+  return plain;
+}
+
+/**
+ * Verify email using a token
+ */
+export async function verifyEmail(db: DbClient, token: string): Promise<{ userId: string }> {
+  // Hash the token to look it up
+  const tokenHash = await hashPassword(token, TOKEN_HASH_CONFIG);
+
+  // Find valid token (not expired, not used)
+  const tokenRecord = await db.query.emailVerificationTokens.findFirst({
+    where: and(
+      eq(emailVerificationTokens.tokenHash, tokenHash),
+      gt(emailVerificationTokens.expiresAt, new Date()),
+      isNull(emailVerificationTokens.usedAt),
+    ),
+  });
+
+  if (!tokenRecord) {
+    throw new InvalidTokenError('Invalid or expired verification token');
+  }
+
+  // Mark email as verified and token as used atomically
+  await withTransaction(db, async (tx) => {
+    await tx.update(users).set({ emailVerified: true }).where(eq(users.id, tokenRecord.userId));
+
+    await tx
+      .update(emailVerificationTokens)
+      .set({ usedAt: new Date() })
+      .where(eq(emailVerificationTokens.id, tokenRecord.id));
+  });
+
+  return { userId: tokenRecord.userId };
 }

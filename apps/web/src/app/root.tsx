@@ -1,30 +1,54 @@
 // apps/web/src/app/root.tsx
 import { toastStore } from '@abe-stack/core';
 import { ScrollArea, Toaster } from '@abe-stack/ui';
-import { AppProvider } from '@app/ClientEnvironment';
 import { DemoPage } from '@demo';
-import { LoginPage, ProtectedRoute, RegisterPage } from '@features/auth';
+import {
+  AuthPage,
+  ConfirmEmailPage,
+  LoginPage,
+  ProtectedRoute,
+  RegisterPage,
+  ResetPasswordPage,
+} from '@features/auth';
 import { DashboardPage } from '@features/dashboard';
 import { HomePage } from '@pages/HomePage';
 import { Route, Routes } from 'react-router-dom';
 
+import { AppProvider } from './AppProvider';
+
+import type { ClientEnvironment } from './ClientEnvironment';
 import type { ReactElement } from 'react';
+
+// ============================================================================
+// Types
+// ============================================================================
+
+interface AppProps {
+  environment: ClientEnvironment;
+}
+
+// ============================================================================
+// Components
+// ============================================================================
 
 function AppToaster(): ReactElement {
   const { messages, dismiss } = toastStore();
   return <Toaster messages={messages} onDismiss={dismiss} />;
 }
 
-export function App(): ReactElement {
+export function App({ environment }: AppProps): ReactElement {
   return (
-    <AppProvider>
-      <div className="theme" style={{ height: '100vh' }}>
-        <ScrollArea style={{ height: '100%' }}>
+    <AppProvider environment={environment}>
+      <div className="theme h-screen">
+        <ScrollArea className="h-full">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/features/demo" element={<DemoPage />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/auth/confirm-email" element={<ConfirmEmailPage />} />
+            <Route path="/demo" element={<DemoPage />} />
             <Route
               path="/dashboard"
               element={
@@ -36,8 +60,8 @@ export function App(): ReactElement {
             <Route path="/clean" element={<HomePage />} />
           </Routes>
         </ScrollArea>
+        <AppToaster />
       </div>
-      <AppToaster />
     </AppProvider>
   );
 }

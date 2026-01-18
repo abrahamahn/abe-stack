@@ -1,15 +1,15 @@
 // apps/web/src/app/createEnvironment.ts
 /**
- * Factory function to create the ClientEnvironment.
+ * Factory functions to create the ClientEnvironment and related services.
  *
  * Called once at module level in main.tsx to initialize all services.
+ * Following chet-stack pattern: services are created before React renders.
  */
 
 import { createQueryPersister } from '@abe-stack/sdk';
 import { clientConfig } from '@config';
 import { createAuthService } from '@features/auth';
 import { QueryClient } from '@tanstack/react-query';
-
 
 import type { ClientEnvironment } from './ClientEnvironment';
 
@@ -44,6 +44,11 @@ export function createPersister(): ReturnType<typeof createQueryPersister> {
 // Environment Factory
 // ============================================================================
 
+/**
+ * Create a new ClientEnvironment instance.
+ *
+ * Call this once in main.tsx and pass the result to AppProvider.
+ */
 export function createClientEnvironment(): ClientEnvironment {
   const config = clientConfig;
   const queryClient = createQueryClient();
@@ -58,27 +63,4 @@ export function createClientEnvironment(): ClientEnvironment {
     queryClient,
     auth,
   };
-}
-
-// ============================================================================
-// Singleton Instance
-// ============================================================================
-
-// Create environment once at module level
-// This ensures services are initialized before React renders
-let _environment: ClientEnvironment | null = null;
-
-export function getClientEnvironment(): ClientEnvironment {
-  if (!_environment) {
-    _environment = createClientEnvironment();
-  }
-  return _environment;
-}
-
-// For testing - allows resetting the environment
-export function resetClientEnvironment(): void {
-  if (_environment) {
-    _environment.auth.destroy();
-    _environment = null;
-  }
 }

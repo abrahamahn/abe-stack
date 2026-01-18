@@ -14,14 +14,19 @@ import type { SubscriptionManager } from '@pubsub';
 // ============================================================================
 
 function createMockDb() {
-  const mockTransaction = vi.fn().mockImplementation(async (cb: (tx: DbClient) => Promise<unknown>) => {
-    return cb(createMockTx());
-  });
+  const mockTransaction = vi
+    .fn()
+    .mockImplementation(async (cb: (tx: DbClient) => Promise<unknown>) => {
+      return cb(createMockTx());
+    });
 
   return {
     transaction: mockTransaction,
     execute: vi.fn(),
-  } as unknown as DbClient & { transaction: ReturnType<typeof vi.fn>; execute: ReturnType<typeof vi.fn> };
+  } as unknown as DbClient & {
+    transaction: ReturnType<typeof vi.fn>;
+    execute: ReturnType<typeof vi.fn>;
+  };
 }
 
 function createMockTx(overrides?: Partial<{ execute: ReturnType<typeof vi.fn> }>) {
@@ -133,7 +138,8 @@ describe('WriteService', () => {
 
   describe('write (batch)', () => {
     test('should execute multiple operations atomically', async () => {
-      const mockExecute = vi.fn()
+      const mockExecute = vi
+        .fn()
         .mockResolvedValueOnce({ rows: [], rowCount: 1 }) // create
         .mockResolvedValueOnce({ rows: [{ version: 1 }], rowCount: 1 }) // update select
         .mockResolvedValueOnce({ rows: [{ id: 'user-2', version: 2 }], rowCount: 1 }); // update
@@ -159,7 +165,8 @@ describe('WriteService', () => {
     });
 
     test('should rollback all operations on failure', async () => {
-      const mockExecute = vi.fn()
+      const mockExecute = vi
+        .fn()
         .mockResolvedValueOnce({ rows: [], rowCount: 1 }) // first create succeeds
         .mockRejectedValueOnce(new Error('unique constraint violation')); // second fails
 
@@ -230,7 +237,8 @@ describe('WriteService', () => {
 
   describe('update operation', () => {
     test('should check version for optimistic locking', async () => {
-      const mockExecute = vi.fn()
+      const mockExecute = vi
+        .fn()
         .mockResolvedValueOnce({ rows: [{ version: 5 }] }) // SELECT version
         .mockResolvedValueOnce({ rows: [{ id: 'user-1', version: 6 }], rowCount: 1 }); // UPDATE
 
@@ -253,8 +261,7 @@ describe('WriteService', () => {
     });
 
     test('should fail on version mismatch', async () => {
-      const mockExecute = vi.fn()
-        .mockResolvedValueOnce({ rows: [{ version: 6 }] }); // SELECT returns different version
+      const mockExecute = vi.fn().mockResolvedValueOnce({ rows: [{ version: 6 }] }); // SELECT returns different version
 
       db.transaction = vi.fn().mockImplementation(async (cb) => {
         return cb({ execute: mockExecute } as unknown as DbClient);
@@ -276,8 +283,7 @@ describe('WriteService', () => {
     });
 
     test('should fail if record not found', async () => {
-      const mockExecute = vi.fn()
-        .mockResolvedValueOnce({ rows: [] }); // SELECT returns nothing
+      const mockExecute = vi.fn().mockResolvedValueOnce({ rows: [] }); // SELECT returns nothing
 
       db.transaction = vi.fn().mockImplementation(async (cb) => {
         return cb({ execute: mockExecute } as unknown as DbClient);
@@ -317,7 +323,8 @@ describe('WriteService', () => {
 
   describe('delete operation', () => {
     test('should delete record and return previous version', async () => {
-      const mockExecute = vi.fn()
+      const mockExecute = vi
+        .fn()
         .mockResolvedValueOnce({ rows: [{ version: 3 }] }) // SELECT version
         .mockResolvedValueOnce({ rowCount: 1 }); // DELETE
 
@@ -339,8 +346,7 @@ describe('WriteService', () => {
     });
 
     test('should fail if record not found', async () => {
-      const mockExecute = vi.fn()
-        .mockResolvedValueOnce({ rows: [] }); // SELECT returns nothing
+      const mockExecute = vi.fn().mockResolvedValueOnce({ rows: [] }); // SELECT returns nothing
 
       db.transaction = vi.fn().mockImplementation(async (cb) => {
         return cb({ execute: mockExecute } as unknown as DbClient);
@@ -359,8 +365,7 @@ describe('WriteService', () => {
     });
 
     test('should check version for optimistic locking on delete', async () => {
-      const mockExecute = vi.fn()
-        .mockResolvedValueOnce({ rows: [{ version: 5 }] }) // SELECT version (mismatch)
+      const mockExecute = vi.fn().mockResolvedValueOnce({ rows: [{ version: 5 }] }); // SELECT version (mismatch)
 
       db.transaction = vi.fn().mockImplementation(async (cb) => {
         return cb({ execute: mockExecute } as unknown as DbClient);
@@ -406,7 +411,8 @@ describe('WriteService', () => {
     });
 
     test('should publish deletion with version -1', async () => {
-      const mockExecute = vi.fn()
+      const mockExecute = vi
+        .fn()
         .mockResolvedValueOnce({ rows: [{ version: 3 }] }) // SELECT
         .mockResolvedValueOnce({ rowCount: 1 }); // DELETE
 
@@ -536,7 +542,8 @@ describe('WriteService', () => {
 
   describe('error normalization', () => {
     test('should normalize unique constraint errors', async () => {
-      const mockExecute = vi.fn()
+      const mockExecute = vi
+        .fn()
         .mockRejectedValue(new Error('unique constraint violation on email'));
 
       db.transaction = vi.fn().mockImplementation(async (cb) => {
@@ -557,8 +564,7 @@ describe('WriteService', () => {
     });
 
     test('should normalize foreign key errors', async () => {
-      const mockExecute = vi.fn()
-        .mockRejectedValue(new Error('foreign key constraint failed'));
+      const mockExecute = vi.fn().mockRejectedValue(new Error('foreign key constraint failed'));
 
       db.transaction = vi.fn().mockImplementation(async (cb) => {
         return cb({ execute: mockExecute } as unknown as DbClient);
@@ -578,8 +584,7 @@ describe('WriteService', () => {
     });
 
     test('should return INTERNAL for unknown errors', async () => {
-      const mockExecute = vi.fn()
-        .mockRejectedValue(new Error('Something unexpected'));
+      const mockExecute = vi.fn().mockRejectedValue(new Error('Something unexpected'));
 
       db.transaction = vi.fn().mockImplementation(async (cb) => {
         return cb({ execute: mockExecute } as unknown as DbClient);

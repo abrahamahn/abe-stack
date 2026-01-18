@@ -1,9 +1,5 @@
 // packages/ui/src/elements/PasswordInput.tsx
-import {
-  estimatePasswordStrength,
-  getStrengthColor,
-  getStrengthLabel,
-} from '@abe-stack/core';
+import { estimatePasswordStrength, getStrengthColor, getStrengthLabel } from '@abe-stack/core';
 import { forwardRef, useState } from 'react';
 
 import { Button } from './Button';
@@ -57,9 +53,10 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>((p
   const passwordValue = value !== undefined ? String(value) : internalValue;
 
   // Calculate strength if enabled
-  const strength = showStrength && passwordValue.length > 0
-    ? estimatePasswordStrength(passwordValue, userInputs)
-    : null;
+  const strength =
+    showStrength && passwordValue.length > 0
+      ? estimatePasswordStrength(passwordValue, userInputs)
+      : null;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     if (value === undefined) {

@@ -126,7 +126,9 @@ export async function clear(store: IDBStore): Promise<void> {
  * Get all keys from the store
  */
 export async function keys<T extends IDBValidKey>(store: IDBStore): Promise<T[]> {
-  return withStore(store, 'readonly', (objectStore) =>
-    objectStore.getAllKeys() as unknown as IDBRequest<T[]>,
+  return withStore(
+    store,
+    'readonly',
+    (objectStore) => objectStore.getAllKeys() as unknown as IDBRequest<T[]>,
   );
 }

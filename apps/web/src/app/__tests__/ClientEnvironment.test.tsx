@@ -1,12 +1,11 @@
 // apps/web/src/app/__tests__/ClientEnvironment.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
+import { ClientEnvironmentProvider, useClientEnvironment } from '@app/ClientEnvironment';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ClientEnvironmentProvider, useClientEnvironment } from '../ClientEnvironment';
-
-import type { ClientEnvironment } from '../ClientEnvironment';
+import type { ClientEnvironment } from '@app/ClientEnvironment';
 import type { JSX } from 'react';
 
 // ============================================================================
@@ -146,7 +145,7 @@ describe('ClientEnvironment', () => {
 
       expect(() => {
         render(<TestConsumer />);
-      }).toThrow('useClientEnvironment must be used within AppProvider');
+      }).toThrow('useClientEnvironment must be used within ClientEnvironmentProvider');
 
       consoleSpy.mockRestore();
     });
@@ -156,7 +155,11 @@ describe('ClientEnvironment', () => {
 
       function AuthConsumer(): JSX.Element {
         const env = useClientEnvironment();
-        return <span data-testid="auth-state">{env.auth.getState().isAuthenticated ? 'auth' : 'anon'}</span>;
+        return (
+          <span data-testid="auth-state">
+            {env.auth.getState().isAuthenticated ? 'auth' : 'anon'}
+          </span>
+        );
       }
 
       render(

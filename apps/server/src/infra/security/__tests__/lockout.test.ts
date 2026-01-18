@@ -109,11 +109,7 @@ describe('Lockout Functions', () => {
     });
 
     test('should log login attempt without optional fields', async () => {
-      await logLoginAttempt(
-        asMockDb(mockDb),
-        'test@example.com',
-        false,
-      );
+      await logLoginAttempt(asMockDb(mockDb), 'test@example.com', false);
 
       expect(mockDb.insert).toHaveBeenCalled();
     });
@@ -176,11 +172,7 @@ describe('Lockout Functions', () => {
       });
 
       const config = { ...defaultLockoutConfig, maxAttempts: 5 };
-      const isLocked = await isAccountLocked(
-        asMockDb(mockDb),
-        'test@example.com',
-        config,
-      );
+      const isLocked = await isAccountLocked(asMockDb(mockDb), 'test@example.com', config);
 
       expect(isLocked).toBe(true);
     });
@@ -454,11 +446,7 @@ describe('Lockout Functions', () => {
     test('should record admin userId in audit trail', async () => {
       mockDb.query.users.findFirst.mockResolvedValue({ id: 'user-123', email: 'test@example.com' });
 
-      await unlockAccount(
-        asMockDb(mockDb),
-        'test@example.com',
-        'admin-999',
-      );
+      await unlockAccount(asMockDb(mockDb), 'test@example.com', 'admin-999');
 
       expect(mockDb.insert).toHaveBeenCalled();
     });

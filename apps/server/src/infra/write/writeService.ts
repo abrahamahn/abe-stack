@@ -201,14 +201,13 @@ export class WriteService {
     }
 
     // Build version check condition
-    const versionCheck = expectedVersion !== undefined
-      ? sql`AND version = ${expectedVersion}`
-      : sql``;
+    const versionCheck =
+      expectedVersion !== undefined ? sql`AND version = ${expectedVersion}` : sql``;
 
     // Get current record for previous version
-    const currentResult = await tx.execute(sql`
+    const currentResult = (await tx.execute(sql`
       SELECT version FROM ${sql.identifier(table)} WHERE id = ${id}
-    `) as unknown as { rows: Array<{ version: number }> };
+    `)) as unknown as { rows: Array<{ version: number }> };
 
     const currentRow = currentResult.rows[0];
     if (!currentRow) {
@@ -231,12 +230,12 @@ export class WriteService {
       updated_at: new Date().toISOString(),
     };
 
-    const result = await tx.execute(sql`
+    const result = (await tx.execute(sql`
       UPDATE ${sql.identifier(table)}
       SET ${sql.raw(this.buildUpdateClause(updateData))}
       WHERE id = ${id} ${versionCheck}
       RETURNING *
-    `) as unknown as { rows: Array<T & { id: string; version: number }>; rowCount: number };
+    `)) as unknown as { rows: Array<T & { id: string; version: number }>; rowCount: number };
 
     if (result.rowCount === 0) {
       throw this.createError('CONFLICT', 'Concurrent modification detected');
@@ -258,14 +257,13 @@ export class WriteService {
     const { table, id, expectedVersion } = operation;
 
     // Build version check condition
-    const versionCheck = expectedVersion !== undefined
-      ? sql`AND version = ${expectedVersion}`
-      : sql``;
+    const versionCheck =
+      expectedVersion !== undefined ? sql`AND version = ${expectedVersion}` : sql``;
 
     // Get current version before delete
-    const currentResult = await tx.execute(sql`
+    const currentResult = (await tx.execute(sql`
       SELECT version FROM ${sql.identifier(table)} WHERE id = ${id}
-    `) as unknown as { rows: Array<{ version: number }> };
+    `)) as unknown as { rows: Array<{ version: number }> };
 
     const currentRow = currentResult.rows[0];
     if (!currentRow) {
@@ -273,10 +271,10 @@ export class WriteService {
     }
 
     // Delete with version check
-    const result = await tx.execute(sql`
+    const result = (await tx.execute(sql`
       DELETE FROM ${sql.identifier(table)}
       WHERE id = ${id} ${versionCheck}
-    `) as unknown as { rowCount: number };
+    `)) as unknown as { rowCount: number };
 
     if (result.rowCount === 0) {
       throw this.createError('CONFLICT', 'Concurrent modification detected');
@@ -319,7 +317,9 @@ export class WriteService {
           await (hook as AfterWriteHook<T>)(result, ctx);
         } catch (err) {
           const errorMsg = err instanceof Error ? err.message : String(err);
-          this.log?.error(`afterWrite hook failed: ${errorMsg}`, { operationId: result.operation.id });
+          this.log?.error(`afterWrite hook failed: ${errorMsg}`, {
+            operationId: result.operation.id,
+          });
         }
       }
     }

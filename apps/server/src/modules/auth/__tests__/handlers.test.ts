@@ -1,11 +1,23 @@
 // apps/server/src/modules/auth/__tests__/handlers.test.ts
 import {
+  handleForgotPassword,
   handleLogin,
   handleLogout,
   handleRefresh,
   handleRegister,
+  handleResetPassword,
+  handleVerifyEmail,
 } from '@auth/handlers';
-import { authenticateUser, logoutUser, refreshUserTokens, registerUser } from '@auth/service';
+import {
+  authenticateUser,
+  logoutUser,
+  refreshUserTokens,
+  registerUser,
+  requestPasswordReset,
+  resetPassword,
+  verifyEmail,
+} from '@auth/service';
+import { verifyToken as verifyJwtToken } from '@auth/utils';
 import {
   AccountLockedError,
   EmailAlreadyExistsError,
@@ -18,13 +30,20 @@ import {
 import { REFRESH_COOKIE_NAME } from '@shared/constants';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { verifyToken as verifyJwtToken } from '../utils';
-
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '@shared';
 
 // ============================================================================
 // Mock Dependencies
 // ============================================================================
+
+// Mock @abe-stack/auth (needed because service.ts imports from it)
+vi.mock('@abe-stack/auth', () => ({
+  createAuthResponse: vi.fn((accessToken, refreshToken, user) => ({
+    accessToken,
+    refreshToken,
+    user: { id: user.id, email: user.email, name: user.name, role: user.role },
+  })),
+}));
 
 // Mock the service module
 vi.mock('@auth/service', () => ({
@@ -32,6 +51,10 @@ vi.mock('@auth/service', () => ({
   authenticateUser: vi.fn(),
   refreshUserTokens: vi.fn(),
   logoutUser: vi.fn(),
+  requestPasswordReset: vi.fn(),
+  resetPassword: vi.fn(),
+  verifyEmail: vi.fn(),
+  createEmailVerificationToken: vi.fn(),
 }));
 
 // Mock config
@@ -65,6 +88,9 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
         jwt: { secret: 'test-secret-32-characters-long!!' },
         argon2: {},
         refreshToken: { expiryDays: 7 },
+      },
+      server: {
+        port: 8080,
       },
     } as AppContext['config'],
     log: {
@@ -386,6 +412,160 @@ describe('handleLogout', () => {
     vi.mocked(logoutUser).mockRejectedValue(new Error('Database error'));
 
     const result = await handleLogout(ctx, request, reply);
+
+    expect(result.status).toBe(500);
+    expect(result.body).toEqual({ message: ERROR_MESSAGES.INTERNAL_ERROR });
+    expect(ctx.log.error).toHaveBeenCalled();
+  });
+});
+
+// ============================================================================
+// Tests: handleForgotPassword
+// ============================================================================
+
+describe('handleForgotPassword', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  test('should return success response for valid request', async () => {
+    const ctx = createMockContext();
+    const body = { email: 'test@example.com' };
+
+    vi.mocked(requestPasswordReset).mockResolvedValue(undefined);
+
+    const result = await handleForgotPassword(ctx, body);
+
+    expect(result.status).toBe(200);
+    expect(result.body).toEqual({ message: SUCCESS_MESSAGES.PASSWORD_RESET_SENT });
+    expect(requestPasswordReset).toHaveBeenCalledWith(
+      ctx.db,
+      'test@example.com',
+      'http://localhost:8080',
+    );
+  });
+
+  test('should return internal error on service failure', async () => {
+    const ctx = createMockContext();
+    const body = { email: 'test@example.com' };
+
+    vi.mocked(requestPasswordReset).mockRejectedValue(new Error('Database error'));
+
+    const result = await handleForgotPassword(ctx, body);
+
+    expect(result.status).toBe(500);
+    expect(result.body).toEqual({ message: ERROR_MESSAGES.INTERNAL_ERROR });
+    expect(ctx.log.error).toHaveBeenCalled();
+  });
+});
+
+// ============================================================================
+// Tests: handleResetPassword
+// ============================================================================
+
+describe('handleResetPassword', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  test('should return success response for valid reset', async () => {
+    const ctx = createMockContext();
+    const body = { token: 'reset-token', password: 'newPassword123!' };
+
+    vi.mocked(resetPassword).mockResolvedValue(undefined);
+
+    const result = await handleResetPassword(ctx, body);
+
+    expect(result.status).toBe(200);
+    expect(result.body).toEqual({ message: 'Password reset successfully' });
+    expect(resetPassword).toHaveBeenCalledWith(
+      ctx.db,
+      ctx.config.auth,
+      'reset-token',
+      'newPassword123!',
+    );
+  });
+
+  test('should return bad request for weak password', async () => {
+    const ctx = createMockContext();
+    const body = { token: 'reset-token', password: 'weak' };
+
+    vi.mocked(resetPassword).mockRejectedValue(new WeakPasswordError({ errors: ['Too weak'] }));
+
+    const result = await handleResetPassword(ctx, body);
+
+    expect(result.status).toBe(400);
+    expect(result.body).toEqual({ message: ERROR_MESSAGES.WEAK_PASSWORD });
+    expect(ctx.log.warn).toHaveBeenCalled();
+  });
+
+  test('should return bad request for invalid token', async () => {
+    const ctx = createMockContext();
+    const body = { token: 'invalid-token', password: 'newPassword123!' };
+
+    vi.mocked(resetPassword).mockRejectedValue(new InvalidTokenError('Invalid token'));
+
+    const result = await handleResetPassword(ctx, body);
+
+    expect(result.status).toBe(400);
+    expect(result.body).toEqual({ message: ERROR_MESSAGES.INVALID_TOKEN });
+  });
+
+  test('should return internal error on service failure', async () => {
+    const ctx = createMockContext();
+    const body = { token: 'reset-token', password: 'newPassword123!' };
+
+    vi.mocked(resetPassword).mockRejectedValue(new Error('Database error'));
+
+    const result = await handleResetPassword(ctx, body);
+
+    expect(result.status).toBe(500);
+    expect(result.body).toEqual({ message: ERROR_MESSAGES.INTERNAL_ERROR });
+    expect(ctx.log.error).toHaveBeenCalled();
+  });
+});
+
+// ============================================================================
+// Tests: handleVerifyEmail
+// ============================================================================
+
+describe('handleVerifyEmail', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  test('should return success response for valid verification', async () => {
+    const ctx = createMockContext();
+    const body = { token: 'verify-token' };
+
+    vi.mocked(verifyEmail).mockResolvedValue({ userId: 'user-123' });
+
+    const result = await handleVerifyEmail(ctx, body);
+
+    expect(result.status).toBe(200);
+    expect(result.body).toEqual({ verified: true, userId: 'user-123' });
+    expect(verifyEmail).toHaveBeenCalledWith(ctx.db, 'verify-token');
+  });
+
+  test('should return bad request for invalid token', async () => {
+    const ctx = createMockContext();
+    const body = { token: 'invalid-token' };
+
+    vi.mocked(verifyEmail).mockRejectedValue(new InvalidTokenError('Invalid token'));
+
+    const result = await handleVerifyEmail(ctx, body);
+
+    expect(result.status).toBe(400);
+    expect(result.body).toEqual({ message: ERROR_MESSAGES.INVALID_TOKEN });
+  });
+
+  test('should return internal error on service failure', async () => {
+    const ctx = createMockContext();
+    const body = { token: 'verify-token' };
+
+    vi.mocked(verifyEmail).mockRejectedValue(new Error('Database error'));
+
+    const result = await handleVerifyEmail(ctx, body);
 
     expect(result.status).toBe(500);
     expect(result.body).toEqual({ message: ERROR_MESSAGES.INTERNAL_ERROR });

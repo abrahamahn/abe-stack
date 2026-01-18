@@ -6,117 +6,21 @@ import {
   Button,
   Card,
   Checkbox,
-  CloseButton,
   Container,
   Heading,
   Input,
   LeftSidebarLayout,
-  Modal,
-  Overlay,
   PageContainer,
-  ResizablePanel,
-  ResizablePanelGroup,
   RightSidebarLayout,
-  ScrollArea,
   StackedLayout,
   Text,
   TopbarLayout,
-  VersionBadge,
 } from '@abe-stack/ui';
-import { useState } from 'react';
 
 import type { ComponentDemo } from '@demo/types';
 import type { ReactElement } from 'react';
 
-// Stateful wrappers for interactive demos
-function ModalDemo(): ReactElement {
-  const [open, setOpen] = useState(false);
-  return (
-    <div>
-      <Button
-        onClick={() => {
-          setOpen(true);
-        }}
-      >
-        Open Modal
-      </Button>
-      <Modal.Root
-        open={open}
-        onClose={() => {
-          setOpen(false);
-        }}
-      >
-        <Modal.Header>
-          <Modal.Title>Modal Title</Modal.Title>
-          <Modal.Close />
-        </Modal.Header>
-        <Modal.Body>
-          <Modal.Description>
-            This is a modal dialog with focus trapping and accessibility support.
-          </Modal.Description>
-          <Text>Press Escape or click outside to close.</Text>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={() => {
-              setOpen(false);
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={() => {
-              setOpen(false);
-            }}
-          >
-            Confirm
-          </Button>
-        </Modal.Footer>
-      </Modal.Root>
-    </div>
-  );
-}
-
-function OverlayDemo(): ReactElement {
-  const [open, setOpen] = useState(false);
-  return (
-    <div>
-      <Button
-        onClick={() => {
-          setOpen(true);
-        }}
-      >
-        Show Overlay
-      </Button>
-      <Overlay
-        open={open}
-        onClick={() => {
-          setOpen(false);
-        }}
-      />
-      {open && (
-        <div
-          style={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 1001,
-            background: 'white',
-            padding: '24px',
-            borderRadius: '8px',
-          }}
-        >
-          <Text>Click the overlay to close</Text>
-        </div>
-      )}
-    </div>
-  );
-}
-
 export const layoutCatalog: Record<string, ComponentDemo> = {
-  // Containers
   container: {
     id: 'container',
     name: 'Container',
@@ -209,6 +113,52 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
           </div>
         ),
       },
+      {
+        name: 'Comparison',
+        description: 'Side-by-side comparison of all sizes',
+        code: `<>
+  <Container size="sm">Small (640px)</Container>
+  <Container size="md">Medium (960px)</Container>
+  <Container size="lg">Large (1200px)</Container>
+</>`,
+        render: (): ReactElement => (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <Container size="sm">
+              <div
+                style={{
+                  backgroundColor: '#e3f2fd',
+                  padding: '16px',
+                  border: '2px solid #2196f3',
+                }}
+              >
+                <Text>Small (640px)</Text>
+              </div>
+            </Container>
+            <Container size="md">
+              <div
+                style={{
+                  backgroundColor: '#f3e5f5',
+                  padding: '16px',
+                  border: '2px solid #9c27b0',
+                }}
+              >
+                <Text>Medium (960px)</Text>
+              </div>
+            </Container>
+            <Container size="lg">
+              <div
+                style={{
+                  backgroundColor: '#fff3e0',
+                  padding: '16px',
+                  border: '2px solid #ff9800',
+                }}
+              >
+                <Text>Large (1200px)</Text>
+              </div>
+            </Container>
+          </div>
+        ),
+      },
     ],
   },
   authLayout: {
@@ -270,6 +220,32 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
           </div>
         ),
       },
+      {
+        name: 'Minimal',
+        description: 'Authentication layout without title or description',
+        code: `<AuthLayout>
+  <Heading as="h2" size="md">Reset Password</Heading>
+  <Text>Enter your email to receive reset instructions</Text>
+  <Input placeholder="Email" />
+  <Button variant="primary">Send Reset Link</Button>
+</AuthLayout>`,
+        render: (): ReactElement => (
+          <div style={{ minHeight: '350px', backgroundColor: 'var(--color-surface)' }}>
+            <AuthLayout>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <Heading as="h3" size="sm">
+                  Reset Password
+                </Heading>
+                <Text tone="muted" style={{ fontSize: '14px' }}>
+                  Enter your email to receive reset instructions
+                </Text>
+                <Input placeholder="Email" type="email" />
+                <Button variant="primary">Send Reset Link</Button>
+              </div>
+            </AuthLayout>
+          </div>
+        ),
+      },
     ],
   },
   pageContainer: {
@@ -317,6 +293,113 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
               </Heading>
               <Text>This PageContainer has a custom max-width of 600px for narrower content.</Text>
             </PageContainer>
+          </div>
+        ),
+      },
+    ],
+  },
+  sidebarLayout: {
+    id: 'sidebarLayout',
+    name: 'AppShell with Sidebar',
+    category: 'layouts',
+    description: 'Two-column layout using AppShell with LeftSidebarLayout',
+    variants: [
+      {
+        name: 'Basic',
+        description: 'AppShell with left sidebar navigation',
+        code: `<AppShell
+  sidebar={
+    <LeftSidebarLayout width="200px">
+      <nav>Navigation items</nav>
+    </LeftSidebarLayout>
+  }
+>
+  <Heading as="h1">Main Content</Heading>
+  <Text>Your page content goes here</Text>
+</AppShell>`,
+        render: (): ReactElement => (
+          <div style={{ border: '1px solid #ddd', height: '300px', overflow: 'hidden' }}>
+            <AppShell
+              sidebar={
+                <LeftSidebarLayout width="180px" bordered>
+                  <div style={{ padding: '8px' }}>
+                    <Heading as="h4" size="sm" style={{ marginBottom: '16px' }}>
+                      Navigation
+                    </Heading>
+                    <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <Button variant="text" style={{ justifyContent: 'flex-start' }}>
+                        Dashboard
+                      </Button>
+                      <Button variant="text" style={{ justifyContent: 'flex-start' }}>
+                        Settings
+                      </Button>
+                      <Button variant="text" style={{ justifyContent: 'flex-start' }}>
+                        Profile
+                      </Button>
+                    </nav>
+                  </div>
+                </LeftSidebarLayout>
+              }
+              sidebarWidth="180px"
+              style={{ height: '100%' }}
+            >
+              <div style={{ padding: '16px' }}>
+                <Heading as="h2" size="md">
+                  Main Content Area
+                </Heading>
+                <Text>This is the main content area with a fixed-width sidebar on the left.</Text>
+                <Card style={{ marginTop: '16px' }}>
+                  <Text>Content cards and other components work well in the main area.</Text>
+                </Card>
+              </div>
+            </AppShell>
+          </div>
+        ),
+      },
+      {
+        name: 'With Header',
+        description: 'AppShell with sidebar and header',
+        code: `<AppShell
+  header={<TopbarLayout>Header</TopbarLayout>}
+  sidebar={<LeftSidebarLayout>Nav</LeftSidebarLayout>}
+>
+  <Text>Main content</Text>
+</AppShell>`,
+        render: (): ReactElement => (
+          <div style={{ border: '1px solid #ddd', height: '300px', overflow: 'hidden' }}>
+            <AppShell
+              header={
+                <div style={{ padding: '12px 16px', borderBottom: '1px solid #ddd' }}>
+                  <Heading as="h3" size="sm">
+                    Dashboard
+                  </Heading>
+                </div>
+              }
+              sidebar={
+                <LeftSidebarLayout width="150px" bordered>
+                  <div style={{ padding: '8px' }}>
+                    <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <Button variant="text" size="small" style={{ justifyContent: 'flex-start' }}>
+                        Home
+                      </Button>
+                      <Button variant="text" size="small" style={{ justifyContent: 'flex-start' }}>
+                        About
+                      </Button>
+                    </nav>
+                  </div>
+                </LeftSidebarLayout>
+              }
+              sidebarWidth="150px"
+              headerHeight="50px"
+              style={{ height: '100%' }}
+            >
+              <div style={{ padding: '16px' }}>
+                <Text>Main content area with header bar above.</Text>
+                <Card style={{ marginTop: '16px' }}>
+                  <Text>The header appears above the main content.</Text>
+                </Card>
+              </div>
+            </AppShell>
           </div>
         ),
       },
@@ -400,53 +483,10 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
                 Main Content
               </Heading>
               <Text>The hero section appears above with extra spacing.</Text>
+              <Card style={{ marginTop: '16px' }}>
+                <Text>Regular content follows the hero section.</Text>
+              </Card>
             </StackedLayout>
-          </div>
-        ),
-      },
-    ],
-  },
-
-  // Shells
-  appShell: {
-    id: 'appShell',
-    name: 'AppShell',
-    category: 'layouts',
-    description: 'Application shell layout with header, sidebar, content, and footer slots',
-    variants: [
-      {
-        name: 'Full Layout',
-        description: 'AppShell with all slots',
-        code: `<AppShell
-  header={<TopbarLayout>Header</TopbarLayout>}
-  sidebar={<LeftSidebarLayout>Sidebar</LeftSidebarLayout>}
-  footer={<BottombarLayout>Footer</BottombarLayout>}
->
-  Main Content
-</AppShell>`,
-        render: (): ReactElement => (
-          <div style={{ height: '300px', border: '1px solid #ddd', overflow: 'hidden' }}>
-            <AppShell
-              header={
-                <div style={{ background: '#eee', padding: '8px', textAlign: 'center' }}>
-                  Header
-                </div>
-              }
-              footer={
-                <div style={{ background: '#eee', padding: '8px', textAlign: 'center' }}>
-                  Footer
-                </div>
-              }
-              sidebar={
-                <div style={{ background: '#f9f9f9', padding: '8px', width: '100px' }}>Sidebar</div>
-              }
-              aside={
-                <div style={{ background: '#f9f9f9', padding: '8px', width: '100px' }}>Aside</div>
-              }
-              style={{ minHeight: '100%', height: '100%' }}
-            >
-              <div style={{ padding: '16px' }}>Main Content</div>
-            </AppShell>
           </div>
         ),
       },
@@ -456,43 +496,43 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
     id: 'topbarLayout',
     name: 'TopbarLayout',
     category: 'layouts',
-    description: 'Top navigation bar with left/center/right sections',
+    description: 'Fixed top navigation bar layout',
     variants: [
       {
         name: 'Basic',
-        description: 'Basic topbar with sections',
-        code: `<TopbarLayout
-  left={<Button variant="text">Back</Button>}
-  center={<Heading as="h3">App Title</Heading>}
-  right={<Button>Settings</Button>}
-/>`,
-        render: (): ReactElement => (
-          <TopbarLayout
-            left={<Button variant="text">Back</Button>}
-            center={
-              <Heading as="h3" size="sm">
-                App Title
-              </Heading>
-            }
-            right={<Button size="small">Settings</Button>}
-            bordered
-          />
-        ),
-      },
-      {
-        name: 'Simple',
-        description: 'Simple topbar with children',
+        description: 'Basic topbar with navigation',
         code: `<TopbarLayout>
-  <Heading as="h3">Dashboard</Heading>
+  <Heading as="h3">App Name</Heading>
+  <nav>Navigation</nav>
 </TopbarLayout>`,
         render: (): ReactElement => (
-          <TopbarLayout bordered>
-            <div style={{ display: 'flex', alignItems: 'center', padding: '0 16px' }}>
-              <Heading as="h3" size="sm">
-                Dashboard
-              </Heading>
-            </div>
-          </TopbarLayout>
+          <div style={{ border: '1px solid var(--ui-color-border)' }}>
+            <TopbarLayout>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  width: '100%',
+                }}
+              >
+                <Heading as="h4" size="sm" style={{ margin: 0 }}>
+                  App Name
+                </Heading>
+                <nav style={{ display: 'flex', gap: '8px' }}>
+                  <Button variant="text" size="small">
+                    Home
+                  </Button>
+                  <Button variant="text" size="small">
+                    About
+                  </Button>
+                  <Button variant="text" size="small">
+                    Contact
+                  </Button>
+                </nav>
+              </div>
+            </TopbarLayout>
+          </div>
         ),
       },
     ],
@@ -501,70 +541,46 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
     id: 'bottombarLayout',
     name: 'BottombarLayout',
     category: 'layouts',
-    description: 'Bottom status/action bar with left/center/right sections',
+    description: 'Fixed bottom navigation bar layout (mobile-style)',
     variants: [
       {
         name: 'Basic',
-        description: 'Basic bottombar with sections',
-        code: `<BottombarLayout
-  left={<VersionBadge version="1.0.0" />}
-  center={<Text tone="muted">Ready</Text>}
-  right={<Button size="small">Help</Button>}
-/>`,
+        description: 'Basic bottom navigation bar',
+        code: `<BottombarLayout>
+  <Button>Home</Button>
+  <Button>Search</Button>
+  <Button>Profile</Button>
+</BottombarLayout>`,
         render: (): ReactElement => (
-          <BottombarLayout
-            left={<VersionBadge version="1.0.0" />}
-            center={
-              <Text tone="muted" style={{ fontSize: '12px' }}>
-                Ready
-              </Text>
-            }
-            right={
-              <Button size="small" variant="text">
-                Help
-              </Button>
-            }
-            bordered
-          />
-        ),
-      },
-    ],
-  },
-  leftSidebarLayout: {
-    id: 'leftSidebarLayout',
-    name: 'LeftSidebarLayout',
-    category: 'layouts',
-    description: 'Left sidebar panel with header/content sections',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Basic left sidebar',
-        code: `<LeftSidebarLayout width="200px" bordered>
-  <nav>Navigation items</nav>
-</LeftSidebarLayout>`,
-        render: (): ReactElement => (
-          <div style={{ height: '200px', display: 'flex', border: '1px solid #ddd' }}>
-            <LeftSidebarLayout width="180px" bordered>
-              <div style={{ padding: '8px' }}>
-                <Heading as="h4" size="sm" style={{ marginBottom: '16px' }}>
-                  Navigation
-                </Heading>
-                <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <Button variant="text" style={{ justifyContent: 'flex-start' }}>
-                    Dashboard
-                  </Button>
-                  <Button variant="text" style={{ justifyContent: 'flex-start' }}>
-                    Settings
-                  </Button>
-                  <Button variant="text" style={{ justifyContent: 'flex-start' }}>
-                    Profile
-                  </Button>
-                </nav>
-              </div>
-            </LeftSidebarLayout>
-            <div style={{ flex: 1, padding: '16px' }}>
-              <Text>Main content area</Text>
+          <div
+            style={{
+              border: '1px solid var(--ui-color-border)',
+              position: 'relative',
+              height: '200px',
+            }}
+          >
+            <div style={{ padding: '16px' }}>
+              <Text>Content area above bottom bar</Text>
             </div>
+            <BottombarLayout>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-around',
+                  width: '100%',
+                }}
+              >
+                <Button variant="text" size="small">
+                  Home
+                </Button>
+                <Button variant="text" size="small">
+                  Search
+                </Button>
+                <Button variant="text" size="small">
+                  Profile
+                </Button>
+              </div>
+            </BottombarLayout>
           </div>
         ),
       },
@@ -574,193 +590,34 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
     id: 'rightSidebarLayout',
     name: 'RightSidebarLayout',
     category: 'layouts',
-    description: 'Right sidebar/panel with header and content sections',
+    description: 'Layout with a right sidebar panel',
     variants: [
       {
         name: 'Basic',
-        description: 'Basic right sidebar',
-        code: `<RightSidebarLayout
-  header={<Heading>Details</Heading>}
-  content={<Text>Panel content</Text>}
-  bordered
-/>`,
+        description: 'Right sidebar with content',
+        code: `<RightSidebarLayout width="200px">
+  <Text>Sidebar content</Text>
+</RightSidebarLayout>`,
         render: (): ReactElement => (
-          <div style={{ height: '200px', display: 'flex', border: '1px solid #ddd' }}>
+          <div
+            style={{
+              border: '1px solid var(--ui-color-border)',
+              height: '200px',
+              display: 'flex',
+            }}
+          >
             <div style={{ flex: 1, padding: '16px' }}>
               <Text>Main content area</Text>
             </div>
-            <RightSidebarLayout
-              width="200px"
-              bordered
-              header={
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '8px',
-                  }}
-                >
-                  <Heading as="h4" size="sm">
-                    Details
-                  </Heading>
-                  <CloseButton onClick={() => {}} aria-label="Close" />
-                </div>
-              }
-              content={
-                <div style={{ padding: '8px' }}>
-                  <Text>This is the detail panel content.</Text>
-                </div>
-              }
-            />
+            <RightSidebarLayout width="180px" bordered>
+              <div style={{ padding: '8px' }}>
+                <Heading as="h4" size="sm" style={{ marginBottom: '12px' }}>
+                  Details
+                </Heading>
+                <Text tone="muted">Sidebar info here</Text>
+              </div>
+            </RightSidebarLayout>
           </div>
-        ),
-      },
-    ],
-  },
-  resizablePanel: {
-    id: 'resizablePanel',
-    name: 'ResizablePanel',
-    category: 'layouts',
-    description: 'Resizable panel layout with drag handles',
-    variants: [
-      {
-        name: 'Horizontal',
-        description: 'Horizontal resizable panels',
-        code: `<ResizablePanelGroup direction="horizontal">
-  <ResizablePanel defaultSize={30} minSize={20}>
-    Sidebar
-  </ResizablePanel>
-  <ResizablePanel defaultSize={70}>
-    Main content
-  </ResizablePanel>
-</ResizablePanelGroup>`,
-        render: (): ReactElement => (
-          <div style={{ height: '200px', border: '1px solid #ddd' }}>
-            <ResizablePanelGroup direction="horizontal">
-              <ResizablePanel defaultSize={30} minSize={20} maxSize={50}>
-                <div style={{ padding: '16px', background: '#f5f5f5', height: '100%' }}>
-                  <Text>Sidebar (drag to resize)</Text>
-                </div>
-              </ResizablePanel>
-              <ResizablePanel defaultSize={70}>
-                <div style={{ padding: '16px', height: '100%' }}>
-                  <Text>Main content area</Text>
-                </div>
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          </div>
-        ),
-      },
-      {
-        name: 'Vertical',
-        description: 'Vertical resizable panels',
-        code: `<ResizablePanelGroup direction="vertical">
-  <ResizablePanel defaultSize={40}>Top</ResizablePanel>
-  <ResizablePanel defaultSize={60}>Bottom</ResizablePanel>
-</ResizablePanelGroup>`,
-        render: (): ReactElement => (
-          <div style={{ height: '300px', border: '1px solid #ddd' }}>
-            <ResizablePanelGroup direction="vertical">
-              <ResizablePanel defaultSize={40} minSize={20} direction="vertical">
-                <div style={{ padding: '16px', background: '#f5f5f5', height: '100%' }}>
-                  <Text>Top panel (drag to resize)</Text>
-                </div>
-              </ResizablePanel>
-              <ResizablePanel defaultSize={60} direction="vertical">
-                <div style={{ padding: '16px', height: '100%' }}>
-                  <Text>Bottom panel</Text>
-                </div>
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          </div>
-        ),
-      },
-    ],
-  },
-
-  // Layers
-  modal: {
-    id: 'modal',
-    name: 'Modal',
-    category: 'layouts',
-    description: 'Modal dialog with focus trap, overlay, and compound components',
-    variants: [
-      {
-        name: 'Interactive',
-        description: 'Click to open modal dialog',
-        code: `<Modal.Root open={open} onClose={handleClose}>
-  <Modal.Header>
-    <Modal.Title>Modal Title</Modal.Title>
-    <Modal.Close />
-  </Modal.Header>
-  <Modal.Body>
-    <Modal.Description>Description text</Modal.Description>
-  </Modal.Body>
-  <Modal.Footer>
-    <Button onClick={handleClose}>Confirm</Button>
-  </Modal.Footer>
-</Modal.Root>`,
-        render: () => <ModalDemo />,
-      },
-    ],
-  },
-  overlay: {
-    id: 'overlay',
-    name: 'Overlay',
-    category: 'layouts',
-    description: 'Semi-transparent overlay backdrop',
-    variants: [
-      {
-        name: 'Interactive',
-        description: 'Click to show overlay',
-        code: `<Overlay open={open} onClick={handleClose} />`,
-        render: () => <OverlayDemo />,
-      },
-    ],
-  },
-  scrollArea: {
-    id: 'scrollArea',
-    name: 'ScrollArea',
-    category: 'layouts',
-    description: 'Custom scrollbar component with auto-hide and theming',
-    variants: [
-      {
-        name: 'Basic',
-        description: 'Basic scroll area',
-        code: `<ScrollArea maxHeight="200px">
-  <div>Long content here...</div>
-</ScrollArea>`,
-        render: (): ReactElement => (
-          <ScrollArea maxHeight="150px" style={{ border: '1px solid #ddd', padding: '8px' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {Array.from({ length: 20 }, (_, i) => (
-                <Text key={i}>Scrollable content line {i + 1}</Text>
-              ))}
-            </div>
-          </ScrollArea>
-        ),
-      },
-      {
-        name: 'Thin Scrollbar',
-        description: 'Scroll area with thin scrollbar',
-        code: `<ScrollArea maxHeight="200px" scrollbarWidth="thin">
-  <div>Content...</div>
-</ScrollArea>`,
-        render: (): ReactElement => (
-          <ScrollArea
-            maxHeight="150px"
-            scrollbarWidth="thin"
-            style={{ border: '1px solid #ddd', padding: '8px' }}
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {Array.from({ length: 15 }, (_, i) => (
-                <Card key={i}>
-                  <Text>Card item {i + 1}</Text>
-                </Card>
-              ))}
-            </div>
-          </ScrollArea>
         ),
       },
     ],

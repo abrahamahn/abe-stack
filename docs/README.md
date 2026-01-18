@@ -1,6 +1,6 @@
 # ABE Stack Documentation
 
-**Last Updated: January 17, 2026**
+**Last Updated: January 19, 2026**
 
 A full-stack TypeScript boilerplate for shipping real apps fast. Web, desktop, mobile, and backend from a single monorepo.
 
@@ -39,18 +39,19 @@ abe-stack/
 
 ### Tech Stack
 
-| Layer    | Technology                                          |
-| -------- | --------------------------------------------------- |
-| Frontend | React 19, Vite, TanStack Query                      |
-| Backend  | Fastify, ts-rest, Zod                               |
-| Database | PostgreSQL, Drizzle ORM                             |
-| Auth     | JWT (access + refresh tokens), Argon2id, role-based |
-| Testing  | Vitest (1900+ tests), Playwright E2E                |
-| Tooling  | Turborepo, pnpm, ESLint, Prettier                   |
+| Layer    | Technology                                                     |
+| -------- | -------------------------------------------------------------- |
+| Frontend | React 19, Vite, TanStack Query                                 |
+| Backend  | Fastify, ts-rest, Zod                                          |
+| Database | PostgreSQL, Drizzle ORM                                        |
+| Auth     | JWT (access + refresh), Argon2id, password reset, email verify |
+| Testing  | Vitest (1900+ tests), Playwright E2E                           |
+| Tooling  | Turborepo, pnpm, ESLint, Prettier                              |
 
 ### What's Built
 
-- Full JWT auth with refresh tokens and role-based access
+- **Auth system** - JWT with refresh rotation, password reset, email verification, account lockout
+- **Security** - Argon2id hashing, memory-based tokens (XSS protection), WebSocket auth
 - 25 UI elements, 16 components, 14 layouts, 13 hooks
 - Interactive component demo at `/demo`
 - Type-safe API contracts with runtime validation

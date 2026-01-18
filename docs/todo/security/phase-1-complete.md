@@ -1,6 +1,6 @@
 # Phase 1 Security Hardening - Completion Report
 
-**Last Updated: January 17, 2026**
+**Last Updated: January 19, 2026**
 
 **Status:** PRODUCTION READY
 **Completed:** January 10, 2026
@@ -32,8 +32,9 @@ Phase 1 Security Hardening has been successfully completed, delivering a product
   - Parallelism: 1 thread
 - **Automatic Password Rehashing** on login for legacy hashes
 - **Timing Attack Protection** with `verifyPasswordSafe()`
-- **zxcvbn Password Strength Validation** (minimum score 3/4)
+- **Custom Password Strength Validation** - Entropy-based scoring (replaced zxcvbn ~800KB)
 - **User Input Dictionary** prevents using email/name in password
+- **Common Password Detection** - 200+ common passwords with l33t speak variants
 
 **Files:**
 
@@ -75,7 +76,48 @@ Phase 1 Security Hardening has been successfully completed, delivering a product
 
 ---
 
-### 4. Security Infrastructure ✅
+### 4. Password Reset & Email Verification ✅
+
+- **Secure Token Generation** - 32 random bytes (64 hex chars) via `crypto.randomBytes()`
+- **Token Hashing** - Argon2id with lighter config (8 MiB memory, timeCost=1)
+- **24-Hour Expiry** - Tokens automatically expire after 24 hours
+- **Single-Use Tokens** - `usedAt` timestamp prevents replay attacks
+- **Email Verification** - Token-based email confirmation flow
+- **Password Reset** - Secure reset flow with password validation
+
+**Files:**
+
+- [apps/server/src/modules/auth/service.ts](../../../apps/server/src/modules/auth/service.ts) - `requestPasswordReset()`, `resetPassword()`, `verifyEmail()`, `createEmailVerificationToken()`
+
+---
+
+### 5. Token Storage Security ✅
+
+- **Memory-Based Default** - Access tokens stored in memory (not localStorage)
+- **XSS Protection** - No tokens accessible via document.cookie or localStorage
+- **HTTP-Only Cookies** - Refresh tokens stored in secure HTTP-only cookies
+- **Session Restoration** - `AuthService.initialize()` refreshes token on page load
+
+**Files:**
+
+- [packages/core/src/utils/index.ts](../../../packages/core/src/utils/index.ts) - `tokenStore` (memory-based)
+- [apps/web/src/features/auth/services/AuthService.ts](../../../apps/web/src/features/auth/services/AuthService.ts) - `initialize()` method
+
+---
+
+### 6. WebSocket Authentication ✅
+
+- **No Query Parameters** - Tokens never passed in URLs (prevents log/history leakage)
+- **Subprotocol Header** - Primary method via `Sec-WebSocket-Protocol`
+- **Cookie Fallback** - `accessToken` cookie for seamless auth
+
+**Files:**
+
+- [apps/server/src/infra/websocket/websocket.ts](../../../apps/server/src/infra/websocket/websocket.ts) - WebSocket auth handler
+
+---
+
+### 7. Security Infrastructure ✅
 
 - **CSRF Protection** via @fastify/csrf-protection with double-submit cookies
 - **CORS Configuration** - Strict by default (localhost:3000), configurable via env
@@ -188,18 +230,22 @@ Phase 1 Security Hardening has been successfully completed, delivering a product
 
 ### Security Features Matrix
 
-| Feature          | Phase 1 | Notes                             |
-| ---------------- | ------- | --------------------------------- |
-| Password Hashing | ✅ A+   | Argon2id OWASP params             |
-| Account Lockout  | ✅ A+   | Progressive delays + hard lockout |
-| Token Rotation   | ✅ A+   | Family tracking + reuse detection |
-| CSRF Protection  | ✅ A+   | Double-submit cookie              |
-| Rate Limiting    | ✅ A+   | Plugin ready, lockout enforced    |
-| Password Policy  | ✅ A+   | zxcvbn + user input check         |
-| Audit Logging    | ✅ A+   | Login attempts + IP tracking      |
-| Input Validation | ✅ A+   | Zod schemas                       |
-| Timing Attacks   | ✅ A+   | Constant-time verification        |
-| Error Handling   | ✅ A+   | Sanitized messages                |
+| Feature          | Phase 1 | Notes                              |
+| ---------------- | ------- | ---------------------------------- |
+| Password Hashing | ✅ A+   | Argon2id OWASP params              |
+| Account Lockout  | ✅ A+   | Progressive delays + hard lockout  |
+| Token Rotation   | ✅ A+   | Family tracking + reuse detection  |
+| CSRF Protection  | ✅ A+   | Double-submit cookie               |
+| Rate Limiting    | ✅ A+   | Plugin ready, lockout enforced     |
+| Password Policy  | ✅ A+   | Custom strength checker (~5KB)     |
+| Password Reset   | ✅ A+   | Argon2id hashed tokens, 24h expiry |
+| Email Verify     | ✅ A+   | Single-use tokens, usedAt tracking |
+| Token Storage    | ✅ A+   | Memory-based (XSS protection)      |
+| WebSocket Auth   | ✅ A+   | Subprotocol header (no URL tokens) |
+| Audit Logging    | ✅ A+   | Login attempts + IP tracking       |
+| Input Validation | ✅ A+   | Zod schemas                        |
+| Timing Attacks   | ✅ A+   | Constant-time verification         |
+| Error Handling   | ✅ A+   | Sanitized messages                 |
 
 ---
 
@@ -387,7 +433,7 @@ All Phase 1 goals achieved:
 - [x] Progressive delays with exponential backoff
 - [x] Refresh token rotation with reuse detection
 - [x] CSRF protection enabled
-- [x] Password strength validation with zxcvbn
+- [x] Custom password strength validation (replaced zxcvbn)
 - [x] Comprehensive audit logging
 - [x] Rate limiting infrastructure
 - [x] Environment validation at startup
@@ -395,6 +441,10 @@ All Phase 1 goals achieved:
 - [x] Clean code refactoring
 - [x] Comprehensive test coverage
 - [x] Production-ready deployment
+- [x] Password reset flow with secure tokens
+- [x] Email verification flow
+- [x] Memory-based token storage (XSS protection)
+- [x] WebSocket authentication hardening
 
 ---
 

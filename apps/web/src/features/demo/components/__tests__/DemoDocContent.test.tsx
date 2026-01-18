@@ -1,24 +1,15 @@
 // apps/web/src/features/demo/components/__tests__/DemoDocContent.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
+import { DemoDocContent } from '@demo/components/DemoDocContent';
 import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import { DemoDocContent } from '../DemoDocContent';
 
 import type { ComponentDemo } from '@demo/types';
 
 // Mock the lazy docs utilities
 vi.mock('@demo/utils/lazyDocs', () => ({
   getComponentDocsLazy: vi.fn(),
-  parseMarkdownLazy: vi.fn((md: string) => `<p>${md}</p>`),
-}));
-
-// Mock DOMPurify
-vi.mock('dompurify', () => ({
-  default: {
-    sanitize: vi.fn((html: string) => html),
-  },
 }));
 
 const mockComponent: ComponentDemo = {
@@ -53,20 +44,23 @@ describe('DemoDocContent', () => {
 
   describe('with docs available', () => {
     it('renders markdown documentation when docs exist', async () => {
-      const { getComponentDocsLazy, parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
+      const { getComponentDocsLazy } = await import('@demo/utils/lazyDocs');
 
       vi.mocked(getComponentDocsLazy).mockResolvedValue('# Button\n\nA button component.');
-      vi.mocked(parseMarkdownLazy).mockReturnValue('<h1>Button</h1><p>A button component.</p>');
 
       render(<DemoDocContent component={mockComponent} />);
 
+      // Verify getComponentDocsLazy was called with correct params
       await waitFor(() => {
         expect(getComponentDocsLazy).toHaveBeenCalledWith('button', 'elements', 'Button');
       });
 
+      // Verify the markdown is rendered (react-markdown renders the content)
       await waitFor(() => {
-        expect(parseMarkdownLazy).toHaveBeenCalledWith('# Button\n\nA button component.');
+        expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Button');
       });
+
+      expect(screen.getByText('A button component.')).toBeInTheDocument();
     });
   });
 
@@ -126,17 +120,17 @@ describe('DemoDocContent', () => {
     });
   });
 
-  describe('DOMPurify integration', () => {
-    it('uses parseMarkdownLazy to sanitize output', async () => {
-      const { getComponentDocsLazy, parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
+  describe('markdown rendering', () => {
+    it('renders markdown content in a container', async () => {
+      const { getComponentDocsLazy } = await import('@demo/utils/lazyDocs');
 
-      vi.mocked(getComponentDocsLazy).mockResolvedValue('# Test');
-      vi.mocked(parseMarkdownLazy).mockReturnValue('<h1>Test</h1>');
+      vi.mocked(getComponentDocsLazy).mockResolvedValue('# Test\n\nTest content');
 
       render(<DemoDocContent component={mockComponent} />);
 
       await waitFor(() => {
-        expect(parseMarkdownLazy).toHaveBeenCalled();
+        const container = document.querySelector('.markdown-content');
+        expect(container).toBeInTheDocument();
       });
     });
   });

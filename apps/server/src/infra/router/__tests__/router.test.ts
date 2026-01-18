@@ -16,7 +16,11 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
  * Create a mock Zod-like schema for testing
  */
 function createMockSchema<T>(
-  validator: (data: unknown) => { success: true; data: T } | { success: false; error: { issues: Array<{ message: string }> } },
+  validator: (
+    data: unknown,
+  ) =>
+    | { success: true; data: T }
+    | { success: false; error: { issues: Array<{ message: string }> } },
 ): ValidationSchema<T> {
   return {
     safeParse: validator,
@@ -30,7 +34,10 @@ const emailPasswordSchema = createMockSchema<{ email: string; password: string }
     return { success: false, error: { issues: [{ message: 'Invalid email' }] } };
   }
   if (typeof d?.password !== 'string' || d.password.length < 8) {
-    return { success: false, error: { issues: [{ message: 'Password must be at least 8 characters' }] } };
+    return {
+      success: false,
+      error: { issues: [{ message: 'Password must be at least 8 characters' }] },
+    };
   }
   return { success: true, data: { email: d.email, password: d.password } };
 });
@@ -49,7 +56,11 @@ const nameSchema = createMockSchema<{ name: string }>((data) => {
 // ============================================================================
 
 interface MockFastifyInstance {
-  routes: Array<{ method: string; path: string; handler: (req: FastifyRequest, reply: FastifyReply) => Promise<void> }>;
+  routes: Array<{
+    method: string;
+    path: string;
+    handler: (req: FastifyRequest, reply: FastifyReply) => Promise<void>;
+  }>;
   hooks: Array<{ event: string; handler: unknown }>;
   registeredPlugins: Array<(instance: MockFastifyInstance) => void>;
   get: ReturnType<typeof vi.fn>;
@@ -226,15 +237,10 @@ describe('registerRouteMap', () => {
   test('should register public routes directly', () => {
     const handler = vi.fn().mockResolvedValue({ status: 200, body: { ok: true } });
     const routes: RouteMap = {
-      'health': publicRoute('GET', handler),
+      health: publicRoute('GET', handler),
     };
 
-    registerRouteMap(
-      app as unknown as FastifyInstance,
-      ctx,
-      routes,
-      { jwtSecret: 'test-secret' },
-    );
+    registerRouteMap(app as unknown as FastifyInstance, ctx, routes, { jwtSecret: 'test-secret' });
 
     expect(app.get).toHaveBeenCalledWith('/health', expect.any(Function));
   });
@@ -242,34 +248,27 @@ describe('registerRouteMap', () => {
   test('should apply prefix to routes', () => {
     const handler = vi.fn().mockResolvedValue({ status: 200, body: {} });
     const routes: RouteMap = {
-      'users': publicRoute('GET', handler),
+      users: publicRoute('GET', handler),
     };
 
-    registerRouteMap(
-      app as unknown as FastifyInstance,
-      ctx,
-      routes,
-      { prefix: '/api', jwtSecret: 'test-secret' },
-    );
+    registerRouteMap(app as unknown as FastifyInstance, ctx, routes, {
+      prefix: '/api',
+      jwtSecret: 'test-secret',
+    });
 
     expect(app.get).toHaveBeenCalledWith('/api/users', expect.any(Function));
   });
 
   test('should register routes with different HTTP methods', () => {
     const routes: RouteMap = {
-      'items': publicRoute('GET', vi.fn().mockResolvedValue({ status: 200, body: [] })),
+      items: publicRoute('GET', vi.fn().mockResolvedValue({ status: 200, body: [] })),
       'items/create': publicRoute('POST', vi.fn().mockResolvedValue({ status: 201, body: {} })),
       'items/update': publicRoute('PUT', vi.fn().mockResolvedValue({ status: 200, body: {} })),
       'items/patch': publicRoute('PATCH', vi.fn().mockResolvedValue({ status: 200, body: {} })),
       'items/delete': publicRoute('DELETE', vi.fn().mockResolvedValue({ status: 204, body: null })),
     };
 
-    registerRouteMap(
-      app as unknown as FastifyInstance,
-      ctx,
-      routes,
-      { jwtSecret: 'test-secret' },
-    );
+    registerRouteMap(app as unknown as FastifyInstance, ctx, routes, { jwtSecret: 'test-secret' });
 
     expect(app.get).toHaveBeenCalled();
     expect(app.post).toHaveBeenCalled();
@@ -280,17 +279,12 @@ describe('registerRouteMap', () => {
 
   test('should group user-protected routes together', () => {
     const routes: RouteMap = {
-      'public': publicRoute('GET', vi.fn().mockResolvedValue({ status: 200, body: {} })),
-      'profile': protectedRoute('GET', vi.fn().mockResolvedValue({ status: 200, body: {} }), 'user'),
-      'settings': protectedRoute('PUT', vi.fn().mockResolvedValue({ status: 200, body: {} }), 'user'),
+      public: publicRoute('GET', vi.fn().mockResolvedValue({ status: 200, body: {} })),
+      profile: protectedRoute('GET', vi.fn().mockResolvedValue({ status: 200, body: {} }), 'user'),
+      settings: protectedRoute('PUT', vi.fn().mockResolvedValue({ status: 200, body: {} }), 'user'),
     };
 
-    registerRouteMap(
-      app as unknown as FastifyInstance,
-      ctx,
-      routes,
-      { jwtSecret: 'test-secret' },
-    );
+    registerRouteMap(app as unknown as FastifyInstance, ctx, routes, { jwtSecret: 'test-secret' });
 
     // Should register via plugin for protected routes
     expect(app.register).toHaveBeenCalled();
@@ -298,16 +292,19 @@ describe('registerRouteMap', () => {
 
   test('should group admin-protected routes together', () => {
     const routes: RouteMap = {
-      'admin/users': protectedRoute('GET', vi.fn().mockResolvedValue({ status: 200, body: [] }), 'admin'),
-      'admin/settings': protectedRoute('PUT', vi.fn().mockResolvedValue({ status: 200, body: {} }), 'admin'),
+      'admin/users': protectedRoute(
+        'GET',
+        vi.fn().mockResolvedValue({ status: 200, body: [] }),
+        'admin',
+      ),
+      'admin/settings': protectedRoute(
+        'PUT',
+        vi.fn().mockResolvedValue({ status: 200, body: {} }),
+        'admin',
+      ),
     };
 
-    registerRouteMap(
-      app as unknown as FastifyInstance,
-      ctx,
-      routes,
-      { jwtSecret: 'test-secret' },
-    );
+    registerRouteMap(app as unknown as FastifyInstance, ctx, routes, { jwtSecret: 'test-secret' });
 
     expect(app.register).toHaveBeenCalled();
   });
@@ -316,15 +313,10 @@ describe('registerRouteMap', () => {
     const handler = vi.fn().mockResolvedValue({ status: 200, body: { success: true } });
 
     const routes = {
-      'login': publicRoute('POST', handler, emailPasswordSchema),
+      login: publicRoute('POST', handler, emailPasswordSchema),
     } as RouteMap;
 
-    registerRouteMap(
-      app as unknown as FastifyInstance,
-      ctx,
-      routes,
-      { jwtSecret: 'test-secret' },
-    );
+    registerRouteMap(app as unknown as FastifyInstance, ctx, routes, { jwtSecret: 'test-secret' });
 
     // Get the registered handler
     const registeredRoute = app.routes.find((r) => r.path === '/login');
@@ -344,15 +336,10 @@ describe('registerRouteMap', () => {
     const handler = vi.fn().mockResolvedValue({ status: 200, body: { token: 'abc' } });
 
     const routes = {
-      'login': publicRoute('POST', handler, emailPasswordSchema),
+      login: publicRoute('POST', handler, emailPasswordSchema),
     } as RouteMap;
 
-    registerRouteMap(
-      app as unknown as FastifyInstance,
-      ctx,
-      routes,
-      { jwtSecret: 'test-secret' },
-    );
+    registerRouteMap(app as unknown as FastifyInstance, ctx, routes, { jwtSecret: 'test-secret' });
 
     const registeredRoute = app.routes.find((r) => r.path === '/login');
     const validBody = { email: 'test@example.com', password: 'securepassword123' };
@@ -370,15 +357,10 @@ describe('registerRouteMap', () => {
     const handler = vi.fn().mockResolvedValue({ status: 200, body: { data: 'test' } });
 
     const routes: RouteMap = {
-      'data': publicRoute('GET', handler),
+      data: publicRoute('GET', handler),
     };
 
-    registerRouteMap(
-      app as unknown as FastifyInstance,
-      ctx,
-      routes,
-      { jwtSecret: 'test-secret' },
-    );
+    registerRouteMap(app as unknown as FastifyInstance, ctx, routes, { jwtSecret: 'test-secret' });
 
     const registeredRoute = app.routes.find((r) => r.path === '/data');
     const req = createMockRequest();
@@ -394,15 +376,10 @@ describe('registerRouteMap', () => {
     const handler = vi.fn();
 
     const routes = {
-      'user': publicRoute('POST', handler, nameSchema),
+      user: publicRoute('POST', handler, nameSchema),
     } as RouteMap;
 
-    registerRouteMap(
-      app as unknown as FastifyInstance,
-      ctx,
-      routes,
-      { jwtSecret: 'test-secret' },
-    );
+    registerRouteMap(app as unknown as FastifyInstance, ctx, routes, { jwtSecret: 'test-secret' });
 
     const registeredRoute = app.routes.find((r) => r.path === '/user');
     const req = createMockRequest({ name: '' });
@@ -416,15 +393,10 @@ describe('registerRouteMap', () => {
 
   test('should not register user routes if none exist', () => {
     const routes: RouteMap = {
-      'public': publicRoute('GET', vi.fn().mockResolvedValue({ status: 200, body: {} })),
+      public: publicRoute('GET', vi.fn().mockResolvedValue({ status: 200, body: {} })),
     };
 
-    registerRouteMap(
-      app as unknown as FastifyInstance,
-      ctx,
-      routes,
-      { jwtSecret: 'test-secret' },
-    );
+    registerRouteMap(app as unknown as FastifyInstance, ctx, routes, { jwtSecret: 'test-secret' });
 
     // register should not be called for user routes
     // Only public routes registered directly
@@ -433,16 +405,15 @@ describe('registerRouteMap', () => {
 
   test('should not register admin routes if none exist', () => {
     const routes: RouteMap = {
-      'public': publicRoute('GET', vi.fn().mockResolvedValue({ status: 200, body: {} })),
-      'user-only': protectedRoute('GET', vi.fn().mockResolvedValue({ status: 200, body: {} }), 'user'),
+      public: publicRoute('GET', vi.fn().mockResolvedValue({ status: 200, body: {} })),
+      'user-only': protectedRoute(
+        'GET',
+        vi.fn().mockResolvedValue({ status: 200, body: {} }),
+        'user',
+      ),
     };
 
-    registerRouteMap(
-      app as unknown as FastifyInstance,
-      ctx,
-      routes,
-      { jwtSecret: 'test-secret' },
-    );
+    registerRouteMap(app as unknown as FastifyInstance, ctx, routes, { jwtSecret: 'test-secret' });
 
     // Only one register call for user routes, none for admin
     expect(app.register).toHaveBeenCalledTimes(1);
@@ -469,15 +440,10 @@ describe('Route Handler Behavior', () => {
     } satisfies RouteResult<{ id: string; created: boolean }>);
 
     const routes: RouteMap = {
-      'items': publicRoute('POST', handler),
+      items: publicRoute('POST', handler),
     };
 
-    registerRouteMap(
-      app as unknown as FastifyInstance,
-      ctx,
-      routes,
-      { jwtSecret: 'test-secret' },
-    );
+    registerRouteMap(app as unknown as FastifyInstance, ctx, routes, { jwtSecret: 'test-secret' });
 
     const registeredRoute = app.routes.find((r) => r.path === '/items');
     const req = createMockRequest();
@@ -496,15 +462,10 @@ describe('Route Handler Behavior', () => {
     });
 
     const routes: RouteMap = {
-      'slow': publicRoute('GET', handler),
+      slow: publicRoute('GET', handler),
     };
 
-    registerRouteMap(
-      app as unknown as FastifyInstance,
-      ctx,
-      routes,
-      { jwtSecret: 'test-secret' },
-    );
+    registerRouteMap(app as unknown as FastifyInstance, ctx, routes, { jwtSecret: 'test-secret' });
 
     const registeredRoute = app.routes.find((r) => r.path === '/slow');
     const req = createMockRequest();
@@ -519,15 +480,10 @@ describe('Route Handler Behavior', () => {
     const handler = vi.fn().mockResolvedValue({ status: 200, body: {} });
 
     const routes = {
-      'test': publicRoute('POST', handler, nameSchema),
+      test: publicRoute('POST', handler, nameSchema),
     } as RouteMap;
 
-    registerRouteMap(
-      app as unknown as FastifyInstance,
-      ctx,
-      routes,
-      { jwtSecret: 'test-secret' },
-    );
+    registerRouteMap(app as unknown as FastifyInstance, ctx, routes, { jwtSecret: 'test-secret' });
 
     const registeredRoute = app.routes.find((r) => r.path === '/test');
     const req = createMockRequest({ name: 'Test' });
@@ -535,12 +491,7 @@ describe('Route Handler Behavior', () => {
 
     await registeredRoute!.handler(req, reply);
 
-    expect(handler).toHaveBeenCalledWith(
-      ctx,
-      { name: 'Test' },
-      req,
-      reply,
-    );
+    expect(handler).toHaveBeenCalledWith(ctx, { name: 'Test' }, req, reply);
   });
 });
 
@@ -564,12 +515,7 @@ describe('Integration with @abe-stack/core schemas', () => {
       'auth/login': publicRoute('POST', handler, loginRequestSchema),
     } as RouteMap;
 
-    registerRouteMap(
-      app as unknown as FastifyInstance,
-      ctx,
-      routes,
-      { jwtSecret: 'test-secret' },
-    );
+    registerRouteMap(app as unknown as FastifyInstance, ctx, routes, { jwtSecret: 'test-secret' });
 
     const registeredRoute = app.routes.find((r) => r.path === '/auth/login');
     expect(registeredRoute).toBeDefined();

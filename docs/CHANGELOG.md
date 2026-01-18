@@ -1,8 +1,79 @@
 # ABE Stack Changelog
 
-**Last Updated: January 18, 2026**
+**Last Updated: January 19, 2026**
 
 All notable changes to this project are documented here. Format follows semantic versioning principles.
+
+---
+
+## 2026-01-19
+
+### Authentication Flow Security Audit & Improvements
+
+Comprehensive security audit of the authentication system with critical fixes and improvements.
+
+**Service Implementation (`apps/server/src/modules/auth/service.ts`):**
+
+| Function                         | Description                                                        |
+| -------------------------------- | ------------------------------------------------------------------ |
+| `requestPasswordReset()`         | Generates secure token, stores Argon2id hash, sends reset email    |
+| `resetPassword()`                | Validates token, updates password, marks token as used             |
+| `createEmailVerificationToken()` | Generates 64-char hex token with 24h expiry for email verification |
+| `verifyEmail()`                  | Validates token, marks email as verified, invalidates token        |
+
+**Security Token Handling:**
+
+- Tokens are 32 random bytes (64 hex chars) generated with `crypto.randomBytes()`
+- Tokens are hashed with Argon2id before storage (lighter config than passwords: 8 MiB memory, timeCost=1)
+- Plain tokens sent to user, only hashes stored in database
+- 24-hour expiration with `usedAt` timestamp to prevent replay attacks
+
+**Route Validation (`apps/server/src/modules/index.ts`):**
+
+Added Zod schema validation to auth routes:
+
+- `POST /api/auth/forgot-password` - `forgotPasswordRequestSchema`
+- `POST /api/auth/reset-password` - `resetPasswordRequestSchema`
+- `POST /api/auth/verify-email` - `emailVerificationRequestSchema`
+
+**WebSocket Authentication Hardening (`apps/server/src/infra/websocket/websocket.ts`):**
+
+- **Removed**: Query parameter token support (`?token=xxx`)
+- **Reason**: Tokens in URLs leak via browser history, referrer headers, and server logs
+- **Supported methods**:
+  1. `Sec-WebSocket-Protocol` header (primary - browser-native)
+  2. `accessToken` cookie (fallback)
+
+**Token Storage Security (`packages/core/src/utils/index.ts`):**
+
+- **Changed**: Default token store from `localStorage` to memory
+- **Reason**: localStorage is vulnerable to XSS attacks
+- **Impact**: Access tokens now lost on page refresh (by design)
+- **Recovery**: Call `refreshToken()` on page load to get new access token from HTTP-only refresh cookie
+
+**Session Restoration (`apps/web/src/features/auth/services/AuthService.ts`):**
+
+Added `initialize()` method for page refresh handling:
+
+```typescript
+async initialize(): Promise<User | null> {
+  // 1. Check if token exists in memory
+  // 2. If not, try refresh via HTTP-only cookie
+  // 3. Fetch user if token available
+}
+```
+
+**Test Fixes:**
+
+- Updated WebSocket tests to use `Sec-WebSocket-Protocol` header instead of query params
+- Added `@abe-stack/auth` mock to handlers tests
+- Fixed mock context to include `server.port` for password reset URL generation
+- Added `passwordResetTokens` and `emailVerificationTokens` to mock DB queries
+- Fixed token mock format to use hex encoding
+
+**Test Count Update:**
+
+- **@abe-stack/server**: 857 tests (all passing)
 
 ---
 

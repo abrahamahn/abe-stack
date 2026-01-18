@@ -11,7 +11,7 @@
  *   pnpm dev server       # Start server only
  */
 
-import { spawn, execSync } from 'child_process';
+import { execSync, spawn } from 'child_process';
 import * as net from 'net';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
@@ -98,6 +98,7 @@ function startTurboDev(filter?: string): ChildProcess {
     cwd: ROOT,
     stdio: 'inherit',
     shell: true,
+    env: { ...process.env, NODE_ENV: 'development' },
   });
 
   turbo.on('error', (err) => {

@@ -36,4 +36,3 @@ export interface NativeBridge {
     filters?: Array<{ name: string; extensions: string[] }>;
   }) => Promise<string | null>;
 }
-

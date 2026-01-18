@@ -1,4 +1,3 @@
-// apps/web/src/features/demo/catalog/__tests__/layoutCatalog.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { render } from '@testing-library/react';
@@ -112,6 +111,22 @@ describe('layoutCatalog', () => {
     });
   });
 
+  describe('SidebarLayout component', () => {
+    it('is defined in the catalog', () => {
+      expect(layoutCatalog.sidebarLayout).toBeDefined();
+    });
+
+    it('renders all variants', () => {
+      const sidebarLayout = layoutCatalog.sidebarLayout;
+      if (!sidebarLayout) return;
+
+      sidebarLayout.variants.forEach((variant: ComponentVariant) => {
+        const { container } = render(variant.render());
+        expect(container).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('StackedLayout component', () => {
     it('is defined in the catalog', () => {
       expect(layoutCatalog.stackedLayout).toBeDefined();
@@ -133,158 +148,6 @@ describe('layoutCatalog', () => {
 
       const variantNames = stackedLayout.variants.map((v: ComponentVariant) => v.name);
       expect(variantNames).toContain('With Hero');
-    });
-  });
-
-  describe('AppShell component', () => {
-    it('is defined in the catalog', () => {
-      expect(layoutCatalog.appShell).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const appShell = layoutCatalog.appShell;
-      if (!appShell) return;
-
-      appShell.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('TopbarLayout component', () => {
-    it('is defined in the catalog', () => {
-      expect(layoutCatalog.topbarLayout).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const topbarLayout = layoutCatalog.topbarLayout;
-      if (!topbarLayout) return;
-
-      topbarLayout.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('BottombarLayout component', () => {
-    it('is defined in the catalog', () => {
-      expect(layoutCatalog.bottombarLayout).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const bottombarLayout = layoutCatalog.bottombarLayout;
-      if (!bottombarLayout) return;
-
-      bottombarLayout.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('LeftSidebarLayout component', () => {
-    it('is defined in the catalog', () => {
-      expect(layoutCatalog.leftSidebarLayout).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const leftSidebarLayout = layoutCatalog.leftSidebarLayout;
-      if (!leftSidebarLayout) return;
-
-      leftSidebarLayout.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('RightSidebarLayout component', () => {
-    it('is defined in the catalog', () => {
-      expect(layoutCatalog.rightSidebarLayout).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const rightSidebarLayout = layoutCatalog.rightSidebarLayout;
-      if (!rightSidebarLayout) return;
-
-      rightSidebarLayout.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('ResizablePanel component', () => {
-    it('is defined in the catalog', () => {
-      expect(layoutCatalog.resizablePanel).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const resizablePanel = layoutCatalog.resizablePanel;
-      if (!resizablePanel) return;
-
-      resizablePanel.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('Modal component', () => {
-    it('is defined in the catalog', () => {
-      expect(layoutCatalog.modal).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const modal = layoutCatalog.modal;
-      if (!modal) return;
-
-      modal.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-
-    it('uses compound component pattern', () => {
-      const modal = layoutCatalog.modal;
-      const firstVariant = modal?.variants[0];
-      if (!firstVariant) return;
-
-      expect(firstVariant.code).toContain('Modal.Root');
-    });
-  });
-
-  describe('Overlay component', () => {
-    it('is defined in the catalog', () => {
-      expect(layoutCatalog.overlay).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const overlay = layoutCatalog.overlay;
-      if (!overlay) return;
-
-      overlay.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('ScrollArea component', () => {
-    it('is defined in the catalog', () => {
-      expect(layoutCatalog.scrollArea).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const scrollArea = layoutCatalog.scrollArea;
-      if (!scrollArea) return;
-
-      scrollArea.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
     });
   });
 });

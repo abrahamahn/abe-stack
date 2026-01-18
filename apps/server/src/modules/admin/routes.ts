@@ -19,7 +19,10 @@ import type { AppContext, RequestWithCookies } from '@shared';
 // ============================================================================
 
 export const adminRoutes: RouteMap = {
-  'admin/auth/unlock': protectedRoute<UnlockAccountRequest, UnlockAccountResponse | { message: string }>(
+  'admin/auth/unlock': protectedRoute<
+    UnlockAccountRequest,
+    UnlockAccountResponse | { message: string }
+  >(
     'POST',
     async (
       ctx: AppContext,

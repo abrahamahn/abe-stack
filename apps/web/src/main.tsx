@@ -2,11 +2,12 @@
 /**
  * Application entry point.
  *
- * Services are initialized at module level via getClientEnvironment().
- * This ensures all services are ready before React renders.
+ * Following chet-stack pattern:
+ * - Services are created at module level (before React renders)
+ * - Environment is passed as prop to AppProvider
  */
 
-import { getClientEnvironment } from '@app';
+import { createClientEnvironment } from '@app/createEnvironment';
 import { App } from '@app/root';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -17,12 +18,13 @@ import '@abe-stack/ui/styles/elements.css';
 // Module-level Initialization
 // ============================================================================
 
-// Get the environment (creates it if not already created)
-const environment = getClientEnvironment();
+// Create the environment once at module level
+// This ensures all services are ready before React renders
+const environment = createClientEnvironment();
 
-// Fetch current user on startup (non-blocking)
-// This will restore auth state if there's a valid token
-void environment.auth.fetchCurrentUser();
+// Initialize auth state on startup (non-blocking)
+// This will restore auth state from refresh token cookie if available
+void environment.auth.initialize();
 
 // For debugging from the Console
 if (environment.config.isDev) {
@@ -42,6 +44,6 @@ if (!rootElement) throw new Error('Failed to find the root element');
 const root = createRoot(rootElement);
 root.render(
   <StrictMode>
-    <App />
+    <App environment={environment} />
   </StrictMode>,
 );

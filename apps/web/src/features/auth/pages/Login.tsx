@@ -42,7 +42,7 @@ export function LoginPage(): JSX.Element {
   return (
     <PageContainer maxWidth={440}>
       <Card>
-        <div style={{ display: 'grid', gap: 12 }}>
+        <div className="grid gap-3">
           <Heading as="h1" size="lg">
             Login
           </Heading>
@@ -51,10 +51,10 @@ export function LoginPage(): JSX.Element {
             onSubmit={(e) => {
               void handleLogin(e);
             }}
-            style={{ display: 'grid', gap: 12 }}
+            className="grid gap-3"
           >
             <div>
-              <label htmlFor="email" style={{ display: 'block', marginBottom: '6px' }}>
+              <label htmlFor="email" className="block mb-2">
                 Email
               </label>
               <Input
@@ -64,7 +64,7 @@ export function LoginPage(): JSX.Element {
                 onChange={handleEmailChange}
                 placeholder="you@example.com"
                 required
-                style={{ width: '100%' }}
+                className="w-full"
               />
             </div>
 
@@ -80,11 +80,7 @@ export function LoginPage(): JSX.Element {
 
             {error && <Text tone="danger">{error}</Text>}
 
-            <Button
-              type="submit"
-              disabled={isLoading}
-              style={{ width: '100%', marginBottom: '8px' }}
-            >
+            <Button type="submit" disabled={isLoading} className="w-full mb-2">
               {isLoading ? 'Logging in...' : 'Login'}
             </Button>
 
@@ -93,7 +89,7 @@ export function LoginPage(): JSX.Element {
               variant="secondary"
               disabled={!canGoBack}
               onClick={goBack}
-              style={{ width: '100%' }}
+              className="w-full"
             >
               Back
             </Button>
@@ -101,7 +97,7 @@ export function LoginPage(): JSX.Element {
         </div>
       </Card>
 
-      <Text tone="muted" style={{ textAlign: 'center', fontSize: '14px' }}>
+      <Text tone="muted" className="text-center text-sm">
         Don't have an account? <a href="/register">Register</a>
       </Text>
     </PageContainer>

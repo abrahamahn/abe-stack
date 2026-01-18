@@ -5,7 +5,15 @@
  * Thin HTTP layer that calls services and formats responses.
  */
 
-import { authenticateUser, logoutUser, refreshUserTokens, registerUser } from '@auth/service';
+import {
+  authenticateUser,
+  logoutUser,
+  refreshUserTokens,
+  registerUser,
+  requestPasswordReset,
+  resetPassword,
+  verifyEmail,
+} from '@auth/service';
 import { getRefreshCookieOptions } from '@config';
 import {
   AccountLockedError,
@@ -204,3 +212,77 @@ export async function handleLogout(
   }
 }
 
+export async function handleForgotPassword(
+  ctx: AppContext,
+  body: { email: string },
+): Promise<
+  { status: 200; body: { message: string } } | { status: 400 | 500; body: { message: string } }
+> {
+  try {
+    const { email } = body;
+    const baseUrl = `http://localhost:${String(ctx.config.server.port)}`;
+    await requestPasswordReset(ctx.db, email, baseUrl);
+
+    return {
+      status: 200,
+      body: { message: SUCCESS_MESSAGES.PASSWORD_RESET_SENT },
+    };
+  } catch (error) {
+    ctx.log.error(error);
+    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+  }
+}
+
+export async function handleResetPassword(
+  ctx: AppContext,
+  body: { token: string; password: string },
+): Promise<
+  { status: 200; body: { message: string } } | { status: 400 | 500; body: { message: string } }
+> {
+  try {
+    const { token, password } = body;
+    await resetPassword(ctx.db, ctx.config.auth, token, password);
+
+    return {
+      status: 200,
+      body: { message: 'Password reset successfully' },
+    };
+  } catch (error) {
+    if (error instanceof WeakPasswordError) {
+      ctx.log.warn({ errors: error.details?.errors }, 'Password validation failed during reset');
+      return { status: 400, body: { message: ERROR_MESSAGES.WEAK_PASSWORD } };
+    }
+
+    if (error instanceof InvalidTokenError) {
+      return { status: 400, body: { message: ERROR_MESSAGES.INVALID_TOKEN } };
+    }
+
+    ctx.log.error(error);
+    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+  }
+}
+
+export async function handleVerifyEmail(
+  ctx: AppContext,
+  body: { token: string },
+): Promise<
+  | { status: 200; body: { verified: boolean; userId: string } }
+  | { status: 400 | 404 | 500; body: { message: string } }
+> {
+  try {
+    const { token } = body;
+    const result = await verifyEmail(ctx.db, token);
+
+    return {
+      status: 200,
+      body: { verified: true, userId: result.userId },
+    };
+  } catch (error) {
+    if (error instanceof InvalidTokenError) {
+      return { status: 400, body: { message: ERROR_MESSAGES.INVALID_TOKEN } };
+    }
+
+    ctx.log.error(error);
+    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+  }
+}

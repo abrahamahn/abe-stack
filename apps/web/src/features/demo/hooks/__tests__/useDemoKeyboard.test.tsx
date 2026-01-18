@@ -1,4 +1,3 @@
-// apps/web/src/features/demo/hooks/__tests__/useDemoKeyboard.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { fireEvent } from '@testing-library/react';

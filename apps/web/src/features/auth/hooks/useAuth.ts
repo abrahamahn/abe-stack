@@ -6,11 +6,20 @@
  * Provides a stable API matching the previous AuthContext interface.
  */
 
-import { useClientEnvironment } from '@app';
+// Import directly from ClientEnvironment to avoid circular dependency
+// (The @app barrel exports createEnvironment which imports from @features/auth)
+import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useCallback, useEffect, useState } from 'react';
 
-import type { LoginRequest, RegisterRequest } from '@abe-stack/core';
-import type { AuthState, User } from '@features/auth';
+import type {
+  EmailVerificationRequest,
+  ForgotPasswordRequest,
+  LoginRequest,
+  RegisterRequest,
+  ResetPasswordRequest,
+} from '@abe-stack/core';
+import type { AuthState, User } from '@auth/services/AuthService';
+// Import directly from services to avoid circular dependency through barrel
 
 export type AuthContextType = {
   user: User | null;
@@ -20,6 +29,9 @@ export type AuthContextType = {
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<boolean>;
+  forgotPassword: (data: ForgotPasswordRequest) => Promise<void>;
+  resetPassword: (data: ResetPasswordRequest) => Promise<void>;
+  verifyEmail: (data: EmailVerificationRequest) => Promise<void>;
 };
 
 /**
@@ -70,6 +82,27 @@ export function useAuth(): AuthContextType {
     return auth.refreshToken();
   }, [auth]);
 
+  const forgotPassword = useCallback(
+    async (data: ForgotPasswordRequest): Promise<void> => {
+      await auth.forgotPassword(data);
+    },
+    [auth],
+  );
+
+  const resetPassword = useCallback(
+    async (data: ResetPasswordRequest): Promise<void> => {
+      await auth.resetPassword(data);
+    },
+    [auth],
+  );
+
+  const verifyEmail = useCallback(
+    async (data: EmailVerificationRequest): Promise<void> => {
+      await auth.verifyEmail(data);
+    },
+    [auth],
+  );
+
   return {
     user: state.user,
     isLoading: state.isLoading,
@@ -78,5 +111,8 @@ export function useAuth(): AuthContextType {
     register,
     logout,
     refreshToken,
+    forgotPassword,
+    resetPassword,
+    verifyEmail,
   };
 }

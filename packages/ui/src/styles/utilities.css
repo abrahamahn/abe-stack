@@ -728,3 +728,127 @@
 .min-w-88 {
   min-width: 5.5rem;
 }
+
+/* ===== ADDITIONAL UTILITIES ===== */
+
+/* Horizontal centering */
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Min height screen */
+.min-h-screen {
+  min-height: 100vh;
+}
+
+/* Padding left variations */
+.pl-4 {
+  padding-left: var(--ui-gap-lg);
+}
+
+.pl-5 {
+  padding-left: var(--ui-gap-xl);
+}
+
+/* Line height utilities */
+.leading-tight {
+  line-height: var(--ui-line-height-tight);
+}
+
+.leading-normal {
+  line-height: var(--ui-line-height-normal);
+}
+
+.leading-loose {
+  line-height: var(--ui-line-height-loose);
+}
+
+/* Semantic color utilities */
+.text-success {
+  color: var(--ui-color-success);
+}
+
+.text-danger {
+  color: var(--ui-color-danger);
+}
+
+.text-warning {
+  color: var(--ui-color-warning);
+}
+
+.text-muted {
+  color: var(--ui-color-muted);
+}
+
+.bg-success-muted {
+  background-color: color-mix(in srgb, var(--ui-color-success) 15%, transparent);
+}
+
+.bg-danger-muted {
+  background-color: color-mix(in srgb, var(--ui-color-danger) 15%, transparent);
+}
+
+.bg-warning-muted {
+  background-color: color-mix(in srgb, var(--ui-color-warning) 15%, transparent);
+}
+
+/* Icon sizes */
+.icon-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+.icon-md {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.icon-lg {
+  width: 2rem;
+  height: 2rem;
+}
+
+/* Status icon container */
+.status-icon {
+  width: 4rem;
+  height: 4rem;
+  border-radius: var(--ui-radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Max width utilities */
+.max-w-md {
+  max-width: 28rem;
+}
+
+.max-w-lg {
+  max-width: 32rem;
+}
+
+/* Space-y utility for vertical spacing between children */
+.space-y-4 > * + * {
+  margin-top: var(--ui-gap-lg);
+}
+
+.space-y-6 > * + * {
+  margin-top: var(--ui-gap-xl);
+}
+
+/* Layout label for demo page */
+.layout-label {
+  position: absolute;
+  top: var(--ui-gap-xs);
+  right: var(--ui-gap-xs);
+  font-size: var(--ui-font-size-2xs);
+  font-weight: var(--ui-font-weight-medium);
+  color: var(--ui-color-primary);
+  background: var(--ui-color-primary-muted);
+  padding: 0.125rem var(--ui-gap-xs);
+  border-radius: var(--ui-radius-sm);
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0.8;
+}

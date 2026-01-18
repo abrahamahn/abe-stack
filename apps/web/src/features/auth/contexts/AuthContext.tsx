@@ -14,8 +14,7 @@
 import { useAuth } from '@auth/hooks/useAuth';
 import { createContext } from 'react';
 
-
-import type { User } from '@features/auth';
+import type { User } from '@auth/services/AuthService';
 import type { ReactElement, ReactNode } from 'react';
 
 // ============================================================================

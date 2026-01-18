@@ -20,9 +20,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 export interface ValidationSchema<T = unknown> {
   safeParse(
     data: unknown,
-  ):
-    | { success: true; data: T }
-    | { success: false; error: { issues: Array<{ message: string }> } };
+  ): { success: true; data: T } | { success: false; error: { issues: Array<{ message: string }> } };
 }
 
 // ============================================================================

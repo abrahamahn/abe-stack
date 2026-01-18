@@ -146,12 +146,7 @@ describe('Security Events', () => {
     });
 
     test('should log token reuse event without optional fields', async () => {
-      await logTokenReuseEvent(
-        asMockDb(mockDb),
-        'user-123',
-        'test@example.com',
-        'family-123',
-      );
+      await logTokenReuseEvent(asMockDb(mockDb), 'user-123', 'test@example.com', 'family-123');
 
       expect(mockDb.insert).toHaveBeenCalled();
     });
@@ -186,22 +181,13 @@ describe('Security Events', () => {
 
   describe('logAccountLockedEvent', () => {
     test('should log account locked event with medium severity', async () => {
-      await logAccountLockedEvent(
-        asMockDb(mockDb),
-        'test@example.com',
-        5,
-        '192.168.1.1',
-      );
+      await logAccountLockedEvent(asMockDb(mockDb), 'test@example.com', 5, '192.168.1.1');
 
       expect(mockDb.insert).toHaveBeenCalled();
     });
 
     test('should log account locked event without optional fields', async () => {
-      await logAccountLockedEvent(
-        asMockDb(mockDb),
-        'test@example.com',
-        3,
-      );
+      await logAccountLockedEvent(asMockDb(mockDb), 'test@example.com', 3);
 
       expect(mockDb.insert).toHaveBeenCalled();
     });
@@ -234,12 +220,7 @@ describe('Security Events', () => {
     });
 
     test('should log account unlocked event without optional fields', async () => {
-      await logAccountUnlockedEvent(
-        asMockDb(mockDb),
-        'user-123',
-        'test@example.com',
-        'admin-456',
-      );
+      await logAccountUnlockedEvent(asMockDb(mockDb), 'user-123', 'test@example.com', 'admin-456');
 
       expect(mockDb.insert).toHaveBeenCalled();
     });

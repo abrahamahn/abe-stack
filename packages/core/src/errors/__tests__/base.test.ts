@@ -1,13 +1,7 @@
 // packages/core/src/errors/__tests__/base.test.ts
 import { describe, expect, test } from 'vitest';
 
-import {
-  AppError,
-  getErrorStatusCode,
-  getSafeErrorMessage,
-  isAppError,
-  toAppError,
-} from '../base';
+import { AppError, getErrorStatusCode, getSafeErrorMessage, isAppError, toAppError } from '../base';
 
 // ============================================================================
 // Base Error Tests

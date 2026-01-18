@@ -5,6 +5,7 @@
  * Manual WebSocket handling using ws directly. Replaces @fastify/websocket.
  */
 
+import { parseCookies } from '@abe-stack/core/http';
 import { verifyToken } from '@modules/auth/utils/jwt';
 import { WebSocketServer, type WebSocket } from 'ws';
 
@@ -38,28 +39,6 @@ export function getWebSocketStats(): WebSocketStats {
 // ============================================================================
 // Cookie Parsing (for WebSocket auth)
 // ============================================================================
-
-function parseCookies(cookieHeader: string | undefined): Record<string, string> {
-  const cookies: Record<string, string> = {};
-  if (!cookieHeader) return cookies;
-
-  const pairs = cookieHeader.split(';');
-  for (const pair of pairs) {
-    const eqIdx = pair.indexOf('=');
-    if (eqIdx < 0) continue;
-    const key = pair.slice(0, eqIdx).trim();
-    let value = pair.slice(eqIdx + 1).trim();
-    if (value.startsWith('"') && value.endsWith('"')) {
-      value = value.slice(1, -1);
-    }
-    try {
-      cookies[key] = decodeURIComponent(value);
-    } catch {
-      cookies[key] = value;
-    }
-  }
-  return cookies;
-}
 
 // ============================================================================
 // WebSocket Registration
@@ -97,28 +76,23 @@ export function registerWebSocket(server: FastifyInstance, ctx: AppContext): voi
 function handleConnection(socket: WebSocket, req: IncomingMessage, ctx: AppContext): void {
   // 1. Authentication
   // WebSockets don't support custom headers in browsers, so we check:
-  // - 'sec-websocket-protocol' header (standard workaround)
-  // - 'token' query parameter
-  // - Cookies (automatically sent)
+  // - 'sec-websocket-protocol' header (standard workaround for JWT)
+  // - Cookies (HTTP-only cookies are automatically sent)
+  //
+  // NOTE: Query parameter tokens are NOT supported due to security risks:
+  // - Tokens in URLs can leak via browser history, referrer headers, and server logs
 
   let token: string | undefined;
 
-  // Parse URL for query params
-  const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
-
-  // Check query param
-  const queryToken = url.searchParams.get('token');
-  if (queryToken) {
-    token = queryToken;
-  }
-
-  // Check protocol header (subprotocol)
-  if (!token && req.headers['sec-websocket-protocol']) {
+  // Check protocol header (subprotocol) - primary method for browsers
+  // Client connects with: new WebSocket(url, ['Bearer', tokenValue])
+  if (req.headers['sec-websocket-protocol']) {
     const protocols = req.headers['sec-websocket-protocol'].split(',').map((p) => p.trim());
-    token = protocols.find((p) => !['graphql', 'json'].includes(p));
+    // Find token (skip known protocol names)
+    token = protocols.find((p) => !['graphql', 'json', 'Bearer'].includes(p));
   }
 
-  // Check cookies
+  // Check cookies (accessToken cookie for seamless auth)
   if (!token) {
     const cookies = parseCookies(req.headers.cookie);
     if (cookies.accessToken) {

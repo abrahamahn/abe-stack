@@ -9,7 +9,18 @@
 import { tokenStore } from '@abe-stack/core';
 import { createApiClient } from '@abe-stack/sdk';
 
-import type { AuthResponse, LoginRequest, RegisterRequest, UserRole } from '@abe-stack/core';
+import type {
+  AuthResponse,
+  EmailVerificationRequest,
+  EmailVerificationResponse,
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
+  LoginRequest,
+  RegisterRequest,
+  ResetPasswordRequest,
+  ResetPasswordResponse,
+  UserRole,
+} from '@abe-stack/core';
 import type { ApiClient } from '@abe-stack/sdk';
 import type { ClientConfig } from '@config';
 import type { QueryClient } from '@tanstack/react-query';
@@ -41,6 +52,7 @@ export class AuthService {
   private config: ClientConfig;
   private refreshIntervalId: ReturnType<typeof setInterval> | null = null;
   private listeners: Set<() => void> = new Set();
+  private initialized = false;
 
   constructor(args: { config: ClientConfig; queryClient: QueryClient }) {
     this.config = args.config;
@@ -56,6 +68,35 @@ export class AuthService {
     if (tokenStore.get()) {
       this.startRefreshInterval();
     }
+  }
+
+  /**
+   * Initialize auth state on app load.
+   *
+   * With memory-based token storage (default for security), tokens are cleared
+   * on page refresh. This method attempts to restore the session using the
+   * refresh token (stored in HTTP-only cookie).
+   *
+   * Call this once on app startup.
+   */
+  async initialize(): Promise<User | null> {
+    if (this.initialized) {
+      return this.getState().user;
+    }
+    this.initialized = true;
+
+    // If we already have a token in memory, fetch the user
+    if (tokenStore.get()) {
+      return this.fetchCurrentUser();
+    }
+
+    // No token in memory - try to restore session from refresh token cookie
+    const refreshed = await this.refreshToken();
+    if (refreshed) {
+      return this.fetchCurrentUser();
+    }
+
+    return null;
   }
 
   // ==========================================================================
@@ -160,6 +201,21 @@ export class AuthService {
       }
       return null;
     }
+  }
+
+  /** Request password reset */
+  async forgotPassword(data: ForgotPasswordRequest): Promise<ForgotPasswordResponse> {
+    return this.api.forgotPassword(data);
+  }
+
+  /** Reset password with token */
+  async resetPassword(data: ResetPasswordRequest): Promise<ResetPasswordResponse> {
+    return this.api.resetPassword(data);
+  }
+
+  /** Verify email with token */
+  async verifyEmail(data: EmailVerificationRequest): Promise<EmailVerificationResponse> {
+    return this.api.verifyEmail(data);
   }
 
   // ==========================================================================

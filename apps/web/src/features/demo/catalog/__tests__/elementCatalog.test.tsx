@@ -1,4 +1,3 @@
-// apps/web/src/features/demo/catalog/__tests__/elementCatalog.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { render } from '@testing-library/react';
@@ -101,259 +100,156 @@ describe('elementCatalog', () => {
     });
   });
 
-  describe('Badge component', () => {
+  describe('Modal component', () => {
     it('is defined in the catalog', () => {
-      expect(elementCatalog.badge).toBeDefined();
+      expect(elementCatalog.modal).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const badge = elementCatalog.badge;
-      if (!badge) return;
+      const modal = elementCatalog.modal;
+      if (!modal) return;
 
-      badge.variants.forEach((variant: ComponentVariant) => {
+      modal.variants.forEach((variant: ComponentVariant) => {
+        const VariantComponent = variant.render;
+        const { container } = render(<VariantComponent />);
+        expect(container).toBeInTheDocument();
+      });
+    });
+
+    it('uses compound component pattern', () => {
+      const modal = elementCatalog.modal;
+      const firstVariant = modal?.variants[0];
+      if (!firstVariant) return;
+
+      expect(firstVariant.code).toContain('Modal.Root');
+      expect(firstVariant.code).not.toContain('<Modal ');
+    });
+  });
+
+  describe('Overlay component', () => {
+    it('is defined in the catalog', () => {
+      expect(elementCatalog.overlay).toBeDefined();
+    });
+
+    it('renders all variants', () => {
+      const overlay = elementCatalog.overlay;
+      if (!overlay) return;
+
+      overlay.variants.forEach((variant: ComponentVariant) => {
+        const VariantComponent = variant.render;
+        const { container } = render(<VariantComponent />);
+        expect(container).toBeInTheDocument();
+      });
+    });
+
+    it('uses open prop not visible', () => {
+      const overlay = elementCatalog.overlay;
+      const firstVariant = overlay?.variants[0];
+      if (!firstVariant) return;
+
+      expect(firstVariant.code).toContain('open={');
+      expect(firstVariant.code).not.toContain('visible');
+    });
+  });
+
+  describe('Pagination component', () => {
+    it('is defined in the catalog', () => {
+      expect(elementCatalog.pagination).toBeDefined();
+    });
+
+    it('renders all variants', () => {
+      const pagination = elementCatalog.pagination;
+      if (!pagination) return;
+
+      pagination.variants.forEach((variant: ComponentVariant) => {
         const { container } = render(variant.render());
         expect(container).toBeInTheDocument();
+      });
+    });
+
+    it('uses value prop not currentPage', () => {
+      const pagination = elementCatalog.pagination;
+      const firstVariant = pagination?.variants[0];
+      if (!firstVariant) return;
+
+      expect(firstVariant.code).toContain('value={');
+      expect(firstVariant.code).not.toContain('currentPage');
+    });
+  });
+
+  describe('Toast component', () => {
+    it('is defined in the catalog', () => {
+      expect(elementCatalog.toast).toBeDefined();
+    });
+
+    it('renders all variants', () => {
+      const toast = elementCatalog.toast;
+      if (!toast) return;
+
+      toast.variants.forEach((variant: ComponentVariant) => {
+        const { container } = render(variant.render());
+        expect(container).toBeInTheDocument();
+      });
+    });
+
+    it('uses message object prop', () => {
+      const toast = elementCatalog.toast;
+      if (!toast) return;
+
+      toast.variants.forEach((variant: ComponentVariant) => {
+        expect(variant.code).toContain('message={{');
+        expect(variant.code).not.toContain('variant="');
       });
     });
   });
 
-  describe('Box component', () => {
+  describe('Dialog component', () => {
     it('is defined in the catalog', () => {
-      expect(elementCatalog.box).toBeDefined();
+      expect(elementCatalog.dialog).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const box = elementCatalog.box;
-      if (!box) return;
+      const dialog = elementCatalog.dialog;
+      if (!dialog) return;
 
-      box.variants.forEach((variant: ComponentVariant) => {
+      dialog.variants.forEach((variant: ComponentVariant) => {
         const { container } = render(variant.render());
         expect(container).toBeInTheDocument();
       });
+    });
+
+    it('uses compound component pattern', () => {
+      const dialog = elementCatalog.dialog;
+      const firstVariant = dialog?.variants[0];
+      if (!firstVariant) return;
+
+      expect(firstVariant.code).toContain('Dialog.Root');
+      expect(firstVariant.code).toContain('Dialog.Trigger');
+      expect(firstVariant.code).toContain('Dialog.Content');
     });
   });
 
-  describe('Button component', () => {
+  describe('RadioGroup component', () => {
     it('is defined in the catalog', () => {
-      expect(elementCatalog.button).toBeDefined();
+      expect(elementCatalog.radioGroup).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const button = elementCatalog.button;
-      if (!button) return;
+      const radioGroup = elementCatalog.radioGroup;
+      if (!radioGroup) return;
 
-      button.variants.forEach((variant: ComponentVariant) => {
+      radioGroup.variants.forEach((variant: ComponentVariant) => {
         const { container } = render(variant.render());
         expect(container).toBeInTheDocument();
       });
     });
-  });
 
-  describe('Checkbox component', () => {
-    it('is defined in the catalog', () => {
-      expect(elementCatalog.checkbox).toBeDefined();
-    });
+    it('uses children not options', () => {
+      const radioGroup = elementCatalog.radioGroup;
+      const firstVariant = radioGroup?.variants[0];
+      if (!firstVariant) return;
 
-    it('renders all variants', () => {
-      const checkbox = elementCatalog.checkbox;
-      if (!checkbox) return;
-
-      checkbox.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('CloseButton component', () => {
-    it('is defined in the catalog', () => {
-      expect(elementCatalog.closeButton).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const closeButton = elementCatalog.closeButton;
-      if (!closeButton) return;
-
-      closeButton.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('Divider component', () => {
-    it('is defined in the catalog', () => {
-      expect(elementCatalog.divider).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const divider = elementCatalog.divider;
-      if (!divider) return;
-
-      divider.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('EnvironmentBadge component', () => {
-    it('is defined in the catalog', () => {
-      expect(elementCatalog.environmentBadge).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const environmentBadge = elementCatalog.environmentBadge;
-      if (!environmentBadge) return;
-
-      environmentBadge.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('Heading component', () => {
-    it('is defined in the catalog', () => {
-      expect(elementCatalog.heading).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const heading = elementCatalog.heading;
-      if (!heading) return;
-
-      heading.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('Input component', () => {
-    it('is defined in the catalog', () => {
-      expect(elementCatalog.input).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const input = elementCatalog.input;
-      if (!input) return;
-
-      input.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('Kbd component', () => {
-    it('is defined in the catalog', () => {
-      expect(elementCatalog.kbd).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const kbd = elementCatalog.kbd;
-      if (!kbd) return;
-
-      kbd.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('MenuItem component', () => {
-    it('is defined in the catalog', () => {
-      expect(elementCatalog.menuItem).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const menuItem = elementCatalog.menuItem;
-      if (!menuItem) return;
-
-      menuItem.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('Progress component', () => {
-    it('is defined in the catalog', () => {
-      expect(elementCatalog.progress).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const progress = elementCatalog.progress;
-      if (!progress) return;
-
-      progress.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('Skeleton component', () => {
-    it('is defined in the catalog', () => {
-      expect(elementCatalog.skeleton).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const skeleton = elementCatalog.skeleton;
-      if (!skeleton) return;
-
-      skeleton.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('Spinner component', () => {
-    it('is defined in the catalog', () => {
-      expect(elementCatalog.spinner).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const spinner = elementCatalog.spinner;
-      if (!spinner) return;
-
-      spinner.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('Switch component', () => {
-    it('is defined in the catalog', () => {
-      expect(elementCatalog.switch).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const switchComponent = elementCatalog.switch;
-      if (!switchComponent) return;
-
-      switchComponent.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
-    });
-  });
-
-  describe('Table component', () => {
-    it('is defined in the catalog', () => {
-      expect(elementCatalog.table).toBeDefined();
-    });
-
-    it('renders all variants', () => {
-      const table = elementCatalog.table;
-      if (!table) return;
-
-      table.variants.forEach((variant: ComponentVariant) => {
-        const { container } = render(variant.render());
-        expect(container).toBeInTheDocument();
-      });
+      expect(firstVariant.code).not.toContain('options={');
     });
   });
 
@@ -382,80 +278,80 @@ describe('elementCatalog', () => {
     });
   });
 
-  describe('TextArea component', () => {
+  describe('Accordion component', () => {
     it('is defined in the catalog', () => {
-      expect(elementCatalog.textarea).toBeDefined();
+      expect(elementCatalog.accordion).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const textarea = elementCatalog.textarea;
-      if (!textarea) return;
+      const accordion = elementCatalog.accordion;
+      if (!accordion) return;
 
-      textarea.variants.forEach((variant: ComponentVariant) => {
+      accordion.variants.forEach((variant: ComponentVariant) => {
         const { container } = render(variant.render());
         expect(container).toBeInTheDocument();
       });
     });
   });
 
-  describe('Toaster component', () => {
+  describe('Checkbox component', () => {
     it('is defined in the catalog', () => {
-      expect(elementCatalog.toaster).toBeDefined();
+      expect(elementCatalog.checkbox).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const toaster = elementCatalog.toaster;
-      if (!toaster) return;
+      const checkbox = elementCatalog.checkbox;
+      if (!checkbox) return;
 
-      toaster.variants.forEach((variant: ComponentVariant) => {
+      checkbox.variants.forEach((variant: ComponentVariant) => {
         const { container } = render(variant.render());
         expect(container).toBeInTheDocument();
       });
     });
   });
 
-  describe('Tooltip component', () => {
+  describe('Select component', () => {
     it('is defined in the catalog', () => {
-      expect(elementCatalog.tooltip).toBeDefined();
+      expect(elementCatalog.select).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const tooltip = elementCatalog.tooltip;
-      if (!tooltip) return;
+      const select = elementCatalog.select;
+      if (!select) return;
 
-      tooltip.variants.forEach((variant: ComponentVariant) => {
+      select.variants.forEach((variant: ComponentVariant) => {
         const { container } = render(variant.render());
         expect(container).toBeInTheDocument();
       });
     });
   });
 
-  describe('VersionBadge component', () => {
+  describe('Table component', () => {
     it('is defined in the catalog', () => {
-      expect(elementCatalog.versionBadge).toBeDefined();
+      expect(elementCatalog.table).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const versionBadge = elementCatalog.versionBadge;
-      if (!versionBadge) return;
+      const table = elementCatalog.table;
+      if (!table) return;
 
-      versionBadge.variants.forEach((variant: ComponentVariant) => {
+      table.variants.forEach((variant: ComponentVariant) => {
         const { container } = render(variant.render());
         expect(container).toBeInTheDocument();
       });
     });
   });
 
-  describe('VisuallyHidden component', () => {
+  describe('Tabs component', () => {
     it('is defined in the catalog', () => {
-      expect(elementCatalog.visuallyHidden).toBeDefined();
+      expect(elementCatalog.tabs).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const visuallyHidden = elementCatalog.visuallyHidden;
-      if (!visuallyHidden) return;
+      const tabs = elementCatalog.tabs;
+      if (!tabs) return;
 
-      visuallyHidden.variants.forEach((variant: ComponentVariant) => {
+      tabs.variants.forEach((variant: ComponentVariant) => {
         const { container } = render(variant.render());
         expect(container).toBeInTheDocument();
       });

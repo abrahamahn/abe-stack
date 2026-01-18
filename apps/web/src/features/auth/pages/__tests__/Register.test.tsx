@@ -452,9 +452,7 @@ describe('RegisterPage', () => {
     });
 
     it('should clear error when form is resubmitted', async () => {
-      mockRegister
-        .mockRejectedValueOnce(new Error('First error'))
-        .mockResolvedValueOnce(undefined);
+      mockRegister.mockRejectedValueOnce(new Error('First error')).mockResolvedValueOnce(undefined);
       renderRegisterPage();
 
       const nameInput = screen.getByLabelText(/name/i);
