@@ -1,8 +1,10 @@
 // apps/web/src/app/providers.tsx
+import { createQueryPersister } from '@abe-stack/sdk';
 import { HistoryProvider } from '@abe-stack/ui';
 import { ApiProvider } from '@api/index';
 import { AuthProvider } from '@auth/index';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { BrowserRouter } from 'react-router-dom';
 
 import type { ReactElement, ReactNode } from 'react';
@@ -12,9 +14,16 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 24 * 60 * 60 * 1000, // 24 hours - required for persistence
       retry: 1,
     },
   },
+});
+
+// Create persister for offline cache support
+const persister = createQueryPersister({
+  maxAge: 24 * 60 * 60 * 1000, // 24 hours
+  throttleTime: 1000, // 1 second
 });
 
 interface AppProvidersProps {
@@ -29,7 +38,10 @@ interface AppProvidersProps {
  */
 export function AppProviders({ children }: AppProvidersProps): ReactElement {
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ persister, maxAge: 24 * 60 * 60 * 1000 }}
+    >
       <BrowserRouter>
         <AuthProvider>
           <ApiProvider>
@@ -37,6 +49,6 @@ export function AppProviders({ children }: AppProvidersProps): ReactElement {
           </ApiProvider>
         </AuthProvider>
       </BrowserRouter>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }

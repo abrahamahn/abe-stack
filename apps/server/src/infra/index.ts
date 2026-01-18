@@ -168,3 +168,22 @@ export {
   type RoutesResponse,
   type StartupSummaryOptions,
 } from './health';
+
+// Logger
+export {
+  createLogger,
+  createRequestContext,
+  createRequestLogger,
+  createJobCorrelationId,
+  createJobLogger,
+  generateCorrelationId,
+  getOrCreateCorrelationId,
+  LOG_LEVELS,
+  registerLoggingMiddleware,
+  shouldLog,
+  type LogData,
+  type Logger,
+  type LoggerConfig,
+  type LogLevel,
+  type RequestContext,
+} from './logger';

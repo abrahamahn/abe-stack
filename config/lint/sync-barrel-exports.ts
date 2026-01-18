@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// config/sync/sync-barrel-exports.ts
+// config/lint/sync-barrel-exports.ts
 /**
  * Automatically creates and updates index.ts barrel files.
  *

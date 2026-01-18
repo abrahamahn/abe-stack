@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// config/sync/sync-import-aliases.ts
+// config/lint/sync-import-aliases.ts
 /**
  * Converts relative imports to path aliases where available.
  *

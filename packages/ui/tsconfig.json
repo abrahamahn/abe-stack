@@ -4,35 +4,89 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "jsx": "react-jsx",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "baseUrl": "./",
-    "types": ["react", "react-dom", "vitest/globals"],
+    "types": [
+      "react",
+      "react-dom",
+      "vitest/globals"
+    ],
     "paths": {
-      "@abe-stack/core": ["../core/src"],
-      "@abe-stack/core/*": ["../core/src/*"],
-      "@components": ["./src/components"],
-      "@components/*": ["./src/components/*"],
-      "@containers": ["./src/layouts/containers"],
-      "@containers/*": ["./src/layouts/containers/*"],
-      "@elements": ["./src/elements"],
-      "@elements/*": ["./src/elements/*"],
-      "@hooks": ["./src/hooks"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@layers": ["./src/layouts/layers"],
-      "@layers/*": ["./src/layouts/layers/*"],
-      "@layouts": ["./src/layouts"],
-      "@layouts/*": ["./src/layouts/*"],
-      "@shells": ["./src/layouts/shells"],
-      "@shells/*": ["./src/layouts/shells/*"],
-      "@theme": ["./src/theme"],
-      "@theme/*": ["./src/theme/*"],
-      "@utils": ["./src/utils"],
-      "@utils/*": ["./src/utils/*"]
+      "@abe-stack/core": [
+        "../core/src"
+      ],
+      "@abe-stack/core/*": [
+        "../core/src/*"
+      ],
+      "@components": [
+        "./src/components"
+      ],
+      "@components/*": [
+        "./src/components/*"
+      ],
+      "@containers": [
+        "./src/layouts/containers"
+      ],
+      "@containers/*": [
+        "./src/layouts/containers/*"
+      ],
+      "@elements": [
+        "./src/elements"
+      ],
+      "@elements/*": [
+        "./src/elements/*"
+      ],
+      "@hooks": [
+        "./src/hooks"
+      ],
+      "@hooks/*": [
+        "./src/hooks/*"
+      ],
+      "@layers": [
+        "./src/layouts/layers"
+      ],
+      "@layers/*": [
+        "./src/layouts/layers/*"
+      ],
+      "@layouts": [
+        "./src/layouts"
+      ],
+      "@layouts/*": [
+        "./src/layouts/*"
+      ],
+      "@shells": [
+        "./src/layouts/shells"
+      ],
+      "@shells/*": [
+        "./src/layouts/shells/*"
+      ],
+      "@theme": [
+        "./src/theme"
+      ],
+      "@theme/*": [
+        "./src/theme/*"
+      ],
+      "@utils": [
+        "./src/utils"
+      ],
+      "@utils/*": [
+        "./src/utils/*"
+      ]
     },
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "src/**/__tests__/**"],
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/**/__tests__/**"
+  ],
   "references": [
     {
       "path": "../core"

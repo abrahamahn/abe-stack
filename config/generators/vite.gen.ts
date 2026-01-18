@@ -152,11 +152,9 @@ ${webAliasEntries}
  */
 export function getDesktopAliases(): Record<string, string> {
   return {
-    ...packageAliases,
-    ...uiInternalAliases,
-    ...coreInternalAliases,
-    // Desktop's own aliases override package aliases where needed
 ${desktopAliasEntries}
+    ...packageAliases,
+    ...coreInternalAliases,
   };
 }
 

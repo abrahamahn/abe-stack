@@ -34,5 +34,5 @@
     /* 5. Clean Console */
     "ignoreDeprecations": "5.0"
   },
-  "exclude": ["node_modules", "dist", "build", "coverage"]
+  "exclude": ["node_modules","dist","build","coverage"]
 }

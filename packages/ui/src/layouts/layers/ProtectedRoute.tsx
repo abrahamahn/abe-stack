@@ -1,8 +1,8 @@
 // packages/ui/src/layouts/layers/ProtectedRoute.tsx
-
-import { Spinner } from '@elements/Spinner';
-import { Text } from '@elements/Text';
 import { Navigate, Outlet } from 'react-router-dom';
+
+import { Spinner } from '../../elements/Spinner';
+import { Text } from '../../elements/Text';
 import '../../styles/components.css';
 
 import type { ReactElement, ReactNode } from 'react';

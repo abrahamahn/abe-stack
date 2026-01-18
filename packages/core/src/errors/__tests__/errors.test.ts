@@ -239,18 +239,20 @@ describe('Core Errors', () => {
         expect(result).toBe(original);
       });
 
-      test('should convert Error to InternalError', () => {
+      test('should convert Error to AppError with 500 status', () => {
         const original = new Error('Some error');
         const result = toAppError(original);
 
-        expect(result).toBeInstanceOf(InternalError);
+        expect(result).toBeInstanceOf(AppError);
+        expect(result.statusCode).toBe(500);
         expect(result.message).toBe('Some error');
       });
 
-      test('should convert unknown to InternalError', () => {
+      test('should convert unknown to AppError with 500 status', () => {
         const result = toAppError('string error');
 
-        expect(result).toBeInstanceOf(InternalError);
+        expect(result).toBeInstanceOf(AppError);
+        expect(result.statusCode).toBe(500);
         expect(result.message).toBe('An unexpected error occurred');
       });
 

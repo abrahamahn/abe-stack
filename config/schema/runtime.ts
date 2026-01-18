@@ -86,14 +86,12 @@ export function getWebAliases(): Record<string, string> {
  */
 export function getDesktopAliases(): Record<string, string> {
   return {
-    ...packageAliases,
-    ...uiInternalAliases,
-    ...coreInternalAliases,
-    // Desktop's own aliases override package aliases where needed
     '@': path.join(desktopRoot, 'src'),
     '@services': path.join(desktopRoot, 'src/services'),
     '@routes': path.join(desktopRoot, 'src/routes'),
     '@api': path.join(desktopRoot, 'src/api'),
+    ...packageAliases,
+    ...coreInternalAliases,
   };
 }
 

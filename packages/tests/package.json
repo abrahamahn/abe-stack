@@ -1,0 +1,38 @@
+{
+  "name": "@abe-stack/tests",
+  "version": "1.0.0",
+  "description": "Shared test utilities, mock factories, and test constants",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./mocks": {
+      "types": "./dist/mocks/index.d.ts",
+      "import": "./dist/mocks/index.js"
+    },
+    "./constants": {
+      "types": "./dist/constants/index.d.ts",
+      "import": "./dist/constants/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "type-check": "tsc --project tsconfig.json --noEmit",
+    "test": "vitest run --config ../../config/vitest.config.ts",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo"
+  },
+  "dependencies": {
+    "@abe-stack/core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3",
+    "vitest": "^4.0.16"
+  },
+  "peerDependencies": {
+    "vitest": "^4.0.0"
+  }
+}

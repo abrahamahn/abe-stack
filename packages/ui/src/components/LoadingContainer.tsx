@@ -1,8 +1,8 @@
 // packages/ui/src/components/LoadingContainer.tsx
-import { Spinner } from '@elements/Spinner';
-import { Text } from '@elements/Text';
-
 import type { ComponentPropsWithoutRef, ReactElement } from 'react';
+
+import { Spinner } from '../elements/Spinner';
+import { Text } from '../elements/Text';
 import '../styles/components.css';
 
 type LoadingContainerProps = ComponentPropsWithoutRef<'div'> & {

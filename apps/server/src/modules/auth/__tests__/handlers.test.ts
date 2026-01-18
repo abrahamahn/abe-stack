@@ -4,7 +4,6 @@ import {
   handleLogout,
   handleRefresh,
   handleRegister,
-  verifyToken,
 } from '@auth/handlers';
 import { authenticateUser, logoutUser, refreshUserTokens, registerUser } from '@auth/service';
 import {
@@ -399,7 +398,7 @@ describe('handleLogout', () => {
 // Tests: verifyToken
 // ============================================================================
 
-describe('verifyToken', () => {
+describe('verifyToken (from utils/jwt)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -413,7 +412,7 @@ describe('verifyToken', () => {
 
     vi.mocked(verifyJwtToken).mockReturnValue(mockPayload);
 
-    const result = verifyToken('valid-token', 'secret-key-32-characters-long!!');
+    const result = verifyJwtToken('valid-token', 'secret-key-32-characters-long!!');
 
     expect(result).toEqual(mockPayload);
     expect(verifyJwtToken).toHaveBeenCalledWith('valid-token', 'secret-key-32-characters-long!!');
@@ -424,7 +423,7 @@ describe('verifyToken', () => {
       throw new Error('Invalid token');
     });
 
-    expect(() => verifyToken('invalid-token', 'secret-key-32-characters-long!!')).toThrow(
+    expect(() => verifyJwtToken('invalid-token', 'secret-key-32-characters-long!!')).toThrow(
       'Invalid token',
     );
   });

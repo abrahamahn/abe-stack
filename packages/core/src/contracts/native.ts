@@ -37,19 +37,3 @@ export interface NativeBridge {
   }) => Promise<string | null>;
 }
 
-/**
- * Default web implementation (no-op for non-native environments)
- */
-export const webBridge: NativeBridge = {
-  getPlatform: async () => 'web',
-  sendNotification: (title, body) => {
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(title, { body });
-    }
-  },
-  isNative: () => false,
-  getAppVersion: async () => '0.0.0',
-  openExternal: async (url) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
-  },
-};

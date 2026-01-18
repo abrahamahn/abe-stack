@@ -16,6 +16,7 @@ export {
   Input,
   Kbd,
   MenuItem,
+  PasswordInput,
   Progress,
   Skeleton,
   Spinner,

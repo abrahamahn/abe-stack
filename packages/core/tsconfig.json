@@ -4,19 +4,44 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": "./",
-    "types": ["node", "vitest/globals"],
+    "types": [
+      "node",
+      "vitest/globals"
+    ],
     "paths": {
-      "@contracts": ["./src/contracts"],
-      "@contracts/*": ["./src/contracts/*"],
-      "@stores": ["./src/stores"],
-      "@stores/*": ["./src/stores/*"],
-      "@utils": ["./src/utils"],
-      "@utils/*": ["./src/utils/*"],
-      "@validation": ["./src/validation"],
-      "@validation/*": ["./src/validation/*"]
+      "@contracts": [
+        "./src/contracts"
+      ],
+      "@contracts/*": [
+        "./src/contracts/*"
+      ],
+      "@stores": [
+        "./src/stores"
+      ],
+      "@stores/*": [
+        "./src/stores/*"
+      ],
+      "@utils": [
+        "./src/utils"
+      ],
+      "@utils/*": [
+        "./src/utils/*"
+      ],
+      "@validation": [
+        "./src/validation"
+      ],
+      "@validation/*": [
+        "./src/validation/*"
+      ]
     },
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "src/**/__tests__/**"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/**/__tests__/**"
+  ]
 }

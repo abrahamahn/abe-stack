@@ -241,16 +241,11 @@ export const aliasDefinitions = {
     '@utils': 'apps/server/src/modules/auth/utils',
   },
 
-  // Desktop-specific aliases
+  // Desktop-specific aliases (unique to desktop, no conflicts with UI)
   desktop: {
     '@': 'apps/desktop/src',
-    '@components': 'apps/desktop/src/components',
-    '@hooks': 'apps/desktop/src/hooks',
     '@services': 'apps/desktop/src/services',
-    '@config': 'apps/desktop/src/config',
-    '@layouts': 'apps/desktop/src/layouts',
     '@routes': 'apps/desktop/src/routes',
-    '@utils': 'apps/desktop/src/utils',
     '@api': 'apps/desktop/src/api',
   },
 

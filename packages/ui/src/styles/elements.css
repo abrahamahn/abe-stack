@@ -469,6 +469,45 @@
   font-size: var(--ui-font-size-xs);
 }
 
+/* Password Input */
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input {
+  padding-right: 4rem;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  font-size: var(--ui-font-size-xs);
+}
+
+.password-strength {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.password-strength-bar {
+  height: 4px;
+  background: var(--ui-color-border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.password-strength-fill {
+  height: 100%;
+  transition: width 0.2s ease, background-color 0.2s ease;
+}
+
+.password-strength-label {
+  font-size: var(--ui-font-size-xs);
+}
+
 /* Kbd */
 .kbd {
   display: inline-block;

@@ -34,7 +34,7 @@ config/
 │   ├── utils.ts         # Shared utilities
 │   └── index.ts         # Main entry with watch mode
 │
-└── sync/                # Code transformation scripts (moved from tools/sync/)
+└── lint/                # Custom lint/transform scripts (moved from tools/sync/)
     ├── sync-file-headers.ts    # Adds // path/file.ts headers
     ├── sync-import-aliases.ts  # Converts relative to alias imports
     ├── sync-test-folders.ts    # Creates __tests__/ directories
@@ -72,7 +72,7 @@ config/
 
 **Moved (consolidated under config/):**
 
-- `tools/sync/*.ts` → `config/sync/*.ts` (code transformation scripts)
+- `tools/sync/*.ts` → `config/lint/*.ts` (custom lint/transform scripts)
 - `config/aliases.ts` → `config/schema/runtime.ts` (generated runtime helpers)
 
 **Workflow:**

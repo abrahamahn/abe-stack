@@ -13,6 +13,7 @@ export { Heading } from './Heading';
 export { Input } from './Input';
 export { Kbd } from './Kbd';
 export { MenuItem } from './MenuItem';
+export { PasswordInput } from './PasswordInput';
 export { Progress } from './Progress';
 export { Skeleton } from './Skeleton';
 export { Spinner } from './Spinner';

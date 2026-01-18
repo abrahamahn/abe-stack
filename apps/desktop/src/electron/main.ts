@@ -2,12 +2,74 @@
 import net from 'node:net';
 import * as path from 'path';
 
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, Notification } from 'electron';
 
 let mainWindow: BrowserWindow | null = null;
 
 // Disable GPU acceleration to avoid renderer crashes on some Linux/WSL setups
 app.disableHardwareAcceleration();
+
+// ============================================================================
+// IPC Handlers for NativeBridge
+// ============================================================================
+
+ipcMain.on('show-notification', (_event, { title, body }: { title: string; body: string }) => {
+  if (Notification.isSupported()) {
+    new Notification({ title, body }).show();
+  }
+});
+
+ipcMain.handle('get-app-version', () => {
+  return app.getVersion();
+});
+
+ipcMain.handle(
+  'show-open-dialog',
+  async (
+    _event,
+    options: {
+      title?: string;
+      filters?: Array<{ name: string; extensions: string[] }>;
+      multiple?: boolean;
+    },
+  ) => {
+    if (!mainWindow) return null;
+
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: options.title,
+      filters: options.filters,
+      properties: options.multiple ? ['openFile', 'multiSelections'] : ['openFile'],
+    });
+
+    return result.canceled ? null : result.filePaths;
+  },
+);
+
+ipcMain.handle(
+  'show-save-dialog',
+  async (
+    _event,
+    options: {
+      title?: string;
+      defaultPath?: string;
+      filters?: Array<{ name: string; extensions: string[] }>;
+    },
+  ) => {
+    if (!mainWindow) return null;
+
+    const result = await dialog.showSaveDialog(mainWindow, {
+      title: options.title,
+      defaultPath: options.defaultPath,
+      filters: options.filters,
+    });
+
+    return result.canceled ? null : result.filePath;
+  },
+);
+
+// ============================================================================
+// Window Management
+// ============================================================================
 
 function uniquePorts(ports: Array<number | undefined>): number[] {
   return Array.from(new Set(ports.filter((port): port is number => Number.isFinite(port))));
