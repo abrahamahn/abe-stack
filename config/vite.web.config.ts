@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
-import { coreRoot, sdkRoot, uiRoot, webRoot } from './aliases';
+import { coreRoot, sdkRoot, uiRoot, webRoot } from './schema/runtime';
 
 export default defineConfig({
   plugins: [

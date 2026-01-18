@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// tools/sync/sync-import-aliases.ts
+// config/sync/sync-import-aliases.ts
 /**
  * Converts relative imports to path aliases where available.
  *

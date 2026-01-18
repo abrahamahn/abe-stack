@@ -1,13 +1,13 @@
-// config/aliases.ts
+// WARNING: This file is auto-generated. DO NOT EDIT DIRECTLY.
 // Edit config/schema/*.ts and run: pnpm config:generate
 
 /**
- * Shared path aliases for Vite and Vitest configurations.
- * Single source of truth for all alias definitions.
+ * Runtime path aliases for Vite and Vitest configurations.
+ * Generated from config/schema/build.ts alias definitions.
  */
 import path from 'node:path';
 
-export const repoRoot = path.resolve(__dirname, '..');
+export const repoRoot = path.resolve(__dirname, '../..');
 
 // Package paths
 export const packagesRoot = path.join(repoRoot, 'packages');
@@ -86,18 +86,14 @@ export function getWebAliases(): Record<string, string> {
  */
 export function getDesktopAliases(): Record<string, string> {
   return {
-    '@': path.join(desktopRoot, 'src'),
-    '@components': path.join(desktopRoot, 'src/components'),
-    '@hooks': path.join(desktopRoot, 'src/hooks'),
-    '@services': path.join(desktopRoot, 'src/services'),
-    '@config': path.join(desktopRoot, 'src/config'),
-    '@layouts': path.join(desktopRoot, 'src/layouts'),
-    '@routes': path.join(desktopRoot, 'src/routes'),
-    '@utils': path.join(desktopRoot, 'src/utils'),
-    '@api': path.join(desktopRoot, 'src/api'),
     ...packageAliases,
+    ...uiInternalAliases,
     ...coreInternalAliases,
-    // Desktop's own @utils overrides core's @utils
+    // Desktop's own aliases override package aliases where needed
+    '@': path.join(desktopRoot, 'src'),
+    '@services': path.join(desktopRoot, 'src/services'),
+    '@routes': path.join(desktopRoot, 'src/routes'),
+    '@api': path.join(desktopRoot, 'src/api'),
   };
 }
 
@@ -123,10 +119,7 @@ export function getServerAliases(): Array<{ find: string; replacement: string }>
     { find: '@rate-limit', replacement: path.join(repoRoot, 'apps/server/src/infra/rate-limit') },
     { find: '@security', replacement: path.join(repoRoot, 'apps/server/src/infra/security') },
     { find: '@storage', replacement: path.join(repoRoot, 'apps/server/src/infra/storage') },
-    {
-      find: '@providers',
-      replacement: path.join(repoRoot, 'apps/server/src/infra/storage/providers'),
-    },
+    { find: '@providers', replacement: path.join(repoRoot, 'apps/server/src/infra/storage/providers') },
     { find: '@websocket', replacement: path.join(repoRoot, 'apps/server/src/infra/websocket') },
     { find: '@auth', replacement: path.join(repoRoot, 'apps/server/src/modules/auth') },
     { find: '@admin', replacement: path.join(repoRoot, 'apps/server/src/modules/admin') },

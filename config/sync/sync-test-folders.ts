@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// tools/sync/sync-test-folders.ts
+// config/sync/sync-test-folders.ts
 /**
  * Creates missing __tests__ folders in code directories.
  *

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// tools/sync/sync-file-headers.ts
+// config/sync/sync-file-headers.ts
 /**
  * Ensures files start with a path header comment.
  *

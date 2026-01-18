@@ -4,7 +4,7 @@ import net from 'node:net';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-import { desktopRoot, getDesktopAliases } from './aliases';
+import { desktopRoot, getDesktopAliases } from './schema/runtime';
 
 function uniquePorts(ports: Array<number | undefined>): number[] {
   return Array.from(new Set(ports.filter((port): port is number => Number.isFinite(port))));

@@ -1,4 +1,4 @@
-// tools/sync/sync-css-theme.ts
+// config/sync/sync-css-theme.ts
 /**
  * Build theme.css from TypeScript theme source files
  *

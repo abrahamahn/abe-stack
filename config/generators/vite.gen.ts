@@ -3,7 +3,7 @@
  * Vite Configuration Generator
  *
  * Generates:
- *   config/aliases.ts
+ *   config/schema/runtime.ts
  */
 
 import * as path from 'path';
@@ -91,12 +91,12 @@ function generateAliasesContent(): string {
     .join('\n');
 
   return `/**
- * Shared path aliases for Vite and Vitest configurations.
- * Single source of truth for all alias definitions.
+ * Runtime path aliases for Vite and Vitest configurations.
+ * Generated from config/schema/build.ts alias definitions.
  */
 import path from 'node:path';
 
-export const repoRoot = path.resolve(__dirname, '..');
+export const repoRoot = path.resolve(__dirname, '../..');
 
 // Package paths
 export const packagesRoot = path.join(repoRoot, 'packages');
@@ -152,10 +152,11 @@ ${webAliasEntries}
  */
 export function getDesktopAliases(): Record<string, string> {
   return {
-${desktopAliasEntries}
     ...packageAliases,
+    ...uiInternalAliases,
     ...coreInternalAliases,
-    // Desktop's own @utils overrides core's @utils
+    // Desktop's own aliases override package aliases where needed
+${desktopAliasEntries}
   };
 }
 
@@ -198,7 +199,7 @@ ${sdkAliasEntries}
 }
 
 /**
- * Generate the aliases.ts file that vite configs import from
+ * Generate the runtime.ts file that vite configs import from
  */
 export function generateViteAliases(
   options: { checkOnly?: boolean; quiet?: boolean } = {},
@@ -209,25 +210,25 @@ export function generateViteAliases(
 
   log.log('\nGenerating Vite aliases...');
 
-  const aliasesPath = path.join(ROOT, 'config/aliases.ts');
+  const runtimePath = path.join(ROOT, 'config/schema/runtime.ts');
   const content = generateAliasesContent();
 
   if (checkOnly) {
-    const existing = fs.existsSync(aliasesPath) ? fs.readFileSync(aliasesPath, 'utf-8') : '';
+    const existing = fs.existsSync(runtimePath) ? fs.readFileSync(runtimePath, 'utf-8') : '';
     // Check if content differs (ignoring the auto-generated header)
-    const existingWithoutHeader = existing.replace(/^\/\/ config\/aliases\.ts\n/, '');
+    const existingWithoutHeader = existing.replace(/^\/\/ config\/schema\/runtime\.ts\n/, '');
     const contentWithoutHeader = content;
     if (existingWithoutHeader !== contentWithoutHeader) {
-      result.generated.push(aliasesPath);
+      result.generated.push(runtimePath);
     } else {
-      result.unchanged.push(aliasesPath);
+      result.unchanged.push(runtimePath);
     }
   } else {
-    if (writeTsFile(aliasesPath, content)) {
-      result.generated.push(aliasesPath);
-      log.log(`  Generated: ${path.relative(ROOT, aliasesPath)}`);
+    if (writeTsFile(runtimePath, content)) {
+      result.generated.push(runtimePath);
+      log.log(`  Generated: ${path.relative(ROOT, runtimePath)}`);
     } else {
-      result.unchanged.push(aliasesPath);
+      result.unchanged.push(runtimePath);
     }
   }
 

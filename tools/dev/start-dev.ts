@@ -120,12 +120,12 @@ async function main(): Promise<void> {
 
   // Start all sync watchers silently in background
   const watchers = [
-    startConfigGenerator(), // Replaces sync-path-aliases.ts
-    startWatcher('tools/sync/sync-file-headers.ts'),
-    startWatcher('tools/sync/sync-import-aliases.ts'),
-    startWatcher('tools/sync/sync-test-folders.ts'),
-    startWatcher('tools/sync/sync-barrel-exports.ts'),
-    startWatcher('tools/sync/sync-css-theme.ts'),
+    startConfigGenerator(), // Generates tsconfigs and aliases
+    startWatcher('config/sync/sync-file-headers.ts'),
+    startWatcher('config/sync/sync-import-aliases.ts'),
+    startWatcher('config/sync/sync-test-folders.ts'),
+    startWatcher('config/sync/sync-barrel-exports.ts'),
+    startWatcher('config/sync/sync-css-theme.ts'),
   ];
 
   // Give watchers a moment to do initial sync
