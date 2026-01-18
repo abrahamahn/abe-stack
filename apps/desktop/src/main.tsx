@@ -47,7 +47,7 @@ root.render(
             Shared logic from <code>@abe-stack/core</code>
           </li>
           <li>
-            Desktop-specific features in <code>apps/desktop/src/native/</code>
+            Desktop-specific features in <code>apps/desktop/src/electron/</code>
           </li>
           <li>80-90% code sharing with web app</li>
         </ul>

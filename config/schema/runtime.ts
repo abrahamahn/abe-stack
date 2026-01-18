@@ -1,4 +1,4 @@
-// config/schema/runtime.ts
+// WARNING: This file is auto-generated. DO NOT EDIT DIRECTLY.
 // Edit config/schema/*.ts and run: pnpm config:generate
 
 /**
@@ -117,7 +117,10 @@ export function getServerAliases(): Array<{ find: string; replacement: string }>
     { find: '@rate-limit', replacement: path.join(repoRoot, 'apps/server/src/infra/rate-limit') },
     { find: '@security', replacement: path.join(repoRoot, 'apps/server/src/infra/security') },
     { find: '@storage', replacement: path.join(repoRoot, 'apps/server/src/infra/storage') },
-    { find: '@providers', replacement: path.join(repoRoot, 'apps/server/src/infra/storage/providers') },
+    {
+      find: '@providers',
+      replacement: path.join(repoRoot, 'apps/server/src/infra/storage/providers'),
+    },
     { find: '@websocket', replacement: path.join(repoRoot, 'apps/server/src/infra/websocket') },
     { find: '@auth', replacement: path.join(repoRoot, 'apps/server/src/modules/auth') },
     { find: '@admin', replacement: path.join(repoRoot, 'apps/server/src/modules/admin') },

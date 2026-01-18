@@ -25,7 +25,7 @@ Write once, use everywhere. This package contains all shared UI components that 
 
 **📚 [View Complete Component Documentation](./docs/README.md)**
 
-Comprehensive documentation for all 57 components including:
+Comprehensive documentation for all 67 UI items including:
 
 - Detailed usage examples (basic to advanced)
 - Complete props reference with TypeScript types
@@ -37,7 +37,7 @@ Comprehensive documentation for all 57 components including:
 **Quick links:**
 
 - [Components](./docs/README.md#components) - Stateful multi-part components (16)
-- [Elements](./docs/README.md#elements) - Low-level primitive elements (24)
+- [Elements](./docs/README.md#elements) - Low-level primitive elements (25)
 - [Layouts](./docs/README.md#layouts) - Layout components (14)
 - [Hooks](./docs/README.md#hooks) - React hooks (13)
 
@@ -82,9 +82,9 @@ By centralizing UI components in this package, we achieve:
 │  features    │  │features      │  │              │
 │              │  │              │  │              │
 │  ├─ src/     │  │ ├─ electron/ │  │ ├─ src/      │
-│  │  ├─ web-  │  │ ├─ native/   │  │ │  ├─adapters│
-│  │  │  only/ │  │ │  (desktop) │  │ │  ├─ core/  │
-│  │  └─App.tsx│  │ └─App.tsx    │  │ │  └─modules/│
+│  │  ├─ api/  │  │ │  main.ts   │  │ │  ├─config/ │
+│  │  ├─ app/  │  │ │  preload.ts│  │ │  ├─infra/  │
+│  │  └─ ...   │  │ └─ main.tsx  │  │ │  └─modules/│
 └──────┬───────┘  └──────┬───────┘  └──────────────┘
        │                 │
        │                 │
@@ -146,8 +146,8 @@ packages/ui/src/
 
 **Platform-specific features:**
 
-- **Desktop**: File system, system tray, native menus → `apps/desktop/src/native/`
-- **Web**: Service workers, web-only APIs → `apps/web/src/web-only/`
+- **Desktop**: File system, system tray, native menus → `apps/desktop/src/electron/`
+- **Web**: Service workers, web-only APIs → `apps/web/src/` (platform-specific code)
 
 **Other:**
 
@@ -229,11 +229,10 @@ function DesktopPage() {
 
 ```
 apps/web/src/
-├── web-only/          # Web-specific features
-│   ├── hooks/
-│   ├── services/
-│   └── components/
-├── App.tsx           # Imports from @abe-stack/ui
+├── api/              # API client setup
+├── app/              # App root and providers
+├── features/         # Feature modules (auth, dashboard)
+├── config/           # App configuration
 └── main.tsx          # Web entry point
 ```
 
@@ -253,15 +252,12 @@ apps/web/src/
 
 ```
 apps/desktop/src/
-├── native/           # Desktop-specific features
-│   ├── hooks/
-│   ├── services/
-│   └── types/
 ├── electron/         # Electron main process
-│   ├── main.ts
-│   └── preload.ts
-├── App.tsx          # Imports from @abe-stack/ui
-└── main.tsx         # Desktop entry point
+│   ├── main.ts       # Main process entry
+│   ├── preload.ts    # Preload script for IPC
+│   └── tsconfig.json # Node/CommonJS config
+├── main.tsx          # Renderer entry point (React root)
+└── types.d.ts        # Type declarations (electronAPI)
 ```
 
 ---
@@ -294,7 +290,7 @@ apps/desktop/src/
 
 2. **Does it use platform-specific APIs?**
    - File system, Electron API?
-   - YES → `apps/{platform}/src/native/`
+   - YES → `apps/{platform}/src/` (platform-specific code)
    - NO → `packages/ui`
 
 3. **Is it pure UI or business logic?**
@@ -597,8 +593,8 @@ function PlayerPage() {
    ```
 
 4. **Add platform-specific features:**
-   - Web: `apps/web/src/web-only/`
-   - Desktop: `apps/desktop/src/native/`
+   - Web: `apps/web/src/` (web-specific code)
+   - Desktop: `apps/desktop/src/electron/` (Electron main process)
 
 ---
 

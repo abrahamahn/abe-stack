@@ -1,5 +1,5 @@
 // apps/server/src/infra/crypto/__tests__/jwt.test.ts
-import { decode, JwtError, sign, verify } from '@crypto/jwt';
+import { decode, JwtError, sign, verify } from '@abe-stack/core/crypto';
 import { describe, expect, test, vi } from 'vitest';
 
 describe('Native JWT Implementation', () => {

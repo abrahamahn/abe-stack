@@ -1,6 +1,6 @@
 # ABE Stack Architecture
 
-**Last Updated: January 17, 2026**
+**Last Updated: January 18, 2026**
 
 Comprehensive architecture documentation for ABE Stack's layered architecture and package layout.
 
@@ -41,22 +41,29 @@ abe-stack/
 │   ├── server/           # Fastify API server
 │   │   └── src/
 │   │       ├── modules/      # Feature modules (auth, users, admin)
-│   │       ├── infra/        # Infrastructure layer
+│   │       ├── infra/        # Infrastructure layer (14 modules)
 │   │       │   ├── database/ # Drizzle ORM, schemas
 │   │       │   ├── storage/  # S3/local file storage
 │   │       │   ├── pubsub/   # Pub/sub subscriptions
 │   │       │   ├── security/ # Lockout, audit logging
 │   │       │   ├── email/    # Email service
 │   │       │   ├── crypto/   # JWT utilities
-│   │       │   ├── http/     # HTTP utilities
-│   │       │   └── rate-limit/
+│   │       │   ├── http/     # HTTP utilities, CSRF, cookies
+│   │       │   ├── rate-limit/ # Token bucket rate limiter
+│   │       │   ├── websocket/  # Real-time WebSocket support
+│   │       │   ├── health/     # Health check endpoints
+│   │       │   ├── logger/     # Structured logging with correlation IDs
+│   │       │   ├── queue/      # Background job processing
+│   │       │   ├── router/     # Route registration patterns
+│   │       │   └── write/      # Transaction + PubSub write helper
 │   │       ├── config/       # Server configuration
 │   │       └── shared/       # Server-specific shared code
 │   └── desktop/          # Electron desktop app
 ├── packages/
 │   ├── core/             # Shared contracts, validation, stores
 │   ├── ui/               # Reusable React components
-│   └── sdk/              # Type-safe API client + React Query hooks
+│   ├── sdk/              # Type-safe API client + React Query hooks
+│   └── tests/            # Shared test utilities, mocks, constants
 ├── config/               # Shared configs (tsconfig, prettier)
 └── docs/                 # Documentation
 ```
@@ -72,6 +79,7 @@ abe-stack/
 | `packages/core/src`       | Shared contracts, validation, stores         |
 | `packages/ui/src`         | Reusable UI components                       |
 | `packages/sdk/src`        | Type-safe API client + React Query hooks     |
+| `packages/tests/src`      | Shared test utilities, mocks, constants      |
 
 ---
 
@@ -140,13 +148,14 @@ apps/server/src/infra/*
 
 ### Package Dependencies
 
-| Package           | Can Import From    |
-| ----------------- | ------------------ |
-| `@abe-stack/core` | External deps only |
-| `@abe-stack/ui`   | `@abe-stack/core`  |
-| `@abe-stack/sdk`  | `@abe-stack/core`  |
-| `apps/web`        | All packages       |
-| `apps/server`     | `@abe-stack/core`  |
+| Package            | Can Import From    |
+| ------------------ | ------------------ |
+| `@abe-stack/core`  | External deps only |
+| `@abe-stack/ui`    | `@abe-stack/core`  |
+| `@abe-stack/sdk`   | `@abe-stack/core`  |
+| `@abe-stack/tests` | `@abe-stack/core`  |
+| `apps/web`         | All packages       |
+| `apps/server`      | `@abe-stack/core`  |
 
 ---
 
@@ -164,10 +173,10 @@ The server implements **hexagonal architecture** (ports & adapters) to isolate b
 └─────────────────────────────────────────────────────────────┘
 ```
 
-| Layer        | Purpose                                 | Examples                                     |
-| ------------ | --------------------------------------- | -------------------------------------------- |
-| **modules/** | Business logic, use cases, domain rules | `auth/service.ts`, `users/routes.ts`         |
-| **infra/**   | External system adapters                | `database/`, `email/`, `storage/`, `pubsub/` |
+| Layer        | Purpose                                 | Examples                                                     |
+| ------------ | --------------------------------------- | ------------------------------------------------------------ |
+| **modules/** | Business logic, use cases, domain rules | `auth/service.ts`, `users/routes.ts`                         |
+| **infra/**   | External system adapters                | `database/`, `email/`, `storage/`, `pubsub/`, `queue/`, etc. |
 
 **Key benefits**:
 
@@ -282,4 +291,4 @@ Based on CHET-Stack patterns. **Phase 1 (Environment Objects) already complete**
 
 ---
 
-_Last Updated: January 17, 2026_
+_Last Updated: January 18, 2026_

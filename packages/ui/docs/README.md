@@ -40,32 +40,32 @@ Stateful components with complex behavior, compound patterns, or multi-part APIs
 
 Low-level primitive elements with minimal logic.
 
-| Element                                              | Description                  | Import          |
-| ---------------------------------------------------- | ---------------------------- | --------------- |
-| [Alert](./elements/Alert.md)                         | Display important messages   | `@abe-stack/ui` |
-| [Avatar](./elements/Avatar.md)                       | User profile image display   | `@abe-stack/ui` |
-| [Badge](./elements/Badge.md)                         | Status or category indicator | `@abe-stack/ui` |
-| [Box](./elements/Box.md)                             | Generic container element    | `@abe-stack/ui` |
-| [Button](./elements/Button.md)                       | Interactive button element   | `@abe-stack/ui` |
-| [Checkbox](./elements/Checkbox.md)                   | Boolean input control        | `@abe-stack/ui` |
-| [CloseButton](./elements/CloseButton.md)             | Close/dismiss button         | `@abe-stack/ui` |
-| [Divider](./elements/Divider.md)                     | Visual content separator     | `@abe-stack/ui` |
-| [EnvironmentBadge](./components/EnvironmentBadge.md) | Environment status display   | `@abe-stack/ui` |
-| [Heading](./elements/Heading.md)                     | Semantic heading text        | `@abe-stack/ui` |
-| [Input](./elements/Input.md)                         | Text input field             | `@abe-stack/ui` |
-| [Kbd](./elements/Kbd.md)                             | Keyboard key display         | `@abe-stack/ui` |
-| [MenuItem](./elements/MenuItem.md)                   | Menu item element            | `@abe-stack/ui` |
-| [Progress](./elements/Progress.md)                   | Progress indicator           | `@abe-stack/ui` |
-| [Skeleton](./elements/Skeleton.md)                   | Loading placeholder          | `@abe-stack/ui` |
-| [Spinner](./elements/Spinner.md)                     | Loading indicator            | `@abe-stack/ui` |
-| [Switch](./elements/Switch.md)                       | Toggle switch control        | `@abe-stack/ui` |
-| [Table](./elements/Table.md)                         | Data table component         | `@abe-stack/ui` |
-| [Text](./elements/Text.md)                           | Semantic text element        | `@abe-stack/ui` |
-| [TextArea](./elements/TextArea.md)                   | Multi-line text input        | `@abe-stack/ui` |
-| [Toaster](./elements/Toaster.md)                     | Toast notification container | `@abe-stack/ui` |
-| [Tooltip](./elements/Tooltip.md)                     | Hover information display    | `@abe-stack/ui` |
-| [VersionBadge](./components/VersionBadge.md)         | Version display badge        | `@abe-stack/ui` |
-| [VisuallyHidden](./elements/VisuallyHidden.md)       | Screen-reader only content   | `@abe-stack/ui` |
+| Element                                            | Description                  | Import          |
+| -------------------------------------------------- | ---------------------------- | --------------- |
+| [Alert](./elements/Alert.md)                       | Display important messages   | `@abe-stack/ui` |
+| [Avatar](./elements/Avatar.md)                     | User profile image display   | `@abe-stack/ui` |
+| [Badge](./elements/Badge.md)                       | Status or category indicator | `@abe-stack/ui` |
+| [Box](./elements/Box.md)                           | Generic container element    | `@abe-stack/ui` |
+| [Button](./elements/Button.md)                     | Interactive button element   | `@abe-stack/ui` |
+| [Checkbox](./elements/Checkbox.md)                 | Boolean input control        | `@abe-stack/ui` |
+| [CloseButton](./elements/CloseButton.md)           | Close/dismiss button         | `@abe-stack/ui` |
+| [Divider](./elements/Divider.md)                   | Visual content separator     | `@abe-stack/ui` |
+| [EnvironmentBadge](./elements/EnvironmentBadge.md) | Environment status display   | `@abe-stack/ui` |
+| [Heading](./elements/Heading.md)                   | Semantic heading text        | `@abe-stack/ui` |
+| [Input](./elements/Input.md)                       | Text input field             | `@abe-stack/ui` |
+| [Kbd](./elements/Kbd.md)                           | Keyboard key display         | `@abe-stack/ui` |
+| [MenuItem](./elements/MenuItem.md)                 | Menu item element            | `@abe-stack/ui` |
+| [Progress](./elements/Progress.md)                 | Progress indicator           | `@abe-stack/ui` |
+| [Skeleton](./elements/Skeleton.md)                 | Loading placeholder          | `@abe-stack/ui` |
+| [Spinner](./elements/Spinner.md)                   | Loading indicator            | `@abe-stack/ui` |
+| [Switch](./elements/Switch.md)                     | Toggle switch control        | `@abe-stack/ui` |
+| [Table](./elements/Table.md)                       | Data table component         | `@abe-stack/ui` |
+| [Text](./elements/Text.md)                         | Semantic text element        | `@abe-stack/ui` |
+| [TextArea](./elements/TextArea.md)                 | Multi-line text input        | `@abe-stack/ui` |
+| [Toaster](./elements/Toaster.md)                   | Toast notification container | `@abe-stack/ui` |
+| [Tooltip](./elements/Tooltip.md)                   | Hover information display    | `@abe-stack/ui` |
+| [VersionBadge](./elements/VersionBadge.md)         | Version display badge        | `@abe-stack/ui` |
+| [VisuallyHidden](./elements/VisuallyHidden.md)     | Screen-reader only content   | `@abe-stack/ui` |
 
 ## Layouts
 

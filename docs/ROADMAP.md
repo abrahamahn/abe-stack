@@ -300,7 +300,7 @@ Better debugging in production.
 - [ ] API versioning and OpenAPI/typed client generation
 - [ ] Generate fetch/React Query clients from ts-rest contract
 
-> **Implementation:** `apps/server/src/modules/router/` (route registry), `apps/server/src/infra/queue/` (QueueServer)
+> **Implementation:** `apps/server/src/infra/router/` (route registry), `apps/server/src/infra/queue/` (QueueServer)
 > **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `ServerManager.ts`, `ApplicationLifecycle.ts`
 
 ---
@@ -366,7 +366,7 @@ When you need Redis (high traffic, distributed caching):
 | **Medium**   | Testing      | E2E tests, API integration tests         |
 | **Low**      | UI           | Demo lazy loading, code standardization  |
 
-> **Recent additions:** QueueServer (`apps/server/src/infra/queue/`), WriteService (`apps/server/src/infra/write/`), RouteMap (`apps/server/src/modules/router/`)
+> **Recent additions:** QueueServer (`apps/server/src/infra/queue/`), WriteService (`apps/server/src/infra/write/`), RouteMap (`apps/server/src/infra/router/`)
 
 ---
 

@@ -6,7 +6,7 @@ Electron wrapper for the ABE Stack web application.
 
 The desktop app is a thin Electron wrapper that loads the web application:
 
-- **Development**: Loads from `http://localhost:5173` (web dev server)
+- **Development**: Loads from dev server (tries ports 5174, 5173, 5175 in order)
 - **Production**: Loads bundled web app from `dist/renderer/`
 
 This approach means:
@@ -18,13 +18,13 @@ This approach means:
 ## Development
 
 ```bash
-# Run with web dev server (recommended - run from monorepo root)
+# Run from monorepo root (starts web + server + all apps)
 pnpm dev
 
-# Run desktop standalone (starts its own renderer)
+# Run desktop standalone (starts its own Vite renderer on port 5174)
 pnpm --filter @abe-stack/desktop dev:standalone
 
-# Run just the electron shell (requires web server already running)
+# Run just the electron shell (requires Vite dev server already running)
 pnpm --filter @abe-stack/desktop dev
 ```
 
@@ -46,11 +46,12 @@ desktop/
 │   ├── electron/           # Electron main process
 │   │   ├── main.ts         # Main process entry, creates BrowserWindow
 │   │   ├── preload.ts      # Preload script for IPC
-│   │   └── tsconfig.json   # Node/CommonJS config for electron
-│   ├── App.tsx             # Root React component
-│   └── main.tsx            # Renderer entry point
+│   │   ├── tsconfig.json   # Node/CommonJS config for electron
+│   │   └── __tests__/      # Electron tests
+│   ├── main.tsx            # Renderer entry point (React root)
+│   └── types.d.ts          # Type declarations (electronAPI)
+├── index.html              # HTML entry point
 ├── tsconfig.json           # React/Vite config for renderer
-├── public/                 # Static assets
 └── dist/                   # Build output
     ├── electron/           # Compiled main process (CommonJS)
     └── renderer/           # Bundled web app (ESM)
@@ -102,4 +103,4 @@ Examples:
 
 ---
 
-_Last Updated: 2026-01-17_
+_Last Updated: 2026-01-18_
