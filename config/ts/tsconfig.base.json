@@ -7,14 +7,14 @@
     "sourceMap": true,
     "incremental": true,
 
-    /* 2. Language Fundamentals (Platform Agnostic) */
+    /* 2. Language Fundamentals */
     "target": "ES2022",
     "lib": ["ES2022"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
 
-    /* 3. Modern Strictness (The "2025 Standard") */
+    /* 3. Modern Strictness */
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,

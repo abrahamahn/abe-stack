@@ -84,6 +84,21 @@ export interface RequestInfo {
 }
 
 // ============================================================================
+// Fastify Request/Reply Extensions
+// ============================================================================
+
+export interface ReplyWithCookies {
+  setCookie: (name: string, value: string, options: Record<string, unknown>) => void;
+  clearCookie: (name: string, options: Record<string, unknown>) => void;
+}
+
+export interface RequestWithCookies {
+  cookies: Record<string, string | undefined>;
+  headers: { authorization?: string };
+  user?: { userId: string; email: string; role: string };
+}
+
+// ============================================================================
 // Service Interfaces (Ports)
 // ============================================================================
 

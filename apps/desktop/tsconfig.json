@@ -1,14 +1,14 @@
 {
   "extends": "../../config/ts/tsconfig.react.json",
   "compilerOptions": {
+    "types": ["vite/client", "react", "react-dom"],
     "paths": {
       "@/*": ["./src/*"]
     },
-    "types": ["vite/client", "react", "react-dom"],
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.desktop.tsbuildinfo"
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "__tests__", "src/electron"],
+  "exclude": ["node_modules", "__tests__", "src/electron"],
   "references": [
     {
       "path": "../../packages/core"

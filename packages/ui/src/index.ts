@@ -35,7 +35,6 @@ export {
   VersionBadge,
   VisuallyHidden,
 } from './elements';
-export * as elements from './elements';
 
 // Components - Composed multi-part components
 export {
@@ -58,7 +57,6 @@ export {
   ToastContainer,
 } from './components';
 export type { TabItem, TabsProps } from './components';
-export * as components from './components';
 
 // Layouts - Page and section layouts
 export {
@@ -86,7 +84,6 @@ export type {
   RightSidebarLayoutProps,
   TopbarLayoutProps,
 } from './layouts';
-export * as layouts from './layouts';
 
 // Hooks
 export {

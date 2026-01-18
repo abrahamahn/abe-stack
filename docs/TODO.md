@@ -157,9 +157,9 @@ Required for: marketplace, music discovery, fitness tracking
 
 Required for: reducing signup friction, user acquisition
 
-- [ ] Google OAuth (`passport-google-oauth20`)
-- [ ] GitHub OAuth (`passport-github`)
-- [ ] Apple OAuth (`passport-apple`)
+- [ ] Google OAuth (direct integration)
+- [ ] GitHub OAuth (direct integration)
+- [ ] Apple OAuth (direct integration)
 - [ ] OAuth connection management UI
 - [ ] Account linking (multiple providers per account)
 

@@ -1,32 +1,19 @@
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "./tsconfig.node.json",
   "compilerOptions": {
-    "noEmit": true,
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "baseUrl": "../..",
-    "paths": {
-      "@abe-stack/sdk": ["./packages/sdk/src"],
-      "@abe-stack/core": ["./packages/core/src"],
-      "@abe-stack/core/*": ["./packages/core/src/*"],
-      "@abe-stack/ui": ["./packages/ui/src"]
-    }
+    "composite": false,
+    "declaration": false,
+    "declarationMap": false,
+    "incremental": false,
+    "noEmit": true
   },
   "include": [
-    "../../apps/**/*",
-    "../../packages/**/*",
+    "../../apps/*/src/**/*",
+    "../../packages/*/src/**/*",
     "../../tools/**/*",
+    "../../config/**/*",
     "../../*.ts",
-    "../../*.tsx"
+    "../../*.js"
   ],
-  "exclude": [
-    "../../node_modules",
-    "../../dist",
-    "../../build",
-    "../../.turbo",
-    "../../.next",
-    "../../coverage",
-    "../../**/__tests__",
-    "../../**/*.test.ts",
-    "../../**/*.test.tsx"
-  ]
+  "exclude": ["../../node_modules", "../../**/dist", "../../**/build"]
 }

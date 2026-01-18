@@ -1,4 +1,4 @@
-// apps/server/src/shared/__tests__/errors.test.ts
+// packages/core/src/errors/__tests__/errors.test.ts
 import {
   AccountLockedError,
   AppError,
@@ -22,10 +22,10 @@ import {
   UserNotFoundError,
   ValidationError,
   WeakPasswordError,
-} from '@shared/errors';
+} from '../index';
 import { describe, expect, test } from 'vitest';
 
-describe('Shared Errors', () => {
+describe('Core Errors', () => {
   describe('AppError', () => {
     test('should create error with default status code', () => {
       const error = new AppError('Test error');

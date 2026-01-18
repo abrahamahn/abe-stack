@@ -15,15 +15,10 @@ export {
 } from '@auth/middleware';
 
 // Handlers
-export {
-  handleRegister,
-  handleLogin,
-  handleRefresh,
-  handleLogout,
-  verifyToken,
-  type ReplyWithCookies,
-  type RequestWithCookies,
-} from '@auth/handlers';
+export { handleRegister, handleLogin, handleRefresh, handleLogout } from '@auth/handlers';
+
+// Types (re-exported from shared)
+export type { ReplyWithCookies, RequestWithCookies } from '@shared';
 
 // Service (business logic)
 export {

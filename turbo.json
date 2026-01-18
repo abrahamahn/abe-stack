@@ -57,6 +57,7 @@
     "config/.env/.env.development",
     "config/.prettierrc",
     "config/ts/*.json",
+    "config/schema/**",
     "eslint.config.ts"
   ]
 }

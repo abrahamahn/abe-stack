@@ -4,15 +4,15 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "lib": ["ES2022", "DOM"],
-    "types": ["vitest/globals"],
-    "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
     "baseUrl": "./",
+    "types": ["vitest/globals"],
     "paths": {
       "@abe-stack/core": ["../core/src"],
       "@abe-stack/core/*": ["../core/src/*"],
       "@persistence": ["./src/persistence"],
       "@persistence/*": ["./src/persistence/*"]
-    }
+    },
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "src/**/__tests__/**"],

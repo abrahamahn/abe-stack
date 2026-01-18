@@ -8,6 +8,100 @@ All notable changes to this project are documented here. Format follows semantic
 
 ## 2026-01-18
 
+### Centralized Config Management System
+
+Implemented a single source of truth for all configuration files with automatic generation.
+
+**New Files:**
+
+- `config/schema/typescript.ts` - TypeScript compiler options and project configs
+- `config/schema/build.ts` - Vite/Vitest settings and aliases
+- `config/schema/linting.ts` - Prettier, lint-staged, VS Code settings
+- `config/schema/packages.ts` - Package.json scripts
+- `config/schema/index.ts` - Main schema entry point
+- `config/generators/utils.ts` - Shared generator utilities
+- `config/generators/tsconfig.gen.ts` - TypeScript config generator
+- `config/generators/vite.gen.ts` - Vite aliases generator
+- `config/generators/vitest.gen.ts` - Vitest config generator
+- `config/generators/prettier.gen.ts` - Prettier config generator
+- `config/generators/vscode.gen.ts` - VS Code settings generator
+- `config/generators/package.gen.ts` - package.json scripts generator
+- `config/generators/index.ts` - Main generator entry point
+
+**New Commands:**
+
+- `pnpm config:generate` - Generate all configs from schema
+- `pnpm config:generate:check` - Verify configs match schema (for CI)
+
+**Removed (replaced by config:generate):**
+
+- `tools/sync/sync-path-aliases.ts` - Now in tsconfig.gen.ts
+- `tools/sync/sync-tsconfig.ts` - Now in tsconfig.gen.ts
+- `tools/sync/sync-linting.ts` - Now in prettier.gen.ts + vscode.gen.ts
+- `config/linting.json` - Now in schema/linting.ts
+
+**Pre-commit hook updated:**
+
+- Now runs `pnpm config:generate` instead of individual sync scripts for config files
+
+### Package Minimization (Continued)
+
+**Removed nanoid dependency:**
+
+- Replaced `nanoid` with native `crypto.randomUUID()` in `packages/core/src/stores/toastStore.ts`
+- Removed `nanoid` from `packages/core/package.json`
+- Removed `nanoid` from `apps/web/package.json` (was redundant)
+- Zero external dependencies for UUID generation
+
+### Documentation Reorganization
+
+Reorganized TODO.md and ROADMAP.md with clear scope boundaries and created legacy reference guide:
+
+**Scope Boundaries Established:**
+
+- **TODO.md** (In-Scope): Solo dev → small team (3-5 engineers), 50,000+ users, up to Series A
+- **ROADMAP.md** (Deferred): Post-Series A, enterprise customers, large teams (5+ engineers)
+
+**New File: `docs/dev/legacy.md` (417 lines):**
+
+Reference guide for migrating utilities from `../../abe-stack-legacy`:
+
+- Migration effort estimates table (~240-310h savings, ~60-85h work)
+- Backend utilities table (77 items with legacy paths)
+- Frontend utilities table (31 items with legacy paths)
+- Frontend components table (13 items with legacy paths)
+- Potential migrations sections: Request Handling, Structured Logging, Session Management, User Management, Security Utilities, Token Utilities, Common Utilities, File Utilities, Cookie Utilities, Error Classes, Database Utilities, Frontend Hooks, Frontend Formatters, DOM Utilities, Style Utilities, React Contexts, UI Components, Auth Components, Auth DTOs, Social Components, Media Components, Client Services, Layout Components, Infrastructure, Base Classes, Repository Layer
+
+**Reorganized `docs/TODO.md` (298 lines):**
+
+- Foundation Status (completed items)
+- High-Priority Improvements (5 items with legacy ref)
+- Core Product Features: File Uploads, Pagination, WebSocket, Background Jobs, Push Notifications, Cache Layer, Search & Filtering
+- Authentication Enhancements: OAuth (direct integration), Magic Links
+- Infrastructure & Quality: Backend, Frontend, Infrastructure, Testing, Documentation, UI Package
+- Code Quality, Architecture, Success Metrics
+
+**Reorganized `docs/ROADMAP.md` (383 lines):**
+
+- V5 Architecture Migration (5 phases)
+- CHET-Stack Real-Time Features (6 phases)
+- Security Phase 2: Passport.js, Additional Auth Methods, Social/OAuth (Passport.js), Advanced Features
+- Product-Specific Features: Messenger/Social, Music Streaming/Marketplace, AI Fitness Coach, Calendar Aggregator
+- Infrastructure Improvements: Repository Layer, Base Classes, Interface-First Services, Error Handling Middleware, Advanced Architecture
+- Things You Can Safely Postpone, Second Tier Improvements, Geolocation, Redis Implementation
+
+**Legacy Cross-References Added:**
+
+- 15 legacy references in TODO.md linking to specific utilities
+- 22 legacy references in ROADMAP.md linking to specific utilities
+- All anchors validated against legacy.md sections
+
+**Fixes:**
+
+- Removed duplicate "Add request ID middleware" task (was in Backend and Code Quality)
+- Clarified OAuth: TODO.md has "direct integration", ROADMAP.md has "Passport.js strategies"
+- Added missing legacy references: Zod validators, Interface-First Services, CHET-Stack Phase 1
+
 ### Package Minimization
 
 Replaced large dependencies with lightweight custom implementations to reduce bundle size:

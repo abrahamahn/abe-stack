@@ -1,7 +1,4 @@
 // apps/desktop/src/App.tsx
-// Import shared UI components from the shared package
-// import { Button, Card, Spinner } from '@abe-stack/ui';
-
 import type { ReactElement } from 'react';
 
 declare global {
@@ -41,10 +38,6 @@ function App(): ReactElement {
           <p>Access to native desktop features available!</p>
         </div>
       )}
-
-      {/* Example: Using shared components (same as web) */}
-      {/* <Button>Click Me</Button> */}
-      {/* <Card>Shared Card Component</Card> */}
 
       <div
         style={{ marginTop: '20px', padding: '15px', background: '#f0f0f0', borderRadius: '8px' }}

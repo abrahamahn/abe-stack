@@ -7,6 +7,8 @@
     "node": ">=18.19 <25"
   },
   "scripts": {
+    "config:generate": "tsx config/generators/index.ts",
+    "config:generate:check": "tsx config/generators/index.ts --check",
     "dev": "tsx tools/dev/start-dev.ts",
     "dev:web": "tsx tools/dev/start-dev.ts web",
     "dev:server": "tsx tools/dev/start-dev.ts server",
@@ -31,17 +33,11 @@
     "test:ui": "turbo run test --filter=@abe-stack/ui",
     "test:core": "turbo run test --filter=@abe-stack/core",
     "test:sdk": "turbo run test --filter=@abe-stack/sdk",
+    "test:e2e": "playwright test --config config/playwright.config.ts",
     "lint": "eslint . --cache --cache-location .cache/eslint/.cache --ext .js,.jsx,.ts,.tsx,.cjs,.mjs,.cts,.mts --report-unused-disable-directives --max-warnings=0",
     "lint:fix": "eslint . --cache --cache-location .cache/eslint/.cache --ext .js,.jsx,.ts,.tsx,.cjs,.mjs,.cts,.mts --fix",
     "lint:changed": "eslint --cache --cache-location .cache/eslint/.cache --max-warnings=0",
     "lint:staged": "eslint --cache --cache-location .cache/eslint/.cache --report-unused-disable-directives --max-warnings=0 --no-warn-ignored",
-    "sync:linting": "tsx tools/sync/sync-linting.ts",
-    "sync:linting:check": "tsx tools/sync/sync-linting.ts --check",
-    "sync:aliases": "tsx tools/sync/sync-path-aliases.ts",
-    "sync:aliases:check": "tsx tools/sync/sync-path-aliases.ts --check",
-    "sync:aliases:watch": "tsx tools/sync/sync-path-aliases.ts --watch",
-    "sync:tsconfig": "tsx tools/sync/sync-tsconfig.ts",
-    "sync:tsconfig:check": "tsx tools/sync/sync-tsconfig.ts --check",
     "sync:headers": "tsx tools/sync/sync-file-headers.ts",
     "sync:headers:check": "tsx tools/sync/sync-file-headers.ts --check",
     "sync:headers:watch": "tsx tools/sync/sync-file-headers.ts --watch",
@@ -70,7 +66,7 @@
     "docker:logs": "docker compose --env-file config/.env/.env.development -f config/docker/docker-compose.yml logs -f",
     "bundle-size": "tsx tools/dev/bundle-size.ts",
     "bundle-size:save": "tsx tools/dev/bundle-size.ts --save",
-    "pre-commit": "pnpm sync:linting && pnpm sync:tsconfig && pnpm sync:aliases && pnpm sync:headers && pnpm sync:imports && pnpm sync:tests && pnpm sync:barrels && pnpm sync:theme && pnpm lint-staged && pnpm type-check"
+    "pre-commit": "pnpm config:generate && pnpm sync:headers && pnpm sync:imports && pnpm sync:tests && pnpm sync:barrels && pnpm sync:theme && pnpm lint-staged && pnpm type-check"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",

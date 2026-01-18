@@ -3,9 +3,8 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
-    "types": ["node", "vitest/globals"],
     "baseUrl": "./",
+    "types": ["node", "vitest/globals"],
     "paths": {
       "@contracts": ["./src/contracts"],
       "@contracts/*": ["./src/contracts/*"],
@@ -15,7 +14,8 @@
       "@utils/*": ["./src/utils/*"],
       "@validation": ["./src/validation"],
       "@validation/*": ["./src/validation/*"]
-    }
+    },
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "src/**/__tests__/**"]

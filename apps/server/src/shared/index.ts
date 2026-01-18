@@ -35,7 +35,7 @@ export {
   FAILURE_REASONS,
 } from '@shared/constants';
 
-// Errors
+// Errors (from @abe-stack/core)
 export {
   // Base error
   AppError,
@@ -66,7 +66,11 @@ export {
   // Helpers
   isAppError,
   toAppError,
-} from '@shared/errors';
+  // Response types
+  type ApiErrorResponse,
+  type ApiSuccessResponse,
+  type ApiResponse,
+} from '@abe-stack/core';
 
 // Types
 export type {
@@ -84,6 +88,9 @@ export type {
   TotpSecret,
   // Request context
   RequestInfo,
+  // Fastify extensions
+  ReplyWithCookies,
+  RequestWithCookies,
   // Service interfaces
   Logger,
   EmailService,

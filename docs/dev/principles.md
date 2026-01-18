@@ -74,7 +74,7 @@ Comprehensive guide to principles, coding standards, patterns, and anti-patterns
 | #   | Principle                  | Why                                    | Fix When Violated       |
 | --- | -------------------------- | -------------------------------------- | ----------------------- |
 | 17  | **Comments Explain "Why"** | Code explains "what"                   | Remove obvious comments |
-| 18  | **Document Decisions**     | Future context, prevents re-litigating | Add to `log/log.md`     |
+| 18  | **Document Decisions**     | Future context, prevents re-litigating | Add to `CHANGELOG.md`   |
 
 ---
 

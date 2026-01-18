@@ -5,9 +5,8 @@
     "rootDir": "./src",
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["react", "react-dom", "vitest/globals"],
-    "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
     "baseUrl": "./",
+    "types": ["react", "react-dom", "vitest/globals"],
     "paths": {
       "@abe-stack/core": ["../core/src"],
       "@abe-stack/core/*": ["../core/src/*"],
@@ -29,7 +28,8 @@
       "@theme/*": ["./src/theme/*"],
       "@utils": ["./src/utils"],
       "@utils/*": ["./src/utils/*"]
-    }
+    },
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "src/**/__tests__/**"],

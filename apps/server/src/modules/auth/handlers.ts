@@ -16,10 +16,12 @@ import {
   SUCCESS_MESSAGES,
   WeakPasswordError,
   type AppContext,
+  type ReplyWithCookies,
+  type RequestWithCookies,
 } from '@shared';
 import { REFRESH_COOKIE_NAME } from '@shared/constants';
 
-import { extractRequestInfo, verifyToken as verifyJwtToken, type TokenPayload } from './utils';
+import { extractRequestInfo } from './utils';
 
 import type {
   AuthResponse,
@@ -29,21 +31,6 @@ import type {
   RegisterRequest,
 } from '@abe-stack/core';
 import type { FastifyRequest } from 'fastify';
-
-// ============================================================================
-// Types
-// ============================================================================
-
-export interface ReplyWithCookies {
-  setCookie: (name: string, value: string, options: Record<string, unknown>) => void;
-  clearCookie: (name: string, options: Record<string, unknown>) => void;
-}
-
-export interface RequestWithCookies {
-  cookies: Record<string, string | undefined>;
-  headers: { authorization?: string };
-  user?: { userId: string; email: string; role: string };
-}
 
 // ============================================================================
 // Handlers
@@ -217,10 +204,3 @@ export async function handleLogout(
   }
 }
 
-// ============================================================================
-// Token Verification (for use in other modules)
-// ============================================================================
-
-export function verifyToken(token: string, secret: string): TokenPayload {
-  return verifyJwtToken(token, secret);
-}

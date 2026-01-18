@@ -1,4 +1,6 @@
 // config/aliases.ts
+// Edit config/schema/*.ts and run: pnpm config:generate
+
 /**
  * Shared path aliases for Vite and Vitest configurations.
  * Single source of truth for all alias definitions.
@@ -23,9 +25,9 @@ export const desktopRoot = path.join(appsRoot, 'desktop');
  * Shared package aliases used across all apps
  */
 export const packageAliases = {
-  '@abe-stack/core': path.join(coreRoot, 'src'),
-  '@abe-stack/sdk': path.join(sdkRoot, 'src'),
-  '@abe-stack/ui': path.join(uiRoot, 'src'),
+  '@abe-stack/core': path.join(repoRoot, 'packages/core/src'),
+  '@abe-stack/sdk': path.join(repoRoot, 'packages/sdk/src'),
+  '@abe-stack/ui': path.join(repoRoot, 'packages/ui/src'),
 };
 
 /**
@@ -33,15 +35,15 @@ export const packageAliases = {
  * These must match the paths defined in packages/ui/tsconfig.json
  */
 export const uiInternalAliases = {
-  '@elements': path.join(uiRoot, 'src/elements'),
-  '@components': path.join(uiRoot, 'src/components'),
-  '@layouts': path.join(uiRoot, 'src/layouts'),
-  '@containers': path.join(uiRoot, 'src/layouts/containers'),
-  '@layers': path.join(uiRoot, 'src/layouts/layers'),
-  '@shells': path.join(uiRoot, 'src/layouts/shells'),
-  '@hooks': path.join(uiRoot, 'src/hooks'),
-  '@theme': path.join(uiRoot, 'src/theme'),
-  '@utils': path.join(uiRoot, 'src/utils'),
+  '@elements': path.join(repoRoot, 'packages/ui/src/elements'),
+  '@components': path.join(repoRoot, 'packages/ui/src/components'),
+  '@layouts': path.join(repoRoot, 'packages/ui/src/layouts'),
+  '@containers': path.join(repoRoot, 'packages/ui/src/layouts/containers'),
+  '@layers': path.join(repoRoot, 'packages/ui/src/layouts/layers'),
+  '@shells': path.join(repoRoot, 'packages/ui/src/layouts/shells'),
+  '@hooks': path.join(repoRoot, 'packages/ui/src/hooks'),
+  '@theme': path.join(repoRoot, 'packages/ui/src/theme'),
+  '@utils': path.join(repoRoot, 'packages/ui/src/utils'),
 };
 
 /**
@@ -49,9 +51,9 @@ export const uiInternalAliases = {
  * When bundling apps that import from @abe-stack/core source, these aliases are needed
  */
 export const coreInternalAliases = {
-  '@contracts': path.join(coreRoot, 'src/contracts'),
-  '@stores': path.join(coreRoot, 'src/stores'),
-  '@validation': path.join(coreRoot, 'src/validation'),
+  '@contracts': path.join(repoRoot, 'packages/core/src/contracts'),
+  '@stores': path.join(repoRoot, 'packages/core/src/stores'),
+  '@validation': path.join(repoRoot, 'packages/core/src/validation'),
 };
 
 /**
@@ -60,11 +62,6 @@ export const coreInternalAliases = {
 export function getWebAliases(): Record<string, string> {
   return {
     '@': path.join(webRoot, 'src'),
-    ...packageAliases,
-    ...uiInternalAliases,
-    ...coreInternalAliases,
-    // Note: @utils is provided by uiInternalAliases for UI component compatibility
-    // Core utils should be imported via @abe-stack/core
     '@api': path.join(webRoot, 'src/api'),
     '@app': path.join(webRoot, 'src/app'),
     '@config': path.join(webRoot, 'src/config'),
@@ -76,6 +73,11 @@ export function getWebAliases(): Record<string, string> {
     '@toast': path.join(webRoot, 'src/features/toast'),
     '@pages': path.join(webRoot, 'src/pages'),
     '@test': path.join(webRoot, 'src/test'),
+    ...packageAliases,
+    ...uiInternalAliases,
+    ...coreInternalAliases,
+    // Note: @utils is provided by uiInternalAliases for UI component compatibility
+    // Core utils should be imported via @abe-stack/core
   };
 }
 
@@ -85,17 +87,17 @@ export function getWebAliases(): Record<string, string> {
 export function getDesktopAliases(): Record<string, string> {
   return {
     '@': path.join(desktopRoot, 'src'),
-    ...packageAliases,
-    ...coreInternalAliases,
     '@components': path.join(desktopRoot, 'src/components'),
     '@hooks': path.join(desktopRoot, 'src/hooks'),
     '@services': path.join(desktopRoot, 'src/services'),
     '@config': path.join(desktopRoot, 'src/config'),
     '@layouts': path.join(desktopRoot, 'src/layouts'),
     '@routes': path.join(desktopRoot, 'src/routes'),
-    // Desktop's own @utils overrides core's @utils
     '@utils': path.join(desktopRoot, 'src/utils'),
     '@api': path.join(desktopRoot, 'src/api'),
+    ...packageAliases,
+    ...coreInternalAliases,
+    // Desktop's own @utils overrides core's @utils
   };
 }
 
@@ -104,31 +106,32 @@ export function getDesktopAliases(): Record<string, string> {
  */
 export function getServerAliases(): Array<{ find: string; replacement: string }> {
   return [
-    { find: '@', replacement: path.join(serverRoot, 'src') },
-    { find: '@config', replacement: path.join(serverRoot, 'src/config') },
-    { find: '@modules', replacement: path.join(serverRoot, 'src/modules') },
-    { find: '@scripts', replacement: path.join(serverRoot, 'src/scripts') },
-    { find: '@shared', replacement: path.join(serverRoot, 'src/shared') },
-    { find: '@types', replacement: path.join(serverRoot, 'src/types') },
-    { find: '@infra', replacement: path.join(serverRoot, 'src/infra') },
-    // Infra subdirectories
-    { find: '@crypto', replacement: path.join(serverRoot, 'src/infra/crypto') },
-    { find: '@database', replacement: path.join(serverRoot, 'src/infra/database') },
-    { find: '@schema', replacement: path.join(serverRoot, 'src/infra/database/schema') },
-    { find: '@email', replacement: path.join(serverRoot, 'src/infra/email') },
-    { find: '@health', replacement: path.join(serverRoot, 'src/infra/health') },
-    { find: '@http', replacement: path.join(serverRoot, 'src/infra/http') },
-    { find: '@pubsub', replacement: path.join(serverRoot, 'src/infra/pubsub') },
-    { find: '@rate-limit', replacement: path.join(serverRoot, 'src/infra/rate-limit') },
-    { find: '@security', replacement: path.join(serverRoot, 'src/infra/security') },
-    { find: '@storage', replacement: path.join(serverRoot, 'src/infra/storage') },
-    { find: '@providers', replacement: path.join(serverRoot, 'src/infra/storage/providers') },
-    { find: '@websocket', replacement: path.join(serverRoot, 'src/infra/websocket') },
-    // Module subdirectories
-    { find: '@auth', replacement: path.join(serverRoot, 'src/modules/auth') },
-    { find: '@admin', replacement: path.join(serverRoot, 'src/modules/admin') },
-    { find: '@users', replacement: path.join(serverRoot, 'src/modules/users') },
-    { find: '@utils', replacement: path.join(serverRoot, 'src/modules/auth/utils') },
+    { find: '@', replacement: path.join(repoRoot, 'apps/server/src') },
+    { find: '@config', replacement: path.join(repoRoot, 'apps/server/src/config') },
+    { find: '@modules', replacement: path.join(repoRoot, 'apps/server/src/modules') },
+    { find: '@scripts', replacement: path.join(repoRoot, 'apps/server/src/scripts') },
+    { find: '@shared', replacement: path.join(repoRoot, 'apps/server/src/shared') },
+    { find: '@types', replacement: path.join(repoRoot, 'apps/server/src/types') },
+    { find: '@infra', replacement: path.join(repoRoot, 'apps/server/src/infra') },
+    { find: '@crypto', replacement: path.join(repoRoot, 'apps/server/src/infra/crypto') },
+    { find: '@database', replacement: path.join(repoRoot, 'apps/server/src/infra/database') },
+    { find: '@schema', replacement: path.join(repoRoot, 'apps/server/src/infra/database/schema') },
+    { find: '@email', replacement: path.join(repoRoot, 'apps/server/src/infra/email') },
+    { find: '@health', replacement: path.join(repoRoot, 'apps/server/src/infra/health') },
+    { find: '@http', replacement: path.join(repoRoot, 'apps/server/src/infra/http') },
+    { find: '@pubsub', replacement: path.join(repoRoot, 'apps/server/src/infra/pubsub') },
+    { find: '@rate-limit', replacement: path.join(repoRoot, 'apps/server/src/infra/rate-limit') },
+    { find: '@security', replacement: path.join(repoRoot, 'apps/server/src/infra/security') },
+    { find: '@storage', replacement: path.join(repoRoot, 'apps/server/src/infra/storage') },
+    {
+      find: '@providers',
+      replacement: path.join(repoRoot, 'apps/server/src/infra/storage/providers'),
+    },
+    { find: '@websocket', replacement: path.join(repoRoot, 'apps/server/src/infra/websocket') },
+    { find: '@auth', replacement: path.join(repoRoot, 'apps/server/src/modules/auth') },
+    { find: '@admin', replacement: path.join(repoRoot, 'apps/server/src/modules/admin') },
+    { find: '@users', replacement: path.join(repoRoot, 'apps/server/src/modules/users') },
+    { find: '@utils', replacement: path.join(repoRoot, 'apps/server/src/modules/auth/utils') },
   ];
 }
 
@@ -137,10 +140,10 @@ export function getServerAliases(): Array<{ find: string; replacement: string }>
  */
 export function getCoreAliases(): Record<string, string> {
   return {
-    '@contracts': path.join(coreRoot, 'src/contracts'),
-    '@stores': path.join(coreRoot, 'src/stores'),
-    '@utils': path.join(coreRoot, 'src/utils'),
-    '@validation': path.join(coreRoot, 'src/validation'),
+    '@contracts': path.join(repoRoot, 'packages/core/src/contracts'),
+    '@stores': path.join(repoRoot, 'packages/core/src/stores'),
+    '@utils': path.join(repoRoot, 'packages/core/src/utils'),
+    '@validation': path.join(repoRoot, 'packages/core/src/validation'),
   };
 }
 
@@ -149,17 +152,17 @@ export function getCoreAliases(): Record<string, string> {
  */
 export function getUiAliases(): Record<string, string> {
   return {
-    '@components': path.join(uiRoot, 'src/components'),
-    '@containers': path.join(uiRoot, 'src/layouts/containers'),
-    '@elements': path.join(uiRoot, 'src/elements'),
-    '@hooks': path.join(uiRoot, 'src/hooks'),
-    '@layers': path.join(uiRoot, 'src/layouts/layers'),
-    '@layouts': path.join(uiRoot, 'src/layouts'),
-    '@shells': path.join(uiRoot, 'src/layouts/shells'),
-    '@styles': path.join(uiRoot, 'src/styles'),
-    '@test': path.join(uiRoot, 'src/test'),
-    '@theme': path.join(uiRoot, 'src/theme'),
-    '@utils': path.join(uiRoot, 'src/utils'),
+    '@components': path.join(repoRoot, 'packages/ui/src/components'),
+    '@containers': path.join(repoRoot, 'packages/ui/src/layouts/containers'),
+    '@elements': path.join(repoRoot, 'packages/ui/src/elements'),
+    '@hooks': path.join(repoRoot, 'packages/ui/src/hooks'),
+    '@layers': path.join(repoRoot, 'packages/ui/src/layouts/layers'),
+    '@layouts': path.join(repoRoot, 'packages/ui/src/layouts'),
+    '@shells': path.join(repoRoot, 'packages/ui/src/layouts/shells'),
+    '@styles': path.join(repoRoot, 'packages/ui/src/styles'),
+    '@test': path.join(repoRoot, 'packages/ui/src/test'),
+    '@theme': path.join(repoRoot, 'packages/ui/src/theme'),
+    '@utils': path.join(repoRoot, 'packages/ui/src/utils'),
   };
 }
 
@@ -168,6 +171,6 @@ export function getUiAliases(): Record<string, string> {
  */
 export function getSdkAliases(): Record<string, string> {
   return {
-    '@persistence': path.join(sdkRoot, 'src/persistence'),
+    '@persistence': path.join(repoRoot, 'packages/sdk/src/persistence'),
   };
 }
