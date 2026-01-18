@@ -9,6 +9,7 @@
   "scripts": {
     "config:generate": "tsx config/generators/index.ts",
     "config:generate:check": "tsx config/generators/index.ts --check",
+    "config:generate:watch": "tsx config/generators/index.ts --watch",
     "dev": "tsx tools/dev/start-dev.ts",
     "dev:web": "tsx tools/dev/start-dev.ts web",
     "dev:server": "tsx tools/dev/start-dev.ts server",

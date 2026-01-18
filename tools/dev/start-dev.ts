@@ -74,6 +74,20 @@ function startWatcher(script: string): ChildProcess {
   return watcher;
 }
 
+function startConfigGenerator(): ChildProcess {
+  const watcher = spawn('pnpm', ['tsx', 'config/generators/index.ts', '--watch', '--quiet'], {
+    cwd: ROOT,
+    stdio: 'ignore',
+    shell: true,
+  });
+
+  watcher.on('error', (err) => {
+    console.error('[config:generate] Failed to start:', err);
+  });
+
+  return watcher;
+}
+
 function startTurboDev(filter?: string): ChildProcess {
   const args = ['turbo', 'run', 'dev'];
   if (filter) {
@@ -106,7 +120,7 @@ async function main(): Promise<void> {
 
   // Start all sync watchers silently in background
   const watchers = [
-    startWatcher('tools/sync/sync-path-aliases.ts'),
+    startConfigGenerator(), // Replaces sync-path-aliases.ts
     startWatcher('tools/sync/sync-file-headers.ts'),
     startWatcher('tools/sync/sync-import-aliases.ts'),
     startWatcher('tools/sync/sync-test-folders.ts'),
