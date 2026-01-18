@@ -1,4 +1,4 @@
-// apps/server/src/infra/crypto/jwt.ts
+// packages/core/src/crypto/jwt.ts
 /**
  * Native JWT Implementation
  *

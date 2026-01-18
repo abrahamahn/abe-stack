@@ -40,6 +40,12 @@ const EXCLUDED_DIRS = new Set([
   '.git',
 ]);
 
+// Subdirectories that should NOT be re-exported from their parent barrel
+// (server-only modules that use Node.js APIs not available in browsers)
+const NO_PARENT_REEXPORT = new Set([
+  'packages/core/src/crypto', // Uses node:crypto, server-only
+]);
+
 const FILE_EXTENSIONS = new Set(['.ts', '.tsx']);
 const AUTO_MARKER = '// @auto-generated - Do not edit manually';
 
@@ -256,8 +262,12 @@ function buildBarrelContent(dirPath: string): string | null {
   }
 
   for (const dirName of subdirs.sort()) {
-    const subIndex = path.join(dirPath, dirName, 'index.ts');
+    const subDirPath = path.join(dirPath, dirName);
+    const subIndex = path.join(subDirPath, 'index.ts');
     if (!fs.existsSync(subIndex)) continue;
+    // Skip server-only modules that shouldn't be re-exported from parent
+    const relativeSubDir = path.relative(ROOT, subDirPath).replace(/\\/g, '/');
+    if (NO_PARENT_REEXPORT.has(relativeSubDir)) continue;
     const exports = parseExports(subIndex);
     if (exports.length === 0) continue;
     const valueExports = exports

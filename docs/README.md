@@ -51,7 +51,7 @@ abe-stack/
 ### What's Built
 
 - Full JWT auth with refresh tokens and role-based access
-- 25+ UI elements, 16 components, 14 layouts, 13 hooks
+- 25 UI elements, 16 components, 14 layouts, 13 hooks
 - Interactive component demo at `/demo`
 - Type-safe API contracts with runtime validation
 - Pluggable storage (local/S3)

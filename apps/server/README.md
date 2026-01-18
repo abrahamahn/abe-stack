@@ -4,7 +4,7 @@
 
 The ABE Stack server is a TypeScript backend built with **Fastify 5.x**, **PostgreSQL**, **Drizzle ORM**, and **ts-rest** contracts. It follows a **hexagonal architecture** with clear separation between infrastructure and business logic.
 
-**Stats:** 79 source files | 39 test files | 557 tests passing
+**Stats:** 96 source files | 53 test files | 800+ tests passing
 
 ## Architecture
 
@@ -22,9 +22,9 @@ The ABE Stack server is a TypeScript backend built with **Fastify 5.x**, **Postg
 │                      Shared Layer (4 files)                     │
 │  Constants, errors, types                                       │
 ├─────────────────────────────────────────────────────────────────┤
-│                      Infrastructure Layer (46 files)            │
+│                      Infrastructure Layer (14 modules)          │
 │  database, storage, email, pubsub, websocket, security,         │
-│  http, rate-limit, crypto, health                               │
+│  http, rate-limit, crypto, health, logger, queue, router, write │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -46,10 +46,11 @@ apps/server/src/
 │   ├── server.config.ts
 │   └── storage.config.ts
 │
-├── infra/               # Infrastructure (46 files, 10 modules)
+├── infra/               # Infrastructure (14 modules)
 │   ├── database/        # Drizzle ORM client + schemas
 │   │   ├── client.ts        # createDbClient, connection pooling
 │   │   ├── transaction.ts   # withTransaction wrapper
+│   │   ├── test-utils.ts    # Database testing utilities
 │   │   ├── schema/          # Database schemas
 │   │   │   ├── users.ts     # users table
 │   │   │   └── auth.ts      # refreshTokens, loginAttempts, etc.
@@ -93,29 +94,49 @@ apps/server/src/
 │   ├── websocket/       # WebSocket support
 │   │   └── websocket.ts
 │   │
-│   └── health/          # Health checks
-│       └── index.ts     # Per-service health validation
+│   ├── health/          # Health checks
+│   │   └── index.ts     # Per-service health validation
+│   │
+│   ├── logger/          # Structured logging
+│   │   ├── logger.ts    # Pino logger factory
+│   │   ├── middleware.ts # Request logging middleware
+│   │   └── types.ts     # Logger types
+│   │
+│   ├── queue/           # Background job processing
+│   │   ├── queueServer.ts   # Job queue server (Chet-stack pattern)
+│   │   ├── memoryStore.ts   # In-memory queue store
+│   │   ├── postgresStore.ts # PostgreSQL queue store
+│   │   └── types.ts
+│   │
+│   ├── router/          # Route registration
+│   │   └── index.ts     # Generic route registry pattern
+│   │
+│   └── write/           # Unified write pattern
+│       └── index.ts     # Transaction + PubSub write helper
 │
-├── modules/             # Business modules (16 files, 3 modules)
+├── modules/             # Business modules (3 modules)
 │   ├── index.ts         # registerRoutes() - route registration
 │   │
-│   ├── auth/            # Authentication (10 files)
+│   ├── auth/            # Authentication
 │   │   ├── handlers.ts  # register, login, refresh, logout
 │   │   ├── service.ts   # AuthService business logic
 │   │   ├── middleware.ts  # requireAuth, requireRole guards
+│   │   ├── routes.ts    # Route definitions
 │   │   └── utils/
 │   │       ├── jwt.ts         # Token generation
 │   │       ├── password.ts    # Argon2id hashing
 │   │       ├── refresh-token.ts  # Token rotation, family detection
 │   │       └── request.ts     # IP/user-agent extraction
 │   │
-│   ├── users/           # User management (3 files)
+│   ├── users/           # User management
 │   │   ├── handlers.ts  # GET /me
-│   │   └── service.ts   # UserService
+│   │   ├── service.ts   # UserService
+│   │   └── routes.ts    # Route definitions
 │   │
-│   └── admin/           # Admin operations (3 files)
+│   └── admin/           # Admin operations
 │       ├── handlers.ts  # Admin unlock endpoint
-│       └── service.ts   # AdminService
+│       ├── service.ts   # AdminService
+│       └── routes.ts    # Route definitions
 │
 ├── shared/              # Shared kernel (4 files)
 │   ├── constants.ts     # Time constants, HTTP status, messages
@@ -210,18 +231,22 @@ const config = loadConfig(process.env);
 
 ### Infrastructure Modules
 
-| Module       | Purpose                                       |
-| ------------ | --------------------------------------------- |
-| `database`   | Drizzle ORM, transactions, optimistic locking |
-| `storage`    | Local filesystem or S3 abstraction            |
-| `email`      | Console or SMTP email service                 |
-| `pubsub`     | In-memory + Postgres NOTIFY for scaling       |
-| `security`   | Login lockout, audit logging                  |
-| `http`       | Security headers, CORS, cookies, CSRF, static |
-| `crypto`     | Native JWT signing/verification               |
-| `rate-limit` | Token bucket rate limiter                     |
-| `websocket`  | Real-time connection support                  |
-| `health`     | Per-service health checks                     |
+| Module       | Purpose                                             |
+| ------------ | --------------------------------------------------- |
+| `database`   | Drizzle ORM, transactions, optimistic locking       |
+| `storage`    | Local filesystem or S3 abstraction                  |
+| `email`      | Console or SMTP email service                       |
+| `pubsub`     | In-memory + Postgres NOTIFY for scaling             |
+| `security`   | Login lockout, audit logging                        |
+| `http`       | Security headers, CORS, cookies, CSRF, static       |
+| `crypto`     | Native JWT signing/verification                     |
+| `rate-limit` | Token bucket rate limiter                           |
+| `websocket`  | Real-time connection support                        |
+| `health`     | Per-service health checks                           |
+| `logger`     | Structured logging with correlation IDs             |
+| `queue`      | Background job processing (Chet-stack pattern)      |
+| `router`     | Generic route registration for DRY patterns         |
+| `write`      | Unified write with transactions + PubSub publishing |
 
 ## API Routes
 
@@ -365,4 +390,4 @@ instance.route({
 
 ---
 
-_Last Updated: 2026-01-17_
+_Last Updated: 2026-01-18_

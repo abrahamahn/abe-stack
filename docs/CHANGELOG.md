@@ -8,6 +8,73 @@ All notable changes to this project are documented here. Format follows semantic
 
 ## 2026-01-18
 
+### Package Extraction: Framework-Independent Utilities
+
+Moved server utilities to `packages/core` for framework independence and code reuse.
+
+**packages/core/src/crypto/** (new module)
+
+| Export     | Description                                                   |
+| ---------- | ------------------------------------------------------------- |
+| `sign()`   | Create HS256 JWT tokens with expiration support               |
+| `verify()` | Verify and decode JWT with constant-time signature comparison |
+| `decode()` | Decode JWT payload without verification                       |
+| `JwtError` | Error class with typed error codes                            |
+
+**packages/core/src/utils/storage.ts** (new file)
+
+| Export                  | Description                                                                   |
+| ----------------------- | ----------------------------------------------------------------------------- |
+| `normalizeStorageKey()` | Strip leading slashes and optionally remove parent refs for safe storage keys |
+
+**Import patterns:**
+
+- `@abe-stack/core/crypto` - Server-only JWT utilities (uses `node:crypto`)
+- `@abe-stack/core` - All browser-safe exports including `normalizeStorageKey`
+
+**Config updates:**
+
+- Added `NO_PARENT_REEXPORT` to barrel sync to prevent server-only modules from polluting browser bundles
+- Package.json exports `./crypto` entry point for server-side JWT access
+
+### Chet-Stack Utility Patterns
+
+Added 6 utility patterns from chet-stack to improve async handling, caching, and file management.
+
+**packages/core/src/async/**
+
+| Utility           | Description                                                                  | Tests |
+| ----------------- | ---------------------------------------------------------------------------- | ----- |
+| `DeferredPromise` | Promise with external resolve/reject for cleaner async control flow          | 14    |
+| `BatchedQueue`    | Batch multiple async calls into single operations (e.g., combine DB queries) | 13    |
+| `ReactiveMap`     | Observable key-value store with subscription support                         | 22    |
+
+**packages/core/src/transactions/**
+
+| Utility         | Description                                                              | Tests |
+| --------------- | ------------------------------------------------------------------------ | ----- |
+| `types.ts`      | Operation types (SetOperation, ListInsertOperation, ListRemoveOperation) | -     |
+| `operations.ts` | Operation inversion and transaction helpers for undo/redo                | 19    |
+
+**packages/core/src/stores/**
+
+| Utility            | Description                                                              | Tests |
+| ------------------ | ------------------------------------------------------------------------ | ----- |
+| `undoRedoStore.ts` | Zustand store for undo/redo with batch threshold and operation inversion | 17    |
+
+**packages/sdk/src/subscriptions/**
+
+| Utility             | Description                                                                    | Tests |
+| ------------------- | ------------------------------------------------------------------------------ | ----- |
+| `SubscriptionCache` | Reference counting for subscriptions with delayed cleanup (prevents thrashing) | 20    |
+
+**apps/server/src/infra/storage/**
+
+| Utility         | Description                                                   | Tests |
+| --------------- | ------------------------------------------------------------- | ----- |
+| `signedUrls.ts` | HMAC-signed URLs for secure file uploads without auth cookies | 33    |
+
+**Total: 138 new tests**
 
 ### Desktop App Simplification
 
@@ -33,47 +100,48 @@ Refactored consolidated test files into individual test files for better maintai
 
 **apps/server (`apps/server/src/infra/`):**
 
-| New Test File | Tests | Description |
-|---------------|-------|-------------|
-| `logger/__tests__/middleware.test.ts` | 15 | Logging middleware, correlation IDs, request context |
-| `queue/__tests__/memoryStore.test.ts` | 28 | MemoryQueueStore CRUD, dequeue, status tracking |
-| `security/__tests__/events.test.ts` | 21 | Security event logging, metrics, queries |
-| `security/__tests__/lockout.test.ts` | 23 | Account lockout, progressive delays, unlock |
-| `email/__tests__/consoleEmailService.test.ts` | 8 | Console email provider |
-| `email/__tests__/smtpEmailService.test.ts` | 9 | SMTP email provider |
-| `email/__tests__/templates.test.ts` | 20 | Email templates (passwordReset, magicLink, etc.) |
-| `email/__tests__/factory.test.ts` | 9 | createEmailService factory |
-| `pubsub/__tests__/subscriptionManager.test.ts` | 31 | Subscription manager operations |
-| `pubsub/__tests__/helpers.test.ts` | 13 | SubKeys and publishAfterWrite |
-| `pubsub/__tests__/postgresPubSub.test.ts` | 9 | PostgresPubSub creation |
+| New Test File                                  | Tests | Description                                          |
+| ---------------------------------------------- | ----- | ---------------------------------------------------- |
+| `logger/__tests__/middleware.test.ts`          | 15    | Logging middleware, correlation IDs, request context |
+| `queue/__tests__/memoryStore.test.ts`          | 28    | MemoryQueueStore CRUD, dequeue, status tracking      |
+| `security/__tests__/events.test.ts`            | 21    | Security event logging, metrics, queries             |
+| `security/__tests__/lockout.test.ts`           | 23    | Account lockout, progressive delays, unlock          |
+| `email/__tests__/consoleEmailService.test.ts`  | 8     | Console email provider                               |
+| `email/__tests__/smtpEmailService.test.ts`     | 9     | SMTP email provider                                  |
+| `email/__tests__/templates.test.ts`            | 20    | Email templates (passwordReset, magicLink, etc.)     |
+| `email/__tests__/factory.test.ts`              | 9     | createEmailService factory                           |
+| `pubsub/__tests__/subscriptionManager.test.ts` | 31    | Subscription manager operations                      |
+| `pubsub/__tests__/helpers.test.ts`             | 13    | SubKeys and publishAfterWrite                        |
+| `pubsub/__tests__/postgresPubSub.test.ts`      | 9     | PostgresPubSub creation                              |
 
 **apps/web:**
 
-| New Test File | Description |
-|---------------|-------------|
-| `app/__tests__/AuthService.test.ts` | AuthService class: login, logout, refresh, state management |
-| `app/__tests__/ClientEnvironment.test.tsx` | ClientEnvironmentProvider and useClientEnvironment hook |
-| `app/__tests__/createEnvironment.test.ts` | Environment factory, singleton pattern, cleanup |
-| `features/auth/pages/__tests__/Register.test.tsx` | RegisterPage form validation, submission, error handling |
+| New Test File                                     | Description                                                 |
+| ------------------------------------------------- | ----------------------------------------------------------- |
+| `app/__tests__/AuthService.test.ts`               | AuthService class: login, logout, refresh, state management |
+| `app/__tests__/ClientEnvironment.test.tsx`        | ClientEnvironmentProvider and useClientEnvironment hook     |
+| `app/__tests__/createEnvironment.test.ts`         | Environment factory, singleton pattern, cleanup             |
+| `features/auth/pages/__tests__/Register.test.tsx` | RegisterPage form validation, submission, error handling    |
 
 **packages/sdk:**
 
-| New Test File | Description |
-|---------------|-------------|
+| New Test File                       | Description                            |
+| ----------------------------------- | -------------------------------------- |
 | `persistence/__tests__/idb.test.ts` | IndexedDB wrapper createStore function |
 
 **packages/core:**
 
-| New Test File | Tests | Description |
-|---------------|-------|-------------|
-| `contracts/__tests__/auth.test.ts` | 24 | Auth schemas, authContract endpoints |
-| `contracts/__tests__/common.test.ts` | 23 | USER_ROLES, userSchema, errorResponseSchema |
-| `errors/__tests__/base.test.ts` | 31 | AppError, isAppError, toAppError, helpers |
-| `errors/__tests__/http.test.ts` | 29 | HTTP error classes (400-500 range) |
-| `errors/__tests__/auth.test.ts` | 31 | Auth errors (credentials, tokens, OAuth, 2FA) |
-| `errors/__tests__/validation.test.ts` | 12 | ValidationError with field-level details |
+| New Test File                         | Tests | Description                                   |
+| ------------------------------------- | ----- | --------------------------------------------- |
+| `contracts/__tests__/auth.test.ts`    | 24    | Auth schemas, authContract endpoints          |
+| `contracts/__tests__/common.test.ts`  | 23    | USER_ROLES, userSchema, errorResponseSchema   |
+| `errors/__tests__/base.test.ts`       | 31    | AppError, isAppError, toAppError, helpers     |
+| `errors/__tests__/http.test.ts`       | 29    | HTTP error classes (400-500 range)            |
+| `errors/__tests__/auth.test.ts`       | 31    | Auth errors (credentials, tokens, OAuth, 2FA) |
+| `errors/__tests__/validation.test.ts` | 12    | ValidationError with field-level details      |
 
 **Test Count Update:**
+
 - **@abe-stack/server**: 806 tests (53 files)
 - **@abe-stack/web**: 506 tests (28 files)
 - **@abe-stack/ui**: 772 tests (78 files)
@@ -112,8 +180,12 @@ Polling-based job queue with PostgreSQL persistence for background task processi
 ```typescript
 // Define handlers
 const handlers: TaskHandlers = {
-  'send-email': async (args: { to: string }) => { /* ... */ },
-  'process-upload': async (args: { fileId: string }) => { /* ... */ },
+  'send-email': async (args: { to: string }) => {
+    /* ... */
+  },
+  'process-upload': async (args: { fileId: string }) => {
+    /* ... */
+  },
 };
 
 // Create and start queue
@@ -414,6 +486,7 @@ Created `@abe-stack/tests` package with shared mock factories to reduce test boi
 - `src/constants/index.ts` - `TEST_USER`, `TEST_TOKENS`, `TEST_JWT_CONFIG`, `TEST_IDS`, etc.
 
 **Usage:**
+
 ```typescript
 import { createMockContext, createMockUser, TEST_USER } from '@abe-stack/tests';
 ```
@@ -438,6 +511,7 @@ Implemented proper logging service with request correlation ID support.
 - Background job logging with `createJobLogger()`
 
 **Integration:**
+
 ```typescript
 // In request handlers, use request.log
 request.log.info('Processing request', { userId: request.user.id });
@@ -448,6 +522,7 @@ log.info('Sending email', { to: email });
 ```
 
 **Updated:**
+
 - `apps/server/src/shared/types.ts` - Deprecated old `Logger` interface, reference new one in `@infra/logger`
 - `apps/server/src/infra/index.ts` - Export all logger utilities
 

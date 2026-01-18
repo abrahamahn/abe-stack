@@ -34,7 +34,7 @@ https://github.com/abrahamahn/abe-stack
 - Full TypeScript strict mode with end-to-end safety
 - 1900+ tests (Vitest unit tests + Playwright E2E)
 - ESLint + Prettier + git hooks (no bad code slips through)
-- Comprehensive shared UI library (16 components, 24 elements, 13 hooks) with interactive demo at `/demo`
+- Comprehensive shared UI library (16 components, 25 elements, 13 hooks, 14 layouts) with interactive demo at `/demo`
 - State: React Query for server state, offline mutation queue
 - Theming, hooks, layouts, resizable panels — all reusable
 
@@ -70,9 +70,10 @@ abe-stack/
 │   ├── desktop/      # Electron (Tauri-ready)
 │   └── server/       # Fastify API (infra/ + modules/)
 ├── packages/
-│   ├── ui/           # 16 components, 24 elements, 13 hooks, 6 layouts
+│   ├── ui/           # 16 components, 25 elements, 12 hooks, 28 layouts
 │   ├── sdk/          # Type-safe API client + React Query + offline support
-│   └── core/         # Contracts, validation, stores, constants, errors
+│   ├── core/         # Contracts, validation, stores, constants, errors
+│   └── tests/        # Shared test utilities, mocks, and constants
 ├── config/           # Docker, env, test configs
 └── tools/            # Dev scripts (sync watchers)
 ```
@@ -140,7 +141,9 @@ pnpm dev
 - **Database Transactions:** Atomic transaction wrapper for auth operations (registration, login, token rotation)
 - **Optimistic Locking:** Version-based concurrency control for collaborative editing (409 Conflict on mismatch)
 - **Storage Providers:** Pluggable local and S3 storage with static file serving
-- **Structured Logging:** Pino logger with request context and child loggers
+- **Structured Logging:** Pino logger with correlation IDs, request context, and child loggers
+- **Background Jobs:** Queue system with PostgreSQL persistence and in-memory stores (Chet-stack pattern)
+- **Write Service:** Unified write pattern with transaction support and automatic PubSub publishing
 
 ### Real-Time Infrastructure
 

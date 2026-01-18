@@ -20,6 +20,11 @@
       "import": "./dist/utils/index.js",
       "require": "./dist/utils/index.js"
     },
+    "./crypto": {
+      "types": "./dist/crypto/index.d.ts",
+      "import": "./dist/crypto/index.js",
+      "require": "./dist/crypto/index.js"
+    },
     "./env": {
       "types": "./dist/env.d.ts",
       "import": "./dist/env.js",
@@ -65,6 +70,5 @@
     "zod": "^3.22.4",
     "zustand": "^5.0.9"
   },
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }

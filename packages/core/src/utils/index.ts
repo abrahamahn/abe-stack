@@ -1,4 +1,6 @@
 // packages/core/src/utils/index.ts
+export { normalizeStorageKey } from './storage';
+
 export type TokenStore = {
   get: () => string | null;
   set: (token: string) => void;

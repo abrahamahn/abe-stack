@@ -18,3 +18,15 @@ export { LocalStorageProvider, S3StorageProvider } from './providers';
 
 // Utils
 export { normalizeStorageKey } from './utils';
+
+// Signed URLs
+export {
+  createSignature,
+  verifySignature,
+  createSignedUrl,
+  parseSignedUrl,
+  isUrlExpired,
+  normalizeFilename,
+  getDefaultExpiration,
+  type SignedUrlData,
+} from './signedUrls';

@@ -23,11 +23,6 @@ Remaining work for packages/ui. These items are lower priority than V5 migration
 - [ ] Update ARIA attributes for screen readers
 - [ ] Add keyboard shortcut documentation
 
-### 2. Missing Layout Tests (Frontend)
-
-- [ ] `LeftSidebarLayout.test.tsx` - comprehensive tests
-- [ ] `RightSidebarLayout.test.tsx` - comprehensive tests
-
 ---
 
 ## Medium Priority

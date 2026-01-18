@@ -2,7 +2,7 @@
 /**
  * Cryptographic Infrastructure
  *
- * Native implementations for cryptographic operations.
+ * Re-exports from @abe-stack/core/crypto with server-specific naming.
  */
 
 export {
@@ -14,4 +14,4 @@ export {
   type JwtHeader,
   type JwtPayload,
   type SignOptions as JwtSignOptions,
-} from '@crypto/jwt';
+} from '@abe-stack/core/crypto';

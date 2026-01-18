@@ -271,11 +271,11 @@ As of January 2026:
 
 | Package       | Test Files | Tests | Coverage |
 | ------------- | ---------- | ----- | -------- |
-| packages/ui   | 77         | 724+  | ~85%     |
-| packages/core | 8          | 280+  | ~80%     |
-| packages/sdk  | 5          | 50+   | ~70%     |
-| apps/web      | 25         | 337+  | ~60%     |
-| apps/server   | 36         | 508+  | ~70%     |
+| packages/ui   | 72         | 724+  | ~85%     |
+| packages/core | 18         | 280+  | ~80%     |
+| packages/sdk  | 7          | 50+   | ~70%     |
+| apps/web      | 27         | 337+  | ~60%     |
+| apps/server   | 51         | 508+  | ~70%     |
 
 ## Testing Setup & Configuration
 

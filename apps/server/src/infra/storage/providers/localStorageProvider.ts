@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
-import { normalizeStorageKey } from '@storage/utils/normalizeKey';
+import { normalizeStorageKey } from '@storage/utils';
 
 import type { LocalStorageConfig, StorageProvider, UploadParams } from '@storage/types';
 
