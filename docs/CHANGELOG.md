@@ -10,39 +10,64 @@ All notable changes to this project are documented here. Format follows semantic
 
 ### Centralized Config Management System
 
-Implemented a single source of truth for all configuration files with automatic generation.
+Implemented a single source of truth for all configuration files with automatic generation. Edit schema files once, configs regenerate everywhere.
 
-**New Files:**
+**Architecture:**
 
-- `config/schema/typescript.ts` - TypeScript compiler options and project configs
-- `config/schema/build.ts` - Vite/Vitest settings and aliases
-- `config/schema/linting.ts` - Prettier, lint-staged, VS Code settings
-- `config/schema/packages.ts` - Package.json scripts
-- `config/schema/index.ts` - Main schema entry point
-- `config/generators/utils.ts` - Shared generator utilities
-- `config/generators/tsconfig.gen.ts` - TypeScript config generator
-- `config/generators/vite.gen.ts` - Vite aliases generator
-- `config/generators/vitest.gen.ts` - Vitest config generator
-- `config/generators/prettier.gen.ts` - Prettier config generator
-- `config/generators/vscode.gen.ts` - VS Code settings generator
-- `config/generators/package.gen.ts` - package.json scripts generator
-- `config/generators/index.ts` - Main generator entry point
+```
+config/
+├── schema/           # Single source of truth (edit here)
+│   ├── typescript.ts # Compiler options, paths, references
+│   ├── build.ts      # Vite/Vitest settings, alias definitions
+│   ├── lint.ts       # Prettier, lint-staged, VS Code settings
+│   ├── packages.ts   # Package.json scripts
+│   └── index.ts      # Main schema entry point
+│
+└── generators/       # Scripts that generate config files
+    ├── tsconfig.gen.ts  # Generates all tsconfig.json files (with JSONC comments)
+    ├── vite.gen.ts      # Generates config/aliases.ts
+    ├── vitest.gen.ts    # Generates vitest configs
+    ├── prettier.gen.ts  # Generates .prettierrc, .prettierignore
+    ├── vscode.gen.ts    # Generates .vscode/settings.json
+    ├── package.gen.ts   # Updates package.json scripts
+    ├── utils.ts         # Shared utilities (path discovery, file writing)
+    └── index.ts         # Main entry with watch mode support
+```
 
 **New Commands:**
 
 - `pnpm config:generate` - Generate all configs from schema
 - `pnpm config:generate:check` - Verify configs match schema (for CI)
+- `pnpm config:generate:watch` - Watch mode for development
 
-**Removed (replaced by config:generate):**
+**Watch Mode Integration:**
 
-- `tools/sync/sync-path-aliases.ts` - Now in tsconfig.gen.ts
-- `tools/sync/sync-tsconfig.ts` - Now in tsconfig.gen.ts
-- `tools/sync/sync-linting.ts` - Now in prettier.gen.ts + vscode.gen.ts
-- `config/linting.json` - Now in schema/linting.ts
+- `pnpm dev` now runs config generator in watch mode automatically
+- Watches `apps/*/src` and `packages/*/src` for new directories (auto-discovers path aliases)
+- Watches `config/schema/` for manual schema edits
+- Replaces the old `sync-path-aliases.ts` watcher in `tools/dev/start-dev.ts`
 
-**Pre-commit hook updated:**
+**Generated Files (have "DO NOT EDIT" headers):**
 
-- Now runs `pnpm config:generate` instead of individual sync scripts for config files
+- All `tsconfig.json` files (with JSONC section comments in base config)
+- `config/aliases.ts` - Vite/Vitest path aliases
+- `config/.prettierrc` and `config/.prettierignore`
+- `.vscode/settings.json`
+- `config/ts/tsconfig.*.json` base configs
+
+**Removed (replaced by generators):**
+
+- `tools/sync/sync-path-aliases.ts` → `tsconfig.gen.ts` + `vite.gen.ts`
+- `tools/sync/sync-tsconfig.ts` → `tsconfig.gen.ts`
+- `tools/sync/sync-linting.ts` → `prettier.gen.ts` + `vscode.gen.ts`
+- `config/linting.json` → `config/schema/lint.ts`
+
+**Workflow:**
+
+1. Edit `config/schema/*.ts` to change settings
+2. Run `pnpm config:generate` (or let watch mode handle it during `pnpm dev`)
+3. All config files regenerate with consistent settings
+4. Pre-commit hook validates configs match schema
 
 ### Package Minimization (Continued)
 
@@ -101,6 +126,42 @@ Reference guide for migrating utilities from `../../abe-stack-legacy`:
 - Removed duplicate "Add request ID middleware" task (was in Backend and Code Quality)
 - Clarified OAuth: TODO.md has "direct integration", ROADMAP.md has "Passport.js strategies"
 - Added missing legacy references: Zod validators, Interface-First Services, CHET-Stack Phase 1
+
+### Error Handling Consolidation
+
+Consolidated two parallel error systems into a single, feature-rich error module in `@abe-stack/core`.
+
+**Problem Solved:**
+
+- `packages/core/src/errors.ts` had simple `HttpError` class (8 error types, no code/details)
+- `apps/server/src/shared/errors.ts` had rich `AppError` class (17+ error types with code, details, toJSON())
+- Duplicate definitions led to inconsistent error handling
+
+**New Structure (`packages/core/src/errors/`):**
+
+- `base.ts` - `AppError` class with statusCode, code, details, toJSON(), helper functions
+- `http.ts` - HTTP errors (BadRequest, Unauthorized, Forbidden, NotFound, Conflict, TooManyRequests, Internal)
+- `auth.ts` - Auth errors (InvalidCredentials, AccountLocked, InvalidToken, TokenReuse, WeakPassword, EmailAlreadyExists, UserNotFound, OAuth, TOTP)
+- `validation.ts` - ValidationError with field-level details
+- `response.ts` - ApiResponse, ApiErrorResponse, ApiSuccessResponse types
+- `index.ts` - Barrel exports
+
+**Updated:**
+
+- `packages/core/src/contracts/common.ts` - `errorResponseSchema` now includes error, code, details fields
+- `apps/server/src/shared/index.ts` - Re-exports errors from `@abe-stack/core`
+- Moved tests from server to core package
+
+**Deleted:**
+
+- `packages/core/src/errors.ts` (old HttpError system)
+- `apps/server/src/shared/errors.ts` (duplicate definitions)
+- `apps/server/src/shared/__tests__/errors.test.ts` (moved to core)
+
+**Backward Compatibility:**
+
+- `PermissionError` alias for `ForbiddenError`
+- `RateLimitError` alias for `TooManyRequestsError`
 
 ### Package Minimization
 
