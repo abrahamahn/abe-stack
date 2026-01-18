@@ -16,22 +16,30 @@ Implemented a single source of truth for all configuration files with automatic 
 
 ```
 config/
-├── schema/           # Single source of truth (edit here)
-│   ├── typescript.ts # Compiler options, paths, references
-│   ├── build.ts      # Vite/Vitest settings, alias definitions
-│   ├── lint.ts       # Prettier, lint-staged, VS Code settings
-│   ├── packages.ts   # Package.json scripts
-│   └── index.ts      # Main schema entry point
+├── schema/              # Single source of truth (edit here)
+│   ├── typescript.ts    # Compiler options, paths, references
+│   ├── build.ts         # Vite/Vitest settings, alias definitions
+│   ├── lint.ts          # Prettier, lint-staged, VS Code settings
+│   ├── packages.ts      # Package.json scripts
+│   ├── runtime.ts       # Generated runtime helpers for Vite/Vitest
+│   └── index.ts         # Main schema entry point
 │
-└── generators/       # Scripts that generate config files
-    ├── tsconfig.gen.ts  # Generates all tsconfig.json files (with JSONC comments)
-    ├── vite.gen.ts      # Generates config/aliases.ts
-    ├── vitest.gen.ts    # Generates vitest configs
-    ├── prettier.gen.ts  # Generates .prettierrc, .prettierignore
-    ├── vscode.gen.ts    # Generates .vscode/settings.json
-    ├── package.gen.ts   # Updates package.json scripts
-    ├── utils.ts         # Shared utilities (path discovery, file writing)
-    └── index.ts         # Main entry with watch mode support
+├── generators/          # Scripts that generate config files
+│   ├── tsconfig.gen.ts  # Generates all tsconfig.json files
+│   ├── vite.gen.ts      # Generates schema/runtime.ts
+│   ├── vitest.gen.ts    # Generates vitest configs
+│   ├── prettier.gen.ts  # Generates .prettierrc, .prettierignore
+│   ├── vscode.gen.ts    # Generates .vscode/settings.json
+│   ├── package.gen.ts   # Updates package.json scripts
+│   ├── utils.ts         # Shared utilities
+│   └── index.ts         # Main entry with watch mode
+│
+└── sync/                # Code transformation scripts (moved from tools/sync/)
+    ├── sync-file-headers.ts    # Adds // path/file.ts headers
+    ├── sync-import-aliases.ts  # Converts relative to alias imports
+    ├── sync-test-folders.ts    # Creates __tests__/ directories
+    ├── sync-barrel-exports.ts  # Auto-generates index.ts exports
+    └── sync-css-theme.ts       # Generates CSS from theme tokens
 ```
 
 **New Commands:**
@@ -50,7 +58,7 @@ config/
 **Generated Files (have "DO NOT EDIT" headers):**
 
 - All `tsconfig.json` files (with JSONC section comments in base config)
-- `config/aliases.ts` - Vite/Vitest path aliases
+- `config/schema/runtime.ts` - Vite/Vitest path aliases and runtime helpers
 - `config/.prettierrc` and `config/.prettierignore`
 - `.vscode/settings.json`
 - `config/ts/tsconfig.*.json` base configs
@@ -61,6 +69,11 @@ config/
 - `tools/sync/sync-tsconfig.ts` → `tsconfig.gen.ts`
 - `tools/sync/sync-linting.ts` → `prettier.gen.ts` + `vscode.gen.ts`
 - `config/linting.json` → `config/schema/lint.ts`
+
+**Moved (consolidated under config/):**
+
+- `tools/sync/*.ts` → `config/sync/*.ts` (code transformation scripts)
+- `config/aliases.ts` → `config/schema/runtime.ts` (generated runtime helpers)
 
 **Workflow:**
 
