@@ -1,19 +1,21 @@
 # ABE Stack Roadmap
 
-**Last Updated: January 17, 2026**
+> **Scope:** Features deferred beyond Series A, or requiring enterprise customers, dedicated platform engineers, or large teams (5+ engineers).
 
-Single source of truth for project milestones and implementation priorities. Organized by milestone with checkboxes for task tracking.
+**Last Updated: January 18, 2026**
 
 ---
 
-## Overview
+## When to Use This Roadmap
 
-The roadmap is organized into four major milestones:
+Add features here when you have:
 
-1. **V5 Migration** - Restructure to layer-based architecture
-2. **CHET-Stack Real-Time** - Add pub/sub, WebSockets, offline support
-3. **Security Phase 2** - Passport.js, additional auth methods, hardening
-4. **Remaining TODOs** - UI, testing, infrastructure polish
+- Enterprise customers requiring compliance (MFA, RBAC, Passkeys)
+- Platform engineer to own observability
+- Traffic that justifies load testing
+- Large team needing DI container
+- Ops team to write runbooks
+- Collaborative editing requirements (CHET-Stack)
 
 ---
 
@@ -73,6 +75,8 @@ Add real-time collaboration, offline support, and optimistic updates. See [Archi
 - [ ] Add `/api/realtime/write` endpoint
 - [ ] Add `/api/realtime/getRecords` endpoint
 
+> **Legacy:** See [Database Utilities](./dev/legacy.md#database-utilities) → `TransactionService.ts`, `BatchedQueue.ts`
+
 ### Phase 2: Real-Time Sync
 
 - [ ] Implement `WebSocketServer` (ws package)
@@ -80,6 +84,8 @@ Add real-time collaboration, offline support, and optimistic updates. See [Archi
 - [ ] Create `RealtimeContext` and `RealtimeProvider`
 - [ ] Add subscription management (subscribe/unsubscribe by key)
 - [ ] Version-based update notifications
+
+> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `WebSocketService.ts`, `WebSocketTypes.ts`; [Frontend Utilities](./dev/legacy.md#frontend-utilities) → `WebsocketPubsubClient.ts`
 
 ### Phase 3: Offline Support
 
@@ -89,12 +95,16 @@ Add real-time collaboration, offline support, and optimistic updates. See [Archi
 - [ ] Service worker for asset caching
 - [ ] Conflict resolution (last-write-wins)
 
+> **Legacy:** See [Frontend Hooks](./dev/legacy.md#frontend-hooks) → `useOnline` hook
+
 ### Phase 4: Undo/Redo
 
 - [ ] Implement `UndoRedoStack`
 - [ ] Operation inversion logic for all operation types
 - [ ] Keyboard shortcuts (Cmd+Z / Cmd+Shift+Z)
 - [ ] UI indicators for undo/redo availability
+
+> **Legacy:** See [Frontend Hooks](./dev/legacy.md#frontend-hooks) → `useShortcut` hook
 
 ### Phase 5: Permissions
 
@@ -103,6 +113,8 @@ Add real-time collaboration, offline support, and optimistic updates. See [Archi
 - [ ] Permission records loading
 - [ ] Workspace/board/task permission patterns
 
+> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `permission.service.ts`, `role.service.ts`, `rbac.middleware.ts`
+
 ### Phase 6: React Hooks
 
 - [ ] `useRecord<T>(table, id)` - single record subscription
@@ -110,11 +122,13 @@ Add real-time collaboration, offline support, and optimistic updates. See [Archi
 - [ ] `useWrite()` - optimistic write with queue
 - [ ] `useUndoRedo()` - undo/redo controls
 
+> **Legacy:** See [Frontend Hooks](./dev/legacy.md#frontend-hooks) → `useAsync`, `useRefCurrent`, `useRefPrevious`
+
 ---
 
 ## Milestone 3: Security Phase 2
 
-Enhanced authentication with Passport.js and additional security hardening. See [Security Phase 2 Roadmap](./todo/security/phase-2-roadmap.md).
+Enhanced authentication with Passport.js and additional security hardening.
 
 ### Phase 1: Security Hardening (COMPLETED)
 
@@ -134,20 +148,30 @@ Enhanced authentication with Passport.js and additional security hardening. See 
 - [ ] Create strategy enable/disable configuration
 - [ ] Update auth routes to use Passport.js
 
-### Phase 3: Additional Auth Methods
+> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `authHelpers.ts`, `cookieUtils.ts`, `csrfUtils.ts`; [Potential Migrations](./dev/legacy.md#session-management) → Session module
 
-- [ ] Magic links (`passport-magic-link`)
+### Phase 3: Additional Auth Methods (Passport.js)
+
+> Note: Basic Magic Links are in TODO.md. This phase adds Passport.js-based implementation for unified auth strategy management.
+
+- [ ] Magic links (`passport-magic-link`) - Passport.js strategy
 - [ ] Passkeys/WebAuthn (`passport-webauthn`)
 - [ ] WebAuthn registration/authentication UI
 - [ ] Passkey management UI (list, rename, delete)
 
-### Phase 4: Social/OAuth Providers
+> **Legacy:** See [Token Utilities](./dev/legacy.md#token-utilities) → `generateSecureToken()`, `hashToken()`; [Backend Utilities](./dev/legacy.md#backend-utilities) → `verification.service.ts`; [Security Utilities](./dev/legacy.md#security-utilities) → Encryption utilities
 
-- [ ] Google OAuth (`passport-google-oauth20`)
-- [ ] GitHub OAuth (`passport-github`)
-- [ ] Apple OAuth (`passport-apple`)
+### Phase 4: Social/OAuth Providers (Passport.js)
+
+> Note: Basic OAuth is in TODO.md. This phase migrates to Passport.js strategies for consistent session handling.
+
+- [ ] Google OAuth (`passport-google-oauth20`) - Passport.js strategy
+- [ ] GitHub OAuth (`passport-github`) - Passport.js strategy
+- [ ] Apple OAuth (`passport-apple`) - Passport.js strategy
 - [ ] OAuth connection management UI
 - [ ] Account linking (multiple providers per account)
+
+> **Legacy:** See [Auth DTOs](./dev/legacy.md#auth-dtos); [Backend Utilities](./dev/legacy.md#backend-utilities) → `TokenManager.ts`, `TokenStorageService.ts`
 
 ### Phase 5: Advanced Features
 
@@ -156,6 +180,8 @@ Enhanced authentication with Passport.js and additional security hardening. See 
 - [ ] Step-up authentication for sensitive operations
 - [ ] Device/session management UI
 - [ ] "Remember this device" functionality
+
+> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `mfa.service.ts`, `InMemoryTokenBlacklist.ts`; [Potential Migrations](./dev/legacy.md#security-utilities) → Encryption utilities
 
 ### Database Schema Updates Required
 
@@ -167,50 +193,161 @@ Enhanced authentication with Passport.js and additional security hardening. See 
 
 ---
 
-## Milestone 4: Remaining TODOs
+## Product-Specific Features
 
-### Backend
+These are specific to product types, not boilerplate infrastructure.
 
-- [x] Email service abstraction (provider-agnostic with local stub) ✅
-- [x] Input validation with Zod; consistent error envelope ✅
+### For Messenger / Social
+
+- [ ] Read receipts
+- [ ] Message reactions
+- [ ] Channel/room management
+- [ ] Message acknowledgments (delivery confirmation)
+- [ ] `SubscriptionCache` for ref-counted record subscriptions
+- [ ] `LoaderCache` for Suspense-friendly, deduped loaders
+
+> **Legacy:** See [Frontend Components](./dev/legacy.md#frontend-components) → Social components; [Frontend Utilities](./dev/legacy.md#frontend-utilities) → `SocialContext.tsx`, `social.ts`; [Potential Migrations](./dev/legacy.md#common-utilities) → ReactiveMap, DeferredPromise
+
+### For Music Streaming / Marketplace
+
+- [ ] Audio streaming endpoint (range requests)
+- [ ] Waveform generation (background job)
+- [ ] Playlist CRUD
+- [ ] **Payment integration** (Stripe checkout, subscriptions)
+- [ ] Artist/creator payouts
+- [ ] **Media processor** for video/audio
+  - Multi-format media processing
+  - Video thumbnail generation
+  - Audio waveform generation
+- [ ] **Stream processor** for large file handling
+
+> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `MediaProcessor.ts`, `StreamProcessor.ts`, `ImageProcessor.ts`; [Frontend Components](./dev/legacy.md#frontend-components) → Media components (`AudioPlayer`, `VideoPlayer`); [Frontend Formatters](./dev/legacy.md#frontend-formatters) → `formatDuration()`
+
+### For AI Fitness Coach
+
+- [ ] AI inference queue (uses job queue)
+- [ ] Workout plan generation
+- [ ] Progress photo analysis (uses image processing)
+- [ ] Calendar/scheduling integration
+
+> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `JobService.ts`, `baseJobProcessor.ts`, `ImageProcessor.ts`
+
+### For Calendar Aggregator
+
+- [ ] OAuth flows (Google, Outlook, Apple)
+- [ ] Calendar sync jobs (uses job queue)
+- [ ] Conflict detection
+- [ ] Unified calendar view
+
+> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `JobService.ts`, `JobQueue.ts`; [Potential Migrations](./dev/legacy.md#common-utilities) → Date helpers
+
+---
+
+## Infrastructure Improvements (Post-Series A)
+
+Patterns that become valuable at scale or with large teams.
+
+### Repository Layer (Optional)
+
+Wrap Drizzle with repository pattern for testability.
+
+- [ ] `BaseRepository<T>` with common CRUD operations
+- [ ] Custom finder methods (`findByEmail`, `findByUsername`)
+- [ ] Case conversion (camelCase ↔ snake_case) if needed
+- [ ] Easier mocking in tests
+
+> **Legacy:** See [Potential Migrations](./dev/legacy.md#repository-layer)
+
+### Base Classes (DDD)
+
+Abstract base classes for consistent patterns across modules.
+
+- [ ] **BaseModel** - base interface with ID generation (UUID v4), validation
+- [ ] **BaseService** - business logic orchestration with transaction helpers
+- [ ] **BaseJobProcessor** - job queue processors with timing, error handling
+
+> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `baseModel.ts`, `baseService.ts`, `baseJobProcessor.ts`
+
+### Interface-First Services
+
+For critical infrastructure, define interfaces.
+
+- [ ] `IJobService` interface for job queue
+- [ ] `ICacheService` interface for cache
+- [ ] `IWebSocketService` interface for real-time
+- [ ] Enables swapping implementations without code changes
+
+> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `CacheService.ts`, `JobService.ts`, `WebSocketService.ts` (reference implementations)
+
+### Error Handling Middleware
+
+Better debugging in production.
+
+- [ ] Request context logging (IP, method, path, user agent)
+- [ ] Error serialization with `.toJSON()`
+- [ ] Correlation IDs for tracing requests
+- [ ] Conditional logging by severity (500+ vs client errors)
+
+> **Legacy:** See [Error Classes](./dev/legacy.md#error-classes); [Backend Utilities](./dev/legacy.md#backend-utilities) → `ErrorHandler.ts`, `LoggerService.ts`; [Potential Migrations](./dev/legacy.md#structured-logging)
+
+### Advanced Architecture
+
+- [ ] Autoindex API endpoints from filesystem (route registry generator)
+- [ ] Modular server composition (ApiServer/FileServer/QueueServer/PubSubServer)
 - [ ] API versioning and OpenAPI/typed client generation
-- [x] Health checks and readiness endpoints ✅
 - [ ] Generate fetch/React Query clients from ts-rest contract
 
-### Frontend (Web)
+> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `ServerManager.ts`, `ApplicationLifecycle.ts`
 
-- [ ] Error boundary + toasts for API errors
-- [ ] Accessibility pass (focus management, keyboard resize handles)
-- [ ] E2E tests for auth and layout resize persistence
+---
 
-### Infrastructure
+## Things You Can Safely Postpone
 
-- [x] Dockerfile/docker-compose for server + Postgres + maildev ✅
-- [ ] Production Postgres settings (connection pooling, SSL)
-- [ ] Secrets management documentation (env, Vault, SSM)
-- [ ] Observability hooks (request logs, metrics, error reporting)
-- [ ] Database backup/retention plan
+These are rarely needed in most real projects:
 
-### Testing
+- [ ] Redis just for the sake of having advanced caching
+- [ ] Full DDD folder structure in every single package/app
+- [ ] Combining all 6 sync scripts into one mega-script
+- [ ] Separate tsconfig just for vitest
+- [ ] Auto-generating theme docs with typedoc/etc
+- [ ] Pre-bundling shared deps in Vite optimizeDeps (modern Vite usually does fine)
+- [ ] Matrix-parallelized CI (unless you have >40-50 min CI times already)
 
-- [ ] Integration tests for API routes (vitest + fastify inject)
-- [ ] Playwright E2E for auth + layout resize persistence
-- [x] Unit tests for Argon2id hashing ✅ (password.test.ts)
-- [ ] Integration tests for each Passport strategy
-- [ ] Security audit: OWASP testing guide compliance
+---
 
-### Documentation
+## Second Tier Improvements
 
-- [ ] Update README with status badges once features land
-- [ ] Quickstart guides per app (web/desktop/mobile)
-- [ ] API docs (OpenAPI or generated client usage)
-- [ ] Release checklist (versioning, changelog, tagging)
+Do when you have bandwidth:
 
-### UI Package
+- [ ] Add **integration/API tests** layer for the server (supertest/jest or vitest + actual DB or testcontainer)
+- [ ] Make **sync scripts configurable** (via small config file) instead of many hard-coded exclusions
+- [ ] **Dynamic/conditional Vite config** based on `mode` (dev vs build vs preview)
+- [ ] Code consistency: standardize arrow functions with forwardRef in UI package
 
-- [ ] Accessibility: keyboard support for ResizablePanel (arrow keys)
-- [ ] Performance: lazy load demo registry by category
-- [ ] Code consistency: standardize arrow functions with forwardRef
+> **Legacy:** See [Potential Migrations](./dev/legacy.md#infrastructure) → Test infrastructure (mocks, TestFactory, ApiTestClient)
+
+---
+
+## Geolocation Features (If Needed)
+
+- [ ] **Geolocation middleware** (IP-based location with consent)
+- [ ] Location caching (24h TTL)
+- [ ] GDPR consent handling
+
+> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `geo.middleware.ts`
+
+---
+
+## Redis Implementation
+
+When you need Redis (high traffic, distributed caching):
+
+- [ ] **Redis cache implementation**
+  - RedisCacheService with full ICacheService interface
+  - RedisClient wrapper with connection management
+  - Startup hooks for cache initialization
+
+> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `RedisCacheService.ts`, `RedisClient.ts`
 
 ---
 
@@ -221,7 +358,7 @@ Enhanced authentication with Passport.js and additional security hardening. See 
 | **Critical** | Security     | Passport.js integration, CSRF hardening  |
 | **High**     | Architecture | V5 migration preparation                 |
 | **High**     | Real-Time    | Foundation (version fields, RecordCache) |
-| **Medium**   | Backend      | Email service, API versioning            |
+| **Medium**   | Backend      | API versioning                           |
 | **Medium**   | Testing      | E2E tests, API integration tests         |
 | **Low**      | UI           | Demo lazy loading, code standardization  |
 
@@ -233,3 +370,14 @@ Enhanced authentication with Passport.js and additional security hardening. See 
 - CHET-Stack features can be implemented independently per phase
 - Security Phase 2 builds on completed Phase 1 foundations
 - All changes require passing format, lint, type-check, and test checks
+
+---
+
+## References
+
+- **In-scope tasks:** See `docs/TODO.md`
+- **Legacy migrations:** See `docs/dev/legacy.md`
+
+---
+
+_Last Updated: 2026-01-18_

@@ -93,6 +93,7 @@
     "msw": "^2.12.7",
     "prettier": "^3.7.4",
     "simple-git-hooks": "^2.11.1",
+    "tsc-alias": "^1.8.16",
     "tsx": "^4.21.0",
     "turbo": "^2.7.2",
     "typescript": "^5.9.3",

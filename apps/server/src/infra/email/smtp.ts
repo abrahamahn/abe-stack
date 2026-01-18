@@ -192,9 +192,9 @@ export class SmtpClient {
 
   private async sendMessage(message: SmtpMessage): Promise<string> {
     const recipients = Array.isArray(message.to) ? message.to : [message.to];
-    const messageId = `<${Date.now().toString()}.${Math.random()
-      .toString(36)
-      .slice(2)}@${this.config.host}>`;
+    const timestamp = String(Date.now());
+    const randomPart = Math.random().toString(36).slice(2);
+    const messageId = `<${timestamp}.${randomPart}@${this.config.host}>`;
 
     // MAIL FROM
     const fromEmail = this.extractEmail(message.from);
@@ -230,7 +230,9 @@ export class SmtpClient {
 
   private buildMessage(message: SmtpMessage, messageId: string): string {
     const recipients = Array.isArray(message.to) ? message.to : [message.to];
-    const boundary = `----=_Part_${Date.now().toString()}_${Math.random().toString(36).slice(2)}`;
+    const boundaryTimestamp = String(Date.now());
+    const boundaryRandom = Math.random().toString(36).slice(2);
+    const boundary = `----=_Part_${boundaryTimestamp}_${boundaryRandom}`;
 
     let content = '';
     content += `Message-ID: ${messageId}\r\n`;

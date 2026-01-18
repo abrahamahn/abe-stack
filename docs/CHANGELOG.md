@@ -1,8 +1,50 @@
 # ABE Stack Changelog
 
-**Last Updated: January 17, 2026**
+**Last Updated: January 18, 2026**
 
 All notable changes to this project are documented here. Format follows semantic versioning principles.
+
+---
+
+## 2026-01-18
+
+### Package Minimization
+
+Replaced large dependencies with lightweight custom implementations to reduce bundle size:
+
+- **Replaced zxcvbn (~800KB) with custom password strength checker**
+  - Created `packages/core/src/validation/passwordStrength.ts` (~5KB)
+  - Implements entropy-based scoring (0-4 scale)
+  - Detects common passwords (200+ entries with l33t speak variants)
+  - Detects keyboard patterns, repeated/sequential characters
+  - Provides user input penalization and crack time estimation
+  - Added comprehensive tests in `passwordStrength.test.ts`
+
+- **Replaced idb-keyval with native IndexedDB wrapper**
+  - Created `packages/sdk/src/persistence/idb.ts` (~100 lines)
+  - Provides `createStore`, `get`, `set`, `del`, `clear`, `keys` functions
+  - Zero external dependencies, same API surface
+
+### Dependency Cleanup
+
+Hoisted common devDependencies to root and removed duplicates:
+
+- **packages/core**: Removed typescript, vitest, tsc-alias, @types/node
+- **packages/sdk**: Removed typescript, vitest, idb-keyval
+- **packages/ui**: Removed typescript, tsc-alias, @types/react, @types/react-dom
+- **Root**: Added tsc-alias (^1.8.16)
+
+### Version Alignment
+
+Fixed version mismatches across packages:
+
+- **@ts-rest/core**: Aligned to ^3.52.1 (was 3.45.1 in packages/core)
+- **zustand**: Aligned to ^5.0.9 (was 5.0.3 in apps/web)
+
+### Lint Fixes
+
+- **smtp.ts**: Fixed template literal type errors by extracting `Date.now()` and `Math.random()` to typed variables
+- **cookie.ts**: Added explicit `: FastifyReply` return types to `setCookie` and `clearCookie` decorator functions
 
 ---
 

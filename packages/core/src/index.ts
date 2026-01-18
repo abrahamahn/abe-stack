@@ -10,5 +10,5 @@ export type { ApiContract, AuthResponse, EmailVerificationRequest, EmailVerifica
 export { toastStore, type ToastMessage } from './stores';
 export { addAuthHeader, createTokenStore, tokenStore } from './utils';
 export type { TokenStore } from './utils';
-export { defaultPasswordConfig, getStrengthColor, getStrengthLabel, validatePassword, validatePasswordBasic } from './validation';
-export type { PasswordConfig, PasswordValidationResult } from './validation';
+export { defaultPasswordConfig, estimatePasswordStrength, getStrengthColor, getStrengthLabel, validatePassword, validatePasswordBasic } from './validation';
+export type { PasswordConfig, PasswordValidationResult, StrengthResult } from './validation';

@@ -198,7 +198,7 @@ export function registerCookies(server: FastifyInstance, options: CookiePluginOp
   // Decorate reply with cookie methods (use function to bind Fastify reply)
   server.decorateReply(
     'setCookie',
-    function (this: FastifyReply, name: string, value: string, opts: CookieOptions = {}) {
+    function (this: FastifyReply, name: string, value: string, opts: CookieOptions = {}): FastifyReply {
       let cookieValue = value;
 
       // Sign if requested
@@ -222,7 +222,7 @@ export function registerCookies(server: FastifyInstance, options: CookiePluginOp
   );
   server.decorateReply(
     'clearCookie',
-    function (this: FastifyReply, name: string, opts: CookieOptions = {}) {
+    function (this: FastifyReply, name: string, opts: CookieOptions = {}): FastifyReply {
       return this.setCookie(name, '', {
         ...opts,
         expires: new Date(0),

@@ -2,11 +2,11 @@
 /**
  * IndexedDB Storage Wrapper
  *
- * Thin wrapper around idb-keyval for persistent storage.
+ * Uses native IndexedDB API for persistent storage.
  * Used by query persister and mutation queue.
  */
 
-import { createStore, get, set, del, clear, keys } from 'idb-keyval';
+import { clear, createStore, del, get, keys, set } from './idb';
 
 // ============================================================================
 // Types

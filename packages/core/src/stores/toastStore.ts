@@ -1,5 +1,4 @@
 // packages/core/src/stores/toastStore.ts
-import { nanoid } from 'nanoid';
 import { create } from 'zustand';
 
 export type ToastMessage = {
@@ -18,7 +17,7 @@ export const toastStore = create<ToastState>((set) => ({
   messages: [],
   show: (msg): void => {
     set((state) => ({
-      messages: [...state.messages, { id: nanoid(), ...msg }],
+      messages: [...state.messages, { id: crypto.randomUUID(), ...msg }],
     }));
   },
   dismiss: (id): void => {

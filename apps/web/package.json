@@ -19,11 +19,10 @@
     "@abe-stack/core": "workspace:*",
     "@abe-stack/ui": "workspace:*",
     "dompurify": "^3.3.1",
-    "nanoid": "^5.0.7",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-router-dom": "^7.11.0",
-    "zustand": "^5.0.3"
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@types/dompurify": "^3.2.0"
