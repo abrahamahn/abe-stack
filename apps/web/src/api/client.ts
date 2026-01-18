@@ -1,9 +1,9 @@
 // apps/web/src/api/client.ts
 import { tokenStore } from '@abe-stack/core';
 import { createApiClient } from '@abe-stack/sdk';
-import { config } from '@config/index';
+import { clientConfig } from '@config';
 
 export const api = createApiClient({
-  baseUrl: config.apiUrl,
+  baseUrl: clientConfig.apiUrl,
   getToken: () => tokenStore.get(),
 });

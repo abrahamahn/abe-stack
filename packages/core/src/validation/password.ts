@@ -40,7 +40,7 @@ export interface PasswordValidationResult {
  * @param config - Password configuration
  * @returns PasswordValidationResult
  */
-export async function validatePassword(
+export function validatePassword(
   password: string,
   userInputs: string[] = [],
   config: PasswordConfig = defaultPasswordConfig,
@@ -58,7 +58,7 @@ export async function validatePassword(
 
   // If basic length checks fail, return early
   if (errors.length > 0) {
-    return {
+    return Promise.resolve({
       isValid: false,
       score: 0,
       errors,
@@ -67,7 +67,7 @@ export async function validatePassword(
         suggestions: [],
       },
       crackTimeDisplay: 'instant',
-    };
+    });
   }
 
   // Use custom strength estimation
@@ -80,7 +80,7 @@ export async function validatePassword(
     );
   }
 
-  return {
+  return Promise.resolve({
     isValid: errors.length === 0,
     score: result.score,
     errors,
@@ -89,7 +89,7 @@ export async function validatePassword(
       suggestions: result.feedback.suggestions,
     },
     crackTimeDisplay: result.crackTimeDisplay,
-  };
+  });
 }
 
 /**

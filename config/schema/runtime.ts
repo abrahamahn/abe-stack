@@ -1,4 +1,4 @@
-// WARNING: This file is auto-generated. DO NOT EDIT DIRECTLY.
+// config/schema/runtime.ts
 // Edit config/schema/*.ts and run: pnpm config:generate
 
 /**

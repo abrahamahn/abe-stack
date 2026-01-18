@@ -1,5 +1,6 @@
 // apps/web/src/features/index.ts
 // @auto-generated - Do not edit manually
+/* eslint-disable @typescript-eslint/no-deprecated */
 
 export {
   AuthContext,

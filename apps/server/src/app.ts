@@ -134,7 +134,7 @@ export class App implements IServiceContainer {
     registerRoutes(this._server, this.context);
 
     // Register WebSocket support
-    await registerWebSocket(this._server, this.context);
+    registerWebSocket(this._server, this.context);
 
     // Register health endpoints
     this.registerHealthEndpoints();

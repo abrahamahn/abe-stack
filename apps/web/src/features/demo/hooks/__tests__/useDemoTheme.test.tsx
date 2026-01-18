@@ -12,7 +12,6 @@ let mockThemeMode = 'system';
 
 vi.mock('@abe-stack/ui', () => ({
   useLocalStorage: (_key: string, defaultValue: string): [string, typeof mockSetThemeMode] => {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (mockThemeMode === undefined) mockThemeMode = defaultValue;
     return [mockThemeMode, mockSetThemeMode];
   },

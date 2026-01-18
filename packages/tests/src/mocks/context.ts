@@ -5,8 +5,6 @@
  * Creates mock AppContext objects for testing handlers and services.
  */
 
-import { vi } from 'vitest';
-
 import { createMockDb, type MockDbClient } from './database';
 import { createMockLogger, type MockLogger } from './logger';
 
@@ -129,10 +127,10 @@ export function createMockContext(overrides?: {
  */
 export function createSpyContext(): MockAppContext & {
   spies: {
-    dbInsert: ReturnType<typeof vi.fn>;
-    dbSelect: ReturnType<typeof vi.fn>;
-    logInfo: ReturnType<typeof vi.fn>;
-    logError: ReturnType<typeof vi.fn>;
+    dbInsert: MockDbClient['insert'];
+    dbSelect: MockDbClient['select'];
+    logInfo: MockLogger['info'];
+    logError: MockLogger['error'];
   };
 } {
   const ctx = createMockContext();

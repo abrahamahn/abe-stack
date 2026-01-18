@@ -5,8 +5,6 @@
  * Fastify hooks for request logging with correlation IDs.
  */
 
-import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-
 import {
   createRequestContext,
   createRequestLogger,
@@ -15,13 +13,14 @@ import {
 } from './logger';
 
 import type { Logger, RequestContext } from './types';
+import type { FastifyInstance } from 'fastify';
 
 // Extend Fastify request with our custom properties
 declare module 'fastify' {
   interface FastifyRequest {
     correlationId: string;
     requestContext: RequestContext;
-    log: Logger;
+    logger: Logger; // Our wrapped logger with correct signature
   }
 }
 
@@ -58,14 +57,14 @@ export function registerLoggingMiddleware(server: FastifyInstance): void {
     request.requestContext = requestContext;
 
     // Create request-scoped logger
-    request.log = createRequestLogger(server.log, requestContext);
+    request.logger = createRequestLogger(server.log, requestContext);
   });
 
   // Log request completion
   server.addHook('onResponse', async (request, reply) => {
     const duration = reply.elapsedTime;
 
-    request.log.info('Request completed', {
+    request.logger.info('Request completed', {
       method: request.method,
       path: request.url,
       statusCode: reply.statusCode,
@@ -75,7 +74,7 @@ export function registerLoggingMiddleware(server: FastifyInstance): void {
 
   // Log errors
   server.addHook('onError', async (request, reply, error) => {
-    request.log.error(error, {
+    request.logger.error(error, {
       method: request.method,
       path: request.url,
       statusCode: reply.statusCode,

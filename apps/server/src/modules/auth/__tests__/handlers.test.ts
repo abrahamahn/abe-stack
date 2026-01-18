@@ -20,8 +20,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { verifyToken as verifyJwtToken } from '../utils';
 
-import type { ReplyWithCookies, RequestWithCookies } from '@auth/handlers';
-import type { AppContext } from '@shared';
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '@shared';
 
 // ============================================================================
 // Mock Dependencies

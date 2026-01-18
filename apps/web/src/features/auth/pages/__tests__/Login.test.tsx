@@ -2,7 +2,7 @@
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -100,7 +100,7 @@ describe('LoginPage', () => {
     it('should render password input field', () => {
       renderLoginPage();
 
-      const passwordInput = screen.getByLabelText(/password/i);
+      const passwordInput = screen.getByLabelText('Password');
       expect(passwordInput).toBeInTheDocument();
       expect(passwordInput).toHaveAttribute('type', 'password');
     });
@@ -137,7 +137,7 @@ describe('LoginPage', () => {
     it('should update password field on input', () => {
       renderLoginPage();
 
-      const passwordInput = screen.getByLabelText(/password/i);
+      const passwordInput = screen.getByLabelText('Password');
       fireEvent.change(passwordInput, { target: { value: 'password123' } });
 
       expect(passwordInput).toHaveValue('password123');
@@ -147,8 +147,8 @@ describe('LoginPage', () => {
       mockLogin.mockResolvedValueOnce(undefined);
       renderLoginPage();
 
-      const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/password/i);
+      const emailInput = screen.getByLabelText('Email');
+      const passwordInput = screen.getByLabelText('Password');
       const loginButton = screen.getByRole('button', { name: /^login$/i });
 
       fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
@@ -211,13 +211,15 @@ describe('LoginPage', () => {
       mockLogin.mockRejectedValueOnce(new Error('Invalid credentials'));
       renderLoginPage();
 
-      const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/password/i);
+      const emailInput = screen.getByLabelText('Email');
+      const passwordInput = screen.getByLabelText('Password');
       const loginButton = screen.getByRole('button', { name: /^login$/i });
 
-      fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-      fireEvent.change(passwordInput, { target: { value: 'wrongpassword' } });
-      fireEvent.click(loginButton);
+      await act(async () => {
+        fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+        fireEvent.change(passwordInput, { target: { value: 'wrongpassword' } });
+        fireEvent.click(loginButton);
+      });
 
       await waitFor(() => {
         expect(screen.getByText(/invalid credentials/i)).toBeInTheDocument();
@@ -228,16 +230,18 @@ describe('LoginPage', () => {
       mockLogin.mockRejectedValueOnce('Unknown error');
       renderLoginPage();
 
-      const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/password/i);
+      const emailInput = screen.getByLabelText('Email');
+      const passwordInput = screen.getByLabelText('Password');
       const loginButton = screen.getByRole('button', { name: /^login$/i });
 
-      fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-      fireEvent.change(passwordInput, { target: { value: 'password' } });
-      fireEvent.click(loginButton);
+      await act(async () => {
+        fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+        fireEvent.change(passwordInput, { target: { value: 'password' } });
+        fireEvent.click(loginButton);
+      });
 
       await waitFor(() => {
-        expect(screen.getByText(/login failed/i)).toBeInTheDocument();
+        expect(screen.getByText('Login failed')).toBeInTheDocument();
       });
     });
   });
@@ -253,7 +257,7 @@ describe('LoginPage', () => {
     it('should have required attribute on password input', () => {
       renderLoginPage();
 
-      const passwordInput = screen.getByLabelText(/password/i);
+      const passwordInput = screen.getByLabelText('Password');
       expect(passwordInput).toHaveAttribute('required');
     });
 
@@ -270,8 +274,8 @@ describe('LoginPage', () => {
       mockLogin.mockResolvedValue(undefined);
       renderLoginPage();
 
-      const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/password/i);
+      const emailInput = screen.getByLabelText('Email');
+      const passwordInput = screen.getByLabelText('Password');
       const loginButton = screen.getByRole('button', { name: /^login$/i });
 
       fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
@@ -311,7 +315,7 @@ describe('LoginPage', () => {
     it('should handle extremely long password input', () => {
       renderLoginPage();
 
-      const passwordInput = screen.getByLabelText(/password/i);
+      const passwordInput = screen.getByLabelText('Password');
       const longPassword = 'a'.repeat(10000);
 
       fireEvent.change(passwordInput, { target: { value: longPassword } });
@@ -333,7 +337,7 @@ describe('LoginPage', () => {
     it('should handle unicode characters in password', () => {
       renderLoginPage();
 
-      const passwordInput = screen.getByLabelText(/password/i);
+      const passwordInput = screen.getByLabelText('Password');
       const unicodePassword = '密码パスワード🔐';
 
       fireEvent.change(passwordInput, { target: { value: unicodePassword } });
@@ -346,8 +350,8 @@ describe('LoginPage', () => {
       mockLogin.mockImplementation(() => new Promise(() => {}));
       renderLoginPage();
 
-      const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/password/i);
+      const emailInput = screen.getByLabelText('Email');
+      const passwordInput = screen.getByLabelText('Password');
       const loginButton = screen.getByRole('button', { name: /^login$/i });
 
       fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
@@ -400,8 +404,8 @@ describe('LoginPage', () => {
         </QueryClientProvider>,
       );
 
-      const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText(/password/i);
+      const emailInput = screen.getByLabelText('Email');
+      const passwordInput = screen.getByLabelText('Password');
       const loginButton = screen.getByRole('button', { name: /^login$/i });
 
       fireEvent.change(emailInput, { target: { value: 'test@example.com' } });

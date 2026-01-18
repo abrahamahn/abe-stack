@@ -5,17 +5,17 @@
  * Provides authentication and authorization functionality.
  */
 
+// Routes (for auto-registration)
+export { authRoutes } from './routes';
+
 // Middleware factories (use these to create guards with your JWT secret)
 export {
-  extractTokenPayload,
-  createRequireAuth,
-  createRequireRole,
-  createAuthGuard,
-  isAdmin,
+  createAuthGuard, createRequireAuth,
+  createRequireRole, extractTokenPayload, isAdmin
 } from '@auth/middleware';
 
 // Handlers
-export { handleRegister, handleLogin, handleRefresh, handleLogout } from '@auth/handlers';
+export { handleLogin, handleLogout, handleRefresh, handleRegister } from '@auth/handlers';
 
 // Types (re-exported from shared)
 export type { ReplyWithCookies, RequestWithCookies } from '@shared';
@@ -27,28 +27,20 @@ export {
   refreshUserTokens,
   registerUser,
   type AuthResult,
-  type RefreshResult,
+  type RefreshResult
 } from '@auth/service';
 
 // Utils (for direct use if needed)
 export {
+  cleanupExpiredTokens,
   // JWT
   createAccessToken,
   createRefreshToken,
-  getRefreshTokenExpiry,
-  JwtError,
-  type TokenPayload,
-  // Password
-  hashPassword,
-  verifyPassword,
-  verifyPasswordSafe,
-  needsRehash,
   // Refresh token management
   createRefreshTokenFamily,
-  rotateRefreshToken,
-  revokeTokenFamily,
-  revokeAllUserTokens,
-  cleanupExpiredTokens,
   // Request utilities
-  extractRequestInfo,
+  extractRequestInfo, getRefreshTokenExpiry,
+  // Password
+  hashPassword, JwtError, needsRehash, revokeAllUserTokens, revokeTokenFamily, rotateRefreshToken, verifyPassword,
+  verifyPasswordSafe, type TokenPayload
 } from './utils';

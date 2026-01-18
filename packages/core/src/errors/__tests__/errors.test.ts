@@ -1,4 +1,6 @@
 // packages/core/src/errors/__tests__/errors.test.ts
+import { describe, expect, test } from 'vitest';
+
 import {
   AccountLockedError,
   AppError,
@@ -23,7 +25,6 @@ import {
   ValidationError,
   WeakPasswordError,
 } from '../index';
-import { describe, expect, test } from 'vitest';
 
 describe('Core Errors', () => {
   describe('AppError', () => {

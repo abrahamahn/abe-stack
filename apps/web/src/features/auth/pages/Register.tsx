@@ -1,6 +1,4 @@
 // apps/web/src/features/auth/pages/Register.tsx
-import { useState } from 'react';
-
 import {
   Button,
   Card,
@@ -11,8 +9,8 @@ import {
   Text,
   useHistoryNav,
 } from '@abe-stack/ui';
-
 import { useAuth } from '@auth/hooks';
+import { useState } from 'react';
 
 import type { ChangeEvent, FormEvent, JSX } from 'react';
 

@@ -38,7 +38,8 @@ function openDB(store: IDBStore): Promise<IDBDatabase> {
     const request = indexedDB.open(store.dbName, 1);
 
     request.onerror = (): void => {
-      reject(request.error);
+      const error = request.error;
+      reject(error instanceof Error ? error : new Error(String(error)));
     };
 
     request.onsuccess = (): void => {
@@ -69,7 +70,8 @@ async function withStore<T>(
     const request = callback(objectStore);
 
     request.onerror = (): void => {
-      reject(request.error);
+      const error = request.error;
+      reject(error instanceof Error ? error : new Error(String(error)));
     };
 
     request.onsuccess = (): void => {
@@ -82,7 +84,8 @@ async function withStore<T>(
 
     tx.onerror = (): void => {
       db.close();
-      reject(tx.error);
+      const error = tx.error;
+      reject(error instanceof Error ? error : new Error(String(error)));
     };
   });
 }

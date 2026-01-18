@@ -75,6 +75,7 @@ Add real-time collaboration, offline support, and optimistic updates. See [Archi
 - [ ] Add `/api/realtime/write` endpoint
 - [ ] Add `/api/realtime/getRecords` endpoint
 
+> **Partial progress:** WriteService (`apps/server/src/infra/write/`) provides transaction handling, version bumping, and auto-pubsub - can be used as foundation for realtime write endpoint
 > **Legacy:** See [Database Utilities](./dev/legacy.md#database-utilities) → `TransactionService.ts`, `BatchedQueue.ts`
 
 ### Phase 2: Real-Time Sync
@@ -284,19 +285,22 @@ For critical infrastructure, define interfaces.
 Better debugging in production.
 
 - [ ] Request context logging (IP, method, path, user agent)
-- [ ] Error serialization with `.toJSON()`
-- [ ] Correlation IDs for tracing requests
+- [x] Error serialization with `.toJSON()` - AppError in `@abe-stack/core/errors`
+- [x] Correlation IDs for tracing requests - `apps/server/src/infra/logger/`
 - [ ] Conditional logging by severity (500+ vs client errors)
 
+> **Implementation:** Errors in `packages/core/src/errors/`, Logging in `apps/server/src/infra/logger/`
 > **Legacy:** See [Error Classes](./dev/legacy.md#error-classes); [Backend Utilities](./dev/legacy.md#backend-utilities) → `ErrorHandler.ts`, `LoggerService.ts`; [Potential Migrations](./dev/legacy.md#structured-logging)
 
 ### Advanced Architecture
 
 - [ ] Autoindex API endpoints from filesystem (route registry generator)
-- [ ] Modular server composition (ApiServer/FileServer/QueueServer/PubSubServer)
+- [x] Route registry pattern (`registerRouteMap` - DRY route registration from Chet-stack)
+- [x] Modular server composition (QueueServer pattern from Chet-stack)
 - [ ] API versioning and OpenAPI/typed client generation
 - [ ] Generate fetch/React Query clients from ts-rest contract
 
+> **Implementation:** `apps/server/src/modules/router/` (route registry), `apps/server/src/infra/queue/` (QueueServer)
 > **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `ServerManager.ts`, `ApplicationLifecycle.ts`
 
 ---
@@ -361,6 +365,8 @@ When you need Redis (high traffic, distributed caching):
 | **Medium**   | Backend      | API versioning                           |
 | **Medium**   | Testing      | E2E tests, API integration tests         |
 | **Low**      | UI           | Demo lazy loading, code standardization  |
+
+> **Recent additions:** QueueServer (`apps/server/src/infra/queue/`), WriteService (`apps/server/src/infra/write/`), RouteMap (`apps/server/src/modules/router/`)
 
 ---
 

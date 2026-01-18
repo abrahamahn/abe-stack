@@ -92,6 +92,7 @@ export type {
   ReplyWithCookies,
   RequestWithCookies,
   // Service interfaces
+  // eslint-disable-next-line @typescript-eslint/no-deprecated
   Logger,
   EmailService,
   EmailOptions,

@@ -89,11 +89,23 @@
       "@pubsub/*": [
         "./src/infra/pubsub/*"
       ],
+      "@queue": [
+        "./src/infra/queue"
+      ],
+      "@queue/*": [
+        "./src/infra/queue/*"
+      ],
       "@rate-limit": [
         "./src/infra/rate-limit"
       ],
       "@rate-limit/*": [
         "./src/infra/rate-limit/*"
+      ],
+      "@router": [
+        "./src/infra/router"
+      ],
+      "@router/*": [
+        "./src/infra/router/*"
       ],
       "@schema": [
         "./src/infra/database/schema"
@@ -130,6 +142,12 @@
       ],
       "@websocket/*": [
         "./src/infra/websocket/*"
+      ],
+      "@write": [
+        "./src/infra/write"
+      ],
+      "@write/*": [
+        "./src/infra/write/*"
       ]
     },
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.server.tsbuildinfo"

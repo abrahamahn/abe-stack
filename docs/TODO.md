@@ -5,6 +5,22 @@
 
 ---
 
+## Unused Code to Integrate
+
+Code that exists but isn't used anywhere (only exported + tested). Integrate when implementing related tasks.
+
+| Unused Code | Package | Related Task | Notes |
+|-------------|---------|--------------|-------|
+| `MutationQueue`, `createMutationQueue` | sdk/persistence | ROADMAP: Offline Support (Phase 3) | Ready for offline mutation handling |
+| `localStorageQueue` | sdk/persistence | ROADMAP: Offline Support (Phase 3) | Fallback for browsers without IndexedDB |
+| `useOnScreen` | ui/hooks | UI Package: lazy load demo registry | Intersection observer for lazy loading |
+| `useCopyToClipboard` | ui/hooks | Demo copy button (currently uses raw API) | Hook available but demo uses `navigator.clipboard` directly |
+| `usePanelConfig` | ui/hooks | ResizablePanel layouts | Panel configuration state management |
+
+> **Note:** UI components like Accordion, Slider, RadioGroup, Popover, Pagination, Kbd, MenuItem, EnvironmentBadge are all **showcased in the demo catalog** - they're available and documented, just not yet used in production features.
+
+---
+
 ## Foundation Status ✅
 
 Everything needed to build and scale to Series A is complete.
@@ -103,16 +119,17 @@ Required for: messenger, social feeds, real-time notifications
 
 > **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `WebSocketService.ts`, `WebSocketTypes.ts`, `WebSocketAuthService.ts`; [Frontend Utilities](./dev/legacy.md#frontend-utilities) → `WebsocketPubsubClient.ts`
 
-### Background Jobs (Backend)
+### Background Jobs (Backend) ✅
 
 Required for: AI processing, audio transcoding, email campaigns
 
-- [ ] Job queue with pg-boss or BullMQ
+- [x] Job queue with PostgreSQL persistence (QueueServer pattern from Chet-stack)
 - [ ] Job types: email, media-processing, ai-inference
-- [ ] Retry with exponential backoff
-- [ ] Job status tracking with statistics
-- [ ] Processor registration pattern
+- [x] Retry with exponential backoff and jitter
+- [x] Job status tracking (pending/processing/completed/failed)
+- [x] Processor registration pattern (TaskHandlers)
 
+> **Implementation:** `apps/server/src/infra/queue/` - QueueServer, PostgresQueueStore, MemoryQueueStore
 > **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `JobService.ts`, `JobQueue.ts`, `FileJobStorage.ts`, `baseJobProcessor.ts`, `email-notification.job.processor.ts`
 
 ### Push Notifications
@@ -182,10 +199,11 @@ Required for: passwordless auth option
 
 ### Backend
 
-- [ ] Health checks and readiness endpoints (expand existing)
-- [ ] Request ID middleware with correlation IDs
+- [x] Health checks and readiness endpoints (expand existing) - `/health/detailed`, `/health/ready`, `/health/live`, `/health/routes`
+- [x] Request ID middleware with correlation IDs - `apps/server/src/infra/logger/`
 - [ ] Password reset flow (already have email service)
 
+> **Implementation:** Health checks in `apps/server/src/app.ts`, Logging in `apps/server/src/infra/logger/`
 > **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `ServerManager.ts` (health/metrics), `LoggerService.ts` (correlation IDs), `ResetService.ts` (password reset); [Auth DTOs](./dev/legacy.md#auth-dtos) → `password-reset.dto`; [Potential Migrations](./dev/legacy.md#structured-logging)
 
 ### Frontend (Web)
@@ -243,7 +261,10 @@ Required for: passwordless auth option
 
 ## Architecture
 
-- [ ] Environment-based DI (entrypoints assemble env, no side-effects on import)
+- [x] Environment-based DI (entrypoints assemble env, no side-effects on import)
+  - AppContext pattern in `apps/server/src/app.ts`
+  - WriteService and QueueServer receive dependencies via options object
+  - No side-effects on import (Chet-stack pattern)
 
 ---
 
@@ -260,7 +281,7 @@ Required for: passwordless auth option
 - [ ] First paying customers on at least one product
 - [ ] <100ms P95 latency on critical paths
 - [ ] Zero security incidents
-- [ ] Job queue processing reliably
+- [x] Job queue processing reliably (QueueServer implemented)
 - [ ] Email delivery working (verification, notifications)
 
 ### Series A

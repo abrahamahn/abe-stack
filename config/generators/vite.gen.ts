@@ -10,7 +10,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 import { aliasDefinitions } from '../schema/build';
-import { createLogger, ROOT, writeTsFile } from './utils';
+import { createLogger, ROOT, writeTsFile, TS_HEADER } from './utils';
 
 interface GeneratorResult {
   generated: string[];
@@ -213,10 +213,9 @@ export function generateViteAliases(
 
   if (checkOnly) {
     const existing = fs.existsSync(runtimePath) ? fs.readFileSync(runtimePath, 'utf-8') : '';
-    // Check if content differs (ignoring the auto-generated header)
-    const existingWithoutHeader = existing.replace(/^\/\/ config\/schema\/runtime\.ts\n/, '');
-    const contentWithoutHeader = content;
-    if (existingWithoutHeader !== contentWithoutHeader) {
+    // Compare with full content including header (same as writeTsFile would produce)
+    const fullContent = TS_HEADER + '\n' + content;
+    if (existing !== fullContent) {
       result.generated.push(runtimePath);
     } else {
       result.unchanged.push(runtimePath);

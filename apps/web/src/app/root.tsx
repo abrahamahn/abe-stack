@@ -1,7 +1,7 @@
 // apps/web/src/app/root.tsx
 import { toastStore } from '@abe-stack/core';
 import { ScrollArea, Toaster } from '@abe-stack/ui';
-import { AppProviders } from '@app/providers';
+import { AppProvider } from '@app/ClientEnvironment';
 import { DemoPage } from '@demo';
 import { LoginPage, ProtectedRoute, RegisterPage } from '@features/auth';
 import { DashboardPage } from '@features/dashboard';
@@ -17,7 +17,7 @@ function AppToaster(): ReactElement {
 
 export function App(): ReactElement {
   return (
-    <AppProviders>
+    <AppProvider>
       <div className="theme" style={{ height: '100vh' }}>
         <ScrollArea style={{ height: '100%' }}>
           <Routes>
@@ -36,8 +36,8 @@ export function App(): ReactElement {
             <Route path="/clean" element={<HomePage />} />
           </Routes>
         </ScrollArea>
-        <AppToaster />
       </div>
-    </AppProviders>
+      <AppToaster />
+    </AppProvider>
   );
 }

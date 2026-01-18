@@ -1,16 +1,17 @@
 // packages/ui/src/elements/PasswordInput.tsx
-import { forwardRef, useState, type ComponentPropsWithoutRef } from 'react';
-
 import {
   estimatePasswordStrength,
   getStrengthColor,
   getStrengthLabel,
 } from '@abe-stack/core';
+import { forwardRef, useState } from 'react';
 
 import { Button } from './Button';
 import { Text } from './Text';
 
 import '../styles/elements.css';
+
+import type { ComponentPropsWithoutRef } from 'react';
 
 type PasswordInputProps = Omit<ComponentPropsWithoutRef<'input'>, 'type'> & {
   /** Label for the input */
@@ -112,7 +113,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>((p
             <div
               className="password-strength-fill"
               style={{
-                width: `${(strength.score + 1) * 20}%`,
+                width: `${String((strength.score + 1) * 20)}%`,
                 backgroundColor: getStrengthColor(strength.score),
               }}
             />

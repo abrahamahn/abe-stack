@@ -84,9 +84,9 @@ export function createMockAdmin(overrides?: Partial<MockUser>): MockUser {
 export function createMockUsers(count: number, overrides?: Partial<MockUser>): MockUser[] {
   return Array.from({ length: count }, (_, i) =>
     createMockUser({
-      id: `user-${i + 1}`,
-      email: `user${i + 1}@example.com`,
-      name: `User ${i + 1}`,
+      id: `user-${String(i + 1)}`,
+      email: `user${String(i + 1)}@example.com`,
+      name: `User ${String(i + 1)}`,
       ...overrides,
     }),
   );

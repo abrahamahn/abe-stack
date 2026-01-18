@@ -35,12 +35,12 @@ export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;
  * Type guard for success responses
  */
 export function isSuccessResponse<T>(response: ApiResponse<T>): response is ApiSuccessResponse<T> {
-  return response.ok === true;
+  return response.ok;
 }
 
 /**
  * Type guard for error responses
  */
 export function isErrorResponse<T>(response: ApiResponse<T>): response is ApiErrorResponse {
-  return response.ok === false;
+  return !response.ok;
 }

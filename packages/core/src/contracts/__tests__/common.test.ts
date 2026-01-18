@@ -1,0 +1,166 @@
+// packages/core/src/contracts/__tests__/common.test.ts
+import { describe, expect, it } from 'vitest';
+
+import { errorResponseSchema, USER_ROLES, userRoleSchema, userSchema } from '../common';
+
+// ============================================================================
+// Common Schemas Tests
+// ============================================================================
+
+describe('common contracts', () => {
+  describe('USER_ROLES', () => {
+    it('should have the expected roles', () => {
+      expect(USER_ROLES).toEqual(['user', 'admin', 'moderator']);
+    });
+
+    it('should be a tuple', () => {
+      expect(USER_ROLES.length).toBe(3);
+    });
+
+    it('should have user as first role', () => {
+      expect(USER_ROLES[0]).toBe('user');
+    });
+
+    it('should have admin as second role', () => {
+      expect(USER_ROLES[1]).toBe('admin');
+    });
+
+    it('should have moderator as third role', () => {
+      expect(USER_ROLES[2]).toBe('moderator');
+    });
+  });
+
+  describe('userRoleSchema', () => {
+    it('should accept valid roles', () => {
+      expect(userRoleSchema.parse('user')).toBe('user');
+      expect(userRoleSchema.parse('admin')).toBe('admin');
+      expect(userRoleSchema.parse('moderator')).toBe('moderator');
+    });
+
+    it('should reject invalid roles', () => {
+      expect(() => userRoleSchema.parse('invalid')).toThrow();
+      expect(() => userRoleSchema.parse('')).toThrow();
+    });
+
+    it('should reject numeric values', () => {
+      expect(() => userRoleSchema.parse(1)).toThrow();
+    });
+
+    it('should reject null', () => {
+      expect(() => userRoleSchema.parse(null)).toThrow();
+    });
+
+    it('should reject undefined', () => {
+      expect(() => userRoleSchema.parse(undefined)).toThrow();
+    });
+  });
+
+  describe('userSchema', () => {
+    it('should accept valid user', () => {
+      const valid = {
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        email: 'test@example.com',
+        name: 'John',
+        role: 'user' as const,
+      };
+      expect(userSchema.parse(valid)).toEqual(valid);
+    });
+
+    it('should accept null name', () => {
+      const valid = {
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        email: 'test@example.com',
+        name: null,
+        role: 'admin' as const,
+      };
+      expect(userSchema.parse(valid)).toEqual(valid);
+    });
+
+    it('should reject invalid uuid', () => {
+      expect(() =>
+        userSchema.parse({ id: 'not-a-uuid', email: 'test@example.com', name: null, role: 'user' }),
+      ).toThrow();
+    });
+
+    it('should reject invalid email', () => {
+      expect(() =>
+        userSchema.parse({
+          id: '123e4567-e89b-12d3-a456-426614174000',
+          email: 'not-an-email',
+          name: null,
+          role: 'user',
+        }),
+      ).toThrow();
+    });
+
+    it('should reject invalid role', () => {
+      expect(() =>
+        userSchema.parse({
+          id: '123e4567-e89b-12d3-a456-426614174000',
+          email: 'test@example.com',
+          name: null,
+          role: 'superadmin',
+        }),
+      ).toThrow();
+    });
+
+    it('should accept all valid roles', () => {
+      for (const role of USER_ROLES) {
+        const user = {
+          id: '123e4567-e89b-12d3-a456-426614174000',
+          email: 'test@example.com',
+          name: 'Test',
+          role,
+        };
+        expect(userSchema.parse(user).role).toBe(role);
+      }
+    });
+  });
+
+  describe('errorResponseSchema', () => {
+    it('should accept valid error response', () => {
+      const valid = {
+        error: 'BadRequestError',
+        message: 'Something went wrong',
+        code: 'VALIDATION_ERROR',
+        details: { field: 'email' },
+      };
+      expect(errorResponseSchema.parse(valid)).toEqual(valid);
+    });
+
+    it('should accept minimal error response', () => {
+      const minimal = { error: 'InternalError', message: 'Server error' };
+      expect(errorResponseSchema.parse(minimal)).toEqual(minimal);
+    });
+
+    it('should accept error without code', () => {
+      const noCode = { error: 'Error', message: 'Message' };
+      expect(errorResponseSchema.parse(noCode)).toEqual(noCode);
+    });
+
+    it('should accept error without details', () => {
+      const noDetails = { error: 'Error', message: 'Message', code: 'CODE' };
+      expect(errorResponseSchema.parse(noDetails)).toEqual(noDetails);
+    });
+
+    it('should reject missing error field', () => {
+      expect(() => errorResponseSchema.parse({ message: 'Message' })).toThrow();
+    });
+
+    it('should reject missing message field', () => {
+      expect(() => errorResponseSchema.parse({ error: 'Error' })).toThrow();
+    });
+
+    it('should accept complex details object', () => {
+      const complex = {
+        error: 'ValidationError',
+        message: 'Validation failed',
+        details: {
+          fields: ['email', 'password'],
+          nested: { deep: { value: 123 } },
+        },
+      };
+      expect(errorResponseSchema.parse(complex)).toEqual(complex);
+    });
+  });
+});

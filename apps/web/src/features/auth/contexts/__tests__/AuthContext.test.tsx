@@ -1,415 +1,282 @@
 // apps/web/src/features/auth/contexts/__tests__/AuthContext.test.tsx
 /** @vitest-environment jsdom */
+/**
+ * AuthContext Tests
+ *
+ * Note: The AuthContext is now a backward-compatibility wrapper that:
+ * 1. Uses useAuth() hook internally (which uses ClientEnvironment)
+ * 2. Provides the auth state via React context
+ *
+ * These tests verify the backward-compatibility layer works correctly.
+ * For comprehensive auth testing, see useAuth.test.tsx.
+ */
+import { ClientEnvironmentProvider } from '@app';
+import { QueryClient } from '@tanstack/react-query';
 import '@testing-library/jest-dom/vitest';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import React from 'react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import React, { useContext } from 'react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Define mocks at module level using vi.hoisted to ensure they're available during mock hoisting
-const { mockTokenStore, mockApi } = vi.hoisted(() => ({
-  mockTokenStore: {
-    get: vi.fn(() => null),
-    set: vi.fn(),
-    clear: vi.fn(),
-  },
-  mockApi: {
-    getCurrentUser: vi.fn(),
-    login: vi.fn(),
-    register: vi.fn(),
-  },
-}));
+import { AuthContext, AuthProvider } from '../AuthContext';
 
-vi.mock('@abe-stack/core', () => ({
-  tokenStore: mockTokenStore,
-}));
+import type { ClientConfig, ClientEnvironment } from '@app';
+import type { AuthService } from '@features/auth';
 
-vi.mock('../../../../api/client', () => ({
-  api: mockApi,
-}));
+// Create a mock AuthService with controllable state
+function createMockAuthService(initialState?: {
+  user?: { id: string; email: string; name: string | null; role: 'user' | 'admin' } | null;
+  isLoading?: boolean;
+  isAuthenticated?: boolean;
+}): AuthService {
+  let state = {
+    user: initialState?.user ?? null,
+    isLoading: initialState?.isLoading ?? false,
+    isAuthenticated: initialState?.isAuthenticated ?? false,
+  };
 
-import { useAuth } from '../../hooks/useAuth';
-import { AuthProvider } from '../AuthContext';
+  const listeners = new Set<() => void>();
+
+  const notifyListeners = (): void => {
+    listeners.forEach((l) => l());
+  };
+
+  return {
+    getState: () => state,
+    subscribe: (listener: () => void) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    login: vi.fn().mockImplementation(async () => {
+      state = {
+        user: { id: '1', email: 'test@example.com', name: 'Test User', role: 'user' },
+        isLoading: false,
+        isAuthenticated: true,
+      };
+      notifyListeners();
+    }),
+    register: vi.fn().mockImplementation(async () => {
+      state = {
+        user: { id: '1', email: 'new@example.com', name: 'New User', role: 'user' },
+        isLoading: false,
+        isAuthenticated: true,
+      };
+      notifyListeners();
+    }),
+    logout: vi.fn().mockImplementation(async () => {
+      state = { user: null, isLoading: false, isAuthenticated: false };
+      notifyListeners();
+    }),
+    refreshToken: vi.fn().mockResolvedValue(true),
+    fetchCurrentUser: vi.fn(),
+    destroy: vi.fn(),
+  } as unknown as AuthService;
+}
+
+// Create mock environment
+function createMockEnvironment(authService?: AuthService): ClientEnvironment {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: { retry: false },
+    },
+  });
+
+  const mockConfig: ClientConfig = {
+    mode: 'test',
+    isDev: false,
+    isProd: false,
+    apiUrl: 'http://localhost:8080',
+    tokenRefreshInterval: 13 * 60 * 1000,
+    uiVersion: '1.0.0',
+  };
+
+  return {
+    config: mockConfig,
+    queryClient,
+    auth: authService ?? createMockAuthService(),
+  };
+}
 
 describe('AuthProvider', () => {
-  let queryClient: QueryClient;
+  let mockEnv: ClientEnvironment;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockTokenStore.get.mockReturnValue(null);
-    queryClient = new QueryClient({
-      defaultOptions: {
-        queries: { retry: false },
-      },
-    });
+    mockEnv = createMockEnvironment();
   });
 
-  const createWrapper = (): React.FC<{ children: React.ReactNode }> => {
+  const createWrapper = (
+    env: ClientEnvironment = mockEnv,
+  ): React.FC<{ children: React.ReactNode }> => {
     return ({ children }: { children: React.ReactNode }): React.ReactElement => (
-      <QueryClientProvider client={queryClient}>
+      <ClientEnvironmentProvider value={env}>
         <AuthProvider>{children}</AuthProvider>
-      </QueryClientProvider>
+      </ClientEnvironmentProvider>
     );
+  };
+
+  // Helper to access AuthContext directly
+  const useAuthContext = () => {
+    return useContext(AuthContext);
   };
 
   describe('Initial State', () => {
     it('should provide initial auth context with null user', () => {
-      const { result } = renderHook(() => useAuth(), {
+      const { result } = renderHook(() => useAuthContext(), {
         wrapper: createWrapper(),
       });
 
-      expect(result.current.user).toBeNull();
-      expect(result.current.isAuthenticated).toBe(false);
+      expect(result.current?.user).toBeNull();
+      expect(result.current?.isAuthenticated).toBe(false);
     });
 
     it('should not be loading when no token exists', () => {
-      const { result } = renderHook(() => useAuth(), {
+      const { result } = renderHook(() => useAuthContext(), {
         wrapper: createWrapper(),
       });
 
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current?.isLoading).toBe(false);
     });
   });
 
   describe('Login', () => {
-    it('should call api.login with credentials', async () => {
-      mockApi.login.mockResolvedValueOnce({
-        token: 'test-token',
-        user: { id: '1', email: 'test@example.com', name: 'Test' },
-      });
-
-      const { result } = renderHook(() => useAuth(), {
+    it('should provide login function', async () => {
+      const { result } = renderHook(() => useAuthContext(), {
         wrapper: createWrapper(),
       });
 
-      await act(async () => {
-        await result.current.login({ email: 'test@example.com', password: 'password' });
-      });
-
-      expect(mockApi.login).toHaveBeenCalledWith({
-        email: 'test@example.com',
-        password: 'password',
-      });
-    });
-
-    it('should store token after successful login', async () => {
-      mockApi.login.mockResolvedValueOnce({
-        token: 'test-token',
-        user: { id: '1', email: 'test@example.com', name: 'Test' },
-      });
-
-      const { result } = renderHook(() => useAuth(), {
-        wrapper: createWrapper(),
-      });
-
-      await act(async () => {
-        await result.current.login({ email: 'test@example.com', password: 'password' });
-      });
-
-      expect(mockTokenStore.set).toHaveBeenCalledWith('test-token');
+      expect(typeof result.current?.login).toBe('function');
     });
 
     it('should update user after successful login', async () => {
-      mockApi.login.mockResolvedValueOnce({
-        token: 'test-token',
-        user: { id: '1', email: 'test@example.com', name: 'Test User' },
-      });
-
-      const { result } = renderHook(() => useAuth(), {
+      const { result } = renderHook(() => useAuthContext(), {
         wrapper: createWrapper(),
       });
 
       await act(async () => {
-        await result.current.login({ email: 'test@example.com', password: 'password' });
+        await result.current?.login({ email: 'test@example.com', password: 'password' });
       });
 
       await waitFor(() => {
-        expect(result.current.user).toEqual({
+        expect(result.current?.user).toEqual({
           id: '1',
           email: 'test@example.com',
           name: 'Test User',
+          role: 'user',
         });
+        expect(result.current?.isAuthenticated).toBe(true);
       });
     });
   });
 
   describe('Register', () => {
-    it('should call api.register with data', async () => {
-      mockApi.register.mockResolvedValueOnce({
-        token: 'test-token',
-        user: { id: '1', email: 'new@example.com', name: 'New User' },
-      });
-
-      const { result } = renderHook(() => useAuth(), {
+    it('should provide register function', () => {
+      const { result } = renderHook(() => useAuthContext(), {
         wrapper: createWrapper(),
       });
 
-      await act(async () => {
-        await result.current.register({
-          email: 'new@example.com',
-          password: 'password',
-          name: 'New User',
-        });
-      });
-
-      expect(mockApi.register).toHaveBeenCalledWith({
-        email: 'new@example.com',
-        password: 'password',
-        name: 'New User',
-      });
+      expect(typeof result.current?.register).toBe('function');
     });
 
-    it('should store token after successful registration', async () => {
-      mockApi.register.mockResolvedValueOnce({
-        token: 'new-token',
-        user: { id: '1', email: 'new@example.com', name: 'New User' },
-      });
-
-      const { result } = renderHook(() => useAuth(), {
+    it('should update user after successful registration', async () => {
+      const { result } = renderHook(() => useAuthContext(), {
         wrapper: createWrapper(),
       });
 
       await act(async () => {
-        await result.current.register({
+        await result.current?.register({
           email: 'new@example.com',
           password: 'password',
           name: 'New User',
         });
       });
 
-      expect(mockTokenStore.set).toHaveBeenCalledWith('new-token');
+      await waitFor(() => {
+        expect(result.current?.user).toEqual({
+          id: '1',
+          email: 'new@example.com',
+          name: 'New User',
+          role: 'user',
+        });
+      });
     });
   });
 
   describe('Logout', () => {
-    it('should clear token on logout', async () => {
-      const { result } = renderHook(() => useAuth(), {
+    it('should provide logout function', () => {
+      const { result } = renderHook(() => useAuthContext(), {
         wrapper: createWrapper(),
       });
 
-      await act(async () => {
-        await result.current.logout();
-      });
-
-      expect(mockTokenStore.clear).toHaveBeenCalled();
+      expect(typeof result.current?.logout).toBe('function');
     });
 
     it('should set user to null after logout', async () => {
-      mockApi.login.mockResolvedValueOnce({
-        token: 'test-token',
-        user: { id: '1', email: 'test@example.com', name: 'Test' },
+      // Start with authenticated user
+      const authService = createMockAuthService({
+        user: { id: '1', email: 'test@example.com', name: 'Test', role: 'user' },
+        isAuthenticated: true,
+      });
+      const env = createMockEnvironment(authService);
+
+      const { result } = renderHook(() => useAuthContext(), {
+        wrapper: createWrapper(env),
       });
 
-      const { result } = renderHook(() => useAuth(), {
-        wrapper: createWrapper(),
-      });
+      // Verify we start authenticated
+      expect(result.current?.isAuthenticated).toBe(true);
 
-      // Login first
+      // Logout
       await act(async () => {
-        await result.current.login({ email: 'test@example.com', password: 'password' });
-      });
-
-      // Then logout
-      await act(async () => {
-        await result.current.logout();
+        await result.current?.logout();
       });
 
       await waitFor(() => {
-        expect(result.current.user).toBeNull();
+        expect(result.current?.user).toBeNull();
+        expect(result.current?.isAuthenticated).toBe(false);
       });
     });
   });
 
-  describe('Token Persistence', () => {
-    it('should fetch user when token exists on mount', async () => {
-      mockTokenStore.get.mockReturnValue('existing-token' as unknown as null);
-      mockApi.getCurrentUser.mockResolvedValueOnce({
-        id: '1',
-        email: 'existing@example.com',
-        name: 'Existing User',
-      });
-
-      const { result: _result } = renderHook(() => useAuth(), {
+  describe('Context Value', () => {
+    it('should provide refreshToken function', () => {
+      const { result } = renderHook(() => useAuthContext(), {
         wrapper: createWrapper(),
       });
 
-      await waitFor(() => {
-        expect(mockApi.getCurrentUser).toHaveBeenCalled();
+      expect(typeof result.current?.refreshToken).toBe('function');
+    });
+
+    it('should provide all auth methods', () => {
+      const { result } = renderHook(() => useAuthContext(), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current).toMatchObject({
+        user: null,
+        isLoading: false,
+        isAuthenticated: false,
+        login: expect.any(Function),
+        register: expect.any(Function),
+        logout: expect.any(Function),
+        refreshToken: expect.any(Function),
       });
     });
   });
 
-  describe('Aggressive TDD - Edge Cases', () => {
-    it('should handle login API error gracefully', async () => {
-      mockApi.login.mockRejectedValueOnce(new Error('Network error'));
-
-      const { result } = renderHook(() => useAuth(), {
+  describe('Backward Compatibility', () => {
+    it('should work with components that use useContext(AuthContext)', () => {
+      const { result } = renderHook(() => useAuthContext(), {
         wrapper: createWrapper(),
       });
 
-      await expect(
-        result.current.login({ email: 'test@example.com', password: 'password' }),
-      ).rejects.toThrow('Network error');
-    });
-
-    it('should handle register API error gracefully', async () => {
-      mockApi.register.mockRejectedValueOnce(new Error('Email already exists'));
-
-      const { result } = renderHook(() => useAuth(), {
-        wrapper: createWrapper(),
-      });
-
-      await expect(
-        result.current.register({
-          email: 'test@example.com',
-          password: 'password',
-          name: 'Test',
-        }),
-      ).rejects.toThrow('Email already exists');
-    });
-
-    it('should handle getCurrentUser API error and clear token', async () => {
-      mockTokenStore.get.mockReturnValue('invalid-token' as unknown as null);
-      mockApi.getCurrentUser.mockRejectedValueOnce(new Error('Unauthorized'));
-
-      const { result: _result } = renderHook(() => useAuth(), {
-        wrapper: createWrapper(),
-      });
-
-      await waitFor(() => {
-        expect(mockTokenStore.clear).toHaveBeenCalled();
-      });
-    });
-
-    it('should handle malformed API response for login', async () => {
-      mockApi.login.mockResolvedValueOnce({
-        token: undefined,
-        user: undefined,
-      });
-
-      const { result } = renderHook(() => useAuth(), {
-        wrapper: createWrapper(),
-      });
-
-      await act(async () => {
-        await result.current.login({ email: 'test@example.com', password: 'password' });
-      });
-
-      // Should handle undefined token without crashing
-      expect(mockTokenStore.set).toHaveBeenCalledWith(undefined);
-    });
-
-    it('should handle concurrent login calls', async () => {
-      mockApi.login.mockImplementation(
-        () =>
-          new Promise((resolve) => {
-            setTimeout(() => {
-              resolve({
-                token: 'token',
-                user: { id: '1', email: 'test@example.com', name: 'Test' },
-              });
-            }, 100);
-          }),
-      );
-
-      const { result } = renderHook(() => useAuth(), {
-        wrapper: createWrapper(),
-      });
-
-      // Start multiple concurrent logins wrapped in act()
-      await act(async () => {
-        const loginPromises = [
-          result.current.login({ email: 'test1@example.com', password: 'password' }),
-          result.current.login({ email: 'test2@example.com', password: 'password' }),
-          result.current.login({ email: 'test3@example.com', password: 'password' }),
-        ];
-
-        await Promise.all(loginPromises);
-      });
-
-      expect(mockApi.login).toHaveBeenCalledTimes(3);
-    });
-
-    it('should handle login with empty credentials', async () => {
-      mockApi.login.mockResolvedValueOnce({
-        token: 'test-token',
-        user: { id: '1', email: '', name: '' },
-      });
-
-      const { result } = renderHook(() => useAuth(), {
-        wrapper: createWrapper(),
-      });
-
-      await act(async () => {
-        await result.current.login({ email: '', password: '' });
-      });
-
-      expect(mockApi.login).toHaveBeenCalledWith({ email: '', password: '' });
-    });
-
-    it('should handle login with very long credentials', async () => {
-      const longEmail = 'a'.repeat(1000) + '@example.com';
-      const longPassword = 'p'.repeat(10000);
-
-      mockApi.login.mockResolvedValueOnce({
-        token: 'test-token',
-        user: { id: '1', email: longEmail, name: 'Test' },
-      });
-
-      const { result } = renderHook(() => useAuth(), {
-        wrapper: createWrapper(),
-      });
-
-      await act(async () => {
-        await result.current.login({ email: longEmail, password: longPassword });
-      });
-
-      expect(mockApi.login).toHaveBeenCalledWith({ email: longEmail, password: longPassword });
-    });
-
-    it('should handle rapid login/logout cycles', async () => {
-      mockApi.login.mockResolvedValue({
-        token: 'test-token',
-        user: { id: '1', email: 'test@example.com', name: 'Test' },
-      });
-
-      const { result } = renderHook(() => useAuth(), {
-        wrapper: createWrapper(),
-      });
-
-      // Rapid login/logout cycles
-      for (let i = 0; i < 10; i++) {
-        await act(async () => {
-          await result.current.login({ email: 'test@example.com', password: 'password' });
-        });
-        await act(async () => {
-          await result.current.logout();
-        });
-      }
-
-      // Should be logged out at the end
-      expect(result.current.user).toBeNull();
-    });
-
-    it('should handle multiple hook instances correctly', async () => {
-      mockApi.login.mockResolvedValueOnce({
-        token: 'test-token',
-        user: { id: '1', email: 'test@example.com', name: 'Test' },
-      });
-
-      const wrapper = createWrapper();
-
-      const { result: result1 } = renderHook(() => useAuth(), { wrapper });
-      const { result: result2 } = renderHook(() => useAuth(), { wrapper });
-
-      await act(async () => {
-        await result1.current.login({ email: 'test@example.com', password: 'password' });
-      });
-
-      // Both hooks should reflect the same state
-      await waitFor(() => {
-        expect(result1.current.user).toEqual(result2.current.user);
-      });
+      // Should have all the expected properties
+      expect(result.current).toBeDefined();
+      expect('user' in (result.current ?? {})).toBe(true);
+      expect('isAuthenticated' in (result.current ?? {})).toBe(true);
+      expect('login' in (result.current ?? {})).toBe(true);
     });
   });
 });
+
+
+

@@ -7,6 +7,7 @@
  */
 
 import { HTTP_STATUS } from '../constants/http';
+
 import { AppError } from './base';
 
 // ============================================================================

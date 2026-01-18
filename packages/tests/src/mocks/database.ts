@@ -52,7 +52,7 @@ function createMockTableQuery(): MockTableQuery {
 /**
  * Create a chainable mock for insert/update/delete
  */
-function createChainableMock() {
+function createChainableMock(): Record<string, ReturnType<typeof vi.fn>> {
   const chain: Record<string, ReturnType<typeof vi.fn>> = {};
 
   chain.values = vi.fn().mockReturnValue(chain);
@@ -63,7 +63,9 @@ function createChainableMock() {
 
   // Make the chain resolve to undefined by default
   Object.defineProperty(chain, 'then', {
-    value: (resolve: (value: unknown) => void) => resolve(undefined),
+    value: (resolve: (value: unknown) => void) => {
+      resolve(undefined);
+    },
     enumerable: false,
   });
 
@@ -73,7 +75,7 @@ function createChainableMock() {
 /**
  * Create a chainable mock for select
  */
-function createSelectMock() {
+function createSelectMock(): Record<string, ReturnType<typeof vi.fn>> {
   const chain: Record<string, ReturnType<typeof vi.fn>> = {};
 
   chain.from = vi.fn().mockReturnValue(chain);
@@ -86,7 +88,9 @@ function createSelectMock() {
 
   // Make the chain resolve to empty array by default
   Object.defineProperty(chain, 'then', {
-    value: (resolve: (value: unknown[]) => void) => resolve([]),
+    value: (resolve: (value: unknown[]) => void) => {
+      resolve([]);
+    },
     enumerable: false,
   });
 
@@ -133,11 +137,14 @@ export function createMockDb(): MockDbClient {
 /**
  * Configure a mock db query to return specific data
  */
-export function configureMockQuery<T>(
+export function configureMockQuery(
   db: MockDbClient,
   table: keyof MockDbQuery,
   method: 'findFirst' | 'findMany',
-  returnValue: T,
+  returnValue: unknown,
 ): void {
-  db.query[table][method].mockResolvedValue(returnValue);
+  const tableQuery = db.query[table];
+  if (tableQuery) {
+    tableQuery[method].mockResolvedValue(returnValue);
+  }
 }

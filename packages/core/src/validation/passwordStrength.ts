@@ -306,22 +306,22 @@ function estimateCrackTime(entropy: number): { seconds: number; display: string 
     return { seconds, display: 'less than a second' };
   }
   if (seconds < 60) {
-    return { seconds, display: `${Math.round(seconds)} seconds` };
+    return { seconds, display: `${String(Math.round(seconds))} seconds` };
   }
   if (seconds < 3600) {
-    return { seconds, display: `${Math.round(seconds / 60)} minutes` };
+    return { seconds, display: `${String(Math.round(seconds / 60))} minutes` };
   }
   if (seconds < 86400) {
-    return { seconds, display: `${Math.round(seconds / 3600)} hours` };
+    return { seconds, display: `${String(Math.round(seconds / 3600))} hours` };
   }
   if (seconds < 2592000) {
-    return { seconds, display: `${Math.round(seconds / 86400)} days` };
+    return { seconds, display: `${String(Math.round(seconds / 86400))} days` };
   }
   if (seconds < 31536000) {
-    return { seconds, display: `${Math.round(seconds / 2592000)} months` };
+    return { seconds, display: `${String(Math.round(seconds / 2592000))} months` };
   }
   if (seconds < 3153600000) {
-    return { seconds, display: `${Math.round(seconds / 31536000)} years` };
+    return { seconds, display: `${String(Math.round(seconds / 31536000))} years` };
   }
   return { seconds, display: 'centuries' };
 }

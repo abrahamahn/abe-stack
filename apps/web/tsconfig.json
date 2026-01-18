@@ -82,6 +82,12 @@
       ],
       "@pages/*": [
         "./src/pages/*"
+      ],
+      "@services": [
+        "./src/features/auth/services"
+      ],
+      "@services/*": [
+        "./src/features/auth/services/*"
       ]
     },
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.web.tsbuildinfo"

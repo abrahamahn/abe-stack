@@ -1,6 +1,4 @@
 // apps/server/src/infra/logger/__tests__/logger.test.ts
-import { beforeEach, describe, expect, test, vi } from 'vitest';
-
 import {
   createLogger,
   createRequestContext,
@@ -10,9 +8,21 @@ import {
   LOG_LEVELS,
   shouldLog,
 } from '@infra/logger/logger';
+import { describe, expect, test, vi, type Mock } from 'vitest';
+
+
+interface MockBaseLogger {
+  trace: Mock;
+  debug: Mock;
+  info: Mock;
+  warn: Mock;
+  error: Mock;
+  fatal: Mock;
+  child: Mock;
+}
 
 describe('Logger', () => {
-  const createMockBaseLogger = () => ({
+  const createMockBaseLogger = (): MockBaseLogger => ({
     trace: vi.fn(),
     debug: vi.fn(),
     info: vi.fn(),
@@ -43,7 +53,7 @@ describe('Logger', () => {
         expect.objectContaining({
           error: 'Test error',
           errorName: 'Error',
-          stack: expect.any(String),
+          stack: expect.any(String) as unknown,
         }),
         'Test error',
       );
@@ -73,7 +83,7 @@ describe('Logger', () => {
       baseLogger.child.mockReturnValue(childLogger);
 
       const logger = createLogger(baseLogger as never, { correlationId: 'abc-123' });
-      const child = logger.child({ userId: 'user-1' });
+      logger.child({ userId: 'user-1' });
 
       expect(baseLogger.child).toHaveBeenCalledWith({ userId: 'user-1' });
     });

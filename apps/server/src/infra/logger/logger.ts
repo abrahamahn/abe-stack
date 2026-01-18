@@ -6,9 +6,9 @@
  * and consistent structured logging.
  */
 
+import type { LogData, Logger, LogLevel, RequestContext } from './types';
 import type { FastifyBaseLogger } from 'fastify';
 
-import type { LogData, Logger, LogLevel, RequestContext } from './types';
 
 /**
  * Create a logger that wraps Fastify's pino logger
@@ -98,18 +98,25 @@ export function generateCorrelationId(): string {
  * Extract correlation ID from headers or generate a new one
  */
 export function getOrCreateCorrelationId(headers: Record<string, string | undefined>): string {
-  const existingId =
-    headers['x-correlation-id'] || headers['x-request-id'] || headers['traceparent'];
+  // Prefer explicit correlation ID headers
+  const correlationId = headers['x-correlation-id'];
+  if (correlationId && typeof correlationId === 'string') {
+    return correlationId;
+  }
 
-  if (existingId && typeof existingId === 'string') {
-    // If traceparent, extract the trace-id portion
-    if (existingId.includes('-')) {
-      const parts = existingId.split('-');
-      if (parts.length >= 2) {
-        return parts[1]; // trace-id is second part of traceparent
-      }
+  const requestId = headers['x-request-id'];
+  if (requestId && typeof requestId === 'string') {
+    return requestId;
+  }
+
+  // Handle W3C Trace Context (traceparent header)
+  // Format: version-traceid-parentid-traceflags (e.g., 00-abc123-def456-01)
+  const traceparent = headers['traceparent'];
+  if (traceparent && typeof traceparent === 'string') {
+    const parts = traceparent.split('-');
+    if (parts.length >= 2 && parts[1]) {
+      return parts[1]; // trace-id is second part
     }
-    return existingId;
   }
 
   return generateCorrelationId();
