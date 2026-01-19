@@ -20,6 +20,12 @@ export const authResponseSchema = z.object({
   user: userSchema,
 });
 
+export const registerResponseSchema = z.object({
+  status: z.literal('pending_verification'),
+  message: z.string(),
+  email: z.string().email(),
+});
+
 export const refreshResponseSchema = z.object({
   token: z.string(),
 });
@@ -34,7 +40,8 @@ export const emailVerificationRequestSchema = z.object({
 
 export const emailVerificationResponseSchema = z.object({
   verified: z.boolean(),
-  userId: z.string().uuid(),
+  token: z.string(),
+  user: userSchema,
 });
 
 export const forgotPasswordRequestSchema = z.object({
@@ -42,6 +49,14 @@ export const forgotPasswordRequestSchema = z.object({
 });
 
 export const forgotPasswordResponseSchema = z.object({
+  message: z.string(),
+});
+
+export const resendVerificationRequestSchema = z.object({
+  email: z.string().email(),
+});
+
+export const resendVerificationResponseSchema = z.object({
   message: z.string(),
 });
 
@@ -57,12 +72,15 @@ export const resetPasswordResponseSchema = z.object({
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
 export type RegisterRequest = z.infer<typeof registerRequestSchema>;
 export type AuthResponse = z.infer<typeof authResponseSchema>;
+export type RegisterResponse = z.infer<typeof registerResponseSchema>;
 export type RefreshResponse = z.infer<typeof refreshResponseSchema>;
 export type LogoutResponse = z.infer<typeof logoutResponseSchema>;
 export type EmailVerificationRequest = z.infer<typeof emailVerificationRequestSchema>;
 export type EmailVerificationResponse = z.infer<typeof emailVerificationResponseSchema>;
 export type ForgotPasswordRequest = z.infer<typeof forgotPasswordRequestSchema>;
 export type ForgotPasswordResponse = z.infer<typeof forgotPasswordResponseSchema>;
+export type ResendVerificationRequest = z.infer<typeof resendVerificationRequestSchema>;
+export type ResendVerificationResponse = z.infer<typeof resendVerificationResponseSchema>;
 export type ResetPasswordRequest = z.infer<typeof resetPasswordRequestSchema>;
 export type ResetPasswordResponse = z.infer<typeof resetPasswordResponseSchema>;
 
@@ -74,11 +92,11 @@ export const authContract = c.router({
     path: '/api/auth/register',
     body: registerRequestSchema,
     responses: {
-      201: authResponseSchema,
+      201: registerResponseSchema,
       400: errorResponseSchema,
       409: errorResponseSchema,
     },
-    summary: 'Register a new user',
+    summary: 'Register a new user - sends verification email',
   },
   login: {
     method: 'POST',
@@ -120,7 +138,17 @@ export const authContract = c.router({
       400: errorResponseSchema,
       404: errorResponseSchema,
     },
-    summary: 'Verify email with a token',
+    summary: 'Verify email with a token - auto-logs in user',
+  },
+  resendVerification: {
+    method: 'POST',
+    path: '/api/auth/resend-verification',
+    body: resendVerificationRequestSchema,
+    responses: {
+      200: resendVerificationResponseSchema,
+      400: errorResponseSchema,
+    },
+    summary: 'Resend verification email to unverified user',
   },
   forgotPassword: {
     method: 'POST',

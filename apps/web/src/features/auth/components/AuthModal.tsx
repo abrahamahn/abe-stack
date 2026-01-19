@@ -21,7 +21,7 @@ export function AuthModal({
   initialMode = 'login',
   onSuccess,
 }: AuthModalProps): ReactElement | null {
-  const { login, register, forgotPassword, resetPassword } = useAuth();
+  const { login, register, forgotPassword, resetPassword, resendVerification } = useAuth();
   const [mode, setMode] = useState<AuthMode>(initialMode);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,17 +44,24 @@ export function AuthModal({
   };
 
   const createFormHandler =
-    <T extends Record<string, unknown>>(handler: (data: T) => Promise<void>) =>
-    async (data: T): Promise<void> => {
+    <T extends Record<string, unknown>, R>(
+      handler: (data: T) => Promise<R>,
+      closeOnSuccess = true,
+    ) =>
+    async (data: T): Promise<R> => {
       setIsLoading(true);
       setError(null);
 
       try {
-        await handler(data);
-        onSuccess?.();
-        onOpenChange(false);
+        const result = await handler(data);
+        if (closeOnSuccess) {
+          onSuccess?.();
+          onOpenChange(false);
+        }
+        return result;
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
+        throw err; // Re-throw so caller can handle if needed
       } finally {
         setIsLoading(false);
       }
@@ -63,9 +70,11 @@ export function AuthModal({
   const formProps: AuthFormProps = {
     mode,
     onLogin: createFormHandler(login),
-    onRegister: createFormHandler(register),
+    // Don't close modal after registration - user needs to see "check your email" message
+    onRegister: createFormHandler(register, false),
     onForgotPassword: createFormHandler(forgotPassword),
     onResetPassword: createFormHandler(resetPassword),
+    onResendVerification: resendVerification,
     onModeChange: handleModeChange,
     isLoading,
     error,

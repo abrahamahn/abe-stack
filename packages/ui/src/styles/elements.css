@@ -60,7 +60,7 @@
 .auth-form-content {
   display: flex;
   flex-direction: column;
-  gap: var(--ui-gap-lg);
+  gap: var(--ui-gap-md);
 }
 
 .auth-form-header {
@@ -68,10 +68,11 @@
 }
 
 .auth-form-title {
-  font-size: var(--ui-font-size-xl);
-  font-weight: var(--ui-font-weight-bold);
+  font-size: var(--ui-font-size-lg);
+  font-weight: var(--ui-font-weight-semibold);
   color: var(--ui-color-text);
   margin: 0 0 var(--ui-gap-xs) 0;
+  line-height: var(--ui-line-height-tight);
 }
 
 .auth-form-subtitle {
@@ -83,18 +84,18 @@
 .auth-form-fields {
   display: flex;
   flex-direction: column;
-  gap: var(--ui-gap-md);
+  gap: var(--ui-gap-sm);
 }
 
 .auth-form-error {
-  font-size: var(--ui-font-size-sm);
+  font-size: var(--ui-font-size-xs);
   color: var(--ui-color-danger);
 }
 
 .auth-form-footer {
   text-align: center;
   font-size: var(--ui-font-size-sm);
-  color: var(--ui-color-text);
+  color: var(--ui-color-text-muted);
 }
 
 .auth-form-footer a {
@@ -402,6 +403,12 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+.checkbox-label {
+  font-size: var(--ui-font-size-sm);
+  color: var(--ui-color-text-muted);
+  line-height: var(--ui-line-height-normal);
 }
 
 /* CloseButton */

@@ -54,6 +54,7 @@ export {
   TokenReuseError,
   WeakPasswordError,
   EmailAlreadyExistsError,
+  EmailNotVerifiedError,
   UserNotFoundError,
   // OAuth errors
   OAuthError,

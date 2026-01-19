@@ -245,4 +245,133 @@ describe('CSRF Protection', () => {
       expect(csrfCookie).toContain('SameSite=Lax');
     });
   });
+
+  describe('Token validation edge cases', () => {
+    test('POST with tampered token should be rejected', async () => {
+      // Get a valid token
+      const tokenResponse = await server.inject({
+        method: 'GET',
+        url: '/csrf-token',
+      });
+
+      const { token } = JSON.parse(tokenResponse.body) as { token: string };
+      const cookies = tokenResponse.headers['set-cookie'];
+      const csrfCookie = Array.isArray(cookies)
+        ? cookies.find((c) => c.startsWith('_csrf='))
+        : cookies;
+
+      if (!csrfCookie) {
+        throw new Error('Expected CSRF cookie to be set');
+      }
+
+      // Tamper with the token by changing a character
+      const tamperedToken = token.slice(0, -1) + (token.slice(-1) === 'a' ? 'b' : 'a');
+
+      const response = await server.inject({
+        method: 'POST',
+        url: '/protected',
+        headers: {
+          'x-csrf-token': tamperedToken,
+          cookie: csrfCookie.split(';')[0],
+        },
+        payload: { data: 'test' },
+      });
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    test('POST with empty token should be rejected', async () => {
+      // Get a valid cookie
+      const tokenResponse = await server.inject({
+        method: 'GET',
+        url: '/csrf-token',
+      });
+
+      const cookies = tokenResponse.headers['set-cookie'];
+      const csrfCookie = Array.isArray(cookies)
+        ? cookies.find((c) => c.startsWith('_csrf='))
+        : cookies;
+
+      if (!csrfCookie) {
+        throw new Error('Expected CSRF cookie to be set');
+      }
+
+      const response = await server.inject({
+        method: 'POST',
+        url: '/protected',
+        headers: {
+          'x-csrf-token': '',
+          cookie: csrfCookie.split(';')[0],
+        },
+        payload: { data: 'test' },
+      });
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    test('POST with token from different session should be rejected', async () => {
+      // Get token from first "session"
+      const tokenResponse1 = await server.inject({
+        method: 'GET',
+        url: '/csrf-token',
+      });
+      const { token } = JSON.parse(tokenResponse1.body) as { token: string };
+
+      // Get cookie from different "session"
+      const tokenResponse2 = await server.inject({
+        method: 'GET',
+        url: '/csrf-token',
+      });
+      const cookies = tokenResponse2.headers['set-cookie'];
+      const csrfCookie = Array.isArray(cookies)
+        ? cookies.find((c) => c.startsWith('_csrf='))
+        : cookies;
+
+      if (!csrfCookie) {
+        throw new Error('Expected CSRF cookie to be set');
+      }
+
+      // Try to use token from session 1 with cookie from session 2
+      const response = await server.inject({
+        method: 'POST',
+        url: '/protected',
+        headers: {
+          'x-csrf-token': token,
+          cookie: csrfCookie.split(';')[0],
+        },
+        payload: { data: 'test' },
+      });
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    test('DELETE request should require CSRF token', async () => {
+      const response = await server.inject({
+        method: 'DELETE',
+        url: '/protected',
+      });
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    test('PUT request should require CSRF token', async () => {
+      const response = await server.inject({
+        method: 'PUT',
+        url: '/protected',
+        payload: { data: 'test' },
+      });
+
+      expect(response.statusCode).toBe(403);
+    });
+
+    test('PATCH request should require CSRF token', async () => {
+      const response = await server.inject({
+        method: 'PATCH',
+        url: '/protected',
+        payload: { data: 'test' },
+      });
+
+      expect(response.statusCode).toBe(403);
+    });
+  });
 });

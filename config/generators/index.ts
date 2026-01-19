@@ -65,7 +65,11 @@ function parseArgs(): {
   return { checkOnly, quiet, watch, only };
 }
 
-function runGenerators(options: { checkOnly: boolean; quiet: boolean; only: GeneratorType | null }): GeneratorResult {
+function runGenerators(options: {
+  checkOnly: boolean;
+  quiet: boolean;
+  only: GeneratorType | null;
+}): GeneratorResult {
   const { checkOnly, quiet, only } = options;
 
   const allResults: GeneratorResult = {

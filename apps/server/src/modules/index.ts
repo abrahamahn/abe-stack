@@ -11,6 +11,7 @@ import {
   forgotPasswordRequestSchema,
   loginRequestSchema,
   registerRequestSchema,
+  resendVerificationRequestSchema,
   resetPasswordRequestSchema,
   unlockAccountRequestSchema,
 } from '@abe-stack/core';
@@ -23,6 +24,7 @@ import {
   handleLogout,
   handleRefresh,
   handleRegister,
+  handleResendVerification,
   handleResetPassword,
   handleVerifyEmail,
   type ReplyWithCookies,
@@ -42,6 +44,7 @@ export {
   handleLogout,
   handleRefresh,
   handleRegister,
+  handleResendVerification,
   handleResetPassword,
   handleVerifyEmail,
   type ReplyWithCookies,
@@ -156,7 +159,19 @@ export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
         .send({ message: parsed.error.issues[0]?.message ?? 'Invalid input' });
     }
 
-    const result = await handleVerifyEmail(ctx, parsed.data);
+    const result = await handleVerifyEmail(ctx, parsed.data, reply as unknown as ReplyWithCookies);
+    return reply.status(result.status).send(result.body);
+  });
+
+  app.post('/api/auth/resend-verification', async (req: FastifyRequest, reply: FastifyReply) => {
+    const parsed = resendVerificationRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return reply
+        .status(400)
+        .send({ message: parsed.error.issues[0]?.message ?? 'Invalid input' });
+    }
+
+    const result = await handleResendVerification(ctx, parsed.data);
     return reply.status(result.status).send(result.body);
   });
 

@@ -21,11 +21,22 @@ export interface EmailConfig {
 }
 
 export function loadEmailConfig(env: Record<string, string | undefined>): EmailConfig {
+  // Determine provider:
+  // 1. If EMAIL_PROVIDER is explicitly set, use it
+  // 2. Otherwise, use SMTP in production if SMTP_HOST is configured
+  // 3. Default to console (logs emails)
   const isProduction = env.NODE_ENV === 'production';
+  const explicitProvider = env.EMAIL_PROVIDER;
+  let provider: 'console' | 'smtp';
+
+  if (explicitProvider === 'smtp' || explicitProvider === 'console') {
+    provider = explicitProvider;
+  } else {
+    provider = isProduction && env.SMTP_HOST ? 'smtp' : 'console';
+  }
 
   return {
-    // Use console in dev, SMTP in production (if configured)
-    provider: isProduction && env.SMTP_HOST ? 'smtp' : 'console',
+    provider,
     smtp: {
       host: env.SMTP_HOST || 'localhost',
       port: parseInt(env.SMTP_PORT || '587', 10),

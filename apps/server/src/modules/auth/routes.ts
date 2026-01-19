@@ -9,7 +9,13 @@
 import { loginRequestSchema, registerRequestSchema } from '@abe-stack/core';
 import { publicRoute, type RouteMap, type RouteResult } from '@infra/router';
 
-import { handleLogin, handleLogout, handleRefresh, handleRegister } from './handlers';
+import {
+  handleLogin,
+  handleLogout,
+  handleRefresh,
+  handleRegister,
+  type RegisterResult,
+} from './handlers';
 
 import type { AuthResponse, LoginRequest, RegisterRequest } from '@abe-stack/core';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '@shared';
@@ -19,14 +25,14 @@ import type { AppContext, ReplyWithCookies, RequestWithCookies } from '@shared';
 // ============================================================================
 
 export const authRoutes: RouteMap = {
-  'auth/register': publicRoute<RegisterRequest, AuthResponse | { message: string }>(
+  'auth/register': publicRoute<RegisterRequest, RegisterResult | { message: string }>(
     'POST',
     async (
       ctx: AppContext,
       body: RegisterRequest,
       _req: RequestWithCookies,
       reply: ReplyWithCookies,
-    ): Promise<RouteResult<AuthResponse | { message: string }>> => {
+    ): Promise<RouteResult<RegisterResult | { message: string }>> => {
       return handleRegister(ctx, body, reply);
     },
     registerRequestSchema,

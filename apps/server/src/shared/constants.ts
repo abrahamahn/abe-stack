@@ -115,6 +115,8 @@ export const SUCCESS_MESSAGES = {
   LOGGED_OUT: 'Logged out successfully',
   ACCOUNT_UNLOCKED: 'Account unlocked successfully',
   PASSWORD_RESET_SENT: 'Password reset email sent',
+  VERIFICATION_EMAIL_SENT:
+    'Verification email sent. Please check your inbox and click the confirmation link.',
   MAGIC_LINK_SENT: 'Magic link sent to your email',
   TOTP_ENABLED: 'Two-factor authentication enabled',
   TOTP_DISABLED: 'Two-factor authentication disabled',

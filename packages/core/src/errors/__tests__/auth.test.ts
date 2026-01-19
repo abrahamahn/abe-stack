@@ -279,5 +279,85 @@ describe('auth errors', () => {
         expect(json).toHaveProperty('message');
       }
     });
+
+    test('should preserve error code in serialization', () => {
+      const error = new InvalidCredentialsError();
+      const json = error.toJSON();
+
+      expect(json.code).toBe('INVALID_CREDENTIALS');
+      expect(json.error).toBe('InvalidCredentialsError');
+      expect(json.message).toBe('Invalid email or password');
+    });
+
+    test('should preserve details in serialization', () => {
+      const details = { minLength: 8, requireNumber: true, requireSymbol: true };
+      const error = new WeakPasswordError(details);
+      const json = error.toJSON();
+
+      expect(json.details).toEqual(details);
+      expect(json.code).toBe('WEAK_PASSWORD');
+    });
+
+    test('should handle undefined code gracefully', () => {
+      // OAuthError without explicit code
+      const error = new OAuthError('Provider timeout', 'google');
+      const json = error.toJSON();
+
+      // code should be undefined, not throw
+      expect(json.code).toBeUndefined();
+      expect(json.error).toBe('OAuthError');
+    });
+
+    test('should handle undefined details gracefully', () => {
+      const error = new InvalidCredentialsError();
+      const json = error.toJSON();
+
+      expect(json.details).toBeUndefined();
+    });
+
+    test('should serialize complex details correctly', () => {
+      const complexDetails = {
+        suggestions: ['Use uppercase', 'Add numbers'],
+        currentScore: 2,
+        minScore: 3,
+        issues: { lowercase: true, uppercase: false },
+      };
+      const error = new WeakPasswordError(complexDetails);
+      const json = error.toJSON();
+
+      expect(json.details).toEqual(complexDetails);
+    });
+
+    test('should preserve error name as constructor name', () => {
+      const errors = [
+        { error: new InvalidCredentialsError(), name: 'InvalidCredentialsError' },
+        { error: new WeakPasswordError(), name: 'WeakPasswordError' },
+        { error: new AccountLockedError(), name: 'AccountLockedError' },
+        { error: new EmailAlreadyExistsError(), name: 'EmailAlreadyExistsError' },
+        { error: new UserNotFoundError(), name: 'UserNotFoundError' },
+        { error: new InvalidTokenError(), name: 'InvalidTokenError' },
+        { error: new TokenReuseError(), name: 'TokenReuseError' },
+        { error: new OAuthError('Failed', 'google'), name: 'OAuthError' },
+        { error: new OAuthStateMismatchError('github'), name: 'OAuthStateMismatchError' },
+        { error: new TotpRequiredError(), name: 'TotpRequiredError' },
+        { error: new TotpInvalidError(), name: 'TotpInvalidError' },
+      ];
+
+      for (const { error, name } of errors) {
+        expect(error.name).toBe(name);
+        expect(error.toJSON().error).toBe(name);
+      }
+    });
+
+    test('should be JSON.stringify compatible', () => {
+      const error = new WeakPasswordError({ min: 8 });
+      const stringified = JSON.stringify(error);
+      const parsed = JSON.parse(stringified);
+
+      expect(parsed.error).toBe('WeakPasswordError');
+      expect(parsed.message).toBe('Password is too weak');
+      expect(parsed.code).toBe('WEAK_PASSWORD');
+      expect(parsed.details).toEqual({ min: 8 });
+    });
   });
 });

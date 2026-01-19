@@ -447,4 +447,177 @@ describe('Refresh Token Rotation', () => {
       expect(result).toBeNull();
     });
   });
+
+  describe('Grace Period Boundary Conditions', () => {
+    test('should allow rotation at exactly grace period boundary minus 1ms', async () => {
+      const { db, tokens } = createMockDb();
+
+      // Create initial family
+      await createRefreshTokenFamily(db, 'user-123');
+
+      // Set token age to exactly 1ms before grace period expires
+      const gracePeriodMs = TEST_REFRESH_TOKEN_GRACE_PERIOD_SECONDS * 1000;
+      const firstToken = tokens[0];
+      if (firstToken === undefined) throw new Error('Expected token');
+      firstToken.createdAt = new Date(Date.now() - gracePeriodMs + 1);
+
+      const result = await rotateRefreshToken(
+        db,
+        firstToken.token,
+        undefined,
+        undefined,
+        TEST_REFRESH_TOKEN_EXPIRY_DAYS,
+        TEST_REFRESH_TOKEN_GRACE_PERIOD_SECONDS,
+      );
+
+      // Should succeed - within grace period
+      expect(result).not.toBeNull();
+      expect(result?.token).toBeTruthy();
+    });
+
+    test('should reject rotation when token family is already revoked', async () => {
+      const { db, tokens, tokenFamilies } = createMockDb();
+
+      // Create initial family
+      await createRefreshTokenFamily(db, 'user-123');
+
+      // Get the original token
+      const originalToken = tokens[0];
+      if (originalToken === undefined) throw new Error('Expected original token');
+
+      // Simulate family being revoked (e.g., from a previous reuse detection)
+      const family = tokenFamilies[0];
+      if (family === undefined) throw new Error('Expected token family');
+      family.revokedAt = new Date();
+      family.revokeReason = 'Token reuse detected';
+
+      const result = await rotateRefreshToken(
+        db,
+        originalToken.token,
+        undefined,
+        undefined,
+        TEST_REFRESH_TOKEN_EXPIRY_DAYS,
+        TEST_REFRESH_TOKEN_GRACE_PERIOD_SECONDS,
+      );
+
+      // Should fail - family is revoked
+      expect(result).toBeNull();
+    });
+
+    test('should return newer token for retry within grace period', async () => {
+      const { db, tokens } = createMockDb();
+
+      // Create initial family
+      const initial = await createRefreshTokenFamily(db, 'user-123');
+
+      // Get the original token
+      const originalToken = tokens[0];
+      if (originalToken === undefined) throw new Error('Expected original token');
+
+      // Set original token as recently created (within grace period)
+      const gracePeriodMs = TEST_REFRESH_TOKEN_GRACE_PERIOD_SECONDS * 1000;
+      originalToken.createdAt = new Date(Date.now() - gracePeriodMs / 2);
+      const savedOriginalToken = originalToken.token;
+
+      // Add a newer token in the same family (simulating a successful rotation)
+      const newerToken = 'newer-valid-token';
+      tokens.push({
+        id: 'token-newer',
+        userId: 'user-123',
+        familyId: initial.familyId,
+        token: newerToken,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        createdAt: new Date(), // Just created
+      });
+
+      const result = await rotateRefreshToken(
+        db,
+        savedOriginalToken,
+        undefined,
+        undefined,
+        TEST_REFRESH_TOKEN_EXPIRY_DAYS,
+        TEST_REFRESH_TOKEN_GRACE_PERIOD_SECONDS,
+      );
+
+      // Should return the newer token (network retry case)
+      expect(result).not.toBeNull();
+      expect(result?.token).toBe(newerToken);
+    });
+
+    test('should handle zero grace period (immediate reuse detection)', async () => {
+      const { db, tokens, tokenFamilies } = createMockDb();
+
+      // Create initial family
+      const initial = await createRefreshTokenFamily(db, 'user-123');
+
+      // Get the original token and set it as slightly old
+      const originalToken = tokens[0];
+      if (originalToken === undefined) throw new Error('Expected original token');
+      originalToken.createdAt = new Date(Date.now() - 100); // 100ms old
+      const savedOriginalToken = originalToken.token;
+
+      // Add a newer token in the same family
+      tokens.push({
+        id: 'token-newer',
+        userId: 'user-123',
+        familyId: initial.familyId,
+        token: 'newer-token',
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        createdAt: new Date(),
+      });
+
+      const result = await rotateRefreshToken(
+        db,
+        savedOriginalToken,
+        undefined,
+        undefined,
+        TEST_REFRESH_TOKEN_EXPIRY_DAYS,
+        0, // Zero grace period
+      );
+
+      // With zero grace period, any reuse is detected
+      expect(result).toBeNull();
+
+      // Family should be revoked
+      const family = tokenFamilies[0];
+      expect(family?.revokedAt).toBeInstanceOf(Date);
+    });
+
+    test('should handle large grace period', async () => {
+      const { db, tokens } = createMockDb();
+
+      // Create initial family
+      const initial = await createRefreshTokenFamily(db, 'user-123');
+
+      // Get the original token
+      const originalToken = tokens[0];
+      if (originalToken === undefined) throw new Error('Expected original token');
+
+      // Set token as 1 hour old
+      originalToken.createdAt = new Date(Date.now() - 60 * 60 * 1000);
+      const savedOriginalToken = originalToken.token;
+
+      // Add a newer token
+      tokens.push({
+        id: 'token-newer',
+        userId: 'user-123',
+        familyId: initial.familyId,
+        token: 'newer-token',
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        createdAt: new Date(),
+      });
+
+      const result = await rotateRefreshToken(
+        db,
+        savedOriginalToken,
+        undefined,
+        undefined,
+        TEST_REFRESH_TOKEN_EXPIRY_DAYS,
+        3600, // 1 hour grace period
+      );
+
+      // Should allow - within 1 hour grace period
+      expect(result).not.toBeNull();
+    });
+  });
 });

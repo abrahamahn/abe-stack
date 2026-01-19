@@ -10,7 +10,7 @@ describe('Server Configuration', () => {
 
       expect(config.host).toBe('0.0.0.0');
       expect(config.port).toBe(8080);
-      expect(config.cors.origin).toBe('http://localhost:3000');
+      expect(config.cors.origin).toBe('http://localhost:5173,http://localhost:3000');
       expect(config.cors.credentials).toBe(true);
       expect(config.cors.methods).toEqual(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']);
       expect(config.trustProxy).toBe(false);

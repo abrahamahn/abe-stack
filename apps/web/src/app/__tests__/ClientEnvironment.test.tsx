@@ -1,38 +1,13 @@
 // apps/web/src/app/__tests__/ClientEnvironment.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
-import { ClientEnvironmentProvider, useClientEnvironment } from '@app/ClientEnvironment';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { ClientEnvironment } from '@app/ClientEnvironment';
+import { ClientEnvironmentProvider, useClientEnvironment } from '../ClientEnvironment';
+
+import type { ClientEnvironment } from '../ClientEnvironment';
 import type { JSX } from 'react';
-
-// ============================================================================
-// Mocks
-// ============================================================================
-
-// Mock createEnvironment to avoid side effects
-vi.mock('../createEnvironment', () => ({
-  getClientEnvironment: vi.fn(() => ({
-    config: { apiUrl: 'http://localhost:3000' },
-    queryClient: {
-      getQueryData: vi.fn(),
-      setQueryData: vi.fn(),
-      removeQueries: vi.fn(),
-    },
-    auth: {
-      getState: vi.fn(() => ({ user: null, isLoading: false, isAuthenticated: false })),
-      subscribe: vi.fn(() => () => {}),
-      destroy: vi.fn(),
-    },
-  })),
-  createPersister: vi.fn(() => ({
-    persistClient: vi.fn(),
-    restoreClient: vi.fn(),
-    removeClient: vi.fn(),
-  })),
-}));
 
 // ============================================================================
 // Test Helpers

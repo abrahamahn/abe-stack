@@ -61,6 +61,18 @@ export class EmailAlreadyExistsError extends ConflictError {
 }
 
 /**
+ * Email address not verified - user must verify email before logging in
+ */
+export class EmailNotVerifiedError extends UnauthorizedError {
+  constructor(
+    public readonly email: string,
+    message = 'Please verify your email address before logging in',
+  ) {
+    super(message, 'EMAIL_NOT_VERIFIED');
+  }
+}
+
+/**
  * User not found
  */
 export class UserNotFoundError extends NotFoundError {

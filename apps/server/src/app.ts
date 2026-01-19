@@ -21,6 +21,8 @@ import {
   getDetailedHealth,
   logStartupSummary,
   registerWebSocket,
+  requireValidSchema,
+  SchemaValidationError,
   SubscriptionManager,
   type DbClient,
   type DetailedHealthResponse,
@@ -88,7 +90,11 @@ export class App implements IServiceContainer {
 
     // Initialize Pub/Sub with horizontal scaling if connection string is available
     this.pubsub = new SubscriptionManager();
-    const pubsubConnString = this.config.database.connectionString || connectionString;
+
+    let pubsubConnString: string | undefined;
+    if (this.config.database.provider === 'postgresql') {
+      pubsubConnString = this.config.database.connectionString || connectionString;
+    }
 
     if (pubsubConnString && this.config.env !== 'test') {
       this._pgPubSub = createPostgresPubSub({
@@ -119,6 +125,25 @@ export class App implements IServiceContainer {
    * Initializes the HTTP server and starts listening
    */
   async start(): Promise<void> {
+    // Validate database schema before starting
+    try {
+      await requireValidSchema(this.db);
+    } catch (error) {
+      if (error instanceof SchemaValidationError) {
+        // eslint-disable-next-line no-console
+        console.error('\n' + '='.repeat(60));
+        // eslint-disable-next-line no-console
+        console.error('DATABASE SCHEMA ERROR');
+        // eslint-disable-next-line no-console
+        console.error('='.repeat(60));
+        // eslint-disable-next-line no-console
+        console.error(error.message);
+        // eslint-disable-next-line no-console
+        console.error('='.repeat(60) + '\n');
+      }
+      throw error;
+    }
+
     // Start horizontal scaling if configured
     if (this._pgPubSub) {
       await this._pgPubSub.start();
@@ -283,6 +308,7 @@ export function createTestApp(
       logLevel: 'silent',
     },
     database: {
+      provider: 'postgresql',
       host: 'localhost',
       port: 5432,
       database: 'test',

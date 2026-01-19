@@ -11,6 +11,7 @@ import { randomBytes } from 'node:crypto';
 import { validatePassword, type UserRole } from '@abe-stack/core';
 import {
   applyProgressiveDelay,
+  emailTemplates,
   emailVerificationTokens,
   getAccountLockoutStatus,
   isAccountLocked,
@@ -21,10 +22,12 @@ import {
   users,
   withTransaction,
   type DbClient,
+  type EmailService,
 } from '@infra';
 import {
   AccountLockedError,
   EmailAlreadyExistsError,
+  EmailNotVerifiedError,
   InvalidCredentialsError,
   InvalidTokenError,
   WeakPasswordError,
@@ -63,21 +66,30 @@ export interface RefreshResult {
   refreshToken: string;
 }
 
+export interface RegisterResult {
+  status: 'pending_verification';
+  message: string;
+  email: string;
+}
+
 // ============================================================================
 // Service Functions
 // ============================================================================
 
 /**
  * Register a new user
- * Returns auth result with tokens, throws if validation fails
+ * Creates user with unverified email and sends verification email
+ * Returns pending status, user must verify email to complete registration
  */
 export async function registerUser(
   db: DbClient,
-  config: AuthConfig,
+  emailService: EmailService,
+  _config: AuthConfig,
   email: string,
   password: string,
   name?: string,
-): Promise<AuthResult> {
+  baseUrl?: string,
+): Promise<RegisterResult> {
   // Check if email is already taken
   const existingUser = await db.query.users.findFirst({
     where: eq(users.email, email),
@@ -93,10 +105,10 @@ export async function registerUser(
     throw new WeakPasswordError({ errors: passwordValidation.errors });
   }
 
-  const passwordHash = await hashPassword(password, config.argon2);
+  const passwordHash = await hashPassword(password, _config.argon2);
 
-  // Create user and refresh token atomically
-  const { user, refreshToken } = await withTransaction(db, async (tx) => {
+  // Create user (unverified by default) and verification token atomically
+  const { user, verificationToken } = await withTransaction(db, async (tx) => {
     const [newUser] = await tx
       .insert(users)
       .values({
@@ -104,6 +116,7 @@ export async function registerUser(
         name: name || null,
         passwordHash,
         role: 'user',
+        emailVerified: false,
       })
       .returning();
 
@@ -111,25 +124,26 @@ export async function registerUser(
       throw new Error('Failed to create user');
     }
 
-    const { token } = await createRefreshTokenFamily(
-      tx,
-      newUser.id,
-      config.refreshToken.expiryDays,
-    );
+    // Create email verification token
+    const token = await createEmailVerificationToken(tx, newUser.id);
 
-    return { user: newUser, refreshToken: token };
+    return { user: newUser, verificationToken: token };
   });
 
-  // Create access token
-  const accessToken = createAccessToken(
-    user.id,
-    user.email,
-    user.role,
-    config.jwt.secret,
-    config.jwt.accessTokenExpiry,
-  );
+  // Send verification email
+  const verifyUrl = `${baseUrl || 'http://localhost:5173'}/auth/confirm-email?token=${verificationToken}`;
+  const emailTemplate = emailTemplates.emailVerification(verifyUrl);
+  await emailService.send({
+    ...emailTemplate,
+    to: email,
+  });
 
-  return createAuthResponse(accessToken, refreshToken, user);
+  return {
+    status: 'pending_verification',
+    message:
+      'Registration successful! Please check your email inbox and click the confirmation link to complete your registration.',
+    email: user.email,
+  };
 }
 
 /**
@@ -171,6 +185,12 @@ export async function authenticateUser(
   if (!isValid) {
     await handleFailedLogin(db, config, email, 'Invalid password', ipAddress, userAgent);
     throw new InvalidCredentialsError();
+  }
+
+  // Check if email is verified
+  if (!user.emailVerified) {
+    await logLoginAttempt(db, email, false, ipAddress, userAgent, 'Email not verified');
+    throw new EmailNotVerifiedError(email);
   }
 
   // Create tokens and log success atomically
@@ -312,6 +332,7 @@ async function generateSecureToken(): Promise<{ plain: string; hash: string }> {
  */
 export async function requestPasswordReset(
   db: DbClient,
+  emailService: EmailService,
   email: string,
   baseUrl: string,
 ): Promise<void> {
@@ -320,9 +341,7 @@ export async function requestPasswordReset(
   });
 
   if (!user) {
-    // Log but don't reveal user doesn't exist
-    // eslint-disable-next-line no-console
-    console.log(`[PASSWORD RESET] Mock email sent to: ${email}`);
+    // Don't reveal user doesn't exist - silently succeed
     return;
   }
 
@@ -335,12 +354,13 @@ export async function requestPasswordReset(
     expiresAt,
   });
 
-  // In production, this would send an actual email
+  // Send password reset email
   const resetUrl = `${baseUrl}/auth/reset-password?token=${plain}`;
-  // eslint-disable-next-line no-console
-  console.log(`[PASSWORD RESET] Email sent to: ${email}`);
-  // eslint-disable-next-line no-console
-  console.log(`[PASSWORD RESET] Reset URL: ${resetUrl}`);
+  const emailTemplate = emailTemplates.passwordReset(resetUrl);
+  await emailService.send({
+    ...emailTemplate,
+    to: email,
+  });
 }
 
 /**
@@ -405,9 +425,50 @@ export async function createEmailVerificationToken(db: DbClient, userId: string)
 }
 
 /**
- * Verify email using a token
+ * Resend verification email for an unverified user
+ * Creates a new verification token and sends the email
  */
-export async function verifyEmail(db: DbClient, token: string): Promise<{ userId: string }> {
+export async function resendVerificationEmail(
+  db: DbClient,
+  emailService: EmailService,
+  email: string,
+  baseUrl: string,
+): Promise<void> {
+  const user = await db.query.users.findFirst({
+    where: eq(users.email, email),
+  });
+
+  if (!user) {
+    // Don't reveal user doesn't exist - silently succeed
+    return;
+  }
+
+  if (user.emailVerified) {
+    // Already verified - nothing to do
+    return;
+  }
+
+  // Create new verification token
+  const verificationToken = await createEmailVerificationToken(db, user.id);
+
+  // Send verification email
+  const verifyUrl = `${baseUrl || 'http://localhost:5173'}/auth/confirm-email?token=${verificationToken}`;
+  const emailTemplate = emailTemplates.emailVerification(verifyUrl);
+  await emailService.send({
+    ...emailTemplate,
+    to: email,
+  });
+}
+
+/**
+ * Verify email using a token
+ * Returns auth result with tokens for auto-login after verification
+ */
+export async function verifyEmail(
+  db: DbClient,
+  config: AuthConfig,
+  token: string,
+): Promise<AuthResult> {
   // Hash the token to look it up
   const tokenHash = await hashPassword(token, TOKEN_HASH_CONFIG);
 
@@ -424,15 +485,43 @@ export async function verifyEmail(db: DbClient, token: string): Promise<{ userId
     throw new InvalidTokenError('Invalid or expired verification token');
   }
 
-  // Mark email as verified and token as used atomically
-  await withTransaction(db, async (tx) => {
-    await tx.update(users).set({ emailVerified: true }).where(eq(users.id, tokenRecord.userId));
+  // Mark email as verified, mark token as used, and create auth tokens atomically
+  const { user, refreshToken } = await withTransaction(db, async (tx) => {
+    // Update user to verified
+    const [updatedUser] = await tx
+      .update(users)
+      .set({ emailVerified: true, emailVerifiedAt: new Date() })
+      .where(eq(users.id, tokenRecord.userId))
+      .returning();
 
+    if (!updatedUser) {
+      throw new Error('Failed to verify user');
+    }
+
+    // Mark token as used
     await tx
       .update(emailVerificationTokens)
       .set({ usedAt: new Date() })
       .where(eq(emailVerificationTokens.id, tokenRecord.id));
+
+    // Create refresh token for auto-login
+    const { token: refreshTok } = await createRefreshTokenFamily(
+      tx,
+      updatedUser.id,
+      config.refreshToken.expiryDays,
+    );
+
+    return { user: updatedUser, refreshToken: refreshTok };
   });
 
-  return { userId: tokenRecord.userId };
+  // Create access token
+  const accessToken = createAccessToken(
+    user.id,
+    user.email,
+    user.role,
+    config.jwt.secret,
+    config.jwt.accessTokenExpiry,
+  );
+
+  return createAuthResponse(accessToken, refreshToken, user);
 }

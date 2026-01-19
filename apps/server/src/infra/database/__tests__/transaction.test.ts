@@ -130,6 +130,150 @@ describe('withTransaction', () => {
   });
 });
 
+describe('transaction rollback behavior', () => {
+  test('should rollback when callback throws after performing operations', async () => {
+    // Track whether rollback was triggered (Drizzle rolls back automatically on throw)
+    const operationsPerformed: string[] = [];
+    let transactionRolledBack = false;
+
+    const mockTx = {
+      insert: vi.fn().mockImplementation(() => {
+        operationsPerformed.push('insert');
+        return { values: vi.fn().mockReturnThis(), returning: vi.fn().mockResolvedValue([]) };
+      }),
+      update: vi.fn().mockImplementation(() => {
+        operationsPerformed.push('update');
+        return { set: vi.fn().mockReturnThis(), where: vi.fn().mockResolvedValue([]) };
+      }),
+    };
+
+    // Simulate Drizzle's transaction behavior: rollback on error
+    const mockTransaction = vi.fn().mockImplementation(async (cb: TransactionCallback<unknown>) => {
+      try {
+        return await cb(mockTx as unknown as DbClient);
+      } catch (error) {
+        // In real Drizzle, this is where rollback happens automatically
+        transactionRolledBack = true;
+        throw error;
+      }
+    });
+
+    const mockDb = {
+      transaction: mockTransaction,
+    } as unknown as Parameters<typeof withTransaction>[0];
+
+    // Callback that performs operations then throws
+    const callback = vi
+      .fn()
+      .mockImplementation(async (tx: { insert: () => void; update: () => void }) => {
+        tx.insert(); // First operation succeeds
+        tx.update(); // Second operation succeeds
+        throw new Error('Business logic validation failed');
+      });
+
+    await expect(withTransaction(mockDb, callback)).rejects.toThrow(
+      'Business logic validation failed',
+    );
+
+    // Verify operations were attempted
+    expect(operationsPerformed).toEqual(['insert', 'update']);
+    // Verify rollback was triggered
+    expect(transactionRolledBack).toBe(true);
+  });
+
+  test('should not commit when error occurs mid-transaction', async () => {
+    let commitCalled = false;
+
+    const mockTransaction = vi.fn().mockImplementation(async (cb: TransactionCallback<unknown>) => {
+      const result = await cb({} as unknown as DbClient);
+      // Only reach commit if no error (if cb throws, we never get here)
+      commitCalled = true;
+      return result;
+    });
+
+    const mockDb = {
+      transaction: mockTransaction,
+    } as unknown as Parameters<typeof withTransaction>[0];
+
+    const callback = vi.fn().mockRejectedValue(new Error('Failed'));
+
+    await expect(withTransaction(mockDb, callback)).rejects.toThrow('Failed');
+
+    // Verify commit was never reached
+    expect(commitCalled).toBe(false);
+  });
+
+  test('should propagate original error after rollback', async () => {
+    class CustomDatabaseError extends Error {
+      constructor(
+        message: string,
+        public code: string,
+      ) {
+        super(message);
+        this.name = 'CustomDatabaseError';
+      }
+    }
+
+    const originalError = new CustomDatabaseError(
+      'Unique constraint violation',
+      'UNIQUE_VIOLATION',
+    );
+
+    const mockTransaction = vi.fn().mockImplementation(async (cb: TransactionCallback<unknown>) => {
+      // Transaction will propagate any error from the callback
+      return await cb({} as unknown as DbClient);
+    });
+
+    const mockDb = {
+      transaction: mockTransaction,
+    } as unknown as Parameters<typeof withTransaction>[0];
+
+    const callback = vi.fn().mockRejectedValue(originalError);
+
+    try {
+      await withTransaction(mockDb, callback);
+      expect.fail('Should have thrown');
+    } catch (error) {
+      expect(error).toBe(originalError);
+      expect((error as CustomDatabaseError).code).toBe('UNIQUE_VIOLATION');
+    }
+  });
+
+  test('should handle error thrown after multiple successful operations', async () => {
+    const operationResults: string[] = [];
+
+    const mockTx = {
+      query: vi.fn().mockImplementation(async (queryStr: string) => {
+        operationResults.push(`query:${queryStr}`);
+        return [];
+      }),
+    };
+
+    const mockTransaction = vi.fn().mockImplementation(async (cb: TransactionCallback<unknown>) => {
+      return await cb(mockTx as unknown as DbClient);
+    });
+
+    const mockDb = {
+      transaction: mockTransaction,
+    } as unknown as Parameters<typeof withTransaction>[0];
+
+    const callback = vi
+      .fn()
+      .mockImplementation(async (tx: { query: (q: string) => Promise<unknown[]> }) => {
+        await tx.query('INSERT INTO users');
+        await tx.query('INSERT INTO tokens');
+        await tx.query('UPDATE counters');
+        // Error after 3 successful operations
+        throw new Error('Final validation failed');
+      });
+
+    await expect(withTransaction(mockDb, callback)).rejects.toThrow('Final validation failed');
+
+    // All operations were attempted before error
+    expect(operationResults).toHaveLength(3);
+  });
+});
+
 describe('isInTransaction', () => {
   test('should always return true', () => {
     const mockDb = {} as Parameters<typeof isInTransaction>[0];

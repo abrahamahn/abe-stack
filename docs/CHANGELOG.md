@@ -8,6 +8,48 @@ All notable changes to this project are documented here. Format follows semantic
 
 ## 2026-01-19
 
+### Client App Entrypoint Refactoring
+
+Refactored the web client entrypoint to follow chet-stack patterns for clarity and simplicity.
+
+**Changes:**
+
+| Before                                                 | After                                    |
+| ------------------------------------------------------ | ---------------------------------------- |
+| `main.tsx` - calls `createClientEnvironment()` factory | `main.tsx` - creates all services inline |
+| `createEnvironment.ts` - factory functions             | _(deleted)_                              |
+| `AppProvider.tsx` - provider composition               | _(merged into App.tsx)_                  |
+| `root.tsx` - App component + routes                    | `App.tsx` - unified providers + routes   |
+
+**New Structure (`apps/web/src/app/`):**
+
+- `main.tsx` - Entry point with inline service creation
+- `App.tsx` - Single component with providers + routes
+- `ClientEnvironment.tsx` - Type + Context + Hook (unchanged)
+- `index.ts` - Barrel exports
+
+**Pattern adopted:** All services created at module level in entry point, assembled into environment object, passed as prop to App component.
+
+---
+
+### Removed sync-import-aliases Automation
+
+Removed the `sync-import-aliases.ts` script that automatically converted relative imports to path aliases.
+
+**Reason:** The automatic conversion was causing issues with vitest test resolution and added complexity. Developers can use path aliases manually where beneficial.
+
+**Files removed:**
+
+- `config/lint/sync-import-aliases.ts`
+
+**Updated files:**
+
+- `tools/dev/start-dev.ts` - Removed watcher
+- `package.json` - Removed `sync:imports` scripts and pre-commit reference
+- `.github/workflows/ci.yml` - Removed `sync:imports:check`
+
+---
+
 ### Authentication Flow Security Audit & Improvements
 
 Comprehensive security audit of the authentication system with critical fixes and improvements.

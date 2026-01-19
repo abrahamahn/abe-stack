@@ -1,8 +1,8 @@
 # Sync Scripts (DX Automation)
 
-**Last Updated: January 17, 2026**
+**Last Updated: January 19, 2026**
 
-Comprehensive guide to the ABE Stack developer experience automation scripts. These eight TypeScript scripts handle repetitive tasks automatically during development.
+Comprehensive guide to the ABE Stack developer experience automation scripts. These seven TypeScript scripts handle repetitive tasks automatically during development.
 
 > **Related Documentation:**
 >
@@ -18,25 +18,23 @@ Comprehensive guide to the ABE Stack developer experience automation scripts. Th
 3. [How Automation Works](#how-automation-works)
 4. [sync-path-aliases.ts](#1-sync-path-aliasests)
 5. [sync-file-headers.ts](#2-sync-file-headersts)
-6. [sync-import-aliases.ts](#3-sync-import-aliasests)
-7. [sync-test-folders.ts](#4-sync-test-foldersts)
-8. [sync-barrel-exports.ts](#5-sync-barrel-exportsts)
-9. [sync-tsconfig.ts](#6-sync-tsconfigts)
-10. [sync-linting.ts](#7-sync-lintingts)
-11. [sync-css-theme.ts](#8-sync-css-themets)
-12. [Manual vs Automatic Execution](#manual-vs-automatic-execution-summary)
+6. [sync-test-folders.ts](#3-sync-test-foldersts)
+7. [sync-barrel-exports.ts](#4-sync-barrel-exportsts)
+8. [sync-tsconfig.ts](#5-sync-tsconfigts)
+9. [sync-linting.ts](#6-sync-lintingts)
+10. [sync-css-theme.ts](#7-sync-css-themets)
+11. [Manual vs Automatic Execution](#manual-vs-automatic-execution-summary)
 
 ---
 
 ## Overview
 
-Eight TypeScript sync scripts automate repetitive development tasks. All scripts are located in `tools/sync/`:
+Seven TypeScript sync scripts automate repetitive development tasks. All scripts are located in `config/lint/`:
 
 | Script                   | Purpose                                                         |
 | ------------------------ | --------------------------------------------------------------- |
 | `sync-path-aliases.ts`   | Auto-generate TypeScript path aliases in `tsconfig.json`        |
 | `sync-file-headers.ts`   | Ensure source files have path comment headers                   |
-| `sync-import-aliases.ts` | Convert relative imports to path aliases                        |
 | `sync-test-folders.ts`   | Create `__tests__/` directories for code directories            |
 | `sync-barrel-exports.ts` | Auto-generate barrel file exports                               |
 | `sync-tsconfig.ts`       | Auto-generate TypeScript project references                     |
@@ -66,22 +64,20 @@ All watcher scripts also support `--quiet` for silent operation (used by `pnpm d
 ```typescript
 // tools/dev/start-dev.ts
 const watchers = [
-  startWatcher('tools/sync/sync-path-aliases.ts'),
-  startWatcher('tools/sync/sync-file-headers.ts'),
-  startWatcher('tools/sync/sync-import-aliases.ts'),
-  startWatcher('tools/sync/sync-test-folders.ts'),
-  startWatcher('tools/sync/sync-barrel-exports.ts'),
-  startWatcher('tools/sync/sync-css-theme.ts'),
+  startConfigGenerator(), // Generates tsconfigs and aliases
+  startWatcher('config/lint/sync-file-headers.ts'),
+  startWatcher('config/lint/sync-test-folders.ts'),
+  startWatcher('config/lint/sync-barrel-exports.ts'),
+  startWatcher('config/lint/sync-css-theme.ts'),
 ];
 ```
 
-Six scripts run in watch mode with `--quiet` flag in background processes. `sync-tsconfig.ts` and `sync-linting.ts` run on demand (sync/check only).
+Five scripts run in watch mode with `--quiet` flag in background processes. `sync-tsconfig.ts` and `sync-linting.ts` run on demand (sync/check only).
 
 ### Pre-commit Hook
 
 ```bash
-pnpm sync:linting && pnpm sync:tsconfig && pnpm sync:aliases && pnpm sync:headers && pnpm sync:imports && \
-pnpm sync:tests && pnpm sync:barrels && pnpm sync:theme
+pnpm config:generate && pnpm sync:headers && pnpm sync:tests && pnpm sync:barrels && pnpm sync:theme
 ```
 
 ### CI Pipeline (`.github/workflows/ci.yml`)
@@ -90,7 +86,6 @@ pnpm sync:tests && pnpm sync:barrels && pnpm sync:theme
 - run: pnpm sync:aliases:check
 - run: pnpm sync:tsconfig:check
 - run: pnpm sync:headers:check
-- run: pnpm sync:imports:check
 - run: pnpm sync:tests:check
 - run: pnpm sync:barrels:check
 ```
@@ -217,99 +212,7 @@ Uses `fs.watch` with `recursive: true` on all scan directories. 100ms debounce o
 
 ---
 
-## 3. sync-import-aliases.ts
-
-**Purpose:** Convert relative imports (`../../../`) to path aliases (`@module`).
-
-**Commands:**
-
-```bash
-pnpm sync:imports        # Sync once
-pnpm sync:imports:check  # Verify
-pnpm sync:imports:watch  # Watch mode
-```
-
-**Before:**
-
-```typescript
-import { Button } from '../../../components/Button';
-import { validateEmail } from '../../utils/validation';
-```
-
-**After:**
-
-```typescript
-import { Button } from '@components';
-import { validateEmail } from '@utils/validation';
-```
-
-### Scope Included
-
-**Project roots:** `apps`, `packages`
-
-Processes all TypeScript/JavaScript files in `src/` directories.
-
-### Scope Excluded
-
-**Directories skipped:**
-
-- `node_modules`, `__tests__`, `.cache`, `.turbo`, `dist`, `build`, `coverage`, `.git`
-- `src/test`, `src/tests` directories
-
-**Files skipped:**
-
-- `.d.ts` declaration files
-- **Barrel files (`index.ts`)** — These should use relative imports for re-exports
-
-**Imports NOT converted:**
-
-- **Same-directory imports** (`./foo`) — These are fine as relative
-- **Non-relative imports** (`react`, `@abe-stack/core`) — Already aliased
-
-**Re-export lines preserved in index files:**
-
-```typescript
-// These lines are NOT converted (should stay relative):
-export { Button } from './Button';
-export type { ButtonProps } from './types';
-```
-
-### How It Works
-
-1. **Loads alias mappings** from each project's `tsconfig.json`
-2. **For each source file:**
-   - Checks if file is a barrel file (index.ts with only exports) → Skip entirely
-   - For non-barrel files, finds all import statements
-   - **Resolves relative import** to absolute path
-   - **Matches against aliases** (longest path first for specificity)
-   - **Replaces with alias path**
-
-3. **Import types handled:**
-
-   ```typescript
-   // Static imports
-   import { foo } from '../module'; // from '...' pattern
-
-   // Dynamic imports
-   const mod = await import('../module'); // import('...') pattern
-
-   // Require
-   const mod = require('../module'); // require('...') pattern
-   ```
-
-### Barrel File Detection
-
-A file is considered a barrel if it contains ONLY:
-
-- Comments (`//`, `/* */`)
-- Import statements
-- Re-export statements (`export { } from`, `export * from`)
-
-Any other code (functions, classes, variables) → Not a barrel, process normally.
-
----
-
-## 4. sync-test-folders.ts
+## 3. sync-test-folders.ts
 
 **Purpose:** Create `__tests__/` directories for all code directories.
 
@@ -357,11 +260,11 @@ If a directory contains ONLY an `index.ts` that is a pure barrel file (only re-e
 
 ### Barrel File Detection
 
-Same logic as `sync-import-aliases.ts` — only exports/imports = barrel file.
+A file is considered a barrel if it contains ONLY comments, import statements, and re-export statements (`export { } from`, `export * from`).
 
 ---
 
-## 5. sync-barrel-exports.ts
+## 4. sync-barrel-exports.ts
 
 **Purpose:** Auto-generate and update `index.ts` barrel files with explicit named exports.
 
@@ -466,7 +369,7 @@ Separates values from types for proper `export type { }` syntax.
 
 ---
 
-## 6. sync-tsconfig.ts
+## 5. sync-tsconfig.ts
 
 **Purpose:** Auto-generate TypeScript project references based on workspace dependencies.
 
@@ -491,7 +394,7 @@ pnpm sync:tsconfig:check  # Verify (CI mode)
 
 ---
 
-## 7. sync-linting.ts
+## 6. sync-linting.ts
 
 **Purpose:** Sync linting config to `package.json` and `.vscode/settings.json`.
 
@@ -519,7 +422,7 @@ pnpm sync:linting:check  # Verify (CI mode)
 
 ---
 
-## 8. sync-css-theme.ts
+## 7. sync-css-theme.ts
 
 **Purpose:** Generate CSS custom properties from TypeScript theme tokens.
 
@@ -585,7 +488,6 @@ for (const filePath of themeSourceFiles) {
 | ------------------- | ---------- | ---------- | -------- |
 | sync-path-aliases   | ✅ Watch   | ✅ Sync    | ✅ Check |
 | sync-file-headers   | ✅ Watch   | ✅ Sync    | ✅ Check |
-| sync-import-aliases | ✅ Watch   | ✅ Sync    | ✅ Check |
 | sync-test-folders   | ✅ Watch   | ✅ Sync    | ✅ Check |
 | sync-barrel-exports | ✅ Watch   | ✅ Sync    | ✅ Check |
 | sync-tsconfig       | ❌         | ✅ Sync    | ✅ Check |

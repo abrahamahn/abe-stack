@@ -7,7 +7,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthService, createAuthService } from '../AuthService';
 
 import type { User } from '../AuthService';
-import type { AuthResponse, LoginRequest, RegisterRequest } from '@abe-stack/core';
+import type {
+  AuthResponse,
+  LoginRequest,
+  RegisterRequest,
+  RegisterResponse,
+} from '@abe-stack/core';
 import type { ClientConfig } from '@config';
 
 // ============================================================================
@@ -64,6 +69,14 @@ function createMockAuthResponse(user: User = createMockUser()): AuthResponse {
   return {
     token: 'mock-token-abc123',
     user,
+  };
+}
+
+function createMockRegisterResponse(email = 'new@example.com'): RegisterResponse {
+  return {
+    status: 'pending_verification',
+    message: 'Please check your email to verify your account',
+    email,
   };
 }
 
@@ -223,24 +236,26 @@ describe('AuthService', () => {
         password: 'password123',
         name: 'New User',
       };
-      mockApiClient.register.mockResolvedValueOnce(createMockAuthResponse());
+      mockApiClient.register.mockResolvedValueOnce(createMockRegisterResponse(data.email));
 
       await authService.register(data);
 
       expect(mockApiClient.register).toHaveBeenCalledWith(data);
     });
 
-    it('should store token on successful registration', async () => {
-      const response = createMockAuthResponse();
+    it('should return pending_verification status without storing token', async () => {
+      const response = createMockRegisterResponse('new@example.com');
       mockApiClient.register.mockResolvedValueOnce(response);
 
-      await authService.register({
+      const result = await authService.register({
         email: 'new@example.com',
         password: 'password123',
         name: 'New User',
       });
 
-      expect(tokenStore.set).toHaveBeenCalledWith(response.token);
+      // Registration now requires email verification - no auto-login
+      expect(result.status).toBe('pending_verification');
+      expect(tokenStore.set).not.toHaveBeenCalled();
     });
   });
 

@@ -8,6 +8,13 @@ vi.mock('@infra/index', () => {
     getSubscriptionCount = vi.fn(() => 0);
   };
 
+  class MockSchemaValidationError extends Error {
+    constructor(public readonly missingTables: string[]) {
+      super(`Missing tables: ${missingTables.join(', ')}`);
+      this.name = 'SchemaValidationError';
+    }
+  }
+
   return {
     createDbClient: vi.fn(() => ({
       execute: vi.fn(() => Promise.resolve()),
@@ -34,6 +41,7 @@ vi.mock('@infra/index', () => {
         uptime: 0,
         services: {
           database: { status: 'up', message: 'connected' },
+          schema: { status: 'up', message: '7 tables present' },
           email: { status: 'up', message: 'console' },
           storage: { status: 'up', message: 'local' },
           pubsub: { status: 'up', message: '0 active subscriptions' },
@@ -44,6 +52,9 @@ vi.mock('@infra/index', () => {
     ),
     logStartupSummary: vi.fn(() => Promise.resolve()),
     SubscriptionManager: MockSubscriptionManager,
+    // Schema validation mocks
+    requireValidSchema: vi.fn(() => Promise.resolve()),
+    SchemaValidationError: MockSchemaValidationError,
   };
 });
 
@@ -87,6 +98,7 @@ describe('App', () => {
       logLevel: 'silent',
     },
     database: {
+      provider: 'postgresql',
       host: 'localhost',
       port: 5432,
       database: 'test',

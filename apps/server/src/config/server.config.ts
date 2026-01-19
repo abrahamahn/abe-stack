@@ -24,7 +24,7 @@ export function loadServerConfig(env: Record<string, string | undefined>): Serve
     port: parseInt(env.API_PORT || env.PORT || String(defaultPort), 10),
     portFallbacks: [defaultPort, defaultPort + 1, defaultPort + 2, defaultPort + 3],
     cors: {
-      origin: env.CORS_ORIGIN || 'http://localhost:3000',
+      origin: env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:3000',
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     },

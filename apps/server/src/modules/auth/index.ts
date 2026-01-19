@@ -24,6 +24,7 @@ export {
   handleLogout,
   handleRefresh,
   handleRegister,
+  handleResendVerification,
   handleResetPassword,
   handleVerifyEmail,
 } from '@auth/handlers';
@@ -39,6 +40,7 @@ export {
   refreshUserTokens,
   registerUser,
   requestPasswordReset,
+  resendVerificationEmail,
   resetPassword,
   verifyEmail,
   type AuthResult,

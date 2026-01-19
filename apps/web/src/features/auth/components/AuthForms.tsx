@@ -1,5 +1,5 @@
 // apps/web/src/features/auth/components/AuthForms.tsx
-import { Button, Input, PasswordInput } from '@abe-stack/ui';
+import { Button, Input, PasswordInput, Text } from '@abe-stack/ui';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -7,6 +7,8 @@ import type {
   ForgotPasswordRequest,
   LoginRequest,
   RegisterRequest,
+  RegisterResponse,
+  ResendVerificationRequest,
   ResetPasswordRequest,
 } from '@abe-stack/core';
 import type { ReactElement } from 'react';
@@ -16,9 +18,10 @@ export type AuthMode = 'login' | 'register' | 'forgot-password' | 'reset-passwor
 export interface AuthFormProps {
   mode: AuthMode;
   onLogin?: (data: LoginRequest) => Promise<void>;
-  onRegister?: (data: RegisterRequest) => Promise<void>;
+  onRegister?: (data: RegisterRequest) => Promise<RegisterResponse>;
   onForgotPassword?: (data: ForgotPasswordRequest) => Promise<void>;
   onResetPassword?: (data: ResetPasswordRequest) => Promise<void>;
+  onResendVerification?: (data: ResendVerificationRequest) => Promise<void>;
   onSuccess?: () => void;
   onModeChange?: (mode: AuthMode) => void;
   initialData?: Record<string, unknown>;
@@ -153,31 +156,143 @@ interface RegisterFormProps extends Omit<
   AuthFormProps,
   'mode' | 'onLogin' | 'onForgotPassword' | 'onResetPassword'
 > {
-  onRegister?: (data: RegisterRequest) => Promise<void>;
+  onRegister?: (data: RegisterRequest) => Promise<RegisterResponse>;
+  onResendVerification?: (data: ResendVerificationRequest) => Promise<void>;
 }
 
 export function RegisterForm({
   onRegister,
+  onResendVerification,
   onModeChange,
   isLoading,
   error,
-  onSuccess,
 }: RegisterFormProps): ReactElement {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
+  const [registrationResult, setRegistrationResult] = useState<RegisterResponse | null>(null);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     if (!onRegister) return;
 
     try {
-      await onRegister({ email, password, name: name || undefined });
-      onSuccess?.();
+      const result = await onRegister({ email, password, name: name || undefined });
+      setRegistrationResult(result);
     } catch {
       // Error is handled by parent component
     }
   };
+
+  const handleResend = async (): Promise<void> => {
+    if (!onResendVerification || !registrationResult?.email || resendCooldown > 0) return;
+
+    setResendLoading(true);
+    setResendMessage(null);
+    try {
+      await onResendVerification({ email: registrationResult.email });
+      setResendMessage('Verification email resent! Check your inbox.');
+      setResendCooldown(60);
+      // Start countdown
+      const interval = setInterval(() => {
+        setResendCooldown((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch {
+      setResendMessage('Failed to resend. Please try again later.');
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
+  // Show success message after registration
+  if (registrationResult) {
+    return (
+      <div className="auth-form">
+        <div className="auth-form-content">
+          <div className="auth-form-header">
+            <h2 className="auth-form-title">Check your email</h2>
+          </div>
+
+          <div className="status-icon bg-success-muted mx-auto">
+            <svg
+              className="icon-lg text-success"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              />
+            </svg>
+          </div>
+
+          <Text tone="muted" className="text-center">
+            {registrationResult.message}
+          </Text>
+
+          <Text tone="muted" className="text-xs text-center">
+            Sent to: <strong>{registrationResult.email}</strong>
+          </Text>
+
+          {resendMessage && (
+            <Text
+              tone={resendMessage.includes('Failed') ? 'danger' : 'success'}
+              className="text-sm text-center"
+            >
+              {resendMessage}
+            </Text>
+          )}
+
+          {onResendVerification && (
+            <div className="text-center">
+              <Button
+                variant="text"
+                onClick={() => {
+                  void handleResend();
+                }}
+                disabled={resendLoading || resendCooldown > 0}
+              >
+                {resendLoading
+                  ? 'Resending...'
+                  : resendCooldown > 0
+                    ? `Resend in ${resendCooldown.toString()}s`
+                    : "Didn't receive it? Resend email"}
+              </Button>
+            </div>
+          )}
+
+          <div className="auth-form-footer">
+            Already verified?{' '}
+            {onModeChange ? (
+              <Button
+                variant="text"
+                onClick={() => {
+                  onModeChange('login');
+                }}
+                style={{ padding: 0, minHeight: 'auto' }}
+              >
+                Sign in
+              </Button>
+            ) : (
+              <Link to="/auth?mode=login">Sign in</Link>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="auth-form">

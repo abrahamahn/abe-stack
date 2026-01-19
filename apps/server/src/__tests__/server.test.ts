@@ -23,6 +23,7 @@ const testConfig: AppConfig = {
     logLevel: 'silent',
   },
   database: {
+    provider: 'postgresql',
     host: 'localhost',
     port: 5432,
     database: 'test',

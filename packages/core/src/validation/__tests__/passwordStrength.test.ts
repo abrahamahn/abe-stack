@@ -114,4 +114,82 @@ describe('estimatePasswordStrength', () => {
       expect(result.feedback.warning).toContain('commonly used');
     });
   });
+
+  describe('score threshold boundaries', () => {
+    test('should return score 0 for empty password', () => {
+      const result = estimatePasswordStrength('');
+      expect(result.score).toBe(0);
+    });
+
+    test('should return score 0 for single character password', () => {
+      const result = estimatePasswordStrength('a');
+      expect(result.score).toBe(0);
+    });
+
+    test('should return consistent scores across multiple calls', () => {
+      const password = 'TestPassword123!';
+      const result1 = estimatePasswordStrength(password);
+      const result2 = estimatePasswordStrength(password);
+      expect(result1.score).toBe(result2.score);
+      expect(result1.entropy).toBe(result2.entropy);
+    });
+
+    test('should return score between 0 and 4 inclusive', () => {
+      const testCases = ['a', 'password', 'Password1', 'Password123!', 'Xk9$mQ2@nL5!pR8*vB3#'];
+
+      for (const password of testCases) {
+        const result = estimatePasswordStrength(password);
+        expect(result.score).toBeGreaterThanOrEqual(0);
+        expect(result.score).toBeLessThanOrEqual(4);
+      }
+    });
+  });
+
+  describe('penalty combinations', () => {
+    test('should apply cumulative penalties for multiple issues', () => {
+      // Password with both common word and keyboard pattern
+      const result = estimatePasswordStrength('password123qwerty');
+      // Multiple penalties applied but longer length provides some entropy
+      expect(result.score).toBeLessThanOrEqual(1);
+      // Should still have a warning about the issues
+      expect(result.feedback.warning).toBeTruthy();
+    });
+
+    test('should penalize passwords with repeats and sequences together', () => {
+      const result = estimatePasswordStrength('aaabbbccc123');
+      expect(result.score).toBeLessThanOrEqual(1);
+      expect(result.feedback.warning).toBeTruthy();
+    });
+
+    test('should apply user input penalty even for strong base passwords', () => {
+      const withoutInput = estimatePasswordStrength('JohnSmith2024!@#');
+      const withInput = estimatePasswordStrength('JohnSmith2024!@#', ['john', 'smith']);
+      expect(withInput.score).toBeLessThan(withoutInput.score);
+    });
+  });
+
+  describe('edge cases', () => {
+    test('should handle unicode characters', () => {
+      const result = estimatePasswordStrength('Пароль123!');
+      expect(result.score).toBeGreaterThanOrEqual(0);
+      expect(result.score).toBeLessThanOrEqual(4);
+    });
+
+    test('should handle whitespace in passwords', () => {
+      const result = estimatePasswordStrength('Password With Spaces 123!');
+      expect(result.score).toBeGreaterThanOrEqual(0);
+    });
+
+    test('should handle very long passwords', () => {
+      const longPassword = 'a'.repeat(100) + 'B'.repeat(100) + '1'.repeat(100);
+      const result = estimatePasswordStrength(longPassword);
+      // Long password has high entropy but repeated chars penalty
+      expect(result.entropy).toBeGreaterThan(100);
+    });
+
+    test('should handle null-like user inputs', () => {
+      const result = estimatePasswordStrength('TestPassword123!', ['', ' ', '  ']);
+      expect(result.score).toBeGreaterThanOrEqual(0);
+    });
+  });
 });

@@ -354,4 +354,160 @@ describe('undoRedoStore', () => {
       expect(store.getState().redoStackSize()).toBe(2);
     });
   });
+
+  describe('store isolation', () => {
+    it('should create independent store instances', () => {
+      const store1 = createUndoRedoStore(0);
+      const store2 = createUndoRedoStore(0);
+
+      const tx1 = {
+        id: 'tx-1',
+        timestamp: 1000,
+        operations: [createSetOperation(['a'], 1, 0)],
+      };
+      const tx2 = {
+        id: 'tx-2',
+        timestamp: 2000,
+        operations: [createSetOperation(['b'], 2, 0)],
+      };
+
+      store1.getState().push(tx1);
+      store2.getState().push(tx2);
+
+      expect(store1.getState().undoStackSize()).toBe(1);
+      expect(store2.getState().undoStackSize()).toBe(1);
+
+      // Operations should not affect each other
+      store1.getState().undo();
+
+      expect(store1.getState().undoStackSize()).toBe(0);
+      expect(store2.getState().undoStackSize()).toBe(1);
+    });
+
+    it('should have independent batch thresholds', () => {
+      const fastStore = createUndoRedoStore(100); // 100ms threshold
+      const slowStore = createUndoRedoStore(5000); // 5 second threshold
+
+      const tx1 = { id: 'tx-1', timestamp: 1000, operations: [createSetOperation(['a'], 1, 0)] };
+      const tx2 = { id: 'tx-2', timestamp: 1500, operations: [createSetOperation(['b'], 2, 0)] };
+
+      fastStore.getState().push(tx1);
+      fastStore.getState().push(tx2);
+      slowStore.getState().push(tx1);
+      slowStore.getState().push(tx2);
+
+      // 500ms difference - outside fast threshold, inside slow threshold
+      expect(fastStore.getState().undoStackSize()).toBe(2); // Not batched
+      expect(slowStore.getState().undoStackSize()).toBe(1); // Batched
+    });
+
+    it('should allow clearing one store without affecting others', () => {
+      const store1 = createUndoRedoStore(0);
+      const store2 = createUndoRedoStore(0);
+
+      const tx = { id: 'tx-1', timestamp: 1000, operations: [createSetOperation(['a'], 1, 0)] };
+
+      store1.getState().push(tx);
+      store2.getState().push(tx);
+      store1.getState().undo();
+      store2.getState().undo();
+
+      expect(store1.getState().redoStackSize()).toBe(1);
+      expect(store2.getState().redoStackSize()).toBe(1);
+
+      store1.getState().clear();
+
+      expect(store1.getState().undoStackSize()).toBe(0);
+      expect(store1.getState().redoStackSize()).toBe(0);
+      expect(store2.getState().redoStackSize()).toBe(1);
+    });
+  });
+
+  describe('large stack behavior', () => {
+    it('should handle large number of transactions', () => {
+      const store = createUndoRedoStore(0);
+
+      // Push 100 transactions
+      for (let i = 0; i < 100; i++) {
+        const tx = {
+          id: `tx-${i}`,
+          timestamp: i * 1000,
+          operations: [createSetOperation(['value'], i + 1, i)],
+        };
+        store.getState().push(tx);
+      }
+
+      expect(store.getState().undoStackSize()).toBe(100);
+
+      // Undo all 100
+      for (let i = 0; i < 100; i++) {
+        const result = store.getState().undo();
+        expect(result).toBeDefined();
+      }
+
+      expect(store.getState().undoStackSize()).toBe(0);
+      expect(store.getState().redoStackSize()).toBe(100);
+
+      // Redo all 100
+      for (let i = 0; i < 100; i++) {
+        const result = store.getState().redo();
+        expect(result).toBeDefined();
+      }
+
+      expect(store.getState().undoStackSize()).toBe(100);
+      expect(store.getState().redoStackSize()).toBe(0);
+    });
+
+    it('should maintain stack integrity after mixed operations', () => {
+      const store = createUndoRedoStore(0);
+
+      // Push 10 transactions
+      for (let i = 0; i < 10; i++) {
+        const tx = {
+          id: `tx-${i}`,
+          timestamp: i * 1000,
+          operations: [createSetOperation(['value'], i + 1, i)],
+        };
+        store.getState().push(tx);
+      }
+
+      // Undo 5
+      for (let i = 0; i < 5; i++) {
+        store.getState().undo();
+      }
+
+      expect(store.getState().undoStackSize()).toBe(5);
+      expect(store.getState().redoStackSize()).toBe(5);
+
+      // Push new transaction (should clear redo stack)
+      const newTx = {
+        id: 'new-tx',
+        timestamp: 20000,
+        operations: [createSetOperation(['value'], 100, 5)],
+      };
+      store.getState().push(newTx);
+
+      expect(store.getState().undoStackSize()).toBe(6);
+      expect(store.getState().redoStackSize()).toBe(0); // Redo cleared
+    });
+
+    it('should handle operations with multiple ops per transaction', () => {
+      const store = createUndoRedoStore(0);
+
+      const tx = {
+        id: 'multi-op-tx',
+        timestamp: 1000,
+        operations: [
+          createSetOperation(['a'], 1, 0),
+          createSetOperation(['b'], 2, 0),
+          createSetOperation(['c'], 3, 0),
+        ],
+      };
+
+      store.getState().push(tx);
+      const result = store.getState().undo();
+
+      expect(result?.operations).toHaveLength(3);
+    });
+  });
 });

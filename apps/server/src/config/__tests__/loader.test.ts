@@ -54,6 +54,9 @@ describe('Configuration Loader', () => {
       };
 
       const config = loadConfig(env);
+      if (config.database.provider !== 'postgresql') {
+        throw new Error('Expected postgresql provider');
+      }
 
       expect(config.database.host).toBe('db.example.com');
       expect(config.database.port).toBe(5433);
@@ -174,6 +177,9 @@ describe('Configuration Loader', () => {
       };
 
       const config = loadConfig(env);
+      if (config.database.provider !== 'postgresql') {
+        throw new Error('Expected postgresql provider');
+      }
 
       expect(config.database.connectionString).toBe('postgresql://user:pass@localhost:5432/db');
     });
@@ -186,6 +192,9 @@ describe('Configuration Loader', () => {
       };
 
       const config = loadConfig(env);
+      if (config.database.provider !== 'postgresql') {
+        throw new Error('Expected postgresql provider');
+      }
 
       expect(config.database.password).toBe('mypassword');
     });

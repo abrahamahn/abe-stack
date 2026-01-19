@@ -83,6 +83,7 @@ vi.mock('../utils', () => ({
 function createMockContext(overrides?: Partial<AppContext>): AppContext {
   return {
     db: {} as AppContext['db'],
+    email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
     config: {
       auth: {
         jwt: { secret: 'test-secret-32-characters-long!!' },
@@ -127,15 +128,15 @@ describe('handleRegister', () => {
     vi.clearAllMocks();
   });
 
-  test('should return 201 with auth response on successful registration', async () => {
+  test('should return 201 with pending verification on successful registration', async () => {
     const ctx = createMockContext();
     const reply = createMockReply();
     const body = { email: 'test@example.com', password: 'StrongPass123!', name: 'Test User' };
 
     const mockResult = {
-      accessToken: 'access-token',
-      refreshToken: 'refresh-token',
-      user: { id: 'user-123', email: 'test@example.com', name: 'Test User', role: 'user' as const },
+      status: 'pending_verification' as const,
+      message: 'Please check your email to verify your account.',
+      email: 'test@example.com',
     };
 
     vi.mocked(registerUser).mockResolvedValue(mockResult);
@@ -143,15 +144,9 @@ describe('handleRegister', () => {
     const result = await handleRegister(ctx, body, reply);
 
     expect(result.status).toBe(201);
-    expect(result.body).toEqual({
-      token: 'access-token',
-      user: mockResult.user,
-    });
-    expect(reply.setCookie).toHaveBeenCalledWith(
-      REFRESH_COOKIE_NAME,
-      'refresh-token',
-      expect.any(Object),
-    );
+    expect(result.body).toEqual(mockResult);
+    // No cookies set - user must verify email first
+    expect(reply.setCookie).not.toHaveBeenCalled();
   });
 
   test('should return 409 when email already exists', async () => {
@@ -440,6 +435,7 @@ describe('handleForgotPassword', () => {
     expect(result.body).toEqual({ message: SUCCESS_MESSAGES.PASSWORD_RESET_SENT });
     expect(requestPasswordReset).toHaveBeenCalledWith(
       ctx.db,
+      ctx.email,
       'test@example.com',
       'http://localhost:8080',
     );
@@ -534,42 +530,66 @@ describe('handleVerifyEmail', () => {
     vi.clearAllMocks();
   });
 
-  test('should return success response for valid verification', async () => {
+  test('should return success response with auth tokens for valid verification', async () => {
     const ctx = createMockContext();
+    const reply = createMockReply();
     const body = { token: 'verify-token' };
 
-    vi.mocked(verifyEmail).mockResolvedValue({ userId: 'user-123' });
+    const mockUser = {
+      id: 'user-123',
+      email: 'test@example.com',
+      name: 'Test',
+      role: 'user' as const,
+    };
+    vi.mocked(verifyEmail).mockResolvedValue({
+      accessToken: 'access-token',
+      refreshToken: 'refresh-token',
+      user: mockUser,
+    });
 
-    const result = await handleVerifyEmail(ctx, body);
+    const result = await handleVerifyEmail(ctx, body, reply);
 
     expect(result.status).toBe(200);
-    expect(result.body).toEqual({ verified: true, userId: 'user-123' });
-    expect(verifyEmail).toHaveBeenCalledWith(ctx.db, 'verify-token');
+    expect(result.body).toEqual({
+      verified: true,
+      token: 'access-token',
+      user: mockUser,
+    });
+    expect(verifyEmail).toHaveBeenCalledWith(ctx.db, ctx.config.auth, 'verify-token');
+    expect(reply.setCookie).toHaveBeenCalledWith(
+      REFRESH_COOKIE_NAME,
+      'refresh-token',
+      expect.any(Object),
+    );
   });
 
   test('should return bad request for invalid token', async () => {
     const ctx = createMockContext();
+    const reply = createMockReply();
     const body = { token: 'invalid-token' };
 
     vi.mocked(verifyEmail).mockRejectedValue(new InvalidTokenError('Invalid token'));
 
-    const result = await handleVerifyEmail(ctx, body);
+    const result = await handleVerifyEmail(ctx, body, reply);
 
     expect(result.status).toBe(400);
     expect(result.body).toEqual({ message: ERROR_MESSAGES.INVALID_TOKEN });
+    expect(reply.setCookie).not.toHaveBeenCalled();
   });
 
   test('should return internal error on service failure', async () => {
     const ctx = createMockContext();
+    const reply = createMockReply();
     const body = { token: 'verify-token' };
 
     vi.mocked(verifyEmail).mockRejectedValue(new Error('Database error'));
 
-    const result = await handleVerifyEmail(ctx, body);
+    const result = await handleVerifyEmail(ctx, body, reply);
 
     expect(result.status).toBe(500);
     expect(result.body).toEqual({ message: ERROR_MESSAGES.INTERNAL_ERROR });
     expect(ctx.log.error).toHaveBeenCalled();
+    expect(reply.setCookie).not.toHaveBeenCalled();
   });
 });
 

@@ -11,13 +11,16 @@ import {
   refreshUserTokens,
   registerUser,
   requestPasswordReset,
+  resendVerificationEmail,
   resetPassword,
   verifyEmail,
+  type RegisterResult,
 } from '@auth/service';
 import { getRefreshCookieOptions } from '@config';
 import {
   AccountLockedError,
   EmailAlreadyExistsError,
+  EmailNotVerifiedError,
   ERROR_MESSAGES,
   InvalidCredentialsError,
   InvalidTokenError,
@@ -30,6 +33,8 @@ import {
 import { REFRESH_COOKIE_NAME } from '@shared/constants';
 
 import { extractRequestInfo } from './utils';
+
+export type { RegisterResult } from '@auth/service';
 
 import type {
   AuthResponse,
@@ -47,27 +52,27 @@ import type { FastifyRequest } from 'fastify';
 export async function handleRegister(
   ctx: AppContext,
   body: RegisterRequest,
-  reply: ReplyWithCookies,
+  _reply: ReplyWithCookies,
 ): Promise<
-  { status: 201; body: AuthResponse } | { status: 400 | 409 | 500; body: { message: string } }
+  { status: 201; body: RegisterResult } | { status: 400 | 409 | 500; body: { message: string } }
 > {
   try {
     const { email, password, name } = body;
-    const result = await registerUser(ctx.db, ctx.config.auth, email, password, name);
-
-    // Set refresh token as HTTP-only cookie
-    reply.setCookie(
-      REFRESH_COOKIE_NAME,
-      result.refreshToken,
-      getRefreshCookieOptions(ctx.config.auth),
+    const baseUrl = `http://localhost:${String(ctx.config.server.port)}`;
+    const result = await registerUser(
+      ctx.db,
+      ctx.email,
+      ctx.config.auth,
+      email,
+      password,
+      name,
+      baseUrl,
     );
 
+    // No cookies set - user must verify email first
     return {
       status: 201,
-      body: {
-        token: result.accessToken,
-        user: result.user,
-      },
+      body: result,
     };
   } catch (error) {
     if (error instanceof EmailAlreadyExistsError) {
@@ -93,7 +98,9 @@ export async function handleLogin(
   request: RequestWithCookies,
   reply: ReplyWithCookies,
 ): Promise<
-  { status: 200; body: AuthResponse } | { status: 400 | 401 | 429 | 500; body: { message: string } }
+  | { status: 200; body: AuthResponse }
+  | { status: 401; body: { message: string; code?: string; email?: string } }
+  | { status: 400 | 429 | 500; body: { message: string } }
 > {
   const { ipAddress, userAgent } = extractRequestInfo(request as unknown as FastifyRequest);
 
@@ -132,6 +139,17 @@ export async function handleLogin(
   } catch (error) {
     if (error instanceof AccountLockedError) {
       return { status: 429, body: { message: ERROR_MESSAGES.ACCOUNT_LOCKED } };
+    }
+
+    if (error instanceof EmailNotVerifiedError) {
+      return {
+        status: 401,
+        body: {
+          message: error.message,
+          code: 'EMAIL_NOT_VERIFIED',
+          email: error.email,
+        },
+      };
     }
 
     if (error instanceof InvalidCredentialsError) {
@@ -221,7 +239,7 @@ export async function handleForgotPassword(
   try {
     const { email } = body;
     const baseUrl = `http://localhost:${String(ctx.config.server.port)}`;
-    await requestPasswordReset(ctx.db, email, baseUrl);
+    await requestPasswordReset(ctx.db, ctx.email, email, baseUrl);
 
     return {
       status: 200,
@@ -265,23 +283,56 @@ export async function handleResetPassword(
 export async function handleVerifyEmail(
   ctx: AppContext,
   body: { token: string },
+  reply: ReplyWithCookies,
 ): Promise<
-  | { status: 200; body: { verified: boolean; userId: string } }
+  | { status: 200; body: AuthResponse & { verified: boolean } }
   | { status: 400 | 404 | 500; body: { message: string } }
 > {
   try {
     const { token } = body;
-    const result = await verifyEmail(ctx.db, token);
+    const result = await verifyEmail(ctx.db, ctx.config.auth, token);
+
+    // Set refresh token as HTTP-only cookie for auto-login
+    reply.setCookie(
+      REFRESH_COOKIE_NAME,
+      result.refreshToken,
+      getRefreshCookieOptions(ctx.config.auth),
+    );
 
     return {
       status: 200,
-      body: { verified: true, userId: result.userId },
+      body: {
+        verified: true,
+        token: result.accessToken,
+        user: result.user,
+      },
     };
   } catch (error) {
     if (error instanceof InvalidTokenError) {
       return { status: 400, body: { message: ERROR_MESSAGES.INVALID_TOKEN } };
     }
 
+    ctx.log.error(error);
+    return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
+  }
+}
+
+export async function handleResendVerification(
+  ctx: AppContext,
+  body: { email: string },
+): Promise<
+  { status: 200; body: { message: string } } | { status: 500; body: { message: string } }
+> {
+  try {
+    const { email } = body;
+    const baseUrl = `http://localhost:${String(ctx.config.server.port)}`;
+    await resendVerificationEmail(ctx.db, ctx.email, email, baseUrl);
+
+    return {
+      status: 200,
+      body: { message: SUCCESS_MESSAGES.VERIFICATION_EMAIL_SENT },
+    };
+  } catch (error) {
     ctx.log.error(error);
     return { status: 500, body: { message: ERROR_MESSAGES.INTERNAL_ERROR } };
   }

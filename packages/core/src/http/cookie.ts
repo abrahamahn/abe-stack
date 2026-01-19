@@ -1,41 +1,20 @@
 // packages/core/src/http/cookie.ts
 /**
- * HTTP Cookie Utilities
+ * Parses a cookie header string into an object of key-value pairs.
  *
- * Shared cookie parsing utilities.
+ * @param cookieHeader The string from the 'Cookie' header.
+ * @returns A record of cookie names and their values.
  */
-
-/**
- * Parse a cookie header string into an object
- */
-export function parseCookies(cookieHeader: string | undefined): Record<string, string> {
-  const cookies: Record<string, string> = {};
-
+export function parseCookies(cookieHeader: string | undefined | null): Record<string, string> {
   if (!cookieHeader) {
-    return cookies;
+    return {};
   }
 
-  const pairs = cookieHeader.split(';');
-
-  for (const pair of pairs) {
-    const eqIdx = pair.indexOf('=');
-    if (eqIdx < 0) continue;
-
-    const key = pair.slice(0, eqIdx).trim();
-    let value = pair.slice(eqIdx + 1).trim();
-
-    // Remove quotes if present
-    if (value.startsWith('"') && value.endsWith('"')) {
-      value = value.slice(1, -1);
+  return cookieHeader.split(';').reduce<Record<string, string>>((acc, cookie) => {
+    const [key, value] = cookie.split('=').map((part) => part.trim());
+    if (key && value) {
+      acc[key] = value;
     }
-
-    // Decode URI component
-    try {
-      cookies[key] = decodeURIComponent(value);
-    } catch {
-      cookies[key] = value;
-    }
-  }
-
-  return cookies;
+    return acc;
+  }, {});
 }

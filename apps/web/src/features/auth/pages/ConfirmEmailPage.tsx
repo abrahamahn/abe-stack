@@ -27,10 +27,11 @@ export function ConfirmEmailPage(): ReactElement {
       try {
         await verifyEmail({ token });
         setStatus('success');
-        setMessage('Email verified successfully! You can now sign in.');
+        setMessage('Your email has been verified and you are now signed in.');
+        // Auto-login happens in verifyEmail, redirect to dashboard
         setTimeout(() => {
-          void navigate('/auth?mode=login');
-        }, 3000);
+          void navigate('/dashboard');
+        }, 2000);
       } catch (err) {
         setStatus('error');
         setMessage(err instanceof Error ? err.message : 'Verification failed');
@@ -76,7 +77,7 @@ export function ConfirmEmailPage(): ReactElement {
             </div>
             <h2 className="text-xl font-bold text-success">Email verified!</h2>
             <p className="text-muted">{message}</p>
-            <p className="text-sm text-muted">Redirecting to sign in...</p>
+            <p className="text-sm text-muted">Redirecting to dashboard...</p>
           </div>
         )}
 

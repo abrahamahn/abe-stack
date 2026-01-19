@@ -7,6 +7,9 @@ describe('Database Configuration', () => {
   describe('loadDatabaseConfig', () => {
     test('should load default values when no env vars set', () => {
       const config = loadDatabaseConfig({});
+      if (config.provider !== 'postgresql') {
+        throw new Error('Expected postgresql provider');
+      }
 
       expect(config.host).toBe('localhost');
       expect(config.port).toBe(5432);
@@ -24,6 +27,9 @@ describe('Database Configuration', () => {
       };
 
       const config = loadDatabaseConfig(env);
+      if (config.provider !== 'postgresql') {
+        throw new Error('Expected postgresql provider');
+      }
 
       expect(config.host).toBe('db.example.com');
       expect(config.port).toBe(5433);
@@ -36,6 +42,9 @@ describe('Database Configuration', () => {
       };
 
       const config = loadDatabaseConfig(env);
+      if (config.provider !== 'postgresql') {
+        throw new Error('Expected postgresql provider');
+      }
 
       expect(config.database).toBe('myapp_production');
       expect(config.user).toBe('admin');
@@ -48,6 +57,9 @@ describe('Database Configuration', () => {
       };
 
       const config = loadDatabaseConfig(env);
+      if (config.provider !== 'postgresql') {
+        throw new Error('Expected postgresql provider');
+      }
 
       expect(config.password).toBe('secret123');
       expect(config.connectionString).toBe('postgresql://user:pass@host:5432/db');
@@ -59,12 +71,18 @@ describe('Database Configuration', () => {
       };
 
       const config = loadDatabaseConfig(env);
+      if (config.provider !== 'postgresql') {
+        throw new Error('Expected postgresql provider');
+      }
 
       expect(config.maxConnections).toBe(50);
     });
 
     test('should include port fallbacks', () => {
       const config = loadDatabaseConfig({});
+      if (config.provider !== 'postgresql') {
+        throw new Error('Expected postgresql provider');
+      }
 
       expect(config.portFallbacks).toEqual([5432, 5433, 5434]);
     });
@@ -75,6 +93,9 @@ describe('Database Configuration', () => {
       };
 
       const config = loadDatabaseConfig(env);
+      if (config.provider !== 'postgresql') {
+        throw new Error('Expected postgresql provider');
+      }
 
       expect(config.port).toBeNaN();
     });

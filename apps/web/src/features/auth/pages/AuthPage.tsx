@@ -1,4 +1,5 @@
 // apps/web/src/features/auth/pages/AuthPage.tsx
+import { AuthLayout } from '@abe-stack/ui';
 import { AuthForm, type AuthMode } from '@auth/components/AuthForms';
 import { useAuth } from '@auth/hooks';
 import { useEffect, useState } from 'react';
@@ -12,7 +13,8 @@ const VALID_MODES = ['login', 'register', 'forgot-password', 'reset-password'] a
 export function AuthPage(): ReactElement {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { login, register, forgotPassword, resetPassword, isAuthenticated } = useAuth();
+  const { login, register, forgotPassword, resetPassword, resendVerification, isAuthenticated } =
+    useAuth();
 
   const [mode, setMode] = useState<AuthMode>('login');
   const [isLoading, setIsLoading] = useState(false);
@@ -38,18 +40,18 @@ export function AuthPage(): ReactElement {
   };
 
   const createFormHandler =
-    <T extends Record<string, unknown>>(handler?: (data: T) => Promise<void>) =>
-    async (data: T): Promise<void> => {
-      if (!handler) return;
-
+    <T extends Record<string, unknown>, R>(handler: (data: T) => Promise<R>) =>
+    async (data: T): Promise<R> => {
       setIsLoading(true);
       setError(null);
 
       try {
-        await handler(data);
+        const result = await handler(data);
         // Success is handled by individual handlers
+        return result;
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
+        throw err; // Re-throw so caller can handle if needed
       } finally {
         setIsLoading(false);
       }
@@ -70,14 +72,15 @@ export function AuthPage(): ReactElement {
       alert('Password reset successfully');
       handleModeChange('login');
     }),
+    onResendVerification: resendVerification,
     onModeChange: handleModeChange,
     isLoading,
     error,
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <AuthLayout>
       <AuthForm {...formProps} />
-    </div>
+    </AuthLayout>
   );
 }

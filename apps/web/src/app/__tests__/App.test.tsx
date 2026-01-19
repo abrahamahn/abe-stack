@@ -1,29 +1,30 @@
-// apps/web/src/app/__tests__/root.test.tsx
+// apps/web/src/app/__tests__/App.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
-import { App } from '@app/root';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { ClientEnvironment } from '@app/ClientEnvironment';
+import { App } from '../App';
 
-// Mock all page components
-vi.mock('../../pages/HomePage', () => ({
+import type { ClientEnvironment } from '../ClientEnvironment';
+
+// Mock all page components - use alias paths to match App.tsx imports
+vi.mock('@pages/HomePage', () => ({
   HomePage: (): React.ReactElement => <div data-testid="home-page">Home Page</div>,
 }));
 
-vi.mock('../../features/dashboard', () => ({
+vi.mock('@features/dashboard', () => ({
   DashboardPage: (): React.ReactElement => <div data-testid="dashboard-page">Dashboard Page</div>,
 }));
 
-vi.mock('../../features/demo', () => ({
+vi.mock('@demo', () => ({
   DemoPage: (): React.ReactElement => <div data-testid="demo-page">Demo Page</div>,
 }));
 
 // Mock auth feature (LoginPage, RegisterPage + ProtectedRoute)
-vi.mock('../../features/auth', () => ({
+vi.mock('@features/auth', () => ({
   LoginPage: (): React.ReactElement => <div data-testid="login-page">Login Page</div>,
   RegisterPage: (): React.ReactElement => <div data-testid="register-page">Register Page</div>,
   AuthPage: (): React.ReactElement => <div data-testid="auth-page">Auth Page</div>,
@@ -46,16 +47,34 @@ vi.mock('@abe-stack/core', () => ({
   }),
 }));
 
-// Mock AppProvider to pass through children with a MemoryRouter (for Routes to work)
-vi.mock('../AppProvider', () => ({
-  AppProvider: ({ children }: { children?: React.ReactNode }): React.ReactElement => (
-    <MemoryRouter>
-      <div data-testid="app-provider">{children}</div>
-    </MemoryRouter>
+// Mock @abe-stack/sdk
+vi.mock('@abe-stack/sdk', () => ({
+  createQueryPersister: vi.fn(() => ({
+    persistClient: vi.fn(),
+    restoreClient: vi.fn().mockResolvedValue(undefined),
+    removeClient: vi.fn(),
+  })),
+}));
+
+// Mock react-router-dom to use MemoryRouter instead of BrowserRouter
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    BrowserRouter: ({ children }: { children: React.ReactNode }): React.ReactElement => (
+      <MemoryRouter>{children}</MemoryRouter>
+    ),
+  };
+});
+
+// Mock @tanstack/react-query-persist-client
+vi.mock('@tanstack/react-query-persist-client', () => ({
+  PersistQueryClientProvider: ({ children }: { children: React.ReactNode }): React.ReactElement => (
+    <div data-testid="persist-provider">{children}</div>
   ),
 }));
 
-// Mock @abe-stack/ui ScrollArea and Toaster
+// Mock @abe-stack/ui ScrollArea, Toaster, and HistoryProvider
 vi.mock('@abe-stack/ui', async () => {
   const actual = await vi.importActual('@abe-stack/ui');
   return {
@@ -64,10 +83,11 @@ vi.mock('@abe-stack/ui', async () => {
       <div>{children}</div>
     ),
     Toaster: (): React.ReactElement => <div data-testid="toaster">Toaster</div>,
+    HistoryProvider: ({ children }: { children: React.ReactNode }): React.ReactElement => (
+      <div data-testid="history-provider">{children}</div>
+    ),
   };
 });
-
-// Import App after mocks are set up
 
 // Create a mock environment for testing
 function createMockEnvironment(): ClientEnvironment {
@@ -129,7 +149,6 @@ describe('App', () => {
       const { container } = render(<App environment={mockEnvironment} />);
 
       const themeContainer = container.querySelector('.theme');
-      // Check for h-screen class which applies full viewport height
       expect(themeContainer).toHaveClass('h-screen');
     });
 
@@ -139,11 +158,16 @@ describe('App', () => {
       expect(getByTestId('toaster')).toBeInTheDocument();
     });
 
-    it('should render within AppProvider', () => {
+    it('should render with PersistQueryClientProvider', () => {
       const { getByTestId } = render(<App environment={mockEnvironment} />);
 
-      expect(getByTestId('app-provider')).toBeInTheDocument();
-      expect(getByTestId('toaster')).toBeInTheDocument();
+      expect(getByTestId('persist-provider')).toBeInTheDocument();
+    });
+
+    it('should render with HistoryProvider', () => {
+      const { getByTestId } = render(<App environment={mockEnvironment} />);
+
+      expect(getByTestId('history-provider')).toBeInTheDocument();
     });
   });
 

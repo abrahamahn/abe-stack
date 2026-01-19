@@ -28,6 +28,7 @@ export {
 export {
   AccountLockedError,
   EmailAlreadyExistsError,
+  EmailNotVerifiedError,
   InvalidCredentialsError,
   InvalidTokenError,
   OAuthError,

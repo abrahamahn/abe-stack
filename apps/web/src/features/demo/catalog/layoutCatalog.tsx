@@ -179,9 +179,9 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
   <Button variant="primary">Sign In</Button>
 </AuthLayout>`,
         render: (): ReactElement => (
-          <div style={{ minHeight: '400px', backgroundColor: 'var(--color-surface)' }}>
+          <div style={{ minHeight: '350px', backgroundColor: 'var(--color-surface)' }}>
             <AuthLayout title="Welcome Back" description="Sign in to your account to continue">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <Input placeholder="Email" type="email" />
                 <Input placeholder="Password" type="password" />
                 <Button variant="primary">Sign In</Button>
@@ -204,16 +204,13 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
   <Button variant="primary">Create Account</Button>
 </AuthLayout>`,
         render: (): ReactElement => (
-          <div style={{ minHeight: '450px', backgroundColor: 'var(--color-surface)' }}>
+          <div style={{ minHeight: '380px', backgroundColor: 'var(--color-surface)' }}>
             <AuthLayout title="Create Account" description="Sign up to get started">
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <Input placeholder="Full Name" />
                 <Input placeholder="Email" type="email" />
                 <Input placeholder="Password" type="password" />
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Checkbox />
-                  <Text style={{ fontSize: '14px' }}>I agree to the terms and conditions</Text>
-                </div>
+                <Checkbox label="I agree to the terms and conditions" />
                 <Button variant="primary">Create Account</Button>
               </div>
             </AuthLayout>
@@ -230,13 +227,13 @@ export const layoutCatalog: Record<string, ComponentDemo> = {
   <Button variant="primary">Send Reset Link</Button>
 </AuthLayout>`,
         render: (): ReactElement => (
-          <div style={{ minHeight: '350px', backgroundColor: 'var(--color-surface)' }}>
+          <div style={{ minHeight: '300px', backgroundColor: 'var(--color-surface)' }}>
             <AuthLayout>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <Heading as="h3" size="sm">
                   Reset Password
                 </Heading>
-                <Text tone="muted" style={{ fontSize: '14px' }}>
+                <Text tone="muted" className="text-sm">
                   Enter your email to receive reset instructions
                 </Text>
                 <Input placeholder="Email" type="email" />

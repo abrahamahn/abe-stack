@@ -46,7 +46,6 @@ https://github.com/abrahamahn/abe-stack
 | --------------------- | ---------------------------------------------------------------- |
 | `sync-path-aliases`   | Auto-generates TS path aliases when directories add `index.ts`   |
 | `sync-file-headers`   | Adds `// path/to/file.ts` headers on new files                   |
-| `sync-import-aliases` | Converts deep relative imports to path aliases                   |
 | `sync-test-folders`   | Creates `__tests__/` folders for code directories                |
 | `sync-barrel-exports` | Auto-creates and updates `index.ts` barrels                      |
 | `sync-tsconfig`       | Auto-generates TypeScript project references                     |

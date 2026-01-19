@@ -8,6 +8,7 @@
  * - Startup validation summary
  */
 
+import { REQUIRED_TABLES, validateSchema } from '@database/schema-validation';
 import { getWebSocketStats } from '@websocket/index';
 import { sql } from 'drizzle-orm';
 
@@ -26,12 +27,18 @@ export interface ServiceHealth {
   latencyMs?: number;
 }
 
+export interface SchemaHealth extends ServiceHealth {
+  missingTables?: string[];
+  tableCount?: number;
+}
+
 export interface DetailedHealthResponse {
   status: OverallStatus;
   timestamp: string;
   uptime: number;
   services: {
     database: ServiceHealth;
+    schema: SchemaHealth;
     email: ServiceHealth;
     storage: ServiceHealth;
     pubsub: ServiceHealth;
@@ -82,6 +89,34 @@ export async function checkDatabase(ctx: AppContext): Promise<ServiceHealth> {
       status: 'down',
       message: error instanceof Error ? error.message : 'Connection failed',
       latencyMs: Date.now() - start,
+    };
+  }
+}
+
+/**
+ * Check database schema completeness
+ */
+export async function checkSchema(ctx: AppContext): Promise<SchemaHealth> {
+  try {
+    const result = await validateSchema(ctx.db);
+    if (result.valid) {
+      return {
+        status: 'up',
+        message: `${String(REQUIRED_TABLES.length)} tables present`,
+        tableCount: REQUIRED_TABLES.length,
+      };
+    } else {
+      return {
+        status: 'down',
+        message: `missing ${String(result.missingTables.length)} tables`,
+        missingTables: result.missingTables,
+        tableCount: REQUIRED_TABLES.length - result.missingTables.length,
+      };
+    }
+  } catch (error) {
+    return {
+      status: 'down',
+      message: error instanceof Error ? error.message : 'Schema validation failed',
     };
   }
 }
@@ -146,8 +181,9 @@ export function checkRateLimit(): ServiceHealth {
  * Get detailed health status for all services
  */
 export async function getDetailedHealth(ctx: AppContext): Promise<DetailedHealthResponse> {
-  const [database, email, storage, pubsub, websocket, rateLimit] = await Promise.all([
+  const [database, schema, email, storage, pubsub, websocket, rateLimit] = await Promise.all([
     checkDatabase(ctx),
+    checkSchema(ctx),
     Promise.resolve(checkEmail(ctx)),
     Promise.resolve(checkStorage(ctx)),
     Promise.resolve(checkPubSub(ctx)),
@@ -155,7 +191,7 @@ export async function getDetailedHealth(ctx: AppContext): Promise<DetailedHealth
     Promise.resolve(checkRateLimit()),
   ]);
 
-  const services = { database, email, storage, pubsub, websocket, rateLimit };
+  const services = { database, schema, email, storage, pubsub, websocket, rateLimit };
 
   // Determine overall status
   const statuses = Object.values(services).map((s) => s.status);
@@ -215,6 +251,7 @@ export async function logStartupSummary(
     `│  Listening: ${url.padEnd(width - 16)}│`,
     `├${line}┤`,
     `│${formatService('Database', health.services.database).padEnd(width - 2)}│`,
+    `│${formatService('Schema', health.services.schema).padEnd(width - 2)}│`,
     `│${formatService('Email', health.services.email).padEnd(width - 2)}│`,
     `│${formatService('Storage', health.services.storage).padEnd(width - 2)}│`,
     `│${formatService('PubSub', health.services.pubsub).padEnd(width - 2)}│`,

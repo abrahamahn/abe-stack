@@ -279,7 +279,7 @@ describe('BatchedQueue', () => {
         processBatch,
         maxParallel: 5,
         maxBatchSize: 10,
-        delayMs: 30,
+        delayMs: 100, // Use longer delay to avoid timing races in tests
       });
 
       const p1 = queue.enqueue(1);

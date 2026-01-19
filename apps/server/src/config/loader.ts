@@ -64,8 +64,10 @@ function validateConfig(config: AppConfig): void {
   }
 
   // Database password required (except in test)
-  if (config.env !== 'test' && !config.database.password && !config.database.connectionString) {
-    errors.push('Database password or connection string is required');
+  if (config.env !== 'test' && config.database.provider === 'postgresql') {
+    if (!config.database.password && !config.database.connectionString) {
+      errors.push('Database password or connection string is required');
+    }
   }
 
   if (errors.length > 0) {

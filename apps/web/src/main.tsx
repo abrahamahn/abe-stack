@@ -3,32 +3,61 @@
  * Application entry point.
  *
  * Following chet-stack pattern:
- * - Services are created at module level (before React renders)
- * - Environment is passed as prop to AppProvider
+ * - All services created at module level (before React renders)
+ * - Environment assembled inline and passed to App
  */
 
-import { createClientEnvironment } from '@app/createEnvironment';
-import { App } from '@app/root';
+import { clientConfig } from '@config';
+import { createAuthService } from '@features/auth';
+import { QueryClient } from '@tanstack/react-query';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+
+import { App } from './app/App';
+
+import type { ClientEnvironment } from '@app/ClientEnvironment';
 
 import '@abe-stack/ui/styles/elements.css';
 
 // ============================================================================
-// Module-level Initialization
+// Service Creation (module level, before React renders)
 // ============================================================================
 
-// Create the environment once at module level
-// This ensures all services are ready before React renders
-const environment = createClientEnvironment();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 24 * 60 * 60 * 1000, // 24 hours - required for persistence
+      retry: 1,
+    },
+  },
+});
+
+const auth = createAuthService({
+  config: clientConfig,
+  queryClient,
+});
+
+// ============================================================================
+// Assemble Environment
+// ============================================================================
+
+const environment: ClientEnvironment = {
+  config: clientConfig,
+  queryClient,
+  auth,
+};
 
 // Initialize auth state on startup (non-blocking)
 // This will restore auth state from refresh token cookie if available
 void environment.auth.initialize();
 
-// For debugging from the Console
+// ============================================================================
+// Debug Access
+// ============================================================================
+
 if (environment.config.isDev) {
-  (window as unknown as { environment: typeof environment }).environment = environment;
+  (window as unknown as { environment: ClientEnvironment }).environment = environment;
 }
 
 // ============================================================================

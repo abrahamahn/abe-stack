@@ -9,13 +9,13 @@
 
 Code that exists but isn't used anywhere (only exported + tested). Integrate when implementing related tasks.
 
-| Unused Code | Package | Related Task | Notes |
-|-------------|---------|--------------|-------|
-| `MutationQueue`, `createMutationQueue` | sdk/persistence | ROADMAP: Offline Support (Phase 3) | Ready for offline mutation handling |
-| `localStorageQueue` | sdk/persistence | ROADMAP: Offline Support (Phase 3) | Fallback for browsers without IndexedDB |
-| `useOnScreen` | ui/hooks | UI Package: lazy load demo registry | Intersection observer for lazy loading |
-| `useCopyToClipboard` | ui/hooks | Demo copy button (currently uses raw API) | Hook available but demo uses `navigator.clipboard` directly |
-| `usePanelConfig` | ui/hooks | ResizablePanel layouts | Panel configuration state management |
+| Unused Code                            | Package         | Related Task                              | Notes                                                       |
+| -------------------------------------- | --------------- | ----------------------------------------- | ----------------------------------------------------------- |
+| `MutationQueue`, `createMutationQueue` | sdk/persistence | ROADMAP: Offline Support (Phase 3)        | Ready for offline mutation handling                         |
+| `localStorageQueue`                    | sdk/persistence | ROADMAP: Offline Support (Phase 3)        | Fallback for browsers without IndexedDB                     |
+| `useOnScreen`                          | ui/hooks        | UI Package: lazy load demo registry       | Intersection observer for lazy loading                      |
+| `useCopyToClipboard`                   | ui/hooks        | Demo copy button (currently uses raw API) | Hook available but demo uses `navigator.clipboard` directly |
+| `usePanelConfig`                       | ui/hooks        | ResizablePanel layouts                    | Panel configuration state management                        |
 
 > **Note:** UI components like Accordion, Slider, RadioGroup, Popover, Pagination, Kbd, MenuItem, EnvironmentBadge are all **showcased in the demo catalog** - they're available and documented, just not yet used in production features.
 
@@ -44,21 +44,24 @@ Everything needed to build and scale to Series A is complete.
 
 ### Top Priority (Do these first)
 
-| Priority | Improvement                                              | Why it's essential                                            | Difficulty |
-| -------- | -------------------------------------------------------- | ------------------------------------------------------------- | ---------- |
-| 1        | **Automate tsconfig project references**                 | Prevents the most painful and silent type errors in monorepos | ★★☆        |
-| 2        | **Zod schema + runtime validation for all env variables**| Catches configuration mistakes early (dev, CI, prod)          | ★☆☆        |
-| 3        | **Merge frequently triggering sync scripts**             | Reduces watcher overhead and CPU usage during `pnpm dev`      | ★★☆        |
-| 4        | **Document affected packages workflows**                 | Saves time for reviewers and new contributors                 | ★☆☆        |
-| 5        | **Enforce domain-folder naming convention**              | Makes architecture intention clearer as project grows         | ★★☆        |
+| Priority | Improvement                                               | Why it's essential                                            | Difficulty | Status  |
+| -------- | --------------------------------------------------------- | ------------------------------------------------------------- | ---------- | ------- |
+| 1        | **Automate tsconfig project references**                  | Prevents the most painful and silent type errors in monorepos | ★★☆        | ✅ Done |
+| 2        | **Zod schema + runtime validation for all env variables** | Catches configuration mistakes early (dev, CI, prod)          | ★☆☆        | Open    |
+| 3        | **Reduce sync script overhead**                           | Reduces watcher overhead and CPU usage during `pnpm dev`      | ★★☆        | ✅ Done |
+| 4        | **Document affected packages workflows**                  | Saves time for reviewers and new contributors                 | ★☆☆        | Open    |
+| 5        | **Enforce domain-folder naming convention**               | Makes architecture intention clearer as project grows         | ★★☆        | Open    |
+
+**Completed:**
+
+- ✅ tsconfig references automated via `config/generators/tsconfig.gen.ts` (runs via `pnpm config:generate`)
+- ✅ Removed `sync-import-aliases.ts` - reduced watchers from 6 to 5, simplifying the dev experience
 
 ### Quick Recommended Order
 
 1. Add proper env + config Zod validation + loading
-2. Automate tsconfig references generation
-3. Merge alias/import/barrel sync scripts + reduce watchers
-4. Write documentation for useful turbo commands (`--filter`, `--since`, `--graph`)
-5. Gradually introduce consistent domain folder naming in server and core
+2. Write documentation for useful turbo commands (`--filter`, `--since`, `--graph`)
+3. Gradually introduce consistent domain folder naming in server and core
 
 > **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `dataTypes.ts` (custom Zod validators)
 
@@ -201,7 +204,7 @@ Required for: passwordless auth option
 
 - [x] Health checks and readiness endpoints (expand existing) - `/health/detailed`, `/health/ready`, `/health/live`, `/health/routes`
 - [x] Request ID middleware with correlation IDs - `apps/server/src/infra/logger/`
-- [ ] Password reset flow (already have email service)
+- [x] Password reset flow - `requestPasswordReset()` and `resetPassword()` in `apps/server/src/modules/auth/service.ts`
 
 > **Implementation:** Health checks in `apps/server/src/app.ts`, Logging in `apps/server/src/infra/logger/`
 > **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `ServerManager.ts` (health/metrics), `LoggerService.ts` (correlation IDs), `ResetService.ts` (password reset); [Auth DTOs](./dev/legacy.md#auth-dtos) → `password-reset.dto`; [Potential Migrations](./dev/legacy.md#structured-logging)
@@ -262,8 +265,9 @@ Required for: passwordless auth option
 ## Architecture
 
 - [x] Environment-based DI (entrypoints assemble env, no side-effects on import)
-  - AppContext pattern in `apps/server/src/app.ts`
-  - WriteService and QueueServer receive dependencies via options object
+  - Server: AppContext pattern in `apps/server/src/app.ts`
+  - Web: ClientEnvironment pattern in `apps/web/src/main.tsx` and `apps/web/src/app/App.tsx`
+  - All services created at module level, assembled into environment, passed as props
   - No side-effects on import (Chet-stack pattern)
 
 ---
@@ -282,7 +286,7 @@ Required for: passwordless auth option
 - [ ] <100ms P95 latency on critical paths
 - [ ] Zero security incidents
 - [x] Job queue processing reliably (QueueServer implemented)
-- [ ] Email delivery working (verification, notifications)
+- [x] Email delivery working (verification, password reset, notifications) - Console + SMTP providers in `apps/server/src/infra/email/`
 
 ### Series A
 
@@ -314,6 +318,6 @@ If no to all three, it goes in `docs/ROADMAP.md`.
 
 ---
 
-_Last Updated: 2026-01-18_
+_Last Updated: 2026-01-19_
 
 _Philosophy: Foundation is done. Ship products. Copy utilities from legacy when needed._

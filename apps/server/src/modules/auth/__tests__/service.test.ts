@@ -37,6 +37,7 @@ import {
 import {
   AccountLockedError,
   EmailAlreadyExistsError,
+  EmailNotVerifiedError,
   InvalidCredentialsError,
   InvalidTokenError,
   WeakPasswordError,
@@ -44,16 +45,20 @@ import {
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { AuthConfig } from '@config';
-import type { DbClient } from '@infra';
+import type { DbClient, EmailService } from '@infra';
 
 // ============================================================================
 // Mock Dependencies
 // ============================================================================
 
 // Mock @abe-stack/core
-vi.mock('@abe-stack/core', () => ({
-  validatePassword: vi.fn(),
-}));
+vi.mock('@abe-stack/core', async () => {
+  const actual = await vi.importActual('@abe-stack/core');
+  return {
+    ...actual,
+    validatePassword: vi.fn(),
+  };
+});
 
 // Mock @infra
 vi.mock('@infra', () => ({
@@ -67,6 +72,20 @@ vi.mock('@infra', () => ({
   refreshTokens: { token: 'token' },
   users: { email: 'email', id: 'id', passwordHash: 'passwordHash', emailVerified: 'emailVerified' },
   withTransaction: vi.fn(),
+  emailTemplates: {
+    emailVerification: vi.fn((url: string) => ({
+      to: '',
+      subject: 'Verify Your Email Address',
+      text: `Verification URL: ${url}`,
+      html: `<a href="${url}">Verify</a>`,
+    })),
+    passwordReset: vi.fn((url: string) => ({
+      to: '',
+      subject: 'Reset Your Password',
+      text: `Reset URL: ${url}`,
+      html: `<a href="${url}">Reset</a>`,
+    })),
+  },
 }));
 
 // Mock ../utils
@@ -92,9 +111,9 @@ vi.mock('drizzle-orm', () => ({
   isNull: vi.fn((...args: unknown[]) => args),
 }));
 
-// Mock crypto
+// Mock crypto - return a proper Buffer
 vi.mock('crypto', () => ({
-  randomBytes: vi.fn<(size: number) => Buffer>(),
+  randomBytes: vi.fn(() => Buffer.from('a'.repeat(64), 'hex')),
 }));
 
 // ============================================================================
@@ -162,7 +181,9 @@ function createMockDb(): MockDbClientExtended & DbClient {
 
   const mockUpdate = vi.fn(() => ({
     set: vi.fn(() => ({
-      where: vi.fn(() => Promise.resolve()),
+      where: vi.fn(() => ({
+        returning: vi.fn(() => Promise.resolve([{ id: 'user-id' }])),
+      })),
     })),
   }));
 
@@ -211,6 +232,12 @@ function createMockConfig() {
   } as unknown as AuthConfig;
 }
 
+function createMockEmailService(): EmailService {
+  return {
+    send: vi.fn().mockResolvedValue({ success: true, messageId: 'mock-message-id' }),
+  };
+}
+
 // ============================================================================
 // Tests: registerUser
 // ============================================================================
@@ -220,11 +247,13 @@ describe('registerUser', () => {
     vi.clearAllMocks();
   });
 
-  test('should register a new user successfully', async () => {
+  test('should register a new user with pending verification', async () => {
     const db = createMockDb();
+    const emailService = createMockEmailService();
     const email = 'new@example.com';
     const password = 'StrongPassword123!';
     const name = 'New User';
+    const baseUrl = 'http://localhost:5173';
 
     // Mock: no existing user
     vi.mocked(db.query.users.findFirst).mockResolvedValue(null);
@@ -241,14 +270,17 @@ describe('registerUser', () => {
     // Mock: password hashing
     vi.mocked(hashPassword).mockResolvedValue('hashed-password');
 
-    // Mock: transaction creates user and token
-    const mockUser = { id: 'user-123', email, name, role: 'user' as const, passwordHash: 'hash' };
+    // Mock: transaction creates user and verification token
+    const mockUser = {
+      id: 'user-123',
+      email,
+      name,
+      role: 'user' as const,
+      passwordHash: 'hash',
+      emailVerified: false,
+    };
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
       return callback(db);
-    });
-    vi.mocked(createRefreshTokenFamily).mockResolvedValue({
-      familyId: 'family-123',
-      token: 'refresh-token-123',
     });
 
     // Mock insert to return the user
@@ -258,21 +290,33 @@ describe('registerUser', () => {
       }),
     });
 
-    // Mock: access token creation
-    vi.mocked(createAccessToken).mockReturnValue('access-token-123');
+    // Mock token generation - createEmailVerificationToken is called inside transaction
+    const mockTokenHex = 'fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210';
+    (vi.mocked(randomBytes) as ReturnType<typeof vi.fn>).mockReturnValue(
+      Buffer.from(mockTokenHex, 'hex'),
+    );
 
-    const result = await registerUser(db, TEST_CONFIG, email, password, name);
+    const result = await registerUser(
+      db,
+      emailService,
+      TEST_CONFIG,
+      email,
+      password,
+      name,
+      baseUrl,
+    );
 
-    expect(result.accessToken).toBe('access-token-123');
-    expect(result.refreshToken).toBe('refresh-token-123');
-    expect(result.user.email).toBe(email);
-    expect(result.user.name).toBe(name);
+    expect(result.status).toBe('pending_verification');
+    expect(result.email).toBe(email);
+    expect(result.message).toContain('check your email');
     expect(validatePassword).toHaveBeenCalledWith(password, [email, name]);
     expect(hashPassword).toHaveBeenCalledWith(password, TEST_CONFIG.argon2);
+    expect(emailService.send).toHaveBeenCalled();
   });
 
   test('should throw EmailAlreadyExistsError when email is taken', async () => {
     const db = createMockDb();
+    const emailService = createMockEmailService();
     const email = 'existing@example.com';
     const password = 'StrongPassword123!';
 
@@ -284,13 +328,14 @@ describe('registerUser', () => {
       role: 'user',
     });
 
-    await expect(registerUser(db, TEST_CONFIG, email, password)).rejects.toThrow(
+    await expect(registerUser(db, emailService, TEST_CONFIG, email, password)).rejects.toThrow(
       EmailAlreadyExistsError,
     );
   });
 
   test('should throw WeakPasswordError when password validation fails', async () => {
     const db = createMockDb();
+    const emailService = createMockEmailService();
     const email = 'new@example.com';
     const password = 'weak';
 
@@ -306,7 +351,9 @@ describe('registerUser', () => {
       crackTimeDisplay: 'instant',
     });
 
-    await expect(registerUser(db, TEST_CONFIG, email, password)).rejects.toThrow(WeakPasswordError);
+    await expect(registerUser(db, emailService, TEST_CONFIG, email, password)).rejects.toThrow(
+      WeakPasswordError,
+    );
   });
 });
 
@@ -332,6 +379,7 @@ describe('authenticateUser', () => {
       name: 'Test User',
       role: 'user' as const,
       passwordHash: 'stored-hash',
+      emailVerified: true,
     };
 
     // Mock: account not locked
@@ -427,6 +475,7 @@ describe('authenticateUser', () => {
       name: 'Test',
       role: 'user' as const,
       passwordHash: 'stored-hash',
+      emailVerified: true,
     };
 
     // Mock: account not locked
@@ -448,6 +497,50 @@ describe('authenticateUser', () => {
     );
   });
 
+  test('should throw EmailNotVerifiedError when email is not verified', async () => {
+    const db = createMockDb();
+    const email = 'unverified@example.com';
+    const password = 'correct-password';
+    const ipAddress = '192.168.1.1';
+    const userAgent = 'Mozilla/5.0';
+
+    const mockUser = {
+      id: 'user-123',
+      email,
+      name: 'Test User',
+      role: 'user' as const,
+      passwordHash: 'stored-hash',
+      emailVerified: false,
+    };
+
+    // Mock: account not locked
+    vi.mocked(isAccountLocked).mockResolvedValue(false);
+    vi.mocked(applyProgressiveDelay).mockResolvedValue(undefined);
+
+    // Mock: user found with unverified email
+    vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
+
+    // Mock: password verification passes
+    vi.mocked(verifyPasswordSafe).mockResolvedValue(true);
+
+    // Mock: failed login logging (email not verified)
+    vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
+
+    await expect(
+      authenticateUser(db, TEST_CONFIG, email, password, ipAddress, userAgent),
+    ).rejects.toThrow(EmailNotVerifiedError);
+
+    // Verify login attempt was logged as failure with reason
+    expect(logLoginAttempt).toHaveBeenCalledWith(
+      db,
+      email,
+      false,
+      ipAddress,
+      userAgent,
+      'Email not verified',
+    );
+  });
+
   test('should trigger account lockout event when threshold reached', async () => {
     const db = createMockDb();
     const email = 'test@example.com';
@@ -461,6 +554,7 @@ describe('authenticateUser', () => {
       name: 'Test',
       role: 'user' as const,
       passwordHash: 'stored-hash',
+      emailVerified: true,
     };
 
     // Mock: account not locked
@@ -496,6 +590,7 @@ describe('authenticateUser', () => {
       name: 'Test',
       role: 'user' as const,
       passwordHash: 'old-hash',
+      emailVerified: true,
     };
 
     // Mock: successful login
@@ -531,7 +626,65 @@ describe('authenticateUser', () => {
     await authenticateUser(db, TEST_CONFIG, email, password, undefined, undefined, onRehash);
 
     expect(needsRehash).toHaveBeenCalledWith('old-hash');
-    // Note: rehash happens in background (fire and forget), so we can't easily test the callback
+
+    // Wait for background rehash to complete (fire and forget uses promise chain)
+    await vi.waitFor(() => {
+      expect(hashPassword).toHaveBeenCalledWith(password, TEST_CONFIG.argon2);
+    });
+
+    // Flush remaining microtasks to allow callback to be invoked
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(onRehash).toHaveBeenCalledWith('user-123');
+  });
+
+  test('should call onRehash callback with error if rehash fails', async () => {
+    const db = createMockDb();
+    const email = 'test@example.com';
+    const password = 'Test1234!';
+
+    const mockUser = {
+      id: 'user-123',
+      email,
+      passwordHash: 'old-hash',
+      role: 'user' as const,
+      name: null,
+      emailVerified: true,
+      emailVerifiedAt: new Date(),
+      lockedUntil: null,
+      failedLoginAttempts: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      version: 1,
+    };
+
+    vi.mocked(isAccountLocked).mockResolvedValue(false);
+    vi.mocked(applyProgressiveDelay).mockResolvedValue(undefined);
+    vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
+    vi.mocked(verifyPasswordSafe).mockResolvedValue(true);
+    vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
+      return callback(db);
+    });
+    vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
+    vi.mocked(createRefreshTokenFamily).mockResolvedValue({
+      familyId: 'family-123',
+      token: 'refresh-token-123',
+    });
+    vi.mocked(createAccessToken).mockReturnValue('access-token-123');
+    vi.mocked(needsRehash).mockReturnValue(true);
+
+    // Mock: hashPassword fails
+    const rehashError = new Error('Hash computation failed');
+    vi.mocked(hashPassword).mockRejectedValue(rehashError);
+
+    const onRehash = vi.fn();
+
+    await authenticateUser(db, TEST_CONFIG, email, password, undefined, undefined, onRehash);
+
+    // Wait for background rehash to fail
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(onRehash).toHaveBeenCalledWith('user-123', rehashError);
   });
 });
 
@@ -650,11 +803,11 @@ describe('requestPasswordReset', () => {
     vi.clearAllMocks();
   });
 
-  test('should create reset token and log URL for existing user', async () => {
+  test('should create reset token and send email for existing user', async () => {
     const db = createMockDb();
+    const emailService = createMockEmailService();
     const email = 'user@example.com';
     const baseUrl = 'http://localhost:8080';
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     // Mock user exists
     const mockUser = { id: 'user-id', email };
@@ -674,7 +827,7 @@ describe('requestPasswordReset', () => {
       }),
     });
 
-    await requestPasswordReset(db, email, baseUrl);
+    await requestPasswordReset(db, emailService, email, baseUrl);
 
     expect(db.query.users.findFirst).toHaveBeenCalledWith({
       where: expect.any(Object),
@@ -687,28 +840,26 @@ describe('requestPasswordReset', () => {
       parallelism: 1,
     });
     expect(db.insert).toHaveBeenCalled();
-    expect(consoleSpy).toHaveBeenCalledWith(`[PASSWORD RESET] Email sent to: ${email}`);
-    expect(consoleSpy).toHaveBeenCalledWith(
-      `[PASSWORD RESET] Reset URL: http://localhost:8080/auth/reset-password?token=${mockTokenHex}`,
-    );
+    expect(emailService.send).toHaveBeenCalled();
   });
 
   test('should handle non-existing user gracefully', async () => {
     const db = createMockDb();
+    const emailService = createMockEmailService();
     const email = 'nonexistent@example.com';
     const baseUrl = 'http://localhost:8080';
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     // Mock user does not exist
     vi.mocked(db.query.users.findFirst).mockResolvedValue(null);
 
-    await requestPasswordReset(db, email, baseUrl);
+    await requestPasswordReset(db, emailService, email, baseUrl);
 
     expect(db.query.users.findFirst).toHaveBeenCalledWith({
       where: expect.any(Object),
     });
     expect(db.insert).not.toHaveBeenCalled();
-    expect(consoleSpy).toHaveBeenCalledWith(`[PASSWORD RESET] Mock email sent to: ${email}`);
+    // Email service should not be called for non-existing users
+    expect(emailService.send).not.toHaveBeenCalled();
   });
 });
 
@@ -854,7 +1005,7 @@ describe('verifyEmail', () => {
     vi.clearAllMocks();
   });
 
-  test('should verify email with valid token', async () => {
+  test('should verify email and return auth tokens', async () => {
     const db = createMockDb();
     const token = 'valid-verification-token';
 
@@ -869,15 +1020,30 @@ describe('verifyEmail', () => {
     };
     vi.mocked(db.query.emailVerificationTokens.findFirst).mockResolvedValue(mockTokenRecord);
 
-    vi.mocked(withTransaction).mockImplementation(async (db, fn) => fn(db));
+    const mockUser = {
+      id: 'user-id',
+      email: 'test@example.com',
+      name: 'Test',
+      role: 'user' as const,
+      emailVerified: true,
+    };
+    vi.mocked(withTransaction).mockImplementation(async (_db, fn) => fn(db));
 
     vi.mocked(db.update).mockReturnValue({
       set: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue(undefined),
+        where: vi.fn().mockReturnValue({
+          returning: vi.fn().mockResolvedValue([mockUser]),
+        }),
       }),
     });
 
-    const result = await verifyEmail(db, token);
+    vi.mocked(createRefreshTokenFamily).mockResolvedValue({
+      familyId: 'family-123',
+      token: 'refresh-token-123',
+    });
+    vi.mocked(createAccessToken).mockReturnValue('access-token-123');
+
+    const result = await verifyEmail(db, TEST_CONFIG, token);
 
     expect(hashPassword).toHaveBeenCalledWith(token, {
       type: 2,
@@ -887,7 +1053,9 @@ describe('verifyEmail', () => {
     });
     expect(db.query.emailVerificationTokens.findFirst).toHaveBeenCalled();
     expect(withTransaction).toHaveBeenCalled();
-    expect(result).toEqual({ userId: 'user-id' });
+    expect(result.accessToken).toBe('access-token-123');
+    expect(result.refreshToken).toBe('refresh-token-123');
+    expect(result.user.id).toBe('user-id');
   });
 
   test('should throw error for invalid token', async () => {
@@ -897,6 +1065,6 @@ describe('verifyEmail', () => {
     vi.mocked(hashPassword).mockResolvedValue('hashed-token');
     vi.mocked(db.query.emailVerificationTokens.findFirst).mockResolvedValue(null);
 
-    await expect(verifyEmail(db, token)).rejects.toThrow(InvalidTokenError);
+    await expect(verifyEmail(db, TEST_CONFIG, token)).rejects.toThrow(InvalidTokenError);
   });
 });

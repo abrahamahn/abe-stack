@@ -1,6 +1,6 @@
 # Development Environment
 
-**Last Updated: January 17, 2026**
+**Last Updated: January 19, 2026**
 
 Guide to the ABE Stack development workflow, testing, linting, CI/CD, and Docker configuration.
 
@@ -41,10 +41,9 @@ pnpm dev desktop  # Start desktop only
 The `tools/dev/start-dev.ts` script:
 
 1. **Checks PostgreSQL** - Attempts to start if not running
-2. **Starts sync watchers** (all 6 in background, silent mode):
-   - `sync-path-aliases.ts` - Updates tsconfig paths
+2. **Starts sync watchers** (all 5 in background, silent mode):
+   - `config:generate` - Generates tsconfigs and path aliases
    - `sync-file-headers.ts` - Adds file path comments
-   - `sync-import-aliases.ts` - Converts relative to alias imports
    - `sync-test-folders.ts` - Creates `__tests__/` directories
    - `sync-barrel-exports.ts` - Updates barrel exports
    - `sync-css-theme.ts` - Generates theme CSS variables
@@ -330,11 +329,8 @@ The `pre-commit` script runs:
 ```bash
 pnpm pre-commit
 # Expands to:
-pnpm sync:linting && \
-pnpm sync:tsconfig && \
-pnpm sync:aliases && \
+pnpm config:generate && \
 pnpm sync:headers && \
-pnpm sync:imports && \
 pnpm sync:tests && \
 pnpm sync:barrels && \
 pnpm sync:theme && \
@@ -419,11 +415,10 @@ jobs:
   build-and-verify:
     needs: setup
     steps:
-      # Check all sync scripts (aliases, headers, imports, tests, barrels)
+      # Check all sync scripts (aliases, headers, tests, barrels)
       - run: pnpm sync:tsconfig:check
       - run: pnpm sync:aliases:check
       - run: pnpm sync:headers:check
-      - run: pnpm sync:imports:check
       - run: pnpm sync:tests:check
       - run: pnpm sync:barrels:check
 

@@ -17,6 +17,9 @@ import type {
   ForgotPasswordResponse,
   LoginRequest,
   RegisterRequest,
+  RegisterResponse,
+  ResendVerificationRequest,
+  ResendVerificationResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
   UserRole,
@@ -140,10 +143,11 @@ export class AuthService {
     this.handleAuthSuccess(response);
   }
 
-  /** Register new account */
-  async register(data: RegisterRequest): Promise<void> {
-    const response: AuthResponse = await this.api.register(data);
-    this.handleAuthSuccess(response);
+  /** Register new account - returns pending status, user must verify email */
+  async register(data: RegisterRequest): Promise<RegisterResponse> {
+    const response: RegisterResponse = await this.api.register(data);
+    // No auto-login - user must verify email first
+    return response;
   }
 
   /** Logout and clear session */
@@ -213,9 +217,19 @@ export class AuthService {
     return this.api.resetPassword(data);
   }
 
-  /** Verify email with token */
+  /** Verify email with token - auto-logs in user on success */
   async verifyEmail(data: EmailVerificationRequest): Promise<EmailVerificationResponse> {
-    return this.api.verifyEmail(data);
+    const response: EmailVerificationResponse = await this.api.verifyEmail(data);
+    // Auto-login on successful verification
+    if (response.verified && response.token) {
+      this.handleAuthSuccess({ token: response.token, user: response.user });
+    }
+    return response;
+  }
+
+  /** Resend verification email */
+  async resendVerification(data: ResendVerificationRequest): Promise<ResendVerificationResponse> {
+    return this.api.resendVerification(data);
   }
 
   // ==========================================================================

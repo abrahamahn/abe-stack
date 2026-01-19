@@ -42,3 +42,14 @@ export { withTransaction, isInTransaction } from './transaction';
 
 // Optimistic concurrency control utilities (Chet-stack pattern)
 export { OptimisticLockError, updateUserWithVersion, isOptimisticLockError } from './utils';
+
+// Schema validation
+export {
+  REQUIRED_TABLES,
+  validateSchema,
+  requireValidSchema,
+  getExistingTables,
+  SchemaValidationError,
+  type RequiredTable,
+  type SchemaValidationResult,
+} from './schema-validation';

@@ -21,6 +21,7 @@ export {
   buildConnectionString,
   createDbClient,
   emailVerificationTokens,
+  getExistingTables,
   isInTransaction,
   isOptimisticLockError,
   loginAttempts,
@@ -30,12 +31,17 @@ export {
   // Schema - Auth
   refreshTokenFamilies,
   refreshTokens,
+  // Schema validation
+  REQUIRED_TABLES,
+  requireValidSchema,
   resolveConnectionStringWithFallback,
+  SchemaValidationError,
   securityEvents,
   updateUserWithVersion,
   // Schema - Users
   USER_ROLES,
   users,
+  validateSchema,
   // Transaction
   withTransaction,
   type DbClient,
@@ -51,6 +57,8 @@ export {
   type PasswordResetToken,
   type RefreshToken,
   type RefreshTokenFamily,
+  type RequiredTable,
+  type SchemaValidationResult,
   type SecurityEvent,
   type User,
   // Types

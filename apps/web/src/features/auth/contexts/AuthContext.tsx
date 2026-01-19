@@ -14,6 +14,7 @@
 import { useAuth } from '@auth/hooks/useAuth';
 import { createContext } from 'react';
 
+import type { RegisterResponse } from '@abe-stack/core';
 import type { User } from '@auth/services/AuthService';
 import type { ReactElement, ReactNode } from 'react';
 
@@ -26,7 +27,7 @@ export type AuthContextType = {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (credentials: { email: string; password: string }) => Promise<void>;
-  register: (data: { email: string; password: string; name?: string }) => Promise<void>;
+  register: (data: { email: string; password: string; name?: string }) => Promise<RegisterResponse>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<boolean>;
 };

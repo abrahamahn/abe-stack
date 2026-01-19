@@ -350,20 +350,28 @@
 }
 
 .auth-layout-card {
-  padding: calc(var(--ui-gap-lg) * 2);
+  padding: var(--ui-gap-xl);
   border-radius: var(--ui-radius-md);
   border: 1px solid var(--ui-color-border);
   box-shadow: var(--ui-color-shadow);
   background: var(--ui-color-surface);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-gap-md);
 }
 
 .auth-layout-title {
-  margin: 0 0 var(--ui-gap-sm) 0;
+  margin: 0;
+  font-size: var(--ui-font-size-lg);
+  font-weight: var(--ui-font-weight-semibold);
+  line-height: var(--ui-line-height-tight);
 }
 
 .auth-layout-description {
-  margin: 0 0 var(--ui-gap-lg) 0;
+  margin: 0;
+  font-size: var(--ui-font-size-sm);
   color: var(--ui-color-text-muted);
+  line-height: var(--ui-line-height-normal);
 }
 
 /* ============================================

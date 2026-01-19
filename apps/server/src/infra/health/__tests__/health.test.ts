@@ -1,5 +1,16 @@
 // apps/server/src/infra/health/__tests__/health.test.ts
+import {
+  checkDatabase,
+  checkEmail,
+  checkStorage,
+  checkPubSub,
+  checkWebSocket,
+  checkRateLimit,
+  getDetailedHealth,
+} from '@health/index';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+import type { AppContext } from '@shared/types';
 
 // Mock websocket module
 vi.mock('@websocket', () => ({
@@ -9,21 +20,9 @@ vi.mock('@websocket', () => ({
   })),
 }));
 
-import {
-  checkDatabase,
-  checkEmail,
-  checkStorage,
-  checkPubSub,
-  checkWebSocket,
-  checkRateLimit,
-  getDetailedHealth,
-} from '../index';
-
-import type { AppContext } from '@shared/types';
-
 describe('Health Check Functions', () => {
-  const mockDb = {
-    execute: vi.fn(() => Promise.resolve()),
+  const mockDb: { execute: ReturnType<typeof vi.fn>; query: Record<string, unknown> } = {
+    execute: vi.fn(),
     query: {},
   };
 
@@ -112,10 +111,22 @@ describe('Health Check Functions', () => {
 
   describe('getDetailedHealth', () => {
     it('should return healthy when all services are up', async () => {
+      // Mock database connectivity check
       mockDb.execute.mockResolvedValueOnce(undefined);
+      // Mock schema validation check (returns all required tables as array)
+      mockDb.execute.mockResolvedValueOnce([
+        { tablename: 'users' },
+        { tablename: 'refresh_tokens' },
+        { tablename: 'refresh_token_families' },
+        { tablename: 'login_attempts' },
+        { tablename: 'password_reset_tokens' },
+        { tablename: 'email_verification_tokens' },
+        { tablename: 'security_events' },
+      ]);
       const result = await getDetailedHealth(mockContext);
       expect(result.status).toBe('healthy');
       expect(result.services.database.status).toBe('up');
+      expect(result.services.schema.status).toBe('up');
       expect(result.services.email.status).toBe('up');
       expect(result.services.storage.status).toBe('up');
       expect(result.services.pubsub.status).toBe('up');
@@ -125,9 +136,23 @@ describe('Health Check Functions', () => {
 
     it('should return degraded when database is down', async () => {
       mockDb.execute.mockRejectedValueOnce(new Error('Connection failed'));
+      // Schema check will also fail since db is down
+      mockDb.execute.mockRejectedValueOnce(new Error('Connection failed'));
       const result = await getDetailedHealth(mockContext);
       expect(result.status).toBe('degraded');
       expect(result.services.database.status).toBe('down');
+    });
+
+    it('should return degraded when schema is incomplete', async () => {
+      // Mock database connectivity check
+      mockDb.execute.mockResolvedValueOnce(undefined);
+      // Mock schema validation check (missing tables - returns array)
+      mockDb.execute.mockResolvedValueOnce([{ tablename: 'users' }]);
+      const result = await getDetailedHealth(mockContext);
+      expect(result.status).toBe('degraded');
+      expect(result.services.database.status).toBe('up');
+      expect(result.services.schema.status).toBe('down');
+      expect(result.services.schema.missingTables).toBeDefined();
     });
   });
 });

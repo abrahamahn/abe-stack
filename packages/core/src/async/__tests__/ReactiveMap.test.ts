@@ -322,4 +322,167 @@ describe('ReactiveMap', () => {
       expect(map.get(2)).toBe('two');
     });
   });
+
+  describe('memory leak prevention', () => {
+    it('should clean up listener Set when last listener unsubscribes', () => {
+      const map = new ReactiveMap<string, number>();
+
+      const unsub1 = map.subscribe('a', () => {});
+      const unsub2 = map.subscribe('a', () => {});
+
+      expect(map.listenerCount('a')).toBe(2);
+
+      unsub1();
+      expect(map.listenerCount('a')).toBe(1);
+
+      unsub2();
+      // After all listeners removed, the internal Set should be deleted
+      expect(map.listenerCount('a')).toBe(0);
+      expect(map.totalListenerCount).toBe(0);
+    });
+
+    it('should not leak memory during rapid subscribe/unsubscribe cycles', () => {
+      const map = new ReactiveMap<string, number>();
+
+      // Simulate rapid subscription cycling (e.g., React component mounts/unmounts)
+      for (let i = 0; i < 1000; i++) {
+        const unsub = map.subscribe('key', () => {});
+        unsub();
+      }
+
+      expect(map.listenerCount('key')).toBe(0);
+      expect(map.totalListenerCount).toBe(0);
+    });
+
+    it('should handle subscriptions to keys that are later deleted', () => {
+      const map = new ReactiveMap<string, number>();
+      const listener = vi.fn();
+
+      map.set('a', 1);
+      const unsub = map.subscribe('a', listener);
+
+      // Delete the data
+      map.delete('a');
+      expect(listener).toHaveBeenCalledWith(undefined);
+
+      // Listener is still attached even though data is gone
+      expect(map.listenerCount('a')).toBe(1);
+
+      // Unsubscribing should clean up properly
+      unsub();
+      expect(map.listenerCount('a')).toBe(0);
+    });
+
+    it('should handle subscriptions to non-existent keys', () => {
+      const map = new ReactiveMap<string, number>();
+      const listener = vi.fn();
+
+      // Subscribe to key before it exists
+      const unsub = map.subscribe('future-key', listener);
+      expect(map.listenerCount('future-key')).toBe(1);
+
+      // Set the value - should notify
+      map.set('future-key', 42);
+      expect(listener).toHaveBeenCalledWith(42);
+
+      // Unsubscribe and verify cleanup
+      unsub();
+      expect(map.listenerCount('future-key')).toBe(0);
+    });
+
+    it('should not accumulate listeners across many keys', () => {
+      const map = new ReactiveMap<string, number>();
+      const unsubscribers: Array<() => void> = [];
+
+      // Subscribe to many different keys
+      for (let i = 0; i < 100; i++) {
+        unsubscribers.push(map.subscribe(`key-${i}`, () => {}));
+      }
+
+      expect(map.totalListenerCount).toBe(100);
+
+      // Unsubscribe from all
+      for (const unsub of unsubscribers) {
+        unsub();
+      }
+
+      expect(map.totalListenerCount).toBe(0);
+    });
+
+    it('should handle interleaved subscribe/unsubscribe on multiple keys', () => {
+      const map = new ReactiveMap<string, number>();
+
+      const unsub1 = map.subscribe('a', () => {});
+      const unsub2 = map.subscribe('b', () => {});
+      const unsub3 = map.subscribe('a', () => {});
+      const unsub4 = map.subscribe('c', () => {});
+
+      expect(map.totalListenerCount).toBe(4);
+      expect(map.listenerCount('a')).toBe(2);
+      expect(map.listenerCount('b')).toBe(1);
+      expect(map.listenerCount('c')).toBe(1);
+
+      // Unsubscribe in different order than subscribed
+      unsub2();
+      expect(map.totalListenerCount).toBe(3);
+      expect(map.listenerCount('b')).toBe(0);
+
+      unsub1();
+      expect(map.totalListenerCount).toBe(2);
+      expect(map.listenerCount('a')).toBe(1);
+
+      unsub4();
+      unsub3();
+      expect(map.totalListenerCount).toBe(0);
+    });
+
+    it('should handle clear() with active listeners without memory leak', () => {
+      const map = new ReactiveMap<string, number>();
+      const listeners = [vi.fn(), vi.fn(), vi.fn()];
+      const unsubscribers: Array<() => void> = [];
+
+      map.set('a', 1);
+      map.set('b', 2);
+      map.set('c', 3);
+
+      unsubscribers.push(map.subscribe('a', listeners[0]));
+      unsubscribers.push(map.subscribe('b', listeners[1]));
+      unsubscribers.push(map.subscribe('c', listeners[2]));
+
+      // Clear all data
+      map.clear();
+
+      // All listeners should have been notified
+      expect(listeners[0]).toHaveBeenCalledWith(undefined);
+      expect(listeners[1]).toHaveBeenCalledWith(undefined);
+      expect(listeners[2]).toHaveBeenCalledWith(undefined);
+
+      // Data should be cleared
+      expect(map.size).toBe(0);
+
+      // Listeners should still be active (clear doesn't unsubscribe)
+      expect(map.totalListenerCount).toBe(3);
+
+      // Manual unsubscribe should clean up
+      for (const unsub of unsubscribers) {
+        unsub();
+      }
+      expect(map.totalListenerCount).toBe(0);
+    });
+
+    it('should handle double unsubscribe gracefully', () => {
+      const map = new ReactiveMap<string, number>();
+
+      const unsub = map.subscribe('a', () => {});
+      expect(map.listenerCount('a')).toBe(1);
+
+      unsub();
+      expect(map.listenerCount('a')).toBe(0);
+
+      // Double unsubscribe should not throw or cause issues
+      unsub();
+      expect(map.listenerCount('a')).toBe(0);
+      expect(map.totalListenerCount).toBe(0);
+    });
+  });
 });

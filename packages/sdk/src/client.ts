@@ -11,6 +11,9 @@ import type {
   LogoutResponse,
   RefreshResponse,
   RegisterRequest,
+  RegisterResponse,
+  ResendVerificationRequest,
+  ResendVerificationResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
   UserResponse,
@@ -24,13 +27,14 @@ export interface ApiClientConfig {
 
 export interface ApiClient {
   login: (data: LoginRequest) => Promise<AuthResponse>;
-  register: (data: RegisterRequest) => Promise<AuthResponse>;
+  register: (data: RegisterRequest) => Promise<RegisterResponse>;
   refresh: () => Promise<RefreshResponse>;
   logout: () => Promise<LogoutResponse>;
   getCurrentUser: () => Promise<UserResponse>;
   forgotPassword: (data: ForgotPasswordRequest) => Promise<ForgotPasswordResponse>;
   resetPassword: (data: ResetPasswordRequest) => Promise<ResetPasswordResponse>;
   verifyEmail: (data: EmailVerificationRequest) => Promise<EmailVerificationResponse>;
+  resendVerification: (data: ResendVerificationRequest) => Promise<ResendVerificationResponse>;
 }
 
 const API_PREFIX = '/api';
@@ -67,8 +71,8 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
         body: JSON.stringify(data),
       });
     },
-    async register(data: RegisterRequest): Promise<AuthResponse> {
-      return request<AuthResponse>('/auth/register', {
+    async register(data: RegisterRequest): Promise<RegisterResponse> {
+      return request<RegisterResponse>('/auth/register', {
         method: 'POST',
         body: JSON.stringify(data),
       });
@@ -102,6 +106,12 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
     },
     async verifyEmail(data: EmailVerificationRequest): Promise<EmailVerificationResponse> {
       return request<EmailVerificationResponse>('/auth/verify-email', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+    },
+    async resendVerification(data: ResendVerificationRequest): Promise<ResendVerificationResponse> {
+      return request<ResendVerificationResponse>('/auth/resend-verification', {
         method: 'POST',
         body: JSON.stringify(data),
       });

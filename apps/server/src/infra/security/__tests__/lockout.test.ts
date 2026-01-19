@@ -451,4 +451,102 @@ describe('Lockout Functions', () => {
       expect(mockDb.insert).toHaveBeenCalled();
     });
   });
+
+  describe('concurrent login attempts', () => {
+    test('should handle multiple concurrent login logs', async () => {
+      // Simulate multiple concurrent login attempt logs
+      const promises = [
+        logLoginAttempt(asMockDb(mockDb), 'test@example.com', false, '192.168.1.1'),
+        logLoginAttempt(asMockDb(mockDb), 'test@example.com', false, '192.168.1.2'),
+        logLoginAttempt(asMockDb(mockDb), 'test@example.com', false, '192.168.1.3'),
+      ];
+
+      await Promise.all(promises);
+
+      // All three should have been logged
+      expect(mockDb.insert).toHaveBeenCalledTimes(3);
+    });
+
+    test('should handle concurrent lockout status checks', async () => {
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([{ count: 4 }]),
+        }),
+      });
+
+      // Multiple concurrent lockout status checks
+      const promises = [
+        isAccountLocked(asMockDb(mockDb), 'test@example.com', defaultLockoutConfig),
+        isAccountLocked(asMockDb(mockDb), 'test@example.com', defaultLockoutConfig),
+        isAccountLocked(asMockDb(mockDb), 'test@example.com', defaultLockoutConfig),
+      ];
+
+      const results = await Promise.all(promises);
+
+      // All should return the same result (consistent state)
+      expect(results.every((r) => !r)).toBe(true);
+    });
+
+    test('should handle concurrent lockout checks reaching threshold', async () => {
+      // Start with 4 attempts, then simulate race where count becomes 5
+      let callCount = 0;
+      mockDb.select.mockImplementation(() => ({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([{ count: callCount++ < 2 ? 4 : 5 }]),
+        }),
+      }));
+
+      const promises = [
+        isAccountLocked(asMockDb(mockDb), 'test@example.com', defaultLockoutConfig),
+        isAccountLocked(asMockDb(mockDb), 'test@example.com', defaultLockoutConfig),
+        isAccountLocked(asMockDb(mockDb), 'test@example.com', defaultLockoutConfig),
+      ];
+
+      const results = await Promise.all(promises);
+
+      // Some may return locked, some may not - but no errors should occur
+      expect(results.filter((r) => r).length).toBeGreaterThanOrEqual(0);
+      expect(results.filter((r) => !r).length).toBeGreaterThanOrEqual(0);
+    });
+
+    test('should handle concurrent progressive delay calculations', async () => {
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([{ count: 2 }]),
+        }),
+      });
+
+      // Multiple concurrent delay calculations
+      const promises = [
+        getProgressiveDelay(asMockDb(mockDb), 'test@example.com', defaultLockoutConfig),
+        getProgressiveDelay(asMockDb(mockDb), 'test@example.com', defaultLockoutConfig),
+        getProgressiveDelay(asMockDb(mockDb), 'test@example.com', defaultLockoutConfig),
+      ];
+
+      const results = await Promise.all(promises);
+
+      // All should return consistent delay
+      expect(results).toEqual([2000, 2000, 2000]);
+    });
+
+    test('should handle interleaved log and check operations', async () => {
+      // Simulate interleaved operations
+      mockDb.select.mockReturnValue({
+        from: vi.fn().mockReturnValue({
+          where: vi.fn().mockResolvedValue([{ count: 3 }]),
+        }),
+      });
+
+      // Mix of logging and checking operations
+      const promises = [
+        logLoginAttempt(asMockDb(mockDb), 'test@example.com', false),
+        isAccountLocked(asMockDb(mockDb), 'test@example.com', defaultLockoutConfig),
+        logLoginAttempt(asMockDb(mockDb), 'test@example.com', false),
+        isAccountLocked(asMockDb(mockDb), 'test@example.com', defaultLockoutConfig),
+      ];
+
+      // All should complete without errors
+      await expect(Promise.all(promises)).resolves.toBeDefined();
+    });
+  });
 });

@@ -47,17 +47,20 @@ export default [
     ],
   },
   jsConfigs.recommended ?? {},
-  ...tseslint.configs.strictTypeChecked,
-  // Ensure TypeScript-ESLint has an explicit root in monorepos.
-  {
+
+  // Configuration for ALL TypeScript files with strict type checking
+  ...tseslint.configs.strictTypeChecked.map((config) => ({
+    ...config,
     files: ['**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
+      ...config.languageOptions,
       parserOptions: {
+        ...(config.languageOptions?.parserOptions as Record<string, unknown> | undefined),
         tsconfigRootDir,
         project: ['./config/ts/tsconfig.eslint.json'],
       },
     },
-  },
+  })),
   {
     files: ['apps/server/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {

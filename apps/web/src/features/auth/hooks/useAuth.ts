@@ -16,6 +16,8 @@ import type {
   ForgotPasswordRequest,
   LoginRequest,
   RegisterRequest,
+  RegisterResponse,
+  ResendVerificationRequest,
   ResetPasswordRequest,
 } from '@abe-stack/core';
 import type { AuthState, User } from '@auth/services/AuthService';
@@ -26,12 +28,13 @@ export type AuthContextType = {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (credentials: LoginRequest) => Promise<void>;
-  register: (data: RegisterRequest) => Promise<void>;
+  register: (data: RegisterRequest) => Promise<RegisterResponse>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<boolean>;
   forgotPassword: (data: ForgotPasswordRequest) => Promise<void>;
   resetPassword: (data: ResetPasswordRequest) => Promise<void>;
   verifyEmail: (data: EmailVerificationRequest) => Promise<void>;
+  resendVerification: (data: ResendVerificationRequest) => Promise<void>;
 };
 
 /**
@@ -68,8 +71,8 @@ export function useAuth(): AuthContextType {
   );
 
   const register = useCallback(
-    async (data: RegisterRequest): Promise<void> => {
-      await auth.register(data);
+    async (data: RegisterRequest): Promise<RegisterResponse> => {
+      return auth.register(data);
     },
     [auth],
   );
@@ -103,6 +106,13 @@ export function useAuth(): AuthContextType {
     [auth],
   );
 
+  const resendVerification = useCallback(
+    async (data: ResendVerificationRequest): Promise<void> => {
+      await auth.resendVerification(data);
+    },
+    [auth],
+  );
+
   return {
     user: state.user,
     isLoading: state.isLoading,
@@ -114,5 +124,6 @@ export function useAuth(): AuthContextType {
     forgotPassword,
     resetPassword,
     verifyEmail,
+    resendVerification,
   };
 }

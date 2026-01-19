@@ -40,6 +40,17 @@ declare module 'fastify' {
 const TOKEN_LENGTH = 32;
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
+// Routes that don't need CSRF protection (no authenticated session to exploit)
+const CSRF_EXEMPT_PATHS = new Set([
+  '/api/auth/login',
+  '/api/auth/register',
+  '/api/auth/forgot-password',
+  '/api/auth/reset-password',
+  '/api/auth/verify-email',
+  '/api/auth/refresh',
+  '/api/auth/logout',
+]);
+
 /**
  * Generate a CSRF token
  */
@@ -129,6 +140,12 @@ export function registerCsrf(server: FastifyInstance, options: CsrfOptions): voi
   server.addHook('preHandler', async (req: FastifyRequest, reply: FastifyReply) => {
     // Skip validation for safe methods
     if (SAFE_METHODS.has(req.method)) {
+      return;
+    }
+
+    // Skip validation for exempt paths (auth endpoints)
+    const path = req.url.split('?')[0] ?? req.url;
+    if (CSRF_EXEMPT_PATHS.has(path)) {
       return;
     }
 
