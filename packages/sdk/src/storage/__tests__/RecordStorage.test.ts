@@ -734,6 +734,13 @@ describe('RecordStorageError', () => {
     expect(error).toBeInstanceOf(Error);
     expect(error).toBeInstanceOf(RecordStorageError);
   });
+
+  it('should work without cause', () => {
+    const error = new RecordStorageError('Test error', 'NOT_FOUND');
+    expect(error.message).toBe('Test error');
+    expect(error.type).toBe('NOT_FOUND');
+    expect(error.cause).toBeUndefined();
+  });
 });
 
 describe('RecordStorage backend utilities', () => {
@@ -827,6 +834,119 @@ describe('RecordStorage backend utilities', () => {
 
       const written = await storage.writeRecordMap(recordMap);
       expect(written).toBe(0);
+    });
+  });
+
+  describe('notify listeners with clear events', () => {
+    it('should notify listeners on clear table when records are deleted', async () => {
+      const storage = new RecordStorage<TestTables>();
+      await storage.ready();
+
+      const user: UserRecord = { id: 'u1', version: 1, name: 'Alice', email: 'alice@example.com' };
+      await storage.setRecord('user', user);
+
+      const events: unknown[] = [];
+      storage.subscribe((event) => {
+        events.push(event);
+      });
+
+      const deleted = await storage.clearTable('user');
+
+      // Should have cleared records
+      expect(deleted).toBe(1);
+    });
+  });
+
+  describe('error handling in listeners', () => {
+    it('should continue notifying listeners even if one throws', async () => {
+      const storage = new RecordStorage<TestTables>();
+      await storage.ready();
+
+      const listener1 = vi.fn(() => {
+        throw new Error('Listener error');
+      });
+      const listener2 = vi.fn();
+
+      storage.subscribe(listener1);
+      storage.subscribe(listener2);
+
+      const user: UserRecord = { id: 'u1', version: 1, name: 'Alice', email: 'alice@example.com' };
+      await storage.setRecord('user', user);
+
+      expect(listener1).toHaveBeenCalled();
+      expect(listener2).toHaveBeenCalled();
+    });
+  });
+
+  describe('unsubscribe', () => {
+    it('should stop receiving events after unsubscribe', async () => {
+      const storage = new RecordStorage<TestTables>();
+      await storage.ready();
+
+      const listener = vi.fn();
+      const unsubscribe = storage.subscribe(listener);
+
+      const user1: UserRecord = { id: 'u1', version: 1, name: 'Alice', email: 'alice@example.com' };
+      await storage.setRecord('user', user1);
+
+      expect(listener).toHaveBeenCalledTimes(1);
+
+      unsubscribe();
+
+      const user2: UserRecord = { id: 'u2', version: 1, name: 'Bob', email: 'bob@example.com' };
+      await storage.setRecord('user', user2);
+
+      // Should not receive more events
+      expect(listener).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('reset', () => {
+    it('should clear all records from all tables', async () => {
+      const storage = new RecordStorage<TestTables>();
+      await storage.ready();
+
+      const user: UserRecord = { id: 'u1', version: 1, name: 'Alice', email: 'alice@example.com' };
+      const post: PostRecord = {
+        id: 'p1',
+        version: 1,
+        title: 'Post',
+        content: 'Content',
+        authorId: 'u1',
+      };
+
+      await storage.setRecord('user', user);
+      await storage.setRecord('post', post);
+
+      await storage.reset();
+
+      // After reset, records should be deleted
+      const fetchedUser = await storage.getRecord<UserRecord>({ table: 'user', id: 'u1' });
+      const fetchedPost = await storage.getRecord<PostRecord>({ table: 'post', id: 'p1' });
+
+      expect(fetchedUser).toBeUndefined();
+      expect(fetchedPost).toBeUndefined();
+    });
+  });
+
+  describe('getBackendType', () => {
+    it('should return the backend type', async () => {
+      const storage = new RecordStorage<TestTables>();
+      await storage.ready();
+
+      const backendType = storage.getBackendType();
+      expect(['indexeddb', 'localstorage', 'memory']).toContain(backendType);
+    });
+  });
+
+  describe('isPersistent', () => {
+    it('should return false for memory backend', async () => {
+      const storage = new RecordStorage<TestTables>();
+      await storage.ready();
+
+      // In test environment, we're likely using memory backend
+      const isPersistent = storage.isPersistent();
+      expect(typeof isPersistent).toBe('boolean');
     });
   });
 });

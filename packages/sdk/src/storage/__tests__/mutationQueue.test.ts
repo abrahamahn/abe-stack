@@ -79,6 +79,14 @@ describe('MutationQueue', () => {
         writable: true,
       });
     });
+
+    test('should handle invalid JSON in localStorage gracefully', () => {
+      mockLocalStorage.setItem('abe-stack-mutation-queue', 'invalid json{{{');
+
+      queue = new MutationQueue();
+      // Should not throw and queue should be empty
+      expect(queue.getPending()).toHaveLength(0);
+    });
   });
 
   describe('add', () => {
@@ -240,6 +248,30 @@ describe('MutationQueue', () => {
   });
 
   describe('processing', () => {
+    test('should not process when offline', async () => {
+      Object.defineProperty(globalThis, 'navigator', {
+        value: { onLine: false },
+        writable: true,
+      });
+
+      const onProcess = vi.fn().mockResolvedValue(undefined);
+      queue = new MutationQueue({ onProcess });
+
+      queue.add('test', { data: 'value' });
+
+      // Wait a bit
+      await vi.advanceTimersByTimeAsync(100);
+
+      expect(onProcess).not.toHaveBeenCalled();
+      expect(queue.getPending()).toHaveLength(1);
+
+      // Restore online status
+      Object.defineProperty(globalThis, 'navigator', {
+        value: { onLine: true },
+        writable: true,
+      });
+    });
+
     test('should process mutations with onProcess callback', async () => {
       vi.useRealTimers(); // Use real timers for async processing tests
       const onProcess = vi.fn().mockResolvedValue(undefined);

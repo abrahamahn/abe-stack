@@ -483,4 +483,193 @@ describe('RealtimeContext', () => {
       expect(screen.getByTestId('is-online').textContent).toBe('true');
     });
   });
+
+  describe('pubsub message handling', () => {
+    it('should skip invalid pubsub messages', async () => {
+      vi.useRealTimers();
+      const cache = new RecordCache<TestTables>();
+      cache.set('user', 'u1', { id: 'u1', version: 1, name: 'Original', email: 'test@test.com' });
+
+      const config = createTestConfig({ recordCache: cache });
+
+      function MessageConsumer(): React.ReactElement {
+        const { recordCache } = useRealtime<TestTables>();
+        const user = recordCache.get('user', 'u1');
+        return <span data-testid="user-name">{user?.name ?? 'not found'}</span>;
+      }
+
+      render(
+        <RealtimeProvider config={config}>
+          <MessageConsumer />
+        </RealtimeProvider>,
+      );
+
+      await waitFor(
+        () => {
+          expect(mockWebSocketInstances.length).toBeGreaterThan(0);
+        },
+        { timeout: 1000 },
+      );
+
+      const ws = mockWebSocketInstances[0];
+      if (ws) {
+        ws.forceConnect();
+
+        // Send a message with invalid key (no colon separator)
+        await act(async () => {
+          ws.onmessage?.(
+            new MessageEvent('message', {
+              data: JSON.stringify({
+                type: 'update',
+                key: 'invalidkey',
+                value: { id: 'u1', version: 2, name: 'Should Not Update' },
+              }),
+            }),
+          );
+        });
+
+        // Send a message with null value
+        await act(async () => {
+          ws.onmessage?.(
+            new MessageEvent('message', {
+              data: JSON.stringify({
+                type: 'update',
+                key: 'user:u1',
+                value: null,
+              }),
+            }),
+          );
+        });
+
+        // Send a message with non-object value
+        await act(async () => {
+          ws.onmessage?.(
+            new MessageEvent('message', {
+              data: JSON.stringify({
+                type: 'update',
+                key: 'user:u1',
+                value: 'string-value',
+              }),
+            }),
+          );
+        });
+      }
+
+      // Cache should not be updated - still have original
+      expect(screen.getByTestId('user-name').textContent).toBe('Original');
+
+      vi.useFakeTimers();
+    });
+  });
+
+  describe('write with non-existent record', () => {
+    it('should handle write operation when record does not exist', async () => {
+      vi.useRealTimers();
+      const cache = new RecordCache<TestTables>();
+      // Note: No record set for 'u1' - it doesn't exist
+
+      const config = createTestConfig({ recordCache: cache });
+
+      function WriteNonExistentConsumer(): React.ReactElement {
+        const { write, undoRedoState } = useRealtime<TestTables>();
+        const [written, setWritten] = React.useState(false);
+
+        React.useEffect(() => {
+          if (!written) {
+            void write([{ table: 'user', id: 'nonexistent', updates: { name: 'New' } }]).then(
+              () => {
+                setWritten(true);
+              },
+            );
+          }
+        }, [write, written]);
+
+        return (
+          <div>
+            <span data-testid="written">{written.toString()}</span>
+            <span data-testid="can-undo">{undoRedoState.canUndo.toString()}</span>
+          </div>
+        );
+      }
+
+      render(
+        <RealtimeProvider config={config}>
+          <WriteNonExistentConsumer />
+        </RealtimeProvider>,
+      );
+
+      await waitFor(
+        () => {
+          expect(screen.getByTestId('written').textContent).toBe('true');
+        },
+        { timeout: 2000 },
+      );
+
+      // Should still have added to undo stack
+      expect(screen.getByTestId('can-undo').textContent).toBe('true');
+
+      vi.useFakeTimers();
+    });
+  });
+
+  describe('redo functionality', () => {
+    it('should redo previously undone write', async () => {
+      vi.useRealTimers();
+      const cache = new RecordCache<TestTables>();
+      cache.set('user', 'u1', { id: 'u1', version: 1, name: 'Alice', email: 'alice@test.com' });
+
+      const config = createTestConfig({ recordCache: cache });
+
+      function RedoConsumer(): React.ReactElement {
+        const { write, undo, redo, recordCache, undoRedoState } = useRealtime<TestTables>();
+        const [step, setStep] = React.useState(0);
+
+        React.useEffect(() => {
+          if (step === 0) {
+            void write([{ table: 'user', id: 'u1', updates: { name: 'Bob' } }]).then(() => {
+              setStep(1);
+            });
+          }
+        }, [write, step]);
+
+        React.useEffect(() => {
+          if (step === 1 && undoRedoState.canUndo) {
+            undo();
+            setStep(2);
+          }
+        }, [step, undoRedoState.canUndo, undo]);
+
+        React.useEffect(() => {
+          if (step === 2 && undoRedoState.canRedo) {
+            redo();
+            setStep(3);
+          }
+        }, [step, undoRedoState.canRedo, redo]);
+
+        const user = recordCache.get('user', 'u1');
+        return (
+          <div>
+            <span data-testid="user-name">{user?.name ?? 'not found'}</span>
+            <span data-testid="step">{step}</span>
+          </div>
+        );
+      }
+
+      render(
+        <RealtimeProvider config={config}>
+          <RedoConsumer />
+        </RealtimeProvider>,
+      );
+
+      await waitFor(
+        () => {
+          expect(screen.getByTestId('step').textContent).toBe('3');
+          expect(screen.getByTestId('user-name').textContent).toBe('Bob');
+        },
+        { timeout: 3000 },
+      );
+
+      vi.useFakeTimers();
+    });
+  });
 });

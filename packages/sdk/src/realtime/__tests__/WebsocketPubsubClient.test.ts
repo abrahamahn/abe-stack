@@ -498,4 +498,101 @@ describe('WebsocketPubsubClient', () => {
       expect(onDebug).not.toHaveBeenCalled();
     });
   });
+
+  describe('message parsing errors', () => {
+    it('should handle invalid JSON in messages', async () => {
+      const onDebug = vi.fn();
+      const onMessage = vi.fn();
+      const _client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage,
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+        debug: true,
+        onDebug,
+      });
+
+      await vi.advanceTimersByTimeAsync(0);
+
+      // Simulate an invalid JSON message
+      const ws = mockWebSocketInstances[0];
+      ws?.onmessage?.(new MessageEvent('message', { data: 'invalid-json{{{' }));
+
+      // onMessage should not be called for invalid messages
+      expect(onMessage).not.toHaveBeenCalled();
+      // Debug log should have been called with parse error
+      expect(onDebug).toHaveBeenCalledWith('Failed to parse message:', expect.any(Error));
+    });
+  });
+
+  describe('offline handling', () => {
+    it('should not reconnect when browser is offline', async () => {
+      // Set navigator.onLine to false
+      Object.defineProperty(navigator, 'onLine', {
+        value: false,
+        writable: true,
+        configurable: true,
+      });
+
+      const onDebug = vi.fn();
+      const _client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
+        secure: false,
+        baseReconnectDelayMs: 100,
+        debug: true,
+        onDebug,
+      });
+
+      await vi.advanceTimersByTimeAsync(0);
+      expect(mockWebSocketInstances.length).toBe(1);
+
+      // Simulate disconnect
+      mockWebSocketInstances[0]?.simulateClose();
+
+      // Advance time - should not try to reconnect because offline
+      await vi.advanceTimersByTimeAsync(10000);
+
+      // Still only 1 instance because offline
+      expect(mockWebSocketInstances.length).toBe(1);
+      expect(onDebug).toHaveBeenCalledWith('Offline, waiting for online event...');
+
+      // Restore navigator.onLine
+      Object.defineProperty(navigator, 'onLine', {
+        value: true,
+        writable: true,
+        configurable: true,
+      });
+    });
+  });
+
+  describe('WebSocket constructor error', () => {
+    it('should handle WebSocket constructor throwing error', async () => {
+      const throwingWebSocket = class extends MockWebSocket {
+        constructor(_url: string) {
+          super(_url);
+          throw new Error('WebSocket not supported');
+        }
+      };
+
+      const onDebug = vi.fn();
+      const _client = new WebsocketPubsubClient({
+        host: 'localhost:3000',
+        onMessage: vi.fn(),
+        WebSocketImpl: throwingWebSocket as unknown as typeof WebSocket,
+        secure: false,
+        baseReconnectDelayMs: 100,
+        maxReconnectAttempts: 1,
+        debug: true,
+        onDebug,
+      });
+
+      // Wait for reconnect attempt
+      await vi.advanceTimersByTimeAsync(500);
+
+      // Should have logged the failure
+      expect(onDebug).toHaveBeenCalledWith('Failed to create WebSocket:', expect.any(Error));
+    });
+  });
 });

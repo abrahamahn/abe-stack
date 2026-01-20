@@ -163,6 +163,39 @@ describe('TransactionQueue', () => {
       expect(mockLocalStorage.getItem('custom-key')).not.toBeNull();
       expect(mockLocalStorage.getItem('abe-transaction-queue')).toBeNull();
     });
+
+    test('should handle invalid JSON in localStorage gracefully', () => {
+      mockLocalStorage.setItem('abe-transaction-queue', 'invalid-json{{{');
+
+      queue = new TransactionQueue({
+        submitTransaction: mockSubmit,
+        onRollback: mockRollback,
+      });
+
+      // Should not throw and queue should be empty
+      expect(queue.getQueuedTransactions()).toHaveLength(0);
+    });
+
+    test('should handle operations with short path gracefully', async () => {
+      mockOnline = false;
+      queue = new TransactionQueue({
+        submitTransaction: mockSubmit,
+        onRollback: mockRollback,
+      });
+
+      // Create a transaction with invalid path (less than 2 elements)
+      const tx: QueuedTransaction = {
+        id: 'tx-short-path',
+        authorId: 'user-1',
+        timestamp: Date.now(),
+        operations: [{ type: 'set', path: ['only-one'], value: 'test' }],
+      };
+
+      void queue.enqueue(tx);
+
+      // Should not track pending writes for invalid paths
+      expect(queue.isPendingWrite({ table: 'only-one', id: '' })).toBe(false);
+    });
   });
 
   describe('enqueue', () => {
@@ -401,6 +434,39 @@ describe('TransactionQueue', () => {
   });
 
   describe('transaction processing', () => {
+    test('should fail with unknown status error', async () => {
+      mockSubmit.mockResolvedValue({ status: 418, message: "I'm a teapot" });
+
+      queue = new TransactionQueue({
+        submitTransaction: mockSubmit,
+        onRollback: mockRollback,
+      });
+
+      const tx = createTestTransaction();
+      await expect(queue.enqueue(tx)).rejects.toThrow("I'm a teapot");
+    });
+
+    test('should handle large transaction exceeding batch size', async () => {
+      mockOnline = true;
+      queue = new TransactionQueue({
+        submitTransaction: mockSubmit,
+        onRollback: mockRollback,
+        maxBatchSize: 50, // Very small batch size
+      });
+
+      // Create a transaction with data that exceeds batch size
+      const largeData = 'x'.repeat(100);
+      const tx: QueuedTransaction = {
+        id: 'tx-large',
+        authorId: 'user-1',
+        timestamp: Date.now(),
+        operations: [{ type: 'set', path: ['table', 'id'], value: largeData }],
+      };
+
+      await queue.enqueue(tx);
+      expect(mockSubmit).toHaveBeenCalled();
+    });
+
     test('should retry on conflict (409)', async () => {
       let callCount = 0;
       mockSubmit.mockImplementation(async () => {
