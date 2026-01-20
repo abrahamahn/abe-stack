@@ -6,7 +6,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "types": ["node"],
-    "noEmit": false
+    "noEmit": true
   },
   "include": [
     "*.ts",

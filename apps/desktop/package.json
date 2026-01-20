@@ -7,10 +7,10 @@
     "dev": "pnpm run dev:electron",
     "dev:standalone": "tsx ../../tools/dev/kill-port.ts 5174 && (pnpm run dev:renderer & pnpm run dev:electron)",
     "dev:renderer": "vite --config ../../config/vite.desktop.config.ts --port 5174",
-    "dev:electron": "NODE_ENV=development tsc -p src/electron/tsconfig.json && NODE_ENV=development electron dist/electron/main.js",
+    "dev:electron": "NODE_ENV=development pnpm run build:electron && NODE_ENV=development electron dist/electron/main.js",
     "build": "pnpm run build:renderer && pnpm run build:electron",
     "build:renderer": "vite build --config ../../config/vite.desktop.config.ts",
-    "build:electron": "tsc -p src/electron/tsconfig.json",
+    "build:electron": "esbuild src/electron/main.ts src/electron/preload.ts --bundle --platform=node --target=node20 --outdir=dist/electron --external:electron --format=cjs",
     "start": "electron dist/electron/main.js",
     "package": "electron-builder",
     "type-check": "tsc --noEmit",
@@ -25,7 +25,8 @@
   },
   "devDependencies": {
     "electron": "^40.0.0",
-    "electron-builder": "^26.4.0"
+    "electron-builder": "^26.4.0",
+    "esbuild": "^0.25.12"
   },
   "build": {
     "appId": "com.abe-stack.desktop",
