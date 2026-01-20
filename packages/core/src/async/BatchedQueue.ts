@@ -60,6 +60,7 @@ export class BatchedQueue<I, O> {
   private tasks: Array<QueuedTask<I, O>> = [];
   private activeBatches = 0;
   private flushScheduled = false;
+  private flushTimeoutId: NodeJS.Timeout | null = null;
 
   constructor(private options: BatchedQueueOptions<I, O>) {}
 
@@ -91,10 +92,30 @@ export class BatchedQueue<I, O> {
   private scheduleFlush(): void {
     if (this.flushScheduled) return;
     this.flushScheduled = true;
-    setTimeout(() => {
+    this.flushTimeoutId = setTimeout(() => {
+      this.flushTimeoutId = null;
       this.flushScheduled = false;
       void this.flush();
     }, this.options.delayMs);
+  }
+
+  /**
+   * Destroy the queue and cancel any pending flushes.
+   * Rejects all pending tasks with an error.
+   */
+  destroy(): void {
+    if (this.flushTimeoutId) {
+      clearTimeout(this.flushTimeoutId);
+      this.flushTimeoutId = null;
+    }
+    this.flushScheduled = false;
+
+    // Reject all pending tasks
+    const error = new Error('BatchedQueue destroyed');
+    for (const task of this.tasks) {
+      task.output.reject(error);
+    }
+    this.tasks = [];
   }
 
   private flush = async (): Promise<void> => {

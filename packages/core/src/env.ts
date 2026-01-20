@@ -43,6 +43,19 @@ export const serverEnvSchema = z
     // Host configuration
     HOST: z.string().default('0.0.0.0'),
 
+    // Email Configuration
+    SMTP_HOST: z.string().optional(),
+    SMTP_PORT: z.coerce.number().optional().default(587),
+    SMTP_SECURE: z
+      .enum(['true', 'false'])
+      .optional()
+      .transform((v) => v === 'true'),
+    SMTP_USER: z.string().optional(),
+    SMTP_PASS: z.string().optional(),
+    EMAIL_PROVIDER: z.enum(['console', 'smtp']).optional().default('console'),
+    EMAIL_FROM_NAME: z.string().optional().default('ABE Stack'),
+    EMAIL_FROM_ADDRESS: z.string().optional(),
+
     // Storage
     STORAGE_PROVIDER: z.enum(['local', 's3']).default('local'),
     STORAGE_ROOT_PATH: z.string().default('./uploads'),
@@ -83,6 +96,8 @@ export const serverEnvSchema = z
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
 
+export const envSchema = serverEnvSchema;
+
 /**
  * Load and validate server environment variables
  * @param raw - Raw environment object (typically process.env)
@@ -101,4 +116,52 @@ export function loadServerEnv(raw: Record<string, unknown>): ServerEnv {
     process.exit(1);
   }
   return parsed.data;
+}
+
+export function validateEnvironment(raw: Record<string, unknown>): ServerEnv {
+  return envSchema.parse(raw);
+}
+
+export function validateEnvironmentSafe(
+  raw: Record<string, unknown>,
+): z.SafeParseReturnType<unknown, ServerEnv> {
+  return envSchema.safeParse(raw);
+}
+
+export function validateDatabaseEnv(raw: Record<string, unknown>): ServerEnv {
+  return validateEnvironment(raw);
+}
+
+export function validateSecurityEnv(raw: Record<string, unknown>): ServerEnv {
+  return validateEnvironment(raw);
+}
+
+export function validateStorageEnv(raw: Record<string, unknown>): ServerEnv {
+  return validateEnvironment(raw);
+}
+
+export function validateEmailEnv(raw: Record<string, unknown>): ServerEnv {
+  return validateEnvironment(raw);
+}
+
+export function validateDevelopmentEnv(raw: Record<string, unknown>): ServerEnv {
+  const env = validateEnvironment(raw);
+  if (env.NODE_ENV !== 'development') {
+    throw new Error('NODE_ENV must be development');
+  }
+  return env;
+}
+
+export function validateProductionEnv(raw: Record<string, unknown>): ServerEnv {
+  const env = validateEnvironment(raw);
+  if (env.NODE_ENV !== 'production') {
+    throw new Error('NODE_ENV must be production');
+  }
+  return env;
+}
+
+export function getEnvValidator(
+  schema: typeof envSchema = envSchema,
+): (raw: z.input<typeof envSchema>) => ServerEnv {
+  return (raw: z.input<typeof envSchema>) => schema.parse(raw);
 }

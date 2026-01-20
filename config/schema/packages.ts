@@ -120,9 +120,6 @@ export const rootScripts = {
   'sync:tests': 'tsx tools/sync/sync-test-folders.ts',
   'sync:tests:check': 'tsx tools/sync/sync-test-folders.ts --check',
   'sync:tests:watch': 'tsx tools/sync/sync-test-folders.ts --watch',
-  'sync:barrels': 'tsx tools/sync/sync-barrel-exports.ts',
-  'sync:barrels:check': 'tsx tools/sync/sync-barrel-exports.ts --check',
-  'sync:barrels:watch': 'tsx tools/sync/sync-barrel-exports.ts --watch',
 
   // Type check
   'type-check': 'turbo run type-check',
@@ -166,5 +163,5 @@ export const rootScripts = {
 
   // Pre-commit (updated to use config:generate)
   'pre-commit':
-    'pnpm config:generate && pnpm sync:headers && pnpm sync:imports && pnpm sync:tests && pnpm sync:barrels && pnpm sync:theme && pnpm lint-staged && pnpm type-check',
+    'pnpm config:generate && pnpm sync:headers && pnpm sync:imports && pnpm sync:tests && pnpm sync:theme && pnpm lint-staged && pnpm type-check',
 } as const;

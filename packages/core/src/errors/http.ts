@@ -93,22 +93,3 @@ export class InternalError extends AppError {
     super(message, HTTP_STATUS.INTERNAL_SERVER_ERROR, code);
   }
 }
-
-// ============================================================================
-// Backward Compatibility Aliases
-// ============================================================================
-
-/**
- * @deprecated Use ValidationError from './validation' instead
- */
-export { BadRequestError as ValidationError };
-
-/**
- * @deprecated Use ForbiddenError instead
- */
-export { ForbiddenError as PermissionError };
-
-/**
- * @deprecated Use TooManyRequestsError instead
- */
-export { TooManyRequestsError as RateLimitError };

@@ -21,59 +21,7 @@ Code that exists but isn't used anywhere (only exported + tested). Integrate whe
 
 ---
 
-## Foundation Status ✅
-
-Everything needed to build and scale to Series A is complete.
-
-| Component | Status  | Notes                                       |
-| --------- | ------- | ------------------------------------------- |
-| Auth      | ✅ Done | JWT + refresh rotation + token families     |
-| Security  | ✅ Done | Argon2id, rate limiting, audit logging      |
-| Real-time | ✅ Done | WebSocket + Postgres PubSub                 |
-| Email     | ✅ Done | Console + SMTP providers                    |
-| Storage   | ✅ Done | Local + S3 providers                        |
-| Database  | ✅ Done | Drizzle + transactions + optimistic locking |
-| Config    | ✅ Done | Domain-split, type-safe                     |
-| CI/CD     | ✅ Done | Parallel lint/test/build                    |
-
-**Stop touching the foundation. Start building product.**
-
----
-
 ## High-Priority Improvements
-
-### Top Priority (Do these first)
-
-| Priority | Improvement                                               | Why it's essential                                            | Difficulty | Status  |
-| -------- | --------------------------------------------------------- | ------------------------------------------------------------- | ---------- | ------- |
-| 1        | **Automate tsconfig project references**                  | Prevents the most painful and silent type errors in monorepos | ★★☆        | ✅ Done |
-| 2        | **Zod schema + runtime validation for all env variables** | Catches configuration mistakes early (dev, CI, prod)          | ★☆☆        | Open    |
-| 3        | **Reduce sync script overhead**                           | Reduces watcher overhead and CPU usage during `pnpm dev`      | ★★☆        | ✅ Done |
-| 4        | **Document affected packages workflows**                  | Saves time for reviewers and new contributors                 | ★☆☆        | Open    |
-| 5        | **Enforce domain-folder naming convention**               | Makes architecture intention clearer as project grows         | ★★☆        | Open    |
-
-**Completed:**
-
-- ✅ tsconfig references automated via `config/generators/tsconfig.gen.ts` (runs via `pnpm config:generate`)
-- ✅ Removed `sync-import-aliases.ts` - reduced watchers from 6 to 5, simplifying the dev experience
-
-### Quick Recommended Order
-
-1. Add proper env + config Zod validation + loading
-2. Write documentation for useful turbo commands (`--filter`, `--since`, `--graph`)
-3. Gradually introduce consistent domain folder naming in server and core
-
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `dataTypes.ts` (custom Zod validators)
-
----
-
-## Missing Unit Tests
-
-- [x] `apps/server/src/app.ts` ✅ (app.test.ts created)
-- [ ] `apps/server/src/infra/database/schema/users.ts`
-- [x] `packages/core/src/contracts/native.ts` ✅ (covered by contracts.test.ts)
-
----
 
 ## Core Product Features
 
@@ -83,17 +31,27 @@ Building blocks needed across multiple products.
 
 Required for: social media, music, fitness (photos), marketplace
 
-- [ ] Presigned upload endpoint (filename + contentType)
-- [ ] Storage key conventions (`uploads/{userId}/{uuid}/{filename}`)
-- [ ] Upload size limits per user role
-- [ ] Signed file URLs with expiration
-- [ ] Content type detection helpers (MIME mapping)
-- [ ] File utilities with retry logic, streams, auto-mkdir
-- [ ] **Image processing pipeline** (Sharp)
+- [x] Presigned upload endpoint (filename + contentType)
+- [x] Storage key conventions (`uploads/{userId}/{uuid}/{filename}`)
+- [x] Upload size limits per user role
+- [x] Signed file URLs with expiration
+- [x] Content type detection helpers (MIME mapping)
+- [x] File utilities with retry logic, streams, auto-mkdir
+- [x] **Image processing pipeline** (Sharp)
   - Resize with fit modes (cover, contain, fill, inside)
   - Format conversion (JPEG, PNG, WebP, AVIF)
   - Quality control and thumbnail generation
-- [ ] Audio file handling (for music apps)
+- [x] **Video processing pipeline** (FFmpeg)
+  - Video format conversion (MP4, WebM, HLS)
+  - Thumbnail extraction from videos
+  - Video compression and optimization
+  - Resolution scaling and aspect ratio handling
+- [x] Audio file handling (for music apps)
+  - Audio format conversion (MP3, AAC, WAV, OGG)
+  - Audio compression and optimization
+  - Metadata extraction (duration, bitrate, codec)
+  - Audio waveform generation
+  - Audio streaming support
 
 > **Legacy:** See [File Utilities](./dev/legacy.md#file-utilities), [Backend Utilities](./dev/legacy.md#backend-utilities) → `FileUtils.ts`, `fileHelpers.ts`, `ContentTypes.ts`, `StorageService.ts`, `ImageProcessor.ts`; [UI Components](./dev/legacy.md#ui-components) → `FileUpload.tsx`
 
@@ -101,11 +59,11 @@ Required for: social media, music, fitness (photos), marketplace
 
 Required for: feeds, search results, lists, marketplace
 
-- [ ] Cursor-based pagination schema in @abe-stack/core
-- [ ] `usePaginatedQuery` hook for infinite scroll
-- [ ] Standard pagination response shape
-- [ ] **PaginationOptions** type - `page`, `limit`, `sortBy`, `sortOrder`
-- [ ] **PaginatedResult<T>** generic type - `data`, `total`, `page`, `hasNext`, `hasPrev`
+- [x] Cursor-based pagination schema in @abe-stack/core
+- [x] `usePaginatedQuery` hook for infinite scroll
+- [x] Standard pagination response shape
+- [x] **PaginationOptions** type - `page`, `limit`, `sortBy`, `sortOrder`
+- [x] **PaginatedResult<T>** generic type - `data`, `total`, `page`, `hasNext`, `hasPrev`
 
 > **Legacy:** See [Migration Effort Estimates](./dev/legacy.md#migration-effort-estimates) → Pagination types (2-3h, drop-in)
 
@@ -121,19 +79,6 @@ Required for: messenger, social feeds, real-time notifications
 - [ ] **Typing indicators** via WebSocket events
 
 > **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `WebSocketService.ts`, `WebSocketTypes.ts`, `WebSocketAuthService.ts`; [Frontend Utilities](./dev/legacy.md#frontend-utilities) → `WebsocketPubsubClient.ts`
-
-### Background Jobs (Backend) ✅
-
-Required for: AI processing, audio transcoding, email campaigns
-
-- [x] Job queue with PostgreSQL persistence (QueueServer pattern from Chet-stack)
-- [ ] Job types: email, media-processing, ai-inference
-- [x] Retry with exponential backoff and jitter
-- [x] Job status tracking (pending/processing/completed/failed)
-- [x] Processor registration pattern (TaskHandlers)
-
-> **Implementation:** `apps/server/src/infra/queue/` - QueueServer, PostgresQueueStore, MemoryQueueStore
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `JobService.ts`, `JobQueue.ts`, `FileJobStorage.ts`, `baseJobProcessor.ts`, `email-notification.job.processor.ts`
 
 ### Push Notifications
 
@@ -202,13 +147,6 @@ Required for: passwordless auth option
 
 ### Backend
 
-- [x] Health checks and readiness endpoints (expand existing) - `/health/detailed`, `/health/ready`, `/health/live`, `/health/routes`
-- [x] Request ID middleware with correlation IDs - `apps/server/src/infra/logger/`
-- [x] Password reset flow - `requestPasswordReset()` and `resetPassword()` in `apps/server/src/modules/auth/service.ts`
-
-> **Implementation:** Health checks in `apps/server/src/app.ts`, Logging in `apps/server/src/infra/logger/`
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `ServerManager.ts` (health/metrics), `LoggerService.ts` (correlation IDs), `ResetService.ts` (password reset); [Auth DTOs](./dev/legacy.md#auth-dtos) → `password-reset.dto`; [Potential Migrations](./dev/legacy.md#structured-logging)
-
 ### Frontend (Web)
 
 - [ ] Error boundary + toasts for API errors
@@ -264,29 +202,17 @@ Required for: passwordless auth option
 
 ## Architecture
 
-- [x] Environment-based DI (entrypoints assemble env, no side-effects on import)
-  - Server: AppContext pattern in `apps/server/src/app.ts`
-  - Web: ClientEnvironment pattern in `apps/web/src/main.tsx` and `apps/web/src/app/App.tsx`
-  - All services created at module level, assembled into environment, passed as props
-  - No side-effects on import (Chet-stack pattern)
-
 ---
 
 ## Success Metrics
 
 ### Pre-Seed (Now)
 
-- [x] Can ship any of the product ideas without infrastructure blockers
-- [x] Auth won't embarrass you in security review
-- [x] New hire can understand the codebase in a day
-
 ### Seed
 
 - [ ] First paying customers on at least one product
 - [ ] <100ms P95 latency on critical paths
 - [ ] Zero security incidents
-- [x] Job queue processing reliably (QueueServer implemented)
-- [x] Email delivery working (verification, password reset, notifications) - Console + SMTP providers in `apps/server/src/infra/email/`
 
 ### Series A
 
@@ -318,6 +244,6 @@ If no to all three, it goes in `docs/ROADMAP.md`.
 
 ---
 
-_Last Updated: 2026-01-19_
+_Last Updated: 2026-01-21_
 
 _Philosophy: Foundation is done. Ship products. Copy utilities from legacy when needed._

@@ -45,9 +45,6 @@
     "sync:tests": "tsx config/lint/sync-test-folders.ts",
     "sync:tests:check": "tsx config/lint/sync-test-folders.ts --check",
     "sync:tests:watch": "tsx config/lint/sync-test-folders.ts --watch",
-    "sync:barrels": "tsx config/lint/sync-barrel-exports.ts",
-    "sync:barrels:check": "tsx config/lint/sync-barrel-exports.ts --check",
-    "sync:barrels:watch": "tsx config/lint/sync-barrel-exports.ts --watch",
     "type-check": "turbo run type-check",
     "format": "prettier --config config/.prettierrc --ignore-path config/.prettierignore --cache --cache-location .cache/prettier/.cache --write .",
     "format:check": "prettier --config config/.prettierrc --ignore-path config/.prettierignore --cache --cache-location .cache/prettier/.cache --check .",
@@ -67,7 +64,7 @@
     "docker:logs": "docker compose --env-file config/.env/.env.development -f config/docker/docker-compose.yml logs -f",
     "bundle-size": "tsx tools/export/bundle-size.ts",
     "bundle-size:save": "tsx tools/export/bundle-size.ts --save",
-    "pre-commit": "pnpm config:generate && pnpm sync:headers && pnpm sync:tests && pnpm sync:barrels && pnpm sync:theme && pnpm lint-staged && pnpm type-check"
+    "pre-commit": "pnpm config:generate && pnpm sync:headers && pnpm sync:tests && pnpm sync:theme && pnpm lint-staged && pnpm type-check"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
@@ -80,6 +77,7 @@
     "@vitejs/plugin-react": "^5.1.2",
     "@vitest/coverage-v8": "^4.0.16",
     "@vitest/ui": "^4.0.16",
+    "drizzle-orm": "^0.45.1",
     "eslint": "^9.39.2",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react": "^7.37.5",
@@ -88,6 +86,7 @@
     "jsdom": "^27.4.0",
     "lint-staged": "^15.2.10",
     "msw": "^2.12.7",
+    "postgres": "^3.4.7",
     "prettier": "^3.7.4",
     "simple-git-hooks": "^2.11.1",
     "tsc-alias": "^1.8.16",

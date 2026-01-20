@@ -12,6 +12,7 @@ import path from 'node:path';
 import {
   applyCors,
   applySecurityHeaders,
+  getProductionSecurityDefaults,
   handlePreflight,
   registerCookies,
   registerCsrf,
@@ -65,6 +66,11 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
   const server = Fastify({
     logger: loggerConfig,
     trustProxy: config.server.trustProxy,
+    // Default body size limit for JSON requests (1MB)
+    // This helps prevent denial-of-service attacks via large payloads.
+    // Note: File upload routes should configure their own higher limits
+    // (e.g., 50MB for multipart uploads) on a per-route basis.
+    bodyLimit: 1024 * 1024, // 1MB
   });
 
   // Register plugins
@@ -89,7 +95,8 @@ function registerPlugins(server: FastifyInstance, config: AppConfig): void {
   // Security headers, CORS, and rate limiting
   server.addHook('onRequest', async (req, res) => {
     // Security headers (replaces @fastify/helmet)
-    applySecurityHeaders(res);
+    // Use stricter defaults (including CSP) in production
+    applySecurityHeaders(res, isProd ? getProductionSecurityDefaults() : {});
 
     // CORS (replaces @fastify/cors)
     applyCors(req, res, {
@@ -126,9 +133,10 @@ function registerPlugins(server: FastifyInstance, config: AppConfig): void {
     secret: config.auth.cookie.secret,
   });
 
-  // CSRF protection (manual implementation)
+  // Enhanced CSRF protection with encrypted tokens in production
   registerCsrf(server, {
     secret: config.auth.cookie.secret,
+    encrypted: isProd, // Use AES-256-GCM encryption in production
     cookieOpts: {
       signed: true,
       sameSite: isProd ? 'strict' : 'lax',
@@ -139,7 +147,7 @@ function registerPlugins(server: FastifyInstance, config: AppConfig): void {
 
   // Global error handler
   server.setErrorHandler((error, _request, reply) => {
-    // Log the error
+    // Always log the full error server-side for debugging
     server.log.error(error);
 
     let statusCode = 500;
@@ -162,6 +170,14 @@ function registerPlugins(server: FastifyInstance, config: AppConfig): void {
       if (typeof fastifyError.code === 'string') {
         code = fastifyError.code;
       }
+    }
+
+    // In production, sanitize error messages for 5xx errors to avoid leaking
+    // sensitive information (stack traces, internal paths, database details, etc.)
+    // 4xx errors are typically client errors and safe to return as-is.
+    if (isProd && statusCode >= 500) {
+      message = 'An internal error occurred. Please try again later.';
+      details = undefined; // Never leak internal details in production
     }
 
     const response: ApiErrorResponse = {

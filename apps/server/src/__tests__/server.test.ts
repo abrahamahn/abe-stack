@@ -21,6 +21,8 @@ const testConfig: AppConfig = {
     cors: { origin: '*', credentials: false, methods: ['GET', 'POST', 'PUT', 'DELETE'] },
     trustProxy: false,
     logLevel: 'silent',
+    appBaseUrl: 'http://localhost:5173',
+    apiBaseUrl: 'http://localhost:0',
   },
   database: {
     provider: 'postgresql',
@@ -127,8 +129,8 @@ describe('createServer', () => {
   });
 
   it('should create a Fastify server instance', () => {
-    expect(server).toBeDefined();
-    expect(server.log).toBeDefined();
+    expect(server.server).toBeInstanceOf(Object);
+    expect(typeof server.log.info).toBe('function');
   });
 
   it('should register root route', async () => {
@@ -140,7 +142,8 @@ describe('createServer', () => {
     expect(response.statusCode).toBe(200);
     const body = JSON.parse(response.body) as { message: string; timestamp: string };
     expect(body.message).toBe('ABE Stack API');
-    expect(body.timestamp).toBeDefined();
+    expect(typeof body.timestamp).toBe('string');
+    expect(new Date(body.timestamp).getTime()).not.toBeNaN();
   });
 
   it('should register /api route', async () => {

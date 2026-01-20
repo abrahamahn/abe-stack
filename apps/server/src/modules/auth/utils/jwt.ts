@@ -57,7 +57,11 @@ export function verifyToken(token: string, secret: string): TokenPayload {
     throw new Error(`JWT secret must be at least ${String(MIN_JWT_SECRET_LENGTH)} characters`);
   }
 
-  return jwtVerify(token, secret) as unknown as TokenPayload;
+  const payload: unknown = jwtVerify(token, secret);
+  if (!isTokenPayload(payload)) {
+    throw new JwtError('Invalid token payload', 'INVALID_TOKEN');
+  }
+  return payload;
 }
 
 // ============================================================================
@@ -79,4 +83,14 @@ export function getRefreshTokenExpiry(expiryDays: number): Date {
   const expiry = new Date();
   expiry.setDate(expiry.getDate() + expiryDays);
   return expiry;
+}
+
+function isTokenPayload(value: unknown): value is TokenPayload {
+  if (!value || typeof value !== 'object') return false;
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record.userId === 'string' &&
+    typeof record.email === 'string' &&
+    typeof record.role === 'string'
+  );
 }

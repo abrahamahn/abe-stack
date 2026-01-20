@@ -54,7 +54,15 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
       credentials: 'include', // Include cookies for refresh token
     });
 
-    const data = (await response.json().catch(() => ({}))) as { message?: string };
+    const url = `${baseUrl}${API_PREFIX}${path}`;
+    const data = (await response.json().catch((parseError: unknown) => {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[ApiClient] Failed to parse JSON response from ${options?.method ?? 'GET'} ${url} (status: ${response.status.toString()})`,
+        parseError,
+      );
+      return {};
+    })) as { message?: string };
 
     if (!response.ok) {
       const statusText = data.message ?? `HTTP ${response.status.toString()}`;

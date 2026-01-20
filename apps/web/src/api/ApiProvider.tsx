@@ -47,7 +47,7 @@ export function ApiProvider({ children }: ApiProviderProps): ReactElement {
         tokenStore.clear();
         void navigate('/login');
       },
-      onServerError: (message) => {
+      onServerError: (message: string | undefined) => {
         toastStore.getState().show({
           title: 'Server error',
           description: message ?? 'Something went wrong',

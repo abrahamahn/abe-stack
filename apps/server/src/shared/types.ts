@@ -1,4 +1,11 @@
 // apps/server/src/shared/types.ts
+import type { UserRole } from '@abe-stack/core';
+import type { AppConfig } from '@config';
+import type { DbClient } from '@database';
+import type { SubscriptionManager } from '@pubsub';
+import type { StorageProvider } from '@storage';
+import type { FastifyBaseLogger } from 'fastify';
+
 /**
  * Shared type definitions
  * Framework-agnostic types used across the application
@@ -8,7 +15,8 @@
 // User Types
 // ============================================================================
 
-export type UserRole = 'user' | 'admin' | 'moderator';
+// Re-export UserRole from core for convenience
+export type { UserRole };
 
 export interface User {
   id: string;
@@ -153,12 +161,6 @@ export interface StorageService {
 // ============================================================================
 // Service Container Interface (Composition Root)
 // ============================================================================
-
-import type { AppConfig } from '@config';
-import type { DbClient } from '@database';
-import type { SubscriptionManager } from '@pubsub';
-import type { StorageProvider } from '@storage';
-import type { FastifyBaseLogger } from 'fastify';
 
 /**
  * Service Container Interface

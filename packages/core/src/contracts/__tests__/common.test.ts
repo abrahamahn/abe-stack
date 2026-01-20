@@ -118,9 +118,8 @@ describe('common contracts', () => {
   });
 
   describe('errorResponseSchema', () => {
-    it('should accept valid error response', () => {
+    it('should accept valid error response with all optional fields', () => {
       const valid = {
-        error: 'BadRequestError',
         message: 'Something went wrong',
         code: 'VALIDATION_ERROR',
         details: { field: 'email' },
@@ -128,32 +127,32 @@ describe('common contracts', () => {
       expect(errorResponseSchema.parse(valid)).toEqual(valid);
     });
 
-    it('should accept minimal error response', () => {
-      const minimal = { error: 'InternalError', message: 'Server error' };
+    it('should accept minimal error response (message only)', () => {
+      const minimal = { message: 'Server error' };
       expect(errorResponseSchema.parse(minimal)).toEqual(minimal);
     });
 
-    it('should accept error without code', () => {
-      const noCode = { error: 'Error', message: 'Message' };
-      expect(errorResponseSchema.parse(noCode)).toEqual(noCode);
+    it('should accept error with code but no details', () => {
+      const withCode = { message: 'Message', code: 'CODE' };
+      expect(errorResponseSchema.parse(withCode)).toEqual(withCode);
     });
 
-    it('should accept error without details', () => {
-      const noDetails = { error: 'Error', message: 'Message', code: 'CODE' };
-      expect(errorResponseSchema.parse(noDetails)).toEqual(noDetails);
+    it('should accept error with details but no code', () => {
+      const withDetails = { message: 'Message', details: { field: 'email' } };
+      expect(errorResponseSchema.parse(withDetails)).toEqual(withDetails);
     });
 
-    it('should reject missing error field', () => {
-      expect(() => errorResponseSchema.parse({ message: 'Message' })).toThrow();
+    it('should strip unknown fields like error', () => {
+      const withExtra = { error: 'SomeError', message: 'Message' };
+      expect(errorResponseSchema.parse(withExtra)).toEqual({ message: 'Message' });
     });
 
     it('should reject missing message field', () => {
-      expect(() => errorResponseSchema.parse({ error: 'Error' })).toThrow();
+      expect(() => errorResponseSchema.parse({ code: 'ERROR' })).toThrow();
     });
 
     it('should accept complex details object', () => {
       const complex = {
-        error: 'ValidationError',
         message: 'Validation failed',
         details: {
           fields: ['email', 'password'],

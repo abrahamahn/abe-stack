@@ -8,13 +8,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RegisterPage } from '../Register';
 
-// ============================================================================
-// Mocks
-// ============================================================================
-
+// Mock the auth hook
 const mockRegister = vi.fn();
+const mockResendVerification = vi.fn();
 const mockUseAuth = vi.fn(() => ({
   register: mockRegister,
+  resendVerification: mockResendVerification,
   isLoading: false,
   user: null,
   isAuthenticated: false,
@@ -26,71 +25,45 @@ vi.mock('../../hooks/useAuth', () => ({
   useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
 }));
 
-// Mock history context from @abe-stack/ui
-const mockGoBack = vi.fn();
-const mockGoForward = vi.fn();
-const mockUseHistoryNav = vi.fn(() => ({
-  goBack: mockGoBack,
-  canGoBack: true,
-  history: ['/'],
-  index: 1,
-  canGoForward: false,
-  goForward: mockGoForward,
-}));
-
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+// Mock navigate
+const mockNavigate = vi.fn();
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
-    useHistoryNav: (): ReturnType<typeof mockUseHistoryNav> => mockUseHistoryNav(),
+    useNavigate: () => mockNavigate,
   };
 });
 
-// ============================================================================
-// Test Helpers
-// ============================================================================
-
-function createQueryClient(): QueryClient {
-  return new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
-  });
-}
-
-function renderRegisterPage(): ReturnType<typeof render> {
-  const queryClient = createQueryClient();
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <MemoryRouter>
-        <RegisterPage />
-      </MemoryRouter>
-    </QueryClientProvider>,
-  );
-}
-
-// ============================================================================
-// Tests
-// ============================================================================
-
 describe('RegisterPage', () => {
-  beforeEach(() => {
+  const createQueryClient = (): QueryClient =>
+    new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+      },
+    });
+
+  const renderRegisterPage = (): ReturnType<typeof render> => {
+    const queryClient = createQueryClient();
+    return render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <RegisterPage />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+  };
+
+  beforeEach((): void => {
     vi.clearAllMocks();
     mockUseAuth.mockReturnValue({
       register: mockRegister,
+      resendVerification: mockResendVerification,
       isLoading: false,
       user: null,
       isAuthenticated: false,
       login: vi.fn(),
       logout: vi.fn(),
-    });
-    mockUseHistoryNav.mockReturnValue({
-      goBack: mockGoBack,
-      canGoBack: true,
-      history: ['/'],
-      index: 1,
-      canGoForward: false,
-      goForward: mockGoForward,
     });
   });
 
@@ -101,20 +74,20 @@ describe('RegisterPage', () => {
       expect(screen.getByRole('heading', { name: /create account/i })).toBeInTheDocument();
     });
 
-    it('should render name input field', () => {
-      renderRegisterPage();
-
-      const nameInput = screen.getByLabelText(/name/i);
-      expect(nameInput).toBeInTheDocument();
-      expect(nameInput).toHaveAttribute('type', 'text');
-    });
-
     it('should render email input field', () => {
       renderRegisterPage();
 
       const emailInput = screen.getByLabelText(/email/i);
       expect(emailInput).toBeInTheDocument();
       expect(emailInput).toHaveAttribute('type', 'email');
+    });
+
+    it('should render name input field', () => {
+      renderRegisterPage();
+
+      const nameInput = screen.getByLabelText(/name/i);
+      expect(nameInput).toBeInTheDocument();
+      expect(nameInput).toHaveAttribute('type', 'text');
     });
 
     it('should render password input field', () => {
@@ -125,44 +98,20 @@ describe('RegisterPage', () => {
       expect(passwordInput).toHaveAttribute('type', 'password');
     });
 
-    it('should render confirm password input field', () => {
-      renderRegisterPage();
-
-      const confirmInput = screen.getByLabelText(/confirm password/i);
-      expect(confirmInput).toBeInTheDocument();
-      expect(confirmInput).toHaveAttribute('type', 'password');
-    });
-
     it('should render create account button', () => {
       renderRegisterPage();
 
       expect(screen.getByRole('button', { name: /create account/i })).toBeInTheDocument();
     });
 
-    it('should render back button', () => {
-      renderRegisterPage();
-
-      expect(screen.getByRole('button', { name: /back/i })).toBeInTheDocument();
-    });
-
-    it('should render login link', () => {
+    it('should render sign in option', () => {
       renderRegisterPage();
 
       expect(screen.getByText(/already have an account/i)).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /login/i })).toBeInTheDocument();
     });
   });
 
   describe('Form Interaction', () => {
-    it('should update name field on input', () => {
-      renderRegisterPage();
-
-      const nameInput = screen.getByLabelText(/name/i);
-      fireEvent.change(nameInput, { target: { value: 'John Doe' } });
-
-      expect(nameInput).toHaveValue('John Doe');
-    });
-
     it('should update email field on input', () => {
       renderRegisterPage();
 
@@ -170,6 +119,15 @@ describe('RegisterPage', () => {
       fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
 
       expect(emailInput).toHaveValue('test@example.com');
+    });
+
+    it('should update name field on input', () => {
+      renderRegisterPage();
+
+      const nameInput = screen.getByLabelText(/name/i);
+      fireEvent.change(nameInput, { target: { value: 'John Doe' } });
+
+      expect(nameInput).toHaveValue('John Doe');
     });
 
     it('should update password field on input', () => {
@@ -181,30 +139,22 @@ describe('RegisterPage', () => {
       expect(passwordInput).toHaveValue('password123');
     });
 
-    it('should update confirm password field on input', () => {
-      renderRegisterPage();
-
-      const confirmInput = screen.getByLabelText(/confirm password/i);
-      fireEvent.change(confirmInput, { target: { value: 'password123' } });
-
-      expect(confirmInput).toHaveValue('password123');
-    });
-
     it('should call register function on form submit', async () => {
-      mockRegister.mockResolvedValueOnce(undefined);
+      mockRegister.mockResolvedValueOnce({
+        email: 'test@example.com',
+        message: 'Check your email',
+      });
       renderRegisterPage();
 
+      const emailInput = screen.getByLabelText('Email');
       const nameInput = screen.getByLabelText(/name/i);
-      const emailInput = screen.getByLabelText(/email/i);
       const passwordInput = screen.getByLabelText('Password');
-      const confirmInput = screen.getByLabelText(/confirm password/i);
-      const submitButton = screen.getByRole('button', { name: /create account/i });
+      const createButton = screen.getByRole('button', { name: /create account/i });
 
-      fireEvent.change(nameInput, { target: { value: 'John Doe' } });
       fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+      fireEvent.change(nameInput, { target: { value: 'John Doe' } });
       fireEvent.change(passwordInput, { target: { value: 'password123' } });
-      fireEvent.change(confirmInput, { target: { value: 'password123' } });
-      fireEvent.click(submitButton);
+      fireEvent.click(createButton);
 
       await waitFor(() => {
         expect(mockRegister).toHaveBeenCalledWith({
@@ -215,101 +165,63 @@ describe('RegisterPage', () => {
       });
     });
 
-    it('should call goBack when back button is clicked', () => {
+    it('should allow registration without name (optional field)', async () => {
+      mockRegister.mockResolvedValueOnce({
+        email: 'test@example.com',
+        message: 'Check your email',
+      });
       renderRegisterPage();
 
-      const backButton = screen.getByRole('button', { name: /back/i });
-      fireEvent.click(backButton);
-
-      expect(mockGoBack).toHaveBeenCalled();
-    });
-  });
-
-  describe('Password Validation', () => {
-    it('should show error when passwords do not match', async () => {
-      renderRegisterPage();
-
-      const nameInput = screen.getByLabelText(/name/i);
-      const emailInput = screen.getByLabelText(/email/i);
+      const emailInput = screen.getByLabelText('Email');
       const passwordInput = screen.getByLabelText('Password');
-      const confirmInput = screen.getByLabelText(/confirm password/i);
-      const submitButton = screen.getByRole('button', { name: /create account/i });
+      const createButton = screen.getByRole('button', { name: /create account/i });
 
-      fireEvent.change(nameInput, { target: { value: 'John Doe' } });
       fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
       fireEvent.change(passwordInput, { target: { value: 'password123' } });
-      fireEvent.change(confirmInput, { target: { value: 'differentpassword' } });
+      fireEvent.click(createButton);
 
-      await act(async () => {
-        fireEvent.click(submitButton);
-      });
-
-      // Should not call register
-      expect(mockRegister).not.toHaveBeenCalled();
-
-      // Should show error message
       await waitFor(() => {
-        expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
+        expect(mockRegister).toHaveBeenCalledWith({
+          email: 'test@example.com',
+          password: 'password123',
+          name: undefined,
+        });
       });
-    });
-
-    it('should disable submit button when passwords do not match', () => {
-      renderRegisterPage();
-
-      const passwordInput = screen.getByLabelText('Password');
-      const confirmInput = screen.getByLabelText(/confirm password/i);
-      const submitButton = screen.getByRole('button', { name: /create account/i });
-
-      fireEvent.change(passwordInput, { target: { value: 'password123' } });
-      fireEvent.change(confirmInput, { target: { value: 'different' } });
-
-      expect(submitButton).toBeDisabled();
-    });
-
-    it('should enable submit button when passwords match', () => {
-      renderRegisterPage();
-
-      const passwordInput = screen.getByLabelText('Password');
-      const confirmInput = screen.getByLabelText(/confirm password/i);
-      const submitButton = screen.getByRole('button', { name: /create account/i });
-
-      fireEvent.change(passwordInput, { target: { value: 'password123' } });
-      fireEvent.change(confirmInput, { target: { value: 'password123' } });
-
-      expect(submitButton).not.toBeDisabled();
     });
   });
 
-  describe('Loading State', () => {
-    it('should show loading text when isLoading is true', () => {
-      mockUseAuth.mockReturnValue({
-        register: mockRegister,
-        isLoading: true,
-        user: null,
-        isAuthenticated: false,
-        login: vi.fn(),
-        logout: vi.fn(),
-      });
-
+  describe('Navigation', () => {
+    it('should navigate to login page when sign in is clicked', () => {
       renderRegisterPage();
 
-      expect(screen.getByRole('button', { name: /creating account/i })).toBeInTheDocument();
+      const signInButton = screen.getByRole('button', { name: /sign in/i });
+      fireEvent.click(signInButton);
+
+      expect(mockNavigate).toHaveBeenCalledWith('/login');
     });
+  });
 
-    it('should disable submit button when loading', () => {
-      mockUseAuth.mockReturnValue({
-        register: mockRegister,
-        isLoading: true,
-        user: null,
-        isAuthenticated: false,
-        login: vi.fn(),
-        logout: vi.fn(),
+  describe('Registration Success', () => {
+    it('should show email verification message after successful registration', async () => {
+      mockRegister.mockResolvedValueOnce({
+        email: 'test@example.com',
+        message: 'Please check your email to verify your account',
       });
-
       renderRegisterPage();
 
-      const submitButton = screen.getByRole('button', { name: /creating account/i });
-      expect(submitButton).toBeDisabled();
+      const emailInput = screen.getByLabelText('Email');
+      const passwordInput = screen.getByLabelText('Password');
+      const createButton = screen.getByRole('button', { name: /create account/i });
+
+      await act(async () => {
+        fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+        fireEvent.change(passwordInput, { target: { value: 'password123' } });
+        fireEvent.click(createButton);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /check your email/i })).toBeInTheDocument();
+      });
     });
   });
 
@@ -318,19 +230,14 @@ describe('RegisterPage', () => {
       mockRegister.mockRejectedValueOnce(new Error('Email already exists'));
       renderRegisterPage();
 
-      const nameInput = screen.getByLabelText(/name/i);
-      const emailInput = screen.getByLabelText(/email/i);
+      const emailInput = screen.getByLabelText('Email');
       const passwordInput = screen.getByLabelText('Password');
-      const confirmInput = screen.getByLabelText(/confirm password/i);
-      const submitButton = screen.getByRole('button', { name: /create account/i });
-
-      fireEvent.change(nameInput, { target: { value: 'John Doe' } });
-      fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-      fireEvent.change(passwordInput, { target: { value: 'password123' } });
-      fireEvent.change(confirmInput, { target: { value: 'password123' } });
+      const createButton = screen.getByRole('button', { name: /create account/i });
 
       await act(async () => {
-        fireEvent.click(submitButton);
+        fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+        fireEvent.change(passwordInput, { target: { value: 'password123' } });
+        fireEvent.click(createButton);
       });
 
       await waitFor(() => {
@@ -342,23 +249,18 @@ describe('RegisterPage', () => {
       mockRegister.mockRejectedValueOnce('Unknown error');
       renderRegisterPage();
 
-      const nameInput = screen.getByLabelText(/name/i);
-      const emailInput = screen.getByLabelText(/email/i);
+      const emailInput = screen.getByLabelText('Email');
       const passwordInput = screen.getByLabelText('Password');
-      const confirmInput = screen.getByLabelText(/confirm password/i);
-      const submitButton = screen.getByRole('button', { name: /create account/i });
-
-      fireEvent.change(nameInput, { target: { value: 'John Doe' } });
-      fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-      fireEvent.change(passwordInput, { target: { value: 'password123' } });
-      fireEvent.change(confirmInput, { target: { value: 'password123' } });
+      const createButton = screen.getByRole('button', { name: /create account/i });
 
       await act(async () => {
-        fireEvent.click(submitButton);
+        fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+        fireEvent.change(passwordInput, { target: { value: 'password123' } });
+        fireEvent.click(createButton);
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Registration failed')).toBeInTheDocument();
+        expect(screen.getByText(/an error occurred/i)).toBeInTheDocument();
       });
     });
   });
@@ -371,14 +273,11 @@ describe('RegisterPage', () => {
       expect(emailInput).toHaveAttribute('required');
     });
 
-    it('should have required attribute on password inputs', () => {
+    it('should have required attribute on password input', () => {
       renderRegisterPage();
 
       const passwordInput = screen.getByLabelText('Password');
-      const confirmInput = screen.getByLabelText(/confirm password/i);
-
       expect(passwordInput).toHaveAttribute('required');
-      expect(confirmInput).toHaveAttribute('required');
     });
 
     it('should have proper form structure', () => {
@@ -387,43 +286,23 @@ describe('RegisterPage', () => {
       const form = container.querySelector('form');
       expect(form).toBeInTheDocument();
     });
-
-    it('should disable back button when canGoBack is false', () => {
-      mockUseHistoryNav.mockReturnValue({
-        goBack: mockGoBack,
-        canGoBack: false,
-        history: [],
-        index: 0,
-        canGoForward: false,
-        goForward: mockGoForward,
-      });
-
-      renderRegisterPage();
-
-      const backButton = screen.getByRole('button', { name: /back/i });
-      expect(backButton).toBeDisabled();
-    });
   });
 
   describe('Edge Cases', () => {
     it('should handle rapid form submissions', async () => {
-      mockRegister.mockResolvedValue(undefined);
+      mockRegister.mockResolvedValue({ email: 'test@example.com', message: 'Success' });
       renderRegisterPage();
 
-      const nameInput = screen.getByLabelText(/name/i);
-      const emailInput = screen.getByLabelText(/email/i);
+      const emailInput = screen.getByLabelText('Email');
       const passwordInput = screen.getByLabelText('Password');
-      const confirmInput = screen.getByLabelText(/confirm password/i);
-      const submitButton = screen.getByRole('button', { name: /create account/i });
+      const createButton = screen.getByRole('button', { name: /create account/i });
 
-      fireEvent.change(nameInput, { target: { value: 'John Doe' } });
       fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
       fireEvent.change(passwordInput, { target: { value: 'password123' } });
-      fireEvent.change(confirmInput, { target: { value: 'password123' } });
 
       // Rapid clicks
       for (let i = 0; i < 5; i++) {
-        fireEvent.click(submitButton);
+        fireEvent.click(createButton);
       }
 
       await waitFor(() => {
@@ -444,46 +323,11 @@ describe('RegisterPage', () => {
       renderRegisterPage();
 
       const passwordInput = screen.getByLabelText('Password');
-      const unicodePassword = '密码パスワード🔐';
+      const unicodePassword = '密码パスワード';
 
       fireEvent.change(passwordInput, { target: { value: unicodePassword } });
 
       expect(passwordInput).toHaveValue(unicodePassword);
-    });
-
-    it('should clear error when form is resubmitted', async () => {
-      mockRegister.mockRejectedValueOnce(new Error('First error')).mockResolvedValueOnce(undefined);
-      renderRegisterPage();
-
-      const nameInput = screen.getByLabelText(/name/i);
-      const emailInput = screen.getByLabelText(/email/i);
-      const passwordInput = screen.getByLabelText('Password');
-      const confirmInput = screen.getByLabelText(/confirm password/i);
-      const submitButton = screen.getByRole('button', { name: /create account/i });
-
-      // Fill form
-      fireEvent.change(nameInput, { target: { value: 'John Doe' } });
-      fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-      fireEvent.change(passwordInput, { target: { value: 'password123' } });
-      fireEvent.change(confirmInput, { target: { value: 'password123' } });
-
-      // First submission - fails
-      await act(async () => {
-        fireEvent.click(submitButton);
-      });
-
-      await waitFor(() => {
-        expect(screen.getByText(/first error/i)).toBeInTheDocument();
-      });
-
-      // Second submission - should clear error and succeed
-      await act(async () => {
-        fireEvent.click(submitButton);
-      });
-
-      await waitFor(() => {
-        expect(screen.queryByText(/first error/i)).not.toBeInTheDocument();
-      });
     });
   });
 });

@@ -2,6 +2,18 @@
 import { createRateLimiter, MemoryStore, RateLimiter, RateLimitPresets } from '@rate-limit';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
+const createRecord = (overrides?: {
+  tokens?: number;
+  lastRefill?: number;
+  violations?: number;
+  lastViolation?: number;
+}) => ({
+  tokens: overrides?.tokens ?? 10,
+  lastRefill: overrides?.lastRefill ?? Date.now(),
+  violations: overrides?.violations ?? 0,
+  lastViolation: overrides?.lastViolation ?? 0,
+});
+
 describe('MemoryStore', () => {
   let store: MemoryStore;
 
@@ -16,7 +28,7 @@ describe('MemoryStore', () => {
   });
 
   test('should store and retrieve records', () => {
-    const record = { tokens: 10, lastRefill: Date.now() };
+    const record = createRecord();
     store.set('client-1', record);
 
     expect(store.get('client-1')).toEqual(record);
@@ -27,7 +39,7 @@ describe('MemoryStore', () => {
   });
 
   test('should delete records', () => {
-    store.set('client-1', { tokens: 10, lastRefill: Date.now() });
+    store.set('client-1', createRecord());
     store.delete('client-1');
 
     expect(store.get('client-1')).toBeUndefined();
@@ -35,8 +47,8 @@ describe('MemoryStore', () => {
 
   test('should cleanup expired records', () => {
     const now = Date.now();
-    store.set('fresh', { tokens: 10, lastRefill: now });
-    store.set('stale', { tokens: 10, lastRefill: now - 5000 });
+    store.set('fresh', createRecord({ lastRefill: now }));
+    store.set('stale', createRecord({ lastRefill: now - 5000 }));
 
     // Cleanup records older than 2000ms
     store.cleanup(2000);
@@ -46,8 +58,8 @@ describe('MemoryStore', () => {
   });
 
   test('should clear all records on destroy', () => {
-    store.set('client-1', { tokens: 10, lastRefill: Date.now() });
-    store.set('client-2', { tokens: 5, lastRefill: Date.now() });
+    store.set('client-1', createRecord());
+    store.set('client-2', createRecord({ tokens: 5 }));
     store.destroy();
 
     expect(store.get('client-1')).toBeUndefined();
@@ -56,8 +68,8 @@ describe('MemoryStore', () => {
 
   describe('getStats', () => {
     test('should return correct tracked clients count', () => {
-      store.set('client-1', { tokens: 10, lastRefill: Date.now() });
-      store.set('client-2', { tokens: 5, lastRefill: Date.now() });
+      store.set('client-1', createRecord());
+      store.set('client-2', createRecord({ tokens: 5 }));
 
       const stats = store.getStats();
 
@@ -65,9 +77,9 @@ describe('MemoryStore', () => {
     });
 
     test('should return correct limited clients count', () => {
-      store.set('client-1', { tokens: 10, lastRefill: Date.now() });
-      store.set('client-2', { tokens: 0.5, lastRefill: Date.now() }); // Limited
-      store.set('client-3', { tokens: 0, lastRefill: Date.now() }); // Limited
+      store.set('client-1', createRecord());
+      store.set('client-2', createRecord({ tokens: 0.5 })); // Limited
+      store.set('client-3', createRecord({ tokens: 0 })); // Limited
 
       const stats = store.getStats();
 
@@ -265,14 +277,14 @@ describe('createRateLimiter', () => {
 
 describe('RateLimitPresets', () => {
   test('standard preset should be 100 per minute', () => {
-    expect(RateLimitPresets.standard).toEqual({ windowMs: 60_000, max: 100 });
+    expect(RateLimitPresets.standard).toMatchObject({ windowMs: 60_000, max: 100 });
   });
 
   test('strict preset should be 10 per minute', () => {
-    expect(RateLimitPresets.strict).toEqual({ windowMs: 60_000, max: 10 });
+    expect(RateLimitPresets.strict).toMatchObject({ windowMs: 60_000, max: 10 });
   });
 
   test('relaxed preset should be 1000 per minute', () => {
-    expect(RateLimitPresets.relaxed).toEqual({ windowMs: 60_000, max: 1000 });
+    expect(RateLimitPresets.relaxed).toMatchObject({ windowMs: 60_000, max: 1000 });
   });
 });

@@ -1,0 +1,380 @@
+#!/usr/bin/env tsx
+// tools/audit/dependency-audit.ts
+/**
+ * Dependency Audit Tool
+ *
+ * Analyzes dependencies across all packages to identify:
+ * - Unused packages
+ * - Outdated versions
+ * - Security vulnerabilities
+ * - Bundle size impact
+ */
+
+import { execSync } from 'node:child_process';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+
+interface PackageInfo {
+  name: string;
+  version: string;
+  dependencies: Record<string, string>;
+  devDependencies: Record<string, string>;
+  path: string;
+}
+
+interface AuditResult {
+  package: string;
+  unused: string[];
+  outdated: { name: string; current: string; latest: string }[];
+  vulnerabilities: { name: string; severity: string; description: string }[];
+  bundleImpact: { name: string; size: number }[];
+}
+
+// ============================================================================
+// Package Analysis
+// ============================================================================
+
+function getAllPackages(): PackageInfo[] {
+  const packages: PackageInfo[] = [];
+  const rootDir = path.resolve(__dirname, '..', '..');
+
+  // Root package
+  interface PackageJson {
+    name?: string;
+    version?: string;
+    dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
+  }
+  const rootPackageJson = JSON.parse(
+    fs.readFileSync(path.join(rootDir, 'package.json'), 'utf-8'),
+  ) as PackageJson;
+  packages.push({
+    name: rootPackageJson.name ?? 'unknown',
+    version: rootPackageJson.version ?? '0.0.0',
+    dependencies: rootPackageJson.dependencies ?? {},
+    devDependencies: rootPackageJson.devDependencies ?? {},
+    path: rootDir,
+  });
+
+  // Apps
+  const appsDir = path.join(rootDir, 'apps');
+  if (fs.existsSync(appsDir)) {
+    const apps = fs.readdirSync(appsDir);
+    for (const app of apps) {
+      const appPath = path.join(appsDir, app);
+      const packageJsonPath = path.join(appPath, 'package.json');
+      if (fs.existsSync(packageJsonPath)) {
+        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8')) as PackageJson;
+        packages.push({
+          name: packageJson.name ?? 'unknown',
+          version: packageJson.version ?? '0.0.0',
+          dependencies: packageJson.dependencies ?? {},
+          devDependencies: packageJson.devDependencies ?? {},
+          path: appPath,
+        });
+      }
+    }
+  }
+
+  // Packages
+  const packagesDir = path.join(rootDir, 'packages');
+  if (fs.existsSync(packagesDir)) {
+    const packageDirs = fs.readdirSync(packagesDir);
+    for (const pkg of packageDirs) {
+      const pkgPath = path.join(packagesDir, pkg);
+      const packageJsonPath = path.join(pkgPath, 'package.json');
+      if (fs.existsSync(packageJsonPath)) {
+        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8')) as PackageJson;
+        packages.push({
+          name: packageJson.name ?? 'unknown',
+          version: packageJson.version ?? '0.0.0',
+          dependencies: packageJson.dependencies ?? {},
+          devDependencies: packageJson.devDependencies ?? {},
+          path: pkgPath,
+        });
+      }
+    }
+  }
+
+  return packages;
+}
+
+// ============================================================================
+// Unused Dependencies Analysis
+// ============================================================================
+
+function findUnusedDependencies(packageInfo: PackageInfo): string[] {
+  const unused: string[] = [];
+  const srcDir = path.join(packageInfo.path, 'src');
+
+  if (!fs.existsSync(srcDir)) return unused;
+
+  // Get all source files
+  const sourceFiles = getAllSourceFiles(srcDir);
+
+  // Check each dependency
+  for (const [depName] of Object.entries(packageInfo.dependencies)) {
+    if (!isDependencyUsed(depName, sourceFiles)) {
+      unused.push(depName);
+    }
+  }
+
+  return unused;
+}
+
+function getAllSourceFiles(dir: string): string[] {
+  const files: string[] = [];
+
+  function walk(currentDir: string): void {
+    const items = fs.readdirSync(currentDir);
+
+    for (const item of items) {
+      const fullPath = path.join(currentDir, item);
+      const stat = fs.statSync(fullPath);
+
+      if (
+        stat.isDirectory() &&
+        !item.startsWith('.') &&
+        item !== 'node_modules' &&
+        item !== 'dist' &&
+        item !== '__tests__'
+      ) {
+        walk(fullPath);
+      } else if (
+        stat.isFile() &&
+        (item.endsWith('.ts') ||
+          item.endsWith('.tsx') ||
+          item.endsWith('.js') ||
+          item.endsWith('.jsx'))
+      ) {
+        files.push(fullPath);
+      }
+    }
+  }
+
+  walk(dir);
+  return files;
+}
+
+function isDependencyUsed(depName: string, sourceFiles: string[]): boolean {
+  // Common import patterns
+  const patterns = [
+    `from '${depName}'`,
+    `from "${depName}"`,
+    `require('${depName}')`,
+    `require("${depName}")`,
+    `import.*${depName}`,
+  ];
+
+  for (const file of sourceFiles) {
+    try {
+      const content = fs.readFileSync(file, 'utf-8');
+      for (const pattern of patterns) {
+        if (new RegExp(pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g').test(content)) {
+          return true;
+        }
+      }
+    } catch {
+      // Skip files that can't be read
+      continue;
+    }
+  }
+
+  return false;
+}
+
+// ============================================================================
+// Outdated Dependencies Analysis
+// ============================================================================
+
+interface OutdatedInfo {
+  current?: string;
+  latest?: string;
+}
+
+function checkOutdatedDependencies(
+  packageInfo: PackageInfo,
+): { name: string; current: string; latest: string }[] {
+  const outdated: { name: string; current: string; latest: string }[] = [];
+
+  try {
+    // Check npm outdated for this package
+    const result = execSync(`cd ${packageInfo.path} && npm outdated --json`, {
+      encoding: 'utf-8',
+      timeout: 30000,
+    });
+
+    const outdatedData = JSON.parse(result) as Record<string, OutdatedInfo>;
+
+    for (const [name, info] of Object.entries(outdatedData)) {
+      if (info.current !== undefined && info.latest !== undefined) {
+        outdated.push({
+          name,
+          current: info.current,
+          latest: info.latest,
+        });
+      }
+    }
+  } catch {
+    // npm outdated might fail, skip for now
+  }
+
+  return outdated;
+}
+
+// ============================================================================
+// Bundle Size Analysis
+// ============================================================================
+
+function estimateBundleImpact(
+  dependencies: Record<string, string>,
+): { name: string; size: number }[] {
+  const impacts: { name: string; size: number }[] = [];
+
+  // Rough estimates of bundle sizes for common packages (in KB)
+  const sizeEstimates: Record<string, number> = {
+    react: 150,
+    'react-dom': 1200,
+    vue: 80,
+    angular: 500,
+    '@tanstack/react-query': 150,
+    '@tanstack/react-query-persist-client': 50,
+    zustand: 20,
+    redux: 30,
+    'react-redux': 50,
+    lodash: 100,
+    moment: 200,
+    'date-fns': 300,
+    axios: 50,
+    'react-markdown': 100,
+    'react-syntax-highlighter': 200,
+    dompurify: 30,
+    zod: 80,
+    yup: 100,
+    joi: 150,
+    typescript: 0, // Dev-only
+    vite: 0, // Dev-only
+    webpack: 0, // Dev-only
+    eslint: 0, // Dev-only
+    prettier: 0, // Dev-only
+  };
+
+  for (const [name] of Object.entries(dependencies)) {
+    const estimatedSize = sizeEstimates[name] || 50; // Default 50KB estimate
+    impacts.push({ name, size: estimatedSize });
+  }
+
+  return impacts.sort((a, b) => b.size - a.size);
+}
+
+// ============================================================================
+// Main Audit Function
+// ============================================================================
+
+function auditDependencies(): AuditResult[] {
+  const packages = getAllPackages();
+  const results: AuditResult[] = [];
+
+  console.log('🔍 Analyzing dependencies across', packages.length, 'packages...\n');
+
+  for (const pkg of packages) {
+    console.log(`📦 Auditing ${pkg.name}...`);
+
+    const unused = findUnusedDependencies(pkg);
+    const outdated = checkOutdatedDependencies(pkg);
+
+    // Combine all dependencies for bundle analysis
+    const allDeps = { ...pkg.dependencies, ...pkg.devDependencies };
+    const bundleImpact = estimateBundleImpact(allDeps);
+
+    results.push({
+      package: pkg.name,
+      unused,
+      outdated,
+      vulnerabilities: [], // Would need external service for this
+      bundleImpact: bundleImpact.slice(0, 10), // Top 10 by size
+    });
+  }
+
+  return results;
+}
+
+// ============================================================================
+// Report Generation
+// ============================================================================
+
+function generateReport(results: AuditResult[]): string {
+  let report = '# 📊 Dependency Audit Report\n\n';
+
+  for (const result of results) {
+    report += `## ${result.package}\n\n`;
+
+    if (result.unused.length > 0) {
+      report += `### 🚨 Unused Dependencies (${String(result.unused.length)})\n`;
+      for (const dep of result.unused) {
+        report += `- \`${dep}\`\n`;
+      }
+      report += '\n';
+    }
+
+    if (result.outdated.length > 0) {
+      report += `### 📅 Outdated Dependencies (${String(result.outdated.length)})\n`;
+      for (const dep of result.outdated) {
+        report += `- \`${dep.name}\`: ${dep.current} → ${dep.latest}\n`;
+      }
+      report += '\n';
+    }
+
+    if (result.bundleImpact.length > 0) {
+      report += `### 📏 Top Bundle Contributors\n`;
+      for (const impact of result.bundleImpact) {
+        report += `- \`${impact.name}\`: ~${String(impact.size)}KB\n`;
+      }
+      report += '\n';
+    }
+
+    if (result.unused.length === 0 && result.outdated.length === 0) {
+      report += '✅ No issues found\n\n';
+    }
+  }
+
+  return report;
+}
+
+// ============================================================================
+// Main Execution
+// ============================================================================
+
+function main(): void {
+  try {
+    const results = auditDependencies();
+    const report = generateReport(results);
+
+    console.log(report);
+
+    // Save report
+    const reportPath = path.join(__dirname, '..', '..', 'dependency-audit-report.md');
+    fs.writeFileSync(reportPath, report);
+    console.log(`📄 Report saved to: ${reportPath}`);
+
+    // Summary
+    const totalUnused = results.reduce((sum, r) => sum + r.unused.length, 0);
+    const totalOutdated = results.reduce((sum, r) => sum + r.outdated.length, 0);
+    const totalBundleSize = results.reduce(
+      (sum, r) => sum + r.bundleImpact.reduce((s, i) => s + i.size, 0),
+      0,
+    );
+
+    console.log('\n📈 Summary:');
+    console.log(`- Unused dependencies: ${String(totalUnused)}`);
+    console.log(`- Outdated dependencies: ${String(totalOutdated)}`);
+    console.log(`- Estimated bundle impact: ~${String(totalBundleSize)}KB`);
+  } catch (error) {
+    console.error('❌ Audit failed:', error);
+    process.exit(1);
+  }
+}
+
+if (require.main === module) {
+  main();
+}

@@ -57,7 +57,7 @@ export {
   Toast,
   ToastContainer,
 } from './components';
-export type { TabItem, TabsProps } from './components';
+export type { TabItem, TabsProps, UserState, UserAction } from './components';
 
 // Layouts - Page and section layouts
 export {
@@ -99,11 +99,24 @@ export {
   useLocalStorage,
   useMediaQuery,
   useOnScreen,
+  useOffsetPaginatedQuery,
+  usePaginatedQuery,
   usePanelConfig,
   useThemeMode,
+  useVirtualScroll,
   useWindowSize,
 } from './hooks';
-export type { HistoryContextValue } from './hooks';
+export type {
+  HistoryContextValue,
+  UseOffsetPaginatedQueryOptions,
+  UseOffsetPaginatedQueryResult,
+  UsePaginatedQueryOptions,
+  UsePaginatedQueryResult,
+  VirtualScrollOptions,
+  VirtualScrollItem,
+  VirtualScrollResult,
+  VirtualScrollListProps,
+} from './hooks';
 
 // Theme
 export {
@@ -127,4 +140,4 @@ export type {
 } from './theme';
 
 // Utilities
-export { cn } from './utils';
+export { cn, Markdown, SyntaxHighlighter } from './utils';

@@ -62,6 +62,7 @@ function createMockUser(): User {
     email: 'test@example.com',
     name: 'Test User',
     role: 'user',
+    createdAt: '2024-01-01T00:00:00Z',
   };
 }
 

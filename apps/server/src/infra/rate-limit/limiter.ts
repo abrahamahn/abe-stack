@@ -24,6 +24,15 @@ export interface RateLimitConfig {
   cleanupIntervalMs?: number;
   /** Storage backend (defaults to MemoryStore) */
   store?: RateLimitStore;
+  /** Role-based limits (optional) */
+  roleLimits?: Record<string, { max: number; windowMs: number }>;
+  /** Progressive delay configuration */
+  progressiveDelay?: {
+    enabled: boolean;
+    baseDelay: number; // Base delay in ms
+    maxDelay: number; // Maximum delay in ms
+    backoffFactor: number; // Exponential backoff factor
+  };
 }
 
 export interface RateLimitInfo {
@@ -35,11 +44,17 @@ export interface RateLimitInfo {
   limit: number;
   /** Time until tokens reset (ms) */
   resetMs: number;
+  /** Progressive delay to apply (ms) */
+  delayMs?: number;
+  /** Number of consecutive violations */
+  violations?: number;
 }
 
 export interface ClientRecord {
   tokens: number;
   lastRefill: number;
+  violations: number;
+  lastViolation: number;
 }
 
 /**
@@ -134,35 +149,78 @@ export class MemoryStore implements RateLimitStore {
 }
 
 // ============================================================================
+// Role Validation
+// ============================================================================
+
+/**
+ * Whitelist of valid role names for rate limiting.
+ * Only roles in this set will receive role-specific rate limits.
+ * Unknown roles fall back to default limits.
+ */
+const VALID_ROLES = new Set(['admin', 'premium', 'basic', 'user', 'guest']);
+
+/**
+ * Type guard to validate that a role is in the allowed whitelist.
+ * Returns false for undefined, null, or non-whitelisted roles.
+ */
+function isValidRole(role: unknown): role is string {
+  return typeof role === 'string' && VALID_ROLES.has(role);
+}
+
+// ============================================================================
 // Rate Limiter
 // ============================================================================
 
 export class RateLimiter {
   private readonly store: RateLimitStore;
-  private readonly refillRate: number;
 
   constructor(private config: RateLimitConfig) {
-    // Calculate tokens per millisecond
-    this.refillRate = config.max / config.windowMs;
     this.store = config.store ?? new MemoryStore(config.cleanupIntervalMs);
   }
 
   /**
    * Check if a request from the given key (usually IP) is allowed.
    * Consumes one token if allowed.
+   * @param key - Client identifier (usually IP address)
+   * @param role - Optional user role (must be in VALID_ROLES whitelist)
    */
-  async check(key: string): Promise<RateLimitInfo> {
+  async check(key: string, role?: string): Promise<RateLimitInfo> {
     const now = Date.now();
-    const record = (await this.store.get(key)) ?? { tokens: this.config.max, lastRefill: now };
+
+    // Validate role against whitelist - unknown roles use default limits
+    const validatedRole = isValidRole(role) ? role : undefined;
+
+    // Determine effective limits based on validated role
+    const effectiveConfig = this.getEffectiveConfig(validatedRole);
+    const refillRate = effectiveConfig.max / effectiveConfig.windowMs;
+
+    const record = (await this.store.get(key)) ?? {
+      tokens: effectiveConfig.max,
+      lastRefill: now,
+      violations: 0,
+      lastViolation: 0,
+    };
 
     // Refill tokens based on time passed
-    this.refillTokens(record, now);
+    this.refillTokens(record, now, refillRate, effectiveConfig.max);
 
     // Check if request is allowed
     const allowed = record.tokens >= 1;
+    let delayMs: number | undefined;
 
     if (allowed) {
       record.tokens -= 1;
+      // Reset violation count on successful request
+      record.violations = 0;
+    } else {
+      // Track violations for progressive delay
+      record.violations = (record.violations || 0) + 1;
+      record.lastViolation = now;
+
+      // Calculate progressive delay if enabled
+      if (this.config.progressiveDelay?.enabled && record.violations > 1) {
+        delayMs = this.calculateProgressiveDelay(record.violations);
+      }
     }
 
     await this.store.set(key, record);
@@ -170,37 +228,48 @@ export class RateLimiter {
     return {
       allowed,
       remaining: Math.floor(record.tokens),
-      limit: this.config.max,
-      resetMs: this.calculateResetMs(record),
+      limit: effectiveConfig.max,
+      resetMs: this.calculateResetMs(record, refillRate),
+      delayMs,
+      violations: record.violations,
     };
   }
 
   /**
    * Get rate limit info without consuming a token.
+   * @param key - Client identifier (usually IP address)
+   * @param role - Optional user role (must be in VALID_ROLES whitelist)
    */
-  async peek(key: string): Promise<RateLimitInfo> {
+  async peek(key: string, role?: string): Promise<RateLimitInfo> {
     const now = Date.now();
+    // Validate role against whitelist - unknown roles use default limits
+    const validatedRole = isValidRole(role) ? role : undefined;
+    const effectiveConfig = this.getEffectiveConfig(validatedRole);
+    const refillRate = effectiveConfig.max / effectiveConfig.windowMs;
+
     const record = await this.store.get(key);
 
     if (!record) {
       return {
         allowed: true,
-        remaining: this.config.max,
-        limit: this.config.max,
+        remaining: effectiveConfig.max,
+        limit: effectiveConfig.max,
         resetMs: 0,
+        violations: 0,
       };
     }
 
     // Calculate current tokens without modifying
     const timePassed = now - record.lastRefill;
-    const tokensToAdd = timePassed * this.refillRate;
-    const currentTokens = Math.min(this.config.max, record.tokens + tokensToAdd);
+    const tokensToAdd = timePassed * refillRate;
+    const currentTokens = Math.min(effectiveConfig.max, record.tokens + tokensToAdd);
 
     return {
       allowed: currentTokens >= 1,
       remaining: Math.floor(currentTokens),
-      limit: this.config.max,
-      resetMs: this.calculateResetMs(record),
+      limit: effectiveConfig.max,
+      resetMs: this.calculateResetMs(record, refillRate),
+      violations: record.violations || 0,
     };
   }
 
@@ -218,20 +287,41 @@ export class RateLimiter {
     await this.store.destroy();
   }
 
-  private refillTokens(record: ClientRecord, now: number): void {
+  private refillTokens(
+    record: ClientRecord,
+    now: number,
+    refillRate: number,
+    maxTokens: number,
+  ): void {
     const timePassed = now - record.lastRefill;
-    const tokensToAdd = timePassed * this.refillRate;
+    const tokensToAdd = timePassed * refillRate;
 
     if (tokensToAdd > 0) {
-      record.tokens = Math.min(this.config.max, record.tokens + tokensToAdd);
+      record.tokens = Math.min(maxTokens, record.tokens + tokensToAdd);
       record.lastRefill = now;
     }
   }
 
-  private calculateResetMs(record: ClientRecord): number {
+  private getEffectiveConfig(role?: string): { max: number; windowMs: number } {
+    if (role && this.config.roleLimits?.[role]) {
+      return this.config.roleLimits[role];
+    }
+    return { max: this.config.max, windowMs: this.config.windowMs };
+  }
+
+  private calculateProgressiveDelay(violations: number): number {
+    if (!this.config.progressiveDelay) return 0;
+
+    const { baseDelay, maxDelay, backoffFactor } = this.config.progressiveDelay;
+    const delay = baseDelay * Math.pow(backoffFactor, violations - 2); // Start from second violation
+
+    return Math.min(delay, maxDelay);
+  }
+
+  private calculateResetMs(record: ClientRecord, refillRate: number): number {
     // Time until fully refilled
     const tokensNeeded = this.config.max - record.tokens;
-    return Math.ceil(tokensNeeded / this.refillRate);
+    return Math.ceil(tokensNeeded / refillRate);
   }
 
   /**
@@ -266,13 +356,42 @@ export function createRateLimiter(config: RateLimitConfig): RateLimiter {
 }
 
 /**
- * Default rate limit configurations.
+ * Default rate limit configurations with role-based limits.
  */
 export const RateLimitPresets = {
   /** Standard API rate limit: 100 requests per minute */
-  standard: { windowMs: 60_000, max: 100 },
+  standard: {
+    windowMs: 60_000,
+    max: 100,
+    roleLimits: {
+      admin: { max: 1000, windowMs: 60_000 }, // Higher limits for admins
+      premium: { max: 500, windowMs: 60_000 }, // Higher limits for premium users
+      basic: { max: 50, windowMs: 60_000 }, // Lower limits for basic users
+    },
+    progressiveDelay: {
+      enabled: true,
+      baseDelay: 1000, // 1 second base delay
+      maxDelay: 30000, // 30 seconds max delay
+      backoffFactor: 2, // Exponential backoff
+    },
+  },
   /** Strict rate limit: 10 requests per minute (for sensitive endpoints) */
-  strict: { windowMs: 60_000, max: 10 },
+  strict: {
+    windowMs: 60_000,
+    max: 10,
+    progressiveDelay: {
+      enabled: true,
+      baseDelay: 5000, // 5 second base delay
+      maxDelay: 300000, // 5 minutes max delay
+      backoffFactor: 2,
+    },
+  },
   /** Relaxed rate limit: 1000 requests per minute */
-  relaxed: { windowMs: 60_000, max: 1000 },
+  relaxed: {
+    windowMs: 60_000,
+    max: 1000,
+    progressiveDelay: {
+      enabled: false, // No progressive delay for relaxed limits
+    },
+  },
 } as const;

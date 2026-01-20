@@ -57,19 +57,55 @@ export class SmtpClient {
   }
 
   async send(message: SmtpMessage): Promise<SmtpResult> {
-    try {
-      await this.connect();
-      await this.authenticate();
-      const messageId = await this.sendMessage(message);
-      await this.quit();
-      return { success: true, messageId };
-    } catch (error) {
-      this.cleanup();
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown SMTP error',
-      };
+    const maxRetries = 3;
+    const baseDelayMs = 1000;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        await this.connect();
+        await this.authenticate();
+        const messageId = await this.sendMessage(message);
+        await this.quit();
+        return { success: true, messageId };
+      } catch (error) {
+        this.cleanup();
+
+        const isLastAttempt = attempt === maxRetries;
+        const errorMessage = error instanceof Error ? error.message : 'Unknown SMTP error';
+
+        // Check if this is a transient error worth retrying
+        const isTransientError =
+          errorMessage.includes('timeout') ||
+          errorMessage.includes('ECONNRESET') ||
+          errorMessage.includes('ECONNREFUSED') ||
+          errorMessage.includes('ETIMEDOUT') ||
+          errorMessage.includes('ENOTFOUND') ||
+          errorMessage.includes('socket hang up') ||
+          errorMessage.includes('Connection') ||
+          errorMessage.startsWith('4'); // SMTP 4xx temporary errors
+
+        if (isLastAttempt || !isTransientError) {
+          return {
+            success: false,
+            error: errorMessage,
+          };
+        }
+
+        // Exponential backoff: 1s, 2s, 4s
+        const delayMs = baseDelayMs * Math.pow(2, attempt - 1);
+        await this.delay(delayMs);
+      }
     }
+
+    // Should not reach here, but TypeScript needs a return
+    return {
+      success: false,
+      error: 'Max retries exceeded',
+    };
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private async connect(): Promise<void> {

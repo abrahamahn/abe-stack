@@ -45,7 +45,7 @@ import {
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { AuthConfig } from '@config';
-import type { DbClient, EmailService } from '@infra';
+import type { DbClient, EmailService, Logger } from '@infra';
 
 // ============================================================================
 // Mock Dependencies
@@ -238,6 +238,19 @@ function createMockEmailService(): EmailService {
   };
 }
 
+function createMockLogger(): Logger {
+  const mockLogger: Logger = {
+    trace: vi.fn(),
+    debug: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    fatal: vi.fn(),
+    child: vi.fn(() => mockLogger),
+  };
+  return mockLogger;
+}
+
 // ============================================================================
 // Tests: registerUser
 // ============================================================================
@@ -368,6 +381,7 @@ describe('authenticateUser', () => {
 
   test('should authenticate user successfully', async () => {
     const db = createMockDb();
+    const logger = createMockLogger();
     const email = 'test@example.com';
     const password = 'correct-password';
     const ipAddress = '192.168.1.1';
@@ -408,7 +422,15 @@ describe('authenticateUser', () => {
     // Mock: access token creation
     vi.mocked(createAccessToken).mockReturnValue('access-token-123');
 
-    const result = await authenticateUser(db, TEST_CONFIG, email, password, ipAddress, userAgent);
+    const result = await authenticateUser(
+      db,
+      TEST_CONFIG,
+      email,
+      password,
+      logger,
+      ipAddress,
+      userAgent,
+    );
 
     expect(result.accessToken).toBe('access-token-123');
     expect(result.refreshToken).toBe('refresh-token-123');
@@ -419,6 +441,7 @@ describe('authenticateUser', () => {
 
   test('should throw AccountLockedError when account is locked', async () => {
     const db = createMockDb();
+    const logger = createMockLogger();
     const email = 'locked@example.com';
     const password = 'any-password';
 
@@ -426,7 +449,7 @@ describe('authenticateUser', () => {
     vi.mocked(isAccountLocked).mockResolvedValue(true);
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
 
-    await expect(authenticateUser(db, TEST_CONFIG, email, password)).rejects.toThrow(
+    await expect(authenticateUser(db, TEST_CONFIG, email, password, logger)).rejects.toThrow(
       AccountLockedError,
     );
     expect(logLoginAttempt).toHaveBeenCalledWith(
@@ -441,6 +464,7 @@ describe('authenticateUser', () => {
 
   test('should throw InvalidCredentialsError when user not found', async () => {
     const db = createMockDb();
+    const logger = createMockLogger();
     const email = 'nonexistent@example.com';
     const password = 'any-password';
     const ipAddress = '192.168.1.1';
@@ -459,13 +483,14 @@ describe('authenticateUser', () => {
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
     vi.mocked(getAccountLockoutStatus).mockResolvedValue({ isLocked: false, failedAttempts: 1 });
 
-    await expect(authenticateUser(db, TEST_CONFIG, email, password, ipAddress)).rejects.toThrow(
-      InvalidCredentialsError,
-    );
+    await expect(
+      authenticateUser(db, TEST_CONFIG, email, password, logger, ipAddress),
+    ).rejects.toThrow(InvalidCredentialsError);
   });
 
   test('should throw InvalidCredentialsError when password is wrong', async () => {
     const db = createMockDb();
+    const logger = createMockLogger();
     const email = 'test@example.com';
     const password = 'wrong-password';
 
@@ -492,13 +517,14 @@ describe('authenticateUser', () => {
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
     vi.mocked(getAccountLockoutStatus).mockResolvedValue({ isLocked: false, failedAttempts: 2 });
 
-    await expect(authenticateUser(db, TEST_CONFIG, email, password)).rejects.toThrow(
+    await expect(authenticateUser(db, TEST_CONFIG, email, password, logger)).rejects.toThrow(
       InvalidCredentialsError,
     );
   });
 
   test('should throw EmailNotVerifiedError when email is not verified', async () => {
     const db = createMockDb();
+    const logger = createMockLogger();
     const email = 'unverified@example.com';
     const password = 'correct-password';
     const ipAddress = '192.168.1.1';
@@ -527,7 +553,7 @@ describe('authenticateUser', () => {
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
 
     await expect(
-      authenticateUser(db, TEST_CONFIG, email, password, ipAddress, userAgent),
+      authenticateUser(db, TEST_CONFIG, email, password, logger, ipAddress, userAgent),
     ).rejects.toThrow(EmailNotVerifiedError);
 
     // Verify login attempt was logged as failure with reason
@@ -543,6 +569,7 @@ describe('authenticateUser', () => {
 
   test('should trigger account lockout event when threshold reached', async () => {
     const db = createMockDb();
+    const logger = createMockLogger();
     const email = 'test@example.com';
     const password = 'wrong-password';
     const ipAddress = '192.168.1.1';
@@ -573,7 +600,7 @@ describe('authenticateUser', () => {
     vi.mocked(logAccountLockedEvent).mockResolvedValue(undefined);
 
     await expect(
-      authenticateUser(db, TEST_CONFIG, email, password, ipAddress, userAgent),
+      authenticateUser(db, TEST_CONFIG, email, password, logger, ipAddress, userAgent),
     ).rejects.toThrow(InvalidCredentialsError);
 
     expect(logAccountLockedEvent).toHaveBeenCalledWith(db, email, 5, ipAddress, userAgent);
@@ -581,6 +608,7 @@ describe('authenticateUser', () => {
 
   test('should trigger password rehash callback when hash needs updating', async () => {
     const db = createMockDb();
+    const logger = createMockLogger();
     const email = 'test@example.com';
     const password = 'correct-password';
 
@@ -623,7 +651,16 @@ describe('authenticateUser', () => {
 
     const onRehash = vi.fn();
 
-    await authenticateUser(db, TEST_CONFIG, email, password, undefined, undefined, onRehash);
+    await authenticateUser(
+      db,
+      TEST_CONFIG,
+      email,
+      password,
+      logger,
+      undefined,
+      undefined,
+      onRehash,
+    );
 
     expect(needsRehash).toHaveBeenCalledWith('old-hash');
 
@@ -638,8 +675,9 @@ describe('authenticateUser', () => {
     expect(onRehash).toHaveBeenCalledWith('user-123');
   });
 
-  test('should call onRehash callback with error if rehash fails', async () => {
+  test('should call onRehash callback with error if rehash fails and log error', async () => {
     const db = createMockDb();
+    const logger = createMockLogger();
     const email = 'test@example.com';
     const password = 'Test1234!';
 
@@ -679,11 +717,28 @@ describe('authenticateUser', () => {
 
     const onRehash = vi.fn();
 
-    await authenticateUser(db, TEST_CONFIG, email, password, undefined, undefined, onRehash);
+    await authenticateUser(
+      db,
+      TEST_CONFIG,
+      email,
+      password,
+      logger,
+      undefined,
+      undefined,
+      onRehash,
+    );
 
     // Wait for background rehash to fail
     await new Promise((resolve) => setImmediate(resolve));
 
+    // Verify error is always logged (the main fix)
+    expect(logger.error).toHaveBeenCalledWith('Failed to upgrade password hash', {
+      userId: 'user-123',
+      error: 'Hash computation failed',
+      stack: expect.any(String),
+    });
+
+    // Verify callback is also called with error
     expect(onRehash).toHaveBeenCalledWith('user-123', rehashError);
   });
 });

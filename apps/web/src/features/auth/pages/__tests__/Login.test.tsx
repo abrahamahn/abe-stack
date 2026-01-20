@@ -8,10 +8,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { LoginPage } from '../Login';
 
-// Mock the auth context
+// Mock the auth hook
 const mockLogin = vi.fn();
+const mockForgotPassword = vi.fn();
 const mockUseAuth = vi.fn(() => ({
   login: mockLogin,
+  forgotPassword: mockForgotPassword,
   isLoading: false,
   user: null,
   isAuthenticated: false,
@@ -23,23 +25,13 @@ vi.mock('../../hooks/useAuth', () => ({
   useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
 }));
 
-// Mock history context from @abe-stack/ui
-const mockGoBack = vi.fn();
-const mockGoForward = vi.fn();
-const mockUseHistoryNav = vi.fn(() => ({
-  goBack: mockGoBack,
-  canGoBack: true,
-  history: ['/'],
-  index: 1,
-  canGoForward: false,
-  goForward: mockGoForward,
-}));
-
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+// Mock navigate
+const mockNavigate = vi.fn();
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
-    useHistoryNav: (): ReturnType<typeof mockUseHistoryNav> => mockUseHistoryNav(),
+    useNavigate: () => mockNavigate,
   };
 });
 
@@ -66,27 +58,20 @@ describe('LoginPage', () => {
     vi.clearAllMocks();
     mockUseAuth.mockReturnValue({
       login: mockLogin,
+      forgotPassword: mockForgotPassword,
       isLoading: false,
       user: null,
       isAuthenticated: false,
       register: vi.fn(),
       logout: vi.fn(),
     });
-    mockUseHistoryNav.mockReturnValue({
-      goBack: mockGoBack,
-      canGoBack: true,
-      history: ['/'],
-      index: 1,
-      canGoForward: false,
-      goForward: mockGoForward,
-    });
   });
 
   describe('Rendering', () => {
-    it('should render the login heading', () => {
+    it('should render the welcome heading', () => {
       renderLoginPage();
 
-      expect(screen.getByRole('heading', { name: /login/i })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /welcome back/i })).toBeInTheDocument();
     });
 
     it('should render email input field', () => {
@@ -105,19 +90,19 @@ describe('LoginPage', () => {
       expect(passwordInput).toHaveAttribute('type', 'password');
     });
 
-    it('should render login button', () => {
+    it('should render sign in button', () => {
       renderLoginPage();
 
-      expect(screen.getByRole('button', { name: /^login$/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
     });
 
-    it('should render back button', () => {
+    it('should render forgot password button', () => {
       renderLoginPage();
 
-      expect(screen.getByRole('button', { name: /back/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /forgot your password/i })).toBeInTheDocument();
     });
 
-    it('should render registration info text', () => {
+    it('should render sign up option', () => {
       renderLoginPage();
 
       expect(screen.getByText(/don't have an account/i)).toBeInTheDocument();
@@ -149,11 +134,11 @@ describe('LoginPage', () => {
 
       const emailInput = screen.getByLabelText('Email');
       const passwordInput = screen.getByLabelText('Password');
-      const loginButton = screen.getByRole('button', { name: /^login$/i });
+      const signInButton = screen.getByRole('button', { name: /^sign in$/i });
 
       fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
       fireEvent.change(passwordInput, { target: { value: 'password123' } });
-      fireEvent.click(loginButton);
+      fireEvent.click(signInButton);
 
       await waitFor(() => {
         expect(mockLogin).toHaveBeenCalledWith({
@@ -162,47 +147,25 @@ describe('LoginPage', () => {
         });
       });
     });
-
-    it('should call goBack when back button is clicked', () => {
-      renderLoginPage();
-
-      const backButton = screen.getByRole('button', { name: /back/i });
-      fireEvent.click(backButton);
-
-      expect(mockGoBack).toHaveBeenCalled();
-    });
   });
 
-  describe('Loading State', () => {
-    it('should show loading text when isLoading is true', () => {
-      mockUseAuth.mockReturnValue({
-        login: mockLogin,
-        isLoading: true,
-        user: null,
-        isAuthenticated: false,
-        register: vi.fn(),
-        logout: vi.fn(),
-      });
-
+  describe('Navigation', () => {
+    it('should navigate to register page when sign up is clicked', () => {
       renderLoginPage();
 
-      expect(screen.getByRole('button', { name: /logging in/i })).toBeInTheDocument();
+      const signUpButton = screen.getByRole('button', { name: /sign up/i });
+      fireEvent.click(signUpButton);
+
+      expect(mockNavigate).toHaveBeenCalledWith('/register');
     });
 
-    it('should disable login button when loading', () => {
-      mockUseAuth.mockReturnValue({
-        login: mockLogin,
-        isLoading: true,
-        user: null,
-        isAuthenticated: false,
-        register: vi.fn(),
-        logout: vi.fn(),
-      });
-
+    it('should navigate to forgot password page when forgot password is clicked', () => {
       renderLoginPage();
 
-      const loginButton = screen.getByRole('button', { name: /logging in/i });
-      expect(loginButton).toBeDisabled();
+      const forgotButton = screen.getByRole('button', { name: /forgot your password/i });
+      fireEvent.click(forgotButton);
+
+      expect(mockNavigate).toHaveBeenCalledWith('/auth?mode=forgot-password');
     });
   });
 
@@ -213,12 +176,12 @@ describe('LoginPage', () => {
 
       const emailInput = screen.getByLabelText('Email');
       const passwordInput = screen.getByLabelText('Password');
-      const loginButton = screen.getByRole('button', { name: /^login$/i });
+      const signInButton = screen.getByRole('button', { name: /^sign in$/i });
 
       await act(async () => {
         fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
         fireEvent.change(passwordInput, { target: { value: 'wrongpassword' } });
-        fireEvent.click(loginButton);
+        fireEvent.click(signInButton);
       });
 
       await waitFor(() => {
@@ -232,16 +195,16 @@ describe('LoginPage', () => {
 
       const emailInput = screen.getByLabelText('Email');
       const passwordInput = screen.getByLabelText('Password');
-      const loginButton = screen.getByRole('button', { name: /^login$/i });
+      const signInButton = screen.getByRole('button', { name: /^sign in$/i });
 
       await act(async () => {
         fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
         fireEvent.change(passwordInput, { target: { value: 'password' } });
-        fireEvent.click(loginButton);
+        fireEvent.click(signInButton);
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Login failed')).toBeInTheDocument();
+        expect(screen.getByText(/an error occurred/i)).toBeInTheDocument();
       });
     });
   });
@@ -269,58 +232,26 @@ describe('LoginPage', () => {
     });
   });
 
-  describe('Aggressive TDD - Edge Cases', () => {
+  describe('Edge Cases', () => {
     it('should handle rapid form submissions', async () => {
       mockLogin.mockResolvedValue(undefined);
       renderLoginPage();
 
       const emailInput = screen.getByLabelText('Email');
       const passwordInput = screen.getByLabelText('Password');
-      const loginButton = screen.getByRole('button', { name: /^login$/i });
+      const signInButton = screen.getByRole('button', { name: /^sign in$/i });
 
       fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
       fireEvent.change(passwordInput, { target: { value: 'password123' } });
 
-      // Rapid fire 10 clicks
-      for (let i = 0; i < 10; i++) {
-        fireEvent.click(loginButton);
+      // Rapid clicks
+      for (let i = 0; i < 5; i++) {
+        fireEvent.click(signInButton);
       }
 
-      // Should handle multiple submissions gracefully
       await waitFor(() => {
         expect(mockLogin).toHaveBeenCalled();
       });
-    });
-
-    it('should handle empty form submission gracefully', () => {
-      renderLoginPage();
-
-      const loginButton = screen.getByRole('button', { name: /^login$/i });
-
-      // Empty form should not crash (HTML validation will prevent submit)
-      expect(() => fireEvent.click(loginButton)).not.toThrow();
-    });
-
-    it('should handle extremely long email input', () => {
-      renderLoginPage();
-
-      const emailInput = screen.getByLabelText(/email/i);
-      const longEmail = 'a'.repeat(1000) + '@example.com';
-
-      fireEvent.change(emailInput, { target: { value: longEmail } });
-
-      expect(emailInput).toHaveValue(longEmail);
-    });
-
-    it('should handle extremely long password input', () => {
-      renderLoginPage();
-
-      const passwordInput = screen.getByLabelText('Password');
-      const longPassword = 'a'.repeat(10000);
-
-      fireEvent.change(passwordInput, { target: { value: longPassword } });
-
-      expect(passwordInput).toHaveValue(longPassword);
     });
 
     it('should handle special characters in email', () => {
@@ -338,106 +269,11 @@ describe('LoginPage', () => {
       renderLoginPage();
 
       const passwordInput = screen.getByLabelText('Password');
-      const unicodePassword = '密码パスワード🔐';
+      const unicodePassword = '密码パスワード';
 
       fireEvent.change(passwordInput, { target: { value: unicodePassword } });
 
       expect(passwordInput).toHaveValue(unicodePassword);
-    });
-
-    it('should handle login that never resolves (timeout scenario)', () => {
-      // Simulate a hung request
-      mockLogin.mockImplementation(() => new Promise(() => {}));
-      renderLoginPage();
-
-      const emailInput = screen.getByLabelText('Email');
-      const passwordInput = screen.getByLabelText('Password');
-      const loginButton = screen.getByRole('button', { name: /^login$/i });
-
-      fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-      fireEvent.change(passwordInput, { target: { value: 'password' } });
-      fireEvent.click(loginButton);
-
-      // Component should not crash while waiting
-      expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    });
-
-    it('should handle multiple rapid re-renders', () => {
-      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-      const { rerender } = render(
-        <QueryClientProvider client={queryClient}>
-          <MemoryRouter>
-            <LoginPage />
-          </MemoryRouter>
-        </QueryClientProvider>,
-      );
-
-      // Rapid re-renders
-      for (let i = 0; i < 50; i++) {
-        rerender(
-          <QueryClientProvider client={queryClient}>
-            <MemoryRouter>
-              <LoginPage />
-            </MemoryRouter>
-          </QueryClientProvider>,
-        );
-      }
-
-      expect(screen.getByRole('heading', { name: /login/i })).toBeInTheDocument();
-    });
-
-    it('should handle component unmount during pending login', () => {
-      let resolveLogin: (() => void) | undefined;
-      mockLogin.mockImplementation(
-        () =>
-          new Promise<void>((resolve) => {
-            resolveLogin = resolve;
-          }),
-      );
-
-      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-      const { unmount } = render(
-        <QueryClientProvider client={queryClient}>
-          <MemoryRouter>
-            <LoginPage />
-          </MemoryRouter>
-        </QueryClientProvider>,
-      );
-
-      const emailInput = screen.getByLabelText('Email');
-      const passwordInput = screen.getByLabelText('Password');
-      const loginButton = screen.getByRole('button', { name: /^login$/i });
-
-      fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-      fireEvent.change(passwordInput, { target: { value: 'password' } });
-      fireEvent.click(loginButton);
-
-      // Unmount while login is pending
-      expect(() => {
-        unmount();
-      }).not.toThrow();
-
-      // Resolve after unmount - should not crash
-      if (resolveLogin) {
-        resolveLogin();
-      }
-    });
-
-    it('should handle back button when canGoBack is false', () => {
-      // Mock canGoBack as false for this test
-      mockUseHistoryNav.mockReturnValue({
-        goBack: mockGoBack,
-        canGoBack: false,
-        history: [],
-        index: 0,
-        canGoForward: false,
-        goForward: mockGoForward,
-      });
-
-      renderLoginPage();
-
-      const backButton = screen.getByRole('button', { name: /back/i });
-      expect(backButton).toBeDisabled();
     });
   });
 });

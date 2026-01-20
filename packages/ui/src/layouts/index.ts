@@ -3,5 +3,20 @@
 
 export { AuthLayout, Container, PageContainer, StackedLayout } from './containers';
 export { Modal, Overlay, ProtectedRoute, ScrollArea } from './layers';
-export { AppShell, BottombarLayout, LeftSidebarLayout, ResizablePanel, ResizablePanelGroup, ResizableSeparator, RightSidebarLayout, TopbarLayout } from './shells';
-export type { AppShellProps, BottombarLayoutProps, LeftSidebarLayoutProps, RightSidebarLayoutProps, TopbarLayoutProps } from './shells';
+export {
+  AppShell,
+  BottombarLayout,
+  LeftSidebarLayout,
+  ResizablePanel,
+  ResizablePanelGroup,
+  ResizableSeparator,
+  RightSidebarLayout,
+  TopbarLayout,
+} from './shells';
+export type {
+  AppShellProps,
+  BottombarLayoutProps,
+  LeftSidebarLayoutProps,
+  RightSidebarLayoutProps,
+  TopbarLayoutProps,
+} from './shells';

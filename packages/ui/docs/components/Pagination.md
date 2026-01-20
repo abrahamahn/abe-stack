@@ -4,6 +4,8 @@
 
 A pagination component for navigating through multiple pages of content with previous/next controls and direct page buttons.
 
+> **Note**: For data fetching and API pagination, see the [Pagination System](../../docs/pagination-guide.md) which provides `usePaginatedQuery` and `useOffsetPaginatedQuery` hooks for infinite scroll and cursor-based pagination.
+
 ## Import
 
 ```tsx

@@ -58,7 +58,7 @@ export async function handleRegister(
 > {
   try {
     const { email, password, name } = body;
-    const baseUrl = `http://localhost:${String(ctx.config.server.port)}`;
+    const baseUrl = ctx.config.server.appBaseUrl;
     const result = await registerUser(
       ctx.db,
       ctx.email,
@@ -111,14 +111,12 @@ export async function handleLogin(
       ctx.config.auth,
       email,
       password,
+      ctx.log,
       ipAddress,
       userAgent,
-      (userId, error) => {
-        if (error) {
-          ctx.log.error({ userId, error }, 'Failed to upgrade password hash');
-        } else {
-          ctx.log.info({ userId }, 'Password hash upgraded');
-        }
+      (userId) => {
+        // Log success - errors are already logged by the service
+        ctx.log.info({ userId }, 'Password hash upgraded');
       },
     );
 
@@ -238,7 +236,7 @@ export async function handleForgotPassword(
 > {
   try {
     const { email } = body;
-    const baseUrl = `http://localhost:${String(ctx.config.server.port)}`;
+    const baseUrl = ctx.config.server.appBaseUrl;
     await requestPasswordReset(ctx.db, ctx.email, email, baseUrl);
 
     return {
@@ -325,7 +323,7 @@ export async function handleResendVerification(
 > {
   try {
     const { email } = body;
-    const baseUrl = `http://localhost:${String(ctx.config.server.port)}`;
+    const baseUrl = ctx.config.server.appBaseUrl;
     await resendVerificationEmail(ctx.db, ctx.email, email, baseUrl);
 
     return {

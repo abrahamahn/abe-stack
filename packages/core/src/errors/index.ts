@@ -16,9 +16,6 @@ export {
   ForbiddenError,
   InternalError,
   NotFoundError,
-  // Deprecated aliases
-  PermissionError,
-  RateLimitError,
   TooManyRequestsError,
   UnauthorizedError,
   UnprocessableError,

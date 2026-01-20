@@ -1,5 +1,5 @@
 // apps/web/src/features/auth/pages/ConfirmEmailPage.tsx
-import { Button, Spinner } from '@abe-stack/ui';
+import { AuthLayout, Button, Spinner, Text } from '@abe-stack/ui';
 import { useAuth } from '@auth/hooks';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -42,68 +42,86 @@ export function ConfirmEmailPage(): ReactElement {
   }, [token, verifyEmail, navigate]);
 
   const handleNavigateToLogin = (): void => {
-    void navigate('/auth?mode=login');
+    void navigate('/login');
   };
 
   return (
-    <div className="min-h-screen flex-center bg-surface p-4">
-      <div className="max-w-md w-full space-y-6">
-        {status === 'loading' && (
-          <div className="text-center space-y-4">
-            <div className="mx-auto">
-              <Spinner size="lg" />
-            </div>
-            <h2 className="text-xl font-bold">Verifying your email...</h2>
-            <p className="text-muted">Please wait while we verify your email address.</p>
-          </div>
-        )}
+    <AuthLayout>
+      <div className="auth-form">
+        <div className="auth-form-content">
+          {status === 'loading' && (
+            <>
+              <div className="auth-form-header">
+                <h2 className="auth-form-title">Verifying your email...</h2>
+              </div>
+              <div className="flex-center">
+                <Spinner size="lg" />
+              </div>
+              <Text tone="muted" className="text-center">
+                Please wait while we verify your email address.
+              </Text>
+            </>
+          )}
 
-        {status === 'success' && (
-          <div className="text-center space-y-4">
-            <div className="status-icon bg-success-muted mx-auto">
-              <svg
-                className="icon-lg text-success"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-            </div>
-            <h2 className="text-xl font-bold text-success">Email verified!</h2>
-            <p className="text-muted">{message}</p>
-            <p className="text-sm text-muted">Redirecting to dashboard...</p>
-          </div>
-        )}
+          {status === 'success' && (
+            <>
+              <div className="auth-form-header">
+                <h2 className="auth-form-title text-success">Email verified!</h2>
+              </div>
+              <div className="status-icon bg-success-muted mx-auto">
+                <svg
+                  className="icon-lg text-success"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </div>
+              <Text tone="muted" className="text-center">
+                {message}
+              </Text>
+              <Text tone="muted" className="text-center text-sm">
+                Redirecting to dashboard...
+              </Text>
+            </>
+          )}
 
-        {status === 'error' && (
-          <div className="text-center space-y-4">
-            <div className="status-icon bg-danger-muted mx-auto">
-              <svg
-                className="icon-lg text-danger"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </div>
-            <h2 className="text-xl font-bold text-danger">Verification failed</h2>
-            <p className="text-muted">{message}</p>
-            <Button onClick={handleNavigateToLogin}>Go to sign in</Button>
-          </div>
-        )}
+          {status === 'error' && (
+            <>
+              <div className="auth-form-header">
+                <h2 className="auth-form-title text-danger">Verification failed</h2>
+              </div>
+              <div className="status-icon bg-danger-muted mx-auto">
+                <svg
+                  className="icon-lg text-danger"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </div>
+              <Text tone="muted" className="text-center">
+                {message}
+              </Text>
+              <Button onClick={handleNavigateToLogin} className="w-full">
+                Go to sign in
+              </Button>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </AuthLayout>
   );
 }

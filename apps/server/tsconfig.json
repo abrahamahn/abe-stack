@@ -3,162 +3,64 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "types": [
-      "node",
-      "vitest/globals"
-    ],
+    "types": ["node", "vitest/globals"],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@admin": [
-        "./src/modules/admin"
-      ],
-      "@admin/*": [
-        "./src/modules/admin/*"
-      ],
-      "@auth": [
-        "./src/modules/auth"
-      ],
-      "@auth/*": [
-        "./src/modules/auth/*"
-      ],
-      "@config": [
-        "./src/config"
-      ],
-      "@config/*": [
-        "./src/config/*"
-      ],
-      "@crypto": [
-        "./src/infra/crypto"
-      ],
-      "@crypto/*": [
-        "./src/infra/crypto/*"
-      ],
-      "@database": [
-        "./src/infra/database"
-      ],
-      "@database/*": [
-        "./src/infra/database/*"
-      ],
-      "@email": [
-        "./src/infra/email"
-      ],
-      "@email/*": [
-        "./src/infra/email/*"
-      ],
-      "@health": [
-        "./src/infra/health"
-      ],
-      "@health/*": [
-        "./src/infra/health/*"
-      ],
-      "@http": [
-        "./src/infra/http"
-      ],
-      "@http/*": [
-        "./src/infra/http/*"
-      ],
-      "@infra": [
-        "./src/infra"
-      ],
-      "@infra/*": [
-        "./src/infra/*"
-      ],
-      "@logger": [
-        "./src/infra/logger"
-      ],
-      "@logger/*": [
-        "./src/infra/logger/*"
-      ],
-      "@modules": [
-        "./src/modules"
-      ],
-      "@modules/*": [
-        "./src/modules/*"
-      ],
-      "@providers": [
-        "./src/infra/storage/providers"
-      ],
-      "@providers/*": [
-        "./src/infra/storage/providers/*"
-      ],
-      "@pubsub": [
-        "./src/infra/pubsub"
-      ],
-      "@pubsub/*": [
-        "./src/infra/pubsub/*"
-      ],
-      "@queue": [
-        "./src/infra/queue"
-      ],
-      "@queue/*": [
-        "./src/infra/queue/*"
-      ],
-      "@rate-limit": [
-        "./src/infra/rate-limit"
-      ],
-      "@rate-limit/*": [
-        "./src/infra/rate-limit/*"
-      ],
-      "@router": [
-        "./src/infra/router"
-      ],
-      "@router/*": [
-        "./src/infra/router/*"
-      ],
-      "@schema": [
-        "./src/infra/database/schema"
-      ],
-      "@schema/*": [
-        "./src/infra/database/schema/*"
-      ],
-      "@security": [
-        "./src/infra/security"
-      ],
-      "@security/*": [
-        "./src/infra/security/*"
-      ],
-      "@shared": [
-        "./src/shared"
-      ],
-      "@shared/*": [
-        "./src/shared/*"
-      ],
-      "@storage": [
-        "./src/infra/storage"
-      ],
-      "@storage/*": [
-        "./src/infra/storage/*"
-      ],
-      "@users": [
-        "./src/modules/users"
-      ],
-      "@users/*": [
-        "./src/modules/users/*"
-      ],
-      "@websocket": [
-        "./src/infra/websocket"
-      ],
-      "@websocket/*": [
-        "./src/infra/websocket/*"
-      ],
-      "@write": [
-        "./src/infra/write"
-      ],
-      "@write/*": [
-        "./src/infra/write/*"
-      ]
+      "@/*": ["./src/*"],
+      "@admin": ["./src/modules/admin"],
+      "@admin/*": ["./src/modules/admin/*"],
+      "@auth": ["./src/modules/auth"],
+      "@auth/*": ["./src/modules/auth/*"],
+      "@config": ["./src/config"],
+      "@config/*": ["./src/config/*"],
+      "@crypto": ["./src/infra/crypto"],
+      "@crypto/*": ["./src/infra/crypto/*"],
+      "@database": ["./src/infra/database"],
+      "@database/*": ["./src/infra/database/*"],
+      "@email": ["./src/infra/email"],
+      "@email/*": ["./src/infra/email/*"],
+      "@files": ["./src/infra/files"],
+      "@files/*": ["./src/infra/files/*"],
+      "@health": ["./src/infra/health"],
+      "@health/*": ["./src/infra/health/*"],
+      "@http": ["./src/infra/http"],
+      "@http/*": ["./src/infra/http/*"],
+      "@infra": ["./src/infra"],
+      "@infra/*": ["./src/infra/*"],
+      "@logger": ["./src/infra/logger"],
+      "@logger/*": ["./src/infra/logger/*"],
+      "@modules": ["./src/modules"],
+      "@modules/*": ["./src/modules/*"],
+      "@pagination": ["./src/infra/pagination"],
+      "@pagination/*": ["./src/infra/pagination/*"],
+      "@providers": ["./src/infra/storage/providers"],
+      "@providers/*": ["./src/infra/storage/providers/*"],
+      "@pubsub": ["./src/infra/pubsub"],
+      "@pubsub/*": ["./src/infra/pubsub/*"],
+      "@queue": ["./src/infra/queue"],
+      "@queue/*": ["./src/infra/queue/*"],
+      "@rate-limit": ["./src/infra/rate-limit"],
+      "@rate-limit/*": ["./src/infra/rate-limit/*"],
+      "@router": ["./src/infra/router"],
+      "@router/*": ["./src/infra/router/*"],
+      "@schema": ["./src/infra/database/schema"],
+      "@schema/*": ["./src/infra/database/schema/*"],
+      "@security": ["./src/infra/security"],
+      "@security/*": ["./src/infra/security/*"],
+      "@shared": ["./src/shared"],
+      "@shared/*": ["./src/shared/*"],
+      "@storage": ["./src/infra/storage"],
+      "@storage/*": ["./src/infra/storage/*"],
+      "@users": ["./src/modules/users"],
+      "@users/*": ["./src/modules/users/*"],
+      "@websocket": ["./src/infra/websocket"],
+      "@websocket/*": ["./src/infra/websocket/*"],
+      "@write": ["./src/infra/write"],
+      "@write/*": ["./src/infra/write/*"]
     },
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.server.tsbuildinfo"
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ],
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
   "references": [
     {
       "path": "../../packages/core"

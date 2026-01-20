@@ -1,6 +1,6 @@
 // apps/web/src/features/auth/components/AuthForms.tsx
 import { Button, Input, PasswordInput, Text } from '@abe-stack/ui';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import type {
@@ -11,7 +11,7 @@ import type {
   ResendVerificationRequest,
   ResetPasswordRequest,
 } from '@abe-stack/core';
-import type { ReactElement } from 'react';
+import type { ChangeEvent, ReactElement } from 'react';
 
 export type AuthMode = 'login' | 'register' | 'forgot-password' | 'reset-password';
 
@@ -37,7 +37,7 @@ export function AuthForm(props: AuthFormProps): ReactElement {
     case 'register':
       return <RegisterForm {...formProps} />;
     case 'forgot-password':
-      return <ForgotPasswordForm {...formProps} />;
+      return <ForgotPasswordForm {...formProps} onForgotPassword={onForgotPassword} />;
     case 'reset-password':
       return <ResetPasswordForm {...formProps} />;
     default:
@@ -101,7 +101,7 @@ export function LoginForm({
             label="Email"
             type="email"
             value={email}
-            onChange={(e) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               setEmail(e.target.value);
             }}
             required
@@ -111,7 +111,7 @@ export function LoginForm({
           <PasswordInput
             label="Password"
             value={password}
-            onChange={(e) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               setPassword(e.target.value);
             }}
             required
@@ -174,6 +174,16 @@ export function RegisterForm({
   const [resendLoading, setResendLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [resendMessage, setResendMessage] = useState<string | null>(null);
+  const cooldownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Cleanup interval on unmount to prevent memory leaks
+  useEffect((): (() => void) => {
+    return (): void => {
+      if (cooldownIntervalRef.current) {
+        clearInterval(cooldownIntervalRef.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
@@ -196,11 +206,18 @@ export function RegisterForm({
       await onResendVerification({ email: registrationResult.email });
       setResendMessage('Verification email resent! Check your inbox.');
       setResendCooldown(60);
+      // Clear any existing interval before starting a new one
+      if (cooldownIntervalRef.current) {
+        clearInterval(cooldownIntervalRef.current);
+      }
       // Start countdown
-      const interval = setInterval(() => {
+      cooldownIntervalRef.current = setInterval(() => {
         setResendCooldown((prev) => {
           if (prev <= 1) {
-            clearInterval(interval);
+            if (cooldownIntervalRef.current) {
+              clearInterval(cooldownIntervalRef.current);
+              cooldownIntervalRef.current = null;
+            }
             return 0;
           }
           return prev - 1;
@@ -312,7 +329,7 @@ export function RegisterForm({
             label="Email"
             type="email"
             value={email}
-            onChange={(e) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               setEmail(e.target.value);
             }}
             required
@@ -323,7 +340,7 @@ export function RegisterForm({
             label="Name (optional)"
             type="text"
             value={name}
-            onChange={(e) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               setName(e.target.value);
             }}
             disabled={isLoading}
@@ -332,7 +349,7 @@ export function RegisterForm({
           <PasswordInput
             label="Password"
             value={password}
-            onChange={(e) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               setPassword(e.target.value);
             }}
             required
@@ -415,7 +432,7 @@ export function ForgotPasswordForm({
             label="Email"
             type="email"
             value={email}
-            onChange={(e) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               setEmail(e.target.value);
             }}
             required
@@ -523,7 +540,7 @@ export function ResetPasswordForm({
           <PasswordInput
             label="New password"
             value={password}
-            onChange={(e) => {
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
               setPassword(e.target.value);
             }}
             required

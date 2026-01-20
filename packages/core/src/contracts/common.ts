@@ -8,7 +8,6 @@ export type UserRole = z.infer<typeof userRoleSchema>;
 
 // Shared schemas
 export const errorResponseSchema = z.object({
-  error: z.string(),
   message: z.string(),
   code: z.string().optional(),
   details: z.record(z.unknown()).optional(),

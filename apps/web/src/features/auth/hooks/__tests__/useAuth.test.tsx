@@ -66,7 +66,13 @@ function createMockEnvironment(
 }
 
 describe('useAuth', () => {
-  const mockUser = { id: '1', email: 'test@example.com', name: 'Test User', role: 'user' as const };
+  const mockUser = {
+    id: '1',
+    email: 'test@example.com',
+    name: 'Test User',
+    role: 'user' as const,
+    createdAt: '2024-01-01T00:00:00Z',
+  };
 
   const createWrapper = (env: ClientEnvironment): React.FC<{ children: React.ReactNode }> => {
     return ({ children }: { children: React.ReactNode }): React.ReactElement => (
@@ -95,6 +101,7 @@ describe('useAuth', () => {
       email: 'test@example.com',
       name: 'Test User',
       role: 'user',
+      createdAt: '2024-01-01T00:00:00Z',
     });
   });
 

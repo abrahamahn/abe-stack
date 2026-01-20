@@ -21,24 +21,144 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
  * Apply security headers to the response.
  * We explicitly choose what we enable, rather than trusting plugin defaults.
  */
-export function applySecurityHeaders(res: FastifyReply): void {
+export interface SecurityHeaderOptions {
+  /**
+   * Enable Content Security Policy (CSP) header.
+   *
+   * CSP is a powerful defense against XSS attacks by restricting which resources
+   * can be loaded. However, it requires careful configuration:
+   *
+   * - May break inline scripts/styles if not configured properly
+   * - Requires 'unsafe-inline' for many CSS frameworks
+   * - May need nonce-based script loading for dynamic content
+   *
+   * RECOMMENDATION: Enable in production after testing your application.
+   * Use the getProductionSecurityDefaults() helper for sensible production defaults.
+   *
+   * Default: false (opt-in to avoid breaking existing applications)
+   */
+  enableCSP?: boolean;
+  enableHSTS?: boolean;
+  enableFrameOptions?: boolean;
+  enableContentTypeOptions?: boolean;
+  enableXSSProtection?: boolean;
+  enableReferrerPolicy?: boolean;
+  enablePermissionsPolicy?: boolean;
+  enableCrossOriginEmbedderPolicy?: boolean;
+  enableCrossOriginOpenerPolicy?: boolean;
+  enableCrossOriginResourcePolicy?: boolean;
+  cspNonce?: string;
+}
+
+/**
+ * Get recommended security header defaults for production environments.
+ * These enable stricter security settings including CSP.
+ *
+ * Usage:
+ *   applySecurityHeaders(res, getProductionSecurityDefaults());
+ */
+export function getProductionSecurityDefaults(): SecurityHeaderOptions {
+  return {
+    enableCSP: true,
+    enableHSTS: true,
+    enableFrameOptions: true,
+    enableContentTypeOptions: true,
+    enableXSSProtection: true,
+    enableReferrerPolicy: true,
+    enablePermissionsPolicy: true,
+    enableCrossOriginEmbedderPolicy: false, // May break cross-origin resources
+    enableCrossOriginOpenerPolicy: false, // May break OAuth popups
+    enableCrossOriginResourcePolicy: false, // May break CDN resources
+  };
+}
+
+export function applySecurityHeaders(res: FastifyReply, options: SecurityHeaderOptions = {}): void {
+  const {
+    enableCSP = false, // Default false for backwards compatibility; use getProductionSecurityDefaults() in production
+    enableHSTS = true,
+    enableFrameOptions = true,
+    enableContentTypeOptions = true,
+    enableXSSProtection = true,
+    enableReferrerPolicy = true,
+    enablePermissionsPolicy = true,
+    enableCrossOriginEmbedderPolicy = false,
+    enableCrossOriginOpenerPolicy = false,
+    enableCrossOriginResourcePolicy = false,
+    cspNonce,
+  } = options;
+
   // Prevent clickjacking - deny all framing
-  res.header('X-Frame-Options', 'DENY');
+  if (enableFrameOptions) {
+    res.header('X-Frame-Options', 'DENY');
+  }
 
   // Prevent MIME type sniffing attacks
-  res.header('X-Content-Type-Options', 'nosniff');
+  if (enableContentTypeOptions) {
+    res.header('X-Content-Type-Options', 'nosniff');
+  }
 
   // Basic XSS protection for older browsers
-  res.header('X-XSS-Protection', '1; mode=block');
+  if (enableXSSProtection) {
+    res.header('X-XSS-Protection', '1; mode=block');
+  }
 
-  // HTTP Strict Transport Security (HSTS) - 1 year with subdomains
-  res.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  // HTTP Strict Transport Security (HSTS) - 1 year with subdomains and preload
+  if (enableHSTS) {
+    res.header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
 
   // Control referrer information sent with requests
-  res.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+  if (enableReferrerPolicy) {
+    res.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+  }
 
   // Restrict browser features/APIs
-  res.header('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  if (enablePermissionsPolicy) {
+    res.header('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+  }
+
+  // Content Security Policy with nonce-based script execution
+  if (enableCSP) {
+    const cspDirectives = [
+      "default-src 'self'",
+      "script-src 'self'",
+      "style-src 'self' 'unsafe-inline'", // Allow inline styles for now
+      "img-src 'self' data: https:", // Allow data URLs and HTTPS images
+      "font-src 'self'",
+      "connect-src 'self'",
+      "media-src 'self'",
+      "object-src 'none'", // Block plugins
+      "frame-src 'none'", // Block iframes
+      "base-uri 'self'",
+      "form-action 'self'",
+    ];
+
+    if (cspNonce) {
+      // Insert nonce-based script-src if nonce is provided
+      cspDirectives[1] = `script-src 'self' 'nonce-${cspNonce}'`;
+    }
+
+    res.header('Content-Security-Policy', cspDirectives.join('; '));
+  }
+
+  // Cross-Origin Embedder Policy - prevents loading cross-origin resources
+  if (enableCrossOriginEmbedderPolicy) {
+    res.header('Cross-Origin-Embedder-Policy', 'require-corp');
+  }
+
+  // Cross-Origin Opener Policy - isolates the browsing context
+  if (enableCrossOriginOpenerPolicy) {
+    res.header('Cross-Origin-Opener-Policy', 'same-origin');
+  }
+
+  // Cross-Origin Resource Policy - blocks cross-origin requests
+  if (enableCrossOriginResourcePolicy) {
+    res.header('Cross-Origin-Resource-Policy', 'same-origin');
+  }
+
+  // Remove server information (don't advertise technology stack)
+  res.header('X-Powered-By', undefined);
+  res.header('Server', undefined);
 }
 
 // ============================================================================

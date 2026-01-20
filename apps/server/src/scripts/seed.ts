@@ -7,6 +7,9 @@
  *
  * Environment variables are loaded via Node's native --env-file flag in package.json scripts.
  *
+ * WARNING: This script is for DEVELOPMENT ONLY. It uses hardcoded test passwords
+ * and will refuse to run in production environments.
+ *
  * Default test users:
  * - admin@example.com / password123 (admin role)
  * - user@example.com / password123 (user role)
@@ -24,6 +27,11 @@ interface SeedUser {
   role: 'user' | 'admin';
 }
 
+/**
+ * WARNING: These are hardcoded test credentials for DEVELOPMENT ONLY.
+ * Never use these passwords in production. The seed script will refuse
+ * to run if NODE_ENV === 'production'.
+ */
 const TEST_USERS: SeedUser[] = [
   {
     email: 'admin@example.com',
@@ -46,6 +54,21 @@ const TEST_USERS: SeedUser[] = [
 ];
 
 async function seed(): Promise<void> {
+  // Safety check: refuse to seed in production
+  if (process.env.NODE_ENV === 'production') {
+    console.error('');
+    console.error('ERROR: Cannot run seed script in production!');
+    console.error('');
+    console.error('This script uses hardcoded test passwords and is intended');
+    console.error('for development environments only. Running this in production');
+    console.error('would create accounts with known, insecure passwords.');
+    console.error('');
+    console.error('If you need to create initial users in production, use a');
+    console.error('secure provisioning process with strong, unique passwords.');
+    console.error('');
+    process.exit(1);
+  }
+
   console.log('🌱 Starting database seed...\n');
 
   // Load configuration to get Argon2 options

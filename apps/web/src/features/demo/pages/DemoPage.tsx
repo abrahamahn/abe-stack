@@ -1,4 +1,5 @@
 // apps/web/src/features/demo/pages/DemoPage.tsx
+import { toastStore } from '@abe-stack/core';
 import {
   Button,
   CloseButton,
@@ -105,7 +106,13 @@ export function DemoPage(): React.ReactElement {
                       variant="text"
                       size="small"
                       onClick={() => {
-                        void logout();
+                        void logout().catch((error: unknown) => {
+                          toastStore.getState().show({
+                            title: 'Logout failed',
+                            description:
+                              error instanceof Error ? error.message : 'Unable to log out',
+                          });
+                        });
                       }}
                     >
                       Logout

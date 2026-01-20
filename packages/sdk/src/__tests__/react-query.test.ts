@@ -10,10 +10,10 @@ describe('createReactQueryClient', () => {
         baseUrl: 'https://api.example.com',
       });
 
-      expect(client).toBeDefined();
-      // The client should have auth routes
-      expect(client.auth).toBeDefined();
-      expect(client.users).toBeDefined();
+      // Verify the client has the expected route namespaces with methods
+      expect(client.auth).toHaveProperty('login');
+      expect(client.auth).toHaveProperty('register');
+      expect(client.users).toHaveProperty('me');
     });
 
     test('should create a client with all options', () => {
@@ -27,35 +27,14 @@ describe('createReactQueryClient', () => {
 
       const client = createReactQueryClient(options);
 
-      expect(client).toBeDefined();
+      // Verify client was created with expected structure
+      expect(client.auth).toHaveProperty('login');
+      expect(client.users).toHaveProperty('me');
     });
   });
 
   describe('client routes', () => {
-    test('should have auth routes defined', () => {
-      const client = createReactQueryClient({
-        baseUrl: 'https://api.example.com',
-      });
-
-      // Check that expected auth routes exist
-      expect(client.auth.login).toBeDefined();
-      expect(client.auth.register).toBeDefined();
-      expect(client.auth.logout).toBeDefined();
-      expect(client.auth.refresh).toBeDefined();
-    });
-
-    test('should have users routes defined', () => {
-      const client = createReactQueryClient({
-        baseUrl: 'https://api.example.com',
-      });
-
-      // The users contract has a 'me' route
-      expect(client.users.me).toBeDefined();
-    });
-  });
-
-  describe('client hooks structure', () => {
-    test('auth routes should have mutation hooks', () => {
+    test('should have auth routes with mutation hooks', () => {
       const client = createReactQueryClient({
         baseUrl: 'https://api.example.com',
       });
@@ -64,9 +43,10 @@ describe('createReactQueryClient', () => {
       expect(typeof client.auth.login.useMutation).toBe('function');
       expect(typeof client.auth.register.useMutation).toBe('function');
       expect(typeof client.auth.logout.useMutation).toBe('function');
+      expect(typeof client.auth.refresh.useMutation).toBe('function');
     });
 
-    test('users routes should have query hooks', () => {
+    test('should have users routes with query hooks', () => {
       const client = createReactQueryClient({
         baseUrl: 'https://api.example.com',
       });
@@ -77,20 +57,21 @@ describe('createReactQueryClient', () => {
   });
 
   describe('options callback functions', () => {
-    test('getToken should be called correctly', () => {
+    test('getToken should be stored as callback', () => {
       const getToken = vi.fn().mockReturnValue('my-token');
 
-      createReactQueryClient({
+      const client = createReactQueryClient({
         baseUrl: 'https://api.example.com',
         getToken,
       });
 
       // The token getter is stored but not immediately called
-      // It's called when making requests
-      expect(typeof getToken).toBe('function');
+      // It's called when making requests - verify client was created
+      expect(client.auth).toHaveProperty('login');
+      expect(getToken).not.toHaveBeenCalled(); // Not called until request
     });
 
-    test('callbacks should be functions when provided', () => {
+    test('error callbacks should not be called during client creation', () => {
       const onUnauthorized = vi.fn();
       const onServerError = vi.fn();
 
@@ -100,9 +81,10 @@ describe('createReactQueryClient', () => {
         onServerError,
       });
 
-      expect(client).toBeDefined();
-      expect(typeof onUnauthorized).toBe('function');
-      expect(typeof onServerError).toBe('function');
+      // Callbacks are stored but not called during creation
+      expect(client.auth).toHaveProperty('login');
+      expect(onUnauthorized).not.toHaveBeenCalled();
+      expect(onServerError).not.toHaveBeenCalled();
     });
   });
 });

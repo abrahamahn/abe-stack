@@ -10,7 +10,48 @@
  * Generated files will have "DO NOT EDIT" headers.
  */
 
-export * from './typescript';
-export * from './build';
-export * from './lint';
-export * from './packages';
+// TypeScript configuration
+export {
+  baseCompilerOptions,
+  reactCompilerOptions,
+  nodeCompilerOptions,
+  baseExclude,
+  excludedAliasNames,
+  skipDirs,
+  maxAliasDepth,
+  projects,
+  packageDirs,
+  type ProjectConfig,
+} from './typescript';
+
+// Build configuration
+export {
+  getRepoRoot,
+  getPaths,
+  vitePlugins,
+  viteWeb,
+  viteDesktop,
+  coverageExclude,
+  vitestBase,
+  vitestWeb,
+  vitestServer,
+  vitestCore,
+  vitestSdk,
+  vitestUi,
+  vitestIntegration,
+  aliasDefinitions,
+} from './build';
+
+// Lint configuration
+export {
+  prettier,
+  prettierIgnore,
+  eslintExtensions,
+  packageJsonScripts,
+  lintStaged,
+  vscodeSettings,
+  vscodeAdditionalSettings,
+} from './lint';
+
+// Package configuration
+export { sharedScripts, libraryScripts, packageScripts, rootScripts } from './packages';

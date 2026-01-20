@@ -10,6 +10,7 @@
     "./utils": "./src/utils/index.ts",
     "./crypto": "./src/crypto/index.ts",
     "./env": "./src/env.ts",
+    "./media": "./src/media/index.ts",
     "./stores": "./src/stores/index.ts",
     "./http": "./src/http/index.ts",
     "./*": "./src/*.ts"

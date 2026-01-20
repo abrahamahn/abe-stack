@@ -43,6 +43,7 @@ function getWebAliases(): Record<string, string> {
     '@contracts': path.join(repoRoot, 'packages/core/src/contracts'),
     '@stores': path.join(repoRoot, 'packages/core/src/stores'),
     '@validation': path.join(repoRoot, 'packages/core/src/validation'),
+    '@tanstack/react-query': path.join(repoRoot, 'packages/ui/src/test/mocks/react-query.ts'),
   };
 }
 
@@ -99,6 +100,7 @@ function getUiAliases(): Record<string, string> {
     '@test': path.join(repoRoot, 'packages/ui/src/test'),
     '@theme': path.join(repoRoot, 'packages/ui/src/theme'),
     '@utils': path.join(repoRoot, 'packages/ui/src/utils'),
+    '@tanstack/react-query': path.join(repoRoot, 'packages/ui/src/test/mocks/react-query.ts'),
   };
 }
 

@@ -70,6 +70,14 @@ function validateConfig(config: AppConfig): void {
     }
   }
 
+  // Email configuration validations
+  if (config.env === 'production' && config.email.provider === 'console') {
+    errors.push('Warning: Email provider is "console" in production - emails will only be logged');
+  }
+  if (config.email.provider === 'smtp' && !config.email.smtp.host) {
+    errors.push('SMTP_HOST is required when email provider is "smtp"');
+  }
+
   if (errors.length > 0) {
     const message = `Configuration validation failed:\n${errors.map((e) => `  - ${e}`).join('\n')}`;
     throw new Error(message);

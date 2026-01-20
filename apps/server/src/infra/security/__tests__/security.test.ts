@@ -541,8 +541,8 @@ describe('Lockout Functions', () => {
       await vi.advanceTimersByTimeAsync(1000);
 
       await delayPromise;
-      // If we get here without timeout, the delay was applied correctly
-      expect(true).toBe(true);
+      // Verify the database was queried to determine delay
+      expect(mockDb.select).toHaveBeenCalled();
     });
   });
 

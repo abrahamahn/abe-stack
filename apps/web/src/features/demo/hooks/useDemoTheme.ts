@@ -28,7 +28,7 @@ export function useDemoTheme(): UseDemoThemeResult {
   }, [themeMode]);
 
   function cycleTheme(): void {
-    setThemeMode((prev) => {
+    setThemeMode((prev: ThemeMode) => {
       if (prev === 'system') return 'light';
       if (prev === 'light') return 'dark';
       return 'system';

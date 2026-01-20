@@ -13,12 +13,23 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { sql } from 'drizzle-orm';
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
-
 import { bootstrap } from './bootstrap';
 
+// Type definitions for database operations (to avoid workspace root type resolution issues)
+interface DatabaseClient {
+  end: () => Promise<void>;
+}
+
+interface DrizzleDatabase {
+  execute: (query: unknown) => Promise<unknown>;
+}
+
+interface SqlTemplateTag {
+  (strings: TemplateStringsArray, ...values: unknown[]): unknown;
+  raw: (query: string) => unknown;
+}
+
+// Type for the raw query result
 // Helper to parse .env file
 function parseEnv(path: string): Record<string, string> {
   try {
@@ -61,16 +72,25 @@ function isTableArray(obj: unknown): obj is Array<{ tablename: string }> {
 }
 
 async function dropAllTables(connectionString: string): Promise<void> {
-  const client = postgres(connectionString, { max: 1 });
-  const db = drizzle(client);
+  // Dynamic imports to get around workspace root type resolution
+  const postgresModule = (await import('postgres')) as {
+    default: (url: string, opts: { max: number }) => DatabaseClient;
+  };
+  const drizzleModule = (await import('drizzle-orm/postgres-js')) as {
+    drizzle: (client: DatabaseClient) => DrizzleDatabase;
+  };
+  const drizzleOrmModule = (await import('drizzle-orm')) as { sql: SqlTemplateTag };
+
+  const client = postgresModule.default(connectionString, { max: 1 });
+  const db = drizzleModule.drizzle(client);
+  const sqlTag = drizzleOrmModule.sql;
 
   console.log('🗑️  Dropping all tables...');
 
   try {
     // Get all tables in public schema
-    const tablesResult = await db.execute(sql`
-      SELECT tablename FROM pg_tables WHERE schemaname = 'public'
-    `);
+    const query = sqlTag`SELECT tablename FROM pg_tables WHERE schemaname = 'public'`;
+    const tablesResult: unknown = await db.execute(query);
 
     if (isTableArray(tablesResult)) {
       const tableNames = tablesResult.map((t) => t.tablename);
@@ -81,7 +101,8 @@ async function dropAllTables(connectionString: string): Promise<void> {
         // Drop all tables with CASCADE to handle foreign key constraints
         for (const tableName of tableNames) {
           console.log(`  Dropping table: ${tableName}`);
-          await db.execute(sql.raw(`DROP TABLE IF EXISTS "${tableName}" CASCADE`));
+          const dropQuery = sqlTag.raw(`DROP TABLE IF EXISTS "${tableName}" CASCADE`);
+          await db.execute(dropQuery);
         }
         console.log(`  ✓ Dropped ${String(tableNames.length)} tables`);
       }

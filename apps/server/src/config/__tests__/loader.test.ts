@@ -15,11 +15,14 @@ describe('Configuration Loader', () => {
       const config = loadConfig(validEnv);
 
       expect(config.env).toBe('test');
-      expect(config.server).toBeDefined();
-      expect(config.database).toBeDefined();
-      expect(config.auth).toBeDefined();
-      expect(config.email).toBeDefined();
-      expect(config.storage).toBeDefined();
+      // Verify each section has expected structure
+      expect(config.server).toHaveProperty('host');
+      expect(config.server).toHaveProperty('port');
+      expect(config.database).toHaveProperty('provider');
+      expect(config.auth).toHaveProperty('jwt');
+      expect(config.auth).toHaveProperty('cookie');
+      expect(config.email).toHaveProperty('smtp');
+      expect(config.storage).toHaveProperty('provider');
     });
 
     test('should default to development environment', () => {
@@ -133,16 +136,17 @@ describe('Configuration Loader', () => {
       expect(() => loadConfig(env)).toThrow('JWT_SECRET must not use development values');
     });
 
-    test('should throw when production cookies are not secure', () => {
+    test('should set secure cookies in production', () => {
       const env = {
         NODE_ENV: 'production',
         JWT_SECRET: 'production-secret-key-at-least-32-chars!',
         DATABASE_URL: 'postgresql://user:pass@localhost:5432/db',
+        EMAIL_PROVIDER: 'smtp', // Required for production
+        SMTP_HOST: 'smtp.example.com',
+        SMTP_PORT: '587',
       };
 
-      // This will throw because secure should be true in production
-      // but loadAuthConfig sets secure: isProduction which is true
-      // So this test verifies the config loads properly in production
+      // Verify production config loads with secure cookie setting
       const config = loadConfig(env);
       expect(config.auth.cookie.secure).toBe(true);
     });

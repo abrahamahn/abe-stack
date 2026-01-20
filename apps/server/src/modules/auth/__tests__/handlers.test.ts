@@ -92,6 +92,7 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
       },
       server: {
         port: 8080,
+        appBaseUrl: 'http://localhost:8080',
       },
     } as AppContext['config'],
     log: {
@@ -236,6 +237,7 @@ describe('handleLogin', () => {
       ctx.config.auth,
       'test@example.com',
       'password123',
+      ctx.log,
       '127.0.0.1',
       'test-agent',
       expect.any(Function),

@@ -16,3 +16,16 @@ export { Select } from './Select';
 export { Slider } from './Slider';
 export { Tabs, type TabsProps, type TabItem } from './Tabs';
 export { Toast, ToastContainer } from './Toast';
+export {
+  createMemoizedContext,
+  createSelectiveContext,
+  createReducerContext,
+  createLazyContext,
+  createSubscriptionContext,
+  Memoized,
+  SelectiveMemo,
+  useRenderPerformance,
+  type ThemeContextValue,
+  type UserState,
+  type UserAction,
+} from './OptimizedProvider';

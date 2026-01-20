@@ -1,146 +1,54 @@
 // apps/web/src/features/auth/pages/Register.tsx
-import {
-  Button,
-  Card,
-  Heading,
-  Input,
-  PageContainer,
-  PasswordInput,
-  Text,
-  useHistoryNav,
-} from '@abe-stack/ui';
+import { AuthLayout } from '@abe-stack/ui';
+import { AuthForm } from '@auth/components/AuthForms';
 import { useAuth } from '@auth/hooks';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import type { ChangeEvent, FormEvent, JSX } from 'react';
+import type { AuthFormProps, AuthMode } from '@auth/components/AuthForms';
+import type { JSX } from 'react';
 
 export function RegisterPage(): JSX.Element {
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const { register, isLoading } = useAuth();
-  const { goBack, canGoBack } = useHistoryNav();
+  const navigate = useNavigate();
+  const { register, resendVerification } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleEmailChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    setEmail(event.target.value);
-  };
-
-  const handleNameChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    setName(event.target.value);
-  };
-
-  const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    setPassword(event.target.value);
-  };
-
-  const handleConfirmPasswordChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    setConfirmPassword(event.target.value);
-  };
-
-  const handleRegister = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
-    e.preventDefault();
-    setError('');
-
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
+  const handleModeChange = (mode: AuthMode): void => {
+    if (mode === 'login') {
+      void navigate('/login');
+    } else if (mode === 'forgot-password') {
+      void navigate('/auth?mode=forgot-password');
     }
+  };
 
-    try {
-      await register({ email, password, name });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed');
-    }
+  const createFormHandler =
+    <T extends Record<string, unknown>, R>(handler: (data: T) => Promise<R>) =>
+    async (data: T): Promise<R> => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        return await handler(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+        throw err;
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+  const formProps: AuthFormProps = {
+    mode: 'register',
+    onRegister: createFormHandler(register),
+    onResendVerification: resendVerification,
+    onModeChange: handleModeChange,
+    isLoading,
+    error,
   };
 
   return (
-    <PageContainer maxWidth={440}>
-      <Card>
-        <div className="grid gap-3">
-          <Heading as="h1" size="lg">
-            Create Account
-          </Heading>
-
-          <form
-            onSubmit={(e) => {
-              void handleRegister(e);
-            }}
-            className="grid gap-3"
-          >
-            <Input.Field
-              id="name"
-              label="Name"
-              type="text"
-              value={name}
-              onChange={handleNameChange}
-              placeholder="Your name"
-            />
-
-            <Input.Field
-              id="email"
-              label="Email"
-              type="email"
-              value={email}
-              onChange={handleEmailChange}
-              placeholder="you@example.com"
-              required
-            />
-
-            <PasswordInput
-              id="password"
-              label="Password"
-              value={password}
-              onChange={handlePasswordChange}
-              placeholder="Choose a strong password"
-              required
-              showStrength
-              showToggle
-              userInputs={[email, name]}
-            />
-
-            <PasswordInput
-              id="confirmPassword"
-              label="Confirm Password"
-              value={confirmPassword}
-              onChange={handleConfirmPasswordChange}
-              placeholder="Repeat your password"
-              required
-              showToggle
-              error={
-                confirmPassword && password !== confirmPassword
-                  ? 'Passwords do not match'
-                  : undefined
-              }
-            />
-
-            {error && <Text tone="danger">{error}</Text>}
-
-            <Button
-              type="submit"
-              disabled={isLoading || password !== confirmPassword}
-              className="w-full mt-2"
-            >
-              {isLoading ? 'Creating account...' : 'Create Account'}
-            </Button>
-
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={!canGoBack}
-              onClick={goBack}
-              className="w-full"
-            >
-              Back
-            </Button>
-          </form>
-        </div>
-      </Card>
-
-      <Text tone="muted" className="text-center text-sm">
-        Already have an account? <a href="/login">Login</a>
-      </Text>
-    </PageContainer>
+    <AuthLayout>
+      <AuthForm {...formProps} />
+    </AuthLayout>
   );
 }

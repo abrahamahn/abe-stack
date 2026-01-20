@@ -73,9 +73,6 @@ jobs:
       - name: Check test folders
         run: pnpm sync:tests:check
 
-      - name: Check barrel exports
-        run: pnpm sync:barrels:check
-
       - name: Cache Turbo
         uses: actions/cache@v4
         with:

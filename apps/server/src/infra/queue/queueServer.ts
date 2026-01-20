@@ -45,6 +45,7 @@ export class QueueServer {
   private running = false;
   private stopPromise: Promise<void> | null = null;
   private stopResolve: (() => void) | null = null;
+  private sleepAbortController: AbortController | null = null;
 
   constructor(options: QueueServerOptions) {
     this.store = options.store;
@@ -80,6 +81,12 @@ export class QueueServer {
 
     this.running = false;
     this.log?.info('Queue server stopping...');
+
+    // Abort any pending sleep
+    if (this.sleepAbortController) {
+      this.sleepAbortController.abort();
+      this.sleepAbortController = null;
+    }
 
     if (this.stopPromise) {
       await this.stopPromise;
@@ -223,7 +230,21 @@ export class QueueServer {
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+    this.sleepAbortController = new AbortController();
+    const signal = this.sleepAbortController.signal;
+
+    return new Promise((resolve) => {
+      const timeoutId = setTimeout(() => {
+        this.sleepAbortController = null;
+        resolve();
+      }, ms);
+
+      signal.addEventListener('abort', () => {
+        clearTimeout(timeoutId);
+        this.sleepAbortController = null;
+        resolve();
+      });
+    });
   }
 }
 

@@ -135,9 +135,8 @@ describe('contracts', () => {
   });
 
   describe('errorResponseSchema', () => {
-    it('should accept valid error response', () => {
+    it('should accept valid error response with optional fields', () => {
       const valid = {
-        error: 'BadRequestError',
         message: 'Something went wrong',
         code: 'VALIDATION_ERROR',
         details: { field: 'email' },
@@ -145,9 +144,14 @@ describe('contracts', () => {
       expect(errorResponseSchema.parse(valid)).toEqual(valid);
     });
 
-    it('should accept minimal error response', () => {
-      const minimal = { error: 'InternalError', message: 'Server error' };
+    it('should accept minimal error response (message only)', () => {
+      const minimal = { message: 'Server error' };
       expect(errorResponseSchema.parse(minimal)).toEqual(minimal);
+    });
+
+    it('should strip unknown fields', () => {
+      const withExtra = { message: 'Error', error: 'SomeError' };
+      expect(errorResponseSchema.parse(withExtra)).toEqual({ message: 'Error' });
     });
   });
 

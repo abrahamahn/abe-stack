@@ -23,6 +23,7 @@ import {
   withTransaction,
   type DbClient,
   type EmailService,
+  type Logger,
 } from '@infra';
 import {
   AccountLockedError,
@@ -130,8 +131,11 @@ export async function registerUser(
     return { user: newUser, verificationToken: token };
   });
 
-  // Send verification email
-  const verifyUrl = `${baseUrl || 'http://localhost:5173'}/auth/confirm-email?token=${verificationToken}`;
+  // Send verification email (baseUrl is required, provided by handlers)
+  if (!baseUrl) {
+    throw new Error('baseUrl is required to send verification emails');
+  }
+  const verifyUrl = `${baseUrl}/auth/confirm-email?token=${verificationToken}`;
   const emailTemplate = emailTemplates.emailVerification(verifyUrl);
   await emailService.send({
     ...emailTemplate,
@@ -155,6 +159,7 @@ export async function authenticateUser(
   config: AuthConfig,
   email: string,
   password: string,
+  logger: Logger,
   ipAddress?: string,
   userAgent?: string,
   onPasswordRehash?: (userId: string, error?: Error) => void,
@@ -202,7 +207,7 @@ export async function authenticateUser(
 
   // Check if password hash needs upgrading (background task)
   if (needsRehash(user.passwordHash)) {
-    rehashPassword(db, config, user.id, password, onPasswordRehash);
+    rehashPassword(db, config, user.id, password, logger, onPasswordRehash);
   }
 
   // Create access token
@@ -289,15 +294,23 @@ function rehashPassword(
   config: AuthConfig,
   userId: string,
   password: string,
+  logger: Logger,
   callback?: (userId: string, error?: Error) => void,
 ): void {
   // Fire and forget - don't block login
   hashPassword(password, config.argon2)
     .then((newHash) => db.update(users).set({ passwordHash: newHash }).where(eq(users.id, userId)))
     .then(() => callback?.(userId))
-    .catch((error: unknown) =>
-      callback?.(userId, error instanceof Error ? error : new Error(String(error))),
-    );
+    .catch((error: unknown) => {
+      const normalizedError = error instanceof Error ? error : new Error(String(error));
+      // Always log rehash failures for observability
+      logger.error('Failed to upgrade password hash', {
+        userId,
+        error: normalizedError.message,
+        stack: normalizedError.stack,
+      });
+      callback?.(userId, normalizedError);
+    });
 }
 
 // ============================================================================
@@ -451,8 +464,8 @@ export async function resendVerificationEmail(
   // Create new verification token
   const verificationToken = await createEmailVerificationToken(db, user.id);
 
-  // Send verification email
-  const verifyUrl = `${baseUrl || 'http://localhost:5173'}/auth/confirm-email?token=${verificationToken}`;
+  // Send verification email (baseUrl is required, provided by handlers)
+  const verifyUrl = `${baseUrl}/auth/confirm-email?token=${verificationToken}`;
   const emailTemplate = emailTemplates.emailVerification(verifyUrl);
   await emailService.send({
     ...emailTemplate,

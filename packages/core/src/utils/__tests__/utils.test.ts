@@ -1,7 +1,7 @@
 // packages/core/src/utils/__tests__/utils.test.ts
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { addAuthHeader, createTokenStore, tokenStore } from '../index';
+import { addAuthHeader, createTokenStore, tokenStore } from '../../index';
 
 describe('utils', () => {
   describe('addAuthHeader', () => {

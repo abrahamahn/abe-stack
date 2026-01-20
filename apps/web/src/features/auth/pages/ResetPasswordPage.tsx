@@ -1,10 +1,11 @@
 // apps/web/src/features/auth/pages/ResetPasswordPage.tsx
-import { Button } from '@abe-stack/ui';
-import { ResetPasswordForm } from '@auth/components/AuthForms';
+import { AuthLayout } from '@abe-stack/ui';
+import { AuthForm } from '@auth/components/AuthForms';
 import { useAuth } from '@auth/hooks';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
+import type { AuthFormProps, AuthMode } from '@auth/components/AuthForms';
 import type { ReactElement } from 'react';
 
 export function ResetPasswordPage(): ReactElement {
@@ -17,6 +18,14 @@ export function ResetPasswordPage(): ReactElement {
 
   const token = searchParams.get('token');
 
+  const handleModeChange = (mode: AuthMode): void => {
+    if (mode === 'login') {
+      void navigate('/login');
+    } else if (mode === 'forgot-password') {
+      void navigate('/auth?mode=forgot-password');
+    }
+  };
+
   const handleResetPassword = async (data: { token: string; password: string }): Promise<void> => {
     setIsLoading(true);
     setError(null);
@@ -24,43 +33,27 @@ export function ResetPasswordPage(): ReactElement {
     try {
       await resetPassword(data);
       alert('Password reset successfully! You can now sign in with your new password.');
-      void navigate('/auth?mode=login');
+      void navigate('/login');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
+      throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleNavigateToForgotPassword = (): void => {
-    void navigate('/auth?mode=forgot-password');
+  const formProps: AuthFormProps = {
+    mode: 'reset-password',
+    onResetPassword: handleResetPassword,
+    onModeChange: handleModeChange,
+    initialData: { token: token ?? undefined },
+    isLoading,
+    error,
   };
-
-  const handleNavigateToLogin = (): void => {
-    void navigate('/auth?mode=login');
-  };
-
-  if (!token) {
-    return (
-      <div className="min-h-screen flex-center bg-surface p-4">
-        <div className="text-center space-y-4">
-          <h2 className="text-xl font-bold text-danger">Invalid reset link</h2>
-          <p className="text-muted">This password reset link is invalid or has expired.</p>
-          <Button onClick={handleNavigateToForgotPassword}>Request a new reset link</Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen flex-center bg-surface p-4">
-      <ResetPasswordForm
-        onResetPassword={handleResetPassword}
-        initialData={{ token }}
-        isLoading={isLoading}
-        error={error}
-        onSuccess={handleNavigateToLogin}
-      />
-    </div>
+    <AuthLayout>
+      <AuthForm {...formProps} />
+    </AuthLayout>
   );
 }

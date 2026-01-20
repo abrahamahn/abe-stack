@@ -15,5 +15,12 @@ export {
   type CookiePluginOptions,
 } from './cookie';
 export { registerCsrf, type CsrfOptions } from './csrf';
-export { applySecurityHeaders, applyCors, handlePreflight, type CorsOptions } from './security';
+export {
+  applySecurityHeaders,
+  applyCors,
+  handlePreflight,
+  getProductionSecurityDefaults,
+  type CorsOptions,
+  type SecurityHeaderOptions,
+} from './security';
 export { registerStaticServe, type StaticServeOptions } from './static';

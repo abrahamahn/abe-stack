@@ -6,7 +6,13 @@
  * Uses the double-submit cookie pattern with signed tokens.
  */
 
-import { randomBytes, createHmac, timingSafeEqual } from 'node:crypto';
+import {
+  randomBytes,
+  createHmac,
+  timingSafeEqual,
+  createCipheriv,
+  createDecipheriv,
+} from 'node:crypto';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
@@ -18,6 +24,7 @@ export interface CsrfOptions {
   cookieName?: string;
   headerName?: string;
   secret: string;
+  encrypted?: boolean; // Use AES encryption for tokens in production
   cookieOpts?: {
     path?: string;
     httpOnly?: boolean;
@@ -41,6 +48,8 @@ const TOKEN_LENGTH = 32;
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
 // Routes that don't need CSRF protection (no authenticated session to exploit)
+// NOTE: /api/auth/logout is intentionally NOT exempt - logout requires CSRF
+// protection to prevent forced logout attacks (CSRF logout attack)
 const CSRF_EXEMPT_PATHS = new Set([
   '/api/auth/login',
   '/api/auth/register',
@@ -48,7 +57,6 @@ const CSRF_EXEMPT_PATHS = new Set([
   '/api/auth/reset-password',
   '/api/auth/verify-email',
   '/api/auth/refresh',
-  '/api/auth/logout',
 ]);
 
 /**
@@ -101,6 +109,57 @@ function verifyToken(
   return { valid: false, token: null };
 }
 
+/**
+ * Encrypt a CSRF token using AES-256-GCM
+ */
+function encryptToken(token: string, secret: string): string {
+  const key = createHmac('sha256', secret).update('csrf-encryption-key').digest();
+  const iv = randomBytes(16);
+  const cipher = createCipheriv('aes-256-gcm', key, iv);
+
+  let encrypted = cipher.update(token, 'utf8', 'base64url');
+  encrypted += cipher.final('base64url');
+
+  const authTag = cipher.getAuthTag().toString('base64url');
+
+  // Format: iv.encrypted.authTag
+  return `${iv.toString('base64url')}.${encrypted}.${authTag}`;
+}
+
+/**
+ * Decrypt a CSRF token using AES-256-GCM
+ */
+function decryptToken(encryptedToken: string, secret: string): string | null {
+  try {
+    const parts = encryptedToken.split('.');
+    if (parts.length !== 3) {
+      return null;
+    }
+
+    const ivStr = parts[0];
+    const encryptedPart = parts[1];
+    const authTagStr = parts[2];
+
+    if (!ivStr || !encryptedPart || !authTagStr) {
+      return null;
+    }
+
+    const key = createHmac('sha256', secret).update('csrf-encryption-key').digest();
+    const iv = Buffer.from(ivStr, 'base64url');
+    const authTag = Buffer.from(authTagStr, 'base64url');
+
+    const decipher = createDecipheriv('aes-256-gcm', key, iv);
+    decipher.setAuthTag(authTag);
+
+    let decrypted = decipher.update(encryptedPart, 'base64url', 'utf8');
+    decrypted += decipher.final('utf8');
+
+    return decrypted;
+  } catch {
+    return null;
+  }
+}
+
 // ============================================================================
 // Fastify Plugin
 // ============================================================================
@@ -109,7 +168,13 @@ function verifyToken(
  * Register CSRF protection on a Fastify instance
  */
 export function registerCsrf(server: FastifyInstance, options: CsrfOptions): void {
-  const { cookieName = '_csrf', headerName = 'x-csrf-token', secret, cookieOpts = {} } = options;
+  const {
+    cookieName = '_csrf',
+    headerName = 'x-csrf-token',
+    secret,
+    encrypted = false,
+    cookieOpts = {},
+  } = options;
 
   const {
     path = '/',
@@ -122,10 +187,15 @@ export function registerCsrf(server: FastifyInstance, options: CsrfOptions): voi
   // Decorate reply with generateCsrf method
   server.decorateReply('generateCsrf', function (this: FastifyReply): string {
     const token = generateToken();
-    const signedToken = signed ? signToken(token, secret) : token;
+    let finalToken = signed ? signToken(token, secret) : token;
+
+    // Encrypt token if encryption is enabled
+    if (encrypted) {
+      finalToken = encryptToken(finalToken, secret);
+    }
 
     // Set the CSRF cookie
-    this.setCookie(cookieName, signedToken, {
+    this.setCookie(cookieName, finalToken, {
       path,
       httpOnly,
       secure,
@@ -160,9 +230,27 @@ export function registerCsrf(server: FastifyInstance, options: CsrfOptions): voi
     }
 
     // Verify the cookie token
-    const cookieResult = signed
-      ? verifyToken(cookieToken, secret)
-      : { valid: true, token: cookieToken };
+    let cookieResult: { valid: boolean; token: string | null };
+
+    if (encrypted) {
+      // Decrypt first, then verify signature if signed
+      const decryptedToken = decryptToken(cookieToken, secret);
+      if (!decryptedToken) {
+        reply.status(403).send({
+          error: 'Forbidden',
+          message: 'Invalid CSRF token',
+        });
+        return;
+      }
+
+      cookieResult = signed
+        ? verifyToken(decryptedToken, secret)
+        : { valid: true, token: decryptedToken };
+    } else {
+      cookieResult = signed
+        ? verifyToken(cookieToken, secret)
+        : { valid: true, token: cookieToken };
+    }
 
     if (!cookieResult.valid || !cookieResult.token) {
       reply.status(403).send({

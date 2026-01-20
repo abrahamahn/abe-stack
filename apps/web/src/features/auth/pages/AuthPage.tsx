@@ -57,6 +57,9 @@ export function AuthPage(): ReactElement {
       }
     };
 
+  // Get token from URL for reset password flow
+  const token = searchParams.get('token');
+
   const formProps: AuthFormProps = {
     mode,
     onLogin: createFormHandler(login),
@@ -76,6 +79,7 @@ export function AuthPage(): ReactElement {
     onModeChange: handleModeChange,
     isLoading,
     error,
+    initialData: token ? { token } : undefined,
   };
 
   return (

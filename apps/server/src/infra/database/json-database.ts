@@ -10,11 +10,13 @@
  * - Optional JSON file persistence
  * - Basic CRUD operations
  * - Simple query support (where, limit, orderBy)
+ * - Mutex-based write locking (prevents race conditions in-process)
+ * - Transaction rollback support via snapshots
+ * - Returns copies of data to prevent reference leaks
  *
  * Limitations (vs PostgreSQL):
- * - No transactions (operations are atomic at the row level)
  * - No complex queries (joins, aggregations)
- * - No concurrent write safety (single process only)
+ * - Single process only (mutex is in-memory, not cross-process)
  * - Limited query operators
  *
  * Use for: Quick prototyping, demos, testing
@@ -25,6 +27,51 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 
 import type { JsonDatabaseConfig } from '@config/database.config';
+
+// =============================================================================
+// Simple Mutex for Write Operations
+// =============================================================================
+
+/**
+ * Simple in-process mutex for serializing write operations.
+ * This prevents race conditions when multiple async operations try to write concurrently.
+ */
+class Mutex {
+  private locked = false;
+  private queue: Array<() => void> = [];
+
+  async acquire(): Promise<void> {
+    if (!this.locked) {
+      this.locked = true;
+      return;
+    }
+
+    return new Promise<void>((resolve) => {
+      this.queue.push(resolve);
+    });
+  }
+
+  release(): void {
+    const next = this.queue.shift();
+    if (next) {
+      next();
+    } else {
+      this.locked = false;
+    }
+  }
+
+  /**
+   * Execute a function while holding the lock
+   */
+  async withLock<T>(fn: () => T | Promise<T>): Promise<T> {
+    await this.acquire();
+    try {
+      return await fn();
+    } finally {
+      this.release();
+    }
+  }
+}
 
 // =============================================================================
 // Types
@@ -74,6 +121,7 @@ export class JsonDatabase {
   private data: DatabaseSchema;
   private readonly filePath: string;
   private readonly persistOnWrite: boolean;
+  private readonly writeMutex = new Mutex();
 
   constructor(config: JsonDatabaseConfig) {
     this.filePath = config.filePath;
@@ -125,10 +173,11 @@ export class JsonDatabase {
   // ===========================================================================
 
   /**
-   * Get all records from a table
+   * Get all records from a table (returns a shallow copy to prevent reference leaks)
    */
   getAll<T extends DbRecord>(table: string): T[] {
-    return (this.data[table] || []) as T[];
+    const tableData = this.data[table] || [];
+    return [...tableData] as T[];
   }
 
   /**
@@ -183,107 +232,141 @@ export class JsonDatabase {
   }
 
   /**
-   * Find a record by ID
+   * Find a record by ID (returns a shallow copy to prevent reference leaks)
    */
   findById(table: string, id: string): DbRecord | undefined {
-    return this.getAll<DbRecord>(table).find((record) => record.id === id);
+    const record = this.getAll<DbRecord>(table).find((record) => record.id === id);
+    return record ? { ...record } : undefined;
   }
 
   /**
-   * Insert a record
+   * Insert a record (async to support mutex locking)
    */
-  insert<T extends DbRecord>(table: string, data: Omit<T, 'id'> & { id?: string }): T {
-    const id = data.id || this.generateId();
-    const record = { ...data, id } as T;
+  async insert<T extends DbRecord>(
+    table: string,
+    data: Omit<T, 'id'> & { id?: string },
+  ): Promise<T> {
+    return this.writeMutex.withLock(() => {
+      const id = data.id || this.generateId();
+      const record = { ...data, id } as T;
 
-    if (!this.data[table]) {
-      this.data[table] = [];
-    }
-    this.data[table].push(record as DbRecord);
-    this.saveToFile();
+      if (!this.data[table]) {
+        this.data[table] = [];
+      }
+      this.data[table].push(record as DbRecord);
+      this.saveToFile();
 
-    return record;
+      return record;
+    });
   }
 
   /**
-   * Insert multiple records
+   * Insert multiple records (async to support mutex locking)
    */
-  insertMany<T extends DbRecord>(
+  async insertMany<T extends DbRecord>(
     table: string,
     records: Array<Omit<T, 'id'> & { id?: string }>,
-  ): T[] {
-    return records.map((record) => this.insert<T>(table, record));
-  }
+  ): Promise<T[]> {
+    return this.writeMutex.withLock(() => {
+      const inserted: T[] = [];
+      for (const data of records) {
+        const id = data.id || this.generateId();
+        const record = { ...data, id } as T;
 
-  /**
-   * Update records matching a condition
-   */
-  update<T extends DbRecord>(table: string, data: Partial<T>, where: WhereCondition<T>): T[] {
-    const updated: T[] = [];
-    const records = this.getAll<T>(table);
-
-    records.forEach((record, i) => {
-      const matches =
-        typeof where === 'function'
-          ? where(record)
-          : Object.entries(where).every(([key, value]) => record[key as keyof T] === value);
-
-      if (matches) {
-        const updatedRecord = { ...record, ...data } as T;
-        (this.data[table] as T[])[i] = updatedRecord;
-        updated.push(updatedRecord);
+        if (!this.data[table]) {
+          this.data[table] = [];
+        }
+        this.data[table].push(record as DbRecord);
+        inserted.push(record);
       }
-    });
-
-    if (updated.length > 0) {
       this.saveToFile();
-    }
-
-    return updated;
+      return inserted;
+    });
   }
 
   /**
-   * Update a record by ID
+   * Update records matching a condition (async to support mutex locking)
    */
-  updateById<T extends DbRecord>(table: string, id: string, data: Partial<T>): T | undefined {
-    const updated = this.update<T>(table, data, { id } as Partial<T>);
+  async update<T extends DbRecord>(
+    table: string,
+    data: Partial<T>,
+    where: WhereCondition<T>,
+  ): Promise<T[]> {
+    return this.writeMutex.withLock(() => {
+      const updated: T[] = [];
+      const tableData = this.data[table] || [];
+
+      tableData.forEach((record, i) => {
+        const typedRecord = record as T;
+        const matches =
+          typeof where === 'function'
+            ? where(typedRecord)
+            : Object.entries(where).every(([key, value]) => typedRecord[key as keyof T] === value);
+
+        if (matches) {
+          const updatedRecord = { ...typedRecord, ...data } as T;
+          (this.data[table] as T[])[i] = updatedRecord;
+          updated.push(updatedRecord);
+        }
+      });
+
+      if (updated.length > 0) {
+        this.saveToFile();
+      }
+
+      return updated;
+    });
+  }
+
+  /**
+   * Update a record by ID (async to support mutex locking)
+   */
+  async updateById<T extends DbRecord>(
+    table: string,
+    id: string,
+    data: Partial<T>,
+  ): Promise<T | undefined> {
+    const updated = await this.update<T>(table, data, { id } as Partial<T>);
     return updated[0];
   }
 
   /**
-   * Delete records matching a condition
+   * Delete records matching a condition (async to support mutex locking)
    */
-  delete<T extends DbRecord>(table: string, where: WhereCondition<T>): T[] {
-    const deleted: T[] = [];
-    const records = this.getAll<T>(table);
-    const remaining: T[] = [];
+  async delete<T extends DbRecord>(table: string, where: WhereCondition<T>): Promise<T[]> {
+    return this.writeMutex.withLock(() => {
+      const deleted: T[] = [];
+      const tableData = this.data[table] || [];
+      const remaining: DbRecord[] = [];
 
-    for (const record of records) {
-      const matches =
-        typeof where === 'function'
-          ? where(record)
-          : Object.entries(where).every(([key, value]) => record[key as keyof T] === value);
+      for (const record of tableData) {
+        const typedRecord = record as T;
+        const matches =
+          typeof where === 'function'
+            ? where(typedRecord)
+            : Object.entries(where).every(([key, value]) => typedRecord[key as keyof T] === value);
 
-      if (matches) {
-        deleted.push(record);
-      } else {
-        remaining.push(record);
+        if (matches) {
+          deleted.push(typedRecord);
+        } else {
+          remaining.push(record);
+        }
       }
-    }
 
-    if (deleted.length > 0) {
-      this.data[table] = remaining as DbRecord[];
-      this.saveToFile();
-    }
+      if (deleted.length > 0) {
+        this.data[table] = remaining;
+        this.saveToFile();
+      }
 
-    return deleted;
+      return deleted;
+    });
   }
 
   /**
-   * Delete a record by ID
+   * Delete a record by ID (async to support mutex locking)
    */
-  deleteById<T extends DbRecord>(table: string, id: string): T | undefined {
-    const deleted = this.delete<T>(table, { id } as Partial<T>);
+  async deleteById(table: string, id: string): Promise<DbRecord | undefined> {
+    const deleted = await this.delete(table, { id });
     return deleted[0];
   }
 
@@ -296,21 +379,25 @@ export class JsonDatabase {
   }
 
   /**
-   * Clear all data from a table
+   * Clear all data from a table (async to support mutex locking)
    */
-  clearTable(table: string): void {
-    this.data[table] = [];
-    this.saveToFile();
+  async clearTable(table: string): Promise<void> {
+    return this.writeMutex.withLock(() => {
+      this.data[table] = [];
+      this.saveToFile();
+    });
   }
 
   /**
-   * Clear all data from all tables
+   * Clear all data from all tables (async to support mutex locking)
    */
-  clearAll(): void {
-    for (const table of Object.keys(this.data)) {
-      this.data[table] = [];
-    }
-    this.saveToFile();
+  async clearAll(): Promise<void> {
+    return this.writeMutex.withLock(() => {
+      for (const table of Object.keys(this.data)) {
+        this.data[table] = [];
+      }
+      this.saveToFile();
+    });
   }
 
   // ===========================================================================
@@ -337,10 +424,27 @@ export class JsonDatabase {
   }
 
   /**
-   * Get internal data (for debugging/testing)
+   * Get internal data (for debugging/testing) - returns a deep copy
    */
   getData(): DatabaseSchema {
-    return this.data;
+    return JSON.parse(JSON.stringify(this.data)) as DatabaseSchema;
+  }
+
+  /**
+   * Create a snapshot of the current database state for rollback
+   */
+  createSnapshot(): DatabaseSchema {
+    return JSON.parse(JSON.stringify(this.data)) as DatabaseSchema;
+  }
+
+  /**
+   * Restore database state from a snapshot
+   */
+  async restoreSnapshot(snapshot: DatabaseSchema): Promise<void> {
+    return this.writeMutex.withLock(() => {
+      this.data = JSON.parse(JSON.stringify(snapshot)) as DatabaseSchema;
+      this.saveToFile();
+    });
   }
 }
 
@@ -364,10 +468,17 @@ export function createJsonDbClient(config: JsonDatabaseConfig): JsonDbClient {
  * JSON Database Client with Drizzle-like interface
  */
 export class JsonDbClient {
-  private db: JsonDatabase;
+  private readonly db: JsonDatabase;
 
   constructor(db: JsonDatabase) {
     this.db = db;
+  }
+
+  /**
+   * Get the underlying JsonDatabase instance (for snapshot/restore operations)
+   */
+  getDatabase(): JsonDatabase {
+    return this.db;
   }
 
   /**
@@ -424,12 +535,24 @@ export class JsonDbClient {
   }
 
   /**
-   * Transaction (no-op for JSON - just executes the callback)
+   * Transaction with rollback support
+   *
+   * Creates a snapshot of the database before executing the callback.
+   * If the callback throws an error, the database is restored to the snapshot.
    */
   async transaction<T>(callback: (tx: JsonDbClient) => Promise<T>, _options?: unknown): Promise<T> {
-    // JSON database doesn't support real transactions
-    // Just execute the callback with this client
-    return callback(this);
+    // Create a snapshot before starting the transaction
+    const snapshot = this.db.createSnapshot();
+
+    try {
+      // Execute the callback
+      const result = await callback(this);
+      return result;
+    } catch (error) {
+      // Rollback on error by restoring the snapshot
+      await this.db.restoreSnapshot(snapshot);
+      throw error;
+    }
   }
 }
 
@@ -533,13 +656,12 @@ class JsonInsertBuilder<T extends DbRecord> {
     return this;
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   async then<TResult>(
     resolve: (value: T[]) => TResult,
     reject?: (reason: unknown) => TResult,
   ): Promise<TResult> {
     try {
-      const inserted = this.db.insertMany<T>(this.tableName, this.data);
+      const inserted = await this.db.insertMany<T>(this.tableName, this.data);
       return resolve(this.shouldReturn ? inserted : ([] as T[]));
     } catch (error) {
       if (reject) {
@@ -580,7 +702,6 @@ class JsonUpdateBuilder<T extends DbRecord> {
     return this;
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   async then<TResult>(
     resolve: (value: T[]) => TResult,
     reject?: (reason: unknown) => TResult,
@@ -589,7 +710,7 @@ class JsonUpdateBuilder<T extends DbRecord> {
       if (!this.whereCondition) {
         throw new Error('WHERE condition required for UPDATE');
       }
-      const updated = this.db.update<T>(this.tableName, this.updateData, this.whereCondition);
+      const updated = await this.db.update<T>(this.tableName, this.updateData, this.whereCondition);
       return resolve(this.shouldReturn ? updated : ([] as T[]));
     } catch (error) {
       if (reject) {
@@ -623,7 +744,6 @@ class JsonDeleteBuilder<T extends DbRecord> {
     return this;
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
   async then<TResult>(
     resolve: (value: T[]) => TResult,
     reject?: (reason: unknown) => TResult,
@@ -632,7 +752,7 @@ class JsonDeleteBuilder<T extends DbRecord> {
       if (!this.whereCondition) {
         throw new Error('WHERE condition required for DELETE');
       }
-      const deleted = this.db.delete<T>(this.tableName, this.whereCondition);
+      const deleted = await this.db.delete<T>(this.tableName, this.whereCondition);
       return resolve(this.shouldReturn ? deleted : ([] as T[]));
     } catch (error) {
       if (reject) {

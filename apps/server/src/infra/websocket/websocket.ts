@@ -94,9 +94,11 @@ function handleConnection(socket: WebSocket, req: IncomingMessage, ctx: AppConte
 
   // Check cookies (accessToken cookie for seamless auth)
   if (!token) {
-    const cookies = parseCookies(req.headers.cookie);
-    if (cookies.accessToken) {
-      token = cookies.accessToken;
+    const rawCookies: unknown = parseCookies(req.headers.cookie);
+    const cookies = isStringRecord(rawCookies) ? rawCookies : {};
+    const accessToken = cookies.accessToken;
+    if (typeof accessToken === 'string') {
+      token = accessToken;
     }
   }
 
@@ -142,18 +144,79 @@ function handleConnection(socket: WebSocket, req: IncomingMessage, ctx: AppConte
       ctx.log.error({ err, userId: user.userId, activeConnections }, 'WebSocket error');
       pubsub.cleanup(socket as unknown as PubSubWebSocket);
     });
-  } catch {
+  } catch (err) {
+    ctx.log.warn({ err }, 'WebSocket token verification failed');
     socket.close(1008, 'Invalid token');
   }
 }
 
-async function sendInitialData(ctx: AppContext, socket: WebSocket, key: string): Promise<void> {
+function isStringRecord(value: unknown): value is Record<string, string> {
+  if (!value || typeof value !== 'object') return false;
+  return Object.values(value).every((entry) => typeof entry === 'string');
+}
+
+// ============================================================================
+// Table Whitelist for WebSocket Subscriptions
+// ============================================================================
+
+/**
+ * Whitelist of allowed table names for WebSocket subscriptions.
+ * Only tables in this set can be queried via subscription keys.
+ * This prevents SQL injection and unauthorized data access.
+ */
+const ALLOWED_SUBSCRIPTION_TABLES = new Set([
+  'users',
+  'sessions',
+  'posts',
+  'comments',
+  'notifications',
+  // Add more tables as needed for real-time subscriptions
+]);
+
+/**
+ * Validate subscription key format and table name.
+ * Key must be: record:{table}:{id}
+ * - table: must be in whitelist, alphanumeric and underscores only
+ * - id: must be alphanumeric, hyphens, and underscores only (UUID-safe)
+ */
+function isValidSubscriptionKey(key: string): { valid: boolean; table?: string; id?: string } {
   const parts = key.split(':');
-  // Expected format: record:{table}:{id}
-  if (parts.length !== 3 || parts[0] !== 'record') return;
+  if (parts.length !== 3 || parts[0] !== 'record') {
+    return { valid: false };
+  }
 
   const [, table, id] = parts;
-  if (!table || !id) return;
+  if (!table || !id) {
+    return { valid: false };
+  }
+
+  // Validate table name format (alphanumeric and underscores)
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(table)) {
+    return { valid: false };
+  }
+
+  // Check table is in whitelist
+  if (!ALLOWED_SUBSCRIPTION_TABLES.has(table)) {
+    return { valid: false };
+  }
+
+  // Validate ID format (alphanumeric, hyphens, underscores - UUID safe)
+  if (!/^[a-zA-Z0-9_-]+$/.test(id)) {
+    return { valid: false };
+  }
+
+  return { valid: true, table, id };
+}
+
+async function sendInitialData(ctx: AppContext, socket: WebSocket, key: string): Promise<void> {
+  // Validate subscription key format and table whitelist
+  const validation = isValidSubscriptionKey(key);
+  if (!validation.valid || !validation.table || !validation.id) {
+    ctx.log.warn({ key }, 'Invalid subscription key format or non-whitelisted table');
+    return;
+  }
+
+  const { table, id } = validation;
 
   try {
     /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */

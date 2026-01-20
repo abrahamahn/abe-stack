@@ -2,7 +2,7 @@
 
 **Last Updated: January 19, 2026**
 
-Comprehensive guide to the ABE Stack developer experience automation scripts. These seven TypeScript scripts handle repetitive tasks automatically during development.
+Comprehensive guide to the ABE Stack developer experience automation scripts. These six TypeScript scripts handle repetitive tasks automatically during development.
 
 > **Related Documentation:**
 >
@@ -19,27 +19,25 @@ Comprehensive guide to the ABE Stack developer experience automation scripts. Th
 4. [sync-path-aliases.ts](#1-sync-path-aliasests)
 5. [sync-file-headers.ts](#2-sync-file-headersts)
 6. [sync-test-folders.ts](#3-sync-test-foldersts)
-7. [sync-barrel-exports.ts](#4-sync-barrel-exportsts)
-8. [sync-tsconfig.ts](#5-sync-tsconfigts)
-9. [sync-linting.ts](#6-sync-lintingts)
-10. [sync-css-theme.ts](#7-sync-css-themets)
-11. [Manual vs Automatic Execution](#manual-vs-automatic-execution-summary)
+7. [sync-tsconfig.ts](#4-sync-tsconfigts)
+8. [sync-linting.ts](#5-sync-lintingts)
+9. [sync-css-theme.ts](#6-sync-css-themets)
+10. [Manual vs Automatic Execution](#manual-vs-automatic-execution-summary)
 
 ---
 
 ## Overview
 
-Seven TypeScript sync scripts automate repetitive development tasks. All scripts are located in `config/lint/`:
+Six TypeScript sync scripts automate repetitive development tasks. All scripts are located in `config/lint/`:
 
-| Script                   | Purpose                                                         |
-| ------------------------ | --------------------------------------------------------------- |
-| `sync-path-aliases.ts`   | Auto-generate TypeScript path aliases in `tsconfig.json`        |
-| `sync-file-headers.ts`   | Ensure source files have path comment headers                   |
-| `sync-test-folders.ts`   | Create `__tests__/` directories for code directories            |
-| `sync-barrel-exports.ts` | Auto-generate barrel file exports                               |
-| `sync-tsconfig.ts`       | Auto-generate TypeScript project references                     |
-| `sync-linting.ts`        | Sync linting config to `package.json` + `.vscode/settings.json` |
-| `sync-css-theme.ts`      | Generate CSS custom properties from theme tokens                |
+| Script                 | Purpose                                                         |
+| ---------------------- | --------------------------------------------------------------- |
+| `sync-path-aliases.ts` | Auto-generate TypeScript path aliases in `tsconfig.json`        |
+| `sync-file-headers.ts` | Ensure source files have path comment headers                   |
+| `sync-test-folders.ts` | Create `__tests__/` directories for code directories            |
+| `sync-tsconfig.ts`     | Auto-generate TypeScript project references                     |
+| `sync-linting.ts`      | Sync linting config to `package.json` + `.vscode/settings.json` |
+| `sync-css-theme.ts`    | Generate CSS custom properties from theme tokens                |
 
 ---
 
@@ -67,17 +65,16 @@ const watchers = [
   startConfigGenerator(), // Generates tsconfigs and aliases
   startWatcher('config/lint/sync-file-headers.ts'),
   startWatcher('config/lint/sync-test-folders.ts'),
-  startWatcher('config/lint/sync-barrel-exports.ts'),
   startWatcher('config/lint/sync-css-theme.ts'),
 ];
 ```
 
-Five scripts run in watch mode with `--quiet` flag in background processes. `sync-tsconfig.ts` and `sync-linting.ts` run on demand (sync/check only).
+Four scripts run in watch mode with `--quiet` flag in background processes. `sync-tsconfig.ts` and `sync-linting.ts` run on demand (sync/check only).
 
 ### Pre-commit Hook
 
 ```bash
-pnpm config:generate && pnpm sync:headers && pnpm sync:tests && pnpm sync:barrels && pnpm sync:theme
+pnpm config:generate && pnpm sync:headers && pnpm sync:tests && pnpm sync:theme
 ```
 
 ### CI Pipeline (`.github/workflows/ci.yml`)
@@ -87,7 +84,6 @@ pnpm config:generate && pnpm sync:headers && pnpm sync:tests && pnpm sync:barrel
 - run: pnpm sync:tsconfig:check
 - run: pnpm sync:headers:check
 - run: pnpm sync:tests:check
-- run: pnpm sync:barrels:check
 ```
 
 ---
@@ -264,112 +260,7 @@ A file is considered a barrel if it contains ONLY comments, import statements, a
 
 ---
 
-## 4. sync-barrel-exports.ts
-
-**Purpose:** Auto-generate and update `index.ts` barrel files with explicit named exports.
-
-**Commands:**
-
-```bash
-pnpm sync:barrels        # Sync once
-pnpm sync:barrels:check  # Verify
-pnpm sync:barrels:watch  # Watch mode
-```
-
-**Pattern enforced:**
-
-```typescript
-// ✅ Generated (correct)
-export { Button, Card } from './Button';
-export type { ButtonProps, CardProps } from './types';
-
-// ❌ Not generated (wrong pattern)
-export * from './Button';
-```
-
-### Scope Included
-
-**Scan roots:**
-
-- `apps/web/src`
-- `apps/server/src`
-- `apps/desktop/src`
-- `packages/core/src`
-- `packages/sdk/src`
-- `packages/ui/src`
-
-### Scope Excluded
-
-**Directories skipped:**
-
-- `node_modules`, `__tests__`, `.cache`, `.turbo`, `dist`, `build`, `coverage`, `.git`
-- `apps/web/src`, `apps/server/src`, `apps/desktop/src` (root src dirs — apps don't need auto-generated root barrels)
-- `tools/dev/export`, `tools/packages`
-- `src/test`, `src/tests`
-
-**Files skipped when parsing exports:**
-
-- `index.ts`, `index.tsx` (barrel files themselves)
-- `.test.ts`, `.test.tsx`, `.spec.ts`, `.spec.tsx`
-
-**Manual barrels preserved:**
-If an `index.ts` exists and does NOT contain the auto-generated marker, it's left untouched:
-
-```typescript
-// @auto-generated - Do not edit manually  ← Only files with this marker are managed
-```
-
-### How It Works
-
-1. **Collects all directories** in scan roots
-2. **For each directory:**
-   - Lists exportable files (`.ts`, `.tsx`, excluding index/tests)
-   - Lists subdirectories with their own `index.ts`
-   - **Parses exports from each file:**
-     - Named exports: `export const`, `export function`, `export class`, `export enum`
-     - Type exports: `export interface`, `export type`
-     - Re-exports: `export { } from`, `export type { } from`
-   - **Generates barrel content:**
-
-     ```typescript
-     // packages/ui/src/components/index.ts
-     // @auto-generated - Do not edit manually
-
-     export { Button, Card } from './Button';
-     export type { ButtonProps, CardProps } from './Button';
-     export { Modal } from './Modal';
-     ```
-
-3. **Compares with existing** — only writes if different
-4. **Preserves manual barrels** — skips files without auto-generated marker
-
-### Export Parsing Details
-
-Parses these patterns:
-
-```typescript
-// Direct exports
-export const foo = ...
-export function bar() { }
-export class Baz { }
-export enum Status { }
-export interface Props { }
-export type Config = ...
-
-// Inline exports
-export { foo, bar }
-export type { Props, Config }
-
-// Re-exports
-export { foo, bar } from './module'
-export type { Props } from './types'
-```
-
-Separates values from types for proper `export type { }` syntax.
-
----
-
-## 5. sync-tsconfig.ts
+## 4. sync-tsconfig.ts
 
 **Purpose:** Auto-generate TypeScript project references based on workspace dependencies.
 
@@ -394,7 +285,7 @@ pnpm sync:tsconfig:check  # Verify (CI mode)
 
 ---
 
-## 6. sync-linting.ts
+## 5. sync-linting.ts
 
 **Purpose:** Sync linting config to `package.json` and `.vscode/settings.json`.
 
@@ -422,7 +313,7 @@ pnpm sync:linting:check  # Verify (CI mode)
 
 ---
 
-## 7. sync-css-theme.ts
+## 6. sync-css-theme.ts
 
 **Purpose:** Generate CSS custom properties from TypeScript theme tokens.
 
@@ -484,15 +375,14 @@ for (const filePath of themeSourceFiles) {
 
 ## Manual vs Automatic Execution Summary
 
-| Script              | `pnpm dev` | Pre-commit | CI Check |
-| ------------------- | ---------- | ---------- | -------- |
-| sync-path-aliases   | ✅ Watch   | ✅ Sync    | ✅ Check |
-| sync-file-headers   | ✅ Watch   | ✅ Sync    | ✅ Check |
-| sync-test-folders   | ✅ Watch   | ✅ Sync    | ✅ Check |
-| sync-barrel-exports | ✅ Watch   | ✅ Sync    | ✅ Check |
-| sync-tsconfig       | ❌         | ✅ Sync    | ✅ Check |
-| sync-linting        | ❌         | ✅ Sync    | ❌ N/A   |
-| sync-css-theme      | ✅ Watch   | ✅ Build   | ❌ N/A   |
+| Script            | `pnpm dev` | Pre-commit | CI Check |
+| ----------------- | ---------- | ---------- | -------- |
+| sync-path-aliases | ✅ Watch   | ✅ Sync    | ✅ Check |
+| sync-file-headers | ✅ Watch   | ✅ Sync    | ✅ Check |
+| sync-test-folders | ✅ Watch   | ✅ Sync    | ✅ Check |
+| sync-tsconfig     | ❌         | ✅ Sync    | ✅ Check |
+| sync-linting      | ❌         | ✅ Sync    | ❌ N/A   |
+| sync-css-theme    | ✅ Watch   | ✅ Build   | ❌ N/A   |
 
 ---
 

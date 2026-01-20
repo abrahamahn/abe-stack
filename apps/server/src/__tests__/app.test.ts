@@ -96,6 +96,8 @@ describe('App', () => {
       cors: { origin: '*', credentials: false, methods: ['GET', 'POST'] },
       trustProxy: false,
       logLevel: 'silent',
+      appBaseUrl: 'http://localhost:5173',
+      apiBaseUrl: 'http://localhost:0',
     },
     database: {
       provider: 'postgresql',

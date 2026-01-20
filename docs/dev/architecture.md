@@ -197,7 +197,6 @@ The server implements **hexagonal architecture** (ports & adapters) to isolate b
 - `sync-path-aliases` keeps TS path aliases aligned with directories that have `index.ts` barrels
 - `sync-file-headers` prepends `// path/to/file.ts` headers to new or updated files
 - `sync-test-folders` creates `__tests__/` folders for code directories (skips barrel-only folders)
-- `sync-barrel-exports` generates and updates explicit named exports in `index.ts`
 - `sync-css-theme` generates CSS custom properties from theme tokens
 - `pnpm dev` runs all sync tools in watch mode alongside Vite/Fastify dev servers
 

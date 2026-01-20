@@ -43,7 +43,7 @@ export function useDemoPanes(): UseDemoPanesResult {
 
   const togglePane = useCallback(
     (pane: keyof DemoPaneConfig): void => {
-      setPaneConfig((prev) => ({
+      setPaneConfig((prev: DemoPaneConfig) => ({
         ...prev,
         [pane]: { ...prev[pane], visible: !prev[pane].visible },
       }));
@@ -52,7 +52,7 @@ export function useDemoPanes(): UseDemoPanesResult {
   );
 
   function handlePaneResize(pane: keyof DemoPaneConfig, size: number): void {
-    setPaneConfig((prev) => ({
+    setPaneConfig((prev: DemoPaneConfig) => ({
       ...prev,
       [pane]: { ...prev[pane], size },
     }));
