@@ -8,9 +8,10 @@
 
 /**
  * Minimal Zod issue interface for compatibility without direct Zod dependency
+ * Updated for Zod v4 where path can include symbols (PropertyKey)
  */
 export interface ZodIssueMinimal {
-  path: Array<string | number>;
+  path: PropertyKey[];
   message: string;
   code: string;
 }
@@ -60,7 +61,7 @@ export function formatValidationErrors(issues: ZodIssueMinimal[]): ValidationErr
       code: 'VALIDATION_ERROR',
       message: 'Request validation failed',
       details: issues.map((issue) => ({
-        field: issue.path.join('.'),
+        field: issue.path.map((p) => String(p)).join('.'),
         message: issue.message,
         code: issue.code,
       })),

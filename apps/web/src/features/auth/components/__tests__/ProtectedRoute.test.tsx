@@ -13,11 +13,45 @@ vi.mock('../../hooks/useAuth', () => ({
   useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
 }));
 
-// Mock UI components
+// Mock UI components - we need to fully mock ProtectedRoute to avoid react-router-dom context issues
+// between different package instances in the monorepo
 vi.mock('@abe-stack/ui', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@abe-stack/ui')>();
+  const { Navigate, Outlet } = await import('react-router-dom');
+
+  // Re-create ProtectedRoute using the same react-router-dom instance as the test
+  const ProtectedRoute = ({
+    isAuthenticated,
+    isLoading,
+    redirectTo = '/login',
+    loadingComponent,
+    children,
+  }: {
+    isAuthenticated: boolean;
+    isLoading: boolean;
+    redirectTo?: string;
+    loadingComponent?: React.ReactNode;
+    children?: React.ReactNode;
+  }): React.ReactElement => {
+    if (isLoading) {
+      return (loadingComponent ?? (
+        <div className="loading-container">
+          <div data-testid="spinner">Loading Spinner</div>
+          <span>Loading...</span>
+        </div>
+      )) as React.ReactElement;
+    }
+
+    if (!isAuthenticated) {
+      return <Navigate to={redirectTo} replace />;
+    }
+
+    return children ? <>{children}</> : <Outlet />;
+  };
+
   return {
     ...actual,
+    ProtectedRoute,
     Spinner: (): React.ReactElement => <div data-testid="spinner">Loading Spinner</div>,
     Text: ({ children }: { children: React.ReactNode }): React.ReactElement => (
       <span>{children}</span>

@@ -24,8 +24,8 @@
     "react-dom": "^19.2.3"
   },
   "devDependencies": {
-    "electron": "^39.2.7",
-    "electron-builder": "^26.0.12"
+    "electron": "^40.0.0",
+    "electron-builder": "^26.4.0"
   },
   "build": {
     "appId": "com.abe-stack.desktop",

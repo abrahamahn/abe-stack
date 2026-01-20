@@ -16,7 +16,7 @@ import { z } from 'zod';
  * Standard email validation schema.
  * Used consistently across auth, users, and admin contracts.
  */
-export const emailSchema = z.string().email().min(1).max(255);
+export const emailSchema = z.email().min(1).max(255);
 
 // ============================================================================
 // Password Schema
@@ -35,7 +35,7 @@ export const passwordSchema = z.string().min(8);
 /**
  * UUID string schema for entity IDs.
  */
-export const uuidSchema = z.string().uuid();
+export const uuidSchema = z.uuid();
 
 /**
  * Optional name field with minimum length.
@@ -53,7 +53,7 @@ export const requiredNameSchema = z.string().min(2);
 export const errorResponseSchema = z.object({
   message: z.string(),
   code: z.string().optional(),
-  details: z.record(z.unknown()).optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type ErrorResponse = z.infer<typeof errorResponseSchema>;

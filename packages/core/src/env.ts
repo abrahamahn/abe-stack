@@ -16,12 +16,12 @@ export const serverEnvSchema = z
     POSTGRES_DB: z.string().min(1, 'Database name is required'),
     POSTGRES_USER: z.string().min(1, 'Database user is required'),
     POSTGRES_PASSWORD: z.string().min(1, 'Database password is required'),
-    DATABASE_URL: z.string().url().optional(),
+    DATABASE_URL: z.url().optional(),
 
     // Redis Configuration
     REDIS_HOST: z.string().default('localhost'),
     REDIS_PORT: z.coerce.number().default(6379),
-    REDIS_URL: z.string().url().optional(),
+    REDIS_URL: z.url().optional(),
 
     // Application Ports
     API_PORT: z.coerce.number().default(8080),
@@ -118,7 +118,7 @@ export function validateEnvironment(raw: Record<string, unknown>): ServerEnv {
 
 export function validateEnvironmentSafe(
   raw: Record<string, unknown>,
-): z.SafeParseReturnType<unknown, ServerEnv> {
+): ReturnType<typeof envSchema.safeParse> {
   return envSchema.safeParse(raw);
 }
 
