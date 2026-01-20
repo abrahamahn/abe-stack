@@ -126,6 +126,8 @@ const coverageExclude = [
   '**/tools/**',
   '**/*.config.{js,ts}',
   '**/*.d.ts',
+  '**/index.ts', // Barrel exports only, no logic to test
+  '**/media/image-processing.ts', // Browser-specific Canvas code, tested manually
 ];
 
 export const baseConfig = defineConfig({

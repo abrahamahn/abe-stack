@@ -109,6 +109,58 @@ describe('Audio Metadata', () => {
       const result = await parseAudioMetadata('/test.unknown');
       expect(result).toEqual({});
     });
+
+    it('should handle truncated MP3 frame header', async () => {
+      const fs = await import('fs');
+      // MPEG frame sync but buffer too short for full header
+      const buffer = Buffer.alloc(3); // Only 3 bytes, not enough for header
+      buffer[0] = 0xff;
+      buffer[1] = 0xfb;
+      vi.mocked(fs.promises.readFile).mockResolvedValue(buffer);
+
+      const result = await parseAudioMetadata('/test.mp3');
+      expect(result.format).toBe('mp3');
+      // Should still detect MP3 but may not get all metadata
+    });
+
+    it('should handle MP3 with invalid bitrate index', async () => {
+      const fs = await import('fs');
+      const buffer = Buffer.alloc(100);
+      buffer[0] = 0xff;
+      buffer[1] = 0xfb;
+      buffer[2] = 0xf0; // Invalid bitrate index (15)
+      buffer[3] = 0x00;
+      vi.mocked(fs.promises.readFile).mockResolvedValue(buffer);
+
+      const result = await parseAudioMetadata('/test.mp3');
+      expect(result.format).toBe('mp3');
+    });
+
+    it('should handle MP3 with invalid sample rate index', async () => {
+      const fs = await import('fs');
+      const buffer = Buffer.alloc(100);
+      buffer[0] = 0xff;
+      buffer[1] = 0xfb;
+      buffer[2] = 0x9c; // Valid bitrate, invalid sample rate index (3)
+      buffer[3] = 0x00;
+      vi.mocked(fs.promises.readFile).mockResolvedValue(buffer);
+
+      const result = await parseAudioMetadata('/test.mp3');
+      expect(result.format).toBe('mp3');
+    });
+
+    it('should handle MP3 with invalid MPEG version', async () => {
+      const fs = await import('fs');
+      const buffer = Buffer.alloc(100);
+      buffer[0] = 0xff;
+      buffer[1] = 0xf0 | 0x08; // Invalid MPEG version (1 in bits 3-4)
+      buffer[2] = 0x90;
+      buffer[3] = 0x00;
+      vi.mocked(fs.promises.readFile).mockResolvedValue(buffer);
+
+      const result = await parseAudioMetadata('/test.mp3');
+      expect(result.format).toBe('mp3');
+    });
   });
 
   describe('AudioMetadata interface', () => {

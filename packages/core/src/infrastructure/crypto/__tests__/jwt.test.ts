@@ -56,6 +56,16 @@ describe('JWT', () => {
       expect(decode(sign({}, SECRET, { expiresIn: '2h' }))?.exp).toBe(now + 7200);
       expect(decode(sign({}, SECRET, { expiresIn: '7d' }))?.exp).toBe(now + 604800);
     });
+
+    it('should throw on invalid expiration format', () => {
+      expect(() => sign({}, SECRET, { expiresIn: 'invalid' })).toThrow(JwtError);
+      expect(() => sign({}, SECRET, { expiresIn: 'invalid' })).toThrow('Invalid expiration format');
+    });
+
+    it('should throw on expiration with unsupported unit', () => {
+      expect(() => sign({}, SECRET, { expiresIn: '10w' })).toThrow('Invalid expiration format');
+      expect(() => sign({}, SECRET, { expiresIn: '1y' })).toThrow('Invalid expiration format');
+    });
   });
 
   describe('verify', () => {
@@ -112,6 +122,61 @@ describe('JWT', () => {
 
       expect(() => verify(token, SECRET)).not.toThrow();
     });
+
+    it('should throw on token with empty parts', () => {
+      // Create token with empty header/payload/signature
+      expect(() => verify('..', SECRET)).toThrow('Invalid token format');
+      expect(() => verify('.payload.sig', SECRET)).toThrow('Invalid token format');
+      expect(() => verify('header..sig', SECRET)).toThrow('Invalid token format');
+      expect(() => verify('header.payload.', SECRET)).toThrow('Invalid token format');
+    });
+
+    it('should throw on invalid header JSON', () => {
+      const invalidHeader = Buffer.from('not-json').toString('base64url');
+      const payload = Buffer.from(JSON.stringify({ userId: '123' })).toString('base64url');
+      const fakeToken = `${invalidHeader}.${payload}.fakesig`;
+
+      expect(() => verify(fakeToken, SECRET)).toThrow('Invalid header');
+    });
+
+    it('should throw on invalid payload JSON', async () => {
+      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString(
+        'base64url',
+      );
+      const invalidPayload = Buffer.from('not-json').toString('base64url');
+
+      // We need a valid signature for this test, but since payload is invalid,
+      // we need to sign something that will match
+      const crypto = await import('node:crypto');
+      const signature = crypto
+        .createHmac('sha256', SECRET)
+        .update(`${header}.${invalidPayload}`)
+        .digest('base64url');
+
+      const token = `${header}.${invalidPayload}.${signature}`;
+
+      expect(() => verify(token, SECRET)).toThrow('Malformed token payload');
+    });
+
+    it('should throw on header with wrong typ', () => {
+      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'WRONG' })).toString(
+        'base64url',
+      );
+      const payload = Buffer.from(JSON.stringify({ userId: '123' })).toString('base64url');
+      const fakeToken = `${header}.${payload}.fakesig`;
+
+      expect(() => verify(fakeToken, SECRET)).toThrow('Algorithm not supported');
+    });
+
+    it('should verify token without exp claim', () => {
+      const payload = { userId: '123' };
+      const token = sign(payload, SECRET); // No expiresIn
+
+      // Should not throw because there's no exp to check
+      const verified = verify(token, SECRET);
+      expect(verified.userId).toBe('123');
+      expect(verified.exp).toBeUndefined();
+    });
   });
 
   describe('decode', () => {
@@ -136,6 +201,21 @@ describe('JWT', () => {
 
       // Should decode even if we don't have the secret
       expect(decoded?.userId).toBe('123');
+    });
+
+    it('should return null for token with invalid payload JSON', () => {
+      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString(
+        'base64url',
+      );
+      const invalidPayload = Buffer.from('not-valid-json').toString('base64url');
+      const token = `${header}.${invalidPayload}.signature`;
+
+      expect(decode(token)).toBeNull();
+    });
+
+    it('should return null for token with empty payload part', () => {
+      const token = 'header..signature';
+      expect(decode(token)).toBeNull();
     });
   });
 

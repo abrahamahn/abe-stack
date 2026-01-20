@@ -1,7 +1,20 @@
 // packages/core/src/__tests__/env.test.ts
 import { afterEach, beforeEach, describe, expect, type MockInstance, test, vi } from 'vitest';
 
-import { loadServerEnv, serverEnvSchema } from '../env';
+import {
+  envSchema,
+  getEnvValidator,
+  loadServerEnv,
+  serverEnvSchema,
+  validateDatabaseEnv,
+  validateDevelopmentEnv,
+  validateEmailEnv,
+  validateEnvironment,
+  validateEnvironmentSafe,
+  validateProductionEnv,
+  validateSecurityEnv,
+  validateStorageEnv,
+} from '../env';
 
 describe('serverEnvSchema', () => {
   const validEnv = {
@@ -217,5 +230,118 @@ describe('loadServerEnv', () => {
     loadServerEnv({});
     // The implementation only calls process.exit(1), it does not log errors
     expect(mockConsoleError).not.toHaveBeenCalled();
+  });
+});
+
+describe('environment helper functions', () => {
+  const validEnv = {
+    POSTGRES_DB: 'testdb',
+    POSTGRES_USER: 'testuser',
+    POSTGRES_PASSWORD: 'testpassword',
+    JWT_SECRET: 'this-is-a-very-long-jwt-secret-key-for-testing',
+    SESSION_SECRET: 'this-is-a-very-long-session-secret-for-testing',
+  };
+
+  describe('validateEnvironment', () => {
+    test('should return validated env on success', () => {
+      const result = validateEnvironment(validEnv);
+      expect(result.POSTGRES_DB).toBe('testdb');
+    });
+
+    test('should throw on invalid env', () => {
+      expect(() => validateEnvironment({})).toThrow();
+    });
+  });
+
+  describe('validateEnvironmentSafe', () => {
+    test('should return success result for valid env', () => {
+      const result = validateEnvironmentSafe(validEnv);
+      expect(result.success).toBe(true);
+    });
+
+    test('should return failure result for invalid env', () => {
+      const result = validateEnvironmentSafe({});
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('validateDatabaseEnv', () => {
+    test('should validate database env successfully', () => {
+      const result = validateDatabaseEnv(validEnv);
+      expect(result.POSTGRES_DB).toBe('testdb');
+      expect(result.POSTGRES_USER).toBe('testuser');
+    });
+  });
+
+  describe('validateSecurityEnv', () => {
+    test('should validate security env successfully', () => {
+      const result = validateSecurityEnv(validEnv);
+      expect(result.JWT_SECRET).toBeDefined();
+      expect(result.SESSION_SECRET).toBeDefined();
+    });
+  });
+
+  describe('validateStorageEnv', () => {
+    test('should validate storage env successfully', () => {
+      const result = validateStorageEnv(validEnv);
+      expect(result.STORAGE_PROVIDER).toBe('local');
+    });
+  });
+
+  describe('validateEmailEnv', () => {
+    test('should validate email env successfully', () => {
+      const result = validateEmailEnv(validEnv);
+      expect(result.EMAIL_PROVIDER).toBe('console');
+    });
+  });
+
+  describe('validateDevelopmentEnv', () => {
+    test('should validate development env successfully', () => {
+      const devEnv = { ...validEnv, NODE_ENV: 'development' };
+      const result = validateDevelopmentEnv(devEnv);
+      expect(result.NODE_ENV).toBe('development');
+    });
+
+    test('should throw for non-development NODE_ENV', () => {
+      const prodEnv = { ...validEnv, NODE_ENV: 'production' };
+      expect(() => validateDevelopmentEnv(prodEnv)).toThrow('NODE_ENV must be development');
+    });
+  });
+
+  describe('validateProductionEnv', () => {
+    test('should validate production env successfully', () => {
+      const prodEnv = {
+        ...validEnv,
+        NODE_ENV: 'production',
+        JWT_SECRET: 'production-very-long-jwt-secret-key-here',
+        SESSION_SECRET: 'production-very-long-session-secret-here',
+      };
+      const result = validateProductionEnv(prodEnv);
+      expect(result.NODE_ENV).toBe('production');
+    });
+
+    test('should throw for non-production NODE_ENV', () => {
+      const devEnv = { ...validEnv, NODE_ENV: 'development' };
+      expect(() => validateProductionEnv(devEnv)).toThrow('NODE_ENV must be production');
+    });
+  });
+
+  describe('getEnvValidator', () => {
+    test('should return a validator function', () => {
+      const validator = getEnvValidator();
+      expect(typeof validator).toBe('function');
+    });
+
+    test('should validate env using returned function', () => {
+      const validator = getEnvValidator();
+      const result = validator(validEnv);
+      expect(result.POSTGRES_DB).toBe('testdb');
+    });
+
+    test('should use custom schema when provided', () => {
+      const validator = getEnvValidator(envSchema);
+      const result = validator(validEnv);
+      expect(result.POSTGRES_DB).toBe('testdb');
+    });
   });
 });

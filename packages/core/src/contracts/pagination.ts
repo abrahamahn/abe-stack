@@ -39,7 +39,7 @@ export type PaginationOptions = z.infer<typeof paginationOptionsSchema>;
 /**
  * Paginated result for offset-based pagination.
  */
-type PaginatedResultSchema<T extends z.ZodTypeAny> = z.ZodObject<{
+type PaginatedResultSchema<T extends z.ZodType> = z.ZodObject<{
   data: z.ZodArray<T>;
   total: z.ZodNumber;
   page: z.ZodNumber;
@@ -49,7 +49,7 @@ type PaginatedResultSchema<T extends z.ZodTypeAny> = z.ZodObject<{
   totalPages: z.ZodNumber;
 }>;
 
-export const paginatedResultSchema = <T extends z.ZodTypeAny>(
+export const paginatedResultSchema = <T extends z.ZodType>(
   itemSchema: T,
 ): PaginatedResultSchema<T> =>
   z.object({
@@ -92,14 +92,14 @@ export type CursorPaginationOptions = z.infer<typeof cursorPaginationOptionsSche
 /**
  * Cursor-based pagination result.
  */
-type CursorPaginatedResultSchema<T extends z.ZodTypeAny> = z.ZodObject<{
+type CursorPaginatedResultSchema<T extends z.ZodType> = z.ZodObject<{
   data: z.ZodArray<T>;
   nextCursor: z.ZodNullable<z.ZodString>;
   hasNext: z.ZodBoolean;
   limit: z.ZodNumber;
 }>;
 
-export const cursorPaginatedResultSchema = <T extends z.ZodTypeAny>(
+export const cursorPaginatedResultSchema = <T extends z.ZodType>(
   itemSchema: T,
 ): CursorPaginatedResultSchema<T> =>
   z.object({
@@ -133,7 +133,7 @@ export type UniversalPaginationOptions = z.infer<typeof universalPaginationOptio
 /**
  * Universal pagination result.
  */
-export const universalPaginatedResultSchema = (itemSchema: z.ZodTypeAny): z.ZodTypeAny =>
+export const universalPaginatedResultSchema = (itemSchema: z.ZodType): z.ZodType =>
   z.union([
     paginatedResultSchema(itemSchema).extend({ type: z.literal('offset') }),
     cursorPaginatedResultSchema(itemSchema).extend({ type: z.literal('cursor') }),

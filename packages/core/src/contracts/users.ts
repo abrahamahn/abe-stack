@@ -32,7 +32,7 @@ export const userSchema = z.object({
 export type User = z.infer<typeof userSchema>;
 
 export const userResponseSchema = userSchema.extend({
-  createdAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
 });
 
 export type UserResponse = z.infer<typeof userResponseSchema>;

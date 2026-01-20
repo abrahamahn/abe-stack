@@ -79,6 +79,37 @@ describe('Password Scoring', () => {
       expect(result.display).toContain('seconds');
     });
 
+    it('should return minutes for moderate entropy', () => {
+      // seconds = 2^entropy / 10000 / 2
+      // For 60-3600 seconds (minutes): entropy between 20.2 and 26.1 bits
+      const result = estimateCrackTime(22); // ~200 seconds = ~3 minutes
+      expect(result.display).toContain('minutes');
+    });
+
+    it('should return hours for higher entropy', () => {
+      // For 3600-86400 seconds (hours): entropy between 26.1 and 30.8 bits
+      const result = estimateCrackTime(28); // ~13000 seconds = ~4 hours
+      expect(result.display).toContain('hours');
+    });
+
+    it('should return days for even higher entropy', () => {
+      // For 86400-2592000 seconds (days): entropy between 30.8 and 35.6 bits
+      const result = estimateCrackTime(33); // ~430000 seconds = ~5 days
+      expect(result.display).toContain('days');
+    });
+
+    it('should return months for high entropy', () => {
+      // For 2592000-31536000 seconds (months): entropy between 35.6 and 39.2 bits
+      const result = estimateCrackTime(37); // ~6.8M seconds = ~79 days = ~3 months
+      expect(result.display).toContain('months');
+    });
+
+    it('should return years for very high entropy', () => {
+      // For 31536000-3153600000 seconds (years): entropy between 39.2 and 45.8 bits
+      const result = estimateCrackTime(42); // ~220M seconds = ~7 years
+      expect(result.display).toContain('years');
+    });
+
     it('should return centuries for very high entropy', () => {
       const result = estimateCrackTime(100);
       expect(result.display).toBe('centuries');

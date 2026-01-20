@@ -21,7 +21,7 @@ import { errorResponseSchema } from './common';
 export const setOperationSchema = z.object({
   type: z.literal('set'),
   table: z.string().min(1),
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: z.string().min(1),
   value: z.unknown(),
 });
@@ -32,7 +32,7 @@ export const setOperationSchema = z.object({
 export const setNowOperationSchema = z.object({
   type: z.literal('set-now'),
   table: z.string().min(1),
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: z.string().min(1),
 });
 
@@ -52,7 +52,7 @@ export const listPositionSchema = z.union([
 export const listInsertOperationSchema = z.object({
   type: z.literal('listInsert'),
   table: z.string().min(1),
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: z.string().min(1),
   value: z.unknown(),
   position: listPositionSchema,
@@ -64,7 +64,7 @@ export const listInsertOperationSchema = z.object({
 export const listRemoveOperationSchema = z.object({
   type: z.literal('listRemove'),
   table: z.string().min(1),
-  id: z.string().uuid(),
+  id: z.uuid(),
   key: z.string().min(1),
   value: z.unknown(),
 });
@@ -88,9 +88,9 @@ export const operationSchema = z.discriminatedUnion('type', [
  */
 export const transactionSchema = z.object({
   /** Unique transaction ID (for idempotency and tracking) */
-  txId: z.string().uuid(),
+  txId: z.uuid(),
   /** User ID performing the transaction */
-  authorId: z.string().uuid(),
+  authorId: z.uuid(),
   /** Operations to apply */
   operations: z.array(operationSchema).min(1),
   /** Client-side timestamp (for ordering) */
@@ -106,7 +106,7 @@ export const transactionSchema = z.object({
  */
 export const recordPointerSchema = z.object({
   table: z.string().min(1),
-  id: z.string().uuid(),
+  id: z.uuid(),
 });
 
 // ============================================================================
@@ -118,10 +118,10 @@ export const recordPointerSchema = z.object({
  */
 export const recordSchema = z
   .object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     version: z.number().int().positive(),
   })
-  .passthrough();
+  .catchall(z.unknown());
 
 /**
  * Map of table -> id -> record

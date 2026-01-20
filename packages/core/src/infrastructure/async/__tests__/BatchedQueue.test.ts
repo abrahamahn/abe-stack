@@ -322,4 +322,108 @@ describe('BatchedQueue', () => {
       expect(user.name).toBe('User 123');
     });
   });
+
+  describe('destroy', () => {
+    it('should cancel pending flush and reject all tasks', async () => {
+      const processBatch = vi.fn(async (batch: number[]) => batch.map((n) => n * 2));
+      const queue = new BatchedQueue({
+        processBatch,
+        maxParallel: 5,
+        maxBatchSize: 10,
+        delayMs: 100, // Long delay so flush hasn't happened
+      });
+
+      // Enqueue some items
+      const promise1 = queue.enqueue(1);
+      const promise2 = queue.enqueue(2);
+      const promise3 = queue.enqueue(3);
+
+      expect(queue.pendingCount).toBe(3);
+
+      // Destroy the queue
+      queue.destroy();
+
+      // Verify all pending tasks are rejected
+      await expect(promise1).rejects.toThrow('BatchedQueue destroyed');
+      await expect(promise2).rejects.toThrow('BatchedQueue destroyed');
+      await expect(promise3).rejects.toThrow('BatchedQueue destroyed');
+
+      // Verify queue is empty
+      expect(queue.pendingCount).toBe(0);
+
+      // Verify processBatch was never called
+      expect(processBatch).not.toHaveBeenCalled();
+    });
+
+    it('should handle destroy when no pending tasks', () => {
+      const processBatch = vi.fn(async (batch: number[]) => batch.map((n) => n * 2));
+      const queue = new BatchedQueue({
+        processBatch,
+        maxParallel: 5,
+        maxBatchSize: 10,
+        delayMs: 10,
+      });
+
+      // Should not throw
+      expect(() => queue.destroy()).not.toThrow();
+      expect(queue.pendingCount).toBe(0);
+    });
+
+    it('should handle destroy after flush has started', async () => {
+      let resolveProcessing: ((value: number[]) => void) | null = null;
+      const processBatch = vi.fn(
+        async (batch: number[]) =>
+          new Promise<number[]>((resolve) => {
+            resolveProcessing = () => resolve(batch.map((n) => n * 2));
+          }),
+      );
+
+      const queue = new BatchedQueue({
+        processBatch,
+        maxParallel: 5,
+        maxBatchSize: 10,
+        delayMs: 1,
+      });
+
+      const promise = queue.enqueue(1);
+
+      // Wait for processing to start
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(queue.activeBatchCount).toBe(1);
+
+      // Add more items and destroy (while processing is in progress)
+      const promise2 = queue.enqueue(2);
+      queue.destroy();
+
+      // Second item should be rejected
+      await expect(promise2).rejects.toThrow('BatchedQueue destroyed');
+
+      // Resolve first batch processing
+      resolveProcessing?.([2]);
+      const result = await promise;
+      expect(result).toBe(2);
+    });
+
+    it('should clear flush timeout on destroy', async () => {
+      const processBatch = vi.fn(async (batch: number[]) => batch.map((n) => n * 2));
+      const queue = new BatchedQueue({
+        processBatch,
+        maxParallel: 5,
+        maxBatchSize: 10,
+        delayMs: 50,
+      });
+
+      // Enqueue to schedule a flush
+      void queue.enqueue(1).catch(() => {}); // Catch the rejection
+
+      // Destroy immediately
+      queue.destroy();
+
+      // Wait past the original delay
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // processBatch should never have been called
+      expect(processBatch).not.toHaveBeenCalled();
+    });
+  });
 });
