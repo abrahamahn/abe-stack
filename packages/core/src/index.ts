@@ -274,48 +274,12 @@ export type {
 } from './errors';
 
 // ============================================================================
-// Media (server-only)
+// Media (server-only) - Import from '@abe-stack/core/media' for server apps
 // ============================================================================
-export {
-  BasicSecurityScanner,
-  checkFFmpeg,
-  convertVideo,
-  createHLSStream,
-  createImageProcessor,
-  detectFileType,
-  detectFileTypeFromFile,
-  detectFileTypeFromPath,
-  extractAudio,
-  extractAudioSegment,
-  generateFileId,
-  generateThumbnail,
-  generateWaveform,
-  getImageFormat,
-  getMediaMetadata,
-  ImageProcessor,
-  isAllowedFileType,
-  parseAudioMetadata,
-  runFFmpeg,
-  sanitizeFilename,
-  validateMediaFile,
-  validateUploadConfig,
-} from './media';
-export type {
-  AudioMetadata,
-  FFmpegOptions,
-  FFmpegResult,
-  FileTypeResult,
-  ImageFormatOptions,
-  ImageMetadata,
-  ImageProcessingOptions,
-  ImageResizeOptions,
-  MediaMetadata,
-  MediaMetadataResult,
-  MediaProcessingOptions,
-  ProcessingResult,
-  SecurityScanResult,
-  UploadConfig,
-} from './media';
+// Note: Media utilities use Node.js APIs (fs, child_process) and are not
+// exported from the main entry point to avoid breaking browser builds.
+// Server applications should import directly:
+//   import { parseAudioMetadata, ... } from '@abe-stack/core/media';
 
 // ============================================================================
 // Shared: Token storage and utilities
@@ -324,17 +288,12 @@ export { addAuthHeader, createTokenStore, randomId, tokenStore } from './shared'
 export type { TokenStore } from './shared';
 
 // ============================================================================
-// Utils: Async, port, storage
+// Utils: Async and storage (browser-safe)
 // ============================================================================
-export {
-  delay,
-  isPortFree,
-  isPortListening,
-  normalizeStorageKey,
-  pickAvailablePort,
-  uniquePorts,
-  waitForPort,
-} from './utils';
+export { delay, normalizeStorageKey } from './utils';
+
+// Note: Port utilities (isPortFree, pickAvailablePort, etc.) use Node.js APIs
+// and should be imported from '@abe-stack/core/utils' for server apps only.
 
 // ============================================================================
 // Environment validation (server-only, also available via @abe-stack/core/env)

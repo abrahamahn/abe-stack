@@ -98,11 +98,36 @@ describe('registerIPCHandlers', () => {
     mocks.mockHandlers.clear();
     mocks.mockListeners.clear();
 
-    mockMainWindow = { id: 1 };
+    mockMainWindow = {
+      id: 1,
+      on: vi.fn(),
+      off: vi.fn(),
+      once: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      removeAllListeners: vi.fn(),
+      emit: vi.fn(),
+      destroy: vi.fn(),
+      close: vi.fn(),
+      focus: vi.fn(),
+      show: vi.fn(),
+      hide: vi.fn(),
+      maximize: vi.fn(),
+      minimize: vi.fn(),
+      restore: vi.fn(),
+      isMaximized: vi.fn().mockReturnValue(false),
+      isMinimized: vi.fn().mockReturnValue(false),
+      isDestroyed: vi.fn().mockReturnValue(false),
+      isVisible: vi.fn().mockReturnValue(true),
+      getBounds: vi.fn().mockReturnValue({ x: 0, y: 0, width: 800, height: 600 }),
+      setBounds: vi.fn(),
+      webContents: {},
+    };
     getMainWindow = () => mockMainWindow;
 
     // Re-register handlers before each test
-    registerIPCHandlers(getMainWindow as () => MockBrowserWindow | null);
+    // Cast through unknown to avoid strict type checking on mock
+    registerIPCHandlers(getMainWindow as unknown as () => import('electron').BrowserWindow | null);
   });
 
   afterEach(() => {
@@ -313,7 +338,9 @@ describe('registerIPCHandlers', () => {
       // Re-register to pick up the new mock value
       mocks.mockHandlers.clear();
       mocks.mockListeners.clear();
-      registerIPCHandlers(getMainWindow);
+      registerIPCHandlers(
+        getMainWindow as unknown as () => import('electron').BrowserWindow | null,
+      );
 
       const listener = mocks.mockListeners.get('show-notification')!;
       listener(null, { title: 'Test', body: 'Body' });

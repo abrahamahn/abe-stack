@@ -4,7 +4,7 @@ import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-import { pickAvailablePort } from '../apps/desktop/src/electron/utils/port';
+import { pickAvailablePort } from '../packages/core/src/utils/port';
 
 const repoRoot = path.resolve(__dirname, '..');
 const appsRoot = path.join(repoRoot, 'apps');
