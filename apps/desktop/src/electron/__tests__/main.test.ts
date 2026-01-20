@@ -148,11 +148,13 @@ describe('main', () => {
       await import('../main');
 
       const readyCall = mocks.mockAppOn.mock.calls.find((call) => call[0] === 'ready');
-      const readyCallback = readyCall![1] as () => Promise<void>;
-      await readyCallback();
+      const readyCallback = readyCall![1] as () => void;
+      readyCallback();
 
-      // Verify window.on was called (it registers the 'closed' event)
-      expect(mocks.mockWindowOn).toHaveBeenCalled();
+      // Wait for the async createWindow to complete
+      await vi.waitFor(() => {
+        expect(mocks.mockWindowOn).toHaveBeenCalled();
+      });
     });
   });
 

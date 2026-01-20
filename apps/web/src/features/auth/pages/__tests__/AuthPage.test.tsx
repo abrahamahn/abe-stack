@@ -42,9 +42,19 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Mock window.alert
-const mockAlert = vi.fn();
-global.alert = mockAlert;
+// Mock toastStore from @abe-stack/core
+const mockToastShow = vi.fn();
+vi.mock('@abe-stack/core', async () => {
+  const actual = await vi.importActual('@abe-stack/core');
+  return {
+    ...actual,
+    toastStore: {
+      getState: () => ({
+        show: mockToastShow,
+      }),
+    },
+  };
+});
 
 describe('AuthPage', () => {
   const createQueryClient = (): QueryClient =>
@@ -240,7 +250,9 @@ describe('AuthPage', () => {
       });
 
       await waitFor(() => {
-        expect(mockAlert).toHaveBeenCalledWith('Password reset link sent to your email');
+        expect(mockToastShow).toHaveBeenCalledWith({
+          title: 'Password reset link sent to your email',
+        });
       });
     });
   });

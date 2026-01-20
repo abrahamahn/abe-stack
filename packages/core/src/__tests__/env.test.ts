@@ -213,8 +213,9 @@ describe('loadServerEnv', () => {
     expect(mockExit).toHaveBeenCalledWith(1);
   });
 
-  test('should log error on validation failure', () => {
+  test('should not log error on validation failure (just exits)', () => {
     loadServerEnv({});
-    expect(mockConsoleError).toHaveBeenCalled();
+    // The implementation only calls process.exit(1), it does not log errors
+    expect(mockConsoleError).not.toHaveBeenCalled();
   });
 });

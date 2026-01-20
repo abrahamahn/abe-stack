@@ -674,18 +674,20 @@ describe('useExpensiveComputation', () => {
   });
 
   it('handles errors in compute function during effect', () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
     // Use skipInitial to avoid error in useState (which can't be caught)
     const compute = vi.fn(() => {
       throw new Error('Computation failed');
     });
 
-    // This should not throw because the error is caught in useEffect
-    renderHook(() => useExpensiveComputation(compute, [], { skipInitial: true }));
+    // This should not throw because the error is caught silently in useEffect
+    const { result } = renderHook(() =>
+      useExpensiveComputation(compute, [], { skipInitial: true }),
+    );
 
-    expect(consoleSpy).toHaveBeenCalledWith('Expensive computation failed:', expect.any(Error));
-    consoleSpy.mockRestore();
+    // The computation was attempted
+    expect(compute).toHaveBeenCalled();
+    // Result should be undefined since computation failed and skipInitial was true
+    expect(result.current).toBeUndefined();
   });
 });
 

@@ -24,7 +24,7 @@ vi.mock('../../hooks/useAuth', () => ({
   useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
 }));
 
-// Mock navigate and alert
+// Mock navigate
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
@@ -34,9 +34,19 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Mock window.alert
-const mockAlert = vi.fn();
-global.alert = mockAlert;
+// Mock toastStore from @abe-stack/core
+const mockToastShow = vi.fn();
+vi.mock('@abe-stack/core', async () => {
+  const actual = await vi.importActual('@abe-stack/core');
+  return {
+    ...actual,
+    toastStore: {
+      getState: () => ({
+        show: mockToastShow,
+      }),
+    },
+  };
+});
 
 describe('ResetPasswordPage', () => {
   const createQueryClient = (): QueryClient =>
@@ -61,6 +71,7 @@ describe('ResetPasswordPage', () => {
 
   beforeEach((): void => {
     vi.clearAllMocks();
+    mockToastShow.mockClear();
     mockUseAuth.mockReturnValue({
       resetPassword: mockResetPassword,
       isLoading: false,
@@ -145,7 +156,7 @@ describe('ResetPasswordPage', () => {
       });
     });
 
-    it('should show alert and navigate to login on success', async () => {
+    it('should show toast and navigate to login on success', async () => {
       mockResetPassword.mockResolvedValueOnce(undefined);
       renderResetPasswordPage();
 
@@ -156,9 +167,10 @@ describe('ResetPasswordPage', () => {
       fireEvent.click(updateButton);
 
       await waitFor(() => {
-        expect(mockAlert).toHaveBeenCalledWith(
-          'Password reset successfully! You can now sign in with your new password.',
-        );
+        expect(mockToastShow).toHaveBeenCalledWith({
+          title: 'Password reset successfully',
+          description: 'You can now sign in with your new password.',
+        });
       });
 
       expect(mockNavigate).toHaveBeenCalledWith('/login', { replace: false });

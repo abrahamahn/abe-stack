@@ -465,7 +465,7 @@ describe('WebsocketPubsubClient', () => {
 
   describe('debug logging', () => {
     it('should log when debug is enabled', async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const onDebug = vi.fn();
 
       const _client = new WebsocketPubsubClient({
         host: 'localhost:3000',
@@ -473,18 +473,16 @@ describe('WebsocketPubsubClient', () => {
         WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
         secure: false,
         debug: true,
+        onDebug,
       });
 
       await vi.advanceTimersByTimeAsync(0);
 
-      expect(consoleSpy).toHaveBeenCalled();
-      expect(consoleSpy.mock.calls.some((call) => call[0] === '[pubsub]')).toBe(true);
-
-      consoleSpy.mockRestore();
+      expect(onDebug).toHaveBeenCalled();
     });
 
     it('should not log when debug is disabled', async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const onDebug = vi.fn();
 
       const _client = new WebsocketPubsubClient({
         host: 'localhost:3000',
@@ -492,14 +490,12 @@ describe('WebsocketPubsubClient', () => {
         WebSocketImpl: createMockWebSocket as unknown as typeof WebSocket,
         secure: false,
         debug: false,
+        onDebug,
       });
 
       await vi.advanceTimersByTimeAsync(0);
 
-      const pubsubLogs = consoleSpy.mock.calls.filter((call) => call[0] === '[pubsub]');
-      expect(pubsubLogs.length).toBe(0);
-
-      consoleSpy.mockRestore();
+      expect(onDebug).not.toHaveBeenCalled();
     });
   });
 });

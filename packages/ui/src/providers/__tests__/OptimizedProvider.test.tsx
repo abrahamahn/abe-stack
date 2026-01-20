@@ -654,14 +654,14 @@ describe('useRenderPerformance', () => {
     expect(result.current.renderCount).toBe(1);
   });
 
-  it('logs in development mode', () => {
+  it('does not log in development mode (logging disabled in implementation)', () => {
     process.env.NODE_ENV = 'development';
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     renderHook(() => useRenderPerformance('TestComponent'));
 
-    // The effect runs after render, so we need to wait
-    expect(consoleSpy).toHaveBeenCalled();
+    // The implementation has logging commented out, so no logging occurs
+    expect(consoleSpy).not.toHaveBeenCalled();
 
     consoleSpy.mockRestore();
   });

@@ -26,6 +26,10 @@ vi.mock('../../../modules/auth/utils/jwt.js', () => ({
   verifyToken: vi.fn(() => ({ userId: 'test-user-123' })),
 }));
 
+vi.mock('../../http/csrf.js', () => ({
+  validateCsrfToken: vi.fn(() => true),
+}));
+
 // Types for dynamic imports
 type WebSocketModuleType = typeof WebSocketModule;
 type JwtModuleType = typeof JwtModule;
@@ -191,6 +195,9 @@ describe('WebSocket Module', () => {
             jwt: {
               secret: 'test-secret',
             },
+            cookie: {
+              secret: 'cookie-secret',
+            },
           },
         },
         pubsub: {
@@ -252,6 +259,9 @@ describe('WebSocket Module', () => {
           auth: {
             jwt: {
               secret: 'test-secret',
+            },
+            cookie: {
+              secret: 'cookie-secret',
             },
           },
         },
@@ -321,6 +331,9 @@ describe('WebSocket Module', () => {
             jwt: {
               secret: 'test-secret',
             },
+            cookie: {
+              secret: 'cookie-secret',
+            },
           },
         },
         pubsub: {
@@ -389,6 +402,9 @@ describe('WebSocket Module', () => {
           auth: {
             jwt: {
               secret: 'test-secret',
+            },
+            cookie: {
+              secret: 'cookie-secret',
             },
           },
         },

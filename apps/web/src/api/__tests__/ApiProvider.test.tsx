@@ -61,18 +61,22 @@ vi.mock('@abe-stack/sdk', async (importOriginal) => {
   };
 });
 
-vi.mock('@abe-stack/core', () => ({
-  tokenStore: {
-    get: mockTokenGet,
-    set: vi.fn(),
-    clear: mockTokenClear,
-  },
-  toastStore: {
-    getState: (): { show: typeof mockShowToast } => ({
-      show: mockShowToast,
-    }),
-  },
-}));
+vi.mock('@abe-stack/core', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/core')>();
+  return {
+    ...actual,
+    tokenStore: {
+      get: mockTokenGet,
+      set: vi.fn(),
+      clear: mockTokenClear,
+    },
+    toastStore: {
+      getState: (): { show: typeof mockShowToast } => ({
+        show: mockShowToast,
+      }),
+    },
+  };
+});
 
 // Create mock environment for tests
 function createMockEnvironment(): ClientEnvironment {

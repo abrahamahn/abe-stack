@@ -59,6 +59,12 @@ describe('MutationQueue', () => {
     });
 
     test('should restore queue from localStorage', () => {
+      // Set offline to prevent auto-processing
+      Object.defineProperty(globalThis, 'navigator', {
+        value: { onLine: false },
+        writable: true,
+      });
+
       const existingQueue = [
         { id: '1', type: 'test', data: {}, timestamp: Date.now(), retries: 0 },
       ];
@@ -66,17 +72,35 @@ describe('MutationQueue', () => {
 
       queue = new MutationQueue();
       expect(queue.getPending()).toHaveLength(1);
+
+      // Restore online status
+      Object.defineProperty(globalThis, 'navigator', {
+        value: { onLine: true },
+        writable: true,
+      });
     });
   });
 
   describe('add', () => {
     test('should add mutation to queue', () => {
+      // Set offline to prevent auto-processing
+      Object.defineProperty(globalThis, 'navigator', {
+        value: { onLine: false },
+        writable: true,
+      });
+
       queue = new MutationQueue();
       const id = queue.add('createPost', { title: 'Test' });
 
       expect(id).toBeDefined();
       expect(queue.getPending()).toHaveLength(1);
       expect(queue.getPending()[0]?.type).toBe('createPost');
+
+      // Restore online status
+      Object.defineProperty(globalThis, 'navigator', {
+        value: { onLine: true },
+        writable: true,
+      });
     });
 
     test('should generate unique IDs', () => {
@@ -111,6 +135,12 @@ describe('MutationQueue', () => {
 
   describe('remove', () => {
     test('should remove mutation by ID', () => {
+      // Set offline to prevent auto-processing
+      Object.defineProperty(globalThis, 'navigator', {
+        value: { onLine: false },
+        writable: true,
+      });
+
       queue = new MutationQueue();
       const id = queue.add('test', {});
 
@@ -118,6 +148,12 @@ describe('MutationQueue', () => {
 
       expect(result).toBe(true);
       expect(queue.getPending()).toHaveLength(0);
+
+      // Restore online status
+      Object.defineProperty(globalThis, 'navigator', {
+        value: { onLine: true },
+        writable: true,
+      });
     });
 
     test('should return false for non-existent ID', () => {
@@ -158,6 +194,12 @@ describe('MutationQueue', () => {
 
   describe('getPending', () => {
     test('should return copy of queue', () => {
+      // Set offline to prevent auto-processing
+      Object.defineProperty(globalThis, 'navigator', {
+        value: { onLine: false },
+        writable: true,
+      });
+
       queue = new MutationQueue();
       queue.add('test', {});
 
@@ -165,6 +207,12 @@ describe('MutationQueue', () => {
       pending.push({ id: 'fake', type: 'fake', data: {}, timestamp: 0, retries: 0 });
 
       expect(queue.getPending()).toHaveLength(1);
+
+      // Restore online status
+      Object.defineProperty(globalThis, 'navigator', {
+        value: { onLine: true },
+        writable: true,
+      });
     });
   });
 
