@@ -111,6 +111,7 @@ export const ERROR_MESSAGES = {
 
   // Email
   EMAIL_VERIFICATION_NOT_IMPLEMENTED: 'Email verification not implemented',
+  EMAIL_SEND_FAILED: 'Failed to send email. Please try again or use the resend option.',
 
   // TOTP
   TOTP_INVALID_CODE: 'Invalid verification code',

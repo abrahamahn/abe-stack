@@ -17,7 +17,11 @@ import {
   resetPassword,
   verifyEmail,
 } from '@auth/service';
-import { verifyToken as verifyJwtToken } from '@auth/utils';
+import {
+  clearRefreshTokenCookie,
+  setRefreshTokenCookie,
+  verifyToken as verifyJwtToken,
+} from '@auth/utils';
 import {
   AccountLockedError,
   EmailAlreadyExistsError,
@@ -69,11 +73,9 @@ vi.mock('@config', () => ({
 
 // Mock utilities
 vi.mock('../utils', () => ({
-  extractRequestInfo: vi.fn(() => ({
-    ipAddress: '127.0.0.1',
-    userAgent: 'test-agent',
-  })),
   verifyToken: vi.fn(),
+  setRefreshTokenCookie: vi.fn(),
+  clearRefreshTokenCookie: vi.fn(),
 }));
 
 // ============================================================================
@@ -117,6 +119,10 @@ function createMockRequest(cookies: Record<string, string | undefined> = {}): Re
     cookies,
     headers: { authorization: undefined },
     user: undefined,
+    requestInfo: {
+      ipAddress: '127.0.0.1',
+      userAgent: 'test-agent',
+    },
   };
 }
 
@@ -227,11 +233,7 @@ describe('handleLogin', () => {
       token: 'access-token',
       user: mockResult.user,
     });
-    expect(reply.setCookie).toHaveBeenCalledWith(
-      REFRESH_COOKIE_NAME,
-      'refresh-token',
-      expect.any(Object),
-    );
+    expect(setRefreshTokenCookie).toHaveBeenCalledWith(reply, 'refresh-token', ctx.config.auth);
     expect(authenticateUser).toHaveBeenCalledWith(
       ctx.db,
       ctx.config.auth,
@@ -314,11 +316,7 @@ describe('handleRefresh', () => {
 
     expect(result.status).toBe(200);
     expect(result.body).toEqual({ token: 'new-access-token' });
-    expect(reply.setCookie).toHaveBeenCalledWith(
-      REFRESH_COOKIE_NAME,
-      'new-refresh-token',
-      expect.any(Object),
-    );
+    expect(setRefreshTokenCookie).toHaveBeenCalledWith(reply, 'new-refresh-token', ctx.config.auth);
   });
 
   test('should return 401 when no refresh token is provided', async () => {
@@ -344,7 +342,7 @@ describe('handleRefresh', () => {
 
     expect(result.status).toBe(401);
     expect(result.body).toEqual({ message: ERROR_MESSAGES.INVALID_TOKEN });
-    expect(reply.clearCookie).toHaveBeenCalledWith(REFRESH_COOKIE_NAME, { path: '/' });
+    expect(clearRefreshTokenCookie).toHaveBeenCalledWith(reply);
   });
 
   test('should return 500 on unexpected errors', async () => {
@@ -382,7 +380,7 @@ describe('handleLogout', () => {
 
     expect(result.status).toBe(200);
     expect(result.body).toEqual({ message: SUCCESS_MESSAGES.LOGGED_OUT });
-    expect(reply.clearCookie).toHaveBeenCalledWith(REFRESH_COOKIE_NAME, { path: '/' });
+    expect(clearRefreshTokenCookie).toHaveBeenCalledWith(reply);
     expect(logoutUser).toHaveBeenCalledWith(ctx.db, 'refresh-token');
   });
 
@@ -397,7 +395,7 @@ describe('handleLogout', () => {
 
     expect(result.status).toBe(200);
     expect(result.body).toEqual({ message: SUCCESS_MESSAGES.LOGGED_OUT });
-    expect(reply.clearCookie).toHaveBeenCalled();
+    expect(clearRefreshTokenCookie).toHaveBeenCalled();
     expect(logoutUser).toHaveBeenCalledWith(ctx.db, undefined);
   });
 
@@ -558,11 +556,7 @@ describe('handleVerifyEmail', () => {
       user: mockUser,
     });
     expect(verifyEmail).toHaveBeenCalledWith(ctx.db, ctx.config.auth, 'verify-token');
-    expect(reply.setCookie).toHaveBeenCalledWith(
-      REFRESH_COOKIE_NAME,
-      'refresh-token',
-      expect.any(Object),
-    );
+    expect(setRefreshTokenCookie).toHaveBeenCalledWith(reply, 'refresh-token', ctx.config.auth);
   });
 
   test('should return bad request for invalid token', async () => {

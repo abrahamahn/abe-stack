@@ -3,11 +3,18 @@
   "compilerOptions": {
     "outDir": "../../dist/electron",
     "rootDir": ".",
-    "module": "CommonJS",
-    "moduleResolution": "node",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "types": ["node"],
     "noEmit": false
   },
-  "include": ["*.ts"],
-  "exclude": ["node_modules", "__tests__"]
+  "include": [
+    "*.ts",
+    "ipc/**/*.ts",
+    "types/**/*.ts",
+    "utils/**/*.ts",
+    "__tests__/**/*.ts",
+    "ipc/__tests__/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
 }

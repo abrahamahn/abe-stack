@@ -1,14 +1,13 @@
 // config/vite.desktop.config.ts
-import net from 'node:net';
 import path from 'node:path';
 
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
+import { pickAvailablePort } from '../apps/desktop/src/electron/utils/port';
+
 const repoRoot = path.resolve(__dirname, '..');
 const appsRoot = path.join(repoRoot, 'apps');
-const packagesRoot = path.join(repoRoot, 'packages');
-
 const desktopRoot = path.join(appsRoot, 'desktop');
 
 function getDesktopAliases(): Record<string, string> {
@@ -24,36 +23,6 @@ function getDesktopAliases(): Record<string, string> {
     '@stores': path.join(repoRoot, 'packages/core/src/stores'),
     '@validation': path.join(repoRoot, 'packages/core/src/validation'),
   };
-}
-
-function uniquePorts(ports: Array<number | undefined>): number[] {
-  return Array.from(new Set(ports.filter((port): port is number => Number.isFinite(port))));
-}
-
-function isPortFree(port: number, host: string): Promise<boolean> {
-  return new Promise((resolve) => {
-    const server = net.createServer();
-
-    server.once('error', () => {
-      resolve(false);
-    });
-
-    server.listen({ port, host }, () => {
-      server.close(() => {
-        resolve(true);
-      });
-    });
-  });
-}
-
-async function pickAvailablePort(ports: number[], host: string): Promise<number> {
-  for (const port of uniquePorts(ports)) {
-    if (await isPortFree(port, host)) {
-      return port;
-    }
-  }
-
-  throw new Error(`No available desktop dev ports found in list: ${ports.join(', ')}`);
 }
 
 export default defineConfig(async ({ command }) => {

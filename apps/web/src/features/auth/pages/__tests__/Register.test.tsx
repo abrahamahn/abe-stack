@@ -197,7 +197,7 @@ describe('RegisterPage', () => {
       const signInButton = screen.getByRole('button', { name: /sign in/i });
       fireEvent.click(signInButton);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/login');
+      expect(mockNavigate).toHaveBeenCalledWith('/login', { replace: false });
     });
   });
 

@@ -31,8 +31,8 @@ export const loginAttempts = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (table) => [
-    index('login_attempts_email_idx').on(table.email),
-    index('login_attempts_created_at_idx').on(table.createdAt),
+    // Composite index for lockout queries: filters by email + createdAt range
+    index('login_attempts_email_created_at_idx').on(table.email, table.createdAt),
     index('login_attempts_ip_address_idx').on(table.ipAddress),
   ],
 );

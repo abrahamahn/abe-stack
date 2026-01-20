@@ -3,144 +3,453 @@ import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
 import {
-  SORT_ORDER,
+  cursorPaginatedResultSchema,
   cursorPaginationOptionsSchema,
   paginatedResultSchema,
   paginationOptionsSchema,
+  SORT_ORDER,
+  universalPaginatedResultSchema,
+  universalPaginationOptionsSchema,
 } from '../pagination';
 
-describe('Pagination Schemas', () => {
-  describe('paginationOptionsSchema', () => {
-    it('should validate valid pagination options', () => {
-      const validOptions = {
-        page: 2,
-        limit: 50,
-        sortBy: 'createdAt',
-        sortOrder: 'desc',
-      };
+describe('SORT_ORDER', () => {
+  it('should have correct sort order values', () => {
+    expect(SORT_ORDER.ASC).toBe('asc');
+    expect(SORT_ORDER.DESC).toBe('desc');
+  });
+});
 
-      const result = paginationOptionsSchema.safeParse(validOptions);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual(validOptions);
-      }
-    });
+// ============================================================================
+// Offset-based Pagination Tests
+// ============================================================================
 
-    it('should provide defaults', () => {
-      const minimalOptions = {};
-
-      const result = paginationOptionsSchema.safeParse(minimalOptions);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.page).toBe(1);
-        expect(result.data.limit).toBe(50);
-        expect(result.data.sortOrder).toBe('desc');
-        expect(result.data.sortBy).toBeUndefined();
-      }
-    });
-
-    it('should reject invalid values', () => {
-      const invalidOptions = [
-        { page: 0 }, // Page must be >= 1
-        { page: -1 },
-        { limit: 0 }, // Limit must be >= 1
-        { limit: -5 },
-        { limit: 1001 }, // Limit must be <= 1000
-        { sortOrder: 'invalid' },
-      ];
-
-      invalidOptions.forEach((options) => {
-        const result = paginationOptionsSchema.safeParse(options);
-        expect(result.success).toBe(false);
-      });
-    });
+describe('paginationOptionsSchema', () => {
+  it('should validate correct pagination options', () => {
+    const validOptions = {
+      page: 1,
+      limit: 50,
+      sortBy: 'createdAt',
+      sortOrder: 'desc',
+    };
+    const result = paginationOptionsSchema.safeParse(validOptions);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.page).toBe(1);
+      expect(result.data.limit).toBe(50);
+      expect(result.data.sortBy).toBe('createdAt');
+      expect(result.data.sortOrder).toBe('desc');
+    }
   });
 
-  describe('cursorPaginationOptionsSchema', () => {
-    it('should validate valid cursor options', () => {
-      const validOptions = {
-        cursor:
-          'eyJ2YWx1ZSI6IjIwMjQtMDEtMDFUMDA6MDA6MDBaIiwidGllQnJlYWtlciI6IjEyMyIsInNvcnRPcmRlciI6ImRlc2MifQ',
-        limit: 25,
-        sortBy: 'name',
-        sortOrder: 'asc',
-      };
-
-      const result = cursorPaginationOptionsSchema.safeParse(validOptions);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual(validOptions);
-      }
-    });
-
-    it('should allow undefined cursor', () => {
-      const options = {
-        limit: 50,
-        sortBy: 'createdAt',
-        sortOrder: 'desc',
-      };
-
-      const result = cursorPaginationOptionsSchema.safeParse(options);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.cursor).toBeUndefined();
-      }
-    });
-
-    it('should reject invalid limit', () => {
-      const invalidOptions = [{ limit: 0 }, { limit: 1001 }, { sortOrder: 'invalid' }];
-
-      invalidOptions.forEach((options) => {
-        const result = cursorPaginationOptionsSchema.safeParse(options);
-        expect(result.success).toBe(false);
-      });
-    });
+  it('should apply default values', () => {
+    const minimalOptions = {};
+    const result = paginationOptionsSchema.safeParse(minimalOptions);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.page).toBe(1);
+      expect(result.data.limit).toBe(50);
+      expect(result.data.sortOrder).toBe('desc');
+      expect(result.data.sortBy).toBeUndefined();
+    }
   });
 
-  describe('paginatedResultSchema', () => {
-    const itemSchema = z.object({
+  it('should reject page less than 1', () => {
+    const invalidOptions = {
+      page: 0,
+      limit: 50,
+    };
+    const result = paginationOptionsSchema.safeParse(invalidOptions);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject negative page', () => {
+    const invalidOptions = {
+      page: -1,
+      limit: 50,
+    };
+    const result = paginationOptionsSchema.safeParse(invalidOptions);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject limit less than 1', () => {
+    const invalidOptions = {
+      page: 1,
+      limit: 0,
+    };
+    const result = paginationOptionsSchema.safeParse(invalidOptions);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject limit greater than 1000', () => {
+    const invalidOptions = {
+      page: 1,
+      limit: 1001,
+    };
+    const result = paginationOptionsSchema.safeParse(invalidOptions);
+    expect(result.success).toBe(false);
+  });
+
+  it('should accept limit of exactly 1000', () => {
+    const validOptions = {
+      page: 1,
+      limit: 1000,
+    };
+    const result = paginationOptionsSchema.safeParse(validOptions);
+    expect(result.success).toBe(true);
+  });
+
+  it('should reject non-integer page', () => {
+    const invalidOptions = {
+      page: 1.5,
+      limit: 50,
+    };
+    const result = paginationOptionsSchema.safeParse(invalidOptions);
+    expect(result.success).toBe(false);
+  });
+
+  it('should only accept asc or desc for sortOrder', () => {
+    const invalidOptions = {
+      page: 1,
+      limit: 50,
+      sortOrder: 'ascending',
+    };
+    const result = paginationOptionsSchema.safeParse(invalidOptions);
+    expect(result.success).toBe(false);
+  });
+
+  it('should accept asc sort order', () => {
+    const validOptions = {
+      page: 1,
+      limit: 50,
+      sortOrder: 'asc',
+    };
+    const result = paginationOptionsSchema.safeParse(validOptions);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.sortOrder).toBe('asc');
+    }
+  });
+});
+
+describe('paginatedResultSchema', () => {
+  const stringItemSchema = z.string();
+  const schema = paginatedResultSchema(stringItemSchema);
+
+  it('should validate correct paginated result', () => {
+    const validResult = {
+      data: ['item1', 'item2', 'item3'],
+      total: 100,
+      page: 1,
+      limit: 50,
+      hasNext: true,
+      hasPrev: false,
+      totalPages: 2,
+    };
+    const result = schema.safeParse(validResult);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.data).toHaveLength(3);
+      expect(result.data.total).toBe(100);
+      expect(result.data.hasNext).toBe(true);
+      expect(result.data.hasPrev).toBe(false);
+    }
+  });
+
+  it('should validate empty data array', () => {
+    const emptyResult = {
+      data: [],
+      total: 0,
+      page: 1,
+      limit: 50,
+      hasNext: false,
+      hasPrev: false,
+      totalPages: 0,
+    };
+    const result = schema.safeParse(emptyResult);
+    expect(result.success).toBe(true);
+  });
+
+  it('should reject missing required fields', () => {
+    const incompleteResult = {
+      data: ['item1'],
+      total: 1,
+    };
+    const result = schema.safeParse(incompleteResult);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject negative total', () => {
+    const invalidResult = {
+      data: [],
+      total: -1,
+      page: 1,
+      limit: 50,
+      hasNext: false,
+      hasPrev: false,
+      totalPages: 0,
+    };
+    const result = schema.safeParse(invalidResult);
+    expect(result.success).toBe(false);
+  });
+
+  it('should work with complex item schemas', () => {
+    const userSchema = z.object({
       id: z.string(),
       name: z.string(),
     });
+    const userPaginatedSchema = paginatedResultSchema(userSchema);
 
-    const schema = paginatedResultSchema(itemSchema);
-
-    it('should validate valid paginated result', () => {
-      const validResult = {
-        data: [
-          { id: '1', name: 'Item 1' },
-          { id: '2', name: 'Item 2' },
-        ],
-        total: 100,
-        page: 1,
-        limit: 50,
-        hasNext: true,
-        hasPrev: false,
-        totalPages: 2,
-      };
-
-      const result = schema.safeParse(validResult);
-      expect(result.success).toBe(true);
-    });
-
-    it('should reject invalid structure', () => {
-      const invalidResults = [
-        { data: [], total: -1 }, // Negative total
-        { data: [], total: 0, page: 0 }, // Invalid page
-        { data: [], total: 0, page: 1, limit: 0 }, // Invalid limit
-      ];
-
-      invalidResults.forEach((resultData) => {
-        const result = schema.safeParse(resultData);
-        expect(result.success).toBe(false);
-      });
-    });
+    const validResult = {
+      data: [
+        { id: '1', name: 'John' },
+        { id: '2', name: 'Jane' },
+      ],
+      total: 2,
+      page: 1,
+      limit: 10,
+      hasNext: false,
+      hasPrev: false,
+      totalPages: 1,
+    };
+    const result = userPaginatedSchema.safeParse(validResult);
+    expect(result.success).toBe(true);
   });
 
-  describe('SORT_ORDER constants', () => {
-    it('should have correct values', () => {
-      expect(SORT_ORDER.ASC).toBe('asc');
-      expect(SORT_ORDER.DESC).toBe('desc');
+  it('should reject items that do not match item schema', () => {
+    const validResult = {
+      data: [1, 2, 3], // Numbers instead of strings
+      total: 3,
+      page: 1,
+      limit: 50,
+      hasNext: false,
+      hasPrev: false,
+      totalPages: 1,
+    };
+    const result = schema.safeParse(validResult);
+    expect(result.success).toBe(false);
+  });
+});
+
+// ============================================================================
+// Cursor-based Pagination Tests
+// ============================================================================
+
+describe('cursorPaginationOptionsSchema', () => {
+  it('should validate correct cursor pagination options', () => {
+    const validOptions = {
+      cursor: 'abc123',
+      limit: 25,
+      sortBy: 'createdAt',
+      sortOrder: 'asc',
+    };
+    const result = cursorPaginationOptionsSchema.safeParse(validOptions);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.cursor).toBe('abc123');
+      expect(result.data.limit).toBe(25);
+    }
+  });
+
+  it('should apply default values', () => {
+    const minimalOptions = {};
+    const result = cursorPaginationOptionsSchema.safeParse(minimalOptions);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.cursor).toBeUndefined();
+      expect(result.data.limit).toBe(50);
+      expect(result.data.sortOrder).toBe('desc');
+    }
+  });
+
+  it('should accept undefined cursor (first page)', () => {
+    const firstPageOptions = {
+      limit: 20,
+    };
+    const result = cursorPaginationOptionsSchema.safeParse(firstPageOptions);
+    expect(result.success).toBe(true);
+  });
+
+  it('should reject limit greater than 1000', () => {
+    const invalidOptions = {
+      limit: 1001,
+    };
+    const result = cursorPaginationOptionsSchema.safeParse(invalidOptions);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject limit less than 1', () => {
+    const invalidOptions = {
+      limit: 0,
+    };
+    const result = cursorPaginationOptionsSchema.safeParse(invalidOptions);
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('cursorPaginatedResultSchema', () => {
+  const stringItemSchema = z.string();
+  const schema = cursorPaginatedResultSchema(stringItemSchema);
+
+  it('should validate correct cursor paginated result', () => {
+    const validResult = {
+      data: ['item1', 'item2'],
+      nextCursor: 'cursor123',
+      hasNext: true,
+      limit: 50,
+    };
+    const result = schema.safeParse(validResult);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.nextCursor).toBe('cursor123');
+      expect(result.data.hasNext).toBe(true);
+    }
+  });
+
+  it('should accept null nextCursor (last page)', () => {
+    const lastPageResult = {
+      data: ['item1'],
+      nextCursor: null,
+      hasNext: false,
+      limit: 50,
+    };
+    const result = schema.safeParse(lastPageResult);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.nextCursor).toBeNull();
+    }
+  });
+
+  it('should validate empty data array', () => {
+    const emptyResult = {
+      data: [],
+      nextCursor: null,
+      hasNext: false,
+      limit: 50,
+    };
+    const result = schema.safeParse(emptyResult);
+    expect(result.success).toBe(true);
+  });
+
+  it('should reject missing limit', () => {
+    const incompleteResult = {
+      data: ['item1'],
+      nextCursor: null,
+      hasNext: false,
+    };
+    const result = schema.safeParse(incompleteResult);
+    expect(result.success).toBe(false);
+  });
+
+  it('should work with complex item schemas', () => {
+    const productSchema = z.object({
+      id: z.string(),
+      price: z.number(),
     });
+    const productCursorSchema = cursorPaginatedResultSchema(productSchema);
+
+    const validResult = {
+      data: [
+        { id: 'prod1', price: 29.99 },
+        { id: 'prod2', price: 49.99 },
+      ],
+      nextCursor: 'cursor-abc',
+      hasNext: true,
+      limit: 10,
+    };
+    const result = productCursorSchema.safeParse(validResult);
+    expect(result.success).toBe(true);
+  });
+});
+
+// ============================================================================
+// Universal Pagination Tests
+// ============================================================================
+
+describe('universalPaginationOptionsSchema', () => {
+  it('should validate offset-based pagination options', () => {
+    const offsetOptions = {
+      type: 'offset',
+      page: 2,
+      limit: 25,
+      sortOrder: 'asc',
+    };
+    const result = universalPaginationOptionsSchema.safeParse(offsetOptions);
+    expect(result.success).toBe(true);
+  });
+
+  it('should validate cursor-based pagination options', () => {
+    const cursorOptions = {
+      type: 'cursor',
+      cursor: 'abc123',
+      limit: 50,
+      sortOrder: 'desc',
+    };
+    const result = universalPaginationOptionsSchema.safeParse(cursorOptions);
+    expect(result.success).toBe(true);
+  });
+
+  it('should reject missing type', () => {
+    const noTypeOptions = {
+      page: 1,
+      limit: 50,
+    };
+    const result = universalPaginationOptionsSchema.safeParse(noTypeOptions);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject invalid type', () => {
+    const invalidTypeOptions = {
+      type: 'invalid',
+      page: 1,
+      limit: 50,
+    };
+    const result = universalPaginationOptionsSchema.safeParse(invalidTypeOptions);
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('universalPaginatedResultSchema', () => {
+  const itemSchema = z.string();
+  const schema = universalPaginatedResultSchema(itemSchema);
+
+  it('should validate offset-based result', () => {
+    const offsetResult = {
+      type: 'offset',
+      data: ['item1', 'item2'],
+      total: 100,
+      page: 1,
+      limit: 50,
+      hasNext: true,
+      hasPrev: false,
+      totalPages: 2,
+    };
+    const result = schema.safeParse(offsetResult);
+    expect(result.success).toBe(true);
+  });
+
+  it('should validate cursor-based result', () => {
+    const cursorResult = {
+      type: 'cursor',
+      data: ['item1', 'item2'],
+      nextCursor: 'next123',
+      hasNext: true,
+      limit: 50,
+    };
+    const result = schema.safeParse(cursorResult);
+    expect(result.success).toBe(true);
+  });
+
+  it('should reject result without type', () => {
+    const noTypeResult = {
+      data: ['item1'],
+      total: 1,
+      page: 1,
+      limit: 50,
+      hasNext: false,
+      hasPrev: false,
+      totalPages: 1,
+    };
+    const result = schema.safeParse(noTypeResult);
+    expect(result.success).toBe(false);
   });
 });

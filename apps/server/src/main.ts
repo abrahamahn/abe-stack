@@ -28,9 +28,7 @@ async function main(): Promise<void> {
 
     process.on('SIGTERM', () => void shutdown('SIGTERM'));
     process.on('SIGINT', () => void shutdown('SIGINT'));
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Failed to start server:', error instanceof Error ? error.message : error);
+  } catch {
     process.exit(1);
   }
 }

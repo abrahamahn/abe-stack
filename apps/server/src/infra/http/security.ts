@@ -11,7 +11,7 @@
  * - Easier to audit and understand
  */
 
-import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Security Headers (Replaces @fastify/helmet)
@@ -242,4 +242,119 @@ export function handlePreflight(req: FastifyRequest, res: FastifyReply): boolean
     return true;
   }
   return false;
+}
+
+// ============================================================================
+// Prototype Pollution Protection
+// ============================================================================
+
+/**
+ * Keys that can be exploited for prototype pollution attacks.
+ * These keys allow attackers to modify Object.prototype or other prototypes
+ * through JSON input, potentially leading to security vulnerabilities.
+ */
+const DANGEROUS_KEYS = ['__proto__', 'constructor', 'prototype'];
+
+/**
+ * Recursively sanitize an object by removing dangerous prototype pollution keys.
+ * This prevents attacks where malicious JSON payloads attempt to modify
+ * Object.prototype through __proto__, constructor, or prototype properties.
+ *
+ * @example
+ * // Malicious input: { "__proto__": { "isAdmin": true } }
+ * // After sanitization: {}
+ *
+ * @param obj - The value to sanitize (can be any JSON-parseable value)
+ * @returns The sanitized value with dangerous keys removed
+ */
+export function sanitizeObject(obj: unknown): unknown {
+  // Primitives and null pass through unchanged
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  // Arrays: recursively sanitize each element
+  if (Array.isArray(obj)) {
+    return obj.map(sanitizeObject);
+  }
+
+  // Objects: filter out dangerous keys and recursively sanitize values
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (!DANGEROUS_KEYS.includes(key)) {
+      result[key] = sanitizeObject(value);
+    }
+  }
+  return result;
+}
+
+/**
+ * Check if an object contains any dangerous prototype pollution keys.
+ * This can be used for validation/logging before sanitization.
+ *
+ * @param obj - The value to check
+ * @returns true if the object contains dangerous keys at any depth
+ */
+export function hasDangerousKeys(obj: unknown): boolean {
+  if (obj === null || typeof obj !== 'object') {
+    return false;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.some(hasDangerousKeys);
+  }
+
+  for (const key of Object.keys(obj)) {
+    if (DANGEROUS_KEYS.includes(key)) {
+      return true;
+    }
+    if (hasDangerousKeys((obj as Record<string, unknown>)[key])) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Create a custom JSON parser for Fastify that sanitizes prototype pollution keys.
+ * This integrates with Fastify's content type parser to automatically sanitize
+ * all incoming JSON request bodies.
+ *
+ * @param server - The Fastify instance to register the parser on
+ *
+ * @example
+ * const server = Fastify();
+ * registerPrototypePollutionProtection(server);
+ */
+export function registerPrototypePollutionProtection(server: FastifyInstance): void {
+  // Remove the default JSON parser and add our sanitizing version
+  server.removeContentTypeParser('application/json');
+
+  server.addContentTypeParser(
+    'application/json',
+    { parseAs: 'string' },
+    (_req: FastifyRequest, body: string, done: (err: Error | null, body?: unknown) => void) => {
+      try {
+        // Handle empty body
+        if (!body || body.trim() === '') {
+          done(null, undefined);
+          return;
+        }
+
+        // Parse JSON
+        const parsed: unknown = JSON.parse(body);
+
+        // Sanitize to remove prototype pollution vectors
+        const sanitized = sanitizeObject(parsed);
+
+        done(null, sanitized);
+      } catch (err) {
+        // Re-throw parse errors with appropriate status
+        const error = err instanceof Error ? err : new Error('Invalid JSON');
+        (error as Error & { statusCode: number }).statusCode = 400;
+        done(error);
+      }
+    },
+  );
 }

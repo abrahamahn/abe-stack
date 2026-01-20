@@ -21,6 +21,7 @@ export interface TokenPayload {
   userId: string;
   email: string;
   role: UserRole;
+  [key: string]: unknown;
 }
 
 // Re-export JwtError for consumers

@@ -156,7 +156,7 @@ describe('LoginPage', () => {
       const signUpButton = screen.getByRole('button', { name: /sign up/i });
       fireEvent.click(signUpButton);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/register');
+      expect(mockNavigate).toHaveBeenCalledWith('/register', { replace: false });
     });
 
     it('should navigate to forgot password page when forgot password is clicked', () => {
@@ -165,7 +165,7 @@ describe('LoginPage', () => {
       const forgotButton = screen.getByRole('button', { name: /forgot your password/i });
       fireEvent.click(forgotButton);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/auth?mode=forgot-password');
+      expect(mockNavigate).toHaveBeenCalledWith('/auth?mode=forgot-password', { replace: false });
     });
   });
 

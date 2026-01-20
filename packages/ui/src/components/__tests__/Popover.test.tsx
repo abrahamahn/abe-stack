@@ -12,7 +12,11 @@ describe('Popover', () => {
   it('opens and closes on trigger click', async () => {
     const user = userEvent.setup();
 
-    render(<Popover trigger={<span>Toggle</span>}>Popover content</Popover>);
+    render(
+      <Popover trigger={<span>Toggle</span>} aria-label="Toggle">
+        Popover content
+      </Popover>,
+    );
 
     const trigger = screen.getByRole('button', { name: 'Toggle' });
     expect(screen.queryByText('Popover content')).not.toBeInTheDocument();
@@ -30,7 +34,11 @@ describe('Popover', () => {
   it('closes on Escape key and returns focus to trigger', async () => {
     const user = userEvent.setup();
 
-    render(<Popover trigger={<span>Show</span>}>Content</Popover>);
+    render(
+      <Popover trigger={<span>Show</span>} aria-label="Show">
+        Content
+      </Popover>,
+    );
 
     const trigger = screen.getByRole('button', { name: 'Show' });
     await user.click(trigger);
@@ -48,13 +56,14 @@ describe('Popover', () => {
     const user = userEvent.setup();
 
     render(
-      <Popover trigger={<span>Show</span>} placement="right">
+      <Popover trigger={<span>Show</span>} placement="right" aria-label="Show">
         Content
       </Popover>,
     );
 
     await user.click(screen.getByRole('button', { name: 'Show' }));
-    expect(screen.getByText('Content').parentElement).toHaveAttribute('data-placement', 'right');
+    // The popover content has role="dialog"
+    expect(screen.getByRole('dialog')).toHaveAttribute('data-placement', 'right');
   });
 
   it('works in controlled mode', async () => {
@@ -62,7 +71,7 @@ describe('Popover', () => {
     const onChange = vi.fn();
 
     const { rerender } = render(
-      <Popover trigger={<span>Show</span>} open={false} onChange={onChange}>
+      <Popover trigger={<span>Show</span>} open={false} onChange={onChange} aria-label="Show">
         Content
       </Popover>,
     );
@@ -73,7 +82,7 @@ describe('Popover', () => {
     expect(onChange).toHaveBeenCalledWith(true);
 
     rerender(
-      <Popover trigger={<span>Show</span>} open={true} onChange={onChange}>
+      <Popover trigger={<span>Show</span>} open={true} onChange={onChange} aria-label="Show">
         Content
       </Popover>,
     );
@@ -86,7 +95,11 @@ describe('Popover', () => {
   it('supports keyboard activation with Enter and Space', async () => {
     const user = userEvent.setup();
 
-    render(<Popover trigger={<span>Show</span>}>Content</Popover>);
+    render(
+      <Popover trigger={<span>Show</span>} aria-label="Show">
+        Content
+      </Popover>,
+    );
 
     const trigger = screen.getByRole('button', { name: 'Show' });
     trigger.focus();
@@ -95,5 +108,12 @@ describe('Popover', () => {
 
     await user.keyboard(' ');
     expect(screen.queryByText('Content')).not.toBeInTheDocument();
+  });
+
+  it('uses default aria-label when not provided', () => {
+    render(<Popover trigger={<span>Menu</span>}>Content</Popover>);
+
+    const trigger = screen.getByRole('button', { name: 'Toggle popover' });
+    expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
   });
 });

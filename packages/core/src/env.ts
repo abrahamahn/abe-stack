@@ -107,12 +107,6 @@ export const envSchema = serverEnvSchema;
 export function loadServerEnv(raw: Record<string, unknown>): ServerEnv {
   const parsed = serverEnvSchema.safeParse(raw);
   if (!parsed.success) {
-    // eslint-disable-next-line no-console
-    console.error('❌ Invalid server environment variables:');
-    // eslint-disable-next-line no-console
-    console.error(JSON.stringify(parsed.error.format(), null, 2));
-    // eslint-disable-next-line no-console
-    console.error('\n💡 Tip: Check your .env files in the config/ directory');
     process.exit(1);
   }
   return parsed.data;

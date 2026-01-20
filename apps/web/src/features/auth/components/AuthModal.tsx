@@ -1,6 +1,6 @@
 // apps/web/src/features/auth/components/AuthModal.tsx
-import { Modal } from '@abe-stack/ui';
-import { useAuth } from '@auth/hooks/useAuth';
+import { Modal, useFormState } from '@abe-stack/ui';
+import { useAuth } from '@auth/hooks';
 import { useEffect, useState } from 'react';
 
 import { AuthForm, type AuthMode } from './AuthForms';
@@ -22,9 +22,8 @@ export function AuthModal({
   onSuccess,
 }: AuthModalProps): ReactElement | null {
   const { login, register, forgotPassword, resetPassword, resendVerification } = useAuth();
+  const { isLoading, error, setError, wrapHandler } = useFormState();
   const [mode, setMode] = useState<AuthMode>(initialMode);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Sync mode when modal opens with a different initialMode
   useEffect(() => {
@@ -32,7 +31,7 @@ export function AuthModal({
       setMode(initialMode);
       setError(null);
     }
-  }, [open, initialMode]);
+  }, [open, initialMode, setError]);
 
   const handleModeChange = (newMode: AuthMode): void => {
     setMode(newMode);
@@ -43,37 +42,18 @@ export function AuthModal({
     onOpenChange(false);
   };
 
-  const createFormHandler =
-    <T extends Record<string, unknown>, R>(
-      handler: (data: T) => Promise<R>,
-      closeOnSuccess = true,
-    ) =>
-    async (data: T): Promise<R> => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const result = await handler(data);
-        if (closeOnSuccess) {
-          onSuccess?.();
-          onOpenChange(false);
-        }
-        return result;
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-        throw err; // Re-throw so caller can handle if needed
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const closeModalOnSuccess = (): void => {
+    onSuccess?.();
+    onOpenChange(false);
+  };
 
   const formProps: AuthFormProps = {
     mode,
-    onLogin: createFormHandler(login),
+    onLogin: wrapHandler(login, { onSuccess: closeModalOnSuccess }),
     // Don't close modal after registration - user needs to see "check your email" message
-    onRegister: createFormHandler(register, false),
-    onForgotPassword: createFormHandler(forgotPassword),
-    onResetPassword: createFormHandler(resetPassword),
+    onRegister: wrapHandler(register),
+    onForgotPassword: wrapHandler(forgotPassword, { onSuccess: closeModalOnSuccess }),
+    onResetPassword: wrapHandler(resetPassword, { onSuccess: closeModalOnSuccess }),
     onResendVerification: resendVerification,
     onModeChange: handleModeChange,
     isLoading,

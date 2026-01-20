@@ -18,6 +18,8 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 
+import { cn } from '../utils/cn';
+
 import '../styles/components.css';
 
 type DialogContextValue = {
@@ -156,14 +158,14 @@ export function DialogTrigger(props: DialogTriggerProps): ReactElement {
 type DialogOverlayProps = ComponentPropsWithoutRef<'div'>;
 
 export function DialogOverlay(props: DialogOverlayProps): ReactElement {
-  const { className = '', ...rest } = props;
-  return <div className={`overlay ${className}`.trim()} {...rest} />;
+  const { className, ...rest } = props;
+  return <div className={cn('overlay', className)} {...rest} />;
 }
 
 type DialogContentProps = ComponentPropsWithoutRef<'div'> & { title?: ReactNode };
 
 export function DialogContent(props: DialogContentProps): ReactElement | null {
-  const { title, className = '', children, ...rest } = props;
+  const { title, className, children, ...rest } = props;
   const { open, setLabelledBy, setDescribedBy, labelledBy, describedBy, setOpen, triggerRef } =
     useDialogContext('Dialog.Content');
   const titleId = useId();
@@ -201,7 +203,7 @@ export function DialogContent(props: DialogContentProps): ReactElement | null {
     >
       <FocusTrap>
         <div
-          className={`modal-card ${className}`.trim()}
+          className={cn('modal-card', className)}
           {...rest}
           ref={(node) => {
             contentRef.current = node;

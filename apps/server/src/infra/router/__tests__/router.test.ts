@@ -16,11 +16,12 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
  * Create a mock Zod-like schema for testing
  */
 function createMockSchema<T>(
-  validator: (
-    data: unknown,
-  ) =>
+  validator: (data: unknown) =>
     | { success: true; data: T }
-    | { success: false; error: { issues: Array<{ message: string }> } },
+    | {
+        success: false;
+        error: { issues: Array<{ path: Array<string | number>; message: string; code: string }> };
+      },
 ): ValidationSchema<T> {
   return {
     safeParse: validator,
@@ -31,12 +32,23 @@ function createMockSchema<T>(
 const emailPasswordSchema = createMockSchema<{ email: string; password: string }>((data) => {
   const d = data as Record<string, unknown>;
   if (typeof d?.email !== 'string' || !d.email.includes('@')) {
-    return { success: false, error: { issues: [{ message: 'Invalid email' }] } };
+    return {
+      success: false,
+      error: { issues: [{ path: ['email'], message: 'Invalid email', code: 'invalid_string' }] },
+    };
   }
   if (typeof d?.password !== 'string' || d.password.length < 8) {
     return {
       success: false,
-      error: { issues: [{ message: 'Password must be at least 8 characters' }] },
+      error: {
+        issues: [
+          {
+            path: ['password'],
+            message: 'Password must be at least 8 characters',
+            code: 'too_small',
+          },
+        ],
+      },
     };
   }
   return { success: true, data: { email: d.email, password: d.password } };
@@ -46,7 +58,10 @@ const emailPasswordSchema = createMockSchema<{ email: string; password: string }
 const nameSchema = createMockSchema<{ name: string }>((data) => {
   const d = data as Record<string, unknown>;
   if (typeof d?.name !== 'string' || d.name.length === 0) {
-    return { success: false, error: { issues: [{ message: 'Name is required' }] } };
+    return {
+      success: false,
+      error: { issues: [{ path: ['name'], message: 'Name is required', code: 'invalid_type' }] },
+    };
   }
   return { success: true, data: { name: d.name } };
 });
@@ -372,7 +387,7 @@ describe('registerRouteMap', () => {
     expect(reply.statusCode).toBe(200);
   });
 
-  test('should return first validation error message', async () => {
+  test('should return all validation errors in structured response', async () => {
     const handler = vi.fn();
 
     const routes = {
@@ -388,7 +403,14 @@ describe('registerRouteMap', () => {
     await registeredRoute!.handler(req, reply);
 
     expect(reply.statusCode).toBe(400);
-    expect(reply.sentBody).toHaveProperty('message', 'Name is required');
+    expect(reply.sentBody).toEqual({
+      ok: false,
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'Request validation failed',
+        details: [{ field: 'name', message: 'Name is required', code: 'invalid_type' }],
+      },
+    });
   });
 
   test('should not register user routes if none exist', () => {

@@ -2,7 +2,7 @@
 /**
  * Security Infrastructure
  *
- * Login tracking, account lockout, and security event logging.
+ * Login tracking, account lockout, rate limiting, and security event logging.
  */
 
 // Types
@@ -18,6 +18,15 @@ export {
   getAccountLockoutStatus,
   unlockAccount,
 } from './lockout';
+
+// Auth rate limiting
+export {
+  AUTH_RATE_LIMITS,
+  authRateLimiters,
+  createAuthRateLimitHook,
+  type AuthEndpoint,
+  type AuthRateLimitConfig,
+} from './rateLimitPresets';
 
 // Security events (re-exported for convenience)
 export {

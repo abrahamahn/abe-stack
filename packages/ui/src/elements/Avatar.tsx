@@ -1,19 +1,38 @@
 // packages/ui/src/elements/Avatar.tsx
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
+
+import { cn } from '../utils/cn';
+
 import '../styles/elements.css';
 
 type AvatarProps = ComponentPropsWithoutRef<'div'> & {
+  /** Image source URL */
   src?: string;
+  /** Alt text for the avatar image (required for accessibility when src is provided) */
   alt?: string;
+  /** Fallback text to display when no image is provided (typically initials) */
   fallback?: string;
 };
 
 export const Avatar = forwardRef<HTMLDivElement, AvatarProps>((props, ref) => {
-  const { src, alt, fallback, className = '', ...rest } = props;
+  const { src, alt, fallback, className, ...rest } = props;
+
+  // Provide a default alt text for accessibility if none is given
+  const imageAlt = alt ?? (fallback ? `Avatar for ${fallback}` : 'User avatar');
 
   return (
-    <div ref={ref} className={`avatar ${className}`.trim()} {...rest}>
-      {src ? <img src={src} alt={alt} /> : fallback || null}
+    <div
+      ref={ref}
+      className={cn('avatar', className)}
+      role="img"
+      aria-label={!src && fallback ? imageAlt : undefined}
+      {...rest}
+    >
+      {src ? (
+        <img src={src} alt={imageAlt} />
+      ) : fallback ? (
+        <span aria-hidden="true">{fallback}</span>
+      ) : null}
     </div>
   );
 });

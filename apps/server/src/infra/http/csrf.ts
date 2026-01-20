@@ -47,9 +47,48 @@ declare module 'fastify' {
 const TOKEN_LENGTH = 32;
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
-// Routes that don't need CSRF protection (no authenticated session to exploit)
-// NOTE: /api/auth/logout is intentionally NOT exempt - logout requires CSRF
-// protection to prevent forced logout attacks (CSRF logout attack)
+/**
+ * CSRF-Exempt Endpoints
+ *
+ * These paths are exempted from CSRF protection because they meet one or more
+ * of the following security criteria:
+ *
+ * 1. No authenticated session exists to exploit (unauthenticated endpoints)
+ * 2. Protected by one-time tokens that prevent replay attacks
+ * 3. Protected by HTTP-only SameSite cookies (refresh token flow)
+ *
+ * Security rationale for each endpoint:
+ *
+ * - /api/auth/login
+ *   No authenticated session to exploit. The user is not logged in yet,
+ *   so there's no session state an attacker could abuse via CSRF.
+ *
+ * - /api/auth/register
+ *   No existing session (new user creation). An attacker cannot force
+ *   a victim to create an account they don't control.
+ *
+ * - /api/auth/forgot-password
+ *   Public endpoint with no session state. The email is sent to the
+ *   account owner, so forcing this request only sends a reset email
+ *   to the legitimate user (mild annoyance, not a security issue).
+ *
+ * - /api/auth/reset-password
+ *   Protected by a one-time, time-limited token sent via email.
+ *   The token itself validates the request authenticity.
+ *
+ * - /api/auth/verify-email
+ *   Protected by a one-time verification token. Only the recipient
+ *   of the verification email can successfully call this endpoint.
+ *
+ * - /api/auth/refresh
+ *   Protected by HTTP-only SameSite cookie containing the refresh token.
+ *   The SameSite attribute prevents cross-origin requests from including
+ *   the cookie, providing CSRF protection at the browser level.
+ *
+ * NOTE: /api/auth/logout is intentionally NOT exempt - logout requires CSRF
+ * protection to prevent forced logout attacks (CSRF logout attack), where
+ * an attacker could force a victim to log out of their session.
+ */
 const CSRF_EXEMPT_PATHS = new Set([
   '/api/auth/login',
   '/api/auth/register',
@@ -157,6 +196,72 @@ function decryptToken(encryptedToken: string, secret: string): string | null {
     return decrypted;
   } catch {
     return null;
+  }
+}
+
+// ============================================================================
+// Standalone CSRF Validation (for WebSocket upgrades, etc.)
+// ============================================================================
+
+export interface CsrfValidationOptions {
+  secret: string;
+  encrypted?: boolean;
+  signed?: boolean;
+}
+
+/**
+ * Validate a CSRF token pair (cookie token and request token).
+ * Used for WebSocket upgrades and other non-Fastify contexts.
+ *
+ * @param cookieToken - The token from the CSRF cookie
+ * @param requestToken - The token from the request (header, query param, etc.)
+ * @param options - Validation options (must match how tokens were generated)
+ * @returns true if the tokens are valid and match
+ */
+export function validateCsrfToken(
+  cookieToken: string | undefined,
+  requestToken: string | undefined,
+  options: CsrfValidationOptions,
+): boolean {
+  const { secret, encrypted = false, signed = true } = options;
+
+  if (!cookieToken || !requestToken) {
+    return false;
+  }
+
+  // Verify the cookie token
+  let cookieResult: { valid: boolean; token: string | null };
+
+  if (encrypted) {
+    // Decrypt first, then verify signature if signed
+    const decryptedToken = decryptToken(cookieToken, secret);
+    if (!decryptedToken) {
+      return false;
+    }
+
+    cookieResult = signed
+      ? verifyToken(decryptedToken, secret)
+      : { valid: true, token: decryptedToken };
+  } else {
+    cookieResult = signed ? verifyToken(cookieToken, secret) : { valid: true, token: cookieToken };
+  }
+
+  if (!cookieResult.valid || !cookieResult.token) {
+    return false;
+  }
+
+  // Compare tokens (timing-safe)
+  try {
+    const tokenBuffer = Buffer.from(requestToken);
+    const expectedBuffer = Buffer.from(cookieResult.token);
+
+    if (tokenBuffer.length !== expectedBuffer.length) {
+      return false;
+    }
+
+    return timingSafeEqual(tokenBuffer, expectedBuffer);
+  } catch {
+    return false;
   }
 }
 

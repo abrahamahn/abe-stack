@@ -1,7 +1,7 @@
 // packages/core/src/__tests__/domain-structure.test.ts
 import { describe, expect, test } from 'vitest';
 
-// Test domain exports
+// Test domain exports for the new domain-based structure
 describe('Domain Structure', () => {
   describe('Auth Domain', () => {
     test('should export password validation functions', async () => {
@@ -12,7 +12,7 @@ describe('Domain Structure', () => {
         getStrengthLabel,
         getStrengthColor,
         estimatePasswordStrength,
-      } = await import('../auth/index.js');
+      } = await import('../domains/auth/index.js');
 
       expect(typeof defaultPasswordConfig).toBe('object');
       expect(typeof validatePassword).toBe('function');
@@ -20,14 +20,6 @@ describe('Domain Structure', () => {
       expect(typeof getStrengthLabel).toBe('function');
       expect(typeof getStrengthColor).toBe('function');
       expect(typeof estimatePasswordStrength).toBe('function');
-    });
-
-    test('should export JWT utilities', async () => {
-      const { createToken, decodeToken, verifyToken } = await import('../auth/index.js');
-
-      expect(typeof createToken).toBe('function');
-      expect(typeof decodeToken).toBe('function');
-      expect(typeof verifyToken).toBe('function');
     });
 
     test('should export auth errors', async () => {
@@ -44,7 +36,7 @@ describe('Domain Structure', () => {
         OAuthStateMismatchError,
         TotpRequiredError,
         TotpInvalidError,
-      } = await import('../auth/index.js');
+      } = await import('../domains/auth/index.js');
 
       // Test that they are error classes by checking they extend Error
       expect(new InvalidCredentialsError()).toBeInstanceOf(Error);
@@ -55,25 +47,67 @@ describe('Domain Structure', () => {
       expect(new EmailAlreadyExistsError()).toBeInstanceOf(Error);
       expect(new EmailNotVerifiedError()).toBeInstanceOf(Error);
       expect(new UserNotFoundError()).toBeInstanceOf(Error);
-      expect(new OAuthError()).toBeInstanceOf(Error);
-      expect(new OAuthStateMismatchError()).toBeInstanceOf(Error);
+      expect(new OAuthError('msg', 'google')).toBeInstanceOf(Error);
+      expect(new OAuthStateMismatchError('google')).toBeInstanceOf(Error);
       expect(new TotpRequiredError()).toBeInstanceOf(Error);
       expect(new TotpInvalidError()).toBeInstanceOf(Error);
     });
+  });
 
-    test('should export auth constants', async () => {
-      // Auth constants are now in shared domain for consistency
-      const { HTTP_STATUS, MS_PER_SECOND, SECONDS_PER_MINUTE } = await import('../shared/index.js');
+  describe('Contracts', () => {
+    test('should export auth schemas from contracts', async () => {
+      const { authContract, loginRequestSchema, registerRequestSchema, authResponseSchema } =
+        await import('../contracts/index.js');
 
-      expect(typeof HTTP_STATUS).toBe('object');
-      expect(typeof MS_PER_SECOND).toBe('number');
-      expect(typeof SECONDS_PER_MINUTE).toBe('number');
+      expect(typeof authContract).toBe('object');
+      expect(typeof loginRequestSchema).toBe('object');
+      expect(typeof registerRequestSchema).toBe('object');
+      expect(typeof authResponseSchema).toBe('object');
+    });
+
+    test('should export user types and schemas from contracts', async () => {
+      const { USER_ROLES, userSchema, userRoleSchema, usersContract } =
+        await import('../contracts/index.js');
+
+      expect(typeof USER_ROLES).toBe('object');
+      expect(Array.isArray(USER_ROLES)).toBe(true);
+      expect(typeof userSchema).toBe('object');
+      expect(typeof userRoleSchema).toBe('object');
+      expect(typeof usersContract).toBe('object');
+    });
+
+    test('should export admin schemas from contracts', async () => {
+      const { adminContract, unlockAccountRequestSchema, unlockAccountResponseSchema } =
+        await import('../contracts/index.js');
+
+      expect(typeof adminContract).toBe('object');
+      expect(typeof unlockAccountRequestSchema).toBe('object');
+      expect(typeof unlockAccountResponseSchema).toBe('object');
     });
   });
 
-  describe('Shared Domain', () => {
+  describe('Pagination Domain', () => {
+    test('should export pagination utilities', async () => {
+      const {
+        encodeCursor,
+        decodeCursor,
+        PaginationError,
+        buildCursorPaginationQuery,
+        paginateArrayWithCursor,
+      } = await import('../domains/pagination/index.js');
+
+      expect(typeof encodeCursor).toBe('function');
+      expect(typeof decodeCursor).toBe('function');
+      expect(typeof PaginationError).toBe('function');
+      expect(typeof buildCursorPaginationQuery).toBe('function');
+      expect(typeof paginateArrayWithCursor).toBe('function');
+    });
+  });
+
+  describe('Infrastructure Layer', () => {
     test('should export async utilities', async () => {
-      const { BatchedQueue, DeferredPromise, ReactiveMap } = await import('../shared/index.js');
+      const { BatchedQueue, DeferredPromise, ReactiveMap } =
+        await import('../infrastructure/async/index.js');
 
       expect(typeof BatchedQueue).toBe('function');
       expect(typeof DeferredPromise).toBe('function');
@@ -81,13 +115,13 @@ describe('Domain Structure', () => {
     });
 
     test('should export HTTP utilities', async () => {
-      const { parseCookies } = await import('../shared/index.js');
+      const { parseCookies } = await import('../infrastructure/http/index.js');
 
       expect(typeof parseCookies).toBe('function');
     });
 
     test('should export state management', async () => {
-      const { createUndoRedoStore, toastStore } = await import('../shared/index.js');
+      const { createUndoRedoStore, toastStore } = await import('../infrastructure/stores/index.js');
 
       expect(typeof createUndoRedoStore).toBe('function');
       expect(typeof toastStore).toBe('function'); // Zustand store is a function
@@ -105,7 +139,7 @@ describe('Domain Structure', () => {
         isListRemoveOperation,
         isSetOperation,
         mergeTransactions,
-      } = await import('../shared/index.js');
+      } = await import('../infrastructure/transactions/index.js');
 
       expect(typeof createListInsertOperation).toBe('function');
       expect(typeof createListRemoveOperation).toBe('function');
@@ -121,7 +155,7 @@ describe('Domain Structure', () => {
 
     test('should export base errors and helpers', async () => {
       const { AppError, ValidationError, isAppError, toAppError } =
-        await import('../shared/index.js');
+        await import('../infrastructure/errors/index.js');
 
       expect(typeof AppError).toBe('function');
       expect(typeof ValidationError).toBe('function');
@@ -141,7 +175,7 @@ describe('Domain Structure', () => {
         ConflictError,
         TooManyRequestsError,
         InternalError,
-      } = await import('../shared/index.js');
+      } = await import('../infrastructure/errors/index.js');
 
       expect(typeof BadRequestError).toBe('function');
       expect(typeof UnauthorizedError).toBe('function');
@@ -169,7 +203,7 @@ describe('Domain Structure', () => {
         MINUTES_PER_HOUR,
         HOURS_PER_DAY,
         DAYS_PER_WEEK,
-      } = await import('../shared/index.js');
+      } = await import('../infrastructure/constants/index.js');
 
       expect(typeof HTTP_STATUS).toBe('object');
       expect(typeof MS_PER_SECOND).toBe('number');
@@ -178,18 +212,13 @@ describe('Domain Structure', () => {
       expect(typeof HOURS_PER_DAY).toBe('number');
       expect(typeof DAYS_PER_WEEK).toBe('number');
     });
-  });
 
-  describe('Contract Exports', () => {
-    test('should export contract schemas', async () => {
-      const { USER_ROLES, adminContract, apiContract, authContract, usersContract } =
-        await import('../contracts/index.js');
+    test('should export crypto utilities', async () => {
+      const { sign, decode, verify } = await import('../infrastructure/crypto/index.js');
 
-      expect(typeof USER_ROLES).toBe('object');
-      expect(typeof adminContract).toBe('object');
-      expect(typeof apiContract).toBe('object');
-      expect(typeof authContract).toBe('object');
-      expect(typeof usersContract).toBe('object');
+      expect(typeof sign).toBe('function');
+      expect(typeof decode).toBe('function');
+      expect(typeof verify).toBe('function');
     });
   });
 
@@ -221,14 +250,14 @@ describe('Domain Structure', () => {
       expect(typeof envSchema).toBe('object');
     });
 
-    test('should export domain utilities', async () => {
+    test('should export domain utilities via main index', async () => {
       const {
-        // Auth domain (browser-safe only - createToken is in subpath export)
+        // Auth domain
         validatePassword,
         InvalidCredentialsError,
-        HTTP_STATUS,
 
-        // Shared domain
+        // Infrastructure
+        HTTP_STATUS,
         BatchedQueue,
         parseCookies,
         createUndoRedoStore,
@@ -236,17 +265,17 @@ describe('Domain Structure', () => {
         BadRequestError,
         isAppError,
 
-        // Contracts
+        // Domains
         USER_ROLES,
         authContract,
       } = await import('../index.js');
 
-      // Auth domain (browser-safe)
+      // Auth domain
       expect(typeof validatePassword).toBe('function');
       expect(typeof InvalidCredentialsError).toBe('function');
-      expect(typeof HTTP_STATUS).toBe('object');
 
-      // Shared domain
+      // Infrastructure
+      expect(typeof HTTP_STATUS).toBe('object');
       expect(typeof BatchedQueue).toBe('function');
       expect(typeof parseCookies).toBe('function');
       expect(typeof createUndoRedoStore).toBe('function');
@@ -254,18 +283,9 @@ describe('Domain Structure', () => {
       expect(typeof BadRequestError).toBe('function');
       expect(typeof isAppError).toBe('function');
 
-      // Contracts
+      // Domains
       expect(typeof USER_ROLES).toBe('object');
       expect(typeof authContract).toBe('object');
-    });
-
-    test('should export crypto utilities via subpath', async () => {
-      // Server-only crypto utils are in subpath export @abe-stack/core/crypto
-      const { sign, decode, verify } = await import('../crypto/index.js');
-
-      expect(typeof sign).toBe('function');
-      expect(typeof decode).toBe('function');
-      expect(typeof verify).toBe('function');
     });
   });
 
@@ -275,7 +295,6 @@ describe('Domain Structure', () => {
       const core = await import('../index.js');
 
       // Common imports that should still work
-      // Note: createToken moved to @abe-stack/core/crypto subpath export
       expect(typeof core.validatePassword).toBe('function');
       expect(typeof core.InvalidCredentialsError).toBe('function');
       expect(typeof core.AppError).toBe('function');

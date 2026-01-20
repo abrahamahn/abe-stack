@@ -107,8 +107,7 @@ export class App implements IServiceContainer {
           if (this._server) {
             this.log.error({ err }, 'PostgresPubSub error');
           } else {
-            // eslint-disable-next-line no-console
-            console.error('PostgresPubSub error:', err);
+            // PostgresPubSub error logged via server logger when available
           }
         },
       });
@@ -130,16 +129,7 @@ export class App implements IServiceContainer {
       await requireValidSchema(this.db);
     } catch (error) {
       if (error instanceof SchemaValidationError) {
-        // eslint-disable-next-line no-console
-        console.error('\n' + '='.repeat(60));
-        // eslint-disable-next-line no-console
-        console.error('DATABASE SCHEMA ERROR');
-        // eslint-disable-next-line no-console
-        console.error('='.repeat(60));
-        // eslint-disable-next-line no-console
-        console.error(error.message);
-        // eslint-disable-next-line no-console
-        console.error('='.repeat(60) + '\n');
+        // Database schema error will be handled by caller
       }
       throw error;
     }

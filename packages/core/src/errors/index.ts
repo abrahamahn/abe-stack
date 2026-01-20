@@ -1,31 +1,55 @@
 // packages/core/src/errors/index.ts
 /**
- * Error Module
+ * Error Handling
  *
- * Centralized error handling for the application.
- * All custom errors, helper functions, and response types.
+ * HTTP error mapping and validation error formatting.
+ * Re-exports infrastructure errors for convenience.
  */
 
-// Base error class and helpers
-export { AppError, getErrorStatusCode, getSafeErrorMessage, isAppError, toAppError } from './base';
+// HTTP error mapper
+export { HTTP_ERROR_MESSAGES, isKnownAuthError, mapErrorToHttpResponse } from './httpMapper';
+export type {
+  ErrorMapperLogger,
+  ErrorMapperOptions,
+  ErrorStatusCode,
+  HttpErrorResponse,
+} from './httpMapper';
 
-// HTTP errors
+// Validation error formatting
+export { formatValidationErrors } from './validationError';
+export type {
+  ValidationErrorDetail,
+  ValidationErrorResponse,
+  ZodIssueMinimal,
+} from './validationError';
+
+// Re-export infrastructure errors for convenience
 export {
+  AppError,
   BadRequestError,
   ConflictError,
   ForbiddenError,
+  getErrorStatusCode,
+  getSafeErrorMessage,
   InternalError,
+  isAppError,
+  isErrorResponse,
+  isSuccessResponse,
   NotFoundError,
+  toAppError,
   TooManyRequestsError,
   UnauthorizedError,
   UnprocessableError,
-} from './http';
+  ValidationError,
+} from '../infrastructure/errors';
+export type { ApiErrorResponse, ApiResponse, ApiSuccessResponse } from '../infrastructure/errors';
 
-// Auth errors
+// Re-export auth errors for convenience
 export {
   AccountLockedError,
   EmailAlreadyExistsError,
   EmailNotVerifiedError,
+  EmailSendError,
   InvalidCredentialsError,
   InvalidTokenError,
   OAuthError,
@@ -35,11 +59,4 @@ export {
   TotpRequiredError,
   UserNotFoundError,
   WeakPasswordError,
-} from './auth';
-
-// Validation error
-export { ValidationError } from './validation';
-
-// Response types
-export type { ApiErrorResponse, ApiResponse, ApiSuccessResponse } from './response';
-export { isErrorResponse, isSuccessResponse } from './response';
+} from '../domains/auth/errors';

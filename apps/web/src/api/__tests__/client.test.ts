@@ -80,13 +80,12 @@ describe('api', () => {
       vi.stubEnv('VITE_API_URL', undefined);
     });
 
-    it('should use default localhost URL when VITE_API_URL is not set', async () => {
+    it('should use empty baseUrl (relative URLs) when VITE_API_URL is not set', async () => {
       await import('../client');
 
       expect(capturedConfig).not.toBeNull();
-      // The actual baseUrl depends on how import.meta.env works in tests
-      // At minimum, verify it has a baseUrl property
-      expect(capturedConfig?.baseUrl).toBeDefined();
+      // Empty string = relative URLs, proxied by Vite in dev
+      expect(capturedConfig?.baseUrl).toBe('');
     });
   });
 

@@ -1,19 +1,51 @@
 // packages/core/src/contracts/auth.ts
+/**
+ * Auth Contract
+ *
+ * Authentication-related schemas and API contract definitions.
+ */
+
 import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
 
-import { errorResponseSchema, userSchema } from './common';
+import { emailSchema, errorResponseSchema, nameSchema, passwordSchema } from './common';
+import { userSchema } from './users';
+
+// ============================================================================
+// Request Schemas
+// ============================================================================
 
 export const loginRequestSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
+  email: emailSchema,
+  password: passwordSchema,
 });
 
 export const registerRequestSchema = z.object({
-  email: z.string().email(),
-  name: z.string().min(2).optional(),
-  password: z.string().min(8),
+  email: emailSchema,
+  name: nameSchema,
+  password: passwordSchema,
 });
+
+export const emailVerificationRequestSchema = z.object({
+  token: z.string(),
+});
+
+export const forgotPasswordRequestSchema = z.object({
+  email: emailSchema,
+});
+
+export const resendVerificationRequestSchema = z.object({
+  email: emailSchema,
+});
+
+export const resetPasswordRequestSchema = z.object({
+  token: z.string(),
+  password: passwordSchema,
+});
+
+// ============================================================================
+// Response Schemas
+// ============================================================================
 
 export const authResponseSchema = z.object({
   token: z.string(),
@@ -23,7 +55,7 @@ export const authResponseSchema = z.object({
 export const registerResponseSchema = z.object({
   status: z.literal('pending_verification'),
   message: z.string(),
-  email: z.string().email(),
+  email: emailSchema,
 });
 
 export const refreshResponseSchema = z.object({
@@ -34,40 +66,27 @@ export const logoutResponseSchema = z.object({
   message: z.string(),
 });
 
-export const emailVerificationRequestSchema = z.object({
-  token: z.string(),
-});
-
 export const emailVerificationResponseSchema = z.object({
   verified: z.boolean(),
   token: z.string(),
   user: userSchema,
 });
 
-export const forgotPasswordRequestSchema = z.object({
-  email: z.string().email(),
-});
-
 export const forgotPasswordResponseSchema = z.object({
   message: z.string(),
-});
-
-export const resendVerificationRequestSchema = z.object({
-  email: z.string().email(),
 });
 
 export const resendVerificationResponseSchema = z.object({
   message: z.string(),
 });
 
-export const resetPasswordRequestSchema = z.object({
-  token: z.string(),
-  password: z.string().min(8),
-});
-
 export const resetPasswordResponseSchema = z.object({
   message: z.string(),
 });
+
+// ============================================================================
+// Types
+// ============================================================================
 
 export type LoginRequest = z.infer<typeof loginRequestSchema>;
 export type RegisterRequest = z.infer<typeof registerRequestSchema>;
@@ -83,6 +102,10 @@ export type ResendVerificationRequest = z.infer<typeof resendVerificationRequest
 export type ResendVerificationResponse = z.infer<typeof resendVerificationResponseSchema>;
 export type ResetPasswordRequest = z.infer<typeof resetPasswordRequestSchema>;
 export type ResetPasswordResponse = z.infer<typeof resetPasswordResponseSchema>;
+
+// ============================================================================
+// Auth Contract
+// ============================================================================
 
 const c = initContract();
 

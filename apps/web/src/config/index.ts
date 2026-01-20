@@ -54,7 +54,8 @@ export function createClientConfig(): ClientConfig {
     mode: env.MODE,
     isDev: env.DEV,
     isProd: env.PROD,
-    apiUrl: (env.VITE_API_URL ?? 'http://localhost:8080').replace(/\/+$/, ''),
+    // Empty string = relative URLs, proxied by Vite in dev, same-origin in prod
+    apiUrl: (env.VITE_API_URL ?? '').replace(/\/+$/, ''),
     tokenRefreshInterval: 13 * 60 * 1000, // 13 minutes
     uiVersion: '1.1.0',
   };

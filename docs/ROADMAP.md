@@ -2,7 +2,7 @@
 
 > **Scope:** Features deferred beyond Series A, or requiring enterprise customers, dedicated platform engineers, or large teams (5+ engineers).
 
-**Last Updated: January 18, 2026**
+**Last Updated: January 20, 2026**
 
 ---
 
@@ -71,40 +71,42 @@ Add real-time collaboration, offline support, and optimistic updates. See [Archi
 
 - [ ] Add `version` field to all syncable database tables
 - [ ] Create `packages/realtime` with transaction types
-- [ ] Implement `RecordCache` (in-memory with tuple-database)
+- [x] Implement `RecordCache` (in-memory with version conflict resolution) → `@abe-stack/sdk/cache`
 - [ ] Add `/api/realtime/write` endpoint
 - [ ] Add `/api/realtime/getRecords` endpoint
 
-> **Partial progress:** WriteService (`apps/server/src/infra/write/`) provides transaction handling, version bumping, and auto-pubsub - can be used as foundation for realtime write endpoint
+> **Implementation:** `RecordCache` in `packages/sdk/src/cache/RecordCache.ts` (69 tests)
+> **Partial progress:** WriteService (`apps/server/src/infra/write/`) provides transaction handling, version bumping, and auto-pubsub
 > **Legacy:** See [Database Utilities](./dev/legacy.md#database-utilities) → `TransactionService.ts`, `BatchedQueue.ts`
 
 ### Phase 2: Real-Time Sync
 
-- [ ] Implement `WebSocketServer` (ws package)
-- [ ] Implement `WebSocketPubSubClient`
+- [x] Implement `WebSocketServer` (ws package) → `apps/server/src/infra/websocket/`
+- [x] Implement `WebSocketPubSubClient` → `@abe-stack/sdk/pubsub` (20 tests)
 - [ ] Create `RealtimeContext` and `RealtimeProvider`
-- [ ] Add subscription management (subscribe/unsubscribe by key)
+- [x] Add subscription management (subscribe/unsubscribe by key) → `SubscriptionCache` (20 tests)
 - [ ] Version-based update notifications
 
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `WebSocketService.ts`, `WebSocketTypes.ts`; [Frontend Utilities](./dev/legacy.md#frontend-utilities) → `WebsocketPubsubClient.ts`
+> **Implementation:** Client in `packages/sdk/src/pubsub/`, Server in `apps/server/src/infra/websocket/`
 
 ### Phase 3: Offline Support
 
-- [ ] Implement `RecordStorage` (IndexedDB wrapper)
-- [ ] Implement `TransactionQueue` for offline writes
-- [ ] Add stale-while-revalidate loaders
+- [x] Implement `RecordStorage` (IndexedDB wrapper) → `@abe-stack/sdk/cache` (31 tests)
+- [x] Implement `TransactionQueue` for offline writes → `@abe-stack/sdk/offline` (26 tests)
+- [x] Add stale-while-revalidate loaders → `LoaderCache` with TTL (57 tests)
 - [ ] Service worker for asset caching
-- [ ] Conflict resolution (last-write-wins)
+- [x] Conflict resolution (last-write-wins) → Built into RecordCache/RecordStorage
 
-> **Legacy:** See [Frontend Hooks](./dev/legacy.md#frontend-hooks) → `useOnline` hook
+> **Implementation:** `packages/sdk/src/cache/RecordStorage.ts`, `packages/sdk/src/offline/TransactionQueue.ts`, `packages/sdk/src/cache/LoaderCache.ts`
 
 ### Phase 4: Undo/Redo
 
-- [ ] Implement `UndoRedoStack`
-- [ ] Operation inversion logic for all operation types
+- [x] Implement `UndoRedoStack` → `@abe-stack/sdk/undo` (38 tests)
+- [x] Operation inversion logic → Built into UndoRedoStack with grouping support
 - [ ] Keyboard shortcuts (Cmd+Z / Cmd+Shift+Z)
-- [ ] UI indicators for undo/redo availability
+- [ ] UI indicators for undo/redo availability (use `onStateChange` callback)
 
+> **Implementation:** `packages/sdk/src/undo/UndoRedoStack.ts`
 > **Legacy:** See [Frontend Hooks](./dev/legacy.md#frontend-hooks) → `useShortcut` hook
 
 ### Phase 5: Permissions
@@ -204,10 +206,11 @@ These are specific to product types, not boilerplate infrastructure.
 - [ ] Message reactions
 - [ ] Channel/room management
 - [ ] Message acknowledgments (delivery confirmation)
-- [ ] `SubscriptionCache` for ref-counted record subscriptions
-- [ ] `LoaderCache` for Suspense-friendly, deduped loaders
+- [x] `SubscriptionCache` for ref-counted record subscriptions → `@abe-stack/sdk/subscriptions`
+- [x] `LoaderCache` for Suspense-friendly, deduped loaders → `@abe-stack/sdk/cache`
 
-> **Legacy:** See [Frontend Components](./dev/legacy.md#frontend-components) → Social components; [Frontend Utilities](./dev/legacy.md#frontend-utilities) → `SocialContext.tsx`, `social.ts`; [Potential Migrations](./dev/legacy.md#common-utilities) → ReactiveMap, DeferredPromise
+> **Implementation:** `packages/sdk/src/subscriptions/SubscriptionCache.ts`, `packages/sdk/src/cache/LoaderCache.ts`
+> **Legacy:** See [Frontend Components](./dev/legacy.md#frontend-components) → Social components
 
 ### For Music Streaming / Marketplace
 
@@ -357,16 +360,16 @@ When you need Redis (high traffic, distributed caching):
 
 ## Priority Matrix
 
-| Priority     | Area         | Items                                    |
-| ------------ | ------------ | ---------------------------------------- |
-| **Critical** | Security     | Passport.js integration, CSRF hardening  |
-| **High**     | Architecture | V5 migration preparation                 |
-| **High**     | Real-Time    | Foundation (version fields, RecordCache) |
-| **Medium**   | Backend      | API versioning                           |
-| **Medium**   | Testing      | E2E tests, API integration tests         |
-| **Low**      | UI           | Demo lazy loading, code standardization  |
+| Priority     | Area         | Items                                   |
+| ------------ | ------------ | --------------------------------------- |
+| **Critical** | Security     | Passport.js integration, CSRF hardening |
+| **High**     | Architecture | V5 migration preparation                |
+| **High**     | Real-Time    | React hooks, RealtimeProvider           |
+| **Medium**   | Backend      | API versioning                          |
+| **Medium**   | Testing      | E2E tests, API integration tests        |
+| **Low**      | UI           | Demo lazy loading, code standardization |
 
-> **Recent additions:** QueueServer (`apps/server/src/infra/queue/`), WriteService (`apps/server/src/infra/write/`), RouteMap (`apps/server/src/infra/router/`)
+> **Recent additions (2026-01-20):** Full SDK client-side state management: `RecordCache`, `RecordStorage`, `LoaderCache`, `SubscriptionCache`, `TransactionQueue`, `UndoRedoStack`, `WebsocketPubsubClient` (261 tests total)
 
 ---
 
@@ -386,4 +389,4 @@ When you need Redis (high traffic, distributed caching):
 
 ---
 
-_Last Updated: 2026-01-18_
+_Last Updated: 2026-01-20_

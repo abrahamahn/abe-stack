@@ -219,51 +219,8 @@ export async function getDetailedHealth(ctx: AppContext): Promise<DetailedHealth
  * Log a formatted startup summary with service statuses
  */
 export async function logStartupSummary(
-  ctx: AppContext,
-  options: StartupSummaryOptions,
+  _ctx: AppContext,
+  _options: StartupSummaryOptions,
 ): Promise<void> {
-  const { host, port, routeCount } = options;
-  const health = await getDetailedHealth(ctx);
-
-  const envLabel = ctx.config.env.toUpperCase();
-  const url = `http://${host}:${String(port)}`;
-
-  // Status icon helper
-  const icon = (status: ServiceStatus): string => {
-    if (status === 'up') return '✓';
-    if (status === 'degraded') return '⚠';
-    return '✗';
-  };
-
-  // Format service line
-  const formatService = (name: string, svc: ServiceHealth): string => {
-    const latency = svc.latencyMs !== undefined ? ` (${String(svc.latencyMs)}ms)` : '';
-    return `  ${icon(svc.status)} ${name}: ${svc.message ?? svc.status}${latency}`;
-  };
-
-  // Build output
-  const width = 51;
-  const line = '─'.repeat(width - 2);
-
-  const lines = [
-    `┌${line}┐`,
-    `│  Server started: ${envLabel.padEnd(width - 22)}│`,
-    `│  Listening: ${url.padEnd(width - 16)}│`,
-    `├${line}┤`,
-    `│${formatService('Database', health.services.database).padEnd(width - 2)}│`,
-    `│${formatService('Schema', health.services.schema).padEnd(width - 2)}│`,
-    `│${formatService('Email', health.services.email).padEnd(width - 2)}│`,
-    `│${formatService('Storage', health.services.storage).padEnd(width - 2)}│`,
-    `│${formatService('PubSub', health.services.pubsub).padEnd(width - 2)}│`,
-    `│${formatService('WebSocket', health.services.websocket).padEnd(width - 2)}│`,
-    `│${formatService('RateLimit', health.services.rateLimit).padEnd(width - 2)}│`,
-    `├${line}┤`,
-    `│  Routes: ${String(routeCount).padEnd(width - 13)}│`,
-    `│  Status: ${health.status.toUpperCase().padEnd(width - 13)}│`,
-    `└${line}┘`,
-  ];
-
-  // Log each line
-  // eslint-disable-next-line no-console
-  console.log('\n' + lines.join('\n') + '\n');
+  // Health status display removed - function kept for future use
 }

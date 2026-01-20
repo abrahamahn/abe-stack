@@ -14,4 +14,5 @@ export {
   type RateLimitInfo,
   type RateLimiterStats,
   type MemoryStoreStats,
+  type MemoryStoreConfig,
 } from '@rate-limit/limiter';

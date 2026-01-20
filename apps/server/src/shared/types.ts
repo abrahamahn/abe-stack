@@ -87,7 +87,7 @@ export interface TotpSecret {
 
 export interface RequestInfo {
   ipAddress: string;
-  userAgent: string;
+  userAgent: string | undefined;
   deviceId?: string;
 }
 
@@ -102,8 +102,16 @@ export interface ReplyWithCookies {
 
 export interface RequestWithCookies {
   cookies: Record<string, string | undefined>;
-  headers: { authorization?: string };
+  headers: {
+    authorization?: string;
+    'user-agent'?: string;
+    [key: string]: string | string[] | undefined;
+  };
+  /** Client IP address (from Fastify's request.ip, respects trustProxy) */
+  ip?: string;
   user?: { userId: string; email: string; role: string };
+  /** Request info extracted by middleware (IP address, user agent) */
+  requestInfo: RequestInfo;
 }
 
 // ============================================================================

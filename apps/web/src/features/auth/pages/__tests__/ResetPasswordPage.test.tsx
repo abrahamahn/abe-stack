@@ -161,7 +161,7 @@ describe('ResetPasswordPage', () => {
         );
       });
 
-      expect(mockNavigate).toHaveBeenCalledWith('/login');
+      expect(mockNavigate).toHaveBeenCalledWith('/login', { replace: false });
     });
   });
 
@@ -172,7 +172,7 @@ describe('ResetPasswordPage', () => {
       const backToSignIn = screen.getByRole('button', { name: /back to sign in/i });
       fireEvent.click(backToSignIn);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/login');
+      expect(mockNavigate).toHaveBeenCalledWith('/login', { replace: false });
     });
 
     it('should navigate to forgot password when request new link is clicked', () => {
@@ -181,7 +181,7 @@ describe('ResetPasswordPage', () => {
       const requestNewLink = screen.getByRole('button', { name: /request a new reset link/i });
       fireEvent.click(requestNewLink);
 
-      expect(mockNavigate).toHaveBeenCalledWith('/auth?mode=forgot-password');
+      expect(mockNavigate).toHaveBeenCalledWith('/auth?mode=forgot-password', { replace: false });
     });
   });
 

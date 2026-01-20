@@ -1,6 +1,6 @@
 // packages/ui/src/components/Popover.tsx
 import { useDisclosure } from '@hooks/useDisclosure';
-import { useEffect, useRef, type ReactElement, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactElement, type ReactNode } from 'react';
 
 import '../styles/components.css';
 
@@ -13,6 +13,8 @@ type PopoverProps = {
   open?: boolean;
   defaultOpen?: boolean;
   onChange?: (open: boolean) => void;
+  /** Accessible label for the popover trigger button */
+  'aria-label'?: string;
 };
 
 export function Popover({
@@ -22,6 +24,7 @@ export function Popover({
   open,
   defaultOpen,
   onChange,
+  'aria-label': ariaLabel = 'Toggle popover',
 }: PopoverProps): ReactElement {
   const {
     open: isOpen,
@@ -33,6 +36,7 @@ export function Popover({
     onChange,
   });
   const triggerRef = useRef<HTMLDivElement>(null);
+  const popoverId = useId();
 
   useEffect((): (() => void) | undefined => {
     if (!isOpen) return undefined;
@@ -56,6 +60,9 @@ export function Popover({
         role="button"
         tabIndex={0}
         aria-expanded={isOpen}
+        aria-haspopup="dialog"
+        aria-controls={isOpen ? popoverId : undefined}
+        aria-label={ariaLabel}
         onClick={() => {
           toggle();
         }}
@@ -69,7 +76,13 @@ export function Popover({
         {trigger}
       </div>
       {isOpen ? (
-        <div className="popover-card" data-placement={placement}>
+        <div
+          id={popoverId}
+          className="popover-card"
+          data-placement={placement}
+          role="dialog"
+          aria-modal="false"
+        >
           {children}
         </div>
       ) : null}

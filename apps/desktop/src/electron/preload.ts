@@ -1,14 +1,19 @@
 // apps/desktop/src/electron/preload.ts
 import { contextBridge, ipcRenderer, shell } from 'electron';
 
+import type { IPCChannel, IPCChannelMap, OpenDialogOptions, SaveDialogOptions } from './types';
 import type { NativeBridge } from '@abe-stack/core';
 
-type OpenDialogOptions = Parameters<NonNullable<NativeBridge['showOpenDialog']>>[0];
-type SaveDialogOptions = Parameters<NonNullable<NativeBridge['showSaveDialog']>>[0];
-
-const invoke = (channel: string, ...args: unknown[]): Promise<unknown> => {
-  return ipcRenderer.invoke(channel, ...args) as Promise<unknown>;
-};
+/**
+ * Type-safe IPC invoke function.
+ * Ensures channel names and arguments match the defined IPCChannelMap.
+ */
+function invoke<K extends IPCChannel>(
+  channel: K,
+  ...args: IPCChannelMap[K]['args']
+): Promise<IPCChannelMap[K]['result']> {
+  return ipcRenderer.invoke(channel, ...args) as Promise<IPCChannelMap[K]['result']>;
+}
 
 /**
  * Preload script
@@ -25,39 +30,15 @@ const electronBridge: NativeBridge = {
 
   isNative: () => true,
 
-  getAppVersion: async () => {
-    const version = await invoke('get-app-version');
-    if (typeof version !== 'string') {
-      throw new Error('Invalid app version');
-    }
-    return version;
-  },
+  getAppVersion: () => invoke('get-app-version'),
 
   openExternal: async (url: string) => {
     await shell.openExternal(url);
   },
 
-  showOpenDialog: async (options: OpenDialogOptions) => {
-    const result = await invoke('show-open-dialog', options);
-    if (result === null) {
-      return null;
-    }
-    if (Array.isArray(result) && result.every((item) => typeof item === 'string')) {
-      return result;
-    }
-    return null;
-  },
+  showOpenDialog: (options: OpenDialogOptions) => invoke('show-open-dialog', options),
 
-  showSaveDialog: async (options: SaveDialogOptions) => {
-    const result = await invoke('show-save-dialog', options);
-    if (result === null) {
-      return null;
-    }
-    if (typeof result === 'string') {
-      return result;
-    }
-    return null;
-  },
+  showSaveDialog: (options: SaveDialogOptions) => invoke('show-save-dialog', options),
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronBridge);

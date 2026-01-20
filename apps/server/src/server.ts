@@ -15,7 +15,10 @@ import {
   getProductionSecurityDefaults,
   handlePreflight,
   registerCookies,
+  registerCorrelationIdHook,
   registerCsrf,
+  registerPrototypePollutionProtection,
+  registerRequestInfoHook,
   registerStaticServe,
 } from '@http/index';
 import { RateLimiter } from '@rate-limit/index';
@@ -89,6 +92,20 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
 function registerPlugins(server: FastifyInstance, config: AppConfig): void {
   const isProd = config.env === 'production';
 
+  // Prototype pollution protection - must be registered first to sanitize all JSON input
+  // This replaces the default JSON parser with one that strips dangerous keys
+  // (__proto__, constructor, prototype) to prevent prototype pollution attacks
+  registerPrototypePollutionProtection(server);
+
+  // Correlation ID - adds unique request identifiers for distributed tracing
+  // Extracts from x-correlation-id header or generates a new UUID
+  // Makes debugging and log correlation easier across services
+  registerCorrelationIdHook(server);
+
+  // Request info extraction - decorates all requests with ipAddress and userAgent
+  // This centralizes client info extraction that was previously done in individual handlers
+  registerRequestInfoHook(server);
+
   // Rate limiter instance (Token Bucket algorithm)
   const limiter = new RateLimiter({ windowMs: 60_000, max: 100 });
 
@@ -146,9 +163,12 @@ function registerPlugins(server: FastifyInstance, config: AppConfig): void {
   });
 
   // Global error handler
-  server.setErrorHandler((error, _request, reply) => {
-    // Always log the full error server-side for debugging
-    server.log.error(error);
+  server.setErrorHandler((error, request, reply) => {
+    // Get correlation ID for error tracking (set by registerCorrelationIdHook)
+    const correlationId = request.correlationId;
+
+    // Always log the full error server-side for debugging with correlation ID
+    server.log.error({ err: error, correlationId }, 'Request error');
 
     let statusCode = 500;
     let code = 'INTERNAL_ERROR';
@@ -186,6 +206,8 @@ function registerPlugins(server: FastifyInstance, config: AppConfig): void {
         code,
         message,
         details,
+        // Always include correlation ID for error tracking/support
+        correlationId,
       },
     };
 

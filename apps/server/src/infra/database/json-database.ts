@@ -417,8 +417,7 @@ export class JsonDatabase {
    * Execute a raw "SQL" query (no-op for JSON, returns empty)
    * This is for compatibility with health checks that do `db.execute(sql`SELECT 1
    */
-  // eslint-disable-next-line @typescript-eslint/require-await
-  async execute(): Promise<unknown[]> {
+  execute(): unknown[] {
     // Return a fake successful result for compatibility
     return [{ '?column?': 1 }];
   }
@@ -524,7 +523,7 @@ export class JsonDbClient {
   execute(query: unknown): Promise<unknown[]> {
     // Ignore the query, just return success
     void query;
-    return this.db.execute();
+    return Promise.resolve(this.db.execute());
   }
 
   /**
@@ -592,8 +591,7 @@ class JsonSelectBuilder<T extends DbRecord> {
     return this;
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
-  async then<TResult>(
+  then<TResult>(
     resolve: (value: T[]) => TResult,
     reject?: (reason: unknown) => TResult,
   ): Promise<TResult> {
@@ -608,10 +606,10 @@ class JsonSelectBuilder<T extends DbRecord> {
         offset: this.offsetValue,
       });
 
-      return resolve(results);
+      return Promise.resolve(resolve(results));
     } catch (error) {
       if (reject) {
-        return reject(error);
+        return Promise.reject(error instanceof Error ? error : new Error(String(error)));
       }
       throw error;
     }
@@ -813,22 +811,20 @@ class JsonTableQuery {
     this.tableName = tableName;
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
-  async findFirst<T extends DbRecord>(options?: {
+  findFirst(options?: {
     where?: unknown;
     columns?: Record<string, boolean>;
-  }): Promise<T | undefined> {
+  }): DbRecord | undefined {
     const where = options?.where ? this.parseWhere(options.where) : undefined;
-    return this.db.findFirst<T>(this.tableName, { where });
+    return this.db.findFirst(this.tableName, { where });
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
-  async findMany<T extends DbRecord>(options?: {
+  findMany<T extends DbRecord>(options?: {
     where?: unknown;
     limit?: number;
     offset?: number;
     columns?: Record<string, boolean>;
-  }): Promise<T[]> {
+  }): T[] {
     const where = options?.where ? this.parseWhere(options.where) : undefined;
     return this.db.find<T>(this.tableName, {
       where,

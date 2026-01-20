@@ -18,9 +18,12 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
  * Avoids direct dependency on zod package
  */
 export interface ValidationSchema<T = unknown> {
-  safeParse(
-    data: unknown,
-  ): { success: true; data: T } | { success: false; error: { issues: Array<{ message: string }> } };
+  safeParse(data: unknown):
+    | { success: true; data: T }
+    | {
+        success: false;
+        error: { issues: Array<{ path: Array<string | number>; message: string; code: string }> };
+      };
 }
 
 // ============================================================================
@@ -72,7 +75,28 @@ export type RouteHandler<TBody = unknown, TResult = unknown> =
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 /**
- * Route definition
+ * Base route definition without generics for use in RouteMap
+ * This allows mixing different typed route definitions in a single map
+ */
+export interface BaseRouteDefinition {
+  /** HTTP method */
+  method: HttpMethod;
+  /** Schema for body validation (optional for GET/DELETE) */
+  schema?: ValidationSchema;
+  /** Route handler - accepts generic handler for flexibility */
+  handler: (
+    ctx: AppContext,
+    body: unknown,
+    request: FastifyRequest,
+    reply: FastifyReply,
+  ) => Promise<RouteResult>;
+  /** Required role (undefined = public, 'user' = any authenticated, 'admin' = admin only) */
+  auth?: 'user' | 'admin';
+}
+
+/**
+ * Typed route definition for use with helper functions
+ * Provides type safety at the handler level
  */
 export interface RouteDefinition<TBody = unknown, TResult = unknown> {
   /** HTTP method */
@@ -87,11 +111,10 @@ export interface RouteDefinition<TBody = unknown, TResult = unknown> {
 
 /**
  * Route map (path -> definition)
- * Uses 'any' for body/result types to allow mixing typed route definitions.
- * Type safety is preserved at the handler level.
+ * Uses BaseRouteDefinition to allow mixing typed route definitions.
+ * Type safety is preserved at the handler level through helper functions.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type RouteMap = Record<string, RouteDefinition<any, any>>;
+export type RouteMap = Record<string, BaseRouteDefinition>;
 
 // ============================================================================
 // Router Options

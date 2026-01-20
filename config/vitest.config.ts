@@ -8,6 +8,7 @@ const packagesRoot = path.join(repoRoot, 'packages');
 const appsRoot = path.join(repoRoot, 'apps');
 
 const webRoot = path.join(appsRoot, 'web');
+const desktopRoot = path.join(appsRoot, 'desktop');
 const uiRoot = path.join(packagesRoot, 'ui');
 
 const packageAliases = {
@@ -107,6 +108,12 @@ function getUiAliases(): Record<string, string> {
 function getSdkAliases(): Record<string, string> {
   return {
     '@persistence': path.join(repoRoot, 'packages/sdk/src/persistence'),
+  };
+}
+
+function getDesktopAliases(): Record<string, string> {
+  return {
+    ...packageAliases,
   };
 }
 
@@ -235,9 +242,25 @@ export const uiConfig = mergeConfig(
   }),
 );
 
+export const desktopConfig = mergeConfig(
+  baseConfig,
+  defineConfig({
+    plugins: [react()],
+    resolve: {
+      alias: getDesktopAliases(),
+    },
+    test: {
+      environment: 'node',
+      include: [`${desktopRoot}/src/**/*.{test,spec}.{js,ts,tsx}`],
+      exclude: ['**/node_modules/**', '**/dist/**'],
+    },
+  }),
+);
+
 const configMap = {
   base: baseConfig,
   core: coreConfig,
+  desktop: desktopConfig,
   integration: integrationConfig,
   sdk: sdkConfig,
   server: serverConfig,

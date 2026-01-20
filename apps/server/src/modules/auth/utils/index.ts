@@ -20,6 +20,8 @@ export {
   cleanupExpiredTokens,
 } from './refresh-token';
 
-export { extractRequestInfo } from './request';
+export { extractRequestInfo, type RequestWithClientInfo, type RequestInfo } from './request';
 
 export { createAuthResponse, type AuthResponseData, type AuthUser } from './response';
+
+export { setRefreshTokenCookie, clearRefreshTokenCookie } from './cookies';

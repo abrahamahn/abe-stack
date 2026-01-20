@@ -181,6 +181,11 @@ abe-stack/
 - **Pagination Hooks:** `usePaginatedQuery` for infinite scroll, `useOffsetPaginatedQuery` for traditional pagination
 - **Offline Mutation Queue:** Queue mutations when offline, auto-sync when back online
 - **Query Persister:** Persist React Query cache to localStorage for instant hydration
+- **Real-Time WebSocket Client:** Auto-reconnecting PubSub client with exponential backoff
+- **Record Cache:** Type-safe in-memory cache with version conflict resolution and optimistic updates
+- **Record Storage:** IndexedDB persistence with automatic fallback to localStorage
+- **Transaction Queue:** Offline-first mutations with conflict resolution and rollback
+- **Undo/Redo Stack:** Generic operation history with grouping support
 
 ### Core Package
 

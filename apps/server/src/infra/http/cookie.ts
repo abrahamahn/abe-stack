@@ -7,7 +7,12 @@
 
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
+import { parseCookies } from '@abe-stack/core/http';
+
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+
+// Re-export parseCookies from core for backward compatibility
+export { parseCookies };
 
 // ============================================================================
 // Types
@@ -37,45 +42,6 @@ declare module 'fastify' {
     setCookie: (name: string, value: string, options?: CookieOptions) => FastifyReply;
     clearCookie: (name: string, options?: CookieOptions) => FastifyReply;
   }
-}
-
-// ============================================================================
-// Cookie Parsing
-// ============================================================================
-
-/**
- * Parse a cookie header string into an object
- */
-export function parseCookies(cookieHeader: string | undefined): Record<string, string> {
-  const cookies: Record<string, string> = {};
-
-  if (!cookieHeader) {
-    return cookies;
-  }
-
-  const pairs = cookieHeader.split(';');
-
-  for (const pair of pairs) {
-    const eqIdx = pair.indexOf('=');
-    if (eqIdx < 0) continue;
-
-    const key = pair.slice(0, eqIdx).trim();
-    let value = pair.slice(eqIdx + 1).trim();
-
-    // Remove quotes if present
-    if (value.startsWith('"') && value.endsWith('"')) {
-      value = value.slice(1, -1);
-    }
-
-    // Decode URI component
-    try {
-      cookies[key] = decodeURIComponent(value);
-    } catch {
-      cookies[key] = value;
-    }
-  }
-
-  return cookies;
 }
 
 // ============================================================================

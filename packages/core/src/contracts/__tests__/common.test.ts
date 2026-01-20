@@ -1,165 +1,235 @@
 // packages/core/src/contracts/__tests__/common.test.ts
 import { describe, expect, it } from 'vitest';
 
-import { errorResponseSchema, USER_ROLES, userRoleSchema, userSchema } from '../common';
+import {
+  emailSchema,
+  errorResponseSchema,
+  nameSchema,
+  passwordSchema,
+  requiredNameSchema,
+  uuidSchema,
+} from '../common';
 
-// ============================================================================
-// Common Schemas Tests
-// ============================================================================
+describe('emailSchema', () => {
+  it('should validate correct email addresses', () => {
+    const validEmails = [
+      'user@example.com',
+      'test.user@domain.org',
+      'name+tag@example.co.uk',
+      'user123@sub.domain.com',
+    ];
 
-describe('common contracts', () => {
-  describe('USER_ROLES', () => {
-    it('should have the expected roles', () => {
-      expect(USER_ROLES).toEqual(['user', 'admin', 'moderator']);
-    });
-
-    it('should be a tuple', () => {
-      expect(USER_ROLES.length).toBe(3);
-    });
-
-    it('should have user as first role', () => {
-      expect(USER_ROLES[0]).toBe('user');
-    });
-
-    it('should have admin as second role', () => {
-      expect(USER_ROLES[1]).toBe('admin');
-    });
-
-    it('should have moderator as third role', () => {
-      expect(USER_ROLES[2]).toBe('moderator');
-    });
+    for (const email of validEmails) {
+      const result = emailSchema.safeParse(email);
+      expect(result.success).toBe(true);
+    }
   });
 
-  describe('userRoleSchema', () => {
-    it('should accept valid roles', () => {
-      expect(userRoleSchema.parse('user')).toBe('user');
-      expect(userRoleSchema.parse('admin')).toBe('admin');
-      expect(userRoleSchema.parse('moderator')).toBe('moderator');
-    });
+  it('should reject invalid email formats', () => {
+    const invalidEmails = [
+      'not-an-email',
+      '@missing-local.com',
+      'missing-at-sign.com',
+      'spaces in@email.com',
+      'user@',
+    ];
 
-    it('should reject invalid roles', () => {
-      expect(() => userRoleSchema.parse('invalid')).toThrow();
-      expect(() => userRoleSchema.parse('')).toThrow();
-    });
-
-    it('should reject numeric values', () => {
-      expect(() => userRoleSchema.parse(1)).toThrow();
-    });
-
-    it('should reject null', () => {
-      expect(() => userRoleSchema.parse(null)).toThrow();
-    });
-
-    it('should reject undefined', () => {
-      expect(() => userRoleSchema.parse(undefined)).toThrow();
-    });
+    for (const email of invalidEmails) {
+      const result = emailSchema.safeParse(email);
+      expect(result.success).toBe(false);
+    }
   });
 
-  describe('userSchema', () => {
-    it('should accept valid user', () => {
-      const valid = {
-        id: '123e4567-e89b-12d3-a456-426614174000',
-        email: 'test@example.com',
-        name: 'John',
-        role: 'user' as const,
-      };
-      expect(userSchema.parse(valid)).toEqual(valid);
-    });
-
-    it('should accept null name', () => {
-      const valid = {
-        id: '123e4567-e89b-12d3-a456-426614174000',
-        email: 'test@example.com',
-        name: null,
-        role: 'admin' as const,
-      };
-      expect(userSchema.parse(valid)).toEqual(valid);
-    });
-
-    it('should reject invalid uuid', () => {
-      expect(() =>
-        userSchema.parse({ id: 'not-a-uuid', email: 'test@example.com', name: null, role: 'user' }),
-      ).toThrow();
-    });
-
-    it('should reject invalid email', () => {
-      expect(() =>
-        userSchema.parse({
-          id: '123e4567-e89b-12d3-a456-426614174000',
-          email: 'not-an-email',
-          name: null,
-          role: 'user',
-        }),
-      ).toThrow();
-    });
-
-    it('should reject invalid role', () => {
-      expect(() =>
-        userSchema.parse({
-          id: '123e4567-e89b-12d3-a456-426614174000',
-          email: 'test@example.com',
-          name: null,
-          role: 'superadmin',
-        }),
-      ).toThrow();
-    });
-
-    it('should accept all valid roles', () => {
-      for (const role of USER_ROLES) {
-        const user = {
-          id: '123e4567-e89b-12d3-a456-426614174000',
-          email: 'test@example.com',
-          name: 'Test',
-          role,
-        };
-        expect(userSchema.parse(user).role).toBe(role);
-      }
-    });
+  it('should reject empty string', () => {
+    const result = emailSchema.safeParse('');
+    expect(result.success).toBe(false);
   });
 
-  describe('errorResponseSchema', () => {
-    it('should accept valid error response with all optional fields', () => {
-      const valid = {
-        message: 'Something went wrong',
-        code: 'VALIDATION_ERROR',
-        details: { field: 'email' },
-      };
-      expect(errorResponseSchema.parse(valid)).toEqual(valid);
-    });
+  it('should reject email longer than 255 characters', () => {
+    const longEmail = 'a'.repeat(250) + '@example.com';
+    const result = emailSchema.safeParse(longEmail);
+    expect(result.success).toBe(false);
+  });
 
-    it('should accept minimal error response (message only)', () => {
-      const minimal = { message: 'Server error' };
-      expect(errorResponseSchema.parse(minimal)).toEqual(minimal);
-    });
+  it('should reject non-string values', () => {
+    expect(emailSchema.safeParse(123).success).toBe(false);
+    expect(emailSchema.safeParse(null).success).toBe(false);
+    expect(emailSchema.safeParse(undefined).success).toBe(false);
+  });
+});
 
-    it('should accept error with code but no details', () => {
-      const withCode = { message: 'Message', code: 'CODE' };
-      expect(errorResponseSchema.parse(withCode)).toEqual(withCode);
-    });
+describe('passwordSchema', () => {
+  it('should validate password with 8 or more characters', () => {
+    const validPasswords = ['password', '12345678', 'securepassword123!', 'a'.repeat(100)];
 
-    it('should accept error with details but no code', () => {
-      const withDetails = { message: 'Message', details: { field: 'email' } };
-      expect(errorResponseSchema.parse(withDetails)).toEqual(withDetails);
-    });
+    for (const password of validPasswords) {
+      const result = passwordSchema.safeParse(password);
+      expect(result.success).toBe(true);
+    }
+  });
 
-    it('should strip unknown fields like error', () => {
-      const withExtra = { error: 'SomeError', message: 'Message' };
-      expect(errorResponseSchema.parse(withExtra)).toEqual({ message: 'Message' });
-    });
+  it('should reject password shorter than 8 characters', () => {
+    const shortPasswords = ['', 'a', '1234567', 'short'];
 
-    it('should reject missing message field', () => {
-      expect(() => errorResponseSchema.parse({ code: 'ERROR' })).toThrow();
-    });
+    for (const password of shortPasswords) {
+      const result = passwordSchema.safeParse(password);
+      expect(result.success).toBe(false);
+    }
+  });
 
-    it('should accept complex details object', () => {
-      const complex = {
-        message: 'Validation failed',
-        details: {
-          fields: ['email', 'password'],
-          nested: { deep: { value: 123 } },
-        },
-      };
-      expect(errorResponseSchema.parse(complex)).toEqual(complex);
-    });
+  it('should accept exactly 8 characters', () => {
+    const result = passwordSchema.safeParse('12345678');
+    expect(result.success).toBe(true);
+  });
+
+  it('should reject non-string values', () => {
+    expect(passwordSchema.safeParse(12345678).success).toBe(false);
+    expect(passwordSchema.safeParse(null).success).toBe(false);
+  });
+});
+
+describe('uuidSchema', () => {
+  it('should validate correct UUIDs', () => {
+    const validUuids = [
+      '550e8400-e29b-41d4-a716-446655440000',
+      '6ba7b810-9dad-11d1-80b4-00c04fd430c8',
+      'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+    ];
+
+    for (const uuid of validUuids) {
+      const result = uuidSchema.safeParse(uuid);
+      expect(result.success).toBe(true);
+    }
+  });
+
+  it('should reject invalid UUIDs', () => {
+    const invalidUuids = [
+      'not-a-uuid',
+      '550e8400-e29b-41d4-a716',
+      '550e8400e29b41d4a716446655440000',
+      '',
+      '550e8400-e29b-41d4-a716-44665544000g',
+    ];
+
+    for (const uuid of invalidUuids) {
+      const result = uuidSchema.safeParse(uuid);
+      expect(result.success).toBe(false);
+    }
+  });
+});
+
+describe('nameSchema', () => {
+  it('should validate name with 2 or more characters', () => {
+    const validNames = ['Jo', 'John', 'John Doe', 'A'.repeat(50)];
+
+    for (const name of validNames) {
+      const result = nameSchema.safeParse(name);
+      expect(result.success).toBe(true);
+    }
+  });
+
+  it('should reject name shorter than 2 characters', () => {
+    const result = nameSchema.safeParse('A');
+    expect(result.success).toBe(false);
+  });
+
+  it('should accept undefined (optional field)', () => {
+    const result = nameSchema.safeParse(undefined);
+    expect(result.success).toBe(true);
+    expect(result.data).toBeUndefined();
+  });
+
+  it('should reject empty string', () => {
+    const result = nameSchema.safeParse('');
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('requiredNameSchema', () => {
+  it('should validate name with 2 or more characters', () => {
+    const validNames = ['Jo', 'John', 'Jane Doe'];
+
+    for (const name of validNames) {
+      const result = requiredNameSchema.safeParse(name);
+      expect(result.success).toBe(true);
+    }
+  });
+
+  it('should reject undefined (required field)', () => {
+    const result = requiredNameSchema.safeParse(undefined);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject name shorter than 2 characters', () => {
+    const result = requiredNameSchema.safeParse('A');
+    expect(result.success).toBe(false);
+  });
+});
+
+describe('errorResponseSchema', () => {
+  it('should validate error with message only', () => {
+    const validError = {
+      message: 'Something went wrong',
+    };
+    const result = errorResponseSchema.safeParse(validError);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.message).toBe('Something went wrong');
+      expect(result.data.code).toBeUndefined();
+      expect(result.data.details).toBeUndefined();
+    }
+  });
+
+  it('should validate error with message and code', () => {
+    const validError = {
+      message: 'Not found',
+      code: 'NOT_FOUND',
+    };
+    const result = errorResponseSchema.safeParse(validError);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.code).toBe('NOT_FOUND');
+    }
+  });
+
+  it('should validate error with all fields', () => {
+    const validError = {
+      message: 'Validation failed',
+      code: 'VALIDATION_ERROR',
+      details: {
+        field: 'email',
+        reason: 'Invalid format',
+      },
+    };
+    const result = errorResponseSchema.safeParse(validError);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.details).toEqual({
+        field: 'email',
+        reason: 'Invalid format',
+      });
+    }
+  });
+
+  it('should reject missing message', () => {
+    const invalidError = {
+      code: 'ERROR',
+    };
+    const result = errorResponseSchema.safeParse(invalidError);
+    expect(result.success).toBe(false);
+  });
+
+  it('should allow details with various value types', () => {
+    const validError = {
+      message: 'Complex error',
+      details: {
+        count: 5,
+        flag: true,
+        nested: { key: 'value' },
+        items: [1, 2, 3],
+      },
+    };
+    const result = errorResponseSchema.safeParse(validError);
+    expect(result.success).toBe(true);
   });
 });

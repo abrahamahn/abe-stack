@@ -71,14 +71,15 @@ Required for: feeds, search results, lists, marketplace
 
 Required for: messenger, social feeds, real-time notifications
 
-- [ ] `packages/ws-client` with auto-reconnect
-- [ ] Auth token refresh on reconnect
-- [ ] Subscription deduplication
+- [x] `packages/ws-client` with auto-reconnect → `WebsocketPubsubClient` in `@abe-stack/sdk/pubsub`
+- [x] Subscription deduplication → `SubscriptionCache` in `@abe-stack/sdk/subscriptions`
+- [ ] Auth token refresh on reconnect (use `onConnect` callback)
 - [ ] React Query cache invalidation on events
 - [ ] **Presence tracking** (online/offline/away status, last seen)
 - [ ] **Typing indicators** via WebSocket events
 
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `WebSocketService.ts`, `WebSocketTypes.ts`, `WebSocketAuthService.ts`; [Frontend Utilities](./dev/legacy.md#frontend-utilities) → `WebsocketPubsubClient.ts`
+> **Implementation:** See `packages/sdk/src/pubsub/`, `packages/sdk/src/subscriptions/`
+> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `WebSocketService.ts`, `WebSocketTypes.ts`
 
 ### Push Notifications
 
@@ -244,6 +245,6 @@ If no to all three, it goes in `docs/ROADMAP.md`.
 
 ---
 
-_Last Updated: 2026-01-21_
+_Last Updated: 2026-01-20_
 
 _Philosophy: Foundation is done. Ship products. Copy utilities from legacy when needed._

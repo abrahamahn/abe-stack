@@ -1,20 +1,34 @@
 // packages/core/src/contracts/admin.ts
+/**
+ * Admin Contract
+ *
+ * Admin-related schemas and API contract definitions.
+ */
+
 import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
 
-import { errorResponseSchema } from './common';
+import { emailSchema, errorResponseSchema } from './common';
+
+// ============================================================================
+// Request/Response Schemas
+// ============================================================================
 
 export const unlockAccountRequestSchema = z.object({
-  email: z.string().email(),
+  email: emailSchema,
 });
 
 export const unlockAccountResponseSchema = z.object({
   message: z.string(),
-  email: z.string().email(),
+  email: emailSchema,
 });
 
 export type UnlockAccountRequest = z.infer<typeof unlockAccountRequestSchema>;
 export type UnlockAccountResponse = z.infer<typeof unlockAccountResponseSchema>;
+
+// ============================================================================
+// Admin Contract
+// ============================================================================
 
 const c = initContract();
 

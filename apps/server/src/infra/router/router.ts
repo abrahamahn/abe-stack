@@ -29,9 +29,9 @@
  */
 
 import { createAuthGuard } from '@auth/middleware';
-import { type AppContext } from '@shared';
+import { type AppContext, formatValidationErrors } from '@shared';
 
-import type { RouteDefinition, RouteMap, RouterOptions } from './types';
+import type { BaseRouteDefinition, RouteDefinition, RouteMap, RouterOptions } from './types';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
@@ -54,9 +54,9 @@ export function registerRouteMap(
   const adminGuard = createAuthGuard(jwtSecret, 'admin');
 
   // Group routes by auth requirement
-  const publicRoutes: Array<[string, RouteDefinition]> = [];
-  const userRoutes: Array<[string, RouteDefinition]> = [];
-  const adminRoutes: Array<[string, RouteDefinition]> = [];
+  const publicRoutes: Array<[string, BaseRouteDefinition]> = [];
+  const userRoutes: Array<[string, BaseRouteDefinition]> = [];
+  const adminRoutes: Array<[string, BaseRouteDefinition]> = [];
 
   for (const [path, definition] of Object.entries(routes)) {
     if (definition.auth === 'admin') {
@@ -102,7 +102,7 @@ function registerRoute(
   ctx: AppContext,
   prefix: string,
   path: string,
-  definition: RouteDefinition,
+  definition: BaseRouteDefinition,
 ): void {
   const fullPath = `${prefix}/${path}`;
   const { method, schema, handler } = definition;
@@ -112,8 +112,7 @@ function registerRoute(
     if (schema) {
       const parsed = schema.safeParse(req.body);
       if (!parsed.success) {
-        const errorMessage = parsed.error.issues[0]?.message ?? 'Invalid input';
-        void reply.status(400).send({ message: errorMessage });
+        void reply.status(400).send(formatValidationErrors(parsed.error.issues));
         return;
       }
 
@@ -153,23 +152,34 @@ function registerRoute(
 
 /**
  * Helper to create a public route definition with type inference
+ * Returns BaseRouteDefinition for compatibility with RouteMap
  */
 export function publicRoute<TBody, TResult>(
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
   handler: RouteDefinition<TBody, TResult>['handler'],
   schema?: RouteDefinition<TBody, TResult>['schema'],
-): RouteDefinition<TBody, TResult> {
-  return { method, handler, schema };
+): BaseRouteDefinition {
+  return {
+    method,
+    handler: handler as BaseRouteDefinition['handler'],
+    schema: schema as BaseRouteDefinition['schema'],
+  };
 }
 
 /**
  * Helper to create a protected route definition with type inference
+ * Returns BaseRouteDefinition for compatibility with RouteMap
  */
 export function protectedRoute<TBody, TResult>(
   method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
   handler: RouteDefinition<TBody, TResult>['handler'],
   auth: 'user' | 'admin' = 'user',
   schema?: RouteDefinition<TBody, TResult>['schema'],
-): RouteDefinition<TBody, TResult> {
-  return { method, handler, schema, auth };
+): BaseRouteDefinition {
+  return {
+    method,
+    handler: handler as BaseRouteDefinition['handler'],
+    schema: schema as BaseRouteDefinition['schema'],
+    auth,
+  };
 }

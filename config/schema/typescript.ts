@@ -216,11 +216,12 @@ export const projects: Record<string, ProjectConfig> = {
 
   'packages/sdk': {
     extends: 'base',
-    types: ['vitest/globals'],
+    types: ['vitest/globals', 'node'],
     compilerOptions: {
       outDir: './dist',
       rootDir: './src',
       lib: ['ES2022', 'DOM'],
+      jsx: 'react-jsx',
       baseUrl: './',
     },
     manualPaths: {

@@ -1,40 +1,10 @@
 // packages/core/src/media/index.ts
 /**
- * Core Media Processing Utilities
+ * Media Processing (Server-only)
  *
- * Shared media processing utilities for client and server.
- * No external dependencies - manual implementations only.
+ * Audio, video, and image processing utilities using FFmpeg.
+ * Security scanning for uploaded files.
  */
-
-// Types (excluding ProcessingResult to avoid conflict with image-processing)
-export type {
-  FileTypeResult,
-  MediaMetadata,
-  SecurityScanResult,
-  MediaProcessingOptions,
-  UploadConfig,
-} from './types';
-// Re-export ProcessingResult from types as MediaProcessingResult for disambiguation
-export type { ProcessingResult as MediaProcessingResult } from './types';
-
-// File type detection
-export {
-  detectFileType,
-  detectFileTypeFromPath,
-  detectFileTypeFromFile,
-  isAllowedFileType,
-} from './file-type';
-
-// Security scanning
-export { BasicSecurityScanner } from './security';
-
-// Validation
-export {
-  validateMediaFile,
-  validateUploadConfig,
-  sanitizeFilename,
-  generateFileId,
-} from './validation';
 
 // Audio metadata
 export { parseAudioMetadata } from './audio-metadata';
@@ -42,24 +12,52 @@ export type { AudioMetadata } from './audio-metadata';
 
 // FFmpeg wrapper
 export {
-  runFFmpeg,
-  getMediaMetadata,
-  convertVideo,
-  extractAudio,
-  generateThumbnail,
-  createHLSStream,
-  generateWaveform,
-  extractAudioSegment,
   checkFFmpeg,
+  convertVideo,
+  createHLSStream,
+  extractAudio,
+  extractAudioSegment,
+  generateThumbnail,
+  generateWaveform,
+  getMediaMetadata,
+  runFFmpeg,
 } from './ffmpeg-wrapper';
-export type { FFmpegOptions, FFmpegResult } from './ffmpeg-wrapper';
+export type { FFmpegOptions, FFmpegResult, MediaMetadataResult } from './ffmpeg-wrapper';
 
-// Image processing (ProcessingResult comes from here)
-export { ImageProcessor, createImageProcessor, getImageFormat } from './image-processing';
+// File type detection
+export {
+  detectFileType,
+  detectFileTypeFromFile,
+  detectFileTypeFromPath,
+  isAllowedFileType,
+} from './file-type';
+
+// Image processing
+export { createImageProcessor, getImageFormat, ImageProcessor } from './image-processing';
 export type {
-  ImageResizeOptions,
   ImageFormatOptions,
-  ImageProcessingOptions,
   ImageMetadata,
-  ProcessingResult,
+  ImageProcessingOptions,
+  ImageResizeOptions,
 } from './image-processing';
+
+// Security scanning
+export { BasicSecurityScanner } from './security';
+
+// Media types (shared type definitions)
+export type {
+  FileTypeResult,
+  MediaMetadata,
+  MediaProcessingOptions,
+  ProcessingResult,
+  SecurityScanResult,
+  UploadConfig,
+} from './types';
+
+// Validation
+export {
+  generateFileId,
+  sanitizeFilename,
+  validateMediaFile,
+  validateUploadConfig,
+} from './validation';

@@ -3,25 +3,38 @@
  * Request utilities for extracting client information
  */
 
-import type { FastifyRequest } from 'fastify';
-
 export interface RequestInfo {
   ipAddress: string | undefined;
   userAgent: string | undefined;
 }
 
 /**
+ * Minimal interface for requests that support IP and user-agent extraction.
+ * This allows handlers to use the abstract RequestWithCookies type while
+ * still being able to extract request info without unsafe casts.
+ */
+export interface RequestWithClientInfo {
+  /** Client IP address (may be from X-Forwarded-For if trustProxy is enabled) */
+  ip?: string;
+  /** HTTP headers */
+  headers: {
+    'user-agent'?: string;
+    [key: string]: string | string[] | undefined;
+  };
+}
+
+/**
  * Extract IP address from request
  * Relies on Fastify's built-in IP detection (configured via trustProxy)
  */
-function extractIpAddress(request: FastifyRequest): string | undefined {
+function extractIpAddress(request: RequestWithClientInfo): string | undefined {
   return request.ip;
 }
 
 /**
  * Extract user agent from request headers
  */
-function extractUserAgent(request: FastifyRequest): string | undefined {
+function extractUserAgent(request: RequestWithClientInfo): string | undefined {
   const userAgent = request.headers['user-agent'];
 
   if (!userAgent || typeof userAgent !== 'string') {
@@ -36,7 +49,7 @@ function extractUserAgent(request: FastifyRequest): string | undefined {
 /**
  * Extract request information for logging and security
  */
-export function extractRequestInfo(request: FastifyRequest): RequestInfo {
+export function extractRequestInfo(request: RequestWithClientInfo): RequestInfo {
   return {
     ipAddress: extractIpAddress(request),
     userAgent: extractUserAgent(request),

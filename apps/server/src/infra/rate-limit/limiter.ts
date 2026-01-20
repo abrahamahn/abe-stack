@@ -81,6 +81,15 @@ export interface MemoryStoreStats {
   trackedClients: number;
   /** Number of clients currently rate limited (tokens < 1) */
   limitedClients: number;
+  /** Number of evictions due to size limit */
+  evictions: number;
+}
+
+export interface MemoryStoreConfig {
+  /** Cleanup interval in milliseconds (default: 60000) */
+  cleanupIntervalMs?: number;
+  /** Maximum number of entries (default: 100000) */
+  maxSize?: number;
 }
 
 export interface RateLimiterStats {
@@ -94,11 +103,26 @@ export interface RateLimiterStats {
 // Memory Store (Default)
 // ============================================================================
 
+/**
+ * Default maximum entries before LRU eviction kicks in.
+ * Set conservatively to prevent memory exhaustion under DDoS.
+ */
+const DEFAULT_MAX_SIZE = 100_000;
+
 export class MemoryStore implements RateLimitStore {
   private hits = new Map<string, ClientRecord>();
   private cleanupTimer: ReturnType<typeof setInterval> | null = null;
+  private readonly maxSize: number;
+  private evictionCount = 0;
 
-  constructor(cleanupIntervalMs = 60000) {
+  constructor(config: MemoryStoreConfig | number = {}) {
+    // Support legacy signature (just cleanupIntervalMs as number)
+    const normalizedConfig: MemoryStoreConfig =
+      typeof config === 'number' ? { cleanupIntervalMs: config } : config;
+
+    const cleanupIntervalMs = normalizedConfig.cleanupIntervalMs ?? 60_000;
+    this.maxSize = normalizedConfig.maxSize ?? DEFAULT_MAX_SIZE;
+
     this.cleanupTimer = setInterval(() => {
       this.cleanup(cleanupIntervalMs * 2);
     }, cleanupIntervalMs);
@@ -106,10 +130,23 @@ export class MemoryStore implements RateLimitStore {
   }
 
   get(key: string): ClientRecord | undefined {
-    return this.hits.get(key);
+    const record = this.hits.get(key);
+    if (record) {
+      // Move to end for LRU ordering (Map preserves insertion order)
+      this.hits.delete(key);
+      this.hits.set(key, record);
+    }
+    return record;
   }
 
   set(key: string, record: ClientRecord): void {
+    // If key exists, delete first to update insertion order
+    if (this.hits.has(key)) {
+      this.hits.delete(key);
+    } else if (this.hits.size >= this.maxSize) {
+      // Evict oldest entries (first entries in Map iteration order)
+      this.evictOldest(Math.max(1, Math.floor(this.maxSize * 0.1))); // Evict 10% at once
+    }
     this.hits.set(key, record);
   }
 
@@ -144,7 +181,22 @@ export class MemoryStore implements RateLimitStore {
     return {
       trackedClients: this.hits.size,
       limitedClients,
+      evictions: this.evictionCount,
     };
+  }
+
+  /**
+   * Evict the oldest N entries (LRU eviction).
+   * Map iteration order is insertion order, so first entries are oldest.
+   */
+  private evictOldest(count: number): void {
+    let evicted = 0;
+    for (const key of this.hits.keys()) {
+      if (evicted >= count) break;
+      this.hits.delete(key);
+      evicted++;
+    }
+    this.evictionCount += evicted;
   }
 }
 

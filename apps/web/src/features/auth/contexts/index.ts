@@ -1,3 +1,3 @@
 // apps/web/src/features/auth/contexts/index.ts
-/* eslint-disable @typescript-eslint/no-deprecated */
-export { AuthContext, AuthProvider, type AuthContextType } from './AuthContext';
+// Auth contexts barrel export
+// Currently empty - AuthContext was removed in favor of useAuth() hook

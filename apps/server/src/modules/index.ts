@@ -2,38 +2,19 @@
 /**
  * Route Registration
  *
- * Manual Fastify route registration with Zod validation.
- * Replaces @ts-rest/fastify for minimal dependencies.
+ * Uses the generic router pattern for DRY registration.
+ * All routes are defined in their respective module route files.
  */
 
-import {
-  emailVerificationRequestSchema,
-  forgotPasswordRequestSchema,
-  loginRequestSchema,
-  registerRequestSchema,
-  resendVerificationRequestSchema,
-  resetPasswordRequestSchema,
-  unlockAccountRequestSchema,
-} from '@abe-stack/core';
+import { registerRouteMap } from '@infra/router';
 
-import { handleAdminUnlock } from './admin';
-import {
-  createAuthGuard,
-  handleForgotPassword,
-  handleLogin,
-  handleLogout,
-  handleRefresh,
-  handleRegister,
-  handleResendVerification,
-  handleResetPassword,
-  handleVerifyEmail,
-  type ReplyWithCookies,
-  type RequestWithCookies,
-} from './auth';
-import { handleMe } from './users';
+import { adminRoutes } from './admin/routes';
+import { authRoutes } from './auth/routes';
+import { realtimeRoutes } from './realtime/routes';
+import { userRoutes } from './users/routes';
 
 import type { AppContext } from '@shared/index';
-import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 
 // Re-export modules
 export { handleAdminUnlock } from './admin';
@@ -51,6 +32,13 @@ export {
   type RequestWithCookies,
 } from './auth';
 export { handleMe } from './users';
+export {
+  handleGetRecords,
+  handleWrite,
+  RecordNotFoundError,
+  registerRealtimeTable,
+  VersionConflictError,
+} from './realtime';
 
 // Generic route registration (Chet-stack pattern)
 export {
@@ -68,147 +56,27 @@ export {
   type ValidationSchema,
 } from '@infra/router';
 
+// Route definitions for external use
+export { adminRoutes } from './admin/routes';
+export { authRoutes } from './auth/routes';
+export { realtimeRoutes } from './realtime/routes';
+export { userRoutes } from './users/routes';
+
 /**
  * Register all application routes
+ *
+ * Uses the generic router pattern to eliminate repetitive validation code.
+ * Each module defines its routes in a routes.ts file using publicRoute/protectedRoute helpers.
  */
 export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
-  // Middleware guards
-  const authGuard = createAuthGuard(ctx.config.auth.jwt.secret);
-  const adminGuard = createAuthGuard(ctx.config.auth.jwt.secret, 'admin');
+  const routerOptions = {
+    prefix: '/api',
+    jwtSecret: ctx.config.auth.jwt.secret,
+  };
 
-  // ============================================================================
-  // Auth Routes (Public)
-  // ============================================================================
-
-  app.post('/api/auth/register', async (req: FastifyRequest, reply: FastifyReply) => {
-    const parsed = registerRequestSchema.safeParse(req.body);
-    if (!parsed.success) {
-      return reply
-        .status(400)
-        .send({ message: parsed.error.issues[0]?.message ?? 'Invalid input' });
-    }
-
-    const result = await handleRegister(ctx, parsed.data, reply as unknown as ReplyWithCookies);
-    return reply.status(result.status).send(result.body);
-  });
-
-  app.post('/api/auth/login', async (req: FastifyRequest, reply: FastifyReply) => {
-    const parsed = loginRequestSchema.safeParse(req.body);
-    if (!parsed.success) {
-      return reply
-        .status(400)
-        .send({ message: parsed.error.issues[0]?.message ?? 'Invalid input' });
-    }
-
-    const result = await handleLogin(
-      ctx,
-      parsed.data,
-      req as unknown as RequestWithCookies,
-      reply as unknown as ReplyWithCookies,
-    );
-    return reply.status(result.status).send(result.body);
-  });
-
-  app.post('/api/auth/refresh', async (req: FastifyRequest, reply: FastifyReply) => {
-    const result = await handleRefresh(
-      ctx,
-      req as unknown as RequestWithCookies,
-      reply as unknown as ReplyWithCookies,
-    );
-    return reply.status(result.status).send(result.body);
-  });
-
-  app.post('/api/auth/logout', async (req: FastifyRequest, reply: FastifyReply) => {
-    const result = await handleLogout(
-      ctx,
-      req as unknown as RequestWithCookies,
-      reply as unknown as ReplyWithCookies,
-    );
-    return reply.status(result.status).send(result.body);
-  });
-
-  app.post('/api/auth/forgot-password', async (req: FastifyRequest, reply: FastifyReply) => {
-    const parsed = forgotPasswordRequestSchema.safeParse(req.body);
-    if (!parsed.success) {
-      return reply
-        .status(400)
-        .send({ message: parsed.error.issues[0]?.message ?? 'Invalid input' });
-    }
-
-    const result = await handleForgotPassword(ctx, parsed.data);
-    return reply.status(result.status).send(result.body);
-  });
-
-  app.post('/api/auth/reset-password', async (req: FastifyRequest, reply: FastifyReply) => {
-    const parsed = resetPasswordRequestSchema.safeParse(req.body);
-    if (!parsed.success) {
-      return reply
-        .status(400)
-        .send({ message: parsed.error.issues[0]?.message ?? 'Invalid input' });
-    }
-
-    const result = await handleResetPassword(ctx, parsed.data);
-    return reply.status(result.status).send(result.body);
-  });
-
-  app.post('/api/auth/verify-email', async (req: FastifyRequest, reply: FastifyReply) => {
-    const parsed = emailVerificationRequestSchema.safeParse(req.body);
-    if (!parsed.success) {
-      return reply
-        .status(400)
-        .send({ message: parsed.error.issues[0]?.message ?? 'Invalid input' });
-    }
-
-    const result = await handleVerifyEmail(ctx, parsed.data, reply as unknown as ReplyWithCookies);
-    return reply.status(result.status).send(result.body);
-  });
-
-  app.post('/api/auth/resend-verification', async (req: FastifyRequest, reply: FastifyReply) => {
-    const parsed = resendVerificationRequestSchema.safeParse(req.body);
-    if (!parsed.success) {
-      return reply
-        .status(400)
-        .send({ message: parsed.error.issues[0]?.message ?? 'Invalid input' });
-    }
-
-    const result = await handleResendVerification(ctx, parsed.data);
-    return reply.status(result.status).send(result.body);
-  });
-
-  // ============================================================================
-  // Users Routes (Protected)
-  // ============================================================================
-
-  void app.register((instance) => {
-    instance.addHook('preHandler', authGuard);
-
-    instance.get('/api/users/me', async (req: FastifyRequest, reply: FastifyReply) => {
-      const result = await handleMe(ctx, req as unknown as RequestWithCookies);
-      return reply.status(result.status).send(result.body);
-    });
-  });
-
-  // ============================================================================
-  // Admin Routes (Protected + Admin Role)
-  // ============================================================================
-
-  void app.register((instance) => {
-    instance.addHook('preHandler', adminGuard);
-
-    instance.post('/api/admin/auth/unlock', async (req: FastifyRequest, reply: FastifyReply) => {
-      const parsed = unlockAccountRequestSchema.safeParse(req.body);
-      if (!parsed.success) {
-        return reply
-          .status(400)
-          .send({ message: parsed.error.issues[0]?.message ?? 'Invalid input' });
-      }
-
-      const result = await handleAdminUnlock(
-        ctx,
-        parsed.data,
-        req as unknown as RequestWithCookies,
-      );
-      return reply.status(result.status).send(result.body);
-    });
-  });
+  // Register all route maps - validation and auth guards are handled automatically
+  registerRouteMap(app, ctx, authRoutes, routerOptions);
+  registerRouteMap(app, ctx, userRoutes, routerOptions);
+  registerRouteMap(app, ctx, adminRoutes, routerOptions);
+  registerRouteMap(app, ctx, realtimeRoutes, routerOptions);
 }

@@ -31,6 +31,35 @@ import type { Logger } from '@logger';
 import type { SubscriptionManager } from '@pubsub';
 
 // ============================================================================
+// SQL Result Helpers
+// ============================================================================
+
+/**
+ * Helper to extract rows from SQL execute result.
+ * Provides runtime validation that the result has the expected shape.
+ */
+function extractRows<T>(result: unknown): T[] {
+  if (result && typeof result === 'object' && 'rows' in result && Array.isArray(result.rows)) {
+    return result.rows as T[];
+  }
+  if (Array.isArray(result)) {
+    return result as T[];
+  }
+  return [];
+}
+
+/**
+ * Helper to extract rowCount from SQL execute result.
+ */
+function extractRowCount(result: unknown): number {
+  if (result && typeof result === 'object' && 'rowCount' in result) {
+    const count = (result as { rowCount: number | null }).rowCount;
+    return count ?? 0;
+  }
+  return 0;
+}
+
+// ============================================================================
 // Write Service
 // ============================================================================
 
@@ -205,11 +234,12 @@ export class WriteService {
       expectedVersion !== undefined ? sql`AND version = ${expectedVersion}` : sql``;
 
     // Get current record for previous version
-    const currentResult = (await tx.execute(sql`
+    const currentResult = await tx.execute(sql`
       SELECT version FROM ${sql.identifier(table)} WHERE id = ${id}
-    `)) as unknown as { rows: Array<{ version: number }> };
+    `);
 
-    const currentRow = currentResult.rows[0];
+    const currentRows = extractRows<{ version: number }>(currentResult);
+    const currentRow = currentRows[0];
     if (!currentRow) {
       throw this.createError('NOT_FOUND', `Record not found: ${table}/${id}`);
     }
@@ -230,18 +260,20 @@ export class WriteService {
       updated_at: new Date().toISOString(),
     };
 
-    const result = (await tx.execute(sql`
+    const result = await tx.execute(sql`
       UPDATE ${sql.identifier(table)}
       SET ${sql.raw(this.buildUpdateClause(updateData))}
       WHERE id = ${id} ${versionCheck}
       RETURNING *
-    `)) as unknown as { rows: Array<T & { id: string; version: number }>; rowCount: number };
+    `);
 
-    if (result.rowCount === 0) {
+    const rowCount = extractRowCount(result);
+    if (rowCount === 0) {
       throw this.createError('CONFLICT', 'Concurrent modification detected');
     }
 
-    const row = result.rows[0];
+    const resultRows = extractRows<T & { id: string; version: number }>(result);
+    const row = resultRows[0];
 
     return {
       operation,
@@ -261,22 +293,24 @@ export class WriteService {
       expectedVersion !== undefined ? sql`AND version = ${expectedVersion}` : sql``;
 
     // Get current version before delete
-    const currentResult = (await tx.execute(sql`
+    const currentResult = await tx.execute(sql`
       SELECT version FROM ${sql.identifier(table)} WHERE id = ${id}
-    `)) as unknown as { rows: Array<{ version: number }> };
+    `);
 
-    const currentRow = currentResult.rows[0];
+    const currentRows = extractRows<{ version: number }>(currentResult);
+    const currentRow = currentRows[0];
     if (!currentRow) {
       throw this.createError('NOT_FOUND', `Record not found: ${table}/${id}`);
     }
 
     // Delete with version check
-    const result = (await tx.execute(sql`
+    const result = await tx.execute(sql`
       DELETE FROM ${sql.identifier(table)}
       WHERE id = ${id} ${versionCheck}
-    `)) as unknown as { rowCount: number };
+    `);
 
-    if (result.rowCount === 0) {
+    const rowCount = extractRowCount(result);
+    if (rowCount === 0) {
       throw this.createError('CONFLICT', 'Concurrent modification detected');
     }
 

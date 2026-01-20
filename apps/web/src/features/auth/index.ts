@@ -9,9 +9,16 @@ export {
   ForgotPasswordForm,
   ResetPasswordForm,
 } from './components';
-// eslint-disable-next-line @typescript-eslint/no-deprecated
-export { AuthContext, AuthProvider, type AuthContextType } from './contexts';
-export { useAuth } from './hooks';
+export {
+  useAuth,
+  useAuthModeNavigation,
+  type AuthContextType,
+  type AuthModeNavigation,
+  type AuthModeNavigationOptions,
+} from './hooks';
+// Re-export AuthMode from SDK for convenience
+export type { AuthMode } from '@abe-stack/sdk';
+export { createFormHandler, type FormHandlerOptions } from './utils';
 export { AuthPage, ConfirmEmailPage, LoginPage, RegisterPage, ResetPasswordPage } from './pages';
 export { AuthService, createAuthService } from './services';
 export type { AuthState, User } from './services';

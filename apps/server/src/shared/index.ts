@@ -55,6 +55,7 @@ export {
   WeakPasswordError,
   EmailAlreadyExistsError,
   EmailNotVerifiedError,
+  EmailSendError,
   UserNotFoundError,
   // OAuth errors
   OAuthError,
@@ -93,8 +94,6 @@ export type {
   ReplyWithCookies,
   RequestWithCookies,
   // Service interfaces
-  // eslint-disable-next-line @typescript-eslint/no-deprecated
-  Logger,
   EmailService,
   EmailOptions,
   EmailResult,
@@ -103,3 +102,15 @@ export type {
   IServiceContainer,
   AppContext,
 } from '@shared/types';
+
+// Error mapping utilities
+export { mapErrorToResponse, isKnownAuthError } from '@shared/errorMapper';
+export type { HttpErrorResponse as ErrorResponse } from '@abe-stack/core';
+
+// Validation error utilities
+export {
+  formatValidationErrors,
+  type ZodIssueMinimal,
+  type ValidationErrorDetail,
+  type ValidationErrorResponse,
+} from '@shared/validationError';

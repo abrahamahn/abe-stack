@@ -6,11 +6,14 @@
  */
 
 import { unlockUserAccount, UserNotFoundError } from '@admin/service';
-import { extractRequestInfo, type RequestWithCookies } from '@modules/auth';
-import { ERROR_MESSAGES, SUCCESS_MESSAGES, type AppContext } from '@shared';
+import {
+  ERROR_MESSAGES,
+  SUCCESS_MESSAGES,
+  type AppContext,
+  type RequestWithCookies,
+} from '@shared';
 
 import type { UnlockAccountRequest, UnlockAccountResponse } from '@abe-stack/core';
-import type { FastifyRequest } from 'fastify';
 
 /**
  * Unlock a user account (admin only)
@@ -29,7 +32,7 @@ export async function handleAdminUnlock(
   }
 
   try {
-    const { ipAddress, userAgent } = extractRequestInfo(request as unknown as FastifyRequest);
+    const { ipAddress, userAgent } = request.requestInfo;
 
     const { email } = body;
     const result = await unlockUserAccount(

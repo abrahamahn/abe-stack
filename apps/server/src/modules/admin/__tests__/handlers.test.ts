@@ -13,13 +13,6 @@ vi.mock('../service.js', () => ({
   },
 }));
 
-vi.mock('@modules/auth', () => ({
-  extractRequestInfo: vi.fn(() => ({
-    ipAddress: '192.168.1.1',
-    userAgent: 'Mozilla/5.0',
-  })),
-}));
-
 vi.mock('@shared', () => ({
   ERROR_MESSAGES: {
     UNAUTHORIZED: 'Unauthorized',
@@ -44,6 +37,10 @@ describe('Admin Handlers', () => {
     user: { userId: 'admin-123' },
     headers: {},
     cookies: {},
+    requestInfo: {
+      ipAddress: '192.168.1.1',
+      userAgent: 'Mozilla/5.0',
+    },
   };
 
   beforeEach(() => {

@@ -1,6 +1,6 @@
 # ABE Stack Architecture
 
-**Last Updated: January 18, 2026**
+**Last Updated: January 20, 2026**
 
 Comprehensive architecture documentation for ABE Stack's layered architecture and package layout.
 
@@ -229,6 +229,78 @@ The server implements **hexagonal architecture** (ports & adapters) to isolate b
 
 ---
 
+## Client-Side State Management (SDK)
+
+The SDK (`packages/sdk`) provides a complete client-side state management solution for real-time, offline-first applications.
+
+### Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    React Components                          │
+│              (useQuery, useMutation, useEffect)             │
+├─────────────────────────────────────────────────────────────┤
+│                    SubscriptionCache                         │
+│         (Reference counting, delayed cleanup)               │
+├─────────────────────────────────────────────────────────────┤
+│    RecordCache (Memory)    │    LoaderCache (Requests)      │
+│    - Type-safe records     │    - Request deduplication     │
+│    - Version conflicts     │    - TTL expiration            │
+│    - Optimistic updates    │    - Stale eviction            │
+├─────────────────────────────────────────────────────────────┤
+│              RecordStorage (IndexedDB)                       │
+│    - Persistent storage with fallbacks                       │
+│    - Version-based concurrency                               │
+├─────────────────────────────────────────────────────────────┤
+│   WebsocketPubsubClient   │    TransactionQueue             │
+│   - Real-time updates     │    - Offline mutations          │
+│   - Auto-reconnect        │    - Conflict resolution        │
+│   - Exponential backoff   │    - Rollback support           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Data Flow
+
+1. **Read Path**: Component subscribes via `SubscriptionCache` -> `WebsocketPubsubClient` subscribes to server -> Updates flow to `RecordCache` -> Component re-renders
+2. **Write Path**: Mutation added to `TransactionQueue` -> Optimistic update in `RecordCache` -> Queue processes when online -> Server confirms or rollback triggers
+
+### Module Responsibilities
+
+| Module                  | Purpose                                 |
+| ----------------------- | --------------------------------------- |
+| `RecordCache`           | In-memory cache with version conflicts  |
+| `RecordStorage`         | IndexedDB persistence for offline       |
+| `LoaderCache`           | Request deduplication with TTL          |
+| `SubscriptionCache`     | Reference counting for subscriptions    |
+| `TransactionQueue`      | Offline mutation queue with retry       |
+| `WebsocketPubsubClient` | Real-time WebSocket with auto-reconnect |
+| `UndoRedoStack`         | Generic operation history management    |
+
+### Integration Pattern
+
+```typescript
+// Initialize SDK components
+const pubsub = new WebsocketPubsubClient({ host, onMessage, onConnect });
+const cache = new RecordCache<Tables>();
+const storage = createRecordStorage<Tables>();
+const subscriptionCache = new SubscriptionCache({
+  onSubscribe: (key) => pubsub.subscribe(key),
+  onUnsubscribe: (key) => pubsub.unsubscribe(key),
+});
+const transactionQueue = createTransactionQueue({
+  submitTransaction,
+  onRollback,
+});
+
+// In React hooks
+function useRecord<T>(table: string, id: string) {
+  useEffect(() => subscriptionCache.subscribe(`${table}:${id}`), [table, id]);
+  return cache.get(table, id);
+}
+```
+
+---
+
 ## Testing Organization
 
 | Test Type         | Location                    | Purpose             |
@@ -262,23 +334,29 @@ abe-stack/
 
 ---
 
-## Future: Real-Time Features
+## Real-Time Features Status
 
-Based on CHET-Stack patterns. **Phase 1 (Environment Objects) already complete** via `AppContext`.
+Based on CHET-Stack patterns. Core infrastructure is now complete.
 
 | Phase | Feature                          | Status      |
 | ----- | -------------------------------- | ----------- |
 | 1     | Environment objects (AppContext) | ✅ Complete |
-| 2     | Operation types                  | Planned     |
-| 3     | Record cache + hooks             | Planned     |
-| 4     | WebSocket sync                   | Planned     |
-| 5     | Offline support                  | Planned     |
+| 2     | Operation types                  | ✅ Complete |
+| 3     | Record cache + hooks             | ✅ Complete |
+| 4     | WebSocket sync                   | ✅ Complete |
+| 5     | Offline support                  | ✅ Complete |
 
-**Key patterns to adopt**:
+**Implemented in `packages/sdk`**:
 
-- Operation-based sync (send operations, not full records)
-- Record cache with subscriptions
-- Offline queue with IndexedDB
+- `RecordCache` - Type-safe in-memory cache with version conflict resolution
+- `RecordStorage` - IndexedDB persistence with automatic fallbacks
+- `WebsocketPubsubClient` - Auto-reconnecting WebSocket client
+- `TransactionQueue` - Offline-first mutation queue with rollback
+- `SubscriptionCache` - Reference-counted subscription management
+- `LoaderCache` - Request deduplication with TTL
+- `UndoRedoStack` - Generic undo/redo with operation grouping
+
+**Remaining work**: React hooks integration (useRecord, useSubscription) and full offline-first example app
 
 ---
 
@@ -290,4 +368,4 @@ Based on CHET-Stack patterns. **Phase 1 (Environment Objects) already complete**
 
 ---
 
-_Last Updated: January 18, 2026_
+_Last Updated: January 20, 2026_

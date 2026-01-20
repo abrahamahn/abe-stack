@@ -5,7 +5,7 @@ import {
   LoginForm,
   RegisterForm,
   ResetPasswordForm,
-} from '@auth/components/AuthForms';
+} from '@auth/components';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';

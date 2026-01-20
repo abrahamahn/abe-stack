@@ -1,10 +1,19 @@
 // packages/core/src/contracts/index.ts
-// @auto-generated - Do not edit manually
+/**
+ * API Contracts
+ *
+ * ts-rest API contract definitions and Zod validation schemas.
+ */
 
-export { adminContract, unlockAccountRequestSchema, unlockAccountResponseSchema } from './admin';
-export type { UnlockAccountRequest, UnlockAccountResponse } from './admin';
+// Combined API contract
 export { apiContract } from './api';
 export type { ApiContract } from './api';
+
+// Admin contract
+export { adminContract, unlockAccountRequestSchema, unlockAccountResponseSchema } from './admin';
+export type { UnlockAccountRequest, UnlockAccountResponse } from './admin';
+
+// Auth contract
 export {
   authContract,
   authResponseSchema,
@@ -38,15 +47,28 @@ export type {
   ResetPasswordRequest,
   ResetPasswordResponse,
 } from './auth';
-export { USER_ROLES, errorResponseSchema, userRoleSchema, userSchema } from './common';
-export type { ErrorResponse, UserRole } from './common';
-export type { NativeBridge } from './native';
+
+// Common schemas
 export {
-  SORT_ORDER,
+  emailSchema,
+  errorResponseSchema,
+  nameSchema,
+  passwordSchema,
+  requiredNameSchema,
+  uuidSchema,
+} from './common';
+export type { ErrorResponse } from './common';
+
+// Native bridge interface
+export type { NativeBridge } from './native';
+
+// Pagination schemas
+export {
   cursorPaginatedResultSchema,
   cursorPaginationOptionsSchema,
   paginatedResultSchema,
   paginationOptionsSchema,
+  SORT_ORDER,
   universalPaginatedResultSchema,
   universalPaginationOptionsSchema,
 } from './pagination';
@@ -59,5 +81,40 @@ export type {
   UniversalPaginatedResult,
   UniversalPaginationOptions,
 } from './pagination';
-export { userResponseSchema, usersContract } from './users';
-export type { UserResponse } from './users';
+
+// Users contract
+export { USER_ROLES, userResponseSchema, userRoleSchema, userSchema, usersContract } from './users';
+export type { User, UserResponse, UserRole } from './users';
+
+// Realtime contract
+export {
+  conflictResponseSchema,
+  getRecordsResponseSchema,
+  listInsertOperationSchema,
+  listPositionSchema,
+  listRemoveOperationSchema,
+  operationSchema,
+  realtimeContract,
+  recordMapSchema,
+  recordPointerSchema,
+  recordSchema,
+  setNowOperationSchema,
+  setOperationSchema,
+  transactionSchema,
+  writeResponseSchema,
+} from './realtime';
+export type {
+  ConflictResponse,
+  GetRecordsResponse,
+  ListInsertOperation,
+  ListPosition,
+  ListRemoveOperation,
+  Operation,
+  RealtimeRecord,
+  RecordMap,
+  RecordPointer,
+  SetNowOperation,
+  SetOperation,
+  Transaction,
+  WriteResponse,
+} from './realtime';

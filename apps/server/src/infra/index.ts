@@ -13,6 +13,7 @@
  * - http: Security headers, CORS middleware
  * - rate-limit: Token Bucket rate limiter
  * - crypto: Native JWT implementation (HS256)
+ * - permissions: Row-level permissions for realtime features
  */
 
 // Database
@@ -257,3 +258,53 @@ export {
   type PaginationMiddlewareOptions,
   type PaginationRequest,
 } from './pagination';
+
+// Permissions (Row-level access control)
+export {
+  // Types and helpers
+  allowed,
+  denied,
+  getRecordKey,
+  isAllowed,
+  isDenied,
+  parseRecordKey,
+  PERMISSION_TYPES,
+  // Checker
+  createAdminRule,
+  createCustomRule,
+  createDefaultPermissionConfig,
+  createMemberRule,
+  createOwnerRule,
+  createPermissionChecker,
+  PermissionChecker,
+  // Middleware
+  createPermissionMiddleware,
+  createStandalonePermissionGuard,
+  getPermissionDenialReason,
+  getRecordIdFromParams,
+  hasPermission,
+  // Types
+  type BatchRecordLoader,
+  type CustomRule,
+  type MembershipRule,
+  type OwnershipRule,
+  type PermissionAllowed,
+  type PermissionCheck,
+  type PermissionCheckerOptions,
+  type PermissionConfig,
+  type PermissionContext,
+  type PermissionDenied,
+  type PermissionGuardOptions,
+  type PermissionMiddlewareOptions,
+  type PermissionRecord,
+  type PreHandlerHook,
+  type PermissionResult,
+  type PermissionRule,
+  type PermissionRuleBase,
+  type PermissionRuleType,
+  type PermissionType,
+  type RecordLoader,
+  type RecordPointer,
+  type RoleRule,
+  type TablePermissionConfig,
+} from './permissions';

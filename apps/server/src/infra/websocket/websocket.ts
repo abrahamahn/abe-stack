@@ -6,13 +6,74 @@
  */
 
 import { parseCookies } from '@abe-stack/core/http';
+import { validateCsrfToken } from '@http';
 import { verifyToken } from '@modules/auth/utils/jwt';
+import { users } from '@schema/users';
+import { eq } from 'drizzle-orm';
 import { WebSocketServer, type WebSocket } from 'ws';
 
-import type { WebSocket as PubSubWebSocket } from '@pubsub/types';
 import type { AppContext } from '@shared';
 import type { FastifyInstance } from 'fastify';
 import type { IncomingMessage } from 'node:http';
+import type { Duplex } from 'node:stream';
+
+// ============================================================================
+// Database Query Builders
+// ============================================================================
+
+/**
+ * Type-safe mapping of allowed subscription tables to their query builders.
+ */
+function getTableQueryBuilder(
+  db: AppContext['db'],
+  table: string,
+): {
+  findFirst: (options: {
+    where: (t: typeof users, ops: { eq: typeof eq }) => ReturnType<typeof eq>;
+    columns: { version: boolean };
+  }) => Promise<{ version: number } | undefined>;
+} | null {
+  switch (table) {
+    case 'users':
+      return {
+        findFirst: (options: {
+          where: (t: typeof users, ops: { eq: typeof eq }) => ReturnType<typeof eq>;
+          columns: { version: boolean };
+        }): Promise<{ version: number } | undefined> => {
+          return db.query.users.findFirst({
+            where: options.where(users, { eq }),
+            columns: { version: true },
+          });
+        },
+      };
+    default:
+      // For other tables that might be added later, return null for now
+      return null;
+  }
+}
+
+// ============================================================================
+// WebSocket Adapter
+// ============================================================================
+
+/**
+ * Minimal WebSocket interface for pub/sub operations.
+ * This matches the interface expected by SubscriptionManager.
+ */
+interface PubSubWebSocket {
+  readyState: number;
+  send(data: string): void;
+}
+
+/**
+ * Type guard to verify a WebSocket has the required pub/sub interface.
+ * The 'ws' library's WebSocket always satisfies this interface.
+ */
+function asPubSubWebSocket(socket: WebSocket): PubSubWebSocket {
+  // WebSocket from 'ws' always has readyState and send(),
+  // so this is a safe structural cast (not `as unknown as`)
+  return socket;
+}
 
 // ============================================================================
 // Connection Tracking
@@ -45,6 +106,21 @@ export function getWebSocketStats(): WebSocketStats {
 // ============================================================================
 
 /**
+ * Reject WebSocket upgrade with HTTP error response
+ */
+function rejectUpgrade(socket: Duplex, statusCode: number, message: string): void {
+  const response = [
+    `HTTP/1.1 ${String(statusCode)} ${message}`,
+    'Content-Type: text/plain',
+    'Connection: close',
+    '',
+    message,
+  ].join('\r\n');
+  socket.write(response);
+  socket.destroy();
+}
+
+/**
  * Register WebSocket support
  */
 export function registerWebSocket(server: FastifyInstance, ctx: AppContext): void {
@@ -52,13 +128,59 @@ export function registerWebSocket(server: FastifyInstance, ctx: AppContext): voi
   const wss = new WebSocketServer({ noServer: true });
   pluginRegistered = true;
 
+  // Determine CSRF encryption setting (matches server.ts configuration)
+  const isProd = ctx.config.env === 'production';
+
   // Handle upgrade requests
-  server.server.on('upgrade', (request: IncomingMessage, socket, head) => {
+  server.server.on('upgrade', (request: IncomingMessage, socket: Duplex, head: Buffer) => {
     const url = new URL(request.url ?? '/', `http://${request.headers.host ?? 'localhost'}`);
 
     // Only handle /ws path
     if (url.pathname !== '/ws') {
       socket.destroy();
+      return;
+    }
+
+    // =========================================================================
+    // CSRF Validation
+    // =========================================================================
+    // WebSocket upgrades must include a valid CSRF token to prevent cross-site
+    // WebSocket hijacking attacks. The token can be provided via:
+    // 1. Query parameter: ?csrf=<token>
+    // 2. Sec-WebSocket-Protocol header: new WebSocket(url, ['csrf.<token>', ...])
+    //
+    // The cookie is automatically sent with the upgrade request.
+
+    // Extract CSRF token from cookie
+    const rawCookies: unknown = parseCookies(request.headers.cookie);
+    const cookies = isStringRecord(rawCookies) ? rawCookies : {};
+    const csrfCookie = cookies._csrf;
+
+    // Extract CSRF token from request (query param or subprotocol)
+    let csrfToken: string | undefined;
+
+    // Check query parameter first
+    csrfToken = url.searchParams.get('csrf') ?? undefined;
+
+    // Check Sec-WebSocket-Protocol header (format: csrf.<token>)
+    if (!csrfToken && request.headers['sec-websocket-protocol']) {
+      const protocols = request.headers['sec-websocket-protocol'].split(',').map((p) => p.trim());
+      const csrfProtocol = protocols.find((p) => p.startsWith('csrf.'));
+      if (csrfProtocol) {
+        csrfToken = csrfProtocol.slice(5); // Remove 'csrf.' prefix
+      }
+    }
+
+    // Validate CSRF token
+    const csrfValid = validateCsrfToken(csrfCookie, csrfToken, {
+      secret: ctx.config.auth.cookie.secret,
+      encrypted: isProd,
+      signed: true,
+    });
+
+    if (!csrfValid) {
+      ctx.log.warn('WebSocket upgrade rejected: invalid CSRF token');
+      rejectUpgrade(socket, 403, 'Forbidden: Invalid CSRF token');
       return;
     }
 
@@ -128,7 +250,7 @@ function handleConnection(socket: WebSocket, req: IncomingMessage, ctx: AppConte
         message = Buffer.from(data).toString();
       }
 
-      pubsub.handleMessage(socket as unknown as PubSubWebSocket, message, (key: string) => {
+      pubsub.handleMessage(asPubSubWebSocket(socket), message, (key: string) => {
         void sendInitialData(ctx, socket, key);
       });
     });
@@ -136,13 +258,13 @@ function handleConnection(socket: WebSocket, req: IncomingMessage, ctx: AppConte
     socket.on('close', () => {
       activeConnections--;
       ctx.log.debug({ userId: user.userId, activeConnections }, 'WebSocket client disconnected');
-      pubsub.cleanup(socket as unknown as PubSubWebSocket);
+      pubsub.cleanup(asPubSubWebSocket(socket));
     });
 
     socket.on('error', (err: Error) => {
       activeConnections--;
       ctx.log.error({ err, userId: user.userId, activeConnections }, 'WebSocket error');
-      pubsub.cleanup(socket as unknown as PubSubWebSocket);
+      pubsub.cleanup(asPubSubWebSocket(socket));
     });
   } catch (err) {
     ctx.log.warn({ err }, 'WebSocket token verification failed');
@@ -219,19 +341,17 @@ async function sendInitialData(ctx: AppContext, socket: WebSocket, key: string):
   const { table, id } = validation;
 
   try {
-    /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-return */
-    const queryBuilder = (ctx.db.query as any)[table];
+    const queryBuilder = getTableQueryBuilder(ctx.db, table);
     if (!queryBuilder) return;
 
     const record = await queryBuilder.findFirst({
-      where: (t: any, { eq }: any) => eq(t.id, id),
+      where: (t, { eq }) => eq(t.id, id),
       columns: { version: true },
     });
 
     if (record) {
       socket.send(JSON.stringify({ type: 'update', key, version: record.version }));
     }
-    /* eslint-enable */
   } catch (err) {
     ctx.log.warn({ err, key }, 'Failed to fetch initial data for subscription');
   }

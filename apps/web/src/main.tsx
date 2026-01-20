@@ -14,6 +14,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { App } from './app/App';
+import { registerServiceWorker } from './utils/registerServiceWorker';
 
 import type { ClientEnvironment } from '@app/ClientEnvironment';
 
@@ -76,3 +77,31 @@ root.render(
     <App environment={environment} />
   </StrictMode>,
 );
+
+// ============================================================================
+// Service Worker Registration (PWA offline support)
+// ============================================================================
+
+// Register service worker in production only
+// In development, service workers can interfere with hot module replacement
+if (!environment.config.isDev) {
+  void registerServiceWorker({
+    swPath: '/sw.js',
+    scope: '/',
+    immediate: false, // Wait for page load to avoid blocking initial render
+    callbacks: {
+      onSuccess: (_registration) => {
+        // Service worker registered successfully
+        // In production, you might want to track this with analytics
+      },
+      onUpdate: (_info) => {
+        // New version available - could show a toast notification here
+        // Example: showToast('A new version is available. Refresh to update.')
+      },
+      onError: (_error) => {
+        // Service worker registration failed
+        // In production, you might want to track this with error monitoring
+      },
+    },
+  });
+}

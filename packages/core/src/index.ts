@@ -1,48 +1,28 @@
 // packages/core/src/index.ts
-// NOTE: This file is manually maintained
-// IMPORTANT: Only browser-safe exports here. Server-only modules use subpath exports:
-//   - @abe-stack/core/crypto - JWT/token functions (uses node:crypto)
-//   - @abe-stack/core/env - Server environment config
-//   - @abe-stack/core/media - Media processing (uses fs, child_process)
+/**
+ * @abe-stack/core
+ *
+ * Shared types, validation, errors, and utilities for the ABE Stack.
+ * This is the main entry point for the package.
+ */
 
-// Async utilities
-export { BatchedQueue, DeferredPromise, ReactiveMap, type BatchedQueueOptions } from './async';
-
-// Constants
+// ============================================================================
+// Contracts (API schemas and types)
+// ============================================================================
 export {
-  DAYS_PER_WEEK,
-  HOURS_PER_DAY,
-  HTTP_STATUS,
-  MINUTES_PER_HOUR,
-  MS_PER_DAY,
-  MS_PER_HOUR,
-  MS_PER_MINUTE,
-  MS_PER_SECOND,
-  SECONDS_PER_DAY,
-  SECONDS_PER_HOUR,
-  SECONDS_PER_MINUTE,
-  type HttpStatusCode,
-} from './constants';
-
-// Contracts
-export {
-  SORT_ORDER,
-  USER_ROLES,
+  // API contracts
   adminContract,
   apiContract,
   authContract,
+  usersContract,
+  // Auth schemas
   authResponseSchema,
-  cursorPaginatedResultSchema,
-  cursorPaginationOptionsSchema,
   emailVerificationRequestSchema,
   emailVerificationResponseSchema,
-  errorResponseSchema,
   forgotPasswordRequestSchema,
   forgotPasswordResponseSchema,
   loginRequestSchema,
   logoutResponseSchema,
-  paginatedResultSchema,
-  paginationOptionsSchema,
   refreshResponseSchema,
   registerRequestSchema,
   registerResponseSchema,
@@ -50,14 +30,29 @@ export {
   resendVerificationResponseSchema,
   resetPasswordRequestSchema,
   resetPasswordResponseSchema,
-  universalPaginatedResultSchema,
-  universalPaginationOptionsSchema,
+  // Admin schemas
   unlockAccountRequestSchema,
   unlockAccountResponseSchema,
+  // Common schemas
+  emailSchema,
+  errorResponseSchema,
+  nameSchema,
+  passwordSchema,
+  requiredNameSchema,
+  uuidSchema,
+  // Pagination schemas
+  cursorPaginatedResultSchema,
+  cursorPaginationOptionsSchema,
+  paginatedResultSchema,
+  paginationOptionsSchema,
+  SORT_ORDER,
+  universalPaginatedResultSchema,
+  universalPaginationOptionsSchema,
+  // User schemas
+  USER_ROLES,
   userResponseSchema,
   userRoleSchema,
   userSchema,
-  usersContract,
 } from './contracts';
 export type {
   ApiContract,
@@ -86,69 +81,72 @@ export type {
   UniversalPaginationOptions,
   UnlockAccountRequest,
   UnlockAccountResponse,
+  User,
   UserResponse,
   UserRole,
 } from './contracts';
 
-// Errors
+// ============================================================================
+// Infrastructure: Async utilities
+// ============================================================================
+export { BatchedQueue, DeferredPromise, ReactiveMap } from './infrastructure/async';
+export type { BatchedQueueOptions } from './infrastructure/async';
+
+// ============================================================================
+// Infrastructure: Constants
+// ============================================================================
 export {
-  AccountLockedError,
+  DAYS_PER_WEEK,
+  HOURS_PER_DAY,
+  HTTP_STATUS,
+  MINUTES_PER_HOUR,
+  MS_PER_DAY,
+  MS_PER_HOUR,
+  MS_PER_MINUTE,
+  MS_PER_SECOND,
+  SECONDS_PER_DAY,
+  SECONDS_PER_HOUR,
+  SECONDS_PER_MINUTE,
+} from './infrastructure/constants';
+export type { HttpStatusCode } from './infrastructure/constants';
+
+// ============================================================================
+// Infrastructure: Errors
+// ============================================================================
+export {
   AppError,
   BadRequestError,
   ConflictError,
-  EmailAlreadyExistsError,
-  EmailNotVerifiedError,
   ForbiddenError,
-  InternalError,
-  InvalidCredentialsError,
-  InvalidTokenError,
-  NotFoundError,
-  OAuthError,
-  OAuthStateMismatchError,
-  TokenReuseError,
-  TooManyRequestsError,
-  TotpInvalidError,
-  TotpRequiredError,
-  UnauthorizedError,
-  UnprocessableError,
-  UserNotFoundError,
-  ValidationError,
-  WeakPasswordError,
   getErrorStatusCode,
   getSafeErrorMessage,
+  InternalError,
   isAppError,
   isErrorResponse,
   isSuccessResponse,
+  NotFoundError,
   toAppError,
-} from './errors';
-export type { ApiErrorResponse, ApiResponse, ApiSuccessResponse } from './errors';
+  TooManyRequestsError,
+  UnauthorizedError,
+  UnprocessableError,
+  ValidationError,
+} from './infrastructure/errors';
+export type { ApiErrorResponse, ApiResponse, ApiSuccessResponse } from './infrastructure/errors';
 
-// HTTP utilities
-export { parseCookies } from './http';
+// ============================================================================
+// Infrastructure: HTTP
+// ============================================================================
+export { parseCookies } from './infrastructure/http';
 
-// Pagination
-export {
-  PAGINATION_ERROR_TYPES,
-  PaginationError,
-  buildCursorPaginationQuery,
-  calculateCursorPaginationMetadata,
-  createCursorForItem,
-  decodeCursor,
-  encodeCursor,
-  paginateArrayWithCursor,
-  paginateLargeArrayWithCursor,
-} from './pagination';
-export type { CursorData, PaginationErrorType } from './pagination';
+// ============================================================================
+// Infrastructure: Stores
+// ============================================================================
+export { createUndoRedoStore, toastStore, useUndoRedoStore } from './infrastructure/stores';
+export type { ToastMessage, UndoRedoState } from './infrastructure/stores';
 
-// Shared utilities
-export { addAuthHeader, createTokenStore, randomId, tokenStore } from './shared';
-export type { TokenStore } from './shared';
-
-// Stores
-export { createUndoRedoStore, toastStore, useUndoRedoStore } from './stores';
-export type { ToastMessage, UndoRedoState } from './stores';
-
-// Transactions
+// ============================================================================
+// Infrastructure: Transactions (for undo/redo)
+// ============================================================================
 export {
   createListInsertOperation,
   createListRemoveOperation,
@@ -160,25 +158,199 @@ export {
   isListRemoveOperation,
   isSetOperation,
   mergeTransactions,
-} from './transactions';
+} from './infrastructure/transactions';
 export type {
   ListInsertOperation,
   ListRemoveOperation,
   Operation,
   SetOperation,
   Transaction,
-} from './transactions';
+} from './infrastructure/transactions';
 
-// Utils
-export { normalizeStorageKey } from './utils';
-
-// Validation
+// ============================================================================
+// Contracts: Realtime API (for REST endpoints)
+// ============================================================================
 export {
+  conflictResponseSchema,
+  getRecordsResponseSchema,
+  listInsertOperationSchema,
+  listPositionSchema,
+  listRemoveOperationSchema,
+  operationSchema,
+  realtimeContract,
+  recordMapSchema,
+  recordPointerSchema,
+  recordSchema,
+  setNowOperationSchema,
+  setOperationSchema,
+  transactionSchema,
+  writeResponseSchema,
+} from './contracts/realtime';
+export type {
+  ConflictResponse,
+  GetRecordsResponse,
+  ListPosition,
+  RealtimeRecord,
+  RecordMap,
+  RecordPointer,
+  WriteResponse,
+  // Realtime operation types - use distinct names to avoid conflict with Transaction types
+  ListInsertOperation as RealtimeListInsertOperation,
+  ListRemoveOperation as RealtimeListRemoveOperation,
+  Operation as RealtimeOperation,
+  SetNowOperation as RealtimeSetNowOperation,
+  SetOperation as RealtimeSetOperation,
+  Transaction as RealtimeTransaction,
+} from './contracts/realtime';
+
+// ============================================================================
+// Domain: Auth (errors and validation)
+// ============================================================================
+export {
+  // Auth errors
+  AccountLockedError,
+  EmailAlreadyExistsError,
+  EmailNotVerifiedError,
+  EmailSendError,
+  InvalidCredentialsError,
+  InvalidTokenError,
+  OAuthError,
+  OAuthStateMismatchError,
+  TokenReuseError,
+  TotpInvalidError,
+  TotpRequiredError,
+  UserNotFoundError,
+  WeakPasswordError,
+  // Password validation
   defaultPasswordConfig,
   estimatePasswordStrength,
   getStrengthColor,
   getStrengthLabel,
   validatePassword,
   validatePasswordBasic,
-} from './validation';
-export type { PasswordConfig, PasswordValidationResult, StrengthResult } from './validation';
+} from './domains/auth';
+export type {
+  PasswordConfig,
+  PasswordPenalties,
+  PasswordValidationResult,
+  StrengthResult,
+} from './domains/auth';
+
+// ============================================================================
+// Domain: Pagination
+// ============================================================================
+export {
+  buildCursorPaginationQuery,
+  calculateCursorPaginationMetadata,
+  createCursorForItem,
+  decodeCursor,
+  encodeCursor,
+  getSortableValue,
+  isCursorValue,
+  PAGINATION_ERROR_TYPES,
+  PaginationError,
+  paginateArrayWithCursor,
+  paginateLargeArrayWithCursor,
+} from './domains/pagination';
+export type { CursorData, PaginationErrorType } from './domains/pagination';
+
+// ============================================================================
+// Errors: HTTP mapping and validation formatting
+// ============================================================================
+export {
+  formatValidationErrors,
+  HTTP_ERROR_MESSAGES,
+  isKnownAuthError,
+  mapErrorToHttpResponse,
+} from './errors';
+export type {
+  ErrorMapperLogger,
+  ErrorMapperOptions,
+  ErrorStatusCode,
+  HttpErrorResponse,
+  ValidationErrorDetail,
+  ValidationErrorResponse,
+  ZodIssueMinimal,
+} from './errors';
+
+// ============================================================================
+// Media (server-only)
+// ============================================================================
+export {
+  BasicSecurityScanner,
+  checkFFmpeg,
+  convertVideo,
+  createHLSStream,
+  createImageProcessor,
+  detectFileType,
+  detectFileTypeFromFile,
+  detectFileTypeFromPath,
+  extractAudio,
+  extractAudioSegment,
+  generateFileId,
+  generateThumbnail,
+  generateWaveform,
+  getImageFormat,
+  getMediaMetadata,
+  ImageProcessor,
+  isAllowedFileType,
+  parseAudioMetadata,
+  runFFmpeg,
+  sanitizeFilename,
+  validateMediaFile,
+  validateUploadConfig,
+} from './media';
+export type {
+  AudioMetadata,
+  FFmpegOptions,
+  FFmpegResult,
+  FileTypeResult,
+  ImageFormatOptions,
+  ImageMetadata,
+  ImageProcessingOptions,
+  ImageResizeOptions,
+  MediaMetadata,
+  MediaMetadataResult,
+  MediaProcessingOptions,
+  ProcessingResult,
+  SecurityScanResult,
+  UploadConfig,
+} from './media';
+
+// ============================================================================
+// Shared: Token storage and utilities
+// ============================================================================
+export { addAuthHeader, createTokenStore, randomId, tokenStore } from './shared';
+export type { TokenStore } from './shared';
+
+// ============================================================================
+// Utils: Async, port, storage
+// ============================================================================
+export {
+  delay,
+  isPortFree,
+  isPortListening,
+  normalizeStorageKey,
+  pickAvailablePort,
+  uniquePorts,
+  waitForPort,
+} from './utils';
+
+// ============================================================================
+// Environment validation (server-only, also available via @abe-stack/core/env)
+// ============================================================================
+export {
+  envSchema,
+  getEnvValidator,
+  loadServerEnv,
+  serverEnvSchema,
+  validateDatabaseEnv,
+  validateDevelopmentEnv,
+  validateEmailEnv,
+  validateEnvironment,
+  validateEnvironmentSafe,
+  validateProductionEnv,
+  validateSecurityEnv,
+  validateStorageEnv,
+} from './env';
+export type { ServerEnv } from './env';

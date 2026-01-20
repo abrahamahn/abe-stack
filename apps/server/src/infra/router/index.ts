@@ -27,6 +27,7 @@
 
 // Types
 export type {
+  BaseRouteDefinition,
   HttpMethod,
   ProtectedHandler,
   PublicHandler,

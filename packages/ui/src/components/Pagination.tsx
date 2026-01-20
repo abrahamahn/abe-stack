@@ -9,6 +9,8 @@ type PaginationProps = {
   defaultValue?: number;
   totalPages: number;
   onChange?: (value: number) => void;
+  /** Accessible label for the pagination navigation */
+  'aria-label'?: string;
 };
 
 export function Pagination({
@@ -16,6 +18,7 @@ export function Pagination({
   defaultValue,
   totalPages,
   onChange,
+  'aria-label': ariaLabel = 'Pagination',
 }: PaginationProps): ReactElement {
   const [currentPage, setPage] = useControllableState<number>({
     value,
@@ -33,8 +36,13 @@ export function Pagination({
   };
 
   return (
-    <div className="pagination">
-      <button className="pagination-button" onClick={prev} disabled={page <= 1}>
+    <nav className="pagination" role="navigation" aria-label={ariaLabel}>
+      <button
+        className="pagination-button"
+        onClick={prev}
+        disabled={page <= 1}
+        aria-label="Go to previous page"
+      >
         ‹
       </button>
       {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
@@ -42,6 +50,8 @@ export function Pagination({
           key={p}
           className="pagination-button"
           data-active={p === page}
+          aria-current={p === page ? 'page' : undefined}
+          aria-label={`Go to page ${String(p)}`}
           onClick={() => {
             setPage(p);
           }}
@@ -49,9 +59,14 @@ export function Pagination({
           {p}
         </button>
       ))}
-      <button className="pagination-button" onClick={next} disabled={page >= totalPages}>
+      <button
+        className="pagination-button"
+        onClick={next}
+        disabled={page >= totalPages}
+        aria-label="Go to next page"
+      >
         ›
       </button>
-    </div>
+    </nav>
   );
 }

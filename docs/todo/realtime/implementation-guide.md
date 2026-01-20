@@ -1,6 +1,6 @@
 # Real-Time Implementation Guide
 
-**Last Updated: January 17, 2026**
+**Last Updated: January 20, 2026**
 
 Step-by-step guide to building collaborative applications.
 
@@ -35,13 +35,18 @@ Full operation history
 - Operation inversion logic
 - Keyboard shortcuts
 
-### Phase 5: Permissions (Backend, Week 8)
+### Phase 5: Permissions (Backend, Complete)
 
-Secure access control
+✅ Secure access control
 
-- Row-level read validation
-- Row-level write validation
-- Permission records loading
+✅ Row-level read validation
+✅ Row-level write validation
+✅ Permission records loading
+✅ Ownership-based permissions
+✅ Membership-based permissions (workspace/team)
+✅ Role-based permissions (admin)
+✅ Custom permission rules
+✅ Fastify middleware integration
 
 ### Phase 6-8: Optional Enhancements (Backend-heavy)
 

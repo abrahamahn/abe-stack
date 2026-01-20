@@ -12,6 +12,52 @@ import type { QueueStore, Task, TaskError, TaskResult } from './types';
 import type { DbClient } from '@database';
 
 // ============================================================================
+// SQL Result Types
+// ============================================================================
+
+/** Row shape for task queries */
+interface TaskRow {
+  id: string;
+  name: string;
+  args: unknown;
+  scheduled_at: string;
+  attempts: number;
+  max_attempts: number;
+  created_at: string;
+}
+
+/** Row shape for count queries */
+interface CountRow {
+  count: string;
+}
+
+/**
+ * Helper to extract rows from SQL execute result.
+ * Provides runtime validation that the result has the expected shape.
+ */
+function extractRows<T>(result: unknown): T[] {
+  if (result && typeof result === 'object' && 'rows' in result && Array.isArray(result.rows)) {
+    return result.rows as T[];
+  }
+  // Drizzle may return array directly in some cases
+  if (Array.isArray(result)) {
+    return result as T[];
+  }
+  return [];
+}
+
+/**
+ * Helper to extract rowCount from SQL execute result.
+ */
+function extractRowCount(result: unknown): number {
+  if (result && typeof result === 'object' && 'rowCount' in result) {
+    const count = (result as { rowCount: number | null }).rowCount;
+    return count ?? 0;
+  }
+  return 0;
+}
+
+// ============================================================================
 // Schema (run this migration manually or via Drizzle)
 // ============================================================================
 
@@ -61,7 +107,7 @@ export class PostgresQueueStore implements QueueStore {
 
   async dequeue(now: string): Promise<Task | null> {
     // Use FOR UPDATE SKIP LOCKED to safely dequeue in concurrent environments
-    const result = (await this.db.execute(sql`
+    const result = await this.db.execute(sql`
       UPDATE job_queue
       SET status = 'processing', attempts = attempts + 1
       WHERE id = (
@@ -72,21 +118,12 @@ export class PostgresQueueStore implements QueueStore {
         FOR UPDATE SKIP LOCKED
       )
       RETURNING id, name, args, scheduled_at, attempts, max_attempts, created_at
-    `)) as unknown as {
-      rows: Array<{
-        id: string;
-        name: string;
-        args: unknown;
-        scheduled_at: string;
-        attempts: number;
-        max_attempts: number;
-        created_at: string;
-      }>;
-    };
+    `);
 
-    if (result.rows.length === 0) return null;
+    const rows = extractRows<TaskRow>(result);
+    if (rows.length === 0) return null;
 
-    const row = result.rows[0];
+    const row = rows[0];
     if (!row) return null;
 
     return {
@@ -136,25 +173,16 @@ export class PostgresQueueStore implements QueueStore {
   }
 
   async get(taskId: string): Promise<Task | null> {
-    const result = (await this.db.execute(sql`
+    const result = await this.db.execute(sql`
       SELECT id, name, args, scheduled_at, attempts, max_attempts, created_at
       FROM job_queue
       WHERE id = ${taskId}
-    `)) as unknown as {
-      rows: Array<{
-        id: string;
-        name: string;
-        args: unknown;
-        scheduled_at: string;
-        attempts: number;
-        max_attempts: number;
-        created_at: string;
-      }>;
-    };
+    `);
 
-    if (result.rows.length === 0) return null;
+    const rows = extractRows<TaskRow>(result);
+    if (rows.length === 0) return null;
 
-    const row = result.rows[0];
+    const row = rows[0];
     if (!row) return null;
 
     return {
@@ -169,27 +197,29 @@ export class PostgresQueueStore implements QueueStore {
   }
 
   async getPendingCount(): Promise<number> {
-    const result = (await this.db.execute(sql`
+    const result = await this.db.execute(sql`
       SELECT COUNT(*) as count FROM job_queue WHERE status = 'pending'
-    `)) as unknown as { rows: Array<{ count: string }> };
-    const row = result.rows[0];
+    `);
+    const rows = extractRows<CountRow>(result);
+    const row = rows[0];
     return row ? parseInt(row.count, 10) : 0;
   }
 
   async getFailedCount(): Promise<number> {
-    const result = (await this.db.execute(sql`
+    const result = await this.db.execute(sql`
       SELECT COUNT(*) as count FROM job_queue WHERE status = 'failed'
-    `)) as unknown as { rows: Array<{ count: string }> };
-    const row = result.rows[0];
+    `);
+    const rows = extractRows<CountRow>(result);
+    const row = rows[0];
     return row ? parseInt(row.count, 10) : 0;
   }
 
   async clearCompleted(before: string): Promise<number> {
-    const result = (await this.db.execute(sql`
+    const result = await this.db.execute(sql`
       DELETE FROM job_queue
       WHERE status = 'completed' AND completed_at < ${before}::timestamptz
-    `)) as unknown as { rowCount: number | null };
-    return result.rowCount ?? 0;
+    `);
+    return extractRowCount(result);
   }
 }
 

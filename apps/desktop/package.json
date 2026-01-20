@@ -13,7 +13,9 @@
     "build:electron": "tsc -p src/electron/tsconfig.json",
     "start": "electron dist/electron/main.js",
     "package": "electron-builder",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "VITEST_TARGET=desktop vitest run --config ../../config/vitest.config.ts",
+    "test:watch": "VITEST_TARGET=desktop vitest --config ../../config/vitest.config.ts"
   },
   "dependencies": {
     "@abe-stack/core": "workspace:*",

@@ -53,7 +53,7 @@ function createMockEnvironment(
     mode: 'test',
     isDev: false,
     isProd: false,
-    apiUrl: 'http://localhost:8080',
+    apiUrl: '',
     tokenRefreshInterval: 13 * 60 * 1000,
     uiVersion: '1.0.0',
   };

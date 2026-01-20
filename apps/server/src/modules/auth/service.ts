@@ -29,6 +29,7 @@ import {
   AccountLockedError,
   EmailAlreadyExistsError,
   EmailNotVerifiedError,
+  EmailSendError,
   InvalidCredentialsError,
   InvalidTokenError,
   WeakPasswordError,
@@ -137,10 +138,19 @@ export async function registerUser(
   }
   const verifyUrl = `${baseUrl}/auth/confirm-email?token=${verificationToken}`;
   const emailTemplate = emailTemplates.emailVerification(verifyUrl);
-  await emailService.send({
-    ...emailTemplate,
-    to: email,
-  });
+
+  try {
+    await emailService.send({
+      ...emailTemplate,
+      to: email,
+    });
+  } catch (error) {
+    // User was created but email failed - throw specific error so handler can handle gracefully
+    throw new EmailSendError(
+      'Failed to send verification email',
+      error instanceof Error ? error : new Error(String(error)),
+    );
+  }
 
   return {
     status: 'pending_verification',
@@ -370,10 +380,19 @@ export async function requestPasswordReset(
   // Send password reset email
   const resetUrl = `${baseUrl}/auth/reset-password?token=${plain}`;
   const emailTemplate = emailTemplates.passwordReset(resetUrl);
-  await emailService.send({
-    ...emailTemplate,
-    to: email,
-  });
+
+  try {
+    await emailService.send({
+      ...emailTemplate,
+      to: email,
+    });
+  } catch (error) {
+    // Token was created but email failed - throw specific error so handler can handle gracefully
+    throw new EmailSendError(
+      'Failed to send password reset email',
+      error instanceof Error ? error : new Error(String(error)),
+    );
+  }
 }
 
 /**
@@ -467,10 +486,19 @@ export async function resendVerificationEmail(
   // Send verification email (baseUrl is required, provided by handlers)
   const verifyUrl = `${baseUrl}/auth/confirm-email?token=${verificationToken}`;
   const emailTemplate = emailTemplates.emailVerification(verifyUrl);
-  await emailService.send({
-    ...emailTemplate,
-    to: email,
-  });
+
+  try {
+    await emailService.send({
+      ...emailTemplate,
+      to: email,
+    });
+  } catch (error) {
+    // Token was created but email failed - throw specific error so handler can handle gracefully
+    throw new EmailSendError(
+      'Failed to send verification email',
+      error instanceof Error ? error : new Error(String(error)),
+    );
+  }
 }
 
 /**

@@ -1,4 +1,11 @@
 // packages/core/src/contracts/api.ts
+/**
+ * Combined API Contract
+ *
+ * Combines all domain contracts into a single API contract.
+ * This is the main export used by clients and servers.
+ */
+
 import { initContract } from '@ts-rest/core';
 
 import { adminContract } from './admin';

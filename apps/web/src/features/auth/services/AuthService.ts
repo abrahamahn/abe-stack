@@ -108,9 +108,7 @@ export class AuthService {
     if (this.tokenStore.get()) {
       try {
         return await this.fetchCurrentUser();
-      } catch (error) {
-        // eslint-disable-next-line no-console -- Intentional warning for debugging auth failures
-        console.warn('[AuthService] Failed to fetch current user during initialization:', error);
+      } catch {
         return null;
       }
     }
@@ -123,9 +121,7 @@ export class AuthService {
       }
       // No refresh token available - user is not logged in (this is normal)
       return null;
-    } catch (error) {
-      // eslint-disable-next-line no-console -- Intentional warning for debugging auth failures
-      console.warn('[AuthService] Failed to restore session during initialization:', error);
+    } catch {
       return null;
     }
   }
@@ -186,7 +182,7 @@ export class AuthService {
     try {
       await this.api.logout();
     } catch {
-      // Ignore errors - we're logging out anyway
+      // Continue with local cleanup even if server logout fails
     }
 
     this.clearAuth();
@@ -218,7 +214,6 @@ export class AuthService {
       this.notifyListeners();
       return true;
     } catch {
-      // Refresh failed - clear auth state
       this.clearAuth();
       return false;
     }

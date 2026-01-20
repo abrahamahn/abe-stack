@@ -6,18 +6,38 @@
  * Uses the generic router pattern for DRY registration.
  */
 
-import { loginRequestSchema, registerRequestSchema } from '@abe-stack/core';
-import { publicRoute, type RouteMap, type RouteResult } from '@infra/router';
+import {
+  emailVerificationRequestSchema,
+  forgotPasswordRequestSchema,
+  loginRequestSchema,
+  registerRequestSchema,
+  resendVerificationRequestSchema,
+  resetPasswordRequestSchema,
+} from '@abe-stack/core';
+import { protectedRoute, publicRoute, type RouteMap, type RouteResult } from '@infra/router';
 
 import {
+  handleForgotPassword,
   handleLogin,
   handleLogout,
+  handleLogoutAll,
   handleRefresh,
   handleRegister,
+  handleResendVerification,
+  handleResetPassword,
+  handleVerifyEmail,
   type RegisterResult,
 } from './handlers';
 
-import type { AuthResponse, LoginRequest, RegisterRequest } from '@abe-stack/core';
+import type {
+  AuthResponse,
+  EmailVerificationRequest,
+  ForgotPasswordRequest,
+  LoginRequest,
+  RegisterRequest,
+  ResendVerificationRequest,
+  ResetPasswordRequest,
+} from '@abe-stack/core';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '@shared';
 
 // ============================================================================
@@ -73,5 +93,66 @@ export const authRoutes: RouteMap = {
     ): Promise<RouteResult<{ message: string }>> => {
       return handleLogout(ctx, req, reply);
     },
+  ),
+
+  'auth/logout-all': protectedRoute<undefined, { message: string }>(
+    'POST',
+    (
+      ctx: AppContext,
+      _body: undefined,
+      req: RequestWithCookies,
+      reply: ReplyWithCookies,
+    ): Promise<RouteResult<{ message: string }>> => {
+      return handleLogoutAll(ctx, req, reply);
+    },
+  ),
+
+  'auth/forgot-password': publicRoute<ForgotPasswordRequest, { message: string }>(
+    'POST',
+    async (
+      ctx: AppContext,
+      body: ForgotPasswordRequest,
+    ): Promise<RouteResult<{ message: string }>> => {
+      return handleForgotPassword(ctx, body);
+    },
+    forgotPasswordRequestSchema,
+  ),
+
+  'auth/reset-password': publicRoute<ResetPasswordRequest, { message: string }>(
+    'POST',
+    async (
+      ctx: AppContext,
+      body: ResetPasswordRequest,
+    ): Promise<RouteResult<{ message: string }>> => {
+      return handleResetPassword(ctx, body);
+    },
+    resetPasswordRequestSchema,
+  ),
+
+  'auth/verify-email': publicRoute<
+    EmailVerificationRequest,
+    (AuthResponse & { verified: boolean }) | { message: string }
+  >(
+    'POST',
+    async (
+      ctx: AppContext,
+      body: EmailVerificationRequest,
+      _req: RequestWithCookies,
+      reply: ReplyWithCookies,
+    ): Promise<RouteResult<(AuthResponse & { verified: boolean }) | { message: string }>> => {
+      return handleVerifyEmail(ctx, body, reply);
+    },
+    emailVerificationRequestSchema,
+  ),
+
+  'auth/resend-verification': publicRoute<ResendVerificationRequest, { message: string }>(
+    'POST',
+    async (
+      ctx: AppContext,
+      body: ResendVerificationRequest,
+    ): Promise<RouteResult<{ message: string }>> => {
+      return handleResendVerification(ctx, body);
+    },
+    resendVerificationRequestSchema,
   ),
 };
