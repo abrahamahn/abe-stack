@@ -141,4 +141,107 @@ describe('AppShell', () => {
       '--app-shell-aside-width': '15rem',
     });
   });
+
+  describe('resizable mode', () => {
+    it('renders with resizable sidebar', () => {
+      const { container } = render(
+        <AppShell sidebar={<div>Sidebar</div>} sidebarResizable>
+          Main
+        </AppShell>,
+      );
+
+      expect(screen.getByText('Sidebar')).toBeInTheDocument();
+      expect(screen.getByText('Main')).toBeInTheDocument();
+      expect(container.firstChild).toHaveClass('app-shell');
+    });
+
+    it('renders with resizable header', () => {
+      const { container } = render(
+        <AppShell header={<div>Header</div>} headerResizable>
+          Main
+        </AppShell>,
+      );
+
+      expect(screen.getByText('Header')).toBeInTheDocument();
+      expect(screen.getByText('Main')).toBeInTheDocument();
+      expect(container.firstChild).toHaveClass('app-shell--resizable');
+    });
+
+    it('renders with resizable footer', () => {
+      render(
+        <AppShell footer={<div>Footer</div>} footerResizable>
+          Main
+        </AppShell>,
+      );
+
+      expect(screen.getByText('Footer')).toBeInTheDocument();
+      expect(screen.getByText('Main')).toBeInTheDocument();
+    });
+
+    it('renders with resizable aside', () => {
+      render(
+        <AppShell aside={<div>Aside</div>} asideResizable>
+          Main
+        </AppShell>,
+      );
+
+      expect(screen.getByText('Aside')).toBeInTheDocument();
+      expect(screen.getByText('Main')).toBeInTheDocument();
+    });
+
+    it('supports both vertical and horizontal resizing', () => {
+      const { container } = render(
+        <AppShell
+          header={<div>Header</div>}
+          sidebar={<div>Sidebar</div>}
+          aside={<div>Aside</div>}
+          footer={<div>Footer</div>}
+          headerResizable
+          sidebarResizable
+          asideResizable
+          footerResizable
+        >
+          Main
+        </AppShell>,
+      );
+
+      expect(screen.getByText('Header')).toBeInTheDocument();
+      expect(screen.getByText('Sidebar')).toBeInTheDocument();
+      expect(screen.getByText('Aside')).toBeInTheDocument();
+      expect(screen.getByText('Footer')).toBeInTheDocument();
+      expect(screen.getByText('Main')).toBeInTheDocument();
+      expect(container.firstChild).toHaveClass('app-shell--resizable');
+    });
+
+    it('does not render collapsed panels in resizable mode', () => {
+      render(
+        <AppShell
+          header={<div>Header</div>}
+          sidebar={<div>Sidebar</div>}
+          headerResizable
+          sidebarResizable
+          headerCollapsed
+          sidebarCollapsed
+        >
+          Main
+        </AppShell>,
+      );
+
+      expect(screen.queryByText('Header')).not.toBeInTheDocument();
+      expect(screen.queryByText('Sidebar')).not.toBeInTheDocument();
+      expect(screen.getByText('Main')).toBeInTheDocument();
+    });
+
+    it('only renders horizontal resizing without vertical', () => {
+      render(
+        <AppShell header={<div>Header</div>} sidebar={<div>Sidebar</div>} sidebarResizable>
+          Main
+        </AppShell>,
+      );
+
+      expect(screen.getByText('Header')).toBeInTheDocument();
+      expect(screen.getByText('Sidebar')).toBeInTheDocument();
+      expect(screen.getByText('Main')).toBeInTheDocument();
+    });
+  });
 });

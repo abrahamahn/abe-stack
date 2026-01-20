@@ -162,4 +162,32 @@ describe('useHistoryNav', () => {
       }).not.toThrow();
     });
   });
+
+  describe('history index tracking', () => {
+    it('should start with index 0 after initial location', () => {
+      render(
+        <MemoryRouter initialEntries={['/home']}>
+          <HistoryProvider>
+            <HistoryDisplay />
+          </HistoryProvider>
+        </MemoryRouter>,
+      );
+
+      expect(screen.getByTestId('history-index').textContent).toBe('0');
+    });
+
+    it('should correctly report history entries', () => {
+      render(
+        <MemoryRouter initialEntries={['/page1']}>
+          <HistoryProvider>
+            <HistoryDisplay />
+            <LocationDisplay />
+          </HistoryProvider>
+        </MemoryRouter>,
+      );
+
+      expect(screen.getByTestId('history-length').textContent).toBe('1');
+      expect(screen.getByTestId('location').textContent).toBe('/page1');
+    });
+  });
 });

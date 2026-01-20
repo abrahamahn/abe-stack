@@ -74,4 +74,35 @@ describe('Checkbox', () => {
     expect(indicator).toHaveAttribute('data-checked', 'true');
     expect(indicator).toHaveTextContent('✓');
   });
+
+  it('toggles on Space key press', async () => {
+    const onChange = vi.fn();
+    const user = userEvent.setup();
+    render(<Checkbox onChange={onChange} />);
+
+    const checkbox = screen.getByRole('checkbox');
+    checkbox.focus();
+    await user.keyboard(' ');
+
+    expect(onChange).toHaveBeenCalledWith(true);
+  });
+
+  it('toggles on Enter key press', async () => {
+    const onChange = vi.fn();
+    const user = userEvent.setup();
+    render(<Checkbox onChange={onChange} />);
+
+    const checkbox = screen.getByRole('checkbox');
+    checkbox.focus();
+    await user.keyboard('{Enter}');
+
+    expect(onChange).toHaveBeenCalledWith(true);
+  });
+
+  it('renders without label when not provided', () => {
+    render(<Checkbox />);
+
+    expect(screen.getByRole('checkbox')).toBeInTheDocument();
+    expect(document.querySelector('.checkbox-label')).not.toBeInTheDocument();
+  });
 });
