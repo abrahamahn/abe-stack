@@ -139,10 +139,10 @@ export const baseConfig = defineConfig({
       exclude: coverageExclude,
       thresholds: {
         global: {
-          branches: 70,
-          functions: 70,
-          lines: 70,
-          statements: 70,
+          branches: 95,
+          functions: 95,
+          lines: 95,
+          statements: 95,
         },
       },
     },
@@ -191,53 +191,49 @@ export const webConfig = mergeConfig(
   }),
 );
 
-export const coreConfig = defineConfig({
-  resolve: {
-    alias: getCoreAliases(),
-  },
-  test: {
-    globals: true,
-    environment: 'node',
-    include: ['src/**/*.{test,spec}.ts'],
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json'],
+export const coreConfig = mergeConfig(
+  baseConfig,
+  defineConfig({
+    resolve: {
+      alias: getCoreAliases(),
     },
-  },
-});
+    test: {
+      include: ['src/**/*.{test,spec}.ts'],
+    },
+  }),
+);
 
-export const sdkConfig = defineConfig({
-  resolve: {
-    alias: {
-      '@abe-stack/core': packageAliases['@abe-stack/core'],
-      ...getCoreAliases(),
-      ...getSdkAliases(),
+export const sdkConfig = mergeConfig(
+  baseConfig,
+  defineConfig({
+    resolve: {
+      alias: {
+        '@abe-stack/core': packageAliases['@abe-stack/core'],
+        ...getCoreAliases(),
+        ...getSdkAliases(),
+      },
     },
-  },
-  test: {
-    globals: true,
-    environment: 'node',
-    include: ['src/**/*.{test,spec}.ts'],
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json'],
+    test: {
+      include: ['src/**/*.{test,spec}.ts'],
     },
-  },
-});
+  }),
+);
 
-export const uiConfig = defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: getUiAliases(),
-  },
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: [`${uiRoot}/src/test/setup.ts`],
-    include: ['src/**/*.{test,spec}.{js,ts,tsx}'],
-    exclude: ['**/node_modules/**', '**/dist/**', '**/build/**'],
-  },
-});
+export const uiConfig = mergeConfig(
+  baseConfig,
+  defineConfig({
+    plugins: [react()],
+    resolve: {
+      alias: getUiAliases(),
+    },
+    test: {
+      environment: 'jsdom',
+      setupFiles: [`${uiRoot}/src/test/setup.ts`],
+      include: ['src/**/*.{test,spec}.{js,ts,tsx}'],
+      exclude: ['**/node_modules/**', '**/dist/**', '**/build/**'],
+    },
+  }),
+);
 
 const configMap = {
   base: baseConfig,
