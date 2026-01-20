@@ -221,36 +221,67 @@ describe('main', () => {
 
       // Trigger ready to create a window
       const readyCall = mocks.mockAppOn.mock.calls.find((call) => call[0] === 'ready');
-      const readyCallback = readyCall![1] as () => Promise<void>;
-      await readyCallback();
+      const readyCallback = readyCall![1] as () => void;
+      readyCallback();
+
+      // Wait for the async createWindow to complete and register the closed callback
+      await vi.waitFor(() => {
+        const closedCall = mocks.mockWindowOn.mock.calls.find((call) => call[0] === 'closed');
+        expect(closedCall).toBeDefined();
+      });
 
       // Simulate window close by calling the closed callback
       const closedCall = mocks.mockWindowOn.mock.calls.find((call) => call[0] === 'closed');
+      const closedCallback = closedCall![1] as () => void;
+      closedCallback();
 
-      // The closed callback should have been registered
-      if (closedCall) {
-        const closedCallback = closedCall[1];
-        closedCallback();
+      // Clear load URL mock to track new calls
+      mocks.mockLoadURL.mockClear();
 
-        // Clear load URL mock to track new calls
-        mocks.mockLoadURL.mockClear();
+      // Trigger activate
+      const activateCall = mocks.mockAppOn.mock.calls.find((call) => call[0] === 'activate') as
+        | [string, unknown]
+        | undefined;
+      expect(activateCall).toBeDefined();
+      const activateCallback = activateCall![1] as () => void;
+      activateCallback();
 
-        // Trigger activate
-        const activateCall = mocks.mockAppOn.mock.calls.find((call) => call[0] === 'activate') as
-          | [string, unknown]
-          | undefined;
-        const activateCallback = activateCall![1] as () => Promise<void>;
-        await activateCallback();
-
-        // Should have created a new window and loaded URL
+      // Wait for the new window to be created
+      await vi.waitFor(() => {
         expect(mocks.mockLoadURL).toHaveBeenCalled();
-      } else {
-        // If closed callback wasn't found, at least verify activate handler was registered
-        const activateCall = mocks.mockAppOn.mock.calls.find((call) => call[0] === 'activate') as
-          | [string, unknown]
-          | undefined;
-        expect(activateCall).toBeDefined();
-      }
+      });
+    });
+
+    it('should not create window on activate if window already exists', async () => {
+      vi.resetModules();
+      await import('../main');
+
+      // Trigger ready to create a window
+      const readyCall = mocks.mockAppOn.mock.calls.find((call) => call[0] === 'ready');
+      const readyCallback = readyCall![1] as () => void;
+      readyCallback();
+
+      // Wait for the async createWindow to complete
+      await vi.waitFor(() => {
+        expect(mocks.mockLoadURL).toHaveBeenCalled();
+      });
+
+      // Clear load URL mock to track new calls
+      mocks.mockLoadURL.mockClear();
+
+      // Trigger activate without closing the window first
+      const activateCall = mocks.mockAppOn.mock.calls.find((call) => call[0] === 'activate') as
+        | [string, unknown]
+        | undefined;
+      expect(activateCall).toBeDefined();
+      const activateCallback = activateCall![1] as () => void;
+      activateCallback();
+
+      // Give a small delay to ensure any async operations complete
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // Should NOT have created a new window since mainWindow is not null
+      expect(mocks.mockLoadURL).not.toHaveBeenCalled();
     });
   });
 
