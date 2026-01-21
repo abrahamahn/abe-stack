@@ -99,27 +99,28 @@ describe('useFormState', () => {
   describe('wrapHandler', () => {
     it('should set loading state during handler execution', async () => {
       const { result } = renderHook(() => useFormState());
-      const handler = vi
-        .fn()
-        .mockImplementation(
-          () => new Promise((resolve) => setTimeout(() => resolve('success'), 10)),
-        );
+      let resolveHandler: (value: string) => void;
+      const handler = vi.fn().mockImplementation(
+        () =>
+          new Promise<string>((resolve) => {
+            resolveHandler = resolve;
+          }),
+      );
 
       const wrappedHandler = result.current.wrapHandler(handler);
 
-      // Start the handler execution
-      const executionPromise = wrappedHandler({ test: 'data' });
-
-      // Check loading state is set to true during execution
-      await act(async () => {
-        // Wait for next tick to allow state update
-        await new Promise((resolve) => setTimeout(resolve, 0));
+      // Start the handler execution (don't await)
+      let executionPromise: Promise<unknown>;
+      act(() => {
+        executionPromise = wrappedHandler({ test: 'data' });
       });
 
+      // Loading state should be true while handler is pending
       expect(result.current.isLoading).toBe(true);
 
-      // Wait for completion
+      // Complete the handler
       await act(async () => {
+        resolveHandler('success');
         await executionPromise;
       });
 
