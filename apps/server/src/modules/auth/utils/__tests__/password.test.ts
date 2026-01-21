@@ -1,7 +1,15 @@
 // apps/server/src/modules/auth/utils/__tests__/password.test.ts
-import { describe, expect, test } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
-import { hashPassword, needsRehash, verifyPassword, verifyPasswordSafe } from '../password';
+import {
+  hashPassword,
+  initDummyHashPool,
+  isDummyHashPoolInitialized,
+  needsRehash,
+  resetDummyHashPool,
+  verifyPassword,
+  verifyPasswordSafe,
+} from '../password';
 
 describe('Password Module (Argon2id)', () => {
   describe('hashPassword', () => {
@@ -187,6 +195,73 @@ describe('Password Module (Argon2id)', () => {
       // Check that hash contains high memory cost (m=19456 = ~19MB)
       // Argon2 format: $argon2id$v=19$m=19456,t=2,p=1$...
       expect(hash).toMatch(/\$m=19456,t=2,p=1\$/);
+    });
+  });
+
+  describe('Dummy Hash Pool', () => {
+    beforeEach(() => {
+      resetDummyHashPool();
+    });
+
+    afterEach(() => {
+      resetDummyHashPool();
+    });
+
+    test('should initialize pool with 10 hashes', async () => {
+      expect(isDummyHashPoolInitialized()).toBe(false);
+
+      await initDummyHashPool();
+
+      expect(isDummyHashPoolInitialized()).toBe(true);
+    });
+
+    test('should not reinitialize if already initialized', async () => {
+      await initDummyHashPool();
+      const firstCheck = isDummyHashPoolInitialized();
+
+      // Second call should be a no-op
+      await initDummyHashPool();
+      const secondCheck = isDummyHashPoolInitialized();
+
+      expect(firstCheck).toBe(true);
+      expect(secondCheck).toBe(true);
+    });
+
+    test('reset should clear pool state', async () => {
+      await initDummyHashPool();
+      expect(isDummyHashPoolInitialized()).toBe(true);
+
+      resetDummyHashPool();
+
+      expect(isDummyHashPoolInitialized()).toBe(false);
+    });
+
+    test('verifyPasswordSafe should work with initialized pool', async () => {
+      await initDummyHashPool();
+
+      const isValid = await verifyPasswordSafe('test', null);
+
+      expect(isValid).toBe(false);
+    });
+
+    test('verifyPasswordSafe should work without initialized pool (fallback)', async () => {
+      // Pool not initialized - should use fallback hash generation
+      const isValid = await verifyPasswordSafe('test', null);
+
+      expect(isValid).toBe(false);
+    });
+
+    test('pool uses different hashes for timing variation', async () => {
+      await initDummyHashPool();
+
+      // Run multiple times - should use random hashes from pool
+      const results: boolean[] = [];
+      for (let i = 0; i < 5; i++) {
+        results.push(await verifyPasswordSafe('test', null));
+      }
+
+      // All should return false (no match)
+      expect(results.every((r) => r === false)).toBe(true);
     });
   });
 });

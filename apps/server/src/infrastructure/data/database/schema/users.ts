@@ -39,6 +39,10 @@ export const refreshTokens = pgTable(
   (table) => [
     index('refresh_tokens_user_id_idx').on(table.userId),
     index('refresh_tokens_family_id_idx').on(table.familyId),
+    // Composite index for efficient token validation queries:
+    // Used by rotateRefreshToken() to find valid tokens by token string and check expiry
+    // Query pattern: WHERE token = $1 AND expires_at > NOW()
+    index('refresh_tokens_token_expires_at_idx').on(table.token, table.expiresAt),
   ],
 );
 

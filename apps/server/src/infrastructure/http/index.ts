@@ -55,6 +55,21 @@ export {
   type StaticServeOptions,
 } from './middleware';
 
+// Middleware - Proxy Validation
+export {
+  getValidatedClientIp,
+  ipMatchesCidr,
+  isFromTrustedProxy,
+  isValidIp,
+  isValidIpv4,
+  isValidIpv6,
+  parseCidr,
+  parseXForwardedFor,
+  validateCidrList,
+  type ForwardedInfo,
+  type ProxyValidationConfig,
+} from './middleware';
+
 // Router
 export {
   protectedRoute,

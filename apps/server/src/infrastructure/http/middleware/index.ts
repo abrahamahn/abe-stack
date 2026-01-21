@@ -38,3 +38,16 @@ export {
 } from './security';
 export { registerStaticServe, type StaticServeOptions } from './static';
 export { registerRequestInfoHook, type RequestInfo } from './requestInfo';
+export {
+  getValidatedClientIp,
+  ipMatchesCidr,
+  isFromTrustedProxy,
+  isValidIp,
+  isValidIpv4,
+  isValidIpv6,
+  parseCidr,
+  parseXForwardedFor,
+  validateCidrList,
+  type ForwardedInfo,
+  type ProxyValidationConfig,
+} from './proxyValidation';

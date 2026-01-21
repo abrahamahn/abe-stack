@@ -80,25 +80,80 @@ export function needsRehash(hash: string, config: Argon2Config = DEFAULT_ARGON2_
 }
 
 // ============================================================================
-// Timing-Safe Verification
+// Timing-Safe Verification with Dummy Hash Pool
 // ============================================================================
 
 /**
- * Dummy hash for timing attack prevention
- * When user doesn't exist, we hash against this to maintain constant time
+ * Pool of pre-computed dummy hashes for timing attack prevention
+ * Using a pool with random selection prevents attackers from detecting
+ * patterns in timing when the user doesn't exist.
  */
-const DUMMY_HASH =
-  '$argon2id$v=19$m=19456,t=2,p=1$dW5yZWFjaGFibGVkdW1teWhhc2g$N8Z0V0V0V0V0V0V0V0V0V0V0V0V0V0V0V0V0V0';
+const DUMMY_HASH_POOL_SIZE = 10;
+let dummyHashPool: string[] = [];
+let poolInitialized = false;
+
+/**
+ * Initialize the dummy hash pool with pre-computed Argon2id hashes
+ * Should be called at server startup for optimal performance
+ */
+export async function initDummyHashPool(
+  config: Argon2Config = DEFAULT_ARGON2_CONFIG,
+): Promise<void> {
+  if (poolInitialized && dummyHashPool.length === DUMMY_HASH_POOL_SIZE) {
+    return;
+  }
+
+  const hashPromises: Promise<string>[] = [];
+  for (let i = 0; i < DUMMY_HASH_POOL_SIZE; i++) {
+    // Use unique dummy passwords to ensure different salts/hashes
+    const dummyPassword = `dummy_password_${i}_${Date.now()}_${Math.random()}`;
+    hashPromises.push(hashPassword(dummyPassword, config));
+  }
+
+  dummyHashPool = await Promise.all(hashPromises);
+  poolInitialized = true;
+}
+
+/**
+ * Get a random dummy hash from the pool
+ * Falls back to generating one on-the-fly if pool not initialized
+ */
+async function getRandomDummyHash(config: Argon2Config = DEFAULT_ARGON2_CONFIG): Promise<string> {
+  if (dummyHashPool.length > 0) {
+    const randomIndex = Math.floor(Math.random() * dummyHashPool.length);
+    return dummyHashPool[randomIndex] as string;
+  }
+
+  // Fallback: generate hash on-the-fly (less optimal but secure)
+  return hashPassword(`fallback_dummy_${Date.now()}`, config);
+}
+
+/**
+ * Check if the dummy hash pool has been initialized
+ * Useful for health checks and startup verification
+ */
+export function isDummyHashPoolInitialized(): boolean {
+  return poolInitialized && dummyHashPool.length === DUMMY_HASH_POOL_SIZE;
+}
+
+/**
+ * Reset the dummy hash pool (primarily for testing)
+ */
+export function resetDummyHashPool(): void {
+  dummyHashPool = [];
+  poolInitialized = false;
+}
 
 /**
  * Verify password with timing attack protection
  * Always performs hash verification even if user doesn't exist
+ * Uses random hash from pool to prevent timing analysis patterns
  */
 export async function verifyPasswordSafe(
   password: string,
   hash: string | null | undefined,
 ): Promise<boolean> {
-  const hashToVerify = hash || DUMMY_HASH;
+  const hashToVerify = hash || (await getRandomDummyHash());
   const isValid = await verifyPassword(password, hashToVerify);
   return hash ? isValid : false;
 }

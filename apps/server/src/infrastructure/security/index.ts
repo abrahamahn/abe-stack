@@ -20,6 +20,16 @@ export {
   type JwtSignOptions,
 } from './crypto';
 
+// JWT Rotation Support
+export {
+  checkTokenSecret,
+  createJwtRotationHandler,
+  signWithRotation,
+  verifyWithRotation,
+  type JwtRotationConfig,
+  type RotatingJwtOptions,
+} from './crypto';
+
 // Permissions
 export {
   allowed,

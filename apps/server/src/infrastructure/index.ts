@@ -32,6 +32,8 @@ export {
   // Schema - Auth
   refreshTokenFamilies,
   refreshTokens,
+  // Schema - Magic Link
+  magicLinkTokens,
   // Schema validation
   REQUIRED_TABLES,
   requireValidSchema,
@@ -64,6 +66,15 @@ export {
   type User,
   // Types
   type UserRole,
+  type MagicLinkToken,
+  type NewMagicLinkToken,
+  // Schema - OAuth
+  oauthConnections,
+  oauthProviderEnum,
+  OAUTH_PROVIDERS,
+  type OAuthConnection,
+  type NewOAuthConnection,
+  type OAuthProvider,
 } from './data/database';
 
 // Storage
@@ -137,6 +148,21 @@ export {
 // HTTP (Security headers, CORS)
 export { applyCors, applySecurityHeaders, handlePreflight, type CorsOptions } from './http';
 
+// Proxy Validation (IP address validation with CIDR support)
+export {
+  getValidatedClientIp,
+  ipMatchesCidr,
+  isFromTrustedProxy,
+  isValidIp,
+  isValidIpv4,
+  isValidIpv6,
+  parseCidr,
+  parseXForwardedFor,
+  validateCidrList,
+  type ForwardedInfo,
+  type ProxyValidationConfig,
+} from './http/middleware';
+
 // WebSocket
 export { getWebSocketStats, registerWebSocket, type WebSocketStats } from './messaging/websocket';
 
@@ -162,6 +188,13 @@ export {
   type JwtHeader,
   type JwtPayload,
   type JwtSignOptions,
+  // JWT Rotation Support
+  checkTokenSecret,
+  createJwtRotationHandler,
+  signWithRotation,
+  verifyWithRotation,
+  type JwtRotationConfig,
+  type RotatingJwtOptions,
 } from './security/crypto';
 
 // Health Checks
@@ -237,6 +270,19 @@ export {
   type WriteResult,
   type WriteServiceOptions,
 } from './jobs/write';
+
+// Scheduled Jobs (Cleanup, Maintenance)
+export {
+  cleanupOldLoginAttempts,
+  countOldLoginAttempts,
+  getLoginAttemptStats,
+  getTotalLoginAttemptCount,
+  DEFAULT_RETENTION_DAYS,
+  MIN_RETENTION_DAYS,
+  MAX_BATCH_SIZE,
+  type CleanupOptions,
+  type CleanupResult,
+} from './jobs/scheduled';
 
 // Router (Generic Route Registration)
 export {
@@ -316,3 +362,57 @@ export {
 
 // Media (Processing)
 export { createServerMediaQueue, ServerMediaQueue, type MediaJobData } from './media';
+
+// Notifications (Push)
+export {
+  createFcmProvider,
+  createNotificationService,
+  createNotificationServiceFromEnv,
+  createWebPushProvider,
+  FcmProvider,
+  getNotificationService,
+  resetNotificationService,
+  WebPushProvider,
+  type FcmConfig,
+  type NotificationFactoryOptions,
+  type NotificationService,
+  type ProviderConfig,
+  type PushNotificationProvider,
+  type SendOptions,
+  type SubscriptionWithId,
+  type VapidConfig,
+} from './notifications';
+
+// Cache
+export {
+  createCache,
+  createCacheFromEnv,
+  createMemoryCache,
+  createRedisCache,
+  MemoryCacheProvider,
+  memoize,
+  memoizeMethod,
+  RedisCacheProvider,
+  type BaseCacheConfig,
+  type CacheConfig,
+  type CacheDeleteOptions,
+  type CacheEntry,
+  type CacheEntryMetadata,
+  type CacheGetOptions,
+  type CacheLogger,
+  type CacheOperationResult,
+  type CacheProvider,
+  type CacheProviderType,
+  type CacheSetOptions,
+  type CacheStats,
+  type CreateCacheOptions,
+  type EvictionReason,
+  type LRUNode,
+  type MemoizedFunction,
+  type MemoizeOptions,
+  type MemoizeStats,
+  type MemoryCacheConfig,
+  type RedisCacheConfig,
+  type RedisClient,
+  type RedisClientFactory,
+} from './cache';

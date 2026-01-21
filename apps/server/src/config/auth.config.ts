@@ -26,6 +26,8 @@ export interface AuthConfig {
   // JWT settings
   jwt: {
     secret: string;
+    /** Previous secret for rotation support - tokens signed with this are still accepted */
+    previousSecret?: string;
     accessTokenExpiry: string | number;
     issuer: string;
     audience: string;
@@ -136,6 +138,7 @@ export function loadAuthConfig(env: Record<string, string | undefined>): AuthCon
 
     jwt: {
       secret: env.JWT_SECRET || '',
+      previousSecret: env.JWT_SECRET_PREVIOUS || undefined,
       accessTokenExpiry: env.ACCESS_TOKEN_EXPIRY || '15m',
       issuer: env.JWT_ISSUER || 'abe-stack',
       audience: env.JWT_AUDIENCE || 'abe-stack-api',
@@ -252,6 +255,141 @@ export function loadAuthConfig(env: Record<string, string | undefined>): AuthCon
 // Helper to check if a strategy is enabled
 export function isStrategyEnabled(config: AuthConfig, strategy: AuthStrategy): boolean {
   return config.strategies.includes(strategy);
+}
+
+// ============================================================================
+// Configuration Validation
+// ============================================================================
+
+/**
+ * Common weak secrets that should never be used in production
+ */
+const WEAK_SECRETS = new Set([
+  'secret',
+  'password',
+  'jwt_secret',
+  'jwt-secret',
+  'jwtsecret',
+  'my_secret',
+  'my-secret',
+  'mysecret',
+  'changeme',
+  'change-me',
+  'change_me',
+  'test',
+  'testing',
+  'development',
+  'dev',
+  'prod',
+  'production',
+  'default',
+  'example',
+  'sample',
+  '12345678901234567890123456789012', // 32 character numeric pattern
+  'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', // 32 character repeated pattern
+]);
+
+/**
+ * Error thrown when auth configuration validation fails
+ */
+export class AuthConfigValidationError extends Error {
+  constructor(
+    message: string,
+    public readonly field: string,
+  ) {
+    super(message);
+    this.name = 'AuthConfigValidationError';
+  }
+}
+
+/**
+ * Validates auth configuration at startup
+ *
+ * Throws AuthConfigValidationError with descriptive messages for:
+ * - JWT secret too short (< 32 chars)
+ * - JWT secret is a common weak value
+ * - Cookie secret too short if set (< 32 chars)
+ * - Lockout max attempts out of range (must be 3-20)
+ * - Lockout duration too short (< 60000ms / 1 minute)
+ * - Refresh token expiry out of range (must be 1-30 days)
+ * - Password min length too short (< 8)
+ *
+ * @param config - The auth configuration to validate
+ * @throws AuthConfigValidationError if validation fails
+ */
+export function validateAuthConfig(config: AuthConfig): void {
+  // Validate JWT secret length
+  if (config.jwt.secret.length < 32) {
+    throw new AuthConfigValidationError(
+      `JWT secret must be at least 32 characters long (current: ${config.jwt.secret.length} characters). ` +
+        'Use a cryptographically secure random string for production.',
+      'jwt.secret',
+    );
+  }
+
+  // Validate JWT secret is not a weak value
+  const normalizedSecret = config.jwt.secret.toLowerCase().trim();
+  if (WEAK_SECRETS.has(normalizedSecret)) {
+    throw new AuthConfigValidationError(
+      'JWT secret is a common weak value and must not be used. ' +
+        'Use a cryptographically secure random string for production.',
+      'jwt.secret',
+    );
+  }
+
+  // Check for repeating character patterns (e.g., "aaaa..." or "1111...")
+  if (/^(.)\1{31,}$/.test(config.jwt.secret)) {
+    throw new AuthConfigValidationError(
+      'JWT secret contains a repeating character pattern and is not secure. ' +
+        'Use a cryptographically secure random string for production.',
+      'jwt.secret',
+    );
+  }
+
+  // Validate cookie secret if set (not empty)
+  if (config.cookie.secret && config.cookie.secret.length > 0 && config.cookie.secret.length < 32) {
+    throw new AuthConfigValidationError(
+      `Cookie secret must be at least 32 characters long if set (current: ${config.cookie.secret.length} characters). ` +
+        'Use a cryptographically secure random string for production.',
+      'cookie.secret',
+    );
+  }
+
+  // Validate lockout max attempts (3-20)
+  if (config.lockout.maxAttempts < 3 || config.lockout.maxAttempts > 20) {
+    throw new AuthConfigValidationError(
+      `Lockout max attempts must be between 3 and 20 (current: ${config.lockout.maxAttempts}). ` +
+        'Too few attempts frustrate users; too many allow brute force attacks.',
+      'lockout.maxAttempts',
+    );
+  }
+
+  // Validate lockout duration (>= 60000ms / 1 minute)
+  if (config.lockout.lockoutDurationMs < 60000) {
+    throw new AuthConfigValidationError(
+      `Lockout duration must be at least 60000ms (1 minute) (current: ${config.lockout.lockoutDurationMs}ms). ` +
+        'Short lockout durations do not effectively prevent brute force attacks.',
+      'lockout.lockoutDurationMs',
+    );
+  }
+
+  // Validate refresh token expiry (1-30 days)
+  if (config.refreshToken.expiryDays < 1 || config.refreshToken.expiryDays > 30) {
+    throw new AuthConfigValidationError(
+      `Refresh token expiry must be between 1 and 30 days (current: ${config.refreshToken.expiryDays} days). ` +
+        'Shorter expiry improves security; longer expiry improves user experience.',
+      'refreshToken.expiryDays',
+    );
+  }
+
+  // Validate password min length (>= 8)
+  if (config.password.minLength < 8) {
+    throw new AuthConfigValidationError(
+      `Password minimum length must be at least 8 characters (current: ${config.password.minLength}). ` +
+        'NIST guidelines recommend a minimum of 8 characters for user-chosen passwords.',
+      'password.minLength',
+    );
+  }
 }
 
 // Helper to get cookie options for refresh token

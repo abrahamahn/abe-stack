@@ -14,7 +14,12 @@ export type { AppConfig } from './types';
 
 // Auth config
 export type { AuthConfig, AuthStrategy, OAuthProviderConfig } from './auth.config';
-export { isStrategyEnabled, getRefreshCookieOptions } from './auth.config';
+export {
+  isStrategyEnabled,
+  getRefreshCookieOptions,
+  validateAuthConfig,
+  AuthConfigValidationError,
+} from './auth.config';
 
 // Database config
 export type { DatabaseConfig } from './database.config';

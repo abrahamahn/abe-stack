@@ -41,3 +41,16 @@ export {
   type WriteResult,
   type WriteServiceOptions,
 } from './write';
+
+// Scheduled Jobs
+export {
+  cleanupOldLoginAttempts,
+  countOldLoginAttempts,
+  getLoginAttemptStats,
+  getTotalLoginAttemptCount,
+  DEFAULT_RETENTION_DAYS,
+  MIN_RETENTION_DAYS,
+  MAX_BATCH_SIZE,
+  type CleanupOptions,
+  type CleanupResult,
+} from './scheduled';

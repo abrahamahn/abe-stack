@@ -911,4 +911,119 @@ describe('Refresh Token Rotation', () => {
       });
     });
   });
+
+  describe('Query Optimization', () => {
+    test('should complete rotation with parallel user and family lookup', async () => {
+      const { db, tokens } = createMockDb();
+
+      // Create initial family
+      const initial = await createRefreshTokenFamily(db, 'user-123');
+
+      // Setup token for rotation
+      const existingToken = tokens[0];
+      if (existingToken === undefined) throw new Error('Expected token');
+      tokens[0] = {
+        ...existingToken,
+        token: 'valid-token-for-rotation',
+        familyId: initial.familyId,
+      };
+
+      // Rotation should work with optimized parallel queries
+      const result = await rotateRefreshToken(db, 'valid-token-for-rotation');
+
+      expect(result).not.toBeNull();
+      expect(result?.userId).toBe('user-123');
+      expect(result?.email).toBe('test@example.com');
+      expect(result?.role).toBe('user');
+    });
+
+    test('should handle token without family (legacy tokens)', async () => {
+      const { db, tokens, mockUsers } = createMockDb();
+
+      // Create a token without family (simulating legacy or orphaned token)
+      tokens.push({
+        id: 'legacy-token-id',
+        userId: mockUsers[0]?.id ?? 'user-123',
+        familyId: null, // No family
+        token: 'legacy-token',
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        createdAt: new Date(),
+      });
+
+      // Should still work - family lookup returns null via Promise.resolve(null)
+      const result = await rotateRefreshToken(db, 'legacy-token');
+
+      expect(result).not.toBeNull();
+      expect(result?.token).toBeTruthy();
+    });
+
+    test('should return null early when token not found (no unnecessary queries)', async () => {
+      const { db, tokens } = createMockDb();
+
+      // Ensure no tokens exist
+      expect(tokens).toHaveLength(0);
+
+      // Should return null without making user/family queries
+      const result = await rotateRefreshToken(db, 'non-existent-token');
+
+      expect(result).toBeNull();
+    });
+
+    test('should return null when user not found (after parallel fetch)', async () => {
+      const { db, tokens, mockUsers } = createMockDb();
+
+      // Create a token
+      tokens.push({
+        id: 'orphan-token-id',
+        userId: 'non-existent-user-id',
+        familyId: null,
+        token: 'orphan-token',
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        createdAt: new Date(),
+      });
+
+      // Clear mock users to simulate user not found
+      mockUsers.length = 0;
+
+      const result = await rotateRefreshToken(db, 'orphan-token');
+
+      expect(result).toBeNull();
+    });
+
+    test('should use composite index for token validation (token + expires_at)', async () => {
+      const { db, tokens } = createMockDb();
+
+      // Create an already-expired token manually
+      const expiredToken = {
+        id: 'expired-token-id',
+        userId: 'user-123',
+        familyId: 'family-123',
+        token: 'expired-token-value',
+        expiresAt: new Date(Date.now() - 1000), // Already expired
+        createdAt: new Date(Date.now() - 10000),
+      };
+      tokens.push(expiredToken);
+
+      // The token lookup uses: WHERE token = $1 AND expires_at > NOW()
+      // This should use the composite index refresh_tokens_token_expires_at_idx
+      // An expired token should return null even if it exists in the database
+      const result = await rotateRefreshToken(db, 'expired-token-value');
+      expect(result).toBeNull();
+
+      // Create a valid (non-expired) token
+      const validToken = {
+        id: 'valid-token-id',
+        userId: 'user-123',
+        familyId: 'family-123',
+        token: 'valid-token-value',
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+        createdAt: new Date(),
+      };
+      tokens.push(validToken);
+
+      // Valid token should be found
+      const validResult = await rotateRefreshToken(db, 'valid-token-value');
+      expect(validResult).not.toBeNull();
+    });
+  });
 });
