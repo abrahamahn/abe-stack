@@ -1,7 +1,7 @@
 // apps/server/src/modules/auth/utils/__tests__/password.test.ts
 import { describe, expect, test } from 'vitest';
 
-import { hashPassword, needsRehash, verifyPassword } from '../password';
+import { hashPassword, needsRehash, verifyPassword, verifyPasswordSafe } from '../password';
 
 describe('Password Module (Argon2id)', () => {
   describe('hashPassword', () => {
@@ -102,6 +102,65 @@ describe('Password Module (Argon2id)', () => {
 
       // Should recommend rehash if memory cost is too low
       expect(shouldRehash).toBe(true);
+    });
+  });
+
+  describe('verifyPasswordSafe', () => {
+    test('should verify correct password with valid hash', async () => {
+      const password = 'CorrectPassword123!';
+      const hash = await hashPassword(password);
+
+      const isValid = await verifyPasswordSafe(password, hash);
+
+      expect(isValid).toBe(true);
+    });
+
+    test('should reject incorrect password with valid hash', async () => {
+      const password = 'CorrectPassword123!';
+      const hash = await hashPassword(password);
+
+      const isValid = await verifyPasswordSafe('WrongPassword123!', hash);
+
+      expect(isValid).toBe(false);
+    });
+
+    test('should return false when hash is null', async () => {
+      const isValid = await verifyPasswordSafe('AnyPassword123!', null);
+
+      expect(isValid).toBe(false);
+    });
+
+    test('should return false when hash is undefined', async () => {
+      const isValid = await verifyPasswordSafe('AnyPassword123!', undefined);
+
+      expect(isValid).toBe(false);
+    });
+
+    test('should return false when hash is empty string', async () => {
+      const isValid = await verifyPasswordSafe('AnyPassword123!', '');
+
+      expect(isValid).toBe(false);
+    });
+
+    test('should maintain constant time even with null hash (timing attack prevention)', async () => {
+      // This test verifies the function runs even when hash is null
+      // The timing should be similar whether hash exists or not
+      const password = 'AnyPassword123!';
+      const hash = await hashPassword(password);
+
+      const startWithHash = Date.now();
+      await verifyPasswordSafe(password, hash);
+      const timeWithHash = Date.now() - startWithHash;
+
+      const startWithoutHash = Date.now();
+      await verifyPasswordSafe(password, null);
+      const timeWithoutHash = Date.now() - startWithoutHash;
+
+      // Both should take similar time (within reasonable margin)
+      // The key is that null hash still does work (hashes against dummy)
+      expect(timeWithoutHash).toBeGreaterThan(0);
+      // Allow 3x margin since the operations might vary
+      expect(Math.abs(timeWithHash - timeWithoutHash)).toBeLessThan(timeWithHash * 3);
     });
   });
 

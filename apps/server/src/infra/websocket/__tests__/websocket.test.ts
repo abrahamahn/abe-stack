@@ -449,4 +449,181 @@ describe('WebSocket Module', () => {
       expect(mockWs.close).toHaveBeenCalledWith(1008, 'Invalid token');
     });
   });
+
+  describe('WebSocket CSRF validation', () => {
+    test('should reject upgrade with invalid CSRF token', async () => {
+      // Re-mock csrf validation to return false
+      vi.doMock('../../http/csrf.js', () => ({
+        validateCsrfToken: vi.fn(() => false),
+      }));
+
+      const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
+
+      const mockHttpServer = new EventEmitter();
+      const mockServer = {
+        server: mockHttpServer,
+      };
+
+      const mockCtx = {
+        log: {
+          debug: vi.fn(),
+          error: vi.fn(),
+          warn: vi.fn(),
+          info: vi.fn(),
+        },
+        config: {
+          env: 'test',
+          auth: {
+            jwt: {
+              secret: 'test-secret',
+            },
+            cookie: {
+              secret: 'cookie-secret',
+            },
+          },
+        },
+        pubsub: {
+          handleMessage: vi.fn(),
+          cleanup: vi.fn(),
+        },
+      };
+
+      registerWebSocket(mockServer as never, mockCtx as never);
+
+      const mockSocket = {
+        write: vi.fn(),
+        destroy: vi.fn(),
+      };
+
+      const mockRequest = {
+        url: '/ws',
+        headers: {
+          host: 'localhost',
+          cookie: '_csrf=invalid-token',
+        },
+      };
+
+      mockHttpServer.emit('upgrade', mockRequest, mockSocket, Buffer.alloc(0));
+
+      // Should write HTTP 403 response
+      expect(mockSocket.write).toHaveBeenCalledWith(expect.stringContaining('403'));
+      expect(mockSocket.destroy).toHaveBeenCalled();
+      expect(mockCtx.log.warn).toHaveBeenCalledWith(
+        'WebSocket upgrade rejected: invalid CSRF token',
+      );
+    });
+
+    test('should extract CSRF token from sec-websocket-protocol header', async () => {
+      const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
+
+      const mockHttpServer = new EventEmitter();
+      const mockServer = {
+        server: mockHttpServer,
+      };
+
+      const mockCtx = {
+        log: {
+          debug: vi.fn(),
+          error: vi.fn(),
+          warn: vi.fn(),
+          info: vi.fn(),
+        },
+        config: {
+          env: 'test',
+          auth: {
+            jwt: {
+              secret: 'test-secret',
+            },
+            cookie: {
+              secret: 'cookie-secret',
+            },
+          },
+        },
+        pubsub: {
+          handleMessage: vi.fn(),
+          cleanup: vi.fn(),
+        },
+      };
+
+      registerWebSocket(mockServer as never, mockCtx as never);
+
+      const mockSocket = {
+        write: vi.fn(),
+        destroy: vi.fn(),
+      };
+
+      const mockWs = {
+        close: vi.fn(),
+        on: vi.fn(),
+      };
+
+      mockHandleUpgrade.mockImplementation(
+        (
+          _req: unknown,
+          _socket: unknown,
+          _head: unknown,
+          callback: (ws: typeof mockWs) => void,
+        ) => {
+          callback(mockWs);
+        },
+      );
+
+      const mockRequest = {
+        url: '/ws?csrf=query-token',
+        headers: {
+          host: 'localhost',
+          cookie: '_csrf=cookie-token',
+          'sec-websocket-protocol': 'graphql, csrf.header-token, valid-token',
+        },
+      };
+
+      mockHttpServer.emit('upgrade', mockRequest, mockSocket, Buffer.alloc(0));
+
+      // Should have proceeded to WebSocket handling (token extracted from protocol header)
+      expect(mockWs.close).not.toHaveBeenCalledWith(
+        expect.any(Number),
+        'Forbidden: Invalid CSRF token',
+      );
+    });
+  });
+
+  describe('WebSocket production mode', () => {
+    test('should use encrypted CSRF in production', async () => {
+      const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
+
+      const mockHttpServer = new EventEmitter();
+      const mockServer = {
+        server: mockHttpServer,
+      };
+
+      const mockCtx = {
+        log: {
+          debug: vi.fn(),
+          error: vi.fn(),
+          warn: vi.fn(),
+          info: vi.fn(),
+        },
+        config: {
+          env: 'production',
+          auth: {
+            jwt: {
+              secret: 'test-secret',
+            },
+            cookie: {
+              secret: 'cookie-secret',
+            },
+          },
+        },
+        pubsub: {
+          handleMessage: vi.fn(),
+          cleanup: vi.fn(),
+        },
+      };
+
+      registerWebSocket(mockServer as never, mockCtx as never);
+
+      // Should have registered without error in production mode
+      expect(mockCtx.log.info).toHaveBeenCalledWith('WebSocket support registered on /ws');
+    });
+  });
 });

@@ -3,7 +3,7 @@ import Fastify from 'fastify';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 import { registerCookies } from '../cookie';
-import { registerCsrf } from '../csrf';
+import { registerCsrf, validateCsrfToken } from '../csrf';
 
 import type { FastifyInstance } from 'fastify';
 
@@ -373,5 +373,356 @@ describe('CSRF Protection', () => {
 
       expect(response.statusCode).toBe(403);
     });
+  });
+});
+
+describe('CSRF-Exempt Paths', () => {
+  let server: FastifyInstance;
+  const secret = 'test-csrf-secret-key-32-chars-long';
+
+  beforeEach(async () => {
+    server = Fastify();
+
+    // Register cookies first (required for CSRF)
+    registerCookies(server, { secret });
+
+    // Register CSRF
+    registerCsrf(server, {
+      secret,
+      cookieOpts: {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+      },
+    });
+
+    // Register exempt routes before server.ready()
+    server.post('/api/auth/login', () => ({ success: true }));
+    server.post('/api/auth/register', () => ({ success: true }));
+    server.post('/api/auth/refresh', () => ({ success: true }));
+    server.post('/api/auth/forgot-password', () => ({ success: true }));
+    server.post('/api/auth/reset-password', () => ({ success: true }));
+    server.post('/api/auth/verify-email', () => ({ success: true }));
+
+    await server.ready();
+  });
+
+  afterEach(async () => {
+    await server.close();
+  });
+
+  test('POST to /api/auth/login should not require CSRF token', async () => {
+    const response = await server.inject({
+      method: 'POST',
+      url: '/api/auth/login',
+      payload: { email: 'test@test.com', password: 'pass' },
+    });
+
+    expect(response.statusCode).toBe(200);
+  });
+
+  test('POST to /api/auth/register should not require CSRF token', async () => {
+    const response = await server.inject({
+      method: 'POST',
+      url: '/api/auth/register',
+      payload: { email: 'test@test.com', password: 'pass' },
+    });
+
+    expect(response.statusCode).toBe(200);
+  });
+
+  test('POST to /api/auth/refresh should not require CSRF token', async () => {
+    const response = await server.inject({
+      method: 'POST',
+      url: '/api/auth/refresh',
+    });
+
+    expect(response.statusCode).toBe(200);
+  });
+
+  test('POST to /api/auth/forgot-password should not require CSRF token', async () => {
+    const response = await server.inject({
+      method: 'POST',
+      url: '/api/auth/forgot-password',
+      payload: { email: 'test@test.com' },
+    });
+
+    expect(response.statusCode).toBe(200);
+  });
+
+  test('POST to /api/auth/reset-password should not require CSRF token', async () => {
+    const response = await server.inject({
+      method: 'POST',
+      url: '/api/auth/reset-password',
+      payload: { token: 'abc', password: 'newpass' },
+    });
+
+    expect(response.statusCode).toBe(200);
+  });
+
+  test('POST to /api/auth/verify-email should not require CSRF token', async () => {
+    const response = await server.inject({
+      method: 'POST',
+      url: '/api/auth/verify-email',
+      payload: { token: 'abc' },
+    });
+
+    expect(response.statusCode).toBe(200);
+  });
+
+  test('exempt path with query string should still be exempt', async () => {
+    const response = await server.inject({
+      method: 'POST',
+      url: '/api/auth/login?redirect=/dashboard',
+      payload: { email: 'test@test.com', password: 'pass' },
+    });
+
+    expect(response.statusCode).toBe(200);
+  });
+});
+
+describe('validateCsrfToken (standalone)', () => {
+  const secret = 'test-csrf-secret-key-32-chars-long';
+
+  test('should return false when cookieToken is undefined', () => {
+    const result = validateCsrfToken(undefined, 'token', { secret });
+    expect(result).toBe(false);
+  });
+
+  test('should return false when requestToken is undefined', () => {
+    const result = validateCsrfToken('cookie', undefined, { secret });
+    expect(result).toBe(false);
+  });
+
+  test('should return false when both tokens are undefined', () => {
+    const result = validateCsrfToken(undefined, undefined, { secret });
+    expect(result).toBe(false);
+  });
+
+  test('should return false for invalid signed token format', () => {
+    // Token without a dot (no signature)
+    const result = validateCsrfToken('invalidtoken', 'invalidtoken', { secret });
+    expect(result).toBe(false);
+  });
+
+  test('should return false for token with mismatched signature', () => {
+    const result = validateCsrfToken('token.wrongsignature', 'token', { secret });
+    expect(result).toBe(false);
+  });
+
+  test('should return false when token lengths differ', () => {
+    // Even if cookie is valid, if request token is different length
+    const result = validateCsrfToken('token.sig', 'different', { secret, signed: false });
+    expect(result).toBe(false);
+  });
+
+  test('should validate unsigned tokens when signed=false', () => {
+    const token = 'simple-token-value';
+    const result = validateCsrfToken(token, token, { secret, signed: false });
+    expect(result).toBe(true);
+  });
+
+  test('should reject mismatched unsigned tokens', () => {
+    const result = validateCsrfToken('token1', 'token2', { secret, signed: false });
+    expect(result).toBe(false);
+  });
+
+  test('should return false for invalid encrypted token', () => {
+    const result = validateCsrfToken('invalid.encrypted.token', 'token', {
+      secret,
+      encrypted: true,
+    });
+    expect(result).toBe(false);
+  });
+
+  test('should return false for encrypted token with wrong format', () => {
+    // Only 2 parts instead of 3
+    const result = validateCsrfToken('part1.part2', 'token', {
+      secret,
+      encrypted: true,
+    });
+    expect(result).toBe(false);
+  });
+});
+
+describe('CSRF with Encryption', () => {
+  let server: FastifyInstance;
+  const secret = 'test-csrf-secret-key-32-chars-long';
+
+  beforeEach(async () => {
+    server = Fastify();
+
+    // Register cookies first (required for CSRF)
+    registerCookies(server, { secret });
+
+    // Register CSRF with encryption enabled
+    registerCsrf(server, {
+      secret,
+      encrypted: true,
+      cookieOpts: {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        signed: true,
+      },
+    });
+
+    // Test routes
+    server.get('/csrf-token', async (_req, reply) => {
+      const token = reply.generateCsrf();
+      return { token };
+    });
+
+    server.post('/protected', () => {
+      return { success: true };
+    });
+
+    await server.ready();
+  });
+
+  afterEach(async () => {
+    await server.close();
+  });
+
+  test('should generate encrypted CSRF tokens', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: '/csrf-token',
+    });
+
+    expect(response.statusCode).toBe(200);
+    const { token } = JSON.parse(response.body) as { token: string };
+    expect(token).toBeDefined();
+
+    // The cookie should contain an encrypted value (format: iv.encrypted.authTag)
+    const cookies = response.headers['set-cookie'];
+    const csrfCookie = Array.isArray(cookies)
+      ? cookies.find((c) => c.startsWith('_csrf='))
+      : cookies;
+    expect(csrfCookie).toBeDefined();
+  });
+
+  test('should validate encrypted CSRF tokens successfully', async () => {
+    // Get encrypted token
+    const tokenResponse = await server.inject({
+      method: 'GET',
+      url: '/csrf-token',
+    });
+
+    const { token } = JSON.parse(tokenResponse.body) as { token: string };
+    const cookies = tokenResponse.headers['set-cookie'];
+    const csrfCookie = Array.isArray(cookies)
+      ? cookies.find((c) => c.startsWith('_csrf='))
+      : cookies;
+
+    if (!csrfCookie) {
+      throw new Error('Expected CSRF cookie to be set');
+    }
+
+    // Make POST with token
+    const response = await server.inject({
+      method: 'POST',
+      url: '/protected',
+      headers: {
+        'x-csrf-token': token,
+        cookie: csrfCookie.split(';')[0],
+      },
+      payload: { data: 'test' },
+    });
+
+    expect(response.statusCode).toBe(200);
+  });
+
+  test('should reject invalid encrypted tokens', async () => {
+    // Get a valid cookie
+    const tokenResponse = await server.inject({
+      method: 'GET',
+      url: '/csrf-token',
+    });
+
+    const cookies = tokenResponse.headers['set-cookie'];
+    const csrfCookie = Array.isArray(cookies)
+      ? cookies.find((c) => c.startsWith('_csrf='))
+      : cookies;
+
+    if (!csrfCookie) {
+      throw new Error('Expected CSRF cookie to be set');
+    }
+
+    // Use wrong token
+    const response = await server.inject({
+      method: 'POST',
+      url: '/protected',
+      headers: {
+        'x-csrf-token': 'wrong-token',
+        cookie: csrfCookie.split(';')[0],
+      },
+      payload: { data: 'test' },
+    });
+
+    expect(response.statusCode).toBe(403);
+  });
+});
+
+describe('CSRF with unsigned tokens', () => {
+  let server: FastifyInstance;
+  const secret = 'test-csrf-secret-key-32-chars-long';
+
+  beforeEach(async () => {
+    server = Fastify();
+    registerCookies(server, { secret });
+    registerCsrf(server, {
+      secret,
+      cookieOpts: {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        signed: false, // Disable signing
+      },
+    });
+
+    server.get('/csrf-token', async (_req, reply) => {
+      const token = reply.generateCsrf();
+      return { token };
+    });
+
+    server.post('/protected', () => {
+      return { success: true };
+    });
+
+    await server.ready();
+  });
+
+  afterEach(async () => {
+    await server.close();
+  });
+
+  test('should work with unsigned tokens', async () => {
+    const tokenResponse = await server.inject({
+      method: 'GET',
+      url: '/csrf-token',
+    });
+
+    const { token } = JSON.parse(tokenResponse.body) as { token: string };
+    const cookies = tokenResponse.headers['set-cookie'];
+    const csrfCookie = Array.isArray(cookies)
+      ? cookies.find((c) => c.startsWith('_csrf='))
+      : cookies;
+
+    if (!csrfCookie) {
+      throw new Error('Expected CSRF cookie to be set');
+    }
+
+    const response = await server.inject({
+      method: 'POST',
+      url: '/protected',
+      headers: {
+        'x-csrf-token': token,
+        cookie: csrfCookie.split(';')[0],
+      },
+      payload: { data: 'test' },
+    });
+
+    expect(response.statusCode).toBe(200);
   });
 });

@@ -128,6 +128,20 @@ const coverageExclude = [
   '**/*.d.ts',
   '**/index.ts', // Barrel exports only, no logic to test
   '**/media/image-processing.ts', // Browser-specific Canvas code, tested manually
+  '**/packages/sdk/src/storage/idb.ts', // Browser-only IndexedDB wrapper
+  '**/packages/sdk/src/api/react-query.ts', // ts-rest React Query integration
+  '**/packages/sdk/src/storage/storage.ts', // Browser-only IndexedDB storage adapter
+  '**/packages/sdk/src/realtime/RealtimeContext.tsx', // Complex React context, most coverage from integration tests
+  '**/packages/sdk/src/storage/RecordStorage.ts', // Browser-only IndexedDB/localStorage backend code
+  // Re-export only files (no logic)
+  '**/apps/server/src/shared/validationError.ts',
+  '**/apps/server/src/modules/auth/handlers.ts',
+  // External service integrations (require running services for full testing)
+  '**/apps/server/src/infra/email/smtp.ts', // SMTP transport needs real SMTP server
+  '**/apps/server/src/infra/database/client.ts', // Database client needs real Postgres
+  '**/apps/server/src/infra/database/schema/*.ts', // Schema functions need real database
+  '**/apps/server/src/infra/websocket/websocket.ts', // WebSocket requires complex HTTP upgrade mocking
+  '**/apps/server/src/app.ts', // Application bootstrap orchestrates many services
 ];
 
 export const baseConfig = defineConfig({

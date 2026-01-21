@@ -164,6 +164,176 @@ describe('QueueServer', () => {
       expect(server.constructor.name).toBe('QueueServer');
     });
   });
+
+  describe('task processing', () => {
+    test('should process task and call handler with args', async () => {
+      vi.useFakeTimers();
+      const handlerSpy = vi.fn().mockResolvedValue(undefined);
+      const testHandlers: TaskHandlers = {
+        'test-task': handlerSpy,
+      };
+
+      const server = createQueueServer({ store, handlers: testHandlers });
+
+      // Enqueue a task
+      await server.enqueue('test-task', { data: 'value' });
+
+      // Start server
+      server.start();
+
+      // Wait for poll
+      await vi.advanceTimersByTimeAsync(100);
+
+      // Handler should be called
+      expect(handlerSpy).toHaveBeenCalledWith({ data: 'value' });
+
+      await server.stop();
+      vi.useRealTimers();
+    });
+
+    test('should log error for task with no handler', async () => {
+      vi.useFakeTimers();
+      const logSpy = vi.fn();
+      const mockLog = { info: vi.fn(), debug: vi.fn(), warn: vi.fn(), error: logSpy };
+
+      const server = createQueueServer({
+        store,
+        handlers: {},
+        log: mockLog as never,
+      });
+
+      // Enqueue a task with no handler
+      await server.enqueue('unknown-task', {});
+
+      server.start();
+      await vi.advanceTimersByTimeAsync(100);
+
+      expect(logSpy).toHaveBeenCalledWith(
+        expect.stringContaining('No handler for task'),
+        expect.any(Object),
+      );
+
+      await server.stop();
+      vi.useRealTimers();
+    });
+
+    test('should retry failed task with exponential backoff', async () => {
+      vi.useFakeTimers();
+      const handlerSpy = vi.fn().mockRejectedValue(new Error('Task failed'));
+      const testHandlers: TaskHandlers = {
+        'failing-task': handlerSpy,
+      };
+
+      const logSpy = vi.fn();
+      const mockLog = { info: vi.fn(), debug: logSpy, warn: vi.fn(), error: vi.fn() };
+
+      const server = createQueueServer({
+        store,
+        handlers: testHandlers,
+        log: mockLog as never,
+        config: { defaultMaxAttempts: 3 },
+      });
+
+      await server.enqueue('failing-task', {});
+      server.start();
+      await vi.advanceTimersByTimeAsync(100);
+
+      expect(handlerSpy).toHaveBeenCalled();
+      // Should log scheduled for retry
+      expect(logSpy).toHaveBeenCalledWith(
+        expect.stringContaining('scheduled for retry'),
+        expect.any(Object),
+      );
+
+      await server.stop();
+      vi.useRealTimers();
+    });
+
+    test('should mark task as permanently failed after max attempts', async () => {
+      vi.useFakeTimers();
+      const handlerSpy = vi.fn().mockRejectedValue(new Error('Task failed'));
+      const testHandlers: TaskHandlers = {
+        'failing-task': handlerSpy,
+      };
+
+      const logSpy = vi.fn();
+      const mockLog = { info: vi.fn(), debug: vi.fn(), warn: vi.fn(), error: logSpy };
+
+      const server = createQueueServer({
+        store,
+        handlers: testHandlers,
+        log: mockLog as never,
+        config: { defaultMaxAttempts: 1 },
+      });
+
+      await server.enqueue('failing-task', {}, { maxAttempts: 1 });
+      server.start();
+
+      // Process task (first attempt)
+      await vi.advanceTimersByTimeAsync(100);
+
+      // Dequeue again to process the retried task at max attempts
+      await vi.advanceTimersByTimeAsync(2000);
+
+      expect(logSpy).toHaveBeenCalledWith(
+        expect.stringContaining('permanently failed'),
+        expect.any(Object),
+      );
+
+      await server.stop();
+      vi.useRealTimers();
+    });
+
+    test('should handle non-Error thrown by handler', async () => {
+      vi.useFakeTimers();
+      const handlerSpy = vi.fn().mockRejectedValue('string error');
+      const testHandlers: TaskHandlers = {
+        'string-error-task': handlerSpy,
+      };
+
+      const server = createQueueServer({
+        store,
+        handlers: testHandlers,
+        config: { defaultMaxAttempts: 1 },
+      });
+
+      await server.enqueue('string-error-task', {}, { maxAttempts: 1 });
+      server.start();
+      await vi.advanceTimersByTimeAsync(100);
+
+      // Task should have been marked as failed
+      const stats = await server.getStats();
+      expect(stats.failed).toBe(1);
+
+      await server.stop();
+      vi.useRealTimers();
+    });
+
+    test('should gracefully handle poll errors', async () => {
+      vi.useFakeTimers();
+
+      // Create a store that throws on dequeue
+      const errorStore = createMemoryQueueStore();
+      vi.spyOn(errorStore, 'dequeue').mockRejectedValue(new Error('DB error'));
+
+      const logSpy = vi.fn();
+      const mockLog = { info: vi.fn(), debug: vi.fn(), warn: vi.fn(), error: logSpy };
+
+      const server = createQueueServer({
+        store: errorStore,
+        handlers: {},
+        log: mockLog as never,
+      });
+
+      server.start();
+      await vi.advanceTimersByTimeAsync(100);
+
+      expect(logSpy).toHaveBeenCalledWith('Queue poll error', expect.any(Object));
+
+      await server.stop();
+      vi.useRealTimers();
+    });
+  });
 });
 
 // ============================================================================

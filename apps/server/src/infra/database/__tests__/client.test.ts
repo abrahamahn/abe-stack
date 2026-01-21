@@ -203,3 +203,6 @@ describe('buildConnectionString', () => {
     });
   });
 });
+
+// Note: createDbClient and resolveConnectionStringWithFallback are tested
+// in integration tests since they require actual database connections.

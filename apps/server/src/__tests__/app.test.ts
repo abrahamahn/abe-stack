@@ -191,4 +191,58 @@ describe('App', () => {
       await expect(app.stop()).resolves.not.toThrow();
     });
   });
+
+  describe('context', () => {
+    it('should throw error when accessing context before start', () => {
+      app = createApp(mockConfig);
+      expect(() => app!.context).toThrow('App not started');
+    });
+
+    it('should throw error when accessing server before start', () => {
+      app = createApp(mockConfig);
+      expect(() => app!.server).toThrow('App not started');
+    });
+
+    it('should provide context after start', async () => {
+      app = createApp(mockConfig);
+      await app.start();
+
+      const context = app.context;
+      expect(context.config).toBe(mockConfig);
+      expect(context.db).toBeDefined();
+      expect(context.email).toBeDefined();
+      expect(context.storage).toBeDefined();
+      expect(context.pubsub).toBeDefined();
+      expect(context.log).toBeDefined();
+    });
+
+    it('should provide server after start', async () => {
+      app = createApp(mockConfig);
+      await app.start();
+
+      const server = app.server;
+      expect(server).toBeDefined();
+      expect(typeof server.log.info).toBe('function');
+    });
+
+    it('should provide logger via log property', async () => {
+      app = createApp(mockConfig);
+      await app.start();
+
+      const log = app.log;
+      expect(log).toBeDefined();
+      expect(typeof log.info).toBe('function');
+    });
+  });
+
+  describe('health endpoints', () => {
+    it('should register health endpoints via get calls', async () => {
+      app = createApp(mockConfig);
+      await app.start();
+
+      // The mock server's get method should have been called for health endpoints
+      const server = app.server;
+      expect(server.get).toHaveBeenCalled();
+    });
+  });
 });
