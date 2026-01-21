@@ -2,6 +2,19 @@
 
 The foundation of ABE Stack. This package contains everything that should be shared across the entire application: contracts, validation, errors, and business logic. No React. No Fastify. No Node.js APIs in the main exports. Just pure TypeScript that runs anywhere.
 
+## Table of Contents
+
+- [Why Framework-Agnostic?](#why-framework-agnostic)
+- [The Flow of Validation](#the-flow-of-validation)
+- [Structure: Domains vs Infrastructure](#structure-domains-vs-infrastructure)
+- [Error Handling Philosophy](#error-handling-philosophy)
+- [DRY in Practice](#dry-in-practice)
+- [Adding a New Domain](#adding-a-new-domain)
+- [What Core Does Not Do](#what-core-does-not-do)
+- [Quick Reference](#quick-reference)
+
+---
+
 ## Why Framework-Agnostic?
 
 We made a deliberate choice early on: **core must work in any JavaScript environment**. This decision shapes everything about how we build.
@@ -260,3 +273,7 @@ import { HTTP_STATUS, MS_PER_SECOND } from '@abe-stack/core';
 ```typescript
 import { detectFileType, parseAudioMetadata, getImageDimensions } from '@abe-stack/core/media';
 ```
+
+---
+
+_Last Updated: 2026-01-21_

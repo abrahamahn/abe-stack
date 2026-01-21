@@ -1,5 +1,4 @@
-/** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
+// apps/web/src/features/demo/hooks/__tests__/useDemoPanes.test.tsx
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

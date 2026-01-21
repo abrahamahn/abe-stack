@@ -32,7 +32,7 @@ import {
   type ReadyResponse,
   type RoutesResponse,
   type StorageProvider,
-} from '@infra/index';
+} from '@infrastructure/index';
 import { registerRoutes } from '@modules/index';
 import { type AppContext, type IServiceContainer } from '@shared/index';
 import { sql } from 'drizzle-orm';

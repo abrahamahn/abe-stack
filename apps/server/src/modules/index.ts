@@ -6,7 +6,7 @@
  * All routes are defined in their respective module route files.
  */
 
-import { registerRouteMap } from '@infra/router';
+import { registerRouteMap } from '@router';
 
 import { adminRoutes } from './admin/routes';
 import { authRoutes } from './auth/routes';
@@ -54,7 +54,7 @@ export {
   type RouteResult,
   type RouterOptions,
   type ValidationSchema,
-} from '@infra/router';
+} from '@router';
 
 // Route definitions for external use
 export { adminRoutes } from './admin/routes';

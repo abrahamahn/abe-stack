@@ -1,6 +1,5 @@
 // packages/ui/src/components/__tests__/Select.test.tsx
 /** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
 import { Select } from '@components/Select';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

@@ -71,6 +71,7 @@ describe('API Client Error Handling Integration', () => {
       expect(error).toBeInstanceOf(BadRequestError);
       expect(error.message).toBe('Invalid input');
       expect(error.code).toBe('VALIDATION_ERROR');
+      expect(error.statusCode).toBe(400);
     });
 
     it('should map 401 to UnauthorizedError', () => {
@@ -78,6 +79,7 @@ describe('API Client Error Handling Integration', () => {
 
       expect(error).toBeInstanceOf(UnauthorizedError);
       expect(error.message).toBe('Invalid credentials');
+      expect(error.statusCode).toBe(401);
     });
 
     it('should map 403 to ForbiddenError', () => {
@@ -85,6 +87,7 @@ describe('API Client Error Handling Integration', () => {
 
       expect(error).toBeInstanceOf(ForbiddenError);
       expect(error.message).toBe('Access denied');
+      expect(error.statusCode).toBe(403);
     });
 
     it('should map 404 to NotFoundError', () => {
@@ -92,6 +95,7 @@ describe('API Client Error Handling Integration', () => {
 
       expect(error).toBeInstanceOf(NotFoundError);
       expect(error.message).toBe('User not found');
+      expect(error.statusCode).toBe(404);
     });
 
     it('should map 409 to ConflictError', () => {
@@ -99,6 +103,7 @@ describe('API Client Error Handling Integration', () => {
 
       expect(error).toBeInstanceOf(ConflictError);
       expect(error.message).toBe('Email already exists');
+      expect(error.statusCode).toBe(409);
     });
 
     it('should map 422 to UnprocessableError', () => {
@@ -109,6 +114,9 @@ describe('API Client Error Handling Integration', () => {
 
       expect(error).toBeInstanceOf(UnprocessableError);
       expect(error.message).toBe('Validation failed');
+      expect(error.statusCode).toBe(422);
+      // Verify details are preserved
+      expect((error as UnprocessableError).details).toEqual({ email: 'Invalid format' });
     });
 
     it('should map 429 to TooManyRequestsError', () => {
@@ -116,17 +124,27 @@ describe('API Client Error Handling Integration', () => {
 
       expect(error).toBeInstanceOf(TooManyRequestsError);
       expect(error.message).toBe('Rate limit exceeded');
+      expect(error.statusCode).toBe(429);
     });
 
     it('should map 5xx to InternalError', () => {
       const error500 = createApiError(500, { message: 'Internal server error' });
       expect(error500).toBeInstanceOf(InternalError);
+      expect(error500.message).toBe('Internal server error');
+      // InternalError always uses statusCode 500 regardless of input status
+      expect(error500.statusCode).toBe(500);
 
       const error502 = createApiError(502, { message: 'Bad gateway' });
       expect(error502).toBeInstanceOf(InternalError);
+      expect(error502.message).toBe('Bad gateway');
+      // InternalError normalizes all 5xx to 500
+      expect(error502.statusCode).toBe(500);
 
       const error503 = createApiError(503, { message: 'Service unavailable' });
       expect(error503).toBeInstanceOf(InternalError);
+      expect(error503.message).toBe('Service unavailable');
+      // InternalError normalizes all 5xx to 500
+      expect(error503.statusCode).toBe(500);
     });
 
     it('should map unknown status to ApiError', () => {
@@ -260,41 +278,65 @@ describe('API Client Error Handling Integration', () => {
     it('should throw NetworkError on network failure', async () => {
       mockFetch.mockRejectedValue(new Error('Network error'));
 
-      await expect(client.login({ email: 'test@test.com', password: 'password' })).rejects.toThrow(
-        NetworkError,
-      );
+      try {
+        await client.login({ email: 'test@test.com', password: 'password' });
+        expect.fail('Expected NetworkError to be thrown');
+      } catch (error) {
+        expect(error).toBeInstanceOf(NetworkError);
+        expect((error as NetworkError).statusCode).toBe(0);
+      }
     });
 
     it('should throw UnauthorizedError on 401', async () => {
       mockFetch.mockResolvedValue(createMockResponse(401, { message: 'Invalid credentials' }));
 
-      await expect(client.login({ email: 'test@test.com', password: 'wrong' })).rejects.toThrow(
-        UnauthorizedError,
-      );
+      try {
+        await client.login({ email: 'test@test.com', password: 'wrong' });
+        expect.fail('Expected UnauthorizedError to be thrown');
+      } catch (error) {
+        expect(error).toBeInstanceOf(UnauthorizedError);
+        expect((error as UnauthorizedError).message).toBe('Invalid credentials');
+        expect((error as UnauthorizedError).statusCode).toBe(401);
+      }
     });
 
     it('should throw BadRequestError on 400', async () => {
       mockFetch.mockResolvedValue(createMockResponse(400, { message: 'Invalid email format' }));
 
-      await expect(client.login({ email: 'invalid', password: 'password' })).rejects.toThrow(
-        BadRequestError,
-      );
+      try {
+        await client.login({ email: 'invalid', password: 'password' });
+        expect.fail('Expected BadRequestError to be thrown');
+      } catch (error) {
+        expect(error).toBeInstanceOf(BadRequestError);
+        expect((error as BadRequestError).message).toBe('Invalid email format');
+        expect((error as BadRequestError).statusCode).toBe(400);
+      }
     });
 
     it('should throw TooManyRequestsError on 429', async () => {
       mockFetch.mockResolvedValue(createMockResponse(429, { message: 'Too many login attempts' }));
 
-      await expect(client.login({ email: 'test@test.com', password: 'password' })).rejects.toThrow(
-        TooManyRequestsError,
-      );
+      try {
+        await client.login({ email: 'test@test.com', password: 'password' });
+        expect.fail('Expected TooManyRequestsError to be thrown');
+      } catch (error) {
+        expect(error).toBeInstanceOf(TooManyRequestsError);
+        expect((error as TooManyRequestsError).message).toBe('Too many login attempts');
+        expect((error as TooManyRequestsError).statusCode).toBe(429);
+      }
     });
 
     it('should throw InternalError on 500', async () => {
       mockFetch.mockResolvedValue(createMockResponse(500, { message: 'Server error' }));
 
-      await expect(client.login({ email: 'test@test.com', password: 'password' })).rejects.toThrow(
-        InternalError,
-      );
+      try {
+        await client.login({ email: 'test@test.com', password: 'password' });
+        expect.fail('Expected InternalError to be thrown');
+      } catch (error) {
+        expect(error).toBeInstanceOf(InternalError);
+        expect((error as InternalError).message).toBe('Server error');
+        expect((error as InternalError).statusCode).toBe(500);
+      }
     });
 
     it('should handle empty response body', async () => {

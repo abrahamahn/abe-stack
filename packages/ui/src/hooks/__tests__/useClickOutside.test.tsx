@@ -1,6 +1,5 @@
 // packages/ui/src/hooks/__tests__/useClickOutside.test.tsx
 /** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
 import { fireEvent, render } from '@testing-library/react';
 import { useRef, type ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';

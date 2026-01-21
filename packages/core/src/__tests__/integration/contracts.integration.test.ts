@@ -43,6 +43,12 @@ describe('Contract Schema Integration', () => {
         validEmails.forEach((email) => {
           const result = emailSchema.safeParse(email);
           expect(result.success, `Email "${email}" should be valid`).toBe(true);
+
+          // Verify parsed data matches input
+          if (result.success) {
+            expect(result.data).toBe(email);
+            expect(typeof result.data).toBe('string');
+          }
         });
       });
 
@@ -60,6 +66,12 @@ describe('Contract Schema Integration', () => {
         invalidEmails.forEach((email) => {
           const result = emailSchema.safeParse(email);
           expect(result.success, `Email "${email}" should be invalid`).toBe(false);
+
+          // Verify error structure when validation fails
+          if (!result.success) {
+            expect(result.error.issues.length).toBeGreaterThan(0);
+            expect(result.error.issues[0]).toHaveProperty('message');
+          }
         });
       });
     });
@@ -80,6 +92,12 @@ describe('Contract Schema Integration', () => {
             result.success,
             `Password should be valid (length: ${String(password.length)})`,
           ).toBe(true);
+
+          // Verify parsed data matches input
+          if (result.success) {
+            expect(result.data).toBe(password);
+            expect(result.data.length).toBeGreaterThanOrEqual(8);
+          }
         });
       });
 
@@ -89,6 +107,12 @@ describe('Contract Schema Integration', () => {
         invalidPasswords.forEach((password) => {
           const result = passwordSchema.safeParse(password);
           expect(result.success, `Password "${password}" should be invalid`).toBe(false);
+
+          // Verify error structure
+          if (!result.success) {
+            expect(result.error.issues.length).toBeGreaterThan(0);
+            expect(result.error.issues[0].code).toBe('too_small');
+          }
         });
       });
     });
@@ -105,6 +129,15 @@ describe('Contract Schema Integration', () => {
         validUuids.forEach((uuid) => {
           const result = uuidSchema.safeParse(uuid);
           expect(result.success, `UUID "${uuid}" should be valid`).toBe(true);
+
+          // Verify parsed data shape
+          if (result.success) {
+            expect(result.data).toBe(uuid);
+            // Verify UUID format (8-4-4-4-12)
+            expect(result.data).toMatch(
+              /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+            );
+          }
         });
       });
 
@@ -114,6 +147,11 @@ describe('Contract Schema Integration', () => {
         invalidUuids.forEach((uuid) => {
           const result = uuidSchema.safeParse(uuid);
           expect(result.success, `UUID "${uuid}" should be invalid`).toBe(false);
+
+          // Verify error structure
+          if (!result.success) {
+            expect(result.error.issues.length).toBeGreaterThan(0);
+          }
         });
       });
     });
@@ -122,19 +160,33 @@ describe('Contract Schema Integration', () => {
       it('should validate names with 2+ characters', () => {
         const result = nameSchema.safeParse('Jo');
         expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data).toBe('Jo');
+          expect(result.data.length).toBeGreaterThanOrEqual(2);
+        }
 
         const result2 = nameSchema.safeParse('John Doe');
         expect(result2.success).toBe(true);
+        if (result2.success) {
+          expect(result2.data).toBe('John Doe');
+        }
       });
 
       it('should allow undefined (optional)', () => {
         const result = nameSchema.safeParse(undefined);
         expect(result.success).toBe(true);
+        if (result.success) {
+          expect(result.data).toBeUndefined();
+        }
       });
 
       it('should reject single character names', () => {
         const result = nameSchema.safeParse('A');
         expect(result.success).toBe(false);
+        if (!result.success) {
+          expect(result.error.issues.length).toBeGreaterThan(0);
+          expect(result.error.issues[0].code).toBe('too_small');
+        }
       });
     });
   });
@@ -205,6 +257,13 @@ describe('Contract Schema Integration', () => {
 
         const result = loginRequestSchema.safeParse(loginData);
         expect(result.success).toBe(true);
+
+        // Verify parsed shape
+        if (result.success) {
+          expect(result.data).toEqual(loginData);
+          expect(result.data).toHaveProperty('email', 'user@example.com');
+          expect(result.data).toHaveProperty('password', 'SecurePass123!');
+        }
       });
 
       it('should reject login with invalid email', () => {
@@ -215,6 +274,12 @@ describe('Contract Schema Integration', () => {
 
         const result = loginRequestSchema.safeParse(loginData);
         expect(result.success).toBe(false);
+
+        // Verify error targets email field
+        if (!result.success) {
+          const emailError = result.error.issues.find((i) => i.path.includes('email'));
+          expect(emailError).toBeDefined();
+        }
       });
 
       it('should reject login with short password', () => {
@@ -225,6 +290,12 @@ describe('Contract Schema Integration', () => {
 
         const result = loginRequestSchema.safeParse(loginData);
         expect(result.success).toBe(false);
+
+        // Verify error targets password field
+        if (!result.success) {
+          const passwordError = result.error.issues.find((i) => i.path.includes('password'));
+          expect(passwordError).toBeDefined();
+        }
       });
     });
 
@@ -238,6 +309,14 @@ describe('Contract Schema Integration', () => {
 
         const result = registerRequestSchema.safeParse(registerData);
         expect(result.success).toBe(true);
+
+        // Verify parsed shape includes all fields
+        if (result.success) {
+          expect(result.data).toEqual(registerData);
+          expect(result.data).toHaveProperty('email', 'newuser@example.com');
+          expect(result.data).toHaveProperty('name', 'New User');
+          expect(result.data).toHaveProperty('password', 'SecurePass123!');
+        }
       });
 
       it('should validate registration without name (optional)', () => {
@@ -248,6 +327,13 @@ describe('Contract Schema Integration', () => {
 
         const result = registerRequestSchema.safeParse(registerData);
         expect(result.success).toBe(true);
+
+        // Verify name is optional
+        if (result.success) {
+          expect(result.data).toHaveProperty('email');
+          expect(result.data).toHaveProperty('password');
+          expect(result.data.name).toBeUndefined();
+        }
       });
 
       it('should reject registration with single character name', () => {
@@ -259,6 +345,12 @@ describe('Contract Schema Integration', () => {
 
         const result = registerRequestSchema.safeParse(registerData);
         expect(result.success).toBe(false);
+
+        // Verify error targets name field
+        if (!result.success) {
+          const nameError = result.error.issues.find((i) => i.path.includes('name'));
+          expect(nameError).toBeDefined();
+        }
       });
     });
 
@@ -270,6 +362,12 @@ describe('Contract Schema Integration', () => {
 
         const result = emailVerificationRequestSchema.safeParse(verifyData);
         expect(result.success).toBe(true);
+
+        // Verify parsed shape
+        if (result.success) {
+          expect(result.data).toEqual(verifyData);
+          expect(result.data.token).toBe('verification-token-123');
+        }
       });
     });
 
@@ -281,6 +379,12 @@ describe('Contract Schema Integration', () => {
 
         const result = forgotPasswordRequestSchema.safeParse(forgotData);
         expect(result.success).toBe(true);
+
+        // Verify parsed shape
+        if (result.success) {
+          expect(result.data).toEqual(forgotData);
+          expect(result.data.email).toBe('user@example.com');
+        }
       });
     });
 
@@ -293,16 +397,24 @@ describe('Contract Schema Integration', () => {
 
         const result = resetPasswordRequestSchema.safeParse(resetData);
         expect(result.success).toBe(true);
+
+        // Verify parsed shape
+        if (result.success) {
+          expect(result.data).toEqual(resetData);
+          expect(result.data.token).toBe('reset-token-123');
+          expect(result.data.password).toBe('NewSecurePass123!');
+        }
       });
     });
   });
 
   describe('Auth response schemas with real data', () => {
     it('should validate auth response with user', () => {
+      const userId = randomUUID();
       const authResponse = {
         token: 'jwt-token-here',
         user: {
-          id: randomUUID(),
+          id: userId,
           email: 'user@example.com',
           name: 'Test User',
           role: 'user',
@@ -311,6 +423,19 @@ describe('Contract Schema Integration', () => {
 
       const result = authResponseSchema.safeParse(authResponse);
       expect(result.success).toBe(true);
+
+      // Verify parsed shape matches expected structure
+      if (result.success) {
+        expect(result.data.token).toBe('jwt-token-here');
+        expect(result.data.user).toEqual({
+          id: userId,
+          email: 'user@example.com',
+          name: 'Test User',
+          role: 'user',
+        });
+        expect(result.data.user.id).toBe(userId);
+        expect(result.data.user.email).toBe('user@example.com');
+      }
     });
 
     it('should validate register response', () => {
@@ -322,14 +447,22 @@ describe('Contract Schema Integration', () => {
 
       const result = registerResponseSchema.safeParse(registerResponse);
       expect(result.success).toBe(true);
+
+      // Verify parsed shape
+      if (result.success) {
+        expect(result.data.status).toBe('pending_verification');
+        expect(result.data.message).toBe('Please check your email to verify your account');
+        expect(result.data.email).toBe('newuser@example.com');
+      }
     });
 
     it('should validate email verification response', () => {
+      const userId = randomUUID();
       const verifyResponse = {
         verified: true,
         token: 'jwt-access-token',
         user: {
-          id: randomUUID(),
+          id: userId,
           email: 'verified@example.com',
           name: 'Verified User',
           role: 'user',
@@ -338,6 +471,16 @@ describe('Contract Schema Integration', () => {
 
       const result = emailVerificationResponseSchema.safeParse(verifyResponse);
       expect(result.success).toBe(true);
+
+      // Verify parsed shape
+      if (result.success) {
+        expect(result.data.verified).toBe(true);
+        expect(result.data.token).toBe('jwt-access-token');
+        expect(result.data.user.id).toBe(userId);
+        expect(result.data.user.email).toBe('verified@example.com');
+        expect(result.data.user.name).toBe('Verified User');
+        expect(result.data.user.role).toBe('user');
+      }
     });
   });
 
@@ -349,6 +492,13 @@ describe('Contract Schema Integration', () => {
 
       const result = errorResponseSchema.safeParse(errorResponse);
       expect(result.success).toBe(true);
+
+      // Verify parsed shape
+      if (result.success) {
+        expect(result.data.message).toBe('Something went wrong');
+        expect(result.data.code).toBeUndefined();
+        expect(result.data.details).toBeUndefined();
+      }
     });
 
     it('should validate error response with code', () => {
@@ -359,6 +509,12 @@ describe('Contract Schema Integration', () => {
 
       const result = errorResponseSchema.safeParse(errorResponse);
       expect(result.success).toBe(true);
+
+      // Verify parsed shape includes code
+      if (result.success) {
+        expect(result.data.message).toBe('Invalid credentials');
+        expect(result.data.code).toBe('INVALID_CREDENTIALS');
+      }
     });
 
     it('should validate error response with details', () => {
@@ -373,6 +529,16 @@ describe('Contract Schema Integration', () => {
 
       const result = errorResponseSchema.safeParse(errorResponse);
       expect(result.success).toBe(true);
+
+      // Verify parsed shape includes all fields
+      if (result.success) {
+        expect(result.data.message).toBe('Validation failed');
+        expect(result.data.code).toBe('VALIDATION_ERROR');
+        expect(result.data.details).toEqual({
+          email: 'Invalid email format',
+          password: 'Password too short',
+        });
+      }
     });
   });
 

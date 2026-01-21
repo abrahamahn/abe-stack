@@ -7,7 +7,7 @@
  */
 
 import { recordPointerSchema, transactionSchema } from '@abe-stack/core';
-import { protectedRoute, type RouteMap, type RouteResult } from '@infra/router';
+import { protectedRoute, type RouteMap, type RouteResult } from '@router';
 import { z } from 'zod';
 
 import {

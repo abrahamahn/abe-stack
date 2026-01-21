@@ -3,70 +3,222 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "types": ["node", "vitest/globals"],
+    "types": [
+      "node",
+      "vitest/globals"
+    ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@admin": ["./src/modules/admin"],
-      "@admin/*": ["./src/modules/admin/*"],
-      "@auth": ["./src/modules/auth"],
-      "@auth/*": ["./src/modules/auth/*"],
-      "@config": ["./src/config"],
-      "@config/*": ["./src/config/*"],
-      "@crypto": ["./src/infra/crypto"],
-      "@crypto/*": ["./src/infra/crypto/*"],
-      "@database": ["./src/infra/database"],
-      "@database/*": ["./src/infra/database/*"],
-      "@email": ["./src/infra/email"],
-      "@email/*": ["./src/infra/email/*"],
-      "@files": ["./src/infra/files"],
-      "@files/*": ["./src/infra/files/*"],
-      "@handlers": ["./src/modules/auth/handlers"],
-      "@handlers/*": ["./src/modules/auth/handlers/*"],
-      "@health": ["./src/infra/health"],
-      "@health/*": ["./src/infra/health/*"],
-      "@http": ["./src/infra/http"],
-      "@http/*": ["./src/infra/http/*"],
-      "@infra": ["./src/infra"],
-      "@infra/*": ["./src/infra/*"],
-      "@logger": ["./src/infra/logger"],
-      "@logger/*": ["./src/infra/logger/*"],
-      "@modules": ["./src/modules"],
-      "@modules/*": ["./src/modules/*"],
-      "@pagination": ["./src/infra/pagination"],
-      "@pagination/*": ["./src/infra/pagination/*"],
-      "@permissions": ["./src/infra/permissions"],
-      "@permissions/*": ["./src/infra/permissions/*"],
-      "@providers": ["./src/infra/storage/providers"],
-      "@providers/*": ["./src/infra/storage/providers/*"],
-      "@pubsub": ["./src/infra/pubsub"],
-      "@pubsub/*": ["./src/infra/pubsub/*"],
-      "@queue": ["./src/infra/queue"],
-      "@queue/*": ["./src/infra/queue/*"],
-      "@rate-limit": ["./src/infra/rate-limit"],
-      "@rate-limit/*": ["./src/infra/rate-limit/*"],
-      "@realtime": ["./src/modules/realtime"],
-      "@realtime/*": ["./src/modules/realtime/*"],
-      "@router": ["./src/infra/router"],
-      "@router/*": ["./src/infra/router/*"],
-      "@schema": ["./src/infra/database/schema"],
-      "@schema/*": ["./src/infra/database/schema/*"],
-      "@security": ["./src/infra/security"],
-      "@security/*": ["./src/infra/security/*"],
-      "@shared": ["./src/shared"],
-      "@shared/*": ["./src/shared/*"],
-      "@storage": ["./src/infra/storage"],
-      "@storage/*": ["./src/infra/storage/*"],
-      "@users": ["./src/modules/users"],
-      "@users/*": ["./src/modules/users/*"],
-      "@websocket": ["./src/infra/websocket"],
-      "@websocket/*": ["./src/infra/websocket/*"],
-      "@write": ["./src/infra/write"],
-      "@write/*": ["./src/infra/write/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@admin": [
+        "./src/modules/admin"
+      ],
+      "@admin/*": [
+        "./src/modules/admin/*"
+      ],
+      "@auth": [
+        "./src/modules/auth"
+      ],
+      "@auth/*": [
+        "./src/modules/auth/*"
+      ],
+      "@config": [
+        "./src/config"
+      ],
+      "@config/*": [
+        "./src/config/*"
+      ],
+      "@crypto": [
+        "./src/infrastructure/security/crypto"
+      ],
+      "@crypto/*": [
+        "./src/infrastructure/security/crypto/*"
+      ],
+      "@data": [
+        "./src/infrastructure/data"
+      ],
+      "@data/*": [
+        "./src/infrastructure/data/*"
+      ],
+      "@database": [
+        "./src/infrastructure/data/database"
+      ],
+      "@database/*": [
+        "./src/infrastructure/data/database/*"
+      ],
+      "@email": [
+        "./src/infrastructure/messaging/email"
+      ],
+      "@email/*": [
+        "./src/infrastructure/messaging/email/*"
+      ],
+      "@files": [
+        "./src/infrastructure/data/files"
+      ],
+      "@files/*": [
+        "./src/infrastructure/data/files/*"
+      ],
+      "@handlers": [
+        "./src/modules/auth/handlers"
+      ],
+      "@handlers/*": [
+        "./src/modules/auth/handlers/*"
+      ],
+      "@health": [
+        "./src/infrastructure/monitor/health"
+      ],
+      "@health/*": [
+        "./src/infrastructure/monitor/health/*"
+      ],
+      "@http": [
+        "./src/infrastructure/http"
+      ],
+      "@http/*": [
+        "./src/infrastructure/http/*"
+      ],
+      "@infrastructure": [
+        "./src/infrastructure"
+      ],
+      "@infrastructure/*": [
+        "./src/infrastructure/*"
+      ],
+      "@jobs": [
+        "./src/infrastructure/jobs"
+      ],
+      "@jobs/*": [
+        "./src/infrastructure/jobs/*"
+      ],
+      "@logger": [
+        "./src/infrastructure/monitor/logger"
+      ],
+      "@logger/*": [
+        "./src/infrastructure/monitor/logger/*"
+      ],
+      "@media": [
+        "./src/infrastructure/media"
+      ],
+      "@media/*": [
+        "./src/infrastructure/media/*"
+      ],
+      "@messaging": [
+        "./src/infrastructure/messaging"
+      ],
+      "@messaging/*": [
+        "./src/infrastructure/messaging/*"
+      ],
+      "@middleware": [
+        "./src/infrastructure/http/middleware"
+      ],
+      "@middleware/*": [
+        "./src/infrastructure/http/middleware/*"
+      ],
+      "@modules": [
+        "./src/modules"
+      ],
+      "@modules/*": [
+        "./src/modules/*"
+      ],
+      "@monitor": [
+        "./src/infrastructure/monitor"
+      ],
+      "@monitor/*": [
+        "./src/infrastructure/monitor/*"
+      ],
+      "@pagination": [
+        "./src/infrastructure/http/pagination"
+      ],
+      "@pagination/*": [
+        "./src/infrastructure/http/pagination/*"
+      ],
+      "@permissions": [
+        "./src/infrastructure/security/permissions"
+      ],
+      "@permissions/*": [
+        "./src/infrastructure/security/permissions/*"
+      ],
+      "@processors": [
+        "./src/infrastructure/media/processors"
+      ],
+      "@processors/*": [
+        "./src/infrastructure/media/processors/*"
+      ],
+      "@pubsub": [
+        "./src/infrastructure/messaging/pubsub"
+      ],
+      "@pubsub/*": [
+        "./src/infrastructure/messaging/pubsub/*"
+      ],
+      "@queue": [
+        "./src/infrastructure/jobs/queue"
+      ],
+      "@queue/*": [
+        "./src/infrastructure/jobs/queue/*"
+      ],
+      "@rate-limit": [
+        "./src/infrastructure/security/rate-limit"
+      ],
+      "@rate-limit/*": [
+        "./src/infrastructure/security/rate-limit/*"
+      ],
+      "@realtime": [
+        "./src/modules/realtime"
+      ],
+      "@realtime/*": [
+        "./src/modules/realtime/*"
+      ],
+      "@router": [
+        "./src/infrastructure/http/router"
+      ],
+      "@router/*": [
+        "./src/infrastructure/http/router/*"
+      ],
+      "@security": [
+        "./src/infrastructure/security"
+      ],
+      "@security/*": [
+        "./src/infrastructure/security/*"
+      ],
+      "@shared": [
+        "./src/shared"
+      ],
+      "@shared/*": [
+        "./src/shared/*"
+      ],
+      "@storage": [
+        "./src/infrastructure/data/storage"
+      ],
+      "@storage/*": [
+        "./src/infrastructure/data/storage/*"
+      ],
+      "@users": [
+        "./src/modules/users"
+      ],
+      "@users/*": [
+        "./src/modules/users/*"
+      ],
+      "@websocket": [
+        "./src/infrastructure/messaging/websocket"
+      ],
+      "@websocket/*": [
+        "./src/infrastructure/messaging/websocket/*"
+      ],
+      "@write": [
+        "./src/infrastructure/jobs/write"
+      ],
+      "@write/*": [
+        "./src/infrastructure/jobs/write/*"
+      ]
     },
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.server.tsbuildinfo"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"],
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
   "references": [
     {
       "path": "../../packages/core"

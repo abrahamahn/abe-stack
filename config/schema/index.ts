@@ -10,6 +10,20 @@
  * Generated files will have "DO NOT EDIT" headers.
  */
 
+// Path aliases
+export {
+  packageAliases,
+  uiInternalAliases,
+  coreInternalAliases,
+  webAliases,
+  serverAliases,
+  desktopAliases,
+  coreAliases,
+  uiAliases,
+  sdkAliases,
+  aliasDefinitions,
+} from './aliases';
+
 // TypeScript configuration
 export {
   baseCompilerOptions,
@@ -24,7 +38,7 @@ export {
   type ProjectConfig,
 } from './typescript';
 
-// Build configuration
+// Build configuration (Vite & Vitest)
 export {
   getRepoRoot,
   getPaths,
@@ -39,7 +53,6 @@ export {
   vitestSdk,
   vitestUi,
   vitestIntegration,
-  aliasDefinitions,
 } from './build';
 
 // Lint configuration

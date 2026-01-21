@@ -1,7 +1,6 @@
 // packages/ui/src/elements/__tests__/Box.test.tsx
 // packages/ui/src/components/__tests__/Box.test.tsx
 /** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 

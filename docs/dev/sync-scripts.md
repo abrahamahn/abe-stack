@@ -18,23 +18,21 @@ Comprehensive guide to the ABE Stack developer experience automation scripts. Th
 3. [How Automation Works](#how-automation-works)
 4. [sync-path-aliases.ts](#1-sync-path-aliasests)
 5. [sync-file-headers.ts](#2-sync-file-headersts)
-6. [sync-test-folders.ts](#3-sync-test-foldersts)
-7. [sync-tsconfig.ts](#4-sync-tsconfigts)
-8. [sync-linting.ts](#5-sync-lintingts)
-9. [sync-css-theme.ts](#6-sync-css-themets)
-10. [Manual vs Automatic Execution](#manual-vs-automatic-execution-summary)
+6. [sync-tsconfig.ts](#3-sync-tsconfigts)
+7. [sync-linting.ts](#4-sync-lintingts)
+8. [sync-css-theme.ts](#5-sync-css-themets)
+9. [Manual vs Automatic Execution](#manual-vs-automatic-execution-summary)
 
 ---
 
 ## Overview
 
-Six TypeScript sync scripts automate repetitive development tasks. All scripts are located in `config/lint/`:
+Five TypeScript sync scripts automate repetitive development tasks. All scripts are located in `config/lint/`:
 
 | Script                 | Purpose                                                         |
 | ---------------------- | --------------------------------------------------------------- |
 | `sync-path-aliases.ts` | Auto-generate TypeScript path aliases in `tsconfig.json`        |
 | `sync-file-headers.ts` | Ensure source files have path comment headers                   |
-| `sync-test-folders.ts` | Create `__tests__/` directories for code directories            |
 | `sync-tsconfig.ts`     | Auto-generate TypeScript project references                     |
 | `sync-linting.ts`      | Sync linting config to `package.json` + `.vscode/settings.json` |
 | `sync-css-theme.ts`    | Generate CSS custom properties from theme tokens                |
@@ -64,17 +62,16 @@ All watcher scripts also support `--quiet` for silent operation (used by `pnpm d
 const watchers = [
   startConfigGenerator(), // Generates tsconfigs and aliases
   startWatcher('config/lint/sync-file-headers.ts'),
-  startWatcher('config/lint/sync-test-folders.ts'),
   startWatcher('config/lint/sync-css-theme.ts'),
 ];
 ```
 
-Four scripts run in watch mode with `--quiet` flag in background processes. `sync-tsconfig.ts` and `sync-linting.ts` run on demand (sync/check only).
+Three scripts run in watch mode with `--quiet` flag in background processes. `sync-tsconfig.ts` and `sync-linting.ts` run on demand (sync/check only).
 
 ### Pre-commit Hook
 
 ```bash
-pnpm config:generate && pnpm sync:headers && pnpm sync:tests && pnpm sync:theme
+pnpm config:generate && pnpm sync:headers && pnpm sync:theme
 ```
 
 ### CI Pipeline (`.github/workflows/ci.yml`)
@@ -83,7 +80,6 @@ pnpm config:generate && pnpm sync:headers && pnpm sync:tests && pnpm sync:theme
 - run: pnpm sync:aliases:check
 - run: pnpm sync:tsconfig:check
 - run: pnpm sync:headers:check
-- run: pnpm sync:tests:check
 ```
 
 ---
@@ -208,59 +204,7 @@ Uses `fs.watch` with `recursive: true` on all scan directories. 100ms debounce o
 
 ---
 
-## 3. sync-test-folders.ts
-
-**Purpose:** Create `__tests__/` directories for all code directories.
-
-**Commands:**
-
-```bash
-pnpm sync:tests        # Sync once
-pnpm sync:tests:check  # Verify
-pnpm sync:tests:watch  # Watch mode
-```
-
-### Scope Included
-
-**Scan roots:** `apps`, `packages`
-
-Only directories that:
-
-1. Are inside a `src/` directory
-2. Contain at least one code file (`.ts`, `.tsx`, etc.)
-3. Are NOT barrel-only directories
-
-### Scope Excluded
-
-**Directories skipped:**
-
-- `node_modules`, `__tests__`, `.cache`, `.turbo`, `dist`, `build`, `coverage`, `.git`
-- `src/test`, `src/tests` directories
-
-**Files that don't count as "code":**
-
-- `.d.ts` declaration files
-- `.test.ts`, `.test.tsx`, `.spec.ts`, `.spec.tsx` test files
-
-**Barrel-only directories skipped:**
-If a directory contains ONLY an `index.ts` that is a pure barrel file (only re-exports), no `__tests__/` folder is created.
-
-### How It Works
-
-1. **Recursively scans** `apps/` and `packages/`
-2. **For each directory inside `src/`:**
-   - Checks if it has code files (not just declaration/test files)
-   - If only file is `index.ts`, checks if it's a barrel file
-   - If directory has real code, ensures `__tests__/` exists
-3. **Creates `__tests__/` with `.gitkeep`** if missing
-
-### Barrel File Detection
-
-A file is considered a barrel if it contains ONLY comments, import statements, and re-export statements (`export { } from`, `export * from`).
-
----
-
-## 4. sync-tsconfig.ts
+## 3. sync-tsconfig.ts
 
 **Purpose:** Auto-generate TypeScript project references based on workspace dependencies.
 
@@ -285,7 +229,7 @@ pnpm sync:tsconfig:check  # Verify (CI mode)
 
 ---
 
-## 5. sync-linting.ts
+## 4. sync-linting.ts
 
 **Purpose:** Sync linting config to `package.json` and `.vscode/settings.json`.
 
@@ -313,7 +257,7 @@ pnpm sync:linting:check  # Verify (CI mode)
 
 ---
 
-## 6. sync-css-theme.ts
+## 5. sync-css-theme.ts
 
 **Purpose:** Generate CSS custom properties from TypeScript theme tokens.
 
@@ -379,7 +323,6 @@ for (const filePath of themeSourceFiles) {
 | ----------------- | ---------- | ---------- | -------- |
 | sync-path-aliases | ✅ Watch   | ✅ Sync    | ✅ Check |
 | sync-file-headers | ✅ Watch   | ✅ Sync    | ✅ Check |
-| sync-test-folders | ✅ Watch   | ✅ Sync    | ✅ Check |
 | sync-tsconfig     | ❌         | ✅ Sync    | ✅ Check |
 | sync-linting      | ❌         | ✅ Sync    | ❌ N/A   |
 | sync-css-theme    | ✅ Watch   | ✅ Build   | ❌ N/A   |

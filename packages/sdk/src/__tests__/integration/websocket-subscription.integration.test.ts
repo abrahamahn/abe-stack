@@ -285,13 +285,21 @@ describe('WebsocketPubsubClient + SubscriptionCache Integration', () => {
       // Subscribe
       subscriptionCache.subscribe('user:u1');
 
+      // Verify cache is empty before message
+      expect(cache.get('user', 'u1')).toBeUndefined();
+
       // Simulate server message
       const ws = mockWebSocketInstances[0];
       const user: User = { id: 'u1', version: 1, name: 'Alice', email: 'alice@test.com' };
       ws?.simulateMessage({ type: 'update', key: 'user:u1', value: user });
 
-      // Cache should be updated
-      expect(cache.get('user', 'u1')).toEqual(user);
+      // Cache should be updated with all fields
+      const cached = cache.get('user', 'u1');
+      expect(cached).toEqual(user);
+      expect(cached?.id).toBe('u1');
+      expect(cached?.version).toBe(1);
+      expect(cached?.name).toBe('Alice');
+      expect(cached?.email).toBe('alice@test.com');
 
       pubsub.close();
     });
@@ -393,6 +401,42 @@ describe('WebsocketPubsubClient + SubscriptionCache Integration', () => {
       // Number value
       ws?.simulateMessage({ type: 'update', key: 'user:u3', value: 123 });
       expect(cache.get('user', 'u3')).toBeUndefined();
+
+      pubsub.close();
+    });
+
+    it('should process messages in order and preserve latest version', async () => {
+      const { cache, pubsub } = createPubsubSystem();
+
+      await vi.advanceTimersByTimeAsync(0);
+
+      const ws = mockWebSocketInstances[0];
+
+      // Simulate a series of rapid updates with incrementing versions
+      const updates = [
+        { id: 'u1', version: 1, name: 'Alice v1', email: 'alice@test.com' },
+        { id: 'u1', version: 2, name: 'Alice v2', email: 'alice@test.com' },
+        { id: 'u1', version: 3, name: 'Alice v3', email: 'alice@test.com' },
+        { id: 'u1', version: 4, name: 'Alice v4', email: 'alice@test.com' },
+      ];
+
+      for (const update of updates) {
+        ws?.simulateMessage({ type: 'update', key: 'user:u1', value: update });
+      }
+
+      // Cache should have the highest version
+      const cached = cache.get('user', 'u1');
+      expect(cached?.version).toBe(4);
+      expect(cached?.name).toBe('Alice v4');
+
+      // Out-of-order update should be rejected
+      ws?.simulateMessage({
+        type: 'update',
+        key: 'user:u1',
+        value: { id: 'u1', version: 2, name: 'Alice stale', email: 'alice@test.com' },
+      });
+      expect(cache.get('user', 'u1')?.version).toBe(4);
+      expect(cache.get('user', 'u1')?.name).toBe('Alice v4');
 
       pubsub.close();
     });

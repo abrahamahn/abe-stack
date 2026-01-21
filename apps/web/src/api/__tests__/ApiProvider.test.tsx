@@ -1,8 +1,6 @@
 // apps/web/src/api/__tests__/ApiProvider.test.tsx
-/** @vitest-environment jsdom */
 import { ClientEnvironmentProvider } from '@app';
 import { QueryClient } from '@tanstack/react-query';
-import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

@@ -17,7 +17,7 @@
     "dev": "tsc --watch --project tsconfig.json",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "type-check": "tsc --project tsconfig.json --noEmit",
-    "test": "VITEST_TARGET=sdk vitest run --config ../../config/vitest.config.ts"
+    "test": "vitest run --project sdk"
   },
   "author": "",
   "license": "ISC",

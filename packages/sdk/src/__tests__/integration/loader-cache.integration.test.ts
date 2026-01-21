@@ -91,14 +91,17 @@ describe('LoaderCache Integration', () => {
       const loader = new Loader<User>({ ttlMs: 1000 });
 
       expect(loader.isStale).toBe(false);
-      expect(loader.timeRemaining).toBeGreaterThan(0);
+      // Initially, timeRemaining should be close to the full TTL (1000ms)
+      expect(loader.timeRemaining).toBe(1000);
 
       vi.advanceTimersByTime(500);
       expect(loader.isStale).toBe(false);
-      expect(loader.timeRemaining).toBeLessThanOrEqual(500);
+      // After 500ms, timeRemaining should be exactly 500ms
+      expect(loader.timeRemaining).toBe(500);
 
       vi.advanceTimersByTime(600);
       expect(loader.isStale).toBe(true);
+      // After TTL expires, timeRemaining should be 0
       expect(loader.timeRemaining).toBe(0);
     });
   });

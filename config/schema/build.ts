@@ -4,9 +4,14 @@
  *
  * Edit this file to change build settings across the monorepo.
  * Run: pnpm config:generate
+ *
+ * For path aliases, see: aliases.ts
  */
 
 import path from 'node:path';
+
+// Re-export aliases for backwards compatibility
+export { aliasDefinitions } from './aliases';
 
 /**
  * Repository root (computed at runtime)
@@ -164,116 +169,4 @@ export const vitestIntegration = {
   exclude: ['**/node_modules/**', '**/dist/**', '**/backup/**'],
   testTimeout: 30000,
   hookTimeout: 30000,
-} as const;
-
-/**
- * Alias definitions for each target
- * These mirror the manual paths in typescript.ts but in a format suitable for Vite/Vitest
- */
-export const aliasDefinitions = {
-  // Package aliases (used by apps that import packages)
-  packages: {
-    '@abe-stack/core': 'packages/core/src',
-    '@abe-stack/sdk': 'packages/sdk/src',
-    '@abe-stack/ui': 'packages/ui/src',
-  },
-
-  // UI internal aliases (needed when bundling apps that use UI)
-  uiInternal: {
-    '@elements': 'packages/ui/src/elements',
-    '@components': 'packages/ui/src/components',
-    '@layouts': 'packages/ui/src/layouts',
-    '@containers': 'packages/ui/src/layouts/containers',
-    '@layers': 'packages/ui/src/layouts/layers',
-    '@shells': 'packages/ui/src/layouts/shells',
-    '@hooks': 'packages/ui/src/hooks',
-    '@theme': 'packages/ui/src/theme',
-    '@utils': 'packages/ui/src/utils',
-  },
-
-  // Web app-specific aliases
-  web: {
-    '@': 'apps/web/src',
-    '@api': 'apps/web/src/api',
-    '@app': 'apps/web/src/app',
-    '@config': 'apps/web/src/config',
-    '@features': 'apps/web/src/features',
-    '@auth': 'apps/web/src/features/auth',
-    '@dashboard': 'apps/web/src/features/dashboard',
-    '@demo': 'apps/web/src/features/demo',
-    '@catalog': 'apps/web/src/features/demo/catalog',
-    '@toast': 'apps/web/src/features/toast',
-    '@pages': 'apps/web/src/pages',
-    '@test': 'apps/web/src/test',
-  },
-
-  // Core internal aliases
-  coreInternal: {
-    '@contracts': 'packages/core/src/contracts',
-    '@stores': 'packages/core/src/stores',
-    '@validation': 'packages/core/src/validation',
-  },
-
-  // Server-specific aliases
-  server: {
-    '@': 'apps/server/src',
-    '@config': 'apps/server/src/config',
-    '@modules': 'apps/server/src/modules',
-    '@scripts': 'apps/server/src/scripts',
-    '@shared': 'apps/server/src/shared',
-    '@types': 'apps/server/src/types',
-    '@infra': 'apps/server/src/infra',
-    '@crypto': 'apps/server/src/infra/crypto',
-    '@database': 'apps/server/src/infra/database',
-    '@schema': 'apps/server/src/infra/database/schema',
-    '@email': 'apps/server/src/infra/email',
-    '@health': 'apps/server/src/infra/health',
-    '@http': 'apps/server/src/infra/http',
-    '@pubsub': 'apps/server/src/infra/pubsub',
-    '@rate-limit': 'apps/server/src/infra/rate-limit',
-    '@security': 'apps/server/src/infra/security',
-    '@storage': 'apps/server/src/infra/storage',
-    '@providers': 'apps/server/src/infra/storage/providers',
-    '@websocket': 'apps/server/src/infra/websocket',
-    '@auth': 'apps/server/src/modules/auth',
-    '@admin': 'apps/server/src/modules/admin',
-    '@users': 'apps/server/src/modules/users',
-    '@utils': 'apps/server/src/modules/auth/utils',
-  },
-
-  // Desktop-specific aliases (unique to desktop, no conflicts with UI)
-  desktop: {
-    '@': 'apps/desktop/src',
-    '@services': 'apps/desktop/src/services',
-    '@routes': 'apps/desktop/src/routes',
-    '@api': 'apps/desktop/src/api',
-  },
-
-  // Core package internal aliases
-  core: {
-    '@contracts': 'packages/core/src/contracts',
-    '@stores': 'packages/core/src/stores',
-    '@utils': 'packages/core/src/utils',
-    '@validation': 'packages/core/src/validation',
-  },
-
-  // UI package internal aliases
-  ui: {
-    '@components': 'packages/ui/src/components',
-    '@containers': 'packages/ui/src/layouts/containers',
-    '@elements': 'packages/ui/src/elements',
-    '@hooks': 'packages/ui/src/hooks',
-    '@layers': 'packages/ui/src/layouts/layers',
-    '@layouts': 'packages/ui/src/layouts',
-    '@shells': 'packages/ui/src/layouts/shells',
-    '@styles': 'packages/ui/src/styles',
-    '@test': 'packages/ui/src/test',
-    '@theme': 'packages/ui/src/theme',
-    '@utils': 'packages/ui/src/utils',
-  },
-
-  // SDK package internal aliases
-  sdk: {
-    '@persistence': 'packages/sdk/src/persistence',
-  },
 } as const;

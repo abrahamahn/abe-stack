@@ -17,7 +17,6 @@ import { generatePackageJson } from './package.gen';
 import { generatePrettierConfigs } from './prettier.gen';
 import { generateTsconfigs } from './tsconfig.gen';
 import { generateViteAliases } from './vite.gen';
-import { generateVitestConfigs } from './vitest.gen';
 import { generateVscodeSettings } from './vscode.gen';
 
 const ROOT = path.resolve(__dirname, '../..');
@@ -28,7 +27,7 @@ interface GeneratorResult {
   errors: string[];
 }
 
-type GeneratorType = 'tsconfig' | 'vite' | 'vitest' | 'prettier' | 'vscode' | 'package';
+type GeneratorType = 'tsconfig' | 'vite' | 'prettier' | 'vscode' | 'package';
 
 const generators: Record<
   GeneratorType,
@@ -36,7 +35,6 @@ const generators: Record<
 > = {
   tsconfig: generateTsconfigs,
   vite: generateViteAliases,
-  vitest: generateVitestConfigs,
   prettier: generatePrettierConfigs,
   vscode: generateVscodeSettings,
   package: generatePackageJson,

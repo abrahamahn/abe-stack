@@ -14,18 +14,20 @@ import {
   createMemberRule,
   createOwnerRule,
   createPermissionChecker,
-} from '@infra/permissions/checker';
-import {
   createPermissionMiddleware,
   createStandalonePermissionGuard,
-} from '@infra/permissions/middleware';
+} from '@permissions';
 import Fastify from 'fastify';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { parseJsonResponse } from './test-utils';
 
-import type { PermissionChecker } from '@infra/permissions/checker';
-import type { PermissionConfig, PermissionRecord, RecordLoader } from '@infra/permissions/types';
+import type {
+  PermissionChecker,
+  PermissionConfig,
+  PermissionRecord,
+  RecordLoader,
+} from '@permissions';
 import type { FastifyInstance } from 'fastify';
 
 // ============================================================================

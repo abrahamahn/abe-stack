@@ -29,36 +29,36 @@ export const packageScripts: Record<string, Record<string, string>> = {
     dev: 'vite --config ../../config/vite.web.config.ts',
     build: 'tsc && vite build --config ../../config/vite.web.config.ts',
     preview: 'vite preview --config ../../config/vite.web.config.ts',
-    test: 'VITEST_TARGET=web vitest --config ../../config/vitest.config.ts',
+    test: 'vitest run --config ../../vitest.config.ts',
   },
 
   'apps/server': {
     dev: 'tsx watch src/main.ts',
     build: 'tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json',
     start: 'node dist/main.js',
-    test: 'VITEST_TARGET=server vitest --config ../../config/vitest.config.ts',
+    test: 'vitest run --config ../../vitest.config.ts',
   },
 
   'apps/desktop': {
     dev: 'concurrently "vite --config ../../config/vite.desktop.config.ts" "tsx src/electron/main.ts"',
     build:
       'vite build --config ../../config/vite.desktop.config.ts && tsc -p tsconfig.electron.json',
-    test: 'vitest --config vitest.config.ts',
+    test: 'vitest run --config ../../vitest.config.ts',
   },
 
   'packages/core': {
     build: 'tsc --build',
-    test: 'VITEST_TARGET=core vitest --config ../../config/vitest.config.ts',
+    test: 'vitest run --config ../../vitest.config.ts',
   },
 
   'packages/sdk': {
     build: 'tsc --build',
-    test: 'VITEST_TARGET=sdk vitest --config ../../config/vitest.config.ts',
+    test: 'vitest run --config ../../vitest.config.ts',
   },
 
   'packages/ui': {
     build: 'tsc --build',
-    test: 'VITEST_TARGET=ui vitest --config ../../config/vitest.config.ts',
+    test: 'vitest run --config ../../vitest.config.ts',
   },
 };
 
@@ -117,9 +117,6 @@ export const rootScripts = {
   'sync:imports': 'tsx tools/sync/sync-import-aliases.ts',
   'sync:imports:check': 'tsx tools/sync/sync-import-aliases.ts --check',
   'sync:imports:watch': 'tsx tools/sync/sync-import-aliases.ts --watch',
-  'sync:tests': 'tsx tools/sync/sync-test-folders.ts',
-  'sync:tests:check': 'tsx tools/sync/sync-test-folders.ts --check',
-  'sync:tests:watch': 'tsx tools/sync/sync-test-folders.ts --watch',
 
   // Type check
   'type-check': 'turbo run type-check',
@@ -163,5 +160,5 @@ export const rootScripts = {
 
   // Pre-commit (updated to use config:generate)
   'pre-commit':
-    'pnpm config:generate && pnpm sync:headers && pnpm sync:imports && pnpm sync:tests && pnpm sync:theme && pnpm lint-staged && pnpm type-check',
+    'pnpm config:generate && pnpm sync:headers && pnpm sync:imports && pnpm sync:theme && pnpm lint-staged && pnpm type-check',
 } as const;

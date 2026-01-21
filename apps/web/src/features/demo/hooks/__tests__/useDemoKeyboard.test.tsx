@@ -1,5 +1,4 @@
-/** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
+// apps/web/src/features/demo/hooks/__tests__/useDemoKeyboard.test.tsx
 import { fireEvent } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

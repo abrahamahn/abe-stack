@@ -41,7 +41,7 @@
     "dev": "echo 'UI package uses source files directly - no build needed for dev'",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "type-check": "tsc --project tsconfig.json --noEmit",
-    "test": "VITEST_TARGET=ui vitest run --config ../../config/vitest.config.ts"
+    "test": "vitest run --project ui"
   },
   "keywords": [
     "abe-stack",

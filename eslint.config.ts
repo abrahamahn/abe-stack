@@ -38,6 +38,7 @@ export default [
       'apps/web/vitest.config.ts',
       '**/vitest.config.ts',
       '**/vitest.config.js',
+      '**/vitest.stryker.config.ts',
       'tools/sync/sync-css-theme.ts',
       'config/drizzle.config.ts',
       'apps/desktop/src/**/*.js',

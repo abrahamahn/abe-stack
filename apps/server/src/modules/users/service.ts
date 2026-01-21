@@ -6,7 +6,7 @@
  * No HTTP awareness - returns domain objects or throws errors.
  */
 
-import { users, type DbClient } from '@infra';
+import { users, type DbClient } from '@infrastructure';
 import { eq } from 'drizzle-orm';
 
 import type { UserRole } from '@abe-stack/core';

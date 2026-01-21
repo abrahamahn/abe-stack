@@ -14,7 +14,8 @@
     "types/**/*.ts",
     "utils/**/*.ts",
     "__tests__/**/*.ts",
-    "ipc/__tests__/**/*.ts"
+    "ipc/__tests__/**/*.ts",
+    "./__tests__/integration.test.ts"
   ],
   "exclude": ["node_modules"]
 }

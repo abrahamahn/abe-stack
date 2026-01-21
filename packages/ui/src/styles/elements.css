@@ -943,7 +943,7 @@ a:focus-visible {
 
 .markdown-content {
   font-size: var(--ui-font-size-sm);
-  line-height: var(--ui-line-height-normal);
+  line-height: var(--ui-line-height-relaxed);
   color: var(--ui-color-text);
 }
 
@@ -955,9 +955,8 @@ a:focus-visible {
 .markdown-content h6 {
   margin-top: var(--ui-gap-xl);
   margin-bottom: var(--ui-gap-sm);
-  font-weight: var(--ui-font-weight-semibold);
+  font-weight: var(--ui-font-weight-bold);
   line-height: var(--ui-line-height-tight);
-  color: var(--ui-color-text);
 }
 
 .markdown-content h1:first-child,
@@ -968,22 +967,28 @@ a:focus-visible {
 
 .markdown-content h1 {
   font-size: var(--ui-font-size-xl);
-  border-bottom: var(--ui-border-width) solid var(--ui-color-border);
+  border-bottom: 2px solid var(--ui-color-primary);
   padding-bottom: var(--ui-gap-xs);
+  color: var(--ui-color-primary);
 }
 
 .markdown-content h2 {
   font-size: var(--ui-font-size-lg);
   border-bottom: var(--ui-border-width) solid var(--ui-color-border);
   padding-bottom: var(--ui-gap-xs);
+  color: var(--ui-color-text);
 }
 
 .markdown-content h3 {
   font-size: var(--ui-font-size-md);
+  color: var(--ui-color-text);
 }
 
 .markdown-content h4 {
   font-size: var(--ui-font-size-sm);
+  color: var(--ui-color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .markdown-content p {
@@ -997,49 +1002,122 @@ a:focus-visible {
 .markdown-content a {
   color: var(--ui-color-primary);
   text-decoration: none;
+  font-weight: var(--ui-font-weight-medium);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s ease;
 }
 
 .markdown-content a:hover {
-  text-decoration: underline;
+  border-bottom-color: var(--ui-color-primary);
 }
 
+/* Bold text - more prominent */
 .markdown-content strong {
-  font-weight: var(--ui-font-weight-semibold);
+  font-weight: var(--ui-font-weight-bold);
+  color: var(--ui-color-text);
 }
 
+/* Italic text */
 .markdown-content em {
   font-style: italic;
 }
 
-/* Inline code */
+/* Inline code - colorful pill style */
 .markdown-content code {
   font-family: var(--ui-font-family-mono);
-  font-size: inherit;
-  padding: 0.125em 0.375em;
-  background-color: var(--ui-color-bg-secondary);
+  font-size: 0.9em;
+  padding: 0.2em 0.5em;
+  background-color: #fef3f2;
   border-radius: var(--ui-radius-sm);
-  color: var(--ui-color-text);
+  color: #c2410c;
+  font-weight: var(--ui-font-weight-medium);
 }
 
-/* Code blocks */
+/* Dark mode inline code */
+@media (prefers-color-scheme: dark) {
+  .markdown-content code {
+    background-color: #292524;
+    color: #fb923c;
+  }
+}
+
+/* Code blocks - polished dark theme */
 .markdown-content pre {
+  position: relative;
   margin: var(--ui-gap-lg) 0;
-  padding: var(--ui-gap-lg);
-  overflow-x: auto;
-  background-color: var(--ui-color-bg-secondary);
-  border-radius: var(--ui-radius-md);
-  border: var(--ui-border-width) solid var(--ui-color-border);
+  padding: 0;
+  overflow: hidden;
+  background-color: #0f172a;
+  border-radius: var(--ui-radius-lg);
+  border: 1px solid #1e293b;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Header bar with dots */
+.markdown-content pre::before {
+  content: '';
+  display: block;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(to bottom, #1e293b, #0f172a);
+  border-bottom: 1px solid #1e293b;
+  background-image:
+    radial-gradient(circle, #ef4444 6px, transparent 6px),
+    radial-gradient(circle, #eab308 6px, transparent 6px),
+    radial-gradient(circle, #22c55e 6px, transparent 6px);
+  background-size:
+    12px 12px,
+    12px 12px,
+    12px 12px;
+  background-position:
+    12px center,
+    32px center,
+    52px center;
+  background-repeat: no-repeat;
 }
 
 .markdown-content pre code {
-  padding: 0;
+  display: block;
+  padding: var(--ui-gap-lg);
+  overflow-x: auto;
   background: none;
   border-radius: 0;
-  font-size: inherit;
-  line-height: var(--ui-line-height-normal);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  color: #e2e8f0;
+  font-weight: normal;
+  tab-size: 2;
 }
 
-/* Lists */
+/* Custom scrollbar for code blocks */
+.markdown-content pre code::-webkit-scrollbar {
+  height: 8px;
+}
+
+.markdown-content pre code::-webkit-scrollbar-track {
+  background: #1e293b;
+  border-radius: 4px;
+}
+
+.markdown-content pre code::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
+
+.markdown-content pre code::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Selection highlight in code */
+.markdown-content pre code::selection,
+.markdown-content pre code *::selection {
+  background-color: #3b82f6;
+  color: white;
+}
+
+/* Lists - styled markers */
 .markdown-content ul,
 .markdown-content ol {
   margin: var(--ui-gap-lg) 0;
@@ -1054,8 +1132,17 @@ a:focus-visible {
   list-style-type: disc;
 }
 
+.markdown-content ul li::marker {
+  color: var(--ui-color-primary);
+}
+
 .markdown-content ol {
   list-style-type: decimal;
+}
+
+.markdown-content ol li::marker {
+  color: var(--ui-color-primary);
+  font-weight: var(--ui-font-weight-semibold);
 }
 
 .markdown-content li > ul,
@@ -1063,20 +1150,28 @@ a:focus-visible {
   margin: var(--ui-gap-xs) 0;
 }
 
-/* Blockquotes */
+/* Blockquotes - styled callout */
 .markdown-content blockquote {
   margin: var(--ui-gap-lg) 0;
-  padding: var(--ui-gap-sm) var(--ui-gap-lg);
+  padding: var(--ui-gap-md) var(--ui-gap-lg);
   border-left: 4px solid var(--ui-color-primary);
-  background-color: var(--ui-color-bg-secondary);
-  color: var(--ui-color-text-muted);
+  background: linear-gradient(to right, rgba(37, 99, 235, 0.08), transparent);
+  border-radius: 0 var(--ui-radius-md) var(--ui-radius-md) 0;
+  font-style: italic;
 }
 
 .markdown-content blockquote p {
   margin-bottom: 0;
+  color: var(--ui-color-text);
 }
 
-/* Tables - scrollable wrapper */
+@media (prefers-color-scheme: dark) {
+  .markdown-content blockquote {
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.15), transparent);
+  }
+}
+
+/* Tables - styled with better headers */
 .markdown-content table {
   display: block;
   width: max-content;
@@ -1085,6 +1180,8 @@ a:focus-visible {
   overflow-x: auto;
   border-collapse: collapse;
   font-size: inherit;
+  border-radius: var(--ui-radius-md);
+  overflow: hidden;
 }
 
 .markdown-content th,
@@ -1101,19 +1198,32 @@ a:focus-visible {
 }
 
 .markdown-content th {
-  background-color: var(--ui-color-bg-secondary);
+  background-color: #1e293b;
+  color: #e2e8f0;
   font-weight: var(--ui-font-weight-semibold);
+  border-color: #334155;
 }
 
 .markdown-content tr:nth-child(even) {
-  background-color: var(--ui-color-bg-tertiary);
+  background-color: var(--ui-color-bg-secondary);
 }
 
-/* Horizontal rules */
+.markdown-content tr:hover td {
+  background-color: rgba(100, 116, 139, 0.1);
+}
+
+/* Horizontal rules - gradient style */
 .markdown-content hr {
   margin: var(--ui-gap-2xl) 0;
   border: none;
-  border-top: var(--ui-border-width) solid var(--ui-color-border);
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--ui-color-border) 20%,
+    var(--ui-color-border) 80%,
+    transparent
+  );
 }
 
 /* Images */

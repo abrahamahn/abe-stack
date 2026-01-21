@@ -446,7 +446,7 @@ describe('UndoRedoStack with Operations Integration', () => {
   });
 
   describe('state tracking', () => {
-    it('should track canUndo correctly', () => {
+    it('should track canUndo correctly and restore data on undo', () => {
       const { cache, undoStack, write } = system;
 
       cache.set('user', 'u1', {
@@ -458,15 +458,20 @@ describe('UndoRedoStack with Operations Integration', () => {
       });
 
       expect(undoStack.canUndo).toBe(false);
+      expect(cache.get('user', 'u1')?.name).toBe('Alice');
 
-      write([{ table: 'user', id: 'u1', updates: { name: 'Update' } }]);
+      write([{ table: 'user', id: 'u1', updates: { name: 'Updated Name' } }]);
       expect(undoStack.canUndo).toBe(true);
+      // Verify data was actually changed
+      expect(cache.get('user', 'u1')?.name).toBe('Updated Name');
 
       undoStack.undo();
       expect(undoStack.canUndo).toBe(false);
+      // Verify data was actually restored
+      expect(cache.get('user', 'u1')?.name).toBe('Alice');
     });
 
-    it('should track canRedo correctly', () => {
+    it('should track canRedo correctly and restore data on redo', () => {
       const { cache, undoStack, write } = system;
 
       cache.set('user', 'u1', {
@@ -479,14 +484,20 @@ describe('UndoRedoStack with Operations Integration', () => {
 
       expect(undoStack.canRedo).toBe(false);
 
-      write([{ table: 'user', id: 'u1', updates: { name: 'Update' } }]);
+      write([{ table: 'user', id: 'u1', updates: { name: 'Updated Name' } }]);
       expect(undoStack.canRedo).toBe(false);
+      // Verify data was changed
+      expect(cache.get('user', 'u1')?.name).toBe('Updated Name');
 
       undoStack.undo();
       expect(undoStack.canRedo).toBe(true);
+      // Verify data was restored
+      expect(cache.get('user', 'u1')?.name).toBe('Alice');
 
       undoStack.redo();
       expect(undoStack.canRedo).toBe(false);
+      // Verify data was re-applied
+      expect(cache.get('user', 'u1')?.name).toBe('Updated Name');
     });
 
     it('should notify state changes', () => {
@@ -500,12 +511,25 @@ describe('UndoRedoStack with Operations Integration', () => {
         bio: '',
       });
 
+      // Before any write, state changes should be empty
+      const initialLength = stateChanges.length;
+
       write([{ table: 'user', id: 'u1', updates: { name: 'Update' } }]);
 
-      expect(stateChanges.length).toBeGreaterThan(0);
+      // Verify cache was actually updated
+      expect(cache.get('user', 'u1')?.name).toBe('Update');
+
+      // Verify state change notification occurred
+      expect(stateChanges.length).toBe(initialLength + 1);
       const lastState = stateChanges[stateChanges.length - 1];
-      expect(lastState?.canUndo).toBe(true);
-      expect(lastState?.undoCount).toBe(1);
+      expect(lastState).toEqual(
+        expect.objectContaining({
+          canUndo: true,
+          canRedo: false,
+          undoCount: 1,
+          redoCount: 0,
+        }),
+      );
     });
 
     it('should increment checkpoint on each operation', () => {

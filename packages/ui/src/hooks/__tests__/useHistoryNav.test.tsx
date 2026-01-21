@@ -1,6 +1,5 @@
 // packages/ui/src/hooks/__tests__/useHistoryNav.test.tsx
 /** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
 import { render, screen, act } from '@testing-library/react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';

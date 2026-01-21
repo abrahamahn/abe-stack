@@ -1,6 +1,5 @@
 // packages/ui/src/components/__tests__/Radio.test.tsx
 /** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState, type ReactElement } from 'react';

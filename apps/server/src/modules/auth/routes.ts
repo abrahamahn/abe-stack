@@ -14,7 +14,7 @@ import {
   resendVerificationRequestSchema,
   resetPasswordRequestSchema,
 } from '@abe-stack/core';
-import { protectedRoute, publicRoute, type RouteMap, type RouteResult } from '@infra/router';
+import { protectedRoute, publicRoute, type RouteMap, type RouteResult } from '@router';
 
 import {
   handleForgotPassword,

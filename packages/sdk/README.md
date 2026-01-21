@@ -2,6 +2,19 @@
 
 Type-safe API client and client-side state management for ABE Stack applications.
 
+## Table of Contents
+
+- [The Philosophy](#the-philosophy)
+- [The Data Flow Story](#the-data-flow-story)
+- [Module Architecture](#module-architecture)
+- [API Reference](#api-reference)
+- [React Integration](#react-integration)
+- [Trade-offs and Limitations](#trade-offs-and-limitations)
+- [Comparison to Similar Patterns](#comparison-to-similar-patterns)
+- [Getting Started](#getting-started)
+
+---
+
 ## The Philosophy
 
 We wanted to build applications that feel instant, work offline, and stay in sync across tabs and devices. This SDK is our answer to that challenge.
@@ -562,3 +575,7 @@ If you are evaluating this pattern, also look at:
 The data flows automatically. Records update in real-time. Mutations queue when offline. Version conflicts resolve deterministically. You focus on building features.
 
 That is the goal, anyway.
+
+---
+
+_Last Updated: 2026-01-21_

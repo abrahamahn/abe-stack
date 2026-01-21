@@ -11,7 +11,6 @@
  * - Nested modals with forms
  */
 
-import '@testing-library/jest-dom/vitest';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';

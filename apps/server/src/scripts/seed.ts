@@ -20,7 +20,7 @@ import { loadConfig } from '@config';
 import { buildConnectionString, createDbClient, users } from '@database';
 import { hashPassword } from '@modules/auth/utils/password';
 
-interface SeedUser {
+export interface SeedUser {
   email: string;
   password: string;
   name: string;
@@ -32,7 +32,7 @@ interface SeedUser {
  * Never use these passwords in production. The seed script will refuse
  * to run if NODE_ENV === 'production'.
  */
-const TEST_USERS: SeedUser[] = [
+export const TEST_USERS: SeedUser[] = [
   {
     email: 'admin@example.com',
     password: 'password123',
@@ -53,7 +53,7 @@ const TEST_USERS: SeedUser[] = [
   },
 ];
 
-async function seed(): Promise<void> {
+export async function seed(): Promise<void> {
   // Safety check: refuse to seed in production
   if (process.env.NODE_ENV === 'production') {
     console.error('');
@@ -112,7 +112,13 @@ async function seed(): Promise<void> {
   process.exit(0);
 }
 
-seed().catch((error: unknown) => {
-  console.error('❌ Seed failed:', error);
-  process.exit(1);
-});
+// Only run when executed directly (not imported for testing)
+const isMainModule =
+  typeof process !== 'undefined' && process.argv[1]?.includes('seed') && !process.env.VITEST;
+
+if (isMainModule) {
+  seed().catch((error: unknown) => {
+    console.error('❌ Seed failed:', error);
+    process.exit(1);
+  });
+}

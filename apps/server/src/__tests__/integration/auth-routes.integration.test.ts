@@ -11,20 +11,20 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import type { FastifyInstance } from 'fastify';
 
 // Mock database and external services
-vi.mock('@infra/database/client', () => ({
+vi.mock('@infrastructure/database/client', () => ({
   createDbClient: vi.fn(() => ({
     execute: vi.fn().mockResolvedValue([]),
     query: {},
   })),
 }));
 
-vi.mock('@infra/email/factory', () => ({
+vi.mock('@infrastructure/email/factory', () => ({
   createEmailService: vi.fn(() => ({
     send: vi.fn().mockResolvedValue({ success: true }),
   })),
 }));
 
-vi.mock('@infra/pubsub/postgresPubSub', () => ({
+vi.mock('@infrastructure/pubsub/postgresPubSub', () => ({
   createPostgresPubSub: vi.fn(() => ({
     start: vi.fn().mockResolvedValue(undefined),
     stop: vi.fn().mockResolvedValue(undefined),

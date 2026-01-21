@@ -9,7 +9,7 @@
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "type-check": "tsc --project tsconfig.json --noEmit",
-    "test": "VITEST_TARGET=server vitest run --config ../../config/vitest.config.ts",
+    "test": "vitest run",
     "db:generate": "drizzle-kit generate --config ../../config/drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config ../../config/drizzle.config.ts",
     "db:push": "drizzle-kit push --config ../../config/drizzle.config.ts",

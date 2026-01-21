@@ -123,7 +123,6 @@ async function main(): Promise<void> {
   const watchers = [
     startConfigGenerator(), // Generates tsconfigs and aliases
     startWatcher('config/lint/sync-file-headers.ts'),
-    startWatcher('config/lint/sync-test-folders.ts'),
     startWatcher('config/lint/sync-css-theme.ts'),
   ];
 

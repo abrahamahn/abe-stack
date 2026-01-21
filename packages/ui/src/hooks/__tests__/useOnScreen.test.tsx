@@ -1,6 +1,5 @@
 // packages/ui/src/hooks/__tests__/useOnScreen.test.tsx
 /** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';
 import { useRef, type ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';

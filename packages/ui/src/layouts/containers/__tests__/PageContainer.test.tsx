@@ -1,7 +1,6 @@
 // packages/ui/src/layouts/containers/__tests__/PageContainer.test.tsx
 // packages/ui/src/layouts/__tests__/PageContainer.test.tsx
 /** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 

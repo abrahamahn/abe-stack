@@ -27,7 +27,7 @@ import { sql } from 'drizzle-orm';
 import Fastify from 'fastify';
 
 import type { AppConfig } from '@config/index';
-import type { DbClient } from '@infra/index';
+import type { DbClient } from '@infrastructure/index';
 import type { FastifyInstance } from 'fastify';
 
 // ============================================================================

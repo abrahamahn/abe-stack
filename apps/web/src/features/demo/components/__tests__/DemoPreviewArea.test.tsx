@@ -1,6 +1,4 @@
 // apps/web/src/features/demo/components/__tests__/DemoPreviewArea.test.tsx
-/** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -67,7 +65,9 @@ describe('DemoPreviewArea', () => {
 
   it('shows placeholder when no component is selected', () => {
     render(<DemoPreviewArea {...defaultProps} />);
-    expect(screen.getByText(/select a component from the left sidebar/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/select a component from the left sidebar to view demos/i),
+    ).toBeInTheDocument();
   });
 
   it('shows component name when selected', () => {

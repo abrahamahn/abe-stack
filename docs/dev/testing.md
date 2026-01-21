@@ -36,7 +36,7 @@ ABE Stack uses a multi-layer testing approach:
 | ----------- | ------------ | --------------------------- | --------------- |
 | Unit        | Vitest       | Functions, hooks, utilities | Fast (~1ms)     |
 | Component   | Vitest + RTL | React components            | Fast (~10ms)    |
-| Integration | Vitest + MSW | API routes, services        | Medium (~100ms) |
+| Integration | Vitest       | API routes, services        | Medium (~100ms) |
 | E2E         | Playwright   | Full user flows             | Slow (~1-5s)    |
 
 ### Test Pyramid
@@ -286,7 +286,6 @@ The ABE Stack testing infrastructure is configured with modern tools and best pr
 - **Vitest** - Fast unit test runner with native ESM support
 - **React Testing Library** - User-centric component testing
 - **@testing-library/user-event** - Realistic user interaction simulation
-- **MSW (Mock Service Worker)** - Network request mocking
 - **Playwright** - End-to-end testing
 - **vitest-axe** - Accessibility testing
 
@@ -306,9 +305,6 @@ vitest
 @vitest/ui
 jsdom
 
-# Network mocking
-msw
-
 # E2E testing
 @playwright/test
 
@@ -319,7 +315,7 @@ vitest-axe
 Quick install (if needed):
 
 ```bash
-pnpm add -D vitest @testing-library/react @testing-library/user-event msw vitest-axe
+pnpm add -D vitest @testing-library/react @testing-library/user-event vitest-axe
 pnpm add -D @playwright/test
 ```
 
@@ -358,43 +354,27 @@ export default defineConfig({
 ```typescript
 import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
-import { afterAll, afterEach, beforeAll } from 'vitest';
+import { afterEach } from 'vitest';
 
-import { server } from './mocks/server';
-
-// MSW Server Lifecycle
-beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
 afterEach(() => {
   cleanup();
-  server.resetHandlers();
 });
-afterAll(() => server.close());
 
 // Export axe for accessibility testing
 export { axe } from 'vitest-axe';
 ```
 
-#### MSW Configuration
+#### API Mocking
 
-**packages/ui/src/test/mocks/handlers.ts** - Define mock API handlers:
-
-```typescript
-import { http, HttpResponse } from 'msw';
-
-export const handlers = [
-  http.get('/api/user/:id', ({ params }) => {
-    return HttpResponse.json({ id: params.id, name: 'John Doe' });
-  }),
-];
-```
-
-**packages/ui/src/test/mocks/server.ts** - Setup MSW server:
+For API mocking, use `vi.mock()` to mock your API client directly:
 
 ```typescript
-import { setupServer } from 'msw/node';
-import { handlers } from './handlers';
+import { vi } from 'vitest';
 
-export const server = setupServer(...handlers);
+// Mock API client
+vi.mock('@/api/client', () => ({
+  fetchUser: vi.fn().mockResolvedValue({ id: '123', name: 'John Doe' }),
+}));
 ```
 
 ### Usage Examples
@@ -438,23 +418,24 @@ describe('Button', () => {
 });
 ```
 
-#### Network Mocking with MSW
+#### Network Mocking with vi.mock()
 
 ```typescript
 import { render, screen, waitFor } from '@testing-library/react';
-import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
-import { server } from '@/test/mocks/server';
 import { UserProfile } from '../UserProfile';
+
+// Mock the API client module
+vi.mock('@/api/client', () => ({
+  fetchUser: vi.fn(),
+}));
+
+import { fetchUser } from '@/api/client';
 
 describe('UserProfile', () => {
   it('displays user data from API', async () => {
-    server.use(
-      http.get('/api/user/123', () => {
-        return HttpResponse.json({ id: '123', name: 'Alice' });
-      }),
-    );
+    vi.mocked(fetchUser).mockResolvedValue({ id: '123', name: 'Alice' });
 
     render(<UserProfile userId="123" />);
 
@@ -464,11 +445,7 @@ describe('UserProfile', () => {
   });
 
   it('handles API errors gracefully', async () => {
-    server.use(
-      http.get('/api/user/123', () => {
-        return HttpResponse.json({ error: 'Not found' }, { status: 404 });
-      }),
-    );
+    vi.mocked(fetchUser).mockRejectedValue(new Error('Not found'));
 
     render(<UserProfile userId="123" />);
 
@@ -606,18 +583,6 @@ Ensure `vitest.config.ts` has correct path to setup file:
 
 ```typescript
 setupFiles: ['./src/test/setup.ts'];
-```
-
-#### MSW Warnings About Unhandled Requests
-
-Add handlers for all network requests or update server config:
-
-```typescript
-beforeAll(() => {
-  server.listen({
-    onUnhandledRequest: 'warn', // or 'bypass' to ignore
-  });
-});
 ```
 
 #### Accessibility Test False Positives
@@ -1151,56 +1116,34 @@ it('handles user interactions', async () => {
 
 #### ✅ For Network Mocking
 
-**MSW (Mock Service Worker)**
+**vi.mock() (Vitest built-in)**
 
-```bash
-pnpm add -D msw
-```
+No additional dependencies required - use Vitest's built-in mocking.
 
 **Why:**
 
-- Best practice for realistic API mocking
-- Intercepts fetch/XHR at the network level
-- Works for both component tests and E2E
-
-**Setup:**
-
-```tsx
-// test/mocks/handlers.ts
-import { http, HttpResponse } from 'msw';
-
-export const handlers = [
-  http.get('/api/users', () => {
-    return HttpResponse.json([
-      { id: 1, name: 'John' },
-      { id: 2, name: 'Jane' },
-    ]);
-  }),
-
-  http.post('/api/users', async ({ request }) => {
-    const newUser = await request.json();
-    return HttpResponse.json({ id: 3, ...newUser }, { status: 201 });
-  }),
-];
-
-// test/mocks/server.ts
-import { setupServer } from 'msw/node';
-import { handlers } from './handlers';
-
-export const server = setupServer(...handlers);
-
-// test/setup.ts
-import { server } from './mocks/server';
-
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
-```
+- Zero additional dependencies
+- Simple and direct
+- Full control over mock behavior
 
 **Usage:**
 
 ```tsx
+import { vi } from 'vitest';
+
+// Mock your API client
+vi.mock('@/api/client', () => ({
+  fetchUsers: vi.fn(),
+}));
+
+import { fetchUsers } from '@/api/client';
+
 it('fetches and displays users', async () => {
+  vi.mocked(fetchUsers).mockResolvedValue([
+    { id: 1, name: 'John' },
+    { id: 2, name: 'Jane' },
+  ]);
+
   render(<UserList />);
 
   expect(await screen.findByText('John')).toBeInTheDocument();
@@ -1208,11 +1151,7 @@ it('fetches and displays users', async () => {
 });
 
 it('handles API errors', async () => {
-  server.use(
-    http.get('/api/users', () => {
-      return HttpResponse.error();
-    }),
-  );
+  vi.mocked(fetchUsers).mockRejectedValue(new Error('Network error'));
 
   render(<UserList />);
   expect(await screen.findByText(/error loading users/i)).toBeInTheDocument();
@@ -1268,7 +1207,7 @@ await expect(page).toHaveScreenshot('homepage.png');
 
 #### 🏆 Best Overall Stack Today
 
-**Vitest + RTL + user-event + MSW + Playwright**
+**Vitest + RTL + user-event + Playwright**
 
 ## Edge Case Testing & TDD Conventions
 
@@ -2142,4 +2081,4 @@ it('has no accessibility violations', async () => {
 
 #### 4. No Network Mocking Tests ❌
 
-**Problem:** No components test API interactions with MSW
+**Problem:** No components test API interactions with vi.mock()

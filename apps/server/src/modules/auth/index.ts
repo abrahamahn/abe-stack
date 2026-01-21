@@ -69,3 +69,6 @@ export {
   verifyPasswordSafe,
   type TokenPayload,
 } from './utils';
+
+// Security (login tracking, lockout, audit)
+export * from './security';

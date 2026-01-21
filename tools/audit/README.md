@@ -120,7 +120,7 @@ Security audit is automatically run on pre-commit:
 
 ```json
 {
-  "pre-commit": "pnpm config:generate && pnpm sync:headers && pnpm sync:tests && pnpm sync:theme && pnpm lint-staged && pnpm type-check && pnpm audit:security"
+  "pre-commit": "pnpm config:generate && pnpm sync:headers && pnpm sync:theme && pnpm lint-staged && pnpm type-check && pnpm audit:security"
 }
 ```
 

@@ -4,28 +4,41 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
+import { packageAliases, uiInternalAliases, coreInternalAliases } from './schema/aliases';
+
 const repoRoot = path.resolve(__dirname, '..');
 const packagesRoot = path.join(repoRoot, 'packages');
 const appsRoot = path.join(repoRoot, 'apps');
 
 const webRoot = path.join(appsRoot, 'web');
-const coreRoot = path.join(packagesRoot, 'core');
-const sdkRoot = path.join(packagesRoot, 'sdk');
-const uiRoot = path.join(packagesRoot, 'ui');
+
+/**
+ * Resolves relative alias paths to absolute paths
+ */
+function resolveAliases(aliases: Record<string, string>): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(aliases).map(([key, value]) => [key, path.join(repoRoot, value)]),
+  );
+}
 
 export default defineConfig({
   plugins: [
     react(),
     tsconfigPaths({
-      // Include all projects that web imports from
-      projects: [
-        `${webRoot}/tsconfig.json`,
-        `${coreRoot}/tsconfig.json`,
-        `${uiRoot}/tsconfig.json`,
-        `${sdkRoot}/tsconfig.json`,
-      ],
+      // Include web app tsconfig for its own aliases
+      projects: [`${webRoot}/tsconfig.json`],
     }),
   ],
+  resolve: {
+    alias: {
+      // Monorepo packages → source files (not dist/)
+      ...resolveAliases(packageAliases),
+      // UI package internal aliases (needed when importing from UI source)
+      ...resolveAliases(uiInternalAliases),
+      // Core package internal aliases
+      ...resolveAliases(coreInternalAliases),
+    },
+  },
   publicDir: `${webRoot}/public`,
   build: {
     outDir: `${webRoot}/dist`,

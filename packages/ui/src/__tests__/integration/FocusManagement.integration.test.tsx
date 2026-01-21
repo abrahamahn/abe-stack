@@ -11,7 +11,6 @@
  * - Skip links and focus landmarks
  */
 
-import '@testing-library/jest-dom/vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useEffect, useRef, useState } from 'react';

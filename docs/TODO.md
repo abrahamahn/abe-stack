@@ -5,123 +5,100 @@
 
 ---
 
-## Unused Code to Integrate
+## Priority: Review Configs and Minimize Packages
 
-Code that exists but isn't used anywhere (only exported + tested). Integrate when implementing related tasks.
-
-| Unused Code                            | Package         | Related Task                              | Notes                                                       |
-| -------------------------------------- | --------------- | ----------------------------------------- | ----------------------------------------------------------- |
-| `MutationQueue`, `createMutationQueue` | sdk/persistence | ROADMAP: Offline Support (Phase 3)        | Ready for offline mutation handling                         |
-| `localStorageQueue`                    | sdk/persistence | ROADMAP: Offline Support (Phase 3)        | Fallback for browsers without IndexedDB                     |
-| `useOnScreen`                          | ui/hooks        | UI Package: lazy load demo registry       | Intersection observer for lazy loading                      |
-| `useCopyToClipboard`                   | ui/hooks        | Demo copy button (currently uses raw API) | Hook available but demo uses `navigator.clipboard` directly |
-| `usePanelConfig`                       | ui/hooks        | ResizablePanel layouts                    | Panel configuration state management                        |
-
-> **Note:** UI components like Accordion, Slider, RadioGroup, Popover, Pagination, Kbd, MenuItem, EnvironmentBadge are all **showcased in the demo catalog** - they're available and documented, just not yet used in production features.
+- [ ] Review all config files (tsconfig, vite, eslint, etc.)
+- [ ] Audit build configuration for simplicity
+- [ ] Ensure minimal packages - remove any unused dependencies
 
 ---
 
-## High-Priority Improvements
+## Priority: Polish Documentation for Presentation
 
-## Core Product Features
+Documentation needs refinement before showcasing. Review and polish all README files and docs for clarity, consistency, and professional presentation.
+
+---
+
+## Urgent: Missing Unit Tests
+
+One file still needs tests:
+
+- [ ] `infrastructure/media/utils/streaming.ts`
+
+---
+
+## Critical: Security Hardening
+
+Data integrity and security improvements. Required before production deployment with user data.
+
+### Database Transaction Support (Backend)
+
+Atomic operations for multi-step auth flows to prevent orphaned data.
+
+- [ ] Create `withTransaction()` helper in `apps/server/src/infra/database/`
+- [ ] Wrap user registration (user + token family)
+- [ ] Wrap token rotation (delete old + create new)
+- [ ] Add tests verifying rollback on failure
+
+### Token Reuse Security Events (Backend)
+
+Log and notify users when token reuse is detected (potential account compromise).
+
+- [ ] Create `security_events` database table
+- [ ] Create `apps/server/src/shared/security-events.ts`
+- [ ] Log token reuse detection events
+- [ ] Send email notification to user
+
+### Account Lockout Edge Cases (Backend)
+
+- [ ] Add `lockout_expires_at` column for exact tracking
+- [ ] Prevent counter reset exploit (sliding window attack)
+- [ ] Add audit logging for admin unlocks
+
+### Error Message Audit (Backend)
+
+- [ ] Audit all error returns in `modules/auth/`
+- [ ] Ensure `handleMe()` uses constants
+- [ ] Document which errors are safe to expose
+
+---
+
+## High Priority: Core Features
 
 Building blocks needed across multiple products.
 
-### File Uploads & Media (Backend)
+### WebSocket Enhancements (Backend + Frontend)
 
-Required for: social media, music, fitness (photos), marketplace
-
-- [x] Presigned upload endpoint (filename + contentType)
-- [x] Storage key conventions (`uploads/{userId}/{uuid}/{filename}`)
-- [x] Upload size limits per user role
-- [x] Signed file URLs with expiration
-- [x] Content type detection helpers (MIME mapping)
-- [x] File utilities with retry logic, streams, auto-mkdir
-- [x] **Image processing pipeline** (Sharp)
-  - Resize with fit modes (cover, contain, fill, inside)
-  - Format conversion (JPEG, PNG, WebP, AVIF)
-  - Quality control and thumbnail generation
-- [x] **Video processing pipeline** (FFmpeg)
-  - Video format conversion (MP4, WebM, HLS)
-  - Thumbnail extraction from videos
-  - Video compression and optimization
-  - Resolution scaling and aspect ratio handling
-- [x] Audio file handling (for music apps)
-  - Audio format conversion (MP3, AAC, WAV, OGG)
-  - Audio compression and optimization
-  - Metadata extraction (duration, bitrate, codec)
-  - Audio waveform generation
-  - Audio streaming support
-
-> **Legacy:** See [File Utilities](./dev/legacy.md#file-utilities), [Backend Utilities](./dev/legacy.md#backend-utilities) → `FileUtils.ts`, `fileHelpers.ts`, `ContentTypes.ts`, `StorageService.ts`, `ImageProcessor.ts`; [UI Components](./dev/legacy.md#ui-components) → `FileUpload.tsx`
-
-### Pagination (Backend + Frontend)
-
-Required for: feeds, search results, lists, marketplace
-
-- [x] Cursor-based pagination schema in @abe-stack/core
-- [x] `usePaginatedQuery` hook for infinite scroll
-- [x] Standard pagination response shape
-- [x] **PaginationOptions** type - `page`, `limit`, `sortBy`, `sortOrder`
-- [x] **PaginatedResult<T>** generic type - `data`, `total`, `page`, `hasNext`, `hasPrev`
-
-> **Legacy:** See [Migration Effort Estimates](./dev/legacy.md#migration-effort-estimates) → Pagination types (2-3h, drop-in)
-
-### WebSocket Client + Presence
-
-Required for: messenger, social feeds, real-time notifications
-
-- [x] `packages/ws-client` with auto-reconnect → `WebsocketPubsubClient` in `@abe-stack/sdk/pubsub`
-- [x] Subscription deduplication → `SubscriptionCache` in `@abe-stack/sdk/subscriptions`
 - [ ] Auth token refresh on reconnect (use `onConnect` callback)
-- [ ] React Query cache invalidation on events
-- [ ] **Presence tracking** (online/offline/away status, last seen)
-- [ ] **Typing indicators** via WebSocket events
+- [ ] React Query cache invalidation on WebSocket events
+- [ ] Presence tracking (online/offline/away, last seen)
+- [ ] Typing indicators via WebSocket events
 
-> **Implementation:** See `packages/sdk/src/pubsub/`, `packages/sdk/src/subscriptions/`
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `WebSocketService.ts`, `WebSocketTypes.ts`
+### Push Notifications (Backend + Frontend)
 
-### Push Notifications
-
-Required for: messenger, social, fitness reminders
-
-- [ ] Web push (service worker)
+- [ ] Web push with service worker
 - [ ] Mobile push setup (FCM/APNs)
 - [ ] Notification preferences per user
 
-> **Legacy:** See [Potential Migrations](./dev/legacy.md#user-management) → User preferences system
-
 ### Cache Layer (Backend)
 
-Required for: performance at scale
-
 - [ ] Cache service interface (swap Redis/memory)
-- [ ] Memoization helper with TTL and custom key generators
+- [ ] Memoization helper with TTL and custom keys
 - [ ] Bulk operations (getMultiple, setMultiple)
-- [ ] Cache statistics (hits, misses, size)
-- [ ] Background cleanup (doesn't block requests)
-
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `CacheService.ts`, `RedisCacheService.ts`, `RedisClient.ts`
+- [ ] Cache statistics and background cleanup
 
 ### Search & Filtering (Backend)
 
-Required for: marketplace, music discovery, fitness tracking
-
-- [ ] **SearchQueryBuilder** with fluent API
+- [ ] SearchQueryBuilder with fluent API
 - [ ] Filter operators (eq, gt, lt, in, range, contains)
-- [ ] Sort direction support
 - [ ] Pagination integration
 - [ ] Provider abstraction (start simple, upgrade to Elasticsearch later)
 
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `SearchService.ts`; [Common Utilities](./dev/legacy.md#common-utilities) → Fuzzy matching
-
 ---
 
-## Authentication Enhancements
+## High Priority: Authentication
 
-### Social/OAuth Providers
-
-Required for: reducing signup friction, user acquisition
+### Social/OAuth Providers (Backend)
 
 - [ ] Google OAuth (direct integration)
 - [ ] GitHub OAuth (direct integration)
@@ -129,89 +106,119 @@ Required for: reducing signup friction, user acquisition
 - [ ] OAuth connection management UI
 - [ ] Account linking (multiple providers per account)
 
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `authHelpers.ts`, `TokenManager.ts`; [Auth DTOs](./dev/legacy.md#auth-dtos); [Auth Components](./dev/legacy.md#auth-components) → `ProtectedRoute.tsx`, Auth modals
-
-### Magic Links
-
-Required for: passwordless auth option
+### Magic Links (Backend)
 
 - [ ] Magic link token generation
 - [ ] `/api/auth/magic-link/request` endpoint
 - [ ] `/api/auth/magic-link/verify` endpoint
 - [ ] `magic_link_tokens` database table
 
-> **Legacy:** See [Token Utilities](./dev/legacy.md#token-utilities) → `generateSecureToken()`, `hashToken()`, `isTokenExpired()`; [Backend Utilities](./dev/legacy.md#backend-utilities) → `verification.service.ts`, `email-template.service.ts`
+---
+
+## Medium Priority: Security Improvements
+
+### Security Enhancements (Backend)
+
+- [ ] Dummy hash pool rotation (prevent timing detection)
+- [ ] Login attempt cleanup job (90-day retention)
+- [ ] JWT secret rotation support (dual-secret verification)
+- [ ] IP proxy header validation (trusted proxy whitelist)
+
+### Database Performance (Backend)
+
+- [ ] Add indexes: `login_attempts(email, created_at)`, `refresh_tokens(token, family_id, expires_at)`
+- [ ] Auth config validation at startup
+- [ ] Query optimization for token rotation
+
+### Test Coverage: Critical Auth Paths (Backend)
+
+- [ ] Token rotation: grace period boundary, concurrent requests, race conditions
+- [ ] Login flow: lockout expiration, parallel requests, password change invalidation
+- [ ] Registration: concurrent same-email, UTF-8 names, boundary passwords
 
 ---
 
-## Infrastructure & Quality
+## Medium Priority: UI Package
+
+### Accessibility (Frontend)
+
+- [ ] ResizablePanel keyboard support (arrow keys for resize)
+- [ ] ResizablePanel Home/End keys (jump to min/max)
+- [ ] Update ARIA attributes for screen readers
+
+### Demo Performance (Frontend)
+
+- [ ] Individual component lazy loading (currently category-based only)
+- [ ] Progressive loading within categories
+- [ ] Route-based code splitting for demo pages
+
+### Code Quality (Frontend)
+
+- [ ] Standardize arrow functions with forwardRef
+- [ ] Consistent prop naming across components
+- [ ] JSDoc comments on public APIs
+
+### Theme (Frontend)
+
+- [ ] Density variants (compact/normal/comfortable)
+- [ ] High-contrast mode support
+
+---
+
+## Medium Priority: Infrastructure
+
+### Frontend
+
+- [ ] Error boundary + toasts for API errors
+- [ ] Focus management improvements
 
 ### Backend
 
-### Frontend (Web)
-
-- [ ] Error boundary + toasts for API errors
-- [ ] Accessibility pass (focus management, keyboard resize handles)
-
-> **Legacy:** See [Error Classes](./dev/legacy.md#error-classes); [UI Components](./dev/legacy.md#ui-components) → `Throttle.tsx` (loading states); [DOM Utilities](./dev/legacy.md#dom-utilities) → Focus helpers; [Frontend Hooks](./dev/legacy.md#frontend-hooks) → `usePopper`; [Frontend Formatters](./dev/legacy.md#frontend-formatters)
-
-### Infrastructure
-
 - [ ] Production Postgres settings (connection pooling, SSL)
-- [ ] Secrets management documentation (env, Vault, SSM)
-- [ ] Observability hooks (request logs, metrics, error reporting)
+- [ ] Secrets management documentation
 - [ ] Database backup/retention plan
-
-> **Legacy:** See [Potential Migrations](./dev/legacy.md#infrastructure) → Secret providers (EnvSecretProvider, FileSecretProvider)
 
 ### Testing
 
 - [ ] Integration tests for API routes (vitest + fastify inject)
-- [ ] Playwright E2E for auth + layout resize persistence
-- [ ] Security audit: OWASP testing guide compliance
-
-> **Legacy:** See [Potential Migrations](./dev/legacy.md#infrastructure) → Test infrastructure (mocks, test utilities, TestFactory)
+- [ ] Playwright E2E for auth flows
+- [ ] Security audit: OWASP testing guide
 
 ### Documentation
 
-- [ ] Update README with status badges once features land
-- [ ] Quickstart guides per app (web/desktop/mobile)
-- [ ] Release checklist (versioning, changelog, tagging)
-
-### UI Package
-
-- [ ] Accessibility: keyboard support for ResizablePanel (arrow keys)
-- [ ] Performance: lazy load demo registry by category
+- [ ] Security decision documentation (why Argon2id params, grace periods, etc.)
+- [ ] Quickstart guides per app
+- [ ] Release checklist
 
 ---
 
-## Code Quality
+## Low Priority: Observability
 
-### High Impact
-
-- [ ] Fix barrel exports in `packages/ui/src/index.ts`
-- [ ] Add infrastructure tests for critical paths
-
-> **Legacy:** See [Structured Logging](./dev/legacy.md#structured-logging) → Correlation IDs, request tracking
-
-### Medium Impact
-
-- [ ] Auth service context objects
-- [ ] Catalog factory pattern (if keeping demo)
+- [ ] Prometheus metrics (login attempts, sessions, hash duration, lockouts)
+- [ ] Query performance monitoring
+- [ ] Batch user lookups optimization
 
 ---
 
-## Architecture
+## Unused Code to Integrate
+
+Code that exists but isn't used anywhere. Integrate when implementing related tasks.
+
+| Unused Code                            | Package         | Related Task           |
+| -------------------------------------- | --------------- | ---------------------- |
+| `MutationQueue`, `createMutationQueue` | sdk/persistence | Offline mutations      |
+| `localStorageQueue`                    | sdk/persistence | IndexedDB fallback     |
+| `useOnScreen`                          | ui/hooks        | Lazy loading           |
+| `useCopyToClipboard`                   | ui/hooks        | Demo copy button       |
+| `usePanelConfig`                       | ui/hooks        | ResizablePanel layouts |
 
 ---
 
 ## Success Metrics
 
-### Pre-Seed (Now)
+### Seed Stage
 
-### Seed
-
-- [ ] First paying customers on at least one product
+- [ ] First paying customers
 - [ ] <100ms P95 latency on critical paths
 - [ ] Zero security incidents
 
@@ -221,8 +228,6 @@ Required for: passwordless auth option
 - [ ] Team of 3-5 engineers productive
 - [ ] 99.9% uptime
 - [ ] Cache layer reducing DB load by 30%+
-- [ ] Real-time features stable at scale
-- [ ] Search/discovery features performant
 
 ---
 
@@ -242,9 +247,10 @@ If no to all three, it goes in `docs/ROADMAP.md`.
 
 - **Deferred features:** See `docs/ROADMAP.md`
 - **Legacy migrations:** See `docs/dev/legacy.md`
+- **Security overview:** See `docs/dev/security.md`
+- **SDK features:** See `packages/sdk/README.md`
+- **Core utilities:** See `packages/core/README.md`
 
 ---
 
-_Last Updated: 2026-01-20_
-
-_Philosophy: Foundation is done. Ship products. Copy utilities from legacy when needed._
+_Last Updated: 2026-01-21_

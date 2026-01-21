@@ -121,7 +121,7 @@ export interface RequestWithCookies {
 /**
  * Logger interface - abstracts away the actual logger implementation
  *
- * @deprecated Use Logger from '@infra/logger' for new code.
+ * @deprecated Use Logger from '@infrastructure/logger' for new code.
  * The infra/logger module provides a more complete interface with:
  * - trace, fatal levels
  * - child() method for scoped logging

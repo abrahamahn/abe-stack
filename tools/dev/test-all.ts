@@ -125,7 +125,7 @@ function runTarget(target: TestTarget): VitestSummary {
     'vitest',
     'run',
     '--config',
-    '../../config/vitest.config.ts',
+    '../../vitest.config.ts',
     '--reporter=default',
     '--reporter=json',
     `--outputFile.json=${outputFile}`,
@@ -134,7 +134,7 @@ function runTarget(target: TestTarget): VitestSummary {
   const result = spawnSync('pnpm', args, {
     cwd: target.cwd,
     stdio: 'inherit',
-    env: { ...process.env, VITEST_TARGET: target.name },
+    env: process.env,
   });
 
   if (result.status !== 0) {

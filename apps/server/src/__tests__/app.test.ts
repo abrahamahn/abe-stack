@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mock infra module - class must be defined inside factory due to hoisting
-vi.mock('@infra/index', () => {
+vi.mock('@infrastructure/index', () => {
   const MockSubscriptionManager = class {
     setAdapter = vi.fn();
     getSubscriptionCount = vi.fn(() => 0);

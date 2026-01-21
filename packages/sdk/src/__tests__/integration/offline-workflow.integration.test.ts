@@ -389,13 +389,24 @@ describe('Offline Workflow Integration', () => {
 
       void queue.enqueue(transaction);
 
-      // Check localStorage
+      // Check localStorage - verify full transaction data was persisted
       const stored = mockLocalStorage.getItem('test-offline-queue');
       expect(stored).not.toBeNull();
 
       const parsed = JSON.parse(stored!) as QueuedTransaction[];
       expect(parsed).toHaveLength(1);
-      expect(parsed[0]?.id).toBe(transaction.id);
+      expect(parsed[0]).toEqual(
+        expect.objectContaining({
+          id: transaction.id,
+          authorId: 'test-user',
+          operations: expect.arrayContaining([
+            expect.objectContaining({
+              type: 'set',
+              value: { name: 'Offline Update' },
+            }),
+          ]),
+        }),
+      );
     });
 
     it('should restore queue from localStorage on init', async () => {
@@ -417,7 +428,14 @@ describe('Offline Workflow Integration', () => {
       });
 
       expect(newQueue.getQueuedTransactions()).toHaveLength(1);
-      expect(newQueue.getQueuedTransactions()[0]?.id).toBe('restored-tx');
+      const restoredTx = newQueue.getQueuedTransactions()[0];
+      expect(restoredTx).toEqual(
+        expect.objectContaining({
+          id: 'restored-tx',
+          authorId: 'user-1',
+          operations: [{ type: 'set', path: ['user', 'u1', 'name'], value: { name: 'Restored' } }],
+        }),
+      );
 
       newQueue.destroy();
     });
@@ -455,6 +473,18 @@ describe('Offline Workflow Integration', () => {
       await promise;
 
       expect(mockSubmit).toHaveBeenCalledTimes(1);
+      // Verify the submitted transaction contains the expected data
+      expect(mockSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: transaction.id,
+          operations: expect.arrayContaining([
+            expect.objectContaining({
+              type: 'set',
+              value: { name: 'Offline Update' },
+            }),
+          ]),
+        }),
+      );
 
       queue.destroy();
     });
@@ -509,9 +539,16 @@ describe('Offline Workflow Integration', () => {
 
       await Promise.all([promise1, promise2, promise3]);
 
-      // All processed
+      // All processed - verify queue is empty and cache has final values
       expect(queue.getStatus().queueSize).toBe(0);
+      // TransactionQueue may batch operations, so verify at least 1 call was made
       expect(mockSubmit).toHaveBeenCalled();
+      expect(mockSubmit.mock.calls.length).toBeGreaterThanOrEqual(1);
+
+      // Verify cache still has the optimistic updates applied
+      expect(cache.get('user', 'u1')?.name).toBe('Alice Updated');
+      expect(cache.get('user', 'u2')?.name).toBe('Bob Updated');
+      expect(cache.get('post', 'p1')?.title).toBe('Post Updated');
     });
   });
 

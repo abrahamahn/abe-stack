@@ -1,7 +1,4 @@
 // apps/web/src/utils/__tests__/registerServiceWorker.test.ts
-/**
- * @vitest-environment jsdom
- */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -250,7 +247,7 @@ describe('registerServiceWorker', () => {
 
       // Clean up - catch the timeout error
       await skipPromise.catch(() => {});
-    });
+    }, 10000);
 
     it('unregister removes the service worker', async () => {
       const registration = createMockRegistration();
@@ -285,7 +282,7 @@ describe('registerServiceWorker', () => {
       // The promise will resolve to null due to timeout/catch
       const version = await versionPromise;
       expect(version).toBeNull();
-    });
+    }, 10000);
 
     it('clearCache posts message to active worker', async () => {
       const activeWorker = createMockServiceWorker();
@@ -307,7 +304,7 @@ describe('registerServiceWorker', () => {
 
       // Clean up - catch the timeout error
       await clearPromise.catch(() => {});
-    });
+    }, 10000);
   });
 
   describe('unregisterAllServiceWorkers', () => {

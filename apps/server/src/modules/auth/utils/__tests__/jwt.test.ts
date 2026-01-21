@@ -1,28 +1,20 @@
 // apps/server/src/modules/auth/utils/__tests__/jwt.test.ts
+/**
+ * JWT Token Utility Tests
+ *
+ * Tests the JWT utility functions with actual implementations
+ * (no mocking of internal dependencies).
+ */
+
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+
 import {
   createAccessToken,
   createRefreshToken,
   getRefreshTokenExpiry,
   verifyToken,
-} from '@modules/auth/utils/jwt';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
-
-// Mock dependencies
-vi.mock('../../../../infra/crypto/index.js', () => ({
-  jwtSign: vi.fn(() => 'mock-jwt-token'),
-  jwtVerify: vi.fn(() => ({ userId: 'user-123', email: 'test@example.com', role: 'user' })),
-  JwtError: class JwtError extends Error {
-    constructor(message: string) {
-      super(message);
-      this.name = 'JwtError';
-    }
-  },
-}));
-
-vi.mock('@shared/constants', () => ({
-  MIN_JWT_SECRET_LENGTH: 32,
-  REFRESH_TOKEN_BYTES: 64,
-}));
+  JwtError,
+} from '../jwt';
 
 describe('JWT Utilities', () => {
   const validSecret = 'this-is-a-very-long-secret-for-testing-purposes';
@@ -32,10 +24,29 @@ describe('JWT Utilities', () => {
   });
 
   describe('createAccessToken', () => {
-    test('should create an access token with valid parameters', () => {
+    test('should create a valid JWT token', () => {
       const token = createAccessToken('user-123', 'test@example.com', 'user', validSecret);
 
-      expect(token).toBe('mock-jwt-token');
+      expect(typeof token).toBe('string');
+      // JWT tokens have 3 parts separated by dots
+      expect(token.split('.').length).toBe(3);
+    });
+
+    test('should create token that can be verified', () => {
+      const token = createAccessToken('user-123', 'test@example.com', 'user', validSecret);
+      const payload = verifyToken(token, validSecret);
+
+      expect(payload.userId).toBe('user-123');
+      expect(payload.email).toBe('test@example.com');
+      expect(payload.role).toBe('user');
+    });
+
+    test('should include expiration in token', () => {
+      const token = createAccessToken('user-123', 'test@example.com', 'user', validSecret, '1h');
+      const payload = verifyToken(token, validSecret);
+
+      expect(payload.exp).toBeDefined();
+      expect(typeof payload.exp).toBe('number');
     });
 
     test('should throw error when secret is too short', () => {
@@ -50,33 +61,24 @@ describe('JWT Utilities', () => {
       );
     });
 
-    test('should pass correct payload to jwtSign', async () => {
-      const { jwtSign } = await import('../../../../infra/crypto/index.js');
-      createAccessToken('user-123', 'test@example.com', 'admin', validSecret, '30m');
+    test('should include custom expiration', () => {
+      const token = createAccessToken('user-123', 'test@example.com', 'admin', validSecret, '30m');
+      const payload = verifyToken(token, validSecret);
 
-      expect(jwtSign).toHaveBeenCalledWith(
-        { userId: 'user-123', email: 'test@example.com', role: 'admin' },
-        validSecret,
-        { expiresIn: '30m' },
-      );
-    });
-
-    test('should use default expiration when not specified', async () => {
-      const { jwtSign } = await import('../../../../infra/crypto/index.js');
-      createAccessToken('user-123', 'test@example.com', 'user', validSecret);
-
-      expect(jwtSign).toHaveBeenCalledWith(expect.anything(), validSecret, { expiresIn: '15m' });
+      expect(payload.role).toBe('admin');
+      expect(payload.exp).toBeDefined();
     });
   });
 
   describe('verifyToken', () => {
     test('should verify and return token payload', () => {
-      const payload = verifyToken('valid-token', validSecret);
+      const token = createAccessToken('user-456', 'test2@example.com', 'admin', validSecret);
+      const payload = verifyToken(token, validSecret);
 
-      expect(payload).toEqual({
-        userId: 'user-123',
-        email: 'test@example.com',
-        role: 'user',
+      expect(payload).toMatchObject({
+        userId: 'user-456',
+        email: 'test2@example.com',
+        role: 'admin',
       });
     });
 
@@ -88,11 +90,25 @@ describe('JWT Utilities', () => {
       expect(() => verifyToken('some-token', '')).toThrow(/JWT secret must be at least/);
     });
 
-    test('should call jwtVerify with correct parameters', async () => {
-      const { jwtVerify } = await import('../../../../infra/crypto/index.js');
-      verifyToken('test-token', validSecret);
+    test('should throw error for invalid token format', () => {
+      expect(() => verifyToken('invalid-token', validSecret)).toThrow();
+    });
 
-      expect(jwtVerify).toHaveBeenCalledWith('test-token', validSecret);
+    test('should throw error for token with wrong secret', () => {
+      const token = createAccessToken('user-123', 'test@example.com', 'user', validSecret);
+      const wrongSecret = 'this-is-a-different-secret-for-testing-purposes';
+
+      expect(() => verifyToken(token, wrongSecret)).toThrow();
+    });
+
+    test('should throw error for tampered token', () => {
+      const token = createAccessToken('user-123', 'test@example.com', 'user', validSecret);
+      const parts = token.split('.');
+      // Tamper with the payload
+      parts[1] = 'tampered' + parts[1];
+      const tamperedToken = parts.join('.');
+
+      expect(() => verifyToken(tamperedToken, validSecret)).toThrow();
     });
   });
 
@@ -109,6 +125,12 @@ describe('JWT Utilities', () => {
       const token2 = createRefreshToken();
 
       expect(token1).not.toBe(token2);
+    });
+
+    test('should only contain hex characters', () => {
+      const token = createRefreshToken();
+
+      expect(token).toMatch(/^[0-9a-f]+$/);
     });
   });
 
@@ -132,6 +154,15 @@ describe('JWT Utilities', () => {
       expected30.setDate(expected30.getDate() + 30);
 
       expect(Math.abs(expiry30.getTime() - expected30.getTime())).toBeLessThan(1000);
+    });
+  });
+
+  describe('JwtError', () => {
+    test('should be exported and usable', () => {
+      expect(JwtError).toBeDefined();
+      const error = new JwtError('test error', 'INVALID_TOKEN');
+      expect(error.message).toBe('test error');
+      expect(error.name).toBe('JwtError');
     });
   });
 });

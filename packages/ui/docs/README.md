@@ -1,265 +1,406 @@
-# @abe-stack/ui Component Documentation
+# @abe-stack/ui — A Design System That Gets Out of Your Way
 
-Complete documentation for all components in the @abe-stack/ui package.
+**A complete React component library with Tailwind-like utilities, design tokens, and zero runtime CSS-in-JS.**
 
-## Quick Navigation
+I wanted a UI system that felt like Tailwind — fast composition with utility classes — but with the consistency of a proper design system. No runtime style calculations, no CSS-in-JS overhead, just CSS custom properties that work everywhere.
 
-- [Components](#components) - Stateful multi-part components
-- [Elements](#elements) - Low-level primitive elements
-- [Layouts](#layouts) - Page structure and layout components
-- [Hooks](#hooks) - React hooks
-- [Theme](#theme) - Theme configuration
-- [Getting Started](#getting-started)
-- [Import Patterns](#import-patterns)
-- [CSS Architecture](#css-architecture)
+So I built this: a library where TypeScript defines the design contract, CSS does the styling, and React components are thin wrappers that compose predictably.
 
-## Components
+---
 
-Stateful components with complex behavior, compound patterns, or multi-part APIs.
+## The Philosophy
 
-| Component                                            | Description                   | Import          |
-| ---------------------------------------------------- | ----------------------------- | --------------- |
-| [Accordion](./components/Accordion.md)               | Collapsible content sections  | `@abe-stack/ui` |
-| [Card](./components/Card.md)                         | Container for related content | `@abe-stack/ui` |
-| [Dialog](./components/Dialog.md)                     | Modal dialog window           | `@abe-stack/ui` |
-| [Dropdown](./components/Dropdown.md)                 | Dropdown menu                 | `@abe-stack/ui` |
-| [FocusTrap](./components/FocusTrap.md)               | Trap focus within container   | `@abe-stack/ui` |
-| [FormField](./components/FormField.md)               | Form field with label/error   | `@abe-stack/ui` |
-| [Image](./components/Image.md)                       | Lazy-loaded image component   | `@abe-stack/ui` |
-| [LoadingContainer](./components/LoadingContainer.md) | Centered loading display      | `@abe-stack/ui` |
-| [Pagination](./components/Pagination.md)             | Page navigation controls      | `@abe-stack/ui` |
-| [Popover](./components/Popover.md)                   | Floating content container    | `@abe-stack/ui` |
-| [Radio](./components/Radio.md)                       | Single radio button           | `@abe-stack/ui` |
-| [RadioGroup](./components/RadioGroup.md)             | Group of radio buttons        | `@abe-stack/ui` |
-| [Select](./components/Select.md)                     | Dropdown selection input      | `@abe-stack/ui` |
-| [Slider](./components/Slider.md)                     | Range input slider            | `@abe-stack/ui` |
-| [Tabs](./components/Tabs.md)                         | Tabbed content interface      | `@abe-stack/ui` |
-| [Toast](./components/Toast.md)                       | Notification message          | `@abe-stack/ui` |
+Most component libraries force you into one of two camps:
 
-## Elements
+1. **CSS-in-JS** — Runtime overhead, bundle bloat, and style conflicts in SSR
+2. **Utility-first** — Great for speed, but tokens scatter across your codebase with no single source of truth
 
-Low-level primitive elements with minimal logic.
+This library takes a third path:
 
-| Element                                            | Description                  | Import          |
-| -------------------------------------------------- | ---------------------------- | --------------- |
-| [Alert](./elements/Alert.md)                       | Display important messages   | `@abe-stack/ui` |
-| [Avatar](./elements/Avatar.md)                     | User profile image display   | `@abe-stack/ui` |
-| [Badge](./elements/Badge.md)                       | Status or category indicator | `@abe-stack/ui` |
-| [Box](./elements/Box.md)                           | Generic container element    | `@abe-stack/ui` |
-| [Button](./elements/Button.md)                     | Interactive button element   | `@abe-stack/ui` |
-| [Checkbox](./elements/Checkbox.md)                 | Boolean input control        | `@abe-stack/ui` |
-| [CloseButton](./elements/CloseButton.md)           | Close/dismiss button         | `@abe-stack/ui` |
-| [Divider](./elements/Divider.md)                   | Visual content separator     | `@abe-stack/ui` |
-| [EnvironmentBadge](./elements/EnvironmentBadge.md) | Environment status display   | `@abe-stack/ui` |
-| [Heading](./elements/Heading.md)                   | Semantic heading text        | `@abe-stack/ui` |
-| [Input](./elements/Input.md)                       | Text input field             | `@abe-stack/ui` |
-| [Kbd](./elements/Kbd.md)                           | Keyboard key display         | `@abe-stack/ui` |
-| [MenuItem](./elements/MenuItem.md)                 | Menu item element            | `@abe-stack/ui` |
-| [Progress](./elements/Progress.md)                 | Progress indicator           | `@abe-stack/ui` |
-| [Skeleton](./elements/Skeleton.md)                 | Loading placeholder          | `@abe-stack/ui` |
-| [Spinner](./elements/Spinner.md)                   | Loading indicator            | `@abe-stack/ui` |
-| [Switch](./elements/Switch.md)                     | Toggle switch control        | `@abe-stack/ui` |
-| [Table](./elements/Table.md)                       | Data table component         | `@abe-stack/ui` |
-| [Text](./elements/Text.md)                         | Semantic text element        | `@abe-stack/ui` |
-| [TextArea](./elements/TextArea.md)                 | Multi-line text input        | `@abe-stack/ui` |
-| [Toaster](./elements/Toaster.md)                   | Toast notification container | `@abe-stack/ui` |
-| [Tooltip](./elements/Tooltip.md)                   | Hover information display    | `@abe-stack/ui` |
-| [VersionBadge](./elements/VersionBadge.md)         | Version display badge        | `@abe-stack/ui` |
-| [VisuallyHidden](./elements/VisuallyHidden.md)     | Screen-reader only content   | `@abe-stack/ui` |
+- **TypeScript as the source of truth** — All design tokens (colors, spacing, typography) live in `.ts` files
+- **CSS custom properties as the runtime** — Generated once at build time, consumed everywhere
+- **Tailwind-like utilities for composition** — Familiar class names, but backed by your design tokens
+- **Semantic component classes** — Components use meaningful names like `.btn-primary`, not `bg-blue-500`
 
-## Layouts
+---
 
-Page structure and layout components organized by purpose.
+## How Styling Works
 
-### Shells
+### The Theme Contract
 
-App-level structural layouts with built-in resizing support.
+Everything starts in `packages/ui/src/theme/`. These TypeScript files define your entire design system:
 
-| Layout                                                       | Description               | Import          |
-| ------------------------------------------------------------ | ------------------------- | --------------- |
-| [AppShell](./layouts/shells/AppShell.md)                     | Application shell layout  | `@abe-stack/ui` |
-| [BottombarLayout](./layouts/shells/BottombarLayout.md)       | Fixed bottom navigation   | `@abe-stack/ui` |
-| [LeftSidebarLayout](./layouts/shells/LeftSidebarLayout.md)   | Left sidebar layout       | `@abe-stack/ui` |
-| [ResizablePanel](./layouts/shells/ResizablePanel.md)         | Resizable panel container | `@abe-stack/ui` |
-| [RightSidebarLayout](./layouts/shells/RightSidebarLayout.md) | Right sidebar layout      | `@abe-stack/ui` |
-| [TopbarLayout](./layouts/shells/TopbarLayout.md)             | Fixed top navigation      | `@abe-stack/ui` |
+```
+theme/
+├── colors.ts      # Light/dark color palettes
+├── spacing.ts     # Gap scale (xs → 3xl)
+├── typography.ts  # Font families, sizes, weights
+├── radius.ts      # Border radius tokens
+├── motion.ts      # Durations and easing curves
+└── buildThemeCss.ts  # Transforms tokens → CSS
+```
 
-### Containers
+Each file exports typed constants:
 
-Content wrapper and spacing layouts.
+```typescript
+// spacing.ts
+export const spacing = {
+  xs: '0.25rem',
+  sm: '0.5rem',
+  md: '0.75rem',
+  lg: '1rem',
+  xl: '1.5rem',
+  '2xl': '2rem',
+  '3xl': '3rem',
+} as const;
+```
 
-| Layout                                                 | Description                | Import          |
-| ------------------------------------------------------ | -------------------------- | --------------- |
-| [AuthLayout](./layouts/containers/AuthLayout.md)       | Authentication page layout | `@abe-stack/ui` |
-| [Container](./layouts/containers/Container.md)         | Content width container    | `@abe-stack/ui` |
-| [PageContainer](./layouts/containers/PageContainer.md) | Page wrapper container     | `@abe-stack/ui` |
-| [StackedLayout](./layouts/containers/StackedLayout.md) | Vertically stacked layout  | `@abe-stack/ui` |
+### buildThemeCss: The Bridge
 
-### Layers
+`buildThemeCss.ts` is the magic glue. It reads your TypeScript tokens and generates CSS custom properties:
 
-Overlay and positioning components.
+```typescript
+// What buildThemeCss does:
+// TypeScript tokens → CSS custom properties
 
-| Layout                                               | Description                  | Import          |
-| ---------------------------------------------------- | ---------------------------- | --------------- |
-| [Modal](./layouts/layers/Modal.md)                   | Modal overlay with portal    | `@abe-stack/ui` |
-| [Overlay](./layouts/layers/Overlay.md)               | Background overlay           | `@abe-stack/ui` |
-| [ProtectedRoute](./layouts/layers/ProtectedRoute.md) | Auth-protected route wrapper | `@abe-stack/ui` |
-| [ScrollArea](./layouts/layers/ScrollArea.md)         | Custom scrollable area       | `@abe-stack/ui` |
+// Input (spacing.ts):
+spacing.lg = '1rem'
+
+// Output (theme.css):
+:root {
+  --ui-gap-lg: 1rem;
+}
+```
+
+When you run `pnpm dev`, the `sync-css-theme` watcher automatically regenerates `theme.css` whenever you change any token file. Change a color in TypeScript, and every component using that token updates instantly.
+
+**Why this matters:**
+
+- Single source of truth in TypeScript (with full type safety)
+- Zero runtime cost (it's just CSS)
+- Works with SSR, RSC, any framework
+- Dark mode via `prefers-color-scheme` media query — no JS required
+
+### The Generated CSS
+
+The build produces `packages/ui/src/styles/theme.css`:
+
+```css
+:root {
+  /* Spacing */
+  --ui-gap-xs: 0.25rem;
+  --ui-gap-sm: 0.5rem;
+  --ui-gap-lg: 1rem;
+
+  /* Colors */
+  --ui-color-primary: #2563eb;
+  --ui-color-bg: #ffffff;
+  --ui-color-text: #0f172a;
+
+  /* Typography */
+  --ui-font-size-sm: 0.875rem;
+  --ui-font-weight-medium: 500;
+
+  /* Motion */
+  --ui-motion-duration-base: 150ms;
+  --ui-motion-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ui-color-primary: #3b82f6;
+    --ui-color-bg: #0b1220;
+    --ui-color-text: #f8fafc;
+  }
+}
+```
+
+---
+
+## Tailwind-Like Utilities
+
+`utilities.css` provides Tailwind-inspired classes that consume your design tokens:
+
+```tsx
+// Compose layouts with familiar syntax
+<div className="flex-col gap-4 p-4">
+  <header className="flex-between border-b">
+    <h1 className="text-lg font-bold">Title</h1>
+  </header>
+  <main className="flex-1 overflow-auto">{children}</main>
+</div>
+```
+
+**Key difference from Tailwind:** These utilities use your CSS custom properties, not hardcoded values:
+
+```css
+/* utilities.css */
+.gap-4 {
+  gap: var(--ui-gap-lg); /* Uses your token, not "1rem" */
+}
+
+.text-lg {
+  font-size: var(--ui-font-size-lg); /* Uses your token */
+}
+```
+
+Change the token once, and every `.gap-4` in your app updates.
+
+### Available Utility Categories
+
+| Category       | Examples                                                  | Description              |
+| -------------- | --------------------------------------------------------- | ------------------------ |
+| **Display**    | `flex`, `grid`, `hidden`                                  | Display modes            |
+| **Flexbox**    | `flex-col`, `flex-center`, `flex-between`, `items-center` | Flex layouts             |
+| **Gap**        | `gap-1` → `gap-8`                                         | Spacing between children |
+| **Padding**    | `p-1` → `p-12`, `px-*`, `py-*`                            | Internal spacing         |
+| **Margin**     | `m-auto`, `mt-4`, `mb-6`                                  | External spacing         |
+| **Typography** | `text-sm`, `text-lg`, `font-bold`                         | Text styles              |
+| **Colors**     | `text-muted`, `text-danger`, `bg-surface`                 | Semantic colors          |
+| **Border**     | `border`, `border-b`, `rounded-lg`                        | Borders and radius       |
+| **Layout**     | `panel`, `bar`, `sidebar`                                 | Pre-composed patterns    |
+
+---
+
+## Component Architecture
+
+Components are organized by complexity and purpose:
+
+### Elements — The Primitives
+
+Low-level building blocks with minimal logic. These are your atoms.
+
+```tsx
+import { Button, Input, Text, Badge } from '@abe-stack/ui';
+
+<Button variant="primary" size="medium">Submit</Button>
+<Input placeholder="Enter email..." />
+<Text tone="muted">Helper text</Text>
+<Badge variant="success">Active</Badge>
+```
+
+**25 Elements:**
+`Alert`, `Avatar`, `Badge`, `Box`, `Button`, `Checkbox`, `CloseButton`, `Divider`, `EnvironmentBadge`, `Heading`, `Input`, `Kbd`, `MenuItem`, `PasswordInput`, `Progress`, `Skeleton`, `Spinner`, `Switch`, `Table`, `Text`, `TextArea`, `Toaster`, `Tooltip`, `VersionBadge`, `VisuallyHidden`
+
+Elements use semantic CSS classes from `elements.css`:
+
+```tsx
+// Button.tsx
+<button className={`btn btn-${variant} btn-${size}`}>{children}</button>
+```
+
+### Components — Stateful Multi-Part
+
+Complex components with internal state, compound patterns, or multi-part APIs.
+
+```tsx
+import { Tabs, Dialog, Select, Accordion } from '@abe-stack/ui';
+
+<Tabs defaultValue="tab1">
+  <Tabs.List>
+    <Tabs.Trigger value="tab1">First</Tabs.Trigger>
+    <Tabs.Trigger value="tab2">Second</Tabs.Trigger>
+  </Tabs.List>
+  <Tabs.Content value="tab1">Content 1</Tabs.Content>
+  <Tabs.Content value="tab2">Content 2</Tabs.Content>
+</Tabs>;
+```
+
+**16 Components:**
+`Accordion`, `Card`, `Dialog`, `Dropdown`, `FocusTrap`, `FormField`, `Image`, `LoadingContainer`, `Pagination`, `Popover`, `Radio`, `RadioGroup`, `Select`, `Slider`, `Tabs`, `Toast`
+
+### Layouts — Page Structure
+
+Layouts handle the structural composition of your app. Three categories:
+
+#### Shells — App-Level Structure
+
+Full-page layouts with sidebars, topbars, and resizable panels.
+
+```tsx
+import { AppShell, TopbarLayout, LeftSidebarLayout } from '@abe-stack/ui';
+
+<AppShell>
+  <TopbarLayout height={48}>
+    <NavBar />
+  </TopbarLayout>
+  <LeftSidebarLayout width={240} minWidth={180}>
+    <Sidebar />
+  </LeftSidebarLayout>
+  <main>{children}</main>
+</AppShell>;
+```
+
+`AppShell`, `TopbarLayout`, `BottombarLayout`, `LeftSidebarLayout`, `RightSidebarLayout`, `ResizablePanel`
+
+#### Containers — Content Wrappers
+
+Spacing, width constraints, and content organization.
+
+```tsx
+import { PageContainer, Container, AuthLayout } from '@abe-stack/ui';
+
+<PageContainer>
+  <Container maxWidth="md">{content}</Container>
+</PageContainer>;
+```
+
+`AuthLayout`, `Container`, `PageContainer`, `StackedLayout`
+
+#### Layers — Overlays and Positioning
+
+Modals, overlays, and route protection.
+
+```tsx
+import { Modal, Overlay, ProtectedRoute } from '@abe-stack/ui';
+
+<ProtectedRoute>
+  <Modal isOpen={open} onClose={close}>
+    <Modal.Header>Title</Modal.Header>
+    <Modal.Body>{content}</Modal.Body>
+  </Modal>
+</ProtectedRoute>;
+```
+
+`Modal`, `Overlay`, `ProtectedRoute`, `ScrollArea`
+
+---
 
 ## Hooks
 
-React hooks for common UI patterns and state management.
+React hooks for common UI patterns. No external dependencies.
 
-| Hook                                                    | Description                      |
-| ------------------------------------------------------- | -------------------------------- |
-| [useClickOutside](./hooks/useClickOutside.md)           | Detect clicks outside an element |
-| [useControllableState](./hooks/useControllableState.md) | Controlled/uncontrolled state    |
-| [useCopyToClipboard](./hooks/useCopyToClipboard.md)     | Copy text to clipboard           |
-| [useDebounce](./hooks/useDebounce.md)                   | Debounce value changes           |
-| [useDisclosure](./hooks/useDisclosure.md)               | Open/close state management      |
-| [useHistoryNav](./hooks/useHistoryNav.md)               | Browser history navigation       |
-| [useKeyboardShortcuts](./hooks/useKeyboardShortcuts.md) | Global keyboard shortcuts        |
-| [useLocalStorage](./hooks/useLocalStorage.md)           | Persist state to localStorage    |
-| [useMediaQuery](./hooks/useMediaQuery.md)               | Media query detection            |
-| [useOnScreen](./hooks/useOnScreen.md)                   | Intersection observer hook       |
-| [usePanelConfig](./hooks/usePanelConfig.md)             | Panel layout configuration       |
-| [useThemeMode](./hooks/useThemeMode.md)                 | Theme mode (light/dark/system)   |
-| [useWindowSize](./hooks/useWindowSize.md)               | Window dimensions tracking       |
+| Hook                   | Purpose                                            |
+| ---------------------- | -------------------------------------------------- |
+| `useDisclosure`        | Open/close state for modals, dropdowns, accordions |
+| `useClickOutside`      | Detect clicks outside a ref element                |
+| `useKeyboardShortcuts` | Register global keyboard shortcuts                 |
+| `useLocalStorage`      | Persist state to localStorage with SSR safety      |
+| `useMediaQuery`        | Reactive media query matching                      |
+| `useDebounce`          | Debounce rapidly changing values                   |
+| `useCopyToClipboard`   | Copy text with success feedback                    |
+| `useControllableState` | Support both controlled and uncontrolled patterns  |
+| `useWindowSize`        | Track window dimensions                            |
+| `useOnScreen`          | Intersection observer for lazy loading             |
+| `useThemeMode`         | Light/dark/system theme switching                  |
+| `usePanelConfig`       | Resizable panel state management                   |
+| `usePaginatedQuery`    | Infinite scroll with cursor pagination             |
+| `useHistoryNav`        | Browser history navigation helpers                 |
 
-## Theme
+```tsx
+import { useDisclosure, useKeyboardShortcuts } from '@abe-stack/ui';
 
-Theme configuration and providers.
+function MyComponent() {
+  const { isOpen, open, close, toggle } = useDisclosure();
 
-| Export                                    | Description            |
-| ----------------------------------------- | ---------------------- |
-| [ThemeProvider](./theme/ThemeProvider.md) | Theme context provider |
+  useKeyboardShortcuts({
+    'mod+k': () => open(),
+    escape: () => close(),
+  });
 
-## Getting Started
+  return (
+    <Dialog isOpen={isOpen} onClose={close}>
+      ...
+    </Dialog>
+  );
+}
+```
 
-### Installation
+---
+
+## CSS File Structure
+
+```
+packages/ui/src/styles/
+├── theme.css       # Generated design tokens (don't edit directly)
+├── elements.css    # Element/primitive styles (.btn, .input, .badge)
+├── components.css  # Component styles (.card, .dialog, .tabs)
+├── layouts.css     # Layout styles (.app-shell, .modal)
+└── utilities.css   # Tailwind-like utilities (.flex-col, .gap-4)
+```
+
+**Import hierarchy:**
+
+```
+theme.css (base tokens)
+    ↓
+elements.css → components.css → layouts.css
+    ↓
+utilities.css (composition layer)
+```
+
+---
+
+## Quick Start
 
 ```bash
 pnpm add @abe-stack/ui @abe-stack/core
 ```
 
-### Basic Usage
-
 ```tsx
-import { Button, Card, Input } from '@abe-stack/ui';
+import { Button, Card, Input, ThemeProvider } from '@abe-stack/ui';
+import '@abe-stack/ui/styles'; // Import all styles
 
-export function MyComponent() {
+function App() {
   return (
-    <Card>
-      <Input placeholder="Enter text..." />
-      <Button variant="primary">Submit</Button>
-    </Card>
+    <ThemeProvider>
+      <Card className="p-4 flex-col gap-3">
+        <Input placeholder="Enter something..." />
+        <Button variant="primary">Submit</Button>
+      </Card>
+    </ThemeProvider>
   );
 }
 ```
 
-## Import Patterns
+---
 
-All exports are available from the main package entry:
+## Modifying the Design System
 
-```tsx
-// Import everything from main entry
-import { Button, Card, Input, Modal, useDisclosure } from '@abe-stack/ui';
-```
+### Change a token
 
-## Component Categories
+1. Edit the TypeScript source:
 
-| Category   | Purpose                               | Examples                      |
-| ---------- | ------------------------------------- | ----------------------------- |
-| Components | Stateful multi-part components        | Accordion, Dialog, Tabs       |
-| Elements   | Low-level primitives, building blocks | Badge, Text, Checkbox, Button |
-| Layouts    | Page structure and composition        | AppShell, Modal, Container    |
+   ```typescript
+   // theme/spacing.ts
+   export const spacing = {
+     lg: '1.25rem', // Was 1rem
+   };
+   ```
 
-## CSS Architecture
+2. The `sync-css-theme` watcher regenerates `theme.css` automatically
 
-The UI package uses a modular CSS architecture with design tokens, component styles, and utility classes.
+3. Every component using `--ui-gap-lg` or `.gap-4` updates
 
-### CSS File Structure
+### Add a new token
 
-```
-packages/ui/src/styles/
-├── theme.css       # Design tokens (CSS custom properties)
-├── elements.css    # Element/primitive component styles
-├── components.css  # Higher-level component styles
-├── layouts.css     # Page layout component styles
-└── utilities.css   # Tailwind-inspired utility classes
-```
+1. Add to the appropriate theme file
+2. Update `buildThemeCss.ts` to include it in the generated CSS
+3. Optionally add utility classes in `utilities.css`
 
-### Import Hierarchy
+### Create a new component
 
-```
-theme.css          ← Design tokens (base)
-    ↓
-elements.css       ← Imports theme.css
-    ↓
-components.css     ← Imports elements.css
-    ↓
-layouts.css        ← Imports theme.css
-    ↓
-utilities.css      ← Imports theme.css
-```
+1. Create the component in the appropriate folder (`elements/`, `components/`, `layouts/`)
+2. Import the relevant CSS file (`../styles/elements.css`)
+3. Use semantic class names that reference your design tokens
+4. Export from the package index
 
-### Design Tokens (theme.css)
+---
 
-All design values are defined as CSS custom properties with `--ui-` prefix:
+## Why Not Just Use Tailwind?
 
-| Token Category    | Examples                                                       | Usage                  |
-| ----------------- | -------------------------------------------------------------- | ---------------------- |
-| **Spacing**       | `--ui-gap-xs` to `--ui-gap-3xl`                                | Gaps, padding, margins |
-| **Border Radius** | `--ui-radius-sm`, `--ui-radius-md`, `--ui-radius-lg`           | Border roundness       |
-| **Colors**        | `--ui-color-primary`, `--ui-color-bg`, `--ui-color-text`       | All colors             |
-| **Typography**    | `--ui-font-size-*`, `--ui-font-weight-*`, `--ui-line-height-*` | Text styles            |
-| **Motion**        | `--ui-motion-duration-*`, `--ui-motion-ease-*`                 | Animations             |
+You could. Tailwind is great. But this approach gives you:
 
-#### Dark Mode
+- **Type-safe tokens** — TypeScript catches typos and provides autocomplete
+- **Single source of truth** — Change once, update everywhere
+- **Zero runtime** — No JIT compilation, no purging config, just CSS
+- **Semantic components** — `.btn-primary` is more readable than `bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md`
+- **Framework agnostic** — The CSS works anywhere, not just with Tailwind's toolchain
 
-Theme automatically adapts via `prefers-color-scheme: dark` media query. All color tokens have dark mode variants.
+The best part? You get the composition speed of utilities with the maintainability of a design system.
 
-### Component Styles
-
-UI components import their own CSS and use semantic class names:
-
-```tsx
-// packages/ui/src/elements/Alert.tsx
-import '../styles/elements.css';
-
-export const Alert = ({ variant, children }) => (
-  <div className={`alert alert-${variant}`}>{children}</div>
-);
-```
-
-### Usage Guidelines
-
-#### UI Components (Internal)
-
-UI package components use semantic class names from elements.css/components.css:
-
-```tsx
-// Good - component uses its own semantic class
-<div className="alert alert-info">...</div>
-<button className="btn btn-primary">...</button>
-```
-
-#### Application Components (External)
-
-Apps compose layouts using utility classes:
-
-```tsx
-// Good - app uses utilities for layout composition
-<div className="flex-col gap-4 p-4">
-  <header className="bar border-b">...</header>
-  <main className="flex-1 overflow-auto">...</main>
-</div>
-```
-
-## Contributing
-
-See the main [package README](../README.md) for contribution guidelines.
+---
 
 ## License
 
-MIT - See [LICENSE](../../../LICENSE) for details.
+MIT — See [LICENSE](../../../LICENSE) for details.

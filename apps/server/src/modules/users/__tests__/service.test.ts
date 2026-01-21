@@ -3,7 +3,7 @@ import { getUserById } from '@users/service';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 // Mock dependencies
-vi.mock('@infra', () => ({
+vi.mock('@infrastructure', () => ({
   users: { id: 'id' },
 }));
 

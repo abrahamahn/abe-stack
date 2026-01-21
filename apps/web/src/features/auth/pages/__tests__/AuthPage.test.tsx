@@ -1,6 +1,4 @@
 // apps/web/src/features/auth/pages/__tests__/AuthPage.test.tsx
-/** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';

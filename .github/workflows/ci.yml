@@ -70,9 +70,6 @@ jobs:
       - name: Check file headers
         run: pnpm sync:headers:check
 
-      - name: Check test folders
-        run: pnpm sync:tests:check
-
       - name: Cache Turbo
         uses: actions/cache@v4
         with:

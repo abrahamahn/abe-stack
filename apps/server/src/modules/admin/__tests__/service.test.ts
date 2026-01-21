@@ -3,7 +3,7 @@ import { unlockUserAccount, UserNotFoundError } from '@admin/service';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 // Mock dependencies
-vi.mock('../../../infra/index.js', () => ({
+vi.mock('../../../infrastructure/index.js', () => ({
   unlockAccount: vi.fn().mockResolvedValue(undefined),
   users: { email: 'email' },
 }));
@@ -51,7 +51,7 @@ describe('Admin Service', () => {
     });
 
     test('should call infraUnlockAccount with correct parameters', async () => {
-      const { unlockAccount } = await import('../../../infra/index.js');
+      const { unlockAccount } = await import('../../../infrastructure/index.js');
       const mockUser = { id: 'user-123', email: 'test@example.com' };
       mockDb.query.users.findFirst.mockResolvedValue(mockUser);
 

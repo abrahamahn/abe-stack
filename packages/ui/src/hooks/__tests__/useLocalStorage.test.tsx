@@ -1,6 +1,5 @@
 // packages/ui/src/hooks/__tests__/useLocalStorage.test.tsx
 /** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
 import { useLocalStorage } from '@hooks/useLocalStorage';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

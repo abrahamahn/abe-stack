@@ -1,6 +1,5 @@
 // packages/ui/src/theme/__tests__/provider.test.tsx
 /** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, useTheme } from '@theme/provider';

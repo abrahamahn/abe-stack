@@ -1,6 +1,4 @@
 // apps/web/src/features/demo/components/__tests__/DemoDocContent.test.tsx
-/** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
 import { DemoDocContent } from '@demo/components/DemoDocContent';
 import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

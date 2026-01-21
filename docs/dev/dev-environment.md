@@ -41,10 +41,9 @@ pnpm dev desktop  # Start desktop only
 The `tools/dev/start-dev.ts` script:
 
 1. **Checks PostgreSQL** - Attempts to start if not running
-2. **Starts sync watchers** (all 4 in background, silent mode):
+2. **Starts sync watchers** (all 3 in background, silent mode):
    - `config:generate` - Generates tsconfigs and path aliases
    - `sync-file-headers.ts` - Adds file path comments
-   - `sync-test-folders.ts` - Creates `__tests__/` directories
    - `sync-css-theme.ts` - Generates theme CSS variables
 3. **Runs `turbo dev`** - Starts Vite/Fastify dev servers
 
@@ -135,7 +134,7 @@ src/
 │   └── service.ts
 ```
 
-The `sync-test-folders.ts` script auto-creates `__tests__/` directories.
+Tests are placed in `__tests__/` directories alongside the code they test.
 
 ---
 
@@ -330,7 +329,6 @@ pnpm pre-commit
 # Expands to:
 pnpm config:generate && \
 pnpm sync:headers && \
-pnpm sync:tests && \
 pnpm sync:theme && \
 pnpm lint-staged && \
 pnpm type-check
@@ -413,11 +411,10 @@ jobs:
   build-and-verify:
     needs: setup
     steps:
-      # Check all sync scripts (aliases, headers, tests)
+      # Check all sync scripts (aliases, headers)
       - run: pnpm sync:tsconfig:check
       - run: pnpm sync:aliases:check
       - run: pnpm sync:headers:check
-      - run: pnpm sync:tests:check
 
       # Full build pipeline
       - run: pnpm build # format → lint → test → type-check → theme → build

@@ -14,7 +14,7 @@ import {
   withTransaction,
   type DbClient,
   type UserRole,
-} from '@infra';
+} from '@infrastructure';
 import { and, eq, gt, lt } from 'drizzle-orm';
 
 import { createRefreshToken, getRefreshTokenExpiry } from './jwt';

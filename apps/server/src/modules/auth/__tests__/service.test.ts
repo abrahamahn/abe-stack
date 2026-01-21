@@ -34,7 +34,7 @@ import {
   logAccountLockedEvent,
   logLoginAttempt,
   withTransaction,
-} from '@infra';
+} from '@infrastructure';
 import {
   AccountLockedError,
   EmailAlreadyExistsError,
@@ -47,7 +47,7 @@ import {
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { AuthConfig } from '@config';
-import type { DbClient, EmailService, Logger } from '@infra';
+import type { DbClient, EmailService, Logger } from '@infrastructure';
 
 // ============================================================================
 // Mock Dependencies
@@ -63,7 +63,7 @@ vi.mock('@abe-stack/core', async () => {
 });
 
 // Mock @infra
-vi.mock('@infra', () => ({
+vi.mock('@infrastructure', () => ({
   applyProgressiveDelay: vi.fn(),
   getAccountLockoutStatus: vi.fn(),
   isAccountLocked: vi.fn(),

@@ -1,11 +1,10 @@
 // packages/ui/src/hooks/__tests__/usePaginatedQuery.test.tsx
 /** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { QueryClient, QueryClientProvider } from '../../test/mocks/react-query';
+import { QueryClient, QueryClientProvider } from '../../__tests__/mocks/react-query';
 import { usePaginatedQuery, useOffsetPaginatedQuery } from '../usePaginatedQuery';
 
 import type {

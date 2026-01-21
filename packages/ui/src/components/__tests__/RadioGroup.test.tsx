@@ -1,6 +1,5 @@
 // packages/ui/src/components/__tests__/RadioGroup.test.tsx
 /** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
 import { Radio } from '@components/Radio';
 import { RadioGroup } from '@components/RadioGroup';
 import { render, screen } from '@testing-library/react';

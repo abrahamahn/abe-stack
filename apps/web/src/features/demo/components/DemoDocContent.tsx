@@ -3,8 +3,6 @@ import { Heading, Skeleton, Text } from '@abe-stack/ui';
 import { getComponentDocsLazy } from '@demo/utils/lazyDocs';
 import { useEffect, useState } from 'react';
 import Markdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import remarkGfm from 'remark-gfm';
 
 import type { ComponentDemo } from '@demo/types';
@@ -47,38 +45,7 @@ export function DemoDocContent({ component }: DemoDocContentProps): ReactElement
   if (docs) {
     return (
       <div className="markdown-content">
-        <Markdown
-          remarkPlugins={[remarkGfm]}
-          components={{
-            code({ className, children, ...props }) {
-              const match = /language-(\w+)/.exec(className || '');
-              // Convert children to string - react-markdown typically passes string content
-              let codeString = '';
-              if (typeof children === 'string') {
-                codeString = children;
-              } else if (Array.isArray(children)) {
-                codeString = children.join('');
-              }
-              codeString = codeString.replace(/\n$/, '');
-              return match ? (
-                <SyntaxHighlighter
-                  style={vscDarkPlus}
-                  language={match[1]}
-                  PreTag="div"
-                  customStyle={{ borderRadius: 'var(--ui-radius-md)' }}
-                >
-                  {codeString}
-                </SyntaxHighlighter>
-              ) : (
-                <code className={className} {...props}>
-                  {children}
-                </code>
-              );
-            },
-          }}
-        >
-          {docs}
-        </Markdown>
+        <Markdown remarkPlugins={[remarkGfm]}>{docs}</Markdown>
       </div>
     );
   }

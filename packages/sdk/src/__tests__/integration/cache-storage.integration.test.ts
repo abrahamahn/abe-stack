@@ -374,7 +374,7 @@ describe('RecordCache + RecordStorage Integration', () => {
       await storage.setRecord('user', user);
 
       // Cache has the record
-      expect(cache.get('user', 'u1')).toBeDefined();
+      expect(cache.get('user', 'u1')).toEqual(user);
 
       // Advance time past TTL
       vi.advanceTimersByTime(150);
@@ -382,10 +382,9 @@ describe('RecordCache + RecordStorage Integration', () => {
       // Cache entry expired
       expect(cache.get('user', 'u1')).toBeUndefined();
 
-      // Storage still has it
+      // Storage still has the full record
       const stored = await storage.getRecord<User>({ table: 'user', id: 'u1' });
-      expect(stored).toBeDefined();
-      expect(stored?.name).toBe('Alice');
+      expect(stored).toEqual(user);
 
       vi.useRealTimers();
     });
@@ -418,9 +417,9 @@ describe('RecordCache + RecordStorage Integration', () => {
       cache.clear();
       expect(cache.get('user', 'u1')).toBeUndefined();
 
-      // Storage still has data
+      // Storage still has the full user record
       const stored = await storage.getRecord<User>({ table: 'user', id: 'u1' });
-      expect(stored).toBeDefined();
+      expect(stored).toEqual(user);
     });
 
     it('should re-hydrate cache from storage after clear', async () => {

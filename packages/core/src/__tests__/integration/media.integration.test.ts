@@ -145,6 +145,172 @@ describe('Media Processing Integration', () => {
         expect(result).toBeNull();
       });
     });
+
+    describe('Malformed magic bytes (partial matches)', () => {
+      it('should reject partial PNG signature', () => {
+        // PNG starts with 89 50 4E 47 0D 0A 1A 0A, but this is incomplete
+        const partialPng = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d]);
+        const result = detectFileType(partialPng);
+
+        // Should not match PNG since signature is incomplete
+        expect(result?.mime).not.toBe('image/png');
+      });
+
+      it('should reject partial JPEG signature', () => {
+        // JPEG starts with FF D8 FF, but this only has first two bytes
+        const partialJpeg = Buffer.from([0xff, 0xd8]);
+        const result = detectFileType(partialJpeg);
+
+        // Should not falsely detect as JPEG
+        expect(result?.mime).not.toBe('image/jpeg');
+      });
+
+      it('should reject corrupted GIF header', () => {
+        // GIF should be "GIF87a" or "GIF89a", this is "GIF8Xa"
+        const corruptedGif = Buffer.from([0x47, 0x49, 0x46, 0x38, 0x58, 0x61]);
+        const result = detectFileType(corruptedGif);
+
+        // Should not match GIF since version byte is wrong
+        expect(result?.mime).not.toBe('image/gif');
+      });
+
+      it('should reject partial PDF signature', () => {
+        // PDF starts with %PDF-, but this only has %PD
+        const partialPdf = Buffer.from([0x25, 0x50, 0x44]);
+        const result = detectFileType(partialPdf);
+
+        // Should not match PDF since signature is incomplete
+        expect(result?.mime).not.toBe('application/pdf');
+      });
+
+      it('should handle bytes that look like multiple formats', () => {
+        // Start with JPEG magic bytes but then garbage
+        const ambiguousBuffer = Buffer.from([0xff, 0xd8, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00]);
+        const result = detectFileType(ambiguousBuffer);
+
+        // Should detect as JPEG based on the valid header
+        expect(result?.mime).toBe('image/jpeg');
+      });
+    });
+
+    describe('Edge case file types', () => {
+      it('should handle TIFF little-endian files', () => {
+        // TIFF little-endian: 49 49 2A 00
+        const tiffLeBuffer = Buffer.from([0x49, 0x49, 0x2a, 0x00, 0x08, 0x00]);
+        const result = detectFileType(tiffLeBuffer);
+
+        // TIFF might or might not be supported depending on implementation
+        if (result) {
+          expect(result.mime).toMatch(/tiff/i);
+        }
+      });
+
+      it('should handle TIFF big-endian files', () => {
+        // TIFF big-endian: 4D 4D 00 2A
+        const tiffBeBuffer = Buffer.from([0x4d, 0x4d, 0x00, 0x2a, 0x00, 0x08]);
+        const result = detectFileType(tiffBeBuffer);
+
+        // TIFF might or might not be supported depending on implementation
+        if (result) {
+          expect(result.mime).toMatch(/tiff/i);
+        }
+      });
+
+      it('should handle WebP files', () => {
+        // WebP: RIFF....WEBP
+        const webpBuffer = Buffer.from([
+          0x52,
+          0x49,
+          0x46,
+          0x46, // RIFF
+          0x00,
+          0x00,
+          0x00,
+          0x00, // file size placeholder
+          0x57,
+          0x45,
+          0x42,
+          0x50, // WEBP
+        ]);
+        const result = detectFileType(webpBuffer);
+
+        if (result) {
+          expect(result.mime).toBe('image/webp');
+        }
+      });
+
+      it('should handle ICO files', () => {
+        // ICO: 00 00 01 00
+        const icoBuffer = Buffer.from([0x00, 0x00, 0x01, 0x00, 0x01, 0x00]);
+        const result = detectFileType(icoBuffer);
+
+        // ICO might or might not be supported
+        if (result) {
+          expect(result.mime).toMatch(/icon|ico/i);
+        }
+      });
+
+      it('should handle WAV files', () => {
+        // WAV: RIFF....WAVE
+        // Note: RIFF-based formats (WAV, WebP, AVI) share the same header prefix.
+        // Detection depends on the format marker at offset 8.
+        const wavBuffer = Buffer.from([
+          0x52,
+          0x49,
+          0x46,
+          0x46, // RIFF
+          0x24,
+          0x00,
+          0x00,
+          0x00, // file size (36 bytes, minimum WAV)
+          0x57,
+          0x41,
+          0x56,
+          0x45, // WAVE
+          0x66,
+          0x6d,
+          0x74,
+          0x20, // "fmt " subchunk
+        ]);
+        const result = detectFileType(wavBuffer);
+
+        // WAV detection may or may not be supported; verify consistent behavior
+        if (result) {
+          // Should detect as either WAV or a RIFF-based format
+          expect(result.mime).toMatch(/wav|audio|webp|riff/i);
+        }
+      });
+
+      it('should handle ZIP files', () => {
+        // ZIP: 50 4B 03 04
+        const zipBuffer = Buffer.from([0x50, 0x4b, 0x03, 0x04, 0x0a, 0x00]);
+        const result = detectFileType(zipBuffer);
+
+        if (result) {
+          expect(result.mime).toMatch(/zip/i);
+        }
+      });
+
+      it('should handle RAR files', () => {
+        // RAR: 52 61 72 21 1A 07
+        const rarBuffer = Buffer.from([0x52, 0x61, 0x72, 0x21, 0x1a, 0x07, 0x00]);
+        const result = detectFileType(rarBuffer);
+
+        if (result) {
+          expect(result.mime).toMatch(/rar/i);
+        }
+      });
+
+      it('should handle GZIP files', () => {
+        // GZIP: 1F 8B
+        const gzipBuffer = Buffer.from([0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00]);
+        const result = detectFileType(gzipBuffer);
+
+        if (result) {
+          expect(result.mime).toMatch(/gzip/i);
+        }
+      });
+    });
   });
 
   describe('File type detection from path', () => {

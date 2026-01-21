@@ -1,16 +1,6 @@
 // apps/web/src/features/demo/utils/__tests__/lazyDocs.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Mock DOMPurify
-vi.mock('dompurify', () => ({
-  default: {
-    sanitize: (html: string, _options?: Record<string, unknown>): string => {
-      // Simple mock that just returns the html (tests focus on parsing logic)
-      return html;
-    },
-  },
-}));
-
 // Mock import.meta.glob modules
 const mockElementModules: Record<string, () => Promise<string>> = {
   '../../../../../../packages/ui/docs/elements/Button.md': () =>
@@ -48,44 +38,6 @@ vi.mock('@demo/utils/lazyDocs', () => {
   const elementPathLookup = buildPathLookup(mockElementModules);
   const componentPathLookup = buildPathLookup(mockComponentModules);
   const layoutPathLookup = buildPathLookup(mockLayoutModules);
-
-  const parseMarkdownToHtml = (markdown: string): string => {
-    if (!markdown) return '';
-
-    let html = markdown;
-
-    // Headers
-    html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-    html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-    html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
-
-    // Bold
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-    // Italic
-    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-
-    // Code blocks (must run before inline code to prevent interference)
-    html = html.replace(/```[\s\S]*?```/g, (match) => {
-      const code = match.replace(/```(\w+)?\n?/, '').replace(/```$/, '');
-      return `<pre><code>${code}</code></pre>`;
-    });
-
-    // Code inline
-    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
-
-    // Links
-    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
-
-    // Line breaks
-    html = html.replace(/\n\n/g, '</p><p>');
-    html = html.replace(/\n/g, '<br>');
-
-    // Wrap in paragraphs
-    html = '<p>' + html + '</p>';
-
-    return html;
-  };
 
   // Use module-level cache that can be reset
   const docsCache = new Map<string, string>();
@@ -147,12 +99,6 @@ vi.mock('@demo/utils/lazyDocs', () => {
         docsCache.set(cacheKey, '');
         return null;
       }
-    },
-
-    parseMarkdownLazy: (markdown: string): string => {
-      const html = parseMarkdownToHtml(markdown);
-      // In the actual implementation, DOMPurify sanitizes - we skip for tests
-      return html;
     },
 
     clearDocsCache: (): void => {
@@ -229,106 +175,6 @@ describe('lazyDocs', () => {
       const second = await getComponentDocsLazy('nonexistent', 'elements');
       expect(first).toBeNull();
       expect(second).toBeNull();
-    });
-  });
-
-  describe('parseMarkdownLazy', () => {
-    it('returns empty string for empty input', async () => {
-      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
-      expect(parseMarkdownLazy('')).toBe('');
-    });
-
-    it('parses h1 headers', async () => {
-      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
-      const result = parseMarkdownLazy('# Header 1');
-      expect(result).toContain('<h1>Header 1</h1>');
-    });
-
-    it('parses h2 headers', async () => {
-      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
-      const result = parseMarkdownLazy('## Header 2');
-      expect(result).toContain('<h2>Header 2</h2>');
-    });
-
-    it('parses h3 headers', async () => {
-      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
-      const result = parseMarkdownLazy('### Header 3');
-      expect(result).toContain('<h3>Header 3</h3>');
-    });
-
-    it('parses bold text', async () => {
-      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
-      const result = parseMarkdownLazy('**bold text**');
-      expect(result).toContain('<strong>bold text</strong>');
-    });
-
-    it('parses italic text', async () => {
-      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
-      const result = parseMarkdownLazy('*italic text*');
-      expect(result).toContain('<em>italic text</em>');
-    });
-
-    it('parses inline code', async () => {
-      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
-      const result = parseMarkdownLazy('Use `code` here');
-      expect(result).toContain('<code>code</code>');
-    });
-
-    it('parses code blocks', async () => {
-      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
-      const result = parseMarkdownLazy('```javascript\nconst x = 1;\n```');
-      expect(result).toContain('<pre><code>');
-      expect(result).toContain('const x = 1;');
-    });
-
-    it('parses links', async () => {
-      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
-      const result = parseMarkdownLazy('[Link](https://example.com)');
-      expect(result).toContain('<a href="https://example.com">Link</a>');
-    });
-
-    it('wraps content in paragraphs', async () => {
-      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
-      const result = parseMarkdownLazy('Some text');
-      expect(result).toMatch(/^<p>.*<\/p>$/);
-    });
-
-    it('converts double newlines to paragraph breaks', async () => {
-      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
-      const result = parseMarkdownLazy('Para 1\n\nPara 2');
-      expect(result).toContain('</p><p>');
-    });
-
-    it('converts single newlines to br tags', async () => {
-      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
-      const result = parseMarkdownLazy('Line 1\nLine 2');
-      expect(result).toContain('<br>');
-    });
-
-    it('handles combined markdown syntax', async () => {
-      const { parseMarkdownLazy } = await import('@demo/utils/lazyDocs');
-      const markdown = [
-        '# Title',
-        '',
-        'This is **bold** and *italic* text.',
-        '',
-        'Use `code` inline.',
-        '',
-        '```js',
-        'const x = 1;',
-        '```',
-        '',
-        '[Link](https://test.com)',
-      ].join('\n');
-
-      const result = parseMarkdownLazy(markdown);
-
-      expect(result).toContain('<h1>Title</h1>');
-      expect(result).toContain('<strong>bold</strong>');
-      expect(result).toContain('<em>italic</em>');
-      expect(result).toContain('<code>code</code>');
-      expect(result).toContain('<pre><code>');
-      expect(result).toContain('<a href="https://test.com">Link</a>');
     });
   });
 

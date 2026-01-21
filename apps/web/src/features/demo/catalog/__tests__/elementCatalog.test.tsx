@@ -1,5 +1,4 @@
-/** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
+// apps/web/src/features/demo/catalog/__tests__/elementCatalog.test.tsx
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 

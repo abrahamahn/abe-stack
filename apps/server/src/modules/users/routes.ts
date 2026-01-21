@@ -6,12 +6,12 @@
  * All routes require authentication.
  */
 
-import { protectedRoute, type RouteMap, type RouteResult } from '@infra/router';
+import { protectedRoute, type RouteMap, type RouteResult } from '@router';
 
 import { handleMe } from './handlers';
 
 import type { CursorPaginatedResult, UserResponse } from '@abe-stack/core';
-import type { PaginationRequest } from '@infra/pagination';
+import type { PaginationRequest } from '@pagination';
 import type { AppContext, RequestWithCookies } from '@shared';
 
 // ============================================================================

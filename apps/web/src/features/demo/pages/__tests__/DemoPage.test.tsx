@@ -1,6 +1,4 @@
 // apps/web/src/features/demo/pages/__tests__/DemoPage.test.tsx
-/** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
 import { ClientEnvironmentProvider } from '@app/ClientEnvironment';
 import { DemoPage } from '@demo/pages/DemoPage';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
@@ -308,8 +306,10 @@ describe('DemoPage', () => {
     it('displays variant count for each component in the list', () => {
       renderDemoPage();
 
+      // Button has 2 variants, Input has 1 variant
       expect(screen.getByText('2 variants')).toBeInTheDocument();
-      expect(screen.getByText('1 variant')).toBeInTheDocument();
+      // There's only one component with 1 variant (Input)
+      expect(screen.getAllByText('1 variant')).toHaveLength(1);
     });
 
     it('renders variants when a component is selected', () => {

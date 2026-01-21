@@ -47,6 +47,14 @@ describe('Auth Domain Integration', () => {
       expect(result.isValid).toBe(true);
       expect(result.score).toBeGreaterThanOrEqual(3);
       expect(result.errors).toHaveLength(0);
+
+      // Verify feedback structure from zxcvbn
+      expect(result.feedback).toBeDefined();
+      expect(typeof result.feedback.warning).toBe('string');
+      expect(Array.isArray(result.feedback.suggestions)).toBe(true);
+
+      // Strong password should have minimal or no warnings
+      expect(result.feedback.warning).toBe('');
     });
 
     it('should reject weak passwords and provide feedback', async () => {
@@ -56,7 +64,56 @@ describe('Auth Domain Integration', () => {
 
       expect(result.isValid).toBe(false);
       expect(result.score).toBeLessThan(3);
-      expect(result.feedback.warning).toBeDefined();
+
+      // Verify zxcvbn provides meaningful feedback for weak passwords
+      expect(result.feedback).toBeDefined();
+      expect(typeof result.feedback.warning).toBe('string');
+      expect(Array.isArray(result.feedback.suggestions)).toBe(true);
+
+      // Weak password should have a warning message (common password)
+      expect(result.feedback.warning.length).toBeGreaterThan(0);
+
+      // Should provide suggestions for improvement
+      expect(result.feedback.suggestions.length).toBeGreaterThanOrEqual(0);
+    });
+
+    it('should provide specific feedback for common passwords', async () => {
+      // Test that zxcvbn provides meaningful warnings for weak passwords
+      // Note: zxcvbn warning messages may vary by version and are context-dependent
+      const weakPasswords = ['password', 'qwerty123', '123456789'];
+
+      for (const password of weakPasswords) {
+        const result = await validatePassword(password);
+
+        expect(result.isValid).toBe(false);
+        expect(result.score).toBeLessThan(3);
+
+        // zxcvbn should provide meaningful feedback
+        expect(result.feedback).toBeDefined();
+        expect(result.feedback.warning.length).toBeGreaterThan(0);
+
+        // The warning should be descriptive (not empty/generic)
+        // Common zxcvbn patterns include: common, guessed, keyboard, pattern, straight, rows
+        expect(result.feedback.warning.split(' ').length).toBeGreaterThan(1);
+      }
+    });
+
+    it('should identify keyboard patterns in passwords', async () => {
+      // Passwords that are long enough to pass minimum length but still weak
+      // due to keyboard patterns
+      const keyboardPasswords = ['qwerty123', 'asdfghjk'];
+
+      for (const password of keyboardPasswords) {
+        const result = await validatePassword(password);
+
+        // zxcvbn detects keyboard patterns as weak
+        expect(result.isValid).toBe(false);
+        expect(result.score).toBeLessThan(3);
+
+        // Verify feedback is provided (warning may or may not be present
+        // depending on the specific pattern, but score should reflect weakness)
+        expect(result.feedback).toBeDefined();
+      }
     });
 
     it('should reject passwords containing user input', async () => {

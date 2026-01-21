@@ -5,24 +5,23 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 import { pickAvailablePort } from '../packages/core/src/utils/port';
+import {
+  desktopAliases,
+  packageAliases,
+  uiInternalAliases,
+  coreInternalAliases,
+} from './schema/aliases';
 
 const repoRoot = path.resolve(__dirname, '..');
-const appsRoot = path.join(repoRoot, 'apps');
-const desktopRoot = path.join(appsRoot, 'desktop');
+const desktopRoot = path.join(repoRoot, 'apps/desktop');
 
-function getDesktopAliases(): Record<string, string> {
-  return {
-    '@': path.join(desktopRoot, 'src'),
-    '@services': path.join(desktopRoot, 'src/services'),
-    '@routes': path.join(desktopRoot, 'src/routes'),
-    '@api': path.join(desktopRoot, 'src/api'),
-    '@abe-stack/core': path.join(repoRoot, 'packages/core/src'),
-    '@abe-stack/sdk': path.join(repoRoot, 'packages/sdk/src'),
-    '@abe-stack/ui': path.join(repoRoot, 'packages/ui/src'),
-    '@contracts': path.join(repoRoot, 'packages/core/src/contracts'),
-    '@stores': path.join(repoRoot, 'packages/core/src/stores'),
-    '@validation': path.join(repoRoot, 'packages/core/src/validation'),
-  };
+/**
+ * Resolves relative alias paths to absolute paths
+ */
+function resolveAliases(aliases: Record<string, string>): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(aliases).map(([key, value]) => [key, path.join(repoRoot, value)]),
+  );
 }
 
 export default defineConfig(async ({ command }) => {
@@ -35,7 +34,12 @@ export default defineConfig(async ({ command }) => {
       outDir: `${desktopRoot}/dist/renderer`,
     },
     resolve: {
-      alias: getDesktopAliases(),
+      alias: {
+        ...resolveAliases(desktopAliases),
+        ...resolveAliases(packageAliases),
+        ...resolveAliases(uiInternalAliases),
+        ...resolveAliases(coreInternalAliases),
+      },
     },
   };
 

@@ -34,7 +34,7 @@
       "env": ["NODE_ENV"]
     },
     "test": {
-      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.ts", "**/*.test.tsx", "config/vitest.config.ts"],
+      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.ts", "**/*.test.tsx", "vitest.workspace.ts"],
       "outputs": [],
       "cache": true,
       "env": ["NODE_ENV", "DATABASE_URL"]

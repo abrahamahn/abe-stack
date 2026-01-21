@@ -1,6 +1,4 @@
 // apps/web/src/features/dashboard/pages/__tests__/Dashboard.test.tsx
-/** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';

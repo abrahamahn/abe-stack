@@ -1,5 +1,4 @@
 // apps/web/src/features/auth/services/__tests__/AuthService.test.ts
-/** @vitest-environment jsdom */
 import { tokenStore } from '@abe-stack/core';
 import { QueryClient } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

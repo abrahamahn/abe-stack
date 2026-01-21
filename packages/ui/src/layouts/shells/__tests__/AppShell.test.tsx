@@ -1,6 +1,5 @@
 // packages/ui/src/layouts/shells/__tests__/AppShell.test.tsx
 /** @vitest-environment jsdom */
-import '@testing-library/jest-dom/vitest';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 

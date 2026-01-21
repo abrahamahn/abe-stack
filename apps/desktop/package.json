@@ -14,8 +14,8 @@
     "start": "electron --disable-features=SystemdIntegration dist/electron/main.js",
     "package": "electron-builder",
     "type-check": "tsc --noEmit",
-    "test": "VITEST_TARGET=desktop vitest run --config ../../config/vitest.config.ts",
-    "test:watch": "VITEST_TARGET=desktop vitest --config ../../config/vitest.config.ts"
+    "test": "vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts"
   },
   "dependencies": {
     "@abe-stack/core": "workspace:*",

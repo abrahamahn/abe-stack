@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { createServer, isAddrInUse, type ServerDependencies } from '../server';
 
 import type { AppConfig } from '../config';
-import type { DbClient } from '../infra';
+import type { DbClient } from '../infrastructure';
 
 // Mock db client
 const mockDb = {

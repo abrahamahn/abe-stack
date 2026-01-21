@@ -24,7 +24,7 @@ import {
   type DbClient,
   type EmailService,
   type Logger,
-} from '@infra';
+} from '@infrastructure';
 import {
   AccountLockedError,
   EmailAlreadyExistsError,

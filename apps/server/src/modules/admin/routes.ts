@@ -7,7 +7,7 @@
  */
 
 import { unlockAccountRequestSchema } from '@abe-stack/core';
-import { protectedRoute, type RouteMap, type RouteResult } from '@infra/router';
+import { protectedRoute, type RouteMap, type RouteResult } from '@router';
 
 import { handleAdminUnlock } from './handlers';
 
