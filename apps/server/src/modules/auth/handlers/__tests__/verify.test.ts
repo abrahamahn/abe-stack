@@ -3,13 +3,35 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { handleResendVerification, handleVerifyEmail } from '../verify';
 
-// Use vi.hoisted to create mock function before hoisting
-const mockSetRefreshTokenCookie = vi.hoisted(() => vi.fn());
+// Use vi.hoisted to create mock functions before vi.mock hoisting
+const { mockVerifyEmail, mockResendVerificationEmail, mockSetRefreshTokenCookie } = vi.hoisted(
+  () => ({
+    mockVerifyEmail: vi.fn(),
+    mockResendVerificationEmail: vi.fn(),
+    mockSetRefreshTokenCookie: vi.fn(),
+  }),
+);
+
+// Mock mapErrorToResponse with implementation
+const mockMapErrorToResponse = vi.hoisted(() =>
+  vi.fn((error: unknown, _ctx: unknown) => {
+    if (error instanceof Error && error.name === 'InvalidTokenError') {
+      return { status: 400, body: { message: error.message } };
+    }
+    if (error instanceof Error && error.name === 'EmailSendError') {
+      return { status: 503, body: { message: 'Email service unavailable' } };
+    }
+    if (error instanceof Error && error.name === 'UserNotFoundError') {
+      return { status: 404, body: { message: 'User not found' } };
+    }
+    return { status: 500, body: { message: 'Internal server error' } };
+  }),
+);
 
 // Mock auth service
 vi.mock('@auth/service', () => ({
-  verifyEmail: vi.fn(),
-  resendVerificationEmail: vi.fn(),
+  verifyEmail: mockVerifyEmail,
+  resendVerificationEmail: mockResendVerificationEmail,
 }));
 
 // Mock the auth utils module (used by the handler as ../utils which resolves to auth/utils)
@@ -45,30 +67,8 @@ vi.mock('@shared', () => ({
     VERIFICATION_EMAIL_SENT:
       'If an account exists with this email, a verification link has been sent.',
   },
-  mapErrorToResponse: vi.fn((error: unknown, _ctx: unknown) => {
-    if (error instanceof Error && error.name === 'InvalidTokenError') {
-      return { status: 400, body: { message: error.message } };
-    }
-    if (error instanceof Error && error.name === 'EmailSendError') {
-      return { status: 503, body: { message: 'Email service unavailable' } };
-    }
-    if (error instanceof Error && error.name === 'UserNotFoundError') {
-      return { status: 404, body: { message: 'User not found' } };
-    }
-    return { status: 500, body: { message: 'Internal server error' } };
-  }),
+  mapErrorToResponse: mockMapErrorToResponse,
 }));
-
-// Import mocks after vi.mock (must come after vi.mock() calls)
-// eslint-disable-next-line import/order
-import { resendVerificationEmail, verifyEmail } from '@auth/service';
-// eslint-disable-next-line import/order
-import { mapErrorToResponse } from '@shared';
-
-// Create typed references to the mocks
-const mockVerifyEmail = verifyEmail as ReturnType<typeof vi.fn>;
-const mockResendVerificationEmail = resendVerificationEmail as ReturnType<typeof vi.fn>;
-const mockMapErrorToResponse = mapErrorToResponse as ReturnType<typeof vi.fn>;
 
 describe('Email Verification Handlers', () => {
   const mockCtx = {

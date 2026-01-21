@@ -55,11 +55,15 @@ const testEmailOptions: EmailOptions = {
 
 describe('ConsoleEmailService', () => {
   let consoleService: ConsoleEmailService;
-  let consoleSpy: ReturnType<typeof vi.spyOn>;
+  let stdoutSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     consoleService = new ConsoleEmailService();
-    consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+  });
+
+  afterEach(() => {
+    stdoutSpy.mockRestore();
   });
 
   test('should return success result with messageId', async () => {
@@ -73,8 +77,8 @@ describe('ConsoleEmailService', () => {
   test('should log email details to console', async () => {
     await consoleService.send(testEmailOptions);
 
-    expect(consoleSpy).toHaveBeenCalled();
-    const calls = (consoleSpy as unknown as { mock: { calls: unknown[][] } }).mock.calls;
+    expect(stdoutSpy).toHaveBeenCalled();
+    const calls = (stdoutSpy as unknown as { mock: { calls: unknown[][] } }).mock.calls;
     const logCalls = calls.flat().map(String).join(' ');
     expect(logCalls).toContain(testEmailOptions.to);
     expect(logCalls).toContain(testEmailOptions.subject);

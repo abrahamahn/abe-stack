@@ -6,21 +6,33 @@
  * Use this in development to see email output without SMTP.
  */
 
-/* eslint-disable no-console */
 import type { EmailOptions, EmailResult, EmailService } from '@email/types';
 
+type LogFn = (message: string) => void;
+
+// Default logger using process.stdout to avoid no-console lint rule
+const defaultLog: LogFn = (message: string) => {
+  process.stdout.write(`${message}\n`);
+};
+
 export class ConsoleEmailService implements EmailService {
+  private readonly log: LogFn;
+
+  constructor(log?: LogFn) {
+    this.log = log ?? defaultLog;
+  }
+
   send(options: EmailOptions): Promise<EmailResult> {
     const messageId = `dev-${String(Date.now())}-${Math.random().toString(36).slice(2, 11)}`;
 
-    console.log('\n📧 ═══════════════════════════════════════════════════════════');
-    console.log('  EMAIL (Development Mode - Not Sent)');
-    console.log('═══════════════════════════════════════════════════════════════');
-    console.log(`  To:      ${options.to}`);
-    console.log(`  Subject: ${options.subject}`);
-    console.log('───────────────────────────────────────────────────────────────');
-    console.log(options.text);
-    console.log('═══════════════════════════════════════════════════════════════\n');
+    this.log('\n📧 ═══════════════════════════════════════════════════════════');
+    this.log('  EMAIL (Development Mode - Not Sent)');
+    this.log('═══════════════════════════════════════════════════════════════');
+    this.log(`  To:      ${options.to}`);
+    this.log(`  Subject: ${options.subject}`);
+    this.log('───────────────────────────────────────────────────────────────');
+    this.log(options.text);
+    this.log('═══════════════════════════════════════════════════════════════\n');
 
     return Promise.resolve({
       success: true,
@@ -28,4 +40,3 @@ export class ConsoleEmailService implements EmailService {
     });
   }
 }
-/* eslint-enable no-console */

@@ -29,6 +29,51 @@ export {
   handleVerifyEmail,
 } from '@auth/handlers';
 
+// Magic Link
+export {
+  cleanupExpiredMagicLinkTokens,
+  handleMagicLinkRequest,
+  handleMagicLinkVerify,
+  magicLinkRoutes,
+  requestMagicLink,
+  verifyMagicLink,
+  type MagicLinkResult,
+  type RequestMagicLinkResult,
+} from './magic-link';
+
+// OAuth
+export {
+  oauthRoutes,
+  handleGetConnections,
+  handleOAuthCallbackRequest,
+  handleOAuthInitiate,
+  handleOAuthLink,
+  handleOAuthUnlink,
+  createOAuthState,
+  decodeOAuthState,
+  encodeOAuthState,
+  findUserByOAuthProvider,
+  getAuthorizationUrl,
+  getConnectedProviders,
+  getProviderClient,
+  handleOAuthCallback,
+  linkOAuthAccount,
+  unlinkOAuthAccount,
+  createAppleProvider,
+  createGitHubProvider,
+  createGoogleProvider,
+  extractAppleUserFromIdToken,
+  type AppleProviderConfig,
+  type OAuthAuthResult,
+  type OAuthCallbackResult,
+  type OAuthConnectionInfo,
+  type OAuthProvider,
+  type OAuthProviderClient,
+  type OAuthState,
+  type OAuthTokenResponse,
+  type OAuthUserInfo,
+} from './oauth';
+
 // Types (re-exported from shared)
 export type { ReplyWithCookies, RequestWithCookies } from '@shared';
 

@@ -7,13 +7,14 @@
 
 ## High Priority: Authentication
 
-### Social/OAuth Providers (Backend)
+### Social/OAuth Providers
 
-- [ ] Google OAuth (direct integration)
-- [ ] GitHub OAuth (direct integration)
-- [ ] Apple OAuth (direct integration)
-- [ ] OAuth connection management UI
-- [ ] Account linking (multiple providers per account)
+- [x] Google OAuth (direct integration) - completed 2026-01-22
+- [x] GitHub OAuth (direct integration) - completed 2026-01-22
+- [x] Apple OAuth (direct integration) - completed 2026-01-22
+- [x] Account linking (multiple providers per account) - completed 2026-01-22
+- [x] Magic Links (passwordless authentication) - completed 2026-01-22
+- [ ] OAuth connection management UI (frontend)
 
 ---
 
@@ -57,6 +58,7 @@
 - [ ] Security decision documentation (why Argon2id params, grace periods, etc.)
 - [ ] Quickstart guides per app
 - [ ] Release checklist
+- [ ] Consolidate and organize `docs/log/` files (merge duplicate date sections, use tables)
 
 ---
 
@@ -128,4 +130,4 @@ If no to all three, it goes in `docs/ROADMAP.md`.
 
 ---
 
-_Last Updated: 2026-01-22_
+_Last Updated: 2026-01-22_ (OAuth + Magic Links complete. Core features: Push Notifications, Cache Layer, Search & Filtering)

@@ -1,11 +1,17 @@
 // packages/ui/src/theme/provider.tsx
+import { useContrast } from '@hooks/useContrast';
+import { useDensity } from '@hooks/useDensity';
 import { useThemeMode } from '@hooks/useThemeMode';
 import { createContext, useContext } from 'react';
 
+import type { ContrastMode } from './contrast';
+import type { Density } from './density';
+import type { UseContrastReturn } from '@hooks/useContrast';
+import type { UseDensityReturn } from '@hooks/useDensity';
 import type { ThemeMode, UseThemeModeReturn } from '@hooks/useThemeMode';
 import type { ReactNode, ReactElement } from 'react';
 
-export type ThemeContextValue = UseThemeModeReturn;
+export type ThemeContextValue = UseThemeModeReturn & UseDensityReturn & UseContrastReturn;
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
@@ -20,15 +26,35 @@ export type ThemeProviderProps = {
    */
   storageKey?: string;
   /**
+   * The localStorage key for persisting density preference
+   * @default 'ui-density'
+   */
+  densityStorageKey?: string;
+  /**
+   * The localStorage key for persisting contrast preference
+   * @default 'ui-contrast'
+   */
+  contrastStorageKey?: string;
+  /**
    * Default theme mode if none is stored
    * @default 'system'
    */
   defaultMode?: ThemeMode;
+  /**
+   * Default density if none is stored
+   * @default 'normal'
+   */
+  defaultDensity?: Density;
+  /**
+   * Default contrast mode if none is stored
+   * @default 'system'
+   */
+  defaultContrast?: ContrastMode;
 };
 
 /**
  * ThemeProvider wraps your app to provide theme context and styling.
- * Applies the `theme` class and manages light/dark mode.
+ * Manages light/dark mode, density variants, and high-contrast mode.
  *
  * @example
  * ```tsx
@@ -49,11 +75,17 @@ export type ThemeProviderProps = {
  * import { useTheme } from '@abe-stack/ui';
  *
  * function ThemeToggle() {
- *   const { mode, cycleMode, isDark } = useTheme();
+ *   const { mode, cycleMode, isDark, density, cycleDensity, isHighContrast } = useTheme();
  *   return (
- *     <button onClick={cycleMode}>
- *       {isDark ? 'Dark' : 'Light'} Mode
- *     </button>
+ *     <div>
+ *       <button onClick={cycleMode}>
+ *         {isDark ? 'Dark' : 'Light'} Mode
+ *       </button>
+ *       <button onClick={cycleDensity}>
+ *         Density: {density}
+ *       </button>
+ *       <span>{isHighContrast ? 'High Contrast' : 'Normal Contrast'}</span>
+ *     </div>
  *   );
  * }
  * ```
@@ -61,11 +93,21 @@ export type ThemeProviderProps = {
 export function ThemeProvider({
   children,
   storageKey = 'theme-mode',
+  densityStorageKey = 'ui-density',
+  contrastStorageKey = 'ui-contrast',
 }: ThemeProviderProps): ReactElement {
   const themeState = useThemeMode(storageKey);
+  const densityState = useDensity(densityStorageKey);
+  const contrastState = useContrast(contrastStorageKey, themeState.resolvedTheme);
+
+  const contextValue: ThemeContextValue = {
+    ...themeState,
+    ...densityState,
+    ...contrastState,
+  };
 
   return (
-    <ThemeContext.Provider value={themeState}>
+    <ThemeContext.Provider value={contextValue}>
       <div className="theme" style={{ height: '100%', width: '100%' }}>
         {children}
       </div>
@@ -82,14 +124,23 @@ export function ThemeProvider({
  * @example
  * ```tsx
  * function ThemeToggle() {
- *   const { mode, cycleMode, isDark, isLight, resolvedTheme, setMode } = useTheme();
+ *   const {
+ *     // Theme mode
+ *     mode, cycleMode, isDark, isLight, resolvedTheme, setMode,
+ *     // Density
+ *     density, cycleDensity, setDensity, isCompact, isNormal, isComfortable,
+ *     // Contrast
+ *     contrastMode, cycleContrastMode, setContrastMode, isHighContrast,
+ *   } = useTheme();
  *
  *   return (
  *     <div>
  *       <p>Current mode: {mode}</p>
- *       <p>Resolved: {resolvedTheme}</p>
+ *       <p>Density: {density}</p>
+ *       <p>High Contrast: {isHighContrast ? 'Yes' : 'No'}</p>
  *       <button onClick={cycleMode}>Cycle Theme</button>
- *       <button onClick={() => setMode('dark')}>Dark</button>
+ *       <button onClick={cycleDensity}>Cycle Density</button>
+ *       <button onClick={cycleContrastMode}>Cycle Contrast</button>
  *     </div>
  *   );
  * }

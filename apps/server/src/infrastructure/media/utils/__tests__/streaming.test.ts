@@ -166,8 +166,10 @@ describe('StreamingMediaProcessor', () => {
       const sharp = await import('sharp');
       const mockSharp = vi.mocked(sharp.default);
       mockSharp.mockImplementationOnce(() => {
-        // eslint-disable-next-line @typescript-eslint/only-throw-error -- testing non-Error throw handling
-        throw 'Unknown error';
+        // Create a non-Error object to test handling of non-standard exceptions
+        // At runtime this is not instanceof Error, testing the fallback error path
+        const nonErrorException = Object.create(null) as Error;
+        throw nonErrorException;
       });
 
       const result = await processor.processLargeImage('/tmp/input.jpg', '/tmp/output.jpg', {});

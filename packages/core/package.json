@@ -7,6 +7,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./domains/auth": "./src/domains/auth/index.ts",
+    "./domains/cache": "./src/domains/cache/index.ts",
     "./domains/users": "./src/domains/users/index.ts",
     "./domains/pagination": "./src/domains/pagination/index.ts",
     "./domains/admin": "./src/domains/admin/index.ts",

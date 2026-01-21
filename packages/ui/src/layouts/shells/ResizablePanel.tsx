@@ -1,14 +1,21 @@
 // packages/ui/src/layouts/shells/ResizablePanel.tsx
 import {
   forwardRef,
+  useCallback,
   useEffect,
   useRef,
   useState,
   type ComponentPropsWithoutRef,
+  type KeyboardEvent,
   type MouseEvent,
   type ReactNode,
 } from 'react';
 import '../../styles/components.css';
+
+/** Step size for keyboard resize (percentage or pixels based on unit) */
+const KEYBOARD_STEP = 2;
+/** Large step size for Shift+Arrow keyboard resize */
+const KEYBOARD_STEP_LARGE = 10;
 
 type ResizablePanelProps = ComponentPropsWithoutRef<'div'> & {
   /**
@@ -83,9 +90,13 @@ type ResizableSeparatorProps = ComponentPropsWithoutRef<'div'> & {
    */
   direction?: 'horizontal' | 'vertical';
   /**
-   * Handler callback for resize
+   * Handler callback for resize delta (mouse drag)
    */
   onResize?: (delta: number) => void;
+  /**
+   * Handler callback for direct size setting (keyboard)
+   */
+  onSizeChange?: (size: number) => void;
   /**
    * Callback when drag starts
    */
@@ -94,18 +105,50 @@ type ResizableSeparatorProps = ComponentPropsWithoutRef<'div'> & {
    * Callback when drag ends
    */
   onDragEnd?: () => void;
+  /**
+   * Current size value for ARIA attributes
+   */
+  currentSize?: number;
+  /**
+   * Minimum size value for ARIA attributes
+   */
+  minSize?: number;
+  /**
+   * Maximum size value for ARIA attributes
+   */
+  maxSize?: number;
+  /**
+   * Size unit for calculating keyboard steps
+   */
+  unit?: '%' | 'px';
+  /**
+   * Accessible label for the separator
+   */
+  'aria-label'?: string;
 };
 
 /**
- * Resizable separator/handle for dragging between panels
+ * Resizable separator/handle for dragging between panels.
+ *
+ * Supports keyboard navigation:
+ * - Arrow keys: Resize by small step (2%)
+ * - Shift + Arrow keys: Resize by large step (10%)
+ * - Home: Jump to minimum size
+ * - End: Jump to maximum size
  */
 export const ResizableSeparator = forwardRef<HTMLDivElement, ResizableSeparatorProps>(
   (props, ref) => {
     const {
       direction = 'horizontal',
       onResize,
+      onSizeChange,
       onDragStart,
       onDragEnd,
+      currentSize,
+      minSize = 10,
+      maxSize = 90,
+      unit = '%',
+      'aria-label': ariaLabel,
       className = '',
       ...rest
     } = props;
@@ -118,6 +161,45 @@ export const ResizableSeparator = forwardRef<HTMLDivElement, ResizableSeparatorP
       onDragStart?.();
       startPosRef.current = direction === 'horizontal' ? e.clientX : e.clientY;
     };
+
+    // Keyboard handler for accessibility
+    const handleKeyDown = useCallback(
+      (e: KeyboardEvent<HTMLDivElement>): void => {
+        if (currentSize === undefined || !onSizeChange) return;
+
+        const step = e.shiftKey ? KEYBOARD_STEP_LARGE : KEYBOARD_STEP;
+        let newSize: number | null = null;
+
+        // Arrow keys increase/decrease based on direction
+        // Horizontal: Right/Down increase, Left/Up decrease
+        // Vertical: Down/Right increase, Up/Left decrease
+        switch (e.key) {
+          case 'ArrowRight':
+          case 'ArrowDown':
+            e.preventDefault();
+            newSize = Math.min(maxSize, currentSize + step);
+            break;
+          case 'ArrowLeft':
+          case 'ArrowUp':
+            e.preventDefault();
+            newSize = Math.max(minSize, currentSize - step);
+            break;
+          case 'Home':
+            e.preventDefault();
+            newSize = minSize;
+            break;
+          case 'End':
+            e.preventDefault();
+            newSize = maxSize;
+            break;
+        }
+
+        if (newSize !== null && newSize !== currentSize) {
+          onSizeChange(newSize);
+        }
+      },
+      [currentSize, maxSize, minSize, onSizeChange],
+    );
 
     useEffect(() => {
       if (!isDragging) return;
@@ -143,14 +225,24 @@ export const ResizableSeparator = forwardRef<HTMLDivElement, ResizableSeparatorP
       };
     }, [isDragging, direction, onResize, onDragEnd]);
 
+    // Generate accessible label
+    const defaultLabel = direction === 'horizontal' ? 'Resize panel width' : 'Resize panel height';
+    const sizeText = currentSize !== undefined ? ` (current: ${String(currentSize)}${unit})` : '';
+
     return (
       <div
         ref={ref}
         className={`resizable-separator ${isDragging ? 'dragging' : ''} ${className}`.trim()}
         data-direction={direction}
         onMouseDown={handleMouseDown}
+        onKeyDown={handleKeyDown}
         role="separator"
+        tabIndex={0}
         aria-orientation={direction === 'horizontal' ? 'vertical' : 'horizontal'}
+        aria-valuenow={currentSize}
+        aria-valuemin={minSize}
+        aria-valuemax={maxSize}
+        aria-label={ariaLabel ?? `${defaultLabel}${sizeText}`}
         {...rest}
       />
     );
@@ -160,7 +252,19 @@ export const ResizableSeparator = forwardRef<HTMLDivElement, ResizableSeparatorP
 ResizableSeparator.displayName = 'ResizableSeparator';
 
 /**
- * Individual resizable panel
+ * Individual resizable panel with keyboard-accessible resize handle.
+ *
+ * @example
+ * ```tsx
+ * <ResizablePanelGroup direction="horizontal">
+ *   <ResizablePanel defaultSize={30} minSize={20}>
+ *     Sidebar content
+ *   </ResizablePanel>
+ *   <ResizablePanel defaultSize={70}>
+ *     Main content
+ *   </ResizablePanel>
+ * </ResizablePanelGroup>
+ * ```
  */
 export const ResizablePanel = forwardRef<HTMLDivElement, ResizablePanelProps>((props, ref) => {
   const {
@@ -185,24 +289,40 @@ export const ResizablePanel = forwardRef<HTMLDivElement, ResizablePanelProps>((p
 
   const size = isControlled ? controlledSize : internalSize;
 
-  const handleResize = (delta: number): void => {
-    const adjustedDelta = invertResize ? -delta : delta;
-    const prevSize = size;
+  // Handle mouse drag resize (delta-based)
+  const handleResize = useCallback(
+    (delta: number): void => {
+      const adjustedDelta = invertResize ? -delta : delta;
+      const prevSize = size;
 
-    let newSize: number;
-    if (unit === 'px') {
-      newSize = Math.max(minSize, Math.min(maxSize, prevSize + adjustedDelta));
-    } else {
-      const container = direction === 'horizontal' ? window.innerWidth : window.innerHeight;
-      const deltaPercent = (adjustedDelta / container) * 100;
-      newSize = Math.max(minSize, Math.min(maxSize, prevSize + deltaPercent));
-    }
+      let newSize: number;
+      if (unit === 'px') {
+        newSize = Math.max(minSize, Math.min(maxSize, prevSize + adjustedDelta));
+      } else {
+        const container = direction === 'horizontal' ? window.innerWidth : window.innerHeight;
+        const deltaPercent = (adjustedDelta / container) * 100;
+        newSize = Math.max(minSize, Math.min(maxSize, prevSize + deltaPercent));
+      }
 
-    if (!isControlled) {
-      setInternalSize(newSize);
-    }
-    onResize?.(newSize);
-  };
+      if (!isControlled) {
+        setInternalSize(newSize);
+      }
+      onResize?.(newSize);
+    },
+    [direction, invertResize, isControlled, maxSize, minSize, onResize, size, unit],
+  );
+
+  // Handle keyboard resize (direct size setting)
+  const handleSizeChange = useCallback(
+    (newSize: number): void => {
+      const clampedSize = Math.max(minSize, Math.min(maxSize, newSize));
+      if (!isControlled) {
+        setInternalSize(clampedSize);
+      }
+      onResize?.(clampedSize);
+    },
+    [isControlled, maxSize, minSize, onResize],
+  );
 
   const currentSize = collapsed ? 0 : size;
   const flexBasis = unit === 'px' ? `${String(currentSize)}px` : `${String(currentSize)}%`;
@@ -233,12 +353,17 @@ export const ResizablePanel = forwardRef<HTMLDivElement, ResizablePanelProps>((p
         <ResizableSeparator
           direction={direction}
           onResize={handleResize}
+          onSizeChange={handleSizeChange}
           onDragStart={() => {
             setIsDragging(true);
           }}
           onDragEnd={() => {
             setIsDragging(false);
           }}
+          currentSize={size}
+          minSize={minSize}
+          maxSize={maxSize}
+          unit={unit}
         />
       )}
     </>

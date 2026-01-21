@@ -28,6 +28,7 @@ import {
   handleVerifyEmail,
   type RegisterResult,
 } from './handlers';
+import { magicLinkRoutes } from './magic-link';
 
 import type {
   AuthResponse,
@@ -155,4 +156,7 @@ export const authRoutes: RouteMap = {
     },
     resendVerificationRequestSchema,
   ),
+
+  // Magic link routes
+  ...magicLinkRoutes,
 };

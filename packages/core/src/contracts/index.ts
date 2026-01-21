@@ -23,6 +23,10 @@ export {
   forgotPasswordResponseSchema,
   loginRequestSchema,
   logoutResponseSchema,
+  magicLinkRequestResponseSchema,
+  magicLinkRequestSchema,
+  magicLinkVerifyResponseSchema,
+  magicLinkVerifySchema,
   refreshResponseSchema,
   registerRequestSchema,
   registerResponseSchema,
@@ -39,6 +43,10 @@ export type {
   ForgotPasswordResponse,
   LoginRequest,
   LogoutResponse,
+  MagicLinkRequest,
+  MagicLinkRequestResponse,
+  MagicLinkVerifyRequest,
+  MagicLinkVerifyResponse,
   RefreshResponse,
   RegisterRequest,
   RegisterResponse,
@@ -85,6 +93,32 @@ export type {
 // Users contract
 export { USER_ROLES, userResponseSchema, userRoleSchema, userSchema, usersContract } from './users';
 export type { User, UserResponse, UserRole } from './users';
+
+// OAuth contract
+export {
+  oauthContract,
+  oauthProviderSchema,
+  oauthInitiateResponseSchema,
+  oauthCallbackQuerySchema,
+  oauthCallbackResponseSchema,
+  oauthLinkResponseSchema,
+  oauthLinkCallbackResponseSchema,
+  oauthUnlinkResponseSchema,
+  oauthConnectionSchema,
+  oauthConnectionsResponseSchema,
+  OAUTH_PROVIDERS,
+} from './oauth';
+export type {
+  OAuthProvider,
+  OAuthInitiateResponse,
+  OAuthCallbackQuery,
+  OAuthCallbackResponse,
+  OAuthLinkResponse,
+  OAuthLinkCallbackResponse,
+  OAuthUnlinkResponse,
+  OAuthConnection,
+  OAuthConnectionsResponse,
+} from './oauth';
 
 // Realtime contract
 export {

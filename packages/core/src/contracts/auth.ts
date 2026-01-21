@@ -44,6 +44,18 @@ export const resetPasswordRequestSchema = z.object({
 });
 
 // ============================================================================
+// Magic Link Schemas
+// ============================================================================
+
+export const magicLinkRequestSchema = z.object({
+  email: emailSchema,
+});
+
+export const magicLinkVerifySchema = z.object({
+  token: z.string().min(1, 'Token is required'),
+});
+
+// ============================================================================
 // Response Schemas
 // ============================================================================
 
@@ -84,6 +96,16 @@ export const resetPasswordResponseSchema = z.object({
   message: z.string(),
 });
 
+export const magicLinkRequestResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+});
+
+export const magicLinkVerifyResponseSchema = z.object({
+  token: z.string(),
+  user: userSchema,
+});
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -102,6 +124,10 @@ export type ResendVerificationRequest = z.infer<typeof resendVerificationRequest
 export type ResendVerificationResponse = z.infer<typeof resendVerificationResponseSchema>;
 export type ResetPasswordRequest = z.infer<typeof resetPasswordRequestSchema>;
 export type ResetPasswordResponse = z.infer<typeof resetPasswordResponseSchema>;
+export type MagicLinkRequest = z.infer<typeof magicLinkRequestSchema>;
+export type MagicLinkVerifyRequest = z.infer<typeof magicLinkVerifySchema>;
+export type MagicLinkRequestResponse = z.infer<typeof magicLinkRequestResponseSchema>;
+export type MagicLinkVerifyResponse = z.infer<typeof magicLinkVerifyResponseSchema>;
 
 // ============================================================================
 // Auth Contract
@@ -192,5 +218,27 @@ export const authContract = c.router({
       400: errorResponseSchema,
     },
     summary: 'Reset password with token',
+  },
+  magicLinkRequest: {
+    method: 'POST',
+    path: '/api/auth/magic-link/request',
+    body: magicLinkRequestSchema,
+    responses: {
+      200: magicLinkRequestResponseSchema,
+      400: errorResponseSchema,
+      429: errorResponseSchema,
+    },
+    summary: 'Request a magic link for passwordless login',
+  },
+  magicLinkVerify: {
+    method: 'POST',
+    path: '/api/auth/magic-link/verify',
+    body: magicLinkVerifySchema,
+    responses: {
+      200: magicLinkVerifyResponseSchema,
+      400: errorResponseSchema,
+      401: errorResponseSchema,
+    },
+    summary: 'Verify magic link token and login',
   },
 });

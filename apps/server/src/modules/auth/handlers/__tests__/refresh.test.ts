@@ -19,6 +19,9 @@ import type { AppContext, ReplyWithCookies, RequestWithCookies } from '@shared';
 // Mock Dependencies
 // ============================================================================
 
+// Use vi.hoisted to create mock function before vi.mock hoisting
+const mockSendTokenReuseAlert = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
+
 vi.mock('@auth/service', () => ({
   refreshUserTokens: vi.fn(),
 }));
@@ -29,11 +32,8 @@ vi.mock('@auth/utils', () => ({
 }));
 
 vi.mock('@auth/security', () => ({
-  sendTokenReuseAlert: vi.fn().mockResolvedValue(undefined),
+  sendTokenReuseAlert: mockSendTokenReuseAlert,
 }));
-
-// eslint-disable-next-line import/order -- must import after vi.mock
-import { sendTokenReuseAlert } from '@auth/security';
 
 // ============================================================================
 // Test Helpers
@@ -334,7 +334,7 @@ describe('handleRefresh', () => {
       // Wait for the fire-and-forget promise to resolve
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      expect(sendTokenReuseAlert).toHaveBeenCalledWith(ctx.email, {
+      expect(mockSendTokenReuseAlert).toHaveBeenCalledWith(ctx.email, {
         email: 'victim@example.com',
         ipAddress: '192.168.1.1',
         userAgent: 'Mozilla',
@@ -358,7 +358,7 @@ describe('handleRefresh', () => {
       await handleRefresh(ctx, request, reply);
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      expect(sendTokenReuseAlert).toHaveBeenCalledWith(ctx.email, {
+      expect(mockSendTokenReuseAlert).toHaveBeenCalledWith(ctx.email, {
         email: 'user@example.com',
         ipAddress: '10.0.0.50',
         userAgent: 'Safari',
@@ -379,7 +379,7 @@ describe('handleRefresh', () => {
       const result = await handleRefresh(ctx, request, reply);
       await new Promise((resolve) => setTimeout(resolve, 0));
 
-      expect(sendTokenReuseAlert).not.toHaveBeenCalled();
+      expect(mockSendTokenReuseAlert).not.toHaveBeenCalled();
       expect(result.status).toBe(401);
     });
 
@@ -391,7 +391,7 @@ describe('handleRefresh', () => {
       vi.mocked(refreshUserTokens).mockRejectedValue(
         new TokenReuseError('user-123', 'user@example.com', 'family-123'),
       );
-      vi.mocked(sendTokenReuseAlert).mockRejectedValue(new Error('SMTP failed'));
+      mockSendTokenReuseAlert.mockRejectedValue(new Error('SMTP failed'));
 
       const result = await handleRefresh(ctx, request, reply);
 
@@ -416,7 +416,7 @@ describe('handleRefresh', () => {
 
       // Create a slow email service
       let emailResolved = false;
-      vi.mocked(sendTokenReuseAlert).mockImplementation(
+      mockSendTokenReuseAlert.mockImplementation(
         () =>
           new Promise((resolve) => {
             setTimeout(() => {

@@ -147,3 +147,78 @@ export {
   isUnauthorizedError,
 } from './errors';
 export type { ApiErrorBody } from './errors';
+
+// Notifications (Push)
+export {
+  // Client
+  createNotificationClient,
+  getDeviceId,
+  getExistingSubscription,
+  getPushPermission,
+  isPushSupported,
+  requestPushPermission,
+  subscribeToPush,
+  unsubscribeFromPush,
+  urlBase64ToUint8Array,
+  // Hooks
+  useNotificationPreferences,
+  usePushPermission,
+  usePushSubscription,
+  useTestNotification,
+} from './notifications';
+export type {
+  NotificationClient,
+  NotificationClientConfig,
+  NotificationPreferencesState,
+  PushPermissionState,
+  PushSubscriptionState,
+  TestNotificationState,
+  UseNotificationPreferencesOptions,
+  UsePushSubscriptionOptions,
+} from './notifications';
+
+// Search
+export {
+  // Query Builder
+  ClientSearchQueryBuilder,
+  createClientSearchQuery,
+  createSearchQuery,
+  fromClientSearchQuery,
+  fromSearchQuery,
+  SearchQueryBuilder,
+  // Quick Filters
+  contains,
+  eq,
+  gt,
+  inArray,
+  lt,
+  neq,
+  // URL Serialization
+  queryToURLSearchParams,
+  urlSearchParamsToQuery,
+  buildURLWithQuery,
+  deserializeFromHash,
+  deserializeFromJSON,
+  deserializeFromURLParams,
+  extractQueryFromURL,
+  mergeSearchParamsIntoURL,
+  serializeToHash,
+  serializeToJSON,
+  serializeToURLParams,
+  // Hooks
+  useDebounceSearch,
+  useInfiniteSearch,
+  useSearch,
+  useSearchParams,
+} from './search';
+export type {
+  CursorSearchFn,
+  SearchFn,
+  SerializationOptions,
+  SerializedFilter,
+  SerializedQuery,
+  UseInfiniteSearchOptions,
+  UseInfiniteSearchResult,
+  UseSearchOptions,
+  UseSearchResult,
+} from './search';

@@ -349,7 +349,7 @@ describe('CSRF Protection', () => {
       url: '/csrf-token',
     });
 
-    const { token } = parseJsonResponse<{ token: string }>(tokenResponse);
+    const { token } = parseJsonResponse(tokenResponse) as { token: string };
     const cookies = tokenResponse.headers['set-cookie'];
     const csrfCookie = Array.isArray(cookies)
       ? cookies.find((c) => c.startsWith('_csrf='))
@@ -412,7 +412,7 @@ describe('CSRF Protection', () => {
       method: 'GET',
       url: '/csrf-token',
     });
-    const { token } = parseJsonResponse<{ token: string }>(tokenResponse1);
+    const { token } = parseJsonResponse(tokenResponse1) as { token: string };
 
     // Get cookie from different session
     const tokenResponse2 = await server.inject({
@@ -473,7 +473,7 @@ describe('CSRF with Encrypted Tokens (Production Mode)', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    const { token } = parseJsonResponse<{ token: string }>(response);
+    const { token } = parseJsonResponse(response) as { token: string };
     expect(token).toBeDefined();
     // Encrypted tokens should be longer due to IV and auth tag
     expect(token.length).toBeGreaterThan(32);
@@ -485,7 +485,7 @@ describe('CSRF with Encrypted Tokens (Production Mode)', () => {
       url: '/csrf-token',
     });
 
-    const { token } = parseJsonResponse<{ token: string }>(tokenResponse);
+    const { token } = parseJsonResponse(tokenResponse) as { token: string };
     const cookies = tokenResponse.headers['set-cookie'];
     const csrfCookie = Array.isArray(cookies)
       ? cookies.find((c) => c.startsWith('_csrf='))
@@ -542,7 +542,7 @@ describe('Correlation ID Middleware', () => {
     );
 
     // Check body
-    const body = parseJsonResponse<{ correlationId: string }>(response);
+    const body = parseJsonResponse(response) as { correlationId: string };
     expect(body.correlationId).toBe(response.headers['x-correlation-id']);
   });
 
@@ -585,7 +585,7 @@ describe('Correlation ID with Trust Proxy', () => {
 
     expect(response.headers['x-correlation-id']).toBe(providedId);
 
-    const body = parseJsonResponse<{ correlationId: string }>(response);
+    const body = parseJsonResponse(response) as { correlationId: string };
     expect(body.correlationId).toBe(providedId);
   });
 
@@ -722,7 +722,7 @@ describe('Rate Limiting', () => {
     });
 
     expect(response.statusCode).toBe(429);
-    const body = parseJsonResponse<{ error: string; message: string }>(response);
+    const body = parseJsonResponse(response) as { error: string; message: string };
     expect(body.error).toBe('Too Many Requests');
     expect(response.headers['x-ratelimit-remaining']).toBe('0');
   });
@@ -784,7 +784,7 @@ describe('Prototype Pollution Protection', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    const body = parseJsonResponse<{ received: Record<string, unknown> }>(response);
+    const body = parseJsonResponse(response) as { received: Record<string, unknown> };
     expect(body.received).toEqual({ safe: 'value' });
     expect(body.received).not.toHaveProperty('__proto__');
   });
@@ -798,7 +798,7 @@ describe('Prototype Pollution Protection', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    const body = parseJsonResponse<{ received: Record<string, unknown> }>(response);
+    const body = parseJsonResponse(response) as { received: Record<string, unknown> };
     expect(body.received).toEqual({ safe: 'value' });
   });
 
@@ -811,7 +811,7 @@ describe('Prototype Pollution Protection', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    const body = parseJsonResponse<{ received: Record<string, unknown> }>(response);
+    const body = parseJsonResponse(response) as { received: Record<string, unknown> };
     expect(body.received).toEqual({ safe: 'value' });
   });
 
@@ -831,9 +831,9 @@ describe('Prototype Pollution Protection', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    const body = parseJsonResponse<{ received: { outer: { inner: Record<string, unknown> } } }>(
-      response,
-    );
+    const body = parseJsonResponse(response) as {
+      received: { outer: { inner: Record<string, unknown> } };
+    };
     expect(body.received.outer.inner).toEqual({ safe: 'nested' });
   });
 
@@ -863,7 +863,7 @@ describe('Prototype Pollution Protection', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    const body = parseJsonResponse<{ received: typeof safePayload }>(response);
+    const body = parseJsonResponse(response) as { received: typeof safePayload };
     expect(body.received).toEqual(safePayload);
   });
 });

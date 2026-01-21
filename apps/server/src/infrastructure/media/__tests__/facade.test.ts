@@ -24,12 +24,18 @@ vi.mock('../processor', () => ({
     });
     cleanup = vi.fn();
   },
-  // eslint-disable-next-line @typescript-eslint/no-extraneous-class
-  ImageProcessor: class MockImageProcessor {},
-  // eslint-disable-next-line @typescript-eslint/no-extraneous-class
-  AudioProcessor: class MockAudioProcessor {},
-  // eslint-disable-next-line @typescript-eslint/no-extraneous-class
-  VideoProcessor: class MockVideoProcessor {},
+  ImageProcessor: class MockImageProcessor {
+    readonly isMock = true;
+    process = vi.fn();
+  },
+  AudioProcessor: class MockAudioProcessor {
+    readonly isMock = true;
+    process = vi.fn();
+  },
+  VideoProcessor: class MockVideoProcessor {
+    readonly isMock = true;
+    process = vi.fn();
+  },
 }));
 
 // Mock the queue module with class syntax

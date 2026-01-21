@@ -112,9 +112,10 @@ describe('IPC Types', () => {
       };
 
       expect(options.filters).toHaveLength(3);
-      expect(options.filters![0].extensions).toContain('png');
-      expect(options.filters![1].extensions).toContain('pdf');
-      expect(options.filters![2].extensions).toContain('*');
+      const filters = options.filters!;
+      expect(filters[0]!.extensions).toContain('png');
+      expect(filters[1]!.extensions).toContain('pdf');
+      expect(filters[2]!.extensions).toContain('*');
     });
   });
 

@@ -27,6 +27,17 @@ export {
   type NewEmailVerificationToken,
   type SecurityEvent,
   type NewSecurityEvent,
+  // Magic Link
+  magicLinkTokens,
+  type MagicLinkToken,
+  type NewMagicLinkToken,
+  // OAuth
+  oauthConnections,
+  oauthProviderEnum,
+  OAUTH_PROVIDERS,
+  type OAuthConnection,
+  type NewOAuthConnection,
+  type OAuthProvider,
 } from './schema';
 
 // Client exports

@@ -27,22 +27,26 @@ import type {
   PermissionRecord,
   RecordLoader,
 } from '@permissions';
-import type { FastifyInstance, preHandlerAsyncHookHandler } from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest, preHandlerHookHandler } from 'fastify';
 
 // ============================================================================
 // Test Helpers
 // ============================================================================
 
 /**
- * Wraps an async handler to work with Fastify's preHandler.
- * Fastify supports async preHandlers, but TypeScript's strict checking
- * flags Promise-returning functions in some contexts.
+ * Wraps an async permission hook for use with Fastify's preHandler.
+ * Uses done callback style to satisfy TypeScript's strict void return checking.
  */
 function asPreHandler(
-  hook: (request: unknown, reply: unknown) => Promise<void> | void,
-): preHandlerAsyncHookHandler {
-  return (request, reply) => {
-    void hook(request, reply);
+  hook: (request: FastifyRequest, reply: FastifyReply) => Promise<void> | void,
+): preHandlerHookHandler {
+  return (request, reply, done) => {
+    const result = hook(request, reply);
+    if (result instanceof Promise) {
+      result.then(() => done()).catch(done);
+    } else {
+      done();
+    }
   };
 }
 
@@ -541,7 +545,7 @@ describe('Permission Middleware Integration', () => {
       });
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{ task: { id: string } }>(response);
+      const body = parseJsonResponse(response) as { task: { id: string } };
       expect(body.task.id).toBe('task-1');
     });
 
@@ -629,7 +633,7 @@ describe('Permission Middleware Integration', () => {
       });
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{ created: { id: string } }>(response);
+      const body = parseJsonResponse(response) as { created: { id: string } };
       expect(body.created.id).toBe('new-task');
     });
   });
@@ -862,7 +866,7 @@ describe('Permission Middleware with Custom Error Handler', () => {
     });
 
     expect(response.statusCode).toBe(403);
-    const body = parseJsonResponse<{ error: string; customReason: string }>(response);
+    const body = parseJsonResponse(response) as { error: string; customReason: string };
     expect(body.error).toBe('Access Denied');
     expect(body.customReason).toContain('No matching permission rules');
     expect(customOnDenied).toHaveBeenCalled();

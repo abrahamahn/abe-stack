@@ -31,6 +31,23 @@ export {
   type NewSecurityEvent,
 } from './auth';
 
+// Magic link schema
+export {
+  magicLinkTokens,
+  type MagicLinkToken,
+  type NewMagicLinkToken,
+} from './magic-link';
+
+// OAuth schema
+export {
+  oauthConnections,
+  oauthProviderEnum,
+  OAUTH_PROVIDERS,
+  type OAuthConnection,
+  type NewOAuthConnection,
+  type OAuthProvider,
+} from './oauth';
+
 // Schema validation
 export {
   REQUIRED_TABLES,

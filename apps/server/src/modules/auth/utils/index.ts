@@ -10,7 +10,15 @@ export {
   type TokenPayload,
 } from './jwt';
 
-export { hashPassword, verifyPassword, verifyPasswordSafe, needsRehash } from './password';
+export {
+  hashPassword,
+  verifyPassword,
+  verifyPasswordSafe,
+  needsRehash,
+  initDummyHashPool,
+  isDummyHashPoolInitialized,
+  resetDummyHashPool,
+} from './password';
 
 export {
   createRefreshTokenFamily,

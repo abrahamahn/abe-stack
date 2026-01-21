@@ -387,8 +387,22 @@
 }
 
 .resizable-separator:hover::after,
-.resizable-separator.dragging::after {
+.resizable-separator.dragging::after,
+.resizable-separator:focus-visible::after {
   background: var(--ui-color-primary);
+}
+
+.resizable-separator:focus-visible {
+  outline: none;
+}
+
+.resizable-separator:focus-visible::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 2px solid var(--ui-color-primary);
+  border-radius: var(--ui-radius-sm);
+  pointer-events: none;
 }
 
 .resizable-separator.dragging {

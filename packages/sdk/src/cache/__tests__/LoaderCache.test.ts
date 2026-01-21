@@ -654,8 +654,12 @@ describe('loadWithCache', () => {
     const cache = new LoaderCache<string>();
 
     const loader = async (): Promise<string> => {
-      // eslint-disable-next-line @typescript-eslint/only-throw-error
-      throw 'string error';
+      // Create a non-Error object to test handling of non-standard rejections
+      // At runtime this is not instanceof Error, testing the fallback error path
+      const nonErrorException = Object.assign(Object.create(null), {
+        message: 'string error',
+      }) as Error;
+      throw nonErrorException;
     };
 
     await expect(loadWithCache(cache, 'key', loader)).rejects.toThrow('string error');

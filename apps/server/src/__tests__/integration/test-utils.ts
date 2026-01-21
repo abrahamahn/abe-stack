@@ -494,9 +494,12 @@ export async function createTestServer(options: TestServerOptions = {}): Promise
 // Response Helpers
 // ============================================================================
 
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- generic for type-safe parsing at call sites
-export function parseJsonResponse<T>(response: LightMyRequestResponse): T {
-  return JSON.parse(response.body) as T;
+/**
+ * Parse JSON response body. Returns unknown - callers should cast or validate the result.
+ * Example: const data = parseJsonResponse(response) as MyType;
+ */
+export function parseJsonResponse(response: LightMyRequestResponse): unknown {
+  return JSON.parse(response.body) as unknown;
 }
 
 export function getResponseCookie(

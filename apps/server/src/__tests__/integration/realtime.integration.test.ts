@@ -83,7 +83,7 @@ describe('POST /api/realtime/write', () => {
         payload: createWriteTransaction('user-123', []),
       });
 
-      const body = parseJsonResponse<{ message: string }>(response);
+      const body = parseJsonResponse(response) as { message: string };
       expect(body.message).toBe('Authentication required');
     });
 
@@ -109,7 +109,7 @@ describe('POST /api/realtime/write', () => {
         }),
       );
 
-      const body = parseJsonResponse<{ message: string }>(response);
+      const body = parseJsonResponse(response) as { message: string };
       expect(body.message).toBe('Author ID must match authenticated user');
     });
 
@@ -139,7 +139,7 @@ describe('POST /api/realtime/write', () => {
       );
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{ recordMap: Record<string, unknown> }>(response);
+      const body = parseJsonResponse(response) as { recordMap: Record<string, unknown> };
       expect(body.recordMap).toBeDefined();
     });
   });
@@ -171,7 +171,7 @@ describe('POST /api/realtime/write', () => {
         }),
       );
 
-      const body = parseJsonResponse<{ message: string }>(response);
+      const body = parseJsonResponse(response) as { message: string };
       expect(body.message).toContain('not allowed');
     });
 
@@ -226,9 +226,9 @@ describe('POST /api/realtime/write', () => {
       );
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{
+      const body = parseJsonResponse(response) as {
         recordMap: { users: Record<string, { name: string; version: number }> };
-      }>(response);
+      };
       expect(body.recordMap.users[testRecord.id]!.name).toBe('Updated Name');
       expect(body.recordMap.users[testRecord.id]!.version).toBe(2);
     });
@@ -258,7 +258,7 @@ describe('POST /api/realtime/write', () => {
         }),
       );
 
-      const body = parseJsonResponse<{ message: string }>(response);
+      const body = parseJsonResponse(response) as { message: string };
       expect(body.message).toContain('cannot be modified');
     });
   });
@@ -290,9 +290,9 @@ describe('POST /api/realtime/write', () => {
       );
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{
+      const body = parseJsonResponse(response) as {
         recordMap: { users: Record<string, { lastSeen: string }> };
-      }>(response);
+      };
       expect(body.recordMap.users[testRecord.id]!.lastSeen).toBeDefined();
     });
   });
@@ -335,9 +335,9 @@ describe('POST /api/realtime/write', () => {
       );
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{ recordMap: { users: Record<string, { tags: string[] }> } }>(
-        response,
-      );
+      const body = parseJsonResponse(response) as {
+        recordMap: { users: Record<string, { tags: string[] }> };
+      };
       expect(body.recordMap.users[testRecord.id]!.tags[0]).toBe('new-tag');
     });
 
@@ -378,9 +378,9 @@ describe('POST /api/realtime/write', () => {
       );
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{ recordMap: { users: Record<string, { tags: string[] }> } }>(
-        response,
-      );
+      const body = parseJsonResponse(response) as {
+        recordMap: { users: Record<string, { tags: string[] }> };
+      };
       expect(body.recordMap.users[testRecord.id]!.tags[1]).toBe('new-tag');
     });
 
@@ -420,9 +420,9 @@ describe('POST /api/realtime/write', () => {
       );
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{ recordMap: { users: Record<string, { tags: string[] }> } }>(
-        response,
-      );
+      const body = parseJsonResponse(response) as {
+        recordMap: { users: Record<string, { tags: string[] }> };
+      };
       expect(body.recordMap.users[testRecord.id]!.tags).not.toContain('remove');
       expect(body.recordMap.users[testRecord.id]!.tags).toContain('keep');
     });
@@ -447,7 +447,7 @@ describe('POST /api/realtime/write', () => {
         }),
       );
 
-      const body = parseJsonResponse<{ message: string }>(response);
+      const body = parseJsonResponse(response) as { message: string };
       expect(body.message).toContain('not found');
     });
   });
@@ -484,10 +484,10 @@ describe('POST /api/realtime/write', () => {
         }),
       );
 
-      const body = parseJsonResponse<{
+      const body = parseJsonResponse(response) as {
         message: string;
         conflictingRecords?: Array<{ table: string; id: string }>;
-      }>(response);
+      };
       expect(body.message).toContain('conflict');
     });
 
@@ -517,9 +517,9 @@ describe('POST /api/realtime/write', () => {
       );
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{ recordMap: { users: Record<string, { version: number }> } }>(
-        response,
-      );
+      const body = parseJsonResponse(response) as {
+        recordMap: { users: Record<string, { version: number }> };
+      };
       expect(body.recordMap.users[testRecord.id]!.version).toBe(6);
     });
   });
@@ -557,9 +557,9 @@ describe('POST /api/realtime/write', () => {
       );
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{
+      const body = parseJsonResponse(response) as {
         recordMap: { users: Record<string, { name: string; bio: string }> };
-      }>(response);
+      };
       expect(body.recordMap.users[testRecord.id]!.name).toBe('New Name');
       expect(body.recordMap.users[testRecord.id]!.bio).toBe('New Bio');
     });
@@ -597,7 +597,7 @@ describe('POST /api/realtime/getRecords', () => {
         payload: { pointers: [{ table: 'users', id: 'user-123' }] },
       });
 
-      const body = parseJsonResponse<{ message: string }>(response);
+      const body = parseJsonResponse(response) as { message: string };
       expect(body.message).toBe('Authentication required');
     });
 
@@ -639,9 +639,9 @@ describe('POST /api/realtime/getRecords', () => {
       );
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{ recordMap: { users: Record<string, typeof testRecord> } }>(
-        response,
-      );
+      const body = parseJsonResponse(response) as {
+        recordMap: { users: Record<string, typeof testRecord> };
+      };
       expect(body.recordMap.users[testRecord.id]).toBeDefined();
       expect(body.recordMap.users[testRecord.id]!.id).toBe(testRecord.id);
     });
@@ -674,9 +674,9 @@ describe('POST /api/realtime/getRecords', () => {
       );
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{ recordMap: { users: Record<string, { id: string }> } }>(
-        response,
-      );
+      const body = parseJsonResponse(response) as {
+        recordMap: { users: Record<string, { id: string }> };
+      };
       expect(Object.keys(body.recordMap.users)).toHaveLength(3);
     });
 
@@ -695,7 +695,7 @@ describe('POST /api/realtime/getRecords', () => {
       );
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{ recordMap: { users: Record<string, unknown> } }>(response);
+      const body = parseJsonResponse(response) as { recordMap: { users: Record<string, unknown> } };
       expect(body.recordMap.users['non-existent']).toBeUndefined();
     });
   });
@@ -723,7 +723,7 @@ describe('POST /api/realtime/getRecords', () => {
         }),
       );
 
-      const body = parseJsonResponse<{ message: string }>(response);
+      const body = parseJsonResponse(response) as { message: string };
       expect(body.message).toContain('not allowed');
     });
   });
@@ -747,7 +747,7 @@ describe('POST /api/realtime/getRecords', () => {
         }),
       );
 
-      const body = parseJsonResponse<{ message: string }>(response);
+      const body = parseJsonResponse(response) as { message: string };
       expect(body.message).toContain('required');
     });
 
@@ -774,7 +774,7 @@ describe('POST /api/realtime/getRecords', () => {
         }),
       );
 
-      const body = parseJsonResponse<{ message: string }>(response);
+      const body = parseJsonResponse(response) as { message: string };
       expect(body.message).toContain('100');
     });
   });
@@ -797,9 +797,9 @@ describe('POST /api/realtime/getRecords', () => {
       );
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{ recordMap: { users: Record<string, { version: number }> } }>(
-        response,
-      );
+      const body = parseJsonResponse(response) as {
+        recordMap: { users: Record<string, { version: number }> };
+      };
       expect(body.recordMap.users[testRecord.id]!.version).toBe(42);
     });
   });

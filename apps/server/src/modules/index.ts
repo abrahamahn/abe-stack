@@ -10,6 +10,7 @@ import { registerRouteMap } from '@router';
 
 import { adminRoutes } from './admin/routes';
 import { authRoutes } from './auth/routes';
+import { notificationRoutes } from './notifications/routes';
 import { realtimeRoutes } from './realtime/routes';
 import { userRoutes } from './users/routes';
 
@@ -39,6 +40,16 @@ export {
   registerRealtimeTable,
   VersionConflictError,
 } from './realtime';
+export {
+  handleGetPreferences,
+  handleGetVapidKey,
+  handleSendNotification,
+  handleSubscribe,
+  handleTestNotification,
+  handleUnsubscribe,
+  handleUpdatePreferences,
+  notificationRoutes,
+} from './notifications';
 
 // Generic route registration (Chet-stack pattern)
 export {
@@ -59,6 +70,7 @@ export {
 // Route definitions for external use
 export { adminRoutes } from './admin/routes';
 export { authRoutes } from './auth/routes';
+export { notificationRoutes as notificationRoutesConfig } from './notifications/routes';
 export { realtimeRoutes } from './realtime/routes';
 export { userRoutes } from './users/routes';
 
@@ -79,4 +91,5 @@ export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
   registerRouteMap(app, ctx, userRoutes, routerOptions);
   registerRouteMap(app, ctx, adminRoutes, routerOptions);
   registerRouteMap(app, ctx, realtimeRoutes, routerOptions);
+  registerRouteMap(app, ctx, notificationRoutes, routerOptions);
 }

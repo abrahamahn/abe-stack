@@ -261,7 +261,7 @@ describe('Password Module (Argon2id)', () => {
       }
 
       // All should return false (no match)
-      expect(results.every((r) => r === false)).toBe(true);
+      expect(results.every((r) => !r)).toBe(true);
     });
   });
 });

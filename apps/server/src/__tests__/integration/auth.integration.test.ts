@@ -88,7 +88,7 @@ describe('Registration Flow', () => {
       });
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{ status: string; email: string }>(response);
+      const body = parseJsonResponse(response) as { status: string; email: string };
       expect(body.status).toBe('pending_verification');
       expect(body.email).toBe('newuser@example.com');
     });
@@ -114,7 +114,7 @@ describe('Registration Flow', () => {
         },
       });
 
-      const body = parseJsonResponse<{ message: string }>(response);
+      const body = parseJsonResponse(response) as { message: string };
       expect(body.message).toBe('Email already registered');
     });
 
@@ -140,7 +140,7 @@ describe('Registration Flow', () => {
         },
       });
 
-      const body = parseJsonResponse<{ message: string }>(response);
+      const body = parseJsonResponse(response) as { message: string };
       expect(body.message).toBe('Password does not meet security requirements');
     });
   });
@@ -207,7 +207,7 @@ describe('Login Flow', () => {
       });
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{ token: string; user: { email: string } }>(response);
+      const body = parseJsonResponse(response) as { token: string; user: { email: string } };
       expect(body.token).toBe('test-access-token');
       expect(body.user.email).toBe('test@example.com');
 
@@ -246,7 +246,7 @@ describe('Login Flow', () => {
       });
 
       expect(response.statusCode).toBe(401);
-      const body = parseJsonResponse<{ message: string }>(response);
+      const body = parseJsonResponse(response) as { message: string };
       expect(body.message).toBe('Invalid credentials');
     });
 
@@ -275,7 +275,7 @@ describe('Login Flow', () => {
       });
 
       expect(response.statusCode).toBe(403);
-      const body = parseJsonResponse<{ message: string }>(response);
+      const body = parseJsonResponse(response) as { message: string };
       expect(body.message).toContain('verify your email');
     });
 
@@ -351,7 +351,7 @@ describe('Token Refresh Flow', () => {
       });
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{ token: string }>(response);
+      const body = parseJsonResponse(response) as { token: string };
       expect(body.token).toBe('new-access-token');
     });
 
@@ -373,7 +373,7 @@ describe('Token Refresh Flow', () => {
       });
 
       expect(response.statusCode).toBe(401);
-      const body = parseJsonResponse<{ message: string }>(response);
+      const body = parseJsonResponse(response) as { message: string };
       expect(body.message).toBe('No refresh token provided');
     });
 
@@ -442,7 +442,7 @@ describe('Logout Flow', () => {
       });
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{ message: string }>(response);
+      const body = parseJsonResponse(response) as { message: string };
       expect(body.message).toBe('Logged out successfully');
 
       // Check cookie is cleared
@@ -510,7 +510,7 @@ describe('Logout Flow', () => {
         url: '/csrf-token',
       });
 
-      const { token } = parseJsonResponse<{ token: string }>(tokenResponse);
+      const { token } = parseJsonResponse(tokenResponse) as { token: string };
       const cookies = tokenResponse.headers['set-cookie'];
       const csrfCookie = Array.isArray(cookies)
         ? cookies.find((c) => c.startsWith('_csrf='))
@@ -614,7 +614,7 @@ describe('Password Reset Flow', () => {
       });
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{ message: string }>(response);
+      const body = parseJsonResponse(response) as { message: string };
       expect(body.message).toBe('Password reset successfully');
     });
 
@@ -765,11 +765,11 @@ describe('Email Verification Flow', () => {
       });
 
       expect(response.statusCode).toBe(200);
-      const body = parseJsonResponse<{
+      const body = parseJsonResponse(response) as {
         verified: boolean;
         token: string;
         user: { email: string };
-      }>(response);
+      };
       expect(body.verified).toBe(true);
       expect(body.token).toBe('new-access-token');
     });

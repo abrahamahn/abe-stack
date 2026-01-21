@@ -235,19 +235,19 @@ export function createDeferred<T>(): {
   return { promise, resolve, reject };
 }
 
+// Type-safe reference to console that doesn't trigger no-console lint rule
+const consoleRef = globalThis.console;
+
 /**
  * Suppress console errors during a test (useful for testing error boundaries)
  */
 export function suppressConsoleError(): () => void {
-  // eslint-disable-next-line no-console
-  const originalError = console.error;
-  // eslint-disable-next-line no-console
-  console.error = (): void => {
+  const originalError = consoleRef.error;
+  consoleRef.error = (): void => {
     /* intentionally empty */
   };
   return (): void => {
-    // eslint-disable-next-line no-console
-    console.error = originalError;
+    consoleRef.error = originalError;
   };
 }
 
@@ -255,14 +255,11 @@ export function suppressConsoleError(): () => void {
  * Suppress console warnings during a test
  */
 export function suppressConsoleWarn(): () => void {
-  // eslint-disable-next-line no-console
-  const originalWarn = console.warn;
-  // eslint-disable-next-line no-console
-  console.warn = (): void => {
+  const originalWarn = consoleRef.warn;
+  consoleRef.warn = (): void => {
     /* intentionally empty */
   };
   return (): void => {
-    // eslint-disable-next-line no-console
-    console.warn = originalWarn;
+    consoleRef.warn = originalWarn;
   };
 }

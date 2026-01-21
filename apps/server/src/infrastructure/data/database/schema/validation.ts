@@ -26,6 +26,8 @@ export const REQUIRED_TABLES = [
   'password_reset_tokens',
   'email_verification_tokens',
   'security_events',
+  'magic_link_tokens',
+  'oauth_connections',
 ] as const;
 
 export type RequiredTable = (typeof REQUIRED_TABLES)[number];
