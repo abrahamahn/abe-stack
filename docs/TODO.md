@@ -50,29 +50,7 @@ Building blocks needed across multiple products.
 
 ---
 
-## Medium Priority: Security Improvements
-
-### Security Enhancements (Backend)
-
-- [ ] Dummy hash pool rotation (prevent timing detection)
-- [ ] Login attempt cleanup job (90-day retention)
-- [ ] JWT secret rotation support (dual-secret verification)
-- [ ] IP proxy header validation (trusted proxy whitelist)
-
-### Database Performance (Backend)
-
-- [ ] Add indexes: `login_attempts(email, created_at)`, `refresh_tokens(token, family_id, expires_at)`
-- [ ] Auth config validation at startup
-- [ ] Query optimization for token rotation
-
-### Test Coverage: Critical Auth Paths (Backend)
-
-- [ ] Login flow: lockout expiration, parallel requests, password change invalidation
-- [ ] Registration: concurrent same-email, UTF-8 names, boundary passwords
-
----
-
-## Medium Priority: UI Packagethree
+## Medium Priority: UI Package
 
 ### Accessibility (Frontend)
 
