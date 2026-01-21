@@ -7,7 +7,7 @@
 
 import { loginAttempts, users } from '@database';
 import { MAX_PROGRESSIVE_DELAY_MS, PROGRESSIVE_DELAY_WINDOW_MS } from '@shared/constants';
-import { and, count, eq, gte } from 'drizzle-orm';
+import { and, count, desc, eq, gte } from 'drizzle-orm';
 
 import { logAccountUnlockedEvent } from './events';
 
@@ -157,7 +157,7 @@ export async function getAccountLockoutStatus(
     .select({ createdAt: loginAttempts.createdAt })
     .from(loginAttempts)
     .where(and(eq(loginAttempts.email, email), eq(loginAttempts.success, false)))
-    .orderBy(loginAttempts.createdAt)
+    .orderBy(desc(loginAttempts.createdAt))
     .limit(1);
 
   if (mostRecentAttempt) {
@@ -190,6 +190,7 @@ export async function getAccountLockoutStatus(
  * @param db - Database client
  * @param email - User email to unlock
  * @param adminUserId - ID of admin performing the unlock (for audit trail)
+ * @param reason - Reason for unlocking the account (for audit trail)
  * @param ipAddress - Optional IP address of admin performing unlock
  * @param userAgent - Optional user agent of admin performing unlock
  * @returns Promise<void>
@@ -198,6 +199,7 @@ export async function unlockAccount(
   db: DbClient,
   email: string,
   adminUserId: string,
+  reason: string,
   ipAddress?: string,
   userAgent?: string,
 ): Promise<void> {
@@ -211,7 +213,7 @@ export async function unlockAccount(
   await db.insert(loginAttempts).values({
     email,
     success: true,
-    failureReason: `Manually unlocked by admin ${adminUserId}`,
+    failureReason: `Unlocked by admin ${adminUserId}: ${reason}`,
     ipAddress: ipAddress || null,
     userAgent: userAgent || 'Admin Console',
   });

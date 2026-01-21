@@ -177,4 +177,91 @@ If you did not change your password, please contact support immediately.
       ),
     };
   },
+
+  /**
+   * Token reuse security alert
+   * Sent when a refresh token is used after it has already been rotated,
+   * indicating a potential token theft/replay attack.
+   */
+  tokenReuseAlert(
+    ipAddress: string,
+    userAgent: string,
+    timestamp: Date,
+  ): EmailOptions & { to: '' } {
+    const formattedTime = timestamp.toISOString();
+    const formattedDate = timestamp.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZoneName: 'short',
+    });
+
+    return {
+      to: '',
+      subject: 'Security Alert: Suspicious Activity on Your Account',
+      text: `
+SECURITY ALERT: Suspicious Activity Detected
+
+We detected suspicious activity on your account that may indicate unauthorized access.
+
+What happened:
+- A previously used authentication token was reused, which is a sign of a potential security breach
+- As a precaution, all your active sessions have been terminated
+
+Details:
+- Time: ${formattedDate}
+- IP Address: ${ipAddress}
+- Device/Browser: ${userAgent || 'Unknown'}
+
+Recommended actions:
+1. Change your password immediately
+2. Enable two-factor authentication (2FA) if not already enabled
+3. Review your recent account activity for any unauthorized actions
+4. If you did not attempt to sign in, your credentials may have been compromised
+
+If you recognize this activity, you can safely ignore this email and sign in again.
+
+If you need assistance, please contact our support team immediately.
+      `.trim(),
+      html: renderLayout(
+        'Security Alert',
+        `
+        <h2 style="${styles.heading}; color: #dc2626;">Security Alert: Suspicious Activity Detected</h2>
+        <p style="${styles.text}">We detected suspicious activity on your account that may indicate unauthorized access.</p>
+
+        <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin: 16px 0;">
+          <h3 style="color: #991b1b; margin: 0 0 12px 0; font-size: 16px;">What happened:</h3>
+          <ul style="color: #7f1d1d; margin: 0; padding-left: 20px;">
+            <li>A previously used authentication token was reused, which is a sign of a potential security breach</li>
+            <li>As a precaution, <strong>all your active sessions have been terminated</strong></li>
+          </ul>
+        </div>
+
+        <div style="background-color: #f3f4f6; border-radius: 8px; padding: 16px; margin: 16px 0;">
+          <h3 style="color: #374151; margin: 0 0 12px 0; font-size: 16px;">Details:</h3>
+          <table style="color: #4b5563; font-size: 14px;">
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: 500;">Time:</td><td>${formattedDate}</td></tr>
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: 500;">IP Address:</td><td>${ipAddress}</td></tr>
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: 500;">Device/Browser:</td><td>${userAgent || 'Unknown'}</td></tr>
+          </table>
+          <p style="color: #6b7280; font-size: 12px; margin: 8px 0 0 0;">Timestamp: ${formattedTime}</p>
+        </div>
+
+        <h3 style="color: #374151; margin: 24px 0 12px 0; font-size: 16px;">Recommended actions:</h3>
+        <ol style="color: #4b5563; margin: 0; padding-left: 20px; line-height: 1.8;">
+          <li><strong>Change your password immediately</strong></li>
+          <li>Enable two-factor authentication (2FA) if not already enabled</li>
+          <li>Review your recent account activity for any unauthorized actions</li>
+          <li>If you did not attempt to sign in, your credentials may have been compromised</li>
+        </ol>
+
+        <p style="${styles.text}; margin-top: 24px;">If you recognize this activity, you can safely ignore this email and sign in again.</p>
+        <p style="${styles.alert}">If you need assistance, please contact our support team immediately.</p>
+        `,
+      ),
+    };
+  },
 };

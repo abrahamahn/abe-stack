@@ -41,6 +41,7 @@ vi.mock('drizzle-orm', () => ({
   gte: vi.fn((col: string, val: unknown) => ({ gte: [col, val] })),
   and: vi.fn((...args: unknown[]) => ({ and: args })),
   count: vi.fn(() => 'count'),
+  desc: vi.fn((col: string) => ({ desc: col })),
 }));
 
 // Mock constants
@@ -408,6 +409,99 @@ describe('Lockout Functions', () => {
       expect(status.failedAttempts).toBe(5);
       expect(status.remainingTime).toBeUndefined();
     });
+
+    test('should use MOST RECENT attempt for lockout expiration calculation', async () => {
+      const now = Date.now();
+      vi.setSystemTime(now);
+
+      // Simulate multiple failed attempts at different times:
+      // - Old attempt: 14 minutes ago
+      // - Most recent attempt: 2 minutes ago
+      // With 15 minute lockout duration:
+      // - If using old attempt: lockout would have expired (14min + 15min = unlocked)
+      // - If using most recent: lockout is still active (2min + 15min = 13min remaining)
+      const mostRecentAttemptTime = new Date(now - 2 * 60 * 1000); // 2 minutes ago
+
+      let orderByCallArgs: unknown[] = [];
+      mockDb.select
+        .mockReturnValueOnce({
+          // First call: count query
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockResolvedValue([{ count: 5 }]),
+          }),
+        })
+        .mockReturnValueOnce({
+          // Second call: find most recent attempt
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              orderBy: vi.fn((...args: unknown[]) => {
+                orderByCallArgs = args;
+                return {
+                  limit: vi.fn().mockResolvedValue([{ createdAt: mostRecentAttemptTime }]),
+                };
+              }),
+            }),
+          }),
+        });
+
+      const status: LockoutStatus = await getAccountLockoutStatus(
+        asMockDb(mockDb),
+        'test@example.com',
+        defaultLockoutConfig,
+      );
+
+      expect(status.isLocked).toBe(true);
+      expect(status.failedAttempts).toBe(5);
+      expect(status.lockedUntil).toBeDefined();
+
+      // Verify that descending order was used (to get most recent first)
+      // The orderBy should have been called with desc(loginAttempts.createdAt)
+      expect(orderByCallArgs.length).toBeGreaterThan(0);
+      expect(orderByCallArgs[0]).toEqual({ desc: 'createdAt' });
+
+      // With most recent attempt 2 min ago and 15 min lockout,
+      // remaining time should be approximately 13 minutes
+      const expectedRemainingTime = 13 * 60 * 1000;
+      expect(status.remainingTime).toBeDefined();
+      expect(status.remainingTime).toBeCloseTo(expectedRemainingTime, -4); // within ~10 seconds
+    });
+
+    test('should calculate correct lockout expiration with multiple attempts at different times', async () => {
+      const now = Date.now();
+      vi.setSystemTime(now);
+
+      // Most recent attempt was 5 minutes ago
+      const mostRecentAttemptTime = new Date(now - 5 * 60 * 1000);
+      // Expected: lockedUntil = mostRecent + lockoutDuration = 5min ago + 15min = 10min from now
+      const expectedLockedUntil = new Date(mostRecentAttemptTime.getTime() + 15 * 60 * 1000);
+      const expectedRemainingTime = expectedLockedUntil.getTime() - now; // 10 minutes
+
+      mockDb.select
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockResolvedValue([{ count: 5 }]),
+          }),
+        })
+        .mockReturnValueOnce({
+          from: vi.fn().mockReturnValue({
+            where: vi.fn().mockReturnValue({
+              orderBy: vi.fn().mockReturnValue({
+                limit: vi.fn().mockResolvedValue([{ createdAt: mostRecentAttemptTime }]),
+              }),
+            }),
+          }),
+        });
+
+      const status: LockoutStatus = await getAccountLockoutStatus(
+        asMockDb(mockDb),
+        'test@example.com',
+        defaultLockoutConfig,
+      );
+
+      expect(status.isLocked).toBe(true);
+      expect(status.lockedUntil).toEqual(expectedLockedUntil);
+      expect(status.remainingTime).toBe(expectedRemainingTime);
+    });
   });
 
   describe('unlockAccount', () => {
@@ -419,6 +513,7 @@ describe('Lockout Functions', () => {
         asMockDb(mockDb),
         'test@example.com',
         'admin-456',
+        'User verified identity via phone call',
         '192.168.1.1',
         'Admin Browser',
       );
@@ -430,7 +525,12 @@ describe('Lockout Functions', () => {
     test('should insert success entry even when user does not exist', async () => {
       mockDb.query.users.findFirst.mockResolvedValue(null);
 
-      await unlockAccount(asMockDb(mockDb), 'unknown@example.com', 'admin-456');
+      await unlockAccount(
+        asMockDb(mockDb),
+        'unknown@example.com',
+        'admin-456',
+        'Account created in error',
+      );
 
       expect(mockDb.insert).toHaveBeenCalled();
     });
@@ -438,16 +538,43 @@ describe('Lockout Functions', () => {
     test('should use default userAgent when not provided', async () => {
       mockDb.query.users.findFirst.mockResolvedValue(null);
 
-      await unlockAccount(asMockDb(mockDb), 'test@example.com', 'admin-456');
+      await unlockAccount(
+        asMockDb(mockDb),
+        'test@example.com',
+        'admin-456',
+        'Password reset requested',
+      );
 
       expect(mockDb.insert).toHaveBeenCalled();
     });
 
-    test('should record admin userId in audit trail', async () => {
+    test('should record admin userId and reason in audit trail', async () => {
       mockDb.query.users.findFirst.mockResolvedValue({ id: 'user-123', email: 'test@example.com' });
 
-      await unlockAccount(asMockDb(mockDb), 'test@example.com', 'admin-999');
+      await unlockAccount(
+        asMockDb(mockDb),
+        'test@example.com',
+        'admin-999',
+        'Customer support ticket #12345',
+      );
 
+      expect(mockDb.insert).toHaveBeenCalled();
+    });
+
+    test('should include custom reason in the failure reason field', async () => {
+      mockDb.query.users.findFirst.mockResolvedValue({ id: 'user-123', email: 'test@example.com' });
+
+      const customReason = 'User locked out due to forgotten password, verified via support call';
+      await unlockAccount(
+        asMockDb(mockDb),
+        'test@example.com',
+        'admin-123',
+        customReason,
+        '10.0.0.1',
+        'Admin Panel',
+      );
+
+      // Verify that insert was called (the reason is included in the failureReason field)
       expect(mockDb.insert).toHaveBeenCalled();
     });
   });

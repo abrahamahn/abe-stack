@@ -1,4 +1,5 @@
 // apps/server/src/modules/auth/utils/__tests__/refresh-token.test.ts
+import { TokenReuseError } from '@abe-stack/core';
 import { refreshTokenFamilies, refreshTokens } from '@database';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -53,17 +54,38 @@ interface UpdateData {
 
 type TransactionCallback<T> = (tx: DbClient) => Promise<T>;
 
+interface MockDbOptions {
+  /** Make the next token insert fail (for rollback testing) */
+  failOnTokenInsert?: boolean;
+  /** Make the next token delete fail (for rollback testing) */
+  failOnTokenDelete?: boolean;
+  /** Make the next family update fail (for rollback testing) */
+  failOnFamilyUpdate?: boolean;
+}
+
+// Pending update operation to be committed/rolled back
+interface PendingFamilyUpdate {
+  familyId: string;
+  data: UpdateData;
+}
+
 // Mock database
-function createMockDb(): {
+function createMockDb(options: MockDbOptions = {}): {
   db: DbClient;
   tokenFamilies: TokenFamily[];
   tokens: Token[];
   mockUsers: MockUser[];
   setDeleteMode: (mode: 'all' | 'expired') => void;
+  setFailOnTokenInsert: (fail: boolean) => void;
+  setFailOnTokenDelete: (fail: boolean) => void;
+  setFailOnFamilyUpdate: (fail: boolean) => void;
 } {
   const tokenFamilies: TokenFamily[] = [];
   const tokens: Token[] = [];
   let deleteMode: 'all' | 'expired' = 'all';
+  let failOnTokenInsert = options.failOnTokenInsert ?? false;
+  let failOnTokenDelete = options.failOnTokenDelete ?? false;
+  let failOnFamilyUpdate = options.failOnFamilyUpdate ?? false;
 
   const mockUsers: MockUser[] = [
     {
@@ -73,108 +95,218 @@ function createMockDb(): {
     },
   ];
 
-  const db = {
-    transaction: async <T>(callback: TransactionCallback<T>): Promise<T> => {
-      return callback(db);
-    },
-    insert: (
-      table: typeof refreshTokenFamilies | typeof refreshTokens,
-    ): {
-      values: (data: InsertData) => { returning: () => Promise<TokenFamily[]> } | Promise<void>;
-    } => ({
-      values: (data: InsertData): { returning: () => Promise<TokenFamily[]> } | Promise<void> => {
-        if (table === refreshTokenFamilies) {
-          const family: TokenFamily = {
-            id: `family-${String(tokenFamilies.length + 1)}`,
-            userId: data.userId ?? '',
-            createdAt: new Date(),
-            revokedAt: null,
-            revokeReason: null,
-          };
-          tokenFamilies.push(family);
-          return {
-            returning: (): Promise<TokenFamily[]> => Promise.resolve([family]),
-          };
-        } else if (table === refreshTokens) {
-          const token: Token = {
-            id: `token-${String(tokens.length + 1)}`,
-            userId: data.userId ?? '',
-            familyId: data.familyId ?? null,
-            token: data.token ?? '',
-            expiresAt: data.expiresAt ?? new Date(),
-            createdAt: new Date(),
-          };
-          tokens.push(token);
-          return Promise.resolve();
-        }
-        return Promise.resolve();
-      },
-    }),
-    query: {
-      refreshTokens: {
-        findFirst: ({
-          orderBy: _orderBy,
-        }: {
-          where?: unknown;
-          orderBy?: unknown;
-        }): Promise<Token | null> => {
-          const filtered = tokens.filter((t) => t.expiresAt > new Date());
+  // Helper to apply pending updates
+  const applyUpdates = (updates: PendingFamilyUpdate[]): void => {
+    updates.forEach((update) => {
+      tokenFamilies.forEach((f) => {
+        f.revokedAt = update.data.revokedAt ?? f.revokedAt;
+        f.revokeReason = update.data.revokeReason ?? f.revokeReason;
+      });
+    });
+  };
 
-          if (filtered.length > 0) {
-            filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  // Helper to apply pending deletes
+  const applyTokenDeletes = (deletedIds: Set<string>): void => {
+    if (deletedIds.size > 0) {
+      const remaining = tokens.filter((t) => !deletedIds.has(t.id));
+      tokens.length = 0;
+      tokens.push(...remaining);
+    }
+  };
+
+  // Create the db object with transaction support that properly handles rollback
+  const createDbInstance = (
+    isTransaction: boolean,
+    pendingFamilies: TokenFamily[],
+    pendingTokens: Token[],
+    pendingUpdates: PendingFamilyUpdate[],
+    pendingDeletedTokenIds: Set<string>,
+  ): DbClient => {
+    const instance = {
+      transaction: async <T>(callback: TransactionCallback<T>): Promise<T> => {
+        // Create isolated transaction state
+        const transactionFamilies: TokenFamily[] = [];
+        const transactionTokens: Token[] = [];
+        const transactionUpdates: PendingFamilyUpdate[] = [];
+        const transactionDeletedTokenIds: Set<string> = new Set();
+
+        const txInstance = createDbInstance(
+          true,
+          transactionFamilies,
+          transactionTokens,
+          transactionUpdates,
+          transactionDeletedTokenIds,
+        );
+
+        // Execute callback - if it throws, transaction data is not committed (rollback)
+        const result = await callback(txInstance);
+
+        // Commit: merge transaction data into parent scope
+        transactionFamilies.forEach((f) => {
+          if (isTransaction) {
+            pendingFamilies.push(f);
+          } else {
+            tokenFamilies.push(f);
           }
-
-          return Promise.resolve(filtered[0] ?? null);
-        },
-      },
-      refreshTokenFamilies: {
-        findFirst: (_args: { where?: unknown }): Promise<TokenFamily | null> => {
-          return Promise.resolve(tokenFamilies[0] ?? null);
-        },
-      },
-      users: {
-        findFirst: (_args: { where?: unknown }): Promise<MockUser | null> => {
-          return Promise.resolve(mockUsers[0] ?? null);
-        },
-      },
-    },
-    delete: (
-      table: typeof refreshTokens,
-    ): { where: (_condition: unknown) => Promise<Token[]> } => ({
-      where: (_condition: unknown): Promise<Token[]> => {
-        if (table === refreshTokens) {
-          if (deleteMode === 'expired') {
-            const now = new Date();
-            const expiredTokens = tokens.filter((t) => t.expiresAt < now);
-            const validTokens = tokens.filter((t) => t.expiresAt >= now);
-            tokens.length = 0;
-            tokens.push(...validTokens);
-            return Promise.resolve(expiredTokens);
+        });
+        transactionTokens.forEach((t) => {
+          if (isTransaction) {
+            pendingTokens.push(t);
+          } else {
+            tokens.push(t);
           }
+        });
+        transactionUpdates.forEach((u) => {
+          if (isTransaction) {
+            pendingUpdates.push(u);
+          } else {
+            applyUpdates([u]);
+          }
+        });
+        transactionDeletedTokenIds.forEach((id) => {
+          if (isTransaction) {
+            pendingDeletedTokenIds.add(id);
+          } else {
+            applyTokenDeletes(new Set([id]));
+          }
+        });
 
-          const deleted = [...tokens];
-          tokens.length = 0; // Simplified deletion
-          return Promise.resolve(deleted);
-        }
-        return Promise.resolve([]);
+        return result;
       },
-    }),
-    update: (
-      table: typeof refreshTokenFamilies,
-    ): { set: (data: UpdateData) => { where: (_condition: unknown) => Promise<void> } } => ({
-      set: (data: UpdateData): { where: (_condition: unknown) => Promise<void> } => ({
-        where: (_condition: unknown): Promise<void> => {
+      insert: (
+        table: typeof refreshTokenFamilies | typeof refreshTokens,
+      ): {
+        values: (data: InsertData) => { returning: () => Promise<TokenFamily[]> } | Promise<void>;
+      } => ({
+        values: (data: InsertData): { returning: () => Promise<TokenFamily[]> } | Promise<void> => {
           if (table === refreshTokenFamilies) {
-            tokenFamilies.forEach((f) => {
-              f.revokedAt = data.revokedAt ?? f.revokedAt;
-              f.revokeReason = data.revokeReason ?? f.revokeReason;
-            });
+            const family: TokenFamily = {
+              id: `family-${String(tokenFamilies.length + pendingFamilies.length + 1)}`,
+              userId: data.userId ?? '',
+              createdAt: new Date(),
+              revokedAt: null,
+              revokeReason: null,
+            };
+            if (isTransaction) {
+              pendingFamilies.push(family);
+            } else {
+              tokenFamilies.push(family);
+            }
+            return {
+              returning: (): Promise<TokenFamily[]> => Promise.resolve([family]),
+            };
+          } else if (table === refreshTokens) {
+            if (failOnTokenInsert) {
+              return Promise.reject(new Error('Simulated token insert failure'));
+            }
+            const token: Token = {
+              id: `token-${String(tokens.length + pendingTokens.length + 1)}`,
+              userId: data.userId ?? '',
+              familyId: data.familyId ?? null,
+              token: data.token ?? '',
+              expiresAt: data.expiresAt ?? new Date(),
+              createdAt: new Date(),
+            };
+            if (isTransaction) {
+              pendingTokens.push(token);
+            } else {
+              tokens.push(token);
+            }
+            return Promise.resolve();
           }
           return Promise.resolve();
         },
       }),
-    }),
-  } as unknown as DbClient;
+      query: {
+        refreshTokens: {
+          findFirst: ({
+            orderBy: _orderBy,
+          }: {
+            where?: unknown;
+            orderBy?: unknown;
+          }): Promise<Token | null> => {
+            const allTokens = [...tokens, ...pendingTokens];
+            const filtered = allTokens.filter((t) => t.expiresAt > new Date());
+
+            if (filtered.length > 0) {
+              filtered.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+            }
+
+            return Promise.resolve(filtered[0] ?? null);
+          },
+        },
+        refreshTokenFamilies: {
+          findFirst: (_args: { where?: unknown }): Promise<TokenFamily | null> => {
+            const allFamilies = [...tokenFamilies, ...pendingFamilies];
+            return Promise.resolve(allFamilies[0] ?? null);
+          },
+        },
+        users: {
+          findFirst: (_args: { where?: unknown }): Promise<MockUser | null> => {
+            return Promise.resolve(mockUsers[0] ?? null);
+          },
+        },
+      },
+      delete: (
+        table: typeof refreshTokens,
+      ): { where: (_condition: unknown) => Promise<Token[]> } => ({
+        where: (_condition: unknown): Promise<Token[]> => {
+          if (table === refreshTokens) {
+            if (failOnTokenDelete) {
+              return Promise.reject(new Error('Simulated token delete failure'));
+            }
+            if (deleteMode === 'expired') {
+              const now = new Date();
+              const expiredTokens = tokens.filter((t) => t.expiresAt < now);
+              const validTokens = tokens.filter((t) => t.expiresAt >= now);
+              tokens.length = 0;
+              tokens.push(...validTokens);
+              return Promise.resolve(expiredTokens);
+            }
+
+            // For transactions, mark tokens for deletion
+            if (isTransaction) {
+              tokens.forEach((t) => pendingDeletedTokenIds.add(t.id));
+              return Promise.resolve([...tokens]);
+            }
+
+            const deleted = [...tokens];
+            tokens.length = 0; // Simplified deletion
+            return Promise.resolve(deleted);
+          }
+          return Promise.resolve([]);
+        },
+      }),
+      update: (
+        table: typeof refreshTokenFamilies,
+      ): { set: (data: UpdateData) => { where: (_condition: unknown) => Promise<void> } } => ({
+        set: (data: UpdateData): { where: (_condition: unknown) => Promise<void> } => ({
+          where: (_condition: unknown): Promise<void> => {
+            if (table === refreshTokenFamilies) {
+              if (failOnFamilyUpdate) {
+                return Promise.reject(new Error('Simulated family update failure'));
+              }
+              // For transactions, queue the update
+              if (isTransaction) {
+                pendingUpdates.push({ familyId: 'all', data });
+                return Promise.resolve();
+              }
+              // For non-transaction, apply immediately
+              tokenFamilies.forEach((f) => {
+                f.revokedAt = data.revokedAt ?? f.revokedAt;
+                f.revokeReason = data.revokeReason ?? f.revokeReason;
+              });
+            }
+            return Promise.resolve();
+          },
+        }),
+      }),
+    } as unknown as DbClient;
+
+    return instance;
+  };
+
+  const db = createDbInstance(false, tokenFamilies, tokens, [], new Set());
 
   return {
     db,
@@ -183,6 +315,15 @@ function createMockDb(): {
     mockUsers,
     setDeleteMode: (mode: 'all' | 'expired'): void => {
       deleteMode = mode;
+    },
+    setFailOnTokenInsert: (fail: boolean): void => {
+      failOnTokenInsert = fail;
+    },
+    setFailOnTokenDelete: (fail: boolean): void => {
+      failOnTokenDelete = fail;
+    },
+    setFailOnFamilyUpdate: (fail: boolean): void => {
+      failOnFamilyUpdate = fail;
     },
   };
 }
@@ -297,9 +438,8 @@ describe('Refresh Token Rotation', () => {
       firstFamily.revokedAt = new Date();
       firstFamily.revokeReason = 'Token reuse detected';
 
-      const result = await rotateRefreshToken(db, initial.token);
-
-      expect(result).toBeNull();
+      // Should throw TokenReuseError when family is revoked (token reuse detected)
+      await expect(rotateRefreshToken(db, initial.token)).rejects.toThrow(TokenReuseError);
     });
   });
 
@@ -442,9 +582,8 @@ describe('Refresh Token Rotation', () => {
       if (firstFamily === undefined) throw new Error('Expected token family');
       firstFamily.revokedAt = new Date();
 
-      const result = await rotateRefreshToken(db, firstToken.token);
-
-      expect(result).toBeNull();
+      // Should throw TokenReuseError when reuse is detected
+      await expect(rotateRefreshToken(db, firstToken.token)).rejects.toThrow(TokenReuseError);
     });
   });
 
@@ -491,17 +630,17 @@ describe('Refresh Token Rotation', () => {
       family.revokedAt = new Date();
       family.revokeReason = 'Token reuse detected';
 
-      const result = await rotateRefreshToken(
-        db,
-        originalToken.token,
-        undefined,
-        undefined,
-        TEST_REFRESH_TOKEN_EXPIRY_DAYS,
-        TEST_REFRESH_TOKEN_GRACE_PERIOD_SECONDS,
-      );
-
-      // Should fail - family is revoked
-      expect(result).toBeNull();
+      // Should throw TokenReuseError - family is revoked
+      await expect(
+        rotateRefreshToken(
+          db,
+          originalToken.token,
+          undefined,
+          undefined,
+          TEST_REFRESH_TOKEN_EXPIRY_DAYS,
+          TEST_REFRESH_TOKEN_GRACE_PERIOD_SECONDS,
+        ),
+      ).rejects.toThrow(TokenReuseError);
     });
 
     test('should return newer token for retry within grace period', async () => {
@@ -566,17 +705,17 @@ describe('Refresh Token Rotation', () => {
         createdAt: new Date(),
       });
 
-      const result = await rotateRefreshToken(
-        db,
-        savedOriginalToken,
-        undefined,
-        undefined,
-        TEST_REFRESH_TOKEN_EXPIRY_DAYS,
-        0, // Zero grace period
-      );
-
-      // With zero grace period, any reuse is detected
-      expect(result).toBeNull();
+      // With zero grace period, any reuse is detected and throws TokenReuseError
+      await expect(
+        rotateRefreshToken(
+          db,
+          savedOriginalToken,
+          undefined,
+          undefined,
+          TEST_REFRESH_TOKEN_EXPIRY_DAYS,
+          0, // Zero grace period
+        ),
+      ).rejects.toThrow(TokenReuseError);
 
       // Family should be revoked
       const family = tokenFamilies[0];
@@ -618,6 +757,158 @@ describe('Refresh Token Rotation', () => {
 
       // Should allow - within 1 hour grace period
       expect(result).not.toBeNull();
+    });
+  });
+
+  describe('Transaction Atomicity', () => {
+    describe('createRefreshTokenFamily transaction rollback', () => {
+      test('should roll back family creation when token insert fails', async () => {
+        const { db, tokenFamilies, tokens, setFailOnTokenInsert } = createMockDb();
+
+        // Configure mock to fail on token insert
+        setFailOnTokenInsert(true);
+
+        // Attempt to create family - should fail
+        await expect(createRefreshTokenFamily(db, 'user-123')).rejects.toThrow(
+          'Simulated token insert failure',
+        );
+
+        // Verify rollback: neither family nor token should be persisted
+        expect(tokenFamilies).toHaveLength(0);
+        expect(tokens).toHaveLength(0);
+      });
+
+      test('should commit both family and token on success', async () => {
+        const { db, tokenFamilies, tokens } = createMockDb();
+
+        const result = await createRefreshTokenFamily(db, 'user-123');
+
+        // Verify commit: both family and token should be persisted
+        expect(tokenFamilies).toHaveLength(1);
+        expect(tokens).toHaveLength(1);
+        expect(result.familyId).toBe(tokenFamilies[0]?.id);
+        expect(tokens[0]?.familyId).toBe(result.familyId);
+      });
+    });
+
+    describe('revokeTokenFamily transaction rollback', () => {
+      test('should roll back family update when token delete fails', async () => {
+        const { db, tokenFamilies, tokens, setFailOnTokenDelete } = createMockDb();
+
+        // First create a family successfully
+        await createRefreshTokenFamily(db, 'user-123');
+        const family = tokenFamilies[0];
+        if (family === undefined) throw new Error('Expected token family');
+        const initialTokenCount = tokens.length;
+
+        // Configure mock to fail on token delete
+        setFailOnTokenDelete(true);
+
+        // Attempt to revoke - should fail
+        await expect(revokeTokenFamily(db, family.id, 'Test revocation')).rejects.toThrow(
+          'Simulated token delete failure',
+        );
+
+        // Verify rollback: family should NOT be marked as revoked
+        expect(family.revokedAt).toBeNull();
+        expect(family.revokeReason).toBeNull();
+        // Tokens should still exist
+        expect(tokens.length).toBe(initialTokenCount);
+      });
+
+      test('should commit both family update and token deletion on success', async () => {
+        const { db, tokenFamilies, tokens } = createMockDb();
+
+        // Create a family first
+        await createRefreshTokenFamily(db, 'user-123');
+        const family = tokenFamilies[0];
+        if (family === undefined) throw new Error('Expected token family');
+
+        // Revoke the family
+        await revokeTokenFamily(db, family.id, 'Security concern');
+
+        // Verify commit: family should be revoked
+        expect(family.revokedAt).toBeInstanceOf(Date);
+        expect(family.revokeReason).toBe('Security concern');
+        // Tokens should be deleted
+        expect(tokens).toHaveLength(0);
+      });
+    });
+
+    describe('revokeAllUserTokens transaction rollback', () => {
+      test('should roll back family updates when token delete fails', async () => {
+        const { db, tokenFamilies, tokens, setFailOnTokenDelete } = createMockDb();
+
+        // Create multiple families for the user
+        await createRefreshTokenFamily(db, 'user-123');
+        await createRefreshTokenFamily(db, 'user-123');
+        const initialTokenCount = tokens.length;
+
+        // Verify families are not revoked initially
+        tokenFamilies.forEach((family) => {
+          expect(family.revokedAt).toBeNull();
+        });
+
+        // Configure mock to fail on token delete
+        setFailOnTokenDelete(true);
+
+        // Attempt to revoke all - should fail
+        await expect(revokeAllUserTokens(db, 'user-123')).rejects.toThrow(
+          'Simulated token delete failure',
+        );
+
+        // Verify rollback: families should NOT be marked as revoked
+        tokenFamilies.forEach((family) => {
+          expect(family.revokedAt).toBeNull();
+          expect(family.revokeReason).toBeNull();
+        });
+        // Tokens should still exist
+        expect(tokens.length).toBe(initialTokenCount);
+      });
+
+      test('should roll back when family update fails', async () => {
+        const { db, tokenFamilies, tokens, setFailOnFamilyUpdate } = createMockDb();
+
+        // Create multiple families for the user
+        await createRefreshTokenFamily(db, 'user-123');
+        await createRefreshTokenFamily(db, 'user-123');
+        const initialTokenCount = tokens.length;
+
+        // Configure mock to fail on family update
+        setFailOnFamilyUpdate(true);
+
+        // Attempt to revoke all - should fail
+        await expect(revokeAllUserTokens(db, 'user-123')).rejects.toThrow(
+          'Simulated family update failure',
+        );
+
+        // Verify rollback: families should NOT be marked as revoked
+        tokenFamilies.forEach((family) => {
+          expect(family.revokedAt).toBeNull();
+          expect(family.revokeReason).toBeNull();
+        });
+        // Tokens should still exist
+        expect(tokens.length).toBe(initialTokenCount);
+      });
+
+      test('should commit all changes on success', async () => {
+        const { db, tokenFamilies, tokens } = createMockDb();
+
+        // Create multiple families for the user
+        await createRefreshTokenFamily(db, 'user-123');
+        await createRefreshTokenFamily(db, 'user-123');
+
+        // Revoke all tokens
+        await revokeAllUserTokens(db, 'user-123');
+
+        // Verify commit: all families should be revoked
+        tokenFamilies.forEach((family) => {
+          expect(family.revokedAt).toBeInstanceOf(Date);
+          expect(family.revokeReason).toBe('User logged out from all devices');
+        });
+        // All tokens should be deleted
+        expect(tokens).toHaveLength(0);
+      });
     });
   });
 });

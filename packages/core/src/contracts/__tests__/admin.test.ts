@@ -7,16 +7,24 @@ describe('unlockAccountRequestSchema', () => {
   it('should validate correct request data', () => {
     const validData = {
       email: 'user@example.com',
+      reason: 'User verified identity via phone call',
     };
     const result = unlockAccountRequestSchema.safeParse(validData);
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.email).toBe('user@example.com');
+      expect(result.data.reason).toBe('User verified identity via phone call');
     }
   });
 
   it('should reject missing email', () => {
-    const invalidData = {};
+    const invalidData = { reason: 'Test reason' };
+    const result = unlockAccountRequestSchema.safeParse(invalidData);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject missing reason', () => {
+    const invalidData = { email: 'user@example.com' };
     const result = unlockAccountRequestSchema.safeParse(invalidData);
     expect(result.success).toBe(false);
   });
@@ -24,6 +32,7 @@ describe('unlockAccountRequestSchema', () => {
   it('should reject invalid email format', () => {
     const invalidData = {
       email: 'not-an-email',
+      reason: 'Test reason',
     };
     const result = unlockAccountRequestSchema.safeParse(invalidData);
     expect(result.success).toBe(false);
@@ -32,9 +41,37 @@ describe('unlockAccountRequestSchema', () => {
   it('should reject empty email string', () => {
     const invalidData = {
       email: '',
+      reason: 'Test reason',
     };
     const result = unlockAccountRequestSchema.safeParse(invalidData);
     expect(result.success).toBe(false);
+  });
+
+  it('should reject empty reason string', () => {
+    const invalidData = {
+      email: 'user@example.com',
+      reason: '',
+    };
+    const result = unlockAccountRequestSchema.safeParse(invalidData);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject reason exceeding 500 characters', () => {
+    const invalidData = {
+      email: 'user@example.com',
+      reason: 'a'.repeat(501),
+    };
+    const result = unlockAccountRequestSchema.safeParse(invalidData);
+    expect(result.success).toBe(false);
+  });
+
+  it('should accept reason at exactly 500 characters', () => {
+    const validData = {
+      email: 'user@example.com',
+      reason: 'a'.repeat(500),
+    };
+    const result = unlockAccountRequestSchema.safeParse(validData);
+    expect(result.success).toBe(true);
   });
 });
 

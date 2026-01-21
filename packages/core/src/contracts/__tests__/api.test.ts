@@ -193,13 +193,19 @@ describe('API Contract Integration', () => {
   });
 
   describe('unlockAccountRequestSchema', () => {
-    it('should accept valid unlock request', () => {
-      const valid = { email: 'locked@example.com' };
+    it('should accept valid unlock request with reason', () => {
+      const valid = { email: 'locked@example.com', reason: 'User verified identity' };
       expect(unlockAccountRequestSchema.parse(valid)).toEqual(valid);
     });
 
     it('should reject invalid email', () => {
-      expect(() => unlockAccountRequestSchema.parse({ email: 'not-an-email' })).toThrow();
+      expect(() =>
+        unlockAccountRequestSchema.parse({ email: 'not-an-email', reason: 'Test reason' }),
+      ).toThrow();
+    });
+
+    it('should reject missing reason', () => {
+      expect(() => unlockAccountRequestSchema.parse({ email: 'locked@example.com' })).toThrow();
     });
   });
 

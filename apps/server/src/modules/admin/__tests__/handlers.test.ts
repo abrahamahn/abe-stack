@@ -53,7 +53,7 @@ describe('Admin Handlers', () => {
 
       const result = await handleAdminUnlock(
         mockCtx as never,
-        { email: 'test@example.com' },
+        { email: 'test@example.com', reason: 'Test unlock reason' },
         requestWithoutUser as never,
       );
 
@@ -61,7 +61,7 @@ describe('Admin Handlers', () => {
       expect(result.body).toEqual({ message: 'Unauthorized' });
     });
 
-    test('should successfully unlock account', async () => {
+    test('should successfully unlock account with reason', async () => {
       const { unlockUserAccount } = await import('../service.js');
       (unlockUserAccount as ReturnType<typeof vi.fn>).mockResolvedValue({
         email: 'test@example.com',
@@ -69,7 +69,7 @@ describe('Admin Handlers', () => {
 
       const result = await handleAdminUnlock(
         mockCtx as never,
-        { email: 'test@example.com' },
+        { email: 'test@example.com', reason: 'User verified identity via phone call' },
         mockRequest as never,
       );
 
@@ -81,6 +81,29 @@ describe('Admin Handlers', () => {
       expect(mockCtx.log.info).toHaveBeenCalled();
     });
 
+    test('should pass reason to unlockUserAccount service', async () => {
+      const { unlockUserAccount } = await import('../service.js');
+      (unlockUserAccount as ReturnType<typeof vi.fn>).mockResolvedValue({
+        email: 'test@example.com',
+      });
+
+      const customReason = 'Customer support ticket #12345';
+      await handleAdminUnlock(
+        mockCtx as never,
+        { email: 'test@example.com', reason: customReason },
+        mockRequest as never,
+      );
+
+      expect(unlockUserAccount).toHaveBeenCalledWith(
+        mockCtx.db,
+        'test@example.com',
+        'admin-123',
+        customReason,
+        '192.168.1.1',
+        'Mozilla/5.0',
+      );
+    });
+
     test('should return 404 when user not found', async () => {
       const { unlockUserAccount, UserNotFoundError } = await import('../service.js');
       (unlockUserAccount as ReturnType<typeof vi.fn>).mockRejectedValue(
@@ -89,7 +112,7 @@ describe('Admin Handlers', () => {
 
       const result = await handleAdminUnlock(
         mockCtx as never,
-        { email: 'nonexistent@example.com' },
+        { email: 'nonexistent@example.com', reason: 'Test reason' },
         mockRequest as never,
       );
 
@@ -105,7 +128,7 @@ describe('Admin Handlers', () => {
 
       const result = await handleAdminUnlock(
         mockCtx as never,
-        { email: 'test@example.com' },
+        { email: 'test@example.com', reason: 'Test reason' },
         mockRequest as never,
       );
 

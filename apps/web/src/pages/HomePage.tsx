@@ -1,30 +1,7 @@
 // apps/web/src/pages/HomePage.tsx
-import { Button, Card, Heading, PageContainer, Text } from '@abe-stack/ui';
-import { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
+import { Button, Card, Heading, Markdown, PageContainer, Skeleton, Text } from '@abe-stack/ui';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import remarkGfm from 'remark-gfm';
-
-import desktopReadme from '../../../../apps/desktop/README.md?raw';
-import webReadme from '../../../../apps/web/README.md?raw';
-import apiTestPlanDoc from '../../../../docs/dev/api-test-plan.md?raw';
-import architectureDoc from '../../../../docs/dev/architecture.md?raw';
-import configSetupDoc from '../../../../docs/dev/config-setup.md?raw';
-import devEnvironmentDoc from '../../../../docs/dev/dev-environment.md?raw';
-import legacyDoc from '../../../../docs/dev/legacy.md?raw';
-import performanceDoc from '../../../../docs/dev/performance.md?raw';
-import principlesDoc from '../../../../docs/dev/principles.md?raw';
-import securityDoc from '../../../../docs/dev/security.md?raw';
-import syncScriptsDoc from '../../../../docs/dev/sync-scripts.md?raw';
-import testingDoc from '../../../../docs/dev/testing.md?raw';
-import weekLog01 from '../../../../docs/log/2026-W01.md?raw';
-import weekLog02 from '../../../../docs/log/2026-W02.md?raw';
-import weekLog03 from '../../../../docs/log/2026-W03.md?raw';
-import weekLog04 from '../../../../docs/log/2026-W04.md?raw';
-import coreReadme from '../../../../packages/core/README.md?raw';
-import sdkReadme from '../../../../packages/sdk/README.md?raw';
-import uiReadme from '../../../../packages/ui/docs/README.md?raw';
-import readmeContent from '../../../../README.md?raw';
 
 import type { JSX } from 'react';
 
@@ -54,43 +31,103 @@ type DocKey =
   | 'log-w03'
   | 'log-w04';
 
-interface DocEntry {
+interface DocMeta {
   label: string;
-  content: string;
   category: 'root' | 'apps' | 'packages' | 'dev' | 'logs';
 }
 
-const docs: Record<DocKey, DocEntry> = {
+// Doc metadata (no content - loaded on demand)
+const docsMeta: Record<DocKey, DocMeta> = {
   // Root
-  readme: { label: 'README', content: readmeContent, category: 'root' },
+  readme: { label: 'README', category: 'root' },
 
   // Apps
-  web: { label: 'Web', content: webReadme, category: 'apps' },
-  desktop: { label: 'Desktop', content: desktopReadme, category: 'apps' },
+  web: { label: 'Web', category: 'apps' },
+  desktop: { label: 'Desktop', category: 'apps' },
 
   // Packages
-  core: { label: 'Core', content: coreReadme, category: 'packages' },
-  ui: { label: 'UI', content: uiReadme, category: 'packages' },
-  sdk: { label: 'SDK', content: sdkReadme, category: 'packages' },
+  core: { label: 'Core', category: 'packages' },
+  ui: { label: 'UI', category: 'packages' },
+  sdk: { label: 'SDK', category: 'packages' },
 
   // Dev docs
-  architecture: { label: 'Architecture', content: architectureDoc, category: 'dev' },
-  principles: { label: 'Principles', content: principlesDoc, category: 'dev' },
-  'dev-environment': { label: 'Dev Environment', content: devEnvironmentDoc, category: 'dev' },
-  'config-setup': { label: 'Config Setup', content: configSetupDoc, category: 'dev' },
-  testing: { label: 'Testing', content: testingDoc, category: 'dev' },
-  security: { label: 'Security', content: securityDoc, category: 'dev' },
-  'api-test-plan': { label: 'API Test Plan', content: apiTestPlanDoc, category: 'dev' },
-  'sync-scripts': { label: 'Sync Scripts', content: syncScriptsDoc, category: 'dev' },
-  performance: { label: 'Performance', content: performanceDoc, category: 'dev' },
-  legacy: { label: 'Legacy', content: legacyDoc, category: 'dev' },
+  architecture: { label: 'Architecture', category: 'dev' },
+  principles: { label: 'Principles', category: 'dev' },
+  'dev-environment': { label: 'Dev Environment', category: 'dev' },
+  'config-setup': { label: 'Config Setup', category: 'dev' },
+  testing: { label: 'Testing', category: 'dev' },
+  security: { label: 'Security', category: 'dev' },
+  'api-test-plan': { label: 'API Test Plan', category: 'dev' },
+  'sync-scripts': { label: 'Sync Scripts', category: 'dev' },
+  performance: { label: 'Performance', category: 'dev' },
+  legacy: { label: 'Legacy', category: 'dev' },
 
   // Logs
-  'log-w01': { label: 'Week 01', content: weekLog01, category: 'logs' },
-  'log-w02': { label: 'Week 02', content: weekLog02, category: 'logs' },
-  'log-w03': { label: 'Week 03', content: weekLog03, category: 'logs' },
-  'log-w04': { label: 'Week 04', content: weekLog04, category: 'logs' },
+  'log-w01': { label: 'Week 01', category: 'logs' },
+  'log-w02': { label: 'Week 02', category: 'logs' },
+  'log-w03': { label: 'Week 03', category: 'logs' },
+  'log-w04': { label: 'Week 04', category: 'logs' },
 };
+
+// Lazy load doc content on demand
+async function loadDocContent(key: DocKey): Promise<string> {
+  const loaders: Record<DocKey, () => Promise<{ default: string }>> = {
+    readme: () => import('../../../../README.md?raw'),
+    web: () => import('../../../../apps/web/README.md?raw'),
+    desktop: () => import('../../../../apps/desktop/README.md?raw'),
+    core: () => import('../../../../packages/core/README.md?raw'),
+    ui: () => import('../../../../packages/ui/docs/README.md?raw'),
+    sdk: () => import('../../../../packages/sdk/README.md?raw'),
+    architecture: () => import('../../../../docs/dev/architecture.md?raw'),
+    principles: () => import('../../../../docs/dev/principles.md?raw'),
+    'dev-environment': () => import('../../../../docs/dev/dev-environment.md?raw'),
+    'config-setup': () => import('../../../../docs/dev/config-setup.md?raw'),
+    testing: () => import('../../../../docs/dev/testing.md?raw'),
+    security: () => import('../../../../docs/dev/security.md?raw'),
+    'api-test-plan': () => import('../../../../docs/dev/api-test-plan.md?raw'),
+    'sync-scripts': () => import('../../../../docs/dev/sync-scripts.md?raw'),
+    performance: () => import('../../../../docs/dev/performance.md?raw'),
+    legacy: () => import('../../../../docs/dev/legacy.md?raw'),
+    'log-w01': () => import('../../../../docs/log/2026-W01.md?raw'),
+    'log-w02': () => import('../../../../docs/log/2026-W02.md?raw'),
+    'log-w03': () => import('../../../../docs/log/2026-W03.md?raw'),
+    'log-w04': () => import('../../../../docs/log/2026-W04.md?raw'),
+  };
+
+  const module = await loaders[key]();
+  return module.default;
+}
+
+// Hook to load doc content with caching
+function useDocContent(key: DocKey): { content: string | null; isLoading: boolean } {
+  const [content, setContent] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [cache] = useState<Map<DocKey, string>>(() => new Map());
+
+  useEffect(() => {
+    const cached = cache.get(key);
+    if (cached) {
+      setContent(cached);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    loadDocContent(key)
+      .then((loaded) => {
+        cache.set(key, loaded);
+        setContent(loaded);
+      })
+      .catch(() => {
+        setContent('Failed to load documentation.');
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [key, cache]);
+
+  return { content, isLoading };
+}
 
 function DocIndex({
   activeDoc,
@@ -99,13 +136,20 @@ function DocIndex({
   activeDoc: DocKey;
   onSelect: (key: DocKey) => void;
 }): JSX.Element {
-  const categories: { key: DocEntry['category']; label: string }[] = [
+  const categories: { key: DocMeta['category']; label: string }[] = [
     { key: 'root', label: 'Home' },
     { key: 'apps', label: 'Apps' },
     { key: 'packages', label: 'Packages' },
     { key: 'dev', label: 'Dev Docs' },
     { key: 'logs', label: 'Changelog' },
   ];
+
+  const handleSelect = useCallback(
+    (key: DocKey) => {
+      onSelect(key);
+    },
+    [onSelect]
+  );
 
   return (
     <Card className="p-4">
@@ -116,7 +160,7 @@ function DocIndex({
               {cat.label}
             </Text>
             <div className="flex flex-wrap gap-1">
-              {(Object.entries(docs) as [DocKey, DocEntry][])
+              {(Object.entries(docsMeta) as [DocKey, DocMeta][])
                 .filter(([, doc]) => doc.category === cat.key)
                 .map(([key, doc]) => (
                   <Button
@@ -124,7 +168,7 @@ function DocIndex({
                     variant={activeDoc === key ? 'primary' : 'secondary'}
                     size="small"
                     onClick={() => {
-                      onSelect(key);
+                      handleSelect(key);
                     }}
                   >
                     {doc.label}
@@ -140,7 +184,7 @@ function DocIndex({
 
 export function HomePage(): JSX.Element {
   const [activeDoc, setActiveDoc] = useState<DocKey>('readme');
-  const currentDoc = docs[activeDoc];
+  const { content, isLoading } = useDocContent(activeDoc);
 
   return (
     <PageContainer>
@@ -168,9 +212,16 @@ export function HomePage(): JSX.Element {
       <DocIndex activeDoc={activeDoc} onSelect={setActiveDoc} />
 
       <Card className="p-4">
-        <div className="markdown-content">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{currentDoc.content}</ReactMarkdown>
-        </div>
+        {isLoading ? (
+          <div className="flex flex-col gap-3">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-5/6" />
+          </div>
+        ) : (
+          <Markdown className="markdown-content">{content ?? ''}</Markdown>
+        )}
       </Card>
     </PageContainer>
   );

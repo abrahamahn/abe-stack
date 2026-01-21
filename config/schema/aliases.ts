@@ -116,6 +116,7 @@ export const serverAliases = {
  */
 export const desktopAliases = {
   '@': 'apps/desktop/src',
+  '@ipc': 'apps/desktop/src/electron/ipc',
   '@services': 'apps/desktop/src/services',
   '@routes': 'apps/desktop/src/routes',
   '@api': 'apps/desktop/src/api',

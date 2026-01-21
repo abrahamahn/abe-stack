@@ -1,5 +1,4 @@
 // apps/server/src/__tests__/integration/permissions.integration.test.ts
-/* eslint-disable @typescript-eslint/no-misused-promises -- Fastify preHandler supports async functions */
 /**
  * Row-Level Permissions Integration Tests
  *
@@ -28,11 +27,24 @@ import type {
   PermissionRecord,
   RecordLoader,
 } from '@permissions';
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, preHandlerAsyncHookHandler } from 'fastify';
 
 // ============================================================================
 // Test Helpers
 // ============================================================================
+
+/**
+ * Wraps an async handler to work with Fastify's preHandler.
+ * Fastify supports async preHandlers, but TypeScript's strict checking
+ * flags Promise-returning functions in some contexts.
+ */
+function asPreHandler(
+  hook: (request: unknown, reply: unknown) => Promise<void> | void,
+): preHandlerAsyncHookHandler {
+  return (request, reply) => {
+    void hook(request, reply);
+  };
+}
 
 function createMockRecordLoader(records: Map<string, PermissionRecord>): RecordLoader {
   return async (table: string, id: string) => {
@@ -466,7 +478,7 @@ describe('Permission Middleware Integration', () => {
     // Read route
     server.get(
       '/tasks/:id',
-      { preHandler: middleware.requireReadPermission('tasks') },
+      { preHandler: asPreHandler(middleware.requireReadPermission('tasks')) },
       async (req) => {
         const params = req.params as { id: string };
         return { task: { id: params.id } };
@@ -476,7 +488,7 @@ describe('Permission Middleware Integration', () => {
     // Write route
     server.put(
       '/tasks/:id',
-      { preHandler: middleware.requireWritePermission('tasks') },
+      { preHandler: asPreHandler(middleware.requireWritePermission('tasks')) },
       async (req) => {
         const params = req.params as { id: string };
         return { updated: { id: params.id } };
@@ -486,7 +498,7 @@ describe('Permission Middleware Integration', () => {
     // Delete route
     server.delete(
       '/tasks/:id',
-      { preHandler: middleware.requireDeletePermission('tasks') },
+      { preHandler: asPreHandler(middleware.requireDeletePermission('tasks')) },
       async (req) => {
         const params = req.params as { id: string };
         return { deleted: params.id };
@@ -496,7 +508,7 @@ describe('Permission Middleware Integration', () => {
     // Admin route
     server.post(
       '/tasks/:id/admin-action',
-      { preHandler: middleware.requireAdminPermission('tasks') },
+      { preHandler: asPreHandler(middleware.requireAdminPermission('tasks')) },
       async () => {
         return { adminAction: 'completed' };
       },
@@ -505,7 +517,7 @@ describe('Permission Middleware Integration', () => {
     // Create route
     server.post(
       '/tasks',
-      { preHandler: middleware.requireWritePermission('tasks', undefined, 'create') },
+      { preHandler: asPreHandler(middleware.requireWritePermission('tasks', undefined, 'create')) },
       async () => {
         return { created: { id: 'new-task' } };
       },
@@ -718,7 +730,7 @@ describe('Standalone Permission Guard', () => {
       getRecordId: (req) => (req.params as { documentId?: string })?.documentId ?? null,
     });
 
-    server.get('/documents/:documentId', { preHandler: guard }, async (req) => {
+    server.get('/documents/:documentId', { preHandler: asPreHandler(guard) }, async (req) => {
       const params = req.params as { documentId: string };
       return { document: { id: params.documentId } };
     });
@@ -766,11 +778,13 @@ describe('Standalone Permission Guard', () => {
     badRouteServer.get(
       '/bad-route',
       {
-        preHandler: createStandalonePermissionGuard(checker, {
-          permission: 'read',
-          table: 'documents',
-          getRecordId: () => null, // Always returns null
-        }),
+        preHandler: asPreHandler(
+          createStandalonePermissionGuard(checker, {
+            permission: 'read',
+            table: 'documents',
+            getRecordId: () => null, // Always returns null
+          }),
+        ),
       },
       () => ({ data: 'test' }),
     );
@@ -828,7 +842,7 @@ describe('Permission Middleware with Custom Error Handler', () => {
 
     server.get(
       '/items/:id',
-      { preHandler: middleware.requireReadPermission('items') },
+      { preHandler: asPreHandler(middleware.requireReadPermission('items')) },
       async () => {
         return { item: 'data' };
       },

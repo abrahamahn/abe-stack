@@ -20,6 +20,7 @@ export async function unlockUserAccount(
   db: DbClient,
   email: string,
   adminUserId: string,
+  reason: string,
   ipAddress?: string,
   userAgent?: string,
 ): Promise<{ email: string }> {
@@ -33,7 +34,7 @@ export async function unlockUserAccount(
   }
 
   // Unlock the account
-  await infraUnlockAccount(db, email, adminUserId, ipAddress, userAgent);
+  await infraUnlockAccount(db, email, adminUserId, reason, ipAddress, userAgent);
 
   return { email };
 }

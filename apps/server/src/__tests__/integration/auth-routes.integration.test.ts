@@ -1,11 +1,11 @@
 // apps/server/src/__tests__/integration/auth-routes.integration.test.ts
-/* eslint-disable import/order -- vi.mock must come before mocked module imports */
 /**
  * Integration tests for authentication routes
  *
  * Tests the complete auth flow using Fastify's inject method.
  */
 
+import Fastify from 'fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { FastifyInstance } from 'fastify';
@@ -32,8 +32,6 @@ vi.mock('@infrastructure/pubsub/postgresPubSub', () => ({
     subscribe: vi.fn().mockResolvedValue(undefined),
   })),
 }));
-
-import Fastify from 'fastify';
 
 describe('Auth Routes Integration', () => {
   let server: FastifyInstance;

@@ -9,7 +9,7 @@
 
 - [ ] Review all config files (tsconfig, vite, eslint, etc.)
 - [ ] Audit build configuration for simplicity
-- [ ] Ensure minimal packages - remove any unused dependencies
+- [x] ~~Ensure minimal packages - remove any unused dependencies~~ ✅ Completed 2026-01-21
 
 ---
 
@@ -19,60 +19,9 @@ Documentation needs refinement before showcasing. Review and polish all README f
 
 ---
 
-## Urgent: Missing Unit Tests
-
-One file still needs tests:
-
-- [ ] `infrastructure/media/utils/streaming.ts`
-
----
-
-## Critical: Security Hardening
-
-Data integrity and security improvements. Required before production deployment with user data.
-
-### Database Transaction Support (Backend)
-
-Atomic operations for multi-step auth flows to prevent orphaned data.
-
-- [ ] Create `withTransaction()` helper in `apps/server/src/infra/database/`
-- [ ] Wrap user registration (user + token family)
-- [ ] Wrap token rotation (delete old + create new)
-- [ ] Add tests verifying rollback on failure
-
-### Token Reuse Security Events (Backend)
-
-Log and notify users when token reuse is detected (potential account compromise).
-
-- [ ] Create `security_events` database table
-- [ ] Create `apps/server/src/shared/security-events.ts`
-- [ ] Log token reuse detection events
-- [ ] Send email notification to user
-
-### Account Lockout Edge Cases (Backend)
-
-- [ ] Add `lockout_expires_at` column for exact tracking
-- [ ] Prevent counter reset exploit (sliding window attack)
-- [ ] Add audit logging for admin unlocks
-
-### Error Message Audit (Backend)
-
-- [ ] Audit all error returns in `modules/auth/`
-- [ ] Ensure `handleMe()` uses constants
-- [ ] Document which errors are safe to expose
-
----
-
 ## High Priority: Core Features
 
 Building blocks needed across multiple products.
-
-### WebSocket Enhancements (Backend + Frontend)
-
-- [ ] Auth token refresh on reconnect (use `onConnect` callback)
-- [ ] React Query cache invalidation on WebSocket events
-- [ ] Presence tracking (online/offline/away, last seen)
-- [ ] Typing indicators via WebSocket events
 
 ### Push Notifications (Backend + Frontend)
 
@@ -132,7 +81,7 @@ Building blocks needed across multiple products.
 
 ### Test Coverage: Critical Auth Paths (Backend)
 
-- [ ] Token rotation: grace period boundary, concurrent requests, race conditions
+- [x] ~~Token rotation: grace period boundary, concurrent requests, race conditions~~
 - [ ] Login flow: lockout expiration, parallel requests, password change invalidation
 - [ ] Registration: concurrent same-email, UTF-8 names, boundary passwords
 
@@ -244,6 +193,13 @@ If no to all three, it goes in `docs/ROADMAP.md`.
 ---
 
 ## References
+
+### WebSocket Enhancements (Backend + Frontend)
+
+- [ ] Auth token refresh on reconnect (use `onConnect` callback)
+- [ ] React Query cache invalidation on WebSocket events
+- [ ] Presence tracking (online/offline/away, last seen)
+- [ ] Typing indicators via WebSocket events
 
 - **Deferred features:** See `docs/ROADMAP.md`
 - **Legacy migrations:** See `docs/dev/legacy.md`

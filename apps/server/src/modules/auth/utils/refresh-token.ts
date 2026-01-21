@@ -6,6 +6,7 @@
  * to detect and prevent token reuse attacks.
  */
 
+import { TokenReuseError } from '@abe-stack/core';
 import {
   logTokenFamilyRevokedEvent,
   logTokenReuseEvent,
@@ -26,30 +27,35 @@ import { createRefreshToken, getRefreshTokenExpiry } from './jwt';
 /**
  * Create a new refresh token family
  * Families are used to detect token reuse attacks
+ *
+ * This operation is wrapped in a transaction for atomicity.
+ * If token insertion fails, the family creation is rolled back.
  */
 export async function createRefreshTokenFamily(
   db: DbClient,
   userId: string,
   expiryDays: number = 7,
 ): Promise<{ familyId: string; token: string }> {
-  const [family] = await db.insert(refreshTokenFamilies).values({ userId }).returning();
+  return await withTransaction(db, async (tx) => {
+    const [family] = await tx.insert(refreshTokenFamilies).values({ userId }).returning();
 
-  if (!family) {
-    throw new Error('Failed to create refresh token family');
-  }
+    if (!family) {
+      throw new Error('Failed to create refresh token family');
+    }
 
-  const token = createRefreshToken();
-  await db.insert(refreshTokens).values({
-    userId,
-    familyId: family.id,
-    token,
-    expiresAt: getRefreshTokenExpiry(expiryDays),
+    const token = createRefreshToken();
+    await tx.insert(refreshTokens).values({
+      userId,
+      familyId: family.id,
+      token,
+      expiresAt: getRefreshTokenExpiry(expiryDays),
+    });
+
+    return {
+      familyId: family.id,
+      token,
+    };
   });
-
-  return {
-    familyId: family.id,
-    token,
-  };
 }
 
 /**
@@ -103,7 +109,8 @@ export async function rotateRefreshToken(
       }
 
       await revokeTokenFamily(db, storedToken.familyId, 'Token reuse detected');
-      return null;
+      // Throw TokenReuseError with user details for security alert notification
+      throw new TokenReuseError(user?.id, user?.email, storedToken.familyId, ipAddress, userAgent);
     }
   }
 
@@ -155,7 +162,8 @@ export async function rotateRefreshToken(
         storedToken.familyId,
         'Token reuse detected outside grace period',
       );
-      return null;
+      // Throw TokenReuseError with user details for security alert notification
+      throw new TokenReuseError(user.id, user.email, storedToken.familyId, ipAddress, userAgent);
     }
   }
 
@@ -188,36 +196,46 @@ export async function rotateRefreshToken(
 
 /**
  * Revoke an entire token family (all tokens created from the same initial login)
+ *
+ * This operation is wrapped in a transaction for atomicity.
+ * If token deletion fails, the family update is rolled back.
  */
 export async function revokeTokenFamily(
   db: DbClient,
   familyId: string,
   reason: string,
 ): Promise<void> {
-  await db
-    .update(refreshTokenFamilies)
-    .set({
-      revokedAt: new Date(),
-      revokeReason: reason,
-    })
-    .where(eq(refreshTokenFamilies.id, familyId));
+  await withTransaction(db, async (tx) => {
+    await tx
+      .update(refreshTokenFamilies)
+      .set({
+        revokedAt: new Date(),
+        revokeReason: reason,
+      })
+      .where(eq(refreshTokenFamilies.id, familyId));
 
-  await db.delete(refreshTokens).where(eq(refreshTokens.familyId, familyId));
+    await tx.delete(refreshTokens).where(eq(refreshTokens.familyId, familyId));
+  });
 }
 
 /**
  * Revoke all refresh tokens for a user (used on logout all devices)
+ *
+ * This operation is wrapped in a transaction for atomicity.
+ * If any operation fails, all changes are rolled back.
  */
 export async function revokeAllUserTokens(db: DbClient, userId: string): Promise<void> {
-  await db
-    .update(refreshTokenFamilies)
-    .set({
-      revokedAt: new Date(),
-      revokeReason: 'User logged out from all devices',
-    })
-    .where(eq(refreshTokenFamilies.userId, userId));
+  await withTransaction(db, async (tx) => {
+    await tx
+      .update(refreshTokenFamilies)
+      .set({
+        revokedAt: new Date(),
+        revokeReason: 'User logged out from all devices',
+      })
+      .where(eq(refreshTokenFamilies.userId, userId));
 
-  await db.delete(refreshTokens).where(eq(refreshTokens.userId, userId));
+    await tx.delete(refreshTokens).where(eq(refreshTokens.userId, userId));
+  });
 }
 
 /**

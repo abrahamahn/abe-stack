@@ -37,8 +37,10 @@ export {
   logAccountUnlockedEvent,
   getUserSecurityEvents,
   getSecurityEventMetrics,
+  sendTokenReuseAlert,
   type SecurityEventType,
   type SecurityEventSeverity,
   type SecurityEventMetadata,
   type LogSecurityEventParams,
+  type SendTokenReuseAlertParams,
 } from './events';

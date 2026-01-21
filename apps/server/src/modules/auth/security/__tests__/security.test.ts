@@ -666,7 +666,12 @@ describe('Lockout Functions', () => {
     test('should insert success entry even when user does not exist', async () => {
       mockDb.query.users.findFirst.mockResolvedValue(null);
 
-      await unlockAccount(asMockDb(mockDb), 'unknown@example.com', 'admin-456');
+      await unlockAccount(
+        asMockDb(mockDb),
+        'unknown@example.com',
+        'admin-456',
+        'Account created in error',
+      );
 
       expect(mockDb.insert).toHaveBeenCalled();
     });
@@ -674,7 +679,12 @@ describe('Lockout Functions', () => {
     test('should use default userAgent when not provided', async () => {
       mockDb.query.users.findFirst.mockResolvedValue(null);
 
-      await unlockAccount(asMockDb(mockDb), 'test@example.com', 'admin-456');
+      await unlockAccount(
+        asMockDb(mockDb),
+        'test@example.com',
+        'admin-456',
+        'Password reset requested',
+      );
 
       const mockResult = mockDb.insert.mock.results[0];
       if (mockResult?.value) {

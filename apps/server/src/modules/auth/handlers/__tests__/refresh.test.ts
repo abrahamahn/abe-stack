@@ -28,6 +28,13 @@ vi.mock('@auth/utils', () => ({
   clearRefreshTokenCookie: vi.fn(),
 }));
 
+vi.mock('@auth/security', () => ({
+  sendTokenReuseAlert: vi.fn().mockResolvedValue(undefined),
+}));
+
+// eslint-disable-next-line import/order -- must import after vi.mock
+import { sendTokenReuseAlert } from '@auth/security';
+
 // ============================================================================
 // Test Helpers
 // ============================================================================
@@ -288,19 +295,150 @@ describe('handleRefresh', () => {
   });
 
   describe('Token Reuse Detection', () => {
-    test('should return 500 on token reuse error (not InvalidTokenError)', async () => {
+    test('should return 401 and clear cookie on token reuse', async () => {
       const ctx = createMockContext();
       const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'reused-token' });
       const reply = createMockReply();
 
-      // TokenReuseError is a different error type than InvalidTokenError
-      vi.mocked(refreshUserTokens).mockRejectedValue(new TokenReuseError());
+      vi.mocked(refreshUserTokens).mockRejectedValue(
+        new TokenReuseError('user-123', 'test@example.com', 'family-123', '192.168.1.1', 'Mozilla'),
+      );
 
       const result = await handleRefresh(ctx, request, reply);
 
-      // TokenReuseError maps to 500 via the general error mapper
-      expect(result.status).toBe(500);
-      expect(ctx.log.error).toHaveBeenCalled();
+      expect(result.status).toBe(401);
+      expect(result.body).toEqual({ message: ERROR_MESSAGES.INVALID_TOKEN });
+      expect(clearRefreshTokenCookie).toHaveBeenCalledWith(reply);
+    });
+
+    test('should send email alert when token reuse is detected with email', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest(
+        { [REFRESH_COOKIE_NAME]: 'reused-token' },
+        { ipAddress: '10.0.0.1', userAgent: 'Test Agent' },
+      );
+      const reply = createMockReply();
+
+      vi.mocked(refreshUserTokens).mockRejectedValue(
+        new TokenReuseError(
+          'user-123',
+          'victim@example.com',
+          'family-123',
+          '192.168.1.1',
+          'Mozilla',
+        ),
+      );
+
+      await handleRefresh(ctx, request, reply);
+
+      // Wait for the fire-and-forget promise to resolve
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(sendTokenReuseAlert).toHaveBeenCalledWith(ctx.email, {
+        email: 'victim@example.com',
+        ipAddress: '192.168.1.1',
+        userAgent: 'Mozilla',
+        timestamp: expect.any(Date),
+      });
+    });
+
+    test('should use request IP/UA when error does not have them', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest(
+        { [REFRESH_COOKIE_NAME]: 'reused-token' },
+        { ipAddress: '10.0.0.50', userAgent: 'Safari' },
+      );
+      const reply = createMockReply();
+
+      // TokenReuseError without IP/UA - should fall back to request info
+      vi.mocked(refreshUserTokens).mockRejectedValue(
+        new TokenReuseError('user-123', 'user@example.com', 'family-123', undefined, undefined),
+      );
+
+      await handleRefresh(ctx, request, reply);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(sendTokenReuseAlert).toHaveBeenCalledWith(ctx.email, {
+        email: 'user@example.com',
+        ipAddress: '10.0.0.50',
+        userAgent: 'Safari',
+        timestamp: expect.any(Date),
+      });
+    });
+
+    test('should not send email when TokenReuseError has no email', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'reused-token' });
+      const reply = createMockReply();
+
+      // TokenReuseError without email - can happen if token lookup fails
+      vi.mocked(refreshUserTokens).mockRejectedValue(
+        new TokenReuseError('user-123', undefined, 'family-123'),
+      );
+
+      const result = await handleRefresh(ctx, request, reply);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(sendTokenReuseAlert).not.toHaveBeenCalled();
+      expect(result.status).toBe(401);
+    });
+
+    test('should log error when email sending fails but still return 401', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'reused-token' });
+      const reply = createMockReply();
+
+      vi.mocked(refreshUserTokens).mockRejectedValue(
+        new TokenReuseError('user-123', 'user@example.com', 'family-123'),
+      );
+      vi.mocked(sendTokenReuseAlert).mockRejectedValue(new Error('SMTP failed'));
+
+      const result = await handleRefresh(ctx, request, reply);
+
+      // Wait for the fire-and-forget promise to reject and be caught
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      expect(result.status).toBe(401);
+      expect(ctx.log.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          err: expect.any(Error),
+          userId: 'user-123',
+          email: 'user@example.com',
+        }),
+        'Failed to send token reuse alert email',
+      );
+    });
+
+    test('should not block response while sending email', async () => {
+      const ctx = createMockContext();
+      const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'reused-token' });
+      const reply = createMockReply();
+
+      // Create a slow email service
+      let emailResolved = false;
+      vi.mocked(sendTokenReuseAlert).mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            setTimeout(() => {
+              emailResolved = true;
+              resolve();
+            }, 100);
+          }),
+      );
+
+      vi.mocked(refreshUserTokens).mockRejectedValue(
+        new TokenReuseError('user-123', 'user@example.com', 'family-123'),
+      );
+
+      const result = await handleRefresh(ctx, request, reply);
+
+      // Response should be returned immediately, email not yet resolved
+      expect(result.status).toBe(401);
+      expect(emailResolved).toBe(false);
+
+      // Wait for email to complete
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      expect(emailResolved).toBe(true);
     });
   });
 

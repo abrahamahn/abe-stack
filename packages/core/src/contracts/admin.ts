@@ -16,6 +16,7 @@ import { emailSchema, errorResponseSchema } from './common';
 
 export const unlockAccountRequestSchema = z.object({
   email: emailSchema,
+  reason: z.string().min(1).max(500),
 });
 
 export const unlockAccountResponseSchema = z.object({

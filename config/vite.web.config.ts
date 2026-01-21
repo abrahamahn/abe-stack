@@ -43,6 +43,26 @@ export default defineConfig({
   build: {
     outDir: `${webRoot}/dist`,
     emptyOutDir: true,
+    // Split vendor chunks for better caching
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // React core - changes rarely
+          'vendor-react': ['react', 'react-dom'],
+          // React Router - changes rarely
+          'vendor-router': ['react-router-dom'],
+          // React Query - changes rarely
+          'vendor-query': ['@tanstack/react-query'],
+        },
+      },
+    },
+    // Smaller chunks for better lazy loading
+    chunkSizeWarningLimit: 300,
+    // CSS code splitting
+    cssCodeSplit: true,
+    // Minification
+    minify: 'esbuild',
+    target: 'es2020',
   },
   server: {
     proxy: {

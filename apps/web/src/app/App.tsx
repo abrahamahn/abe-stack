@@ -11,20 +11,31 @@
 import { toastStore } from '@abe-stack/core';
 import { createQueryPersister } from '@abe-stack/sdk';
 import { HistoryProvider, ScrollArea, Toaster } from '@abe-stack/ui';
-import { DemoPage } from '@demo';
-import {
-  AuthPage,
-  ConfirmEmailPage,
-  LoginPage,
-  ProtectedRoute,
-  RegisterPage,
-  ResetPasswordPage,
-} from '@features/auth';
-import { DashboardPage } from '@features/dashboard';
-import { HomePage } from '@pages/HomePage';
-import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
-import { Suspense } from 'react';
+import { ProtectedRoute } from '@features/auth';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+
+// ============================================================================
+// Lazy-loaded Routes (Code Splitting)
+// ============================================================================
+
+const HomePage = lazy(() => import('@pages/HomePage').then((m) => ({ default: m.HomePage })));
+const LoginPage = lazy(() => import('@features/auth').then((m) => ({ default: m.LoginPage })));
+const RegisterPage = lazy(() =>
+  import('@features/auth').then((m) => ({ default: m.RegisterPage }))
+);
+const AuthPage = lazy(() => import('@features/auth').then((m) => ({ default: m.AuthPage })));
+const ResetPasswordPage = lazy(() =>
+  import('@features/auth').then((m) => ({ default: m.ResetPasswordPage }))
+);
+const ConfirmEmailPage = lazy(() =>
+  import('@features/auth').then((m) => ({ default: m.ConfirmEmailPage }))
+);
+const DemoPage = lazy(() => import('@demo').then((m) => ({ default: m.DemoPage })));
+const DashboardPage = lazy(() =>
+  import('@features/dashboard').then((m) => ({ default: m.DashboardPage }))
+);
 
 import { ClientEnvironmentProvider } from './ClientEnvironment';
 
@@ -32,11 +43,13 @@ import type { ClientEnvironment } from './ClientEnvironment';
 import type { ReactElement } from 'react';
 
 // ============================================================================
-// Persister (module level, created once)
+// Persistence Configuration
 // ============================================================================
 
+const PERSIST_MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
+
 const persister = createQueryPersister({
-  maxAge: 24 * 60 * 60 * 1000, // 24 hours
+  maxAge: PERSIST_MAX_AGE,
   throttleTime: 1000, // 1 second
 });
 
@@ -93,22 +106,100 @@ function AppRoutes(): ReactElement {
 // ============================================================================
 
 /**
+ * Hook to manage query cache persistence manually.
+ *
+ * Replaces PersistQueryClientProvider with direct IndexedDB persistence:
+ * - On mount: restores cached queries from IndexedDB
+ * - On cache updates: persists to IndexedDB (throttled)
+ * - On unmount: final persistence and cleanup
+ */
+function useQueryPersistence(environment: ClientEnvironment): boolean {
+  const [isRestored, setIsRestored] = useState(false);
+  const { queryClient } = environment;
+
+  useEffect(() => {
+    let unsubscribe: (() => void) | undefined;
+
+    const init = async (): Promise<void> => {
+      // Restore cached data from IndexedDB
+      try {
+        const persistedClient = await persister.restoreClient();
+        if (persistedClient) {
+          // Restore each query's data from the persisted state
+          for (const persistedQuery of persistedClient.clientState.queries) {
+            queryClient.setQueryData(persistedQuery.queryKey, persistedQuery.state.data);
+          }
+        }
+      } catch {
+        // Restore failed silently, continue with empty cache
+      }
+
+      setIsRestored(true);
+
+      // Subscribe to cache changes for persistence
+      unsubscribe = queryClient.getQueryCache().subscribe(() => {
+        const queries = queryClient
+          .getQueryCache()
+          .getAll()
+          .filter((query) => query.state.data !== undefined)
+          .map((query) => ({
+            queryKey: query.queryKey,
+            queryHash: query.queryHash,
+            state: {
+              data: query.state.data,
+              dataUpdatedAt: query.state.dataUpdatedAt,
+              error: query.state.error,
+              errorUpdatedAt: query.state.errorUpdatedAt,
+              fetchFailureCount: query.state.fetchFailureCount,
+              fetchFailureReason: query.state.fetchFailureReason,
+              fetchMeta: query.state.fetchMeta,
+              fetchStatus: query.state.fetchStatus,
+              isInvalidated: query.state.isInvalidated,
+              status: query.state.status,
+            },
+          }));
+
+        persister.persistClient({
+          timestamp: Date.now(),
+          buster: '',
+          clientState: { queries, mutations: [] },
+        });
+      });
+    };
+
+    void init();
+
+    return (): void => {
+      unsubscribe?.();
+    };
+  }, [queryClient]);
+
+  return isRestored;
+}
+
+/**
  * Root component that sets up all application infrastructure.
  *
  * Provider stack (outer to inner):
  * - Suspense: Loading fallback
- * - PersistQueryClientProvider: Query persistence for offline support
+ * - QueryClientProvider: React Query infrastructure
  * - BrowserRouter: React Router infrastructure
  * - ClientEnvironmentProvider: Our unified service context
  * - HistoryProvider: Navigation history tracking
+ *
+ * Query persistence is handled manually via useQueryPersistence hook,
+ * which restores from and persists to IndexedDB.
  */
 export function App({ environment }: AppProps): ReactElement {
+  const isRestored = useQueryPersistence(environment);
+
+  if (!isRestored) {
+    return <Loading />;
+  }
+
   return (
     <Suspense fallback={<Loading />}>
-      <PersistQueryClientProvider
-        client={environment.queryClient}
-        persistOptions={{ persister, maxAge: 24 * 60 * 60 * 1000 }}
-      >
+      <QueryClientProvider client={environment.queryClient}>
         <BrowserRouter>
           <ClientEnvironmentProvider value={environment}>
             <HistoryProvider>
@@ -121,7 +212,7 @@ export function App({ environment }: AppProps): ReactElement {
             </HistoryProvider>
           </ClientEnvironmentProvider>
         </BrowserRouter>
-      </PersistQueryClientProvider>
+      </QueryClientProvider>
     </Suspense>
   );
 }

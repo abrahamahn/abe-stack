@@ -1,6 +1,6 @@
 // apps/web/src/pages/__tests__/HomePage.test.tsx
 import { HomePage } from '@pages/HomePage';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
@@ -113,14 +113,17 @@ describe('HomePage', () => {
   };
 
   describe('Layout', () => {
-    it('should render the main heading', () => {
+    it('should render the main heading', async () => {
       renderWithRouter();
 
-      // Use getAllByRole since README content also has an h1 "ABE Stack"
-      const headings = screen.getAllByRole('heading', { name: /abe stack/i, level: 1 });
-      expect(headings.length).toBeGreaterThanOrEqual(1);
-      // First one is the page heading
-      expect(headings[0]).toHaveClass('heading');
+      // Wait for async content to load, then check headings
+      await waitFor(() => {
+        // Use getAllByRole since README content also has an h1 "ABE Stack"
+        const headings = screen.getAllByRole('heading', { name: /abe stack/i, level: 1 });
+        expect(headings.length).toBeGreaterThanOrEqual(1);
+        // First one is the page heading
+        expect(headings[0]).toHaveClass('heading');
+      });
     });
 
     it('should render the tagline', () => {
@@ -188,68 +191,84 @@ describe('HomePage', () => {
       expect(screen.getByRole('button', { name: 'Week 04' })).toBeInTheDocument();
     });
 
-    it('should switch content when clicking a different doc', () => {
+    it('should switch content when clicking a different doc', async () => {
       renderWithRouter();
 
-      // Initially shows README content
-      expect(screen.getByText(/auth that works/i)).toBeInTheDocument();
+      // Wait for initial README content to load
+      await waitFor(() => {
+        expect(screen.getByText(/auth that works/i)).toBeInTheDocument();
+      });
 
       // Click on core package
       fireEvent.click(screen.getByRole('button', { name: 'Core' }));
 
-      // Should now show core package content
-      expect(screen.getByRole('heading', { name: /@abe-stack\/core/i })).toBeInTheDocument();
-      expect(screen.getByText(/core package documentation/i)).toBeInTheDocument();
+      // Wait for new content to load
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /@abe-stack\/core/i })).toBeInTheDocument();
+        expect(screen.getByText(/core package documentation/i)).toBeInTheDocument();
+      });
     });
 
-    it('should switch to changelog', () => {
+    it('should switch to changelog', async () => {
       renderWithRouter();
 
       fireEvent.click(screen.getByRole('button', { name: 'Week 04' }));
 
-      expect(screen.getByRole('heading', { name: /week 04/i })).toBeInTheDocument();
-      expect(screen.getByText(/weekly log/i)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /week 04/i })).toBeInTheDocument();
+        expect(screen.getByText(/weekly log/i)).toBeInTheDocument();
+      });
     });
 
-    it('should switch to dev docs', () => {
+    it('should switch to dev docs', async () => {
       renderWithRouter();
 
       fireEvent.click(screen.getByRole('button', { name: 'Architecture' }));
 
-      expect(screen.getByRole('heading', { name: /architecture/i })).toBeInTheDocument();
-      expect(screen.getByText(/architecture documentation/i)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /architecture/i })).toBeInTheDocument();
+        expect(screen.getByText(/architecture documentation/i)).toBeInTheDocument();
+      });
     });
   });
 
   describe('README Content', () => {
-    it('should render markdown content', () => {
+    it('should render markdown content', async () => {
       renderWithRouter();
 
-      expect(screen.getByRole('heading', { name: /what you get/i })).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /what you get/i })).toBeInTheDocument();
+      });
     });
 
-    it('should render code blocks', () => {
+    it('should render code blocks', async () => {
       const { container } = renderWithRouter();
 
-      const codeBlocks = container.querySelectorAll('pre');
-      expect(codeBlocks.length).toBeGreaterThanOrEqual(1);
+      await waitFor(() => {
+        const codeBlocks = container.querySelectorAll('pre');
+        expect(codeBlocks.length).toBeGreaterThanOrEqual(1);
+      });
     });
 
-    it('should contain bash commands in code blocks', () => {
+    it('should contain bash commands in code blocks', async () => {
       const { container } = renderWithRouter();
 
-      const codeContent = container.textContent ?? '';
-      expect(codeContent).toContain('pnpm install');
-      expect(codeContent).toContain('pnpm dev');
+      await waitFor(() => {
+        const codeContent = container.textContent ?? '';
+        expect(codeContent).toContain('pnpm install');
+        expect(codeContent).toContain('pnpm dev');
+      });
     });
   });
 
   describe('Styling', () => {
-    it('should render content in markdown-content container', () => {
+    it('should render content in markdown-content container', async () => {
       const { container } = renderWithRouter();
 
-      const markdownContentElement = container.querySelector('.markdown-content');
-      expect(markdownContentElement).toBeInTheDocument();
+      await waitFor(() => {
+        const markdownContentElement = container.querySelector('.markdown-content');
+        expect(markdownContentElement).toBeInTheDocument();
+      });
     });
   });
 });

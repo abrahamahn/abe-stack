@@ -10,10 +10,13 @@ import {
   logSecurityEvent,
   logTokenFamilyRevokedEvent,
   logTokenReuseEvent,
+  sendTokenReuseAlert,
 } from '../events';
+
 
 import type { MockDbClient } from '../../../../infrastructure/data/database/utils/test-utils';
 import type { DbClient } from '@database';
+import type { EmailService } from '@email';
 
 // Mock the database module
 vi.mock('@database', async (importOriginal) => {
@@ -319,6 +322,126 @@ describe('Security Events', () => {
       expect(metrics.accountLockedCount).toBe(3);
       expect(metrics.criticalEventCount).toBe(1);
       expect(metrics.totalEventCount).toBe(5);
+    });
+  });
+
+  describe('sendTokenReuseAlert', () => {
+    let mockEmailService: EmailService;
+
+    beforeEach(() => {
+      mockEmailService = {
+        send: vi.fn().mockResolvedValue({ success: true, messageId: 'test-id' }),
+      };
+    });
+
+    test('should send token reuse alert email with correct parameters', async () => {
+      const params = {
+        email: 'user@example.com',
+        ipAddress: '192.168.1.100',
+        userAgent: 'Mozilla/5.0',
+        timestamp: new Date('2026-01-21T15:30:00Z'),
+      };
+
+      await sendTokenReuseAlert(mockEmailService, params);
+
+      expect(mockEmailService.send).toHaveBeenCalledTimes(1);
+      expect(mockEmailService.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'user@example.com',
+          subject: 'Security Alert: Suspicious Activity on Your Account',
+        }),
+      );
+    });
+
+    test('should include IP address in email content', async () => {
+      const params = {
+        email: 'user@example.com',
+        ipAddress: '10.0.0.1',
+        userAgent: 'Test Browser',
+        timestamp: new Date(),
+      };
+
+      await sendTokenReuseAlert(mockEmailService, params);
+
+      const callArg = vi.mocked(mockEmailService.send).mock.calls[0]?.[0];
+      expect(callArg?.text).toContain('10.0.0.1');
+      expect(callArg?.html).toContain('10.0.0.1');
+    });
+
+    test('should include user agent in email content', async () => {
+      const params = {
+        email: 'user@example.com',
+        ipAddress: '192.168.1.1',
+        userAgent: 'Safari/537.36',
+        timestamp: new Date(),
+      };
+
+      await sendTokenReuseAlert(mockEmailService, params);
+
+      const callArg = vi.mocked(mockEmailService.send).mock.calls[0]?.[0];
+      expect(callArg?.text).toContain('Safari/537.36');
+      expect(callArg?.html).toContain('Safari/537.36');
+    });
+
+    test('should handle undefined user agent by showing Unknown', async () => {
+      const params = {
+        email: 'user@example.com',
+        ipAddress: '192.168.1.1',
+        userAgent: undefined,
+        timestamp: new Date(),
+      };
+
+      await sendTokenReuseAlert(mockEmailService, params);
+
+      const callArg = vi.mocked(mockEmailService.send).mock.calls[0]?.[0];
+      expect(callArg?.text).toContain('Unknown');
+      expect(callArg?.html).toContain('Unknown');
+    });
+
+    test('should propagate email service errors', async () => {
+      const mockError = new Error('SMTP connection failed');
+      mockEmailService.send = vi.fn().mockRejectedValue(mockError);
+
+      const params = {
+        email: 'user@example.com',
+        ipAddress: '192.168.1.1',
+        userAgent: 'Test',
+        timestamp: new Date(),
+      };
+
+      await expect(sendTokenReuseAlert(mockEmailService, params)).rejects.toThrow(
+        'SMTP connection failed',
+      );
+    });
+
+    test('should include security recommendations in email', async () => {
+      const params = {
+        email: 'user@example.com',
+        ipAddress: '192.168.1.1',
+        userAgent: 'Test',
+        timestamp: new Date(),
+      };
+
+      await sendTokenReuseAlert(mockEmailService, params);
+
+      const callArg = vi.mocked(mockEmailService.send).mock.calls[0]?.[0];
+      expect(callArg?.text).toContain('Change your password');
+      expect(callArg?.text).toContain('two-factor authentication');
+    });
+
+    test('should include timestamp in email content', async () => {
+      const timestamp = new Date('2026-01-21T10:00:00Z');
+      const params = {
+        email: 'user@example.com',
+        ipAddress: '192.168.1.1',
+        userAgent: 'Test',
+        timestamp,
+      };
+
+      await sendTokenReuseAlert(mockEmailService, params);
+
+      const callArg = vi.mocked(mockEmailService.send).mock.calls[0]?.[0];
+      expect(callArg?.html).toContain('2026-01-21T10:00:00.000Z');
     });
   });
 });

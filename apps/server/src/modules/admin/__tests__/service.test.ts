@@ -34,6 +34,7 @@ describe('Admin Service', () => {
         mockDb as never,
         'test@example.com',
         'admin-456',
+        'User verified identity via phone',
         '192.168.1.1',
         'Mozilla/5.0',
       );
@@ -46,11 +47,11 @@ describe('Admin Service', () => {
       mockDb.query.users.findFirst.mockResolvedValue(null);
 
       await expect(
-        unlockUserAccount(mockDb as never, 'nonexistent@example.com', 'admin-456'),
+        unlockUserAccount(mockDb as never, 'nonexistent@example.com', 'admin-456', 'Test reason'),
       ).rejects.toThrow(UserNotFoundError);
     });
 
-    test('should call infraUnlockAccount with correct parameters', async () => {
+    test('should call infraUnlockAccount with correct parameters including reason', async () => {
       const { unlockAccount } = await import('../../../infrastructure/index.js');
       const mockUser = { id: 'user-123', email: 'test@example.com' };
       mockDb.query.users.findFirst.mockResolvedValue(mockUser);
@@ -59,6 +60,7 @@ describe('Admin Service', () => {
         mockDb as never,
         'test@example.com',
         'admin-456',
+        'Customer support ticket #12345',
         '192.168.1.1',
         'Mozilla/5.0',
       );
@@ -67,18 +69,42 @@ describe('Admin Service', () => {
         mockDb,
         'test@example.com',
         'admin-456',
+        'Customer support ticket #12345',
         '192.168.1.1',
         'Mozilla/5.0',
       );
     });
 
-    test('should work without optional parameters', async () => {
+    test('should work without optional parameters but require reason', async () => {
       const mockUser = { id: 'user-123', email: 'test@example.com' };
       mockDb.query.users.findFirst.mockResolvedValue(mockUser);
 
-      const result = await unlockUserAccount(mockDb as never, 'test@example.com', 'admin-456');
+      const result = await unlockUserAccount(
+        mockDb as never,
+        'test@example.com',
+        'admin-456',
+        'Password reset requested',
+      );
 
       expect(result).toEqual({ email: 'test@example.com' });
+    });
+
+    test('should pass reason through to infraUnlockAccount', async () => {
+      const { unlockAccount } = await import('../../../infrastructure/index.js');
+      const mockUser = { id: 'user-123', email: 'test@example.com' };
+      mockDb.query.users.findFirst.mockResolvedValue(mockUser);
+
+      const customReason = 'User locked out due to forgotten password, verified via email';
+      await unlockUserAccount(mockDb as never, 'test@example.com', 'admin-789', customReason);
+
+      expect(unlockAccount).toHaveBeenCalledWith(
+        mockDb,
+        'test@example.com',
+        'admin-789',
+        customReason,
+        undefined,
+        undefined,
+      );
     });
   });
 });

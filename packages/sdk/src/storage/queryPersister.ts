@@ -8,11 +8,57 @@
 
 import { idbStorage } from './storage';
 
-import type { PersistedClient, Persister } from '@tanstack/query-persist-client-core';
-
 // ============================================================================
 // Types
 // ============================================================================
+
+/**
+ * Persisted query state structure.
+ * Represents the serialized state of a single query.
+ */
+export interface PersistedQuery {
+  queryKey: readonly unknown[];
+  queryHash: string;
+  state: {
+    data: unknown;
+    dataUpdatedAt: number;
+    error: unknown;
+    errorUpdatedAt: number;
+    fetchFailureCount: number;
+    fetchFailureReason: unknown;
+    fetchMeta: unknown;
+    fetchStatus: string;
+    isInvalidated: boolean;
+    status: string;
+  };
+}
+
+/**
+ * Persisted client state structure.
+ * Contains the full query cache state for restoration.
+ */
+export interface PersistedClientState {
+  queries: PersistedQuery[];
+  mutations: unknown[];
+}
+
+/**
+ * Represents a persisted TanStack Query client state.
+ */
+export interface PersistedClient {
+  timestamp: number;
+  buster: string;
+  clientState: PersistedClientState;
+}
+
+/**
+ * Interface for persisting TanStack Query client state.
+ */
+export interface Persister {
+  persistClient(client: PersistedClient): void;
+  restoreClient(): Promise<PersistedClient | undefined>;
+  removeClient(): Promise<void>;
+}
 
 export interface QueryPersisterOptions {
   /** Storage key for the persisted cache */
@@ -34,11 +80,10 @@ const DEFAULT_THROTTLE = 1000; // 1 second
 /**
  * Create an IndexedDB persister for TanStack Query
  *
- * Usage:
+ * Usage with manual persistence (recommended):
  * ```ts
- * import { QueryClient } from '@tanstack/react-query';
- * import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
- * import { createQueryPersister } from '@abe-stack/sdk/storage';
+ * import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+ * import { createQueryPersister } from '@abe-stack/sdk';
  *
  * const queryClient = new QueryClient({
  *   defaultOptions: {
@@ -51,12 +96,25 @@ const DEFAULT_THROTTLE = 1000; // 1 second
  *
  * const persister = createQueryPersister();
  *
- * <PersistQueryClientProvider
- *   client={queryClient}
- *   persistOptions={{ persister, maxAge: 1000 * 60 * 60 * 24 }}
- * >
- *   <App />
- * </PersistQueryClientProvider>
+ * // On mount: restore from IndexedDB
+ * const persistedClient = await persister.restoreClient();
+ * if (persistedClient) {
+ *   for (const query of persistedClient.clientState.queries) {
+ *     queryClient.setQueryData(query.queryKey, query.state.data);
+ *   }
+ * }
+ *
+ * // Subscribe to cache changes for persistence
+ * queryClient.getQueryCache().subscribe(() => {
+ *   const queries = queryClient.getQueryCache().getAll()
+ *     .filter(q => q.state.data !== undefined)
+ *     .map(q => ({ queryKey: q.queryKey, queryHash: q.queryHash, state: q.state }));
+ *   persister.persistClient({
+ *     timestamp: Date.now(),
+ *     buster: '',
+ *     clientState: { queries, mutations: [] },
+ *   });
+ * });
  * ```
  */
 export function createQueryPersister(options: QueryPersisterOptions = {}): Persister {

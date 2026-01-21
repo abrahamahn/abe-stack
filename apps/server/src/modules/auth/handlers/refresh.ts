@@ -5,11 +5,13 @@
  * Handles token refresh using HTTP-only refresh token cookie.
  */
 
+import { sendTokenReuseAlert } from '@auth/security';
 import { refreshUserTokens } from '@auth/service';
 import {
   ERROR_MESSAGES,
   InvalidTokenError,
   mapErrorToResponse,
+  TokenReuseError,
   type AppContext,
   type ReplyWithCookies,
   type RequestWithCookies,
@@ -53,6 +55,32 @@ export async function handleRefresh(
     // Clear cookie on invalid token before returning error
     if (error instanceof InvalidTokenError) {
       clearRefreshTokenCookie(reply);
+      return { status: 401, body: { message: ERROR_MESSAGES.INVALID_TOKEN } };
+    }
+
+    // Handle token reuse detection - send security alert email
+    if (error instanceof TokenReuseError) {
+      clearRefreshTokenCookie(reply);
+
+      // Send email alert (fire and forget - don't block the response)
+      if (error.email) {
+        sendTokenReuseAlert(ctx.email, {
+          email: error.email,
+          ipAddress: error.ipAddress || ipAddress,
+          userAgent: error.userAgent || userAgent,
+          timestamp: new Date(),
+        }).catch((emailError: unknown) => {
+          ctx.log.error(
+            {
+              err: emailError instanceof Error ? emailError : new Error(String(emailError)),
+              userId: error.userId,
+              email: error.email,
+            },
+            'Failed to send token reuse alert email',
+          );
+        });
+      }
+
       return { status: 401, body: { message: ERROR_MESSAGES.INVALID_TOKEN } };
     }
 

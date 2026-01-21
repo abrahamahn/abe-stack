@@ -171,4 +171,88 @@ describe('emailTemplates', () => {
       expect(result.text).not.toMatch(/<[a-z]+/i);
     });
   });
+
+  describe('tokenReuseAlert', () => {
+    const testIp = '192.168.1.100';
+    const testUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
+    const testTimestamp = new Date('2026-01-21T15:30:00Z');
+
+    test('should generate security alert email with correct subject', () => {
+      const result = emailTemplates.tokenReuseAlert(testIp, testUserAgent, testTimestamp);
+
+      expect(result.subject).toBe('Security Alert: Suspicious Activity on Your Account');
+      expect(result.to).toBe('');
+    });
+
+    test('should include IP address in both text and HTML', () => {
+      const result = emailTemplates.tokenReuseAlert(testIp, testUserAgent, testTimestamp);
+
+      expect(result.text).toContain(testIp);
+      expect(result.html).toContain(testIp);
+    });
+
+    test('should include user agent in both text and HTML', () => {
+      const result = emailTemplates.tokenReuseAlert(testIp, testUserAgent, testTimestamp);
+
+      expect(result.text).toContain(testUserAgent);
+      expect(result.html).toContain(testUserAgent);
+    });
+
+    test('should include formatted timestamp', () => {
+      const result = emailTemplates.tokenReuseAlert(testIp, testUserAgent, testTimestamp);
+
+      // Check for ISO timestamp
+      expect(result.html).toContain('2026-01-21T15:30:00.000Z');
+    });
+
+    test('should explain what happened', () => {
+      const result = emailTemplates.tokenReuseAlert(testIp, testUserAgent, testTimestamp);
+
+      expect(result.text).toContain('authentication token was reused');
+      expect(result.text).toContain('sessions have been terminated');
+      expect(result.html).toContain('authentication token was reused');
+      expect(result.html).toContain('sessions have been terminated');
+    });
+
+    test('should include security recommendations', () => {
+      const result = emailTemplates.tokenReuseAlert(testIp, testUserAgent, testTimestamp);
+
+      expect(result.text).toContain('Change your password');
+      expect(result.text).toContain('two-factor authentication');
+      expect(result.text).toContain('Review your recent account activity');
+      expect(result.html).toContain('Change your password');
+      expect(result.html).toContain('two-factor authentication');
+    });
+
+    test('should handle empty user agent', () => {
+      const result = emailTemplates.tokenReuseAlert(testIp, '', testTimestamp);
+
+      expect(result.text).toContain('Unknown');
+      expect(result.html).toContain('Unknown');
+    });
+
+    test('should generate valid HTML structure', () => {
+      const result = emailTemplates.tokenReuseAlert(testIp, testUserAgent, testTimestamp);
+
+      expect(result.html).toContain('<!DOCTYPE html>');
+      expect(result.html).toContain('<html>');
+      expect(result.html).toContain('</html>');
+      expect(result.html).toContain('Security Alert');
+    });
+
+    test('should have plain text alternative without HTML tags', () => {
+      const result = emailTemplates.tokenReuseAlert(testIp, testUserAgent, testTimestamp);
+
+      // Text version should not contain HTML tags
+      expect(result.text).not.toMatch(/<[a-z]+/i);
+    });
+
+    test('should include warning styling in HTML', () => {
+      const result = emailTemplates.tokenReuseAlert(testIp, testUserAgent, testTimestamp);
+
+      // Should have warning-colored elements
+      expect(result.html).toContain('#dc2626'); // Red color for alert
+      expect(result.html).toContain('#fef2f2'); // Light red background
+    });
+  });
 });

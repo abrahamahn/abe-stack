@@ -34,11 +34,12 @@ export async function handleAdminUnlock(
   try {
     const { ipAddress, userAgent } = request.requestInfo;
 
-    const { email } = body;
+    const { email, reason } = body;
     const result = await unlockUserAccount(
       ctx.db,
       email,
       request.user.userId,
+      reason,
       ipAddress,
       userAgent,
     );

@@ -95,9 +95,16 @@ export class InvalidTokenError extends UnauthorizedError {
 
 /**
  * Token has already been used (replay attack detection)
+ * Captures user details for security alerting
  */
 export class TokenReuseError extends UnauthorizedError {
-  constructor() {
+  constructor(
+    public readonly userId?: string,
+    public readonly email?: string,
+    public readonly familyId?: string,
+    public readonly ipAddress?: string,
+    public readonly userAgent?: string,
+  ) {
     super('Token has already been used', 'TOKEN_REUSED');
   }
 }

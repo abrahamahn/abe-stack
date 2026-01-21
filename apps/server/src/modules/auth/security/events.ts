@@ -1,8 +1,10 @@
 // apps/server/src/modules/auth/security/events.ts
 import { securityEvents } from '@database';
+import { emailTemplates } from '@email';
 import { desc, eq, gte } from 'drizzle-orm';
 
 import type { DbClient } from '@database';
+import type { EmailService } from '@email';
 
 /**
  * Security event types
@@ -255,4 +257,44 @@ export async function getSecurityEventMetrics(
     criticalEventCount,
     totalEventCount: events.length,
   };
+}
+
+/**
+ * Parameters for sending a token reuse alert email
+ */
+export interface SendTokenReuseAlertParams {
+  email: string;
+  ipAddress: string;
+  userAgent: string | undefined;
+  timestamp: Date;
+}
+
+/**
+ * Send a security alert email when token reuse is detected
+ *
+ * This alerts the user that their account may have been compromised
+ * and that all their sessions have been terminated as a precaution.
+ *
+ * @example
+ * ```typescript
+ * await sendTokenReuseAlert(emailService, {
+ *   email: 'user@example.com',
+ *   ipAddress: '192.168.1.1',
+ *   userAgent: 'Mozilla/5.0...',
+ *   timestamp: new Date(),
+ * });
+ * ```
+ */
+export async function sendTokenReuseAlert(
+  emailService: EmailService,
+  params: SendTokenReuseAlertParams,
+): Promise<void> {
+  const { email, ipAddress, userAgent, timestamp } = params;
+
+  const template = emailTemplates.tokenReuseAlert(ipAddress, userAgent || 'Unknown', timestamp);
+
+  await emailService.send({
+    ...template,
+    to: email,
+  });
 }

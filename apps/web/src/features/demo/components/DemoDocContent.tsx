@@ -1,9 +1,7 @@
 // apps/web/src/features/demo/components/DemoDocContent.tsx
-import { Heading, Skeleton, Text } from '@abe-stack/ui';
+import { Heading, Markdown, Skeleton, Text } from '@abe-stack/ui';
 import { getComponentDocsLazy } from '@demo/utils/lazyDocs';
 import { useEffect, useState } from 'react';
-import Markdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
 
 import type { ComponentDemo } from '@demo/types';
 import type { ReactElement } from 'react';
@@ -43,11 +41,7 @@ export function DemoDocContent({ component }: DemoDocContentProps): ReactElement
   }
 
   if (docs) {
-    return (
-      <div className="markdown-content">
-        <Markdown remarkPlugins={[remarkGfm]}>{docs}</Markdown>
-      </div>
-    );
+    return <Markdown className="markdown-content">{docs}</Markdown>;
   }
 
   return (

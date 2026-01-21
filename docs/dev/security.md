@@ -1,6 +1,6 @@
 # Security Architecture
 
-**Last Updated: January 20, 2026**
+**Last Updated: January 21, 2026**
 
 Overview of security measures implemented in ABE Stack.
 
@@ -33,10 +33,23 @@ Overview of security measures implemented in ABE Stack.
 When a refresh token is used after it's been rotated:
 
 1. Entire token family is revoked (all devices from that login)
-2. Security event logged with severity "high"
-3. User must re-authenticate
+2. Security event logged with severity "critical"
+3. **Email alert sent to user** with IP, user agent, and timestamp
+4. User must re-authenticate
 
 **Grace Period:** 30 seconds (allows network retries)
+
+**Email Alert:** Users receive a security alert email explaining the suspicious activity, that all sessions were terminated, and recommendations (change password, enable 2FA, review account activity).
+
+### Token Operations
+
+All token family operations are wrapped in database transactions for atomicity:
+
+- `createRefreshTokenFamily()` - family + initial token created atomically
+- `revokeTokenFamily()` - family revocation + token deletion in one transaction
+- `revokeAllUserTokens()` - all families and tokens for user revoked atomically
+
+If any operation fails, all changes are rolled back.
 
 ---
 
@@ -57,6 +70,9 @@ When a refresh token is used after it's been rotated:
 - **Trigger:** 5 failed login attempts within 15 minutes
 - **Duration:** 15 minutes (configurable)
 - **Progressive Delay:** Exponential backoff on repeated failures
+- **Admin Unlock:** Requires reason (1-500 chars) for audit trail
+
+**Lockout Status:** Uses most recent failed attempt for expiration calculation (descending sort order). Lockout cannot be extended by additional failed attempts during active lockout period.
 
 ### Timing Attack Prevention
 

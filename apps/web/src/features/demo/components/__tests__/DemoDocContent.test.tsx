@@ -53,7 +53,7 @@ describe('DemoDocContent', () => {
         expect(getComponentDocsLazy).toHaveBeenCalledWith('button', 'elements', 'Button');
       });
 
-      // Verify the markdown is rendered (react-markdown renders the content)
+      // Verify the markdown is rendered (custom Markdown component renders the content)
       await waitFor(() => {
         expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Button');
       });

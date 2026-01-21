@@ -1,5 +1,5 @@
 // apps/web/src/app/__tests__/App.test.tsx
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -65,13 +65,6 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Mock @tanstack/react-query-persist-client
-vi.mock('@tanstack/react-query-persist-client', () => ({
-  PersistQueryClientProvider: ({ children }: { children: React.ReactNode }): React.ReactElement => (
-    <div data-testid="persist-provider">{children}</div>
-  ),
-}));
-
 // Mock @abe-stack/ui ScrollArea, Toaster, and HistoryProvider
 vi.mock('@abe-stack/ui', async () => {
   const actual = await vi.importActual('@abe-stack/ui');
@@ -89,6 +82,11 @@ vi.mock('@abe-stack/ui', async () => {
 
 // Create a mock environment for testing
 function createMockEnvironment(): ClientEnvironment {
+  const mockQueryCache = {
+    subscribe: vi.fn(() => vi.fn()),
+    getAll: vi.fn(() => []),
+  };
+
   return {
     config: {
       mode: 'test',
@@ -103,6 +101,9 @@ function createMockEnvironment(): ClientEnvironment {
       setQueryData: vi.fn(),
       getQueryState: vi.fn(),
       removeQueries: vi.fn(),
+      getQueryCache: vi.fn(() => mockQueryCache),
+      mount: vi.fn(),
+      unmount: vi.fn(),
     } as unknown as ClientEnvironment['queryClient'],
     auth: {
       getState: vi.fn(() => ({ user: null, isLoading: false, isAuthenticated: false })),
@@ -130,50 +131,112 @@ describe('App', () => {
   });
 
   describe('Basic Rendering', () => {
-    it('should render without crashing', () => {
+    it('should render without crashing', async () => {
       expect(() => {
         render(<App environment={mockEnvironment} />);
       }).not.toThrow();
+
+      // Wait for async restoration to complete
+      await waitFor(() => {
+        expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+      });
     });
 
-    it('should render the theme container', () => {
+    it('should render the theme container', async () => {
       const { container } = render(<App environment={mockEnvironment} />);
 
-      const themeContainer = container.querySelector('.theme');
-      expect(themeContainer).toBeInTheDocument();
+      await waitFor(() => {
+        const themeContainer = container.querySelector('.theme');
+        expect(themeContainer).toBeInTheDocument();
+      });
     });
 
-    it('should have full viewport height', () => {
+    it('should have full viewport height', async () => {
       const { container } = render(<App environment={mockEnvironment} />);
 
-      const themeContainer = container.querySelector('.theme');
-      expect(themeContainer).toHaveClass('h-screen');
+      await waitFor(() => {
+        const themeContainer = container.querySelector('.theme');
+        expect(themeContainer).toHaveClass('h-screen');
+      });
     });
 
-    it('should render the Toaster component', () => {
-      const { getByTestId } = render(<App environment={mockEnvironment} />);
+    it('should render the Toaster component', async () => {
+      render(<App environment={mockEnvironment} />);
 
-      expect(getByTestId('toaster')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('toaster')).toBeInTheDocument();
+      });
     });
 
-    it('should render with PersistQueryClientProvider', () => {
-      const { getByTestId } = render(<App environment={mockEnvironment} />);
+    it('should render with manual query persistence', async () => {
+      render(<App environment={mockEnvironment} />);
 
-      expect(getByTestId('persist-provider')).toBeInTheDocument();
+      // Wait for async restoration to complete, then verify app renders
+      await waitFor(() => {
+        expect(screen.getByTestId('home-page')).toBeInTheDocument();
+      });
     });
 
-    it('should render with HistoryProvider', () => {
-      const { getByTestId } = render(<App environment={mockEnvironment} />);
+    it('should render with HistoryProvider', async () => {
+      render(<App environment={mockEnvironment} />);
 
-      expect(getByTestId('history-provider')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('history-provider')).toBeInTheDocument();
+      });
     });
   });
 
   describe('Route Rendering', () => {
-    it('should render HomePage on root route', () => {
+    it('should render HomePage on root route', async () => {
       render(<App environment={mockEnvironment} />);
 
-      expect(screen.getByTestId('home-page')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('home-page')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Query Persistence', () => {
+    it('should show loading state while restoring cache', () => {
+      render(<App environment={mockEnvironment} />);
+
+      // Initially shows loading while async restoration runs
+      expect(screen.getByText('Loading...')).toBeInTheDocument();
+    });
+
+    it('should complete restoration and render app', async () => {
+      render(<App environment={mockEnvironment} />);
+
+      // After restoration completes, app should render
+      await waitFor(() => {
+        expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+        expect(screen.getByTestId('home-page')).toBeInTheDocument();
+      });
+    });
+
+    it('should subscribe to query cache changes after restoration', async () => {
+      render(<App environment={mockEnvironment} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('home-page')).toBeInTheDocument();
+      });
+
+      // Verify getQueryCache().subscribe was called for persistence
+      expect(mockEnvironment.queryClient.getQueryCache).toHaveBeenCalled();
+      const mockQueryCache = vi.mocked(mockEnvironment.queryClient.getQueryCache)();
+      expect(mockQueryCache.subscribe).toHaveBeenCalled();
+    });
+
+    it('should handle empty persisted state gracefully', async () => {
+      // Default mock returns undefined, simulating no cached data
+      render(<App environment={mockEnvironment} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('home-page')).toBeInTheDocument();
+      });
+
+      // App renders without crashing when no cached data exists
+      expect(screen.getByTestId('history-provider')).toBeInTheDocument();
     });
   });
 });

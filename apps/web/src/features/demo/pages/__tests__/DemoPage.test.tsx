@@ -396,7 +396,7 @@ describe('DemoPage', () => {
         expect(mockGetComponentDocsLazy).toHaveBeenCalledWith('button', 'elements', 'Button');
       });
 
-      // react-markdown renders the content in a markdown-content container
+      // Custom Markdown component renders the content in a markdown-content container
       await waitFor(() => {
         const markdownContainer = document.querySelector('.markdown-content');
         expect(markdownContainer).toBeInTheDocument();
