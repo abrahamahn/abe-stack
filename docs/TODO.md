@@ -9,7 +9,6 @@
 
 - [ ] Review all config files (tsconfig, vite, eslint, etc.)
 - [ ] Audit build configuration for simplicity
-- [x] ~~Ensure minimal packages - remove any unused dependencies~~ ✅ Completed 2026-01-21
 
 ---
 
@@ -81,7 +80,6 @@ Building blocks needed across multiple products.
 
 ### Test Coverage: Critical Auth Paths (Backend)
 
-- [x] ~~Token rotation: grace period boundary, concurrent requests, race conditions~~
 - [ ] Login flow: lockout expiration, parallel requests, password change invalidation
 - [ ] Registration: concurrent same-email, UTF-8 names, boundary passwords
 
