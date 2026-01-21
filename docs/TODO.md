@@ -5,32 +5,6 @@
 
 ---
 
-## High Priority: Core Features
-
-Building blocks needed across multiple products.
-
-### Push Notifications (Backend + Frontend)
-
-- [ ] Web push with service worker
-- [ ] Mobile push setup (FCM/APNs)
-- [ ] Notification preferences per user
-
-### Cache Layer (Backend)
-
-- [ ] Cache service interface (swap Redis/memory)
-- [ ] Memoization helper with TTL and custom keys
-- [ ] Bulk operations (getMultiple, setMultiple)
-- [ ] Cache statistics and background cleanup
-
-### Search & Filtering (Backend)
-
-- [ ] SearchQueryBuilder with fluent API
-- [ ] Filter operators (eq, gt, lt, in, range, contains)
-- [ ] Pagination integration
-- [ ] Provider abstraction (start simple, upgrade to Elasticsearch later)
-
----
-
 ## High Priority: Authentication
 
 ### Social/OAuth Providers (Backend)
@@ -41,22 +15,9 @@ Building blocks needed across multiple products.
 - [ ] OAuth connection management UI
 - [ ] Account linking (multiple providers per account)
 
-### Magic Links (Backend) - COMPLETED
-
-- [x] Magic link token generation (32-byte crypto random, SHA-256 hashed)
-- [x] `/api/auth/magic-link/request` endpoint (rate limited: 3/hour/email)
-- [x] `/api/auth/magic-link/verify` endpoint (returns JWT tokens)
-- [x] `magic_link_tokens` database table (with indexes)
-
 ---
 
 ## Medium Priority: UI Package
-
-### Accessibility (Frontend)
-
-- [ ] ResizablePanel keyboard support (arrow keys for resize)
-- [ ] ResizablePanel Home/End keys (jump to min/max)
-- [ ] Update ARIA attributes for screen readers
 
 ### Demo Performance (Frontend)
 
@@ -69,11 +30,6 @@ Building blocks needed across multiple products.
 - [ ] Standardize arrow functions with forwardRef
 - [ ] Consistent prop naming across components
 - [ ] JSDoc comments on public APIs
-
-### Theme (Frontend)
-
-- [ ] Density variants (compact/normal/comfortable)
-- [ ] High-contrast mode support
 
 \*\*CUTOFF LINE -----------------------------------
 
@@ -172,4 +128,4 @@ If no to all three, it goes in `docs/ROADMAP.md`.
 
 ---
 
-_Last Updated: 2026-01-21_
+_Last Updated: 2026-01-22_
