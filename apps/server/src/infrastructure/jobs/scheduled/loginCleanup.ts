@@ -123,8 +123,7 @@ export async function cleanupOldLoginAttempts(
         )
       `);
 
-      // Result can be either an array or an object with rowCount depending on driver
-      batchDeleted = 'rowCount' in result ? (result.rowCount ?? 0) : result.length;
+      batchDeleted = (result as { rowCount?: number }).rowCount ?? 0;
       deletedCount += batchDeleted;
 
       // Continue until no more records to delete

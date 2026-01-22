@@ -16,7 +16,6 @@ import type {
   MemoryCacheConfig,
 } from '@abe-stack/core';
 
-
 // ============================================================================
 // Memory Cache Provider Implementation
 // ============================================================================
@@ -114,7 +113,7 @@ export class MemoryCacheProvider implements CacheProvider {
     return Promise.resolve(node.value as T);
   }
 
-  set<T>(key: string, value: T, options: CacheSetOptions = {}): Promise<void> {
+  set(key: string, value: unknown, options: CacheSetOptions = {}): Promise<void> {
     const fullKey = this.getFullKey(key);
     const ttl = options.ttl ?? this.config.defaultTtl;
     const expiresAt = ttl > 0 ? Date.now() + ttl : undefined;
@@ -486,10 +485,7 @@ export class MemoryCacheProvider implements CacheProvider {
       }
 
       // Evict until we have room
-      while (
-        this.tail &&
-        this.currentMemoryBytes + newSize > this.config.maxMemoryBytes
-      ) {
+      while (this.tail && this.currentMemoryBytes + newSize > this.config.maxMemoryBytes) {
         const node = this.removeTail();
         if (node) {
           this.cache.delete(node.key);

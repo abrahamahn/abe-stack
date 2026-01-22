@@ -127,6 +127,15 @@ export class SqlSearchProvider<
     };
   }
 
+  /**
+   * Get table with compatible type for Drizzle's from() method.
+   * Uses double assertion to work around Drizzle ORM v0.35+ type constraints.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private get fromTable(): any {
+    return this.table;
+  }
+
   // ============================================================================
   // Public API
   // ============================================================================
@@ -160,7 +169,7 @@ export class SqlSearchProvider<
       const orderByClause = this.buildOrderByClause(query.sort);
 
       // Execute query with one extra row to determine hasNext
-      const qb = this.db.select().from(this.table);
+      const qb = this.db.select().from(this.fromTable);
       const qbWithWhere = whereClause ? qb.where(whereClause) : qb;
       const qbWithOrder =
         orderByClause.length > 0 ? qbWithWhere.orderBy(...orderByClause) : qbWithWhere;
@@ -173,7 +182,7 @@ export class SqlSearchProvider<
       // Get total count if requested
       let total: number | undefined;
       if (query.includeCount) {
-        const countQb = this.db.select({ count: sql<number>`count(*)` }).from(this.table);
+        const countQb = this.db.select({ count: sql<number>`count(*)` }).from(this.fromTable);
         const countQbWithWhere = whereClause ? countQb.where(whereClause) : countQb;
         const countResult = await countQbWithWhere;
         const countValue = countResult[0]?.count;
@@ -218,7 +227,7 @@ export class SqlSearchProvider<
       const orderByClause = this.buildOrderByClause(query.sort);
 
       // Execute query with extra rows for cursor detection
-      const qb = this.db.select().from(this.table);
+      const qb = this.db.select().from(this.fromTable);
       const qbWithWhere = whereClause ? qb.where(whereClause) : qb;
       const results = await qbWithWhere.orderBy(...orderByClause).limit(limit + 1);
 
@@ -233,7 +242,7 @@ export class SqlSearchProvider<
       let total: number | undefined;
       if (query.includeCount) {
         const baseWhere = this.buildWhereClause(query);
-        const countQb = this.db.select({ count: sql<number>`count(*)` }).from(this.table);
+        const countQb = this.db.select({ count: sql<number>`count(*)` }).from(this.fromTable);
         const countQbWithWhere = baseWhere ? countQb.where(baseWhere) : countQb;
         const countResult = await countQbWithWhere;
         const countValue = countResult[0]?.count;
@@ -288,7 +297,7 @@ export class SqlSearchProvider<
                     value: column,
                     count: sql<number>`count(*)`,
                   })
-                  .from(this.table);
+                  .from(this.fromTable);
 
                 const bucketQbWithWhere = whereClause ? bucketQb.where(whereClause) : bucketQb;
 
@@ -324,7 +333,7 @@ export class SqlSearchProvider<
     try {
       const whereClause = this.buildWhereClause(query);
 
-      const qb = this.db.select({ count: sql<number>`count(*)` }).from(this.table);
+      const qb = this.db.select({ count: sql<number>`count(*)` }).from(this.fromTable);
       const qbWithWhere = whereClause ? qb.where(whereClause) : qb;
       const result = await qbWithWhere;
 
@@ -339,7 +348,7 @@ export class SqlSearchProvider<
     try {
       await this.db
         .select({ one: sql`1` })
-        .from(this.table)
+        .from(this.fromTable)
         .limit(1);
       return true;
     } catch {
