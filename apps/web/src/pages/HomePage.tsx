@@ -1,7 +1,15 @@
 // apps/web/src/pages/HomePage.tsx
-import { Button, Card, Heading, Markdown, PageContainer, Skeleton, Text } from '@abe-stack/ui';
+import {
+  Button,
+  Card,
+  Heading,
+  Link,
+  Markdown,
+  PageContainer,
+  Skeleton,
+  Text,
+} from '@abe-stack/ui';
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 
 import type { JSX } from 'react';
 
@@ -148,7 +156,7 @@ function DocIndex({
     (key: DocKey) => {
       onSelect(key);
     },
-    [onSelect]
+    [onSelect],
   );
 
   return (

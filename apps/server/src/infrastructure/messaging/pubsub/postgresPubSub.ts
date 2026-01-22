@@ -3,7 +3,7 @@
  * PostgreSQL NOTIFY/LISTEN Pub/Sub Adapter
  *
  * Uses Postgres NOTIFY/LISTEN for cross-instance messaging.
- * Enables horizontal scaling without Redis dependency.
+ * Enables horizontal scaling with native Postgres capabilities.
  *
  * How it works:
  * 1. Each server instance opens a dedicated LISTEN connection

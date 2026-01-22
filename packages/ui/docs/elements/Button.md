@@ -89,7 +89,7 @@ import { Button } from 'abeahn-ui/components';
 ### With React Router Link
 
 ```tsx
-import { Link } from 'react-router-dom';
+import { Link } from '@abe-stack/ui';
 
 <Button as={Link} to="/dashboard" variant="primary">
   Dashboard

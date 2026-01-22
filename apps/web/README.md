@@ -1,433 +1,340 @@
-# ABE Stack Web Application
+# ABE Stack Web
 
-This is the frontend React application for ABE Stack. Before we dive into the code, let us talk about the philosophy that shapes how this application is organized.
+> Services before React.
 
-## Table of Contents
+Vite + React 19 frontend. The key insight: services are created before React renders. No race conditions between initialization and component mounting. Auth service starts refreshing tokens before any component mounts. The app boots faster.
 
-- [Philosophy: Services Before React](#philosophy-services-before-react)
-- [The ClientEnvironment Pattern](#the-clientenvironment-pattern)
-- [Directory Structure](#directory-structure)
-- [How Routing Works](#how-routing-works)
-- [Authentication Flow](#authentication-flow)
-- [Token Management](#token-management)
-- [API Integration](#api-integration)
-- [Development](#development)
-- [Path Aliases](#path-aliases)
-- [Environment Variables](#environment-variables)
-- [Building for Production](#building-for-production)
-- [Progressive Web App Support](#progressive-web-app-support)
-- [The Demo Feature](#the-demo-feature)
-- [Design Decisions and Trade-offs](#design-decisions-and-trade-offs)
-- [Package Dependencies](#package-dependencies)
-- [Testing](#testing)
+## Features
 
----
+- services initialized before React 🚀
+- single ClientEnvironment (no provider hell) 📦
+- cookie-based auth with auto-refresh 🍪
+- type-safe API client (ts-rest + React Query) 🔒
+- PWA with offline caching 📱
+- interactive component demo catalog 🎨
+- query cache persistence (IndexedDB) 💾
+- lazy-loaded routes (code splitting) ⚡
+- 48 test files passing ✅
 
-## Philosophy: Services Before React
+## Getting Started
 
-The most important decision we made in this codebase is that **services are created before React renders**. This might seem like a minor detail, but it fundamentally changes how the application works.
+```sh
+# from monorepo root
+pnpm dev
 
-In a typical React app, you might see something like this:
-
-```tsx
-// The typical approach - services created inside React tree
-function App() {
-  const [queryClient] = useState(() => new QueryClient());
-  const [authService] = useState(() => new AuthService(queryClient));
-
-  return <Providers queryClient={queryClient}>...</Providers>;
-}
+# standalone
+pnpm --filter @abe-stack/web dev
 ```
 
-We do it differently. Look at `src/main.tsx`:
+Vite runs on port 5173, proxies `/api` to the backend on 8080.
 
-```tsx
-// Our approach - services created at module level
-const queryClient = new QueryClient({ ... })
-const auth = createAuthService({ config: clientConfig, queryClient })
+## Commands
 
-const environment: ClientEnvironment = { config: clientConfig, queryClient, auth }
+```sh
+pnpm --filter @abe-stack/web dev        # development (HMR)
+pnpm --filter @abe-stack/web build      # production build
+pnpm --filter @abe-stack/web preview    # preview production build
+pnpm --filter @abe-stack/web test       # run tests
+pnpm --filter @abe-stack/web type-check # check types
+```
+
+## Architecture
+
+```typescript
+// main.tsx - services created BEFORE React renders
+const queryClient = new QueryClient({ ... });
+const auth = createAuthService({ config, queryClient });
+
+const environment: ClientEnvironment = { config, queryClient, auth };
 
 // THEN React renders
-root.render(<App environment={environment} />)
+root.render(<App environment={environment} />);
 ```
 
-Why does this matter? Because services exist before the React lifecycle begins. The auth service can start initializing immediately. Token refresh can begin before any component mounts. The application boots faster and there are no race conditions between service initialization and component rendering.
+**Why this matters:**
 
-This pattern comes from chet-stack and we have found it to be remarkably effective for managing complex client-side state.
+- Auth initializes immediately (no waiting for component mount)
+- Token refresh starts before UI renders
+- No race conditions
+- Testing is trivial (mock one object)
 
-## The ClientEnvironment Pattern
+### The ClientEnvironment Pattern
 
-Instead of multiple nested providers each wrapping the next, we use a single `ClientEnvironment` object that holds all our services:
+One object holds all services. One provider. No nesting.
 
-```tsx
+```typescript
 type ClientEnvironment = {
   config: ClientConfig;
   queryClient: QueryClient;
   auth: AuthService;
-  // Future: pubsub, offlineQueue, etc.
 };
-```
 
-This object is passed to the `App` component and made available via context. Any component can access any service through the `useClientEnvironment` hook:
-
-```tsx
-function SomeComponent() {
+// Any component can access any service
+function MyComponent() {
   const { auth, config } = useClientEnvironment();
-  // Use services directly
 }
 ```
 
-The benefits are substantial:
+## Features
 
-1. **Testing becomes trivial** - Mock one object instead of wrestling with multiple provider wrappers
-2. **Dependencies are explicit** - You can see exactly what a component needs
-3. **No provider hell** - One provider instead of QueryClientProvider inside AuthProvider inside ConfigProvider inside...
+### Auth (`src/features/auth/`)
 
-## Directory Structure
+Complete authentication UI with all flows.
+
+| Feature            | Implementation                                   |
+| ------------------ | ------------------------------------------------ |
+| Login/Register     | Forms with validation                            |
+| Token Management   | Memory storage (XSS-safe)                        |
+| Auto-refresh       | Every 13 min with exponential backoff            |
+| Protected Routes   | `<ProtectedRoute>` component                     |
+| Password Reset     | Full flow with email                             |
+| Email Verification | Confirmation page with resend (60s cooldown)     |
+| Auth Modal         | Unified modal supporting all auth modes          |
+| Form Modes         | login, register, forgot-password, reset-password |
+
+```typescript
+const { user, isAuthenticated, isLoading, login, logout } = useAuth();
+```
+
+**Components:**
+
+- `AuthModal` - Unified modal for all auth flows
+- `AuthForm` - Router component that renders the correct form based on mode
+- `LoginForm`, `RegisterForm`, `ForgotPasswordForm`, `ResetPasswordForm`
+- `ProtectedRoute` - Redirect to login if not authenticated
+
+**Hooks:**
+
+- `useAuth` - Main auth hook with user state and methods
+- `useAuthFormState` - Form state management with loading/error
+- `useResendCooldown` - 60-second cooldown for email resend
+
+### Dashboard (`src/features/dashboard/`)
+
+Protected area for authenticated users.
+
+### Demo (`src/features/demo/`)
+
+Interactive component catalog at `/demo`. Displays all `@abe-stack/ui` components with:
+
+- Live examples with theme switching
+- Code snippets
+- Resizable pane layout (keyboard shortcuts: T/B/L/R/D/C)
+- Three categories: components (11), elements (38), layouts (8)
+- Lazy-loaded documentation
+- Auth integration (can test login/register flows)
+
+## Project Structure
 
 ```
 src/
-├── main.tsx              # Entry point - creates services, renders App
+├── main.tsx                  # entry - creates services, renders App
 ├── app/
-│   ├── App.tsx           # Root component with providers and routes
-│   └── ClientEnvironment.tsx  # Environment type and provider
+│   ├── App.tsx               # routes + providers + query persistence
+│   └── ClientEnvironment.tsx # environment type + context
 ├── api/
-│   ├── ApiProvider.tsx   # React Query API client provider
-│   └── client.ts         # Standalone API client instance
+│   ├── client.ts             # standalone API client
+│   └── ApiProvider.tsx       # React Query integration
 ├── config/
-│   └── index.ts          # Centralized client configuration
+│   └── index.ts              # client configuration
 ├── features/
-│   ├── auth/             # Authentication feature
-│   │   ├── components/   # AuthModal, LoginForm, etc.
-│   │   ├── hooks/        # useAuth, useAuthFormState
-│   │   ├── pages/        # AuthPage, LoginPage, etc.
-│   │   └── services/     # AuthService class
-│   ├── dashboard/        # Protected dashboard feature
-│   │   └── pages/        # DashboardPage
-│   └── demo/             # Component showcase feature
-│       ├── catalog/      # Component registry
-│       ├── components/   # Demo UI components
-│       ├── hooks/        # useDemoTheme, useDemoPanes
-│       └── pages/        # DemoPage
+│   ├── auth/                 # authentication
+│   │   ├── components/       # LoginForm, AuthModal, RegisterForm, etc.
+│   │   ├── hooks/            # useAuth, useAuthFormState, useResendCooldown
+│   │   ├── pages/            # LoginPage, RegisterPage, ResetPasswordPage, ConfirmEmailPage
+│   │   ├── services/         # AuthService class
+│   │   └── utils/            # createFormHandler
+│   ├── dashboard/            # protected dashboard
+│   │   └── pages/            # Dashboard (protected route)
+│   ├── demo/                 # interactive component catalog
+│   │   ├── catalog/          # componentCatalog, elementCatalog, layoutCatalog
+│   │   ├── components/       # DemoTopBar, DemoBottomBar, DemoMainLayout, etc.
+│   │   ├── hooks/            # useDemoKeyboard, useDemoTheme, useDemoPanes
+│   │   ├── pages/            # DemoPage
+│   │   ├── types/            # ComponentDemo types
+│   │   └── utils/            # lazyDocs
+│   └── notifications/        # (empty - future feature)
 ├── pages/
-│   └── HomePage.tsx      # Landing page
-└── utils/
-    └── registerServiceWorker.ts  # PWA service worker setup
+│   └── HomePage.tsx          # landing page
+├── utils/
+│   └── registerServiceWorker.ts # PWA service worker registration
+└── public/
+    ├── sw.js                 # service worker with push notification support
+    ├── manifest.json         # PWA manifest
+    └── icons/                # PWA icons (192, 512, apple-touch, favicon)
 ```
 
-We organize by feature, not by type. The `auth` folder contains everything related to authentication - its components, hooks, pages, and services all live together. This makes it easy to understand a feature by looking at one directory rather than hunting across `components/`, `hooks/`, and `services/` folders.
+**Organized by feature**, not by type. Everything about auth lives in `features/auth/`.
 
-## How Routing Works
+## Routes
 
-Routes are defined in `App.tsx`, inline and explicit:
+All routes are lazy-loaded for optimal code splitting:
 
 ```tsx
-function AppRoutes(): ReactElement {
-  return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/auth" element={<AuthPage />} />
-      <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
-      <Route path="/auth/confirm-email" element={<ConfirmEmailPage />} />
-      <Route path="/demo" element={<DemoPage />} />
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
-  );
-}
+// Explicit routes in App.tsx - no magic
+<Routes>
+  <Route path="/" element={<HomePage />} />
+  <Route path="/login" element={<LoginPage />} />
+  <Route path="/register" element={<RegisterPage />} />
+  <Route path="/auth" element={<AuthPage />} />
+  <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+  <Route path="/auth/confirm-email" element={<ConfirmEmailPage />} />
+  <Route path="/demo" element={<DemoPage />} />
+  <Route
+    path="/dashboard"
+    element={
+      <ProtectedRoute>
+        <DashboardPage />
+      </ProtectedRoute>
+    }
+  />
+  <Route path="/clean" element={<HomePage />} />
+</Routes>
 ```
 
-We deliberately chose not to use file-based routing. Why? Because explicit routes are easier to understand, refactor, and debug. You can see all routes in one place. When you need to add a route, you add it here. There is no magic.
-
-Protected routes use the `ProtectedRoute` component, which checks authentication state and redirects to `/login` if needed:
-
-```tsx
-export const ProtectedRoute = ({ children }: { children?: ReactNode }): ReactElement => {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  return (
-    <ProtectedRouteBase isAuthenticated={isAuthenticated} isLoading={isLoading} redirectTo="/login">
-      {children}
-    </ProtectedRouteBase>
-  );
-};
-```
-
-## Authentication Flow
-
-Authentication is handled by the `AuthService` class in `src/features/auth/services/AuthService.ts`. This is a plain TypeScript class, not a React hook or context - it can be used anywhere.
-
-The flow works like this:
-
-1. On app startup, `auth.initialize()` is called (see `main.tsx`)
-2. This checks if there is an existing session by attempting a token refresh
-3. If refresh succeeds, the user is automatically logged in
-4. If not, the user remains logged out (this is fine - they will log in when needed)
-
-The auth service manages:
-
-- Login/logout operations
-- Registration with email verification
-- Password reset flow
-- Token refresh with exponential backoff
-- State synchronization with React Query
-
-Components access auth state through the `useAuth` hook:
-
-```tsx
-function MyComponent() {
-  const { user, isAuthenticated, isLoading, login, logout } = useAuth();
-
-  if (isLoading) return <Loading />;
-  if (!isAuthenticated) return <LoginPrompt />;
-
-  return <UserProfile user={user} />;
-}
-```
-
-The hook subscribes to auth service changes, so your component re-renders when auth state changes.
-
-## Token Management
-
-Tokens are stored in memory by default. This means:
-
-- Tokens are cleared on page refresh (intentional for security)
-- The refresh token (stored in an HTTP-only cookie) is used to restore sessions
-- Token refresh runs automatically every 13 minutes
-- If refresh fails, exponential backoff kicks in (2x delay each failure, max 5 minutes)
-
-This design prioritizes security over convenience. You cannot XSS steal tokens from memory as easily as from localStorage.
+All pages are lazy-loaded using `React.lazy()` for automatic code splitting.
 
 ## API Integration
 
-We provide two ways to call the API:
+Two ways to call the API:
 
-### 1. The API Client (for services)
-
-```tsx
+```typescript
+// 1. Standalone client (for services)
 import { api } from '@api/client';
-
-// Used by AuthService and other services
 const user = await api.getCurrentUser();
-```
 
-### 2. The ApiProvider (for components)
-
-```tsx
+// 2. React Query hooks (for components)
 import { useApi } from '@api/ApiProvider';
-
-function MyComponent() {
-  const api = useApi();
-  // Use with React Query hooks
-}
+const api = useApi();
 ```
 
-Both use the SDK's `createApiClient` and `createReactQueryClient` under the hood, which are type-safe wrappers around ts-rest.
-
-The API URL is configured in `src/config/index.ts`. In development, it defaults to empty string which means relative URLs - Vite proxies `/api` requests to the backend server.
-
-## Development
-
-Start the development server:
-
-```bash
-pnpm dev
-```
-
-This runs Vite on port 5173 with hot module replacement. The dev server proxies API requests to `localhost:8080`:
-
-```ts
-// From config/vite.web.config.ts
-server: {
-  proxy: {
-    '/api': { target: 'http://localhost:8080', changeOrigin: true },
-    '/ws': { target: 'ws://localhost:8080', ws: true },
-    '/uploads': { target: 'http://localhost:8080', changeOrigin: true },
-  },
-}
-```
-
-Run type checking:
-
-```bash
-pnpm type-check
-```
-
-Run tests:
-
-```bash
-pnpm test
-```
-
-Run tests in watch mode:
-
-```bash
-pnpm test:watch
-```
+Both are type-safe wrappers around ts-rest.
 
 ## Path Aliases
 
-We use path aliases extensively to avoid deep relative imports. Instead of:
+Auto-generated. No deep relative imports.
 
-```tsx
-import { useAuth } from '../../../features/auth/hooks/useAuth';
-```
-
-You write:
-
-```tsx
+```typescript
+// Instead of '../../../features/auth/hooks/useAuth'
 import { useAuth } from '@auth/hooks';
 ```
 
-The aliases are defined in `tsconfig.json` and automatically configured for Vite. Here are the main ones:
+| Alias         | Path                             |
+| ------------- | -------------------------------- |
+| `@`           | `./src/*`                        |
+| `@api`        | `./src/api`                      |
+| `@app`        | `./src/app`                      |
+| `@auth`       | `./src/features/auth`            |
+| `@catalog`    | `./src/features/demo/catalog`    |
+| `@components` | `./src/features/auth/components` |
+| `@config`     | `./src/config`                   |
+| `@dashboard`  | `./src/features/dashboard`       |
+| `@demo`       | `./src/features/demo`            |
+| `@features`   | `./src/features`                 |
+| `@hooks`      | `./src/features/auth/hooks`      |
+| `@pages`      | `./src/pages`                    |
+| `@services`   | `./src/features/auth/services`   |
 
-| Alias       | Path                  |
-| ----------- | --------------------- |
-| `@`         | `./src/*`             |
-| `@api`      | `./src/api`           |
-| `@app`      | `./src/app`           |
-| `@auth`     | `./src/features/auth` |
-| `@config`   | `./src/config`        |
-| `@demo`     | `./src/features/demo` |
-| `@features` | `./src/features`      |
-| `@pages`    | `./src/pages`         |
+## Configuration
 
-Path aliases are auto-generated by the monorepo's dev tooling when you create new directories with `index.ts` files.
-
-## Environment Variables
-
-The only required environment variable is:
-
-| Variable       | Description  | Default                    |
-| -------------- | ------------ | -------------------------- |
-| `VITE_API_URL` | API base URL | Empty (uses relative URLs) |
-
-In development, leave it empty - Vite proxies to the backend. In production, set it to your API domain.
-
-Access config through the centralized config module:
-
-```tsx
+```typescript
 import { clientConfig } from '@config';
 
-console.log(clientConfig.apiUrl); // API URL
-console.log(clientConfig.isDev); // true in development
-console.log(clientConfig.isProd); // true in production
+clientConfig.apiUrl; // API URL (empty = relative, Vite proxies)
+clientConfig.isDev; // true in development
+clientConfig.isProd; // true in production
+clientConfig.mode; // environment mode (development, production, test)
+clientConfig.tokenRefreshInterval; // 13 minutes (780000ms)
+clientConfig.uiVersion; // UI version string
 ```
 
-## Building for Production
+Only env var: `VITE_API_URL` (optional, defaults to relative URLs).
 
-```bash
-pnpm build
-```
+## Demo Catalog Components
 
-This outputs to `dist/`. The build is optimized with:
+The `/demo` route showcases 57 components across 3 categories:
 
-- Tree shaking (unused code removed)
-- Code splitting (routes loaded on demand)
-- Asset hashing (cache busting)
+**Components (11):**
+Box, Button, Card, Input, Spinner, AppShell, Badge, FormField, LoadingContainer, ToastContainer
 
-Preview the production build locally:
+**Elements (38):**
+Accordion, Alert, Avatar, Card (structured), Checkbox, Divider, Dropdown, Heading, MenuItem, Modal, Overlay, Pagination, Popover, Progress, Radio, RadioGroup, Select, Skeleton, Slider, Switch, Tabs, Text, VisuallyHidden, TextArea, Tooltip, Table, Toast, ResizablePanel, ScrollArea, Dialog, Image, CloseButton, EnvironmentBadge, Kbd, PasswordInput, Toaster, VersionBadge
 
-```bash
-pnpm preview
-```
+**Layouts (8):**
+Container, AuthLayout, PageContainer, LeftSidebarLayout (with AppShell), StackedLayout, TopbarLayout, BottombarLayout, RightSidebarLayout
 
-## Progressive Web App Support
+Each component demo includes:
 
-The app includes PWA support with a service worker for offline asset caching. The service worker is registered in production only (it interferes with HMR in development).
+- Multiple variants showing different props/states
+- Live render preview
+- Code snippet for copy/paste
+- Description of use case
 
-Key files:
+## PWA Support
 
-- `public/sw.js` - The service worker
-- `public/manifest.json` - PWA manifest
-- `src/utils/registerServiceWorker.ts` - Registration utility with lifecycle management
+Full PWA support with offline capabilities (production only).
 
-The service worker provides:
+- `public/sw.js` - service worker with push notification support
+- `public/manifest.json` - PWA manifest with app metadata
+- `public/icons/` - complete icon set (favicon, apple-touch-icon, 192x192, 512x512)
+- `src/utils/registerServiceWorker.ts` - registration with lifecycle hooks
+- Service worker registers on page load (non-blocking)
+- Callbacks for success, update, and error events
 
-- Offline asset caching
-- Update detection with callbacks
-- Cache versioning and cleanup
+## Query Cache Persistence
 
-## The Demo Feature
+React Query cache persisted to IndexedDB (24-hour max age):
 
-The demo page (`/demo`) is a component showcase that displays all UI components from `@abe-stack/ui`. It is useful for:
+- Automatic restoration on app load
+- Throttled persistence (1 second) on cache updates
+- Manual persistence management (no PersistQueryClientProvider)
+- Hooks into React Query cache subscription
+- Survives page refreshes and browser restarts
 
-- Exploring available components
-- Testing theme variants
-- Copying component code
+## Trade-offs
 
-The demo uses a catalog system defined in `src/features/demo/catalog/` where each component is registered with variants, descriptions, and example code.
+**Why services before React?**
 
-## Design Decisions and Trade-offs
+- No race conditions, faster boot, easier testing
 
-### Why no file-based routing?
+**Why class-based AuthService?**
 
-We tried it. It was magical until we needed to debug why a route was not working. Explicit routes in one file are easier to understand and refactor.
+- Runs outside React (app boot, service workers)
 
-### Why class-based AuthService instead of hooks?
+**Why memory tokens instead of localStorage?**
 
-Hooks are great for React components, but auth logic needs to run outside React (on app boot, in service workers, etc.). A class gives us that flexibility while still being easy to use via the `useAuth` hook.
+- XSS-safe. Refresh token in HTTP-only cookie handles persistence.
 
-### Why memory-based token storage?
+**Why one ClientEnvironment?**
 
-Security. LocalStorage is vulnerable to XSS. Memory tokens cannot be stolen by malicious scripts. The trade-off is users need to re-authenticate on page refresh, but the refresh token in HTTP-only cookies handles this automatically.
+- One provider, clear dependencies, trivial testing
 
-### Why one ClientEnvironment instead of multiple contexts?
+**Why explicit routes?**
 
-Simpler testing, clearer dependencies, no provider nesting. The cost is one large context, but we have not found this to be a problem in practice.
+- Easier to debug than file-based magic
 
-### Why Zustand for toasts instead of React context?
+**Why lazy routes?**
 
-Toasts need to be triggered from outside React (API error handlers, service workers). Zustand stores work anywhere. The toast store is defined in `@abe-stack/core` so both web and server can use it.
+- Automatic code splitting, faster initial load, better performance
 
-## Package Dependencies
+**Why manual query persistence?**
 
-This app depends on three internal packages:
+- Full control over persistence timing, no extra provider wrapping
 
-- `@abe-stack/core` - Shared types, validation, stores
+## Dependencies
+
+**Internal:**
+
+- `@abe-stack/core` - types, validation, stores
 - `@abe-stack/ui` - React components
-- `@abe-stack/sdk` - API client and React Query hooks
+- `@abe-stack/sdk` - API client + React Query hooks
 
-External dependencies are minimal:
+**External:**
 
-- React 19 with react-router-dom v7
-- TanStack Query (React Query) for server state
-- Zustand for client state
-- DOMPurify and react-markdown for safe markdown rendering
-
-## Testing
-
-Tests live in `__tests__/` directories next to the code they test. We use Vitest with React Testing Library.
-
-Run all tests:
-
-```bash
-pnpm test
-```
-
-Run a specific test file:
-
-```bash
-pnpm test -- --run src/features/auth/hooks/__tests__/useAuth.test.tsx
-```
-
-Tests should verify behavior, not implementation. A good test for a form checks that submitting with valid data calls the right function, not that internal state updates correctly.
-
-## Further Reading
-
-- [Architecture documentation](../../docs/dev/architecture.md) - How the monorepo is organized
-- [Testing strategy](../../docs/dev/testing.md) - How we approach testing
-- [Design principles](../../docs/dev/principles.md) - Patterns and anti-patterns
+- React 19 + custom router (via @abe-stack/ui)
+- TanStack Query (React Query)
+- Vite
 
 ---
 
-_Last Updated: 2026-01-21_
+[Read the detailed docs](../../docs) for architecture decisions, development workflows, and contribution guidelines.

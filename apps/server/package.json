@@ -14,7 +14,8 @@
     "db:migrate": "drizzle-kit migrate --config ../../config/drizzle.config.ts",
     "db:push": "drizzle-kit push --config ../../config/drizzle.config.ts",
     "db:studio": "drizzle-kit studio --config ../../config/drizzle.config.ts",
-    "db:seed": "tsx --env-file=../../config/.env/.env.development src/scripts/seed.ts"
+    "db:seed": "tsx --env-file=../../config/.env/.env.development src/scripts/seed.ts",
+    "db:bootstrap:admin": "tsx src/scripts/bootstrap-admin.ts"
   },
   "dependencies": {
     "@abe-stack/core": "workspace:*",

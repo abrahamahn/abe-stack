@@ -1,9 +1,9 @@
 // packages/ui/src/hooks/__tests__/useHistoryNav.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen, act } from '@testing-library/react';
-import { MemoryRouter, useLocation } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 
+import { MemoryRouter, useLocation } from '../../router';
 import { HistoryProvider, useHistoryNav } from '../useHistoryNav';
 
 // Helper component to display history state

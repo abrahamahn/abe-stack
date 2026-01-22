@@ -1,0 +1,61 @@
+# config/docker/docker-compose.dev.yml
+# Development Docker Compose for ABE Stack
+#
+# Usage:
+#   docker compose -f config/docker/docker-compose.dev.yml up -d
+#
+# This compose file provides infrastructure services (PostgreSQL) for local development.
+# Run the web and server apps directly with `pnpm dev` for hot reload.
+#
+# Full stack development workflow:
+#   1. Start database: docker compose -f config/docker/docker-compose.dev.yml up -d
+#   2. Run migrations: pnpm db:push
+#   3. Start dev servers: pnpm dev
+
+name: abe-stack-dev
+
+services:
+  # ===========================================================================
+  # PostgreSQL Database
+  # ===========================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: abe-stack-dev-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-abe_stack_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-development}
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-abe_stack_dev}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ===========================================================================
+  # Redis (Optional - for cache/sessions/queues)
+  # ===========================================================================
+  # Uncomment if your development requires Redis
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: abe-stack-dev-redis
+  #   ports:
+  #     - '${REDIS_PORT:-6379}:6379'
+  #   volumes:
+  #     - redis_dev_data:/data
+  #   healthcheck:
+  #     test: ['CMD', 'redis-cli', 'ping']
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   restart: unless-stopped
+
+volumes:
+  postgres_dev_data:
+    name: abe-stack-postgres-dev-data
+  # redis_dev_data:
+  #   name: abe-stack-redis-dev-data

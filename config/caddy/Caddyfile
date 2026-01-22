@@ -1,0 +1,132 @@
+# config/caddy/Caddyfile
+# Production Caddy Configuration for ABE Stack
+#
+# Features:
+#   - Automatic HTTPS via Let's Encrypt
+#   - HTTP/2 and HTTP/3 support
+#   - gzip/zstd compression
+#   - WebSocket proxy with upgrade headers
+#   - Security headers (HSTS, X-Frame-Options, etc.)
+#
+# Usage:
+#   Set DOMAIN and ACME_EMAIL environment variables before running Caddy.
+#   docker compose -f config/docker/docker-compose.prod.yml up -d
+#
+# Environment Variables:
+#   DOMAIN     - Your domain (e.g., example.com)
+#   ACME_EMAIL - Email for Let's Encrypt certificate notifications
+
+# Global options
+{
+	# Email for ACME (Let's Encrypt) certificate notifications
+	email {$ACME_EMAIL:admin@example.com}
+
+	# Enable HTTP/3
+	servers {
+		protocols h1 h2 h3
+	}
+
+	# Staging for testing (uncomment to avoid rate limits during setup)
+	# acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+}
+
+# Main site configuration
+{$DOMAIN:localhost} {
+	# Enable compression (gzip and zstd)
+	encode gzip zstd
+
+	# Security headers
+	header {
+		# HSTS - enforce HTTPS for 1 year
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		# Prevent clickjacking
+		X-Frame-Options "SAMEORIGIN"
+		# Prevent MIME type sniffing
+		X-Content-Type-Options "nosniff"
+		# XSS protection (legacy browsers)
+		X-XSS-Protection "1; mode=block"
+		# Referrer policy
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# Remove server header
+		-Server
+	}
+
+	# Health check endpoint (direct to API)
+	handle /health* {
+		reverse_proxy api:8080 {
+			# Health checks should be fast
+			transport http {
+				read_timeout 5s
+				write_timeout 5s
+			}
+		}
+	}
+
+	# WebSocket endpoint
+	# Match both path and upgrade headers for WebSocket connections
+	@websocket {
+		path /ws
+		header Connection *Upgrade*
+		header Upgrade websocket
+	}
+	handle @websocket {
+		reverse_proxy api:8080 {
+			# Preserve WebSocket headers
+			header_up Connection {http.request.header.Connection}
+			header_up Upgrade {http.request.header.Upgrade}
+			header_up Sec-WebSocket-Key {http.request.header.Sec-WebSocket-Key}
+			header_up Sec-WebSocket-Version {http.request.header.Sec-WebSocket-Version}
+			header_up Sec-WebSocket-Extensions {http.request.header.Sec-WebSocket-Extensions}
+			header_up Sec-WebSocket-Protocol {http.request.header.Sec-WebSocket-Protocol}
+
+			# WebSocket connections are long-lived
+			transport http {
+				read_timeout 0
+				write_timeout 0
+			}
+		}
+	}
+
+	# API routes
+	handle /api/* {
+		reverse_proxy api:8080 {
+			# Forward original client information
+			header_up X-Real-IP {remote_host}
+			header_up X-Forwarded-Proto {scheme}
+
+			# Timeouts for API requests
+			transport http {
+				read_timeout 30s
+				write_timeout 30s
+			}
+		}
+	}
+
+	# Static file uploads (if served by API)
+	handle /uploads/* {
+		reverse_proxy api:8080
+	}
+
+	# Frontend - all other routes
+	handle {
+		reverse_proxy web:80 {
+			# Standard timeouts for static content
+			transport http {
+				read_timeout 10s
+				write_timeout 10s
+			}
+		}
+	}
+
+	# Logging
+	log {
+		output stdout
+		format json
+		level INFO
+	}
+}
+
+# Redirect www to non-www
+www.{$DOMAIN:localhost} {
+	redir https://{$DOMAIN:localhost}{uri} permanent
+}

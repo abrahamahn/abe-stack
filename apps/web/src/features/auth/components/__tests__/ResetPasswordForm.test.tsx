@@ -1,8 +1,8 @@
 // apps/web/src/features/auth/components/__tests__/ResetPasswordForm.test.tsx
+import { MemoryRouter } from '@abe-stack/ui';
 import { ResetPasswordForm } from '@auth/components/ResetPasswordForm';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import type { ResetPasswordFormProps } from '@auth/components/ResetPasswordForm';

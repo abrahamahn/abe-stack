@@ -9,7 +9,8 @@ import React, {
   useState,
   type ReactNode,
 } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+
+import { useLocation, useNavigate } from '../router';
 
 type HistoryEntry = string;
 
@@ -54,7 +55,7 @@ export function HistoryProvider({ children }: { children: ReactNode }): React.Re
 
     if (isRedirectLanding) {
       // ensure the previous entry is retained so back works
-      void navigate(currentPath, { replace: true, state: { fromRedirect: false } });
+      navigate(currentPath, { replace: true, state: { fromRedirect: false } });
     }
   }, [location.pathname, location.search, location.hash, locationState, navigate]);
 
@@ -66,7 +67,7 @@ export function HistoryProvider({ children }: { children: ReactNode }): React.Re
     const nextIndex = Math.max(0, indexRef.current - 1);
     indexRef.current = nextIndex;
     setIndex(nextIndex);
-    void navigate(-1);
+    navigate(-1);
   }, [canGoBack, navigate]);
 
   const goForward = useCallback(() => {
@@ -74,7 +75,7 @@ export function HistoryProvider({ children }: { children: ReactNode }): React.Re
     const nextIndex = Math.min(history.length - 1, indexRef.current + 1);
     indexRef.current = nextIndex;
     setIndex(nextIndex);
-    void navigate(1);
+    navigate(1);
   }, [canGoForward, navigate, history.length]);
 
   const value = useMemo(

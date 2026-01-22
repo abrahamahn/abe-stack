@@ -1,13 +1,13 @@
 // apps/web/src/features/auth/pages/ConfirmEmailPage.tsx
-import { AuthLayout, Button, Spinner, Text } from '@abe-stack/ui';
+import { AuthLayout, Button, Spinner, Text, useNavigate, useSearchParams } from '@abe-stack/ui';
 import { useAuth } from '@auth/hooks';
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import type { ReactElement } from 'react';
 
 export function ConfirmEmailPage(): ReactElement {
-  const [searchParams] = useSearchParams();
+  const searchParamsResult = useSearchParams();
+  const searchParams: URLSearchParams = searchParamsResult[0];
   const navigate = useNavigate();
   const { verifyEmail } = useAuth();
 
@@ -30,7 +30,7 @@ export function ConfirmEmailPage(): ReactElement {
         setMessage('Your email has been verified and you are now signed in.');
         // Auto-login happens in verifyEmail, redirect to dashboard
         setTimeout(() => {
-          void navigate('/dashboard');
+          navigate('/dashboard');
         }, 2000);
       } catch (err) {
         setStatus('error');
@@ -42,7 +42,7 @@ export function ConfirmEmailPage(): ReactElement {
   }, [token, verifyEmail, navigate]);
 
   const handleNavigateToLogin = (): void => {
-    void navigate('/login');
+    navigate('/login');
   };
 
   return (

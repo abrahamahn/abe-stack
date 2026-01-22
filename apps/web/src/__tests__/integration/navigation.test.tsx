@@ -9,11 +9,11 @@
  * - Route guards and loading states
  */
 
+import { Navigate, Outlet, Route, Routes, useLocation } from '@abe-stack/ui';
 import { ProtectedRoute } from '@features/auth';
 import { DashboardPage } from '@features/dashboard';
 import { HomePage } from '@pages';
 import { screen, waitFor } from '@testing-library/react';
-import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { createMockEnvironment, mockUser, renderWithProviders } from '../utils';
@@ -32,7 +32,7 @@ vi.mock('@auth/hooks/useAuth', () => ({
   useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
 }));
 
-// Mock the @abe-stack/ui ProtectedRoute to use local react-router-dom
+// Mock the @abe-stack/ui ProtectedRoute component for testing
 vi.mock('@abe-stack/ui', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@abe-stack/ui')>();
 

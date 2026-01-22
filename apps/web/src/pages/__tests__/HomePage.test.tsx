@@ -1,7 +1,7 @@
 // apps/web/src/pages/__tests__/HomePage.test.tsx
+import { MemoryRouter } from '@abe-stack/ui';
 import { HomePage } from '@pages/HomePage';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 // Mock all markdown imports

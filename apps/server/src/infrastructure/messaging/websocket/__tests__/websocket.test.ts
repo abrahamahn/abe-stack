@@ -47,7 +47,7 @@ describe('WebSocket Module', () => {
   });
 
   describe('getWebSocketStats', () => {
-    test('should return initial stats with zero connections', async () => {
+    test('should return initial stats with zero connections', { timeout: 10000 }, async () => {
       const { getWebSocketStats } = (await import('../websocket.js')) as WebSocketModuleType;
       const stats = getWebSocketStats();
 

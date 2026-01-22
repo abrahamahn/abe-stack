@@ -89,6 +89,7 @@ export type {
 // Hooks
 export {
   HistoryProvider,
+  useAuthModeNavigation,
   useClickOutside,
   useControllableState,
   useCopyToClipboard,
@@ -109,6 +110,9 @@ export {
   useWindowSize,
 } from './hooks';
 export type {
+  AuthMode,
+  AuthModeNavigation,
+  AuthModeNavigationOptions,
   FormState,
   HistoryContextValue,
   UseOffsetPaginatedQueryOptions,
@@ -142,6 +146,36 @@ export type {
   ThemeContextValue,
   ThemeProviderProps,
 } from './theme';
+
+// Router - Custom minimal router (replaces react-router-dom)
+export {
+  BrowserRouter,
+  Link,
+  MemoryRouter,
+  Navigate,
+  Outlet,
+  OutletProvider,
+  Route,
+  Router,
+  RouterContext,
+  Routes,
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from './router';
+export type {
+  LinkProps,
+  MemoryRouterProps,
+  NavigateFunction,
+  NavigateProps,
+  OutletProviderProps,
+  RouterContextValue,
+  RouterLocation,
+  RouterProps,
+  RouteProps,
+  RoutesProps,
+} from './router';
 
 // Utilities
 export { cn, createFormHandler, Markdown, SyntaxHighlighter } from './utils';

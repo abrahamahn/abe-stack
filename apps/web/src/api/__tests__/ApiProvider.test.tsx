@@ -1,8 +1,8 @@
 // apps/web/src/api/__tests__/ApiProvider.test.tsx
+import { MemoryRouter } from '@abe-stack/ui';
 import { ClientEnvironmentProvider } from '@app';
 import { QueryClient } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ApiProvider, useApi } from '../ApiProvider';
@@ -25,9 +25,9 @@ const { mockNavigate, mockTokenGet, mockTokenClear, mockShowToast } = vi.hoisted
   mockShowToast: vi.fn(),
 }));
 
-// Mock react-router-dom
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+// Mock router navigation
+vi.mock('@abe-stack/ui', async () => {
+  const actual = await vi.importActual<typeof import('@abe-stack/ui')>('@abe-stack/ui');
   return {
     ...actual,
     useNavigate: (): typeof mockNavigate => mockNavigate,

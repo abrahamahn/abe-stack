@@ -69,3 +69,9 @@ export {
   type UseOffsetPaginatedQueryOptions,
   type UseOffsetPaginatedQueryResult,
 } from './usePaginatedQuery';
+export {
+  useAuthModeNavigation,
+  type AuthMode,
+  type AuthModeNavigation,
+  type AuthModeNavigationOptions,
+} from './useAuthModeNavigation';

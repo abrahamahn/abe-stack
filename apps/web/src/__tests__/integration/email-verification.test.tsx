@@ -8,9 +8,9 @@
  * - Error handling for missing token
  */
 
+import { Route, Routes } from '@abe-stack/ui';
 import { ConfirmEmailPage } from '@features/auth';
 import { screen, waitFor } from '@testing-library/react';
-import { Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { mockUser, renderWithProviders } from '../utils';

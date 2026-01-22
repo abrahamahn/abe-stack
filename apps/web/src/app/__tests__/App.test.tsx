@@ -1,7 +1,6 @@
 // apps/web/src/app/__tests__/App.test.tsx
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { App } from '../App';
@@ -54,22 +53,13 @@ vi.mock('@abe-stack/sdk', () => ({
   })),
 }));
 
-// Mock react-router-dom to use MemoryRouter instead of BrowserRouter
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
-  return {
-    ...actual,
-    BrowserRouter: ({ children }: { children: React.ReactNode }): React.ReactElement => (
-      <MemoryRouter>{children}</MemoryRouter>
-    ),
-  };
-});
-
-// Mock @abe-stack/ui ScrollArea, Toaster, and HistoryProvider
+// Mock @abe-stack/ui - replace BrowserRouter with MemoryRouter for tests
 vi.mock('@abe-stack/ui', async () => {
   const actual = await vi.importActual('@abe-stack/ui');
   return {
     ...actual,
+    // Use MemoryRouter instead of BrowserRouter in tests
+    BrowserRouter: actual.MemoryRouter,
     ScrollArea: ({ children }: { children: React.ReactNode }): React.ReactElement => (
       <div>{children}</div>
     ),

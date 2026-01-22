@@ -174,15 +174,25 @@ describe('SqlSearchProvider', () => {
     test('should include count when requested', async () => {
       const provider = new SqlSearchProvider(mockDb as never, mockTable as never, tableConfig);
 
-      mockOffset.mockResolvedValue([{ id: '1' }]);
-      mockWhere.mockReturnValueOnce({
+      // Mock main query (no filters, so from() is used directly)
+      mockOffset.mockResolvedValueOnce([{ id: '1' }]);
+
+      // Mock count query - no filter so from() is awaited directly
+      // Make from() return a thenable for the count query (second call)
+      const mockFromThenable = {
+        where: mockWhere,
         orderBy: mockOrderBy,
         limit: mockLimit,
-      });
-      // Mock count query
+        offset: mockOffset,
+        then: (resolve: (value: unknown) => void) => resolve([{ count: 50 }]),
+      };
       mockFrom.mockReturnValueOnce({
-        where: vi.fn().mockResolvedValue([{ count: 50 }]),
+        where: mockWhere,
+        orderBy: mockOrderBy,
+        limit: mockLimit,
+        offset: mockOffset,
       });
+      mockFrom.mockReturnValueOnce(mockFromThenable);
 
       const result = await provider.search({
         page: 1,
@@ -215,9 +225,12 @@ describe('SqlSearchProvider', () => {
     test('should return count', async () => {
       const provider = new SqlSearchProvider(mockDb as never, mockTable as never, tableConfig);
 
-      mockFrom.mockReturnValueOnce({
-        where: vi.fn().mockResolvedValue([{ count: 25 }]),
-      });
+      // No filter, so from() is awaited directly. Make it thenable.
+      const mockFromThenable = {
+        where: mockWhere,
+        then: (resolve: (value: unknown) => void) => resolve([{ count: 25 }]),
+      };
+      mockFrom.mockReturnValueOnce(mockFromThenable);
 
       const count = await provider.count({});
 

@@ -1,4 +1,5 @@
 // apps/web/src/features/auth/components/__tests__/AuthForms.test.tsx
+import { MemoryRouter } from '@abe-stack/ui';
 import {
   AuthForm,
   ForgotPasswordForm,
@@ -7,7 +8,6 @@ import {
   ResetPasswordForm,
 } from '@auth/components';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 import type { ReactElement, ReactNode } from 'react';

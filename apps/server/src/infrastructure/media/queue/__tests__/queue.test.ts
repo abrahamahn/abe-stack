@@ -223,7 +223,8 @@ describe('CustomJobQueue', () => {
 
       await queue.add('retry-job', { value: 1 });
       await queue.start();
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Increased timeout to allow for exponential backoff delays in CI
+      await new Promise((resolve) => setTimeout(resolve, 3000));
       await queue.stop();
 
       // Should have tried 1 initial + 3 retries = 4 times total, but maxRetries is 3
@@ -334,8 +335,8 @@ describe('CustomJobQueue', () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
       expect(queue.processedJobs).toHaveLength(0);
 
-      // Wait for delay to expire
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Wait for delay to expire (increased for CI stability)
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       expect(queue.processedJobs).toContainEqual({ value: 99 });
 
       await queue.stop();

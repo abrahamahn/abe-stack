@@ -1,6 +1,7 @@
-// packages/sdk/src/hooks/useAuthModeNavigation.ts
+// packages/ui/src/hooks/useAuthModeNavigation.ts
 import { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+
+import { useNavigate } from '../router';
 
 /**
  * Authentication mode - determines which auth form/page is shown.
@@ -96,7 +97,7 @@ export function useAuthModeNavigation(options?: AuthModeNavigationOptions): Auth
     (mode: AuthMode): void => {
       onBeforeNavigate?.(mode);
       const route = routes[mode];
-      void navigate(route, { replace });
+      navigate(route, { replace });
     },
     [navigate, onBeforeNavigate, replace, routes],
   );

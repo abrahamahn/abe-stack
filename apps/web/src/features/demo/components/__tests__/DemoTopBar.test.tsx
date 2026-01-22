@@ -7,11 +7,8 @@ import { DemoTopBar } from '../DemoTopBar';
 
 import type { DemoTopBarProps } from '../DemoTopBar';
 
-// Mock useNavigate
+// Mock useNavigate from @abe-stack/ui
 const mockNavigate = vi.fn();
-vi.mock('react-router-dom', () => ({
-  useNavigate: (): typeof mockNavigate => mockNavigate,
-}));
 
 // Mock @abe-stack/core
 vi.mock('@abe-stack/core', () => ({
@@ -22,8 +19,9 @@ vi.mock('@abe-stack/core', () => ({
   },
 }));
 
-// Mock @abe-stack/ui components
+// Mock @abe-stack/ui components and router
 vi.mock('@abe-stack/ui', () => ({
+  useNavigate: (): typeof mockNavigate => mockNavigate,
   Button: ({
     children,
     onClick,

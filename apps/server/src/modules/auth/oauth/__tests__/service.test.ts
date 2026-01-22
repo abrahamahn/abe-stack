@@ -122,6 +122,7 @@ interface MockDbClientExtended {
     oauthConnections: MockDbQueryResult;
     users: MockDbQueryResult;
   };
+  select: ReturnType<typeof vi.fn>;
   insert: ReturnType<typeof vi.fn> & ((...args: unknown[]) => MockDbInsertResult);
   update: ReturnType<typeof vi.fn> & ((...args: unknown[]) => MockDbUpdateResult);
   delete: ReturnType<typeof vi.fn> & ((...args: unknown[]) => MockDbDeleteResult);

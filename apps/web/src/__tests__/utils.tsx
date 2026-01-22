@@ -8,11 +8,11 @@
  * - MSW handlers: Mock API responses
  */
 
+import { MemoryRouter } from '@abe-stack/ui';
 import { ClientEnvironmentProvider } from '@app/ClientEnvironment';
 import { QueryClient } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
 
 import type { ClientEnvironment } from '@app/ClientEnvironment';
 import type { ClientConfig } from '@config';

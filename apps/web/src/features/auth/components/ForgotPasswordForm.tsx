@@ -1,7 +1,6 @@
 // apps/web/src/features/auth/components/ForgotPasswordForm.tsx
-import { Button, Input } from '@abe-stack/ui';
+import { Button, Input, Link } from '@abe-stack/ui';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 
 import type { AuthMode } from './AuthForms';
 import type { ForgotPasswordRequest } from '@abe-stack/core';

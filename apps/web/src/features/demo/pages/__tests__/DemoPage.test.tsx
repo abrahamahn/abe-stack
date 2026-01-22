@@ -1,9 +1,9 @@
 // apps/web/src/features/demo/pages/__tests__/DemoPage.test.tsx
+import { MemoryRouter } from '@abe-stack/ui';
 import { ClientEnvironmentProvider } from '@app/ClientEnvironment';
 import { DemoPage } from '@demo/pages/DemoPage';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import type { ClientEnvironment } from '@app/ClientEnvironment';
@@ -11,8 +11,8 @@ import type { ComponentCategory, ComponentDemo } from '@demo/types';
 
 // Mock navigation
 const mockNavigate = vi.fn();
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
+vi.mock('@abe-stack/ui', async () => {
+  const actual = await vi.importActual('@abe-stack/ui');
   return {
     ...actual,
     useNavigate: (): typeof mockNavigate => mockNavigate,

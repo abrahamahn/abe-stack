@@ -7,7 +7,6 @@
  *
  * Horizontal Scaling:
  * - PostgresPubSub uses Postgres NOTIFY/LISTEN for cross-instance messaging
- * - No Redis dependency required
  */
 
 // Types

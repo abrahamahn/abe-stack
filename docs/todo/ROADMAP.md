@@ -312,7 +312,7 @@ Better debugging in production.
 
 These are rarely needed in most real projects:
 
-- [ ] Redis just for the sake of having advanced caching
+- [ ] External caching layer just for the sake of it
 - [ ] Full DDD folder structure in every single package/app
 - [ ] Combining all 6 sync scripts into one mega-script
 - [ ] Separate tsconfig just for vitest
@@ -342,19 +342,6 @@ Do when you have bandwidth:
 - [ ] GDPR consent handling
 
 > **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `geo.middleware.ts`
-
----
-
-## Redis Implementation
-
-When you need Redis (high traffic, distributed caching):
-
-- [ ] **Redis cache implementation**
-  - RedisCacheService with full ICacheService interface
-  - RedisClient wrapper with connection management
-  - Startup hooks for cache initialization
-
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `RedisCacheService.ts`, `RedisClient.ts`
 
 ---
 

@@ -1,8 +1,8 @@
 // apps/web/src/features/dashboard/pages/Dashboard.tsx
-import { Button, Card, Heading, PageContainer, Text } from '@abe-stack/ui';
+import { Button, Card, Heading, PageContainer, Text, useNavigate } from '@abe-stack/ui';
 import { useAuth, type User } from '@auth';
-import { useNavigate, type NavigateFunction } from 'react-router-dom';
 
+import type { NavigateFunction } from '@abe-stack/ui';
 import type { JSX } from 'react';
 
 export function DashboardPage(): JSX.Element {
@@ -11,7 +11,7 @@ export function DashboardPage(): JSX.Element {
 
   const handleLogout = async (): Promise<void> => {
     await logout();
-    void navigate('/');
+    navigate('/');
   };
 
   return (
@@ -22,7 +22,9 @@ export function DashboardPage(): JSX.Element {
         </Heading>
         <Button
           onClick={() => {
-            void handleLogout();
+            handleLogout().catch(() => {
+              // Error is already handled by auth service
+            });
           }}
         >
           Logout

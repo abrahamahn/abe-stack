@@ -1,7 +1,6 @@
 // apps/web/src/features/auth/components/LoginForm.tsx
-import { Button, Input, PasswordInput } from '@abe-stack/ui';
+import { Button, Input, Link, PasswordInput } from '@abe-stack/ui';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 
 import type { AuthMode } from './AuthForms';
 import type { ForgotPasswordRequest, LoginRequest } from '@abe-stack/core';

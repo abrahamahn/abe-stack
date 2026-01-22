@@ -239,7 +239,6 @@ function estimateBundleImpact(
     angular: 500,
     '@tanstack/react-query': 150,
     '@tanstack/react-query-persist-client': 50,
-    zustand: 20,
     redux: 30,
     'react-redux': 50,
     lodash: 100,

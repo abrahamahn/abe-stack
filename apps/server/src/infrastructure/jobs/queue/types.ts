@@ -90,7 +90,7 @@ export interface QueueConfig {
 
 /**
  * Storage interface for the queue
- * Can be implemented with Postgres, Redis, or in-memory
+ * Can be implemented with Postgres or in-memory
  */
 export interface QueueStore {
   /** Enqueue a new task */

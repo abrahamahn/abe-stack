@@ -8,9 +8,9 @@
 
 import { toastStore, tokenStore } from '@abe-stack/core';
 import { createReactQueryClient } from '@abe-stack/sdk';
+import { useNavigate } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app';
 import { createContext, useContext, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import type { ReactQueryClientInstance } from '@abe-stack/sdk';
 import type { ReactElement, ReactNode } from 'react';
@@ -45,7 +45,7 @@ export function ApiProvider({ children }: ApiProviderProps): ReactElement {
       getToken: () => tokenStore.get(),
       onUnauthorized: () => {
         tokenStore.clear();
-        void navigate('/login');
+        navigate('/login');
       },
       onServerError: (message: string | undefined) => {
         toastStore.getState().show({

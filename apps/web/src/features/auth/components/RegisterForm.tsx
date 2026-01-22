@@ -1,8 +1,7 @@
 // apps/web/src/features/auth/components/RegisterForm.tsx
-import { Button, Input, PasswordInput, Text } from '@abe-stack/ui';
+import { Button, Input, Link, PasswordInput, Text } from '@abe-stack/ui';
 import { useResendCooldown } from '@auth/hooks';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 
 import type { AuthMode } from './AuthForms';
 import type { RegisterRequest, RegisterResponse, ResendVerificationRequest } from '@abe-stack/core';

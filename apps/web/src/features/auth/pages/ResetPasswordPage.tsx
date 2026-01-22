@@ -1,15 +1,15 @@
 // apps/web/src/features/auth/pages/ResetPasswordPage.tsx
 import { toastStore } from '@abe-stack/core';
-import { AuthLayout, useFormState } from '@abe-stack/ui';
+import { AuthLayout, useFormState, useSearchParams } from '@abe-stack/ui';
 import { AuthForm } from '@auth/components/AuthForms';
 import { useAuth, useAuthModeNavigation } from '@auth/hooks';
-import { useSearchParams } from 'react-router-dom';
 
 import type { AuthFormProps } from '@auth/components/AuthForms';
 import type { ReactElement } from 'react';
 
 export function ResetPasswordPage(): ReactElement {
-  const [searchParams] = useSearchParams();
+  const searchParamsResult = useSearchParams();
+  const searchParams: URLSearchParams = searchParamsResult[0];
   const { resetPassword } = useAuth();
   const { isLoading, error, wrapHandler } = useFormState();
   const { navigateToMode, navigateToLogin } = useAuthModeNavigation();

@@ -26,7 +26,7 @@ The recommended pattern is to use `AuthLayout` together with `AuthForm` from the
 import { AuthLayout } from '@abe-stack/ui';
 import { AuthForm } from '@auth/components/AuthForms';
 import { useAuth } from '@auth/hooks';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from '@abe-stack/ui';
 
 export function LoginPage() {
   const navigate = useNavigate();

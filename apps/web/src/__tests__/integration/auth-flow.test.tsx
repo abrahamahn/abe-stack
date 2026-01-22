@@ -9,9 +9,9 @@
  * - Mode switching between login/register/forgot-password
  */
 
+import { Route, Routes, useLocation } from '@abe-stack/ui';
 import { LoginPage, RegisterPage } from '@features/auth';
 import { screen, waitFor } from '@testing-library/react';
-import { Route, Routes, useLocation } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 import { createMockEnvironment, mockUser, renderWithProviders } from '../utils';

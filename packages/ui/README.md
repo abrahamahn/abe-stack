@@ -1,404 +1,397 @@
 # @abe-stack/ui
 
-This is where we keep all our shared React components. The ones that look the same whether you are browsing on the web or running the desktop app. We call it "write once, use everywhere" and in practice we get around 80-90% code reuse across platforms.
+> Write once, use everywhere.
 
-## Table of Contents
+Shared React components for web and desktop. 80-90% code reuse across platforms. Plain CSS with CSS variables - zero runtime overhead, browser-native dark mode.
 
-- [Why a Shared UI Package](#why-a-shared-ui-package)
-- [The Anatomy of Our Component Library](#the-anatomy-of-our-component-library)
-- [How We Handle Styling](#how-we-handle-styling)
-- [Creating Components: A Walkthrough](#creating-components-a-walkthrough)
-- [The Decision Process](#the-decision-process)
-- [Trade-offs We Accepted](#trade-offs-we-accepted)
-- [Working with the Package](#working-with-the-package)
+## Features
 
----
+- 26 elements (Button, Input, Badge, Table...) 🧱
+- 16 components (Dialog, Tabs, Select, FormField...) 🔲
+- 15 layouts (AppShell, Modal, Sidebar, ResizablePanel...) 📐
+- 23+ hooks (useDisclosure, useClickOutside, useVirtualScroll...) 🪝
+- Custom router (~150 lines, replaces react-router) 🛣️
+- Optimized providers (memoized contexts) ⚡
+- CSS variables theming 🎨
+- Dark mode (prefers-color-scheme) 🌙
+- ~1400 tests passing ✅
 
-## Why a Shared UI Package
+## Installation
 
-When we started building abe-stack, we faced the classic multi-platform question: how much code can we realistically share between web and desktop? We tried a few approaches before landing on this one.
+```bash
+pnpm add @abe-stack/ui
+```
 
-The first instinct was to keep everything separate. Web components in `apps/web`, desktop components in `apps/desktop`. Clean boundaries. But after the third time we fixed the same button hover state in two places, we knew something had to change.
+## Usage
 
-The second approach was to share everything. One codebase, conditional rendering for platform differences. That worked until we needed to access the file system on desktop while the web version needed browser APIs. The conditionals got ugly fast.
+```typescript
+import { Button, Card, Dialog, AppShell, useDisclosure, Router, Routes, Route } from '@abe-stack/ui';
 
-So we settled on this middle ground: a shared UI package that contains everything that looks and behaves the same across platforms, while the apps themselves hold onto their platform-specific bits. The `packages/ui` directory is that shared middle ground.
+function MyComponent() {
+  const { isOpen, open, close } = useDisclosure();
 
-Here is what this looks like in practice:
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={
+          <>
+            <Button onClick={open}>Open Dialog</Button>
+            <Dialog open={isOpen} onClose={close}>
+              <Dialog.Header>Title</Dialog.Header>
+              <Dialog.Body>Content</Dialog.Body>
+            </Dialog>
+          </>
+        } />
+      </Routes>
+    </Router>
+  );
+}
+```
+
+## Architecture
 
 ```
 ┌──────────────┐  ┌──────────────┐
 │  apps/web    │  │apps/desktop  │
-│              │  │              │
-│  Web-only    │  │Desktop-only  │
-│  features    │  │features      │
-│  (10-20%)    │  │(10-20%)      │
+│  (10-20%)    │  │  (10-20%)    │
 └──────┬───────┘  └──────┬───────┘
-       │                 │
        └────────┬────────┘
-                │
                 ▼
-      ┌──────────────────────┐
-      │  packages/ui         │
-      │                      │
-      │  SHARED UI (80-90%)  │
-      │                      │
-      │  Button, Card, Modal │
-      │  Tabs, Dialog, Forms │
-      │  Layouts, Hooks      │
-      └──────────────────────┘
+      ┌──────────────────┐
+      │  packages/ui     │
+      │  (80-90%)        │
+      │                  │
+      │  Button, Card,   │
+      │  Dialog, Tabs... │
+      └──────────────────┘
 ```
 
-The web app adds its service workers, analytics, and SEO handling. The desktop app adds file system access, system tray integration, and native menus. Everything else comes from this package.
+Platform-specific code stays in apps. Everything else lives here.
 
----
+## Elements
 
-## The Anatomy of Our Component Library
-
-We organize components by what they do, not by how they look. After trying several taxonomies, we found this one makes the most sense when you are actually building features:
-
-```
-packages/ui/src/
-├── elements/        # Atomic building blocks
-├── components/      # Composed multi-part components
-├── layouts/         # Page structure and overlays
-│   ├── containers/  # Content wrappers
-│   ├── layers/      # Modals, overlays, scroll areas
-│   └── shells/      # App-level structure
-├── hooks/           # React hooks for common patterns
-├── theme/           # Design tokens and theming
-├── styles/          # CSS architecture
-└── utils/           # Helper functions
-```
-
-**Elements** are the atoms. Button, Input, Badge, Spinner. They do one thing, they do it well, they compose into larger pieces. We have about 25 of these.
-
-**Components** are the molecules. Accordion, Dialog, Tabs, Select. They combine multiple elements and manage their own state. About 16 of these currently.
-
-**Layouts** handle page structure. This is where AppShell lives (the main app container with topbar, sidebar, and content area), along with Modal, Overlay, and our resizable panel system.
-
-**Hooks** provide reusable behavior. `useDisclosure` for open/close state, `useClickOutside` for closing dropdowns, `usePaginatedQuery` for list pagination. Around 20 hooks at last count.
-
-When you import from this package, you get clean access to everything:
+Atomic building blocks (26 total).
 
 ```typescript
-import { Button, Card, Dialog, AppShell, useDisclosure } from '@abe-stack/ui';
+import {
+  Alert, Avatar, Badge, Box, Button, Checkbox, CloseButton,
+  Divider, EnvironmentBadge, Heading, Input, Kbd, MenuItem,
+  PasswordInput, Progress, Skeleton, Spinner, Switch,
+  Table, Text, TextArea, Toaster, Tooltip,
+  VersionBadge, VisuallyHidden
+} from '@abe-stack/ui';
+
+// Table has composable parts
+<Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Name</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell>Data</TableCell>
+    </TableRow>
+  </TableBody>
+</Table>
 ```
 
----
+## Components
 
-## How We Handle Styling
+Composed multi-part components (16 total).
 
-We went back and forth on CSS strategy more than we care to admit. CSS-in-JS? Tailwind? CSS Modules? Each has advocates who swear by it.
+```typescript
+import {
+  Accordion, Card, Dialog, Dropdown, FocusTrap, FormField,
+  Image, LoadingContainer, Pagination, Popover,
+  Radio, RadioGroup, Select, Slider, Tabs, Toast
+} from '@abe-stack/ui';
 
-We landed on plain CSS with CSS custom properties (variables). Here is why:
+// Composable parts
+<Card>
+  <Card.Header>Title</Card.Header>
+  <Card.Body>Content</Card.Body>
+  <Card.Footer>Actions</Card.Footer>
+</Card>
 
-1. **No runtime cost.** CSS-in-JS libraries add JavaScript overhead. When you have 60+ components, that adds up.
-
-2. **Browser-native dark mode.** Using `prefers-color-scheme` media queries means the browser handles theme switching before React even hydrates.
-
-3. **Predictable specificity.** With BEM-like class naming, we always know which styles win without fighting the cascade.
-
-4. **Easy to inspect.** Open DevTools, see the actual styles. No generated class names to decode.
-
-The CSS lives in four files under `src/styles/`:
-
-```
-styles/
-├── theme.css       # Design tokens as CSS variables
-├── elements.css    # Styles for atomic elements
-├── components.css  # Styles for composed components
-├── layouts.css     # Styles for layout components
-└── utilities.css   # Helper classes
+// Form fields with labels and errors
+<FormField label="Email" error={errors.email}>
+  <Input type="email" {...register('email')} />
+</FormField>
 ```
 
-The `theme.css` file defines everything as CSS custom properties:
+## Layouts
+
+Page structure and overlays (15 total).
+
+```typescript
+// Containers (4)
+import { AuthLayout, Container, PageContainer, StackedLayout } from '@abe-stack/ui';
+
+// Layers (4)
+import { Modal, Overlay, ProtectedRoute, ScrollArea } from '@abe-stack/ui';
+
+// Shells (7)
+import {
+  AppShell, BottombarLayout, LeftSidebarLayout,
+  ResizablePanel, ResizablePanelGroup, ResizableSeparator,
+  RightSidebarLayout, TopbarLayout
+} from '@abe-stack/ui';
+
+// AppShell for complex layouts
+<AppShell>
+  <AppShell.Topbar>...</AppShell.Topbar>
+  <AppShell.Sidebar>...</AppShell.Sidebar>
+  <AppShell.Main>...</AppShell.Main>
+</AppShell>
+
+// Or use specialized layouts
+<LeftSidebarLayout sidebar={<Nav />}>
+  <PageContainer>Content</PageContainer>
+</LeftSidebarLayout>
+
+// Resizable panels
+<ResizablePanelGroup direction="horizontal">
+  <ResizablePanel defaultSize={30}>Sidebar</ResizablePanel>
+  <ResizableSeparator />
+  <ResizablePanel defaultSize={70}>Main</ResizablePanel>
+</ResizablePanelGroup>
+```
+
+## Hooks
+
+Reusable behavior patterns (23+ hooks).
+
+```typescript
+import {
+  // State management
+  useDisclosure, // open/close state
+  useControllableState, // controlled/uncontrolled state
+  useFormState, // form field state
+  useLocalStorage, // persistent state
+
+  // UI interactions
+  useClickOutside, // detect clicks outside element
+  useDebounce, // debounced values
+  useCopyToClipboard, // copy text to clipboard
+  useResendCooldown, // resend button cooldown
+
+  // Navigation
+  useHistoryNav, // browser history navigation
+  useAuthModeNavigation, // auth mode switching
+
+  // Keyboard
+  useKeyboardShortcut, // single shortcut
+  useKeyboardShortcuts, // multiple shortcuts
+  useUndoRedoShortcuts, // undo/redo with platform detection
+
+  // Responsive
+  useMediaQuery, // responsive breakpoints
+  useWindowSize, // window dimensions
+  useOnScreen, // intersection observer
+
+  // Theming
+  useThemeMode, // light/dark mode
+  useDensity, // spacing density
+  useContrast, // contrast mode
+  usePanelConfig, // panel configuration
+
+  // Performance
+  useVirtualScroll, // virtual scrolling for large lists
+  usePaginatedQuery, // cursor/offset pagination
+  useOptimizedMemo, // deep/shallow memoization utilities
+  useExpensiveComputation, // memoized expensive calculations
+  useTTLCache, // time-based cache
+  useLRUCache, // LRU cache
+} from '@abe-stack/ui';
+```
+
+## Router
+
+Custom router implementation (~150 lines) that replaces react-router-dom.
+
+```typescript
+import {
+  Router, Routes, Route, Link, Navigate,
+  useNavigate, useLocation, useParams, useSearchParams
+} from '@abe-stack/ui';
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/users/:id" element={<UserPage />} />
+        <Route path="/old" element={<Navigate to="/new" />} />
+      </Routes>
+    </Router>
+  );
+}
+
+function Nav() {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [searchParams] = useSearchParams();
+
+  return (
+    <>
+      <Link to="/home">Home</Link>
+      <button onClick={() => navigate('/dashboard')}>Dashboard</button>
+    </>
+  );
+}
+```
+
+Features: path params, query strings, nested routes, memory router for testing.
+
+## Providers
+
+Optimized context providers for performance-critical apps.
+
+```typescript
+import {
+  createMemoizedContext,      // memoized context
+  createSelectiveContext,      // selective re-renders
+  createReducerContext,        // reducer pattern
+  createLazyContext,           // lazy initialization
+  createSubscriptionContext,   // subscription-based
+  Memoized,                    // memoized wrapper component
+  SelectiveMemo,               // selective memo wrapper
+  useRenderPerformance,        // performance monitoring
+} from '@abe-stack/ui';
+
+// Create optimized context
+const { Provider, useContext } = createMemoizedContext<UserState>();
+
+// Wrap expensive components
+<Memoized deps={[user.id]}>
+  <ExpensiveComponent user={user} />
+</Memoized>
+```
+
+## Utils
+
+Utility functions for common patterns.
+
+````typescript
+import {
+  cn,                  // className merge utility
+  createFormHandler,   // form submission handler
+  parseMarkdown,       // markdown to React
+  Markdown,            // markdown component
+  SyntaxHighlighter,   // code syntax highlighting
+  highlightCode,       // highlight code string
+} from '@abe-stack/ui';
+
+// Merge classNames conditionally
+const className = cn('base-class', {
+  'active': isActive,
+  'disabled': isDisabled
+});
+
+// Parse markdown with syntax highlighting
+<Markdown content="# Hello\n```ts\nconst x = 1;\n```" />
+````
+
+## Theming
+
+CSS variables for zero-runtime theming.
 
 ```css
+/* theme.css */
 :root {
   --ui-color-primary: #2563eb;
   --ui-color-bg: #ffffff;
   --ui-radius-md: 0.625rem;
-  --ui-gap-md: 0.75rem;
-  /* ... and so on */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --ui-color-primary: #3b82f6;
     --ui-color-bg: #0b1220;
-    /* Dark theme overrides */
   }
 }
 ```
 
-Components reference these variables instead of hardcoding values:
-
-```css
-.btn-primary {
-  background: var(--ui-color-primary);
-  border-radius: var(--ui-radius-md);
-  padding: var(--ui-gap-sm) var(--ui-gap-md);
-}
-```
-
-For TypeScript access to theme values (when you need them in JavaScript), we export the same tokens from `src/theme/`:
+TypeScript access:
 
 ```typescript
-import { colors, spacing, radius } from '@abe-stack/ui';
+import {
+  // Design tokens
+  colors, darkColors, lightColors, spacing, radius, typography, motion,
+
+  // Theme utilities
+  ThemeProvider, useTheme,
+  getContrastCssVariables, getDensityCssVariables,
+
+  // Density & contrast
+  useDensity, useContrast, DEFAULT_DENSITY, DEFAULT_CONTRAST_MODE,
+} from '@abe-stack/ui';
+
+// Wrap app with theme provider
+<ThemeProvider defaultMode="dark" defaultDensity="comfortable">
+  <App />
+</ThemeProvider>
 ```
 
-This dual approach means CSS gets the variables it needs and JavaScript gets typed constants when doing calculations or passing styles as props.
+## Project Structure
 
----
+```
+packages/ui/src/
+├── elements/        # 26 atomic components (Button, Input, Badge...)
+├── components/      # 16 composed components (Dialog, Tabs, Select...)
+├── layouts/
+│   ├── containers/  # 4 containers (Container, PageContainer, AuthLayout, StackedLayout)
+│   ├── layers/      # 4 layers (Modal, Overlay, ProtectedRoute, ScrollArea)
+│   └── shells/      # 7 shells (AppShell, ResizablePanel, *SidebarLayout...)
+├── hooks/           # 23+ hooks (useDisclosure, useVirtualScroll, usePaginatedQuery...)
+├── router/          # Custom router (~150 lines)
+├── providers/       # Optimized context providers
+├── theme/           # Design tokens (colors, spacing, radius, typography, motion, density, contrast)
+├── utils/           # Utilities (cn, markdown, syntax highlighting, form handlers)
+└── styles/          # CSS files
+    ├── theme.css
+    ├── elements.css
+    ├── components.css
+    ├── layouts.css
+    └── utilities.css
+```
 
-## Creating Components: A Walkthrough
+## Commands
 
-Let us walk through adding a new component from scratch. Say we need a `Tag` element for displaying labels.
+```sh
+pnpm --filter @abe-stack/ui build      # build
+pnpm --filter @abe-stack/ui test       # run tests
+pnpm --filter @abe-stack/ui type-check # check types
+```
 
-**Step 1: Create the component file**
+## Creating Components
 
 ```typescript
+// 1. Create component
 // packages/ui/src/elements/Tag.tsx
-import { forwardRef, type ComponentPropsWithoutRef } from 'react';
-import '../styles/elements.css';
-
-type TagProps = ComponentPropsWithoutRef<'span'> & {
-  variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger';
-  size?: 'small' | 'medium';
-};
-
 const Tag = forwardRef<HTMLSpanElement, TagProps>((props, ref) => {
-  const { variant = 'default', size = 'medium', className = '', ...rest } = props;
-
-  return (
-    <span
-      ref={ref}
-      className={`tag tag-${variant} tag-${size} ${className}`}
-      {...rest}
-    />
-  );
+  const { variant = 'default', className = '', ...rest } = props;
+  return <span ref={ref} className={`tag tag-${variant} ${className}`} {...rest} />;
 });
 
-Tag.displayName = 'Tag';
-
-export { Tag };
-export type { TagProps };
-```
-
-Notice a few patterns here:
-
-- We use `forwardRef` so parent components can access the DOM node
-- Props extend the native element's props (`ComponentPropsWithoutRef<'span'>`)
-- Variants map to CSS class names, keeping styling logic in CSS
-- We spread remaining props, allowing `data-*` attributes, `aria-*` labels, etc.
-
-**Step 2: Add the styles**
-
-```css
-/* In src/styles/elements.css */
-.tag {
-  display: inline-flex;
-  align-items: center;
-  border-radius: var(--ui-radius-full);
-  font-size: var(--ui-font-size-xs);
-  font-weight: var(--ui-font-weight-medium);
-}
-
-.tag-small {
-  padding: 0.125rem 0.5rem;
-}
-.tag-medium {
-  padding: 0.25rem 0.75rem;
-}
-
-.tag-default {
-  background: var(--ui-badge-neutral-bg);
-  border: 1px solid var(--ui-badge-neutral-border);
-}
-
-.tag-primary {
-  background: var(--ui-badge-primary-bg);
-  border: 1px solid var(--ui-badge-primary-border);
-}
-
-/* ...and so on for other variants */
-```
-
-**Step 3: Export from the barrel file**
-
-```typescript
-// packages/ui/src/elements/index.ts
-export { Tag } from './Tag';
-export type { TagProps } from './Tag';
-```
-
-**Step 4: Write a test**
-
-```typescript
-// packages/ui/src/elements/__tests__/Tag.test.tsx
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
-import { Tag } from '../Tag';
-
-describe('Tag', () => {
-  it('renders with default variant', () => {
-    render(<Tag>Label</Tag>);
-    expect(screen.getByText('Label')).toHaveClass('tag-default');
-  });
-
-  it('applies custom className', () => {
-    render(<Tag className="custom">Label</Tag>);
-    expect(screen.getByText('Label')).toHaveClass('custom');
-  });
-});
-```
-
-**Step 5: Use it anywhere**
-
-```typescript
-// In any app
+// 2. Add styles to elements.css
+// 3. Export from elements/index.ts
+// 4. Write tests
+// 5. Use anywhere
 import { Tag } from '@abe-stack/ui';
-
-function StatusList() {
-  return (
-    <div>
-      <Tag variant="success">Active</Tag>
-      <Tag variant="warning">Pending</Tag>
-    </div>
-  );
-}
 ```
 
-That is the whole process. The component is now available in both web and desktop apps with no additional configuration.
+## Trade-offs
+
+**CSS variables over CSS-in-JS:** Zero runtime, browser-native theming. No dynamic prop-based styles.
+
+**Explicit exports:** More maintenance, but reliable tree-shaking.
+
+**Composition over configuration:** Simple components, compose the pieces yourself.
+
+**Platform-agnostic:** No platform-specific optimizations in shared code.
 
 ---
 
-## The Decision Process
-
-When building a new feature, we ask three questions to figure out where code belongs:
-
-**1. Will this render the same way on web and desktop?**
-
-If yes, it goes in `packages/ui`. A Button is a Button everywhere. A Dialog opens the same way regardless of platform.
-
-**2. Does it need platform-specific APIs?**
-
-File system access, system tray, native notifications? Those go in the platform app. The shared package stays framework-agnostic.
-
-**3. Is it UI or business logic?**
-
-Pure presentation goes in `packages/ui`. Validation rules, data transformations, and business rules go in `packages/core`. The UI package imports from core, never the other way around.
-
-Here is the flow:
-
-```
-New feature needed?
-        │
-        ▼
-  Same on web + desktop?
-        │
-   YES ─┼─ NO
-   │        │
-   ▼        ▼
-packages/ui   apps/{platform}/
-        │
-        ▼
-  Uses platform APIs?
-        │
-   NO ──┼─ YES
-   │        │
-   ▼        ▼
-packages/ui   apps/{platform}/
-```
-
-Sometimes the answer is "split it." A music player component might live in `packages/ui` while the desktop app wraps it with native media key support. The shared component handles rendering; the app handles platform integration.
-
----
-
-## Trade-offs We Accepted
-
-This architecture is not perfect. We made deliberate choices and accepted their costs.
-
-**We chose CSS variables over CSS-in-JS.**
-
-The benefit: zero runtime overhead, browser-native theming, easy debugging. The cost: no dynamic styling based on props without inline styles or additional class generation. We are okay with this because most of our styling is predetermined by our design system.
-
-**We chose explicit exports over barrel re-exports.**
-
-Every export is named explicitly in `index.ts`. No `export * from './Button'`. This means more maintenance when adding components, but it also means we always know exactly what we are shipping. Tree-shaking works reliably.
-
-**We chose composition over configuration.**
-
-Our components are relatively simple. A Dialog does not have 50 props for every possible configuration. Instead, we export the pieces (DialogHeader, DialogBody, DialogFooter) and let you compose them. More flexible, but requires more knowledge of the available pieces.
-
-**We chose platform-agnostic over platform-optimized.**
-
-Components work identically on web and desktop. We do not have special desktop-only styling or web-only features in this package. That means we cannot take full advantage of platform-specific capabilities here, but it also means we never have to debug "it works on web but not desktop" issues in shared code.
-
-**We accepted the discipline requirement.**
-
-This architecture only works if everyone follows the rules. Put shared code in packages, platform code in apps. It requires constant vigilance to avoid drift. We have linting rules to catch cross-boundary imports, but culture matters more than tooling.
-
----
-
-## Working with the Package
-
-**Installing dependencies**
-
-```bash
-pnpm install
-```
-
-**Building**
-
-```bash
-pnpm --filter @abe-stack/ui build
-```
-
-**Running tests**
-
-```bash
-pnpm --filter @abe-stack/ui test
-```
-
-**Type checking**
-
-```bash
-pnpm --filter @abe-stack/ui type-check
-```
-
-**Using in your app**
-
-```typescript
-import { Button, Card, Input, useDisclosure } from '@abe-stack/ui';
-```
-
-The package exposes everything through its main entry point. No need for deep imports.
-
----
-
-## What is in the Box
-
-At last count, we have:
-
-- **25 Elements**: Alert, Avatar, Badge, Box, Button, Checkbox, CloseButton, Divider, Heading, Input, Kbd, MenuItem, PasswordInput, Progress, Skeleton, Spinner, Switch, Table, Text, TextArea, Toaster, Tooltip, VisuallyHidden, and more
-- **16 Components**: Accordion, Card, Dialog, Dropdown, FocusTrap, FormField, Image, LoadingContainer, Pagination, Popover, Radio, RadioGroup, Select, Slider, Tabs, Toast
-- **14 Layouts**: AppShell, AuthLayout, Container, Modal, Overlay, PageContainer, ProtectedRoute, ResizablePanel, ScrollArea, and the sidebar/topbar variants
-- **20+ Hooks**: useClickOutside, useControllableState, useDebounce, useDisclosure, useFormState, useKeyboardShortcuts, useLocalStorage, useMediaQuery, usePaginatedQuery, useThemeMode, useVirtualScroll, and more
-
-Full documentation with props tables and usage examples lives in the `./docs/` directory.
-
----
-
-## The Philosophy
-
-Write it once. Test it once. Fix it once. Use it everywhere.
-
-That is the whole point of this package. When we add a new button variant, both apps get it. When we fix an accessibility issue in the Dialog, both apps benefit. When we optimize a hook, every feature using it gets faster.
-
-The extra discipline this requires is worth it. We spend less time duplicating work and more time building features that matter.
-
----
-
-_Last Updated: 2026-01-21_
+[Read the detailed docs](../../docs) for architecture decisions, development workflows, and contribution guidelines.

@@ -140,7 +140,7 @@ toastStore.getState().show({
 ## Related Components
 
 - [Toast](../elements/Toast.md) - Individual toast element
-- [toastStore](../../packages/core/src/stores/toastStore.ts) - Zustand store for toast state
+- [toastStore](../../packages/core/src/stores/toastStore.ts) - Store for toast state
 
 ## References
 

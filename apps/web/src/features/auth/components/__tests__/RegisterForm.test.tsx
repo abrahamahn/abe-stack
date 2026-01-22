@@ -1,9 +1,9 @@
 // apps/web/src/features/auth/components/__tests__/RegisterForm.test.tsx
+import { MemoryRouter } from '@abe-stack/ui';
 import { RegisterForm } from '@auth/components/RegisterForm';
 import { useResendCooldown } from '@auth/hooks';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import type { RegisterResponse } from '@abe-stack/core';

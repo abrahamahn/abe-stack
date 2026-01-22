@@ -12,11 +12,11 @@ import type {
   ResendVerificationRequest,
   ResetPasswordRequest,
 } from '@abe-stack/core';
-import type { AuthMode } from '@abe-stack/sdk';
+import type { AuthMode } from '@abe-stack/ui';
 import type { ReactElement } from 'react';
 
 // Re-export AuthMode for backwards compatibility
-export type { AuthMode } from '@abe-stack/sdk';
+export type { AuthMode } from '@abe-stack/ui';
 
 export interface AuthFormProps {
   mode: AuthMode;

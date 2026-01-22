@@ -2,7 +2,7 @@
 /**
  * Custom Store Implementation
  *
- * A lightweight zustand-like store implementation with React integration.
+ * A lightweight store implementation with React integration.
  * Provides both hook-based subscriptions and direct state access via getState().
  *
  * @packageDocumentation
@@ -62,7 +62,7 @@ function getUseSyncExternalStore(): NonNullable<typeof useSyncExternalStore> {
 /**
  * Creates a store with React hook integration.
  *
- * This is a lightweight replacement for zustand that provides:
+ * This provides:
  * - React hook for subscribing to state changes
  * - getState() for accessing state outside React components
  * - setState() for updating state

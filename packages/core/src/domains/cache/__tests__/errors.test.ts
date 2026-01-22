@@ -59,28 +59,28 @@ describe('cache errors', () => {
 
   describe('CacheConnectionError', () => {
     test('should have correct properties', () => {
-      const error = new CacheConnectionError('redis');
+      const error = new CacheConnectionError('memory');
 
-      expect(error.message).toBe('Failed to connect to cache: redis');
+      expect(error.message).toBe('Failed to connect to cache: memory');
       expect(error.code).toBe('CACHE_CONNECTION_ERROR');
-      expect(error.providerName).toBe('redis');
+      expect(error.providerName).toBe('memory');
     });
 
     test('should accept custom message', () => {
-      const error = new CacheConnectionError('redis', 'Connection refused');
+      const error = new CacheConnectionError('memory', 'Connection refused');
 
-      expect(error.message).toBe('Connection refused: redis');
+      expect(error.message).toBe('Connection refused: memory');
     });
 
     test('should include cause', () => {
       const cause = new Error('ECONNREFUSED');
-      const error = new CacheConnectionError('redis', 'Connection failed', cause);
+      const error = new CacheConnectionError('memory', 'Connection failed', cause);
 
       expect(error.cacheErrorCause).toBe(cause);
     });
 
     test('should extend CacheError', () => {
-      const error = new CacheConnectionError('redis');
+      const error = new CacheConnectionError('memory');
 
       expect(error).toBeInstanceOf(CacheError);
     });
@@ -182,11 +182,11 @@ describe('cache errors', () => {
 
   describe('CacheNotInitializedError', () => {
     test('should have correct properties', () => {
-      const error = new CacheNotInitializedError('redis');
+      const error = new CacheNotInitializedError('memory');
 
-      expect(error.message).toBe("Cache provider 'redis' is not initialized");
+      expect(error.message).toBe("Cache provider 'memory' is not initialized");
       expect(error.code).toBe('CACHE_NOT_INITIALIZED');
-      expect(error.providerName).toBe('redis');
+      expect(error.providerName).toBe('memory');
     });
   });
 
@@ -197,7 +197,7 @@ describe('cache errors', () => {
       });
 
       test('should return true for CacheError subclasses', () => {
-        expect(isCacheError(new CacheConnectionError('redis'))).toBe(true);
+        expect(isCacheError(new CacheConnectionError('memory'))).toBe(true);
         expect(isCacheError(new CacheTimeoutError('get', 5000))).toBe(true);
         expect(isCacheError(new CacheSerializationError('key'))).toBe(true);
       });
@@ -216,7 +216,7 @@ describe('cache errors', () => {
 
     describe('isCacheConnectionError', () => {
       test('should return true for CacheConnectionError', () => {
-        expect(isCacheConnectionError(new CacheConnectionError('redis'))).toBe(true);
+        expect(isCacheConnectionError(new CacheConnectionError('memory'))).toBe(true);
       });
 
       test('should return false for other cache errors', () => {
@@ -232,7 +232,7 @@ describe('cache errors', () => {
 
       test('should return false for other cache errors', () => {
         expect(isCacheTimeoutError(new CacheError('test'))).toBe(false);
-        expect(isCacheTimeoutError(new CacheConnectionError('redis'))).toBe(false);
+        expect(isCacheTimeoutError(new CacheConnectionError('memory'))).toBe(false);
       });
     });
   });
@@ -274,7 +274,7 @@ describe('cache errors', () => {
     test('all cache errors should serialize to JSON', () => {
       const errors = [
         new CacheError('test'),
-        new CacheConnectionError('redis'),
+        new CacheConnectionError('memory'),
         new CacheTimeoutError('get', 5000),
         new CacheSerializationError('key'),
         new CacheDeserializationError('key'),
@@ -282,7 +282,7 @@ describe('cache errors', () => {
         new CacheCapacityError(100, 100),
         new CacheMemoryLimitError(1024, 512),
         new CacheProviderNotFoundError('unknown'),
-        new CacheNotInitializedError('redis'),
+        new CacheNotInitializedError('memory'),
       ];
 
       for (const error of errors) {

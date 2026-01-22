@@ -1,7 +1,6 @@
 // apps/web/src/features/auth/components/ResetPasswordForm.tsx
-import { Button, PasswordInput } from '@abe-stack/ui';
+import { Button, Link, PasswordInput } from '@abe-stack/ui';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 
 import type { AuthMode } from './AuthForms';
 import type { ResetPasswordRequest } from '@abe-stack/core';

@@ -1,7 +1,6 @@
 // apps/web/src/features/demo/components/DemoTopBar.tsx
 import { toastStore } from '@abe-stack/core';
-import { Button, Heading, ResizablePanel, Text } from '@abe-stack/ui';
-import { useNavigate } from 'react-router-dom';
+import { Button, Heading, ResizablePanel, Text, useNavigate } from '@abe-stack/ui';
 
 import type { AuthMode } from '@auth/components/AuthForms';
 import type { ReactElement } from 'react';
@@ -45,7 +44,7 @@ export function DemoTopBar({
             variant="text"
             size="small"
             onClick={() => {
-              void navigate('/');
+              navigate('/');
             }}
             aria-label="Back to home"
           >

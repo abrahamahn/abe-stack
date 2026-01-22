@@ -8,9 +8,9 @@
  * - UI components and layout
  */
 
+import { Route, Routes } from '@abe-stack/ui';
 import { DashboardPage } from '@features/dashboard';
 import { screen, waitFor } from '@testing-library/react';
-import { Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 import { createMockEnvironment, mockAdminUser, mockUser, renderWithProviders } from '../utils';

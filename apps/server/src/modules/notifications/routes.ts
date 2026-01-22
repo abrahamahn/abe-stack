@@ -45,8 +45,8 @@ export const notificationRoutes: RouteMap = {
   // Public route - get VAPID key for client subscription
   'notifications/vapid-key': publicRoute<undefined, VapidKeyResponse | { message: string }>(
     'GET',
-    async (ctx: AppContext): Promise<RouteResult<VapidKeyResponse | { message: string }>> => {
-      return handleGetVapidKey(ctx);
+    (ctx: AppContext): Promise<RouteResult<VapidKeyResponse | { message: string }>> => {
+      return Promise.resolve(handleGetVapidKey(ctx));
     },
   ),
 

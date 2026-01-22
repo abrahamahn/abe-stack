@@ -10,11 +10,10 @@
 
 import { toastStore } from '@abe-stack/core';
 import { createQueryPersister } from '@abe-stack/sdk';
-import { HistoryProvider, ScrollArea, Toaster } from '@abe-stack/ui';
+import { BrowserRouter, HistoryProvider, Route, Routes, ScrollArea, Toaster } from '@abe-stack/ui';
 import { ProtectedRoute } from '@features/auth';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 // ============================================================================
 // Lazy-loaded Routes (Code Splitting)
@@ -23,18 +22,18 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 const HomePage = lazy(() => import('@pages/HomePage').then((m) => ({ default: m.HomePage })));
 const LoginPage = lazy(() => import('@features/auth').then((m) => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() =>
-  import('@features/auth').then((m) => ({ default: m.RegisterPage }))
+  import('@features/auth').then((m) => ({ default: m.RegisterPage })),
 );
 const AuthPage = lazy(() => import('@features/auth').then((m) => ({ default: m.AuthPage })));
 const ResetPasswordPage = lazy(() =>
-  import('@features/auth').then((m) => ({ default: m.ResetPasswordPage }))
+  import('@features/auth').then((m) => ({ default: m.ResetPasswordPage })),
 );
 const ConfirmEmailPage = lazy(() =>
-  import('@features/auth').then((m) => ({ default: m.ConfirmEmailPage }))
+  import('@features/auth').then((m) => ({ default: m.ConfirmEmailPage })),
 );
 const DemoPage = lazy(() => import('@demo').then((m) => ({ default: m.DemoPage })));
 const DashboardPage = lazy(() =>
-  import('@features/dashboard').then((m) => ({ default: m.DashboardPage }))
+  import('@features/dashboard').then((m) => ({ default: m.DashboardPage })),
 );
 
 import { ClientEnvironmentProvider } from './ClientEnvironment';

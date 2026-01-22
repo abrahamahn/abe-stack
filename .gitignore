@@ -7,7 +7,6 @@ node_modules/
 .claude/
 .gemini/
 docs/AGENTS.md
-docs/INDEX.md
 docs/GEMINI.md
 docs/CLAUDE.md
 docs/agent/*.md

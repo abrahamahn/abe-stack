@@ -1,8 +1,8 @@
 // apps/web/src/features/auth/components/__tests__/ForgotPasswordForm.test.tsx
+import { MemoryRouter } from '@abe-stack/ui';
 import { ForgotPasswordForm } from '@auth/components/ForgotPasswordForm';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import type { ForgotPasswordFormProps } from '@auth/components/ForgotPasswordForm';

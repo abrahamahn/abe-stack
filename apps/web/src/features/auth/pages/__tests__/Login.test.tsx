@@ -1,7 +1,7 @@
 // apps/web/src/features/auth/pages/__tests__/Login.test.tsx
+import { MemoryRouter } from '@abe-stack/ui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { LoginPage } from '../Login';
@@ -19,17 +19,30 @@ const mockUseAuth = vi.fn(() => ({
   logout: vi.fn(),
 }));
 
-vi.mock('../../hooks/useAuth', () => ({
-  useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
-}));
-
 // Mock navigate
 const mockNavigate = vi.fn();
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
+
+// Mock the hooks module - useAuth and useAuthModeNavigation
+vi.mock('../../hooks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../hooks')>();
   return {
     ...actual,
-    useNavigate: () => mockNavigate,
+    useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
+    useAuthModeNavigation: () => ({
+      navigateToMode: (mode: string): void => {
+        const routes: Record<string, string> = {
+          login: '/login',
+          register: '/register',
+          'forgot-password': '/auth?mode=forgot-password',
+          'reset-password': '/auth?mode=reset-password',
+        };
+        mockNavigate(routes[mode], { replace: false });
+      },
+      navigateToLogin: (): void => mockNavigate('/login', { replace: false }),
+      navigateToRegister: (): void => mockNavigate('/register', { replace: false }),
+      navigateToForgotPassword: (): void =>
+        mockNavigate('/auth?mode=forgot-password', { replace: false }),
+    }),
   };
 });
 

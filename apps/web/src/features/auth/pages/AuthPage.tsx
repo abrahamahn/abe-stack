@@ -1,10 +1,9 @@
 // apps/web/src/features/auth/pages/AuthPage.tsx
 import { toastStore } from '@abe-stack/core';
-import { AuthLayout, useFormState } from '@abe-stack/ui';
+import { AuthLayout, useFormState, useNavigate, useSearchParams } from '@abe-stack/ui';
 import { AuthForm, type AuthMode } from '@auth/components/AuthForms';
 import { useAuth } from '@auth/hooks';
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import type { AuthFormProps } from '@auth/components/AuthForms';
 import type { ReactElement } from 'react';
@@ -12,7 +11,8 @@ import type { ReactElement } from 'react';
 const VALID_MODES = ['login', 'register', 'forgot-password', 'reset-password'] as const;
 
 export function AuthPage(): ReactElement {
-  const [searchParams] = useSearchParams();
+  const searchParamsResult = useSearchParams();
+  const searchParams: URLSearchParams = searchParamsResult[0];
   const navigate = useNavigate();
   const { login, register, forgotPassword, resetPassword, resendVerification, isAuthenticated } =
     useAuth();
@@ -22,25 +22,31 @@ export function AuthPage(): ReactElement {
 
   useEffect(() => {
     if (isAuthenticated) {
-      void navigate('/dashboard');
+      navigate('/dashboard');
     }
   }, [isAuthenticated, navigate]);
 
   useEffect(() => {
-    const modeParam = searchParams.get('mode');
-    if (modeParam && VALID_MODES.includes(modeParam as AuthMode)) {
-      setMode(modeParam as AuthMode);
+    const modeParam: string | null = searchParams.get('mode');
+    const isValidMode = (value: string | null): value is AuthMode => {
+      if (value === null) return false;
+      const validModes: readonly string[] = VALID_MODES;
+      return validModes.includes(value);
+    };
+    if (isValidMode(modeParam)) {
+      setMode(modeParam);
     }
   }, [searchParams]);
 
   const handleModeChange = (newMode: AuthMode): void => {
     setMode(newMode);
     setError(null);
-    void navigate(`/auth?mode=${newMode}`, { replace: true });
+    const modeStr: string = newMode;
+    navigate(`/auth?mode=${modeStr}`, { replace: true });
   };
 
   // Get token from URL for reset password flow
-  const token = searchParams.get('token');
+  const token: string | null = searchParams.get('token');
 
   const formProps: AuthFormProps = {
     mode,

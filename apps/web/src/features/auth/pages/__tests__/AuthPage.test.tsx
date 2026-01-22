@@ -1,7 +1,7 @@
 // apps/web/src/features/auth/pages/__tests__/AuthPage.test.tsx
+import { MemoryRouter } from '@abe-stack/ui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AuthPage } from '../AuthPage';
@@ -32,8 +32,8 @@ vi.mock('../../hooks/useAuth', () => ({
 
 // Mock navigate
 const mockNavigate = vi.fn();
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom');
+vi.mock('@abe-stack/ui', async () => {
+  const actual = await vi.importActual('@abe-stack/ui');
   return {
     ...actual,
     useNavigate: () => mockNavigate,

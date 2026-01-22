@@ -8,7 +8,7 @@
  * Benefits over fixed-window:
  * - Smoother rate limiting (no burst at window boundaries)
  * - More predictable behavior for clients
- * - Easy to swap storage (Memory → Redis) later
+ * - Pluggable storage backend (memory store included)
  */
 
 // ============================================================================
@@ -59,7 +59,7 @@ export interface ClientRecord {
 
 /**
  * Interface for rate limit storage backends.
- * Allows swapping in-memory map for Redis/Postgres in production.
+ * Default implementation uses in-memory storage.
  */
 export interface RateLimitStore {
   /** Get record for a client */

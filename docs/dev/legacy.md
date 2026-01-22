@@ -38,7 +38,6 @@
 | ServerManager                               | 4-6h          | 2-3h adapt     |
 | Session module                              | 6-8h          | 2-3h adapt     |
 | Auth DTOs                                   | 4-6h          | 1-2h adapt     |
-| Redis cache implementation                  | 6-8h          | 2-3h adapt     |
 | Job queue infrastructure                    | 4-6h          | 1-2h adapt     |
 | Token storage services                      | 4-6h          | 1-2h adapt     |
 | Secret providers                            | 4-6h          | 1-2h adapt     |
@@ -112,8 +111,6 @@
 | Format date            | `src/server/shared/date/formatDate.ts`                                         |
 | Error classes          | `src/server/infrastructure/errors/`                                            |
 | Error handler          | `src/server/infrastructure/errors/ErrorHandler.ts`                             |
-| Redis cache            | `src/server/infrastructure/cache/RedisCacheService.ts`                         |
-| Redis client           | `src/server/infrastructure/cache/RedisClient.ts`                               |
 | Job queue              | `src/server/infrastructure/jobs/JobQueue.ts`                                   |
 | File job storage       | `src/server/infrastructure/jobs/FileJobStorage.ts`                             |
 | Console transport      | `src/server/infrastructure/logging/ConsoleTransport.ts`                        |

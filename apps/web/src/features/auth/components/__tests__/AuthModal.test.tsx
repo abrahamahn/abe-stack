@@ -1,8 +1,8 @@
 // apps/web/src/features/auth/components/__tests__/AuthModal.test.tsx
+import { MemoryRouter } from '@abe-stack/ui';
 import { ClientEnvironmentProvider } from '@app/ClientEnvironment';
 import { AuthModal } from '@auth/components/AuthModal';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 import type { ClientEnvironment } from '@app/ClientEnvironment';

@@ -1,6 +1,6 @@
 // apps/web/src/features/auth/components/__tests__/ProtectedRoute.test.tsx
+import { MemoryRouter, Route, Routes } from '@abe-stack/ui';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ProtectedRoute } from '../ProtectedRoute';
@@ -11,13 +11,13 @@ vi.mock('../../hooks/useAuth', () => ({
   useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
 }));
 
-// Mock UI components - we need to fully mock ProtectedRoute to avoid react-router-dom context issues
+// Mock UI components - we need to fully mock ProtectedRoute to avoid router context issues
 // between different package instances in the monorepo
 vi.mock('@abe-stack/ui', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@abe-stack/ui')>();
-  const { Navigate, Outlet } = await import('react-router-dom');
+  const { Navigate, Outlet } = await importOriginal<typeof import('@abe-stack/ui')>();
 
-  // Re-create ProtectedRoute using the same react-router-dom instance as the test
+  // Re-create ProtectedRoute using the same router instance as the test
   const ProtectedRoute = ({
     isAuthenticated,
     isLoading,

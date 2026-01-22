@@ -1,7 +1,7 @@
 # ABE Stack - TODO
 
-> **Scope:** Solo developer to small team (3-5 engineers), 50,000+ users, up to Series A. :contentReference[oaicite:1]{index=1}  
-> **Philosophy:** Ship products. The foundation is solid. Build features users pay for. :contentReference[oaicite:2]{index=2}
+> **Scope:** Solo developer to small team (3-5 engineers), 50,000+ users, up to Series A.
+> **Philosophy:** Ship products. The foundation is solid. Build features users pay for.
 >
 > **New guiding constraint:** Everything should support **(a)** developer velocity, **(b)** production readiness, **(c)** leanness/maintainability.
 >
@@ -11,12 +11,71 @@
 > - **SaaS Profile (optional):** billing/subscriptions + quotas + customer portal
 > - **Admin Profile (optional):** command center, security viewer, job monitor
 > - **Advanced Profile (optional):** realtime/offline sync, push, search, desktop, heavy media
->
-> Add “operational readiness” next (not more features). :contentReference[oaicite:3]{index=3}
 
-Minimal production ops pack: structured logs already started, but also:
+---
 
-- migrations story, backup/restore story, rate-limit observability, basic metrics, error budget style alerts. :contentReference[oaicite:4]{index=4}
+## Priority Zero: Package Reduction (The Notion Path)
+
+> **Goal:** Transition from Product Engineer (gluing libraries) to Systems Engineer (building engines).
+> Stay ultra framework-independent while keeping React + TypeScript.
+
+### 1) Routing
+
+- [ ] Remove `react-router-dom`
+- [ ] Build 20-line `useRouter` hook with `window.history` + `popstate`
+- [ ] Enable Notion-style side-peek views and custom transitions
+
+### 2) State/Data
+
+- [ ] Remove `@tanstack/react-query`
+- [ ] Build custom RecordCache with `useSyncExternalStore`
+- [ ] Direct WebSocket/IndexedDB sync without generic caching overhead
+
+### 3) API Layer
+
+- [ ] Remove `@ts-rest/core`, `@ts-rest/react-query`, `@ts-rest/fastify`
+- [ ] Build pure TypeScript contract interfaces
+- [ ] Create minimal fetch wrapper with type inference
+
+### 4) Database
+
+- [ ] Remove `drizzle-orm`, `drizzle-kit`
+- [ ] Build raw SQL query builder with `postgres` driver
+- [ ] Enable micro-optimizations, sharding, advanced Postgres features (JSONB, specialized indexes)
+
+### 5) Testing
+
+- [ ] Remove `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`
+- [ ] Remove `jsdom`
+- [ ] Test logic in pure TypeScript
+- [ ] Use Playwright for all UI/integration tests
+
+### 6) Git Hooks
+
+- [ ] Remove `lint-staged`, `simple-git-hooks`
+- [ ] Create manual pre-commit scripts
+- [ ] Run linting/formatting directly without helper packages
+
+### Packages to Keep (Dangerous to Code Manually)
+
+| Package          | Why Keep                                            |
+| ---------------- | --------------------------------------------------- |
+| `typescript`     | Type safety (non-negotiable)                        |
+| `react`          | UI layer (non-negotiable)                           |
+| `vite` + `turbo` | Build infrastructure                                |
+| `argon2`         | Never code your own password hashing                |
+| `postgres`       | Don't write your own DB driver protocol             |
+| `ws`             | Raw TCP socket management is a rabbit hole          |
+| `zod`            | Input parsing/validation is security-critical       |
+| `fastify`        | Schema validation + performance (industry standard) |
+| `vitest`         | Test runner                                         |
+| `playwright`     | E2E testing                                         |
+
+### New Responsibilities After Cleanup
+
+- [ ] **Manual Sync** - Own how data flows from DB to UI
+- [ ] **Manual Routing** - Own URL changes and page transitions
+- [ ] **Raw Queries** - Own SQL structure and optimization
 
 ---
 
@@ -30,50 +89,21 @@ Minimal production ops pack: structured logs already started, but also:
 
 **Goal:** clone → env → **one command** → production-ish deployment.
 
-### 1) “Deploy Pack” (Docker-first)
+### 1) "Deploy Pack" ✅
 
-- [ ] Production Dockerfiles for: `apps/server`, `apps/web`, `apps/desktop` (desktop optional)
-- [ ] `docker-compose.prod.yml` (server + web + postgres + redis optional)
-- [ ] `docker-compose.dev.yml` (fast local onboarding)
-- [ ] Health checks wired (compose + server health endpoints)
-- [ ] Container logging format standardized (JSON logs, request correlation id in logs)
-- [ ] Document: required ports + networking + reverse proxy assumptions
+See `docs/deploy/README.md` and `docs/log/2026-W04.md`
 
-### 2) Reverse Proxy + TLS
+### 2) Reverse Proxy + TLS ✅
 
-- [ ] Provide **Caddy** (or Nginx) config for:
-  - TLS via Let’s Encrypt
-  - `/api/*` → server
-  - `/*` → web
-  - WebSocket upgrade pass-through
-- [ ] Security headers + compression verified behind proxy
-- [ ] “Trusted proxy” config documented (X-Forwarded-For, etc.)
+See `docs/deploy/reverse-proxy.md` and `docs/deploy/trusted-proxy-setup.md`
 
-### 3) Database + Migrations Story (must be boring + reliable)
+### 3) Database + Migrations ✅
 
-- [ ] Single command migration workflow (`pnpm db:migrate` or equivalent)
-- [ ] Migration strategy doc:
-  - how to run on deploy
-  - rollback policy
-  - idempotency and safety
-- [ ] Add “first deploy bootstrap” flow (seed/admin creation is explicit + safe)
+See `docs/deploy/migrations.md`
 
-### 4) “Deploy Targets”
+### 4) "Deploy Targets" ✅
 
-**DigitalOcean (baseline)**
-
-- [ ] `docs/deploy/digitalocean.md`:
-  - Ubuntu droplet setup
-  - Docker install
-  - Caddy/Nginx
-  - environment secrets
-  - systemd unit or docker compose “restart always”
-  - backups/restore drill
-
-**GCP**
-
-- [ ] `docs/deploy/gcp.md` with one concrete option:
-  - Compute Engine VM (Ubuntu) or Cloud Run (if you go serverless)
+See `docs/deploy/digitalocean.md` and `docs/deploy/gcp.md`
 
 ### 5) CI/CD (keep it simple)
 
@@ -122,7 +152,7 @@ Minimal production ops pack: structured logs already started, but also:
   - **Minimal** includes: web + server + postgres, auth, core UI kit, basic logging, basic tests
   - **SaaS** includes: billing + subscriptions + portal + quotas
   - **Admin** includes: command center dashboards
-  - **Advanced** includes: realtime/offline, push, search, cache/redis, desktop, heavy media
+  - **Advanced** includes: realtime/offline, push, search, cache desktop, heavy media
 - [ ] Add `FEATURE_FLAGS.md` or `config/features.ts`:
   - `ENABLE_ADMIN`
   - `ENABLE_BILLING`
@@ -130,7 +160,7 @@ Minimal production ops pack: structured logs already started, but also:
   - `ENABLE_OFFLINE_QUEUE`
   - `ENABLE_PUSH`
   - `ENABLE_SEARCH`
-  - `ENABLE_CACHE_REDIS`
+  - `ENABLE_CACHE`
   - `ENABLE_MEDIA_PIPELINE`
   - `ENABLE_DESKTOP`
 - [ ] Ensure disabling a feature removes runtime wiring (not just dead config)
@@ -189,7 +219,7 @@ Create `docs/STRIP_PLAN.md` with the following defaults:
   - Push notifications
   - Realtime/offline
   - Search/filtering
-  - Redis provider
+  - Cache provider
   - Media plugin
   - Demo catalogs
 - [ ] Provide “re-enable” instructions for each
@@ -412,4 +442,4 @@ If no to all three, it goes in `docs/ROADMAP.md`. :contentReference[oaicite:38]{
 
 ---
 
-_Last Updated: 2026-01-22 (Revised: Ops Pack + Admin + Billing + Profiles + Strip Plan)_
+_Last Updated: 2026-01-22 (Deploy Pack + Reverse Proxy complete)_

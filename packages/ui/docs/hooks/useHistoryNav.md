@@ -42,8 +42,7 @@ The hook that provides access to history state and navigation functions.
 The `HistoryProvider` must be placed inside a React Router context:
 
 ```tsx
-import { BrowserRouter } from 'react-router-dom';
-import { HistoryProvider } from '@abe-stack/ui';
+import { BrowserRouter, HistoryProvider, Routes } from '@abe-stack/ui';
 
 function App() {
   return (
