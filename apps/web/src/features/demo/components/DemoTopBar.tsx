@@ -1,6 +1,6 @@
 // apps/web/src/features/demo/components/DemoTopBar.tsx
 import { toastStore } from '@abe-stack/stores';
-import { Button, Heading, ResizablePanel, Text, useNavigate } from '@abe-stack/ui';
+import { Button, Heading, ResizablePanel, Text, useNavigate, useSidePeek } from '@abe-stack/ui';
 
 import type { AuthMode } from '@auth/components/AuthForms';
 import type { ReactElement } from 'react';
@@ -25,6 +25,7 @@ export function DemoTopBar({
   onOpenAuthModal,
 }: DemoTopBarProps): ReactElement {
   const navigate = useNavigate();
+  const { toggle, isOpen } = useSidePeek();
 
   return (
     <ResizablePanel
@@ -39,7 +40,7 @@ export function DemoTopBar({
     >
       <div className="bar border-b relative">
         <span className="layout-label">TopbarLayout</span>
-        <div className="min-w-88">
+        <div className="min-w-88 flex items-center gap-2">
           <Button
             variant="text"
             size="small"
@@ -49,6 +50,16 @@ export function DemoTopBar({
             aria-label="Back to home"
           >
             ← Back
+          </Button>
+          <Button
+            variant={isOpen ? 'primary' : 'secondary'}
+            size="small"
+            onClick={() => {
+              toggle('/side-peek-demo');
+            }}
+            aria-label="Toggle side peek demo"
+          >
+            {isOpen ? '✕ Close Peek' : '⬚ Side Peek'}
           </Button>
         </div>
         <div className="flex-1 flex-center">
