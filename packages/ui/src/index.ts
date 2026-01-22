@@ -147,7 +147,6 @@ export type {
   ThemeProviderProps,
 } from './theme';
 
-// Router - Custom minimal router (replaces react-router-dom)
 export {
   BrowserRouter,
   Link,
