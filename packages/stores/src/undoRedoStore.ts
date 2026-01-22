@@ -1,4 +1,4 @@
-// packages/core/src/stores/undoRedoStore.ts
+// packages/stores/src/undoRedoStore.ts
 /**
  * Undo/Redo Store
  *
@@ -17,7 +17,7 @@ import {
   invertTransaction,
   mergeTransactions,
   type Transaction,
-} from '../infrastructure/transactions';
+} from '@abe-stack/core/infrastructure/transactions';
 
 import { createStore, type UseBoundStore } from './createStore';
 

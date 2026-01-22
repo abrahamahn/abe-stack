@@ -1,4 +1,4 @@
-// packages/shared/src/stores/__tests__/toastStore.test.ts
+// packages/stores/src/__tests__/toastStore.test.ts
 import { describe, expect, it, beforeEach } from 'vitest';
 
 import { toastStore } from '../toastStore';

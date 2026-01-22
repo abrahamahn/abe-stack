@@ -48,6 +48,7 @@ export {
   Image,
   LoadingContainer,
   Pagination,
+  PeekLink,
   Popover,
   Radio,
   RadioGroup,
@@ -57,7 +58,7 @@ export {
   Toast,
   ToastContainer,
 } from './components';
-export type { TabItem, TabsProps, UserState, UserAction } from './components';
+export type { PeekLinkProps, TabItem, TabsProps, UserState, UserAction } from './components';
 
 // Layouts - Page and section layouts
 export {
@@ -75,6 +76,7 @@ export {
   ResizableSeparator,
   RightSidebarLayout,
   ScrollArea,
+  SidePeek,
   StackedLayout,
   TopbarLayout,
 } from './layouts';
@@ -83,6 +85,8 @@ export type {
   BottombarLayoutProps,
   LeftSidebarLayoutProps,
   RightSidebarLayoutProps,
+  SidePeekRootProps,
+  SidePeekSize,
   TopbarLayoutProps,
 } from './layouts';
 
@@ -105,6 +109,7 @@ export {
   usePaginatedQuery,
   usePanelConfig,
   useResendCooldown,
+  useSidePeek,
   useThemeMode,
   useVirtualScroll,
   useWindowSize,
@@ -120,6 +125,7 @@ export type {
   UsePaginatedQueryOptions,
   UsePaginatedQueryResult,
   UseResendCooldownReturn,
+  UseSidePeekResult,
   VirtualScrollOptions,
   VirtualScrollItem,
   VirtualScrollResult,

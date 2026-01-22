@@ -1,75 +1,55 @@
-# Developer Documentation
+# Development Guides
 
-Technical reference for ABE Stack development, architecture, and best practices.
+Workflow, testing, configuration, and tooling documentation for ABE Stack.
 
 ---
 
 ## Quick Navigation
 
-| Document                                | Purpose                                          | When to Read                            |
-| --------------------------------------- | ------------------------------------------------ | --------------------------------------- |
-| [Architecture](./architecture.md)       | Monorepo structure, layering, hexagonal patterns | Adding dependencies, cross-package work |
-| [Principles](./principles.md)           | Coding standards, patterns, anti-patterns        | Before any code change                  |
-| [Dev Environment](./dev-environment.md) | Workflow, testing, linting, CI/CD                | Getting started, CI issues              |
-| [Config Setup](./config-setup.md)       | TypeScript, path aliases, Vite, build            | Config changes, build issues            |
-| [Testing](./testing.md)                 | Test strategy, patterns, examples                | Writing tests                           |
-| [Security](./security.md)               | Auth, tokens, rate limiting, auditing            | Security-related changes                |
+| Document                                | Purpose                                    | When to Read                 |
+| --------------------------------------- | ------------------------------------------ | ---------------------------- |
+| [Dev Environment](./dev-environment.md) | Workflow, testing, linting, CI/CD          | Getting started, CI issues   |
+| [Config Setup](./config-setup.md)       | TypeScript, path aliases, Vite, build      | Config changes, build issues |
+| [Testing](./testing.md)                 | Test strategy, TDD, React testing patterns | Writing tests                |
+| [Sync Scripts](./sync-scripts.md)       | DX automation scripts                      | Understanding automation     |
+| [Security](./security.md)               | Auth, tokens, rate limiting, auditing      | Security-related changes     |
+| [Performance](./performance.md)         | Database and frontend optimization         | Performance issues           |
 
 ---
 
-## Getting Started
+## Documents
 
-New to the codebase? Read in this order:
+### Setup & Workflow
 
-1. **[Architecture](./architecture.md)** - Understand the monorepo structure
-2. **[Principles](./principles.md)** - Learn the coding standards
-3. **[Dev Environment](./dev-environment.md)** - Set up your workflow
-4. **[Testing](./testing.md)** - Write your first tests
+| Document                                | Description                                                |
+| --------------------------------------- | ---------------------------------------------------------- |
+| [Dev Environment](./dev-environment.md) | Development workflow, commands, linting, CI/CD, Docker     |
+| [Config Setup](./config-setup.md)       | TypeScript configuration, path aliases, Vite, build system |
 
----
+### Quality
 
-## Document Index
+| Document                | Description                                                |
+| ----------------------- | ---------------------------------------------------------- |
+| [Testing](./testing.md) | TDD workflow, unit/integration/E2E patterns, React testing |
 
-### Core Concepts
+### Automation
 
-| Document                          | Description                                                                                    |
-| --------------------------------- | ---------------------------------------------------------------------------------------------- |
-| [Architecture](./architecture.md) | Monorepo structure, package layout, dependency flow, hexagonal architecture for server modules |
-| [Principles](./principles.md)     | Non-negotiable rules, coding standards, patterns to follow, anti-patterns to avoid             |
+| Document                          | Description                                                       |
+| --------------------------------- | ----------------------------------------------------------------- |
+| [Sync Scripts](./sync-scripts.md) | DX automation (path aliases, barrel exports, file headers, theme) |
 
-### Development Workflow
+### Production
 
-| Document                                | Description                                                               |
-| --------------------------------------- | ------------------------------------------------------------------------- |
-| [Dev Environment](./dev-environment.md) | Development workflow, testing commands, linting, CI/CD, Docker setup      |
-| [Config Setup](./config-setup.md)       | TypeScript configuration, path aliases, Vite setup, build system, caching |
-| [Sync Scripts](./sync-scripts.md)       | DX automation scripts (path aliases, barrel exports, file headers)        |
-
-### Testing
-
-| Document                            | Description                                                                              |
-| ----------------------------------- | ---------------------------------------------------------------------------------------- |
-| [Testing](./testing.md)             | Test strategy, TDD workflow, unit/integration/E2E patterns, React testing best practices |
-| [API Test Plan](./api-test-plan.md) | API endpoint test coverage, integration test status, testing priorities                  |
-
-### Security & Performance
-
-| Document                        | Description                                                                  |
-| ------------------------------- | ---------------------------------------------------------------------------- |
-| [Security](./security.md)       | Password hashing, JWT tokens, refresh tokens, rate limiting, security events |
-| [Performance](./performance.md) | Database optimization, frontend performance, profiling techniques            |
-
-### Reference
-
-| Document              | Description                                                               |
-| --------------------- | ------------------------------------------------------------------------- |
-| [Legacy](./legacy.md) | Migration guide from legacy codebase, reusable patterns, effort estimates |
+| Document                        | Description                                                 |
+| ------------------------------- | ----------------------------------------------------------- |
+| [Security](./security.md)       | Password hashing, JWT tokens, refresh tokens, rate limiting |
+| [Performance](./performance.md) | Database optimization, N+1 fixes, frontend code splitting   |
 
 ---
 
 ## Related Documentation
 
-- [Deployment Guide](../deploy/README.md) - Production deployment
+- [Specifications](../specs/) - Architecture and principles
+- [Reference](../reference/) - Migration guides and legacy patterns
 - [TODO](../todo/TODO.md) - Planned features and tasks
-- [ROADMAP](../todo/ROADMAP.md) - Deferred features
 - [Weekly Logs](../log/) - Development progress

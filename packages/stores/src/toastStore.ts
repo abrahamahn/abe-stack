@@ -1,4 +1,4 @@
-// packages/core/src/stores/toastStore.ts
+// packages/stores/src/toastStore.ts
 import { createStore } from './createStore';
 
 export type ToastMessage = {

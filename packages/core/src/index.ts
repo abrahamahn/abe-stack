@@ -172,12 +172,6 @@ export type { ApiErrorResponse, ApiResponse, ApiSuccessResponse } from './infras
 export { parseCookies } from './infrastructure/http';
 
 // ============================================================================
-// Stores
-// ============================================================================
-export { createStore, createUndoRedoStore, toastStore, useUndoRedoStore } from './stores';
-export type { StoreApi, ToastMessage, UndoRedoState, UseBoundStore } from './stores';
-
-// ============================================================================
 // Infrastructure: Transactions (for undo/redo)
 // ============================================================================
 export {

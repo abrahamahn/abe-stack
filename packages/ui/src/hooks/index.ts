@@ -75,3 +75,4 @@ export {
   type AuthModeNavigation,
   type AuthModeNavigationOptions,
 } from './useAuthModeNavigation';
+export { useSidePeek, type UseSidePeekResult } from './useSidePeek';

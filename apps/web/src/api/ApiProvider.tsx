@@ -6,8 +6,9 @@
  * Creates a React Query client wrapper with navigation callbacks.
  */
 
-import { toastStore, tokenStore } from '@abe-stack/core';
+import { tokenStore } from '@abe-stack/core';
 import { createReactQueryClient } from '@abe-stack/sdk';
+import { toastStore } from '@abe-stack/stores';
 import { useNavigate } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app';
 import { createContext, useContext, useMemo } from 'react';

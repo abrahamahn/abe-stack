@@ -178,6 +178,9 @@ importers:
       '@abe-stack/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
+      '@abe-stack/stores':
+        specifier: workspace:*
+        version: link:../../packages/stores
       '@abe-stack/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -199,10 +202,6 @@ importers:
       zod:
         specifier: ^4.3.5
         version: 4.3.5
-    devDependencies:
-      react:
-        specifier: ^19.1.0
-        version: 19.2.3
 
   packages/sdk:
     dependencies:
@@ -226,11 +225,24 @@ importers:
         specifier: ^6.2.5
         version: 6.2.5
 
+  packages/stores:
+    dependencies:
+      '@abe-stack/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      react:
+        specifier: ^19.1.0
+        version: 19.2.3
+
   packages/ui:
     dependencies:
       '@abe-stack/core':
         specifier: workspace:*
         version: link:../core
+      '@abe-stack/stores':
+        specifier: workspace:*
+        version: link:../stores
       react:
         specifier: ^19.2.3
         version: 19.2.3

@@ -45,14 +45,16 @@ export {
 
 // Database - Utils
 export {
-  createMockDb,
   isInTransaction,
   isOptimisticLockError,
   OptimisticLockError,
   updateUserWithVersion,
   withTransaction,
-  type MockDbClient,
 } from './database';
+
+// Note: createMockDb and MockDbClient are NOT exported here.
+// They import vitest which cannot be loaded at runtime.
+// Import directly from './database/utils/test-utils' in test files.
 
 // Database - Schema Validation
 export {

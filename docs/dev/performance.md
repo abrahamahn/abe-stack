@@ -35,7 +35,7 @@ Quick Summary:
 
 See Also:
 
-- `./architecture.md`
+- `../specs/architecture.md`
 - `./testing.md`
 
 ---

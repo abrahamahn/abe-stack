@@ -1,6 +1,6 @@
-// packages/core/src/stores/index.ts
+// packages/stores/src/index.ts
 /**
- * State Stores
+ * @abe-stack/stores
  *
  * Custom React hook-based stores for toast notifications and undo/redo functionality.
  */

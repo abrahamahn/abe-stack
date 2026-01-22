@@ -1,4 +1,4 @@
-// packages/core/src/stores/createStore.ts
+// packages/stores/src/createStore.ts
 /**
  * Custom Store Implementation
  *
@@ -7,6 +7,8 @@
  *
  * @packageDocumentation
  */
+
+import { useSyncExternalStore } from 'react';
 
 /**
  * Store API interface - the methods available on the store object
@@ -37,27 +39,6 @@ type StateCreator<T> = (
   set: (partial: Partial<T> | ((state: T) => Partial<T>)) => void,
   get: () => T,
 ) => T;
-
-// Lazy import for React's useSyncExternalStore
-// This allows the store to work in non-React environments for testing
-let useSyncExternalStore:
-  | (<T>(
-      subscribe: (callback: () => void) => () => void,
-      getSnapshot: () => T,
-      getServerSnapshot?: () => T,
-    ) => T)
-  | undefined;
-
-function getUseSyncExternalStore(): NonNullable<typeof useSyncExternalStore> {
-  if (useSyncExternalStore === undefined) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const React = require('react') as {
-      useSyncExternalStore: NonNullable<typeof useSyncExternalStore>;
-    };
-    useSyncExternalStore = React.useSyncExternalStore;
-  }
-  return useSyncExternalStore;
-}
 
 /**
  * Creates a store with React hook integration.
@@ -117,8 +98,7 @@ export function createStore<T extends object>(createState: StateCreator<T>): Use
 
   // Create the hook
   const useStore = (): T => {
-    const useSyncExternalStoreFn = getUseSyncExternalStore();
-    return useSyncExternalStoreFn(
+    return useSyncExternalStore(
       subscribe,
       getState,
       getState, // Server snapshot (same as client for this use case)

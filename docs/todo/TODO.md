@@ -19,11 +19,11 @@
 > **Goal:** Transition from Product Engineer (gluing libraries) to Systems Engineer (building engines).
 > Stay ultra framework-independent while keeping React + TypeScript.
 
-### 1) Routing
+### 1) Routing ✓
 
-- [ ] Remove `react-router-dom`
-- [ ] Build 20-line `useRouter` hook with `window.history` + `popstate`
-- [ ] Enable Notion-style side-peek views and custom transitions
+- [x] Remove `react-router-dom` ✓ (not in any package.json)
+- [x] Build custom router with `window.history` + `popstate` ✓ (see `packages/ui/src/router/`)
+- [x] Enable Notion-style side-peek views and custom transitions ✓ (see `SidePeek`, `useSidePeek`, `PeekLink`)
 
 ### 2) State/Data
 
@@ -74,7 +74,7 @@
 ### New Responsibilities After Cleanup
 
 - [ ] **Manual Sync** - Own how data flows from DB to UI
-- [ ] **Manual Routing** - Own URL changes and page transitions
+- [x] **Manual Routing** - Own URL changes and page transitions ✓
 - [ ] **Raw Queries** - Own SQL structure and optimization
 
 ---
@@ -88,22 +88,6 @@
 ## High Priority: One-Click Deploy (DigitalOcean / GCP Ubuntu)
 
 **Goal:** clone → env → **one command** → production-ish deployment.
-
-### 1) "Deploy Pack" ✅
-
-See `docs/deploy/README.md` and `docs/log/2026-W04.md`
-
-### 2) Reverse Proxy + TLS ✅
-
-See `docs/deploy/reverse-proxy.md` and `docs/deploy/trusted-proxy-setup.md`
-
-### 3) Database + Migrations ✅
-
-See `docs/deploy/migrations.md`
-
-### 4) "Deploy Targets" ✅
-
-See `docs/deploy/digitalocean.md` and `docs/deploy/gcp.md`
 
 ### 5) CI/CD (keep it simple)
 
@@ -435,7 +419,7 @@ If no to all three, it goes in `docs/ROADMAP.md`. :contentReference[oaicite:38]{
 - [ ] Typing indicators via WebSocket events :contentReference[oaicite:42]{index=42}
 
 - **Deferred features:** See `docs/ROADMAP.md` :contentReference[oaicite:43]{index=43}
-- **Legacy migrations:** See `docs/dev/legacy.md` :contentReference[oaicite:44]{index=44}
+- **Legacy migrations:** See `docs/reference/legacy.md`
 - **Security overview:** See `docs/dev/security.md` :contentReference[oaicite:45]{index=45}
 - **SDK features:** See `packages/sdk/README.md` :contentReference[oaicite:46]{index=46}
 - **Core utilities:** See `packages/core/README.md` :contentReference[oaicite:47]{index=47}

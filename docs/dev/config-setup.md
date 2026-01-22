@@ -719,12 +719,12 @@ Use with `turbo run` or `pnpm --filter`:
 
 ### Related Documentation
 
-| Topic                        | Document                                   |
-| ---------------------------- | ------------------------------------------ |
-| Sync scripts (DX automation) | [sync-scripts.md](./sync-scripts.md)       |
-| Testing, CI/CD, Git hooks    | [dev-environment.md](./dev-environment.md) |
-| Testing strategy             | [testing.md](./testing.md)                 |
-| Architecture overview        | [architecture.md](./architecture.md)       |
+| Topic                        | Document                                    |
+| ---------------------------- | ------------------------------------------- |
+| Sync scripts (DX automation) | [sync-scripts.md](./sync-scripts.md)        |
+| Testing, CI/CD, Git hooks    | [dev-environment.md](./dev-environment.md)  |
+| Testing strategy             | [testing.md](./testing.md)                  |
+| Architecture overview        | [architecture.md](../specs/architecture.md) |
 
 ---
 

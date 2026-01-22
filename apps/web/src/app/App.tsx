@@ -8,8 +8,8 @@
  * - Environment passed as prop (dependency injection)
  */
 
-import { toastStore } from '@abe-stack/core';
 import { createQueryPersister } from '@abe-stack/sdk';
+import { toastStore } from '@abe-stack/stores';
 import { BrowserRouter, HistoryProvider, Route, Routes, ScrollArea, Toaster } from '@abe-stack/ui';
 import { ProtectedRoute } from '@features/auth';
 import { QueryClientProvider } from '@tanstack/react-query';

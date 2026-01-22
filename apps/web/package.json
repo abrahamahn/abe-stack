@@ -15,6 +15,7 @@
   "dependencies": {
     "@abe-stack/core": "workspace:*",
     "@abe-stack/sdk": "workspace:*",
+    "@abe-stack/stores": "workspace:*",
     "@abe-stack/ui": "workspace:*",
     "@tanstack/react-query": "^5.90.19",
     "react": "^19.2.3",

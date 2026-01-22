@@ -1,5 +1,5 @@
 // apps/web/src/features/auth/pages/AuthPage.tsx
-import { toastStore } from '@abe-stack/core';
+import { toastStore } from '@abe-stack/stores';
 import { AuthLayout, useFormState, useNavigate, useSearchParams } from '@abe-stack/ui';
 import { AuthForm, type AuthMode } from '@auth/components/AuthForms';
 import { useAuth } from '@auth/hooks';

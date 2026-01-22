@@ -207,7 +207,7 @@ pnpm test        # Vitest
 ## See Also
 
 - [Architecture Overview](./architecture.md)
-- [Testing Guide](./testing.md)
+- [Testing Guide](../dev/testing.md)
 - [Workflows](../agent/workflows.md)
 
 ---

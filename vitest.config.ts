@@ -35,9 +35,29 @@ export default defineConfig({
         resolve: {
           alias: {
             '@contracts': path.join(repoRoot, 'packages/core/src/contracts'),
-            '@stores': path.join(repoRoot, 'packages/core/src/stores'),
             '@validation': path.join(repoRoot, 'packages/core/src/validation'),
             '@utils': path.join(repoRoot, 'packages/core/src/utils'),
+          },
+        },
+      },
+
+      // packages/stores
+      {
+        test: {
+          name: 'stores',
+          root: path.join(repoRoot, 'packages/stores'),
+          environment: 'node',
+          globals: true,
+          include: ['src/**/*.{test,spec}.ts'],
+          exclude: commonExclude,
+        },
+        resolve: {
+          alias: {
+            '@abe-stack/core': path.join(repoRoot, 'packages/core/src'),
+            '@abe-stack/core/infrastructure/transactions': path.join(
+              repoRoot,
+              'packages/core/src/infrastructure/transactions/index.ts',
+            ),
           },
         },
       },
@@ -56,9 +76,9 @@ export default defineConfig({
           alias: {
             '@abe-stack/core': path.join(repoRoot, 'packages/core/src'),
             '@abe-stack/sdk': path.join(repoRoot, 'packages/sdk/src'),
+            '@abe-stack/stores': path.join(repoRoot, 'packages/stores/src'),
             '@abe-stack/ui': path.join(repoRoot, 'packages/ui/src'),
             '@contracts': path.join(repoRoot, 'packages/core/src/contracts'),
-            '@stores': path.join(repoRoot, 'packages/core/src/stores'),
             '@validation': path.join(repoRoot, 'packages/core/src/validation'),
             '@persistence': path.join(repoRoot, 'packages/sdk/src/persistence'),
           },
@@ -92,6 +112,7 @@ export default defineConfig({
             '@utils': path.join(repoRoot, 'packages/ui/src/utils'),
             '@abe-stack/core': path.join(repoRoot, 'packages/core/src'),
             '@abe-stack/sdk': path.join(repoRoot, 'packages/sdk/src'),
+            '@abe-stack/stores': path.join(repoRoot, 'packages/stores/src'),
             '@abe-stack/ui': path.join(repoRoot, 'packages/ui/src'),
             '@tanstack/react-query': path.join(
               repoRoot,
@@ -338,6 +359,7 @@ export default defineConfig({
             '@test': path.join(repoRoot, 'apps/web/src/__tests__'),
             '@abe-stack/core': path.join(repoRoot, 'packages/core/src'),
             '@abe-stack/sdk': path.join(repoRoot, 'packages/sdk/src'),
+            '@abe-stack/stores': path.join(repoRoot, 'packages/stores/src'),
             '@abe-stack/ui': path.join(repoRoot, 'packages/ui/src'),
             '@elements': path.join(repoRoot, 'packages/ui/src/elements'),
             '@components': path.join(repoRoot, 'packages/ui/src/components'),
@@ -349,7 +371,6 @@ export default defineConfig({
             '@theme': path.join(repoRoot, 'packages/ui/src/theme'),
             '@utils': path.join(repoRoot, 'packages/ui/src/utils'),
             '@contracts': path.join(repoRoot, 'packages/core/src/contracts'),
-            '@stores': path.join(repoRoot, 'packages/core/src/stores'),
             '@validation': path.join(repoRoot, 'packages/core/src/validation'),
           },
         },
@@ -373,6 +394,7 @@ export default defineConfig({
             '@ipc': path.join(repoRoot, 'apps/desktop/src/electron/ipc'),
             '@abe-stack/core': path.join(repoRoot, 'packages/core/src'),
             '@abe-stack/sdk': path.join(repoRoot, 'packages/sdk/src'),
+            '@abe-stack/stores': path.join(repoRoot, 'packages/stores/src'),
             '@abe-stack/ui': path.join(repoRoot, 'packages/ui/src'),
             // UI internal aliases (needed when importing @abe-stack/ui)
             '@elements': path.join(repoRoot, 'packages/ui/src/elements'),
@@ -386,7 +408,6 @@ export default defineConfig({
             '@utils': path.join(repoRoot, 'packages/ui/src/utils'),
             // Core internal aliases
             '@contracts': path.join(repoRoot, 'packages/core/src/contracts'),
-            '@stores': path.join(repoRoot, 'packages/core/src/stores'),
             '@validation': path.join(repoRoot, 'packages/core/src/validation'),
           },
         },

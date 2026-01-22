@@ -1,7 +1,7 @@
 // packages/ui/src/components/Toast.tsx
 import { useEffect, type ReactElement } from 'react';
 
-import type { ToastMessage } from '@abe-stack/core';
+import type { ToastMessage } from '@abe-stack/stores';
 
 import '../styles/components.css';
 

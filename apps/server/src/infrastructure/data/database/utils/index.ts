@@ -8,5 +8,6 @@ export {
 // Transaction utilities
 export { withTransaction, isInTransaction } from './transaction';
 
-// Test utilities
-export { createMockDb, type MockDbClient } from './test-utils';
+// Note: test-utils.ts is NOT exported here intentionally.
+// Test utilities import vitest which cannot be loaded at runtime.
+// Import directly from './test-utils' in test files.

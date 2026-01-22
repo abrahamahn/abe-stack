@@ -1,5 +1,5 @@
 // apps/web/src/features/demo/components/DemoTopBar.tsx
-import { toastStore } from '@abe-stack/core';
+import { toastStore } from '@abe-stack/stores';
 import { Button, Heading, ResizablePanel, Text, useNavigate } from '@abe-stack/ui';
 
 import type { AuthMode } from '@auth/components/AuthForms';

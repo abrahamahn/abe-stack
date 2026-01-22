@@ -21,7 +21,7 @@ Add features here when you have:
 
 ## Milestone 1: V5 Architecture Migration
 
-Restructure from role-based (`apps/`, `packages/`) to layer-based (`frontend/`, `backend/`, `shared/`) architecture. See [Architecture](./dev/architecture.md) for details.
+Restructure from role-based (`apps/`, `packages/`) to layer-based (`frontend/`, `backend/`, `shared/`) architecture. See [Architecture](./specs/architecture.md) for details.
 
 ### Phase 1: Preparation
 
@@ -65,7 +65,7 @@ Restructure from role-based (`apps/`, `packages/`) to layer-based (`frontend/`, 
 
 ## Milestone 2: CHET-Stack Real-Time Features
 
-Add real-time collaboration, offline support, and optimistic updates. See [Architecture](./dev/architecture.md#future-real-time-features).
+Add real-time collaboration, offline support, and optimistic updates. See [Architecture](./specs/architecture.md#future-real-time-features).
 
 ### Phase 1: Foundation
 
@@ -77,7 +77,7 @@ Add real-time collaboration, offline support, and optimistic updates. See [Archi
 
 > **Implementation:** `RecordCache` in `packages/sdk/src/cache/RecordCache.ts` (69 tests)
 > **Partial progress:** WriteService (`apps/server/src/infra/write/`) provides transaction handling, version bumping, and auto-pubsub
-> **Legacy:** See [Database Utilities](./dev/legacy.md#database-utilities) → `TransactionService.ts`, `BatchedQueue.ts`
+> **Legacy:** See [Database Utilities](./reference/legacy.md#database-utilities) → `TransactionService.ts`, `BatchedQueue.ts`
 
 ### Phase 2: Real-Time Sync
 
@@ -107,7 +107,7 @@ Add real-time collaboration, offline support, and optimistic updates. See [Archi
 - [ ] UI indicators for undo/redo availability (use `onStateChange` callback)
 
 > **Implementation:** `packages/sdk/src/undo/UndoRedoStack.ts`
-> **Legacy:** See [Frontend Hooks](./dev/legacy.md#frontend-hooks) → `useShortcut` hook
+> **Legacy:** See [Frontend Hooks](./reference/legacy.md#frontend-hooks) → `useShortcut` hook
 
 ### Phase 5: Permissions
 
@@ -116,7 +116,7 @@ Add real-time collaboration, offline support, and optimistic updates. See [Archi
 - [ ] Permission records loading
 - [ ] Workspace/board/task permission patterns
 
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `permission.service.ts`, `role.service.ts`, `rbac.middleware.ts`
+> **Legacy:** See [Backend Utilities](./reference/legacy.md#backend-utilities) → `permission.service.ts`, `role.service.ts`, `rbac.middleware.ts`
 
 ### Phase 6: React Hooks
 
@@ -125,7 +125,7 @@ Add real-time collaboration, offline support, and optimistic updates. See [Archi
 - [ ] `useWrite()` - optimistic write with queue
 - [ ] `useUndoRedo()` - undo/redo controls
 
-> **Legacy:** See [Frontend Hooks](./dev/legacy.md#frontend-hooks) → `useAsync`, `useRefCurrent`, `useRefPrevious`
+> **Legacy:** See [Frontend Hooks](./reference/legacy.md#frontend-hooks) → `useAsync`, `useRefCurrent`, `useRefPrevious`
 
 ---
 
@@ -151,7 +151,7 @@ Enhanced authentication with Passport.js and additional security hardening.
 - [ ] Create strategy enable/disable configuration
 - [ ] Update auth routes to use Passport.js
 
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `authHelpers.ts`, `cookieUtils.ts`, `csrfUtils.ts`; [Potential Migrations](./dev/legacy.md#session-management) → Session module
+> **Legacy:** See [Backend Utilities](./reference/legacy.md#backend-utilities) → `authHelpers.ts`, `cookieUtils.ts`, `csrfUtils.ts`; [Potential Migrations](./reference/legacy.md#session-management) → Session module
 
 ### Phase 3: Additional Auth Methods (Passport.js)
 
@@ -162,7 +162,7 @@ Enhanced authentication with Passport.js and additional security hardening.
 - [ ] WebAuthn registration/authentication UI
 - [ ] Passkey management UI (list, rename, delete)
 
-> **Legacy:** See [Token Utilities](./dev/legacy.md#token-utilities) → `generateSecureToken()`, `hashToken()`; [Backend Utilities](./dev/legacy.md#backend-utilities) → `verification.service.ts`; [Security Utilities](./dev/legacy.md#security-utilities) → Encryption utilities
+> **Legacy:** See [Token Utilities](./reference/legacy.md#token-utilities) → `generateSecureToken()`, `hashToken()`; [Backend Utilities](./reference/legacy.md#backend-utilities) → `verification.service.ts`; [Security Utilities](./reference/legacy.md#security-utilities) → Encryption utilities
 
 ### Phase 4: Social/OAuth Providers (Passport.js)
 
@@ -174,7 +174,7 @@ Enhanced authentication with Passport.js and additional security hardening.
 - [ ] OAuth connection management UI
 - [ ] Account linking (multiple providers per account)
 
-> **Legacy:** See [Auth DTOs](./dev/legacy.md#auth-dtos); [Backend Utilities](./dev/legacy.md#backend-utilities) → `TokenManager.ts`, `TokenStorageService.ts`
+> **Legacy:** See [Auth DTOs](./reference/legacy.md#auth-dtos); [Backend Utilities](./reference/legacy.md#backend-utilities) → `TokenManager.ts`, `TokenStorageService.ts`
 
 ### Phase 5: Advanced Features
 
@@ -184,7 +184,7 @@ Enhanced authentication with Passport.js and additional security hardening.
 - [ ] Device/session management UI
 - [ ] "Remember this device" functionality
 
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `mfa.service.ts`, `InMemoryTokenBlacklist.ts`; [Potential Migrations](./dev/legacy.md#security-utilities) → Encryption utilities
+> **Legacy:** See [Backend Utilities](./reference/legacy.md#backend-utilities) → `mfa.service.ts`, `InMemoryTokenBlacklist.ts`; [Potential Migrations](./reference/legacy.md#security-utilities) → Encryption utilities
 
 ### Database Schema Updates Required
 
@@ -210,7 +210,7 @@ These are specific to product types, not boilerplate infrastructure.
 - [x] `LoaderCache` for Suspense-friendly, deduped loaders → `@abe-stack/sdk/cache`
 
 > **Implementation:** `packages/sdk/src/subscriptions/SubscriptionCache.ts`, `packages/sdk/src/cache/LoaderCache.ts`
-> **Legacy:** See [Frontend Components](./dev/legacy.md#frontend-components) → Social components
+> **Legacy:** See [Frontend Components](./reference/legacy.md#frontend-components) → Social components
 
 ### For Music Streaming / Marketplace
 
@@ -225,7 +225,7 @@ These are specific to product types, not boilerplate infrastructure.
   - Audio waveform generation
 - [ ] **Stream processor** for large file handling
 
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `MediaProcessor.ts`, `StreamProcessor.ts`, `ImageProcessor.ts`; [Frontend Components](./dev/legacy.md#frontend-components) → Media components (`AudioPlayer`, `VideoPlayer`); [Frontend Formatters](./dev/legacy.md#frontend-formatters) → `formatDuration()`
+> **Legacy:** See [Backend Utilities](./reference/legacy.md#backend-utilities) → `MediaProcessor.ts`, `StreamProcessor.ts`, `ImageProcessor.ts`; [Frontend Components](./reference/legacy.md#frontend-components) → Media components (`AudioPlayer`, `VideoPlayer`); [Frontend Formatters](./reference/legacy.md#frontend-formatters) → `formatDuration()`
 
 ### For AI Fitness Coach
 
@@ -234,7 +234,7 @@ These are specific to product types, not boilerplate infrastructure.
 - [ ] Progress photo analysis (uses image processing)
 - [ ] Calendar/scheduling integration
 
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `JobService.ts`, `baseJobProcessor.ts`, `ImageProcessor.ts`
+> **Legacy:** See [Backend Utilities](./reference/legacy.md#backend-utilities) → `JobService.ts`, `baseJobProcessor.ts`, `ImageProcessor.ts`
 
 ### For Calendar Aggregator
 
@@ -243,7 +243,7 @@ These are specific to product types, not boilerplate infrastructure.
 - [ ] Conflict detection
 - [ ] Unified calendar view
 
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `JobService.ts`, `JobQueue.ts`; [Potential Migrations](./dev/legacy.md#common-utilities) → Date helpers
+> **Legacy:** See [Backend Utilities](./reference/legacy.md#backend-utilities) → `JobService.ts`, `JobQueue.ts`; [Potential Migrations](./reference/legacy.md#common-utilities) → Date helpers
 
 ---
 
@@ -260,7 +260,7 @@ Wrap Drizzle with repository pattern for testability.
 - [ ] Case conversion (camelCase ↔ snake_case) if needed
 - [ ] Easier mocking in tests
 
-> **Legacy:** See [Potential Migrations](./dev/legacy.md#repository-layer)
+> **Legacy:** See [Potential Migrations](./reference/legacy.md#repository-layer)
 
 ### Base Classes (DDD)
 
@@ -270,7 +270,7 @@ Abstract base classes for consistent patterns across modules.
 - [ ] **BaseService** - business logic orchestration with transaction helpers
 - [ ] **BaseJobProcessor** - job queue processors with timing, error handling
 
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `baseModel.ts`, `baseService.ts`, `baseJobProcessor.ts`
+> **Legacy:** See [Backend Utilities](./reference/legacy.md#backend-utilities) → `baseModel.ts`, `baseService.ts`, `baseJobProcessor.ts`
 
 ### Interface-First Services
 
@@ -281,7 +281,7 @@ For critical infrastructure, define interfaces.
 - [ ] `IWebSocketService` interface for real-time
 - [ ] Enables swapping implementations without code changes
 
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `CacheService.ts`, `JobService.ts`, `WebSocketService.ts` (reference implementations)
+> **Legacy:** See [Backend Utilities](./reference/legacy.md#backend-utilities) → `CacheService.ts`, `JobService.ts`, `WebSocketService.ts` (reference implementations)
 
 ### Error Handling Middleware
 
@@ -293,7 +293,7 @@ Better debugging in production.
 - [ ] Conditional logging by severity (500+ vs client errors)
 
 > **Implementation:** Errors in `packages/core/src/errors/`, Logging in `apps/server/src/infra/logger/`
-> **Legacy:** See [Error Classes](./dev/legacy.md#error-classes); [Backend Utilities](./dev/legacy.md#backend-utilities) → `ErrorHandler.ts`, `LoggerService.ts`; [Potential Migrations](./dev/legacy.md#structured-logging)
+> **Legacy:** See [Error Classes](./reference/legacy.md#error-classes); [Backend Utilities](./reference/legacy.md#backend-utilities) → `ErrorHandler.ts`, `LoggerService.ts`; [Potential Migrations](./reference/legacy.md#structured-logging)
 
 ### Advanced Architecture
 
@@ -304,7 +304,7 @@ Better debugging in production.
 - [ ] Generate fetch/React Query clients from ts-rest contract
 
 > **Implementation:** `apps/server/src/infra/router/` (route registry), `apps/server/src/infra/queue/` (QueueServer)
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `ServerManager.ts`, `ApplicationLifecycle.ts`
+> **Legacy:** See [Backend Utilities](./reference/legacy.md#backend-utilities) → `ServerManager.ts`, `ApplicationLifecycle.ts`
 
 ---
 
@@ -331,7 +331,7 @@ Do when you have bandwidth:
 - [ ] **Dynamic/conditional Vite config** based on `mode` (dev vs build vs preview)
 - [ ] Code consistency: standardize arrow functions with forwardRef in UI package
 
-> **Legacy:** See [Potential Migrations](./dev/legacy.md#infrastructure) → Test infrastructure (mocks, TestFactory, ApiTestClient)
+> **Legacy:** See [Potential Migrations](./reference/legacy.md#infrastructure) → Test infrastructure (mocks, TestFactory, ApiTestClient)
 
 ---
 
@@ -341,7 +341,7 @@ Do when you have bandwidth:
 - [ ] Location caching (24h TTL)
 - [ ] GDPR consent handling
 
-> **Legacy:** See [Backend Utilities](./dev/legacy.md#backend-utilities) → `geo.middleware.ts`
+> **Legacy:** See [Backend Utilities](./reference/legacy.md#backend-utilities) → `geo.middleware.ts`
 
 ---
 

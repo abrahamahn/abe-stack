@@ -726,3 +726,174 @@
   bottom: var(--ui-gap-lg);
   left: var(--ui-gap-lg);
 }
+
+/* ============================================================================
+   Side Peek (Notion-style slide-out panel)
+   ============================================================================ */
+
+.side-peek-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  z-index: 999;
+  transition: background 0.2s ease-out;
+}
+
+.side-peek-overlay--open {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.side-peek {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  background: var(--ui-color-bg);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.2s ease-out;
+  overflow: hidden;
+}
+
+.side-peek--open {
+  transform: translateX(0);
+}
+
+/* Size variants */
+.side-peek--sm {
+  width: 320px;
+  max-width: 100vw;
+}
+
+.side-peek--md {
+  width: 480px;
+  max-width: 100vw;
+}
+
+.side-peek--lg {
+  width: 640px;
+  max-width: 100vw;
+}
+
+.side-peek--xl {
+  width: 800px;
+  max-width: 100vw;
+}
+
+.side-peek--full {
+  width: 100vw;
+}
+
+/* Responsive: smaller screens get full width */
+@media (max-width: 640px) {
+  .side-peek--sm,
+  .side-peek--md,
+  .side-peek--lg,
+  .side-peek--xl {
+    width: 100vw;
+  }
+}
+
+/* Header */
+.side-peek-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ui-gap-md);
+  padding: var(--ui-gap-md) var(--ui-gap-lg);
+  border-bottom: 1px solid var(--ui-color-border);
+  flex-shrink: 0;
+}
+
+/* Title */
+.side-peek-title {
+  margin: 0;
+  font-size: var(--ui-font-size-lg);
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Description */
+.side-peek-description {
+  margin: 0;
+  font-size: var(--ui-font-size-sm);
+  color: var(--ui-color-muted);
+}
+
+/* Content */
+.side-peek-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--ui-gap-lg);
+}
+
+/* Footer */
+.side-peek-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--ui-gap-sm);
+  padding: var(--ui-gap-md) var(--ui-gap-lg);
+  border-top: 1px solid var(--ui-color-border);
+  flex-shrink: 0;
+}
+
+/* Close button */
+.side-peek-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--ui-color-muted);
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: var(--ui-radius-sm);
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.side-peek-close:hover {
+  background: var(--ui-color-subtle);
+  color: var(--ui-color-text);
+}
+
+/* Expand button (open in full page) */
+.side-peek-expand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--ui-color-muted);
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: var(--ui-radius-sm);
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.side-peek-expand:hover {
+  background: var(--ui-color-subtle);
+  color: var(--ui-color-text);
+}
+
+/* PeekLink active state */
+[data-peek-active] {
+  color: var(--ui-color-primary);
+}

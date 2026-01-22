@@ -2,7 +2,8 @@
 // @auto-generated - Do not edit manually
 
 export { AuthLayout, Container, PageContainer, StackedLayout } from './containers';
-export { Modal, Overlay, ProtectedRoute, ScrollArea } from './layers';
+export { Modal, Overlay, ProtectedRoute, ScrollArea, SidePeek } from './layers';
+export type { SidePeekRootProps, SidePeekSize } from './layers';
 export {
   AppShell,
   BottombarLayout,

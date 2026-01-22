@@ -362,7 +362,7 @@ Based on CHET-Stack patterns. Core infrastructure is now complete.
 ## See Also
 
 - [Principles & Standards](./principles.md)
-- [Testing Guide](./testing.md)
+- [Testing Guide](../dev/testing.md)
 - [Workflows](../agent/workflows.md)
 
 ---
