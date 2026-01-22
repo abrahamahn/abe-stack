@@ -22,16 +22,7 @@ Minimal production ops pack: structured logs already started, but also:
 
 ## Immediate: Code Review
 
-- [x] Review OAuth implementation (type errors in tests, verify endpoints work) - **All items complete**
-  - See `docs/log/2026-W04.md` for detailed fixes (Apple signature verification, redirect URI security, route registration)
-  - [x] **Medium:** Add rate limiting to OAuth endpoints (DoS prevention) - Added to `rateLimitPresets.ts`
-  - [x] **Medium:** N+1 queries in findUserByOAuthProvider and unlinkOAuthAccount - Optimized with JOINs and Promise.all
-  - [x] **Low:** Add audit logging for OAuth events (login, link, unlink) - Added to `security/events.ts`
-  - [x] **Low:** Implement OAuth token refresh background job - Created `jobs/scheduled/oauthTokenRefresh.ts`
-
-- [x] Review Magic Links implementation - **All items complete** (see `docs/log/2026-W04.md`)
-
-- [ ] Smoke test: Web + Server + Desktop “happy path” on a clean machine (no local dev shortcuts)
+- [ ] Smoke test: Web + Server + Desktop "happy path" on a clean machine (no local dev shortcuts)
 
 ---
 
