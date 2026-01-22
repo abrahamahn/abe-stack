@@ -1,23 +1,59 @@
 # ABE Stack
 
-> A boilerplate that ships, not a framework you fight.
+**A full-stack TypeScript boilerplate for shipping real apps — fast.**
 
-I kept rebuilding the same foundation for every project: monorepo setup, authentication, database layer, UI components, testing infrastructure, Docker, CI pipelines. Weeks of work before writing any actual product code.
+I got tired of spending weeks on every new project just setting up the same things: monorepo config, auth, database, UI components, testing, Docker, CI... only to finally start building what actually mattered.
 
-ABE Stack is that foundation, extracted and refined. It handles auth, security, data layer, and UI so you can focus on what makes your product different.
+So I built **ABE Stack** — one clean, production-ready foundation that powers web, desktop, and backend from a single repo. The goal? Let you (and me) go from idea to deployed app in days instead of months.
 
-## Features
-
-- **Cookie-based auth** — JWT with refresh rotation, account lockout, audit logging
-- **Realtime updates** — WebSocket pub/sub with automatic reconnection
-- **Offline mode** — Mutation queue syncs when connection returns
-- **Undo/redo** — Built-in operation history with grouping support
-- **End-to-end testing** — Playwright E2E, Vitest unit tests, 5,300+ tests total
-- **Runs in a single process** — Scales when you need to
+https://github.com/abrahamahn/abe-stack
 
 ---
 
-## Getting Started
+## Why I Built This
+
+- **One codebase, multiple platforms** → Web (Vite + React), Desktop (Electron), and a Fastify backend
+- **No framework lock-in** → React is just the renderer. All real logic lives in shared packages — swap UI layers later if you want
+- **Speed without chaos** → Turborepo caching, parallel builds, minimal config
+- **Production-ready from day one** → Secure defaults, Docker, strict types, env validation
+- **Joyful development** → Fast feedback, zero config fatigue, everything just works
+
+---
+
+## What's Inside
+
+### Core Stack
+
+- Monorepo powered by **Turborepo + pnpm** workspaces
+- Frontend: **React 19** (web via Vite, desktop via Electron)
+- Backend: **Fastify + Drizzle ORM + PostgreSQL**
+- API: Type-safe contracts with **ts-rest + Zod**
+- Auth: JWT with refresh rotation, password reset, email verification, role-based access
+- Pagination: Cursor-based pagination for feeds and lists (50k+ users ready)
+
+### Security (Enterprise Grade)
+
+- **Security Headers**: CSP with nonce-based execution, COEP/COOP/CORP cross-origin isolation, HSTS
+- **Rate Limiting**: Role-based limits (Admin: 1000/min, Premium: 500/min, Basic: 50/min) with progressive delays
+- **CSRF Protection**: AES-256-GCM encrypted tokens with timing-safe comparison
+- **Input Validation**: XSS prevention, SQL/NoSQL injection detection, comprehensive sanitization
+- **Audit Logging**: Security event tracking, intrusion detection, risk scoring (0-100)
+- **File Uploads**: HMAC-signed URLs, content validation, size limits
+
+### Quality & Developer Experience
+
+- Full **TypeScript strict mode** with end-to-end type safety
+- **5,300+ tests** (Vitest unit tests + Playwright E2E)
+- ESLint + Prettier + git hooks (no bad code slips through)
+- Shared UI library: 16 components, 25 elements, 13 hooks, 14 layouts (demo at `/demo`)
+- State: React Query for server state, offline mutation queue
+- Theming, hooks, layouts, resizable panels — all reusable
+
+---
+
+## Quick Start
+
+### Option 1: Local Development
 
 ```bash
 git clone https://github.com/abrahamahn/abe-stack.git && cd abe-stack
@@ -29,68 +65,103 @@ pnpm dev
 
 Open [localhost:3000](http://localhost:3000).
 
-**Or with Docker:**
+### Option 2: Docker
 
 ```bash
+git clone https://github.com/abrahamahn/abe-stack.git && cd abe-stack
 docker compose -f config/docker/docker-compose.yml up --build
 ```
 
 ---
 
-## What Makes This Different
+## Repository Layout
 
-### The SDK Does More Than Fetch
-
-Most boilerplates give you a typed API client and call it a day. This SDK handles what happens when the network isn't reliable:
-
-- **Mutation queue** — Writes are queued when offline and replayed on reconnect
-- **Record cache** — In-memory cache with optimistic updates and conflict resolution
-- **Persistence** — IndexedDB storage with localStorage fallback
-- **Undo/redo** — Operation history with grouping support
-
-The architecture is inspired by Notion's data layer — everything can run in a single process, but the abstractions make it easy to break pieces out when you need to scale.
-
-### The Server Is Production-Ready
-
-Not a toy example. The Fastify server includes everything you need:
-
-- **Auth that works** — JWT tokens with refresh rotation, password reset flow, email verification, role-based access control
-- **Security defaults** — CSP headers with nonce-based scripts, COEP/COOP/CORP isolation, HSTS, encrypted CSRF tokens
-- **Rate limiting** — Per-route limits with role-based overrides
-- **Audit logging** — Track login attempts, password changes, suspicious activity
-- **WebSocket pub/sub** — Real-time updates with automatic channel management
-
-### Strict TypeScript, No Exceptions
-
-Every line of code passes the same standards:
-
-- **`strict: true`** — All strict flags enabled (noImplicitAny, strictNullChecks, etc.)
-- **No `any` types** — Use `unknown` and type guards instead
-- **No `eslint-disable`** — Fix the issue, don't silence it
-- **Explicit return types** — Required on exported functions
-- **Zod validation** — Runtime type checking at API boundaries
+```
+abe-stack/
+├── apps/
+│   ├── web/          # Vite + React web app
+│   ├── desktop/      # Electron app (shares code with web)
+│   └── server/       # Fastify API (enterprise security, audit logging)
+├── packages/
+│   ├── core/         # Contracts, validation, stores, errors, media
+│   ├── ui/           # 16 components, 25 elements, 13 hooks, 14 layouts
+│   ├── sdk/          # Type-safe API client + React Query + offline support
+│   └── tests/        # Shared test utilities and mocks
+├── config/           # Docker, env, test configs
+├── tools/            # Dev scripts (sync watchers, audit tools)
+└── docs/             # Documentation
+```
 
 ---
 
-## Structure
+## Architecture
 
-### Apps
+```
+apps/*           → Thin renderers (just UI)
+                 ↓
+packages/*       → Where the real logic lives (shared, framework-agnostic)
+```
 
-| App            | Stack                          | Purpose                            |
-| -------------- | ------------------------------ | ---------------------------------- |
-| `apps/web`     | Vite + React 19                | Web frontend                       |
-| `apps/desktop` | Electron                       | Desktop app (shares code with web) |
-| `apps/server`  | Fastify + Drizzle + PostgreSQL | API backend                        |
+**Dependency rule:** Apps import packages. Packages never import apps. Change your mind about React later? Only touch `apps/`. Everything else stays.
 
-### Packages
+---
 
-| Package           | Purpose                                    | Docs                                                       |
-| ----------------- | ------------------------------------------ | ---------------------------------------------------------- |
-| `@abe-stack/core` | Contracts, validation, stores, error types | [`packages/core/README.md`](packages/core/README.md)       |
-| `@abe-stack/ui`   | 25 elements, 16 components, 14 layouts     | [`packages/ui/docs/README.md`](packages/ui/docs/README.md) |
-| `@abe-stack/sdk`  | API client, caching, offline, undo/redo    | [`packages/sdk/README.md`](packages/sdk/README.md)         |
+## SDK Features
 
-> **Dependency rule:** Apps import packages. Packages never import apps. Domain logic stays framework-agnostic.
+_Inspired by [chet-stack](https://github.com/ccorcos/chet-stack) — particularly the offline-first data layer, real-time sync, and undo/redo patterns._
+
+- **Type-safe API Client** — Built on ts-rest with automatic request/response typing
+- **React Query Integration** — Custom hooks for data fetching with caching
+- **Pagination Hooks** — `usePaginatedQuery` for infinite scroll, `useOffsetPaginatedQuery` for traditional pagination
+- **Offline Mutation Queue** — Queue mutations when offline, auto-sync when back online
+- **Query Persister** — Persist React Query cache to localStorage for instant hydration
+- **WebSocket Client** — Auto-reconnecting PubSub with exponential backoff
+- **Record Cache** — Type-safe in-memory cache with version conflict resolution and optimistic updates
+- **Record Storage** — IndexedDB persistence with automatic fallback to localStorage
+- **Undo/Redo Stack** — Generic operation history with grouping support
+
+---
+
+## Core Package
+
+- **API Contracts** — Type-safe contracts with ts-rest for client-server communication
+- **Validation Schemas** — Zod schemas for runtime validation (auth, user, environment)
+- **Pagination System** — Cursor-based pagination with encoding/decoding utilities
+- **Shared Stores** — Framework-agnostic stores (toastStore, tokenStore)
+- **Error Types** — Custom HTTP error classes with utilities
+
+---
+
+## Development Automation
+
+`pnpm dev` runs all sync watchers in watch mode (quiet by default):
+
+| Tool                | Purpose                                                          |
+| ------------------- | ---------------------------------------------------------------- |
+| `sync-path-aliases` | Auto-generates TS path aliases when directories add `index.ts`   |
+| `sync-file-headers` | Adds `// path/to/file.ts` headers on new files                   |
+| `sync-test-folders` | Creates `__tests__/` folders for code directories                |
+| `sync-tsconfig`     | Auto-generates TypeScript project references                     |
+| `sync-linting`      | Syncs linting config to `package.json` + `.vscode/settings.json` |
+| `sync-css-theme`    | Rebuilds `theme.css` when theme tokens change                    |
+
+**Path alias configuration:**
+
+- Max depth: 3 levels from `src/` (e.g., `src/features/auth/components`)
+- Excluded names: `utils`, `helpers`, `types`, `constants` (use relative imports)
+- Shallower directories win for duplicate names
+
+---
+
+## Audit Tools
+
+```bash
+pnpm audit:deps      # Dependency analysis (unused, outdated, security)
+pnpm audit:security  # Security vulnerability scanning with CVSS scores
+pnpm audit:build     # Bundle size monitoring and optimization suggestions
+pnpm audit:bundle    # Build performance analysis and bottleneck detection
+pnpm audit:all       # Run all audit tools
+```
 
 ---
 
@@ -139,28 +210,9 @@ Every line of code passes the same standards:
 
 ---
 
-## Repository Layout
-
-```
-abe-stack/
-├── apps/
-│   ├── web/              # React frontend
-│   ├── desktop/          # Electron app
-│   └── server/           # Fastify API
-├── packages/
-│   ├── core/             # Shared domain logic
-│   ├── ui/               # Component library
-│   └── sdk/              # API client and data layer
-├── config/               # Build and environment configs
-├── tools/                # Development scripts
-└── docs/                 # Documentation
-```
-
----
-
 ## Roadmap
 
-See [`docs/ROADMAP.md`](docs/ROADMAP.md) for planned features:
+See [`docs/todo/ROADMAP.md`](docs/todo/ROADMAP.md) for planned features:
 
 - **MFA** — TOTP support with authenticator apps
 - **Data handling templates** — GDPR/HIPAA patterns
@@ -169,7 +221,9 @@ See [`docs/ROADMAP.md`](docs/ROADMAP.md) for planned features:
 
 ## Contributing
 
-Issues and pull requests welcome.
+Found a bug? Want to add a feature? Have a better way to do something?
+
+Open an issue or PR. All contributions welcome.
 
 ---
 
@@ -179,6 +233,5 @@ MIT © 2026 ABE Stack Contributors
 
 ---
 
-Built to ship faster. Now it's yours.
-
-[GitHub](https://github.com/abrahamahn/abe-stack)
+Built by one developer who just wanted to ship faster.
+Now it's yours too.
