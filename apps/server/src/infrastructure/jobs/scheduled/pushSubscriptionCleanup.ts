@@ -171,7 +171,7 @@ export async function cleanupPushSubscriptions(
       )
     `);
 
-    batchDeleted = Number((result as unknown as { rowCount?: number }).rowCount ?? 0);
+    batchDeleted = (result as unknown as { rowCount?: number }).rowCount ?? 0;
     totalDeleted += batchDeleted;
 
     // Continue until no more records to delete

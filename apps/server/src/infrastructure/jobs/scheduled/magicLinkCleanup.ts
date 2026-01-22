@@ -126,7 +126,7 @@ export async function cleanupMagicLinkTokens(
         )
       `);
 
-      batchDeleted = Number((result as { rowCount?: number }).rowCount ?? 0);
+      batchDeleted = (result as { rowCount?: number }).rowCount ?? 0;
       deletedCount += batchDeleted;
 
       // Continue until no more records to delete

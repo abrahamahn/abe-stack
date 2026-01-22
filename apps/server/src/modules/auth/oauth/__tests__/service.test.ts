@@ -148,6 +148,17 @@ function createMockDb(): MockDbClientExtended & DbClient {
     })),
   }));
 
+  // Create select chain mock for findUserByOAuthProvider (JOIN query)
+  const mockSelect = vi.fn(() => {
+    const chain = {
+      from: vi.fn().mockReturnThis(),
+      innerJoin: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      limit: vi.fn(() => Promise.resolve([])),
+    };
+    return chain;
+  });
+
   return {
     query: {
       oauthConnections: {
@@ -159,6 +170,7 @@ function createMockDb(): MockDbClientExtended & DbClient {
         findMany: vi.fn(),
       },
     },
+    select: mockSelect,
     insert: mockInsert,
     update: mockUpdate,
     delete: mockDelete,
@@ -335,24 +347,31 @@ describe('findUserByOAuthProvider', () => {
   test('should return null when no connection found', async () => {
     const db = createMockDb();
 
-    vi.mocked(db.query.oauthConnections.findFirst).mockResolvedValue(null);
+    // The function uses db.select() with JOIN, returns empty array if not found
+    const selectChain = {
+      from: vi.fn().mockReturnThis(),
+      innerJoin: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue([]),
+    };
+    vi.mocked(db.select as ReturnType<typeof vi.fn>).mockReturnValue(selectChain);
 
     const result = await findUserByOAuthProvider(db, 'google', 'google-123');
 
     expect(result).toBeNull();
   });
 
-  test('should return null when user not found', async () => {
+  test('should return null when JOIN returns empty result', async () => {
     const db = createMockDb();
 
-    vi.mocked(db.query.oauthConnections.findFirst).mockResolvedValue({
-      id: 'conn-1',
-      userId: 'user-123',
-      provider: 'google',
-      providerUserId: 'google-123',
-    });
-
-    vi.mocked(db.query.users.findFirst).mockResolvedValue(null);
+    // Return empty array (no matching user/connection)
+    const selectChain = {
+      from: vi.fn().mockReturnThis(),
+      innerJoin: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue([]),
+    };
+    vi.mocked(db.select as ReturnType<typeof vi.fn>).mockReturnValue(selectChain);
 
     const result = await findUserByOAuthProvider(db, 'google', 'google-123');
 
@@ -362,19 +381,19 @@ describe('findUserByOAuthProvider', () => {
   test('should return user info when found', async () => {
     const db = createMockDb();
 
-    vi.mocked(db.query.oauthConnections.findFirst).mockResolvedValue({
-      id: 'conn-1',
-      userId: 'user-123',
-      provider: 'google',
-      providerUserId: 'google-123',
-    });
-
-    vi.mocked(db.query.users.findFirst).mockResolvedValue({
-      id: 'user-123',
-      email: 'user@example.com',
-      name: 'Test User',
-      role: 'user',
-    });
+    // Return user data from JOIN query
+    const selectChain = {
+      from: vi.fn().mockReturnThis(),
+      innerJoin: vi.fn().mockReturnThis(),
+      where: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockResolvedValue([
+        {
+          userId: 'user-123',
+          email: 'user@example.com',
+        },
+      ]),
+    };
+    vi.mocked(db.select as ReturnType<typeof vi.fn>).mockReturnValue(selectChain);
 
     const result = await findUserByOAuthProvider(db, 'google', 'google-123');
 

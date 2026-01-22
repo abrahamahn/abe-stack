@@ -267,8 +267,33 @@ describe('createSqlSearchProvider', () => {
 describe('LIKE wildcard escaping', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Re-establish the mock chain after clearing
+    mockSelect.mockReturnValue({ from: mockFrom });
+    mockFrom.mockReturnValue({
+      where: mockWhere,
+      orderBy: mockOrderBy,
+      limit: mockLimit,
+      offset: mockOffset,
+    });
+    mockWhere.mockReturnValue({
+      orderBy: mockOrderBy,
+      limit: mockLimit,
+      offset: mockOffset,
+      groupBy: mockGroupBy,
+    });
+    mockOrderBy.mockReturnValue({
+      limit: mockLimit,
+      offset: mockOffset,
+    });
+    mockLimit.mockReturnValue({
+      offset: mockOffset,
+    });
     mockOffset.mockResolvedValue([]);
-    mockLimit.mockResolvedValue([]);
+    mockGroupBy.mockReturnValue({
+      orderBy: mockOrderBy,
+      limit: mockLimit,
+      offset: mockOffset,
+    });
   });
 
   test('should escape % wildcard in CONTAINS filter', async () => {
@@ -347,8 +372,33 @@ describe('LIKE wildcard escaping', () => {
 describe('Query complexity limits', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Re-establish the mock chain after clearing
+    mockSelect.mockReturnValue({ from: mockFrom });
+    mockFrom.mockReturnValue({
+      where: mockWhere,
+      orderBy: mockOrderBy,
+      limit: mockLimit,
+      offset: mockOffset,
+    });
+    mockWhere.mockReturnValue({
+      orderBy: mockOrderBy,
+      limit: mockLimit,
+      offset: mockOffset,
+      groupBy: mockGroupBy,
+    });
+    mockOrderBy.mockReturnValue({
+      limit: mockLimit,
+      offset: mockOffset,
+    });
+    mockLimit.mockReturnValue({
+      offset: mockOffset,
+    });
     mockOffset.mockResolvedValue([]);
-    mockLimit.mockResolvedValue([]);
+    mockGroupBy.mockReturnValue({
+      orderBy: mockOrderBy,
+      limit: mockLimit,
+      offset: mockOffset,
+    });
   });
 
   test('should throw QueryTooComplexError when filter depth exceeds limit', async () => {

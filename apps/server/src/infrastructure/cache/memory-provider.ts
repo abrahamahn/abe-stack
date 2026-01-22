@@ -114,7 +114,7 @@ export class MemoryCacheProvider implements CacheProvider {
     return Promise.resolve(node.value as T);
   }
 
-  set<T extends unknown>(key: string, value: T, options: CacheSetOptions = {}): Promise<void> {
+  set<T>(key: string, value: T, options: CacheSetOptions = {}): Promise<void> {
     const fullKey = this.getFullKey(key);
     const ttl = options.ttl ?? this.config.defaultTtl;
     const expiresAt = ttl > 0 ? Date.now() + ttl : undefined;
