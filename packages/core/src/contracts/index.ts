@@ -2,8 +2,19 @@
 /**
  * API Contracts
  *
- * ts-rest API contract definitions and Zod validation schemas.
+ * API contract definitions and Zod validation schemas.
  */
+
+// Contract type definitions
+export type {
+  Contract,
+  ContractRouter,
+  EndpointDef,
+  HttpMethod,
+  QueryParams,
+  RequestBody,
+  SuccessResponse,
+} from './types';
 
 // Combined API contract
 export { apiContract } from './api';
@@ -95,8 +106,8 @@ export type {
 } from './pagination';
 
 // Users contract
-export { USER_ROLES, userResponseSchema, userRoleSchema, userSchema, usersContract } from './users';
-export type { User, UserResponse, UserRole } from './users';
+export { userRoleSchema, userSchema, usersContract } from './users';
+export type { User, UserRole } from './users';
 
 // OAuth contract
 export {

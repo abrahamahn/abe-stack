@@ -197,6 +197,8 @@ describe('handleMagicLinkRequest', () => {
 // ============================================================================
 
 describe('handleMagicLinkVerify', () => {
+  const createdAt = new Date('2024-01-01T00:00:00.000Z').toISOString();
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -215,6 +217,7 @@ describe('handleMagicLinkVerify', () => {
         email: 'test@example.com',
         name: 'Test User',
         role: 'user' as const,
+        createdAt,
       },
     };
 

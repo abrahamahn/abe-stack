@@ -1,4 +1,4 @@
-// packages/core/src/media/types.ts
+// packages/media/src/types.ts
 /**
  * Core Media Processing Types
  *

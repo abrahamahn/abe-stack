@@ -187,12 +187,32 @@ describe('Concurrent Same-Email Registration', () => {
 
     await registerUser(db, emailService, TEST_CONFIG, email, password, 'First User', baseUrl);
 
-    // Second registration should fail
-    vi.mocked(db.query.users.findFirst).mockResolvedValueOnce({ id: 'user-123', email });
+    // Second registration should return success (to prevent user enumeration)
+    vi.mocked(db.query.users.findFirst).mockResolvedValueOnce({
+      id: 'user-123',
+      email,
+      name: 'First User',
+      passwordHash: 'hash',
+      role: 'user',
+      emailVerified: true,
+      emailVerifiedAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      version: 1,
+    });
 
-    await expect(
-      registerUser(db, emailService, TEST_CONFIG, email, password, 'Second User', baseUrl),
-    ).rejects.toThrow(EmailAlreadyExistsError);
+    const result = await registerUser(
+      db,
+      emailService,
+      TEST_CONFIG,
+      email,
+      password,
+      'Second User',
+      baseUrl,
+    );
+    expect(result.status).toBe('pending_verification');
+    // Should send notification email to existing user
+    expect(emailService.send).toHaveBeenCalledTimes(2); // First registration + notification
   });
 
   test('should handle race condition with database constraint', async () => {

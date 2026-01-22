@@ -1,4 +1,4 @@
-// packages/core/src/media/__tests__/file-type.test.ts
+// packages/media/src/__tests__/file-type.test.ts
 import { describe, expect, test, vi } from 'vitest';
 
 import {

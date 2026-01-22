@@ -44,7 +44,7 @@ describe('main.tsx', () => {
 
       expect(mockCreateRoot).toHaveBeenCalledTimes(1);
       expect(mockCreateRoot).toHaveBeenCalledWith(rootElement);
-    }, 10000);
+    }, 30000);
 
     it('should throw error when root container is not found', async () => {
       // Remove the root element

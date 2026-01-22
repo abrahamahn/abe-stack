@@ -1,22 +1,7 @@
 // packages/core/src/contracts/__tests__/users.test.ts
 import { describe, expect, it } from 'vitest';
 
-import {
-  USER_ROLES,
-  userResponseSchema,
-  userRoleSchema,
-  userSchema,
-  usersContract,
-} from '../users';
-
-describe('USER_ROLES', () => {
-  it('should have correct role values', () => {
-    expect(USER_ROLES).toContain('user');
-    expect(USER_ROLES).toContain('admin');
-    expect(USER_ROLES).toContain('moderator');
-    expect(USER_ROLES).toHaveLength(3);
-  });
-});
+import { userRoleSchema, userSchema, usersContract } from '../users';
 
 describe('userRoleSchema', () => {
   it('should validate correct user roles', () => {
@@ -40,6 +25,7 @@ describe('userSchema', () => {
       email: 'user@example.com',
       name: 'John Doe',
       role: 'user',
+      createdAt: '2024-01-15T10:30:00.000Z',
     };
     const result = userSchema.safeParse(validUser);
     expect(result.success).toBe(true);
@@ -57,6 +43,7 @@ describe('userSchema', () => {
       email: 'user@example.com',
       name: null,
       role: 'user',
+      createdAt: '2024-01-15T10:30:00.000Z',
     };
     const result = userSchema.safeParse(userWithNullName);
     expect(result.success).toBe(true);
@@ -71,6 +58,7 @@ describe('userSchema', () => {
       email: 'user@example.com',
       name: 'John',
       role: 'user',
+      createdAt: '2024-01-15T10:30:00.000Z',
     };
     const result = userSchema.safeParse(invalidUser);
     expect(result.success).toBe(false);
@@ -82,6 +70,7 @@ describe('userSchema', () => {
       email: 'invalid-email',
       name: 'John',
       role: 'user',
+      createdAt: '2024-01-15T10:30:00.000Z',
     };
     const result = userSchema.safeParse(invalidUser);
     expect(result.success).toBe(false);
@@ -93,6 +82,30 @@ describe('userSchema', () => {
       email: 'user@example.com',
       name: 'John',
       role: 'superuser',
+      createdAt: '2024-01-15T10:30:00.000Z',
+    };
+    const result = userSchema.safeParse(invalidUser);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject missing createdAt', () => {
+    const invalidUser = {
+      id: '550e8400-e29b-41d4-a716-446655440000',
+      email: 'user@example.com',
+      name: 'John Doe',
+      role: 'user',
+    };
+    const result = userSchema.safeParse(invalidUser);
+    expect(result.success).toBe(false);
+  });
+
+  it('should reject invalid datetime format', () => {
+    const invalidUser = {
+      id: '550e8400-e29b-41d4-a716-446655440000',
+      email: 'user@example.com',
+      name: 'John Doe',
+      role: 'user',
+      createdAt: '2024-01-15',
     };
     const result = userSchema.safeParse(invalidUser);
     expect(result.success).toBe(false);
@@ -112,6 +125,7 @@ describe('userSchema', () => {
       email: 'admin@example.com',
       name: 'Admin User',
       role: 'admin',
+      createdAt: '2024-01-15T10:30:00.000Z',
     };
     const result = userSchema.safeParse(adminUser);
     expect(result.success).toBe(true);
@@ -126,76 +140,13 @@ describe('userSchema', () => {
       email: 'mod@example.com',
       name: 'Moderator User',
       role: 'moderator',
+      createdAt: '2024-01-15T10:30:00.000Z',
     };
     const result = userSchema.safeParse(modUser);
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.role).toBe('moderator');
     }
-  });
-});
-
-describe('userResponseSchema', () => {
-  it('should validate user response with createdAt', () => {
-    const validResponse = {
-      id: '550e8400-e29b-41d4-a716-446655440000',
-      email: 'user@example.com',
-      name: 'John Doe',
-      role: 'user',
-      createdAt: '2024-01-15T10:30:00.000Z',
-    };
-    const result = userResponseSchema.safeParse(validResponse);
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.createdAt).toBe('2024-01-15T10:30:00.000Z');
-    }
-  });
-
-  it('should reject missing createdAt', () => {
-    const invalidResponse = {
-      id: '550e8400-e29b-41d4-a716-446655440000',
-      email: 'user@example.com',
-      name: 'John Doe',
-      role: 'user',
-    };
-    const result = userResponseSchema.safeParse(invalidResponse);
-    expect(result.success).toBe(false);
-  });
-
-  it('should reject invalid datetime format', () => {
-    const invalidResponse = {
-      id: '550e8400-e29b-41d4-a716-446655440000',
-      email: 'user@example.com',
-      name: 'John Doe',
-      role: 'user',
-      createdAt: '2024-01-15',
-    };
-    const result = userResponseSchema.safeParse(invalidResponse);
-    expect(result.success).toBe(false);
-  });
-
-  it('should reject invalid datetime string', () => {
-    const invalidResponse = {
-      id: '550e8400-e29b-41d4-a716-446655440000',
-      email: 'user@example.com',
-      name: 'John Doe',
-      role: 'user',
-      createdAt: 'not-a-date',
-    };
-    const result = userResponseSchema.safeParse(invalidResponse);
-    expect(result.success).toBe(false);
-  });
-
-  it('should inherit all user schema validations', () => {
-    const invalidResponse = {
-      id: 'not-a-uuid',
-      email: 'user@example.com',
-      name: 'John',
-      role: 'user',
-      createdAt: '2024-01-15T10:30:00.000Z',
-    };
-    const result = userResponseSchema.safeParse(invalidResponse);
-    expect(result.success).toBe(false);
   });
 });
 

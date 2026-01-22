@@ -58,6 +58,7 @@ export interface MagicLinkResult {
     email: string;
     name: string | null;
     role: 'user' | 'admin' | 'moderator';
+    createdAt: string;
   };
 }
 
@@ -122,7 +123,9 @@ async function isIpRateLimited(
   const result = await db
     .select({ count: count() })
     .from(magicLinkTokens)
-    .where(and(eq(magicLinkTokens.ipAddress, ipAddress), gt(magicLinkTokens.createdAt, windowStart)));
+    .where(
+      and(eq(magicLinkTokens.ipAddress, ipAddress), gt(magicLinkTokens.createdAt, windowStart)),
+    );
 
   const requestCount = result[0]?.count ?? 0;
   return requestCount >= maxRequests;

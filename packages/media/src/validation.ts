@@ -1,4 +1,4 @@
-// packages/core/src/media/validation.ts
+// packages/media/src/validation.ts
 /**
  * Media Validation Utilities
  *

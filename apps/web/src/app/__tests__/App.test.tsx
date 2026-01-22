@@ -72,11 +72,6 @@ vi.mock('@abe-stack/ui', async () => {
 
 // Create a mock environment for testing
 function createMockEnvironment(): ClientEnvironment {
-  const mockQueryCache = {
-    subscribe: vi.fn(() => vi.fn()),
-    getAll: vi.fn(() => []),
-  };
-
   return {
     config: {
       mode: 'test',
@@ -86,15 +81,14 @@ function createMockEnvironment(): ClientEnvironment {
       tokenRefreshInterval: 5 * 60 * 1000,
       uiVersion: '1.0.0',
     },
-    queryClient: {
+    queryCache: {
       getQueryData: vi.fn(),
       setQueryData: vi.fn(),
       getQueryState: vi.fn(),
-      removeQueries: vi.fn(),
-      getQueryCache: vi.fn(() => mockQueryCache),
-      mount: vi.fn(),
-      unmount: vi.fn(),
-    } as unknown as ClientEnvironment['queryClient'],
+      invalidateQueries: vi.fn(),
+      subscribe: vi.fn(() => vi.fn()),
+      getAll: vi.fn(() => []),
+    } as unknown as ClientEnvironment['queryCache'],
     auth: {
       getState: vi.fn(() => ({ user: null, isLoading: false, isAuthenticated: false })),
       subscribe: vi.fn(() => () => {}),
@@ -211,10 +205,8 @@ describe('App', () => {
         expect(screen.getByTestId('home-page')).toBeInTheDocument();
       });
 
-      // Verify getQueryCache().subscribe was called for persistence
-      expect(mockEnvironment.queryClient.getQueryCache).toHaveBeenCalled();
-      const mockQueryCache = vi.mocked(mockEnvironment.queryClient.getQueryCache)();
-      expect(mockQueryCache.subscribe).toHaveBeenCalled();
+      // Verify queryCache.subscribe was called for persistence
+      expect(mockEnvironment.queryCache.subscribe).toHaveBeenCalled();
     });
 
     it('should handle empty persisted state gracefully', async () => {

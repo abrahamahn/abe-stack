@@ -8,10 +8,16 @@ import {
   PageContainer,
   Skeleton,
   Text,
+  useDelayedFlag,
 } from '@abe-stack/ui';
 import { useCallback, useEffect, useState } from 'react';
 
 import type { JSX } from 'react';
+
+// Prefetch demo page on hover for instant navigation
+const prefetchDemo = (): void => {
+  void import('@demo');
+};
 
 type DocKey =
   | 'readme'
@@ -86,16 +92,16 @@ async function loadDocContent(key: DocKey): Promise<string> {
     core: () => import('../../../../packages/core/README.md?raw'),
     ui: () => import('../../../../packages/ui/docs/README.md?raw'),
     sdk: () => import('../../../../packages/sdk/README.md?raw'),
-    architecture: () => import('../../../../docs/dev/architecture.md?raw'),
-    principles: () => import('../../../../docs/dev/principles.md?raw'),
-    'dev-environment': () => import('../../../../docs/dev/dev-environment.md?raw'),
-    'config-setup': () => import('../../../../docs/dev/config-setup.md?raw'),
+    architecture: () => import('../../../../docs/specs/architecture.md?raw'),
+    principles: () => import('../../../../docs/specs/principles.md?raw'),
+    'dev-environment': () => import('../../../../docs/dev/workflow.md?raw'),
+    'config-setup': () => import('../../../../docs/dev/configuration.md?raw'),
     testing: () => import('../../../../docs/dev/testing.md?raw'),
     security: () => import('../../../../docs/dev/security.md?raw'),
-    'api-test-plan': () => import('../../../../docs/dev/api-test-plan.md?raw'),
+    'api-test-plan': () => import('../../../../docs/todo/api-test-plan.md?raw'),
     'sync-scripts': () => import('../../../../docs/dev/sync-scripts.md?raw'),
     performance: () => import('../../../../docs/dev/performance.md?raw'),
-    legacy: () => import('../../../../docs/dev/legacy.md?raw'),
+    legacy: () => import('../../../../docs/reference/legacy.md?raw'),
     'log-w01': () => import('../../../../docs/log/2026-W01.md?raw'),
     'log-w02': () => import('../../../../docs/log/2026-W02.md?raw'),
     'log-w03': () => import('../../../../docs/log/2026-W03.md?raw'),
@@ -193,6 +199,8 @@ function DocIndex({
 export function HomePage(): JSX.Element {
   const [activeDoc, setActiveDoc] = useState<DocKey>('readme');
   const { content, isLoading } = useDocContent(activeDoc);
+  // Delay showing skeleton to prevent flash for fast loads
+  const showSkeleton = useDelayedFlag(isLoading, 150);
 
   return (
     <PageContainer>
@@ -212,7 +220,7 @@ export function HomePage(): JSX.Element {
         <Link to="/dashboard">
           <Button variant="secondary">Dashboard</Button>
         </Link>
-        <Link to="/demo">
+        <Link to="/demo" onMouseEnter={prefetchDemo}>
           <Button variant="secondary">Demo</Button>
         </Link>
       </section>
@@ -220,7 +228,7 @@ export function HomePage(): JSX.Element {
       <DocIndex activeDoc={activeDoc} onSelect={setActiveDoc} />
 
       <Card className="p-4">
-        {isLoading ? (
+        {showSkeleton ? (
           <div className="flex flex-col gap-3">
             <Skeleton className="h-8 w-48" />
             <Skeleton className="h-4 w-full" />

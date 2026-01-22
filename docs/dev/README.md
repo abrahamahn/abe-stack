@@ -6,14 +6,14 @@ Workflow, testing, configuration, and tooling documentation for ABE Stack.
 
 ## Quick Navigation
 
-| Document                                | Purpose                                    | When to Read                 |
-| --------------------------------------- | ------------------------------------------ | ---------------------------- |
-| [Dev Environment](./dev-environment.md) | Workflow, testing, linting, CI/CD          | Getting started, CI issues   |
-| [Config Setup](./config-setup.md)       | TypeScript, path aliases, Vite, build      | Config changes, build issues |
-| [Testing](./testing.md)                 | Test strategy, TDD, React testing patterns | Writing tests                |
-| [Sync Scripts](./sync-scripts.md)       | DX automation scripts                      | Understanding automation     |
-| [Security](./security.md)               | Auth, tokens, rate limiting, auditing      | Security-related changes     |
-| [Performance](./performance.md)         | Database and frontend optimization         | Performance issues           |
+| Document                            | Purpose                                    | When to Read                 |
+| ----------------------------------- | ------------------------------------------ | ---------------------------- |
+| [Workflow](./workflow.md)           | Development workflow, linting, CI/CD       | Getting started, CI issues   |
+| [Configuration](./configuration.md) | TypeScript, path aliases, Vite, build      | Config changes, build issues |
+| [Testing](./testing.md)             | Test strategy, TDD, React testing patterns | Writing tests                |
+| [Sync Scripts](./sync-scripts.md)   | DX automation scripts                      | Understanding automation     |
+| [Security](./security.md)           | Auth, tokens, rate limiting, auditing      | Security-related changes     |
+| [Performance](./performance.md)     | Database and frontend optimization         | Performance issues           |
 
 ---
 
@@ -21,10 +21,10 @@ Workflow, testing, configuration, and tooling documentation for ABE Stack.
 
 ### Setup & Workflow
 
-| Document                                | Description                                                |
-| --------------------------------------- | ---------------------------------------------------------- |
-| [Dev Environment](./dev-environment.md) | Development workflow, commands, linting, CI/CD, Docker     |
-| [Config Setup](./config-setup.md)       | TypeScript configuration, path aliases, Vite, build system |
+| Document                            | Description                                                |
+| ----------------------------------- | ---------------------------------------------------------- |
+| [Workflow](./workflow.md)           | Development workflow, commands, linting, CI/CD, Docker     |
+| [Configuration](./configuration.md) | TypeScript configuration, path aliases, Vite, build system |
 
 ### Quality
 

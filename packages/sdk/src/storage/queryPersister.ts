@@ -1,8 +1,8 @@
 // packages/sdk/src/storage/queryPersister.ts
 /**
- * TanStack Query Persister
+ * Query Cache Persister
  *
- * Persists the React Query cache to IndexedDB for offline support.
+ * Persists the query cache to IndexedDB for offline support.
  * Queries are automatically restored when the app loads.
  */
 
@@ -43,7 +43,7 @@ export interface PersistedClientState {
 }
 
 /**
- * Represents a persisted TanStack Query client state.
+ * Represents a persisted query cache state.
  */
 export interface PersistedClient {
   timestamp: number;
@@ -52,7 +52,7 @@ export interface PersistedClient {
 }
 
 /**
- * Interface for persisting TanStack Query client state.
+ * Interface for persisting query cache state.
  */
 export interface Persister {
   persistClient(client: PersistedClient): void;
@@ -78,20 +78,15 @@ const DEFAULT_MAX_AGE = 1000 * 60 * 60 * 24; // 24 hours
 const DEFAULT_THROTTLE = 1000; // 1 second
 
 /**
- * Create an IndexedDB persister for TanStack Query
+ * Create an IndexedDB persister for QueryCache
  *
  * Usage with manual persistence (recommended):
  * ```ts
- * import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
- * import { createQueryPersister } from '@abe-stack/sdk';
+ * import { QueryCache, createQueryPersister } from '@abe-stack/sdk';
  *
- * const queryClient = new QueryClient({
- *   defaultOptions: {
- *     queries: {
- *       gcTime: 1000 * 60 * 60 * 24, // 24 hours
- *       staleTime: 1000 * 60 * 5, // 5 minutes
- *     },
- *   },
+ * const queryCache = new QueryCache({
+ *   defaultGcTime: 1000 * 60 * 60 * 24, // 24 hours
+ *   defaultStaleTime: 1000 * 60 * 5, // 5 minutes
  * });
  *
  * const persister = createQueryPersister();
@@ -100,15 +95,19 @@ const DEFAULT_THROTTLE = 1000; // 1 second
  * const persistedClient = await persister.restoreClient();
  * if (persistedClient) {
  *   for (const query of persistedClient.clientState.queries) {
- *     queryClient.setQueryData(query.queryKey, query.state.data);
+ *     queryCache.setQueryData(query.queryKey, query.state.data);
  *   }
  * }
  *
  * // Subscribe to cache changes for persistence
- * queryClient.getQueryCache().subscribe(() => {
- *   const queries = queryClient.getQueryCache().getAll()
+ * queryCache.subscribe(['*'], () => {
+ *   const queries = queryCache.getAll()
  *     .filter(q => q.state.data !== undefined)
- *     .map(q => ({ queryKey: q.queryKey, queryHash: q.queryHash, state: q.state }));
+ *     .map(q => ({
+ *       queryKey: q.queryKey,
+ *       queryHash: q.queryHash,
+ *       state: q.state
+ *     }));
  *   persister.persistClient({
  *     timestamp: Date.now(),
  *     buster: '',

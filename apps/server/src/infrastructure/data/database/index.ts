@@ -3,7 +3,6 @@
 // Schema exports
 export {
   // Users
-  USER_ROLES,
   users,
   refreshTokens,
   type UserRole,

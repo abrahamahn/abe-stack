@@ -8,15 +8,17 @@ Central index for ABE Stack documentation.
 
 ## Quick Navigation
 
-| Area          | Entry Point        | Purpose                           |
-| ------------- | ------------------ | --------------------------------- |
-| Overview      | Root `README.md`   | Project overview and quick start  |
-| Agent Guide   | `AGENTS.md`        | AI agent behavioral rules         |
-| What to Build | `todo/TODO.md`     | Active tasks and priorities       |
-| Deferred      | `todo/ROADMAP.md`  | Future features (not now)         |
-| Weekly Logs   | `log/`             | Development changelog             |
-| Dev Reference | `dev/README.md`    | Architecture, testing, principles |
-| Deployment    | `deploy/README.md` | Production deployment guides      |
+| Area          | Entry Point           | Purpose                          |
+| ------------- | --------------------- | -------------------------------- |
+| Overview      | Root `README.md`      | Project overview and quick start |
+| Agent Guide   | `AGENTS.md`           | AI agent behavioral rules        |
+| Specs         | `specs/README.md`     | Architecture and principles      |
+| Dev Guides    | `dev/README.md`       | Workflow, testing, tooling       |
+| Reference     | `reference/README.md` | Legacy patterns and migration    |
+| What to Build | `todo/TODO.md`        | Active tasks and priorities      |
+| Deferred      | `todo/ROADMAP.md`     | Future features (not now)        |
+| Deployment    | `deploy/README.md`    | Production deployment guides     |
+| Weekly Logs   | `log/`                | Development changelog            |
 
 ---
 
@@ -27,23 +29,28 @@ docs/
 ├── README.md           # This file - documentation index
 ├── AGENTS.md           # Agent behavioral rules (symlink to .claude/CLAUDE.md)
 │
+├── specs/              # Specifications (architecture & design)
+│   ├── README.md       # Specs index
+│   ├── architecture.md # Monorepo structure, layering
+│   └── principles.md   # Coding standards, patterns
+│
+├── dev/                # Development guides (workflow & tooling)
+│   ├── README.md       # Dev docs index
+│   ├── workflow.md     # Development workflow
+│   ├── configuration.md # Build configuration
+│   ├── testing.md      # Test strategy and patterns
+│   ├── sync-scripts.md # DX automation
+│   ├── security.md     # Security architecture
+│   └── performance.md  # Optimization techniques
+│
+├── reference/          # Reference material
+│   ├── README.md       # Reference index
+│   └── legacy.md       # Legacy migration patterns
+│
 ├── todo/               # Task tracking
 │   ├── TODO.md         # Active tasks and priorities
 │   ├── ROADMAP.md      # Deferred features
 │   └── QUALITY-TEST.md # Quality test checklist
-│
-├── dev/                # Developer reference
-│   ├── README.md       # Dev docs index
-│   ├── architecture.md # Monorepo structure, layering
-│   ├── principles.md   # Coding standards, patterns
-│   ├── testing.md      # Test strategy and patterns
-│   ├── security.md     # Security architecture
-│   ├── config-setup.md # Build configuration
-│   ├── dev-environment.md # Development workflow
-│   ├── sync-scripts.md # DX automation
-│   ├── performance.md  # Optimization techniques
-│   ├── api-test-plan.md # API test coverage
-│   └── legacy.md       # Legacy migration reference
 │
 ├── deploy/             # Deployment guides
 │   ├── README.md       # Deployment overview
@@ -72,9 +79,9 @@ docs/
 ### New to the Codebase
 
 1. Root `README.md` - Project overview
-2. `dev/architecture.md` - Understand structure
-3. `dev/principles.md` - Coding standards
-4. `dev/dev-environment.md` - Set up workflow
+2. `specs/architecture.md` - Understand structure
+3. `specs/principles.md` - Coding standards
+4. `dev/workflow.md` - Set up workflow
 
 ### Agent Development
 
@@ -94,12 +101,13 @@ docs/
 
 | Keyword                            | Document                  |
 | ---------------------------------- | ------------------------- |
-| architecture, layers, hexagonal    | `dev/architecture.md`     |
-| patterns, anti-patterns, standards | `dev/principles.md`       |
+| architecture, layers, hexagonal    | `specs/architecture.md`   |
+| patterns, anti-patterns, standards | `specs/principles.md`     |
 | testing, TDD, vitest               | `dev/testing.md`          |
 | security, auth, tokens             | `dev/security.md`         |
 | path aliases, barrel exports       | `dev/sync-scripts.md`     |
-| CI/CD, git hooks, docker           | `dev/dev-environment.md`  |
+| CI/CD, git hooks, docker           | `dev/workflow.md`         |
+| legacy, migration                  | `reference/legacy.md`     |
 | deployment, production             | `deploy/README.md`        |
 | digitalocean, droplet              | `deploy/digitalocean.md`  |
 | gcp, google cloud                  | `deploy/gcp.md`           |

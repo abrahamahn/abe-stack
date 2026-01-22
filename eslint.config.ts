@@ -269,6 +269,31 @@ export default [
     },
   },
   {
+    // Allow console in logger implementations and console-based dev services
+    files: [
+      '**/logger/console.ts',
+      '**/consoleEmailService.ts',
+    ],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+  {
+    // QueryCache uses single type parameters for API ergonomics (React Query-like pattern)
+    files: ['**/query/QueryCache.ts'],
+    rules: {
+      '@typescript-eslint/no-unnecessary-type-parameters': 'off',
+    },
+  },
+  {
+    // sql-provider.ts needs type workaround for Drizzle ORM v0.35+ constraints
+    files: ['**/search/sql-provider.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+    },
+  },
+  {
     files: ['eslint.config.ts'],
     rules: {
       '@typescript-eslint/no-unsafe-assignment': 'off',

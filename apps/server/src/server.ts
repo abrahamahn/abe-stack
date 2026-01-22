@@ -9,6 +9,7 @@
 
 import path from 'node:path';
 
+import { createConsoleLogger } from '@abe-stack/core';
 import {
   applyCors,
   applySecurityHeaders,
@@ -53,21 +54,11 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
   // Logger configuration
   const loggerConfig = isProd
     ? { level: config.server.logLevel }
-    : {
-        level: config.server.logLevel,
-        transport: {
-          target: 'pino-pretty',
-          options: {
-            colorize: true,
-            translateTime: 'HH:MM:ss',
-            singleLine: true,
-            ignore: 'pid,hostname',
-          },
-        },
-      };
+    : createConsoleLogger(config.server.logLevel);
 
   const server = Fastify({
     logger: loggerConfig,
+    disableRequestLogging: !isProd,
     trustProxy: config.server.trustProxy,
     // Default body size limit for JSON requests (1MB)
     // This helps prevent denial-of-service attacks via large payloads.
@@ -105,6 +96,32 @@ function registerPlugins(server: FastifyInstance, config: AppConfig): void {
   // Request info extraction - decorates all requests with ipAddress and userAgent
   // This centralizes client info extraction that was previously done in individual handlers
   registerRequestInfoHook(server);
+
+  if (!isProd) {
+    server.addHook('onRequest', (request, _reply, done) => {
+      (request as { _startAt?: bigint })._startAt = process.hrtime.bigint();
+      done();
+    });
+
+    server.addHook('onResponse', (request, reply, done) => {
+      const start = (request as { _startAt?: bigint })._startAt;
+      const durationMs = start
+        ? Number(process.hrtime.bigint() - start) / 1_000_000
+        : reply.elapsedTime;
+      server.log.info(
+        {
+          method: request.method,
+          path: request.url,
+          statusCode: reply.statusCode,
+          durationMs: Math.round(durationMs),
+          ip: request.ip,
+          correlationId: request.correlationId,
+        },
+        'request',
+      );
+      done();
+    });
+  }
 
   // Rate limiter instance (Token Bucket algorithm)
   const limiter = new RateLimiter({ windowMs: 60_000, max: 100 });

@@ -27,7 +27,6 @@ import {
 } from '@infrastructure';
 import {
   AccountLockedError,
-  EmailAlreadyExistsError,
   EmailNotVerifiedError,
   EmailSendError,
   InvalidCredentialsError,
@@ -60,6 +59,7 @@ export interface AuthResult {
     email: string;
     name: string | null;
     role: UserRole;
+    createdAt: string;
   };
 }
 
@@ -98,7 +98,26 @@ export async function registerUser(
   });
 
   if (existingUser) {
-    throw new EmailAlreadyExistsError(`Email already registered: ${email}`);
+    // If user exists, send an email to them to notify about the new registration attempt
+    // and return a generic success message to prevent user enumeration.
+    try {
+      const emailTemplate = emailTemplates.existingAccountRegistrationAttempt(existingUser.email);
+      await emailService.send({
+        to: existingUser.email,
+        subject: emailTemplate.subject,
+        text: emailTemplate.text,
+        html: emailTemplate.html,
+      });
+    } catch {
+      // Log the error but don't expose it to the client
+      // A monitoring/alerting system should be in place for such errors
+    }
+    return {
+      status: 'pending_verification',
+      message:
+        'Registration successful! Please check your email inbox and click the confirmation link to complete your registration.',
+      email,
+    };
   }
 
   // Validate password strength
@@ -306,6 +325,7 @@ function rehashPassword(
   password: string,
   logger: Logger,
   callback?: (userId: string, error?: Error) => void,
+  retryCount = 3,
 ): void {
   // Fire and forget - don't block login
   hashPassword(password, config.argon2)
@@ -318,8 +338,19 @@ function rehashPassword(
         userId,
         error: normalizedError.message,
         stack: normalizedError.stack,
+        retryCount,
       });
-      callback?.(userId, normalizedError);
+
+      if (retryCount > 0) {
+        setTimeout(
+          () => {
+            rehashPassword(db, config, userId, password, logger, callback, retryCount - 1);
+          },
+          1000 * (4 - retryCount),
+        ); // 1s, 2s, 3s
+      } else {
+        callback?.(userId, normalizedError);
+      }
     });
 }
 
@@ -371,10 +402,19 @@ export async function requestPasswordReset(
   const { plain, hash } = await generateSecureToken();
   const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
 
-  await db.insert(passwordResetTokens).values({
-    userId: user.id,
-    tokenHash: hash,
-    expiresAt,
+  await withTransaction(db, async (tx) => {
+    // Invalidate all existing password reset tokens for this user
+    await tx
+      .update(passwordResetTokens)
+      .set({ usedAt: new Date() })
+      .where(and(eq(passwordResetTokens.userId, user.id), isNull(passwordResetTokens.usedAt)));
+
+    // Create a new password reset token
+    await tx.insert(passwordResetTokens).values({
+      userId: user.id,
+      tokenHash: hash,
+      expiresAt,
+    });
   });
 
   // Send password reset email
@@ -404,12 +444,6 @@ export async function resetPassword(
   token: string,
   newPassword: string,
 ): Promise<void> {
-  // Validate password strength first
-  const passwordValidation = await validatePassword(newPassword, []);
-  if (!passwordValidation.isValid) {
-    throw new WeakPasswordError({ errors: passwordValidation.errors });
-  }
-
   // Hash the token to look it up
   const tokenHash = await hashPassword(token, TOKEN_HASH_CONFIG);
 
@@ -424,6 +458,21 @@ export async function resetPassword(
 
   if (!tokenRecord) {
     throw new InvalidTokenError('Invalid or expired reset token');
+  }
+
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, tokenRecord.userId),
+  });
+
+  if (!user) {
+    // This should not happen if the token is valid
+    throw new InvalidTokenError('User not found for the given token');
+  }
+
+  // Validate password strength first
+  const passwordValidation = await validatePassword(newPassword, [user.email, user.name || '']);
+  if (!passwordValidation.isValid) {
+    throw new WeakPasswordError({ errors: passwordValidation.errors });
   }
 
   // Hash the new password
@@ -463,7 +512,6 @@ export async function setPassword(
   // Find the user
   const user = await db.query.users.findFirst({
     where: eq(users.id, userId),
-    columns: { id: true, passwordHash: true },
   });
 
   if (!user) {
@@ -478,7 +526,7 @@ export async function setPassword(
   }
 
   // Validate password strength
-  const passwordValidation = await validatePassword(newPassword, []);
+  const passwordValidation = await validatePassword(newPassword, [user.email, user.name || '']);
   if (!passwordValidation.isValid) {
     throw new WeakPasswordError({ errors: passwordValidation.errors });
   }
@@ -529,7 +577,17 @@ export async function resendVerificationEmail(
   }
 
   // Create new verification token
-  const verificationToken = await createEmailVerificationToken(db, user.id);
+  const verificationToken = await withTransaction(db, async (tx) => {
+    // Invalidate all existing email verification tokens for this user
+    await tx
+      .update(emailVerificationTokens)
+      .set({ usedAt: new Date() })
+      .where(
+        and(eq(emailVerificationTokens.userId, user.id), isNull(emailVerificationTokens.usedAt)),
+      );
+
+    return createEmailVerificationToken(tx, user.id);
+  });
 
   // Send verification email (baseUrl is required, provided by handlers)
   const verifyUrl = `${baseUrl}/auth/confirm-email?token=${verificationToken}`;

@@ -730,8 +730,9 @@ describe('Progressive Delay Timing', () => {
     await authenticateUser(db, TEST_CONFIG, email, 'password', logger);
 
     expect(delayApplied).toHaveBeenCalled();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(applyProgressiveDelay).toHaveBeenCalledBefore(verifyPasswordSafe as any);
+    expect(applyProgressiveDelay).toHaveBeenCalledBefore(
+      verifyPasswordSafe as unknown as ReturnType<typeof vi.fn>,
+    );
   });
 });
 

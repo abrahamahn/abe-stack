@@ -41,6 +41,7 @@ export {
 export {
   Accordion,
   Card,
+  DelayedFallback,
   Dialog,
   Dropdown,
   FocusTrap,
@@ -58,7 +59,14 @@ export {
   Toast,
   ToastContainer,
 } from './components';
-export type { PeekLinkProps, TabItem, TabsProps, UserState, UserAction } from './components';
+export type {
+  DelayedFallbackProps,
+  PeekLinkProps,
+  TabItem,
+  TabsProps,
+  UserState,
+  UserAction,
+} from './components';
 
 // Layouts - Page and section layouts
 export {
@@ -98,6 +106,7 @@ export {
   useControllableState,
   useCopyToClipboard,
   useDebounce,
+  useDelayedFlag,
   useDisclosure,
   useFormState,
   useHistoryNav,

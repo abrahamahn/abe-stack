@@ -28,7 +28,8 @@ async function main(): Promise<void> {
 
     process.on('SIGTERM', () => void shutdown('SIGTERM'));
     process.on('SIGINT', () => void shutdown('SIGINT'));
-  } catch {
+  } catch (error) {
+    process.stderr.write(`Server startup failed: ${String(error)}\n`);
     process.exit(1);
   }
 }

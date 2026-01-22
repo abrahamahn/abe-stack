@@ -247,7 +247,13 @@ describe('Auth Routes', () => {
           status: 200,
           body: {
             token: 'access-token',
-            user: { id: 'user-123', email: 'test@example.com', name: 'Test', role: 'user' },
+            user: {
+              id: 'user-123',
+              email: 'test@example.com',
+              name: 'Test',
+              role: 'user',
+              createdAt: new Date('2024-01-01T00:00:00.000Z').toISOString(),
+            },
           },
         });
 
@@ -519,7 +525,13 @@ describe('Auth Routes', () => {
           body: {
             verified: true,
             token: 'access-token',
-            user: { id: 'user-123', email: 'test@example.com', name: 'Test', role: 'user' },
+            user: {
+              id: 'user-123',
+              email: 'test@example.com',
+              name: 'Test',
+              role: 'user',
+              createdAt: new Date('2024-01-01T00:00:00.000Z').toISOString(),
+            },
           },
         });
 

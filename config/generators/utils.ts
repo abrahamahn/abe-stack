@@ -128,7 +128,9 @@ export function findAliasDirectories(
     if (!fs.existsSync(currentDir)) return;
     if (depth > options.maxDepth) return;
 
-    const entries = fs.readdirSync(currentDir, { withFileTypes: true });
+    const entries = fs
+      .readdirSync(currentDir, { withFileTypes: true })
+      .sort((a, b) => a.name.localeCompare(b.name));
 
     for (const entry of entries) {
       if (!entry.isDirectory()) continue;
@@ -183,7 +185,8 @@ export function generatePathAliases(
   const sortedDirs = allDirs.sort((a, b) => {
     const depthA = a.split(path.sep).length;
     const depthB = b.split(path.sep).length;
-    return depthA - depthB;
+    if (depthA !== depthB) return depthA - depthB;
+    return a.localeCompare(b);
   });
 
   const prefix = options.aliasPrefix ?? '@';

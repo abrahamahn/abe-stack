@@ -6,10 +6,12 @@
  * Supports optimistic locking with version-based conflict detection.
  */
 
-import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
 
 import { errorResponseSchema } from './common';
+
+import type { Contract } from './types';
+
 
 // ============================================================================
 // Operation Schemas
@@ -172,9 +174,7 @@ export type GetRecordsResponse = z.infer<typeof getRecordsResponseSchema>;
 // Realtime Contract
 // ============================================================================
 
-const c = initContract();
-
-export const realtimeContract = c.router({
+export const realtimeContract = {
   /**
    * Write a transaction of operations
    *
@@ -182,7 +182,7 @@ export const realtimeContract = c.router({
    * Returns 409 if any record has been modified since it was loaded.
    */
   write: {
-    method: 'POST',
+    method: 'POST' as const,
     path: '/api/realtime/write',
     body: transactionSchema,
     responses: {
@@ -202,7 +202,7 @@ export const realtimeContract = c.router({
    * Returns a RecordMap with all found records.
    */
   getRecords: {
-    method: 'POST',
+    method: 'POST' as const,
     path: '/api/realtime/getRecords',
     body: z.object({
       pointers: z.array(recordPointerSchema).min(1).max(100),
@@ -215,4 +215,4 @@ export const realtimeContract = c.router({
     },
     summary: 'Fetch records by table and ID',
   },
-});
+} satisfies Contract;

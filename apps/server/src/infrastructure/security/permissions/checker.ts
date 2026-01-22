@@ -27,246 +27,490 @@ import {
 
 import type { UserRole } from '@abe-stack/core';
 
-// ============================================================================
-// Permission Checker Class
+
+
 // ============================================================================
 
+// Permission Checker Class
+
+// ============================================================================
+
+
+
 /**
+
  * Options for creating a permission checker
+
  */
+
 export interface PermissionCheckerOptions {
+
   /** Permission configuration */
+
   config: PermissionConfig;
+
   /** Function to load individual records */
+
   recordLoader: RecordLoader;
+
   /** Optional batch record loader for efficiency */
+
   batchRecordLoader?: BatchRecordLoader;
+
 }
 
+
+
 /**
+
  * Permission checker for row-level access control
+
  */
+
 export class PermissionChecker {
+
   private readonly config: PermissionConfig;
+
   private readonly recordLoader: RecordLoader;
+
   private readonly batchRecordLoader?: BatchRecordLoader;
+
   private readonly tableConfigMap: Map<string, TablePermissionConfig>;
 
+
+
   constructor(options: PermissionCheckerOptions) {
+
     this.config = options.config;
+
     this.recordLoader = options.recordLoader;
+
     this.batchRecordLoader = options.batchRecordLoader;
 
+
+
     // Build table config lookup map
+
     this.tableConfigMap = new Map();
+
     if (options.config.tableConfigs) {
+
       for (const tableConfig of options.config.tableConfigs) {
+
         this.tableConfigMap.set(tableConfig.table, tableConfig);
+
       }
+
     }
+
   }
 
+
+
   // ==========================================================================
+
   // Public API
+
   // ==========================================================================
 
+
+
   /**
+
    * Check if a user can read a specific record
+
    */
+
   async checkReadPermission(
+
     userId: string,
+
     userRole: UserRole,
+
     table: string,
+
     recordId: string,
+
   ): Promise<PermissionResult> {
+
     return this.checkPermission(userId, userRole, table, recordId, 'read');
+
   }
 
+
+
   /**
+
    * Check if a user can write to a specific record
+
    */
+
   async checkWritePermission(
+
     userId: string,
+
     userRole: UserRole,
+
     table: string,
+
     recordId: string,
+
     operation: 'create' | 'update' | 'delete' = 'update',
+
   ): Promise<PermissionResult> {
+
     const permissionType: PermissionType = operation === 'delete' ? 'delete' : 'write';
+
     return this.checkPermission(userId, userRole, table, recordId, permissionType, operation);
+
   }
 
+
+
   /**
+
    * Check if a user has admin permission on a record
+
    */
+
   async checkAdminPermission(
+
     userId: string,
+
     userRole: UserRole,
+
     table: string,
+
     recordId: string,
+
   ): Promise<PermissionResult> {
+
     return this.checkPermission(userId, userRole, table, recordId, 'admin');
+
   }
 
+
+
   /**
+
    * Filter records to only those the user can read
+
    */
+
   async filterReadableRecords<T extends PermissionRecord>(
+
     userId: string,
+
     userRole: UserRole,
+
     table: string,
+
     records: T[],
+
   ): Promise<T[]> {
+
     const results = await Promise.all(
+
       records.map(async (record) => {
+
         const result = await this.checkRecordPermission(userId, userRole, table, record, 'read');
+
         return { record, allowed: result.allowed };
+
       }),
+
     );
+
+
 
     return results.filter((r) => r.allowed).map((r) => r.record);
+
   }
 
+
+
   /**
+
    * Filter record pointers to only those the user can read
+
    */
+
   async filterReadablePointers(
+
     userId: string,
+
     userRole: UserRole,
+
     pointers: RecordPointer[],
+
   ): Promise<RecordPointer[]> {
+
     if (pointers.length === 0) {
+
       return [];
+
     }
+
+
 
     // Load all records
+
     const recordMap = await this.loadRecords(pointers);
+
+
 
     // Check permissions and filter
+
     const results = await Promise.all(
+
       pointers.map(async (pointer) => {
+
         const record = recordMap.get(getRecordKey(pointer));
+
         if (!record) {
+
           // Record doesn't exist, deny access
+
           return { pointer, allowed: false };
+
         }
+
+
 
         const result = await this.checkRecordPermission(
+
           userId,
+
           userRole,
+
           pointer.table,
+
           record,
+
           'read',
+
         );
+
         return { pointer, allowed: result.allowed };
+
       }),
+
     );
+
+
 
     return results.filter((r) => r.allowed).map((r) => r.pointer);
+
   }
 
+
+
   /**
+
    * Batch check permissions for multiple records
+
    */
+
   async batchCheckPermissions(
+
     userId: string,
+
     userRole: UserRole,
+
     checks: Array<{ table: string; recordId: string; permission: PermissionType }>,
+
   ): Promise<Map<string, PermissionResult>> {
+
     // Load all records at once for efficiency
+
     const pointers = checks.map((c) => ({ table: c.table, id: c.recordId }));
+
     const recordMap = await this.loadRecords(pointers);
 
+
+
     // Check permissions for each
+
     const results = new Map<string, PermissionResult>();
 
+
+
     await Promise.all(
+
       checks.map(async (check) => {
+
         const key = getRecordKey({ table: check.table, id: check.recordId });
+
         const record = recordMap.get(key);
 
+
+
         let result: PermissionResult;
+
         if (!record) {
+
           result = denied('Record not found');
-        } else {
-          result = await this.checkRecordPermission(
-            userId,
-            userRole,
-            check.table,
-            record,
-            check.permission,
-          );
+
         }
+
+        else {
+
+          result = await this.checkRecordPermission(
+
+            userId,
+
+            userRole,
+
+            check.table,
+
+            record,
+
+            check.permission,
+
+          );
+
+        }
+
+
 
         results.set(key, result);
+
       }),
+
     );
 
+
+
     return results;
+
   }
 
-  // ==========================================================================
-  // Core Permission Logic
+
+
   // ==========================================================================
 
+  // Core Permission Logic
+
+  // ==========================================================================
+
+
+
   /**
+
    * Check permission for a specific record
+
    */
+
   private async checkPermission(
+
     userId: string,
+
     userRole: UserRole,
+
     table: string,
+
     recordId: string,
+
     permission: PermissionType,
+
     operation?: 'create' | 'update' | 'delete',
+
   ): Promise<PermissionResult> {
+
     // For create operations, we don't need to load the record
+
     if (operation === 'create') {
+
       return this.checkCreatePermission(userId, userRole, table);
+
     }
+
+
 
     // Load the record
+
     const record = await this.recordLoader(table, recordId);
+
     if (!record) {
+
       return denied('Record not found');
+
     }
+
+
 
     return this.checkRecordPermission(userId, userRole, table, record, permission);
+
   }
 
+
+
   /**
+
    * Check permission for a create operation
+
    */
+
   private checkCreatePermission(
+
     userId: string,
+
     userRole: UserRole,
+
     table: string,
+
   ): PermissionResult {
+
     // Get rules for this table
+
     const rules = this.getRulesForTable(table);
 
+
+
     // Check role-based rules first (they don't need a record)
+
     for (const rule of rules) {
+
       if (rule.type === 'role') {
+
         const roleRule = rule;
+
         if (roleRule.roles.includes(userRole) && roleRule.grants.includes('write')) {
+
           return allowed(`role:${userRole}`);
+
         }
+
       }
+
     }
+
+
 
     // Admin can always create
+
     if (userRole === 'admin') {
+
       return allowed('role:admin');
+
     }
+
+
 
     // Default: allow authenticated users to create
+
     // (they will own the record they create)
+
     if (userId) {
+
       return allowed('authenticated-create');
+
     }
 
+
+
     return this.getDefaultResult(table, 'write');
+
   }
 
   /**

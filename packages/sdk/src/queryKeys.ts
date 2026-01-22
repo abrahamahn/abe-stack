@@ -2,7 +2,7 @@
 /**
  * Centralized Query Key Factory
  *
- * Provides type-safe, hierarchical query keys for React Query.
+ * Provides type-safe, hierarchical query keys for the custom query hooks.
  * Using a factory pattern ensures:
  * - Consistent key structure across the app
  * - Type safety for filter/parameter objects
@@ -17,10 +17,10 @@
  * });
  *
  * // Invalidate all user queries
- * queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+ * queryCache.invalidateQueries({ queryKey: queryKeys.users.all });
  *
  * // Invalidate specific user
- * queryClient.invalidateQueries({ queryKey: queryKeys.users.detail(userId) });
+ * queryCache.invalidateQueries({ queryKey: queryKeys.users.detail(userId) });
  * ```
  */
 

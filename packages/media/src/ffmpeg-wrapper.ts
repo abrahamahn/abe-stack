@@ -1,4 +1,4 @@
-// packages/core/src/media/ffmpeg-wrapper.ts
+// packages/media/src/ffmpeg-wrapper.ts
 /**
  * Custom FFmpeg Wrapper - Lightweight replacement for fluent-ffmpeg
  *

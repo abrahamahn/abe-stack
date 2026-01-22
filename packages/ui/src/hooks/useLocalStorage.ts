@@ -27,8 +27,15 @@ export function useLocalStorage<T>(
     try {
       const valueToStore = value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);
+      // Defer localStorage write to avoid blocking UI updates
       if (typeof window !== 'undefined') {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        queueMicrotask(() => {
+          try {
+            window.localStorage.setItem(key, JSON.stringify(valueToStore));
+          } catch {
+            // Silently fail if localStorage is unavailable
+          }
+        });
       }
     } catch {
       // Silently fail if localStorage is unavailable

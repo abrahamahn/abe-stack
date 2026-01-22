@@ -20,7 +20,7 @@ import type {
   ResendVerificationResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
-  UserResponse,
+  User,
 } from '@abe-stack/core';
 
 export interface ApiClientConfig {
@@ -34,7 +34,7 @@ export interface ApiClient {
   register: (data: RegisterRequest) => Promise<RegisterResponse>;
   refresh: () => Promise<RefreshResponse>;
   logout: () => Promise<LogoutResponse>;
-  getCurrentUser: () => Promise<UserResponse>;
+  getCurrentUser: () => Promise<User>;
   forgotPassword: (data: ForgotPasswordRequest) => Promise<ForgotPasswordResponse>;
   resetPassword: (data: ResetPasswordRequest) => Promise<ResetPasswordResponse>;
   verifyEmail: (data: EmailVerificationRequest) => Promise<EmailVerificationResponse>;
@@ -105,8 +105,8 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
         body: JSON.stringify({}),
       });
     },
-    async getCurrentUser(): Promise<UserResponse> {
-      return request<UserResponse>('/users/me');
+    async getCurrentUser(): Promise<User> {
+      return request<User>('/users/me');
     },
     async forgotPassword(data: ForgotPasswordRequest): Promise<ForgotPasswordResponse> {
       return request<ForgotPasswordResponse>('/auth/forgot-password', {

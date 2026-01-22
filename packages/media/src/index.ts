@@ -1,7 +1,8 @@
-// packages/core/src/media/index.ts
+// packages/media/src/index.ts
 /**
- * Media Processing (Server-only)
+ * @abe-stack/media
  *
+ * Media Processing (Server-only)
  * Audio, video, and image processing utilities using FFmpeg.
  * Security scanning for uploaded files.
  */

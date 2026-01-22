@@ -179,6 +179,33 @@ If you did not change your password, please contact support immediately.
   },
 
   /**
+   * Existing account registration attempt notification
+   * Sent when someone tries to register with an email that already has an account
+   */
+  existingAccountRegistrationAttempt(email: string): EmailOptions & { to: '' } {
+    return {
+      to: '',
+      subject: 'Sign-in Attempt on Your Account',
+      text: `
+Someone attempted to create a new account using your email address (${email}).
+
+If this was you, you may already have an account. Try signing in instead, or use the "Forgot Password" option if you don't remember your password.
+
+If you did not attempt to create a new account, you can safely ignore this email. Your account remains secure.
+      `.trim(),
+      html: renderLayout(
+        'Sign-in Attempt',
+        `
+        <h2 style="${styles.heading}">Sign-in Attempt on Your Account</h2>
+        <p style="${styles.text}">Someone attempted to create a new account using your email address.</p>
+        <p style="${styles.text}">If this was you, you may already have an account. Try signing in instead, or use the "Forgot Password" option if you don't remember your password.</p>
+        <p style="${styles.footer}">If you did not attempt to create a new account, you can safely ignore this email. Your account remains secure.</p>
+        `,
+      ),
+    };
+  },
+
+  /**
    * Token reuse security alert
    * Sent when a refresh token is used after it has already been rotated,
    * indicating a potential token theft/replay attack.

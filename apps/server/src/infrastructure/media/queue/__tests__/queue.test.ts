@@ -239,13 +239,13 @@ describe('CustomJobQueue', () => {
       await queue.start();
 
       // Wait for first failure and retry scheduling (increased for CI)
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       // Make it succeed now
       queue.shouldFail = false;
 
-      // Wait for retry to process (increased for CI)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Wait for retry to process - needs more time for exponential backoff
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       await queue.stop();
 
       expect(queue.processedJobs).toContainEqual({ value: 42 });

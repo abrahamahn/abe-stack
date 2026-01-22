@@ -16,8 +16,6 @@ import {
   registerRequestSchema,
   unlockAccountRequestSchema,
   unlockAccountResponseSchema,
-  USER_ROLES,
-  userResponseSchema,
   userRoleSchema,
   userSchema,
 } from '../';
@@ -38,12 +36,6 @@ describe('API Contract Integration', () => {
     it('should include admin contract', () => {
       expect(apiContract.admin).toBeDefined();
       expect(apiContract.admin.unlockAccount).toBeDefined();
-    });
-  });
-
-  describe('USER_ROLES', () => {
-    it('should have the expected roles', () => {
-      expect(USER_ROLES).toEqual(['user', 'admin', 'moderator']);
     });
   });
 
@@ -108,6 +100,7 @@ describe('API Contract Integration', () => {
         email: 'test@example.com',
         name: 'John',
         role: 'user' as const,
+        createdAt: '2024-01-01T00:00:00.000Z',
       };
       expect(userSchema.parse(valid)).toEqual(valid);
     });
@@ -118,13 +111,20 @@ describe('API Contract Integration', () => {
         email: 'test@example.com',
         name: null,
         role: 'admin' as const,
+        createdAt: '2024-01-01T00:00:00.000Z',
       };
       expect(userSchema.parse(valid)).toEqual(valid);
     });
 
     it('should reject invalid uuid', () => {
       expect(() =>
-        userSchema.parse({ id: 'not-a-uuid', email: 'test@example.com', name: null, role: 'user' }),
+        userSchema.parse({
+          id: 'not-a-uuid',
+          email: 'test@example.com',
+          name: null,
+          role: 'user',
+          createdAt: '2024-01-01T00:00:00.000Z',
+        }),
       ).toThrow();
     });
   });
@@ -138,6 +138,7 @@ describe('API Contract Integration', () => {
           email: 'test@example.com',
           name: 'John',
           role: 'user' as const,
+          createdAt: '2024-01-01T00:00:00.000Z',
         },
       };
       expect(authResponseSchema.parse(valid)).toEqual(valid);
@@ -176,19 +177,6 @@ describe('API Contract Integration', () => {
     it('should strip unknown fields', () => {
       const withExtra = { message: 'Error', error: 'SomeError' };
       expect(errorResponseSchema.parse(withExtra)).toEqual({ message: 'Error' });
-    });
-  });
-
-  describe('userResponseSchema', () => {
-    it('should accept valid user response with createdAt', () => {
-      const valid = {
-        id: '123e4567-e89b-12d3-a456-426614174000',
-        email: 'test@example.com',
-        name: 'John',
-        role: 'user' as const,
-        createdAt: '2024-01-01T00:00:00.000Z',
-      };
-      expect(userResponseSchema.parse(valid)).toEqual(valid);
     });
   });
 

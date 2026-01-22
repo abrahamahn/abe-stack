@@ -44,9 +44,12 @@ export const RouterContext = createContext<RouterContextValue | null>(null);
 
 function createBrowserLocationStore(): {
   getSnapshot: () => RouterLocation;
+  getServerSnapshot: () => RouterLocation;
   subscribe: (callback: () => void) => () => void;
+  updateLocation: (state?: unknown) => void;
 } {
   let currentLocation = getLocationFromWindow();
+  const listeners = new Set<() => void>();
 
   function getLocationFromWindow(): RouterLocation {
     return {
@@ -57,18 +60,43 @@ function createBrowserLocationStore(): {
     };
   }
 
+  function notifyListeners(): void {
+    listeners.forEach((listener) => {
+      listener();
+    });
+  }
+
   return {
     getSnapshot: (): RouterLocation => currentLocation,
+    getServerSnapshot: (): RouterLocation => ({
+      pathname: '/',
+      search: '',
+      hash: '',
+      state: null,
+    }),
     subscribe: (callback: () => void): (() => void) => {
+      listeners.add(callback);
+
       const handlePopState = (): void => {
         currentLocation = getLocationFromWindow();
-        callback();
+        notifyListeners();
       };
 
       window.addEventListener('popstate', handlePopState);
       return (): void => {
+        listeners.delete(callback);
         window.removeEventListener('popstate', handlePopState);
       };
+    },
+    // Synchronously update location before notifying - prevents stale reads
+    updateLocation: (state?: unknown): void => {
+      currentLocation = {
+        pathname: window.location.pathname,
+        search: window.location.search,
+        hash: window.location.hash,
+        state: state ?? null,
+      };
+      notifyListeners();
     },
   };
 }
@@ -88,10 +116,11 @@ export function Router({ children }: RouterProps): React.ReactElement {
     browserStore?.subscribe ?? ((): (() => void) => (): void => {}),
     browserStore?.getSnapshot ??
       ((): RouterLocation => ({ pathname: '/', search: '', hash: '', state: null })),
-    (): RouterLocation => ({ pathname: '/', search: '', hash: '', state: null }), // Server snapshot
+    browserStore?.getServerSnapshot ??
+      ((): RouterLocation => ({ pathname: '/', search: '', hash: '', state: null })),
   );
 
-  const navigate: NavigateFunction = (to, options = {}) => {
+  const navigate: NavigateFunction = React.useCallback((to, options = {}) => {
     if (typeof to === 'number') {
       window.history.go(to);
       return;
@@ -105,9 +134,9 @@ export function Router({ children }: RouterProps): React.ReactElement {
       window.history.pushState(options.state ?? null, '', url);
     }
 
-    // Trigger re-render by dispatching popstate
-    window.dispatchEvent(new PopStateEvent('popstate', { state: options.state }));
-  };
+    // Synchronously update the store and notify listeners
+    browserStore?.updateLocation(options.state);
+  }, []);
 
   return <RouterContext.Provider value={{ location, navigate }}>{children}</RouterContext.Provider>;
 }

@@ -6,8 +6,8 @@ Comprehensive guide to the ABE Stack developer experience automation scripts. Th
 
 > **Related Documentation:**
 >
-> - [Configuration & Build Setup](./config-setup.md) - Core monorepo configuration
-> - [Development Environment](./dev-environment.md) - Testing, CI/CD, Git hooks
+> - [Configuration](./configuration.md) - Core monorepo configuration
+> - [Workflow](./workflow.md) - Testing, CI/CD, Git hooks
 
 ---
 

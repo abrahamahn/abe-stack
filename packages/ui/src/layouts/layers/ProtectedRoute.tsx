@@ -1,7 +1,6 @@
 // packages/ui/src/layouts/layers/ProtectedRoute.tsx
-import { Spinner } from '@elements/Spinner';
-import { Text } from '@elements/Text';
-
+import { LoadingContainer } from '../../components/LoadingContainer';
+import { useDelayedFlag } from '../../hooks/useDelayedFlag';
 import { Navigate, Outlet } from '../../router';
 import '../../styles/components.css';
 
@@ -18,11 +17,15 @@ export type ProtectedRouteProps = {
   loadingComponent?: ReactNode;
   /** Children to render when authenticated */
   children?: ReactNode;
+  /** Delay in ms before showing loading state (default: 150) */
+  loadingDelay?: number;
 };
 
 /**
  * A route wrapper that checks authentication status and shows a loading state
  * while fetching auth state. Redirects to the specified path if not authenticated.
+ *
+ * Uses delayed loading to prevent flash of loading state for fast auth checks.
  *
  * @example
  * ```tsx
@@ -46,12 +49,19 @@ export const ProtectedRoute = ({
   redirectTo = '/login',
   loadingComponent,
   children,
+  loadingDelay = 150,
 }: ProtectedRouteProps): ReactElement => {
+  // Delay showing loading state to prevent flash for fast auth checks
+  const showLoading = useDelayedFlag(isLoading, loadingDelay);
+
   if (isLoading) {
+    // Still loading but delay hasn't passed - render nothing to prevent flash
+    if (!showLoading) {
+      return <></>;
+    }
     return (loadingComponent ?? (
-      <div className="loading-container">
-        <Spinner />
-        <Text>Loading...</Text>
+      <div className="flex-center h-screen">
+        <LoadingContainer text="" size="md" />
       </div>
     )) as ReactElement;
   }

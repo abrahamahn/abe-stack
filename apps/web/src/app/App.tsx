@@ -8,33 +8,29 @@
  * - Environment passed as prop (dependency injection)
  */
 
-import { createQueryPersister } from '@abe-stack/sdk';
+import { createQueryPersister, QueryCacheProvider } from '@abe-stack/sdk';
 import { toastStore } from '@abe-stack/stores';
-import { BrowserRouter, HistoryProvider, Route, Routes, ScrollArea, Toaster } from '@abe-stack/ui';
-import { ProtectedRoute } from '@features/auth';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { lazy, Suspense, useEffect, useState } from 'react';
+import {
+  BrowserRouter,
+  HistoryProvider,
+  Route,
+  Routes,
+  ScrollArea,
+  Toaster,
+} from '@abe-stack/ui';
+import { DemoPage } from '@demo';
+import {
+  AuthPage,
+  ConfirmEmailPage,
+  LoginPage,
+  ProtectedRoute,
+  RegisterPage,
+  ResetPasswordPage,
+} from '@features/auth';
+import { DashboardPage } from '@features/dashboard';
+import { HomePage } from '@pages/HomePage';
+import { useEffect } from 'react';
 
-// ============================================================================
-// Lazy-loaded Routes (Code Splitting)
-// ============================================================================
-
-const HomePage = lazy(() => import('@pages/HomePage').then((m) => ({ default: m.HomePage })));
-const LoginPage = lazy(() => import('@features/auth').then((m) => ({ default: m.LoginPage })));
-const RegisterPage = lazy(() =>
-  import('@features/auth').then((m) => ({ default: m.RegisterPage })),
-);
-const AuthPage = lazy(() => import('@features/auth').then((m) => ({ default: m.AuthPage })));
-const ResetPasswordPage = lazy(() =>
-  import('@features/auth').then((m) => ({ default: m.ResetPasswordPage })),
-);
-const ConfirmEmailPage = lazy(() =>
-  import('@features/auth').then((m) => ({ default: m.ConfirmEmailPage })),
-);
-const DemoPage = lazy(() => import('@demo').then((m) => ({ default: m.DemoPage })));
-const DashboardPage = lazy(() =>
-  import('@features/dashboard').then((m) => ({ default: m.DashboardPage })),
-);
 
 import { ClientEnvironmentProvider } from './ClientEnvironment';
 
@@ -64,14 +60,6 @@ interface AppProps {
 // Components
 // ============================================================================
 
-function Loading(): ReactElement {
-  return (
-    <div className="flex-center h-screen">
-      <div className="text-muted">Loading...</div>
-    </div>
-  );
-}
-
 function AppToaster(): ReactElement {
   const { messages, dismiss } = toastStore();
   return <Toaster messages={messages} onDismiss={dismiss} />;
@@ -81,12 +69,13 @@ function AppRoutes(): ReactElement {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/clean" element={<HomePage />} />
+      <Route path="/demo" element={<DemoPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
       <Route path="/auth/confirm-email" element={<ConfirmEmailPage />} />
-      <Route path="/demo" element={<DemoPage />} />
       <Route
         path="/dashboard"
         element={
@@ -95,7 +84,6 @@ function AppRoutes(): ReactElement {
           </ProtectedRoute>
         }
       />
-      <Route path="/clean" element={<HomePage />} />
     </Routes>
   );
 }
@@ -105,56 +93,51 @@ function AppRoutes(): ReactElement {
 // ============================================================================
 
 /**
- * Hook to manage query cache persistence manually.
+ * Hook to manage query cache persistence in the background.
  *
- * Replaces PersistQueryClientProvider with direct IndexedDB persistence:
- * - On mount: restores cached queries from IndexedDB
- * - On cache updates: persists to IndexedDB (throttled)
- * - On unmount: final persistence and cleanup
+ * Non-blocking approach for instant app load:
+ * - App renders immediately without waiting for IndexedDB
+ * - Cache restoration happens in background
+ * - Persists cache changes to IndexedDB (throttled)
  */
-function useQueryPersistence(environment: ClientEnvironment): boolean {
-  const [isRestored, setIsRestored] = useState(false);
-  const { queryClient } = environment;
+function useQueryPersistence(environment: ClientEnvironment): void {
+  const { queryCache } = environment;
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
 
     const init = async (): Promise<void> => {
-      // Restore cached data from IndexedDB
+      // Restore cached data from IndexedDB in background
       try {
         const persistedClient = await persister.restoreClient();
         if (persistedClient) {
-          // Restore each query's data from the persisted state
           for (const persistedQuery of persistedClient.clientState.queries) {
-            queryClient.setQueryData(persistedQuery.queryKey, persistedQuery.state.data);
+            queryCache.setQueryData(persistedQuery.queryKey, persistedQuery.state.data);
           }
         }
       } catch {
         // Restore failed silently, continue with empty cache
       }
 
-      setIsRestored(true);
-
       // Subscribe to cache changes for persistence
-      unsubscribe = queryClient.getQueryCache().subscribe(() => {
-        const queries = queryClient
-          .getQueryCache()
-          .getAll()
-          .filter((query) => query.state.data !== undefined)
-          .map((query) => ({
-            queryKey: query.queryKey,
-            queryHash: query.queryHash,
+      unsubscribe = queryCache.subscribeAll(() => {
+        const allQueries = queryCache.getAll();
+        const queries = allQueries
+          .filter((entry) => entry.state.data !== undefined)
+          .map((entry) => ({
+            queryKey: entry.queryKey,
+            queryHash: JSON.stringify(entry.queryKey),
             state: {
-              data: query.state.data,
-              dataUpdatedAt: query.state.dataUpdatedAt,
-              error: query.state.error,
-              errorUpdatedAt: query.state.errorUpdatedAt,
-              fetchFailureCount: query.state.fetchFailureCount,
-              fetchFailureReason: query.state.fetchFailureReason,
-              fetchMeta: query.state.fetchMeta,
-              fetchStatus: query.state.fetchStatus,
-              isInvalidated: query.state.isInvalidated,
-              status: query.state.status,
+              data: entry.state.data,
+              dataUpdatedAt: entry.state.dataUpdatedAt,
+              error: entry.state.error,
+              errorUpdatedAt: entry.state.errorUpdatedAt,
+              fetchFailureCount: entry.state.fetchFailureCount,
+              fetchFailureReason: null,
+              fetchMeta: null,
+              fetchStatus: entry.state.fetchStatus,
+              isInvalidated: entry.state.isInvalidated,
+              status: entry.state.status,
             },
           }));
 
@@ -171,9 +154,7 @@ function useQueryPersistence(environment: ClientEnvironment): boolean {
     return (): void => {
       unsubscribe?.();
     };
-  }, [queryClient]);
-
-  return isRestored;
+  }, [queryCache]);
 }
 
 /**
@@ -181,7 +162,7 @@ function useQueryPersistence(environment: ClientEnvironment): boolean {
  *
  * Provider stack (outer to inner):
  * - Suspense: Loading fallback
- * - QueryClientProvider: React Query infrastructure
+ * - QueryCacheProvider: Custom query cache infrastructure
  * - BrowserRouter: React Router infrastructure
  * - ClientEnvironmentProvider: Our unified service context
  * - HistoryProvider: Navigation history tracking
@@ -190,28 +171,23 @@ function useQueryPersistence(environment: ClientEnvironment): boolean {
  * which restores from and persists to IndexedDB.
  */
 export function App({ environment }: AppProps): ReactElement {
-  const isRestored = useQueryPersistence(environment);
-
-  if (!isRestored) {
-    return <Loading />;
-  }
+  // Start background cache restoration (non-blocking)
+  useQueryPersistence(environment);
 
   return (
-    <Suspense fallback={<Loading />}>
-      <QueryClientProvider client={environment.queryClient}>
-        <BrowserRouter>
-          <ClientEnvironmentProvider value={environment}>
-            <HistoryProvider>
-              <div className="theme h-screen">
-                <ScrollArea className="h-full">
-                  <AppRoutes />
-                </ScrollArea>
-                <AppToaster />
-              </div>
-            </HistoryProvider>
-          </ClientEnvironmentProvider>
-        </BrowserRouter>
-      </QueryClientProvider>
-    </Suspense>
+    <QueryCacheProvider cache={environment.queryCache}>
+      <BrowserRouter>
+        <ClientEnvironmentProvider value={environment}>
+          <HistoryProvider>
+            <div className="theme h-screen">
+              <ScrollArea className="h-full">
+                <AppRoutes />
+              </ScrollArea>
+              <AppToaster />
+            </div>
+          </HistoryProvider>
+        </ClientEnvironmentProvider>
+      </BrowserRouter>
+    </QueryCacheProvider>
   );
 }

@@ -209,6 +209,8 @@ describe('handleRegister', () => {
 // ============================================================================
 
 describe('handleLogin', () => {
+  const createdAt = new Date('2024-01-01T00:00:00.000Z').toISOString();
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -222,7 +224,13 @@ describe('handleLogin', () => {
     const mockResult = {
       accessToken: 'access-token',
       refreshToken: 'refresh-token',
-      user: { id: 'user-123', email: 'test@example.com', name: 'Test', role: 'user' as const },
+      user: {
+        id: 'user-123',
+        email: 'test@example.com',
+        name: 'Test',
+        role: 'user' as const,
+        createdAt,
+      },
     };
 
     vi.mocked(authenticateUser).mockResolvedValue(mockResult);
@@ -527,6 +535,8 @@ describe('handleResetPassword', () => {
 // ============================================================================
 
 describe('handleVerifyEmail', () => {
+  const createdAt = new Date('2024-01-01T00:00:00.000Z').toISOString();
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -541,6 +551,7 @@ describe('handleVerifyEmail', () => {
       email: 'test@example.com',
       name: 'Test',
       role: 'user' as const,
+      createdAt,
     };
     vi.mocked(verifyEmail).mockResolvedValue({
       accessToken: 'access-token',

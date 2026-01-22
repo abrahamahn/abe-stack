@@ -5,11 +5,13 @@
  * OAuth authentication schemas and API contract definitions.
  */
 
-import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
+
 
 import { errorResponseSchema } from './common';
 import { userSchema } from './users';
+
+import type { Contract } from './types';
 
 // ============================================================================
 // Constants
@@ -109,12 +111,10 @@ export type OAuthConnectionsResponse = z.infer<typeof oauthConnectionsResponseSc
 // OAuth Contract
 // ============================================================================
 
-const c = initContract();
-
-export const oauthContract = c.router({
+export const oauthContract = {
   // Initiate OAuth flow
   initiateGoogle: {
-    method: 'GET',
+    method: 'GET' as const,
     path: '/api/auth/oauth/google',
     responses: {
       302: oauthInitiateResponseSchema,
@@ -123,7 +123,7 @@ export const oauthContract = c.router({
     summary: 'Initiate Google OAuth flow',
   },
   initiateGithub: {
-    method: 'GET',
+    method: 'GET' as const,
     path: '/api/auth/oauth/github',
     responses: {
       302: oauthInitiateResponseSchema,
@@ -132,7 +132,7 @@ export const oauthContract = c.router({
     summary: 'Initiate GitHub OAuth flow',
   },
   initiateApple: {
-    method: 'GET',
+    method: 'GET' as const,
     path: '/api/auth/oauth/apple',
     responses: {
       302: oauthInitiateResponseSchema,
@@ -143,7 +143,7 @@ export const oauthContract = c.router({
 
   // OAuth callbacks
   callbackGoogle: {
-    method: 'GET',
+    method: 'GET' as const,
     path: '/api/auth/oauth/google/callback',
     query: oauthCallbackQuerySchema,
     responses: {
@@ -153,7 +153,7 @@ export const oauthContract = c.router({
     summary: 'Handle Google OAuth callback',
   },
   callbackGithub: {
-    method: 'GET',
+    method: 'GET' as const,
     path: '/api/auth/oauth/github/callback',
     query: oauthCallbackQuerySchema,
     responses: {
@@ -163,7 +163,7 @@ export const oauthContract = c.router({
     summary: 'Handle GitHub OAuth callback',
   },
   callbackApple: {
-    method: 'GET',
+    method: 'GET' as const,
     path: '/api/auth/oauth/apple/callback',
     query: oauthCallbackQuerySchema,
     responses: {
@@ -175,7 +175,7 @@ export const oauthContract = c.router({
 
   // Link OAuth accounts
   linkGoogle: {
-    method: 'POST',
+    method: 'POST' as const,
     path: '/api/auth/oauth/google/link',
     body: z.object({}),
     responses: {
@@ -186,7 +186,7 @@ export const oauthContract = c.router({
     summary: 'Link Google account to authenticated user',
   },
   linkGithub: {
-    method: 'POST',
+    method: 'POST' as const,
     path: '/api/auth/oauth/github/link',
     body: z.object({}),
     responses: {
@@ -197,7 +197,7 @@ export const oauthContract = c.router({
     summary: 'Link GitHub account to authenticated user',
   },
   linkApple: {
-    method: 'POST',
+    method: 'POST' as const,
     path: '/api/auth/oauth/apple/link',
     body: z.object({}),
     responses: {
@@ -210,7 +210,7 @@ export const oauthContract = c.router({
 
   // Unlink OAuth accounts
   unlinkGoogle: {
-    method: 'DELETE',
+    method: 'DELETE' as const,
     path: '/api/auth/oauth/google/unlink',
     body: z.object({}),
     responses: {
@@ -222,7 +222,7 @@ export const oauthContract = c.router({
     summary: 'Unlink Google account from authenticated user',
   },
   unlinkGithub: {
-    method: 'DELETE',
+    method: 'DELETE' as const,
     path: '/api/auth/oauth/github/unlink',
     body: z.object({}),
     responses: {
@@ -234,7 +234,7 @@ export const oauthContract = c.router({
     summary: 'Unlink GitHub account from authenticated user',
   },
   unlinkApple: {
-    method: 'DELETE',
+    method: 'DELETE' as const,
     path: '/api/auth/oauth/apple/unlink',
     body: z.object({}),
     responses: {
@@ -248,7 +248,7 @@ export const oauthContract = c.router({
 
   // Get connected providers
   getConnections: {
-    method: 'GET',
+    method: 'GET' as const,
     path: '/api/auth/oauth/connections',
     responses: {
       200: oauthConnectionsResponseSchema,
@@ -256,4 +256,4 @@ export const oauthContract = c.router({
     },
     summary: 'Get OAuth connections for authenticated user',
   },
-});
+} satisfies Contract;

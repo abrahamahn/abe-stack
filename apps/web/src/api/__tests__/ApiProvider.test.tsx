@@ -1,7 +1,7 @@
 // apps/web/src/api/__tests__/ApiProvider.test.tsx
+import { QueryCache } from '@abe-stack/sdk';
 import { MemoryRouter } from '@abe-stack/ui';
 import { ClientEnvironmentProvider } from '@app';
-import { QueryClient } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -10,51 +10,26 @@ import { ApiProvider, useApi } from '../ApiProvider';
 import type { ClientConfig, ClientEnvironment } from '@app';
 import type { AuthService } from '@features/auth';
 
-// Track callback handlers captured by createReactQueryClient
-let capturedCallbacks: {
-  getToken?: () => string | null;
-  onUnauthorized?: () => void;
-  onServerError?: (message?: string) => void;
-} = {};
-
 // Use vi.hoisted to hoist mock functions along with vi.mock
-const { mockNavigate, mockTokenGet, mockTokenClear, mockShowToast } = vi.hoisted(() => ({
-  mockNavigate: vi.fn(),
+const { mockTokenGet } = vi.hoisted(() => ({
   mockTokenGet: vi.fn(() => 'test-token'),
-  mockTokenClear: vi.fn(),
-  mockShowToast: vi.fn(),
 }));
-
-// Mock router navigation
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual<typeof import('@abe-stack/ui')>('@abe-stack/ui');
-  return {
-    ...actual,
-    useNavigate: (): typeof mockNavigate => mockNavigate,
-  };
-});
 
 // Mock dependencies - use importOriginal for partial mocking
 vi.mock('@abe-stack/sdk', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@abe-stack/sdk')>();
   return {
     ...actual,
-    createReactQueryClient: vi.fn(
-      (config: {
-        getToken?: () => string | null;
-        onUnauthorized?: () => void;
-        onServerError?: (message?: string) => void;
-      }) => {
-        capturedCallbacks = config;
-        return { someApiMethod: vi.fn() };
-      },
-    ),
     createApiClient: vi.fn(() => ({
       login: vi.fn(),
       register: vi.fn(),
       logout: vi.fn(),
       refresh: vi.fn(),
       getCurrentUser: vi.fn(),
+      forgotPassword: vi.fn(),
+      resetPassword: vi.fn(),
+      verifyEmail: vi.fn(),
+      resendVerification: vi.fn(),
     })),
   };
 });
@@ -66,22 +41,16 @@ vi.mock('@abe-stack/core', async (importOriginal) => {
     tokenStore: {
       get: mockTokenGet,
       set: vi.fn(),
-      clear: mockTokenClear,
-    },
-    toastStore: {
-      getState: (): { show: typeof mockShowToast } => ({
-        show: mockShowToast,
-      }),
+      clear: vi.fn(),
     },
   };
 });
 
 // Create mock environment for tests
 function createMockEnvironment(): ClientEnvironment {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
+  const queryCache = new QueryCache({
+    defaultStaleTime: 5 * 60 * 1000,
+    defaultGcTime: 24 * 60 * 60 * 1000,
   });
 
   const mockConfig: ClientConfig = {
@@ -106,7 +75,7 @@ function createMockEnvironment(): ClientEnvironment {
 
   return {
     config: mockConfig,
-    queryClient,
+    queryCache,
     auth: mockAuth,
   };
 }
@@ -120,7 +89,6 @@ function TestConsumer(): React.ReactElement {
 describe('ApiProvider', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    capturedCallbacks = {};
   });
 
   const renderWithProvider = (): ReturnType<typeof render> => {
@@ -150,59 +118,6 @@ describe('ApiProvider', () => {
 
   it('should render without crashing', () => {
     expect(() => renderWithProvider()).not.toThrow();
-  });
-
-  describe('callback behaviors', () => {
-    it('getToken retrieves token from tokenStore', () => {
-      renderWithProvider();
-
-      expect(capturedCallbacks.getToken).toBeDefined();
-      const getToken = capturedCallbacks.getToken;
-      if (!getToken) throw new Error('getToken not captured');
-      const token = getToken();
-
-      expect(mockTokenGet).toHaveBeenCalled();
-      expect(token).toBe('test-token');
-    });
-
-    it('onUnauthorized clears token and navigates to login', () => {
-      renderWithProvider();
-
-      expect(capturedCallbacks.onUnauthorized).toBeDefined();
-      const onUnauthorized = capturedCallbacks.onUnauthorized;
-      if (!onUnauthorized) throw new Error('onUnauthorized not captured');
-      onUnauthorized();
-
-      expect(mockTokenClear).toHaveBeenCalled();
-      expect(mockNavigate).toHaveBeenCalledWith('/login');
-    });
-
-    it('onServerError shows toast with error message', () => {
-      renderWithProvider();
-
-      expect(capturedCallbacks.onServerError).toBeDefined();
-      const onServerError = capturedCallbacks.onServerError;
-      if (!onServerError) throw new Error('onServerError not captured');
-      onServerError('Database connection failed');
-
-      expect(mockShowToast).toHaveBeenCalledWith({
-        title: 'Server error',
-        description: 'Database connection failed',
-      });
-    });
-
-    it('onServerError shows default message when none provided', () => {
-      renderWithProvider();
-
-      const onServerError = capturedCallbacks.onServerError;
-      if (!onServerError) throw new Error('onServerError not captured');
-      onServerError(undefined);
-
-      expect(mockShowToast).toHaveBeenCalledWith({
-        title: 'Server error',
-        description: 'Something went wrong',
-      });
-    });
   });
 });
 

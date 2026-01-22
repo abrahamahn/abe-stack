@@ -35,6 +35,7 @@ export { useDensity, type UseDensityReturn } from './useDensity';
 export { useContrast, type UseContrastReturn } from './useContrast';
 export { useCopyToClipboard } from './useCopyToClipboard';
 export { useHistoryNav, HistoryProvider, type HistoryContextValue } from './useHistoryNav';
+export { useDelayedFlag } from './useDelayedFlag';
 export {
   deepEqual,
   shallowEqual,

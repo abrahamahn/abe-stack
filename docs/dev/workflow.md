@@ -1,4 +1,4 @@
-# Development Environment
+# Workflow
 
 **Last Updated: January 19, 2026**
 
@@ -6,7 +6,7 @@ Guide to the ABE Stack development workflow, testing, linting, CI/CD, and Docker
 
 > **Related Documentation:**
 >
-> - [Configuration & Build Setup](./config-setup.md) - Core monorepo configuration
+> - [Configuration](./configuration.md) - Core monorepo configuration
 > - [Sync Scripts](./sync-scripts.md) - DX automation scripts
 > - [Testing Strategy](./testing.md) - Detailed testing patterns
 

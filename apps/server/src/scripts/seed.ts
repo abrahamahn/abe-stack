@@ -20,11 +20,13 @@ import { loadConfig } from '@config';
 import { buildConnectionString, createDbClient, users } from '@database';
 import { hashPassword } from '@modules/auth/utils/password';
 
+import type { UserRole } from '@abe-stack/core';
+
 export interface SeedUser {
   email: string;
   password: string;
   name: string;
-  role: 'user' | 'admin';
+  role: UserRole;
 }
 
 /**

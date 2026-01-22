@@ -37,10 +37,10 @@ export const webConfig: UserConfig = defineConfig({
       '@dashboard': path.join(repoRoot, 'apps/web/src/features/dashboard'),
       '@demo': path.join(repoRoot, 'apps/web/src/features/demo'),
       '@catalog': path.join(repoRoot, 'apps/web/src/features/demo/catalog'),
-      '@toast': path.join(repoRoot, 'apps/web/src/features/toast'),
       '@pages': path.join(repoRoot, 'apps/web/src/pages'),
       '@test': path.join(repoRoot, 'apps/web/src/__tests__'),
       '@abe-stack/core': path.join(repoRoot, 'packages/core/src'),
+      '@abe-stack/media': path.join(repoRoot, 'packages/media/src'),
       '@abe-stack/sdk': path.join(repoRoot, 'packages/sdk/src'),
       '@abe-stack/stores': path.join(repoRoot, 'packages/stores/src'),
       '@abe-stack/ui': path.join(repoRoot, 'packages/ui/src'),
@@ -54,7 +54,6 @@ export const webConfig: UserConfig = defineConfig({
       '@theme': path.join(repoRoot, 'packages/ui/src/theme'),
       '@utils': path.join(repoRoot, 'packages/ui/src/utils'),
       '@contracts': path.join(repoRoot, 'packages/core/src/contracts'),
-      '@validation': path.join(repoRoot, 'packages/core/src/validation'),
     },
   },
 });
@@ -230,20 +229,12 @@ export const serverConfig: UserConfig = defineConfig({
         replacement: path.join(repoRoot, 'packages/core/src/domains/auth/index.ts'),
       },
       {
-        find: '@abe-stack/core/domains/users',
-        replacement: path.join(repoRoot, 'packages/core/src/domains/users/index.ts'),
-      },
-      {
         find: '@abe-stack/core/domains/pagination',
         replacement: path.join(repoRoot, 'packages/core/src/domains/pagination/index.ts'),
       },
       {
-        find: '@abe-stack/core/domains/admin',
-        replacement: path.join(repoRoot, 'packages/core/src/domains/admin/index.ts'),
-      },
-      {
-        find: '@abe-stack/core/media',
-        replacement: path.join(repoRoot, 'packages/core/src/media/index.ts'),
+        find: '@abe-stack/media',
+        replacement: path.join(repoRoot, 'packages/media/src/index.ts'),
       },
       { find: '@abe-stack/core', replacement: path.join(repoRoot, 'packages/core/src') },
     ],

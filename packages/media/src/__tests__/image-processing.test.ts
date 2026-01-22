@@ -1,4 +1,4 @@
-// packages/core/src/media/__tests__/image-processing.test.ts
+// packages/media/src/__tests__/image-processing.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {

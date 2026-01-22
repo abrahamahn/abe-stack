@@ -6,18 +6,16 @@
  * This is the main export used by clients and servers.
  */
 
-import { initContract } from '@ts-rest/core';
-
 import { adminContract } from './admin';
 import { authContract } from './auth';
 import { usersContract } from './users';
 
-const c = initContract();
+import type { ContractRouter } from './types';
 
-export const apiContract = c.router({
+export const apiContract = {
   auth: authContract,
   users: usersContract,
   admin: adminContract,
-});
+} satisfies ContractRouter;
 
 export type ApiContract = typeof apiContract;

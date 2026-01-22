@@ -1,6 +1,6 @@
 // apps/web/src/features/auth/pages/__tests__/ConfirmEmailPage.test.tsx
+import { QueryCache, QueryCacheProvider } from '@abe-stack/sdk';
 import { MemoryRouter } from '@abe-stack/ui';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import { fireEvent } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -34,23 +34,22 @@ vi.mock('@abe-stack/ui', async () => {
 });
 
 describe('ConfirmEmailPage', () => {
-  const createQueryClient = (): QueryClient =>
-    new QueryClient({
-      defaultOptions: {
-        queries: { retry: false },
-      },
+  const createQueryCache = (): QueryCache =>
+    new QueryCache({
+      defaultStaleTime: 0,
+      defaultGcTime: 0,
     });
 
   const renderConfirmEmailPage = (
     initialEntries: string[] = ['/confirm-email?token=valid-token'],
   ): ReturnType<typeof render> => {
-    const queryClient = createQueryClient();
+    const queryCache = createQueryCache();
     return render(
-      <QueryClientProvider client={queryClient}>
+      <QueryCacheProvider cache={queryCache}>
         <MemoryRouter initialEntries={initialEntries}>
           <ConfirmEmailPage />
         </MemoryRouter>
-      </QueryClientProvider>,
+      </QueryCacheProvider>,
     );
   };
 

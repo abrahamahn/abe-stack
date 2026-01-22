@@ -12,7 +12,6 @@ type LogFn = (message: string) => void;
 
 // Default logger using console.log
 const defaultLog: LogFn = (message: string) => {
-  // eslint-disable-next-line no-console
   console.log(message);
 };
 

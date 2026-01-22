@@ -2,7 +2,6 @@
 
 // Users schema
 export {
-  USER_ROLES,
   users,
   refreshTokens,
   type UserRole,

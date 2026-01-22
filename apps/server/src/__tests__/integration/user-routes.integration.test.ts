@@ -9,6 +9,7 @@
 import Fastify from 'fastify';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { UserRole } from '@abe-stack/core';
 import type { FastifyInstance } from 'fastify';
 
 // ============================================================================
@@ -23,7 +24,7 @@ describe('User Routes Integration', () => {
     id: 'user-123',
     email: 'test@example.com',
     name: 'Test User',
-    role: 'user' as const,
+    role: 'user' as UserRole,
     createdAt: new Date('2024-01-01T00:00:00Z'),
   };
 
@@ -31,7 +32,7 @@ describe('User Routes Integration', () => {
     id: 'admin-456',
     email: 'admin@example.com',
     name: 'Admin User',
-    role: 'admin' as const,
+    role: 'admin' as UserRole,
     createdAt: new Date('2024-01-01T00:00:00Z'),
   };
 

@@ -13,6 +13,7 @@ export interface AuthUser {
   email: string;
   name: string | null;
   role: UserRole;
+  createdAt: string;
 }
 
 /**
@@ -38,8 +39,17 @@ export interface AuthResponseData {
 export function createAuthResponse(
   accessToken: string,
   refreshToken: string,
-  user: { id: string; email: string; name: string | null; role: UserRole },
+  user: {
+    id: string;
+    email: string;
+    name: string | null;
+    role: UserRole;
+    createdAt: Date | string;
+  },
 ): AuthResponseData {
+  const createdAt =
+    typeof user.createdAt === 'string' ? user.createdAt : user.createdAt.toISOString();
+
   return {
     accessToken,
     refreshToken,
@@ -48,6 +58,7 @@ export function createAuthResponse(
       email: user.email,
       name: user.name,
       role: user.role,
+      createdAt,
     },
   };
 }

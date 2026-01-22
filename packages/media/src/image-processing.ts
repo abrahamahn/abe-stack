@@ -1,4 +1,4 @@
-// packages/core/src/media/image-processing.ts
+// packages/media/src/image-processing.ts
 /**
  * Custom Image Processing - Lightweight replacement for Sharp
  *
@@ -9,44 +9,50 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 
-// DOM types for browser environment
-declare global {
-  var document: {
-    createElement(tagName: 'canvas'): HTMLCanvasElement;
-    createElement(tagName: 'img'): HTMLImageElement;
-    createElement(tagName: string): HTMLElement;
-  };
+// DOM types for Canvas API (module-scoped to avoid conflicts with lib.dom.d.ts)
+interface IHTMLElement {
+  readonly tagName?: string;
+}
 
-  var Image: {
-    new (): HTMLImageElement;
-  };
+interface IHTMLImageElement extends IHTMLElement {
+  src: string;
+  width: number;
+  height: number;
+  onload: (() => void) | null;
+  onerror: (() => void) | null;
+}
 
-  var HTMLCanvasElement: {
-    prototype: HTMLCanvasElement;
-  };
+interface ICanvasRenderingContext2D {
+  drawImage(image: IHTMLImageElement, dx: number, dy: number, dw?: number, dh?: number): void;
+  canvas: IHTMLCanvasElement;
+}
 
-  // Base HTML element type
-  type HTMLElement = object;
+interface IHTMLCanvasElement extends IHTMLElement {
+  width: number;
+  height: number;
+  getContext(contextId: '2d'): ICanvasRenderingContext2D | null;
+  toBlob(callback: (blob: Blob | null) => void, type?: string, quality?: number): void;
+}
 
-  interface HTMLImageElement extends HTMLElement {
-    src: string;
-    width: number;
-    height: number;
-    onload: (() => void) | null;
-    onerror: (() => void) | null;
-  }
+interface IDocument {
+  createElement(tagName: 'canvas'): IHTMLCanvasElement;
+  createElement(tagName: 'img'): IHTMLImageElement;
+  createElement(tagName: string): IHTMLElement;
+}
 
-  interface HTMLCanvasElement extends HTMLElement {
-    width: number;
-    height: number;
-    getContext(contextId: '2d'): CanvasRenderingContext2D | null;
-    toBlob(callback: (blob: Blob | null) => void, type?: string, quality?: number): void;
-  }
+interface IImageConstructor {
+  new (): IHTMLImageElement;
+}
 
-  interface CanvasRenderingContext2D {
-    drawImage(image: HTMLImageElement, dx: number, dy: number, dw?: number, dh?: number): void;
-    canvas: HTMLCanvasElement;
-  }
+// Type-safe access to browser globals via globalThis
+interface BrowserGlobals {
+  document?: IDocument;
+  Image?: IImageConstructor;
+  HTMLCanvasElement?: { prototype: IHTMLCanvasElement };
+}
+
+function getBrowserGlobals(): BrowserGlobals {
+  return globalThis as unknown as BrowserGlobals;
 }
 
 export interface ImageResizeOptions {
@@ -96,12 +102,13 @@ export class ImageProcessor {
    * Check if Canvas API is available
    */
   private hasCanvasSupport(): boolean {
+    const globals = getBrowserGlobals();
     return (
       typeof globalThis !== 'undefined' &&
-      'document' in globalThis &&
-      'createElement' in globalThis.document &&
-      typeof globalThis.Image !== 'undefined' &&
-      typeof globalThis.HTMLCanvasElement !== 'undefined'
+      globals.document !== undefined &&
+      typeof globals.document.createElement === 'function' &&
+      globals.Image !== undefined &&
+      globals.HTMLCanvasElement !== undefined
     );
   }
 
@@ -138,6 +145,17 @@ export class ImageProcessor {
     outputPath: string,
     options: ImageProcessingOptions,
   ): Promise<ProcessingResult> {
+    const globals = getBrowserGlobals();
+    const ImageConstructor = globals.Image;
+    const doc = globals.document;
+
+    if (!ImageConstructor || !doc) {
+      return {
+        success: false,
+        error: 'Browser APIs not available',
+      };
+    }
+
     try {
       // Load image from file first
       const buffer = await fs.readFile(inputPath);
@@ -145,13 +163,13 @@ export class ImageProcessor {
       const url = URL.createObjectURL(blob);
 
       // Create image element
-      const img = new globalThis.Image();
+      const img = new ImageConstructor();
 
       return await new Promise<ProcessingResult>((resolve) => {
         img.onload = (): void => {
           try {
             // Create canvas
-            const canvas = globalThis.document.createElement('canvas');
+            const canvas = doc.createElement('canvas');
             const ctx = canvas.getContext('2d');
 
             if (!ctx) {
@@ -278,13 +296,18 @@ export class ImageProcessor {
    * Generate thumbnail using Canvas
    */
   private async generateThumbnailWithCanvas(
-    img: HTMLImageElement,
+    img: IHTMLImageElement,
     outputPath: string,
     options: { size: number; fit?: 'contain' | 'cover' | 'fill' },
   ): Promise<void> {
+    const doc = getBrowserGlobals().document;
+    if (!doc) {
+      throw new Error('Document API not available');
+    }
+
     return new Promise((resolve, reject) => {
       try {
-        const canvas = globalThis.document.createElement('canvas');
+        const canvas = doc.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
         if (!ctx) {

@@ -42,7 +42,6 @@ export {
   securityEvents,
   updateUserWithVersion,
   // Schema - Users
-  USER_ROLES,
   users,
   validateSchema,
   // Transaction

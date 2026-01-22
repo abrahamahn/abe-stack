@@ -21,7 +21,7 @@ function getDatabaseUrl(): string {
 }
 
 export default defineConfig({
-  schema: path.join(serverRoot, 'src/infra/database/schema/index.ts'),
+  schema: path.join(serverRoot, 'src/infrastructure/data/database/schema/index.ts'),
   out: path.join(serverRoot, 'drizzle'),
   dialect: 'postgresql',
   dbCredentials: {

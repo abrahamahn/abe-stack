@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { userRoutes } from '../routes';
 
-import type { CursorPaginatedResult, CursorPaginationOptions, UserResponse } from '@abe-stack/core';
+import type { CursorPaginatedResult, CursorPaginationOptions, User } from '@abe-stack/core';
 import type { RouteResult } from '@router';
 import type { AppContext, RequestWithCookies } from '@shared';
 
@@ -21,6 +21,7 @@ import type { AppContext, RequestWithCookies } from '@shared';
 // Mock the handlers module
 vi.mock('../handlers', () => ({
   handleMe: vi.fn(),
+  handleListUsers: vi.fn(),
 }));
 
 // ============================================================================
@@ -196,7 +197,7 @@ describe('User Routes Handler Mapping', () => {
     test('should call handleMe with correct arguments', async () => {
       const user = { userId: 'user-123', email: 'test@example.com', role: 'user' };
       const request = createMockRequest(user);
-      const expectedResult: RouteResult<UserResponse> = {
+      const expectedResult: RouteResult<User> = {
         status: 200,
         body: {
           id: 'user-123',
@@ -307,7 +308,7 @@ describe('User Routes Pagination (users/list)', () => {
       expect(result.body).toHaveProperty('nextCursor');
       expect(result.body).toHaveProperty('hasNext');
       expect(result.body).toHaveProperty('limit');
-      expect((result.body as CursorPaginatedResult<UserResponse>).data).toHaveLength(2);
+      expect((result.body as CursorPaginatedResult<User>).data).toHaveLength(2);
     });
 
     test('should include pagination metadata in response', async () => {
@@ -322,7 +323,7 @@ describe('User Routes Pagination (users/list)', () => {
         {} as never,
       );
 
-      const body = result.body as CursorPaginatedResult<UserResponse>;
+      const body = result.body as CursorPaginatedResult<User>;
       expect(body).toHaveProperty('nextCursor');
       expect(body).toHaveProperty('hasNext');
       expect(body).toHaveProperty('limit');
@@ -343,7 +344,7 @@ describe('User Routes Pagination (users/list)', () => {
 
       expect(result.status).toBe(200);
       // The handler should use pagination.helpers.createCursorResult
-      const body = result.body as CursorPaginatedResult<UserResponse>;
+      const body = result.body as CursorPaginatedResult<User>;
       expect(body.limit).toBe(5);
     });
   });
@@ -402,7 +403,7 @@ describe('User Routes Pagination (users/list)', () => {
         {} as never,
       );
 
-      const body = result.body as CursorPaginatedResult<UserResponse>;
+      const body = result.body as CursorPaginatedResult<User>;
       expect(body.data.length).toBeGreaterThan(0);
 
       // Verify user structure
@@ -426,7 +427,7 @@ describe('User Routes Pagination (users/list)', () => {
         {} as never,
       );
 
-      const body = result.body as CursorPaginatedResult<UserResponse>;
+      const body = result.body as CursorPaginatedResult<User>;
       for (const mockUser of body.data) {
         expect(mockUser.email).toMatch(/@example\.com$/);
       }
@@ -444,7 +445,7 @@ describe('User Routes Pagination (users/list)', () => {
         {} as never,
       );
 
-      const body = result.body as CursorPaginatedResult<UserResponse>;
+      const body = result.body as CursorPaginatedResult<User>;
       for (const mockUser of body.data) {
         expect(mockUser.role).toBe('user');
       }
@@ -464,7 +465,7 @@ describe('User Routes Pagination (users/list)', () => {
         {} as never,
       );
 
-      const body = result.body as CursorPaginatedResult<UserResponse>;
+      const body = result.body as CursorPaginatedResult<User>;
       expect(body.hasNext).toBe(false);
     });
 
@@ -480,7 +481,7 @@ describe('User Routes Pagination (users/list)', () => {
         {} as never,
       );
 
-      const body = result.body as CursorPaginatedResult<UserResponse>;
+      const body = result.body as CursorPaginatedResult<User>;
       expect(body.nextCursor).toBeNull();
     });
   });
@@ -568,6 +569,10 @@ describe('User Routes Type Safety', () => {
     (handlers.handleMe as ReturnType<typeof vi.fn>).mockResolvedValue({
       status: 200,
       body: { id: '1', email: 'test@example.com', name: null, role: 'user', createdAt: '' },
+    });
+    (handlers.handleListUsers as ReturnType<typeof vi.fn>).mockResolvedValue({
+      status: 200,
+      body: { users: [], nextCursor: null, hasNext: false },
     });
 
     const meResult = meHandler(ctx, undefined, request as never, {} as never);

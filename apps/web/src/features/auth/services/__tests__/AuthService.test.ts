@@ -1,6 +1,5 @@
 // apps/web/src/features/auth/services/__tests__/AuthService.test.ts
 import { tokenStore } from '@abe-stack/core';
-import { QueryClient } from '@tanstack/react-query';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AuthService, createAuthService } from '../AuthService';
@@ -86,7 +85,6 @@ function createMockRegisterResponse(email = 'new@example.com'): RegisterResponse
 
 describe('AuthService', () => {
   let authService: AuthService;
-  let queryClient: QueryClient;
   let config: ClientConfig;
 
   beforeEach(() => {
@@ -96,11 +94,8 @@ describe('AuthService', () => {
     // Reset token store mock
     vi.mocked(tokenStore.get).mockReturnValue(null);
 
-    queryClient = new QueryClient({
-      defaultOptions: { queries: { retry: false } },
-    });
     config = createMockConfig();
-    authService = new AuthService({ config, queryClient });
+    authService = new AuthService({ config });
   });
 
   afterEach(() => {
@@ -116,7 +111,7 @@ describe('AuthService', () => {
     it('should start refresh interval when token exists', () => {
       vi.mocked(tokenStore.get).mockReturnValue('existing-token');
 
-      const serviceWithToken = new AuthService({ config, queryClient });
+      const serviceWithToken = new AuthService({ config });
 
       expect(serviceWithToken).toBeDefined();
       serviceWithToken.destroy();
@@ -132,10 +127,11 @@ describe('AuthService', () => {
       expect(state.isLoading).toBe(false);
     });
 
-    it('should return user when authenticated', () => {
+    it('should return user when authenticated', async () => {
       const mockUser = createMockUser();
-      queryClient.setQueryData(['auth', 'me'], mockUser);
+      mockApiClient.login.mockResolvedValueOnce(createMockAuthResponse(mockUser));
 
+      await authService.login({ email: 'test@example.com', password: 'password' });
       const state = authService.getState();
 
       expect(state.user).toEqual(mockUser);
@@ -146,11 +142,11 @@ describe('AuthService', () => {
       vi.mocked(tokenStore.get).mockReturnValue('some-token');
 
       // Create fresh service with token
-      const newService = new AuthService({ config, queryClient });
+      const newService = new AuthService({ config });
       const state = newService.getState();
 
-      // Without user data and with token, isLoading depends on query state
-      expect(state.isLoading).toBe(false); // No query pending by default
+      // Without user data and with token, isLoading depends on internal state
+      expect(state.isLoading).toBe(false); // No loading by default
       newService.destroy();
     });
   });
@@ -211,13 +207,13 @@ describe('AuthService', () => {
       expect(tokenStore.set).toHaveBeenCalledWith(response.token);
     });
 
-    it('should update query data with user', async () => {
+    it('should update state with user', async () => {
       const response = createMockAuthResponse();
       mockApiClient.login.mockResolvedValueOnce(response);
 
       await authService.login({ email: 'test@example.com', password: 'password' });
 
-      expect(queryClient.getQueryData(['auth', 'me'])).toEqual(response.user);
+      expect(authService.getState().user).toEqual(response.user);
     });
 
     it('should throw on login failure', async () => {
@@ -276,14 +272,15 @@ describe('AuthService', () => {
       expect(tokenStore.clear).toHaveBeenCalled();
     });
 
-    it('should remove user from query cache', async () => {
-      const mockUser = createMockUser();
-      queryClient.setQueryData(['auth', 'me'], mockUser);
+    it('should remove user from state', async () => {
+      // First login to set user
+      mockApiClient.login.mockResolvedValueOnce(createMockAuthResponse());
+      await authService.login({ email: 'test@example.com', password: 'password' });
       mockApiClient.logout.mockResolvedValueOnce(undefined);
 
       await authService.logout();
 
-      expect(queryClient.getQueryData(['auth', 'me'])).toBeUndefined();
+      expect(authService.getState().user).toBeNull();
     });
 
     it('should not throw on logout error', async () => {
@@ -340,7 +337,7 @@ describe('AuthService', () => {
       const user = await authService.fetchCurrentUser();
 
       expect(user).toEqual(mockUser);
-      expect(queryClient.getQueryData(['auth', 'me'])).toEqual(mockUser);
+      expect(authService.getState().user).toEqual(mockUser);
     });
 
     it('should try refresh on initial fetch failure', async () => {
@@ -374,7 +371,7 @@ describe('AuthService', () => {
   describe('destroy', () => {
     it('should stop refresh interval', () => {
       vi.mocked(tokenStore.get).mockReturnValue('token');
-      const serviceWithToken = new AuthService({ config, queryClient });
+      const serviceWithToken = new AuthService({ config });
 
       serviceWithToken.destroy();
 
@@ -401,7 +398,7 @@ describe('AuthService', () => {
 
   describe('createAuthService factory', () => {
     it('should create AuthService instance', () => {
-      const service = createAuthService({ config, queryClient });
+      const service = createAuthService({ config });
 
       expect(service.constructor.name).toBe('AuthService');
       service.destroy();

@@ -1,10 +1,10 @@
 // packages/ui/src/hooks/__tests__/usePaginatedQuery.test.tsx
 /** @vitest-environment jsdom */
+import { QueryCache, QueryCacheProvider } from '@abe-stack/sdk';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { QueryClient, QueryClientProvider } from '../../__tests__/mocks/react-query';
 import { usePaginatedQuery, useOffsetPaginatedQuery } from '../usePaginatedQuery';
 
 import type {
@@ -16,9 +16,12 @@ import type {
 import type { ReactNode } from 'react';
 
 const createWrapper = () => {
-  const queryClient = new QueryClient();
+  const queryCache = new QueryCache({
+    defaultStaleTime: 0,
+    defaultGcTime: 0,
+  });
   return function Wrapper({ children }: { children: ReactNode }) {
-    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+    return <QueryCacheProvider cache={queryCache}>{children}</QueryCacheProvider>;
   };
 };
 
@@ -187,6 +190,7 @@ describe('usePaginatedQuery', () => {
             queryKey: ['test-error'],
             queryFn,
             onError,
+            retry: false,
           }),
         { wrapper: createWrapper() },
       );
@@ -384,6 +388,7 @@ describe('usePaginatedQuery', () => {
             queryKey: ['offset-error'],
             queryFn,
             onError,
+            retry: false,
           }),
         { wrapper: createWrapper() },
       );

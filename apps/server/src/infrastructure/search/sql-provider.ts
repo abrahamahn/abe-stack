@@ -58,7 +58,7 @@ import type {
   SqlTableConfig,
 } from './types';
 import type { DbClient } from '@database';
-import type { PgColumn, PgTableWithColumns } from 'drizzle-orm/pg-core';
+import type { PgColumn, PgTable, PgTableWithColumns } from 'drizzle-orm/pg-core';
 
 // ============================================================================
 // Constants
@@ -128,12 +128,11 @@ export class SqlSearchProvider<
   }
 
   /**
-   * Get table with compatible type for Drizzle's from() method.
-   * Uses double assertion to work around Drizzle ORM v0.35+ type constraints.
+   * Get table reference for Drizzle's from() method.
+   * Uses PgTable type to satisfy Drizzle ORM v0.35+ constraints.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private get fromTable(): any {
-    return this.table;
+  private get fromTable(): PgTable {
+    return this.table as PgTable;
   }
 
   // ============================================================================

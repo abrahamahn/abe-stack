@@ -1,4 +1,4 @@
-// packages/core/src/media/__tests__/audio-metadata.test.ts
+// packages/media/src/__tests__/audio-metadata.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
 import { parseAudioMetadata, type AudioMetadata } from '../audio-metadata';

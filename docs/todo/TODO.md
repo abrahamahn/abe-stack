@@ -19,38 +19,24 @@
 > **Goal:** Transition from Product Engineer (gluing libraries) to Systems Engineer (building engines).
 > Stay ultra framework-independent while keeping React + TypeScript.
 
-### 1) Routing ✓
+### 2) State/Data ✅
 
-- [x] Remove `react-router-dom` ✓ (not in any package.json)
-- [x] Build custom router with `window.history` + `popstate` ✓ (see `packages/ui/src/router/`)
-- [x] Enable Notion-style side-peek views and custom transitions ✓ (see `SidePeek`, `useSidePeek`, `PeekLink`)
+Completed. See [2026-W04 log](../log/2026-W04.md#completed-statedata-package-reduction-priority-zero).
 
-### 2) State/Data
-
-- [ ] Remove `@tanstack/react-query`
-- [ ] Build custom RecordCache with `useSyncExternalStore`
-- [ ] Direct WebSocket/IndexedDB sync without generic caching overhead
-
-### 3) API Layer
-
-- [ ] Remove `@ts-rest/core`, `@ts-rest/react-query`, `@ts-rest/fastify`
-- [ ] Build pure TypeScript contract interfaces
-- [ ] Create minimal fetch wrapper with type inference
-
-### 4) Database
+### 3) Database
 
 - [ ] Remove `drizzle-orm`, `drizzle-kit`
 - [ ] Build raw SQL query builder with `postgres` driver
 - [ ] Enable micro-optimizations, sharding, advanced Postgres features (JSONB, specialized indexes)
 
-### 5) Testing
+### 4) Testing
 
 - [ ] Remove `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`
 - [ ] Remove `jsdom`
 - [ ] Test logic in pure TypeScript
 - [ ] Use Playwright for all UI/integration tests
 
-### 6) Git Hooks
+### 5) Git Hooks
 
 - [ ] Remove `lint-staged`, `simple-git-hooks`
 - [ ] Create manual pre-commit scripts
@@ -74,7 +60,6 @@
 ### New Responsibilities After Cleanup
 
 - [ ] **Manual Sync** - Own how data flows from DB to UI
-- [x] **Manual Routing** - Own URL changes and page transitions ✓
 - [ ] **Raw Queries** - Own SQL structure and optimization
 
 ---
@@ -168,10 +153,8 @@ Create `docs/STRIP_PLAN.md` with the following defaults:
 
 #### B) Media processing (opt-in plugin)
 
-- [ ] Move heavy deps into optional module/plugin:
-  - `packages/media-plugin/` (sharp, ffmpeg wrappers, pipelines)
 - [ ] Minimal profile uses a lightweight upload path (no heavy binaries)
-- [ ] Docs: “Enable Media Plugin” guide + dependency notes
+- [ ] Docs: "Enable Media Plugin" guide + dependency notes
 
 #### C) 5-phase SDK flow (advanced mode)
 
@@ -426,4 +409,4 @@ If no to all three, it goes in `docs/ROADMAP.md`. :contentReference[oaicite:38]{
 
 ---
 
-_Last Updated: 2026-01-22 (Deploy Pack + Reverse Proxy complete)_
+_Last Updated: 2026-01-22 (Completed items moved to docs/log/2026-W04.md)_

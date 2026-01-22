@@ -1,4 +1,4 @@
-// packages/core/src/media/__tests__/security.test.ts
+// packages/media/src/__tests__/security.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
 import { BasicSecurityScanner } from '../security';

@@ -1,4 +1,4 @@
-# Configuration & Build Setup
+# Configuration
 
 **Last Updated: January 17, 2026**
 
@@ -7,7 +7,7 @@ Core monorepo configuration guide covering TypeScript, path aliases, build syste
 > **Related Documentation:**
 >
 > - [Sync Scripts](./sync-scripts.md) - DX automation scripts (path aliases, barrel exports, etc.)
-> - [Development Environment](./dev-environment.md) - Testing, CI/CD, Git hooks, Docker
+> - [Workflow](./workflow.md) - Testing, CI/CD, Git hooks, Docker
 
 ---
 
@@ -722,7 +722,7 @@ Use with `turbo run` or `pnpm --filter`:
 | Topic                        | Document                                    |
 | ---------------------------- | ------------------------------------------- |
 | Sync scripts (DX automation) | [sync-scripts.md](./sync-scripts.md)        |
-| Testing, CI/CD, Git hooks    | [dev-environment.md](./dev-environment.md)  |
+| Testing, CI/CD, Git hooks    | [workflow.md](./workflow.md)                |
 | Testing strategy             | [testing.md](./testing.md)                  |
 | Architecture overview        | [architecture.md](../specs/architecture.md) |
 

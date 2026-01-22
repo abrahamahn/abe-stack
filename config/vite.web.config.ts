@@ -49,8 +49,6 @@ export default defineConfig({
         manualChunks: {
           // React core - changes rarely
           'vendor-react': ['react', 'react-dom'],
-          // React Query - changes rarely
-          'vendor-query': ['@tanstack/react-query'],
         },
       },
     },

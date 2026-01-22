@@ -1,5 +1,4 @@
 // apps/server/src/infrastructure/data/database/schema/__tests__/users.test.ts
-import { USER_ROLES } from '@abe-stack/core';
 import { getTableName } from 'drizzle-orm';
 import { describe, expect, test } from 'vitest';
 
@@ -164,20 +163,6 @@ describe('refreshTokens schema', () => {
     expect(createdAtColumn.dataType).toBe('date');
     expect(createdAtColumn.notNull).toBe(true);
     expect(createdAtColumn.hasDefault).toBe(true);
-  });
-});
-
-// ============================================================================
-// Tests: USER_ROLES re-export
-// ============================================================================
-
-describe('USER_ROLES re-export', () => {
-  test('should re-export USER_ROLES from @abe-stack/core', () => {
-    // Verify the re-export matches the core package
-    expect(USER_ROLES).toBeDefined();
-    expect(Array.isArray(USER_ROLES)).toBe(true);
-    expect(USER_ROLES).toContain('user');
-    expect(USER_ROLES).toContain('admin');
   });
 });
 

@@ -12,6 +12,7 @@ import type { UserRole } from '@abe-stack/core';
 describe('createAuthResponse', () => {
   const mockAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock.token';
   const mockRefreshToken = 'refresh-token-abc123';
+  const createdAt = new Date('2024-01-01T00:00:00.000Z');
 
   describe('basic functionality', () => {
     test('should create response with all required fields', () => {
@@ -20,6 +21,7 @@ describe('createAuthResponse', () => {
         email: 'test@example.com',
         name: 'Test User',
         role: 'user' as UserRole,
+        createdAt,
       };
 
       const result = createAuthResponse(mockAccessToken, mockRefreshToken, user);
@@ -35,6 +37,7 @@ describe('createAuthResponse', () => {
         email: 'test@example.com',
         name: 'Test User',
         role: 'user' as UserRole,
+        createdAt,
       };
 
       const result = createAuthResponse(mockAccessToken, mockRefreshToken, user);
@@ -49,6 +52,7 @@ describe('createAuthResponse', () => {
         email: 'john@example.com',
         name: 'John Doe',
         role: 'admin' as UserRole,
+        createdAt,
       };
 
       const result = createAuthResponse(mockAccessToken, mockRefreshToken, user);
@@ -67,6 +71,7 @@ describe('createAuthResponse', () => {
         email: 'user@example.com',
         name: 'Regular User',
         role: 'user' as UserRole,
+        createdAt,
       };
 
       const result = createAuthResponse(mockAccessToken, mockRefreshToken, user);
@@ -80,6 +85,7 @@ describe('createAuthResponse', () => {
         email: 'admin@example.com',
         name: 'Admin User',
         role: 'admin' as UserRole,
+        createdAt,
       };
 
       const result = createAuthResponse(mockAccessToken, mockRefreshToken, user);
@@ -93,6 +99,7 @@ describe('createAuthResponse', () => {
         email: 'mod@example.com',
         name: 'Moderator',
         role: 'moderator' as UserRole,
+        createdAt,
       };
 
       const result = createAuthResponse(mockAccessToken, mockRefreshToken, user);
@@ -108,6 +115,7 @@ describe('createAuthResponse', () => {
         email: 'test@example.com',
         name: null,
         role: 'user' as UserRole,
+        createdAt,
       };
 
       const result = createAuthResponse(mockAccessToken, mockRefreshToken, user);
@@ -122,6 +130,7 @@ describe('createAuthResponse', () => {
         email: 'test@example.com',
         name: '',
         role: 'user' as UserRole,
+        createdAt,
       };
 
       const result = createAuthResponse(mockAccessToken, mockRefreshToken, user);
@@ -137,6 +146,7 @@ describe('createAuthResponse', () => {
         email: 'test@example.com',
         name: 'Test User',
         role: 'user' as UserRole,
+        createdAt,
       };
 
       const originalEmail = user.email;
@@ -155,6 +165,7 @@ describe('createAuthResponse', () => {
         email: 'test@example.com',
         name: 'Test User',
         role: 'user' as UserRole,
+        createdAt,
       };
 
       const result = createAuthResponse(mockAccessToken, mockRefreshToken, user);
@@ -170,6 +181,7 @@ describe('createAuthResponse', () => {
         email: 'test@example.com',
         name: 'Test User',
         role: 'user' as UserRole,
+        createdAt,
       };
 
       const result = createAuthResponse('', '', user);
@@ -185,6 +197,7 @@ describe('createAuthResponse', () => {
         email: 'test@example.com',
         name: 'Test User',
         role: 'user' as UserRole,
+        createdAt,
       };
 
       const result = createAuthResponse(longToken, longToken, user);
@@ -199,6 +212,7 @@ describe('createAuthResponse', () => {
         email: 'test+tag@example.com',
         name: 'Name with "quotes" and <brackets>',
         role: 'user' as UserRole,
+        createdAt,
       };
 
       const result = createAuthResponse(mockAccessToken, mockRefreshToken, user);
@@ -214,6 +228,7 @@ describe('createAuthResponse', () => {
         email: 'test@example.com',
         name: 'Test User',
         role: 'user' as UserRole,
+        createdAt,
       };
 
       const result = createAuthResponse(mockAccessToken, mockRefreshToken, user);
@@ -229,13 +244,14 @@ describe('createAuthResponse', () => {
         email: 'test@example.com',
         name: 'Test User',
         role: 'user' as UserRole,
+        createdAt,
       };
 
       const result = createAuthResponse(mockAccessToken, mockRefreshToken, user);
 
       // Verify exact shape
       expect(Object.keys(result)).toEqual(['accessToken', 'refreshToken', 'user']);
-      expect(Object.keys(result.user)).toEqual(['id', 'email', 'name', 'role']);
+      expect(Object.keys(result.user)).toEqual(['id', 'email', 'name', 'role', 'createdAt']);
     });
 
     test('should not include extra properties from input', () => {
@@ -244,6 +260,7 @@ describe('createAuthResponse', () => {
         email: 'test@example.com',
         name: 'Test User',
         role: 'user' as UserRole,
+        createdAt,
         extraProp: 'should not be included',
         anotherProp: 123,
       };

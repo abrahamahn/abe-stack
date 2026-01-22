@@ -6,7 +6,8 @@
  * Handles record loading, operation application, and optimistic locking.
  */
 
-import { sql } from 'drizzle-orm';
+import { users } from '@infrastructure';
+import { and, eq, inArray } from 'drizzle-orm';
 
 import type { ApplyOperationsResult, RealtimeRecord, VersionConflict } from './types';
 import type {
@@ -21,25 +22,12 @@ import type {
 import type { DbClient } from '@database';
 
 // ============================================================================
-// SQL Result Helpers
-// ============================================================================
-
-/**
- * Extract rows from SQL execute result
- */
-function extractRows<T>(result: unknown): T[] {
-  if (result && typeof result === 'object' && 'rows' in result && Array.isArray(result.rows)) {
-    return result.rows as T[];
-  }
-  if (Array.isArray(result)) {
-    return result as T[];
-  }
-  return [];
-}
-
-// ============================================================================
 // Table Configuration
 // ============================================================================
+
+const tableMap = {
+  users,
+};
 
 /**
  * Registry of allowed tables for realtime operations
@@ -47,7 +35,7 @@ function extractRows<T>(result: unknown): T[] {
  * For security, only explicitly registered tables can be accessed.
  * This prevents arbitrary table access through the API.
  */
-const ALLOWED_TABLES = new Set<string>(['users']);
+const ALLOWED_TABLES = new Set<string>(Object.keys(tableMap));
 
 /**
  * Fields that cannot be modified through realtime operations
@@ -118,10 +106,31 @@ function setPath(obj: Record<string, unknown>, path: string, value: unknown): vo
 }
 
 /**
- * Deep equality comparison using JSON serialization
+ * Deep equality comparison
  */
 function deepEqual(a: unknown, b: unknown): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
+  if (a === b) return true;
+
+  if (a && b && typeof a === 'object' && typeof b === 'object') {
+    if (Array.isArray(a) !== Array.isArray(b)) return false;
+
+    const keysA = Object.keys(a);
+    const keysB = Object.keys(b);
+
+    if (keysA.length !== keysB.length) return false;
+
+    for (const key of keysA) {
+      const objA = a as Record<string, unknown>;
+      const objB = b as Record<string, unknown>;
+      if (!keysB.includes(key) || !deepEqual(objA[key], objB[key])) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  return false;
 }
 
 // ============================================================================
@@ -155,15 +164,18 @@ export async function loadRecords(db: DbClient, pointers: RecordPointer[]): Prom
 
   for (const [table, ids] of byTable.entries()) {
     recordMap[table] = {};
+    const tableSchema = tableMap[table as keyof typeof tableMap] as typeof users | undefined;
+    if (!tableSchema) {
+      continue;
+    }
 
-    // Use parameterized query for safety
-    const result = await db.execute(sql`
-      SELECT * FROM ${sql.identifier(table)} WHERE id = ANY(${ids})
-    `);
+    const rows = await db
+      .select()
+      .from(tableSchema)
+      .where(inArray(tableSchema.id, ids));
 
-    const rows = extractRows<RealtimeRecord>(result);
     for (const row of rows) {
-      recordMap[table][row.id] = row;
+      recordMap[table][row.id] = row as RealtimeRecord;
     }
   }
 
@@ -370,14 +382,11 @@ export async function saveRecords(
  * Insert a new record
  */
 async function insertRecord(db: DbClient, table: string, record: RealtimeRecord): Promise<void> {
-  const keys = Object.keys(record);
-  const columns = keys.map((k) => `"${toSnakeCase(k)}"`).join(', ');
-  const valuesList = keys.map((k) => formatValue(record[k]));
-  const valuesString = valuesList
-    .map((v) => (typeof v === 'string' ? `'${v}'` : String(v)))
-    .join(', ');
-
-  await db.execute(sql.raw(`INSERT INTO "${table}" (${columns}) VALUES (${valuesString})`));
+  const tableSchema = tableMap[table as keyof typeof tableMap] as typeof users | undefined;
+  if (!tableSchema) {
+    throw new Error(`Table '${table}' is not registered for realtime operations`);
+  }
+  await db.insert(tableSchema).values(record as typeof users.$inferInsert);
 }
 
 /**
@@ -389,39 +398,18 @@ async function updateRecord(
   record: RealtimeRecord,
   expectedVersion: number,
 ): Promise<boolean> {
-  const entries = Object.entries(record).filter(([key]) => key !== 'id');
-  const setClauses = entries
-    .map(
-      ([key]) =>
-        `"${toSnakeCase(key)}" = ${typeof record[key] === 'string' ? `'${record[key]}'` : String(record[key])}`,
-    )
-    .join(', ');
-
-  const result = await db.execute(sql`
-    UPDATE ${sql.identifier(table)} SET ${sql.raw(setClauses)}, "updated_at" = NOW()
-    WHERE id = ${record.id} AND version = ${expectedVersion}
-  `);
-
-  // Check if row was updated (Drizzle returns result with rowCount for updates)
-  return (result as { rowCount?: number }).rowCount === 1;
-}
-
-/**
- * Format a value for SQL
- */
-function formatValue(value: unknown): unknown {
-  if (value === null || value === undefined) {
-    return null;
+  const tableSchema = tableMap[table as keyof typeof tableMap] as typeof users | undefined;
+  if (!tableSchema) {
+    throw new Error(`Table '${table}' is not registered for realtime operations`);
   }
-  if (typeof value === 'object' && !(value instanceof Date)) {
-    return JSON.stringify(value);
-  }
-  return value;
-}
 
-/**
- * Convert camelCase to snake_case
- */
-function toSnakeCase(str: string): string {
-  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+  const { id, ...rest } = record;
+
+  const result = await db
+    .update(tableSchema)
+    .set({ ...rest, updatedAt: new Date() })
+    .where(and(eq(tableSchema.id, id), eq(tableSchema.version, expectedVersion)))
+    .returning({ id: tableSchema.id });
+
+  return result.length === 1;
 }

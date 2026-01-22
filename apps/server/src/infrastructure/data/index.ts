@@ -16,7 +16,6 @@ export {
   refreshTokenFamilies,
   refreshTokens,
   securityEvents,
-  USER_ROLES,
   users,
   type EmailVerificationToken,
   type LoginAttempt,

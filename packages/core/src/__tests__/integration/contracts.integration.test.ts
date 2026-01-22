@@ -26,7 +26,7 @@ import {
   passwordSchema,
   uuidSchema,
 } from '../../contracts/common';
-import { userResponseSchema, userRoleSchema, userSchema } from '../../contracts/users';
+import { userRoleSchema, userSchema } from '../../contracts/users';
 
 describe('Contract Schema Integration', () => {
   describe('Common schemas with real data', () => {
@@ -198,6 +198,7 @@ describe('Contract Schema Integration', () => {
         email: 'john@example.com',
         name: 'John Doe',
         role: 'user',
+        createdAt: new Date().toISOString(),
       };
 
       const result = userSchema.safeParse(user);
@@ -213,6 +214,7 @@ describe('Contract Schema Integration', () => {
         email: 'jane@example.com',
         name: null,
         role: 'admin',
+        createdAt: new Date().toISOString(),
       };
 
       const result = userSchema.safeParse(user);
@@ -231,19 +233,6 @@ describe('Contract Schema Integration', () => {
     it('should reject invalid user role', () => {
       const result = userRoleSchema.safeParse('superuser');
       expect(result.success).toBe(false);
-    });
-
-    it('should validate userResponseSchema with ISO datetime', () => {
-      const userResponse = {
-        id: randomUUID(),
-        email: 'test@example.com',
-        name: 'Test User',
-        role: 'user',
-        createdAt: new Date().toISOString(),
-      };
-
-      const result = userResponseSchema.safeParse(userResponse);
-      expect(result.success).toBe(true);
     });
   });
 
@@ -411,6 +400,7 @@ describe('Contract Schema Integration', () => {
   describe('Auth response schemas with real data', () => {
     it('should validate auth response with user', () => {
       const userId = randomUUID();
+      const createdAt = new Date().toISOString();
       const authResponse = {
         token: 'jwt-token-here',
         user: {
@@ -418,6 +408,7 @@ describe('Contract Schema Integration', () => {
           email: 'user@example.com',
           name: 'Test User',
           role: 'user',
+          createdAt,
         },
       };
 
@@ -432,6 +423,7 @@ describe('Contract Schema Integration', () => {
           email: 'user@example.com',
           name: 'Test User',
           role: 'user',
+          createdAt,
         });
         expect(result.data.user.id).toBe(userId);
         expect(result.data.user.email).toBe('user@example.com');
@@ -466,6 +458,7 @@ describe('Contract Schema Integration', () => {
           email: 'verified@example.com',
           name: 'Verified User',
           role: 'user',
+          createdAt: new Date().toISOString(),
         },
       };
 
@@ -553,6 +546,7 @@ describe('Contract Schema Integration', () => {
           email: 'integration@test.com',
           name: 'Integration Test',
           role: 'moderator',
+          createdAt: new Date().toISOString(),
         },
       };
 
@@ -572,6 +566,7 @@ describe('Contract Schema Integration', () => {
           email: 'test@example.com',
           name: 'Test',
           role: 'user',
+          createdAt: new Date().toISOString(),
         },
       };
 
@@ -613,6 +608,7 @@ describe('Contract Schema Integration', () => {
           email: 'newuser@company.com',
           name: 'New User',
           role: 'user' as const,
+          createdAt: new Date().toISOString(),
         },
       };
       expect(emailVerificationResponseSchema.safeParse(verifyResponse).success).toBe(true);
@@ -634,6 +630,7 @@ describe('Contract Schema Integration', () => {
           email: 'existing@company.com',
           name: 'Existing User',
           role: 'admin' as const,
+          createdAt: new Date().toISOString(),
         },
       };
       expect(authResponseSchema.safeParse(loginResponse).success).toBe(true);

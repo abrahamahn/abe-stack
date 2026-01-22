@@ -2,34 +2,19 @@
 /**
  * @vitest-environment jsdom
  */
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, test, vi, beforeEach } from 'vitest';
 
-import {
-  useSearch,
-  useInfiniteSearch,
-  useSearchParams,
-  useDebounceSearch,
-} from '../hooks';
+import { QueryCacheProvider } from '../../query/QueryCacheProvider';
+import { useSearch, useInfiniteSearch, useSearchParams, useDebounceSearch } from '../hooks';
 
 import type { CursorSearchResult, SearchResult } from '@abe-stack/core';
 
-
-// Helper to create wrapper with QueryClient
+// Helper to create wrapper with QueryCacheProvider
 function createWrapper() {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-        gcTime: 0,
-      },
-    },
-  });
-
   return function Wrapper({ children }: { children: React.ReactNode }) {
-    return React.createElement(QueryClientProvider, { client: queryClient }, children);
+    return React.createElement(QueryCacheProvider, { options: { defaultGcTime: 0 } }, children);
   };
 }
 
@@ -225,15 +210,16 @@ describe('useSearch', () => {
     const error = new Error('Search failed');
     const mockSearchFn = vi.fn().mockRejectedValue(error);
 
-    const { result } = renderHook(() => useSearch<TestUser>(mockSearchFn), {
+    const { result } = renderHook(() => useSearch<TestUser>(mockSearchFn, { retry: 0 }), {
       wrapper: createWrapper(),
     });
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.isError).toBe(true);
     });
 
     expect(result.current.error).toBeTruthy();
+    expect(result.current.isLoading).toBe(false);
   });
 
   test('should provide query builder', async () => {

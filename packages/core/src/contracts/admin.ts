@@ -5,10 +5,12 @@
  * Admin-related schemas and API contract definitions.
  */
 
-import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
 
 import { emailSchema, errorResponseSchema } from './common';
+
+import type { Contract } from './types';
+
 
 // ============================================================================
 // Request/Response Schemas
@@ -31,11 +33,9 @@ export type UnlockAccountResponse = z.infer<typeof unlockAccountResponseSchema>;
 // Admin Contract
 // ============================================================================
 
-const c = initContract();
-
-export const adminContract = c.router({
+export const adminContract = {
   unlockAccount: {
-    method: 'POST',
+    method: 'POST' as const,
     path: '/api/admin/auth/unlock',
     body: unlockAccountRequestSchema,
     responses: {
@@ -46,4 +46,4 @@ export const adminContract = c.router({
     },
     summary: 'Unlock a locked user account (admin only)',
   },
-});
+} satisfies Contract;

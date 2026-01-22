@@ -62,6 +62,18 @@ export default defineConfig({
         },
       },
 
+      // packages/media
+      {
+        test: {
+          name: 'media',
+          root: path.join(repoRoot, 'packages/media'),
+          environment: 'node',
+          globals: true,
+          include: ['src/**/*.{test,spec}.ts'],
+          exclude: commonExclude,
+        },
+      },
+
       // packages/sdk
       {
         test: {
@@ -75,6 +87,7 @@ export default defineConfig({
         resolve: {
           alias: {
             '@abe-stack/core': path.join(repoRoot, 'packages/core/src'),
+            '@abe-stack/media': path.join(repoRoot, 'packages/media/src'),
             '@abe-stack/sdk': path.join(repoRoot, 'packages/sdk/src'),
             '@abe-stack/stores': path.join(repoRoot, 'packages/stores/src'),
             '@abe-stack/ui': path.join(repoRoot, 'packages/ui/src'),
@@ -111,13 +124,10 @@ export default defineConfig({
             '@theme': path.join(repoRoot, 'packages/ui/src/theme'),
             '@utils': path.join(repoRoot, 'packages/ui/src/utils'),
             '@abe-stack/core': path.join(repoRoot, 'packages/core/src'),
+            '@abe-stack/media': path.join(repoRoot, 'packages/media/src'),
             '@abe-stack/sdk': path.join(repoRoot, 'packages/sdk/src'),
             '@abe-stack/stores': path.join(repoRoot, 'packages/stores/src'),
             '@abe-stack/ui': path.join(repoRoot, 'packages/ui/src'),
-            '@tanstack/react-query': path.join(
-              repoRoot,
-              'packages/ui/src/__tests__/mocks/react-query.ts',
-            ),
           },
         },
       },
@@ -323,8 +333,8 @@ export default defineConfig({
               replacement: path.join(repoRoot, 'packages/core/src/domains/admin/index.ts'),
             },
             {
-              find: '@abe-stack/core/media',
-              replacement: path.join(repoRoot, 'packages/core/src/media/index.ts'),
+              find: '@abe-stack/media',
+              replacement: path.join(repoRoot, 'packages/media/src/index.ts'),
             },
             { find: '@abe-stack/core', replacement: path.join(repoRoot, 'packages/core/src') },
           ],
@@ -358,6 +368,7 @@ export default defineConfig({
             '@pages': path.join(repoRoot, 'apps/web/src/pages'),
             '@test': path.join(repoRoot, 'apps/web/src/__tests__'),
             '@abe-stack/core': path.join(repoRoot, 'packages/core/src'),
+            '@abe-stack/media': path.join(repoRoot, 'packages/media/src'),
             '@abe-stack/sdk': path.join(repoRoot, 'packages/sdk/src'),
             '@abe-stack/stores': path.join(repoRoot, 'packages/stores/src'),
             '@abe-stack/ui': path.join(repoRoot, 'packages/ui/src'),
@@ -393,6 +404,7 @@ export default defineConfig({
             '@': path.join(repoRoot, 'apps/desktop/src'),
             '@ipc': path.join(repoRoot, 'apps/desktop/src/electron/ipc'),
             '@abe-stack/core': path.join(repoRoot, 'packages/core/src'),
+            '@abe-stack/media': path.join(repoRoot, 'packages/media/src'),
             '@abe-stack/sdk': path.join(repoRoot, 'packages/sdk/src'),
             '@abe-stack/stores': path.join(repoRoot, 'packages/stores/src'),
             '@abe-stack/ui': path.join(repoRoot, 'packages/ui/src'),

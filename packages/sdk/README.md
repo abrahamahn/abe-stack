@@ -83,20 +83,30 @@ await api.verifyEmail({ token });
 await api.resendVerification({ email });
 ```
 
-**React Query Client** (with caching and hooks):
+**With Query Cache** (for generic fetching):
 
 ```typescript
-import { createReactQueryClient } from '@abe-stack/sdk';
+import { QueryCache, QueryCacheProvider, useQuery } from '@abe-stack/sdk';
 
-const api = createReactQueryClient({
-  baseUrl: 'http://localhost:3000',
-  getToken: () => useAuthStore.getState().token,
-  onUnauthorized: () => useAuthStore.getState().logout(),
-});
+const queryCache = new QueryCache({ defaultStaleTime: 5 * 60 * 1000 });
 
-// In components - automatic caching and refetching
-const { data: user, isLoading } = api.auth.getCurrentUser.useQuery();
-const { mutate: login } = api.auth.login.useMutation();
+// Wrap your app
+function App() {
+  return (
+    <QueryCacheProvider cache={queryCache}>
+      <YourApp />
+    </QueryCacheProvider>
+  );
+}
+
+// In components - automatic caching
+function UserList() {
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ['users'],
+    queryFn: () => api.getUsers(),
+  });
+  return <div>{/* ... */}</div>;
+}
 ```
 
 ### RecordCache (`src/cache/`)
@@ -221,15 +231,14 @@ await queue.enqueue({
 
 ### QueryPersister (`src/storage/`)
 
-TanStack Query persistence to IndexedDB.
+QueryCache persistence to IndexedDB.
 
 ```typescript
-import { createQueryPersister, clearQueryCache } from '@abe-stack/sdk';
-import { QueryClient } from '@tanstack/react-query';
+import { createQueryPersister, clearQueryCache, QueryCache } from '@abe-stack/sdk';
 
-const queryClient = new QueryClient();
+const queryCache = new QueryCache();
 const persister = createQueryPersister({
-  queryClient,
+  queryCache,
   dbName: 'myapp-queries',
   maxAge: 24 * 60 * 60 * 1000, // 24 hours
 });
@@ -396,7 +405,7 @@ packages/sdk/src/
 
 **Memory usage:** Data kept in memory. Implement pagination for large datasets.
 
-**Complexity:** Not for simple CRUD. Use React Query if you don't need offline/realtime.
+**Complexity:** Not for simple CRUD. Consider simpler fetch-based solutions if you don't need offline/realtime.
 
 **Eventual consistency:** Optimistic state may not match server. Design UI for rollbacks.
 

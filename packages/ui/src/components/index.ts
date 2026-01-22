@@ -2,6 +2,7 @@
 // Components - Composed multi-part components with complex state/behavior
 export { Accordion } from './Accordion';
 export { Card } from './Card';
+export { DelayedFallback, type DelayedFallbackProps } from './DelayedFallback';
 export { Dialog } from './Dialog';
 export { Dropdown } from './Dropdown';
 export { FocusTrap } from './FocusTrap';

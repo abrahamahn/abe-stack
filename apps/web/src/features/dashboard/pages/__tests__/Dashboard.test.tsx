@@ -1,6 +1,6 @@
 // apps/web/src/features/dashboard/pages/__tests__/Dashboard.test.tsx
+import { QueryCache, QueryCacheProvider } from '@abe-stack/sdk';
 import { MemoryRouter } from '@abe-stack/ui';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -36,21 +36,20 @@ vi.mock('../../../auth', () => ({
 }));
 
 describe('DashboardPage', () => {
-  const createQueryClient = (): QueryClient =>
-    new QueryClient({
-      defaultOptions: {
-        queries: { retry: false },
-      },
+  const createQueryCache = (): QueryCache =>
+    new QueryCache({
+      defaultStaleTime: 0,
+      defaultGcTime: 0,
     });
 
   const renderDashboardPage = (): ReturnType<typeof render> => {
-    const queryClient = createQueryClient();
+    const queryCache = createQueryCache();
     return render(
-      <QueryClientProvider client={queryClient}>
+      <QueryCacheProvider cache={queryCache}>
         <MemoryRouter>
           <DashboardPage />
         </MemoryRouter>
-      </QueryClientProvider>,
+      </QueryCacheProvider>,
     );
   };
 
@@ -324,24 +323,24 @@ describe('DashboardPage', () => {
     });
 
     it('should handle 100 rapid re-renders', () => {
-      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      const queryCache = createQueryCache();
       const { rerender } = render(
-        <QueryClientProvider client={queryClient}>
+        <QueryCacheProvider cache={queryCache}>
           <MemoryRouter>
             <DashboardPage />
           </MemoryRouter>
-        </QueryClientProvider>,
+        </QueryCacheProvider>,
       );
 
       const start = performance.now();
 
       for (let i = 0; i < 100; i++) {
         rerender(
-          <QueryClientProvider client={queryClient}>
+          <QueryCacheProvider cache={queryCache}>
             <MemoryRouter>
               <DashboardPage />
             </MemoryRouter>
-          </QueryClientProvider>,
+          </QueryCacheProvider>,
         );
       }
 
@@ -361,13 +360,13 @@ describe('DashboardPage', () => {
           }),
       );
 
-      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      const queryCache = createQueryCache();
       const { unmount } = render(
-        <QueryClientProvider client={queryClient}>
+        <QueryCacheProvider cache={queryCache}>
           <MemoryRouter>
             <DashboardPage />
           </MemoryRouter>
-        </QueryClientProvider>,
+        </QueryCacheProvider>,
       );
 
       const logoutButton = screen.getByRole('button', { name: /logout/i });

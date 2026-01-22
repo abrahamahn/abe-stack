@@ -67,21 +67,23 @@ export {
   universalPaginatedResultSchema,
   universalPaginationOptionsSchema,
   // User schemas
-  USER_ROLES,
-  userResponseSchema,
   userRoleSchema,
   userSchema,
 } from './contracts';
 export type {
   ApiContract,
   AuthResponse,
+  Contract,
+  ContractRouter,
   CursorPaginatedResult,
   CursorPaginationOptions,
   EmailVerificationRequest,
   EmailVerificationResponse,
+  EndpointDef,
   ErrorResponse,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
+  HttpMethod,
   LoginRequest,
   LogoutResponse,
   MagicLinkRequest,
@@ -100,9 +102,11 @@ export type {
   OAuthUnlinkResponse,
   PaginatedResult,
   PaginationOptions,
+  QueryParams,
   RefreshResponse,
   RegisterRequest,
   RegisterResponse,
+  RequestBody,
   ResendVerificationRequest,
   ResendVerificationResponse,
   ResetPasswordRequest,
@@ -110,12 +114,12 @@ export type {
   SetPasswordRequest,
   SetPasswordResponse,
   SortOrder,
+  SuccessResponse,
   UniversalPaginatedResult,
   UniversalPaginationOptions,
   UnlockAccountRequest,
   UnlockAccountResponse,
   User,
-  UserResponse,
   UserRole,
 } from './contracts';
 
@@ -170,6 +174,11 @@ export type { ApiErrorResponse, ApiResponse, ApiSuccessResponse } from './infras
 // Infrastructure: HTTP
 // ============================================================================
 export { parseCookies } from './infrastructure/http';
+
+// ============================================================================
+// Infrastructure: Logger (dev-only helpers)
+// ============================================================================
+export { createConsoleLogger, type LogLevel } from './infrastructure/logger/console';
 
 // ============================================================================
 // Infrastructure: Transactions (for undo/redo)
@@ -503,14 +512,6 @@ export type {
   ValidationErrorResponse,
   ZodIssueMinimal,
 } from './errors';
-
-// ============================================================================
-// Media (server-only) - Import from '@abe-stack/core/media' for server apps
-// ============================================================================
-// Note: Media utilities use Node.js APIs (fs, child_process) and are not
-// exported from the main entry point to avoid breaking browser builds.
-// Server applications should import directly:
-//   import { parseAudioMetadata, ... } from '@abe-stack/core/media';
 
 // ============================================================================
 // Shared: Token storage and utilities

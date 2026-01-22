@@ -226,6 +226,7 @@ describe('authResponseSchema', () => {
         email: 'user@example.com',
         name: 'John Doe',
         role: 'user',
+        createdAt: '2024-01-15T10:00:00.000Z',
       },
     };
     const result = authResponseSchema.safeParse(validData);
@@ -239,6 +240,7 @@ describe('authResponseSchema', () => {
         email: 'user@example.com',
         name: 'John Doe',
         role: 'user',
+        createdAt: '2024-01-15T10:00:00.000Z',
       },
     };
     const result = authResponseSchema.safeParse(invalidData);
@@ -331,6 +333,7 @@ describe('emailVerificationResponseSchema', () => {
         email: 'user@example.com',
         name: 'John',
         role: 'user',
+        createdAt: '2024-01-15T10:00:00.000Z',
       },
     };
     const result = emailVerificationResponseSchema.safeParse(validData);
@@ -345,6 +348,7 @@ describe('emailVerificationResponseSchema', () => {
         email: 'user@example.com',
         name: 'John',
         role: 'user',
+        createdAt: '2024-01-15T10:00:00.000Z',
       },
     };
     const result = emailVerificationResponseSchema.safeParse(invalidData);

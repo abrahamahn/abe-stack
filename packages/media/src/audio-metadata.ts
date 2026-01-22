@@ -1,4 +1,4 @@
-// packages/core/src/media/audio-metadata.ts
+// packages/media/src/audio-metadata.ts
 /**
  * Custom Audio Metadata Parser - Lightweight replacement for music-metadata
  *

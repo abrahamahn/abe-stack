@@ -5,11 +5,13 @@
  * Authentication-related schemas and API contract definitions.
  */
 
-import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
+
 
 import { emailSchema, errorResponseSchema, nameSchema, passwordSchema } from './common';
 import { userSchema } from './users';
+
+import type { Contract } from './types';
 
 // ============================================================================
 // Request Schemas
@@ -143,11 +145,9 @@ export type MagicLinkVerifyResponse = z.infer<typeof magicLinkVerifyResponseSche
 // Auth Contract
 // ============================================================================
 
-const c = initContract();
-
-export const authContract = c.router({
+export const authContract = {
   register: {
-    method: 'POST',
+    method: 'POST' as const,
     path: '/api/auth/register',
     body: registerRequestSchema,
     responses: {
@@ -158,7 +158,7 @@ export const authContract = c.router({
     summary: 'Register a new user - sends verification email',
   },
   login: {
-    method: 'POST',
+    method: 'POST' as const,
     path: '/api/auth/login',
     body: loginRequestSchema,
     responses: {
@@ -169,7 +169,7 @@ export const authContract = c.router({
     summary: 'Login an existing user',
   },
   refresh: {
-    method: 'POST',
+    method: 'POST' as const,
     path: '/api/auth/refresh',
     body: z.object({}),
     responses: {
@@ -179,7 +179,7 @@ export const authContract = c.router({
     summary: 'Refresh access token using refresh token cookie',
   },
   logout: {
-    method: 'POST',
+    method: 'POST' as const,
     path: '/api/auth/logout',
     body: z.object({}),
     responses: {
@@ -189,7 +189,7 @@ export const authContract = c.router({
     summary: 'Logout and invalidate refresh token',
   },
   verifyEmail: {
-    method: 'POST',
+    method: 'POST' as const,
     path: '/api/auth/verify-email',
     body: emailVerificationRequestSchema,
     responses: {
@@ -200,7 +200,7 @@ export const authContract = c.router({
     summary: 'Verify email with a token - auto-logs in user',
   },
   resendVerification: {
-    method: 'POST',
+    method: 'POST' as const,
     path: '/api/auth/resend-verification',
     body: resendVerificationRequestSchema,
     responses: {
@@ -210,7 +210,7 @@ export const authContract = c.router({
     summary: 'Resend verification email to unverified user',
   },
   forgotPassword: {
-    method: 'POST',
+    method: 'POST' as const,
     path: '/api/auth/forgot-password',
     body: forgotPasswordRequestSchema,
     responses: {
@@ -220,7 +220,7 @@ export const authContract = c.router({
     summary: 'Request password reset',
   },
   resetPassword: {
-    method: 'POST',
+    method: 'POST' as const,
     path: '/api/auth/reset-password',
     body: resetPasswordRequestSchema,
     responses: {
@@ -230,19 +230,19 @@ export const authContract = c.router({
     summary: 'Reset password with token',
   },
   setPassword: {
-    method: 'POST',
+    method: 'POST' as const,
     path: '/api/auth/set-password',
     body: setPasswordRequestSchema,
     responses: {
       200: setPasswordResponseSchema,
       400: errorResponseSchema,
       401: errorResponseSchema,
-      409: errorResponseSchema, // User already has a password
+      409: errorResponseSchema,
     },
     summary: 'Set password for first time (magic-link only users)',
   },
   magicLinkRequest: {
-    method: 'POST',
+    method: 'POST' as const,
     path: '/api/auth/magic-link/request',
     body: magicLinkRequestSchema,
     responses: {
@@ -253,7 +253,7 @@ export const authContract = c.router({
     summary: 'Request a magic link for passwordless login',
   },
   magicLinkVerify: {
-    method: 'POST',
+    method: 'POST' as const,
     path: '/api/auth/magic-link/verify',
     body: magicLinkVerifySchema,
     responses: {
@@ -263,4 +263,4 @@ export const authContract = c.router({
     },
     summary: 'Verify magic link token and login',
   },
-});
+} satisfies Contract;

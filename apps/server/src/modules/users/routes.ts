@@ -8,10 +8,9 @@
 
 import { protectedRoute, type RouteMap, type RouteResult } from '@router';
 
-import { handleMe } from './handlers';
+import { handleListUsers, handleMe } from './handlers';
 
-import type { CursorPaginatedResult, UserResponse } from '@abe-stack/core';
-import type { PaginationRequest } from '@pagination';
+import type { CursorPaginatedResult, User } from '@abe-stack/core';
 import type { AppContext, RequestWithCookies } from '@shared';
 
 // ============================================================================
@@ -19,82 +18,27 @@ import type { AppContext, RequestWithCookies } from '@shared';
 // ============================================================================
 
 export const userRoutes: RouteMap = {
-  'users/me': protectedRoute<undefined, UserResponse | { message: string }>(
+  'users/me': protectedRoute<undefined, User | { message: string }>(
     'GET',
     async (
       ctx: AppContext,
       _body: undefined,
       req: RequestWithCookies,
-    ): Promise<RouteResult<UserResponse | { message: string }>> => {
+    ): Promise<RouteResult<User | { message: string }>> => {
       return handleMe(ctx, req);
     },
     'user',
   ),
 
   // Example paginated endpoint using cursor-based pagination
-  'users/list': protectedRoute<
-    undefined,
-    CursorPaginatedResult<UserResponse> | { message: string }
-  >(
+  'users/list': protectedRoute<undefined, CursorPaginatedResult<User> | { message: string }>(
     'GET',
     (
-      _ctx: AppContext,
+      ctx: AppContext,
       _body: undefined,
       req: RequestWithCookies,
-    ): Promise<RouteResult<CursorPaginatedResult<UserResponse> | { message: string }>> => {
-      // Extract pagination options from request
-      const { pagination } = req as RequestWithCookies & PaginationRequest;
-
-      if (pagination.type !== 'cursor') {
-        return Promise.resolve({
-          status: 400,
-          body: { message: 'This endpoint only supports cursor pagination' },
-        });
-      }
-
-      const options = pagination.cursor;
-      if (!options) {
-        return Promise.resolve({
-          status: 400,
-          body: { message: 'Cursor pagination options are required' },
-        });
-      }
-
-      // In a real implementation, you would:
-      // 1. Apply pagination to your database query
-      // 2. Use pagination.helpers.applyCursorPagination()
-      // 3. Return the formatted result
-
-      // Mock implementation for demonstration
-      const mockUsers: UserResponse[] = [
-        {
-          id: '1',
-          email: 'user1@example.com',
-          name: null,
-          role: 'user',
-          createdAt: '2024-01-01T00:00:00Z',
-        },
-        {
-          id: '2',
-          email: 'user2@example.com',
-          name: null,
-          role: 'user',
-          createdAt: '2024-01-02T00:00:00Z',
-        },
-      ];
-
-      // Use helpers to create properly formatted response
-      const result = pagination.helpers.createCursorResult(
-        mockUsers,
-        null, // No next page in this example
-        false, // No more pages
-        options.limit,
-      );
-
-      return Promise.resolve({
-        status: 200,
-        body: result,
-      });
+    ): Promise<RouteResult<CursorPaginatedResult<User> | { message: string }>> => {
+      return handleListUsers(ctx, req);
     },
     'admin', // Only admins can list users
   ),

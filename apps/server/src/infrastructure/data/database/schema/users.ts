@@ -1,9 +1,10 @@
 // apps/server/src/infrastructure/data/database/schema/users.ts
-import { USER_ROLES, type UserRole } from '@abe-stack/core';
 import { boolean, index, integer, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
+import type { UserRole } from '@abe-stack/core';
+
 // Re-export for local use
-export { USER_ROLES, type UserRole };
+export type { UserRole };
 
 export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),

@@ -3,6 +3,10 @@
  * HTTP Server Configuration
  */
 
+import type { LogLevel } from '@abe-stack/core';
+
+export type { LogLevel };
+
 export interface ServerConfig {
   host: string;
   port: number;
@@ -13,7 +17,7 @@ export interface ServerConfig {
     methods: string[];
   };
   trustProxy: boolean;
-  logLevel: string;
+  logLevel: LogLevel;
   /** Base URL for the frontend app (used in email links) */
   appBaseUrl: string;
   /** Base URL for the API server */
@@ -35,7 +39,7 @@ export function loadServerConfig(env: Record<string, string | undefined>): Serve
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     },
     trustProxy: env.TRUST_PROXY === 'true',
-    logLevel: env.LOG_LEVEL || 'info',
+    logLevel: (env.LOG_LEVEL || 'info') as LogLevel,
     appBaseUrl: env.APP_BASE_URL || `http://localhost:${String(appPort)}`,
     apiBaseUrl: env.API_BASE_URL || `http://localhost:${String(port)}`,
   };

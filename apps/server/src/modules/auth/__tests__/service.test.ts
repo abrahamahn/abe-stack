@@ -341,11 +341,28 @@ describe('registerUser', () => {
       email,
       name: 'Existing',
       role: 'user',
+      passwordHash: 'hash',
+      emailVerified: true,
+      emailVerifiedAt: new Date(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      version: 1,
     });
 
-    await expect(registerUser(db, emailService, TEST_CONFIG, email, password)).rejects.toThrow(
-      EmailAlreadyExistsError,
+    // Should return success (not throw) to prevent user enumeration
+    const result = await registerUser(
+      db,
+      emailService,
+      TEST_CONFIG,
+      email,
+      password,
+      undefined,
+      'http://localhost:5173',
     );
+    expect(result.status).toBe('pending_verification');
+    expect(result.email).toBe(email);
+    // Should send notification email to existing user
+    expect(emailService.send).toHaveBeenCalled();
   });
 
   test('should throw WeakPasswordError when password validation fails', async () => {
@@ -738,6 +755,7 @@ describe('authenticateUser', () => {
       userId: 'user-123',
       error: 'Hash computation failed',
       stack: expect.any(String),
+      retryCount: 3,
     });
 
     // Verify callback is also called with error

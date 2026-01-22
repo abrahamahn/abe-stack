@@ -111,6 +111,8 @@ function createLoginBody(overrides?: Partial<LoginRequest>): LoginRequest {
 // ============================================================================
 
 describe('handleLogin', () => {
+  const createdAt = new Date('2024-01-01T00:00:00.000Z').toISOString();
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -130,6 +132,7 @@ describe('handleLogin', () => {
           email: 'test@example.com',
           name: 'Test User',
           role: 'user' as const,
+          createdAt,
         },
       };
 
@@ -158,6 +161,7 @@ describe('handleLogin', () => {
           email: 'test@example.com',
           name: 'Test User',
           role: 'user' as const,
+          createdAt,
         },
       };
 
@@ -191,6 +195,7 @@ describe('handleLogin', () => {
           email: 'test@example.com',
           name: 'Test User',
           role: 'user' as const,
+          createdAt,
         },
       };
 
@@ -219,6 +224,7 @@ describe('handleLogin', () => {
           email: 'test@example.com',
           name: null,
           role: 'user' as const,
+          createdAt,
         },
       };
 
@@ -244,6 +250,7 @@ describe('handleLogin', () => {
           email: 'admin@example.com',
           name: 'Admin User',
           role: 'admin' as const,
+          createdAt,
         },
       };
 
@@ -342,6 +349,7 @@ describe('handleLogin', () => {
           email: 'test@example.com',
           name: 'Test User',
           role: 'user' as const,
+          createdAt,
         },
       };
 
@@ -377,6 +385,7 @@ describe('handleLogin', () => {
           email: 'test@example.com',
           name: 'Test User',
           role: 'user' as const,
+          createdAt,
         },
       };
 
@@ -410,6 +419,7 @@ describe('handleLogin', () => {
           email: 'test@example.com',
           name: 'Test User',
           role: 'user' as const,
+          createdAt,
         },
       };
 
@@ -443,6 +453,7 @@ describe('handleLogin', () => {
           email: 'test@example.com',
           name: 'Test User',
           role: 'user' as const,
+          createdAt,
         },
       };
 

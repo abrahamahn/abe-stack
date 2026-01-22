@@ -66,11 +66,9 @@ describe('Domain Structure', () => {
     });
 
     test('should export user types and schemas from contracts', async () => {
-      const { USER_ROLES, userSchema, userRoleSchema, usersContract } =
+      const { userSchema, userRoleSchema, usersContract } =
         await import('../contracts/index.js');
 
-      expect(typeof USER_ROLES).toBe('object');
-      expect(Array.isArray(USER_ROLES)).toBe(true);
       expect(typeof userSchema).toBe('object');
       expect(typeof userRoleSchema).toBe('object');
       expect(typeof usersContract).toBe('object');
@@ -120,12 +118,7 @@ describe('Domain Structure', () => {
       expect(typeof parseCookies).toBe('function');
     });
 
-    test('should export state management', async () => {
-      const { createUndoRedoStore, toastStore } = await import('../stores/index.js');
-
-      expect(typeof createUndoRedoStore).toBe('function');
-      expect(typeof toastStore).toBe('function'); // Custom store is a function
-    });
+    // State management has been moved to @abe-stack/stores package
 
     test('should export transaction utilities', async () => {
       const {
@@ -260,13 +253,12 @@ describe('Domain Structure', () => {
         HTTP_STATUS,
         BatchedQueue,
         parseCookies,
-        createUndoRedoStore,
         AppError,
         BadRequestError,
         isAppError,
 
         // Domains
-        USER_ROLES,
+        userRoleSchema,
         authContract,
       } = await import('../index.js');
 
@@ -274,17 +266,16 @@ describe('Domain Structure', () => {
       expect(typeof validatePassword).toBe('function');
       expect(typeof InvalidCredentialsError).toBe('function');
 
-      // Infrastructure
+      // Infrastructure (state management moved to @abe-stack/stores)
       expect(typeof HTTP_STATUS).toBe('object');
       expect(typeof BatchedQueue).toBe('function');
       expect(typeof parseCookies).toBe('function');
-      expect(typeof createUndoRedoStore).toBe('function');
       expect(typeof AppError).toBe('function');
       expect(typeof BadRequestError).toBe('function');
       expect(typeof isAppError).toBe('function');
 
       // Domains
-      expect(typeof USER_ROLES).toBe('object');
+      expect(typeof userRoleSchema).toBe('object');
       expect(typeof authContract).toBe('object');
     });
   });
@@ -300,7 +291,7 @@ describe('Domain Structure', () => {
       expect(typeof core.AppError).toBe('function');
       expect(typeof core.BadRequestError).toBe('function');
       expect(typeof core.HTTP_STATUS).toBe('object');
-      expect(typeof core.USER_ROLES).toBe('object');
+      expect(typeof core.userRoleSchema).toBe('object');
       expect(typeof core.authContract).toBe('object');
     });
   });

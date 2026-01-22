@@ -15,9 +15,9 @@
 
 import { createContext, useContext } from 'react';
 
+import type { QueryCache } from '@abe-stack/sdk';
 import type { AuthService } from '@auth/services/AuthService';
 import type { ClientConfig } from '@config';
-import type { QueryClient } from '@tanstack/react-query';
 import type { ReactElement, ReactNode } from 'react';
 
 // ============================================================================
@@ -28,8 +28,8 @@ export type ClientEnvironment = {
   /** Application configuration */
   config: ClientConfig;
 
-  /** React Query client for data fetching/caching */
-  queryClient: QueryClient;
+  /** Query cache for data fetching/caching */
+  queryCache: QueryCache;
 
   /** Authentication service */
   auth: AuthService;

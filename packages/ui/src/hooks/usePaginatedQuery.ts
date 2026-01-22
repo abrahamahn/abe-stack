@@ -1,5 +1,5 @@
 // packages/ui/src/hooks/usePaginatedQuery.ts
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryCache } from '@abe-stack/sdk';
 import { useCallback, useMemo, useRef } from 'react';
 
 import type {
@@ -8,41 +8,12 @@ import type {
   PaginatedResult,
   PaginationOptions,
 } from '@abe-stack/core';
-type QueryClientLike = {
-  invalidateQueries: (filters: { queryKey: string[] }) => void;
-};
-
-type InfiniteQueryResult<TPage, TError> = {
-  data?: { pages: TPage[] };
-  isLoading: boolean;
-  isFetchingNextPage: boolean;
-  isFetching: boolean;
-  isError: boolean;
-  error: TError | null;
-  hasNextPage?: boolean;
-  fetchNextPage: (options?: { pageParam?: number | string | null }) => Promise<unknown>;
-  refetch: () => Promise<unknown>;
-  remove: () => void;
-};
-
-const useQueryClientTyped = useQueryClient as unknown as () => QueryClientLike;
-const useInfiniteQueryTyped = useInfiniteQuery as unknown as <TPage, TError, TPageParam>(options: {
-  queryKey: readonly unknown[];
-  queryFn: (context: { pageParam?: TPageParam }) => Promise<TPage>;
-  getNextPageParam?: (lastPage: TPage) => TPageParam | undefined;
-  getPreviousPageParam?: (firstPage: TPage) => TPageParam | undefined;
-  enabled?: boolean;
-  staleTime?: number;
-  cacheTime?: number;
-  refetchInterval?: number;
-  keepPreviousData?: boolean;
-}) => InfiniteQueryResult<TPage, TError>;
 
 /**
  * Configuration for usePaginatedQuery hook
  */
 export interface UsePaginatedQueryOptions<TData = unknown, TError = unknown> {
-  /** Query key for React Query */
+  /** Query key for the query */
   queryKey: string[];
   /** Query function that accepts pagination options */
   queryFn: (options: CursorPaginationOptions) => Promise<CursorPaginatedResult<TData>>;
@@ -54,14 +25,18 @@ export interface UsePaginatedQueryOptions<TData = unknown, TError = unknown> {
   onDataReceived?: (data: TData[], isInitialLoad: boolean) => void;
   /** Function called on pagination error */
   onError?: (error: TError) => void;
-  /** Stale time for React Query */
+  /** Stale time in milliseconds */
   staleTime?: number;
-  /** Cache time for React Query */
+  /** GC time in milliseconds (replaces cacheTime) */
+  gcTime?: number;
+  /** @deprecated Use gcTime instead */
   cacheTime?: number;
-  /** Refetch interval */
+  /** Refetch interval in milliseconds */
   refetchInterval?: number;
-  /** Whether to keep previous data while loading */
+  /** Keep previous data when fetching new data */
   keepPreviousData?: boolean;
+  /** Number of retries on failure (default: 3, set to false/0 to disable) */
+  retry?: number | boolean;
 }
 
 /**
@@ -110,11 +85,10 @@ export function usePaginatedQuery<TData = unknown, TError = unknown>({
   onDataReceived,
   onError,
   staleTime,
-  cacheTime,
-  refetchInterval,
-  keepPreviousData = true,
+  gcTime,
+  retry,
 }: UsePaginatedQueryOptions<TData, TError>): UsePaginatedQueryResult<TData> {
-  const queryClient = useQueryClientTyped();
+  const queryCache = useQueryCache();
   const hasCalledOnDataReceivedRef = useRef(false);
 
   // Default pagination options
@@ -127,9 +101,9 @@ export function usePaginatedQuery<TData = unknown, TError = unknown>({
   };
 
   // Infinite query for handling pagination
-  const infiniteQuery = useInfiniteQueryTyped<CursorPaginatedResult<TData>, TError, string | null>({
+  const infiniteQuery = useInfiniteQuery<CursorPaginatedResult<TData>, Error, string | undefined>({
     queryKey,
-    queryFn: async ({ pageParam }: { pageParam?: string | null }) => {
+    queryFn: async ({ pageParam }) => {
       const options: CursorPaginationOptions = {
         ...defaultOptions,
         cursor: pageParam ?? undefined,
@@ -143,14 +117,14 @@ export function usePaginatedQuery<TData = unknown, TError = unknown>({
         throw error;
       }
     },
+    initialPageParam: undefined,
     getNextPageParam: (lastPage: CursorPaginatedResult<TData>) => {
-      return lastPage.hasNext ? lastPage.nextCursor : undefined;
+      return lastPage.hasNext ? (lastPage.nextCursor ?? undefined) : undefined;
     },
     enabled,
     staleTime,
-    cacheTime,
-    refetchInterval,
-    keepPreviousData,
+    gcTime,
+    retry,
   });
 
   // Flatten all pages into a single data array
@@ -177,9 +151,8 @@ export function usePaginatedQuery<TData = unknown, TError = unknown>({
   // Reset function
   const reset = useCallback(() => {
     hasCalledOnDataReceivedRef.current = false;
-    infiniteQuery.remove();
-    queryClient.invalidateQueries({ queryKey });
-  }, [infiniteQuery, queryClient, queryKey]);
+    queryCache.removeQuery(queryKey);
+  }, [queryCache, queryKey]);
 
   return {
     data,
@@ -188,7 +161,7 @@ export function usePaginatedQuery<TData = unknown, TError = unknown>({
     isFetching: infiniteQuery.isFetching,
     isError: infiniteQuery.isError,
     error: infiniteQuery.error,
-    hasNextPage: infiniteQuery.hasNextPage ?? false,
+    hasNextPage: infiniteQuery.hasNextPage,
     fetchNextPage: (): void => {
       void infiniteQuery.fetchNextPage();
     },
@@ -214,9 +187,9 @@ export interface UseOffsetPaginatedQueryOptions<TData = unknown, TError = unknow
   onDataReceived?: (data: TData[], isInitialLoad: boolean) => void;
   onError?: (error: TError) => void;
   staleTime?: number;
-  cacheTime?: number;
-  refetchInterval?: number;
-  keepPreviousData?: boolean;
+  gcTime?: number;
+  /** Number of retries on failure (default: 3, set to false/0 to disable) */
+  retry?: number | boolean;
 }
 
 export interface UseOffsetPaginatedQueryResult<TData = unknown> {
@@ -242,9 +215,8 @@ export function useOffsetPaginatedQuery<TData = unknown, TError = unknown>({
   onDataReceived,
   onError,
   staleTime,
-  cacheTime,
-  refetchInterval,
-  keepPreviousData = true,
+  gcTime,
+  retry,
 }: UseOffsetPaginatedQueryOptions<TData, TError>): UseOffsetPaginatedQueryResult<TData> {
   const defaultOptions: PaginationOptions = {
     page: 1,
@@ -254,12 +226,12 @@ export function useOffsetPaginatedQuery<TData = unknown, TError = unknown>({
     ...initialOptions,
   };
 
-  const query = useInfiniteQueryTyped<PaginatedResult<TData>, TError, number>({
+  const query = useInfiniteQuery<PaginatedResult<TData>, Error, number>({
     queryKey: [...queryKey, 'offset'],
-    queryFn: async ({ pageParam }: { pageParam?: number }) => {
+    queryFn: async ({ pageParam }) => {
       const options: PaginationOptions = {
         ...defaultOptions,
-        page: pageParam ?? defaultOptions.page,
+        page: pageParam,
       };
 
       try {
@@ -271,6 +243,7 @@ export function useOffsetPaginatedQuery<TData = unknown, TError = unknown>({
         throw error;
       }
     },
+    initialPageParam: 1,
     getNextPageParam: (lastPage: PaginatedResult<TData>) => {
       return lastPage.hasNext ? lastPage.page + 1 : undefined;
     },
@@ -279,9 +252,8 @@ export function useOffsetPaginatedQuery<TData = unknown, TError = unknown>({
     },
     enabled,
     staleTime,
-    cacheTime,
-    refetchInterval,
-    keepPreviousData,
+    gcTime,
+    retry,
   });
 
   const currentPageData = query.data?.pages[query.data.pages.length - 1];
@@ -297,8 +269,10 @@ export function useOffsetPaginatedQuery<TData = unknown, TError = unknown>({
     currentPage: currentPageData?.page ?? 1,
     totalPages: currentPageData?.totalPages ?? 0,
     totalItems: currentPageData?.total ?? 0,
-    fetchPage: (page: number): void => {
-      void query.fetchNextPage({ pageParam: page });
+    fetchPage: (_page: number): void => {
+      // Note: Our useInfiniteQuery doesn't support arbitrary page jumping
+      // This would need to be enhanced if needed
+      void query.fetchNextPage();
     },
     refetch: (): void => {
       void query.refetch();

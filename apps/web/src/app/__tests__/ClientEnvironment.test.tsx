@@ -17,12 +17,14 @@ function createMockClientEnvironment(): ClientEnvironment {
       apiUrl: 'http://test-api.example.com',
       tokenRefreshInterval: 60000,
     } as ClientEnvironment['config'],
-    queryClient: {
+    queryCache: {
       getQueryData: vi.fn(),
       setQueryData: vi.fn(),
-      removeQueries: vi.fn(),
       getQueryState: vi.fn(),
-    } as unknown as ClientEnvironment['queryClient'],
+      invalidateQueries: vi.fn(),
+      subscribe: vi.fn(() => vi.fn()),
+      getAll: vi.fn(() => []),
+    } as unknown as ClientEnvironment['queryCache'],
     auth: {
       getState: vi.fn(() => ({
         user: null,
@@ -44,7 +46,7 @@ function TestConsumer(): JSX.Element {
     <div>
       <span data-testid="api-url">{env.config.apiUrl}</span>
       <span data-testid="has-auth">{env.auth ? 'yes' : 'no'}</span>
-      <span data-testid="has-query-client">{env.queryClient ? 'yes' : 'no'}</span>
+      <span data-testid="has-query-cache">{env.queryCache ? 'yes' : 'no'}</span>
     </div>
   );
 }
@@ -70,7 +72,7 @@ describe('ClientEnvironment', () => {
 
       expect(screen.getByTestId('api-url')).toHaveTextContent('http://test-api.example.com');
       expect(screen.getByTestId('has-auth')).toHaveTextContent('yes');
-      expect(screen.getByTestId('has-query-client')).toHaveTextContent('yes');
+      expect(screen.getByTestId('has-query-cache')).toHaveTextContent('yes');
     });
 
     it('should allow accessing config properties', () => {
@@ -144,18 +146,18 @@ describe('ClientEnvironment', () => {
       expect(screen.getByTestId('auth-state')).toHaveTextContent('anon');
     });
 
-    it('should provide access to query client', () => {
+    it('should provide access to query cache', () => {
       const mockEnv = createMockClientEnvironment();
 
-      function QueryConsumer(): JSX.Element {
+      function QueryCacheConsumer(): JSX.Element {
         const env = useClientEnvironment();
-        const hasQueryClient = typeof env.queryClient.getQueryData === 'function';
-        return <span data-testid="has-methods">{hasQueryClient ? 'yes' : 'no'}</span>;
+        const hasQueryCache = typeof env.queryCache.getQueryData === 'function';
+        return <span data-testid="has-methods">{hasQueryCache ? 'yes' : 'no'}</span>;
       }
 
       render(
         <ClientEnvironmentProvider value={mockEnv}>
-          <QueryConsumer />
+          <QueryCacheConsumer />
         </ClientEnvironmentProvider>,
       );
 
@@ -169,7 +171,7 @@ describe('ClientEnvironment', () => {
 
       // Type check - environment should have these properties
       expect(mockEnv.config).toBeDefined();
-      expect(mockEnv.queryClient).toBeDefined();
+      expect(mockEnv.queryCache).toBeDefined();
       expect(mockEnv.auth).toBeDefined();
     });
 

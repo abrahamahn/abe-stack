@@ -168,12 +168,8 @@ export const projects: Record<string, ProjectConfig> = {
     manualPaths: {
       '@contracts': ['./src/contracts'],
       '@contracts/*': ['./src/contracts/*'],
-      '@stores': ['./src/stores'],
-      '@stores/*': ['./src/stores/*'],
       '@utils': ['./src/utils'],
       '@utils/*': ['./src/utils/*'],
-      '@validation': ['./src/validation'],
-      '@validation/*': ['./src/validation/*'],
     },
     exclude: ['dist', 'src/**/__tests__/**'],
   },
@@ -227,8 +223,33 @@ export const projects: Record<string, ProjectConfig> = {
     manualPaths: {
       '@abe-stack/core': ['../core/src'],
       '@abe-stack/core/*': ['../core/src/*'],
-      '@persistence': ['./src/persistence'],
-      '@persistence/*': ['./src/persistence/*'],
+    },
+    exclude: ['dist', 'src/**/__tests__/**'],
+    references: ['@abe-stack/core'],
+  },
+
+  'packages/media': {
+    extends: 'base',
+    types: ['node', 'vitest/globals'],
+    compilerOptions: {
+      outDir: './dist',
+      rootDir: './src',
+      baseUrl: './',
+    },
+    exclude: ['dist', 'src/**/__tests__/**'],
+  },
+
+  'packages/stores': {
+    extends: 'base',
+    types: ['node', 'vitest/globals'],
+    compilerOptions: {
+      outDir: './dist',
+      rootDir: './src',
+      baseUrl: './',
+    },
+    manualPaths: {
+      '@abe-stack/core': ['../core/src'],
+      '@abe-stack/core/*': ['../core/src/*'],
     },
     exclude: ['dist', 'src/**/__tests__/**'],
     references: ['@abe-stack/core'],
@@ -240,7 +261,9 @@ export const projects: Record<string, ProjectConfig> = {
  */
 export const packageDirs: Record<string, string> = {
   '@abe-stack/core': 'packages/core',
+  '@abe-stack/media': 'packages/media',
   '@abe-stack/sdk': 'packages/sdk',
+  '@abe-stack/stores': 'packages/stores',
   '@abe-stack/ui': 'packages/ui',
   '@abe-stack/web': 'apps/web',
   '@abe-stack/server': 'apps/server',

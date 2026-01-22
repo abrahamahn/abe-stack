@@ -13,7 +13,9 @@
  */
 export const packageAliases = {
   '@abe-stack/core': 'packages/core/src',
+  '@abe-stack/media': 'packages/media/src',
   '@abe-stack/sdk': 'packages/sdk/src',
+  '@abe-stack/stores': 'packages/stores/src',
   '@abe-stack/ui': 'packages/ui/src',
 } as const;
 
@@ -39,8 +41,6 @@ export const uiInternalAliases = {
  */
 export const coreInternalAliases = {
   '@contracts': 'packages/core/src/contracts',
-  '@stores': 'packages/core/src/stores',
-  '@validation': 'packages/core/src/validation',
 } as const;
 
 /**
@@ -56,9 +56,7 @@ export const webAliases = {
   '@dashboard': 'apps/web/src/features/dashboard',
   '@demo': 'apps/web/src/features/demo',
   '@catalog': 'apps/web/src/features/demo/catalog',
-  '@toast': 'apps/web/src/features/toast',
   '@pages': 'apps/web/src/pages',
-  '@test': 'apps/web/src/test',
 } as const;
 
 /**
@@ -117,9 +115,6 @@ export const serverAliases = {
 export const desktopAliases = {
   '@': 'apps/desktop/src',
   '@ipc': 'apps/desktop/src/electron/ipc',
-  '@services': 'apps/desktop/src/services',
-  '@routes': 'apps/desktop/src/routes',
-  '@api': 'apps/desktop/src/api',
 } as const;
 
 /**
@@ -127,9 +122,7 @@ export const desktopAliases = {
  */
 export const coreAliases = {
   '@contracts': 'packages/core/src/contracts',
-  '@stores': 'packages/core/src/stores',
   '@utils': 'packages/core/src/utils',
-  '@validation': 'packages/core/src/validation',
 } as const;
 
 /**
@@ -143,18 +136,15 @@ export const uiAliases = {
   '@layers': 'packages/ui/src/layouts/layers',
   '@layouts': 'packages/ui/src/layouts',
   '@shells': 'packages/ui/src/layouts/shells',
-  '@styles': 'packages/ui/src/styles',
-  '@test': 'packages/ui/src/test',
   '@theme': 'packages/ui/src/theme',
   '@utils': 'packages/ui/src/utils',
 } as const;
 
 /**
  * SDK package aliases (for SDK's own tests/build)
+ * Currently empty - SDK uses relative imports internally
  */
-export const sdkAliases = {
-  '@persistence': 'packages/sdk/src/persistence',
-} as const;
+export const sdkAliases = {} as const;
 
 /**
  * Combined alias definitions (for backwards compatibility with generators)

@@ -24,8 +24,7 @@
     "./http": "./src/infrastructure/http/index.ts",
     "./shared": "./src/shared/index.ts",
     "./utils": "./src/utils/index.ts",
-    "./env": "./src/env.ts",
-    "./media": "./src/media/index.ts"
+    "./env": "./src/env.ts"
   },
   "scripts": {
     "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build && tsc-alias",
@@ -56,7 +55,6 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "@ts-rest/core": "^3.52.1",
     "zod": "^4.3.5"
   }
 }

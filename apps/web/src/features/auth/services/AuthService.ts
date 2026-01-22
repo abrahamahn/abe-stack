@@ -3,7 +3,7 @@
  * AuthService - Manages authentication state and operations.
  *
  * Encapsulates auth logic previously spread across AuthContext.
- * Uses React Query for user state, token store for persistence.
+ * Uses internal state management for user data, token store for persistence.
  */
 
 import { tokenStore } from '@abe-stack/core';
@@ -27,7 +27,6 @@ import type {
 import type { TokenStore } from '@abe-stack/core';
 import type { ApiClient } from '@abe-stack/sdk';
 import type { ClientConfig } from '@config';
-import type { QueryClient } from '@tanstack/react-query';
 
 // ============================================================================
 // Types
@@ -56,7 +55,6 @@ const MAX_REFRESH_BACKOFF_MS = 5 * 60 * 1000;
 
 export class AuthService {
   private api: ApiClient;
-  private queryClient: QueryClient;
   private config: ClientConfig;
   private tokenStore: TokenStore;
   private refreshIntervalId: ReturnType<typeof setTimeout> | null = null;
@@ -66,9 +64,13 @@ export class AuthService {
   private consecutiveRefreshFailures = 0;
   private refreshPromise: Promise<boolean> | null = null;
 
-  constructor(args: { config: ClientConfig; queryClient: QueryClient }) {
+  /** Current authenticated user (internal state, replaces QueryClient) */
+  private user: User | null = null;
+  /** Whether user data is currently being loaded */
+  private isLoadingUser = false;
+
+  constructor(args: { config: ClientConfig }) {
     this.config = args.config;
-    this.queryClient = args.queryClient;
 
     const tokenStoreTyped: TokenStore = tokenStore;
     const createApiClientTyped: (config: {
@@ -132,14 +134,12 @@ export class AuthService {
 
   /** Get current auth state */
   getState(): AuthState {
-    const user = this.queryClient.getQueryData<User>(['auth', 'me']);
-    const queryState = this.queryClient.getQueryState(['auth', 'me']);
     const hasToken = Boolean(this.tokenStore.get());
 
     return {
-      user: user ?? null,
-      isLoading: hasToken && queryState?.status === 'pending',
-      isAuthenticated: Boolean(user),
+      user: this.user,
+      isLoading: hasToken && this.isLoadingUser,
+      isAuthenticated: Boolean(this.user),
     };
   }
 
@@ -240,9 +240,13 @@ export class AuthService {
       return null;
     }
 
+    this.isLoadingUser = true;
+    this.notifyListeners();
+
     try {
       const user = await this.api.getCurrentUser();
-      this.queryClient.setQueryData(['auth', 'me'], user);
+      this.user = user;
+      this.isLoadingUser = false;
       this.notifyListeners();
       return user;
     } catch {
@@ -251,14 +255,18 @@ export class AuthService {
       if (refreshed) {
         try {
           const user = await this.api.getCurrentUser();
-          this.queryClient.setQueryData(['auth', 'me'], user);
+          this.user = user;
+          this.isLoadingUser = false;
           this.notifyListeners();
           return user;
         } catch {
+          this.isLoadingUser = false;
           this.clearAuth();
           return null;
         }
       }
+      this.isLoadingUser = false;
+      this.notifyListeners();
       return null;
     }
   }
@@ -294,14 +302,16 @@ export class AuthService {
 
   private handleAuthSuccess(response: AuthResponse): void {
     this.tokenStore.set(response.token);
-    this.queryClient.setQueryData(['auth', 'me'], response.user);
+    this.user = response.user;
+    this.isLoadingUser = false;
     this.startRefreshInterval();
     this.notifyListeners();
   }
 
   private clearAuth(): void {
     this.tokenStore.clear();
-    this.queryClient.removeQueries({ queryKey: ['auth', 'me'], exact: true });
+    this.user = null;
+    this.isLoadingUser = false;
     this.notifyListeners();
   }
 
@@ -357,9 +367,6 @@ export class AuthService {
 // Factory
 // ============================================================================
 
-export function createAuthService(args: {
-  config: ClientConfig;
-  queryClient: QueryClient;
-}): AuthService {
+export function createAuthService(args: { config: ClientConfig }): AuthService {
   return new AuthService(args);
 }

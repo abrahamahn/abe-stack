@@ -2,17 +2,15 @@
 // NOTE: This file is manually maintained after refactor
 
 // API Client
-export { createApiClient, createReactQueryClient } from './api';
+export { createApiClient } from './api';
 export type {
   ApiClient,
   ApiClientConfig,
   ApiClientOptions,
   AuthResponse,
-  CreateApiOptions,
   LoginRequest,
-  ReactQueryClientInstance,
   RegisterRequest,
-  UserResponse,
+  User,
 } from './api';
 
 // In-Memory Cache
@@ -125,6 +123,29 @@ export type {
   UndoRedoState,
   UndoableOperation,
 } from './undo';
+
+// Query Cache
+export { QueryCache, hashQueryKey, queryKeysEqual } from './query/QueryCache';
+export type {
+  FetchStatus,
+  QueryCacheOptions,
+  QueryKey,
+  QueryState,
+  QueryStatus,
+  SetQueryDataOptions,
+} from './query/QueryCache';
+export { QueryCacheProvider, useQueryCache } from './query/QueryCacheProvider';
+export type { QueryCacheProviderProps } from './query/QueryCacheProvider';
+export { useQuery } from './query/useQuery';
+export type { UseQueryOptions, UseQueryResult } from './query/useQuery';
+export { useInfiniteQuery } from './query/useInfiniteQuery';
+export type {
+  InfinitePageParam,
+  UseInfiniteQueryOptions,
+  UseInfiniteQueryResult,
+} from './query/useInfiniteQuery';
+export { useMutation } from './query/useMutation';
+export type { MutationStatus, UseMutationOptions, UseMutationResult } from './query/useMutation';
 
 // Query Keys
 export { queryKeys } from './queryKeys';

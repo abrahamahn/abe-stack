@@ -1,4 +1,4 @@
-// packages/core/src/media/security.ts
+// packages/media/src/security.ts
 /**
  * Basic Media Security Scanner
  *

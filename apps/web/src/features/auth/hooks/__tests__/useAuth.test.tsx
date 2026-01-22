@@ -1,6 +1,6 @@
 // apps/web/src/features/auth/hooks/__tests__/useAuth.test.tsx
+import { QueryCache } from '@abe-stack/sdk';
 import { ClientEnvironmentProvider } from '@app';
-import { QueryClient } from '@tanstack/react-query';
 import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
@@ -41,10 +41,9 @@ function createMockAuthService(
 function createMockEnvironment(
   authOverrides?: Partial<ReturnType<AuthService['getState']>>,
 ): ClientEnvironment {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
+  const queryCache = new QueryCache({
+    defaultStaleTime: 0,
+    defaultGcTime: 0,
   });
 
   const mockConfig: ClientConfig = {
@@ -58,7 +57,7 @@ function createMockEnvironment(
 
   return {
     config: mockConfig,
-    queryClient,
+    queryCache,
     auth: createMockAuthService(authOverrides),
   };
 }

@@ -55,6 +55,7 @@ export interface OAuthAuthResult {
     email: string;
     name: string | null;
     role: UserRole;
+    createdAt: string;
   };
   isNewUser: boolean;
 }
@@ -380,6 +381,7 @@ async function authenticateOrCreateWithOAuth(
         email: user.email,
         name: user.name,
         role: user.role,
+        createdAt: user.createdAt.toISOString(),
       },
       isNewUser: false,
     };
@@ -455,6 +457,7 @@ async function authenticateOrCreateWithOAuth(
       email: result.user.email,
       name: result.user.name,
       role: result.user.role,
+      createdAt: result.user.createdAt.toISOString(),
     },
     isNewUser: true,
   };

@@ -20,6 +20,33 @@ import type { ChildProcess } from 'child_process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '../..');
+const USE_COLOR = process.stdout.isTTY;
+
+const COLORS = {
+  reset: '\x1b[0m',
+  dim: '\x1b[2m',
+  cyan: '\x1b[36m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  red: '\x1b[31m',
+} as const;
+
+function colorize(text: string, color: keyof typeof COLORS): string {
+  if (!USE_COLOR) return text;
+  return `${COLORS[color]}${text}${COLORS.reset}`;
+}
+
+function logLine(label: string, message: string): void {
+  const paddedLabel = label.padEnd(10, ' ');
+  console.log(`${colorize(paddedLabel, 'cyan')}${message}`);
+}
+
+function logHeader(title: string): void {
+  const line = '='.repeat(Math.max(title.length + 8, 32));
+  console.log(colorize(line, 'dim'));
+  console.log(colorize(`=== ${title} ===`, 'green'));
+  console.log(colorize(line, 'dim'));
+}
 
 function isPortOpen(port: number): Promise<boolean> {
   return new Promise((resolve) => {
@@ -45,18 +72,18 @@ async function ensurePostgres(): Promise<void> {
   const isRunning = await isPortOpen(5432);
 
   if (isRunning) {
-    console.log('✓ PostgreSQL is running on port 5432\n');
+    logLine('[db]', 'PostgreSQL running on port 5432');
     return;
   }
 
-  console.log('PostgreSQL not running. Attempting to start...');
+  logLine('[db]', 'PostgreSQL not running. Attempting to start...');
 
   try {
     execSync('sudo service postgresql start', { stdio: 'inherit' });
-    console.log('✓ PostgreSQL started\n');
+    logLine('[db]', colorize('PostgreSQL started', 'green'));
   } catch {
-    console.error('\n⚠ Could not start PostgreSQL automatically.');
-    console.error('  Please start it manually: sudo service postgresql start\n');
+    console.error(colorize('[db]', 'yellow'), 'Could not start PostgreSQL automatically.');
+    console.error(colorize('[db]', 'yellow'), 'Start it manually: sudo service postgresql start');
   }
 }
 
@@ -64,7 +91,7 @@ function startWatcher(script: string): ChildProcess {
   const watcher = spawn('pnpm', ['tsx', script, '--watch', '--quiet'], {
     cwd: ROOT,
     stdio: 'ignore',
-    shell: true,
+    shell: false,
   });
 
   watcher.on('error', (err) => {
@@ -78,7 +105,7 @@ function startConfigGenerator(): ChildProcess {
   const watcher = spawn('pnpm', ['tsx', 'config/generators/index.ts', '--watch', '--quiet'], {
     cwd: ROOT,
     stdio: 'ignore',
-    shell: true,
+    shell: false,
   });
 
   watcher.on('error', (err) => {
@@ -89,7 +116,7 @@ function startConfigGenerator(): ChildProcess {
 }
 
 function startTurboDev(filter?: string): ChildProcess {
-  const args = ['turbo', 'run', 'dev'];
+  const args = ['turbo', 'run', 'dev', '--log-order=stream', '--log-prefix=task'];
   if (filter) {
     args.push(`--filter=@abe-stack/${filter}`);
   }
@@ -97,8 +124,12 @@ function startTurboDev(filter?: string): ChildProcess {
   const turbo = spawn('pnpm', args, {
     cwd: ROOT,
     stdio: 'inherit',
-    shell: true,
-    env: { ...process.env, NODE_ENV: 'development' },
+    shell: false,
+    env: {
+      ...process.env,
+      NODE_ENV: 'development',
+      TURBO_LOG: 'light',
+    },
   });
 
   turbo.on('error', (err) => {
@@ -112,7 +143,11 @@ function startTurboDev(filter?: string): ChildProcess {
 async function main(): Promise<void> {
   const filter = process.argv[2];
 
-  console.log('Starting development environment...\n');
+  logHeader('Dev Environment');
+  logLine('[dev]', 'Starting development environment');
+  if (filter) {
+    logLine('[dev]', `Filter: @abe-stack/${filter}`);
+  }
 
   // Ensure PostgreSQL is running (skip for web-only or desktop-only)
   if (!filter || filter === 'server') {
@@ -126,8 +161,11 @@ async function main(): Promise<void> {
     startWatcher('config/lint/sync-css-theme.ts'),
   ];
 
+  logLine('[dev]', 'Watchers running (config, headers, theme)');
+
   // Give watchers a moment to do initial sync
   setTimeout(() => {
+    logLine('[dev]', 'Starting turbo dev tasks');
     const turbo = startTurboDev(filter);
 
     const cleanup = (): void => {

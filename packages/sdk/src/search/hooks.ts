@@ -2,26 +2,24 @@
 /**
  * Search React Hooks
  *
- * React Query-based hooks for executing search queries.
+ * Custom hooks for executing search queries.
  * Provides useSearch for paginated results and useInfiniteSearch for infinite scrolling.
  */
 
-import {
-  type CursorSearchResult,
-  type SearchQuery,
-  type SearchResult,
-  type SearchResultItem,
-} from '@abe-stack/core';
-import {
-  useQuery,
-  useInfiniteQuery,
-  type UseQueryOptions,
-} from '@tanstack/react-query';
 import { useCallback, useMemo, useState } from 'react';
+
+import { useQuery as useQueryBase, useInfiniteQuery as useInfiniteQueryBase } from '../query';
 
 
 import { type ClientSearchQueryBuilder, fromClientSearchQuery } from './query-builder';
 import { serializeToURLParams, deserializeFromURLParams } from './serialization';
+
+import type {
+  CursorSearchResult,
+  SearchQuery,
+  SearchResult,
+  SearchResultItem,
+} from '@abe-stack/core';
 
 // ============================================================================
 // Types
@@ -40,11 +38,7 @@ export type CursorSearchFn<T> = (query: SearchQuery<T>) => Promise<CursorSearchR
 /**
  * Options for useSearch hook.
  */
-export interface UseSearchOptions<T, TError = Error>
-  extends Omit<
-    UseQueryOptions<SearchResult<T>, TError, SearchResult<T>>,
-    'queryKey' | 'queryFn'
-  > {
+export interface UseSearchOptions<T, TError = Error> {
   /** Initial query state */
   initialQuery?: SearchQuery<T>;
   /** Query key prefix */
@@ -53,6 +47,20 @@ export interface UseSearchOptions<T, TError = Error>
   syncToUrl?: boolean;
   /** Debounce search input (ms) */
   debounceMs?: number;
+  /** Whether to enable the query */
+  enabled?: boolean;
+  /** Time in ms before data is considered stale */
+  staleTime?: number;
+  /** Time in ms before unused queries are garbage collected */
+  gcTime?: number;
+  /** Number of retries on failure */
+  retry?: number | boolean;
+  /** Refetch on window focus */
+  refetchOnWindowFocus?: boolean;
+  /** Callback when query succeeds */
+  onSuccess?: (data: SearchResult<T>) => void;
+  /** Callback when query fails */
+  onError?: (error: TError) => void;
 }
 
 /**
@@ -85,6 +93,8 @@ export interface UseSearchResult<T> {
   isLoading: boolean;
   /** Is a refetch in progress */
   isFetching: boolean;
+  /** Whether the query failed */
+  isError: boolean;
   /** Error if the query failed */
   error: Error | null;
   /** Current query state */
@@ -119,6 +129,8 @@ export interface UseInfiniteSearchResult<T> {
   isFetchingNextPage: boolean;
   /** Has more pages */
   hasNextPage: boolean;
+  /** Whether the query failed */
+  isError: boolean;
   /** Error if the query failed */
   error: Error | null;
   /** Current query state */
@@ -181,7 +193,13 @@ export function useSearch<T = Record<string, unknown>, TError = Error>(
     queryKeyPrefix = 'search',
     syncToUrl = false,
     debounceMs: _debounceMs,
-    ...queryOptions
+    enabled,
+    staleTime,
+    gcTime,
+    retry,
+    refetchOnWindowFocus,
+    onSuccess,
+    onError,
   } = options;
 
   // Initialize query from URL if syncing
@@ -202,10 +220,16 @@ export function useSearch<T = Record<string, unknown>, TError = Error>(
   );
 
   // Execute query
-  const queryResult = useQuery({
+  const queryResult = useQueryBase<SearchResult<T>, TError>({
     queryKey,
     queryFn: () => searchFn(query),
-    ...queryOptions,
+    enabled,
+    staleTime,
+    gcTime,
+    retry,
+    refetchOnWindowFocus,
+    onSuccess,
+    onError,
   });
 
   // Update URL when query changes
@@ -272,6 +296,7 @@ export function useSearch<T = Record<string, unknown>, TError = Error>(
     data: queryResult.data,
     isLoading: queryResult.isLoading,
     isFetching: queryResult.isFetching,
+    isError: queryResult.isError,
     error: queryResult.error as Error | null,
     query,
     builder,
@@ -280,7 +305,9 @@ export function useSearch<T = Record<string, unknown>, TError = Error>(
     setPage,
     setSort,
     clearFilters,
-    refetch: (): void => { void queryResult.refetch(); },
+    refetch: (): void => {
+      void queryResult.refetch();
+    },
   };
 }
 
@@ -330,7 +357,15 @@ export function useInfiniteSearch<T = Record<string, unknown>>(
   searchFn: CursorSearchFn<T>,
   options: UseInfiniteSearchOptions<T> = {},
 ): UseInfiniteSearchResult<T> {
-  const { initialQuery = {}, queryKeyPrefix = 'infiniteSearch', ...queryOptions } = options;
+  const {
+    initialQuery = {},
+    queryKeyPrefix = 'infiniteSearch',
+    enabled,
+    staleTime,
+    gcTime,
+    retry,
+    refetchOnWindowFocus,
+  } = options;
 
   const [query, setQueryState] = useState<SearchQuery<T>>(initialQuery);
 
@@ -341,18 +376,16 @@ export function useInfiniteSearch<T = Record<string, unknown>>(
   }, [queryKeyPrefix, query]);
 
   // Execute infinite query
-  const infiniteResult = useInfiniteQuery<
-    CursorSearchResult<T>,
-    Error,
-    { pages: CursorSearchResult<T>[]; pageParams: (string | undefined)[] },
-    readonly [string, string],
-    string | undefined
-  >({
+  const infiniteResult = useInfiniteQueryBase<CursorSearchResult<T>, Error, string | undefined>({
     queryKey,
     queryFn: ({ pageParam }) => searchFn({ ...query, cursor: pageParam }),
     getNextPageParam: (lastPage: CursorSearchResult<T>) => lastPage.nextCursor ?? undefined,
     initialPageParam: undefined,
-    ...queryOptions,
+    enabled,
+    staleTime,
+    gcTime,
+    retry,
+    refetchOnWindowFocus,
   });
 
   // Flatten data from all pages
@@ -398,13 +431,18 @@ export function useInfiniteSearch<T = Record<string, unknown>>(
     isLoading: infiniteResult.isLoading,
     isFetchingNextPage: infiniteResult.isFetchingNextPage,
     hasNextPage: infiniteResult.hasNextPage,
+    isError: infiniteResult.isError,
     error: infiniteResult.error,
     query,
     builder,
     setQuery,
     setSearch,
-    fetchNextPage: (): void => { void infiniteResult.fetchNextPage(); },
-    refetch: (): void => { void infiniteResult.refetch(); },
+    fetchNextPage: (): void => {
+      void infiniteResult.fetchNextPage();
+    },
+    refetch: (): void => {
+      void infiniteResult.refetch();
+    },
     total,
   };
 }
@@ -515,7 +553,9 @@ export function useDebounceSearch(
       setDebouncedValue(value);
     }, delayMs);
 
-    return (): void => { clearTimeout(timer); };
+    return (): void => {
+      clearTimeout(timer);
+    };
   }, [value, delayMs]);
 
   const clear = useCallback(() => {

@@ -88,12 +88,14 @@ function createMockClientEnvironment(): ClientEnvironment {
       apiUrl: 'http://localhost:3000',
       tokenRefreshInterval: 60000,
     } as ClientEnvironment['config'],
-    queryClient: {
+    queryCache: {
       getQueryData: vi.fn(),
       setQueryData: vi.fn(),
-      removeQueries: vi.fn(),
       getQueryState: vi.fn(),
-    } as unknown as ClientEnvironment['queryClient'],
+      invalidateQueries: vi.fn(),
+      subscribe: vi.fn(() => vi.fn()),
+      getAll: vi.fn(() => []),
+    } as unknown as ClientEnvironment['queryCache'],
     auth: {
       getState: vi.fn(() => ({
         user: null,

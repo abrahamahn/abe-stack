@@ -43,8 +43,8 @@ import {
   type LoginRequest,
 } from '@abe-stack/core';
 
-// Server only - uses Node.js APIs
-import { parseAudioMetadata, detectFileType } from '@abe-stack/core/media';
+// Server only - uses Node.js APIs (separate package)
+import { parseAudioMetadata, detectFileTypeFromFile } from '@abe-stack/media';
 import { sign, verify } from '@abe-stack/core/crypto';
 import { loadServerEnv } from '@abe-stack/core/env';
 ```
@@ -294,40 +294,39 @@ const useCounter = createStore<number>((set) => ({
 const undoStore = createUndoRedoStore();
 ```
 
-## Media (Server Only)
+## Media (Separate Package)
 
-Audio, video, and image processing with FFmpeg.
+Media utilities are available in the `@abe-stack/media` package (server only - uses Node.js APIs).
 
 ```typescript
 import {
-  detectFileType,
+  detectFileTypeFromFile,
+  detectFileTypeFromBuffer,
   parseAudioMetadata,
-  getImageFormat,
   ImageProcessor,
-  generateThumbnail,
-  generateWaveform,
-  convertVideo,
-  createHLSStream,
+  FFmpegWrapper,
   BasicSecurityScanner,
-} from '@abe-stack/core/media';
+  validateMediaFile,
+  sanitizeFilename,
+} from '@abe-stack/media';
 
 // File type detection
-const fileType = await detectFileType(buffer);
+const fileType = await detectFileTypeFromFile('/path/to/file');
 
 // Audio processing
 const metadata = await parseAudioMetadata('/path/to/audio.mp3');
 
 // Image processing
-const processor = createImageProcessor();
-const resized = await processor.resize(buffer, { width: 800, height: 600 });
+const processor = new ImageProcessor();
+const thumbnail = await processor.createThumbnail(inputBuffer, { width: 200, height: 200 });
 
-// Video processing
-const thumbnail = await generateThumbnail('/path/to/video.mp4', '/path/to/thumb.jpg');
-const waveform = await generateWaveform('/path/to/audio.mp3', '/path/to/wave.png');
+// FFmpeg video processing
+const ffmpeg = new FFmpegWrapper('/path/to/ffmpeg');
+const result = await ffmpeg.generateThumbnail('/video.mp4', '/thumb.jpg');
 
 // Security scanning
 const scanner = new BasicSecurityScanner();
-const result = await scanner.scan(buffer, 'file.jpg');
+const scanResult = await scanner.scanFile('/path/to/file');
 ```
 
 ## Project Structure

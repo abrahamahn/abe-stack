@@ -7,9 +7,9 @@
  * - Environment assembled inline and passed to App
  */
 
+import { QueryCache } from '@abe-stack/sdk';
 import { clientConfig } from '@config';
 import { createAuthService } from '@features/auth';
-import { QueryClient } from '@tanstack/react-query';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
@@ -24,19 +24,15 @@ import '@abe-stack/ui/styles/elements.css';
 // Service Creation (module level, before React renders)
 // ============================================================================
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 24 * 60 * 60 * 1000, // 24 hours - required for persistence
-      retry: 1,
-    },
-  },
+const queryCache = new QueryCache({
+  defaultStaleTime: 5 * 60 * 1000, // 5 minutes
+  defaultGcTime: 24 * 60 * 60 * 1000, // 24 hours - required for persistence
+  refetchOnWindowFocus: true,
+  refetchOnReconnect: true,
 });
 
 const auth = createAuthService({
   config: clientConfig,
-  queryClient,
 });
 
 // ============================================================================
@@ -45,7 +41,7 @@ const auth = createAuthService({
 
 const environment: ClientEnvironment = {
   config: clientConfig,
-  queryClient,
+  queryCache,
   auth,
 };
 

@@ -13,7 +13,7 @@ type TestElement = ReactElement & { props: { children: string; style: { color: s
 function findByChildren(elements: ReactNode[], content: string): TestElement | undefined {
   for (const el of elements) {
     if (el && typeof el === 'object' && 'props' in el) {
-      const element = el as TestElement;
+      const element = el;
       if (element.props.children === content) {
         return element;
       }
@@ -100,7 +100,7 @@ describe('Custom Syntax Highlighter', () => {
       // Should contain newline characters
       const newlineElements = result.filter((el) => {
         if (el && typeof el === 'object' && 'props' in el) {
-          return (el as TestElement).props.children === '\n';
+          return (el).props.children === '\n';
         }
         return false;
       });

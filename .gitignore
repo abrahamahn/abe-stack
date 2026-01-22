@@ -5,11 +5,6 @@ node_modules/
 
 # Agents
 .claude/
-.gemini/
-docs/AGENTS.md
-docs/GEMINI.md
-docs/CLAUDE.md
-docs/agent/*.md
 
 # Build outputs
 dist/

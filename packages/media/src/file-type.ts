@@ -1,4 +1,4 @@
-// packages/core/src/media/file-type.ts
+// packages/media/src/file-type.ts
 /**
  * Custom File Type Detection - Lightweight replacement for file-type package
  *

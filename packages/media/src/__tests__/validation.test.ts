@@ -1,4 +1,4 @@
-// packages/core/src/media/__tests__/validation.test.ts
+// packages/media/src/__tests__/validation.test.ts
 import { describe, expect, test, vi } from 'vitest';
 
 import {
@@ -36,6 +36,7 @@ describe('validateMediaFile', () => {
     const result = await validateMediaFile('/test/image.jpg', {
       maxFileSize: 10 * 1024 * 1024, // 10MB
       allowedTypes: ['image/*'],
+      extractMetadata: true,
     });
 
     expect(result.valid).toBe(true);
@@ -50,6 +51,7 @@ describe('validateMediaFile', () => {
     const result = await validateMediaFile('/test/large.jpg', {
       maxFileSize: 10 * 1024 * 1024, // 10MB
       allowedTypes: ['image/*'],
+      extractMetadata: true,
     });
 
     expect(result.valid).toBe(false);
@@ -64,6 +66,7 @@ describe('validateMediaFile', () => {
     const result = await validateMediaFile('/test/empty.jpg', {
       maxFileSize: 10 * 1024 * 1024,
       allowedTypes: ['image/*'],
+      extractMetadata: true,
     });
 
     expect(result.valid).toBe(false);
@@ -80,6 +83,7 @@ describe('validateMediaFile', () => {
     const result = await validateMediaFile('/test/unknown', {
       maxFileSize: 10 * 1024 * 1024,
       allowedTypes: ['image/*'],
+      extractMetadata: true,
     });
 
     expect(result.valid).toBe(false);
@@ -100,6 +104,7 @@ describe('validateMediaFile', () => {
     const result = await validateMediaFile('/test/malware.exe', {
       maxFileSize: 10 * 1024 * 1024,
       allowedTypes: ['image/*'],
+      extractMetadata: true,
     });
 
     expect(result.valid).toBe(false);
@@ -114,6 +119,7 @@ describe('validateMediaFile', () => {
     const result = await validateMediaFile('/test/nonexistent.jpg', {
       maxFileSize: 10 * 1024 * 1024,
       allowedTypes: ['image/*'],
+      extractMetadata: true,
     });
 
     expect(result.valid).toBe(false);
@@ -129,6 +135,7 @@ describe('validateMediaFile', () => {
     const result = await validateMediaFile('/test/error.jpg', {
       maxFileSize: 10 * 1024 * 1024,
       allowedTypes: ['image/*'],
+      extractMetadata: true,
     });
 
     expect(result.valid).toBe(false);

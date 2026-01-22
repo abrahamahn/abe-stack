@@ -1,28 +1,26 @@
 // apps/web/src/api/ApiProvider.tsx
 /**
- * ApiProvider - Provides React Query API client to components.
+ * ApiProvider - Provides API client to components.
  *
  * Uses ClientEnvironment's config for base URL and token management.
- * Creates a React Query client wrapper with navigation callbacks.
+ * Creates a standalone API client with navigation callbacks.
  */
 
 import { tokenStore } from '@abe-stack/core';
-import { createReactQueryClient } from '@abe-stack/sdk';
-import { toastStore } from '@abe-stack/stores';
-import { useNavigate } from '@abe-stack/ui';
+import { createApiClient } from '@abe-stack/sdk';
 import { useClientEnvironment } from '@app';
 import { createContext, useContext, useMemo } from 'react';
 
-import type { ReactQueryClientInstance } from '@abe-stack/sdk';
+import type { ApiClient } from '@abe-stack/sdk';
 import type { ReactElement, ReactNode } from 'react';
 
-const ApiContext = createContext<ReactQueryClientInstance | null>(null);
+const ApiContext = createContext<ApiClient | null>(null);
 
 /**
  * Hook to access the typed API client.
  * Must be used within ApiProvider (which is inside ClientEnvironmentProvider).
  */
-export const useApi = (): ReactQueryClientInstance => {
+export const useApi = (): ApiClient => {
   const ctx = useContext(ApiContext);
   if (!ctx) throw new Error('useApi must be used within ApiProvider');
   return ctx;
@@ -35,27 +33,20 @@ type ApiProviderProps = {
 /**
  * ApiProvider creates a configured API client with auth token management.
  * Must be used within ClientEnvironmentProvider.
+ *
+ * Note: Error handling (unauthorized, server errors) should be done at the
+ * call site using try-catch. Use isUnauthorizedError() from @abe-stack/sdk
+ * to check for 401 errors.
  */
 export function ApiProvider({ children }: ApiProviderProps): ReactElement {
   const { config } = useClientEnvironment();
-  const navigate = useNavigate();
 
-  const api = useMemo<ReactQueryClientInstance>(() => {
-    return createReactQueryClient({
+  const api = useMemo<ApiClient>(() => {
+    return createApiClient({
       baseUrl: config.apiUrl,
       getToken: () => tokenStore.get(),
-      onUnauthorized: () => {
-        tokenStore.clear();
-        navigate('/login');
-      },
-      onServerError: (message: string | undefined) => {
-        toastStore.getState().show({
-          title: 'Server error',
-          description: message ?? 'Something went wrong',
-        });
-      },
     });
-  }, [config.apiUrl, navigate]);
+  }, [config.apiUrl]);
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
 }

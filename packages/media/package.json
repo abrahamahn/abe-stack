@@ -1,0 +1,39 @@
+{
+  "name": "@abe-stack/media",
+  "version": "1.0.0",
+  "description": "Media processing utilities for abe-stack (server-only)",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build && tsc-alias",
+    "dev": "echo 'Media package uses source files directly'",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "type-check": "tsc --project tsconfig.json --noEmit",
+    "test": "vitest run --project media"
+  },
+  "keywords": [
+    "abe-stack",
+    "media",
+    "ffmpeg",
+    "image-processing"
+  ],
+  "author": "",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abrahamahn/abe-stack.git",
+    "directory": "packages/media"
+  },
+  "bugs": {
+    "url": "https://github.com/abrahamahn/abe-stack/issues"
+  },
+  "homepage": "https://github.com/abrahamahn/abe-stack#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "sideEffects": false
+}

@@ -8,9 +8,9 @@
  * - MSW handlers: Mock API responses
  */
 
+import { QueryCache } from '@abe-stack/sdk';
 import { MemoryRouter } from '@abe-stack/ui';
 import { ClientEnvironmentProvider } from '@app/ClientEnvironment';
-import { QueryClient } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -142,22 +142,16 @@ export interface MockEnvironmentOptions extends MockAuthServiceOptions {
 export function createMockEnvironment(options: MockEnvironmentOptions = {}): ClientEnvironment {
   const { config: configOverrides, ...authOptions } = options;
 
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        retry: false,
-        gcTime: 0,
-        staleTime: 0,
-      },
-      mutations: {
-        retry: false,
-      },
-    },
+  const queryCache = new QueryCache({
+    defaultStaleTime: 0,
+    defaultGcTime: 0,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 
   return {
     config: { ...mockConfig, ...configOverrides },
-    queryClient,
+    queryCache,
     auth: createMockAuthService(authOptions),
   };
 }

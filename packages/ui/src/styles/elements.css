@@ -12,6 +12,28 @@
   padding: 0;
 }
 
+html,
+body,
+#root {
+  background: var(--ui-color-bg);
+  color: var(--ui-color-text);
+  min-height: 100%;
+}
+
+:root {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+  }
+}
+
 .theme {
   color: var(--ui-color-text);
   background: var(--ui-color-bg);
