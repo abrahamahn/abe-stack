@@ -106,7 +106,7 @@ export async function initDummyHashPool(
   const hashPromises: Promise<string>[] = [];
   for (let i = 0; i < DUMMY_HASH_POOL_SIZE; i++) {
     // Use unique dummy passwords to ensure different salts/hashes
-    const dummyPassword = `dummy_password_${i}_${Date.now()}_${Math.random()}`;
+    const dummyPassword = `dummy_password_${String(i)}_${String(Date.now())}_${String(Math.random())}`;
     hashPromises.push(hashPassword(dummyPassword, config));
   }
 
@@ -125,7 +125,7 @@ async function getRandomDummyHash(config: Argon2Config = DEFAULT_ARGON2_CONFIG):
   }
 
   // Fallback: generate hash on-the-fly (less optimal but secure)
-  return hashPassword(`fallback_dummy_${Date.now()}`, config);
+  return hashPassword(`fallback_dummy_${String(Date.now())}`, config);
 }
 
 /**

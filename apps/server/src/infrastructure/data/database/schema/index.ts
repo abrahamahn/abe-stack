@@ -48,6 +48,20 @@ export {
   type OAuthProvider,
 } from './oauth';
 
+// Push subscriptions schema
+export {
+  pushSubscriptions,
+  notificationPreferences,
+  type PushSubscription,
+  type NewPushSubscription,
+  type NotificationPreference,
+  type NewNotificationPreference,
+  type NotificationChannel,
+  type NotificationType,
+  type TypePreferences,
+  type QuietHoursConfig,
+} from './push-subscriptions';
+
 // Schema validation
 export {
   REQUIRED_TABLES,

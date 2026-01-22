@@ -130,6 +130,8 @@ export class MemoryCacheProvider implements CacheProvider {
       if (this.config.trackMemoryUsage && existingNode.size) {
         this.currentMemoryBytes -= existingNode.size;
       }
+      // Save old tags before overwriting
+      const oldTags = existingNode.tags;
       existingNode.value = value;
       existingNode.expiresAt = options.updateTtlOnExisting ? expiresAt : existingNode.expiresAt;
       existingNode.tags = tags;
@@ -138,10 +140,14 @@ export class MemoryCacheProvider implements CacheProvider {
         this.currentMemoryBytes += size;
       }
       this.moveToHead(existingNode);
-      this.updateTagIndex(fullKey, existingNode.tags, tags);
+      this.updateTagIndex(fullKey, oldTags, tags);
     } else {
-      // Evict if at capacity
-      this.evictIfNeeded(size);
+      // Evict if at capacity - skip caching if entry is too large
+      const hasRoom = this.evictIfNeeded(size);
+      if (!hasRoom) {
+        // Entry too large to fit, skip caching (graceful degradation)
+        return Promise.resolve();
+      }
 
       // Create new node
       const node: LRUNode<unknown> = {
@@ -424,11 +430,16 @@ export class MemoryCacheProvider implements CacheProvider {
     }
 
     let deleted = false;
-    for (const fullKey of keys) {
+    // Copy keys to array since we'll modify tagIndex during iteration
+    const keysToDelete = Array.from(keys);
+
+    for (const fullKey of keysToDelete) {
       const node = this.cache.get(fullKey);
       if (node) {
         this.removeNode(node);
         this.cache.delete(fullKey);
+        // Clean up ALL tags that reference this key, not just the requested tag
+        this.updateTagIndex(fullKey, node.tags, []);
         if (this.config.trackMemoryUsage && node.size) {
           this.currentMemoryBytes -= node.size;
         }
@@ -437,7 +448,6 @@ export class MemoryCacheProvider implements CacheProvider {
       }
     }
 
-    this.tagIndex.delete(tag);
     this.stats.deletes++;
     this.stats.size = this.cache.size;
     this.stats.memoryUsage = this.currentMemoryBytes;
@@ -445,7 +455,11 @@ export class MemoryCacheProvider implements CacheProvider {
     return deleted;
   }
 
-  private evictIfNeeded(newSize?: number): void {
+  /**
+   * Evict entries if needed to make room for a new entry.
+   * @returns true if there's room for the new entry, false if the entry is too large to ever fit
+   */
+  private evictIfNeeded(newSize?: number): boolean {
     // Check size limit
     if (this.config.maxSize > 0 && this.cache.size >= this.config.maxSize) {
       const node = this.removeTail();
@@ -461,11 +475,17 @@ export class MemoryCacheProvider implements CacheProvider {
     }
 
     // Check memory limit
-    if (
-      this.config.maxMemoryBytes > 0 &&
-      newSize &&
-      this.currentMemoryBytes + newSize > this.config.maxMemoryBytes
-    ) {
+    if (this.config.maxMemoryBytes > 0 && newSize) {
+      // If the entry is larger than maxMemoryBytes, it can never fit
+      if (newSize > this.config.maxMemoryBytes) {
+        this.logger?.warn('Cache entry too large to fit in memory limit', {
+          entrySize: newSize,
+          maxMemoryBytes: this.config.maxMemoryBytes,
+        });
+        return false;
+      }
+
+      // Evict until we have room
       while (
         this.tail &&
         this.currentMemoryBytes + newSize > this.config.maxMemoryBytes
@@ -482,6 +502,8 @@ export class MemoryCacheProvider implements CacheProvider {
         }
       }
     }
+
+    return true;
   }
 
   private cleanup(): void {

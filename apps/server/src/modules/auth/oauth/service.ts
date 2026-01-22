@@ -294,10 +294,13 @@ export async function handleOAuthCallback(
     if (!appleTokens.accessToken) {
       throw new OAuthError('Apple OAuth did not return id_token', 'apple', 'NO_ID_TOKEN');
     }
-    // For Apple, we need to get id_token from the exchange response
-    // In the actual flow, we'd need to modify exchangeCode to return id_token
-    // For now, we'll assume the service layer handles this
-    userInfo = extractAppleUserFromIdToken(appleTokens.accessToken);
+    // Get Apple client_id for id_token audience validation
+    const appleConfig = config.oauth.apple;
+    if (!appleConfig) {
+      throw new OAuthError('Apple OAuth not configured', 'apple', 'NOT_CONFIGURED');
+    }
+    // Verify signature and extract user info from id_token
+    userInfo = await extractAppleUserFromIdToken(appleTokens.accessToken, appleConfig.clientId);
   } else {
     userInfo = await client.getUserInfo(tokens.accessToken);
   }
@@ -459,6 +462,8 @@ async function authenticateOrCreateWithOAuth(
 
 /**
  * Link OAuth account to existing user
+ *
+ * Optimized: Runs validation queries in parallel instead of sequentially
  */
 export async function linkOAuthAccount(
   db: DbClient,
@@ -470,19 +475,28 @@ export async function linkOAuthAccount(
 ): Promise<void> {
   const encryptionKey = config.cookie.secret;
 
-  // Check if user exists
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, userId),
-  });
+  // Run all validation queries in parallel (no dependencies between them)
+  const [user, existingConnection, otherConnection] = await Promise.all([
+    // Check if user exists
+    db.query.users.findFirst({
+      where: eq(users.id, userId),
+    }),
+    // Check if this provider is already linked to this user
+    db.query.oauthConnections.findFirst({
+      where: and(eq(oauthConnections.userId, userId), eq(oauthConnections.provider, provider)),
+    }),
+    // Check if this provider account is linked to another user
+    db.query.oauthConnections.findFirst({
+      where: and(
+        eq(oauthConnections.provider, provider),
+        eq(oauthConnections.providerUserId, userInfo.id),
+      ),
+    }),
+  ]);
 
   if (!user) {
     throw new NotFoundError('User not found');
   }
-
-  // Check if this provider is already linked to this user
-  const existingConnection = await db.query.oauthConnections.findFirst({
-    where: and(eq(oauthConnections.userId, userId), eq(oauthConnections.provider, provider)),
-  });
 
   if (existingConnection) {
     throw new ConflictError(
@@ -490,14 +504,6 @@ export async function linkOAuthAccount(
       'OAUTH_ALREADY_LINKED',
     );
   }
-
-  // Check if this provider account is linked to another user
-  const otherConnection = await db.query.oauthConnections.findFirst({
-    where: and(
-      eq(oauthConnections.provider, provider),
-      eq(oauthConnections.providerUserId, userInfo.id),
-    ),
-  });
 
   if (otherConnection) {
     throw new ConflictError(
@@ -520,34 +526,37 @@ export async function linkOAuthAccount(
 
 /**
  * Unlink OAuth account from user
+ *
+ * Optimized: Runs validation queries in parallel instead of sequentially
  */
 export async function unlinkOAuthAccount(
   db: DbClient,
   userId: string,
   provider: OAuthProvider,
 ): Promise<void> {
-  // Check if connection exists
-  const connection = await db.query.oauthConnections.findFirst({
-    where: and(eq(oauthConnections.userId, userId), eq(oauthConnections.provider, provider)),
-  });
+  // Run all validation queries in parallel (no dependencies between them)
+  const [connection, user, connections] = await Promise.all([
+    // Check if connection exists
+    db.query.oauthConnections.findFirst({
+      where: and(eq(oauthConnections.userId, userId), eq(oauthConnections.provider, provider)),
+    }),
+    // Get user to check passwordHash
+    db.query.users.findFirst({
+      where: eq(users.id, userId),
+    }),
+    // Count OAuth connections for this user
+    db.query.oauthConnections.findMany({
+      where: eq(oauthConnections.userId, userId),
+    }),
+  ]);
 
   if (!connection) {
     throw new NotFoundError(`${provider} is not linked to your account`);
   }
 
-  // Check if this is the only auth method
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, userId),
-  });
-
   if (!user) {
     throw new NotFoundError('User not found');
   }
-
-  // Count OAuth connections
-  const connections = await db.query.oauthConnections.findMany({
-    where: eq(oauthConnections.userId, userId),
-  });
 
   // Check if user has a password (not just oauth:provider:hash)
   const hasPassword = !user.passwordHash.startsWith('oauth:');
@@ -586,30 +595,29 @@ export async function getConnectedProviders(
 
 /**
  * Find user by OAuth provider and provider user ID
+ *
+ * Optimized: Uses a single JOIN query instead of N+1 queries
  */
 export async function findUserByOAuthProvider(
   db: DbClient,
   provider: OAuthProvider,
   providerUserId: string,
 ): Promise<{ userId: string; email: string } | null> {
-  const connection = await db.query.oauthConnections.findFirst({
-    where: and(
-      eq(oauthConnections.provider, provider),
-      eq(oauthConnections.providerUserId, providerUserId),
-    ),
-  });
+  // Single JOIN query instead of two separate queries
+  const result = await db
+    .select({
+      userId: users.id,
+      email: users.email,
+    })
+    .from(oauthConnections)
+    .innerJoin(users, eq(oauthConnections.userId, users.id))
+    .where(
+      and(
+        eq(oauthConnections.provider, provider),
+        eq(oauthConnections.providerUserId, providerUserId),
+      ),
+    )
+    .limit(1);
 
-  if (!connection) {
-    return null;
-  }
-
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, connection.userId),
-  });
-
-  if (!user) {
-    return null;
-  }
-
-  return { userId: user.id, email: user.email };
+  return result[0] ?? null;
 }

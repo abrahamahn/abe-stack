@@ -105,7 +105,10 @@ describe('Auth Routes', () => {
 
     test('should define all expected routes', () => {
       const routeKeys = Object.keys(authRoutes);
-      expect(routeKeys).toHaveLength(9);
+      // Core auth routes (12) + OAuth routes (13) = 25
+      expect(routeKeys).toHaveLength(25);
+
+      // Core auth routes
       expect(routeKeys).toContain('auth/register');
       expect(routeKeys).toContain('auth/login');
       expect(routeKeys).toContain('auth/refresh');
@@ -113,8 +116,26 @@ describe('Auth Routes', () => {
       expect(routeKeys).toContain('auth/logout-all');
       expect(routeKeys).toContain('auth/forgot-password');
       expect(routeKeys).toContain('auth/reset-password');
+      expect(routeKeys).toContain('auth/set-password');
       expect(routeKeys).toContain('auth/verify-email');
       expect(routeKeys).toContain('auth/resend-verification');
+      expect(routeKeys).toContain('auth/magic-link/request');
+      expect(routeKeys).toContain('auth/magic-link/verify');
+
+      // OAuth routes
+      expect(routeKeys).toContain('auth/oauth/google');
+      expect(routeKeys).toContain('auth/oauth/github');
+      expect(routeKeys).toContain('auth/oauth/apple');
+      expect(routeKeys).toContain('auth/oauth/google/callback');
+      expect(routeKeys).toContain('auth/oauth/github/callback');
+      expect(routeKeys).toContain('auth/oauth/apple/callback');
+      expect(routeKeys).toContain('auth/oauth/google/link');
+      expect(routeKeys).toContain('auth/oauth/github/link');
+      expect(routeKeys).toContain('auth/oauth/apple/link');
+      expect(routeKeys).toContain('auth/oauth/google/unlink');
+      expect(routeKeys).toContain('auth/oauth/github/unlink');
+      expect(routeKeys).toContain('auth/oauth/apple/unlink');
+      expect(routeKeys).toContain('auth/oauth/connections');
     });
   });
 
@@ -788,22 +809,41 @@ describe('Schema Validation', () => {
 // ============================================================================
 
 describe('Route Protection', () => {
-  test('should have only one protected route (logout-all)', () => {
+  test('should have expected protected routes', () => {
     const protectedRoutes = Object.entries(authRoutes).filter(
       ([_, def]: [string, BaseRouteDefinition]) => def.auth !== undefined,
     );
-    expect(protectedRoutes).toHaveLength(1);
-    expect(protectedRoutes[0]![0]).toBe('auth/logout-all');
-    expect(protectedRoutes[0]![1].auth).toBe('user');
+
+    // 2 core (logout-all, set-password) + 7 OAuth (3 link + 3 unlink + 1 connections) = 9 protected routes
+    expect(protectedRoutes).toHaveLength(9);
+
+    const protectedRouteNames = protectedRoutes.map(([name]) => name);
+    expect(protectedRouteNames).toContain('auth/logout-all');
+    expect(protectedRouteNames).toContain('auth/set-password');
+    expect(protectedRouteNames).toContain('auth/oauth/google/link');
+    expect(protectedRouteNames).toContain('auth/oauth/github/link');
+    expect(protectedRouteNames).toContain('auth/oauth/apple/link');
+    expect(protectedRouteNames).toContain('auth/oauth/google/unlink');
+    expect(protectedRouteNames).toContain('auth/oauth/github/unlink');
+    expect(protectedRouteNames).toContain('auth/oauth/apple/unlink');
+    expect(protectedRouteNames).toContain('auth/oauth/connections');
+
+    // All protected routes should require 'user' auth level
+    for (const [_, def] of protectedRoutes) {
+      expect(def.auth).toBe('user');
+    }
   });
 
   test('should have all other routes as public', () => {
     const publicRoutes = Object.entries(authRoutes).filter(
       ([_, def]: [string, BaseRouteDefinition]) => def.auth === undefined,
     );
-    expect(publicRoutes).toHaveLength(8);
+
+    // 10 core + 6 OAuth (3 initiate + 3 callback) = 16 public routes
+    expect(publicRoutes).toHaveLength(16);
 
     const publicRouteNames = publicRoutes.map(([name]) => name);
+    // Core public routes
     expect(publicRouteNames).toContain('auth/register');
     expect(publicRouteNames).toContain('auth/login');
     expect(publicRouteNames).toContain('auth/refresh');
@@ -812,6 +852,15 @@ describe('Route Protection', () => {
     expect(publicRouteNames).toContain('auth/reset-password');
     expect(publicRouteNames).toContain('auth/verify-email');
     expect(publicRouteNames).toContain('auth/resend-verification');
+    expect(publicRouteNames).toContain('auth/magic-link/request');
+    expect(publicRouteNames).toContain('auth/magic-link/verify');
+    // OAuth public routes
+    expect(publicRouteNames).toContain('auth/oauth/google');
+    expect(publicRouteNames).toContain('auth/oauth/github');
+    expect(publicRouteNames).toContain('auth/oauth/apple');
+    expect(publicRouteNames).toContain('auth/oauth/google/callback');
+    expect(publicRouteNames).toContain('auth/oauth/github/callback');
+    expect(publicRouteNames).toContain('auth/oauth/apple/callback');
   });
 
   test('should not have any admin-only routes', () => {
@@ -827,9 +876,72 @@ describe('Route Protection', () => {
 // ============================================================================
 
 describe('Route Methods', () => {
-  test('all auth routes should use POST method', () => {
-    for (const [_name, def] of Object.entries(authRoutes)) {
-      expect(def.method).toBe('POST');
+  test('core auth routes should use POST method', () => {
+    const coreRoutes = [
+      'auth/register',
+      'auth/login',
+      'auth/refresh',
+      'auth/logout',
+      'auth/logout-all',
+      'auth/forgot-password',
+      'auth/reset-password',
+      'auth/set-password',
+      'auth/verify-email',
+      'auth/resend-verification',
+      'auth/magic-link/request',
+      'auth/magic-link/verify',
+    ];
+
+    for (const routeName of coreRoutes) {
+      const route = authRoutes[routeName];
+      expect(route).toBeDefined();
+      expect(route?.method).toBe('POST');
+    }
+  });
+
+  test('OAuth initiate and callback routes should use GET method', () => {
+    const getRoutes = [
+      'auth/oauth/google',
+      'auth/oauth/github',
+      'auth/oauth/apple',
+      'auth/oauth/google/callback',
+      'auth/oauth/github/callback',
+      'auth/oauth/apple/callback',
+      'auth/oauth/connections',
+    ];
+
+    for (const routeName of getRoutes) {
+      const route = authRoutes[routeName];
+      expect(route).toBeDefined();
+      expect(route?.method).toBe('GET');
+    }
+  });
+
+  test('OAuth link routes should use POST method', () => {
+    const linkRoutes = [
+      'auth/oauth/google/link',
+      'auth/oauth/github/link',
+      'auth/oauth/apple/link',
+    ];
+
+    for (const routeName of linkRoutes) {
+      const route = authRoutes[routeName];
+      expect(route).toBeDefined();
+      expect(route?.method).toBe('POST');
+    }
+  });
+
+  test('OAuth unlink routes should use DELETE method', () => {
+    const unlinkRoutes = [
+      'auth/oauth/google/unlink',
+      'auth/oauth/github/unlink',
+      'auth/oauth/apple/unlink',
+    ];
+
+    for (const routeName of unlinkRoutes) {
+      const route = authRoutes[routeName];
+      expect(route).toBeDefined();
+      expect(route?.method).toBe('DELETE');
     }
   });
 });

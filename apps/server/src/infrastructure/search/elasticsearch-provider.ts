@@ -231,14 +231,6 @@ export class ElasticsearchProvider<TRecord = Record<string, unknown>>
   // Private Methods
   // ============================================================================
 
-  private throwNotImplemented(method: string): never {
-    throw new SearchProviderUnavailableError(
-      this.name,
-      `Elasticsearch provider method '${method}' is not yet implemented. ` +
-        `To use Elasticsearch, add @elastic/elasticsearch as a dependency and implement this provider.`,
-    );
-  }
-
   /**
    * Build Elasticsearch query from SearchQuery.
    * @internal For future implementation

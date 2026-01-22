@@ -25,6 +25,7 @@ declare global {
     prototype: HTMLCanvasElement;
   };
 
+  // Base HTML element type
   type HTMLElement = object;
 
   interface HTMLImageElement extends HTMLElement {

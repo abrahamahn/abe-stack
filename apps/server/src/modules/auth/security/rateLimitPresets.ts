@@ -32,7 +32,11 @@ export type AuthEndpoint =
   | 'resetPassword'
   | 'verifyEmail'
   | 'resendVerification'
-  | 'refresh';
+  | 'refresh'
+  | 'oauthInitiate'
+  | 'oauthCallback'
+  | 'oauthLink'
+  | 'oauthUnlink';
 
 // ============================================================================
 // Auth Rate Limit Configurations
@@ -102,6 +106,34 @@ export const AUTH_RATE_LIMITS: Record<AuthEndpoint, AuthRateLimitConfig> = {
    * Still stricter than global limit to prevent abuse.
    */
   refresh: { max: 30, windowMs: 60_000 },
+
+  /**
+   * OAuth Initiate: 10 attempts per minute
+   * Prevents state exhaustion attacks while allowing
+   * legitimate retries if user navigates back.
+   */
+  oauthInitiate: { max: 10, windowMs: 60_000 },
+
+  /**
+   * OAuth Callback: 20 attempts per minute
+   * More lenient since it's a redirect from provider.
+   * Protects against callback flooding.
+   */
+  oauthCallback: { max: 20, windowMs: 60_000 },
+
+  /**
+   * OAuth Link: 5 attempts per hour
+   * Strict since linking is infrequent.
+   * Prevents abuse of account linking feature.
+   */
+  oauthLink: { max: 5, windowMs: 3_600_000 },
+
+  /**
+   * OAuth Unlink: 5 attempts per hour
+   * Strict since unlinking is infrequent.
+   * Prevents repeated unlink/link cycles.
+   */
+  oauthUnlink: { max: 5, windowMs: 3_600_000 },
 };
 
 // ============================================================================

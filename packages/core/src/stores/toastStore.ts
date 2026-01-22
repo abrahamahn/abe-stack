@@ -1,5 +1,5 @@
-// packages/core/src/infrastructure/stores/toastStore.ts
-import { create } from 'zustand';
+// packages/core/src/stores/toastStore.ts
+import { createStore } from './createStore';
 
 export type ToastMessage = {
   id: string;
@@ -13,7 +13,7 @@ type ToastState = {
   dismiss: (id: string) => void;
 };
 
-export const toastStore = create<ToastState>((set) => ({
+export const toastStore = createStore<ToastState>((set) => ({
   messages: [],
   show: (msg): void => {
     set((state) => ({

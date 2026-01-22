@@ -10,5 +10,5 @@ export { handleRegister, type RegisterResult } from './register';
 export { handleRefresh } from './refresh';
 export { handleLogout } from './logout';
 export { handleLogoutAll } from './logout-all';
-export { handleForgotPassword, handleResetPassword } from './password';
+export { handleForgotPassword, handleResetPassword, handleSetPassword } from './password';
 export { handleVerifyEmail, handleResendVerification } from './verify';

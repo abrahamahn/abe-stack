@@ -75,6 +75,17 @@ export {
   type OAuthConnection,
   type NewOAuthConnection,
   type OAuthProvider,
+  // Schema - Push Subscriptions
+  pushSubscriptions,
+  notificationPreferences,
+  type PushSubscription as DbPushSubscription,
+  type NewPushSubscription,
+  type NotificationPreference as DbNotificationPreference,
+  type NewNotificationPreference,
+  type NotificationChannel as DbNotificationChannel,
+  type NotificationType as DbNotificationType,
+  type TypePreferences,
+  type QuietHoursConfig,
 } from './data/database';
 
 // Storage
@@ -273,6 +284,7 @@ export {
 
 // Scheduled Jobs (Cleanup, Maintenance)
 export {
+  // Login Cleanup
   cleanupOldLoginAttempts,
   countOldLoginAttempts,
   getLoginAttemptStats,
@@ -282,6 +294,14 @@ export {
   MAX_BATCH_SIZE,
   type CleanupOptions,
   type CleanupResult,
+  // Push Subscription Cleanup
+  cleanupPushSubscriptions,
+  countPushCleanupCandidates,
+  getPushSubscriptionStats,
+  DEFAULT_INACTIVE_DAYS,
+  PUSH_MAX_BATCH_SIZE,
+  type PushCleanupOptions,
+  type PushCleanupResult,
 } from './jobs/scheduled';
 
 // Router (Generic Route Registration)
@@ -388,13 +408,10 @@ export {
   createCache,
   createCacheFromEnv,
   createMemoryCache,
-  createRedisCache,
   MemoryCacheProvider,
   memoize,
   memoizeMethod,
-  RedisCacheProvider,
   type BaseCacheConfig,
-  type CacheConfig,
   type CacheDeleteOptions,
   type CacheEntry,
   type CacheEntryMetadata,
@@ -402,7 +419,6 @@ export {
   type CacheLogger,
   type CacheOperationResult,
   type CacheProvider,
-  type CacheProviderType,
   type CacheSetOptions,
   type CacheStats,
   type CreateCacheOptions,
@@ -412,7 +428,4 @@ export {
   type MemoizeOptions,
   type MemoizeStats,
   type MemoryCacheConfig,
-  type RedisCacheConfig,
-  type RedisClient,
-  type RedisClientFactory,
 } from './cache';

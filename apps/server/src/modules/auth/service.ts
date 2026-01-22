@@ -441,6 +441,54 @@ export async function resetPassword(
 }
 
 /**
+ * Check if a user has a password set (vs being magic-link only)
+ */
+export function hasPassword(passwordHash: string): boolean {
+  return !passwordHash.startsWith('magiclink:');
+}
+
+/**
+ * Set password for a user who doesn't have one (magic-link only users)
+ *
+ * @throws InvalidCredentialsError if user not found
+ * @throws Error with code PASSWORD_ALREADY_SET if user already has a password
+ * @throws WeakPasswordError if password is too weak
+ */
+export async function setPassword(
+  db: DbClient,
+  config: AuthConfig,
+  userId: string,
+  newPassword: string,
+): Promise<void> {
+  // Find the user
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, userId),
+    columns: { id: true, passwordHash: true },
+  });
+
+  if (!user) {
+    throw new InvalidCredentialsError();
+  }
+
+  // Check if user already has a password
+  if (hasPassword(user.passwordHash)) {
+    const error = new Error('User already has a password set');
+    error.name = 'PasswordAlreadySetError';
+    throw error;
+  }
+
+  // Validate password strength
+  const passwordValidation = await validatePassword(newPassword, []);
+  if (!passwordValidation.isValid) {
+    throw new WeakPasswordError({ errors: passwordValidation.errors });
+  }
+
+  // Hash and set the password
+  const passwordHash = await hashPassword(newPassword, config.argon2);
+  await db.update(users).set({ passwordHash }).where(eq(users.id, userId));
+}
+
+/**
  * Create an email verification token for a user
  */
 export async function createEmailVerificationToken(db: DbClient, userId: string): Promise<string> {

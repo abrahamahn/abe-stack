@@ -94,6 +94,7 @@ export interface AuthConfig {
   oauth: {
     google?: OAuthProviderConfig;
     github?: OAuthProviderConfig;
+    apple?: OAuthProviderConfig & { teamId: string; keyId: string; privateKey: string };
     facebook?: OAuthProviderConfig;
     microsoft?: OAuthProviderConfig & { tenantId: string };
   };
@@ -221,6 +222,19 @@ export function loadAuthConfig(env: Record<string, string | undefined>): AuthCon
           clientId: env.GITHUB_CLIENT_ID,
           clientSecret: env.GITHUB_CLIENT_SECRET || '',
           callbackUrl: env.GITHUB_CALLBACK_URL || '/api/auth/oauth/github/callback',
+        },
+      }),
+      ...(env.APPLE_CLIENT_ID && {
+        apple: {
+          clientId: env.APPLE_CLIENT_ID,
+          clientSecret: '', // Apple uses JWT client_secret generated at runtime
+          callbackUrl: env.APPLE_CALLBACK_URL || '/api/auth/oauth/apple/callback',
+          teamId: env.APPLE_TEAM_ID || '',
+          keyId: env.APPLE_KEY_ID || '',
+          // Private key can be multiline, support both direct value and base64 encoded
+          privateKey: env.APPLE_PRIVATE_KEY_BASE64
+            ? Buffer.from(env.APPLE_PRIVATE_KEY_BASE64, 'base64').toString('utf8')
+            : env.APPLE_PRIVATE_KEY || '',
         },
       }),
       ...(env.FACEBOOK_CLIENT_ID && {

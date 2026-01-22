@@ -418,7 +418,7 @@ describe('handleRefresh', () => {
       let emailResolved = false;
       mockSendTokenReuseAlert.mockImplementation(
         () =>
-          new Promise((resolve) => {
+          new Promise<void>((resolve) => {
             setTimeout(() => {
               emailResolved = true;
               resolve();

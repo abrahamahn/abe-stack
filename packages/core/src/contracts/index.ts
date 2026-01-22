@@ -34,6 +34,8 @@ export {
   resendVerificationResponseSchema,
   resetPasswordRequestSchema,
   resetPasswordResponseSchema,
+  setPasswordRequestSchema,
+  setPasswordResponseSchema,
 } from './auth';
 export type {
   AuthResponse,
@@ -54,6 +56,8 @@ export type {
   ResendVerificationResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
+  SetPasswordRequest,
+  SetPasswordResponse,
 } from './auth';
 
 // Common schemas

@@ -43,6 +43,10 @@ export const resetPasswordRequestSchema = z.object({
   password: passwordSchema,
 });
 
+export const setPasswordRequestSchema = z.object({
+  password: passwordSchema,
+});
+
 // ============================================================================
 // Magic Link Schemas
 // ============================================================================
@@ -96,6 +100,10 @@ export const resetPasswordResponseSchema = z.object({
   message: z.string(),
 });
 
+export const setPasswordResponseSchema = z.object({
+  message: z.string(),
+});
+
 export const magicLinkRequestResponseSchema = z.object({
   success: z.boolean(),
   message: z.string(),
@@ -124,6 +132,8 @@ export type ResendVerificationRequest = z.infer<typeof resendVerificationRequest
 export type ResendVerificationResponse = z.infer<typeof resendVerificationResponseSchema>;
 export type ResetPasswordRequest = z.infer<typeof resetPasswordRequestSchema>;
 export type ResetPasswordResponse = z.infer<typeof resetPasswordResponseSchema>;
+export type SetPasswordRequest = z.infer<typeof setPasswordRequestSchema>;
+export type SetPasswordResponse = z.infer<typeof setPasswordResponseSchema>;
 export type MagicLinkRequest = z.infer<typeof magicLinkRequestSchema>;
 export type MagicLinkVerifyRequest = z.infer<typeof magicLinkVerifySchema>;
 export type MagicLinkRequestResponse = z.infer<typeof magicLinkRequestResponseSchema>;
@@ -218,6 +228,18 @@ export const authContract = c.router({
       400: errorResponseSchema,
     },
     summary: 'Reset password with token',
+  },
+  setPassword: {
+    method: 'POST',
+    path: '/api/auth/set-password',
+    body: setPasswordRequestSchema,
+    responses: {
+      200: setPasswordResponseSchema,
+      400: errorResponseSchema,
+      401: errorResponseSchema,
+      409: errorResponseSchema, // User already has a password
+    },
+    summary: 'Set password for first time (magic-link only users)',
   },
   magicLinkRequest: {
     method: 'POST',

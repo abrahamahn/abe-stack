@@ -8,17 +8,14 @@
 // Re-export core cache types
 export type {
   BaseCacheConfig,
-  CacheConfig,
   CacheDeleteOptions,
   CacheEntry,
   CacheEntryMetadata,
   CacheGetOptions,
   CacheProvider,
-  CacheProviderType,
   CacheSetOptions,
   CacheStats,
   MemoryCacheConfig,
-  RedisCacheConfig,
 } from '@abe-stack/core';
 
 // ============================================================================

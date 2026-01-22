@@ -28,6 +28,8 @@ export const REQUIRED_TABLES = [
   'security_events',
   'magic_link_tokens',
   'oauth_connections',
+  'push_subscriptions',
+  'notification_preferences',
 ] as const;
 
 export type RequiredTable = (typeof REQUIRED_TABLES)[number];

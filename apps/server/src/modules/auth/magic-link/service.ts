@@ -31,11 +31,14 @@ import type { AuthConfig } from '@config';
 /** Token length in bytes (32 bytes = 256 bits of entropy) */
 const TOKEN_BYTES = 32;
 
-/** Token expiry in minutes */
-const TOKEN_EXPIRY_MINUTES = 15;
+/** Token expiry in minutes (default, can be overridden by config) */
+const DEFAULT_TOKEN_EXPIRY_MINUTES = 15;
 
-/** Max requests per email per hour for rate limiting */
-const MAX_REQUESTS_PER_HOUR = 3;
+/** Max requests per email per hour for rate limiting (default) */
+const DEFAULT_MAX_REQUESTS_PER_EMAIL = 3;
+
+/** Max requests per IP per hour for rate limiting */
+const DEFAULT_MAX_REQUESTS_PER_IP = 10;
 
 /** Rate limit window in milliseconds (1 hour) */
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
@@ -89,7 +92,11 @@ function hashToken(token: string): string {
 /**
  * Check if rate limit is exceeded for an email
  */
-async function isRateLimited(db: DbClient, email: string): Promise<boolean> {
+async function isEmailRateLimited(
+  db: DbClient,
+  email: string,
+  maxRequests: number = DEFAULT_MAX_REQUESTS_PER_EMAIL,
+): Promise<boolean> {
   const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS);
 
   const result = await db
@@ -98,12 +105,44 @@ async function isRateLimited(db: DbClient, email: string): Promise<boolean> {
     .where(and(eq(magicLinkTokens.email, email), gt(magicLinkTokens.createdAt, windowStart)));
 
   const requestCount = result[0]?.count ?? 0;
-  return requestCount >= MAX_REQUESTS_PER_HOUR;
+  return requestCount >= maxRequests;
+}
+
+/**
+ * Check if rate limit is exceeded for an IP address
+ * Prevents abuse from a single source targeting multiple emails
+ */
+async function isIpRateLimited(
+  db: DbClient,
+  ipAddress: string,
+  maxRequests: number = DEFAULT_MAX_REQUESTS_PER_IP,
+): Promise<boolean> {
+  const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS);
+
+  const result = await db
+    .select({ count: count() })
+    .from(magicLinkTokens)
+    .where(and(eq(magicLinkTokens.ipAddress, ipAddress), gt(magicLinkTokens.createdAt, windowStart)));
+
+  const requestCount = result[0]?.count ?? 0;
+  return requestCount >= maxRequests;
 }
 
 // ============================================================================
 // Service Functions
 // ============================================================================
+
+/**
+ * Magic link request options
+ */
+export interface MagicLinkRequestOptions {
+  /** Token expiry in minutes (default: 15) */
+  tokenExpiryMinutes?: number;
+  /** Max requests per email per hour (default: 3) */
+  maxAttemptsPerEmail?: number;
+  /** Max requests per IP per hour (default: 10) */
+  maxAttemptsPerIp?: number;
+}
 
 /**
  * Request a magic link for passwordless authentication
@@ -112,8 +151,9 @@ async function isRateLimited(db: DbClient, email: string): Promise<boolean> {
  * @param emailService - Email service for sending magic links
  * @param email - User's email address
  * @param baseUrl - Frontend base URL for the magic link
- * @param ipAddress - Client IP address (for security logging)
+ * @param ipAddress - Client IP address (for security logging and rate limiting)
  * @param userAgent - Client user agent (for security logging)
+ * @param options - Optional configuration overrides
  * @returns Result indicating success (always returns success to prevent email enumeration)
  * @throws TooManyRequestsError if rate limit is exceeded
  */
@@ -124,23 +164,41 @@ export async function requestMagicLink(
   baseUrl: string,
   ipAddress?: string,
   userAgent?: string,
+  options?: MagicLinkRequestOptions,
 ): Promise<RequestMagicLinkResult> {
+  const {
+    tokenExpiryMinutes = DEFAULT_TOKEN_EXPIRY_MINUTES,
+    maxAttemptsPerEmail = DEFAULT_MAX_REQUESTS_PER_EMAIL,
+    maxAttemptsPerIp = DEFAULT_MAX_REQUESTS_PER_IP,
+  } = options ?? {};
+
   // Normalize email to lowercase
   const normalizedEmail = email.toLowerCase().trim();
 
-  // Check rate limit
-  const rateLimited = await isRateLimited(db, normalizedEmail);
-  if (rateLimited) {
+  // Check email-based rate limit
+  const emailRateLimited = await isEmailRateLimited(db, normalizedEmail, maxAttemptsPerEmail);
+  if (emailRateLimited) {
     throw new TooManyRequestsError(
       'Too many magic link requests. Please try again later.',
       RATE_LIMIT_WINDOW_MS / 1000, // Convert to seconds for retry-after
     );
   }
 
+  // Check IP-based rate limit (if IP is provided)
+  if (ipAddress) {
+    const ipRateLimited = await isIpRateLimited(db, ipAddress, maxAttemptsPerIp);
+    if (ipRateLimited) {
+      throw new TooManyRequestsError(
+        'Too many requests from this location. Please try again later.',
+        RATE_LIMIT_WINDOW_MS / 1000,
+      );
+    }
+  }
+
   // Generate token
   const token = generateToken();
   const tokenHash = hashToken(token);
-  const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_MINUTES * 60 * 1000);
+  const expiresAt = new Date(Date.now() + tokenExpiryMinutes * 60 * 1000);
 
   // Store hashed token
   await db.insert(magicLinkTokens).values({
@@ -155,7 +213,7 @@ export async function requestMagicLink(
   const magicLinkUrl = `${baseUrl}/auth/magic-link?token=${token}`;
 
   // Send email
-  const emailTemplate = emailTemplates.magicLink(magicLinkUrl, TOKEN_EXPIRY_MINUTES);
+  const emailTemplate = emailTemplates.magicLink(magicLinkUrl, tokenExpiryMinutes);
 
   try {
     await emailService.send({
@@ -180,6 +238,9 @@ export async function requestMagicLink(
 /**
  * Verify a magic link token and authenticate the user
  *
+ * Uses atomic update to prevent race conditions - the token is marked as used
+ * in the same operation that validates it, ensuring only one request can succeed.
+ *
  * @param db - Database client
  * @param config - Auth configuration
  * @param token - The magic link token from the URL
@@ -194,26 +255,27 @@ export async function verifyMagicLink(
   // Hash the token to look it up
   const tokenHash = hashToken(token);
 
-  // Find valid token (not expired, not used)
-  const tokenRecord = await db.query.magicLinkTokens.findFirst({
-    where: and(
-      eq(magicLinkTokens.tokenHash, tokenHash),
-      gt(magicLinkTokens.expiresAt, new Date()),
-      isNull(magicLinkTokens.usedAt),
-    ),
-  });
-
-  if (!tokenRecord) {
-    throw new InvalidTokenError('Invalid or expired magic link');
-  }
-
   // Find or create user and generate tokens atomically
   const result = await withTransaction(db, async (tx) => {
-    // Mark token as used first to prevent race conditions
-    await tx
+    // Atomically mark token as used while validating it
+    // This prevents race conditions - only the first request succeeds
+    const now = new Date();
+    const [tokenRecord] = await tx
       .update(magicLinkTokens)
-      .set({ usedAt: new Date() })
-      .where(eq(magicLinkTokens.id, tokenRecord.id));
+      .set({ usedAt: now })
+      .where(
+        and(
+          eq(magicLinkTokens.tokenHash, tokenHash),
+          gt(magicLinkTokens.expiresAt, now),
+          isNull(magicLinkTokens.usedAt),
+        ),
+      )
+      .returning();
+
+    // If no rows were updated, token is invalid, expired, or already used
+    if (!tokenRecord) {
+      throw new InvalidTokenError('Invalid or expired magic link');
+    }
 
     // Find existing user
     let user = await tx.query.users.findFirst({

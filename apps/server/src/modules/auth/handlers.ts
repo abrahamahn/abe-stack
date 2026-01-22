@@ -15,6 +15,7 @@ export {
   handleRegister,
   handleResendVerification,
   handleResetPassword,
+  handleSetPassword,
   handleVerifyEmail,
   type RegisterResult,
 } from './handlers/index';

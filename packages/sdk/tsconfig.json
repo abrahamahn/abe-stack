@@ -3,20 +3,40 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "lib": ["ES2022", "DOM"],
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
     "jsx": "react-jsx",
     "baseUrl": "./",
-    "types": ["vitest/globals", "node"],
+    "types": [
+      "vitest/globals",
+      "node"
+    ],
     "paths": {
-      "@abe-stack/core": ["../core/src"],
-      "@abe-stack/core/*": ["../core/src/*"],
-      "@persistence": ["./src/persistence"],
-      "@persistence/*": ["./src/persistence/*"]
+      "@abe-stack/core": [
+        "../core/src"
+      ],
+      "@abe-stack/core/*": [
+        "../core/src/*"
+      ],
+      "@persistence": [
+        "./src/persistence"
+      ],
+      "@persistence/*": [
+        "./src/persistence/*"
+      ]
     },
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "src/**/__tests__/**"],
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/**/__tests__/**"
+  ],
   "references": [
     {
       "path": "../core"

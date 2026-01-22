@@ -18,11 +18,6 @@ export const serverEnvSchema = z
     POSTGRES_PASSWORD: z.string().min(1, 'Database password is required'),
     DATABASE_URL: z.url().optional(),
 
-    // Redis Configuration
-    REDIS_HOST: z.string().default('localhost'),
-    REDIS_PORT: z.coerce.number().default(6379),
-    REDIS_URL: z.url().optional(),
-
     // Application Ports
     API_PORT: z.coerce.number().default(8080),
     APP_PORT: z.coerce.number().default(3000),
@@ -77,8 +72,6 @@ export const serverEnvSchema = z
     DATABASE_URL:
       env.DATABASE_URL ||
       `postgresql://${env.POSTGRES_USER}:${env.POSTGRES_PASSWORD}@${env.POSTGRES_HOST}:${String(env.POSTGRES_PORT)}/${env.POSTGRES_DB}`,
-
-    REDIS_URL: env.REDIS_URL || `redis://${env.REDIS_HOST}:${String(env.REDIS_PORT)}`,
   }))
   .refine(
     (env) => {

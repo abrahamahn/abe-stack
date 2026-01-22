@@ -1,16 +1,8 @@
 // apps/server/src/infrastructure/cache/__tests__/cache-factory.test.ts
-import { CacheProviderNotFoundError } from '@abe-stack/core';
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
-
-import {
-  createCache,
-  createCacheFromEnv,
-  createMemoryCache,
-  createRedisCache,
-} from '../cache-factory';
+import { createCache, createCacheFromEnv, createMemoryCache } from '../cache-factory';
 import { MemoryCacheProvider } from '../memory-provider';
-import { RedisCacheProvider } from '../redis-provider';
 
 // ============================================================================
 // Cache Factory Tests
@@ -26,25 +18,6 @@ describe('cache factory', () => {
 
       expect(cache).toBeInstanceOf(MemoryCacheProvider);
       expect(cache.name).toBe('memory');
-    });
-
-    test('should create redis provider', () => {
-      const cache = createCache({
-        provider: 'redis',
-        url: 'redis://localhost:6379',
-      });
-
-      expect(cache).toBeInstanceOf(RedisCacheProvider);
-      expect(cache.name).toBe('redis');
-    });
-
-    test('should throw for unknown provider', () => {
-      expect(() =>
-        createCache({
-          provider: 'unknown' as 'memory',
-          maxSize: 100,
-        }),
-      ).toThrow(CacheProviderNotFoundError);
     });
 
     test('should pass options to provider', () => {
@@ -98,10 +71,7 @@ describe('cache factory', () => {
     test('should pass options', async () => {
       const evicted: string[] = [];
 
-      cache = createMemoryCache(
-        { maxSize: 2 },
-        { onEviction: (key) => evicted.push(key) },
-      );
+      cache = createMemoryCache({ maxSize: 2 }, { onEviction: (key) => evicted.push(key) });
 
       await cache.set('key1', 'value1');
       await cache.set('key2', 'value2');
@@ -111,65 +81,15 @@ describe('cache factory', () => {
     });
   });
 
-  describe('createRedisCache', () => {
-    test('should create redis cache with URL', () => {
-      const cache = createRedisCache('redis://localhost:6379');
-
-      expect(cache).toBeInstanceOf(RedisCacheProvider);
-      expect(cache.name).toBe('redis');
-    });
-
-    test('should apply overrides', () => {
-      const cache = createRedisCache('redis://localhost:6379', {
-        keyPrefix: 'test',
-        db: 1,
-      });
-
-      expect(cache).toBeInstanceOf(RedisCacheProvider);
-    });
-  });
-
   describe('createCacheFromEnv', () => {
     const originalEnv = process.env;
-
-    beforeEach(() => {
-      vi.resetModules();
-      process.env = { ...originalEnv };
-    });
 
     afterEach(() => {
       process.env = originalEnv;
     });
 
     test('should create memory cache by default', () => {
-      delete process.env['CACHE_PROVIDER'];
-      delete process.env['REDIS_URL'];
-
-      const cache = createCacheFromEnv();
-
-      expect(cache).toBeInstanceOf(MemoryCacheProvider);
-    });
-
-    test('should create memory cache when CACHE_PROVIDER is memory', () => {
-      process.env['CACHE_PROVIDER'] = 'memory';
-
-      const cache = createCacheFromEnv();
-
-      expect(cache).toBeInstanceOf(MemoryCacheProvider);
-    });
-
-    test('should create redis cache when configured', () => {
-      process.env['CACHE_PROVIDER'] = 'redis';
-      process.env['REDIS_URL'] = 'redis://localhost:6379';
-
-      const cache = createCacheFromEnv();
-
-      expect(cache).toBeInstanceOf(RedisCacheProvider);
-    });
-
-    test('should fall back to memory when redis URL is missing', () => {
-      process.env['CACHE_PROVIDER'] = 'redis';
-      delete process.env['REDIS_URL'];
+      process.env = { ...originalEnv };
 
       const cache = createCacheFromEnv();
 
@@ -177,25 +97,16 @@ describe('cache factory', () => {
     });
 
     test('should use environment configuration', () => {
-      process.env['CACHE_PROVIDER'] = 'memory';
-      process.env['CACHE_KEY_PREFIX'] = 'myapp';
-      process.env['CACHE_DEFAULT_TTL'] = '120000';
-      process.env['CACHE_MAX_SIZE'] = '500';
+      process.env = {
+        ...originalEnv,
+        CACHE_KEY_PREFIX: 'myapp',
+        CACHE_DEFAULT_TTL: '120000',
+        CACHE_MAX_SIZE: '500',
+      };
 
       const cache = createCacheFromEnv();
 
       expect(cache).toBeInstanceOf(MemoryCacheProvider);
-    });
-
-    test('should configure redis options from environment', () => {
-      process.env['CACHE_PROVIDER'] = 'redis';
-      process.env['REDIS_URL'] = 'redis://localhost:6379';
-      process.env['REDIS_DB'] = '2';
-      process.env['REDIS_TLS'] = 'true';
-
-      const cache = createCacheFromEnv();
-
-      expect(cache).toBeInstanceOf(RedisCacheProvider);
     });
   });
 });

@@ -66,7 +66,14 @@ export type AuditEventType =
   | 'session_hijack_attempt'
   | 'privilege_escalation'
   | 'data_exfiltration'
-  | 'anomaly_detected';
+  | 'anomaly_detected'
+  // OAuth-specific events
+  | 'oauth_login_success'
+  | 'oauth_login_failure'
+  | 'oauth_link_success'
+  | 'oauth_link_failure'
+  | 'oauth_unlink_success'
+  | 'oauth_unlink_failure';
 
 export interface AuditConfig {
   /** Enable audit logging */
@@ -280,6 +287,13 @@ export class SecurityAuditLogger {
       privilege_escalation: 'critical',
       data_exfiltration: 'critical',
       anomaly_detected: 'medium',
+      // OAuth events
+      oauth_login_success: 'low',
+      oauth_login_failure: 'low',
+      oauth_link_success: 'low',
+      oauth_link_failure: 'low',
+      oauth_unlink_success: 'low',
+      oauth_unlink_failure: 'low',
     };
 
     return severityMap[eventType];
@@ -309,6 +323,13 @@ export class SecurityAuditLogger {
       privilege_escalation: 100,
       data_exfiltration: 100,
       anomaly_detected: 40,
+      // OAuth events
+      oauth_login_success: 0,
+      oauth_login_failure: 10,
+      oauth_link_success: 0,
+      oauth_link_failure: 10,
+      oauth_unlink_success: 5,
+      oauth_unlink_failure: 10,
     };
 
     score += baseScores[eventType];

@@ -122,6 +122,10 @@ describe('Health Check Functions', () => {
         { tablename: 'password_reset_tokens' },
         { tablename: 'email_verification_tokens' },
         { tablename: 'security_events' },
+        { tablename: 'magic_link_tokens' },
+        { tablename: 'oauth_connections' },
+        { tablename: 'push_subscriptions' },
+        { tablename: 'notification_preferences' },
       ]);
       const result = await getDetailedHealth(mockContext);
       expect(result.status).toBe('healthy');

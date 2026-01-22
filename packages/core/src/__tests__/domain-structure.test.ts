@@ -121,10 +121,10 @@ describe('Domain Structure', () => {
     });
 
     test('should export state management', async () => {
-      const { createUndoRedoStore, toastStore } = await import('../infrastructure/stores/index.js');
+      const { createUndoRedoStore, toastStore } = await import('../stores/index.js');
 
       expect(typeof createUndoRedoStore).toBe('function');
-      expect(typeof toastStore).toBe('function'); // Zustand store is a function
+      expect(typeof toastStore).toBe('function'); // Custom store is a function
     });
 
     test('should export transaction utilities', async () => {

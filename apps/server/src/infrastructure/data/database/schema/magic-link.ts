@@ -32,6 +32,10 @@ export const magicLinkTokens = pgTable(
   (table) => [
     // Index for finding tokens by email and checking expiry
     index('magic_link_tokens_email_expires_at_idx').on(table.email, table.expiresAt),
+    // Index for rate limiting by email (counts tokens per email in time window)
+    index('magic_link_tokens_email_created_at_idx').on(table.email, table.createdAt),
+    // Index for rate limiting by IP address (counts tokens per IP in time window)
+    index('magic_link_tokens_ip_created_at_idx').on(table.ipAddress, table.createdAt),
     // Index for cleanup queries
     index('magic_link_tokens_created_at_idx').on(table.createdAt),
   ],

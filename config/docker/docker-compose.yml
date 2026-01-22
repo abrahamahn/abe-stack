@@ -21,22 +21,6 @@ services:
       retries: 5
     restart: unless-stopped
 
-  redis:
-    image: redis:7-alpine
-    container_name: abe-stack-redis
-    env_file:
-      - ../.env/.env.development
-    expose:
-      - '6379'
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
-      interval: 10s
-      timeout: 3s
-      retries: 5
-    restart: unless-stopped
-
   api:
     build:
       context: ../..
@@ -49,14 +33,11 @@ services:
       PORT: 8080
       API_PORT: 8080
       POSTGRES_HOST: postgres
-      REDIS_HOST: redis
       NODE_ENV: production
       PNPM_WORKSPACE_ROOT: /app
     working_dir: /app
     depends_on:
       postgres:
-        condition: service_healthy
-      redis:
         condition: service_healthy
     ports:
       - '8080:8080'
@@ -102,4 +83,3 @@ services:
 
 volumes:
   postgres_data:
-  redis_data:

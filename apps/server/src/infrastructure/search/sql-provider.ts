@@ -16,6 +16,8 @@ import {
   InvalidFilterError,
   InvalidCursorError,
   SearchProviderError,
+  QueryTooComplexError,
+  SearchError,
   type CompoundFilter,
   type CursorSearchResult,
   type FacetedSearchQuery,
@@ -57,8 +59,6 @@ import type {
 } from './types';
 import type { DbClient } from '@database';
 import type { PgColumn, PgTableWithColumns } from 'drizzle-orm/pg-core';
-
-
 
 // ============================================================================
 // Constants
@@ -107,8 +107,7 @@ export class SqlSearchProvider<
     dialect: 'pg';
   }>,
   TRecord extends Record<string, unknown> = Record<string, unknown>,
-> implements ServerSearchProvider<TRecord>
-{
+> implements ServerSearchProvider<TRecord> {
   readonly name: string;
   private readonly config: Required<Omit<SqlSearchProviderConfig, 'name'>>;
   private readonly tableConfig: SqlTableConfig;
@@ -161,14 +160,12 @@ export class SqlSearchProvider<
       const orderByClause = this.buildOrderByClause(query.sort);
 
       // Execute query with one extra row to determine hasNext
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const results = await this.db
-        .select()
-        .from(this.table as any)
-        .where(whereClause)
-        .orderBy(...orderByClause)
-        .limit(limit + 1)
-        .offset(offset);
+      const qb = this.db.select().from(this.table);
+      const qbWithWhere = whereClause ? qb.where(whereClause) : qb;
+      const qbWithOrder =
+        orderByClause.length > 0 ? qbWithWhere.orderBy(...orderByClause) : qbWithWhere;
+
+      const results = await qbWithOrder.limit(limit + 1).offset(offset);
 
       const hasNext = results.length > limit;
       const data = (hasNext ? results.slice(0, limit) : results) as TRecord[];
@@ -176,11 +173,9 @@ export class SqlSearchProvider<
       // Get total count if requested
       let total: number | undefined;
       if (query.includeCount) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const countResult = await this.db
-          .select({ count: sql<number>`count(*)` })
-          .from(this.table as any)
-          .where(whereClause);
+        const countQb = this.db.select({ count: sql<number>`count(*)` }).from(this.table);
+        const countQbWithWhere = whereClause ? countQb.where(whereClause) : countQb;
+        const countResult = await countQbWithWhere;
         const countValue = countResult[0]?.count;
         total = typeof countValue === 'number' ? countValue : 0;
       }
@@ -223,34 +218,26 @@ export class SqlSearchProvider<
       const orderByClause = this.buildOrderByClause(query.sort);
 
       // Execute query with extra rows for cursor detection
-       
-      const results = await this.db
-        .select()
-        .from(this.table as any)
-        .where(whereClause)
-        .orderBy(...orderByClause)
-        .limit(limit + 1);
+      const qb = this.db.select().from(this.table);
+      const qbWithWhere = whereClause ? qb.where(whereClause) : qb;
+      const results = await qbWithWhere.orderBy(...orderByClause).limit(limit + 1);
 
       const hasNext = results.length > limit;
       const data = (hasNext ? results.slice(0, limit) : results) as TRecord[];
 
       // Generate cursors
       const lastItem = data[data.length - 1];
-      const nextCursor =
-        hasNext && lastItem
-          ? this.createCursor(lastItem, query.sort ?? [])
-          : null;
+      const nextCursor = hasNext && lastItem ? this.createCursor(lastItem, query.sort ?? []) : null;
 
       // Get total count if requested
       let total: number | undefined;
       if (query.includeCount) {
         const baseWhere = this.buildWhereClause(query);
-         
-        const countResult = await this.db
-          .select({ count: sql<number>`count(*)` })
-          .from(this.table as any)
-          .where(baseWhere);
-        total = Number(countResult[0]?.count ?? 0);
+        const countQb = this.db.select({ count: sql<number>`count(*)` }).from(this.table);
+        const countQbWithWhere = baseWhere ? countQb.where(baseWhere) : countQb;
+        const countResult = await countQbWithWhere;
+        const countValue = countResult[0]?.count;
+        total = typeof countValue === 'number' ? countValue : 0;
       }
 
       const executionTime = performance.now() - startTime;
@@ -296,14 +283,16 @@ export class SqlSearchProvider<
                 const whereClause = this.buildWhereClause(query);
                 const facetLimit = facetConfig.size ?? 10;
 
-                 
-                const bucketResults = await this.db
+                const bucketQb = this.db
                   .select({
                     value: column,
                     count: sql<number>`count(*)`,
                   })
-                  .from(this.table as any)
-                  .where(whereClause)
+                  .from(this.table);
+
+                const bucketQbWithWhere = whereClause ? bucketQb.where(whereClause) : bucketQb;
+
+                const bucketResults = await bucketQbWithWhere
                   .groupBy(column)
                   .orderBy(desc(sql`count(*)`))
                   .limit(facetLimit);
@@ -312,7 +301,7 @@ export class SqlSearchProvider<
                   field: facetConfig.field,
                   buckets: bucketResults.map((row) => ({
                     value: row.value as string | number | boolean | Date | null,
-                    count: Number(row.count),
+                    count: typeof row.count === 'number' ? row.count : 0,
                   })),
                 };
               }),
@@ -335,13 +324,12 @@ export class SqlSearchProvider<
     try {
       const whereClause = this.buildWhereClause(query);
 
-       
-      const result = await this.db
-        .select({ count: sql<number>`count(*)` })
-        .from(this.table as any)
-        .where(whereClause);
+      const qb = this.db.select({ count: sql<number>`count(*)` }).from(this.table);
+      const qbWithWhere = whereClause ? qb.where(whereClause) : qb;
+      const result = await qbWithWhere;
 
-      return Number(result[0]?.count ?? 0);
+      const countValue = result[0]?.count;
+      return typeof countValue === 'number' ? countValue : 0;
     } catch (error) {
       throw this.wrapError(error, 'count');
     }
@@ -349,8 +337,10 @@ export class SqlSearchProvider<
 
   async healthCheck(): Promise<boolean> {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await this.db.select({ one: sql`1` }).from(this.table as any).limit(1);
+      await this.db
+        .select({ one: sql`1` })
+        .from(this.table)
+        .limit(1);
       return true;
     } catch {
       return false;
@@ -370,18 +360,40 @@ export class SqlSearchProvider<
       return undefined;
     }
 
-    return this.translateFilter(query.filters);
+    // Initialize complexity tracking context
+    const context = { conditionCount: 0 };
+    return this.translateFilter(query.filters, 0, context);
   }
 
   private translateFilter(
     filter: FilterCondition<TRecord> | CompoundFilter<TRecord>,
+    depth: number = 0,
+    context: { conditionCount: number } = { conditionCount: 0 },
   ): SQL | undefined {
+    // Check query depth limit
+    if (depth > this.config.maxQueryDepth) {
+      throw new QueryTooComplexError(
+        `Filter nesting exceeds maximum depth of ${String(this.config.maxQueryDepth)}`,
+        this.config.maxQueryDepth,
+        this.config.maxConditions,
+      );
+    }
+
     if (isFilterCondition(filter)) {
+      // Check condition count limit
+      context.conditionCount++;
+      if (context.conditionCount > this.config.maxConditions) {
+        throw new QueryTooComplexError(
+          `Filter exceeds maximum of ${String(this.config.maxConditions)} conditions`,
+          this.config.maxQueryDepth,
+          this.config.maxConditions,
+        );
+      }
       return this.translateCondition(filter);
     }
 
     if (isCompoundFilter(filter)) {
-      return this.translateCompound(filter);
+      return this.translateCompound(filter, depth, context);
     }
 
     return undefined;
@@ -395,38 +407,40 @@ export class SqlSearchProvider<
     }
 
     const value = condition.value;
+    const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
 
-     
     switch (condition.operator) {
       case FILTER_OPERATORS.EQ:
-        return eq(column, value as any);
+        return eq(column, value);
 
       case FILTER_OPERATORS.NEQ:
-        return ne(column, value as any);
+        return ne(column, value);
 
       case FILTER_OPERATORS.GT:
-        return gt(column, value as any);
+        return gt(column, value);
 
       case FILTER_OPERATORS.GTE:
-        return gte(column, value as any);
+        return gte(column, value);
 
       case FILTER_OPERATORS.LT:
-        return lt(column, value as any);
+        return lt(column, value);
 
       case FILTER_OPERATORS.LTE:
-        return lte(column, value as any);
+        return lte(column, value);
 
       case FILTER_OPERATORS.CONTAINS:
-        return ilike(column, `%${value}%`);
+        return ilike(column, `%${this.escapeLikePattern(stringValue)}%`);
 
       case FILTER_OPERATORS.STARTS_WITH:
-        return ilike(column, `${value}%`);
+        return ilike(column, `${this.escapeLikePattern(stringValue)}%`);
 
       case FILTER_OPERATORS.ENDS_WITH:
-        return ilike(column, `%${value}`);
+        return ilike(column, `%${this.escapeLikePattern(stringValue)}`);
 
       case FILTER_OPERATORS.LIKE:
-        return condition.caseSensitive ? like(column, value as string) : ilike(column, value as string);
+        return condition.caseSensitive
+          ? like(column, value as string)
+          : ilike(column, value as string);
 
       case FILTER_OPERATORS.ILIKE:
         return ilike(column, value as string);
@@ -450,14 +464,8 @@ export class SqlSearchProvider<
         return isNotNull(column);
 
       case FILTER_OPERATORS.BETWEEN:
-        if (
-          typeof value === 'object' &&
-          value !== null &&
-          'min' in value &&
-          'max' in value
-        ) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          return between(column, value.min as any, value.max as any);
+        if (typeof value === 'object' && value !== null && 'min' in value && 'max' in value) {
+          return between(column, value.min, value.max);
         }
         throw new InvalidFilterError(
           'BETWEEN operator requires {min, max} value',
@@ -467,16 +475,20 @@ export class SqlSearchProvider<
 
       default:
         throw new InvalidFilterError(
-          `Unsupported operator: ${condition.operator}`,
+          `Unsupported operator: ${condition.operator as string}`,
           fieldName,
           condition.operator,
         );
     }
   }
 
-  private translateCompound(compound: CompoundFilter<TRecord>): SQL | undefined {
+  private translateCompound(
+    compound: CompoundFilter<TRecord>,
+    depth: number = 0,
+    context: { conditionCount: number } = { conditionCount: 0 },
+  ): SQL | undefined {
     const conditions = compound.conditions
-      .map((c) => this.translateFilter(c))
+      .map((c) => this.translateFilter(c, depth + 1, context))
       .filter((c): c is SQL => c !== undefined);
 
     if (conditions.length === 0) {
@@ -490,13 +502,14 @@ export class SqlSearchProvider<
       case LOGICAL_OPERATORS.OR:
         return or(...conditions);
 
-      case LOGICAL_OPERATORS.NOT:
+      case LOGICAL_OPERATORS.NOT: {
         // NOT is applied to the combined AND of conditions
         const combined = and(...conditions);
         return combined ? sql`NOT (${combined})` : undefined;
+      }
 
       default:
-        throw new InvalidFilterError(`Unknown logical operator: ${compound.operator}`);
+        throw new InvalidFilterError(`Unknown logical operator: ${String(compound.operator)}`);
     }
   }
 
@@ -531,7 +544,7 @@ export class SqlSearchProvider<
     try {
       const decoded = decodeCursor(cursor);
 
-      if (!decoded || decoded.value === undefined) {
+      if (!decoded) {
         throw new InvalidCursorError('Invalid cursor format');
       }
 
@@ -541,18 +554,13 @@ export class SqlSearchProvider<
       const sortOrder = firstSort?.order ?? 'asc';
       const cursorValue = decoded.value;
 
-      if (cursorValue === undefined) {
-        throw new InvalidCursorError('Cursor value not found for sort field');
-      }
-
       const column = this.getColumn(sortField);
       if (!column) {
         throw new InvalidCursorError(`Unknown sort field in cursor: ${sortField}`);
       }
 
       // Forward pagination: get items after cursor
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return sortOrder === 'desc' ? lt(column, cursorValue as any) : gt(column, cursorValue as any);
+      return sortOrder === 'desc' ? lt(column, cursorValue) : gt(column, cursorValue);
     } catch (error) {
       if (error instanceof InvalidCursorError) {
         throw error;
@@ -578,6 +586,15 @@ export class SqlSearchProvider<
   // Private Methods - Utilities
   // ============================================================================
 
+  /**
+   * Escape SQL LIKE metacharacters in user input.
+   * Prevents users from injecting wildcards like % or _ into search patterns.
+   */
+  private escapeLikePattern(value: string): string {
+    // Escape backslash first, then % and _ metacharacters
+    return value.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
+  }
+
   private getColumn(field: string): PgColumn | undefined {
     // Check column mappings first
     const mapping = this.tableConfig.columns.find((c) => c.field === field);
@@ -588,8 +605,9 @@ export class SqlSearchProvider<
     return columns[columnName];
   }
 
-  private wrapError(error: unknown, operation: string): SearchProviderError {
-    if (error instanceof SearchProviderError) {
+  private wrapError(error: unknown, operation: string): SearchError {
+    // Preserve all SearchError subclasses (QueryTooComplexError, InvalidFilterError, etc.)
+    if (error instanceof SearchError) {
       return error;
     }
 

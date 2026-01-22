@@ -38,6 +38,17 @@ export {
   type OAuthConnection,
   type NewOAuthConnection,
   type OAuthProvider,
+  // Push Subscriptions
+  pushSubscriptions,
+  notificationPreferences,
+  type PushSubscription,
+  type NewPushSubscription,
+  type NotificationPreference,
+  type NewNotificationPreference,
+  type NotificationChannel,
+  type NotificationType,
+  type TypePreferences,
+  type QuietHoursConfig,
 } from './schema';
 
 // Client exports

@@ -55,15 +55,12 @@ const testEmailOptions: EmailOptions = {
 
 describe('ConsoleEmailService', () => {
   let consoleService: ConsoleEmailService;
-  let stdoutSpy: ReturnType<typeof vi.spyOn>;
+  let logMessages: string[];
 
   beforeEach(() => {
-    consoleService = new ConsoleEmailService();
-    stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
-  });
-
-  afterEach(() => {
-    stdoutSpy.mockRestore();
+    logMessages = [];
+    // Use the custom log function constructor parameter
+    consoleService = new ConsoleEmailService((msg) => logMessages.push(msg));
   });
 
   test('should return success result with messageId', async () => {
@@ -77,12 +74,11 @@ describe('ConsoleEmailService', () => {
   test('should log email details to console', async () => {
     await consoleService.send(testEmailOptions);
 
-    expect(stdoutSpy).toHaveBeenCalled();
-    const calls = (stdoutSpy as unknown as { mock: { calls: unknown[][] } }).mock.calls;
-    const logCalls = calls.flat().map(String).join(' ');
-    expect(logCalls).toContain(testEmailOptions.to);
-    expect(logCalls).toContain(testEmailOptions.subject);
-    expect(logCalls).toContain(testEmailOptions.text);
+    expect(logMessages.length).toBeGreaterThan(0);
+    const allLogs = logMessages.join(' ');
+    expect(allLogs).toContain(testEmailOptions.to);
+    expect(allLogs).toContain(testEmailOptions.subject);
+    expect(allLogs).toContain(testEmailOptions.text);
   });
 
   test('should generate unique messageIds for each send', async () => {

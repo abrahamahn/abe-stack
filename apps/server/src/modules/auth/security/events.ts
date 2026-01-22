@@ -16,7 +16,18 @@ export type SecurityEventType =
   | 'account_unlocked'
   | 'suspicious_login'
   | 'password_changed'
-  | 'email_changed';
+  | 'email_changed'
+  | 'magic_link_requested'
+  | 'magic_link_verified'
+  | 'magic_link_failed'
+  // OAuth events
+  | 'oauth_login_success'
+  | 'oauth_login_failure'
+  | 'oauth_account_created'
+  | 'oauth_link_success'
+  | 'oauth_link_failure'
+  | 'oauth_unlink_success'
+  | 'oauth_unlink_failure';
 
 /**
  * Security event severity levels
@@ -296,5 +307,243 @@ export async function sendTokenReuseAlert(
   await emailService.send({
     ...template,
     to: email,
+  });
+}
+
+// ============================================================================
+// Magic Link Events
+// ============================================================================
+
+/**
+ * Log a magic link request event
+ */
+export async function logMagicLinkRequestEvent(
+  db: DbClient,
+  email: string,
+  ipAddress?: string,
+  userAgent?: string,
+): Promise<void> {
+  await logSecurityEvent({
+    db,
+    email,
+    eventType: 'magic_link_requested',
+    severity: 'low',
+    ipAddress,
+    userAgent,
+    metadata: {
+      reason: 'Magic link authentication requested',
+    },
+  });
+}
+
+/**
+ * Log a successful magic link verification event
+ */
+export async function logMagicLinkVerifiedEvent(
+  db: DbClient,
+  userId: string,
+  email: string,
+  isNewUser: boolean,
+  ipAddress?: string,
+  userAgent?: string,
+): Promise<void> {
+  await logSecurityEvent({
+    db,
+    userId,
+    email,
+    eventType: 'magic_link_verified',
+    severity: 'low',
+    ipAddress,
+    userAgent,
+    metadata: {
+      reason: 'Magic link successfully verified',
+      isNewUser,
+    },
+  });
+}
+
+/**
+ * Log a failed magic link verification event
+ */
+export async function logMagicLinkFailedEvent(
+  db: DbClient,
+  email: string | undefined,
+  reason: string,
+  ipAddress?: string,
+  userAgent?: string,
+): Promise<void> {
+  await logSecurityEvent({
+    db,
+    email,
+    eventType: 'magic_link_failed',
+    severity: 'medium',
+    ipAddress,
+    userAgent,
+    metadata: {
+      reason,
+    },
+  });
+}
+
+// ============================================================================
+// OAuth Events
+// ============================================================================
+
+/**
+ * Log a successful OAuth login event
+ */
+export async function logOAuthLoginSuccessEvent(
+  db: DbClient,
+  userId: string,
+  email: string,
+  provider: string,
+  isNewUser: boolean,
+  ipAddress?: string,
+  userAgent?: string,
+): Promise<void> {
+  await logSecurityEvent({
+    db,
+    userId,
+    email,
+    eventType: isNewUser ? 'oauth_account_created' : 'oauth_login_success',
+    severity: 'low',
+    ipAddress,
+    userAgent,
+    metadata: {
+      provider,
+      isNewUser,
+      reason: isNewUser ? `New account created via ${provider}` : `Logged in via ${provider}`,
+    },
+  });
+}
+
+/**
+ * Log a failed OAuth login/callback event
+ */
+export async function logOAuthLoginFailureEvent(
+  db: DbClient,
+  provider: string,
+  reason: string,
+  email?: string,
+  ipAddress?: string,
+  userAgent?: string,
+): Promise<void> {
+  await logSecurityEvent({
+    db,
+    email,
+    eventType: 'oauth_login_failure',
+    severity: 'medium',
+    ipAddress,
+    userAgent,
+    metadata: {
+      provider,
+      reason,
+    },
+  });
+}
+
+/**
+ * Log a successful OAuth account link event
+ */
+export async function logOAuthLinkSuccessEvent(
+  db: DbClient,
+  userId: string,
+  email: string,
+  provider: string,
+  ipAddress?: string,
+  userAgent?: string,
+): Promise<void> {
+  await logSecurityEvent({
+    db,
+    userId,
+    email,
+    eventType: 'oauth_link_success',
+    severity: 'low',
+    ipAddress,
+    userAgent,
+    metadata: {
+      provider,
+      reason: `Linked ${provider} account`,
+    },
+  });
+}
+
+/**
+ * Log a failed OAuth account link event
+ */
+export async function logOAuthLinkFailureEvent(
+  db: DbClient,
+  userId: string,
+  email: string,
+  provider: string,
+  reason: string,
+  ipAddress?: string,
+  userAgent?: string,
+): Promise<void> {
+  await logSecurityEvent({
+    db,
+    userId,
+    email,
+    eventType: 'oauth_link_failure',
+    severity: 'low',
+    ipAddress,
+    userAgent,
+    metadata: {
+      provider,
+      reason,
+    },
+  });
+}
+
+/**
+ * Log a successful OAuth account unlink event
+ */
+export async function logOAuthUnlinkSuccessEvent(
+  db: DbClient,
+  userId: string,
+  email: string,
+  provider: string,
+  ipAddress?: string,
+  userAgent?: string,
+): Promise<void> {
+  await logSecurityEvent({
+    db,
+    userId,
+    email,
+    eventType: 'oauth_unlink_success',
+    severity: 'low',
+    ipAddress,
+    userAgent,
+    metadata: {
+      provider,
+      reason: `Unlinked ${provider} account`,
+    },
+  });
+}
+
+/**
+ * Log a failed OAuth account unlink event
+ */
+export async function logOAuthUnlinkFailureEvent(
+  db: DbClient,
+  userId: string,
+  email: string,
+  provider: string,
+  reason: string,
+  ipAddress?: string,
+  userAgent?: string,
+): Promise<void> {
+  await logSecurityEvent({
+    db,
+    userId,
+    email,
+    eventType: 'oauth_unlink_failure',
+    severity: 'low',
+    ipAddress,
+    userAgent,
+    metadata: {
+      provider,
+      reason,
+    },
   });
 }

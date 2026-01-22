@@ -14,11 +14,9 @@ export type {
   CacheEntryMetadata,
   CacheGetOptions,
   CacheProvider,
-  CacheProviderType,
   CacheSetOptions,
   CacheStats,
   MemoryCacheConfig,
-  RedisCacheConfig,
 } from './types';
 
 // Errors

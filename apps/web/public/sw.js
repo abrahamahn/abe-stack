@@ -1,13 +1,18 @@
 // apps/web/public/sw.js
 /**
- * Service Worker for PWA Offline Asset Caching
+ * Service Worker for PWA Offline Asset Caching and Push Notifications
  *
  * Implements caching strategies:
  * - Cache-first: Static assets (JS, CSS, images, fonts)
  * - Network-first: API calls with fallback to cache
  * - Stale-while-revalidate: HTML pages
  *
- * @version 1.0.0
+ * Push notification handling:
+ * - Receives push events and displays notifications
+ * - Handles notification clicks (opens URL, focuses window)
+ * - Supports action buttons and custom data payloads
+ *
+ * @version 1.1.0
  */
 
 const CACHE_VERSION = 'v1';
@@ -299,4 +304,163 @@ self.addEventListener('message', (event) => {
       caches.keys().then((names) => Promise.all(names.map((name) => caches.delete(name)))),
     );
   }
+});
+
+// ============================================================================
+// Push Notification Events
+// ============================================================================
+
+/**
+ * Push event - receive and display push notifications
+ *
+ * Expected payload format (matches NotificationPayload from @abe-stack/core):
+ * {
+ *   title: string,
+ *   body: string,
+ *   icon?: string,
+ *   badge?: string,
+ *   image?: string,
+ *   tag?: string,
+ *   data?: { type?: string, url?: string, ... },
+ *   actions?: Array<{ action: string, title: string, icon?: string }>,
+ *   requireInteraction?: boolean,
+ *   renotify?: boolean,
+ *   silent?: boolean,
+ *   vibrate?: number[],
+ *   timestamp?: number,
+ *   url?: string
+ * }
+ */
+self.addEventListener('push', (event) => {
+  if (!event.data) {
+    console.warn('[SW] Push event received without data');
+    return;
+  }
+
+  let payload;
+  try {
+    payload = event.data.json();
+  } catch (error) {
+    console.error('[SW] Failed to parse push payload:', error);
+    // Fallback: try to use text as title
+    payload = {
+      title: 'New Notification',
+      body: event.data.text() || 'You have a new notification',
+    };
+  }
+
+  const { title, ...options } = payload;
+
+  // Build notification options
+  const notificationOptions = {
+    body: options.body || '',
+    icon: options.icon || '/icons/logo192.png',
+    badge: options.badge || '/icons/badge72.png',
+    image: options.image,
+    tag: options.tag,
+    data: {
+      ...options.data,
+      // Store URL in data for click handling
+      url: options.url || options.data?.url,
+      timestamp: options.timestamp || Date.now(),
+    },
+    actions: options.actions || [],
+    requireInteraction: options.requireInteraction || false,
+    renotify: options.renotify || false,
+    silent: options.silent || false,
+    vibrate: options.vibrate,
+    timestamp: options.timestamp,
+  };
+
+  // Remove undefined values
+  Object.keys(notificationOptions).forEach((key) => {
+    if (notificationOptions[key] === undefined) {
+      delete notificationOptions[key];
+    }
+  });
+
+  event.waitUntil(self.registration.showNotification(title || 'Notification', notificationOptions));
+});
+
+/**
+ * Notification click event - handle user interaction with notifications
+ *
+ * Handles:
+ * - Main notification body clicks (opens URL or focuses app)
+ * - Action button clicks (dispatches to app via postMessage)
+ */
+self.addEventListener('notificationclick', (event) => {
+  const notification = event.notification;
+  const action = event.action;
+  const data = notification.data || {};
+
+  // Always close the notification
+  notification.close();
+
+  // Determine the URL to open
+  let targetUrl = data.url || '/';
+
+  // If an action was clicked, check for action-specific URL
+  if (action && data.actions) {
+    const clickedAction = data.actions.find((a) => a.action === action);
+    if (clickedAction && clickedAction.url) {
+      targetUrl = clickedAction.url;
+    }
+  }
+
+  event.waitUntil(
+    (async () => {
+      // Get all window clients
+      const windowClients = await self.clients.matchAll({
+        type: 'window',
+        includeUncontrolled: true,
+      });
+
+      // Try to find an existing window to focus
+      for (const client of windowClients) {
+        const clientUrl = new URL(client.url);
+
+        // If we have a matching origin, focus and navigate
+        if (clientUrl.origin === self.location.origin) {
+          // Send message to client about the notification click
+          client.postMessage({
+            type: 'NOTIFICATION_CLICK',
+            action: action,
+            data: data,
+            url: targetUrl,
+          });
+
+          // Focus and navigate the client
+          await client.focus();
+
+          // Navigate if URL is different from current page
+          if (clientUrl.pathname !== targetUrl && !targetUrl.startsWith('http')) {
+            await client.navigate(targetUrl);
+          }
+
+          return;
+        }
+      }
+
+      // No existing window found, open a new one
+      const fullUrl = targetUrl.startsWith('http') ? targetUrl : self.location.origin + targetUrl;
+      await self.clients.openWindow(fullUrl);
+    })(),
+  );
+});
+
+/**
+ * Notification close event - track when notifications are dismissed
+ */
+self.addEventListener('notificationclose', (event) => {
+  const notification = event.notification;
+  const data = notification.data || {};
+
+  // Optionally track notification dismissal
+  // This could be used for analytics or updating server state
+  console.log('[SW] Notification closed:', {
+    tag: notification.tag,
+    type: data.type,
+    timestamp: data.timestamp,
+  });
 });

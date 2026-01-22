@@ -16,6 +16,7 @@ export {
   cleanupExpiredMagicLinkTokens,
   requestMagicLink,
   verifyMagicLink,
+  type MagicLinkRequestOptions,
   type MagicLinkResult,
   type RequestMagicLinkResult,
 } from './service';

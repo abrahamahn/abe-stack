@@ -5,13 +5,12 @@
  * Tests the HTTP handlers for magic link authentication.
  */
 
+import { EmailSendError, InvalidTokenError, TooManyRequestsError } from '@abe-stack/core';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { EmailSendError, InvalidTokenError, TooManyRequestsError } from '@abe-stack/core';
-
+import { setRefreshTokenCookie } from '../../utils';
 import { handleMagicLinkRequest, handleMagicLinkVerify } from '../handlers';
 import { requestMagicLink, verifyMagicLink } from '../service';
-import { setRefreshTokenCookie } from '../../utils';
 
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '@shared';
 
@@ -26,6 +25,16 @@ vi.mock('../service', () => ({
 
 vi.mock('../../utils', () => ({
   setRefreshTokenCookie: vi.fn(),
+}));
+
+vi.mock('../../security', () => ({
+  logMagicLinkRequestEvent: vi.fn(),
+  logMagicLinkVerifiedEvent: vi.fn(),
+  logMagicLinkFailedEvent: vi.fn(),
+}));
+
+vi.mock('@config', () => ({
+  isStrategyEnabled: vi.fn(() => true), // Enable magic strategy by default
 }));
 
 // Mock @shared to provide mapErrorToResponse and error classes
@@ -59,12 +68,17 @@ function createMockContext(): AppContext {
         appBaseUrl: 'http://localhost:5173',
       },
       auth: {
+        strategies: ['local', 'magic'], // Enable magic strategy for tests
         jwt: {
           secret: 'test-secret',
           accessTokenExpiry: '15m',
         },
         refreshToken: {
           expiryDays: 7,
+        },
+        magicLink: {
+          tokenExpiryMinutes: 15,
+          maxAttempts: 3,
         },
       },
     } as AppContext['config'],
@@ -135,6 +149,10 @@ describe('handleMagicLinkRequest', () => {
       'http://localhost:5173',
       '127.0.0.1',
       'Mozilla/5.0 (Test)',
+      {
+        tokenExpiryMinutes: 15,
+        maxAttemptsPerEmail: 3,
+      },
     );
   });
 
@@ -150,7 +168,9 @@ describe('handleMagicLinkRequest', () => {
     const result = await handleMagicLinkRequest(ctx, body, request);
 
     expect(result.status).toBe(200);
-    expect(result.body.success).toBe(true);
+    // Type assertion since we've verified status is 200 (success response)
+    const body200 = result.body as { success: boolean; message: string };
+    expect(body200.success).toBe(true);
     expect(ctx.log.error).toHaveBeenCalled();
   });
 
@@ -166,7 +186,9 @@ describe('handleMagicLinkRequest', () => {
     const result = await handleMagicLinkRequest(ctx, body, request);
 
     expect(result.status).toBe(429);
-    expect(result.body.message).toContain('Too many');
+    // Type assertion since we've verified status is 429 (error response)
+    const errorBody = result.body as { message: string; code?: string };
+    expect(errorBody.message).toContain('Too many');
   });
 });
 
@@ -223,7 +245,9 @@ describe('handleMagicLinkVerify', () => {
     const result = await handleMagicLinkVerify(ctx, body, request, reply);
 
     expect(result.status).toBe(401);
-    expect(result.body.message).toContain('Invalid');
+    // Type assertion since we've verified status is 401 (error response)
+    const errorBody = result.body as { message: string; code?: string };
+    expect(errorBody.message).toContain('Invalid');
   });
 
   test('should return error for expired token', async () => {

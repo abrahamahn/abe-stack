@@ -5,13 +5,11 @@
  * Tests the magic link service business logic by mocking database operations.
  */
 
+import { EmailSendError, InvalidTokenError, TooManyRequestsError } from '@abe-stack/core';
+import { withTransaction } from '@infrastructure';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { EmailSendError, InvalidTokenError, TooManyRequestsError } from '@abe-stack/core';
-
 import { cleanupExpiredMagicLinkTokens, requestMagicLink, verifyMagicLink } from '../service';
-
-import { withTransaction } from '@infrastructure';
 
 import type { AuthConfig } from '@config';
 import type { DbClient, EmailService } from '@infrastructure';
@@ -310,7 +308,7 @@ describe('verifyMagicLink', () => {
       email: 'test@example.com',
       tokenHash: 'hashed-token',
       expiresAt: new Date(Date.now() + 1000000),
-      usedAt: null,
+      usedAt: new Date(),
     };
 
     const mockUser = {
@@ -321,15 +319,14 @@ describe('verifyMagicLink', () => {
       emailVerified: true,
     };
 
-    // Mock: token found
-    vi.mocked(db.query.magicLinkTokens.findFirst).mockResolvedValue(mockTokenRecord);
-
-    // Mock: transaction
+    // Mock: transaction with atomic token update and user lookup
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-      // Mock token marking as used
+      // Mock atomic token update (marks as used and returns token)
       vi.mocked(db.update).mockReturnValue({
         set: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue(undefined),
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([mockTokenRecord]),
+          }),
         }),
       });
 
@@ -355,7 +352,7 @@ describe('verifyMagicLink', () => {
       email: 'newuser@example.com',
       tokenHash: 'hashed-token',
       expiresAt: new Date(Date.now() + 1000000),
-      usedAt: null,
+      usedAt: new Date(),
     };
 
     const mockNewUser = {
@@ -366,19 +363,18 @@ describe('verifyMagicLink', () => {
       emailVerified: true,
     };
 
-    // Mock: token found
-    vi.mocked(db.query.magicLinkTokens.findFirst).mockResolvedValue(mockTokenRecord);
-
-    // Mock: transaction
+    // Mock: transaction with atomic token update and user creation
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-      // Mock token marking as used
+      // Mock atomic token update (marks as used and returns token)
       vi.mocked(db.update).mockReturnValue({
         set: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue(undefined),
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([mockTokenRecord]),
+          }),
         }),
       });
 
-      // Mock user not found (first call)
+      // Mock user not found
       vi.mocked(db.query.users.findFirst).mockResolvedValue(null);
 
       // Mock user creation
@@ -407,7 +403,7 @@ describe('verifyMagicLink', () => {
       email: 'unverified@example.com',
       tokenHash: 'hashed-token',
       expiresAt: new Date(Date.now() + 1000000),
-      usedAt: null,
+      usedAt: new Date(),
     };
 
     const mockUnverifiedUser = {
@@ -423,17 +419,16 @@ describe('verifyMagicLink', () => {
       emailVerified: true,
     };
 
-    // Mock: token found
-    vi.mocked(db.query.magicLinkTokens.findFirst).mockResolvedValue(mockTokenRecord);
-
-    // Mock: transaction
+    // Mock: transaction with atomic token update and user verification
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-      // Mock token marking as used
+      // Track update calls to differentiate between token and user updates
       let updateCallCount = 0;
       vi.mocked(db.update).mockImplementation(() => ({
         set: vi.fn().mockReturnValue({
           where: vi.fn().mockReturnValue({
-            returning: vi.fn().mockResolvedValue(updateCallCount++ === 0 ? [] : [mockVerifiedUser]),
+            returning: vi
+              .fn()
+              .mockResolvedValue(updateCallCount++ === 0 ? [mockTokenRecord] : [mockVerifiedUser]),
           }),
         }),
       }));
@@ -454,8 +449,18 @@ describe('verifyMagicLink', () => {
     const db = createMockDb();
     const token = 'invalid-token';
 
-    // Mock: token not found
-    vi.mocked(db.query.magicLinkTokens.findFirst).mockResolvedValue(null);
+    // Mock: transaction where atomic update returns empty (token not found/invalid)
+    vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
+      vi.mocked(db.update).mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([]), // No token found
+          }),
+        }),
+      });
+
+      return callback(db);
+    });
 
     await expect(verifyMagicLink(db, TEST_CONFIG, token)).rejects.toThrow(InvalidTokenError);
   });
@@ -464,8 +469,18 @@ describe('verifyMagicLink', () => {
     const db = createMockDb();
     const token = 'expired-token';
 
-    // Token record won't be found because query filters by expiresAt > now
-    vi.mocked(db.query.magicLinkTokens.findFirst).mockResolvedValue(null);
+    // Mock: transaction where atomic update returns empty (token expired)
+    vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
+      vi.mocked(db.update).mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([]), // No valid token
+          }),
+        }),
+      });
+
+      return callback(db);
+    });
 
     await expect(verifyMagicLink(db, TEST_CONFIG, token)).rejects.toThrow(InvalidTokenError);
   });
@@ -474,8 +489,18 @@ describe('verifyMagicLink', () => {
     const db = createMockDb();
     const token = 'used-token';
 
-    // Token record won't be found because query filters by usedAt is null
-    vi.mocked(db.query.magicLinkTokens.findFirst).mockResolvedValue(null);
+    // Mock: transaction where atomic update returns empty (token already used)
+    vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
+      vi.mocked(db.update).mockReturnValue({
+        set: vi.fn().mockReturnValue({
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue([]), // No valid token
+          }),
+        }),
+      });
+
+      return callback(db);
+    });
 
     await expect(verifyMagicLink(db, TEST_CONFIG, token)).rejects.toThrow(InvalidTokenError);
   });

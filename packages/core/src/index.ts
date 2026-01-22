@@ -34,6 +34,8 @@ export {
   resendVerificationResponseSchema,
   resetPasswordRequestSchema,
   resetPasswordResponseSchema,
+  setPasswordRequestSchema,
+  setPasswordResponseSchema,
   // OAuth schemas
   oauthContract,
   oauthProviderSchema,
@@ -105,6 +107,8 @@ export type {
   ResendVerificationResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
+  SetPasswordRequest,
+  SetPasswordResponse,
   SortOrder,
   UniversalPaginatedResult,
   UniversalPaginationOptions,
@@ -168,10 +172,10 @@ export type { ApiErrorResponse, ApiResponse, ApiSuccessResponse } from './infras
 export { parseCookies } from './infrastructure/http';
 
 // ============================================================================
-// Infrastructure: Stores
+// Stores
 // ============================================================================
-export { createUndoRedoStore, toastStore, useUndoRedoStore } from './infrastructure/stores';
-export type { ToastMessage, UndoRedoState } from './infrastructure/stores';
+export { createStore, createUndoRedoStore, toastStore, useUndoRedoStore } from './stores';
+export type { StoreApi, ToastMessage, UndoRedoState, UseBoundStore } from './stores';
 
 // ============================================================================
 // Infrastructure: Transactions (for undo/redo)
@@ -293,11 +297,9 @@ export type {
   CacheEntryMetadata,
   CacheGetOptions,
   CacheProvider,
-  CacheProviderType,
   CacheSetOptions,
   CacheStats,
   MemoryCacheConfig,
-  RedisCacheConfig,
 } from './domains/cache';
 
 // ============================================================================

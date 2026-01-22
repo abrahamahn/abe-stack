@@ -236,39 +236,6 @@ export interface MemoryCacheConfig extends BaseCacheConfig {
 }
 
 /**
- * Configuration for Redis cache provider.
+ * Cache configuration type (memory provider only).
  */
-export interface RedisCacheConfig extends BaseCacheConfig {
-  provider: 'redis';
-  /** Redis connection URL */
-  url: string;
-  /** Connection timeout in ms (default: 5000) */
-  connectTimeout?: number;
-  /** Command timeout in ms (default: 5000) */
-  commandTimeout?: number;
-  /** Enable TLS */
-  tls?: boolean;
-  /** Database index (default: 0) */
-  db?: number;
-  /** Connection pool size (default: 10) */
-  poolSize?: number;
-  /** Retry strategy configuration */
-  retryStrategy?: {
-    /** Maximum number of retries */
-    maxRetries: number;
-    /** Initial delay between retries in ms */
-    initialDelayMs: number;
-    /** Maximum delay between retries in ms */
-    maxDelayMs: number;
-  };
-}
-
-/**
- * Union type for all cache configurations.
- */
-export type CacheConfig = MemoryCacheConfig | RedisCacheConfig;
-
-/**
- * Cache provider type identifier.
- */
-export type CacheProviderType = CacheConfig['provider'];
+export type CacheConfig = MemoryCacheConfig;

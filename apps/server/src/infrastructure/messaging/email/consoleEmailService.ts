@@ -10,9 +10,10 @@ import type { EmailOptions, EmailResult, EmailService } from '@email/types';
 
 type LogFn = (message: string) => void;
 
-// Default logger using process.stdout to avoid no-console lint rule
+// Default logger using console.log
 const defaultLog: LogFn = (message: string) => {
-  process.stdout.write(`${message}\n`);
+  // eslint-disable-next-line no-console
+  console.log(message);
 };
 
 export class ConsoleEmailService implements EmailService {

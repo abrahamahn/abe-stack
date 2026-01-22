@@ -1,7 +1,7 @@
 // packages/core/src/stores/__tests__/undoRedoStore.test.ts
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
-import { createTransaction, createSetOperation } from '../../transactions';
+import { createTransaction, createSetOperation } from '../../infrastructure/transactions';
 import { createUndoRedoStore } from '../undoRedoStore';
 
 describe('undoRedoStore', () => {

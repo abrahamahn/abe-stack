@@ -1,8 +1,8 @@
-// packages/core/src/infrastructure/stores/undoRedoStore.ts
+// packages/core/src/stores/undoRedoStore.ts
 /**
  * Undo/Redo Store
  *
- * This module provides a Zustand-based undo/redo store for managing transaction history.
+ * This module provides an undo/redo store for managing transaction history.
  * These utilities are part of the public API and available for use throughout the application.
  *
  * Features:
@@ -13,9 +13,13 @@
  *
  * @packageDocumentation
  */
-import { create, type StoreApi, type UseBoundStore } from 'zustand';
+import {
+  invertTransaction,
+  mergeTransactions,
+  type Transaction,
+} from '../infrastructure/transactions';
 
-import { invertTransaction, mergeTransactions, type Transaction } from '../transactions';
+import { createStore, type UseBoundStore } from './createStore';
 
 /**
  * Default threshold in milliseconds for batching rapid edits.
@@ -80,7 +84,7 @@ export interface UndoRedoState {
  * For most applications, use the default `useUndoRedoStore` instead.
  *
  * @param batchThresholdMs - Time window for batching rapid edits (default: 1200ms)
- * @returns A Zustand store hook for undo/redo state
+ * @returns A store hook for undo/redo state
  *
  * @example Creating an isolated undo context for a specific editor
  * ```typescript
@@ -124,8 +128,8 @@ export interface UndoRedoState {
  */
 export function createUndoRedoStore(
   batchThresholdMs: number = BATCH_THRESHOLD_MS,
-): UseBoundStore<StoreApi<UndoRedoState>> {
-  return create<UndoRedoState>((set, get) => ({
+): UseBoundStore<UndoRedoState> {
+  return createStore<UndoRedoState>((set, get) => ({
     undoStack: [],
     redoStack: [],
     lastTimestamp: 0,

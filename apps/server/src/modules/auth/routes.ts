@@ -13,6 +13,7 @@ import {
   registerRequestSchema,
   resendVerificationRequestSchema,
   resetPasswordRequestSchema,
+  setPasswordRequestSchema,
 } from '@abe-stack/core';
 import { protectedRoute, publicRoute, type RouteMap, type RouteResult } from '@router';
 
@@ -25,10 +26,12 @@ import {
   handleRegister,
   handleResendVerification,
   handleResetPassword,
+  handleSetPassword,
   handleVerifyEmail,
   type RegisterResult,
 } from './handlers';
 import { magicLinkRoutes } from './magic-link';
+import { oauthRoutes } from './oauth';
 
 import type {
   AuthResponse,
@@ -38,6 +41,7 @@ import type {
   RegisterRequest,
   ResendVerificationRequest,
   ResetPasswordRequest,
+  SetPasswordRequest,
 } from '@abe-stack/core';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '@shared';
 
@@ -130,6 +134,19 @@ export const authRoutes: RouteMap = {
     resetPasswordRequestSchema,
   ),
 
+  'auth/set-password': protectedRoute<SetPasswordRequest, { message: string }>(
+    'POST',
+    async (
+      ctx: AppContext,
+      body: SetPasswordRequest,
+      req: RequestWithCookies,
+    ): Promise<RouteResult<{ message: string }>> => {
+      return handleSetPassword(ctx, body, req);
+    },
+    'user',
+    setPasswordRequestSchema,
+  ),
+
   'auth/verify-email': publicRoute<
     EmailVerificationRequest,
     (AuthResponse & { verified: boolean }) | { message: string }
@@ -159,4 +176,7 @@ export const authRoutes: RouteMap = {
 
   // Magic link routes
   ...magicLinkRoutes,
+
+  // OAuth routes
+  ...oauthRoutes,
 };

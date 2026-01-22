@@ -1,9 +1,12 @@
-// packages/core/src/infrastructure/stores/index.ts
+// packages/core/src/stores/index.ts
 /**
  * State Stores
  *
- * Zustand-based stores for toast notifications and undo/redo functionality.
+ * Custom React hook-based stores for toast notifications and undo/redo functionality.
  */
+
+export { createStore } from './createStore';
+export type { StoreApi, UseBoundStore } from './createStore';
 
 export { toastStore } from './toastStore';
 export type { ToastMessage } from './toastStore';

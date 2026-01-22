@@ -124,13 +124,6 @@ describe('serverEnvSchema', () => {
       }
     });
 
-    test('should auto-construct REDIS_URL when not provided', () => {
-      const result = serverEnvSchema.safeParse(validEnv);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.REDIS_URL).toBe('redis://localhost:6379');
-      }
-    });
   });
 
   describe('validation rules', () => {

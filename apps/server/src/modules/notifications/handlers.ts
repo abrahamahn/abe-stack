@@ -52,7 +52,7 @@ type HandlerResult<T> =
  *
  * GET /api/notifications/vapid-key
  */
-export async function handleGetVapidKey(ctx: AppContext): Promise<HandlerResult<VapidKeyResponse>> {
+export function handleGetVapidKey(ctx: AppContext): HandlerResult<VapidKeyResponse> {
   try {
     const notificationService = getNotificationService();
     const publicKey = getVapidPublicKey(notificationService);
@@ -99,7 +99,8 @@ export async function handleSubscribe(
   }
 
   try {
-    const subscriptionId = subscribe(
+    const subscriptionId = await subscribe(
+      ctx.db,
       req.user.userId,
       body.subscription,
       body.deviceId,
@@ -150,7 +151,7 @@ export async function handleUnsubscribe(
   }
 
   try {
-    const removed = unsubscribe(body.subscriptionId, body.endpoint);
+    const removed = await unsubscribe(ctx.db, body.subscriptionId, body.endpoint);
 
     if (!removed) {
       return {
@@ -196,7 +197,7 @@ export async function handleGetPreferences(
   }
 
   try {
-    const preferences = getPreferences(req.user.userId);
+    const preferences = await getPreferences(ctx.db, req.user.userId);
 
     return {
       status: 200,
@@ -232,7 +233,7 @@ export async function handleUpdatePreferences(
   }
 
   try {
-    const preferences = updatePreferences(req.user.userId, body);
+    const preferences = await updatePreferences(ctx.db, req.user.userId, body);
 
     return {
       status: 200,
@@ -276,7 +277,7 @@ export async function handleTestNotification(
 
   try {
     const notificationService = getNotificationService();
-    const result = await sendToUser(notificationService, req.user.userId, {
+    const result = await sendToUser(ctx.db, notificationService, req.user.userId, {
       title: 'Test Notification',
       body: 'This is a test notification from your app.',
       icon: '/icons/icon-192.png',
@@ -338,13 +339,13 @@ export async function handleSendNotification(
 
     if (body.userIds && body.userIds.length > 0) {
       // Send to specific users
-      result = await sendToUsers(notificationService, body.userIds, body.payload, {
+      result = await sendToUsers(ctx.db, notificationService, body.userIds, body.payload, {
         ttl: body.ttl,
         topic: body.topic,
       });
     } else {
       // Broadcast to all
-      result = await broadcast(notificationService, body.payload, {
+      result = await broadcast(ctx.db, notificationService, body.payload, {
         ttl: body.ttl,
         topic: body.topic,
       });

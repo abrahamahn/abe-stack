@@ -23,6 +23,12 @@
       "@auth/*": [
         "./src/modules/auth/*"
       ],
+      "@cache": [
+        "./src/infrastructure/cache"
+      ],
+      "@cache/*": [
+        "./src/infrastructure/cache/*"
+      ],
       "@config": [
         "./src/config"
       ],
@@ -95,6 +101,12 @@
       "@logger/*": [
         "./src/infrastructure/monitor/logger/*"
       ],
+      "@magic-link": [
+        "./src/modules/auth/magic-link"
+      ],
+      "@magic-link/*": [
+        "./src/modules/auth/magic-link/*"
+      ],
       "@media": [
         "./src/infrastructure/media"
       ],
@@ -125,6 +137,18 @@
       "@monitor/*": [
         "./src/infrastructure/monitor/*"
       ],
+      "@notifications": [
+        "./src/infrastructure/notifications"
+      ],
+      "@notifications/*": [
+        "./src/infrastructure/notifications/*"
+      ],
+      "@oauth": [
+        "./src/modules/auth/oauth"
+      ],
+      "@oauth/*": [
+        "./src/modules/auth/oauth/*"
+      ],
       "@pagination": [
         "./src/infrastructure/http/pagination"
       ],
@@ -142,6 +166,12 @@
       ],
       "@processors/*": [
         "./src/infrastructure/media/processors/*"
+      ],
+      "@providers": [
+        "./src/modules/auth/oauth/providers"
+      ],
+      "@providers/*": [
+        "./src/modules/auth/oauth/providers/*"
       ],
       "@pubsub": [
         "./src/infrastructure/messaging/pubsub"
@@ -172,6 +202,18 @@
       ],
       "@router/*": [
         "./src/infrastructure/http/router/*"
+      ],
+      "@scheduled": [
+        "./src/infrastructure/jobs/scheduled"
+      ],
+      "@scheduled/*": [
+        "./src/infrastructure/jobs/scheduled/*"
+      ],
+      "@search": [
+        "./src/infrastructure/search"
+      ],
+      "@search/*": [
+        "./src/infrastructure/search/*"
       ],
       "@security": [
         "./src/infrastructure/security"

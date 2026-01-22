@@ -288,6 +288,41 @@ describe('MemoryCacheProvider', () => {
 
       expect(deleted).toBe(false);
     });
+
+    test('should clean up cross-referenced tags when deleting by tag', async () => {
+      // Entry with multiple tags
+      await cache.set('user:1', { id: 1 }, { tags: ['users', 'admins'] });
+      await cache.set('user:2', { id: 2 }, { tags: ['users'] });
+
+      // Delete by 'users' tag
+      await cache.delete('users', { byTag: true });
+
+      // Both entries should be deleted
+      expect(await cache.has('user:1')).toBe(false);
+      expect(await cache.has('user:2')).toBe(false);
+
+      // The 'admins' tag should also be cleaned up (no stale references)
+      // Adding a new entry with 'admins' tag should work correctly
+      await cache.set('admin:1', { id: 1 }, { tags: ['admins'] });
+      await cache.delete('admins', { byTag: true });
+      expect(await cache.has('admin:1')).toBe(false);
+    });
+
+    test('should update tags when setting existing key with new tags', async () => {
+      // Set key with initial tags
+      await cache.set('user:1', { id: 1 }, { tags: ['users', 'active'] });
+
+      // Update key with different tags
+      await cache.set('user:1', { id: 1, updated: true }, { tags: ['users', 'inactive'] });
+
+      // Deleting by 'active' tag should NOT delete user:1 (old tag removed)
+      await cache.delete('active', { byTag: true });
+      expect(await cache.has('user:1')).toBe(true);
+
+      // Deleting by 'inactive' tag SHOULD delete user:1 (new tag applied)
+      await cache.delete('inactive', { byTag: true });
+      expect(await cache.has('user:1')).toBe(false);
+    });
   });
 
   describe('key prefix', () => {

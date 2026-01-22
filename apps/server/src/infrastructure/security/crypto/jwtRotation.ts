@@ -118,7 +118,7 @@ export function verifyWithRotation(token: string, config: JwtRotationConfig): Jw
     ) {
       try {
         return jwtVerify(token, config.previousSecret);
-      } catch (previousError) {
+      } catch {
         // If previous also fails, throw the original error
         // This preserves the error from the current secret attempt
         throw currentError;
@@ -202,7 +202,19 @@ export function checkTokenSecret(
  * const payload = jwt.verify(token);
  * ```
  */
-export function createJwtRotationHandler(config: JwtRotationConfig) {
+export interface JwtRotationHandler {
+  sign: (payload: object, options?: JwtSignOptions) => string;
+  verify: (token: string) => JwtPayload;
+  checkSecret: (token: string) => {
+    isValid: boolean;
+    usedSecret: 'current' | 'previous' | 'none';
+    error?: JwtError;
+  };
+  isRotating: () => boolean;
+  getConfig: () => { hasSecret: boolean; hasPreviousSecret: boolean };
+}
+
+export function createJwtRotationHandler(config: JwtRotationConfig): JwtRotationHandler {
   return {
     sign: (payload: object, options?: JwtSignOptions): string => {
       return signWithRotation(payload, config, options);
@@ -212,7 +224,11 @@ export function createJwtRotationHandler(config: JwtRotationConfig) {
       return verifyWithRotation(token, config);
     },
 
-    checkSecret: (token: string) => {
+    checkSecret: (token: string): {
+      isValid: boolean;
+      usedSecret: 'current' | 'previous' | 'none';
+      error?: JwtError;
+    } => {
       return checkTokenSecret(token, config);
     },
 

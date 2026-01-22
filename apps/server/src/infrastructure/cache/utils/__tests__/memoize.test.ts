@@ -168,13 +168,14 @@ describe('memoize', () => {
     test('should use custom key generator', async () => {
       let callCount = 0;
 
-      const fn = memoize(
-        async (user: { id: string; name: string }) => {
+      type User = { id: string; name: string };
+      const fn = memoize<[User], string>(
+        async (user: User) => {
           callCount++;
           return user.name.toUpperCase();
         },
         {
-          keyGenerator: (user: { id: string; name: string }) => user.id,
+          keyGenerator: ((...args: unknown[]) => (args[0] as User).id) as (...args: unknown[]) => string,
         },
       );
 

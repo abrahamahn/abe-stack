@@ -17,7 +17,7 @@
     "./infrastructure/crypto": "./src/infrastructure/crypto/index.ts",
     "./infrastructure/errors": "./src/infrastructure/errors/index.ts",
     "./infrastructure/http": "./src/infrastructure/http/index.ts",
-    "./infrastructure/stores": "./src/infrastructure/stores/index.ts",
+    "./stores": "./src/stores/index.ts",
     "./infrastructure/transactions": "./src/infrastructure/transactions/index.ts",
     "./contracts": "./src/contracts/index.ts",
     "./crypto": "./src/infrastructure/crypto/index.ts",
@@ -58,7 +58,12 @@
   "sideEffects": false,
   "dependencies": {
     "@ts-rest/core": "^3.52.1",
-    "zod": "^4.3.5",
-    "zustand": "^5.0.10"
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "react": "^19.1.0"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0"
   }
 }

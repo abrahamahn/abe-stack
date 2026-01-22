@@ -12,7 +12,6 @@ import type {
   CacheSetOptions,
   CacheStats,
   MemoryCacheConfig,
-  RedisCacheConfig,
 } from '../types';
 
 // ============================================================================
@@ -228,45 +227,7 @@ describe('cache types', () => {
     });
   });
 
-  describe('RedisCacheConfig', () => {
-    test('should have redis provider type and required url', () => {
-      const config: RedisCacheConfig = {
-        provider: 'redis',
-        url: 'redis://localhost:6379',
-        connectTimeout: 5000,
-        commandTimeout: 3000,
-        tls: false,
-        db: 0,
-        poolSize: 10,
-      };
-
-      expect(config.provider).toBe('redis');
-      expect(config.url).toBe('redis://localhost:6379');
-      expect(config.connectTimeout).toBe(5000);
-      expect(config.commandTimeout).toBe(3000);
-      expect(config.tls).toBe(false);
-      expect(config.db).toBe(0);
-      expect(config.poolSize).toBe(10);
-    });
-
-    test('should support retry strategy', () => {
-      const config: RedisCacheConfig = {
-        provider: 'redis',
-        url: 'redis://localhost:6379',
-        retryStrategy: {
-          maxRetries: 5,
-          initialDelayMs: 100,
-          maxDelayMs: 5000,
-        },
-      };
-
-      expect(config.retryStrategy?.maxRetries).toBe(5);
-      expect(config.retryStrategy?.initialDelayMs).toBe(100);
-      expect(config.retryStrategy?.maxDelayMs).toBe(5000);
-    });
-  });
-
-  describe('CacheConfig union type', () => {
+  describe('CacheConfig type', () => {
     test('should accept memory config', () => {
       const config: CacheConfig = {
         provider: 'memory',
@@ -276,25 +237,17 @@ describe('cache types', () => {
       expect(config.provider).toBe('memory');
     });
 
-    test('should accept redis config', () => {
-      const config: CacheConfig = {
-        provider: 'redis',
-        url: 'redis://localhost:6379',
-      };
-
-      expect(config.provider).toBe('redis');
-    });
-
-    test('should discriminate by provider', () => {
+    test('should support memory-specific options', () => {
       const config: CacheConfig = {
         provider: 'memory',
         maxSize: 1000,
+        cleanupInterval: 60000,
+        maxMemoryBytes: 100 * 1024 * 1024,
       };
 
-      if (config.provider === 'memory') {
-        // TypeScript should know this is MemoryCacheConfig
-        expect(config.maxSize).toBe(1000);
-      }
+      expect(config.provider).toBe('memory');
+      expect(config.cleanupInterval).toBe(60000);
+      expect(config.maxMemoryBytes).toBe(100 * 1024 * 1024);
     });
   });
 });
