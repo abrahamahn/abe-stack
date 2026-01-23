@@ -32,6 +32,7 @@ export async function handleRegister(
     const baseUrl = ctx.config.server.appBaseUrl;
     const result = await registerUser(
       ctx.db,
+      ctx.repos,
       ctx.email,
       ctx.config.auth,
       email,

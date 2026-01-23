@@ -3,17 +3,31 @@ import { afterEach, describe, expect, test } from 'vitest';
 
 import {
   getSearchProviderFactory,
-  parseProviderType,
   resetSearchProviderFactory,
   SearchProviderFactory,
 } from '../search-factory';
 
-// Mock database and table
-const mockDb = {} as never;
-const mockTable = {
-  id: { name: 'id' },
-  name: { name: 'name' },
-} as never;
+import type { RawDb, Repositories } from '@database';
+import type { SqlTableConfig } from '../types';
+
+// Mock database
+const mockDb = {
+  raw: async () => [],
+  query: async () => [],
+  queryOne: async () => null,
+  execute: async () => 0,
+} as unknown as RawDb;
+
+const mockRepos = {} as Repositories;
+
+const tableConfig: Partial<SqlTableConfig> & { table: string } = {
+  table: 'users',
+  primaryKey: 'id',
+  columns: [
+    { field: 'id', column: 'id', type: 'string' },
+    { field: 'name', column: 'name', type: 'string' },
+  ],
+};
 
 describe('SearchProviderFactory', () => {
   afterEach(() => {
@@ -24,16 +38,22 @@ describe('SearchProviderFactory', () => {
     test('should create and register SQL provider', () => {
       const factory = new SearchProviderFactory();
 
-      const provider = factory.createSqlProvider(
-        mockDb,
-        mockTable,
-        { table: 'users' },
-        { name: 'test-sql' },
-      );
+      const provider = factory.createSqlProvider(mockDb, mockRepos, tableConfig, {
+        name: 'test-sql',
+      });
 
       expect(provider).toBeDefined();
       expect(provider.name).toBe('test-sql');
       expect(factory.hasProvider('test-sql')).toBe(true);
+    });
+
+    test('should use default name when not specified', () => {
+      const factory = new SearchProviderFactory();
+
+      const provider = factory.createSqlProvider(mockDb, mockRepos, tableConfig);
+
+      expect(provider.name).toBe('sql');
+      expect(factory.hasProvider('sql')).toBe(true);
     });
   });
 
@@ -57,7 +77,7 @@ describe('SearchProviderFactory', () => {
     test('should return registered provider', () => {
       const factory = new SearchProviderFactory();
 
-      factory.createSqlProvider(mockDb, mockTable, { table: 'users' }, { name: 'sql-test' });
+      factory.createSqlProvider(mockDb, mockRepos, tableConfig, { name: 'sql-test' });
 
       const provider = factory.getProvider('sql-test');
 
@@ -77,7 +97,7 @@ describe('SearchProviderFactory', () => {
     test('should return true for existing provider', () => {
       const factory = new SearchProviderFactory();
 
-      factory.createSqlProvider(mockDb, mockTable, { table: 'users' }, { name: 'my-provider' });
+      factory.createSqlProvider(mockDb, mockRepos, tableConfig, { name: 'my-provider' });
 
       expect(factory.hasProvider('my-provider')).toBe(true);
     });
@@ -93,7 +113,7 @@ describe('SearchProviderFactory', () => {
     test('should remove existing provider', () => {
       const factory = new SearchProviderFactory();
 
-      factory.createSqlProvider(mockDb, mockTable, { table: 'users' }, { name: 'to-remove' });
+      factory.createSqlProvider(mockDb, mockRepos, tableConfig, { name: 'to-remove' });
 
       const removed = factory.removeProvider('to-remove');
 
@@ -110,30 +130,51 @@ describe('SearchProviderFactory', () => {
     });
   });
 
-  describe('getProviderNames', () => {
-    test('should return all provider names', () => {
+  describe('getProviders', () => {
+    test('should return all providers as a Map', () => {
       const factory = new SearchProviderFactory();
 
-      factory.createSqlProvider(mockDb, mockTable, { table: 'users' }, { name: 'provider1' });
+      factory.createSqlProvider(mockDb, mockRepos, tableConfig, { name: 'provider1' });
       factory.createElasticsearchProvider({
         name: 'provider2',
         node: 'http://localhost:9200',
         index: 'test',
       });
 
-      const names = factory.getProviderNames();
+      const providers = factory.getProviders();
 
-      expect(names).toContain('provider1');
-      expect(names).toContain('provider2');
-      expect(names).toHaveLength(2);
+      expect(providers.has('provider1')).toBe(true);
+      expect(providers.has('provider2')).toBe(true);
+      expect(providers.size).toBe(2);
+    });
+  });
+
+  describe('getProvidersByType', () => {
+    test('should return provider names by type', () => {
+      const factory = new SearchProviderFactory();
+
+      factory.createSqlProvider(mockDb, mockRepos, tableConfig, { name: 'users-sql' });
+      factory.createSqlProvider(mockDb, mockRepos, tableConfig, { name: 'orders-sql' });
+      factory.createElasticsearchProvider({
+        name: 'search-es',
+        node: 'http://localhost:9200',
+        index: 'test',
+      });
+
+      const sqlProviders = factory.getProvidersByType('sql');
+      const esProviders = factory.getProvidersByType('elasticsearch');
+
+      expect(sqlProviders).toContain('users-sql');
+      expect(sqlProviders).toContain('orders-sql');
+      expect(esProviders).toContain('search-es');
     });
   });
 
   describe('closeAll', () => {
-    test('should close all providers', async () => {
+    test('should close all providers and clear the map', async () => {
       const factory = new SearchProviderFactory();
 
-      factory.createSqlProvider(mockDb, mockTable, { table: 'users' }, { name: 'p1' });
+      factory.createSqlProvider(mockDb, mockRepos, tableConfig, { name: 'p1' });
       factory.createElasticsearchProvider({
         name: 'p2',
         node: 'http://localhost:9200',
@@ -142,31 +183,7 @@ describe('SearchProviderFactory', () => {
 
       await factory.closeAll();
 
-      expect(factory.getProviderNames()).toHaveLength(0);
-    });
-  });
-
-  describe('healthCheckAll', () => {
-    test('should check health of all providers', async () => {
-      const factory = new SearchProviderFactory();
-
-      // SQL provider health check will fail (no real db)
-      factory.createSqlProvider(mockDb, mockTable, { table: 'users' }, { name: 'sql' });
-
-      // ES provider health check returns false (stub implementation)
-      factory.createElasticsearchProvider({
-        name: 'es',
-        node: 'http://localhost:9200',
-        index: 'test',
-      });
-
-      const results = await factory.healthCheckAll();
-
-      expect(results.has('sql')).toBe(true);
-      expect(results.has('es')).toBe(true);
-      // Both should fail as they're not connected to real services
-      expect(results.get('sql')).toBe(false);
-      expect(results.get('es')).toBe(false);
+      expect(factory.getProviders().size).toBe(0);
     });
   });
 });
@@ -185,7 +202,7 @@ describe('getSearchProviderFactory', () => {
 
   test('should persist providers across calls', () => {
     const factory1 = getSearchProviderFactory();
-    factory1.createSqlProvider(mockDb, mockTable, { table: 'users' }, { name: 'singleton-test' });
+    factory1.createSqlProvider(mockDb, mockRepos, tableConfig, { name: 'singleton-test' });
 
     const factory2 = getSearchProviderFactory();
 
@@ -196,25 +213,12 @@ describe('getSearchProviderFactory', () => {
 describe('resetSearchProviderFactory', () => {
   test('should create new instance after reset', () => {
     const factory1 = getSearchProviderFactory();
-    factory1.createSqlProvider(mockDb, mockTable, { table: 'users' }, { name: 'will-be-gone' });
+    factory1.createSqlProvider(mockDb, mockRepos, tableConfig, { name: 'will-be-gone' });
 
     resetSearchProviderFactory();
 
     const factory2 = getSearchProviderFactory();
 
     expect(factory2.hasProvider('will-be-gone')).toBe(false);
-  });
-});
-
-describe('parseProviderType', () => {
-  test('should parse valid provider types', () => {
-    expect(parseProviderType('sql')).toBe('sql');
-    expect(parseProviderType('elasticsearch')).toBe('elasticsearch');
-    expect(parseProviderType('memory')).toBe('memory');
-  });
-
-  test('should throw for invalid provider type', () => {
-    expect(() => parseProviderType('invalid')).toThrow('Invalid provider type');
-    expect(() => parseProviderType('mongodb')).toThrow('Invalid provider type');
   });
 });

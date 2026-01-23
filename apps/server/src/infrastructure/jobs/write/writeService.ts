@@ -13,7 +13,7 @@
  */
 
 import { SubKeys, withTransaction } from '@infrastructure/index';
-import { sql } from 'drizzle-orm';
+import { escapeIdentifier } from '@abe-stack/db';
 
 import type {
   AfterWriteHook,
@@ -29,35 +29,6 @@ import type {
 import type { DbClient } from '@database';
 import type { Logger } from '@logger';
 import type { SubscriptionManager } from '@pubsub';
-
-// ============================================================================
-// SQL Result Helpers
-// ============================================================================
-
-/**
- * Helper to extract rows from SQL execute result.
- * Provides runtime validation that the result has the expected shape.
- */
-function extractRows<T>(result: unknown): T[] {
-  if (result && typeof result === 'object' && 'rows' in result && Array.isArray(result.rows)) {
-    return result.rows as T[];
-  }
-  if (Array.isArray(result)) {
-    return result as T[];
-  }
-  return [];
-}
-
-/**
- * Helper to extract rowCount from SQL execute result.
- */
-function extractRowCount(result: unknown): number {
-  if (result && typeof result === 'object' && 'rowCount' in result) {
-    const count = (result as { rowCount: number | null }).rowCount;
-    return count ?? 0;
-  }
-  return 0;
-}
 
 // ============================================================================
 // Write Service
@@ -209,9 +180,9 @@ export class WriteService {
       updated_at: new Date().toISOString(),
     };
 
-    await tx.execute(sql`
-      INSERT INTO ${sql.identifier(table)} ${sql.raw(this.buildInsertClause(record))}
-    `);
+    await tx.raw(
+      `INSERT INTO ${escapeIdentifier(table)} ${this.buildInsertClause(record)}`,
+    );
 
     return {
       operation,
@@ -231,14 +202,12 @@ export class WriteService {
 
     // Build version check condition
     const versionCheck =
-      expectedVersion !== undefined ? sql`AND version = ${expectedVersion}` : sql``;
+      expectedVersion !== undefined ? `AND version = ${String(expectedVersion)}` : '';
 
     // Get current record for previous version
-    const currentResult = await tx.execute(sql`
-      SELECT version FROM ${sql.identifier(table)} WHERE id = ${id}
-    `);
-
-    const currentRows = extractRows<{ version: number }>(currentResult);
+    const currentRows = await tx.raw<{ version: number }>(
+      `SELECT version FROM ${escapeIdentifier(table)} WHERE id = '${String(id).replace(/'/g, "''")}'`,
+    );
     const currentRow = currentRows[0];
     if (!currentRow) {
       throw this.createError('NOT_FOUND', `Record not found: ${table}/${id}`);
@@ -260,20 +229,19 @@ export class WriteService {
       updated_at: new Date().toISOString(),
     };
 
-    const result = await tx.execute(sql`
-      UPDATE ${sql.identifier(table)}
-      SET ${sql.raw(this.buildUpdateClause(updateData))}
-      WHERE id = ${id} ${versionCheck}
-      RETURNING *
-    `);
+    const idEscaped = String(id).replace(/'/g, "''");
+    const result = await tx.raw<T & { id: string; version: number }>(
+      `UPDATE ${escapeIdentifier(table)}
+      SET ${this.buildUpdateClause(updateData)}
+      WHERE id = '${idEscaped}' ${versionCheck}
+      RETURNING *`,
+    );
 
-    const rowCount = extractRowCount(result);
-    if (rowCount === 0) {
+    if (result.length === 0) {
       throw this.createError('CONFLICT', 'Concurrent modification detected');
     }
 
-    const resultRows = extractRows<T & { id: string; version: number }>(result);
-    const row = resultRows[0];
+    const row = result[0];
 
     return {
       operation,
@@ -288,28 +256,27 @@ export class WriteService {
   ): Promise<OperationResult<T>> {
     const { table, id, expectedVersion } = operation;
 
+    const idEscaped = String(id).replace(/'/g, "''");
+
     // Build version check condition
     const versionCheck =
-      expectedVersion !== undefined ? sql`AND version = ${expectedVersion}` : sql``;
+      expectedVersion !== undefined ? `AND version = ${String(expectedVersion)}` : '';
 
     // Get current version before delete
-    const currentResult = await tx.execute(sql`
-      SELECT version FROM ${sql.identifier(table)} WHERE id = ${id}
-    `);
-
-    const currentRows = extractRows<{ version: number }>(currentResult);
+    const currentRows = await tx.raw<{ version: number }>(
+      `SELECT version FROM ${escapeIdentifier(table)} WHERE id = '${idEscaped}'`,
+    );
     const currentRow = currentRows[0];
     if (!currentRow) {
       throw this.createError('NOT_FOUND', `Record not found: ${table}/${id}`);
     }
 
     // Delete with version check
-    const result = await tx.execute(sql`
-      DELETE FROM ${sql.identifier(table)}
-      WHERE id = ${id} ${versionCheck}
-    `);
+    const rowCount = await tx.execute({
+      text: `DELETE FROM ${escapeIdentifier(table)} WHERE id = '${idEscaped}' ${versionCheck}`,
+      values: [],
+    });
 
-    const rowCount = extractRowCount(result);
     if (rowCount === 0) {
       throw this.createError('CONFLICT', 'Concurrent modification detected');
     }

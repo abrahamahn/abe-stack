@@ -27,7 +27,7 @@ export async function handleVerifyEmail(
 > {
   try {
     const { token } = body;
-    const result = await verifyEmail(ctx.db, ctx.config.auth, token);
+    const result = await verifyEmail(ctx.db, ctx.repos, ctx.config.auth, token);
 
     // Set refresh token as HTTP-only cookie for auto-login
     setRefreshTokenCookie(reply, result.refreshToken, ctx.config.auth);
@@ -54,7 +54,7 @@ export async function handleResendVerification(
   try {
     const { email } = body;
     const baseUrl = ctx.config.server.appBaseUrl;
-    await resendVerificationEmail(ctx.db, ctx.email, email, baseUrl);
+    await resendVerificationEmail(ctx.db, ctx.repos, ctx.email, email, baseUrl);
 
     return {
       status: 200,

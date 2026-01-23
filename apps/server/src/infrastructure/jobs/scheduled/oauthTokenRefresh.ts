@@ -13,11 +13,18 @@
 
 import { randomBytes, createCipheriv, createDecipheriv, scryptSync } from 'node:crypto';
 
-import { and, eq, lt, isNotNull, sql } from 'drizzle-orm';
-
-import { oauthConnections, type OAuthProvider } from '../../data/database/schema';
-
-import type { DbClient } from '../../data/database/client';
+import {
+  and,
+  eq,
+  lt,
+  isNotNull,
+  select,
+  update,
+  selectCount,
+  OAUTH_CONNECTIONS_TABLE,
+  type OAuthProvider,
+  type RawDb,
+} from '@abe-stack/db';
 
 // ============================================================================
 // Constants
@@ -205,7 +212,7 @@ async function refreshProviderToken(
  * ```
  */
 export async function refreshExpiringOAuthTokens(
-  db: DbClient,
+  db: RawDb,
   options: OAuthTokenRefreshOptions,
 ): Promise<OAuthTokenRefreshResult> {
   const startTime = Date.now();
@@ -225,18 +232,21 @@ export async function refreshExpiringOAuthTokens(
   cutoffDate.setTime(cutoffDate.getTime() + effectiveRefreshHours * 60 * 60 * 1000);
 
   // Find connections with expiring tokens that have refresh tokens
-  const expiringConnections = await db
-    .select({
-      id: oauthConnections.id,
-      provider: oauthConnections.provider,
-      refreshToken: oauthConnections.refreshToken,
-      expiresAt: oauthConnections.expiresAt,
-    })
-    .from(oauthConnections)
-    .where(
-      and(lt(oauthConnections.expiresAt, cutoffDate), isNotNull(oauthConnections.refreshToken)),
-    )
-    .limit(batchSize);
+  type ConnectionRow = Record<string, unknown> & {
+    id: string;
+    provider: string;
+    refresh_token: string | null;
+    expires_at: Date | null;
+  };
+  const expiringConnections = await db.query<ConnectionRow>(
+    select(OAUTH_CONNECTIONS_TABLE)
+      .columns('id', 'provider', 'refresh_token', 'expires_at')
+      .where(
+        and(lt('expires_at', cutoffDate), isNotNull('refresh_token')),
+      )
+      .limit(batchSize)
+      .toSql(),
+  );
 
   const result: OAuthTokenRefreshResult = {
     processedCount: expiringConnections.length,
@@ -267,7 +277,7 @@ export async function refreshExpiringOAuthTokens(
       continue;
     }
 
-    if (!connection.refreshToken) {
+    if (!connection.refresh_token) {
       result.failureCount++;
       result.failures.push({
         connectionId: connection.id,
@@ -279,7 +289,7 @@ export async function refreshExpiringOAuthTokens(
 
     try {
       // Decrypt the refresh token
-      const decryptedRefreshToken = decryptToken(connection.refreshToken, encryptionKey);
+      const decryptedRefreshToken = decryptToken(connection.refresh_token, encryptionKey);
 
       // Call provider to refresh
       const tokenResponse = await refreshProviderToken(
@@ -295,17 +305,19 @@ export async function refreshExpiringOAuthTokens(
         : null;
 
       // Update the connection with new tokens
-      await db
-        .update(oauthConnections)
-        .set({
-          accessToken: encryptToken(tokenResponse.access_token, encryptionKey),
-          refreshToken: tokenResponse.refresh_token
-            ? encryptToken(tokenResponse.refresh_token, encryptionKey)
-            : connection.refreshToken, // Keep old if not returned
-          expiresAt,
-          updatedAt: new Date(),
-        })
-        .where(eq(oauthConnections.id, connection.id));
+      await db.execute(
+        update(OAUTH_CONNECTIONS_TABLE)
+          .set({
+            access_token: encryptToken(tokenResponse.access_token, encryptionKey),
+            refresh_token: tokenResponse.refresh_token
+              ? encryptToken(tokenResponse.refresh_token, encryptionKey)
+              : connection.refresh_token, // Keep old if not returned
+            expires_at: expiresAt,
+            updated_at: new Date(),
+          })
+          .where(eq('id', connection.id))
+          .toSql(),
+      );
 
       result.successCount++;
     } catch (error) {
@@ -331,7 +343,7 @@ export async function refreshExpiringOAuthTokens(
  * @returns Count of tokens expiring soon
  */
 export async function countExpiringOAuthTokens(
-  db: DbClient,
+  db: RawDb,
   refreshBeforeHours: number = DEFAULT_REFRESH_BEFORE_HOURS,
 ): Promise<number> {
   const effectiveRefreshHours = Math.max(refreshBeforeHours, MIN_REFRESH_BEFORE_HOURS);
@@ -339,14 +351,15 @@ export async function countExpiringOAuthTokens(
   const cutoffDate = new Date();
   cutoffDate.setTime(cutoffDate.getTime() + effectiveRefreshHours * 60 * 60 * 1000);
 
-  const result = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(oauthConnections)
-    .where(
-      and(lt(oauthConnections.expiresAt, cutoffDate), isNotNull(oauthConnections.refreshToken)),
-    );
+  const result = await db.queryOne<{ count: number }>(
+    selectCount(OAUTH_CONNECTIONS_TABLE)
+      .where(
+        and(lt('expires_at', cutoffDate), isNotNull('refresh_token')),
+      )
+      .toSql(),
+  );
 
-  return result[0]?.count ?? 0;
+  return result?.count ?? 0;
 }
 
 /**
@@ -357,7 +370,7 @@ export async function countExpiringOAuthTokens(
  * @param refreshBeforeHours - Hours before expiry to consider (default: 1)
  */
 export async function getOAuthTokenStats(
-  db: DbClient,
+  db: RawDb,
   refreshBeforeHours: number = DEFAULT_REFRESH_BEFORE_HOURS,
 ): Promise<{
   total: number;
@@ -373,28 +386,33 @@ export async function getOAuthTokenStats(
   cutoffDate.setTime(cutoffDate.getTime() + effectiveRefreshHours * 60 * 60 * 1000);
 
   const [totalResult, expiringSoonResult, expiredResult, withRefreshResult] = await Promise.all([
-    db.select({ count: sql<number>`count(*)::int` }).from(oauthConnections),
-    db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(oauthConnections)
-      .where(
-        and(lt(oauthConnections.expiresAt, cutoffDate), isNotNull(oauthConnections.expiresAt)),
-      ),
-    db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(oauthConnections)
-      .where(lt(oauthConnections.expiresAt, now)),
-    db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(oauthConnections)
-      .where(isNotNull(oauthConnections.refreshToken)),
+    db.queryOne<{ count: number }>(
+      selectCount(OAUTH_CONNECTIONS_TABLE).toSql(),
+    ),
+    db.queryOne<{ count: number }>(
+      selectCount(OAUTH_CONNECTIONS_TABLE)
+        .where(
+          and(lt('expires_at', cutoffDate), isNotNull('expires_at')),
+        )
+        .toSql(),
+    ),
+    db.queryOne<{ count: number }>(
+      selectCount(OAUTH_CONNECTIONS_TABLE)
+        .where(lt('expires_at', now))
+        .toSql(),
+    ),
+    db.queryOne<{ count: number }>(
+      selectCount(OAUTH_CONNECTIONS_TABLE)
+        .where(isNotNull('refresh_token'))
+        .toSql(),
+    ),
   ]);
 
   return {
-    total: totalResult[0]?.count ?? 0,
-    expiringSoon: expiringSoonResult[0]?.count ?? 0,
-    expired: expiredResult[0]?.count ?? 0,
-    withRefreshToken: withRefreshResult[0]?.count ?? 0,
+    total: totalResult?.count ?? 0,
+    expiringSoon: expiringSoonResult?.count ?? 0,
+    expired: expiredResult?.count ?? 0,
+    withRefreshToken: withRefreshResult?.count ?? 0,
     refreshBeforeHours: effectiveRefreshHours,
   };
 }

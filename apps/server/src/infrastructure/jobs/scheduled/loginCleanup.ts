@@ -11,11 +11,7 @@
  * - Security auditing (keeps relevant recent data)
  */
 
-import { lt, sql } from 'drizzle-orm';
-
-import { loginAttempts } from '../../data/database/schema/auth';
-
-import type { DbClient } from '../../data/database/client';
+import { lt, selectCount, LOGIN_ATTEMPTS_TABLE, type RawDb } from '@abe-stack/db';
 
 // ============================================================================
 // Constants
@@ -80,7 +76,7 @@ export interface CleanupResult {
  * ```
  */
 export async function cleanupOldLoginAttempts(
-  db: DbClient,
+  db: RawDb,
   options: CleanupOptions = {},
 ): Promise<CleanupResult> {
   const startTime = Date.now();
@@ -103,27 +99,28 @@ export async function cleanupOldLoginAttempts(
 
   if (dryRun) {
     // Count records that would be deleted
-    const countResult = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(loginAttempts)
-      .where(lt(loginAttempts.createdAt, cutoffDate));
+    const countResult = await db.queryOne<{ count: number }>(
+      selectCount(LOGIN_ATTEMPTS_TABLE)
+        .where(lt('created_at', cutoffDate))
+        .toSql(),
+    );
 
-    deletedCount = countResult[0]?.count ?? 0;
+    deletedCount = countResult?.count ?? 0;
   } else {
     // Delete in batches to avoid long-running transactions
     let batchDeleted = 0;
     do {
       // Use subquery to limit deletion batch size
-      const result = await db.execute(sql`
-        DELETE FROM login_attempts
-        WHERE id IN (
-          SELECT id FROM login_attempts
-          WHERE created_at < ${cutoffDate}
-          LIMIT ${batchSize}
-        )
-      `);
+      batchDeleted = await db.execute({
+        text: `DELETE FROM login_attempts
+          WHERE id IN (
+            SELECT id FROM login_attempts
+            WHERE created_at < $1
+            LIMIT $2
+          )`,
+        values: [cutoffDate, batchSize],
+      });
 
-      batchDeleted = (result as { rowCount?: number }).rowCount ?? 0;
       deletedCount += batchDeleted;
 
       // Continue until no more records to delete
@@ -149,7 +146,7 @@ export async function cleanupOldLoginAttempts(
  * @returns Count of records that would be cleaned up
  */
 export async function countOldLoginAttempts(
-  db: DbClient,
+  db: RawDb,
   retentionDays: number = DEFAULT_RETENTION_DAYS,
 ): Promise<number> {
   const effectiveRetentionDays = Math.max(retentionDays, MIN_RETENTION_DAYS);
@@ -158,12 +155,13 @@ export async function countOldLoginAttempts(
   cutoffDate.setDate(cutoffDate.getDate() - effectiveRetentionDays);
   cutoffDate.setHours(0, 0, 0, 0);
 
-  const result = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(loginAttempts)
-    .where(lt(loginAttempts.createdAt, cutoffDate));
+  const result = await db.queryOne<{ count: number }>(
+    selectCount(LOGIN_ATTEMPTS_TABLE)
+      .where(lt('created_at', cutoffDate))
+      .toSql(),
+  );
 
-  return result[0]?.count ?? 0;
+  return result?.count ?? 0;
 }
 
 /**
@@ -173,10 +171,12 @@ export async function countOldLoginAttempts(
  * @param db - Database client
  * @returns Total count of login attempts
  */
-export async function getTotalLoginAttemptCount(db: DbClient): Promise<number> {
-  const result = await db.select({ count: sql<number>`count(*)::int` }).from(loginAttempts);
+export async function getTotalLoginAttemptCount(db: RawDb): Promise<number> {
+  const result = await db.queryOne<{ count: number }>(
+    selectCount(LOGIN_ATTEMPTS_TABLE).toSql(),
+  );
 
-  return result[0]?.count ?? 0;
+  return result?.count ?? 0;
 }
 
 /**
@@ -187,7 +187,7 @@ export async function getTotalLoginAttemptCount(db: DbClient): Promise<number> {
  * @param retentionDays - Number of days to retain (default: 90)
  */
 export async function getLoginAttemptStats(
-  db: DbClient,
+  db: RawDb,
   retentionDays: number = DEFAULT_RETENTION_DAYS,
 ): Promise<{
   total: number;

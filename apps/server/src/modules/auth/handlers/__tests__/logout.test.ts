@@ -33,6 +33,7 @@ vi.mock('@auth/utils', () => ({
 function createMockContext(overrides?: Partial<AppContext>): AppContext {
   return {
     db: {} as AppContext['db'],
+    repos: {} as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
     config: {} as AppContext['config'],
     log: {
@@ -101,7 +102,7 @@ describe('handleLogout', () => {
 
       await handleLogout(ctx, request, reply);
 
-      expect(logoutUser).toHaveBeenCalledWith(ctx.db, 'test-refresh-token-123');
+      expect(logoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, 'test-refresh-token-123');
     });
 
     test('should clear refresh token cookie on successful logout', async () => {
@@ -126,7 +127,7 @@ describe('handleLogout', () => {
       const result = await handleLogout(ctx, request, reply);
 
       expect(result.status).toBe(200);
-      expect(logoutUser).toHaveBeenCalledWith(ctx.db, undefined);
+      expect(logoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, undefined);
       expect(clearRefreshTokenCookie).toHaveBeenCalledWith(reply);
     });
 
@@ -140,7 +141,7 @@ describe('handleLogout', () => {
       const result = await handleLogout(ctx, request, reply);
 
       expect(result.status).toBe(200);
-      expect(logoutUser).toHaveBeenCalledWith(ctx.db, undefined);
+      expect(logoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, undefined);
     });
   });
 
@@ -197,7 +198,7 @@ describe('handleLogout', () => {
 
       await handleLogout(ctx, request, reply);
 
-      expect(logoutUser).toHaveBeenCalledWith(ctx.db, 'correct-token');
+      expect(logoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, 'correct-token');
     });
 
     test('should handle empty string refresh token', async () => {
@@ -210,7 +211,7 @@ describe('handleLogout', () => {
       const result = await handleLogout(ctx, request, reply);
 
       expect(result.status).toBe(200);
-      expect(logoutUser).toHaveBeenCalledWith(ctx.db, '');
+      expect(logoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, '');
     });
   });
 });

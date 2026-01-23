@@ -59,7 +59,7 @@ export async function handleMagicLinkRequest(
     // Use config values for magic link settings
     const magicLinkConfig = ctx.config.auth.magicLink;
 
-    const result = await requestMagicLink(ctx.db, ctx.email, email, baseUrl, ipAddress, userAgent, {
+    const result = await requestMagicLink(ctx.db, ctx.repos, ctx.email, email, baseUrl, ipAddress, userAgent, {
       tokenExpiryMinutes: magicLinkConfig.tokenExpiryMinutes,
       maxAttemptsPerEmail: magicLinkConfig.maxAttempts,
     });
@@ -118,7 +118,7 @@ export async function handleMagicLinkVerify(
   try {
     const { token } = body;
 
-    const result = await verifyMagicLink(ctx.db, ctx.config.auth, token);
+    const result = await verifyMagicLink(ctx.db, ctx.repos, ctx.config.auth, token);
 
     // Set refresh token as HTTP-only cookie
     setRefreshTokenCookie(reply, result.refreshToken, ctx.config.auth);

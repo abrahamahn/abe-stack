@@ -1,5 +1,5 @@
 // apps/server/src/infrastructure/jobs/scheduled/__tests__/loginCleanup.test.ts
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
   cleanupOldLoginAttempts,
@@ -11,7 +11,7 @@ import {
   MIN_RETENTION_DAYS,
 } from '../loginCleanup';
 
-import type { DbClient } from '../../../data/database/client';
+import type { RawDb } from '@abe-stack/db';
 import type { CleanupOptions } from '../loginCleanup';
 
 // ============================================================================
@@ -22,37 +22,36 @@ function createMockDb(options: {
   countResult?: number;
   deleteRowCount?: number;
   batchBehavior?: 'single' | 'multiple';
-}): DbClient {
+}): RawDb {
   const { countResult = 0, deleteRowCount = 0, batchBehavior = 'single' } = options;
 
   let deleteCallCount = 0;
 
   return {
-    select: vi.fn().mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ count: countResult }]),
-      }),
-    }),
+    query: vi.fn().mockResolvedValue([{ count: countResult }]),
+    queryOne: vi.fn().mockResolvedValue({ count: countResult }),
     execute: vi.fn().mockImplementation(() => {
       deleteCallCount++;
       // For batch behavior test, return full batch first time, then 0
       if (batchBehavior === 'multiple') {
         if (deleteCallCount === 1) {
-          return Promise.resolve({ rowCount: MAX_BATCH_SIZE });
+          return Promise.resolve(MAX_BATCH_SIZE);
         }
-        return Promise.resolve({ rowCount: deleteRowCount });
+        return Promise.resolve(deleteRowCount);
       }
-      return Promise.resolve({ rowCount: deleteRowCount });
+      return Promise.resolve(deleteRowCount);
     }),
-  } as unknown as DbClient;
+    raw: vi.fn(),
+  } as unknown as RawDb;
 }
 
-function createMockDbWithTotalCount(totalResult: number): DbClient {
+function createMockDbWithTotalCount(totalResult: number): RawDb {
   return {
-    select: vi.fn().mockReturnValue({
-      from: vi.fn().mockResolvedValue([{ count: totalResult }]),
-    }),
-  } as unknown as DbClient;
+    query: vi.fn().mockResolvedValue([{ count: totalResult }]),
+    queryOne: vi.fn().mockResolvedValue({ count: totalResult }),
+    execute: vi.fn(),
+    raw: vi.fn(),
+  } as unknown as RawDb;
 }
 
 // ============================================================================
@@ -170,7 +169,7 @@ describe('loginCleanup', () => {
       const count = await countOldLoginAttempts(mockDb, 30);
 
       expect(count).toBe(100);
-      expect(mockDb.select).toHaveBeenCalled();
+      expect(mockDb.queryOne).toHaveBeenCalled();
     });
 
     test('should enforce minimum retention days', async () => {
@@ -179,17 +178,16 @@ describe('loginCleanup', () => {
       await countOldLoginAttempts(mockDb, 3);
 
       // The function should use MIN_RETENTION_DAYS
-      expect(mockDb.select).toHaveBeenCalled();
+      expect(mockDb.queryOne).toHaveBeenCalled();
     });
 
     test('should return 0 when no results', async () => {
       const mockDb = {
-        select: vi.fn().mockReturnValue({
-          from: vi.fn().mockReturnValue({
-            where: vi.fn().mockResolvedValue([]),
-          }),
-        }),
-      } as unknown as DbClient;
+        query: vi.fn().mockResolvedValue([]),
+        queryOne: vi.fn().mockResolvedValue(null),
+        execute: vi.fn(),
+        raw: vi.fn(),
+      } as unknown as RawDb;
 
       const count = await countOldLoginAttempts(mockDb);
 
@@ -216,10 +214,11 @@ describe('loginCleanup', () => {
 
     test('should return 0 when result is undefined', async () => {
       const mockDb = {
-        select: vi.fn().mockReturnValue({
-          from: vi.fn().mockResolvedValue([]),
-        }),
-      } as unknown as DbClient;
+        query: vi.fn().mockResolvedValue([]),
+        queryOne: vi.fn().mockResolvedValue(null),
+        execute: vi.fn(),
+        raw: vi.fn(),
+      } as unknown as RawDb;
 
       const count = await getTotalLoginAttemptCount(mockDb);
 
@@ -229,23 +228,20 @@ describe('loginCleanup', () => {
 
   describe('getLoginAttemptStats', () => {
     test('should return complete stats', async () => {
-      let selectCallCount = 0;
+      let queryOneCallCount = 0;
       const mockDb = {
-        select: vi.fn().mockImplementation(() => {
-          selectCallCount++;
-          return {
-            from: vi.fn().mockImplementation(() => {
-              // First call is for total count, second for old records count
-              if (selectCallCount === 1) {
-                return Promise.resolve([{ count: 1000 }]);
-              }
-              return {
-                where: vi.fn().mockResolvedValue([{ count: 200 }]),
-              };
-            }),
-          };
+        query: vi.fn(),
+        queryOne: vi.fn().mockImplementation(() => {
+          queryOneCallCount++;
+          // First call is for total count, second for old records count
+          if (queryOneCallCount === 1) {
+            return Promise.resolve({ count: 1000 });
+          }
+          return Promise.resolve({ count: 200 });
         }),
-      } as unknown as DbClient;
+        execute: vi.fn(),
+        raw: vi.fn(),
+      } as unknown as RawDb;
 
       const stats = await getLoginAttemptStats(mockDb);
 
@@ -256,22 +252,19 @@ describe('loginCleanup', () => {
     });
 
     test('should use custom retention days', async () => {
-      let selectCallCount = 0;
+      let queryOneCallCount = 0;
       const mockDb = {
-        select: vi.fn().mockImplementation(() => {
-          selectCallCount++;
-          return {
-            from: vi.fn().mockImplementation(() => {
-              if (selectCallCount === 1) {
-                return Promise.resolve([{ count: 500 }]);
-              }
-              return {
-                where: vi.fn().mockResolvedValue([{ count: 100 }]),
-              };
-            }),
-          };
+        query: vi.fn(),
+        queryOne: vi.fn().mockImplementation(() => {
+          queryOneCallCount++;
+          if (queryOneCallCount === 1) {
+            return Promise.resolve({ count: 500 });
+          }
+          return Promise.resolve({ count: 100 });
         }),
-      } as unknown as DbClient;
+        execute: vi.fn(),
+        raw: vi.fn(),
+      } as unknown as RawDb;
 
       const stats = await getLoginAttemptStats(mockDb, 60);
 
@@ -279,22 +272,19 @@ describe('loginCleanup', () => {
     });
 
     test('should enforce minimum retention days in stats', async () => {
-      let selectCallCount = 0;
+      let queryOneCallCount = 0;
       const mockDb = {
-        select: vi.fn().mockImplementation(() => {
-          selectCallCount++;
-          return {
-            from: vi.fn().mockImplementation(() => {
-              if (selectCallCount === 1) {
-                return Promise.resolve([{ count: 100 }]);
-              }
-              return {
-                where: vi.fn().mockResolvedValue([{ count: 10 }]),
-              };
-            }),
-          };
+        query: vi.fn(),
+        queryOne: vi.fn().mockImplementation(() => {
+          queryOneCallCount++;
+          if (queryOneCallCount === 1) {
+            return Promise.resolve({ count: 100 });
+          }
+          return Promise.resolve({ count: 10 });
         }),
-      } as unknown as DbClient;
+        execute: vi.fn(),
+        raw: vi.fn(),
+      } as unknown as RawDb;
 
       const stats = await getLoginAttemptStats(mockDb, 2);
 

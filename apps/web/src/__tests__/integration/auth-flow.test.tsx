@@ -11,7 +11,7 @@
 
 import { Route, Routes, useLocation } from '@abe-stack/ui';
 import { LoginPage, RegisterPage } from '@features/auth';
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { createMockEnvironment, mockUser, renderWithProviders } from '../utils';
@@ -303,10 +303,13 @@ describe('Auth Flow Integration', () => {
       expect(screen.getByRole('button', { name: /creating account/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /creating account/i })).toBeDisabled();
 
-      resolveRegister!({
-        status: 'pending_verification',
-        message: 'Check email',
-        email: 'test@example.com',
+      // Cleanup: resolve the promise and wait for state updates to complete
+      await act(async () => {
+        resolveRegister!({
+          status: 'pending_verification',
+          message: 'Check email',
+          email: 'test@example.com',
+        });
       });
     });
   });

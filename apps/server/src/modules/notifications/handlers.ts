@@ -4,28 +4,17 @@
  *
  * HTTP handlers for push notification endpoints.
  * Thin layer that validates input, calls services, and formats responses.
+ *
+ * NOTE: Notification sending has been removed (web-push package removed).
+ * VAPID key, test notification, and send notification endpoints are stubbed.
  */
 
-import { randomUUID } from 'crypto';
+import { isAppError } from '@abe-stack/core';
 
-import { isAppError, VapidNotConfiguredError } from '@abe-stack/core';
-import { getNotificationService } from '@infrastructure/notifications';
-
-import {
-  broadcast,
-  getPreferences,
-  getVapidPublicKey,
-  sendToUser,
-  sendToUsers,
-  subscribe,
-  unsubscribe,
-  updatePreferences,
-} from './service';
+import { getPreferences, subscribe, unsubscribe, updatePreferences } from './service';
 
 import type {
   PreferencesResponse,
-  SendNotificationRequest,
-  SendNotificationResponse,
   SubscribeRequest,
   SubscribeResponse,
   UnsubscribeRequest,
@@ -51,30 +40,18 @@ type HandlerResult<T> =
  * Get VAPID public key for client subscription
  *
  * GET /api/notifications/vapid-key
+ *
+ * NOTE: Web Push (VAPID) support has been removed.
+ * This endpoint returns a 501 Not Implemented status.
  */
-export function handleGetVapidKey(ctx: AppContext): HandlerResult<VapidKeyResponse> {
-  try {
-    const notificationService = getNotificationService();
-    const publicKey = getVapidPublicKey(notificationService);
-
-    return {
-      status: 200,
-      body: { publicKey },
-    };
-  } catch (error) {
-    if (error instanceof VapidNotConfiguredError) {
-      return {
-        status: 500,
-        body: { message: error.message, code: error.code },
-      };
-    }
-
-    ctx.log.error({ err: error as Error, handler: 'handleGetVapidKey' }, 'Failed to get VAPID key');
-    return {
-      status: 500,
-      body: { message: 'Failed to get VAPID key' },
-    };
-  }
+export function handleGetVapidKey(_ctx: AppContext): HandlerResult<VapidKeyResponse> {
+  return {
+    status: 500,
+    body: {
+      message: 'Web Push notifications are not available. VAPID keys not configured.',
+      code: 'VAPID_NOT_CONFIGURED',
+    },
+  };
 }
 
 // ============================================================================
@@ -262,12 +239,15 @@ export async function handleUpdatePreferences(
  * Send test notification to self
  *
  * POST /api/notifications/test
+ *
+ * NOTE: Notification sending has been removed (web-push package removed).
+ * This endpoint returns a 501 Not Implemented status.
  */
-export async function handleTestNotification(
-  ctx: AppContext,
+export function handleTestNotification(
+  _ctx: AppContext,
   _body: undefined,
   req: RequestWithCookies,
-): Promise<HandlerResult<SendNotificationResponse>> {
+): HandlerResult<{ message: string }> {
   if (!req.user) {
     return {
       status: 401,
@@ -275,39 +255,13 @@ export async function handleTestNotification(
     };
   }
 
-  try {
-    const notificationService = getNotificationService();
-    const result = await sendToUser(ctx.db, notificationService, req.user.userId, {
-      title: 'Test Notification',
-      body: 'This is a test notification from your app.',
-      icon: '/icons/icon-192.png',
-      data: { type: 'test', timestamp: Date.now() },
-    });
-
-    return {
-      status: 200,
-      body: {
-        messageId: randomUUID(),
-        result,
-      },
-    };
-  } catch (error) {
-    if (isAppError(error)) {
-      return {
-        status: 400,
-        body: { message: error.message, code: error.code },
-      };
-    }
-
-    ctx.log.error(
-      { err: error as Error, handler: 'handleTestNotification', userId: req.user.userId },
-      'Failed to send test notification',
-    );
-    return {
-      status: 500,
-      body: { message: 'Failed to send test notification' },
-    };
-  }
+  return {
+    status: 500,
+    body: {
+      message: 'Push notification sending is not available. Provider not configured.',
+      code: 'PROVIDER_NOT_CONFIGURED',
+    },
+  };
 }
 
 // ============================================================================
@@ -318,12 +272,15 @@ export async function handleTestNotification(
  * Send notification to specific users or broadcast
  *
  * POST /api/notifications/send
+ *
+ * NOTE: Notification sending has been removed (web-push package removed).
+ * This endpoint returns a 501 Not Implemented status.
  */
-export async function handleSendNotification(
-  ctx: AppContext,
-  body: SendNotificationRequest,
+export function handleSendNotification(
+  _ctx: AppContext,
+  _body: unknown,
   req: RequestWithCookies,
-): Promise<HandlerResult<SendNotificationResponse>> {
+): HandlerResult<{ message: string }> {
   if (!req.user) {
     return {
       status: 401,
@@ -331,57 +288,11 @@ export async function handleSendNotification(
     };
   }
 
-  try {
-    const notificationService = getNotificationService();
-    const messageId = randomUUID();
-
-    let result;
-
-    if (body.userIds && body.userIds.length > 0) {
-      // Send to specific users
-      result = await sendToUsers(ctx.db, notificationService, body.userIds, body.payload, {
-        ttl: body.ttl,
-        topic: body.topic,
-      });
-    } else {
-      // Broadcast to all
-      result = await broadcast(ctx.db, notificationService, body.payload, {
-        ttl: body.ttl,
-        topic: body.topic,
-      });
-    }
-
-    ctx.log.info(
-      {
-        messageId,
-        type: body.type,
-        priority: body.priority,
-        targetCount: body.userIds?.length ?? 'broadcast',
-        successful: result.successful,
-        failed: result.failed,
-      },
-      'Notification sent',
-    );
-
-    return {
-      status: 200,
-      body: { messageId, result },
-    };
-  } catch (error) {
-    if (isAppError(error)) {
-      return {
-        status: 400,
-        body: { message: error.message, code: error.code },
-      };
-    }
-
-    ctx.log.error(
-      { err: error as Error, handler: 'handleSendNotification' },
-      'Failed to send notification',
-    );
-    return {
-      status: 500,
-      body: { message: 'Failed to send notification' },
-    };
-  }
+  return {
+    status: 500,
+    body: {
+      message: 'Push notification sending is not available. Provider not configured.',
+      code: 'PROVIDER_NOT_CONFIGURED',
+    },
+  };
 }

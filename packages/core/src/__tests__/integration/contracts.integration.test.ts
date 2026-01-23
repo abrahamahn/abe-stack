@@ -2,7 +2,8 @@
 /**
  * Integration tests for contract schema validation
  *
- * Tests that Zod schemas work together correctly with real-world data scenarios.
+ * Tests that schemas work together correctly with real-world data scenarios.
+ * Uses manual TypeScript validation (no longer using Zod).
  */
 
 import { randomUUID } from 'node:crypto';
@@ -69,8 +70,8 @@ describe('Contract Schema Integration', () => {
 
           // Verify error structure when validation fails
           if (!result.success) {
-            expect(result.error.issues.length).toBeGreaterThan(0);
-            expect(result.error.issues[0]).toHaveProperty('message');
+            expect(result.error).toBeInstanceOf(Error);
+            expect(result.error.message.length).toBeGreaterThan(0);
           }
         });
       });
@@ -110,8 +111,8 @@ describe('Contract Schema Integration', () => {
 
           // Verify error structure
           if (!result.success) {
-            expect(result.error.issues.length).toBeGreaterThan(0);
-            expect(result.error.issues[0].code).toBe('too_small');
+            expect(result.error).toBeInstanceOf(Error);
+            expect(result.error.message).toContain('8');
           }
         });
       });
@@ -150,7 +151,8 @@ describe('Contract Schema Integration', () => {
 
           // Verify error structure
           if (!result.success) {
-            expect(result.error.issues.length).toBeGreaterThan(0);
+            expect(result.error).toBeInstanceOf(Error);
+            expect(result.error.message.length).toBeGreaterThan(0);
           }
         });
       });
@@ -184,8 +186,8 @@ describe('Contract Schema Integration', () => {
         const result = nameSchema.safeParse('A');
         expect(result.success).toBe(false);
         if (!result.success) {
-          expect(result.error.issues.length).toBeGreaterThan(0);
-          expect(result.error.issues[0].code).toBe('too_small');
+          expect(result.error).toBeInstanceOf(Error);
+          expect(result.error.message).toContain('2');
         }
       });
     });
@@ -264,10 +266,10 @@ describe('Contract Schema Integration', () => {
         const result = loginRequestSchema.safeParse(loginData);
         expect(result.success).toBe(false);
 
-        // Verify error targets email field
+        // Verify error mentions email
         if (!result.success) {
-          const emailError = result.error.issues.find((i) => i.path.includes('email'));
-          expect(emailError).toBeDefined();
+          expect(result.error).toBeInstanceOf(Error);
+          expect(result.error.message.toLowerCase()).toContain('email');
         }
       });
 
@@ -280,10 +282,10 @@ describe('Contract Schema Integration', () => {
         const result = loginRequestSchema.safeParse(loginData);
         expect(result.success).toBe(false);
 
-        // Verify error targets password field
+        // Verify error mentions password
         if (!result.success) {
-          const passwordError = result.error.issues.find((i) => i.path.includes('password'));
-          expect(passwordError).toBeDefined();
+          expect(result.error).toBeInstanceOf(Error);
+          expect(result.error.message.toLowerCase()).toContain('password');
         }
       });
     });
@@ -335,10 +337,10 @@ describe('Contract Schema Integration', () => {
         const result = registerRequestSchema.safeParse(registerData);
         expect(result.success).toBe(false);
 
-        // Verify error targets name field
+        // Verify error mentions name
         if (!result.success) {
-          const nameError = result.error.issues.find((i) => i.path.includes('name'));
-          expect(nameError).toBeDefined();
+          expect(result.error).toBeInstanceOf(Error);
+          expect(result.error.message.toLowerCase()).toContain('name');
         }
       });
     });

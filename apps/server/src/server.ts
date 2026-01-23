@@ -24,7 +24,6 @@ import {
 } from '@http/index';
 import { RateLimiter } from '@rate-limit/index';
 import { isAppError, type ApiErrorResponse } from '@shared/index';
-import { sql } from 'drizzle-orm';
 import Fastify from 'fastify';
 
 import type { AppConfig } from '@config/index';
@@ -264,7 +263,7 @@ function registerCoreRoutes(server: FastifyInstance, db: DbClient): void {
     let dbHealthy = true;
 
     try {
-      await db.execute(sql`SELECT 1`);
+      await db.execute({ text: 'SELECT 1', values: [] });
     } catch (error) {
       dbHealthy = false;
       server.log.error({ err: error }, 'Database health check failed');

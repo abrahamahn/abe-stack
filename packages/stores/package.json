@@ -8,8 +8,7 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build && tsc-alias",
-    "dev": "echo 'Stores package uses source files directly'",
+    "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "type-check": "tsc --project tsconfig.json --noEmit",
     "test": "vitest run --project stores"

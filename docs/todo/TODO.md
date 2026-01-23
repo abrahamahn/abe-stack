@@ -8,8 +8,8 @@
 > **Distribution model:**
 >
 > - **Minimal Profile (default):** deployable core + auth + DB + basic UI + docs
-> - **SaaS Profile (optional):** billing/subscriptions + quotas + customer portal
-> - **Admin Profile (optional):** command center, security viewer, job monitor
+> - **SaaS Profile (complete):** billing/subscriptions + quotas + customer portal ✅
+> - **Admin Profile (complete):** command center, security viewer, job monitor ✅
 > - **Advanced Profile (optional):** realtime/offline sync, push, search, desktop, heavy media
 
 ---
@@ -18,29 +18,8 @@
 
 > **Goal:** Transition from Product Engineer (gluing libraries) to Systems Engineer (building engines).
 > Stay ultra framework-independent while keeping React + TypeScript.
-
-### 2) State/Data ✅
-
-Completed. See [2026-W04 log](../log/2026-W04.md#completed-statedata-package-reduction-priority-zero).
-
-### 3) Database
-
-- [ ] Remove `drizzle-orm`, `drizzle-kit`
-- [ ] Build raw SQL query builder with `postgres` driver
-- [ ] Enable micro-optimizations, sharding, advanced Postgres features (JSONB, specialized indexes)
-
-### 4) Testing
-
-- [ ] Remove `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`
-- [ ] Remove `jsdom`
-- [ ] Test logic in pure TypeScript
-- [ ] Use Playwright for all UI/integration tests
-
-### 5) Git Hooks
-
-- [ ] Remove `lint-staged`, `simple-git-hooks`
-- [ ] Create manual pre-commit scripts
-- [ ] Run linting/formatting directly without helper packages
+>
+> **Completed:** Database (drizzle→raw SQL), Push Notifications (removed), Validation (zod→manual), Build Tools (vite-tsconfig-paths removed). See `docs/log/2026-W04.md` for details.
 
 ### Packages to Keep (Dangerous to Code Manually)
 
@@ -52,7 +31,6 @@ Completed. See [2026-W04 log](../log/2026-W04.md#completed-statedata-package-red
 | `argon2`         | Never code your own password hashing                |
 | `postgres`       | Don't write your own DB driver protocol             |
 | `ws`             | Raw TCP socket management is a rabbit hole          |
-| `zod`            | Input parsing/validation is security-critical       |
 | `fastify`        | Schema validation + performance (industry standard) |
 | `vitest`         | Test runner                                         |
 | `playwright`     | E2E testing                                         |
@@ -62,6 +40,21 @@ Completed. See [2026-W04 log](../log/2026-W04.md#completed-statedata-package-red
 - [ ] **Manual Sync** - Own how data flows from DB to UI
 - [ ] **Raw Queries** - Own SQL structure and optimization
 
+### Future: Server Mode Flag
+
+Add environment flag to switch between server implementations:
+
+- [ ] Add `SERVER_MODE` env variable: `fastify` | `raw` | `both`
+- [ ] `fastify` (default) - Use Fastify framework only
+- [ ] `raw` - Use raw Node.js HTTP server only (maximum performance, minimal features)
+- [ ] `both` - Run both servers on different ports (for benchmarking)
+
+**Use cases:**
+
+- Production: `fastify` for full features (validation, hooks, plugins)
+- Benchmarking: `both` to compare performance
+- Edge/Lambda: `raw` for minimal cold start (future consideration)
+
 ---
 
 ## Immediate: Code Review
@@ -70,187 +63,10 @@ Completed. See [2026-W04 log](../log/2026-W04.md#completed-statedata-package-red
 
 ---
 
-## High Priority: One-Click Deploy (DigitalOcean / GCP Ubuntu)
+## Completed: PayPal Billing Adapter ✅
 
-**Goal:** clone → env → **one command** → production-ish deployment.
-
-### 5) CI/CD (keep it simple)
-
-- [ ] GitHub Actions “deploy” workflow (manual trigger is fine):
-  - build + test + docker build
-  - push images to registry
-  - SSH into server and pull + restart
-- [ ] Secrets checklist (env var template + required vars)
-- [ ] Add “Release checklist” gating deploy (see Docs section)
-
----
-
-## High Priority: Deployment & DevOps Orchestration (IaC + Pipeline)
-
-**Goal:** standardized infra + repeatable deployments across providers.
-
-### IaC
-
-- [ ] Choose one: **Terraform or Pulumi** (default to Terraform for ecosystem + adoption)
-- [ ] Provide minimal IaC modules:
-  - [ ] `infra/digitalocean/` (droplet + firewall + domain + optional managed db)
-  - [ ] `infra/gcp/` (compute instance + firewall + service account)
-  - [ ] Optional adapters: AWS/Vercel/Railway (only if it stays small)
-- [ ] “Bring-your-own” variables + outputs (domain, SSH keys, region, instance size)
-
-### CI/CD Pipeline (complete)
-
-- [ ] Full GitHub Actions workflow that respects your established build rules:
-  - [ ] `pnpm config:generate:check`
-  - [ ] Turbo-cached testing
-  - [ ] build artifacts + docker images
-  - [ ] deployment step (DO/GCP)
-- [ ] Environments: `staging` + `production`
-- [ ] Rollback strategy (previous image tags, health-check based)
-- [ ] Add “CI sanity mode” to keep PR checks fast (see Testing strip plan)
-
----
-
-## High Priority: Lean-Down / Strip Unnecessary Code (Without Losing Power)
-
-**Goal:** keep your “everything stack”, but ship as a **minimal default**.
-
-### 1) Define the “Minimal Profile” explicitly
-
-- [ ] Write `docs/profiles.md` defining:
-  - **Minimal** includes: web + server + postgres, auth, core UI kit, basic logging, basic tests
-  - **SaaS** includes: billing + subscriptions + portal + quotas
-  - **Admin** includes: command center dashboards
-  - **Advanced** includes: realtime/offline, push, search, cache desktop, heavy media
-- [ ] Add `FEATURE_FLAGS.md` or `config/features.ts`:
-  - `ENABLE_ADMIN`
-  - `ENABLE_BILLING`
-  - `ENABLE_REALTIME`
-  - `ENABLE_OFFLINE_QUEUE`
-  - `ENABLE_PUSH`
-  - `ENABLE_SEARCH`
-  - `ENABLE_CACHE`
-  - `ENABLE_MEDIA_PIPELINE`
-  - `ENABLE_DESKTOP`
-- [ ] Ensure disabling a feature removes runtime wiring (not just dead config)
-
-### 2) “Boilerplate Tax” Strip Plan (explicit)
-
-Create `docs/STRIP_PLAN.md` with the following defaults:
-
-#### A) Tests (reduce brittleness)
-
-- [ ] Introduce test tiers:
-  - `pnpm test` = fast unit + critical integration
-  - `pnpm test:full` = everything (heavy)
-  - `pnpm test:e2e` = Playwright
-- [ ] Strip default boilerplate tests down to **50–100 high-value tests**:
-  - Auth E2E (signup/login/magic link/oauth/logout all)
-  - Core SDK “happy path” integration
-  - Minimal DB persistence + migrations
-- [ ] Move the rest into `tests/templates/` (example patterns users copy)
-- [ ] CI: PRs run fast tests; nightly runs full
-
-#### B) Media processing (opt-in plugin)
-
-- [ ] Minimal profile uses a lightweight upload path (no heavy binaries)
-- [ ] Docs: "Enable Media Plugin" guide + dependency notes
-
-#### C) 5-phase SDK flow (advanced mode)
-
-- [ ] Minimal profile: `createRecordCache` behaves like a standard React Query wrapper
-- [ ] Advanced profile: keep Optimistic → Persist → Sync → Confirm → Reconcile
-- [ ] Provide a “Switch to Advanced Sync Mode” guide
-- [ ] Default templates should not require TransactionQueue/conflict resolution knowledge
-
-#### D) Security hardening defaults (don’t scare new users)
-
-- [ ] Minimal profile defaults:
-  - Argon2id (standard parameters)
-  - Standard CSRF tokens (non-AES complexity)
-- [ ] Advanced security goes to docs:
-  - `docs/security-hardening.md` (dummy hash pool, special CSRF crypto, etc.)
-- [ ] Keep advanced security available as toggles, not hardwired
-
-### 3) Modular boundaries cleanup
-
-- [ ] Move optional features into isolated modules:
-  - `apps/server/src/modules/*` (billing, admin, realtime, push, media)
-- [ ] SDK exports grouped by feature (minimal consumers don’t import everything)
-- [ ] Ensure stubs are not shipped in Minimal (or clearly marked experimental)
-
-### 4) Controlled “Delete list”
-
-- [ ] `docs/STRIP_PLAN.md` lists what can be removed safely in Minimal:
-  - Desktop app
-  - Push notifications
-  - Realtime/offline
-  - Search/filtering
-  - Cache provider
-  - Media plugin
-  - Demo catalogs
-- [ ] Provide “re-enable” instructions for each
-
----
-
-## High Priority: The Administrative "Command Center" (Admin Profile)
-
-**Goal:** standardized admin UI so every app doesn't reinvent it.
-
-### Admin UI: User Management
-
-- [ ] Admin dashboard shell + navigation
-- [ ] User list (search/filter/pagination)
-- [ ] User detail: roles, email verification status, disable/ban, reset sessions
-- [ ] Manual email verify / resend verification
-- [ ] Role management UI (RBAC-friendly)
-
-### Security Audit Viewer
-
-- [ ] UI to visualize `security_events` (token reuse alerts, lockout events, suspicious activity)
-- [ ] Filters: user, event type, date range
-- [ ] Drill-down view for event details
-- [ ] Export (CSV/JSON) for incident review
-
-### Job Monitor (infra/queue)
-
-- [ ] Queue dashboard:
-  - pending, running, failed, retrying, dead-letter
-- [ ] Job details: payload metadata (safe redaction), retries, last error
-- [ ] Manual retry / cancel job controls
-- [ ] Basic alert surface (spikes in failures)
-
----
-
-## High Priority: Standardized Billing (SaaS Profile)
-
-**Goal:** boilerplate SaaS billing that just works.
-
-### Choose Provider + Abstraction
-
-- [ ] Stripe-first implementation
-- [ ] Optional LemonSqueezy adapter (behind interface)
-
-### Subscription Logic
-
-- [ ] Webhook handlers:
-  - subscription created/updated/canceled
-  - payment success/failure
-  - refunds/chargebacks handling policy
-- [ ] Pricing table UI components
-- [ ] Customer portal integration (manage payment method, cancel, invoices)
-
-### Entitlements + Usage Tracking
-
-- [ ] Define “entitlements” model:
-  - plan → features → limits
-- [ ] Link realtime/transaction/queue usage to quotas:
-  - usage counters
-  - monthly reset
-  - overage policy (block vs degrade vs bill)
-- [ ] Admin override for entitlements (support workflows)
-
----
+> **Note:** Both Stripe and PayPal billing are complete. See `docs/log/2026-W04.md` for implementation details.
+> PayPal provider implements full parity with Stripe: subscriptions, webhooks, checkout flow.
 
 ## High Priority: User Profile & Settings UI
 
@@ -271,11 +87,6 @@ Create `docs/STRIP_PLAN.md` with the following defaults:
 - [ ] 2FA setup UI (TOTP) + recovery codes
 - [ ] Password change UI (with strength guidance)
 - [ ] Device/login history (if you have events already)
-
-### Billing hook (if SaaS enabled)
-
-- [ ] Show current plan + limits + usage
-- [ ] Link to customer portal
 
 ---
 
@@ -349,6 +160,89 @@ Create `docs/STRIP_PLAN.md` with the following defaults:
 
 ---
 
+## High Priority: Lean-Down / Strip Unnecessary Code (Without Losing Power)
+
+**Goal:** keep your “everything stack”, but ship as a **minimal default**.
+
+### 1) Define the “Minimal Profile” explicitly
+
+- [ ] Write `docs/profiles.md` defining:
+  - **Minimal** includes: web + server + postgres, auth, core UI kit, basic logging, basic tests
+  - **SaaS** includes: billing + subscriptions + portal + quotas
+  - **Admin** includes: command center dashboards
+  - **Advanced** includes: realtime/offline, push, search, cache desktop, heavy media
+- [ ] Add `FEATURE_FLAGS.md` or `config/features.ts`:
+  - `ENABLE_ADMIN`
+  - `ENABLE_BILLING`
+  - `ENABLE_REALTIME`
+  - `ENABLE_OFFLINE_QUEUE`
+  - `ENABLE_PUSH`
+  - `ENABLE_SEARCH`
+  - `ENABLE_CACHE`
+  - `ENABLE_MEDIA_PIPELINE`
+  - `ENABLE_DESKTOP`
+  - `USE_RAW_SQL` - Toggle between drizzle-orm and raw SQL query builder for A/B testing
+- [ ] Ensure disabling a feature removes runtime wiring (not just dead config)
+
+### 2) “Boilerplate Tax” Strip Plan (explicit)
+
+Create `docs/STRIP_PLAN.md` with the following defaults:
+
+#### A) Tests (reduce brittleness)
+
+- [ ] Introduce test tiers:
+  - `pnpm test` = fast unit + critical integration
+  - `pnpm test:full` = everything (heavy)
+  - `pnpm test:e2e` = Playwright
+- [ ] Strip default boilerplate tests down to **50–100 high-value tests**:
+  - Auth E2E (signup/login/magic link/oauth/logout all)
+  - Core SDK “happy path” integration
+  - Minimal DB persistence + migrations
+- [ ] Move the rest into `tests/templates/` (example patterns users copy)
+- [ ] CI: PRs run fast tests; nightly runs full
+
+#### B) Media processing (opt-in plugin)
+
+- [ ] Minimal profile uses a lightweight upload path (no heavy binaries)
+- [ ] Docs: "Enable Media Plugin" guide + dependency notes
+
+#### C) 5-phase SDK flow (advanced mode)
+
+- [ ] Minimal profile: `createRecordCache` behaves like a standard React Query wrapper
+- [ ] Advanced profile: keep Optimistic → Persist → Sync → Confirm → Reconcile
+- [ ] Provide a “Switch to Advanced Sync Mode” guide
+- [ ] Default templates should not require TransactionQueue/conflict resolution knowledge
+
+#### D) Security hardening defaults (don’t scare new users)
+
+- [ ] Minimal profile defaults:
+  - Argon2id (standard parameters)
+  - Standard CSRF tokens (non-AES complexity)
+- [ ] Advanced security goes to docs:
+  - `docs/security-hardening.md` (dummy hash pool, special CSRF crypto, etc.)
+- [ ] Keep advanced security available as toggles, not hardwired
+
+### 3) Modular boundaries cleanup
+
+- [ ] Move optional features into isolated modules:
+  - `apps/server/src/modules/*` (billing, admin, realtime, push, media)
+- [ ] SDK exports grouped by feature (minimal consumers don’t import everything)
+- [ ] Ensure stubs are not shipped in Minimal (or clearly marked experimental)
+
+### 4) Controlled “Delete list”
+
+- [ ] `docs/STRIP_PLAN.md` lists what can be removed safely in Minimal:
+  - Desktop app
+  - Push notifications
+  - Realtime/offline
+  - Search/filtering
+  - Cache provider
+  - Media plugin
+  - Demo catalogs
+- [ ] Provide “re-enable” instructions for each
+
+---
+
 ## Unused Code to Integrate
 
 Code that exists but isn't used anywhere. Integrate when implementing related tasks. :contentReference[oaicite:29]{index=29}
@@ -409,4 +303,26 @@ If no to all three, it goes in `docs/ROADMAP.md`. :contentReference[oaicite:38]{
 
 ---
 
-_Last Updated: 2026-01-22 (Completed items moved to docs/log/2026-W04.md)_
+## Final: Post-Trimdown Package Removal
+
+> **Do this LAST** after test trimdown is complete (see "Boilerplate Tax" Strip Plan above).
+
+### Remove @testing-library
+
+Once unit tests are trimmed to 50-100 high-value tests, evaluate removing `@testing-library/*`:
+
+- [ ] Audit remaining tests - how many use `@testing-library/react`?
+- [ ] Convert critical component tests to Playwright E2E or simple `vitest` + `jsdom`
+- [ ] Remove packages from root `package.json`:
+  - `@testing-library/jest-dom`
+  - `@testing-library/react`
+  - `@testing-library/user-event`
+- [ ] Update test patterns documentation
+
+**Rationale:** Testing-library encourages many granular unit tests. After trimdown, if most value comes from E2E tests (Playwright) and integration tests (vitest + fastify inject), these packages become unnecessary weight.
+
+**Keep if:** Component-level testing remains valuable after trimdown.
+
+---
+
+_Last Updated: 2026-01-23 (SaaS Billing + Admin Command Center complete - see docs/log/2026-W04.md)_

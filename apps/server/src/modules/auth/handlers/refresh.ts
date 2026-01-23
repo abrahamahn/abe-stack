@@ -38,6 +38,7 @@ export async function handleRefresh(
   try {
     const result = await refreshUserTokens(
       ctx.db,
+      ctx.repos,
       ctx.config.auth,
       oldRefreshToken,
       ipAddress,

@@ -74,6 +74,18 @@ export default defineConfig({
         },
       },
 
+      // packages/db
+      {
+        test: {
+          name: 'db',
+          root: path.join(repoRoot, 'packages/db'),
+          environment: 'node',
+          globals: true,
+          include: ['src/**/*.{test,spec}.ts'],
+          exclude: commonExclude,
+        },
+      },
+
       // packages/sdk
       {
         test: {

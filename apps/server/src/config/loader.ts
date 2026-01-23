@@ -7,6 +7,7 @@
  */
 
 import { loadAuthConfig } from '@config/auth.config';
+import { loadBillingConfig, validateBillingConfig } from '@config/billing.config';
 import { loadDatabaseConfig } from '@config/database.config';
 import { loadEmailConfig } from '@config/email.config';
 import { loadServerConfig } from '@config/server.config';
@@ -31,6 +32,7 @@ export function loadConfig(env: Record<string, string | undefined>): AppConfig {
     auth: loadAuthConfig(env),
     email: loadEmailConfig(env),
     storage: loadStorageConfig(env),
+    billing: loadBillingConfig(env),
   };
 
   // Validate critical settings
@@ -76,6 +78,12 @@ function validateConfig(config: AppConfig): void {
   }
   if (config.email.provider === 'smtp' && !config.email.smtp.host) {
     errors.push('SMTP_HOST is required when email provider is "smtp"');
+  }
+
+  // Billing configuration validations
+  if (config.billing) {
+    const billingErrors = validateBillingConfig(config.billing);
+    errors.push(...billingErrors);
   }
 
   if (errors.length > 0) {

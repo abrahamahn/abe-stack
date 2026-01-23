@@ -6,10 +6,9 @@
  */
 
 import { parseCookies } from '@abe-stack/core/http';
-import { users } from '@database/schema/users';
 import { validateCsrfToken } from '@http';
 import { verifyToken } from '@modules/auth/utils/jwt';
-import { eq } from 'drizzle-orm';
+import { select, eq, USERS_TABLE } from '@abe-stack/db';
 import { WebSocketServer, type WebSocket } from 'ws';
 
 import type { AppContext } from '@shared';
@@ -18,38 +17,35 @@ import type { IncomingMessage } from 'node:http';
 import type { Duplex } from 'node:stream';
 
 // ============================================================================
-// Database Query Builders
+// Database Query Helpers
 // ============================================================================
 
 /**
- * Type-safe mapping of allowed subscription tables to their query builders.
+ * Get version for a record in a table by id.
+ * Returns undefined if the record doesn't exist.
  */
-function getTableQueryBuilder(
+async function getRecordVersion(
   db: AppContext['db'],
   table: string,
-): {
-  findFirst: (options: {
-    where: (t: typeof users, ops: { eq: typeof eq }) => ReturnType<typeof eq>;
-    columns: { version: boolean };
-  }) => Promise<{ version: number } | undefined>;
-} | null {
-  switch (table) {
-    case 'users':
-      return {
-        findFirst: (options: {
-          where: (t: typeof users, ops: { eq: typeof eq }) => ReturnType<typeof eq>;
-          columns: { version: boolean };
-        }): Promise<{ version: number } | undefined> => {
-          return db.query.users.findFirst({
-            where: options.where(users, { eq }),
-            columns: { version: true },
-          });
-        },
-      };
-    default:
-      // For other tables that might be added later, return null for now
-      return null;
-  }
+  id: string,
+): Promise<number | undefined> {
+  // Map table names to their actual table names
+  const tableMap: Record<string, string> = {
+    users: USERS_TABLE,
+  };
+
+  const actualTable = tableMap[table];
+  if (!actualTable) return undefined;
+
+  const row = await db.queryOne<{ version: number }>(
+    select(actualTable)
+      .columns('version')
+      .where(eq('id', id))
+      .limit(1)
+      .toSql(),
+  );
+
+  return row?.version;
 }
 
 // ============================================================================
@@ -341,16 +337,10 @@ async function sendInitialData(ctx: AppContext, socket: WebSocket, key: string):
   const { table, id } = validation;
 
   try {
-    const queryBuilder = getTableQueryBuilder(ctx.db, table);
-    if (!queryBuilder) return;
+    const version = await getRecordVersion(ctx.db, table, id);
 
-    const record = await queryBuilder.findFirst({
-      where: (t, { eq }) => eq(t.id, id),
-      columns: { version: true },
-    });
-
-    if (record) {
-      socket.send(JSON.stringify({ type: 'update', key, version: record.version }));
+    if (version !== undefined) {
+      socket.send(JSON.stringify({ type: 'update', key, version }));
     }
   } catch (err) {
     ctx.log.warn({ err, key }, 'Failed to fetch initial data for subscription');

@@ -34,7 +34,7 @@ export function loadServerConfig(env: Record<string, string | undefined>): Serve
     port,
     portFallbacks: [defaultPort, defaultPort + 1, defaultPort + 2, defaultPort + 3],
     cors: {
-      origin: env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:3000',
+      origin: env.CORS_ORIGIN || `http://localhost:${String(appPort)}`,
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     },

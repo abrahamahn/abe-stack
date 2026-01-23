@@ -1,0 +1,251 @@
+name: Infrastructure Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      provider:
+        description: 'Cloud provider'
+        required: true
+        default: 'digitalocean'
+        type: choice
+        options:
+          - digitalocean
+          - gcp
+      action:
+        description: 'Terraform action'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+          - apply
+          - plan
+      auto_approve:
+        description: 'Auto-approve terraform apply (only applies to apply action)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  id-token: write # Required for GCP Workload Identity
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'staging' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.0"
+
+      - name: Configure AWS Credentials (for state backend)
+        if: env.AWS_ACCESS_KEY_ID
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+      - name: Terraform Format Check
+        run: |
+          cd infra
+          terraform fmt -check -recursive
+
+      - name: Terraform Validate
+        run: |
+          cd infra
+          terraform init -backend=false
+          terraform validate
+
+  deploy-infrastructure:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'staging' }}
+    needs: validate
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.0"
+
+      # Configure cloud provider credentials
+      - name: Configure DigitalOcean Credentials
+        if: inputs.provider == 'digitalocean'
+        run: |
+          echo "DIGITALOCEAN_TOKEN=${{ secrets.DIGITALOCEAN_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Authenticate to Google Cloud
+        if: inputs.provider == 'gcp'
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Google Cloud SDK
+        if: inputs.provider == 'gcp'
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure AWS Credentials (for state backend)
+        if: env.AWS_ACCESS_KEY_ID
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+      # Create terraform.tfvars file
+      - name: Create Terraform Variables File
+        run: |
+          cd infra
+          cat > terraform.tfvars << EOF
+          # Environment Configuration
+          environment = "${{ inputs.environment || 'staging' }}"
+
+          # Domain Configuration
+          domain = "${{ secrets.DOMAIN }}"
+
+          # SSH Configuration
+          ssh_public_key = "${{ secrets.SSH_PUBLIC_KEY }}"
+
+          # Provider-specific configuration
+          EOF
+
+          # Add provider-specific variables
+          if [ "${{ inputs.provider }}" = "digitalocean" ]; then
+            cat >> terraform.tfvars << EOF
+          digitalocean_token = "${{ secrets.DIGITALOCEAN_TOKEN }}"
+
+          # DigitalOcean Configuration
+          region = "${{ vars.DO_REGION || 'nyc1' }}"
+          instance_size = "${{ vars.DO_INSTANCE_SIZE || 's-1vcpu-1gb' }}"
+          enable_managed_database = ${{ vars.DO_ENABLE_MANAGED_DB || 'false' }}
+          database_size = "${{ vars.DO_DATABASE_SIZE || 'db-s-1vcpu-1gb' }}"
+          EOF
+          elif [ "${{ inputs.provider }}" = "gcp" ]; then
+            cat >> terraform.tfvars << EOF
+          gcp_project_id = "${{ vars.GCP_PROJECT_ID }}"
+
+          # GCP Configuration
+          region = "${{ vars.GCP_REGION || 'us-central1' }}"
+          zone = "${{ vars.GCP_ZONE || 'us-central1-a' }}"
+          instance_size = "${{ vars.GCP_INSTANCE_SIZE || 'e2-small' }}"
+          enable_managed_database = ${{ vars.GCP_ENABLE_MANAGED_DB || 'false' }}
+          database_size = "${{ vars.GCP_DATABASE_SIZE || 'db-f1-micro' }}"
+          database_username = "${{ secrets.GCP_DB_USERNAME || 'abe_user' }}"
+          database_password = "${{ secrets.GCP_DB_PASSWORD }}"
+          EOF
+          fi
+
+      - name: Terraform Init
+        run: |
+          cd infra/${{ inputs.provider }}
+          terraform init
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          cd infra/${{ inputs.provider }}
+          terraform plan -out=tfplan -var-file=../terraform.tfvars
+
+          # Save plan output for summary
+          terraform show -no-color tfplan > tfplan.txt
+
+      - name: Terraform Plan Summary
+        run: |
+          cd infra/${{ inputs.provider }}
+          echo "## Terraform Plan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          cat tfplan.txt | head -50 >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "... (truncated)" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Terraform Apply
+        if: inputs.action == 'apply' && (inputs.auto_approve || github.event.inputs.auto_approve == 'true')
+        run: |
+          cd infra/${{ inputs.provider }}
+          terraform apply -auto-approve tfplan
+
+      - name: Terraform Apply (Manual Approval Required)
+        if: inputs.action == 'apply' && !(inputs.auto_approve || github.event.inputs.auto_approve == 'true')
+        run: |
+          echo "Infrastructure deployment requires manual approval."
+          echo "Review the plan above and re-run with auto_approve=true if changes look correct."
+          exit 1
+
+      - name: Wait for Infrastructure to be Ready
+        if: inputs.action == 'apply' && (inputs.auto_approve || github.event.inputs.auto_approve == 'true')
+        run: |
+          echo "Waiting for infrastructure to be fully ready..."
+          sleep 60 # Give time for startup scripts to complete
+
+      - name: Extract Infrastructure Outputs
+        if: inputs.action == 'apply' && (inputs.auto_approve || github.event.inputs.auto_approve == 'true')
+        id: outputs
+        run: |
+          cd infra/${{ inputs.provider }}
+
+          # Extract outputs and create deployment info
+          echo "## 🚀 Infrastructure Deployed Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Get outputs
+          INSTANCE_IP=$(terraform output -raw instance_public_ip 2>/dev/null || echo "N/A")
+          SSH_CONNECTION=$(terraform output -raw ssh_connection_string 2>/dev/null || echo "N/A")
+          DOMAIN=$(terraform output -raw domain_name 2>/dev/null || echo "N/A")
+
+          echo "**Instance IP:** $INSTANCE_IP" >> $GITHUB_STEP_SUMMARY
+          echo "**SSH Connection:** \`$SSH_CONNECTION\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Domain:** $DOMAIN" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Export for other jobs/workflows
+          echo "INSTANCE_IP=$INSTANCE_IP" >> $GITHUB_OUTPUT
+          echo "SSH_CONNECTION=$SSH_CONNECTION" >> $GITHUB_OUTPUT
+          echo "DOMAIN=$DOMAIN" >> $GITHUB_OUTPUT
+
+          # Save deployment info to file for other workflows
+          mkdir -p ../../.deploy
+          cat > ../../.deploy/${{ inputs.environment }}-${{ inputs.provider }}.json << EOF
+          {
+            "environment": "${{ inputs.environment }}",
+            "provider": "${{ inputs.provider }}",
+            "instance_ip": "$INSTANCE_IP",
+            "ssh_connection": "$SSH_CONNECTION",
+            "domain": "$DOMAIN",
+            "deployed_at": "$(date -Iseconds)",
+            "commit_sha": "${{ github.sha }}"
+          }
+          EOF
+
+      - name: Upload Terraform State (if using local backend)
+        if: inputs.action == 'apply' && (inputs.auto_approve || github.event.inputs.auto_approve == 'true')
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-state-${{ inputs.environment }}-${{ inputs.provider }}
+          path: infra/${{ inputs.provider }}/.terraform/
+          retention-days: 30
+
+      - name: Upload Deployment Info
+        if: inputs.action == 'apply' && (inputs.auto_approve || github.event.inputs.auto_approve == 'true')
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-info-${{ inputs.environment }}-${{ inputs.provider }}
+          path: .deploy/
+          retention-days: 30

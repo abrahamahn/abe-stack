@@ -6,9 +6,8 @@
  * Uses the generic router pattern for DRY registration.
  */
 
-import { recordPointerSchema, transactionSchema } from '@abe-stack/core';
+import { getRecordsRequestSchema, transactionSchema } from '@abe-stack/core';
 import { protectedRoute, type RouteMap, type RouteResult } from '@router';
-import { z } from 'zod';
 
 import {
   handleGetRecords,
@@ -18,19 +17,9 @@ import {
   type WriteResult,
 } from './handlers';
 
-import type { RecordPointer, RealtimeTransaction } from '@abe-stack/core';
+import type { GetRecordsRequest, RecordPointer, RealtimeTransaction } from '@abe-stack/core';
 import type { AppContext, RequestWithCookies } from '@shared';
 import type { FastifyReply } from 'fastify';
-
-// ============================================================================
-// Request Schemas
-// ============================================================================
-
-const getRecordsRequestSchema = z.object({
-  pointers: z.array(recordPointerSchema).min(1).max(100),
-});
-
-type GetRecordsRequest = z.infer<typeof getRecordsRequestSchema>;
 
 // ============================================================================
 // Route Definitions

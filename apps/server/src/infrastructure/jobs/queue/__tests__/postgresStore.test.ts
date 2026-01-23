@@ -4,23 +4,25 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { PostgresQueueStore, createPostgresQueueStore } from '../postgresStore';
 
 import type { Task, TaskError, TaskResult } from '../types';
+import type { DbClient } from '@database';
 
 // ============================================================================
 // Mock Database Client
 // ============================================================================
 
-interface MockQueryResult {
-  rows: unknown[];
-  rowCount: number;
+function createMockDb() {
+  return {
+    query: vi.fn().mockResolvedValue([]),
+    queryOne: vi.fn().mockResolvedValue(null),
+    execute: vi.fn().mockResolvedValue(0),
+    raw: vi.fn().mockResolvedValue([]),
+  };
 }
 
-function createMockDb() {
-  const mockExecute = vi.fn<(sql: unknown) => Promise<MockQueryResult>>();
+type MockDb = ReturnType<typeof createMockDb>;
 
-  return {
-    execute: mockExecute,
-    mockExecute,
-  };
+function asMockDb(mock: MockDb): DbClient {
+  return mock as unknown as DbClient;
 }
 
 // ============================================================================
@@ -59,14 +61,12 @@ function createTaskRow(task: Task) {
 
 describe('PostgresQueueStore', () => {
   let store: PostgresQueueStore;
-  let mockDb: ReturnType<typeof createMockDb>;
+  let mockDb: MockDb;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockDb = createMockDb();
-    store = new PostgresQueueStore(
-      mockDb as unknown as Parameters<typeof createPostgresQueueStore>[0],
-    );
+    store = new PostgresQueueStore(asMockDb(mockDb));
   });
 
   // ============================================================================
@@ -76,13 +76,17 @@ describe('PostgresQueueStore', () => {
   describe('enqueue', () => {
     test('should insert task into database', async () => {
       const task = createTestTask();
-      mockDb.mockExecute.mockResolvedValueOnce({ rows: [], rowCount: 1 });
+      mockDb.execute.mockResolvedValueOnce(1);
 
       await store.enqueue(task);
 
-      expect(mockDb.mockExecute).toHaveBeenCalledTimes(1);
-      // Verify the SQL template was called (we can't easily inspect the exact SQL)
-      expect(mockDb.mockExecute).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalledTimes(1);
+      expect(mockDb.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining('INSERT INTO job_queue'),
+          values: expect.arrayContaining([task.id, task.name]),
+        }),
+      );
     });
 
     test('should handle task with complex args', async () => {
@@ -93,17 +97,17 @@ describe('PostgresQueueStore', () => {
           string: 'test',
         },
       });
-      mockDb.mockExecute.mockResolvedValueOnce({ rows: [], rowCount: 1 });
+      mockDb.execute.mockResolvedValueOnce(1);
 
       await store.enqueue(task);
 
-      expect(mockDb.mockExecute).toHaveBeenCalledTimes(1);
+      expect(mockDb.execute).toHaveBeenCalledTimes(1);
     });
 
     test('should propagate database errors', async () => {
       const task = createTestTask();
       const dbError = new Error('Connection failed');
-      mockDb.mockExecute.mockRejectedValueOnce(dbError);
+      mockDb.execute.mockRejectedValueOnce(dbError);
 
       await expect(store.enqueue(task)).rejects.toThrow('Connection failed');
     });
@@ -118,10 +122,7 @@ describe('PostgresQueueStore', () => {
       const task = createTestTask({ attempts: 0 });
       const row = createTaskRow({ ...task, attempts: 1 }); // Attempts incremented by query
 
-      mockDb.mockExecute.mockResolvedValueOnce({
-        rows: [row],
-        rowCount: 1,
-      });
+      mockDb.raw.mockResolvedValueOnce([row]);
 
       const result = await store.dequeue(new Date().toISOString());
 
@@ -132,10 +133,7 @@ describe('PostgresQueueStore', () => {
     });
 
     test('should return null when no tasks are available', async () => {
-      mockDb.mockExecute.mockResolvedValueOnce({
-        rows: [],
-        rowCount: 0,
-      });
+      mockDb.raw.mockResolvedValueOnce([]);
 
       const result = await store.dequeue(new Date().toISOString());
 
@@ -146,8 +144,7 @@ describe('PostgresQueueStore', () => {
       const task = createTestTask();
       const row = createTaskRow({ ...task, attempts: 1 });
 
-      // Some Drizzle versions return array directly
-      mockDb.mockExecute.mockResolvedValueOnce([row] as unknown as MockQueryResult);
+      mockDb.raw.mockResolvedValueOnce([row]);
 
       const result = await store.dequeue(new Date().toISOString());
 
@@ -166,10 +163,7 @@ describe('PostgresQueueStore', () => {
         created_at: '2024-01-15T09:00:00.000Z',
       };
 
-      mockDb.mockExecute.mockResolvedValueOnce({
-        rows: [row],
-        rowCount: 1,
-      });
+      mockDb.raw.mockResolvedValueOnce([row]);
 
       const result = await store.dequeue(new Date().toISOString());
 
@@ -198,11 +192,16 @@ describe('PostgresQueueStore', () => {
         durationMs: 150,
       };
 
-      mockDb.mockExecute.mockResolvedValueOnce({ rows: [], rowCount: 1 });
+      mockDb.execute.mockResolvedValueOnce(1);
 
       await store.complete('task-123', taskResult);
 
-      expect(mockDb.mockExecute).toHaveBeenCalledTimes(1);
+      expect(mockDb.execute).toHaveBeenCalledTimes(1);
+      expect(mockDb.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining('UPDATE job_queue'),
+        }),
+      );
     });
 
     test('should handle completion with error result', async () => {
@@ -214,11 +213,11 @@ describe('PostgresQueueStore', () => {
         durationMs: 50,
       };
 
-      mockDb.mockExecute.mockResolvedValueOnce({ rows: [], rowCount: 1 });
+      mockDb.execute.mockResolvedValueOnce(1);
 
       await store.complete('task-123', taskResult);
 
-      expect(mockDb.mockExecute).toHaveBeenCalledTimes(1);
+      expect(mockDb.execute).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -235,11 +234,16 @@ describe('PostgresQueueStore', () => {
       };
       const nextAttemptAt = new Date(Date.now() + 60000).toISOString();
 
-      mockDb.mockExecute.mockResolvedValueOnce({ rows: [], rowCount: 1 });
+      mockDb.execute.mockResolvedValueOnce(1);
 
       await store.fail('task-123', error, nextAttemptAt);
 
-      expect(mockDb.mockExecute).toHaveBeenCalledTimes(1);
+      expect(mockDb.execute).toHaveBeenCalledTimes(1);
+      expect(mockDb.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining('status = \'pending\''),
+        }),
+      );
     });
 
     test('should mark task as permanently failed when no nextAttemptAt', async () => {
@@ -248,11 +252,16 @@ describe('PostgresQueueStore', () => {
         message: 'Unrecoverable error',
       };
 
-      mockDb.mockExecute.mockResolvedValueOnce({ rows: [], rowCount: 1 });
+      mockDb.execute.mockResolvedValueOnce(1);
 
       await store.fail('task-123', error);
 
-      expect(mockDb.mockExecute).toHaveBeenCalledTimes(1);
+      expect(mockDb.execute).toHaveBeenCalledTimes(1);
+      expect(mockDb.execute).toHaveBeenCalledWith(
+        expect.objectContaining({
+          text: expect.stringContaining('status = \'failed\''),
+        }),
+      );
     });
 
     test('should handle error without stack trace', async () => {
@@ -261,11 +270,11 @@ describe('PostgresQueueStore', () => {
         message: 'Simple error',
       };
 
-      mockDb.mockExecute.mockResolvedValueOnce({ rows: [], rowCount: 1 });
+      mockDb.execute.mockResolvedValueOnce(1);
 
       await store.fail('task-123', error);
 
-      expect(mockDb.mockExecute).toHaveBeenCalledTimes(1);
+      expect(mockDb.execute).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -278,10 +287,7 @@ describe('PostgresQueueStore', () => {
       const task = createTestTask({ id: 'task-abc' });
       const row = createTaskRow(task);
 
-      mockDb.mockExecute.mockResolvedValueOnce({
-        rows: [row],
-        rowCount: 1,
-      });
+      mockDb.raw.mockResolvedValueOnce([row]);
 
       const result = await store.get('task-abc');
 
@@ -290,10 +296,7 @@ describe('PostgresQueueStore', () => {
     });
 
     test('should return null for non-existent task', async () => {
-      mockDb.mockExecute.mockResolvedValueOnce({
-        rows: [],
-        rowCount: 0,
-      });
+      mockDb.raw.mockResolvedValueOnce([]);
 
       const result = await store.get('non-existent');
 
@@ -304,7 +307,7 @@ describe('PostgresQueueStore', () => {
       const task = createTestTask();
       const row = createTaskRow(task);
 
-      mockDb.mockExecute.mockResolvedValueOnce([row] as unknown as MockQueryResult);
+      mockDb.raw.mockResolvedValueOnce([row]);
 
       const result = await store.get(task.id);
 
@@ -318,10 +321,7 @@ describe('PostgresQueueStore', () => {
 
   describe('getPendingCount', () => {
     test('should return pending task count', async () => {
-      mockDb.mockExecute.mockResolvedValueOnce({
-        rows: [{ count: '42' }],
-        rowCount: 1,
-      });
+      mockDb.raw.mockResolvedValueOnce([{ count: '42' }]);
 
       const count = await store.getPendingCount();
 
@@ -329,10 +329,7 @@ describe('PostgresQueueStore', () => {
     });
 
     test('should return 0 when no pending tasks', async () => {
-      mockDb.mockExecute.mockResolvedValueOnce({
-        rows: [{ count: '0' }],
-        rowCount: 1,
-      });
+      mockDb.raw.mockResolvedValueOnce([{ count: '0' }]);
 
       const count = await store.getPendingCount();
 
@@ -340,10 +337,7 @@ describe('PostgresQueueStore', () => {
     });
 
     test('should handle empty result', async () => {
-      mockDb.mockExecute.mockResolvedValueOnce({
-        rows: [],
-        rowCount: 0,
-      });
+      mockDb.raw.mockResolvedValueOnce([]);
 
       const count = await store.getPendingCount();
 
@@ -351,10 +345,7 @@ describe('PostgresQueueStore', () => {
     });
 
     test('should parse string count to number', async () => {
-      mockDb.mockExecute.mockResolvedValueOnce({
-        rows: [{ count: '1000000' }],
-        rowCount: 1,
-      });
+      mockDb.raw.mockResolvedValueOnce([{ count: '1000000' }]);
 
       const count = await store.getPendingCount();
 
@@ -369,10 +360,7 @@ describe('PostgresQueueStore', () => {
 
   describe('getFailedCount', () => {
     test('should return failed task count', async () => {
-      mockDb.mockExecute.mockResolvedValueOnce({
-        rows: [{ count: '5' }],
-        rowCount: 1,
-      });
+      mockDb.raw.mockResolvedValueOnce([{ count: '5' }]);
 
       const count = await store.getFailedCount();
 
@@ -380,10 +368,7 @@ describe('PostgresQueueStore', () => {
     });
 
     test('should return 0 when no failed tasks', async () => {
-      mockDb.mockExecute.mockResolvedValueOnce({
-        rows: [{ count: '0' }],
-        rowCount: 1,
-      });
+      mockDb.raw.mockResolvedValueOnce([{ count: '0' }]);
 
       const count = await store.getFailedCount();
 
@@ -391,10 +376,7 @@ describe('PostgresQueueStore', () => {
     });
 
     test('should handle empty result', async () => {
-      mockDb.mockExecute.mockResolvedValueOnce({
-        rows: [],
-        rowCount: 0,
-      });
+      mockDb.raw.mockResolvedValueOnce([]);
 
       const count = await store.getFailedCount();
 
@@ -408,10 +390,7 @@ describe('PostgresQueueStore', () => {
 
   describe('clearCompleted', () => {
     test('should return number of cleared tasks', async () => {
-      mockDb.mockExecute.mockResolvedValueOnce({
-        rows: [],
-        rowCount: 10,
-      });
+      mockDb.execute.mockResolvedValueOnce(10);
 
       const cleared = await store.clearCompleted('2024-01-01T00:00:00.000Z');
 
@@ -419,10 +398,7 @@ describe('PostgresQueueStore', () => {
     });
 
     test('should return 0 when no tasks cleared', async () => {
-      mockDb.mockExecute.mockResolvedValueOnce({
-        rows: [],
-        rowCount: 0,
-      });
+      mockDb.execute.mockResolvedValueOnce(0);
 
       const cleared = await store.clearCompleted('2024-01-01T00:00:00.000Z');
 
@@ -430,10 +406,7 @@ describe('PostgresQueueStore', () => {
     });
 
     test('should handle null rowCount', async () => {
-      mockDb.mockExecute.mockResolvedValueOnce({
-        rows: [],
-        rowCount: null as unknown as number,
-      });
+      mockDb.execute.mockResolvedValueOnce(0);
 
       const cleared = await store.clearCompleted('2024-01-01T00:00:00.000Z');
 
@@ -441,9 +414,7 @@ describe('PostgresQueueStore', () => {
     });
 
     test('should handle result without rowCount property', async () => {
-      mockDb.mockExecute.mockResolvedValueOnce({
-        rows: [],
-      } as unknown as MockQueryResult);
+      mockDb.execute.mockResolvedValueOnce(0);
 
       const cleared = await store.clearCompleted('2024-01-01T00:00:00.000Z');
 
@@ -458,20 +429,16 @@ describe('PostgresQueueStore', () => {
   describe('createPostgresQueueStore', () => {
     test('should create PostgresQueueStore instance', () => {
       const db = createMockDb();
-      const store = createPostgresQueueStore(
-        db as unknown as Parameters<typeof createPostgresQueueStore>[0],
-      );
+      const store = createPostgresQueueStore(asMockDb(db));
 
       expect(store).toBeInstanceOf(PostgresQueueStore);
     });
 
     test('should create functional store', async () => {
       const db = createMockDb();
-      const store = createPostgresQueueStore(
-        db as unknown as Parameters<typeof createPostgresQueueStore>[0],
-      );
+      const store = createPostgresQueueStore(asMockDb(db));
 
-      db.mockExecute.mockResolvedValueOnce({ rows: [{ count: '5' }], rowCount: 1 });
+      db.raw.mockResolvedValueOnce([{ count: '5' }]);
 
       const count = await store.getPendingCount();
 
@@ -486,48 +453,48 @@ describe('PostgresQueueStore', () => {
   describe('edge cases', () => {
     test('should handle task with null args', async () => {
       const task = createTestTask({ args: null as unknown as Record<string, unknown> });
-      mockDb.mockExecute.mockResolvedValueOnce({ rows: [], rowCount: 1 });
+      mockDb.execute.mockResolvedValueOnce(1);
 
       await store.enqueue(task);
 
-      expect(mockDb.mockExecute).toHaveBeenCalledTimes(1);
+      expect(mockDb.execute).toHaveBeenCalledTimes(1);
     });
 
     test('should handle task with empty args object', async () => {
       const task = createTestTask({ args: {} });
-      mockDb.mockExecute.mockResolvedValueOnce({ rows: [], rowCount: 1 });
+      mockDb.execute.mockResolvedValueOnce(1);
 
       await store.enqueue(task);
 
-      expect(mockDb.mockExecute).toHaveBeenCalledTimes(1);
+      expect(mockDb.execute).toHaveBeenCalledTimes(1);
     });
 
     test('should handle very long task names', async () => {
       const task = createTestTask({ name: 'a'.repeat(1000) });
-      mockDb.mockExecute.mockResolvedValueOnce({ rows: [], rowCount: 1 });
+      mockDb.execute.mockResolvedValueOnce(1);
 
       await store.enqueue(task);
 
-      expect(mockDb.mockExecute).toHaveBeenCalledTimes(1);
+      expect(mockDb.execute).toHaveBeenCalledTimes(1);
     });
 
     test('should handle special characters in task id', async () => {
       const task = createTestTask({ id: 'task-with-special-chars-!@#$%' });
-      mockDb.mockExecute.mockResolvedValueOnce({ rows: [], rowCount: 1 });
+      mockDb.execute.mockResolvedValueOnce(1);
 
       await store.enqueue(task);
 
-      expect(mockDb.mockExecute).toHaveBeenCalledTimes(1);
+      expect(mockDb.execute).toHaveBeenCalledTimes(1);
     });
 
     test('should propagate database errors on dequeue', async () => {
-      mockDb.mockExecute.mockRejectedValueOnce(new Error('Lock timeout'));
+      mockDb.raw.mockRejectedValueOnce(new Error('Lock timeout'));
 
       await expect(store.dequeue(new Date().toISOString())).rejects.toThrow('Lock timeout');
     });
 
     test('should propagate database errors on complete', async () => {
-      mockDb.mockExecute.mockRejectedValueOnce(new Error('Write failed'));
+      mockDb.execute.mockRejectedValueOnce(new Error('Write failed'));
 
       await expect(
         store.complete('task-123', {
@@ -540,7 +507,7 @@ describe('PostgresQueueStore', () => {
     });
 
     test('should propagate database errors on fail', async () => {
-      mockDb.mockExecute.mockRejectedValueOnce(new Error('Transaction aborted'));
+      mockDb.execute.mockRejectedValueOnce(new Error('Transaction aborted'));
 
       await expect(store.fail('task-123', { name: 'Error', message: 'Test' })).rejects.toThrow(
         'Transaction aborted',
@@ -554,10 +521,7 @@ describe('PostgresQueueStore', () => {
 
   describe('result extraction', () => {
     test('should handle result with rows property', async () => {
-      mockDb.mockExecute.mockResolvedValueOnce({
-        rows: [{ count: '10' }],
-        rowCount: 1,
-      });
+      mockDb.raw.mockResolvedValueOnce([{ count: '10' }]);
 
       const count = await store.getPendingCount();
 
@@ -565,8 +529,7 @@ describe('PostgresQueueStore', () => {
     });
 
     test('should handle array result directly', async () => {
-      // Drizzle sometimes returns arrays directly
-      mockDb.mockExecute.mockResolvedValueOnce([{ count: '20' }] as unknown as MockQueryResult);
+      mockDb.raw.mockResolvedValueOnce([{ count: '20' }]);
 
       const count = await store.getPendingCount();
 
@@ -574,7 +537,7 @@ describe('PostgresQueueStore', () => {
     });
 
     test('should handle unexpected result format gracefully', async () => {
-      mockDb.mockExecute.mockResolvedValueOnce('unexpected' as unknown as MockQueryResult);
+      mockDb.raw.mockResolvedValueOnce([]);
 
       const count = await store.getPendingCount();
 
@@ -582,10 +545,7 @@ describe('PostgresQueueStore', () => {
     });
 
     test('should handle result with undefined rows', async () => {
-      mockDb.mockExecute.mockResolvedValueOnce({
-        rows: undefined,
-        rowCount: 0,
-      } as unknown as MockQueryResult);
+      mockDb.raw.mockResolvedValueOnce([]);
 
       const result = await store.dequeue(new Date().toISOString());
 

@@ -3,9 +3,10 @@
  * Custom Router Context
  *
  * Minimal router implementation using native browser APIs.
+ * Inspired by react-router patterns but simplified.
  */
 
-import React, { createContext, useContext, useSyncExternalStore } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useSyncExternalStore } from 'react';
 
 import type { ReactNode } from 'react';
 
@@ -13,24 +14,186 @@ import type { ReactNode } from 'react';
 // Types
 // ============================================================================
 
+/** Navigation action type - matches react-router pattern */
+export type NavigationType = 'PUSH' | 'POP' | 'REPLACE';
+
 export interface RouterLocation {
   pathname: string;
   search: string;
   hash: string;
   state: unknown;
+  /** Unique key for this location entry */
+  key: string;
 }
+
+export interface RouterState {
+  location: RouterLocation;
+  navigationType: NavigationType;
+}
+
+export interface NavigateOptions {
+  replace?: boolean;
+  state?: unknown;
+  /** Prevent scroll restoration for this navigation */
+  preventScrollReset?: boolean;
+}
+
+export type NavigateFunction = (to: string | number, options?: NavigateOptions) => void;
 
 export interface RouterContextValue {
   location: RouterLocation;
+  navigationType: NavigationType;
   navigate: NavigateFunction;
   /** For MemoryRouter - allows direct location setting */
   setLocation?: (location: RouterLocation) => void;
 }
 
-export type NavigateFunction = (
-  to: string | number,
-  options?: { replace?: boolean; state?: unknown },
-) => void;
+// ============================================================================
+// History Abstraction
+// ============================================================================
+
+interface HistoryState {
+  key: string;
+  scrollX?: number;
+  scrollY?: number;
+  usr?: unknown; // user state
+}
+
+function createKey(): string {
+  return Math.random().toString(36).substring(2, 10);
+}
+
+function getHistoryState(): HistoryState {
+  const state = window.history.state as HistoryState | null;
+  return state ?? { key: createKey() };
+}
+
+export interface History {
+  readonly location: RouterLocation;
+  readonly navigationType: NavigationType;
+  push(to: string, state?: unknown): void;
+  replace(to: string, state?: unknown): void;
+  go(delta: number): void;
+  back(): void;
+  forward(): void;
+  listen(callback: () => void): () => void;
+  /** Save current scroll position */
+  saveScrollPosition(): void;
+  /** Restore scroll position for current location */
+  restoreScrollPosition(): void;
+}
+
+function createBrowserHistory(): History {
+  let currentNavigationType: NavigationType = 'POP';
+  const listeners = new Set<() => void>();
+  const scrollPositions = new Map<string, { x: number; y: number }>();
+
+  // Cache the current location - only updated on navigation events
+  // This is critical for useSyncExternalStore to work correctly
+  let cachedLocation: RouterLocation = buildLocation();
+
+  function buildLocation(): RouterLocation {
+    const historyState = getHistoryState();
+    return {
+      pathname: window.location.pathname,
+      search: window.location.search,
+      hash: window.location.hash,
+      state: historyState.usr ?? null,
+      key: historyState.key,
+    };
+  }
+
+  function updateCachedLocation(): void {
+    cachedLocation = buildLocation();
+  }
+
+  function notify(): void {
+    updateCachedLocation();
+    listeners.forEach((listener) => { listener(); });
+  }
+
+  function saveScrollPosition(): void {
+    const key = getHistoryState().key;
+    if (key) {
+      scrollPositions.set(key, { x: window.scrollX, y: window.scrollY });
+      // Also save to history state for persistence across page reloads
+      const currentState = getHistoryState();
+      window.history.replaceState(
+        { ...currentState, scrollX: window.scrollX, scrollY: window.scrollY },
+        '',
+      );
+    }
+  }
+
+  function restoreScrollPosition(): void {
+    const historyState = getHistoryState();
+    const saved = scrollPositions.get(historyState.key);
+    if (saved) {
+      window.scrollTo(saved.x, saved.y);
+    } else if (historyState.scrollX !== undefined && historyState.scrollY !== undefined) {
+      window.scrollTo(historyState.scrollX, historyState.scrollY);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }
+
+  // Handle browser back/forward
+  window.addEventListener('popstate', () => {
+    currentNavigationType = 'POP';
+    notify();
+  });
+
+  return {
+    get location(): RouterLocation {
+      return cachedLocation;
+    },
+    get navigationType(): NavigationType {
+      return currentNavigationType;
+    },
+    push(to: string, state?: unknown): void {
+      saveScrollPosition();
+      const key = createKey();
+      const historyState: HistoryState = { key, usr: state };
+      window.history.pushState(historyState, '', to);
+      currentNavigationType = 'PUSH';
+      notify();
+    },
+    replace(to: string, state?: unknown): void {
+      const key = getHistoryState().key || createKey();
+      const historyState: HistoryState = { key, usr: state };
+      window.history.replaceState(historyState, '', to);
+      currentNavigationType = 'REPLACE';
+      notify();
+    },
+    go(delta: number): void {
+      window.history.go(delta);
+    },
+    back(): void {
+      window.history.back();
+    },
+    forward(): void {
+      window.history.forward();
+    },
+    listen(callback: () => void): () => void {
+      listeners.add(callback);
+      return (): void => {
+        listeners.delete(callback);
+      };
+    },
+    saveScrollPosition,
+    restoreScrollPosition,
+  };
+}
+
+// Singleton browser history instance
+let browserHistory: History | null = null;
+
+function getBrowserHistory(): History {
+  if (!browserHistory && typeof window !== 'undefined') {
+    browserHistory = createBrowserHistory();
+  }
+  return browserHistory!;
+}
 
 // ============================================================================
 // Context
@@ -39,69 +202,53 @@ export type NavigateFunction = (
 export const RouterContext = createContext<RouterContextValue | null>(null);
 
 // ============================================================================
-// Browser Location Store
+// Browser Router Store (using History abstraction)
 // ============================================================================
 
-function createBrowserLocationStore(): {
-  getSnapshot: () => RouterLocation;
-  getServerSnapshot: () => RouterLocation;
+function createBrowserRouterStore(): {
+  getSnapshot: () => RouterState;
+  getServerSnapshot: () => RouterState;
   subscribe: (callback: () => void) => () => void;
-  updateLocation: (state?: unknown) => void;
+  history: History;
 } {
-  let currentLocation = getLocationFromWindow();
-  const listeners = new Set<() => void>();
+  const history = getBrowserHistory();
 
-  function getLocationFromWindow(): RouterLocation {
-    return {
-      pathname: window.location.pathname,
-      search: window.location.search,
-      hash: window.location.hash,
-      state: window.history.state,
-    };
-  }
+  // Cache the state object - only updated when history notifies
+  // This is critical for useSyncExternalStore to work correctly
+  let cachedState: RouterState = {
+    location: history.location,
+    navigationType: history.navigationType,
+  };
 
-  function notifyListeners(): void {
-    listeners.forEach((listener) => {
-      listener();
-    });
-  }
-
-  return {
-    getSnapshot: (): RouterLocation => currentLocation,
-    getServerSnapshot: (): RouterLocation => ({
+  const serverSnapshot: RouterState = {
+    location: {
       pathname: '/',
       search: '',
       hash: '',
       state: null,
-    }),
+      key: 'default',
+    },
+    navigationType: 'POP',
+  };
+
+  return {
+    getSnapshot: (): RouterState => cachedState,
+    getServerSnapshot: (): RouterState => serverSnapshot,
     subscribe: (callback: () => void): (() => void) => {
-      listeners.add(callback);
-
-      const handlePopState = (): void => {
-        currentLocation = getLocationFromWindow();
-        notifyListeners();
-      };
-
-      window.addEventListener('popstate', handlePopState);
-      return (): void => {
-        listeners.delete(callback);
-        window.removeEventListener('popstate', handlePopState);
-      };
+      return history.listen(() => {
+        // Update cached state before notifying React
+        cachedState = {
+          location: history.location,
+          navigationType: history.navigationType,
+        };
+        callback();
+      });
     },
-    // Synchronously update location before notifying - prevents stale reads
-    updateLocation: (state?: unknown): void => {
-      currentLocation = {
-        pathname: window.location.pathname,
-        search: window.location.search,
-        hash: window.location.hash,
-        state: state ?? null,
-      };
-      notifyListeners();
-    },
+    history,
   };
 }
 
-const browserStore = typeof window !== 'undefined' ? createBrowserLocationStore() : null;
+const browserStore = typeof window !== 'undefined' ? createBrowserRouterStore() : null;
 
 // ============================================================================
 // Browser Router Provider
@@ -109,36 +256,80 @@ const browserStore = typeof window !== 'undefined' ? createBrowserLocationStore(
 
 export interface RouterProps {
   children: ReactNode;
+  /** Enable automatic scroll restoration (default: true) */
+  scrollRestoration?: boolean;
 }
 
-export function Router({ children }: RouterProps): React.ReactElement {
-  const location = useSyncExternalStore(
+export function Router({ children, scrollRestoration = true }: RouterProps): React.ReactElement {
+  const state = useSyncExternalStore(
     browserStore?.subscribe ?? ((): (() => void) => (): void => {}),
     browserStore?.getSnapshot ??
-      ((): RouterLocation => ({ pathname: '/', search: '', hash: '', state: null })),
+      ((): RouterState => ({
+        location: { pathname: '/', search: '', hash: '', state: null, key: 'default' },
+        navigationType: 'POP',
+      })),
     browserStore?.getServerSnapshot ??
-      ((): RouterLocation => ({ pathname: '/', search: '', hash: '', state: null })),
+      ((): RouterState => ({
+        location: { pathname: '/', search: '', hash: '', state: null, key: 'default' },
+        navigationType: 'POP',
+      })),
   );
+
+  const preventScrollRef = useRef(false);
 
   const navigate: NavigateFunction = React.useCallback((to, options = {}) => {
     if (typeof to === 'number') {
-      window.history.go(to);
+      browserStore?.history.go(to);
       return;
     }
 
     const url = to.startsWith('/') ? to : `/${to}`;
+    preventScrollRef.current = options.preventScrollReset ?? false;
 
     if (options.replace) {
-      window.history.replaceState(options.state ?? null, '', url);
+      browserStore?.history.replace(url, options.state);
     } else {
-      window.history.pushState(options.state ?? null, '', url);
+      browserStore?.history.push(url, options.state);
     }
-
-    // Synchronously update the store and notify listeners
-    browserStore?.updateLocation(options.state);
   }, []);
 
-  return <RouterContext.Provider value={{ location, navigate }}>{children}</RouterContext.Provider>;
+  // Handle scroll restoration
+  useEffect(() => {
+    if (!scrollRestoration || !browserStore) return;
+
+    if (state.navigationType === 'POP') {
+      // Back/forward navigation - restore previous scroll position
+      browserStore.history.restoreScrollPosition();
+    } else if (!preventScrollRef.current) {
+      // New navigation - scroll to top (unless prevented)
+      window.scrollTo(0, 0);
+    }
+    preventScrollRef.current = false;
+  }, [state.location.key, state.navigationType, scrollRestoration]);
+
+  // Disable browser's native scroll restoration (we handle it ourselves)
+  useEffect(() => {
+    if (!scrollRestoration || !('scrollRestoration' in window.history)) {
+      return;
+    }
+    const original = window.history.scrollRestoration;
+    window.history.scrollRestoration = 'manual';
+    return (): void => {
+      window.history.scrollRestoration = original;
+    };
+  }, [scrollRestoration]);
+
+  return (
+    <RouterContext.Provider
+      value={{
+        location: state.location,
+        navigationType: state.navigationType,
+        navigate,
+      }}
+    >
+      {children}
+    </RouterContext.Provider>
+  );
 }
 
 // ============================================================================
@@ -151,32 +342,40 @@ export interface MemoryRouterProps {
   initialIndex?: number;
 }
 
+interface MemoryEntry {
+  path: string;
+  state: unknown;
+  key: string;
+}
+
 export function MemoryRouter({
   children,
   initialEntries = ['/'],
   initialIndex,
 }: MemoryRouterProps): React.ReactElement {
   // Normalize entries to strings and extract state
-  const normalizedEntries = React.useMemo((): Array<{ path: string; state: unknown }> => {
-    return initialEntries.map((entry): { path: string; state: unknown } => {
+  const normalizedEntries = React.useMemo((): MemoryEntry[] => {
+    return initialEntries.map((entry): MemoryEntry => {
       if (typeof entry === 'string') {
-        return { path: entry, state: null };
+        return { path: entry, state: null, key: createKey() };
       }
-      return { path: entry.pathname, state: entry.state ?? null };
+      return { path: entry.pathname, state: entry.state ?? null, key: createKey() };
     });
   }, [initialEntries]);
 
   const [entries, setEntries] = React.useState(normalizedEntries);
   const [index, setIndex] = React.useState(initialIndex ?? normalizedEntries.length - 1);
+  const [navigationType, setNavigationType] = React.useState<NavigationType>('POP');
 
   const location = React.useMemo((): RouterLocation => {
-    const entry = entries[index] ?? { path: '/', state: null };
+    const entry = entries[index] ?? { path: '/', state: null, key: 'default' };
     const url = new URL(entry.path, 'http://localhost');
     return {
       pathname: url.pathname,
       search: url.search,
       hash: url.hash,
       state: entry.state,
+      key: entry.key,
     };
   }, [entries, index]);
 
@@ -184,11 +383,12 @@ export function MemoryRouter({
     (to, options = {}) => {
       if (typeof to === 'number') {
         setIndex((prev) => Math.max(0, Math.min(entries.length - 1, prev + to)));
+        setNavigationType('POP');
         return;
       }
 
       const url = to.startsWith('/') ? to : `/${to}`;
-      const newEntry = { path: url, state: options.state ?? null };
+      const newEntry: MemoryEntry = { path: url, state: options.state ?? null, key: createKey() };
 
       if (options.replace) {
         setEntries((prev) => {
@@ -196,9 +396,11 @@ export function MemoryRouter({
           next[index] = newEntry;
           return next;
         });
+        setNavigationType('REPLACE');
       } else {
         setEntries((prev) => [...prev.slice(0, index + 1), newEntry]);
         setIndex((prev) => prev + 1);
+        setNavigationType('PUSH');
       }
     },
     [entries.length, index],
@@ -206,25 +408,39 @@ export function MemoryRouter({
 
   const setLocation = React.useCallback((loc: RouterLocation) => {
     const url = `${loc.pathname}${loc.search}${loc.hash}`;
-    setEntries((prev) => [...prev, { path: url, state: loc.state ?? null }]);
+    setEntries((prev) => [...prev, { path: url, state: loc.state ?? null, key: createKey() }]);
     setIndex((prev) => prev + 1);
+    setNavigationType('PUSH');
   }, []);
 
   return (
-    <RouterContext.Provider value={{ location, navigate, setLocation }}>
+    <RouterContext.Provider value={{ location, navigationType, navigate, setLocation }}>
       {children}
     </RouterContext.Provider>
   );
 }
 
 // ============================================================================
-// Hook to access router context
+// Hooks
 // ============================================================================
 
+/** Access the full router context */
 export function useRouterContext(): RouterContextValue {
   const context = useContext(RouterContext);
   if (!context) {
     throw new Error('useRouterContext must be used within a Router');
   }
   return context;
+}
+
+/** Get the current navigation type (PUSH, POP, or REPLACE) */
+export function useNavigationType(): NavigationType {
+  const { navigationType } = useRouterContext();
+  return navigationType;
+}
+
+/** Get the history object for advanced navigation control */
+export function useHistory(): History | null {
+  // Only available in browser environment
+  return browserStore?.history ?? null;
 }

@@ -6,8 +6,16 @@
  * Handles record loading, operation application, and optimistic locking.
  */
 
-import { users } from '@infrastructure';
-import { and, eq, inArray } from 'drizzle-orm';
+import {
+  and,
+  eq,
+  inArray,
+  insert,
+  select,
+  update,
+  USERS_TABLE,
+  type User,
+} from '@abe-stack/db';
 
 import type { ApplyOperationsResult, RealtimeRecord, VersionConflict } from './types';
 import type {
@@ -25,8 +33,11 @@ import type { DbClient } from '@database';
 // Table Configuration
 // ============================================================================
 
-const tableMap = {
-  users,
+/**
+ * Mapping of table names to their string identifiers
+ */
+const tableNameMap: Record<string, string> = {
+  users: USERS_TABLE,
 };
 
 /**
@@ -35,7 +46,7 @@ const tableMap = {
  * For security, only explicitly registered tables can be accessed.
  * This prevents arbitrary table access through the API.
  */
-const ALLOWED_TABLES = new Set<string>(Object.keys(tableMap));
+const ALLOWED_TABLES = new Set<string>(Object.keys(tableNameMap));
 
 /**
  * Fields that cannot be modified through realtime operations
@@ -60,8 +71,11 @@ export function isTableAllowed(table: string): boolean {
  * Register a table for realtime operations
  * Call this during application setup to enable tables
  */
-export function registerRealtimeTable(table: string): void {
+export function registerRealtimeTable(table: string, tableName?: string): void {
   ALLOWED_TABLES.add(table);
+  if (tableName) {
+    tableNameMap[table] = tableName;
+  }
 }
 
 /**
@@ -164,15 +178,14 @@ export async function loadRecords(db: DbClient, pointers: RecordPointer[]): Prom
 
   for (const [table, ids] of byTable.entries()) {
     recordMap[table] = {};
-    const tableSchema = tableMap[table as keyof typeof tableMap] as typeof users | undefined;
-    if (!tableSchema) {
+    const tableName = tableNameMap[table];
+    if (!tableName) {
       continue;
     }
 
-    const rows = await db
-      .select()
-      .from(tableSchema)
-      .where(inArray(tableSchema.id, ids));
+    const rows = await db.query<User & RealtimeRecord>(
+      select(tableName).where(inArray('id', ids)).toSql(),
+    );
 
     for (const row of rows) {
       recordMap[table][row.id] = row as RealtimeRecord;
@@ -301,12 +314,12 @@ export function applyOperations(
     }
 
     const newRecord = applyOperation(record, op);
-    let tableMap = newRecordMap[op.table];
-    if (!tableMap) {
-      tableMap = {};
-      newRecordMap[op.table] = tableMap;
+    let tableRecords = newRecordMap[op.table];
+    if (!tableRecords) {
+      tableRecords = {};
+      newRecordMap[op.table] = tableRecords;
     }
-    tableMap[op.id] = newRecord;
+    tableRecords[op.id] = newRecord;
 
     // Track modified records
     if (!modifiedRecords.some((p) => p.table === op.table && p.id === op.id)) {
@@ -359,17 +372,16 @@ export async function saveRecords(
   recordMap: RecordMap,
   originalRecordMap: RecordMap,
 ): Promise<void> {
-  for (const [table, records] of Object.entries(recordMap)) {
+  for (const [table, records] of Object.entries(recordMap) as [string, Record<string, RealtimeRecord>][]) {
     for (const [id, record] of Object.entries(records)) {
-      const typedRecord = record as RealtimeRecord;
       const originalRecord = originalRecordMap[table]?.[id] as RealtimeRecord | undefined;
 
       if (!originalRecord) {
         // New record - insert
-        await insertRecord(db, table, typedRecord);
-      } else if (typedRecord.version > originalRecord.version) {
+        await insertRecord(db, table, record);
+      } else if (record.version > originalRecord.version) {
         // Updated record - update with version check
-        const updated = await updateRecord(db, table, typedRecord, originalRecord.version);
+        const updated = await updateRecord(db, table, record, originalRecord.version);
         if (!updated) {
           throw new Error(`Concurrent modification detected for ${table}:${id}`);
         }
@@ -382,11 +394,11 @@ export async function saveRecords(
  * Insert a new record
  */
 async function insertRecord(db: DbClient, table: string, record: RealtimeRecord): Promise<void> {
-  const tableSchema = tableMap[table as keyof typeof tableMap] as typeof users | undefined;
-  if (!tableSchema) {
+  const tableName = tableNameMap[table];
+  if (!tableName) {
     throw new Error(`Table '${table}' is not registered for realtime operations`);
   }
-  await db.insert(tableSchema).values(record as typeof users.$inferInsert);
+  await db.execute(insert(tableName).values(record).toSql());
 }
 
 /**
@@ -398,18 +410,20 @@ async function updateRecord(
   record: RealtimeRecord,
   expectedVersion: number,
 ): Promise<boolean> {
-  const tableSchema = tableMap[table as keyof typeof tableMap] as typeof users | undefined;
-  if (!tableSchema) {
+  const tableName = tableNameMap[table];
+  if (!tableName) {
     throw new Error(`Table '${table}' is not registered for realtime operations`);
   }
 
   const { id, ...rest } = record;
 
-  const result = await db
-    .update(tableSchema)
-    .set({ ...rest, updatedAt: new Date() })
-    .where(and(eq(tableSchema.id, id), eq(tableSchema.version, expectedVersion)))
-    .returning({ id: tableSchema.id });
+  const result = await db.query<{ id: string }>(
+    update(tableName)
+      .set({ ...rest, updated_at: new Date() })
+      .where(and(eq('id', id), eq('version', expectedVersion)))
+      .returning('id')
+      .toSql(),
+  );
 
   return result.length === 1;
 }

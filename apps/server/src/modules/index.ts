@@ -10,6 +10,7 @@ import { registerRouteMap } from '@router';
 
 import { adminRoutes } from './admin/routes';
 import { authRoutes } from './auth/routes';
+import { billingRoutes, registerWebhookRoutes } from './billing';
 import { notificationRoutes } from './notifications/routes';
 import { realtimeRoutes } from './realtime/routes';
 import { userRoutes } from './users/routes';
@@ -92,4 +93,12 @@ export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
   registerRouteMap(app, ctx, adminRoutes, routerOptions);
   registerRouteMap(app, ctx, realtimeRoutes, routerOptions);
   registerRouteMap(app, ctx, notificationRoutes, routerOptions);
+
+  // Billing routes (only if billing is enabled)
+  if (ctx.config.billing?.enabled) {
+    registerRouteMap(app, ctx, billingRoutes, routerOptions);
+  }
+
+  // Webhook routes (registered separately for raw body access)
+  registerWebhookRoutes(app, ctx);
 }

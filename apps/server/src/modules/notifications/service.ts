@@ -3,36 +3,41 @@
  * Notification Service
  *
  * Business logic for push notification operations including
- * subscription management, sending, and preference handling.
+ * subscription management and preference handling.
  *
  * Uses database persistence for subscriptions and preferences.
+ *
+ * NOTE: Notification sending has been removed (web-push package removed).
+ * Subscription management and preferences remain for future provider implementations.
  */
 
+import { DEFAULT_NOTIFICATION_PREFERENCES, PushSubscriptionExistsError } from '@abe-stack/core';
 import {
-  DEFAULT_NOTIFICATION_PREFERENCES,
-  ProviderNotConfiguredError,
-  SubscriptionExistsError,
-  VapidNotConfiguredError,
-} from '@abe-stack/core';
-import {
-  notificationPreferences,
-  pushSubscriptions,
-  type DbClient,
-  type QuietHoursConfig,
-  type TypePreferences,
-} from '@infrastructure';
-import { and, eq, inArray, sql } from 'drizzle-orm';
+  and,
+  eq,
+  inArray,
+  select,
+  selectCount,
+  insert,
+  update,
+  deleteFrom,
+  toCamelCase,
+  PUSH_SUBSCRIPTIONS_TABLE,
+  PUSH_SUBSCRIPTION_COLUMNS,
+  NOTIFICATION_PREFERENCES_TABLE,
+  NOTIFICATION_PREFERENCE_COLUMNS,
+  type PushSubscription as DbPushSubscription,
+  type NotificationPreference as DbNotificationPreference,
+} from '@abe-stack/db';
+import { type DbClient, type QuietHoursConfig, type TypePreferences } from '@infrastructure';
 
 import type {
-  BatchSendResult,
-  NotificationPayload,
   NotificationPreferences,
   NotificationType,
   PushSubscription,
   StoredPushSubscription,
   UpdatePreferencesRequest,
 } from '@abe-stack/core';
-import type { NotificationService, SendOptions } from '@infrastructure/notifications';
 
 // ============================================================================
 // Subscription Management
@@ -56,50 +61,58 @@ export async function subscribe(
   userAgent: string,
 ): Promise<string> {
   // Check if endpoint already exists
-  const existing = await db.query.pushSubscriptions.findFirst({
-    where: eq(pushSubscriptions.endpoint, subscription.endpoint),
-  });
+  const existingRow = await db.queryOne<Record<string, unknown>>(
+    select(PUSH_SUBSCRIPTIONS_TABLE)
+      .where(eq('endpoint', subscription.endpoint))
+      .limit(1)
+      .toSql(),
+  );
 
-  if (existing) {
+  if (existingRow) {
+    const existing = toCamelCase<DbPushSubscription>(existingRow, PUSH_SUBSCRIPTION_COLUMNS);
     if (existing.userId === userId) {
       // Update existing subscription - reactivate and update lastUsedAt
-      await db
-        .update(pushSubscriptions)
-        .set({
-          isActive: true,
-          lastUsedAt: new Date(),
-          keysP256dh: subscription.keys.p256dh,
-          keysAuth: subscription.keys.auth,
-          expirationTime: subscription.expirationTime
-            ? new Date(subscription.expirationTime)
-            : null,
-        })
-        .where(eq(pushSubscriptions.id, existing.id));
+      await db.execute(
+        update(PUSH_SUBSCRIPTIONS_TABLE)
+          .set({
+            is_active: true,
+            last_used_at: new Date(),
+            keys_p256dh: subscription.keys.p256dh,
+            keys_auth: subscription.keys.auth,
+            expiration_time: subscription.expirationTime
+              ? new Date(subscription.expirationTime)
+              : null,
+          })
+          .where(eq('id', existing.id))
+          .toSql(),
+      );
       return existing.id;
     }
-    throw new SubscriptionExistsError('Endpoint already registered to another user');
+    throw new PushSubscriptionExistsError('Endpoint already registered to another user');
   }
 
   // Create new subscription
-  const [newSub] = await db
-    .insert(pushSubscriptions)
-    .values({
-      userId,
-      endpoint: subscription.endpoint,
-      expirationTime: subscription.expirationTime ? new Date(subscription.expirationTime) : null,
-      keysP256dh: subscription.keys.p256dh,
-      keysAuth: subscription.keys.auth,
-      deviceId,
-      userAgent: userAgent || null,
-      isActive: true,
-    })
-    .returning({ id: pushSubscriptions.id });
+  const newSubRows = await db.query<Record<string, unknown>>(
+    insert(PUSH_SUBSCRIPTIONS_TABLE)
+      .values({
+        user_id: userId,
+        endpoint: subscription.endpoint,
+        expiration_time: subscription.expirationTime ? new Date(subscription.expirationTime) : null,
+        keys_p256dh: subscription.keys.p256dh,
+        keys_auth: subscription.keys.auth,
+        device_id: deviceId,
+        user_agent: userAgent || null,
+        is_active: true,
+      })
+      .returning('id')
+      .toSql(),
+  );
 
-  if (!newSub) {
+  if (!newSubRows[0]) {
     throw new Error('Failed to create subscription');
   }
 
-  return newSub.id;
+  return (newSubRows[0] as { id: string }).id;
 }
 
 /**
@@ -115,18 +128,16 @@ export async function unsubscribe(
   subscriptionId?: string,
   endpoint?: string,
 ): Promise<boolean> {
-  let result;
+  let result: Record<string, unknown>[];
 
   if (subscriptionId) {
-    result = await db
-      .delete(pushSubscriptions)
-      .where(eq(pushSubscriptions.id, subscriptionId))
-      .returning({ id: pushSubscriptions.id });
+    result = await db.query<Record<string, unknown>>(
+      deleteFrom(PUSH_SUBSCRIPTIONS_TABLE).where(eq('id', subscriptionId)).returning('id').toSql(),
+    );
   } else if (endpoint) {
-    result = await db
-      .delete(pushSubscriptions)
-      .where(eq(pushSubscriptions.endpoint, endpoint))
-      .returning({ id: pushSubscriptions.id });
+    result = await db.query<Record<string, unknown>>(
+      deleteFrom(PUSH_SUBSCRIPTIONS_TABLE).where(eq('endpoint', endpoint)).returning('id').toSql(),
+    );
   } else {
     return false;
   }
@@ -145,11 +156,16 @@ export async function getUserSubscriptions(
   db: DbClient,
   userId: string,
 ): Promise<StoredPushSubscription[]> {
-  const subs = await db.query.pushSubscriptions.findMany({
-    where: and(eq(pushSubscriptions.userId, userId), eq(pushSubscriptions.isActive, true)),
-  });
+  const rows = await db.query<Record<string, unknown>>(
+    select(PUSH_SUBSCRIPTIONS_TABLE)
+      .where(and(eq('user_id', userId), eq('is_active', true)))
+      .toSql(),
+  );
 
-  return subs.map(dbSubToStoredSub);
+  return rows.map((row) => {
+    const sub = toCamelCase<DbPushSubscription>(row, PUSH_SUBSCRIPTION_COLUMNS);
+    return dbSubToStoredSub(sub);
+  });
 }
 
 /**
@@ -163,11 +179,13 @@ export async function getSubscriptionById(
   db: DbClient,
   subscriptionId: string,
 ): Promise<StoredPushSubscription | undefined> {
-  const sub = await db.query.pushSubscriptions.findFirst({
-    where: eq(pushSubscriptions.id, subscriptionId),
-  });
+  const row = await db.queryOne<Record<string, unknown>>(
+    select(PUSH_SUBSCRIPTIONS_TABLE).where(eq('id', subscriptionId)).limit(1).toSql(),
+  );
 
-  return sub ? dbSubToStoredSub(sub) : undefined;
+  if (!row) return undefined;
+  const sub = toCamelCase<DbPushSubscription>(row, PUSH_SUBSCRIPTION_COLUMNS);
+  return dbSubToStoredSub(sub);
 }
 
 /**
@@ -182,10 +200,12 @@ export async function markSubscriptionsExpired(
 ): Promise<void> {
   if (subscriptionIds.length === 0) return;
 
-  await db
-    .update(pushSubscriptions)
-    .set({ isActive: false })
-    .where(inArray(pushSubscriptions.id, subscriptionIds));
+  await db.execute(
+    update(PUSH_SUBSCRIPTIONS_TABLE)
+      .set({ is_active: false })
+      .where(inArray('id', subscriptionIds))
+      .toSql(),
+  );
 }
 
 /**
@@ -195,17 +215,20 @@ export async function markSubscriptionsExpired(
  * @returns Array of all active subscriptions
  */
 export async function getAllActiveSubscriptions(db: DbClient): Promise<StoredPushSubscription[]> {
-  const subs = await db.query.pushSubscriptions.findMany({
-    where: eq(pushSubscriptions.isActive, true),
-  });
+  const rows = await db.query<Record<string, unknown>>(
+    select(PUSH_SUBSCRIPTIONS_TABLE).where(eq('is_active', true)).toSql(),
+  );
 
-  return subs.map(dbSubToStoredSub);
+  return rows.map((row) => {
+    const sub = toCamelCase<DbPushSubscription>(row, PUSH_SUBSCRIPTION_COLUMNS);
+    return dbSubToStoredSub(sub);
+  });
 }
 
 /**
  * Convert database subscription to StoredPushSubscription
  */
-function dbSubToStoredSub(dbSub: typeof pushSubscriptions.$inferSelect): StoredPushSubscription {
+function dbSubToStoredSub(dbSub: DbPushSubscription): StoredPushSubscription {
   return {
     id: dbSub.id,
     userId: dbSub.userId,
@@ -224,181 +247,6 @@ function dbSubToStoredSub(dbSub: typeof pushSubscriptions.$inferSelect): StoredP
 }
 
 // ============================================================================
-// Notification Sending
-// ============================================================================
-
-/**
- * Send notification to a user
- *
- * @param db - Database client
- * @param notificationService - Notification service instance
- * @param userId - Target user ID
- * @param payload - Notification payload
- * @param options - Send options
- * @returns Batch send result
- */
-export async function sendToUser(
-  db: DbClient,
-  notificationService: NotificationService,
-  userId: string,
-  payload: NotificationPayload,
-  options?: SendOptions,
-): Promise<BatchSendResult> {
-  const provider = notificationService.getWebPushProvider();
-  if (!provider) {
-    throw new ProviderNotConfiguredError('web-push');
-  }
-
-  const subscriptions = await getUserSubscriptions(db, userId);
-  if (subscriptions.length === 0) {
-    return {
-      total: 0,
-      successful: 0,
-      failed: 0,
-      results: [],
-      expiredSubscriptions: [],
-    };
-  }
-
-  const subscriptionsWithId = subscriptions.map((s) => ({
-    id: s.id,
-    subscription: {
-      endpoint: s.endpoint,
-      expirationTime: s.expirationTime,
-      keys: s.keys,
-    },
-  }));
-
-  const result = await provider.sendBatch(subscriptionsWithId, payload, options);
-
-  // Clean up expired subscriptions
-  if (result.expiredSubscriptions.length > 0) {
-    await markSubscriptionsExpired(db, result.expiredSubscriptions);
-  }
-
-  // Update lastUsedAt for successful sends
-  const successfulIds = result.results.filter((r) => r.success).map((r) => r.subscriptionId);
-  if (successfulIds.length > 0) {
-    await db
-      .update(pushSubscriptions)
-      .set({ lastUsedAt: new Date() })
-      .where(inArray(pushSubscriptions.id, successfulIds));
-  }
-
-  return result;
-}
-
-/**
- * Send notification to multiple users
- *
- * @param db - Database client
- * @param notificationService - Notification service instance
- * @param userIds - Target user IDs
- * @param payload - Notification payload
- * @param options - Send options
- * @returns Aggregated batch send result
- */
-export async function sendToUsers(
-  db: DbClient,
-  notificationService: NotificationService,
-  userIds: string[],
-  payload: NotificationPayload,
-  options?: SendOptions,
-): Promise<BatchSendResult> {
-  const provider = notificationService.getWebPushProvider();
-  if (!provider) {
-    throw new ProviderNotConfiguredError('web-push');
-  }
-
-  // Get all active subscriptions for the given users
-  const subs = await db.query.pushSubscriptions.findMany({
-    where: and(inArray(pushSubscriptions.userId, userIds), eq(pushSubscriptions.isActive, true)),
-  });
-
-  if (subs.length === 0) {
-    return {
-      total: 0,
-      successful: 0,
-      failed: 0,
-      results: [],
-      expiredSubscriptions: [],
-    };
-  }
-
-  const subscriptionsWithId = subs.map((s) => ({
-    id: s.id,
-    subscription: {
-      endpoint: s.endpoint,
-      expirationTime: s.expirationTime ? s.expirationTime.getTime() : null,
-      keys: {
-        p256dh: s.keysP256dh,
-        auth: s.keysAuth,
-      },
-    },
-  }));
-
-  const result = await provider.sendBatch(subscriptionsWithId, payload, options);
-
-  // Clean up expired subscriptions
-  if (result.expiredSubscriptions.length > 0) {
-    await markSubscriptionsExpired(db, result.expiredSubscriptions);
-  }
-
-  return result;
-}
-
-/**
- * Broadcast notification to all subscribed users
- *
- * @param db - Database client
- * @param notificationService - Notification service instance
- * @param payload - Notification payload
- * @param options - Send options
- * @returns Batch send result
- */
-export async function broadcast(
-  db: DbClient,
-  notificationService: NotificationService,
-  payload: NotificationPayload,
-  options?: SendOptions,
-): Promise<BatchSendResult> {
-  const provider = notificationService.getWebPushProvider();
-  if (!provider) {
-    throw new ProviderNotConfiguredError('web-push');
-  }
-
-  const subscriptions = await getAllActiveSubscriptions(db);
-
-  if (subscriptions.length === 0) {
-    return {
-      total: 0,
-      successful: 0,
-      failed: 0,
-      results: [],
-      expiredSubscriptions: [],
-    };
-  }
-
-  const subscriptionsWithId = subscriptions.map((s) => ({
-    id: s.id,
-    subscription: {
-      endpoint: s.endpoint,
-      expirationTime: s.expirationTime,
-      keys: s.keys,
-    },
-  }));
-
-  const result = await provider.sendBatch(subscriptionsWithId, payload, options);
-
-  // Clean up expired subscriptions
-  if (result.expiredSubscriptions.length > 0) {
-    await markSubscriptionsExpired(db, result.expiredSubscriptions);
-  }
-
-  return result;
-}
-
-// ============================================================================
 // Preference Management
 // ============================================================================
 
@@ -413,29 +261,33 @@ export async function getPreferences(
   db: DbClient,
   userId: string,
 ): Promise<NotificationPreferences> {
-  const existing = await db.query.notificationPreferences.findFirst({
-    where: eq(notificationPreferences.userId, userId),
-  });
+  const existingRow = await db.queryOne<Record<string, unknown>>(
+    select(NOTIFICATION_PREFERENCES_TABLE).where(eq('user_id', userId)).limit(1).toSql(),
+  );
 
-  if (existing) {
-    return dbPrefsToNotificationPrefs(existing);
+  if (existingRow) {
+    const prefs = toCamelCase<DbNotificationPreference>(existingRow, NOTIFICATION_PREFERENCE_COLUMNS);
+    return dbPrefsToNotificationPrefs(prefs);
   }
 
   // Create default preferences
-  const [newPrefs] = await db
-    .insert(notificationPreferences)
-    .values({
-      userId,
-      globalEnabled: DEFAULT_NOTIFICATION_PREFERENCES.globalEnabled,
-      quietHours: DEFAULT_NOTIFICATION_PREFERENCES.quietHours as QuietHoursConfig,
-      types: DEFAULT_NOTIFICATION_PREFERENCES.types as TypePreferences,
-    })
-    .returning();
+  const newPrefsRows = await db.query<Record<string, unknown>>(
+    insert(NOTIFICATION_PREFERENCES_TABLE)
+      .values({
+        user_id: userId,
+        global_enabled: DEFAULT_NOTIFICATION_PREFERENCES.globalEnabled,
+        quiet_hours: DEFAULT_NOTIFICATION_PREFERENCES.quietHours as QuietHoursConfig,
+        types: DEFAULT_NOTIFICATION_PREFERENCES.types as TypePreferences,
+      })
+      .returningAll()
+      .toSql(),
+  );
 
-  if (!newPrefs) {
+  if (!newPrefsRows[0]) {
     throw new Error('Failed to create notification preferences');
   }
 
+  const newPrefs = toCamelCase<DbNotificationPreference>(newPrefsRows[0], NOTIFICATION_PREFERENCE_COLUMNS);
   return dbPrefsToNotificationPrefs(newPrefs);
 }
 
@@ -456,12 +308,12 @@ export async function updatePreferences(
   const current = await getPreferences(db, userId);
 
   // Build update object
-  const updateData: Partial<typeof notificationPreferences.$inferInsert> = {
-    updatedAt: new Date(),
+  const updateData: Record<string, unknown> = {
+    updated_at: new Date(),
   };
 
   if (updates.globalEnabled !== undefined) {
-    updateData.globalEnabled = updates.globalEnabled;
+    updateData.global_enabled = updates.globalEnabled;
   }
 
   if (updates.quietHours) {
@@ -478,7 +330,7 @@ export async function updatePreferences(
     if (updates.quietHours.timezone !== undefined) {
       newQuietHours.timezone = updates.quietHours.timezone;
     }
-    updateData.quietHours = newQuietHours as QuietHoursConfig;
+    updateData.quiet_hours = newQuietHours;
   }
 
   if (updates.types) {
@@ -495,19 +347,22 @@ export async function updatePreferences(
         newTypes[type].channels = typeUpdate.channels;
       }
     }
-    updateData.types = newTypes as TypePreferences;
+    updateData.types = newTypes;
   }
 
-  const [updated] = await db
-    .update(notificationPreferences)
-    .set(updateData)
-    .where(eq(notificationPreferences.userId, userId))
-    .returning();
+  const updatedRows = await db.query<Record<string, unknown>>(
+    update(NOTIFICATION_PREFERENCES_TABLE)
+      .set(updateData)
+      .where(eq('user_id', userId))
+      .returningAll()
+      .toSql(),
+  );
 
-  if (!updated) {
+  if (!updatedRows[0]) {
     throw new Error('Failed to update notification preferences');
   }
 
+  const updated = toCamelCase<DbNotificationPreference>(updatedRows[0], NOTIFICATION_PREFERENCE_COLUMNS);
   return dbPrefsToNotificationPrefs(updated);
 }
 
@@ -586,9 +441,7 @@ function getCurrentHourInTimezone(timezone: string): number {
 /**
  * Convert database preferences to NotificationPreferences
  */
-function dbPrefsToNotificationPrefs(
-  dbPrefs: typeof notificationPreferences.$inferSelect,
-): NotificationPreferences {
+function dbPrefsToNotificationPrefs(dbPrefs: DbNotificationPreference): NotificationPreferences {
   return {
     userId: dbPrefs.userId,
     globalEnabled: dbPrefs.globalEnabled,
@@ -596,24 +449,6 @@ function dbPrefsToNotificationPrefs(
     types: dbPrefs.types as NotificationPreferences['types'],
     updatedAt: dbPrefs.updatedAt,
   };
-}
-
-// ============================================================================
-// VAPID Key Access
-// ============================================================================
-
-/**
- * Get VAPID public key for client subscription
- *
- * @param notificationService - Notification service instance
- * @returns VAPID public key
- */
-export function getVapidPublicKey(notificationService: NotificationService): string {
-  const publicKey = notificationService.getVapidPublicKey();
-  if (!publicKey) {
-    throw new VapidNotConfiguredError();
-  }
-  return publicKey;
 }
 
 // ============================================================================
@@ -638,15 +473,14 @@ export async function cleanupExpiredSubscriptions(
   // 1. Marked as inactive, OR
   // 2. Not used for `inactiveDays` days, OR
   // 3. Past their expiration time
-  const result = await db
-    .delete(pushSubscriptions)
-    .where(
-      sql`${pushSubscriptions.isActive} = false
-        OR ${pushSubscriptions.lastUsedAt} < ${cutoffDate}
-        OR (${pushSubscriptions.expirationTime} IS NOT NULL
-            AND ${pushSubscriptions.expirationTime} < NOW())`,
-    )
-    .returning({ id: pushSubscriptions.id });
+  const result = await db.raw<{ id: string }>(
+    `DELETE FROM ${PUSH_SUBSCRIPTIONS_TABLE}
+     WHERE is_active = false
+        OR last_used_at < $1
+        OR (expiration_time IS NOT NULL AND expiration_time < NOW())
+     RETURNING id`,
+    [cutoffDate],
+  );
 
   return result.length;
 }
@@ -666,27 +500,30 @@ export async function getSubscriptionStats(db: DbClient): Promise<{
   const now = new Date();
   const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-  const [totalResult] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(pushSubscriptions);
+  const totalResult = await db.queryOne<{ count: number }>(
+    selectCount(PUSH_SUBSCRIPTIONS_TABLE).toSql(),
+  );
 
-  const [activeResult] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(pushSubscriptions)
-    .where(eq(pushSubscriptions.isActive, true));
+  const activeResult = await db.queryOne<{ count: number }>(
+    selectCount(PUSH_SUBSCRIPTIONS_TABLE).where(eq('is_active', true)).toSql(),
+  );
 
-  const [expiringSoonResult] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(pushSubscriptions)
-    .where(
-      sql`${pushSubscriptions.expirationTime} IS NOT NULL
-        AND ${pushSubscriptions.expirationTime} <= ${weekFromNow}
-        AND ${pushSubscriptions.expirationTime} > ${now}`,
-    );
+  type ExpiringSoonRow = Record<string, unknown> & { count: string | number };
+  const expiringSoonResult = await db.queryOne<ExpiringSoonRow>(
+    {
+      text: `SELECT COUNT(*)::int as count FROM ${PUSH_SUBSCRIPTIONS_TABLE}
+             WHERE expiration_time IS NOT NULL
+               AND expiration_time <= $1
+               AND expiration_time > $2`,
+      values: [weekFromNow, now],
+    },
+  );
 
   const total = totalResult?.count ?? 0;
   const active = activeResult?.count ?? 0;
-  const expiringSoon = expiringSoonResult?.count ?? 0;
+  const expiringSoon = typeof expiringSoonResult?.count === 'number'
+    ? expiringSoonResult.count
+    : parseInt(String(expiringSoonResult?.count ?? 0), 10);
 
   return {
     total,
@@ -706,8 +543,8 @@ export async function getSubscriptionStats(db: DbClient): Promise<{
  * @param db - Database client
  */
 export async function clearAllData(db: DbClient): Promise<void> {
-  await db.delete(pushSubscriptions);
-  await db.delete(notificationPreferences);
+  await db.execute(deleteFrom(PUSH_SUBSCRIPTIONS_TABLE).toSql());
+  await db.execute(deleteFrom(NOTIFICATION_PREFERENCES_TABLE).toSql());
 }
 
 /**
@@ -716,7 +553,9 @@ export async function clearAllData(db: DbClient): Promise<void> {
  * @param db - Database client
  */
 export async function getSubscriptionCount(db: DbClient): Promise<number> {
-  const [result] = await db.select({ count: sql<number>`count(*)::int` }).from(pushSubscriptions);
+  const result = await db.queryOne<{ count: number }>(
+    selectCount(PUSH_SUBSCRIPTIONS_TABLE).toSql(),
+  );
   return result?.count ?? 0;
 }
 
@@ -726,9 +565,8 @@ export async function getSubscriptionCount(db: DbClient): Promise<number> {
  * @param db - Database client
  */
 export async function getActiveSubscriptionCount(db: DbClient): Promise<number> {
-  const [result] = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(pushSubscriptions)
-    .where(eq(pushSubscriptions.isActive, true));
+  const result = await db.queryOne<{ count: number }>(
+    selectCount(PUSH_SUBSCRIPTIONS_TABLE).where(eq('is_active', true)).toSql(),
+  );
   return result?.count ?? 0;
 }

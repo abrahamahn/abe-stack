@@ -57,24 +57,6 @@ export const eslintExtensions = [
 ] as const;
 
 /**
- * Package.json scripts related to linting
- */
-export const packageJsonScripts = {
-  'lint:staged':
-    'eslint --cache --cache-location .cache/eslint/.cache --report-unused-disable-directives --max-warnings=0 --no-warn-ignored',
-} as const;
-
-/**
- * Lint-staged configuration
- */
-export const lintStaged = {
-  '*.{ts,tsx,js,jsx,cjs,mjs,cts,mts,json,css,scss,md}': [
-    'pnpm prettier --config config/.prettierrc --ignore-path config/.prettierignore --write',
-  ],
-  '**/*.{ts,tsx,js,jsx,cjs,mjs,cts,mts}': ['pnpm lint:staged'],
-} as const;
-
-/**
  * VS Code settings for linting
  */
 export const vscodeSettings = {

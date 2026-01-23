@@ -85,6 +85,7 @@ vi.mock('../utils', () => ({
 function createMockContext(overrides?: Partial<AppContext>): AppContext {
   return {
     db: {} as AppContext['db'],
+    repos: {} as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
     config: {
       auth: {
@@ -245,6 +246,7 @@ describe('handleLogin', () => {
     expect(setRefreshTokenCookie).toHaveBeenCalledWith(reply, 'refresh-token', ctx.config.auth);
     expect(authenticateUser).toHaveBeenCalledWith(
       ctx.db,
+      ctx.repos,
       ctx.config.auth,
       'test@example.com',
       'password123',
@@ -390,7 +392,7 @@ describe('handleLogout', () => {
     expect(result.status).toBe(200);
     expect(result.body).toEqual({ message: SUCCESS_MESSAGES.LOGGED_OUT });
     expect(clearRefreshTokenCookie).toHaveBeenCalledWith(reply);
-    expect(logoutUser).toHaveBeenCalledWith(ctx.db, 'refresh-token');
+    expect(logoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, 'refresh-token');
   });
 
   test('should return 200 even when no refresh token cookie exists', async () => {
@@ -405,7 +407,7 @@ describe('handleLogout', () => {
     expect(result.status).toBe(200);
     expect(result.body).toEqual({ message: SUCCESS_MESSAGES.LOGGED_OUT });
     expect(clearRefreshTokenCookie).toHaveBeenCalled();
-    expect(logoutUser).toHaveBeenCalledWith(ctx.db, undefined);
+    expect(logoutUser).toHaveBeenCalledWith(ctx.db, ctx.repos, undefined);
   });
 
   test('should return 500 on unexpected errors', async () => {
@@ -444,6 +446,7 @@ describe('handleForgotPassword', () => {
     expect(result.body).toEqual({ message: SUCCESS_MESSAGES.PASSWORD_RESET_SENT });
     expect(requestPasswordReset).toHaveBeenCalledWith(
       ctx.db,
+      ctx.repos,
       ctx.email,
       'test@example.com',
       'http://localhost:8080',
@@ -485,6 +488,7 @@ describe('handleResetPassword', () => {
     expect(result.body).toEqual({ message: 'Password reset successfully' });
     expect(resetPassword).toHaveBeenCalledWith(
       ctx.db,
+      ctx.repos,
       ctx.config.auth,
       'reset-token',
       'newPassword123!',
@@ -567,7 +571,7 @@ describe('handleVerifyEmail', () => {
       token: 'access-token',
       user: mockUser,
     });
-    expect(verifyEmail).toHaveBeenCalledWith(ctx.db, ctx.config.auth, 'verify-token');
+    expect(verifyEmail).toHaveBeenCalledWith(ctx.db, ctx.repos, ctx.config.auth, 'verify-token');
     expect(setRefreshTokenCookie).toHaveBeenCalledWith(reply, 'refresh-token', ctx.config.auth);
   });
 

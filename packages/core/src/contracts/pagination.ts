@@ -2,11 +2,11 @@
 /**
  * Pagination Schemas
  *
- * Zod schemas for pagination options and results.
+ * Validation schemas for pagination options and results.
  * Used in API contracts for paginated endpoints.
  */
 
-import { z } from 'zod';
+import { createSchema, type Schema } from './types';
 
 // ============================================================================
 // Sort Order
@@ -20,6 +20,24 @@ export const SORT_ORDER = {
 export type SortOrder = (typeof SORT_ORDER)[keyof typeof SORT_ORDER];
 
 // ============================================================================
+// Validation Helpers
+// ============================================================================
+
+function validateInt(data: unknown, fieldName: string): number {
+  if (typeof data !== 'number' || !Number.isInteger(data)) {
+    throw new Error(`${fieldName} must be an integer`);
+  }
+  return data;
+}
+
+function validateSortOrder(data: unknown): SortOrder {
+  if (data !== 'asc' && data !== 'desc') {
+    throw new Error('sortOrder must be "asc" or "desc"');
+  }
+  return data;
+}
+
+// ============================================================================
 // Offset-based Pagination
 // ============================================================================
 
@@ -27,42 +45,50 @@ export type SortOrder = (typeof SORT_ORDER)[keyof typeof SORT_ORDER];
  * Pagination options for offset-based pagination.
  * Used for traditional page-based pagination.
  */
-export const paginationOptionsSchema = z.object({
-  page: z.number().int().min(1).default(1),
-  limit: z.number().int().min(1).max(1000).default(50),
-  sortBy: z.string().optional(),
-  sortOrder: z.enum([SORT_ORDER.ASC, SORT_ORDER.DESC]).default(SORT_ORDER.DESC),
-});
+export interface PaginationOptions {
+  page: number;
+  limit: number;
+  sortBy?: string;
+  sortOrder: SortOrder;
+}
 
-export type PaginationOptions = z.infer<typeof paginationOptionsSchema>;
+export const paginationOptionsSchema: Schema<PaginationOptions> = createSchema((data: unknown) => {
+  const obj = (data && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+  // Page defaults to 1
+  let page = 1;
+  if (obj.page !== undefined) {
+    page = validateInt(obj.page, 'page');
+    if (page < 1) {
+      throw new Error('page must be at least 1');
+    }
+  }
+
+  // Limit defaults to 50
+  let limit = 50;
+  if (obj.limit !== undefined) {
+    limit = validateInt(obj.limit, 'limit');
+    if (limit < 1) {
+      throw new Error('limit must be at least 1');
+    }
+    if (limit > 1000) {
+      throw new Error('limit must be at most 1000');
+    }
+  }
+
+  // sortBy is optional
+  const sortBy = typeof obj.sortBy === 'string' ? obj.sortBy : undefined;
+
+  // sortOrder defaults to desc
+  const sortOrder = obj.sortOrder !== undefined ? validateSortOrder(obj.sortOrder) : 'desc';
+
+  return { page, limit, sortBy, sortOrder };
+});
 
 /**
  * Paginated result for offset-based pagination.
  */
-type PaginatedResultSchema<T extends z.ZodType> = z.ZodObject<{
-  data: z.ZodArray<T>;
-  total: z.ZodNumber;
-  page: z.ZodNumber;
-  limit: z.ZodNumber;
-  hasNext: z.ZodBoolean;
-  hasPrev: z.ZodBoolean;
-  totalPages: z.ZodNumber;
-}>;
-
-export const paginatedResultSchema = <T extends z.ZodType>(
-  itemSchema: T,
-): PaginatedResultSchema<T> =>
-  z.object({
-    data: z.array(itemSchema),
-    total: z.number().int().min(0),
-    page: z.number().int().min(1),
-    limit: z.number().int().min(1),
-    hasNext: z.boolean(),
-    hasPrev: z.boolean(),
-    totalPages: z.number().int().min(0),
-  });
-
-export type PaginatedResult<T> = {
+export interface PaginatedResult<T> {
   data: T[];
   total: number;
   page: number;
@@ -70,7 +96,63 @@ export type PaginatedResult<T> = {
   hasNext: boolean;
   hasPrev: boolean;
   totalPages: number;
-};
+}
+
+/**
+ * Schema factory for paginated results.
+ */
+export function paginatedResultSchema<T>(
+  itemSchema: Schema<T>,
+): Schema<PaginatedResult<T>> {
+  return createSchema((data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid paginated result');
+    }
+    const obj = data as Record<string, unknown>;
+
+    if (!Array.isArray(obj.data)) {
+      throw new Error('data must be an array');
+    }
+    const parsedData = obj.data.map((item) => itemSchema.parse(item));
+
+    const total = validateInt(obj.total, 'total');
+    if (total < 0) {
+      throw new Error('total must be non-negative');
+    }
+
+    const page = validateInt(obj.page, 'page');
+    if (page < 1) {
+      throw new Error('page must be at least 1');
+    }
+
+    const limit = validateInt(obj.limit, 'limit');
+    if (limit < 1) {
+      throw new Error('limit must be at least 1');
+    }
+
+    if (typeof obj.hasNext !== 'boolean') {
+      throw new Error('hasNext must be a boolean');
+    }
+    if (typeof obj.hasPrev !== 'boolean') {
+      throw new Error('hasPrev must be a boolean');
+    }
+
+    const totalPages = validateInt(obj.totalPages, 'totalPages');
+    if (totalPages < 0) {
+      throw new Error('totalPages must be non-negative');
+    }
+
+    return {
+      data: parsedData,
+      total,
+      page,
+      limit,
+      hasNext: obj.hasNext,
+      hasPrev: obj.hasPrev,
+      totalPages,
+    };
+  });
+}
 
 // ============================================================================
 // Cursor-based Pagination
@@ -80,41 +162,95 @@ export type PaginatedResult<T> = {
  * Cursor-based pagination options.
  * More efficient for large datasets and infinite scroll.
  */
-export const cursorPaginationOptionsSchema = z.object({
-  cursor: z.string().optional(),
-  limit: z.number().int().min(1).max(1000).default(50),
-  sortBy: z.string().optional(),
-  sortOrder: z.enum([SORT_ORDER.ASC, SORT_ORDER.DESC]).default(SORT_ORDER.DESC),
-});
+export interface CursorPaginationOptions {
+  cursor?: string;
+  limit: number;
+  sortBy?: string;
+  sortOrder: SortOrder;
+}
 
-export type CursorPaginationOptions = z.infer<typeof cursorPaginationOptionsSchema>;
+export const cursorPaginationOptionsSchema: Schema<CursorPaginationOptions> = createSchema(
+  (data: unknown) => {
+    const obj = (data && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    // cursor is optional
+    const cursor = typeof obj.cursor === 'string' ? obj.cursor : undefined;
+
+    // Limit defaults to 50
+    let limit = 50;
+    if (obj.limit !== undefined) {
+      limit = validateInt(obj.limit, 'limit');
+      if (limit < 1) {
+        throw new Error('limit must be at least 1');
+      }
+      if (limit > 1000) {
+        throw new Error('limit must be at most 1000');
+      }
+    }
+
+    // sortBy is optional
+    const sortBy = typeof obj.sortBy === 'string' ? obj.sortBy : undefined;
+
+    // sortOrder defaults to desc
+    const sortOrder = obj.sortOrder !== undefined ? validateSortOrder(obj.sortOrder) : 'desc';
+
+    return { cursor, limit, sortBy, sortOrder };
+  },
+);
 
 /**
  * Cursor-based pagination result.
  */
-type CursorPaginatedResultSchema<T extends z.ZodType> = z.ZodObject<{
-  data: z.ZodArray<T>;
-  nextCursor: z.ZodNullable<z.ZodString>;
-  hasNext: z.ZodBoolean;
-  limit: z.ZodNumber;
-}>;
-
-export const cursorPaginatedResultSchema = <T extends z.ZodType>(
-  itemSchema: T,
-): CursorPaginatedResultSchema<T> =>
-  z.object({
-    data: z.array(itemSchema),
-    nextCursor: z.string().nullable(),
-    hasNext: z.boolean(),
-    limit: z.number().int().min(1),
-  });
-
-export type CursorPaginatedResult<T> = {
+export interface CursorPaginatedResult<T> {
   data: T[];
   nextCursor: string | null;
   hasNext: boolean;
   limit: number;
-};
+}
+
+/**
+ * Schema factory for cursor-based paginated results.
+ */
+export function cursorPaginatedResultSchema<T>(
+  itemSchema: Schema<T>,
+): Schema<CursorPaginatedResult<T>> {
+  return createSchema((data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid cursor paginated result');
+    }
+    const obj = data as Record<string, unknown>;
+
+    if (!Array.isArray(obj.data)) {
+      throw new Error('data must be an array');
+    }
+    const parsedData = obj.data.map((item) => itemSchema.parse(item));
+
+    // nextCursor can be string or null
+    let nextCursor: string | null = null;
+    if (obj.nextCursor !== null && obj.nextCursor !== undefined) {
+      if (typeof obj.nextCursor !== 'string') {
+        throw new Error('nextCursor must be a string or null');
+      }
+      nextCursor = obj.nextCursor;
+    }
+
+    if (typeof obj.hasNext !== 'boolean') {
+      throw new Error('hasNext must be a boolean');
+    }
+
+    const limit = validateInt(obj.limit, 'limit');
+    if (limit < 1) {
+      throw new Error('limit must be at least 1');
+    }
+
+    return {
+      data: parsedData,
+      nextCursor,
+      hasNext: obj.hasNext,
+      limit,
+    };
+  });
+}
 
 // ============================================================================
 // Universal Pagination
@@ -123,20 +259,56 @@ export type CursorPaginatedResult<T> = {
 /**
  * Universal pagination options that can be either offset or cursor-based.
  */
-export const universalPaginationOptionsSchema = z.union([
-  paginationOptionsSchema.extend({ type: z.literal('offset') }),
-  cursorPaginationOptionsSchema.extend({ type: z.literal('cursor') }),
-]);
+export type UniversalPaginationOptions =
+  | (PaginationOptions & { type: 'offset' })
+  | (CursorPaginationOptions & { type: 'cursor' });
 
-export type UniversalPaginationOptions = z.infer<typeof universalPaginationOptionsSchema>;
+export const universalPaginationOptionsSchema: Schema<UniversalPaginationOptions> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid universal pagination options');
+    }
+    const obj = data as Record<string, unknown>;
+
+    if (obj.type === 'offset') {
+      const parsed = paginationOptionsSchema.parse(data);
+      return { ...parsed, type: 'offset' as const };
+    } else if (obj.type === 'cursor') {
+      const parsed = cursorPaginationOptionsSchema.parse(data);
+      return { ...parsed, type: 'cursor' as const };
+    } else {
+      throw new Error('type must be "offset" or "cursor"');
+    }
+  },
+);
 
 /**
  * Universal pagination result.
  */
-export const universalPaginatedResultSchema = (itemSchema: z.ZodType): z.ZodType =>
-  z.union([
-    paginatedResultSchema(itemSchema).extend({ type: z.literal('offset') }),
-    cursorPaginatedResultSchema(itemSchema).extend({ type: z.literal('cursor') }),
-  ]);
+export type UniversalPaginatedResult<T> =
+  | (PaginatedResult<T> & { type: 'offset' })
+  | (CursorPaginatedResult<T> & { type: 'cursor' });
 
-export type UniversalPaginatedResult = z.infer<ReturnType<typeof universalPaginatedResultSchema>>;
+/**
+ * Schema factory for universal paginated results.
+ */
+export function universalPaginatedResultSchema<T>(
+  itemSchema: Schema<T>,
+): Schema<UniversalPaginatedResult<T>> {
+  return createSchema((data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid universal paginated result');
+    }
+    const obj = data as Record<string, unknown>;
+
+    if (obj.type === 'offset') {
+      const parsed = paginatedResultSchema(itemSchema).parse(data);
+      return { ...parsed, type: 'offset' as const };
+    } else if (obj.type === 'cursor') {
+      const parsed = cursorPaginatedResultSchema(itemSchema).parse(data);
+      return { ...parsed, type: 'cursor' as const };
+    } else {
+      throw new Error('type must be "offset" or "cursor"');
+    }
+  });
+}

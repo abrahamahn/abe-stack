@@ -188,18 +188,33 @@ For testing, uncomment the staging ACME server in Caddyfile to avoid rate limits
 
 ---
 
-## Secrets Checklist
+## Deployment Workflow
 
-Before deploying to production:
+### Automated Deployment (Recommended)
 
-- [ ] `DOMAIN` - Set to your actual domain
-- [ ] `ACME_EMAIL` - Valid email for Let's Encrypt
-- [ ] `POSTGRES_PASSWORD` - Strong, random password (not default)
-- [ ] `JWT_SECRET` - Generated with `openssl rand -base64 32`
-- [ ] `SESSION_SECRET` - Generated with `openssl rand -base64 32`
-- [ ] DNS records point to your server IP
-- [ ] Firewall allows only 80/443 inbound
-- [ ] Environment file has restricted permissions (`chmod 600`)
+Use the GitHub Actions deployment workflow for reliable, repeatable deployments:
+
+1. **Configure Secrets**: Follow the [secrets checklist](./secrets-checklist.md)
+2. **Run Release Checklist**: Complete all items in the [release checklist](./release-checklist.md)
+3. **Trigger Deployment**: Go to GitHub Actions → "Deploy" workflow → "Run workflow"
+4. **Monitor**: Watch the deployment logs in real-time
+5. **Verify**: Test your application at `https://yourdomain.com`
+
+### Manual Deployment (Alternative)
+
+For custom deployment scenarios, use the traditional Docker Compose approach:
+
+```bash
+# 1. Configure environment
+cp config/.env/.env.example config/.env/.env.production
+# Edit .env.production with production values
+
+# 2. Build and deploy
+docker compose -f config/docker/docker-compose.prod.yml --env-file config/.env/.env.production up -d --build
+
+# 3. Run migrations (first deploy only)
+docker compose -f config/docker/docker-compose.prod.yml exec api node -e "/* migration command */"
+```
 
 ---
 

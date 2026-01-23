@@ -574,11 +574,5 @@ describe('Realtime Hooks', () => {
       expect(screen.getByTestId('has-undo').textContent).toBe('true');
       expect(screen.getByTestId('has-redo').textContent).toBe('true');
     });
-
-    it.skip('should update state after write and undo', async () => {
-      // This test is skipped due to timing issues with async state updates
-      // The functionality is tested in the RealtimeContext tests
-      expect(true).toBe(true);
-    });
   });
 });

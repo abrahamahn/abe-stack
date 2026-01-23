@@ -2,7 +2,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import eslintPluginImport from 'eslint-plugin-import';
+import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
 
 import type { Linter } from 'eslint';
@@ -45,6 +45,7 @@ export default [
       'apps/desktop/src/**/*.js.map',
       '**/*.d.ts',
       '**/*.d.ts.map',
+      'packages/db/src/benchmark/**',
     ],
   },
   jsConfigs.recommended ?? {},
@@ -202,28 +203,15 @@ export default [
       'no-var': 'error',
     },
   },
+  // React hooks rules - catches missing deps and rules of hooks violations
   {
+    files: ['**/*.{tsx,jsx}'],
     plugins: {
-      import: eslintPluginImport,
+      'react-hooks': reactHooks,
     },
     rules: {
-      'import/order': [
-        'warn',
-        {
-          groups: [
-            'builtin',
-            'external',
-            'internal',
-            'parent',
-            'sibling',
-            'index',
-            'object',
-            'type',
-          ],
-          'newlines-between': 'always',
-          alphabetize: { order: 'asc', caseInsensitive: true },
-        },
-      ],
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
     },
   },
   {
@@ -253,7 +241,7 @@ export default [
                 'Frontend code must not import backend/server modules. Add an API layer or shared contract instead.',
             },
             {
-              group: ['**/infrastructure/**', '**/database/**', 'drizzle-orm', 'postgres', 'pg'],
+              group: ['**/infrastructure/**', '**/database/**', '@abe-stack/db', 'postgres', 'pg'],
               message:
                 'UI must not import database or backend internals. Use API clients or shared contracts instead.',
             },
@@ -286,11 +274,74 @@ export default [
     },
   },
   {
+    // db/utils.ts uses single type parameters for API ergonomics
+    files: ['packages/db/src/utils.ts'],
+    rules: {
+      '@typescript-eslint/no-unnecessary-type-parameters': 'off',
+    },
+  },
+  {
+    // db/client.ts passes query values to postgres driver which expects any[]
+    files: ['packages/db/src/client.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-argument': 'off',
+    },
+  },
+  {
+    // router context uses non-null assertion for React context pattern
+    files: ['packages/ui/src/router/context.tsx'],
+    rules: {
+      '@typescript-eslint/no-non-null-assertion': 'off',
+    },
+  },
+  {
+    // seed script template expressions are safe for logging
+    files: ['apps/server/src/scripts/seed.ts'],
+    rules: {
+      '@typescript-eslint/restrict-template-expressions': 'off',
+    },
+  },
+  {
     // sql-provider.ts needs type workaround for Drizzle ORM v0.35+ constraints
     files: ['**/search/sql-provider.ts'],
     rules: {
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/restrict-template-expressions': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'off',
+      '@typescript-eslint/no-unnecessary-type-conversion': 'off',
+    },
+  },
+  {
+    // writeService.ts deals with dynamic record types
+    files: ['**/jobs/write/writeService.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/restrict-template-expressions': 'off',
+      '@typescript-eslint/no-unnecessary-type-conversion': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'off',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+    },
+  },
+  {
+    // realtime/service.ts deals with dynamic record types
+    files: ['**/realtime/service.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/restrict-template-expressions': 'off',
+    },
+  },
+  {
+    // search-factory.ts deals with dynamic column types
+    files: ['**/search/search-factory.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
     },
   },
   {

@@ -11,11 +11,7 @@
  * - Security (removes stale tokens)
  */
 
-import { lt, sql } from 'drizzle-orm';
-
-import { magicLinkTokens } from '../../data/database/schema';
-
-import type { DbClient } from '../../data/database/client';
+import { lt, selectCount, MAGIC_LINK_TOKENS_TABLE, type RawDb } from '@abe-stack/db';
 
 // ============================================================================
 // Constants
@@ -84,7 +80,7 @@ export interface MagicLinkCleanupResult {
  * ```
  */
 export async function cleanupMagicLinkTokens(
-  db: DbClient,
+  db: RawDb,
   options: MagicLinkCleanupOptions = {},
 ): Promise<MagicLinkCleanupResult> {
   const startTime = Date.now();
@@ -106,27 +102,28 @@ export async function cleanupMagicLinkTokens(
 
   if (dryRun) {
     // Count records that would be deleted
-    const countResult = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(magicLinkTokens)
-      .where(lt(magicLinkTokens.createdAt, cutoffDate));
+    const countResult = await db.queryOne<{ count: number }>(
+      selectCount(MAGIC_LINK_TOKENS_TABLE)
+        .where(lt('created_at', cutoffDate))
+        .toSql(),
+    );
 
-    deletedCount = countResult[0]?.count ?? 0;
+    deletedCount = countResult?.count ?? 0;
   } else {
     // Delete in batches to avoid long-running transactions
     let batchDeleted = 0;
     do {
       // Use subquery to limit deletion batch size
-      const result = await db.execute(sql`
-        DELETE FROM magic_link_tokens
-        WHERE id IN (
-          SELECT id FROM magic_link_tokens
-          WHERE created_at < ${cutoffDate}
-          LIMIT ${batchSize}
-        )
-      `);
+      batchDeleted = await db.execute({
+        text: `DELETE FROM magic_link_tokens
+          WHERE id IN (
+            SELECT id FROM magic_link_tokens
+            WHERE created_at < $1
+            LIMIT $2
+          )`,
+        values: [cutoffDate, batchSize],
+      });
 
-      batchDeleted = (result as { rowCount?: number }).rowCount ?? 0;
       deletedCount += batchDeleted;
 
       // Continue until no more records to delete
@@ -152,7 +149,7 @@ export async function cleanupMagicLinkTokens(
  * @returns Count of records that would be cleaned up
  */
 export async function countOldMagicLinkTokens(
-  db: DbClient,
+  db: RawDb,
   retentionHours: number = DEFAULT_RETENTION_HOURS,
 ): Promise<number> {
   const effectiveRetentionHours = Math.max(retentionHours, MIN_RETENTION_HOURS);
@@ -160,12 +157,13 @@ export async function countOldMagicLinkTokens(
   const cutoffDate = new Date();
   cutoffDate.setTime(cutoffDate.getTime() - effectiveRetentionHours * 60 * 60 * 1000);
 
-  const result = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(magicLinkTokens)
-    .where(lt(magicLinkTokens.createdAt, cutoffDate));
+  const result = await db.queryOne<{ count: number }>(
+    selectCount(MAGIC_LINK_TOKENS_TABLE)
+      .where(lt('created_at', cutoffDate))
+      .toSql(),
+  );
 
-  return result[0]?.count ?? 0;
+  return result?.count ?? 0;
 }
 
 /**
@@ -175,10 +173,12 @@ export async function countOldMagicLinkTokens(
  * @param db - Database client
  * @returns Total count of magic link tokens
  */
-export async function getTotalMagicLinkTokenCount(db: DbClient): Promise<number> {
-  const result = await db.select({ count: sql<number>`count(*)::int` }).from(magicLinkTokens);
+export async function getTotalMagicLinkTokenCount(db: RawDb): Promise<number> {
+  const result = await db.queryOne<{ count: number }>(
+    selectCount(MAGIC_LINK_TOKENS_TABLE).toSql(),
+  );
 
-  return result[0]?.count ?? 0;
+  return result?.count ?? 0;
 }
 
 /**
@@ -189,7 +189,7 @@ export async function getTotalMagicLinkTokenCount(db: DbClient): Promise<number>
  * @param retentionHours - Number of hours to retain (default: 24)
  */
 export async function getMagicLinkTokenStats(
-  db: DbClient,
+  db: RawDb,
   retentionHours: number = DEFAULT_RETENTION_HOURS,
 ): Promise<{
   total: number;

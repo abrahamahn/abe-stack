@@ -51,6 +51,9 @@ vi.mock('@abe-stack/sdk', () => ({
     restoreClient: vi.fn().mockResolvedValue(undefined),
     removeClient: vi.fn(),
   })),
+  QueryCacheProvider: ({ children }: { children: React.ReactNode }): React.ReactElement => (
+    <div data-testid="query-cache-provider">{children}</div>
+  ),
 }));
 
 // Mock @abe-stack/ui - replace BrowserRouter with MemoryRouter for tests
@@ -87,6 +90,7 @@ function createMockEnvironment(): ClientEnvironment {
       getQueryState: vi.fn(),
       invalidateQueries: vi.fn(),
       subscribe: vi.fn(() => vi.fn()),
+      subscribeAll: vi.fn(() => vi.fn()),
       getAll: vi.fn(() => []),
     } as unknown as ClientEnvironment['queryCache'],
     auth: {
@@ -181,19 +185,11 @@ describe('App', () => {
   });
 
   describe('Query Persistence', () => {
-    it('should show loading state while restoring cache', () => {
+    it('should render immediately without blocking (non-blocking cache restoration)', async () => {
       render(<App environment={mockEnvironment} />);
 
-      // Initially shows loading while async restoration runs
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
-    });
-
-    it('should complete restoration and render app', async () => {
-      render(<App environment={mockEnvironment} />);
-
-      // After restoration completes, app should render
+      // App renders immediately without waiting for cache restoration
       await waitFor(() => {
-        expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
         expect(screen.getByTestId('home-page')).toBeInTheDocument();
       });
     });
@@ -205,8 +201,8 @@ describe('App', () => {
         expect(screen.getByTestId('home-page')).toBeInTheDocument();
       });
 
-      // Verify queryCache.subscribe was called for persistence
-      expect(mockEnvironment.queryCache.subscribe).toHaveBeenCalled();
+      // Verify queryCache.subscribeAll was called for persistence
+      expect(mockEnvironment.queryCache.subscribeAll).toHaveBeenCalled();
     });
 
     it('should handle empty persisted state gracefully', async () => {

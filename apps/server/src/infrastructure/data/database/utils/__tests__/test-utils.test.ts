@@ -1,221 +1,222 @@
 // apps/server/src/infrastructure/data/database/utils/__tests__/test-utils.test.ts
 import { describe, expect, test } from 'vitest';
 
-import { createMockDb } from '../test-utils';
+import { asMockDb, createMockDb, createMockDbWithData } from '../test-utils';
 
 describe('createMockDb', () => {
-  test('should return an object with insert, select, and query properties', () => {
+  test('should return an object with query, queryOne, execute, and raw properties', () => {
     const mockDb = createMockDb();
 
-    expect(mockDb).toHaveProperty('insert');
-    expect(mockDb).toHaveProperty('select');
     expect(mockDb).toHaveProperty('query');
+    expect(mockDb).toHaveProperty('queryOne');
+    expect(mockDb).toHaveProperty('execute');
+    expect(mockDb).toHaveProperty('raw');
   });
 
-  test('should have insert function that returns chainable values method', async () => {
+  test('should have query function that resolves to empty array by default', async () => {
     const mockDb = createMockDb();
 
-    // Access the mock as a callable function
-    const insert = mockDb.insert as unknown as () => { values: (data: unknown) => Promise<void> };
-    const insertResult = insert();
-    expect(insertResult).toHaveProperty('values');
-
-    const valuesResult = insertResult.values({});
-    await expect(valuesResult).resolves.toBeUndefined();
-  });
-
-  test('should have select function that returns chainable from.where.orderBy.limit methods', () => {
-    const mockDb = createMockDb();
-
-    const select = mockDb.select as unknown as () => {
-      from: (table: unknown) => {
-        where: (condition: unknown) => {
-          orderBy: (order: unknown) => {
-            limit: (n: number) => Promise<unknown[]>;
-          };
-        };
-      };
-    };
-    const selectResult = select();
-    expect(selectResult).toHaveProperty('from');
-
-    const fromResult = selectResult.from({});
-    expect(fromResult).toHaveProperty('where');
-
-    const whereResult = fromResult.where({});
-    expect(whereResult).toHaveProperty('orderBy');
-
-    const orderByResult = whereResult.orderBy({});
-    expect(orderByResult).toHaveProperty('limit');
-  });
-
-  test('should have select chain that resolves to empty array', async () => {
-    const mockDb = createMockDb();
-
-    const select = mockDb.select as unknown as () => {
-      from: (table: unknown) => {
-        where: (condition: unknown) => {
-          orderBy: (order: unknown) => {
-            limit: (n: number) => Promise<unknown[]>;
-          };
-        };
-      };
-    };
-    const result = await select().from({}).where({}).orderBy({}).limit(10);
+    const result = await mockDb.query({ text: 'SELECT * FROM users', values: [] });
 
     expect(result).toEqual([]);
   });
 
-  test('should have query.securityEvents.findMany that resolves to empty array', async () => {
+  test('should have queryOne function that resolves to null by default', async () => {
     const mockDb = createMockDb();
 
-    const findMany = mockDb.query.securityEvents.findMany as unknown as (
-      query: unknown,
-    ) => Promise<unknown[]>;
-    const result = await findMany({});
-
-    expect(result).toEqual([]);
-  });
-
-  test('should have query.users.findFirst that resolves to null', async () => {
-    const mockDb = createMockDb();
-
-    const findFirst = mockDb.query.users.findFirst as unknown as (query: unknown) => Promise<null>;
-    const result = await findFirst({});
+    const result = await mockDb.queryOne({ text: 'SELECT * FROM users WHERE id = $1', values: ['1'] });
 
     expect(result).toBeNull();
   });
 
-  test('should track calls to insert', () => {
+  test('should have execute function that resolves to 0 by default', async () => {
     const mockDb = createMockDb();
 
-    const insert = mockDb.insert as unknown as () => unknown;
-    insert();
-    insert();
-    insert();
+    const result = await mockDb.execute({ text: 'DELETE FROM users', values: [] });
 
-    expect(mockDb.insert).toHaveBeenCalledTimes(3);
+    expect(result).toBe(0);
   });
 
-  test('should track calls to select', () => {
+  test('should have raw function that resolves to empty array by default', async () => {
     const mockDb = createMockDb();
 
-    const select = mockDb.select as unknown as () => unknown;
-    select();
-    select();
+    const result = await mockDb.raw('SELECT NOW()');
 
-    expect(mockDb.select).toHaveBeenCalledTimes(2);
+    expect(result).toEqual([]);
   });
 
-  test('should track calls to query.securityEvents.findMany', () => {
+  test('should track calls to query', () => {
     const mockDb = createMockDb();
 
-    const findMany = mockDb.query.securityEvents.findMany as unknown as (
-      query: unknown,
-    ) => Promise<unknown[]>;
-    void findMany({});
-    void findMany({});
+    void mockDb.query({ text: 'SELECT 1', values: [] });
+    void mockDb.query({ text: 'SELECT 2', values: [] });
+    void mockDb.query({ text: 'SELECT 3', values: [] });
 
-    expect(mockDb.query.securityEvents.findMany).toHaveBeenCalledTimes(2);
+    expect(mockDb.query).toHaveBeenCalledTimes(3);
   });
 
-  test('should track calls to query.users.findFirst', () => {
+  test('should track calls to queryOne', () => {
     const mockDb = createMockDb();
 
-    const findFirst = mockDb.query.users.findFirst as unknown as (query: unknown) => Promise<null>;
-    void findFirst({});
+    void mockDb.queryOne({ text: 'SELECT 1', values: [] });
+    void mockDb.queryOne({ text: 'SELECT 2', values: [] });
 
-    expect(mockDb.query.users.findFirst).toHaveBeenCalledTimes(1);
+    expect(mockDb.queryOne).toHaveBeenCalledTimes(2);
   });
 
-  test('should allow mocking insert.values to return custom value', async () => {
+  test('should track calls to execute', () => {
     const mockDb = createMockDb();
-    const customReturn = { id: 'test-id' };
 
-    const insert = mockDb.insert as unknown as () => {
-      values: { mockResolvedValueOnce: (value: unknown) => void } & ((
-        data: unknown,
-      ) => Promise<unknown>);
-    };
-    insert().values.mockResolvedValueOnce(customReturn);
+    void mockDb.execute({ text: 'INSERT INTO users VALUES (1)', values: [] });
+    void mockDb.execute({ text: 'INSERT INTO users VALUES (2)', values: [] });
+    void mockDb.execute({ text: 'INSERT INTO users VALUES (3)', values: [] });
+    void mockDb.execute({ text: 'INSERT INTO users VALUES (4)', values: [] });
 
-    const insertResult = insert();
-    const result = await insertResult.values({ name: 'test' });
-
-    expect(result).toEqual(customReturn);
+    expect(mockDb.execute).toHaveBeenCalledTimes(4);
   });
 
-  test('should allow mocking query.users.findFirst to return custom value', async () => {
+  test('should track calls to raw', () => {
     const mockDb = createMockDb();
-    const mockUser = { id: 'user-1', name: 'Test User', email: 'test@example.com' };
 
-    (
-      mockDb.query.users.findFirst as unknown as { mockResolvedValueOnce: (value: unknown) => void }
-    ).mockResolvedValueOnce(mockUser);
+    void mockDb.raw('SELECT NOW()');
 
-    const findFirst = mockDb.query.users.findFirst as unknown as (
-      query: unknown,
-    ) => Promise<unknown>;
-    const result = await findFirst({ where: { id: 'user-1' } });
+    expect(mockDb.raw).toHaveBeenCalledTimes(1);
+  });
+
+  test('should allow mocking query to return custom value', async () => {
+    const mockDb = createMockDb();
+    const mockUsers = [
+      { id: '1', name: 'User 1', email: 'user1@example.com' },
+      { id: '2', name: 'User 2', email: 'user2@example.com' },
+    ];
+
+    mockDb.query.mockResolvedValueOnce(mockUsers);
+
+    const result = await mockDb.query({ text: 'SELECT * FROM users', values: [] });
+
+    expect(result).toEqual(mockUsers);
+  });
+
+  test('should allow mocking queryOne to return custom value', async () => {
+    const mockDb = createMockDb();
+    const mockUser = { id: '1', name: 'Test User', email: 'test@example.com' };
+
+    mockDb.queryOne.mockResolvedValueOnce(mockUser);
+
+    const result = await mockDb.queryOne({ text: 'SELECT * FROM users WHERE id = $1', values: ['1'] });
 
     expect(result).toEqual(mockUser);
   });
 
-  test('should allow mocking query.securityEvents.findMany to return custom value', async () => {
+  test('should allow mocking execute to return custom count', async () => {
     const mockDb = createMockDb();
-    const mockEvents = [
-      { id: 'event-1', type: 'login' },
-      { id: 'event-2', type: 'logout' },
-    ];
 
-    (
-      mockDb.query.securityEvents.findMany as unknown as {
-        mockResolvedValueOnce: (value: unknown) => void;
-      }
-    ).mockResolvedValueOnce(mockEvents);
+    mockDb.execute.mockResolvedValueOnce(5);
 
-    const findMany = mockDb.query.securityEvents.findMany as unknown as (
-      query: unknown,
-    ) => Promise<unknown[]>;
-    const result = await findMany({});
+    const result = await mockDb.execute({ text: 'DELETE FROM users WHERE created_at < NOW()', values: [] });
 
-    expect(result).toEqual(mockEvents);
+    expect(result).toBe(5);
+  });
+
+  test('should allow mocking raw to return custom result', async () => {
+    const mockDb = createMockDb();
+    const mockTables = [{ tablename: 'users' }, { tablename: 'posts' }];
+
+    mockDb.raw.mockResolvedValueOnce(mockTables);
+
+    const result = await mockDb.raw('SELECT tablename FROM pg_tables');
+
+    expect(result).toEqual(mockTables);
   });
 
   test('should create independent mock instances', () => {
     const mockDb1 = createMockDb();
     const mockDb2 = createMockDb();
 
-    const insert1 = mockDb1.insert as unknown as () => unknown;
-    const insert2 = mockDb2.insert as unknown as () => unknown;
+    void mockDb1.query({ text: 'SELECT 1', values: [] });
+    void mockDb1.query({ text: 'SELECT 2', values: [] });
+    void mockDb1.query({ text: 'SELECT 3', values: [] });
 
-    insert1();
-    insert1();
-    insert1();
+    void mockDb2.query({ text: 'SELECT 1', values: [] });
 
-    insert2();
-
-    expect(mockDb1.insert).toHaveBeenCalledTimes(3);
-    expect(mockDb2.insert).toHaveBeenCalledTimes(1);
+    expect(mockDb1.query).toHaveBeenCalledTimes(3);
+    expect(mockDb2.query).toHaveBeenCalledTimes(1);
   });
 
   test('should be usable with vi.fn type assertions', () => {
     const mockDb = createMockDb();
 
     // Verify the functions are vi.fn() instances by checking mock methods
-    expect(typeof (mockDb.insert as unknown as { mockReturnValue: unknown }).mockReturnValue).toBe(
-      'function',
-    );
-    expect(typeof (mockDb.select as unknown as { mockReturnValue: unknown }).mockReturnValue).toBe(
-      'function',
-    );
-    expect(
-      typeof (mockDb.query.securityEvents.findMany as unknown as { mockReturnValue: unknown })
-        .mockReturnValue,
-    ).toBe('function');
-    expect(
-      typeof (mockDb.query.users.findFirst as unknown as { mockReturnValue: unknown })
-        .mockReturnValue,
-    ).toBe('function');
+    expect(typeof mockDb.query.mockReturnValue).toBe('function');
+    expect(typeof mockDb.queryOne.mockReturnValue).toBe('function');
+    expect(typeof mockDb.execute.mockReturnValue).toBe('function');
+    expect(typeof mockDb.raw.mockReturnValue).toBe('function');
+  });
+});
+
+describe('createMockDbWithData', () => {
+  test('should create mock with custom query result', async () => {
+    const mockUsers = [{ id: '1', name: 'Test' }];
+    const mockDb = createMockDbWithData({ queryResult: mockUsers });
+
+    const result = await mockDb.query({ text: 'SELECT * FROM users', values: [] });
+
+    expect(result).toEqual(mockUsers);
+  });
+
+  test('should create mock with custom queryOne result', async () => {
+    const mockUser = { id: '1', name: 'Test' };
+    const mockDb = createMockDbWithData({ queryOneResult: mockUser });
+
+    const result = await mockDb.queryOne({ text: 'SELECT * FROM users WHERE id = $1', values: ['1'] });
+
+    expect(result).toEqual(mockUser);
+  });
+
+  test('should create mock with custom execute result', async () => {
+    const mockDb = createMockDbWithData({ executeResult: 10 });
+
+    const result = await mockDb.execute({ text: 'DELETE FROM users', values: [] });
+
+    expect(result).toBe(10);
+  });
+
+  test('should create mock with custom raw result', async () => {
+    const mockTables = [{ tablename: 'users' }];
+    const mockDb = createMockDbWithData({ rawResult: mockTables });
+
+    const result = await mockDb.raw('SELECT tablename FROM pg_tables');
+
+    expect(result).toEqual(mockTables);
+  });
+
+  test('should use default values when options not provided', async () => {
+    const mockDb = createMockDbWithData({});
+
+    expect(await mockDb.query({ text: 'SELECT 1', values: [] })).toEqual([]);
+    expect(await mockDb.queryOne({ text: 'SELECT 1', values: [] })).toBeNull();
+    expect(await mockDb.execute({ text: 'SELECT 1', values: [] })).toBe(0);
+    expect(await mockDb.raw('SELECT 1')).toEqual([]);
+  });
+});
+
+describe('asMockDb', () => {
+  test('should cast MockDbClient to RawDb type', () => {
+    const mockDb = createMockDb();
+    const db = asMockDb(mockDb);
+
+    // Should be usable in functions expecting RawDb
+    expect(db).toBeDefined();
+  });
+
+  test('should preserve mock functionality after casting', async () => {
+    const mockDb = createMockDb();
+    mockDb.queryOne.mockResolvedValueOnce({ id: '1', count: 5 });
+
+    const db = asMockDb(mockDb);
+    const result = await db.queryOne<{ count: number }>({ text: 'SELECT COUNT(*) as count FROM users', values: [] });
+
+    expect(result?.count).toBe(5);
+    expect(mockDb.queryOne).toHaveBeenCalledTimes(1);
   });
 });

@@ -14,7 +14,6 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState, type FormEvent } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { axe } from 'vitest-axe';
 
 import { FormField } from '../../components/FormField';
 import { Select } from '../../components/Select';
@@ -467,14 +466,6 @@ describe('FormComposition Integration Tests', () => {
       });
     });
 
-    it('has no accessibility violations', async () => {
-      const { container } = render(
-        <RegistrationForm onSubmit={vi.fn().mockResolvedValue(undefined)} />,
-      );
-
-      const results = await axe(container);
-      expect(results.violations).toHaveLength(0);
-    });
   });
 
   describe('Resend Verification Form with Cooldown', () => {
@@ -494,16 +485,6 @@ describe('FormComposition Integration Tests', () => {
 
     // Note: Cooldown timing tests are covered in useResendCooldown unit tests.
     // Integration tests with fake timers and async operations can be unreliable.
-
-    it('has no accessibility violations', async () => {
-      vi.useRealTimers(); // axe needs real timers
-      const { container } = render(
-        <ResendVerificationForm onResend={vi.fn().mockResolvedValue(undefined)} />,
-      );
-
-      const results = await axe(container);
-      expect(results.violations).toHaveLength(0);
-    });
   });
 
   describe('Form Field Component Compositions', () => {

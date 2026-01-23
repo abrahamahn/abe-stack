@@ -290,32 +290,35 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         description: 'Basic modal',
         code: '<Modal.Root open={open} onClose={onClose}>...</Modal.Root>',
         render: (): ReactElement => {
-          const [open, setOpen] = React.useState(false);
-          return (
-            <>
-              <Button
-                onClick={() => {
-                  setOpen(true);
-                }}
-              >
-                Open Modal
-              </Button>
-              <Modal.Root
-                open={open}
-                onClose={() => {
-                  setOpen(false);
-                }}
-              >
-                <div style={{ padding: '24px' }}>
-                  <Modal.Title>Modal Title</Modal.Title>
-                  <Text>Modal content goes here</Text>
-                  <Modal.Close>
-                    <Button style={{ marginTop: '16px' }}>Close</Button>
-                  </Modal.Close>
-                </div>
-              </Modal.Root>
-            </>
-          );
+          const ModalExample = (): ReactElement => {
+            const [open, setOpen] = React.useState(false);
+            return (
+              <>
+                <Button
+                  onClick={() => {
+                    setOpen(true);
+                  }}
+                >
+                  Open Modal
+                </Button>
+                <Modal.Root
+                  open={open}
+                  onClose={() => {
+                    setOpen(false);
+                  }}
+                >
+                  <div style={{ padding: '24px' }}>
+                    <Modal.Title>Modal Title</Modal.Title>
+                    <Text>Modal content goes here</Text>
+                    <Modal.Close>
+                      <Button style={{ marginTop: '16px' }}>Close</Button>
+                    </Modal.Close>
+                  </div>
+                </Modal.Root>
+              </>
+            );
+          };
+          return <ModalExample />;
         },
       },
     ],
@@ -331,24 +334,27 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         description: 'Basic overlay',
         code: '<Overlay open={true} />',
         render: (): ReactElement => {
-          const [open, setOpen] = React.useState(false);
-          return (
-            <>
-              <Button
-                onClick={() => {
-                  setOpen(!open);
-                }}
-              >
-                Toggle Overlay
-              </Button>
-              <Overlay
-                open={open}
-                onClick={() => {
-                  setOpen(false);
-                }}
-              />
-            </>
-          );
+          const OverlayExample = (): ReactElement => {
+            const [open, setOpen] = React.useState(false);
+            return (
+              <>
+                <Button
+                  onClick={() => {
+                    setOpen(!open);
+                  }}
+                >
+                  Toggle Overlay
+                </Button>
+                <Overlay
+                  open={open}
+                  onClick={() => {
+                    setOpen(false);
+                  }}
+                />
+              </>
+            );
+          };
+          return <OverlayExample />;
         },
       },
     ],

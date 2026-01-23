@@ -19,6 +19,7 @@ import {
   createPostgresPubSub,
   createStorage,
   getDetailedHealth,
+  getRepositoryContext,
   logStartupSummary,
   registerWebSocket,
   requireValidSchema,
@@ -30,12 +31,12 @@ import {
   type LiveResponse,
   type PostgresPubSub,
   type ReadyResponse,
+  type Repositories,
   type RoutesResponse,
   type StorageProvider,
 } from '@infrastructure/index';
 import { registerRoutes } from '@modules/index';
 import { type AppContext, type IServiceContainer } from '@shared/index';
-import { sql } from 'drizzle-orm';
 
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
 
@@ -49,6 +50,7 @@ export interface AppOptions {
   config: AppConfig;
   // Optional overrides for testing
   db?: DbClient;
+  repos?: Repositories;
   email?: EmailService;
   storage?: StorageProvider;
 }
@@ -59,6 +61,7 @@ export class App implements IServiceContainer {
 
   // Infrastructure services (IServiceContainer implementation)
   readonly db: DbClient;
+  readonly repos: Repositories;
   readonly email: EmailService;
   readonly storage: StorageProvider;
   readonly pubsub: SubscriptionManager;
@@ -85,6 +88,8 @@ export class App implements IServiceContainer {
 
     // Initialize infrastructure services
     this.db = options.db ?? createDbClient(connectionString);
+    const repoCtx = getRepositoryContext(connectionString);
+    this.repos = options.repos ?? repoCtx.repos;
     this.email = options.email ?? createEmailService(this.config.email);
     this.storage = options.storage ?? createStorage(this.config.storage);
 
@@ -196,7 +201,7 @@ export class App implements IServiceContainer {
       {},
       async (_request, reply): Promise<ReadyResponse> => {
         try {
-          await this.db.execute(sql`SELECT 1`);
+          await this.db.healthCheck();
           return { status: 'ready', timestamp: new Date().toISOString() };
         } catch {
           void reply.status(503);
@@ -243,6 +248,7 @@ export class App implements IServiceContainer {
     return {
       config: this.config,
       db: this.db,
+      repos: this.repos,
       email: this.email,
       storage: this.storage,
       pubsub: this.pubsub,

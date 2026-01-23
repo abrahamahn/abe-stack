@@ -4,7 +4,7 @@ import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 
 import '../styles/elements.css';
 
-type SwitchProps = ComponentPropsWithoutRef<'button'> & {
+type SwitchProps = Omit<ComponentPropsWithoutRef<'button'>, 'onChange' | 'defaultChecked'> & {
   checked?: boolean;
   defaultChecked?: boolean;
   onChange?: (checked: boolean) => void;

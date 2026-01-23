@@ -5,13 +5,10 @@
  * OAuth authentication schemas and API contract definitions.
  */
 
-import { z } from 'zod';
-
-
-import { errorResponseSchema } from './common';
-import { userSchema } from './users';
-
-import type { Contract } from './types';
+import { emptyBodySchema } from './auth';
+import { errorResponseSchema, uuidSchema } from './common';
+import { createSchema, type Contract, type Schema } from './types';
+import { userSchema, type User } from './users';
 
 // ============================================================================
 // Constants
@@ -23,89 +20,233 @@ export const OAUTH_PROVIDERS = ['google', 'github', 'apple'] as const;
 // Schemas
 // ============================================================================
 
+export type OAuthProvider = (typeof OAUTH_PROVIDERS)[number];
+
 /**
  * OAuth provider enum
  */
-export const oauthProviderSchema = z.enum(OAUTH_PROVIDERS);
+export const oauthProviderSchema: Schema<OAuthProvider> = createSchema((data: unknown) => {
+  if (typeof data !== 'string') {
+    throw new Error('OAuth provider must be a string');
+  }
+  if (!OAUTH_PROVIDERS.includes(data as OAuthProvider)) {
+    throw new Error(`Invalid OAuth provider. Must be one of: ${OAUTH_PROVIDERS.join(', ')}`);
+  }
+  return data as OAuthProvider;
+});
+
+/**
+ * URL validation helper
+ */
+function isValidUrl(url: string): boolean {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * OAuth initiate response - returns URL to redirect to
  */
-export const oauthInitiateResponseSchema = z.object({
-  url: z.url(),
-});
+export interface OAuthInitiateResponse {
+  url: string;
+}
+
+export const oauthInitiateResponseSchema: Schema<OAuthInitiateResponse> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid OAuth initiate response');
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj.url !== 'string' || !isValidUrl(obj.url)) {
+      throw new Error('URL must be a valid URL');
+    }
+    return { url: obj.url };
+  },
+);
 
 /**
  * OAuth callback request (query parameters)
  */
-export const oauthCallbackQuerySchema = z.object({
-  code: z.string().optional(),
-  state: z.string().optional(),
-  error: z.string().optional(),
-  error_description: z.string().optional(),
-});
+export interface OAuthCallbackQuery {
+  code?: string;
+  state?: string;
+  error?: string;
+  error_description?: string;
+}
+
+export const oauthCallbackQuerySchema: Schema<OAuthCallbackQuery> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      return {};
+    }
+    const obj = data as Record<string, unknown>;
+    return {
+      code: typeof obj.code === 'string' ? obj.code : undefined,
+      state: typeof obj.state === 'string' ? obj.state : undefined,
+      error: typeof obj.error === 'string' ? obj.error : undefined,
+      error_description:
+        typeof obj.error_description === 'string' ? obj.error_description : undefined,
+    };
+  },
+);
 
 /**
  * OAuth callback response - auth result
  */
-export const oauthCallbackResponseSchema = z.object({
-  token: z.string(),
-  user: userSchema,
-  isNewUser: z.boolean(),
-});
+export interface OAuthCallbackResponse {
+  token: string;
+  user: User;
+  isNewUser: boolean;
+}
+
+export const oauthCallbackResponseSchema: Schema<OAuthCallbackResponse> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid OAuth callback response');
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj.token !== 'string') {
+      throw new Error('Token must be a string');
+    }
+    if (typeof obj.isNewUser !== 'boolean') {
+      throw new Error('isNewUser must be a boolean');
+    }
+    return {
+      token: obj.token,
+      user: userSchema.parse(obj.user),
+      isNewUser: obj.isNewUser,
+    };
+  },
+);
 
 /**
  * OAuth link response
  */
-export const oauthLinkResponseSchema = z.object({
-  url: z.url(),
+export interface OAuthLinkResponse {
+  url: string;
+}
+
+export const oauthLinkResponseSchema: Schema<OAuthLinkResponse> = createSchema((data: unknown) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid OAuth link response');
+  }
+  const obj = data as Record<string, unknown>;
+  if (typeof obj.url !== 'string' || !isValidUrl(obj.url)) {
+    throw new Error('URL must be a valid URL');
+  }
+  return { url: obj.url };
 });
 
 /**
  * OAuth link callback response
  */
-export const oauthLinkCallbackResponseSchema = z.object({
-  linked: z.boolean(),
-  provider: oauthProviderSchema,
-});
+export interface OAuthLinkCallbackResponse {
+  linked: boolean;
+  provider: OAuthProvider;
+}
+
+export const oauthLinkCallbackResponseSchema: Schema<OAuthLinkCallbackResponse> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid OAuth link callback response');
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj.linked !== 'boolean') {
+      throw new Error('Linked must be a boolean');
+    }
+    return {
+      linked: obj.linked,
+      provider: oauthProviderSchema.parse(obj.provider),
+    };
+  },
+);
 
 /**
  * OAuth unlink response
  */
-export const oauthUnlinkResponseSchema = z.object({
-  message: z.string(),
-});
+export interface OAuthUnlinkResponse {
+  message: string;
+}
+
+export const oauthUnlinkResponseSchema: Schema<OAuthUnlinkResponse> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid OAuth unlink response');
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj.message !== 'string') {
+      throw new Error('Message must be a string');
+    }
+    return { message: obj.message };
+  },
+);
 
 /**
  * OAuth connection info
  */
-export const oauthConnectionSchema = z.object({
-  id: z.uuid(),
-  provider: oauthProviderSchema,
-  providerEmail: z.email().nullable(),
-  connectedAt: z.coerce.date(),
+export interface OAuthConnection {
+  id: string;
+  provider: OAuthProvider;
+  providerEmail: string | null;
+  connectedAt: Date;
+}
+
+export const oauthConnectionSchema: Schema<OAuthConnection> = createSchema((data: unknown) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid OAuth connection');
+  }
+  const obj = data as Record<string, unknown>;
+
+  const id = uuidSchema.parse(obj.id);
+  const provider = oauthProviderSchema.parse(obj.provider);
+
+  let providerEmail: string | null = null;
+  if (obj.providerEmail !== null && obj.providerEmail !== undefined) {
+    if (typeof obj.providerEmail !== 'string') {
+      throw new Error('Provider email must be a string or null');
+    }
+    providerEmail = obj.providerEmail;
+  }
+
+  let connectedAt: Date;
+  if (obj.connectedAt instanceof Date) {
+    connectedAt = obj.connectedAt;
+  } else if (typeof obj.connectedAt === 'string' || typeof obj.connectedAt === 'number') {
+    connectedAt = new Date(obj.connectedAt);
+    if (isNaN(connectedAt.getTime())) {
+      throw new Error('Invalid connectedAt date');
+    }
+  } else {
+    throw new Error('connectedAt must be a date');
+  }
+
+  return { id, provider, providerEmail, connectedAt };
 });
 
 /**
  * OAuth connections response
  */
-export const oauthConnectionsResponseSchema = z.object({
-  connections: z.array(oauthConnectionSchema),
-});
+export interface OAuthConnectionsResponse {
+  connections: OAuthConnection[];
+}
 
-// ============================================================================
-// Types
-// ============================================================================
-
-export type OAuthProvider = z.infer<typeof oauthProviderSchema>;
-export type OAuthInitiateResponse = z.infer<typeof oauthInitiateResponseSchema>;
-export type OAuthCallbackQuery = z.infer<typeof oauthCallbackQuerySchema>;
-export type OAuthCallbackResponse = z.infer<typeof oauthCallbackResponseSchema>;
-export type OAuthLinkResponse = z.infer<typeof oauthLinkResponseSchema>;
-export type OAuthLinkCallbackResponse = z.infer<typeof oauthLinkCallbackResponseSchema>;
-export type OAuthUnlinkResponse = z.infer<typeof oauthUnlinkResponseSchema>;
-export type OAuthConnection = z.infer<typeof oauthConnectionSchema>;
-export type OAuthConnectionsResponse = z.infer<typeof oauthConnectionsResponseSchema>;
+export const oauthConnectionsResponseSchema: Schema<OAuthConnectionsResponse> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid OAuth connections response');
+    }
+    const obj = data as Record<string, unknown>;
+    if (!Array.isArray(obj.connections)) {
+      throw new Error('Connections must be an array');
+    }
+    return {
+      connections: obj.connections.map((c) => oauthConnectionSchema.parse(c)),
+    };
+  },
+);
 
 // ============================================================================
 // OAuth Contract
@@ -177,7 +318,7 @@ export const oauthContract = {
   linkGoogle: {
     method: 'POST' as const,
     path: '/api/auth/oauth/google/link',
-    body: z.object({}),
+    body: emptyBodySchema,
     responses: {
       200: oauthLinkResponseSchema,
       401: errorResponseSchema,
@@ -188,7 +329,7 @@ export const oauthContract = {
   linkGithub: {
     method: 'POST' as const,
     path: '/api/auth/oauth/github/link',
-    body: z.object({}),
+    body: emptyBodySchema,
     responses: {
       200: oauthLinkResponseSchema,
       401: errorResponseSchema,
@@ -199,7 +340,7 @@ export const oauthContract = {
   linkApple: {
     method: 'POST' as const,
     path: '/api/auth/oauth/apple/link',
-    body: z.object({}),
+    body: emptyBodySchema,
     responses: {
       200: oauthLinkResponseSchema,
       401: errorResponseSchema,
@@ -212,7 +353,7 @@ export const oauthContract = {
   unlinkGoogle: {
     method: 'DELETE' as const,
     path: '/api/auth/oauth/google/unlink',
-    body: z.object({}),
+    body: emptyBodySchema,
     responses: {
       200: oauthUnlinkResponseSchema,
       401: errorResponseSchema,
@@ -224,7 +365,7 @@ export const oauthContract = {
   unlinkGithub: {
     method: 'DELETE' as const,
     path: '/api/auth/oauth/github/unlink',
-    body: z.object({}),
+    body: emptyBodySchema,
     responses: {
       200: oauthUnlinkResponseSchema,
       401: errorResponseSchema,
@@ -236,7 +377,7 @@ export const oauthContract = {
   unlinkApple: {
     method: 'DELETE' as const,
     path: '/api/auth/oauth/apple/unlink',
-    body: z.object({}),
+    body: emptyBodySchema,
     responses: {
       200: oauthUnlinkResponseSchema,
       401: errorResponseSchema,

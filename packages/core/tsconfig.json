@@ -15,23 +15,11 @@
       "@contracts/*": [
         "./src/contracts/*"
       ],
-      "@stores": [
-        "./src/stores"
-      ],
-      "@stores/*": [
-        "./src/stores/*"
-      ],
       "@utils": [
         "./src/utils"
       ],
       "@utils/*": [
         "./src/utils/*"
-      ],
-      "@validation": [
-        "./src/validation"
-      ],
-      "@validation/*": [
-        "./src/validation/*"
       ]
     },
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo"

@@ -6,9 +6,7 @@
  * Prevents cryptic "relation does not exist" errors in production.
  */
 
-import { sql } from 'drizzle-orm';
-
-import type { DbClient } from '../client';
+import type { RawDb } from '@abe-stack/db';
 
 // ============================================================================
 // Required Tables
@@ -16,7 +14,7 @@ import type { DbClient } from '../client';
 
 /**
  * All tables required for the application to function.
- * Keep in sync with schema/*.ts
+ * Keep in sync with @abe-stack/db schema
  */
 export const REQUIRED_TABLES = [
   'users',
@@ -61,22 +59,18 @@ export class SchemaValidationError extends Error {
 /**
  * Check which tables exist in the database
  */
-export async function getExistingTables(db: DbClient): Promise<string[]> {
-  const result = await db.execute(sql`
-    SELECT tablename
-    FROM pg_tables
-    WHERE schemaname = 'public'
-  `);
+export async function getExistingTables(db: RawDb): Promise<string[]> {
+  const result = await db.raw<{ tablename: string }>(
+    `SELECT tablename FROM pg_tables WHERE schemaname = 'public'`
+  );
 
-  // Drizzle with postgres-js returns array directly, not { rows: [...] }
-  const rows = result as unknown as Array<{ tablename: string }>;
-  return rows.map((row) => row.tablename);
+  return result.map((row) => row.tablename);
 }
 
 /**
  * Validate that all required tables exist
  */
-export async function validateSchema(db: DbClient): Promise<SchemaValidationResult> {
+export async function validateSchema(db: RawDb): Promise<SchemaValidationResult> {
   const existingTables = await getExistingTables(db);
   const existingSet = new Set(existingTables);
 
@@ -93,7 +87,7 @@ export async function validateSchema(db: DbClient): Promise<SchemaValidationResu
  * Validate schema and throw if incomplete.
  * Call this during app startup.
  */
-export async function requireValidSchema(db: DbClient): Promise<void> {
+export async function requireValidSchema(db: RawDb): Promise<void> {
   const result = await validateSchema(db);
 
   if (!result.valid) {

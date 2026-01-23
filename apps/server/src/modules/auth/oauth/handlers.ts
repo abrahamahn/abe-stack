@@ -211,6 +211,7 @@ export async function handleOAuthCallbackRequest(
 
     const result = await handleOAuthCallback(
       ctx.db,
+      ctx.repos,
       ctx.config.auth,
       provider,
       query.code,
@@ -352,7 +353,7 @@ export async function handleOAuthUnlink(
       };
     }
 
-    await unlinkOAuthAccount(ctx.db, user.userId, provider);
+    await unlinkOAuthAccount(ctx.db, ctx.repos, user.userId, provider);
 
     // Log successful unlink event
     await logOAuthUnlinkSuccessEvent(
@@ -409,7 +410,7 @@ export async function handleGetConnections(
       };
     }
 
-    const connections = await getConnectedProviders(ctx.db, user.userId);
+    const connections = await getConnectedProviders(ctx.db, ctx.repos, user.userId);
 
     return {
       status: 200,

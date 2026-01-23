@@ -14,17 +14,11 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 // ============================================================================
 
 /**
- * Minimal schema interface compatible with Zod schemas
- * Avoids direct dependency on zod package
- * Updated for Zod v4 compatibility where path can include symbols (PropertyKey)
+ * Minimal schema interface for validation.
+ * Compatible with the manual validation schemas in @abe-stack/core.
  */
 export interface ValidationSchema<T = unknown> {
-  safeParse(data: unknown):
-    | { success: true; data: T }
-    | {
-        success: false;
-        error: { issues: Array<{ path: PropertyKey[]; message: string; code: string }> };
-      };
+  safeParse(data: unknown): { success: true; data: T } | { success: false; error: Error };
 }
 
 // ============================================================================

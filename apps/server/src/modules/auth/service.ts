@@ -12,19 +12,29 @@ import { validatePassword, type UserRole } from '@abe-stack/core';
 import {
   applyProgressiveDelay,
   emailTemplates,
-  emailVerificationTokens,
   getAccountLockoutStatus,
   isAccountLocked,
   logAccountLockedEvent,
   logLoginAttempt,
-  passwordResetTokens,
-  refreshTokens,
-  users,
   withTransaction,
   type DbClient,
   type EmailService,
   type Logger,
+  type Repositories,
 } from '@infrastructure';
+import {
+  and,
+  eq,
+  isNull,
+  insert,
+  update,
+  toCamelCase,
+  USERS_TABLE,
+  USER_COLUMNS,
+  PASSWORD_RESET_TOKENS_TABLE,
+  EMAIL_VERIFICATION_TOKENS_TABLE,
+  type User,
+} from '@abe-stack/db';
 import {
   AccountLockedError,
   EmailNotVerifiedError,
@@ -33,7 +43,6 @@ import {
   InvalidTokenError,
   WeakPasswordError,
 } from '@shared';
-import { and, eq, gt, isNull } from 'drizzle-orm';
 
 import { createAuthResponse } from './utils';
 import {
@@ -85,6 +94,7 @@ export interface RegisterResult {
  */
 export async function registerUser(
   db: DbClient,
+  repos: Repositories,
   emailService: EmailService,
   _config: AuthConfig,
   email: string,
@@ -92,10 +102,8 @@ export async function registerUser(
   name?: string,
   baseUrl?: string,
 ): Promise<RegisterResult> {
-  // Check if email is already taken
-  const existingUser = await db.query.users.findFirst({
-    where: eq(users.email, email),
-  });
+  // Check if email is already taken (using repository)
+  const existingUser = await repos.users.findByEmail(email);
 
   if (existingUser) {
     // If user exists, send an email to them to notify about the new registration attempt
@@ -130,20 +138,24 @@ export async function registerUser(
 
   // Create user (unverified by default) and verification token atomically
   const { user, verificationToken } = await withTransaction(db, async (tx) => {
-    const [newUser] = await tx
-      .insert(users)
-      .values({
-        email,
-        name: name || null,
-        passwordHash,
-        role: 'user',
-        emailVerified: false,
-      })
-      .returning();
+    const newUserRows = await tx.query<Record<string, unknown>>(
+      insert(USERS_TABLE)
+        .values({
+          email,
+          name: name || null,
+          password_hash: passwordHash,
+          role: 'user',
+          email_verified: false,
+        })
+        .returningAll()
+        .toSql(),
+    );
 
-    if (!newUser) {
+    if (!newUserRows[0]) {
       throw new Error('Failed to create user');
     }
+
+    const newUser = toCamelCase<User>(newUserRows[0], USER_COLUMNS);
 
     // Create email verification token
     const token = await createEmailVerificationToken(tx, newUser.id);
@@ -185,6 +197,7 @@ export async function registerUser(
  */
 export async function authenticateUser(
   db: DbClient,
+  repos: Repositories,
   config: AuthConfig,
   email: string,
   password: string,
@@ -203,10 +216,8 @@ export async function authenticateUser(
   // Apply progressive delay based on recent failed attempts
   await applyProgressiveDelay(db, email, config.lockout);
 
-  // Fetch user (may be null)
-  const user = await db.query.users.findFirst({
-    where: eq(users.email, email),
-  });
+  // Fetch user (may be null) - using repository
+  const user = await repos.users.findByEmail(email);
 
   // Timing-safe password verification
   const isValid = await verifyPasswordSafe(password, user?.passwordHash);
@@ -257,6 +268,7 @@ export async function authenticateUser(
  */
 export async function refreshUserTokens(
   db: DbClient,
+  _repos: Repositories,
   config: AuthConfig,
   oldRefreshToken: string,
   ipAddress?: string,
@@ -293,9 +305,13 @@ export async function refreshUserTokens(
 /**
  * Logout user by invalidating their refresh token
  */
-export async function logoutUser(db: DbClient, refreshToken?: string): Promise<void> {
+export async function logoutUser(
+  _db: DbClient,
+  repos: Repositories,
+  refreshToken?: string,
+): Promise<void> {
   if (refreshToken) {
-    await db.delete(refreshTokens).where(eq(refreshTokens.token, refreshToken));
+    await repos.refreshTokens.deleteByToken(refreshToken);
   }
 }
 
@@ -329,7 +345,11 @@ function rehashPassword(
 ): void {
   // Fire and forget - don't block login
   hashPassword(password, config.argon2)
-    .then((newHash) => db.update(users).set({ passwordHash: newHash }).where(eq(users.id, userId)))
+    .then((newHash) =>
+      db.execute(
+        update(USERS_TABLE).set({ password_hash: newHash }).where(eq('id', userId)).toSql(),
+      ),
+    )
     .then(() => callback?.(userId))
     .catch((error: unknown) => {
       const normalizedError = error instanceof Error ? error : new Error(String(error));
@@ -386,13 +406,13 @@ async function generateSecureToken(): Promise<{ plain: string; hash: string }> {
  */
 export async function requestPasswordReset(
   db: DbClient,
+  repos: Repositories,
   emailService: EmailService,
   email: string,
   baseUrl: string,
 ): Promise<void> {
-  const user = await db.query.users.findFirst({
-    where: eq(users.email, email),
-  });
+  // Using repository for user lookup
+  const user = await repos.users.findByEmail(email);
 
   if (!user) {
     // Don't reveal user doesn't exist - silently succeed
@@ -404,17 +424,23 @@ export async function requestPasswordReset(
 
   await withTransaction(db, async (tx) => {
     // Invalidate all existing password reset tokens for this user
-    await tx
-      .update(passwordResetTokens)
-      .set({ usedAt: new Date() })
-      .where(and(eq(passwordResetTokens.userId, user.id), isNull(passwordResetTokens.usedAt)));
+    await tx.execute(
+      update(PASSWORD_RESET_TOKENS_TABLE)
+        .set({ used_at: new Date() })
+        .where(and(eq('user_id', user.id), isNull('used_at')))
+        .toSql(),
+    );
 
     // Create a new password reset token
-    await tx.insert(passwordResetTokens).values({
-      userId: user.id,
-      tokenHash: hash,
-      expiresAt,
-    });
+    await tx.execute(
+      insert(PASSWORD_RESET_TOKENS_TABLE)
+        .values({
+          user_id: user.id,
+          token_hash: hash,
+          expires_at: expiresAt,
+        })
+        .toSql(),
+    );
   });
 
   // Send password reset email
@@ -440,6 +466,7 @@ export async function requestPasswordReset(
  */
 export async function resetPassword(
   db: DbClient,
+  repos: Repositories,
   config: AuthConfig,
   token: string,
   newPassword: string,
@@ -447,22 +474,15 @@ export async function resetPassword(
   // Hash the token to look it up
   const tokenHash = await hashPassword(token, TOKEN_HASH_CONFIG);
 
-  // Find valid token (not expired, not used)
-  const tokenRecord = await db.query.passwordResetTokens.findFirst({
-    where: and(
-      eq(passwordResetTokens.tokenHash, tokenHash),
-      gt(passwordResetTokens.expiresAt, new Date()),
-      isNull(passwordResetTokens.usedAt),
-    ),
-  });
+  // Find valid token (not expired, not used) - using repository
+  const tokenRecord = await repos.passwordResetTokens.findValidByTokenHash(tokenHash);
 
   if (!tokenRecord) {
     throw new InvalidTokenError('Invalid or expired reset token');
   }
 
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, tokenRecord.userId),
-  });
+  // Using repository for user lookup
+  const user = await repos.users.findById(tokenRecord.userId);
 
   if (!user) {
     // This should not happen if the token is valid
@@ -480,12 +500,19 @@ export async function resetPassword(
 
   // Update password and mark token as used atomically
   await withTransaction(db, async (tx) => {
-    await tx.update(users).set({ passwordHash }).where(eq(users.id, tokenRecord.userId));
+    await tx.execute(
+      update(USERS_TABLE)
+        .set({ password_hash: passwordHash })
+        .where(eq('id', tokenRecord.userId))
+        .toSql(),
+    );
 
-    await tx
-      .update(passwordResetTokens)
-      .set({ usedAt: new Date() })
-      .where(eq(passwordResetTokens.id, tokenRecord.id));
+    await tx.execute(
+      update(PASSWORD_RESET_TOKENS_TABLE)
+        .set({ used_at: new Date() })
+        .where(eq('id', tokenRecord.id))
+        .toSql(),
+    );
   });
 }
 
@@ -504,15 +531,14 @@ export function hasPassword(passwordHash: string): boolean {
  * @throws WeakPasswordError if password is too weak
  */
 export async function setPassword(
-  db: DbClient,
+  _db: DbClient,
+  repos: Repositories,
   config: AuthConfig,
   userId: string,
   newPassword: string,
 ): Promise<void> {
-  // Find the user
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, userId),
-  });
+  // Find the user - using repository
+  const user = await repos.users.findById(userId);
 
   if (!user) {
     throw new InvalidCredentialsError();
@@ -531,23 +557,41 @@ export async function setPassword(
     throw new WeakPasswordError({ errors: passwordValidation.errors });
   }
 
-  // Hash and set the password
-  const passwordHash = await hashPassword(newPassword, config.argon2);
-  await db.update(users).set({ passwordHash }).where(eq(users.id, userId));
+  // Hash and set the password - using repository
+  const passwordHashValue = await hashPassword(newPassword, config.argon2);
+  await repos.users.update(userId, { passwordHash: passwordHashValue });
 }
 
 /**
  * Create an email verification token for a user
+ * @param dbOrRepos - Either DbClient (for transactions) or Repositories (for direct calls)
  */
-export async function createEmailVerificationToken(db: DbClient, userId: string): Promise<string> {
+export async function createEmailVerificationToken(
+  dbOrRepos: DbClient | Repositories,
+  userId: string,
+): Promise<string> {
   const { plain, hash } = await generateSecureToken();
   const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
 
-  await db.insert(emailVerificationTokens).values({
-    userId,
-    tokenHash: hash,
-    expiresAt,
-  });
+  // Check if this is a Repositories object (has emailVerificationTokens property)
+  if ('emailVerificationTokens' in dbOrRepos) {
+    await dbOrRepos.emailVerificationTokens.create({
+      userId,
+      tokenHash: hash,
+      expiresAt,
+    });
+  } else {
+    // DbClient (for transactions)
+    await dbOrRepos.execute(
+      insert(EMAIL_VERIFICATION_TOKENS_TABLE)
+        .values({
+          user_id: userId,
+          token_hash: hash,
+          expires_at: expiresAt,
+        })
+        .toSql(),
+    );
+  }
 
   return plain;
 }
@@ -558,13 +602,13 @@ export async function createEmailVerificationToken(db: DbClient, userId: string)
  */
 export async function resendVerificationEmail(
   db: DbClient,
+  repos: Repositories,
   emailService: EmailService,
   email: string,
   baseUrl: string,
 ): Promise<void> {
-  const user = await db.query.users.findFirst({
-    where: eq(users.email, email),
-  });
+  // Using repository for user lookup
+  const user = await repos.users.findByEmail(email);
 
   if (!user) {
     // Don't reveal user doesn't exist - silently succeed
@@ -576,15 +620,15 @@ export async function resendVerificationEmail(
     return;
   }
 
-  // Create new verification token
+  // Create new verification token (using transaction for atomicity)
   const verificationToken = await withTransaction(db, async (tx) => {
     // Invalidate all existing email verification tokens for this user
-    await tx
-      .update(emailVerificationTokens)
-      .set({ usedAt: new Date() })
-      .where(
-        and(eq(emailVerificationTokens.userId, user.id), isNull(emailVerificationTokens.usedAt)),
-      );
+    await tx.execute(
+      update(EMAIL_VERIFICATION_TOKENS_TABLE)
+        .set({ used_at: new Date() })
+        .where(and(eq('user_id', user.id), isNull('used_at')))
+        .toSql(),
+    );
 
     return createEmailVerificationToken(tx, user.id);
   });
@@ -613,20 +657,15 @@ export async function resendVerificationEmail(
  */
 export async function verifyEmail(
   db: DbClient,
+  repos: Repositories,
   config: AuthConfig,
   token: string,
 ): Promise<AuthResult> {
   // Hash the token to look it up
   const tokenHash = await hashPassword(token, TOKEN_HASH_CONFIG);
 
-  // Find valid token (not expired, not used)
-  const tokenRecord = await db.query.emailVerificationTokens.findFirst({
-    where: and(
-      eq(emailVerificationTokens.tokenHash, tokenHash),
-      gt(emailVerificationTokens.expiresAt, new Date()),
-      isNull(emailVerificationTokens.usedAt),
-    ),
-  });
+  // Find valid token (not expired, not used) - using repository
+  const tokenRecord = await repos.emailVerificationTokens.findValidByTokenHash(tokenHash);
 
   if (!tokenRecord) {
     throw new InvalidTokenError('Invalid or expired verification token');
@@ -635,21 +674,27 @@ export async function verifyEmail(
   // Mark email as verified, mark token as used, and create auth tokens atomically
   const { user, refreshToken } = await withTransaction(db, async (tx) => {
     // Update user to verified
-    const [updatedUser] = await tx
-      .update(users)
-      .set({ emailVerified: true, emailVerifiedAt: new Date() })
-      .where(eq(users.id, tokenRecord.userId))
-      .returning();
+    const updatedUserRows = await tx.query<Record<string, unknown>>(
+      update(USERS_TABLE)
+        .set({ email_verified: true, email_verified_at: new Date() })
+        .where(eq('id', tokenRecord.userId))
+        .returningAll()
+        .toSql(),
+    );
 
-    if (!updatedUser) {
+    if (!updatedUserRows[0]) {
       throw new Error('Failed to verify user');
     }
 
+    const updatedUser = toCamelCase<User>(updatedUserRows[0], USER_COLUMNS);
+
     // Mark token as used
-    await tx
-      .update(emailVerificationTokens)
-      .set({ usedAt: new Date() })
-      .where(eq(emailVerificationTokens.id, tokenRecord.id));
+    await tx.execute(
+      update(EMAIL_VERIFICATION_TOKENS_TABLE)
+        .set({ used_at: new Date() })
+        .where(eq('id', tokenRecord.id))
+        .toSql(),
+    );
 
     // Create refresh token for auto-login
     const { token: refreshTok } = await createRefreshTokenFamily(

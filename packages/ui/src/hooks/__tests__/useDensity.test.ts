@@ -1,6 +1,6 @@
 // packages/ui/src/hooks/__tests__/useDensity.test.ts
 /** @vitest-environment jsdom */
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { useDensity } from '../useDensity';
@@ -90,15 +90,18 @@ describe('useDensity', () => {
       expect(result.current.density).toBe('comfortable');
     });
 
-    it('persists density to localStorage', () => {
+    it('persists density to localStorage', async () => {
       const { result } = renderHook(() => useDensity(storageKey));
 
       act(() => {
         result.current.setDensity('compact');
       });
 
-      const stored = JSON.parse(localStorage.getItem(storageKey) ?? '""') as string;
-      expect(stored).toBe('compact');
+      // localStorage write is deferred via queueMicrotask, so we need to wait
+      await waitFor(() => {
+        const stored = JSON.parse(localStorage.getItem(storageKey) ?? '""') as string;
+        expect(stored).toBe('compact');
+      });
     });
   });
 

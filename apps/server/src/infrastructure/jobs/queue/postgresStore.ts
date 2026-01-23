@@ -6,9 +6,17 @@
  * Uses SELECT FOR UPDATE SKIP LOCKED for safe concurrent dequeue.
  */
 
-import { sql } from 'drizzle-orm';
-
-import type { QueueStore, Task, TaskError, TaskResult } from './types';
+import type {
+  JobDetails,
+  JobListOptions,
+  JobListResult,
+  JobStatus,
+  QueueStats,
+  QueueStore,
+  Task,
+  TaskError,
+  TaskResult,
+} from './types';
 import type { DbClient } from '@database';
 
 // ============================================================================
@@ -16,7 +24,7 @@ import type { DbClient } from '@database';
 // ============================================================================
 
 /** Row shape for task queries */
-interface TaskRow {
+type TaskRow = Record<string, unknown> & {
   id: string;
   name: string;
   args: unknown;
@@ -24,38 +32,21 @@ interface TaskRow {
   attempts: number;
   max_attempts: number;
   created_at: string;
-}
+};
+
+/** Extended row shape for detailed job queries */
+type JobDetailsRow = TaskRow & {
+  status: string;
+  completed_at: string | null;
+  duration_ms: number | null;
+  error: string | null;
+  dead_letter_reason?: string | null;
+};
 
 /** Row shape for count queries */
-interface CountRow {
+type CountRow = Record<string, unknown> & {
   count: string;
-}
-
-/**
- * Helper to extract rows from SQL execute result.
- * Provides runtime validation that the result has the expected shape.
- */
-function extractRows<T>(result: unknown): T[] {
-  if (result && typeof result === 'object' && 'rows' in result && Array.isArray(result.rows)) {
-    return result.rows as T[];
-  }
-  // Drizzle may return array directly in some cases
-  if (Array.isArray(result)) {
-    return result as T[];
-  }
-  return [];
-}
-
-/**
- * Helper to extract rowCount from SQL execute result.
- */
-function extractRowCount(result: unknown): number {
-  if (result && typeof result === 'object' && 'rowCount' in result) {
-    const count = (result as { rowCount: number | null }).rowCount;
-    return count ?? 0;
-  }
-  return 0;
-}
+};
 
 // ============================================================================
 // Schema (run this migration manually or via Drizzle)
@@ -90,37 +81,37 @@ export class PostgresQueueStore implements QueueStore {
   constructor(private db: DbClient) {}
 
   async enqueue(task: Task): Promise<void> {
-    await this.db.execute(sql`
-      INSERT INTO job_queue (id, name, args, scheduled_at, attempts, max_attempts, created_at, status)
-      VALUES (
-        ${task.id},
-        ${task.name},
-        ${JSON.stringify(task.args)}::jsonb,
-        ${task.scheduledAt}::timestamptz,
-        ${task.attempts},
-        ${task.maxAttempts},
-        ${task.createdAt}::timestamptz,
-        'pending'
-      )
-    `);
+    await this.db.execute({
+      text: `INSERT INTO job_queue (id, name, args, scheduled_at, attempts, max_attempts, created_at, status)
+        VALUES ($1, $2, $3::jsonb, $4::timestamptz, $5, $6, $7::timestamptz, 'pending')`,
+      values: [
+        task.id,
+        task.name,
+        JSON.stringify(task.args),
+        task.scheduledAt,
+        task.attempts,
+        task.maxAttempts,
+        task.createdAt,
+      ],
+    });
   }
 
   async dequeue(now: string): Promise<Task | null> {
     // Use FOR UPDATE SKIP LOCKED to safely dequeue in concurrent environments
-    const result = await this.db.execute(sql`
-      UPDATE job_queue
+    const rows = await this.db.raw<TaskRow>(
+      `UPDATE job_queue
       SET status = 'processing', attempts = attempts + 1
       WHERE id = (
         SELECT id FROM job_queue
-        WHERE status = 'pending' AND scheduled_at <= ${now}::timestamptz
+        WHERE status = 'pending' AND scheduled_at <= $1::timestamptz
         ORDER BY scheduled_at ASC
         LIMIT 1
         FOR UPDATE SKIP LOCKED
       )
-      RETURNING id, name, args, scheduled_at, attempts, max_attempts, created_at
-    `);
+      RETURNING id, name, args, scheduled_at, attempts, max_attempts, created_at`,
+      [now],
+    );
 
-    const rows = extractRows<TaskRow>(result);
     if (rows.length === 0) return null;
 
     const row = rows[0];
@@ -138,48 +129,42 @@ export class PostgresQueueStore implements QueueStore {
   }
 
   async complete(taskId: string, result: TaskResult): Promise<void> {
-    await this.db.execute(sql`
-      UPDATE job_queue
-      SET
-        status = 'completed',
-        completed_at = ${result.completedAt}::timestamptz,
-        duration_ms = ${result.durationMs}
-      WHERE id = ${taskId}
-    `);
+    await this.db.execute({
+      text: `UPDATE job_queue
+        SET status = 'completed', completed_at = $1::timestamptz, duration_ms = $2
+        WHERE id = $3`,
+      values: [result.completedAt, result.durationMs, taskId],
+    });
   }
 
   async fail(taskId: string, error: TaskError, nextAttemptAt?: string): Promise<void> {
     if (nextAttemptAt) {
       // Retry: reset to pending with new scheduled time
-      await this.db.execute(sql`
-        UPDATE job_queue
-        SET
-          status = 'pending',
-          scheduled_at = ${nextAttemptAt}::timestamptz,
-          error = ${JSON.stringify(error)}::jsonb
-        WHERE id = ${taskId}
-      `);
+      await this.db.execute({
+        text: `UPDATE job_queue
+          SET status = 'pending', scheduled_at = $1::timestamptz, error = $2::jsonb
+          WHERE id = $3`,
+        values: [nextAttemptAt, JSON.stringify(error), taskId],
+      });
     } else {
       // Final failure
-      await this.db.execute(sql`
-        UPDATE job_queue
-        SET
-          status = 'failed',
-          error = ${JSON.stringify(error)}::jsonb,
-          completed_at = NOW()
-        WHERE id = ${taskId}
-      `);
+      await this.db.execute({
+        text: `UPDATE job_queue
+          SET status = 'failed', error = $1::jsonb, completed_at = NOW()
+          WHERE id = $2`,
+        values: [JSON.stringify(error), taskId],
+      });
     }
   }
 
   async get(taskId: string): Promise<Task | null> {
-    const result = await this.db.execute(sql`
-      SELECT id, name, args, scheduled_at, attempts, max_attempts, created_at
+    const rows = await this.db.raw<TaskRow>(
+      `SELECT id, name, args, scheduled_at, attempts, max_attempts, created_at
       FROM job_queue
-      WHERE id = ${taskId}
-    `);
+      WHERE id = $1`,
+      [taskId],
+    );
 
-    const rows = extractRows<TaskRow>(result);
     if (rows.length === 0) return null;
 
     const row = rows[0];
@@ -197,29 +182,242 @@ export class PostgresQueueStore implements QueueStore {
   }
 
   async getPendingCount(): Promise<number> {
-    const result = await this.db.execute(sql`
-      SELECT COUNT(*) as count FROM job_queue WHERE status = 'pending'
-    `);
-    const rows = extractRows<CountRow>(result);
+    const rows = await this.db.raw<CountRow>(
+      `SELECT COUNT(*) as count FROM job_queue WHERE status = 'pending'`,
+    );
     const row = rows[0];
     return row ? parseInt(row.count, 10) : 0;
   }
 
   async getFailedCount(): Promise<number> {
-    const result = await this.db.execute(sql`
-      SELECT COUNT(*) as count FROM job_queue WHERE status = 'failed'
-    `);
-    const rows = extractRows<CountRow>(result);
+    const rows = await this.db.raw<CountRow>(
+      `SELECT COUNT(*) as count FROM job_queue WHERE status = 'failed'`,
+    );
     const row = rows[0];
     return row ? parseInt(row.count, 10) : 0;
   }
 
   async clearCompleted(before: string): Promise<number> {
-    const result = await this.db.execute(sql`
-      DELETE FROM job_queue
-      WHERE status = 'completed' AND completed_at < ${before}::timestamptz
-    `);
-    return extractRowCount(result);
+    return await this.db.execute({
+      text: `DELETE FROM job_queue
+        WHERE status = 'completed' AND completed_at < $1::timestamptz`,
+      values: [before],
+    });
+  }
+
+  // ===========================================================================
+  // Monitoring Methods
+  // ===========================================================================
+
+  async listJobs(options: JobListOptions): Promise<JobListResult> {
+    const { status, name, page, limit, sortBy = 'createdAt', sortOrder = 'desc' } = options;
+    const offset = (page - 1) * limit;
+
+    // Build WHERE clause
+    const conditions: string[] = [];
+    const values: unknown[] = [];
+    let paramIndex = 1;
+
+    if (status) {
+      conditions.push(`status = $${paramIndex}`);
+      values.push(status);
+      paramIndex++;
+    }
+
+    if (name) {
+      conditions.push(`name ILIKE $${paramIndex}`);
+      values.push(`%${name}%`);
+      paramIndex++;
+    }
+
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    // Map sortBy to column names
+    const columnMap: Record<string, string> = {
+      createdAt: 'created_at',
+      scheduledAt: 'scheduled_at',
+      completedAt: 'completed_at',
+    };
+    const sortColumn = columnMap[sortBy] ?? 'created_at';
+    const order = sortOrder === 'asc' ? 'ASC' : 'DESC';
+
+    // Get total count
+    const countQuery = `SELECT COUNT(*) as count FROM job_queue ${whereClause}`;
+    const countRows = await this.db.raw<CountRow>(countQuery, values);
+    const total = countRows[0] ? parseInt(countRows[0].count, 10) : 0;
+
+    // Get paginated data
+    const dataQuery = `
+      SELECT id, name, args, status, attempts, max_attempts, scheduled_at, created_at,
+             completed_at, duration_ms, error, dead_letter_reason
+      FROM job_queue
+      ${whereClause}
+      ORDER BY ${sortColumn} ${order}
+      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+    `;
+
+    const rows = await this.db.raw<JobDetailsRow>(dataQuery, [...values, limit, offset]);
+
+    const data: JobDetails[] = rows.map((row) => this.mapRowToJobDetails(row));
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      hasNext: page < totalPages,
+      hasPrev: page > 1,
+      totalPages,
+    };
+  }
+
+  async getJobDetails(taskId: string): Promise<JobDetails | null> {
+    const rows = await this.db.raw<JobDetailsRow>(
+      `SELECT id, name, args, status, attempts, max_attempts, scheduled_at, created_at,
+              completed_at, duration_ms, error, dead_letter_reason
+       FROM job_queue
+       WHERE id = $1`,
+      [taskId],
+    );
+
+    if (rows.length === 0 || !rows[0]) return null;
+    return this.mapRowToJobDetails(rows[0]);
+  }
+
+  async getQueueStats(): Promise<QueueStats> {
+    // Get counts by status
+    const statusQuery = `
+      SELECT status, COUNT(*) as count
+      FROM job_queue
+      GROUP BY status
+    `;
+    const statusRows = await this.db.raw<{ status: string; count: string }>(statusQuery, []);
+
+    let pending = 0;
+    let processing = 0;
+    let completed = 0;
+    let failed = 0;
+    let deadLetter = 0;
+    let cancelled = 0;
+
+    for (const row of statusRows) {
+      const count = parseInt(row.count, 10);
+      switch (row.status) {
+        case 'pending':
+          pending = count;
+          break;
+        case 'processing':
+          processing = count;
+          break;
+        case 'completed':
+          completed = count;
+          break;
+        case 'failed':
+          failed = count;
+          break;
+        case 'dead_letter':
+          deadLetter = count;
+          break;
+        case 'cancelled':
+          cancelled = count;
+          break;
+      }
+    }
+
+    // Get recent stats (last hour)
+    const recentQuery = `
+      SELECT
+        COUNT(*) FILTER (WHERE status = 'completed' AND completed_at > NOW() - INTERVAL '1 hour') as recent_completed,
+        COUNT(*) FILTER (WHERE status = 'failed' AND completed_at > NOW() - INTERVAL '1 hour') as recent_failed
+      FROM job_queue
+    `;
+    const recentRows = await this.db.raw<{ recent_completed: string; recent_failed: string }>(
+      recentQuery,
+      [],
+    );
+
+    const recentCompleted = recentRows[0] ? parseInt(recentRows[0].recent_completed, 10) : 0;
+    const recentFailed = recentRows[0] ? parseInt(recentRows[0].recent_failed, 10) : 0;
+
+    const total = pending + processing + completed + failed + deadLetter + cancelled;
+    const completedTotal = completed + failed;
+    const failureRate = completedTotal > 0 ? (failed / completedTotal) * 100 : 0;
+
+    return {
+      pending,
+      processing,
+      completed,
+      failed,
+      deadLetter,
+      total,
+      failureRate: Math.round(failureRate * 100) / 100,
+      recentCompleted,
+      recentFailed,
+    };
+  }
+
+  async retryJob(taskId: string): Promise<boolean> {
+    // Only retry failed jobs
+    const result = await this.db.execute({
+      text: `UPDATE job_queue
+        SET status = 'pending', attempts = 0, error = NULL, completed_at = NULL, scheduled_at = NOW()
+        WHERE id = $1 AND status IN ('failed', 'dead_letter')`,
+      values: [taskId],
+    });
+    return result > 0;
+  }
+
+  async cancelJob(taskId: string): Promise<boolean> {
+    // Only cancel pending or processing jobs
+    const result = await this.db.execute({
+      text: `UPDATE job_queue
+        SET status = 'cancelled', completed_at = NOW()
+        WHERE id = $1 AND status IN ('pending', 'processing')`,
+      values: [taskId],
+    });
+    return result > 0;
+  }
+
+  async moveToDeadLetter(taskId: string, reason: string): Promise<boolean> {
+    const result = await this.db.execute({
+      text: `UPDATE job_queue
+        SET status = 'dead_letter', dead_letter_reason = $2, completed_at = NOW()
+        WHERE id = $1 AND status = 'failed'`,
+      values: [taskId, reason],
+    });
+    return result > 0;
+  }
+
+  // ===========================================================================
+  // Private Helpers
+  // ===========================================================================
+
+  private mapRowToJobDetails(row: JobDetailsRow): JobDetails {
+    let parsedError: TaskError | null = null;
+    if (row.error) {
+      try {
+        parsedError = JSON.parse(row.error) as TaskError;
+      } catch {
+        parsedError = { name: 'UnknownError', message: String(row.error) };
+      }
+    }
+
+    return {
+      id: row.id,
+      name: row.name,
+      args: row.args,
+      status: row.status as JobStatus,
+      attempts: row.attempts,
+      maxAttempts: row.max_attempts,
+      scheduledAt: row.scheduled_at,
+      createdAt: row.created_at,
+      completedAt: row.completed_at,
+      durationMs: row.duration_ms,
+      error: parsedError,
+      deadLetterReason: row.dead_letter_reason ?? null,
+    };
   }
 }
 

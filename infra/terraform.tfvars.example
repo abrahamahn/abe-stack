@@ -1,0 +1,66 @@
+# Example Terraform Variables Configuration
+# Copy this file to terraform.tfvars and customize for your deployment
+
+# ============================================================================
+# REQUIRED VARIABLES
+# ============================================================================
+
+# Your domain name (must be registered and DNS configured)
+domain = "abe-stack.example.com"
+
+# SSH public key for server access (generate with: ssh-keygen -t rsa -b 4096)
+# IMPORTANT: This should be the PUBLIC key content, not the private key
+ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7vbvJ... your-key-here"
+
+# ============================================================================
+# PROVIDER-SPECIFIC REQUIRED VARIABLES
+# ============================================================================
+
+# For DigitalOcean deployments:
+# digitalocean_token = "your-digitalocean-api-token"
+
+# For GCP deployments:
+project_id = "your-gcp-project-id"
+
+# ============================================================================
+# OPTIONAL VARIABLES (with sensible defaults)
+# ============================================================================
+
+# Deployment environment
+environment = "staging"
+
+# Application name (used for resource naming)
+app_name = "abe-stack"
+
+# Cloud region (choose based on your users' location)
+region = "nyc1"        # DigitalOcean regions: nyc1, sfo3, lon1, etc.
+# region = "us-central1" # GCP regions: us-central1, europe-west1, etc.
+
+# Instance size (start small, scale up as needed)
+instance_size = "s-1vcpu-1gb"  # DigitalOcean: s-1vcpu-1gb, s-2vcpu-2gb, etc.
+# instance_size = "e2-small"     # GCP: e2-micro, e2-small, n1-standard-1, etc.
+
+# Application port (default: 3000)
+app_port = 3000
+
+# ============================================================================
+# OPTIONAL ADVANCED FEATURES
+# ============================================================================
+
+# Enable managed database (recommended for production)
+enable_managed_database = false
+
+# Database configuration (only needed if enable_managed_database = true)
+database_size = "db-s-1vcpu-1gb"  # DigitalOcean managed DB
+# database_size = "db-f1-micro"    # GCP Cloud SQL
+
+# Custom database credentials (optional, will be auto-generated if not provided)
+# database_username = "abe_user"
+# database_password = "super-secret-password"
+
+# ============================================================================
+# DEVELOPMENT/TESTING OPTIONS
+# ============================================================================
+
+# For development, you might want to disable backups to reduce costs
+# backups_enabled = false  # Only affects production environments by default

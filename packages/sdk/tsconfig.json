@@ -19,12 +19,6 @@
       ],
       "@abe-stack/core/*": [
         "../core/src/*"
-      ],
-      "@persistence": [
-        "./src/persistence"
-      ],
-      "@persistence/*": [
-        "./src/persistence/*"
       ]
     },
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo"

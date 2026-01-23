@@ -1,0 +1,42 @@
+{
+  "name": "@abe-stack/db",
+  "version": "1.0.0",
+  "description": "Type-safe SQL query builder for PostgreSQL",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build",
+    "clean": "rm -rf dist tsconfig.tsbuildinfo",
+    "type-check": "tsc --project tsconfig.json --noEmit",
+    "test": "vitest run --project db"
+  },
+  "keywords": [
+    "abe-stack",
+    "database",
+    "sql",
+    "query-builder",
+    "postgresql"
+  ],
+  "author": "",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abrahamahn/abe-stack.git",
+    "directory": "packages/db"
+  },
+  "bugs": {
+    "url": "https://github.com/abrahamahn/abe-stack/issues"
+  },
+  "homepage": "https://github.com/abrahamahn/abe-stack#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "sideEffects": false,
+  "dependencies": {
+    "postgres": "^3.4.8"
+  }
+}

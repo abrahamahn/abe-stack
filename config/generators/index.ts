@@ -158,7 +158,7 @@ function watchMode(quiet: boolean): void {
       if (!quiet && results.generated.length > 0) {
         console.log(`[config:generate] Updated ${String(results.generated.length)} file(s)`);
       }
-    }, 300);
+    }, 1000);
   };
 
   const watchDirectory = (dirPath: string): void => {

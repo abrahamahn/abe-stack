@@ -20,6 +20,15 @@ import {
 } from '@abe-stack/ui';
 import { DemoPage } from '@demo';
 import {
+  AdminLayout,
+  JobMonitorPage,
+  PlanManagementPage,
+  SecurityEventDetailPage,
+  SecurityEventsPage,
+  UserDetailPage,
+  UserListPage,
+} from '@features/admin';
+import {
   AuthPage,
   ConfirmEmailPage,
   LoginPage,
@@ -27,6 +36,12 @@ import {
   RegisterPage,
   ResetPasswordPage,
 } from '@features/auth';
+import {
+  BillingSettingsPage,
+  CheckoutCancelPage,
+  CheckoutSuccessPage,
+  PricingPage,
+} from '@features/billing';
 import { DashboardPage } from '@features/dashboard';
 import { HomePage } from '@pages/HomePage';
 import { useEffect } from 'react';
@@ -84,6 +99,44 @@ function AppRoutes(): ReactElement {
           </ProtectedRoute>
         }
       />
+
+      {/* Billing Routes */}
+      <Route path="/pricing" element={<PricingPage />} />
+      <Route
+        path="/settings/billing"
+        element={
+          <ProtectedRoute>
+            <BillingSettingsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/billing/success"
+        element={
+          <ProtectedRoute>
+            <CheckoutSuccessPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/billing/cancel"
+        element={
+          <ProtectedRoute>
+            <CheckoutCancelPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Admin Routes */}
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<UserListPage />} />
+        <Route path="users" element={<UserListPage />} />
+        <Route path="users/:id" element={<UserDetailPage />} />
+        <Route path="security" element={<SecurityEventsPage />} />
+        <Route path="security/:id" element={<SecurityEventDetailPage />} />
+        <Route path="jobs" element={<JobMonitorPage />} />
+        <Route path="billing/plans" element={<PlanManagementPage />} />
+      </Route>
     </Routes>
   );
 }

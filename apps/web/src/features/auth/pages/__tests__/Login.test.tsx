@@ -169,11 +169,13 @@ describe('LoginPage', () => {
       expect(mockNavigate).toHaveBeenCalledWith('/register', { replace: false });
     });
 
-    it('should navigate to forgot password page when forgot password is clicked', () => {
+    it('should navigate to forgot password page when forgot password is clicked', async () => {
       renderLoginPage();
 
       const forgotButton = screen.getByRole('button', { name: /forgot your password/i });
-      fireEvent.click(forgotButton);
+      await act(async () => {
+        fireEvent.click(forgotButton);
+      });
 
       expect(mockNavigate).toHaveBeenCalledWith('/auth?mode=forgot-password', { replace: false });
     });

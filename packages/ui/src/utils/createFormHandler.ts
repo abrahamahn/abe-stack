@@ -42,7 +42,7 @@ export function createFormHandler(
   setError: (error: string | null) => void,
   defaultOptions?: FormHandlerOptions,
 ) {
-  return function wrapHandler<T extends Record<string, unknown>, R>(
+  return function wrapHandler<T, R>(
     handler: (data: T) => Promise<R>,
     options?: FormHandlerOptions,
   ): (data: T) => Promise<R> {

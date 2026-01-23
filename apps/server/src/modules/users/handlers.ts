@@ -25,7 +25,7 @@ export async function handleMe(
   }
 
   try {
-    const user = await getUserById(ctx.db, request.user.userId);
+    const user = await getUserById(ctx.repos.users, request.user.userId);
 
     if (!user) {
       return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
@@ -67,7 +67,7 @@ export async function handleListUsers(
   }
 
   try {
-    const { users, nextCursor, hasNext } = await listUsers(ctx.db, pagination.cursor);
+    const { users, nextCursor, hasNext } = await listUsers(ctx.repos.users, pagination.cursor);
 
     const userResponses: User[] = users.map((user) => ({
       id: user.id,

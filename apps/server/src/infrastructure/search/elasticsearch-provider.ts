@@ -92,7 +92,7 @@ export class ElasticsearchProvider<TRecord = Record<string, unknown>>
   private connected = false;
 
   constructor(config: ElasticsearchProviderConfig) {
-    this.name = config.name;
+    this.name = config.name ?? 'elasticsearch';
     this.config = config;
   }
 

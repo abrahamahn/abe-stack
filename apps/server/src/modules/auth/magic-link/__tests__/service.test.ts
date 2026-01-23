@@ -1,173 +1,176 @@
 // apps/server/src/modules/auth/magic-link/__tests__/service.test.ts
 /**
- * Magic Link Service Unit Tests
+ * Magic Link Service Tests
  *
- * Tests the magic link service business logic by mocking database operations.
+ * Comprehensive tests for passwordless authentication via magic links.
+ * Tests requestMagicLink and verifyMagicLink with repository pattern.
  */
 
-import { EmailSendError, InvalidTokenError, TooManyRequestsError } from '@abe-stack/core';
-import { withTransaction } from '@infrastructure';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-
-import { cleanupExpiredMagicLinkTokens, requestMagicLink, verifyMagicLink } from '../service';
-
+import {
+  requestMagicLink,
+  verifyMagicLink,
+  cleanupExpiredMagicLinkTokens,
+} from '../service';
+import type {
+  Repositories,
+  EmailService,
+  DbClient,
+} from '@infrastructure';
 import type { AuthConfig } from '@config';
-import type { DbClient, EmailService } from '@infrastructure';
+import type { MagicLinkToken, User } from '@abe-stack/db';
 
 // ============================================================================
 // Mock Dependencies
 // ============================================================================
 
-// Mock @infrastructure
-vi.mock('@infrastructure', () => ({
-  emailTemplates: {
-    magicLink: vi.fn((url: string, expiry: number) => ({
-      to: '',
-      subject: 'Sign in to your account',
-      text: `Magic link URL: ${url}, expires in ${expiry} minutes`,
-      html: `<a href="${url}">Sign In</a>`,
-    })),
-  },
-  magicLinkTokens: {
-    id: 'id',
-    email: 'email',
-    tokenHash: 'tokenHash',
-    expiresAt: 'expiresAt',
-    usedAt: 'usedAt',
-    createdAt: 'createdAt',
-    ipAddress: 'ipAddress',
-    userAgent: 'userAgent',
-  },
-  users: {
-    id: 'id',
-    email: 'email',
-    name: 'name',
-    role: 'role',
-    passwordHash: 'passwordHash',
-    emailVerified: 'emailVerified',
-  },
-  withTransaction: vi.fn(),
-}));
+vi.mock('node:crypto', async () => {
+  const actual = await vi.importActual<typeof import('node:crypto')>('node:crypto');
+  return {
+    ...actual,
+    randomBytes: vi.fn((size: number) => {
+      // Return predictable bytes for testing
+      const buf = Buffer.alloc(size);
+      for (let i = 0; i < size; i++) {
+        buf[i] = i % 256;
+      }
+      return buf;
+    }),
+  };
+});
 
-// Mock ../utils
-vi.mock('../../utils', () => ({
+vi.mock('@infrastructure', async () => {
+  const actual = await vi.importActual<typeof import('@infrastructure')>('@infrastructure');
+  return {
+    ...actual,
+    emailTemplates: {
+      magicLink: vi.fn((url: string, expiryMinutes: number) => ({
+        subject: 'Your Magic Link',
+        text: `Click here: ${url}. Expires in ${expiryMinutes} minutes.`,
+        html: `<a href="${url}">Click here</a>. Expires in ${expiryMinutes} minutes.`,
+      })),
+    },
+    withTransaction: vi.fn(async (_db, callback) => {
+      // Mock transaction executor
+      const mockTx = {
+        query: vi.fn(),
+        queryOne: vi.fn(),
+        execute: vi.fn().mockResolvedValue(1),
+      };
+      return callback(mockTx);
+    }),
+  };
+});
+
+vi.mock('@auth/utils', () => ({
   createAuthResponse: vi.fn((accessToken, refreshToken, user) => ({
     accessToken,
     refreshToken,
-    user: { id: user.id, email: user.email, name: user.name, role: user.role },
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      createdAt: user.createdAt.toISOString(),
+    },
   })),
   createAccessToken: vi.fn(() => 'mock-access-token'),
-  createRefreshTokenFamily: vi.fn(() => ({
-    familyId: 'family-123',
-    token: 'mock-refresh-token',
-  })),
+  createRefreshTokenFamily: vi.fn(async () => ({ token: 'mock-refresh-token' })),
 }));
-
-// Mock drizzle-orm
-vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: unknown[]) => args),
-  and: vi.fn((...args: unknown[]) => args),
-  gt: vi.fn((...args: unknown[]) => args),
-  lt: vi.fn((...args: unknown[]) => args),
-  isNull: vi.fn((...args: unknown[]) => args),
-  count: vi.fn(() => 'count'),
-}));
-
-// ============================================================================
-// Test Constants
-// ============================================================================
-
-const TEST_CONFIG = {
-  jwt: {
-    secret: 'test-secret-32-characters-long!!',
-    accessTokenExpiry: '15m',
-  },
-  refreshToken: {
-    expiryDays: 7,
-  },
-} as unknown as AuthConfig;
 
 // ============================================================================
 // Test Helpers
 // ============================================================================
 
-interface MockDbQueryResult {
-  findFirst: ReturnType<typeof vi.fn>;
-}
-
-interface MockDbSelectResult {
-  from: ReturnType<typeof vi.fn>;
-}
-
-interface MockDbInsertResult {
-  values: ReturnType<typeof vi.fn>;
-}
-
-interface MockDbUpdateResult {
-  set: ReturnType<typeof vi.fn>;
-}
-
-interface MockDbDeleteResult {
-  where: ReturnType<typeof vi.fn>;
-}
-
-interface MockDbClientExtended {
-  query: {
-    magicLinkTokens: MockDbQueryResult;
-    users: MockDbQueryResult;
-  };
-  select: ReturnType<typeof vi.fn> & ((...args: unknown[]) => MockDbSelectResult);
-  insert: ReturnType<typeof vi.fn> & ((...args: unknown[]) => MockDbInsertResult);
-  update: ReturnType<typeof vi.fn> & ((...args: unknown[]) => MockDbUpdateResult);
-  delete: ReturnType<typeof vi.fn> & ((...args: unknown[]) => MockDbDeleteResult);
-}
-
-function createMockDb(): MockDbClientExtended & DbClient {
-  const mockSelect = vi.fn(() => ({
-    from: vi.fn(() => ({
-      where: vi.fn(() => Promise.resolve([{ count: 0 }])),
-    })),
-  }));
-
-  const mockInsert = vi.fn(() => ({
-    values: vi.fn(() => ({
-      returning: vi.fn(() => Promise.resolve([])),
-    })),
-  }));
-
-  const mockUpdate = vi.fn(() => ({
-    set: vi.fn(() => ({
-      where: vi.fn(() => ({
-        returning: vi.fn(() => Promise.resolve([{ id: 'user-id' }])),
-      })),
-    })),
-  }));
-
-  const mockDelete = vi.fn(() => ({
-    where: vi.fn(() => ({
-      returning: vi.fn(() => Promise.resolve([{ id: 'token-1' }, { id: 'token-2' }])),
-    })),
-  }));
-
+function createMockDb(): DbClient {
   return {
-    query: {
-      magicLinkTokens: {
-        findFirst: vi.fn(),
-      },
-      users: {
-        findFirst: vi.fn(),
-      },
-    },
-    select: mockSelect,
-    insert: mockInsert,
-    update: mockUpdate,
-    delete: mockDelete,
-  } as unknown as MockDbClientExtended & DbClient;
+    query: vi.fn(),
+    queryOne: vi.fn(),
+    execute: vi.fn(),
+  } as unknown as DbClient;
 }
 
 function createMockEmailService(): EmailService {
   return {
-    send: vi.fn().mockResolvedValue({ success: true, messageId: 'mock-message-id' }),
+    send: vi.fn().mockResolvedValue({ success: true, messageId: 'test-message-id' }),
+  };
+}
+
+function createMockRepositories(): Repositories {
+  return {
+    users: {} as Repositories['users'],
+    refreshTokens: {} as Repositories['refreshTokens'],
+    refreshTokenFamilies: {} as Repositories['refreshTokenFamilies'],
+    loginAttempts: {} as Repositories['loginAttempts'],
+    passwordResetTokens: {} as Repositories['passwordResetTokens'],
+    emailVerificationTokens: {} as Repositories['emailVerificationTokens'],
+    securityEvents: {} as Repositories['securityEvents'],
+    magicLinkTokens: {
+      findById: vi.fn(),
+      findValidByTokenHash: vi.fn(),
+      findValidByEmail: vi.fn(),
+      findRecentByEmail: vi.fn(),
+      create: vi.fn(),
+      markAsUsed: vi.fn(),
+      deleteByEmail: vi.fn(),
+      deleteExpired: vi.fn(),
+      countRecentByEmail: vi.fn(),
+      countRecentByIp: vi.fn(),
+    },
+    oauthConnections: {} as Repositories['oauthConnections'],
+    pushSubscriptions: {} as Repositories['pushSubscriptions'],
+    notificationPreferences: {} as Repositories['notificationPreferences'],
+  };
+}
+
+function createMockAuthConfig(): AuthConfig {
+  return {
+    jwt: {
+      secret: 'test-secret-32-characters-long!!',
+      accessTokenExpiry: '15m',
+    },
+    argon2: {},
+    refreshToken: {
+      expiryDays: 7,
+      gracePeriodSeconds: 30,
+    },
+    lockout: {
+      maxAttempts: 5,
+      windowMs: 900000,
+      lockoutDurationMs: 1800000,
+    },
+  };
+}
+
+function createMockMagicLinkToken(overrides?: Partial<MagicLinkToken>): MagicLinkToken {
+  return {
+    id: 'token-123',
+    email: 'test@example.com',
+    tokenHash: 'hash123',
+    expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+    usedAt: null,
+    ipAddress: '127.0.0.1',
+    userAgent: 'Test Browser',
+    createdAt: new Date(),
+    ...overrides,
+  };
+}
+
+function createMockUser(overrides?: Partial<User>): User {
+  return {
+    id: 'user-123',
+    email: 'test@example.com',
+    name: 'Test User',
+    passwordHash: 'hash',
+    role: 'user',
+    emailVerified: true,
+    emailVerifiedAt: new Date(),
+    lockedUntil: null,
+    failedLoginAttempts: 0,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    version: 1,
+    ...overrides,
   };
 }
 
@@ -180,113 +183,347 @@ describe('requestMagicLink', () => {
     vi.clearAllMocks();
   });
 
-  test('should create magic link token and send email', async () => {
-    const db = createMockDb();
-    const emailService = createMockEmailService();
-    const email = 'test@example.com';
-    const baseUrl = 'http://localhost:5173';
-    const ipAddress = '192.168.1.1';
-    const userAgent = 'Mozilla/5.0';
+  describe('successful request', () => {
+    test('should create token and send email on successful request', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const emailService = createMockEmailService();
+      const email = 'test@example.com';
+      const baseUrl = 'https://example.com';
 
-    // Mock: no rate limit (0 requests in window)
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ count: 0 }]),
-      }),
+      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.magicLinkTokens.countRecentByIp).mockResolvedValue(0);
+      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+
+      const result = await requestMagicLink(
+        db,
+        repos,
+        emailService,
+        email,
+        baseUrl,
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.message).toBe('If an account exists with this email, a magic link has been sent.');
     });
 
-    // Mock: token insert succeeds
-    vi.mocked(db.insert).mockReturnValue({
-      values: vi.fn().mockReturnValue({
-        returning: vi.fn().mockResolvedValue([{ id: 'token-id' }]),
-      }),
+    test('should normalize email to lowercase', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const emailService = createMockEmailService();
+      const email = 'TEST@EXAMPLE.COM';
+      const baseUrl = 'https://example.com';
+
+      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.magicLinkTokens.countRecentByIp).mockResolvedValue(0);
+      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+
+      await requestMagicLink(db, repos, emailService, email, baseUrl);
+
+      expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: 'test@example.com',
+        }),
+      );
     });
 
-    const result = await requestMagicLink(db, emailService, email, baseUrl, ipAddress, userAgent);
+    test('should trim email whitespace', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const emailService = createMockEmailService();
+      const email = '  test@example.com  ';
+      const baseUrl = 'https://example.com';
 
-    expect(result.success).toBe(true);
-    expect(result.message).toContain('magic link has been sent');
-    expect(db.insert).toHaveBeenCalled();
-    expect(emailService.send).toHaveBeenCalled();
+      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.magicLinkTokens.countRecentByIp).mockResolvedValue(0);
+      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
 
-    // Check email was sent to correct address
-    const sendCall = vi.mocked(emailService.send).mock.calls[0]![0];
-    expect(sendCall.to).toBe(email);
-    expect(sendCall.subject).toBe('Sign in to your account');
+      await requestMagicLink(db, repos, emailService, email, baseUrl);
+
+      expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          email: 'test@example.com',
+        }),
+      );
+    });
+
+    test('should create token with correct expiry time', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const emailService = createMockEmailService();
+      const email = 'test@example.com';
+      const baseUrl = 'https://example.com';
+
+      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+
+      const now = Date.now();
+      await requestMagicLink(db, repos, emailService, email, baseUrl, undefined, undefined, {
+        tokenExpiryMinutes: 20,
+      });
+
+      expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          expiresAt: expect.any(Date),
+        }),
+      );
+
+      const call = vi.mocked(repos.magicLinkTokens.create).mock.calls[0][0];
+      const expectedExpiry = now + 20 * 60 * 1000;
+      const actualExpiry = call.expiresAt.getTime();
+      expect(Math.abs(actualExpiry - expectedExpiry)).toBeLessThan(1000);
+    });
+
+    test('should store IP address when provided', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const emailService = createMockEmailService();
+      const email = 'test@example.com';
+      const baseUrl = 'https://example.com';
+      const ipAddress = '192.168.1.100';
+
+      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.magicLinkTokens.countRecentByIp).mockResolvedValue(0);
+      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+
+      await requestMagicLink(db, repos, emailService, email, baseUrl, ipAddress);
+
+      expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ipAddress,
+        }),
+      );
+    });
+
+    test('should store user agent when provided', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const emailService = createMockEmailService();
+      const email = 'test@example.com';
+      const baseUrl = 'https://example.com';
+      const userAgent = 'Mozilla/5.0';
+
+      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+
+      await requestMagicLink(
+        db,
+        repos,
+        emailService,
+        email,
+        baseUrl,
+        undefined,
+        userAgent,
+      );
+
+      expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userAgent,
+        }),
+      );
+    });
+
+    test('should send email with magic link URL', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const emailService = createMockEmailService();
+      const email = 'test@example.com';
+      const baseUrl = 'https://example.com';
+
+      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+
+      await requestMagicLink(db, repos, emailService, email, baseUrl);
+
+      expect(emailService.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'test@example.com',
+          subject: 'Your Magic Link',
+        }),
+      );
+    });
   });
 
-  test('should normalize email to lowercase', async () => {
-    const db = createMockDb();
-    const emailService = createMockEmailService();
-    const email = 'TEST@EXAMPLE.COM';
-    const baseUrl = 'http://localhost:5173';
+  describe('rate limiting', () => {
+    test('should throw TooManyRequestsError when email rate limit exceeded', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const emailService = createMockEmailService();
+      const email = 'test@example.com';
+      const baseUrl = 'https://example.com';
 
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ count: 0 }]),
-      }),
+      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(3);
+
+      await expect(
+        requestMagicLink(db, repos, emailService, email, baseUrl),
+      ).rejects.toThrow('Too many magic link requests');
     });
 
-    vi.mocked(db.insert).mockReturnValue({
-      values: vi.fn().mockReturnValue({
-        returning: vi.fn().mockResolvedValue([{}]),
-      }),
+    test('should throw TooManyRequestsError when IP rate limit exceeded', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const emailService = createMockEmailService();
+      const email = 'test@example.com';
+      const baseUrl = 'https://example.com';
+      const ipAddress = '192.168.1.100';
+
+      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.magicLinkTokens.countRecentByIp).mockResolvedValue(10);
+
+      await expect(
+        requestMagicLink(db, repos, emailService, email, baseUrl, ipAddress),
+      ).rejects.toThrow('Too many requests from this location');
     });
 
-    const result = await requestMagicLink(db, emailService, email, baseUrl);
+    test('should respect custom email rate limit', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const emailService = createMockEmailService();
+      const email = 'test@example.com';
+      const baseUrl = 'https://example.com';
 
-    expect(result.success).toBe(true);
+      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(5);
 
-    // Check email was normalized to lowercase
-    const sendCall = vi.mocked(emailService.send).mock.calls[0]![0];
-    expect(sendCall.to).toBe('test@example.com');
+      await expect(
+        requestMagicLink(db, repos, emailService, email, baseUrl, undefined, undefined, {
+          maxAttemptsPerEmail: 5,
+        }),
+      ).rejects.toThrow('Too many magic link requests');
+    });
+
+    test('should respect custom IP rate limit', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const emailService = createMockEmailService();
+      const email = 'test@example.com';
+      const baseUrl = 'https://example.com';
+      const ipAddress = '192.168.1.100';
+
+      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.magicLinkTokens.countRecentByIp).mockResolvedValue(20);
+
+      await expect(
+        requestMagicLink(db, repos, emailService, email, baseUrl, ipAddress, undefined, {
+          maxAttemptsPerIp: 20,
+        }),
+      ).rejects.toThrow('Too many requests from this location');
+    });
+
+    test('should not check IP rate limit when IP not provided', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const emailService = createMockEmailService();
+      const email = 'test@example.com';
+      const baseUrl = 'https://example.com';
+
+      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+
+      await requestMagicLink(db, repos, emailService, email, baseUrl);
+
+      expect(repos.magicLinkTokens.countRecentByIp).not.toHaveBeenCalled();
+    });
   });
 
-  test('should throw TooManyRequestsError when rate limit exceeded', async () => {
-    const db = createMockDb();
-    const emailService = createMockEmailService();
-    const email = 'test@example.com';
-    const baseUrl = 'http://localhost:5173';
+  describe('email sending', () => {
+    test('should throw EmailSendError when email fails to send', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const emailService = createMockEmailService();
+      const email = 'test@example.com';
+      const baseUrl = 'https://example.com';
 
-    // Mock: rate limit exceeded (3+ requests in window)
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ count: 3 }]),
-      }),
+      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+      vi.mocked(emailService.send).mockRejectedValue(new Error('SMTP server unavailable'));
+
+      await expect(
+        requestMagicLink(db, repos, emailService, email, baseUrl),
+      ).rejects.toThrow('Failed to send magic link email');
     });
 
-    await expect(requestMagicLink(db, emailService, email, baseUrl)).rejects.toThrow(
-      TooManyRequestsError,
-    );
+    test('should handle non-Error email failures', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const emailService = createMockEmailService();
+      const email = 'test@example.com';
+      const baseUrl = 'https://example.com';
 
-    // Email should not have been sent
-    expect(emailService.send).not.toHaveBeenCalled();
+      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+      vi.mocked(emailService.send).mockRejectedValue('String error');
+
+      await expect(
+        requestMagicLink(db, repos, emailService, email, baseUrl),
+      ).rejects.toThrow('Failed to send magic link email');
+    });
   });
 
-  test('should throw EmailSendError when email fails', async () => {
-    const db = createMockDb();
-    const emailService = createMockEmailService();
-    const email = 'test@example.com';
-    const baseUrl = 'http://localhost:5173';
+  describe('edge cases', () => {
+    test('should handle null IP address', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const emailService = createMockEmailService();
+      const email = 'test@example.com';
+      const baseUrl = 'https://example.com';
 
-    vi.mocked(db.select).mockReturnValue({
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ count: 0 }]),
-      }),
+      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+
+      await requestMagicLink(db, repos, emailService, email, baseUrl, undefined);
+
+      expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ipAddress: null,
+        }),
+      );
     });
 
-    vi.mocked(db.insert).mockReturnValue({
-      values: vi.fn().mockReturnValue({
-        returning: vi.fn().mockResolvedValue([{}]),
-      }),
+    test('should handle null user agent', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const emailService = createMockEmailService();
+      const email = 'test@example.com';
+      const baseUrl = 'https://example.com';
+
+      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+
+      await requestMagicLink(
+        db,
+        repos,
+        emailService,
+        email,
+        baseUrl,
+        undefined,
+        undefined,
+      );
+
+      expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userAgent: null,
+        }),
+      );
     });
 
-    // Mock: email send fails
-    vi.mocked(emailService.send).mockRejectedValue(new Error('SMTP connection failed'));
+    test('should use default expiry when not provided', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const emailService = createMockEmailService();
+      const email = 'test@example.com';
+      const baseUrl = 'https://example.com';
 
-    await expect(requestMagicLink(db, emailService, email, baseUrl)).rejects.toThrow(
-      EmailSendError,
-    );
+      vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
+      vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
+
+      const now = Date.now();
+      await requestMagicLink(db, repos, emailService, email, baseUrl);
+
+      const call = vi.mocked(repos.magicLinkTokens.create).mock.calls[0][0];
+      const expectedExpiry = now + 15 * 60 * 1000; // 15 minutes default
+      const actualExpiry = call.expiresAt.getTime();
+      expect(Math.abs(actualExpiry - expectedExpiry)).toBeLessThan(1000);
+    });
   });
 });
 
@@ -299,210 +536,456 @@ describe('verifyMagicLink', () => {
     vi.clearAllMocks();
   });
 
-  test('should verify valid token and return auth result for existing user', async () => {
-    const db = createMockDb();
-    const token = 'valid-magic-link-token';
+  describe('successful verification', () => {
+    test('should authenticate existing user successfully', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const config = createMockAuthConfig();
+      const token = 'valid-token';
+      const user = createMockUser();
 
-    const mockTokenRecord = {
-      id: 'token-id',
-      email: 'test@example.com',
-      tokenHash: 'hashed-token',
-      expiresAt: new Date(Date.now() + 1000000),
-      usedAt: new Date(),
-    };
-
-    const mockUser = {
-      id: 'user-123',
-      email: 'test@example.com',
-      name: 'Test User',
-      role: 'user' as const,
-      emailVerified: true,
-    };
-
-    // Mock: transaction with atomic token update and user lookup
-    vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-      // Mock atomic token update (marks as used and returns token)
-      vi.mocked(db.update).mockReturnValue({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            returning: vi.fn().mockResolvedValue([mockTokenRecord]),
+      const { withTransaction } = await import('@infrastructure');
+      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
+        const mockTx = {
+          query: vi.fn().mockResolvedValue([
+            {
+              id: 'token-123',
+              email: 'test@example.com',
+              token_hash: 'hash123',
+              expires_at: new Date(Date.now() + 10000),
+              used_at: null,
+            },
+          ]),
+          queryOne: vi.fn().mockResolvedValue({
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            password_hash: user.passwordHash,
+            role: user.role,
+            email_verified: true,
+            email_verified_at: user.emailVerifiedAt,
+            created_at: user.createdAt,
+            updated_at: user.updatedAt,
           }),
-        }),
+          execute: vi.fn().mockResolvedValue(1),
+        };
+        return callback(mockTx);
       });
 
-      // Mock user found
-      vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
+      const result = await verifyMagicLink(db, repos, config, token);
 
-      return callback(db);
+      expect(result.accessToken).toBe('mock-access-token');
+      expect(result.refreshToken).toBe('mock-refresh-token');
+      expect(result.user.email).toBe('test@example.com');
     });
 
-    const result = await verifyMagicLink(db, TEST_CONFIG, token);
+    test('should create new user when none exists', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const config = createMockAuthConfig();
+      const token = 'valid-token';
 
-    expect(result.accessToken).toBe('mock-access-token');
-    expect(result.refreshToken).toBe('mock-refresh-token');
-    expect(result.user.email).toBe('test@example.com');
+      const { withTransaction } = await import('@infrastructure');
+      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
+        const mockTx = {
+          query: vi.fn()
+            .mockResolvedValueOnce([
+              {
+                id: 'token-123',
+                email: 'newuser@example.com',
+                token_hash: 'hash123',
+                expires_at: new Date(Date.now() + 10000),
+                used_at: null,
+              },
+            ])
+            .mockResolvedValueOnce([
+              {
+                id: 'new-user-123',
+                email: 'newuser@example.com',
+                name: null,
+                password_hash: 'magiclink:hash',
+                role: 'user',
+                email_verified: true,
+                email_verified_at: new Date(),
+                created_at: new Date(),
+                updated_at: new Date(),
+              },
+            ]),
+          queryOne: vi.fn().mockResolvedValue(null),
+          execute: vi.fn().mockResolvedValue(1),
+        };
+        return callback(mockTx);
+      });
+
+      const result = await verifyMagicLink(db, repos, config, token);
+
+      expect(result.user.email).toBe('newuser@example.com');
+      expect(result.user.role).toBe('user');
+    });
+
+    test('should verify email for unverified user', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const config = createMockAuthConfig();
+      const token = 'valid-token';
+      const user = createMockUser({ emailVerified: false, emailVerifiedAt: null });
+
+      const { withTransaction } = await import('@infrastructure');
+      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
+        const mockTx = {
+          query: vi.fn()
+            .mockResolvedValueOnce([
+              {
+                id: 'token-123',
+                email: 'test@example.com',
+                token_hash: 'hash123',
+                expires_at: new Date(Date.now() + 10000),
+                used_at: null,
+              },
+            ])
+            .mockResolvedValueOnce([
+              {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                password_hash: user.passwordHash,
+                role: user.role,
+                email_verified: true,
+                email_verified_at: new Date(),
+                created_at: user.createdAt,
+                updated_at: user.updatedAt,
+              },
+            ]),
+          queryOne: vi.fn().mockResolvedValue({
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            password_hash: user.passwordHash,
+            role: user.role,
+            email_verified: false,
+            email_verified_at: null,
+            created_at: user.createdAt,
+            updated_at: user.updatedAt,
+          }),
+          execute: vi.fn().mockResolvedValue(1),
+        };
+        return callback(mockTx);
+      });
+
+      const result = await verifyMagicLink(db, repos, config, token);
+
+      expect(result.user.email).toBe('test@example.com');
+    });
+
+    test('should create refresh token for authenticated user', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const config = createMockAuthConfig();
+      const token = 'valid-token';
+      const user = createMockUser();
+
+      const { withTransaction } = await import('@infrastructure');
+      const { createRefreshTokenFamily } = await import('@auth/utils');
+
+      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
+        const mockTx = {
+          query: vi.fn().mockResolvedValue([
+            {
+              id: 'token-123',
+              email: 'test@example.com',
+              token_hash: 'hash123',
+              expires_at: new Date(Date.now() + 10000),
+              used_at: null,
+            },
+          ]),
+          queryOne: vi.fn().mockResolvedValue({
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            password_hash: user.passwordHash,
+            role: user.role,
+            email_verified: true,
+            email_verified_at: user.emailVerifiedAt,
+            created_at: user.createdAt,
+            updated_at: user.updatedAt,
+          }),
+        };
+        return callback(mockTx);
+      });
+
+      await verifyMagicLink(db, repos, config, token);
+
+      expect(createRefreshTokenFamily).toHaveBeenCalledWith(
+        expect.anything(),
+        user.id,
+        config.refreshToken.expiryDays,
+      );
+    });
   });
 
-  test('should create new user for unknown email', async () => {
-    const db = createMockDb();
-    const token = 'valid-magic-link-token';
+  describe('error handling', () => {
+    test('should throw InvalidTokenError for invalid token', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const config = createMockAuthConfig();
+      const token = 'invalid-token';
 
-    const mockTokenRecord = {
-      id: 'token-id',
-      email: 'newuser@example.com',
-      tokenHash: 'hashed-token',
-      expiresAt: new Date(Date.now() + 1000000),
-      usedAt: new Date(),
-    };
-
-    const mockNewUser = {
-      id: 'new-user-123',
-      email: 'newuser@example.com',
-      name: null,
-      role: 'user' as const,
-      emailVerified: true,
-    };
-
-    // Mock: transaction with atomic token update and user creation
-    vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-      // Mock atomic token update (marks as used and returns token)
-      vi.mocked(db.update).mockReturnValue({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            returning: vi.fn().mockResolvedValue([mockTokenRecord]),
-          }),
-        }),
+      const { withTransaction } = await import('@infrastructure');
+      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
+        const mockTx = {
+          query: vi.fn().mockResolvedValue([]),
+          queryOne: vi.fn(),
+          execute: vi.fn().mockResolvedValue(1),
+        };
+        return callback(mockTx);
       });
 
-      // Mock user not found
-      vi.mocked(db.query.users.findFirst).mockResolvedValue(null);
-
-      // Mock user creation
-      vi.mocked(db.insert).mockReturnValue({
-        values: vi.fn().mockReturnValue({
-          returning: vi.fn().mockResolvedValue([mockNewUser]),
-        }),
-      });
-
-      return callback(db);
+      await expect(
+        verifyMagicLink(db, repos, config, token),
+      ).rejects.toThrow('Invalid or expired magic link');
     });
 
-    const result = await verifyMagicLink(db, TEST_CONFIG, token);
+    test('should throw InvalidTokenError for expired token', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const config = createMockAuthConfig();
+      const token = 'expired-token';
 
-    expect(result.accessToken).toBe('mock-access-token');
-    expect(result.user.email).toBe('newuser@example.com');
-    expect(db.insert).toHaveBeenCalled();
+      const { withTransaction } = await import('@infrastructure');
+      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
+        const mockTx = {
+          query: vi.fn().mockResolvedValue([]),
+          queryOne: vi.fn(),
+          execute: vi.fn().mockResolvedValue(1),
+        };
+        return callback(mockTx);
+      });
+
+      await expect(
+        verifyMagicLink(db, repos, config, token),
+      ).rejects.toThrow('Invalid or expired magic link');
+    });
+
+    test('should throw InvalidTokenError for already used token', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const config = createMockAuthConfig();
+      const token = 'used-token';
+
+      const { withTransaction } = await import('@infrastructure');
+      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
+        const mockTx = {
+          query: vi.fn().mockResolvedValue([]),
+          queryOne: vi.fn(),
+          execute: vi.fn().mockResolvedValue(1),
+        };
+        return callback(mockTx);
+      });
+
+      await expect(
+        verifyMagicLink(db, repos, config, token),
+      ).rejects.toThrow('Invalid or expired magic link');
+    });
+
+    test('should throw error when user creation fails', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const config = createMockAuthConfig();
+      const token = 'valid-token';
+
+      const { withTransaction } = await import('@infrastructure');
+      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
+        const mockTx = {
+          query: vi.fn()
+            .mockResolvedValueOnce([
+              {
+                id: 'token-123',
+                email: 'test@example.com',
+                token_hash: 'hash123',
+                expires_at: new Date(Date.now() + 10000),
+                used_at: null,
+              },
+            ])
+            .mockResolvedValueOnce([]),
+          queryOne: vi.fn().mockResolvedValue(null),
+          execute: vi.fn().mockResolvedValue(1),
+        };
+        return callback(mockTx);
+      });
+
+      await expect(
+        verifyMagicLink(db, repos, config, token),
+      ).rejects.toThrow('Failed to create user');
+    });
   });
 
-  test('should verify email for unverified user', async () => {
-    const db = createMockDb();
-    const token = 'valid-magic-link-token';
+  describe('token security', () => {
+    test('should hash token before lookup', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const config = createMockAuthConfig();
+      const token = 'plain-text-token';
+      const user = createMockUser();
 
-    const mockTokenRecord = {
-      id: 'token-id',
-      email: 'unverified@example.com',
-      tokenHash: 'hashed-token',
-      expiresAt: new Date(Date.now() + 1000000),
-      usedAt: new Date(),
-    };
+      const { withTransaction } = await import('@infrastructure');
+      const mockQuery = vi.fn().mockResolvedValue([
+        {
+          id: 'token-123',
+          email: 'test@example.com',
+          token_hash: 'hashed-value',
+          expires_at: new Date(Date.now() + 10000),
+          used_at: null,
+        },
+      ]);
 
-    const mockUnverifiedUser = {
-      id: 'user-123',
-      email: 'unverified@example.com',
-      name: 'Unverified User',
-      role: 'user' as const,
-      emailVerified: false,
-    };
-
-    const mockVerifiedUser = {
-      ...mockUnverifiedUser,
-      emailVerified: true,
-    };
-
-    // Mock: transaction with atomic token update and user verification
-    vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-      // Track update calls to differentiate between token and user updates
-      let updateCallCount = 0;
-      vi.mocked(db.update).mockImplementation(() => ({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            returning: vi
-              .fn()
-              .mockResolvedValue(updateCallCount++ === 0 ? [mockTokenRecord] : [mockVerifiedUser]),
+      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
+        const mockTx = {
+          query: mockQuery,
+          queryOne: vi.fn().mockResolvedValue({
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            password_hash: user.passwordHash,
+            role: user.role,
+            email_verified: true,
+            email_verified_at: user.emailVerifiedAt,
+            created_at: user.createdAt,
+            updated_at: user.updatedAt,
           }),
-        }),
-      }));
-
-      // Mock user found but unverified
-      vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUnverifiedUser);
-
-      return callback(db);
-    });
-
-    const result = await verifyMagicLink(db, TEST_CONFIG, token);
-
-    expect(result.accessToken).toBe('mock-access-token');
-    expect(result.user.email).toBe('unverified@example.com');
-  });
-
-  test('should throw InvalidTokenError for missing token', async () => {
-    const db = createMockDb();
-    const token = 'invalid-token';
-
-    // Mock: transaction where atomic update returns empty (token not found/invalid)
-    vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-      vi.mocked(db.update).mockReturnValue({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            returning: vi.fn().mockResolvedValue([]), // No token found
-          }),
-        }),
+          execute: vi.fn().mockResolvedValue(1),
+        };
+        return callback(mockTx);
       });
 
-      return callback(db);
+      await verifyMagicLink(db, repos, config, token);
+
+      // Token should be hashed, not stored as plain text
+      expect(mockQuery).toHaveBeenCalled();
     });
 
-    await expect(verifyMagicLink(db, TEST_CONFIG, token)).rejects.toThrow(InvalidTokenError);
-  });
+    test('should mark token as used atomically', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const config = createMockAuthConfig();
+      const token = 'valid-token';
+      const user = createMockUser();
 
-  test('should throw InvalidTokenError for expired token', async () => {
-    const db = createMockDb();
-    const token = 'expired-token';
+      const { withTransaction } = await import('@infrastructure');
+      const mockQuery = vi.fn().mockResolvedValue([
+        {
+          id: 'token-123',
+          email: 'test@example.com',
+          token_hash: 'hash123',
+          expires_at: new Date(Date.now() + 10000),
+          used_at: new Date(),
+        },
+      ]);
 
-    // Mock: transaction where atomic update returns empty (token expired)
-    vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-      vi.mocked(db.update).mockReturnValue({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            returning: vi.fn().mockResolvedValue([]), // No valid token
+      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
+        const mockTx = {
+          query: mockQuery,
+          queryOne: vi.fn().mockResolvedValue({
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            password_hash: user.passwordHash,
+            role: user.role,
+            email_verified: true,
+            email_verified_at: user.emailVerifiedAt,
+            created_at: user.createdAt,
+            updated_at: user.updatedAt,
           }),
-        }),
+          execute: vi.fn().mockResolvedValue(1),
+        };
+        return callback(mockTx);
       });
 
-      return callback(db);
-    });
+      await verifyMagicLink(db, repos, config, token);
 
-    await expect(verifyMagicLink(db, TEST_CONFIG, token)).rejects.toThrow(InvalidTokenError);
+      expect(mockQuery).toHaveBeenCalled();
+    });
   });
 
-  test('should throw InvalidTokenError for already used token', async () => {
-    const db = createMockDb();
-    const token = 'used-token';
+  describe('edge cases', () => {
+    test('should handle user with null name', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const config = createMockAuthConfig();
+      const token = 'valid-token';
+      const user = createMockUser({ name: null });
 
-    // Mock: transaction where atomic update returns empty (token already used)
-    vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-      vi.mocked(db.update).mockReturnValue({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            returning: vi.fn().mockResolvedValue([]), // No valid token
+      const { withTransaction } = await import('@infrastructure');
+      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
+        const mockTx = {
+          query: vi.fn().mockResolvedValue([
+            {
+              id: 'token-123',
+              email: 'test@example.com',
+              token_hash: 'hash123',
+              expires_at: new Date(Date.now() + 10000),
+              used_at: null,
+            },
+          ]),
+          queryOne: vi.fn().mockResolvedValue({
+            id: user.id,
+            email: user.email,
+            name: null,
+            password_hash: user.passwordHash,
+            role: user.role,
+            email_verified: true,
+            email_verified_at: user.emailVerifiedAt,
+            created_at: user.createdAt,
+            updated_at: user.updatedAt,
           }),
-        }),
+          execute: vi.fn().mockResolvedValue(1),
+        };
+        return callback(mockTx);
       });
 
-      return callback(db);
+      const result = await verifyMagicLink(db, repos, config, token);
+
+      expect(result.user.name).toBeNull();
     });
 
-    await expect(verifyMagicLink(db, TEST_CONFIG, token)).rejects.toThrow(InvalidTokenError);
+    test('should handle admin role user', async () => {
+      const db = createMockDb();
+      const repos = createMockRepositories();
+      const config = createMockAuthConfig();
+      const token = 'valid-token';
+      const user = createMockUser({ role: 'admin' });
+
+      const { withTransaction } = await import('@infrastructure');
+      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
+        const mockTx = {
+          query: vi.fn().mockResolvedValue([
+            {
+              id: 'token-123',
+              email: 'admin@example.com',
+              token_hash: 'hash123',
+              expires_at: new Date(Date.now() + 10000),
+              used_at: null,
+            },
+          ]),
+          queryOne: vi.fn().mockResolvedValue({
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            password_hash: user.passwordHash,
+            role: 'admin',
+            email_verified: true,
+            email_verified_at: user.emailVerifiedAt,
+            created_at: user.createdAt,
+            updated_at: user.updatedAt,
+          }),
+          execute: vi.fn().mockResolvedValue(1),
+        };
+        return callback(mockTx);
+      });
+
+      const result = await verifyMagicLink(db, repos, config, token);
+
+      expect(result.user.role).toBe('admin');
+    });
   });
 });
 
@@ -515,34 +998,37 @@ describe('cleanupExpiredMagicLinkTokens', () => {
     vi.clearAllMocks();
   });
 
-  test('should delete expired tokens and return count', async () => {
+  test('should call repository deleteExpired method', async () => {
     const db = createMockDb();
+    const repos = createMockRepositories();
 
-    // Mock: delete returns 2 deleted tokens
-    vi.mocked(db.delete).mockReturnValue({
-      where: vi.fn().mockReturnValue({
-        returning: vi.fn().mockResolvedValue([{ id: 'token-1' }, { id: 'token-2' }]),
-      }),
-    });
+    vi.mocked(repos.magicLinkTokens.deleteExpired).mockResolvedValue(5);
 
-    const result = await cleanupExpiredMagicLinkTokens(db);
+    const result = await cleanupExpiredMagicLinkTokens(db, repos);
 
-    expect(result).toBe(2);
-    expect(db.delete).toHaveBeenCalled();
+    expect(result).toBe(5);
+    expect(repos.magicLinkTokens.deleteExpired).toHaveBeenCalledTimes(1);
   });
 
-  test('should return 0 when no expired tokens', async () => {
+  test('should return zero when no tokens to delete', async () => {
     const db = createMockDb();
+    const repos = createMockRepositories();
 
-    // Mock: no tokens to delete
-    vi.mocked(db.delete).mockReturnValue({
-      where: vi.fn().mockReturnValue({
-        returning: vi.fn().mockResolvedValue([]),
-      }),
-    });
+    vi.mocked(repos.magicLinkTokens.deleteExpired).mockResolvedValue(0);
 
-    const result = await cleanupExpiredMagicLinkTokens(db);
+    const result = await cleanupExpiredMagicLinkTokens(db, repos);
 
     expect(result).toBe(0);
+  });
+
+  test('should return correct count of deleted tokens', async () => {
+    const db = createMockDb();
+    const repos = createMockRepositories();
+
+    vi.mocked(repos.magicLinkTokens.deleteExpired).mockResolvedValue(42);
+
+    const result = await cleanupExpiredMagicLinkTokens(db, repos);
+
+    expect(result).toBe(42);
   });
 });

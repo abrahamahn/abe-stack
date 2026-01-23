@@ -12,6 +12,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import type { AppContext } from '@shared/types';
 
+// Mock database module
+const mockValidateSchema = vi.hoisted(() => vi.fn());
+vi.mock('@database', async () => {
+  const actual = await vi.importActual('@database');
+  return {
+    ...actual,
+    validateSchema: mockValidateSchema,
+  };
+});
+
 // Mock websocket module
 vi.mock('@websocket', () => ({
   getWebSocketStats: vi.fn(() => ({
@@ -21,9 +31,14 @@ vi.mock('@websocket', () => ({
 }));
 
 describe('Health Check Functions', () => {
-  const mockDb: { execute: ReturnType<typeof vi.fn>; query: Record<string, unknown> } = {
+  const mockDb: {
+    execute: ReturnType<typeof vi.fn>;
+    query: Record<string, unknown>;
+    healthCheck: ReturnType<typeof vi.fn>;
+  } = {
     execute: vi.fn(),
     query: {},
+    healthCheck: vi.fn(),
   };
 
   const mockPubsub = {
@@ -54,7 +69,7 @@ describe('Health Check Functions', () => {
 
   describe('checkDatabase', () => {
     it('should return up when database is connected', async () => {
-      mockDb.execute.mockResolvedValueOnce(undefined);
+      mockDb.healthCheck.mockResolvedValueOnce(true);
       const result = await checkDatabase(mockContext);
       expect(result.status).toBe('up');
       expect(result.message).toBe('connected');
@@ -62,7 +77,7 @@ describe('Health Check Functions', () => {
     });
 
     it('should return down when database connection fails', async () => {
-      mockDb.execute.mockRejectedValueOnce(new Error('Connection refused'));
+      mockDb.healthCheck.mockRejectedValueOnce(new Error('Connection refused'));
       const result = await checkDatabase(mockContext);
       expect(result.status).toBe('down');
       expect(result.message).toBe('Connection refused');
@@ -112,21 +127,12 @@ describe('Health Check Functions', () => {
   describe('getDetailedHealth', () => {
     it('should return healthy when all services are up', async () => {
       // Mock database connectivity check
-      mockDb.execute.mockResolvedValueOnce(undefined);
-      // Mock schema validation check (returns all required tables as array)
-      mockDb.execute.mockResolvedValueOnce([
-        { tablename: 'users' },
-        { tablename: 'refresh_tokens' },
-        { tablename: 'refresh_token_families' },
-        { tablename: 'login_attempts' },
-        { tablename: 'password_reset_tokens' },
-        { tablename: 'email_verification_tokens' },
-        { tablename: 'security_events' },
-        { tablename: 'magic_link_tokens' },
-        { tablename: 'oauth_connections' },
-        { tablename: 'push_subscriptions' },
-        { tablename: 'notification_preferences' },
-      ]);
+      mockDb.healthCheck.mockResolvedValueOnce(true);
+      // Mock schema validation check
+      mockValidateSchema.mockResolvedValueOnce({
+        valid: true,
+        missingTables: [],
+      });
       const result = await getDetailedHealth(mockContext);
       expect(result.status).toBe('healthy');
       expect(result.services.database.status).toBe('up');
@@ -139,9 +145,9 @@ describe('Health Check Functions', () => {
     });
 
     it('should return degraded when database is down', async () => {
-      mockDb.execute.mockRejectedValueOnce(new Error('Connection failed'));
+      mockDb.healthCheck.mockRejectedValueOnce(new Error('Connection failed'));
       // Schema check will also fail since db is down
-      mockDb.execute.mockRejectedValueOnce(new Error('Connection failed'));
+      mockValidateSchema.mockRejectedValueOnce(new Error('Connection failed'));
       const result = await getDetailedHealth(mockContext);
       expect(result.status).toBe('degraded');
       expect(result.services.database.status).toBe('down');
@@ -149,9 +155,12 @@ describe('Health Check Functions', () => {
 
     it('should return degraded when schema is incomplete', async () => {
       // Mock database connectivity check
-      mockDb.execute.mockResolvedValueOnce(undefined);
-      // Mock schema validation check (missing tables - returns array)
-      mockDb.execute.mockResolvedValueOnce([{ tablename: 'users' }]);
+      mockDb.healthCheck.mockResolvedValueOnce(true);
+      // Mock schema validation check (missing tables)
+      mockValidateSchema.mockResolvedValueOnce({
+        valid: false,
+        missingTables: ['magic_link_tokens', 'oauth_connections'],
+      });
       const result = await getDetailedHealth(mockContext);
       expect(result.status).toBe('degraded');
       expect(result.services.database.status).toBe('up');

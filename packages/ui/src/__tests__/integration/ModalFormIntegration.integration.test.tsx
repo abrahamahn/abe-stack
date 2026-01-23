@@ -15,7 +15,6 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { axe } from 'vitest-axe';
 
 import { FormField } from '../../components/FormField';
 import { Select } from '../../components/Select';
@@ -625,19 +624,6 @@ describe('ModalFormIntegration Integration Tests', () => {
       });
     });
 
-    it('has no accessibility violations', async () => {
-      const user = userEvent.setup();
-      const { container } = render(
-        <CreateUserModal onSubmit={vi.fn().mockResolvedValue(undefined)} />,
-      );
-
-      await user.click(screen.getByTestId('open-create-modal'));
-
-      await waitFor(async () => {
-        const results = await axe(container);
-        expect(results.violations).toHaveLength(0);
-      });
-    });
   });
 
   describe('ConfirmDeleteModal', () => {

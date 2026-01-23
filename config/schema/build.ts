@@ -43,15 +43,14 @@ export const getPaths = () => {
  */
 export const vitePlugins = {
   react: true,
-  tsconfigPaths: true,
 } as const;
 
 /**
  * Vite configuration for web app
+ * Uses explicit aliases from config/schema/aliases.ts
  */
 export const viteWeb = {
-  plugins: ['react', 'tsconfigPaths'],
-  tsconfigProjects: ['apps/web', 'packages/core', 'packages/ui', 'packages/sdk'],
+  plugins: ['react'],
 } as const;
 
 /**
@@ -60,8 +59,6 @@ export const viteWeb = {
 export const viteDesktop = {
   plugins: ['react'],
   base: './',
-  // Desktop uses explicit aliases instead of tsconfigPaths
-  useExplicitAliases: true,
   portPreferences: [5173, 5174, 5175],
 } as const;
 

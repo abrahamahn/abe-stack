@@ -1,7 +1,6 @@
 // apps/server/src/modules/auth/security/events.ts
-import { securityEvents } from '@database';
 import { emailTemplates } from '@email';
-import { desc, eq, gte } from 'drizzle-orm';
+import { insert, select, eq, gte, SECURITY_EVENTS_TABLE } from '@abe-stack/db';
 
 import type { DbClient } from '@database';
 import type { EmailService } from '@email';
@@ -80,15 +79,19 @@ export interface LogSecurityEventParams {
 export async function logSecurityEvent(params: LogSecurityEventParams): Promise<void> {
   const { db, userId, email, eventType, severity, ipAddress, userAgent, metadata } = params;
 
-  await db.insert(securityEvents).values({
-    userId: userId || null,
-    email: email || null,
-    eventType,
-    severity,
-    ipAddress: ipAddress || null,
-    userAgent: userAgent || null,
-    metadata: metadata ? JSON.stringify(metadata) : null,
-  });
+  await db.execute(
+    insert(SECURITY_EVENTS_TABLE)
+      .values({
+        user_id: userId || null,
+        email: email || null,
+        event_type: eventType,
+        severity,
+        ip_address: ipAddress || null,
+        user_agent: userAgent || null,
+        metadata: metadata ? JSON.stringify(metadata) : null,
+      })
+      .toSql(),
+  );
 }
 
 /**
@@ -212,19 +215,27 @@ export async function getUserSecurityEvents(
   userId: string,
   limit: number = 50,
 ): Promise<Array<{ id: string; eventType: string; severity: string; createdAt: Date }>> {
-  const events = await db.query.securityEvents.findMany({
-    where: eq(securityEvents.userId, userId),
-    orderBy: [desc(securityEvents.createdAt)],
-    limit,
-    columns: {
-      id: true,
-      eventType: true,
-      severity: true,
-      createdAt: true,
-    },
-  });
+  type EventRow = Record<string, unknown> & {
+    id: string;
+    event_type: string;
+    severity: string;
+    created_at: Date;
+  };
+  const rows = await db.query<EventRow>(
+    select(SECURITY_EVENTS_TABLE)
+      .columns('id', 'event_type', 'severity', 'created_at')
+      .where(eq('user_id', userId))
+      .orderBy('created_at', 'desc')
+      .limit(limit)
+      .toSql(),
+  );
 
-  return events;
+  return rows.map((row) => ({
+    id: row.id,
+    eventType: row.event_type,
+    severity: row.severity,
+    createdAt: row.created_at,
+  }));
 }
 
 /**
@@ -244,22 +255,25 @@ export async function getSecurityEventMetrics(
   criticalEventCount: number;
   totalEventCount: number;
 }> {
-  const events = await db.query.securityEvents.findMany({
-    where: gte(securityEvents.createdAt, since),
-    columns: {
-      eventType: true,
-      severity: true,
-    },
-  });
+  type EventRow = Record<string, unknown> & {
+    event_type: string;
+    severity: string;
+  };
+  const events = await db.query<EventRow>(
+    select(SECURITY_EVENTS_TABLE)
+      .columns('event_type', 'severity')
+      .where(gte('created_at', since))
+      .toSql(),
+  );
 
   const tokenReuseCount = events.filter(
-    (e: { eventType: string; severity: string }) => e.eventType === 'token_reuse_detected',
+    (e) => e.event_type === 'token_reuse_detected',
   ).length;
   const accountLockedCount = events.filter(
-    (e: { eventType: string; severity: string }) => e.eventType === 'account_locked',
+    (e) => e.event_type === 'account_locked',
   ).length;
   const criticalEventCount = events.filter(
-    (e: { eventType: string; severity: string }) => e.severity === 'critical',
+    (e) => e.severity === 'critical',
   ).length;
 
   return {

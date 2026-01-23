@@ -2,17 +2,22 @@
 /**
  * API Contracts
  *
- * API contract definitions and Zod validation schemas.
+ * API contract definitions and validation schemas.
+ * Uses manual TypeScript validation instead of zod.
  */
 
 // Contract type definitions
+export { createSchema } from './types';
 export type {
   Contract,
   ContractRouter,
   EndpointDef,
   HttpMethod,
+  InferSchema,
   QueryParams,
   RequestBody,
+  SafeParseResult,
+  Schema,
   SuccessResponse,
 } from './types';
 
@@ -21,8 +26,56 @@ export { apiContract } from './api';
 export type { ApiContract } from './api';
 
 // Admin contract
-export { adminContract, unlockAccountRequestSchema, unlockAccountResponseSchema } from './admin';
-export type { UnlockAccountRequest, UnlockAccountResponse } from './admin';
+export {
+  adminContract,
+  adminLockUserRequestSchema,
+  adminLockUserResponseSchema,
+  adminUpdateUserRequestSchema,
+  adminUpdateUserResponseSchema,
+  adminUserListFiltersSchema,
+  adminUserListResponseSchema,
+  adminUserSchema,
+  unlockAccountRequestSchema,
+  unlockAccountResponseSchema,
+  USER_STATUSES,
+  userStatusSchema,
+} from './admin';
+export type {
+  AdminLockUserRequest,
+  AdminLockUserResponse,
+  AdminUpdateUserRequest,
+  AdminUpdateUserResponse,
+  AdminUser,
+  AdminUserListFilters,
+  AdminUserListResponse,
+  UnlockAccountRequest,
+  UnlockAccountResponse,
+  UserStatus,
+} from './admin';
+
+// Jobs contract (admin job monitoring)
+export {
+  JOB_STATUSES,
+  jobActionResponseSchema,
+  jobDetailsSchema,
+  jobErrorSchema,
+  jobIdRequestSchema,
+  jobListQuerySchema,
+  jobListResponseSchema,
+  jobsContract,
+  jobStatusSchema,
+  queueStatsSchema,
+} from './jobs';
+export type {
+  JobActionResponse,
+  JobDetails,
+  JobError,
+  JobIdRequest,
+  JobListQuery,
+  JobListResponse,
+  JobStatus,
+  QueueStats,
+} from './jobs';
 
 // Auth contract
 export {
@@ -30,6 +83,7 @@ export {
   authResponseSchema,
   emailVerificationRequestSchema,
   emailVerificationResponseSchema,
+  emptyBodySchema,
   forgotPasswordRequestSchema,
   forgotPasswordResponseSchema,
   loginRequestSchema,
@@ -52,6 +106,7 @@ export type {
   AuthResponse,
   EmailVerificationRequest,
   EmailVerificationResponse,
+  EmptyBody,
   ForgotPasswordRequest,
   ForgotPasswordResponse,
   LoginRequest,
@@ -106,7 +161,7 @@ export type {
 } from './pagination';
 
 // Users contract
-export { userRoleSchema, userSchema, usersContract } from './users';
+export { USER_ROLES, userRoleSchema, userSchema, usersContract } from './users';
 export type { User, UserRole } from './users';
 
 // OAuth contract
@@ -138,6 +193,7 @@ export type {
 // Realtime contract
 export {
   conflictResponseSchema,
+  getRecordsRequestSchema,
   getRecordsResponseSchema,
   listInsertOperationSchema,
   listPositionSchema,
@@ -154,12 +210,14 @@ export {
 } from './realtime';
 export type {
   ConflictResponse,
+  GetRecordsRequest,
   GetRecordsResponse,
   ListInsertOperation,
   ListPosition,
   ListRemoveOperation,
   Operation,
   RealtimeRecord,
+  RealtimeTransaction,
   RecordMap,
   RecordPointer,
   SetNowOperation,
@@ -167,3 +225,106 @@ export type {
   Transaction,
   WriteResponse,
 } from './realtime';
+
+// Security contract
+export {
+  securityContract,
+  securityEventDetailRequestSchema,
+  securityEventDetailResponseSchema,
+  securityEventSchema,
+  securityEventsExportRequestSchema,
+  securityEventsExportResponseSchema,
+  securityEventsFilterSchema,
+  securityEventsListRequestSchema,
+  securityEventsListResponseSchema,
+  securityMetricsRequestSchema,
+  securityMetricsResponseSchema,
+  securityMetricsSchema,
+  SECURITY_EVENT_TYPES,
+  SECURITY_SEVERITIES,
+} from './security';
+export type {
+  SecurityEvent,
+  SecurityEventDetailRequest,
+  SecurityEventDetailResponse,
+  SecurityEventsExportRequest,
+  SecurityEventsExportResponse,
+  SecurityEventsFilter,
+  SecurityEventsListRequest,
+  SecurityEventsListResponse,
+  SecurityEventType,
+  SecurityMetrics,
+  SecurityMetricsRequest,
+  SecurityMetricsResponse,
+  SecuritySeverity,
+} from './security';
+
+// Billing contract
+export {
+  // Constants
+  BILLING_PROVIDERS,
+  INVOICE_STATUSES,
+  PAYMENT_METHOD_TYPES,
+  PLAN_INTERVALS,
+  SUBSCRIPTION_STATUSES,
+  // Contracts
+  adminBillingContract,
+  billingContract,
+  // Schemas
+  addPaymentMethodRequestSchema,
+  adminPlanResponseSchema,
+  adminPlanSchema,
+  adminPlansListResponseSchema,
+  cancelSubscriptionRequestSchema,
+  checkoutRequestSchema,
+  checkoutResponseSchema,
+  createPlanRequestSchema,
+  emptyBillingBodySchema,
+  invoiceSchema,
+  invoicesListResponseSchema,
+  paymentMethodResponseSchema,
+  paymentMethodSchema,
+  paymentMethodsListResponseSchema,
+  planSchema,
+  plansListResponseSchema,
+  setupIntentResponseSchema,
+  subscriptionActionResponseSchema,
+  subscriptionResponseSchema,
+  subscriptionSchema,
+  syncStripeResponseSchema,
+  updatePlanRequestSchema,
+  updateSubscriptionRequestSchema,
+} from './billing';
+export type {
+  // Types
+  AddPaymentMethodRequest,
+  AdminPlan,
+  AdminPlanResponse,
+  AdminPlansListResponse,
+  BillingProvider,
+  CancelSubscriptionRequest,
+  CardDetails,
+  CheckoutRequest,
+  CheckoutResponse,
+  CreatePlanRequest,
+  EmptyBillingBody,
+  Invoice,
+  InvoiceStatus,
+  InvoicesListResponse,
+  PaymentMethod,
+  PaymentMethodResponse,
+  PaymentMethodsListResponse,
+  PaymentMethodType,
+  Plan,
+  PlanFeature,
+  PlanInterval,
+  PlansListResponse,
+  SetupIntentResponse,
+  Subscription,
+  SubscriptionActionResponse,
+  SubscriptionResponse,
+  SubscriptionStatus,
+  SyncStripeResponse,
+  UpdatePlanRequest,
+  UpdateSubscriptionRequest,
+} from './billing';

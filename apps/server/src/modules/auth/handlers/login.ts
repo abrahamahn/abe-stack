@@ -32,6 +32,7 @@ export async function handleLogin(
     const { email, password } = body;
     const result = await authenticateUser(
       ctx.db,
+      ctx.repos,
       ctx.config.auth,
       email,
       password,

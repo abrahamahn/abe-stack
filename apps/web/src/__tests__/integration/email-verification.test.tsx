@@ -1,4 +1,4 @@
-// apps/web/src/test/integration/email-verification.test.tsx
+// apps/web/src/__tests__/integration/email-verification.test.tsx
 /**
  * Integration tests for email verification flow.
  *
@@ -10,7 +10,7 @@
 
 import { Route, Routes } from '@abe-stack/ui';
 import { ConfirmEmailPage } from '@features/auth';
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { mockUser, renderWithProviders } from '../utils';
@@ -42,7 +42,7 @@ describe('Email Verification Integration', () => {
   // ============================================================================
 
   describe('Loading State', () => {
-    it('should show loading state initially', () => {
+    it('should show loading state initially', async () => {
       // Create a promise that never resolves to keep loading state
       let resolveVerify: () => void;
       const verifyPromise = new Promise<void>((resolve) => {
@@ -65,11 +65,13 @@ describe('Email Verification Integration', () => {
         screen.getByText('Please wait while we verify your email address.'),
       ).toBeInTheDocument();
 
-      // Cleanup
-      resolveVerify!();
+      // Cleanup: resolve the promise and wait for state updates to complete
+      await act(async () => {
+        resolveVerify!();
+      });
     });
 
-    it('should show spinner during loading', () => {
+    it('should show spinner during loading', async () => {
       let resolveVerify: () => void;
       const verifyPromise = new Promise<void>((resolve) => {
         resolveVerify = resolve;
@@ -97,8 +99,10 @@ describe('Email Verification Integration', () => {
       expect(screen.queryByText('Email verified!')).not.toBeInTheDocument();
       expect(screen.queryByText('Verification failed')).not.toBeInTheDocument();
 
-      // Cleanup
-      resolveVerify!();
+      // Cleanup: resolve the promise and wait for state updates to complete
+      await act(async () => {
+        resolveVerify!();
+      });
     });
   });
 

@@ -1,7 +1,7 @@
 // apps/server/src/shared/types.ts
 import type { UserRole } from '@abe-stack/core';
 import type { AppConfig } from '@config';
-import type { DbClient } from '@database';
+import type { DbClient, Repositories } from '@database';
 import type { SubscriptionManager } from '@pubsub';
 import type { StorageProvider } from '@storage';
 import type { FastifyBaseLogger } from 'fastify';
@@ -186,8 +186,11 @@ export interface IServiceContainer {
   /** Application configuration */
   readonly config: AppConfig;
 
-  /** Database client */
+  /** Database client (raw SQL query builder) */
   readonly db: DbClient;
+
+  /** Database repositories (raw SQL query builder) */
+  readonly repos: Repositories;
 
   /** Email service for sending notifications */
   readonly email: EmailService;

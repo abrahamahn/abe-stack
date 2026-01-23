@@ -1,7 +1,7 @@
 // apps/desktop/src/__tests__/main.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
-import { cleanup, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock react-dom/client
@@ -161,14 +161,16 @@ describe('main.tsx', () => {
 
       if (rootElement) {
         const root = realCreateRoot(rootElement);
-        root.render(
-          <StrictMode>
-            <div style={{ padding: '20px' }}>
-              <h1>Abe Stack Desktop App</h1>
-              <p>Welcome to the desktop application!</p>
-            </div>
-          </StrictMode>,
-        );
+        await act(async () => {
+          root.render(
+            <StrictMode>
+              <div style={{ padding: '20px' }}>
+                <h1>Abe Stack Desktop App</h1>
+                <p>Welcome to the desktop application!</p>
+              </div>
+            </StrictMode>,
+          );
+        });
 
         await waitFor(() => {
           expect(screen.getByText('Abe Stack Desktop App')).toBeInTheDocument();
@@ -186,28 +188,30 @@ describe('main.tsx', () => {
 
       if (rootElement) {
         const root = realCreateRoot(rootElement);
-        root.render(
-          <StrictMode>
-            <div style={{ padding: '20px' }}>
-              <h1>Abe Stack Desktop App</h1>
-              <div
-                style={{
-                  marginTop: '20px',
-                  padding: '15px',
-                  background: '#f0f0f0',
-                  borderRadius: '8px',
-                }}
-              >
-                <h3>Architecture</h3>
-                <ul>
-                  <li>
-                    Shared UI from <code>@abe-stack/ui</code>
-                  </li>
-                </ul>
+        await act(async () => {
+          root.render(
+            <StrictMode>
+              <div style={{ padding: '20px' }}>
+                <h1>Abe Stack Desktop App</h1>
+                <div
+                  style={{
+                    marginTop: '20px',
+                    padding: '15px',
+                    background: '#f0f0f0',
+                    borderRadius: '8px',
+                  }}
+                >
+                  <h3>Architecture</h3>
+                  <ul>
+                    <li>
+                      Shared UI from <code>@abe-stack/ui</code>
+                    </li>
+                  </ul>
+                </div>
               </div>
-            </div>
-          </StrictMode>,
-        );
+            </StrictMode>,
+          );
+        });
 
         await waitFor(() => {
           expect(screen.getByText('Architecture')).toBeInTheDocument();
@@ -233,26 +237,28 @@ describe('main.tsx', () => {
 
       if (rootElement) {
         const root = realCreateRoot(rootElement);
-        root.render(
-          <StrictMode>
-            <div style={{ padding: '20px' }}>
-              <h1>Abe Stack Desktop App</h1>
-              {isElectron && (
-                <div
-                  style={{
-                    padding: '10px',
-                    background: '#e3f2fd',
-                    borderRadius: '4px',
-                    marginTop: '10px',
-                  }}
-                >
-                  <strong>Running in Electron</strong>
-                  <p>Access to native desktop features available!</p>
-                </div>
-              )}
-            </div>
-          </StrictMode>,
-        );
+        await act(async () => {
+          root.render(
+            <StrictMode>
+              <div style={{ padding: '20px' }}>
+                <h1>Abe Stack Desktop App</h1>
+                {isElectron && (
+                  <div
+                    style={{
+                      padding: '10px',
+                      background: '#e3f2fd',
+                      borderRadius: '4px',
+                      marginTop: '10px',
+                    }}
+                  >
+                    <strong>Running in Electron</strong>
+                    <p>Access to native desktop features available!</p>
+                  </div>
+                )}
+              </div>
+            </StrictMode>,
+          );
+        });
 
         await waitFor(() => {
           expect(screen.getByText('Running in Electron')).toBeInTheDocument();
@@ -277,18 +283,20 @@ describe('main.tsx', () => {
 
       if (rootElement) {
         const root = realCreateRoot(rootElement);
-        root.render(
-          <StrictMode>
-            <div style={{ padding: '20px' }}>
-              <h1>Abe Stack Desktop App</h1>
-              {isElectron && (
-                <div>
-                  <strong>Running in Electron</strong>
-                </div>
-              )}
-            </div>
-          </StrictMode>,
-        );
+        await act(async () => {
+          root.render(
+            <StrictMode>
+              <div style={{ padding: '20px' }}>
+                <h1>Abe Stack Desktop App</h1>
+                {isElectron && (
+                  <div>
+                    <strong>Running in Electron</strong>
+                  </div>
+                )}
+              </div>
+            </StrictMode>,
+          );
+        });
 
         await waitFor(() => {
           expect(screen.getByText('Abe Stack Desktop App')).toBeInTheDocument();

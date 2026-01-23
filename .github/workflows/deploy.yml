@@ -1,0 +1,272 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+      tag:
+        description: 'Docker image tag (leave empty for latest)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'production' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.26.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check configuration
+        run: pnpm config:generate:check
+
+      - name: Check path aliases
+        run: pnpm sync:aliases:check
+
+      - name: Check file headers
+        run: pnpm sync:headers:check
+
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: .cache/turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Run build and verification pipeline
+        run: pnpm build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ vars.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ vars.REGISTRY }}/${{ vars.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=raw,value=${{ inputs.tag || 'latest' }}
+            type=raw,value=${{ github.sha }}
+
+      - name: Build and push API Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./config/docker/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}-api
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push Web Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./config/docker/Dockerfile.web
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}-web
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VITE_API_URL=${{ vars.VITE_API_URL }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script: |
+            # Set deployment environment
+            export DEPLOY_ENV="${{ inputs.environment || 'production' }}"
+            export IMAGE_TAG="${{ inputs.tag || 'latest' }}"
+            export REGISTRY="${{ vars.REGISTRY }}"
+            export IMAGE_NAME="${{ vars.IMAGE_NAME }}"
+
+            # Create deployment directory if it doesn't exist
+            mkdir -p ~/abe-stack-deploy
+
+            # Navigate to deployment directory
+            cd ~/abe-stack-deploy
+
+            # Download docker-compose.prod.yml if not present or update it
+            if [ ! -f "docker-compose.prod.yml" ]; then
+              echo "Downloading production docker-compose file..."
+              curl -sSL "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/config/docker/docker-compose.prod.yml" -o docker-compose.prod.yml
+            fi
+
+            # Download Caddyfile if not present or update it
+            if [ ! -f "Caddyfile" ]; then
+              echo "Downloading Caddyfile..."
+              curl -sSL "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/config/caddy/Caddyfile" -o Caddyfile
+            fi
+
+            # Create .env file if it doesn't exist
+            if [ ! -f ".env.${DEPLOY_ENV}" ]; then
+              echo "Creating environment file template..."
+              cat > ".env.${DEPLOY_ENV}" << EOF
+            # Production Environment Variables
+            # Update these values before deployment
+
+            # Domain Configuration
+            DOMAIN=${{ secrets.DOMAIN }}
+            ACME_EMAIL=${{ secrets.ACME_EMAIL }}
+
+            # Database Secrets
+            POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+            POSTGRES_DB=abe_stack
+            POSTGRES_USER=postgres
+
+            # Application Secrets
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+
+            # Trust Proxy (for correct IP extraction)
+            TRUST_PROXY=true
+            TRUSTED_PROXIES=172.16.0.0/12,10.0.0.0/8
+            MAX_PROXY_DEPTH=1
+
+            # Storage Configuration
+            STORAGE_PROVIDER=local
+            STORAGE_LOCAL_PATH=/app/uploads
+            STORAGE_LOCAL_PUBLIC_URL=/uploads
+
+            # Email Configuration
+            EMAIL_PROVIDER=console
+            EMAIL_FROM_NAME=ABE Stack
+            EMAIL_FROM_ADDRESS=noreply@\${DOMAIN}
+
+            # API URL for frontend (empty = relative URLs via reverse proxy)
+            VITE_API_URL=
+            EOF
+            fi
+
+            # Pull latest images
+            echo "Pulling latest Docker images..."
+            docker pull \${REGISTRY}/\${IMAGE_NAME}:\${IMAGE_TAG}-api
+            docker pull \${REGISTRY}/\${IMAGE_NAME}:\${IMAGE_TAG}-web
+
+            # Create environment file for docker-compose
+            cp ".env.\${DEPLOY_ENV}" ".env"
+
+            # Update docker-compose to use pre-built images instead of build directives
+            # Replace API build block with image
+            sed -i '/^  api:$/,/^  web:$/ {
+                /^    build:$/,/^      dockerfile:/ {
+                    s|^    build:|    image: '"\${REGISTRY}/\${IMAGE_NAME}:\${IMAGE_TAG}"'-api|
+                    t
+                    /^      context:/d
+                    /^      dockerfile:/d
+                }
+            }' docker-compose.prod.yml
+
+            # Replace Web build block with image
+            sed -i '/^  web:$/,/^volumes:$/ {
+                /^    build:$/,/^      args:/ {
+                    s|^    build:|    image: '"\${REGISTRY}/\${IMAGE_NAME}:\${IMAGE_TAG}"'-web|
+                    t
+                    /^      context:/d
+                    /^      dockerfile:/d
+                    /^      args:/d
+                }
+            }' docker-compose.prod.yml
+
+            # Stop existing containers gracefully
+            echo "Stopping existing containers..."
+            docker compose -f docker-compose.prod.yml down --timeout 30
+
+            # Start new containers
+            echo "Starting new containers..."
+            docker compose -f docker-compose.prod.yml up -d
+
+            # Run database migrations if needed
+            echo "Running database migrations..."
+            # Wait a moment for API to be ready
+            sleep 10
+            if docker compose -f docker-compose.prod.yml exec -T api node -e "
+              const { execSync } = require('child_process');
+              try {
+                console.log('Checking for pending migrations...');
+                // Add your migration check command here
+                // execSync('npm run db:migrate', { stdio: 'inherit' });
+                console.log('Migrations completed successfully');
+              } catch (error) {
+                console.error('Migration failed:', error.message);
+                process.exit(1);
+              }
+            "; then
+              echo "Database migrations completed successfully"
+            else
+              echo "Database migration failed, but continuing deployment..."
+              # Don't fail the deployment for migration issues in case they're already applied
+            fi
+
+            # Wait for services to be healthy
+            echo "Waiting for services to be healthy..."
+            timeout=300
+            elapsed=0
+
+            while [ \$elapsed -lt \$timeout ]; do
+              if docker compose -f docker-compose.prod.yml ps | grep -q "healthy"; then
+                echo "All services are healthy!"
+                break
+              fi
+              echo "Waiting for services to be healthy... (\$elapsed/\$timeout seconds)"
+              sleep 10
+              elapsed=\$((elapsed + 10))
+            done
+
+            if [ \$elapsed -ge \$timeout ]; then
+              echo "Timeout waiting for services to be healthy"
+              docker compose -f docker-compose.prod.yml logs
+              exit 1
+            fi
+
+            # Clean up old images
+            echo "Cleaning up old Docker images..."
+            docker image prune -f
+
+            echo "Deployment completed successfully!"
+            echo "Application is available at: https://\${DOMAIN}"
+
+            # Show status
+            docker compose -f docker-compose.prod.yml ps

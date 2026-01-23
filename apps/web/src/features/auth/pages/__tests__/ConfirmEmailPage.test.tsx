@@ -1,8 +1,7 @@
 // apps/web/src/features/auth/pages/__tests__/ConfirmEmailPage.test.tsx
 import { QueryCache, QueryCacheProvider } from '@abe-stack/sdk';
 import { MemoryRouter } from '@abe-stack/ui';
-import { render, screen, waitFor } from '@testing-library/react';
-import { fireEvent } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ConfirmEmailPage } from '../ConfirmEmailPage';
@@ -116,7 +115,10 @@ describe('ConfirmEmailPage', () => {
       renderConfirmEmailPage();
 
       // Wait for verification to complete (using runAllTimersAsync to work with fake timers)
-      await vi.runAllTimersAsync();
+      // Wrap in act to handle state updates triggered by timers
+      await act(async () => {
+        await vi.runAllTimersAsync();
+      });
 
       // Verify navigation was called
       expect(mockNavigate).toHaveBeenCalledWith('/dashboard');

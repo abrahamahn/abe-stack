@@ -2,9 +2,10 @@
 import { handleMe } from '@users/handlers';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-// Mock dependencies
-vi.mock('../service.js', () => ({
+// Mock getUserById service function
+vi.mock('@users/service', () => ({
   getUserById: vi.fn(),
+  listUsers: vi.fn(),
 }));
 
 vi.mock('@shared', () => ({
@@ -15,9 +16,20 @@ vi.mock('@shared', () => ({
   },
 }));
 
+import * as userService from '@users/service';
+
 describe('Users Handlers', () => {
   const mockCtx = {
-    db: {},
+    repos: {
+      users: {
+        findById: vi.fn(),
+        findByEmail: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        delete: vi.fn(),
+        list: vi.fn(),
+      },
+    },
     log: {
       error: vi.fn(),
     },
@@ -44,7 +56,6 @@ describe('Users Handlers', () => {
     });
 
     test('should return user profile when authenticated', async () => {
-      const { getUserById } = await import('../service.js');
       const mockUser = {
         id: 'user-123',
         email: 'test@example.com',
@@ -52,7 +63,7 @@ describe('Users Handlers', () => {
         role: 'user' as const,
         createdAt: new Date('2024-01-01T00:00:00.000Z'),
       };
-      (getUserById as ReturnType<typeof vi.fn>).mockResolvedValue(mockUser);
+      vi.mocked(userService.getUserById).mockResolvedValue(mockUser);
 
       const result = await handleMe(mockCtx as never, mockRequest as never);
 
@@ -67,8 +78,7 @@ describe('Users Handlers', () => {
     });
 
     test('should return 404 when user not found', async () => {
-      const { getUserById } = await import('../service.js');
-      (getUserById as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+      vi.mocked(userService.getUserById).mockResolvedValue(null);
 
       const result = await handleMe(mockCtx as never, mockRequest as never);
 
@@ -77,8 +87,7 @@ describe('Users Handlers', () => {
     });
 
     test('should return 500 on unexpected error', async () => {
-      const { getUserById } = await import('../service.js');
-      (getUserById as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Database error'));
+      vi.mocked(userService.getUserById).mockRejectedValue(new Error('Database error'));
 
       const result = await handleMe(mockCtx as never, mockRequest as never);
 

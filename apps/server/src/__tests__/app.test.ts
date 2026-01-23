@@ -55,6 +55,32 @@ vi.mock('@infrastructure/index', () => {
     // Schema validation mocks
     requireValidSchema: vi.fn(() => Promise.resolve()),
     SchemaValidationError: MockSchemaValidationError,
+    // Repository context mock
+    getRepositoryContext: vi.fn(() => ({
+      raw: {
+        close: vi.fn(() => Promise.resolve()),
+      },
+      repos: {
+        users: {
+          findById: vi.fn(),
+          findByEmail: vi.fn(),
+          create: vi.fn(),
+          update: vi.fn(),
+          delete: vi.fn(),
+          list: vi.fn(),
+        },
+        refreshTokens: { findByToken: vi.fn(), create: vi.fn(), delete: vi.fn() },
+        refreshTokenFamilies: { findById: vi.fn(), create: vi.fn(), delete: vi.fn() },
+        loginAttempts: { findByIp: vi.fn(), create: vi.fn() },
+        passwordResetTokens: { findByToken: vi.fn(), create: vi.fn(), delete: vi.fn() },
+        emailVerificationTokens: { findByToken: vi.fn(), create: vi.fn(), delete: vi.fn() },
+        securityEvents: { create: vi.fn(), findByUserId: vi.fn() },
+        magicLinkTokens: { findByToken: vi.fn(), create: vi.fn(), delete: vi.fn() },
+        oauthConnections: { findByProvider: vi.fn(), create: vi.fn() },
+        pushSubscriptions: { findByEndpoint: vi.fn(), create: vi.fn() },
+        notificationPreferences: { findByUserId: vi.fn(), create: vi.fn() },
+      },
+    })),
   };
 });
 

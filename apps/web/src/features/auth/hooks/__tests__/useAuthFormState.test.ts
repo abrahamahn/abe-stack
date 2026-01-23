@@ -26,7 +26,7 @@ describe('AuthFormState type', () => {
       setIsLoading: () => undefined,
       setError: () => undefined,
       clearError: () => undefined,
-      wrapHandler: <T extends Record<string, unknown>, R>(handler: (data: T) => Promise<R>) =>
+      wrapHandler: <T, R>(handler: (data: T) => Promise<R>) =>
         handler,
     };
 

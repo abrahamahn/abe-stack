@@ -73,6 +73,12 @@ vi.mock('@shared', () => ({
 describe('Email Verification Handlers', () => {
   const mockCtx = {
     db: {},
+    repos: {
+      users: {
+        findById: vi.fn(),
+        findByEmail: vi.fn(),
+      },
+    },
     email: {},
     config: {
       auth: {
@@ -129,7 +135,12 @@ describe('Email Verification Handlers', () => {
           token: mockResult.accessToken,
           user: mockResult.user,
         });
-        expect(mockVerifyEmail).toHaveBeenCalledWith(mockCtx.db, mockCtx.config.auth, validToken);
+        expect(mockVerifyEmail).toHaveBeenCalledWith(
+          mockCtx.db,
+          mockCtx.repos,
+          mockCtx.config.auth,
+          validToken,
+        );
         expect(mockSetRefreshTokenCookie).toHaveBeenCalledWith(
           mockReply,
           mockResult.refreshToken,
@@ -315,6 +326,7 @@ describe('Email Verification Handlers', () => {
 
         expect(mockVerifyEmail).toHaveBeenCalledWith(
           mockCtx.db,
+          mockCtx.repos,
           mockCtx.config.auth,
           tokenWithSpecialChars,
         );
@@ -337,6 +349,7 @@ describe('Email Verification Handlers', () => {
         });
         expect(mockResendVerificationEmail).toHaveBeenCalledWith(
           mockCtx.db,
+          mockCtx.repos,
           mockCtx.email,
           validEmail,
           mockCtx.config.server.appBaseUrl,
@@ -382,6 +395,7 @@ describe('Email Verification Handlers', () => {
 
         expect(mockResendVerificationEmail).toHaveBeenCalledWith(
           customCtx.db,
+          customCtx.repos,
           customCtx.email,
           validEmail,
           'https://production.example.com',
@@ -428,6 +442,7 @@ describe('Email Verification Handlers', () => {
 
         expect(mockResendVerificationEmail).toHaveBeenCalledWith(
           mockCtx.db,
+          mockCtx.repos,
           mockCtx.email,
           'USER@EXAMPLE.COM',
           expect.anything(),
@@ -442,6 +457,7 @@ describe('Email Verification Handlers', () => {
 
         expect(mockResendVerificationEmail).toHaveBeenCalledWith(
           mockCtx.db,
+          mockCtx.repos,
           mockCtx.email,
           emailWithPlus,
           expect.anything(),
@@ -457,6 +473,7 @@ describe('Email Verification Handlers', () => {
         expect(result.status).toBe(200);
         expect(mockResendVerificationEmail).toHaveBeenCalledWith(
           mockCtx.db,
+          mockCtx.repos,
           mockCtx.email,
           intlEmail,
           expect.anything(),

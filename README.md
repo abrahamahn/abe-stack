@@ -40,6 +40,14 @@ https://github.com/abrahamahn/abe-stack
 - **Audit Logging**: Security event tracking, intrusion detection, risk scoring (0-100)
 - **File Uploads**: HMAC-signed URLs, content validation, size limits
 
+### Deployment & Infrastructure
+
+- **Infrastructure as Code**: Terraform modules for DigitalOcean and Google Cloud
+- **CI/CD Pipelines**: GitHub Actions for automated testing, building, and deployment
+- **Multi-Environment**: Staging and production environment support
+- **Container Ready**: Docker Compose for local development and production deployment
+- **One-Click Deploy**: From code to production in minutes
+
 ### Quality & Developer Experience
 
 - Full **TypeScript strict mode** with end-to-end type safety

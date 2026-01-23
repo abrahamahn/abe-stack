@@ -7,70 +7,33 @@
     "node": ">=18.19 <25"
   },
   "scripts": {
-    "config:generate": "tsx config/generators/index.ts",
-    "config:generate:check": "tsx config/generators/index.ts --check",
-    "config:generate:watch": "tsx config/generators/index.ts --watch",
     "dev": "tsx tools/dev/start-dev.ts",
-    "dev:web": "tsx tools/dev/start-dev.ts web",
-    "dev:server": "tsx tools/dev/start-dev.ts server",
-    "dev:desktop": "tsx tools/dev/start-dev.ts desktop",
     "build": "pnpm theme:build && turbo run build lint type-check test --output-logs=errors-only",
-    "build:fast": "pnpm theme:build && turbo run build --output-logs=errors-only",
-    "build:validate": "turbo run validate build --output-logs=errors-only",
     "build:web": "turbo run build --filter=@abe-stack/web --output-logs=errors-only",
     "build:server": "turbo run build --filter=@abe-stack/server --output-logs=errors-only",
     "build:desktop": "turbo run build --filter=@abe-stack/desktop --output-logs=errors-only",
-    "build:contracts": "turbo run build --filter=@abe-stack/core --output-logs=errors-only",
-    "build:ui": "turbo run build --filter=@abe-stack/ui --output-logs=errors-only",
     "theme:build": "node --import tsx config/lint/sync-css-theme.ts",
-    "theme:watch": "node --import tsx config/lint/sync-css-theme.ts --watch",
-    "sync:theme": "node --import tsx config/lint/sync-css-theme.ts",
-    "sync:theme:watch": "node --import tsx config/lint/sync-css-theme.ts --watch",
     "test": "vitest run --reporter=dot",
-    "test:changed": "vitest run --changed --reporter=dot",
-    "test:verbose": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "test:turbo": "turbo run test --output-logs=errors-only",
     "test:e2e": "playwright test --config config/playwright.config.ts",
     "lint": "eslint . --cache --cache-location .cache/eslint/.cache --ext .js,.jsx,.ts,.tsx,.cjs,.mjs,.cts,.mts --report-unused-disable-directives --max-warnings=0",
     "lint:fix": "eslint . --cache --cache-location .cache/eslint/.cache --ext .js,.jsx,.ts,.tsx,.cjs,.mjs,.cts,.mts --fix",
-    "lint:changed": "eslint --cache --cache-location .cache/eslint/.cache --max-warnings=0",
-    "lint:staged": "eslint --cache --cache-location .cache/eslint/.cache --report-unused-disable-directives --max-warnings=0 --no-warn-ignored",
-    "sync:headers": "tsx config/lint/sync-file-headers.ts",
-    "sync:headers:check": "tsx config/lint/sync-file-headers.ts --check",
-    "sync:headers:watch": "tsx config/lint/sync-file-headers.ts --watch",
     "type-check": "turbo run type-check --output-logs=errors-only",
     "format": "prettier --config config/.prettierrc --ignore-path config/.prettierignore --cache --cache-location .cache/prettier/.cache --write .",
     "format:check": "prettier --config config/.prettierrc --ignore-path config/.prettierignore --cache --cache-location .cache/prettier/.cache --check .",
-    "validate": "turbo run validate --output-logs=errors-only",
     "clean": "turbo run clean --output-logs=errors-only && rm -rf node_modules .turbo .cache",
     "clean:cache": "rm -rf .turbo .cache packages/*/tsconfig.tsbuildinfo apps/*/tsconfig.tsbuildinfo packages/*/.cache apps/*/.cache",
-    "export": "node tools/export/export-code.ts",
-    "export:ui": "node tools/export/export-ui-code.ts",
-    "export:server": "node tools/export/export-server-code.ts",
-    "db:generate": "pnpm --filter @abe-stack/server db:generate",
-    "db:migrate": "pnpm --filter @abe-stack/server db:migrate",
-    "db:push": "pnpm --filter @abe-stack/server db:push",
-    "db:studio": "pnpm --filter @abe-stack/server db:studio",
+    "config:generate": "tsx config/generators/index.ts",
+    "sync:headers": "tsx config/lint/sync-file-headers.ts",
     "db:seed": "pnpm --filter @abe-stack/server db:seed",
-    "db:bootstrap:admin": "pnpm --filter @abe-stack/server db:bootstrap:admin",
-    "db:restart": "tsx tools/restart-db.ts",
     "db:reset": "tsx tools/dev/reset.ts",
     "db:bootstrap": "tsx tools/dev/bootstrap.ts",
     "setup": "tsx tools/dev/setup.ts",
-    "prepare": "simple-git-hooks",
     "docker:up": "docker compose --env-file config/.env/.env.development -f config/docker/docker-compose.yml up --build",
     "docker:down": "docker compose --env-file config/.env/.env.development -f config/docker/docker-compose.yml down",
-    "docker:logs": "docker compose --env-file config/.env/.env.development -f config/docker/docker-compose.yml logs -f",
     "deploy": "docker compose -f config/docker/docker-compose.prod.yml up -d --build",
     "deploy:down": "docker compose -f config/docker/docker-compose.prod.yml down",
-    "deploy:logs": "docker compose -f config/docker/docker-compose.prod.yml logs -f",
-    "deploy:dev": "docker compose -f config/docker/docker-compose.dev.yml up -d",
-    "deploy:dev:down": "docker compose -f config/docker/docker-compose.dev.yml down",
-    "bundle-size": "tsx tools/export/bundle-size.ts",
-    "bundle-size:save": "tsx tools/export/bundle-size.ts --save",
-    "pre-commit": "pnpm config:generate && pnpm sync:headers && pnpm sync:theme && pnpm lint-staged && pnpm type-check"
+    "pre-commit": "pnpm config:generate && pnpm sync:headers && pnpm theme:build && pnpm format && pnpm lint && pnpm type-check"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
@@ -81,26 +44,17 @@
     "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.2",
-    "@vitest/coverage-v8": "^4.0.17",
-    "drizzle-orm": "^0.45.1",
     "eslint": "^9.39.2",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.0.1",
     "jsdom": "^27.4.0",
-    "lint-staged": "^16.2.7",
     "postgres": "^3.4.8",
     "prettier": "^3.8.0",
-    "simple-git-hooks": "^2.13.1",
-    "tsc-alias": "^1.8.16",
     "tsx": "^4.21.0",
     "turbo": "^2.7.5",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.53.1",
     "vite": "^7.3.1",
-    "vite-tsconfig-paths": "^6.0.4",
-    "vitest": "^4.0.17",
-    "vitest-axe": "^0.1.0"
+    "vitest": "^4.0.17"
   },
   "pnpm": {
     "overrides": {
@@ -113,20 +67,7 @@
     "ignoredBuiltDependencies": [
       "electron-winstaller",
       "esbuild",
-      "simple-git-hooks",
       "unrs-resolver"
-    ]
-  },
-  "simple-git-hooks": {
-    "pre-commit": "pnpm pre-commit",
-    "pre-push": "pnpm build"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx,cjs,mjs,cts,mts,json,css,scss,md}": [
-      "pnpm prettier --config config/.prettierrc --ignore-path config/.prettierignore --write"
-    ],
-    "**/*.{ts,tsx,js,jsx,cjs,mjs,cts,mts}": [
-      "pnpm lint:staged"
     ]
   },
   "packageManager": "pnpm@10.26.2"

@@ -24,8 +24,8 @@ import type {
  * Base configuration for search providers.
  */
 export interface SearchProviderConfig {
-  /** Provider name for logging */
-  name: string;
+  /** Provider name for logging (defaults to provider type if not specified) */
+  name?: string;
   /** Request timeout in milliseconds */
   timeout?: number;
   /** Enable query logging */

@@ -2,7 +2,7 @@
 import { MemoryRouter } from '@abe-stack/ui';
 import { ClientEnvironmentProvider } from '@app/ClientEnvironment';
 import { DemoPage } from '@demo/pages/DemoPage';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
@@ -290,11 +290,13 @@ describe('DemoPage', () => {
       expect(screen.getByText(/select a component from the left sidebar/i)).toBeInTheDocument();
     });
 
-    it('shows component details when a component is selected', () => {
+    it('shows component details when a component is selected', async () => {
       renderDemoPage();
 
       const buttonComponent = screen.getByText('Button');
-      fireEvent.click(buttonComponent);
+      await act(async () => {
+        fireEvent.click(buttonComponent);
+      });
 
       // Check for heading with exact name or containing Button
       const headings = screen.getAllByRole('heading');
@@ -314,29 +316,35 @@ describe('DemoPage', () => {
       expect(screen.getAllByText('1 variant')).toHaveLength(1);
     });
 
-    it('renders variants when a component is selected', () => {
+    it('renders variants when a component is selected', async () => {
       renderDemoPage();
 
-      fireEvent.click(screen.getByText('Button'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('Button'));
+      });
 
       expect(screen.getByRole('heading', { name: 'Primary' })).toBeInTheDocument();
       expect(screen.getByRole('heading', { name: 'Secondary' })).toBeInTheDocument();
       expect(screen.getByText('Primary button style')).toBeInTheDocument();
     });
 
-    it('renders the variant component', () => {
+    it('renders the variant component', async () => {
       renderDemoPage();
 
-      fireEvent.click(screen.getByText('Button'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('Button'));
+      });
 
       // The mocked render function creates a button with 'Click me'
       expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument();
     });
 
-    it('shows code in details element', () => {
+    it('shows code in details element', async () => {
       renderDemoPage();
 
-      fireEvent.click(screen.getByText('Button'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('Button'));
+      });
 
       const details = screen.getAllByText('View Code');
       expect(details.length).toBeGreaterThan(0);
@@ -348,16 +356,20 @@ describe('DemoPage', () => {
   });
 
   describe('Copy to Clipboard', () => {
-    it('copies code to clipboard when copy button is clicked', () => {
+    it('copies code to clipboard when copy button is clicked', async () => {
       renderDemoPage();
 
-      fireEvent.click(screen.getByText('Button'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('Button'));
+      });
 
       // The copy button has title="Copy code" so look for buttons with that title
       const copyButtons = screen.getAllByTitle(/copy code/i);
       const firstButton = copyButtons[0];
       if (firstButton) {
-        fireEvent.click(firstButton);
+        await act(async () => {
+          fireEvent.click(firstButton);
+        });
       }
 
       expect(mockClipboard.writeText).toHaveBeenCalledWith(

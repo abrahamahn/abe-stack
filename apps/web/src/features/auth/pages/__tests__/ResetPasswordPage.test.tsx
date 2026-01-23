@@ -45,10 +45,10 @@ vi.mock('../../hooks', async (importOriginal) => {
   };
 });
 
-// Mock toastStore from @abe-stack/core
+// Mock toastStore from @abe-stack/stores
 const mockToastShow = vi.fn();
-vi.mock('@abe-stack/core', async () => {
-  const actual = await vi.importActual('@abe-stack/core');
+vi.mock('@abe-stack/stores', async () => {
+  const actual = await vi.importActual('@abe-stack/stores');
   return {
     ...actual,
     toastStore: {

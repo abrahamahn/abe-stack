@@ -1,7 +1,7 @@
 // packages/ui/src/hooks/__tests__/useLocalStorage.test.tsx
 /** @vitest-environment jsdom */
 import { useLocalStorage } from '@hooks/useLocalStorage';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ReactElement } from 'react';
@@ -34,10 +34,13 @@ describe('useLocalStorage', () => {
     expect(screen.getByTestId('value')).toHaveTextContent('stored');
   });
 
-  it('writes updates to localStorage', () => {
+  it('writes updates to localStorage', async () => {
     render(<LocalStorageHarness storageKey="write-key" initialValue="initial" />);
     fireEvent.click(screen.getByText('Set'));
-    expect(window.localStorage.getItem('write-key')).toBe(JSON.stringify('next'));
+    // localStorage write is deferred via queueMicrotask, so we need to wait
+    await waitFor(() => {
+      expect(window.localStorage.getItem('write-key')).toBe(JSON.stringify('next'));
+    });
   });
 
   it('responds to storage events from other tabs', () => {

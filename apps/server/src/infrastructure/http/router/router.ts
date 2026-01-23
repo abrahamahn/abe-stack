@@ -29,7 +29,7 @@
  */
 
 import { createAuthGuard } from '@auth/middleware';
-import { type AppContext, formatValidationErrors } from '@shared';
+import type { AppContext } from '@shared';
 
 import type { BaseRouteDefinition, RouteDefinition, RouteMap, RouterOptions } from './types';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
@@ -112,7 +112,7 @@ function registerRoute(
     if (schema) {
       const parsed = schema.safeParse(req.body);
       if (!parsed.success) {
-        void reply.status(400).send(formatValidationErrors(parsed.error.issues));
+        void reply.status(400).send({ message: parsed.error.message });
         return;
       }
 

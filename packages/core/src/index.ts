@@ -49,8 +49,74 @@ export {
   oauthConnectionsResponseSchema,
   OAUTH_PROVIDERS,
   // Admin schemas
+  adminLockUserRequestSchema,
+  adminLockUserResponseSchema,
+  adminUpdateUserRequestSchema,
+  adminUpdateUserResponseSchema,
+  adminUserListFiltersSchema,
+  adminUserListResponseSchema,
+  adminUserSchema,
   unlockAccountRequestSchema,
   unlockAccountResponseSchema,
+  USER_STATUSES,
+  userStatusSchema,
+  // Security schemas
+  securityContract,
+  securityEventDetailRequestSchema,
+  securityEventDetailResponseSchema,
+  securityEventSchema,
+  securityEventsExportRequestSchema,
+  securityEventsExportResponseSchema,
+  securityEventsFilterSchema,
+  securityEventsListRequestSchema,
+  securityEventsListResponseSchema,
+  securityMetricsRequestSchema,
+  securityMetricsResponseSchema,
+  securityMetricsSchema,
+  SECURITY_EVENT_TYPES,
+  SECURITY_SEVERITIES,
+  // Jobs schemas (admin job monitoring)
+  JOB_STATUSES,
+  jobActionResponseSchema,
+  jobDetailsSchema,
+  jobErrorSchema,
+  jobIdRequestSchema,
+  jobListQuerySchema,
+  jobListResponseSchema,
+  jobsContract,
+  jobStatusSchema,
+  queueStatsSchema,
+  // Billing schemas
+  BILLING_PROVIDERS,
+  INVOICE_STATUSES,
+  PAYMENT_METHOD_TYPES,
+  PLAN_INTERVALS,
+  SUBSCRIPTION_STATUSES,
+  adminBillingContract,
+  billingContract,
+  addPaymentMethodRequestSchema,
+  adminPlanResponseSchema,
+  adminPlanSchema,
+  adminPlansListResponseSchema,
+  cancelSubscriptionRequestSchema,
+  checkoutRequestSchema,
+  checkoutResponseSchema,
+  createPlanRequestSchema,
+  emptyBillingBodySchema,
+  invoiceSchema,
+  invoicesListResponseSchema,
+  paymentMethodResponseSchema,
+  paymentMethodSchema,
+  paymentMethodsListResponseSchema,
+  planSchema,
+  plansListResponseSchema,
+  setupIntentResponseSchema,
+  subscriptionActionResponseSchema,
+  subscriptionResponseSchema,
+  subscriptionSchema,
+  syncStripeResponseSchema,
+  updatePlanRequestSchema,
+  updateSubscriptionRequestSchema,
   // Common schemas
   emailSchema,
   errorResponseSchema,
@@ -69,8 +135,20 @@ export {
   // User schemas
   userRoleSchema,
   userSchema,
+  USER_ROLES,
+  // Schema factory
+  createSchema,
+  // Auth body schemas
+  emptyBodySchema,
 } from './contracts';
 export type {
+  // Schema types
+  Schema,
+  InferSchema,
+  SafeParseResult,
+  // Empty body type
+  EmptyBody,
+  // Contracts
   ApiContract,
   AuthResponse,
   Contract,
@@ -121,6 +199,69 @@ export type {
   UnlockAccountResponse,
   User,
   UserRole,
+  // Admin user management types
+  AdminLockUserRequest,
+  AdminLockUserResponse,
+  AdminUpdateUserRequest,
+  AdminUpdateUserResponse,
+  AdminUser,
+  AdminUserListFilters,
+  AdminUserListResponse,
+  UserStatus,
+  // Security types
+  SecurityEvent,
+  SecurityEventDetailRequest,
+  SecurityEventDetailResponse,
+  SecurityEventsExportRequest,
+  SecurityEventsExportResponse,
+  SecurityEventsFilter,
+  SecurityEventsListRequest,
+  SecurityEventsListResponse,
+  SecurityEventType,
+  SecurityMetrics,
+  SecurityMetricsRequest,
+  SecurityMetricsResponse,
+  SecuritySeverity,
+  // Jobs types (admin job monitoring)
+  JobActionResponse,
+  JobDetails,
+  JobError,
+  JobIdRequest,
+  JobListQuery,
+  JobListResponse,
+  JobStatus,
+  QueueStats,
+  // Billing types
+  AddPaymentMethodRequest,
+  AdminPlan,
+  AdminPlanResponse,
+  AdminPlansListResponse,
+  BillingProvider,
+  CancelSubscriptionRequest,
+  CardDetails,
+  CheckoutRequest,
+  CheckoutResponse,
+  CreatePlanRequest,
+  EmptyBillingBody,
+  Invoice,
+  InvoiceStatus,
+  InvoicesListResponse,
+  PaymentMethod,
+  PaymentMethodResponse,
+  PaymentMethodsListResponse,
+  PaymentMethodType,
+  Plan,
+  PlanFeature,
+  PlanInterval,
+  PlansListResponse,
+  SetupIntentResponse,
+  Subscription,
+  SubscriptionActionResponse,
+  SubscriptionResponse,
+  SubscriptionStatus,
+  SyncStripeResponse,
+  UpdatePlanRequest,
+  UpdateSubscriptionRequest,
 } from './contracts';
 
 // ============================================================================
@@ -208,6 +349,7 @@ export type {
 // ============================================================================
 export {
   conflictResponseSchema,
+  getRecordsRequestSchema,
   getRecordsResponseSchema,
   listInsertOperationSchema,
   listPositionSchema,
@@ -224,6 +366,7 @@ export {
 } from './contracts/realtime';
 export type {
   ConflictResponse,
+  GetRecordsRequest,
   GetRecordsResponse,
   ListPosition,
   RealtimeRecord,
@@ -344,11 +487,9 @@ export {
   PayloadTooLargeError,
   PreferencesNotFoundError,
   ProviderError,
-  ProviderNotConfiguredError,
   QuietHoursActiveError,
-  SubscriptionExistsError,
+  SubscriptionExistsError as PushSubscriptionExistsError,
   SubscriptionExpiredError,
-  SubscriptionNotFoundError,
   VapidNotConfiguredError,
 } from './domains/notifications';
 export type {
@@ -493,6 +634,42 @@ export type {
   // SortOrder is exported from contracts
   UrlSearchParamsInput,
 } from './domains/search';
+
+// ============================================================================
+// Domain: Billing
+// ============================================================================
+export {
+  // Plan errors
+  PlanNotFoundError,
+  PlanNotActiveError,
+  PlanHasActiveSubscriptionsError,
+  CannotDeactivatePlanWithActiveSubscriptionsError,
+  // Subscription errors
+  SubscriptionExistsError as BillingSubscriptionExistsError,
+  SubscriptionNotFoundError as BillingSubscriptionNotFoundError,
+  SubscriptionAlreadyCanceledError,
+  SubscriptionNotCancelingError,
+  SubscriptionNotActiveError,
+  CannotDowngradeInTrialError,
+  // Payment method errors
+  PaymentMethodNotFoundError,
+  CannotRemoveDefaultPaymentMethodError,
+  PaymentMethodValidationError,
+  // Customer errors
+  CustomerNotFoundError,
+  // Provider errors
+  BillingProviderError,
+  ProviderNotConfiguredError as BillingProviderNotConfiguredError,
+  CheckoutSessionError,
+  WebhookSignatureError,
+  WebhookEventAlreadyProcessedError,
+  // Invoice errors
+  InvoiceNotFoundError,
+  // Type guards
+  isBillingProviderError,
+  isSubscriptionError,
+  isPlanError,
+} from './domains/billing';
 
 // ============================================================================
 // Errors: HTTP mapping and validation formatting

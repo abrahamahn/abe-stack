@@ -37,8 +37,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build && tsc-alias && cp -r src/styles dist/",
-    "dev": "echo 'UI package uses source files directly - no build needed for dev'",
+    "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build && cp -r src/styles dist/",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "type-check": "tsc --project tsconfig.json --noEmit",
     "test": "vitest run --project ui"

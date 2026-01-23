@@ -1,23 +1,37 @@
 // apps/server/src/infrastructure/data/database/schema/index.ts
+/**
+ * Schema Exports
+ *
+ * Re-exports types and constants from @abe-stack/db.
+ * Table names and column mappings are used with the raw SQL query builder.
+ */
 
-// Users schema
+// User types and constants
 export {
-  users,
-  refreshTokens,
-  type UserRole,
+  USERS_TABLE,
+  USER_COLUMNS,
+  REFRESH_TOKENS_TABLE,
+  REFRESH_TOKEN_COLUMNS,
   type User,
   type NewUser,
+  type UpdateUser,
+  type UserRole,
   type RefreshToken,
   type NewRefreshToken,
-} from './users';
+} from '@abe-stack/db';
 
-// Auth schema
+// Auth types and constants
 export {
-  refreshTokenFamilies,
-  loginAttempts,
-  passwordResetTokens,
-  emailVerificationTokens,
-  securityEvents,
+  REFRESH_TOKEN_FAMILIES_TABLE,
+  REFRESH_TOKEN_FAMILY_COLUMNS,
+  LOGIN_ATTEMPTS_TABLE,
+  LOGIN_ATTEMPT_COLUMNS,
+  PASSWORD_RESET_TOKENS_TABLE,
+  PASSWORD_RESET_TOKEN_COLUMNS,
+  EMAIL_VERIFICATION_TOKENS_TABLE,
+  EMAIL_VERIFICATION_TOKEN_COLUMNS,
+  SECURITY_EVENTS_TABLE,
+  SECURITY_EVENT_COLUMNS,
   type RefreshTokenFamily,
   type NewRefreshTokenFamily,
   type LoginAttempt,
@@ -28,29 +42,35 @@ export {
   type NewEmailVerificationToken,
   type SecurityEvent,
   type NewSecurityEvent,
-} from './auth';
+  type SecurityEventType,
+  type SecurityEventSeverity,
+} from '@abe-stack/db';
 
-// Magic link schema
+// Magic link types and constants
 export {
-  magicLinkTokens,
+  MAGIC_LINK_TOKENS_TABLE,
+  MAGIC_LINK_TOKEN_COLUMNS,
   type MagicLinkToken,
   type NewMagicLinkToken,
-} from './magic-link';
+} from '@abe-stack/db';
 
-// OAuth schema
+// OAuth types and constants
 export {
-  oauthConnections,
-  oauthProviderEnum,
+  OAUTH_CONNECTIONS_TABLE,
+  OAUTH_CONNECTION_COLUMNS,
   OAUTH_PROVIDERS,
   type OAuthConnection,
   type NewOAuthConnection,
+  type UpdateOAuthConnection,
   type OAuthProvider,
-} from './oauth';
+} from '@abe-stack/db';
 
-// Push subscriptions schema
+// Push subscription types and constants
 export {
-  pushSubscriptions,
-  notificationPreferences,
+  PUSH_SUBSCRIPTIONS_TABLE,
+  PUSH_SUBSCRIPTION_COLUMNS,
+  NOTIFICATION_PREFERENCES_TABLE,
+  NOTIFICATION_PREFERENCE_COLUMNS,
   type PushSubscription,
   type NewPushSubscription,
   type NotificationPreference,
@@ -59,7 +79,7 @@ export {
   type NotificationType,
   type TypePreferences,
   type QuietHoursConfig,
-} from './push-subscriptions';
+} from '@abe-stack/db';
 
 // Schema validation
 export {

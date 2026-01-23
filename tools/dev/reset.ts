@@ -15,21 +15,6 @@ import { resolve } from 'node:path';
 
 import { bootstrap } from './bootstrap';
 
-// Type definitions for database operations (to avoid workspace root type resolution issues)
-interface DatabaseClient {
-  end: () => Promise<void>;
-}
-
-interface DrizzleDatabase {
-  execute: (query: unknown) => Promise<unknown>;
-}
-
-interface SqlTemplateTag {
-  (strings: TemplateStringsArray, ...values: unknown[]): unknown;
-  raw: (query: string) => unknown;
-}
-
-// Type for the raw query result
 // Helper to parse .env file
 function parseEnv(path: string): Record<string, string> {
   try {
@@ -64,53 +49,47 @@ function buildConnectionString(env: Record<string, string>): string {
   return `postgres://${auth}@${host}:${port}/${database}`;
 }
 
-function isTableArray(obj: unknown): obj is Array<{ tablename: string }> {
-  return (
-    Array.isArray(obj) &&
-    (obj.length === 0 || (typeof obj[0] === 'object' && obj[0] !== null && 'tablename' in obj[0]))
-  );
+// Inline type for table records returned from pg_tables
+interface TableRecord {
+  tablename: string;
+}
+
+// Inline type for the raw db client methods we use
+interface RawDbClient {
+  raw<T>(sql: string, values?: unknown[]): Promise<T[]>;
+  close(): Promise<void>;
+}
+
+// Type for the @abe-stack/db module
+interface DbModule {
+  createRawDb: (connectionString: string) => RawDbClient;
 }
 
 async function dropAllTables(connectionString: string): Promise<void> {
-  // Dynamic imports to get around workspace root type resolution
-  const postgresModule = (await import('postgres')) as {
-    default: (url: string, opts: { max: number }) => DatabaseClient;
-  };
-  const drizzleModule = (await import('drizzle-orm/postgres-js')) as {
-    drizzle: (client: DatabaseClient) => DrizzleDatabase;
-  };
-  const drizzleOrmModule = (await import('drizzle-orm')) as { sql: SqlTemplateTag };
-
-  const client = postgresModule.default(connectionString, { max: 1 });
-  const db = drizzleModule.drizzle(client);
-  const sqlTag = drizzleOrmModule.sql;
+  // Dynamic import with explicit type assertion
+  const dbModule: DbModule = await import('@abe-stack/db') as DbModule;
+  const db = dbModule.createRawDb(connectionString);
 
   console.log('🗑️  Dropping all tables...');
 
   try {
     // Get all tables in public schema
-    const query = sqlTag`SELECT tablename FROM pg_tables WHERE schemaname = 'public'`;
-    const tablesResult: unknown = await db.execute(query);
+    const tables = await db.raw<TableRecord>(
+      `SELECT tablename FROM pg_tables WHERE schemaname = 'public'`
+    );
 
-    if (isTableArray(tablesResult)) {
-      const tableNames = tablesResult.map((t) => t.tablename);
-
-      if (tableNames.length === 0) {
-        console.log('  No tables to drop.');
-      } else {
-        // Drop all tables with CASCADE to handle foreign key constraints
-        for (const tableName of tableNames) {
-          console.log(`  Dropping table: ${tableName}`);
-          const dropQuery = sqlTag.raw(`DROP TABLE IF EXISTS "${tableName}" CASCADE`);
-          await db.execute(dropQuery);
-        }
-        console.log(`  ✓ Dropped ${String(tableNames.length)} tables`);
-      }
+    if (tables.length === 0) {
+      console.log('  No tables to drop.');
     } else {
-      console.log('  Could not determine tables to drop.');
+      // Drop all tables with CASCADE to handle foreign key constraints
+      for (const table of tables) {
+        console.log(`  Dropping table: ${table.tablename}`);
+        await db.raw(`DROP TABLE IF EXISTS "${table.tablename}" CASCADE`);
+      }
+      console.log(`  ✓ Dropped ${String(tables.length)} tables`);
     }
   } finally {
-    await client.end();
+    await db.close();
   }
 }
 
@@ -150,7 +129,7 @@ async function reset(): Promise<void> {
   // Drop all tables
   await dropAllTables(connectionString);
 
-  // Recreate schema using drizzle-kit push
+  // Recreate schema using db:push
   await pushSchema(envVars);
 
   // Bootstrap with seed data

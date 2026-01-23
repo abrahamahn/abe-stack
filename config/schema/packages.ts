@@ -34,7 +34,7 @@ export const packageScripts: Record<string, Record<string, string>> = {
 
   'apps/server': {
     dev: 'tsx watch src/main.ts',
-    build: 'tsc -p tsconfig.build.json && tsc-alias -p tsconfig.build.json',
+    build: 'tsc -p tsconfig.build.json',
     start: 'node dist/main.js',
     test: 'vitest run --config ../../vitest.config.ts',
   },
@@ -107,8 +107,6 @@ export const rootScripts = {
   'lint:fix':
     'eslint . --cache --cache-location .cache/eslint/.cache --ext .js,.jsx,.ts,.tsx,.cjs,.mjs,.cts,.mts --fix',
   'lint:changed': 'eslint --cache --cache-location .cache/eslint/.cache --max-warnings=0',
-  'lint:staged':
-    'eslint --cache --cache-location .cache/eslint/.cache --report-unused-disable-directives --max-warnings=0 --no-warn-ignored',
 
   // Sync scripts (kept - these transform code, not config)
   'sync:headers': 'tsx tools/sync/sync-file-headers.ts',
@@ -158,7 +156,7 @@ export const rootScripts = {
   'bundle-size': 'tsx tools/dev/bundle-size.ts',
   'bundle-size:save': 'tsx tools/dev/bundle-size.ts --save',
 
-  // Pre-commit (updated to use config:generate)
-  'pre-commit':
-    'pnpm config:generate && pnpm sync:headers && pnpm sync:imports && pnpm sync:theme && pnpm lint-staged && pnpm type-check',
+  // Pre-commit/push hooks (now use manual scripts in tools/git/)
+  'pre-commit': 'tsx tools/git/pre-commit.ts',
+  'pre-push': 'tsx tools/git/pre-push.ts',
 } as const;

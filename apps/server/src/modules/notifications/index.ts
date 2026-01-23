@@ -2,8 +2,11 @@
 /**
  * Notifications Module
  *
- * Push notification management including subscription, sending,
+ * Push notification management including subscription management
  * and preference handling.
+ *
+ * NOTE: Notification sending has been removed (web-push package removed).
+ * Subscription management and preferences remain for future provider implementations.
  */
 
 // Routes (for auto-registration)
@@ -22,17 +25,16 @@ export {
 
 // Service (business logic)
 export {
-  broadcast,
   clearAllData,
+  cleanupExpiredSubscriptions,
   getActiveSubscriptionCount,
+  getAllActiveSubscriptions,
   getPreferences,
   getSubscriptionById,
   getSubscriptionCount,
+  getSubscriptionStats,
   getUserSubscriptions,
-  getVapidPublicKey,
   markSubscriptionsExpired,
-  sendToUser,
-  sendToUsers,
   shouldSendNotification,
   subscribe,
   unsubscribe,

@@ -266,7 +266,7 @@ export function RealtimeProvider<TTables extends TableMap = TableMap>({
         // Will be connected to pubsub in effect
       },
     });
-  }, [debug]);
+  }, []);
 
   // Create pubsub client
   const pubsub = useMemo(() => {

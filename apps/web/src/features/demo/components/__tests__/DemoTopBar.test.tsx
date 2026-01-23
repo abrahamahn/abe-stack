@@ -7,8 +7,16 @@ import { DemoTopBar } from '../DemoTopBar';
 
 import type { DemoTopBarProps } from '../DemoTopBar';
 
-// Mock useNavigate from @abe-stack/ui
+// Mock useNavigate and useSidePeek from @abe-stack/ui
 const mockNavigate = vi.fn();
+const mockToggle = vi.fn();
+const mockUseSidePeek = vi.fn().mockReturnValue({
+  isOpen: false,
+  peekPath: null,
+  open: vi.fn(),
+  close: vi.fn(),
+  toggle: mockToggle,
+});
 
 // Mock @abe-stack/core
 vi.mock('@abe-stack/core', () => ({
@@ -22,6 +30,7 @@ vi.mock('@abe-stack/core', () => ({
 // Mock @abe-stack/ui components and router
 vi.mock('@abe-stack/ui', () => ({
   useNavigate: (): typeof mockNavigate => mockNavigate,
+  useSidePeek: (): ReturnType<typeof mockUseSidePeek> => mockUseSidePeek(),
   Button: ({
     children,
     onClick,

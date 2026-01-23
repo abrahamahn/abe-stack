@@ -2,36 +2,44 @@
 import { unlockUserAccount, UserNotFoundError } from '@admin/service';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
+import type { DbClient } from '@database';
+
 // Mock dependencies
 vi.mock('../../../infrastructure/index.js', () => ({
   unlockAccount: vi.fn().mockResolvedValue(undefined),
-  users: { email: 'email' },
 }));
 
-vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((col, val) => ({ eq: [col, val] })),
-}));
+// Create mock db matching RawDb interface
+function createMockDb() {
+  return {
+    query: vi.fn().mockResolvedValue([]),
+    queryOne: vi.fn().mockResolvedValue(null),
+    execute: vi.fn().mockResolvedValue(0),
+    raw: vi.fn().mockResolvedValue([]),
+  };
+}
+
+type MockDb = ReturnType<typeof createMockDb>;
+
+function asMockDb(mock: MockDb): DbClient {
+  return mock as unknown as DbClient;
+}
 
 describe('Admin Service', () => {
-  const mockDb = {
-    query: {
-      users: {
-        findFirst: vi.fn(),
-      },
-    },
-  };
+  let mockDb: MockDb;
 
   beforeEach(() => {
+    mockDb = createMockDb();
     vi.clearAllMocks();
   });
 
   describe('unlockUserAccount', () => {
     test('should unlock account when user exists', async () => {
-      const mockUser = { id: 'user-123', email: 'test@example.com' };
-      mockDb.query.users.findFirst.mockResolvedValue(mockUser);
+      const mockUser = { id: 'user-123' };
+      mockDb.queryOne.mockResolvedValue(mockUser);
 
       const result = await unlockUserAccount(
-        mockDb as never,
+        asMockDb(mockDb),
         'test@example.com',
         'admin-456',
         'User verified identity via phone',
@@ -40,24 +48,29 @@ describe('Admin Service', () => {
       );
 
       expect(result).toEqual({ email: 'test@example.com' });
-      expect(mockDb.query.users.findFirst).toHaveBeenCalled();
+      expect(mockDb.queryOne).toHaveBeenCalled();
     });
 
     test('should throw UserNotFoundError when user does not exist', async () => {
-      mockDb.query.users.findFirst.mockResolvedValue(null);
+      mockDb.queryOne.mockResolvedValue(null);
 
       await expect(
-        unlockUserAccount(mockDb as never, 'nonexistent@example.com', 'admin-456', 'Test reason'),
+        unlockUserAccount(
+          asMockDb(mockDb),
+          'nonexistent@example.com',
+          'admin-456',
+          'Test reason',
+        ),
       ).rejects.toThrow(UserNotFoundError);
     });
 
     test('should call infraUnlockAccount with correct parameters including reason', async () => {
       const { unlockAccount } = await import('../../../infrastructure/index.js');
-      const mockUser = { id: 'user-123', email: 'test@example.com' };
-      mockDb.query.users.findFirst.mockResolvedValue(mockUser);
+      const mockUser = { id: 'user-123' };
+      mockDb.queryOne.mockResolvedValue(mockUser);
 
       await unlockUserAccount(
-        mockDb as never,
+        asMockDb(mockDb),
         'test@example.com',
         'admin-456',
         'Customer support ticket #12345',
@@ -66,7 +79,7 @@ describe('Admin Service', () => {
       );
 
       expect(unlockAccount).toHaveBeenCalledWith(
-        mockDb,
+        asMockDb(mockDb),
         'test@example.com',
         'admin-456',
         'Customer support ticket #12345',
@@ -76,11 +89,11 @@ describe('Admin Service', () => {
     });
 
     test('should work without optional parameters but require reason', async () => {
-      const mockUser = { id: 'user-123', email: 'test@example.com' };
-      mockDb.query.users.findFirst.mockResolvedValue(mockUser);
+      const mockUser = { id: 'user-123' };
+      mockDb.queryOne.mockResolvedValue(mockUser);
 
       const result = await unlockUserAccount(
-        mockDb as never,
+        asMockDb(mockDb),
         'test@example.com',
         'admin-456',
         'Password reset requested',
@@ -91,14 +104,19 @@ describe('Admin Service', () => {
 
     test('should pass reason through to infraUnlockAccount', async () => {
       const { unlockAccount } = await import('../../../infrastructure/index.js');
-      const mockUser = { id: 'user-123', email: 'test@example.com' };
-      mockDb.query.users.findFirst.mockResolvedValue(mockUser);
+      const mockUser = { id: 'user-123' };
+      mockDb.queryOne.mockResolvedValue(mockUser);
 
       const customReason = 'User locked out due to forgotten password, verified via email';
-      await unlockUserAccount(mockDb as never, 'test@example.com', 'admin-789', customReason);
+      await unlockUserAccount(
+        asMockDb(mockDb),
+        'test@example.com',
+        'admin-789',
+        customReason,
+      );
 
       expect(unlockAccount).toHaveBeenCalledWith(
-        mockDb,
+        asMockDb(mockDb),
         'test@example.com',
         'admin-789',
         customReason,

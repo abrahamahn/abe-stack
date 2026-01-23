@@ -1,0 +1,186 @@
+name: Infrastructure Test
+
+on:
+  push:
+    paths:
+      - 'infra/**'
+  pull_request:
+    paths:
+      - 'infra/**'
+  workflow_dispatch:
+    inputs:
+      provider:
+        description: 'Cloud provider to test'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - digitalocean
+          - gcp
+
+permissions:
+  contents: read
+
+jobs:
+  test-infrastructure:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        provider: ${{ fromJSON(inputs.provider == 'all' && '["digitalocean", "gcp"]' || format('["{0}"]', inputs.provider || 'digitalocean')) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.0"
+
+      - name: Check Terraform Formatting
+        run: |
+          cd infra
+          echo "🔍 Checking Terraform formatting..."
+          if terraform fmt -check -recursive; then
+            echo "✅ Terraform files are properly formatted"
+          else
+            echo "❌ Terraform files need formatting. Run 'terraform fmt -recursive' in the infra directory."
+            exit 1
+          fi
+
+      - name: Validate Terraform Configuration
+        run: |
+          cd infra
+          echo "🔧 Validating Terraform configuration..."
+          terraform init -backend=false
+          if terraform validate; then
+            echo "✅ Terraform configuration is valid"
+          else
+            echo "❌ Terraform configuration validation failed"
+            exit 1
+          fi
+
+      - name: Test Infrastructure Scripts
+        run: |
+          cd infra
+          echo "🧪 Testing infrastructure scripts..."
+
+          # Test the validation script
+          if ./test-config.sh; then
+            echo "✅ Infrastructure test script passed"
+          else
+            echo "❌ Infrastructure test script failed"
+            exit 1
+          fi
+
+      - name: Test Provider-Specific Configuration
+        run: |
+          cd infra/${{ matrix.provider }}
+          echo "🔧 Testing ${{ matrix.provider }} configuration..."
+
+          # Initialize terraform for this provider
+          terraform init -backend=false
+
+          # Test with minimal variables for validation
+          cat > test.tfvars << EOF
+          environment = "test"
+          domain = "test.example.com"
+          ssh_public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7vbvJ... test-key"
+          app_name = "abe-stack-test"
+          app_port = 3000
+          EOF
+
+          # Add provider-specific test variables
+          if [ "${{ matrix.provider }}" = "digitalocean" ]; then
+            cat >> test.tfvars << EOF
+            region = "nyc1"
+            instance_size = "s-1vcpu-1gb"
+            enable_managed_database = false
+            EOF
+          elif [ "${{ matrix.provider }}" = "gcp" ]; then
+            cat >> test.tfvars << EOF
+            project_id = "test-project-123456"
+            region = "us-central1"
+            zone = "us-central1-a"
+            instance_size = "e2-small"
+            enable_managed_database = false
+            EOF
+          fi
+
+          # Test terraform plan with test variables
+          if terraform plan -var-file=test.tfvars -out=tfplan-test >/dev/null 2>&1; then
+            echo "✅ ${{ matrix.provider }} terraform plan succeeded"
+            # Clean up test plan
+            rm -f tfplan-test
+          else
+            echo "❌ ${{ matrix.provider }} terraform plan failed"
+            exit 1
+          fi
+
+          # Clean up test files
+          rm -f test.tfvars
+
+      - name: Check for Required Documentation
+        run: |
+          cd infra
+          echo "📚 Checking documentation completeness..."
+
+          # Check for README
+          if [ -f "README.md" ]; then
+            echo "✅ Infrastructure README exists"
+          else
+            echo "❌ Infrastructure README.md is missing"
+            exit 1
+          fi
+
+          # Check for example configuration
+          if [ -f "terraform.tfvars.example" ]; then
+            echo "✅ Terraform example configuration exists"
+          else
+            echo "❌ terraform.tfvars.example is missing"
+            exit 1
+          fi
+
+      - name: Validate Terraform Module Structure
+        run: |
+          echo "🏗️ Validating module structure..."
+
+          for provider in digitalocean gcp; do
+            if [ -d "infra/$provider" ]; then
+              echo "Checking $provider module..."
+
+              # Check for required files
+              required_files=("main.tf" "variables.tf" "outputs.tf")
+              for file in "${required_files[@]}"; do
+                if [ -f "infra/$provider/$file" ]; then
+                  echo "✅ $provider/$file exists"
+                else
+                  echo "❌ $provider/$file is missing"
+                  exit 1
+                fi
+              done
+            fi
+          done
+
+      - name: Infrastructure Test Summary
+        if: success()
+        run: |
+          echo "## ✅ Infrastructure Tests Passed!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Tests completed:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Terraform formatting check" >> $GITHUB_STEP_SUMMARY
+          echo "- Terraform validation" >> $GITHUB_STEP_SUMMARY
+          echo "- Configuration scripts test" >> $GITHUB_STEP_SUMMARY
+          echo "- Provider-specific configuration tests" >> $GITHUB_STEP_SUMMARY
+          echo "- Documentation completeness check" >> $GITHUB_STEP_SUMMARY
+          echo "- Module structure validation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🎉 All infrastructure tests passed! Ready for deployment." >> $GITHUB_STEP_SUMMARY
+
+      - name: Infrastructure Test Summary (Failed)
+        if: failure()
+        run: |
+          echo "## ❌ Infrastructure Tests Failed!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Please review the failed tests above and fix any issues before deploying infrastructure." >> $GITHUB_STEP_SUMMARY

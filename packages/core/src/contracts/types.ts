@@ -6,13 +6,21 @@
  * Used by both contracts and SDK for type inference.
  */
 
-import type { z } from 'zod';
-
 // ============================================================================
 // Core Types
 // ============================================================================
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+
+/**
+ * Schema interface for validation.
+ * Replaces zod schemas with a simple interface that supports parse/safeParse.
+ */
+export interface Schema<T> {
+  parse: (data: unknown) => T;
+  safeParse: (data: unknown) => { success: true; data: T } | { success: false; error: Error };
+  _type: T; // Phantom type for inference
+}
 
 /**
  * Definition of a single API endpoint.
@@ -21,9 +29,9 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 export interface EndpointDef<TBody = unknown, TResponse = unknown, TQuery = unknown> {
   method: HttpMethod;
   path: string;
-  body?: z.ZodType<TBody>;
-  query?: z.ZodType<TQuery>;
-  responses: Record<number, z.ZodType<TResponse>>;
+  body?: Schema<TBody>;
+  query?: Schema<TQuery>;
+  responses: Record<number, Schema<TResponse>>;
   summary?: string;
 }
 
@@ -35,12 +43,12 @@ export interface EndpointDef<TBody = unknown, TResponse = unknown, TQuery = unkn
  * Extract the success response type (200 or 201) from an endpoint definition.
  */
 export type SuccessResponse<E extends EndpointDef> = E['responses'] extends {
-  200: z.ZodType<infer R>;
+  200: Schema<infer R>;
 }
   ? R
-  : E['responses'] extends { 201: z.ZodType<infer R> }
+  : E['responses'] extends { 201: Schema<infer R> }
     ? R
-    : E['responses'] extends { 302: z.ZodType<infer R> }
+    : E['responses'] extends { 302: Schema<infer R> }
       ? R
       : unknown;
 
@@ -48,13 +56,13 @@ export type SuccessResponse<E extends EndpointDef> = E['responses'] extends {
  * Extract the request body type from an endpoint definition.
  */
 export type RequestBody<E extends EndpointDef> =
-  E['body'] extends z.ZodType<infer B> ? B : undefined;
+  E['body'] extends Schema<infer B> ? B : undefined;
 
 /**
  * Extract the query parameters type from an endpoint definition.
  */
 export type QueryParams<E extends EndpointDef> =
-  E['query'] extends z.ZodType<infer Q> ? Q : undefined;
+  E['query'] extends Schema<infer Q> ? Q : undefined;
 
 // ============================================================================
 // Contract Types
@@ -69,3 +77,42 @@ export type Contract = Record<string, EndpointDef>;
  * A router combines multiple contracts into a namespace.
  */
 export type ContractRouter = Record<string, Contract>;
+
+// ============================================================================
+// SafeParse Result Type
+// ============================================================================
+
+/**
+ * Result type for safeParse operations.
+ */
+export type SafeParseResult<T> =
+  | { success: true; data: T }
+  | { success: false; error: Error };
+
+// ============================================================================
+// Schema Factory Helpers
+// ============================================================================
+
+/**
+ * Create a schema from a validation function.
+ * This is the building block for all manual validation schemas.
+ */
+export function createSchema<T>(validate: (data: unknown) => T): Schema<T> {
+  return {
+    parse: validate,
+    safeParse: (data: unknown): SafeParseResult<T> => {
+      try {
+        const result = validate(data);
+        return { success: true, data: result };
+      } catch (e) {
+        return { success: false, error: e instanceof Error ? e : new Error(String(e)) };
+      }
+    },
+    _type: undefined as unknown as T,
+  };
+}
+
+/**
+ * Infer the type from a schema (similar to z.infer).
+ */
+export type InferSchema<S> = S extends Schema<infer T> ? T : never;

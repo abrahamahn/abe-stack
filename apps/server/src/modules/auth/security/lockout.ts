@@ -5,14 +5,22 @@
  * Handles login attempt tracking, progressive delays, and account lockout.
  */
 
-import { loginAttempts, users } from '@database';
+import {
+  and,
+  eq,
+  gte,
+  select,
+  selectCount,
+  insert,
+  LOGIN_ATTEMPTS_TABLE,
+  USERS_TABLE,
+  type DbClient,
+} from '@database';
 import { MAX_PROGRESSIVE_DELAY_MS, PROGRESSIVE_DELAY_WINDOW_MS } from '@shared/constants';
-import { and, count, desc, eq, gte } from 'drizzle-orm';
 
 import { logAccountUnlockedEvent } from './events';
 
 import type { LockoutConfig, LockoutStatus } from './types';
-import type { DbClient } from '@database';
 
 /**
  * Count failed login attempts for an email within a time window
@@ -26,18 +34,13 @@ async function countFailedAttempts(
   email: string,
   windowStart: Date,
 ): Promise<number> {
-  const [result] = await db
-    .select({ count: count() })
-    .from(loginAttempts)
-    .where(
-      and(
-        eq(loginAttempts.email, email),
-        eq(loginAttempts.success, false),
-        gte(loginAttempts.createdAt, windowStart),
-      ),
-    );
+  const result = await db.queryOne<{ count: number }>(
+    selectCount(LOGIN_ATTEMPTS_TABLE)
+      .where(and(eq('email', email), eq('success', false), gte('created_at', windowStart)))
+      .toSql(),
+  );
 
-  return result?.count || 0;
+  return result?.count ?? 0;
 }
 
 /**
@@ -51,13 +54,17 @@ export async function logLoginAttempt(
   userAgent?: string,
   failureReason?: string,
 ): Promise<void> {
-  await db.insert(loginAttempts).values({
-    email,
-    success,
-    ipAddress: ipAddress || null,
-    userAgent: userAgent || null,
-    failureReason: failureReason || null,
-  });
+  await db.execute(
+    insert(LOGIN_ATTEMPTS_TABLE)
+      .values({
+        email,
+        success,
+        ip_address: ipAddress || null,
+        user_agent: userAgent || null,
+        failure_reason: failureReason || null,
+      })
+      .toSql(),
+  );
 }
 
 /**
@@ -153,16 +160,19 @@ export async function getAccountLockoutStatus(
   }
 
   // Find the most recent failed attempt to calculate lockout expiration
-  const [mostRecentAttempt] = await db
-    .select({ createdAt: loginAttempts.createdAt })
-    .from(loginAttempts)
-    .where(and(eq(loginAttempts.email, email), eq(loginAttempts.success, false)))
-    .orderBy(desc(loginAttempts.createdAt))
-    .limit(1);
+  type AttemptRow = Record<string, unknown> & { created_at: Date };
+  const mostRecentAttempt = await db.queryOne<AttemptRow>(
+    select(LOGIN_ATTEMPTS_TABLE)
+      .columns('created_at')
+      .where(and(eq('email', email), eq('success', false)))
+      .orderBy('created_at', 'desc')
+      .limit(1)
+      .toSql(),
+  );
 
   if (mostRecentAttempt) {
     const lockedUntil = new Date(
-      mostRecentAttempt.createdAt.getTime() + lockoutConfig.lockoutDurationMs,
+      mostRecentAttempt.created_at.getTime() + lockoutConfig.lockoutDurationMs,
     );
     const remainingTime = Math.max(0, lockedUntil.getTime() - Date.now());
 
@@ -204,19 +214,24 @@ export async function unlockAccount(
   userAgent?: string,
 ): Promise<void> {
   // Get user info for logging
-  const user = await db.query.users.findFirst({
-    where: eq(users.email, email),
-  });
+  type UserRow = Record<string, unknown> & { id: string };
+  const user = await db.queryOne<UserRow>(
+    select(USERS_TABLE).columns('id').where(eq('email', email)).limit(1).toSql(),
+  );
 
   // Log a manual unlock event
   // The success: true entry will reset the failed attempt counter
-  await db.insert(loginAttempts).values({
-    email,
-    success: true,
-    failureReason: `Unlocked by admin ${adminUserId}: ${reason}`,
-    ipAddress: ipAddress || null,
-    userAgent: userAgent || 'Admin Console',
-  });
+  await db.execute(
+    insert(LOGIN_ATTEMPTS_TABLE)
+      .values({
+        email,
+        success: true,
+        failure_reason: `Unlocked by admin ${adminUserId}: ${reason}`,
+        ip_address: ipAddress || null,
+        user_agent: userAgent || 'Admin Console',
+      })
+      .toSql(),
+  );
 
   // Log security event
   if (user) {

@@ -9,7 +9,7 @@ import { ProtectedRoute } from '../ProtectedRoute';
 describe('ProtectedRoute', () => {
   describe('loading state', () => {
     it('should show default loading UI when isLoading is true', () => {
-      render(
+      const { container } = render(
         <MemoryRouter>
           <ProtectedRoute isAuthenticated={false} isLoading={true}>
             <div>Protected Content</div>
@@ -17,7 +17,9 @@ describe('ProtectedRoute', () => {
         </MemoryRouter>,
       );
 
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      // Check for the loading container with spinner (default UI doesn't have text)
+      expect(container.querySelector('.loading-container')).toBeInTheDocument();
+      expect(container.querySelector('.spinner')).toBeInTheDocument();
       expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     });
 
@@ -35,7 +37,8 @@ describe('ProtectedRoute', () => {
       );
 
       expect(screen.getByText('Custom Loading')).toBeInTheDocument();
-      expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
+      // Custom loading replaces the default loading container
+      expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     });
   });
 
@@ -126,7 +129,7 @@ describe('ProtectedRoute', () => {
 
   describe('edge cases', () => {
     it('should prioritize loading state over authenticated state', () => {
-      render(
+      const { container } = render(
         <MemoryRouter>
           <ProtectedRoute isAuthenticated={true} isLoading={true}>
             <div>Protected Content</div>
@@ -134,7 +137,9 @@ describe('ProtectedRoute', () => {
         </MemoryRouter>,
       );
 
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      // Check for the loading container with spinner (default UI doesn't have text)
+      expect(container.querySelector('.loading-container')).toBeInTheDocument();
+      expect(container.querySelector('.spinner')).toBeInTheDocument();
       expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     });
   });

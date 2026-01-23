@@ -116,4 +116,92 @@ export interface QueueStore {
 
   /** Clear all completed tasks older than given date */
   clearCompleted(before: string): Promise<number>;
+
+  /** List jobs with filtering and pagination (for monitoring) */
+  listJobs?(options: JobListOptions): Promise<JobListResult>;
+
+  /** Get detailed job information by ID */
+  getJobDetails?(taskId: string): Promise<JobDetails | null>;
+
+  /** Get queue statistics */
+  getQueueStats?(): Promise<QueueStats>;
+
+  /** Retry a failed job */
+  retryJob?(taskId: string): Promise<boolean>;
+
+  /** Cancel a pending or processing job */
+  cancelJob?(taskId: string): Promise<boolean>;
+
+  /** Move job to dead letter queue */
+  moveToDeadLetter?(taskId: string, reason: string): Promise<boolean>;
+}
+
+// ============================================================================
+// Job Monitoring Types
+// ============================================================================
+
+/**
+ * Job status values
+ */
+export type JobStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'dead_letter' | 'cancelled';
+
+/**
+ * Detailed job information for monitoring
+ */
+export interface JobDetails {
+  id: string;
+  name: string;
+  args: unknown;
+  status: JobStatus;
+  attempts: number;
+  maxAttempts: number;
+  scheduledAt: string;
+  createdAt: string;
+  completedAt: string | null;
+  durationMs: number | null;
+  error: TaskError | null;
+  deadLetterReason?: string | null;
+}
+
+/**
+ * Options for listing jobs
+ */
+export interface JobListOptions {
+  status?: JobStatus;
+  name?: string;
+  page: number;
+  limit: number;
+  sortBy?: 'createdAt' | 'scheduledAt' | 'completedAt';
+  sortOrder?: 'asc' | 'desc';
+}
+
+/**
+ * Paginated job list result
+ */
+export interface JobListResult {
+  data: JobDetails[];
+  total: number;
+  page: number;
+  limit: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+  totalPages: number;
+}
+
+/**
+ * Queue statistics for monitoring dashboard
+ */
+export interface QueueStats {
+  pending: number;
+  processing: number;
+  completed: number;
+  failed: number;
+  deadLetter: number;
+  total: number;
+  /** Failure rate as a percentage (0-100) */
+  failureRate: number;
+  /** Jobs processed in the last hour */
+  recentCompleted: number;
+  /** Jobs failed in the last hour */
+  recentFailed: number;
 }

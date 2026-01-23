@@ -20,7 +20,7 @@ import type {
  * Push notification provider interface
  *
  * Implementations handle the actual sending of push notifications
- * to different push services (Web Push, FCM, APNs, etc.)
+ * to different push services (FCM, APNs, etc.)
  */
 export interface PushNotificationProvider {
   /** Provider name for identification */
@@ -62,7 +62,7 @@ export interface PushNotificationProvider {
   isConfigured(): boolean;
 
   /**
-   * Get the public key for client subscription (VAPID for Web Push)
+   * Get the public key for client subscription (if applicable)
    *
    * @returns Public key string or undefined if not applicable
    */
@@ -96,18 +96,6 @@ export interface SendOptions {
 }
 
 /**
- * VAPID configuration for Web Push
- */
-export interface VapidConfig {
-  /** VAPID public key (base64url encoded) */
-  publicKey: string;
-  /** VAPID private key (base64url encoded) */
-  privateKey: string;
-  /** Contact email for VAPID */
-  subject: string;
-}
-
-/**
  * FCM configuration
  */
 export interface FcmConfig {
@@ -120,15 +108,10 @@ export interface FcmConfig {
 /**
  * Provider configuration union type
  */
-export type ProviderConfig =
-  | {
-      type: 'web-push';
-      vapid: VapidConfig;
-    }
-  | {
-      type: 'fcm';
-      fcm: FcmConfig;
-    };
+export type ProviderConfig = {
+  type: 'fcm';
+  fcm: FcmConfig;
+};
 
 // ============================================================================
 // Factory Types
@@ -138,8 +121,6 @@ export type ProviderConfig =
  * Options for creating notification providers
  */
 export interface NotificationFactoryOptions {
-  /** Web Push VAPID configuration */
-  vapid?: VapidConfig;
   /** FCM configuration */
   fcm?: FcmConfig;
   /** Default TTL for notifications (seconds) */
@@ -150,14 +131,8 @@ export interface NotificationFactoryOptions {
  * Notification service aggregating multiple providers
  */
 export interface NotificationService {
-  /** Get the Web Push provider */
-  getWebPushProvider(): PushNotificationProvider | undefined;
-
   /** Get the FCM provider */
   getFcmProvider(): PushNotificationProvider | undefined;
-
-  /** Get the Web Push public key for client subscription */
-  getVapidPublicKey(): string | undefined;
 
   /** Check if any provider is configured */
   isConfigured(): boolean;

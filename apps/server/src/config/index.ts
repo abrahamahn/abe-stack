@@ -39,3 +39,7 @@ export type {
   S3StorageConfig,
 } from './storage.config';
 export { loadStorageConfig } from './storage.config';
+
+// Billing config
+export type { BillingConfig } from './billing.config';
+export { loadBillingConfig, validateBillingConfig } from './billing.config';

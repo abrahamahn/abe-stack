@@ -39,7 +39,12 @@
 
 // Types
 export type {
+  JobDetails,
+  JobListOptions,
+  JobListResult,
+  JobStatus,
   QueueConfig,
+  QueueStats,
   QueueStore,
   Task,
   TaskError,

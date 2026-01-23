@@ -9,7 +9,7 @@ import {
   validateSchema,
 } from '../validation';
 
-import type { DbClient } from '../../client';
+import type { RawDb } from '@abe-stack/db';
 
 // ============================================================================
 // Mock Helpers
@@ -19,12 +19,21 @@ interface MockTableRow {
   tablename: string;
 }
 
-function createMockDb(tables: string[]): DbClient {
+function createMockDb(tables: string[]) {
   const rows: MockTableRow[] = tables.map((tablename) => ({ tablename }));
 
   return {
-    execute: vi.fn().mockResolvedValue(rows),
-  } as unknown as DbClient;
+    query: vi.fn().mockResolvedValue([]),
+    queryOne: vi.fn().mockResolvedValue(null),
+    execute: vi.fn().mockResolvedValue(0),
+    raw: vi.fn().mockResolvedValue(rows),
+  };
+}
+
+type MockDb = ReturnType<typeof createMockDb>;
+
+function asMockDb(mock: MockDb): RawDb {
+  return mock as unknown as RawDb;
 }
 
 // ============================================================================
@@ -118,7 +127,7 @@ describe('getExistingTables', () => {
   test('should return list of existing table names', async () => {
     const mockDb = createMockDb(['users', 'posts', 'comments']);
 
-    const result = await getExistingTables(mockDb);
+    const result = await getExistingTables(asMockDb(mockDb));
 
     expect(result).toEqual(['users', 'posts', 'comments']);
   });
@@ -126,7 +135,7 @@ describe('getExistingTables', () => {
   test('should return empty array when no tables exist', async () => {
     const mockDb = createMockDb([]);
 
-    const result = await getExistingTables(mockDb);
+    const result = await getExistingTables(asMockDb(mockDb));
 
     expect(result).toEqual([]);
   });
@@ -134,35 +143,24 @@ describe('getExistingTables', () => {
   test('should execute SQL query against pg_tables', async () => {
     const mockDb = createMockDb(['users']);
 
-    await getExistingTables(mockDb);
+    await getExistingTables(asMockDb(mockDb));
 
-    expect(mockDb.execute).toHaveBeenCalledTimes(1);
-    // The function uses sql tagged template literal
+    expect(mockDb.raw).toHaveBeenCalledTimes(1);
   });
 
   test('should handle database with many tables', async () => {
     const tables = Array.from({ length: 50 }, (_, i) => `table_${i}`);
     const mockDb = createMockDb(tables);
 
-    const result = await getExistingTables(mockDb);
+    const result = await getExistingTables(asMockDb(mockDb));
 
     expect(result).toHaveLength(50);
   });
 
   test('should handle array-like result from postgres-js', async () => {
-    // Drizzle with postgres-js returns array directly
-    // The function casts this to Array<{ tablename: string }>
-    const mockDb = {
-      execute: vi
-        .fn()
-        .mockResolvedValue([
-          { tablename: 'users' },
-          { tablename: 'posts' },
-          { tablename: 'comments' },
-        ]),
-    } as unknown as DbClient;
+    const mockDb = createMockDb(['users', 'posts', 'comments']);
 
-    const result = await getExistingTables(mockDb);
+    const result = await getExistingTables(asMockDb(mockDb));
 
     expect(result).toEqual(['users', 'posts', 'comments']);
   });
@@ -176,7 +174,7 @@ describe('validateSchema', () => {
   test('should return valid when all required tables exist', async () => {
     const mockDb = createMockDb([...REQUIRED_TABLES]);
 
-    const result = await validateSchema(mockDb);
+    const result = await validateSchema(asMockDb(mockDb));
 
     expect(result.valid).toBe(true);
     expect(result.missingTables).toEqual([]);
@@ -187,7 +185,7 @@ describe('validateSchema', () => {
     const existingTables = ['users', 'refresh_tokens'];
     const mockDb = createMockDb(existingTables);
 
-    const result = await validateSchema(mockDb);
+    const result = await validateSchema(asMockDb(mockDb));
 
     expect(result.valid).toBe(false);
     expect(result.missingTables.length).toBeGreaterThan(0);
@@ -196,7 +194,7 @@ describe('validateSchema', () => {
   test('should correctly identify missing tables', async () => {
     const mockDb = createMockDb(['users']);
 
-    const result = await validateSchema(mockDb);
+    const result = await validateSchema(asMockDb(mockDb));
 
     expect(result.missingTables).toContain('refresh_tokens');
     expect(result.missingTables).toContain('login_attempts');
@@ -206,7 +204,7 @@ describe('validateSchema', () => {
   test('should include extra tables in existingTables', async () => {
     const mockDb = createMockDb([...REQUIRED_TABLES, 'extra_table', 'another_table']);
 
-    const result = await validateSchema(mockDb);
+    const result = await validateSchema(asMockDb(mockDb));
 
     expect(result.valid).toBe(true);
     expect(result.existingTables).toContain('extra_table');
@@ -216,7 +214,7 @@ describe('validateSchema', () => {
   test('should return invalid when database is empty', async () => {
     const mockDb = createMockDb([]);
 
-    const result = await validateSchema(mockDb);
+    const result = await validateSchema(asMockDb(mockDb));
 
     expect(result.valid).toBe(false);
     expect(result.missingTables).toEqual([...REQUIRED_TABLES]);
@@ -228,7 +226,7 @@ describe('validateSchema', () => {
     const partialTables = REQUIRED_TABLES.slice(0, 3);
     const mockDb = createMockDb([...partialTables]);
 
-    const result = await validateSchema(mockDb);
+    const result = await validateSchema(asMockDb(mockDb));
 
     expect(result.valid).toBe(false);
     expect(result.missingTables.length).toBe(REQUIRED_TABLES.length - 3);
@@ -243,20 +241,20 @@ describe('requireValidSchema', () => {
   test('should resolve when schema is valid', async () => {
     const mockDb = createMockDb([...REQUIRED_TABLES]);
 
-    await expect(requireValidSchema(mockDb)).resolves.toBeUndefined();
+    await expect(requireValidSchema(asMockDb(mockDb))).resolves.toBeUndefined();
   });
 
   test('should throw SchemaValidationError when tables are missing', async () => {
     const mockDb = createMockDb(['users']);
 
-    await expect(requireValidSchema(mockDb)).rejects.toThrow(SchemaValidationError);
+    await expect(requireValidSchema(asMockDb(mockDb))).rejects.toThrow(SchemaValidationError);
   });
 
   test('should include missing tables in error', async () => {
     const mockDb = createMockDb(['users']);
 
     try {
-      await requireValidSchema(mockDb);
+      await requireValidSchema(asMockDb(mockDb));
       expect.fail('Should have thrown');
     } catch (error) {
       expect(error).toBeInstanceOf(SchemaValidationError);
@@ -270,10 +268,10 @@ describe('requireValidSchema', () => {
   test('should throw when database is completely empty', async () => {
     const mockDb = createMockDb([]);
 
-    await expect(requireValidSchema(mockDb)).rejects.toThrow(SchemaValidationError);
+    await expect(requireValidSchema(asMockDb(mockDb))).rejects.toThrow(SchemaValidationError);
 
     try {
-      await requireValidSchema(mockDb);
+      await requireValidSchema(asMockDb(mockDb));
     } catch (error) {
       if (error instanceof SchemaValidationError) {
         expect(error.missingTables).toEqual([...REQUIRED_TABLES]);
@@ -284,6 +282,6 @@ describe('requireValidSchema', () => {
   test('should not throw when extra tables exist', async () => {
     const mockDb = createMockDb([...REQUIRED_TABLES, 'extra_1', 'extra_2']);
 
-    await expect(requireValidSchema(mockDb)).resolves.toBeUndefined();
+    await expect(requireValidSchema(asMockDb(mockDb))).resolves.toBeUndefined();
   });
 });

@@ -5,141 +5,387 @@
  * Authentication-related schemas and API contract definitions.
  */
 
-import { z } from 'zod';
-
-
 import { emailSchema, errorResponseSchema, nameSchema, passwordSchema } from './common';
-import { userSchema } from './users';
-
-import type { Contract } from './types';
+import { createSchema, type Contract, type Schema } from './types';
+import { userSchema, type User } from './users';
 
 // ============================================================================
 // Request Schemas
 // ============================================================================
 
-export const loginRequestSchema = z.object({
-  email: emailSchema,
-  password: passwordSchema,
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export const loginRequestSchema: Schema<LoginRequest> = createSchema((data: unknown) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid login request');
+  }
+  const obj = data as Record<string, unknown>;
+  return {
+    email: emailSchema.parse(obj.email),
+    password: passwordSchema.parse(obj.password),
+  };
 });
 
-export const registerRequestSchema = z.object({
-  email: emailSchema,
-  name: nameSchema,
-  password: passwordSchema,
+export interface RegisterRequest {
+  email: string;
+  name?: string;
+  password: string;
+}
+
+export const registerRequestSchema: Schema<RegisterRequest> = createSchema((data: unknown) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid register request');
+  }
+  const obj = data as Record<string, unknown>;
+  return {
+    email: emailSchema.parse(obj.email),
+    name: nameSchema.parse(obj.name),
+    password: passwordSchema.parse(obj.password),
+  };
 });
 
-export const emailVerificationRequestSchema = z.object({
-  token: z.string(),
-});
+export interface EmailVerificationRequest {
+  token: string;
+}
 
-export const forgotPasswordRequestSchema = z.object({
-  email: emailSchema,
-});
+export const emailVerificationRequestSchema: Schema<EmailVerificationRequest> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid email verification request');
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj.token !== 'string') {
+      throw new Error('Token must be a string');
+    }
+    return { token: obj.token };
+  },
+);
 
-export const resendVerificationRequestSchema = z.object({
-  email: emailSchema,
-});
+export interface ForgotPasswordRequest {
+  email: string;
+}
 
-export const resetPasswordRequestSchema = z.object({
-  token: z.string(),
-  password: passwordSchema,
-});
+export const forgotPasswordRequestSchema: Schema<ForgotPasswordRequest> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid forgot password request');
+    }
+    const obj = data as Record<string, unknown>;
+    return { email: emailSchema.parse(obj.email) };
+  },
+);
 
-export const setPasswordRequestSchema = z.object({
-  password: passwordSchema,
-});
+export interface ResendVerificationRequest {
+  email: string;
+}
+
+export const resendVerificationRequestSchema: Schema<ResendVerificationRequest> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid resend verification request');
+    }
+    const obj = data as Record<string, unknown>;
+    return { email: emailSchema.parse(obj.email) };
+  },
+);
+
+export interface ResetPasswordRequest {
+  token: string;
+  password: string;
+}
+
+export const resetPasswordRequestSchema: Schema<ResetPasswordRequest> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid reset password request');
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj.token !== 'string') {
+      throw new Error('Token must be a string');
+    }
+    return {
+      token: obj.token,
+      password: passwordSchema.parse(obj.password),
+    };
+  },
+);
+
+export interface SetPasswordRequest {
+  password: string;
+}
+
+export const setPasswordRequestSchema: Schema<SetPasswordRequest> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid set password request');
+    }
+    const obj = data as Record<string, unknown>;
+    return { password: passwordSchema.parse(obj.password) };
+  },
+);
 
 // ============================================================================
 // Magic Link Schemas
 // ============================================================================
 
-export const magicLinkRequestSchema = z.object({
-  email: emailSchema,
+export interface MagicLinkRequest {
+  email: string;
+}
+
+export const magicLinkRequestSchema: Schema<MagicLinkRequest> = createSchema((data: unknown) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid magic link request');
+  }
+  const obj = data as Record<string, unknown>;
+  return { email: emailSchema.parse(obj.email) };
 });
 
-export const magicLinkVerifySchema = z.object({
-  token: z.string().min(1, 'Token is required'),
-});
+export interface MagicLinkVerifyRequest {
+  token: string;
+}
+
+export const magicLinkVerifySchema: Schema<MagicLinkVerifyRequest> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid magic link verify request');
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj.token !== 'string' || obj.token.length < 1) {
+      throw new Error('Token is required');
+    }
+    return { token: obj.token };
+  },
+);
 
 // ============================================================================
 // Response Schemas
 // ============================================================================
 
-export const authResponseSchema = z.object({
-  token: z.string(),
-  user: userSchema,
+export interface AuthResponse {
+  token: string;
+  user: User;
+}
+
+export const authResponseSchema: Schema<AuthResponse> = createSchema((data: unknown) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid auth response');
+  }
+  const obj = data as Record<string, unknown>;
+  if (typeof obj.token !== 'string') {
+    throw new Error('Token must be a string');
+  }
+  return {
+    token: obj.token,
+    user: userSchema.parse(obj.user),
+  };
 });
 
-export const registerResponseSchema = z.object({
-  status: z.literal('pending_verification'),
-  message: z.string(),
-  email: emailSchema,
+export interface RegisterResponse {
+  status: 'pending_verification';
+  message: string;
+  email: string;
+}
+
+export const registerResponseSchema: Schema<RegisterResponse> = createSchema((data: unknown) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid register response');
+  }
+  const obj = data as Record<string, unknown>;
+  if (obj.status !== 'pending_verification') {
+    throw new Error('Invalid status');
+  }
+  if (typeof obj.message !== 'string') {
+    throw new Error('Message must be a string');
+  }
+  return {
+    status: 'pending_verification',
+    message: obj.message,
+    email: emailSchema.parse(obj.email),
+  };
 });
 
-export const refreshResponseSchema = z.object({
-  token: z.string(),
+export interface RefreshResponse {
+  token: string;
+}
+
+export const refreshResponseSchema: Schema<RefreshResponse> = createSchema((data: unknown) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid refresh response');
+  }
+  const obj = data as Record<string, unknown>;
+  if (typeof obj.token !== 'string') {
+    throw new Error('Token must be a string');
+  }
+  return { token: obj.token };
 });
 
-export const logoutResponseSchema = z.object({
-  message: z.string(),
+export interface LogoutResponse {
+  message: string;
+}
+
+export const logoutResponseSchema: Schema<LogoutResponse> = createSchema((data: unknown) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid logout response');
+  }
+  const obj = data as Record<string, unknown>;
+  if (typeof obj.message !== 'string') {
+    throw new Error('Message must be a string');
+  }
+  return { message: obj.message };
 });
 
-export const emailVerificationResponseSchema = z.object({
-  verified: z.boolean(),
-  token: z.string(),
-  user: userSchema,
-});
+export interface EmailVerificationResponse {
+  verified: boolean;
+  token: string;
+  user: User;
+}
 
-export const forgotPasswordResponseSchema = z.object({
-  message: z.string(),
-});
+export const emailVerificationResponseSchema: Schema<EmailVerificationResponse> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid email verification response');
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj.verified !== 'boolean') {
+      throw new Error('Verified must be a boolean');
+    }
+    if (typeof obj.token !== 'string') {
+      throw new Error('Token must be a string');
+    }
+    return {
+      verified: obj.verified,
+      token: obj.token,
+      user: userSchema.parse(obj.user),
+    };
+  },
+);
 
-export const resendVerificationResponseSchema = z.object({
-  message: z.string(),
-});
+export interface ForgotPasswordResponse {
+  message: string;
+}
 
-export const resetPasswordResponseSchema = z.object({
-  message: z.string(),
-});
+export const forgotPasswordResponseSchema: Schema<ForgotPasswordResponse> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid forgot password response');
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj.message !== 'string') {
+      throw new Error('Message must be a string');
+    }
+    return { message: obj.message };
+  },
+);
 
-export const setPasswordResponseSchema = z.object({
-  message: z.string(),
-});
+export interface ResendVerificationResponse {
+  message: string;
+}
 
-export const magicLinkRequestResponseSchema = z.object({
-  success: z.boolean(),
-  message: z.string(),
-});
+export const resendVerificationResponseSchema: Schema<ResendVerificationResponse> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid resend verification response');
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj.message !== 'string') {
+      throw new Error('Message must be a string');
+    }
+    return { message: obj.message };
+  },
+);
 
-export const magicLinkVerifyResponseSchema = z.object({
-  token: z.string(),
-  user: userSchema,
-});
+export interface ResetPasswordResponse {
+  message: string;
+}
+
+export const resetPasswordResponseSchema: Schema<ResetPasswordResponse> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid reset password response');
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj.message !== 'string') {
+      throw new Error('Message must be a string');
+    }
+    return { message: obj.message };
+  },
+);
+
+export interface SetPasswordResponse {
+  message: string;
+}
+
+export const setPasswordResponseSchema: Schema<SetPasswordResponse> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid set password response');
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj.message !== 'string') {
+      throw new Error('Message must be a string');
+    }
+    return { message: obj.message };
+  },
+);
+
+export interface MagicLinkRequestResponse {
+  success: boolean;
+  message: string;
+}
+
+export const magicLinkRequestResponseSchema: Schema<MagicLinkRequestResponse> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid magic link request response');
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj.success !== 'boolean') {
+      throw new Error('Success must be a boolean');
+    }
+    if (typeof obj.message !== 'string') {
+      throw new Error('Message must be a string');
+    }
+    return { success: obj.success, message: obj.message };
+  },
+);
+
+export interface MagicLinkVerifyResponse {
+  token: string;
+  user: User;
+}
+
+export const magicLinkVerifyResponseSchema: Schema<MagicLinkVerifyResponse> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid magic link verify response');
+    }
+    const obj = data as Record<string, unknown>;
+    if (typeof obj.token !== 'string') {
+      throw new Error('Token must be a string');
+    }
+    return {
+      token: obj.token,
+      user: userSchema.parse(obj.user),
+    };
+  },
+);
 
 // ============================================================================
-// Types
+// Empty Body Schema (for endpoints with no body)
 // ============================================================================
 
-export type LoginRequest = z.infer<typeof loginRequestSchema>;
-export type RegisterRequest = z.infer<typeof registerRequestSchema>;
-export type AuthResponse = z.infer<typeof authResponseSchema>;
-export type RegisterResponse = z.infer<typeof registerResponseSchema>;
-export type RefreshResponse = z.infer<typeof refreshResponseSchema>;
-export type LogoutResponse = z.infer<typeof logoutResponseSchema>;
-export type EmailVerificationRequest = z.infer<typeof emailVerificationRequestSchema>;
-export type EmailVerificationResponse = z.infer<typeof emailVerificationResponseSchema>;
-export type ForgotPasswordRequest = z.infer<typeof forgotPasswordRequestSchema>;
-export type ForgotPasswordResponse = z.infer<typeof forgotPasswordResponseSchema>;
-export type ResendVerificationRequest = z.infer<typeof resendVerificationRequestSchema>;
-export type ResendVerificationResponse = z.infer<typeof resendVerificationResponseSchema>;
-export type ResetPasswordRequest = z.infer<typeof resetPasswordRequestSchema>;
-export type ResetPasswordResponse = z.infer<typeof resetPasswordResponseSchema>;
-export type SetPasswordRequest = z.infer<typeof setPasswordRequestSchema>;
-export type SetPasswordResponse = z.infer<typeof setPasswordResponseSchema>;
-export type MagicLinkRequest = z.infer<typeof magicLinkRequestSchema>;
-export type MagicLinkVerifyRequest = z.infer<typeof magicLinkVerifySchema>;
-export type MagicLinkRequestResponse = z.infer<typeof magicLinkRequestResponseSchema>;
-export type MagicLinkVerifyResponse = z.infer<typeof magicLinkVerifyResponseSchema>;
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface EmptyBody {}
+
+export const emptyBodySchema: Schema<EmptyBody> = createSchema((data: unknown) => {
+  if (data !== undefined && data !== null && typeof data === 'object') {
+    return {};
+  }
+  return {};
+});
 
 // ============================================================================
 // Auth Contract
@@ -171,7 +417,7 @@ export const authContract = {
   refresh: {
     method: 'POST' as const,
     path: '/api/auth/refresh',
-    body: z.object({}),
+    body: emptyBodySchema,
     responses: {
       200: refreshResponseSchema,
       401: errorResponseSchema,
@@ -181,7 +427,7 @@ export const authContract = {
   logout: {
     method: 'POST' as const,
     path: '/api/auth/logout',
-    body: z.object({}),
+    body: emptyBodySchema,
     responses: {
       200: logoutResponseSchema,
       401: errorResponseSchema,

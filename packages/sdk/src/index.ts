@@ -239,3 +239,32 @@ export type {
   UseSearchOptions,
   UseSearchResult,
 } from './search';
+
+// Billing
+export {
+  // Client
+  createBillingClient,
+  // Hooks
+  billingQueryKeys,
+  useInvoices,
+  usePaymentMethods,
+  usePlans,
+  useSubscription,
+  // Admin Client
+  createAdminBillingClient,
+  useAdminPlans,
+} from './billing';
+export type {
+  // Client Types
+  BillingClient,
+  BillingClientConfig,
+  // Hook State Types
+  InvoicesState,
+  PaymentMethodsState,
+  PlansState,
+  SubscriptionState,
+  // Admin Types
+  AdminBillingClient,
+  AdminBillingClientConfig,
+  AdminPlansState,
+} from './billing';

@@ -4,6 +4,7 @@
  */
 
 import type { AuthConfig } from '@config/auth.config';
+import type { BillingConfig } from '@config/billing.config';
 import type { DatabaseConfig } from '@config/database.config';
 import type { EmailConfig } from '@config/email.config';
 import type { ServerConfig } from '@config/server.config';
@@ -20,4 +21,5 @@ export interface AppConfig {
   auth: AuthConfig;
   email: EmailConfig;
   storage: StorageConfig;
+  billing?: BillingConfig;
 }

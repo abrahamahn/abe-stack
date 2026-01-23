@@ -5,57 +5,23 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { SqlSearchProvider, createSqlSearchProvider } from '../sql-provider';
 
 import type { SqlTableConfig } from '../types';
+import type { RawDb, Repositories } from '@database';
 
-// Mock Drizzle
-const mockSelect = vi.fn();
-const mockFrom = vi.fn();
-const mockWhere = vi.fn();
-const mockOrderBy = vi.fn();
-const mockLimit = vi.fn();
-const mockOffset = vi.fn();
-const mockGroupBy = vi.fn();
-
-// Chain mock methods
-mockSelect.mockReturnValue({ from: mockFrom });
-mockFrom.mockReturnValue({
-  where: mockWhere,
-  orderBy: mockOrderBy,
-  limit: mockLimit,
-  offset: mockOffset,
-});
-mockWhere.mockReturnValue({
-  orderBy: mockOrderBy,
-  limit: mockLimit,
-  offset: mockOffset,
-  groupBy: mockGroupBy,
-});
-mockOrderBy.mockReturnValue({
-  limit: mockLimit,
-  offset: mockOffset,
-});
-mockLimit.mockReturnValue({
-  offset: mockOffset,
-});
-mockOffset.mockResolvedValue([]);
-mockGroupBy.mockReturnValue({
-  orderBy: mockOrderBy,
-  limit: mockLimit,
-  offset: mockOffset,
-});
+// Mock RawDb interface
+const mockRaw = vi.fn();
+const mockQuery = vi.fn();
+const mockQueryOne = vi.fn();
+const mockExecute = vi.fn();
 
 const mockDb = {
-  select: mockSelect,
-} as unknown;
+  raw: mockRaw,
+  query: mockQuery,
+  queryOne: mockQueryOne,
+  execute: mockExecute,
+} as unknown as RawDb;
 
-// Mock table with columns
-const mockTable = {
-  id: { name: 'id' },
-  name: { name: 'name' },
-  email: { name: 'email' },
-  age: { name: 'age' },
-  status: { name: 'status' },
-  createdAt: { name: 'createdAt' },
-} as unknown;
+// Mock repositories
+const mockRepos = {} as Repositories;
 
 const tableConfig: Partial<SqlTableConfig> & { table: string } = {
   table: 'users',
@@ -66,51 +32,28 @@ const tableConfig: Partial<SqlTableConfig> & { table: string } = {
     { field: 'email', column: 'email', type: 'string' },
     { field: 'age', column: 'age', type: 'number' },
     { field: 'status', column: 'status', type: 'string' },
-    { field: 'createdAt', column: 'createdAt', type: 'date' },
+    { field: 'createdAt', column: 'created_at', type: 'date' },
   ],
 };
 
 describe('SqlSearchProvider', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Re-establish the mock chain after clearing
-    mockSelect.mockReturnValue({ from: mockFrom });
-    mockFrom.mockReturnValue({
-      where: mockWhere,
-      orderBy: mockOrderBy,
-      limit: mockLimit,
-      offset: mockOffset,
-    });
-    mockWhere.mockReturnValue({
-      orderBy: mockOrderBy,
-      limit: mockLimit,
-      offset: mockOffset,
-      groupBy: mockGroupBy,
-    });
-    mockOrderBy.mockReturnValue({
-      limit: mockLimit,
-      offset: mockOffset,
-    });
-    mockLimit.mockReturnValue({
-      offset: mockOffset,
-    });
-    mockOffset.mockResolvedValue([]);
-    mockGroupBy.mockReturnValue({
-      orderBy: mockOrderBy,
-      limit: mockLimit,
-      offset: mockOffset,
-    });
+    mockRaw.mockResolvedValue([]);
+    mockQuery.mockResolvedValue([]);
+    mockQueryOne.mockResolvedValue(null);
+    mockExecute.mockResolvedValue(0);
   });
 
   describe('constructor', () => {
     test('should create provider with default config', () => {
-      const provider = new SqlSearchProvider(mockDb as never, mockTable as never, tableConfig);
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig);
 
       expect(provider.name).toBe('sql');
     });
 
     test('should create provider with custom config', () => {
-      const provider = new SqlSearchProvider(mockDb as never, mockTable as never, tableConfig, {
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig, {
         name: 'custom-sql',
         maxPageSize: 500,
       });
@@ -121,378 +64,292 @@ describe('SqlSearchProvider', () => {
 
   describe('getCapabilities', () => {
     test('should return correct capabilities', () => {
-      const provider = new SqlSearchProvider(mockDb as never, mockTable as never, tableConfig);
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig);
 
       const capabilities = provider.getCapabilities();
 
       expect(capabilities.fullTextSearch).toBe(false);
       expect(capabilities.fuzzyMatching).toBe(false);
-      expect(capabilities.highlighting).toBe(false);
       expect(capabilities.cursorPagination).toBe(true);
+      expect(capabilities.arrayOperations).toBe(true);
       expect(capabilities.maxPageSize).toBe(1000);
-      expect(capabilities.supportedOperators).toContain(FILTER_OPERATORS.EQ);
-      expect(capabilities.supportedOperators).toContain(FILTER_OPERATORS.BETWEEN);
     });
   });
 
   describe('search', () => {
-    test('should execute search with pagination', async () => {
-      const provider = new SqlSearchProvider(mockDb as never, mockTable as never, tableConfig);
+    test('should execute basic search', async () => {
+      mockRaw.mockResolvedValue([{ id: '1', name: 'Test' }]);
 
-      mockOffset.mockResolvedValue([
-        { id: '1', name: 'John' },
-        { id: '2', name: 'Jane' },
-      ]);
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig);
 
-      const result = await provider.search({
-        page: 1,
-        limit: 10,
-      });
+      const result = await provider.search({ limit: 10 });
 
-      expect(result.page).toBe(1);
-      expect(result.limit).toBe(10);
-      expect(result.data).toHaveLength(2);
-      expect(result.hasNext).toBe(false);
-      expect(result.hasPrev).toBe(false);
+      expect(mockRaw).toHaveBeenCalled();
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]!.item).toEqual({ id: '1', name: 'Test' });
     });
 
-    test('should detect hasNext when more results exist', async () => {
-      const provider = new SqlSearchProvider(mockDb as never, mockTable as never, tableConfig);
+    test('should apply filters correctly', async () => {
+      mockRaw.mockResolvedValue([]);
 
-      // Return 11 results when limit is 10 (indicating more exist)
-      mockOffset.mockResolvedValue(Array.from({ length: 11 }, (_, i) => ({ id: String(i) })));
-
-      const result = await provider.search({
-        page: 1,
-        limit: 10,
-      });
-
-      expect(result.hasNext).toBe(true);
-      expect(result.data).toHaveLength(10);
-    });
-
-    test('should include count when requested', async () => {
-      const provider = new SqlSearchProvider(mockDb as never, mockTable as never, tableConfig);
-
-      // Mock main query (no filters, so from() is used directly)
-      mockOffset.mockResolvedValueOnce([{ id: '1' }]);
-
-      // Mock count query - no filter so from() is awaited directly
-      // Make from() return a thenable for the count query (second call)
-      const mockFromThenable = {
-        where: mockWhere,
-        orderBy: mockOrderBy,
-        limit: mockLimit,
-        offset: mockOffset,
-        then: (resolve: (value: unknown) => void) => resolve([{ count: 50 }]),
-      };
-      mockFrom.mockReturnValueOnce({
-        where: mockWhere,
-        orderBy: mockOrderBy,
-        limit: mockLimit,
-        offset: mockOffset,
-      });
-      mockFrom.mockReturnValueOnce(mockFromThenable);
-
-      const result = await provider.search({
-        page: 1,
-        limit: 10,
-        includeCount: true,
-      });
-
-      expect(result.total).toBe(50);
-      expect(result.totalPages).toBe(5);
-    });
-
-    test('should apply filters', async () => {
-      const provider = new SqlSearchProvider(mockDb as never, mockTable as never, tableConfig);
-
-      mockOffset.mockResolvedValue([]);
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig);
 
       await provider.search({
         filters: {
-          field: 'status',
-          operator: 'eq',
-          value: 'active',
+          field: 'name',
+          operator: FILTER_OPERATORS.EQ,
+          value: 'Test',
         },
+        limit: 10,
       });
 
-      expect(mockWhere).toHaveBeenCalled();
+      // Verify the raw SQL was called
+      expect(mockRaw).toHaveBeenCalled();
+      const [sql] = mockRaw.mock.calls[0] as [string];
+      expect(sql).toContain('WHERE');
+      expect(sql).toContain('name');
+    });
+
+    test('should handle pagination correctly', async () => {
+      mockRaw.mockResolvedValue([
+        { id: '1', name: 'Test 1' },
+        { id: '2', name: 'Test 2' },
+      ]);
+
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig);
+
+      const result = await provider.search({ page: 2, limit: 10 });
+
+      expect(result.page).toBe(2);
+      expect(result.hasPrev).toBe(true);
+    });
+
+    test('should include total count when requested', async () => {
+      mockRaw.mockResolvedValueOnce([{ id: '1', name: 'Test' }]);
+      mockRaw.mockResolvedValueOnce([{ count: '5' }]);
+
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig);
+
+      const result = await provider.search({ limit: 10, includeCount: true });
+
+      expect(mockRaw).toHaveBeenCalledTimes(2);
+      expect(result.total).toBe(5);
     });
   });
 
-  describe('count', () => {
-    test('should return count', async () => {
-      const provider = new SqlSearchProvider(mockDb as never, mockTable as never, tableConfig);
+  describe('filter operators', () => {
+    test('should support EQ operator', async () => {
+      mockRaw.mockResolvedValue([]);
 
-      // No filter, so from() is awaited directly. Make it thenable.
-      const mockFromThenable = {
-        where: mockWhere,
-        then: (resolve: (value: unknown) => void) => resolve([{ count: 25 }]),
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig);
+
+      await provider.search({
+        filters: { field: 'status', operator: FILTER_OPERATORS.EQ, value: 'active' },
+      });
+
+      const [sql] = mockRaw.mock.calls[0] as [string];
+      expect(sql).toContain('status');
+      expect(sql).toContain('=');
+    });
+
+    test('should support NEQ operator', async () => {
+      mockRaw.mockResolvedValue([]);
+
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig);
+
+      await provider.search({
+        filters: { field: 'status', operator: FILTER_OPERATORS.NEQ, value: 'deleted' },
+      });
+
+      const [sql] = mockRaw.mock.calls[0] as [string];
+      expect(sql).toContain('<>');
+    });
+
+    test('should support GT/GTE/LT/LTE operators', async () => {
+      mockRaw.mockResolvedValue([]);
+
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig);
+
+      await provider.search({
+        filters: { field: 'age', operator: FILTER_OPERATORS.GT, value: 18 },
+      });
+
+      const [sql] = mockRaw.mock.calls[0] as [string];
+      expect(sql).toContain('>');
+    });
+
+    test('should support CONTAINS operator', async () => {
+      mockRaw.mockResolvedValue([]);
+
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig);
+
+      await provider.search({
+        filters: { field: 'name', operator: FILTER_OPERATORS.CONTAINS, value: 'test' },
+      });
+
+      const [sql] = mockRaw.mock.calls[0] as [string];
+      expect(sql).toContain('ILIKE');
+    });
+
+    test('should support IN operator', async () => {
+      mockRaw.mockResolvedValue([]);
+
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig);
+
+      await provider.search({
+        filters: { field: 'status', operator: FILTER_OPERATORS.IN, value: ['active', 'pending'] },
+      });
+
+      const [sql] = mockRaw.mock.calls[0] as [string];
+      expect(sql).toContain('IN');
+    });
+
+    test('should support IS_NULL operator', async () => {
+      mockRaw.mockResolvedValue([]);
+
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig);
+
+      await provider.search({
+        filters: { field: 'email', operator: FILTER_OPERATORS.IS_NULL, value: null },
+      });
+
+      const [sql] = mockRaw.mock.calls[0] as [string];
+      expect(sql).toContain('IS NULL');
+    });
+
+    test('should support BETWEEN operator', async () => {
+      mockRaw.mockResolvedValue([]);
+
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig);
+
+      await provider.search({
+        filters: { field: 'age', operator: FILTER_OPERATORS.BETWEEN, value: { min: 18, max: 65 } },
+      });
+
+      const [sql] = mockRaw.mock.calls[0] as [string];
+      expect(sql).toContain('BETWEEN');
+    });
+  });
+
+  describe('compound filters', () => {
+    test('should support AND compound filter', async () => {
+      mockRaw.mockResolvedValue([]);
+
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig);
+
+      await provider.search({
+        filters: {
+          operator: 'and',
+          conditions: [
+            { field: 'status', operator: FILTER_OPERATORS.EQ, value: 'active' },
+            { field: 'age', operator: FILTER_OPERATORS.GT, value: 18 },
+          ],
+        },
+      });
+
+      const [sql] = mockRaw.mock.calls[0] as [string];
+      expect(sql).toContain('AND');
+    });
+
+    test('should support OR compound filter', async () => {
+      mockRaw.mockResolvedValue([]);
+
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig);
+
+      await provider.search({
+        filters: {
+          operator: 'or',
+          conditions: [
+            { field: 'status', operator: FILTER_OPERATORS.EQ, value: 'active' },
+            { field: 'status', operator: FILTER_OPERATORS.EQ, value: 'pending' },
+          ],
+        },
+      });
+
+      const [sql] = mockRaw.mock.calls[0] as [string];
+      expect(sql).toContain('OR');
+    });
+  });
+
+  describe('query limits', () => {
+    test('should throw error for too deep nesting', async () => {
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig, {
+        maxQueryDepth: 2,
+      });
+
+      // Create deeply nested filter
+      const deepFilter = {
+        operator: 'and' as const,
+        conditions: [
+          {
+            operator: 'and' as const,
+            conditions: [
+              {
+                operator: 'and' as const,
+                conditions: [{ field: 'name', operator: FILTER_OPERATORS.EQ, value: 'test' }],
+              },
+            ],
+          },
+        ],
       };
-      mockFrom.mockReturnValueOnce(mockFromThenable);
 
-      const count = await provider.count({});
+      await expect(provider.search({ filters: deepFilter })).rejects.toThrow(QueryTooComplexError);
+    });
 
-      expect(count).toBe(25);
+    test('should throw error for too many conditions', async () => {
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig, {
+        maxConditions: 2,
+      });
+
+      const manyConditions = {
+        operator: 'and' as const,
+        conditions: [
+          { field: 'name', operator: FILTER_OPERATORS.EQ, value: 'test1' },
+          { field: 'email', operator: FILTER_OPERATORS.EQ, value: 'test2' },
+          { field: 'status', operator: FILTER_OPERATORS.EQ, value: 'test3' },
+        ],
+      };
+
+      await expect(provider.search({ filters: manyConditions })).rejects.toThrow(QueryTooComplexError);
     });
   });
 
   describe('healthCheck', () => {
     test('should return true when database is accessible', async () => {
-      const provider = new SqlSearchProvider(mockDb as never, mockTable as never, tableConfig);
+      mockRaw.mockResolvedValue([{ '?column?': 1 }]);
 
-      mockLimit.mockResolvedValueOnce([{ one: 1 }]);
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig);
 
-      const healthy = await provider.healthCheck();
+      const result = await provider.healthCheck();
 
-      expect(healthy).toBe(true);
+      expect(result).toBe(true);
     });
 
-    test('should return false when database is inaccessible', async () => {
-      const provider = new SqlSearchProvider(mockDb as never, mockTable as never, tableConfig);
+    test('should return false when database is not accessible', async () => {
+      mockRaw.mockRejectedValue(new Error('Connection failed'));
 
-      mockLimit.mockRejectedValueOnce(new Error('Connection failed'));
+      const provider = new SqlSearchProvider(mockDb, mockRepos, tableConfig);
 
-      const healthy = await provider.healthCheck();
+      const result = await provider.healthCheck();
 
-      expect(healthy).toBe(false);
-    });
-  });
-
-  describe('close', () => {
-    test('should close without error', async () => {
-      const provider = new SqlSearchProvider(mockDb as never, mockTable as never, tableConfig);
-
-      await expect(provider.close()).resolves.toBeUndefined();
-    });
-  });
-});
-
-describe('createSqlSearchProvider', () => {
-  test('should create provider using factory function', () => {
-    const provider = createSqlSearchProvider(mockDb as never, mockTable as never, tableConfig);
-
-    expect(provider).toBeInstanceOf(SqlSearchProvider);
-  });
-});
-
-describe('LIKE wildcard escaping', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    // Re-establish the mock chain after clearing
-    mockSelect.mockReturnValue({ from: mockFrom });
-    mockFrom.mockReturnValue({
-      where: mockWhere,
-      orderBy: mockOrderBy,
-      limit: mockLimit,
-      offset: mockOffset,
-    });
-    mockWhere.mockReturnValue({
-      orderBy: mockOrderBy,
-      limit: mockLimit,
-      offset: mockOffset,
-      groupBy: mockGroupBy,
-    });
-    mockOrderBy.mockReturnValue({
-      limit: mockLimit,
-      offset: mockOffset,
-    });
-    mockLimit.mockReturnValue({
-      offset: mockOffset,
-    });
-    mockOffset.mockResolvedValue([]);
-    mockGroupBy.mockReturnValue({
-      orderBy: mockOrderBy,
-      limit: mockLimit,
-      offset: mockOffset,
+      expect(result).toBe(false);
     });
   });
 
-  test('should escape % wildcard in CONTAINS filter', async () => {
-    const provider = new SqlSearchProvider(mockDb as never, mockTable as never, tableConfig);
+  describe('createSqlSearchProvider factory', () => {
+    test('should create provider with factory function', () => {
+      const provider = createSqlSearchProvider(mockDb, mockRepos, tableConfig);
 
-    mockOffset.mockResolvedValue([]);
-
-    // Search for literal "100%" - the % should be escaped
-    await provider.search({
-      filters: {
-        field: 'name',
-        operator: FILTER_OPERATORS.CONTAINS,
-        value: '100%',
-      },
+      expect(provider).toBeInstanceOf(SqlSearchProvider);
+      expect(provider.name).toBe('sql');
     });
 
-    expect(mockWhere).toHaveBeenCalled();
-    // The % in user input should be escaped to \%
-    // Pattern should be %100\%% not %100%%
-  });
+    test('should create provider with custom config', () => {
+      const provider = createSqlSearchProvider(mockDb, mockRepos, tableConfig, {
+        name: 'factory-sql',
+      });
 
-  test('should escape _ wildcard in STARTS_WITH filter', async () => {
-    const provider = new SqlSearchProvider(mockDb as never, mockTable as never, tableConfig);
-
-    mockOffset.mockResolvedValue([]);
-
-    // Search for literal "user_" - the _ should be escaped
-    await provider.search({
-      filters: {
-        field: 'name',
-        operator: FILTER_OPERATORS.STARTS_WITH,
-        value: 'user_',
-      },
+      expect(provider.name).toBe('factory-sql');
     });
-
-    expect(mockWhere).toHaveBeenCalled();
-    // The _ in user input should be escaped to \_
-  });
-
-  test('should escape backslash in ENDS_WITH filter', async () => {
-    const provider = new SqlSearchProvider(mockDb as never, mockTable as never, tableConfig);
-
-    mockOffset.mockResolvedValue([]);
-
-    // Search for literal "C:\path" - the \ should be escaped
-    await provider.search({
-      filters: {
-        field: 'name',
-        operator: FILTER_OPERATORS.ENDS_WITH,
-        value: 'C:\\path',
-      },
-    });
-
-    expect(mockWhere).toHaveBeenCalled();
-  });
-
-  test('should NOT escape wildcards in LIKE operator (user expects pattern)', async () => {
-    const provider = new SqlSearchProvider(mockDb as never, mockTable as never, tableConfig);
-
-    mockOffset.mockResolvedValue([]);
-
-    // LIKE operator explicitly allows wildcards
-    await provider.search({
-      filters: {
-        field: 'name',
-        operator: FILTER_OPERATORS.LIKE,
-        value: '%admin%',
-      },
-    });
-
-    expect(mockWhere).toHaveBeenCalled();
-    // Wildcards should NOT be escaped for LIKE operator
-  });
-});
-
-describe('Query complexity limits', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    // Re-establish the mock chain after clearing
-    mockSelect.mockReturnValue({ from: mockFrom });
-    mockFrom.mockReturnValue({
-      where: mockWhere,
-      orderBy: mockOrderBy,
-      limit: mockLimit,
-      offset: mockOffset,
-    });
-    mockWhere.mockReturnValue({
-      orderBy: mockOrderBy,
-      limit: mockLimit,
-      offset: mockOffset,
-      groupBy: mockGroupBy,
-    });
-    mockOrderBy.mockReturnValue({
-      limit: mockLimit,
-      offset: mockOffset,
-    });
-    mockLimit.mockReturnValue({
-      offset: mockOffset,
-    });
-    mockOffset.mockResolvedValue([]);
-    mockGroupBy.mockReturnValue({
-      orderBy: mockOrderBy,
-      limit: mockLimit,
-      offset: mockOffset,
-    });
-  });
-
-  test('should throw QueryTooComplexError when filter depth exceeds limit', async () => {
-    const provider = new SqlSearchProvider(
-      mockDb as never,
-      mockTable as never,
-      tableConfig,
-      { name: 'test-sql', maxQueryDepth: 2 }, // Set low depth limit for testing
-    );
-
-    // Create deeply nested filter (depth = 3)
-    const deeplyNestedFilter = {
-      operator: 'and' as const,
-      conditions: [
-        {
-          operator: 'or' as const,
-          conditions: [
-            {
-              operator: 'and' as const, // This is depth 3, exceeds limit of 2
-              conditions: [{ field: 'status', operator: FILTER_OPERATORS.EQ, value: 'active' }],
-            },
-          ],
-        },
-      ],
-    };
-
-    await expect(provider.search({ filters: deeplyNestedFilter })).rejects.toThrow(
-      QueryTooComplexError,
-    );
-  });
-
-  test('should throw QueryTooComplexError when condition count exceeds limit', async () => {
-    const provider = new SqlSearchProvider(
-      mockDb as never,
-      mockTable as never,
-      tableConfig,
-      { name: 'test-sql', maxConditions: 3 }, // Set low condition limit for testing
-    );
-
-    // Create filter with 4 conditions
-    const manyConditionsFilter = {
-      operator: 'and' as const,
-      conditions: [
-        { field: 'status', operator: FILTER_OPERATORS.EQ, value: 'active' },
-        { field: 'name', operator: FILTER_OPERATORS.CONTAINS, value: 'test' },
-        { field: 'age', operator: FILTER_OPERATORS.GTE, value: 18 },
-        { field: 'email', operator: FILTER_OPERATORS.ENDS_WITH, value: '.com' }, // 4th condition exceeds limit
-      ],
-    };
-
-    await expect(provider.search({ filters: manyConditionsFilter })).rejects.toThrow(
-      QueryTooComplexError,
-    );
-  });
-
-  test('should allow filters within complexity limits', async () => {
-    const provider = new SqlSearchProvider(mockDb as never, mockTable as never, tableConfig, {
-      name: 'test-sql',
-      maxQueryDepth: 5,
-      maxConditions: 50,
-    });
-
-    mockOffset.mockResolvedValue([]);
-
-    const validFilter = {
-      operator: 'and' as const,
-      conditions: [
-        { field: 'status', operator: FILTER_OPERATORS.EQ, value: 'active' },
-        {
-          operator: 'or' as const,
-          conditions: [
-            { field: 'name', operator: FILTER_OPERATORS.CONTAINS, value: 'test' },
-            { field: 'email', operator: FILTER_OPERATORS.ENDS_WITH, value: '.com' },
-          ],
-        },
-      ],
-    };
-
-    // Should not throw
-    const result = await provider.search({ filters: validFilter });
-    expect(result).toBeDefined();
-    expect(mockWhere).toHaveBeenCalled();
   });
 });

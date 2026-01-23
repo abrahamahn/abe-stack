@@ -1,6 +1,6 @@
 // packages/ui/src/hooks/__tests__/useThemeMode.test.ts
 /** @vitest-environment jsdom */
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useThemeMode, type ThemeMode } from '../useThemeMode';
@@ -101,15 +101,18 @@ describe('useThemeMode', () => {
       expect(result.current.mode).toBe('system');
     });
 
-    it('persists mode to localStorage', () => {
+    it('persists mode to localStorage', async () => {
       const { result } = renderHook(() => useThemeMode(storageKey));
 
       act(() => {
         result.current.setMode('dark');
       });
 
-      const stored = JSON.parse(localStorage.getItem(storageKey) ?? '""') as string;
-      expect(stored).toBe('dark');
+      // localStorage write is deferred via queueMicrotask, so we need to wait
+      await waitFor(() => {
+        const stored = JSON.parse(localStorage.getItem(storageKey) ?? '""') as string;
+        expect(stored).toBe('dark');
+      });
     });
   });
 

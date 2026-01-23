@@ -23,7 +23,7 @@ export async function handleForgotPassword(
   try {
     const { email } = body;
     const baseUrl = ctx.config.server.appBaseUrl;
-    await requestPasswordReset(ctx.db, ctx.email, email, baseUrl);
+    await requestPasswordReset(ctx.db, ctx.repos, ctx.email, email, baseUrl);
 
     return {
       status: 200,
@@ -56,7 +56,7 @@ export async function handleResetPassword(
 > {
   try {
     const { token, password } = body;
-    await resetPassword(ctx.db, ctx.config.auth, token, password);
+    await resetPassword(ctx.db, ctx.repos, ctx.config.auth, token, password);
 
     return {
       status: 200,
@@ -85,7 +85,7 @@ export async function handleSetPassword(
     }
 
     const { password } = body;
-    await setPassword(ctx.db, ctx.config.auth, userId, password);
+    await setPassword(ctx.db, ctx.repos, ctx.config.auth, userId, password);
 
     return {
       status: 200,

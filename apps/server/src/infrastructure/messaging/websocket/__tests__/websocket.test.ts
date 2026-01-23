@@ -26,8 +26,9 @@ vi.mock('@modules/auth/utils/jwt', () => ({
   verifyToken: vi.fn(() => ({ userId: 'test-user-123' })),
 }));
 
+const mockValidateCsrfToken = vi.fn(() => true);
 vi.mock('@http', () => ({
-  validateCsrfToken: vi.fn(() => true),
+  validateCsrfToken: mockValidateCsrfToken,
 }));
 
 // Types for dynamic imports
@@ -176,10 +177,7 @@ describe('WebSocket Module', () => {
   });
 
   describe('WebSocket authentication', () => {
-    // TODO: This test needs rework - the mock for @http/validateCsrfToken
-    // needs to be configured per-test, and the test expectations don't match
-    // actual code behavior (CSRF rejects with 403, not 401)
-    test.skip('should close socket if no token provided', async () => {
+    test('should close socket if no token provided', async () => {
       const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
 
       const mockHttpServer = new EventEmitter();
@@ -195,6 +193,7 @@ describe('WebSocket Module', () => {
           info: vi.fn(),
         },
         config: {
+          env: 'test',
           auth: {
             jwt: {
               secret: 'test-secret',
@@ -222,7 +221,7 @@ describe('WebSocket Module', () => {
         on: vi.fn(),
       };
 
-      // Configure mock to call the callback
+      // Configure mock to call the callback (CSRF passes, but no auth token)
       mockHandleUpgrade.mockImplementation(
         (
           _req: unknown,
@@ -237,13 +236,13 @@ describe('WebSocket Module', () => {
       const mockRequest = {
         url: '/ws',
         headers: { host: 'localhost' },
+        // No token in sec-websocket-protocol or cookies
       };
 
       mockHttpServer.emit('upgrade', mockRequest, mockSocket, Buffer.alloc(0));
 
-      // When no token is provided, the socket should be rejected with a write and destroy
-      expect(mockSocket.write).toHaveBeenCalledWith(expect.stringContaining('401'));
-      expect(mockSocket.destroy).toHaveBeenCalled();
+      // When no token is provided, the WebSocket should be closed with code 1008
+      expect(mockWs.close).toHaveBeenCalledWith(1008, 'Authentication required');
     });
 
     test('should accept connection with token in query param', async () => {
@@ -464,13 +463,9 @@ describe('WebSocket Module', () => {
   });
 
   describe('WebSocket CSRF validation', () => {
-    // TODO: This test uses vi.doMock('@middleware/csrf') but websocket.ts imports from '@http'
-    // The mock path mismatch causes the test to fail. Needs rework.
-    test.skip('should reject upgrade with invalid CSRF token', async () => {
-      // Re-mock csrf validation to return false
-      vi.doMock('@http', () => ({
-        validateCsrfToken: vi.fn(() => false),
-      }));
+    test('should reject upgrade with invalid CSRF token', async () => {
+      // Configure CSRF validation to return false for this test
+      mockValidateCsrfToken.mockReturnValue(false);
 
       const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
 
@@ -526,6 +521,9 @@ describe('WebSocket Module', () => {
       expect(mockCtx.log.warn).toHaveBeenCalledWith(
         'WebSocket upgrade rejected: invalid CSRF token',
       );
+
+      // Reset mock for other tests
+      mockValidateCsrfToken.mockReturnValue(true);
     });
 
     test('should extract CSRF token from sec-websocket-protocol header', async () => {

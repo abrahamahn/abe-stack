@@ -13,11 +13,18 @@
  * 5. Client refetches and retries (or shows conflict UI)
  */
 
-import { users } from '@database/schema';
-import { and, eq, sql } from 'drizzle-orm';
-
-import type { DbClient } from '@database/client';
-import type { User } from '@database/schema';
+import {
+  update,
+  select,
+  and,
+  eq,
+  USERS_TABLE,
+  USER_COLUMNS,
+  toCamelCase,
+  toSnakeCase,
+  type RawDb,
+  type User,
+} from '@abe-stack/db';
 
 /**
  * Error thrown when optimistic lock fails (version mismatch)
@@ -49,39 +56,45 @@ export class OptimisticLockError extends Error {
  * // If version wasn't 3, throws OptimisticLockError
  */
 export async function updateUserWithVersion(
-  db: DbClient,
+  db: RawDb,
   id: string,
   data: Partial<Omit<User, 'id' | 'version' | 'createdAt' | 'updatedAt'>>,
   expectedVersion: number,
 ): Promise<User> {
-  // First, try the optimistic update
-  const result = await db
-    .update(users)
-    .set({
-      ...data,
-      version: sql`${users.version} + 1`,
-      updatedAt: sql`now()`,
-    })
-    .where(and(eq(users.id, id), eq(users.version, expectedVersion)))
-    .returning();
+  // Convert data to snake_case and add version increment
+  const snakeData = toSnakeCase(data as Record<string, unknown>, USER_COLUMNS);
 
-  const updated = result[0];
-  if (!updated) {
+  // Build the update query with version increment
+  const result = await db.queryOne<Record<string, unknown>>(
+    update(USERS_TABLE)
+      .set({
+        ...snakeData,
+        version: { expression: 'version + 1' },
+        updated_at: { expression: 'now()' },
+      })
+      .where(and(eq('id', id), eq('version', expectedVersion)))
+      .returningAll()
+      .toSql()
+  );
+
+  if (!result) {
     // Version mismatch - fetch current version for error response
-    const current = await db
-      .select({ version: users.version })
-      .from(users)
-      .where(eq(users.id, id))
-      .limit(1);
+    const current = await db.queryOne<{ version: number }>(
+      select(USERS_TABLE)
+        .columns('version')
+        .where(eq('id', id))
+        .limit(1)
+        .toSql()
+    );
 
-    if (current.length === 0) {
+    if (!current) {
       throw new Error('Record not found');
     }
 
-    throw new OptimisticLockError(current[0]?.version ?? 0);
+    throw new OptimisticLockError(current.version);
   }
 
-  return updated;
+  return toCamelCase<User>(result, USER_COLUMNS);
 }
 
 /**

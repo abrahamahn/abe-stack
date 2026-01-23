@@ -68,7 +68,7 @@ function estimatePackageBundleSize(packageName: string, packagePath: string): Bu
     '@abe-stack/core': { size: 150, gzipSize: 40 }, // Our core utilities
 
     // Database (runtime only, not in client bundle)
-    'drizzle-orm': { size: 0, gzipSize: 0 },
+    '@abe-stack/db': { size: 0, gzipSize: 0 },
     postgres: { size: 0, gzipSize: 0 },
 
     // Security (runtime only)

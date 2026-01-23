@@ -28,7 +28,7 @@ export interface FormState {
    * const handleLogin = wrapHandler(login);
    * ```
    */
-  wrapHandler: <T extends Record<string, unknown>, R>(
+  wrapHandler: <T, R>(
     handler: (data: T) => Promise<R>,
     options?: FormHandlerOptions,
   ) => (data: T) => Promise<R>;
@@ -64,7 +64,7 @@ export function useFormState(): FormState {
   }, []);
 
   const wrapHandler = useCallback(
-    <T extends Record<string, unknown>, R>(
+    <T, R>(
       handler: (data: T) => Promise<R>,
       options?: FormHandlerOptions,
     ): ((data: T) => Promise<R>) => {

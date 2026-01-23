@@ -34,15 +34,12 @@ export { createElasticsearchProvider, ElasticsearchProvider } from './elasticsea
 
 // Factory
 export {
-  createSearchProvider,
   getSearchProviderFactory,
-  parseProviderType,
   resetSearchProviderFactory,
   SearchProviderFactory,
 } from './search-factory';
 export type {
   ElasticsearchProviderOptions,
-  MemoryProviderOptions,
-  SearchProviderOptions,
+  ProviderOptions,
   SqlSearchProviderOptions,
 } from './search-factory';

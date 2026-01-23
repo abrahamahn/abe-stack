@@ -13,15 +13,12 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 // ============================================================================
 
 /**
- * Create a mock Zod-like schema for testing
+ * Create a mock schema for testing (compatible with manual validation)
  */
 function createMockSchema<T>(
   validator: (data: unknown) =>
     | { success: true; data: T }
-    | {
-        success: false;
-        error: { issues: Array<{ path: Array<string | number>; message: string; code: string }> };
-      },
+    | { success: false; error: Error },
 ): ValidationSchema<T> {
   return {
     safeParse: validator,
@@ -34,21 +31,13 @@ const emailPasswordSchema = createMockSchema<{ email: string; password: string }
   if (typeof d?.email !== 'string' || !d.email.includes('@')) {
     return {
       success: false,
-      error: { issues: [{ path: ['email'], message: 'Invalid email', code: 'invalid_string' }] },
+      error: new Error('Invalid email'),
     };
   }
   if (typeof d?.password !== 'string' || d.password.length < 8) {
     return {
       success: false,
-      error: {
-        issues: [
-          {
-            path: ['password'],
-            message: 'Password must be at least 8 characters',
-            code: 'too_small',
-          },
-        ],
-      },
+      error: new Error('Password must be at least 8 characters'),
     };
   }
   return { success: true, data: { email: d.email, password: d.password } };
@@ -60,7 +49,7 @@ const nameSchema = createMockSchema<{ name: string }>((data) => {
   if (typeof d?.name !== 'string' || d.name.length === 0) {
     return {
       success: false,
-      error: { issues: [{ path: ['name'], message: 'Name is required', code: 'invalid_type' }] },
+      error: new Error('Name is required'),
     };
   }
   return { success: true, data: { name: d.name } };
@@ -132,6 +121,7 @@ function createMockFastify(): MockFastifyInstance {
 function createMockContext(): AppContext {
   return {
     db: {} as never,
+    repos: {} as never,
     config: {} as never,
     log: {
       info: vi.fn(),
@@ -387,7 +377,7 @@ describe('registerRouteMap', () => {
     expect(reply.statusCode).toBe(200);
   });
 
-  test('should return all validation errors in structured response', async () => {
+  test('should return validation error message', async () => {
     const handler = vi.fn();
 
     const routes = {
@@ -404,12 +394,7 @@ describe('registerRouteMap', () => {
 
     expect(reply.statusCode).toBe(400);
     expect(reply.sentBody).toEqual({
-      ok: false,
-      error: {
-        code: 'VALIDATION_ERROR',
-        message: 'Request validation failed',
-        details: [{ field: 'name', message: 'Name is required', code: 'invalid_type' }],
-      },
+      message: 'Name is required',
     });
   });
 

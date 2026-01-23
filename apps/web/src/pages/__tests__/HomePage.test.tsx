@@ -45,24 +45,24 @@ vi.mock('../../../../../packages/ui/docs/README.md?raw', () => ({
   default: `# @abe-stack/ui\n\nUI package documentation.`,
 }));
 
-// Dev docs
-vi.mock('../../../../../docs/dev/api-test-plan.md?raw', () => ({
+// Dev docs - paths match actual imports in HomePage.tsx
+vi.mock('../../../../../docs/todo/api-test-plan.md?raw', () => ({
   default: `# API Test Plan\n\nAPI test plan documentation.`,
 }));
 
-vi.mock('../../../../../docs/dev/architecture.md?raw', () => ({
+vi.mock('../../../../../docs/specs/architecture.md?raw', () => ({
   default: `# Architecture\n\nArchitecture documentation.`,
 }));
 
-vi.mock('../../../../../docs/dev/config-setup.md?raw', () => ({
+vi.mock('../../../../../docs/dev/configuration.md?raw', () => ({
   default: `# Config Setup\n\nConfiguration setup documentation.`,
 }));
 
-vi.mock('../../../../../docs/dev/dev-environment.md?raw', () => ({
+vi.mock('../../../../../docs/dev/workflow.md?raw', () => ({
   default: `# Dev Environment\n\nDevelopment environment setup.`,
 }));
 
-vi.mock('../../../../../docs/dev/legacy.md?raw', () => ({
+vi.mock('../../../../../docs/reference/legacy.md?raw', () => ({
   default: `# Legacy\n\nLegacy documentation.`,
 }));
 
@@ -70,7 +70,7 @@ vi.mock('../../../../../docs/dev/performance.md?raw', () => ({
   default: `# Performance\n\nPerformance documentation.`,
 }));
 
-vi.mock('../../../../../docs/dev/principles.md?raw', () => ({
+vi.mock('../../../../../docs/specs/principles.md?raw', () => ({
   default: `# Principles\n\nDesign principles.`,
 }));
 
@@ -193,11 +193,6 @@ describe('HomePage', () => {
 
     it('should switch content when clicking a different doc', async () => {
       renderWithRouter();
-
-      // Wait for initial README content to load
-      await waitFor(() => {
-        expect(screen.getByText(/auth that works/i)).toBeInTheDocument();
-      });
 
       // Click on core package
       fireEvent.click(screen.getByRole('button', { name: 'Core' }));

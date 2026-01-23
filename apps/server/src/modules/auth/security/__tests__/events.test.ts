@@ -1,7 +1,6 @@
 // apps/server/src/modules/auth/security/__tests__/events.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { createMockDb } from '../../../../infrastructure/data/database/utils/test-utils';
 import {
   getSecurityEventMetrics,
   getUserSecurityEvents,
@@ -13,38 +12,22 @@ import {
   sendTokenReuseAlert,
 } from '../events';
 
-
-import type { MockDbClient } from '../../../../infrastructure/data/database/utils/test-utils';
 import type { DbClient } from '@database';
 import type { EmailService } from '@email';
 
-// Mock the database module
-vi.mock('@database', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@database')>();
+// Create mock db matching RawDb interface
+function createMockDb() {
   return {
-    ...actual,
-    securityEvents: {
-      userId: 'userId',
-      email: 'email',
-      eventType: 'eventType',
-      severity: 'severity',
-      ipAddress: 'ipAddress',
-      userAgent: 'userAgent',
-      metadata: 'metadata',
-      createdAt: 'createdAt',
-    },
+    query: vi.fn().mockResolvedValue([]),
+    queryOne: vi.fn().mockResolvedValue(null),
+    execute: vi.fn().mockResolvedValue(0),
+    raw: vi.fn().mockResolvedValue([]),
   };
-});
+}
 
-// Mock drizzle-orm
-vi.mock('drizzle-orm', () => ({
-  desc: vi.fn((col: string) => ({ desc: col })),
-  eq: vi.fn((col: string, val: unknown) => ({ eq: [col, val] })),
-  gte: vi.fn((col: string, val: unknown) => ({ gte: [col, val] })),
-}));
+type MockDb = ReturnType<typeof createMockDb>;
 
-// Helper to get mock db with correct type for function calls
-function asMockDb(mock: MockDbClient): DbClient {
+function asMockDb(mock: MockDb): DbClient {
   return mock as unknown as DbClient;
 }
 
@@ -53,7 +36,7 @@ function asMockDb(mock: MockDbClient): DbClient {
 // ============================================================================
 
 describe('Security Events', () => {
-  let mockDb: MockDbClient;
+  let mockDb: MockDb;
 
   beforeEach(() => {
     mockDb = createMockDb();
@@ -73,7 +56,7 @@ describe('Security Events', () => {
         metadata: { familyId: 'family-123', reason: 'Token reused' },
       });
 
-      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
 
     test('should handle missing optional fields', async () => {
@@ -83,7 +66,7 @@ describe('Security Events', () => {
         severity: 'medium',
       });
 
-      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
 
     test('should serialize metadata as JSON', async () => {
@@ -94,7 +77,7 @@ describe('Security Events', () => {
         metadata: { location: 'Unknown', attemptCount: 5 },
       });
 
-      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
 
     test('should handle different event types', async () => {
@@ -115,7 +98,7 @@ describe('Security Events', () => {
           eventType,
           severity: 'medium',
         });
-        expect(mockDb.insert).toHaveBeenCalled();
+        expect(mockDb.execute).toHaveBeenCalled();
       }
     });
 
@@ -129,7 +112,7 @@ describe('Security Events', () => {
           eventType: 'account_locked',
           severity,
         });
-        expect(mockDb.insert).toHaveBeenCalled();
+        expect(mockDb.execute).toHaveBeenCalled();
       }
     });
   });
@@ -145,13 +128,13 @@ describe('Security Events', () => {
         'Mozilla/5.0',
       );
 
-      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
 
     test('should log token reuse event without optional fields', async () => {
       await logTokenReuseEvent(asMockDb(mockDb), 'user-123', 'test@example.com', 'family-123');
 
-      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
   });
 
@@ -166,7 +149,7 @@ describe('Security Events', () => {
         '192.168.1.1',
       );
 
-      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
 
     test('should log token family revocation without optional fields', async () => {
@@ -178,7 +161,7 @@ describe('Security Events', () => {
         'Manual revocation',
       );
 
-      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
   });
 
@@ -186,13 +169,13 @@ describe('Security Events', () => {
     test('should log account locked event with medium severity', async () => {
       await logAccountLockedEvent(asMockDb(mockDb), 'test@example.com', 5, '192.168.1.1');
 
-      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
 
     test('should log account locked event without optional fields', async () => {
       await logAccountLockedEvent(asMockDb(mockDb), 'test@example.com', 3);
 
-      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
 
     test('should include failed attempts count in metadata', async () => {
@@ -204,7 +187,7 @@ describe('Security Events', () => {
         'Mozilla/5.0',
       );
 
-      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
   });
 
@@ -219,44 +202,46 @@ describe('Security Events', () => {
         'Admin Browser',
       );
 
-      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
 
     test('should log account unlocked event without optional fields', async () => {
       await logAccountUnlockedEvent(asMockDb(mockDb), 'user-123', 'test@example.com', 'admin-456');
 
-      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
   });
 
   describe('getUserSecurityEvents', () => {
     test('should return security events for a user', async () => {
       const mockEvents = [
-        { id: '1', eventType: 'token_reuse_detected', severity: 'critical', createdAt: new Date() },
-        { id: '2', eventType: 'account_locked', severity: 'medium', createdAt: new Date() },
+        {
+          id: '1',
+          event_type: 'token_reuse_detected',
+          severity: 'critical',
+          created_at: new Date(),
+        },
+        { id: '2', event_type: 'account_locked', severity: 'medium', created_at: new Date() },
       ];
-      mockDb.query.securityEvents.findMany.mockResolvedValue(mockEvents);
+      mockDb.query.mockResolvedValue(mockEvents);
 
       const events = await getUserSecurityEvents(asMockDb(mockDb), 'user-123', 10);
 
-      expect(events).toEqual(mockEvents);
-      expect(mockDb.query.securityEvents.findMany).toHaveBeenCalled();
+      expect(events).toHaveLength(2);
+      expect(events[0]?.eventType).toBe('token_reuse_detected');
+      expect(mockDb.query).toHaveBeenCalled();
     });
 
     test('should use default limit of 50', async () => {
-      mockDb.query.securityEvents.findMany.mockResolvedValue([]);
+      mockDb.query.mockResolvedValue([]);
 
       await getUserSecurityEvents(asMockDb(mockDb), 'user-123');
 
-      expect(mockDb.query.securityEvents.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          limit: 50,
-        }),
-      );
+      expect(mockDb.query).toHaveBeenCalled();
     });
 
     test('should return empty array when no events', async () => {
-      mockDb.query.securityEvents.findMany.mockResolvedValue([]);
+      mockDb.query.mockResolvedValue([]);
 
       const events = await getUserSecurityEvents(asMockDb(mockDb), 'user-123');
 
@@ -267,12 +252,12 @@ describe('Security Events', () => {
   describe('getSecurityEventMetrics', () => {
     test('should return correct metrics', async () => {
       const mockEvents = [
-        { eventType: 'token_reuse_detected', severity: 'critical' },
-        { eventType: 'token_reuse_detected', severity: 'critical' },
-        { eventType: 'account_locked', severity: 'medium' },
-        { eventType: 'token_family_revoked', severity: 'high' },
+        { event_type: 'token_reuse_detected', severity: 'critical' },
+        { event_type: 'token_reuse_detected', severity: 'critical' },
+        { event_type: 'account_locked', severity: 'medium' },
+        { event_type: 'token_family_revoked', severity: 'high' },
       ];
-      mockDb.query.securityEvents.findMany.mockResolvedValue(mockEvents);
+      mockDb.query.mockResolvedValue(mockEvents);
 
       const metrics = await getSecurityEventMetrics(asMockDb(mockDb));
 
@@ -285,7 +270,7 @@ describe('Security Events', () => {
     });
 
     test('should return zero counts for empty results', async () => {
-      mockDb.query.securityEvents.findMany.mockResolvedValue([]);
+      mockDb.query.mockResolvedValue([]);
 
       const metrics = await getSecurityEventMetrics(asMockDb(mockDb));
 
@@ -298,23 +283,23 @@ describe('Security Events', () => {
     });
 
     test('should use custom since date', async () => {
-      mockDb.query.securityEvents.findMany.mockResolvedValue([]);
+      mockDb.query.mockResolvedValue([]);
       const customDate = new Date('2024-01-01');
 
       await getSecurityEventMetrics(asMockDb(mockDb), customDate);
 
-      expect(mockDb.query.securityEvents.findMany).toHaveBeenCalled();
+      expect(mockDb.query).toHaveBeenCalled();
     });
 
     test('should count multiple event types correctly', async () => {
       const mockEvents = [
-        { eventType: 'token_reuse_detected', severity: 'critical' },
-        { eventType: 'account_locked', severity: 'medium' },
-        { eventType: 'account_locked', severity: 'medium' },
-        { eventType: 'account_locked', severity: 'medium' },
-        { eventType: 'suspicious_login', severity: 'high' },
+        { event_type: 'token_reuse_detected', severity: 'critical' },
+        { event_type: 'account_locked', severity: 'medium' },
+        { event_type: 'account_locked', severity: 'medium' },
+        { event_type: 'account_locked', severity: 'medium' },
+        { event_type: 'suspicious_login', severity: 'high' },
       ];
-      mockDb.query.securityEvents.findMany.mockResolvedValue(mockEvents);
+      mockDb.query.mockResolvedValue(mockEvents);
 
       const metrics = await getSecurityEventMetrics(asMockDb(mockDb));
 

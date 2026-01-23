@@ -1,7 +1,6 @@
 // apps/server/src/modules/auth/security/__tests__/lockout.test.ts
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { createMockDb } from '../../../../infrastructure/data/database/utils/test-utils';
 import {
   applyProgressiveDelay,
   clearLoginAttempts,
@@ -12,37 +11,8 @@ import {
   unlockAccount,
 } from '../lockout';
 
-import type { MockDbClient } from '../../../../infrastructure/data/database/utils/test-utils';
 import type { LockoutConfig, LockoutStatus } from '../types';
 import type { DbClient } from '@database';
-
-// Mock the database module
-vi.mock('@database', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@database')>();
-  return {
-    ...actual,
-    loginAttempts: {
-      email: 'email',
-      success: 'success',
-      createdAt: 'createdAt',
-      ipAddress: 'ipAddress',
-      userAgent: 'userAgent',
-      failureReason: 'failureReason',
-    },
-    users: {
-      email: 'email',
-    },
-  };
-});
-
-// Mock drizzle-orm
-vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((col: string, val: unknown) => ({ eq: [col, val] })),
-  gte: vi.fn((col: string, val: unknown) => ({ gte: [col, val] })),
-  and: vi.fn((...args: unknown[]) => ({ and: args })),
-  count: vi.fn(() => 'count'),
-  desc: vi.fn((col: string) => ({ desc: col })),
-}));
 
 // Mock constants
 vi.mock('@shared/constants', () => ({
@@ -55,8 +25,19 @@ vi.mock('@security/events', () => ({
   logAccountUnlockedEvent: vi.fn().mockResolvedValue(undefined),
 }));
 
-// Helper to get mock db with correct type for function calls
-function asMockDb(mock: MockDbClient): DbClient {
+// Create mock db matching RawDb interface
+function createMockDb() {
+  return {
+    query: vi.fn().mockResolvedValue([]),
+    queryOne: vi.fn().mockResolvedValue(null),
+    execute: vi.fn().mockResolvedValue(0),
+    raw: vi.fn().mockResolvedValue([]),
+  };
+}
+
+type MockDb = ReturnType<typeof createMockDb>;
+
+function asMockDb(mock: MockDb): DbClient {
   return mock as unknown as DbClient;
 }
 
@@ -65,7 +46,7 @@ function asMockDb(mock: MockDbClient): DbClient {
 // ============================================================================
 
 describe('Lockout Functions', () => {
-  let mockDb: MockDbClient;
+  let mockDb: MockDb;
   const defaultLockoutConfig: LockoutConfig = {
     maxAttempts: 5,
     lockoutDurationMs: 15 * 60 * 1000, // 15 minutes
@@ -93,7 +74,7 @@ describe('Lockout Functions', () => {
         'Mozilla/5.0',
       );
 
-      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
 
     test('should log failed login attempt with reason', async () => {
@@ -106,23 +87,19 @@ describe('Lockout Functions', () => {
         'Invalid password',
       );
 
-      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
 
     test('should log login attempt without optional fields', async () => {
       await logLoginAttempt(asMockDb(mockDb), 'test@example.com', false);
 
-      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
   });
 
   describe('isAccountLocked', () => {
     test('should return true when failed attempts exceed max', async () => {
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ count: 5 }]),
-        }),
-      });
+      mockDb.queryOne.mockResolvedValue({ count: 5 });
 
       const isLocked = await isAccountLocked(
         asMockDb(mockDb),
@@ -134,11 +111,7 @@ describe('Lockout Functions', () => {
     });
 
     test('should return false when failed attempts below max', async () => {
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ count: 3 }]),
-        }),
-      });
+      mockDb.queryOne.mockResolvedValue({ count: 3 });
 
       const isLocked = await isAccountLocked(
         asMockDb(mockDb),
@@ -150,11 +123,7 @@ describe('Lockout Functions', () => {
     });
 
     test('should return false when no failed attempts', async () => {
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ count: 0 }]),
-        }),
-      });
+      mockDb.queryOne.mockResolvedValue({ count: 0 });
 
       const isLocked = await isAccountLocked(
         asMockDb(mockDb),
@@ -166,11 +135,7 @@ describe('Lockout Functions', () => {
     });
 
     test('should return true when attempts equal max', async () => {
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ count: 5 }]),
-        }),
-      });
+      mockDb.queryOne.mockResolvedValue({ count: 5 });
 
       const config = { ...defaultLockoutConfig, maxAttempts: 5 };
       const isLocked = await isAccountLocked(asMockDb(mockDb), 'test@example.com', config);
@@ -196,11 +161,7 @@ describe('Lockout Functions', () => {
     });
 
     test('should return 0 when no failed attempts', async () => {
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ count: 0 }]),
-        }),
-      });
+      mockDb.queryOne.mockResolvedValue({ count: 0 });
 
       const delay = await getProgressiveDelay(
         asMockDb(mockDb),
@@ -213,11 +174,7 @@ describe('Lockout Functions', () => {
 
     test('should return exponential delay based on failed attempts', async () => {
       // 1 failed attempt = 1000ms * 2^0 = 1000ms
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ count: 1 }]),
-        }),
-      });
+      mockDb.queryOne.mockResolvedValue({ count: 1 });
 
       const delay = await getProgressiveDelay(
         asMockDb(mockDb),
@@ -230,11 +187,7 @@ describe('Lockout Functions', () => {
 
     test('should calculate exponential backoff correctly', async () => {
       // 3 failed attempts = 1000ms * 2^2 = 4000ms
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ count: 3 }]),
-        }),
-      });
+      mockDb.queryOne.mockResolvedValue({ count: 3 });
 
       const delay = await getProgressiveDelay(
         asMockDb(mockDb),
@@ -247,11 +200,7 @@ describe('Lockout Functions', () => {
 
     test('should cap delay at MAX_PROGRESSIVE_DELAY_MS', async () => {
       // 10 failed attempts = 1000ms * 2^9 = 512000ms, capped at 30000ms
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ count: 10 }]),
-        }),
-      });
+      mockDb.queryOne.mockResolvedValue({ count: 10 });
 
       const delay = await getProgressiveDelay(
         asMockDb(mockDb),
@@ -264,11 +213,7 @@ describe('Lockout Functions', () => {
 
     test('should handle 2 failed attempts correctly', async () => {
       // 2 failed attempts = 1000ms * 2^1 = 2000ms
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ count: 2 }]),
-        }),
-      });
+      mockDb.queryOne.mockResolvedValue({ count: 2 });
 
       const delay = await getProgressiveDelay(
         asMockDb(mockDb),
@@ -282,11 +227,7 @@ describe('Lockout Functions', () => {
 
   describe('applyProgressiveDelay', () => {
     test('should not delay when no progressive delay needed', async () => {
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ count: 0 }]),
-        }),
-      });
+      mockDb.queryOne.mockResolvedValue({ count: 0 });
 
       const start = Date.now();
       await applyProgressiveDelay(asMockDb(mockDb), 'test@example.com', defaultLockoutConfig);
@@ -296,11 +237,7 @@ describe('Lockout Functions', () => {
     });
 
     test('should delay when progressive delay is needed', async () => {
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ count: 1 }]),
-        }),
-      });
+      mockDb.queryOne.mockResolvedValue({ count: 1 });
 
       const delayPromise = applyProgressiveDelay(
         asMockDb(mockDb),
@@ -313,7 +250,7 @@ describe('Lockout Functions', () => {
 
       await delayPromise;
       // Verify the database was queried to determine delay
-      expect(mockDb.select).toHaveBeenCalled();
+      expect(mockDb.queryOne).toHaveBeenCalled();
     });
   });
 
@@ -323,18 +260,14 @@ describe('Lockout Functions', () => {
       await clearLoginAttempts(asMockDb(mockDb), 'test@example.com');
 
       // No database operations should be called
-      expect(mockDb.insert).not.toHaveBeenCalled();
-      expect(mockDb.select).not.toHaveBeenCalled();
+      expect(mockDb.execute).not.toHaveBeenCalled();
+      expect(mockDb.queryOne).not.toHaveBeenCalled();
     });
   });
 
   describe('getAccountLockoutStatus', () => {
     test('should return unlocked status when not locked', async () => {
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ count: 2 }]),
-        }),
-      });
+      mockDb.queryOne.mockResolvedValue({ count: 2 });
 
       const status: LockoutStatus = await getAccountLockoutStatus(
         asMockDb(mockDb),
@@ -354,22 +287,11 @@ describe('Lockout Functions', () => {
 
       const mostRecentAttemptTime = new Date(now - 5 * 60 * 1000); // 5 minutes ago
 
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            orderBy: vi.fn().mockReturnValue({
-              limit: vi.fn().mockResolvedValue([{ createdAt: mostRecentAttemptTime }]),
-            }),
-          }),
-        }),
-      });
-
-      // Override for count query (first call)
-      mockDb.select.mockReturnValueOnce({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ count: 5 }]),
-        }),
-      });
+      // First call: count query returns locked
+      // Second call: most recent attempt query
+      mockDb.queryOne
+        .mockResolvedValueOnce({ count: 5 })
+        .mockResolvedValueOnce({ created_at: mostRecentAttemptTime });
 
       const status: LockoutStatus = await getAccountLockoutStatus(
         asMockDb(mockDb),
@@ -383,21 +305,9 @@ describe('Lockout Functions', () => {
     });
 
     test('should return locked status without timing when no recent attempt found', async () => {
-      mockDb.select
-        .mockReturnValueOnce({
-          from: vi.fn().mockReturnValue({
-            where: vi.fn().mockResolvedValue([{ count: 5 }]),
-          }),
-        })
-        .mockReturnValueOnce({
-          from: vi.fn().mockReturnValue({
-            where: vi.fn().mockReturnValue({
-              orderBy: vi.fn().mockReturnValue({
-                limit: vi.fn().mockResolvedValue([]),
-              }),
-            }),
-          }),
-        });
+      // First call: count query returns locked
+      // Second call: most recent attempt query returns null
+      mockDb.queryOne.mockResolvedValueOnce({ count: 5 }).mockResolvedValueOnce(null);
 
       const status: LockoutStatus = await getAccountLockoutStatus(
         asMockDb(mockDb),
@@ -422,27 +332,9 @@ describe('Lockout Functions', () => {
       // - If using most recent: lockout is still active (2min + 15min = 13min remaining)
       const mostRecentAttemptTime = new Date(now - 2 * 60 * 1000); // 2 minutes ago
 
-      let orderByCallArgs: unknown[] = [];
-      mockDb.select
-        .mockReturnValueOnce({
-          // First call: count query
-          from: vi.fn().mockReturnValue({
-            where: vi.fn().mockResolvedValue([{ count: 5 }]),
-          }),
-        })
-        .mockReturnValueOnce({
-          // Second call: find most recent attempt
-          from: vi.fn().mockReturnValue({
-            where: vi.fn().mockReturnValue({
-              orderBy: vi.fn((...args: unknown[]) => {
-                orderByCallArgs = args;
-                return {
-                  limit: vi.fn().mockResolvedValue([{ createdAt: mostRecentAttemptTime }]),
-                };
-              }),
-            }),
-          }),
-        });
+      mockDb.queryOne
+        .mockResolvedValueOnce({ count: 5 })
+        .mockResolvedValueOnce({ created_at: mostRecentAttemptTime });
 
       const status: LockoutStatus = await getAccountLockoutStatus(
         asMockDb(mockDb),
@@ -453,11 +345,6 @@ describe('Lockout Functions', () => {
       expect(status.isLocked).toBe(true);
       expect(status.failedAttempts).toBe(5);
       expect(status.lockedUntil).toBeDefined();
-
-      // Verify that descending order was used (to get most recent first)
-      // The orderBy should have been called with desc(loginAttempts.createdAt)
-      expect(orderByCallArgs.length).toBeGreaterThan(0);
-      expect(orderByCallArgs[0]).toEqual({ desc: 'createdAt' });
 
       // With most recent attempt 2 min ago and 15 min lockout,
       // remaining time should be approximately 13 minutes
@@ -476,21 +363,9 @@ describe('Lockout Functions', () => {
       const expectedLockedUntil = new Date(mostRecentAttemptTime.getTime() + 15 * 60 * 1000);
       const expectedRemainingTime = expectedLockedUntil.getTime() - now; // 10 minutes
 
-      mockDb.select
-        .mockReturnValueOnce({
-          from: vi.fn().mockReturnValue({
-            where: vi.fn().mockResolvedValue([{ count: 5 }]),
-          }),
-        })
-        .mockReturnValueOnce({
-          from: vi.fn().mockReturnValue({
-            where: vi.fn().mockReturnValue({
-              orderBy: vi.fn().mockReturnValue({
-                limit: vi.fn().mockResolvedValue([{ createdAt: mostRecentAttemptTime }]),
-              }),
-            }),
-          }),
-        });
+      mockDb.queryOne
+        .mockResolvedValueOnce({ count: 5 })
+        .mockResolvedValueOnce({ created_at: mostRecentAttemptTime });
 
       const status: LockoutStatus = await getAccountLockoutStatus(
         asMockDb(mockDb),
@@ -507,7 +382,7 @@ describe('Lockout Functions', () => {
   describe('unlockAccount', () => {
     test('should insert success entry and look up user when unlocking', async () => {
       const mockUser = { id: 'user-123', email: 'test@example.com' };
-      mockDb.query.users.findFirst.mockResolvedValue(mockUser);
+      mockDb.queryOne.mockResolvedValue(mockUser);
 
       await unlockAccount(
         asMockDb(mockDb),
@@ -518,12 +393,12 @@ describe('Lockout Functions', () => {
         'Admin Browser',
       );
 
-      expect(mockDb.insert).toHaveBeenCalled();
-      expect(mockDb.query.users.findFirst).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
+      expect(mockDb.queryOne).toHaveBeenCalled();
     });
 
     test('should insert success entry even when user does not exist', async () => {
-      mockDb.query.users.findFirst.mockResolvedValue(null);
+      mockDb.queryOne.mockResolvedValue(null);
 
       await unlockAccount(
         asMockDb(mockDb),
@@ -532,11 +407,11 @@ describe('Lockout Functions', () => {
         'Account created in error',
       );
 
-      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
 
     test('should use default userAgent when not provided', async () => {
-      mockDb.query.users.findFirst.mockResolvedValue(null);
+      mockDb.queryOne.mockResolvedValue(null);
 
       await unlockAccount(
         asMockDb(mockDb),
@@ -545,11 +420,11 @@ describe('Lockout Functions', () => {
         'Password reset requested',
       );
 
-      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
 
     test('should record admin userId and reason in audit trail', async () => {
-      mockDb.query.users.findFirst.mockResolvedValue({ id: 'user-123', email: 'test@example.com' });
+      mockDb.queryOne.mockResolvedValue({ id: 'user-123', email: 'test@example.com' });
 
       await unlockAccount(
         asMockDb(mockDb),
@@ -558,11 +433,11 @@ describe('Lockout Functions', () => {
         'Customer support ticket #12345',
       );
 
-      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
 
     test('should include custom reason in the failure reason field', async () => {
-      mockDb.query.users.findFirst.mockResolvedValue({ id: 'user-123', email: 'test@example.com' });
+      mockDb.queryOne.mockResolvedValue({ id: 'user-123', email: 'test@example.com' });
 
       const customReason = 'User locked out due to forgotten password, verified via support call';
       await unlockAccount(
@@ -574,8 +449,8 @@ describe('Lockout Functions', () => {
         'Admin Panel',
       );
 
-      // Verify that insert was called (the reason is included in the failureReason field)
-      expect(mockDb.insert).toHaveBeenCalled();
+      // Verify that execute was called (the reason is included in the failureReason field)
+      expect(mockDb.execute).toHaveBeenCalled();
     });
   });
 
@@ -591,15 +466,11 @@ describe('Lockout Functions', () => {
       await Promise.all(promises);
 
       // All three should have been logged
-      expect(mockDb.insert).toHaveBeenCalledTimes(3);
+      expect(mockDb.execute).toHaveBeenCalledTimes(3);
     });
 
     test('should handle concurrent lockout status checks', async () => {
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ count: 4 }]),
-        }),
-      });
+      mockDb.queryOne.mockResolvedValue({ count: 4 });
 
       // Multiple concurrent lockout status checks
       const promises = [
@@ -617,11 +488,7 @@ describe('Lockout Functions', () => {
     test('should handle concurrent lockout checks reaching threshold', async () => {
       // Start with 4 attempts, then simulate race where count becomes 5
       let callCount = 0;
-      mockDb.select.mockImplementation(() => ({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ count: callCount++ < 2 ? 4 : 5 }]),
-        }),
-      }));
+      mockDb.queryOne.mockImplementation(() => Promise.resolve({ count: callCount++ < 2 ? 4 : 5 }));
 
       const promises = [
         isAccountLocked(asMockDb(mockDb), 'test@example.com', defaultLockoutConfig),
@@ -637,11 +504,7 @@ describe('Lockout Functions', () => {
     });
 
     test('should handle concurrent progressive delay calculations', async () => {
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ count: 2 }]),
-        }),
-      });
+      mockDb.queryOne.mockResolvedValue({ count: 2 });
 
       // Multiple concurrent delay calculations
       const promises = [
@@ -658,11 +521,7 @@ describe('Lockout Functions', () => {
 
     test('should handle interleaved log and check operations', async () => {
       // Simulate interleaved operations
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue([{ count: 3 }]),
-        }),
-      });
+      mockDb.queryOne.mockResolvedValue({ count: 3 });
 
       // Mix of logging and checking operations
       const promises = [

@@ -17,7 +17,7 @@
  */
 
 import { loadConfig } from '@config';
-import { buildConnectionString, createDbClient, users } from '@database';
+import { buildConnectionString, createDbClient, USERS_TABLE, insert } from '@database';
 import { hashPassword } from '@modules/auth/utils/password';
 
 import type { UserRole } from '@abe-stack/core';
@@ -85,15 +85,17 @@ export async function seed(): Promise<void> {
     const passwordHash = await hashPassword(user.password, config.auth.argon2);
 
     try {
-      await db
-        .insert(users)
-        .values({
-          email: user.email,
-          passwordHash,
-          name: user.name,
-          role: user.role,
-        })
-        .onConflictDoNothing({ target: users.email });
+      await db.execute(
+        insert(USERS_TABLE)
+          .values({
+            email: user.email,
+            password_hash: passwordHash,
+            name: user.name,
+            role: user.role,
+          })
+          .onConflictDoNothing('email')
+          .toSql(),
+      );
 
       console.log(`  ✓ ${user.email} (${user.role})`);
     } catch (error) {

@@ -27,8 +27,7 @@
     "./env": "./src/env.ts"
   },
   "scripts": {
-    "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build && tsc-alias",
-    "dev": "echo 'Core package uses source files directly - no build needed for dev'",
+    "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "type-check": "tsc --project tsconfig.json --noEmit",
     "test": "vitest run --project core"
@@ -53,8 +52,5 @@
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
-  "sideEffects": false,
-  "dependencies": {
-    "zod": "^4.3.5"
-  }
+  "sideEffects": false
 }

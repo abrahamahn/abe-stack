@@ -6,8 +6,6 @@
  * Supports multiple provider types with a unified interface.
  */
 
-
-
 import { createElasticsearchProvider } from './elasticsearch-provider';
 import { createSqlSearchProvider } from './sql-provider';
 
@@ -20,8 +18,7 @@ import type {
   SqlSearchProviderConfig,
   SqlTableConfig,
 } from './types';
-import type { DbClient } from '@database';
-import type { PgColumn, PgTableWithColumns } from 'drizzle-orm/pg-core';
+import type { DbClient, Repositories } from '@database';
 
 // ============================================================================
 // Factory Types
@@ -30,75 +27,61 @@ import type { PgColumn, PgTableWithColumns } from 'drizzle-orm/pg-core';
 /**
  * Options for creating a SQL search provider.
  */
-export interface SqlSearchProviderOptions<
-  TTable extends PgTableWithColumns<{
-    name: string;
-    schema: string | undefined;
-    columns: Record<string, PgColumn>;
-    dialect: 'pg';
-  }>,
-> {
-  type: 'sql';
+export interface SqlSearchProviderOptions {
+  /** Database client */
   db: DbClient;
-  table: TTable;
+  /** Repositories */
+  repos: Repositories;
+  /** Table configuration */
   tableConfig: Partial<SqlTableConfig> & { table: string };
+  /** Optional provider configuration */
   config?: SqlSearchProviderConfig;
 }
 
 /**
- * Options for creating an Elasticsearch provider.
+ * Options for creating an Elasticsearch search provider.
  */
 export interface ElasticsearchProviderOptions {
-  type: 'elasticsearch';
+  /** Elasticsearch configuration */
   config: ElasticsearchProviderConfig;
 }
 
 /**
- * Options for creating an in-memory provider.
+ * All provider options mapped by type.
  */
-export interface MemoryProviderOptions<TRecord> {
-  type: 'memory';
-  data: TRecord[];
-  config?: { name?: string };
-}
-
-/**
- * Union of all provider options.
- */
-export type SearchProviderOptions<
-  TTable extends PgTableWithColumns<{
-    name: string;
-    schema: string | undefined;
-    columns: Record<string, PgColumn>;
-    dialect: 'pg';
-  }>,
-  TRecord = Record<string, unknown>,
-> = SqlSearchProviderOptions<TTable> | ElasticsearchProviderOptions | MemoryProviderOptions<TRecord>;
+export type ProviderOptions = {
+  sql: SqlSearchProviderOptions;
+  elasticsearch: ElasticsearchProviderOptions;
+};
 
 // ============================================================================
-// Search Provider Factory
+// Factory Class
 // ============================================================================
 
 /**
  * Factory for creating search providers.
  *
+ * Supports multiple provider types:
+ * - SQL: Query-based search using raw SQL
+ * - Elasticsearch: Full-text search using Elasticsearch
+ *
  * @example
- * ```typescript
  * const factory = new SearchProviderFactory();
  *
  * // Create SQL provider
- * const sqlProvider = factory.createSqlProvider(db, usersTable, {
- *   table: 'users',
- *   primaryKey: 'id',
- * });
+ * const sqlProvider = factory.createSqlProvider(
+ *   db,
+ *   repos,
+ *   { table: 'users', primaryKey: 'id', columns: [...] },
+ *   { name: 'users-sql' }
+ * );
  *
  * // Create Elasticsearch provider
  * const esProvider = factory.createElasticsearchProvider({
- *   name: 'elasticsearch',
  *   node: 'http://localhost:9200',
  *   index: 'users',
+ *   name: 'users-es',
  * });
- * ```
  */
 export class SearchProviderFactory {
   private providers: Map<string, ServerSearchProvider> = new Map();
@@ -106,21 +89,13 @@ export class SearchProviderFactory {
   /**
    * Create a SQL search provider.
    */
-  createSqlProvider<
-    TTable extends PgTableWithColumns<{
-      name: string;
-      schema: string | undefined;
-      columns: Record<string, PgColumn>;
-      dialect: 'pg';
-    }>,
-    TRecord extends Record<string, unknown> = Record<string, unknown>,
-  >(
+  createSqlProvider<TRecord extends Record<string, unknown> = Record<string, unknown>>(
     db: DbClient,
-    table: TTable,
+    repos: Repositories,
     tableConfig: Partial<SqlTableConfig> & { table: string },
     config?: SqlSearchProviderConfig,
-  ): SqlSearchProvider<TTable, TRecord> {
-    const provider = createSqlSearchProvider<TTable, TRecord>(db, table, tableConfig, config);
+  ): SqlSearchProvider<TRecord> {
+    const provider = createSqlSearchProvider<TRecord>(db, repos, tableConfig, config);
     this.providers.set(provider.name, provider as ServerSearchProvider);
     return provider;
   }
@@ -139,65 +114,64 @@ export class SearchProviderFactory {
   /**
    * Get a provider by name.
    */
-  getProvider<TRecord = Record<string, unknown>>(
-    name: string,
-  ): ServerSearchProvider<TRecord> | undefined {
-    return this.providers.get(name) as ServerSearchProvider<TRecord> | undefined;
+  getProvider(name: string): ServerSearchProvider | undefined {
+    return this.providers.get(name);
   }
 
   /**
-   * Check if a provider exists.
+   * Get all registered providers.
+   */
+  getProviders(): Map<string, ServerSearchProvider> {
+    return new Map(this.providers);
+  }
+
+  /**
+   * Get provider names by type.
+   */
+  getProvidersByType(type: SearchProviderType): string[] {
+    return Array.from(this.providers.entries())
+      .filter(([, provider]) => {
+        if (type === 'sql') {
+          return provider instanceof Object && 'name' in provider && provider.name.includes('sql');
+        }
+        if (type === 'elasticsearch') {
+          return provider instanceof Object && 'name' in provider && provider.name.includes('es');
+        }
+        return false;
+      })
+      .map(([name]) => name);
+  }
+
+  /**
+   * Check if a provider exists by name.
    */
   hasProvider(name: string): boolean {
     return this.providers.has(name);
   }
 
   /**
-   * Remove a provider.
+   * Remove a provider by name.
    */
   removeProvider(name: string): boolean {
     return this.providers.delete(name);
   }
 
   /**
-   * Get all provider names.
-   */
-  getProviderNames(): string[] {
-    return Array.from(this.providers.keys());
-  }
-
-  /**
-   * Close all providers and release resources.
+   * Close all providers.
    */
   async closeAll(): Promise<void> {
-    const closePromises = Array.from(this.providers.values()).map((provider) =>
-      provider.close(),
-    );
+    const closePromises = Array.from(this.providers.values()).map(async (provider) => {
+      if (typeof provider.close === 'function') {
+        await provider.close();
+      }
+    });
     await Promise.all(closePromises);
     this.providers.clear();
-  }
-
-  /**
-   * Health check all providers.
-   */
-  async healthCheckAll(): Promise<Map<string, boolean>> {
-    const results = new Map<string, boolean>();
-
-    for (const [name, provider] of this.providers) {
-      try {
-        const healthy = await provider.healthCheck();
-        results.set(name, healthy);
-      } catch {
-        results.set(name, false);
-      }
-    }
-
-    return results;
   }
 }
 
 // ============================================================================
-// Singleton Instance
+// Factory Instance (Singleton)
 // ============================================================================
 
 let factoryInstance: SearchProviderFactory | null = null;
@@ -213,65 +187,11 @@ export function getSearchProviderFactory(): SearchProviderFactory {
 }
 
 /**
- * Reset the singleton factory (for testing).
+ * Reset the singleton factory instance (for testing).
  */
 export function resetSearchProviderFactory(): void {
   if (factoryInstance) {
     void factoryInstance.closeAll();
     factoryInstance = null;
   }
-}
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/**
- * Create a search provider from options.
- */
-export function createSearchProvider<
-  TTable extends PgTableWithColumns<{
-    name: string;
-    schema: string | undefined;
-    columns: Record<string, PgColumn>;
-    dialect: 'pg';
-  }>,
-  TRecord extends Record<string, unknown> = Record<string, unknown>,
->(
-  options: SearchProviderOptions<TTable, TRecord>,
-): ServerSearchProvider<TRecord> {
-  const factory = getSearchProviderFactory();
-
-  switch (options.type) {
-    case 'sql':
-      return factory.createSqlProvider<TTable, TRecord>(
-        options.db,
-        options.table,
-        options.tableConfig,
-        options.config,
-      );
-
-    case 'elasticsearch':
-      return factory.createElasticsearchProvider<TRecord>(options.config);
-
-    case 'memory':
-      // Memory provider would be implemented for testing
-      throw new Error('Memory provider not yet implemented');
-
-    default:
-      throw new Error(`Unknown provider type: ${(options as { type: string }).type}`);
-  }
-}
-
-/**
- * Get provider type from string.
- */
-export function parseProviderType(type: string): SearchProviderType {
-  const validTypes: SearchProviderType[] = ['sql', 'elasticsearch', 'memory'];
-
-  if (validTypes.includes(type as SearchProviderType)) {
-    return type as SearchProviderType;
-  }
-
-  throw new Error(`Invalid provider type: ${type}. Valid types are: ${validTypes.join(', ')}`);
 }

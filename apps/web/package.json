@@ -6,11 +6,8 @@
   "scripts": {
     "dev": "tsx ../../tools/dev/kill-port.ts 5173 && vite --config ../../config/vite.web.config.ts --open",
     "build": "vite build --config ../../config/vite.web.config.ts",
-    "preview": "vite preview --config ../../config/vite.web.config.ts",
     "type-check": "tsc --project tsconfig.json --noEmit",
-    "test": "vitest run --config vitest.config.ts",
-    "test:watch": "vitest --config vitest.config.ts",
-    "lint": "eslint src --ext ts,tsx"
+    "test": "vitest run --config vitest.config.ts"
   },
   "dependencies": {
     "@abe-stack/core": "workspace:*",

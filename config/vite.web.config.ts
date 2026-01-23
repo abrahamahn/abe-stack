@@ -2,9 +2,13 @@
 import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
-import { packageAliases, uiInternalAliases, coreInternalAliases } from './schema/aliases';
+import {
+  packageAliases,
+  uiInternalAliases,
+  coreInternalAliases,
+  webAliases,
+} from './schema/aliases';
 
 const repoRoot = path.resolve(__dirname, '..');
 const packagesRoot = path.join(repoRoot, 'packages');
@@ -22,13 +26,7 @@ function resolveAliases(aliases: Record<string, string>): Record<string, string>
 }
 
 export default defineConfig({
-  plugins: [
-    react(),
-    tsconfigPaths({
-      // Include web app tsconfig for its own aliases
-      projects: [`${webRoot}/tsconfig.json`],
-    }),
-  ],
+  plugins: [react()],
   resolve: {
     alias: {
       // Monorepo packages → source files (not dist/)
@@ -37,6 +35,8 @@ export default defineConfig({
       ...resolveAliases(uiInternalAliases),
       // Core package internal aliases
       ...resolveAliases(coreInternalAliases),
+      // Web app aliases (@config, @features, etc.)
+      ...resolveAliases(webAliases),
     },
   },
   publicDir: `${webRoot}/public`,

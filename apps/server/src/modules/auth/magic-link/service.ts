@@ -10,14 +10,26 @@ import { createHash, randomBytes } from 'node:crypto';
 
 import {
   emailTemplates,
-  magicLinkTokens,
-  users,
   withTransaction,
   type DbClient,
   type EmailService,
+  type Repositories,
 } from '@infrastructure';
 import { EmailSendError, InvalidTokenError, TooManyRequestsError } from '@shared';
-import { and, count, eq, gt, isNull, lt } from 'drizzle-orm';
+import {
+  and,
+  eq,
+  gt,
+  isNull,
+  update,
+  insert,
+  select,
+  MAGIC_LINK_TOKENS_TABLE,
+  USERS_TABLE,
+  USER_COLUMNS,
+  toCamelCase,
+  type User,
+} from '@abe-stack/db';
 
 import { createAuthResponse } from '../utils';
 import { createAccessToken, createRefreshTokenFamily } from '../utils';
@@ -42,9 +54,6 @@ const DEFAULT_MAX_REQUESTS_PER_IP = 10;
 
 /** Rate limit window in milliseconds (1 hour) */
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
-
-/** Cleanup threshold - delete tokens older than this (24 hours) */
-const CLEANUP_THRESHOLD_HOURS = 24;
 
 // ============================================================================
 // Types
@@ -94,18 +103,12 @@ function hashToken(token: string): string {
  * Check if rate limit is exceeded for an email
  */
 async function isEmailRateLimited(
-  db: DbClient,
+  repos: Repositories,
   email: string,
   maxRequests: number = DEFAULT_MAX_REQUESTS_PER_EMAIL,
 ): Promise<boolean> {
   const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS);
-
-  const result = await db
-    .select({ count: count() })
-    .from(magicLinkTokens)
-    .where(and(eq(magicLinkTokens.email, email), gt(magicLinkTokens.createdAt, windowStart)));
-
-  const requestCount = result[0]?.count ?? 0;
+  const requestCount = await repos.magicLinkTokens.countRecentByEmail(email, windowStart);
   return requestCount >= maxRequests;
 }
 
@@ -114,20 +117,12 @@ async function isEmailRateLimited(
  * Prevents abuse from a single source targeting multiple emails
  */
 async function isIpRateLimited(
-  db: DbClient,
+  repos: Repositories,
   ipAddress: string,
   maxRequests: number = DEFAULT_MAX_REQUESTS_PER_IP,
 ): Promise<boolean> {
   const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS);
-
-  const result = await db
-    .select({ count: count() })
-    .from(magicLinkTokens)
-    .where(
-      and(eq(magicLinkTokens.ipAddress, ipAddress), gt(magicLinkTokens.createdAt, windowStart)),
-    );
-
-  const requestCount = result[0]?.count ?? 0;
+  const requestCount = await repos.magicLinkTokens.countRecentByIp(ipAddress, windowStart);
   return requestCount >= maxRequests;
 }
 
@@ -150,7 +145,8 @@ export interface MagicLinkRequestOptions {
 /**
  * Request a magic link for passwordless authentication
  *
- * @param db - Database client
+ * @param db - Database client (for transactions, kept for A/B testing)
+ * @param repos - Repositories for database operations
  * @param emailService - Email service for sending magic links
  * @param email - User's email address
  * @param baseUrl - Frontend base URL for the magic link
@@ -161,7 +157,8 @@ export interface MagicLinkRequestOptions {
  * @throws TooManyRequestsError if rate limit is exceeded
  */
 export async function requestMagicLink(
-  db: DbClient,
+  _db: DbClient,
+  repos: Repositories,
   emailService: EmailService,
   email: string,
   baseUrl: string,
@@ -178,8 +175,8 @@ export async function requestMagicLink(
   // Normalize email to lowercase
   const normalizedEmail = email.toLowerCase().trim();
 
-  // Check email-based rate limit
-  const emailRateLimited = await isEmailRateLimited(db, normalizedEmail, maxAttemptsPerEmail);
+  // Check email-based rate limit (using repository)
+  const emailRateLimited = await isEmailRateLimited(repos, normalizedEmail, maxAttemptsPerEmail);
   if (emailRateLimited) {
     throw new TooManyRequestsError(
       'Too many magic link requests. Please try again later.',
@@ -189,7 +186,7 @@ export async function requestMagicLink(
 
   // Check IP-based rate limit (if IP is provided)
   if (ipAddress) {
-    const ipRateLimited = await isIpRateLimited(db, ipAddress, maxAttemptsPerIp);
+    const ipRateLimited = await isIpRateLimited(repos, ipAddress, maxAttemptsPerIp);
     if (ipRateLimited) {
       throw new TooManyRequestsError(
         'Too many requests from this location. Please try again later.',
@@ -203,8 +200,8 @@ export async function requestMagicLink(
   const tokenHash = hashToken(token);
   const expiresAt = new Date(Date.now() + tokenExpiryMinutes * 60 * 1000);
 
-  // Store hashed token
-  await db.insert(magicLinkTokens).values({
+  // Store hashed token (using repository)
+  await repos.magicLinkTokens.create({
     email: normalizedEmail,
     tokenHash,
     expiresAt,
@@ -245,6 +242,7 @@ export async function requestMagicLink(
  * in the same operation that validates it, ensuring only one request can succeed.
  *
  * @param db - Database client
+ * @param repos - Repositories (kept for A/B testing, transaction uses drizzle)
  * @param config - Auth configuration
  * @param token - The magic link token from the URL
  * @returns Authentication result with tokens and user info
@@ -252,6 +250,7 @@ export async function requestMagicLink(
  */
 export async function verifyMagicLink(
   db: DbClient,
+  _repos: Repositories,
   config: AuthConfig,
   token: string,
 ): Promise<MagicLinkResult> {
@@ -263,17 +262,27 @@ export async function verifyMagicLink(
     // Atomically mark token as used while validating it
     // This prevents race conditions - only the first request succeeds
     const now = new Date();
-    const [tokenRecord] = await tx
-      .update(magicLinkTokens)
-      .set({ usedAt: now })
-      .where(
-        and(
-          eq(magicLinkTokens.tokenHash, tokenHash),
-          gt(magicLinkTokens.expiresAt, now),
-          isNull(magicLinkTokens.usedAt),
-        ),
-      )
-      .returning();
+    type TokenRecord = Record<string, unknown> & {
+      id: string;
+      email: string;
+      token_hash: string;
+      expires_at: Date;
+      used_at: Date | null;
+    };
+    const tokenRecords = await tx.query<TokenRecord>(
+      update(MAGIC_LINK_TOKENS_TABLE)
+        .set({ used_at: now })
+        .where(
+          and(
+            eq('token_hash', tokenHash),
+            gt('expires_at', now),
+            isNull('used_at'),
+          ),
+        )
+        .returningAll()
+        .toSql(),
+    );
+    const tokenRecord = tokenRecords[0];
 
     // If no rows were updated, token is invalid, expired, or already used
     if (!tokenRecord) {
@@ -281,39 +290,47 @@ export async function verifyMagicLink(
     }
 
     // Find existing user
-    let user = await tx.query.users.findFirst({
-      where: eq(users.email, tokenRecord.email),
-    });
+    const userRow = await tx.queryOne<Record<string, unknown>>(
+      select(USERS_TABLE)
+                .where(eq('email', tokenRecord.email))
+        .limit(1)
+        .toSql(),
+    );
+    let user: User | null = userRow ? toCamelCase<User>(userRow, USER_COLUMNS) : null;
 
     // If user doesn't exist, create them
     if (!user) {
-      const [newUser] = await tx
-        .insert(users)
-        .values({
-          email: tokenRecord.email,
-          name: null,
-          // Magic link users don't have a password - generate a random unusable hash
-          passwordHash: `magiclink:${randomBytes(32).toString('hex')}`,
-          role: 'user',
-          emailVerified: true, // Email is verified by using magic link
-          emailVerifiedAt: new Date(),
-        })
-        .returning();
+      const newUserRows = await tx.query<Record<string, unknown>>(
+        insert(USERS_TABLE)
+          .values({
+            email: tokenRecord.email,
+            name: null,
+            // Magic link users don't have a password - generate a random unusable hash
+            password_hash: `magiclink:${randomBytes(32).toString('hex')}`,
+            role: 'user',
+            email_verified: true, // Email is verified by using magic link
+            email_verified_at: new Date(),
+          })
+          .returningAll()
+          .toSql(),
+      );
 
-      if (!newUser) {
+      if (!newUserRows[0]) {
         throw new Error('Failed to create user');
       }
-      user = newUser;
+      user = toCamelCase<User>(newUserRows[0], USER_COLUMNS);
     } else if (!user.emailVerified) {
       // If user exists but email not verified, verify it now
-      const [updatedUser] = await tx
-        .update(users)
-        .set({ emailVerified: true, emailVerifiedAt: new Date() })
-        .where(eq(users.id, user.id))
-        .returning();
+      const updatedRows = await tx.query<Record<string, unknown>>(
+        update(USERS_TABLE)
+          .set({ email_verified: true, email_verified_at: new Date() })
+          .where(eq('id', user.id))
+          .returningAll()
+          .toSql(),
+      );
 
-      if (updatedUser) {
-        user = updatedUser;
+      if (updatedRows[0]) {
+        user = toCamelCase<User>(updatedRows[0], USER_COLUMNS);
       }
     }
 
@@ -343,16 +360,13 @@ export async function verifyMagicLink(
  * Clean up expired magic link tokens
  * Should be called periodically by a scheduled job
  *
- * @param db - Database client
+ * @param db - Database client (kept for A/B testing)
+ * @param repos - Repositories for database operations
  * @returns Number of tokens deleted
  */
-export async function cleanupExpiredMagicLinkTokens(db: DbClient): Promise<number> {
-  const threshold = new Date(Date.now() - CLEANUP_THRESHOLD_HOURS * 60 * 60 * 1000);
-
-  const result = await db
-    .delete(magicLinkTokens)
-    .where(lt(magicLinkTokens.createdAt, threshold))
-    .returning({ id: magicLinkTokens.id });
-
-  return result.length;
+export async function cleanupExpiredMagicLinkTokens(
+  _db: DbClient,
+  repos: Repositories,
+): Promise<number> {
+  return repos.magicLinkTokens.deleteExpired();
 }

@@ -149,14 +149,14 @@ export function createSelectiveContext<
     prevValueRef.current = contextValue;
     changedKeysRef.current = changedKeys;
 
-    // Memoize the context value
+    // Memoize the context value - use ref for changedKeys to avoid triggering on every render
     const memoizedValue = useMemo(
       () => ({
         ...contextValue,
         // Add a method to check if a specific key changed
-        hasChanged: (key: keyof T): boolean => changedKeys.has(key),
+        hasChanged: (key: keyof T): boolean => changedKeysRef.current.has(key),
       }),
-      [contextValue, changedKeys],
+      [contextValue],
     );
 
     return <Context.Provider value={memoizedValue as unknown as T}>{children}</Context.Provider>;

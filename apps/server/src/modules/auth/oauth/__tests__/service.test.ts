@@ -1,529 +1,1056 @@
 // apps/server/src/modules/auth/oauth/__tests__/service.test.ts
-/**
- * OAuth Service Unit Tests
- *
- * Tests the OAuth service business logic by mocking database operations
- * and OAuth provider clients.
- */
-
-import { ConflictError, NotFoundError, OAuthStateMismatchError } from '@abe-stack/core';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+
+import type {
+  OAuthConnectionRepository,
+  RefreshTokenRepository,
+  UserRepository,
+} from '@abe-stack/db';
+import { createMockDb, asMockDb } from '@infrastructure/data/database/utils/test-utils';
+import type { Repositories, DbClient } from '@infrastructure';
+import type { AuthConfig } from '@config';
 
 import {
   createOAuthState,
   decodeOAuthState,
   encodeOAuthState,
   findUserByOAuthProvider,
+  getAuthorizationUrl,
   getConnectedProviders,
+  getProviderClient,
+  handleOAuthCallback,
+  linkOAuthAccount,
   unlinkOAuthAccount,
 } from '../service';
+import type { OAuthProviderClient, OAuthTokenResponse, OAuthUserInfo } from '../types';
 
-import type { OAuthProvider } from '../types';
-import type { AuthConfig } from '@config';
-import type { DbClient } from '@infrastructure';
-
-// ============================================================================
-// Mock Dependencies
-// ============================================================================
-
-// Mock @infrastructure
-vi.mock('@infrastructure', () => ({
-  oauthConnections: {
-    id: 'id',
-    userId: 'userId',
-    provider: 'provider',
-    providerUserId: 'providerUserId',
-    providerEmail: 'providerEmail',
-    accessToken: 'accessToken',
-    refreshToken: 'refreshToken',
-    expiresAt: 'expiresAt',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
-  },
-  users: {
-    id: 'id',
-    email: 'email',
-    name: 'name',
-    role: 'role',
-    passwordHash: 'passwordHash',
-    emailVerified: 'emailVerified',
-  },
-  withTransaction: vi.fn(),
-  OAUTH_PROVIDERS: ['google', 'github', 'apple'],
-}));
-
-// Mock drizzle-orm
-vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: unknown[]) => args),
-  and: vi.fn((...args: unknown[]) => args),
-}));
-
-// Mock ../utils
-vi.mock('../../utils', () => ({
-  createAccessToken: vi.fn(() => 'mock-access-token'),
-  createRefreshTokenFamily: vi.fn(() => ({
-    familyId: 'family-123',
-    token: 'mock-refresh-token',
-  })),
-}));
-
-// ============================================================================
-// Test Constants
-// ============================================================================
-
-const TEST_CONFIG = {
-  jwt: {
-    secret: 'test-secret-32-characters-long!!',
-    accessTokenExpiry: '15m',
-  },
-  refreshToken: {
-    expiryDays: 7,
-  },
-  cookie: {
-    secret: 'cookie-secret-32-characters-lng!',
-  },
-  oauth: {
-    google: {
-      clientId: 'google-client-id',
-      clientSecret: 'google-client-secret',
-      callbackUrl: '/api/auth/oauth/google/callback',
-    },
-    github: {
-      clientId: 'github-client-id',
-      clientSecret: 'github-client-secret',
-      callbackUrl: '/api/auth/oauth/github/callback',
-    },
-  },
-} as unknown as AuthConfig;
-
-// ============================================================================
-// Test Helpers
-// ============================================================================
-
-interface MockDbQueryResult {
-  findFirst: ReturnType<typeof vi.fn>;
-  findMany: ReturnType<typeof vi.fn>;
-}
-
-interface MockDbInsertResult {
-  values: ReturnType<typeof vi.fn>;
-}
-
-interface MockDbUpdateResult {
-  set: ReturnType<typeof vi.fn>;
-}
-
-interface MockDbDeleteResult {
-  where: ReturnType<typeof vi.fn>;
-}
-
-interface MockDbClientExtended {
-  query: {
-    oauthConnections: MockDbQueryResult;
-    users: MockDbQueryResult;
-  };
-  select: ReturnType<typeof vi.fn>;
-  insert: ReturnType<typeof vi.fn> & ((...args: unknown[]) => MockDbInsertResult);
-  update: ReturnType<typeof vi.fn> & ((...args: unknown[]) => MockDbUpdateResult);
-  delete: ReturnType<typeof vi.fn> & ((...args: unknown[]) => MockDbDeleteResult);
-}
-
-function createMockDb(): MockDbClientExtended & DbClient {
-  const mockInsert = vi.fn(() => ({
-    values: vi.fn(() => ({
-      returning: vi.fn(() => Promise.resolve([])),
-    })),
-  }));
-
-  const mockUpdate = vi.fn(() => ({
-    set: vi.fn(() => ({
-      where: vi.fn(() => ({
-        returning: vi.fn(() => Promise.resolve([])),
-      })),
-    })),
-  }));
-
-  const mockDelete = vi.fn(() => ({
-    where: vi.fn(() => ({
-      returning: vi.fn(() => Promise.resolve([])),
-    })),
-  }));
-
-  // Create select chain mock for findUserByOAuthProvider (JOIN query)
-  const mockSelect = vi.fn(() => {
-    const chain = {
-      from: vi.fn().mockReturnThis(),
-      innerJoin: vi.fn().mockReturnThis(),
-      where: vi.fn().mockReturnThis(),
-      limit: vi.fn(() => Promise.resolve([])),
-    };
-    return chain;
-  });
-
+// Mock the crypto module for consistent state generation in tests
+vi.mock('node:crypto', async () => {
+  const actual = await vi.importActual<typeof import('node:crypto')>('node:crypto');
   return {
-    query: {
-      oauthConnections: {
-        findFirst: vi.fn(),
-        findMany: vi.fn(),
-      },
-      users: {
-        findFirst: vi.fn(),
-        findMany: vi.fn(),
-      },
-    },
-    select: mockSelect,
-    insert: mockInsert,
-    update: mockUpdate,
-    delete: mockDelete,
-  } as unknown as MockDbClientExtended & DbClient;
-}
-
-// ============================================================================
-// Tests: OAuth State Management
-// ============================================================================
-
-describe('OAuth State Management', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  test('createOAuthState should create valid state object', () => {
-    const provider: OAuthProvider = 'google';
-    const redirectUri = 'http://localhost:3000/callback';
-    const isLinking = false;
-
-    const state = createOAuthState(provider, redirectUri, isLinking);
-
-    expect(state.provider).toBe(provider);
-    expect(state.redirectUri).toBe(redirectUri);
-    expect(state.isLinking).toBe(false);
-    expect(state.userId).toBeUndefined();
-    expect(state.state).toBeDefined();
-    expect(state.state.length).toBe(64); // 32 bytes hex
-    expect(state.createdAt).toBeLessThanOrEqual(Date.now());
-  });
-
-  test('createOAuthState should include userId for linking', () => {
-    const provider: OAuthProvider = 'github';
-    const redirectUri = 'http://localhost:3000/callback';
-    const isLinking = true;
-    const userId = 'user-123';
-
-    const state = createOAuthState(provider, redirectUri, isLinking, userId);
-
-    expect(state.isLinking).toBe(true);
-    expect(state.userId).toBe(userId);
-  });
-
-  test('encodeOAuthState and decodeOAuthState should be reversible', () => {
-    const provider: OAuthProvider = 'google';
-    const redirectUri = 'http://localhost:3000/callback';
-    const isLinking = true;
-    const userId = 'user-456';
-
-    const originalState = createOAuthState(provider, redirectUri, isLinking, userId);
-    const encoded = encodeOAuthState(originalState, TEST_CONFIG.cookie.secret);
-    const decoded = decodeOAuthState(encoded, TEST_CONFIG.cookie.secret);
-
-    expect(decoded.provider).toBe(originalState.provider);
-    expect(decoded.redirectUri).toBe(originalState.redirectUri);
-    expect(decoded.isLinking).toBe(originalState.isLinking);
-    expect(decoded.userId).toBe(originalState.userId);
-    expect(decoded.state).toBe(originalState.state);
-    expect(decoded.createdAt).toBe(originalState.createdAt);
-  });
-
-  test('decodeOAuthState should throw for invalid state', async () => {
-    expect(() => decodeOAuthState('invalid-state', TEST_CONFIG.cookie.secret)).toThrow(
-      OAuthStateMismatchError,
-    );
-  });
-
-  test('decodeOAuthState should throw for tampered state', async () => {
-    const state = createOAuthState('google', 'http://localhost:3000/callback', false);
-    const encoded = encodeOAuthState(state, TEST_CONFIG.cookie.secret);
-
-    // Tamper with the encoded state
-    const tampered = encoded.slice(0, -5) + 'xxxxx';
-
-    expect(() => decodeOAuthState(tampered, TEST_CONFIG.cookie.secret)).toThrow(
-      OAuthStateMismatchError,
-    );
-  });
-
-  test('decodeOAuthState should throw for expired state', async () => {
-    // Create state with old timestamp
-    const state = createOAuthState('google', 'http://localhost:3000/callback', false);
-    state.createdAt = Date.now() - 15 * 60 * 1000; // 15 minutes ago (expired)
-
-    const encoded = encodeOAuthState(state, TEST_CONFIG.cookie.secret);
-
-    expect(() => decodeOAuthState(encoded, TEST_CONFIG.cookie.secret)).toThrow(
-      OAuthStateMismatchError,
-    );
-  });
+    ...actual,
+    randomBytes: vi.fn((size: number) => {
+      // Return actual Buffer for crypto operations
+      return actual.randomBytes(size);
+    }),
+  };
 });
 
-// ============================================================================
-// Tests: getConnectedProviders
-// ============================================================================
+// Mock provider factories
+vi.mock('../providers', () => ({
+  createGoogleProvider: vi.fn(),
+  createGitHubProvider: vi.fn(),
+  createAppleProvider: vi.fn(),
+  extractAppleUserFromIdToken: vi.fn(),
+}));
 
-describe('getConnectedProviders', () => {
+// Mock auth utils
+vi.mock('../../utils', () => ({
+  createAccessToken: vi.fn(() => 'mock-access-token'),
+  createRefreshTokenFamily: vi.fn(() => Promise.resolve({ token: 'mock-refresh-token' })),
+}));
+
+// Mock transaction
+vi.mock('@infrastructure', async () => {
+  const actual = await vi.importActual<typeof import('@infrastructure')>('@infrastructure');
+  return {
+    ...actual,
+    withTransaction: vi.fn(async (db, callback) => {
+      return callback(db);
+    }),
+  };
+});
+
+// Mock db insert helpers
+vi.mock('@abe-stack/db', async () => {
+  const actual = await vi.importActual<typeof import('@abe-stack/db')>('@abe-stack/db');
+  return {
+    ...actual,
+    insert: vi.fn(() => ({
+      values: vi.fn(() => ({
+        returningAll: vi.fn(() => ({
+          toSql: vi.fn(() => 'INSERT SQL'),
+        })),
+        toSql: vi.fn(() => 'INSERT SQL'),
+      })),
+    })),
+    toCamelCase: vi.fn((data) => data),
+  };
+});
+
+describe('OAuth Service', () => {
+  let mockDb: DbClient;
+  let mockRepos: Repositories;
+  let mockConfig: AuthConfig;
+
   beforeEach(() => {
     vi.clearAllMocks();
+
+    // Mock database client using test utility
+    const mockDbClient = createMockDb();
+    mockDb = asMockDb(mockDbClient);
+
+    // Mock repositories
+    mockRepos = {
+      users: {
+        findById: vi.fn(),
+        findByEmail: vi.fn(),
+        create: vi.fn(),
+      } as Partial<UserRepository> as UserRepository,
+      oauthConnections: {
+        findByProviderUserId: vi.fn(),
+        findByUserIdAndProvider: vi.fn(),
+        findByUserId: vi.fn(),
+        create: vi.fn(),
+        update: vi.fn(),
+        deleteByUserIdAndProvider: vi.fn(),
+      } as Partial<OAuthConnectionRepository> as OAuthConnectionRepository,
+      refreshTokens: {} as RefreshTokenRepository,
+      refreshTokenFamilies: {} as Repositories['refreshTokenFamilies'],
+      loginAttempts: {} as Repositories['loginAttempts'],
+      passwordResetTokens: {} as Repositories['passwordResetTokens'],
+      emailVerificationTokens: {} as Repositories['emailVerificationTokens'],
+      securityEvents: {} as Repositories['securityEvents'],
+      magicLinkTokens: {} as Repositories['magicLinkTokens'],
+      pushSubscriptions: {} as Repositories['pushSubscriptions'],
+      notificationPreferences: {} as Repositories['notificationPreferences'],
+    };
+
+    // Mock auth config
+    mockConfig = {
+      jwt: {
+        secret: 'test-secret',
+        accessTokenExpiry: '15m',
+        issuer: 'test',
+        audience: 'test',
+      },
+      refreshToken: {
+        expiryDays: 30,
+        gracePeriodSeconds: 60,
+      },
+      cookie: {
+        secret: 'encryption-secret-key-for-state',
+        name: 'refreshToken',
+        httpOnly: true,
+        secure: true,
+        sameSite: 'lax',
+        path: '/',
+      },
+      oauth: {
+        google: {
+          clientId: 'google-client-id',
+          clientSecret: 'google-client-secret',
+          callbackUrl: 'http://localhost:3000/auth/google/callback',
+        },
+        github: {
+          clientId: 'github-client-id',
+          clientSecret: 'github-client-secret',
+          callbackUrl: 'http://localhost:3000/auth/github/callback',
+        },
+        apple: {
+          clientId: 'apple-client-id',
+          clientSecret: 'apple-client-secret',
+          callbackUrl: 'http://localhost:3000/auth/apple/callback',
+          teamId: 'apple-team-id',
+          keyId: 'apple-key-id',
+          privateKey: 'apple-private-key',
+        },
+      },
+    } as AuthConfig;
   });
 
-  test('should return empty array for user with no connections', async () => {
-    const db = createMockDb();
-    const userId = 'user-123';
+  describe('createOAuthState', () => {
+    test('should create OAuth state with required fields', () => {
+      const state = createOAuthState('google', 'http://localhost:3000', false);
 
-    vi.mocked(db.query.oauthConnections.findMany).mockResolvedValue([]);
+      expect(state).toMatchObject({
+        state: expect.any(String),
+        provider: 'google',
+        redirectUri: 'http://localhost:3000',
+        isLinking: false,
+        createdAt: expect.any(Number),
+      });
+      expect(state.userId).toBeUndefined();
+    });
 
-    const connections = await getConnectedProviders(db, userId);
+    test('should include userId when provided', () => {
+      const state = createOAuthState('github', 'http://localhost:3000', true, 'user-123');
 
-    expect(connections).toEqual([]);
-    expect(db.query.oauthConnections.findMany).toHaveBeenCalled();
+      expect(state).toMatchObject({
+        provider: 'github',
+        redirectUri: 'http://localhost:3000',
+        isLinking: true,
+        userId: 'user-123',
+      });
+    });
+
+    test('should include timestamp for expiry checking', () => {
+      const before = Date.now();
+      const state = createOAuthState('google', 'http://localhost:3000', false);
+      const after = Date.now();
+
+      expect(state.createdAt).toBeGreaterThanOrEqual(before);
+      expect(state.createdAt).toBeLessThanOrEqual(after);
+    });
   });
 
-  test('should return mapped connections for user', async () => {
-    const db = createMockDb();
-    const userId = 'user-123';
+  describe('encodeOAuthState and decodeOAuthState', () => {
+    test('should encode and decode state correctly', () => {
+      const originalState = createOAuthState('google', 'http://localhost:3000', false);
+      const encoded = encodeOAuthState(originalState, mockConfig.cookie.secret);
+      const decoded = decodeOAuthState(encoded, mockConfig.cookie.secret);
 
-    const mockConnections = [
-      {
-        id: 'conn-1',
-        userId,
+      expect(decoded).toEqual(originalState);
+    });
+
+    test('should throw error for expired state', () => {
+      const oldState = createOAuthState('google', 'http://localhost:3000', false);
+      oldState.createdAt = Date.now() - 11 * 60 * 1000; // 11 minutes ago
+
+      const encoded = encodeOAuthState(oldState, mockConfig.cookie.secret);
+
+      expect(() => decodeOAuthState(encoded, mockConfig.cookie.secret)).toThrow(
+        'OAuth state mismatch',
+      );
+    });
+
+    test('should throw error for invalid encrypted data', () => {
+      expect(() => decodeOAuthState('invalid-data', mockConfig.cookie.secret)).toThrow(
+        'OAuth state mismatch',
+      );
+    });
+
+    test('should throw error for malformed encrypted data', () => {
+      expect(() => decodeOAuthState('part1:part2', mockConfig.cookie.secret)).toThrow(
+        'OAuth state mismatch',
+      );
+    });
+  });
+
+  describe('getProviderClient', () => {
+    test('should create Google provider client', async () => {
+      const { createGoogleProvider } = await import('../providers/index.js');
+
+      getProviderClient('google', mockConfig);
+
+      expect(createGoogleProvider).toHaveBeenCalledWith('google-client-id', 'google-client-secret');
+    });
+
+    test('should create GitHub provider client', async () => {
+      const { createGitHubProvider } = await import('../providers/index.js');
+
+      getProviderClient('github', mockConfig);
+
+      expect(createGitHubProvider).toHaveBeenCalledWith('github-client-id', 'github-client-secret');
+    });
+
+    test('should create Apple provider client with additional config', async () => {
+      const { createAppleProvider } = await import('../providers/index.js');
+
+      getProviderClient('apple', mockConfig);
+
+      expect(createAppleProvider).toHaveBeenCalledWith({
+        clientId: 'apple-client-id',
+        teamId: 'apple-team-id',
+        keyId: 'apple-key-id',
+        privateKey: 'apple-private-key',
+      });
+    });
+
+    test('should throw error for unconfigured provider', () => {
+      const configWithoutGoogle = { ...mockConfig, oauth: {} };
+
+      expect(() => getProviderClient('google', configWithoutGoogle)).toThrow(
+        'OAuth provider google is not configured',
+      );
+    });
+
+    test('should throw error for Apple without required fields', () => {
+      const incompleteAppleConfig = {
+        ...mockConfig,
+        oauth: {
+          apple: {
+            clientId: 'apple-client-id',
+            clientSecret: 'apple-client-secret',
+            callbackUrl: 'http://localhost:3000/auth/apple/callback',
+          },
+        },
+      };
+
+      expect(() => getProviderClient('apple', incompleteAppleConfig as AuthConfig)).toThrow(
+        'Apple OAuth requires teamId, keyId, and privateKey configuration',
+      );
+    });
+  });
+
+  describe('getAuthorizationUrl', () => {
+    test('should generate authorization URL with state', async () => {
+      const mockClient: OAuthProviderClient = {
+        provider: 'google',
+        getAuthorizationUrl: vi.fn(() => 'https://accounts.google.com/o/oauth2/v2/auth'),
+        exchangeCode: vi.fn(),
+        getUserInfo: vi.fn(),
+      };
+
+      const { createGoogleProvider } = await import('../providers/index.js');
+      vi.mocked(createGoogleProvider).mockReturnValue(mockClient);
+
+      const result = getAuthorizationUrl(
+        'google',
+        mockConfig,
+        'http://localhost:3000/callback',
+        false,
+      );
+
+      expect(result).toMatchObject({
+        url: 'https://accounts.google.com/o/oauth2/v2/auth',
+        state: expect.any(String),
+      });
+      expect(mockClient.getAuthorizationUrl).toHaveBeenCalled();
+    });
+
+    test('should include userId in state when linking', async () => {
+      const mockClient: OAuthProviderClient = {
+        provider: 'google',
+        getAuthorizationUrl: vi.fn((state) => {
+          // Verify state was passed
+          expect(state).toBeDefined();
+          return 'https://accounts.google.com/o/oauth2/v2/auth';
+        }),
+        exchangeCode: vi.fn(),
+        getUserInfo: vi.fn(),
+      };
+
+      const { createGoogleProvider } = await import('../providers/index.js');
+      vi.mocked(createGoogleProvider).mockReturnValue(mockClient);
+
+      const result = getAuthorizationUrl(
+        'google',
+        mockConfig,
+        'http://localhost:3000/callback',
+        true,
+        'user-123',
+      );
+
+      expect(result.state).toBeDefined();
+      const decoded = decodeOAuthState(result.state, mockConfig.cookie.secret);
+      expect(decoded.userId).toBe('user-123');
+      expect(decoded.isLinking).toBe(true);
+    });
+  });
+
+  describe('handleOAuthCallback', () => {
+    const mockOAuthUserInfo: OAuthUserInfo = {
+      id: 'provider-user-123',
+      email: 'user@example.com',
+      name: 'Test User',
+      emailVerified: true,
+    };
+
+    const mockTokens: OAuthTokenResponse = {
+      accessToken: 'provider-access-token',
+      refreshToken: 'provider-refresh-token',
+      expiresAt: new Date(Date.now() + 3600000),
+      tokenType: 'Bearer',
+    };
+
+    test('should authenticate existing user with OAuth connection', async () => {
+      const mockClient: OAuthProviderClient = {
+        provider: 'google',
+        getAuthorizationUrl: vi.fn(),
+        exchangeCode: vi.fn().mockResolvedValue(mockTokens),
+        getUserInfo: vi.fn().mockResolvedValue(mockOAuthUserInfo),
+      };
+
+      const { createGoogleProvider } = await import('../providers/index.js');
+      vi.mocked(createGoogleProvider).mockReturnValue(mockClient);
+
+      const existingConnection = {
+        id: 'conn-123',
+        userId: 'user-123',
         provider: 'google' as const,
-        providerUserId: 'google-123',
-        providerEmail: 'user@gmail.com',
+        providerUserId: 'provider-user-123',
+        providerEmail: 'user@example.com',
         accessToken: 'encrypted-token',
         refreshToken: null,
         expiresAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const existingUser = {
+        id: 'user-123',
+        email: 'user@example.com',
+        name: 'Test User',
+        role: 'user' as const,
+        passwordHash: 'hash',
         createdAt: new Date('2024-01-01'),
-        updatedAt: new Date('2024-01-01'),
-      },
-      {
-        id: 'conn-2',
-        userId,
-        provider: 'github' as const,
-        providerUserId: 'github-456',
-        providerEmail: 'user@github.com',
-        accessToken: 'encrypted-token-2',
+        updatedAt: new Date(),
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+        lockedUntil: null,
+        failedLoginAttempts: 0,
+        version: 1,
+      };
+
+      vi.mocked(mockRepos.oauthConnections.findByProviderUserId).mockResolvedValue(
+        existingConnection,
+      );
+      vi.mocked(mockRepos.users.findById).mockResolvedValue(existingUser);
+
+      const state = createOAuthState('google', 'http://localhost:3000/callback', false);
+      const encoded = encodeOAuthState(state, mockConfig.cookie.secret);
+
+      const result = await handleOAuthCallback(
+        mockDb,
+        mockRepos,
+        mockConfig,
+        'google',
+        'auth-code',
+        encoded,
+        'http://localhost:3000/callback',
+      );
+
+      expect(result.isLinking).toBe(false);
+      expect(result.auth).toBeDefined();
+      expect(result.auth?.isNewUser).toBe(false);
+      expect(result.auth?.user.id).toBe('user-123');
+      expect(mockRepos.oauthConnections.update).toHaveBeenCalledWith(
+        'conn-123',
+        expect.objectContaining({
+          providerEmail: 'user@example.com',
+        }),
+      );
+    });
+
+    test('should create new user for new OAuth login', async () => {
+      const mockClient: OAuthProviderClient = {
+        provider: 'google',
+        getAuthorizationUrl: vi.fn(),
+        exchangeCode: vi.fn().mockResolvedValue(mockTokens),
+        getUserInfo: vi.fn().mockResolvedValue(mockOAuthUserInfo),
+      };
+
+      const { createGoogleProvider } = await import('../providers/index.js');
+      vi.mocked(createGoogleProvider).mockReturnValue(mockClient);
+
+      vi.mocked(mockRepos.oauthConnections.findByProviderUserId).mockResolvedValue(null);
+      vi.mocked(mockRepos.users.findByEmail).mockResolvedValue(null);
+
+      const newUser = {
+        id: 'new-user-123',
+        email: 'user@example.com',
+        name: 'Test User',
+        role: 'user' as const,
+        passwordHash: 'oauth:google:hash',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+        lockedUntil: null,
+        failedLoginAttempts: 0,
+        version: 1,
+      };
+
+      vi.mocked(mockDb.query).mockResolvedValue([newUser]);
+
+      const state = createOAuthState('google', 'http://localhost:3000/callback', false);
+      const encoded = encodeOAuthState(state, mockConfig.cookie.secret);
+
+      const result = await handleOAuthCallback(
+        mockDb,
+        mockRepos,
+        mockConfig,
+        'google',
+        'auth-code',
+        encoded,
+        'http://localhost:3000/callback',
+      );
+
+      expect(result.isLinking).toBe(false);
+      expect(result.auth).toBeDefined();
+      expect(result.auth?.isNewUser).toBe(true);
+      expect(mockDb.query).toHaveBeenCalled();
+    });
+
+    test('should throw error if email already exists without OAuth connection', async () => {
+      const mockClient: OAuthProviderClient = {
+        provider: 'google',
+        getAuthorizationUrl: vi.fn(),
+        exchangeCode: vi.fn().mockResolvedValue(mockTokens),
+        getUserInfo: vi.fn().mockResolvedValue(mockOAuthUserInfo),
+      };
+
+      const { createGoogleProvider } = await import('../providers/index.js');
+      vi.mocked(createGoogleProvider).mockReturnValue(mockClient);
+
+      vi.mocked(mockRepos.oauthConnections.findByProviderUserId).mockResolvedValue(null);
+      vi.mocked(mockRepos.users.findByEmail).mockResolvedValue({
+        id: 'existing-user',
+        email: 'user@example.com',
+        name: 'Existing User',
+        role: 'user',
+        passwordHash: 'hash',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+        lockedUntil: null,
+        failedLoginAttempts: 0,
+        version: 1,
+      });
+
+      const state = createOAuthState('google', 'http://localhost:3000/callback', false);
+      const encoded = encodeOAuthState(state, mockConfig.cookie.secret);
+
+      await expect(
+        handleOAuthCallback(
+          mockDb,
+          mockRepos,
+          mockConfig,
+          'google',
+          'auth-code',
+          encoded,
+          'http://localhost:3000/callback',
+        ),
+      ).rejects.toThrow('already exists');
+    });
+
+    test('should link OAuth account when isLinking is true', async () => {
+      const mockClient: OAuthProviderClient = {
+        provider: 'google',
+        getAuthorizationUrl: vi.fn(),
+        exchangeCode: vi.fn().mockResolvedValue(mockTokens),
+        getUserInfo: vi.fn().mockResolvedValue(mockOAuthUserInfo),
+      };
+
+      const { createGoogleProvider } = await import('../providers/index.js');
+      vi.mocked(createGoogleProvider).mockReturnValue(mockClient);
+
+      vi.mocked(mockRepos.users.findById).mockResolvedValue({
+        id: 'user-123',
+        email: 'user@example.com',
+        name: 'Test User',
+        role: 'user',
+        passwordHash: 'hash',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+        lockedUntil: null,
+        failedLoginAttempts: 0,
+        version: 1,
+      });
+      vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue(null);
+      vi.mocked(mockRepos.oauthConnections.findByProviderUserId).mockResolvedValue(null);
+
+      const state = createOAuthState('google', 'http://localhost:3000/callback', true, 'user-123');
+      const encoded = encodeOAuthState(state, mockConfig.cookie.secret);
+
+      const result = await handleOAuthCallback(
+        mockDb,
+        mockRepos,
+        mockConfig,
+        'google',
+        'auth-code',
+        encoded,
+        'http://localhost:3000/callback',
+      );
+
+      expect(result.isLinking).toBe(true);
+      expect(result.linked).toBe(true);
+      expect(result.auth).toBeUndefined();
+      expect(mockRepos.oauthConnections.create).toHaveBeenCalled();
+    });
+
+    test('should throw error for state mismatch', async () => {
+      const state = createOAuthState('google', 'http://localhost:3000/callback', false);
+      const encoded = encodeOAuthState(state, mockConfig.cookie.secret);
+
+      await expect(
+        handleOAuthCallback(
+          mockDb,
+          mockRepos,
+          mockConfig,
+          'github', // Different provider
+          'auth-code',
+          encoded,
+          'http://localhost:3000/callback',
+        ),
+      ).rejects.toThrow('OAuth state mismatch');
+    });
+  });
+
+  describe('linkOAuthAccount', () => {
+    const mockUserInfo: OAuthUserInfo = {
+      id: 'provider-user-123',
+      email: 'user@example.com',
+      name: 'Test User',
+      emailVerified: true,
+    };
+
+    const mockTokens: OAuthTokenResponse = {
+      accessToken: 'provider-access-token',
+      tokenType: 'Bearer',
+    };
+
+    test('should link OAuth account to existing user', async () => {
+      vi.mocked(mockRepos.users.findById).mockResolvedValue({
+        id: 'user-123',
+        email: 'user@example.com',
+        name: 'Test User',
+        role: 'user',
+        passwordHash: 'hash',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+        lockedUntil: null,
+        failedLoginAttempts: 0,
+        version: 1,
+      });
+      vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue(null);
+      vi.mocked(mockRepos.oauthConnections.findByProviderUserId).mockResolvedValue(null);
+
+      await linkOAuthAccount(
+        mockDb,
+        mockRepos,
+        mockConfig,
+        'user-123',
+        'google',
+        mockUserInfo,
+        mockTokens,
+      );
+
+      expect(mockRepos.oauthConnections.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 'user-123',
+          provider: 'google',
+          providerUserId: 'provider-user-123',
+        }),
+      );
+    });
+
+    test('should throw error if user not found', async () => {
+      vi.mocked(mockRepos.users.findById).mockResolvedValue(null);
+      vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue(null);
+      vi.mocked(mockRepos.oauthConnections.findByProviderUserId).mockResolvedValue(null);
+
+      await expect(
+        linkOAuthAccount(
+          mockDb,
+          mockRepos,
+          mockConfig,
+          'nonexistent-user',
+          'google',
+          mockUserInfo,
+          mockTokens,
+        ),
+      ).rejects.toThrow('User not found');
+    });
+
+    test('should throw error if provider already linked to user', async () => {
+      vi.mocked(mockRepos.users.findById).mockResolvedValue({
+        id: 'user-123',
+        email: 'user@example.com',
+        name: 'Test User',
+        role: 'user',
+        passwordHash: 'hash',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+        lockedUntil: null,
+        failedLoginAttempts: 0,
+        version: 1,
+      });
+      vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue({
+        id: 'conn-123',
+        userId: 'user-123',
+        provider: 'google',
+        providerUserId: 'existing-provider-id',
+        providerEmail: 'user@example.com',
+        accessToken: 'token',
         refreshToken: null,
         expiresAt: null,
-        createdAt: new Date('2024-01-02'),
-        updatedAt: new Date('2024-01-02'),
-      },
-    ];
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      vi.mocked(mockRepos.oauthConnections.findByProviderUserId).mockResolvedValue(null);
 
-    vi.mocked(db.query.oauthConnections.findMany).mockResolvedValue(mockConnections);
-
-    const connections = await getConnectedProviders(db, userId);
-
-    expect(connections).toHaveLength(2);
-    expect(connections[0]).toEqual({
-      id: 'conn-1',
-      provider: 'google',
-      providerEmail: 'user@gmail.com',
-      connectedAt: new Date('2024-01-01'),
+      await expect(
+        linkOAuthAccount(
+          mockDb,
+          mockRepos,
+          mockConfig,
+          'user-123',
+          'google',
+          mockUserInfo,
+          mockTokens,
+        ),
+      ).rejects.toThrow('already linked to your account');
     });
-    expect(connections[1]).toEqual({
-      id: 'conn-2',
-      provider: 'github',
-      providerEmail: 'user@github.com',
-      connectedAt: new Date('2024-01-02'),
+
+    test('should throw error if provider account linked to another user', async () => {
+      vi.mocked(mockRepos.users.findById).mockResolvedValue({
+        id: 'user-123',
+        email: 'user@example.com',
+        name: 'Test User',
+        role: 'user',
+        passwordHash: 'hash',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+        lockedUntil: null,
+        failedLoginAttempts: 0,
+        version: 1,
+      });
+      vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue(null);
+      vi.mocked(mockRepos.oauthConnections.findByProviderUserId).mockResolvedValue({
+        id: 'conn-456',
+        userId: 'other-user-123',
+        provider: 'google',
+        providerUserId: 'provider-user-123',
+        providerEmail: 'other@example.com',
+        accessToken: 'token',
+        refreshToken: null,
+        expiresAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      await expect(
+        linkOAuthAccount(
+          mockDb,
+          mockRepos,
+          mockConfig,
+          'user-123',
+          'google',
+          mockUserInfo,
+          mockTokens,
+        ),
+      ).rejects.toThrow('already linked to another user');
     });
   });
-});
 
-// ============================================================================
-// Tests: findUserByOAuthProvider
-// ============================================================================
+  describe('unlinkOAuthAccount', () => {
+    test('should unlink OAuth account from user', async () => {
+      const connection = {
+        id: 'conn-123',
+        userId: 'user-123',
+        provider: 'google' as const,
+        providerUserId: 'provider-user-123',
+        providerEmail: 'user@example.com',
+        accessToken: 'token',
+        refreshToken: null,
+        expiresAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
 
-describe('findUserByOAuthProvider', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+      const user = {
+        id: 'user-123',
+        email: 'user@example.com',
+        name: 'Test User',
+        role: 'user' as const,
+        passwordHash: 'regular-hash', // Not oauth:*
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+        lockedUntil: null,
+        failedLoginAttempts: 0,
+        version: 1,
+      };
 
-  test('should return null when no connection found', async () => {
-    const db = createMockDb();
-
-    // The function uses db.select() with JOIN, returns empty array if not found
-    const selectChain = {
-      from: vi.fn().mockReturnThis(),
-      innerJoin: vi.fn().mockReturnThis(),
-      where: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue([]),
-    };
-    vi.mocked(db.select as ReturnType<typeof vi.fn>).mockReturnValue(selectChain);
-
-    const result = await findUserByOAuthProvider(db, 'google', 'google-123');
-
-    expect(result).toBeNull();
-  });
-
-  test('should return null when JOIN returns empty result', async () => {
-    const db = createMockDb();
-
-    // Return empty array (no matching user/connection)
-    const selectChain = {
-      from: vi.fn().mockReturnThis(),
-      innerJoin: vi.fn().mockReturnThis(),
-      where: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue([]),
-    };
-    vi.mocked(db.select as ReturnType<typeof vi.fn>).mockReturnValue(selectChain);
-
-    const result = await findUserByOAuthProvider(db, 'google', 'google-123');
-
-    expect(result).toBeNull();
-  });
-
-  test('should return user info when found', async () => {
-    const db = createMockDb();
-
-    // Return user data from JOIN query
-    const selectChain = {
-      from: vi.fn().mockReturnThis(),
-      innerJoin: vi.fn().mockReturnThis(),
-      where: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue([
+      vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue(connection);
+      vi.mocked(mockRepos.users.findById).mockResolvedValue(user);
+      vi.mocked(mockRepos.oauthConnections.findByUserId).mockResolvedValue([
+        connection,
         {
+          id: 'conn-456',
           userId: 'user-123',
-          email: 'user@example.com',
+          provider: 'github',
+          providerUserId: 'github-123',
+          providerEmail: 'user@example.com',
+          accessToken: 'token',
+          refreshToken: null,
+          expiresAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
-      ]),
-    };
-    vi.mocked(db.select as ReturnType<typeof vi.fn>).mockReturnValue(selectChain);
+      ]);
 
-    const result = await findUserByOAuthProvider(db, 'google', 'google-123');
+      await unlinkOAuthAccount(mockDb, mockRepos, 'user-123', 'google');
 
-    expect(result).toEqual({
-      userId: 'user-123',
-      email: 'user@example.com',
+      expect(mockRepos.oauthConnections.deleteByUserIdAndProvider).toHaveBeenCalledWith(
+        'user-123',
+        'google',
+      );
+    });
+
+    test('should throw error if connection not found', async () => {
+      vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue(null);
+      vi.mocked(mockRepos.users.findById).mockResolvedValue({
+        id: 'user-123',
+        email: 'user@example.com',
+        name: 'Test User',
+        role: 'user',
+        passwordHash: 'hash',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+        lockedUntil: null,
+        failedLoginAttempts: 0,
+        version: 1,
+      });
+      vi.mocked(mockRepos.oauthConnections.findByUserId).mockResolvedValue([]);
+
+      await expect(unlinkOAuthAccount(mockDb, mockRepos, 'user-123', 'google')).rejects.toThrow(
+        'not linked to your account',
+      );
+    });
+
+    test('should throw error if user not found', async () => {
+      vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue({
+        id: 'conn-123',
+        userId: 'user-123',
+        provider: 'google',
+        providerUserId: 'provider-user-123',
+        providerEmail: 'user@example.com',
+        accessToken: 'token',
+        refreshToken: null,
+        expiresAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+      vi.mocked(mockRepos.users.findById).mockResolvedValue(null);
+      vi.mocked(mockRepos.oauthConnections.findByUserId).mockResolvedValue([]);
+
+      await expect(unlinkOAuthAccount(mockDb, mockRepos, 'user-123', 'google')).rejects.toThrow(
+        'User not found',
+      );
+    });
+
+    test('should throw error if unlinking only auth method without password', async () => {
+      const connection = {
+        id: 'conn-123',
+        userId: 'user-123',
+        provider: 'google' as const,
+        providerUserId: 'provider-user-123',
+        providerEmail: 'user@example.com',
+        accessToken: 'token',
+        refreshToken: null,
+        expiresAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const user = {
+        id: 'user-123',
+        email: 'user@example.com',
+        name: 'Test User',
+        role: 'user' as const,
+        passwordHash: 'oauth:google:hash', // OAuth-only user
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+        lockedUntil: null,
+        failedLoginAttempts: 0,
+        version: 1,
+      };
+
+      vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue(connection);
+      vi.mocked(mockRepos.users.findById).mockResolvedValue(user);
+      vi.mocked(mockRepos.oauthConnections.findByUserId).mockResolvedValue([connection]);
+
+      await expect(unlinkOAuthAccount(mockDb, mockRepos, 'user-123', 'google')).rejects.toThrow(
+        'Cannot unlink the only authentication method',
+      );
+    });
+
+    test('should allow unlinking if user has multiple OAuth connections', async () => {
+      const connection = {
+        id: 'conn-123',
+        userId: 'user-123',
+        provider: 'google' as const,
+        providerUserId: 'provider-user-123',
+        providerEmail: 'user@example.com',
+        accessToken: 'token',
+        refreshToken: null,
+        expiresAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const user = {
+        id: 'user-123',
+        email: 'user@example.com',
+        name: 'Test User',
+        role: 'user' as const,
+        passwordHash: 'oauth:google:hash', // OAuth-only user
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+        lockedUntil: null,
+        failedLoginAttempts: 0,
+        version: 1,
+      };
+
+      vi.mocked(mockRepos.oauthConnections.findByUserIdAndProvider).mockResolvedValue(connection);
+      vi.mocked(mockRepos.users.findById).mockResolvedValue(user);
+      vi.mocked(mockRepos.oauthConnections.findByUserId).mockResolvedValue([
+        connection,
+        {
+          id: 'conn-456',
+          userId: 'user-123',
+          provider: 'github',
+          providerUserId: 'github-123',
+          providerEmail: 'user@example.com',
+          accessToken: 'token',
+          refreshToken: null,
+          expiresAt: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ]);
+
+      await unlinkOAuthAccount(mockDb, mockRepos, 'user-123', 'google');
+
+      expect(mockRepos.oauthConnections.deleteByUserIdAndProvider).toHaveBeenCalledWith(
+        'user-123',
+        'google',
+      );
     });
   });
-});
 
-// ============================================================================
-// Tests: unlinkOAuthAccount
-// ============================================================================
+  describe('getConnectedProviders', () => {
+    test('should return list of connected providers', async () => {
+      const connections = [
+        {
+          id: 'conn-123',
+          userId: 'user-123',
+          provider: 'google' as const,
+          providerUserId: 'google-123',
+          providerEmail: 'user@gmail.com',
+          accessToken: 'token',
+          refreshToken: null,
+          expiresAt: null,
+          createdAt: new Date('2024-01-01'),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'conn-456',
+          userId: 'user-123',
+          provider: 'github' as const,
+          providerUserId: 'github-123',
+          providerEmail: 'user@github.com',
+          accessToken: 'token',
+          refreshToken: null,
+          expiresAt: null,
+          createdAt: new Date('2024-02-01'),
+          updatedAt: new Date(),
+        },
+      ];
 
-describe('unlinkOAuthAccount', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+      vi.mocked(mockRepos.oauthConnections.findByUserId).mockResolvedValue(connections);
+
+      const result = await getConnectedProviders(mockDb, mockRepos, 'user-123');
+
+      expect(result).toEqual([
+        {
+          id: 'conn-123',
+          provider: 'google',
+          providerEmail: 'user@gmail.com',
+          connectedAt: new Date('2024-01-01'),
+        },
+        {
+          id: 'conn-456',
+          provider: 'github',
+          providerEmail: 'user@github.com',
+          connectedAt: new Date('2024-02-01'),
+        },
+      ]);
+    });
+
+    test('should return empty array when no connections', async () => {
+      vi.mocked(mockRepos.oauthConnections.findByUserId).mockResolvedValue([]);
+
+      const result = await getConnectedProviders(mockDb, mockRepos, 'user-123');
+
+      expect(result).toEqual([]);
+    });
   });
 
-  test('should throw NotFoundError when connection not found', async () => {
-    const db = createMockDb();
-    const userId = 'user-123';
-    const provider: OAuthProvider = 'google';
+  describe('findUserByOAuthProvider', () => {
+    test('should find user by OAuth provider and provider user ID', async () => {
+      vi.mocked(mockRepos.oauthConnections.findByProviderUserId).mockResolvedValue({
+        id: 'conn-123',
+        userId: 'user-123',
+        provider: 'google',
+        providerUserId: 'google-user-123',
+        providerEmail: 'user@example.com',
+        accessToken: 'token',
+        refreshToken: null,
+        expiresAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
 
-    vi.mocked(db.query.oauthConnections.findFirst).mockResolvedValue(null);
+      vi.mocked(mockRepos.users.findById).mockResolvedValue({
+        id: 'user-123',
+        email: 'user@example.com',
+        name: 'Test User',
+        role: 'user',
+        passwordHash: 'hash',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        emailVerified: true,
+        emailVerifiedAt: new Date(),
+        lockedUntil: null,
+        failedLoginAttempts: 0,
+        version: 1,
+      });
 
-    await expect(unlinkOAuthAccount(db, userId, provider)).rejects.toThrow(NotFoundError);
-  });
+      const result = await findUserByOAuthProvider(mockDb, mockRepos, 'google', 'google-user-123');
 
-  test('should throw NotFoundError when user not found', async () => {
-    const db = createMockDb();
-    const userId = 'user-123';
-    const provider: OAuthProvider = 'google';
-
-    vi.mocked(db.query.oauthConnections.findFirst).mockResolvedValue({
-      id: 'conn-1',
-      userId,
-      provider,
-      providerUserId: 'google-123',
+      expect(result).toEqual({
+        userId: 'user-123',
+        email: 'user@example.com',
+      });
     });
 
-    vi.mocked(db.query.users.findFirst).mockResolvedValue(null);
+    test('should return null when connection not found', async () => {
+      vi.mocked(mockRepos.oauthConnections.findByProviderUserId).mockResolvedValue(null);
 
-    await expect(unlinkOAuthAccount(db, userId, provider)).rejects.toThrow(NotFoundError);
-  });
+      const result = await findUserByOAuthProvider(mockDb, mockRepos, 'google', 'nonexistent');
 
-  test('should throw ConflictError when unlinking only auth method', async () => {
-    const db = createMockDb();
-    const userId = 'user-123';
-    const provider: OAuthProvider = 'google';
-
-    vi.mocked(db.query.oauthConnections.findFirst).mockResolvedValue({
-      id: 'conn-1',
-      userId,
-      provider,
-      providerUserId: 'google-123',
+      expect(result).toBeNull();
     });
 
-    vi.mocked(db.query.users.findFirst).mockResolvedValue({
-      id: userId,
-      email: 'user@example.com',
-      passwordHash: 'oauth:google:randomhash', // OAuth-only user
+    test('should return null when user not found', async () => {
+      vi.mocked(mockRepos.oauthConnections.findByProviderUserId).mockResolvedValue({
+        id: 'conn-123',
+        userId: 'user-123',
+        provider: 'google',
+        providerUserId: 'google-user-123',
+        providerEmail: 'user@example.com',
+        accessToken: 'token',
+        refreshToken: null,
+        expiresAt: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      vi.mocked(mockRepos.users.findById).mockResolvedValue(null);
+
+      const result = await findUserByOAuthProvider(mockDb, mockRepos, 'google', 'google-user-123');
+
+      expect(result).toBeNull();
     });
-
-    vi.mocked(db.query.oauthConnections.findMany).mockResolvedValue([
-      { id: 'conn-1', provider: 'google' }, // Only one connection
-    ]);
-
-    await expect(unlinkOAuthAccount(db, userId, provider)).rejects.toThrow(ConflictError);
-  });
-
-  test('should allow unlinking when user has password', async () => {
-    const db = createMockDb();
-    const userId = 'user-123';
-    const provider: OAuthProvider = 'google';
-
-    vi.mocked(db.query.oauthConnections.findFirst).mockResolvedValue({
-      id: 'conn-1',
-      userId,
-      provider,
-      providerUserId: 'google-123',
-    });
-
-    vi.mocked(db.query.users.findFirst).mockResolvedValue({
-      id: userId,
-      email: 'user@example.com',
-      passwordHash: '$argon2id$v=19$m=19456,t=2,p=1$...', // Has real password
-    });
-
-    vi.mocked(db.query.oauthConnections.findMany).mockResolvedValue([
-      { id: 'conn-1', provider: 'google' },
-    ]);
-
-    vi.mocked(db.delete).mockReturnValue({
-      where: vi.fn().mockResolvedValue(undefined),
-    });
-
-    await expect(unlinkOAuthAccount(db, userId, provider)).resolves.toBeUndefined();
-    expect(db.delete).toHaveBeenCalled();
-  });
-
-  test('should allow unlinking when user has multiple connections', async () => {
-    const db = createMockDb();
-    const userId = 'user-123';
-    const provider: OAuthProvider = 'google';
-
-    vi.mocked(db.query.oauthConnections.findFirst).mockResolvedValue({
-      id: 'conn-1',
-      userId,
-      provider,
-      providerUserId: 'google-123',
-    });
-
-    vi.mocked(db.query.users.findFirst).mockResolvedValue({
-      id: userId,
-      email: 'user@example.com',
-      passwordHash: 'oauth:google:randomhash', // OAuth-only user
-    });
-
-    vi.mocked(db.query.oauthConnections.findMany).mockResolvedValue([
-      { id: 'conn-1', provider: 'google' },
-      { id: 'conn-2', provider: 'github' }, // Has another connection
-    ]);
-
-    vi.mocked(db.delete).mockReturnValue({
-      where: vi.fn().mockResolvedValue(undefined),
-    });
-
-    await expect(unlinkOAuthAccount(db, userId, provider)).resolves.toBeUndefined();
-    expect(db.delete).toHaveBeenCalled();
   });
 });

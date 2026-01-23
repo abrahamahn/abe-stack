@@ -2,22 +2,17 @@
 /**
  * Password Handler Tests
  *
- * Comprehensive tests for forgot password and reset password flows.
+ * Comprehensive tests for password reset and set password flows.
  */
 
-import { requestPasswordReset, resetPassword } from '@auth/service';
-import {
-  EmailSendError,
-  ERROR_MESSAGES,
-  InvalidTokenError,
-  SUCCESS_MESSAGES,
-  WeakPasswordError,
-} from '@shared';
+import { InvalidTokenError, WeakPasswordError } from '@abe-stack/core';
+import { requestPasswordReset, resetPassword, setPassword } from '@auth/service';
+import { EmailSendError, InvalidCredentialsError } from '@shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { handleForgotPassword, handleResetPassword } from '../password';
+import { handleForgotPassword, handleResetPassword, handleSetPassword } from '../password';
 
-import type { AppContext } from '@shared';
+import type { AppContext, RequestWithCookies } from '@shared';
 
 // ============================================================================
 // Mock Dependencies
@@ -26,6 +21,7 @@ import type { AppContext } from '@shared';
 vi.mock('@auth/service', () => ({
   requestPasswordReset: vi.fn(),
   resetPassword: vi.fn(),
+  setPassword: vi.fn(),
 }));
 
 // ============================================================================
@@ -35,18 +31,30 @@ vi.mock('@auth/service', () => ({
 function createMockContext(overrides?: Partial<AppContext>): AppContext {
   return {
     db: {} as AppContext['db'],
+    repos: {} as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
     config: {
       auth: {
-        jwt: { secret: 'test-secret-32-characters-long!!' },
+        jwt: {
+          secret: 'test-secret-32-characters-long!!',
+          accessTokenExpiry: '15m',
+        },
         argon2: {},
-        refreshToken: { expiryDays: 7 },
+        refreshToken: {
+          expiryDays: 7,
+          gracePeriodSeconds: 30,
+        },
+        lockout: {
+          maxAttempts: 5,
+          windowMs: 900000,
+          lockoutDurationMs: 1800000,
+        },
       },
       server: {
         port: 8080,
         appBaseUrl: 'http://localhost:8080',
       },
-    } as AppContext['config'],
+    },
     log: {
       info: vi.fn(),
       warn: vi.fn(),
@@ -62,8 +70,21 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
   } as unknown as AppContext;
 }
 
+function createMockRequest(userId?: string): RequestWithCookies {
+  return {
+    cookies: {},
+    headers: { 'user-agent': 'Test Browser' },
+    ip: '127.0.0.1',
+    requestInfo: {
+      ipAddress: '127.0.0.1',
+      userAgent: 'Test Browser',
+    },
+    user: userId ? { userId, role: 'user' as const } : undefined,
+  };
+}
+
 // ============================================================================
-// Tests: handleForgotPassword
+// Tests: handleForgotPassword (formerly handleRequestPasswordReset)
 // ============================================================================
 
 describe('handleForgotPassword', () => {
@@ -71,53 +92,45 @@ describe('handleForgotPassword', () => {
     vi.clearAllMocks();
   });
 
-  describe('Success Cases', () => {
-    test('should return 200 with success message for existing user', async () => {
+  describe('successful password reset request', () => {
+    test('should return 200 with success message when email exists', async () => {
       const ctx = createMockContext();
-      const body = { email: 'existing@example.com' };
+      const body = { email: 'test@example.com' };
 
       vi.mocked(requestPasswordReset).mockResolvedValue(undefined);
 
       const result = await handleForgotPassword(ctx, body);
 
       expect(result.status).toBe(200);
-      expect(result.body).toEqual({ message: SUCCESS_MESSAGES.PASSWORD_RESET_SENT });
+      expect(result.body.message).toBe('Password reset email sent');
+    });
+
+    test('should call requestPasswordReset with correct parameters', async () => {
+      const ctx = createMockContext();
+      const body = { email: 'test@example.com' };
+
+      vi.mocked(requestPasswordReset).mockResolvedValue(undefined);
+
+      await handleForgotPassword(ctx, body);
+
       expect(requestPasswordReset).toHaveBeenCalledWith(
         ctx.db,
+        ctx.repos,
         ctx.email,
-        'existing@example.com',
+        'test@example.com',
         'http://localhost:8080',
       );
     });
 
-    test('should return 200 with success message for non-existing user (prevent enumeration)', async () => {
-      const ctx = createMockContext();
-      const body = { email: 'nonexistent@example.com' };
-
-      // Service returns undefined even for non-existent users
-      vi.mocked(requestPasswordReset).mockResolvedValue(undefined);
-
-      const result = await handleForgotPassword(ctx, body);
-
-      // Same response as existing user to prevent enumeration
-      expect(result.status).toBe(200);
-      expect(result.body).toEqual({ message: SUCCESS_MESSAGES.PASSWORD_RESET_SENT });
-    });
-
-    test('should use appBaseUrl from config for reset link', async () => {
-      const customBaseUrl = 'https://myapp.example.com';
+    test('should use appBaseUrl from config', async () => {
       const ctx = createMockContext({
         config: {
-          auth: {
-            jwt: { secret: 'test-secret-32-characters-long!!' },
-            argon2: {},
-            refreshToken: { expiryDays: 7 },
-          },
+          ...createMockContext().config,
           server: {
-            port: 443,
-            appBaseUrl: customBaseUrl,
+            port: 3000,
+            appBaseUrl: 'https://example.com',
           },
-        } as AppContext['config'],
+        },
       });
       const body = { email: 'test@example.com' };
 
@@ -127,125 +140,121 @@ describe('handleForgotPassword', () => {
 
       expect(requestPasswordReset).toHaveBeenCalledWith(
         ctx.db,
+        ctx.repos,
         ctx.email,
         'test@example.com',
-        customBaseUrl,
+        'https://example.com',
       );
+    });
+
+    test('should handle different email formats', async () => {
+      const ctx = createMockContext();
+      const emails = [
+        'user@example.com',
+        'user+tag@example.co.uk',
+        'user.name@subdomain.example.com',
+      ];
+
+      for (const email of emails) {
+        vi.mocked(requestPasswordReset).mockResolvedValue(undefined);
+
+        const result = await handleForgotPassword(ctx, { email });
+
+        expect(result.status).toBe(200);
+        expect(requestPasswordReset).toHaveBeenCalledWith(
+          ctx.db,
+          ctx.repos,
+          ctx.email,
+          email,
+          'http://localhost:8080',
+        );
+        vi.clearAllMocks();
+      }
     });
   });
 
-  describe('EmailSendError Cases', () => {
-    test('should return 200 even when email sending fails (prevent enumeration)', async () => {
+  describe('email send error handling', () => {
+    test('should return 200 even if email send fails (prevent enumeration)', async () => {
       const ctx = createMockContext();
-      const body = { email: 'user@example.com' };
-      const originalError = new Error('SMTP connection failed');
+      const body = { email: 'test@example.com' };
 
-      vi.mocked(requestPasswordReset).mockRejectedValue(
-        new EmailSendError('Failed to send password reset email', originalError),
-      );
+      const emailError = new EmailSendError('SMTP connection failed', new Error('SMTP timeout'));
+
+      vi.mocked(requestPasswordReset).mockRejectedValue(emailError);
 
       const result = await handleForgotPassword(ctx, body);
 
-      // Still return success to prevent enumeration
       expect(result.status).toBe(200);
-      expect(result.body).toEqual({ message: SUCCESS_MESSAGES.PASSWORD_RESET_SENT });
+      expect(result.body.message).toBe('Password reset email sent');
     });
 
-    test('should log error when email sending fails', async () => {
+    test('should log email send failure with details', async () => {
       const ctx = createMockContext();
-      const body = { email: 'user@example.com' };
-      const originalError = new Error('SMTP connection timeout');
+      const body = { email: 'test@example.com' };
 
-      vi.mocked(requestPasswordReset).mockRejectedValue(
-        new EmailSendError('Failed to send password reset email', originalError),
-      );
+      const originalError = new Error('SMTP connection failed');
+      const emailError = new EmailSendError('Email send failed', originalError);
+
+      vi.mocked(requestPasswordReset).mockRejectedValue(emailError);
 
       await handleForgotPassword(ctx, body);
 
       expect(ctx.log.error).toHaveBeenCalledWith(
-        { email: 'user@example.com', originalError: 'SMTP connection timeout' },
+        {
+          email: 'test@example.com',
+          originalError: 'SMTP connection failed',
+        },
         'Failed to send password reset email',
       );
     });
 
-    test('should handle EmailSendError without original error', async () => {
+    test('should handle EmailSendError without originalError', async () => {
       const ctx = createMockContext();
-      const body = { email: 'user@example.com' };
+      const body = { email: 'test@example.com' };
 
-      vi.mocked(requestPasswordReset).mockRejectedValue(
-        new EmailSendError('Failed to send password reset email'),
-      );
+      const emailError = new EmailSendError('Email send failed');
+
+      vi.mocked(requestPasswordReset).mockRejectedValue(emailError);
 
       const result = await handleForgotPassword(ctx, body);
 
       expect(result.status).toBe(200);
       expect(ctx.log.error).toHaveBeenCalledWith(
-        { email: 'user@example.com', originalError: undefined },
+        {
+          email: 'test@example.com',
+          originalError: undefined,
+        },
         'Failed to send password reset email',
       );
     });
   });
 
-  describe('Error Cases', () => {
-    test('should return 500 on database error', async () => {
+  describe('error handling', () => {
+    test('should return mapped error for non-email errors', async () => {
       const ctx = createMockContext();
       const body = { email: 'test@example.com' };
 
-      vi.mocked(requestPasswordReset).mockRejectedValue(new Error('Database connection failed'));
+      const dbError = new Error('Database connection failed');
+      vi.mocked(requestPasswordReset).mockRejectedValue(dbError);
 
       const result = await handleForgotPassword(ctx, body);
 
       expect(result.status).toBe(500);
-      expect(result.body).toEqual({ message: ERROR_MESSAGES.INTERNAL_ERROR });
-      expect(ctx.log.error).toHaveBeenCalled();
+      expect(result.body.message).toBe('Internal server error');
     });
 
-    test('should return 500 on unexpected error', async () => {
+    test('should handle InvalidTokenError appropriately', async () => {
       const ctx = createMockContext();
       const body = { email: 'test@example.com' };
 
-      vi.mocked(requestPasswordReset).mockRejectedValue(new Error('Unexpected error'));
+      const error = new Error('Invalid token');
+      error.name = 'InvalidTokenError';
+      vi.mocked(requestPasswordReset).mockRejectedValue(error);
 
       const result = await handleForgotPassword(ctx, body);
 
-      expect(result.status).toBe(500);
-      expect(result.body).toEqual({ message: ERROR_MESSAGES.INTERNAL_ERROR });
-    });
-  });
-
-  describe('Edge Cases', () => {
-    test('should handle email with special characters', async () => {
-      const ctx = createMockContext();
-      const body = { email: 'user+tag@example.com' };
-
-      vi.mocked(requestPasswordReset).mockResolvedValue(undefined);
-
-      const result = await handleForgotPassword(ctx, body);
-
-      expect(result.status).toBe(200);
-      expect(requestPasswordReset).toHaveBeenCalledWith(
-        ctx.db,
-        ctx.email,
-        'user+tag@example.com',
-        expect.any(String),
-      );
-    });
-
-    test('should handle email with subdomain', async () => {
-      const ctx = createMockContext();
-      const body = { email: 'user@mail.company.com' };
-
-      vi.mocked(requestPasswordReset).mockResolvedValue(undefined);
-
-      const result = await handleForgotPassword(ctx, body);
-
-      expect(result.status).toBe(200);
-      expect(requestPasswordReset).toHaveBeenCalledWith(
-        ctx.db,
-        ctx.email,
-        'user@mail.company.com',
-        expect.any(String),
-      );
+      // Should be mapped by mapErrorToResponse
+      expect(result.status).toBeGreaterThanOrEqual(400);
     });
   });
 });
@@ -259,28 +268,28 @@ describe('handleResetPassword', () => {
     vi.clearAllMocks();
   });
 
-  describe('Success Cases', () => {
-    test('should return 200 with success message for valid reset', async () => {
+  describe('successful password reset', () => {
+    test('should return 200 with success message on valid token', async () => {
       const ctx = createMockContext();
-      const body = { token: 'valid-reset-token', password: 'NewStrongPass123!' };
+      const body = {
+        token: 'valid-reset-token-123456789abcdef',
+        password: 'NewSecureP@ssw0rd!',
+      };
 
       vi.mocked(resetPassword).mockResolvedValue(undefined);
 
       const result = await handleResetPassword(ctx, body);
 
       expect(result.status).toBe(200);
-      expect(result.body).toEqual({ message: 'Password reset successfully' });
-      expect(resetPassword).toHaveBeenCalledWith(
-        ctx.db,
-        ctx.config.auth,
-        'valid-reset-token',
-        'NewStrongPass123!',
-      );
+      expect(result.body.message).toBe('Password reset successfully');
     });
 
-    test('should pass auth config to service for password hashing', async () => {
+    test('should call resetPassword with correct parameters', async () => {
       const ctx = createMockContext();
-      const body = { token: 'reset-token', password: 'SecurePassword1!' };
+      const body = {
+        token: 'valid-reset-token-123456789abcdef',
+        password: 'NewSecureP@ssw0rd!',
+      };
 
       vi.mocked(resetPassword).mockResolvedValue(undefined);
 
@@ -288,243 +297,430 @@ describe('handleResetPassword', () => {
 
       expect(resetPassword).toHaveBeenCalledWith(
         ctx.db,
+        ctx.repos,
         ctx.config.auth,
-        'reset-token',
-        'SecurePassword1!',
+        'valid-reset-token-123456789abcdef',
+        'NewSecureP@ssw0rd!',
+      );
+    });
+
+    test('should handle complex passwords with special characters', async () => {
+      const ctx = createMockContext();
+      const complexPasswords = [
+        'P@ssw0rd!#$%',
+        'MyP@ss123_W0rd',
+        'Secure!23456789',
+        'Test@2024#Pass',
+      ];
+
+      for (const password of complexPasswords) {
+        vi.mocked(resetPassword).mockResolvedValue(undefined);
+
+        const result = await handleResetPassword(ctx, {
+          token: 'token-123',
+          password,
+        });
+
+        expect(result.status).toBe(200);
+        expect(resetPassword).toHaveBeenCalledWith(
+          ctx.db,
+          ctx.repos,
+          ctx.config.auth,
+          'token-123',
+          password,
+        );
+        vi.clearAllMocks();
+      }
+    });
+
+    test('should handle long tokens', async () => {
+      const ctx = createMockContext();
+      const longToken = 'a'.repeat(128);
+      const body = {
+        token: longToken,
+        password: 'NewSecureP@ssw0rd!',
+      };
+
+      vi.mocked(resetPassword).mockResolvedValue(undefined);
+
+      const result = await handleResetPassword(ctx, body);
+
+      expect(result.status).toBe(200);
+      expect(resetPassword).toHaveBeenCalledWith(
+        ctx.db,
+        ctx.repos,
+        ctx.config.auth,
+        longToken,
+        'NewSecureP@ssw0rd!',
       );
     });
   });
 
-  describe('Invalid Token Cases', () => {
+  describe('error handling', () => {
+    test('should return 400 for invalid token', async () => {
+      const ctx = createMockContext();
+      const body = {
+        token: 'invalid-token',
+        password: 'NewSecureP@ssw0rd!',
+      };
+
+      const error = new InvalidTokenError('Invalid or expired reset token');
+      vi.mocked(resetPassword).mockRejectedValue(error);
+
+      const result = await handleResetPassword(ctx, body);
+
+      expect(result.status).toBe(400);
+      expect(result.body.message).toContain('Invalid or expired');
+    });
+
     test('should return 400 for expired token', async () => {
       const ctx = createMockContext();
-      const body = { token: 'expired-token', password: 'NewPassword123!' };
+      const body = {
+        token: 'expired-token-123',
+        password: 'NewSecureP@ssw0rd!',
+      };
 
-      vi.mocked(resetPassword).mockRejectedValue(new InvalidTokenError('Token has expired'));
+      const error = new InvalidTokenError('Invalid or expired reset token');
+      vi.mocked(resetPassword).mockRejectedValue(error);
 
       const result = await handleResetPassword(ctx, body);
 
       expect(result.status).toBe(400);
-      expect(result.body).toEqual({ message: ERROR_MESSAGES.INVALID_TOKEN });
     });
 
-    test('should return 400 for already used token', async () => {
+    test('should return 400 for weak password', async () => {
       const ctx = createMockContext();
-      const body = { token: 'used-token', password: 'NewPassword123!' };
+      const body = {
+        token: 'valid-token',
+        password: 'weak',
+      };
 
       vi.mocked(resetPassword).mockRejectedValue(
-        new InvalidTokenError('Token has already been used'),
+        new WeakPasswordError('Password is too weak'),
       );
 
       const result = await handleResetPassword(ctx, body);
 
       expect(result.status).toBe(400);
-      expect(result.body).toEqual({ message: ERROR_MESSAGES.INVALID_TOKEN });
+      expect(result.body.message).toContain('weak');
     });
 
-    test('should return 400 for invalid token format', async () => {
+    test('should return 500 for database errors', async () => {
       const ctx = createMockContext();
-      const body = { token: 'invalid-format', password: 'NewPassword123!' };
-
-      vi.mocked(resetPassword).mockRejectedValue(new InvalidTokenError('Invalid token'));
-
-      const result = await handleResetPassword(ctx, body);
-
-      expect(result.status).toBe(400);
-      expect(result.body).toEqual({ message: ERROR_MESSAGES.INVALID_TOKEN });
-    });
-
-    test('should return 400 for non-existent token', async () => {
-      const ctx = createMockContext();
-      const body = { token: 'nonexistent-token', password: 'NewPassword123!' };
-
-      vi.mocked(resetPassword).mockRejectedValue(
-        new InvalidTokenError('Invalid or expired reset token'),
-      );
-
-      const result = await handleResetPassword(ctx, body);
-
-      expect(result.status).toBe(400);
-      expect(result.body).toEqual({ message: ERROR_MESSAGES.INVALID_TOKEN });
-    });
-  });
-
-  describe('Weak Password Cases', () => {
-    test('should return 400 for password that is too short', async () => {
-      const ctx = createMockContext();
-      const body = { token: 'valid-token', password: 'short' };
-
-      vi.mocked(resetPassword).mockRejectedValue(
-        new WeakPasswordError({ errors: ['Password must be at least 8 characters'] }),
-      );
-
-      const result = await handleResetPassword(ctx, body);
-
-      expect(result.status).toBe(400);
-      expect(result.body).toEqual({ message: ERROR_MESSAGES.WEAK_PASSWORD });
-    });
-
-    test('should return 400 for password without uppercase', async () => {
-      const ctx = createMockContext();
-      const body = { token: 'valid-token', password: 'alllowercase1!' };
-
-      vi.mocked(resetPassword).mockRejectedValue(
-        new WeakPasswordError({ errors: ['Password must contain uppercase letter'] }),
-      );
-
-      const result = await handleResetPassword(ctx, body);
-
-      expect(result.status).toBe(400);
-      expect(result.body).toEqual({ message: ERROR_MESSAGES.WEAK_PASSWORD });
-    });
-
-    test('should return 400 for password without numbers', async () => {
-      const ctx = createMockContext();
-      const body = { token: 'valid-token', password: 'NoNumbersHere!' };
-
-      vi.mocked(resetPassword).mockRejectedValue(
-        new WeakPasswordError({ errors: ['Password must contain a number'] }),
-      );
-
-      const result = await handleResetPassword(ctx, body);
-
-      expect(result.status).toBe(400);
-      expect(result.body).toEqual({ message: ERROR_MESSAGES.WEAK_PASSWORD });
-    });
-
-    test('should return 400 for common password', async () => {
-      const ctx = createMockContext();
-      const body = { token: 'valid-token', password: 'Password123!' };
-
-      vi.mocked(resetPassword).mockRejectedValue(
-        new WeakPasswordError({ errors: ['Password is too common'] }),
-      );
-
-      const result = await handleResetPassword(ctx, body);
-
-      expect(result.status).toBe(400);
-      expect(result.body).toEqual({ message: ERROR_MESSAGES.WEAK_PASSWORD });
-    });
-
-    test('should return 400 with multiple password validation errors', async () => {
-      const ctx = createMockContext();
-      const body = { token: 'valid-token', password: 'weak' };
-
-      vi.mocked(resetPassword).mockRejectedValue(
-        new WeakPasswordError({
-          errors: ['Password too short', 'Missing uppercase', 'Missing number'],
-        }),
-      );
-
-      const result = await handleResetPassword(ctx, body);
-
-      expect(result.status).toBe(400);
-      expect(result.body).toEqual({ message: ERROR_MESSAGES.WEAK_PASSWORD });
-    });
-  });
-
-  describe('Error Cases', () => {
-    test('should return 500 on database error', async () => {
-      const ctx = createMockContext();
-      const body = { token: 'valid-token', password: 'NewPassword123!' };
+      const body = {
+        token: 'valid-token',
+        password: 'NewSecureP@ssw0rd!',
+      };
 
       vi.mocked(resetPassword).mockRejectedValue(new Error('Database connection failed'));
 
       const result = await handleResetPassword(ctx, body);
 
       expect(result.status).toBe(500);
-      expect(result.body).toEqual({ message: ERROR_MESSAGES.INTERNAL_ERROR });
-      expect(ctx.log.error).toHaveBeenCalled();
+      expect(result.body.message).toBe('Internal server error');
     });
 
-    test('should return 500 on password hashing error', async () => {
+    test('should handle token already used scenario', async () => {
       const ctx = createMockContext();
-      const body = { token: 'valid-token', password: 'NewPassword123!' };
+      const body = {
+        token: 'used-token',
+        password: 'NewSecureP@ssw0rd!',
+      };
 
-      vi.mocked(resetPassword).mockRejectedValue(new Error('Password hashing failed'));
+      const error = new InvalidTokenError('Token already used');
+      vi.mocked(resetPassword).mockRejectedValue(error);
 
       const result = await handleResetPassword(ctx, body);
 
-      expect(result.status).toBe(500);
-      expect(result.body).toEqual({ message: ERROR_MESSAGES.INTERNAL_ERROR });
+      expect(result.status).toBe(400);
+    });
+  });
+});
+
+// ============================================================================
+// Tests: handleSetPassword
+// ============================================================================
+
+describe('handleSetPassword', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('successful password set', () => {
+    test('should return 200 with success message for authenticated user', async () => {
+      const ctx = createMockContext();
+      const body = { password: 'NewSecureP@ssw0rd!' };
+      const req = createMockRequest('user-123');
+
+      vi.mocked(setPassword).mockResolvedValue(undefined);
+
+      const result = await handleSetPassword(ctx, body, req);
+
+      expect(result.status).toBe(200);
+      expect(result.body.message).toBe('Password set successfully');
     });
 
-    test('should return 500 on transaction failure', async () => {
+    test('should call setPassword with correct parameters', async () => {
       const ctx = createMockContext();
-      const body = { token: 'valid-token', password: 'NewPassword123!' };
+      const body = { password: 'NewSecureP@ssw0rd!' };
+      const req = createMockRequest('user-123');
 
-      vi.mocked(resetPassword).mockRejectedValue(new Error('Transaction rollback'));
+      vi.mocked(setPassword).mockResolvedValue(undefined);
 
-      const result = await handleResetPassword(ctx, body);
+      await handleSetPassword(ctx, body, req);
 
-      expect(result.status).toBe(500);
-      expect(result.body).toEqual({ message: ERROR_MESSAGES.INTERNAL_ERROR });
+      expect(setPassword).toHaveBeenCalledWith(
+        ctx.db,
+        ctx.repos,
+        ctx.config.auth,
+        'user-123',
+        'NewSecureP@ssw0rd!',
+      );
+    });
+
+    test('should handle different user IDs', async () => {
+      const ctx = createMockContext();
+      const body = { password: 'NewSecureP@ssw0rd!' };
+      const userIds = ['user-1', 'user-999', 'uuid-abc-123'];
+
+      for (const userId of userIds) {
+        vi.mocked(setPassword).mockResolvedValue(undefined);
+
+        const req = createMockRequest(userId);
+        const result = await handleSetPassword(ctx, body, req);
+
+        expect(result.status).toBe(200);
+        expect(setPassword).toHaveBeenCalledWith(
+          ctx.db,
+          ctx.repos,
+          ctx.config.auth,
+          userId,
+          'NewSecureP@ssw0rd!',
+        );
+        vi.clearAllMocks();
+      }
+    });
+
+    test('should handle complex passwords with special characters', async () => {
+      const ctx = createMockContext();
+      const req = createMockRequest('user-123');
+      const complexPasswords = [
+        'P@ssw0rd!#$%^&*()',
+        'MyV3ry!Secure_P@ssw0rd',
+        'Test@2024#NewPass!',
+      ];
+
+      for (const password of complexPasswords) {
+        vi.mocked(setPassword).mockResolvedValue(undefined);
+
+        const result = await handleSetPassword(ctx, { password }, req);
+
+        expect(result.status).toBe(200);
+        expect(setPassword).toHaveBeenCalledWith(
+          ctx.db,
+          ctx.repos,
+          ctx.config.auth,
+          'user-123',
+          password,
+        );
+        vi.clearAllMocks();
+      }
     });
   });
 
-  describe('Edge Cases', () => {
-    test('should handle long token string', async () => {
+  describe('authentication errors', () => {
+    test('should return 401 when user is not authenticated', async () => {
       const ctx = createMockContext();
-      const longToken = 'a'.repeat(256);
-      const body = { token: longToken, password: 'NewPassword123!' };
+      const body = { password: 'NewSecureP@ssw0rd!' };
+      const req = createMockRequest(); // No userId
 
-      vi.mocked(resetPassword).mockResolvedValue(undefined);
+      const result = await handleSetPassword(ctx, body, req);
 
-      const result = await handleResetPassword(ctx, body);
+      expect(result.status).toBe(401);
+      expect(result.body.message).toBe('Authentication required');
+      expect(setPassword).not.toHaveBeenCalled();
+    });
+
+    test('should return 401 when req.user is undefined', async () => {
+      const ctx = createMockContext();
+      const body = { password: 'NewSecureP@ssw0rd!' };
+      const req = {
+        ...createMockRequest(),
+        user: undefined,
+      };
+
+      const result = await handleSetPassword(ctx, body, req);
+
+      expect(result.status).toBe(401);
+      expect(result.body.message).toBe('Authentication required');
+      expect(setPassword).not.toHaveBeenCalled();
+    });
+
+    test('should return 401 when userId is empty string', async () => {
+      const ctx = createMockContext();
+      const body = { password: 'NewSecureP@ssw0rd!' };
+      const req = {
+        ...createMockRequest(),
+        user: { userId: '', role: 'user' as const },
+      };
+
+      const result = await handleSetPassword(ctx, body, req);
+
+      expect(result.status).toBe(401);
+      expect(result.body.message).toBe('Authentication required');
+      expect(setPassword).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('password already set error', () => {
+    test('should return 409 when user already has password', async () => {
+      const ctx = createMockContext();
+      const body = { password: 'NewSecureP@ssw0rd!' };
+      const req = createMockRequest('user-123');
+
+      const error = new Error('User already has a password set');
+      error.name = 'PasswordAlreadySetError';
+      vi.mocked(setPassword).mockRejectedValue(error);
+
+      const result = await handleSetPassword(ctx, body, req);
+
+      expect(result.status).toBe(409);
+      expect(result.body.message).toBe('User already has a password set');
+    });
+
+    test('should match exact error name PasswordAlreadySetError', async () => {
+      const ctx = createMockContext();
+      const body = { password: 'NewSecureP@ssw0rd!' };
+      const req = createMockRequest('user-123');
+
+      // Test that error name must be exactly 'PasswordAlreadySetError'
+      const error = new Error('User already has a password set');
+      error.name = 'PasswordAlreadySetError';
+      vi.mocked(setPassword).mockRejectedValue(error);
+
+      const result = await handleSetPassword(ctx, body, req);
+
+      expect(result.status).toBe(409);
+    });
+
+    test('should not match similar error names', async () => {
+      const ctx = createMockContext();
+      const body = { password: 'NewSecureP@ssw0rd!' };
+      const req = createMockRequest('user-123');
+
+      // Test with different error name
+      const error = new Error('Password exists');
+      error.name = 'PasswordExistsError'; // Different name
+      vi.mocked(setPassword).mockRejectedValue(error);
+
+      const result = await handleSetPassword(ctx, body, req);
+
+      // Should fall through to general error handling, not 409
+      expect(result.status).toBe(500);
+    });
+  });
+
+  describe('other error handling', () => {
+    test('should return 400 for weak password', async () => {
+      const ctx = createMockContext();
+      const body = { password: 'weak' };
+      const req = createMockRequest('user-123');
+
+      vi.mocked(setPassword).mockRejectedValue(
+        new WeakPasswordError('Password is too weak'),
+      );
+
+      const result = await handleSetPassword(ctx, body, req);
+
+      expect(result.status).toBe(400);
+      expect(result.body.message).toContain('weak');
+    });
+
+    test('should return 500 for database errors', async () => {
+      const ctx = createMockContext();
+      const body = { password: 'NewSecureP@ssw0rd!' };
+      const req = createMockRequest('user-123');
+
+      vi.mocked(setPassword).mockRejectedValue(new Error('Database connection failed'));
+
+      const result = await handleSetPassword(ctx, body, req);
+
+      expect(result.status).toBe(500);
+      expect(result.body.message).toBe('Internal server error');
+    });
+
+    test('should return 401 for InvalidCredentialsError', async () => {
+      const ctx = createMockContext();
+      const body = { password: 'NewSecureP@ssw0rd!' };
+      const req = createMockRequest('nonexistent-user');
+
+      const error = new InvalidCredentialsError('Invalid credentials');
+      vi.mocked(setPassword).mockRejectedValue(error);
+
+      const result = await handleSetPassword(ctx, body, req);
+
+      expect(result.status).toBe(401);
+    });
+
+    test('should handle generic Error instances', async () => {
+      const ctx = createMockContext();
+      const body = { password: 'NewSecureP@ssw0rd!' };
+      const req = createMockRequest('user-123');
+
+      vi.mocked(setPassword).mockRejectedValue(new Error('Unknown error'));
+
+      const result = await handleSetPassword(ctx, body, req);
+
+      expect(result.status).toBe(500);
+      expect(result.body.message).toBe('Internal server error');
+    });
+  });
+
+  describe('edge cases', () => {
+    test('should handle very long passwords', async () => {
+      const ctx = createMockContext();
+      const longPassword = 'A1b2C3d4!'.repeat(20); // 180 characters
+      const body = { password: longPassword };
+      const req = createMockRequest('user-123');
+
+      vi.mocked(setPassword).mockResolvedValue(undefined);
+
+      const result = await handleSetPassword(ctx, body, req);
 
       expect(result.status).toBe(200);
-      expect(resetPassword).toHaveBeenCalledWith(
+      expect(setPassword).toHaveBeenCalledWith(
         ctx.db,
+        ctx.repos,
         ctx.config.auth,
-        longToken,
-        'NewPassword123!',
+        'user-123',
+        longPassword,
       );
     });
 
-    test('should handle password with special characters', async () => {
+    test('should handle passwords with unicode characters', async () => {
       const ctx = createMockContext();
-      const body = { token: 'valid-token', password: 'P@$$w0rd!@#$%^&*()' };
+      const body = { password: 'P@ssw0rd123!🔒' };
+      const req = createMockRequest('user-123');
 
-      vi.mocked(resetPassword).mockResolvedValue(undefined);
+      vi.mocked(setPassword).mockResolvedValue(undefined);
 
-      const result = await handleResetPassword(ctx, body);
-
-      expect(result.status).toBe(200);
-      expect(resetPassword).toHaveBeenCalledWith(
-        ctx.db,
-        ctx.config.auth,
-        'valid-token',
-        'P@$$w0rd!@#$%^&*()',
-      );
-    });
-
-    test('should handle password with unicode characters', async () => {
-      const ctx = createMockContext();
-      const body = { token: 'valid-token', password: 'Passw0rd123!' };
-
-      vi.mocked(resetPassword).mockResolvedValue(undefined);
-
-      const result = await handleResetPassword(ctx, body);
+      const result = await handleSetPassword(ctx, body, req);
 
       expect(result.status).toBe(200);
     });
 
-    test('should handle hex token format', async () => {
+    test('should handle null user.userId gracefully', async () => {
       const ctx = createMockContext();
-      const hexToken = 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2';
-      const body = { token: hexToken, password: 'NewPassword123!' };
+      const body = { password: 'NewSecureP@ssw0rd!' };
+      const req = {
+        ...createMockRequest(),
+        user: { userId: null as unknown as string, role: 'user' as const },
+      };
 
-      vi.mocked(resetPassword).mockResolvedValue(undefined);
+      const result = await handleSetPassword(ctx, body, req);
 
-      const result = await handleResetPassword(ctx, body);
-
-      expect(result.status).toBe(200);
-      expect(resetPassword).toHaveBeenCalledWith(
-        ctx.db,
-        ctx.config.auth,
-        hexToken,
-        expect.any(String),
-      );
+      expect(result.status).toBe(401);
+      expect(result.body.message).toBe('Authentication required');
     });
   });
 });

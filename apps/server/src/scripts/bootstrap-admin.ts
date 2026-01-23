@@ -22,9 +22,15 @@
 import { randomBytes } from 'node:crypto';
 
 import { loadConfig } from '@config';
-import { buildConnectionString, createDbClient, users } from '@database';
+import {
+  buildConnectionString,
+  createDbClient,
+  USERS_TABLE,
+  select,
+  eq,
+  insert,
+} from '@database';
 import { hashPassword } from '@modules/auth/utils/password';
-import { eq } from 'drizzle-orm';
 
 interface BootstrapResult {
   email: string;
@@ -63,7 +69,9 @@ export async function bootstrapAdmin(): Promise<BootstrapResult> {
   const db = createDbClient(connectionString);
 
   // Check if admin already exists
-  const existing = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  const existing = await db.query<Record<string, unknown>>(
+    select(USERS_TABLE).where(eq('email', email)).limit(1).toSql(),
+  );
 
   if (existing.length > 0) {
     console.log(`⚠️  Admin user already exists: ${email}`);
@@ -76,13 +84,17 @@ export async function bootstrapAdmin(): Promise<BootstrapResult> {
   const passwordHash = await hashPassword(password, config.auth.argon2);
 
   // Create admin user
-  await db.insert(users).values({
-    email,
-    passwordHash,
-    name,
-    role: 'admin',
-    emailVerifiedAt: new Date(), // Auto-verify admin
-  });
+  await db.execute(
+    insert(USERS_TABLE)
+      .values({
+        email,
+        password_hash: passwordHash,
+        name,
+        role: 'admin',
+        email_verified_at: new Date(),
+      })
+      .toSql(),
+  );
 
   console.log('✅ Admin user created successfully!\n');
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');

@@ -9,13 +9,20 @@
 import { randomBytes, createCipheriv, createDecipheriv, scryptSync } from 'node:crypto';
 
 import {
-  oauthConnections,
-  users,
   withTransaction,
   type DbClient,
   type OAuthProvider,
+  type Repositories,
   type UserRole,
 } from '@infrastructure';
+import {
+  insert,
+  toCamelCase,
+  USERS_TABLE,
+  USER_COLUMNS,
+  OAUTH_CONNECTIONS_TABLE,
+  type User,
+} from '@abe-stack/db';
 import {
   ConflictError,
   EmailAlreadyExistsError,
@@ -23,7 +30,6 @@ import {
   OAuthError,
   OAuthStateMismatchError,
 } from '@shared';
-import { and, eq } from 'drizzle-orm';
 
 import { createAccessToken, createRefreshTokenFamily } from '../utils';
 
@@ -269,6 +275,7 @@ export function getAuthorizationUrl(
  */
 export async function handleOAuthCallback(
   db: DbClient,
+  repos: Repositories,
   config: AuthConfig,
   provider: OAuthProvider,
   code: string,
@@ -308,12 +315,12 @@ export async function handleOAuthCallback(
 
   // Handle linking vs authentication
   if (stateObj.isLinking && stateObj.userId) {
-    await linkOAuthAccount(db, config, stateObj.userId, provider, userInfo, tokens);
+    await linkOAuthAccount(db, repos, config, stateObj.userId, provider, userInfo, tokens);
     return { isLinking: true, linked: true };
   }
 
   // Authenticate or create user
-  const auth = await authenticateOrCreateWithOAuth(db, config, provider, userInfo, tokens);
+  const auth = await authenticateOrCreateWithOAuth(db, repos, config, provider, userInfo, tokens);
   return { auth, isLinking: false };
 }
 
@@ -322,6 +329,7 @@ export async function handleOAuthCallback(
  */
 async function authenticateOrCreateWithOAuth(
   db: DbClient,
+  repos: Repositories,
   config: AuthConfig,
   provider: OAuthProvider,
   userInfo: OAuthUserInfo,
@@ -329,30 +337,23 @@ async function authenticateOrCreateWithOAuth(
 ): Promise<OAuthAuthResult> {
   const encryptionKey = config.cookie.secret;
 
-  // Check if OAuth connection already exists
-  const existingConnection = await db.query.oauthConnections.findFirst({
-    where: and(
-      eq(oauthConnections.provider, provider),
-      eq(oauthConnections.providerUserId, userInfo.id),
-    ),
-  });
+  // Check if OAuth connection already exists (using repository)
+  const existingConnection = await repos.oauthConnections.findByProviderUserId(
+    provider,
+    userInfo.id,
+  );
 
   if (existingConnection) {
-    // Update tokens and return existing user
-    await db
-      .update(oauthConnections)
-      .set({
-        accessToken: encryptToken(tokens.accessToken, encryptionKey),
-        refreshToken: tokens.refreshToken ? encryptToken(tokens.refreshToken, encryptionKey) : null,
-        expiresAt: tokens.expiresAt,
-        providerEmail: userInfo.email,
-        updatedAt: new Date(),
-      })
-      .where(eq(oauthConnections.id, existingConnection.id));
-
-    const user = await db.query.users.findFirst({
-      where: eq(users.id, existingConnection.userId),
+    // Update tokens and return existing user (using repository)
+    await repos.oauthConnections.update(existingConnection.id, {
+      accessToken: encryptToken(tokens.accessToken, encryptionKey),
+      refreshToken: tokens.refreshToken ? encryptToken(tokens.refreshToken, encryptionKey) : null,
+      expiresAt: tokens.expiresAt,
+      providerEmail: userInfo.email,
+      updatedAt: new Date(),
     });
+
+    const user = await repos.users.findById(existingConnection.userId);
 
     if (!user) {
       throw new NotFoundError('User not found');
@@ -387,10 +388,8 @@ async function authenticateOrCreateWithOAuth(
     };
   }
 
-  // Check if email already exists (for a different user)
-  const existingUser = await db.query.users.findFirst({
-    where: eq(users.email, userInfo.email),
-  });
+  // Check if email already exists (for a different user) - using repository
+  const existingUser = await repos.users.findByEmail(userInfo.email);
 
   if (existingUser) {
     // Email exists but no OAuth connection - user should link their account
@@ -402,33 +401,43 @@ async function authenticateOrCreateWithOAuth(
   // Create new user with OAuth connection
   const result = await withTransaction(db, async (tx) => {
     // Create user (verified if provider verified email)
-    const [newUser] = await tx
-      .insert(users)
-      .values({
-        email: userInfo.email,
-        name: userInfo.name,
-        // OAuth users don't have a password - generate a random unusable hash
-        passwordHash: `oauth:${provider}:${randomBytes(32).toString('hex')}`,
-        role: 'user',
-        emailVerified: userInfo.emailVerified,
-        emailVerifiedAt: userInfo.emailVerified ? new Date() : null,
-      })
-      .returning();
+    const newUserRows = await tx.query<Record<string, unknown>>(
+      insert(USERS_TABLE)
+        .values({
+          email: userInfo.email,
+          name: userInfo.name,
+          // OAuth users don't have a password - generate a random unusable hash
+          password_hash: `oauth:${provider}:${randomBytes(32).toString('hex')}`,
+          role: 'user',
+          email_verified: userInfo.emailVerified,
+          email_verified_at: userInfo.emailVerified ? new Date() : null,
+        })
+        .returningAll()
+        .toSql(),
+    );
 
-    if (!newUser) {
+    if (!newUserRows[0]) {
       throw new Error('Failed to create user');
     }
 
+    const newUser = toCamelCase<User>(newUserRows[0], USER_COLUMNS);
+
     // Create OAuth connection
-    await tx.insert(oauthConnections).values({
-      userId: newUser.id,
-      provider,
-      providerUserId: userInfo.id,
-      providerEmail: userInfo.email,
-      accessToken: encryptToken(tokens.accessToken, encryptionKey),
-      refreshToken: tokens.refreshToken ? encryptToken(tokens.refreshToken, encryptionKey) : null,
-      expiresAt: tokens.expiresAt,
-    });
+    await tx.execute(
+      insert(OAUTH_CONNECTIONS_TABLE)
+        .values({
+          user_id: newUser.id,
+          provider,
+          provider_user_id: userInfo.id,
+          provider_email: userInfo.email,
+          access_token: encryptToken(tokens.accessToken, encryptionKey),
+          refresh_token: tokens.refreshToken
+            ? encryptToken(tokens.refreshToken, encryptionKey)
+            : null,
+          expires_at: tokens.expiresAt,
+        })
+        .toSql(),
+    );
 
     // Create refresh token
     const { token: refreshToken } = await createRefreshTokenFamily(
@@ -469,7 +478,8 @@ async function authenticateOrCreateWithOAuth(
  * Optimized: Runs validation queries in parallel instead of sequentially
  */
 export async function linkOAuthAccount(
-  db: DbClient,
+  _db: DbClient,
+  repos: Repositories,
   config: AuthConfig,
   userId: string,
   provider: OAuthProvider,
@@ -478,23 +488,14 @@ export async function linkOAuthAccount(
 ): Promise<void> {
   const encryptionKey = config.cookie.secret;
 
-  // Run all validation queries in parallel (no dependencies between them)
+  // Run all validation queries in parallel (no dependencies between them) - using repositories
   const [user, existingConnection, otherConnection] = await Promise.all([
     // Check if user exists
-    db.query.users.findFirst({
-      where: eq(users.id, userId),
-    }),
+    repos.users.findById(userId),
     // Check if this provider is already linked to this user
-    db.query.oauthConnections.findFirst({
-      where: and(eq(oauthConnections.userId, userId), eq(oauthConnections.provider, provider)),
-    }),
+    repos.oauthConnections.findByUserIdAndProvider(userId, provider),
     // Check if this provider account is linked to another user
-    db.query.oauthConnections.findFirst({
-      where: and(
-        eq(oauthConnections.provider, provider),
-        eq(oauthConnections.providerUserId, userInfo.id),
-      ),
-    }),
+    repos.oauthConnections.findByProviderUserId(provider, userInfo.id),
   ]);
 
   if (!user) {
@@ -515,8 +516,8 @@ export async function linkOAuthAccount(
     );
   }
 
-  // Create OAuth connection
-  await db.insert(oauthConnections).values({
+  // Create OAuth connection (using repository)
+  await repos.oauthConnections.create({
     userId,
     provider,
     providerUserId: userInfo.id,
@@ -533,24 +534,19 @@ export async function linkOAuthAccount(
  * Optimized: Runs validation queries in parallel instead of sequentially
  */
 export async function unlinkOAuthAccount(
-  db: DbClient,
+  _db: DbClient,
+  repos: Repositories,
   userId: string,
   provider: OAuthProvider,
 ): Promise<void> {
-  // Run all validation queries in parallel (no dependencies between them)
+  // Run all validation queries in parallel (no dependencies between them) - using repositories
   const [connection, user, connections] = await Promise.all([
     // Check if connection exists
-    db.query.oauthConnections.findFirst({
-      where: and(eq(oauthConnections.userId, userId), eq(oauthConnections.provider, provider)),
-    }),
+    repos.oauthConnections.findByUserIdAndProvider(userId, provider),
     // Get user to check passwordHash
-    db.query.users.findFirst({
-      where: eq(users.id, userId),
-    }),
+    repos.users.findById(userId),
     // Count OAuth connections for this user
-    db.query.oauthConnections.findMany({
-      where: eq(oauthConnections.userId, userId),
-    }),
+    repos.oauthConnections.findByUserId(userId),
   ]);
 
   if (!connection) {
@@ -571,22 +567,20 @@ export async function unlinkOAuthAccount(
     );
   }
 
-  // Delete the connection
-  await db
-    .delete(oauthConnections)
-    .where(and(eq(oauthConnections.userId, userId), eq(oauthConnections.provider, provider)));
+  // Delete the connection (using repository)
+  await repos.oauthConnections.deleteByUserIdAndProvider(userId, provider);
 }
 
 /**
  * Get user's connected OAuth providers
  */
 export async function getConnectedProviders(
-  db: DbClient,
+  _db: DbClient,
+  repos: Repositories,
   userId: string,
 ): Promise<OAuthConnectionInfo[]> {
-  const connections = await db.query.oauthConnections.findMany({
-    where: eq(oauthConnections.userId, userId),
-  });
+  // Using repository
+  const connections = await repos.oauthConnections.findByUserId(userId);
 
   return connections.map((conn) => ({
     id: conn.id,
@@ -598,29 +592,25 @@ export async function getConnectedProviders(
 
 /**
  * Find user by OAuth provider and provider user ID
- *
- * Optimized: Uses a single JOIN query instead of N+1 queries
  */
 export async function findUserByOAuthProvider(
-  db: DbClient,
+  _db: DbClient,
+  repos: Repositories,
   provider: OAuthProvider,
   providerUserId: string,
 ): Promise<{ userId: string; email: string } | null> {
-  // Single JOIN query instead of two separate queries
-  const result = await db
-    .select({
-      userId: users.id,
-      email: users.email,
-    })
-    .from(oauthConnections)
-    .innerJoin(users, eq(oauthConnections.userId, users.id))
-    .where(
-      and(
-        eq(oauthConnections.provider, provider),
-        eq(oauthConnections.providerUserId, providerUserId),
-      ),
-    )
-    .limit(1);
+  // Using repositories (two queries instead of JOIN)
+  const connection = await repos.oauthConnections.findByProviderUserId(provider, providerUserId);
 
-  return result[0] ?? null;
+  if (!connection) {
+    return null;
+  }
+
+  const user = await repos.users.findById(connection.userId);
+
+  if (!user) {
+    return null;
+  }
+
+  return { userId: user.id, email: user.email };
 }

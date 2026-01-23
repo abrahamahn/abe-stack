@@ -7,6 +7,24 @@ import {
   updateUserWithVersion,
 } from '../optimistic-lock';
 
+import type { RawDb } from '@abe-stack/db';
+
+// Create mock db matching RawDb interface
+function createMockDb() {
+  return {
+    query: vi.fn().mockResolvedValue([]),
+    queryOne: vi.fn().mockResolvedValue(null),
+    execute: vi.fn().mockResolvedValue(0),
+    raw: vi.fn().mockResolvedValue([]),
+  };
+}
+
+type MockDb = ReturnType<typeof createMockDb>;
+
+function asMockDb(mock: MockDb): RawDb {
+  return mock as unknown as RawDb;
+}
+
 describe('OptimisticLockError', () => {
   test('should create an error with default message', () => {
     const error = new OptimisticLockError(5);
@@ -89,56 +107,55 @@ describe('isOptimisticLockError', () => {
 });
 
 describe('updateUserWithVersion', () => {
-  const mockUser = {
+  const mockUserRow = {
     id: 'user-123',
     email: 'test@example.com',
     name: 'Test User',
     version: 2,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    created_at: new Date(),
+    updated_at: new Date(),
+    role: 'user',
+    password_hash: 'hash',
+    email_verified: true,
+    email_verified_at: new Date(),
   };
 
   test('should return updated user when version matches', async () => {
-    const mockReturning = vi.fn().mockResolvedValue([mockUser]);
-    const mockWhere = vi.fn().mockReturnValue({ returning: mockReturning });
-    const mockSet = vi.fn().mockReturnValue({ where: mockWhere });
-    const mockUpdate = vi.fn().mockReturnValue({ set: mockSet });
+    const mockDb = createMockDb();
+    // First queryOne returns the updated row
+    mockDb.queryOne.mockResolvedValueOnce(mockUserRow);
 
-    const mockDb = {
-      update: mockUpdate,
-    } as unknown as Parameters<typeof updateUserWithVersion>[0];
+    const result = await updateUserWithVersion(
+      asMockDb(mockDb),
+      'user-123',
+      { name: 'Updated Name' },
+      1,
+    );
 
-    const result = await updateUserWithVersion(mockDb, 'user-123', { name: 'Updated Name' }, 1);
-
-    expect(result).toEqual(mockUser);
-    expect(mockUpdate).toHaveBeenCalled();
-    expect(mockSet).toHaveBeenCalled();
+    expect(result).toBeDefined();
+    expect(result.id).toBe('user-123');
+    expect(mockDb.queryOne).toHaveBeenCalledTimes(1);
   });
 
   test('should throw OptimisticLockError when version mismatch', async () => {
-    // First update returns empty (version mismatch)
-    const mockReturning = vi.fn().mockResolvedValue([]);
-    const mockWhere = vi.fn().mockReturnValue({ returning: mockReturning });
-    const mockSet = vi.fn().mockReturnValue({ where: mockWhere });
-    const mockUpdate = vi.fn().mockReturnValue({ set: mockSet });
-
-    // Then fetch current version
-    const mockLimit = vi.fn().mockResolvedValue([{ version: 5 }]);
-    const mockSelectWhere = vi.fn().mockReturnValue({ limit: mockLimit });
-    const mockFrom = vi.fn().mockReturnValue({ where: mockSelectWhere });
-    const mockSelect = vi.fn().mockReturnValue({ from: mockFrom });
-
-    const mockDb = {
-      update: mockUpdate,
-      select: mockSelect,
-    } as unknown as Parameters<typeof updateUserWithVersion>[0];
+    const mockDb = createMockDb();
+    // First queryOne returns null (version mismatch, no rows updated)
+    mockDb.queryOne
+      .mockResolvedValueOnce(null)
+      // Second queryOne returns current version
+      .mockResolvedValueOnce({ version: 5 });
 
     await expect(
-      updateUserWithVersion(mockDb, 'user-123', { name: 'Updated Name' }, 1),
+      updateUserWithVersion(asMockDb(mockDb), 'user-123', { name: 'Updated Name' }, 1),
     ).rejects.toThrow(OptimisticLockError);
 
+    // Reset mock to test again with error details
+    mockDb.queryOne
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ version: 5 });
+
     try {
-      await updateUserWithVersion(mockDb, 'user-123', { name: 'Updated Name' }, 1);
+      await updateUserWithVersion(asMockDb(mockDb), 'user-123', { name: 'Updated Name' }, 1);
     } catch (error) {
       expect(isOptimisticLockError(error)).toBe(true);
       if (isOptimisticLockError(error)) {
@@ -149,49 +166,33 @@ describe('updateUserWithVersion', () => {
   });
 
   test('should throw Error when record not found', async () => {
-    // Update returns empty
-    const mockReturning = vi.fn().mockResolvedValue([]);
-    const mockWhere = vi.fn().mockReturnValue({ returning: mockReturning });
-    const mockSet = vi.fn().mockReturnValue({ where: mockWhere });
-    const mockUpdate = vi.fn().mockReturnValue({ set: mockSet });
+    const mockDb = createMockDb();
+    // First queryOne returns null (no rows updated)
+    mockDb.queryOne
+      .mockResolvedValueOnce(null)
+      // Second queryOne returns null (record not found)
+      .mockResolvedValueOnce(null);
 
-    // Select returns empty (record not found)
-    const mockLimit = vi.fn().mockResolvedValue([]);
-    const mockSelectWhere = vi.fn().mockReturnValue({ limit: mockLimit });
-    const mockFrom = vi.fn().mockReturnValue({ where: mockSelectWhere });
-    const mockSelect = vi.fn().mockReturnValue({ from: mockFrom });
-
-    const mockDb = {
-      update: mockUpdate,
-      select: mockSelect,
-    } as unknown as Parameters<typeof updateUserWithVersion>[0];
-
-    await expect(updateUserWithVersion(mockDb, 'nonexistent', { name: 'Test' }, 1)).rejects.toThrow(
-      'Record not found',
-    );
+    await expect(
+      updateUserWithVersion(asMockDb(mockDb), 'nonexistent', { name: 'Test' }, 1),
+    ).rejects.toThrow('Record not found');
   });
 
   test('should handle version 0 in error response', async () => {
-    const mockReturning = vi.fn().mockResolvedValue([]);
-    const mockWhere = vi.fn().mockReturnValue({ returning: mockReturning });
-    const mockSet = vi.fn().mockReturnValue({ where: mockWhere });
-    const mockUpdate = vi.fn().mockReturnValue({ set: mockSet });
-
-    // Return undefined version (edge case)
-    const mockLimit = vi.fn().mockResolvedValue([{ version: undefined }]);
-    const mockSelectWhere = vi.fn().mockReturnValue({ limit: mockLimit });
-    const mockFrom = vi.fn().mockReturnValue({ where: mockSelectWhere });
-    const mockSelect = vi.fn().mockReturnValue({ from: mockFrom });
-
-    const mockDb = {
-      update: mockUpdate,
-      select: mockSelect,
-    } as unknown as Parameters<typeof updateUserWithVersion>[0];
+    const mockDb = createMockDb();
+    // First queryOne returns null (version mismatch)
+    mockDb.queryOne
+      .mockResolvedValueOnce(null)
+      // Second queryOne returns version 0 (edge case)
+      .mockResolvedValueOnce({ version: 0 });
 
     try {
-      await updateUserWithVersion(mockDb, 'user-123', { name: 'Test' }, 1);
+      await updateUserWithVersion(asMockDb(mockDb), 'user-123', { name: 'Test' }, 1);
+      // Should throw, so fail if we get here
+      expect.fail('Should have thrown OptimisticLockError');
     } catch (error) {
       if (isOptimisticLockError(error)) {
+        // Version 0 is valid
         expect(error.currentVersion).toBe(0);
       }
     }

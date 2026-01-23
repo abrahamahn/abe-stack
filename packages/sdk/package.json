@@ -13,7 +13,6 @@
   },
   "scripts": {
     "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build",
-    "dev": "echo 'SDK package uses source files directly - no build needed for dev'",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "type-check": "tsc --project tsconfig.json --noEmit",
     "test": "vitest run --project sdk"
@@ -40,7 +39,5 @@
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0"
   },
-  "devDependencies": {
-    "fake-indexeddb": "^6.2.5"
-  }
+  "devDependencies": {}
 }

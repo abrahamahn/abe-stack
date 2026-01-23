@@ -1,6 +1,5 @@
 // packages/core/src/contracts/__tests__/pagination.test.ts
 import { describe, expect, it } from 'vitest';
-import { z } from 'zod';
 
 import {
   cursorPaginatedResultSchema,
@@ -11,6 +10,43 @@ import {
   universalPaginatedResultSchema,
   universalPaginationOptionsSchema,
 } from '../pagination';
+import { createSchema, type Schema } from '../types';
+
+// Helper to create simple test schemas
+const stringSchema: Schema<string> = createSchema((data: unknown) => {
+  if (typeof data !== 'string') {
+    throw new Error('Expected string');
+  }
+  return data;
+});
+
+const userSchemaManual: Schema<{ id: string; name: string }> = createSchema((data: unknown) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Expected object');
+  }
+  const obj = data as Record<string, unknown>;
+  if (typeof obj.id !== 'string') {
+    throw new Error('Expected id to be string');
+  }
+  if (typeof obj.name !== 'string') {
+    throw new Error('Expected name to be string');
+  }
+  return { id: obj.id, name: obj.name };
+});
+
+const productSchemaManual: Schema<{ id: string; price: number }> = createSchema((data: unknown) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Expected object');
+  }
+  const obj = data as Record<string, unknown>;
+  if (typeof obj.id !== 'string') {
+    throw new Error('Expected id to be string');
+  }
+  if (typeof obj.price !== 'number') {
+    throw new Error('Expected price to be number');
+  }
+  return { id: obj.id, price: obj.price };
+});
 
 describe('SORT_ORDER', () => {
   it('should have correct sort order values', () => {
@@ -132,8 +168,7 @@ describe('paginationOptionsSchema', () => {
 });
 
 describe('paginatedResultSchema', () => {
-  const stringItemSchema = z.string();
-  const schema = paginatedResultSchema(stringItemSchema);
+  const schema = paginatedResultSchema(stringSchema);
 
   it('should validate correct paginated result', () => {
     const validResult = {
@@ -193,11 +228,7 @@ describe('paginatedResultSchema', () => {
   });
 
   it('should work with complex item schemas', () => {
-    const userSchema = z.object({
-      id: z.string(),
-      name: z.string(),
-    });
-    const userPaginatedSchema = paginatedResultSchema(userSchema);
+    const userPaginatedSchema = paginatedResultSchema(userSchemaManual);
 
     const validResult = {
       data: [
@@ -287,8 +318,7 @@ describe('cursorPaginationOptionsSchema', () => {
 });
 
 describe('cursorPaginatedResultSchema', () => {
-  const stringItemSchema = z.string();
-  const schema = cursorPaginatedResultSchema(stringItemSchema);
+  const schema = cursorPaginatedResultSchema(stringSchema);
 
   it('should validate correct cursor paginated result', () => {
     const validResult = {
@@ -341,11 +371,7 @@ describe('cursorPaginatedResultSchema', () => {
   });
 
   it('should work with complex item schemas', () => {
-    const productSchema = z.object({
-      id: z.string(),
-      price: z.number(),
-    });
-    const productCursorSchema = cursorPaginatedResultSchema(productSchema);
+    const productCursorSchema = cursorPaginatedResultSchema(productSchemaManual);
 
     const validResult = {
       data: [
@@ -409,8 +435,7 @@ describe('universalPaginationOptionsSchema', () => {
 });
 
 describe('universalPaginatedResultSchema', () => {
-  const itemSchema = z.string();
-  const schema = universalPaginatedResultSchema(itemSchema);
+  const schema = universalPaginatedResultSchema(stringSchema);
 
   it('should validate offset-based result', () => {
     const offsetResult = {

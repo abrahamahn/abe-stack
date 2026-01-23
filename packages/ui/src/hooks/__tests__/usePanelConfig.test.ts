@@ -1,7 +1,7 @@
 // packages/ui/src/hooks/__tests__/usePanelConfig.test.ts
 /** @vitest-environment jsdom */
 import { usePanelConfig, type PanelConfig } from '@hooks/usePanelConfig';
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 type TestPanelKeys = 'left' | 'right' | 'bottom';
@@ -102,17 +102,20 @@ describe('usePanelConfig', () => {
       expect(result.current.config.bottom).toEqual(defaultConfig.bottom);
     });
 
-    it('persists toggle to localStorage', () => {
+    it('persists toggle to localStorage', async () => {
       const { result } = renderHook(() => usePanelConfig(storageKey, defaultConfig));
 
       act(() => {
         result.current.togglePane('left');
       });
 
-      const stored = JSON.parse(
-        localStorage.getItem(storageKey) ?? '{}',
-      ) as PanelConfig<TestPanelKeys>;
-      expect(stored.left.visible).toBe(false);
+      // localStorage write is deferred via queueMicrotask, so we need to wait
+      await waitFor(() => {
+        const stored = JSON.parse(
+          localStorage.getItem(storageKey) ?? '{}',
+        ) as PanelConfig<TestPanelKeys>;
+        expect(stored.left.visible).toBe(false);
+      });
     });
 
     it('can toggle multiple panels independently', () => {
@@ -168,17 +171,20 @@ describe('usePanelConfig', () => {
       expect(result.current.config.bottom).toEqual(defaultConfig.bottom);
     });
 
-    it('persists resize to localStorage', () => {
+    it('persists resize to localStorage', async () => {
       const { result } = renderHook(() => usePanelConfig(storageKey, defaultConfig));
 
       act(() => {
         result.current.resizePane('right', 45);
       });
 
-      const stored = JSON.parse(
-        localStorage.getItem(storageKey) ?? '{}',
-      ) as PanelConfig<TestPanelKeys>;
-      expect(stored.right.size).toBe(45);
+      // localStorage write is deferred via queueMicrotask, so we need to wait
+      await waitFor(() => {
+        const stored = JSON.parse(
+          localStorage.getItem(storageKey) ?? '{}',
+        ) as PanelConfig<TestPanelKeys>;
+        expect(stored.right.size).toBe(45);
+      });
     });
 
     it('handles edge case sizes', () => {
@@ -225,7 +231,7 @@ describe('usePanelConfig', () => {
       expect(result.current.config).toEqual(defaultConfig);
     });
 
-    it('persists reset to localStorage', () => {
+    it('persists reset to localStorage', async () => {
       const { result } = renderHook(() => usePanelConfig(storageKey, defaultConfig));
 
       act(() => {
@@ -233,10 +239,13 @@ describe('usePanelConfig', () => {
         result.current.resetConfig();
       });
 
-      const stored = JSON.parse(
-        localStorage.getItem(storageKey) ?? '{}',
-      ) as PanelConfig<TestPanelKeys>;
-      expect(stored).toEqual(defaultConfig);
+      // localStorage write is deferred via queueMicrotask, so we need to wait
+      await waitFor(() => {
+        const stored = JSON.parse(
+          localStorage.getItem(storageKey) ?? '{}',
+        ) as PanelConfig<TestPanelKeys>;
+        expect(stored).toEqual(defaultConfig);
+      });
     });
   });
 
@@ -257,7 +266,7 @@ describe('usePanelConfig', () => {
       expect(result.current.config).toEqual(newConfig);
     });
 
-    it('persists setConfig to localStorage', () => {
+    it('persists setConfig to localStorage', async () => {
       const { result } = renderHook(() => usePanelConfig(storageKey, defaultConfig));
 
       const newConfig: PanelConfig<TestPanelKeys> = {
@@ -270,10 +279,13 @@ describe('usePanelConfig', () => {
         result.current.setConfig(newConfig);
       });
 
-      const stored = JSON.parse(
-        localStorage.getItem(storageKey) ?? '{}',
-      ) as PanelConfig<TestPanelKeys>;
-      expect(stored).toEqual(newConfig);
+      // localStorage write is deferred via queueMicrotask, so we need to wait
+      await waitFor(() => {
+        const stored = JSON.parse(
+          localStorage.getItem(storageKey) ?? '{}',
+        ) as PanelConfig<TestPanelKeys>;
+        expect(stored).toEqual(newConfig);
+      });
     });
   });
 

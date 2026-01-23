@@ -60,8 +60,6 @@ export {
   prettier,
   prettierIgnore,
   eslintExtensions,
-  packageJsonScripts,
-  lintStaged,
   vscodeSettings,
   vscodeAdditionalSettings,
 } from './lint';

@@ -1,0 +1,178 @@
+name: Rollback Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment to rollback'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      provider:
+        description: 'Cloud provider'
+        required: true
+        default: 'digitalocean'
+        type: choice
+        options:
+          - digitalocean
+          - gcp
+      target_tag:
+        description: 'Docker image tag to rollback to (leave empty for previous deployment)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  rollback-deployment:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'staging' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download Deployment Info
+        uses: actions/download-artifact@v4
+        with:
+          name: deployment-info-${{ inputs.environment }}-${{ inputs.provider }}
+          path: .deploy/
+
+      - name: Extract Infrastructure Information
+        id: get-deployment-info
+        run: |
+          DEPLOY_FILE=".deploy/${{ inputs.environment }}-${{ inputs.provider }}.json"
+
+          if [ -f "$DEPLOY_FILE" ]; then
+            INSTANCE_IP=$(jq -r '.instance_ip // empty' "$DEPLOY_FILE")
+            echo "instance_ip=$INSTANCE_IP" >> $GITHUB_OUTPUT
+
+            echo "## 🔄 Rollback Target Infrastructure" >> $GITHUB_STEP_SUMMARY
+            echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Provider:** ${{ inputs.provider }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Instance IP:** $INSTANCE_IP" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ No deployment info found for rollback"
+            exit 1
+          fi
+
+      - name: Determine Rollback Tag
+        id: get-rollback-tag
+        run: |
+          if [ -n "${{ inputs.target_tag }}" ]; then
+            ROLLBACK_TAG="${{ inputs.target_tag }}"
+          else
+            # Try to find previous deployment tag from GitHub releases/tags
+            # This is a simplified approach - in production you might want more sophisticated logic
+            echo "Finding previous deployment tag..."
+            ROLLBACK_TAG=$(git tag --sort=-version:refname | head -2 | tail -1)
+            if [ -z "$ROLLBACK_TAG" ]; then
+              ROLLBACK_TAG="main"
+            fi
+          fi
+
+          echo "rollback_tag=$ROLLBACK_TAG" >> $GITHUB_OUTPUT
+          echo "**Rollback Tag:** $ROLLBACK_TAG" >> $GITHUB_STEP_SUMMARY
+
+      - name: Prepare SSH key for rollback
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ steps.get-deployment-info.outputs.instance_ip }} >> ~/.ssh/known_hosts
+
+      - name: Execute Rollback
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ steps.get-deployment-info.outputs.instance_ip }}
+          username: ${{ vars.SSH_USERNAME || 'root' }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ vars.SSH_PORT || 22 }}
+          script: |
+            # Set rollback environment variables
+            export DEPLOY_ENV="${{ inputs.environment }}"
+            export ROLLBACK_TAG="${{ steps.get-rollback-tag.outputs.rollback_tag }}"
+            export REGISTRY="${{ vars.REGISTRY }}"
+            export IMAGE_NAME="${{ vars.IMAGE_NAME }}"
+
+            echo "🔄 Starting rollback to $ROLLBACK_TAG..."
+
+            # Navigate to deployment directory
+            cd ~/abe-stack-deploy
+
+            # Check if docker-compose file exists
+            if [ ! -f "docker-compose.prod.yml" ]; then
+              echo "❌ No deployment found to rollback"
+              exit 1
+            fi
+
+            # Update docker-compose to use rollback images
+            echo "🐳 Updating docker-compose for rollback..."
+
+            # Replace image tags with rollback tag
+            sed -i "s|image: \${REGISTRY}/\${IMAGE_NAME}:[^-]*-api|image: \${REGISTRY}/\${IMAGE_NAME}:\${ROLLBACK_TAG}-api|" docker-compose.prod.yml
+            sed -i "s|image: \${REGISTRY}/\${IMAGE_NAME}:[^-]*-web|image: \${REGISTRY}/\${IMAGE_NAME}:\${ROLLBACK_TAG}-web|" docker-compose.prod.yml
+
+            # Stop existing containers gracefully
+            echo "🛑 Stopping current containers..."
+            docker compose -f docker-compose.prod.yml down --timeout 30
+
+            # Pull rollback images
+            echo "📥 Pulling rollback Docker images..."
+            docker pull \${REGISTRY}/\${IMAGE_NAME}:\${ROLLBACK_TAG}-api
+            docker pull \${REGISTRY}/\${IMAGE_NAME}:\${ROLLBACK_TAG}-web
+
+            # Start rollback containers
+            echo "🚀 Starting rollback containers..."
+            docker compose -f docker-compose.prod.yml up -d
+
+            # Wait for services to be healthy
+            echo "🏥 Waiting for rollback services to be healthy..."
+            timeout=300
+            elapsed=0
+
+            while [ \$elapsed -lt \$timeout ]; do
+              healthy_count=\$(docker compose -f docker-compose.prod.yml ps | grep -c "healthy")
+              total_services=\$(docker compose -f docker-compose.prod.yml ps | grep -c "Up")
+
+              if [ "\$healthy_count" -eq "\$total_services" ] && [ "\$total_services" -gt 0 ]; then
+                echo "✅ Rollback completed successfully!"
+                echo "All \$total_services services are healthy."
+                break
+              fi
+
+              echo "⏳ Waiting for rollback... (\$healthy_count/\$total_services services healthy)"
+              sleep 10
+              elapsed=\$((elapsed + 10))
+            done
+
+            if [ \$elapsed -ge \$timeout ]; then
+              echo "❌ Rollback failed - timeout waiting for services"
+              docker compose -f docker-compose.prod.yml logs
+              exit 1
+            fi
+
+            # Clean up old images
+            echo "🧹 Cleaning up old Docker images..."
+            docker image prune -f
+
+            echo "✅ Rollback to $ROLLBACK_TAG completed successfully!"
+            docker compose -f docker-compose.prod.yml ps
+
+      - name: Rollback Summary
+        run: |
+          echo "## 🔄 Rollback Completed Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Provider:** ${{ inputs.provider }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Rolled back to:** ${{ steps.get-rollback-tag.outputs.rollback_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Rollback completed at:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ⚠️ Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. Verify application functionality" >> $GITHUB_STEP_SUMMARY
+          echo "2. Monitor for any issues" >> $GITHUB_STEP_SUMMARY
+          echo "3. Consider redeploying with fixes if needed" >> $GITHUB_STEP_SUMMARY

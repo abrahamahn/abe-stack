@@ -1,5 +1,11 @@
 // apps/server/src/infrastructure/data/database/utils/transaction.ts
-import type { DbClient } from '@database/client';
+/**
+ * Transaction Utilities
+ *
+ * Helper functions for database transactions using raw SQL.
+ */
+
+import type { RawDb, TransactionOptions } from '@abe-stack/db';
 
 /**
  * Execute a callback within a database transaction
@@ -9,32 +15,31 @@ import type { DbClient } from '@database/client';
  * @example
  * ```typescript
  * const result = await withTransaction(db, async (tx) => {
- *   const user = await tx.insert(users).values({...}).returning();
- *   const token = await tx.insert(refreshTokens).values({...});
+ *   const user = await tx.queryOne<User>(insert(USERS_TABLE).values({...}).returningAll().toSql());
+ *   const token = await tx.queryOne<Token>(insert(TOKENS_TABLE).values({...}).returningAll().toSql());
  *   return user;
  * });
  * ```
  *
- * @param db - Database client
+ * @param db - Raw database client
  * @param callback - Async function to execute within transaction
+ * @param options - Optional transaction options (isolation level, read-only)
  * @returns Promise<T> - Result of the callback
  * @throws Error if transaction fails
  */
 export async function withTransaction<T>(
-  db: DbClient,
-  callback: (tx: DbClient) => Promise<T>,
+  db: RawDb,
+  callback: (tx: RawDb) => Promise<T>,
+  options?: TransactionOptions,
 ): Promise<T> {
-  return await db.transaction(async (tx) => {
-    return await callback(tx as DbClient);
-  });
+  return await db.transaction(callback, options);
 }
 
 /**
  * Type guard to check if we're already in a transaction
- * Drizzle transactions are passed as the same type, so this helps document intent
+ * (For documentation purposes - nested transactions use savepoints)
  */
-export function isInTransaction(_db: DbClient): boolean {
-  // Drizzle doesn't expose a direct way to check, but we can use this for documentation
-  // In practice, nested transactions will use savepoints automatically
-  return true; // Always safe to call withTransaction - it handles nesting
+export function isInTransaction(_db: RawDb): boolean {
+  // Raw SQL client handles nested transactions with savepoints
+  return true;
 }

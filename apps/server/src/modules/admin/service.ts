@@ -6,9 +6,9 @@
  * No HTTP awareness - returns domain objects or throws errors.
  */
 
-import { unlockAccount as infraUnlockAccount, users, type DbClient } from '@infrastructure';
+import { unlockAccount as infraUnlockAccount, type DbClient } from '@infrastructure';
 import { UserNotFoundError } from '@shared';
-import { eq } from 'drizzle-orm';
+import { select, eq, USERS_TABLE } from '@abe-stack/db';
 
 export { UserNotFoundError };
 
@@ -25,9 +25,13 @@ export async function unlockUserAccount(
   userAgent?: string,
 ): Promise<{ email: string }> {
   // Check if the target user exists
-  const targetUser = await db.query.users.findFirst({
-    where: eq(users.email, email),
-  });
+  const targetUser = await db.queryOne<{ id: string }>(
+    select(USERS_TABLE)
+      .columns('id')
+      .where(eq('email', email))
+      .limit(1)
+      .toSql(),
+  );
 
   if (!targetUser) {
     throw new UserNotFoundError(`User not found: ${email}`);

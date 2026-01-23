@@ -1,65 +1,59 @@
 // apps/server/src/infrastructure/data/database/client.ts
-import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+/**
+ * Database Client
+ *
+ * Raw SQL database client using @abe-stack/db.
+ * Provides connection management and transaction support.
+ */
 
-import * as schema from './schema';
+import {
+  createRawDb,
+  buildConnectionString as buildConnString,
+  canReachDatabase,
+  type RawDb,
+} from '@abe-stack/db';
 
 type DbEnv = Record<string, string | number | boolean | undefined>;
 type GlobalWithDb = typeof globalThis & {
-  db?: PostgresJsDatabase<typeof schema>;
+  rawDb?: RawDb;
 };
 
+/**
+ * Build a database connection string from environment variables
+ */
 export function buildConnectionString(env: DbEnv = process.env as DbEnv): string {
-  if (env.DATABASE_URL && typeof env.DATABASE_URL === 'string') {
-    return env.DATABASE_URL;
-  }
-
-  const user = String(env.POSTGRES_USER || env.DB_USER || 'postgres');
-  const password = String(env.POSTGRES_PASSWORD || env.DB_PASSWORD || '');
-  const host = String(env.POSTGRES_HOST || env.DB_HOST || 'localhost');
-  const port = String(env.POSTGRES_PORT || env.DB_PORT || 5432);
-  const database = String(env.POSTGRES_DB || env.DB_NAME || 'abe_stack_dev');
-
-  const auth = password ? `${user}:${password}` : user;
-  return `postgres://${auth}@${host}:${port}/${database}`;
+  return buildConnString(env as Record<string, string | undefined>);
 }
 
-export function createDbClient(connectionString: string): PostgresJsDatabase<typeof schema> {
-  const client = postgres(connectionString, {
-    max: Number(process.env.DB_MAX_CONNECTIONS || 10),
-    idle_timeout: Number(process.env.DB_IDLE_TIMEOUT || 30000),
-    connect_timeout: Number(process.env.DB_CONNECT_TIMEOUT || 10000),
-  });
-
+/**
+ * Create a raw SQL database client
+ */
+export function createDbClient(connectionString: string): RawDb {
   if (process.env.NODE_ENV !== 'production') {
     const globalWithDb = globalThis as GlobalWithDb;
 
-    const cachedDb = globalWithDb.db ?? drizzle(client, { schema });
-    globalWithDb.db = cachedDb;
-    return cachedDb;
+    if (!globalWithDb.rawDb) {
+      globalWithDb.rawDb = createRawDb({
+        connectionString,
+        maxConnections: Number(process.env.DB_MAX_CONNECTIONS || 10),
+        idleTimeout: Number(process.env.DB_IDLE_TIMEOUT || 30000),
+        connectTimeout: Number(process.env.DB_CONNECT_TIMEOUT || 10000),
+      });
+    }
+
+    return globalWithDb.rawDb;
   }
 
-  return drizzle(client, { schema });
-}
-
-export type DbClient = ReturnType<typeof createDbClient>;
-
-async function canReachDatabase(connectionString: string): Promise<boolean> {
-  const client = postgres(connectionString, {
-    max: 1,
-    idle_timeout: Number(process.env.DB_IDLE_TIMEOUT || 1000),
-    connect_timeout: Number(process.env.DB_CONNECT_TIMEOUT || 1000),
+  return createRawDb({
+    connectionString,
+    maxConnections: Number(process.env.DB_MAX_CONNECTIONS || 10),
+    idleTimeout: Number(process.env.DB_IDLE_TIMEOUT || 30000),
+    connectTimeout: Number(process.env.DB_CONNECT_TIMEOUT || 10000),
   });
-
-  try {
-    await client`select 1`;
-    await client.end({ timeout: 1 });
-    return true;
-  } catch {
-    await client.end({ timeout: 1 }).catch(() => undefined);
-    return false;
-  }
 }
+
+/** Database client type (RawDb from @abe-stack/db) */
+export type DbClient = RawDb;
 
 function uniquePorts(ports: Array<number | undefined>): number[] {
   return Array.from(new Set(ports.filter((port): port is number => Number.isFinite(port))));

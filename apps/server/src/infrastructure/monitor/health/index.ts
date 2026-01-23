@@ -10,7 +10,6 @@
 
 import { REQUIRED_TABLES, validateSchema } from '@database';
 import { getWebSocketStats } from '@websocket/index';
-import { sql } from 'drizzle-orm';
 
 import type { AppContext } from '@shared/types';
 
@@ -78,10 +77,10 @@ export interface StartupSummaryOptions {
 export async function checkDatabase(ctx: AppContext): Promise<ServiceHealth> {
   const start = Date.now();
   try {
-    await ctx.db.execute(sql`SELECT 1`);
+    const isHealthy = await ctx.db.healthCheck();
     return {
-      status: 'up',
-      message: 'connected',
+      status: isHealthy ? 'up' : 'down',
+      message: isHealthy ? 'connected' : 'health check failed',
       latencyMs: Date.now() - start,
     };
   } catch (error) {

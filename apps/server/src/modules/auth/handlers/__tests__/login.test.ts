@@ -38,6 +38,7 @@ vi.mock('@auth/utils', () => ({
 function createMockContext(overrides?: Partial<AppContext>): AppContext {
   return {
     db: {} as AppContext['db'],
+    repos: {} as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
     config: {
       auth: {
@@ -171,6 +172,7 @@ describe('handleLogin', () => {
 
       expect(authenticateUser).toHaveBeenCalledWith(
         ctx.db,
+        ctx.repos,
         ctx.config.auth,
         body.email,
         body.password,
@@ -355,7 +357,7 @@ describe('handleLogin', () => {
 
       let capturedCallback: ((userId: string) => void) | undefined;
       vi.mocked(authenticateUser).mockImplementation(
-        async (_db, _config, _email, _password, _logger, _ip, _ua, callback) => {
+        async (_db, _repos, _config, _email, _password, _logger, _ip, _ua, callback) => {
           capturedCallback = callback;
           return mockAuthResult;
         },
@@ -399,6 +401,7 @@ describe('handleLogin', () => {
         expect.anything(),
         expect.anything(),
         expect.anything(),
+        expect.anything(),
         '192.168.1.100',
         expect.anything(),
         expect.anything(),
@@ -434,6 +437,7 @@ describe('handleLogin', () => {
         expect.anything(),
         expect.anything(),
         expect.anything(),
+        expect.anything(),
         'Mozilla/5.0 Custom Browser',
         expect.anything(),
       );
@@ -462,6 +466,7 @@ describe('handleLogin', () => {
       await handleLogin(ctx, body, request, reply);
 
       expect(authenticateUser).toHaveBeenCalledWith(
+        expect.anything(),
         expect.anything(),
         expect.anything(),
         expect.anything(),

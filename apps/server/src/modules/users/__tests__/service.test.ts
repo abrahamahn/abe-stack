@@ -2,22 +2,12 @@
 import { getUserById } from '@users/service';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-// Mock dependencies
-vi.mock('@infrastructure', () => ({
-  users: { id: 'id' },
-}));
-
-vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((col: unknown, val: unknown) => ({ eq: [col, val] })),
-}));
+import type { UserRepository } from '@abe-stack/db';
 
 describe('Users Service', () => {
-  const mockDb = {
-    query: {
-      users: {
-        findFirst: vi.fn(),
-      },
-    },
+  // Mock UserRepository with findById method
+  const mockUserRepo: Partial<UserRepository> = {
+    findById: vi.fn(),
   };
 
   beforeEach(() => {
@@ -32,10 +22,17 @@ describe('Users Service', () => {
         name: 'Test User',
         role: 'user' as const,
         createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+        emailVerified: true,
+        emailVerifiedAt: new Date('2024-01-01'),
+        passwordHash: 'hashed',
+        lockedUntil: null,
+        failedLoginAttempts: 0,
+        version: 1,
       };
-      mockDb.query.users.findFirst.mockResolvedValue(mockUser);
+      vi.mocked(mockUserRepo.findById!).mockResolvedValue(mockUser);
 
-      const result = await getUserById(mockDb as never, 'user-123');
+      const result = await getUserById(mockUserRepo as UserRepository, 'user-123');
 
       expect(result).toEqual({
         id: 'user-123',
@@ -47,9 +44,9 @@ describe('Users Service', () => {
     });
 
     test('should return null when user not found', async () => {
-      mockDb.query.users.findFirst.mockResolvedValue(null);
+      vi.mocked(mockUserRepo.findById!).mockResolvedValue(null);
 
-      const result = await getUserById(mockDb as never, 'nonexistent');
+      const result = await getUserById(mockUserRepo as UserRepository, 'nonexistent');
 
       expect(result).toBeNull();
     });
@@ -61,10 +58,17 @@ describe('Users Service', () => {
         name: null,
         role: 'admin' as const,
         createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+        emailVerified: true,
+        emailVerifiedAt: new Date('2024-01-01'),
+        passwordHash: 'hashed',
+        lockedUntil: null,
+        failedLoginAttempts: 0,
+        version: 1,
       };
-      mockDb.query.users.findFirst.mockResolvedValue(mockUser);
+      vi.mocked(mockUserRepo.findById!).mockResolvedValue(mockUser);
 
-      const result = await getUserById(mockDb as never, 'user-123');
+      const result = await getUserById(mockUserRepo as UserRepository, 'user-123');
 
       expect(result).toEqual({
         id: 'user-123',
@@ -76,15 +80,11 @@ describe('Users Service', () => {
     });
 
     test('should query with correct user id', async () => {
-      mockDb.query.users.findFirst.mockResolvedValue(null);
+      vi.mocked(mockUserRepo.findById!).mockResolvedValue(null);
 
-      await getUserById(mockDb as never, 'specific-user-id');
+      await getUserById(mockUserRepo as UserRepository, 'specific-user-id');
 
-      expect(mockDb.query.users.findFirst).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.anything() as unknown,
-        }),
-      );
+      expect(mockUserRepo.findById).toHaveBeenCalledWith('specific-user-id');
     });
   });
 });

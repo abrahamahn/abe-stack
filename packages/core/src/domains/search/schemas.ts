@@ -1,52 +1,63 @@
 // packages/core/src/domains/search/schemas.ts
 /**
- * Search & Filtering Zod Schemas
+ * Search & Filtering Validation Schemas
  *
  * Validation schemas for search queries, filters, and results.
  * Used for API validation and type inference.
  */
 
-import { z } from 'zod';
+import { createSchema, type Schema } from '../../contracts/types';
 
 import { FILTER_OPERATORS, LOGICAL_OPERATORS, SORT_ORDER } from './types';
+
+import type {
+  CompoundFilter,
+  FacetBucket,
+  FacetConfig,
+  FacetedSearchQuery,
+  FacetResult,
+  FilterCondition,
+  FilterOperator,
+  FilterPrimitive,
+  FilterValue,
+  FullTextSearchConfig,
+  HighlightedField,
+  LogicalOperator,
+  SearchQuery,
+  SearchResult,
+  SearchResultItem,
+  SortConfig,
+  SortOrder,
+  CursorSearchResult,
+} from './types';
 
 // ============================================================================
 // Filter Operator Schemas
 // ============================================================================
 
+const FILTER_OPERATOR_VALUES = Object.values(FILTER_OPERATORS);
+
 /**
  * Schema for filter operators.
  */
-export const filterOperatorSchema = z.enum([
-  FILTER_OPERATORS.EQ,
-  FILTER_OPERATORS.NEQ,
-  FILTER_OPERATORS.GT,
-  FILTER_OPERATORS.GTE,
-  FILTER_OPERATORS.LT,
-  FILTER_OPERATORS.LTE,
-  FILTER_OPERATORS.CONTAINS,
-  FILTER_OPERATORS.STARTS_WITH,
-  FILTER_OPERATORS.ENDS_WITH,
-  FILTER_OPERATORS.LIKE,
-  FILTER_OPERATORS.ILIKE,
-  FILTER_OPERATORS.IN,
-  FILTER_OPERATORS.NOT_IN,
-  FILTER_OPERATORS.IS_NULL,
-  FILTER_OPERATORS.IS_NOT_NULL,
-  FILTER_OPERATORS.BETWEEN,
-  FILTER_OPERATORS.ARRAY_CONTAINS,
-  FILTER_OPERATORS.ARRAY_CONTAINS_ANY,
-  FILTER_OPERATORS.FULL_TEXT,
-]);
+export const filterOperatorSchema: Schema<FilterOperator> = createSchema((data: unknown) => {
+  if (typeof data !== 'string' || !FILTER_OPERATOR_VALUES.includes(data as FilterOperator)) {
+    throw new Error(`Invalid filter operator: ${String(data)}`);
+  }
+  return data as FilterOperator;
+});
+
+const LOGICAL_OPERATOR_VALUES = Object.values(LOGICAL_OPERATORS);
 
 /**
  * Schema for logical operators.
  */
-export const logicalOperatorSchema = z.enum([
-  LOGICAL_OPERATORS.AND,
-  LOGICAL_OPERATORS.OR,
-  LOGICAL_OPERATORS.NOT,
-]);
+export const logicalOperatorSchema: Schema<LogicalOperator> = createSchema((data: unknown) => {
+  if (typeof data !== 'string' || !LOGICAL_OPERATOR_VALUES.includes(data as LogicalOperator)) {
+    throw new Error(`Invalid logical operator: ${String(data)}`);
+  }
+  return data as LogicalOperator;
+});
 
 // ============================================================================
 // Filter Value Schemas
@@ -55,30 +66,53 @@ export const logicalOperatorSchema = z.enum([
 /**
  * Schema for primitive filter values.
  */
-export const filterPrimitiveSchema = z.union([
-  z.string(),
-  z.number(),
-  z.boolean(),
-  z.date(),
-  z.null(),
-]);
+export const filterPrimitiveSchema: Schema<FilterPrimitive> = createSchema((data: unknown) => {
+  if (
+    data === null ||
+    typeof data === 'string' ||
+    typeof data === 'number' ||
+    typeof data === 'boolean' ||
+    data instanceof Date
+  ) {
+    return data as FilterPrimitive;
+  }
+  throw new Error('Invalid filter primitive value');
+});
 
 /**
  * Schema for range values.
  */
-export const rangeValueSchema = z.object({
-  min: filterPrimitiveSchema,
-  max: filterPrimitiveSchema,
+export interface RangeValue {
+  min: FilterPrimitive;
+  max: FilterPrimitive;
+}
+
+export const rangeValueSchema: Schema<RangeValue> = createSchema((data: unknown) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid range value');
+  }
+  const obj = data as Record<string, unknown>;
+  return {
+    min: filterPrimitiveSchema.parse(obj.min),
+    max: filterPrimitiveSchema.parse(obj.max),
+  };
 });
 
 /**
  * Schema for filter values (primitives, arrays, or ranges).
  */
-export const filterValueSchema = z.union([
-  filterPrimitiveSchema,
-  z.array(filterPrimitiveSchema),
-  rangeValueSchema,
-]);
+export const filterValueSchema: Schema<FilterValue> = createSchema((data: unknown) => {
+  // Try as array of primitives
+  if (Array.isArray(data)) {
+    return data.map((item) => filterPrimitiveSchema.parse(item));
+  }
+  // Try as range
+  if (data && typeof data === 'object' && 'min' in data && 'max' in data) {
+    return rangeValueSchema.parse(data);
+  }
+  // Try as primitive
+  return filterPrimitiveSchema.parse(data);
+});
 
 // ============================================================================
 // Filter Condition Schemas
@@ -87,33 +121,73 @@ export const filterValueSchema = z.union([
 /**
  * Schema for a single filter condition.
  */
-export const filterConditionSchema = z.object({
-  field: z.string().min(1),
-  operator: filterOperatorSchema,
-  value: filterValueSchema,
-  caseSensitive: z.boolean().optional(),
+export const filterConditionSchema: Schema<FilterCondition> = createSchema((data: unknown) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid filter condition');
+  }
+  const obj = data as Record<string, unknown>;
+
+  if (typeof obj.field !== 'string' || obj.field.length < 1) {
+    throw new Error('Filter field must be a non-empty string');
+  }
+
+  return {
+    field: obj.field,
+    operator: filterOperatorSchema.parse(obj.operator),
+    value: filterValueSchema.parse(obj.value),
+    caseSensitive: typeof obj.caseSensitive === 'boolean' ? obj.caseSensitive : undefined,
+  };
 });
 
 /**
  * Recursive schema for compound filters.
  */
-export const compoundFilterSchema: z.ZodType<{
-  operator: 'and' | 'or' | 'not';
-  conditions: Array<
-    | { field: string; operator: string; value: unknown; caseSensitive?: boolean }
-    | { operator: 'and' | 'or' | 'not'; conditions: unknown[] }
-  >;
-}> = z.lazy(() =>
-  z.object({
-    operator: logicalOperatorSchema,
-    conditions: z.array(z.union([filterConditionSchema, compoundFilterSchema])).min(1),
-  }),
-);
+export const compoundFilterSchema: Schema<CompoundFilter> = createSchema((data: unknown) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid compound filter');
+  }
+  const obj = data as Record<string, unknown>;
+
+  const operator = logicalOperatorSchema.parse(obj.operator);
+
+  if (!Array.isArray(obj.conditions) || obj.conditions.length < 1) {
+    throw new Error('Compound filter must have at least one condition');
+  }
+
+  const conditions = obj.conditions.map((cond) => {
+    const c = cond as Record<string, unknown>;
+    // Determine if it's a simple condition or compound filter
+    if ('field' in c) {
+      return filterConditionSchema.parse(c);
+    } else if ('conditions' in c) {
+      return compoundFilterSchema.parse(c);
+    }
+    throw new Error('Invalid condition in compound filter');
+  });
+
+  return { operator, conditions };
+});
 
 /**
  * Schema for any filter (single or compound).
  */
-export const filterSchema = z.union([filterConditionSchema, compoundFilterSchema]);
+export const filterSchema: Schema<FilterCondition | CompoundFilter> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid filter');
+    }
+    const obj = data as Record<string, unknown>;
+
+    // Determine type by checking for 'field' vs 'conditions'
+    if ('field' in obj) {
+      return filterConditionSchema.parse(data);
+    }
+    if ('conditions' in obj) {
+      return compoundFilterSchema.parse(data);
+    }
+    throw new Error('Filter must have either field or conditions');
+  },
+);
 
 // ============================================================================
 // Sort Schemas
@@ -122,15 +196,31 @@ export const filterSchema = z.union([filterConditionSchema, compoundFilterSchema
 /**
  * Schema for sort order.
  */
-export const sortOrderSchema = z.enum([SORT_ORDER.ASC, SORT_ORDER.DESC]);
+export const sortOrderSchema: Schema<SortOrder> = createSchema((data: unknown) => {
+  if (data !== SORT_ORDER.ASC && data !== SORT_ORDER.DESC) {
+    throw new Error('Sort order must be "asc" or "desc"');
+  }
+  return data;
+});
 
 /**
  * Schema for sort configuration.
  */
-export const sortConfigSchema = z.object({
-  field: z.string().min(1),
-  order: sortOrderSchema,
-  nulls: z.enum(['first', 'last']).optional(),
+export const sortConfigSchema: Schema<SortConfig> = createSchema((data: unknown) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid sort config');
+  }
+  const obj = data as Record<string, unknown>;
+
+  if (typeof obj.field !== 'string' || obj.field.length < 1) {
+    throw new Error('Sort field must be a non-empty string');
+  }
+
+  return {
+    field: obj.field,
+    order: sortOrderSchema.parse(obj.order),
+    nulls: obj.nulls === 'first' || obj.nulls === 'last' ? obj.nulls : undefined,
+  };
 });
 
 // ============================================================================
@@ -140,14 +230,36 @@ export const sortConfigSchema = z.object({
 /**
  * Schema for full-text search configuration.
  */
-export const fullTextSearchConfigSchema = z.object({
-  query: z.string().min(1).max(1000),
-  fields: z.array(z.string()).optional(),
-  fuzziness: z.number().min(0).max(1).optional(),
-  highlight: z.boolean().optional(),
-  highlightPrefix: z.string().optional(),
-  highlightSuffix: z.string().optional(),
-});
+export const fullTextSearchConfigSchema: Schema<FullTextSearchConfig> = createSchema(
+  (data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid full-text search config');
+    }
+    const obj = data as Record<string, unknown>;
+
+    if (typeof obj.query !== 'string' || obj.query.length < 1 || obj.query.length > 1000) {
+      throw new Error('Search query must be 1-1000 characters');
+    }
+
+    // Validate fuzziness if provided
+    let fuzziness: number | undefined;
+    if (obj.fuzziness !== undefined) {
+      if (typeof obj.fuzziness !== 'number' || obj.fuzziness < 0 || obj.fuzziness > 1) {
+        throw new Error('fuzziness must be a number between 0 and 1');
+      }
+      fuzziness = obj.fuzziness;
+    }
+
+    return {
+      query: obj.query,
+      fields: Array.isArray(obj.fields) ? obj.fields : undefined,
+      fuzziness,
+      highlight: typeof obj.highlight === 'boolean' ? obj.highlight : undefined,
+      highlightPrefix: typeof obj.highlightPrefix === 'string' ? obj.highlightPrefix : undefined,
+      highlightSuffix: typeof obj.highlightSuffix === 'string' ? obj.highlightSuffix : undefined,
+    };
+  },
+);
 
 // ============================================================================
 // Search Query Schema
@@ -157,27 +269,66 @@ export const fullTextSearchConfigSchema = z.object({
  * Default pagination values.
  */
 export const SEARCH_DEFAULTS = {
-  PAGE: 1,
-  LIMIT: 50,
-  MAX_LIMIT: 1000,
-} as const;
+  PAGE: 1 as number,
+  LIMIT: 50 as number,
+  MAX_LIMIT: 1000 as number,
+};
 
 /**
  * Schema for search query.
  */
-export const searchQuerySchema = z.object({
-  filters: filterSchema.optional(),
-  sort: z.array(sortConfigSchema).optional(),
-  search: fullTextSearchConfigSchema.optional(),
-  page: z.number().int().min(1).default(SEARCH_DEFAULTS.PAGE),
-  limit: z.number().int().min(1).max(SEARCH_DEFAULTS.MAX_LIMIT).default(SEARCH_DEFAULTS.LIMIT),
-  cursor: z.string().optional(),
-  select: z.array(z.string()).optional(),
-  includeCount: z.boolean().optional(),
+export const searchQuerySchema: Schema<SearchQuery> = createSchema((data: unknown) => {
+  const obj = (data && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+  // Parse filters if present
+  let filters: FilterCondition | CompoundFilter | undefined;
+  if (obj.filters !== undefined) {
+    filters = filterSchema.parse(obj.filters);
+  }
+
+  // Parse sort if present
+  let sort: SortConfig[] | undefined;
+  if (Array.isArray(obj.sort)) {
+    sort = obj.sort.map((s) => sortConfigSchema.parse(s));
+  }
+
+  // Parse search if present
+  let search: FullTextSearchConfig | undefined;
+  if (obj.search !== undefined) {
+    search = fullTextSearchConfigSchema.parse(obj.search);
+  }
+
+  // Parse pagination
+  let page = SEARCH_DEFAULTS.PAGE;
+  if (obj.page !== undefined) {
+    if (typeof obj.page !== 'number' || !Number.isInteger(obj.page) || obj.page < 1) {
+      throw new Error('page must be a positive integer');
+    }
+    page = obj.page;
+  }
+
+  let limit = SEARCH_DEFAULTS.LIMIT;
+  if (typeof obj.limit === 'number' && Number.isInteger(obj.limit)) {
+    if (obj.limit < 1 || obj.limit > SEARCH_DEFAULTS.MAX_LIMIT) {
+      throw new Error(`Limit must be between 1 and ${String(SEARCH_DEFAULTS.MAX_LIMIT)}`);
+    }
+    limit = obj.limit;
+  }
+
+  return {
+    filters,
+    sort,
+    search,
+    page,
+    limit,
+    cursor: typeof obj.cursor === 'string' ? obj.cursor : undefined,
+    select: Array.isArray(obj.select) ? (obj.select as string[]) : undefined,
+    includeCount: typeof obj.includeCount === 'boolean' ? obj.includeCount : undefined,
+  };
 });
 
-export type SearchQueryInput = z.input<typeof searchQuerySchema>;
-export type SearchQueryOutput = z.output<typeof searchQuerySchema>;
+export type SearchQueryInput = SearchQuery;
+export type SearchQueryOutput = SearchQuery;
 
 // ============================================================================
 // Search Result Schemas
@@ -186,79 +337,138 @@ export type SearchQueryOutput = z.output<typeof searchQuerySchema>;
 /**
  * Schema for highlighted field.
  */
-export const highlightedFieldSchema = z.object({
-  field: z.string(),
-  highlighted: z.string(),
-  original: z.string(),
+export const highlightedFieldSchema: Schema<HighlightedField> = createSchema((data: unknown) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid highlighted field');
+  }
+  const obj = data as Record<string, unknown>;
+
+  if (typeof obj.field !== 'string') {
+    throw new Error('Highlighted field must have a field name');
+  }
+  if (typeof obj.highlighted !== 'string') {
+    throw new Error('Highlighted field must have highlighted text');
+  }
+  if (typeof obj.original !== 'string') {
+    throw new Error('Highlighted field must have original text');
+  }
+
+  return {
+    field: obj.field,
+    highlighted: obj.highlighted,
+    original: obj.original,
+  };
 });
 
 /**
  * Schema factory for search result items.
  */
-export const searchResultItemSchema = <T extends z.ZodType>(
-  itemSchema: T,
-): z.ZodObject<{
-  item: T;
-  score: z.ZodOptional<z.ZodNumber>;
-  highlights: z.ZodOptional<z.ZodArray<typeof highlightedFieldSchema>>;
-}> =>
-  z.object({
-    item: itemSchema,
-    score: z.number().optional(),
-    highlights: z.array(highlightedFieldSchema).optional(),
+export function searchResultItemSchema<T>(itemSchema: Schema<T>): Schema<SearchResultItem<T>> {
+  return createSchema((data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid search result item');
+    }
+    const obj = data as Record<string, unknown>;
+
+    const item = itemSchema.parse(obj.item);
+
+    return {
+      item,
+      score: typeof obj.score === 'number' ? obj.score : undefined,
+      highlights: Array.isArray(obj.highlights)
+        ? obj.highlights.map((h) => highlightedFieldSchema.parse(h))
+        : undefined,
+    };
   });
+}
 
 /**
  * Schema factory for paginated search results.
  */
-export const searchResultSchema = <T extends z.ZodType>(
-  itemSchema: T,
-): z.ZodObject<{
-  data: z.ZodArray<ReturnType<typeof searchResultItemSchema<T>>>;
-  total: z.ZodOptional<z.ZodNumber>;
-  page: z.ZodNumber;
-  limit: z.ZodNumber;
-  hasNext: z.ZodBoolean;
-  hasPrev: z.ZodBoolean;
-  totalPages: z.ZodOptional<z.ZodNumber>;
-  executionTime: z.ZodOptional<z.ZodNumber>;
-}> =>
-  z.object({
-    data: z.array(searchResultItemSchema(itemSchema)),
-    total: z.number().int().min(0).optional(),
-    page: z.number().int().min(1),
-    limit: z.number().int().min(1),
-    hasNext: z.boolean(),
-    hasPrev: z.boolean(),
-    totalPages: z.number().int().min(0).optional(),
-    executionTime: z.number().optional(),
+export function searchResultSchema<T>(itemSchema: Schema<T>): Schema<SearchResult<T>> {
+  const resultItemSchema = searchResultItemSchema(itemSchema);
+
+  return createSchema((data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid search result');
+    }
+    const obj = data as Record<string, unknown>;
+
+    if (!Array.isArray(obj.data)) {
+      throw new Error('Search result data must be an array');
+    }
+
+    const parsedData = obj.data.map((item) => resultItemSchema.parse(item));
+
+    if (typeof obj.page !== 'number' || obj.page < 1) {
+      throw new Error('Page must be a positive integer');
+    }
+    if (typeof obj.limit !== 'number' || obj.limit < 1) {
+      throw new Error('Limit must be a positive integer');
+    }
+    if (typeof obj.hasNext !== 'boolean') {
+      throw new Error('hasNext must be a boolean');
+    }
+    if (typeof obj.hasPrev !== 'boolean') {
+      throw new Error('hasPrev must be a boolean');
+    }
+
+    return {
+      data: parsedData,
+      total: typeof obj.total === 'number' && obj.total >= 0 ? obj.total : undefined,
+      page: obj.page,
+      limit: obj.limit,
+      hasNext: obj.hasNext,
+      hasPrev: obj.hasPrev,
+      totalPages:
+        typeof obj.totalPages === 'number' && obj.totalPages >= 0 ? obj.totalPages : undefined,
+      executionTime: typeof obj.executionTime === 'number' ? obj.executionTime : undefined,
+    };
   });
+}
 
 /**
  * Schema factory for cursor-based search results.
  */
-export const cursorSearchResultSchema = <T extends z.ZodType>(
-  itemSchema: T,
-): z.ZodObject<{
-  data: z.ZodArray<ReturnType<typeof searchResultItemSchema<T>>>;
-  nextCursor: z.ZodNullable<z.ZodString>;
-  prevCursor: z.ZodNullable<z.ZodString>;
-  hasNext: z.ZodBoolean;
-  hasPrev: z.ZodBoolean;
-  limit: z.ZodNumber;
-  total: z.ZodOptional<z.ZodNumber>;
-  executionTime: z.ZodOptional<z.ZodNumber>;
-}> =>
-  z.object({
-    data: z.array(searchResultItemSchema(itemSchema)),
-    nextCursor: z.string().nullable(),
-    prevCursor: z.string().nullable(),
-    hasNext: z.boolean(),
-    hasPrev: z.boolean(),
-    limit: z.number().int().min(1),
-    total: z.number().int().min(0).optional(),
-    executionTime: z.number().optional(),
+export function cursorSearchResultSchema<T>(itemSchema: Schema<T>): Schema<CursorSearchResult<T>> {
+  const resultItemSchema = searchResultItemSchema(itemSchema);
+
+  return createSchema((data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid cursor search result');
+    }
+    const obj = data as Record<string, unknown>;
+
+    if (!Array.isArray(obj.data)) {
+      throw new Error('Search result data must be an array');
+    }
+
+    const parsedData = obj.data.map((item) => resultItemSchema.parse(item));
+
+    if (typeof obj.hasNext !== 'boolean') {
+      throw new Error('hasNext must be a boolean');
+    }
+    if (typeof obj.hasPrev !== 'boolean') {
+      throw new Error('hasPrev must be a boolean');
+    }
+    if (typeof obj.limit !== 'number' || obj.limit < 1) {
+      throw new Error('Limit must be a positive integer');
+    }
+
+    return {
+      data: parsedData,
+      nextCursor:
+        obj.nextCursor === null || typeof obj.nextCursor === 'string' ? obj.nextCursor : null,
+      prevCursor:
+        obj.prevCursor === null || typeof obj.prevCursor === 'string' ? obj.prevCursor : null,
+      hasNext: obj.hasNext,
+      hasPrev: obj.hasPrev,
+      limit: obj.limit,
+      total: typeof obj.total === 'number' && obj.total >= 0 ? obj.total : undefined,
+      executionTime: typeof obj.executionTime === 'number' ? obj.executionTime : undefined,
+    };
   });
+}
 
 // ============================================================================
 // Facet Schemas
@@ -267,67 +477,167 @@ export const cursorSearchResultSchema = <T extends z.ZodType>(
 /**
  * Schema for facet bucket.
  */
-export const facetBucketSchema = z.object({
-  value: filterPrimitiveSchema,
-  count: z.number().int().min(0),
-  selected: z.boolean().optional(),
+export const facetBucketSchema: Schema<FacetBucket> = createSchema((data: unknown) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid facet bucket');
+  }
+  const obj = data as Record<string, unknown>;
+
+  return {
+    value: filterPrimitiveSchema.parse(obj.value),
+    count: typeof obj.count === 'number' && Number.isInteger(obj.count) ? obj.count : 0,
+    selected: typeof obj.selected === 'boolean' ? obj.selected : undefined,
+  };
 });
 
 /**
  * Schema for facet configuration.
  */
-export const facetConfigSchema = z.object({
-  field: z.string().min(1),
-  size: z.number().int().min(1).max(100).optional(),
-  sortBy: z.enum(['count', 'value']).optional(),
-  sortOrder: sortOrderSchema.optional(),
-  includeMissing: z.boolean().optional(),
+export const facetConfigSchema: Schema<FacetConfig> = createSchema((data: unknown) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid facet config');
+  }
+  const obj = data as Record<string, unknown>;
+
+  if (typeof obj.field !== 'string' || obj.field.length < 1) {
+    throw new Error('Facet field must be a non-empty string');
+  }
+
+  // Validate size if provided
+  let size: number | undefined;
+  if (obj.size !== undefined) {
+    if (typeof obj.size !== 'number' || !Number.isInteger(obj.size) || obj.size < 1 || obj.size > 100) {
+      throw new Error('Facet size must be an integer between 1 and 100');
+    }
+    size = obj.size;
+  }
+
+  return {
+    field: obj.field,
+    size,
+    sortBy:
+      obj.sortBy === 'count' || obj.sortBy === 'value' ? obj.sortBy : undefined,
+    sortOrder:
+      obj.sortOrder === 'asc' || obj.sortOrder === 'desc'
+        ? (obj.sortOrder as SortOrder)
+        : undefined,
+    includeMissing: typeof obj.includeMissing === 'boolean' ? obj.includeMissing : undefined,
+  };
 });
 
 /**
  * Schema for facet result.
  */
-export const facetResultSchema = z.object({
-  field: z.string(),
-  buckets: z.array(facetBucketSchema),
-  totalUnique: z.number().int().min(0).optional(),
+export const facetResultSchema: Schema<FacetResult> = createSchema((data: unknown) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid facet result');
+  }
+  const obj = data as Record<string, unknown>;
+
+  if (typeof obj.field !== 'string') {
+    throw new Error('Facet result must have a field');
+  }
+
+  if (!Array.isArray(obj.buckets)) {
+    throw new Error('Facet result must have buckets array');
+  }
+
+  return {
+    field: obj.field,
+    buckets: obj.buckets.map((b) => facetBucketSchema.parse(b)),
+    totalUnique: typeof obj.totalUnique === 'number' ? obj.totalUnique : undefined,
+  };
 });
 
 /**
  * Schema for faceted search query.
  */
-export const facetedSearchQuerySchema = searchQuerySchema.extend({
-  facets: z.array(facetConfigSchema).optional(),
-});
+export const facetedSearchQuerySchema: Schema<FacetedSearchQuery> = createSchema(
+  (data: unknown) => {
+    const base = searchQuerySchema.parse(data);
+    const obj = (data && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    return {
+      ...base,
+      facets: Array.isArray(obj.facets)
+        ? (obj.facets as unknown[]).map((f) => facetConfigSchema.parse(f))
+        : undefined,
+    };
+  },
+);
 
 /**
  * Schema factory for faceted search results.
  */
-export const facetedSearchResultSchema = <T extends z.ZodType>(
-  itemSchema: T,
-): ReturnType<typeof searchResultSchema<T>> & {
-  extend: ReturnType<typeof searchResultSchema<T>>['extend'];
-} =>
-  searchResultSchema(itemSchema).extend({
-    facets: z.array(facetResultSchema).optional(),
+export function facetedSearchResultSchema<T>(
+  itemSchema: Schema<T>,
+): Schema<SearchResult<T> & { facets?: FacetResult[] }> {
+  const baseSchema = searchResultSchema(itemSchema);
+
+  return createSchema((data: unknown) => {
+    const base = baseSchema.parse(data);
+    const obj = (data && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+    return {
+      ...base,
+      facets: Array.isArray(obj.facets)
+        ? obj.facets.map((f) => facetResultSchema.parse(f))
+        : undefined,
+    };
   });
+}
 
 // ============================================================================
 // URL Query Parameter Schemas
 // ============================================================================
 
+export interface UrlSearchParams {
+  q?: string;
+  page?: number;
+  limit?: number;
+  sort?: string;
+  filters?: string;
+  cursor?: string;
+  fields?: string;
+}
+
 /**
  * Schema for parsing search params from URL query strings.
  * Handles string-to-type conversions for URL parameters.
  */
-export const urlSearchParamsSchema = z.object({
-  q: z.string().optional(), // Full-text search query
-  page: z.coerce.number().int().min(1).optional(),
-  limit: z.coerce.number().int().min(1).max(SEARCH_DEFAULTS.MAX_LIMIT).optional(),
-  sort: z.string().optional(), // Format: "field:asc,field2:desc"
-  filters: z.string().optional(), // JSON-encoded filters
-  cursor: z.string().optional(),
-  fields: z.string().optional(), // Comma-separated field names
+export const urlSearchParamsSchema: Schema<UrlSearchParams> = createSchema((data: unknown) => {
+  const obj = (data && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+
+  let page: number | undefined;
+  if (obj.page !== undefined) {
+    const parsed = Number(obj.page);
+    if (!isNaN(parsed) && Number.isInteger(parsed) && parsed >= 1) {
+      page = parsed;
+    }
+  }
+
+  let limit: number | undefined;
+  if (obj.limit !== undefined) {
+    const parsed = Number(obj.limit);
+    if (
+      !isNaN(parsed) &&
+      Number.isInteger(parsed) &&
+      parsed >= 1 &&
+      parsed <= SEARCH_DEFAULTS.MAX_LIMIT
+    ) {
+      limit = parsed;
+    }
+  }
+
+  return {
+    q: typeof obj.q === 'string' ? obj.q : undefined,
+    page,
+    limit,
+    sort: typeof obj.sort === 'string' ? obj.sort : undefined,
+    filters: typeof obj.filters === 'string' ? obj.filters : undefined,
+    cursor: typeof obj.cursor === 'string' ? obj.cursor : undefined,
+    fields: typeof obj.fields === 'string' ? obj.fields : undefined,
+  };
 });
 
-export type UrlSearchParamsInput = z.input<typeof urlSearchParamsSchema>;
+export type UrlSearchParamsInput = UrlSearchParams;

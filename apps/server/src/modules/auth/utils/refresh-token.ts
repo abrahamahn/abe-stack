@@ -10,13 +10,30 @@ import { TokenReuseError } from '@abe-stack/core';
 import {
   logTokenFamilyRevokedEvent,
   logTokenReuseEvent,
-  refreshTokenFamilies,
-  refreshTokens,
   withTransaction,
   type DbClient,
   type UserRole,
 } from '@infrastructure';
-import { and, eq, gt, lt } from 'drizzle-orm';
+import {
+  and,
+  eq,
+  gt,
+  lt,
+  select,
+  insert,
+  update,
+  deleteFrom,
+  toCamelCase,
+  REFRESH_TOKEN_FAMILIES_TABLE,
+  REFRESH_TOKEN_FAMILY_COLUMNS,
+  REFRESH_TOKENS_TABLE,
+  REFRESH_TOKEN_COLUMNS,
+  USERS_TABLE,
+  USER_COLUMNS,
+  type RefreshTokenFamily,
+  type RefreshToken,
+  type User,
+} from '@abe-stack/db';
 
 import { createRefreshToken, getRefreshTokenExpiry } from './jwt';
 
@@ -37,19 +54,27 @@ export async function createRefreshTokenFamily(
   expiryDays: number = 7,
 ): Promise<{ familyId: string; token: string }> {
   return await withTransaction(db, async (tx) => {
-    const [family] = await tx.insert(refreshTokenFamilies).values({ userId }).returning();
+    const familyRows = await tx.query<Record<string, unknown>>(
+      insert(REFRESH_TOKEN_FAMILIES_TABLE).values({ user_id: userId }).returningAll().toSql(),
+    );
 
-    if (!family) {
+    if (!familyRows[0]) {
       throw new Error('Failed to create refresh token family');
     }
 
+    const family = toCamelCase<RefreshTokenFamily>(familyRows[0], REFRESH_TOKEN_FAMILY_COLUMNS);
+
     const token = createRefreshToken();
-    await tx.insert(refreshTokens).values({
-      userId,
-      familyId: family.id,
-      token,
-      expiresAt: getRefreshTokenExpiry(expiryDays),
-    });
+    await tx.execute(
+      insert(REFRESH_TOKENS_TABLE)
+        .values({
+          user_id: userId,
+          family_id: family.id,
+          token,
+          expires_at: getRefreshTokenExpiry(expiryDays),
+        })
+        .toSql(),
+    );
 
     return {
       familyId: family.id,
@@ -82,14 +107,18 @@ export async function rotateRefreshToken(
 
   // OPTIMIZATION 1: Single query to find valid token
   // Uses composite index (token, expires_at) for efficient lookup
-  // Query: WHERE token = $1 AND expires_at > NOW()
-  const storedToken = await db.query.refreshTokens.findFirst({
-    where: and(eq(refreshTokens.token, oldToken), gt(refreshTokens.expiresAt, now)),
-  });
+  const storedTokenRow = await db.queryOne<Record<string, unknown>>(
+    select(REFRESH_TOKENS_TABLE)
+            .where(and(eq('token', oldToken), gt('expires_at', now)))
+      .limit(1)
+      .toSql(),
+  );
 
-  if (!storedToken) {
+  if (!storedTokenRow) {
     return null;
   }
+
+  const storedToken = toCamelCase<RefreshToken>(storedTokenRow, REFRESH_TOKEN_COLUMNS);
 
   // Calculate grace period metrics once
   const tokenAge = Date.now() - storedToken.createdAt.getTime();
@@ -97,25 +126,31 @@ export async function rotateRefreshToken(
 
   // OPTIMIZATION 2: Parallel fetch of user and family data
   // These are independent queries that can run concurrently
-  // User lookup uses primary key index on users.id
-  // Family lookup uses primary key index on refresh_token_families.id
-  const [user, family] = await Promise.all([
+  const [userRow, familyRow] = await Promise.all([
     // User lookup - always needed for the response
-    db.query.users.findFirst({
-      where: eq(refreshTokens.userId, storedToken.userId),
-    }),
+    db.queryOne<Record<string, unknown>>(
+      select(USERS_TABLE).where(eq('id', storedToken.userId)).limit(1).toSql(),
+    ),
     // Family lookup - only if familyId exists
     storedToken.familyId
-      ? db.query.refreshTokenFamilies.findFirst({
-          where: eq(refreshTokenFamilies.id, storedToken.familyId),
-        })
+      ? db.queryOne<Record<string, unknown>>(
+          select(REFRESH_TOKEN_FAMILIES_TABLE)
+                        .where(eq('id', storedToken.familyId))
+            .limit(1)
+            .toSql(),
+        )
       : Promise.resolve(null),
   ]);
 
   // Early exit if user doesn't exist
-  if (!user) {
+  if (!userRow) {
     return null;
   }
+
+  const user = toCamelCase<User>(userRow, USER_COLUMNS);
+  const family = familyRow
+    ? toCamelCase<RefreshTokenFamily>(familyRow, REFRESH_TOKEN_FAMILY_COLUMNS)
+    : null;
 
   // Check if family is revoked (token reuse attack)
   // At this point, family exists if storedToken.familyId exists (from parallel fetch)
@@ -127,15 +162,20 @@ export async function rotateRefreshToken(
 
   // OPTIMIZATION 3: Only check for recent tokens if family exists
   // Uses index on (family_id) combined with created_at filter
-  // Query: WHERE family_id = $1 AND created_at > $2 ORDER BY created_at DESC LIMIT 1
-  const recentTokenInFamily = storedToken.familyId
-    ? await db.query.refreshTokens.findFirst({
-        where: and(
-          eq(refreshTokens.familyId, storedToken.familyId),
-          gt(refreshTokens.createdAt, graceWindowStart),
-        ),
-        orderBy: (tokens, { desc }) => [desc(tokens.createdAt)],
-      })
+  const recentTokenRow = storedToken.familyId
+    ? await db.queryOne<Record<string, unknown>>(
+        select(REFRESH_TOKENS_TABLE)
+                    .where(
+            and(eq('family_id', storedToken.familyId), gt('created_at', graceWindowStart)),
+          )
+          .orderBy('created_at', 'desc')
+          .limit(1)
+          .toSql(),
+      )
+    : null;
+
+  const recentTokenInFamily = recentTokenRow
+    ? toCamelCase<RefreshToken>(recentTokenRow, REFRESH_TOKEN_COLUMNS)
     : null;
 
   // Handle network retry case: return newer token if within grace period
@@ -174,15 +214,19 @@ export async function rotateRefreshToken(
   // Uses primary key index for delete, inserts use sequence for id
   const newToken = await withTransaction(db, async (tx) => {
     // Delete uses primary key index: WHERE id = $1
-    await tx.delete(refreshTokens).where(eq(refreshTokens.id, storedToken.id));
+    await tx.execute(deleteFrom(REFRESH_TOKENS_TABLE).where(eq('id', storedToken.id)).toSql());
 
     const token = createRefreshToken();
-    await tx.insert(refreshTokens).values({
-      userId: storedToken.userId,
-      familyId: storedToken.familyId,
-      token,
-      expiresAt: getRefreshTokenExpiry(expiryDays),
-    });
+    await tx.execute(
+      insert(REFRESH_TOKENS_TABLE)
+        .values({
+          user_id: storedToken.userId,
+          family_id: storedToken.familyId,
+          token,
+          expires_at: getRefreshTokenExpiry(expiryDays),
+        })
+        .toSql(),
+    );
 
     return token;
   });
@@ -211,15 +255,17 @@ export async function revokeTokenFamily(
   reason: string,
 ): Promise<void> {
   await withTransaction(db, async (tx) => {
-    await tx
-      .update(refreshTokenFamilies)
-      .set({
-        revokedAt: new Date(),
-        revokeReason: reason,
-      })
-      .where(eq(refreshTokenFamilies.id, familyId));
+    await tx.execute(
+      update(REFRESH_TOKEN_FAMILIES_TABLE)
+        .set({
+          revoked_at: new Date(),
+          revoke_reason: reason,
+        })
+        .where(eq('id', familyId))
+        .toSql(),
+    );
 
-    await tx.delete(refreshTokens).where(eq(refreshTokens.familyId, familyId));
+    await tx.execute(deleteFrom(REFRESH_TOKENS_TABLE).where(eq('family_id', familyId)).toSql());
   });
 }
 
@@ -231,15 +277,17 @@ export async function revokeTokenFamily(
  */
 export async function revokeAllUserTokens(db: DbClient, userId: string): Promise<void> {
   await withTransaction(db, async (tx) => {
-    await tx
-      .update(refreshTokenFamilies)
-      .set({
-        revokedAt: new Date(),
-        revokeReason: 'User logged out from all devices',
-      })
-      .where(eq(refreshTokenFamilies.userId, userId));
+    await tx.execute(
+      update(REFRESH_TOKEN_FAMILIES_TABLE)
+        .set({
+          revoked_at: new Date(),
+          revoke_reason: 'User logged out from all devices',
+        })
+        .where(eq('user_id', userId))
+        .toSql(),
+    );
 
-    await tx.delete(refreshTokens).where(eq(refreshTokens.userId, userId));
+    await tx.execute(deleteFrom(REFRESH_TOKENS_TABLE).where(eq('user_id', userId)).toSql());
   });
 }
 
@@ -247,6 +295,8 @@ export async function revokeAllUserTokens(db: DbClient, userId: string): Promise
  * Clean up expired tokens (run periodically)
  */
 export async function cleanupExpiredTokens(db: DbClient): Promise<number> {
-  const result = await db.delete(refreshTokens).where(lt(refreshTokens.expiresAt, new Date()));
-  return Array.isArray(result) ? result.length : 0;
+  const result = await db.execute(
+    deleteFrom(REFRESH_TOKENS_TABLE).where(lt('expires_at', new Date())).toSql(),
+  );
+  return result;
 }

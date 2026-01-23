@@ -11,18 +11,20 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { userRoutes } from '../routes';
 
 import type { CursorPaginatedResult, CursorPaginationOptions, User } from '@abe-stack/core';
-import type { RouteResult } from '@router';
 import type { AppContext, RequestWithCookies } from '@shared';
 
 // ============================================================================
 // Mock Dependencies
 // ============================================================================
 
-// Mock the handlers module
-vi.mock('../handlers', () => ({
-  handleMe: vi.fn(),
-  handleListUsers: vi.fn(),
+// Mock the service module so real handlers can run with mocked DB calls
+vi.mock('../service', () => ({
+  getUserById: vi.fn(),
+  listUsers: vi.fn(),
 }));
+
+// Import mocked service functions
+import * as userService from '../service';
 
 // ============================================================================
 // Test Helpers
@@ -31,6 +33,19 @@ vi.mock('../handlers', () => ({
 function createMockContext(): AppContext {
   return {
     db: {} as never,
+    repos: {
+      users: {} as never,
+      refreshTokens: {} as never,
+      refreshTokenFamilies: {} as never,
+      loginAttempts: {} as never,
+      passwordResetTokens: {} as never,
+      emailVerificationTokens: {} as never,
+      securityEvents: {} as never,
+      magicLinkTokens: {} as never,
+      oauthConnections: {} as never,
+      pushSubscriptions: {} as never,
+      notificationPreferences: {} as never,
+    },
     config: {
       auth: {
         jwt: { secret: 'test-secret-32-characters-long!!' },
@@ -182,32 +197,25 @@ describe('User Routes Definition', () => {
 
 describe('User Routes Handler Mapping', () => {
   let ctx: AppContext;
-  let handleMe: ReturnType<typeof vi.fn>;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
     ctx = createMockContext();
-
-    // Import mocked handlers
-    const handlers = await import('../handlers.js');
-    handleMe = handlers.handleMe as ReturnType<typeof vi.fn>;
   });
 
   describe('users/me handler', () => {
-    test('should call handleMe with correct arguments', async () => {
+    test('should return user data when user is found', async () => {
       const user = { userId: 'user-123', email: 'test@example.com', role: 'user' };
       const request = createMockRequest(user);
-      const expectedResult: RouteResult<User> = {
-        status: 200,
-        body: {
-          id: 'user-123',
-          email: 'test@example.com',
-          name: 'Test User',
-          role: 'user',
-          createdAt: '2024-01-01T00:00:00.000Z',
-        },
-      };
-      handleMe.mockResolvedValue(expectedResult);
+
+      // Mock the service to return a user
+      (userService.getUserById as ReturnType<typeof vi.fn>).mockResolvedValue({
+        id: 'user-123',
+        email: 'test@example.com',
+        name: 'Test User',
+        role: 'user',
+        createdAt: new Date('2024-01-01T00:00:00.000Z'),
+      });
 
       const result = await userRoutes['users/me']!.handler(
         ctx,
@@ -216,17 +224,13 @@ describe('User Routes Handler Mapping', () => {
         {} as never,
       );
 
-      expect(handleMe).toHaveBeenCalledWith(ctx, request);
-      expect(result).toEqual(expectedResult);
+      expect(result.status).toBe(200);
+      expect(result.body).toHaveProperty('id', 'user-123');
+      expect(result.body).toHaveProperty('email', 'test@example.com');
     });
 
     test('should handle unauthorized requests', async () => {
       const request = createMockRequest(undefined);
-      const expectedResult: RouteResult<{ message: string }> = {
-        status: 401,
-        body: { message: 'Unauthorized' },
-      };
-      handleMe.mockResolvedValue(expectedResult);
 
       const result = await userRoutes['users/me']!.handler(
         ctx,
@@ -241,11 +245,9 @@ describe('User Routes Handler Mapping', () => {
     test('should handle user not found', async () => {
       const user = { userId: 'nonexistent-user', email: 'test@example.com', role: 'user' };
       const request = createMockRequest(user);
-      const expectedResult: RouteResult<{ message: string }> = {
-        status: 404,
-        body: { message: 'User not found' },
-      };
-      handleMe.mockResolvedValue(expectedResult);
+
+      // Mock the service to return null (user not found)
+      (userService.getUserById as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 
       const result = await userRoutes['users/me']!.handler(
         ctx,
@@ -260,11 +262,11 @@ describe('User Routes Handler Mapping', () => {
     test('should handle internal server errors', async () => {
       const user = { userId: 'user-123', email: 'test@example.com', role: 'user' };
       const request = createMockRequest(user);
-      const expectedResult: RouteResult<{ message: string }> = {
-        status: 500,
-        body: { message: 'Internal server error' },
-      };
-      handleMe.mockResolvedValue(expectedResult);
+
+      // Mock the service to throw an error
+      (userService.getUserById as ReturnType<typeof vi.fn>).mockRejectedValue(
+        new Error('Database error'),
+      );
 
       const result = await userRoutes['users/me']!.handler(
         ctx,
@@ -285,9 +287,41 @@ describe('User Routes Handler Mapping', () => {
 describe('User Routes Pagination (users/list)', () => {
   let ctx: AppContext;
 
+  // Mock user data for tests
+  const mockUsers = [
+    {
+      id: 'user-1',
+      email: 'user1@example.com',
+      name: 'User One',
+      role: 'user' as const,
+      createdAt: new Date('2024-01-01'),
+    },
+    {
+      id: 'user-2',
+      email: 'user2@example.com',
+      name: 'User Two',
+      role: 'user' as const,
+      createdAt: new Date('2024-01-02'),
+    },
+    {
+      id: 'user-3',
+      email: 'user3@example.com',
+      name: 'User Three',
+      role: 'user' as const,
+      createdAt: new Date('2024-01-03'),
+    },
+  ];
+
   beforeEach(() => {
     vi.clearAllMocks();
     ctx = createMockContext();
+
+    // Default mock: return mock users
+    (userService.listUsers as ReturnType<typeof vi.fn>).mockResolvedValue({
+      users: mockUsers,
+      nextCursor: null,
+      hasNext: false,
+    });
   });
 
   describe('Cursor Pagination', () => {
@@ -295,6 +329,13 @@ describe('User Routes Pagination (users/list)', () => {
       const user = { userId: 'admin-123', email: 'admin@example.com', role: 'admin' };
       const pagination = createMockCursorPagination({ limit: 2 });
       const request = createMockRequest(user, pagination);
+
+      // Mock to return 2 users
+      (userService.listUsers as ReturnType<typeof vi.fn>).mockResolvedValue({
+        users: mockUsers.slice(0, 2),
+        nextCursor: 'cursor-123',
+        hasNext: true,
+      });
 
       const result = await userRoutes['users/list']!.handler(
         ctx,
@@ -386,7 +427,8 @@ describe('User Routes Pagination (users/list)', () => {
       );
 
       expect(result.status).toBe(400);
-      expect(result.body).toEqual({ message: 'Cursor pagination options are required' });
+      // Handler uses the same error message for both non-cursor type and missing cursor options
+      expect(result.body).toEqual({ message: 'This endpoint only supports cursor pagination' });
     });
   });
 
@@ -494,21 +536,30 @@ describe('User Routes Pagination (users/list)', () => {
 describe('User Routes Return Values', () => {
   let ctx: AppContext;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
     ctx = createMockContext();
 
-    // Setup default mock returns
-    const handlers = await import('../handlers.js');
-    (handlers.handleMe as ReturnType<typeof vi.fn>).mockResolvedValue({
-      status: 200,
-      body: {
-        id: 'user-123',
-        email: 'test@example.com',
-        name: 'Test User',
-        role: 'user',
-        createdAt: '2024-01-01T00:00:00.000Z',
-      },
+    // Setup default service mocks
+    (userService.getUserById as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: 'user-123',
+      email: 'test@example.com',
+      name: 'Test User',
+      role: 'user',
+      createdAt: new Date('2024-01-01'),
+    });
+    (userService.listUsers as ReturnType<typeof vi.fn>).mockResolvedValue({
+      users: [
+        {
+          id: 'user-1',
+          email: 'user1@example.com',
+          name: 'User One',
+          role: 'user',
+          createdAt: new Date('2024-01-01'),
+        },
+      ],
+      nextCursor: null,
+      hasNext: false,
     });
   });
 
@@ -564,15 +615,18 @@ describe('User Routes Type Safety', () => {
     const ctx = createMockContext();
     const request = createMockRequest({ userId: '1', email: 'test@example.com', role: 'user' });
 
-    // Setup mock using the already-mocked handlers module
-    const handlers = await import('../handlers.js');
-    (handlers.handleMe as ReturnType<typeof vi.fn>).mockResolvedValue({
-      status: 200,
-      body: { id: '1', email: 'test@example.com', name: null, role: 'user', createdAt: '' },
+    // Setup service mocks
+    (userService.getUserById as ReturnType<typeof vi.fn>).mockResolvedValue({
+      id: '1',
+      email: 'test@example.com',
+      name: null,
+      role: 'user',
+      createdAt: new Date(),
     });
-    (handlers.handleListUsers as ReturnType<typeof vi.fn>).mockResolvedValue({
-      status: 200,
-      body: { users: [], nextCursor: null, hasNext: false },
+    (userService.listUsers as ReturnType<typeof vi.fn>).mockResolvedValue({
+      users: [],
+      nextCursor: null,
+      hasNext: false,
     });
 
     const meResult = meHandler(ctx, undefined, request as never, {} as never);

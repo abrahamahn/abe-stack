@@ -10,11 +10,7 @@
  * - Sending efficiency (avoids sending to dead endpoints)
  */
 
-import { lt, or, sql } from 'drizzle-orm';
-
-import { pushSubscriptions } from '../../data/database/schema/push-subscriptions';
-
-import type { DbClient } from '../../data/database/client';
+import { lt, or, eq, isNotNull, and, selectCount, PUSH_SUBSCRIPTIONS_TABLE, type RawDb } from '@abe-stack/db';
 
 // ============================================================================
 // Constants
@@ -90,7 +86,7 @@ export interface PushCleanupResult {
  * ```
  */
 export async function cleanupPushSubscriptions(
-  db: DbClient,
+  db: RawDb,
   options: PushCleanupOptions = {},
 ): Promise<PushCleanupResult> {
   const startTime = Date.now();
@@ -113,26 +109,23 @@ export async function cleanupPushSubscriptions(
 
   if (dryRun) {
     // Count records that would be deleted by each category
-    const [markedInactiveResult] = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(pushSubscriptions)
-      .where(sql`${pushSubscriptions.isActive} = false`);
+    const markedInactiveResult = await db.queryOne<{ count: number }>(
+      selectCount(PUSH_SUBSCRIPTIONS_TABLE)
+        .where(eq('is_active', false))
+        .toSql(),
+    );
 
-    const [staleResult] = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(pushSubscriptions)
-      .where(
-        sql`${pushSubscriptions.isActive} = true
-          AND ${pushSubscriptions.lastUsedAt} < ${cutoffDate}`,
-      );
+    const staleResult = await db.queryOne<{ count: number }>(
+      selectCount(PUSH_SUBSCRIPTIONS_TABLE)
+        .where(and(eq('is_active', true), lt('last_used_at', cutoffDate)))
+        .toSql(),
+    );
 
-    const [expiredResult] = await db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(pushSubscriptions)
-      .where(
-        sql`${pushSubscriptions.expirationTime} IS NOT NULL
-          AND ${pushSubscriptions.expirationTime} < ${now}`,
-      );
+    const expiredResult = await db.queryOne<{ count: number }>(
+      selectCount(PUSH_SUBSCRIPTIONS_TABLE)
+        .where(and(isNotNull('expiration_time'), lt('expiration_time', now)))
+        .toSql(),
+    );
 
     const markedInactive = markedInactiveResult?.count ?? 0;
     const inactive = staleResult?.count ?? 0;
@@ -160,18 +153,18 @@ export async function cleanupPushSubscriptions(
 
   do {
     // Delete subscriptions matching any cleanup criteria
-    const result = await db.execute(sql`
-      DELETE FROM push_subscriptions
-      WHERE id IN (
-        SELECT id FROM push_subscriptions
-        WHERE is_active = false
-          OR last_used_at < ${cutoffDate}
-          OR (expiration_time IS NOT NULL AND expiration_time < ${now})
-        LIMIT ${batchSize}
-      )
-    `);
+    batchDeleted = await db.execute({
+      text: `DELETE FROM push_subscriptions
+        WHERE id IN (
+          SELECT id FROM push_subscriptions
+          WHERE is_active = false
+            OR last_used_at < $1
+            OR (expiration_time IS NOT NULL AND expiration_time < $2)
+          LIMIT $3
+        )`,
+      values: [cutoffDate, now, batchSize],
+    });
 
-    batchDeleted = (result as unknown as { rowCount?: number }).rowCount ?? 0;
     totalDeleted += batchDeleted;
 
     // Continue until no more records to delete
@@ -201,7 +194,7 @@ export async function cleanupPushSubscriptions(
  * @param inactiveDays - Number of days to consider inactive (default: 90)
  */
 export async function getPushSubscriptionStats(
-  db: DbClient,
+  db: RawDb,
   inactiveDays: number = DEFAULT_INACTIVE_DAYS,
 ): Promise<{
   total: number;
@@ -229,50 +222,50 @@ export async function getPushSubscriptionStats(
     expiredResult,
     expiringSoonResult,
   ] = await Promise.all([
-    db.select({ count: sql<number>`count(*)::int` }).from(pushSubscriptions),
+    db.queryOne<{ count: number }>(
+      selectCount(PUSH_SUBSCRIPTIONS_TABLE).toSql(),
+    ),
 
-    db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(pushSubscriptions)
-      .where(sql`${pushSubscriptions.isActive} = true`),
+    db.queryOne<{ count: number }>(
+      selectCount(PUSH_SUBSCRIPTIONS_TABLE)
+        .where(eq('is_active', true))
+        .toSql(),
+    ),
 
-    db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(pushSubscriptions)
-      .where(sql`${pushSubscriptions.isActive} = false`),
+    db.queryOne<{ count: number }>(
+      selectCount(PUSH_SUBSCRIPTIONS_TABLE)
+        .where(eq('is_active', false))
+        .toSql(),
+    ),
 
-    db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(pushSubscriptions)
-      .where(
-        sql`${pushSubscriptions.isActive} = true
-          AND ${pushSubscriptions.lastUsedAt} < ${cutoffDate}`,
-      ),
+    db.queryOne<{ count: number }>(
+      selectCount(PUSH_SUBSCRIPTIONS_TABLE)
+        .where(and(eq('is_active', true), lt('last_used_at', cutoffDate)))
+        .toSql(),
+    ),
 
-    db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(pushSubscriptions)
-      .where(
-        sql`${pushSubscriptions.expirationTime} IS NOT NULL
-          AND ${pushSubscriptions.expirationTime} < ${now}`,
-      ),
+    db.queryOne<{ count: number }>(
+      selectCount(PUSH_SUBSCRIPTIONS_TABLE)
+        .where(and(isNotNull('expiration_time'), lt('expiration_time', now)))
+        .toSql(),
+    ),
 
-    db
-      .select({ count: sql<number>`count(*)::int` })
-      .from(pushSubscriptions)
-      .where(
-        sql`${pushSubscriptions.expirationTime} IS NOT NULL
-          AND ${pushSubscriptions.expirationTime} > ${now}
-          AND ${pushSubscriptions.expirationTime} <= ${weekFromNow}`,
-      ),
+    // Expiring within next week: expiration_time IS NOT NULL AND > now AND <= weekFromNow
+    db.raw<{ count: number }>(
+      `SELECT COUNT(*) as count FROM push_subscriptions
+       WHERE expiration_time IS NOT NULL
+         AND expiration_time > $1
+         AND expiration_time <= $2`,
+      [now, weekFromNow],
+    ),
   ]);
 
   return {
-    total: totalResult[0]?.count ?? 0,
-    active: activeResult[0]?.count ?? 0,
-    markedInactive: markedInactiveResult[0]?.count ?? 0,
-    stale: staleResult[0]?.count ?? 0,
-    expired: expiredResult[0]?.count ?? 0,
+    total: totalResult?.count ?? 0,
+    active: activeResult?.count ?? 0,
+    markedInactive: markedInactiveResult?.count ?? 0,
+    stale: staleResult?.count ?? 0,
+    expired: expiredResult?.count ?? 0,
     expiringSoon: expiringSoonResult[0]?.count ?? 0,
     cutoffDate,
   };
@@ -287,7 +280,7 @@ export async function getPushSubscriptionStats(
  * @returns Count of records that would be cleaned up
  */
 export async function countCleanupCandidates(
-  db: DbClient,
+  db: RawDb,
   inactiveDays: number = DEFAULT_INACTIVE_DAYS,
 ): Promise<number> {
   const effectiveInactiveDays = Math.max(inactiveDays, MIN_INACTIVE_DAYS);
@@ -298,17 +291,17 @@ export async function countCleanupCandidates(
 
   const now = new Date();
 
-  const result = await db
-    .select({ count: sql<number>`count(*)::int` })
-    .from(pushSubscriptions)
-    .where(
-      or(
-        sql`${pushSubscriptions.isActive} = false`,
-        lt(pushSubscriptions.lastUsedAt, cutoffDate),
-        sql`${pushSubscriptions.expirationTime} IS NOT NULL
-          AND ${pushSubscriptions.expirationTime} < ${now}`,
-      ),
-    );
+  const result = await db.queryOne<{ count: number }>(
+    selectCount(PUSH_SUBSCRIPTIONS_TABLE)
+      .where(
+        or(
+          eq('is_active', false),
+          lt('last_used_at', cutoffDate),
+          and(isNotNull('expiration_time'), lt('expiration_time', now)),
+        ),
+      )
+      .toSql(),
+  );
 
-  return result[0]?.count ?? 0;
+  return result?.count ?? 0;
 }

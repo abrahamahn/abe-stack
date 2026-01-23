@@ -1,0 +1,121 @@
+name: Infrastructure Destroy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      provider:
+        description: 'Cloud provider'
+        required: true
+        default: 'digitalocean'
+        type: choice
+        options:
+          - digitalocean
+          - gcp
+      confirm_destroy:
+        description: 'Type "DESTROY" to confirm infrastructure destruction'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write # Required for GCP Workload Identity
+
+jobs:
+  destroy-infrastructure:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'staging' }}
+
+    steps:
+      - name: Validate Destruction Confirmation
+        if: inputs.confirm_destroy != 'DESTROY'
+        run: |
+          echo "❌ Destruction not confirmed. Please type 'DESTROY' to confirm."
+          exit 1
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.0"
+
+      # Configure cloud provider credentials
+      - name: Configure DigitalOcean Credentials
+        if: inputs.provider == 'digitalocean'
+        run: |
+          echo "DIGITALOCEAN_TOKEN=${{ secrets.DIGITALOCEAN_TOKEN }}" >> $GITHUB_ENV
+
+      - name: Authenticate to Google Cloud
+        if: inputs.provider == 'gcp'
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Google Cloud SDK
+        if: inputs.provider == 'gcp'
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure AWS Credentials (for state backend)
+        if: env.AWS_ACCESS_KEY_ID
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+      # Download terraform state if available
+      - name: Download Terraform State
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-state-${{ inputs.environment }}-${{ inputs.provider }}
+          path: infra/${{ inputs.provider }}/.terraform/
+
+      - name: Terraform Init
+        run: |
+          cd infra/${{ inputs.provider }}
+          terraform init
+
+      - name: Terraform Workspace Select
+        run: |
+          cd infra/${{ inputs.provider }}
+          terraform workspace select ${{ inputs.environment }} 2>/dev/null || terraform workspace new ${{ inputs.environment }}
+
+      - name: Terraform Plan Destroy
+        run: |
+          cd infra/${{ inputs.provider }}
+          terraform plan -destroy -out=tfplan-destroy
+
+      - name: Terraform Destroy
+        run: |
+          cd infra/${{ inputs.provider }}
+          terraform apply -auto-approve tfplan-destroy
+
+      - name: Clean up Deployment Artifacts
+        run: |
+          # Remove deployment info file if it exists
+          rm -f .deploy/${{ inputs.environment }}-${{ inputs.provider }}.json
+
+          # Clean up terraform state artifacts
+          rm -rf infra/${{ inputs.provider }}/.terraform/
+
+      - name: Infrastructure Destruction Summary
+        run: |
+          echo "## 🗑️ Infrastructure Destroyed Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Provider:** ${{ inputs.provider }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Destroyed at:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ **Important:** Make sure to:" >> $GITHUB_STEP_SUMMARY
+          echo "- Delete any DNS records pointing to the destroyed infrastructure" >> $GITHUB_STEP_SUMMARY
+          echo "- Update your CI/CD secrets to remove references to destroyed resources" >> $GITHUB_STEP_SUMMARY
+          echo "- Clean up any remaining cloud resources (backups, snapshots, etc.)" >> $GITHUB_STEP_SUMMARY

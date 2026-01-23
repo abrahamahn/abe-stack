@@ -6,11 +6,8 @@
  * No HTTP awareness - returns domain objects or throws errors.
  */
 
-import { users, type DbClient } from '@infrastructure';
-import { and, asc, desc, gt, lt, or, type SQL } from 'drizzle-orm';
-import { eq } from 'drizzle-orm';
-
 import type { CursorPaginationOptions, UserRole } from '@abe-stack/core';
+import type { UserRepository } from '@abe-stack/db';
 
 export interface User {
   id: string;
@@ -30,10 +27,11 @@ export interface ListUsersResult {
  * Get a user by their ID
  * Returns null if user not found
  */
-export async function getUserById(db: DbClient, userId: string): Promise<User | null> {
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, userId),
-  });
+export async function getUserById(
+  userRepo: UserRepository,
+  userId: string,
+): Promise<User | null> {
+  const user = await userRepo.findById(userId);
 
   if (!user) {
     return null;
@@ -52,46 +50,27 @@ export async function getUserById(db: DbClient, userId: string): Promise<User | 
  * Get a paginated list of users
  */
 export async function listUsers(
-  db: DbClient,
+  userRepo: UserRepository,
   options: CursorPaginationOptions,
 ): Promise<ListUsersResult> {
   const { limit, cursor, sortOrder } = options;
-  const orderDirection = sortOrder === 'asc' ? asc : desc;
-  const comparisonOp = sortOrder === 'asc' ? gt : lt;
 
-  let where: SQL | undefined;
-  if (cursor) {
-    const parts = cursor.split('_');
-    const createdAt = parts[0];
-    const id = parts[1];
-    if (createdAt && id) {
-      const createdAtDate = new Date(createdAt);
-      where = or(
-        comparisonOp(users.createdAt, createdAtDate),
-        and(eq(users.createdAt, createdAtDate), comparisonOp(users.id, id)),
-      );
-    }
-  }
-
-  const userList = await db.query.users.findMany({
-    where,
-    orderBy: [orderDirection(users.createdAt), orderDirection(users.id)],
-    limit: limit + 1,
+  const result = await userRepo.list({
+    limit,
+    cursor,
+    direction: sortOrder,
+    sortBy: 'created_at',
   });
 
-  const hasNext = userList.length > limit;
-  if (hasNext) {
-    userList.pop();
-  }
-
-  const lastUser = userList[userList.length - 1];
-  const nextCursor = hasNext && lastUser
-    ? `${lastUser.createdAt.toISOString()}_${lastUser.id}`
-    : null;
-
   return {
-    users: userList,
-    nextCursor,
-    hasNext,
+    users: result.items.map((user) => ({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      createdAt: user.createdAt,
+    })),
+    nextCursor: result.nextCursor,
+    hasNext: result.nextCursor !== null,
   };
 }

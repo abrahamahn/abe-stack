@@ -28,6 +28,7 @@ vi.mock('@auth/utils', () => ({
 function createMockContext(overrides?: Partial<AppContext>): AppContext {
   return {
     db: {} as AppContext['db'],
+    repos: {} as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
     config: {} as AppContext['config'],
     log: {

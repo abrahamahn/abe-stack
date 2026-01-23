@@ -19,6 +19,22 @@ export { Tabs, type TabsProps, type TabItem } from './Tabs';
 export { Toast, ToastContainer } from './Toast';
 export { PeekLink, type PeekLinkProps } from './PeekLink';
 
+// Billing components
+export {
+  InvoiceList,
+  InvoiceRow,
+  PaymentMethodCard,
+  PlanCard,
+  PricingTable,
+  SubscriptionStatus,
+  type InvoiceListProps,
+  type InvoiceRowProps,
+  type PaymentMethodCardProps,
+  type PlanCardProps,
+  type PricingTableProps,
+  type SubscriptionStatusProps,
+} from './billing';
+
 // Re-export providers for backwards compatibility
 // Prefer importing directly from '@abe-stack/ui/providers' or '@abe-stack/ui'
 export {

@@ -38,13 +38,19 @@ import type {
 // ============================================================================
 
 interface MockDbClient {
+  query: ReturnType<typeof vi.fn>;
+  queryOne: ReturnType<typeof vi.fn>;
   execute: ReturnType<typeof vi.fn>;
+  raw: ReturnType<typeof vi.fn>;
 }
 
 function createMockDb(): MockDbClient {
   return {
-    execute: vi.fn(),
-  };
+    query: vi.fn().mockResolvedValue([]),
+    queryOne: vi.fn().mockResolvedValue(null),
+    execute: vi.fn().mockResolvedValue(0),
+    raw: vi.fn().mockResolvedValue([]),
+  } as unknown as MockDbClient;
 }
 
 // ============================================================================
@@ -536,53 +542,56 @@ describe('Realtime Service', () => {
     });
 
     test('should load records from database', async () => {
-      // Register a test table
-      registerRealtimeTable('test_records');
-
+      // Use 'users' table which is in the tableMap
       const mockRows = [
-        { id: 'id-1', name: 'Record 1', version: 1 },
-        { id: 'id-2', name: 'Record 2', version: 2 },
+        { id: 'id-1', name: 'User 1', email: 'user1@example.com', version: 1 },
+        { id: 'id-2', name: 'User 2', email: 'user2@example.com', version: 2 },
       ];
-      mockDb.execute.mockResolvedValue({ rows: mockRows });
+
+      // Mock db.query to return the records
+      mockDb.query.mockResolvedValue(mockRows);
 
       const pointers = [
-        { table: 'test_records', id: 'id-1' },
-        { table: 'test_records', id: 'id-2' },
+        { table: 'users', id: 'id-1' },
+        { table: 'users', id: 'id-2' },
       ];
 
       const result = await loadRecords(mockDb as never, pointers);
 
-      expect(mockDb.execute).toHaveBeenCalledTimes(1);
-      expect(result.test_records?.['id-1']).toEqual(mockRows[0]);
-      expect(result.test_records?.['id-2']).toEqual(mockRows[1]);
+      expect(mockDb.query).toHaveBeenCalledTimes(1);
+      expect(result.users?.['id-1']).toEqual(mockRows[0]);
+      expect(result.users?.['id-2']).toEqual(mockRows[1]);
     });
 
     test('should deduplicate pointers for same record', async () => {
-      registerRealtimeTable('dedup_table');
-      mockDb.execute.mockResolvedValue({ rows: [{ id: 'id-1', version: 1 }] });
+      const mockRows = [{ id: 'id-1', name: 'User 1', version: 1 }];
+
+      // Mock db.query to return the records
+      mockDb.query.mockResolvedValue(mockRows);
 
       const pointers = [
-        { table: 'dedup_table', id: 'id-1' },
-        { table: 'dedup_table', id: 'id-1' },
-        { table: 'dedup_table', id: 'id-1' },
+        { table: 'users', id: 'id-1' },
+        { table: 'users', id: 'id-1' },
+        { table: 'users', id: 'id-1' },
       ];
 
       await loadRecords(mockDb as never, pointers);
 
       // Should only query once with deduplicated IDs
-      expect(mockDb.execute).toHaveBeenCalledTimes(1);
+      expect(mockDb.query).toHaveBeenCalledTimes(1);
     });
 
-    test('should handle array result format', async () => {
-      registerRealtimeTable('array_table');
-      const mockRows = [{ id: 'id-1', version: 1 }];
-      mockDb.execute.mockResolvedValue(mockRows); // Direct array, not { rows: [] }
+    test('should handle records from database correctly', async () => {
+      const mockRows = [{ id: 'id-1', name: 'User', version: 1 }];
 
-      const pointers = [{ table: 'array_table', id: 'id-1' }];
+      // Mock db.query to return the records
+      mockDb.query.mockResolvedValue(mockRows);
+
+      const pointers = [{ table: 'users', id: 'id-1' }];
 
       const result = await loadRecords(mockDb as never, pointers);
 
-      expect(result.array_table?.['id-1']).toEqual(mockRows[0]);
+      expect(result.users?.['id-1']).toEqual(mockRows[0]);
     });
   });
 });

@@ -213,7 +213,8 @@ Custom router implementation (~150 lines) that replaces react-router-dom.
 ```typescript
 import {
   Router, Routes, Route, Link, Navigate,
-  useNavigate, useLocation, useParams, useSearchParams
+  useNavigate, useLocation, useParams, useSearchParams,
+  useNavigationType, useHistory
 } from '@abe-stack/ui';
 
 function App() {
@@ -232,6 +233,7 @@ function Nav() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
+  const navigationType = useNavigationType(); // 'PUSH' | 'POP' | 'REPLACE'
 
   return (
     <>
@@ -242,7 +244,23 @@ function Nav() {
 }
 ```
 
-Features: path params, query strings, nested routes, memory router for testing.
+**Features:**
+
+- Path params (`:id`), query strings, wildcards (`*`)
+- Nested routes with `<Outlet>`
+- `MemoryRouter` for testing
+- `NavigationType` tracking (PUSH/POP/REPLACE)
+- History abstraction (`push`, `replace`, `go`, `back`, `forward`)
+- Scroll restoration (save on navigate, restore on back/forward)
+
+**Benchmark (100 navigations with render cycles):**
+
+| Router           | Time    | Per Navigation |
+| ---------------- | ------- | -------------- |
+| Custom           | ~920ms  | ~9.2ms         |
+| react-router-dom | ~1000ms | ~10.0ms        |
+
+**~10% faster** with a fraction of the code. Direct `useSyncExternalStore` integration with no extra abstraction layers.
 
 ## Providers
 

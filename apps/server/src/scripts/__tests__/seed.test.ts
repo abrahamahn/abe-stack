@@ -14,10 +14,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 const mockLoadConfig = vi.fn();
 const mockBuildConnectionString = vi.fn();
 const mockCreateDbClient = vi.fn();
+const mockExecute = vi.fn();
 const mockHashPassword = vi.fn();
 const mockInsert = vi.fn();
 const mockValues = vi.fn();
 const mockOnConflictDoNothing = vi.fn();
+const mockToSql = vi.fn();
 
 vi.mock('@config', () => ({
   loadConfig: mockLoadConfig,
@@ -26,7 +28,8 @@ vi.mock('@config', () => ({
 vi.mock('@database', () => ({
   buildConnectionString: mockBuildConnectionString,
   createDbClient: mockCreateDbClient,
-  users: { email: 'email_column' },
+  USERS_TABLE: 'users',
+  insert: mockInsert,
 }));
 
 vi.mock('@modules/auth/utils/password', () => ({
@@ -82,10 +85,15 @@ describe('seed script', () => {
 
     mockBuildConnectionString.mockReturnValue('postgresql://localhost:5432/test');
 
-    mockOnConflictDoNothing.mockResolvedValue(undefined);
+    // Mock the query builder chain for insert()
+    mockToSql.mockReturnValue({ text: 'INSERT INTO users...', values: [] });
+    mockOnConflictDoNothing.mockReturnValue({ toSql: mockToSql });
     mockValues.mockReturnValue({ onConflictDoNothing: mockOnConflictDoNothing });
     mockInsert.mockReturnValue({ values: mockValues });
-    mockCreateDbClient.mockReturnValue({ insert: mockInsert });
+
+    // Mock db client with execute method
+    mockExecute.mockResolvedValue(1);
+    mockCreateDbClient.mockReturnValue({ execute: mockExecute });
 
     mockHashPassword.mockResolvedValue('$argon2id$hashed');
   });
@@ -136,7 +144,7 @@ describe('seed script', () => {
       expect(exitCode).toBe(0);
       expect(mockLoadConfig).toHaveBeenCalled();
       expect(mockBuildConnectionString).toHaveBeenCalled();
-      expect(mockCreateDbClient).toHaveBeenCalled();
+      expect(mockExecute).toHaveBeenCalled();
     });
 
     it('should seed all three test users', async () => {
@@ -146,8 +154,8 @@ describe('seed script', () => {
 
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
-      // Should have called insert 3 times (once for each user)
-      expect(mockInsert).toHaveBeenCalledTimes(3);
+      // Should have called execute 3 times (once for each user)
+      expect(mockExecute).toHaveBeenCalledTimes(3);
     });
 
     it('should hash passwords with argon2 config', async () => {
@@ -178,7 +186,7 @@ describe('seed script', () => {
           email: 'admin@example.com',
           name: 'Admin User',
           role: 'admin',
-          passwordHash: '$argon2id$hashed',
+          password_hash: '$argon2id$hashed',
         }),
       );
     });
@@ -215,7 +223,7 @@ describe('seed script', () => {
       await expect(seed()).rejects.toThrow('process.exit(0)');
 
       expect(mockOnConflictDoNothing).toHaveBeenCalledTimes(3);
-      expect(mockOnConflictDoNothing).toHaveBeenCalledWith({ target: 'email_column' });
+      expect(mockOnConflictDoNothing).toHaveBeenCalledWith('email');
     });
 
     it('should display success message after seeding', async () => {
@@ -257,12 +265,12 @@ describe('seed script', () => {
 
       // First user succeeds, second throws unique error
       let callCount = 0;
-      mockOnConflictDoNothing.mockImplementation(() => {
+      mockExecute.mockImplementation(() => {
         callCount++;
         if (callCount === 2) {
-          throw new Error('unique constraint violation');
+          return Promise.reject(new Error('unique constraint violation'));
         }
-        return Promise.resolve();
+        return Promise.resolve(1);
       });
 
       const { seed } = await import('../seed.js');
@@ -275,7 +283,7 @@ describe('seed script', () => {
     it('should rethrow non-unique errors', async () => {
       process.env.NODE_ENV = 'development';
 
-      mockOnConflictDoNothing.mockRejectedValue(new Error('Connection refused'));
+      mockExecute.mockRejectedValue(new Error('Connection refused'));
 
       const { seed } = await import('../seed.js');
 

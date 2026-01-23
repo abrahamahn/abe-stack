@@ -20,10 +20,11 @@ import {
   logLoginAttempt,
   withTransaction,
 } from '@infrastructure';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { AuthConfig } from '@config';
-import type { DbClient, Logger } from '@infrastructure';
+import type { RawDb } from '@abe-stack/db';
+import type { Logger, Repositories } from '@infrastructure';
 
 // ============================================================================
 // Mock Dependencies
@@ -44,10 +45,6 @@ vi.mock('@infrastructure', () => ({
   isAccountLocked: vi.fn(),
   logAccountLockedEvent: vi.fn(),
   logLoginAttempt: vi.fn(),
-  passwordResetTokens: { tokenHash: 'tokenHash', expiresAt: 'expiresAt', usedAt: 'usedAt' },
-  emailVerificationTokens: { tokenHash: 'tokenHash', expiresAt: 'expiresAt', usedAt: 'usedAt' },
-  refreshTokens: { token: 'token' },
-  users: { email: 'email', id: 'id', passwordHash: 'passwordHash', emailVerified: 'emailVerified' },
   withTransaction: vi.fn(),
   emailTemplates: {
     emailVerification: vi.fn((url: string) => ({
@@ -81,13 +78,6 @@ vi.mock('../utils', () => ({
   verifyPasswordSafe: vi.fn(),
 }));
 
-vi.mock('drizzle-orm', () => ({
-  eq: vi.fn((...args: unknown[]) => args),
-  and: vi.fn((...args: unknown[]) => args),
-  gt: vi.fn((...args: unknown[]) => args),
-  isNull: vi.fn((...args: unknown[]) => args),
-}));
-
 // ============================================================================
 // Test Helpers
 // ============================================================================
@@ -114,56 +104,13 @@ const TEST_CONFIG: AuthConfig = {
   },
 } as unknown as AuthConfig;
 
-function createMockDb(): DbClient {
-  const mockInsert = vi.fn(() => ({
-    values: vi.fn(() => ({
-      returning: vi.fn(() => Promise.resolve([])),
-    })),
-  }));
-
-  const mockUpdate = vi.fn(() => ({
-    set: vi.fn(() => ({
-      where: vi.fn(() => ({
-        returning: vi.fn(() => Promise.resolve([{ id: 'user-id' }])),
-      })),
-    })),
-  }));
-
-  const mockDelete = vi.fn(() => ({
-    where: vi.fn(() => Promise.resolve()),
-  }));
-
+function createMockDb(): RawDb {
   return {
-    query: {
-      users: {
-        findFirst: vi.fn(),
-      },
-      passwordResetTokens: {
-        findFirst: vi.fn(),
-      },
-      emailVerificationTokens: {
-        findFirst: vi.fn(),
-      },
-      refreshTokens: {
-        findFirst: vi.fn(),
-      },
-      loginAttempts: {
-        findMany: vi.fn(),
-      },
-    },
-    insert: mockInsert,
-    update: mockUpdate,
-    delete: mockDelete,
-    select: vi.fn(() => ({
-      from: vi.fn(() => ({
-        where: vi.fn(() => ({
-          orderBy: vi.fn(() => ({
-            limit: vi.fn(() => Promise.resolve([])),
-          })),
-        })),
-      })),
-    })),
-  } as unknown as DbClient;
+    query: vi.fn().mockResolvedValue([]),
+    queryOne: vi.fn().mockResolvedValue(null),
+    execute: vi.fn().mockResolvedValue(0),
+    raw: vi.fn().mockResolvedValue([]),
+  } as unknown as RawDb;
 }
 
 function createMockLogger(): Logger {
@@ -177,6 +124,116 @@ function createMockLogger(): Logger {
     child: vi.fn(() => mockLogger),
   };
   return mockLogger;
+}
+
+function createMockRepos() {
+  return {
+    users: {
+      findById: vi.fn(),
+      findByEmail: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      list: vi.fn(),
+      existsByEmail: vi.fn(),
+      incrementFailedAttempts: vi.fn(),
+      resetFailedAttempts: vi.fn(),
+      lockAccount: vi.fn(),
+      unlockAccount: vi.fn(),
+      verifyEmail: vi.fn(),
+      updateWithVersion: vi.fn(),
+    },
+    refreshTokens: {
+      findById: vi.fn(),
+      findByToken: vi.fn(),
+      findByUserId: vi.fn(),
+      create: vi.fn(),
+      delete: vi.fn(),
+      deleteByToken: vi.fn(),
+      deleteByUserId: vi.fn(),
+      deleteByFamilyId: vi.fn(),
+      deleteExpired: vi.fn(),
+    },
+    refreshTokenFamilies: {
+      findById: vi.fn(),
+      findActiveByUserId: vi.fn(),
+      create: vi.fn(),
+      revoke: vi.fn(),
+      revokeAllForUser: vi.fn(),
+    },
+    loginAttempts: {
+      create: vi.fn(),
+      countRecentFailures: vi.fn(),
+      findRecentByEmail: vi.fn(),
+      deleteOlderThan: vi.fn(),
+    },
+    passwordResetTokens: {
+      findById: vi.fn(),
+      findValidByTokenHash: vi.fn(),
+      findValidByUserId: vi.fn(),
+      create: vi.fn(),
+      markAsUsed: vi.fn(),
+      invalidateByUserId: vi.fn(),
+      deleteByUserId: vi.fn(),
+      deleteExpired: vi.fn(),
+    },
+    emailVerificationTokens: {
+      findById: vi.fn(),
+      findValidByTokenHash: vi.fn(),
+      findValidByUserId: vi.fn(),
+      create: vi.fn(),
+      markAsUsed: vi.fn(),
+      invalidateByUserId: vi.fn(),
+      deleteByUserId: vi.fn(),
+      deleteExpired: vi.fn(),
+    },
+    securityEvents: {
+      create: vi.fn(),
+      findByUserId: vi.fn(),
+      findByEmail: vi.fn(),
+      findByType: vi.fn(),
+      findBySeverity: vi.fn(),
+      countByType: vi.fn(),
+      deleteOlderThan: vi.fn(),
+    },
+    magicLinkTokens: {
+      findById: vi.fn(),
+      findValidByTokenHash: vi.fn(),
+      findValidByEmail: vi.fn(),
+      findRecentByEmail: vi.fn(),
+      countRecentByEmail: vi.fn(),
+      create: vi.fn(),
+      markAsUsed: vi.fn(),
+      deleteByEmail: vi.fn(),
+      deleteExpired: vi.fn(),
+    },
+    oauthConnections: {
+      findById: vi.fn(),
+      findByUserIdAndProvider: vi.fn(),
+      findByProviderUserId: vi.fn(),
+      findByUserId: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      deleteByUserId: vi.fn(),
+      deleteByUserIdAndProvider: vi.fn(),
+    },
+    pushSubscriptions: {
+      findById: vi.fn(),
+      findByEndpoint: vi.fn(),
+      findByUserId: vi.fn(),
+      create: vi.fn(),
+      updateLastUsed: vi.fn(),
+      delete: vi.fn(),
+      deleteByUserId: vi.fn(),
+      deleteInactive: vi.fn(),
+    },
+    notificationPreferences: {
+      findByUserId: vi.fn(),
+      upsert: vi.fn(),
+      delete: vi.fn(),
+    },
+  } as unknown as Repositories;
 }
 
 // ============================================================================
@@ -195,6 +252,7 @@ describe('Account Lockout Expiration', () => {
 
   test('should allow login after lockout period expires', async () => {
     const db = createMockDb();
+    const repos = createMockRepos();
     const logger = createMockLogger();
     const email = 'test@example.com';
     const password = 'correct-password';
@@ -217,7 +275,7 @@ describe('Account Lockout Expiration', () => {
     // First attempt: account is locked
     vi.mocked(isAccountLocked).mockResolvedValueOnce(true);
 
-    await expect(authenticateUser(db, TEST_CONFIG, email, password, logger)).rejects.toThrow(
+    await expect(authenticateUser(db, repos, TEST_CONFIG, email, password, logger)).rejects.toThrow(
       AccountLockedError,
     );
 
@@ -227,14 +285,14 @@ describe('Account Lockout Expiration', () => {
     // Second attempt: lockout has expired
     vi.mocked(isAccountLocked).mockResolvedValueOnce(false);
     vi.mocked(applyProgressiveDelay).mockResolvedValue(undefined);
-    vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
+    vi.mocked(repos.users.findByEmail).mockResolvedValue(mockUser);
 
     const { verifyPasswordSafe } = await import('../utils/index.js');
     vi.mocked(verifyPasswordSafe).mockResolvedValue(true);
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => callback(db));
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
 
-    const result = await authenticateUser(db, TEST_CONFIG, email, password, logger);
+    const result = await authenticateUser(db, repos, TEST_CONFIG, email, password, logger);
 
     expect(result.accessToken).toBe('access-token');
     expect(result.user.email).toBe(email);
@@ -242,6 +300,7 @@ describe('Account Lockout Expiration', () => {
 
   test('should remain locked before lockout period expires', async () => {
     const db = createMockDb();
+    const repos = createMockRepos();
     const logger = createMockLogger();
     const email = 'test@example.com';
     const password = 'correct-password';
@@ -253,7 +312,7 @@ describe('Account Lockout Expiration', () => {
     // Advance time by half the lockout duration (15 minutes)
     vi.advanceTimersByTime(15 * 60 * 1000);
 
-    await expect(authenticateUser(db, TEST_CONFIG, email, password, logger)).rejects.toThrow(
+    await expect(authenticateUser(db, repos, TEST_CONFIG, email, password, logger)).rejects.toThrow(
       AccountLockedError,
     );
 
@@ -300,6 +359,7 @@ describe('Parallel Login Requests', () => {
 
   test('should handle multiple simultaneous login attempts from same user', async () => {
     const db = createMockDb();
+    const repos = createMockRepos();
     const logger = createMockLogger();
     const email = 'test@example.com';
     const password = 'correct-password';
@@ -321,7 +381,7 @@ describe('Parallel Login Requests', () => {
 
     vi.mocked(isAccountLocked).mockResolvedValue(false);
     vi.mocked(applyProgressiveDelay).mockResolvedValue(undefined);
-    vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
+    vi.mocked(repos.users.findByEmail).mockResolvedValue(mockUser);
 
     const { verifyPasswordSafe } = await import('../utils/index.js');
     vi.mocked(verifyPasswordSafe).mockResolvedValue(true);
@@ -330,9 +390,9 @@ describe('Parallel Login Requests', () => {
 
     // Fire 3 parallel login requests
     const loginPromises = [
-      authenticateUser(db, TEST_CONFIG, email, password, logger),
-      authenticateUser(db, TEST_CONFIG, email, password, logger),
-      authenticateUser(db, TEST_CONFIG, email, password, logger),
+      authenticateUser(db, repos, TEST_CONFIG, email, password, logger),
+      authenticateUser(db, repos, TEST_CONFIG, email, password, logger),
+      authenticateUser(db, repos, TEST_CONFIG, email, password, logger),
     ];
 
     const results = await Promise.all(loginPromises);
@@ -347,6 +407,7 @@ describe('Parallel Login Requests', () => {
 
   test('should handle mixed success/failure parallel attempts', async () => {
     const db = createMockDb();
+    const repos = createMockRepos();
     const logger = createMockLogger();
     const email = 'test@example.com';
 
@@ -367,7 +428,7 @@ describe('Parallel Login Requests', () => {
 
     vi.mocked(isAccountLocked).mockResolvedValue(false);
     vi.mocked(applyProgressiveDelay).mockResolvedValue(undefined);
-    vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
+    vi.mocked(repos.users.findByEmail).mockResolvedValue(mockUser);
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => callback(db));
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
     vi.mocked(getAccountLockoutStatus).mockResolvedValue({ isLocked: false, failedAttempts: 1 });
@@ -380,9 +441,9 @@ describe('Parallel Login Requests', () => {
       .mockResolvedValueOnce(true); // Third succeeds
 
     const results = await Promise.allSettled([
-      authenticateUser(db, TEST_CONFIG, email, 'correct-password', logger),
-      authenticateUser(db, TEST_CONFIG, email, 'wrong-password', logger),
-      authenticateUser(db, TEST_CONFIG, email, 'correct-password', logger),
+      authenticateUser(db, repos, TEST_CONFIG, email, 'correct-password', logger),
+      authenticateUser(db, repos, TEST_CONFIG, email, 'wrong-password', logger),
+      authenticateUser(db, repos, TEST_CONFIG, email, 'correct-password', logger),
     ]);
 
     expect(results[0].status).toBe('fulfilled');
@@ -396,6 +457,7 @@ describe('Parallel Login Requests', () => {
 
   test('should trigger lockout after concurrent failed attempts exceed threshold', async () => {
     const db = createMockDb();
+    const repos = createMockRepos();
     const logger = createMockLogger();
     const email = 'test@example.com';
 
@@ -416,7 +478,7 @@ describe('Parallel Login Requests', () => {
 
     vi.mocked(isAccountLocked).mockResolvedValue(false);
     vi.mocked(applyProgressiveDelay).mockResolvedValue(undefined);
-    vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
+    vi.mocked(repos.users.findByEmail).mockResolvedValue(mockUser);
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
 
     const { verifyPasswordSafe } = await import('../utils/index.js');
@@ -436,7 +498,7 @@ describe('Parallel Login Requests', () => {
     const failedPromises = Array(5)
       .fill(null)
       .map(() =>
-        authenticateUser(db, TEST_CONFIG, email, 'wrong-password', logger).catch((e: unknown) => e),
+        authenticateUser(db, repos, TEST_CONFIG, email, 'wrong-password', logger).catch((e: unknown) => e),
       );
 
     const results = await Promise.all(failedPromises);
@@ -459,6 +521,7 @@ describe('Password Change Session Invalidation', () => {
 
   test('should invalidate refresh tokens after password reset', async () => {
     const db = createMockDb();
+    const repos = createMockRepos();
     const oldRefreshToken = 'old-refresh-token';
 
     const { rotateRefreshToken } = await import('../utils/index.js');
@@ -466,13 +529,14 @@ describe('Password Change Session Invalidation', () => {
     // After password reset, refresh token rotation should fail
     vi.mocked(rotateRefreshToken).mockResolvedValue(null);
 
-    await expect(refreshUserTokens(db, TEST_CONFIG, oldRefreshToken)).rejects.toThrow(
+    await expect(refreshUserTokens(db, repos, TEST_CONFIG, oldRefreshToken)).rejects.toThrow(
       'Invalid or expired token',
     );
   });
 
   test('should allow new login after password change', async () => {
     const db = createMockDb();
+    const repos = createMockRepos();
     const logger = createMockLogger();
     const email = 'test@example.com';
     const newPassword = 'NewSecurePassword123!';
@@ -494,14 +558,14 @@ describe('Password Change Session Invalidation', () => {
 
     vi.mocked(isAccountLocked).mockResolvedValue(false);
     vi.mocked(applyProgressiveDelay).mockResolvedValue(undefined);
-    vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
+    vi.mocked(repos.users.findByEmail).mockResolvedValue(mockUser);
 
     const { verifyPasswordSafe } = await import('../utils/index.js');
     vi.mocked(verifyPasswordSafe).mockResolvedValue(true);
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => callback(db));
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
 
-    const result = await authenticateUser(db, TEST_CONFIG, email, newPassword, logger);
+    const result = await authenticateUser(db, repos, TEST_CONFIG, email, newPassword, logger);
 
     expect(result.accessToken).toBe('access-token');
     expect(result.user.email).toBe(email);
@@ -509,6 +573,7 @@ describe('Password Change Session Invalidation', () => {
 
   test('should reject old password after password change', async () => {
     const db = createMockDb();
+    const repos = createMockRepos();
     const logger = createMockLogger();
     const email = 'test@example.com';
     const oldPassword = 'OldPassword123!';
@@ -530,14 +595,14 @@ describe('Password Change Session Invalidation', () => {
 
     vi.mocked(isAccountLocked).mockResolvedValue(false);
     vi.mocked(applyProgressiveDelay).mockResolvedValue(undefined);
-    vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
+    vi.mocked(repos.users.findByEmail).mockResolvedValue(mockUser);
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
     vi.mocked(getAccountLockoutStatus).mockResolvedValue({ isLocked: false, failedAttempts: 1 });
 
     const { verifyPasswordSafe } = await import('../utils/index.js');
     vi.mocked(verifyPasswordSafe).mockResolvedValue(false); // Old password doesn't match new hash
 
-    await expect(authenticateUser(db, TEST_CONFIG, email, oldPassword, logger)).rejects.toThrow(
+    await expect(authenticateUser(db, repos, TEST_CONFIG, email, oldPassword, logger)).rejects.toThrow(
       InvalidCredentialsError,
     );
   });
@@ -554,6 +619,7 @@ describe('Login During Active Lockout', () => {
 
   test('should reject login with correct password during lockout', async () => {
     const db = createMockDb();
+    const repos = createMockRepos();
     const logger = createMockLogger();
     const email = 'locked@example.com';
     const correctPassword = 'CorrectPassword123!';
@@ -561,7 +627,7 @@ describe('Login During Active Lockout', () => {
     vi.mocked(isAccountLocked).mockResolvedValue(true);
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
 
-    await expect(authenticateUser(db, TEST_CONFIG, email, correctPassword, logger)).rejects.toThrow(
+    await expect(authenticateUser(db, repos, TEST_CONFIG, email, correctPassword, logger)).rejects.toThrow(
       AccountLockedError,
     );
 
@@ -572,6 +638,7 @@ describe('Login During Active Lockout', () => {
 
   test('should log lockout rejection with IP and user agent', async () => {
     const db = createMockDb();
+    const repos = createMockRepos();
     const logger = createMockLogger();
     const email = 'locked@example.com';
     const ipAddress = '192.168.1.100';
@@ -581,7 +648,7 @@ describe('Login During Active Lockout', () => {
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
 
     await expect(
-      authenticateUser(db, TEST_CONFIG, email, 'any-password', logger, ipAddress, userAgent),
+      authenticateUser(db, repos, TEST_CONFIG, email, 'any-password', logger, ipAddress, userAgent),
     ).rejects.toThrow(AccountLockedError);
 
     expect(logLoginAttempt).toHaveBeenCalledWith(
@@ -596,6 +663,7 @@ describe('Login During Active Lockout', () => {
 
   test('should not increment failed attempts during lockout', async () => {
     const db = createMockDb();
+    const repos = createMockRepos();
     const logger = createMockLogger();
     const email = 'locked@example.com';
 
@@ -605,7 +673,7 @@ describe('Login During Active Lockout', () => {
     // Make 3 attempts during lockout
     for (let i = 0; i < 3; i++) {
       await expect(
-        authenticateUser(db, TEST_CONFIG, email, 'wrong-password', logger),
+        authenticateUser(db, repos, TEST_CONFIG, email, 'wrong-password', logger),
       ).rejects.toThrow(AccountLockedError);
     }
 
@@ -660,6 +728,7 @@ describe('Progressive Delay Timing', () => {
 
   test('should reset delay after successful login', async () => {
     const db = createMockDb();
+    const repos = createMockRepos();
     const logger = createMockLogger();
     const email = 'test@example.com';
 
@@ -680,14 +749,14 @@ describe('Progressive Delay Timing', () => {
 
     vi.mocked(isAccountLocked).mockResolvedValue(false);
     vi.mocked(applyProgressiveDelay).mockResolvedValue(undefined);
-    vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
+    vi.mocked(repos.users.findByEmail).mockResolvedValue(mockUser);
 
     const { verifyPasswordSafe } = await import('../utils/index.js');
     vi.mocked(verifyPasswordSafe).mockResolvedValue(true);
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => callback(db));
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
 
-    await authenticateUser(db, TEST_CONFIG, email, 'correct-password', logger);
+    await authenticateUser(db, repos, TEST_CONFIG, email, 'correct-password', logger);
 
     // After successful login, next attempt should have no delay
     vi.mocked(getProgressiveDelay).mockResolvedValue(0);
@@ -697,6 +766,7 @@ describe('Progressive Delay Timing', () => {
 
   test('should apply delay before password verification', async () => {
     const db = createMockDb();
+    const repos = createMockRepos();
     const logger = createMockLogger();
     const email = 'test@example.com';
 
@@ -720,18 +790,18 @@ describe('Progressive Delay Timing', () => {
     vi.mocked(applyProgressiveDelay).mockImplementation(async () => {
       delayApplied();
     });
-    vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
+    vi.mocked(repos.users.findByEmail).mockResolvedValue(mockUser);
 
     const { verifyPasswordSafe } = await import('../utils/index.js');
     vi.mocked(verifyPasswordSafe).mockResolvedValue(true);
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => callback(db));
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
 
-    await authenticateUser(db, TEST_CONFIG, email, 'password', logger);
+    await authenticateUser(db, repos, TEST_CONFIG, email, 'password', logger);
 
     expect(delayApplied).toHaveBeenCalled();
     expect(applyProgressiveDelay).toHaveBeenCalledBefore(
-      verifyPasswordSafe as unknown as ReturnType<typeof vi.fn>,
+      vi.mocked(verifyPasswordSafe),
     );
   });
 });
@@ -747,6 +817,7 @@ describe('Lockout Counter Reset', () => {
 
   test('should reset failed attempt counter on successful login', async () => {
     const db = createMockDb();
+    const repos = createMockRepos();
     const logger = createMockLogger();
     const email = 'test@example.com';
 
@@ -771,14 +842,14 @@ describe('Lockout Counter Reset', () => {
     // Then successful login
     vi.mocked(isAccountLocked).mockResolvedValue(false);
     vi.mocked(applyProgressiveDelay).mockResolvedValue(undefined);
-    vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
+    vi.mocked(repos.users.findByEmail).mockResolvedValue(mockUser);
 
     const { verifyPasswordSafe } = await import('../utils/index.js');
     vi.mocked(verifyPasswordSafe).mockResolvedValue(true);
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => callback(db));
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
 
-    await authenticateUser(db, TEST_CONFIG, email, 'correct-password', logger);
+    await authenticateUser(db, repos, TEST_CONFIG, email, 'correct-password', logger);
 
     // Verify successful login was logged (which resets the counter window)
     expect(logLoginAttempt).toHaveBeenCalledWith(db, email, true, undefined, undefined);
@@ -786,6 +857,7 @@ describe('Lockout Counter Reset', () => {
 
   test('should not trigger lockout after counter reset', async () => {
     const db = createMockDb();
+    const repos = createMockRepos();
     const logger = createMockLogger();
     const email = 'test@example.com';
 
@@ -806,7 +878,7 @@ describe('Lockout Counter Reset', () => {
 
     vi.mocked(isAccountLocked).mockResolvedValue(false);
     vi.mocked(applyProgressiveDelay).mockResolvedValue(undefined);
-    vi.mocked(db.query.users.findFirst).mockResolvedValue(mockUser);
+    vi.mocked(repos.users.findByEmail).mockResolvedValue(mockUser);
     vi.mocked(withTransaction).mockImplementation(async (_db, callback) => callback(db));
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
 
@@ -817,7 +889,7 @@ describe('Lockout Counter Reset', () => {
 
     // First: successful login (resets counter)
     vi.mocked(verifyPasswordSafe).mockResolvedValueOnce(true);
-    await authenticateUser(db, TEST_CONFIG, email, 'correct-password', logger);
+    await authenticateUser(db, repos, TEST_CONFIG, email, 'correct-password', logger);
 
     // Reset mock to track new failures
     vi.mocked(getAccountLockoutStatus).mockResolvedValue({ isLocked: false, failedAttempts: 1 });
@@ -826,7 +898,7 @@ describe('Lockout Counter Reset', () => {
     vi.mocked(verifyPasswordSafe).mockResolvedValueOnce(false);
 
     await expect(
-      authenticateUser(db, TEST_CONFIG, email, 'wrong-password', logger),
+      authenticateUser(db, repos, TEST_CONFIG, email, 'wrong-password', logger),
     ).rejects.toThrow(InvalidCredentialsError);
 
     // Account should not be locked (only 1 failure after reset)
@@ -861,6 +933,7 @@ describe('Email Verification Auto-Login', () => {
 
   test('should auto-login user after email verification', async () => {
     const db = createMockDb();
+    const repos = createMockRepos();
     const token = 'valid-verification-token';
 
     const { hashPassword } = await import('../utils/index.js');
@@ -874,7 +947,7 @@ describe('Email Verification Auto-Login', () => {
       usedAt: null,
       createdAt: new Date(),
     };
-    vi.mocked(db.query.emailVerificationTokens.findFirst).mockResolvedValue(mockTokenRecord);
+    vi.mocked(repos.emailVerificationTokens.findValidByTokenHash).mockResolvedValue(mockTokenRecord);
 
     const mockUser = {
       id: 'user-id',
@@ -891,22 +964,21 @@ describe('Email Verification Auto-Login', () => {
       version: 0,
     };
 
-    vi.mocked(withTransaction).mockImplementation(async (_db, fn) => fn(db));
-    vi.mocked(db.update).mockReturnValue({
-      set: vi.fn().mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          returning: vi.fn().mockResolvedValue([mockUser]),
-        }),
-      }),
-    } as never);
+    vi.mocked(withTransaction).mockImplementation(async (_db, fn) => {
+      const mockTx = {
+        query: vi.fn().mockResolvedValue([mockUser]),
+        queryOne: vi.fn().mockResolvedValue(mockUser),
+        execute: vi.fn().mockResolvedValue(1),
+        raw: vi.fn(),
+      } as unknown as RawDb;
+      return fn(mockTx);
+    });
 
-    const result = await verifyEmail(db, TEST_CONFIG, token);
+    const result = await verifyEmail(db, repos, TEST_CONFIG, token);
 
     expect(result.accessToken).toBe('access-token');
     expect(result.refreshToken).toBe('refresh-token');
     expect(result.user.id).toBe('user-id');
-    // Note: emailVerified is not included in the AuthResponse user object
-    // (it's only stored in the database, not returned to the client)
     expect(result.user.email).toBe('test@example.com');
   });
 });
@@ -922,19 +994,20 @@ describe('Timing-Safe Operations', () => {
 
   test('should use timing-safe password verification for non-existent users', async () => {
     const db = createMockDb();
+    const repos = createMockRepos();
     const logger = createMockLogger();
     const email = 'nonexistent@example.com';
 
     vi.mocked(isAccountLocked).mockResolvedValue(false);
     vi.mocked(applyProgressiveDelay).mockResolvedValue(undefined);
-    vi.mocked(db.query.users.findFirst).mockResolvedValue(undefined);
+    vi.mocked(repos.users.findByEmail).mockResolvedValue(null);
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
     vi.mocked(getAccountLockoutStatus).mockResolvedValue({ isLocked: false, failedAttempts: 1 });
 
     const { verifyPasswordSafe } = await import('../utils/index.js');
     vi.mocked(verifyPasswordSafe).mockResolvedValue(false);
 
-    await expect(authenticateUser(db, TEST_CONFIG, email, 'any-password', logger)).rejects.toThrow(
+    await expect(authenticateUser(db, repos, TEST_CONFIG, email, 'any-password', logger)).rejects.toThrow(
       InvalidCredentialsError,
     );
 
@@ -944,6 +1017,7 @@ describe('Timing-Safe Operations', () => {
 
   test('should take similar time for existing vs non-existing user', async () => {
     const db = createMockDb();
+    const repos = createMockRepos();
     const logger = createMockLogger();
 
     const { verifyPasswordSafe } = await import('../utils/index.js');
@@ -961,16 +1035,16 @@ describe('Timing-Safe Operations', () => {
     vi.mocked(getAccountLockoutStatus).mockResolvedValue({ isLocked: false, failedAttempts: 1 });
 
     // Non-existent user
-    vi.mocked(db.query.users.findFirst).mockResolvedValueOnce(undefined);
+    vi.mocked(repos.users.findByEmail).mockResolvedValueOnce(null);
 
     const start1 = Date.now();
     await expect(
-      authenticateUser(db, TEST_CONFIG, 'nonexistent@example.com', 'password', logger),
+      authenticateUser(db, repos, TEST_CONFIG, 'nonexistent@example.com', 'password', logger),
     ).rejects.toThrow();
     const time1 = Date.now() - start1;
 
     // Existing user with wrong password
-    vi.mocked(db.query.users.findFirst).mockResolvedValueOnce({
+    vi.mocked(repos.users.findByEmail).mockResolvedValueOnce({
       id: 'user-123',
       email: 'existing@example.com',
       passwordHash: 'hash',
@@ -987,7 +1061,7 @@ describe('Timing-Safe Operations', () => {
 
     const start2 = Date.now();
     await expect(
-      authenticateUser(db, TEST_CONFIG, 'existing@example.com', 'wrong-password', logger),
+      authenticateUser(db, repos, TEST_CONFIG, 'existing@example.com', 'wrong-password', logger),
     ).rejects.toThrow();
     const time2 = Date.now() - start2;
 

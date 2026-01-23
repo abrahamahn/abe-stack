@@ -2,7 +2,8 @@
 /**
  * Notification Infrastructure
  *
- * Push notification providers and factory for Web Push and FCM.
+ * Push notification providers and factory.
+ * Currently supports FCM (Firebase Cloud Messaging) as a stub implementation.
  */
 
 // Types
@@ -14,11 +15,7 @@ export type {
   PushNotificationProvider,
   SendOptions,
   SubscriptionWithId,
-  VapidConfig,
 } from './types';
-
-// Web Push Provider
-export { createWebPushProvider, WebPushProvider } from './web-push-provider';
 
 // FCM Provider (stub)
 export { createFcmProvider, FcmProvider } from './fcm-provider';

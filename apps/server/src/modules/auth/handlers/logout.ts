@@ -26,7 +26,7 @@ export async function handleLogout(
 ): Promise<{ status: 200; body: LogoutResponse } | { status: number; body: { message: string } }> {
   try {
     const refreshToken = request.cookies[REFRESH_COOKIE_NAME];
-    await logoutUser(ctx.db, refreshToken);
+    await logoutUser(ctx.db, ctx.repos, refreshToken);
 
     clearRefreshTokenCookie(reply);
 

@@ -2,7 +2,7 @@
 /**
  * SQL Search Provider
  *
- * Drizzle ORM-based search provider for SQL databases.
+ * Raw SQL-based search provider for PostgreSQL databases.
  * Translates search queries to SQL with proper escaping and parameterization.
  */
 
@@ -29,27 +29,6 @@ import {
   type SearchResult,
   type SortConfig,
 } from '@abe-stack/core';
-import {
-  and,
-  asc,
-  between,
-  desc,
-  eq,
-  gt,
-  gte,
-  ilike,
-  inArray,
-  isNotNull,
-  isNull,
-  like,
-  lt,
-  lte,
-  ne,
-  notInArray,
-  or,
-  sql,
-  type SQL,
-} from 'drizzle-orm';
 
 import type {
   SearchContext,
@@ -57,8 +36,20 @@ import type {
   SqlSearchProviderConfig,
   SqlTableConfig,
 } from './types';
-import type { DbClient } from '@database';
-import type { PgColumn, PgTable, PgTableWithColumns } from 'drizzle-orm/pg-core';
+import type { RawDb, Repositories } from '@database';
+
+// ============================================================================
+// Types
+// ============================================================================
+
+/** Internal type for SQL fragment with parameters */
+interface SqlFragment {
+  text: string;
+  values: unknown[];
+}
+
+/** Row type for count queries */
+type CountRow = Record<string, unknown> & { count: string | number };
 
 // ============================================================================
 // Constants
@@ -97,24 +88,19 @@ const SUPPORTED_OPERATORS: FilterOperator[] = [
 // ============================================================================
 
 /**
- * SQL-based search provider using Drizzle ORM.
+ * SQL-based search provider using raw parameterized SQL.
  */
-export class SqlSearchProvider<
-  TTable extends PgTableWithColumns<{
-    name: string;
-    schema: string | undefined;
-    columns: Record<string, PgColumn>;
-    dialect: 'pg';
-  }>,
-  TRecord extends Record<string, unknown> = Record<string, unknown>,
-> implements ServerSearchProvider<TRecord> {
+export class SqlSearchProvider<TRecord extends Record<string, unknown> = Record<string, unknown>>
+  implements ServerSearchProvider<TRecord>
+{
   readonly name: string;
   private readonly config: Required<Omit<SqlSearchProviderConfig, 'name'>>;
   private readonly tableConfig: SqlTableConfig;
+  private paramIndex: number = 0;
 
   constructor(
-    private readonly db: DbClient,
-    private readonly table: TTable,
+    private readonly db: RawDb,
+    _repos: Repositories,
     tableConfig: Partial<SqlTableConfig> & { table: string },
     config?: SqlSearchProviderConfig,
   ) {
@@ -125,14 +111,6 @@ export class SqlSearchProvider<
       primaryKey: tableConfig.primaryKey ?? 'id',
       columns: tableConfig.columns ?? [],
     };
-  }
-
-  /**
-   * Get table reference for Drizzle's from() method.
-   * Uses PgTable type to satisfy Drizzle ORM v0.35+ constraints.
-   */
-  private get fromTable(): PgTable {
-    return this.table as PgTable;
   }
 
   // ============================================================================
@@ -163,29 +141,36 @@ export class SqlSearchProvider<
       const limit = Math.min(query.limit ?? this.config.defaultPageSize, this.config.maxPageSize);
       const offset = (page - 1) * limit;
 
-      // Build the query
-      const whereClause = this.buildWhereClause(query);
+      // Reset param index for this query
+      this.paramIndex = 0;
+
+      // Build WHERE clause
+      const whereFragment = this.buildWhereClause(query);
       const orderByClause = this.buildOrderByClause(query.sort);
 
-      // Execute query with one extra row to determine hasNext
-      const qb = this.db.select().from(this.fromTable);
-      const qbWithWhere = whereClause ? qb.where(whereClause) : qb;
-      const qbWithOrder =
-        orderByClause.length > 0 ? qbWithWhere.orderBy(...orderByClause) : qbWithWhere;
+      // Build the query
+      const whereClause = whereFragment ? `WHERE ${whereFragment.text}` : '';
+      const orderBy = orderByClause ? `ORDER BY ${orderByClause}` : '';
 
-      const results = await qbWithOrder.limit(limit + 1).offset(offset);
+      const sqlText = `SELECT * FROM ${this.tableConfig.table} ${whereClause} ${orderBy} LIMIT $${this.nextParam()} OFFSET $${this.nextParam()}`;
+      const values = [...(whereFragment?.values ?? []), limit + 1, offset];
+
+      const results = await this.db.raw<TRecord>(sqlText, values);
 
       const hasNext = results.length > limit;
-      const data = (hasNext ? results.slice(0, limit) : results) as TRecord[];
+      const data = hasNext ? results.slice(0, limit) : results;
 
       // Get total count if requested
       let total: number | undefined;
       if (query.includeCount) {
-        const countQb = this.db.select({ count: sql<number>`count(*)` }).from(this.fromTable);
-        const countQbWithWhere = whereClause ? countQb.where(whereClause) : countQb;
-        const countResult = await countQbWithWhere;
+        // Reset param index for count query
+        this.paramIndex = 0;
+        const countWhereFragment = this.buildWhereClause(query);
+        const countWhereClause = countWhereFragment ? `WHERE ${countWhereFragment.text}` : '';
+        const countSql = `SELECT COUNT(*) as count FROM ${this.tableConfig.table} ${countWhereClause}`;
+        const countResult = await this.db.raw<CountRow>(countSql, countWhereFragment?.values ?? []);
         const countValue = countResult[0]?.count;
-        total = typeof countValue === 'number' ? countValue : 0;
+        total = typeof countValue === 'number' ? countValue : parseInt(String(countValue), 10);
       }
 
       const executionTime = performance.now() - startTime;
@@ -214,24 +199,38 @@ export class SqlSearchProvider<
     try {
       const limit = Math.min(query.limit ?? this.config.defaultPageSize, this.config.maxPageSize);
 
-      // Build base where clause
-      let whereClause = this.buildWhereClause(query);
+      // Reset param index for this query
+      this.paramIndex = 0;
+
+      // Build base WHERE clause
+      let whereFragment = this.buildWhereClause(query);
 
       // Apply cursor if provided
       if (query.cursor) {
-        const cursorWhere = this.buildCursorCondition(query.cursor, query.sort ?? []);
-        whereClause = whereClause ? and(whereClause, cursorWhere) : cursorWhere;
+        const cursorFragment = this.buildCursorCondition(query.cursor, query.sort ?? []);
+        if (cursorFragment) {
+          if (whereFragment) {
+            whereFragment = {
+              text: `(${whereFragment.text}) AND (${cursorFragment.text})`,
+              values: [...whereFragment.values, ...cursorFragment.values],
+            };
+          } else {
+            whereFragment = cursorFragment;
+          }
+        }
       }
 
       const orderByClause = this.buildOrderByClause(query.sort);
+      const whereClause = whereFragment ? `WHERE ${whereFragment.text}` : '';
+      const orderBy = orderByClause ? `ORDER BY ${orderByClause}` : '';
 
-      // Execute query with extra rows for cursor detection
-      const qb = this.db.select().from(this.fromTable);
-      const qbWithWhere = whereClause ? qb.where(whereClause) : qb;
-      const results = await qbWithWhere.orderBy(...orderByClause).limit(limit + 1);
+      const sqlText = `SELECT * FROM ${this.tableConfig.table} ${whereClause} ${orderBy} LIMIT $${this.nextParam()}`;
+      const values = [...(whereFragment?.values ?? []), limit + 1];
+
+      const results = await this.db.raw<TRecord>(sqlText, values);
 
       const hasNext = results.length > limit;
-      const data = (hasNext ? results.slice(0, limit) : results) as TRecord[];
+      const data = hasNext ? results.slice(0, limit) : results;
 
       // Generate cursors
       const lastItem = data[data.length - 1];
@@ -240,12 +239,14 @@ export class SqlSearchProvider<
       // Get total count if requested
       let total: number | undefined;
       if (query.includeCount) {
-        const baseWhere = this.buildWhereClause(query);
-        const countQb = this.db.select({ count: sql<number>`count(*)` }).from(this.fromTable);
-        const countQbWithWhere = baseWhere ? countQb.where(baseWhere) : countQb;
-        const countResult = await countQbWithWhere;
+        // Reset param index for count query
+        this.paramIndex = 0;
+        const baseWhereFragment = this.buildWhereClause(query);
+        const countWhereClause = baseWhereFragment ? `WHERE ${baseWhereFragment.text}` : '';
+        const countSql = `SELECT COUNT(*) as count FROM ${this.tableConfig.table} ${countWhereClause}`;
+        const countResult = await this.db.raw<CountRow>(countSql, baseWhereFragment?.values ?? []);
         const countValue = countResult[0]?.count;
-        total = typeof countValue === 'number' ? countValue : 0;
+        total = typeof countValue === 'number' ? countValue : parseInt(String(countValue), 10);
       }
 
       const executionTime = performance.now() - startTime;
@@ -253,7 +254,7 @@ export class SqlSearchProvider<
       return {
         data: data.map((item) => ({ item })),
         nextCursor,
-        prevCursor: null, // Would need to implement backward pagination
+        prevCursor: null,
         hasNext,
         hasPrev: query.cursor !== undefined,
         limit,
@@ -280,36 +281,34 @@ export class SqlSearchProvider<
         query.facets && query.facets.length > 0
           ? await Promise.all(
               query.facets.map(async (facetConfig) => {
-                const column = this.getColumn(facetConfig.field);
-                if (!column) {
+                const columnName = this.resolveColumnName(facetConfig.field);
+                if (!columnName) {
                   return {
                     field: facetConfig.field,
                     buckets: [],
                   };
                 }
 
-                const whereClause = this.buildWhereClause(query);
+                // Reset param index for each facet query
+                this.paramIndex = 0;
+                const whereFragment = this.buildWhereClause(query);
                 const facetLimit = facetConfig.size ?? 10;
 
-                const bucketQb = this.db
-                  .select({
-                    value: column,
-                    count: sql<number>`count(*)`,
-                  })
-                  .from(this.fromTable);
+                const whereClause = whereFragment ? `WHERE ${whereFragment.text}` : '';
+                const facetSql = `SELECT ${columnName} as value, COUNT(*) as count FROM ${this.tableConfig.table} ${whereClause} GROUP BY ${columnName} ORDER BY count DESC LIMIT $${this.nextParam()}`;
+                const values = [...(whereFragment?.values ?? []), facetLimit];
 
-                const bucketQbWithWhere = whereClause ? bucketQb.where(whereClause) : bucketQb;
-
-                const bucketResults = await bucketQbWithWhere
-                  .groupBy(column)
-                  .orderBy(desc(sql`count(*)`))
-                  .limit(facetLimit);
+                type FacetRow = Record<string, unknown> & {
+                  value: string | number | boolean | Date | null;
+                  count: string | number;
+                };
+                const bucketResults = await this.db.raw<FacetRow>(facetSql, values);
 
                 return {
                   field: facetConfig.field,
                   buckets: bucketResults.map((row) => ({
-                    value: row.value as string | number | boolean | Date | null,
-                    count: typeof row.count === 'number' ? row.count : 0,
+                    value: row.value,
+                    count: typeof row.count === 'number' ? row.count : parseInt(String(row.count), 10),
                   })),
                 };
               }),
@@ -330,14 +329,15 @@ export class SqlSearchProvider<
 
   async count(query: SearchQuery<TRecord>, _context?: SearchContext): Promise<number> {
     try {
-      const whereClause = this.buildWhereClause(query);
+      // Reset param index for this query
+      this.paramIndex = 0;
+      const whereFragment = this.buildWhereClause(query);
+      const whereClause = whereFragment ? `WHERE ${whereFragment.text}` : '';
 
-      const qb = this.db.select({ count: sql<number>`count(*)` }).from(this.fromTable);
-      const qbWithWhere = whereClause ? qb.where(whereClause) : qb;
-      const result = await qbWithWhere;
-
-      const countValue = result[0]?.count;
-      return typeof countValue === 'number' ? countValue : 0;
+      const countSql = `SELECT COUNT(*) as count FROM ${this.tableConfig.table} ${whereClause}`;
+      const countResult = await this.db.raw<CountRow>(countSql, whereFragment?.values ?? []);
+      const countValue = countResult[0]?.count;
+      return typeof countValue === 'number' ? countValue : parseInt(String(countValue), 10);
     } catch (error) {
       throw this.wrapError(error, 'count');
     }
@@ -345,10 +345,7 @@ export class SqlSearchProvider<
 
   async healthCheck(): Promise<boolean> {
     try {
-      await this.db
-        .select({ one: sql`1` })
-        .from(this.fromTable)
-        .limit(1);
+      await this.db.raw(`SELECT 1 FROM ${this.tableConfig.table} LIMIT 1`, []);
       return true;
     } catch {
       return false;
@@ -356,14 +353,22 @@ export class SqlSearchProvider<
   }
 
   async close(): Promise<void> {
-    // No cleanup needed for Drizzle - connection managed externally
+    // No cleanup needed - connection managed externally
+  }
+
+  // ============================================================================
+  // Private Methods - Parameter Management
+  // ============================================================================
+
+  private nextParam(): number {
+    return ++this.paramIndex;
   }
 
   // ============================================================================
   // Private Methods - Where Clause Building
   // ============================================================================
 
-  private buildWhereClause(query: SearchQuery<TRecord>): SQL | undefined {
+  private buildWhereClause(query: SearchQuery<TRecord>): SqlFragment | undefined {
     if (!query.filters) {
       return undefined;
     }
@@ -377,7 +382,7 @@ export class SqlSearchProvider<
     filter: FilterCondition<TRecord> | CompoundFilter<TRecord>,
     depth: number = 0,
     context: { conditionCount: number } = { conditionCount: 0 },
-  ): SQL | undefined {
+  ): SqlFragment | undefined {
     // Check query depth limit
     if (depth > this.config.maxQueryDepth) {
       throw new QueryTooComplexError(
@@ -407,10 +412,10 @@ export class SqlSearchProvider<
     return undefined;
   }
 
-  private translateCondition(condition: FilterCondition<TRecord>): SQL | undefined {
+  private translateCondition(condition: FilterCondition<TRecord>): SqlFragment | undefined {
     const fieldName = String(condition.field);
-    const column = this.getColumn(fieldName);
-    if (!column) {
+    const columnName = this.resolveColumnName(fieldName);
+    if (!columnName) {
       throw new InvalidFilterError(`Unknown field: ${fieldName}`, fieldName);
     }
 
@@ -419,61 +424,80 @@ export class SqlSearchProvider<
 
     switch (condition.operator) {
       case FILTER_OPERATORS.EQ:
-        return eq(column, value);
+        return { text: `${columnName} = $${this.nextParam()}`, values: [value] };
 
       case FILTER_OPERATORS.NEQ:
-        return ne(column, value);
+        return { text: `${columnName} <> $${this.nextParam()}`, values: [value] };
 
       case FILTER_OPERATORS.GT:
-        return gt(column, value);
+        return { text: `${columnName} > $${this.nextParam()}`, values: [value] };
 
       case FILTER_OPERATORS.GTE:
-        return gte(column, value);
+        return { text: `${columnName} >= $${this.nextParam()}`, values: [value] };
 
       case FILTER_OPERATORS.LT:
-        return lt(column, value);
+        return { text: `${columnName} < $${this.nextParam()}`, values: [value] };
 
       case FILTER_OPERATORS.LTE:
-        return lte(column, value);
+        return { text: `${columnName} <= $${this.nextParam()}`, values: [value] };
 
       case FILTER_OPERATORS.CONTAINS:
-        return ilike(column, `%${this.escapeLikePattern(stringValue)}%`);
+        return {
+          text: `${columnName} ILIKE $${this.nextParam()}`,
+          values: [`%${this.escapeLikePattern(stringValue)}%`],
+        };
 
       case FILTER_OPERATORS.STARTS_WITH:
-        return ilike(column, `${this.escapeLikePattern(stringValue)}%`);
+        return {
+          text: `${columnName} ILIKE $${this.nextParam()}`,
+          values: [`${this.escapeLikePattern(stringValue)}%`],
+        };
 
       case FILTER_OPERATORS.ENDS_WITH:
-        return ilike(column, `%${this.escapeLikePattern(stringValue)}`);
+        return {
+          text: `${columnName} ILIKE $${this.nextParam()}`,
+          values: [`%${this.escapeLikePattern(stringValue)}`],
+        };
 
       case FILTER_OPERATORS.LIKE:
-        return condition.caseSensitive
-          ? like(column, value as string)
-          : ilike(column, value as string);
+        return {
+          text: condition.caseSensitive
+            ? `${columnName} LIKE $${this.nextParam()}`
+            : `${columnName} ILIKE $${this.nextParam()}`,
+          values: [value],
+        };
 
       case FILTER_OPERATORS.ILIKE:
-        return ilike(column, value as string);
+        return { text: `${columnName} ILIKE $${this.nextParam()}`, values: [value] };
 
-      case FILTER_OPERATORS.IN:
+      case FILTER_OPERATORS.IN: {
         if (!Array.isArray(value) || value.length === 0) {
-          return sql`false`;
+          return { text: 'false', values: [] };
         }
-        return inArray(column, value);
+        const placeholders = value.map(() => `$${this.nextParam()}`).join(', ');
+        return { text: `${columnName} IN (${placeholders})`, values: value };
+      }
 
-      case FILTER_OPERATORS.NOT_IN:
+      case FILTER_OPERATORS.NOT_IN: {
         if (!Array.isArray(value) || value.length === 0) {
           return undefined;
         }
-        return notInArray(column, value);
+        const placeholders = value.map(() => `$${this.nextParam()}`).join(', ');
+        return { text: `${columnName} NOT IN (${placeholders})`, values: value };
+      }
 
       case FILTER_OPERATORS.IS_NULL:
-        return isNull(column);
+        return { text: `${columnName} IS NULL`, values: [] };
 
       case FILTER_OPERATORS.IS_NOT_NULL:
-        return isNotNull(column);
+        return { text: `${columnName} IS NOT NULL`, values: [] };
 
       case FILTER_OPERATORS.BETWEEN:
         if (typeof value === 'object' && value !== null && 'min' in value && 'max' in value) {
-          return between(column, value.min, value.max);
+          return {
+            text: `${columnName} BETWEEN $${this.nextParam()} AND $${this.nextParam()}`,
+            values: [value.min, value.max],
+          };
         }
         throw new InvalidFilterError(
           'BETWEEN operator requires {min, max} value',
@@ -494,27 +518,29 @@ export class SqlSearchProvider<
     compound: CompoundFilter<TRecord>,
     depth: number = 0,
     context: { conditionCount: number } = { conditionCount: 0 },
-  ): SQL | undefined {
-    const conditions = compound.conditions
+  ): SqlFragment | undefined {
+    const fragments = compound.conditions
       .map((c) => this.translateFilter(c, depth + 1, context))
-      .filter((c): c is SQL => c !== undefined);
+      .filter((c): c is SqlFragment => c !== undefined);
 
-    if (conditions.length === 0) {
+    if (fragments.length === 0) {
       return undefined;
     }
 
+    const combinedText = fragments.map((f) => `(${f.text})`).join(
+      compound.operator === LOGICAL_OPERATORS.AND ? ' AND ' : ' OR ',
+    );
+    const combinedValues = fragments.flatMap((f) => f.values);
+
     switch (compound.operator) {
       case LOGICAL_OPERATORS.AND:
-        return and(...conditions);
+        return { text: combinedText, values: combinedValues };
 
       case LOGICAL_OPERATORS.OR:
-        return or(...conditions);
+        return { text: combinedText, values: combinedValues };
 
-      case LOGICAL_OPERATORS.NOT: {
-        // NOT is applied to the combined AND of conditions
-        const combined = and(...conditions);
-        return combined ? sql`NOT (${combined})` : undefined;
-      }
+      case LOGICAL_OPERATORS.NOT:
+        return { text: `NOT (${combinedText})`, values: combinedValues };
 
       default:
         throw new InvalidFilterError(`Unknown logical operator: ${String(compound.operator)}`);
@@ -525,30 +551,31 @@ export class SqlSearchProvider<
   // Private Methods - Order By Building
   // ============================================================================
 
-  private buildOrderByClause(sort?: SortConfig<TRecord>[]): SQL[] {
+  private buildOrderByClause(sort?: SortConfig<TRecord>[]): string {
     if (!sort || sort.length === 0) {
       // Default sort by primary key
       const pkKey = Array.isArray(this.tableConfig.primaryKey)
         ? this.tableConfig.primaryKey[0]
         : this.tableConfig.primaryKey;
-      const pkColumn = pkKey ? this.getColumn(pkKey) : undefined;
-      return pkColumn ? [asc(pkColumn)] : [];
+      const pkColumn = pkKey ? this.resolveColumnName(pkKey) : undefined;
+      return pkColumn ? `${pkColumn} ASC` : '';
     }
 
     return sort
       .map((s) => {
-        const column = this.getColumn(String(s.field));
-        if (!column) return null;
-        return s.order === 'desc' ? desc(column) : asc(column);
+        const columnName = this.resolveColumnName(String(s.field));
+        if (!columnName) return null;
+        return `${columnName} ${s.order === 'desc' ? 'DESC' : 'ASC'}`;
       })
-      .filter((s): s is SQL => s !== null);
+      .filter((s): s is string => s !== null)
+      .join(', ');
   }
 
   // ============================================================================
   // Private Methods - Cursor Handling
   // ============================================================================
 
-  private buildCursorCondition(cursor: string, sort: SortConfig<TRecord>[]): SQL | undefined {
+  private buildCursorCondition(cursor: string, sort: SortConfig<TRecord>[]): SqlFragment | undefined {
     try {
       const decoded = decodeCursor(cursor);
 
@@ -562,13 +589,17 @@ export class SqlSearchProvider<
       const sortOrder = firstSort?.order ?? 'asc';
       const cursorValue = decoded.value;
 
-      const column = this.getColumn(sortField);
-      if (!column) {
+      const columnName = this.resolveColumnName(sortField);
+      if (!columnName) {
         throw new InvalidCursorError(`Unknown sort field in cursor: ${sortField}`);
       }
 
       // Forward pagination: get items after cursor
-      return sortOrder === 'desc' ? lt(column, cursorValue) : gt(column, cursorValue);
+      const operator = sortOrder === 'desc' ? '<' : '>';
+      return {
+        text: `${columnName} ${operator} $${this.nextParam()}`,
+        values: [cursorValue],
+      };
     } catch (error) {
       if (error instanceof InvalidCursorError) {
         throw error;
@@ -603,14 +634,26 @@ export class SqlSearchProvider<
     return value.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
   }
 
-  private getColumn(field: string): PgColumn | undefined {
+  /**
+   * Resolve a field name to its actual column name.
+   * Checks column mappings first, then validates against allowed columns.
+   */
+  private resolveColumnName(field: string): string | undefined {
     // Check column mappings first
     const mapping = this.tableConfig.columns.find((c) => c.field === field);
-    const columnName = mapping?.column ?? field;
+    if (mapping) {
+      return mapping.column;
+    }
 
-    // Get from table
-    const columns = this.table as unknown as { [key: string]: PgColumn };
-    return columns[columnName];
+    // If no explicit mapping, check if field is in columns list
+    const isKnownColumn = this.tableConfig.columns.some((c) => c.column === field || c.field === field);
+
+    // If columns list is empty, assume field is valid (backwards compatibility)
+    if (this.tableConfig.columns.length === 0 || isKnownColumn) {
+      return field;
+    }
+
+    return undefined;
   }
 
   private wrapError(error: unknown, operation: string): SearchError {
@@ -637,19 +680,11 @@ export class SqlSearchProvider<
 /**
  * Create a SQL search provider.
  */
-export function createSqlSearchProvider<
-  TTable extends PgTableWithColumns<{
-    name: string;
-    schema: string | undefined;
-    columns: Record<string, PgColumn>;
-    dialect: 'pg';
-  }>,
-  TRecord extends Record<string, unknown> = Record<string, unknown>,
->(
-  db: DbClient,
-  table: TTable,
+export function createSqlSearchProvider<TRecord extends Record<string, unknown> = Record<string, unknown>>(
+  db: RawDb,
+  repos: Repositories,
   tableConfig: Partial<SqlTableConfig> & { table: string },
   config?: SqlSearchProviderConfig,
-): SqlSearchProvider<TTable, TRecord> {
-  return new SqlSearchProvider(db, table, tableConfig, config);
+): SqlSearchProvider<TRecord> {
+  return new SqlSearchProvider(db, repos, tableConfig, config);
 }
