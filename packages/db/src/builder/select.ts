@@ -16,6 +16,7 @@ import {
   combine,
   escapeIdentifier,
   formatTable,
+  raw,
   type JoinSpec,
   type QueryBuilder,
   type QueryResult,
@@ -356,7 +357,7 @@ export function select(table: string | TableSpec): SelectBuilder {
  * @example selectCount('users').where(eq('active', true))
  */
 export function selectCount(table: string | TableSpec): SelectBuilder {
-  return new SelectBuilder(table).columns('COUNT(*) as count');
+  return new SelectBuilder(table).columns().column(raw('COUNT(*)'), 'count');
 }
 
 /**

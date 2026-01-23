@@ -27,9 +27,5 @@ function getRoleTone(role: UserRole): 'info' | 'success' | 'danger' | 'warning' 
 }
 
 export function RoleBadge({ role }: RoleBadgeProps): JSX.Element {
-  return (
-    <Badge tone={getRoleTone(role)}>
-      {role.charAt(0).toUpperCase() + role.slice(1)}
-    </Badge>
-  );
+  return <Badge tone={getRoleTone(role)}>{role.charAt(0).toUpperCase() + role.slice(1)}</Badge>;
 }

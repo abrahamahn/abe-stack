@@ -11,7 +11,7 @@
  */
 
 import { tokenStore } from '@abe-stack/core';
-import { useAdminPlans } from '@abe-stack/sdk';
+import { useAdminPlans, type AdminBillingClientConfig } from '@abe-stack/sdk';
 import {
   Badge,
   Button,
@@ -107,7 +107,7 @@ function PlanForm({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
         <Input
           id="name"
           value={data.name}
-          onChange={(e) => handleChange('name', e.target.value)}
+          onChange={(e) => { handleChange('name', e.target.value); }}
           placeholder="e.g., Pro Plan"
           disabled={isSubmitting}
         />
@@ -118,7 +118,7 @@ function PlanForm({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
         <Input
           id="description"
           value={data.description}
-          onChange={(e) => handleChange('description', e.target.value)}
+          onChange={(e) => { handleChange('description', e.target.value); }}
           placeholder="Brief description of the plan"
           disabled={isSubmitting}
         />
@@ -129,7 +129,7 @@ function PlanForm({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
           <label htmlFor="interval">Billing Interval *</label>
           <Select
             value={data.interval}
-            onChange={(value) => handleChange('interval', value as 'month' | 'year')}
+            onChange={(value) => { handleChange('interval', value as 'month' | 'year'); }}
             disabled={isSubmitting}
           >
             <option value="month">Monthly</option>
@@ -143,7 +143,7 @@ function PlanForm({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
             id="price"
             type="number"
             value={data.priceInCents.toString()}
-            onChange={(e) => handleChange('priceInCents', parseInt(e.target.value, 10) || 0)}
+            onChange={(e) => { handleChange('priceInCents', parseInt(e.target.value, 10) || 0); }}
             placeholder="e.g., 1999 for $19.99"
             disabled={isSubmitting}
           />
@@ -154,7 +154,7 @@ function PlanForm({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
           <Input
             id="currency"
             value={data.currency}
-            onChange={(e) => handleChange('currency', e.target.value.toLowerCase())}
+            onChange={(e) => { handleChange('currency', e.target.value.toLowerCase()); }}
             placeholder="usd"
             disabled={isSubmitting}
           />
@@ -168,7 +168,7 @@ function PlanForm({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
             id="trialDays"
             type="number"
             value={data.trialDays.toString()}
-            onChange={(e) => handleChange('trialDays', parseInt(e.target.value, 10) || 0)}
+            onChange={(e) => { handleChange('trialDays', parseInt(e.target.value, 10) || 0); }}
             placeholder="0"
             disabled={isSubmitting}
           />
@@ -180,7 +180,7 @@ function PlanForm({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
             id="sortOrder"
             type="number"
             value={data.sortOrder.toString()}
-            onChange={(e) => handleChange('sortOrder', parseInt(e.target.value, 10) || 0)}
+            onChange={(e) => { handleChange('sortOrder', parseInt(e.target.value, 10) || 0); }}
             placeholder="0"
             disabled={isSubmitting}
           />
@@ -191,7 +191,7 @@ function PlanForm({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
           <Switch
             id="isActive"
             checked={data.isActive}
-            onChange={(checked) => handleChange('isActive', checked)}
+            onChange={(checked) => { handleChange('isActive', checked); }}
             disabled={isSubmitting}
           />
         </div>
@@ -208,20 +208,20 @@ function PlanForm({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
           <div key={index} className="plan-form__feature-row">
             <Input
               value={feature.name}
-              onChange={(e) => handleFeatureChange(index, 'name', e.target.value)}
+              onChange={(e) => { handleFeatureChange(index, 'name', e.target.value); }}
               placeholder="Feature name"
               disabled={isSubmitting}
             />
             <Switch
               checked={feature.included}
-              onChange={(checked) => handleFeatureChange(index, 'included', checked)}
+              onChange={(checked) => { handleFeatureChange(index, 'included', checked); }}
               disabled={isSubmitting}
             />
             <Button
               type="button"
               size="small"
               variant="text"
-              onClick={() => handleRemoveFeature(index)}
+              onClick={() => { handleRemoveFeature(index); }}
               disabled={isSubmitting}
             >
               Remove
@@ -244,9 +244,9 @@ export function PlanManagementPage(): ReactElement {
   const [editPlan, setEditPlan] = useState<AdminPlan | null>(null);
   const [formData, setFormData] = useState<PlanFormData>(defaultFormData);
 
-  const clientConfig = {
+  const clientConfig: AdminBillingClientConfig = {
     baseUrl: config.apiUrl,
-    getToken: () => tokenStore.get(),
+    getToken: (): string | null => tokenStore.get(),
   };
 
   const {
@@ -372,7 +372,9 @@ export function PlanManagementPage(): ReactElement {
                   </TableCell>
                   <TableCell>{formatPrice(plan.priceInCents, plan.currency)}</TableCell>
                   <TableCell>{plan.interval === 'month' ? 'Monthly' : 'Yearly'}</TableCell>
-                  <TableCell>{plan.trialDays > 0 ? `${plan.trialDays} days` : '-'}</TableCell>
+                  <TableCell>
+                    {plan.trialDays > 0 ? `${String(plan.trialDays)} days` : '-'}
+                  </TableCell>
                   <TableCell>
                     <Badge tone={plan.isActive ? 'success' : 'info'}>
                       {plan.isActive ? 'Active' : 'Inactive'}
@@ -387,11 +389,16 @@ export function PlanManagementPage(): ReactElement {
                   </TableCell>
                   <TableCell>
                     <div className="plan-management-page__actions">
-                      <Button size="small" variant="text" onClick={() => handleOpenEdit(plan)} disabled={isActing}>
+                      <Button size="small" variant="text" onClick={() => { handleOpenEdit(plan); }} disabled={isActing}>
                         Edit
                       </Button>
                       {!plan.stripePriceId && (
-                        <Button size="small" variant="text" onClick={() => handleSync(plan.id)} disabled={isActing}>
+                        <Button
+                          size="small"
+                          variant="text"
+                          onClick={() => { void handleSync(plan.id); }}
+                          disabled={isActing}
+                        >
                           Sync to Stripe
                         </Button>
                       )}
@@ -399,7 +406,7 @@ export function PlanManagementPage(): ReactElement {
                         <Button
                           size="small"
                           variant="text"
-                          onClick={() => handleDeactivate(plan.id)}
+                          onClick={() => { void handleDeactivate(plan.id); }}
                           disabled={isActing}
                         >
                           Deactivate
@@ -419,10 +426,13 @@ export function PlanManagementPage(): ReactElement {
         <Dialog.Content title="Create New Plan">
           <PlanForm data={formData} onChange={setFormData} isSubmitting={isActing} />
           <div className="dialog-actions">
-            <Button variant="text" onClick={() => setCreateDialogOpen(false)} disabled={isActing}>
+            <Button variant="text" onClick={() => { setCreateDialogOpen(false); }} disabled={isActing}>
               Cancel
             </Button>
-            <Button onClick={handleCreate} disabled={isActing || !formData.name || formData.priceInCents <= 0}>
+            <Button
+              onClick={() => { void handleCreate(); }}
+              disabled={isActing || !formData.name || formData.priceInCents <= 0}
+            >
               {isActing ? 'Creating...' : 'Create Plan'}
             </Button>
           </div>
@@ -430,14 +440,17 @@ export function PlanManagementPage(): ReactElement {
       </Dialog.Root>
 
       {/* Edit Plan Dialog */}
-      <Dialog.Root open={editPlan !== null} onChange={(open) => !open && setEditPlan(null)}>
+      <Dialog.Root
+        open={editPlan !== null}
+        onChange={(open) => { if (!open) setEditPlan(null); }}
+      >
         <Dialog.Content title={`Edit Plan: ${editPlan?.name ?? ''}`}>
           <PlanForm data={formData} onChange={setFormData} isSubmitting={isActing} />
           <div className="dialog-actions">
-            <Button variant="text" onClick={() => setEditPlan(null)} disabled={isActing}>
+            <Button variant="text" onClick={() => { setEditPlan(null); }} disabled={isActing}>
               Cancel
             </Button>
-            <Button onClick={handleUpdate} disabled={isActing || !formData.name}>
+            <Button onClick={() => { void handleUpdate(); }} disabled={isActing || !formData.name}>
               {isActing ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>

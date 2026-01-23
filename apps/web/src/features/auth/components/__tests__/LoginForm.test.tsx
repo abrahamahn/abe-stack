@@ -1,21 +1,16 @@
 // apps/web/src/features/auth/components/__tests__/LoginForm.test.tsx
-import { MemoryRouter } from '@abe-stack/ui';
 import { LoginForm } from '@auth/components/LoginForm';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { renderWithProviders } from '../../../../__tests__/utils';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import type { LoginFormProps } from '@auth/components/LoginForm';
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactElement } from 'react';
 
-// Wrapper component for Router context
-function RouterWrapper({ children }: { children: ReactNode }): ReactElement {
-  return <MemoryRouter>{children}</MemoryRouter>;
-}
-
-// Helper function to render with router
-function renderWithRouter(ui: ReactElement): ReturnType<typeof render> {
-  return render(ui, { wrapper: RouterWrapper });
+// Helper function to render with providers
+function renderWithRouter(ui: ReactElement) {
+  return renderWithProviders(ui);
 }
 
 describe('LoginForm', () => {

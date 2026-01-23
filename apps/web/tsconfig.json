@@ -100,6 +100,12 @@
       ],
       "@services/*": [
         "./src/features/admin/services/*"
+      ],
+      "@settings": [
+        "./src/features/settings"
+      ],
+      "@settings/*": [
+        "./src/features/settings/*"
       ]
     },
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.web.tsbuildinfo"

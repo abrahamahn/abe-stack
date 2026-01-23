@@ -9,7 +9,11 @@
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "type-check": "tsc --project tsconfig.json --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --config ../../vitest.config.ts --project server",
+    "test:unit": "vitest run --config ../../vitest.config.ts --project server --test-name-pattern '(unit|fast)'",
+    "test:integration": "vitest run --config ../../vitest.config.ts --project server --test-name-pattern '(integration|critical)'",
+    "test:full": "vitest run --config ../../vitest.config.ts --project server",
+    "db:push": "tsx --env-file=../../config/.env/.env.development src/scripts/db-push.ts",
     "db:seed": "tsx --env-file=../../config/.env/.env.development src/scripts/seed.ts",
     "db:bootstrap:admin": "tsx src/scripts/bootstrap-admin.ts"
   },

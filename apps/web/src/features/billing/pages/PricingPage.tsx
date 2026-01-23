@@ -4,7 +4,7 @@
  */
 
 import { tokenStore } from '@abe-stack/core';
-import { usePlans, useSubscription } from '@abe-stack/sdk';
+import { usePlans, useSubscription, type BillingClientConfig } from '@abe-stack/sdk';
 import { PageContainer, PricingTable } from '@abe-stack/ui';
 import { useNavigate } from '@abe-stack/ui';
 
@@ -21,9 +21,9 @@ export function PricingPage(): ReactElement {
   const navigate = useNavigate();
   const { config } = useClientEnvironment();
 
-  const clientConfig = {
+  const clientConfig: BillingClientConfig = {
     baseUrl: config.apiUrl,
-    getToken: () => tokenStore.get(),
+    getToken: (): string | null => tokenStore.get(),
   };
 
   const { plans, isLoading: plansLoading, error: plansError } = usePlans(clientConfig);
@@ -72,7 +72,7 @@ export function PricingPage(): ReactElement {
         plans={plans}
         currentPlanId={subscription?.planId}
         loadingPlanId={isActing ? 'loading' : null}
-        onSelectPlan={handleSelectPlan}
+        onSelectPlan={(plan) => { void handleSelectPlan(plan); }}
         getActionLabel={getActionLabel}
         getBadge={getBadge}
         isLoading={plansLoading}

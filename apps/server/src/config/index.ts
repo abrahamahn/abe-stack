@@ -1,45 +1,60 @@
 // apps/server/src/config/index.ts
+
 /**
- * Unified Application Configuration
- *
- * Single source of truth for all configuration.
- * Load once at startup, pass through App class.
+ * 1. THE BRAIN
+ * This is the only way the app should initialize the config.
  */
+export { load, load as loadConfig } from './factory';
 
-// Main config loader
-export { loadConfig } from './loader';
-
-// App config type
-export type { AppConfig } from './types';
-
-// Auth config
-export type { AuthConfig, AuthStrategy, OAuthProviderConfig } from './auth.config';
+/**
+ * 2. AUTHENTICATION & SECURITY
+ * Only export the utilities and types the server-side logic needs.
+ */
 export {
-  isStrategyEnabled,
+  AuthValidationError,
   getRefreshCookieOptions,
-  validateAuthConfig,
-  AuthConfigValidationError,
-} from './auth.config';
+  isStrategyEnabled,
+  loadAuth,
+  validateAuth,
+} from './auth/auth';
 
-// Database config
-export type { DatabaseConfig } from './database.config';
-export { buildConnectionString } from './database.config';
+export { loadJwtRotationConfig } from './auth/jwt';
+export { loadRateLimitConfig } from './auth/rate-limit';
 
-// Email config
-export type { EmailConfig } from './email.config';
+/**
+ * 3. INFRASTRUCTURE
+ * Selective helpers for DB connections and Storage handling.
+ */
+export { loadCacheConfig } from './infra/cache';
+export { buildConnectionString, getSafeConnectionString, loadDatabase } from './infra/database';
+export { loadServer } from './infra/server';
+export { loadStorage } from './infra/storage';
 
-// Server config
-export type { ServerConfig } from './server.config';
+/**
+ * 4. SERVICES
+ * Domain-specific loaders.
+ */
+export { loadBilling, validateBilling } from './services/billing';
+export { loadEmail } from './services/email';
+export { loadFcmConfig } from './services/notifications';
+export { loadElasticsearchConfig, loadSqlSearchConfig } from './services/search';
 
-// Storage config
+/**
+ * 5. THE CONTRACTS (Type Aliases)
+ * We alias these from Core so the Server doesn't have to import from
+ * two different places for config-related tasks.
+ */
 export type {
+  AppConfig,
+  AuthConfig,
+  BillingConfig,
+  CacheConfig,
+  DatabaseConfig,
+  EmailConfig,
+  FcmConfig,
+  OAuthProviderConfig,
+  QueueConfig,
+  SearchConfig,
+  ServerConfig,
   StorageConfig,
-  StorageProviderName,
-  LocalStorageConfig,
-  S3StorageConfig,
-} from './storage.config';
-export { loadStorageConfig } from './storage.config';
-
-// Billing config
-export type { BillingConfig } from './billing.config';
-export { loadBillingConfig, validateBillingConfig } from './billing.config';
+} from '@abe-stack/core/contracts/config';

@@ -108,11 +108,7 @@ export function UserActionsMenu({
 
   return (
     <div className="space-y-6">
-      {error && (
-        <Alert tone="danger">
-          {error}
-        </Alert>
-      )}
+      {error && <Alert tone="danger">{error}</Alert>}
 
       {/* Edit User Section */}
       <Card>
@@ -120,29 +116,40 @@ export function UserActionsMenu({
           <Heading as="h3" size="md" className="mb-4">
             Edit User
           </Heading>
-          <form onSubmit={handleUpdateSubmit} className="space-y-4">
+          <form
+            onSubmit={(e) => {
+              void handleUpdateSubmit(e);
+            }}
+            className="space-y-4"
+          >
             <div>
-              <label htmlFor="edit-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="edit-name"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 Name
               </label>
               <Input
                 id="edit-name"
                 type="text"
                 value={editName}
-                onChange={(e) => setEditName(e.target.value)}
+                onChange={(e) => { setEditName(e.target.value); }}
                 placeholder="Enter name"
                 disabled={isAnyLoading}
               />
             </div>
 
             <div>
-              <label htmlFor="edit-role" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="edit-role"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 Role
               </label>
               <Select
                 id="edit-role"
                 value={editRole}
-                onChange={(value) => setEditRole(value as UserRole)}
+                onChange={(value) => { setEditRole(value as UserRole); }}
                 disabled={isAnyLoading}
               >
                 {ROLE_OPTIONS.map((option) => (
@@ -173,25 +180,28 @@ export function UserActionsMenu({
             <Text tone="muted" className="mb-4">
               This user is currently locked. Provide a reason to unlock their account.
             </Text>
-            <form onSubmit={handleUnlockSubmit} className="space-y-4">
+            <form
+              onSubmit={(event) => { void handleUnlockSubmit(event); }}
+              className="space-y-4"
+            >
               <div>
-                <label htmlFor="unlock-reason" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label
+                  htmlFor="unlock-reason"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
                   Reason for unlocking
                 </label>
                 <TextArea
                   id="unlock-reason"
                   value={unlockReason}
-                  onChange={(e) => setUnlockReason(e.target.value)}
+                  onChange={(e) => { setUnlockReason(e.target.value); }}
                   placeholder="Enter reason for unlocking this account"
                   rows={3}
                   disabled={isAnyLoading}
                 />
               </div>
 
-              <Button
-                type="submit"
-                disabled={isAnyLoading || !unlockReason.trim()}
-              >
+              <Button type="submit" disabled={isAnyLoading || !unlockReason.trim()}>
                 {isUnlocking ? 'Unlocking...' : 'Unlock User'}
               </Button>
             </form>
@@ -206,15 +216,21 @@ export function UserActionsMenu({
             <Text tone="muted" className="mb-4">
               Locking a user will prevent them from logging in.
             </Text>
-            <form onSubmit={handleLockSubmit} className="space-y-4">
+            <form
+              onSubmit={(event) => { void handleLockSubmit(event); }}
+              className="space-y-4"
+            >
               <div>
-                <label htmlFor="lock-reason" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label
+                  htmlFor="lock-reason"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
                   Reason for locking
                 </label>
                 <TextArea
                   id="lock-reason"
                   value={lockReason}
-                  onChange={(e) => setLockReason(e.target.value)}
+                  onChange={(e) => { setLockReason(e.target.value); }}
                   placeholder="Enter reason for locking this account"
                   rows={3}
                   disabled={isAnyLoading}
@@ -222,13 +238,16 @@ export function UserActionsMenu({
               </div>
 
               <div>
-                <label htmlFor="lock-duration" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label
+                  htmlFor="lock-duration"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                >
                   Lock Duration
                 </label>
                 <Select
                   id="lock-duration"
                   value={lockDuration}
-                  onChange={(value) => setLockDuration(value)}
+                  onChange={(value) => { setLockDuration(value); }}
                   disabled={isAnyLoading}
                 >
                   {LOCK_DURATION_OPTIONS.map((option) => (

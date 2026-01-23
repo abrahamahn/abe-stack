@@ -45,7 +45,7 @@ export default [
       'apps/desktop/src/**/*.js.map',
       '**/*.d.ts',
       '**/*.d.ts.map',
-      'packages/db/src/benchmark/**',
+      'apps/server/legacy-tests/**',
     ],
   },
   jsConfigs.recommended ?? {},

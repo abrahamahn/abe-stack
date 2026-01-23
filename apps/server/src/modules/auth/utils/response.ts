@@ -12,6 +12,7 @@ export interface AuthUser {
   id: string;
   email: string;
   name: string | null;
+  avatarUrl: string | null;
   role: UserRole;
   createdAt: string;
 }
@@ -43,6 +44,7 @@ export function createAuthResponse(
     id: string;
     email: string;
     name: string | null;
+    avatarUrl?: string | null;
     role: UserRole;
     createdAt: Date | string;
   },
@@ -57,6 +59,7 @@ export function createAuthResponse(
       id: user.id,
       email: user.email,
       name: user.name,
+      avatarUrl: user.avatarUrl ?? null,
       role: user.role,
       createdAt,
     },

@@ -5,7 +5,7 @@
  * Dialog for exporting security events as CSV or JSON.
  */
 
-import { Button, Modal, Text } from '@abe-stack/ui';
+import { Button, Modal, Radio, RadioGroup, Text } from '@abe-stack/ui';
 import { useCallback, useState } from 'react';
 
 import { useExportEvents } from '../hooks/useExportEvents';
@@ -27,11 +27,7 @@ export interface ExportDialogProps {
 // Component
 // ============================================================================
 
-export function ExportDialog({
-  isOpen,
-  onClose,
-  filter,
-}: ExportDialogProps): JSX.Element {
+export function ExportDialog({ isOpen, onClose, filter }: ExportDialogProps): JSX.Element {
   const [selectedFormat, setSelectedFormat] = useState<'csv' | 'json'>('csv');
   const { downloadExport, isExporting, isError, error } = useExportEvents();
 
@@ -44,41 +40,25 @@ export function ExportDialog({
     <Modal.Root open={isOpen} onClose={onClose}>
       <Modal.Header>
         <Modal.Title>Export Security Events</Modal.Title>
-        <Modal.Description>
-          Export security events matching the current filters.
-        </Modal.Description>
+        <Modal.Description>Export security events matching the current filters.</Modal.Description>
       </Modal.Header>
 
       <Modal.Body>
         <div className="py-4 space-y-4">
           <div>
-            <Text className="mb-2 font-medium">
-              Select Format
-            </Text>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="format"
-                  value="csv"
-                  checked={selectedFormat === 'csv'}
-                  onChange={() => setSelectedFormat('csv')}
-                  className="w-4 h-4"
-                />
-                <Text>CSV</Text>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="format"
-                  value="json"
-                  checked={selectedFormat === 'json'}
-                  onChange={() => setSelectedFormat('json')}
-                  className="w-4 h-4"
-                />
-                <Text>JSON</Text>
-              </label>
-            </div>
+            <Text className="mb-2 font-medium">Select Format</Text>
+            <RadioGroup
+              name="format"
+              value={selectedFormat}
+              onValueChange={(value) => {
+                setSelectedFormat(value as 'csv' | 'json');
+              }}
+              aria-label="Export format"
+              className="flex gap-4"
+            >
+              <Radio value="csv" label="CSV" />
+              <Radio value="json" label="JSON" />
+            </RadioGroup>
           </div>
 
           {Object.keys(filter).length > 0 && (
@@ -91,9 +71,7 @@ export function ExportDialog({
 
           {isError && (
             <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg p-3">
-              <Text size="sm">
-                Export failed: {error?.message ?? 'Unknown error'}
-              </Text>
+              <Text size="sm">Export failed: {error?.message ?? 'Unknown error'}</Text>
             </div>
           )}
 

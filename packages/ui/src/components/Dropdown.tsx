@@ -7,14 +7,31 @@ import '../styles/components.css';
 type Placement = 'bottom' | 'right';
 
 type DropdownProps = {
+  /** Trigger button content */
   trigger: ReactNode;
+  /** Menu position relative to trigger */
   placement?: Placement;
+  /** Menu content or render function with close callback */
   children: ReactNode | ((close: () => void) => ReactNode);
+  /** Controlled open state */
   open?: boolean;
+  /** Initial open state for uncontrolled usage */
   defaultOpen?: boolean;
+  /** Callback when open state changes */
   onChange?: (open: boolean) => void;
 };
 
+/**
+ * A dropdown menu with keyboard navigation and flexible content.
+ *
+ * @example
+ * ```tsx
+ * <Dropdown trigger={<button>Menu</button>}>
+ *   <MenuItem>Edit</MenuItem>
+ *   <MenuItem>Delete</MenuItem>
+ * </Dropdown>
+ * ```
+ */
 export function Dropdown({
   trigger,
   placement = 'bottom',

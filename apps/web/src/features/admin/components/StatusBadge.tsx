@@ -59,9 +59,7 @@ function getStatusLabel(status: UserStatus): string {
 
 export function StatusBadge({ status }: StatusBadgeProps): JSX.Element {
   return (
-    <span
-      className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusStyles(status)}`}
-    >
+    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusStyles(status)}`}>
       {getStatusLabel(status)}
     </span>
   );

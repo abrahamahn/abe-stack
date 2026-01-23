@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-ARG NODE_VERSION=20
+ARG NODE_VERSION=22
 
 # =============================================================================
 # Base Stage - Common dependencies and configuration
@@ -56,8 +56,10 @@ COPY . .
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --frozen-lockfile && \
     pnpm --filter @abe-stack/core build && \
+    pnpm --filter @abe-stack/db build && \
     pnpm --filter @abe-stack/server build && \
-    pnpm --filter @abe-stack/server deploy --prod --legacy /app/server-deploy
+    pnpm --filter @abe-stack/server deploy --prod --legacy /app/server-deploy && \
+    node tools/dev/create-server-aliases.js /app/server-deploy apps/server/tsconfig.json
 
 # =============================================================================
 # Production Stage - Minimal runtime image with security hardening

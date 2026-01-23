@@ -36,9 +36,7 @@ const DEFAULT_LIMIT = 20;
 /**
  * Hook for managing admin user listing
  */
-export function useAdminUsers(
-  initialFilters: AdminUserListFilters = {},
-): UseAdminUsersResult {
+export function useAdminUsers(initialFilters: AdminUserListFilters = {}): UseAdminUsersResult {
   const [filters, setFiltersState] = useState<AdminUserListFilters>({
     page: 1,
     limit: DEFAULT_LIMIT,

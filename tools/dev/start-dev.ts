@@ -140,6 +140,12 @@ function startTurboDev(filter?: string): ChildProcess {
   return turbo;
 }
 
+function runBuilds(): void {
+  logLine('[build]', 'Building core/db packages');
+  execSync('pnpm --filter @abe-stack/core build', { stdio: 'inherit', cwd: ROOT });
+  execSync('pnpm --filter @abe-stack/db build', { stdio: 'inherit', cwd: ROOT });
+}
+
 async function main(): Promise<void> {
   const filter = process.argv[2];
 
@@ -153,6 +159,9 @@ async function main(): Promise<void> {
   if (!filter || filter === 'server') {
     await ensurePostgres();
   }
+
+  // Ensure shared packages are built for runtime resolution
+  runBuilds();
 
   // Start all sync watchers silently in background
   const watchers = [

@@ -2,7 +2,11 @@
 import { createStorage } from '@storage';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-import type { LocalStorageConfig, S3StorageConfig, StorageConfig } from '@config/storage.config';
+import type {
+  LocalStorageConfig,
+  S3StorageConfig,
+  StorageConfig,
+} from '@abe-stack/core/contracts/config';
 
 // Use vi.hoisted for class mocks
 const { MockLocalStorageProvider, MockS3StorageProvider } = vi.hoisted(() => {
@@ -77,6 +81,8 @@ describe('createStorage', () => {
         region: 'us-east-1',
         accessKeyId: 'access-key',
         secretAccessKey: 'secret-key',
+        forcePathStyle: false,
+        presignExpiresInSeconds: 900,
       };
 
       const provider = createStorage(config);

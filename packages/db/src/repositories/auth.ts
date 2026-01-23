@@ -10,7 +10,7 @@
  * - security_events
  */
 
-import { and, eq, gt, isNull, lt, select, insert, update, deleteFrom } from '../builder';
+import { and, eq, gt, isNull, lt, select, insert, update, deleteFrom, raw } from '../builder';
 import {
   EMAIL_VERIFICATION_TOKEN_COLUMNS,
   EMAIL_VERIFICATION_TOKENS_TABLE,
@@ -135,7 +135,8 @@ export function createLoginAttemptRepository(db: RawDb): LoginAttemptRepository 
     async countRecentFailures(email: string, since: Date): Promise<number> {
       const result = await db.queryOne<{ count: string }>(
         select(LOGIN_ATTEMPTS_TABLE)
-          .columns('COUNT(*) as count')
+          .columns()
+          .column(raw('COUNT(*)'), 'count')
           .where(and(
             eq('email', email),
             eq('success', false),
@@ -506,7 +507,8 @@ export function createSecurityEventRepository(db: RawDb): SecurityEventRepositor
     async countByType(eventType: string, since: Date): Promise<number> {
       const result = await db.queryOne<{ count: string }>(
         select(SECURITY_EVENTS_TABLE)
-          .columns('COUNT(*) as count')
+          .columns()
+          .column(raw('COUNT(*)'), 'count')
           .where(and(eq('event_type', eventType), gt('created_at', since)))
           .toSql()
       );

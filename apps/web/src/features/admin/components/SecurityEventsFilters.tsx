@@ -31,15 +31,12 @@ export function SecurityEventsFilters({
 }: SecurityEventsFiltersProps): JSX.Element {
   const [localFilter, setLocalFilter] = useState<SecurityEventsFilter>(filter);
 
-  const handleInputChange = useCallback(
-    (field: keyof SecurityEventsFilter, value: string) => {
-      setLocalFilter((prev) => ({
-        ...prev,
-        [field]: value || undefined,
-      }));
-    },
-    [],
-  );
+  const handleInputChange = useCallback((field: keyof SecurityEventsFilter, value: string) => {
+    setLocalFilter((prev) => ({
+      ...prev,
+      [field]: value || undefined,
+    }));
+  }, []);
 
   const handleApply = useCallback(() => {
     onFilterChange(localFilter);
@@ -76,7 +73,9 @@ export function SecurityEventsFilters({
           </label>
           <Select
             value={localFilter.eventType ?? ''}
-            onChange={(value) => handleInputChange('eventType', value)}
+            onChange={(value) => {
+              handleInputChange('eventType', value);
+            }}
           >
             {eventTypeOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -92,7 +91,9 @@ export function SecurityEventsFilters({
           </label>
           <Select
             value={localFilter.severity ?? ''}
-            onChange={(value) => handleInputChange('severity', value)}
+            onChange={(value) => {
+              handleInputChange('severity', value);
+            }}
           >
             {severityOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -110,7 +111,9 @@ export function SecurityEventsFilters({
             type="email"
             placeholder="Search by email..."
             value={localFilter.email ?? ''}
-            onChange={(e) => handleInputChange('email', e.target.value)}
+            onChange={(e) => {
+              handleInputChange('email', e.target.value);
+            }}
           />
         </div>
 
@@ -122,7 +125,9 @@ export function SecurityEventsFilters({
             type="text"
             placeholder="Filter by IP..."
             value={localFilter.ipAddress ?? ''}
-            onChange={(e) => handleInputChange('ipAddress', e.target.value)}
+            onChange={(e) => {
+              handleInputChange('ipAddress', e.target.value);
+            }}
           />
         </div>
 
@@ -133,7 +138,9 @@ export function SecurityEventsFilters({
           <Input
             type="datetime-local"
             value={localFilter.startDate ?? ''}
-            onChange={(e) => handleInputChange('startDate', e.target.value)}
+            onChange={(e) => {
+              handleInputChange('startDate', e.target.value);
+            }}
           />
         </div>
 
@@ -144,7 +151,9 @@ export function SecurityEventsFilters({
           <Input
             type="datetime-local"
             value={localFilter.endDate ?? ''}
-            onChange={(e) => handleInputChange('endDate', e.target.value)}
+            onChange={(e) => {
+              handleInputChange('endDate', e.target.value);
+            }}
           />
         </div>
 
@@ -156,7 +165,9 @@ export function SecurityEventsFilters({
             type="text"
             placeholder="Filter by User ID..."
             value={localFilter.userId ?? ''}
-            onChange={(e) => handleInputChange('userId', e.target.value)}
+            onChange={(e) => {
+              handleInputChange('userId', e.target.value);
+            }}
           />
         </div>
 

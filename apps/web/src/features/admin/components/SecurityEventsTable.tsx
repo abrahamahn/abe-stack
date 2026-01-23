@@ -53,9 +53,7 @@ function getSeverityBadgeClass(severity: string): string {
 }
 
 function formatEventType(eventType: string): string {
-  return eventType
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return eventType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function formatDate(dateString: string): string {
@@ -114,7 +112,9 @@ export function SecurityEventsTable({
             <TableRow
               key={event.id}
               className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
-              onClick={() => handleRowClick(event)}
+              onClick={() => {
+                handleRowClick(event);
+              }}
             >
               <TableCell>
                 <Text size="sm">{formatDate(event.createdAt)}</Text>
@@ -158,11 +158,7 @@ export function SecurityEventsTable({
         <Text tone="muted" size="sm">
           Showing {data.data.length} of {data.total} events
         </Text>
-        <Pagination
-          value={pagination.page}
-          totalPages={data.totalPages}
-          onChange={onPageChange}
-        />
+        <Pagination value={pagination.page} totalPages={data.totalPages} onChange={onPageChange} />
       </div>
     </div>
   );

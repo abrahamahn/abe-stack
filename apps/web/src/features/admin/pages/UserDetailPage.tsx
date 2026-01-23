@@ -86,7 +86,7 @@ export function UserDetailPage(): JSX.Element {
               {user ? user.email : 'User Details'}
             </Heading>
           </div>
-          <Button onClick={() => refresh()} disabled={isLoading}>
+          <Button onClick={() => { void refresh(); }} disabled={isLoading}>
             Refresh
           </Button>
         </div>

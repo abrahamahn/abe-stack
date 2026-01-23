@@ -150,6 +150,7 @@ export function createRawDb(config: DbConfig | string): RawDb {
     ssl: dbConfig.ssl,
   });
 
+  // The postgres client exposes begin() on the main Sql instance only.
   return createDbFromSql(sql);
 }
 
@@ -204,16 +205,49 @@ function createDbFromSql(sql: PostgresClient): RawDb {
       options?: TransactionOptions,
     ): Promise<T> {
       const isolationLevel = options?.isolationLevel ?? 'read committed';
+      const readOnly = options?.readOnly;
+      const deferrable = options?.deferrable;
 
-      // Cast sql to Sql type for transaction support
-      // TransactionSql doesn't have begin(), so we need to ensure we're using Sql
-      const mainSql = sql as Sql;
+      const isolationClause = `isolation level ${isolationLevel}`;
+      const client = sql as Sql;
+      const beginFn = (client as unknown as { begin?: unknown }).begin;
+      const savepointFn = (client as unknown as { savepoint?: unknown }).savepoint;
 
-      const result = await mainSql.begin(isolationLevel, async (tx) => {
+      const runCallback = async (tx: TransactionSql | Sql): Promise<T> => {
+        const txOptions: string[] = [];
+        if (readOnly === true) {
+          txOptions.push('READ ONLY');
+        } else if (readOnly === false) {
+          txOptions.push('READ WRITE');
+        }
+        if (deferrable === true) {
+          txOptions.push('DEFERRABLE');
+        } else if (deferrable === false) {
+          txOptions.push('NOT DEFERRABLE');
+        }
+        if (txOptions.length > 0) {
+          await tx.unsafe(`SET TRANSACTION ${txOptions.join(' ')}`);
+        }
         const txDb = createDbFromSql(tx);
         return callback(txDb);
-      });
-      return result as T;
+      };
+
+      if (typeof beginFn === 'function') {
+        const result = client.begin(isolationClause, runCallback);
+        return (await result) as T;
+      }
+
+      if (typeof savepointFn === 'function') {
+        // Nested transactions: postgres uses savepoints and does not support SET TRANSACTION.
+        const result = (client as unknown as { savepoint: (cb: (tx: TransactionSql) => Promise<T>) => Promise<T> })
+          .savepoint(async (tx) => {
+            const txDb = createDbFromSql(tx);
+            return callback(txDb);
+          });
+        return (await result) as T;
+      }
+
+      throw new Error('Database client does not support transactions');
     },
 
     async healthCheck(): Promise<boolean> {

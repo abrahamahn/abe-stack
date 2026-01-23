@@ -124,17 +124,20 @@ export default serverConfig;
 
 ### Test File Location
 
-Tests live in `__tests__/` subdirectories next to source files:
+**Hybrid model:**
+
+- Unit tests are colocated adjacent to the file under test.
+- Integration/E2E tests are centralized in `src/__tests__/integration/` or `test/`.
 
 ```text
 src/
 ├── auth/
-│   ├── __tests__/
-│   │   └── service.test.ts
-│   └── service.ts
+│   ├── service.ts
+│   └── service.test.ts
+└── __tests__/
+    └── integration/
+        └── auth-flow.test.ts
 ```
-
-Tests are placed in `__tests__/` directories alongside the code they test.
 
 ---
 

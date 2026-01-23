@@ -28,6 +28,7 @@ export const mockUser: User = {
   id: 'user-123',
   email: 'test@example.com',
   name: 'Test User',
+  avatarUrl: null,
   role: 'user',
   createdAt: '2024-01-01T00:00:00Z',
 };
@@ -36,6 +37,7 @@ export const mockAdminUser: User = {
   id: 'admin-123',
   email: 'admin@example.com',
   name: 'Admin User',
+  avatarUrl: null,
   role: 'admin',
   createdAt: '2024-01-01T00:00:00Z',
 };

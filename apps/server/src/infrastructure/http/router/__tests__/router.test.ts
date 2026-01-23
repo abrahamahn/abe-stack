@@ -133,6 +133,7 @@ function createMockContext(): AppContext {
     pubsub: {} as never,
     email: {} as never,
     storage: {} as never,
+    cache: {} as never,
   };
 }
 

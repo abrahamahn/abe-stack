@@ -5,14 +5,28 @@ import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import '../styles/components.css';
 
 type SliderProps = ComponentPropsWithoutRef<'input'> & {
+  /** Minimum value */
   min?: number;
+  /** Maximum value */
   max?: number;
+  /** Step increment */
   step?: number;
+  /** Controlled value */
   value?: number;
+  /** Initial value for uncontrolled usage */
   defaultValue?: number;
+  /** Callback when value changes */
   onChange?: (value: number) => void;
 };
 
+/**
+ * A range slider input with controllable state.
+ *
+ * @example
+ * ```tsx
+ * <Slider min={0} max={100} value={volume} onChange={setVolume} />
+ * ```
+ */
 export const Slider = forwardRef<HTMLInputElement, SliderProps>((props, ref) => {
   const {
     min = 0,

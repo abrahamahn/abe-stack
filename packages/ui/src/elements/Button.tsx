@@ -4,11 +4,24 @@ import { forwardRef, type ComponentPropsWithoutRef, type ElementType } from 'rea
 import '../styles/elements.css';
 
 type ButtonProps = ComponentPropsWithoutRef<'button'> & {
+  /** The HTML element or React component to render as */
   as?: ElementType;
+  /** Visual style variant */
   variant?: 'primary' | 'secondary' | 'text';
+  /** Button size */
   size?: 'small' | 'medium' | 'large';
 };
 
+/**
+ * A polymorphic button component with multiple variants and sizes.
+ *
+ * @example
+ * ```tsx
+ * <Button variant="primary" onClick={handleClick}>
+ *   Click me
+ * </Button>
+ * ```
+ */
 const Button = forwardRef<HTMLElement, ButtonProps>((props, ref) => {
   const {
     as = 'button',

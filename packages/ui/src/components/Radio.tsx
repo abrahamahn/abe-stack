@@ -6,14 +6,28 @@ import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import '../styles/components.css';
 
 type RadioProps = Omit<ComponentPropsWithoutRef<'input'>, 'type' | 'onChange' | 'name'> & {
+  /** Controlled checked state */
   checked?: boolean;
+  /** Initial checked state for uncontrolled usage */
   defaultChecked?: boolean;
+  /** Callback when checked state changes */
   onChange?: (checked: boolean) => void;
+  /** Label text or element */
   label?: React.ReactNode;
+  /** Radio group name */
   name?: string;
+  /** Value for the radio option */
   value?: string | number | readonly string[];
 };
 
+/**
+ * An accessible radio button for mutually exclusive options.
+ *
+ * @example
+ * ```tsx
+ * <Radio label="Option A" name="choice" value="a" />
+ * ```
+ */
 export const Radio = forwardRef<HTMLInputElement, RadioProps>((props, ref) => {
   const {
     checked: checkedProp,

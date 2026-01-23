@@ -28,7 +28,7 @@ export interface UseSecurityEventResult {
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
-  refetch: () => void;
+  refetch: () => Promise<void>;
 }
 
 // ============================================================================

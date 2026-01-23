@@ -6,7 +6,15 @@
  * and renders child routes in the main content area.
  */
 
-import { LeftSidebarLayout, Navigate, Outlet, ScrollArea, useLocation, useNavigate } from '@abe-stack/ui';
+import {
+  Button,
+  LeftSidebarLayout,
+  Navigate,
+  Outlet,
+  ScrollArea,
+  useLocation,
+  useNavigate,
+} from '@abe-stack/ui';
 import { useAuth } from '@features/auth';
 
 import type { ReactElement, ReactNode } from 'react';
@@ -132,18 +140,16 @@ function NavButton({
   onClick: () => void;
 }): ReactElement {
   return (
-    <button
+    <Button
       type="button"
+      variant={isActive ? 'secondary' : 'text'}
+      size="small"
       onClick={onClick}
-      className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors ${
-        isActive
-          ? 'bg-surface-2 text-text-primary font-medium'
-          : 'text-text-secondary hover:bg-surface-1 hover:text-text-primary'
-      }`}
+      className={`w-full justify-start gap-3 ${isActive ? 'font-medium' : ''}`}
     >
       <span className="flex-shrink-0">{item.icon}</span>
       <span>{item.label}</span>
-    </button>
+    </Button>
   );
 }
 
@@ -168,17 +174,19 @@ function AdminSidebar(): ReactElement {
               key={item.path}
               item={item}
               isActive={location.pathname.startsWith(item.path)}
-              onClick={() => navigate(item.path)}
+              onClick={() => { navigate(item.path); }}
             />
           ))}
         </nav>
       }
       footer={
         <div className="p-3 border-t border-border">
-          <button
+          <Button
             type="button"
-            onClick={() => navigate('/dashboard')}
-            className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-text-secondary hover:bg-surface-1 hover:text-text-primary"
+            onClick={() => { navigate('/dashboard'); }}
+            variant="text"
+            size="small"
+            className="w-full justify-start gap-2"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -194,7 +202,7 @@ function AdminSidebar(): ReactElement {
               <path d="m15 18-6-6 6-6" />
             </svg>
             Back to App
-          </button>
+          </Button>
         </div>
       }
     />

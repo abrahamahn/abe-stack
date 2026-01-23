@@ -199,6 +199,7 @@ describe('Contract Schema Integration', () => {
         id: randomUUID(),
         email: 'john@example.com',
         name: 'John Doe',
+        avatarUrl: null,
         role: 'user',
         createdAt: new Date().toISOString(),
       };
@@ -215,6 +216,7 @@ describe('Contract Schema Integration', () => {
         id: randomUUID(),
         email: 'jane@example.com',
         name: null,
+        avatarUrl: null,
         role: 'admin',
         createdAt: new Date().toISOString(),
       };
@@ -409,6 +411,7 @@ describe('Contract Schema Integration', () => {
           id: userId,
           email: 'user@example.com',
           name: 'Test User',
+          avatarUrl: null,
           role: 'user',
           createdAt,
         },
@@ -424,6 +427,7 @@ describe('Contract Schema Integration', () => {
           id: userId,
           email: 'user@example.com',
           name: 'Test User',
+          avatarUrl: null,
           role: 'user',
           createdAt,
         });

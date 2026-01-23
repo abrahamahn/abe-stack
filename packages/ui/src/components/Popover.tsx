@@ -7,16 +7,32 @@ import '../styles/components.css';
 type Placement = 'bottom' | 'right';
 
 type PopoverProps = {
+  /** Trigger element */
   trigger: ReactNode;
+  /** Popover position relative to trigger */
   placement?: Placement;
+  /** Popover content */
   children: ReactNode;
+  /** Controlled open state */
   open?: boolean;
+  /** Initial open state for uncontrolled usage */
   defaultOpen?: boolean;
+  /** Callback when open state changes */
   onChange?: (open: boolean) => void;
   /** Accessible label for the popover trigger button */
   'aria-label'?: string;
 };
 
+/**
+ * A popover component for displaying rich content on trigger.
+ *
+ * @example
+ * ```tsx
+ * <Popover trigger={<button>Info</button>}>
+ *   <p>Popover content here</p>
+ * </Popover>
+ * ```
+ */
 export function Popover({
   trigger,
   placement = 'bottom',

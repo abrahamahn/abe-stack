@@ -161,8 +161,34 @@ export type {
 } from './pagination';
 
 // Users contract
-export { USER_ROLES, userRoleSchema, userSchema, usersContract } from './users';
-export type { User, UserRole } from './users';
+export {
+  avatarDeleteResponseSchema,
+  avatarUploadResponseSchema,
+  changePasswordRequestSchema,
+  changePasswordResponseSchema,
+  revokeAllSessionsResponseSchema,
+  revokeSessionResponseSchema,
+  sessionSchema,
+  sessionsListResponseSchema,
+  updateProfileRequestSchema,
+  USER_ROLES,
+  userRoleSchema,
+  userSchema,
+  usersContract,
+} from './users';
+export type {
+  AvatarDeleteResponse,
+  AvatarUploadResponse,
+  ChangePasswordRequest,
+  ChangePasswordResponse,
+  RevokeAllSessionsResponse,
+  RevokeSessionResponse,
+  Session,
+  SessionsListResponse,
+  UpdateProfileRequest,
+  User,
+  UserRole,
+} from './users';
 
 // OAuth contract
 export {
@@ -176,6 +202,7 @@ export {
   oauthUnlinkResponseSchema,
   oauthConnectionSchema,
   oauthConnectionsResponseSchema,
+  oauthEnabledProvidersResponseSchema,
   OAUTH_PROVIDERS,
 } from './oauth';
 export type {
@@ -188,6 +215,7 @@ export type {
   OAuthUnlinkResponse,
   OAuthConnection,
   OAuthConnectionsResponse,
+  OAuthEnabledProvidersResponse,
 } from './oauth';
 
 // Realtime contract

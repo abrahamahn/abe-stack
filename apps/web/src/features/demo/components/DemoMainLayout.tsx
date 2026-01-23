@@ -3,6 +3,7 @@ import {
   Button,
   CloseButton,
   Heading,
+  MenuItem,
   ResizablePanel,
   ResizablePanelGroup,
   ScrollArea,
@@ -124,19 +125,18 @@ export function DemoMainLayout({
             <ScrollArea className="scroll-flex">
               <div className="flex-col gap-1 p-2">
                 {componentsInCategory.map((comp) => (
-                  <button
+                  <MenuItem
                     key={comp.id}
                     onClick={() => {
                       setSelectedComponent(comp);
                     }}
-                    className="menu-item"
                     data-selected={selectedComponent?.id === comp.id}
                   >
                     <Text>{comp.name}</Text>
                     <Text tone="muted" className="text-xs">
                       {comp.variants.length} variant{comp.variants.length !== 1 ? 's' : ''}
                     </Text>
-                  </button>
+                  </MenuItem>
                 ))}
               </div>
             </ScrollArea>

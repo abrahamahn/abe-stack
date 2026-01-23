@@ -236,6 +236,41 @@ function createMockRepos() {
   } as unknown as Repositories;
 }
 
+interface MockUser {
+  id: string;
+  email: string;
+  name: string;
+  avatarUrl: string | null;
+  role: 'user' | 'admin' | 'moderator';
+  passwordHash: string;
+  emailVerified: boolean;
+  emailVerifiedAt: Date | null;
+  lockedUntil: Date | null;
+  failedLoginAttempts: number;
+  createdAt: Date;
+  updatedAt: Date;
+  version: number;
+}
+
+function createMockUser(overrides: Partial<MockUser> = {}): MockUser {
+  return {
+    id: 'user-123',
+    email: 'test@example.com',
+    name: 'Test User',
+    avatarUrl: null,
+    role: 'user',
+    passwordHash: 'stored-hash',
+    emailVerified: true,
+    emailVerifiedAt: new Date(),
+    lockedUntil: null,
+    failedLoginAttempts: 0,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    version: 1,
+    ...overrides,
+  };
+}
+
 // ============================================================================
 // Tests: Account Lockout Expiration
 // ============================================================================
@@ -257,20 +292,7 @@ describe('Account Lockout Expiration', () => {
     const email = 'test@example.com';
     const password = 'correct-password';
 
-    const mockUser = {
-      id: 'user-123',
-      email,
-      name: 'Test User',
-      role: 'user' as const,
-      passwordHash: 'stored-hash',
-      emailVerified: true,
-      emailVerifiedAt: new Date(),
-      lockedUntil: null,
-      failedLoginAttempts: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      version: 0,
-    };
+    const mockUser = createMockUser({ email });
 
     // First attempt: account is locked
     vi.mocked(isAccountLocked).mockResolvedValueOnce(true);
@@ -364,20 +386,7 @@ describe('Parallel Login Requests', () => {
     const email = 'test@example.com';
     const password = 'correct-password';
 
-    const mockUser = {
-      id: 'user-123',
-      email,
-      name: 'Test User',
-      role: 'user' as const,
-      passwordHash: 'stored-hash',
-      emailVerified: true,
-      emailVerifiedAt: new Date(),
-      lockedUntil: null,
-      failedLoginAttempts: 0,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      version: 0,
-    };
+    const mockUser = createMockUser({ email });
 
     vi.mocked(isAccountLocked).mockResolvedValue(false);
     vi.mocked(applyProgressiveDelay).mockResolvedValue(undefined);

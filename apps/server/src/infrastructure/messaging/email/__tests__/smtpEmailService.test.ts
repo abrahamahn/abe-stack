@@ -31,11 +31,14 @@ function createMockEmailConfig(): EmailConfig {
         user: 'test@example.com',
         pass: 'test-password',
       },
+      connectionTimeout: 30000,
+      socketTimeout: 30000,
     },
     from: {
       name: 'Test App',
       address: 'noreply@example.com',
     },
+    replyTo: 'noreply@example.com',
   };
 }
 

@@ -3,6 +3,8 @@ import { Button, Input, Link, PasswordInput, Text } from '@abe-stack/ui';
 import { useResendCooldown } from '@auth/hooks';
 import { useState } from 'react';
 
+import { OAuthButtons } from './OAuthButtons';
+
 import type { AuthMode } from './AuthForms';
 import type { RegisterRequest, RegisterResponse, ResendVerificationRequest } from '@abe-stack/core';
 import type { ChangeEvent, ReactElement } from 'react';
@@ -147,6 +149,8 @@ export function RegisterForm({
           <h2 className="auth-form-title">Create account</h2>
           <p className="auth-form-subtitle">Sign up for a new account</p>
         </div>
+
+        <OAuthButtons mode="register" disabled={isLoading} />
 
         <form
           onSubmit={(e) => {

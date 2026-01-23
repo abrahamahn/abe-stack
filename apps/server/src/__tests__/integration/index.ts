@@ -11,7 +11,7 @@ export {
   createMockDb,
   createMockEmailService,
   createMockStorageProvider,
-  createTestConfig,
+  createTest,
   createTestServer,
   createTestUser,
   createUnverifiedUser,

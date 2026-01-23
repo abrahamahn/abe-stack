@@ -14,6 +14,14 @@ type AvatarProps = ComponentPropsWithoutRef<'div'> & {
   fallback?: string;
 };
 
+/**
+ * A component for displaying user avatars with support for images and text fallbacks.
+ *
+ * @example
+ * ```tsx
+ * <Avatar src="/avatar.jpg" alt="John Doe" fallback="JD" />
+ * ```
+ */
 export const Avatar = forwardRef<HTMLDivElement, AvatarProps>((props, ref) => {
   const { src, alt, fallback, className, ...rest } = props;
 

@@ -9,6 +9,10 @@ export type {
   ApiClientOptions,
   AuthResponse,
   LoginRequest,
+  OAuthConnectionsResponse,
+  OAuthEnabledProvidersResponse,
+  OAuthProvider,
+  OAuthUnlinkResponse,
   RegisterRequest,
   User,
 } from './api';
@@ -268,3 +272,12 @@ export type {
   AdminBillingClientConfig,
   AdminPlansState,
 } from './billing';
+
+// OAuth
+export {
+  getOAuthLoginUrl,
+  oauthQueryKeys,
+  useEnabledOAuthProviders,
+  useOAuthConnections,
+} from './oauth';
+export type { EnabledOAuthProvidersState, OAuthConnectionsState } from './oauth';

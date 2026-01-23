@@ -45,7 +45,7 @@ export function JobMonitorPage(): JSX.Element {
     await retryJob(jobId);
     // Refetch the job details if it's the selected job
     if (jobId === selectedJobId) {
-      jobDetails.refetch();
+      void jobDetails.refetch();
     }
   };
 
@@ -53,7 +53,7 @@ export function JobMonitorPage(): JSX.Element {
     await cancelJob(jobId);
     // Refetch the job details if it's the selected job
     if (jobId === selectedJobId) {
-      jobDetails.refetch();
+      void jobDetails.refetch();
     }
   };
 

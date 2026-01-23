@@ -5,13 +5,29 @@ import '../styles/elements.css';
 import type { ReactNode, CSSProperties, ReactElement } from 'react';
 
 export type BoxProps = {
+  /** Content to render inside the box */
   children?: ReactNode;
+  /** Additional inline styles (merged with layout styles) */
   style?: CSSProperties;
+  /** CSS class name for custom styling */
   className?: string;
+  /** Padding value (CSS value or number for pixels) */
   padding?: number | string;
+  /** Flex direction for child layout */
   flexDirection?: 'row' | 'column';
 };
 
+/**
+ * A flexible container component for creating simple flex-based layouts.
+ *
+ * @example
+ * ```tsx
+ * <Box flexDirection="row" padding={16}>
+ *   <div>Item 1</div>
+ *   <div>Item 2</div>
+ * </Box>
+ * ```
+ */
 export const Box = ({
   children,
   style,

@@ -153,7 +153,7 @@ export const PricingTable = forwardRef<HTMLDivElement, PricingTableProps>(
                 'pricing-table__toggle-button',
                 selectedInterval === 'month' && 'pricing-table__toggle-button--active',
               )}
-              onClick={() => setSelectedInterval('month')}
+              onClick={() => { setSelectedInterval('month'); }}
             >
               Monthly
             </button>
@@ -163,7 +163,7 @@ export const PricingTable = forwardRef<HTMLDivElement, PricingTableProps>(
                 'pricing-table__toggle-button',
                 selectedInterval === 'year' && 'pricing-table__toggle-button--active',
               )}
-              onClick={() => setSelectedInterval('year')}
+              onClick={() => { setSelectedInterval('year'); }}
             >
               Yearly
               {yearlySavings !== null && (
@@ -176,7 +176,7 @@ export const PricingTable = forwardRef<HTMLDivElement, PricingTableProps>(
         <div
           className={cn(
             'pricing-table__grid',
-            `pricing-table__grid--${filteredPlans.length}`,
+            `pricing-table__grid--${String(filteredPlans.length)}`,
           )}
         >
           {filteredPlans.map((plan) => {

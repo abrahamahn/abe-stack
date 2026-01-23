@@ -51,7 +51,7 @@ export class PlanHasActiveSubscriptionsError extends ConflictError {
 export class CannotDeactivatePlanWithActiveSubscriptionsError extends BadRequestError {
   constructor(planId: string, activeCount: number) {
     super(
-      `Cannot deactivate plan ${planId}: ${activeCount} active subscription(s) exist`,
+      `Cannot deactivate plan ${planId}: ${String(activeCount)} active subscription(s) exist`,
       'CANNOT_DEACTIVATE_PLAN_WITH_SUBSCRIPTIONS',
     );
   }

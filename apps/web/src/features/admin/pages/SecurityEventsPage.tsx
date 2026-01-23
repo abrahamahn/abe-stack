@@ -83,10 +83,10 @@ export function SecurityEventsPage(): JSX.Element {
                 </option>
               ))}
             </Select>
-            <Button variant="secondary" onClick={() => refetchEvents()}>
+            <Button variant="secondary" onClick={() => { void refetchEvents(); }}>
               Refresh
             </Button>
-            <Button onClick={() => setIsExportDialogOpen(true)}>
+            <Button onClick={() => { setIsExportDialogOpen(true); }}>
               Export
             </Button>
           </div>
@@ -99,7 +99,7 @@ export function SecurityEventsPage(): JSX.Element {
         <div className="flex items-center justify-between">
           <Button
             variant="secondary"
-            onClick={() => setShowFilters(!showFilters)}
+            onClick={() => { setShowFilters(!showFilters); }}
           >
             {showFilters ? 'Hide Filters' : 'Show Filters'}
           </Button>
@@ -126,7 +126,7 @@ export function SecurityEventsPage(): JSX.Element {
         {/* Export Dialog */}
         <ExportDialog
           isOpen={isExportDialogOpen}
-          onClose={() => setIsExportDialogOpen(false)}
+          onClose={() => { setIsExportDialogOpen(false); }}
           filter={filter}
         />
       </div>

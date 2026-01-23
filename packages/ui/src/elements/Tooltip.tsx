@@ -5,11 +5,24 @@ import '../styles/elements.css';
 type Placement = 'top' | 'bottom' | 'left' | 'right';
 
 type TooltipProps = {
+  /** Tooltip content to display */
   content: ReactNode;
+  /** Tooltip position relative to trigger */
   placement?: Placement;
+  /** Trigger element */
   children: ReactNode;
 };
 
+/**
+ * A simple tooltip that displays helpful information on hover.
+ *
+ * @example
+ * ```tsx
+ * <Tooltip content="Helpful info">
+ *   <button>Hover me</button>
+ * </Tooltip>
+ * ```
+ */
 export function Tooltip({ content, placement = 'top', children }: TooltipProps): ReactElement {
   const [open, setOpen] = useState<boolean>(false);
   const timeoutRef = useRef<ReturnType<typeof globalThis.setTimeout> | null>(null);

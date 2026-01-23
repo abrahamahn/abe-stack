@@ -5,7 +5,7 @@
  * Data access layer for magic link authentication tokens.
  */
 
-import { and, eq, gt, isNull, lt, select, insert, update, deleteFrom } from '../builder';
+import { and, eq, gt, isNull, lt, select, insert, update, deleteFrom, raw } from '../builder';
 import {
   MAGIC_LINK_TOKEN_COLUMNS,
   MAGIC_LINK_TOKENS_TABLE,
@@ -130,7 +130,8 @@ export function createMagicLinkTokenRepository(db: RawDb): MagicLinkTokenReposit
     async countRecentByEmail(email: string, since: Date): Promise<number> {
       const result = await db.queryOne<{ count: string }>(
         select(MAGIC_LINK_TOKENS_TABLE)
-          .columns('COUNT(*) as count')
+          .columns()
+          .column(raw('COUNT(*)'), 'count')
           .where(and(eq('email', email), gt('created_at', since)))
           .toSql()
       );
@@ -140,7 +141,8 @@ export function createMagicLinkTokenRepository(db: RawDb): MagicLinkTokenReposit
     async countRecentByIp(ipAddress: string, since: Date): Promise<number> {
       const result = await db.queryOne<{ count: string }>(
         select(MAGIC_LINK_TOKENS_TABLE)
-          .columns('COUNT(*) as count')
+          .columns()
+          .column(raw('COUNT(*)'), 'count')
           .where(and(eq('ip_address', ipAddress), gt('created_at', since)))
           .toSql()
       );

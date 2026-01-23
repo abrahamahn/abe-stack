@@ -1,39 +1,161 @@
 // apps/web/src/features/auth/utils/__tests__/createFormHandler.test.ts
-import {
-  createFormHandler as uiCreateFormHandler,
-  type FormHandlerOptions as UIFormHandlerOptions,
-} from '@abe-stack/ui';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, test, vi, beforeEach } from 'vitest';
+import type { Mock } from 'vitest';
 
 import { createFormHandler } from '../createFormHandler';
 
-import type { FormHandlerOptions } from '../createFormHandler';
-
 describe('createFormHandler', () => {
-  it('is a re-export of createFormHandler from @abe-stack/ui', () => {
-    expect(createFormHandler).toBe(uiCreateFormHandler);
+  let mockSubmitFn: Mock;
+  let mockSetErrors: Mock;
+  let mockSetIsSubmitting: Mock;
+
+  beforeEach(() => {
+    mockSubmitFn = vi.fn();
+    mockSetErrors = vi.fn();
+    mockSetIsSubmitting = vi.fn();
   });
 
-  it('has the expected function signature', () => {
-    expect(typeof createFormHandler).toBe('function');
-  });
-});
+  const buildHandler = () =>
+    createFormHandler(mockSetIsSubmitting, mockSetErrors)(mockSubmitFn);
 
-describe('FormHandlerOptions type', () => {
-  it('is compatible with FormHandlerOptions from @abe-stack/ui', () => {
-    // Type-level test: types should be compatible
-    const options: UIFormHandlerOptions = {
-      onStart: () => undefined,
-      onSuccess: () => undefined,
-      onError: (_error: Error) => undefined,
-      onFinally: () => undefined,
+  test('should create a form handler that calls submit function', async () => {
+    const mockData = { email: 'test@example.com', password: 'password123' };
+    mockSubmitFn.mockResolvedValue({ success: true });
+
+    const formHandler = buildHandler();
+
+    await formHandler(mockData);
+
+    expect(mockSetIsSubmitting).toHaveBeenCalledWith(true);
+    expect(mockSubmitFn).toHaveBeenCalledWith(mockData);
+    expect(mockSetIsSubmitting).toHaveBeenCalledWith(false);
+  });
+
+  test('should handle successful form submission', async () => {
+    const mockData = { email: 'test@example.com', password: 'password123' };
+    const mockResult = { success: true, user: { id: 'user-123' } };
+    mockSubmitFn.mockResolvedValue(mockResult);
+
+    const formHandler = buildHandler();
+
+    const result = await formHandler(mockData);
+
+    expect(mockSetIsSubmitting).toHaveBeenNthCalledWith(1, true);
+    expect(mockSubmitFn).toHaveBeenCalledWith(mockData);
+    expect(mockSetIsSubmitting).toHaveBeenNthCalledWith(2, false);
+    expect(result).toEqual(mockResult);
+  });
+
+  test('should handle form submission errors', async () => {
+    const mockData = { email: 'test@example.com', password: 'password123' };
+    const mockError = new Error('Invalid credentials');
+    mockSubmitFn.mockRejectedValue(mockError);
+
+    const formHandler = buildHandler();
+
+    await expect(formHandler(mockData)).rejects.toThrow('Invalid credentials');
+
+    expect(mockSetIsSubmitting).toHaveBeenNthCalledWith(1, true);
+    expect(mockSubmitFn).toHaveBeenCalledWith(mockData);
+    expect(mockSetErrors).toHaveBeenCalledWith('Invalid credentials');
+    expect(mockSetIsSubmitting).toHaveBeenNthCalledWith(2, false);
+  });
+
+  test('should handle non-error rejections', async () => {
+    const mockData = { email: 'test@example.com', password: 'password123' };
+    const validationError = {
+      message: 'Validation failed',
+      details: {
+        email: 'Invalid email format',
+        password: 'Password too weak',
+      },
     };
+    mockSubmitFn.mockRejectedValue(validationError);
 
-    // This assignment should compile without error
-    const localOptions: FormHandlerOptions = options;
-    const backToUI: UIFormHandlerOptions = localOptions;
+    const formHandler = buildHandler();
 
-    expect(localOptions).toEqual(options);
-    expect(backToUI).toEqual(localOptions);
+    await expect(formHandler(mockData)).rejects.toEqual(validationError);
+
+    expect(mockSetIsSubmitting).toHaveBeenNthCalledWith(1, true);
+    expect(mockSubmitFn).toHaveBeenCalledWith(mockData);
+    expect(mockSetErrors).toHaveBeenCalledWith('An error occurred');
+    expect(mockSetIsSubmitting).toHaveBeenNthCalledWith(2, false);
+  });
+
+  test('should clear errors before submission', async () => {
+    const mockData = { email: 'test@example.com', password: 'password123' };
+    mockSubmitFn.mockResolvedValue({ success: true });
+
+    const formHandler = buildHandler();
+
+    await formHandler(mockData);
+
+    expect(mockSetErrors).toHaveBeenCalledWith(null);
+  });
+
+  test('should handle empty data submission', async () => {
+    const mockData: Record<string, never> = {};
+    mockSubmitFn.mockResolvedValue({ success: true });
+
+    const formHandler = buildHandler();
+
+    await formHandler(mockData);
+
+    expect(mockSetIsSubmitting).toHaveBeenNthCalledWith(1, true);
+    expect(mockSubmitFn).toHaveBeenCalledWith(mockData);
+    expect(mockSetIsSubmitting).toHaveBeenNthCalledWith(2, false);
+  });
+
+  test('should handle null data submission', async () => {
+    const mockData: null = null;
+    mockSubmitFn.mockResolvedValue({ success: true });
+
+    const formHandler = buildHandler();
+
+    await formHandler(mockData);
+
+    expect(mockSetIsSubmitting).toHaveBeenNthCalledWith(1, true);
+    expect(mockSubmitFn).toHaveBeenCalledWith(null);
+    expect(mockSetIsSubmitting).toHaveBeenNthCalledWith(2, false);
+  });
+
+  test('should maintain correct submission state sequence', async () => {
+    const mockData = { email: 'test@example.com' };
+    mockSubmitFn.mockResolvedValue({ success: true });
+
+    const formHandler = buildHandler();
+
+    // Spy on the sequence of calls
+    const sequence: string[] = [];
+    mockSetIsSubmitting.mockImplementation((state: boolean) => {
+      sequence.push(state ? 'start' : 'end');
+    });
+
+    await formHandler(mockData);
+
+    expect(sequence).toEqual(['start', 'end']);
+  });
+
+  test('should handle concurrent submissions gracefully', async () => {
+    const mockData1 = { email: 'test1@example.com' };
+    const mockData2 = { email: 'test2@example.com' };
+
+    // Mock a slow submission
+    mockSubmitFn.mockImplementation((data: { email: string }) =>
+      new Promise((resolve) => {
+        setTimeout(() => resolve({ success: true, data }), 10);
+      }),
+    );
+
+    const formHandler = buildHandler();
+
+    // Trigger two submissions
+    const promise1 = formHandler(mockData1);
+    const promise2 = formHandler(mockData2);
+
+    await Promise.all([promise1, promise2]);
+
+    // Should have called setIsSubmitting multiple times
+    expect(mockSetIsSubmitting).toHaveBeenCalledTimes(4); // start, end, start, end
   });
 });

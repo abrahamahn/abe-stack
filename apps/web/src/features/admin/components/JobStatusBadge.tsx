@@ -22,7 +22,10 @@ export interface JobStatusBadgeProps {
 // Status Configuration
 // ============================================================================
 
-const STATUS_CONFIG: Record<JobStatus, { tone: 'info' | 'success' | 'danger' | 'warning'; label: string }> = {
+const STATUS_CONFIG: Record<
+  JobStatus,
+  { tone: 'info' | 'success' | 'danger' | 'warning'; label: string }
+> = {
   pending: { tone: 'info', label: 'Pending' },
   processing: { tone: 'warning', label: 'Processing' },
   completed: { tone: 'success', label: 'Completed' },
@@ -36,7 +39,7 @@ const STATUS_CONFIG: Record<JobStatus, { tone: 'info' | 'success' | 'danger' | '
 // ============================================================================
 
 export function JobStatusBadge({ status }: JobStatusBadgeProps): JSX.Element {
-  const config = STATUS_CONFIG[status] ?? { tone: 'info' as const, label: status };
+  const config = STATUS_CONFIG[status];
 
   return <Badge tone={config.tone}>{config.label}</Badge>;
 }

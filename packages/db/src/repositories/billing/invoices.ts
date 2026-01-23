@@ -147,7 +147,12 @@ export function createInvoiceRepository(db: RawDb): InvoiceRepository {
       let query = select(INVOICES_TABLE);
 
       if (conditions.length > 0) {
-        const whereCondition = conditions.length === 1 ? conditions[0]! : and(...conditions);
+        const [firstCondition, ...restConditions] = conditions;
+        if (!firstCondition) {
+          throw new Error('Failed to build invoice query conditions');
+        }
+        const whereCondition =
+          restConditions.length === 0 ? firstCondition : and(firstCondition, ...restConditions);
         query = query.where(whereCondition);
       }
 

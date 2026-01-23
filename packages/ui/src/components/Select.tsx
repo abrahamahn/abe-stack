@@ -19,14 +19,29 @@ type SelectProps = Omit<
   ComponentPropsWithoutRef<'button'>,
   'value' | 'defaultValue' | 'onChange'
 > & {
+  /** Controlled selected value */
   value?: string;
+  /** Initially selected value for uncontrolled usage */
   defaultValue?: string;
+  /** Callback when selected value changes */
   onChange?: (value: string) => void;
+  /** Option elements */
   children: ReactNode;
 };
 
 type OptionShape = { value: string; label: ReactNode; disabled?: boolean };
 
+/**
+ * A custom select dropdown with keyboard navigation.
+ *
+ * @example
+ * ```tsx
+ * <Select value={selected} onChange={setSelected}>
+ *   <option value="a">Option A</option>
+ *   <option value="b">Option B</option>
+ * </Select>
+ * ```
+ */
 export const Select = forwardRef<HTMLDivElement, SelectProps>((props, ref) => {
   const {
     className = '',

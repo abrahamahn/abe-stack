@@ -13,10 +13,20 @@ import '../styles/elements.css';
 type HeadingSize = 'xl' | 'lg' | 'md' | 'sm';
 
 type HeadingProps = ComponentPropsWithoutRef<'h2'> & {
+  /** The HTML element to render as (typically h1-h6) */
   as?: ElementType;
+  /** Visual size variant independent of semantic level */
   size?: HeadingSize;
 };
 
+/**
+ * A polymorphic heading component with consistent sizing independent of HTML level.
+ *
+ * @example
+ * ```tsx
+ * <Heading as="h1" size="xl">Page Title</Heading>
+ * ```
+ */
 export const Heading = forwardRef<HTMLElement, HeadingProps>((props, ref): ReactElement => {
   const { as = 'h2', size = 'lg', className, ...rest } = props;
   const Component: ElementType = as;

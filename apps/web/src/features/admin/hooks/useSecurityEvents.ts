@@ -34,7 +34,7 @@ export interface UseSecurityEventsResult {
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
-  refetch: () => void;
+  refetch: () => Promise<void>;
   setFilter: (filter: SecurityEventsFilter) => void;
   setPage: (page: number) => void;
   filter: SecurityEventsFilter;
@@ -45,9 +45,7 @@ export interface UseSecurityEventsResult {
 // Hook
 // ============================================================================
 
-export function useSecurityEvents(
-  options: UseSecurityEventsOptions = {},
-): UseSecurityEventsResult {
+export function useSecurityEvents(options: UseSecurityEventsOptions = {}): UseSecurityEventsResult {
   const { config } = useClientEnvironment();
   const [filter, setFilter] = useState<SecurityEventsFilter>(options.filter ?? {});
   const [pagination, setPagination] = useState<PaginationOptions>({
@@ -66,10 +64,7 @@ export function useSecurityEvents(
     [config.apiUrl],
   );
 
-  const queryKey = useMemo(
-    () => ['securityEvents', filter, pagination],
-    [filter, pagination],
-  );
+  const queryKey = useMemo(() => ['securityEvents', filter, pagination], [filter, pagination]);
 
   const queryResult: UseQueryResult<SecurityEventsListResponse> = useQuery({
     queryKey,

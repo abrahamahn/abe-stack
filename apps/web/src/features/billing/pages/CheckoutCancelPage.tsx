@@ -28,10 +28,10 @@ export function CheckoutCancelPage(): ReactElement {
             you&apos;re ready.
           </p>
           <div className="checkout-result-page__actions">
-            <Button onClick={() => navigate('/pricing')}>
+            <Button onClick={() => { navigate('/pricing'); }}>
               Return to Pricing
             </Button>
-            <Button variant="text" onClick={() => navigate('/')}>
+            <Button variant="text" onClick={() => { navigate('/'); }}>
               Go to Home
             </Button>
           </div>

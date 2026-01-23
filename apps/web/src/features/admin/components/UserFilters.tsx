@@ -93,9 +93,7 @@ export function UserFilters({
     });
   }, [onFiltersChange]);
 
-  const hasActiveFilters = Boolean(
-    filters.search || filters.role || filters.status,
-  );
+  const hasActiveFilters = Boolean(filters.search || filters.role || filters.status);
 
   return (
     <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -105,7 +103,7 @@ export function UserFilters({
           type="text"
           placeholder="Search by email or name..."
           value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
+          onChange={(e) => { setSearchValue(e.target.value); }}
           className="flex-1"
           disabled={isLoading}
         />
@@ -118,7 +116,10 @@ export function UserFilters({
       <div className="flex flex-wrap gap-4 items-center">
         {/* Role Filter */}
         <div className="flex items-center gap-2">
-          <label htmlFor="role-filter" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label
+            htmlFor="role-filter"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
             Role:
           </label>
           <Select
@@ -137,7 +138,10 @@ export function UserFilters({
 
         {/* Status Filter */}
         <div className="flex items-center gap-2">
-          <label htmlFor="status-filter" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label
+            htmlFor="status-filter"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
             Status:
           </label>
           <Select
@@ -156,7 +160,10 @@ export function UserFilters({
 
         {/* Sort */}
         <div className="flex items-center gap-2">
-          <label htmlFor="sort-filter" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label
+            htmlFor="sort-filter"
+            className="text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
             Sort by:
           </label>
           <Select

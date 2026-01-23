@@ -3,6 +3,7 @@ import { toastStore } from '@abe-stack/stores';
 import { AuthLayout, useFormState, useNavigate, useSearchParams } from '@abe-stack/ui';
 import { AuthForm, type AuthMode } from '@auth/components/AuthForms';
 import { useAuth } from '@auth/hooks';
+import { getPostLoginRedirect } from '@auth/utils';
 import { useEffect, useState } from 'react';
 
 import type { AuthFormProps } from '@auth/components/AuthForms';
@@ -14,7 +15,7 @@ export function AuthPage(): ReactElement {
   const searchParamsResult = useSearchParams();
   const searchParams: URLSearchParams = searchParamsResult[0];
   const navigate = useNavigate();
-  const { login, register, forgotPassword, resetPassword, resendVerification, isAuthenticated } =
+  const { login, register, forgotPassword, resetPassword, resendVerification, isAuthenticated, user } =
     useAuth();
   const { isLoading, error, setError, wrapHandler } = useFormState();
 
@@ -22,9 +23,9 @@ export function AuthPage(): ReactElement {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      navigate(getPostLoginRedirect(user));
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, user]);
 
   useEffect(() => {
     const modeParam: string | null = searchParams.get('mode');

@@ -5,18 +5,36 @@ import { type ReactElement, type ReactNode } from 'react';
 import '../styles/components.css';
 
 type AccordionItem = {
+  /** Unique identifier for the item */
   id: string;
+  /** Accordion header content */
   title: ReactNode;
+  /** Accordion panel content */
   content: ReactNode;
 };
 
 type AccordionProps = {
+  /** Array of accordion items */
   items: AccordionItem[];
+  /** Controlled currently open item ID */
   value?: string | null;
+  /** Initially open item ID for uncontrolled usage */
   defaultValue?: string | null;
+  /** Callback when opened item changes */
   onChange?: (id: string | null) => void;
 };
 
+/**
+ * An accessible accordion component with single-expansion pattern.
+ *
+ * @example
+ * ```tsx
+ * <Accordion items={[
+ *   { id: '1', title: 'Section 1', content: 'Content 1' },
+ *   { id: '2', title: 'Section 2', content: 'Content 2' },
+ * ]} />
+ * ```
+ */
 export function Accordion({
   items,
   value,

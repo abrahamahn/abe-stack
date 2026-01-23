@@ -36,6 +36,7 @@ export type User = {
   id: string;
   email: string;
   name: string | null;
+  avatarUrl: string | null;
   role: UserRole;
   createdAt: string;
 };
@@ -52,6 +53,24 @@ export type AuthState = {
 
 // Maximum backoff delay for token refresh (5 minutes)
 const MAX_REFRESH_BACKOFF_MS = 5 * 60 * 1000;
+const REQUEST_TIMEOUT_MS = 8000;
+
+const withTimeout = async <T>(promise: Promise<T>, label: string): Promise<T> =>
+  new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`${label} timed out after ${String(REQUEST_TIMEOUT_MS)}ms`));
+    }, REQUEST_TIMEOUT_MS);
+
+    promise
+      .then((value) => {
+        clearTimeout(timer);
+        resolve(value);
+      })
+      .catch((error: unknown) => {
+        clearTimeout(timer);
+        reject(error instanceof Error ? error : new Error(String(error)));
+      });
+  });
 
 export class AuthService {
   private api: ApiClient;
@@ -208,7 +227,7 @@ export class AuthService {
   /** Perform the actual token refresh */
   private async performRefresh(): Promise<boolean> {
     try {
-      const response = await this.api.refresh();
+      const response = await withTimeout(this.api.refresh(), 'Token refresh');
       this.tokenStore.set(response.token);
       this.resetRefreshBackoff();
       this.notifyListeners();
@@ -244,7 +263,7 @@ export class AuthService {
     this.notifyListeners();
 
     try {
-      const user = await this.api.getCurrentUser();
+      const user = await withTimeout(this.api.getCurrentUser(), 'Fetch current user');
       this.user = user;
       this.isLoadingUser = false;
       this.notifyListeners();
@@ -254,7 +273,7 @@ export class AuthService {
       const refreshed = await this.refreshToken();
       if (refreshed) {
         try {
-          const user = await this.api.getCurrentUser();
+          const user = await withTimeout(this.api.getCurrentUser(), 'Fetch current user');
           this.user = user;
           this.isLoadingUser = false;
           this.notifyListeners();

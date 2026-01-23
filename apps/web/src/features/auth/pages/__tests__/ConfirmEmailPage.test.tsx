@@ -105,7 +105,7 @@ describe('ConfirmEmailPage', () => {
       renderConfirmEmailPage();
 
       await waitFor(() => {
-        expect(screen.getByText(/redirecting to dashboard/i)).toBeInTheDocument();
+        expect(screen.getByText(/redirecting to your account/i)).toBeInTheDocument();
       });
     });
 
@@ -121,7 +121,7 @@ describe('ConfirmEmailPage', () => {
       });
 
       // Verify navigation was called
-      expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
+      expect(mockNavigate).toHaveBeenCalledWith('/settings');
       vi.useRealTimers();
     });
 

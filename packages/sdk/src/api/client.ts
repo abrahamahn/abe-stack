@@ -13,6 +13,10 @@ import type {
   ForgotPasswordResponse,
   LoginRequest,
   LogoutResponse,
+  OAuthConnectionsResponse,
+  OAuthEnabledProvidersResponse,
+  OAuthProvider,
+  OAuthUnlinkResponse,
   RefreshResponse,
   RegisterRequest,
   RegisterResponse,
@@ -39,6 +43,12 @@ export interface ApiClient {
   resetPassword: (data: ResetPasswordRequest) => Promise<ResetPasswordResponse>;
   verifyEmail: (data: EmailVerificationRequest) => Promise<EmailVerificationResponse>;
   resendVerification: (data: ResendVerificationRequest) => Promise<ResendVerificationResponse>;
+  // OAuth methods
+  getEnabledOAuthProviders: () => Promise<OAuthEnabledProvidersResponse>;
+  getOAuthConnections: () => Promise<OAuthConnectionsResponse>;
+  unlinkOAuthProvider: (provider: OAuthProvider) => Promise<OAuthUnlinkResponse>;
+  getOAuthLoginUrl: (provider: OAuthProvider) => string;
+  getOAuthLinkUrl: (provider: OAuthProvider) => string;
 }
 
 const API_PREFIX = '/api';
@@ -131,6 +141,26 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
         method: 'POST',
         body: JSON.stringify(data),
       });
+    },
+    // OAuth methods
+    async getEnabledOAuthProviders(): Promise<OAuthEnabledProvidersResponse> {
+      return request<OAuthEnabledProvidersResponse>('/auth/oauth/providers');
+    },
+    async getOAuthConnections(): Promise<OAuthConnectionsResponse> {
+      return request<OAuthConnectionsResponse>('/auth/oauth/connections');
+    },
+    async unlinkOAuthProvider(provider: OAuthProvider): Promise<OAuthUnlinkResponse> {
+      return request<OAuthUnlinkResponse>(`/auth/oauth/${provider}/unlink`, {
+        method: 'DELETE',
+      });
+    },
+    getOAuthLoginUrl(provider: OAuthProvider): string {
+      // This returns a URL the browser should navigate to (redirect)
+      return `${baseUrl}${API_PREFIX}/auth/oauth/${provider}`;
+    },
+    getOAuthLinkUrl(provider: OAuthProvider): string {
+      // This returns the link initiation endpoint - must be called with auth
+      return `${baseUrl}${API_PREFIX}/auth/oauth/${provider}/link`;
     },
   };
 }

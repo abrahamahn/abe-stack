@@ -4,6 +4,14 @@ import '../styles/elements.css';
 
 type MenuItemProps = ComponentPropsWithoutRef<'button'>;
 
+/**
+ * A styled button for menu items in dropdowns and navigation menus.
+ *
+ * @example
+ * ```tsx
+ * <MenuItem onClick={handleEdit}>Edit</MenuItem>
+ * ```
+ */
 export const MenuItem = forwardRef<HTMLButtonElement, MenuItemProps>((props, ref) => {
   const { className = '', type = 'button', ...rest } = props;
   return <button ref={ref} type={type} className={`menu-item ${className}`.trim()} {...rest} />;

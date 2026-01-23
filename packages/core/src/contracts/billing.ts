@@ -100,7 +100,7 @@ export const planSchema: Schema<Plan> = createSchema((data: unknown) => {
   return {
     id: obj.id,
     name: obj.name,
-    description: obj.description as string | null,
+    description: obj.description,
     interval: obj.interval as PlanInterval,
     priceInCents: obj.priceInCents,
     currency: obj.currency,
@@ -187,8 +187,8 @@ export const subscriptionSchema: Schema<Subscription> = createSchema((data: unkn
     currentPeriodStart: obj.currentPeriodStart,
     currentPeriodEnd: obj.currentPeriodEnd,
     cancelAtPeriodEnd: obj.cancelAtPeriodEnd,
-    canceledAt: obj.canceledAt as string | null,
-    trialEnd: obj.trialEnd as string | null,
+    canceledAt: obj.canceledAt,
+    trialEnd: obj.trialEnd,
     createdAt: obj.createdAt,
   };
 });
@@ -357,8 +357,8 @@ export const invoiceSchema: Schema<Invoice> = createSchema((data: unknown) => {
     currency: obj.currency,
     periodStart: obj.periodStart,
     periodEnd: obj.periodEnd,
-    paidAt: obj.paidAt as string | null,
-    invoicePdfUrl: obj.invoicePdfUrl as string | null,
+    paidAt: obj.paidAt,
+    invoicePdfUrl: obj.invoicePdfUrl,
     createdAt: obj.createdAt,
   };
 });
@@ -540,9 +540,9 @@ export const adminPlanSchema: Schema<AdminPlan> = createSchema((data: unknown) =
 
   return {
     ...basePlan,
-    stripePriceId: obj.stripePriceId as string | null,
-    stripeProductId: obj.stripeProductId as string | null,
-    paypalPlanId: obj.paypalPlanId as string | null,
+    stripePriceId: obj.stripePriceId,
+    stripeProductId: obj.stripeProductId,
+    paypalPlanId: obj.paypalPlanId,
     createdAt: obj.createdAt,
     updatedAt: obj.updatedAt,
   };
@@ -631,7 +631,13 @@ export const updatePlanRequestSchema: Schema<UpdatePlanRequest> = createSchema((
     result.name = obj.name.trim();
   }
   if (obj.description !== undefined) {
-    result.description = obj.description === null ? null : String(obj.description);
+    if (obj.description === null) {
+      result.description = null;
+    } else if (typeof obj.description === 'string') {
+      result.description = obj.description;
+    } else {
+      throw new Error('Invalid plan description');
+    }
   }
   if (obj.interval !== undefined) {
     if (!PLAN_INTERVALS.includes(obj.interval as PlanInterval)) {

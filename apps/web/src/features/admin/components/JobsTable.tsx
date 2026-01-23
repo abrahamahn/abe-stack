@@ -118,7 +118,9 @@ export function JobsTable({
                 <JobRow
                   key={job.id}
                   job={job}
-                  onClick={() => onJobClick(job)}
+                  onClick={() => {
+                    onJobClick(job);
+                  }}
                   onRetry={onRetry}
                   onCancel={onCancel}
                 />
@@ -129,11 +131,7 @@ export function JobsTable({
           {/* Pagination */}
           {data.totalPages > 1 && (
             <div className="flex justify-center pt-4">
-              <Pagination
-                value={data.page}
-                totalPages={data.totalPages}
-                onChange={onPageChange}
-              />
+              <Pagination value={data.page} totalPages={data.totalPages} onChange={onPageChange} />
             </div>
           )}
         </>
@@ -180,7 +178,11 @@ function JobRow({ job, onClick, onRetry, onCancel }: JobRowProps): JSX.Element {
           {formatDate(job.createdAt)}
         </Text>
       </TableCell>
-      <TableCell onClick={(e) => e.stopPropagation()}>
+      <TableCell
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
         <div className="flex gap-1">
           {canRetry && (
             <Button

@@ -35,6 +35,7 @@ import {
   type RoutesResponse,
   type StorageProvider,
 } from '@infrastructure/index';
+import { CacheService, createCacheService } from '@/services/cache-service';
 import { registerRoutes } from '@modules/index';
 import { type AppContext, type IServiceContainer } from '@shared/index';
 
@@ -53,6 +54,7 @@ export interface AppOptions {
   repos?: Repositories;
   email?: EmailService;
   storage?: StorageProvider;
+  cache?: CacheService;
 }
 
 export class App implements IServiceContainer {
@@ -65,6 +67,7 @@ export class App implements IServiceContainer {
   readonly email: EmailService;
   readonly storage: StorageProvider;
   readonly pubsub: SubscriptionManager;
+  readonly cache: CacheService;
 
   // Horizontal scaling adapter
   private _pgPubSub: PostgresPubSub | null = null;
@@ -92,6 +95,12 @@ export class App implements IServiceContainer {
     this.repos = options.repos ?? repoCtx.repos;
     this.email = options.email ?? createEmailService(this.config.email);
     this.storage = options.storage ?? createStorage(this.config.storage);
+    this.cache =
+      options.cache ??
+      createCacheService({
+        ttl: this.config.cache.ttl,
+        maxSize: this.config.cache.maxSize,
+      });
 
     // Initialize Pub/Sub with horizontal scaling if connection string is available
     this.pubsub = new SubscriptionManager();
@@ -252,6 +261,7 @@ export class App implements IServiceContainer {
       email: this.email,
       storage: this.storage,
       pubsub: this.pubsub,
+      cache: this.cache,
       log: this._server.log,
     };
   }
@@ -299,11 +309,13 @@ export function createTestApp(
       host: '127.0.0.1',
       port: 0, // Random port
       portFallbacks: [],
-      cors: { origin: '*', credentials: false, methods: ['GET', 'POST'] },
+      cors: { origin: ['*'], credentials: false, methods: ['GET', 'POST'] },
       trustProxy: false,
       logLevel: 'silent',
+      maintenanceMode: false,
       appBaseUrl: 'http://localhost:5173',
       apiBaseUrl: 'http://localhost:0',
+      rateLimit: { windowMs: 60000, max: 1000 },
     },
     database: {
       provider: 'postgresql',
@@ -314,6 +326,7 @@ export function createTestApp(
       password: 'test',
       maxConnections: 1,
       portFallbacks: [],
+      ssl: false,
     },
     auth: {
       strategies: ['local'],
@@ -354,12 +367,57 @@ export function createTestApp(
     },
     email: {
       provider: 'console',
-      smtp: { host: '', port: 587, secure: false, auth: { user: '', pass: '' } },
+      smtp: {
+        host: '',
+        port: 587,
+        secure: false,
+        auth: { user: '', pass: '' },
+        connectionTimeout: 30000,
+        socketTimeout: 30000,
+      },
       from: { name: 'Test', address: 'test@test.com' },
+      replyTo: 'test@test.com',
     },
     storage: {
       provider: 'local',
       rootPath: './test-uploads',
+    },
+    billing: {
+      enabled: false,
+      provider: 'stripe',
+      currency: 'USD',
+      stripe: { secretKey: '', publishableKey: '', webhookSecret: '' },
+      paypal: { clientId: '', clientSecret: '', webhookId: '', sandbox: true },
+      plans: {},
+      urls: {
+        portalReturnUrl: 'http://localhost:5173/settings/billing',
+        checkoutSuccessUrl: 'http://localhost:5173/checkout/success',
+        checkoutCancelUrl: 'http://localhost:5173/checkout/cancel',
+      },
+    },
+    cache: {
+      ttl: 300000,
+      maxSize: 1000,
+      useExternalProvider: false,
+    },
+    queue: {
+      provider: 'local',
+      pollIntervalMs: 1000,
+      concurrency: 1,
+      defaultMaxAttempts: 3,
+      backoffBaseMs: 1000,
+      maxBackoffMs: 30000,
+    },
+    notifications: {
+      credentials: '',
+      projectId: '',
+    },
+    search: {
+      provider: 'sql',
+      config: {
+        defaultPageSize: 20,
+        maxPageSize: 100,
+      },
     },
     ...configOverrides,
   };

@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { S3StorageProvider } from '../s3StorageProvider';
 
-import type { S3StorageConfig } from '@config/storage.config';
+import type { S3StorageConfig } from '@abe-stack/core/contracts/config';
 
 // Use vi.hoisted to ensure mocks are created before vi.mock hoisting
 const { mockSend, MockS3Client, MockPutObjectCommand, mockGetSignedUrl, mockFromEnv } = vi.hoisted(
@@ -53,6 +53,8 @@ describe('S3StorageProvider', () => {
     region: 'us-east-1',
     accessKeyId: 'test-access-key',
     secretAccessKey: 'test-secret-key',
+    forcePathStyle: false,
+    presignExpiresInSeconds: 900,
   };
 
   beforeEach(() => {

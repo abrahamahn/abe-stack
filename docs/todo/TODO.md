@@ -14,99 +14,14 @@
 
 ---
 
-## Priority Zero: Package Reduction (The Notion Path)
-
-> **Goal:** Transition from Product Engineer (gluing libraries) to Systems Engineer (building engines).
-> Stay ultra framework-independent while keeping React + TypeScript.
->
-> **Completed:** Database (drizzle→raw SQL), Push Notifications (removed), Validation (zod→manual), Build Tools (vite-tsconfig-paths removed). See `docs/log/2026-W04.md` for details.
-
-### Packages to Keep (Dangerous to Code Manually)
-
-| Package          | Why Keep                                            |
-| ---------------- | --------------------------------------------------- |
-| `typescript`     | Type safety (non-negotiable)                        |
-| `react`          | UI layer (non-negotiable)                           |
-| `vite` + `turbo` | Build infrastructure                                |
-| `argon2`         | Never code your own password hashing                |
-| `postgres`       | Don't write your own DB driver protocol             |
-| `ws`             | Raw TCP socket management is a rabbit hole          |
-| `fastify`        | Schema validation + performance (industry standard) |
-| `vitest`         | Test runner                                         |
-| `playwright`     | E2E testing                                         |
-
-### New Responsibilities After Cleanup
-
-- [ ] **Manual Sync** - Own how data flows from DB to UI
-- [ ] **Raw Queries** - Own SQL structure and optimization
-
-### Future: Server Mode Flag
-
-Add environment flag to switch between server implementations:
-
-- [ ] Add `SERVER_MODE` env variable: `fastify` | `raw` | `both`
-- [ ] `fastify` (default) - Use Fastify framework only
-- [ ] `raw` - Use raw Node.js HTTP server only (maximum performance, minimal features)
-- [ ] `both` - Run both servers on different ports (for benchmarking)
-
-**Use cases:**
-
-- Production: `fastify` for full features (validation, hooks, plugins)
-- Benchmarking: `both` to compare performance
-- Edge/Lambda: `raw` for minimal cold start (future consideration)
-
----
-
-## Immediate: Code Review
-
-- [ ] Smoke test: Web + Server + Desktop "happy path" on a clean machine (no local dev shortcuts)
-
----
-
-## Completed: PayPal Billing Adapter ✅
-
-> **Note:** Both Stripe and PayPal billing are complete. See `docs/log/2026-W04.md` for implementation details.
-> PayPal provider implements full parity with Stripe: subscriptions, webhooks, checkout flow.
-
-## High Priority: User Profile & Settings UI
-
-**Goal:** eliminate the “settings page tax” for every new app.
-
-### Profile Management
-
-- [ ] Settings page skeleton (tabs: Profile / Security / Sessions / Billing)
-- [ ] Avatar upload integrated with Media pipeline (or lightweight upload in Minimal)
-- [ ] Username/display name + email change flows
-- [ ] Session management:
-  - list active sessions
-  - revoke session
-  - logout-all (use existing logic)
-
-### Security (optional but common)
+## Medium Priority: User Settings (Remaining)
 
 - [ ] 2FA setup UI (TOTP) + recovery codes
-- [ ] Password change UI (with strength guidance)
-- [ ] Device/login history (if you have events already)
-
----
-
-## High Priority: Authentication
-
-### Social/OAuth Providers
-
-- [ ] OAuth connection management UI (frontend) :contentReference[oaicite:7]{index=7}
-- [ ] Provider enable/disable switch per provider (Google/GitHub/Apple) via env flags
-- [ ] Document provider setup + callback URL pitfalls
+- [ ] Email change flow with verification
 
 ---
 
 ## Medium Priority: UI Package
-
-### Demo Performance (Frontend)
-
-- [ ] Individual component lazy loading (currently category-based only) :contentReference[oaicite:8]{index=8}
-- [ ] Progressive loading within categories :contentReference[oaicite:9]{index=9}
-- [ ] Route-based code splitting for demo pages :contentReference[oaicite:10]{index=10}
 
 ### Code Quality (Frontend)
 
@@ -149,7 +64,7 @@ Add environment flag to switch between server implementations:
 
 ---
 
-## Low Priority: Observability
+## Low Priority: Monitoring
 
 - [ ] Prometheus metrics (login attempts, sessions, hash duration, lockouts) :contentReference[oaicite:26]{index=26}
 - [ ] Query performance monitoring :contentReference[oaicite:27]{index=27}
@@ -183,65 +98,6 @@ Add environment flag to switch between server implementations:
   - `ENABLE_DESKTOP`
   - `USE_RAW_SQL` - Toggle between drizzle-orm and raw SQL query builder for A/B testing
 - [ ] Ensure disabling a feature removes runtime wiring (not just dead config)
-
-### 2) “Boilerplate Tax” Strip Plan (explicit)
-
-Create `docs/STRIP_PLAN.md` with the following defaults:
-
-#### A) Tests (reduce brittleness)
-
-- [ ] Introduce test tiers:
-  - `pnpm test` = fast unit + critical integration
-  - `pnpm test:full` = everything (heavy)
-  - `pnpm test:e2e` = Playwright
-- [ ] Strip default boilerplate tests down to **50–100 high-value tests**:
-  - Auth E2E (signup/login/magic link/oauth/logout all)
-  - Core SDK “happy path” integration
-  - Minimal DB persistence + migrations
-- [ ] Move the rest into `tests/templates/` (example patterns users copy)
-- [ ] CI: PRs run fast tests; nightly runs full
-
-#### B) Media processing (opt-in plugin)
-
-- [ ] Minimal profile uses a lightweight upload path (no heavy binaries)
-- [ ] Docs: "Enable Media Plugin" guide + dependency notes
-
-#### C) 5-phase SDK flow (advanced mode)
-
-- [ ] Minimal profile: `createRecordCache` behaves like a standard React Query wrapper
-- [ ] Advanced profile: keep Optimistic → Persist → Sync → Confirm → Reconcile
-- [ ] Provide a “Switch to Advanced Sync Mode” guide
-- [ ] Default templates should not require TransactionQueue/conflict resolution knowledge
-
-#### D) Security hardening defaults (don’t scare new users)
-
-- [ ] Minimal profile defaults:
-  - Argon2id (standard parameters)
-  - Standard CSRF tokens (non-AES complexity)
-- [ ] Advanced security goes to docs:
-  - `docs/security-hardening.md` (dummy hash pool, special CSRF crypto, etc.)
-- [ ] Keep advanced security available as toggles, not hardwired
-
-### 3) Modular boundaries cleanup
-
-- [ ] Move optional features into isolated modules:
-  - `apps/server/src/modules/*` (billing, admin, realtime, push, media)
-- [ ] SDK exports grouped by feature (minimal consumers don’t import everything)
-- [ ] Ensure stubs are not shipped in Minimal (or clearly marked experimental)
-
-### 4) Controlled “Delete list”
-
-- [ ] `docs/STRIP_PLAN.md` lists what can be removed safely in Minimal:
-  - Desktop app
-  - Push notifications
-  - Realtime/offline
-  - Search/filtering
-  - Cache provider
-  - Media plugin
-  - Demo catalogs
-- [ ] Provide “re-enable” instructions for each
-
----
 
 ## Unused Code to Integrate
 
@@ -295,18 +151,6 @@ If no to all three, it goes in `docs/ROADMAP.md`. :contentReference[oaicite:38]{
 - [ ] Presence tracking (online/offline/away, last seen) :contentReference[oaicite:41]{index=41}
 - [ ] Typing indicators via WebSocket events :contentReference[oaicite:42]{index=42}
 
-- **Deferred features:** See `docs/ROADMAP.md` :contentReference[oaicite:43]{index=43}
-- **Legacy migrations:** See `docs/reference/legacy.md`
-- **Security overview:** See `docs/dev/security.md` :contentReference[oaicite:45]{index=45}
-- **SDK features:** See `packages/sdk/README.md` :contentReference[oaicite:46]{index=46}
-- **Core utilities:** See `packages/core/README.md` :contentReference[oaicite:47]{index=47}
-
----
-
-## Final: Post-Trimdown Package Removal
-
-> **Do this LAST** after test trimdown is complete (see "Boilerplate Tax" Strip Plan above).
-
 ### Remove @testing-library
 
 Once unit tests are trimmed to 50-100 high-value tests, evaluate removing `@testing-library/*`:
@@ -325,4 +169,4 @@ Once unit tests are trimmed to 50-100 high-value tests, evaluate removing `@test
 
 ---
 
-_Last Updated: 2026-01-23 (SaaS Billing + Admin Command Center complete - see docs/log/2026-W04.md)_
+_Last Updated: 2026-01-23 (User Profile & Settings UI complete - see docs/log/2026-W04.md)_

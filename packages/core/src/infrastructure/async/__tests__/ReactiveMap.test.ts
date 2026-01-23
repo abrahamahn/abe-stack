@@ -1,488 +1,494 @@
-// packages/core/src/async/__tests__/ReactiveMap.test.ts
-import { describe, expect, it, vi } from 'vitest';
+// packages/core/src/infrastructure/async/__tests__/ReactiveMap.test.ts
+import { describe, expect, test, vi, beforeEach } from 'vitest';
 
 import { ReactiveMap } from '../ReactiveMap';
 
 describe('ReactiveMap', () => {
-  describe('basic operations', () => {
-    it('should get and set values', () => {
-      const map = new ReactiveMap<string, number>();
+  let reactiveMap: ReactiveMap<string, number>;
 
-      map.set('a', 1);
-      map.set('b', 2);
+  beforeEach(() => {
+    reactiveMap = new ReactiveMap<string, number>();
+  });
 
-      expect(map.get('a')).toBe(1);
-      expect(map.get('b')).toBe(2);
-      expect(map.get('c')).toBeUndefined();
+  describe('constructor', () => {
+    test('should initialize an empty map', () => {
+      expect(reactiveMap.size).toBe(0);
+      expect(reactiveMap.keys()).toEqual([]);
+      expect(reactiveMap.values()).toEqual([]);
+      expect(reactiveMap.entries()).toEqual([]);
     });
 
-    it('should check if key exists', () => {
-      const map = new ReactiveMap<string, number>();
+    test('should initialize with initial values', () => {
+      const initialEntries = [['key1', 1], ['key2', 2]] as [string, number][];
+      const map = new ReactiveMap<string, number>(initialEntries);
 
-      map.set('a', 1);
-
-      expect(map.has('a')).toBe(true);
-      expect(map.has('b')).toBe(false);
+      expect(map.size).toBe(2);
+      expect(map.get('key1')).toBe(1);
+      expect(map.get('key2')).toBe(2);
     });
 
-    it('should delete values', () => {
-      const map = new ReactiveMap<string, number>();
-
-      map.set('a', 1);
-      expect(map.has('a')).toBe(true);
-
-      map.delete('a');
-      expect(map.has('a')).toBe(false);
-      expect(map.get('a')).toBeUndefined();
-    });
-
-    it('should clear all values', () => {
-      const map = new ReactiveMap<string, number>();
-
-      map.set('a', 1);
-      map.set('b', 2);
-      map.set('c', 3);
-
-      map.clear();
-
+    test('should handle empty initial array', () => {
+      const map = new ReactiveMap<string, number>([]);
+      
       expect(map.size).toBe(0);
-      expect(map.has('a')).toBe(false);
-      expect(map.has('b')).toBe(false);
-      expect(map.has('c')).toBe(false);
     });
   });
 
-  describe('iteration', () => {
-    it('should return all keys', () => {
-      const map = new ReactiveMap<string, number>();
+  describe('get', () => {
+    test('should return value for existing key', () => {
+      reactiveMap.set('key1', 42);
 
-      map.set('a', 1);
-      map.set('b', 2);
-      map.set('c', 3);
-
-      expect(map.keys()).toEqual(['a', 'b', 'c']);
+      expect(reactiveMap.get('key1')).toBe(42);
     });
 
-    it('should return all values', () => {
-      const map = new ReactiveMap<string, number>();
-
-      map.set('a', 1);
-      map.set('b', 2);
-      map.set('c', 3);
-
-      expect(map.values()).toEqual([1, 2, 3]);
+    test('should return undefined for non-existing key', () => {
+      expect(reactiveMap.get('nonexistent')).toBeUndefined();
     });
 
-    it('should return all entries', () => {
-      const map = new ReactiveMap<string, number>();
+    test('should handle falsy values', () => {
+      const map = new ReactiveMap<string, number | string | null | boolean>();
+      map.set('zero', 0);
+      map.set('empty', '');
+      map.set('null', null);
+      map.set('false', false);
 
-      map.set('a', 1);
-      map.set('b', 2);
+      expect(map.get('zero')).toBe(0);
+      expect(map.get('empty')).toBe('');
+      expect(map.get('null')).toBe(null);
+      expect(map.get('false')).toBe(false);
+    });
 
-      expect(map.entries()).toEqual([
+    test('should handle complex keys', () => {
+      const complexKey = 'complex-key-with-special-chars!@#$%^&*()';
+      reactiveMap.set(complexKey, 123);
+
+      expect(reactiveMap.get(complexKey)).toBe(123);
+    });
+  });
+
+  describe('set', () => {
+    test('should add new key-value pair', () => {
+      reactiveMap.set('newKey', 100);
+
+      expect(reactiveMap.get('newKey')).toBe(100);
+      expect(reactiveMap.size).toBe(1);
+    });
+
+    test('should update existing key-value pair', () => {
+      reactiveMap.set('existingKey', 50);
+      expect(reactiveMap.get('existingKey')).toBe(50);
+
+      reactiveMap.set('existingKey', 75);
+      expect(reactiveMap.get('existingKey')).toBe(75);
+      expect(reactiveMap.size).toBe(1);
+    });
+
+    test('should return the map instance for chaining', () => {
+      const result = reactiveMap.set('key', 1);
+      
+      expect(result).toBe(reactiveMap);
+    });
+
+    test('should handle multiple sets', () => {
+      reactiveMap
+        .set('key1', 1)
+        .set('key2', 2)
+        .set('key3', 3);
+
+      expect(reactiveMap.size).toBe(3);
+      expect(reactiveMap.get('key1')).toBe(1);
+      expect(reactiveMap.get('key2')).toBe(2);
+      expect(reactiveMap.get('key3')).toBe(3);
+    });
+  });
+
+  describe('has', () => {
+    test('should return true for existing key', () => {
+      reactiveMap.set('existing', 1);
+
+      expect(reactiveMap.has('existing')).toBe(true);
+    });
+
+    test('should return false for non-existing key', () => {
+      expect(reactiveMap.has('nonexistent')).toBe(false);
+    });
+
+    test('should handle falsy values correctly', () => {
+      reactiveMap.set('falsy', 0);
+
+      expect(reactiveMap.has('falsy')).toBe(true);
+    });
+  });
+
+  describe('delete', () => {
+    test('should remove existing key', () => {
+      reactiveMap.set('toBeDeleted', 999);
+
+      const result = reactiveMap.delete('toBeDeleted');
+
+      expect(result).toBe(true);
+      expect(reactiveMap.has('toBeDeleted')).toBe(false);
+      expect(reactiveMap.size).toBe(0);
+    });
+
+    test('should return false for non-existing key', () => {
+      const result = reactiveMap.delete('nonexistent');
+
+      expect(result).toBe(false);
+      expect(reactiveMap.size).toBe(0);
+    });
+
+    test('should handle multiple deletions', () => {
+      reactiveMap.set('key1', 1).set('key2', 2).set('key3', 3);
+
+      expect(reactiveMap.delete('key2')).toBe(true);
+      expect(reactiveMap.size).toBe(2);
+      expect(reactiveMap.has('key2')).toBe(false);
+
+      expect(reactiveMap.delete('key1')).toBe(true);
+      expect(reactiveMap.size).toBe(1);
+      expect(reactiveMap.has('key1')).toBe(false);
+
+      expect(reactiveMap.delete('nonexistent')).toBe(false);
+      expect(reactiveMap.size).toBe(1);
+    });
+  });
+
+  describe('clear', () => {
+    test('should remove all entries', () => {
+      reactiveMap.set('key1', 1).set('key2', 2).set('key3', 3);
+
+      reactiveMap.clear();
+
+      expect(reactiveMap.size).toBe(0);
+      expect(reactiveMap.has('key1')).toBe(false);
+      expect(reactiveMap.has('key2')).toBe(false);
+      expect(reactiveMap.has('key3')).toBe(false);
+    });
+
+    test('should work on empty map', () => {
+      reactiveMap.clear();
+
+      expect(reactiveMap.size).toBe(0);
+    });
+
+    test('should allow adding after clear', () => {
+      reactiveMap.set('key1', 1);
+      reactiveMap.clear();
+      reactiveMap.set('key2', 2);
+
+      expect(reactiveMap.size).toBe(1);
+      expect(reactiveMap.get('key2')).toBe(2);
+    });
+  });
+
+  describe('size', () => {
+    test('should return correct size', () => {
+      expect(reactiveMap.size).toBe(0);
+
+      reactiveMap.set('key1', 1);
+      expect(reactiveMap.size).toBe(1);
+
+      reactiveMap.set('key2', 2);
+      expect(reactiveMap.size).toBe(2);
+
+      reactiveMap.delete('key1');
+      expect(reactiveMap.size).toBe(1);
+
+      reactiveMap.clear();
+      expect(reactiveMap.size).toBe(0);
+    });
+
+    test('should not change when getting non-existent keys', () => {
+      expect(reactiveMap.size).toBe(0);
+      reactiveMap.get('nonexistent');
+      expect(reactiveMap.size).toBe(0);
+    });
+
+    test('should not change when checking existence of non-existent keys', () => {
+      expect(reactiveMap.size).toBe(0);
+      reactiveMap.has('nonexistent');
+      expect(reactiveMap.size).toBe(0);
+    });
+  });
+
+  describe('keys', () => {
+    test('should return array of all keys', () => {
+      reactiveMap.set('key1', 1).set('key2', 2).set('key3', 3);
+
+      const keys = reactiveMap.keys();
+
+      expect(keys).toEqual(['key1', 'key2', 'key3']);
+      expect(keys).toHaveLength(3);
+    });
+
+    test('should return empty array for empty map', () => {
+      const keys = reactiveMap.keys();
+
+      expect(keys).toEqual([]);
+    });
+
+    test('should update after modifications', () => {
+      reactiveMap.set('key1', 1).set('key2', 2);
+      expect(reactiveMap.keys()).toEqual(['key1', 'key2']);
+
+      reactiveMap.delete('key1');
+      expect(reactiveMap.keys()).toEqual(['key2']);
+
+      reactiveMap.set('key3', 3);
+      expect(reactiveMap.keys()).toEqual(['key2', 'key3']);
+    });
+
+    test('should handle key ordering', () => {
+      reactiveMap.set('first', 1);
+      reactiveMap.set('second', 2);
+      reactiveMap.set('third', 3);
+
+      // Should preserve insertion order
+      expect(reactiveMap.keys()).toEqual(['first', 'second', 'third']);
+    });
+  });
+
+  describe('values', () => {
+    test('should return array of all values', () => {
+      reactiveMap.set('key1', 10).set('key2', 20).set('key3', 30);
+
+      const values = reactiveMap.values();
+
+      expect(values).toEqual([10, 20, 30]);
+      expect(values).toHaveLength(3);
+    });
+
+    test('should return empty array for empty map', () => {
+      const values = reactiveMap.values();
+
+      expect(values).toEqual([]);
+    });
+
+    test('should update after modifications', () => {
+      reactiveMap.set('key1', 10).set('key2', 20);
+      expect(reactiveMap.values()).toEqual([10, 20]);
+
+      reactiveMap.delete('key1');
+      expect(reactiveMap.values()).toEqual([20]);
+
+      reactiveMap.set('key3', 30);
+      expect(reactiveMap.values()).toEqual([20, 30]);
+    });
+
+    test('should preserve value ordering with key ordering', () => {
+      reactiveMap.set('first', 100);
+      reactiveMap.set('second', 200);
+      reactiveMap.set('third', 300);
+
+      const keys = reactiveMap.keys();
+      const values = reactiveMap.values();
+
+      // Values should correspond to keys in the same order
+      expect(keys[0]).toBe('first');
+      expect(values[0]).toBe(100);
+      expect(keys[1]).toBe('second');
+      expect(values[1]).toBe(200);
+      expect(keys[2]).toBe('third');
+      expect(values[2]).toBe(300);
+    });
+  });
+
+  describe('entries', () => {
+    test('should return array of key-value pairs', () => {
+      reactiveMap.set('key1', 100).set('key2', 200).set('key3', 300);
+
+      const entries = reactiveMap.entries();
+
+      expect(entries).toEqual([
+        ['key1', 100],
+        ['key2', 200],
+        ['key3', 300],
+      ]);
+      expect(entries).toHaveLength(3);
+    });
+
+    test('should return empty array for empty map', () => {
+      const entries = reactiveMap.entries();
+
+      expect(entries).toEqual([]);
+    });
+
+    test('should update after modifications', () => {
+      reactiveMap.set('key1', 100).set('key2', 200);
+      expect(reactiveMap.entries()).toEqual([
+        ['key1', 100],
+        ['key2', 200],
+      ]);
+
+      reactiveMap.delete('key1');
+      expect(reactiveMap.entries()).toEqual([['key2', 200]]);
+
+      reactiveMap.set('key3', 300);
+      expect(reactiveMap.entries()).toEqual([
+        ['key2', 200],
+        ['key3', 300],
+      ]);
+    });
+
+    test('should handle mixed value types', () => {
+      reactiveMap.set('str', 'hello');
+      reactiveMap.set('num', 42);
+      reactiveMap.set('bool', true);
+      reactiveMap.set('obj', { a: 1 });
+
+      const entries = reactiveMap.entries();
+
+      expect(entries).toEqual([
+        ['str', 'hello'],
+        ['num', 42],
+        ['bool', true],
+        ['obj', { a: 1 }],
+      ]);
+    });
+  });
+
+  describe('forEach', () => {
+    test('should iterate over all entries', () => {
+      reactiveMap.set('a', 1).set('b', 2).set('c', 3);
+
+      const results: [string, number][] = [];
+      reactiveMap.forEach((value, key) => {
+        results.push([key, value]);
+      });
+
+      expect(results).toEqual([
+        ['a', 1],
+        ['b', 2],
+        ['c', 3],
+      ]);
+    });
+
+    test('should pass the map as third argument to callback', () => {
+      reactiveMap.set('key', 42);
+
+      reactiveMap.forEach((value, key, map) => {
+        expect(map).toBe(reactiveMap);
+        expect(value).toBe(42);
+        expect(key).toBe('key');
+      });
+    });
+
+    test('should handle empty map', () => {
+      const callback = vi.fn();
+      reactiveMap.forEach(callback);
+
+      expect(callback).not.toHaveBeenCalled();
+    });
+
+    test('should handle callback errors', () => {
+      reactiveMap.set('key1', 1).set('key2', 2);
+
+      const callback = vi.fn().mockImplementation(() => {
+        throw new Error('Callback error');
+      });
+
+      expect(() => reactiveMap.forEach(callback)).toThrow('Callback error');
+      expect(callback).toHaveBeenCalledTimes(1); // Stops after first error
+    });
+
+    test('should iterate in insertion order', () => {
+      reactiveMap.set('first', 1);
+      reactiveMap.set('second', 2);
+      reactiveMap.set('third', 3);
+
+      const order: string[] = [];
+      reactiveMap.forEach((_, key) => {
+        order.push(key);
+      });
+
+      expect(order).toEqual(['first', 'second', 'third']);
+    });
+  });
+
+  describe('iteration protocols', () => {
+    test('should support for...of iteration', () => {
+      reactiveMap.set('a', 1).set('b', 2);
+
+      const entries: [string, number][] = [];
+      for (const [key, value] of reactiveMap) {
+        entries.push([key, value]);
+      }
+
+      expect(entries).toEqual([
         ['a', 1],
         ['b', 2],
       ]);
     });
 
-    it('should track size', () => {
-      const map = new ReactiveMap<string, number>();
+    test('should support spread operator', () => {
+      reactiveMap.set('x', 10).set('y', 20);
 
-      expect(map.size).toBe(0);
+      const entries = [...reactiveMap];
 
-      map.set('a', 1);
+      expect(entries).toEqual([
+        ['x', 10],
+        ['y', 20],
+      ]);
+    });
+
+    test('should support destructuring', () => {
+      reactiveMap.set('first', 1);
+
+      const [[key, value]] = reactiveMap;
+      expect(key).toBe('first');
+      expect(value).toBe(1);
+    });
+  });
+
+  describe('edge cases', () => {
+    test('should handle very large keys and values', () => {
+      const largeKey = 'k'.repeat(10000);
+      const largeValue = { data: 'v'.repeat(10000) };
+      const map = new ReactiveMap<string, { data: string }>();
+
+      map.set(largeKey, largeValue);
+
+      expect(map.get(largeKey)).toEqual(largeValue);
       expect(map.size).toBe(1);
+    });
 
-      map.set('b', 2);
+    test('should handle symbol keys', () => {
+      const sym = Symbol('test');
+      // @ts-expect-error - Testing with symbol key
+      reactiveMap.set(sym, 123);
+
+      // @ts-expect-error - Testing with symbol key
+      expect(reactiveMap.get(sym)).toBe(123);
+    });
+
+    test('should handle null and undefined keys', () => {
+      const map = new ReactiveMap<string | null | undefined, number>();
+      map.set(null, 1);
+      map.set(undefined, 2);
+
+      expect(map.get(null)).toBe(1);
+      expect(map.get(undefined)).toBe(2);
       expect(map.size).toBe(2);
-
-      map.delete('a');
-      expect(map.size).toBe(1);
-    });
-  });
-
-  describe('subscriptions', () => {
-    it('should notify subscribers on set', () => {
-      const map = new ReactiveMap<string, number>();
-      const listener = vi.fn();
-
-      map.subscribe('a', listener);
-      map.set('a', 42);
-
-      expect(listener).toHaveBeenCalledTimes(1);
-      expect(listener).toHaveBeenCalledWith(42);
     });
 
-    it('should notify subscribers on delete', () => {
-      const map = new ReactiveMap<string, number>();
-      const listener = vi.fn();
+    test('should handle object values', () => {
+      const objValue = { nested: { deep: 'value' }, arr: [1, 2, 3] };
+      const map = new ReactiveMap<string, typeof objValue>();
+      map.set('obj', objValue);
 
-      map.set('a', 1);
-      map.subscribe('a', listener);
-      map.delete('a');
-
-      expect(listener).toHaveBeenCalledTimes(1);
-      expect(listener).toHaveBeenCalledWith(undefined);
+      const retrieved = map.get('obj');
+      expect(retrieved).toEqual(objValue);
+      expect(retrieved).toBe(objValue); // Objects should be stored by reference
     });
 
-    it('should notify subscribers on clear', () => {
-      const map = new ReactiveMap<string, number>();
-      const listenerA = vi.fn();
-      const listenerB = vi.fn();
-
-      map.set('a', 1);
-      map.set('b', 2);
-
-      map.subscribe('a', listenerA);
-      map.subscribe('b', listenerB);
-
-      map.clear();
-
-      expect(listenerA).toHaveBeenCalledWith(undefined);
-      expect(listenerB).toHaveBeenCalledWith(undefined);
-    });
-
-    it('should support multiple subscribers per key', () => {
-      const map = new ReactiveMap<string, number>();
-      const listener1 = vi.fn();
-      const listener2 = vi.fn();
-      const listener3 = vi.fn();
-
-      map.subscribe('a', listener1);
-      map.subscribe('a', listener2);
-      map.subscribe('a', listener3);
-
-      map.set('a', 100);
-
-      expect(listener1).toHaveBeenCalledWith(100);
-      expect(listener2).toHaveBeenCalledWith(100);
-      expect(listener3).toHaveBeenCalledWith(100);
-    });
-
-    it('should not notify unsubscribed listeners', () => {
-      const map = new ReactiveMap<string, number>();
-      const listener = vi.fn();
-
-      const unsubscribe = map.subscribe('a', listener);
-      unsubscribe();
-
-      map.set('a', 42);
-
-      expect(listener).not.toHaveBeenCalled();
-    });
-
-    it('should only unsubscribe the specific listener', () => {
-      const map = new ReactiveMap<string, number>();
-      const listener1 = vi.fn();
-      const listener2 = vi.fn();
-
-      const unsubscribe1 = map.subscribe('a', listener1);
-      map.subscribe('a', listener2);
-
-      unsubscribe1();
-
-      map.set('a', 42);
-
-      expect(listener1).not.toHaveBeenCalled();
-      expect(listener2).toHaveBeenCalledWith(42);
-    });
-
-    it('should not notify listeners for different keys', () => {
-      const map = new ReactiveMap<string, number>();
-      const listenerA = vi.fn();
-      const listenerB = vi.fn();
-
-      map.subscribe('a', listenerA);
-      map.subscribe('b', listenerB);
-
-      map.set('a', 1);
-
-      expect(listenerA).toHaveBeenCalledWith(1);
-      expect(listenerB).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('batch writes', () => {
-    it('should apply all writes before notifying', () => {
-      const map = new ReactiveMap<string, number>();
-      const results: Array<{ key: string; value: number | undefined }> = [];
-
-      map.subscribe('a', (v) => results.push({ key: 'a', value: v }));
-      map.subscribe('b', (v) => results.push({ key: 'b', value: v }));
-
-      // In write callback, both values should already be set
-      map.subscribe('a', () => {
-        results.push({ key: 'check-b-during-a', value: map.get('b') });
-      });
-
-      map.write([
-        { key: 'a', value: 1 },
-        { key: 'b', value: 2 },
-      ]);
-
-      // Both values should be set before any notification
-      expect(results).toContainEqual({ key: 'check-b-during-a', value: 2 });
-    });
-
-    it('should delete with undefined value in batch', () => {
-      const map = new ReactiveMap<string, number>();
-      const listener = vi.fn();
-
-      map.set('a', 1);
-      map.subscribe('a', listener);
-
-      map.write([{ key: 'a', value: undefined }]);
-
-      expect(map.has('a')).toBe(false);
-      expect(listener).toHaveBeenCalledWith(undefined);
-    });
-
-    it('should handle mixed writes and deletes', () => {
-      const map = new ReactiveMap<string, number>();
-
-      map.set('a', 1);
-      map.set('b', 2);
-
-      map.write([
-        { key: 'a', value: undefined }, // delete
-        { key: 'b', value: 20 }, // update
-        { key: 'c', value: 3 }, // insert
-      ]);
-
-      expect(map.has('a')).toBe(false);
-      expect(map.get('b')).toBe(20);
-      expect(map.get('c')).toBe(3);
-    });
-  });
-
-  describe('listener tracking', () => {
-    it('should track listener count per key', () => {
-      const map = new ReactiveMap<string, number>();
-
-      expect(map.listenerCount('a')).toBe(0);
-
-      const unsub1 = map.subscribe('a', () => {});
-      expect(map.listenerCount('a')).toBe(1);
-
-      const unsub2 = map.subscribe('a', () => {});
-      expect(map.listenerCount('a')).toBe(2);
-
-      unsub1();
-      expect(map.listenerCount('a')).toBe(1);
-
-      unsub2();
-      expect(map.listenerCount('a')).toBe(0);
-    });
-
-    it('should track total listener count', () => {
-      const map = new ReactiveMap<string, number>();
-
-      expect(map.totalListenerCount).toBe(0);
-
-      const unsub1 = map.subscribe('a', () => {});
-      const unsub2 = map.subscribe('b', () => {});
-      const unsub3 = map.subscribe('a', () => {});
-
-      expect(map.totalListenerCount).toBe(3);
-
-      unsub1();
-      expect(map.totalListenerCount).toBe(2);
-
-      unsub2();
-      unsub3();
-      expect(map.totalListenerCount).toBe(0);
-    });
-  });
-
-  describe('type safety', () => {
-    it('should work with complex types', () => {
-      interface User {
-        id: string;
-        name: string;
-        email: string;
-      }
-
-      const map = new ReactiveMap<string, User>();
-      const user: User = { id: '1', name: 'John', email: 'john@example.com' };
-
-      map.set('user-1', user);
-
-      const retrieved = map.get('user-1');
-      expect(retrieved?.id).toBe('1');
-      expect(retrieved?.name).toBe('John');
-    });
-
-    it('should work with numeric keys', () => {
-      const map = new ReactiveMap<number, string>();
-
-      map.set(1, 'one');
-      map.set(2, 'two');
-
-      expect(map.get(1)).toBe('one');
-      expect(map.get(2)).toBe('two');
-    });
-  });
-
-  describe('memory leak prevention', () => {
-    it('should clean up listener Set when last listener unsubscribes', () => {
-      const map = new ReactiveMap<string, number>();
-
-      const unsub1 = map.subscribe('a', () => {});
-      const unsub2 = map.subscribe('a', () => {});
-
-      expect(map.listenerCount('a')).toBe(2);
-
-      unsub1();
-      expect(map.listenerCount('a')).toBe(1);
-
-      unsub2();
-      // After all listeners removed, the internal Set should be deleted
-      expect(map.listenerCount('a')).toBe(0);
-      expect(map.totalListenerCount).toBe(0);
-    });
-
-    it('should not leak memory during rapid subscribe/unsubscribe cycles', () => {
-      const map = new ReactiveMap<string, number>();
-
-      // Simulate rapid subscription cycling (e.g., React component mounts/unmounts)
-      for (let i = 0; i < 1000; i++) {
-        const unsub = map.subscribe('key', () => {});
-        unsub();
-      }
-
-      expect(map.listenerCount('key')).toBe(0);
-      expect(map.totalListenerCount).toBe(0);
-    });
-
-    it('should handle subscriptions to keys that are later deleted', () => {
-      const map = new ReactiveMap<string, number>();
-      const listener = vi.fn();
-
-      map.set('a', 1);
-      const unsub = map.subscribe('a', listener);
-
-      // Delete the data
-      map.delete('a');
-      expect(listener).toHaveBeenCalledWith(undefined);
-
-      // Listener is still attached even though data is gone
-      expect(map.listenerCount('a')).toBe(1);
-
-      // Unsubscribing should clean up properly
-      unsub();
-      expect(map.listenerCount('a')).toBe(0);
-    });
-
-    it('should handle subscriptions to non-existent keys', () => {
-      const map = new ReactiveMap<string, number>();
-      const listener = vi.fn();
-
-      // Subscribe to key before it exists
-      const unsub = map.subscribe('future-key', listener);
-      expect(map.listenerCount('future-key')).toBe(1);
-
-      // Set the value - should notify
-      map.set('future-key', 42);
-      expect(listener).toHaveBeenCalledWith(42);
-
-      // Unsubscribe and verify cleanup
-      unsub();
-      expect(map.listenerCount('future-key')).toBe(0);
-    });
-
-    it('should not accumulate listeners across many keys', () => {
-      const map = new ReactiveMap<string, number>();
-      const unsubscribers: Array<() => void> = [];
-
-      // Subscribe to many different keys
-      for (let i = 0; i < 100; i++) {
-        unsubscribers.push(map.subscribe(`key-${i}`, () => {}));
-      }
-
-      expect(map.totalListenerCount).toBe(100);
-
-      // Unsubscribe from all
-      for (const unsub of unsubscribers) {
-        unsub();
-      }
-
-      expect(map.totalListenerCount).toBe(0);
-    });
-
-    it('should handle interleaved subscribe/unsubscribe on multiple keys', () => {
-      const map = new ReactiveMap<string, number>();
-
-      const unsub1 = map.subscribe('a', () => {});
-      const unsub2 = map.subscribe('b', () => {});
-      const unsub3 = map.subscribe('a', () => {});
-      const unsub4 = map.subscribe('c', () => {});
-
-      expect(map.totalListenerCount).toBe(4);
-      expect(map.listenerCount('a')).toBe(2);
-      expect(map.listenerCount('b')).toBe(1);
-      expect(map.listenerCount('c')).toBe(1);
-
-      // Unsubscribe in different order than subscribed
-      unsub2();
-      expect(map.totalListenerCount).toBe(3);
-      expect(map.listenerCount('b')).toBe(0);
-
-      unsub1();
-      expect(map.totalListenerCount).toBe(2);
-      expect(map.listenerCount('a')).toBe(1);
-
-      unsub4();
-      unsub3();
-      expect(map.totalListenerCount).toBe(0);
-    });
-
-    it('should handle clear() with active listeners without memory leak', () => {
-      const map = new ReactiveMap<string, number>();
-      const listeners = [vi.fn(), vi.fn(), vi.fn()];
-      const unsubscribers: Array<() => void> = [];
-
-      map.set('a', 1);
-      map.set('b', 2);
-      map.set('c', 3);
-
-      unsubscribers.push(map.subscribe('a', listeners[0]));
-      unsubscribers.push(map.subscribe('b', listeners[1]));
-      unsubscribers.push(map.subscribe('c', listeners[2]));
-
-      // Clear all data
-      map.clear();
-
-      // All listeners should have been notified
-      expect(listeners[0]).toHaveBeenCalledWith(undefined);
-      expect(listeners[1]).toHaveBeenCalledWith(undefined);
-      expect(listeners[2]).toHaveBeenCalledWith(undefined);
-
-      // Data should be cleared
-      expect(map.size).toBe(0);
-
-      // Listeners should still be active (clear doesn't unsubscribe)
-      expect(map.totalListenerCount).toBe(3);
-
-      // Manual unsubscribe should clean up
-      for (const unsub of unsubscribers) {
-        unsub();
-      }
-      expect(map.totalListenerCount).toBe(0);
-    });
-
-    it('should handle double unsubscribe gracefully', () => {
-      const map = new ReactiveMap<string, number>();
-
-      const unsub = map.subscribe('a', () => {});
-      expect(map.listenerCount('a')).toBe(1);
-
-      unsub();
-      expect(map.listenerCount('a')).toBe(0);
-
-      // Double unsubscribe should not throw or cause issues
-      unsub();
-      expect(map.listenerCount('a')).toBe(0);
-      expect(map.totalListenerCount).toBe(0);
+    test('should handle function values', () => {
+      const fnValue = () => 'test';
+      const map = new ReactiveMap<string, typeof fnValue>();
+      map.set('fn', fnValue);
+
+      const retrieved = map.get('fn');
+      expect(retrieved).toBe(fnValue); // Functions should be stored by reference
     });
   });
 });

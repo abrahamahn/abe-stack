@@ -99,14 +99,17 @@ export function JobDetailsPanel({
           />
           <DetailItem
             label="Duration"
-            value={job.durationMs ? `${job.durationMs}ms` : '-'}
+            value={job.durationMs ? `${String(job.durationMs)}ms` : '-'}
           />
         </div>
       </Card>
 
       {/* Attempts */}
       <Card className="p-3">
-        <DetailItem label="Attempts" value={`${job.attempts} / ${job.maxAttempts}`} />
+        <DetailItem
+          label="Attempts"
+          value={`${String(job.attempts)} / ${String(job.maxAttempts)}`}
+        />
       </Card>
 
       {/* Arguments */}

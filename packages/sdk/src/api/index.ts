@@ -8,4 +8,14 @@
 export { createApiClient } from './client';
 export type { ApiClient, ApiClientConfig } from './client';
 
-export type { ApiClientOptions, AuthResponse, LoginRequest, RegisterRequest, User } from './types';
+export type {
+  ApiClientOptions,
+  AuthResponse,
+  LoginRequest,
+  OAuthConnectionsResponse,
+  OAuthEnabledProvidersResponse,
+  OAuthProvider,
+  OAuthUnlinkResponse,
+  RegisterRequest,
+  User,
+} from './types';

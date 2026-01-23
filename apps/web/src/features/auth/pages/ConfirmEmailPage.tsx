@@ -1,6 +1,7 @@
 // apps/web/src/features/auth/pages/ConfirmEmailPage.tsx
 import { AuthLayout, Button, Spinner, Text, useNavigate, useSearchParams } from '@abe-stack/ui';
 import { useAuth } from '@auth/hooks';
+import { getPostLoginRedirect } from '@auth/utils';
 import { useEffect, useState } from 'react';
 
 import type { ReactElement } from 'react';
@@ -9,7 +10,7 @@ export function ConfirmEmailPage(): ReactElement {
   const searchParamsResult = useSearchParams();
   const searchParams: URLSearchParams = searchParamsResult[0];
   const navigate = useNavigate();
-  const { verifyEmail } = useAuth();
+  const { verifyEmail, user } = useAuth();
 
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
@@ -29,8 +30,9 @@ export function ConfirmEmailPage(): ReactElement {
         setStatus('success');
         setMessage('Your email has been verified and you are now signed in.');
         // Auto-login happens in verifyEmail, redirect to dashboard
+        const redirectPath = getPostLoginRedirect(user);
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate(redirectPath);
         }, 2000);
       } catch (err) {
         setStatus('error');
@@ -39,7 +41,7 @@ export function ConfirmEmailPage(): ReactElement {
     };
 
     void verify();
-  }, [token, verifyEmail, navigate]);
+  }, [token, verifyEmail, navigate, user]);
 
   const handleNavigateToLogin = (): void => {
     navigate('/login');
@@ -87,7 +89,7 @@ export function ConfirmEmailPage(): ReactElement {
                 {message}
               </Text>
               <Text tone="muted" className="text-center text-sm">
-                Redirecting to dashboard...
+                Redirecting to your account...
               </Text>
             </>
           )}

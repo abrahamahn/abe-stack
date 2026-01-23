@@ -30,6 +30,7 @@ export interface User {
   email: string;
   passwordHash: string;
   name: string | null;
+  avatarUrl: string | null;
   role: UserRole;
   emailVerified: boolean;
   emailVerifiedAt: Date | null;
@@ -49,6 +50,7 @@ export interface NewUser {
   email: string;
   passwordHash: string;
   name?: string | null;
+  avatarUrl?: string | null;
   role?: UserRole;
   emailVerified?: boolean;
   emailVerifiedAt?: Date | null;
@@ -67,6 +69,7 @@ export interface UpdateUser {
   email?: string;
   passwordHash?: string;
   name?: string | null;
+  avatarUrl?: string | null;
   role?: UserRole;
   emailVerified?: boolean;
   emailVerifiedAt?: Date | null;
@@ -116,6 +119,7 @@ export const USER_COLUMNS = {
   email: 'email',
   passwordHash: 'password_hash',
   name: 'name',
+  avatarUrl: 'avatar_url',
   role: 'role',
   emailVerified: 'email_verified',
   emailVerifiedAt: 'email_verified_at',

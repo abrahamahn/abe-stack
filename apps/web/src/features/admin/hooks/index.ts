@@ -4,7 +4,11 @@ export { useAdminUser } from './useAdminUser';
 export type { UseAdminUserResult, UseAdminUserState } from './useAdminUser';
 
 export { useAdminUsers } from './useAdminUsers';
-export type { UseAdminUsersActions, UseAdminUsersResult, UseAdminUsersState } from './useAdminUsers';
+export type {
+  UseAdminUsersActions,
+  UseAdminUsersResult,
+  UseAdminUsersState,
+} from './useAdminUsers';
 
 export { useUserActions } from './useUserActions';
 export type { UseUserActionsResult, UseUserActionsState } from './useUserActions';

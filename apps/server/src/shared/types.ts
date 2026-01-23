@@ -1,6 +1,6 @@
 // apps/server/src/shared/types.ts
-import type { UserRole } from '@abe-stack/core';
 import type { AppConfig } from '@config';
+import type { UserRole } from '@abe-stack/core';
 import type { DbClient, Repositories } from '@database';
 import type { SubscriptionManager } from '@pubsub';
 import type { StorageProvider } from '@storage';
@@ -22,6 +22,7 @@ export interface User {
   id: string;
   email: string;
   name: string | null;
+  avatarUrl: string | null;
   role: UserRole;
   createdAt: Date;
 }
@@ -112,6 +113,8 @@ export interface RequestWithCookies {
   user?: { userId: string; email: string; role: string };
   /** Request info extracted by middleware (IP address, user agent) */
   requestInfo: RequestInfo;
+  /** Start time for request timing in development (bigint from process.hrtime.bigint()) */
+  requestStart?: bigint;
 }
 
 // ============================================================================
@@ -183,7 +186,7 @@ export interface StorageService {
  * - Portable: Framework-agnostic interface (only logger is Fastify-specific)
  */
 export interface IServiceContainer {
-  /** Application configuration */
+  /** Application uration */
   readonly config: AppConfig;
 
   /** Database client (raw SQL query builder) */
@@ -200,6 +203,9 @@ export interface IServiceContainer {
 
   /** Pub/sub manager for real-time subscriptions */
   readonly pubsub: SubscriptionManager;
+
+  /** Cache service for performance optimization */
+  readonly cache: import('../services/cache-service').CacheService;
 }
 
 // ============================================================================

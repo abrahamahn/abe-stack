@@ -31,6 +31,7 @@ import {
 import {
   AuthPage,
   ConfirmEmailPage,
+  ConnectedAccountsPage,
   LoginPage,
   ProtectedRoute,
   RegisterPage,
@@ -43,6 +44,7 @@ import {
   PricingPage,
 } from '@features/billing';
 import { DashboardPage } from '@features/dashboard';
+import { SettingsPage } from '@features/settings';
 import { HomePage } from '@pages/HomePage';
 import { useEffect } from 'react';
 
@@ -96,6 +98,24 @@ function AppRoutes(): ReactElement {
         element={
           <ProtectedRoute>
             <DashboardPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Settings Routes */}
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <SettingsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings/accounts"
+        element={
+          <ProtectedRoute>
+            <ConnectedAccountsPage />
           </ProtectedRoute>
         }
       />

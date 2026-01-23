@@ -8,11 +8,11 @@
 
 // Re-export config types for convenience
 export type {
-  StorageConfig,
-  StorageProviderName,
   LocalStorageConfig,
   S3StorageConfig,
-} from '@config/storage.config';
+  StorageConfig,
+  StorageProviderName,
+} from '@abe-stack/core/contracts/config';
 
 export interface UploadParams {
   key: string;

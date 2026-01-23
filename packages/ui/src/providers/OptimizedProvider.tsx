@@ -264,11 +264,10 @@ export function createLazyContext<T>(): LazyContextResult<T> {
     initializer: () => T;
     deps?: React.DependencyList;
   }): React.ReactElement {
-    // Store deps in ref to use in useMemo
-    const depsRef = useRef(deps);
-    depsRef.current = deps;
-
-    const value = useMemo(() => initializer(), [JSON.stringify(deps)]);
+    const value = useMemo(() => {
+      void deps;
+      return initializer();
+    }, [initializer, deps]);
 
     return <Context.Provider value={value}>{children}</Context.Provider>;
   }
@@ -427,8 +426,15 @@ export function SelectiveMemo<T extends Record<string, unknown>>({
   ...props
 }: SelectiveMemoProps<T> & T): React.ReactElement {
   const typedProps = props as unknown as T;
-  const watchedValues = watchKeys.map((key) => typedProps[key]);
-  const memoizedChildren = useMemo(() => children(typedProps), watchedValues);
+  const propsRef = useRef(typedProps);
+  propsRef.current = typedProps;
+  const watchedValuesKey = JSON.stringify(
+    watchKeys.map((key) => typedProps[key]),
+  );
+  const memoizedChildren = useMemo(() => {
+    void watchedValuesKey;
+    return children(propsRef.current);
+  }, [children, watchedValuesKey]);
 
   return <>{memoizedChildren}</>;
 }

@@ -1,636 +1,741 @@
 // packages/media/src/__tests__/image-processing.test.ts
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, test, vi, beforeEach } from 'vitest';
+import type { Mock } from 'vitest';
 
-import {
-  createImageProcessor,
-  getImageFormat,
-  ImageProcessor,
-  type ImageFormatOptions,
-  type ImageMetadata,
-  type ImageProcessingOptions,
-  type ImageResizeOptions,
-  type ProcessingResult,
-} from '../image-processing';
+import { resizeImage, optimizeImage, validateImage } from '../image-processing';
+import type { ImageFormatOptions } from '../image-processing';
 
-// Mock fs module
-vi.mock('fs', () => ({
-  promises: {
-    readFile: vi.fn(),
-    writeFile: vi.fn(),
-    mkdir: vi.fn(),
-    copyFile: vi.fn(),
-    stat: vi.fn(),
-  },
-}));
-
-// Create a mock canvas context
-const createMockCanvasContext = () => ({
-  drawImage: vi.fn(),
-  fillStyle: '',
-  fillRect: vi.fn(),
-  getImageData: vi.fn(() => ({ data: new Uint8ClampedArray(100) })),
-  putImageData: vi.fn(),
-  save: vi.fn(),
-  restore: vi.fn(),
-  scale: vi.fn(),
-  translate: vi.fn(),
-  canvas: { width: 800, height: 600 },
+// Mock sharp since it's an external dependency
+vi.mock('sharp', () => {
+  return {
+    default: vi.fn().mockImplementation(() => ({
+      resize: vi.fn().mockReturnThis(),
+      jpeg: vi.fn().mockReturnThis(),
+      png: vi.fn().mockReturnThis(),
+      webp: vi.fn().mockReturnThis(),
+      toBuffer: vi.fn().mockResolvedValue(Buffer.from('mocked-image-buffer')),
+      toFormat: vi.fn().mockReturnThis(),
+      quality: vi.fn().mockReturnThis(),
+      withMetadata: vi.fn().mockReturnThis(),
+      removeAlpha: vi.fn().mockReturnThis(),
+      flatten: vi.fn().mockReturnThis(),
+      rotate: vi.fn().mockReturnThis(),
+      blur: vi.fn().mockReturnThis(),
+      sharpen: vi.fn().mockReturnThis(),
+      median: vi.fn().mockReturnThis(),
+      gamma: vi.fn().mockReturnThis(),
+      negate: vi.fn().mockReturnThis(),
+      normalise: vi.fn().mockReturnThis(),
+      clahe: vi.fn().mockReturnThis(),
+      convolve: vi.fn().mockReturnThis(),
+      threshold: vi.fn().mockReturnThis(),
+      linear: vi.fn().mockReturnThis(),
+      modulate: vi.fn().mockReturnThis(),
+      tint: vi.fn().mockReturnThis(),
+      composite: vi.fn().mockReturnThis(),
+      extend: vi.fn().mockReturnThis(),
+      embed: vi.fn().mockReturnThis(),
+      max: vi.fn().mockReturnThis(),
+      min: vi.fn().mockReturnThis(),
+      withoutEnlargement: vi.fn().mockReturnThis(),
+      kernel: vi.fn().mockReturnThis(),
+      failOnError: vi.fn().mockReturnThis(),
+      stats: vi.fn().mockResolvedValue({
+        channels: [
+          { min: 0, max: 255, mean: 128, stdev: 64, minIgnore: 0, maxIgnore: 0, sum: 0, squaredSum: 0, entropy: 0, percentage: 0 }
+        ],
+        isOpaque: true,
+        entropy: 0.5,
+        sharpness: 1.2,
+        dominant: [128, 128, 128]
+      }),
+    })),
+  };
 });
 
-// Create a mock canvas element
-const createMockCanvas = () => {
-  const ctx = createMockCanvasContext();
-  return {
-    width: 800,
-    height: 600,
-    getContext: vi.fn(() => ctx),
-    toBlob: vi.fn((callback: (blob: Blob | null) => void, type: string, _quality: number) => {
-      const mockBlob = new Blob(['mock image data'], { type });
-      callback(mockBlob);
-    }),
-    toDataURL: vi.fn(() => 'data:image/jpeg;base64,mockdata'),
-  };
-};
+const sharp = await import('sharp');
+const sharpMock = sharp as unknown as Mock;
 
 describe('Image Processing', () => {
-  describe('ImageProcessor', () => {
-    it('should create instance', () => {
-      const processor = new ImageProcessor();
-      expect(processor).toBeInstanceOf(ImageProcessor);
+  const mockImageBuffer = Buffer.from('test-image-data');
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('resizeImage', () => {
+    test('should resize image to specified dimensions', async () => {
+      const result = await resizeImage(mockImageBuffer, { width: 800, height: 600 });
+
+      expect(sharp).toHaveBeenCalledWith(mockImageBuffer);
+      expect(sharp().resize).toHaveBeenCalledWith(800, 600);
+      expect(sharp().toBuffer).toHaveBeenCalled();
+      expect(result).toBeInstanceOf(Buffer);
     });
 
-    it('should process image and return result', async () => {
-      const fs = await import('fs');
-      vi.mocked(fs.promises.mkdir).mockResolvedValue(undefined);
-      vi.mocked(fs.promises.copyFile).mockResolvedValue(undefined);
-      vi.mocked(fs.promises.stat).mockResolvedValue({ size: 1024 } as never);
+    test('should resize image with only width specified', async () => {
+      const result = await resizeImage(mockImageBuffer, { width: 800 });
 
-      const processor = new ImageProcessor();
-      const result = await processor.process('/input.jpg', '/output.jpg');
-
-      expect(result.success).toBe(true);
-      expect(result.outputPath).toBe('/output.jpg');
+      expect(sharp().resize).toHaveBeenCalledWith(800, undefined);
+      expect(result).toBeInstanceOf(Buffer);
     });
 
-    it('should get metadata', async () => {
-      const fs = await import('fs');
-      vi.mocked(fs.promises.stat).mockResolvedValue({ size: 2048 } as never);
+    test('should resize image with only height specified', async () => {
+      const result = await resizeImage(mockImageBuffer, { height: 600 });
 
-      const processor = new ImageProcessor();
-      const metadata = await processor.getMetadata('/test.jpg');
+      expect(sharp().resize).toHaveBeenCalledWith(undefined, 600);
+      expect(result).toBeInstanceOf(Buffer);
+    });
 
-      expect(metadata.size).toBe(2048);
+    test('should resize image with fit option', async () => {
+      const result = await resizeImage(mockImageBuffer, { width: 800, height: 600, fit: 'cover' });
+
+      expect(sharp().resize).toHaveBeenCalledWith(800, 600, { fit: 'cover' });
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should resize image with position option', async () => {
+      const result = await resizeImage(mockImageBuffer, { 
+        width: 800, 
+        height: 600, 
+        fit: 'cover', 
+        position: 'center' 
+      });
+
+      expect(sharp().resize).toHaveBeenCalledWith(800, 600, { fit: 'cover', position: 'center' });
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should resize image with withoutEnlargement option', async () => {
+      const result = await resizeImage(mockImageBuffer, { 
+        width: 2000, 
+        height: 1500, 
+        withoutEnlargement: true 
+      });
+
+      expect(sharp().resize).toHaveBeenCalledWith(2000, 1500, { withoutEnlargement: true });
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should handle resize with aspect ratio preservation', async () => {
+      const result = await resizeImage(mockImageBuffer, { width: 800, fit: 'inside' });
+
+      expect(sharp().resize).toHaveBeenCalledWith(800, undefined, { fit: 'inside' });
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should handle resize with kernel option', async () => {
+      const result = await resizeImage(mockImageBuffer, { 
+        width: 800, 
+        height: 600, 
+        fit: 'cover', 
+        kernel: 'lanczos3' 
+      });
+
+      expect(sharp().resize).toHaveBeenCalledWith(800, 600, { fit: 'cover', kernel: 'lanczos3' });
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should handle resize with canvas option', async () => {
+      const result = await resizeImage(mockImageBuffer, { 
+        width: 800, 
+        height: 600, 
+        fit: 'contain', 
+        canvas: 'crop' 
+      });
+
+      expect(sharp().resize).toHaveBeenCalledWith(800, 600, { fit: 'contain', options: { canvas: 'crop' } });
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should handle resize error', async () => {
+      sharpMock.mockImplementation(() => {
+        throw new Error('Invalid image format');
+      });
+
+      await expect(resizeImage(mockImageBuffer, { width: 800 })).rejects.toThrow('Invalid image format');
+    });
+
+    test('should handle resize with invalid dimensions', async () => {
+      await expect(resizeImage(mockImageBuffer, { width: -100, height: 600 })).rejects.toThrow();
+      await expect(resizeImage(mockImageBuffer, { width: 0, height: 0 })).rejects.toThrow();
+    });
+
+    test('should handle resize with very large dimensions', async () => {
+      const result = await resizeImage(mockImageBuffer, { width: 10000, height: 10000 });
+
+      expect(sharp().resize).toHaveBeenCalledWith(10000, 10000);
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should handle resize with decimal dimensions', async () => {
+      const result = await resizeImage(mockImageBuffer, { width: 800.5, height: 600.7 });
+
+      expect(sharp().resize).toHaveBeenCalledWith(801, 601); // Sharp typically rounds
+      expect(result).toBeInstanceOf(Buffer);
     });
   });
 
-  describe('createImageProcessor', () => {
-    it('should create new ImageProcessor instance', () => {
-      const processor = createImageProcessor();
-      expect(processor).toBeInstanceOf(ImageProcessor);
+  describe('optimizeImage', () => {
+    test('should optimize image to JPEG format with quality', async () => {
+      const result = await optimizeImage(mockImageBuffer, { format: 'jpeg', quality: 80 });
+
+      expect(sharp().jpeg).toHaveBeenCalledWith({ quality: 80 });
+      expect(sharp().toBuffer).toHaveBeenCalled();
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should optimize image to PNG format', async () => {
+      const result = await optimizeImage(mockImageBuffer, { format: 'png' });
+
+      expect(sharp().png).toHaveBeenCalledWith({});
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should optimize image to WebP format with quality', async () => {
+      const result = await optimizeImage(mockImageBuffer, { format: 'webp', quality: 75 });
+
+      expect(sharp().webp).toHaveBeenCalledWith({ quality: 75 });
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should optimize image with AVIF format', async () => {
+      const result = await optimizeImage(mockImageBuffer, { format: 'avif', quality: 60 });
+
+      expect(sharp().toFormat).toHaveBeenCalledWith('avif', { quality: 60 });
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should optimize image with metadata preserved', async () => {
+      const result = await optimizeImage(mockImageBuffer, { 
+        format: 'jpeg', 
+        quality: 85, 
+        withMetadata: true 
+      });
+
+      expect(sharp().withMetadata).toHaveBeenCalled();
+      expect(sharp().jpeg).toHaveBeenCalledWith({ quality: 85 });
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should optimize image with alpha channel removed', async () => {
+      const result = await optimizeImage(mockImageBuffer, { 
+        format: 'jpeg', 
+        removeAlpha: true 
+      });
+
+      expect(sharp().removeAlpha).toHaveBeenCalled();
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should optimize image with background flattening', async () => {
+      const result = await optimizeImage(mockImageBuffer, { 
+        format: 'jpeg', 
+        flatten: true,
+        background: { r: 255, g: 255, b: 255 }
+      });
+
+      expect(sharp().flatten).toHaveBeenCalledWith({ background: { r: 255, g: 255, b: 255 } });
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should optimize image with progressive encoding', async () => {
+      const result = await optimizeImage(mockImageBuffer, { 
+        format: 'jpeg', 
+        progressive: true 
+      });
+
+      expect(sharp().jpeg).toHaveBeenCalledWith({ progressive: true });
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should optimize image with interlace', async () => {
+      const result = await optimizeImage(mockImageBuffer, { 
+        format: 'png', 
+        interlace: true 
+      });
+
+      expect(sharp().png).toHaveBeenCalledWith({ interlace: true });
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should optimize image with compression level', async () => {
+      const result = await optimizeImage(mockImageBuffer, { 
+        format: 'png', 
+        compressionLevel: 9 
+      });
+
+      expect(sharp().png).toHaveBeenCalledWith({ compressionLevel: 9 });
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should optimize image with adaptive filtering', async () => {
+      const result = await optimizeImage(mockImageBuffer, { 
+        format: 'png', 
+        adaptiveFiltering: true 
+      });
+
+      expect(sharp().png).toHaveBeenCalledWith({ adaptiveFiltering: true });
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should optimize image with chroma subsampling', async () => {
+      const result = await optimizeImage(mockImageBuffer, { 
+        format: 'jpeg', 
+        chromaSubsampling: '4:2:0' 
+      });
+
+      expect(sharp().jpeg).toHaveBeenCalledWith({ chromaSubsampling: '4:2:0' });
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should optimize image with MozJPEG', async () => {
+      const result = await optimizeImage(mockImageBuffer, { 
+        format: 'jpeg', 
+        mozjpeg: true 
+      });
+
+      expect(sharp().jpeg).toHaveBeenCalledWith({ mozjpeg: true });
+      expect(result).toBeInstanceOf(Buffer);
+    });
+
+    test('should handle optimization error', async () => {
+      sharpMock.mockImplementation(() => {
+        throw new Error('Optimization failed');
+      });
+
+      await expect(optimizeImage(mockImageBuffer, { format: 'jpeg' })).rejects.toThrow('Optimization failed');
+    });
+
+    test('should handle unsupported format', async () => {
+      await expect(
+        optimizeImage(mockImageBuffer, { format: 'bmp' as unknown as ImageFormatOptions['format'] }),
+      ).rejects.toThrow();
+    });
+
+    test('should handle invalid quality value', async () => {
+      await expect(optimizeImage(mockImageBuffer, { format: 'jpeg', quality: 150 })).rejects.toThrow();
+      await expect(optimizeImage(mockImageBuffer, { format: 'jpeg', quality: -10 })).rejects.toThrow();
     });
   });
 
-  describe('getImageFormat', () => {
-    it('should detect JPEG format', () => {
-      const buffer = Buffer.from([0xff, 0xd8, 0xff, 0xe0]);
-      expect(getImageFormat(buffer)).toBe('jpeg');
-    });
-
-    it('should detect PNG format', () => {
-      const buffer = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
-      expect(getImageFormat(buffer)).toBe('png');
-    });
-
-    it('should detect GIF format', () => {
-      const buffer = Buffer.from([0x47, 0x49, 0x46, 0x38, 0x39, 0x61]);
-      expect(getImageFormat(buffer)).toBe('gif');
-    });
-
-    it('should detect WebP format', () => {
-      const buffer = Buffer.alloc(12);
-      buffer.write('RIFF', 0);
-      buffer.write('WEBP', 8);
-      expect(getImageFormat(buffer)).toBe('webp');
-    });
-
-    it('should return unknown for unrecognized format', () => {
-      const buffer = Buffer.from([0x00, 0x00, 0x00, 0x00]);
-      expect(getImageFormat(buffer)).toBe('unknown');
-    });
-
-    it('should return unknown for small buffer', () => {
-      const buffer = Buffer.from([0xff, 0xd8]);
-      expect(getImageFormat(buffer)).toBe('unknown');
-    });
-  });
-
-  describe('calculateDimensions (internal)', () => {
-    // Access private method via any for testing
-    const processor = new ImageProcessor() as unknown as {
-      calculateDimensions: (
-        originalWidth: number,
-        originalHeight: number,
-        resize?: ImageResizeOptions,
-      ) => { width: number; height: number };
-      getMimeType: (format?: ImageFormatOptions) => string;
-      getExtension: (format?: ImageFormatOptions) => string;
-    };
-
-    it('should return original dimensions without resize options', () => {
-      const result = processor.calculateDimensions(1920, 1080, undefined);
-      expect(result).toEqual({ width: 1920, height: 1080 });
-    });
-
-    it('should return original dimensions when no width or height specified', () => {
-      const result = processor.calculateDimensions(1920, 1080, { fit: 'contain' });
-      expect(result).toEqual({ width: 1920, height: 1080 });
-    });
-
-    describe('fit: contain', () => {
-      it('should fit landscape image within bounds', () => {
-        const result = processor.calculateDimensions(1920, 1080, {
-          width: 800,
-          height: 600,
-          fit: 'contain',
-        });
-        // Landscape image: width determines size
-        expect(result.width).toBe(800);
-        expect(result.height).toBeLessThanOrEqual(600);
-      });
-
-      it('should fit portrait image within bounds', () => {
-        const result = processor.calculateDimensions(1080, 1920, {
-          width: 800,
-          height: 600,
-          fit: 'contain',
-        });
-        // Portrait image: height determines size
-        expect(result.height).toBeLessThanOrEqual(600);
-        expect(result.width).toBeLessThanOrEqual(800);
-      });
-    });
-
-    describe('fit: cover', () => {
-      it('should cover bounds with landscape image', () => {
-        const result = processor.calculateDimensions(1920, 1080, {
-          width: 800,
-          height: 600,
-          fit: 'cover',
-        });
-        // Cover means filling the area
-        expect(result.width).toBeGreaterThanOrEqual(800);
-        expect(result.height).toBeGreaterThanOrEqual(600);
-      });
-
-      it('should cover bounds with portrait image', () => {
-        const result = processor.calculateDimensions(1080, 1920, {
-          width: 800,
-          height: 600,
-          fit: 'cover',
-        });
-        expect(result.width).toBeGreaterThanOrEqual(800);
-        expect(result.height).toBeGreaterThanOrEqual(600);
-      });
-    });
-
-    describe('fit: fill', () => {
-      it('should use exact dimensions', () => {
-        const result = processor.calculateDimensions(1920, 1080, {
-          width: 800,
-          height: 600,
-          fit: 'fill',
-        });
-        expect(result).toEqual({ width: 800, height: 600 });
-      });
-    });
-
-    describe('fit: inside', () => {
-      it('should not enlarge image', () => {
-        const result = processor.calculateDimensions(400, 300, {
-          width: 800,
-          height: 600,
-          fit: 'inside',
-        });
-        // Original is smaller, should return original
-        expect(result).toEqual({ width: 400, height: 300 });
-      });
-
-      it('should shrink image to fit inside', () => {
-        const result = processor.calculateDimensions(1920, 1080, {
-          width: 800,
-          height: 600,
-          fit: 'inside',
-        });
-        expect(result.width).toBeLessThanOrEqual(800);
-        expect(result.height).toBeLessThanOrEqual(600);
-      });
-    });
-
-    describe('fit: outside', () => {
-      it('should scale image to cover bounds', () => {
-        const result = processor.calculateDimensions(1920, 1080, {
-          width: 800,
-          height: 600,
-          fit: 'outside',
-        });
-        // Similar to cover
-        expect(result.width).toBeGreaterThanOrEqual(800);
-      });
-    });
-
-    describe('withoutEnlargement', () => {
-      it('should not enlarge when withoutEnlargement is true', () => {
-        const result = processor.calculateDimensions(400, 300, {
-          width: 800,
-          height: 600,
-          fit: 'contain',
-          withoutEnlargement: true,
-        });
-        expect(result.width).toBeLessThanOrEqual(400);
-        expect(result.height).toBeLessThanOrEqual(300);
-      });
-
-      it('should allow shrinking with withoutEnlargement', () => {
-        const result = processor.calculateDimensions(1920, 1080, {
-          width: 800,
-          height: 600,
-          fit: 'contain',
-          withoutEnlargement: true,
-        });
-        expect(result.width).toBeLessThanOrEqual(800);
-        expect(result.height).toBeLessThanOrEqual(600);
-      });
-    });
-  });
-
-  describe('getMimeType (internal)', () => {
-    const processor = new ImageProcessor() as unknown as {
-      getMimeType: (format?: ImageFormatOptions) => string;
-    };
-
-    it('should return image/jpeg for jpeg format', () => {
-      expect(processor.getMimeType({ format: 'jpeg' })).toBe('image/jpeg');
-    });
-
-    it('should return image/png for png format', () => {
-      expect(processor.getMimeType({ format: 'png' })).toBe('image/png');
-    });
-
-    it('should return image/webp for webp format', () => {
-      expect(processor.getMimeType({ format: 'webp' })).toBe('image/webp');
-    });
-
-    it('should return image/jpeg as default', () => {
-      expect(processor.getMimeType(undefined)).toBe('image/jpeg');
-      expect(processor.getMimeType({})).toBe('image/jpeg');
-    });
-  });
-
-  describe('getExtension (internal)', () => {
-    const processor = new ImageProcessor() as unknown as {
-      getExtension: (format?: ImageFormatOptions) => string;
-    };
-
-    it('should return format extension', () => {
-      expect(processor.getExtension({ format: 'png' })).toBe('png');
-      expect(processor.getExtension({ format: 'webp' })).toBe('webp');
-    });
-
-    it('should return jpeg as default', () => {
-      expect(processor.getExtension(undefined)).toBe('jpeg');
-      expect(processor.getExtension({})).toBe('jpeg');
-    });
-  });
-
-  describe('getBasicMetadata (internal)', () => {
-    it('should return metadata with size and format', async () => {
-      const fs = await import('fs');
-      vi.mocked(fs.promises.stat).mockResolvedValue({ size: 4096 } as never);
-
-      const processor = new ImageProcessor();
-      const metadata = await processor.getMetadata('/test/image.png');
-
-      expect(metadata.size).toBe(4096);
-      expect(metadata.format).toBe('png');
-    });
-
-    it('should return empty metadata on error', async () => {
-      const fs = await import('fs');
-      vi.mocked(fs.promises.stat).mockRejectedValue(new Error('File not found'));
-
-      const processor = new ImageProcessor() as unknown as {
-        getBasicMetadata: (inputPath: string) => Promise<ImageMetadata>;
+  describe('validateImage', () => {
+    test('should validate a valid image buffer', async () => {
+      const mockStats = {
+        channels: [{ min: 0, max: 255, mean: 128, stdev: 64 }],
+        isOpaque: true,
+        entropy: 0.5,
+        sharpness: 1.2,
+        dominant: [128, 128, 128]
       };
-      const metadata = await processor.getBasicMetadata('/nonexistent.jpg');
+      
+      sharpMock.mockImplementation(() => ({
+        stats: vi.fn().mockResolvedValue(mockStats),
+      }));
 
-      expect(metadata).toEqual({});
+      const result = await validateImage(mockImageBuffer);
+
+      expect(sharp().stats).toHaveBeenCalled();
+      expect(result).toEqual({
+        isValid: true,
+        width: undefined, // Width would come from metadata, not stats
+        height: undefined,
+        channels: 1,
+        isOpaque: true,
+        entropy: 0.5,
+        sharpness: 1.2,
+        dominantColor: [128, 128, 128],
+        mimeType: undefined
+      });
     });
-  });
 
-  describe('process with error handling', () => {
-    it('should return error result on mkdir failure', async () => {
-      const fs = await import('fs');
-      vi.mocked(fs.promises.mkdir).mockRejectedValue(new Error('Permission denied'));
-
-      const processor = new ImageProcessor();
-      const result = await processor.process('/input.jpg', '/output.jpg');
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('Permission denied');
-    });
-
-    it('should return error result on non-Error exception', async () => {
-      const fs = await import('fs');
-      vi.mocked(fs.promises.mkdir).mockRejectedValue('String error');
-
-      const processor = new ImageProcessor();
-      const result = await processor.process('/input.jpg', '/output.jpg');
-
-      expect(result.success).toBe(false);
-      expect(result.error).toBe('Image processing failed');
-    });
-  });
-
-  describe('processBasic (fallback path)', () => {
-    it('should copy file with resize options', async () => {
-      const fs = await import('fs');
-      vi.mocked(fs.promises.mkdir).mockResolvedValue(undefined);
-      vi.mocked(fs.promises.copyFile).mockResolvedValue(undefined);
-      vi.mocked(fs.promises.stat).mockResolvedValue({ size: 2048 } as never);
-
-      const processor = new ImageProcessor();
-      const result = await processor.process('/input.jpg', '/output.jpg', {
-        resize: { width: 800, height: 600 },
+    test('should detect invalid image buffer', async () => {
+      sharpMock.mockImplementation(() => {
+        throw new Error('Input buffer contains unsupported image format');
       });
 
-      expect(result.success).toBe(true);
-      expect(result.outputPath).toBe('/output.jpg');
-      expect(result.metadata?.size).toBe(2048);
+      const result = await validateImage(Buffer.from('invalid-image-data'));
+
+      expect(result.isValid).toBe(false);
+      expect(result.error).toContain('unsupported image format');
     });
 
-    it('should copy file with format options', async () => {
-      const fs = await import('fs');
-      vi.mocked(fs.promises.mkdir).mockResolvedValue(undefined);
-      vi.mocked(fs.promises.copyFile).mockResolvedValue(undefined);
-      vi.mocked(fs.promises.stat).mockResolvedValue({ size: 1024 } as never);
-
-      const processor = new ImageProcessor();
-      const result = await processor.process('/input.jpg', '/output.webp', {
-        format: { format: 'webp', quality: 80 },
-      });
-
-      expect(result.success).toBe(true);
-    });
-
-    it('should copy file with thumbnail options', async () => {
-      const fs = await import('fs');
-      vi.mocked(fs.promises.mkdir).mockResolvedValue(undefined);
-      vi.mocked(fs.promises.copyFile).mockResolvedValue(undefined);
-      vi.mocked(fs.promises.stat).mockResolvedValue({ size: 512 } as never);
-
-      const processor = new ImageProcessor();
-      const result = await processor.process('/input.jpg', '/output.jpg', {
-        thumbnail: { size: 150 },
-      });
-
-      expect(result.success).toBe(true);
-    });
-
-    it('should copy file without any processing options', async () => {
-      const fs = await import('fs');
-      vi.mocked(fs.promises.mkdir).mockResolvedValue(undefined);
-      vi.mocked(fs.promises.copyFile).mockResolvedValue(undefined);
-      vi.mocked(fs.promises.stat).mockResolvedValue({ size: 4096 } as never);
-
-      const processor = new ImageProcessor();
-      const result = await processor.process('/input.jpg', '/output.jpg', {});
-
-      expect(result.success).toBe(true);
-      expect(result.metadata?.size).toBe(4096);
-    });
-  });
-
-  describe('processWithCanvas (when Canvas is available)', () => {
-    const originalDocument = globalThis.document;
-
-    beforeEach(() => {
-      // Mock document.createElement to return a canvas mock
-      const mockCanvas = createMockCanvas();
-      const mockImage = {
-        src: '',
-        width: 1920,
-        height: 1080,
-        onload: null as (() => void) | null,
-        onerror: null as ((e: Error) => void) | null,
+    test('should validate image with size constraints', async () => {
+      const mockStats = {
+        channels: [{ min: 0, max: 255, mean: 128, stdev: 64 }],
+        isOpaque: true,
+        entropy: 0.5,
+        sharpness: 1.2,
+        dominant: [128, 128, 128]
       };
+      
+      const mockMetadata = { width: 1920, height: 1080, format: 'jpeg' };
+      sharpMock.mockImplementation(() => ({
+        stats: vi.fn().mockResolvedValue(mockStats),
+        metadata: vi.fn().mockResolvedValue(mockMetadata),
+      }));
 
-      globalThis.document = {
-        createElement: vi.fn((tagName: string) => {
-          if (tagName === 'canvas') return mockCanvas;
-          if (tagName === 'img') return mockImage;
-          return null;
-        }),
-      } as unknown as Document;
+      const result = await validateImage(mockImageBuffer, {
+        maxWidth: 2000,
+        maxHeight: 1500,
+        minWidth: 100,
+        minHeight: 100
+      });
+
+      expect(result.isValid).toBe(true);
+      expect(result.width).toBe(1920);
+      expect(result.height).toBe(1080);
     });
 
-    afterEach(() => {
-      globalThis.document = originalDocument;
+    test('should reject image exceeding max dimensions', async () => {
+      const mockStats = {
+        channels: [{ min: 0, max: 255, mean: 128, stdev: 64 }],
+        isOpaque: true,
+        entropy: 0.5,
+        sharpness: 1.2,
+        dominant: [128, 128, 128]
+      };
+      
+      const mockMetadata = { width: 3000, height: 2000, format: 'jpeg' };
+      sharpMock.mockImplementation(() => ({
+        stats: vi.fn().mockResolvedValue(mockStats),
+        metadata: vi.fn().mockResolvedValue(mockMetadata),
+      }));
+
+      const result = await validateImage(mockImageBuffer, {
+        maxWidth: 2000,
+        maxHeight: 1500
+      });
+
+      expect(result.isValid).toBe(false);
+      expect(result.error).toContain('exceeds maximum allowed dimensions');
     });
 
-    it('should detect canvas support when document is available', () => {
-      // With our mock, hasCanvasSupport should now return true
-      expect(globalThis.document).toBeDefined();
-      expect(typeof globalThis.document.createElement).toBe('function');
+    test('should reject image below min dimensions', async () => {
+      const mockStats = {
+        channels: [{ min: 0, max: 255, mean: 128, stdev: 64 }],
+        isOpaque: true,
+        entropy: 0.5,
+        sharpness: 1.2,
+        dominant: [128, 128, 128]
+      };
+      
+      const mockMetadata = { width: 50, height: 50, format: 'jpeg' };
+      sharpMock.mockImplementation(() => ({
+        stats: vi.fn().mockResolvedValue(mockStats),
+        metadata: vi.fn().mockResolvedValue(mockMetadata),
+      }));
+
+      const result = await validateImage(mockImageBuffer, {
+        minWidth: 100,
+        minHeight: 100
+      });
+
+      expect(result.isValid).toBe(false);
+      expect(result.error).toContain('below minimum required dimensions');
+    });
+
+    test('should validate image with file size constraints', async () => {
+      // Mock a larger image buffer to test size constraints
+      const largeBuffer = Buffer.alloc(1024 * 1024 * 5); // 5MB buffer
+      
+      const mockStats = {
+        channels: [{ min: 0, max: 255, mean: 128, stdev: 64 }],
+        isOpaque: true,
+        entropy: 0.5,
+        sharpness: 1.2,
+        dominant: [128, 128, 128]
+      };
+      
+      const mockMetadata = { width: 1920, height: 1080, format: 'jpeg' };
+      sharpMock.mockImplementation(() => ({
+        stats: vi.fn().mockResolvedValue(mockStats),
+        metadata: vi.fn().mockResolvedValue(mockMetadata),
+      }));
+
+      const result = await validateImage(largeBuffer, {
+        maxSize: 1024 * 1024 * 2 // 2MB max
+      });
+
+      expect(result.isValid).toBe(false);
+      expect(result.error).toContain('exceeds maximum allowed size');
+    });
+
+    test('should validate image with acceptable file size', async () => {
+      const smallBuffer = Buffer.alloc(1024 * 100); // 100KB buffer
+      
+      const mockStats = {
+        channels: [{ min: 0, max: 255, mean: 128, stdev: 64 }],
+        isOpaque: true,
+        entropy: 0.5,
+        sharpness: 1.2,
+        dominant: [128, 128, 128]
+      };
+      
+      const mockMetadata = { width: 800, height: 600, format: 'jpeg' };
+      sharpMock.mockImplementation(() => ({
+        stats: vi.fn().mockResolvedValue(mockStats),
+        metadata: vi.fn().mockResolvedValue(mockMetadata),
+      }));
+
+      const result = await validateImage(smallBuffer, {
+        maxSize: 1024 * 1024 * 2 // 2MB max
+      });
+
+      expect(result.isValid).toBe(true);
+      expect(result.error).toBeUndefined();
+    });
+
+    test('should validate image with specific formats', async () => {
+      const mockStats = {
+        channels: [{ min: 0, max: 255, mean: 128, stdev: 64 }],
+        isOpaque: true,
+        entropy: 0.5,
+        sharpness: 1.2,
+        dominant: [128, 128, 128]
+      };
+      
+      const mockMetadata = { width: 800, height: 600, format: 'png' };
+      sharpMock.mockImplementation(() => ({
+        stats: vi.fn().mockResolvedValue(mockStats),
+        metadata: vi.fn().mockResolvedValue(mockMetadata),
+      }));
+
+      const result = await validateImage(mockImageBuffer, {
+        allowedFormats: ['jpeg', 'png']
+      });
+
+      expect(result.isValid).toBe(true);
+      expect(result.mimeType).toBe('png');
+    });
+
+    test('should reject image with disallowed format', async () => {
+      const mockStats = {
+        channels: [{ min: 0, max: 255, mean: 128, stdev: 64 }],
+        isOpaque: true,
+        entropy: 0.5,
+        sharpness: 1.2,
+        dominant: [128, 128, 128]
+      };
+      
+      const mockMetadata = { width: 800, height: 600, format: 'gif' };
+      sharpMock.mockImplementation(() => ({
+        stats: vi.fn().mockResolvedValue(mockStats),
+        metadata: vi.fn().mockResolvedValue(mockMetadata),
+      }));
+
+      const result = await validateImage(mockImageBuffer, {
+        allowedFormats: ['jpeg', 'png']
+      });
+
+      expect(result.isValid).toBe(false);
+      expect(result.error).toContain('format not allowed');
+    });
+
+    test('should validate image with opacity requirements', async () => {
+      const mockStats = {
+        channels: [{ min: 0, max: 255, mean: 128, stdev: 64 }],
+        isOpaque: false, // Has transparency
+        entropy: 0.5,
+        sharpness: 1.2,
+        dominant: [128, 128, 128]
+      };
+      
+      const mockMetadata = { width: 800, height: 600, format: 'png' };
+      sharpMock.mockImplementation(() => ({
+        stats: vi.fn().mockResolvedValue(mockStats),
+        metadata: vi.fn().mockResolvedValue(mockMetadata),
+      }));
+
+      const result = await validateImage(mockImageBuffer, {
+        requireOpaque: true
+      });
+
+      expect(result.isValid).toBe(false);
+      expect(result.error).toContain('must not contain transparency');
+    });
+
+    test('should validate opaque image when required', async () => {
+      const mockStats = {
+        channels: [{ min: 0, max: 255, mean: 128, stdev: 64 }],
+        isOpaque: true, // No transparency
+        entropy: 0.5,
+        sharpness: 1.2,
+        dominant: [128, 128, 128]
+      };
+      
+      const mockMetadata = { width: 800, height: 600, format: 'jpeg' };
+      sharpMock.mockImplementation(() => ({
+        stats: vi.fn().mockResolvedValue(mockStats),
+        metadata: vi.fn().mockResolvedValue(mockMetadata),
+      }));
+
+      const result = await validateImage(mockImageBuffer, {
+        requireOpaque: true
+      });
+
+      expect(result.isValid).toBe(true);
+      expect(result.isOpaque).toBe(true);
+    });
+
+    test('should validate image with minimum entropy', async () => {
+      const lowEntropyStats = {
+        channels: [{ min: 0, max: 255, mean: 128, stdev: 64 }],
+        isOpaque: true,
+        entropy: 0.1, // Low entropy (probably a simple image)
+        sharpness: 1.2,
+        dominant: [128, 128, 128]
+      };
+      
+      const mockMetadata = { width: 800, height: 600, format: 'jpeg' };
+      sharpMock.mockImplementation(() => ({
+        stats: vi.fn().mockResolvedValue(lowEntropyStats),
+        metadata: vi.fn().mockResolvedValue(mockMetadata),
+      }));
+
+      const result = await validateImage(mockImageBuffer, {
+        minEntropy: 0.5
+      });
+
+      expect(result.isValid).toBe(false);
+      expect(result.error).toContain('does not meet minimum entropy');
+    });
+
+    test('should validate image with sufficient entropy', async () => {
+      const highEntropyStats = {
+        channels: [{ min: 0, max: 255, mean: 128, stdev: 64 }],
+        isOpaque: true,
+        entropy: 0.8, // High entropy
+        sharpness: 1.2,
+        dominant: [128, 128, 128]
+      };
+      
+      const mockMetadata = { width: 800, height: 600, format: 'jpeg' };
+      sharpMock.mockImplementation(() => ({
+        stats: vi.fn().mockResolvedValue(highEntropyStats),
+        metadata: vi.fn().mockResolvedValue(mockMetadata),
+      }));
+
+      const result = await validateImage(mockImageBuffer, {
+        minEntropy: 0.5
+      });
+
+      expect(result.isValid).toBe(true);
+      expect(result.entropy).toBe(0.8);
+    });
+
+    test('should handle validation error', async () => {
+      sharpMock.mockImplementation(() => {
+        throw new Error('Validation error');
+      });
+
+      const result = await validateImage(mockImageBuffer);
+
+      expect(result.isValid).toBe(false);
+      expect(result.error).toContain('Validation error');
     });
   });
 
-  describe('calculateDimensions edge cases', () => {
-    const processor = new ImageProcessor() as unknown as {
-      calculateDimensions: (
-        originalWidth: number,
-        originalHeight: number,
-        resize?: ImageResizeOptions,
-      ) => { width: number; height: number };
-    };
+  describe('integration tests', () => {
+    test('should resize and optimize an image in sequence', async () => {
+      const resized = await resizeImage(mockImageBuffer, { width: 800, height: 600 });
+      const optimized = await optimizeImage(resized, { format: 'webp', quality: 80 });
 
-    it('should handle square image with contain fit', () => {
-      const result = processor.calculateDimensions(1000, 1000, {
-        width: 800,
-        height: 600,
-        fit: 'contain',
-      });
-      // Square image should fit within bounds
-      expect(result.width).toBeLessThanOrEqual(800);
-      expect(result.height).toBeLessThanOrEqual(600);
+      expect(resized).toBeInstanceOf(Buffer);
+      expect(optimized).toBeInstanceOf(Buffer);
     });
 
-    it('should handle only width specified', () => {
-      const result = processor.calculateDimensions(1920, 1080, {
-        width: 800,
-        fit: 'contain',
+    test('should validate, resize, and optimize an image', async () => {
+      const validationResult = await validateImage(mockImageBuffer, {
+        maxWidth: 2000,
+        maxHeight: 2000,
+        allowedFormats: ['jpeg', 'png', 'webp']
       });
-      expect(result.width).toBe(800);
-      // Height should maintain aspect ratio
-      expect(result.height).toBeLessThanOrEqual(1080);
+
+      expect(validationResult.isValid).toBe(true);
+
+      if (validationResult.isValid) {
+        const resized = await resizeImage(mockImageBuffer, { width: 800, height: 600 });
+        const optimized = await optimizeImage(resized, { format: 'jpeg', quality: 85 });
+
+        expect(resized).toBeInstanceOf(Buffer);
+        expect(optimized).toBeInstanceOf(Buffer);
+      }
     });
 
-    it('should handle only height specified', () => {
-      const result = processor.calculateDimensions(1920, 1080, {
-        height: 600,
-        fit: 'contain',
-      });
-      expect(result.height).toBeLessThanOrEqual(600);
-    });
+    test('should handle invalid image through full pipeline', async () => {
+      const invalidBuffer = Buffer.from('not-an-image');
 
-    it('should handle inside fit with smaller image', () => {
-      const result = processor.calculateDimensions(400, 300, {
-        width: 800,
-        height: 600,
-        fit: 'inside',
-      });
-      // Inside fit should not enlarge smaller images
-      expect(result.width).toBe(400);
-      expect(result.height).toBe(300);
-    });
+      const validationResult = await validateImage(invalidBuffer);
+      expect(validationResult.isValid).toBe(false);
 
-    it('should handle outside fit for portrait image', () => {
-      const result = processor.calculateDimensions(1080, 1920, {
-        width: 800,
-        height: 600,
-        fit: 'outside',
-      });
-      // At least one dimension should match or exceed target
-      expect(result.width >= 800 || result.height >= 600).toBe(true);
-    });
+      // Attempt resize should fail
+      await expect(resizeImage(invalidBuffer, { width: 800 })).rejects.toThrow();
 
-    it('should handle cover fit for portrait image', () => {
-      const result = processor.calculateDimensions(1080, 1920, {
-        width: 800,
-        height: 600,
-        fit: 'cover',
-      });
-      // Cover should fill the entire target area
-      expect(result.width).toBeGreaterThanOrEqual(800);
-    });
-
-    it('should respect withoutEnlargement for small images', () => {
-      const result = processor.calculateDimensions(100, 100, {
-        width: 800,
-        height: 600,
-        fit: 'fill',
-        withoutEnlargement: true,
-      });
-      expect(result.width).toBeLessThanOrEqual(100);
-      expect(result.height).toBeLessThanOrEqual(100);
+      // Attempt optimize should fail
+      await expect(optimizeImage(invalidBuffer, { format: 'jpeg' })).rejects.toThrow();
     });
   });
 
-  describe('Type interfaces', () => {
-    describe('ImageResizeOptions', () => {
-      it('should accept width and height', () => {
-        const options: ImageResizeOptions = {
-          width: 800,
-          height: 600,
-        };
-        expect(options.width).toBe(800);
-        expect(options.height).toBe(600);
-      });
+  describe('edge cases', () => {
+    test('should handle empty buffer', async () => {
+      const emptyBuffer = Buffer.alloc(0);
 
-      it('should accept fit modes', () => {
-        const options: ImageResizeOptions[] = [
-          { fit: 'contain' },
-          { fit: 'cover' },
-          { fit: 'fill' },
-          { fit: 'inside' },
-          { fit: 'outside' },
-        ];
-        expect(options).toHaveLength(5);
-      });
+      await expect(validateImage(emptyBuffer)).resolves.toEqual(
+        expect.objectContaining({ isValid: false })
+      );
 
-      it('should accept withoutEnlargement', () => {
-        const options: ImageResizeOptions = {
-          width: 800,
-          withoutEnlargement: true,
-        };
-        expect(options.withoutEnlargement).toBe(true);
-      });
+      await expect(resizeImage(emptyBuffer, { width: 100 })).rejects.toThrow();
+      await expect(optimizeImage(emptyBuffer, { format: 'jpeg' })).rejects.toThrow();
     });
 
-    describe('ImageFormatOptions', () => {
-      it('should accept format types', () => {
-        const jpeg: ImageFormatOptions = { format: 'jpeg', quality: 80 };
-        const png: ImageFormatOptions = { format: 'png', compressionLevel: 9 };
-        const webp: ImageFormatOptions = { format: 'webp', quality: 90 };
+    test('should handle very large buffer', async () => {
+      const largeBuffer = Buffer.alloc(1024 * 1024 * 50); // 50MB buffer
 
-        expect(jpeg.format).toBe('jpeg');
-        expect(png.format).toBe('png');
-        expect(webp.format).toBe('webp');
-      });
-
-      it('should accept progressive option', () => {
-        const options: ImageFormatOptions = {
-          format: 'jpeg',
-          progressive: true,
-        };
-        expect(options.progressive).toBe(true);
-      });
+      // Should validate size constraints
+      const result = await validateImage(largeBuffer, { maxSize: 1024 * 1024 * 10 }); // 10MB limit
+      expect(result.isValid).toBe(false);
+      expect(result.error).toContain('exceeds maximum allowed size');
     });
 
-    describe('ImageProcessingOptions', () => {
-      it('should accept all options', () => {
-        const options: ImageProcessingOptions = {
-          resize: { width: 800, height: 600, fit: 'cover' },
-          format: { format: 'webp', quality: 85 },
-          thumbnail: { size: 150, fit: 'cover' },
-        };
+    test('should handle null/undefined input', async () => {
+      // @ts-expect-error - Testing invalid input
+      await expect(validateImage(null)).resolves.toEqual(
+        expect.objectContaining({ isValid: false })
+      );
 
-        expect(options.resize?.width).toBe(800);
-        expect(options.format?.format).toBe('webp');
-        expect(options.thumbnail?.size).toBe(150);
-      });
+      // @ts-expect-error - Testing invalid input
+      await expect(validateImage(undefined)).resolves.toEqual(
+        expect.objectContaining({ isValid: false })
+      );
     });
 
-    describe('ImageMetadata', () => {
-      it('should have all optional fields', () => {
-        const metadata: ImageMetadata = {};
-        expect(metadata.width).toBeUndefined();
-        expect(metadata.height).toBeUndefined();
-        expect(metadata.format).toBeUndefined();
-        expect(metadata.size).toBeUndefined();
-      });
-
-      it('should accept full metadata', () => {
-        const metadata: ImageMetadata = {
-          width: 1920,
-          height: 1080,
-          format: 'jpeg',
-          size: 524288,
-        };
-        expect(metadata.width).toBe(1920);
-        expect(metadata.size).toBe(524288);
-      });
+    test('should handle non-buffer input', async () => {
+      // @ts-expect-error - Testing invalid input
+      await expect(validateImage('not-a-buffer')).resolves.toEqual(
+        expect.objectContaining({ isValid: false })
+      );
     });
 
-    describe('ProcessingResult', () => {
-      it('should represent success', () => {
-        const result: ProcessingResult = {
-          success: true,
-          outputPath: '/output.jpg',
-          thumbnailPath: '/output_thumb.jpg',
-          metadata: { width: 800, height: 600 },
-        };
-        expect(result.success).toBe(true);
-        expect(result.error).toBeUndefined();
+    test('should handle resize with zero dimensions', async () => {
+      await expect(resizeImage(mockImageBuffer, { width: 0, height: 0 })).rejects.toThrow();
+      await expect(resizeImage(mockImageBuffer, { width: 0 })).rejects.toThrow();
+      await expect(resizeImage(mockImageBuffer, { height: 0 })).rejects.toThrow();
+    });
+
+    test('should handle optimize with invalid quality', async () => {
+      await expect(optimizeImage(mockImageBuffer, { format: 'jpeg', quality: -1 })).rejects.toThrow();
+      await expect(optimizeImage(mockImageBuffer, { format: 'jpeg', quality: 101 })).rejects.toThrow();
+    });
+
+    test('should handle validation with negative constraints', async () => {
+      const result = await validateImage(mockImageBuffer, {
+        maxWidth: -100,
+        maxHeight: -100
       });
 
-      it('should represent failure', () => {
-        const result: ProcessingResult = {
-          success: false,
-          error: 'Processing failed',
-        };
-        expect(result.success).toBe(false);
-        expect(result.error).toBe('Processing failed');
-      });
+      // Should handle gracefully, likely invalid due to impossible constraints
+      expect(result.isValid).toBeDefined();
     });
   });
 });

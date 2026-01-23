@@ -1,0 +1,34 @@
+import type { RateLimitConfig } from '@abe-stack/core/contracts/config';
+import { getBool, getInt } from '@abe-stack/core/config/utils';
+
+/**
+ * Loads rate limiting configuration for API protection.
+ */
+export function loadRateLimitConfig(env: Record<string, string | undefined>): RateLimitConfig {
+  const isProd = env.NODE_ENV === 'production';
+
+  return {
+    // 1 minute default window
+    windowMs: getInt(env.RATE_LIMIT_WINDOW_MS, 60 * 1000),
+
+    // Max requests per window
+    max: getInt(env.RATE_LIMIT_MAX, isProd ? 100 : 1000),
+
+    // Internal memory management
+    cleanupIntervalMs: getInt(env.RATE_LIMIT_CLEANUP_INTERVAL_MS, 60 * 1000),
+
+    // High-end security: slow down bots rather than just blocking them
+    progressiveDelay: {
+      enabled: getBool(env.RATE_LIMIT_PROGRESSIVE_DELAY_ENABLED) ?? true,
+      baseDelay: getInt(env.RATE_LIMIT_BASE_DELAY_MS, 1000),
+      maxDelay: getInt(env.RATE_LIMIT_MAX_DELAY_MS, 10000),
+      backoffFactor: 2,
+    },
+  };
+}
+
+export const DEFAULT_RATE_LIMIT_CONFIG: RateLimitConfig = {
+  windowMs: 60000,
+  max: 100,
+  cleanupIntervalMs: 60000,
+};

@@ -6,11 +6,22 @@ import type { ToastMessage } from '@abe-stack/stores';
 import '../styles/components.css';
 
 type ToastProps = {
+  /** Toast message data */
   message: ToastMessage;
+  /** Auto-dismiss duration in ms */
   duration?: number;
+  /** Callback when toast is dismissed */
   onDismiss?: (id: string) => void;
 };
 
+/**
+ * A single toast notification that auto-dismisses.
+ *
+ * @example
+ * ```tsx
+ * <Toast message={{ id: '1', title: 'Success!' }} onDismiss={dismiss} />
+ * ```
+ */
 export function Toast({ message, duration = 3500, onDismiss }: ToastProps): ReactElement {
   useEffect(() => {
     const timer: ReturnType<typeof globalThis.setTimeout> = globalThis.setTimeout(() => {
@@ -34,10 +45,20 @@ export function Toast({ message, duration = 3500, onDismiss }: ToastProps): Reac
 }
 
 type ToastContainerProps = {
+  /** Array of toast messages to display */
   messages: ToastMessage[];
+  /** Callback when a toast is dismissed */
   onDismiss?: (id: string) => void;
 };
 
+/**
+ * A container for rendering multiple toast notifications.
+ *
+ * @example
+ * ```tsx
+ * <ToastContainer messages={toasts} onDismiss={dismiss} />
+ * ```
+ */
 export function ToastContainer({ messages, onDismiss }: ToastContainerProps): ReactElement {
   return (
     <div className="toast">

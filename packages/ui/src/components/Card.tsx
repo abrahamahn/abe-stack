@@ -11,10 +11,22 @@ import { cn } from '../utils/cn';
 import '../styles/elements.css';
 
 type CardRootProps = ComponentPropsWithoutRef<'div'> & {
+  /** The HTML element or React component to render as */
   as?: ElementType;
 };
 type CardSectionProps = ComponentPropsWithoutRef<'div'>;
 
+/**
+ * A container component for grouping related content with consistent styling.
+ *
+ * @example
+ * ```tsx
+ * <Card>
+ *   <Card.Header>Title</Card.Header>
+ *   <Card.Body>Content</Card.Body>
+ * </Card>
+ * ```
+ */
 const CardRoot = forwardRef<HTMLElement, CardRootProps>((props, ref) => {
   const { as = 'div', className, children, ...rest } = props;
   const Component: ElementType = as;
@@ -26,6 +38,7 @@ const CardRoot = forwardRef<HTMLElement, CardRootProps>((props, ref) => {
 });
 CardRoot.displayName = 'Card';
 
+/** Card header section for titles and actions. */
 function CardHeader({ className, children, ...rest }: CardSectionProps): ReactElement {
   return (
     <div className={cn('card-header', className)} {...rest}>
@@ -34,6 +47,7 @@ function CardHeader({ className, children, ...rest }: CardSectionProps): ReactEl
   );
 }
 
+/** Card body section for main content. */
 function CardBody({ className, children, ...rest }: CardSectionProps): ReactElement {
   return (
     <div className={cn('card-body', className)} {...rest}>
@@ -42,6 +56,7 @@ function CardBody({ className, children, ...rest }: CardSectionProps): ReactElem
   );
 }
 
+/** Card footer section for actions and metadata. */
 function CardFooter({ className, children, ...rest }: CardSectionProps): ReactElement {
   return (
     <div className={cn('card-footer', className)} {...rest}>

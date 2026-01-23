@@ -1,7 +1,6 @@
 // apps/web/src/features/auth/pages/__tests__/Register.test.tsx
-import { QueryCache, QueryCacheProvider } from '@abe-stack/sdk';
-import { MemoryRouter } from '@abe-stack/ui';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { renderWithProviders } from '../../../../__tests__/utils';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RegisterPage } from '../Register';
@@ -47,22 +46,7 @@ vi.mock('../../hooks', async (importOriginal) => {
 });
 
 describe('RegisterPage', () => {
-  const createQueryCache = (): QueryCache =>
-    new QueryCache({
-      defaultStaleTime: 0,
-      defaultGcTime: 0,
-    });
-
-  const renderRegisterPage = (): ReturnType<typeof render> => {
-    const queryCache = createQueryCache();
-    return render(
-      <QueryCacheProvider cache={queryCache}>
-        <MemoryRouter>
-          <RegisterPage />
-        </MemoryRouter>
-      </QueryCacheProvider>,
-    );
-  };
+  const renderRegisterPage = () => renderWithProviders(<RegisterPage />);
 
   beforeEach((): void => {
     vi.clearAllMocks();

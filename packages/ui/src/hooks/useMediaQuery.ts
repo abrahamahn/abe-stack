@@ -1,6 +1,14 @@
 // packages/ui/src/hooks/useMediaQuery.ts
 import { useEffect, useState } from 'react';
 
+/**
+ * Hook to track a CSS media query match state.
+ *
+ * @example
+ * ```tsx
+ * const isMobile = useMediaQuery('(max-width: 768px)');
+ * ```
+ */
 export function useMediaQuery(query: string): boolean {
   const [matches, setMatches] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;

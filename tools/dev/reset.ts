@@ -67,7 +67,7 @@ interface DbModule {
 
 async function dropAllTables(connectionString: string): Promise<void> {
   // Dynamic import with explicit type assertion
-  const dbModule: DbModule = await import('@abe-stack/db') as DbModule;
+  const dbModule: DbModule = await import('../../packages/db/src/index.ts') as DbModule;
   const db = dbModule.createRawDb(connectionString);
 
   console.log('🗑️  Dropping all tables...');

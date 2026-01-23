@@ -47,7 +47,13 @@ export function JobActionsMenu({
   }
 
   return (
-    <Dropdown trigger={<Button variant="text" size="small">Actions</Button>}>
+    <Dropdown
+      trigger={
+        <Button variant="text" size="small">
+          Actions
+        </Button>
+      }
+    >
       {(close) => (
         <>
           {canRetry && (

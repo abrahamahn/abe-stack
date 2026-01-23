@@ -48,12 +48,15 @@ export function useExportEvents(): UseExportEventsResult {
     [config.apiUrl],
   );
 
-  const mutation: UseMutationResult<SecurityEventsExportResponse, Error, SecurityEventsExportRequest> =
-    useMutation({
-      mutationFn: async (request: SecurityEventsExportRequest) => {
-        return adminApi.exportSecurityEvents(request);
-      },
-    });
+  const mutation: UseMutationResult<
+    SecurityEventsExportResponse,
+    Error,
+    SecurityEventsExportRequest
+  > = useMutation({
+    mutationFn: async (request: SecurityEventsExportRequest) => {
+      return adminApi.exportSecurityEvents(request);
+    },
+  });
 
   const exportEvents = useCallback(
     (format: 'csv' | 'json', filter?: SecurityEventsFilter) => {
@@ -64,20 +67,23 @@ export function useExportEvents(): UseExportEventsResult {
 
   const downloadExport = useCallback(
     (format: 'csv' | 'json', filter?: SecurityEventsFilter) => {
-      void mutation.mutateAsync({ format, filter }).then((response) => {
-        // Create a blob and download link
-        const blob = new Blob([response.data], { type: response.contentType });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = response.filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      }).catch(() => {
-        // Error is already handled in mutation state
-      });
+      void mutation
+        .mutateAsync({ format, filter })
+        .then((response) => {
+          // Create a blob and download link
+          const blob = new Blob([response.data], { type: response.contentType });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = response.filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        })
+        .catch(() => {
+          // Error is already handled in mutation state
+        });
     },
     [mutation],
   );

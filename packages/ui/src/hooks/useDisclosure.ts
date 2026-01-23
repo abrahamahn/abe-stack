@@ -3,11 +3,22 @@ import { useControllableState } from '@hooks/useControllableState';
 import { useCallback } from 'react';
 
 export type UseDisclosureProps = {
+  /** Controlled open state */
   open?: boolean;
+  /** Initial open state for uncontrolled usage */
   defaultOpen?: boolean;
+  /** Callback when open state changes */
   onChange?: (open: boolean) => void;
 };
 
+/**
+ * Hook for managing open/close state of dialogs, dropdowns, etc.
+ *
+ * @example
+ * ```tsx
+ * const { open, openFn, close, toggle } = useDisclosure();
+ * ```
+ */
 export function useDisclosure({ open, defaultOpen = false, onChange }: UseDisclosureProps): {
   open: boolean;
   openFn: () => void;

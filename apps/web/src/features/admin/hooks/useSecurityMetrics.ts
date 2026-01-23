@@ -31,7 +31,7 @@ export interface UseSecurityMetricsResult {
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
-  refetch: () => void;
+  refetch: () => Promise<void>;
   period: MetricsPeriod;
   setPeriod: (period: MetricsPeriod) => void;
 }

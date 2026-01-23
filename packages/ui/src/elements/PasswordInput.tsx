@@ -25,7 +25,12 @@ type PasswordInputProps = Omit<ComponentPropsWithoutRef<'input'>, 'type'> & {
 };
 
 /**
- * Password input with optional strength indicator and visibility toggle
+ * Password input with optional strength indicator and visibility toggle.
+ *
+ * @example
+ * ```tsx
+ * <PasswordInput label="Password" showStrength showToggle />
+ * ```
  */
 export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>((props, ref) => {
   const {

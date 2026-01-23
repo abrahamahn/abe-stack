@@ -1,0 +1,161 @@
+// apps/web/src/features/settings/components/SessionsList.tsx
+/**
+ * Sessions List Component
+ *
+ * Displays list of user sessions with revoke functionality.
+ */
+
+import { useState, type ReactElement } from 'react';
+
+import { Alert, Button, Skeleton } from '@abe-stack/ui';
+
+import { useRevokeAllSessions, useRevokeSession, useSessions } from '../hooks';
+
+import { SessionCard } from './SessionCard';
+
+// ============================================================================
+// Types
+// ============================================================================
+
+export interface SessionsListProps {
+  onRevokeSuccess?: () => void;
+}
+
+// ============================================================================
+// Component
+// ============================================================================
+
+export function SessionsList({ onRevokeSuccess }: SessionsListProps): ReactElement {
+  const [revokingId, setRevokingId] = useState<string | null>(null);
+
+  const { sessions, isLoading, isError, error, refetch } = useSessions();
+
+  const { revokeSession, isLoading: isRevokingSingle, error: revokeError } = useRevokeSession({
+    onSuccess: () => {
+      setRevokingId(null);
+      refetch();
+      onRevokeSuccess?.();
+    },
+    onError: () => {
+      setRevokingId(null);
+    },
+  });
+
+  const {
+    revokeAllSessions,
+    isLoading: isRevokingAll,
+    error: revokeAllError,
+    revokedCount,
+  } = useRevokeAllSessions({
+    onSuccess: () => {
+      refetch();
+      onRevokeSuccess?.();
+    },
+  });
+
+  const handleRevoke = (sessionId: string): void => {
+    if (confirm('Are you sure you want to revoke this session?')) {
+      setRevokingId(sessionId);
+      revokeSession(sessionId);
+    }
+  };
+
+  const handleRevokeAll = (): void => {
+    const otherSessions = sessions.filter((s) => !s.isCurrent);
+    if (otherSessions.length === 0) {
+      return;
+    }
+
+    if (
+      confirm(
+        `Are you sure you want to log out from ${String(otherSessions.length)} other device${otherSessions.length === 1 ? '' : 's'}?`,
+      )
+    ) {
+      revokeAllSessions();
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-24 w-full" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Alert tone="danger">
+        Failed to load sessions: {error?.message ?? 'Unknown error'}
+      </Alert>
+    );
+  }
+
+  const otherSessions = sessions.filter((s) => !s.isCurrent);
+  const currentSession = sessions.find((s) => s.isCurrent);
+
+  return (
+    <div className="space-y-4">
+      {revokedCount !== null && revokedCount > 0 && (
+        <Alert tone="success">
+          Successfully logged out from {revokedCount} device{revokedCount === 1 ? '' : 's'}.
+        </Alert>
+      )}
+
+      {(revokeError ?? revokeAllError) && (
+        <Alert tone="danger">
+          {revokeError?.message ?? revokeAllError?.message}
+        </Alert>
+      )}
+
+      {/* Current Session */}
+      {currentSession && (
+        <SessionCard
+          session={currentSession}
+          onRevoke={() => {}}
+        />
+      )}
+
+      {/* Other Sessions */}
+      {otherSessions.length > 0 && (
+        <>
+          <div className="border-t pt-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-medium">
+                Other Devices ({otherSessions.length})
+              </h3>
+              <Button
+                variant="text"
+                size="small"
+                onClick={handleRevokeAll}
+                disabled={isRevokingAll || isRevokingSingle}
+                className="text-red-600 hover:text-red-700"
+              >
+                {isRevokingAll ? 'Logging out...' : 'Log out from all'}
+              </Button>
+            </div>
+
+            <div className="space-y-3">
+              {otherSessions.map((session) => (
+                <SessionCard
+                  key={session.id}
+                  session={session}
+                  onRevoke={() => { handleRevoke(session.id); }}
+                  isRevoking={revokingId === session.id}
+                />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+
+      {sessions.length === 1 && (
+        <p className="text-sm text-gray-500 text-center py-4">
+          This is your only active session.
+        </p>
+      )}
+    </div>
+  );
+}

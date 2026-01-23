@@ -1,7 +1,6 @@
 // apps/web/src/features/auth/pages/__tests__/AuthPage.test.tsx
-import { QueryCache, QueryCacheProvider } from '@abe-stack/sdk';
-import { MemoryRouter } from '@abe-stack/ui';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { renderWithProviders } from '../../../../__tests__/utils';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AuthPage } from '../AuthPage';
@@ -55,22 +54,8 @@ vi.mock('@abe-stack/stores', async () => {
 });
 
 describe('AuthPage', () => {
-  const createQueryCache = (): QueryCache =>
-    new QueryCache({
-      defaultStaleTime: 0,
-      defaultGcTime: 0,
-    });
-
-  const renderAuthPage = (initialEntries: string[] = ['/auth']): ReturnType<typeof render> => {
-    const queryCache = createQueryCache();
-    return render(
-      <QueryCacheProvider cache={queryCache}>
-        <MemoryRouter initialEntries={initialEntries}>
-          <AuthPage />
-        </MemoryRouter>
-      </QueryCacheProvider>,
-    );
-  };
+  const renderAuthPage = (initialEntries: string[] = ['/auth']) =>
+    renderWithProviders(<AuthPage />, { initialEntries });
 
   beforeEach((): void => {
     vi.clearAllMocks();
@@ -148,6 +133,7 @@ describe('AuthPage', () => {
           id: '1',
           email: 'test@example.com',
           name: 'Test User',
+          avatarUrl: null,
           role: 'user' as const,
           createdAt: '2024-01-01T00:00:00Z',
         },
@@ -157,7 +143,7 @@ describe('AuthPage', () => {
 
       renderAuthPage();
 
-      expect(mockNavigate).toHaveBeenCalledWith('/dashboard');
+      expect(mockNavigate).toHaveBeenCalledWith('/settings');
     });
   });
 

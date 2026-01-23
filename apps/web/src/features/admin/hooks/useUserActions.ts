@@ -24,8 +24,14 @@ export interface UseUserActionsState {
 }
 
 export interface UseUserActionsResult extends UseUserActionsState {
-  updateUserAction: (userId: string, data: AdminUpdateUserRequest) => Promise<AdminUpdateUserResponse | null>;
-  lockUserAction: (userId: string, data: AdminLockUserRequest) => Promise<AdminLockUserResponse | null>;
+  updateUserAction: (
+    userId: string,
+    data: AdminUpdateUserRequest,
+  ) => Promise<AdminUpdateUserResponse | null>;
+  lockUserAction: (
+    userId: string,
+    data: AdminLockUserRequest,
+  ) => Promise<AdminLockUserResponse | null>;
   unlockUserAction: (userId: string, reason: string) => Promise<AdminLockUserResponse | null>;
   clearError: () => void;
 }
@@ -43,7 +49,10 @@ export function useUserActions(): UseUserActionsResult {
   });
 
   const updateUserAction = useCallback(
-    async (userId: string, data: AdminUpdateUserRequest): Promise<AdminUpdateUserResponse | null> => {
+    async (
+      userId: string,
+      data: AdminUpdateUserRequest,
+    ): Promise<AdminUpdateUserResponse | null> => {
       setState((prev) => ({ ...prev, isUpdating: true, error: null }));
 
       try {

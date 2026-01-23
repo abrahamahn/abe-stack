@@ -5,11 +5,22 @@ import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import '../styles/elements.css';
 
 type SwitchProps = Omit<ComponentPropsWithoutRef<'button'>, 'onChange' | 'defaultChecked'> & {
+  /** Controlled checked state */
   checked?: boolean;
+  /** Initial checked state for uncontrolled usage */
   defaultChecked?: boolean;
+  /** Callback when checked state changes */
   onChange?: (checked: boolean) => void;
 };
 
+/**
+ * An accessible toggle switch for binary on/off states.
+ *
+ * @example
+ * ```tsx
+ * <Switch checked={enabled} onChange={setEnabled} />
+ * ```
+ */
 export const Switch = forwardRef<HTMLButtonElement, SwitchProps>((props, ref) => {
   const { checked, defaultChecked, onChange, className = '', type = 'button', ...rest } = props;
 

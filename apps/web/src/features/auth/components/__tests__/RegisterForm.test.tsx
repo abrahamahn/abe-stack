@@ -1,14 +1,14 @@
 // apps/web/src/features/auth/components/__tests__/RegisterForm.test.tsx
-import { MemoryRouter } from '@abe-stack/ui';
 import { RegisterForm } from '@auth/components/RegisterForm';
 import { useResendCooldown } from '@auth/hooks';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { renderWithProviders } from '../../../../__tests__/utils';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import type { RegisterResponse } from '@abe-stack/core';
 import type { RegisterFormProps } from '@auth/components/RegisterForm';
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactElement } from 'react';
 
 // Mock the useResendCooldown hook (vi.mock is hoisted automatically)
 vi.mock('@auth/hooks', () => ({
@@ -20,14 +20,9 @@ vi.mock('@auth/hooks', () => ({
   })),
 }));
 
-// Wrapper component for Router context
-function RouterWrapper({ children }: { children: ReactNode }): ReactElement {
-  return <MemoryRouter>{children}</MemoryRouter>;
-}
-
-// Helper function to render with router
-function renderWithRouter(ui: ReactElement): ReturnType<typeof render> {
-  return render(ui, { wrapper: RouterWrapper });
+// Helper function to render with providers
+function renderWithRouter(ui: ReactElement) {
+  return renderWithProviders(ui);
 }
 
 describe('RegisterForm', () => {

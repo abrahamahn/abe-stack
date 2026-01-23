@@ -68,6 +68,7 @@ function createMockContext(): AppContext {
     email: {} as AppContext['email'],
     storage: {} as AppContext['storage'],
     pubsub: {} as AppContext['pubsub'],
+    cache: {} as AppContext['cache'],
     log: {
       info: vi.fn(),
       warn: vi.fn(),

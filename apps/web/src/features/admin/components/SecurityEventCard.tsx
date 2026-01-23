@@ -39,9 +39,7 @@ function getSeverityBadgeClass(severity: string): string {
 }
 
 function formatEventType(eventType: string): string {
-  return eventType
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return eventType.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 function formatDate(dateString: string): string {
@@ -82,10 +80,7 @@ function DetailRow({ label, value, isLoading }: DetailRowProps): JSX.Element {
 // Component
 // ============================================================================
 
-export function SecurityEventCard({
-  event,
-  isLoading,
-}: SecurityEventCardProps): JSX.Element {
+export function SecurityEventCard({ event, isLoading }: SecurityEventCardProps): JSX.Element {
   return (
     <div className="space-y-6">
       <Card className="p-6">
@@ -94,11 +89,7 @@ export function SecurityEventCard({
         </Heading>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
-          <DetailRow
-            label="Event ID"
-            value={event?.id}
-            isLoading={isLoading}
-          />
+          <DetailRow label="Event ID" value={event?.id} isLoading={isLoading} />
           <DetailRow
             label="Created At"
             value={event ? formatDate(event.createdAt) : undefined}
@@ -162,9 +153,7 @@ export function SecurityEventCard({
           </Heading>
 
           <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 overflow-auto">
-            <pre className="text-sm font-mono">
-              {JSON.stringify(event.metadata, null, 2)}
-            </pre>
+            <pre className="text-sm font-mono">{JSON.stringify(event.metadata, null, 2)}</pre>
           </div>
         </Card>
       )}

@@ -41,7 +41,7 @@ export interface UseJobsListResult {
   isLoading: boolean;
   isError: boolean;
   error: Error | null;
-  refetch: () => void;
+  refetch: () => Promise<void>;
   setFilter: (filter: JobsFilter) => void;
   setPage: (page: number) => void;
   setStatus: (status: JobStatus | undefined) => void;

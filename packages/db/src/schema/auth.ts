@@ -32,6 +32,8 @@ export const SECURITY_EVENTS_TABLE = 'security_events';
 export interface RefreshTokenFamily {
   id: string;
   userId: string;
+  ipAddress: string | null;
+  userAgent: string | null;
   createdAt: Date;
   revokedAt: Date | null;
   revokeReason: string | null;
@@ -43,6 +45,8 @@ export interface RefreshTokenFamily {
 export interface NewRefreshTokenFamily {
   id?: string;
   userId: string;
+  ipAddress?: string | null;
+  userAgent?: string | null;
   createdAt?: Date;
   revokedAt?: Date | null;
   revokeReason?: string | null;
@@ -51,6 +55,8 @@ export interface NewRefreshTokenFamily {
 export const REFRESH_TOKEN_FAMILY_COLUMNS = {
   id: 'id',
   userId: 'user_id',
+  ipAddress: 'ip_address',
+  userAgent: 'user_agent',
   createdAt: 'created_at',
   revokedAt: 'revoked_at',
   revokeReason: 'revoke_reason',

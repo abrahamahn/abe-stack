@@ -30,7 +30,12 @@ interface MetricItemProps {
   isLoading: boolean;
 }
 
-function MetricItem({ label, value, variant = 'default', isLoading }: MetricItemProps): JSX.Element {
+function MetricItem({
+  label,
+  value,
+  variant = 'default',
+  isLoading,
+}: MetricItemProps): JSX.Element {
   const getVariantClass = (): string => {
     switch (variant) {
       case 'critical':
@@ -71,10 +76,7 @@ function MetricItem({ label, value, variant = 'default', isLoading }: MetricItem
 // Component
 // ============================================================================
 
-export function SecurityMetricsCard({
-  metrics,
-  isLoading,
-}: SecurityMetricsCardProps): JSX.Element {
+export function SecurityMetricsCard({ metrics, isLoading }: SecurityMetricsCardProps): JSX.Element {
   return (
     <Card className="p-6">
       <Heading as="h3" size="md" className="mb-4">
@@ -82,11 +84,7 @@ export function SecurityMetricsCard({
       </Heading>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        <MetricItem
-          label="Total Events"
-          value={metrics?.totalEvents ?? 0}
-          isLoading={isLoading}
-        />
+        <MetricItem label="Total Events" value={metrics?.totalEvents ?? 0} isLoading={isLoading} />
         <MetricItem
           label="Critical"
           value={metrics?.criticalEvents ?? 0}

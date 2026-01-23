@@ -147,7 +147,7 @@ export {
   type CteInsertBuilder,
   type CteSelectBuilder,
   type CteUpdateBuilder,
-} from './builder';
+} from './builder/index.js';
 
 // Client exports
 export {
@@ -160,7 +160,7 @@ export {
   type QueryOptions,
   type RawDb,
   type TransactionOptions,
-} from './client';
+} from './client.js';
 
 // Schema type exports
 export {
@@ -276,7 +276,7 @@ export {
   type UpdatePaymentMethod,
   type UpdatePlan,
   type UpdateSubscription,
-} from './schema';
+} from './schema/index.js';
 
 // Utilities
 export {

@@ -13,13 +13,21 @@ import {
 import '../styles/components.css';
 
 export type RadioGroupProps = {
+  /** Controlled selected value */
   value?: string;
+  /** Initially selected value for uncontrolled usage */
   defaultValue?: string;
+  /** Callback when selected value changes */
   onValueChange?: (value: string) => void;
+  /** Shared name for the radio group */
   name?: string;
+  /** Radio button children */
   children: ReactNode;
+  /** Additional CSS classes */
   className?: string;
+  /** Accessible label for the group */
   'aria-label'?: string;
+  /** ID of element labeling the group */
   'aria-labelledby'?: string;
 };
 
@@ -35,6 +43,17 @@ export function useRadioGroupContext(): RadioGroupContextType | null {
   return useContext(RadioGroupContext);
 }
 
+/**
+ * A container for grouped radio buttons with keyboard navigation.
+ *
+ * @example
+ * ```tsx
+ * <RadioGroup value={selected} onValueChange={setSelected}>
+ *   <Radio label="Option A" value="a" />
+ *   <Radio label="Option B" value="b" />
+ * </RadioGroup>
+ * ```
+ */
 export function RadioGroup(props: RadioGroupProps): ReactElement {
   const {
     value: valueProp,

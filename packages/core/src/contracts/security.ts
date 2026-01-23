@@ -97,12 +97,12 @@ export const securityEventSchema: Schema<SecurityEvent> = createSchema((data: un
 
   return {
     id: obj.id,
-    userId: obj.userId as string | null,
-    email: obj.email as string | null,
+    userId: obj.userId,
+    email: obj.email,
     eventType: obj.eventType,
     severity: obj.severity,
-    ipAddress: obj.ipAddress as string | null,
-    userAgent: obj.userAgent as string | null,
+    ipAddress: obj.ipAddress,
+    userAgent: obj.userAgent,
     metadata: obj.metadata as Record<string, unknown> | null,
     createdAt: obj.createdAt,
   };

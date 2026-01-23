@@ -2,29 +2,109 @@
   "name": "@abe-stack/core",
   "version": "1.1.0",
   "description": "API contracts, shared types, and validation schemas for abe-stack",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "types": "src/index.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./domains/auth": "./src/domains/auth/index.ts",
-    "./domains/cache": "./src/domains/cache/index.ts",
-    "./domains/users": "./src/domains/users/index.ts",
-    "./domains/pagination": "./src/domains/pagination/index.ts",
-    "./domains/admin": "./src/domains/admin/index.ts",
-    "./infrastructure": "./src/infrastructure/index.ts",
-    "./infrastructure/async": "./src/infrastructure/async/index.ts",
-    "./infrastructure/constants": "./src/infrastructure/constants/index.ts",
-    "./infrastructure/crypto": "./src/infrastructure/crypto/index.ts",
-    "./infrastructure/errors": "./src/infrastructure/errors/index.ts",
-    "./infrastructure/http": "./src/infrastructure/http/index.ts",
-    "./infrastructure/transactions": "./src/infrastructure/transactions/index.ts",
-    "./contracts": "./src/contracts/index.ts",
-    "./crypto": "./src/infrastructure/crypto/index.ts",
-    "./errors": "./src/errors/index.ts",
-    "./http": "./src/infrastructure/http/index.ts",
-    "./shared": "./src/shared/index.ts",
-    "./utils": "./src/utils/index.ts",
-    "./env": "./src/env.ts"
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./domains/auth": {
+      "types": "./src/domains/auth/index.ts",
+      "default": "./dist/domains/auth/index.js"
+    },
+    "./domains/cache": {
+      "types": "./src/domains/cache/index.ts",
+      "default": "./dist/domains/cache/index.js"
+    },
+    "./domains/users": {
+      "types": "./src/domains/users/index.ts",
+      "default": "./dist/domains/users/index.js"
+    },
+    "./domains/pagination": {
+      "types": "./src/domains/pagination/index.ts",
+      "default": "./dist/domains/pagination/index.js"
+    },
+    "./domains/admin": {
+      "types": "./src/domains/admin/index.ts",
+      "default": "./dist/domains/admin/index.js"
+    },
+    "./infrastructure": {
+      "types": "./src/infrastructure/index.ts",
+      "default": "./dist/infrastructure/index.js"
+    },
+    "./infrastructure/async": {
+      "types": "./src/infrastructure/async/index.ts",
+      "default": "./dist/infrastructure/async/index.js"
+    },
+    "./infrastructure/constants": {
+      "types": "./src/infrastructure/constants/index.ts",
+      "default": "./dist/infrastructure/constants/index.js"
+    },
+    "./infrastructure/crypto": {
+      "types": "./src/infrastructure/crypto/index.ts",
+      "default": "./dist/infrastructure/crypto/index.js"
+    },
+    "./infrastructure/errors": {
+      "types": "./src/infrastructure/errors/index.ts",
+      "default": "./dist/infrastructure/errors/index.js"
+    },
+    "./infrastructure/http": {
+      "types": "./src/infrastructure/http/index.ts",
+      "default": "./dist/infrastructure/http/index.js"
+    },
+    "./infrastructure/transactions": {
+      "types": "./src/infrastructure/transactions/index.ts",
+      "default": "./dist/infrastructure/transactions/index.js"
+    },
+    "./infrastructure/logger/console": {
+      "types": "./src/infrastructure/logger/console.ts",
+      "default": "./dist/infrastructure/logger/console.js"
+    },
+    "./contracts": {
+      "types": "./src/contracts/index.ts",
+      "default": "./dist/contracts/index.js"
+    },
+    "./config": {
+      "types": "./src/config/types.ts",
+      "default": "./dist/config/types.js"
+    },
+    "./config/types": {
+      "types": "./src/config/types.ts",
+      "default": "./dist/config/types.js"
+    },
+    "./config/utils": {
+      "types": "./src/config/utils.ts",
+      "default": "./dist/config/utils.js"
+    },
+    "./contracts/config": {
+      "types": "./src/contracts/config/index.ts",
+      "default": "./dist/contracts/config/index.js"
+    },
+    "./crypto": {
+      "types": "./src/infrastructure/crypto/index.ts",
+      "default": "./dist/infrastructure/crypto/index.js"
+    },
+    "./errors": {
+      "types": "./src/errors/index.ts",
+      "default": "./dist/errors/index.js"
+    },
+    "./http": {
+      "types": "./src/infrastructure/http/index.ts",
+      "default": "./dist/infrastructure/http/index.js"
+    },
+    "./shared": {
+      "types": "./src/shared/index.ts",
+      "default": "./dist/shared/index.js"
+    },
+    "./utils": {
+      "types": "./src/utils/index.ts",
+      "default": "./dist/utils/index.js"
+    },
+    "./env": {
+      "types": "./src/env.ts",
+      "default": "./dist/env.js"
+    }
   },
   "scripts": {
     "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build",

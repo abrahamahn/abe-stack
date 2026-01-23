@@ -209,15 +209,18 @@ function createMockUser(overrides?: Partial<User>): User {
     id: 'user-id',
     email: 'test@example.com',
     name: 'Test User',
+    avatarUrl: null,
     role: 'user',
     passwordHash: '$argon2id$v=19$m=19456,t=2,p=1$test',
     emailVerified: true,
     emailVerifiedAt: new Date(),
     lockedUntil: null,
+    failedLoginAttempts: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
+    version: 1,
     ...overrides,
-  } as User;
+  };
 }
 
 // ============================================================================

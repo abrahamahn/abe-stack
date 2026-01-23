@@ -19,7 +19,7 @@ import { RateLimiter } from '@rate-limit/index';
 import Fastify from 'fastify';
 import { vi, type Mock } from 'vitest';
 
-import type { AppConfig } from '@config/index';
+import type { AppConfig } from '@config';
 import type { FastifyInstance, InjectOptions, LightMyRequestResponse } from 'fastify';
 
 // Mock function type that is callable
@@ -203,10 +203,10 @@ export function createUnverifiedUser(overrides: Partial<TestUser> = {}): TestUse
 }
 
 // ============================================================================
-// Test Configuration
+// Test uration
 // ============================================================================
 
-export function createTestConfig(overrides: Partial<AppConfig> = {}): AppConfig {
+export function createTest(overrides: Partial<AppConfig> = {}): AppConfig {
   return {
     env: 'test',
     server: {
@@ -344,7 +344,7 @@ export interface TestServer {
 }
 
 /**
- * Create a configured test server using fastify.inject()
+ * Create a ured test server using fastify.inject()
  * This creates a server without actually listening on a port.
  */
 export async function createTestServer(options: TestServerOptions = {}): Promise<TestServer> {
@@ -360,7 +360,7 @@ export async function createTestServer(options: TestServerOptions = {}): Promise
     production = false,
   } = options;
 
-  const config = createTestConfig({
+  const config = createTest({
     ...configOverrides,
     env: production ? 'production' : 'test',
   });
@@ -458,7 +458,7 @@ export async function createTestServer(options: TestServerOptions = {}): Promise
   server.decorate('testDb', db);
   server.decorate('testEmail', email);
   server.decorate('testStorage', storage);
-  server.decorate('testConfig', config);
+  server.decorate('test', config);
 
   // NOTE: server.ready() is NOT called here to allow tests to add routes
   // Tests should call server.ready() after adding their routes
@@ -577,6 +577,6 @@ declare module 'fastify' {
     testDb: MockDbClient;
     testEmail: MockEmailService;
     testStorage: MockStorageProvider;
-    testConfig: AppConfig;
+    test: AppConfig;
   }
 }

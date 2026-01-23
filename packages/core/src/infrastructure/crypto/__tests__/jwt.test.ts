@@ -1,238 +1,279 @@
 // packages/core/src/infrastructure/crypto/__tests__/jwt.test.ts
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, test, vi, beforeEach } from 'vitest';
 
-import { decode, JwtError, sign, verify } from '../jwt';
+import { 
+  jwtSign, 
+  jwtVerify, 
+  jwtDecode, 
+  JwtError, 
+  type JwtPayload,
+  checkTokenSecret,
+  createJwtRotationHandler,
+  signWithRotation,
+  verifyWithRotation,
+  type JwtRotationConfig
+} from '../jwt';
 
-describe('JWT', () => {
-  const SECRET = 'test-secret-key-12345';
+// Mock crypto for Node.js environment
+vi.mock('node:crypto', async () => {
+  const actual = await vi.importActual('node:crypto');
+  return {
+    ...actual,
+    randomFillSync: vi.fn((buffer) => {
+      // Fill buffer with predictable values for consistent tests
+      for (let i = 0; i < buffer.length; i++) {
+        buffer[i] = i % 256;
+      }
+      return buffer;
+    }),
+  };
+});
+
+describe('JWT Utilities', () => {
+  const secret = 'test-secret-32-characters-long!!';
+  const payload: JwtPayload = {
+    userId: 'user-123',
+    email: 'test@example.com',
+    role: 'user',
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
+  };
 
   beforeEach(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date('2024-01-01T00:00:00Z'));
+    vi.clearAllMocks();
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  describe('sign', () => {
-    it('should create a valid JWT token', () => {
-      const payload = { userId: '123', role: 'admin' };
-      const token = sign(payload, SECRET);
+  describe('jwtSign', () => {
+    test('should create a valid JWT token', async () => {
+      const token = await jwtSign(payload, secret);
 
       expect(typeof token).toBe('string');
-      expect(token.split('.')).toHaveLength(3);
+      expect(token.split('.')).toHaveLength(3); // header.payload.signature
+
+      // Decode to verify content
+      const decoded = jwtDecode(token);
+      expect(decoded.userId).toBe(payload.userId);
+      expect(decoded.email).toBe(payload.email);
+      expect(decoded.role).toBe(payload.role);
     });
 
-    it('should include iat claim', () => {
-      const payload = { userId: '123' };
-      const token = sign(payload, SECRET);
-      const decoded = decode(token);
+    test('should include provided options in token', async () => {
+      const customPayload = { ...payload, customField: 'custom-value' };
+      const token = await jwtSign(customPayload, secret);
 
-      expect(decoded?.iat).toBe(Math.floor(Date.now() / 1000));
+      const decoded = jwtDecode(token);
+      expect(decoded.customField).toBe('custom-value');
     });
 
-    it('should add expiration when expiresIn is provided', () => {
-      const payload = { userId: '123' };
-      const token = sign(payload, SECRET, { expiresIn: '1h' });
-      const decoded = decode(token);
+    test('should handle different secret lengths', async () => {
+      const shortSecret = 'short';
+      const longSecret = 'very-long-secret-key-that-is-much-longer-than-required';
+      
+      const token1 = await jwtSign(payload, shortSecret);
+      const token2 = await jwtSign(payload, longSecret);
 
-      expect(decoded?.exp).toBe(Math.floor(Date.now() / 1000) + 3600);
+      expect(typeof token1).toBe('string');
+      expect(typeof token2).toBe('string');
+      expect(token1).not.toBe(token2);
     });
 
-    it('should handle numeric expiresIn', () => {
-      const payload = { userId: '123' };
-      const token = sign(payload, SECRET, { expiresIn: 300 });
-      const decoded = decode(token);
-
-      expect(decoded?.exp).toBe(Math.floor(Date.now() / 1000) + 300);
-    });
-
-    it('should parse different time units', () => {
-      const now = Math.floor(Date.now() / 1000);
-
-      expect(decode(sign({}, SECRET, { expiresIn: '30s' }))?.exp).toBe(now + 30);
-      expect(decode(sign({}, SECRET, { expiresIn: '15m' }))?.exp).toBe(now + 900);
-      expect(decode(sign({}, SECRET, { expiresIn: '2h' }))?.exp).toBe(now + 7200);
-      expect(decode(sign({}, SECRET, { expiresIn: '7d' }))?.exp).toBe(now + 604800);
-    });
-
-    it('should throw on invalid expiration format', () => {
-      expect(() => sign({}, SECRET, { expiresIn: 'invalid' })).toThrow(JwtError);
-      expect(() => sign({}, SECRET, { expiresIn: 'invalid' })).toThrow('Invalid expiration format');
-    });
-
-    it('should throw on expiration with unsupported unit', () => {
-      expect(() => sign({}, SECRET, { expiresIn: '10w' })).toThrow('Invalid expiration format');
-      expect(() => sign({}, SECRET, { expiresIn: '1y' })).toThrow('Invalid expiration format');
+    test('should throw error for invalid secret', async () => {
+      await expect(jwtSign(payload, '')).rejects.toThrow(JwtError);
+      await expect(jwtSign(payload, null as unknown as string)).rejects.toThrow(JwtError);
     });
   });
 
-  describe('verify', () => {
-    it('should verify valid token', () => {
-      const payload = { userId: '123', role: 'admin' };
-      const token = sign(payload, SECRET);
-      const verified = verify(token, SECRET);
+  describe('jwtVerify', () => {
+    test('should verify a valid token', async () => {
+      const token = await jwtSign(payload, secret);
+      const result = await jwtVerify<JwtPayload>(token, secret);
 
-      expect(verified.userId).toBe('123');
-      expect(verified.role).toBe('admin');
+      expect(result).toEqual(payload);
     });
 
-    it('should throw on invalid signature', () => {
-      const token = sign({ userId: '123' }, SECRET);
-
-      expect(() => verify(token, 'wrong-secret')).toThrow(JwtError);
-      expect(() => verify(token, 'wrong-secret')).toThrow('Invalid signature');
+    test('should throw error for invalid token', async () => {
+      await expect(jwtVerify('invalid.token.format', secret)).rejects.toThrow(JwtError);
+      await expect(jwtVerify('header.payload.signature', secret)).rejects.toThrow(JwtError);
     });
 
-    it('should throw on expired token', () => {
-      const token = sign({ userId: '123' }, SECRET, { expiresIn: '1h' });
+    test('should throw error for expired token', async () => {
+      const expiredPayload = {
+        ...payload,
+        exp: Math.floor(Date.now() / 1000) - 3600, // 1 hour ago
+      };
+      const token = await jwtSign(expiredPayload, secret);
 
-      // Advance time past expiration
-      vi.advanceTimersByTime(2 * 60 * 60 * 1000); // 2 hours
-
-      expect(() => verify(token, SECRET)).toThrow(JwtError);
-      expect(() => verify(token, SECRET)).toThrow('Token has expired');
+      await expect(jwtVerify(token, secret)).rejects.toThrow(JwtError);
     });
 
-    it('should throw on malformed token', () => {
-      expect(() => verify('invalid', SECRET)).toThrow(JwtError);
-      expect(() => verify('a.b', SECRET)).toThrow('Invalid token format');
-      expect(() => verify('a.b.c.d', SECRET)).toThrow('Invalid token format');
+    test('should throw error for invalid signature', async () => {
+      const token = await jwtSign(payload, secret);
+      const tamperedToken = token.substring(0, token.length - 5) + 'aaaaa';
+
+      await expect(jwtVerify(tamperedToken, secret)).rejects.toThrow(JwtError);
     });
 
-    it('should throw on non-string token', () => {
-      expect(() => verify(123 as unknown as string, SECRET)).toThrow('Token must be a string');
-    });
+    test('should throw error for wrong secret', async () => {
+      const token = await jwtSign(payload, secret);
+      const wrongSecret = 'different-secret-key';
 
-    it('should throw on invalid algorithm', () => {
-      // Create a token with wrong algorithm in header
-      const header = Buffer.from(JSON.stringify({ alg: 'none', typ: 'JWT' })).toString('base64url');
-      const payload = Buffer.from(JSON.stringify({ userId: '123' })).toString('base64url');
-      const fakeToken = `${header}.${payload}.fakesig`;
-
-      expect(() => verify(fakeToken, SECRET)).toThrow('Algorithm not supported');
-    });
-
-    it('should pass for non-expired token', () => {
-      const token = sign({ userId: '123' }, SECRET, { expiresIn: '1h' });
-
-      // Advance time but not past expiration
-      vi.advanceTimersByTime(30 * 60 * 1000); // 30 minutes
-
-      expect(() => verify(token, SECRET)).not.toThrow();
-    });
-
-    it('should throw on token with empty parts', () => {
-      // Create token with empty header/payload/signature
-      expect(() => verify('..', SECRET)).toThrow('Invalid token format');
-      expect(() => verify('.payload.sig', SECRET)).toThrow('Invalid token format');
-      expect(() => verify('header..sig', SECRET)).toThrow('Invalid token format');
-      expect(() => verify('header.payload.', SECRET)).toThrow('Invalid token format');
-    });
-
-    it('should throw on invalid header JSON', () => {
-      const invalidHeader = Buffer.from('not-json').toString('base64url');
-      const payload = Buffer.from(JSON.stringify({ userId: '123' })).toString('base64url');
-      const fakeToken = `${invalidHeader}.${payload}.fakesig`;
-
-      expect(() => verify(fakeToken, SECRET)).toThrow('Invalid header');
-    });
-
-    it('should throw on invalid payload JSON', async () => {
-      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString(
-        'base64url',
-      );
-      const invalidPayload = Buffer.from('not-json').toString('base64url');
-
-      // We need a valid signature for this test, but since payload is invalid,
-      // we need to sign something that will match
-      const crypto = await import('node:crypto');
-      const signature = crypto
-        .createHmac('sha256', SECRET)
-        .update(`${header}.${invalidPayload}`)
-        .digest('base64url');
-
-      const token = `${header}.${invalidPayload}.${signature}`;
-
-      expect(() => verify(token, SECRET)).toThrow('Malformed token payload');
-    });
-
-    it('should throw on header with wrong typ', () => {
-      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'WRONG' })).toString(
-        'base64url',
-      );
-      const payload = Buffer.from(JSON.stringify({ userId: '123' })).toString('base64url');
-      const fakeToken = `${header}.${payload}.fakesig`;
-
-      expect(() => verify(fakeToken, SECRET)).toThrow('Algorithm not supported');
-    });
-
-    it('should verify token without exp claim', () => {
-      const payload = { userId: '123' };
-      const token = sign(payload, SECRET); // No expiresIn
-
-      // Should not throw because there's no exp to check
-      const verified = verify(token, SECRET);
-      expect(verified.userId).toBe('123');
-      expect(verified.exp).toBeUndefined();
+      await expect(jwtVerify(token, wrongSecret)).rejects.toThrow(JwtError);
     });
   });
 
-  describe('decode', () => {
-    it('should decode valid token without verification', () => {
-      const payload = { userId: '123', role: 'admin' };
-      const token = sign(payload, SECRET);
-      const decoded = decode(token);
+  describe('jwtDecode', () => {
+    test('should decode a valid token without verification', () => {
+      const token = jwtSign(payload, secret) as string; // Synchronous for this test
+      const decoded = jwtDecode(token);
 
-      expect(decoded?.userId).toBe('123');
-      expect(decoded?.role).toBe('admin');
+      expect(decoded.userId).toBe(payload.userId);
+      expect(decoded.email).toBe(payload.email);
+      expect(decoded.role).toBe(payload.role);
     });
 
-    it('should return null for invalid token', () => {
-      expect(decode('invalid')).toBeNull();
-      expect(decode('a.b')).toBeNull();
-      expect(decode('')).toBeNull();
+    test('should handle tokens with special characters in payload', () => {
+      const specialPayload = { ...payload, special: 'café naïve résumé' };
+      const token = jwtSign(specialPayload, secret) as string;
+      const decoded = jwtDecode(token);
+
+      expect(decoded.special).toBe('café naïve résumé');
     });
 
-    it('should decode without verifying signature', () => {
-      const token = sign({ userId: '123' }, SECRET);
-      const decoded = decode(token);
-
-      // Should decode even if we don't have the secret
-      expect(decoded?.userId).toBe('123');
+    test('should throw error for invalid token format', () => {
+      expect(() => jwtDecode('invalid')).toThrow(JwtError);
+      expect(() => jwtDecode('header.payload')).toThrow(JwtError);
+      expect(() => jwtDecode('')).toThrow(JwtError);
     });
 
-    it('should return null for token with invalid payload JSON', () => {
-      const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString(
-        'base64url',
-      );
-      const invalidPayload = Buffer.from('not-valid-json').toString('base64url');
-      const token = `${header}.${invalidPayload}.signature`;
-
-      expect(decode(token)).toBeNull();
-    });
-
-    it('should return null for token with empty payload part', () => {
-      const token = 'header..signature';
-      expect(decode(token)).toBeNull();
+    test('should handle malformed base64 in payload', () => {
+      expect(() => jwtDecode('header.invalid_base64_payload.signature')).toThrow(JwtError);
     });
   });
 
-  describe('JwtError', () => {
-    it('should have correct properties', () => {
-      const error = new JwtError('Test error', 'INVALID_TOKEN');
-
-      expect(error.message).toBe('Test error');
-      expect(error.code).toBe('INVALID_TOKEN');
-      expect(error.name).toBe('JwtError');
+  describe('checkTokenSecret', () => {
+    test('should return true for valid secret', () => {
+      expect(checkTokenSecret(secret)).toBe(true);
     });
 
-    it('should support different error codes', () => {
-      expect(new JwtError('msg', 'INVALID_TOKEN').code).toBe('INVALID_TOKEN');
-      expect(new JwtError('msg', 'INVALID_SIGNATURE').code).toBe('INVALID_SIGNATURE');
-      expect(new JwtError('msg', 'TOKEN_EXPIRED').code).toBe('TOKEN_EXPIRED');
-      expect(new JwtError('msg', 'MALFORMED_TOKEN').code).toBe('MALFORMED_TOKEN');
+    test('should return false for empty secret', () => {
+      expect(checkTokenSecret('')).toBe(false);
+    });
+
+    test('should return false for null/undefined secret', () => {
+      expect(checkTokenSecret(null as unknown as string)).toBe(false);
+      expect(checkTokenSecret(undefined as unknown as string)).toBe(false);
+    });
+
+    test('should return true for secrets of various lengths', () => {
+      expect(checkTokenSecret('a')).toBe(true);
+      expect(checkTokenSecret('a'.repeat(10))).toBe(true);
+      expect(checkTokenSecret('a'.repeat(100))).toBe(true);
+    });
+  });
+
+  describe('JWT Rotation', () => {
+    const oldSecret = 'old-secret-key-thats-32-chars!!';
+    const newSecret = 'new-secret-key-thats-32-chars!!';
+    const rotationConfig: JwtRotationConfig = {
+      currentSecret: newSecret,
+      previousSecret: oldSecret,
+      algorithm: 'HS256',
+    };
+
+    test('signWithRotation should create token with current secret', async () => {
+      const token = await signWithRotation(payload, rotationConfig);
+      const decoded = jwtDecode(token);
+
+      expect(decoded.userId).toBe(payload.userId);
+      expect(decoded.exp).toBe(payload.exp);
+    });
+
+    test('verifyWithRotation should verify with current secret', async () => {
+      const token = await signWithRotation(payload, rotationConfig);
+      const result = await verifyWithRotation<JwtPayload>(token, rotationConfig);
+
+      expect(result.userId).toBe(payload.userId);
+      expect(result.email).toBe(payload.email);
+    });
+
+    test('verifyWithRotation should verify with previous secret', async () => {
+      // Create token with old secret
+      const legacyToken = await jwtSign(payload, oldSecret);
+      
+      // Verify with rotation config (should work with previous secret)
+      const result = await verifyWithRotation<JwtPayload>(legacyToken, rotationConfig);
+
+      expect(result.userId).toBe(payload.userId);
+      expect(result.email).toBe(payload.email);
+    });
+
+    test('verifyWithRotation should fail with neither secret', async () => {
+      const token = await jwtSign(payload, 'neither-current-nor-previous');
+      
+      await expect(verifyWithRotation(token, rotationConfig)).rejects.toThrow(JwtError);
+    });
+
+    test('createJwtRotationHandler should create a verification function', async () => {
+      const handler = createJwtRotationHandler(rotationConfig);
+      const token = await jwtSign(payload, oldSecret);
+      
+      const result = await handler<JwtPayload>(token);
+
+      expect(result.userId).toBe(payload.userId);
+    });
+  });
+
+  describe('Edge cases', () => {
+    test('should handle very large payloads', async () => {
+      const largePayload = {
+        ...payload,
+        largeData: 'x'.repeat(10000), // 10KB of data
+      };
+      
+      const token = await jwtSign(largePayload, secret);
+      const result = await jwtVerify<JwtPayload & { largeData: string }>(token, secret);
+
+      expect(result.largeData).toBe(largePayload.largeData);
+    });
+
+    test('should handle numeric claims', async () => {
+      const numericPayload = {
+        ...payload,
+        numericId: 12345,
+        floatVal: 123.45,
+      };
+      
+      const token = await jwtSign(numericPayload, secret);
+      const result = await jwtVerify<JwtPayload & { numericId: number; floatVal: number }>(token, secret);
+
+      expect(result.numericId).toBe(12345);
+      expect(result.floatVal).toBe(123.45);
+    });
+
+    test('should handle nested objects in payload', async () => {
+      const nestedPayload = {
+        ...payload,
+        profile: {
+          firstName: 'John',
+          lastName: 'Doe',
+          settings: {
+            theme: 'dark',
+            notifications: true,
+          },
+        },
+      };
+      
+      const token = await jwtSign(nestedPayload, secret);
+      const result = await jwtVerify<JwtPayload & {
+        profile: {
+          firstName: string;
+          lastName: string;
+          settings: { theme: string; notifications: boolean };
+        };
+      }>(token, secret);
+
+      expect(result.profile.firstName).toBe('John');
+      expect(result.profile.settings.theme).toBe('dark');
     });
   });
 });

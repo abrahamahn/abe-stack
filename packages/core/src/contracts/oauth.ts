@@ -248,6 +248,27 @@ export const oauthConnectionsResponseSchema: Schema<OAuthConnectionsResponse> = 
   },
 );
 
+/**
+ * Enabled OAuth providers response
+ */
+export interface OAuthEnabledProvidersResponse {
+  providers: OAuthProvider[];
+}
+
+export const oauthEnabledProvidersResponseSchema: Schema<OAuthEnabledProvidersResponse> =
+  createSchema((data: unknown) => {
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid enabled providers response');
+    }
+    const obj = data as Record<string, unknown>;
+    if (!Array.isArray(obj.providers)) {
+      throw new Error('Providers must be an array');
+    }
+    return {
+      providers: obj.providers.map((p) => oauthProviderSchema.parse(p)),
+    };
+  });
+
 // ============================================================================
 // OAuth Contract
 // ============================================================================
@@ -396,5 +417,15 @@ export const oauthContract = {
       401: errorResponseSchema,
     },
     summary: 'Get OAuth connections for authenticated user',
+  },
+
+  // Get enabled OAuth providers (public)
+  getEnabledProviders: {
+    method: 'GET' as const,
+    path: '/api/auth/oauth/providers',
+    responses: {
+      200: oauthEnabledProvidersResponseSchema,
+    },
+    summary: 'Get list of enabled OAuth providers',
   },
 } satisfies Contract;

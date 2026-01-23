@@ -12,6 +12,18 @@ const FOCUSABLE = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(', ');
 
+/**
+ * Traps focus within its children, restoring focus on unmount.
+ *
+ * @example
+ * ```tsx
+ * <FocusTrap>
+ *   <dialog>
+ *     <button>Focusable</button>
+ *   </dialog>
+ * </FocusTrap>
+ * ```
+ */
 export function FocusTrap({ children }: { children: ReactNode }): ReactElement {
   const rootRef = useRef<HTMLDivElement>(null);
 

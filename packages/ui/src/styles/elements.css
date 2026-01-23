@@ -129,6 +129,67 @@ body,
   text-decoration: underline;
 }
 
+/* Auth Form OAuth */
+.auth-form-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--ui-gap-md);
+  margin: var(--ui-gap-sm) 0;
+}
+
+.auth-form-divider::before,
+.auth-form-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--ui-color-border);
+}
+
+.auth-form-divider-text {
+  font-size: var(--ui-font-size-xs);
+  color: var(--ui-color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.oauth-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-gap-xs);
+}
+
+.oauth-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ui-gap-sm);
+  width: 100%;
+  padding: var(--ui-gap-sm) var(--ui-gap-md);
+  border: 1px solid var(--ui-color-border);
+  border-radius: var(--ui-radius-md);
+  background: var(--ui-color-surface);
+  color: var(--ui-color-text);
+  font-size: var(--ui-font-size-sm);
+  font-weight: var(--ui-font-weight-medium);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.oauth-button:hover:not(:disabled) {
+  background: var(--ui-color-surface-hover);
+  border-color: var(--ui-color-text-muted);
+}
+
+.oauth-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.oauth-button-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 /* Alert */
 .alert {
   border-radius: var(--ui-radius-md);
@@ -570,6 +631,21 @@ body,
 .input-description,
 .input-error {
   font-size: var(--ui-font-size-xs);
+}
+
+.file-input::file-selector-button {
+  margin-right: var(--ui-gap-sm);
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--ui-radius-sm);
+  border: 1px solid var(--ui-color-border);
+  background: var(--ui-color-surface);
+  color: var(--ui-color-text);
+  font-size: var(--ui-font-size-xs);
+  cursor: pointer;
+}
+
+.file-input::file-selector-button:hover {
+  background: var(--ui-color-surface-hover);
 }
 
 /* Password Input */

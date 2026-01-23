@@ -41,7 +41,7 @@ export type ErrorMapperOptions = CoreErrorMapperOptions;
  *
  * @param error - The caught error
  * @param ctx - Application context (for logging)
- * @param options - Optional configuration for error handling
+ * @param options - Optional uration for error handling
  * @returns Structured error response with status and body
  *
  * @example

@@ -20,10 +20,12 @@ export class SmtpEmailService implements EmailService {
       host: this.config.smtp.host,
       port: this.config.smtp.port,
       secure: this.config.smtp.secure,
-      auth: {
-        user: this.config.smtp.auth.user,
-        pass: this.config.smtp.auth.pass,
-      },
+      auth: this.config.smtp.auth
+        ? {
+            user: this.config.smtp.auth.user,
+            pass: this.config.smtp.auth.pass,
+          }
+        : undefined,
     });
   }
 

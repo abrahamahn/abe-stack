@@ -36,12 +36,7 @@ function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString();
 }
 
-export function UserTable({
-  data,
-  isLoading,
-  page,
-  onPageChange,
-}: UserTableProps): JSX.Element {
+export function UserTable({ data, isLoading, page, onPageChange }: UserTableProps): JSX.Element {
   const navigate = useNavigate();
 
   const handleRowClick = (user: AdminUser): void => {
@@ -84,7 +79,7 @@ export function UserTable({
             <TableRow
               key={user.id}
               className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
-              onClick={() => handleRowClick(user)}
+              onClick={() => { handleRowClick(user); }}
             >
               <TableCell>
                 <Text size="sm">{user.email}</Text>
@@ -122,11 +117,7 @@ export function UserTable({
         <Text tone="muted" size="sm">
           Showing {data.data.length} of {data.total} users
         </Text>
-        <Pagination
-          value={page}
-          totalPages={data.totalPages}
-          onChange={onPageChange}
-        />
+        <Pagination value={page} totalPages={data.totalPages} onChange={onPageChange} />
       </div>
     </div>
   );

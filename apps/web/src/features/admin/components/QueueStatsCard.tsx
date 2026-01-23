@@ -31,7 +31,12 @@ const HIGH_FAILURE_RATE_THRESHOLD = 10; // 10%
 // Component
 // ============================================================================
 
-export function QueueStatsCard({ stats, isLoading, isError, error }: QueueStatsCardProps): JSX.Element {
+export function QueueStatsCard({
+  stats,
+  isLoading,
+  isError,
+  error,
+}: QueueStatsCardProps): JSX.Element {
   if (isLoading) {
     return (
       <Card className="p-4">
@@ -77,7 +82,11 @@ export function QueueStatsCard({ stats, isLoading, isError, error }: QueueStatsC
         <StatItem label="Pending" value={stats.pending} />
         <StatItem label="Processing" value={stats.processing} />
         <StatItem label="Completed" value={stats.completed} />
-        <StatItem label="Failed" value={stats.failed} tone={stats.failed > 0 ? 'danger' : undefined} />
+        <StatItem
+          label="Failed"
+          value={stats.failed}
+          tone={stats.failed > 0 ? 'danger' : undefined}
+        />
         <StatItem
           label="Dead Letter"
           value={stats.deadLetter}
@@ -93,7 +102,10 @@ export function QueueStatsCard({ stats, isLoading, isError, error }: QueueStatsC
             value={`${stats.failureRate.toFixed(1)}%`}
             tone={hasHighFailureRate ? 'danger' : undefined}
           />
-          <StatItem label="Recent (1h)" value={`${stats.recentCompleted} OK / ${stats.recentFailed} fail`} />
+          <StatItem
+            label="Recent (1h)"
+            value={`${String(stats.recentCompleted)} OK / ${String(stats.recentFailed)} fail`}
+          />
         </div>
       </div>
     </Card>

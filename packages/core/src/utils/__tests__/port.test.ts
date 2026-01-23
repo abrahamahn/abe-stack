@@ -1,8 +1,156 @@
 // packages/core/src/utils/__tests__/port.test.ts
-import net from 'node:net';
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+type ErrorHandler = (error: Error) => void;
+type ConnectHandler = () => void;
+
+const listeners = new Map<string, Set<number>>();
+
+const normalizeHost = (host?: string): string => {
+  if (!host || host.length === 0) return '0.0.0.0';
+  return host === 'localhost' ? '127.0.0.1' : host;
+};
+
+const isPortTaken = (port: number, host: string): boolean => {
+  for (const [listeningHost, ports] of listeners.entries()) {
+    if (!ports.has(port)) continue;
+    if (host === listeningHost) return true;
+    if (host === '0.0.0.0' || listeningHost === '0.0.0.0') return true;
+  }
+  return false;
+};
+
+const isPortListeningForHost = (port: number, host: string): boolean => {
+  const normalizedHost = normalizeHost(host);
+  for (const [listeningHost, ports] of listeners.entries()) {
+    if (!ports.has(port)) continue;
+    if (listeningHost === '0.0.0.0') return true;
+    if (listeningHost === normalizedHost) return true;
+  }
+  return false;
+};
+
+vi.mock('node:net', () => {
+  const createServer = () => {
+    let boundPort: number | null = null;
+    let boundHost: string | null = null;
+    let errorHandler: ErrorHandler | null = null;
+
+    return {
+      listen(
+        portOrOptions: number | { port: number; host?: string },
+        hostOrCallback?: string | (() => void),
+        callback?: () => void,
+      ) {
+        const resolvedCallback =
+          typeof hostOrCallback === 'function' ? hostOrCallback : callback;
+        const host =
+          typeof portOrOptions === 'object'
+            ? normalizeHost(portOrOptions.host)
+            : normalizeHost(typeof hostOrCallback === 'string' ? hostOrCallback : undefined);
+        const port =
+          typeof portOrOptions === 'object' ? portOrOptions.port : portOrOptions;
+
+        if (isPortTaken(port, host)) {
+          const error = Object.assign(new Error('EADDRINUSE'), { code: 'EADDRINUSE' });
+          if (errorHandler) queueMicrotask(() => errorHandler(error));
+          return this;
+        }
+
+        boundPort = port;
+        boundHost = host;
+        const ports = listeners.get(host) ?? new Set<number>();
+        ports.add(port);
+        listeners.set(host, ports);
+        if (resolvedCallback) queueMicrotask(() => resolvedCallback());
+        return this;
+      },
+      close(cb?: () => void) {
+        if (boundPort !== null && boundHost !== null) {
+          const ports = listeners.get(boundHost);
+          if (ports) {
+            ports.delete(boundPort);
+            if (ports.size === 0) listeners.delete(boundHost);
+          }
+        }
+        boundPort = null;
+        boundHost = null;
+        if (cb) queueMicrotask(() => cb());
+        return this;
+      },
+      once(event: string, handler: ErrorHandler) {
+        if (event === 'error') {
+          errorHandler = handler;
+        }
+        return this;
+      },
+    };
+  };
+
+  const createConnection = ({ host, port }: { host: string; port: number }) => {
+    let connectHandler: ConnectHandler | null = null;
+    let errorHandler: ErrorHandler | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let resolved = false;
+
+    const clearTimeoutIfNeeded = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+    };
+
+    const socket = {
+      once(event: string, handler: ConnectHandler | ErrorHandler) {
+        if (event === 'connect') {
+          connectHandler = handler as ConnectHandler;
+        }
+        if (event === 'error') {
+          errorHandler = handler as ErrorHandler;
+        }
+        return socket;
+      },
+      setTimeout(timeout: number, handler: () => void) {
+        timeoutId = setTimeout(() => {
+          if (resolved) return;
+          resolved = true;
+          handler();
+        }, timeout);
+        return socket;
+      },
+      end() {
+        return socket;
+      },
+      destroy() {
+        return socket;
+      },
+    };
+
+    queueMicrotask(() => {
+      if (resolved) return;
+      if (isPortListeningForHost(port, host)) {
+        resolved = true;
+        clearTimeoutIfNeeded();
+        connectHandler?.();
+      } else {
+        resolved = true;
+        clearTimeoutIfNeeded();
+        errorHandler?.(new Error('ECONNREFUSED'));
+      }
+    });
+
+    return socket;
+  };
+
+  return {
+    default: {
+      createServer,
+      createConnection,
+    },
+  };
+});
+
+import net from 'node:net';
 import { isPortFree, isPortListening, pickAvailablePort, uniquePorts, waitForPort } from '../port';
 
 describe('uniquePorts', () => {
@@ -58,6 +206,7 @@ describe('isPortFree', () => {
   let server: net.Server | null = null;
 
   afterEach(async () => {
+    listeners.clear();
     if (server) {
       await new Promise<void>((resolve) => {
         server?.close(() => resolve());
@@ -105,6 +254,7 @@ describe('isPortListening', () => {
   let server: net.Server | null = null;
 
   afterEach(async () => {
+    listeners.clear();
     if (server) {
       await new Promise<void>((resolve) => {
         server?.close(() => resolve());
@@ -146,6 +296,7 @@ describe('pickAvailablePort', () => {
   let server: net.Server | null = null;
 
   afterEach(async () => {
+    listeners.clear();
     if (server) {
       await new Promise<void>((resolve) => {
         server?.close(() => resolve());
@@ -237,6 +388,7 @@ describe('waitForPort', () => {
 
   afterEach(async () => {
     vi.useRealTimers();
+    listeners.clear();
     if (server) {
       await new Promise<void>((resolve) => {
         server?.close(() => resolve());

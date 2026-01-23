@@ -2,6 +2,8 @@
 import { Button, Input, Link, PasswordInput } from '@abe-stack/ui';
 import { useState } from 'react';
 
+import { OAuthButtons } from './OAuthButtons';
+
 import type { AuthMode } from './AuthForms';
 import type { ForgotPasswordRequest, LoginRequest } from '@abe-stack/core';
 import type { ChangeEvent, ReactElement } from 'react';
@@ -52,6 +54,8 @@ export function LoginForm({
           <h2 className="auth-form-title">Welcome back</h2>
           <p className="auth-form-subtitle">Sign in to your account</p>
         </div>
+
+        <OAuthButtons mode="login" disabled={isLoading} />
 
         <form
           onSubmit={(e) => {

@@ -3,9 +3,18 @@ import { forwardRef, type ComponentPropsWithoutRef, type CSSProperties } from 'r
 import '../styles/elements.css';
 
 type ProgressProps = ComponentPropsWithoutRef<'div'> & {
-  value: number; // 0-100
+  /** Progress value between 0-100 (clamped automatically) */
+  value: number;
 };
 
+/**
+ * A progress bar component for displaying determinate progress (0-100%).
+ *
+ * @example
+ * ```tsx
+ * <Progress value={50} />
+ * ```
+ */
 export const Progress = forwardRef<HTMLDivElement, ProgressProps>((props, ref) => {
   const { value, className = '', style, ...rest } = props;
   // Handle NaN/invalid values by defaulting to 0

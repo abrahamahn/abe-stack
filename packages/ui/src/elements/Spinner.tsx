@@ -3,8 +3,18 @@ import type { CSSProperties, ReactElement } from 'react';
 
 import '../styles/elements.css';
 
-/** Consider using <Loading/> instead. */
-export function Spinner(props: { size?: string }): ReactElement {
+/**
+ * A simple loading spinner for indicating indeterminate loading states.
+ *
+ * @example
+ * ```tsx
+ * <Spinner size="24px" />
+ * ```
+ */
+export function Spinner(props: {
+  /** Size of the spinner (CSS value) */
+  size?: string;
+}): ReactElement {
   const size = props.size ?? 'var(--ui-gap-lg)';
   return <span className="spinner" style={{ '--ui-spinner-size': size } as CSSProperties} />;
 }

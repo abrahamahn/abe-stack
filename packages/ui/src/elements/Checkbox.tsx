@@ -7,12 +7,24 @@ import type React from 'react';
 import '../styles/elements.css';
 
 type CheckboxProps = Omit<ComponentPropsWithoutRef<'input'>, 'type' | 'onChange'> & {
+  /** Controlled checked state */
   checked?: boolean;
+  /** Initial checked state for uncontrolled usage */
   defaultChecked?: boolean;
+  /** Callback when checked state changes */
   onChange?: (checked: boolean) => void;
+  /** Label text or element to display next to checkbox */
   label?: React.ReactNode;
 };
 
+/**
+ * An accessible checkbox component supporting both controlled and uncontrolled usage.
+ *
+ * @example
+ * ```tsx
+ * <Checkbox label="Accept terms" checked={agreed} onChange={setAgreed} />
+ * ```
+ */
 export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref) => {
   const { checked, defaultChecked, onChange, label, className = '', ...rest } = props;
 

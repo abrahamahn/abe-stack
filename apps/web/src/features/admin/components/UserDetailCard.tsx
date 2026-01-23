@@ -23,13 +23,7 @@ function formatDateTime(dateString: string | null): string {
   return new Date(dateString).toLocaleString();
 }
 
-function InfoRow({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}): JSX.Element {
+function InfoRow({ label, children }: { label: string; children: React.ReactNode }): JSX.Element {
   return (
     <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 last:border-0">
       <Text className="font-medium text-gray-500 dark:text-gray-400">{label}</Text>

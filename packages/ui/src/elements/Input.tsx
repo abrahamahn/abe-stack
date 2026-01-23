@@ -6,16 +6,31 @@ import { Text } from './Text';
 import '../styles/elements.css';
 
 type InputRootProps = ComponentPropsWithoutRef<'input'> & {
+  /** The HTML element to render as */
   as?: ElementType;
 };
 
 type InputFieldProps = ComponentPropsWithoutRef<'input'> & {
+  /** The HTML element to render as */
   as?: ElementType;
+  /** Visible label text for the input */
   label?: string;
+  /** Visually hide the label (keeps it accessible) */
+  hideLabel?: boolean;
+  /** Helper text displayed below the input */
   description?: string;
+  /** Error message (also sets aria-invalid) */
   error?: string;
 };
 
+/**
+ * Base input element with consistent styling.
+ *
+ * @example
+ * ```tsx
+ * <Input placeholder="Enter text..." />
+ * ```
+ */
 const InputRoot = forwardRef<HTMLElement, InputRootProps>((props, ref) => {
   const { as = 'input', className = '', ...rest } = props;
   const Component: ElementType = as;
@@ -23,8 +38,16 @@ const InputRoot = forwardRef<HTMLElement, InputRootProps>((props, ref) => {
 });
 InputRoot.displayName = 'Input';
 
+/**
+ * Input with integrated label, description, and error message support.
+ *
+ * @example
+ * ```tsx
+ * <Input.Field label="Email" type="email" error={errors.email} />
+ * ```
+ */
 const InputField = forwardRef<HTMLInputElement, InputFieldProps>((props, ref) => {
-  const { as, label, description, error, className, id, ...rest } = props;
+  const { as, label, hideLabel, description, error, className, id, ...rest } = props;
   const inputId = id ?? `input-${Math.random().toString(36).slice(2, 7)}`;
   const descId = description ? `${inputId}-desc` : undefined;
   const errorId = error ? `${inputId}-err` : undefined;
@@ -32,7 +55,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>((props, ref) =>
   return (
     <div className="input-field">
       {label ? (
-        <label htmlFor={inputId} className="input-label">
+        <label htmlFor={inputId} className={`input-label ${hideLabel ? 'visually-hidden' : ''}`.trim()}>
           {label}
         </label>
       ) : null}

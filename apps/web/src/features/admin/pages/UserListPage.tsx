@@ -41,7 +41,7 @@ export function UserListPage(): JSX.Element {
               View and manage user accounts
             </p>
           </div>
-          <Button onClick={() => refresh()} disabled={isLoading}>
+          <Button onClick={() => { void refresh(); }} disabled={isLoading}>
             Refresh
           </Button>
         </div>

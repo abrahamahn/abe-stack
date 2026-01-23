@@ -26,7 +26,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 
-import type { JsonDatabaseConfig } from '@config/database.config';
+import type { JsonDatabaseConfig } from '@abe-stack/core/contracts/config';
 
 // =============================================================================
 // Simple Mutex for Write Operations

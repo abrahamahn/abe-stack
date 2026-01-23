@@ -5,7 +5,7 @@
  * Data access layer for billing subscriptions table.
  */
 
-import { and, eq, gt, inArray, lt, or, select, insert, update, deleteFrom } from '../../builder';
+import { and, eq, gt, inArray, lt, or, select, insert, update, deleteFrom, raw } from '../../builder';
 import {
   type NewSubscription,
   type Subscription,
@@ -192,7 +192,12 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
       let query = select(SUBSCRIPTIONS_TABLE);
 
       if (conditions.length > 0) {
-        const whereCondition = conditions.length === 1 ? conditions[0]! : and(...conditions);
+        const [firstCondition, ...restConditions] = conditions;
+        if (!firstCondition) {
+          throw new Error('Failed to build subscription query conditions');
+        }
+        const whereCondition =
+          restConditions.length === 0 ? firstCondition : and(firstCondition, ...restConditions);
         query = query.where(whereCondition);
       }
 
@@ -347,7 +352,8 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
     async countActiveByPlanId(planId: string): Promise<number> {
       const result = await db.queryOne<{ count: string | number }>(
         select(SUBSCRIPTIONS_TABLE)
-          .columns('COUNT(*) as count')
+          .columns()
+          .column(raw('COUNT(*)'), 'count')
           .where(
             and(
               eq('plan_id', planId),

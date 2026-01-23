@@ -43,14 +43,33 @@ function useDialogContext(component: string): DialogContextValue {
 }
 
 type DialogRootProps = {
+  /** Dialog components */
   children: ReactNode;
+  /** Controlled open state */
   open?: boolean;
+  /** Initial open state for uncontrolled usage */
   defaultOpen?: boolean;
+  /** Callback when state changes */
   onChange?: (open: boolean) => void;
+  /** Close dialog on ESC key */
   closeOnEscape?: boolean;
+  /** Close dialog on overlay click */
   closeOnOverlayClick?: boolean;
 };
 
+/**
+ * A compound component for building accessible modal dialogs.
+ *
+ * @example
+ * ```tsx
+ * <Dialog.Root>
+ *   <Dialog.Trigger>Open</Dialog.Trigger>
+ *   <Dialog.Content title="Dialog Title">
+ *     <p>Content</p>
+ *   </Dialog.Content>
+ * </Dialog.Root>
+ * ```
+ */
 export function DialogRoot({
   children,
   open,
@@ -138,6 +157,7 @@ export function DialogRoot({
 
 type DialogTriggerProps = ComponentPropsWithoutRef<'button'>;
 
+/** Trigger button to open the dialog. */
 export function DialogTrigger(props: DialogTriggerProps): ReactElement {
   const { setOpen, triggerRef } = useDialogContext('Dialog.Trigger');
   const { className = '', type = 'button', ...rest } = props;
@@ -157,13 +177,18 @@ export function DialogTrigger(props: DialogTriggerProps): ReactElement {
 
 type DialogOverlayProps = ComponentPropsWithoutRef<'div'>;
 
+/** Background overlay displayed behind the dialog. */
 export function DialogOverlay(props: DialogOverlayProps): ReactElement {
   const { className, ...rest } = props;
   return <div className={cn('overlay', className)} {...rest} />;
 }
 
-type DialogContentProps = ComponentPropsWithoutRef<'div'> & { title?: ReactNode };
+type DialogContentProps = ComponentPropsWithoutRef<'div'> & {
+  /** Dialog title (sets aria-labelledby) */
+  title?: ReactNode;
+};
 
+/** Dialog content container with focus trapping. */
 export function DialogContent(props: DialogContentProps): ReactElement | null {
   const { title, className, children, ...rest } = props;
   const { open, setLabelledBy, setDescribedBy, labelledBy, describedBy, setOpen, triggerRef } =
@@ -234,6 +259,7 @@ export function DialogContent(props: DialogContentProps): ReactElement | null {
 
 type DialogDescriptionProps = ComponentPropsWithoutRef<'div'>;
 
+/** Dialog description (sets aria-describedby). */
 export function DialogDescription(props: DialogDescriptionProps): ReactElement {
   const { className = '', ...rest } = props;
   const { setDescribedBy } = useDialogContext('Dialog.Description');
@@ -251,6 +277,7 @@ export function DialogDescription(props: DialogDescriptionProps): ReactElement {
 
 type DialogTitleProps = ComponentPropsWithoutRef<'div'>;
 
+/** Dialog title element (sets aria-labelledby). */
 export function DialogTitle(props: DialogTitleProps): ReactElement {
   const { className = '', ...rest } = props;
   const id = useId();

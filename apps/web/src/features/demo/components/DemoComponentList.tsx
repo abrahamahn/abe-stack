@@ -1,5 +1,5 @@
 // apps/web/src/features/demo/components/DemoComponentList.tsx
-import { CloseButton, Heading, ScrollArea, Text } from '@abe-stack/ui';
+import { CloseButton, Heading, MenuItem, ScrollArea, Text } from '@abe-stack/ui';
 
 import type { ComponentDemo } from '@demo/types';
 
@@ -27,19 +27,18 @@ export function DemoComponentList({
       <ScrollArea className="scroll-flex">
         <div className="flex-col gap-1 p-2">
           {components.map((comp) => (
-            <button
+            <MenuItem
               key={comp.id}
               onClick={() => {
                 onSelectComponent(comp);
               }}
-              className="menu-item"
               data-selected={selectedComponent?.id === comp.id}
             >
               <Text>{comp.name}</Text>
               <Text tone="muted" className="text-xs">
                 {comp.variants.length} variant{comp.variants.length !== 1 ? 's' : ''}
               </Text>
-            </button>
+            </MenuItem>
           ))}
         </div>
       </ScrollArea>

@@ -3,18 +3,36 @@ import { useState, type ReactElement, type ReactNode } from 'react';
 import '../styles/components.css';
 
 export type TabItem = {
+  /** Unique identifier for the tab */
   id: string;
+  /** Tab label text */
   label: string;
+  /** Tab panel content */
   content: ReactNode;
 };
 
 export type TabsProps = {
+  /** Array of tab items */
   items: TabItem[];
+  /** Controlled active tab ID */
   value?: string;
+  /** Initially active tab ID for uncontrolled usage */
   defaultValue?: string;
+  /** Callback when active tab changes */
   onChange?: (id: string) => void;
 };
 
+/**
+ * An accessible tabbed interface with keyboard navigation.
+ *
+ * @example
+ * ```tsx
+ * <Tabs items={[
+ *   { id: 'tab1', label: 'Tab 1', content: <p>Content 1</p> },
+ *   { id: 'tab2', label: 'Tab 2', content: <p>Content 2</p> },
+ * ]} />
+ * ```
+ */
 export function Tabs({ items, value, defaultValue, onChange }: TabsProps): ReactElement {
   const [activeId, setActiveId] = useState<string>(() => defaultValue ?? items[0]?.id ?? '');
   const currentId = value ?? activeId;

@@ -31,6 +31,9 @@ vi.mock('@features/auth', () => ({
   ConfirmEmailPage: (): React.ReactElement => (
     <div data-testid="confirm-email-page">Confirm Email</div>
   ),
+  ConnectedAccountsPage: (): React.ReactElement => (
+    <div data-testid="connected-accounts-page">Connected Accounts</div>
+  ),
   ProtectedRoute: ({ children }: { children: React.ReactNode }): React.ReactElement => (
     <div data-testid="protected-route">{children}</div>
   ),

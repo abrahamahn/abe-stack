@@ -5,14 +5,26 @@ import { type ReactElement } from 'react';
 import '../styles/components.css';
 
 type PaginationProps = {
+  /** Controlled current page */
   value?: number;
+  /** Initially selected page for uncontrolled usage */
   defaultValue?: number;
+  /** Total number of pages */
   totalPages: number;
+  /** Callback when page changes */
   onChange?: (value: number) => void;
   /** Accessible label for the pagination navigation */
   'aria-label'?: string;
 };
 
+/**
+ * Accessible pagination navigation component.
+ *
+ * @example
+ * ```tsx
+ * <Pagination value={page} totalPages={10} onChange={setPage} />
+ * ```
+ */
 export function Pagination({
   value,
   defaultValue,
