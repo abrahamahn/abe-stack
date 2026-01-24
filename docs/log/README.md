@@ -8,12 +8,12 @@ Weekly changelog files for the ABE Stack project. This replaces the previous mon
 
 ## 2026
 
-| Week                 | Dates     | Highlights                                                                       |
-| -------------------- | --------- | -------------------------------------------------------------------------------- |
+| Week                 | Dates     | Highlights                                                                            |
+| -------------------- | --------- | ------------------------------------------------------------------------------------- |
 | [W04](./2026-W04.md) | Jan 20-26 | Architectural decoupling, 70+ lint fixes, env reorganization, billing (Stripe/PayPal) |
-| [W03](./2026-W03.md) | Jan 13-19 | Pagination system, domain architecture, RecordCache, TransactionQueue            |
-| [W02](./2026-W02.md) | Jan 6-12  | Build tooling, codebase simplification                                           |
-| [W01](./2026-W01.md) | Jan 1-5   | File reorganization, initial setup                                               |
+| [W03](./2026-W03.md) | Jan 13-19 | Pagination system, domain architecture, RecordCache, TransactionQueue                 |
+| [W02](./2026-W02.md) | Jan 6-12  | Build tooling, codebase simplification                                                |
+| [W01](./2026-W01.md) | Jan 1-5   | File reorganization, initial setup                                                    |
 
 ---
 
@@ -21,10 +21,10 @@ Weekly changelog files for the ABE Stack project. This replaces the previous mon
 
 ### 2026-01-25
 
-- **Architecture**: Separated server infrastructure from core entry point to prevent client code leaks
-- **Maintenance**: Resolved 70+ lint and type errors across all packages
-- **Config**: Migrated environment files to `.config/env` and improved root path resolution
-- **Tests**: Repaired widespread syntax corruption in legacy integration tests
+- **Architecture**: Decoupled server infrastructure from core to fix client-side leaks
+- **Build System**: Established strict segregation; resolved 150+ "rootDir" build errors
+- **Maintenance**: Resolved 70+ lint/type errors; repaired corrupted legacy tests
+- **Configuration**: Unified environment management in `.config/env` with improved root resolution
 
 ### 2026-01-21
 
