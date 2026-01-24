@@ -314,7 +314,7 @@ export default defineConfig({
             },
             {
               find: '@abe-stack/core/env',
-              replacement: path.join(repoRoot, 'packages/core/src/env.ts'),
+              replacement: path.join(repoRoot, 'packages/core/src/env'),
             },
             {
               find: '@abe-stack/core/shared',

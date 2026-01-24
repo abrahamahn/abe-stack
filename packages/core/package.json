@@ -114,8 +114,16 @@
       "default": "./dist/utils/index.js"
     },
     "./env": {
-      "types": "./dist/env.d.ts",
-      "default": "./dist/env.js"
+      "types": "./dist/env/index.d.ts",
+      "default": "./dist/env/index.js"
+    },
+    "./env/load": {
+      "types": "./dist/env/load.d.ts",
+      "default": "./dist/env/load.js"
+    },
+    "./env/schema": {
+      "types": "./dist/env/schema.d.ts",
+      "default": "./dist/env/schema.js"
     },
     "./pubsub": {
       "types": "./dist/infrastructure/pubsub/index.d.ts",

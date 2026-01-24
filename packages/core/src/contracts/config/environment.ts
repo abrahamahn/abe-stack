@@ -316,8 +316,6 @@ export const PackageManagerEnvSchema = z.object({
 export const FrontendEnvSchema = z.object({
   VITE_API_URL: z.string().url().optional(),
   VITE_APP_NAME: z.string().optional(),
-  PUBLIC_APP_URL: z.string().url().optional(),
-  PUBLIC_API_URL: z.string().url().optional(),
 });
 
 /**
@@ -344,8 +342,7 @@ export const FullEnvSchema = BaseEnvSchema.extend({
   // 1. Production Database Enforcement
   if (isProd) {
     const hasPostgres =
-      data.DATABASE_URL ||
-      (data.POSTGRES_HOST && data.POSTGRES_USER && data.POSTGRES_PASSWORD);
+      data.DATABASE_URL || (data.POSTGRES_HOST && data.POSTGRES_USER && data.POSTGRES_PASSWORD);
 
     const hasSqlite = data.SQLITE_FILE_PATH;
     const hasMongo = data.MONGODB_CONNECTION_STRING;
@@ -365,7 +362,8 @@ export const FullEnvSchema = BaseEnvSchema.extend({
     if (weakSecrets.includes(data.JWT_SECRET.toLowerCase()) || data.JWT_SECRET.length < 32) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'Security Risk: JWT_SECRET must be at least 32 characters and not a common word in production',
+        message:
+          'Security Risk: JWT_SECRET must be at least 32 characters and not a common word in production',
         path: ['JWT_SECRET'],
       });
     }

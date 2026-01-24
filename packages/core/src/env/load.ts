@@ -79,19 +79,20 @@ export function initEnv(): void {
     parseAndPopulate(resolvedPath);
   }
 
-  // 3. Priority 2: .env.local (Not committed to git - Root)
-  parseAndPopulate(path.join(repoRoot, '.env.local'));
-
-  // 4. Priority 3: .env (Base - Root)
-  parseAndPopulate(path.join(repoRoot, '.env'));
-
-  // 5. Priority 4: .env.local (Config directory)
+  // 3. Priority 1: .env.local (Config directory - Not committed)
   parseAndPopulate(path.join(configDir, 'env', '.env.local'));
 
-  // 6. Priority 5: Stage-specific (.env.production, .env.development)
+  // 4. Priority 2: Stage-specific (.env.production, .env.development)
   const envFile = path.join(configDir, 'env', `.env.${nodeEnv}`);
   if (process.env['NODE_ENV'] !== 'test') {
     console.log(`[EnvLoader] Loading stage: ${nodeEnv}`);
   }
   parseAndPopulate(envFile);
+
+  // 5. Priority 3: Base .env (Config directory)
+  parseAndPopulate(path.join(configDir, 'env', '.env'));
+
+  // 6. Priority 4: Root fallbacks
+  parseAndPopulate(path.join(repoRoot, '.env.local'));
+  parseAndPopulate(path.join(repoRoot, '.env'));
 }
