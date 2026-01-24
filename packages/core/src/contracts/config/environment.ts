@@ -311,6 +311,16 @@ export const PackageManagerEnvSchema = z.object({
 });
 
 /**
+ * Zod schema for frontend-related environment variables
+ */
+export const FrontendEnvSchema = z.object({
+  VITE_API_URL: z.string().optional(),
+  VITE_APP_NAME: z.string().optional(),
+  PUBLIC_APP_URL: z.string().optional(),
+  PUBLIC_API_URL: z.string().optional(),
+});
+
+/**
  * Combined environment schema for the entire application
  */
 export const FullEnvSchema = BaseEnvSchema.extend({
@@ -327,6 +337,7 @@ export const FullEnvSchema = BaseEnvSchema.extend({
   ...SearchEnvSchema.shape,
   ...PackageManagerEnvSchema.shape,
   ...NotificationEnvSchema.shape,
+  ...FrontendEnvSchema.shape,
 });
 
 export type FullEnv = z.infer<typeof FullEnvSchema>;

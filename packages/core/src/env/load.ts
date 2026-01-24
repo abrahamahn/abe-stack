@@ -57,17 +57,41 @@ export function initEnv(): void {
     currentDir = path.dirname(currentDir);
   }
 
-  if (!configDir) return;
+  if (!configDir) {
+    if (process.env['NODE_ENV'] !== 'test') {
+      console.warn('[EnvLoader] Warning: .config directory not found. Environment files skipped.');
+    }
+    return;
+  }
+
+  const repoRoot = path.dirname(configDir);
+  if (process.env['NODE_ENV'] !== 'test') {
+    console.log(`[EnvLoader] Resolved Repo Root: ${repoRoot}`);
+  }
 
   // 2. Priority 1: Explicit ENV_FILE
   const customPath = process.env['ENV_FILE'];
   if (customPath) {
-    parseAndPopulate(path.resolve(process.cwd(), customPath));
+    const resolvedPath = path.resolve(process.cwd(), customPath);
+    if (process.env['NODE_ENV'] !== 'test') {
+      console.log(`[EnvLoader] Loading explicit file: ${customPath}`);
+    }
+    parseAndPopulate(resolvedPath);
   }
 
-  // 3. Priority 2: .env.local (Not committed to git)
+  // 3. Priority 2: .env.local (Not committed to git - Root)
+  parseAndPopulate(path.join(repoRoot, '.env.local'));
+
+  // 4. Priority 3: .env (Base - Root)
+  parseAndPopulate(path.join(repoRoot, '.env'));
+
+  // 5. Priority 4: .env.local (Config directory)
   parseAndPopulate(path.join(configDir, 'env', '.env.local'));
 
-  // 4. Priority 3: Stage-specific (.env.production, .env.development)
-  parseAndPopulate(path.join(configDir, 'env', `.env.${nodeEnv}`));
+  // 6. Priority 5: Stage-specific (.env.production, .env.development)
+  const envFile = path.join(configDir, 'env', `.env.${nodeEnv}`);
+  if (process.env['NODE_ENV'] !== 'test') {
+    console.log(`[EnvLoader] Loading stage: ${nodeEnv}`);
+  }
+  parseAndPopulate(envFile);
 }

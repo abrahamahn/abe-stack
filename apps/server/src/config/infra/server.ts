@@ -15,9 +15,18 @@ export function loadServer(env: FullEnv): ServerConfig {
   const port = env.API_PORT ?? env.PORT ?? defaultPort;
   const appPort = env.APP_PORT ?? 5173;
 
-  // URL resolution (prefer PUBLIC_ prefix)
-  const appBaseUrl = env.PUBLIC_APP_URL || env.APP_BASE_URL || `http://localhost:${appPort}`;
-  const apiBaseUrl = env.PUBLIC_API_URL || env.API_BASE_URL || `http://localhost:${port}`;
+  // URL resolution (flexible naming support)
+  const appBaseUrl =
+    env.PUBLIC_APP_URL ||
+    env.APP_URL ||
+    env.APP_BASE_URL ||
+    `http://localhost:${appPort}`;
+
+  const apiBaseUrl =
+    env.PUBLIC_API_URL ||
+    env.VITE_API_URL || // Support Vite-style naming for API
+    env.API_BASE_URL ||
+    `http://localhost:${port}`;
 
   return {
     host: env.HOST || '0.0.0.0',

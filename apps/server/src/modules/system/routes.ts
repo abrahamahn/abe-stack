@@ -1,15 +1,15 @@
 // apps/server/src/modules/system/routes.ts
 import type { RouteMap } from '@router';
-import { publicRoute } from '@router';
+import { protectedRoute, publicRoute } from '@router';
 
 import {
-  handleApiInfo,
-  handleHealth,
-  handleListModules,
-  handleListRoutes,
-  handleLive,
-  handleRoot,
-  handleSystemStatus,
+    handleApiInfo,
+    handleHealth,
+    handleListModules,
+    handleListRoutes,
+    handleLive,
+    handleRoot,
+    handleSystemStatus,
 } from './handlers';
 
 export const systemRoutes: RouteMap = {
@@ -21,19 +21,19 @@ export const systemRoutes: RouteMap = {
   // Health Routes
   'api/health': publicRoute('GET', handleHealth),
 
-  // System Verification Routes
-  'api/system/health': publicRoute('GET', handleHealth),
+  // System Verification Routes (Sensitive - Admin Only)
+  'api/system/health': protectedRoute('GET', handleHealth, 'admin'),
 
-  'api/system/status': publicRoute('GET', handleSystemStatus),
+  'api/system/status': protectedRoute('GET', handleSystemStatus, 'admin'),
 
-  'api/system/modules': publicRoute('GET', handleListModules),
+  'api/system/modules': protectedRoute('GET', handleListModules, 'admin'),
 
-  'api/system/routes': publicRoute('GET', handleListRoutes),
+  'api/system/routes': protectedRoute('GET', handleListRoutes, 'admin'),
 
   // Legacy Health Routes (Aliases)
-  'api/health/detailed': publicRoute('GET', handleSystemStatus),
+  'api/health/detailed': protectedRoute('GET', handleSystemStatus, 'admin'),
 
-  'api/health/routes': publicRoute('GET', handleListRoutes),
+  'api/health/routes': protectedRoute('GET', handleListRoutes, 'admin'),
 
   'api/health/ready': publicRoute('GET', handleHealth),
 
