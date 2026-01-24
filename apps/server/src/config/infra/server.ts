@@ -1,13 +1,22 @@
 // apps/server/src/config/infra/server.ts
-import { getList } from '@abe-stack/core/config/utils';
-import type { LogLevel, ServerConfig } from '@abe-stack/core/contracts/config';
-import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
+import { getList } from '@abe-stack/core/config';
+import type { LogLevel, ServerConfig } from '@abe-stack/core/config';
+import type { FullEnv } from '@abe-stack/core/config';
 
 /**
  * Loads the core HTTP server configuration.
  * Handles ports, CORS, and basic infrastructure settings.
  */
-export function loadServer(env: FullEnv): ServerConfig {
+/**
+ * Load HTTP Server Configuration.
+ *
+ * Handles:
+ * - **Port Resolution**: Checks `API_PORT` -> `PORT` -> Default (8080).
+ * - **CORS**: Configures allowed origins for cross-domain requests.
+ * - **Discovery**: Resolves public base URLs for the App (Frontend) and API.
+ * - **Operational**: Sets trust proxy (for load balancers) and log levels.
+ */
+export function loadServerConfig(env: FullEnv): ServerConfig {
   const isProd = env.NODE_ENV === 'production';
   const defaultPort = 8080;
 

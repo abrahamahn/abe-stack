@@ -1,4 +1,9 @@
 // apps/server/src/config/infra/storage.ts
+import type { StorageConfig, StorageProviderName } from '@abe-stack/core/config';
+import type { FullEnv } from '@abe-stack/core/config';
+
+import { resolve } from 'node:path';
+
 /**
  * Storage Configuration Loader
  *
@@ -6,13 +11,19 @@
  * Works with AWS S3, MinIO, Cloudflare R2, DigitalOcean Spaces.
  */
 
-import type { StorageConfig, StorageProviderName } from '@abe-stack/core/contracts/config';
-import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
-
 /**
  * Loads file storage configuration from environment variables.
  */
-export function loadStorage(env: FullEnv): StorageConfig {
+/**
+ * Load File Storage Configuration.
+ *
+ * **Strategies**:
+ * - **Local**: Stores files on disk (default in dev). Root path is configurable.
+ * - **S3**: Uses parameters compatible with AWS S3, Cloudflare R2, MinIO, or DigitalOcean Spaces.
+ *
+ * @param env - Environment variables.
+ */
+export function loadStorageConfig(env: FullEnv): StorageConfig {
   const provider = (env.STORAGE_PROVIDER || 'local') as StorageProviderName;
 
   if (provider === 's3') {
@@ -32,10 +43,14 @@ export function loadStorage(env: FullEnv): StorageConfig {
   }
 
   // Local filesystem storage (development default)
+  // Ensure we use an absolute path relative to the specific app root,
+  // not the CWD (which might be the monorepo root)
+  const defaultPath = resolve(__dirname, '../../../uploads');
+
   return {
     provider: 'local',
     // In a monorepo, keep uploads in a known data directory
-    rootPath: env.STORAGE_ROOT_PATH || '.data/uploads',
+    rootPath: env.STORAGE_ROOT_PATH ? resolve(process.cwd(), env.STORAGE_ROOT_PATH) : defaultPath,
     // Public URL for serving files (e.g., http://localhost:8080/uploads)
     publicBaseUrl: env.STORAGE_PUBLIC_BASE_URL,
   };

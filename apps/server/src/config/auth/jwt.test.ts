@@ -44,7 +44,7 @@ describe('JWT Rotation Configuration', () => {
 
     expect(config).toEqual({
       secret: 'my-current-secret-key-that-is-at-least-32-characters-long',
-      previousSecret: undefined, // Empty string becomes undefined due to || operator
+      previousSecret: undefined,
     });
   });
 

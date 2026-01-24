@@ -1,97 +1,147 @@
 // apps/server/src/app.ts
-/**
- * Application Class - Dependency Injection Container
- *
- * Single source of truth for all application services and configuration.
- * Manages lifecycle (start/stop) and provides context to all handlers.
- *
- * Benefits:
- * - All dependencies initialized in one place
- * - Easy to test (mock individual services)
- * - Clear lifecycle management
- * - Single entry point for the application
- */
-
-import { buildConnectionString, type AppConfig } from '@/config/index';
-import type { CacheService } from '@/services/cache-service';
-import { createCacheService } from '@/services/cache-service';
-import type { PostgresPubSub } from '@infrastructure/index';
+import { buildConnectionString } from '@/config';
+import { DEFAULT_SEARCH_SCHEMAS } from '@/config/services/search';
 import {
+  createBillingProvider,
   createDbClient,
   createEmailService,
+  createNotificationService,
   createPostgresPubSub,
+  createPostgresQueueStore,
+  createQueueServer,
   createStorage,
+  createWriteService,
   getRepositoryContext,
+  getSearchProviderFactory,
   logStartupSummary,
   registerWebSocket,
   requireValidSchema,
-  SchemaValidationError,
   SubscriptionManager,
-  type DbClient,
-  type EmailService,
-  type Repositories,
-  type StorageProvider,
-  type SubscriptionKey,
 } from '@infrastructure/index';
 import { registerRoutes } from '@modules/index';
-import { type AppContext, type IServiceContainer } from '@shared/index';
-
-import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
+import { type AppConfig, type AppContext, type IServiceContainer } from '@shared/index';
+import { createCacheService, type CacheService } from './services/cache-service';
 
 import { createServer, listen } from '@/server';
-
-// ============================================================================
-// App Class
-// ============================================================================
+import type { FcmConfig as FcmConfigType } from '@abe-stack/core';
+import { BaseError, createConsoleLogger } from '@abe-stack/core';
+import type {
+  BillingService,
+  DbClient,
+  EmailService,
+  FcmConfig,
+  NotificationFactoryOptions,
+  NotificationService,
+  PostgresPubSub,
+  QueueServer,
+  Repositories,
+  ServerSearchProvider,
+  StorageProvider,
+  WriteService,
+} from '@infrastructure/index';
+import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
 
 export interface AppOptions {
   config: AppConfig;
-  // Optional overrides for testing
   db?: DbClient;
   repos?: Repositories;
   email?: EmailService;
   storage?: StorageProvider;
+  notifications?: NotificationService;
+  billing?: BillingService;
+  search?: ServerSearchProvider;
+  queue?: QueueServer;
+  write?: WriteService;
   cache?: CacheService;
 }
 
 export class App implements IServiceContainer {
-  // Configuration
   readonly config: AppConfig;
 
-  // Infrastructure services (IServiceContainer implementation)
-  readonly db: DbClient;
-  readonly repos: Repositories;
-  readonly email: EmailService;
-  readonly storage: StorageProvider;
-  readonly pubsub: SubscriptionManager;
-  readonly cache: CacheService;
+  public readonly db: DbClient;
+  public readonly repos: Repositories;
+  public readonly email: EmailService;
+  public readonly storage: StorageProvider;
+  public readonly notifications: NotificationService;
+  public readonly billing: BillingService;
+  public readonly search: ServerSearchProvider;
+  public readonly queue: QueueServer;
+  public readonly write: WriteService;
+  public readonly pubsub: SubscriptionManager;
+  public readonly cache: CacheService;
 
-  // Horizontal scaling adapter
   private _pgPubSub: PostgresPubSub | null = null;
-
-  // HTTP server (Fastify)
   private _server: FastifyInstance | null = null;
+  private _fallbackLogger: FastifyBaseLogger | null = null;
 
-  // Module info for startup summary
   private readonly moduleInfo = {
     auth: { routes: 5 },
     users: { routes: 1 },
     admin: { routes: 1 },
-    health: { routes: 4 }, // detailed, routes, ready, live
+    health: { routes: 4 },
   };
 
   constructor(options: AppOptions) {
     this.config = options.config;
-
-    // Build connection string
     const connectionString = buildConnectionString(this.config.database);
 
-    // Initialize infrastructure services
+    // 1. Data Persistence
     this.db = options.db ?? createDbClient(connectionString);
     const repoCtx = getRepositoryContext(connectionString);
     this.repos = options.repos ?? repoCtx.repos;
-    this.email = options.email ?? createEmailService(this.config.email);
+
+    // 2. Storage & Messaging
     this.storage = options.storage ?? createStorage(this.config.storage);
+    this.email = options.email ?? createEmailService(this.config.email);
+
+    // 3. Notifications
+    if (options.notifications) {
+      this.notifications = options.notifications;
+    } else {
+      const notificationOptions: NotificationFactoryOptions = {
+        fcm:
+          this.config.notifications.provider === 'fcm'
+            ? (this.config.notifications.config as FcmConfig as FcmConfigType)
+            : undefined,
+      };
+      this.notifications = createNotificationService(notificationOptions);
+    }
+
+    // 4. Billing
+    this.billing =
+      options.billing ??
+      createBillingProvider({
+        enabled: this.config.billing.enabled,
+        currency: this.config.billing.currency,
+        plans: this.config.billing.plans,
+        provider: this.config.billing.provider,
+        stripe: this.config.billing.stripe,
+        paypal: this.config.billing.paypal,
+        urls: this.config.billing.urls,
+      });
+
+    // 5. Search
+    const userSearchSchema = DEFAULT_SEARCH_SCHEMAS.users;
+    if (!userSearchSchema) throw new Error('User search schema not found');
+
+    this.search =
+      options.search ??
+      getSearchProviderFactory().createSqlProvider(this.db, this.repos, userSearchSchema);
+
+    // 6. Async Patterns (Write & Queue)
+    this.pubsub = new SubscriptionManager();
+    this.write = options.write ?? createWriteService({ db: this.db, pubsub: this.pubsub });
+
+    this.queue =
+      options.queue ??
+      createQueueServer({
+        store: createPostgresQueueStore(this.db),
+        config: this.config.queue,
+        log: this.log,
+        handlers: {},
+      });
+
+    // 7. Cache
     this.cache =
       options.cache ??
       createCacheService({
@@ -99,292 +149,154 @@ export class App implements IServiceContainer {
         maxSize: this.config.cache.maxSize,
       });
 
-    // Initialize Pub/Sub with horizontal scaling if connection string is available
-    this.pubsub = new SubscriptionManager();
+    // 8. Scaling Adapter
+    this.setupPubSub(connectionString);
+  }
 
-    let pubsubConnString: string | undefined;
-    if (this.config.database.provider === 'postgresql') {
-      pubsubConnString = this.config.database.connectionString || connectionString;
-    }
+  private setupPubSub(connectionString: string): void {
+    const pubsubConnString =
+      this.config.database.provider === 'postgresql'
+        ? this.config.database.connectionString || connectionString
+        : null;
 
     if (pubsubConnString && this.config.env !== 'test') {
       this._pgPubSub = createPostgresPubSub({
         connectionString: pubsubConnString,
-        onMessage: (key: string, version: number): void => {
-          this.pubsub.publishLocal(key as SubscriptionKey, version);
+        onMessage: (key, version) => {
+          this.pubsub.publishLocal(key, version);
         },
-        onError: (err: Error) => {
-          // Use server logger if available, otherwise fallback to console
-          if (this._server) {
-            this._server.log.error({ err }, 'PostgresPubSub error');
-          } else {
-            // eslint-disable-next-line no-console
-            console.error('PostgresPubSub error:', err);
-          }
+        onError: (err) => {
+          this.log.error({ err }, 'PostgresPubSub error');
         },
       });
-
+      // Do not start() here, wait for app.start()
       this.pubsub.setAdapter(this._pgPubSub);
     }
   }
 
-  // ============================================================================
-  // Lifecycle
-  // ============================================================================
+  private setupErrorHandler(server: FastifyInstance): void {
+    server.setErrorHandler((error, request, reply) => {
+      // 1. Handle Known Domain Errors (Clean Architecture)
+      if (error instanceof BaseError) {
+        // Log "operational" errors as info/warn, not error, to reduce noise
+        if (error.statusCode < 500) {
+          request.log.warn({ err: error }, 'Operational Error');
+        } else {
+          request.log.error({ err: error }, 'Domain Error');
+        }
 
-  /**
-   * Start the application
-   * Initializes the HTTP server and starts listening
-   */
-  async start(): Promise<void> {
-    // Validate database schema before starting
-    try {
-      await requireValidSchema(this.db);
-    } catch (error) {
-      if (error instanceof SchemaValidationError) {
-        // Database schema error will be handled by caller
+        return reply.status(error.statusCode).send({
+          error: error.name,
+          message: error.message,
+          code: (error as unknown as Record<string, unknown>).code,
+        });
       }
-      throw error;
-    }
 
-    // Start horizontal scaling if configured
-    if (this._pgPubSub) {
-      await this._pgPubSub.start();
-    }
+      // 2. Handle Schema Validation Errors (Fastify native)
+      if (error && typeof error === 'object' && 'validation' in error && error.validation) {
+        return reply.status(400).send({
+          error: 'ValidationError',
+          message: 'Invalid request data',
+          details: (error as Record<string, unknown>).validation,
+        });
+      }
 
-    // Create Fastify instance
-    this._server = await createServer({
-      config: this.config,
-      db: this.db,
-    });
-
-    // Register routes with context
-    registerRoutes(this._server, this.context);
-
-    // Register WebSocket support
-    registerWebSocket(this._server, this.context);
-
-    // Start listening
-    await listen(this._server, this.config);
-
-    // Log startup summary
-    const routeCount = Object.values(this.moduleInfo).reduce((sum, m) => sum + m.routes, 0);
-    await logStartupSummary(this.context, {
-      host: this.config.server.host,
-      port: this.config.server.port,
-      routeCount,
+      // 3. Fallback: Unexpected Crash
+      request.log.error({ err: error }, 'Unexpected Crash');
+      return reply.status(500).send({
+        error: 'InternalServerError',
+        message: 'Something went wrong',
+      });
     });
   }
 
-  /**
-   * Stop the application
-   * Gracefully shuts down all services
-   */
-  async stop(): Promise<void> {
-    // Stop horizontal scaling
-    if (this._pgPubSub) {
-      await this._pgPubSub.stop();
-    }
+  async start(): Promise<void> {
+    try {
+      // Validate DB Schema before accepting traffic
+      await requireValidSchema(this.db);
 
+      // Start internal async services
+      if (this._pgPubSub) await this._pgPubSub.start();
+
+      // Initialize Web Server
+      this._server = await createServer({
+        config: this.config,
+        db: this.db,
+        app: this,
+      });
+
+      // Register Centralized Error Handler
+      this.setupErrorHandler(this._server);
+
+      registerRoutes(this._server, this.context);
+      registerWebSocket(this._server, this.context);
+
+      await listen(this._server, this.config);
+
+      const routeCount = Object.values(this.moduleInfo).reduce((sum, m) => sum + m.routes, 0);
+      await logStartupSummary(this.context, {
+        host: this.config.server.host,
+        port: this.config.server.port,
+        routeCount,
+      });
+    } catch (error) {
+      this.log.fatal({ error }, 'Failed to start application. Cleaning up...');
+      await this.stop(); // Ensure partial connections are closed
+      throw error;
+    }
+  }
+
+  async stop(): Promise<void> {
+    // 1. Stop processing new background work
+    if (this._pgPubSub) await this._pgPubSub.stop();
+    await this.queue.stop();
+
+    // 2. Clear volatile data
+    this.cache.cleanup();
+
+    // 3. Stop receiving HTTP traffic
     if (this._server) {
       await this._server.close();
       this._server = null;
     }
+
+    this.log.info('Application stopped gracefully.');
   }
 
-  // ============================================================================
-  // Context (for handlers)
-  // ============================================================================
-
-  /**
-   * Get the application context for handlers
-   * This is what gets passed to all route handlers
-   */
   get context(): AppContext {
-    if (!this._server) {
-      throw new Error('App not started - call start() first');
-    }
-
     return {
       config: this.config,
       db: this.db,
       repos: this.repos,
       email: this.email,
       storage: this.storage,
+      notifications: this.notifications,
+      billing: this.billing,
+      search: this.search,
+      queue: this.queue,
+      write: this.write,
       pubsub: this.pubsub,
       cache: this.cache,
-      log: this._server.log,
+      log: this.log,
     };
   }
 
-  /**
-   * Get the Fastify server instance
-   * Useful for testing or advanced configuration
-   */
   get server(): FastifyInstance {
-    if (!this._server) {
-      throw new Error('App not started - call start() first');
-    }
+    if (!this._server) throw new Error('App not started');
     return this._server;
   }
 
-  /**
-   * Get the logger
-   */
   get log(): FastifyBaseLogger {
-    return this.server.log;
+    if (this._server) return this._server.log;
+    if (!this._fallbackLogger) {
+      this._fallbackLogger = createConsoleLogger(
+        this.config.server.logLevel,
+      ) as unknown as FastifyBaseLogger;
+    }
+    return this._fallbackLogger;
   }
 }
 
-// ============================================================================
-// Factory Functions
-// ============================================================================
-
-/**
- * Create an App instance with default configuration
- */
 export function createApp(config: AppConfig): App {
   return new App({ config });
-}
-
-/**
- * Create a mock App for testing
- */
-export function createTestApp(
-  configOverrides: Partial<AppConfig> = {},
-  serviceOverrides: Partial<Pick<AppOptions, 'db' | 'email' | 'storage'>> = {},
-): App {
-  const testConfig: AppConfig = {
-    env: 'test',
-    server: {
-      host: '127.0.0.1',
-      port: 0, // Random port
-      portFallbacks: [],
-      cors: { origin: ['*'], credentials: false, methods: ['GET', 'POST'] },
-      trustProxy: false,
-      logLevel: 'silent',
-      maintenanceMode: false,
-      appBaseUrl: 'http://localhost:5173',
-      apiBaseUrl: 'http://localhost:0',
-      rateLimit: { windowMs: 60000, max: 1000 },
-    },
-    database: {
-      provider: 'postgresql',
-      host: 'localhost',
-      port: 5432,
-      database: 'test',
-      user: 'test',
-      password: 'test',
-      maxConnections: 1,
-      portFallbacks: [],
-      ssl: false,
-    },
-    auth: {
-      strategies: ['local'],
-      jwt: {
-        secret: 'test-secret-that-is-at-least-32-chars',
-        accessTokenExpiry: '15m',
-        issuer: 'test',
-        audience: 'test',
-      },
-      refreshToken: { expiryDays: 7, gracePeriodSeconds: 30 },
-      argon2: { type: 2, memoryCost: 1024, timeCost: 1, parallelism: 1 },
-      password: { minLength: 8, maxLength: 64, minZxcvbnScore: 2 },
-      lockout: {
-        maxAttempts: 10,
-        lockoutDurationMs: 1800000,
-        progressiveDelay: false,
-        baseDelayMs: 0,
-      },
-      bffMode: false,
-      proxy: { trustProxy: false, trustedProxies: [], maxProxyDepth: 1 },
-      rateLimit: {
-        login: { max: 100, windowMs: 60000 },
-        register: { max: 100, windowMs: 60000 },
-        forgotPassword: { max: 100, windowMs: 60000 },
-        verifyEmail: { max: 100, windowMs: 60000 },
-      },
-      cookie: {
-        name: 'refreshToken',
-        secret: 'test',
-        httpOnly: true,
-        secure: false,
-        sameSite: 'lax',
-        path: '/',
-      },
-      oauth: {},
-      magicLink: { tokenExpiryMinutes: 15, maxAttempts: 3 },
-      totp: { issuer: 'Test', window: 1 },
-    },
-    email: {
-      provider: 'console',
-      smtp: {
-        host: '',
-        port: 587,
-        secure: false,
-        auth: { user: '', pass: '' },
-        connectionTimeout: 30000,
-        socketTimeout: 30000,
-      },
-      from: { name: 'Test', address: 'test@test.com' },
-      replyTo: 'test@test.com',
-    },
-    storage: {
-      provider: 'local',
-      rootPath: './test-uploads',
-    },
-    billing: {
-      enabled: false,
-      provider: 'stripe',
-      currency: 'USD',
-      stripe: { secretKey: '', publishableKey: '', webhookSecret: '' },
-      paypal: { clientId: '', clientSecret: '', webhookId: '', sandbox: true },
-      plans: {},
-      urls: {
-        portalReturnUrl: 'http://localhost:5173/settings/billing',
-        checkoutSuccessUrl: 'http://localhost:5173/checkout/success',
-        checkoutCancelUrl: 'http://localhost:5173/checkout/cancel',
-      },
-    },
-    cache: {
-      ttl: 300000,
-      maxSize: 1000,
-      useExternalProvider: false,
-    },
-    queue: {
-      provider: 'local',
-      pollIntervalMs: 1000,
-      concurrency: 1,
-      defaultMaxAttempts: 3,
-      backoffBaseMs: 1000,
-      maxBackoffMs: 30000,
-    },
-    notifications: {
-      enabled: false,
-      provider: 'fcm',
-      config: {
-        credentials: '',
-        projectId: '',
-      },
-    },
-    search: {
-      provider: 'sql',
-      config: {
-        defaultPageSize: 20,
-        maxPageSize: 100,
-      },
-    },
-    packageManager: {
-      provider: 'pnpm',
-      strictPeerDeps: true,
-      frozenLockfile: true,
-    },
-    ...configOverrides,
-  };
-
-  return new App({
-    config: testConfig,
-    email: serviceOverrides.email ?? createEmailService(testConfig.email),
-    ...serviceOverrides,
-  });
 }

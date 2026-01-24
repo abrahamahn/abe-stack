@@ -1,5 +1,5 @@
 // apps/server/src/config/infra/queue.test.ts
-import type { FullEnv } from '@abe-stack/core/contracts/config';
+import type { FullEnv } from '@abe-stack/core/config';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_QUEUE_CONFIG, loadQueueConfig } from './queue';
 
@@ -11,6 +11,31 @@ describe('Queue Configuration', () => {
       provider: 'local',
       concurrency: 5,
       defaultMaxAttempts: 3,
+      pollIntervalMs: 1000,
+      backoffBaseMs: 1000,
+      maxBackoffMs: 300000,
+    });
+  });
+
+  it('loads custom configuration from environment variables', () => {
+    const env = {
+      QUEUE_PROVIDER: 'redis',
+      QUEUE_CONCURRENCY: 10,
+      QUEUE_POLL_INTERVAL_MS: 500,
+      QUEUE_MAX_ATTEMPTS: 5,
+      QUEUE_BACKOFF_BASE_MS: 2000,
+      QUEUE_MAX_BACKOFF_MS: 600000,
+    } as unknown as FullEnv;
+
+    const config = loadQueueConfig(env);
+
+    expect(config).toEqual({
+      provider: 'redis',
+      concurrency: 10,
+      pollIntervalMs: 500,
+      defaultMaxAttempts: 5,
+      backoffBaseMs: 2000,
+      maxBackoffMs: 600000,
     });
   });
 
@@ -22,17 +47,9 @@ describe('Queue Configuration', () => {
     expect(redis.provider).toBe('redis');
   });
 
-  it('implements sensible retry logic defaults', () => {
-    const config = loadQueueConfig({} as unknown as FullEnv);
-
-    // Premium insight: Backoff should never be 0 or negative
-    expect(config.backoffBaseMs).toBeGreaterThan(0);
-    expect(config.maxBackoffMs).toBeGreaterThan(config.backoffBaseMs);
-  });
-
   it('exports a Required default config for internal service use', () => {
     expect(DEFAULT_QUEUE_CONFIG.provider).toBe('local');
-    // Using Required<QueueConfig> in the constant ensures all fields are populated
-    expect(DEFAULT_QUEUE_CONFIG.pollIntervalMs).toBeDefined();
+    expect(DEFAULT_QUEUE_CONFIG.pollIntervalMs).toBe(1000);
+    expect(DEFAULT_QUEUE_CONFIG.concurrency).toBe(5);
   });
 });

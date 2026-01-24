@@ -9,10 +9,10 @@ describe('Rate Limit Configuration', () => {
 
     expect(config).toEqual({
       windowMs: 60000,
-      max: 1000, // Default is 1000 in non-production environments
+      max: 1000,
       cleanupIntervalMs: 60000,
       progressiveDelay: {
-        enabled: true, // Default to true when not specified
+        enabled: true,
         baseDelay: 1000,
         maxDelay: 10000,
         backoffFactor: 2,

@@ -2,10 +2,10 @@
 # Production Docker Compose for ABE Stack
 #
 # Usage:
-#   docker compose -f config/docker/docker-compose.prod.yml --env-file .config/env/.config/env/.env.production up -d
+#   docker compose -f config/docker/docker-compose.prod.yml --env-file .config/env/.env.production up -d
 #
 # Prerequisites:
-#   1. Create .config/env/.config/env/.env.production from .env.example
+#   1. Create .config/env/.env.production from .env.example
 #   2. Set strong secrets: JWT_SECRET, SESSION_SECRET, POSTGRES_PASSWORD
 #   3. Set DOMAIN and ACME_EMAIL for automatic TLS certificates
 #

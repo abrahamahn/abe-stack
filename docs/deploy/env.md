@@ -5,7 +5,7 @@ description: Complete reference for Abe Stack environment configuration.
 
 # Environment Variables
 
-This document explains every environment variable used by the server config. Use `.env.example` as the canonical template and copy it to `.config/env/.config/env/.env.development`, `.config/env/.config/env/.env.test`, or `.config/env/.config/env/.env.production`.
+This document explains every environment variable used by the server config. Use `.env.example` as the canonical template and copy it to `.config/env/.env.development`, `.config/env/.env.test`, or `.config/env/.env.production`.
 
 Notes:
 

@@ -6,16 +6,16 @@
  */
 
 import {
+  BillingProviderNotConfiguredError,
   CannotDeactivatePlanWithActiveSubscriptionsError,
   PlanNotFoundError,
-  BillingProviderNotConfiguredError,
   type AdminPlan,
-  type AdminPlansListResponse,
   type AdminPlanResponse,
+  type AdminPlansListResponse,
   type CreatePlanRequest,
-  type UpdatePlanRequest,
-  type SyncStripeResponse,
   type SubscriptionActionResponse,
+  type SyncStripeResponse,
+  type UpdatePlanRequest,
 } from '@abe-stack/core';
 import type { Plan as DbPlan } from '@abe-stack/db';
 
@@ -206,14 +206,7 @@ export async function handleAdminSyncPlanToStripe(
 
   try {
     const repos = getAdminBillingRepos(ctx);
-    const provider = createBillingProvider({
-      provider: ctx.config.billing.provider,
-      stripe: ctx.config.billing.stripe,
-      paypal: ctx.config.billing.paypal,
-      portalReturnUrl: ctx.config.billing.urls.portalReturnUrl,
-      checkoutSuccessUrl: ctx.config.billing.urls.checkoutSuccessUrl,
-      checkoutCancelUrl: ctx.config.billing.urls.checkoutCancelUrl,
-    });
+    const provider = createBillingProvider(ctx.config.billing);
 
     const result = await syncPlanToStripe(repos, provider, params.id);
 

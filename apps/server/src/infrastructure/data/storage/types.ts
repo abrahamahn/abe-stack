@@ -12,7 +12,7 @@ export type {
   S3StorageConfig,
   StorageConfig,
   StorageProviderName,
-} from '@abe-stack/core/contracts/config';
+} from '@abe-stack/core/config';
 
 export interface UploadParams {
   key: string;
@@ -21,6 +21,8 @@ export interface UploadParams {
 }
 
 export interface StorageProvider {
-  upload(params: UploadParams): Promise<{ key: string }>;
+  upload(key: string, data: Buffer | Uint8Array | string, contentType: string): Promise<string>;
+  download(key: string): Promise<Buffer>;
+  delete(key: string): Promise<void>;
   getSignedUrl(key: string, expiresInSeconds?: number): Promise<string>;
 }

@@ -1,11 +1,7 @@
 // apps/server/src/config/infra/package.test.ts
-import type { FullEnv, PackageManagerConfig } from '@abe-stack/core/contracts/config';
+import type { FullEnv } from '@abe-stack/core/config';
 import { describe, expect, it } from 'vitest';
-import {
-  DEFAULT_PACKAGE_MANAGER_CONFIG,
-  loadPackageManagerConfig,
-  validatePackageManagerConfig,
-} from './package';
+import { DEFAULT_PACKAGE_MANAGER_CONFIG, loadPackageManagerConfig } from './package';
 
 describe('Package Manager Configuration', () => {
   it('loads default configuration when no environment variables are set', () => {
@@ -80,42 +76,6 @@ describe('Package Manager Configuration', () => {
     const config = loadPackageManagerConfig(env);
 
     expect(config.provider).toBe('pnpm');
-  });
-
-  it('validatePackageManagerConfig returns no errors for valid configuration', () => {
-    const config = {
-      provider: 'pnpm',
-      strictPeerDeps: true,
-      frozenLockfile: true,
-      registry: 'https://registry.npmjs.org/',
-    } satisfies PackageManagerConfig;
-
-    const errors = validatePackageManagerConfig(config);
-    expect(errors).toHaveLength(0);
-  });
-
-  it('validatePackageManagerConfig returns no errors for valid npm configuration', () => {
-    const config = {
-      provider: 'npm',
-      audit: true,
-      legacyPeerDeps: false,
-      registry: 'https://registry.npmjs.org/',
-    } satisfies PackageManagerConfig;
-
-    const errors = validatePackageManagerConfig(config);
-    expect(errors).toHaveLength(0);
-  });
-
-  it('validatePackageManagerConfig returns no errors for valid yarn configuration', () => {
-    const config = {
-      provider: 'yarn',
-      audit: true,
-      frozenLockfile: true,
-      registry: 'https://registry.yarnpkg.com/',
-    } satisfies PackageManagerConfig;
-
-    const errors = validatePackageManagerConfig(config);
-    expect(errors).toHaveLength(0);
   });
 
   it('exports default configuration constants', () => {

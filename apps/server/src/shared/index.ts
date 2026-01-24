@@ -6,111 +6,100 @@
  * used throughout the application.
  */
 
-// Constants
+// Basic types (from @abe-stack/core)
 export {
-  // Time constants
-  MS_PER_SECOND,
-  SECONDS_PER_MINUTE,
-  MINUTES_PER_HOUR,
-  HOURS_PER_DAY,
-  DAYS_PER_WEEK,
-  MS_PER_MINUTE,
-  MS_PER_HOUR,
-  MS_PER_DAY,
-  SECONDS_PER_HOUR,
-  SECONDS_PER_DAY,
-  // Security constants
-  MIN_JWT_SECRET_LENGTH,
-  REFRESH_TOKEN_BYTES,
-  PROGRESSIVE_DELAY_WINDOW_MS,
-  MAX_PROGRESSIVE_DELAY_MS,
-  // Cookie names
-  REFRESH_COOKIE_NAME,
-  CSRF_COOKIE_NAME,
-  // HTTP status codes
-  HTTP_STATUS,
-  // Messages
-  ERROR_MESSAGES,
-  SUCCESS_MESSAGES,
-  FAILURE_REASONS,
-} from '@shared/constants';
-
-// Errors (from @abe-stack/core)
-export {
-  // Base error
-  AppError,
-  // HTTP errors
-  BadRequestError,
-  UnauthorizedError,
-  ForbiddenError,
-  NotFoundError,
-  ConflictError,
-  TooManyRequestsError,
-  InternalError,
-  // Auth errors
-  InvalidCredentialsError,
+  // Business Errors (Mapped from Core)
   AccountLockedError,
-  InvalidTokenError,
-  TokenReuseError,
-  WeakPasswordError,
+  // Errors
+  AppError,
+  BadRequestError,
+  ConflictError,
+  DAYS_PER_WEEK,
   EmailAlreadyExistsError,
   EmailNotVerifiedError,
   EmailSendError,
-  UserNotFoundError,
-  // OAuth errors
+  ForbiddenError,
+  HOURS_PER_DAY,
+  HTTP_STATUS,
+  InternalError,
+  InvalidCredentialsError,
+  InvalidTokenError,
+  MINUTES_PER_HOUR,
+  MS_PER_DAY,
+  MS_PER_HOUR,
+  MS_PER_MINUTE,
+  // Constants
+  MS_PER_SECOND,
+  NotFoundError,
   OAuthError,
   OAuthStateMismatchError,
-  // 2FA errors
-  TotpRequiredError,
+  SECONDS_PER_DAY,
+  SECONDS_PER_HOUR,
+  SECONDS_PER_MINUTE,
+  TokenReuseError,
+  TooManyRequestsError,
   TotpInvalidError,
-  // Validation errors
-  ValidationError,
-  // Helpers
+  TotpRequiredError,
+  UnauthorizedError,
+  UserNotFoundError,
+  WeakPasswordError,
   isAppError,
+  // Auth Results
+  isKnownAuthError,
+  mapErrorToHttpResponse,
   toAppError,
-  // Response types
-  type ApiErrorResponse,
-  type ApiSuccessResponse,
-  type ApiResponse,
 } from '@abe-stack/core';
 
-// Types
+// API Response Types (from @abe-stack/core)
 export type {
-  // User types
-  UserRole,
-  User,
-  UserWithPassword,
-  // Token types
-  TokenPayload,
-  RefreshTokenData,
-  // Auth types
-  AuthResult,
-  OAuthUserInfo,
-  MagicLinkData,
-  TotpSecret,
-  // Request context
-  RequestInfo,
-  // Fastify extensions
-  ReplyWithCookies,
-  RequestWithCookies,
-  // Service interfaces
+  ApiErrorResponse,
+  ApiResponse,
+  ApiSuccessResponse,
+  AppConfig,
+  BillingService,
+  // Service Interfaces (Ports)
   EmailService,
-  EmailOptions,
-  EmailResult,
+  ErrorResponse,
+  Logger,
+  NotificationService,
   StorageService,
-  // DI Container
-  IServiceContainer,
-  AppContext,
-} from '@shared/types';
+} from '@abe-stack/core';
 
-// Error mapping utilities
-export { mapErrorToResponse, isKnownAuthError } from '@shared/errorMapper';
-export type { HttpErrorResponse as ErrorResponse } from '@abe-stack/core';
+// Server-specific shared types
+export type {
+  AppContext,
+  AuthResult,
+  HasContext,
+  IServiceContainer,
+  MagicLinkData,
+  OAuthUserInfo,
+  RefreshTokenData,
+  ReplyWithCookies,
+  RequestInfo,
+  RequestWithCookies,
+  TokenPayload,
+  TotpSecret,
+  User,
+  UserRole,
+  UserWithPassword,
+} from './types';
+
+// Error mapping (Adapted for Server AppContext)
+export { mapErrorToResponse } from './errorMapper';
+
+// Constants and Messages
+export {
+  CSRF_COOKIE_NAME,
+  ERROR_MESSAGES,
+  FAILURE_REASONS,
+  REFRESH_COOKIE_NAME,
+  SUCCESS_MESSAGES,
+} from './constants';
 
 // Validation error utilities
 export {
   formatValidationErrors,
-  type ZodIssueMinimal,
   type ValidationErrorDetail,
   type ValidationErrorResponse,
-} from '@shared/validationError';
+  type ZodIssueMinimal,
+} from './validationError';

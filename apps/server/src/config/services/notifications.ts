@@ -5,14 +5,17 @@ import type {
   NotificationConfig,
   NotificationProvider,
   OneSignalConfig,
-} from '@abe-stack/core/contracts/config';
-import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
+} from '@abe-stack/core/config';
+import type { FullEnv } from '@abe-stack/core/config';
 
 /**
- * Loads push notification configuration from environment variables.
+ * Load Push Notification Configuration.
  *
- * Supports multiple providers: OneSignal, Courier, Knock, FCM, SNS, Braze, and generic.
- * Provider priority: Explicit NOTIFICATIONS_PROVIDER > OneSignal > Courier > Knock > FCM > SNS > Braze.
+ * **Supported Providers**:
+ * - **OneSignal** (Recommended Default)
+ * - **FCM** (Firebase Cloud Messaging)
+ * - **Courier** (Multi-channel orchestration)
+ * - **Generic** (For custom webhooks)
  *
  * Notifications are disabled if no valid provider credentials are found.
  *

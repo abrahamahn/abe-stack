@@ -6,7 +6,14 @@
  */
 
 // Base error class and utilities
-export { AppError, getErrorStatusCode, getSafeErrorMessage, isAppError, toAppError } from './base';
+export {
+  AppError,
+  BaseError,
+  getErrorStatusCode,
+  getSafeErrorMessage,
+  isAppError,
+  toAppError,
+} from './base';
 
 // HTTP error classes
 export {

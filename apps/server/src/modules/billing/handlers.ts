@@ -17,22 +17,22 @@ import {
   SubscriptionAlreadyCanceledError,
   SubscriptionNotActiveError,
   SubscriptionNotCancelingError,
+  type AddPaymentMethodRequest,
+  type CancelSubscriptionRequest,
   type CheckoutRequest,
   type CheckoutResponse,
-  type CancelSubscriptionRequest,
-  type SubscriptionActionResponse,
-  type UpdateSubscriptionRequest,
-  type AddPaymentMethodRequest,
-  type Plan,
-  type Subscription,
   type Invoice,
-  type PaymentMethod,
-  type PlansListResponse,
-  type SubscriptionResponse,
   type InvoicesListResponse,
-  type PaymentMethodsListResponse,
+  type PaymentMethod,
   type PaymentMethodResponse,
+  type PaymentMethodsListResponse,
+  type Plan,
+  type PlansListResponse,
   type SetupIntentResponse,
+  type Subscription,
+  type SubscriptionActionResponse,
+  type SubscriptionResponse,
+  type UpdateSubscriptionRequest,
 } from '@abe-stack/core';
 
 import { createBillingProvider } from '@infrastructure/billing';
@@ -295,14 +295,7 @@ export async function handleCreateCheckout(
 
   try {
     const repos = getBillingRepos(ctx);
-    const provider = createBillingProvider({
-      provider: ctx.config.billing.provider,
-      stripe: ctx.config.billing.stripe,
-      paypal: ctx.config.billing.paypal,
-      portalReturnUrl: ctx.config.billing.urls.portalReturnUrl,
-      checkoutSuccessUrl: ctx.config.billing.urls.checkoutSuccessUrl,
-      checkoutCancelUrl: ctx.config.billing.urls.checkoutCancelUrl,
-    });
+    const provider = createBillingProvider(ctx.config.billing);
 
     const session = await createCheckoutSession(repos, provider, {
       userId: request.user.userId,
@@ -342,14 +335,7 @@ export async function handleCancelSubscription(
 
   try {
     const repos = getBillingRepos(ctx);
-    const provider = createBillingProvider({
-      provider: ctx.config.billing.provider,
-      stripe: ctx.config.billing.stripe,
-      paypal: ctx.config.billing.paypal,
-      portalReturnUrl: ctx.config.billing.urls.portalReturnUrl,
-      checkoutSuccessUrl: ctx.config.billing.urls.checkoutSuccessUrl,
-      checkoutCancelUrl: ctx.config.billing.urls.checkoutCancelUrl,
-    });
+    const provider = createBillingProvider(ctx.config.billing);
 
     await cancelSubscription(repos, provider, request.user.userId, body.immediately);
 
@@ -387,14 +373,7 @@ export async function handleResumeSubscription(
 
   try {
     const repos = getBillingRepos(ctx);
-    const provider = createBillingProvider({
-      provider: ctx.config.billing.provider,
-      stripe: ctx.config.billing.stripe,
-      paypal: ctx.config.billing.paypal,
-      portalReturnUrl: ctx.config.billing.urls.portalReturnUrl,
-      checkoutSuccessUrl: ctx.config.billing.urls.checkoutSuccessUrl,
-      checkoutCancelUrl: ctx.config.billing.urls.checkoutCancelUrl,
-    });
+    const provider = createBillingProvider(ctx.config.billing);
 
     await resumeSubscription(repos, provider, request.user.userId);
 
@@ -431,14 +410,7 @@ export async function handleUpdateSubscription(
 
   try {
     const repos = getBillingRepos(ctx);
-    const provider = createBillingProvider({
-      provider: ctx.config.billing.provider,
-      stripe: ctx.config.billing.stripe,
-      paypal: ctx.config.billing.paypal,
-      portalReturnUrl: ctx.config.billing.urls.portalReturnUrl,
-      checkoutSuccessUrl: ctx.config.billing.urls.checkoutSuccessUrl,
-      checkoutCancelUrl: ctx.config.billing.urls.checkoutCancelUrl,
-    });
+    const provider = createBillingProvider(ctx.config.billing);
 
     await updateSubscription(repos, provider, request.user.userId, body.planId);
 
@@ -542,14 +514,7 @@ export async function handleAddPaymentMethod(
 
   try {
     const repos = getBillingRepos(ctx);
-    const provider = createBillingProvider({
-      provider: ctx.config.billing.provider,
-      stripe: ctx.config.billing.stripe,
-      paypal: ctx.config.billing.paypal,
-      portalReturnUrl: ctx.config.billing.urls.portalReturnUrl,
-      checkoutSuccessUrl: ctx.config.billing.urls.checkoutSuccessUrl,
-      checkoutCancelUrl: ctx.config.billing.urls.checkoutCancelUrl,
-    });
+    const provider = createBillingProvider(ctx.config.billing);
 
     const paymentMethod = await addPaymentMethod(
       repos,
@@ -591,14 +556,7 @@ export async function handleRemovePaymentMethod(
 
   try {
     const repos = getBillingRepos(ctx);
-    const provider = createBillingProvider({
-      provider: ctx.config.billing.provider,
-      stripe: ctx.config.billing.stripe,
-      paypal: ctx.config.billing.paypal,
-      portalReturnUrl: ctx.config.billing.urls.portalReturnUrl,
-      checkoutSuccessUrl: ctx.config.billing.urls.checkoutSuccessUrl,
-      checkoutCancelUrl: ctx.config.billing.urls.checkoutCancelUrl,
-    });
+    const provider = createBillingProvider(ctx.config.billing);
 
     await removePaymentMethod(repos, provider, request.user.userId, paymentMethodId);
 
@@ -635,14 +593,7 @@ export async function handleSetDefaultPaymentMethod(
 
   try {
     const repos = getBillingRepos(ctx);
-    const provider = createBillingProvider({
-      provider: ctx.config.billing.provider,
-      stripe: ctx.config.billing.stripe,
-      paypal: ctx.config.billing.paypal,
-      portalReturnUrl: ctx.config.billing.urls.portalReturnUrl,
-      checkoutSuccessUrl: ctx.config.billing.urls.checkoutSuccessUrl,
-      checkoutCancelUrl: ctx.config.billing.urls.checkoutCancelUrl,
-    });
+    const provider = createBillingProvider(ctx.config.billing);
 
     const paymentMethod = await setDefaultPaymentMethod(
       repos,
@@ -682,14 +633,7 @@ export async function handleCreateSetupIntent(
 
   try {
     const repos = getBillingRepos(ctx);
-    const provider = createBillingProvider({
-      provider: ctx.config.billing.provider,
-      stripe: ctx.config.billing.stripe,
-      paypal: ctx.config.billing.paypal,
-      portalReturnUrl: ctx.config.billing.urls.portalReturnUrl,
-      checkoutSuccessUrl: ctx.config.billing.urls.checkoutSuccessUrl,
-      checkoutCancelUrl: ctx.config.billing.urls.checkoutCancelUrl,
-    });
+    const provider = createBillingProvider(ctx.config.billing);
 
     const result = await createSetupIntent(
       repos,

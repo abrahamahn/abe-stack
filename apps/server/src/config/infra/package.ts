@@ -1,9 +1,6 @@
 // apps/server/src/config/infra/package.ts
-import type {
-  PackageManagerConfig,
-  PackageManagerProvider,
-} from '@abe-stack/core/contracts/config';
-import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
+import type { PackageManagerConfig, PackageManagerProvider } from '@abe-stack/core/config';
+import type { FullEnv } from '@abe-stack/core/config';
 
 /**
  * Loads package manager configuration from environment variables.
@@ -32,6 +29,7 @@ import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
  * YARN_FROZEN_LOCKFILE=true
  * ```
  */
+
 export function loadPackageManagerConfig(env: FullEnv): PackageManagerConfig {
   const provider = (env.PACKAGE_MANAGER_PROVIDER || 'pnpm') as PackageManagerProvider;
 
@@ -69,33 +67,6 @@ export function loadPackageManagerConfig(env: FullEnv): PackageManagerConfig {
         registry: env.PNPM_REGISTRY,
       };
   }
-}
-
-/**
- * Validates package manager configuration for production readiness.
- *
- * @param config - Package manager configuration to validate
- * @returns Array of validation error messages (empty if valid)
- */
-export function validatePackageManagerConfig(config: PackageManagerConfig): string[] {
-  const errors: string[] = [];
-
-  // Add any specific validation rules for package manager configuration
-  // Currently, we just validate that required fields are present based on provider
-
-  switch (config.provider) {
-    case 'npm':
-      // No specific validations needed for npm config
-      break;
-    case 'pnpm':
-      // No specific validations needed for pnpm config
-      break;
-    case 'yarn':
-      // No specific validations needed for yarn config
-      break;
-  }
-
-  return errors;
 }
 
 export const DEFAULT_PACKAGE_MANAGER_CONFIG = {

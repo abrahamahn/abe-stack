@@ -12,10 +12,25 @@
 import { HTTP_STATUS } from '../constants';
 
 /**
+ * Base abstract error class for the clean architecture.
+ * All domain and infrastructure errors should extend this.
+ */
+export abstract class BaseError extends Error {
+  abstract readonly statusCode: number;
+
+  protected constructor(message: string) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.name = this.constructor.name;
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+/**
  * Base application error class
  * All custom errors should extend this
  */
-export class AppError extends Error {
+export class AppError extends BaseError {
   constructor(
     message: string,
     public readonly statusCode: number = HTTP_STATUS.INTERNAL_SERVER_ERROR,
@@ -23,8 +38,6 @@ export class AppError extends Error {
     public readonly details?: Record<string, unknown>,
   ) {
     super(message);
-    this.name = this.constructor.name;
-    Error.captureStackTrace(this, this.constructor);
   }
 
   toJSON(): { error: string; message: string; code?: string; details?: Record<string, unknown> } {

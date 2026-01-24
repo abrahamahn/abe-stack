@@ -31,8 +31,8 @@ Access:
 
 ```bash
 # 1. Create production environment file
-cp .env.example .config/env/.config/env/.env.production
-# Edit .config/env/.config/env/.env.production with production values
+cp .env.example .config/env/.env.production
+# Edit .config/env/.env.production with production values
 
 # 2. Set required environment variables
 export DOMAIN=example.com
@@ -42,7 +42,7 @@ export JWT_SECRET=$(openssl rand -base64 32)
 export SESSION_SECRET=$(openssl rand -base64 32)
 
 # 3. Build and start (includes Caddy reverse proxy with auto TLS)
-docker compose -f config/docker/docker-compose.prod.yml --env-file .config/env/.config/env/.env.production up -d
+docker compose -f config/docker/docker-compose.prod.yml --env-file .config/env/.env.production up -d
 
 # 4. Run migrations (first deploy only)
 docker compose -f config/docker/docker-compose.prod.yml exec api node -e "/* migration command */"
@@ -206,11 +206,11 @@ For custom deployment scenarios, use the traditional Docker Compose approach:
 
 ```bash
 # 1. Configure environment
-cp .env.example .config/env/.config/env/.env.production
-# Edit .config/env/.config/env/.env.production with production values
+cp .env.example .config/env/.env.production
+# Edit .config/env/.env.production with production values
 
 # 2. Build and deploy
-docker compose -f config/docker/docker-compose.prod.yml --env-file .config/env/.config/env/.env.production up -d --build
+docker compose -f config/docker/docker-compose.prod.yml --env-file .config/env/.env.production up -d --build
 
 # 3. Run migrations (first deploy only)
 docker compose -f config/docker/docker-compose.prod.yml exec api node -e "/* migration command */"
@@ -313,8 +313,8 @@ config/
 │   └── Caddyfile.dev          # Development Caddy config (HTTP)
 └── .env/
     ├── .env.example           # Environment variable template
-    ├── .config/env/.config/env/.env.development       # Development settings
-    └── .config/env/.config/env/.env.production        # Production settings (create this)
+    ├── .config/env/.env.development       # Development settings
+    └── .config/env/.env.production        # Production settings (create this)
 ```
 
 ---

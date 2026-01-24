@@ -148,22 +148,22 @@ git clone https://github.com/your-org/abe-stack.git
 cd abe-stack
 
 # Create production environment file
-cp .env.example .config/env/.config/env/.env.production
+cp .env.example .config/env/.env.production
 ```
 
 ### Generate Secrets
 
 ```bash
 # Generate secure secrets
-echo "POSTGRES_PASSWORD=$(openssl rand -base64 32)" >> .config/env/.config/env/.env.production
-echo "JWT_SECRET=$(openssl rand -base64 32)" >> .config/env/.config/env/.env.production
-echo "SESSION_SECRET=$(openssl rand -base64 32)" >> .config/env/.config/env/.env.production
+echo "POSTGRES_PASSWORD=$(openssl rand -base64 32)" >> .config/env/.env.production
+echo "JWT_SECRET=$(openssl rand -base64 32)" >> .config/env/.env.production
+echo "SESSION_SECRET=$(openssl rand -base64 32)" >> .config/env/.env.production
 ```
 
 ### Edit Environment File
 
 ```bash
-nano .config/env/.config/env/.env.production
+nano .config/env/.env.production
 ```
 
 Update these values:
@@ -184,7 +184,7 @@ EMAIL_PROVIDER=smtp  # If sending real emails
 Secure the file:
 
 ```bash
-chmod 600 .config/env/.config/env/.env.production
+chmod 600 .config/env/.env.production
 ```
 
 ---
@@ -198,7 +198,7 @@ cd ~/abe-stack
 
 # Build and start all services
 docker compose -f config/docker/docker-compose.prod.yml \
-  --env-file .config/env/.config/env/.env.production \
+  --env-file .config/env/.env.production \
   up -d --build
 
 # View logs
@@ -239,7 +239,7 @@ Type=oneshot
 RemainAfterExit=yes
 User=deploy
 WorkingDirectory=/home/deploy/abe-stack
-ExecStart=/usr/bin/docker compose -f config/docker/docker-compose.prod.yml --env-file .config/env/.config/env/.env.production up -d
+ExecStart=/usr/bin/docker compose -f config/docker/docker-compose.prod.yml --env-file .config/env/.env.production up -d
 ExecStop=/usr/bin/docker compose -f config/docker/docker-compose.prod.yml down
 TimeoutStartSec=0
 
@@ -345,7 +345,7 @@ git pull
 
 # Rebuild and restart
 docker compose -f config/docker/docker-compose.prod.yml \
-  --env-file .config/env/.config/env/.env.production \
+  --env-file .config/env/.env.production \
   up -d --build
 
 # View logs for any issues

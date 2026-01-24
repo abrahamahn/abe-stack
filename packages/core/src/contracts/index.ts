@@ -140,6 +140,19 @@ export type { ErrorResponse } from './common';
 // Native bridge interface
 export type { NativeBridge } from './native';
 
+// Server Environment
+export type { ServerEnvironment } from './environment';
+
+// Service interfaces (Ports)
+export type {
+  EmailOptions,
+  EmailResult,
+  EmailService,
+  Logger,
+  NotificationService,
+  StorageService,
+} from './services';
+
 // Pagination schemas
 export {
   cursorPaginatedResultSchema,
@@ -288,6 +301,50 @@ export type {
 } from './security';
 
 // Billing contract
+export type {
+  // Types
+  AddPaymentMethodRequest,
+  AdminPlan,
+  AdminPlanResponse,
+  AdminPlansListResponse,
+  BillingProvider,
+  BillingService,
+  CancelSubscriptionRequest,
+  CardDetails,
+  CheckoutParams,
+  CheckoutRequest,
+  CheckoutResponse,
+  CheckoutResult,
+  CreatePlanRequest,
+  CreateProductParams,
+  CreateProductResult,
+  EmptyBillingBody,
+  Invoice,
+  InvoicesListResponse,
+  InvoiceStatus,
+  NormalizedEventType,
+  NormalizedWebhookEvent,
+  PaymentMethod,
+  PaymentMethodResponse,
+  PaymentMethodsListResponse,
+  PaymentMethodType,
+  Plan,
+  PlanFeature,
+  PlanInterval,
+  PlansListResponse,
+  ProviderInvoice,
+  ProviderPaymentMethod,
+  ProviderSubscription,
+  SetupIntentResponse,
+  SetupIntentResult,
+  Subscription,
+  SubscriptionActionResponse,
+  SubscriptionResponse,
+  SubscriptionStatus,
+  SyncStripeResponse,
+  UpdatePlanRequest,
+  UpdateSubscriptionRequest,
+} from './billing';
 export {
   // Schemas
   addPaymentMethodRequestSchema,
@@ -322,37 +379,4 @@ export {
   syncStripeResponseSchema,
   updatePlanRequestSchema,
   updateSubscriptionRequestSchema,
-} from './billing/billing';
-export type {
-  // Types
-  AddPaymentMethodRequest,
-  AdminPlan,
-  AdminPlanResponse,
-  AdminPlansListResponse,
-  BillingProvider,
-  CancelSubscriptionRequest,
-  CardDetails,
-  CheckoutRequest,
-  CheckoutResponse,
-  CreatePlanRequest,
-  EmptyBillingBody,
-  Invoice,
-  InvoicesListResponse,
-  InvoiceStatus,
-  PaymentMethod,
-  PaymentMethodResponse,
-  PaymentMethodsListResponse,
-  PaymentMethodType,
-  Plan,
-  PlanFeature,
-  PlanInterval,
-  PlansListResponse,
-  SetupIntentResponse,
-  Subscription,
-  SubscriptionActionResponse,
-  SubscriptionResponse,
-  SubscriptionStatus,
-  SyncStripeResponse,
-  UpdatePlanRequest,
-  UpdateSubscriptionRequest,
 } from './billing/billing';

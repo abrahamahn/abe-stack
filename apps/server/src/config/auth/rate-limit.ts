@@ -1,9 +1,15 @@
 // apps/server/src/config/auth/rate-limit.ts
-import { getBool, getInt } from '@abe-stack/core/config/utils';
-import type { RateLimitConfig } from '@abe-stack/core/contracts/config';
+import { getBool, getInt } from '@abe-stack/core/config';
+import type { RateLimitConfig } from '@abe-stack/core/config';
 
 /**
- * Loads rate limiting configuration for API protection.
+ * Load Rate Limit Configuration.
+ *
+ * Configures the "Global" API rate limit as well as progressive delay settings.
+ *
+ * **Progressive Delay**:
+ * Instead of hard-blocking users immediately, we can slow down responses
+ * (backoff) to discourage brute-force or scraping without impacting legitimate users.
  */
 export function loadRateLimitConfig(env: Record<string, string | undefined>): RateLimitConfig {
   const isProd = env.NODE_ENV === 'production';
@@ -14,7 +20,6 @@ export function loadRateLimitConfig(env: Record<string, string | undefined>): Ra
     cleanupIntervalMs: getInt(env.RATE_LIMIT_CLEANUP_INTERVAL_MS, 60 * 1000),
 
     progressiveDelay: {
-      // Cleaner "Premium" approach: use getBool fallback
       enabled: env.RATE_LIMIT_PROGRESSIVE_DELAY_ENABLED
         ? getBool(env.RATE_LIMIT_PROGRESSIVE_DELAY_ENABLED)
         : true,

@@ -1,6 +1,6 @@
 // apps/server/src/infrastructure/data/storage/__tests__/factory.test.ts
 import { createStorage } from '@storage';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type {
   LocalStorageConfig,
@@ -69,7 +69,9 @@ describe('createStorage', () => {
       const provider = createStorage(config);
 
       expect(provider).toBeInstanceOf(MockLocalStorageProvider);
-      expect((provider as InstanceType<typeof MockLocalStorageProvider>).config).toEqual(config);
+      expect((provider as unknown as typeof MockLocalStorageProvider.prototype).config).toEqual(
+        config,
+      );
     });
   });
 
@@ -106,7 +108,9 @@ describe('createStorage', () => {
       const provider = createStorage(config);
 
       expect(provider).toBeInstanceOf(MockS3StorageProvider);
-      expect((provider as InstanceType<typeof MockS3StorageProvider>).config).toEqual(config);
+      expect((provider as unknown as typeof MockS3StorageProvider.prototype).config).toEqual(
+        config,
+      );
     });
   });
 

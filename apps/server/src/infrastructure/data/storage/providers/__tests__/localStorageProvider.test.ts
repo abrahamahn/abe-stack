@@ -1,7 +1,7 @@
 // apps/server/src/infrastructure/data/storage/__tests__/localStorageProvider.test.ts
 import { mkdir, writeFile } from 'node:fs/promises';
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { LocalStorageProvider } from '../localStorageProvider';
 
@@ -37,9 +37,9 @@ describe('LocalStorageProvider', () => {
         body: Buffer.from('hello world'),
       };
 
-      const result = await provider.upload(params);
+      const result = await provider.upload(params.key, params.body, params.contentType);
 
-      expect(result.key).toBe('test/file.txt');
+      expect(result).toBe('test/file.txt');
       expect(mkdir).toHaveBeenCalledWith('/tmp/uploads/test', { recursive: true });
       expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/test/file.txt', params.body);
     });
@@ -52,9 +52,9 @@ describe('LocalStorageProvider', () => {
         body: Buffer.from('hello world'),
       };
 
-      const result = await provider.upload(params);
+      const result = await provider.upload(params.key, params.body, params.contentType);
 
-      expect(result.key).toBe('mock-uuid-1234');
+      expect(result).toBe('mock-uuid-1234');
       expect(mkdir).toHaveBeenCalledWith('/tmp/uploads', { recursive: true });
       expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/mock-uuid-1234', params.body);
     });
@@ -67,9 +67,9 @@ describe('LocalStorageProvider', () => {
         body: Buffer.from('content'),
       };
 
-      const result = await provider.upload(params);
+      const result = await provider.upload(params.key, params.body, params.contentType);
 
-      expect(result.key).toBe('/leading/slash.txt');
+      expect(result).toBe('/leading/slash.txt');
       expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/leading/slash.txt', params.body);
     });
 
@@ -81,7 +81,7 @@ describe('LocalStorageProvider', () => {
         body: Buffer.from('malicious'),
       };
 
-      await provider.upload(params);
+      await provider.upload(params.key, params.body, params.contentType);
 
       // The normalizeStorageKey with stripParentRefs=true removes ".." sequences
       expect(writeFile).toHaveBeenCalledWith(expect.not.stringContaining('..'), params.body);
@@ -95,7 +95,7 @@ describe('LocalStorageProvider', () => {
         body: 'string content',
       };
 
-      await provider.upload(params);
+      await provider.upload(params.key, params.body, params.contentType);
 
       expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/text-file.txt', 'string content');
     });
@@ -109,7 +109,7 @@ describe('LocalStorageProvider', () => {
         body,
       };
 
-      await provider.upload(params);
+      await provider.upload(params.key, params.body, params.contentType);
 
       expect(writeFile).toHaveBeenCalledWith('/tmp/uploads/binary.bin', body);
     });

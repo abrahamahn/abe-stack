@@ -74,6 +74,11 @@ function createMockContext(): AppContext {
     email: {} as never,
     storage: {} as never,
     cache: {} as never,
+    billing: {} as never,
+    notifications: {} as never,
+    queue: {} as never,
+    write: {} as never,
+    search: {} as never,
   };
 }
 

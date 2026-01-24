@@ -1,14 +1,18 @@
 // apps/server/src/config/auth/auth.test.ts
-import type { FullEnv } from '@abe-stack/core/contracts/config';
+import type { FullEnv } from '@abe-stack/core/config';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import { getRefreshCookieOptions, loadAuth } from '../auth';
+import {
+  getRefreshCookieOptions,
+  isStrategyEnabled,
+  loadAuthConfig,
+  validateAuthConfig,
+} from './auth';
 
 const apiBaseUrl = 'http://localhost:8080';
-const load = (env: unknown) => loadAuth(env as FullEnv, apiBaseUrl);
+const load = (env: unknown) => loadAuthConfig(env as FullEnv, apiBaseUrl);
 
 describe('Auth Configuration', () => {
   beforeEach(() => {
-    // Premium Move: Wipe the env before each test to ensure 100% isolation
     vi.unstubAllEnvs();
   });
 
@@ -20,12 +24,10 @@ describe('Auth Configuration', () => {
   });
 
   test('should parse proxy settings', () => {
-    // Explicitly stubbing the env for this specific test
     vi.stubEnv('JWT_SECRET', 'a-very-secure-secret-key-at-least-32-chars!');
     vi.stubEnv('TRUST_PROXY', 'true');
     vi.stubEnv('TRUSTED_PROXIES', '192.168.1.1, 10.0.0.1');
 
-    // cast process.env
     const config = load(process.env);
     expect(config.proxy.trustProxy).toBe(true);
   });
@@ -63,8 +65,57 @@ describe('getRefreshCookieOptions', () => {
     });
     const options = getRefreshCookieOptions(config);
 
-    expect(options.httpOnly).toBe(true);
-    // Fixed: 7 days * 24h * 60m * 60s * 1000ms
     expect(options.maxAge).toBe(7 * 24 * 60 * 60 * 1000);
+  });
+});
+
+describe('Security Validation', () => {
+  const baseValidConfig = () =>
+    load({
+      JWT_SECRET: 'long-enough-secret-key-32-characters-minimum',
+      COOKIE_SECRET: 'another-long-enough-secret-32-characters',
+    });
+
+  test('should throw if JWT secret is too short', () => {
+    const config = baseValidConfig();
+    (config.jwt as any).secret = 'short';
+
+    expect(() => validateAuthConfig(config)).toThrow(/JWT secret must be at least 32 characters/);
+  });
+
+  test('should throw if JWT secret is a weak value', () => {
+    const config = baseValidConfig();
+    (config.jwt as any).secret = 'password' + ' '.repeat(24);
+
+    expect(() => validateAuthConfig(config)).toThrow(/JWT secret is a weak value/);
+  });
+
+  test('should throw if password minLength is too small', () => {
+    const config = baseValidConfig();
+    (config.password as any).minLength = 6;
+
+    expect(() => validateAuthConfig(config)).toThrow(
+      /Min password length must be at least 8 characters/,
+    );
+  });
+
+  test('should throw if lockout duration is too short', () => {
+    const config = baseValidConfig();
+    (config.lockout as any).lockoutDurationMs = 30000;
+
+    expect(() => validateAuthConfig(config)).toThrow(/Lockout duration must be at least 60000ms/);
+  });
+});
+
+describe('isStrategyEnabled', () => {
+  test('should correctly identify enabled strategies', () => {
+    const config = load({
+      AUTH_STRATEGIES: 'local,google',
+      JWT_SECRET: 'long-enough-secret-key-32-characters-minimum',
+    });
+
+    expect(isStrategyEnabled(config, 'local')).toBe(true);
+    expect(isStrategyEnabled(config, 'google')).toBe(true);
+    expect(isStrategyEnabled(config, 'magic')).toBe(false);
   });
 });

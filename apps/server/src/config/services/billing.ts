@@ -1,14 +1,16 @@
 // apps/server/src/config/services/billing.ts
-import type { BillingConfig, BillingProvider } from '@abe-stack/core/contracts/config';
-import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
+import type { BillingConfig, BillingProvider } from '@abe-stack/core/config';
+import type { FullEnv } from '@abe-stack/core/config';
 
 /**
- * Loads billing and subscription configuration from environment variables.
+ * Load Billing Configuration.
  *
- * Supports both Stripe and PayPal with automatic provider detection.
- * Provider priority: Explicit BILLING_PROVIDER > Stripe > PayPal.
+ * **Provider Strategy**:
+ * - **Stripe**: Primary payment processor (Subscriptions, Checkout).
+ * - **PayPal**: Alternative fallback.
  *
- * Billing is disabled if no valid provider credentials are found.
+ * **Safety**:
+ * Automatically disables billing if credentials are missing to prevent runtime crashes.
  *
  * @param env - Environment variable map
  * @returns Complete billing configuration
@@ -24,7 +26,7 @@ import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
  * PAYPAL_CLIENT_SECRET=...
  * ```
  */
-export function loadBilling(env: FullEnv, appBaseUrl?: string): BillingConfig {
+export function loadBillingConfig(env: FullEnv, appBaseUrl?: string): BillingConfig {
   // Use passed URL or fall back to env/default
   const appUrl = (appBaseUrl || env.APP_URL || 'http://localhost:5173').replace(/\/$/, '');
 
@@ -88,18 +90,15 @@ function resolveActiveProvider(
   explicit: BillingProvider | undefined,
   avail: { stripe: boolean; paypal: boolean },
 ): BillingProvider | null {
-  if (explicit === 'stripe' && avail.stripe) return 'stripe';
-  if (explicit === 'paypal' && avail.paypal) return 'paypal';
+  if (explicit) return explicit;
 
   // Auto-detection logic if no explicit provider is set
-  if (!explicit) {
-    if (avail.stripe) return 'stripe';
-    if (avail.paypal) return 'paypal';
-  }
+  if (avail.stripe) return 'stripe';
+  if (avail.paypal) return 'paypal';
   return null;
 }
 
-export function validateBilling(config: BillingConfig): string[] {
+export function validateBillingConfig(config: BillingConfig): string[] {
   const errors: string[] = [];
   const isProd = process.env.NODE_ENV === 'production';
 
@@ -120,7 +119,7 @@ export function validateBilling(config: BillingConfig): string[] {
 }
 
 function ensureValid(config: BillingConfig): void {
-  const errors = validateBilling(config);
+  const errors = validateBillingConfig(config);
   if (errors.length > 0) {
     throw new Error(`Billing Configuration Failed:\n${errors.map((e) => ` - ${e}`).join('\n')}`);
   }

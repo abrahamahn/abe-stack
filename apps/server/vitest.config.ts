@@ -1,6 +1,6 @@
 // apps/server/vitest.config.ts
-import { defineConfig } from 'vitest/config';
 import path from 'node:path';
+import { defineConfig } from 'vitest/config';
 
 const repoRoot = path.join(__dirname, '../..');
 
@@ -16,7 +16,6 @@ export default defineConfig({
       '**/dist/**',
       '**/.stryker-tmp/**',
       '**/backup/**',
-      '**/legacy-tests/**',
       '**/*.spec.ts', // Playwright e2e tests
       '**/__tests__/templates/**', // Template tests
     ],

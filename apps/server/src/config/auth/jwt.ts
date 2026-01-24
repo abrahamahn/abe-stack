@@ -1,9 +1,12 @@
 // apps/server/src/config/auth/jwt.ts
-import type { JwtRotationConfig } from '@abe-stack/core/contracts/config';
+import type { JwtRotationConfig } from '@abe-stack/core/config';
 
 /**
- * Loads JWT configuration specifically for rotation-aware services.
- * This is used by the Auth logic but can be exported independently.
+ * Load JWT Rotation Configuration.
+ *
+ * Supports key rotation by allowing a `previousSecret` to be configured.
+ * This allows the server to Validate tokens signed with the OLD key,
+ * while Signing new tokens with the NEW key/secret.
  */
 export function loadJwtRotationConfig(env: Record<string, string | undefined>): JwtRotationConfig {
   const secret = env.JWT_SECRET || '';

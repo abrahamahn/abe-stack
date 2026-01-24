@@ -11,13 +11,13 @@ import * as crypto from 'crypto';
 import type { SubscriptionStatus } from '@abe-stack/db';
 
 import type {
+  BillingService,
   CheckoutParams,
   CheckoutResult,
   CreateProductParams,
   CreateProductResult,
   NormalizedEventType,
   NormalizedWebhookEvent,
-  PaymentProviderInterface,
   PayPalConfig,
   ProviderInvoice,
   ProviderPaymentMethod,
@@ -132,7 +132,7 @@ function mapPayPalEventType(eventType: string): NormalizedEventType {
 // PayPal Provider Implementation
 // ============================================================================
 
-export class PayPalProvider implements PaymentProviderInterface {
+export class PayPalProvider implements BillingService {
   readonly provider = 'paypal' as const;
 
   private baseUrl: string;

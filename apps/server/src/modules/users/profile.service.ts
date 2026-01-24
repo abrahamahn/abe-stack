@@ -169,11 +169,7 @@ export async function uploadAvatar(
   const key = `${AVATAR_PATH_PREFIX}/${userId}/${String(timestamp)}.${extension ?? 'jpg'}`;
 
   // Upload to storage
-  const { key: storedKey } = await storage.upload({
-    key,
-    contentType: file.mimetype,
-    body: file.buffer,
-  });
+  const storedKey = await storage.upload(key, file.buffer, file.mimetype);
 
   // Get signed URL for the avatar
   const avatarUrl = await storage.getSignedUrl(storedKey);

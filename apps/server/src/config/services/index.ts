@@ -1,10 +1,10 @@
 // apps/server/src/config/services/index.ts
 
 // billing.ts
-export { loadBilling, validateBilling } from './billing';
+export { loadBillingConfig, validateBillingConfig } from './billing';
 
 // email.ts
-export { DEFAULT_SMTP_CONFIG, loadEmail, loadSmtpConfig } from './email';
+export { DEFAULT_SMTP_CONFIG, loadEmailConfig, loadSmtpConfig } from './email';
 
 // notifications.ts
 export {

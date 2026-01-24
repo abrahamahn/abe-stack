@@ -10,13 +10,13 @@ import Stripe from 'stripe';
 import type { SubscriptionStatus } from '@abe-stack/db';
 
 import type {
+  BillingService,
   CheckoutParams,
   CheckoutResult,
   CreateProductParams,
   CreateProductResult,
   NormalizedEventType,
   NormalizedWebhookEvent,
-  PaymentProviderInterface,
   ProviderInvoice,
   ProviderPaymentMethod,
   ProviderSubscription,
@@ -82,7 +82,7 @@ function mapStripeEventType(stripeType: string): NormalizedEventType {
 // Stripe Provider Implementation
 // ============================================================================
 
-export class StripeProvider implements PaymentProviderInterface {
+export class StripeProvider implements BillingService {
   readonly provider = 'stripe' as const;
 
   private stripe: Stripe;

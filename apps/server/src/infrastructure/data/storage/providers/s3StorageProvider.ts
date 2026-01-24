@@ -1,10 +1,15 @@
 // apps/server/src/infrastructure/data/storage/providers/s3StorageProvider.ts
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { fromEnv } from '@aws-sdk/credential-providers';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { normalizeStorageKey } from '@storage/utils';
 
-import type { S3StorageConfig, StorageProvider, UploadParams } from '@storage/types';
+import type { S3StorageConfig, StorageProvider } from '@storage/types';
 
 export class S3StorageProvider implements StorageProvider {
   private readonly client: S3Client;
@@ -26,17 +31,46 @@ export class S3StorageProvider implements StorageProvider {
     this.defaultExpires = config.presignExpiresInSeconds;
   }
 
-  async upload(params: UploadParams): Promise<{ key: string }> {
-    const key = normalizeStorageKey(params.key);
+  async upload(
+    key: string,
+    data: Buffer | Uint8Array | string,
+    contentType: string,
+  ): Promise<string> {
+    const finalKey = normalizeStorageKey(key);
     await this.client.send(
       new PutObjectCommand({
         Bucket: this.config.bucket,
-        Key: key,
-        Body: params.body,
-        ContentType: params.contentType,
+        Key: finalKey,
+        Body: data,
+        ContentType: contentType,
       }),
     );
-    return { key };
+    return finalKey;
+  }
+
+  async download(key: string): Promise<Buffer> {
+    const result = await this.client.send(
+      new GetObjectCommand({
+        Bucket: this.config.bucket,
+        Key: normalizeStorageKey(key),
+      }),
+    );
+
+    if (!result.Body) {
+      throw new Error(`Empty body returned for S3 key: ${key}`);
+    }
+
+    const byteArray = await result.Body.transformToByteArray();
+    return Buffer.from(byteArray);
+  }
+
+  async delete(key: string): Promise<void> {
+    await this.client.send(
+      new DeleteObjectCommand({
+        Bucket: this.config.bucket,
+        Key: normalizeStorageKey(key),
+      }),
+    );
   }
 
   async getSignedUrl(key: string, expiresInSeconds?: number): Promise<string> {

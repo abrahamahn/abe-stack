@@ -99,27 +99,3 @@ export function createNotificationServiceFromEnv(
 
   return new NotificationServiceImpl(fcmProvider);
 }
-
-/**
- * Get the default notification service instance (singleton)
- *
- * Creates a service from environment variables on first call.
- * Subsequent calls return the same instance.
- *
- * @returns NotificationService singleton
- */
-let defaultService: NotificationService | undefined;
-
-export function getNotificationService(): NotificationService {
-  if (!defaultService) {
-    defaultService = createNotificationServiceFromEnv();
-  }
-  return defaultService;
-}
-
-/**
- * Reset the default notification service (for testing)
- */
-export function resetNotificationService(): void {
-  defaultService = undefined;
-}

@@ -1,15 +1,45 @@
-// apps/server/src/config/services/search.ts
 import type {
   ElasticsearchProviderConfig,
   SqlSearchProviderConfig,
-} from '@abe-stack/core/contracts/config';
-import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
+  SqlTableConfig,
+} from '@abe-stack/core/config';
+import type { FullEnv } from '@abe-stack/core/config';
 
 /**
- * Loads Elasticsearch configuration from environment variables.
+ * Default Search Schemas
  *
- * Supports both basic auth (username/password) and API key authentication.
- * For cloud-hosted Elasticsearch, use API keys for better security.
+ * Defines the searchable columns, filters, and sort options for domain entities.
+ * Decoupled from the App / Composition Root to allow easier modification.
+ */
+export const DEFAULT_SEARCH_SCHEMAS: Record<string, SqlTableConfig> = {
+  users: {
+    table: 'users',
+    primaryKey: 'id',
+    columns: [
+      {
+        field: 'name',
+        column: 'name',
+        type: 'string',
+        filterable: true,
+        sortable: true,
+      },
+      {
+        field: 'email',
+        column: 'email',
+        type: 'string',
+        filterable: true,
+        sortable: true,
+      },
+    ],
+  },
+};
+
+/**
+ * Load Elasticsearch Configuration.
+ *
+ * **Use Case**:
+ * High-performance full-text search for large datasets (>100k records).
+ * Supports both self-hosted (Username/Pass) and Cloud (API Key) auth.
  *
  * @param env - Environment variable map
  * @returns Elasticsearch provider configuration
@@ -32,10 +62,11 @@ export function loadElasticsearchConfig(env: FullEnv): ElasticsearchProviderConf
 }
 
 /**
- * Loads SQL-based search configuration from environment variables.
+ * Load SQL Search Configuration.
  *
- * SQL search uses database LIKE/ILIKE queries - simpler than Elasticsearch
- * but sufficient for smaller datasets. Includes DoS protection via limits.
+ * **Use Case**:
+ * Simple, ACID-compliant search for small-to-medium datasets using standard `ILIKE` queries.
+ * No external infrastructure required, but less performant for fuzzy matching.
  *
  * @param env - Environment variable map
  * @returns SQL search provider configuration

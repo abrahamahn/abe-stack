@@ -14,8 +14,8 @@ export {
   AuthValidationError,
   getRefreshCookieOptions,
   isStrategyEnabled,
-  loadAuth,
-  validateAuth,
+  loadAuthConfig,
+  validateAuthConfig,
 } from './auth/auth';
 
 export { loadJwtRotationConfig } from './auth/jwt';
@@ -26,17 +26,21 @@ export { loadRateLimitConfig } from './auth/rate-limit';
  * Selective helpers for DB connections and Storage handling.
  */
 export { loadCacheConfig } from './infra/cache';
-export { buildConnectionString, getSafeConnectionString, loadDatabase } from './infra/database';
-export { loadServer } from './infra/server';
-export { loadStorage } from './infra/storage';
+export {
+  buildConnectionString,
+  getSafeConnectionString,
+  loadDatabaseConfig,
+} from './infra/database';
+export { loadServerConfig } from './infra/server';
+export { loadStorageConfig } from './infra/storage';
 
 /**
  * 4. SERVICES
  * Domain-specific loaders.
  */
-export { loadPackageManagerConfig, validatePackageManagerConfig } from './infra/package';
-export { loadBilling, validateBilling } from './services/billing';
-export { loadEmail } from './services/email';
+export { loadPackageManagerConfig } from './infra/package';
+export { loadBillingConfig, validateBillingConfig } from './services/billing';
+export { loadEmailConfig } from './services/email';
 export { loadNotificationsConfig, validateNotificationsConfig } from './services/notifications';
 export { loadElasticsearchConfig, loadSqlSearchConfig } from './services/search';
 
@@ -60,4 +64,4 @@ export type {
   SearchConfig,
   ServerConfig,
   StorageConfig,
-} from '@abe-stack/core/contracts/config';
+} from '@abe-stack/core/config';

@@ -105,7 +105,7 @@ S3_BUCKET_NAME=your-s3-bucket
 
 ## Environment File Template
 
-Create this file on your server at `~/abe-stack-deploy/.config/env/.config/env/.env.production`:
+Create this file on your server at `~/abe-stack-deploy/.config/env/.env.production`:
 
 ```bash
 # Domain Configuration

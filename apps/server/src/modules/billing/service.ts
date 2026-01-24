@@ -7,30 +7,30 @@
  */
 
 import {
+  BillingSubscriptionExistsError,
+  BillingSubscriptionNotFoundError,
+  CannotRemoveDefaultPaymentMethodError,
   CustomerNotFoundError,
+  PaymentMethodNotFoundError,
   PlanNotActiveError,
   PlanNotFoundError,
   SubscriptionAlreadyCanceledError,
-  BillingSubscriptionExistsError,
   SubscriptionNotActiveError,
   SubscriptionNotCancelingError,
-  BillingSubscriptionNotFoundError,
-  PaymentMethodNotFoundError,
-  CannotRemoveDefaultPaymentMethodError,
 } from '@abe-stack/core';
 import type {
   CustomerMappingRepository,
+  Invoice as DbInvoice,
+  PaymentMethod as DbPaymentMethod,
+  Plan as DbPlan,
+  Subscription as DbSubscription,
   InvoiceRepository,
   PaymentMethodRepository,
   PlanRepository,
   SubscriptionRepository,
-  Plan as DbPlan,
-  Subscription as DbSubscription,
-  Invoice as DbInvoice,
-  PaymentMethod as DbPaymentMethod,
 } from '@abe-stack/db';
 
-import type { PaymentProviderInterface } from '@infrastructure/billing';
+import type { BillingService } from '@infrastructure/billing';
 
 // ============================================================================
 // Types
@@ -108,7 +108,7 @@ export async function getUserSubscription(
  */
 export async function createCheckoutSession(
   repos: BillingRepositories,
-  provider: PaymentProviderInterface,
+  provider: BillingService,
   params: CheckoutSessionParams,
 ): Promise<CheckoutSessionResult> {
   // Check if user already has an active subscription
@@ -162,7 +162,7 @@ export async function createCheckoutSession(
  */
 export async function cancelSubscription(
   repos: BillingRepositories,
-  provider: PaymentProviderInterface,
+  provider: BillingService,
   userId: string,
   immediately = false,
 ): Promise<void> {
@@ -201,7 +201,7 @@ export async function cancelSubscription(
  */
 export async function resumeSubscription(
   repos: BillingRepositories,
-  provider: PaymentProviderInterface,
+  provider: BillingService,
   userId: string,
 ): Promise<void> {
   const subscription = await repos.subscriptions.findActiveByUserId(userId);
@@ -228,7 +228,7 @@ export async function resumeSubscription(
  */
 export async function updateSubscription(
   repos: BillingRepositories,
-  provider: PaymentProviderInterface,
+  provider: BillingService,
   userId: string,
   newPlanId: string,
 ): Promise<void> {
@@ -304,7 +304,7 @@ export async function getUserPaymentMethods(
  */
 export async function createSetupIntent(
   repos: BillingRepositories,
-  provider: PaymentProviderInterface,
+  provider: BillingService,
   userId: string,
   email: string,
 ): Promise<{ clientSecret: string }> {
@@ -323,7 +323,7 @@ export async function createSetupIntent(
  */
 export async function addPaymentMethod(
   repos: BillingRepositories,
-  provider: PaymentProviderInterface,
+  provider: BillingService,
   userId: string,
   email: string,
   paymentMethodId: string,
@@ -340,7 +340,9 @@ export async function addPaymentMethod(
 
   // Get payment method details from provider
   const providerMethods = await provider.listPaymentMethods(customerMapping.providerCustomerId);
-  const providerMethod = providerMethods.find((pm) => pm.id === paymentMethodId);
+  const providerMethod = providerMethods.find(
+    (pm: import('@abe-stack/core').ProviderPaymentMethod) => pm.id === paymentMethodId,
+  );
 
   if (!providerMethod) {
     throw new PaymentMethodNotFoundError(paymentMethodId);
@@ -366,7 +368,7 @@ export async function addPaymentMethod(
  */
 export async function removePaymentMethod(
   repos: BillingRepositories,
-  provider: PaymentProviderInterface,
+  provider: BillingService,
   userId: string,
   paymentMethodId: string,
 ): Promise<void> {
@@ -396,7 +398,7 @@ export async function removePaymentMethod(
  */
 export async function setDefaultPaymentMethod(
   repos: BillingRepositories,
-  provider: PaymentProviderInterface,
+  provider: BillingService,
   userId: string,
   paymentMethodId: string,
 ): Promise<DbPaymentMethod> {
@@ -441,7 +443,7 @@ export async function setDefaultPaymentMethod(
  */
 export async function getCustomerId(
   repos: BillingRepositories,
-  provider: PaymentProviderInterface,
+  provider: BillingService,
   userId: string,
 ): Promise<string | null> {
   const mapping = await repos.customerMappings.findByUserIdAndProvider(userId, provider.provider);

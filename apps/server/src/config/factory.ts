@@ -2,19 +2,20 @@
 import type {
   AppConfig,
   ElasticsearchProviderConfig,
+  FullEnv,
   SqlSearchProviderConfig,
-} from '@abe-stack/core/contracts/config';
-import { FullEnvSchema, type FullEnv } from '@abe-stack/core/contracts/config/environment';
+} from '@abe-stack/core/config';
+import { FullEnvSchema, initEnv } from '@abe-stack/core/config';
 
-import { loadAuth, validateAuth } from './auth/auth';
+import { loadAuthConfig, validateAuthConfig } from './auth/auth';
 import { loadCacheConfig } from './infra/cache';
-import { loadDatabase } from './infra/database';
-import { loadPackageManagerConfig, validatePackageManagerConfig } from './infra/package';
+import { loadDatabaseConfig } from './infra/database';
+import { loadPackageManagerConfig } from './infra/package';
 import { loadQueueConfig } from './infra/queue';
-import { loadServer } from './infra/server';
-import { loadStorage } from './infra/storage';
-import { loadBilling, validateBilling } from './services/billing';
-import { loadEmail } from './services/email';
+import { loadServerConfig } from './infra/server';
+import { loadStorageConfig } from './infra/storage';
+import { loadBillingConfig, validateBillingConfig } from './services/billing';
+import { loadEmailConfig } from './services/email';
 import { loadNotificationsConfig, validateNotificationsConfig } from './services/notifications';
 import {
   loadElasticsearchConfig,
@@ -23,8 +24,27 @@ import {
   validateSqlSearchConfig,
 } from './services/search';
 
-export function load(rawEnv: Record<string, string | undefined>): AppConfig {
-  // 1. Validate raw strings against Zod Schema
+/**
+ * Config Factory
+ *
+ * The single source of truth for loading and validating the application configuration.
+ *
+ * **Responsibility**:
+ * 1. Read raw environment variables (Record<string, string>).
+ * 2. Validate them against the Zod schema (`FullEnvSchema`).
+ * 3. Transform them into the structured `AppConfig` domain object.
+ * 4. Apply domain-specific business rules (e.g., "SSL required in production").
+ *
+ * @param rawEnv - Raw environment variables (usually `process.env`).
+ * @returns Validated `AppConfig` or exits process on error.
+ */
+export function load(rawEnv: Record<string, string | undefined> = process.env): AppConfig {
+  // 1. Initialize environment from files if we are loading from process.env
+  if (rawEnv === process.env) {
+    initEnv();
+  }
+
+  // 2. Validate raw strings against Zod Schema
   const envResult = FullEnvSchema.safeParse(rawEnv);
 
   if (!envResult.success) {
@@ -37,18 +57,18 @@ export function load(rawEnv: Record<string, string | undefined>): AppConfig {
   const env: FullEnv = envResult.data;
 
   const nodeEnv = (env.NODE_ENV || 'development') as AppConfig['env'];
-  const server = loadServer(env);
+  const server = loadServerConfig(env);
 
   const searchProvider = (env.SEARCH_PROVIDER || 'sql') as 'sql' | 'elasticsearch';
 
   const config: AppConfig = {
     env: nodeEnv,
     server,
-    database: loadDatabase(env),
-    auth: loadAuth(env, server.apiBaseUrl),
-    email: loadEmail(env),
-    storage: loadStorage(env),
-    billing: loadBilling(env, server.appBaseUrl),
+    database: loadDatabaseConfig(env),
+    auth: loadAuthConfig(env, server.apiBaseUrl),
+    email: loadEmailConfig(env),
+    storage: loadStorageConfig(env),
+    billing: loadBillingConfig(env, server.appBaseUrl),
     cache: loadCacheConfig(env),
     queue: loadQueueConfig(env),
     notifications: loadNotificationsConfig(env),
@@ -72,14 +92,14 @@ function validate(config: AppConfig): void {
 
   // Auth Domain
   try {
-    validateAuth(config.auth);
+    validateAuthConfig(config.auth);
   } catch (e: any) {
     errors.push(e.message);
   }
 
   // Billing Domain
   if (config.billing?.enabled) {
-    errors.push(...validateBilling(config.billing));
+    errors.push(...validateBillingConfig(config.billing));
   }
 
   // Search Domain - Using clean Type Predicates
@@ -93,9 +113,6 @@ function validate(config: AppConfig): void {
 
   // Notifications Domain
   errors.push(...validateNotificationsConfig(config.notifications));
-
-  // Package Manager Domain
-  errors.push(...validatePackageManagerConfig(config.packageManager));
 
   // Global Production Hard-Guards
   if (isProd) {
@@ -118,6 +135,6 @@ function validate(config: AppConfig): void {
     console.error(report);
     console.error('='.repeat(50) + '\n');
 
-    throw new Error('Server failed to start: Invalid Configuration');
+    throw new Error(`Server failed to start: Invalid Configuration\n${errors.join('\n')}`);
   }
 }

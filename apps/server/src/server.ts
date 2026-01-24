@@ -1,10 +1,14 @@
 // apps/server/src/server.ts
 /**
- * Fastify Server Setup
+ * Fastify Server Factory
  *
- * Creates and configures the Fastify HTTP server with plugins and core routes.
- * This module handles all Fastify-specific concerns, keeping them separate
- * from the application's DI container and lifecycle management.
+ * Responsible for the "HTTP Layer" configuration:
+ * - Instantiating Fastify
+ * - Registering global plugins (Cors, Helmet, Rate Limit)
+ * - Registering the Hybrid Context Hook
+ *
+ * This module remains agnostic of domain logic, delegating actual route handling
+ * to the modules registered in the App lifecycle.
  */
 
 import { createConsoleLogger } from '@abe-stack/core';
@@ -13,6 +17,7 @@ import Fastify from 'fastify';
 
 import type { AppConfig } from '@/config/index';
 import type { DbClient } from '@infrastructure/index';
+import type { HasContext, IServiceContainer, RequestWithCookies } from '@shared/index';
 import type { FastifyInstance } from 'fastify';
 
 // ============================================================================
@@ -22,6 +27,7 @@ import type { FastifyInstance } from 'fastify';
 export interface ServerDependencies {
   config: AppConfig;
   db: DbClient;
+  app?: IServiceContainer & HasContext;
 }
 
 // ============================================================================
@@ -29,10 +35,15 @@ export interface ServerDependencies {
 // ============================================================================
 
 /**
- * Create and configure a Fastify server instance
+ * Create and configure a Fastify server instance.
+ *
+ * @param deps - Dependencies required for server configuration.
+ * @param deps.app - The `App` instance. If provided, the "Hybrid Context" hook is installed,
+ *                   attaching `app.context` to every `req`.
+ * @returns Configured Fastify instance (ready for `listen`).
  */
 export async function createServer(deps: ServerDependencies): Promise<FastifyInstance> {
-  const { config } = deps;
+  const { config, app } = deps;
   const isProd = config.env === 'production';
 
   // Logger configuration
@@ -51,6 +62,17 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
     bodyLimit: 1024 * 1024, // 1MB
   });
 
+  // Hybrid Context Hook (2026 Pattern)
+  // If app instance is provided, attach context to request
+  if (app) {
+    server.addHook('onRequest', (req, _reply, done) => {
+      // In a real async-safe implementation, we might use AsyncLocalStorage here
+      // But for Fastify's request scope, direct assignment is safe and explicit.
+      (req as unknown as RequestWithCookies).context = app.context;
+      done();
+    });
+  }
+
   // Register plugins
   registerPlugins(server, config);
 
@@ -62,7 +84,13 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
 // ============================================================================
 
 /**
- * Start listening on the configured port with fallback support
+ * Start listening on the configured port.
+ *
+ * Includes "Port Fallback" logic: if the preferred port is in use,
+ * it attempts to bind to the fallback ports defined in config.
+ *
+ * @param server - Fastify instance
+ * @param config - App configuration containing host/port settings
  */
 export async function listen(server: FastifyInstance, config: AppConfig): Promise<void> {
   const { host, port, portFallbacks } = config.server;

@@ -1,22 +1,26 @@
 // apps/server/src/shared/types.ts
-import type { AppConfig } from '@/config';
-import type { UserRole } from '@abe-stack/core';
+import type {
+  AppConfig,
+  BillingService,
+  UserRole as CoreUserRole,
+  EmailService,
+  NotificationService,
+  StorageService as StorageProvider,
+} from '@abe-stack/core';
 import type { DbClient, Repositories } from '@database';
-import type { SubscriptionManager } from '@infrastructure/index';
-import type { StorageProvider } from '@storage';
+import type {
+  QueueServer,
+  ServerSearchProvider,
+  SubscriptionManager,
+  WriteService,
+} from '@infrastructure/index';
 import type { FastifyBaseLogger } from 'fastify';
-
-/**
- * Shared type definitions
- * Framework-agnostic types used across the application
- */
 
 // ============================================================================
 // User Types
 // ============================================================================
 
-// Re-export UserRole from core for convenience
-export type { UserRole };
+export type UserRole = CoreUserRole;
 
 export interface User {
   id: string;
@@ -115,6 +119,8 @@ export interface RequestWithCookies {
   requestInfo: RequestInfo;
   /** Start time for request timing in development (bigint from process.hrtime.bigint()) */
   requestStart?: bigint;
+  /** Application Context (Hybrid Pattern) - Available on request via hook */
+  context?: AppContext;
 }
 
 // ============================================================================
@@ -122,52 +128,9 @@ export interface RequestWithCookies {
 // ============================================================================
 
 /**
- * Logger interface - abstracts away the actual logger implementation
- *
- * @deprecated Use Logger from '@infrastructure/logger' for new code.
- * The infra/logger module provides a more complete interface with:
- * - trace, fatal levels
- * - child() method for scoped logging
- * - Correlation ID support
- * - Request context integration
+ * Storage provider interface (Alias for core StorageService)
  */
-export interface Logger {
-  info(msg: string, data?: Record<string, unknown>): void;
-  warn(msg: string, data?: Record<string, unknown>): void;
-  error(msg: string | Error, data?: Record<string, unknown>): void;
-  debug(msg: string, data?: Record<string, unknown>): void;
-}
-
-/**
- * Email service interface
- */
-export interface EmailService {
-  send(options: EmailOptions): Promise<EmailResult>;
-}
-
-export interface EmailOptions {
-  to: string;
-  subject: string;
-  text?: string;
-  html?: string;
-  from?: { name: string; address: string };
-}
-
-export interface EmailResult {
-  success: boolean;
-  messageId?: string;
-  error?: string;
-}
-
-/**
- * Storage service interface
- */
-export interface StorageService {
-  upload(key: string, data: Buffer, contentType: string): Promise<string>;
-  download(key: string): Promise<Buffer>;
-  delete(key: string): Promise<void>;
-  getSignedUrl(key: string, expiresIn: number): Promise<string>;
-}
+export type { StorageProvider };
 
 // ============================================================================
 // Service Container Interface (Composition Root)
@@ -179,20 +142,15 @@ export interface StorageService {
  * Defines the contract for the application's dependency injection container.
  * The App class implements this interface, providing a single source of truth
  * for all infrastructure services.
- *
- * Benefits:
- * - Testable: Mock individual services in tests
- * - Explicit: All dependencies are visible and typed
- * - Portable: Framework-agnostic interface (only logger is Fastify-specific)
  */
 export interface IServiceContainer {
-  /** Application uration */
+  /** Application configuration */
   readonly config: AppConfig;
 
   /** Database client (raw SQL query builder) */
   readonly db: DbClient;
 
-  /** Database repositories (raw SQL query builder) */
+  /** Database repositories */
   readonly repos: Repositories;
 
   /** Email service for sending notifications */
@@ -206,6 +164,28 @@ export interface IServiceContainer {
 
   /** Cache service for performance optimization */
   readonly cache: import('../services/cache-service').CacheService;
+
+  /** Billing provider for payments/subscriptions */
+  readonly billing: BillingService;
+
+  /** Notification service for push/email */
+  readonly notifications: NotificationService;
+
+  /** Background job queue server */
+  readonly queue: QueueServer;
+
+  /** Unified write service (Chet-stack pattern) */
+  readonly write: WriteService;
+
+  /** Server-side search provider */
+  readonly search: ServerSearchProvider;
+}
+
+/**
+ * Interface for services that provide an AppContext
+ */
+export interface HasContext {
+  readonly context: AppContext;
 }
 
 // ============================================================================

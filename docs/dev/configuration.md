@@ -516,7 +516,7 @@ Tasks are re-run when:
 {
   "globalDependencies": [
     "tsconfig.json",
-    ".config/env/.config/env/.env.development",
+    ".config/env/.env.development",
     "config/.prettierrc",
     ".config/*.json",
     "eslint.config.ts"

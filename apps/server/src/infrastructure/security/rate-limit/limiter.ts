@@ -16,37 +16,25 @@
 // ============================================================================
 
 export interface RateLimitConfig {
-  /** Time window in milliseconds */
   windowMs: number;
-  /** Maximum requests per window */
   max: number;
-  /** Cleanup interval in milliseconds (default: 60000) */
   cleanupIntervalMs?: number;
-  /** Storage backend (defaults to MemoryStore) */
   store?: RateLimitStore;
-  /** Role-based limits (optional) */
   roleLimits?: Record<string, { max: number; windowMs: number }>;
-  /** Progressive delay configuration */
   progressiveDelay?: {
     enabled: boolean;
-    baseDelay: number; // Base delay in ms
-    maxDelay: number; // Maximum delay in ms
-    backoffFactor: number; // Exponential backoff factor
+    baseDelay: number;
+    maxDelay: number;
+    backoffFactor: number;
   };
 }
 
 export interface RateLimitInfo {
-  /** Whether the request is allowed */
   allowed: boolean;
-  /** Remaining tokens */
   remaining: number;
-  /** Total tokens (max) */
   limit: number;
-  /** Time until tokens reset (ms) */
   resetMs: number;
-  /** Progressive delay to apply (ms) */
   delayMs?: number;
-  /** Number of consecutive violations */
   violations?: number;
 }
 
@@ -62,40 +50,27 @@ export interface ClientRecord {
  * Default implementation uses in-memory storage.
  */
 export interface RateLimitStore {
-  /** Get record for a client */
   get(key: string): Promise<ClientRecord | undefined> | ClientRecord | undefined;
-  /** Set record for a client */
   set(key: string, record: ClientRecord): Promise<void> | void;
-  /** Delete record for a client */
   delete(key: string): Promise<void> | void;
-  /** Clean up expired records (optional) */
   cleanup?(expireThreshold: number): Promise<void> | void;
-  /** Destroy the store connection/timers */
   destroy(): Promise<void> | void;
-  /** Get store statistics (optional) */
   getStats?(): MemoryStoreStats;
 }
 
 export interface MemoryStoreStats {
-  /** Number of clients being tracked */
   trackedClients: number;
-  /** Number of clients currently rate limited (tokens < 1) */
   limitedClients: number;
-  /** Number of evictions due to size limit */
   evictions: number;
 }
 
 export interface MemoryStoreConfig {
-  /** Cleanup interval in milliseconds (default: 60000) */
   cleanupIntervalMs?: number;
-  /** Maximum number of entries (default: 100000) */
   maxSize?: number;
 }
 
 export interface RateLimiterStats {
-  /** Rate limiter configuration */
   config: { windowMs: number; max: number };
-  /** Store statistics if available */
   store?: MemoryStoreStats;
 }
 
@@ -116,7 +91,6 @@ export class MemoryStore implements RateLimitStore {
   private evictionCount = 0;
 
   constructor(config: MemoryStoreConfig | number = {}) {
-    // Support legacy signature (just cleanupIntervalMs as number)
     const normalizedConfig: MemoryStoreConfig =
       typeof config === 'number' ? { cleanupIntervalMs: config } : config;
 

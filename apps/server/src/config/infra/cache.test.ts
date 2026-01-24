@@ -1,5 +1,5 @@
 // apps/server/src/config/infra/cache.test.ts
-import type { FullEnv } from '@abe-stack/core/contracts/config';
+import type { FullEnv } from '@abe-stack/core/config';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_CACHE_CONFIG, loadCacheConfig } from './cache';
 
@@ -37,20 +37,24 @@ describe('Cache Configuration', () => {
     });
   });
 
-  it('loads custom configuration with redis disabled', () => {
+  it('prioritizes CACHE_PROVIDER=redis over CACHE_USE_REDIS=false', () => {
     const env = {
-      CACHE_TTL_MS: 120000,
-      CACHE_MAX_SIZE: 500,
-      // Not setting CACHE_USE_REDIS means it's undefined, so externalConfig won't be set
+      CACHE_PROVIDER: 'redis',
+      CACHE_USE_REDIS: 'false',
     } as unknown as FullEnv;
 
     const config = loadCacheConfig(env);
+    expect(config.useExternalProvider).toBe(true);
+  });
 
-    expect(config).toEqual({
-      ttl: 120000,
-      maxSize: 500,
-      useExternalProvider: false,
-    });
+  it('supports CACHE_PROVIDER=local explicitly', () => {
+    const env = {
+      CACHE_PROVIDER: 'local',
+      CACHE_USE_REDIS: 'true',
+    } as unknown as FullEnv;
+
+    const config = loadCacheConfig(env);
+    expect(config.useExternalProvider).toBe(false);
   });
 
   it('uses default redis config when redis is enabled but host/port not specified', () => {

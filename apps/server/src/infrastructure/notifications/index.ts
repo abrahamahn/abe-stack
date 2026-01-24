@@ -18,12 +18,10 @@ export type {
 } from './types';
 
 // FCM Provider (stub)
-export { createFcmProvider, FcmProvider } from './fcm-provider';
+export { FcmProvider, createFcmProvider } from './fcm-provider';
 
 // Factory
 export {
   createNotificationService,
   createNotificationServiceFromEnv,
-  getNotificationService,
-  resetNotificationService,
 } from './notification-factory';

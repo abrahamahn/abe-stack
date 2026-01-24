@@ -1,11 +1,9 @@
 // apps/server/src/config/auth/auth.ts
 import type { AuthConfig, AuthStrategy, OAuthProviderConfig } from '@abe-stack/core';
-import { getList } from '@abe-stack/core/config/utils';
-import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
+import { BaseError } from '@abe-stack/core';
+import { getList } from '@abe-stack/core/config';
+import type { FullEnv } from '@abe-stack/core/config';
 
-/**
- * Common weak secrets and patterns
- */
 const WEAK_SECRETS = new Set([
   'secret',
   'password',
@@ -15,19 +13,8 @@ const WEAK_SECRETS = new Set([
   'dev',
   'prod',
 ]);
+
 const REPEATING_PATTERN = /^(.)\1{31,}$/;
-
-export class AuthValidationError extends Error {
-  public readonly field: string;
-
-  constructor(message: string, field: string) {
-    super(message);
-    this.field = field;
-    this.name = 'AuthValidationError';
-  }
-}
-
-// --- CORE LOGIC ---
 
 const VALID_STRATEGIES = new Set([
   'local',
@@ -40,7 +27,25 @@ const VALID_STRATEGIES = new Set([
   'apple',
 ]);
 
-export function loadAuth(env: FullEnv, apiBaseUrl: string): AuthConfig {
+export class AuthValidationError extends BaseError {
+  public readonly statusCode = 400;
+  public readonly field: string;
+
+  constructor(message: string, field: string) {
+    super(message);
+    this.field = field;
+  }
+}
+
+/**
+ * Load complete Authentication Configuration.
+ *
+ * Configures all auth strategies, session policies, and password rules.
+ *
+ * @param env - Validated Environment Variables
+ * @param apiBaseUrl - Public API URL (needed for OAuth callbacks)
+ */
+export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
   const isProduction = env.NODE_ENV === 'production';
   const jwtSecret = env.JWT_SECRET || '';
 
@@ -50,7 +55,6 @@ export function loadAuth(env: FullEnv, apiBaseUrl: string): AuthConfig {
     strategies: (env.AUTH_STRATEGIES || 'local')
       .split(',')
       .map((s) => s.trim().toLowerCase())
-      // Premium touch: Filter out invalid strategies to prevent downstream crashes
       .filter((s): s is AuthStrategy => VALID_STRATEGIES.has(s)),
 
     jwt: {
@@ -173,11 +177,21 @@ export function loadAuth(env: FullEnv, apiBaseUrl: string): AuthConfig {
   };
 
   // Run validation before returning
-  validateAuth(config);
+  validateAuthConfig(config);
   return config;
 }
 
-export function validateAuth(config: AuthConfig): void {
+/**
+ * Validates critical security constraints.
+ *
+ * Enforces:
+ * - Minimum secret lengths (32+ chars)
+ * - Complexity requirements
+ * - Safe limits for Lockout/RateLimiting
+ *
+ * @throws {AuthValidationError} If any security policy is violated.
+ */
+export function validateAuthConfig(config: AuthConfig): void {
   const { jwt, cookie, lockout, refreshToken, password } = config;
 
   if (jwt.secret.length < 32)
@@ -198,7 +212,6 @@ export function validateAuth(config: AuthConfig): void {
       'lockout.maxAttempts',
     );
 
-  // Added missing validation for duration (security best practice)
   if (lockout.lockoutDurationMs < 60000)
     throw new AuthValidationError(
       'Lockout duration must be at least 60000ms',
@@ -233,7 +246,7 @@ export function getRefreshCookieOptions(config: AuthConfig): {
     secure: config.cookie.secure,
     sameSite: config.cookie.sameSite as 'strict' | 'lax' | 'none',
     path: config.cookie.path,
-    maxAge: config.refreshToken.expiryDays * 24 * 60 * 60 * 1000, // Convert days to milliseconds
+    maxAge: config.refreshToken.expiryDays * 24 * 60 * 60 * 1000,
   };
 }
 

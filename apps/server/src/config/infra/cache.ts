@@ -1,10 +1,17 @@
 // apps/server/src/config/infra/cache.ts
-import type { CacheConfig } from '@abe-stack/core/contracts/config';
-import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
+import type { CacheConfig } from '@abe-stack/core/config';
+import type { FullEnv } from '@abe-stack/core/config';
 
 /**
  * Loads Caching configuration.
  * Supports local memory caching with placeholders for external providers (Redis).
+ */
+/**
+ * Load Cache Configuration.
+ *
+ * Determines if the application uses:
+ * - **Memory Cache**: Simple LRU map (good for single-instance).
+ * - **Redis**: specific external cache (required for horizontal scaling/clusters).
  */
 export function loadCacheConfig(env: FullEnv): CacheConfig {
   const provider = (env.CACHE_PROVIDER || (env.CACHE_USE_REDIS === 'true' ? 'redis' : 'local')) as

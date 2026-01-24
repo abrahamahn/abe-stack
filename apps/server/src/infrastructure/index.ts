@@ -13,7 +13,9 @@
  * - http: Security headers, CORS middleware
  * - rate-limit: Token Bucket rate limiter
  * - crypto: Native JWT implementation (HS256)
- * - permissions: Row-level permissions for realtime features
+ * - search: Elasticsearch/SQL search providers
+ * - billing: Stripe/PayPal payment providers
+ * - media: Video/Image processing queue
  */
 
 // Database
@@ -188,6 +190,26 @@ export {
 // WebSocket
 export { getWebSocketStats, registerWebSocket, type WebSocketStats } from './messaging/websocket';
 
+// Billing
+export { createBillingProvider, isBillingConfigured } from './billing';
+export type {
+  BillingConfig,
+  BillingService,
+  CheckoutParams,
+  CheckoutResult,
+  ProviderInvoice,
+  ProviderPaymentMethod,
+  ProviderSubscription,
+} from './billing';
+
+// Search
+export { SearchProviderFactory, getSearchProviderFactory } from './search';
+export type { SearchProviderType, SearchResultWithMetrics, ServerSearchProvider } from './search';
+
+// Write Service
+export { WriteService, createWriteService } from './jobs/write';
+export type { OperationResult, WriteBatch, WriteOperation, WriteResult } from './jobs/write';
+
 // Rate Limiting
 export {
   MemoryStore,
@@ -280,23 +302,6 @@ export {
   type TaskHandlers,
   type TaskResult,
 } from './jobs/queue';
-
-// Write (Unified Write Pattern)
-export {
-  WriteService,
-  createWriteService,
-  type AfterWriteHook,
-  type BeforeValidateHook,
-  type OperationResult,
-  type OperationType,
-  type WriteBatch,
-  type WriteContext,
-  type WriteError,
-  type WriteHooks,
-  type WriteOperation,
-  type WriteResult,
-  type WriteServiceOptions,
-} from './jobs/write';
 
 // Scheduled Jobs (Cleanup, Maintenance)
 export {
@@ -405,8 +410,6 @@ export {
   createFcmProvider,
   createNotificationService,
   createNotificationServiceFromEnv,
-  getNotificationService,
-  resetNotificationService,
   type FcmConfig,
   type NotificationFactoryOptions,
   type NotificationService,

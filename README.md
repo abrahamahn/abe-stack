@@ -67,7 +67,7 @@ https://github.com/abrahamahn/abe-stack
 git clone https://github.com/abrahamahn/abe-stack.git && cd abe-stack
 corepack enable && corepack prepare pnpm@10.26.2 --activate
 pnpm install
-cp .env.example .config/env/.config/env/.env.development
+cp .env.example .config/env/.env.development
 pnpm dev
 ```
 
@@ -79,6 +79,95 @@ Open [localhost:3000](http://localhost:3000).
 git clone https://github.com/abrahamahn/abe-stack.git && cd abe-stack
 docker compose -f config/docker/docker-compose.yml up --build
 ```
+
+---
+
+## First-Time Setup
+
+**New to ABE Stack?** Here's everything you need to get started:
+
+### 1. Prerequisites
+
+Ensure you have these installed:
+
+```bash
+# Node.js 20+ and pnpm
+node --version  # Should be 20.x or higher
+corepack enable && corepack prepare pnpm@10.26.2 --activate
+
+# PostgreSQL (for local development)
+pg_isready  # Check if PostgreSQL is running
+
+# If PostgreSQL isn't running:
+# macOS (Homebrew): brew services start postgresql
+# Linux: sudo systemctl start postgresql
+# Windows: Start PostgreSQL service from Services
+```
+
+### 2. Clone and Install
+
+```bash
+git clone https://github.com/abrahamahn/abe-stack.git
+cd abe-stack
+pnpm install
+```
+
+### 3. Configure Environment
+
+Copy the example environment files:
+
+```bash
+# Development environment (works out-of-box with PostgreSQL)
+cp .config/env/.env.development.example .config/env/.env.development
+
+# Local overrides (optional, for your personal settings)
+cp .config/env/.env.local.example .config/env/.env.local
+```
+
+**Default configuration:**
+
+- PostgreSQL: `postgresql://postgres:postgres@localhost:5432/abe_stack_dev`
+- Email: Console (logs to terminal)
+- Storage: Local filesystem (`apps/server/uploads`)
+- All other services: Local/mock providers
+
+**Need to customize?** Edit `.config/env/.env.local` with your settings. See [.config/env/README.md](.config/env/README.md) for details.
+
+### 4. Initialize Database
+
+```bash
+# Create the database
+createdb abe_stack_dev
+
+# Run migrations and seed data
+pnpm db:bootstrap
+```
+
+### 5. Start Development
+
+```bash
+pnpm dev
+```
+
+**What runs:**
+
+- Web app: [http://localhost:5173](http://localhost:5173)
+- API server: [http://localhost:8080](http://localhost:8080)
+- Desktop app: Electron window (optional)
+
+### 6. Verify Everything Works
+
+1. Open [http://localhost:5173](http://localhost:5173)
+2. Click "Register" and create an account
+3. Check your terminal for the verification email (console provider)
+4. Log in and explore the demo at `/demo`
+
+**Troubleshooting:**
+
+- **Database connection error?** Ensure PostgreSQL is running and credentials match
+- **Port already in use?** Change `APP_PORT` or `API_PORT` in `.config/env/.env.local`
+- **Module not found?** Run `pnpm install` again
+- **More help?** See [.config/env/README.md](.config/env/README.md#troubleshooting)
 
 ---
 

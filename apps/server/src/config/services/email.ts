@@ -1,6 +1,5 @@
-// apps/server/src/config/services/email.ts
-import type { EmailConfig, SmtpConfig } from '@abe-stack/core/contracts/config';
-import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
+import type { EmailConfig, FullEnv, SmtpConfig } from '@abe-stack/core/config';
+import { getInt } from '@abe-stack/core/config';
 
 /**
  * Loads raw SMTP transport settings from environment variables.
@@ -11,21 +10,20 @@ import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
 export function loadSmtpConfig(env: FullEnv): SmtpConfig {
   return {
     host: env.SMTP_HOST || 'localhost',
-    port: env.SMTP_PORT ?? 587,
+    port: getInt(env.SMTP_PORT as any, 587),
     secure: env.SMTP_SECURE === 'true',
     auth: env.SMTP_USER && env.SMTP_PASS ? { user: env.SMTP_USER, pass: env.SMTP_PASS } : undefined,
-    connectionTimeout: env.SMTP_CONNECTION_TIMEOUT ?? 5000,
-    socketTimeout: env.SMTP_SOCKET_TIMEOUT ?? 30000,
+    connectionTimeout: getInt(env.SMTP_CONNECTION_TIMEOUT as any, 5000),
+    socketTimeout: getInt(env.SMTP_SOCKET_TIMEOUT as any, 30000),
   };
 }
 
 /**
- * Loads the high-level Email Service configuration.
+ * Load Email Service Configuration.
  *
- * Handles switching between local console logging and production mail servers.
- * Console provider logs emails to terminal (development).
- * SMTP provider sends real emails via configured server (production).
- *
+ * **Provider Modes**:
+ * - **Console**: "Dry run" mode. Logs email content to stdout. Useful for local dev.
+ * - **SMTP**: Real email delivery via standard mail servers (SendGrid, SES, Postmark, etc).
  * @param env - Environment variable map
  * @returns Complete email configuration
  *
@@ -36,7 +34,7 @@ export function loadSmtpConfig(env: FullEnv): SmtpConfig {
  * // emailConfig.provider === 'smtp' in production
  * ```
  */
-export function loadEmail(env: FullEnv): EmailConfig {
+export function loadEmailConfig(env: FullEnv): EmailConfig {
   const provider = (env.EMAIL_PROVIDER || 'console') as EmailConfig['provider'];
 
   const smtp = loadSmtpConfig(env);

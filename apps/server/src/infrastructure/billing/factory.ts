@@ -10,24 +10,18 @@ import { BillingProviderNotConfiguredError } from '@abe-stack/core';
 import { PayPalProvider } from './paypal-provider';
 import { StripeProvider } from './stripe-provider';
 
-import type { BillingConfig, PaymentProviderInterface } from './types';
+import type { BillingConfig, BillingService } from './types';
 
 /**
  * Create a billing provider based on configuration
  */
-export function createBillingProvider(config: BillingConfig): PaymentProviderInterface {
+export function createBillingProvider(config: BillingConfig): BillingService {
   switch (config.provider) {
     case 'stripe': {
-      if (!config.stripe) {
-        throw new BillingProviderNotConfiguredError('stripe');
-      }
       return new StripeProvider(config.stripe);
     }
 
     case 'paypal': {
-      if (!config.paypal) {
-        throw new BillingProviderNotConfiguredError('paypal');
-      }
       return new PayPalProvider(config.paypal);
     }
 

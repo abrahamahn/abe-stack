@@ -138,9 +138,9 @@ describe('S3StorageProvider', () => {
         body: Buffer.from('hello world'),
       };
 
-      const result = await provider.upload(params);
+      const result = await provider.upload(params.key, params.body, params.contentType);
 
-      expect(result.key).toBe('uploads/test-file.txt');
+      expect(result).toBe('uploads/test-file.txt');
       expect(MockPutObjectCommand).toHaveBeenCalledWith({
         Bucket: 'test-bucket',
         Key: 'uploads/test-file.txt',
@@ -158,9 +158,9 @@ describe('S3StorageProvider', () => {
         body: Buffer.from('content'),
       };
 
-      const result = await provider.upload(params);
+      const result = await provider.upload(params.key, params.body, params.contentType);
 
-      expect(result.key).toBe('leading/slash/file.txt');
+      expect(result).toBe('leading/slash/file.txt');
       expect(MockPutObjectCommand).toHaveBeenCalledWith(
         expect.objectContaining({
           Key: 'leading/slash/file.txt',
@@ -176,7 +176,7 @@ describe('S3StorageProvider', () => {
         body: 'string content',
       };
 
-      await provider.upload(params);
+      await provider.upload(params.key, params.body, params.contentType);
 
       expect(MockPutObjectCommand).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -194,7 +194,7 @@ describe('S3StorageProvider', () => {
         body,
       };
 
-      await provider.upload(params);
+      await provider.upload(params.key, params.body, params.contentType);
 
       expect(MockPutObjectCommand).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -212,7 +212,9 @@ describe('S3StorageProvider', () => {
         body: Buffer.from('fail'),
       };
 
-      await expect(provider.upload(params)).rejects.toThrow('S3 upload failed');
+      await expect(provider.upload(params.key, params.body, params.contentType)).rejects.toThrow(
+        'S3 upload failed',
+      );
     });
   });
 

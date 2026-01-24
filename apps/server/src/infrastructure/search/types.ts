@@ -159,39 +159,11 @@ export interface SearchProviderFactoryOptions {
 // SQL-Specific Types
 // ============================================================================
 
-/**
- * Column mapping for SQL queries.
- */
-export interface SqlColumnMapping {
-  /** Source field name (from query) */
-  field: string;
-  /** Target column name (in database) */
-  column: string;
-  /** Column type for proper escaping */
-  type?: 'string' | 'number' | 'boolean' | 'date' | 'json' | 'array';
-  /** Is this column sortable? */
-  sortable?: boolean;
-  /** Is this column filterable? */
-  filterable?: boolean;
-  /** Custom SQL expression for the column */
-  expression?: string;
-}
+// ============================================================================
+// SQL-Specific Types
+// ============================================================================
 
-/**
- * Table configuration for SQL search.
- */
-export interface SqlTableConfig {
-  /** Table name */
-  table: string;
-  /** Primary key column(s) */
-  primaryKey: string | string[];
-  /** Column mappings */
-  columns: SqlColumnMapping[];
-  /** Columns to include in text search */
-  searchColumns?: string[];
-  /** Default sort configuration */
-  defaultSort?: { column: string; order: 'asc' | 'desc' };
-}
+export type { SqlColumnMapping, SqlTableConfig } from '@abe-stack/core/contracts/config';
 
 /**
  * SQL query execution options.

@@ -4,10 +4,22 @@ import type {
   DatabaseProvider,
   JsonDatabaseConfig,
   PostgresConfig,
-} from '@abe-stack/core/contracts/config';
-import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
+} from '@abe-stack/core/config';
+import type { FullEnv } from '@abe-stack/core/config';
 
-export function loadDatabase(env: FullEnv): DatabaseConfig {
+/**
+ * Load Database Configuration.
+ *
+ * Supports multiple providers:
+ * - **PostgreSQL**: Production-ready relational DB (Default).
+ * - **MongoDB**: Document store.
+ * - **SQLite**: Lightweight file-based DB (great for testing/prototyping).
+ * - **JSON**: Simple file-based persistence for small apps.
+ *
+ * @param env - Environment variables.
+ * @returns Provider-specific configuration.
+ */
+export function loadDatabaseConfig(env: FullEnv): DatabaseConfig {
   const provider = (env.DATABASE_PROVIDER || 'postgresql') as DatabaseProvider;
 
   switch (provider) {
@@ -68,8 +80,10 @@ export function loadDatabase(env: FullEnv): DatabaseConfig {
 }
 
 /**
- * Builds a full connection string.
- * Prioritizes explicit connectionString, then builds from parts.
+ * Builds a standardized connection string from discrete config parts.
+ *
+ * **PostgreSQL Logic**:
+ * Constructs `postgresql://user:pass@host:port/db`.
  */
 export function buildConnectionString(config: DatabaseConfig): string {
   switch (config.provider) {

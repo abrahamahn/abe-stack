@@ -5,7 +5,7 @@ services:
     image: postgres:16-alpine
     container_name: abe-stack-postgres
     env_file:
-      - ../.config/env/.config/env/.env.development
+      - ../.config/env/.env.development
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}

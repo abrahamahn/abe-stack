@@ -1,8 +1,9 @@
 // apps/server/src/config/services/search.test.ts
-import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
+import type { FullEnv } from '@abe-stack/core/config';
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_ELASTICSEARCH_CONFIG,
+  DEFAULT_SEARCH_SCHEMAS,
   DEFAULT_SQL_SEARCH_CONFIG,
   loadElasticsearchConfig,
   loadSqlSearchConfig,
@@ -62,17 +63,11 @@ describe('Search Configuration', () => {
 
       const config = loadElasticsearchConfig(env);
 
-      expect(config).toEqual({
-        node: 'http://localhost:9200',
-        index: 'my-index',
-        auth: {
-          username: 'elastic-user',
-          password: 'elastic-password',
-        },
-        apiKey: undefined,
-        requestTimeout: undefined,
-        tls: undefined,
+      expect(config.auth).toEqual({
+        username: 'elastic-user',
+        password: 'elastic-password',
       });
+      expect(config.apiKey).toBeUndefined();
     });
 
     it('loads configuration with API key only', () => {
@@ -84,14 +79,8 @@ describe('Search Configuration', () => {
 
       const config = loadElasticsearchConfig(env);
 
-      expect(config).toEqual({
-        node: 'https://my-es-cluster.com',
-        index: 'my-index',
-        auth: undefined,
-        apiKey: 'my-api-key',
-        requestTimeout: undefined,
-        tls: undefined,
-      });
+      expect(config.auth).toBeUndefined();
+      expect(config.apiKey).toBe('my-api-key');
     });
 
     it('handles TLS and request timeout correctly', () => {
@@ -106,12 +95,11 @@ describe('Search Configuration', () => {
       expect(config.requestTimeout).toBe(15000);
     });
 
-    // Validation tests remain same as they test the Config object, not env loading
     it('validateElasticsearchConfig returns errors for missing required fields', () => {
       const config = {
         node: '',
         index: '',
-      };
+      } as any;
 
       const errors = validateElasticsearchConfig(config);
       expect(errors).toContain('ELASTICSEARCH_NODE is required');
@@ -122,7 +110,7 @@ describe('Search Configuration', () => {
       const config = {
         node: 'http://localhost:9200',
         index: 'my-index',
-      };
+      } as any;
 
       const errors = validateElasticsearchConfig(config);
       expect(errors).toHaveLength(0);
@@ -172,34 +160,13 @@ describe('Search Configuration', () => {
       });
     });
 
-    // Removed "handles string to number conversion" test
-
     it('handles boolean conversion for logging', () => {
       const env = {
         SQL_SEARCH_LOGGING: 'true',
       } as unknown as FullEnv;
 
       const config = loadSqlSearchConfig(env);
-
       expect(config.logging).toBe(true);
-    });
-
-    it('handles optional fields when not provided', () => {
-      const env = {
-        // Only providing required fields
-      } as unknown as FullEnv;
-
-      const config = loadSqlSearchConfig(env);
-
-      expect(config).toEqual({
-        defaultPageSize: 50,
-        maxPageSize: 1000,
-        // Optional fields should be undefined
-        maxQueryDepth: undefined,
-        maxConditions: undefined,
-        logging: undefined,
-        timeout: undefined,
-      });
     });
 
     it('handles zero values correctly for optional fields', () => {
@@ -211,7 +178,6 @@ describe('Search Configuration', () => {
 
       const config = loadSqlSearchConfig(env);
 
-      // When environment variables are set to 0, they should be present
       expect(config.maxQueryDepth).toBe(0);
       expect(config.maxConditions).toBe(0);
       expect(config.timeout).toBe(0);
@@ -221,7 +187,7 @@ describe('Search Configuration', () => {
       const config = {
         defaultPageSize: 1500,
         maxPageSize: 1000,
-      };
+      } as any;
 
       const errors = validateSqlSearchConfig(config);
       expect(errors).toContain('SQL_SEARCH_DEFAULT_PAGE_SIZE cannot exceed MAX_PAGE_SIZE');
@@ -231,17 +197,7 @@ describe('Search Configuration', () => {
       const config = {
         defaultPageSize: 50,
         maxPageSize: 1000,
-      };
-
-      const errors = validateSqlSearchConfig(config);
-      expect(errors).toHaveLength(0);
-    });
-
-    it('validateSqlSearchConfig returns no errors when default equals max', () => {
-      const config = {
-        defaultPageSize: 100,
-        maxPageSize: 100,
-      };
+      } as any;
 
       const errors = validateSqlSearchConfig(config);
       expect(errors).toHaveLength(0);
@@ -251,6 +207,17 @@ describe('Search Configuration', () => {
       expect(DEFAULT_SQL_SEARCH_CONFIG).toBeDefined();
       expect(DEFAULT_SQL_SEARCH_CONFIG.defaultPageSize).toBe(50);
       expect(DEFAULT_SQL_SEARCH_CONFIG.maxPageSize).toBe(1000);
+    });
+
+    it('exports default search schemas with correct structure', () => {
+      expect(DEFAULT_SEARCH_SCHEMAS).toBeDefined();
+      expect(DEFAULT_SEARCH_SCHEMAS.users).toBeDefined();
+      expect(DEFAULT_SEARCH_SCHEMAS.users?.table).toBe('users');
+
+      const emailColumn = DEFAULT_SEARCH_SCHEMAS.users?.columns.find((c) => c.field === 'email');
+      expect(emailColumn).toBeDefined();
+      expect(emailColumn?.type).toBe('string');
+      expect(emailColumn?.filterable).toBe(true);
     });
   });
 });

@@ -6,12 +6,12 @@
  */
 
 import {
-  PlanNotFoundError,
   CannotDeactivatePlanWithActiveSubscriptionsError,
+  PlanNotFoundError,
 } from '@abe-stack/core';
-import type { PlanRepository, SubscriptionRepository, Plan as DbPlan } from '@abe-stack/db';
+import type { Plan as DbPlan, PlanRepository, SubscriptionRepository } from '@abe-stack/db';
 
-import type { PaymentProviderInterface } from '@infrastructure/billing';
+import type { BillingService } from '@infrastructure/billing';
 
 // ============================================================================
 // Types
@@ -152,7 +152,7 @@ export async function deactivatePlan(
  */
 export async function syncPlanToStripe(
   repos: AdminBillingRepositories,
-  provider: PaymentProviderInterface,
+  provider: BillingService,
   planId: string,
 ): Promise<{ stripePriceId: string; stripeProductId: string }> {
   const plan = await repos.plans.findById(planId);

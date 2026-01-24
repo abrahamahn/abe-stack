@@ -1,4 +1,6 @@
 // apps/server/src/modules/admin/__tests__/userHandlers.test.ts
+import { UserNotFoundError } from '@shared';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
   handleGetUser,
   handleListUsers,
@@ -6,8 +8,6 @@ import {
   handleUnlockUser,
   handleUpdateUser,
 } from '../userHandlers';
-import { UserNotFoundError } from '@shared';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { AppContext, RequestWithCookies } from '@shared';
 import type { FastifyReply, FastifyRequest } from 'fastify';
@@ -69,6 +69,11 @@ function createMockContext(): AppContext {
     storage: {} as AppContext['storage'],
     pubsub: {} as AppContext['pubsub'],
     cache: {} as AppContext['cache'],
+    billing: {} as AppContext['billing'],
+    notifications: {} as AppContext['notifications'],
+    queue: {} as AppContext['queue'],
+    write: {} as AppContext['write'],
+    search: {} as AppContext['search'],
     log: {
       info: vi.fn(),
       warn: vi.fn(),

@@ -55,9 +55,9 @@ Environment files in ``:
 
 ```text
 
-├── .config/env/.config/env/.env.development    # Development settings
-├── .config/env/.config/env/.env.production     # Production settings
-└── .config/env/.config/env/.env.test           # Test settings
+├── .config/env/.env.development    # Development settings
+├── .config/env/.env.production     # Production settings
+└── .config/env/.env.test           # Test settings
 ```
 
 ---

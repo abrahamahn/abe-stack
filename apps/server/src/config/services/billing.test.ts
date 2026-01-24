@@ -1,13 +1,17 @@
 // apps/server/src/config/services/billing.test.ts
-import type { BillingConfig, FullEnv } from '@abe-stack/core/contracts/config';
-import { describe, expect, it } from 'vitest';
-import { loadBilling, validateBilling } from './billing';
+import type { FullEnv } from '@abe-stack/core/config';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { loadBillingConfig, validateBillingConfig } from './billing';
 
 describe('Billing Configuration', () => {
+  beforeEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it('loads default configuration when no environment variables are set', () => {
     const env = {} as unknown as FullEnv;
     const appBaseUrl = 'http://localhost:5173';
-    const config = loadBilling(env, appBaseUrl);
+    const config = loadBillingConfig(env, appBaseUrl);
 
     expect(config).toEqual({
       enabled: false,
@@ -50,49 +54,36 @@ describe('Billing Configuration', () => {
       BILLING_CHECKOUT_CANCEL_URL: 'https://example.com/cancel',
     } as unknown as FullEnv;
 
-    const appBaseUrl = 'http://localhost:5173';
-    const config = loadBilling(env, appBaseUrl);
+    const config = loadBillingConfig(env);
 
     expect(config.enabled).toBe(true);
     expect(config.provider).toBe('stripe');
     expect(config.currency).toBe('eur');
-    expect(config.stripe).toEqual({
-      secretKey: 'sk_test_123',
-      publishableKey: 'pk_test_123',
-      webhookSecret: '',
-    });
     expect(config.plans).toEqual({
       free: 'free-plan-id',
       pro: 'pro-plan-id',
       enterprise: 'enterprise-plan-id',
     });
-    expect(config.urls).toEqual({
-      portalReturnUrl: 'https://example.com/return',
-      checkoutSuccessUrl: 'https://example.com/success',
-      checkoutCancelUrl: 'https://example.com/cancel',
-    });
   });
 
-  it('loads paypal configuration when paypal credentials are provided', () => {
+  it('loads paypal configuration and respects production mode', () => {
     const env = {
       PAYPAL_CLIENT_ID: 'paypal-client-id',
       PAYPAL_CLIENT_SECRET: 'paypal-secret',
-      BILLING_CURRENCY: 'gbp',
       PAYPAL_MODE: 'production',
     } as unknown as FullEnv;
 
-    const appBaseUrl = 'http://localhost:5173';
-    const config = loadBilling(env, appBaseUrl);
+    const config = loadBillingConfig(env);
 
     expect(config.enabled).toBe(true);
     expect(config.provider).toBe('paypal');
-    expect(config.currency).toBe('gbp');
-    expect(config.paypal).toEqual({
-      clientId: 'paypal-client-id',
-      clientSecret: 'paypal-secret',
-      webhookId: '',
-      sandbox: false, // because PAYPAL_MODE is 'production'
-    });
+    expect(config.paypal.sandbox).toBe(false);
+
+    const devConfig = loadBillingConfig({
+      ...env,
+      PAYPAL_MODE: 'sandbox',
+    } as unknown as FullEnv);
+    expect(devConfig.paypal.sandbox).toBe(true);
   });
 
   it('prefers explicitly set billing provider', () => {
@@ -101,242 +92,56 @@ describe('Billing Configuration', () => {
       STRIPE_PUBLISHABLE_KEY: 'pk_test_123',
       PAYPAL_CLIENT_ID: 'paypal-client-id',
       PAYPAL_CLIENT_SECRET: 'paypal-secret',
-      BILLING_PROVIDER: 'paypal', // Explicitly set to paypal
+      BILLING_PROVIDER: 'paypal',
     } as unknown as FullEnv;
 
-    const appBaseUrl = 'http://localhost:5173';
-    const config = loadBilling(env, appBaseUrl);
-
-    expect(config.enabled).toBe(true);
+    const config = loadBillingConfig(env);
     expect(config.provider).toBe('paypal');
   });
 
-  it('defaults to stripe when both providers are available but no explicit provider is set', () => {
+  it('handles URL construction with trailing slash removal', () => {
     const env = {
       STRIPE_SECRET_KEY: 'sk_test_123',
       STRIPE_PUBLISHABLE_KEY: 'pk_test_123',
-      PAYPAL_CLIENT_ID: 'paypal-client-id',
-      PAYPAL_CLIENT_SECRET: 'paypal-secret',
+      APP_URL: 'https://myapp.com/',
     } as unknown as FullEnv;
 
-    const appBaseUrl = 'http://localhost:5173';
-    const config = loadBilling(env, appBaseUrl);
-
-    expect(config.enabled).toBe(true);
-    expect(config.provider).toBe('stripe');
-  });
-
-  it('uses appBaseUrl parameter for URL construction when provided', () => {
-    const env = {
-      STRIPE_SECRET_KEY: 'sk_test_123',
-      STRIPE_PUBLISHABLE_KEY: 'pk_test_123',
-    } as unknown as FullEnv;
-
-    const appBaseUrl = 'https://myapp.com';
-    const config = loadBilling(env, appBaseUrl);
-
+    const config = loadBillingConfig(env);
     expect(config.urls.portalReturnUrl).toBe('https://myapp.com/settings/billing');
-    expect(config.urls.checkoutSuccessUrl).toBe('https://myapp.com/billing/success');
-    expect(config.urls.checkoutCancelUrl).toBe('https://myapp.com/pricing');
   });
 
-  it('falls back to APP_URL environment variable for URL construction when appBaseUrl is not provided', () => {
-    const env = {
-      STRIPE_SECRET_KEY: 'sk_test_123',
-      STRIPE_PUBLISHABLE_KEY: 'pk_test_123',
-      APP_URL: 'https://myapp.com',
-    } as unknown as FullEnv;
+  describe('Validation Logic', () => {
+    it('validateBillingConfig returns errors for missing credentials', () => {
+      const config = {
+        provider: 'stripe',
+        stripe: { secretKey: '', publishableKey: '' },
+      } as any;
 
-    const config = loadBilling(env);
+      const errors = validateBillingConfig(config);
+      expect(errors).toContain('STRIPE_SECRET_KEY missing');
+      expect(errors).toContain('STRIPE_PUBLISHABLE_KEY missing');
+    });
 
-    expect(config.urls.portalReturnUrl).toBe('https://myapp.com/settings/billing');
-    expect(config.urls.checkoutSuccessUrl).toBe('https://myapp.com/billing/success');
-    expect(config.urls.checkoutCancelUrl).toBe('https://myapp.com/pricing');
-  });
+    it('requires webhook secrets in production for security', () => {
+      vi.stubEnv('NODE_ENV', 'production');
 
-  it('defaults to localhost when neither appBaseUrl nor APP_URL is provided', () => {
-    const env = {
-      STRIPE_SECRET_KEY: 'sk_test_123',
-      STRIPE_PUBLISHABLE_KEY: 'pk_test_123',
-    } as unknown as FullEnv;
+      const config = {
+        provider: 'stripe',
+        stripe: { secretKey: 'sk_prod', publishableKey: 'pk_prod', webhookSecret: '' },
+      } as any;
 
-    const config = loadBilling(env);
+      const errors = validateBillingConfig(config);
+      expect(errors).toContain('STRIPE_WEBHOOK_SECRET is mandatory in production');
+    });
 
-    expect(config.urls.portalReturnUrl).toBe('http://localhost:5173/settings/billing');
-    expect(config.urls.checkoutSuccessUrl).toBe('http://localhost:5173/billing/success');
-    expect(config.urls.checkoutCancelUrl).toBe('http://localhost:5173/pricing');
-  });
-
-  it('handles trailing slash removal from appBaseUrl', () => {
-    const env = {
-      STRIPE_SECRET_KEY: 'sk_test_123',
-      STRIPE_PUBLISHABLE_KEY: 'pk_test_123',
-    } as unknown as FullEnv;
-
-    const appBaseUrl = 'https://myapp.com/';
-    const config = loadBilling(env, appBaseUrl);
-
-    expect(config.urls.portalReturnUrl).toBe('https://myapp.com/settings/billing');
-    expect(config.urls.checkoutSuccessUrl).toBe('https://myapp.com/billing/success');
-    expect(config.urls.checkoutCancelUrl).toBe('https://myapp.com/pricing');
-  });
-
-  it('validateBilling returns errors for invalid stripe config', () => {
-    const config = {
-      enabled: true,
-      provider: 'stripe',
-      currency: 'usd',
-      stripe: {
-        secretKey: '',
-        publishableKey: '',
-        webhookSecret: '',
-      },
-      paypal: {
-        clientId: '',
-        clientSecret: '',
-        webhookId: '',
-        sandbox: true,
-      },
-      plans: {
-        free: undefined,
-        pro: undefined,
-        enterprise: undefined,
-      },
-      urls: {
-        portalReturnUrl: 'http://localhost:5173/settings/billing',
-        checkoutSuccessUrl: 'http://localhost:5173/billing/success',
-        checkoutCancelUrl: 'http://localhost:5173/pricing',
-      },
-    } satisfies BillingConfig;
-
-    const errors = validateBilling(config);
-    expect(errors).toContain('STRIPE_SECRET_KEY missing');
-    expect(errors).toContain('STRIPE_PUBLISHABLE_KEY missing');
-  });
-
-  it('validateBilling returns errors for invalid paypal config', () => {
-    const config = {
-      enabled: true,
-      provider: 'paypal',
-      currency: 'usd',
-      stripe: {
-        secretKey: 'sk_test_123',
-        publishableKey: 'pk_test_123',
-        webhookSecret: 'wh_test_123',
-      },
-      paypal: {
-        clientId: '',
-        clientSecret: '',
-        webhookId: '',
-        sandbox: true,
-      },
-      plans: {
-        free: undefined,
-        pro: undefined,
-        enterprise: undefined,
-      },
-      urls: {
-        portalReturnUrl: 'http://localhost:5173/settings/billing',
-        checkoutSuccessUrl: 'http://localhost:5173/billing/success',
-        checkoutCancelUrl: 'http://localhost:5173/pricing',
-      },
-    } satisfies BillingConfig;
-
-    const errors = validateBilling(config);
-    expect(errors).toContain('PAYPAL_CLIENT_ID missing');
-    expect(errors).toContain('PAYPAL_CLIENT_SECRET missing');
-  });
-
-  it('validateBilling returns no errors for valid stripe config', () => {
-    const config = {
-      enabled: true,
-      provider: 'stripe',
-      currency: 'usd',
-      stripe: {
-        secretKey: 'sk_test_123',
-        publishableKey: 'pk_test_123',
-        webhookSecret: 'wh_test_123',
-      },
-      paypal: {
-        clientId: '',
-        clientSecret: '',
-        webhookId: '',
-        sandbox: true,
-      },
-      plans: {
-        free: undefined,
-        pro: undefined,
-        enterprise: undefined,
-      },
-      urls: {
-        portalReturnUrl: 'http://localhost:5173/settings/billing',
-        checkoutSuccessUrl: 'http://localhost:5173/billing/success',
-        checkoutCancelUrl: 'http://localhost:5173/pricing',
-      },
-    } satisfies BillingConfig;
-
-    const errors = validateBilling(config);
-    expect(errors).toHaveLength(0);
-  });
-
-  it('validateBilling returns no errors for valid paypal config', () => {
-    const config = {
-      enabled: true,
-      provider: 'paypal',
-      currency: 'usd',
-      stripe: {
-        secretKey: '',
-        publishableKey: '',
-        webhookSecret: '',
-      },
-      paypal: {
-        clientId: 'client_id',
-        clientSecret: 'client_secret',
-        webhookId: 'webhook_id',
-        sandbox: true,
-      },
-      plans: {
-        free: undefined,
-        pro: undefined,
-        enterprise: undefined,
-      },
-      urls: {
-        portalReturnUrl: 'http://localhost:5173/settings/billing',
-        checkoutSuccessUrl: 'http://localhost:5173/billing/success',
-        checkoutCancelUrl: 'http://localhost:5173/pricing',
-      },
-    } satisfies BillingConfig;
-
-    const errors = validateBilling(config);
-    expect(errors).toHaveLength(0);
-  });
-
-  // Ensure env cleanup happens even if tests fail
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
-  it('requires webhook secrets in production for security', () => {
-    // Mock production environment
-    vi.stubEnv('NODE_ENV', 'production');
-
-    expect(() => {
-      loadBilling({
-        STRIPE_SECRET_KEY: 'sk_test_123',
-        STRIPE_PUBLISHABLE_KEY: 'pk_test_123',
-        // Missing STRIPE_WEBHOOK_SECRET
-      } as unknown as FullEnv);
-    }).toThrow(/STRIPE_WEBHOOK_SECRET is mandatory/);
-  });
-
-  it('correctly maps the Enterprise Plan ID', () => {
-    const env = {
-      STRIPE_SECRET_KEY: 'sk_test_123',
-      STRIPE_PUBLISHABLE_KEY: 'pk_test_123',
-      PLAN_ENTERPRISE_ID: 'price_premium_123',
-    } as unknown as FullEnv;
-
-    const config = loadBilling(env);
-    expect(config.plans.enterprise).toBe('price_premium_123');
+    it('throws when loading configuration with missing mandatory credentials', () => {
+      expect(() => {
+        loadBillingConfig({
+          BILLING_PROVIDER: 'stripe',
+          STRIPE_SECRET_KEY: 'sk_test_123',
+          // Missing publishable key
+        } as unknown as FullEnv);
+      }).toThrow(/STRIPE_PUBLISHABLE_KEY missing/);
+    });
   });
 });

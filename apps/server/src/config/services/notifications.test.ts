@@ -1,9 +1,5 @@
 // apps/server/src/config/services/notifications.test.ts
-import type {
-  FullEnv,
-  NotificationConfig,
-  OneSignalConfig,
-} from '@abe-stack/core/contracts/config';
+import type { FullEnv, NotificationConfig, OneSignalConfig } from '@abe-stack/core/config';
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_NOTIFICATION_CONFIG,

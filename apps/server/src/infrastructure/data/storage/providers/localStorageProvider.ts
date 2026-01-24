@@ -1,11 +1,11 @@
 // apps/server/src/infrastructure/data/storage/providers/localStorageProvider.ts
 import { randomUUID } from 'node:crypto';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
 import { normalizeStorageKey } from '@storage/utils';
 
-import type { LocalStorageConfig, StorageProvider, UploadParams } from '@storage/types';
+import type { LocalStorageConfig, StorageProvider } from '@storage/types';
 
 export class LocalStorageProvider implements StorageProvider {
   constructor(private readonly config: LocalStorageConfig) {}
@@ -16,12 +16,32 @@ export class LocalStorageProvider implements StorageProvider {
     return join(this.config.rootPath, safeKey);
   }
 
-  async upload(params: UploadParams): Promise<{ key: string }> {
-    const key = params.key || randomUUID();
-    const filePath = this.resolveKey(key);
+  async upload(
+    key: string,
+    data: Buffer | Uint8Array | string,
+    _contentType: string,
+  ): Promise<string> {
+    const finalKey = key || randomUUID();
+    const filePath = this.resolveKey(finalKey);
     await mkdir(dirname(filePath), { recursive: true });
-    await writeFile(filePath, params.body);
-    return { key };
+    await writeFile(filePath, data);
+    return finalKey;
+  }
+
+  async download(key: string): Promise<Buffer> {
+    const filePath = this.resolveKey(key);
+    return readFile(filePath);
+  }
+
+  async delete(key: string): Promise<void> {
+    const filePath = this.resolveKey(key);
+    try {
+      await unlink(filePath);
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'code' in error && error.code !== 'ENOENT') {
+        throw error;
+      }
+    }
   }
 
   getSignedUrl(key: string): Promise<string> {
