@@ -3,8 +3,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { SmtpEmailService } from '../smtpEmailService';
 
+import type { EmailConfig } from '@/config';
 import type { EmailOptions } from '../types';
-import type { EmailConfig } from '@config';
 
 // Mock the SmtpClient
 const mockSend = vi.fn().mockResolvedValue({ success: true, messageId: 'smtp-123' });

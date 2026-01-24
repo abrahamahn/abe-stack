@@ -121,7 +121,11 @@ export const PricingTable = forwardRef<HTMLDivElement, PricingTableProps>(
 
     if (isLoading) {
       return (
-        <div ref={ref} className={cn('pricing-table', 'pricing-table--loading', className)} {...rest}>
+        <div
+          ref={ref}
+          className={cn('pricing-table', 'pricing-table--loading', className)}
+          {...rest}
+        >
           <div className="pricing-table__loading">Loading plans...</div>
         </div>
       );
@@ -153,7 +157,9 @@ export const PricingTable = forwardRef<HTMLDivElement, PricingTableProps>(
                 'pricing-table__toggle-button',
                 selectedInterval === 'month' && 'pricing-table__toggle-button--active',
               )}
-              onClick={() => { setSelectedInterval('month'); }}
+              onClick={() => {
+                setSelectedInterval('month');
+              }}
             >
               Monthly
             </button>
@@ -163,7 +169,9 @@ export const PricingTable = forwardRef<HTMLDivElement, PricingTableProps>(
                 'pricing-table__toggle-button',
                 selectedInterval === 'year' && 'pricing-table__toggle-button--active',
               )}
-              onClick={() => { setSelectedInterval('year'); }}
+              onClick={() => {
+                setSelectedInterval('year');
+              }}
             >
               Yearly
               {yearlySavings !== null && (

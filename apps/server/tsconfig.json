@@ -1,11 +1,13 @@
 {
-  "extends": "../../config/ts/tsconfig.node.json",
+  "extends": "../../.config/tsconfig.node.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
     "types": ["node", "vitest/globals"],
     "paths": {
       "@/*": ["./src/*"],
+      "@abe-stack/core": ["../../packages/core/src/index.ts"],
+      "@abe-stack/core/*": ["../../packages/core/src/*"],
       "@admin": ["./src/modules/admin"],
       "@admin/*": ["./src/modules/admin/*"],
       "@auth": ["./src/modules/auth"],
@@ -32,6 +34,8 @@
       "@health/*": ["./src/infrastructure/monitor/health/*"],
       "@http": ["./src/infrastructure/http"],
       "@http/*": ["./src/infrastructure/http/*"],
+      "@infra": ["./src/config/infra"],
+      "@infra/*": ["./src/config/infra/*"],
       "@infrastructure": ["./src/infrastructure"],
       "@infrastructure/*": ["./src/infrastructure/*"],
       "@jobs": ["./src/infrastructure/jobs"],
@@ -62,8 +66,6 @@
       "@processors/*": ["./src/infrastructure/media/processors/*"],
       "@providers": ["./src/modules/auth/oauth/providers"],
       "@providers/*": ["./src/modules/auth/oauth/providers/*"],
-      "@pubsub": ["./src/infrastructure/messaging/pubsub"],
-      "@pubsub/*": ["./src/infrastructure/messaging/pubsub/*"],
       "@queue": ["./src/infrastructure/jobs/queue"],
       "@queue/*": ["./src/infrastructure/jobs/queue/*"],
       "@rate-limit": ["./src/infrastructure/security/rate-limit"],
@@ -84,6 +86,8 @@
       "@shared/*": ["./src/shared/*"],
       "@storage": ["./src/infrastructure/data/storage"],
       "@storage/*": ["./src/infrastructure/data/storage/*"],
+      "@system": ["./src/modules/system"],
+      "@system/*": ["./src/modules/system/*"],
       "@users": ["./src/modules/users"],
       "@users/*": ["./src/modules/users/*"],
       "@webhooks": ["./src/modules/billing/webhooks"],
@@ -96,7 +100,7 @@
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.server.tsbuildinfo"
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "legacy-tests"],
+  "exclude": ["node_modules", "dist"],
   "references": [
     {
       "path": "../../packages/core"

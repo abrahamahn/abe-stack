@@ -79,8 +79,8 @@ export type {
   SubscriptionStatusProps,
   TabItem,
   TabsProps,
-  UserState,
   UserAction,
+  UserState,
 } from './components';
 
 // Layouts - Page and section layouts
@@ -118,18 +118,20 @@ export {
   HistoryProvider,
   useAuthModeNavigation,
   useClickOutside,
+  useContrast,
   useControllableState,
   useCopyToClipboard,
   useDebounce,
   useDelayedFlag,
+  useDensity,
   useDisclosure,
   useFormState,
   useHistoryNav,
   useKeyboardShortcuts,
   useLocalStorage,
   useMediaQuery,
-  useOnScreen,
   useOffsetPaginatedQuery,
+  useOnScreen,
   usePaginatedQuery,
   usePanelConfig,
   useResendCooldown,
@@ -144,32 +146,36 @@ export type {
   AuthModeNavigationOptions,
   FormState,
   HistoryContextValue,
+  UseContrastReturn,
+  UseDensityReturn,
   UseOffsetPaginatedQueryOptions,
   UseOffsetPaginatedQueryResult,
   UsePaginatedQueryOptions,
   UsePaginatedQueryResult,
   UseResendCooldownReturn,
   UseSidePeekResult,
-  VirtualScrollOptions,
   VirtualScrollItem,
-  VirtualScrollResult,
   VirtualScrollListProps,
+  VirtualScrollOptions,
+  VirtualScrollResult,
 } from './hooks';
 
 // Theme
 export {
+  ThemeProvider,
   colors,
   darkColors,
   lightColors,
   motion,
   radius,
   spacing,
-  ThemeProvider,
   typography,
   useTheme,
 } from './theme';
 export type {
+  ContrastMode,
   DarkColors,
+  Density,
   LightColors,
   Radius,
   ThemeColors,
@@ -204,14 +210,14 @@ export type {
   NavigateProps,
   NavigationType,
   OutletProviderProps,
+  RouteProps,
   RouterContextValue,
   RouterLocation,
   RouterProps,
   RouterState,
-  RouteProps,
   RoutesProps,
 } from './router';
 
 // Utilities
-export { cn, createFormHandler, Markdown, SyntaxHighlighter } from './utils';
+export { Markdown, SyntaxHighlighter, cn, createFormHandler } from './utils';
 export type { FormHandlerOptions } from './utils';

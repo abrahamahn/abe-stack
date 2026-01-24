@@ -68,7 +68,10 @@ describe('Admin User Service', () => {
 
   describe('listUsers', () => {
     test('should return paginated users', async () => {
-      const mockUsers = [createMockUser(), createMockUser({ id: 'user-456', email: 'other@example.com' })];
+      const mockUsers = [
+        createMockUser(),
+        createMockUser({ id: 'user-456', email: 'other@example.com' }),
+      ];
       vi.mocked(mockRepo.listWithFilters).mockResolvedValue({
         items: mockUsers,
         total: 2,
@@ -202,7 +205,7 @@ describe('Admin User Service', () => {
   });
 
   describe('lockUser', () => {
-    test('should lock user with duration', async () => {
+    test('should lock user with dconfiguration', async () => {
       const mockUser = createMockUser();
       const lockedUser = createMockUser({ lockedUntil: new Date('2099-12-31') });
       vi.mocked(mockRepo.findById)
@@ -216,7 +219,7 @@ describe('Admin User Service', () => {
       expect(mockRepo.lockAccount).toHaveBeenCalled();
     });
 
-    test('should lock user indefinitely when no duration provided', async () => {
+    test('should lock user indefinitely when no dconfiguration provided', async () => {
       const mockUser = createMockUser();
       const lockedUser = createMockUser({ lockedUntil: new Date('2099-12-31') });
       vi.mocked(mockRepo.findById)

@@ -10,7 +10,7 @@ interface FfprobeCallback {
 
 interface FfprobeData {
   format: {
-    duration?: number;
+    dconfiguration?: number;
     bit_rate?: string;
   };
   streams: Array<{
@@ -39,7 +39,7 @@ vi.mock('fluent-ffmpeg', () => {
     complexFilter: vi.fn().mockReturnThis(),
     screenshots: vi.fn().mockReturnThis(),
     setStartTime: vi.fn().mockReturnThis(),
-    setDuration: vi.fn().mockReturnThis(),
+    setDconfiguration: vi.fn().mockReturnThis(),
     on: vi.fn().mockReturnThis(),
     save: vi.fn().mockReturnThis(),
     run: vi.fn().mockReturnThis(),
@@ -79,7 +79,7 @@ describe('VideoProcessor', () => {
       complexFilter: vi.fn().mockReturnThis(),
       screenshots: vi.fn().mockReturnThis(),
       setStartTime: vi.fn().mockReturnThis(),
-      setDuration: vi.fn().mockReturnThis(),
+      setDconfiguration: vi.fn().mockReturnThis(),
       on: vi.fn().mockImplementation((event: string, callback: () => void) => {
         if (event === 'end') {
           setTimeout(callback, 0); // Simulate async success
@@ -93,7 +93,7 @@ describe('VideoProcessor', () => {
     mockFfprobe.mockImplementation((_inputPath: string, callback: FfprobeCallback) => {
       callback(null, {
         format: {
-          duration: 120.5,
+          dconfiguration: 120.5,
           bit_rate: '2500000',
         },
         streams: [
@@ -198,7 +198,7 @@ describe('VideoProcessor', () => {
       const metadata = await processor.getMetadata(inputPath);
 
       expect(metadata).toEqual({
-        duration: 120.5,
+        dconfiguration: 120.5,
         width: 1920,
         height: 1080,
         bitrate: 2500000,
@@ -312,25 +312,25 @@ describe('VideoProcessor', () => {
     });
   });
 
-  describe('getDuration', () => {
-    it('should get video duration', async () => {
+  describe('getDconfiguration', () => {
+    it('should get video dconfiguration', async () => {
       const inputPath = '/tmp/test.mp4';
 
-      const duration = await processor.getDuration(inputPath);
+      const dconfiguration = await processor.getDconfiguration(inputPath);
 
-      expect(duration).toBe(120.5);
+      expect(dconfiguration).toBe(120.5);
     });
 
-    it('should return null on duration extraction error', async () => {
+    it('should return null on dconfiguration extraction error', async () => {
       mockFfprobe.mockImplementation((_inputPath: string, callback: FfprobeCallback) => {
-        callback(new Error('Duration extraction failed'), null);
+        callback(new Error('Dconfiguration extraction failed'), null);
       });
 
       const inputPath = '/tmp/test.mp4';
 
-      const duration = await processor.getDuration(inputPath);
+      const dconfiguration = await processor.getDconfiguration(inputPath);
 
-      expect(duration).toBe(null);
+      expect(dconfiguration).toBe(null);
     });
   });
 });

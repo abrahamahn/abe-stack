@@ -38,7 +38,9 @@ export interface AdminApiClient {
   listSecurityEvents: (request: SecurityEventsListRequest) => Promise<SecurityEventsListResponse>;
   getSecurityEvent: (id: string) => Promise<SecurityEvent>;
   getSecurityMetrics: (period?: 'hour' | 'day' | 'week' | 'month') => Promise<SecurityMetrics>;
-  exportSecurityEvents: (request: SecurityEventsExportRequest) => Promise<SecurityEventsExportResponse>;
+  exportSecurityEvents: (
+    request: SecurityEventsExportRequest,
+  ) => Promise<SecurityEventsExportResponse>;
 
   // Job monitoring
   listJobs: (query: Partial<JobListQuery>) => Promise<JobListResponse>;
@@ -79,7 +81,8 @@ export function createAdminApiClient(config: AdminApiConfig): AdminApiClient {
       );
     }
 
-    const data = (await response.json().catch(() => ({}))) as ApiErrorBody & Record<string, unknown>;
+    const data = (await response.json().catch(() => ({}))) as ApiErrorBody &
+      Record<string, unknown>;
 
     if (!response.ok) {
       throw createApiError(response.status, data);
@@ -89,7 +92,9 @@ export function createAdminApiClient(config: AdminApiConfig): AdminApiClient {
   };
 
   return {
-    async listSecurityEvents(requestBody: SecurityEventsListRequest): Promise<SecurityEventsListResponse> {
+    async listSecurityEvents(
+      requestBody: SecurityEventsListRequest,
+    ): Promise<SecurityEventsListResponse> {
       return request<SecurityEventsListResponse>('/admin/security/events', {
         method: 'POST',
         body: JSON.stringify(requestBody),
@@ -105,7 +110,9 @@ export function createAdminApiClient(config: AdminApiConfig): AdminApiClient {
       return request<SecurityMetrics>(`/admin/security/metrics${queryString}`);
     },
 
-    async exportSecurityEvents(requestBody: SecurityEventsExportRequest): Promise<SecurityEventsExportResponse> {
+    async exportSecurityEvents(
+      requestBody: SecurityEventsExportRequest,
+    ): Promise<SecurityEventsExportResponse> {
       return request<SecurityEventsExportResponse>('/admin/security/export', {
         method: 'POST',
         body: JSON.stringify(requestBody),

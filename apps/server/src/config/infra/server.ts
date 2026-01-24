@@ -1,21 +1,23 @@
 // apps/server/src/config/infra/server.ts
-import { getBool, getInt, getList } from '@abe-stack/core/config/utils';
+import { getList } from '@abe-stack/core/config/utils';
 import type { LogLevel, ServerConfig } from '@abe-stack/core/contracts/config';
+import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
 
 /**
  * Loads the core HTTP server configuration.
  * Handles ports, CORS, and basic infrastructure settings.
  */
-export function loadServer(env: Record<string, string | undefined>): ServerConfig {
+export function loadServer(env: FullEnv): ServerConfig {
   const isProd = env.NODE_ENV === 'production';
   const defaultPort = 8080;
 
-  // Port resolution (Standard PORT env is used by most cloud providers)
-  const port = getInt(env.API_PORT || env.PORT, defaultPort);
-  const appPort = getInt(env.APP_PORT, 5173);
+  // Port resolution
+  const port = env.API_PORT ?? env.PORT ?? defaultPort;
+  const appPort = env.APP_PORT ?? 5173;
 
-  const appBaseUrl = env.APP_BASE_URL || `http://localhost:${appPort}`;
-  const apiBaseUrl = env.API_BASE_URL || `http://localhost:${port}`;
+  // URL resolution (prefer PUBLIC_ prefix)
+  const appBaseUrl = env.PUBLIC_APP_URL || env.APP_BASE_URL || `http://localhost:${appPort}`;
+  const apiBaseUrl = env.PUBLIC_API_URL || env.API_BASE_URL || `http://localhost:${port}`;
 
   return {
     host: env.HOST || '0.0.0.0',
@@ -25,15 +27,19 @@ export function loadServer(env: Record<string, string | undefined>): ServerConfi
 
     cors: {
       // Support multiple origins (e.g., Web + Desktop + Admin)
-      origin: env.CORS_ORIGIN ? getList(env.CORS_ORIGIN) : [appBaseUrl],
+      origin: env.CORS_ORIGINS
+        ? getList(env.CORS_ORIGINS)
+        : env.CORS_ORIGIN
+          ? getList(env.CORS_ORIGIN)
+          : [appBaseUrl],
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     },
 
     // Operational Settings
-    trustProxy: getBool(env.TRUST_PROXY) ?? isProd,
+    trustProxy: env.TRUST_PROXY === 'true' || (env.TRUST_PROXY === undefined && isProd),
     logLevel: (env.LOG_LEVEL || 'info') as LogLevel,
-    maintenanceMode: getBool(env.MAINTENANCE_MODE) ?? false,
+    maintenanceMode: env.MAINTENANCE_MODE === 'true',
 
     // Identity/Discovery
     appBaseUrl,
@@ -41,8 +47,8 @@ export function loadServer(env: Record<string, string | undefined>): ServerConfi
 
     // Global Rate Limiting (Infrastructure layer)
     rateLimit: {
-      windowMs: getInt(env.RATE_LIMIT_WINDOW_MS, 60000),
-      max: getInt(env.RATE_LIMIT_MAX, isProd ? 100 : 1000),
+      windowMs: env.RATE_LIMIT_WINDOW_MS ?? 60000,
+      max: env.RATE_LIMIT_MAX ?? (isProd ? 100 : 1000),
     },
   };
 }

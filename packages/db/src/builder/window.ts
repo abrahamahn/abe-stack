@@ -147,11 +147,7 @@ class WindowExprImpl implements WindowExpr {
   readonly text: string;
   readonly values: readonly unknown[];
 
-  constructor(
-    funcText: string,
-    funcValues: readonly unknown[],
-    spec?: WindowSpec,
-  ) {
+  constructor(funcText: string, funcValues: readonly unknown[], spec?: WindowSpec) {
     const overClause = spec ? `OVER (${spec.toSql()})` : 'OVER ()';
     this.text = `${funcText} ${overClause}`;
     this.values = funcValues;

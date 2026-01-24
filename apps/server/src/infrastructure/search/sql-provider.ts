@@ -90,9 +90,9 @@ const SUPPORTED_OPERATORS: FilterOperator[] = [
 /**
  * SQL-based search provider using raw parameterized SQL.
  */
-export class SqlSearchProvider<TRecord extends Record<string, unknown> = Record<string, unknown>>
-  implements ServerSearchProvider<TRecord>
-{
+export class SqlSearchProvider<
+  TRecord extends Record<string, unknown> = Record<string, unknown>,
+> implements ServerSearchProvider<TRecord> {
   readonly name: string;
   private readonly config: Required<Omit<SqlSearchProviderConfig, 'name'>>;
   private readonly tableConfig: SqlTableConfig;
@@ -308,7 +308,8 @@ export class SqlSearchProvider<TRecord extends Record<string, unknown> = Record<
                   field: facetConfig.field,
                   buckets: bucketResults.map((row) => ({
                     value: row.value,
-                    count: typeof row.count === 'number' ? row.count : parseInt(String(row.count), 10),
+                    count:
+                      typeof row.count === 'number' ? row.count : parseInt(String(row.count), 10),
                   })),
                 };
               }),
@@ -527,9 +528,9 @@ export class SqlSearchProvider<TRecord extends Record<string, unknown> = Record<
       return undefined;
     }
 
-    const combinedText = fragments.map((f) => `(${f.text})`).join(
-      compound.operator === LOGICAL_OPERATORS.AND ? ' AND ' : ' OR ',
-    );
+    const combinedText = fragments
+      .map((f) => `(${f.text})`)
+      .join(compound.operator === LOGICAL_OPERATORS.AND ? ' AND ' : ' OR ');
     const combinedValues = fragments.flatMap((f) => f.values);
 
     switch (compound.operator) {
@@ -575,7 +576,10 @@ export class SqlSearchProvider<TRecord extends Record<string, unknown> = Record<
   // Private Methods - Cursor Handling
   // ============================================================================
 
-  private buildCursorCondition(cursor: string, sort: SortConfig<TRecord>[]): SqlFragment | undefined {
+  private buildCursorCondition(
+    cursor: string,
+    sort: SortConfig<TRecord>[],
+  ): SqlFragment | undefined {
     try {
       const decoded = decodeCursor(cursor);
 
@@ -646,7 +650,9 @@ export class SqlSearchProvider<TRecord extends Record<string, unknown> = Record<
     }
 
     // If no explicit mapping, check if field is in columns list
-    const isKnownColumn = this.tableConfig.columns.some((c) => c.column === field || c.field === field);
+    const isKnownColumn = this.tableConfig.columns.some(
+      (c) => c.column === field || c.field === field,
+    );
 
     // If columns list is empty, assume field is valid (backwards compatibility)
     if (this.tableConfig.columns.length === 0 || isKnownColumn) {
@@ -680,7 +686,9 @@ export class SqlSearchProvider<TRecord extends Record<string, unknown> = Record<
 /**
  * Create a SQL search provider.
  */
-export function createSqlSearchProvider<TRecord extends Record<string, unknown> = Record<string, unknown>>(
+export function createSqlSearchProvider<
+  TRecord extends Record<string, unknown> = Record<string, unknown>,
+>(
   db: RawDb,
   repos: Repositories,
   tableConfig: Partial<SqlTableConfig> & { table: string },

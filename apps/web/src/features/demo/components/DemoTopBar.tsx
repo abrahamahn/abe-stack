@@ -59,7 +59,12 @@ export function DemoTopBar({
             }}
             aria-label="Toggle side peek demo"
           >
-            {isOpen ? '✕ Close Peek' : '⬚ Side Peek'}
+            <span className="flex items-center gap-2">
+              <span aria-hidden className="text-base">
+                {isOpen ? '✕' : '🪟'}
+              </span>
+              <span>{isOpen ? 'Close Peek' : 'Side Peek'}</span>
+            </span>
           </Button>
         </div>
         <div className="flex-1 flex-center">

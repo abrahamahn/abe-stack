@@ -126,7 +126,7 @@ describe('Pagination Middleware', () => {
     const reply = createMockReply();
 
     expect(() =>
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply)
+      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply),
     ).toThrow(PaginationError);
 
     try {
@@ -147,7 +147,7 @@ describe('Pagination Middleware', () => {
     const reply = createMockReply();
 
     expect(() =>
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply)
+      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply),
     ).toThrow(PaginationError);
 
     try {
@@ -168,7 +168,7 @@ describe('Pagination Middleware', () => {
     const reply = createMockReply();
 
     expect(() =>
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply)
+      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply),
     ).toThrow(PaginationError);
 
     try {
@@ -189,7 +189,7 @@ describe('Pagination Middleware', () => {
     const reply = createMockReply();
 
     expect(() =>
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply)
+      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply),
     ).toThrow(PaginationError);
 
     try {
@@ -210,7 +210,7 @@ describe('Pagination Middleware', () => {
     const reply = createMockReply();
 
     expect(() =>
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply)
+      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply),
     ).toThrow(PaginationError);
 
     try {
@@ -253,7 +253,7 @@ describe('Pagination Middleware', () => {
     });
   });
 
-  it('should disable cursor pagination when ured', async () => {
+  it('should disable cursor pagination when configured', async () => {
     const middleware = createPaginationMiddleware({
       enableCursorPagination: false,
     });

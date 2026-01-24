@@ -226,3 +226,82 @@ export function decode(token: string): JwtPayload | null {
     return null;
   }
 }
+
+// ============================================================================
+// Convenience Functions with Aliases
+// ============================================================================
+
+/**
+ * Async wrapper for sign function (for compatibility with async interfaces)
+ */
+export function jwtSign(payload: object, secret: string, options?: SignOptions): string {
+  return sign(payload, secret, options);
+}
+
+/**
+ * Async wrapper for verify function (for compatibility with async interfaces)
+ */
+export function jwtVerify(token: string, secret: string): JwtPayload {
+  return verify(token, secret);
+}
+
+/**
+ * Alias for decode function
+ */
+export function jwtDecode(token: string): JwtPayload | null {
+  return decode(token);
+}
+
+/**
+ * Check if a token secret meets minimum requirements
+ */
+export function checkTokenSecret(secret: string): boolean {
+  if (!secret || typeof secret !== 'string' || secret.length === 0) {
+    return false;
+  }
+  // Additional validation could be added here
+  return true;
+}
+
+// ============================================================================
+// JWT Rotation Support
+// ============================================================================
+
+export interface JwtRotationConfig {
+  currentSecret: string;
+  previousSecret?: string;
+  algorithm?: 'HS256';
+}
+
+/**
+ * Sign a token using the current secret
+ */
+export function signWithRotation(payload: object, config: JwtRotationConfig): Promise<string> {
+  return Promise.resolve(jwtSign(payload, config.currentSecret));
+}
+
+/**
+ * Verify a token using either the current or previous secret
+ */
+export function verifyWithRotation(token: string, config: JwtRotationConfig): JwtPayload {
+  try {
+    // Try verifying with current secret first
+    return jwtVerify(token, config.currentSecret);
+  } catch (error) {
+    // If that fails and a previous secret is provided, try with that
+    if (config.previousSecret) {
+      return jwtVerify(token, config.previousSecret);
+    }
+    // If no previous secret or verification still fails, rethrow the error
+    throw error;
+  }
+}
+
+/**
+ * Create a rotation-aware verification handler
+ */
+export function createJwtRotationHandler(config: JwtRotationConfig) {
+  return (token: string): JwtPayload => {
+    return verifyWithRotation(token, config);
+  };
+}

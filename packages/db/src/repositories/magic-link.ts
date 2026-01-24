@@ -40,9 +40,7 @@ export function createMagicLinkTokenRepository(db: RawDb): MagicLinkTokenReposit
   return {
     async findById(id: string): Promise<MagicLinkToken | null> {
       const result = await db.queryOne<Record<string, unknown>>(
-        select(MAGIC_LINK_TOKENS_TABLE)
-          .where(eq('id', id))
-          .toSql()
+        select(MAGIC_LINK_TOKENS_TABLE).where(eq('id', id)).toSql(),
       );
       return result ? toCamelCase<MagicLinkToken>(result, MAGIC_LINK_TOKEN_COLUMNS) : null;
     },
@@ -50,12 +48,8 @@ export function createMagicLinkTokenRepository(db: RawDb): MagicLinkTokenReposit
     async findValidByTokenHash(tokenHash: string): Promise<MagicLinkToken | null> {
       const result = await db.queryOne<Record<string, unknown>>(
         select(MAGIC_LINK_TOKENS_TABLE)
-          .where(and(
-            eq('token_hash', tokenHash),
-            gt('expires_at', new Date()),
-            isNull('used_at')
-          ))
-          .toSql()
+          .where(and(eq('token_hash', tokenHash), gt('expires_at', new Date()), isNull('used_at')))
+          .toSql(),
       );
       return result ? toCamelCase<MagicLinkToken>(result, MAGIC_LINK_TOKEN_COLUMNS) : null;
     },
@@ -63,14 +57,10 @@ export function createMagicLinkTokenRepository(db: RawDb): MagicLinkTokenReposit
     async findValidByEmail(email: string): Promise<MagicLinkToken | null> {
       const result = await db.queryOne<Record<string, unknown>>(
         select(MAGIC_LINK_TOKENS_TABLE)
-          .where(and(
-            eq('email', email),
-            gt('expires_at', new Date()),
-            isNull('used_at')
-          ))
+          .where(and(eq('email', email), gt('expires_at', new Date()), isNull('used_at')))
           .orderBy('created_at', 'desc')
           .limit(1)
-          .toSql()
+          .toSql(),
       );
       return result ? toCamelCase<MagicLinkToken>(result, MAGIC_LINK_TOKEN_COLUMNS) : null;
     },
@@ -78,23 +68,20 @@ export function createMagicLinkTokenRepository(db: RawDb): MagicLinkTokenReposit
     async findRecentByEmail(email: string, since: Date): Promise<MagicLinkToken[]> {
       const results = await db.query<Record<string, unknown>>(
         select(MAGIC_LINK_TOKENS_TABLE)
-          .where(and(
-            eq('email', email),
-            gt('created_at', since)
-          ))
+          .where(and(eq('email', email), gt('created_at', since)))
           .orderBy('created_at', 'desc')
-          .toSql()
+          .toSql(),
       );
       return toCamelCaseArray<MagicLinkToken>(results, MAGIC_LINK_TOKEN_COLUMNS);
     },
 
     async create(token: NewMagicLinkToken): Promise<MagicLinkToken> {
-      const snakeData = toSnakeCase(token as unknown as Record<string, unknown>, MAGIC_LINK_TOKEN_COLUMNS);
+      const snakeData = toSnakeCase(
+        token as unknown as Record<string, unknown>,
+        MAGIC_LINK_TOKEN_COLUMNS,
+      );
       const result = await db.queryOne<Record<string, unknown>>(
-        insert(MAGIC_LINK_TOKENS_TABLE)
-          .values(snakeData)
-          .returningAll()
-          .toSql()
+        insert(MAGIC_LINK_TOKENS_TABLE).values(snakeData).returningAll().toSql(),
       );
       if (!result) {
         throw new Error('Failed to create magic link token');
@@ -104,26 +91,17 @@ export function createMagicLinkTokenRepository(db: RawDb): MagicLinkTokenReposit
 
     async markAsUsed(id: string): Promise<void> {
       await db.execute(
-        update(MAGIC_LINK_TOKENS_TABLE)
-          .set({ used_at: new Date() })
-          .where(eq('id', id))
-          .toSql()
+        update(MAGIC_LINK_TOKENS_TABLE).set({ used_at: new Date() }).where(eq('id', id)).toSql(),
       );
     },
 
     async deleteByEmail(email: string): Promise<number> {
-      return db.execute(
-        deleteFrom(MAGIC_LINK_TOKENS_TABLE)
-          .where(eq('email', email))
-          .toSql()
-      );
+      return db.execute(deleteFrom(MAGIC_LINK_TOKENS_TABLE).where(eq('email', email)).toSql());
     },
 
     async deleteExpired(): Promise<number> {
       return db.execute(
-        deleteFrom(MAGIC_LINK_TOKENS_TABLE)
-          .where(lt('expires_at', new Date()))
-          .toSql()
+        deleteFrom(MAGIC_LINK_TOKENS_TABLE).where(lt('expires_at', new Date())).toSql(),
       );
     },
 
@@ -133,7 +111,7 @@ export function createMagicLinkTokenRepository(db: RawDb): MagicLinkTokenReposit
           .columns()
           .column(raw('COUNT(*)'), 'count')
           .where(and(eq('email', email), gt('created_at', since)))
-          .toSql()
+          .toSql(),
       );
       return result ? parseInt(result.count, 10) : 0;
     },
@@ -144,7 +122,7 @@ export function createMagicLinkTokenRepository(db: RawDb): MagicLinkTokenReposit
           .columns()
           .column(raw('COUNT(*)'), 'count')
           .where(and(eq('ip_address', ipAddress), gt('created_at', since)))
-          .toSql()
+          .toSql(),
       );
       return result ? parseInt(result.count, 10) : 0;
     },

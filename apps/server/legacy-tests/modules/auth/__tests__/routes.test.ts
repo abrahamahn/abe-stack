@@ -60,7 +60,7 @@ function createMockContext(): AppContext {
       paymentMethods: {} as never,
       billingEvents: {} as never,
     },
-    : {
+    config: {
       auth: {
         jwt: { secret: 'test-secret-32-characters-long!!' },
         argon2: {},

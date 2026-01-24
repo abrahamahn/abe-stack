@@ -36,19 +36,10 @@ export {
   serializeToJSON,
   serializeToURLParams,
 } from './serialization';
-export type {
-  SerializationOptions,
-  SerializedFilter,
-  SerializedQuery,
-} from './serialization';
+export type { SerializationOptions, SerializedFilter, SerializedQuery } from './serialization';
 
 // Hooks
-export {
-  useDebounceSearch,
-  useInfiniteSearch,
-  useSearch,
-  useSearchParams,
-} from './hooks';
+export { useDebounceSearch, useInfiniteSearch, useSearch, useSearchParams } from './hooks';
 export type {
   CursorSearchFn,
   SearchFn,

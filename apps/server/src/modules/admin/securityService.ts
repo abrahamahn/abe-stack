@@ -148,11 +148,12 @@ export async function listSecurityEvents(
   options: PaginationOptions,
   filter: SecurityEventsFilter = {},
 ): Promise<SecurityEventsListResponse> {
-  const { page = 1, limit = 50, sortBy = 'createdAt', sortOrder = 'desc' } = options;
+  const { page, limit, sortBy, sortOrder } = options;
+  const effectiveSortBy = sortBy ?? 'createdAt';
   const offset = (page - 1) * limit;
 
   // Map camelCase sortBy to snake_case column
-  const sortColumn = sortBy === 'createdAt' ? 'created_at' : sortBy;
+  const sortColumn = effectiveSortBy === 'createdAt' ? 'created_at' : effectiveSortBy;
 
   // Build filter conditions
   const conditions = buildFilterConditions(filter);

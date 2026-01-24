@@ -7,7 +7,11 @@ export { loadBilling, validateBilling } from './billing';
 export { DEFAULT_SMTP_CONFIG, loadEmail, loadSmtpConfig } from './email';
 
 // notifications.ts
-export { DEFAULT_FCM_CONFIG, loadFcmConfig, validateFcmConfig } from './notifications';
+export {
+  DEFAULT_NOTIFICATION_CONFIG,
+  loadNotificationsConfig,
+  validateNotificationsConfig,
+} from './notifications';
 
 // search.ts
 export {

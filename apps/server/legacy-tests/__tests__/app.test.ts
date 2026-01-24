@@ -1,5 +1,5 @@
 // apps/server/src/__tests__/app.test.ts
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock infra module - class must be defined inside factory due to hoisting
 vi.mock('@infrastructure/index', () => {
@@ -109,10 +109,10 @@ vi.mock('@/server', () => ({
   listen: vi.fn(() => Promise.resolve()),
 }));
 
-import type { App } from '@';
+import type { App } from '@abe-stack/core';
 
 type ServiceContainerOptions = {
-  : App;
+  config: App;
   db?: { execute: ReturnType<typeof vi.fn>; healthCheck: ReturnType<typeof vi.fn> };
   repos?: Record<string, unknown>;
   email?: { send: ReturnType<typeof vi.fn> };
@@ -132,7 +132,7 @@ type ServiceContainerOptions = {
 // Mock services
 vi.mock('@/services/service-container', () => {
   class ServiceContainer {
-    : App;
+    config: App;
     db: { execute: ReturnType<typeof vi.fn>; healthCheck: ReturnType<typeof vi.fn> };
     repos: Record<string, unknown>;
     email: { send: ReturnType<typeof vi.fn> };
@@ -142,12 +142,16 @@ vi.mock('@/services/service-container', () => {
       delete: ReturnType<typeof vi.fn>;
     };
     pubsub: { setAdapter: ReturnType<typeof vi.fn> };
-    cache: { get: ReturnType<typeof vi.fn>; set: ReturnType<typeof vi.fn>; delete: ReturnType<typeof vi.fn> };
+    cache: {
+      get: ReturnType<typeof vi.fn>;
+      set: ReturnType<typeof vi.fn>;
+      delete: ReturnType<typeof vi.fn>;
+    };
     pgPubSub: null;
     initialize = vi.fn();
     cleanup = vi.fn(() => Promise.resolve());
     constructor(options: ServiceContainerOptions) {
-      this. = options.;
+      this.config = options.config;
       this.db = options.db ?? { execute: vi.fn(), healthCheck: vi.fn() };
       this.repos = options.repos ?? {};
       this.email = options.email ?? { send: vi.fn() };
@@ -163,7 +167,7 @@ vi.mock('@/services/service-container', () => {
       this.pgPubSub = null;
     }
     getContext = vi.fn((logger: unknown) => ({
-      : this.,
+      config: this.config,
       db: this.db,
       repos: this.repos,
       email: this.email,
@@ -176,11 +180,11 @@ vi.mock('@/services/service-container', () => {
 
   return {
     ServiceContainer,
-    createServiceContainer: vi.fn((: App) => new ServiceContainer({  })),
+    createServiceContainer: vi.fn((config: App) => new ServiceContainer({ config })),
   };
 });
 
-import { App, createApp } from '@/app';
+import { createApp } from '@/app';
 
 describe('App', () => {
   const mock: App = {
@@ -222,7 +226,7 @@ describe('App', () => {
       password: { minLength: 8, maxLength: 64, minZxcvbnScore: 2 },
       lockout: {
         maxAttempts: 10,
-        lockoutDurationMs: 1800000,
+        lockoutDconfigurationMs: 1800000,
         progressiveDelay: false,
         baseDelayMs: 0,
       },
@@ -274,17 +278,17 @@ describe('App', () => {
   });
 
   describe('constructor', () => {
-    it('should create an app instance with ', () => {
-      app = new App({ : mock });
-      expect(app.serviceContainer.).toBe(mock);
+    it('should create an app instance with config', () => {
+      app = new App({ config: mock });
+      expect(app.serviceContainer.config).toBe(mock);
     });
   });
 
   describe('createApp', () => {
-    it('should create an app with default uration', () => {
+    it('should create an app with default configuration', () => {
       app = createApp(mock);
       expect(app).toBeInstanceOf(App);
-      expect(app.serviceContainer.).toBe(mock);
+      expect(app.serviceContainer.config).toBe(mock);
     });
   });
 
@@ -312,7 +316,7 @@ describe('App', () => {
       await app.start();
 
       const context = app.context;
-      expect(context.).toBe(mock);
+      expect(context.config).toBe(mock);
       expect(context.db).toBeDefined();
       expect(context.email).toBeDefined();
       expect(context.storage).toBeDefined();

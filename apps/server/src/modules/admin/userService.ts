@@ -92,10 +92,7 @@ export async function listUsers(
 /**
  * Get a single user by ID
  */
-export async function getUserById(
-  userRepo: UserRepository,
-  userId: string,
-): Promise<AdminUser> {
+export async function getUserById(userRepo: UserRepository, userId: string): Promise<AdminUser> {
   const user = await userRepo.findById(userId);
   if (!user) {
     throw new UserNotFoundError(`User not found: ${userId}`);

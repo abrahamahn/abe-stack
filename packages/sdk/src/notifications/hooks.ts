@@ -454,7 +454,9 @@ export function usePushPermission(): PushPermissionState {
       }
     }, 1000);
 
-    return (): void => { clearInterval(interval); };
+    return (): void => {
+      clearInterval(interval);
+    };
   }, [isSupported, permission]);
 
   return {

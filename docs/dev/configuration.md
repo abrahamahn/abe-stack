@@ -90,7 +90,7 @@ apps/desktop → packages/core
 
 ```text
 tsconfig.json                    # Root: project references only
-config/ts/tsconfig.base.json     # Base config (strictest settings)
+.config/tsconfig.base.json     # Base config (strictest settings)
     ├── tsconfig.node.json       # Node.js apps (server, tools)
     ├── tsconfig.react.json      # React apps (web, desktop)
     └── tsconfig.eslint.json     # ESLint (no emit, all files)
@@ -122,7 +122,7 @@ The root `tsconfig.json` only defines project references for the monorepo:
 
 This enables `tsc --build` to compile all packages in dependency order.
 
-### Base Configuration (`config/ts/tsconfig.base.json`)
+### Base Configuration (`.config/tsconfig.base.json`)
 
 The base config defines the strictest settings inherited by all packages:
 
@@ -161,7 +161,7 @@ The base config defines the strictest settings inherited by all packages:
 }
 ```
 
-### Node.js Configuration (`config/ts/tsconfig.node.json`)
+### Node.js Configuration (`.config/tsconfig.node.json`)
 
 For server-side apps with Node.js module resolution:
 
@@ -176,7 +176,7 @@ For server-side apps with Node.js module resolution:
 }
 ```
 
-### React Configuration (`config/ts/tsconfig.react.json`)
+### React Configuration (`.config/tsconfig.react.json`)
 
 For frontend apps bundled with Vite (no emit, bundler handles compilation):
 
@@ -516,9 +516,9 @@ Tasks are re-run when:
 {
   "globalDependencies": [
     "tsconfig.json",
-    "config/.env/.env.development",
+    ".config/env/.config/env/.env.development",
     "config/.prettierrc",
-    "config/ts/*.json",
+    ".config/*.json",
     "eslint.config.ts"
   ]
 }
@@ -677,10 +677,10 @@ const serverConfigSchema = z.object({
 | Purpose                        | Location                             |
 | ------------------------------ | ------------------------------------ |
 | Root TypeScript config         | `tsconfig.json`                      |
-| Base TypeScript config         | `config/ts/tsconfig.base.json`       |
-| Node.js TypeScript config      | `config/ts/tsconfig.node.json`       |
-| React TypeScript config        | `config/ts/tsconfig.react.json`      |
-| ESLint TypeScript config       | `config/ts/tsconfig.eslint.json`     |
+| Base TypeScript config         | `.config/tsconfig.base.json`         |
+| Node.js TypeScript config      | `.config/tsconfig.node.json`         |
+| React TypeScript config        | `.config/tsconfig.react.json`        |
+| ESLint TypeScript config       | `.config/tsconfig.eslint.json`       |
 | Server build config            | `apps/server/tsconfig.build.json`    |
 | Path aliases (Vite/Vitest)     | `config/aliases.ts`                  |
 | Vite web config                | `config/vite.web.config.ts`          |
@@ -695,7 +695,7 @@ const serverConfigSchema = z.object({
 | Turbo config                   | `turbo.json`                         |
 | pnpm workspace                 | `pnpm-workspace.yaml`                |
 | pnpm config                    | `.pnpmrc`                            |
-| Environment files              | `config/.env/.env.*`                 |
+| Environment files              | `.env.*`                             |
 | Docker compose                 | `config/docker/docker-compose.yml`   |
 | Dockerfile                     | `config/docker/Dockerfile`           |
 | Server domain configs          | `apps/server/src/config/*.config.ts` |

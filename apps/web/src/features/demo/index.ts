@@ -1,5 +1,5 @@
 // apps/web/src/features/demo/index.ts
-export { DemoPage } from './pages';
+export { DemoPage, SidePeekDemoPage } from './pages';
 export type { ComponentCategory, ComponentDemo, ComponentVariant, DemoPaneConfig } from './types';
 export {
   componentCatalog,

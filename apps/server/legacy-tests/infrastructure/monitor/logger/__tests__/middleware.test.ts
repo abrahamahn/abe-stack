@@ -195,7 +195,7 @@ describe('registerLoggingMiddleware', () => {
         method: 'GET',
         path: '/api/test',
         statusCode: 201,
-        duration: 123,
+        dconfiguration: 123,
       });
     });
   });

@@ -140,7 +140,9 @@ export class InsertBuilder implements QueryBuilder {
 
     // INSERT INTO table (columns)
     const columnList = this._columns.map(escapeIdentifier).join(', ');
-    parts.push(`INSERT INTO ${formatTable(this._table)} (${columnList})`);
+    const tableFragment = formatTable(this._table);
+    parts.push(`INSERT INTO ${tableFragment.text} (${columnList})`);
+    allValues.push(...tableFragment.values); // Push table subquery params first
 
     // VALUES
     const rowPlaceholders: string[] = [];

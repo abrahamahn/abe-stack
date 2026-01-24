@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { SmtpEmailService } from '../smtpEmailService';
 
 import type { EmailOptions } from '../types';
-import type { Email } from '@';
+import type { Email } from '@abe-stack/core';
 
 // Mock the SmtpClient
 const mockSend = vi.fn().mockResolvedValue({ success: true, messageId: 'smtp-123' });
@@ -12,7 +12,7 @@ const mockSend = vi.fn().mockResolvedValue({ success: true, messageId: 'smtp-123
 vi.mock('../smtp.js', () => ({
   SmtpClient: class MockSmtpClient {
     send = mockSend;
-    constructor(public : unknown) {}
+    constructor(public config: unknown) {}
   },
 }));
 
@@ -52,7 +52,7 @@ const testEmailOptions: EmailOptions = {
 
 describe('SmtpEmailService', () => {
   let smtpService: SmtpEmailService;
-  const  = createMockEmail();
+  const config = createMockEmail();
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -65,7 +65,7 @@ describe('SmtpEmailService', () => {
       await smtpService.send(testEmailOptions);
 
       expect(mockSend).toHaveBeenCalledWith({
-        from: `"${.from.name}" <${.from.address}>`,
+        from: `"${config.from.name}" <${config.from.address}>`,
         to: testEmailOptions.to,
         subject: testEmailOptions.subject,
         text: testEmailOptions.text,
@@ -135,7 +135,7 @@ describe('SmtpEmailService', () => {
     });
   });
 
-  describe('uration', () => {
+  describe('configuration', () => {
     test('should use smtp  from constructor', () => {
       const custom = createMockEmail();
       custom.smtp.host = 'custom-smtp.example.com';
@@ -144,16 +144,16 @@ describe('SmtpEmailService', () => {
       const service = new SmtpEmailService(custom);
 
       // Service should be created without errors
-      expect(service).toBeDefined();
+      expect(config).toBeDefined();
     });
 
-    test('should use secure connection when ured', () => {
+    test('should use secure connection when configured', () => {
       const secure = createMockEmail();
       secure.smtp.secure = true;
 
       const service = new SmtpEmailService(secure);
 
-      expect(service).toBeDefined();
+      expect(config).toBeDefined();
     });
   });
 });

@@ -76,7 +76,7 @@ describe('QueueServer', () => {
         store,
         handlers,
         log: mockLog as never,
-        : { pollIntervalMs: 10000 }, // Long interval to avoid actual polling
+        config: { pollIntervalMs: 10000 }, // Long interval to avoid actual polling
       });
 
       server.start();
@@ -94,7 +94,7 @@ describe('QueueServer', () => {
         store,
         handlers,
         log: mockLog as never,
-        : { pollIntervalMs: 10000 },
+        config: { pollIntervalMs: 10000 },
       });
 
       server.start();
@@ -134,8 +134,8 @@ describe('QueueServer', () => {
     });
   });
 
-  describe('uration', () => {
-    test('should use default uration when not provided', () => {
+  describe('configuration', () => {
+    test('should use default configuration when not provided', () => {
       const server = createQueueServer({ store, handlers });
 
       // We can't directly test private , but we can verify behavior
@@ -146,7 +146,7 @@ describe('QueueServer', () => {
       const server = createQueueServer({
         store,
         handlers,
-        : {
+        config: {
           pollIntervalMs: 5000,
           defaultMaxAttempts: 5,
           backoffBaseMs: 2000,
@@ -231,7 +231,7 @@ describe('QueueServer', () => {
         store,
         handlers: testHandlers,
         log: mockLog as never,
-        : { defaultMaxAttempts: 3 },
+        config: { defaultMaxAttempts: 3 },
       });
 
       await server.enqueue('failing-task', {});
@@ -263,7 +263,7 @@ describe('QueueServer', () => {
         store,
         handlers: testHandlers,
         log: mockLog as never,
-        : { defaultMaxAttempts: 1 },
+        config: { defaultMaxAttempts: 1 },
       });
 
       await server.enqueue('failing-task', {}, { maxAttempts: 1 });
@@ -294,7 +294,7 @@ describe('QueueServer', () => {
       const server = createQueueServer({
         store,
         handlers: testHandlers,
-        : { defaultMaxAttempts: 1 },
+        config: { defaultMaxAttempts: 1 },
       });
 
       await server.enqueue('string-error-task', {}, { maxAttempts: 1 });
@@ -461,7 +461,7 @@ describe('MemoryQueueStore', () => {
         taskId: 'task-1',
         success: true,
         completedAt: now,
-        durationMs: 100,
+        dconfigurationMs: 100,
       });
 
       // Task should no longer be pending
@@ -475,7 +475,7 @@ describe('MemoryQueueStore', () => {
           taskId: 'non-existent',
           success: true,
           completedAt: new Date().toISOString(),
-          durationMs: 0,
+          dconfigurationMs: 0,
         }),
       ).resolves.toBeUndefined();
     });
@@ -598,7 +598,7 @@ describe('MemoryQueueStore', () => {
         taskId: 'task-1',
         success: true,
         completedAt: past.toISOString(),
-        durationMs: 100,
+        dconfigurationMs: 100,
       });
 
       const cleared = await store.clearCompleted(now.toISOString());
@@ -625,7 +625,7 @@ describe('MemoryQueueStore', () => {
         taskId: 'task-1',
         success: true,
         completedAt: now.toISOString(),
-        durationMs: 100,
+        dconfigurationMs: 100,
       });
 
       const cleared = await store.clearCompleted(past.toISOString());

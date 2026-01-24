@@ -528,7 +528,8 @@ export function usePaymentMethods(clientConfig: BillingClientConfig): PaymentMet
         await client.setDefaultPaymentMethod(paymentMethodId);
         await fetchPaymentMethods();
       } catch (err) {
-        const error = err instanceof Error ? err : new Error('Failed to set default payment method');
+        const error =
+          err instanceof Error ? err : new Error('Failed to set default payment method');
         setError(error);
         throw error;
       } finally {

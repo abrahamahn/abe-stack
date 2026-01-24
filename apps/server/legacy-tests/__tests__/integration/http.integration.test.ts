@@ -1,4 +1,4 @@
-// apps/server/src/__tests__/integration/http.integration.test.ts
+// apps/server/legacy-tests/__tests__/integration/http.integration.test.ts
 /**
  * HTTP Infrastructure Integration Tests
  *
@@ -80,7 +80,7 @@ describe('Security Headers', () => {
     });
 
     expect(response.headers['strict-transport-security']).toBe(
-      'max-age=31536000; includeSubDomains'
+      'max-age=31536000; includeSubDomains',
     );
   });
 
@@ -145,10 +145,10 @@ describe('Production Security Headers', () => {
 });
 
 // ============================================================================
-// CORS uration Tests
+// CORS configuration Tests
 // ============================================================================
 
-describe('CORS uration', () => {
+describe('CORS configuration', () => {
   let server: FastifyInstance;
 
   beforeEach(async () => {
@@ -538,7 +538,7 @@ describe('Correlation ID Middleware', () => {
     // Check response header
     expect(response.headers['x-correlation-id']).toBeDefined();
     expect(response.headers['x-correlation-id']).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
     );
 
     // Check body
@@ -603,7 +603,7 @@ describe('Correlation ID with Trust Proxy', () => {
     // Should generate a new valid ID instead of using the malicious one
     expect(response.headers['x-correlation-id']).not.toBe(maliciousId);
     expect(response.headers['x-correlation-id']).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
     );
   });
 });
@@ -640,7 +640,7 @@ describe('Correlation ID without Trust Proxy', () => {
     // Should generate new ID, not use provided one
     expect(response.headers['x-correlation-id']).not.toBe(providedId);
     expect(response.headers['x-correlation-id']).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
     );
   });
 });

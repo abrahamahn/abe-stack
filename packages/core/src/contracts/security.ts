@@ -357,8 +357,8 @@ export interface SecurityEventsExportResponse {
   contentType: string;
 }
 
-export const securityEventsExportResponseSchema: Schema<SecurityEventsExportResponse> = createSchema(
-  (data: unknown) => {
+export const securityEventsExportResponseSchema: Schema<SecurityEventsExportResponse> =
+  createSchema((data: unknown) => {
     if (!data || typeof data !== 'object') {
       throw new Error('Invalid export response');
     }
@@ -379,8 +379,7 @@ export const securityEventsExportResponseSchema: Schema<SecurityEventsExportResp
       filename: obj.filename,
       contentType: obj.contentType,
     };
-  },
-);
+  });
 
 // ============================================================================
 // Security Contract

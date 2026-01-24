@@ -150,9 +150,7 @@ describe('updateUserWithVersion', () => {
     ).rejects.toThrow(OptimisticLockError);
 
     // Reset mock to test again with error details
-    mockDb.queryOne
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({ version: 5 });
+    mockDb.queryOne.mockResolvedValueOnce(null).mockResolvedValueOnce({ version: 5 });
 
     try {
       await updateUserWithVersion(asMockDb(mockDb), 'user-123', { name: 'Updated Name' }, 1);

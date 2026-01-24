@@ -5,7 +5,19 @@
  * Data access layer for billing subscriptions table.
  */
 
-import { and, eq, gt, inArray, lt, or, select, insert, update, deleteFrom, raw } from '../../builder';
+import {
+  and,
+  eq,
+  gt,
+  inArray,
+  lt,
+  or,
+  select,
+  insert,
+  update,
+  deleteFrom,
+  raw,
+} from '../../builder';
 import {
   type NewSubscription,
   type Subscription,
@@ -124,10 +136,7 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
       const result = await db.queryOne<Record<string, unknown>>(
         select(SUBSCRIPTIONS_TABLE)
           .where(
-            and(
-              eq('provider', provider),
-              eq('provider_subscription_id', providerSubscriptionId),
-            ),
+            and(eq('provider', provider), eq('provider_subscription_id', providerSubscriptionId)),
           )
           .toSql(),
       );
@@ -137,12 +146,7 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
     async findActiveByUserId(userId: string): Promise<Subscription | null> {
       const result = await db.queryOne<Record<string, unknown>>(
         select(SUBSCRIPTIONS_TABLE)
-          .where(
-            and(
-              eq('user_id', userId),
-              inArray('status', ACTIVE_STATUSES),
-            ),
-          )
+          .where(and(eq('user_id', userId), inArray('status', ACTIVE_STATUSES)))
           .orderBy('created_at', 'desc')
           .limit(1)
           .toSql(),
@@ -241,9 +245,7 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
 
       const lastItem = items[items.length - 1];
       const nextCursor =
-        hasMore && lastItem
-          ? `${lastItem.createdAt.toISOString()}_${lastItem.id}`
-          : null;
+        hasMore && lastItem ? `${lastItem.createdAt.toISOString()}_${lastItem.id}` : null;
 
       return { items, nextCursor };
     },
@@ -276,11 +278,7 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
         snakeData.metadata = JSON.stringify(data.metadata);
       }
       const result = await db.queryOne<Record<string, unknown>>(
-        update(SUBSCRIPTIONS_TABLE)
-          .set(snakeData)
-          .where(eq('id', id))
-          .returningAll()
-          .toSql(),
+        update(SUBSCRIPTIONS_TABLE).set(snakeData).where(eq('id', id)).returningAll().toSql(),
       );
       return result ? transformSubscription(result) : null;
     },
@@ -301,10 +299,7 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
         update(SUBSCRIPTIONS_TABLE)
           .set(snakeData)
           .where(
-            and(
-              eq('provider', provider),
-              eq('provider_subscription_id', providerSubscriptionId),
-            ),
+            and(eq('provider', provider), eq('provider_subscription_id', providerSubscriptionId)),
           )
           .returningAll()
           .toSql(),
@@ -313,9 +308,7 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
     },
 
     async delete(id: string): Promise<boolean> {
-      const count = await db.execute(
-        deleteFrom(SUBSCRIPTIONS_TABLE).where(eq('id', id)).toSql(),
-      );
+      const count = await db.execute(deleteFrom(SUBSCRIPTIONS_TABLE).where(eq('id', id)).toSql());
       return count > 0;
     },
 
@@ -354,12 +347,7 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
         select(SUBSCRIPTIONS_TABLE)
           .columns()
           .column(raw('COUNT(*)'), 'count')
-          .where(
-            and(
-              eq('plan_id', planId),
-              inArray('status', ACTIVE_STATUSES),
-            ),
-          )
+          .where(and(eq('plan_id', planId), inArray('status', ACTIVE_STATUSES)))
           .toSql(),
       );
       return result ? Number(result.count) : 0;

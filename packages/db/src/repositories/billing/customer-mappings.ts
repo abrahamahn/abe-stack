@@ -80,12 +80,7 @@ export function createCustomerMappingRepository(db: RawDb): CustomerMappingRepos
     ): Promise<CustomerMapping | null> {
       const result = await db.queryOne<Record<string, unknown>>(
         select(CUSTOMER_MAPPINGS_TABLE)
-          .where(
-            and(
-              eq('provider', provider),
-              eq('provider_customer_id', providerCustomerId),
-            ),
-          )
+          .where(and(eq('provider', provider), eq('provider_customer_id', providerCustomerId)))
           .toSql(),
       );
       return result ? toCamelCase<CustomerMapping>(result, CUSTOMER_MAPPING_COLUMNS) : null;
@@ -98,9 +93,7 @@ export function createCustomerMappingRepository(db: RawDb): CustomerMappingRepos
           .orderBy('created_at', 'asc')
           .toSql(),
       );
-      return results.map((row) =>
-        toCamelCase<CustomerMapping>(row, CUSTOMER_MAPPING_COLUMNS),
-      );
+      return results.map((row) => toCamelCase<CustomerMapping>(row, CUSTOMER_MAPPING_COLUMNS));
     },
 
     async create(mapping: NewCustomerMapping): Promise<CustomerMapping> {
@@ -125,9 +118,7 @@ export function createCustomerMappingRepository(db: RawDb): CustomerMappingRepos
     },
 
     async deleteByUserId(userId: string): Promise<number> {
-      return db.execute(
-        deleteFrom(CUSTOMER_MAPPINGS_TABLE).where(eq('user_id', userId)).toSql(),
-      );
+      return db.execute(deleteFrom(CUSTOMER_MAPPINGS_TABLE).where(eq('user_id', userId)).toSql());
     },
 
     async getOrCreate(

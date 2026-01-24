@@ -2,12 +2,15 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import reactHooks from 'eslint-plugin-react-hooks';
+import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
+
+// Type assertion to handle plugin compatibility
+const reactHooksPluginTyped: any = reactHooksPlugin;
 
 import type { Linter } from 'eslint';
 
-const tsconfigRootDir: string = path.dirname(fileURLToPath(import.meta.url));
+const tsconfigRootDir: string = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
 const require = createRequire(import.meta.url);
 let jsConfigs: { recommended?: { languageOptions?: { parser?: Linter.Parser } } } = {};
 try {
@@ -46,9 +49,11 @@ export default [
       '**/*.d.ts',
       '**/*.d.ts.map',
       'apps/server/legacy-tests/**',
+      'eslint.config.ts',
+      'vitest.config.ts',
     ],
   },
-  jsConfigs.recommended ?? {},
+  jsConfigs.recommended ? { ...jsConfigs.recommended } : {},
 
   // Configuration for ALL TypeScript files with strict type checking
   ...tseslint.configs.strictTypeChecked.map((config) => ({
@@ -59,7 +64,7 @@ export default [
       parserOptions: {
         ...(config.languageOptions?.parserOptions as Record<string, unknown> | undefined),
         tsconfigRootDir,
-        project: ['./config/ts/tsconfig.eslint.json'],
+        project: ['./.config/tsconfig.eslint.json'],
       },
     },
   })),
@@ -207,7 +212,7 @@ export default [
   {
     files: ['**/*.{tsx,jsx}'],
     plugins: {
-      'react-hooks': reactHooks,
+      'react-hooks': reactHooksPluginTyped,
     },
     rules: {
       'react-hooks/rules-of-hooks': 'error',
@@ -257,10 +262,20 @@ export default [
     },
   },
   {
+    files: ['tooling/**/*.{ts,tsx,cts,mts}'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+  {
     // Allow console in logger implementations and console-based dev services
     files: [
       '**/logger/console.ts',
       '**/consoleEmailService.ts',
+      'packages/core/src/env/load.ts',
+      'packages/core/src/env/schema.ts',
+      'packages/core/src/env/test-priority.ts',
+      'packages/core/src/env/check.ts',
     ],
     rules: {
       'no-console': 'off',
@@ -387,7 +402,7 @@ export default [
     ],
     languageOptions: {
       parserOptions: {
-        project: ['./config/ts/tsconfig.eslint.json'],
+        project: ['./.config/tsconfig.eslint.json'],
         tsconfigRootDir,
       },
     },

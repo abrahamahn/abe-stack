@@ -10,6 +10,19 @@ import { randomBytes } from 'node:crypto';
 
 import { validatePassword, type UserRole } from '@abe-stack/core';
 import {
+  and,
+  EMAIL_VERIFICATION_TOKENS_TABLE,
+  eq,
+  insert,
+  isNull,
+  PASSWORD_RESET_TOKENS_TABLE,
+  toCamelCase,
+  update,
+  USER_COLUMNS,
+  USERS_TABLE,
+  type User,
+} from '@abe-stack/db';
+import {
   applyProgressiveDelay,
   emailTemplates,
   getAccountLockoutStatus,
@@ -23,19 +36,6 @@ import {
   type Repositories,
 } from '@infrastructure';
 import {
-  and,
-  eq,
-  isNull,
-  insert,
-  update,
-  toCamelCase,
-  USERS_TABLE,
-  USER_COLUMNS,
-  PASSWORD_RESET_TOKENS_TABLE,
-  EMAIL_VERIFICATION_TOKENS_TABLE,
-  type User,
-} from '@abe-stack/db';
-import {
   AccountLockedError,
   EmailNotVerifiedError,
   EmailSendError,
@@ -44,9 +44,9 @@ import {
   WeakPasswordError,
 } from '@shared';
 
-import { createAuthResponse } from './utils';
 import {
   createAccessToken,
+  createAuthResponse,
   createRefreshTokenFamily,
   hashPassword,
   needsRehash,
@@ -54,7 +54,7 @@ import {
   verifyPasswordSafe,
 } from './utils';
 
-import type { AuthConfig } from '@config';
+import type { AuthConfig } from '@/config';
 
 // ============================================================================
 // Types

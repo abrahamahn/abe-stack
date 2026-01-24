@@ -45,10 +45,10 @@ All services (postgres, api, web) are on an internal Docker network. Only Caddy 
 
 ```bash
 # Create production environment file
-cp config/.env/.env.example config/.env/.env.production
+cp .env.example .config/env/.config/env/.env.production
 
 # Edit with your values
-nano config/.env/.env.production
+nano .config/env/.config/env/.env.production
 ```
 
 Required variables for TLS:
@@ -70,7 +70,7 @@ SESSION_SECRET=$(openssl rand -base64 32)
 
 ```bash
 docker compose -f config/docker/docker-compose.prod.yml \
-  --env-file config/.env/.env.production up -d
+  --env-file .config/env/.config/env/.env.production up -d
 ```
 
 ### 3. Verify Deployment

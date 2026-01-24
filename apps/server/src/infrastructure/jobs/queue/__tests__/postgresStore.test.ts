@@ -241,7 +241,7 @@ describe('PostgresQueueStore', () => {
       expect(mockDb.execute).toHaveBeenCalledTimes(1);
       expect(mockDb.execute).toHaveBeenCalledWith(
         expect.objectContaining({
-          text: expect.stringContaining('status = \'pending\''),
+          text: expect.stringContaining("status = 'pending'"),
         }),
       );
     });
@@ -259,7 +259,7 @@ describe('PostgresQueueStore', () => {
       expect(mockDb.execute).toHaveBeenCalledTimes(1);
       expect(mockDb.execute).toHaveBeenCalledWith(
         expect.objectContaining({
-          text: expect.stringContaining('status = \'failed\''),
+          text: expect.stringContaining("status = 'failed'"),
         }),
       );
     });

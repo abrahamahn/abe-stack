@@ -43,7 +43,7 @@ export function getRequiredPathParam(req: RequestWithCookies, paramName: string)
 export function getValidatedPathParam(
   req: RequestWithCookies,
   paramName: string,
-  validator?: (value: string) => boolean
+  validator?: (value: string) => boolean,
 ): string | undefined {
   const param = getPathParam(req, paramName);
   if (param && validator && !validator(param)) {

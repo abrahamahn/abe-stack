@@ -144,9 +144,7 @@ describe('Window Functions', () => {
 
     it('firstValue generates FIRST_VALUE()', () => {
       const expr = firstValue('price').over(partitionBy('product_id').orderBy('date'));
-      expect(expr.text).toBe(
-        'FIRST_VALUE(price) OVER (PARTITION BY product_id ORDER BY date ASC)',
-      );
+      expect(expr.text).toBe('FIRST_VALUE(price) OVER (PARTITION BY product_id ORDER BY date ASC)');
     });
 
     it('lastValue generates LAST_VALUE()', () => {

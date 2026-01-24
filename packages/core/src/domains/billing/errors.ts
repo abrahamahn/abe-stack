@@ -128,9 +128,7 @@ export class CannotDowngradeInTrialError extends BadRequestError {
 export class PaymentMethodNotFoundError extends NotFoundError {
   constructor(paymentMethodId?: string) {
     super(
-      paymentMethodId
-        ? `Payment method not found: ${paymentMethodId}`
-        : 'Payment method not found',
+      paymentMethodId ? `Payment method not found: ${paymentMethodId}` : 'Payment method not found',
       'PAYMENT_METHOD_NOT_FOUND',
     );
   }
@@ -195,7 +193,11 @@ export class BillingProviderError extends AppError {
  */
 export class ProviderNotConfiguredError extends AppError {
   constructor(provider: string) {
-    super(`Billing provider not configured: ${provider}`, HTTP_STATUS.INTERNAL_SERVER_ERROR, 'PROVIDER_NOT_CONFIGURED');
+    super(
+      `Billing provider not configured: ${provider}`,
+      HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      'PROVIDER_NOT_CONFIGURED',
+    );
   }
 }
 

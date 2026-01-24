@@ -4,42 +4,42 @@ Agent instructions are stored in `~/.claude/settings.json`.
 
 ## Available Agents
 
-| Agent | Command | Purpose |
-|-------|---------|---------|
-| `feature-builder` | `/agent feature-builder` | Build features with vertical slicing |
-| `bug-fixer` | `/agent bug-fixer` | TDD bug fixes |
-| `refactorer` | `/agent refactorer` | Safe migrations (strangler fig) |
-| `test-writer` | `/agent test-writer` | Comprehensive test coverage |
-| `code-explorer` | `/agent code-explorer` | Navigate/understand code |
-| `performance-optimizer` | `/agent performance-optimizer` | Fix bottlenecks |
-| `security-reviewer` | `/agent security-reviewer` | Security audits |
-| `docs-updater` | `/agent docs-updater` | Update documentation |
-| `api-builder` | `/agent api-builder` | Build API endpoints |
-| `ui-builder` | `/agent ui-builder` | Build React components |
-| `lint-fixer` | `/agent lint-fixer` | Fix lint/type/test errors |
+| Agent                   | Command                        | Purpose                              |
+| ----------------------- | ------------------------------ | ------------------------------------ |
+| `feature-builder`       | `/agent feature-builder`       | Build features with vertical slicing |
+| `bug-fixer`             | `/agent bug-fixer`             | TDD bug fixes                        |
+| `refactorer`            | `/agent refactorer`            | Safe migrations (strangler fig)      |
+| `test-writer`           | `/agent test-writer`           | Comprehensive test coverage          |
+| `code-explorer`         | `/agent code-explorer`         | Navigate/understand code             |
+| `performance-optimizer` | `/agent performance-optimizer` | Fix bottlenecks                      |
+| `security-reviewer`     | `/agent security-reviewer`     | Security audits                      |
+| `docs-updater`          | `/agent docs-updater`          | Update documentation                 |
+| `api-builder`           | `/agent api-builder`           | Build API endpoints                  |
+| `ui-builder`            | `/agent ui-builder`            | Build React components               |
+| `lint-fixer`            | `/agent lint-fixer`            | Fix lint/type/test errors            |
 
 ## Agent Selection
 
-| Use Case | Agent |
-|----------|-------|
-| New feature | `feature-builder` |
-| Bug fix | `bug-fixer` |
-| Refactoring | `refactorer` |
-| Test coverage | `test-writer` |
-| Code understanding | `code-explorer` |
-| Performance | `performance-optimizer` |
-| Security review | `security-reviewer` |
-| API development | `api-builder` |
-| UI components | `ui-builder` |
-| Fix errors | `lint-fixer` |
+| Use Case           | Agent                   |
+| ------------------ | ----------------------- |
+| New feature        | `feature-builder`       |
+| Bug fix            | `bug-fixer`             |
+| Refactoring        | `refactorer`            |
+| Test coverage      | `test-writer`           |
+| Code understanding | `code-explorer`         |
+| Performance        | `performance-optimizer` |
+| Security review    | `security-reviewer`     |
+| API development    | `api-builder`           |
+| UI components      | `ui-builder`            |
+| Fix errors         | `lint-fixer`            |
 
 ## Strategy Quick Reference
 
-| Work Type | Strategy |
-|-----------|----------|
-| New feature | Vertical slicing: types → DB → routes → hooks → UI |
-| Bug fix | TDD: repro test → fix → regression |
-| Refactor | Strangler fig: add new → migrate → remove old |
+| Work Type   | Strategy                                                    |
+| ----------- | ----------------------------------------------------------- |
+| New feature | Vertical slicing: types → DB → routes → hooks → UI          |
+| Bug fix     | TDD: repro test → fix → regression                          |
+| Refactor    | Strangler fig: add new → migrate → remove old               |
 | Cross-layer | Dependency-first: types → validation → DB → routes → client |
 
 ## Checkpoint Rules
@@ -65,18 +65,21 @@ pnpm build
 ## Example Prompts
 
 **Code exploration:**
+
 ```
 Where is authentication implemented?
 Trace the flow from login to dashboard.
 ```
 
 **Feature building:**
+
 ```
 Add a new /api/projects endpoint with CRUD operations.
 Create a UserProfile component with edit functionality.
 ```
 
 **Bug fixing:**
+
 ```
 Fix the login error when email has uppercase letters.
 The checkout fails when cart is empty - add validation.

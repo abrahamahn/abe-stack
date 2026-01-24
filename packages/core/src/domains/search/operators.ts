@@ -225,11 +225,7 @@ function evalEndsWith(
  * SQL LIKE pattern matching.
  * Supports % (any characters) and _ (single character) wildcards.
  */
-function evalLike(
-  fieldValue: unknown,
-  filterValue: FilterValue,
-  caseSensitive: boolean,
-): boolean {
+function evalLike(fieldValue: unknown, filterValue: FilterValue, caseSensitive: boolean): boolean {
   if (typeof fieldValue !== 'string' || typeof filterValue !== 'string') {
     return false;
   }
@@ -275,11 +271,7 @@ function evalIn(fieldValue: unknown, filterValue: FilterValue, caseSensitive: bo
 /**
  * Not in array operator.
  */
-function evalNotIn(
-  fieldValue: unknown,
-  filterValue: FilterValue,
-  caseSensitive: boolean,
-): boolean {
+function evalNotIn(fieldValue: unknown, filterValue: FilterValue, caseSensitive: boolean): boolean {
   return !evalIn(fieldValue, filterValue, caseSensitive);
 }
 

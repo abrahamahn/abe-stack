@@ -13,6 +13,7 @@ export interface User {
   id: string;
   email: string;
   name: string | null;
+  avatarUrl: string | null;
   role: UserRole;
   createdAt: Date;
 }
@@ -27,10 +28,7 @@ export interface ListUsersResult {
  * Get a user by their ID
  * Returns null if user not found
  */
-export async function getUserById(
-  userRepo: UserRepository,
-  userId: string,
-): Promise<User | null> {
+export async function getUserById(userRepo: UserRepository, userId: string): Promise<User | null> {
   const user = await userRepo.findById(userId);
 
   if (!user) {
@@ -41,6 +39,7 @@ export async function getUserById(
     id: user.id,
     email: user.email,
     name: user.name,
+    avatarUrl: user.avatarUrl ?? null,
     role: user.role,
     createdAt: user.createdAt,
   };
@@ -67,6 +66,7 @@ export async function listUsers(
       id: user.id,
       email: user.email,
       name: user.name,
+      avatarUrl: user.avatarUrl ?? null,
       role: user.role,
       createdAt: user.createdAt,
     })),

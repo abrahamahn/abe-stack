@@ -83,7 +83,9 @@ export function getContrastCssVariables(
     return null;
   }
 
-  return resolvedTheme === 'dark' ? { ...highContrastDarkOverrides } : { ...highContrastLightOverrides };
+  return resolvedTheme === 'dark'
+    ? { ...highContrastDarkOverrides }
+    : { ...highContrastLightOverrides };
 }
 
 /** Default contrast mode setting */

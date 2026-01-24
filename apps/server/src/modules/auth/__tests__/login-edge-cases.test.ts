@@ -22,7 +22,7 @@ import {
 } from '@infrastructure';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import type { AuthConfig } from '@config';
+import type { AuthConfig } from '@/config/index.js';
 import type { RawDb } from '@abe-stack/db';
 import type { Logger, Repositories } from '@infrastructure';
 
@@ -424,6 +424,7 @@ describe('Parallel Login Requests', () => {
       id: 'user-123',
       email,
       name: 'Test User',
+      avatarUrl: null,
       role: 'user' as const,
       passwordHash: 'stored-hash',
       emailVerified: true,
@@ -474,6 +475,7 @@ describe('Parallel Login Requests', () => {
       id: 'user-123',
       email,
       name: 'Test User',
+      avatarUrl: null,
       role: 'user' as const,
       passwordHash: 'stored-hash',
       emailVerified: true,
@@ -507,7 +509,9 @@ describe('Parallel Login Requests', () => {
     const failedPromises = Array(5)
       .fill(null)
       .map(() =>
-        authenticateUser(db, repos, TEST_CONFIG, email, 'wrong-password', logger).catch((e: unknown) => e),
+        authenticateUser(db, repos, TEST_CONFIG, email, 'wrong-password', logger).catch(
+          (e: unknown) => e,
+        ),
       );
 
     const results = await Promise.all(failedPromises);
@@ -554,6 +558,7 @@ describe('Password Change Session Invalidation', () => {
       id: 'user-123',
       email,
       name: 'Test User',
+      avatarUrl: null,
       role: 'user' as const,
       passwordHash: 'new-hashed-password',
       emailVerified: true,
@@ -591,6 +596,7 @@ describe('Password Change Session Invalidation', () => {
       id: 'user-123',
       email,
       name: 'Test User',
+      avatarUrl: null,
       role: 'user' as const,
       passwordHash: 'new-hashed-password', // Password was changed
       emailVerified: true,
@@ -611,9 +617,9 @@ describe('Password Change Session Invalidation', () => {
     const { verifyPasswordSafe } = await import('../utils/index.js');
     vi.mocked(verifyPasswordSafe).mockResolvedValue(false); // Old password doesn't match new hash
 
-    await expect(authenticateUser(db, repos, TEST_CONFIG, email, oldPassword, logger)).rejects.toThrow(
-      InvalidCredentialsError,
-    );
+    await expect(
+      authenticateUser(db, repos, TEST_CONFIG, email, oldPassword, logger),
+    ).rejects.toThrow(InvalidCredentialsError);
   });
 });
 
@@ -636,9 +642,9 @@ describe('Login During Active Lockout', () => {
     vi.mocked(isAccountLocked).mockResolvedValue(true);
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
 
-    await expect(authenticateUser(db, repos, TEST_CONFIG, email, correctPassword, logger)).rejects.toThrow(
-      AccountLockedError,
-    );
+    await expect(
+      authenticateUser(db, repos, TEST_CONFIG, email, correctPassword, logger),
+    ).rejects.toThrow(AccountLockedError);
 
     // Password verification should NOT be called when account is locked
     const { verifyPasswordSafe } = await import('../utils/index.js');
@@ -745,6 +751,7 @@ describe('Progressive Delay Timing', () => {
       id: 'user-123',
       email,
       name: 'Test User',
+      avatarUrl: null,
       role: 'user' as const,
       passwordHash: 'stored-hash',
       emailVerified: true,
@@ -783,6 +790,7 @@ describe('Progressive Delay Timing', () => {
       id: 'user-123',
       email,
       name: 'Test User',
+      avatarUrl: null,
       role: 'user' as const,
       passwordHash: 'stored-hash',
       emailVerified: true,
@@ -809,9 +817,7 @@ describe('Progressive Delay Timing', () => {
     await authenticateUser(db, repos, TEST_CONFIG, email, 'password', logger);
 
     expect(delayApplied).toHaveBeenCalled();
-    expect(applyProgressiveDelay).toHaveBeenCalledBefore(
-      vi.mocked(verifyPasswordSafe),
-    );
+    expect(applyProgressiveDelay).toHaveBeenCalledBefore(vi.mocked(verifyPasswordSafe));
   });
 });
 
@@ -834,6 +840,7 @@ describe('Lockout Counter Reset', () => {
       id: 'user-123',
       email,
       name: 'Test User',
+      avatarUrl: null,
       role: 'user' as const,
       passwordHash: 'stored-hash',
       emailVerified: true,
@@ -874,6 +881,7 @@ describe('Lockout Counter Reset', () => {
       id: 'user-123',
       email,
       name: 'Test User',
+      avatarUrl: null,
       role: 'user' as const,
       passwordHash: 'stored-hash',
       emailVerified: true,
@@ -956,12 +964,15 @@ describe('Email Verification Auto-Login', () => {
       usedAt: null,
       createdAt: new Date(),
     };
-    vi.mocked(repos.emailVerificationTokens.findValidByTokenHash).mockResolvedValue(mockTokenRecord);
+    vi.mocked(repos.emailVerificationTokens.findValidByTokenHash).mockResolvedValue(
+      mockTokenRecord,
+    );
 
     const mockUser = {
       id: 'user-id',
       email: 'test@example.com',
       name: 'Test',
+      avatarUrl: null,
       role: 'user' as const,
       passwordHash: 'hash',
       emailVerified: true,
@@ -1016,9 +1027,9 @@ describe('Timing-Safe Operations', () => {
     const { verifyPasswordSafe } = await import('../utils/index.js');
     vi.mocked(verifyPasswordSafe).mockResolvedValue(false);
 
-    await expect(authenticateUser(db, repos, TEST_CONFIG, email, 'any-password', logger)).rejects.toThrow(
-      InvalidCredentialsError,
-    );
+    await expect(
+      authenticateUser(db, repos, TEST_CONFIG, email, 'any-password', logger),
+    ).rejects.toThrow(InvalidCredentialsError);
 
     // verifyPasswordSafe should be called even for non-existent users (timing attack prevention)
     expect(verifyPasswordSafe).toHaveBeenCalledWith('any-password', undefined);
@@ -1061,6 +1072,7 @@ describe('Timing-Safe Operations', () => {
       emailVerifiedAt: new Date(),
       role: 'user',
       name: 'Test',
+      avatarUrl: null,
       lockedUntil: null,
       failedLoginAttempts: 0,
       createdAt: new Date(),

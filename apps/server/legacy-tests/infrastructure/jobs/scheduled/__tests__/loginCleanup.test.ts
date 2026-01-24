@@ -76,7 +76,7 @@ describe('loginCleanup', () => {
 
       expect(result.deletedCount).toBe(150);
       expect(result.dryRun).toBe(false);
-      expect(result.durationMs).toBeGreaterThanOrEqual(0);
+      expect(result.dconfigurationMs).toBeGreaterThanOrEqual(0);
 
       // Verify cutoff date is 90 days ago (normalized to start of local day)
       const expectedCutoff = new Date();

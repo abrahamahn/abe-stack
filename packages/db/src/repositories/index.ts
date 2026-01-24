@@ -34,16 +34,10 @@ export {
 } from './auth';
 
 // Magic Link Repository
-export {
-  createMagicLinkTokenRepository,
-  type MagicLinkTokenRepository,
-} from './magic-link';
+export { createMagicLinkTokenRepository, type MagicLinkTokenRepository } from './magic-link';
 
 // OAuth Repository
-export {
-  createOAuthConnectionRepository,
-  type OAuthConnectionRepository,
-} from './oauth';
+export { createOAuthConnectionRepository, type OAuthConnectionRepository } from './oauth';
 
 // Push Repository
 export {

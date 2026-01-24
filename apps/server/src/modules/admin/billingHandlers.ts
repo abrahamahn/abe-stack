@@ -200,7 +200,7 @@ export async function handleAdminSyncPlanToStripe(
 ): Promise<
   { status: 200; body: SyncStripeResponse } | { status: 400 | 404 | 500; body: { message: string } }
 > {
-  if (!ctx.config.billing || !ctx.config.billing.enabled) {
+  if (!ctx.config.billing.enabled) {
     return { status: 500, body: { message: 'Billing is not enabled' } };
   }
 

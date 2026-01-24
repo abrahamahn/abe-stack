@@ -1,9 +1,9 @@
 // apps/server/src/config/services/search.ts
-import { getBool, getInt } from '@abe-stack/core/config/utils';
 import type {
   ElasticsearchProviderConfig,
   SqlSearchProviderConfig,
 } from '@abe-stack/core/contracts/config';
+import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
 
 /**
  * Loads Elasticsearch configuration from environment variables.
@@ -14,9 +14,7 @@ import type {
  * @param env - Environment variable map
  * @returns Elasticsearch provider configuration
  */
-export function loadElasticsearchConfig(
-  env: Record<string, string | undefined>
-): ElasticsearchProviderConfig {
+export function loadElasticsearchConfig(env: FullEnv): ElasticsearchProviderConfig {
   return {
     node: env.ELASTICSEARCH_NODE || 'http://localhost:9200',
     index: env.ELASTICSEARCH_INDEX || 'default',
@@ -28,10 +26,8 @@ export function loadElasticsearchConfig(
           }
         : undefined,
     apiKey: env.ELASTICSEARCH_API_KEY,
-    tls: env.ELASTICSEARCH_TLS ? getBool(env.ELASTICSEARCH_TLS) : undefined,
-    requestTimeout: env.ELASTICSEARCH_REQUEST_TIMEOUT_MS
-      ? getInt(env.ELASTICSEARCH_REQUEST_TIMEOUT_MS, 30000)
-      : undefined,
+    tls: env.ELASTICSEARCH_TLS ? env.ELASTICSEARCH_TLS === 'true' : undefined,
+    requestTimeout: env.ELASTICSEARCH_REQUEST_TIMEOUT_MS ?? undefined,
   };
 }
 
@@ -44,20 +40,14 @@ export function loadElasticsearchConfig(
  * @param env - Environment variable map
  * @returns SQL search provider configuration
  */
-export function loadSqlSearchConfig(
-  env: Record<string, string | undefined>
-): SqlSearchProviderConfig {
+export function loadSqlSearchConfig(env: FullEnv): SqlSearchProviderConfig {
   return {
-    defaultPageSize: getInt(env.SQL_SEARCH_DEFAULT_PAGE_SIZE, 50),
-    maxPageSize: getInt(env.SQL_SEARCH_MAX_PAGE_SIZE, 1000),
-    maxQueryDepth: env.SQL_SEARCH_MAX_QUERY_DEPTH
-      ? getInt(env.SQL_SEARCH_MAX_QUERY_DEPTH, 5)
-      : undefined,
-    maxConditions: env.SQL_SEARCH_MAX_CONDITIONS
-      ? getInt(env.SQL_SEARCH_MAX_CONDITIONS, 20)
-      : undefined,
-    logging: env.SQL_SEARCH_LOGGING ? getBool(env.SQL_SEARCH_LOGGING) : undefined,
-    timeout: env.SQL_SEARCH_TIMEOUT_MS ? getInt(env.SQL_SEARCH_TIMEOUT_MS, 5000) : undefined,
+    defaultPageSize: env.SQL_SEARCH_DEFAULT_PAGE_SIZE ?? 50,
+    maxPageSize: env.SQL_SEARCH_MAX_PAGE_SIZE ?? 1000,
+    maxQueryDepth: env.SQL_SEARCH_MAX_QUERY_DEPTH ?? undefined,
+    maxConditions: env.SQL_SEARCH_MAX_CONDITIONS ?? undefined,
+    logging: env.SQL_SEARCH_LOGGING ? env.SQL_SEARCH_LOGGING === 'true' : undefined,
+    timeout: env.SQL_SEARCH_TIMEOUT_MS ?? undefined,
   };
 }
 

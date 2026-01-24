@@ -5,6 +5,7 @@ This guide explains how to configure OAuth providers (Google, GitHub, Apple) for
 ## Overview
 
 ABE Stack supports OAuth 2.0 authentication with:
+
 - **Google** - Email/profile via OpenID Connect
 - **GitHub** - Email via user API
 - **Apple** - Sign in with Apple (requires additional configuration)
@@ -69,6 +70,7 @@ https://your-domain.com/api/auth/oauth/{provider}/callback
 ```
 
 Examples:
+
 - `https://myapp.com/api/auth/oauth/google/callback`
 - `https://myapp.com/api/auth/oauth/github/callback`
 - `https://myapp.com/api/auth/oauth/apple/callback`
@@ -112,6 +114,7 @@ The callback URL is constructed as: `{APP_BASE_URL}{PROVIDER_CALLBACK_URL}`
 7. Copy Client ID and Client Secret
 
 **Common pitfalls:**
+
 - Forgetting to add the redirect URI
 - Mismatch between registered URI and actual callback (trailing slashes matter!)
 - Not enabling the Google+ API (required for profile info)
@@ -127,6 +130,7 @@ The callback URL is constructed as: `{APP_BASE_URL}{PROVIDER_CALLBACK_URL}`
 4. Copy Client ID and generate Client Secret
 
 **Common pitfalls:**
+
 - GitHub OAuth apps are per-user/organization
 - Callback URL must match exactly (no trailing slash)
 - User email must be public OR you need `user:email` scope (we request this automatically)
@@ -151,6 +155,7 @@ Apple Sign In requires an Apple Developer account ($99/year).
    - Key ID is your `APPLE_KEY_ID`
 
 **Common pitfalls:**
+
 - Private key can only be downloaded once - store it securely
 - Services ID (not App ID) is the client ID
 - Must use HTTPS even for development
@@ -158,6 +163,7 @@ Apple Sign In requires an Apple Developer account ($99/year).
 - Private key must be in PEM format with proper line breaks
 
 **Base64 encoding the private key:**
+
 ```bash
 # Convert the .p8 file to base64 (avoids multiline issues in .env)
 base64 -i AuthKey_XXXXXXXXXX.p8 | tr -d '\n'
@@ -170,6 +176,7 @@ base64 -i AuthKey_XXXXXXXXXX.p8 | tr -d '\n'
 The callback URL registered with the provider doesn't match what your app is sending.
 
 **Check:**
+
 1. Exact URL match (including trailing slashes)
 2. Protocol match (http vs https)
 3. Port number (localhost:3000 vs localhost)
@@ -180,6 +187,7 @@ The callback URL registered with the provider doesn't match what your app is sen
 The CSRF protection state parameter was lost or tampered with.
 
 **Causes:**
+
 - User took too long (state expires after 10 minutes)
 - Multiple browser tabs interfering
 - Cookie issues (SameSite, Secure flags)
@@ -187,6 +195,7 @@ The CSRF protection state parameter was lost or tampered with.
 ### "Email not verified" errors
 
 Some providers don't verify emails. ABE Stack inherits the verification status from the provider:
+
 - Google: Always verified
 - GitHub: Check if email is verified via API
 - Apple: Always verified
@@ -194,11 +203,13 @@ Some providers don't verify emails. ABE Stack inherits the verification status f
 ### Apple-specific issues
 
 **"Invalid client_secret"**
+
 - Private key format is wrong (must be PEM)
 - Key ID doesn't match the key
 - Team ID is incorrect
 
 **"invalid_request"**
+
 - Services ID not properly configured
 - Return URL not registered
 

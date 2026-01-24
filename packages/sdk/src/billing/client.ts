@@ -171,7 +171,9 @@ export function createBillingClient(config: BillingClientConfig): BillingClient 
       });
     },
 
-    async cancelSubscription(data?: CancelSubscriptionRequest): Promise<SubscriptionActionResponse> {
+    async cancelSubscription(
+      data?: CancelSubscriptionRequest,
+    ): Promise<SubscriptionActionResponse> {
       return request<SubscriptionActionResponse>('/billing/subscription/cancel', {
         method: 'POST',
         body: JSON.stringify(data || {}),
@@ -216,13 +218,10 @@ export function createBillingClient(config: BillingClientConfig): BillingClient 
     },
 
     async setDefaultPaymentMethod(paymentMethodId: string): Promise<PaymentMethodResponse> {
-      return request<PaymentMethodResponse>(
-        `/billing/payment-methods/${paymentMethodId}/default`,
-        {
-          method: 'POST',
-          body: JSON.stringify({}),
-        },
-      );
+      return request<PaymentMethodResponse>(`/billing/payment-methods/${paymentMethodId}/default`, {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
     },
 
     async createSetupIntent(): Promise<SetupIntentResponse> {

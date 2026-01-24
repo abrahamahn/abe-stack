@@ -11,18 +11,39 @@
 
 /**
  * Convert camelCase to snake_case
- * @example camelToSnake('createdAt') => 'created_at'
+ * @example camelToSnake('camelCase') => 'camel_case'
+ * @example camelToSnake('PascalCase') => 'pascal_case'
+ * @example camelToSnake('XMLHttpRequest') => 'xml_http_request'
  */
 export function camelToSnake(str: string): string {
-  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+  // If string is already all uppercase (like 'SCREAMING_SNAKE_CASE'),
+  // just lower case it to avoid inserting underscores between every letter
+  if (str === str.toUpperCase()) {
+    return str.toLowerCase();
+  }
+
+  return str
+    .replace(/([a-z\d_])([A-Z])/g, '$1_$2') // Handle camel/Pascal boundaries (camelCase -> camel_case)
+    .replace(/([A-Z]+)(?=[A-Z][a-z])/g, '$1_') // Handle acronyms (XMLHttp -> XML_Http)
+    .replace(/-/g, '_') // Handle kebab-case -> kebab_case
+    .toLowerCase();
 }
 
 /**
- * Convert snake_case to camelCase
+ * Convert snake_case or kebab-case to camelCase
  * @example snakeToCamel('created_at') => 'createdAt'
+ * @example snakeToCamel('kebab-case') => 'kebabCase'
+ * @example snakeToCamel('PascalCase') => 'firstName'
+ * @example snakeToCamel('SCREAMING_SNAKE') => 'screamingSnake'
  */
 export function snakeToCamel(str: string): string {
-  return str.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase());
+  // If the string is all uppercase (like SCREAMING_SNAKE_CASE), convert to lowercase first
+  // but allow for mixed case like PascalCase (which has lowercase letters)
+  const input = str === str.toUpperCase() ? str.toLowerCase() : str;
+
+  return input
+    .replace(/[-_]+(.)?/g, (_, c: string | undefined) => (c ? c.toUpperCase() : '')) // Handle separators
+    .replace(/^(.)/, (c: string) => c.toLowerCase()); // Ensure first char is lowercase
 }
 
 /**
@@ -32,17 +53,24 @@ export type ColumnMapping = Record<string, string>;
 
 /**
  * Convert a TypeScript object to SQL column/value pairs
- * @param data Object with camelCase keys
- * @param mapping Column mapping (camelCase -> snake_case)
- * @returns Object with snake_case keys
+ * ALSO supports converting a single string if input is string
  */
+export function toSnakeCase(data: string, mapping?: ColumnMapping): string;
 export function toSnakeCase(
   data: Record<string, unknown>,
-  mapping: ColumnMapping,
-): Record<string, unknown> {
+  mapping?: ColumnMapping,
+): Record<string, unknown>;
+export function toSnakeCase(
+  data: string | Record<string, unknown>,
+  mapping?: ColumnMapping,
+): string | Record<string, unknown> {
+  if (typeof data === 'string') {
+    return camelToSnake(data);
+  }
+
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(data)) {
-    const columnName = mapping[key] ?? camelToSnake(key);
+    const columnName = mapping?.[key] ?? camelToSnake(key);
     result[columnName] = value;
   }
   return result;
@@ -50,15 +78,24 @@ export function toSnakeCase(
 
 /**
  * Convert a SQL record to TypeScript object
- * @param record Object with snake_case keys
- * @param mapping Column mapping (camelCase -> snake_case)
- * @returns Object with camelCase keys
+ * ALSO supports converting a single string if input is string
  */
-export function toCamelCase<T>(record: Record<string, unknown>, mapping: ColumnMapping): T {
+export function toCamelCase(record: string, mapping?: ColumnMapping): string;
+export function toCamelCase<T>(record: Record<string, unknown>, mapping?: ColumnMapping): T;
+export function toCamelCase<T>(
+  record: string | Record<string, unknown>,
+  mapping?: ColumnMapping,
+): string | T {
+  if (typeof record === 'string') {
+    return snakeToCamel(record);
+  }
+
   // Create reverse mapping (snake_case -> camelCase)
   const reverseMapping: Record<string, string> = {};
-  for (const [camel, snake] of Object.entries(mapping)) {
-    reverseMapping[snake] = camel;
+  if (mapping) {
+    for (const [camel, snake] of Object.entries(mapping)) {
+      reverseMapping[snake] = camel;
+    }
   }
 
   const result: Record<string, unknown> = {};
@@ -72,8 +109,81 @@ export function toCamelCase<T>(record: Record<string, unknown>, mapping: ColumnM
 /**
  * Convert an array of SQL records to TypeScript objects
  */
-export function toCamelCaseArray<T>(records: Record<string, unknown>[], mapping: ColumnMapping): T[] {
+export function toCamelCaseArray<T>(
+  records: Record<string, unknown>[],
+  mapping?: ColumnMapping,
+): T[] {
   return records.map((r) => toCamelCase<T>(r, mapping));
+}
+
+/**
+ * Recursively key-map an object using a converter function
+ */
+function mapKeys(
+  obj: unknown,
+  mapper: (key: string) => string,
+  seen = new WeakMap<object, unknown>(),
+): unknown {
+  if (!obj || typeof obj !== 'object') {
+    return obj;
+  }
+
+  // Handle Dates, RegExps, buffers
+  if (
+    obj instanceof Date ||
+    obj instanceof RegExp ||
+    (typeof Buffer !== 'undefined' && Buffer.isBuffer(obj))
+  ) {
+    return obj;
+  }
+
+  // Circular reference check
+  if (seen.has(obj)) {
+    return seen.get(obj);
+  }
+
+  if (Array.isArray(obj)) {
+    const result: unknown[] = [];
+    seen.set(obj, result);
+    obj.forEach((v) => result.push(mapKeys(v, mapper, seen)));
+    return result;
+  }
+
+  // Handle plain objects
+  const result: Record<string | symbol, unknown> = {};
+  seen.set(obj, result);
+
+  // Use simple for-in loop for maximum compatibility
+  // Cast to any to iterate
+  const o = obj as Record<string, unknown>;
+  for (const key in o) {
+    if (Object.prototype.hasOwnProperty.call(o, key)) {
+      const newKey = mapper(key);
+      result[newKey] = mapKeys(o[key], mapper, seen);
+    }
+  }
+
+  // Handle symbols
+  const symKeys = Object.getOwnPropertySymbols(o);
+  for (const sym of symKeys) {
+    result[sym] = (o as Record<symbol, unknown>)[sym];
+  }
+
+  return result;
+}
+
+/**
+ * Recursively convert object keys to snake_case
+ */
+export function snakeifyKeys<T = unknown>(obj: unknown): T {
+  return mapKeys(obj, camelToSnake) as T;
+}
+
+/**
+ * Recursively convert object keys to camelCase
+ */
+export function camelizeKeys<T = unknown>(obj: unknown): T {
+  return mapKeys(obj, snakeToCamel) as T;
 }
 
 // ============================================================================

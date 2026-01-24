@@ -59,7 +59,9 @@ export function useSessions(): UseSessionsResult {
     isLoading: query.status === 'pending',
     isError: query.status === 'error',
     error: query.error,
-    refetch: (): void => { void query.refetch(); },
+    refetch: (): void => {
+      void query.refetch();
+    },
   };
 }
 
@@ -143,7 +145,9 @@ export function useRevokeAllSessions(
   });
 
   return {
-    revokeAllSessions: (): void => { mutation.mutate(); },
+    revokeAllSessions: (): void => {
+      mutation.mutate();
+    },
     isLoading: mutation.status === 'pending',
     isSuccess: mutation.status === 'success',
     isError: mutation.status === 'error',

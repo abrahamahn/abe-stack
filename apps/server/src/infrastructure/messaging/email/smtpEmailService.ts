@@ -7,7 +7,7 @@
 
 import { SmtpClient } from './smtp';
 
-import type { EmailConfig } from '@config';
+import type { EmailConfig } from '@/config';
 import type { EmailOptions, EmailResult, EmailService } from '@email/types';
 
 export class SmtpEmailService implements EmailService {

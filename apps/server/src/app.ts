@@ -12,13 +12,15 @@
  * - Single entry point for the application
  */
 
-import { buildConnectionString, type AppConfig } from '@config/index';
+import { buildConnectionString, type AppConfig } from '@/config/index';
+import type { CacheService } from '@/services/cache-service';
+import { createCacheService } from '@/services/cache-service';
+import type { PostgresPubSub } from '@infrastructure/index';
 import {
   createDbClient,
   createEmailService,
   createPostgresPubSub,
   createStorage,
-  getDetailedHealth,
   getRepositoryContext,
   logStartupSummary,
   registerWebSocket,
@@ -26,16 +28,11 @@ import {
   SchemaValidationError,
   SubscriptionManager,
   type DbClient,
-  type DetailedHealthResponse,
   type EmailService,
-  type LiveResponse,
-  type PostgresPubSub,
-  type ReadyResponse,
   type Repositories,
-  type RoutesResponse,
   type StorageProvider,
+  type SubscriptionKey,
 } from '@infrastructure/index';
-import { CacheService, createCacheService } from '@/services/cache-service';
 import { registerRoutes } from '@modules/index';
 import { type AppContext, type IServiceContainer } from '@shared/index';
 
@@ -113,18 +110,20 @@ export class App implements IServiceContainer {
     if (pubsubConnString && this.config.env !== 'test') {
       this._pgPubSub = createPostgresPubSub({
         connectionString: pubsubConnString,
-        onMessage: (key, version) => {
-          this.pubsub.publishLocal(key, version);
+        onMessage: (key: string, version: number): void => {
+          this.pubsub.publishLocal(key as SubscriptionKey, version);
         },
-        onError: (err) => {
+        onError: (err: Error) => {
           // Use server logger if available, otherwise fallback to console
           if (this._server) {
-            this.log.error({ err }, 'PostgresPubSub error');
+            this._server.log.error({ err }, 'PostgresPubSub error');
           } else {
-            // PostgresPubSub error logged via server logger when available
+            // eslint-disable-next-line no-console
+            console.error('PostgresPubSub error:', err);
           }
         },
       });
+
       this.pubsub.setAdapter(this._pgPubSub);
     }
   }
@@ -165,9 +164,6 @@ export class App implements IServiceContainer {
     // Register WebSocket support
     registerWebSocket(this._server, this.context);
 
-    // Register health endpoints
-    this.registerHealthEndpoints();
-
     // Start listening
     await listen(this._server, this.config);
 
@@ -177,51 +173,6 @@ export class App implements IServiceContainer {
       host: this.config.server.host,
       port: this.config.server.port,
       routeCount,
-    });
-  }
-
-  /**
-   * Register health check endpoints
-   */
-  private registerHealthEndpoints(): void {
-    if (!this._server) return;
-
-    // Detailed health check
-    this._server.get<{ Reply: DetailedHealthResponse }>(
-      '/health/detailed',
-      {},
-      async (): Promise<DetailedHealthResponse> => {
-        return getDetailedHealth(this.context);
-      },
-    );
-
-    // Route tree view
-    this._server.get<{ Reply: RoutesResponse }>('/health/routes', {}, (): RoutesResponse => {
-      const routes = this._server?.printRoutes({ commonPrefix: false }) ?? '';
-      return {
-        routes,
-        timestamp: new Date().toISOString(),
-      };
-    });
-
-    // Readiness probe (503 if DB is down)
-    this._server.get<{ Reply: ReadyResponse }>(
-      '/health/ready',
-      {},
-      async (_request, reply): Promise<ReadyResponse> => {
-        try {
-          await this.db.healthCheck();
-          return { status: 'ready', timestamp: new Date().toISOString() };
-        } catch {
-          void reply.status(503);
-          return { status: 'not_ready', timestamp: new Date().toISOString() };
-        }
-      },
-    );
-
-    // Liveness probe (always 200)
-    this._server.get<{ Reply: LiveResponse }>('/health/live', {}, (): LiveResponse => {
-      return { status: 'alive', uptime: Math.round(process.uptime()) };
     });
   }
 
@@ -409,8 +360,12 @@ export function createTestApp(
       maxBackoffMs: 30000,
     },
     notifications: {
-      credentials: '',
-      projectId: '',
+      enabled: false,
+      provider: 'fcm',
+      config: {
+        credentials: '',
+        projectId: '',
+      },
     },
     search: {
       provider: 'sql',
@@ -418,6 +373,11 @@ export function createTestApp(
         defaultPageSize: 20,
         maxPageSize: 100,
       },
+    },
+    packageManager: {
+      provider: 'pnpm',
+      strictPeerDeps: true,
+      frozenLockfile: true,
     },
     ...configOverrides,
   };

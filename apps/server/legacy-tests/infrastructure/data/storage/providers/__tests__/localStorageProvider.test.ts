@@ -116,7 +116,7 @@ describe('LocalStorageProvider', () => {
   });
 
   describe('getSignedUrl', () => {
-    it('should return a file:// URL when no publicBaseUrl is configured', async () => {
+    it('should return a file:// URL when no publicBaseUrl is configconfigured', async () => {
       const provider = new LocalStorageProvider(baseConfig);
 
       const url = await provider.getSignedUrl('path/to/file.txt');
@@ -124,7 +124,7 @@ describe('LocalStorageProvider', () => {
       expect(url).toBe('file:///tmp/uploads/path/to/file.txt');
     });
 
-    it('should return a public URL when publicBaseUrl is configured', async () => {
+    it('should return a public URL when publicBaseUrl is configconfigured', async () => {
       const configWithPublicUrl: LocalStorageConfig = {
         ...baseConfig,
         publicBaseUrl: 'https://cdn.example.com/files',

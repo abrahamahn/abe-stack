@@ -187,7 +187,10 @@ export function isCacheTimeoutError(error: unknown): error is CacheTimeoutError 
 /**
  * Convert any error to a CacheError.
  */
-export function toCacheError(error: unknown, defaultMessage = 'Cache operation failed'): CacheError {
+export function toCacheError(
+  error: unknown,
+  defaultMessage = 'Cache operation failed',
+): CacheError {
   if (isCacheError(error)) {
     return error;
   }

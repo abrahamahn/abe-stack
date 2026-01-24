@@ -42,7 +42,7 @@ function mapStripeStatus(stripeStatus: Stripe.Subscription.Status): Subscription
     trialing: 'trialing',
     unpaid: 'unpaid',
   };
-  return statusMap[stripeStatus] || 'incomplete';
+  return statusMap[stripeStatus];
 }
 
 /**
@@ -217,7 +217,7 @@ export class StripeProvider implements PaymentProviderInterface {
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : null,
       trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
-      metadata: (subscription.metadata as Record<string, string>) || {},
+      metadata: subscription.metadata as Record<string, string>,
     };
   }
 
@@ -248,12 +248,13 @@ export class StripeProvider implements PaymentProviderInterface {
 
     // Get default payment method
     const customer = await this.stripe.customers.retrieve(customerId);
-    const defaultPaymentMethodId =
-      customer.deleted !== true && customer.invoice_settings?.default_payment_method
-        ? typeof customer.invoice_settings.default_payment_method === 'string'
-          ? customer.invoice_settings.default_payment_method
-          : customer.invoice_settings.default_payment_method.id
-        : null;
+    const defaultPaymentMethod =
+      customer.deleted !== true ? customer.invoice_settings.default_payment_method : null;
+    const defaultPaymentMethodId = defaultPaymentMethod
+      ? typeof defaultPaymentMethod === 'string'
+        ? defaultPaymentMethod
+        : defaultPaymentMethod.id
+      : null;
 
     return paymentMethods.data.map((pm) => ({
       id: pm.id,
@@ -319,7 +320,7 @@ export class StripeProvider implements PaymentProviderInterface {
         currency: invoice.currency,
         periodStart: new Date(invoice.period_start * 1000),
         periodEnd: new Date(invoice.period_end * 1000),
-        paidAt: invoice.status_transitions?.paid_at
+        paidAt: invoice.status_transitions.paid_at
           ? new Date(invoice.status_transitions.paid_at * 1000)
           : null,
         invoicePdfUrl: invoice.invoice_pdf || null,
@@ -383,11 +384,7 @@ export class StripeProvider implements PaymentProviderInterface {
   }
 
   parseWebhookEvent(payload: Buffer, signature: string): NormalizedWebhookEvent {
-    const event = this.stripe.webhooks.constructEvent(
-      payload,
-      signature,
-      this.webhookSecret,
-    );
+    const event = this.stripe.webhooks.constructEvent(payload, signature, this.webhookSecret);
 
     const normalizedType = mapStripeEventType(event.type);
 
@@ -433,12 +430,10 @@ export class StripeProvider implements PaymentProviderInterface {
       }
       case 'charge.dispute.created': {
         const dispute = event.data.object as unknown as Stripe.Dispute;
-        const disputeCharge = dispute.charge;
-        if (typeof disputeCharge === 'object' && disputeCharge?.customer) {
-          customerId =
-            typeof disputeCharge.customer === 'string'
-              ? disputeCharge.customer
-              : disputeCharge.customer.id;
+        const disputeCharge = dispute.charge as Stripe.Charge;
+        const chargeCustomer = disputeCharge.customer;
+        if (chargeCustomer) {
+          customerId = typeof chargeCustomer === 'string' ? chargeCustomer : chargeCustomer.id;
         }
         break;
       }

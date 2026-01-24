@@ -5,7 +5,7 @@ import { ConsoleEmailService } from '../consoleEmailService';
 import { createEmailService } from '../factory';
 import { SmtpEmailService } from '../smtpEmailService';
 
-import type { EmailConfig } from '@config';
+import type { EmailConfig } from '@/config';
 
 // Mock the SmtpClient to prevent actual SMTP connections
 vi.mock('../smtp.js', () => ({

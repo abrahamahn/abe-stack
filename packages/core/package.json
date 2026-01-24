@@ -81,6 +81,18 @@
       "types": "./src/contracts/config/index.ts",
       "default": "./dist/contracts/config/index.js"
     },
+    "./contracts/config/notification-schema": {
+      "types": "./src/contracts/config/notification-schema.ts",
+      "default": "./dist/contracts/config/notification-schema.js"
+    },
+    "./contracts/config/environment": {
+      "types": "./src/contracts/config/environment.ts",
+      "default": "./dist/contracts/config/environment.js"
+    },
+    "./contracts/config/environment-schema": {
+      "types": "./src/contracts/config/environment-schema.ts",
+      "default": "./dist/contracts/config/environment-schema.js"
+    },
     "./crypto": {
       "types": "./src/infrastructure/crypto/index.ts",
       "default": "./dist/infrastructure/crypto/index.js"
@@ -104,6 +116,10 @@
     "./env": {
       "types": "./src/env.ts",
       "default": "./dist/env.js"
+    },
+    "./pubsub": {
+      "types": "./src/infrastructure/pubsub/index.ts",
+      "default": "./dist/infrastructure/pubsub/index.js"
     }
   },
   "scripts": {
@@ -132,5 +148,9 @@
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "dependencies": {
+    "postgres": "^3.4.8",
+    "zod": "^4.3.6"
+  }
 }

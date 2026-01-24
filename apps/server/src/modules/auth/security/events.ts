@@ -266,15 +266,9 @@ export async function getSecurityEventMetrics(
       .toSql(),
   );
 
-  const tokenReuseCount = events.filter(
-    (e) => e.event_type === 'token_reuse_detected',
-  ).length;
-  const accountLockedCount = events.filter(
-    (e) => e.event_type === 'account_locked',
-  ).length;
-  const criticalEventCount = events.filter(
-    (e) => e.severity === 'critical',
-  ).length;
+  const tokenReuseCount = events.filter((e) => e.event_type === 'token_reuse_detected').length;
+  const accountLockedCount = events.filter((e) => e.event_type === 'account_locked').length;
+  const criticalEventCount = events.filter((e) => e.severity === 'critical').length;
 
   return {
     tokenReuseCount,

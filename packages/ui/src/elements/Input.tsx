@@ -55,7 +55,10 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>((props, ref) =>
   return (
     <div className="input-field">
       {label ? (
-        <label htmlFor={inputId} className={`input-label ${hideLabel ? 'visually-hidden' : ''}`.trim()}>
+        <label
+          htmlFor={inputId}
+          className={`input-label ${hideLabel ? 'visually-hidden' : ''}`.trim()}
+        >
           {label}
         </label>
       ) : null}

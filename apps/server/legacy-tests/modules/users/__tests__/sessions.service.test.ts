@@ -87,13 +87,16 @@ describe('Sessions Service', () => {
 
       await revokeSession(mockRepos, 'user-123', 'family-1');
 
-      expect(mockRefreshTokenFamilies.revoke).toHaveBeenCalledWith('family-1', 'User revoked session');
+      expect(mockRefreshTokenFamilies.revoke).toHaveBeenCalledWith(
+        'family-1',
+        'User revoked session',
+      );
     });
 
     test('should throw error when trying to revoke current session', async () => {
-      await expect(
-        revokeSession(mockRepos, 'user-123', 'family-1', 'family-1'),
-      ).rejects.toThrow('Cannot revoke current session');
+      await expect(revokeSession(mockRepos, 'user-123', 'family-1', 'family-1')).rejects.toThrow(
+        'Cannot revoke current session',
+      );
     });
 
     test('should throw error when session belongs to another user', async () => {

@@ -103,9 +103,7 @@ export async function cleanupMagicLinkTokens(
   if (dryRun) {
     // Count records that would be deleted
     const countResult = await db.queryOne<{ count: number }>(
-      selectCount(MAGIC_LINK_TOKENS_TABLE)
-        .where(lt('created_at', cutoffDate))
-        .toSql(),
+      selectCount(MAGIC_LINK_TOKENS_TABLE).where(lt('created_at', cutoffDate)).toSql(),
     );
 
     deletedCount = countResult?.count ?? 0;
@@ -158,9 +156,7 @@ export async function countOldMagicLinkTokens(
   cutoffDate.setTime(cutoffDate.getTime() - effectiveRetentionHours * 60 * 60 * 1000);
 
   const result = await db.queryOne<{ count: number }>(
-    selectCount(MAGIC_LINK_TOKENS_TABLE)
-      .where(lt('created_at', cutoffDate))
-      .toSql(),
+    selectCount(MAGIC_LINK_TOKENS_TABLE).where(lt('created_at', cutoffDate)).toSql(),
   );
 
   return result?.count ?? 0;
@@ -174,9 +170,7 @@ export async function countOldMagicLinkTokens(
  * @returns Total count of magic link tokens
  */
 export async function getTotalMagicLinkTokenCount(db: RawDb): Promise<number> {
-  const result = await db.queryOne<{ count: number }>(
-    selectCount(MAGIC_LINK_TOKENS_TABLE).toSql(),
-  );
+  const result = await db.queryOne<{ count: number }>(selectCount(MAGIC_LINK_TOKENS_TABLE).toSql());
 
   return result?.count ?? 0;
 }

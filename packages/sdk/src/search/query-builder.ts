@@ -22,7 +22,11 @@ import {
 } from '@abe-stack/core';
 
 // Re-export core query builder
-export { coreCreateSearchQuery as createSearchQuery, coreFromSearchQuery as fromSearchQuery, SearchQueryBuilder };
+export {
+  coreCreateSearchQuery as createSearchQuery,
+  coreFromSearchQuery as fromSearchQuery,
+  SearchQueryBuilder,
+};
 
 // ============================================================================
 // Client Query Builder
@@ -81,7 +85,11 @@ export class ClientSearchQueryBuilder<T = Record<string, unknown>> {
   }
 
   whereIn(field: keyof T | string, values: FilterValue[]): this {
-    this._filters.push({ field, operator: FILTER_OPERATORS.IN, value: values } as FilterCondition<T>);
+    this._filters.push({
+      field,
+      operator: FILTER_OPERATORS.IN,
+      value: values,
+    } as FilterCondition<T>);
     return this;
   }
 
@@ -258,7 +266,9 @@ export class ClientSearchQueryBuilder<T = Record<string, unknown>> {
 /**
  * Create a client search query builder.
  */
-export function createClientSearchQuery<T = Record<string, unknown>>(): ClientSearchQueryBuilder<T> {
+export function createClientSearchQuery<
+  T = Record<string, unknown>,
+>(): ClientSearchQueryBuilder<T> {
   return new ClientSearchQueryBuilder<T>();
 }
 
@@ -425,9 +435,7 @@ interface SerializedFilter {
 /**
  * Serialize filters for URL transport.
  */
-function serializeFilters<T>(
-  filter: FilterCondition<T> | CompoundFilter<T>,
-): SerializedFilter {
+function serializeFilters<T>(filter: FilterCondition<T> | CompoundFilter<T>): SerializedFilter {
   if ('conditions' in filter) {
     // Compound filter
     return {
@@ -519,7 +527,9 @@ function deserializeValue(value: unknown): FilterValue {
     }
 
     if (Array.isArray(value)) {
-      return value.map((v) => deserializeValue(v)) as Array<string | number | boolean | Date | null>;
+      return value.map((v) => deserializeValue(v)) as Array<
+        string | number | boolean | Date | null
+      >;
     }
   }
 

@@ -10,7 +10,16 @@
  * - Sending efficiency (avoids sending to dead endpoints)
  */
 
-import { lt, or, eq, isNotNull, and, selectCount, PUSH_SUBSCRIPTIONS_TABLE, type RawDb } from '@abe-stack/db';
+import {
+  lt,
+  or,
+  eq,
+  isNotNull,
+  and,
+  selectCount,
+  PUSH_SUBSCRIPTIONS_TABLE,
+  type RawDb,
+} from '@abe-stack/db';
 
 // ============================================================================
 // Constants
@@ -110,9 +119,7 @@ export async function cleanupPushSubscriptions(
   if (dryRun) {
     // Count records that would be deleted by each category
     const markedInactiveResult = await db.queryOne<{ count: number }>(
-      selectCount(PUSH_SUBSCRIPTIONS_TABLE)
-        .where(eq('is_active', false))
-        .toSql(),
+      selectCount(PUSH_SUBSCRIPTIONS_TABLE).where(eq('is_active', false)).toSql(),
     );
 
     const staleResult = await db.queryOne<{ count: number }>(
@@ -222,20 +229,14 @@ export async function getPushSubscriptionStats(
     expiredResult,
     expiringSoonResult,
   ] = await Promise.all([
+    db.queryOne<{ count: number }>(selectCount(PUSH_SUBSCRIPTIONS_TABLE).toSql()),
+
     db.queryOne<{ count: number }>(
-      selectCount(PUSH_SUBSCRIPTIONS_TABLE).toSql(),
+      selectCount(PUSH_SUBSCRIPTIONS_TABLE).where(eq('is_active', true)).toSql(),
     ),
 
     db.queryOne<{ count: number }>(
-      selectCount(PUSH_SUBSCRIPTIONS_TABLE)
-        .where(eq('is_active', true))
-        .toSql(),
-    ),
-
-    db.queryOne<{ count: number }>(
-      selectCount(PUSH_SUBSCRIPTIONS_TABLE)
-        .where(eq('is_active', false))
-        .toSql(),
+      selectCount(PUSH_SUBSCRIPTIONS_TABLE).where(eq('is_active', false)).toSql(),
     ),
 
     db.queryOne<{ count: number }>(

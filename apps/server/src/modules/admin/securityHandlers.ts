@@ -143,10 +143,7 @@ export async function handleExportSecurityEvents(
     const { format, filter } = body;
     const result = await exportSecurityEvents(ctx.db, format, filter);
 
-    ctx.log.info(
-      { adminId: user.userId, format, filter },
-      'Admin exported security events',
-    );
+    ctx.log.info({ adminId: user.userId, format, filter }, 'Admin exported security events');
 
     return { status: 200, body: result };
   } catch (error) {

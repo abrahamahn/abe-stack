@@ -12,9 +12,10 @@ import type { LogLevel as ConsoleLogLevel } from '../../infrastructure/logger/co
 // Primitive Types
 // ============================================================================
 
-export type DatabaseProvider = 'postgresql' | 'json';
+export type DatabaseProvider = 'postgresql' | 'sqlite' | 'mongodb' | 'json';
 export type StorageProviderName = 'local' | 's3';
 export type QueueProvider = 'local' | 'redis';
+export type PackageManagerProvider = 'npm' | 'pnpm' | 'yarn';
 export type LogLevel = ConsoleLogLevel;
 
 // ============================================================================
@@ -59,7 +60,117 @@ export interface JsonDatabaseConfig {
   persistOnWrite: boolean;
 }
 
-export type DatabaseConfig = PostgresConfig | JsonDatabaseConfig;
+/**
+ * MySQL database configuration.
+ * Compatible with MySQL and MariaDB databases.
+ */
+export interface MySqlConfig {
+  provider: 'mysql';
+  /** Database server hostname */
+  host: string;
+  /** Database server port (default: 3306) */
+  port: number;
+  /** Database name */
+  database: string;
+  /** Database user */
+  user: string;
+  /** Database password */
+  password: string;
+  /** Full connection string (takes precedence over individual fields) */
+  connectionString?: string;
+  /** Maximum number of connections in the pool */
+  maxConnections: number;
+  /** Alternative ports to try if primary is unavailable (dev convenience) */
+  portFallbacks: number[];
+  /** Enable SSL/TLS connection */
+  ssl: boolean;
+}
+
+/**
+ * SQLite database configuration.
+ * Lightweight file-based database, good for development and embedded systems.
+ */
+export interface SqliteConfig {
+  provider: 'sqlite';
+  /** Path to the SQLite database file */
+  filePath: string;
+  /** Enable WAL mode for better concurrency */
+  walMode: boolean;
+  /** Enable foreign key constraints */
+  foreignKeys: boolean;
+  /** Timeout for database locks (milliseconds) */
+  timeout: number;
+}
+
+/**
+ * MongoDB database configuration.
+ * NoSQL document database configuration.
+ */
+export interface MongoConfig {
+  provider: 'mongodb';
+  /** MongoDB connection string */
+  connectionString: string;
+  /** Database name */
+  database: string;
+  /** Additional options for the MongoDB connection */
+  options?: {
+    /** Enable SSL/TLS connection */
+    ssl?: boolean;
+    /** Connection timeout in milliseconds */
+    connectTimeoutMs?: number;
+    /** Socket timeout in milliseconds */
+    socketTimeoutMs?: number;
+    /** Whether to use a new database connection for each operation */
+    useUnifiedTopology?: boolean;
+  };
+}
+
+export type DatabaseConfig = PostgresConfig | JsonDatabaseConfig | SqliteConfig | MongoConfig;
+
+// ============================================================================
+// Package Manager Configuration
+// ============================================================================
+
+/**
+ * NPM package manager configuration.
+ */
+export interface NpmConfig {
+  provider: 'npm';
+  /** Enable audit checks during installation */
+  audit: boolean;
+  /** Use legacy peer dependencies behavior */
+  legacyPeerDeps: boolean;
+  /** Registry URL to use */
+  registry?: string;
+}
+
+/**
+ * PNPM package manager configuration.
+ */
+export interface PnpmConfig {
+  provider: 'pnpm';
+  /** Enable strict peer dependencies */
+  strictPeerDeps: boolean;
+  /** Use frozen lockfile (fail if lockfile is out of sync) */
+  frozenLockfile: boolean;
+  /** Registry URL to use */
+  registry?: string;
+}
+
+/**
+ * Yarn package manager configuration.
+ */
+export interface YarnConfig {
+  provider: 'yarn';
+  /** Enable audit checks during installation */
+  audit: boolean;
+  /** Use frozen lockfile (fail if lockfile is out of sync) */
+  frozenLockfile: boolean;
+  /** Registry URL to use */
+  registry?: string;
+}
+
+export type PackageManagerConfig = NpmConfig | PnpmConfig | YarnConfig;
 
 // ============================================================================
 // Cache Configuration

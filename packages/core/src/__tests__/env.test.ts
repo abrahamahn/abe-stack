@@ -123,7 +123,6 @@ describe('serverEnvSchema', () => {
         expect(result.data.DATABASE_URL).toBe('postgresql://custom:url@host:5432/db');
       }
     });
-
   });
 
   describe('validation rules', () => {

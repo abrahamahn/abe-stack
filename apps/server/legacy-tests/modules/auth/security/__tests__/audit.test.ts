@@ -699,7 +699,7 @@ describe('registerSecurityAudit', () => {
 
     expect(mockServer.decorate).toHaveBeenCalledWith(
       'auditLogger',
-      expect.any(SecurityAuditLogger)
+      expect.any(SecurityAuditLogger),
     );
   });
 

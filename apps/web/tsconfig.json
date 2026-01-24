@@ -1,121 +1,54 @@
 {
-  "extends": "../../config/ts/tsconfig.react.json",
+  "extends": "../../.config/tsconfig.react.json",
   "compilerOptions": {
-    "types": [
-      "vite/client",
-      "react",
-      "react-dom",
-      "vitest/globals"
-    ],
+    "types": ["vite/client", "react", "react-dom", "vitest/globals"],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@admin": [
-        "./src/features/admin"
-      ],
-      "@admin/*": [
-        "./src/features/admin/*"
-      ],
-      "@api": [
-        "./src/api"
-      ],
-      "@api/*": [
-        "./src/api/*"
-      ],
-      "@app": [
-        "./src/app"
-      ],
-      "@app/*": [
-        "./src/app/*"
-      ],
-      "@auth": [
-        "./src/features/auth"
-      ],
-      "@auth/*": [
-        "./src/features/auth/*"
-      ],
-      "@billing": [
-        "./src/features/billing"
-      ],
-      "@billing/*": [
-        "./src/features/billing/*"
-      ],
-      "@catalog": [
-        "./src/features/demo/catalog"
-      ],
-      "@catalog/*": [
-        "./src/features/demo/catalog/*"
-      ],
-      "@components": [
-        "./src/features/admin/components"
-      ],
-      "@components/*": [
-        "./src/features/admin/components/*"
-      ],
-      "@config": [
-        "./src/config"
-      ],
-      "@config/*": [
-        "./src/config/*"
-      ],
-      "@dashboard": [
-        "./src/features/dashboard"
-      ],
-      "@dashboard/*": [
-        "./src/features/dashboard/*"
-      ],
-      "@demo": [
-        "./src/features/demo"
-      ],
-      "@demo/*": [
-        "./src/features/demo/*"
-      ],
-      "@features": [
-        "./src/features"
-      ],
-      "@features/*": [
-        "./src/features/*"
-      ],
-      "@hooks": [
-        "./src/features/admin/hooks"
-      ],
-      "@hooks/*": [
-        "./src/features/admin/hooks/*"
-      ],
-      "@layouts": [
-        "./src/features/admin/layouts"
-      ],
-      "@layouts/*": [
-        "./src/features/admin/layouts/*"
-      ],
-      "@pages": [
-        "./src/pages"
-      ],
-      "@pages/*": [
-        "./src/pages/*"
-      ],
-      "@services": [
-        "./src/features/admin/services"
-      ],
-      "@services/*": [
-        "./src/features/admin/services/*"
-      ],
-      "@settings": [
-        "./src/features/settings"
-      ],
-      "@settings/*": [
-        "./src/features/settings/*"
-      ]
+      "@/*": ["./src/*"],
+      "@abe-stack/core": ["../../packages/core/src/index.ts"],
+      "@abe-stack/core/*": ["../../packages/core/src/*"],
+      "@abe-stack/ui": ["../../packages/ui/src/index.ts"],
+      "@abe-stack/ui/*": ["../../packages/ui/src/*"],
+      "@abe-stack/sdk": ["../../packages/sdk/src/index.ts"],
+      "@abe-stack/sdk/*": ["../../packages/sdk/src/*"],
+      "@abe-stack/stores": ["../../packages/stores/src/index.ts"],
+      "@abe-stack/stores/*": ["../../packages/stores/src/*"],
+      "@admin": ["./src/features/admin"],
+      "@admin/*": ["./src/features/admin/*"],
+      "@api": ["./src/api"],
+      "@api/*": ["./src/api/*"],
+      "@app": ["./src/app"],
+      "@app/*": ["./src/app/*"],
+      "@auth": ["./src/features/auth"],
+      "@auth/*": ["./src/features/auth/*"],
+      "@billing": ["./src/features/billing"],
+      "@billing/*": ["./src/features/billing/*"],
+      "@catalog": ["./src/features/demo/catalog"],
+      "@catalog/*": ["./src/features/demo/catalog/*"],
+      "@components": ["./src/features/admin/components"],
+      "@components/*": ["./src/features/admin/components/*"],
+      "@config": ["./src/config"],
+      "@config/*": ["./src/config/*"],
+      "@dashboard": ["./src/features/dashboard"],
+      "@dashboard/*": ["./src/features/dashboard/*"],
+      "@demo": ["./src/features/demo"],
+      "@demo/*": ["./src/features/demo/*"],
+      "@features": ["./src/features"],
+      "@features/*": ["./src/features/*"],
+      "@hooks": ["./src/features/admin/hooks"],
+      "@hooks/*": ["./src/features/admin/hooks/*"],
+      "@layouts": ["./src/features/admin/layouts"],
+      "@layouts/*": ["./src/features/admin/layouts/*"],
+      "@pages": ["./src/pages"],
+      "@pages/*": ["./src/pages/*"],
+      "@services": ["./src/features/admin/services"],
+      "@services/*": ["./src/features/admin/services/*"],
+      "@settings": ["./src/features/settings"],
+      "@settings/*": ["./src/features/settings/*"]
     },
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.web.tsbuildinfo"
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules"
-  ],
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"],
   "references": [
     {
       "path": "../../packages/core"

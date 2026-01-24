@@ -71,16 +71,22 @@ export class DeleteBuilder implements QueryBuilder {
   /**
    * Build the SQL query
    */
+  /**
+   * Build the SQL query
+   */
   toSql(): QueryResult {
     const parts: SqlFragment[] = [];
 
     // DELETE FROM table
-    parts.push({ text: `DELETE FROM ${formatTable(this._table)}`, values: [] });
+    const tableFragment = formatTable(this._table);
+    parts.push({ text: `DELETE FROM ${tableFragment.text}`, values: [...tableFragment.values] });
 
     // USING clause (for joins)
     if (this._using.length > 0) {
-      const usingTables = this._using.map(formatTable).join(', ');
-      parts.push({ text: `USING ${usingTables}`, values: [] });
+      const usingFragments = this._using.map(formatTable);
+      const usingText = usingFragments.map((f) => f.text).join(', ');
+      const usingValues = usingFragments.flatMap((f) => f.values);
+      parts.push({ text: `USING ${usingText}`, values: usingValues });
     }
 
     // WHERE clause
@@ -120,7 +126,8 @@ export const del = deleteFrom;
  */
 export function truncate(table: string | TableSpec): QueryResult {
   const tableSpec = typeof table === 'string' ? { name: table } : table;
-  return { text: `TRUNCATE ${formatTable(tableSpec)}`, values: [] };
+  const fragment = formatTable(tableSpec);
+  return { text: `TRUNCATE ${fragment.text}`, values: fragment.values as unknown[] };
 }
 
 /**
@@ -129,5 +136,6 @@ export function truncate(table: string | TableSpec): QueryResult {
  */
 export function truncateCascade(table: string | TableSpec): QueryResult {
   const tableSpec = typeof table === 'string' ? { name: table } : table;
-  return { text: `TRUNCATE ${formatTable(tableSpec)} CASCADE`, values: [] };
+  const fragment = formatTable(tableSpec);
+  return { text: `TRUNCATE ${fragment.text} CASCADE`, values: fragment.values as unknown[] };
 }

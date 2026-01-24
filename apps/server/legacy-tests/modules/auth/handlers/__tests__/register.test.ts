@@ -25,7 +25,7 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
     db: {} as AppContext['db'],
     repos: {} as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
-    : {
+    config: {
       auth: {
         jwt: {
           secret: 'test-secret-32-characters-long!!',
@@ -48,7 +48,7 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
         port: 8080,
         appBaseUrl: 'http://localhost:8080',
       },
-    } as AppContext[''],
+    } as AppContext['config'],
     log: {
       error: vi.fn(),
     } as unknown as AppContext['log'],

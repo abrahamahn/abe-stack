@@ -211,8 +211,10 @@ export function memoizeMethod(options: MemoizeOptions = {}): MethodDecorator {
         // Include instance identity in key to avoid cross-instance collisions
         const userKeyGenerator = options.keyGenerator;
         const instanceKeyGenerator = userKeyGenerator
-          ? (...fnArgs: unknown[]): string => `${String(propertyKey)}:${userKeyGenerator(...fnArgs)}`
-          : (...fnArgs: unknown[]): string => `${String(propertyKey)}:${defaultKeyGenerator(...fnArgs)}`;
+          ? (...fnArgs: unknown[]): string =>
+              `${String(propertyKey)}:${userKeyGenerator(...fnArgs)}`
+          : (...fnArgs: unknown[]): string =>
+              `${String(propertyKey)}:${defaultKeyGenerator(...fnArgs)}`;
 
         memoizedFn = memoize(boundMethod, {
           ...options,

@@ -1,5 +1,5 @@
 // apps/server/src/modules/auth/magic-link/__tests__/service.test.ts
-import { loadAuth } from '@';
+import { loadAuth } from '@abe-stack/core';
 import { requestMagicLink, verifyMagicLink } from '@auth/magic-link/service';
 import { withTransaction } from '@infrastructure';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
@@ -142,7 +142,7 @@ describe('Magic Link Service', () => {
         email,
         baseUrl,
         ipAddress,
-        userAgent
+        userAgent,
       );
 
       expect(result).toBeDefined();
@@ -153,7 +153,7 @@ describe('Magic Link Service', () => {
           tokenHash: expect.any(String),
           ipAddress,
           userAgent,
-        })
+        }),
       );
       expect(emailService.send).toHaveBeenCalled();
     });
@@ -176,8 +176,8 @@ describe('Magic Link Service', () => {
           email,
           baseUrl,
           '192.168.1.1',
-          'test-agent'
-        )
+          'test-agent',
+        ),
       ).rejects.toThrow('DB error');
     });
   });
@@ -189,7 +189,7 @@ describe('Magic Link Service', () => {
         {
           JWT_SECRET: 'test-secret-32-characters-long!!',
         },
-        'http://localhost:8080'
+        'http://localhost:8080',
       );
 
       vi.mocked(withTransaction).mockResolvedValue({
@@ -217,11 +217,11 @@ describe('Magic Link Service', () => {
         {
           JWT_SECRET: 'test-secret-32-characters-long!!',
         },
-        'http://localhost:8080'
+        'http://localhost:8080',
       );
 
       await expect(verifyMagicLink(mockDb, mockRepos, auth, 'non-existent-token')).rejects.toThrow(
-        'Invalid or expired magic link'
+        'Invalid or expired magic link',
       );
 
       expect(withTransaction).toHaveBeenCalled();
@@ -233,11 +233,11 @@ describe('Magic Link Service', () => {
         {
           JWT_SECRET: 'test-secret-32-characters-long!!',
         },
-        'http://localhost:8080'
+        'http://localhost:8080',
       );
 
       await expect(verifyMagicLink(mockDb, mockRepos, auth, 'expired-token')).rejects.toThrow(
-        'Invalid or expired magic link'
+        'Invalid or expired magic link',
       );
     });
 
@@ -247,11 +247,11 @@ describe('Magic Link Service', () => {
         {
           JWT_SECRET: 'test-secret-32-characters-long!!',
         },
-        'http://localhost:8080'
+        'http://localhost:8080',
       );
 
       await expect(verifyMagicLink(mockDb, mockRepos, auth, 'used-token')).rejects.toThrow(
-        'Invalid or expired magic link'
+        'Invalid or expired magic link',
       );
     });
   });

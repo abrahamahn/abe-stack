@@ -1,39 +1,18 @@
 // apps/web/src/features/demo/hooks/useDemoTheme.ts
-import { useLocalStorage } from '@abe-stack/ui';
-import { useEffect } from 'react';
+import { useThemeMode } from '@abe-stack/ui';
 
 export type ThemeMode = 'system' | 'light' | 'dark';
 
 interface UseDemoThemeResult {
   themeMode: ThemeMode;
+  resolvedTheme: 'light' | 'dark';
   cycleTheme: () => void;
   getThemeIcon: () => string;
   getThemeLabel: () => string;
 }
 
 export function useDemoTheme(): UseDemoThemeResult {
-  const [themeMode, setThemeMode] = useLocalStorage<ThemeMode>('demo-theme-mode', 'system');
-
-  // Apply theme mode to document
-  useEffect(() => {
-    const root = document.documentElement;
-    root.removeAttribute('data-theme');
-
-    if (themeMode === 'light') {
-      root.setAttribute('data-theme', 'light');
-    } else if (themeMode === 'dark') {
-      root.setAttribute('data-theme', 'dark');
-    }
-    // 'system' = no attribute, CSS handles it via prefers-color-scheme
-  }, [themeMode]);
-
-  function cycleTheme(): void {
-    setThemeMode((prev: ThemeMode) => {
-      if (prev === 'system') return 'light';
-      if (prev === 'light') return 'dark';
-      return 'system';
-    });
-  }
+  const { mode: themeMode, cycleMode, resolvedTheme } = useThemeMode('demo-theme-mode');
 
   function getThemeIcon(): string {
     if (themeMode === 'light') return '☀️';
@@ -49,7 +28,8 @@ export function useDemoTheme(): UseDemoThemeResult {
 
   return {
     themeMode,
-    cycleTheme,
+    resolvedTheme,
+    cycleTheme: cycleMode,
     getThemeIcon,
     getThemeLabel,
   };

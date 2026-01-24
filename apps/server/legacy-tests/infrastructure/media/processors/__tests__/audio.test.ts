@@ -13,7 +13,7 @@ vi.mock('fluent-ffmpeg', () => ({
     audioChannels: vi.fn().mockReturnThis(),
     audioFrequency: vi.fn().mockReturnThis(),
     setStartTime: vi.fn().mockReturnThis(),
-    setDuration: vi.fn().mockReturnThis(),
+    setDconfiguration: vi.fn().mockReturnThis(),
     on: vi.fn().mockReturnThis(),
     save: vi.fn().mockReturnThis(),
   })),
@@ -47,7 +47,7 @@ describe('AudioProcessor', () => {
       audioChannels: vi.fn().mockReturnThis(),
       audioFrequency: vi.fn().mockReturnThis(),
       setStartTime: vi.fn().mockReturnThis(),
-      setDuration: vi.fn().mockReturnThis(),
+      setDconfiguration: vi.fn().mockReturnThis(),
       on: vi.fn().mockImplementation((event: string, callback: () => void) => {
         if (event === 'end') {
           setTimeout(callback, 0); // Simulate async success
@@ -59,7 +59,7 @@ describe('AudioProcessor', () => {
 
     mockParseFile.mockResolvedValue({
       format: {
-        duration: 180.5,
+        dconfiguration: 180.5,
         bitrate: 320000,
         codec: 'mp3',
         container: 'MPEG',
@@ -151,7 +151,7 @@ describe('AudioProcessor', () => {
       const metadata = await processor.getMetadata(inputPath);
 
       expect(metadata).toEqual({
-        duration: 180.5,
+        dconfiguration: 180.5,
         bitrate: 320000,
         codec: 'mp3',
         format: 'MPEG',
@@ -194,9 +194,14 @@ describe('AudioProcessor', () => {
       const inputPath = '/tmp/input.mp3';
       const outputPath = '/tmp/segment.mp3';
       const startTime = 30;
-      const duration = 15;
+      const dconfiguration = 15;
 
-      const result = await processor.extractSegment(inputPath, outputPath, startTime, duration);
+      const result = await processor.extractSegment(
+        inputPath,
+        outputPath,
+        startTime,
+        dconfiguration,
+      );
 
       expect(result.success).toBe(true);
       expect(result.outputPath).toBe(outputPath);
@@ -205,7 +210,7 @@ describe('AudioProcessor', () => {
     it('should handle segment extraction errors', async () => {
       mockFfmpeg.mockReturnValue({
         setStartTime: vi.fn().mockReturnThis(),
-        setDuration: vi.fn().mockReturnThis(),
+        setDconfiguration: vi.fn().mockReturnThis(),
         on: vi.fn().mockImplementation((event: string, callback: (err: Error) => void) => {
           if (event === 'error') {
             setTimeout(() => callback(new Error('Segment extraction failed')), 0);
@@ -225,23 +230,23 @@ describe('AudioProcessor', () => {
     });
   });
 
-  describe('getDuration', () => {
-    it('should get audio duration', async () => {
+  describe('getDconfiguration', () => {
+    it('should get audio dconfiguration', async () => {
       const inputPath = '/tmp/test.mp3';
 
-      const duration = await processor.getDuration(inputPath);
+      const dconfiguration = await processor.getDconfiguration(inputPath);
 
-      expect(duration).toBe(180.5);
+      expect(dconfiguration).toBe(180.5);
     });
 
-    it('should return null on duration extraction error', async () => {
-      mockParseFile.mockRejectedValue(new Error('Duration extraction failed'));
+    it('should return null on dconfiguration extraction error', async () => {
+      mockParseFile.mockRejectedValue(new Error('Dconfiguration extraction failed'));
 
       const inputPath = '/tmp/test.mp3';
 
-      const duration = await processor.getDuration(inputPath);
+      const dconfiguration = await processor.getDconfiguration(inputPath);
 
-      expect(duration).toBe(null);
+      expect(dconfiguration).toBe(null);
     });
   });
 });

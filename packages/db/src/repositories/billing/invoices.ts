@@ -48,16 +48,10 @@ export interface InvoiceRepository {
   ): Promise<Invoice | null>;
 
   /** List invoices for a user */
-  findByUserId(
-    userId: string,
-    options?: PaginationOptions,
-  ): Promise<PaginatedResult<Invoice>>;
+  findByUserId(userId: string, options?: PaginationOptions): Promise<PaginatedResult<Invoice>>;
 
   /** List invoices with filters */
-  list(
-    filters?: InvoiceFilters,
-    options?: PaginationOptions,
-  ): Promise<PaginatedResult<Invoice>>;
+  list(filters?: InvoiceFilters, options?: PaginationOptions): Promise<PaginatedResult<Invoice>>;
 
   /** Create a new invoice */
   create(invoice: NewInvoice): Promise<Invoice>;
@@ -98,12 +92,7 @@ export function createInvoiceRepository(db: RawDb): InvoiceRepository {
     ): Promise<Invoice | null> {
       const result = await db.queryOne<Record<string, unknown>>(
         select(INVOICES_TABLE)
-          .where(
-            and(
-              eq('provider', provider),
-              eq('provider_invoice_id', providerInvoiceId),
-            ),
-          )
+          .where(and(eq('provider', provider), eq('provider_invoice_id', providerInvoiceId)))
           .toSql(),
       );
       return result ? toCamelCase<Invoice>(result, INVOICE_COLUMNS) : null;
@@ -132,9 +121,7 @@ export function createInvoiceRepository(db: RawDb): InvoiceRepository {
       }
       if (filters.status) {
         if (Array.isArray(filters.status)) {
-          conditions.push(
-            or(...filters.status.map((s) => eq('status', s))),
-          );
+          conditions.push(or(...filters.status.map((s) => eq('status', s))));
         } else {
           conditions.push(eq('status', filters.status));
         }
@@ -196,18 +183,13 @@ export function createInvoiceRepository(db: RawDb): InvoiceRepository {
 
       const lastItem = items[items.length - 1];
       const nextCursor =
-        hasMore && lastItem
-          ? `${lastItem.createdAt.toISOString()}_${lastItem.id}`
-          : null;
+        hasMore && lastItem ? `${lastItem.createdAt.toISOString()}_${lastItem.id}` : null;
 
       return { items, nextCursor };
     },
 
     async create(invoice: NewInvoice): Promise<Invoice> {
-      const snakeData = toSnakeCase(
-        invoice as unknown as Record<string, unknown>,
-        INVOICE_COLUMNS,
-      );
+      const snakeData = toSnakeCase(invoice as unknown as Record<string, unknown>, INVOICE_COLUMNS);
       const result = await db.queryOne<Record<string, unknown>>(
         insert(INVOICES_TABLE).values(snakeData).returningAll().toSql(),
       );
@@ -218,16 +200,9 @@ export function createInvoiceRepository(db: RawDb): InvoiceRepository {
     },
 
     async update(id: string, data: UpdateInvoice): Promise<Invoice | null> {
-      const snakeData = toSnakeCase(
-        data as unknown as Record<string, unknown>,
-        INVOICE_COLUMNS,
-      );
+      const snakeData = toSnakeCase(data as unknown as Record<string, unknown>, INVOICE_COLUMNS);
       const result = await db.queryOne<Record<string, unknown>>(
-        update(INVOICES_TABLE)
-          .set(snakeData)
-          .where(eq('id', id))
-          .returningAll()
-          .toSql(),
+        update(INVOICES_TABLE).set(snakeData).where(eq('id', id)).returningAll().toSql(),
       );
       return result ? toCamelCase<Invoice>(result, INVOICE_COLUMNS) : null;
     },
@@ -237,19 +212,11 @@ export function createInvoiceRepository(db: RawDb): InvoiceRepository {
       providerInvoiceId: string,
       data: UpdateInvoice,
     ): Promise<Invoice | null> {
-      const snakeData = toSnakeCase(
-        data as unknown as Record<string, unknown>,
-        INVOICE_COLUMNS,
-      );
+      const snakeData = toSnakeCase(data as unknown as Record<string, unknown>, INVOICE_COLUMNS);
       const result = await db.queryOne<Record<string, unknown>>(
         update(INVOICES_TABLE)
           .set(snakeData)
-          .where(
-            and(
-              eq('provider', provider),
-              eq('provider_invoice_id', providerInvoiceId),
-            ),
-          )
+          .where(and(eq('provider', provider), eq('provider_invoice_id', providerInvoiceId)))
           .returningAll()
           .toSql(),
       );

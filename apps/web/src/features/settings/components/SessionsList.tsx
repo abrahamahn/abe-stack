@@ -30,7 +30,11 @@ export function SessionsList({ onRevokeSuccess }: SessionsListProps): ReactEleme
 
   const { sessions, isLoading, isError, error, refetch } = useSessions();
 
-  const { revokeSession, isLoading: isRevokingSingle, error: revokeError } = useRevokeSession({
+  const {
+    revokeSession,
+    isLoading: isRevokingSingle,
+    error: revokeError,
+  } = useRevokeSession({
     onSuccess: () => {
       setRevokingId(null);
       refetch();
@@ -87,9 +91,7 @@ export function SessionsList({ onRevokeSuccess }: SessionsListProps): ReactEleme
 
   if (isError) {
     return (
-      <Alert tone="danger">
-        Failed to load sessions: {error?.message ?? 'Unknown error'}
-      </Alert>
+      <Alert tone="danger">Failed to load sessions: {error?.message ?? 'Unknown error'}</Alert>
     );
   }
 
@@ -105,27 +107,18 @@ export function SessionsList({ onRevokeSuccess }: SessionsListProps): ReactEleme
       )}
 
       {(revokeError ?? revokeAllError) && (
-        <Alert tone="danger">
-          {revokeError?.message ?? revokeAllError?.message}
-        </Alert>
+        <Alert tone="danger">{revokeError?.message ?? revokeAllError?.message}</Alert>
       )}
 
       {/* Current Session */}
-      {currentSession && (
-        <SessionCard
-          session={currentSession}
-          onRevoke={() => {}}
-        />
-      )}
+      {currentSession && <SessionCard session={currentSession} onRevoke={() => {}} />}
 
       {/* Other Sessions */}
       {otherSessions.length > 0 && (
         <>
           <div className="border-t pt-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-medium">
-                Other Devices ({otherSessions.length})
-              </h3>
+              <h3 className="font-medium">Other Devices ({otherSessions.length})</h3>
               <Button
                 variant="text"
                 size="small"
@@ -142,7 +135,9 @@ export function SessionsList({ onRevokeSuccess }: SessionsListProps): ReactEleme
                 <SessionCard
                   key={session.id}
                   session={session}
-                  onRevoke={() => { handleRevoke(session.id); }}
+                  onRevoke={() => {
+                    handleRevoke(session.id);
+                  }}
                   isRevoking={revokingId === session.id}
                 />
               ))}
@@ -152,9 +147,7 @@ export function SessionsList({ onRevokeSuccess }: SessionsListProps): ReactEleme
       )}
 
       {sessions.length === 1 && (
-        <p className="text-sm text-gray-500 text-center py-4">
-          This is your only active session.
-        </p>
+        <p className="text-sm text-gray-500 text-center py-4">This is your only active session.</p>
       )}
     </div>
   );

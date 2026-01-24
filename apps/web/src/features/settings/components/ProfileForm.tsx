@@ -36,7 +36,9 @@ export function ProfileForm({ user, onSuccess }: ProfileFormProps): ReactElement
       reset();
       onSuccess?.();
       // Clear success message after 3 seconds
-      setTimeout(() => { setSuccessMessage(null); }, 3000);
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
     },
   });
 
@@ -58,9 +60,7 @@ export function ProfileForm({ user, onSuccess }: ProfileFormProps): ReactElement
           disabled
           className="bg-gray-100 dark:bg-gray-800"
         />
-        <p className="text-sm text-gray-500 mt-1">
-          Email cannot be changed at this time.
-        </p>
+        <p className="text-sm text-gray-500 mt-1">Email cannot be changed at this time.</p>
       </FormField>
 
       <FormField label="Display Name" htmlFor="name">
@@ -68,29 +68,20 @@ export function ProfileForm({ user, onSuccess }: ProfileFormProps): ReactElement
           id="name"
           type="text"
           value={name}
-          onChange={(e) => { setName(e.target.value); }}
+          onChange={(e) => {
+            setName(e.target.value);
+          }}
           placeholder="Enter your display name"
           maxLength={100}
         />
       </FormField>
 
-      {error && (
-        <Alert tone="danger">
-          {error.message}
-        </Alert>
-      )}
+      {error && <Alert tone="danger">{error.message}</Alert>}
 
-      {successMessage && (
-        <Alert tone="success">
-          {successMessage}
-        </Alert>
-      )}
+      {successMessage && <Alert tone="success">{successMessage}</Alert>}
 
       <div className="flex justify-end">
-        <Button
-          type="submit"
-          disabled={!hasChanges || isLoading}
-        >
+        <Button type="submit" disabled={!hasChanges || isLoading}>
           {isLoading ? 'Saving...' : 'Save Changes'}
         </Button>
       </div>

@@ -1,32 +1,16 @@
 {
-  "extends": "../../config/ts/tsconfig.react.json",
+  "extends": "../../.config/tsconfig.react.json",
   "compilerOptions": {
-    "types": [
-      "vite/client",
-      "react",
-      "react-dom"
-    ],
+    "types": ["vite/client", "react", "react-dom"],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@ipc": [
-        "./src/electron/ipc"
-      ],
-      "@ipc/*": [
-        "./src/electron/ipc/*"
-      ]
+      "@/*": ["./src/*"],
+      "@ipc": ["./src/electron/ipc"],
+      "@ipc/*": ["./src/electron/ipc/*"]
     },
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.desktop.tsbuildinfo"
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "__tests__",
-    "src/electron"
-  ],
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "__tests__", "src/electron"],
   "references": [
     {
       "path": "../../packages/core"

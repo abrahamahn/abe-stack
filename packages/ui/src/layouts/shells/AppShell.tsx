@@ -136,7 +136,6 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(
       onFooterResize,
       className = '',
       style,
-      ...props
     },
     ref,
   ) => {
@@ -177,7 +176,7 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(
     // Simple non-resizable mode - use CSS Grid
     if (!hasResizableVertical && !hasResizableHorizontal) {
       return (
-        <div ref={ref} className={`app-shell ${className}`.trim()} style={cssVars} {...props}>
+        <div ref={ref} className={`app-shell ${className}`.trim()} style={cssVars}>
           {showHeader && <header className="app-shell-header">{header}</header>}
           <div className="app-shell-body">
             {showSidebar && <aside className="app-shell-sidebar">{sidebar}</aside>}
@@ -245,7 +244,6 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(
           direction="vertical"
           className={`app-shell app-shell--resizable ${className}`.trim()}
           style={cssVars}
-          {...props}
         >
           {showHeader && (
             <ResizablePanel
@@ -283,7 +281,7 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(
 
     // Only horizontal resizing
     return (
-      <div ref={ref} className={`app-shell ${className}`.trim()} style={cssVars} {...props}>
+      <div ref={ref} className={`app-shell ${className}`.trim()} style={cssVars}>
         {showHeader && <header className="app-shell-header">{header}</header>}
         {renderHorizontalContent()}
         {showFooter && <footer className="app-shell-footer">{footer}</footer>}

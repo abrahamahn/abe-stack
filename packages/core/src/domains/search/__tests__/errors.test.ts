@@ -41,12 +41,9 @@ describe('search errors', () => {
     });
 
     test('should accept custom status code and details', () => {
-      const error = new SearchError(
-        'Server error',
-        SEARCH_ERROR_TYPES.PROVIDER_ERROR,
-        500,
-        { additional: 'info' },
-      );
+      const error = new SearchError('Server error', SEARCH_ERROR_TYPES.PROVIDER_ERROR, 500, {
+        additional: 'info',
+      });
 
       expect(error.statusCode).toBe(500);
       expect(error.details).toEqual({ additional: 'info' });
@@ -242,12 +239,16 @@ describe('search errors', () => {
 
     test('isSearchProviderError should identify SearchProviderError', () => {
       expect(isSearchProviderError(new SearchProviderError('Test', 'sql'))).toBe(true);
-      expect(isSearchProviderError(new SearchError('Test', SEARCH_ERROR_TYPES.PROVIDER_ERROR))).toBe(false);
+      expect(
+        isSearchProviderError(new SearchError('Test', SEARCH_ERROR_TYPES.PROVIDER_ERROR)),
+      ).toBe(false);
     });
 
     test('isSearchTimeoutError should identify SearchTimeoutError', () => {
       expect(isSearchTimeoutError(new SearchTimeoutError(1000))).toBe(true);
-      expect(isSearchTimeoutError(new SearchError('Test', SEARCH_ERROR_TYPES.SEARCH_TIMEOUT))).toBe(false);
+      expect(isSearchTimeoutError(new SearchError('Test', SEARCH_ERROR_TYPES.SEARCH_TIMEOUT))).toBe(
+        false,
+      );
     });
   });
 

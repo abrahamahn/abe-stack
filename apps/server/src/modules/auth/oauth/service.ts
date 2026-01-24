@@ -6,8 +6,16 @@
  * Handles provider management, account linking, and user creation.
  */
 
-import { randomBytes, createCipheriv, createDecipheriv, scryptSync } from 'node:crypto';
+import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'node:crypto';
 
+import {
+  insert,
+  OAUTH_CONNECTIONS_TABLE,
+  toCamelCase,
+  USER_COLUMNS,
+  USERS_TABLE,
+  type User,
+} from '@abe-stack/db';
 import {
   withTransaction,
   type DbClient,
@@ -15,14 +23,6 @@ import {
   type Repositories,
   type UserRole,
 } from '@infrastructure';
-import {
-  insert,
-  toCamelCase,
-  USERS_TABLE,
-  USER_COLUMNS,
-  OAUTH_CONNECTIONS_TABLE,
-  type User,
-} from '@abe-stack/db';
 import {
   ConflictError,
   EmailAlreadyExistsError,
@@ -40,6 +40,7 @@ import {
   extractAppleUserFromIdToken,
 } from './providers';
 
+import type { AuthConfig, OAuthProviderConfig } from '@/config';
 import type {
   OAuthConnectionInfo,
   OAuthProviderClient,
@@ -47,7 +48,6 @@ import type {
   OAuthTokenResponse,
   OAuthUserInfo,
 } from './types';
-import type { AuthConfig, OAuthProviderConfig } from '@config';
 
 // ============================================================================
 // Types
@@ -60,6 +60,7 @@ export interface OAuthAuthResult {
     id: string;
     email: string;
     name: string | null;
+    avatarUrl: string | null;
     role: UserRole;
     createdAt: string;
   };
@@ -381,6 +382,7 @@ async function authenticateOrCreateWithOAuth(
         id: user.id,
         email: user.email,
         name: user.name,
+        avatarUrl: user.avatarUrl ?? null,
         role: user.role,
         createdAt: user.createdAt.toISOString(),
       },
@@ -465,6 +467,7 @@ async function authenticateOrCreateWithOAuth(
       id: result.user.id,
       email: result.user.email,
       name: result.user.name,
+      avatarUrl: result.user.avatarUrl ?? null,
       role: result.user.role,
       createdAt: result.user.createdAt.toISOString(),
     },

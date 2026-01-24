@@ -5,7 +5,12 @@
  * Displays a single pricing plan with features and CTA.
  */
 
-import { forwardRef, type ComponentPropsWithoutRef, type ReactElement, type ReactNode } from 'react';
+import {
+  forwardRef,
+  type ComponentPropsWithoutRef,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
 
 import { cn } from '../../utils/cn';
 

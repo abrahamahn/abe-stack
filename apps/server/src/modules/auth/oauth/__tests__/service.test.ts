@@ -1,14 +1,14 @@
 // apps/server/src/modules/auth/oauth/__tests__/service.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
+import type { AuthConfig } from '@/config';
 import type {
   OAuthConnectionRepository,
   RefreshTokenRepository,
   UserRepository,
 } from '@abe-stack/db';
-import { createMockDb, asMockDb } from '@infrastructure/data/database/utils/test-utils';
-import type { Repositories, DbClient } from '@infrastructure';
-import type { AuthConfig } from '@config';
+import type { DbClient, Repositories } from '@infrastructure';
+import { asMockDb, createMockDb } from '@infrastructure/data/database/utils/test-utils';
 
 import {
   createOAuthState,
@@ -114,6 +114,12 @@ describe('OAuth Service', () => {
       magicLinkTokens: {} as Repositories['magicLinkTokens'],
       pushSubscriptions: {} as Repositories['pushSubscriptions'],
       notificationPreferences: {} as Repositories['notificationPreferences'],
+      plans: {} as Repositories['plans'],
+      subscriptions: {} as Repositories['subscriptions'],
+      customerMappings: {} as Repositories['customerMappings'],
+      invoices: {} as Repositories['invoices'],
+      paymentMethods: {} as Repositories['paymentMethods'],
+      billingEvents: {} as Repositories['billingEvents'],
     };
 
     // Mock auth config
@@ -382,6 +388,7 @@ describe('OAuth Service', () => {
         id: 'user-123',
         email: 'user@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user' as const,
         passwordHash: 'hash',
         createdAt: new Date('2024-01-01'),
@@ -441,6 +448,7 @@ describe('OAuth Service', () => {
         id: 'new-user-123',
         email: 'user@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user' as const,
         passwordHash: 'oauth:google:hash',
         createdAt: new Date(),
@@ -488,7 +496,8 @@ describe('OAuth Service', () => {
       vi.mocked(mockRepos.users.findByEmail).mockResolvedValue({
         id: 'existing-user',
         email: 'user@example.com',
-        name: 'Existing User',
+        name: 'Test User',
+        avatarUrl: null,
         role: 'user',
         passwordHash: 'hash',
         createdAt: new Date(),
@@ -531,6 +540,7 @@ describe('OAuth Service', () => {
         id: 'user-123',
         email: 'user@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user',
         passwordHash: 'hash',
         createdAt: new Date(),
@@ -599,6 +609,7 @@ describe('OAuth Service', () => {
         id: 'user-123',
         email: 'user@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user',
         passwordHash: 'hash',
         createdAt: new Date(),
@@ -654,6 +665,7 @@ describe('OAuth Service', () => {
         id: 'user-123',
         email: 'user@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user',
         passwordHash: 'hash',
         createdAt: new Date(),
@@ -696,6 +708,7 @@ describe('OAuth Service', () => {
         id: 'user-123',
         email: 'user@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user',
         passwordHash: 'hash',
         createdAt: new Date(),
@@ -753,6 +766,7 @@ describe('OAuth Service', () => {
         id: 'user-123',
         email: 'user@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user' as const,
         passwordHash: 'regular-hash', // Not oauth:*
         createdAt: new Date(),
@@ -796,6 +810,7 @@ describe('OAuth Service', () => {
         id: 'user-123',
         email: 'user@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user',
         passwordHash: 'hash',
         createdAt: new Date(),
@@ -852,6 +867,7 @@ describe('OAuth Service', () => {
         id: 'user-123',
         email: 'user@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user' as const,
         passwordHash: 'oauth:google:hash', // OAuth-only user
         createdAt: new Date(),
@@ -890,6 +906,7 @@ describe('OAuth Service', () => {
         id: 'user-123',
         email: 'user@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user' as const,
         passwordHash: 'oauth:google:hash', // OAuth-only user
         createdAt: new Date(),
@@ -1005,6 +1022,7 @@ describe('OAuth Service', () => {
         id: 'user-123',
         email: 'user@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user',
         passwordHash: 'hash',
         createdAt: new Date(),

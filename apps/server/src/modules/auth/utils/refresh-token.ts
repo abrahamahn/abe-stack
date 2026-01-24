@@ -109,7 +109,7 @@ export async function rotateRefreshToken(
   // Uses composite index (token, expires_at) for efficient lookup
   const storedTokenRow = await db.queryOne<Record<string, unknown>>(
     select(REFRESH_TOKENS_TABLE)
-            .where(and(eq('token', oldToken), gt('expires_at', now)))
+      .where(and(eq('token', oldToken), gt('expires_at', now)))
       .limit(1)
       .toSql(),
   );
@@ -135,7 +135,7 @@ export async function rotateRefreshToken(
     storedToken.familyId
       ? db.queryOne<Record<string, unknown>>(
           select(REFRESH_TOKEN_FAMILIES_TABLE)
-                        .where(eq('id', storedToken.familyId))
+            .where(eq('id', storedToken.familyId))
             .limit(1)
             .toSql(),
         )
@@ -165,9 +165,7 @@ export async function rotateRefreshToken(
   const recentTokenRow = storedToken.familyId
     ? await db.queryOne<Record<string, unknown>>(
         select(REFRESH_TOKENS_TABLE)
-                    .where(
-            and(eq('family_id', storedToken.familyId), gt('created_at', graceWindowStart)),
-          )
+          .where(and(eq('family_id', storedToken.familyId), gt('created_at', graceWindowStart)))
           .orderBy('created_at', 'desc')
           .limit(1)
           .toSql(),

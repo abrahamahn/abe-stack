@@ -7,11 +7,7 @@
 
 import { useMutation } from '@abe-stack/sdk';
 
-import {
-  createSettingsApi,
-  type ChangePasswordRequest,
-  type ChangePasswordResponse,
-} from '../api';
+import { createSettingsApi, type ChangePasswordRequest, type ChangePasswordResponse } from '../api';
 
 // ============================================================================
 // Settings API Instance

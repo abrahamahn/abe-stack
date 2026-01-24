@@ -20,10 +20,25 @@ describe('search schemas', () => {
   describe('filterOperatorSchema', () => {
     test('should accept valid operators', () => {
       const validOperators = [
-        'eq', 'neq', 'gt', 'gte', 'lt', 'lte',
-        'contains', 'startsWith', 'endsWith', 'like', 'ilike',
-        'in', 'notIn', 'isNull', 'isNotNull', 'between',
-        'arrayContains', 'arrayContainsAny', 'fullText',
+        'eq',
+        'neq',
+        'gt',
+        'gte',
+        'lt',
+        'lte',
+        'contains',
+        'startsWith',
+        'endsWith',
+        'like',
+        'ilike',
+        'in',
+        'notIn',
+        'isNull',
+        'isNotNull',
+        'between',
+        'arrayContains',
+        'arrayContainsAny',
+        'fullText',
       ];
 
       for (const op of validOperators) {
@@ -121,9 +136,7 @@ describe('search schemas', () => {
     test('should accept simple compound filter', () => {
       const result = compoundFilterSchema.safeParse({
         operator: 'and',
-        conditions: [
-          { field: 'status', operator: 'eq', value: 'active' },
-        ],
+        conditions: [{ field: 'status', operator: 'eq', value: 'active' }],
       });
       expect(result.success).toBe(true);
     });
@@ -205,8 +218,12 @@ describe('search schemas', () => {
     });
 
     test('should reject fuzziness out of range', () => {
-      expect(fullTextSearchConfigSchema.safeParse({ query: 'test', fuzziness: -0.1 }).success).toBe(false);
-      expect(fullTextSearchConfigSchema.safeParse({ query: 'test', fuzziness: 1.1 }).success).toBe(false);
+      expect(fullTextSearchConfigSchema.safeParse({ query: 'test', fuzziness: -0.1 }).success).toBe(
+        false,
+      );
+      expect(fullTextSearchConfigSchema.safeParse({ query: 'test', fuzziness: 1.1 }).success).toBe(
+        false,
+      );
     });
   });
 

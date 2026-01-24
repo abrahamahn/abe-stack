@@ -21,7 +21,8 @@ export type AuthStrategy =
   | 'google'
   | 'github'
   | 'facebook'
-  | 'microsoft';
+  | 'microsoft'
+  | 'apple';
 
 // ============================================================================
 // OAuth Configuration

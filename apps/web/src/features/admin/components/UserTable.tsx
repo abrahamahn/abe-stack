@@ -79,7 +79,9 @@ export function UserTable({ data, isLoading, page, onPageChange }: UserTableProp
             <TableRow
               key={user.id}
               className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
-              onClick={() => { handleRowClick(user); }}
+              onClick={() => {
+                handleRowClick(user);
+              }}
             >
               <TableCell>
                 <Text size="sm">{user.email}</Text>

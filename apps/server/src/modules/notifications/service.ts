@@ -62,10 +62,7 @@ export async function subscribe(
 ): Promise<string> {
   // Check if endpoint already exists
   const existingRow = await db.queryOne<Record<string, unknown>>(
-    select(PUSH_SUBSCRIPTIONS_TABLE)
-      .where(eq('endpoint', subscription.endpoint))
-      .limit(1)
-      .toSql(),
+    select(PUSH_SUBSCRIPTIONS_TABLE).where(eq('endpoint', subscription.endpoint)).limit(1).toSql(),
   );
 
   if (existingRow) {
@@ -266,7 +263,10 @@ export async function getPreferences(
   );
 
   if (existingRow) {
-    const prefs = toCamelCase<DbNotificationPreference>(existingRow, NOTIFICATION_PREFERENCE_COLUMNS);
+    const prefs = toCamelCase<DbNotificationPreference>(
+      existingRow,
+      NOTIFICATION_PREFERENCE_COLUMNS,
+    );
     return dbPrefsToNotificationPrefs(prefs);
   }
 
@@ -287,7 +287,10 @@ export async function getPreferences(
     throw new Error('Failed to create notification preferences');
   }
 
-  const newPrefs = toCamelCase<DbNotificationPreference>(newPrefsRows[0], NOTIFICATION_PREFERENCE_COLUMNS);
+  const newPrefs = toCamelCase<DbNotificationPreference>(
+    newPrefsRows[0],
+    NOTIFICATION_PREFERENCE_COLUMNS,
+  );
   return dbPrefsToNotificationPrefs(newPrefs);
 }
 
@@ -362,7 +365,10 @@ export async function updatePreferences(
     throw new Error('Failed to update notification preferences');
   }
 
-  const updated = toCamelCase<DbNotificationPreference>(updatedRows[0], NOTIFICATION_PREFERENCE_COLUMNS);
+  const updated = toCamelCase<DbNotificationPreference>(
+    updatedRows[0],
+    NOTIFICATION_PREFERENCE_COLUMNS,
+  );
   return dbPrefsToNotificationPrefs(updated);
 }
 
@@ -509,21 +515,20 @@ export async function getSubscriptionStats(db: DbClient): Promise<{
   );
 
   type ExpiringSoonRow = Record<string, unknown> & { count: string | number };
-  const expiringSoonResult = await db.queryOne<ExpiringSoonRow>(
-    {
-      text: `SELECT COUNT(*)::int as count FROM ${PUSH_SUBSCRIPTIONS_TABLE}
+  const expiringSoonResult = await db.queryOne<ExpiringSoonRow>({
+    text: `SELECT COUNT(*)::int as count FROM ${PUSH_SUBSCRIPTIONS_TABLE}
              WHERE expiration_time IS NOT NULL
                AND expiration_time <= $1
                AND expiration_time > $2`,
-      values: [weekFromNow, now],
-    },
-  );
+    values: [weekFromNow, now],
+  });
 
   const total = totalResult?.count ?? 0;
   const active = activeResult?.count ?? 0;
-  const expiringSoon = typeof expiringSoonResult?.count === 'number'
-    ? expiringSoonResult.count
-    : parseInt(String(expiringSoonResult?.count ?? 0), 10);
+  const expiringSoon =
+    typeof expiringSoonResult?.count === 'number'
+      ? expiringSoonResult.count
+      : parseInt(String(expiringSoonResult?.count ?? 0), 10);
 
   return {
     total,

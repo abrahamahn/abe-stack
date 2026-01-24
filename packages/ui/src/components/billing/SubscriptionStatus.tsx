@@ -5,11 +5,7 @@
  * Displays the current subscription status with actions.
  */
 
-import {
-  forwardRef,
-  type ComponentPropsWithoutRef,
-  type ReactElement,
-} from 'react';
+import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 'react';
 
 import { cn } from '../../utils/cn';
 
@@ -167,11 +163,7 @@ export const SubscriptionStatus = forwardRef<HTMLDivElement, SubscriptionStatusP
     return (
       <div
         ref={ref}
-        className={cn(
-          'subscription-status',
-          `subscription-status--${status}`,
-          className,
-        )}
+        className={cn('subscription-status', `subscription-status--${status}`, className)}
         {...rest}
       >
         <div className="subscription-status__header">
@@ -221,7 +213,8 @@ export const SubscriptionStatus = forwardRef<HTMLDivElement, SubscriptionStatusP
 
           {status === 'past_due' && (
             <div className="subscription-status__warning">
-              Your payment is past due. Please update your payment method to avoid service interruption.
+              Your payment is past due. Please update your payment method to avoid service
+              interruption.
             </div>
           )}
         </div>

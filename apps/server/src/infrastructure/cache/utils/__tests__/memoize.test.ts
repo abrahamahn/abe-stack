@@ -175,7 +175,9 @@ describe('memoize', () => {
           return user.name.toUpperCase();
         },
         {
-          keyGenerator: ((...args: unknown[]) => (args[0] as User).id) as (...args: unknown[]) => string,
+          keyGenerator: ((...args: unknown[]) => (args[0] as User).id) as (
+            ...args: unknown[]
+          ) => string,
         },
       );
 

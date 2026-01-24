@@ -31,7 +31,7 @@ vi.mock('../../processor', () => ({
       activeJobs: 0,
       queuedJobs: 0,
       limits: {
-        maxDuration: 300000,
+        maxDconfiguration: 300000,
         maxFileSize: 104857600,
         maxConcurrentJobs: 3,
         allowedFormats: ['jpg', 'png'],
@@ -53,7 +53,7 @@ describe('MediaProcessingQueue', () => {
         activeJobs: 0,
         queuedJobs: 0,
         limits: {
-          maxDuration: 300000,
+          maxDconfiguration: 300000,
           maxFileSize: 104857600,
           maxConcurrentJobs: 3,
           allowedFormats: ['jpg', 'png'],
@@ -141,7 +141,7 @@ describe('MediaProcessingQueue', () => {
           activeJobs: 0,
           queuedJobs: 0,
           limits: {
-            maxDuration: 300000,
+            maxDconfiguration: 300000,
             maxFileSize: 104857600,
             maxConcurrentJobs: 3,
             allowedFormats: ['jpg', 'png'],
@@ -180,7 +180,7 @@ describe('MediaProcessingQueue', () => {
         activeJobs: 0,
         queuedJobs: 0,
         limits: {
-          maxDuration: 300000,
+          maxDconfiguration: 300000,
           maxFileSize: 104857600,
           maxConcurrentJobs: 3,
           allowedFormats: ['jpg', 'png'],
@@ -296,7 +296,7 @@ describe('createMediaProcessingQueue', () => {
 
   it('should create a MediaProcessingQueue with custom limits', () => {
     const queue = createMediaProcessingQueue(mockLogger, {
-      maxDuration: 10 * 60 * 1000,
+      maxDconfiguration: 10 * 60 * 1000,
       maxFileSize: 200 * 1024 * 1024,
       maxConcurrentJobs: 5,
       allowedFormats: ['jpg', 'png', 'gif'],

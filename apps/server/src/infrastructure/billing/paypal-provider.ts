@@ -83,8 +83,8 @@ interface PayPalSubscription {
 interface PayPalTransaction {
   id: string;
   status: string;
-  amount: { value: string; currency_code: string };
-  payer: { email_address: string; payer_id: string };
+  amount?: { value?: string; currency_code?: string };
+  payer?: { email_address?: string; payer_id?: string };
   time: string;
 }
 
@@ -144,9 +144,7 @@ export class PayPalProvider implements PaymentProviderInterface {
   private tokenExpiresAt: number = 0;
 
   constructor(config: PayPalConfig) {
-    this.baseUrl = config.sandbox
-      ? 'https://api-m.sandbox.paypal.com'
-      : 'https://api-m.paypal.com';
+    this.baseUrl = config.sandbox ? 'https://api-m.sandbox.paypal.com' : 'https://api-m.paypal.com';
     this.clientId = config.clientId;
     this.clientSecret = config.clientSecret;
     this.webhookId = config.webhookId;
@@ -167,7 +165,7 @@ export class PayPalProvider implements PaymentProviderInterface {
     const response = await fetch(`${this.baseUrl}/v1/oauth2/token`, {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${auth}`,
+        Authorization: `Basic ${auth}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: 'grant_type=client_credentials',
@@ -185,15 +183,11 @@ export class PayPalProvider implements PaymentProviderInterface {
     return this.accessToken;
   }
 
-  private async request<T>(
-    method: string,
-    path: string,
-    body?: unknown,
-  ): Promise<T> {
+  private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
     const token = await this.getAccessToken();
 
     const headers: Record<string, string> = {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     };
 
@@ -210,7 +204,7 @@ export class PayPalProvider implements PaymentProviderInterface {
 
     if (!response.ok) {
       const error = await response.text();
-      throw new Error(`PayPal API error (${response.status}): ${error}`);
+      throw new Error(`PayPal API error (${String(response.status)}): ${error}`);
     }
 
     // Handle 204 No Content
@@ -225,11 +219,11 @@ export class PayPalProvider implements PaymentProviderInterface {
   // Customer Management
   // -------------------------------------------------------------------------
 
-  async createCustomer(userId: string, _email: string): Promise<string> {
+  createCustomer(userId: string, _email: string): Promise<string> {
     // PayPal doesn't have a separate customer creation API
     // The customer (payer) is created when they approve the subscription
     // We return the userId as the customer identifier
-    return `paypal_${userId}`;
+    return Promise.resolve(`paypal_${userId}`);
   }
 
   // -------------------------------------------------------------------------
@@ -351,20 +345,20 @@ export class PayPalProvider implements PaymentProviderInterface {
   // Payment Methods
   // -------------------------------------------------------------------------
 
-  async createSetupIntent(_customerId: string): Promise<SetupIntentResult> {
+  createSetupIntent(_customerId: string): Promise<SetupIntentResult> {
     // PayPal handles payment methods through the subscription approval flow
     // There's no equivalent to Stripe's SetupIntent
     // Return a placeholder that indicates PayPal flow
-    return {
+    return Promise.resolve({
       clientSecret: 'paypal_use_subscription_flow',
-    };
+    });
   }
 
-  async listPaymentMethods(_customerId: string): Promise<ProviderPaymentMethod[]> {
+  listPaymentMethods(_customerId: string): Promise<ProviderPaymentMethod[]> {
     // PayPal doesn't expose saved payment methods the same way Stripe does
     // Payment sources are managed through the PayPal account
     // For now, return empty array - users manage payment methods in PayPal
-    return [];
+    return Promise.resolve([]);
   }
 
   async attachPaymentMethod(_customerId: string, _paymentMethodId: string): Promise<void> {
@@ -400,12 +394,12 @@ export class PayPalProvider implements PaymentProviderInterface {
       const endDate = new Date().toISOString();
       const startDate = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString();
 
-      const response = await this.request<{ transaction_details: PayPalTransaction[] }>(
+      const response = await this.request<{ transaction_details?: PayPalTransaction[] }>(
         'GET',
-        `/v1/reporting/transactions?start_date=${startDate}&end_date=${endDate}&fields=all&page_size=${limit}`,
+        `/v1/reporting/transactions?start_date=${startDate}&end_date=${endDate}&fields=all&page_size=${String(limit)}`,
       );
 
-      for (const tx of response.transaction_details || []) {
+      for (const tx of response.transaction_details ?? []) {
         if (tx.payer?.payer_id === customerId || customerId.startsWith('paypal_')) {
           invoices.push({
             id: tx.id,
@@ -413,7 +407,8 @@ export class PayPalProvider implements PaymentProviderInterface {
             subscriptionId: null, // Would need to correlate
             status: tx.status === 'S' ? 'paid' : 'open',
             amountDue: Math.round(parseFloat(tx.amount?.value || '0') * 100),
-            amountPaid: tx.status === 'S' ? Math.round(parseFloat(tx.amount?.value || '0') * 100) : 0,
+            amountPaid:
+              tx.status === 'S' ? Math.round(parseFloat(tx.amount?.value || '0') * 100) : 0,
             currency: tx.amount?.currency_code?.toLowerCase() || 'usd',
             periodStart: new Date(tx.time),
             periodEnd: new Date(tx.time),
@@ -481,9 +476,7 @@ export class PayPalProvider implements PaymentProviderInterface {
 
   async updateProduct(productId: string, name: string, description?: string): Promise<void> {
     // PayPal uses PATCH for product updates
-    const patches = [
-      { op: 'replace', path: '/name', value: name },
-    ];
+    const patches = [{ op: 'replace', path: '/name', value: name }];
 
     if (description) {
       patches.push({ op: 'replace', path: '/description', value: description });
@@ -511,13 +504,13 @@ export class PayPalProvider implements PaymentProviderInterface {
 
     try {
       // Parse the signature header parts
-      const parts = signature.split(',').reduce((acc, part) => {
+      const parts = signature.split(',').reduce<Record<string, string>>((acc, part) => {
         const [key, value] = part.trim().split('=');
         if (key && value) {
           acc[key] = value;
         }
         return acc;
-      }, {} as Record<string, string>);
+      }, {});
 
       // Basic validation that required parts exist
       if (!parts.transmission_id || !parts.timestamp) {
@@ -567,7 +560,7 @@ export class PayPalProvider implements PaymentProviderInterface {
       case 'subscription': {
         const sub = resource as unknown as PayPalSubscription;
         subscriptionId = sub.id;
-        customerId = sub.subscriber?.payer_id;
+        customerId = sub.subscriber.payer_id;
         status = sub.status;
         if (sub.custom_id) {
           try {
@@ -586,7 +579,10 @@ export class PayPalProvider implements PaymentProviderInterface {
         break;
       }
       case 'dispute': {
-        const dispute = resource as { dispute_id: string; disputed_transactions?: Array<{ seller_transaction_id: string }> };
+        const dispute = resource as {
+          dispute_id: string;
+          disputed_transactions?: Array<{ seller_transaction_id: string }>;
+        };
         invoiceId = dispute.disputed_transactions?.[0]?.seller_transaction_id;
         break;
       }

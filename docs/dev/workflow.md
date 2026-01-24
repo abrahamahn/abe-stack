@@ -51,13 +51,13 @@ The `tools/dev/start-dev.ts` script:
 
 ### Environment Variables
 
-Environment files in `config/.env/`:
+Environment files in ``:
 
 ```text
-config/.env/
-├── .env.development    # Development settings
-├── .env.production     # Production settings
-└── .env.test           # Test settings
+
+├── .config/env/.config/env/.env.development    # Development settings
+├── .config/env/.config/env/.env.production     # Production settings
+└── .config/env/.config/env/.env.test           # Test settings
 ```
 
 ---

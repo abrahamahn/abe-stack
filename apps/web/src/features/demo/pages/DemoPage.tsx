@@ -1,9 +1,9 @@
 // apps/web/src/features/demo/pages/DemoPage.tsx
-import { Button, Heading, ResizablePanelGroup, SidePeek, Text, useSidePeek } from '@abe-stack/ui';
+import { ResizablePanelGroup, SidePeek, useContrast, useDensity, useSidePeek } from '@abe-stack/ui';
 import { AuthModal } from '@auth/components';
 import { useAuth } from '@auth/hooks';
 import { getAllCategories, getComponentsByCategory, getTotalComponentCount } from '@catalog/index';
-import { DemoBottomBar, DemoMainLayout, DemoTopBar } from '@demo/components';
+import { DemoBottomBar, DemoMainLayout, DemoTopBar, SidePeekDemoContent } from '@demo/components';
 import { useDemoKeyboard, useDemoPanes, useDemoTheme } from '@demo/hooks';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -11,14 +11,16 @@ import type { AuthMode } from '@auth/components/AuthForms';
 import type { ComponentDemo } from '@demo/types';
 
 export function DemoPage(): React.ReactElement {
-  const { cycleTheme, getThemeIcon, getThemeLabel } = useDemoTheme();
+  const { cycleTheme, getThemeIcon, getThemeLabel, resolvedTheme } = useDemoTheme();
+  const { density, cycleDensity } = useDensity('demo-density');
+  const { contrastMode, cycleContrastMode } = useContrast('demo-contrast', resolvedTheme);
   const { paneConfig, togglePane, handlePaneResize, resetLayout } = useDemoPanes();
   const [activeCategory, setActiveCategory] = useState<string>('elements');
   const [selectedComponent, setSelectedComponent] = useState<ComponentDemo | null>(null);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const { user, isAuthenticated, logout } = useAuth();
-  const { isOpen: sidePeekOpen, peekPath, close: closeSidePeek } = useSidePeek();
+  const { isOpen: sidePeekOpen, peekPath: _peekPath, close: closeSidePeek } = useSidePeek();
 
   useDemoKeyboard({
     togglePane,
@@ -55,6 +57,18 @@ export function DemoPage(): React.ReactElement {
     [handlePaneResize],
   );
 
+  const getDensityLabel = useCallback((): string => {
+    if (density === 'compact') return 'Compact';
+    if (density === 'comfortable') return 'Comfortable';
+    return 'Normal';
+  }, [density]);
+
+  const getContrastLabel = useCallback((): string => {
+    if (contrastMode === 'high') return 'High';
+    if (contrastMode === 'normal') return 'Normal';
+    return 'System';
+  }, [contrastMode]);
+
   return (
     <>
       <div className="h-screen w-screen overflow-hidden">
@@ -81,6 +95,10 @@ export function DemoPage(): React.ReactElement {
               cycleTheme={cycleTheme}
               getThemeIcon={getThemeIcon}
               getThemeLabel={getThemeLabel}
+              cycleDensity={cycleDensity}
+              getDensityLabel={getDensityLabel}
+              cycleContrast={cycleContrastMode}
+              getContrastLabel={getContrastLabel}
             />
 
             {/* Middle Area */}
@@ -106,58 +124,12 @@ export function DemoPage(): React.ReactElement {
         <SidePeek.Header>
           <SidePeek.Title>Side Peek Demo</SidePeek.Title>
           <div className="flex gap-2">
-            <SidePeek.Expand to={peekPath ?? '/demo'} />
+            <SidePeek.Expand to="/side-peek-demo" />
             <SidePeek.Close />
           </div>
         </SidePeek.Header>
         <SidePeek.Content>
-          <div className="space-y-4">
-            <Text>
-              This is a <strong>Notion-style side peek</strong> panel. It slides in from the right
-              and keeps the background visible.
-            </Text>
-
-            <Heading as="h3" size="md">
-              Features
-            </Heading>
-            <ul className="list-disc list-inside space-y-2">
-              <li>URL-synced state (try refreshing!)</li>
-              <li>Smooth CSS transitions</li>
-              <li>Click overlay or press Escape to close</li>
-              <li>Expand button to open in full page</li>
-              <li>Multiple size variants (sm, md, lg, xl, full)</li>
-              <li>Focus trap for accessibility</li>
-            </ul>
-
-            <Heading as="h3" size="md">
-              Usage
-            </Heading>
-            <pre className="bg-black/10 p-4 rounded text-sm overflow-auto">
-              {`import { SidePeek, useSidePeek } from '@abe-stack/ui';
-
-const { isOpen, open, close } = useSidePeek();
-
-<button onClick={() => open('/details')}>
-  Open Side Peek
-</button>
-
-<SidePeek.Root open={isOpen} onClose={close}>
-  <SidePeek.Header>
-    <SidePeek.Title>Title</SidePeek.Title>
-    <SidePeek.Close />
-  </SidePeek.Header>
-  <SidePeek.Content>
-    Your content here
-  </SidePeek.Content>
-</SidePeek.Root>`}
-            </pre>
-
-            <div className="pt-4">
-              <Button variant="primary" onClick={closeSidePeek}>
-                Close this panel
-              </Button>
-            </div>
-          </div>
+          <SidePeekDemoContent actionLabel="Close this panel" onAction={closeSidePeek} />
         </SidePeek.Content>
       </SidePeek.Root>
     </>

@@ -143,7 +143,13 @@ export interface QueueStore {
 /**
  * Job status values
  */
-export type JobStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'dead_letter' | 'cancelled';
+export type JobStatus =
+  | 'pending'
+  | 'processing'
+  | 'completed'
+  | 'failed'
+  | 'dead_letter'
+  | 'cancelled';
 
 /**
  * Detailed job information for monitoring

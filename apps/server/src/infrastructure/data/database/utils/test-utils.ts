@@ -9,9 +9,7 @@ export interface MockDbClient {
   queryOne: Mock<(sql: { text: string; values: unknown[] }) => Promise<unknown>>;
   execute: Mock<(sql: { text: string; values: unknown[] }) => Promise<number>>;
   raw: Mock<(sql: string) => Promise<unknown[]>>;
-  transaction: Mock<
-    <T>(callback: (tx: RawDb) => Promise<T>, options?: unknown) => Promise<T>
-  >;
+  transaction: Mock<<T>(callback: (tx: RawDb) => Promise<T>, options?: unknown) => Promise<T>>;
   healthCheck: Mock<() => Promise<boolean>>;
   close: Mock<() => Promise<void>>;
   getClient: Mock<() => unknown>;

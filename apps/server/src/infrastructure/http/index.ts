@@ -96,3 +96,6 @@ export {
   type PaginationMiddlewareOptions,
   type PaginationRequest,
 } from './pagination';
+
+// Plugins
+export { registerPlugins } from './plugins';

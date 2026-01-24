@@ -584,12 +584,11 @@
   padding: var(--ui-gap-sm);
   flex-shrink: 0;
   background: var(--ui-color-bg);
-  width: 3.125rem;
+  width: max-content;
 }
 
 @media (max-width: 48rem) {
   .sidebar {
-    width: 2.625rem;
     padding: var(--ui-gap-xs);
   }
 }
@@ -706,12 +705,13 @@
 
 /* Sidebar button (category/toggle) */
 .sidebar-btn {
-  width: 100%;
+  width: 2.5rem;
   height: 2.5rem;
   padding: 0;
 }
 
 .sidebar-btn-sm {
+  width: 2.25rem;
   height: 2.25rem;
 }
 

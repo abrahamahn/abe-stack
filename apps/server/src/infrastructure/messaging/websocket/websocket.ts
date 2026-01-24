@@ -6,11 +6,12 @@
  */
 
 import { parseCookies } from '@abe-stack/core/http';
+import { eq, select, USERS_TABLE } from '@abe-stack/db';
 import { validateCsrfToken } from '@http';
 import { verifyToken } from '@modules/auth/utils/jwt';
-import { select, eq, USERS_TABLE } from '@abe-stack/db';
 import { WebSocketServer, type WebSocket } from 'ws';
 
+import type { SubscriptionKey } from '@infrastructure/index';
 import type { AppContext } from '@shared';
 import type { FastifyInstance } from 'fastify';
 import type { IncomingMessage } from 'node:http';
@@ -38,11 +39,7 @@ async function getRecordVersion(
   if (!actualTable) return undefined;
 
   const row = await db.queryOne<{ version: number }>(
-    select(actualTable)
-      .columns('version')
-      .where(eq('id', id))
-      .limit(1)
-      .toSql(),
+    select(actualTable).columns('version').where(eq('id', id)).limit(1).toSql(),
   );
 
   return row?.version;
@@ -246,7 +243,7 @@ function handleConnection(socket: WebSocket, req: IncomingMessage, ctx: AppConte
         message = Buffer.from(data).toString();
       }
 
-      pubsub.handleMessage(asPubSubWebSocket(socket), message, (key: string) => {
+      pubsub.handleMessage(asPubSubWebSocket(socket), message, (key: SubscriptionKey) => {
         void sendInitialData(ctx, socket, key);
       });
     });

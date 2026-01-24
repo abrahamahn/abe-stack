@@ -5,11 +5,7 @@
  * Displays a single invoice in a list/table format.
  */
 
-import {
-  forwardRef,
-  type ComponentPropsWithoutRef,
-  type ReactElement,
-} from 'react';
+import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 'react';
 
 import { cn } from '../../utils/cn';
 
@@ -126,16 +122,20 @@ export const InvoiceRow = forwardRef<HTMLDivElement, InvoiceRowProps>(
     },
     ref,
   ): ReactElement => {
-    const { status, amountPaid, currency, periodStart, periodEnd, paidAt, invoicePdfUrl, createdAt } =
-      invoice;
+    const {
+      status,
+      amountPaid,
+      currency,
+      periodStart,
+      periodEnd,
+      paidAt,
+      invoicePdfUrl,
+      createdAt,
+    } = invoice;
     const statusVariant = getStatusVariant(status);
 
     return (
-      <div
-        ref={ref}
-        className={cn('invoice-row', `invoice-row--${status}`, className)}
-        {...rest}
-      >
+      <div ref={ref} className={cn('invoice-row', `invoice-row--${status}`, className)} {...rest}>
         <div className="invoice-row__date">
           <span className="invoice-row__date-label">
             {paidAt ? formatDate(paidAt) : formatDate(createdAt)}
@@ -143,15 +143,11 @@ export const InvoiceRow = forwardRef<HTMLDivElement, InvoiceRowProps>(
         </div>
 
         <div className="invoice-row__period">
-          <span className="invoice-row__period-label">
-            {formatPeriod(periodStart, periodEnd)}
-          </span>
+          <span className="invoice-row__period-label">{formatPeriod(periodStart, periodEnd)}</span>
         </div>
 
         <div className="invoice-row__amount">
-          <span className="invoice-row__amount-value">
-            {formatPrice(amountPaid, currency)}
-          </span>
+          <span className="invoice-row__amount-value">{formatPrice(amountPaid, currency)}</span>
         </div>
 
         <div className="invoice-row__status">

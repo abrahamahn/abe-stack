@@ -22,7 +22,7 @@ import {
 } from '@infrastructure';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import type { Auth } from '@';
+import type { Auth } from '@abe-stack/core';
 import type { RawDb } from '@abe-stack/db';
 import type { Logger, Repositories } from '@infrastructure';
 
@@ -98,7 +98,7 @@ const TEST_: Auth = {
   },
   lockout: {
     maxAttempts: 5,
-    lockoutDurationMs: 30 * 60 * 1000, // 30 minutes
+    lockoutDconfigurationMs: 30 * 60 * 1000, // 30 minutes
     progressiveDelay: true,
     baseDelayMs: 1000,
   },
@@ -277,10 +277,10 @@ describe('Account Lockout Expiration', () => {
     vi.mocked(isAccountLocked).mockResolvedValueOnce(true);
 
     await expect(authenticateUser(db, repos, TEST_, email, password, logger)).rejects.toThrow(
-      AccountLockedError
+      AccountLockedError,
     );
 
-    // Advance time past lockout duration (30 minutes)
+    // Advance time past lockout dconfiguration (30 minutes)
     vi.advanceTimersByTime(31 * 60 * 1000);
 
     // Second attempt: lockout has expired
@@ -310,11 +310,11 @@ describe('Account Lockout Expiration', () => {
     vi.mocked(isAccountLocked).mockResolvedValue(true);
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
 
-    // Advance time by half the lockout duration (15 minutes)
+    // Advance time by half the lockout dconfiguration (15 minutes)
     vi.advanceTimersByTime(15 * 60 * 1000);
 
     await expect(authenticateUser(db, repos, TEST_, email, password, logger)).rejects.toThrow(
-      AccountLockedError
+      AccountLockedError,
     );
 
     expect(logLoginAttempt).toHaveBeenCalledWith(
@@ -323,7 +323,7 @@ describe('Account Lockout Expiration', () => {
       false,
       undefined,
       undefined,
-      'Account locked'
+      'Account locked',
     );
   });
 
@@ -502,7 +502,9 @@ describe('Parallel Login Requests', () => {
     const failedPromises = Array(5)
       .fill(null)
       .map(() =>
-        authenticateUser(db, repos, TEST_, email, 'wrong-password', logger).catch((e: unknown) => e)
+        authenticateUser(db, repos, TEST_, email, 'wrong-password', logger).catch(
+          (e: unknown) => e,
+        ),
       );
 
     const results = await Promise.all(failedPromises);
@@ -534,7 +536,7 @@ describe('Password Change Session Invalidation', () => {
     vi.mocked(rotateRefreshToken).mockResolvedValue(null);
 
     await expect(refreshUserTokens(db, repos, TEST_, oldRefreshToken)).rejects.toThrow(
-      'Invalid or expired token'
+      'Invalid or expired token',
     );
   });
 
@@ -609,7 +611,7 @@ describe('Password Change Session Invalidation', () => {
     vi.mocked(verifyPasswordSafe).mockResolvedValue(false); // Old password doesn't match new hash
 
     await expect(authenticateUser(db, repos, TEST_, email, oldPassword, logger)).rejects.toThrow(
-      InvalidCredentialsError
+      InvalidCredentialsError,
     );
   });
 });
@@ -634,7 +636,7 @@ describe('Login During Active Lockout', () => {
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
 
     await expect(
-      authenticateUser(db, repos, TEST_, email, correctPassword, logger)
+      authenticateUser(db, repos, TEST_, email, correctPassword, logger),
     ).rejects.toThrow(AccountLockedError);
 
     // Password verification should NOT be called when account is locked
@@ -654,7 +656,7 @@ describe('Login During Active Lockout', () => {
     vi.mocked(logLoginAttempt).mockResolvedValue(undefined);
 
     await expect(
-      authenticateUser(db, repos, TEST_, email, 'any-password', logger, ipAddress, userAgent)
+      authenticateUser(db, repos, TEST_, email, 'any-password', logger, ipAddress, userAgent),
     ).rejects.toThrow(AccountLockedError);
 
     expect(logLoginAttempt).toHaveBeenCalledWith(
@@ -663,7 +665,7 @@ describe('Login During Active Lockout', () => {
       false,
       ipAddress,
       userAgent,
-      'Account locked'
+      'Account locked',
     );
   });
 
@@ -679,7 +681,7 @@ describe('Login During Active Lockout', () => {
     // Make 3 attempts during lockout
     for (let i = 0; i < 3; i++) {
       await expect(
-        authenticateUser(db, repos, TEST_, email, 'wrong-password', logger)
+        authenticateUser(db, repos, TEST_, email, 'wrong-password', logger),
       ).rejects.toThrow(AccountLockedError);
     }
 
@@ -906,7 +908,7 @@ describe('Lockout Counter Reset', () => {
     vi.mocked(verifyPasswordSafe).mockResolvedValueOnce(false);
 
     await expect(
-      authenticateUser(db, repos, TEST_, email, 'wrong-password', logger)
+      authenticateUser(db, repos, TEST_, email, 'wrong-password', logger),
     ).rejects.toThrow(InvalidCredentialsError);
 
     // Account should not be locked (only 1 failure after reset)
@@ -956,7 +958,7 @@ describe('Email Verification Auto-Login', () => {
       createdAt: new Date(),
     };
     vi.mocked(repos.emailVerificationTokens.findValidByTokenHash).mockResolvedValue(
-      mockTokenRecord
+      mockTokenRecord,
     );
 
     const mockUser = {
@@ -1019,7 +1021,7 @@ describe('Timing-Safe Operations', () => {
     vi.mocked(verifyPasswordSafe).mockResolvedValue(false);
 
     await expect(authenticateUser(db, repos, TEST_, email, 'any-password', logger)).rejects.toThrow(
-      InvalidCredentialsError
+      InvalidCredentialsError,
     );
 
     // verifyPasswordSafe should be called even for non-existent users (timing attack prevention)
@@ -1050,7 +1052,7 @@ describe('Timing-Safe Operations', () => {
 
     const start1 = Date.now();
     await expect(
-      authenticateUser(db, repos, TEST_, 'nonexistent@example.com', 'password', logger)
+      authenticateUser(db, repos, TEST_, 'nonexistent@example.com', 'password', logger),
     ).rejects.toThrow();
     const time1 = Date.now() - start1;
 
@@ -1073,7 +1075,7 @@ describe('Timing-Safe Operations', () => {
 
     const start2 = Date.now();
     await expect(
-      authenticateUser(db, repos, TEST_, 'existing@example.com', 'wrong-password', logger)
+      authenticateUser(db, repos, TEST_, 'existing@example.com', 'wrong-password', logger),
     ).rejects.toThrow();
     const time2 = Date.now() - start2;
 

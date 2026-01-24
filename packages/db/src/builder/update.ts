@@ -126,7 +126,8 @@ export class UpdateBuilder implements QueryBuilder {
     const parts: SqlFragment[] = [];
 
     // UPDATE table
-    parts.push({ text: `UPDATE ${formatTable(this._table)}`, values: [] });
+    const tableFragment = formatTable(this._table);
+    parts.push({ text: `UPDATE ${tableFragment.text}`, values: [...tableFragment.values] });
 
     // SET clause
     const setClauses: SqlFragment[] = [];
@@ -150,7 +151,8 @@ export class UpdateBuilder implements QueryBuilder {
 
     // FROM clause (for joins)
     if (this._from) {
-      parts.push({ text: `FROM ${formatTable(this._from)}`, values: [] });
+      const fromFragment = formatTable(this._from);
+      parts.push({ text: `FROM ${fromFragment.text}`, values: [...fromFragment.values] });
     }
 
     // WHERE clause

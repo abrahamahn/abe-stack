@@ -1,5 +1,6 @@
 // apps/server/src/config/services/billing.ts
 import type { BillingConfig, BillingProvider } from '@abe-stack/core/contracts/config';
+import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
 
 /**
  * Loads billing and subscription configuration from environment variables.
@@ -23,10 +24,7 @@ import type { BillingConfig, BillingProvider } from '@abe-stack/core/contracts/c
  * PAYPAL_CLIENT_SECRET=...
  * ```
  */
-export function loadBilling(
-  env: Record<string, string | undefined>,
-  appBaseUrl?: string
-): BillingConfig {
+export function loadBilling(env: FullEnv, appBaseUrl?: string): BillingConfig {
   // Use passed URL or fall back to env/default
   const appUrl = (appBaseUrl || env.APP_URL || 'http://localhost:5173').replace(/\/$/, '');
 
@@ -39,7 +37,7 @@ export function loadBilling(
   // 2. Resolve active provider (Explicit Choice > Stripe > PayPal)
   const provider = resolveActiveProvider(
     env.BILLING_PROVIDER as BillingProvider | undefined,
-    availability
+    availability,
   );
 
   const config: BillingConfig = {
@@ -88,7 +86,7 @@ export function loadBilling(
 
 function resolveActiveProvider(
   explicit: BillingProvider | undefined,
-  avail: { stripe: boolean; paypal: boolean }
+  avail: { stripe: boolean; paypal: boolean },
 ): BillingProvider | null {
   if (explicit === 'stripe' && avail.stripe) return 'stripe';
   if (explicit === 'paypal' && avail.paypal) return 'paypal';

@@ -5,13 +5,13 @@ import { ConsoleEmailService } from '../consoleEmailService';
 import { createEmailService } from '../factory';
 import { SmtpEmailService } from '../smtpEmailService';
 
-import type { Email } from '@';
+import type { Email } from '@abe-stack/core';
 
 // Mock the SmtpClient to prevent actual SMTP connections
 vi.mock('../smtp.js', () => ({
   SmtpClient: class MockSmtpClient {
     send = vi.fn().mockResolvedValue({ success: true, messageId: 'mock-123' });
-    constructor(public : unknown) {}
+    constructor(public config: unknown) {}
   },
 }));
 
@@ -49,21 +49,21 @@ describe('createEmailService', () => {
 
   describe('provider selection', () => {
     test('should create SmtpEmailService when provider is smtp', () => {
-      const  = createMockEmail('smtp');
+      const config = createMockEmail('smtp');
       const service = createEmailService();
 
       expect(service).toBeInstanceOf(SmtpEmailService);
     });
 
     test('should create ConsoleEmailService when provider is console', () => {
-      const  = createMockEmail('console');
+      const config = createMockEmail('console');
       const service = createEmailService();
 
       expect(service).toBeInstanceOf(ConsoleEmailService);
     });
 
     test('should default to ConsoleEmailService for unknown providers', () => {
-      const  = {
+      const config = {
         ...createMockEmail('console'),
         provider: 'unknown' as 'console',
       };
@@ -75,7 +75,7 @@ describe('createEmailService', () => {
 
   describe('service functionality', () => {
     test('should return working SmtpEmailService', async () => {
-      const  = createMockEmail('smtp');
+      const config = createMockEmail('smtp');
       const service = createEmailService();
 
       const result = await service.send({
@@ -89,7 +89,7 @@ describe('createEmailService', () => {
 
     test('should return working ConsoleEmailService', async () => {
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => undefined);
-      const  = createMockEmail('console');
+      const config = createMockEmail('console');
       const service = createEmailService();
 
       const result = await service.send({
@@ -103,11 +103,11 @@ describe('createEmailService', () => {
     });
   });
 
-  describe('uration handling', () => {
+  describe('configuration handling', () => {
     test('should pass smtp  to SmtpEmailService', () => {
-      const  = createMockEmail('smtp');
-      .smtp.host = 'custom-host.example.com';
-      .smtp.port = 465;
+      const config = createMockEmail('smtp');
+      config.smtp.host = 'custom-host.example.com';
+      config.smtp.port = 465;
 
       const service = createEmailService();
 
@@ -116,9 +116,9 @@ describe('createEmailService', () => {
     });
 
     test('should create ConsoleEmailService regardless of smtp ', () => {
-      const  = createMockEmail('console');
+      const config = createMockEmail('console');
       // Even with smtp  present, console provider should work
-      .smtp.host = 'unused-host.example.com';
+      config.smtp.host = 'unused-host.example.com';
 
       const service = createEmailService();
 
@@ -128,7 +128,7 @@ describe('createEmailService', () => {
 
   describe('edge cases', () => {
     test('should handle empty string provider', () => {
-      const  = {
+      const config = {
         ...createMockEmail('console'),
         provider: '' as 'console',
       };
@@ -139,14 +139,14 @@ describe('createEmailService', () => {
     });
 
     test('should handle case sensitivity in provider', () => {
-      const  = {
+      const config = {
         ...createMockEmail('console'),
         provider: 'SMTP' as 'smtp',
       };
       const service = createEmailService();
 
       // Depends on implementation - might be smtp or console
-      expect(service).toBeDefined();
+      expect(config).toBeDefined();
     });
   });
 });

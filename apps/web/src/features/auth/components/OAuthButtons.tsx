@@ -86,10 +86,13 @@ export function OAuthButtons({ mode = 'login', disabled }: OAuthButtonsProps): R
     [config.apiUrl],
   );
 
-  const { providers, isLoading } = useEnabledOAuthProviders(clientConfig);
+  const oauthState = useEnabledOAuthProviders(clientConfig);
+  const providers = Array.isArray(oauthState.providers) ? oauthState.providers : [];
+  const isLoading = oauthState.isLoading;
+  const error = oauthState.error;
 
-  // Don't render anything if no providers are enabled
-  if (!isLoading && providers.length === 0) {
+  // Don't render anything if no providers are enabled or provider lookup failed
+  if ((!isLoading && providers.length === 0) || error) {
     return null;
   }
 

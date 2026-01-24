@@ -8,3 +8,5 @@ export type { DemoMainLayoutProps } from './DemoMainLayout';
 export { DemoPreviewArea } from './DemoPreviewArea';
 export { DemoTopBar } from './DemoTopBar';
 export type { DemoTopBarProps } from './DemoTopBar';
+export { SidePeekDemoContent } from './SidePeekDemoContent';
+export type { SidePeekDemoContentProps } from './SidePeekDemoContent';

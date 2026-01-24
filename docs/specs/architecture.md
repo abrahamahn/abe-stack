@@ -302,12 +302,12 @@ function useRecord<T>(table: string, id: string) {
 
 ## Testing Organization
 
-| Test Type         | Location                                              | Purpose             |
-| ----------------- | ----------------------------------------------------- | ------------------- |
-| Unit tests        | Adjacent to source files (`file.ts` + `file.test.ts`) | Business logic      |
-| Integration tests | `apps/server/src/__tests__/integration/` or `test/`   | Routes + DB         |
+| Test Type         | Location                                               | Purpose             |
+| ----------------- | ------------------------------------------------------ | ------------------- |
+| Unit tests        | Adjacent to source files (`file.ts` + `file.test.ts`)  | Business logic      |
+| Integration tests | `apps/server/src/__tests__/integration/` or `test/`    | Routes + DB         |
 | Component tests   | Adjacent to components (`Component.tsx` + `.test.tsx`) | UI components       |
-| E2E tests         | `apps/web/src/test/e2e`                               | Critical user flows |
+| E2E tests         | `apps/web/src/test/e2e`                                | Critical user flows |
 
 **Hybrid model**: Colocate unit/component tests; centralize integration/E2E tests.
 

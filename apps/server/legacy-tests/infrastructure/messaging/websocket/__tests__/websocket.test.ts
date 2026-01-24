@@ -74,7 +74,7 @@ describe('WebSocket Module', () => {
           warn: vi.fn(),
           info: vi.fn(),
         },
-        : {
+        config: {
           auth: {
             jwt: {
               secret: 'test-secret',
@@ -112,7 +112,7 @@ describe('WebSocket Module', () => {
           warn: vi.fn(),
           info: vi.fn(),
         },
-        : {
+        config: {
           auth: {
             jwt: {
               secret: 'test-secret',
@@ -145,7 +145,7 @@ describe('WebSocket Module', () => {
           warn: vi.fn(),
           info: vi.fn(),
         },
-        : {
+        config: {
           auth: {
             jwt: {
               secret: 'test-secret',
@@ -192,7 +192,7 @@ describe('WebSocket Module', () => {
           warn: vi.fn(),
           info: vi.fn(),
         },
-        : {
+        config: {
           env: 'test',
           auth: {
             jwt: {
@@ -262,7 +262,7 @@ describe('WebSocket Module', () => {
           warn: vi.fn(),
           info: vi.fn(),
         },
-        : {
+        config: {
           auth: {
             jwt: {
               secret: 'test-secret',
@@ -335,7 +335,7 @@ describe('WebSocket Module', () => {
           warn: vi.fn(),
           info: vi.fn(),
         },
-        : {
+        config: {
           auth: {
             jwt: {
               secret: 'test-secret',
@@ -409,7 +409,7 @@ describe('WebSocket Module', () => {
           warn: vi.fn(),
           info: vi.fn(),
         },
-        : {
+        config: {
           auth: {
             jwt: {
               secret: 'test-secret',
@@ -481,7 +481,7 @@ describe('WebSocket Module', () => {
           warn: vi.fn(),
           info: vi.fn(),
         },
-        : {
+        config: {
           env: 'test',
           auth: {
             jwt: {
@@ -541,7 +541,7 @@ describe('WebSocket Module', () => {
           warn: vi.fn(),
           info: vi.fn(),
         },
-        : {
+        config: {
           env: 'test',
           auth: {
             jwt: {
@@ -616,7 +616,7 @@ describe('WebSocket Module', () => {
           warn: vi.fn(),
           info: vi.fn(),
         },
-        : {
+        config: {
           env: 'production',
           auth: {
             jwt: {

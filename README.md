@@ -67,7 +67,7 @@ https://github.com/abrahamahn/abe-stack
 git clone https://github.com/abrahamahn/abe-stack.git && cd abe-stack
 corepack enable && corepack prepare pnpm@10.26.2 --activate
 pnpm install
-cp config/.env/.env.example config/.env/.env.development
+cp .env.example .config/env/.config/env/.env.development
 pnpm dev
 ```
 
@@ -86,18 +86,31 @@ docker compose -f config/docker/docker-compose.yml up --build
 
 ```
 abe-stack/
-├── apps/
-│   ├── web/          # Vite + React web app
-│   ├── desktop/      # Electron app (shares code with web)
-│   └── server/       # Fastify API (enterprise security, audit logging)
-├── packages/
-│   ├── core/         # Contracts, validation, stores, errors, media
-│   ├── ui/           # 16 components, 25 elements, 13 hooks, 14 layouts
-│   ├── sdk/          # Type-safe API client + React Query + offline support
-│   └── tests/        # Shared test utilities and mocks
-├── config/           # Docker, env, test configs
-├── tools/            # Dev scripts (sync watchers, audit tools)
-└── docs/             # Documentation
+├── apps/                 # Applications (Web, Server, Desktop)
+│   ├── web/              # Vite + React web app
+│   ├── desktop/          # Electron app (shares code with web)
+│   └── server/           # Fastify API (enterprise security, audit logging)
+├── packages/             # Shared Logic & Contracts
+│   ├── core/             # Contracts, validation, stores, errors, media
+│   ├── ui/               # 16 components, 25 elements, 13 hooks, 14 layouts
+│   ├── sdk/              # Type-safe API client + React Query + offline support
+│   └── tests/            # Shared test utilities and mocks
+├── infra/                # Deployment & Orchestration
+│   ├── docker/           # Dockerfiles & Compose
+│   ├── caddy/            # Caddy reverse proxy configs
+│   └── nginx/            # Nginx configs
+├── tooling/              # Meta Development Tools
+│   ├── generators/       # Code scaffolding utilities
+│   ├── lint/             # Linting & formatting configs
+│   └── schema/           # Build-time schemas
+├── .config/              # Tooling Configurations (hidden)
+│   ├── tsconfig*.json    # TypeScript configurations
+│   ├── vite.config.ts    # Vite build config
+│   ├── vitest.config.ts  # Testing framework config
+│   └── ...               # Other tool configs
+├── .env*                 # Environment configuration files
+├── tools/                # Dev scripts (sync watchers, audit tools)
+└── docs/                 # Documentation
 ```
 
 ---

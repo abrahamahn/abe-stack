@@ -13,6 +13,10 @@ export interface DemoBottomBarProps {
   cycleTheme: () => void;
   getThemeIcon: () => string;
   getThemeLabel: () => string;
+  cycleDensity: () => void;
+  getDensityLabel: () => string;
+  cycleContrast: () => void;
+  getContrastLabel: () => string;
 }
 
 export function DemoBottomBar({
@@ -23,6 +27,10 @@ export function DemoBottomBar({
   cycleTheme,
   getThemeIcon,
   getThemeLabel,
+  cycleDensity,
+  getDensityLabel,
+  cycleContrast,
+  getContrastLabel,
 }: DemoBottomBarProps): ReactElement {
   return (
     <ResizablePanel
@@ -56,18 +64,42 @@ export function DemoBottomBar({
           ))}
         </div>
 
-        {/* Right: Theme Toggle */}
-        <Button
-          variant="secondary"
-          size="small"
-          onClick={cycleTheme}
-          title={`Theme: ${getThemeLabel()} (click to change)`}
-          aria-label={`Theme: ${getThemeLabel()}, click to change`}
-          className="flex items-center gap-2 p-1 px-2"
-        >
-          <span>{getThemeIcon()}</span>
-          <span className="text-xs hide-mobile">{getThemeLabel()}</span>
-        </Button>
+        {/* Right: Theme Controls */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            size="small"
+            onClick={cycleDensity}
+            title={`Density: ${getDensityLabel()} (click to change)`}
+            aria-label={`Density: ${getDensityLabel()}, click to change`}
+            className="flex items-center gap-2 p-1 px-2"
+          >
+            <span aria-hidden>📏</span>
+            <span className="text-xs">{getDensityLabel()}</span>
+          </Button>
+          <Button
+            variant="secondary"
+            size="small"
+            onClick={cycleContrast}
+            title={`Contrast: ${getContrastLabel()} (click to change)`}
+            aria-label={`Contrast: ${getContrastLabel()}, click to change`}
+            className="flex items-center gap-2 p-1 px-2"
+          >
+            <span aria-hidden>🌗</span>
+            <span className="text-xs">{getContrastLabel()}</span>
+          </Button>
+          <Button
+            variant="secondary"
+            size="small"
+            onClick={cycleTheme}
+            title={`Theme: ${getThemeLabel()} (click to change)`}
+            aria-label={`Theme: ${getThemeLabel()}, click to change`}
+            className="flex items-center gap-2 p-1 px-2"
+          >
+            <span>{getThemeIcon()}</span>
+            <span className="text-xs hide-mobile">{getThemeLabel()}</span>
+          </Button>
+        </div>
       </div>
     </ResizablePanel>
   );

@@ -19,7 +19,7 @@ import { RateLimiter } from '@rate-limit/index';
 import Fastify from 'fastify';
 import { vi, type Mock } from 'vitest';
 
-import type { AppConfig } from '@config';
+import type { AppConfig } from '@/config';
 import type { FastifyInstance, InjectOptions, LightMyRequestResponse } from 'fastify';
 
 // Mock function type that is callable
@@ -393,7 +393,7 @@ export async function createTestServer(options: TestServerOptions = {}): Promise
 
     if (enableCors) {
       applyCors(req, res, {
-        origin: config.server.cors.origin,
+        origin: config.server.cors.origin.join(','),
         credentials: config.server.cors.credentials,
         allowedMethods: config.server.cors.methods,
       });

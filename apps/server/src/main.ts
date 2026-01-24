@@ -6,7 +6,7 @@
  * Environment variables are loaded via Node's native --env-file flag in package.json scripts.
  */
 
-import { loadConfig } from '@config/index';
+import { loadConfig } from '@/config/index';
 
 import { createApp } from '@/app';
 

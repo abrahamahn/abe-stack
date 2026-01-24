@@ -7,7 +7,7 @@
  */
 
 import { withTransaction } from '@database';
-import { SubKeys } from '@pubsub';
+import { SubKeys } from '@infrastructure/index';
 
 import {
   applyOperations,
@@ -18,7 +18,7 @@ import {
   saveRecords,
 } from './service';
 
-import type { RecordPointer, RealtimeTransaction } from '@abe-stack/core';
+import type { RealtimeTransaction, RecordPointer } from '@abe-stack/core';
 import type { RouteResult } from '@router';
 import type { AppContext, RequestWithCookies } from '@shared';
 
@@ -54,7 +54,7 @@ export async function handleWrite(
   body: RealtimeTransaction,
   req: RequestWithCookies,
 ): Promise<RouteResult<WriteResult | ConflictResult | { message: string }>> {
-  const { db, pubsub, log } = ctx;
+  const { db, log } = ctx;
   const userId = req.user?.userId;
 
   // Require authentication
@@ -136,12 +136,11 @@ export async function handleWrite(
       return { recordMap: newRecordMap, modifiedRecords };
     });
 
-    // 7. Publish updates via PubSub (after transaction commit)
     setImmediate(() => {
       for (const { table, id } of result.modifiedRecords) {
         const record = result.recordMap[table]?.[id];
         if (record && typeof record === 'object' && 'version' in record) {
-          pubsub.publish(SubKeys.record(table, id), (record as { version: number }).version);
+          ctx.pubsub.publish(SubKeys.record(table, id), (record as { version: number }).version);
         }
       }
     });

@@ -37,12 +37,7 @@ export function SecurityEventsPage(): JSX.Element {
     refetch: refetchEvents,
   } = useSecurityEvents();
 
-  const {
-    data: metricsData,
-    isLoading: metricsLoading,
-    period,
-    setPeriod,
-  } = useSecurityMetrics();
+  const { data: metricsData, isLoading: metricsLoading, period, setPeriod } = useSecurityMetrics();
 
   const handlePeriodChange = useCallback(
     (value: string) => {
@@ -72,21 +67,26 @@ export function SecurityEventsPage(): JSX.Element {
             </Text>
           </div>
           <div className="flex items-center gap-2">
-            <Select
-              value={period}
-              onChange={handlePeriodChange}
-              className="w-40"
-            >
+            <Select value={period} onChange={handlePeriodChange} className="w-40">
               {periodOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
             </Select>
-            <Button variant="secondary" onClick={() => { void refetchEvents(); }}>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                void refetchEvents();
+              }}
+            >
               Refresh
             </Button>
-            <Button onClick={() => { setIsExportDialogOpen(true); }}>
+            <Button
+              onClick={() => {
+                setIsExportDialogOpen(true);
+              }}
+            >
               Export
             </Button>
           </div>
@@ -99,7 +99,9 @@ export function SecurityEventsPage(): JSX.Element {
         <div className="flex items-center justify-between">
           <Button
             variant="secondary"
-            onClick={() => { setShowFilters(!showFilters); }}
+            onClick={() => {
+              setShowFilters(!showFilters);
+            }}
           >
             {showFilters ? 'Hide Filters' : 'Show Filters'}
           </Button>
@@ -111,9 +113,7 @@ export function SecurityEventsPage(): JSX.Element {
         </div>
 
         {/* Filters */}
-        {showFilters && (
-          <SecurityEventsFilters filter={filter} onFilterChange={setFilter} />
-        )}
+        {showFilters && <SecurityEventsFilters filter={filter} onFilterChange={setFilter} />}
 
         {/* Events Table */}
         <SecurityEventsTable
@@ -126,7 +126,9 @@ export function SecurityEventsPage(): JSX.Element {
         {/* Export Dialog */}
         <ExportDialog
           isOpen={isExportDialogOpen}
-          onClose={() => { setIsExportDialogOpen(false); }}
+          onClose={() => {
+            setIsExportDialogOpen(false);
+          }}
           filter={filter}
         />
       </div>

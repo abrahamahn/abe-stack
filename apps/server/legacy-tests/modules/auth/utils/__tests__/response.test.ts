@@ -266,7 +266,14 @@ describe('createAuthResponse', () => {
 
       // Verify exact shape
       expect(Object.keys(result)).toEqual(['accessToken', 'refreshToken', 'user']);
-      expect(Object.keys(result.user)).toEqual(['id', 'email', 'name', 'avatarUrl', 'role', 'createdAt']);
+      expect(Object.keys(result.user)).toEqual([
+        'id',
+        'email',
+        'name',
+        'avatarUrl',
+        'role',
+        'createdAt',
+      ]);
     });
 
     test('should not include extra properties from input', () => {

@@ -31,8 +31,8 @@ Access:
 
 ```bash
 # 1. Create production environment file
-cp config/.env/.env.example config/.env/.env.production
-# Edit .env.production with production values
+cp .env.example .config/env/.config/env/.env.production
+# Edit .config/env/.config/env/.env.production with production values
 
 # 2. Set required environment variables
 export DOMAIN=example.com
@@ -42,7 +42,7 @@ export JWT_SECRET=$(openssl rand -base64 32)
 export SESSION_SECRET=$(openssl rand -base64 32)
 
 # 3. Build and start (includes Caddy reverse proxy with auto TLS)
-docker compose -f config/docker/docker-compose.prod.yml --env-file config/.env/.env.production up -d
+docker compose -f config/docker/docker-compose.prod.yml --env-file .config/env/.config/env/.env.production up -d
 
 # 4. Run migrations (first deploy only)
 docker compose -f config/docker/docker-compose.prod.yml exec api node -e "/* migration command */"
@@ -144,7 +144,7 @@ In production, only Caddy ports (80/443) are exposed to the internet.
 | `STORAGE_PROVIDER` | `local`   | `local` or `s3`     |
 | `EMAIL_PROVIDER`   | `console` | `console` or `smtp` |
 
-See `config/.env/.env.example` for the complete list.
+See `.env.example` for the complete list.
 
 ---
 
@@ -206,11 +206,11 @@ For custom deployment scenarios, use the traditional Docker Compose approach:
 
 ```bash
 # 1. Configure environment
-cp config/.env/.env.example config/.env/.env.production
-# Edit .env.production with production values
+cp .env.example .config/env/.config/env/.env.production
+# Edit .config/env/.config/env/.env.production with production values
 
 # 2. Build and deploy
-docker compose -f config/docker/docker-compose.prod.yml --env-file config/.env/.env.production up -d --build
+docker compose -f config/docker/docker-compose.prod.yml --env-file .config/env/.config/env/.env.production up -d --build
 
 # 3. Run migrations (first deploy only)
 docker compose -f config/docker/docker-compose.prod.yml exec api node -e "/* migration command */"
@@ -313,8 +313,8 @@ config/
 │   └── Caddyfile.dev          # Development Caddy config (HTTP)
 └── .env/
     ├── .env.example           # Environment variable template
-    ├── .env.development       # Development settings
-    └── .env.production        # Production settings (create this)
+    ├── .config/env/.config/env/.env.development       # Development settings
+    └── .config/env/.config/env/.env.production        # Production settings (create this)
 ```
 
 ---

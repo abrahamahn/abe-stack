@@ -65,26 +65,24 @@ export async function updateUserWithVersion(
   const snakeData = toSnakeCase(data as Record<string, unknown>, USER_COLUMNS);
 
   // Build the update query with version increment
+  const updateData = {
+    ...snakeData,
+    version: { expression: 'version + 1' },
+    updated_at: { expression: 'now()' },
+  } as Record<string, unknown>;
+
   const result = await db.queryOne<Record<string, unknown>>(
     update(USERS_TABLE)
-      .set({
-        ...snakeData,
-        version: { expression: 'version + 1' },
-        updated_at: { expression: 'now()' },
-      })
+      .set(updateData)
       .where(and(eq('id', id), eq('version', expectedVersion)))
       .returningAll()
-      .toSql()
+      .toSql(),
   );
 
   if (!result) {
     // Version mismatch - fetch current version for error response
     const current = await db.queryOne<{ version: number }>(
-      select(USERS_TABLE)
-        .columns('version')
-        .where(eq('id', id))
-        .limit(1)
-        .toSql()
+      select(USERS_TABLE).columns('version').where(eq('id', id)).limit(1).toSql(),
     );
 
     if (!current) {
@@ -94,7 +92,7 @@ export async function updateUserWithVersion(
     throw new OptimisticLockError(current.version);
   }
 
-  return toCamelCase<User>(result, USER_COLUMNS);
+  return toCamelCase<User>(result, USER_COLUMNS as Record<string, string>);
 }
 
 /**

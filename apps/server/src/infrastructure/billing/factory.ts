@@ -44,16 +44,13 @@ export function isBillingConfigured(config: Partial<BillingConfig>): boolean {
 
   switch (config.provider) {
     case 'stripe':
+      if (!config.stripe) return false;
       return Boolean(
-        config.stripe?.secretKey &&
-        config.stripe?.publishableKey &&
-        config.stripe?.webhookSecret,
+        config.stripe.secretKey && config.stripe.publishableKey && config.stripe.webhookSecret,
       );
     case 'paypal':
-      return Boolean(
-        config.paypal?.clientId &&
-        config.paypal?.clientSecret,
-      );
+      if (!config.paypal) return false;
+      return Boolean(config.paypal.clientId && config.paypal.clientSecret);
     default:
       return false;
   }

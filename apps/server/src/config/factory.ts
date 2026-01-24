@@ -1,20 +1,21 @@
 // apps/server/src/config/factory.ts
-import type { AppConfig } from '@abe-stack/core/';
+import type {
+  AppConfig,
+  ElasticsearchProviderConfig,
+  SqlSearchProviderConfig,
+} from '@abe-stack/core/contracts/config';
+import { FullEnvSchema, type FullEnv } from '@abe-stack/core/contracts/config/environment';
 
-// 1. Infrastructure Imports
+import { loadAuth, validateAuth } from './auth/auth';
 import { loadCacheConfig } from './infra/cache';
 import { loadDatabase } from './infra/database';
+import { loadPackageManagerConfig, validatePackageManagerConfig } from './infra/package';
 import { loadQueueConfig } from './infra/queue';
 import { loadServer } from './infra/server';
 import { loadStorage } from './infra/storage';
-
-// 2. Auth Domain Imports
-import { loadAuth, validateAuth } from './auth/auth';
-
-// 3. Services Domain Imports
 import { loadBilling, validateBilling } from './services/billing';
 import { loadEmail } from './services/email';
-import { loadFcmConfig, validateFcmConfig } from './services/notifications';
+import { loadNotificationsConfig, validateNotificationsConfig } from './services/notifications';
 import {
   loadElasticsearchConfig,
   loadSqlSearchConfig,
@@ -22,18 +23,23 @@ import {
   validateSqlSearchConfig,
 } from './services/search';
 
-/**
- * The Master Factory: Transforms raw environment variables into a
- * validated, type-safe AppConfig object.
- */
-export function load(env: Record<string, string | undefined>): AppConfig {
+export function load(rawEnv: Record<string, string | undefined>): AppConfig {
+  // 1. Validate raw strings against Zod Schema
+  const envResult = FullEnvSchema.safeParse(rawEnv);
+
+  if (!envResult.success) {
+    console.error('\n❌ ABE-STACK: Environment Validation Failed');
+    console.table(envResult.error.flatten().fieldErrors);
+    process.exit(1);
+  }
+
+  // 2. Use the typed Zod output directly
+  const env: FullEnv = envResult.data;
+
   const nodeEnv = (env.NODE_ENV || 'development') as AppConfig['env'];
   const server = loadServer(env);
 
-  // Resolve search provider (defaulting to sql for ease of use)
   const searchProvider = (env.SEARCH_PROVIDER || 'sql') as 'sql' | 'elasticsearch';
-  const searchConfig =
-    searchProvider === 'elasticsearch' ? loadElasticsearchConfig(env) : loadSqlSearchConfig(env);
 
   const config: AppConfig = {
     env: nodeEnv,
@@ -44,80 +50,66 @@ export function load(env: Record<string, string | undefined>): AppConfig {
     storage: loadStorage(env),
     billing: loadBilling(env, server.appBaseUrl),
     cache: loadCacheConfig(env),
-    // New Additions
     queue: loadQueueConfig(env),
-    notifications: loadFcmConfig(env),
+    notifications: loadNotificationsConfig(env),
     search: {
       provider: searchProvider,
-      config: searchConfig,
+      config:
+        searchProvider === 'elasticsearch'
+          ? loadElasticsearchConfig(env)
+          : loadSqlSearchConfig(env),
     },
+    packageManager: loadPackageManagerConfig(env),
   };
 
   validate(config);
-
   return config;
 }
 
-/**
- * Centralized Validation Runner
- */
 function validate(config: AppConfig): void {
   const errors: string[] = [];
   const isProd = config.env === 'production';
 
-  // --- Domain Delegated Validations ---
-
-  // Auth
+  // Auth Domain
   try {
     validateAuth(config.auth);
   } catch (e: any) {
     errors.push(e.message);
   }
 
-  // Billing
+  // Billing Domain
   if (config.billing?.enabled) {
     errors.push(...validateBilling(config.billing));
   }
 
-  // Search - type narrowing based on provider
+  // Search Domain - Using clean Type Predicates
   if (config.search.provider === 'elasticsearch') {
     errors.push(
-      ...validateElasticsearchConfig(
-        config.search.config as import('@abe-stack/core/contracts/config').ElasticsearchProviderConfig
-      )
+      ...validateElasticsearchConfig(config.search.config as ElasticsearchProviderConfig),
     );
   } else {
-    errors.push(
-      ...validateSqlSearchConfig(
-        config.search.config as import('@abe-stack/core/contracts/config').SqlSearchProviderConfig
-      )
-    );
+    errors.push(...validateSqlSearchConfig(config.search.config as SqlSearchProviderConfig));
   }
 
-  // Notifications
-  errors.push(...validateFcmConfig(config.notifications));
+  // Notifications Domain
+  errors.push(...validateNotificationsConfig(config.notifications));
 
-  // --- Global Infrastructure Guards ---
+  // Package Manager Domain
+  errors.push(...validatePackageManagerConfig(config.packageManager));
 
+  // Global Production Hard-Guards
   if (isProd) {
-    // 1. Storage Security
     if (config.storage.provider === 's3' && !config.storage.accessKeyId) {
       errors.push('Storage: S3_ACCESS_KEY_ID is required in production');
     }
-
-    // 2. Email Integrity
     if (config.email.provider === 'console') {
-      errors.push('Email: Provider cannot be "console" in production. Use "smtp" or an API.');
+      errors.push('Email: Provider cannot be "console" in production.');
     }
-
-    // 3. Database Security
     if (config.database.provider === 'postgresql' && !config.database.ssl) {
-      // Note: This is a warning in some stacks, but a hard error in Abe-Stack
-      errors.push('Database: SSL must be enabled in production environments.');
+      errors.push('Database: SSL must be enabled in production.');
     }
   }
 
-  // --- Final Execution ---
   if (errors.length > 0) {
     const report = errors.map((e) => `  ↳ ❌ ${e}`).join('\n');
     console.error('\n' + '='.repeat(50));
@@ -126,6 +118,6 @@ function validate(config: AppConfig): void {
     console.error(report);
     console.error('='.repeat(50) + '\n');
 
-    throw new Error('Server failed to start due to invalid configuration.');
+    throw new Error('Server failed to start: Invalid Configuration');
   }
 }

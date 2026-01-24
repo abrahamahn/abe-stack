@@ -60,9 +60,11 @@ project-data/
 .env.local
 .env.*.local
 
-# Shared/server environment
-config/.env/.env.local
-config/.env/.env.production
+# Config environment files
+.config/env/.env.local
+.config/env/.env.production
+.config/env/.env.test
+.config/env/.env.development
 
 # App-level environment files (keep .env.example, ignore .env.local)
 apps/*/.env.local
@@ -91,4 +93,4 @@ Thumbs.db
 *.tmp
 
 # Uploads
-uploads/
+.data/

@@ -31,11 +31,15 @@ vi.mock('@database', () => ({
   withTransaction: vi.fn((_db, callback) => callback(_db)),
 }));
 
-vi.mock('@pubsub', () => ({
-  SubKeys: {
-    record: (table: string, id: string) => `record:${table}:${id}`,
-  },
-}));
+vi.mock('@infrastructure/index', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@infrastructure/index')>();
+  return {
+    ...actual,
+    SubKeys: {
+      record: (table: string, id: string) => `record:${table}:${id}`,
+    },
+  };
+});
 
 import {
   handleGetRecords,
@@ -44,8 +48,8 @@ import {
   VersionConflictError,
 } from '../handlers';
 
-import type { AppContext, RequestWithCookies } from '../../../shared/types';
 import type { RealtimeTransaction, RecordPointer } from '@abe-stack/core';
+import type { AppContext, RequestWithCookies } from '../../../shared/types';
 
 // ============================================================================
 // Test Helpers

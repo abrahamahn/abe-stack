@@ -127,25 +127,40 @@ describe('types', () => {
 
   describe('formatTable', () => {
     it('formats simple table name', () => {
-      expect(formatTable({ name: 'users' })).toBe('users');
+      expect(formatTable({ name: 'users' })).toEqual({ text: 'users', values: [] });
     });
 
     it('formats table with schema', () => {
-      expect(formatTable({ name: 'users', schema: 'public' })).toBe('public.users');
+      expect(formatTable({ name: 'users', schema: 'public' })).toEqual({
+        text: 'public.users',
+        values: [],
+      });
     });
 
     it('formats table with alias', () => {
-      expect(formatTable({ name: 'users', alias: 'u' })).toBe('users AS u');
+      expect(formatTable({ name: 'users', alias: 'u' })).toEqual({
+        text: 'users AS u',
+        values: [],
+      });
     });
 
     it('formats table with schema and alias', () => {
-      expect(formatTable({ name: 'users', schema: 'public', alias: 'u' })).toBe(
-        'public.users AS u',
-      );
+      expect(formatTable({ name: 'users', schema: 'public', alias: 'u' })).toEqual({
+        text: 'public.users AS u',
+        values: [],
+      });
     });
 
     it('quotes special characters in table name', () => {
-      expect(formatTable({ name: 'user-data' })).toBe('"user-data"');
+      expect(formatTable({ name: 'user-data' })).toEqual({ text: '"user-data"', values: [] });
+    });
+
+    it('formats subquery table', () => {
+      const subqueryMock = { text: 'SELECT 1', values: [100] };
+      expect(formatTable({ name: 'ignored', alias: 'sub', subquery: subqueryMock })).toEqual({
+        text: '(SELECT 1) AS sub',
+        values: [100],
+      });
     });
   });
 });

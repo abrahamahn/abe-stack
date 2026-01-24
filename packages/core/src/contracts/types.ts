@@ -55,14 +55,12 @@ export type SuccessResponse<E extends EndpointDef> = E['responses'] extends {
 /**
  * Extract the request body type from an endpoint definition.
  */
-export type RequestBody<E extends EndpointDef> =
-  E['body'] extends Schema<infer B> ? B : undefined;
+export type RequestBody<E extends EndpointDef> = E['body'] extends Schema<infer B> ? B : undefined;
 
 /**
  * Extract the query parameters type from an endpoint definition.
  */
-export type QueryParams<E extends EndpointDef> =
-  E['query'] extends Schema<infer Q> ? Q : undefined;
+export type QueryParams<E extends EndpointDef> = E['query'] extends Schema<infer Q> ? Q : undefined;
 
 // ============================================================================
 // Contract Types
@@ -85,9 +83,7 @@ export type ContractRouter = Record<string, Contract>;
 /**
  * Result type for safeParse operations.
  */
-export type SafeParseResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: Error };
+export type SafeParseResult<T> = { success: true; data: T } | { success: false; error: Error };
 
 // ============================================================================
 // Schema Factory Helpers

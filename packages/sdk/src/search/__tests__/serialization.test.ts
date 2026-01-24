@@ -15,7 +15,6 @@ import {
 
 import type { SearchQuery } from '@abe-stack/core';
 
-
 describe('serialization', () => {
   describe('serializeToURLParams', () => {
     test('should serialize empty query', () => {
@@ -340,7 +339,10 @@ describe('serialization', () => {
 
     test('should deserialize Date values', () => {
       const params = new URLSearchParams();
-      params.set('filters', JSON.stringify({ f: 'createdAt', o: 'gte', v: { $d: '2024-01-15T10:30:00.000Z' } }));
+      params.set(
+        'filters',
+        JSON.stringify({ f: 'createdAt', o: 'gte', v: { $d: '2024-01-15T10:30:00.000Z' } }),
+      );
 
       const query = deserializeFromURLParams(params);
       const filter = query.filters as { value: Date };
@@ -350,7 +352,10 @@ describe('serialization', () => {
 
     test('should deserialize range values', () => {
       const params = new URLSearchParams();
-      params.set('filters', JSON.stringify({ f: 'price', o: 'between', v: { $r: { min: 10, max: 100 } } }));
+      params.set(
+        'filters',
+        JSON.stringify({ f: 'price', o: 'between', v: { $r: { min: 10, max: 100 } } }),
+      );
 
       const query = deserializeFromURLParams(params);
       const filter = query.filters as { value: { min: number; max: number } };

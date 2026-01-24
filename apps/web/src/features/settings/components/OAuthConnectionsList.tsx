@@ -10,7 +10,11 @@ import { useMemo, useState, type ReactElement } from 'react';
 import { Alert, Button, Card, Skeleton } from '@abe-stack/ui';
 
 import type { OAuthConnection, OAuthProvider } from '@abe-stack/core';
-import { useEnabledOAuthProviders, useOAuthConnections, type ApiClientConfig } from '@abe-stack/sdk';
+import {
+  useEnabledOAuthProviders,
+  useOAuthConnections,
+  type ApiClientConfig,
+} from '@abe-stack/sdk';
 
 // ============================================================================
 // Types
@@ -79,9 +83,7 @@ export function OAuthConnectionsList({ onSuccess }: OAuthConnectionsListProps): 
       onSuccess?.();
     } catch (err) {
       setUnlinkError(
-        err instanceof Error
-          ? err.message
-          : `Failed to disconnect ${providerInfo[provider].name}`,
+        err instanceof Error ? err.message : `Failed to disconnect ${providerInfo[provider].name}`,
       );
     }
   };
@@ -101,8 +103,7 @@ export function OAuthConnectionsList({ onSuccess }: OAuthConnectionsListProps): 
   if (providersError || connectionsError) {
     return (
       <Alert tone="danger">
-        Failed to load OAuth connections:{' '}
-        {providersError?.message ?? connectionsError?.message}
+        Failed to load OAuth connections: {providersError?.message ?? connectionsError?.message}
       </Alert>
     );
   }
@@ -128,11 +129,7 @@ export function OAuthConnectionsList({ onSuccess }: OAuthConnectionsListProps): 
 
   return (
     <div className="space-y-3">
-      {unlinkError && (
-        <Alert tone="danger">
-          {unlinkError}
-        </Alert>
-      )}
+      {unlinkError && <Alert tone="danger">{unlinkError}</Alert>}
 
       {providerList.map(({ provider, connected, connection }) => (
         <ProviderCard
@@ -140,8 +137,12 @@ export function OAuthConnectionsList({ onSuccess }: OAuthConnectionsListProps): 
           provider={provider}
           connected={connected}
           connection={connection ?? null}
-          onConnect={() => { handleConnect(provider); }}
-          onDisconnect={() => { void handleDisconnect(provider); }}
+          onConnect={() => {
+            handleConnect(provider);
+          }}
+          onDisconnect={() => {
+            void handleDisconnect(provider);
+          }}
           isDisconnecting={isActing}
         />
       ))}
@@ -188,9 +189,7 @@ function ProviderCard({
           <div>
             <p className="font-medium">{info.name}</p>
             {connected && connection && (
-              <p className="text-sm text-gray-500">
-                {connection.providerEmail}
-              </p>
+              <p className="text-sm text-gray-500">{connection.providerEmail}</p>
             )}
           </div>
         </div>
@@ -206,11 +205,7 @@ function ProviderCard({
             {isDisconnecting ? 'Disconnecting...' : 'Disconnect'}
           </Button>
         ) : (
-          <Button
-            variant="secondary"
-            size="small"
-            onClick={onConnect}
-          >
+          <Button variant="secondary" size="small" onClick={onConnect}>
             Connect
           </Button>
         )}

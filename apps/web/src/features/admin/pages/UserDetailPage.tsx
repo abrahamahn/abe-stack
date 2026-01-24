@@ -86,17 +86,18 @@ export function UserDetailPage(): JSX.Element {
               {user ? user.email : 'User Details'}
             </Heading>
           </div>
-          <Button onClick={() => { void refresh(); }} disabled={isLoading}>
+          <Button
+            onClick={() => {
+              void refresh();
+            }}
+            disabled={isLoading}
+          >
             Refresh
           </Button>
         </div>
 
         {/* Error Alerts */}
-        {loadError && (
-          <Alert tone="danger">
-            {loadError}
-          </Alert>
-        )}
+        {loadError && <Alert tone="danger">{loadError}</Alert>}
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

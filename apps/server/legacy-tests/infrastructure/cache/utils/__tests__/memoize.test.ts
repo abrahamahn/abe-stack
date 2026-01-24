@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/cache/utils/__tests__/memoize.test.ts
+// apps/server/legacy-tests/infrastructure/cache/utils/__tests__/memoize.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {
@@ -175,7 +175,9 @@ describe('memoize', () => {
           return user.name.toUpperCase();
         },
         {
-          keyGenerator: ((...args: unknown[]) => (args[0] as User).id) as (...args: unknown[]) => string,
+          keyGenerator: ((...args: unknown[]) => (args[0] as User).id) as (
+            ...args: unknown[]
+          ) => string,
         },
       );
 

@@ -6,10 +6,10 @@
  * Eliminates duplicate cookie setting/clearing logic across handlers.
  */
 
-import { getRefreshCookieOptions } from '@config';
+import { getRefreshCookieOptions } from '@/config';
 import { REFRESH_COOKIE_NAME } from '@shared/constants';
 
-import type { AuthConfig } from '@config';
+import type { AuthConfig } from '@/config';
 import type { ReplyWithCookies } from '@shared';
 
 /**

@@ -33,7 +33,7 @@ describe('cache factory', () => {
           provider: 'memory',
           maxSize: 100,
         },
-        { logger }
+        { logger },
       );
 
       expect(cache).toBeInstanceOf(MemoryCacheProvider);
@@ -96,7 +96,7 @@ describe('cache factory', () => {
       expect(cache).toBeInstanceOf(MemoryCacheProvider);
     });
 
-    test('should use environment uration', () => {
+    test('should use environment configuration', () => {
       process.env = {
         ...originalEnv,
         CACHE_KEY_PREFIX: 'myapp',

@@ -128,9 +128,7 @@ describe('CTE (Common Table Expressions)', () => {
     it('correctly renumbers parameters across CTE and main query', () => {
       const query = withCte(
         'filtered',
-        select('users')
-          .where(eq('status', 'active'))
-          .where(gt('age', 18)),
+        select('users').where(eq('status', 'active')).where(gt('age', 18)),
       )
         .select('filtered')
         .where(eq('role', 'admin'))

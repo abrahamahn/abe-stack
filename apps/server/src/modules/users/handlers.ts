@@ -37,6 +37,7 @@ export async function handleMe(
         id: user.id,
         email: user.email,
         name: user.name,
+        avatarUrl: user.avatarUrl ?? null,
         role: user.role,
         createdAt: user.createdAt.toISOString(),
       },
@@ -73,6 +74,7 @@ export async function handleListUsers(
       id: user.id,
       email: user.email,
       name: user.name,
+      avatarUrl: user.avatarUrl ?? null,
       role: user.role,
       createdAt: user.createdAt.toISOString(),
     }));

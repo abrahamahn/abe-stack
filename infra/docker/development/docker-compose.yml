@@ -1,0 +1,85 @@
+name: abe-stack
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: abe-stack-postgres
+    env_file:
+      - ../.config/env/.config/env/.env.development
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ../../..
+      dockerfile: infra/docker/Dockerfile
+    container_name: abe-stack-api
+    env_file:
+      - ../../../.config/env/.env.development
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8080
+      API_PORT: 8080
+      POSTGRES_HOST: postgres
+      NODE_ENV: production
+      PNPM_WORKSPACE_ROOT: /app
+    working_dir: /app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - '8080:8080'
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://localhost:8080/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  web:
+    image: node:20-alpine
+    working_dir: /app
+    container_name: abe-stack-web
+    env_file:
+      - ../../../.config/env/.env.development
+    environment:
+      APP_PORT: 4173
+      API_PORT: 8080
+      VITE_HOST: 0.0.0.0
+      CI: 'true'
+      PNPM_WORKSPACE_ROOT: /app
+    volumes:
+      - ../../../:/app
+    command: >
+      sh -c "corepack enable &&
+             pnpm install --frozen-lockfile &&
+             pnpm --filter @abe-stack/web build &&
+             pnpm --filter @abe-stack/web preview --host 0.0.0.0 --port 4173"
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - '4173:4173'
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

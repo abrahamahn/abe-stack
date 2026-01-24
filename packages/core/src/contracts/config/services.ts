@@ -141,6 +141,56 @@ export interface EmailConfig {
 // ============================================================================
 
 /**
+ * OneSignal push notification configuration.
+ * Used for mobile and web push notifications.
+ */
+export interface OneSignalConfig {
+  /** OneSignal REST API key */
+  restApiKey: string;
+  /** OneSignal user authentication key */
+  userAuthKey: string;
+  /** OneSignal app ID */
+  appId: string;
+  /** Optional: Additional settings */
+  settings?: {
+    /** Whether to enable logging */
+    enableLogging?: boolean;
+  };
+}
+
+/**
+ * Courier push notification configuration.
+ * Used for multi-channel notifications via Courier platform.
+ */
+export interface CourierConfig {
+  /** Courier API key */
+  apiKey: string;
+  /** Courier API URL */
+  apiUrl?: string;
+  /** Optional: Additional settings */
+  settings?: {
+    /** Whether to enable logging */
+    enableLogging?: boolean;
+  };
+}
+
+/**
+ * Knock push notification configuration.
+ * Used for multi-channel notifications via Knock platform.
+ */
+export interface KnockConfig {
+  /** Knock secret key */
+  secretKey: string;
+  /** Knock API URL */
+  apiUrl?: string;
+  /** Optional: Additional settings */
+  settings?: {
+    /** Whether to enable logging */
+    enableLogging?: boolean;
+  };
+}
+
+/**
  * Firebase Cloud Messaging (FCM) configuration.
  * Used for mobile and web push notifications.
  */
@@ -149,6 +199,90 @@ export interface FcmConfig {
   credentials: string;
   /** Firebase project ID */
   projectId: string;
+}
+
+/**
+ * Amazon SNS configuration.
+ * Used for high-volume push notifications.
+ */
+export interface SnsConfig {
+  /** AWS Access Key ID */
+  accessKeyId: string;
+  /** AWS Secret Access Key */
+  secretAccessKey: string;
+  /** AWS Region */
+  region: string;
+  /** SNS Topic ARN (optional) */
+  topicArn?: string;
+}
+
+/**
+ * Braze configuration.
+ * Used for marketing and engagement notifications.
+ */
+export interface BrazeConfig {
+  /** Braze API key */
+  apiKey: string;
+  /** Braze API URL */
+  apiUrl: string;
+  /** Optional: Additional settings */
+  settings?: {
+    /** Whether to enable logging */
+    enableLogging?: boolean;
+  };
+}
+
+/**
+ * Generic push notification configuration.
+ * Used for custom notification implementations.
+ */
+export interface GenericNotificationConfig {
+  /** Provider-specific configuration */
+  [key: string]: any;
+}
+
+/**
+ * Push notification provider type.
+ */
+export type NotificationProvider =
+  | 'onesignal'
+  | 'courier'
+  | 'knock'
+  | 'fcm'
+  | 'sns'
+  | 'braze'
+  | 'generic';
+
+/**
+ * Union type for all possible notification configurations.
+ */
+export type NotificationProviderConfig =
+  | { provider: 'onesignal'; config: OneSignalConfig }
+  | { provider: 'courier'; config: CourierConfig }
+  | { provider: 'knock'; config: KnockConfig }
+  | { provider: 'fcm'; config: FcmConfig }
+  | { provider: 'sns'; config: SnsConfig }
+  | { provider: 'braze'; config: BrazeConfig }
+  | { provider: 'generic'; config: GenericNotificationConfig };
+
+/**
+ * Push notifications configuration.
+ * Supports multiple providers for flexibility.
+ */
+export interface NotificationConfig {
+  /** Enable push notifications */
+  enabled: boolean;
+  /** Active push notification provider */
+  provider: NotificationProvider;
+  /** Provider-specific configuration */
+  config:
+    | OneSignalConfig
+    | CourierConfig
+    | KnockConfig
+    | FcmConfig
+    | SnsConfig
+    | BrazeConfig
+    | GenericNotificationConfig;
 }
 
 // ============================================================================

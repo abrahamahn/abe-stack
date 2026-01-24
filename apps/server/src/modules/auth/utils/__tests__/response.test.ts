@@ -20,6 +20,7 @@ describe('createAuthResponse', () => {
         id: 'user-123',
         email: 'test@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user' as UserRole,
         createdAt,
       };
@@ -36,6 +37,7 @@ describe('createAuthResponse', () => {
         id: 'user-123',
         email: 'test@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user' as UserRole,
         createdAt,
       };
@@ -51,6 +53,7 @@ describe('createAuthResponse', () => {
         id: 'user-456',
         email: 'john@example.com',
         name: 'John Doe',
+        avatarUrl: null,
         role: 'admin' as UserRole,
         createdAt,
       };
@@ -70,6 +73,7 @@ describe('createAuthResponse', () => {
         id: 'user-123',
         email: 'user@example.com',
         name: 'Regular User',
+        avatarUrl: null,
         role: 'user' as UserRole,
         createdAt,
       };
@@ -84,6 +88,7 @@ describe('createAuthResponse', () => {
         id: 'admin-123',
         email: 'admin@example.com',
         name: 'Admin User',
+        avatarUrl: null,
         role: 'admin' as UserRole,
         createdAt,
       };
@@ -98,6 +103,7 @@ describe('createAuthResponse', () => {
         id: 'mod-123',
         email: 'mod@example.com',
         name: 'Moderator',
+        avatarUrl: null,
         role: 'moderator' as UserRole,
         createdAt,
       };
@@ -114,6 +120,7 @@ describe('createAuthResponse', () => {
         id: 'user-123',
         email: 'test@example.com',
         name: null,
+        avatarUrl: null,
         role: 'user' as UserRole,
         createdAt,
       };
@@ -129,6 +136,7 @@ describe('createAuthResponse', () => {
         id: 'user-123',
         email: 'test@example.com',
         name: '',
+        avatarUrl: null,
         role: 'user' as UserRole,
         createdAt,
       };
@@ -145,6 +153,7 @@ describe('createAuthResponse', () => {
         id: 'user-123',
         email: 'test@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user' as UserRole,
         createdAt,
       };
@@ -164,6 +173,7 @@ describe('createAuthResponse', () => {
         id: 'user-123',
         email: 'test@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user' as UserRole,
         createdAt,
       };
@@ -180,6 +190,7 @@ describe('createAuthResponse', () => {
         id: 'user-123',
         email: 'test@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user' as UserRole,
         createdAt,
       };
@@ -196,6 +207,7 @@ describe('createAuthResponse', () => {
         id: 'user-123',
         email: 'test@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user' as UserRole,
         createdAt,
       };
@@ -211,6 +223,7 @@ describe('createAuthResponse', () => {
         id: 'user-with-unicode-\u00e9\u00e8',
         email: 'test+tag@example.com',
         name: 'Name with "quotes" and <brackets>',
+        avatarUrl: null,
         role: 'user' as UserRole,
         createdAt,
       };
@@ -227,6 +240,7 @@ describe('createAuthResponse', () => {
         id: '550e8400-e29b-41d4-a716-446655440000',
         email: 'test@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user' as UserRole,
         createdAt,
       };
@@ -251,7 +265,14 @@ describe('createAuthResponse', () => {
 
       // Verify exact shape
       expect(Object.keys(result)).toEqual(['accessToken', 'refreshToken', 'user']);
-      expect(Object.keys(result.user)).toEqual(['id', 'email', 'name', 'role', 'createdAt']);
+      expect(Object.keys(result.user)).toEqual([
+        'id',
+        'email',
+        'name',
+        'avatarUrl',
+        'role',
+        'createdAt',
+      ]);
     });
 
     test('should not include extra properties from input', () => {

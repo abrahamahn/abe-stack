@@ -28,37 +28,37 @@ const TEST_PAYLOAD = { userId: 'user-123', email: 'test@example.com', role: 'use
 describe('JWT Rotation', () => {
   describe('signWithRotation', () => {
     test('should sign token with current secret', () => {
-      const : JwtRotation = { secret: CURRENT_SECRET };
+      const config: JwtRotation = { secret: CURRENT_SECRET };
 
-      const token = signWithRotation(TEST_PAYLOAD, );
+      const token = signWithRotation(TEST_PAYLOAD, config);
 
       expect(typeof token).toBe('string');
       expect(token.split('.')).toHaveLength(3);
     });
 
     test('should sign token with expiration', () => {
-      const : JwtRotation = { secret: CURRENT_SECRET };
+      const config: JwtRotation = { secret: CURRENT_SECRET };
 
-      const token = signWithRotation(TEST_PAYLOAD, , { expiresIn: '1h' });
-      const payload = verifyWithRotation(token, );
+      const token = signWithRotation(TEST_PAYLOAD, config, { expiresIn: '1h' });
+      const payload = verifyWithRotation(token, config);
 
       expect(payload.exp).toBeDefined();
       expect(payload.exp).toBeGreaterThan(Date.now() / 1000);
     });
 
     test('should throw if secret is missing', () => {
-      const : JwtRotation = { secret: '' };
+      const config: JwtRotation = { secret: '' };
 
-      expect(() => signWithRotation(TEST_PAYLOAD, )).toThrow(JwtError);
+      expect(() => signWithRotation(TEST_PAYLOAD, config)).toThrow(JwtError);
     });
 
     test('should ignore previousSecret when signing', () => {
-      const : JwtRotation = {
+      const config: JwtRotation = {
         secret: CURRENT_SECRET,
         previousSecret: PREVIOUS_SECRET,
       };
 
-      const token = signWithRotation(TEST_PAYLOAD, );
+      const token = signWithRotation(TEST_PAYLOAD, config);
 
       // Token should verify with current secret
       const payload = verifyWithRotation(token, { secret: CURRENT_SECRET });
@@ -68,10 +68,10 @@ describe('JWT Rotation', () => {
 
   describe('verifyWithRotation', () => {
     test('should verify token signed with current secret', () => {
-      const : JwtRotation = { secret: CURRENT_SECRET };
-      const token = signWithRotation(TEST_PAYLOAD, );
+      const config: JwtRotation = { secret: CURRENT_SECRET };
+      const token = signWithRotation(TEST_PAYLOAD, config);
 
-      const payload = verifyWithRotation(token, );
+      const payload = verifyWithRotation(token, config);
 
       expect(payload.userId).toBe(TEST_PAYLOAD.userId);
       expect(payload.email).toBe(TEST_PAYLOAD.email);
@@ -82,12 +82,12 @@ describe('JWT Rotation', () => {
       const oldToken = jwtSign(TEST_PAYLOAD, PREVIOUS_SECRET);
 
       // Verify with rotation  that has both secrets
-      const : JwtRotation = {
+      const config: JwtRotation = {
         secret: CURRENT_SECRET,
         previousSecret: PREVIOUS_SECRET,
       };
 
-      const payload = verifyWithRotation(oldToken, );
+      const payload = verifyWithRotation(oldToken, config);
 
       expect(payload.userId).toBe(TEST_PAYLOAD.userId);
     });
@@ -95,12 +95,12 @@ describe('JWT Rotation', () => {
     test('should reject token signed with unknown secret', () => {
       const invalidToken = jwtSign(TEST_PAYLOAD, INVALID_SECRET);
 
-      const : JwtRotation = {
+      const config: JwtRotation = {
         secret: CURRENT_SECRET,
         previousSecret: PREVIOUS_SECRET,
       };
 
-      expect(() => verifyWithRotation(invalidToken, )).toThrow(JwtError);
+      expect(() => verifyWithRotation(invalidToken, config)).toThrow(JwtError);
     });
 
     test('should not try previous secret for expired tokens', async () => {
@@ -110,35 +110,35 @@ describe('JWT Rotation', () => {
       // Wait for token to expire
       await new Promise((resolve) => setTimeout(resolve, 1100));
 
-      const : JwtRotation = {
+      const config: JwtRotation = {
         secret: CURRENT_SECRET,
         previousSecret: PREVIOUS_SECRET,
       };
 
-      expect(() => verifyWithRotation(shortLivedToken, )).toThrow(JwtError);
+      expect(() => verifyWithRotation(shortLivedToken, config)).toThrow(JwtError);
     });
 
     test('should not try previous secret for malformed tokens', () => {
-      const : JwtRotation = {
+      const config: JwtRotation = {
         secret: CURRENT_SECRET,
         previousSecret: PREVIOUS_SECRET,
       };
 
-      expect(() => verifyWithRotation('invalid.token', )).toThrow(JwtError);
+      expect(() => verifyWithRotation('invalid.token', config)).toThrow(JwtError);
     });
 
     test('should throw if secret is missing', () => {
       const token = jwtSign(TEST_PAYLOAD, CURRENT_SECRET);
-      const : JwtRotation = { secret: '' };
+      const config: JwtRotation = { secret: '' };
 
-      expect(() => verifyWithRotation(token, )).toThrow(JwtError);
+      expect(() => verifyWithRotation(token, config)).toThrow(JwtError);
     });
 
-    test('should work without previousSecret ured', () => {
-      const : JwtRotation = { secret: CURRENT_SECRET };
-      const token = signWithRotation(TEST_PAYLOAD, );
+    test('should work without previousSecret configured', () => {
+      const config: JwtRotation = { secret: CURRENT_SECRET };
+      const token = signWithRotation(TEST_PAYLOAD, config);
 
-      const payload = verifyWithRotation(token, );
+      const payload = verifyWithRotation(token, config);
 
       expect(payload.userId).toBe(TEST_PAYLOAD.userId);
     });
@@ -146,13 +146,13 @@ describe('JWT Rotation', () => {
 
   describe('checkTokenSecret', () => {
     test('should identify token signed with current secret', () => {
-      const : JwtRotation = {
+      const config: JwtRotation = {
         secret: CURRENT_SECRET,
         previousSecret: PREVIOUS_SECRET,
       };
-      const token = signWithRotation(TEST_PAYLOAD, );
+      const token = signWithRotation(TEST_PAYLOAD, config);
 
-      const result = checkTokenSecret(token, );
+      const result = checkTokenSecret(token, config);
 
       expect(result.isValid).toBe(true);
       expect(result.usedSecret).toBe('current');
@@ -162,12 +162,12 @@ describe('JWT Rotation', () => {
     test('should identify token signed with previous secret', () => {
       const oldToken = jwtSign(TEST_PAYLOAD, PREVIOUS_SECRET);
 
-      const : JwtRotation = {
+      const config: JwtRotation = {
         secret: CURRENT_SECRET,
         previousSecret: PREVIOUS_SECRET,
       };
 
-      const result = checkTokenSecret(oldToken, );
+      const result = checkTokenSecret(oldToken, config);
 
       expect(result.isValid).toBe(true);
       expect(result.usedSecret).toBe('previous');
@@ -176,12 +176,12 @@ describe('JWT Rotation', () => {
     test('should identify invalid token', () => {
       const invalidToken = jwtSign(TEST_PAYLOAD, INVALID_SECRET);
 
-      const : JwtRotation = {
+      const config: JwtRotation = {
         secret: CURRENT_SECRET,
         previousSecret: PREVIOUS_SECRET,
       };
 
-      const result = checkTokenSecret(invalidToken, );
+      const result = checkTokenSecret(invalidToken, config);
 
       expect(result.isValid).toBe(false);
       expect(result.usedSecret).toBe('none');
@@ -190,9 +190,9 @@ describe('JWT Rotation', () => {
 
     test('should handle missing secret', () => {
       const token = jwtSign(TEST_PAYLOAD, CURRENT_SECRET);
-      const : JwtRotation = { secret: '' };
+      const config: JwtRotation = { secret: '' };
 
-      const result = checkTokenSecret(token, );
+      const result = checkTokenSecret(token, config);
 
       expect(result.isValid).toBe(false);
       expect(result.usedSecret).toBe('none');
@@ -202,7 +202,7 @@ describe('JWT Rotation', () => {
 
   describe('createJwtRotationHandler', () => {
     test('should create handler with sign and verify functions', () => {
-      const : JwtRotation = { secret: CURRENT_SECRET };
+      const config: JwtRotation = { secret: CURRENT_SECRET };
       const handler = createJwtRotationHandler();
 
       const token = handler.sign(TEST_PAYLOAD, { expiresIn: '1h' });
@@ -244,10 +244,10 @@ describe('JWT Rotation', () => {
         previousSecret: PREVIOUS_SECRET,
       });
 
-      const  = handler.get();
+      const config = handler.get();
 
-      expect(.hasSecret).toBe(true);
-      expect(.hasPreviousSecret).toBe(true);
+      expect(config.hasSecret).toBe(true);
+      expect(config.hasPreviousSecret).toBe(true);
     });
 
     test('checkSecret method should work through handler', () => {
@@ -266,19 +266,19 @@ describe('JWT Rotation', () => {
 
   describe('edge cases', () => {
     test('should handle undefined previousSecret', () => {
-      const : JwtRotation = {
+      const config: JwtRotation = {
         secret: CURRENT_SECRET,
         previousSecret: undefined,
       };
 
-      const token = signWithRotation(TEST_PAYLOAD, );
-      const payload = verifyWithRotation(token, );
+      const token = signWithRotation(TEST_PAYLOAD, config);
+      const payload = verifyWithRotation(token, config);
 
       expect(payload.userId).toBe(TEST_PAYLOAD.userId);
     });
 
     test('should handle empty string previousSecret', () => {
-      const : JwtRotation = {
+      const config: JwtRotation = {
         secret: CURRENT_SECRET,
         previousSecret: '',
       };
@@ -286,7 +286,7 @@ describe('JWT Rotation', () => {
       // Should not try to verify with empty previous secret
       const invalidToken = jwtSign(TEST_PAYLOAD, INVALID_SECRET);
 
-      expect(() => verifyWithRotation(invalidToken, )).toThrow(JwtError);
+      expect(() => verifyWithRotation(invalidToken, config)).toThrow(JwtError);
     });
 
     test('should preserve payload properties through rotation', () => {
@@ -298,9 +298,9 @@ describe('JWT Rotation', () => {
         metadata: { theme: 'dark', locale: 'en-US' },
       };
 
-      const : JwtRotation = { secret: CURRENT_SECRET };
-      const token = signWithRotation(complexPayload, );
-      const payload = verifyWithRotation(token, );
+      const config: JwtRotation = { secret: CURRENT_SECRET };
+      const token = signWithRotation(complexPayload, config);
+      const payload = verifyWithRotation(token, config);
 
       expect(payload.userId).toBe(complexPayload.userId);
       expect(payload.permissions).toEqual(complexPayload.permissions);

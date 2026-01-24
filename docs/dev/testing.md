@@ -63,23 +63,23 @@ apps/server/src/config/
 
 ### Comparison
 
-| Feature | Colocated (Adjacent) | Dedicated Folder (`__tests__`) |
-| --- | --- | --- |
-| Discoverability | High | Low |
-| Path resilience | High | Low |
-| Clutter | Medium | Low |
-| Marketability | Modern/Pro | Classic/Legacy |
+| Feature         | Colocated (Adjacent) | Dedicated Folder (`__tests__`) |
+| --------------- | -------------------- | ------------------------------ |
+| Discoverability | High                 | Low                            |
+| Path resilience | High                 | Low                            |
+| Clutter         | Medium               | Low                            |
+| Marketability   | Modern/Pro           | Classic/Legacy                 |
 
 **Recommendation:** Colocate unit tests. Centralize integration and E2E tests.
 
 ## Test Pyramid
 
-| Layer | Tool | Scope | Speed |
-|-------|------|-------|-------|
-| Unit | Vitest | Functions, hooks | ~1ms |
-| Component | Vitest + RTL | React components | ~10ms |
-| Integration | Vitest | API routes, services | ~100ms |
-| E2E | Playwright | Full user flows | ~1-5s |
+| Layer       | Tool         | Scope                | Speed  |
+| ----------- | ------------ | -------------------- | ------ |
+| Unit        | Vitest       | Functions, hooks     | ~1ms   |
+| Component   | Vitest + RTL | React components     | ~10ms  |
+| Integration | Vitest       | API routes, services | ~100ms |
+| E2E         | Playwright   | Full user flows      | ~1-5s  |
 
 **Distribution:** 70% Component/Integration, 20% Unit, 10% E2E
 
@@ -104,6 +104,7 @@ pnpm test:coverage
 ## Required Edge Cases
 
 Per component:
+
 - Happy path
 - Missing/invalid props (null, undefined)
 - Boundary conditions (0, negative, max)

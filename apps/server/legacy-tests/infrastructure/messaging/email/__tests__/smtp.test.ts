@@ -3,7 +3,7 @@
  * Tests for the SMTP client utility functions.
  *
  * Full SMTP protocol testing requires complex async mocking of node:net/node:tls.
- * These tests focus on the SmtpClient class construction and uration.
+ * These tests focus on the SmtpClient class construction and configuration.
  * Integration testing with real SMTP servers should be done separately.
  */
 import { describe, expect, test } from 'vitest';
@@ -13,7 +13,7 @@ import { SmtpClient, type Smtp } from '../smtp';
 describe('SmtpClient', () => {
   describe('constructor', () => {
     test('should create client with minimal ', () => {
-      const : Smtp = {
+      const config: Smtp = {
         host: 'smtp.example.com',
         port: 587,
         secure: false,
@@ -25,7 +25,7 @@ describe('SmtpClient', () => {
     });
 
     test('should create client with auth ', () => {
-      const : Smtp = {
+      const config: Smtp = {
         host: 'smtp.example.com',
         port: 587,
         secure: false,
@@ -37,7 +37,7 @@ describe('SmtpClient', () => {
     });
 
     test('should create client with secure  (port 465)', () => {
-      const : Smtp = {
+      const config: Smtp = {
         host: 'smtp.example.com',
         port: 465,
         secure: true,
@@ -49,7 +49,7 @@ describe('SmtpClient', () => {
     });
 
     test('should create client with custom timeouts', () => {
-      const : Smtp = {
+      const config: Smtp = {
         host: 'smtp.example.com',
         port: 587,
         secure: false,
@@ -62,7 +62,7 @@ describe('SmtpClient', () => {
     });
 
     test('should use default timeouts when not specified', () => {
-      const : Smtp = {
+      const config: Smtp = {
         host: 'smtp.example.com',
         port: 587,
         secure: false,
@@ -76,7 +76,7 @@ describe('SmtpClient', () => {
 
   describe('send method signature', () => {
     test('should have send method that returns a promise', () => {
-      const : Smtp = {
+      const config: Smtp = {
         host: 'localhost',
         port: 25,
         secure: false,
@@ -87,7 +87,7 @@ describe('SmtpClient', () => {
     });
 
     test('should return error result when connection fails', async () => {
-      const : Smtp = {
+      const config: Smtp = {
         host: 'nonexistent.invalid',
         port: 25,
         secure: false,
@@ -109,7 +109,7 @@ describe('SmtpClient', () => {
 
   describe('Smtp types', () => {
     test('should accept string recipient', () => {
-      const : Smtp = {
+      const config: Smtp = {
         host: 'smtp.example.com',
         port: 587,
         secure: false,
@@ -128,7 +128,7 @@ describe('SmtpClient', () => {
     });
 
     test('should accept array of recipients', () => {
-      const : Smtp = {
+      const config: Smtp = {
         host: 'smtp.example.com',
         port: 587,
         secure: false,
@@ -147,7 +147,7 @@ describe('SmtpClient', () => {
     });
 
     test('should accept html content', () => {
-      const : Smtp = {
+      const config: Smtp = {
         host: 'smtp.example.com',
         port: 587,
         secure: false,
@@ -166,7 +166,7 @@ describe('SmtpClient', () => {
     });
 
     test('should accept both text and html content', () => {
-      const : Smtp = {
+      const config: Smtp = {
         host: 'smtp.example.com',
         port: 587,
         secure: false,

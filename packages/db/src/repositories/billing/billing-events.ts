@@ -41,10 +41,7 @@ export interface BillingEventRepository {
   deleteOlderThan(date: Date): Promise<number>;
 
   /** List recent events by type */
-  listByType(
-    eventType: BillingEventType,
-    limit?: number,
-  ): Promise<BillingEvent[]>;
+  listByType(eventType: BillingEventType, limit?: number): Promise<BillingEvent[]>;
 }
 
 // ============================================================================
@@ -79,12 +76,7 @@ export function createBillingEventRepository(db: RawDb): BillingEventRepository 
     ): Promise<BillingEvent | null> {
       const result = await db.queryOne<Record<string, unknown>>(
         select(BILLING_EVENTS_TABLE)
-          .where(
-            and(
-              eq('provider', provider),
-              eq('provider_event_id', providerEventId),
-            ),
-          )
+          .where(and(eq('provider', provider), eq('provider_event_id', providerEventId)))
           .toSql(),
       );
       return result ? transformBillingEvent(result) : null;
@@ -94,12 +86,7 @@ export function createBillingEventRepository(db: RawDb): BillingEventRepository 
       const result = await db.queryOne<Record<string, unknown>>(
         select(BILLING_EVENTS_TABLE)
           .columns('1 as exists')
-          .where(
-            and(
-              eq('provider', provider),
-              eq('provider_event_id', providerEventId),
-            ),
-          )
+          .where(and(eq('provider', provider), eq('provider_event_id', providerEventId)))
           .limit(1)
           .toSql(),
       );
@@ -129,17 +116,10 @@ export function createBillingEventRepository(db: RawDb): BillingEventRepository 
     },
 
     async deleteOlderThan(date: Date): Promise<number> {
-      return db.execute(
-        deleteFrom(BILLING_EVENTS_TABLE)
-          .where(lt('created_at', date))
-          .toSql(),
-      );
+      return db.execute(deleteFrom(BILLING_EVENTS_TABLE).where(lt('created_at', date)).toSql());
     },
 
-    async listByType(
-      eventType: BillingEventType,
-      limit = 100,
-    ): Promise<BillingEvent[]> {
+    async listByType(eventType: BillingEventType, limit = 100): Promise<BillingEvent[]> {
       const results = await db.query<Record<string, unknown>>(
         select(BILLING_EVENTS_TABLE)
           .where(eq('event_type', eventType))

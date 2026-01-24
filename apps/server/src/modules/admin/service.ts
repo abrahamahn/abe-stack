@@ -26,11 +26,7 @@ export async function unlockUserAccount(
 ): Promise<{ email: string }> {
   // Check if the target user exists
   const targetUser = await db.queryOne<{ id: string }>(
-    select(USERS_TABLE)
-      .columns('id')
-      .where(eq('email', email))
-      .limit(1)
-      .toSql(),
+    select(USERS_TABLE).columns('id').where(eq('email', email)).limit(1).toSql(),
   );
 
   if (!targetUser) {

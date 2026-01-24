@@ -25,9 +25,7 @@ describe('ClientSearchQueryBuilder', () => {
     });
 
     test('should build query with filters', () => {
-      const builder = createClientSearchQuery()
-        .whereEq('status', 'active')
-        .whereGt('age', 18);
+      const builder = createClientSearchQuery().whereEq('status', 'active').whereGt('age', 18);
 
       const query = builder.build();
 
@@ -35,9 +33,7 @@ describe('ClientSearchQueryBuilder', () => {
     });
 
     test('should build query with sort', () => {
-      const builder = createClientSearchQuery()
-        .orderByDesc('createdAt')
-        .orderByAsc('name');
+      const builder = createClientSearchQuery().orderByDesc('createdAt').orderByAsc('name');
 
       const query = builder.build();
 
@@ -59,9 +55,7 @@ describe('ClientSearchQueryBuilder', () => {
     });
 
     test('should build query with pagination', () => {
-      const builder = createClientSearchQuery()
-        .page(3)
-        .limit(25);
+      const builder = createClientSearchQuery().page(3).limit(25);
 
       const query = builder.build();
 
@@ -90,9 +84,7 @@ describe('ClientSearchQueryBuilder', () => {
 
   describe('ClientSearchQueryBuilder URL methods', () => {
     test('toURLSearchParams should serialize to URLSearchParams', () => {
-      const builder = createClientSearchQuery()
-        .page(2)
-        .limit(25);
+      const builder = createClientSearchQuery().page(2).limit(25);
 
       const params = builder.toURLSearchParams();
 
@@ -101,9 +93,7 @@ describe('ClientSearchQueryBuilder', () => {
     });
 
     test('toQueryString should return query string', () => {
-      const builder = createClientSearchQuery()
-        .page(2)
-        .limit(10);
+      const builder = createClientSearchQuery().page(2).limit(10);
 
       const queryString = builder.toQueryString();
 
@@ -366,7 +356,10 @@ describe('ClientSearchQueryBuilder', () => {
 
     test('should deserialize Date values', () => {
       const params = new URLSearchParams();
-      params.set('filters', JSON.stringify({ f: 'createdAt', o: 'gte', v: { $date: '2024-01-15T00:00:00.000Z' } }));
+      params.set(
+        'filters',
+        JSON.stringify({ f: 'createdAt', o: 'gte', v: { $date: '2024-01-15T00:00:00.000Z' } }),
+      );
 
       const query = urlSearchParamsToQuery(params);
       const filter = query.filters as { value: Date };
@@ -375,7 +368,10 @@ describe('ClientSearchQueryBuilder', () => {
 
     test('should deserialize range values', () => {
       const params = new URLSearchParams();
-      params.set('filters', JSON.stringify({ f: 'price', o: 'between', v: { $range: { min: 10, max: 100 } } }));
+      params.set(
+        'filters',
+        JSON.stringify({ f: 'price', o: 'between', v: { $range: { min: 10, max: 100 } } }),
+      );
 
       const query = urlSearchParamsToQuery(params);
       const filter = query.filters as { value: { min: number; max: number } };
@@ -502,9 +498,7 @@ describe('ClientSearchQueryBuilder', () => {
 
       const builder = createClientSearchQuery<TestRecord>();
       const original = builder
-        .and((b) =>
-          b.whereEq('status', 'active').whereGte('age', 18),
-        )
+        .and((b) => b.whereEq('status', 'active').whereGte('age', 18))
         .build();
 
       const params = queryToURLSearchParams(original);

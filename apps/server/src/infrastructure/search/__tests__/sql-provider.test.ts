@@ -310,7 +310,9 @@ describe('SqlSearchProvider', () => {
         ],
       };
 
-      await expect(provider.search({ filters: manyConditions })).rejects.toThrow(QueryTooComplexError);
+      await expect(provider.search({ filters: manyConditions })).rejects.toThrow(
+        QueryTooComplexError,
+      );
     });
   });
 

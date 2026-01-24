@@ -28,7 +28,9 @@ export function CheckoutSuccessPage(): ReactElement {
       setCountdown((c) => c - 1);
     }, 1000);
 
-    return (): void => { clearTimeout(timer); };
+    return (): void => {
+      clearTimeout(timer);
+    };
   }, [countdown, navigate]);
 
   return (
@@ -40,17 +42,26 @@ export function CheckoutSuccessPage(): ReactElement {
           </div>
           <h1 className="checkout-result-page__title">Payment Successful!</h1>
           <p className="checkout-result-page__message">
-            Thank you for subscribing. Your account has been upgraded and you now have access to
-            all premium features.
+            Thank you for subscribing. Your account has been upgraded and you now have access to all
+            premium features.
           </p>
           <p className="checkout-result-page__countdown">
             Redirecting to billing settings in {countdown} seconds...
           </p>
           <div className="checkout-result-page__actions">
-            <Button onClick={() => { navigate('/settings/billing'); }}>
+            <Button
+              onClick={() => {
+                navigate('/settings/billing');
+              }}
+            >
               Go to Billing Settings
             </Button>
-            <Button variant="text" onClick={() => { navigate('/dashboard'); }}>
+            <Button
+              variant="text"
+              onClick={() => {
+                navigate('/dashboard');
+              }}
+            >
               Go to Dashboard
             </Button>
           </div>

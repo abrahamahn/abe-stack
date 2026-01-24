@@ -6,6 +6,8 @@
  * Import from '@abe-stack/core/contracts/config' or '@abe-stack/core'.
  */
 
+export * from './environment';
+
 // ============================================================================
 // Auth Exports
 // ============================================================================
@@ -23,25 +25,34 @@ export type {
 // ============================================================================
 
 export type {
+  // Cache
+  CacheConfig,
   // Database
   DatabaseConfig,
   DatabaseProvider,
   JsonDatabaseConfig,
+  // Storage
+  LocalStorageConfig,
+  // Server
+  LogLevel,
+  MongoConfig,
+  MySqlConfig,
+  NpmConfig,
+  // Package Manager
+  PackageManagerConfig,
+  PackageManagerProvider,
+  PnpmConfig,
   PostgresConfig,
-  // Cache
-  CacheConfig,
   // Queue
   QueueConfig,
   QueueProvider,
-  // Server
-  LogLevel,
-  ServerConfig,
-  // Storage
-  LocalStorageConfig,
   S3StorageConfig,
+  ServerConfig,
+  SqliteConfig,
   StorageConfig,
   StorageConfigBase,
   StorageProviderName,
+  YarnConfig,
 } from './infra';
 
 // ============================================================================
@@ -54,16 +65,24 @@ export type {
   BillingPlansConfig,
   BillingProvider,
   BillingUrlsConfig,
-  PayPalProviderConfig,
-  StripeProviderConfig,
-  // Email
-  EmailConfig,
-  SmtpConfig,
   // Notifications
-  FcmConfig,
+  BrazeConfig,
+  CourierConfig,
   // Search
   ElasticsearchProviderConfig,
+  // Email
+  EmailConfig,
+  FcmConfig,
+  GenericNotificationConfig,
+  KnockConfig,
+  NotificationConfig,
+  NotificationProvider,
+  OneSignalConfig,
+  PayPalProviderConfig,
+  SmtpConfig,
+  SnsConfig,
   SqlSearchProviderConfig,
+  StripeProviderConfig,
 } from './services';
 
 // ============================================================================
@@ -74,6 +93,7 @@ import type { AuthConfig } from './auth';
 import type {
   CacheConfig,
   DatabaseConfig,
+  PackageManagerConfig,
   QueueConfig,
   ServerConfig,
   StorageConfig,
@@ -82,7 +102,7 @@ import type {
   BillingConfig,
   ElasticsearchProviderConfig,
   EmailConfig,
-  FcmConfig,
+  NotificationConfig,
   SqlSearchProviderConfig,
 } from './services';
 
@@ -129,7 +149,9 @@ export interface AppConfig {
   /** Background job queue settings */
   queue: QueueConfig;
   /** Push notification settings */
-  notifications: FcmConfig;
+  notifications: NotificationConfig;
   /** Search service settings */
   search: SearchConfig;
+  /** Package manager settings */
+  packageManager: PackageManagerConfig;
 }

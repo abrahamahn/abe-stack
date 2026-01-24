@@ -229,6 +229,7 @@ describe('handleLogin', () => {
         id: 'user-123',
         email: 'test@example.com',
         name: 'Test',
+        avatarUrl: null,
         role: 'user' as const,
         createdAt,
       },
@@ -554,6 +555,7 @@ describe('handleVerifyEmail', () => {
       id: 'user-123',
       email: 'test@example.com',
       name: 'Test',
+      avatarUrl: null,
       role: 'user' as const,
       createdAt,
     };

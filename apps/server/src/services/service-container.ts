@@ -6,8 +6,9 @@
  * Separated from lifecycle management to follow single responsibility principle.
  */
 
-import { buildConnectionString } from '@config';
-import type { AppConfig } from '@config';
+import type { AppConfig } from '@/config';
+import { buildConnectionString } from '@/config';
+import type { PostgresPubSub } from '@infrastructure/index';
 import {
   createDbClient,
   createEmailService,
@@ -17,10 +18,11 @@ import {
   SubscriptionManager,
   type DbClient,
   type EmailService,
-  type PostgresPubSub,
   type Repositories,
   type StorageProvider,
+  type SubscriptionKey,
 } from '@infrastructure/index';
+
 import { type AppContext, type IServiceContainer } from '@shared/index';
 import { CacheService } from './cache-service';
 
@@ -65,8 +67,8 @@ export class ServiceContainer implements IServiceContainer {
 
     // Initialize cache service
     this.cache = new CacheService({
-      ttl: this.config.cache?.ttl || 5 * 60 * 1000, // 5 minutes default
-      maxSize: this.config.cache?.maxSize || 1000,  // 1000 items default
+      ttl: this.config.cache.ttl,
+      maxSize: this.config.cache.maxSize,
     });
 
     // Initialize Pub/Sub with horizontal scaling if connection string is available
@@ -80,10 +82,10 @@ export class ServiceContainer implements IServiceContainer {
     if (pubsubConnString && this.config.env !== 'test') {
       this._pgPubSub = createPostgresPubSub({
         connectionString: pubsubConnString,
-        onMessage: (key, version) => {
-          this.pubsub.publishLocal(key, version);
+        onMessage: (key: string, version: number): void => {
+          this.pubsub.publishLocal(key as SubscriptionKey, version);
         },
-        onError: (err) => {
+        onError: (err: Error) => {
           // Note: At this stage, we don't have access to the server logger yet
           // Errors will be handled when the logger becomes available
           process.stderr.write(`PostgresPubSub error: ${String(err)}\n`);
@@ -159,14 +161,15 @@ export function createTestServiceContainer(
       host: '127.0.0.1',
       port: 0, // Random port
       portFallbacks: [],
-      cors: { origin: '*', credentials: false, methods: ['GET', 'POST'] },
+      cors: { origin: ['*'], credentials: false, methods: ['GET', 'POST'] },
       trustProxy: false,
       logLevel: 'error',
+      maintenanceMode: false,
       appBaseUrl: 'http://localhost:5173',
       apiBaseUrl: 'http://localhost:0',
       rateLimit: {
         windowMs: 60000, // 1 minute
-        max: 100,        // 100 requests
+        max: 100, // 100 requests
       },
     },
     database: {
@@ -178,6 +181,7 @@ export function createTestServiceContainer(
       password: 'test',
       maxConnections: 1,
       portFallbacks: [],
+      ssl: false,
     },
     auth: {
       strategies: ['local'],
@@ -218,16 +222,66 @@ export function createTestServiceContainer(
     },
     email: {
       provider: 'console',
-      smtp: { host: '', port: 587, secure: false, auth: { user: '', pass: '' } },
+      smtp: {
+        host: '',
+        port: 587,
+        secure: false,
+        auth: { user: '', pass: '' },
+        connectionTimeout: 30000,
+        socketTimeout: 30000,
+      },
       from: { name: 'Test', address: 'test@test.com' },
+      replyTo: 'test@test.com',
     },
     storage: {
       provider: 'local',
       rootPath: './test-uploads',
     },
     cache: {
-      ttl: 1000,    // 1 second for tests
+      ttl: 1000, // 1 second for tests
       maxSize: 100, // smaller cache for tests
+      useExternalProvider: false,
+    },
+    billing: {
+      enabled: false,
+      provider: 'stripe',
+      currency: 'USD',
+      stripe: { secretKey: '', publishableKey: '', webhookSecret: '' },
+      paypal: { clientId: '', clientSecret: '', webhookId: '', sandbox: true },
+      plans: {},
+      urls: {
+        portalReturnUrl: 'http://localhost:5173/settings/billing',
+        checkoutSuccessUrl: 'http://localhost:5173/checkout/success',
+        checkoutCancelUrl: 'http://localhost:5173/checkout/cancel',
+      },
+    },
+    queue: {
+      provider: 'local',
+      pollIntervalMs: 1000,
+      concurrency: 1,
+      defaultMaxAttempts: 3,
+      backoffBaseMs: 1000,
+      maxBackoffMs: 30000,
+    },
+    notifications: {
+      enabled: false,
+      provider: 'fcm',
+      config: {
+        credentials: '',
+        projectId: '',
+      },
+    },
+    search: {
+      provider: 'sql',
+      config: {
+        defaultPageSize: 20,
+        maxPageSize: 100,
+      },
+    },
+    packageManager: {
+      provider: 'pnpm',
+      strictPeerDeps: true,
+      frozenLockfile: true,
     },
     ...Overrides,
   };

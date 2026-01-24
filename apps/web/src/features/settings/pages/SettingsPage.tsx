@@ -28,15 +28,16 @@ function ProfileTab({ user }: { user: User }): ReactElement {
   return (
     <div className="space-y-6">
       <div>
-        <Heading as="h3" size="md" className="mb-4">Avatar</Heading>
-        <AvatarUpload
-          currentAvatarUrl={user.avatarUrl}
-          userName={user.name}
-        />
+        <Heading as="h3" size="md" className="mb-4">
+          Avatar
+        </Heading>
+        <AvatarUpload currentAvatarUrl={user.avatarUrl} userName={user.name} />
       </div>
 
       <div className="border-t pt-6">
-        <Heading as="h3" size="md" className="mb-4">Profile Information</Heading>
+        <Heading as="h3" size="md" className="mb-4">
+          Profile Information
+        </Heading>
         <ProfileForm user={user} />
       </div>
     </div>
@@ -47,12 +48,16 @@ function SecurityTab(): ReactElement {
   return (
     <div className="space-y-6">
       <div>
-        <Heading as="h3" size="md" className="mb-4">Change Password</Heading>
+        <Heading as="h3" size="md" className="mb-4">
+          Change Password
+        </Heading>
         <PasswordChangeForm />
       </div>
 
       <div className="border-t pt-6">
-        <Heading as="h3" size="md" className="mb-4">Connected Accounts</Heading>
+        <Heading as="h3" size="md" className="mb-4">
+          Connected Accounts
+        </Heading>
         <OAuthConnectionsList />
       </div>
     </div>
@@ -62,9 +67,12 @@ function SecurityTab(): ReactElement {
 function SessionsTab(): ReactElement {
   return (
     <div>
-      <Heading as="h3" size="md" className="mb-4">Active Sessions</Heading>
+      <Heading as="h3" size="md" className="mb-4">
+        Active Sessions
+      </Heading>
       <p className="text-gray-500 text-sm mb-4">
-        Manage your active sessions across devices. Revoking a session will log you out from that device.
+        Manage your active sessions across devices. Revoking a session will log you out from that
+        device.
       </p>
       <SessionsList />
     </div>
@@ -74,20 +82,17 @@ function SessionsTab(): ReactElement {
 function BillingTab(): ReactElement {
   return (
     <div>
-      <Heading as="h3" size="md" className="mb-4">Billing</Heading>
-      <p className="text-gray-500 text-sm mb-4">
-        Manage your subscription and billing details.
-      </p>
+      <Heading as="h3" size="md" className="mb-4">
+        Billing
+      </Heading>
+      <p className="text-gray-500 text-sm mb-4">Manage your subscription and billing details.</p>
       <Card className="p-4">
         <p className="text-gray-500">
           Visit the{' '}
-          <a
-            href="/billing"
-            className="text-blue-600 hover:text-blue-700 underline"
-          >
+          <a href="/billing" className="text-blue-600 hover:text-blue-700 underline">
             Billing page
-          </a>
-          {' '}to manage your subscription.
+          </a>{' '}
+          to manage your subscription.
         </p>
       </Card>
     </div>
@@ -102,19 +107,21 @@ export function SettingsPage(): ReactElement {
   // Fetch current user
   const apiBaseUrl =
     typeof import.meta.env.VITE_API_URL === 'string' ? import.meta.env.VITE_API_URL : '';
-  const { data: user, status, error, refetch } = useQuery<User>({
+  const {
+    data: user,
+    status,
+    error,
+    refetch,
+  } = useQuery<User>({
     queryKey: ['user', 'me'],
     queryFn: async () => {
       const token = localStorage.getItem('accessToken');
-      const response = await fetch(
-        `${apiBaseUrl}/api/users/me`,
-        {
-          headers: {
-            Authorization: `Bearer ${token ?? ''}`,
-          },
-          credentials: 'include',
+      const response = await fetch(`${apiBaseUrl}/api/users/me`, {
+        headers: {
+          Authorization: `Bearer ${token ?? ''}`,
         },
-      );
+        credentials: 'include',
+      });
 
       if (!response.ok) {
         throw new Error('Failed to fetch user');
@@ -126,28 +133,31 @@ export function SettingsPage(): ReactElement {
   });
 
   // Build tabs
-  const tabs = useMemo(() => [
-    {
-      id: 'profile',
-      label: 'Profile',
-      content: user ? <ProfileTab user={user} /> : null,
-    },
-    {
-      id: 'security',
-      label: 'Security',
-      content: <SecurityTab />,
-    },
-    {
-      id: 'sessions',
-      label: 'Sessions',
-      content: <SessionsTab />,
-    },
-    {
-      id: 'billing',
-      label: 'Billing',
-      content: <BillingTab />,
-    },
-  ], [user]);
+  const tabs = useMemo(
+    () => [
+      {
+        id: 'profile',
+        label: 'Profile',
+        content: user ? <ProfileTab user={user} /> : null,
+      },
+      {
+        id: 'security',
+        label: 'Security',
+        content: <SecurityTab />,
+      },
+      {
+        id: 'sessions',
+        label: 'Sessions',
+        content: <SessionsTab />,
+      },
+      {
+        id: 'billing',
+        label: 'Billing',
+        content: <BillingTab />,
+      },
+    ],
+    [user],
+  );
 
   // Loading state
   if (status === 'pending') {
@@ -166,14 +176,18 @@ export function SettingsPage(): ReactElement {
     return (
       <Container className="py-8">
         <Card className="p-6 text-center">
-          <Heading as="h2" size="lg" className="mb-4">Unable to Load Settings</Heading>
+          <Heading as="h2" size="lg" className="mb-4">
+            Unable to Load Settings
+          </Heading>
           <p className="text-gray-500 mb-4">
             {error?.message ?? 'Failed to load your profile. Please try again.'}
           </p>
           <Button
             type="button"
             variant="text"
-            onClick={() => { void refetch(); }}
+            onClick={() => {
+              void refetch();
+            }}
             className="underline"
           >
             Try Again
@@ -185,7 +199,9 @@ export function SettingsPage(): ReactElement {
 
   return (
     <Container className="py-8 max-w-3xl">
-      <Heading as="h1" size="xl" className="mb-6">Settings</Heading>
+      <Heading as="h1" size="xl" className="mb-6">
+        Settings
+      </Heading>
 
       <Card className="p-6">
         <Tabs items={tabs} />

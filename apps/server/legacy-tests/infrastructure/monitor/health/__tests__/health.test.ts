@@ -46,7 +46,7 @@ describe('Health Check Functions', () => {
   };
 
   const mockContext = {
-    : {
+    config: {
       env: 'test',
       email: { provider: 'console' },
       storage: { provider: 'local' },

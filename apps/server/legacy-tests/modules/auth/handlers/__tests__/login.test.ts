@@ -34,7 +34,7 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
     db: {} as AppContext['db'],
     repos: {} as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
-    : {
+    config: {
       auth: {
         jwt: {
           secret: 'test-secret-32-characters-long!!',
@@ -57,7 +57,7 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
         port: 8080,
         appBaseUrl: 'http://localhost:8080',
       },
-    } as AppContext[''],
+    } as AppContext['config'],
     log: {
       error: vi.fn(),
     } as unknown as AppContext['log'],
@@ -126,11 +126,15 @@ describe('handleLogin', () => {
       token: 'access-token',
       user: mockAuthResult.user,
     });
-    expect(setRefreshTokenCookie).toHaveBeenCalledWith(mockReply, 'refresh-token', mockCtx..auth);
+    expect(setRefreshTokenCookie).toHaveBeenCalledWith(
+      mockReply,
+      'refresh-token',
+      mockCtx.config.auth,
+    );
     expect(authenticateUser).toHaveBeenCalledWith(
       mockCtx.db,
       mockCtx.repos,
-      mockCtx..auth,
+      mockCtx.config.auth,
       'test@example.com',
       'password123',
       mockCtx.log,
@@ -175,7 +179,9 @@ describe('handleLogin', () => {
       password: 'password123',
     };
 
-    vi.mocked(authenticateUser).mockRejectedValue(new EmailNotVerifiedError('unverified@example.com'));
+    vi.mocked(authenticateUser).mockRejectedValue(
+      new EmailNotVerifiedError('unverified@example.com'),
+    );
 
     const result = await handleLogin(mockCtx, body, mockRequest, mockReply);
 

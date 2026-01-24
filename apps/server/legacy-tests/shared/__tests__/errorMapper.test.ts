@@ -41,7 +41,7 @@ function createMockContext(): AppContext {
 
   return {
     log: mockLogger,
-    : {} as AppContext[''],
+    config: {} as AppContext['config'],
     db: {} as AppContext['db'],
     repos: {} as AppContext['repos'],
     email: {} as AppContext['email'],

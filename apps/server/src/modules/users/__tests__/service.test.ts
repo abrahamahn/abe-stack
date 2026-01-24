@@ -20,6 +20,7 @@ describe('Users Service', () => {
         id: 'user-123',
         email: 'test@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user' as const,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01'),
@@ -38,6 +39,7 @@ describe('Users Service', () => {
         id: 'user-123',
         email: 'test@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user',
         createdAt: mockUser.createdAt,
       });
@@ -56,6 +58,7 @@ describe('Users Service', () => {
         id: 'user-123',
         email: 'test@example.com',
         name: null,
+        avatarUrl: null,
         role: 'admin' as const,
         createdAt: new Date('2024-01-01'),
         updatedAt: new Date('2024-01-01'),
@@ -74,6 +77,7 @@ describe('Users Service', () => {
         id: 'user-123',
         email: 'test@example.com',
         name: null,
+        avatarUrl: null,
         role: 'admin',
         createdAt: mockUser.createdAt,
       });

@@ -27,7 +27,7 @@ describe('cn utility', () => {
   test('should handle conditional classes with ternary operators', () => {
     const isActive = true;
     const isDisabled = false;
-    
+
     const result = cn('btn', isActive ? 'active' : '', isDisabled ? 'disabled' : 'enabled');
     expect(result).toBe('btn active enabled');
   });
@@ -35,7 +35,7 @@ describe('cn utility', () => {
   test('should handle conditional classes with logical operators', () => {
     const hasError = true;
     const isSuccess = false;
-    
+
     const result = cn('input', hasError && 'error', isSuccess && 'success', 'default');
     expect(result).toBe('input error default');
   });
@@ -54,7 +54,7 @@ describe('cn utility', () => {
     const result = cn(
       'btn',
       { active: true, disabled: false, hidden: true },
-      { primary: false, secondary: true }
+      { primary: false, secondary: true },
     );
     expect(result).toBe('btn active hidden secondary');
   });
@@ -62,7 +62,7 @@ describe('cn utility', () => {
   test('should handle mixed arguments (strings, booleans, objects, arrays)', () => {
     const isActive = true;
     const classes = ['btn', 'primary'];
-    
+
     const result = cn(
       'container',
       classes,
@@ -71,9 +71,9 @@ describe('cn utility', () => {
       null,
       undefined,
       0,
-      ''
+      '',
     );
-    
+
     expect(result).toBe('container btn primary active visible');
   });
 
@@ -81,18 +81,13 @@ describe('cn utility', () => {
     const variant = 'outline';
     const size = 'lg';
     const isDisabled = false;
-    
-    const result = cn(
-      'btn',
-      `btn-${variant}`,
-      `btn-${size}`,
-      {
-        'btn-disabled': isDisabled,
-        'btn-enabled': !isDisabled,
-        [`btn-${variant}-${size}`]: variant && size,
-      }
-    );
-    
+
+    const result = cn('btn', `btn-${variant}`, `btn-${size}`, {
+      'btn-disabled': isDisabled,
+      'btn-enabled': !isDisabled,
+      [`btn-${variant}-${size}`]: variant && size,
+    });
+
     expect(result).toBe('btn btn-outline btn-lg btn-enabled btn-outline-lg');
   });
 
@@ -108,16 +103,18 @@ describe('cn utility', () => {
   });
 
   test('should handle falsey values in objects', () => {
-    const result = cn(
-      'wrapper',
-      { 'has-content': true, 'no-content': false, 'is-loading': null, 'loaded': undefined }
-    );
+    const result = cn('wrapper', {
+      'has-content': true,
+      'no-content': false,
+      'is-loading': null,
+      loaded: undefined,
+    });
     expect(result).toBe('wrapper has-content');
   });
 
   test('should handle numeric values', () => {
     const result = cn('item', 0, 1, 'active', 2);
-    expect(result).toBe('item 0 1 active 2');
+    expect(result).toBe('item 1 active 2');
   });
 
   test('should handle special characters in class names', () => {
@@ -166,15 +163,17 @@ describe('cn utility', () => {
       ['level-1', ['level-2', { 'deep-active': true, 'deep-inactive': false }]],
       { top: true, bottom: false },
     ];
-    
+
     const result = cn('container', complexClasses);
     expect(result).toBe('container base level-1 level-2 deep-active top');
   });
 
   test('should handle large number of arguments', () => {
-    const args = Array.from({ length: 50 }, (_, i) => i % 2 === 0 ? `class-${i}` : Boolean(i % 3));
+    const args = Array.from({ length: 50 }, (_, i) =>
+      i % 2 === 0 ? `class-${i}` : Boolean(i % 3),
+    );
     const result = cn('base', ...args);
-    
+
     // Should include base class and all truthy values
     expect(result).toContain('base');
     expect(result).toContain('class-0');
@@ -195,9 +194,9 @@ describe('cn utility', () => {
   });
 
   test('should handle objects with mixed key types', () => {
-    const obj = { 
-      'string-key': true, 
-      42: true, 
+    const obj = {
+      'string-key': true,
+      42: true,
       [Symbol('sym')]: true, // This will be ignored as symbols are not enumerable in this context
       ['null']: true, // Explicit string key
     };

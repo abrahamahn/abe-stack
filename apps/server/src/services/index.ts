@@ -6,10 +6,7 @@
 export {
   ServiceContainer,
   createServiceContainer,
-  createTestServiceContainer
+  createTestServiceContainer,
 } from './service-container';
 
-export {
-  CacheService,
-  createCacheService
-} from './cache-service';
+export { CacheService, createCacheService } from './cache-service';

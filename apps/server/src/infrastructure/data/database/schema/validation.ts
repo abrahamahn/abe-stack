@@ -61,7 +61,7 @@ export class SchemaValidationError extends Error {
  */
 export async function getExistingTables(db: RawDb): Promise<string[]> {
   const result = await db.raw<{ tablename: string }>(
-    `SELECT tablename FROM pg_tables WHERE schemaname = 'public'`
+    `SELECT tablename FROM pg_tables WHERE schemaname = 'public'`,
   );
 
   return result.map((row) => row.tablename);

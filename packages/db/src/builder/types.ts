@@ -109,6 +109,7 @@ export interface TableSpec {
   name: string;
   alias?: string;
   schema?: string;
+  subquery?: SqlFragment;
 }
 
 /**
@@ -157,16 +158,25 @@ export function escapeIdentifier(name: string): string {
 }
 
 /**
- * Format a table name with optional schema
+ * Format a table name with optional schema or subquery
  */
-export function formatTable(table: TableSpec): string {
-  let result = '';
-  if (table.schema) {
-    result = escapeIdentifier(table.schema) + '.';
+export function formatTable(table: TableSpec): SqlFragment {
+  let text = '';
+  let values: unknown[] = [];
+
+  if (table.subquery) {
+    // For subqueries, wrap in parentheses if not already
+    text = `(${table.subquery.text})`;
+    values = [...table.subquery.values];
+  } else {
+    if (table.schema) {
+      text = escapeIdentifier(table.schema) + '.';
+    }
+    text += escapeIdentifier(table.name);
   }
-  result += escapeIdentifier(table.name);
+
   if (table.alias) {
-    result += ' AS ' + escapeIdentifier(table.alias);
+    text += ' AS ' + escapeIdentifier(table.alias);
   }
-  return result;
+  return { text, values };
 }

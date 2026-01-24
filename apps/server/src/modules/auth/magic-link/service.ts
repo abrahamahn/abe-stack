@@ -9,6 +9,20 @@
 import { createHash, randomBytes } from 'node:crypto';
 
 import {
+  MAGIC_LINK_TOKENS_TABLE,
+  USERS_TABLE,
+  USER_COLUMNS,
+  and,
+  eq,
+  gt,
+  insert,
+  isNull,
+  select,
+  toCamelCase,
+  update,
+  type User,
+} from '@abe-stack/db';
+import {
   emailTemplates,
   withTransaction,
   type DbClient,
@@ -16,25 +30,10 @@ import {
   type Repositories,
 } from '@infrastructure';
 import { EmailSendError, InvalidTokenError, TooManyRequestsError } from '@shared';
-import {
-  and,
-  eq,
-  gt,
-  isNull,
-  update,
-  insert,
-  select,
-  MAGIC_LINK_TOKENS_TABLE,
-  USERS_TABLE,
-  USER_COLUMNS,
-  toCamelCase,
-  type User,
-} from '@abe-stack/db';
 
-import { createAuthResponse } from '../utils';
-import { createAccessToken, createRefreshTokenFamily } from '../utils';
+import { createAccessToken, createAuthResponse, createRefreshTokenFamily } from '../utils';
 
-import type { AuthConfig } from '@config';
+import type { AuthConfig } from '@/config';
 
 // ============================================================================
 // Constants
@@ -66,6 +65,7 @@ export interface MagicLinkResult {
     id: string;
     email: string;
     name: string | null;
+    avatarUrl: string | null;
     role: 'user' | 'admin' | 'moderator';
     createdAt: string;
   };
@@ -272,13 +272,7 @@ export async function verifyMagicLink(
     const tokenRecords = await tx.query<TokenRecord>(
       update(MAGIC_LINK_TOKENS_TABLE)
         .set({ used_at: now })
-        .where(
-          and(
-            eq('token_hash', tokenHash),
-            gt('expires_at', now),
-            isNull('used_at'),
-          ),
-        )
+        .where(and(eq('token_hash', tokenHash), gt('expires_at', now), isNull('used_at')))
         .returningAll()
         .toSql(),
     );
@@ -291,10 +285,7 @@ export async function verifyMagicLink(
 
     // Find existing user
     const userRow = await tx.queryOne<Record<string, unknown>>(
-      select(USERS_TABLE)
-                .where(eq('email', tokenRecord.email))
-        .limit(1)
-        .toSql(),
+      select(USERS_TABLE).where(eq('email', tokenRecord.email)).limit(1).toSql(),
     );
     let user: User | null = userRow ? toCamelCase<User>(userRow, USER_COLUMNS) : null;
 

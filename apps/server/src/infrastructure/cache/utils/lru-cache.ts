@@ -139,7 +139,7 @@ export class LRUCache<TKey, TValue> {
   values(): TValue[] {
     // Clean up expired entries first
     this.cleanupExpired();
-    return Array.from(this.cache.values()).map(node => node.value);
+    return Array.from(this.cache.values()).map((node) => node.value);
   }
 
   entries(): [TKey, TValue][] {

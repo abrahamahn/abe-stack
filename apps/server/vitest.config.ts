@@ -21,9 +21,9 @@ export default defineConfig({
       '**/__tests__/templates/**', // Template tests
     ],
     // Define test tiers for filtering
-    testNamePattern: process.env.TEST_TIER 
-      ? process.env.TEST_TIER === 'unit' 
-        ? '(unit|fast|quick)' 
+    testNamePattern: process.env.TEST_TIER
+      ? process.env.TEST_TIER === 'unit'
+        ? '(unit|fast|quick)'
         : process.env.TEST_TIER === 'integration'
           ? '(integration|critical|end-to-end|e2e)'
           : undefined
@@ -52,10 +52,7 @@ export default defineConfig({
       },
       {
         find: '@schema',
-        replacement: path.join(
-          repoRoot,
-          'apps/server/src/infrastructure/data/database/schema',
-        ),
+        replacement: path.join(repoRoot, 'apps/server/src/infrastructure/data/database/schema'),
       },
       {
         find: '@storage',
@@ -63,10 +60,7 @@ export default defineConfig({
       },
       {
         find: '@providers',
-        replacement: path.join(
-          repoRoot,
-          'apps/server/src/infrastructure/data/storage/providers',
-        ),
+        replacement: path.join(repoRoot, 'apps/server/src/infrastructure/data/storage/providers'),
       },
       {
         find: '@files',
@@ -87,10 +81,7 @@ export default defineConfig({
       },
       {
         find: '@websocket',
-        replacement: path.join(
-          repoRoot,
-          'apps/server/src/infrastructure/messaging/websocket',
-        ),
+        replacement: path.join(repoRoot, 'apps/server/src/infrastructure/messaging/websocket'),
       },
       // Security layer
       {
@@ -103,17 +94,11 @@ export default defineConfig({
       },
       {
         find: '@permissions',
-        replacement: path.join(
-          repoRoot,
-          'apps/server/src/infrastructure/security/permissions',
-        ),
+        replacement: path.join(repoRoot, 'apps/server/src/infrastructure/security/permissions'),
       },
       {
         find: '@rate-limit',
-        replacement: path.join(
-          repoRoot,
-          'apps/server/src/infrastructure/security/rate-limit',
-        ),
+        replacement: path.join(repoRoot, 'apps/server/src/infrastructure/security/rate-limit'),
       },
       // HTTP layer
       {

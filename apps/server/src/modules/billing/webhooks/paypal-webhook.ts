@@ -191,16 +191,17 @@ async function handleSubscriptionCreated(
     };
   };
 
-  const startTime = raw.resource?.start_time
-    ? new Date(raw.resource.start_time)
-    : new Date();
+  const startTime = raw.resource?.start_time ? new Date(raw.resource.start_time) : new Date();
   const nextBillingTime = raw.resource?.billing_info?.next_billing_time
     ? new Date(raw.resource.billing_info.next_billing_time)
     : new Date(startTime.getTime() + 30 * 24 * 60 * 60 * 1000);
 
   // Create or update customer mapping
   if (customerId) {
-    const existingMapping = await repos.customerMappings.findByProviderCustomerId('paypal', customerId);
+    const existingMapping = await repos.customerMappings.findByProviderCustomerId(
+      'paypal',
+      customerId,
+    );
     if (!existingMapping) {
       await repos.customerMappings.create({
         userId,
@@ -350,9 +351,7 @@ async function handleInvoicePaid(
     ? Math.round(parseFloat(raw.resource.amount.total) * 100)
     : 0;
   const currency = raw.resource?.amount?.currency?.toLowerCase() || 'usd';
-  const saleTime = raw.resource?.create_time
-    ? new Date(raw.resource.create_time)
-    : new Date();
+  const saleTime = raw.resource?.create_time ? new Date(raw.resource.create_time) : new Date();
 
   // Find subscription
   let dbSubscriptionId: string | null = null;
@@ -439,16 +438,16 @@ async function handleInvoicePaymentFailed(
     status: 'past_due',
   });
 
-  log.info({ subscriptionId: providerSubscriptionId }, 'Marked subscription as past_due from PayPal webhook');
+  log.info(
+    { subscriptionId: providerSubscriptionId },
+    'Marked subscription as past_due from PayPal webhook',
+  );
 }
 
 /**
  * Handle refund.created event (PAYMENT.SALE.REFUNDED)
  */
-function handleRefundCreated(
-  event: NormalizedWebhookEvent,
-  log: FastifyBaseLogger,
-): void {
+function handleRefundCreated(event: NormalizedWebhookEvent, log: FastifyBaseLogger): void {
   // Log refund event for auditing
   log.info({ eventId: event.id, customerId: event.data.customerId }, 'PayPal refund created');
 
@@ -458,12 +457,12 @@ function handleRefundCreated(
 /**
  * Handle chargeback.created event (CUSTOMER.DISPUTE.CREATED)
  */
-function handleChargebackCreated(
-  event: NormalizedWebhookEvent,
-  log: FastifyBaseLogger,
-): void {
+function handleChargebackCreated(event: NormalizedWebhookEvent, log: FastifyBaseLogger): void {
   // Log chargeback event for auditing - this is a serious event
-  log.warn({ eventId: event.id, customerId: event.data.customerId }, 'PayPal chargeback/dispute created');
+  log.warn(
+    { eventId: event.id, customerId: event.data.customerId },
+    'PayPal chargeback/dispute created',
+  );
 
   // Add additional handling if needed (e.g., alerting, account flagging)
 }

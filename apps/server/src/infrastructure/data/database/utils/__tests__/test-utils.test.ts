@@ -24,7 +24,10 @@ describe('createMockDb', () => {
   test('should have queryOne function that resolves to null by default', async () => {
     const mockDb = createMockDb();
 
-    const result = await mockDb.queryOne({ text: 'SELECT * FROM users WHERE id = $1', values: ['1'] });
+    const result = await mockDb.queryOne({
+      text: 'SELECT * FROM users WHERE id = $1',
+      values: ['1'],
+    });
 
     expect(result).toBeNull();
   });
@@ -103,7 +106,10 @@ describe('createMockDb', () => {
 
     mockDb.queryOne.mockResolvedValueOnce(mockUser);
 
-    const result = await mockDb.queryOne({ text: 'SELECT * FROM users WHERE id = $1', values: ['1'] });
+    const result = await mockDb.queryOne({
+      text: 'SELECT * FROM users WHERE id = $1',
+      values: ['1'],
+    });
 
     expect(result).toEqual(mockUser);
   });
@@ -113,7 +119,10 @@ describe('createMockDb', () => {
 
     mockDb.execute.mockResolvedValueOnce(5);
 
-    const result = await mockDb.execute({ text: 'DELETE FROM users WHERE created_at < NOW()', values: [] });
+    const result = await mockDb.execute({
+      text: 'DELETE FROM users WHERE created_at < NOW()',
+      values: [],
+    });
 
     expect(result).toBe(5);
   });
@@ -168,7 +177,10 @@ describe('createMockDbWithData', () => {
     const mockUser = { id: '1', name: 'Test' };
     const mockDb = createMockDbWithData({ queryOneResult: mockUser });
 
-    const result = await mockDb.queryOne({ text: 'SELECT * FROM users WHERE id = $1', values: ['1'] });
+    const result = await mockDb.queryOne({
+      text: 'SELECT * FROM users WHERE id = $1',
+      values: ['1'],
+    });
 
     expect(result).toEqual(mockUser);
   });
@@ -214,7 +226,10 @@ describe('asMockDb', () => {
     mockDb.queryOne.mockResolvedValueOnce({ id: '1', count: 5 });
 
     const db = asMockDb(mockDb);
-    const result = await db.queryOne<{ count: number }>({ text: 'SELECT COUNT(*) as count FROM users', values: [] });
+    const result = await db.queryOne<{ count: number }>({
+      text: 'SELECT COUNT(*) as count FROM users',
+      values: [],
+    });
 
     expect(result?.count).toBe(5);
     expect(mockDb.queryOne).toHaveBeenCalledTimes(1);

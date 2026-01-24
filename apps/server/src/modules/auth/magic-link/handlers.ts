@@ -6,8 +6,8 @@
  * Thin layer that calls services and formats responses.
  */
 
+import { isStrategyEnabled } from '@/config';
 import { InvalidTokenError } from '@abe-stack/core';
-import { isStrategyEnabled } from '@config';
 import {
   EmailSendError,
   mapErrorToResponse,
@@ -59,10 +59,19 @@ export async function handleMagicLinkRequest(
     // Use config values for magic link settings
     const magicLinkConfig = ctx.config.auth.magicLink;
 
-    const result = await requestMagicLink(ctx.db, ctx.repos, ctx.email, email, baseUrl, ipAddress, userAgent, {
-      tokenExpiryMinutes: magicLinkConfig.tokenExpiryMinutes,
-      maxAttemptsPerEmail: magicLinkConfig.maxAttempts,
-    });
+    const result = await requestMagicLink(
+      ctx.db,
+      ctx.repos,
+      ctx.email,
+      email,
+      baseUrl,
+      ipAddress,
+      userAgent,
+      {
+        tokenExpiryMinutes: magicLinkConfig.tokenExpiryMinutes,
+        maxAttemptsPerEmail: magicLinkConfig.maxAttempts,
+      },
+    );
 
     // Log the request event (fire and forget - don't block response)
     void logMagicLinkRequestEvent(ctx.db, email.toLowerCase(), ipAddress, userAgent);

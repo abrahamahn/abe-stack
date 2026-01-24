@@ -174,7 +174,9 @@ function AdminSidebar(): ReactElement {
               key={item.path}
               item={item}
               isActive={location.pathname.startsWith(item.path)}
-              onClick={() => { navigate(item.path); }}
+              onClick={() => {
+                navigate(item.path);
+              }}
             />
           ))}
         </nav>
@@ -183,7 +185,9 @@ function AdminSidebar(): ReactElement {
         <div className="p-3 border-t border-border">
           <Button
             type="button"
-            onClick={() => { navigate('/dashboard'); }}
+            onClick={() => {
+              navigate('/dashboard');
+            }}
             variant="text"
             size="small"
             className="w-full justify-start gap-2"

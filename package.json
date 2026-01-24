@@ -7,12 +7,12 @@
     "node": ">=18.19 <25"
   },
   "scripts": {
-    "dev": "tsx tools/dev/start-dev.ts",
+    "dev": "tsx tooling/scripts/dev/start-dev.ts",
     "build": "pnpm theme:build && turbo run build lint type-check --output-logs=errors-only && turbo run test --filter=!@abe-stack/server --output-logs=errors-only",
     "build:web": "turbo run build --filter=@abe-stack/web --output-logs=errors-only",
     "build:server": "turbo run build --filter=@abe-stack/server --output-logs=errors-only",
     "build:desktop": "turbo run build --filter=@abe-stack/desktop --output-logs=errors-only",
-    "theme:build": "node --import tsx config/lint/sync-css-theme.ts",
+    "theme:build": "node --import tsx tooling/lint/sync-css-theme.ts",
     "test": "vitest run --reporter=dot",
     "test:unit": "TEST_TIER=unit vitest run --reporter=dot",
     "test:integration": "TEST_TIER=integration vitest run --reporter=dot",
@@ -33,13 +33,13 @@
     "db:reset": "tsx tools/dev/reset.ts",
     "db:bootstrap": "tsx tools/dev/bootstrap.ts",
     "setup": "tsx tools/dev/setup.ts",
-    "docker:dev": "docker compose --env-file config/.env/.env.development -f config/docker/docker-compose.dev.yml up --build",
-    "docker:prod": "docker compose --env-file config/.env/.env.production -f config/docker/docker-compose.prod.yml up -d --build",
+    "docker:dev": "docker compose --env-file .config/env/.env.development -f config/docker/docker-compose.dev.yml up --build",
+    "docker:prod": "docker compose --env-file .config/env/.env.production -f config/docker/docker-compose.prod.yml up -d --build",
     "docker:down": "docker compose -f config/docker/docker-compose.dev.yml down",
     "docker:down:prod": "docker compose -f config/docker/docker-compose.prod.yml down",
     "deploy": "pnpm docker:prod",
     "deploy:down": "pnpm docker:down:prod",
-    "pre-commit": "pnpm config:generate && pnpm sync:headers && pnpm theme:build && pnpm format && pnpm lint && pnpm type-check"
+    "pre-commit": "pnpm theme:build && pnpm format && pnpm lint && pnpm type-check"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",

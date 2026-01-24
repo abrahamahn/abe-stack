@@ -31,7 +31,9 @@ type FileInputFieldProps = Omit<ComponentPropsWithoutRef<'input'>, 'type'> & {
  */
 const FileInputRoot = forwardRef<HTMLInputElement, FileInputProps>((props, ref) => {
   const { className = '', type = 'file', ...rest } = props;
-  return <input ref={ref} type={type} className={`input file-input ${className}`.trim()} {...rest} />;
+  return (
+    <input ref={ref} type={type} className={`input file-input ${className}`.trim()} {...rest} />
+  );
 });
 
 FileInputRoot.displayName = 'FileInput';
@@ -45,7 +47,10 @@ const FileInputField = forwardRef<HTMLInputElement, FileInputFieldProps>((props,
   return (
     <div className="input-field">
       {label ? (
-        <label htmlFor={inputId} className={`input-label ${hideLabel ? 'visually-hidden' : ''}`.trim()}>
+        <label
+          htmlFor={inputId}
+          className={`input-label ${hideLabel ? 'visually-hidden' : ''}`.trim()}
+        >
           {label}
         </label>
       ) : null}

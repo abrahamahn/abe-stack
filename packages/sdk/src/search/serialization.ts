@@ -411,7 +411,7 @@ function deserializeSort<T>(sortStr: string): SortConfig<T>[] {
     const [field, order] = s.split(':');
     return {
       field: field as keyof T,
-      order: (order === 'desc' ? SORT_ORDER.DESC : SORT_ORDER.ASC),
+      order: order === 'desc' ? SORT_ORDER.DESC : SORT_ORDER.ASC,
     };
   });
 }
@@ -473,10 +473,7 @@ function deserializeValue(value: unknown): FilterValue {
 /**
  * Merge search params into existing URL.
  */
-export function mergeSearchParamsIntoURL(
-  url: string | URL,
-  params: URLSearchParams,
-): URL {
+export function mergeSearchParamsIntoURL(url: string | URL, params: URLSearchParams): URL {
   const urlObj = typeof url === 'string' ? new URL(url) : new URL(url.href);
 
   params.forEach((value, key) => {
@@ -521,9 +518,7 @@ export function buildURLWithQuery<T = Record<string, unknown>>(
 /**
  * Serialize query to URL hash.
  */
-export function serializeToHash<T = Record<string, unknown>>(
-  query: SearchQuery<T>,
-): string {
+export function serializeToHash<T = Record<string, unknown>>(query: SearchQuery<T>): string {
   const serialized = serializeQuery(query, true);
   return btoa(JSON.stringify(serialized));
 }
@@ -531,9 +526,7 @@ export function serializeToHash<T = Record<string, unknown>>(
 /**
  * Deserialize query from URL hash.
  */
-export function deserializeFromHash<T = Record<string, unknown>>(
-  hash: string,
-): SearchQuery<T> {
+export function deserializeFromHash<T = Record<string, unknown>>(hash: string): SearchQuery<T> {
   const cleaned = hash.startsWith('#') ? hash.slice(1) : hash;
   const decoded = atob(cleaned);
   const parsed = JSON.parse(decoded) as SerializedQuery;

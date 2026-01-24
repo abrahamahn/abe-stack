@@ -23,7 +23,7 @@ export class S3StorageProvider implements StorageProvider {
             }
           : fromEnv(),
     });
-    this.defaultExpires = config.presignExpiresInSeconds ?? 900; // 15 minutes
+    this.defaultExpires = config.presignExpiresInSeconds;
   }
 
   async upload(params: UploadParams): Promise<{ key: string }> {

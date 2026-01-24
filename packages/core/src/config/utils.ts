@@ -46,8 +46,7 @@ export const getInt = (val: string | undefined, fallback: number): number => {
  * getBool(process.env.ENABLED);   // '' → false
  * ```
  */
-export const getBool = (val: string | undefined): boolean =>
-  val?.toLowerCase().trim() === 'true';
+export const getBool = (val: string | undefined): boolean => val?.toLowerCase().trim() === 'true';
 
 /**
  * Parse a comma-separated list from an environment variable.
@@ -89,7 +88,6 @@ export const getList = (val: string | undefined): string[] =>
  * @example
  * ```typescript
  * const jwtSecret = getRequired(process.env.JWT_SECRET, 'JWT_SECRET');
- * // Throws: "Configuration Error: Missing required environment variable [JWT_SECRET]"
  * ```
  */
 export const getRequired = (val: string | undefined, key: string): string => {

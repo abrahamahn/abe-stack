@@ -34,9 +34,10 @@ export { loadStorage } from './infra/storage';
  * 4. SERVICES
  * Domain-specific loaders.
  */
+export { loadPackageManagerConfig, validatePackageManagerConfig } from './infra/package';
 export { loadBilling, validateBilling } from './services/billing';
 export { loadEmail } from './services/email';
-export { loadFcmConfig } from './services/notifications';
+export { loadNotificationsConfig, validateNotificationsConfig } from './services/notifications';
 export { loadElasticsearchConfig, loadSqlSearchConfig } from './services/search';
 
 /**
@@ -51,8 +52,10 @@ export type {
   CacheConfig,
   DatabaseConfig,
   EmailConfig,
-  FcmConfig,
+  NotificationConfig,
+  NotificationProvider,
   OAuthProviderConfig,
+  OneSignalConfig,
   QueueConfig,
   SearchConfig,
   ServerConfig,

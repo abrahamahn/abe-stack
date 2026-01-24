@@ -431,8 +431,8 @@ describe('File Server', () => {
 
     test('should set Content-Length header', async () => {
       const id = 'length-test-id';
-      const filename = 'measured.txt';
-      const content = 'Measured content here';
+      const filename = 'measconfigured.txt';
+      const content = 'Measconfigured content here';
 
       const fileDir = path.join(uploadDir, id);
       await mkdir(fileDir, { recursive: true });

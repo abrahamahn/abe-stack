@@ -219,13 +219,13 @@ export class PostgresQueueStore implements QueueStore {
     let paramIndex = 1;
 
     if (status) {
-      conditions.push(`status = $${paramIndex}`);
+      conditions.push(`status = $${String(paramIndex)}`);
       values.push(status);
       paramIndex++;
     }
 
     if (name) {
-      conditions.push(`name ILIKE $${paramIndex}`);
+      conditions.push(`name ILIKE $${String(paramIndex)}`);
       values.push(`%${name}%`);
       paramIndex++;
     }
@@ -253,7 +253,7 @@ export class PostgresQueueStore implements QueueStore {
       FROM job_queue
       ${whereClause}
       ORDER BY ${sortColumn} ${order}
-      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+      LIMIT $${String(paramIndex)} OFFSET $${String(paramIndex + 1)}
     `;
 
     const rows = await this.db.raw<JobDetailsRow>(dataQuery, [...values, limit, offset]);
@@ -400,7 +400,7 @@ export class PostgresQueueStore implements QueueStore {
       try {
         parsedError = JSON.parse(row.error) as TaskError;
       } catch {
-        parsedError = { name: 'UnknownError', message: String(row.error) };
+        parsedError = { name: 'UnknownError', message: row.error };
       }
     }
 

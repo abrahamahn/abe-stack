@@ -95,7 +95,14 @@ describe('Security Events', () => {
       const ipAddress = '192.168.1.1';
       const userAgent = 'test-agent';
 
-      await logAccountUnlockedEvent(mockDb, userId, 'user@example.com', unlockedBy, ipAddress, userAgent);
+      await logAccountUnlockedEvent(
+        mockDb,
+        userId,
+        'user@example.com',
+        unlockedBy,
+        ipAddress,
+        userAgent,
+      );
 
       expect(mockDb.execute).toHaveBeenCalledWith(
         expect.objectContaining({

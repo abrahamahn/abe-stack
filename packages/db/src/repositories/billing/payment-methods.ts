@@ -151,19 +151,13 @@ export function createPaymentMethodRepository(db: RawDb): PaymentMethodRepositor
         snakeData.card_details = JSON.stringify(data.cardDetails);
       }
       const result = await db.queryOne<Record<string, unknown>>(
-        update(PAYMENT_METHODS_TABLE)
-          .set(snakeData)
-          .where(eq('id', id))
-          .returningAll()
-          .toSql(),
+        update(PAYMENT_METHODS_TABLE).set(snakeData).where(eq('id', id)).returningAll().toSql(),
       );
       return result ? transformPaymentMethod(result) : null;
     },
 
     async delete(id: string): Promise<boolean> {
-      const count = await db.execute(
-        deleteFrom(PAYMENT_METHODS_TABLE).where(eq('id', id)).toSql(),
-      );
+      const count = await db.execute(deleteFrom(PAYMENT_METHODS_TABLE).where(eq('id', id)).toSql());
       return count > 0;
     },
 

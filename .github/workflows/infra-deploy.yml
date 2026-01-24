@@ -49,7 +49,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "~1.0"
+          terraform_version: '~1.0'
 
       - name: Configure AWS Credentials (for state backend)
         if: env.AWS_ACCESS_KEY_ID
@@ -82,7 +82,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "~1.0"
+          terraform_version: '~1.0'
 
       # Configure cloud provider credentials
       - name: Configure DigitalOcean Credentials

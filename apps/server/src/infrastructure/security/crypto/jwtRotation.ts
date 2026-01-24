@@ -224,7 +224,9 @@ export function createJwtRotationHandler(config: JwtRotationConfig): JwtRotation
       return verifyWithRotation(token, config);
     },
 
-    checkSecret: (token: string): {
+    checkSecret: (
+      token: string,
+    ): {
       isValid: boolean;
       usedSecret: 'current' | 'previous' | 'none';
       error?: JwtError;

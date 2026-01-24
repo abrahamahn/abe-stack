@@ -15,9 +15,11 @@ vi.mock('postgres', () => {
       return {
         unsafe: vi.fn().mockResolvedValue([]),
         end: vi.fn().mockResolvedValue(undefined),
-        begin: vi.fn().mockImplementation(async (_isolation: string, cb: (tx: unknown) => unknown) => {
-          return cb(tx);
-        }),
+        begin: vi
+          .fn()
+          .mockImplementation(async (_isolation: string, cb: (tx: unknown) => unknown) => {
+            return cb(tx);
+          }),
       };
     }),
   };
@@ -55,7 +57,7 @@ describe('Database Client', () => {
 
     test('should handle different connection strings', () => {
       const differentConnectionString = 'postgresql://admin:secret@prod-server:5432/proddb';
-      
+
       const client = createRawDb(differentConnectionString);
 
       expect(client).toBeDefined();
@@ -190,9 +192,9 @@ describe('Database Client', () => {
           unsafe: vi.fn().mockRejectedValue(error),
         }));
 
-        await expect(
-          dbClient.query({ text: 'INVALID QUERY', values: [] }),
-        ).rejects.toThrow('Invalid query');
+        await expect(dbClient.query({ text: 'INVALID QUERY', values: [] })).rejects.toThrow(
+          'Invalid query',
+        );
       });
 
       test('should handle complex query with multiple parameters', async () => {
@@ -228,7 +230,9 @@ describe('Database Client', () => {
         });
 
         expect(result).toEqual({ id: 1, name: 'Alice' });
-        expect(postgres().unsafe).toHaveBeenCalledWith('SELECT * FROM users WHERE name = $1', ['Alice']);
+        expect(postgres().unsafe).toHaveBeenCalledWith('SELECT * FROM users WHERE name = $1', [
+          'Alice',
+        ]);
       });
 
       test('should return null for empty results', async () => {
@@ -250,9 +254,9 @@ describe('Database Client', () => {
           unsafe: vi.fn().mockRejectedValue(error),
         }));
 
-        await expect(
-          dbClient.queryOne({ text: 'INVALID QUERY', values: [] }),
-        ).rejects.toThrow('Query failed');
+        await expect(dbClient.queryOne({ text: 'INVALID QUERY', values: [] })).rejects.toThrow(
+          'Query failed',
+        );
       });
 
       test('should handle queryOne with no parameters', async () => {
@@ -299,7 +303,10 @@ describe('Database Client', () => {
         const result = await dbClient.raw('SELECT column1, column2 FROM some_table');
 
         expect(result).toEqual(mockResult);
-        expect(postgres().unsafe).toHaveBeenCalledWith('SELECT column1, column2 FROM some_table', []);
+        expect(postgres().unsafe).toHaveBeenCalledWith(
+          'SELECT column1, column2 FROM some_table',
+          [],
+        );
       });
 
       test('should handle raw query with parameters', async () => {
@@ -334,9 +341,7 @@ describe('Database Client', () => {
       });
 
       test('should handle raw query with complex SQL', async () => {
-        const mockResult = [
-          { user_id: 1, total_orders: 5, avg_amount: 99.99 },
-        ];
+        const mockResult = [{ user_id: 1, total_orders: 5, avg_amount: 99.99 }];
         postgresMock.mockImplementation(() => ({
           unsafe: vi.fn().mockResolvedValue(mockResult),
         }));
@@ -362,10 +367,12 @@ describe('Database Client', () => {
 
     describe('transaction support', () => {
       test('should support transaction blocks', async () => {
-        const beginSpy = vi.fn().mockImplementation(async (_isolation: string, cb: (tx: Tx) => unknown) => {
-          const tx = { unsafe: vi.fn().mockResolvedValue([]) };
-          return cb(tx);
-        });
+        const beginSpy = vi
+          .fn()
+          .mockImplementation(async (_isolation: string, cb: (tx: Tx) => unknown) => {
+            const tx = { unsafe: vi.fn().mockResolvedValue([]) };
+            return cb(tx);
+          });
 
         postgresMock.mockImplementation(() => ({
           unsafe: vi.fn().mockResolvedValue([]),
@@ -377,15 +384,20 @@ describe('Database Client', () => {
         const result = await client.transaction(async () => 'committed');
 
         expect(result).toBe('committed');
-        expect(beginSpy).toHaveBeenCalledWith('isolation level read committed', expect.any(Function));
+        expect(beginSpy).toHaveBeenCalledWith(
+          'isolation level read committed',
+          expect.any(Function),
+        );
       });
 
       test('should apply transaction options', async () => {
         const txUnsafe = vi.fn().mockResolvedValue([]);
-        const beginSpy = vi.fn().mockImplementation(async (_isolation: string, cb: (tx: Tx) => unknown) => {
-          const tx = { unsafe: txUnsafe };
-          return cb(tx);
-        });
+        const beginSpy = vi
+          .fn()
+          .mockImplementation(async (_isolation: string, cb: (tx: Tx) => unknown) => {
+            const tx = { unsafe: txUnsafe };
+            return cb(tx);
+          });
 
         postgresMock.mockImplementation(() => ({
           unsafe: vi.fn().mockResolvedValue([]),
@@ -443,7 +455,11 @@ describe('Database Client', () => {
         postgresMock.mockImplementation(() => ({
           unsafe: vi.fn().mockResolvedValue(healthResult),
           end: vi.fn().mockResolvedValue(undefined),
-          begin: vi.fn().mockImplementation(async (_isolation: string, cb: (tx: Tx) => unknown) => cb({ unsafe: vi.fn() })),
+          begin: vi
+            .fn()
+            .mockImplementation(async (_isolation: string, cb: (tx: Tx) => unknown) =>
+              cb({ unsafe: vi.fn() }),
+            ),
         }));
 
         const result = await dbClient.query({ text: 'SELECT 1 as health_check', values: [] });
@@ -460,7 +476,11 @@ describe('Database Client', () => {
         postgresMock.mockImplementation(() => ({
           unsafe: vi.fn().mockResolvedValue(pingResult),
           end: vi.fn().mockResolvedValue(undefined),
-          begin: vi.fn().mockImplementation(async (_isolation: string, cb: (tx: Tx) => unknown) => cb({ unsafe: vi.fn() })),
+          begin: vi
+            .fn()
+            .mockImplementation(async (_isolation: string, cb: (tx: Tx) => unknown) =>
+              cb({ unsafe: vi.fn() }),
+            ),
         }));
 
         const result = await dbClient.query({ text: 'SELECT NOW() as now', values: [] });
@@ -510,12 +530,10 @@ describe('Database Client', () => {
           { text: 'UPDATE users SET name = $1 WHERE id = $2', values: ['New Name 3', 3] },
         ];
 
-        const results = await Promise.all(
-          queries.map(query => dbClient.execute(query))
-        );
+        const results = await Promise.all(queries.map((query) => dbClient.execute(query)));
 
         expect(results).toHaveLength(3);
-        expect(results.every(r => r === 1)).toBe(true);
+        expect(results.every((r) => r === 1)).toBe(true);
       });
     });
 
@@ -535,9 +553,9 @@ describe('Database Client', () => {
           unsafe: vi.fn().mockRejectedValue(syntaxError),
         }));
 
-        await expect(
-          dbClient.query({ text: 'INVALID SQL SYNTAX', values: [] }),
-        ).rejects.toThrow('Syntax error in SQL');
+        await expect(dbClient.query({ text: 'INVALID SQL SYNTAX', values: [] })).rejects.toThrow(
+          'Syntax error in SQL',
+        );
       });
 
       test('should handle constraint violation errors', async () => {
@@ -547,7 +565,10 @@ describe('Database Client', () => {
         }));
 
         await expect(
-          dbClient.execute({ text: 'INSERT INTO users (email) VALUES ($1)', values: ['duplicate@example.com'] })
+          dbClient.execute({
+            text: 'INSERT INTO users (email) VALUES ($1)',
+            values: ['duplicate@example.com'],
+          }),
         ).rejects.toThrow('Unique constraint violation');
       });
     });
@@ -561,7 +582,7 @@ describe('Database Client', () => {
         idleTimeout: 60000,
         connectTimeout: 20000,
       });
-      
+
       // Verify that the client was created with expected defaults
       expect(client).toBeDefined();
     });

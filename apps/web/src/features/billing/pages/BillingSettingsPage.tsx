@@ -66,12 +66,7 @@ export function BillingSettingsPage(): ReactElement {
     setDefault,
   } = usePaymentMethods(clientConfig);
 
-  const {
-    invoices,
-    hasMore,
-    isLoading: invLoading,
-    error: invError,
-  } = useInvoices(clientConfig);
+  const { invoices, hasMore, isLoading: invLoading, error: invError } = useInvoices(clientConfig);
 
   // Handlers
   const handleChangePlan = useCallback((): void => {
@@ -93,7 +88,11 @@ export function BillingSettingsPage(): ReactElement {
       // In a real app, you would integrate with Stripe Elements here
       // For now, we'll just log the secret (Stripe integration deferred)
       // TODO: Open Stripe Elements modal to collect card details
-      alert('Stripe Elements integration coming soon. Client secret: ' + clientSecret.slice(0, 20) + '...');
+      alert(
+        'Stripe Elements integration coming soon. Client secret: ' +
+          clientSecret.slice(0, 20) +
+          '...',
+      );
     } catch {
       // Error handled by hook
     }
@@ -110,9 +109,12 @@ export function BillingSettingsPage(): ReactElement {
     }
   }, [deleteMethodId, removePaymentMethod]);
 
-  const handleSetDefault = useCallback(async (pm: PaymentMethod): Promise<void> => {
-    await setDefault(pm.id);
-  }, [setDefault]);
+  const handleSetDefault = useCallback(
+    async (pm: PaymentMethod): Promise<void> => {
+      await setDefault(pm.id);
+    },
+    [setDefault],
+  );
 
   // Determine if removal should be disabled
   const hasActiveSubscription = subscription && subscription.status !== 'canceled';
@@ -132,10 +134,16 @@ export function BillingSettingsPage(): ReactElement {
           <SubscriptionStatus
             subscription={subscription}
             isActing={subActing}
-            onCancel={() => { setCancelDialogOpen(true); }}
-            onResume={() => { void handleResume(); }}
+            onCancel={() => {
+              setCancelDialogOpen(true);
+            }}
+            onResume={() => {
+              void handleResume();
+            }}
             onChangePlan={handleChangePlan}
-            onManagePaymentMethods={() => document.getElementById('payment-methods')?.scrollIntoView({ behavior: 'smooth' })}
+            onManagePaymentMethods={() =>
+              document.getElementById('payment-methods')?.scrollIntoView({ behavior: 'smooth' })
+            }
           />
         )}
       </section>
@@ -144,7 +152,12 @@ export function BillingSettingsPage(): ReactElement {
       <section id="payment-methods" className="billing-settings-page__section">
         <div className="billing-settings-page__section-header">
           <h2 className="billing-settings-page__section-title">Payment Methods</h2>
-          <Button onClick={() => { void handleAddPaymentMethod(); }} disabled={pmActing}>
+          <Button
+            onClick={() => {
+              void handleAddPaymentMethod();
+            }}
+            disabled={pmActing}
+          >
             Add Payment Method
           </Button>
         </div>
@@ -157,7 +170,12 @@ export function BillingSettingsPage(): ReactElement {
           <Card>
             <Card.Body>
               <p>No payment methods saved.</p>
-              <Button onClick={() => { void handleAddPaymentMethod(); }} className="mt-4">
+              <Button
+                onClick={() => {
+                  void handleAddPaymentMethod();
+                }}
+                className="mt-4"
+              >
                 Add Your First Card
               </Button>
             </Card.Body>
@@ -170,7 +188,9 @@ export function BillingSettingsPage(): ReactElement {
                 paymentMethod={pm}
                 isActing={pmActing}
                 onRemove={handleRemovePaymentMethod}
-                onSetDefault={(pm) => { void handleSetDefault(pm); }}
+                onSetDefault={(pm) => {
+                  void handleSetDefault(pm);
+                }}
                 removeDisabled={pm.isDefault && hasActiveSubscription ? true : false}
               />
             ))}
@@ -197,12 +217,19 @@ export function BillingSettingsPage(): ReactElement {
             until the end of your current billing period.
           </p>
           <div className="dialog-actions">
-            <Button variant="text" onClick={() => { setCancelDialogOpen(false); }}>
+            <Button
+              variant="text"
+              onClick={() => {
+                setCancelDialogOpen(false);
+              }}
+            >
               Keep Subscription
             </Button>
             <Button
               variant="secondary"
-              onClick={() => { void handleCancelConfirm(); }}
+              onClick={() => {
+                void handleCancelConfirm();
+              }}
               disabled={subActing}
             >
               {subActing ? 'Canceling...' : 'Cancel Subscription'}
@@ -214,17 +241,26 @@ export function BillingSettingsPage(): ReactElement {
       {/* Remove Payment Method Dialog */}
       <Dialog.Root
         open={deleteMethodId !== null}
-        onChange={(open) => { if (!open) setDeleteMethodId(null); }}
+        onChange={(open) => {
+          if (!open) setDeleteMethodId(null);
+        }}
       >
         <Dialog.Content title="Remove Payment Method">
           <p>Are you sure you want to remove this payment method?</p>
           <div className="dialog-actions">
-            <Button variant="text" onClick={() => { setDeleteMethodId(null); }}>
+            <Button
+              variant="text"
+              onClick={() => {
+                setDeleteMethodId(null);
+              }}
+            >
               Cancel
             </Button>
             <Button
               variant="secondary"
-              onClick={() => { void handleConfirmRemove(); }}
+              onClick={() => {
+                void handleConfirmRemove();
+              }}
               disabled={pmActing}
             >
               {pmActing ? 'Removing...' : 'Remove'}

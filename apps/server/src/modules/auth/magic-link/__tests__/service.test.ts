@@ -6,23 +6,34 @@
  * Tests requestMagicLink and verifyMagicLink with repository pattern.
  */
 
+import type { AuthConfig } from '@/config';
+import type { MagicLinkToken, RawDb, User } from '@abe-stack/db';
+import type { DbClient, EmailService, Repositories } from '../../../../infrastructure/index.js';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import {
-  requestMagicLink,
-  verifyMagicLink,
-  cleanupExpiredMagicLinkTokens,
-} from '../service';
-import type {
-  Repositories,
-  EmailService,
-  DbClient,
-} from '@infrastructure';
-import type { AuthConfig } from '@config';
-import type { MagicLinkToken, User } from '@abe-stack/db';
+import { cleanupExpiredMagicLinkTokens, requestMagicLink, verifyMagicLink } from '../service';
 
 // ============================================================================
 // Mock Dependencies
 // ============================================================================
+
+type TransactionCallback = (tx: RawDb) => Promise<unknown>;
+
+function createMockRawDb(): RawDb {
+  const tx = {
+    query: vi.fn(),
+    queryOne: vi.fn(),
+    execute: vi.fn().mockResolvedValue(1),
+    raw: vi.fn(),
+    transaction: vi.fn(),
+    healthCheck: vi.fn().mockResolvedValue(true),
+    close: vi.fn().mockResolvedValue(undefined),
+    getClient: vi.fn() as unknown as RawDb['getClient'],
+  } as RawDb;
+
+  tx.transaction = vi.fn(async (callback) => callback(tx));
+
+  return tx;
+}
 
 vi.mock('node:crypto', async () => {
   const actual = await vi.importActual<typeof import('node:crypto')>('node:crypto');
@@ -39,8 +50,10 @@ vi.mock('node:crypto', async () => {
   };
 });
 
-vi.mock('@infrastructure', async () => {
-  const actual = await vi.importActual<typeof import('@infrastructure')>('@infrastructure');
+vi.mock('../../../../infrastructure/index.js', async () => {
+  const actual = await vi.importActual<typeof import('../../../../infrastructure/index.js')>(
+    '../../../../infrastructure/index.js',
+  );
   return {
     ...actual,
     emailTemplates: {
@@ -50,19 +63,15 @@ vi.mock('@infrastructure', async () => {
         html: `<a href="${url}">Click here</a>. Expires in ${expiryMinutes} minutes.`,
       })),
     },
-    withTransaction: vi.fn(async (_db, callback) => {
+    withTransaction: vi.fn(async (_db: DbClient, callback: TransactionCallback) => {
       // Mock transaction executor
-      const mockTx = {
-        query: vi.fn(),
-        queryOne: vi.fn(),
-        execute: vi.fn().mockResolvedValue(1),
-      };
+      const mockTx = createMockRawDb();
       return callback(mockTx);
     }),
   };
 });
 
-vi.mock('@auth/utils', () => ({
+vi.mock('../../utils/index.js', () => ({
   createAuthResponse: vi.fn((accessToken, refreshToken, user) => ({
     accessToken,
     refreshToken,
@@ -70,6 +79,7 @@ vi.mock('@auth/utils', () => ({
       id: user.id,
       email: user.email,
       name: user.name,
+      avatarUrl: user.avatarUrl ?? null,
       role: user.role,
       createdAt: user.createdAt.toISOString(),
     },
@@ -120,25 +130,55 @@ function createMockRepositories(): Repositories {
     oauthConnections: {} as Repositories['oauthConnections'],
     pushSubscriptions: {} as Repositories['pushSubscriptions'],
     notificationPreferences: {} as Repositories['notificationPreferences'],
+    plans: {} as Repositories['plans'],
+    subscriptions: {} as Repositories['subscriptions'],
+    customerMappings: {} as Repositories['customerMappings'],
+    invoices: {} as Repositories['invoices'],
+    paymentMethods: {} as Repositories['paymentMethods'],
+    billingEvents: {} as Repositories['billingEvents'],
   };
 }
 
 function createMockAuthConfig(): AuthConfig {
   return {
+    strategies: ['local'],
     jwt: {
       secret: 'test-secret-32-characters-long!!',
       accessTokenExpiry: '15m',
+      issuer: 'test',
+      audience: 'test',
     },
-    argon2: {},
     refreshToken: {
       expiryDays: 7,
       gracePeriodSeconds: 30,
     },
+    argon2: { type: 2, memoryCost: 1024, timeCost: 1, parallelism: 1 },
+    password: { minLength: 8, maxLength: 64, minZxcvbnScore: 2 },
     lockout: {
       maxAttempts: 5,
-      windowMs: 900000,
       lockoutDurationMs: 1800000,
+      progressiveDelay: false,
+      baseDelayMs: 0,
     },
+    bffMode: false,
+    proxy: { trustProxy: false, trustedProxies: [], maxProxyDepth: 1 },
+    rateLimit: {
+      login: { max: 100, windowMs: 60000 },
+      register: { max: 100, windowMs: 60000 },
+      forgotPassword: { max: 100, windowMs: 60000 },
+      verifyEmail: { max: 100, windowMs: 60000 },
+    },
+    cookie: {
+      name: 'refreshToken',
+      secret: 'test-secret-32-characters-long!!',
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      path: '/',
+    },
+    oauth: {},
+    magicLink: { tokenExpiryMinutes: 15, maxAttempts: 3 },
+    totp: { issuer: 'Test', window: 1 },
   };
 }
 
@@ -171,6 +211,7 @@ function createMockUser(overrides?: Partial<User>): User {
     updatedAt: new Date(),
     version: 1,
     ...overrides,
+    avatarUrl: overrides?.avatarUrl ?? null,
   };
 }
 
@@ -195,16 +236,12 @@ describe('requestMagicLink', () => {
       vi.mocked(repos.magicLinkTokens.countRecentByIp).mockResolvedValue(0);
       vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
 
-      const result = await requestMagicLink(
-        db,
-        repos,
-        emailService,
-        email,
-        baseUrl,
-      );
+      const result = await requestMagicLink(db, repos, emailService, email, baseUrl);
 
       expect(result.success).toBe(true);
-      expect(result.message).toBe('If an account exists with this email, a magic link has been sent.');
+      expect(result.message).toBe(
+        'If an account exists with this email, a magic link has been sent.',
+      );
     });
 
     test('should normalize email to lowercase', async () => {
@@ -268,7 +305,10 @@ describe('requestMagicLink', () => {
         }),
       );
 
-      const call = vi.mocked(repos.magicLinkTokens.create).mock.calls[0][0];
+      const call = vi.mocked(repos.magicLinkTokens.create).mock.calls[0]?.[0];
+      if (!call) {
+        throw new Error('Expected magicLinkTokens.create to be called');
+      }
       const expectedExpiry = now + 20 * 60 * 1000;
       const actualExpiry = call.expiresAt.getTime();
       expect(Math.abs(actualExpiry - expectedExpiry)).toBeLessThan(1000);
@@ -306,15 +346,7 @@ describe('requestMagicLink', () => {
       vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
       vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
 
-      await requestMagicLink(
-        db,
-        repos,
-        emailService,
-        email,
-        baseUrl,
-        undefined,
-        userAgent,
-      );
+      await requestMagicLink(db, repos, emailService, email, baseUrl, undefined, userAgent);
 
       expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -354,9 +386,9 @@ describe('requestMagicLink', () => {
 
       vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(3);
 
-      await expect(
-        requestMagicLink(db, repos, emailService, email, baseUrl),
-      ).rejects.toThrow('Too many magic link requests');
+      await expect(requestMagicLink(db, repos, emailService, email, baseUrl)).rejects.toThrow(
+        'Too many magic link requests',
+      );
     });
 
     test('should throw TooManyRequestsError when IP rate limit exceeded', async () => {
@@ -437,9 +469,9 @@ describe('requestMagicLink', () => {
       vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
       vi.mocked(emailService.send).mockRejectedValue(new Error('SMTP server unavailable'));
 
-      await expect(
-        requestMagicLink(db, repos, emailService, email, baseUrl),
-      ).rejects.toThrow('Failed to send magic link email');
+      await expect(requestMagicLink(db, repos, emailService, email, baseUrl)).rejects.toThrow(
+        'Failed to send magic link email',
+      );
     });
 
     test('should handle non-Error email failures', async () => {
@@ -453,9 +485,9 @@ describe('requestMagicLink', () => {
       vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
       vi.mocked(emailService.send).mockRejectedValue('String error');
 
-      await expect(
-        requestMagicLink(db, repos, emailService, email, baseUrl),
-      ).rejects.toThrow('Failed to send magic link email');
+      await expect(requestMagicLink(db, repos, emailService, email, baseUrl)).rejects.toThrow(
+        'Failed to send magic link email',
+      );
     });
   });
 
@@ -489,15 +521,7 @@ describe('requestMagicLink', () => {
       vi.mocked(repos.magicLinkTokens.countRecentByEmail).mockResolvedValue(0);
       vi.mocked(repos.magicLinkTokens.create).mockResolvedValue(createMockMagicLinkToken());
 
-      await requestMagicLink(
-        db,
-        repos,
-        emailService,
-        email,
-        baseUrl,
-        undefined,
-        undefined,
-      );
+      await requestMagicLink(db, repos, emailService, email, baseUrl, undefined, undefined);
 
       expect(repos.magicLinkTokens.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -519,7 +543,10 @@ describe('requestMagicLink', () => {
       const now = Date.now();
       await requestMagicLink(db, repos, emailService, email, baseUrl);
 
-      const call = vi.mocked(repos.magicLinkTokens.create).mock.calls[0][0];
+      const call = vi.mocked(repos.magicLinkTokens.create).mock.calls[0]?.[0];
+      if (!call) {
+        throw new Error('Expected magicLinkTokens.create to be called');
+      }
       const expectedExpiry = now + 15 * 60 * 1000; // 15 minutes default
       const actualExpiry = call.expiresAt.getTime();
       expect(Math.abs(actualExpiry - expectedExpiry)).toBeLessThan(1000);
@@ -544,33 +571,35 @@ describe('verifyMagicLink', () => {
       const token = 'valid-token';
       const user = createMockUser();
 
-      const { withTransaction } = await import('@infrastructure');
-      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-        const mockTx = {
-          query: vi.fn().mockResolvedValue([
-            {
-              id: 'token-123',
-              email: 'test@example.com',
-              token_hash: 'hash123',
-              expires_at: new Date(Date.now() + 10000),
-              used_at: null,
-            },
-          ]),
-          queryOne: vi.fn().mockResolvedValue({
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            password_hash: user.passwordHash,
-            role: user.role,
-            email_verified: true,
-            email_verified_at: user.emailVerifiedAt,
-            created_at: user.createdAt,
-            updated_at: user.updatedAt,
-          }),
-          execute: vi.fn().mockResolvedValue(1),
-        };
-        return callback(mockTx);
-      });
+      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      vi.mocked(withTransaction).mockImplementation(
+        async (_db: DbClient, callback: TransactionCallback) => {
+          const mockTx = {
+            query: vi.fn().mockResolvedValue([
+              {
+                id: 'token-123',
+                email: 'test@example.com',
+                token_hash: 'hash123',
+                expires_at: new Date(Date.now() + 10000),
+                used_at: null,
+              },
+            ]),
+            queryOne: vi.fn().mockResolvedValue({
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              password_hash: user.passwordHash,
+              role: user.role,
+              email_verified: true,
+              email_verified_at: user.emailVerifiedAt,
+              created_at: user.createdAt,
+              updated_at: user.updatedAt,
+            }),
+            execute: vi.fn().mockResolvedValue(1),
+          } as unknown as RawDb;
+          return callback(mockTx);
+        },
+      );
 
       const result = await verifyMagicLink(db, repos, config, token);
 
@@ -585,37 +614,40 @@ describe('verifyMagicLink', () => {
       const config = createMockAuthConfig();
       const token = 'valid-token';
 
-      const { withTransaction } = await import('@infrastructure');
-      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-        const mockTx = {
-          query: vi.fn()
-            .mockResolvedValueOnce([
-              {
-                id: 'token-123',
-                email: 'newuser@example.com',
-                token_hash: 'hash123',
-                expires_at: new Date(Date.now() + 10000),
-                used_at: null,
-              },
-            ])
-            .mockResolvedValueOnce([
-              {
-                id: 'new-user-123',
-                email: 'newuser@example.com',
-                name: null,
-                password_hash: 'magiclink:hash',
-                role: 'user',
-                email_verified: true,
-                email_verified_at: new Date(),
-                created_at: new Date(),
-                updated_at: new Date(),
-              },
-            ]),
-          queryOne: vi.fn().mockResolvedValue(null),
-          execute: vi.fn().mockResolvedValue(1),
-        };
-        return callback(mockTx);
-      });
+      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      vi.mocked(withTransaction).mockImplementation(
+        async (_db: DbClient, callback: TransactionCallback) => {
+          const mockTx = {
+            query: vi
+              .fn()
+              .mockResolvedValueOnce([
+                {
+                  id: 'token-123',
+                  email: 'newuser@example.com',
+                  token_hash: 'hash123',
+                  expires_at: new Date(Date.now() + 10000),
+                  used_at: null,
+                },
+              ])
+              .mockResolvedValueOnce([
+                {
+                  id: 'new-user-123',
+                  email: 'newuser@example.com',
+                  name: null,
+                  password_hash: 'magiclink:hash',
+                  role: 'user',
+                  email_verified: true,
+                  email_verified_at: new Date(),
+                  created_at: new Date(),
+                  updated_at: new Date(),
+                },
+              ]),
+            queryOne: vi.fn().mockResolvedValue(null),
+            execute: vi.fn().mockResolvedValue(1),
+          } as unknown as RawDb;
+          return callback(mockTx);
+        },
+      );
 
       const result = await verifyMagicLink(db, repos, config, token);
 
@@ -630,47 +662,50 @@ describe('verifyMagicLink', () => {
       const token = 'valid-token';
       const user = createMockUser({ emailVerified: false, emailVerifiedAt: null });
 
-      const { withTransaction } = await import('@infrastructure');
-      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-        const mockTx = {
-          query: vi.fn()
-            .mockResolvedValueOnce([
-              {
-                id: 'token-123',
-                email: 'test@example.com',
-                token_hash: 'hash123',
-                expires_at: new Date(Date.now() + 10000),
-                used_at: null,
-              },
-            ])
-            .mockResolvedValueOnce([
-              {
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                password_hash: user.passwordHash,
-                role: user.role,
-                email_verified: true,
-                email_verified_at: new Date(),
-                created_at: user.createdAt,
-                updated_at: user.updatedAt,
-              },
-            ]),
-          queryOne: vi.fn().mockResolvedValue({
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            password_hash: user.passwordHash,
-            role: user.role,
-            email_verified: false,
-            email_verified_at: null,
-            created_at: user.createdAt,
-            updated_at: user.updatedAt,
-          }),
-          execute: vi.fn().mockResolvedValue(1),
-        };
-        return callback(mockTx);
-      });
+      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      vi.mocked(withTransaction).mockImplementation(
+        async (_db: DbClient, callback: TransactionCallback) => {
+          const mockTx = {
+            query: vi
+              .fn()
+              .mockResolvedValueOnce([
+                {
+                  id: 'token-123',
+                  email: 'test@example.com',
+                  token_hash: 'hash123',
+                  expires_at: new Date(Date.now() + 10000),
+                  used_at: null,
+                },
+              ])
+              .mockResolvedValueOnce([
+                {
+                  id: user.id,
+                  email: user.email,
+                  name: user.name,
+                  password_hash: user.passwordHash,
+                  role: user.role,
+                  email_verified: true,
+                  email_verified_at: new Date(),
+                  created_at: user.createdAt,
+                  updated_at: user.updatedAt,
+                },
+              ]),
+            queryOne: vi.fn().mockResolvedValue({
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              password_hash: user.passwordHash,
+              role: user.role,
+              email_verified: false,
+              email_verified_at: null,
+              created_at: user.createdAt,
+              updated_at: user.updatedAt,
+            }),
+            execute: vi.fn().mockResolvedValue(1),
+          } as unknown as RawDb;
+          return callback(mockTx);
+        },
+      );
 
       const result = await verifyMagicLink(db, repos, config, token);
 
@@ -684,34 +719,36 @@ describe('verifyMagicLink', () => {
       const token = 'valid-token';
       const user = createMockUser();
 
-      const { withTransaction } = await import('@infrastructure');
-      const { createRefreshTokenFamily } = await import('@auth/utils');
+      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      const { createRefreshTokenFamily } = await import('../../utils/index.js');
 
-      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-        const mockTx = {
-          query: vi.fn().mockResolvedValue([
-            {
-              id: 'token-123',
-              email: 'test@example.com',
-              token_hash: 'hash123',
-              expires_at: new Date(Date.now() + 10000),
-              used_at: null,
-            },
-          ]),
-          queryOne: vi.fn().mockResolvedValue({
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            password_hash: user.passwordHash,
-            role: user.role,
-            email_verified: true,
-            email_verified_at: user.emailVerifiedAt,
-            created_at: user.createdAt,
-            updated_at: user.updatedAt,
-          }),
-        };
-        return callback(mockTx);
-      });
+      vi.mocked(withTransaction).mockImplementation(
+        async (_db: DbClient, callback: TransactionCallback) => {
+          const mockTx = {
+            query: vi.fn().mockResolvedValue([
+              {
+                id: 'token-123',
+                email: 'test@example.com',
+                token_hash: 'hash123',
+                expires_at: new Date(Date.now() + 10000),
+                used_at: null,
+              },
+            ]),
+            queryOne: vi.fn().mockResolvedValue({
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              password_hash: user.passwordHash,
+              role: user.role,
+              email_verified: true,
+              email_verified_at: user.emailVerifiedAt,
+              created_at: user.createdAt,
+              updated_at: user.updatedAt,
+            }),
+          } as unknown as RawDb;
+          return callback(mockTx);
+        },
+      );
 
       await verifyMagicLink(db, repos, config, token);
 
@@ -730,19 +767,21 @@ describe('verifyMagicLink', () => {
       const config = createMockAuthConfig();
       const token = 'invalid-token';
 
-      const { withTransaction } = await import('@infrastructure');
-      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-        const mockTx = {
-          query: vi.fn().mockResolvedValue([]),
-          queryOne: vi.fn(),
-          execute: vi.fn().mockResolvedValue(1),
-        };
-        return callback(mockTx);
-      });
+      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      vi.mocked(withTransaction).mockImplementation(
+        async (_db: DbClient, callback: TransactionCallback) => {
+          const mockTx = {
+            query: vi.fn().mockResolvedValue([]),
+            queryOne: vi.fn(),
+            execute: vi.fn().mockResolvedValue(1),
+          } as unknown as RawDb;
+          return callback(mockTx);
+        },
+      );
 
-      await expect(
-        verifyMagicLink(db, repos, config, token),
-      ).rejects.toThrow('Invalid or expired magic link');
+      await expect(verifyMagicLink(db, repos, config, token)).rejects.toThrow(
+        'Invalid or expired magic link',
+      );
     });
 
     test('should throw InvalidTokenError for expired token', async () => {
@@ -751,19 +790,21 @@ describe('verifyMagicLink', () => {
       const config = createMockAuthConfig();
       const token = 'expired-token';
 
-      const { withTransaction } = await import('@infrastructure');
-      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-        const mockTx = {
-          query: vi.fn().mockResolvedValue([]),
-          queryOne: vi.fn(),
-          execute: vi.fn().mockResolvedValue(1),
-        };
-        return callback(mockTx);
-      });
+      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      vi.mocked(withTransaction).mockImplementation(
+        async (_db: DbClient, callback: TransactionCallback) => {
+          const mockTx = {
+            query: vi.fn().mockResolvedValue([]),
+            queryOne: vi.fn(),
+            execute: vi.fn().mockResolvedValue(1),
+          } as unknown as RawDb;
+          return callback(mockTx);
+        },
+      );
 
-      await expect(
-        verifyMagicLink(db, repos, config, token),
-      ).rejects.toThrow('Invalid or expired magic link');
+      await expect(verifyMagicLink(db, repos, config, token)).rejects.toThrow(
+        'Invalid or expired magic link',
+      );
     });
 
     test('should throw InvalidTokenError for already used token', async () => {
@@ -772,19 +813,21 @@ describe('verifyMagicLink', () => {
       const config = createMockAuthConfig();
       const token = 'used-token';
 
-      const { withTransaction } = await import('@infrastructure');
-      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-        const mockTx = {
-          query: vi.fn().mockResolvedValue([]),
-          queryOne: vi.fn(),
-          execute: vi.fn().mockResolvedValue(1),
-        };
-        return callback(mockTx);
-      });
+      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      vi.mocked(withTransaction).mockImplementation(
+        async (_db: DbClient, callback: TransactionCallback) => {
+          const mockTx = {
+            query: vi.fn().mockResolvedValue([]),
+            queryOne: vi.fn(),
+            execute: vi.fn().mockResolvedValue(1),
+          } as unknown as RawDb;
+          return callback(mockTx);
+        },
+      );
 
-      await expect(
-        verifyMagicLink(db, repos, config, token),
-      ).rejects.toThrow('Invalid or expired magic link');
+      await expect(verifyMagicLink(db, repos, config, token)).rejects.toThrow(
+        'Invalid or expired magic link',
+      );
     });
 
     test('should throw error when user creation fails', async () => {
@@ -793,29 +836,32 @@ describe('verifyMagicLink', () => {
       const config = createMockAuthConfig();
       const token = 'valid-token';
 
-      const { withTransaction } = await import('@infrastructure');
-      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-        const mockTx = {
-          query: vi.fn()
-            .mockResolvedValueOnce([
-              {
-                id: 'token-123',
-                email: 'test@example.com',
-                token_hash: 'hash123',
-                expires_at: new Date(Date.now() + 10000),
-                used_at: null,
-              },
-            ])
-            .mockResolvedValueOnce([]),
-          queryOne: vi.fn().mockResolvedValue(null),
-          execute: vi.fn().mockResolvedValue(1),
-        };
-        return callback(mockTx);
-      });
+      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      vi.mocked(withTransaction).mockImplementation(
+        async (_db: DbClient, callback: TransactionCallback) => {
+          const mockTx = {
+            query: vi
+              .fn()
+              .mockResolvedValueOnce([
+                {
+                  id: 'token-123',
+                  email: 'test@example.com',
+                  token_hash: 'hash123',
+                  expires_at: new Date(Date.now() + 10000),
+                  used_at: null,
+                },
+              ])
+              .mockResolvedValueOnce([]),
+            queryOne: vi.fn().mockResolvedValue(null),
+            execute: vi.fn().mockResolvedValue(1),
+          } as unknown as RawDb;
+          return callback(mockTx);
+        },
+      );
 
-      await expect(
-        verifyMagicLink(db, repos, config, token),
-      ).rejects.toThrow('Failed to create user');
+      await expect(verifyMagicLink(db, repos, config, token)).rejects.toThrow(
+        'Failed to create user',
+      );
     });
   });
 
@@ -827,7 +873,7 @@ describe('verifyMagicLink', () => {
       const token = 'plain-text-token';
       const user = createMockUser();
 
-      const { withTransaction } = await import('@infrastructure');
+      const { withTransaction } = await import('../../../../infrastructure/index.js');
       const mockQuery = vi.fn().mockResolvedValue([
         {
           id: 'token-123',
@@ -838,24 +884,26 @@ describe('verifyMagicLink', () => {
         },
       ]);
 
-      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-        const mockTx = {
-          query: mockQuery,
-          queryOne: vi.fn().mockResolvedValue({
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            password_hash: user.passwordHash,
-            role: user.role,
-            email_verified: true,
-            email_verified_at: user.emailVerifiedAt,
-            created_at: user.createdAt,
-            updated_at: user.updatedAt,
-          }),
-          execute: vi.fn().mockResolvedValue(1),
-        };
-        return callback(mockTx);
-      });
+      vi.mocked(withTransaction).mockImplementation(
+        async (_db: DbClient, callback: TransactionCallback) => {
+          const mockTx = {
+            query: mockQuery,
+            queryOne: vi.fn().mockResolvedValue({
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              password_hash: user.passwordHash,
+              role: user.role,
+              email_verified: true,
+              email_verified_at: user.emailVerifiedAt,
+              created_at: user.createdAt,
+              updated_at: user.updatedAt,
+            }),
+            execute: vi.fn().mockResolvedValue(1),
+          } as unknown as RawDb;
+          return callback(mockTx);
+        },
+      );
 
       await verifyMagicLink(db, repos, config, token);
 
@@ -870,7 +918,7 @@ describe('verifyMagicLink', () => {
       const token = 'valid-token';
       const user = createMockUser();
 
-      const { withTransaction } = await import('@infrastructure');
+      const { withTransaction } = await import('../../../../infrastructure/index.js');
       const mockQuery = vi.fn().mockResolvedValue([
         {
           id: 'token-123',
@@ -881,24 +929,26 @@ describe('verifyMagicLink', () => {
         },
       ]);
 
-      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-        const mockTx = {
-          query: mockQuery,
-          queryOne: vi.fn().mockResolvedValue({
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            password_hash: user.passwordHash,
-            role: user.role,
-            email_verified: true,
-            email_verified_at: user.emailVerifiedAt,
-            created_at: user.createdAt,
-            updated_at: user.updatedAt,
-          }),
-          execute: vi.fn().mockResolvedValue(1),
-        };
-        return callback(mockTx);
-      });
+      vi.mocked(withTransaction).mockImplementation(
+        async (_db: DbClient, callback: TransactionCallback) => {
+          const mockTx = {
+            query: mockQuery,
+            queryOne: vi.fn().mockResolvedValue({
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              password_hash: user.passwordHash,
+              role: user.role,
+              email_verified: true,
+              email_verified_at: user.emailVerifiedAt,
+              created_at: user.createdAt,
+              updated_at: user.updatedAt,
+            }),
+            execute: vi.fn().mockResolvedValue(1),
+          } as unknown as RawDb;
+          return callback(mockTx);
+        },
+      );
 
       await verifyMagicLink(db, repos, config, token);
 
@@ -914,33 +964,35 @@ describe('verifyMagicLink', () => {
       const token = 'valid-token';
       const user = createMockUser({ name: null });
 
-      const { withTransaction } = await import('@infrastructure');
-      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-        const mockTx = {
-          query: vi.fn().mockResolvedValue([
-            {
-              id: 'token-123',
-              email: 'test@example.com',
-              token_hash: 'hash123',
-              expires_at: new Date(Date.now() + 10000),
-              used_at: null,
-            },
-          ]),
-          queryOne: vi.fn().mockResolvedValue({
-            id: user.id,
-            email: user.email,
-            name: null,
-            password_hash: user.passwordHash,
-            role: user.role,
-            email_verified: true,
-            email_verified_at: user.emailVerifiedAt,
-            created_at: user.createdAt,
-            updated_at: user.updatedAt,
-          }),
-          execute: vi.fn().mockResolvedValue(1),
-        };
-        return callback(mockTx);
-      });
+      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      vi.mocked(withTransaction).mockImplementation(
+        async (_db: DbClient, callback: TransactionCallback) => {
+          const mockTx = {
+            query: vi.fn().mockResolvedValue([
+              {
+                id: 'token-123',
+                email: 'test@example.com',
+                token_hash: 'hash123',
+                expires_at: new Date(Date.now() + 10000),
+                used_at: null,
+              },
+            ]),
+            queryOne: vi.fn().mockResolvedValue({
+              id: user.id,
+              email: user.email,
+              name: null,
+              password_hash: user.passwordHash,
+              role: user.role,
+              email_verified: true,
+              email_verified_at: user.emailVerifiedAt,
+              created_at: user.createdAt,
+              updated_at: user.updatedAt,
+            }),
+            execute: vi.fn().mockResolvedValue(1),
+          } as unknown as RawDb;
+          return callback(mockTx);
+        },
+      );
 
       const result = await verifyMagicLink(db, repos, config, token);
 
@@ -954,33 +1006,35 @@ describe('verifyMagicLink', () => {
       const token = 'valid-token';
       const user = createMockUser({ role: 'admin' });
 
-      const { withTransaction } = await import('@infrastructure');
-      vi.mocked(withTransaction).mockImplementation(async (_db, callback) => {
-        const mockTx = {
-          query: vi.fn().mockResolvedValue([
-            {
-              id: 'token-123',
-              email: 'admin@example.com',
-              token_hash: 'hash123',
-              expires_at: new Date(Date.now() + 10000),
-              used_at: null,
-            },
-          ]),
-          queryOne: vi.fn().mockResolvedValue({
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            password_hash: user.passwordHash,
-            role: 'admin',
-            email_verified: true,
-            email_verified_at: user.emailVerifiedAt,
-            created_at: user.createdAt,
-            updated_at: user.updatedAt,
-          }),
-          execute: vi.fn().mockResolvedValue(1),
-        };
-        return callback(mockTx);
-      });
+      const { withTransaction } = await import('../../../../infrastructure/index.js');
+      vi.mocked(withTransaction).mockImplementation(
+        async (_db: DbClient, callback: TransactionCallback) => {
+          const mockTx = {
+            query: vi.fn().mockResolvedValue([
+              {
+                id: 'token-123',
+                email: 'admin@example.com',
+                token_hash: 'hash123',
+                expires_at: new Date(Date.now() + 10000),
+                used_at: null,
+              },
+            ]),
+            queryOne: vi.fn().mockResolvedValue({
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              password_hash: user.passwordHash,
+              role: 'admin',
+              email_verified: true,
+              email_verified_at: user.emailVerifiedAt,
+              created_at: user.createdAt,
+              updated_at: user.updatedAt,
+            }),
+            execute: vi.fn().mockResolvedValue(1),
+          } as unknown as RawDb;
+          return callback(mockTx);
+        },
+      );
 
       const result = await verifyMagicLink(db, repos, config, token);
 

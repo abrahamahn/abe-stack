@@ -88,11 +88,7 @@ export class InvalidFilterError extends SearchError {
  * Unknown or unsupported filter operator.
  */
 export class InvalidOperatorError extends SearchError {
-  constructor(
-    operator: string,
-    supportedOperators?: string[],
-    details?: Record<string, unknown>,
-  ) {
+  constructor(operator: string, supportedOperators?: string[], details?: Record<string, unknown>) {
     super(
       `Unknown filter operator: ${operator}`,
       SEARCH_ERROR_TYPES.INVALID_OPERATOR,
@@ -107,17 +103,12 @@ export class InvalidOperatorError extends SearchError {
  * Invalid or non-existent field reference.
  */
 export class InvalidFieldError extends SearchError {
-  constructor(
-    field: string,
-    allowedFields?: string[],
-    details?: Record<string, unknown>,
-  ) {
-    super(
-      `Invalid field: ${field}`,
-      SEARCH_ERROR_TYPES.INVALID_FIELD,
-      HTTP_STATUS.BAD_REQUEST,
-      { field, allowedFields, ...details },
-    );
+  constructor(field: string, allowedFields?: string[], details?: Record<string, unknown>) {
+    super(`Invalid field: ${field}`, SEARCH_ERROR_TYPES.INVALID_FIELD, HTTP_STATUS.BAD_REQUEST, {
+      field,
+      allowedFields,
+      ...details,
+    });
     this.name = 'InvalidFieldError';
   }
 }
@@ -162,12 +153,10 @@ export class SearchProviderError extends SearchError {
     public readonly originalError?: Error,
     details?: Record<string, unknown>,
   ) {
-    super(
-      message,
-      SEARCH_ERROR_TYPES.PROVIDER_ERROR,
-      HTTP_STATUS.INTERNAL_SERVER_ERROR,
-      { providerName, ...details },
-    );
+    super(message, SEARCH_ERROR_TYPES.PROVIDER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR, {
+      providerName,
+      ...details,
+    });
     this.name = 'SearchProviderError';
   }
 }
@@ -181,12 +170,10 @@ export class SearchProviderUnavailableError extends SearchError {
     message = `Search provider '${providerName}' is unavailable`,
     details?: Record<string, unknown>,
   ) {
-    super(
-      message,
-      SEARCH_ERROR_TYPES.PROVIDER_UNAVAILABLE,
-      HTTP_STATUS.SERVICE_UNAVAILABLE,
-      { providerName, ...details },
-    );
+    super(message, SEARCH_ERROR_TYPES.PROVIDER_UNAVAILABLE, HTTP_STATUS.SERVICE_UNAVAILABLE, {
+      providerName,
+      ...details,
+    });
     this.name = 'SearchProviderUnavailableError';
   }
 }
@@ -221,12 +208,11 @@ export class QueryTooComplexError extends SearchError {
     public readonly maxConditions?: number,
     details?: Record<string, unknown>,
   ) {
-    super(
-      message,
-      SEARCH_ERROR_TYPES.QUERY_TOO_COMPLEX,
-      HTTP_STATUS.BAD_REQUEST,
-      { maxDepth, maxConditions, ...details },
-    );
+    super(message, SEARCH_ERROR_TYPES.QUERY_TOO_COMPLEX, HTTP_STATUS.BAD_REQUEST, {
+      maxDepth,
+      maxConditions,
+      ...details,
+    });
     this.name = 'QueryTooComplexError';
   }
 }

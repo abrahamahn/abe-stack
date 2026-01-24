@@ -31,9 +31,9 @@ describe('Media Processing Types', () => {
       };
 
       expect(options).toBeDefined();
-      expect(options.resize?.width).toBe(800);
-      expect(options.format?.format).toBe('jpeg');
-      expect(options.thumbnail?.size).toBe(300);
+      expect(options.configresize?.width).toBe(800);
+      expect(options.configformat?.format).toBe('jpeg');
+      expect(options.configthumbnail?.size).toBe(300);
     });
 
     it('should allow partial options', () => {
@@ -69,11 +69,11 @@ describe('Media Processing Types', () => {
         },
       };
 
-      expect(options.format).toBe('mp3');
-      expect(options.bitrate).toBe('256k');
-      expect(options.channels).toBe(2);
-      expect(options.sampleRate).toBe(44100);
-      expect(options.waveform?.width).toBe(800);
+      expect(options.configformat).toBe('mp3');
+      expect(options.configbitrate).toBe('256k');
+      expect(options.configchannels).toBe(2);
+      expect(options.configsampleRate).toBe(44100);
+      expect(options.configwaveform?.width).toBe(800);
     });
   });
 
@@ -89,17 +89,17 @@ describe('Media Processing Types', () => {
         },
       };
 
-      expect(options.format).toBe('mp4');
-      expect(options.resolution?.width).toBe(1920);
-      expect(options.bitrate).toBe('5000k');
-      expect(options.thumbnail?.time).toBe(5);
+      expect(options.configformat).toBe('mp4');
+      expect(options.configresolution?.width).toBe(1920);
+      expect(options.configbitrate).toBe('5000k');
+      expect(options.configthumbnail?.time).toBe(5);
     });
   });
 
   describe('MediaMetadata', () => {
     it('should allow all metadata fields', () => {
       const metadata: MediaMetadata = {
-        duration: 180.5,
+        dconfiguration: 180.5,
         width: 1920,
         height: 1080,
         bitrate: 2500000,
@@ -109,7 +109,7 @@ describe('Media Processing Types', () => {
         sampleRate: 44100,
       };
 
-      expect(metadata.duration).toBe(180.5);
+      expect(metadata.dconfiguration).toBe(180.5);
       expect(metadata.width).toBe(1920);
       expect(metadata.height).toBe(1080);
       expect(metadata.bitrate).toBe(2500000);
@@ -121,10 +121,10 @@ describe('Media Processing Types', () => {
 
     it('should allow partial metadata', () => {
       const partialMetadata: MediaMetadata = {
-        duration: 120,
+        dconfiguration: 120,
       };
 
-      expect(partialMetadata.duration).toBe(120);
+      expect(partialMetadata.dconfiguration).toBe(120);
       expect(partialMetadata.width).toBeUndefined();
     });
   });

@@ -199,7 +199,7 @@ describe('MemoryQueueStore', () => {
         taskId: 'task-1',
         success: true,
         completedAt: now,
-        durationMs: 100,
+        dconfigurationMs: 100,
       });
 
       // Task should no longer be pending
@@ -213,7 +213,7 @@ describe('MemoryQueueStore', () => {
           taskId: 'non-existent',
           success: true,
           completedAt: new Date().toISOString(),
-          durationMs: 0,
+          dconfigurationMs: 0,
         }),
       ).resolves.toBeUndefined();
     });
@@ -235,13 +235,13 @@ describe('MemoryQueueStore', () => {
         taskId: 'task-1',
         success: true,
         completedAt: now,
-        durationMs: 250,
+        dconfigurationMs: 250,
       });
 
       const all = store.getAll();
       const completed = all.find((t) => t.id === 'task-1');
       expect(completed?.completedAt).toBe(now);
-      expect(completed?.durationMs).toBe(250);
+      expect(completed?.dconfigurationMs).toBe(250);
     });
   });
 
@@ -423,7 +423,7 @@ describe('MemoryQueueStore', () => {
         taskId: 'task-1',
         success: true,
         completedAt: past.toISOString(),
-        durationMs: 100,
+        dconfigurationMs: 100,
       });
 
       const cleared = await store.clearCompleted(now.toISOString());
@@ -450,7 +450,7 @@ describe('MemoryQueueStore', () => {
         taskId: 'task-1',
         success: true,
         completedAt: now.toISOString(),
-        durationMs: 100,
+        dconfigurationMs: 100,
       });
 
       const cleared = await store.clearCompleted(past.toISOString());

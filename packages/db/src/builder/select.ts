@@ -35,6 +35,22 @@ interface ComputedColumn {
 }
 
 /**
+ * Common Table Expression (CTE) definition
+ */
+interface CteDef {
+  alias: string;
+  query: SelectBuilder;
+}
+
+/**
+ * Union definition
+ */
+interface UnionDef {
+  type: 'UNION' | 'UNION ALL';
+  query: SelectBuilder;
+}
+
+/**
  * SelectBuilder class for constructing SELECT queries
  */
 export class SelectBuilder implements QueryBuilder {
@@ -51,6 +67,8 @@ export class SelectBuilder implements QueryBuilder {
   private _offset: number | null = null;
   private _forUpdate = false;
   private _forShare = false;
+  private _ctes: CteDef[] = [];
+  private _unions: UnionDef[] = [];
 
   constructor(table: string | TableSpec) {
     this._table = typeof table === 'string' ? { name: table } : table;
@@ -103,6 +121,31 @@ export class SelectBuilder implements QueryBuilder {
       expr: { text: `(${subquery.text})`, values: subquery.values },
       alias,
     });
+    return this;
+  }
+
+  /**
+   * Add a Common Table Expression (CTE)
+   * @example select('recent_orders').with('recent_orders', select('orders').limit(10))
+   */
+  with(alias: string, query: SelectBuilder): this {
+    this._ctes.push({ alias, query });
+    return this;
+  }
+
+  /**
+   * Combine with another query using UNION
+   */
+  union(query: SelectBuilder): this {
+    this._unions.push({ type: 'UNION', query });
+    return this;
+  }
+
+  /**
+   * Combine with another query using UNION ALL
+   */
+  unionAll(query: SelectBuilder): this {
+    this._unions.push({ type: 'UNION ALL', query });
     return this;
   }
 
@@ -239,10 +282,47 @@ export class SelectBuilder implements QueryBuilder {
   }
 
   /**
+   * Return a TableSpec representing this query as a subquery with an alias
+   * @example select(select('users').as('u')).columns('u.id')
+   */
+  as(alias: string): TableSpec {
+    const { text, values } = this.toSql();
+    return {
+      name: alias, // The name is technically unused if subquery is present, but kept for type compliance
+      alias: alias,
+      subquery: { text, values },
+    };
+  }
+
+  /**
    * Build the SQL query
    */
   toSql(): QueryResult {
     const parts: SqlFragment[] = [];
+
+    // CTEs
+    if (this._ctes.length > 0) {
+      const cteParts: string[] = [];
+      const cteValues: unknown[] = [];
+
+      for (const cte of this._ctes) {
+        const cteQuery = cte.query.toSql();
+
+        // Renumber CTE parameters
+        let exprText = cteQuery.text;
+        for (let i = cteQuery.values.length; i >= 1; i--) {
+          exprText = exprText.replace(
+            new RegExp(`\\$${String(i)}(?!\\d)`, 'g'),
+            `$${String(cteValues.length + i)}`,
+          );
+        }
+
+        cteParts.push(`${escapeIdentifier(cte.alias)} AS (${exprText})`);
+        cteValues.push(...cteQuery.values);
+      }
+
+      parts.push({ text: `WITH ${cteParts.join(', ')}`, values: cteValues });
+    }
 
     // SELECT [DISTINCT] columns
     const selectKeyword = this._distinct ? 'SELECT DISTINCT' : 'SELECT';
@@ -283,13 +363,18 @@ export class SelectBuilder implements QueryBuilder {
     parts.push({ text: `${selectKeyword} ${columnList}`, values: columnValues });
 
     // FROM table
-    parts.push({ text: `FROM ${formatTable(this._table)}`, values: [] });
+    const tableFragment = formatTable(this._table);
+    parts.push({ text: `FROM ${tableFragment.text}`, values: [...tableFragment.values] });
 
     // JOINs
     for (const join of this._joins) {
       const joinType = join.type.toUpperCase();
-      const joinText = `${joinType} JOIN ${formatTable(join.table)} ON ${join.on.text}`;
-      parts.push({ text: joinText, values: [...join.on.values] });
+      const joinTableFragment = formatTable(join.table);
+      const joinText = `${joinType} JOIN ${joinTableFragment.text} ON ${join.on.text}`;
+      parts.push({
+        text: joinText,
+        values: [...joinTableFragment.values, ...join.on.values],
+      });
     }
 
     // WHERE
@@ -306,6 +391,17 @@ export class SelectBuilder implements QueryBuilder {
     // HAVING
     if (this._having && this._having.text) {
       parts.push({ text: `HAVING ${this._having.text}`, values: [...this._having.values] });
+    }
+
+    // UNIONS (before ORDER BY/LIMIT if we treat them as compounding, but syntax varies)
+    // Actually standard SQL: q1 UNION q2 ORDER BY is valid for the whole result.
+    for (const unionUnion of this._unions) {
+      const unionQuery = unionUnion.query.toSql();
+      // Values handling in combine() will renumber them
+      parts.push({
+        text: `${unionUnion.type} ${unionQuery.text}`,
+        values: [...unionQuery.values],
+      });
     }
 
     // ORDER BY

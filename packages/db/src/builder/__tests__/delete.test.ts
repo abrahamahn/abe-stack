@@ -31,9 +31,7 @@ describe('DeleteBuilder', () => {
     });
 
     it('handles table with alias', () => {
-      const query = deleteFrom({ name: 'users', alias: 'u' })
-        .where(eq('id', 'user-123'))
-        .toSql();
+      const query = deleteFrom({ name: 'users', alias: 'u' }).where(eq('id', 'user-123')).toSql();
       expect(query.text).toBe('DELETE FROM users AS u WHERE id = $1');
     });
   });

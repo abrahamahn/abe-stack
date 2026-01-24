@@ -6,7 +6,7 @@ import { SmtpEmailService } from '@email/smtpEmailService';
 import { emailTemplates } from '@email/templates';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import type { Email } from '@';
+import type { Email } from '@abe-stack/core';
 import type { EmailOptions } from '@email/types';
 
 // Mock the SmtpClient
@@ -15,7 +15,7 @@ const mockSend = vi.fn().mockResolvedValue({ success: true, messageId: 'smtp-123
 vi.mock('../smtp.js', () => ({
   SmtpClient: class MockSmtpClient {
     send = mockSend;
-    constructor(public : unknown) {}
+    constructor(public config: unknown) {}
   },
 }));
 
@@ -95,7 +95,7 @@ describe('ConsoleEmailService', () => {
 
 describe('SmtpEmailService', () => {
   let smtpService: SmtpEmailService;
-  const  = createMockEmail('smtp');
+  const config = createMockEmail('smtp');
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -107,7 +107,7 @@ describe('SmtpEmailService', () => {
     await smtpService.send(testEmailOptions);
 
     expect(mockSend).toHaveBeenCalledWith({
-      from: `"${.from.name}" <${.from.address}>`,
+      from: `"${config.from.name}" <${config.from.address}>`,
       to: testEmailOptions.to,
       subject: testEmailOptions.subject,
       text: testEmailOptions.text,
@@ -237,21 +237,21 @@ describe('createEmailService', () => {
   });
 
   test('should create SmtpEmailService when provider is smtp', () => {
-    const  = createMockEmail('smtp');
+    const config = createMockEmail('smtp');
     const service = createEmailService();
 
     expect(service).toBeInstanceOf(SmtpEmailService);
   });
 
   test('should create ConsoleEmailService when provider is console', () => {
-    const  = createMockEmail('console');
+    const config = createMockEmail('console');
     const service = createEmailService();
 
     expect(service).toBeInstanceOf(ConsoleEmailService);
   });
 
   test('should default to ConsoleEmailService for unknown providers', () => {
-    const  = {
+    const config = {
       ...createMockEmail('console'),
       provider: 'unknown' as 'console',
     };

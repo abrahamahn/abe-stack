@@ -1,58 +1,216 @@
 // apps/server/src/config/services/notifications.ts
-import type { FcmConfig } from '@abe-stack/core/contracts/config';
+import type {
+  CourierConfig,
+  FcmConfig,
+  NotificationConfig,
+  NotificationProvider,
+  OneSignalConfig,
+} from '@abe-stack/core/contracts/config';
+import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
 
 /**
- * Loads Firebase Cloud Messaging (FCM) configuration from environment variables.
+ * Loads push notification configuration from environment variables.
  *
- * FCM credentials should be the stringified JSON of your Firebase service account.
- * Get this from: Firebase Console → Project Settings → Service Accounts → Generate Key.
+ * Supports multiple providers: OneSignal, Courier, Knock, FCM, SNS, Braze, and generic.
+ * Provider priority: Explicit NOTIFICATIONS_PROVIDER > OneSignal > Courier > Knock > FCM > SNS > Braze.
+ *
+ * Notifications are disabled if no valid provider credentials are found.
  *
  * @param env - Environment variable map
- * @returns FCM configuration (credentials as string, parsed by infrastructure layer)
+ * @returns Complete notification configuration
  *
- * @example
+ * @example OneSignal
  * ```env
- * FCM_PROJECT_ID=my-firebase-project
- * FCM_CREDENTIALS={"type":"service_account",...}
+ * NOTIFICATIONS_PROVIDER=onesignal
+ * ONESIGNAL_REST_API_KEY=your-rest-api-key
+ * ONESIGNAL_USER_AUTH_KEY=your-user-auth-key
+ * ONESIGNAL_APP_ID=your-app-id
+ * ```
+ *
+ * @example Courier
+ * ```env
+ * NOTIFICATIONS_PROVIDER=courier
+ * COURIER_API_KEY=your-api-key
+ * ```
+ *
+ * @example Knock
+ * ```env
+ * NOTIFICATIONS_PROVIDER=knock
+ * KNOCK_SECRET_KEY=your-secret-key
+ * ```
+ *
+ * @example FCM
+ * ```env
+ * NOTIFICATIONS_PROVIDER=fcm
+ * FCM_PROJECT_ID=your-project-id
+ * FCM_CREDENTIALS=your-service-account-json
+ * ```
+ *
+ * @example SNS
+ * ```env
+ * NOTIFICATIONS_PROVIDER=sns
+ * AWS_SNS_ACCESS_KEY_ID=your-access-key
+ * AWS_SNS_SECRET_ACCESS_KEY=your-secret-key
+ * AWS_SNS_REGION=us-east-1
+ * ```
+ *
+ * @example Braze
+ * ```env
+ * NOTIFICATIONS_PROVIDER=braze
+ * BRAZE_API_KEY=your-api-key
+ * BRAZE_API_URL=https://rest.iad-01.braze.com
  * ```
  */
-export function loadFcmConfig(env: Record<string, string | undefined>): FcmConfig {
-  const credentials = env.FCM_CREDENTIALS || '';
-
-  return {
-    // We keep it as a string here; the Infrastructure layer will parse it
-    credentials,
-    projectId: env.FCM_PROJECT_ID || '',
+export function loadNotificationsConfig(env: FullEnv): NotificationConfig {
+  // Check which provider keys are present
+  const availability = {
+    onesignal: Boolean(
+      env.ONESIGNAL_REST_API_KEY && env.ONESIGNAL_USER_AUTH_KEY && env.ONESIGNAL_APP_ID,
+    ),
+    fcm: Boolean(env.FCM_PROJECT_ID && env.FCM_CREDENTIALS),
+    courier: Boolean(env.COURIER_API_KEY),
   };
+
+  // Resolve active provider (Explicit Choice > OneSignal > FCM > Courier)
+  const provider = resolveActiveProvider(
+    env.NOTIFICATIONS_PROVIDER as NotificationProvider | undefined,
+    availability,
+  );
+
+  // Determine if notifications should be enabled based on valid credentials
+  const isEnabled = Boolean(provider);
+
+  // Build configuration based on what provider would be used (even if not enabled due to missing credentials)
+  const effectiveProvider = provider || 'onesignal'; // Default to onesignal
+
+  let config: NotificationConfig = {
+    enabled: isEnabled,
+    provider: effectiveProvider,
+    config: {},
+  };
+
+  // Always build the config structure based on the provider that would be used,
+  // regardless of whether it's enabled (to support partial configs)
+  switch (effectiveProvider) {
+    case 'onesignal':
+      config.config = {
+        restApiKey: env.ONESIGNAL_REST_API_KEY || '',
+        userAuthKey: env.ONESIGNAL_USER_AUTH_KEY || '',
+        appId: env.ONESIGNAL_APP_ID || '',
+        settings: {
+          enableLogging: env.ONESIGNAL_ENABLE_LOGGING === 'true',
+        },
+      };
+      break;
+
+    case 'fcm':
+      config.config = {
+        credentials: env.FCM_CREDENTIALS || '',
+        projectId: env.FCM_PROJECT_ID || '',
+      };
+      break;
+
+    case 'courier':
+      config.config = {
+        apiKey: env.COURIER_API_KEY || '',
+        apiUrl: env.COURIER_API_URL || 'https://api.courier.com',
+        settings: {
+          enableLogging: env.COURIER_ENABLE_LOGGING === 'true',
+        },
+      };
+      break;
+
+    case 'generic':
+    default:
+      config.config = {};
+      break;
+  }
+
+  if (config.enabled) {
+    ensureValid(config);
+  }
+
+  return config;
+}
+
+function resolveActiveProvider(
+  explicit: NotificationProvider | undefined,
+  avail: { onesignal: boolean; fcm: boolean; courier: boolean },
+): NotificationProvider | null {
+  if (explicit === 'onesignal' && avail.onesignal) return 'onesignal';
+  if (explicit === 'fcm' && avail.fcm) return 'fcm';
+  if (explicit === 'courier' && avail.courier) return 'courier';
+  if (explicit === 'generic') return 'generic';
+
+  // Auto-detection logic if no explicit provider is set
+  if (!explicit) {
+    if (avail.onesignal) return 'onesignal';
+    if (avail.fcm) return 'fcm';
+    if (avail.courier) return 'courier';
+  }
+  return null;
 }
 
 /**
- * Validates FCM configuration for production readiness.
+ * Validates notification configuration for production readiness.
  *
- * Only validates if notifications appear to be enabled (projectId or credentials present).
- * Checks that both required fields are provided and credentials are valid JSON.
- *
- * @param config - FCM configuration to validate
+ * @param config - Notification configuration to validate
  * @returns Array of validation error messages (empty if valid)
  */
-export function validateFcmConfig(config: FcmConfig): string[] {
+export function validateNotificationsConfig(config: NotificationConfig): string[] {
   const errors: string[] = [];
 
-  // Only validate if a project ID is provided (implying the user wants notifications)
-  if (config.projectId || config.credentials) {
-    if (!config.projectId) errors.push('FCM_PROJECT_ID is missing');
-    if (!config.credentials) errors.push('FCM_CREDENTIALS (JSON string) is missing');
+  // Only validate if notifications are enabled
+  if (config.enabled) {
+    switch (config.provider) {
+      case 'onesignal': {
+        const onesignal = config.config as OneSignalConfig;
+        if (!onesignal.restApiKey) errors.push('restApiKey: Required');
+        if (!onesignal.userAuthKey) errors.push('userAuthKey: Required');
+        if (!onesignal.appId) errors.push('appId: Required');
+        break;
+      }
 
-    // Quick sanity check for JSON format
-    if (config.credentials && !config.credentials.trim().startsWith('{')) {
-      errors.push('FCM_CREDENTIALS must be a valid JSON string');
+      case 'fcm': {
+        const fcm = config.config as FcmConfig;
+        if (!fcm.credentials) errors.push('credentials: Required');
+        if (!fcm.projectId) errors.push('projectId: Required');
+        break;
+      }
+
+      case 'courier': {
+        const courier = config.config as CourierConfig;
+        if (!courier.apiKey) errors.push('apiKey: Required');
+        break;
+      }
+
+      case 'generic':
+        // No validation for generic provider
+        break;
     }
   }
 
   return errors;
 }
 
-export const DEFAULT_FCM_CONFIG: FcmConfig = {
-  credentials: '',
-  projectId: '',
+function ensureValid(config: NotificationConfig): void {
+  const errors = validateNotificationsConfig(config);
+  if (errors.length > 0) {
+    throw new Error(
+      `Notification Configuration Failed:\n${errors.map((e) => ` - ${e}`).join('\n')}`,
+    );
+  }
+}
+
+export const DEFAULT_NOTIFICATION_CONFIG: NotificationConfig = {
+  enabled: false,
+  provider: 'onesignal',
+  config: {
+    restApiKey: '',
+    userAuthKey: '',
+    appId: '',
+    settings: {
+      enableLogging: false,
+    },
+  },
 };

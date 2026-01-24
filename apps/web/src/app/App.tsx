@@ -10,15 +10,8 @@
 
 import { createQueryPersister, QueryCacheProvider } from '@abe-stack/sdk';
 import { toastStore } from '@abe-stack/stores';
-import {
-  BrowserRouter,
-  HistoryProvider,
-  Route,
-  Routes,
-  ScrollArea,
-  Toaster,
-} from '@abe-stack/ui';
-import { DemoPage } from '@demo';
+import { BrowserRouter, HistoryProvider, Route, Routes, ScrollArea, Toaster } from '@abe-stack/ui';
+import { DemoPage, SidePeekDemoPage } from '@demo';
 import {
   AdminLayout,
   JobMonitorPage,
@@ -47,7 +40,6 @@ import { DashboardPage } from '@features/dashboard';
 import { SettingsPage } from '@features/settings';
 import { HomePage } from '@pages/HomePage';
 import { useEffect } from 'react';
-
 
 import { ClientEnvironmentProvider } from './ClientEnvironment';
 
@@ -88,6 +80,7 @@ function AppRoutes(): ReactElement {
       <Route path="/" element={<HomePage />} />
       <Route path="/clean" element={<HomePage />} />
       <Route path="/demo" element={<DemoPage />} />
+      <Route path="/side-peek-demo" element={<SidePeekDemoPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/auth" element={<AuthPage />} />

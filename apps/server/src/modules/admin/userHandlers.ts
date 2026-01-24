@@ -8,13 +8,7 @@
 
 import { UserNotFoundError } from '@shared';
 import { ERROR_MESSAGES, type AppContext } from '@shared';
-import {
-  getUserById,
-  listUsers,
-  lockUser,
-  unlockUser,
-  updateUser,
-} from '@admin/userService';
+import { getUserById, listUsers, lockUser, unlockUser, updateUser } from '@admin/userService';
 
 import type {
   AdminLockUserRequest,
@@ -52,10 +46,20 @@ export async function handleListUsers(
 
     const filters: AdminUserListFilters = {
       search: typeof query.search === 'string' ? query.search : undefined,
-      role: typeof query.role === 'string' ? (query.role as AdminUserListFilters['role']) : undefined,
-      status: typeof query.status === 'string' ? (query.status as AdminUserListFilters['status']) : undefined,
-      sortBy: typeof query.sortBy === 'string' ? (query.sortBy as AdminUserListFilters['sortBy']) : undefined,
-      sortOrder: typeof query.sortOrder === 'string' ? (query.sortOrder as AdminUserListFilters['sortOrder']) : undefined,
+      role:
+        typeof query.role === 'string' ? (query.role as AdminUserListFilters['role']) : undefined,
+      status:
+        typeof query.status === 'string'
+          ? (query.status as AdminUserListFilters['status'])
+          : undefined,
+      sortBy:
+        typeof query.sortBy === 'string'
+          ? (query.sortBy as AdminUserListFilters['sortBy'])
+          : undefined,
+      sortOrder:
+        typeof query.sortOrder === 'string'
+          ? (query.sortOrder as AdminUserListFilters['sortOrder'])
+          : undefined,
       page: query.page ? Number(query.page) : undefined,
       limit: query.limit ? Number(query.limit) : undefined,
     };
@@ -103,10 +107,7 @@ export async function handleGetUser(
 
     const user = await getUserById(ctx.repos.users, userId);
 
-    ctx.log.info(
-      { adminId: authUser.userId, targetUserId: userId },
-      'Admin retrieved user',
-    );
+    ctx.log.info({ adminId: authUser.userId, targetUserId: userId }, 'Admin retrieved user');
 
     return { status: 200, body: user };
   } catch (error) {

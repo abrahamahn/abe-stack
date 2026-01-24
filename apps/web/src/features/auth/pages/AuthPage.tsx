@@ -15,8 +15,15 @@ export function AuthPage(): ReactElement {
   const searchParamsResult = useSearchParams();
   const searchParams: URLSearchParams = searchParamsResult[0];
   const navigate = useNavigate();
-  const { login, register, forgotPassword, resetPassword, resendVerification, isAuthenticated, user } =
-    useAuth();
+  const {
+    login,
+    register,
+    forgotPassword,
+    resetPassword,
+    resendVerification,
+    isAuthenticated,
+    user,
+  } = useAuth();
   const { isLoading, error, setError, wrapHandler } = useFormState();
 
   const [mode, setMode] = useState<AuthMode>('login');

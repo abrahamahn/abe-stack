@@ -10,7 +10,6 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { useQuery as useQueryBase, useInfiniteQuery as useInfiniteQueryBase } from '../query';
 
-
 import { type ClientSearchQueryBuilder, fromClientSearchQuery } from './query-builder';
 import { serializeToURLParams, deserializeFromURLParams } from './serialization';
 

@@ -1,35 +1,18 @@
 {
-  "extends": "../../config/ts/tsconfig.base.json",
+  "extends": "../../.config/tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": "./",
-    "types": [
-      "node",
-      "vitest/globals"
-    ],
+    "types": ["node", "vitest/globals"],
     "paths": {
-      "@contracts": [
-        "./src/contracts"
-      ],
-      "@contracts/*": [
-        "./src/contracts/*"
-      ],
-      "@utils": [
-        "./src/utils"
-      ],
-      "@utils/*": [
-        "./src/utils/*"
-      ]
+      "@contracts": ["./src/contracts"],
+      "@contracts/*": ["./src/contracts/*"],
+      "@utils": ["./src/utils"],
+      "@utils/*": ["./src/utils/*"]
     },
     "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "src/**/__tests__/**"
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "src/**/__tests__/**"]
 }

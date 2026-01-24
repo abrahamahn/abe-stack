@@ -6,7 +6,7 @@ import { SmtpEmailService } from '@email/smtpEmailService';
 import { emailTemplates } from '@email/templates';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import type { EmailConfig } from '@config';
+import type { EmailConfig } from '@/config';
 import type { EmailOptions } from '@email/types';
 
 // Mock the SmtpClient

@@ -111,23 +111,20 @@ export function AvatarUpload({
   const error = uploadError ?? deleteError;
 
   // Get initials from name
-  const initials = userName
-    ?.split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2) ?? '?';
+  const initials =
+    userName
+      ?.split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) ?? '?';
 
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4">
         <div className="relative">
           {displayUrl ? (
-            <Avatar
-              src={displayUrl}
-              alt={userName ?? 'User avatar'}
-              className="w-20 h-20"
-            />
+            <Avatar src={displayUrl} alt={userName ?? 'User avatar'} className="w-20 h-20" />
           ) : (
             <div className="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-2xl font-medium text-gray-600 dark:text-gray-300">
               {initials}
@@ -177,32 +174,18 @@ export function AvatarUpload({
             </div>
           ) : (
             <div className="flex gap-2">
-              <Button
-                type="button"
-                onClick={handleUpload}
-                disabled={isLoading}
-              >
+              <Button type="button" onClick={handleUpload} disabled={isLoading}>
                 {isUploading ? 'Uploading...' : 'Save'}
               </Button>
-              <Button
-                type="button"
-                variant="text"
-                onClick={handleCancel}
-                disabled={isLoading}
-              >
+              <Button type="button" variant="text" onClick={handleCancel} disabled={isLoading}>
                 Cancel
               </Button>
             </div>
           )}
-
         </div>
       </div>
 
-      {error && (
-        <Alert tone="danger">
-          {error.message}
-        </Alert>
-      )}
+      {error && <Alert tone="danger">{error.message}</Alert>}
     </div>
   );
 }

@@ -16,7 +16,7 @@ vi.mock('../processor', () => ({
       activeJobs: 0,
       queuedJobs: 0,
       limits: {
-        maxDuration: 300000,
+        maxDconfiguration: 300000,
         maxFileSize: 104857600,
         maxConcurrentJobs: 3,
         allowedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp3', 'wav', 'mp4', 'mov'],
@@ -139,7 +139,7 @@ describe('ServerMediaQueue', () => {
         activeJobs: 0,
         queuedJobs: 0,
         limits: expect.objectContaining({
-          maxDuration: 300000,
+          maxDconfiguration: 300000,
           maxFileSize: 104857600,
           maxConcurrentJobs: 3,
         }),

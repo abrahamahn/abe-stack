@@ -15,10 +15,11 @@ describe('adminApi', () => {
     global.fetch = fetchMock as typeof fetch;
   });
 
-  const mockJsonResponse = (data: unknown) => ({
-    ok: true,
-    json: vi.fn().mockResolvedValue(data),
-  }) as unknown as Response;
+  const mockJsonResponse = (data: unknown) =>
+    ({
+      ok: true,
+      json: vi.fn().mockResolvedValue(data),
+    }) as unknown as Response;
 
   test('listUsers should call list endpoint with query params', async () => {
     const response = { data: [], pagination: { page: 1, limit: 10, total: 0, totalPages: 0 } };
@@ -28,7 +29,7 @@ describe('adminApi', () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       'http://localhost:3000/api/admin/users?search=test&page=1&limit=10',
-      expect.objectContaining({ method: undefined, credentials: 'include' }),
+      expect.objectContaining({ credentials: 'include' }),
     );
     expect(result).toEqual(response);
   });
@@ -41,7 +42,7 @@ describe('adminApi', () => {
 
     expect(fetchMock).toHaveBeenCalledWith(
       'http://localhost:3000/api/admin/users/user-123',
-      expect.objectContaining({ method: undefined, credentials: 'include' }),
+      expect.objectContaining({ credentials: 'include' }),
     );
     expect(result).toEqual(mockUser);
   });

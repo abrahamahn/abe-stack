@@ -13,6 +13,7 @@ import { authRoutes } from './auth/routes';
 import { billingRoutes, registerWebhookRoutes } from './billing';
 import { notificationRoutes } from './notifications/routes';
 import { realtimeRoutes } from './realtime/routes';
+import { systemRoutes } from './system/routes';
 import { userRoutes } from './users/routes';
 
 import type { AppContext } from '@shared/index';
@@ -33,14 +34,6 @@ export {
   type ReplyWithCookies,
   type RequestWithCookies,
 } from './auth';
-export { handleMe } from './users';
-export {
-  handleGetRecords,
-  handleWrite,
-  RecordNotFoundError,
-  registerRealtimeTable,
-  VersionConflictError,
-} from './realtime';
 export {
   handleGetPreferences,
   handleGetVapidKey,
@@ -51,6 +44,14 @@ export {
   handleUpdatePreferences,
   notificationRoutes,
 } from './notifications';
+export {
+  handleGetRecords,
+  handleWrite,
+  RecordNotFoundError,
+  registerRealtimeTable,
+  VersionConflictError,
+} from './realtime';
+export { handleMe } from './users';
 
 // Generic route registration (Chet-stack pattern)
 export {
@@ -73,6 +74,7 @@ export { adminRoutes } from './admin/routes';
 export { authRoutes } from './auth/routes';
 export { notificationRoutes as notificationRoutesConfig } from './notifications/routes';
 export { realtimeRoutes } from './realtime/routes';
+export { systemRoutes } from './system/routes';
 export { userRoutes } from './users/routes';
 
 /**
@@ -93,9 +95,10 @@ export function registerRoutes(app: FastifyInstance, ctx: AppContext): void {
   registerRouteMap(app, ctx, adminRoutes, routerOptions);
   registerRouteMap(app, ctx, realtimeRoutes, routerOptions);
   registerRouteMap(app, ctx, notificationRoutes, routerOptions);
+  registerRouteMap(app, ctx, systemRoutes, { ...routerOptions, prefix: '' }); // System routes handle their own prefixes (some are /, some /api)
 
   // Billing routes (only if billing is enabled)
-  if (ctx.config.billing?.enabled) {
+  if (ctx.config.billing.enabled) {
     registerRouteMap(app, ctx, billingRoutes, routerOptions);
   }
 

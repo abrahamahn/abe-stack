@@ -241,9 +241,7 @@ export async function refreshExpiringOAuthTokens(
   const expiringConnections = await db.query<ConnectionRow>(
     select(OAUTH_CONNECTIONS_TABLE)
       .columns('id', 'provider', 'refresh_token', 'expires_at')
-      .where(
-        and(lt('expires_at', cutoffDate), isNotNull('refresh_token')),
-      )
+      .where(and(lt('expires_at', cutoffDate), isNotNull('refresh_token')))
       .limit(batchSize)
       .toSql(),
   );
@@ -353,9 +351,7 @@ export async function countExpiringOAuthTokens(
 
   const result = await db.queryOne<{ count: number }>(
     selectCount(OAUTH_CONNECTIONS_TABLE)
-      .where(
-        and(lt('expires_at', cutoffDate), isNotNull('refresh_token')),
-      )
+      .where(and(lt('expires_at', cutoffDate), isNotNull('refresh_token')))
       .toSql(),
   );
 
@@ -386,25 +382,17 @@ export async function getOAuthTokenStats(
   cutoffDate.setTime(cutoffDate.getTime() + effectiveRefreshHours * 60 * 60 * 1000);
 
   const [totalResult, expiringSoonResult, expiredResult, withRefreshResult] = await Promise.all([
-    db.queryOne<{ count: number }>(
-      selectCount(OAUTH_CONNECTIONS_TABLE).toSql(),
-    ),
+    db.queryOne<{ count: number }>(selectCount(OAUTH_CONNECTIONS_TABLE).toSql()),
     db.queryOne<{ count: number }>(
       selectCount(OAUTH_CONNECTIONS_TABLE)
-        .where(
-          and(lt('expires_at', cutoffDate), isNotNull('expires_at')),
-        )
+        .where(and(lt('expires_at', cutoffDate), isNotNull('expires_at')))
         .toSql(),
     ),
     db.queryOne<{ count: number }>(
-      selectCount(OAUTH_CONNECTIONS_TABLE)
-        .where(lt('expires_at', now))
-        .toSql(),
+      selectCount(OAUTH_CONNECTIONS_TABLE).where(lt('expires_at', now)).toSql(),
     ),
     db.queryOne<{ count: number }>(
-      selectCount(OAUTH_CONNECTIONS_TABLE)
-        .where(isNotNull('refresh_token'))
-        .toSql(),
+      selectCount(OAUTH_CONNECTIONS_TABLE).where(isNotNull('refresh_token')).toSql(),
     ),
   ]);
 

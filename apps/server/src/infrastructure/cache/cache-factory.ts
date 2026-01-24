@@ -30,7 +30,10 @@ import type { CacheProvider, MemoryCacheConfig } from '@abe-stack/core';
  * });
  * ```
  */
-export function createCache(config: MemoryCacheConfig, options: CreateCacheOptions = {}): CacheProvider {
+export function createCache(
+  config: MemoryCacheConfig,
+  options: CreateCacheOptions = {},
+): CacheProvider {
   return new MemoryCacheProvider(config, options);
 }
 

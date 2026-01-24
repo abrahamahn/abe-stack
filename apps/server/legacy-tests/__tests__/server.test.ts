@@ -1,17 +1,17 @@
 // apps/server/src/__tests__/server.test.ts
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { createServer, isAddrInUse, type ServerDependencies } from '../server';
+import { createServer, isAddrInUse, type ServerDependencies } from '../server.js';
 
-import type { App } from '../';
-import type { DbClient } from '../infrastructure';
+import type { App } from '../index.js';
+import type { DbClient } from '../infrastructure.js';
 
 // Mock db client
 const mockDb = {
   execute: vi.fn().mockResolvedValue([{ '?column?': 1 }]),
 } as unknown as DbClient;
 
-// Test uration
+// Test configuration
 const test: App = {
   env: 'test',
   server: {
@@ -47,7 +47,7 @@ const test: App = {
     password: { minLength: 8, maxLength: 64, minZxcvbnScore: 2 },
     lockout: {
       maxAttempts: 10,
-      lockoutDurationMs: 1800000,
+      lockoutDconfigurationMs: 1800000,
       progressiveDelay: false,
       baseDelayMs: 0,
     },
@@ -118,7 +118,7 @@ describe('createServer', () => {
 
   beforeAll(async () => {
     const deps: ServerDependencies = {
-      : test,
+      config: test,
       db: mockDb,
     };
     server = await createServer(deps);
@@ -228,7 +228,7 @@ describe('error handler', () => {
 
   beforeAll(async () => {
     errorServer = await createServer({
-      : test,
+      config: test,
       db: mockDb,
     });
 
@@ -287,7 +287,7 @@ describe('error handler', () => {
   });
 });
 
-describe('production uration', () => {
+describe('production configuration', () => {
   let prodServer: Awaited<ReturnType<typeof createServer>>;
 
   beforeAll(async () => {
@@ -296,7 +296,7 @@ describe('production uration', () => {
       env: 'production' as const,
     };
     prodServer = await createServer({
-      : prod,
+      config: prod,
       db: mockDb,
     });
 
@@ -335,8 +335,8 @@ describe('production uration', () => {
 
 describe('listen function', () => {
   it('should use fallback port when primary port is in use', async () => {
-    const server1 = await createServer({ : test, db: mockDb });
-    const server2 = await createServer({ : test, db: mockDb });
+    const server1 = await createServer({ config: test, db: mockDb });
+    const server2 = await createServer({ config: test, db: mockDb });
 
     // Start first server on a specific port
     const port1 = 9876;
@@ -358,7 +358,7 @@ describe('listen function', () => {
         (error as NodeJS.ErrnoException).code = 'EADDRINUSE';
         throw error;
       }
-      server2.server.address = () => ({ port } as never);
+      server2.server.address = () => ({ port }) as never;
     });
 
     // Listen on second server with fallback
@@ -377,9 +377,9 @@ describe('listen function', () => {
   });
 
   it('should throw error when no ports are available', async () => {
-    const server1 = await createServer({ : test, db: mockDb });
-    const server2 = await createServer({ : test, db: mockDb });
-    const server3 = await createServer({ : test, db: mockDb });
+    const server1 = await createServer({ config: test, db: mockDb });
+    const server2 = await createServer({ config: test, db: mockDb });
+    const server3 = await createServer({ config: test, db: mockDb });
 
     const port1 = 9878;
     const port2 = 9879;
@@ -407,7 +407,7 @@ describe('listen function', () => {
   });
 
   it('should deduplicate port list', async () => {
-    const server = await createServer({ : test, db: mockDb });
+    const server = await createServer({ config: test, db: mockDb });
 
     const port = 9880;
     const WithDuplicates = {
@@ -420,7 +420,7 @@ describe('listen function', () => {
     };
 
     server.listen = vi.fn().mockImplementation(async ({ port }: { port: number }) => {
-      server.server.address = () => ({ port } as never);
+      server.server.address = () => ({ port }) as never;
     });
 
     const { listen } = await import('../server.js');
@@ -436,7 +436,7 @@ describe('listen function', () => {
   });
 
   it('should propagate non-EADDRINUSE errors', async () => {
-    const server = await createServer({ : test, db: mockDb });
+    const server = await createServer({ config: test, db: mockDb });
 
     // Mock the listen function to throw a different error
     const originalListen = server.listen.bind(server);
@@ -456,7 +456,7 @@ describe('error handler with AppError', () => {
 
   beforeAll(async () => {
     appErrorServer = await createServer({
-      : test,
+      config: test,
       db: mockDb,
     });
 
@@ -502,7 +502,7 @@ describe('rate limiting', () => {
       },
     };
 
-    const server = await createServer({ : limited, db: mockDb });
+    const server = await createServer({ config: limited, db: mockDb });
 
     // Make many rapid requests to trigger rate limit
     const responses = [];

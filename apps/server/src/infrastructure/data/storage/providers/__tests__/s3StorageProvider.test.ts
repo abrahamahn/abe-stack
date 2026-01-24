@@ -1,5 +1,5 @@
-// apps/server/src/infrastructure/data/storage/__tests__/s3StorageProvider.test.ts
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+// apps/server/src/infrastructure/data/storage/providers/__tests__/s3StorageProvider.test.ts
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { S3StorageProvider } from '../s3StorageProvider';
 
@@ -68,7 +68,7 @@ describe('S3StorageProvider', () => {
       expect(MockS3Client).toHaveBeenCalledWith({
         region: 'us-east-1',
         endpoint: undefined,
-        forcePathStyle: undefined,
+        forcePathStyle: false, // Changed from undefined to false
         credentials: {
           accessKeyId: 'test-access-key',
           secretAccessKey: 'test-secret-key',

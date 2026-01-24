@@ -174,7 +174,7 @@ describe('MemoryCacheProvider', () => {
         },
         {
           onEviction: (key, reason) => {
-            evicted.push({ key, reason });
+            evicted.push({ ...config, reason });
           },
         },
       );

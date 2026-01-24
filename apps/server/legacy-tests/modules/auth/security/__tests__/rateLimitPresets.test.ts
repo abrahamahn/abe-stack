@@ -12,7 +12,7 @@ describe('AUTH_RATE_LIMITS', () => {
   });
 
   describe('login preset', () => {
-    test('should have correct uration', () => {
+    test('should have correct configuration', () => {
       const preset = AUTH_RATE_LIMITS.login;
 
       expect(preset).toBeDefined();
@@ -22,7 +22,7 @@ describe('AUTH_RATE_LIMITS', () => {
   });
 
   describe('register preset', () => {
-    test('should have correct uration', () => {
+    test('should have correct configuration', () => {
       const preset = AUTH_RATE_LIMITS.register;
 
       expect(preset).toBeDefined();
@@ -32,7 +32,7 @@ describe('AUTH_RATE_LIMITS', () => {
   });
 
   describe('forgotPassword preset', () => {
-    test('should have correct uration', () => {
+    test('should have correct configuration', () => {
       const preset = AUTH_RATE_LIMITS.forgotPassword;
 
       expect(preset).toBeDefined();
@@ -42,7 +42,7 @@ describe('AUTH_RATE_LIMITS', () => {
   });
 
   describe('verifyEmail preset', () => {
-    test('should have correct uration', () => {
+    test('should have correct configuration', () => {
       const preset = AUTH_RATE_LIMITS.verifyEmail;
 
       expect(preset).toBeDefined();
@@ -52,7 +52,7 @@ describe('AUTH_RATE_LIMITS', () => {
   });
 
   describe('resendVerification preset', () => {
-    test('should have correct uration', () => {
+    test('should have correct configuration', () => {
       const preset = AUTH_RATE_LIMITS.resendVerification;
 
       expect(preset).toBeDefined();
@@ -62,7 +62,7 @@ describe('AUTH_RATE_LIMITS', () => {
   });
 
   describe('resetPassword preset', () => {
-    test('should have correct uration', () => {
+    test('should have correct configuration', () => {
       const preset = AUTH_RATE_LIMITS.resetPassword;
 
       expect(preset).toBeDefined();
@@ -72,7 +72,7 @@ describe('AUTH_RATE_LIMITS', () => {
   });
 
   describe('refresh preset', () => {
-    test('should have correct uration', () => {
+    test('should have correct configuration', () => {
       const preset = AUTH_RATE_LIMITS.refresh;
 
       expect(preset).toBeDefined();
@@ -82,7 +82,7 @@ describe('AUTH_RATE_LIMITS', () => {
   });
 
   describe('all presets', () => {
-    test('should have valid urations', () => {
+    test('should have valid configurations', () => {
       const allPresets = Object.values(AUTH_RATE_LIMITS);
 
       allPresets.forEach((preset) => {

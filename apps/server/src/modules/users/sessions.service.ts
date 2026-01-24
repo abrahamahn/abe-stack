@@ -106,10 +106,7 @@ export async function revokeAllSessions(
  * Get session count for a user
  * Useful for displaying "X active sessions" in UI
  */
-export async function getSessionCount(
-  repos: Repositories,
-  userId: string,
-): Promise<number> {
+export async function getSessionCount(repos: Repositories, userId: string): Promise<number> {
   const families = await repos.refreshTokenFamilies.findActiveByUserId(userId);
   return families.length;
 }

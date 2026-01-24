@@ -18,11 +18,7 @@ import {
   type SearchResult,
 } from '@abe-stack/core';
 
-import type {
-  ElasticsearchProviderConfig,
-  SearchContext,
-  ServerSearchProvider,
-} from './types';
+import type { ElasticsearchProviderConfig, SearchContext, ServerSearchProvider } from './types';
 
 // ============================================================================
 // Constants
@@ -83,9 +79,9 @@ const SUPPORTED_OPERATORS: FilterOperator[] = [
  * }
  * ```
  */
-export class ElasticsearchProvider<TRecord = Record<string, unknown>>
-  implements ServerSearchProvider<TRecord>
-{
+export class ElasticsearchProvider<
+  TRecord = Record<string, unknown>,
+> implements ServerSearchProvider<TRecord> {
   readonly name: string;
   // @ts-expect-error Reserved for future Elasticsearch implementation
   private readonly config: ElasticsearchProviderConfig;
@@ -124,10 +120,7 @@ export class ElasticsearchProvider<TRecord = Record<string, unknown>>
     };
   }
 
-  search(
-    _query: SearchQuery<TRecord>,
-    _context?: SearchContext,
-  ): Promise<SearchResult<TRecord>> {
+  search(_query: SearchQuery<TRecord>, _context?: SearchContext): Promise<SearchResult<TRecord>> {
     return this.throwNotImplementedAsync('search');
   }
 

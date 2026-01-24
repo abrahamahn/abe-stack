@@ -64,7 +64,7 @@ function createMockRecordLoader(records: Map<string, PermissionRecord>): RecordL
 
 function createTestChecker(records: Map<string, PermissionRecord> = new Map()): PermissionChecker {
   return createPermissionChecker({
-    : createDefaultPermission(),
+    config: createDefaultPermission(),
     recordLoader: createMockRecordLoader(records),
   });
 }

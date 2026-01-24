@@ -7,11 +7,7 @@
  */
 
 // Client
-export {
-  createBillingClient,
-  type BillingClient,
-  type BillingClientConfig,
-} from './client';
+export { createBillingClient, type BillingClient, type BillingClientConfig } from './client';
 
 // Hooks
 export {

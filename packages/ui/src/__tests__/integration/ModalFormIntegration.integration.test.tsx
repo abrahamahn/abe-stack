@@ -623,7 +623,6 @@ describe('ModalFormIntegration Integration Tests', () => {
         expect(screen.getByTestId('modal-name')).toHaveValue('');
       });
     });
-
   });
 
   describe('ConfirmDeleteModal', () => {

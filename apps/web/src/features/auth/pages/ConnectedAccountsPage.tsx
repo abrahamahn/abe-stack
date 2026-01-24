@@ -197,9 +197,7 @@ export function ConnectedAccountsPage(): ReactElement {
                           }}
                           disabled={isActing || !canDisconnect}
                           title={
-                            !canDisconnect
-                              ? 'You must have at least one login method'
-                              : undefined
+                            !canDisconnect ? 'You must have at least one login method' : undefined
                           }
                         >
                           Disconnect
@@ -251,11 +249,13 @@ export function ConnectedAccountsPage(): ReactElement {
           if (!open) setDisconnectTarget(null);
         }}
       >
-        <Dialog.Content title={`Disconnect ${disconnectTarget ? PROVIDER_DISPLAY[disconnectTarget.provider].label : ''}?`}>
+        <Dialog.Content
+          title={`Disconnect ${disconnectTarget ? PROVIDER_DISPLAY[disconnectTarget.provider].label : ''}?`}
+        >
           <p>
             Are you sure you want to disconnect your{' '}
-            {disconnectTarget ? PROVIDER_DISPLAY[disconnectTarget.provider].label : ''} account?
-            You can reconnect it at any time.
+            {disconnectTarget ? PROVIDER_DISPLAY[disconnectTarget.provider].label : ''} account? You
+            can reconnect it at any time.
           </p>
           {!canDisconnect && (
             <p className="text-danger text-sm">

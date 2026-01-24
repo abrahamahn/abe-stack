@@ -209,27 +209,27 @@ describe('proxyValidation', () => {
   });
 
   describe('getValidatedClientIp', () => {
-    const  = {
+    const config = {
       trustedProxies: ['10.0.0.0/8', '172.16.0.0/12'],
       maxProxyDepth: 2,
     };
 
     test('should trust X-Forwarded-For from trusted proxy', () => {
-      const result = getValidatedClientIp('203.0.113.50', '10.0.0.5', );
+      const result = getValidatedClientIp('203.0.113.50', '10.0.0.5', config);
 
       expect(result.clientIp).toBe('203.0.113.50');
       expect(result.trusted).toBe(true);
     });
 
     test('should not trust X-Forwarded-For from untrusted source', () => {
-      const result = getValidatedClientIp('spoofed.ip', '1.2.3.4', );
+      const result = getValidatedClientIp('spoofed.ip', '1.2.3.4', config);
 
       expect(result.clientIp).toBe('1.2.3.4');
       expect(result.trusted).toBe(false);
     });
 
     test('should handle multi-hop proxy chain', () => {
-      const result = getValidatedClientIp('203.0.113.50, 10.0.0.5', '10.0.0.10', );
+      const result = getValidatedClientIp('203.0.113.50, 10.0.0.5', '10.0.0.10', config);
 
       expect(result.clientIp).toBe('203.0.113.50');
       expect(result.trusted).toBe(true);
@@ -237,13 +237,9 @@ describe('proxyValidation', () => {
     });
 
     test('should respect maxProxyDepth', () => {
-      const limited = { ..., maxProxyDepth: 1 };
+      const limited = { ...config, maxProxyDepth: 1 };
 
-      const result = getValidatedClientIp(
-        '203.0.113.50, 10.0.0.5, 10.0.0.6',
-        '10.0.0.10',
-        limited,
-      );
+      const result = getValidatedClientIp('203.0.113.50, 10.0.0.5, 10.0.0.6', '10.0.0.10', limited);
 
       // With depth 1, we only trust one hop back from socket IP
       // Chain: [203.0.113.50, 10.0.0.5, 10.0.0.6, 10.0.0.10]
@@ -253,7 +249,7 @@ describe('proxyValidation', () => {
     });
 
     test('should use socket IP when no X-Forwarded-For', () => {
-      const result = getValidatedClientIp(undefined, '10.0.0.5', );
+      const result = getValidatedClientIp(undefined, '10.0.0.5', config);
 
       expect(result.clientIp).toBe('10.0.0.5');
       expect(result.trusted).toBe(true);
@@ -263,7 +259,7 @@ describe('proxyValidation', () => {
       const result = getValidatedClientIp(
         '203.0.113.50, 8.8.8.8, 10.0.0.5', // 8.8.8.8 is not trusted
         '10.0.0.10',
-        ,
+        config,
       );
 
       // Should stop at 8.8.8.8 since it's not a trusted proxy
@@ -310,7 +306,7 @@ describe('proxyValidation', () => {
   describe('common proxy scenarios', () => {
     test('AWS ALB scenario', () => {
       // ALB adds client IP to X-Forwarded-For
-      const  = {
+      const config = {
         trustedProxies: ['10.0.0.0/8'], // VPC range
         maxProxyDepth: 1,
       };
@@ -318,7 +314,7 @@ describe('proxyValidation', () => {
       const result = getValidatedClientIp(
         '203.0.113.195', // Client IP
         '10.0.1.50', // ALB IP
-        ,
+        config,
       );
 
       expect(result.clientIp).toBe('203.0.113.195');
@@ -326,7 +322,7 @@ describe('proxyValidation', () => {
     });
 
     test('Cloudflare + nginx scenario', () => {
-      const  = {
+      const config = {
         trustedProxies: [
           '173.245.48.0/20', // Cloudflare
           '10.0.0.0/8', // Internal
@@ -337,27 +333,27 @@ describe('proxyValidation', () => {
       const result = getValidatedClientIp(
         '203.0.113.50, 173.245.48.10', // Client -> Cloudflare
         '10.0.0.5', // nginx
-        ,
+        config,
       );
 
       expect(result.clientIp).toBe('203.0.113.50');
     });
 
     test('direct connection (no proxy)', () => {
-      const  = {
+      const config = {
         trustedProxies: ['10.0.0.0/8'],
         maxProxyDepth: 1,
       };
 
       // Direct connection from public IP (no proxy)
-      const result = getValidatedClientIp(undefined, '203.0.113.50', );
+      const result = getValidatedClientIp(undefined, '203.0.113.50', config);
 
       expect(result.clientIp).toBe('203.0.113.50');
       expect(result.trusted).toBe(false);
     });
 
     test('spoofed header from untrusted client', () => {
-      const  = {
+      const config = {
         trustedProxies: ['10.0.0.0/8'],
         maxProxyDepth: 1,
       };
@@ -366,7 +362,7 @@ describe('proxyValidation', () => {
       const result = getValidatedClientIp(
         '127.0.0.1', // Spoofed header claiming to be localhost
         '203.0.113.50', // Actual client IP (not trusted proxy)
-        ,
+        config,
       );
 
       // Should ignore the spoofed header

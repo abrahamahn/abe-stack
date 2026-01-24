@@ -12,7 +12,7 @@ import { BadRequestError, NotFoundError, WeakPasswordError } from '@shared';
 
 import { hashPassword, verifyPassword } from '@auth/utils';
 
-import type { AuthConfig } from '@config';
+import type { AuthConfig } from '@/config';
 
 // ============================================================================
 // Types

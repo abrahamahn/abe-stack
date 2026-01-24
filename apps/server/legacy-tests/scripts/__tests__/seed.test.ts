@@ -117,7 +117,7 @@ describe('seed script', () => {
 
       expect(exitCode).toBe(1);
       expect(
-        consoleErrors.some((msg) => msg.includes('Cannot run seed script in production'))
+        consoleErrors.some((msg) => msg.includes('Cannot run seed script in production')),
       ).toBe(true);
     });
 
@@ -187,7 +187,7 @@ describe('seed script', () => {
           name: 'Admin User',
           role: 'admin',
           password_hash: '$argon2id$hashed',
-        })
+        }),
       );
     });
 
@@ -203,7 +203,7 @@ describe('seed script', () => {
           email: 'user@example.com',
           name: 'Test User',
           role: 'user',
-        })
+        }),
       );
 
       expect(mockValues).toHaveBeenCalledWith(
@@ -211,7 +211,7 @@ describe('seed script', () => {
           email: 'demo@example.com',
           name: 'Demo User',
           role: 'user',
-        })
+        }),
       );
     });
 
@@ -325,7 +325,7 @@ describe('seed script', () => {
     });
   });
 
-  describe('test users uration', () => {
+  describe('test users configuration', () => {
     it('should use expected test credentials', async () => {
       process.env.NODE_ENV = 'development';
 
@@ -340,21 +340,21 @@ describe('seed script', () => {
         expect.objectContaining({
           email: 'admin@example.com',
           role: 'admin',
-        })
+        }),
       );
 
       expect(calls).toContainEqual(
         expect.objectContaining({
           email: 'user@example.com',
           role: 'user',
-        })
+        }),
       );
 
       expect(calls).toContainEqual(
         expect.objectContaining({
           email: 'demo@example.com',
           role: 'user',
-        })
+        }),
       );
     });
 

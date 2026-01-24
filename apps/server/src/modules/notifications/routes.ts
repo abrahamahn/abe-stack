@@ -100,7 +100,7 @@ export const notificationRoutes: RouteMap = {
     PreferencesResponse | { message: string }
   >(
     'PUT',
-    async (
+    (
       ctx: AppContext,
       body: UpdatePreferencesRequest,
       req: RequestWithCookies,
@@ -113,12 +113,12 @@ export const notificationRoutes: RouteMap = {
 
   'notifications/test': protectedRoute<undefined, SendNotificationResponse | { message: string }>(
     'POST',
-    async (
+    (
       ctx: AppContext,
       _body: undefined,
       req: RequestWithCookies,
     ): Promise<RouteResult<SendNotificationResponse | { message: string }>> => {
-      return handleTestNotification(ctx, _body, req);
+      return Promise.resolve(handleTestNotification(ctx, _body, req));
     },
     'user',
   ),
@@ -129,12 +129,12 @@ export const notificationRoutes: RouteMap = {
     SendNotificationResponse | { message: string }
   >(
     'POST',
-    async (
+    (
       ctx: AppContext,
       body: SendNotificationRequest,
       req: RequestWithCookies,
     ): Promise<RouteResult<SendNotificationResponse | { message: string }>> => {
-      return handleSendNotification(ctx, body, req);
+      return Promise.resolve(handleSendNotification(ctx, body, req));
     },
     'admin',
     sendNotificationRequestSchema,

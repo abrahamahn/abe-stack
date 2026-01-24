@@ -207,7 +207,12 @@ describe('Admin User Handlers', () => {
       vi.mocked(updateUser).mockResolvedValue(mockUser);
 
       const req = createMockRequest({}, { id: 'user-123' });
-      const result = await handleUpdateUser(mockCtx, { name: 'Updated Name' }, req, createMockReply());
+      const result = await handleUpdateUser(
+        mockCtx,
+        { name: 'Updated Name' },
+        req,
+        createMockReply(),
+      );
 
       expect(result.status).toBe(200);
       expect('body' in result && 'user' in result.body).toBe(true);
@@ -300,14 +305,24 @@ describe('Admin User Handlers', () => {
       vi.mocked(unlockUser).mockRejectedValue(new UserNotFoundError('User not found'));
 
       const req = createMockRequest({}, { id: 'nonexistent' });
-      const result = await handleUnlockUser(mockCtx, { email: '', reason: 'Test' }, req, createMockReply());
+      const result = await handleUnlockUser(
+        mockCtx,
+        { email: '', reason: 'Test' },
+        req,
+        createMockReply(),
+      );
 
       expect(result.status).toBe(404);
     });
 
     test('should return 401 when not authenticated', async () => {
       const req = createMockRequest({ user: undefined }, { id: 'user-123' });
-      const result = await handleUnlockUser(mockCtx, { email: '', reason: 'Test' }, req, createMockReply());
+      const result = await handleUnlockUser(
+        mockCtx,
+        { email: '', reason: 'Test' },
+        req,
+        createMockReply(),
+      );
 
       expect(result.status).toBe(401);
     });

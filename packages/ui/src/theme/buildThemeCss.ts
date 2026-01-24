@@ -138,5 +138,5 @@ export function generateThemeCss(): string {
   const lightTokens = buildThemeTokens(lightColors);
   const darkTokens = buildThemeTokens(darkColors);
 
-  return `:root {\n${serializeTokens(lightTokens)}\n}\n\n@media (prefers-color-scheme: dark) {\n  :root {\n${serializeTokens(darkTokens)}\n  }\n}\n`;
+  return `:root {\n${serializeTokens(lightTokens)}\n}\n\n:root[data-theme='light'] {\n${serializeTokens(lightTokens)}\n}\n\n:root[data-theme='dark'] {\n${serializeTokens(darkTokens)}\n}\n\n@media (prefers-color-scheme: dark) {\n  :root:not([data-theme]) {\n${serializeTokens(darkTokens)}\n  }\n}\n`;
 }

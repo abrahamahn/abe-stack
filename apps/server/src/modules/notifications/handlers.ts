@@ -30,7 +30,7 @@ import type { AppContext, RequestWithCookies } from '@shared';
 
 type HandlerResult<T> =
   | { status: 200 | 201; body: T }
-  | { status: 400 | 401 | 403 | 404 | 500; body: { message: string; code?: string } };
+  | { status: 400 | 401 | 403 | 404 | 500 | 501; body: { message: string; code?: string } };
 
 // ============================================================================
 // Public Handlers (No auth required)
@@ -46,7 +46,7 @@ type HandlerResult<T> =
  */
 export function handleGetVapidKey(_ctx: AppContext): HandlerResult<VapidKeyResponse> {
   return {
-    status: 500,
+    status: 501,
     body: {
       message: 'Web Push notifications are not available. VAPID keys not configured.',
       code: 'VAPID_NOT_CONFIGURED',

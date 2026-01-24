@@ -1,8 +1,8 @@
 // apps/server/src/shared/types.ts
-import type { AppConfig } from '@config';
+import type { AppConfig } from '@/config';
 import type { UserRole } from '@abe-stack/core';
 import type { DbClient, Repositories } from '@database';
-import type { SubscriptionManager } from '@pubsub';
+import type { SubscriptionManager } from '@infrastructure/index';
 import type { StorageProvider } from '@storage';
 import type { FastifyBaseLogger } from 'fastify';
 

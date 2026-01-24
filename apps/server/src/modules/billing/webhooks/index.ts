@@ -5,4 +5,8 @@
 
 export { handlePayPalWebhook } from './paypal-webhook';
 export { registerWebhookRoutes } from './routes';
-export { handleStripeWebhook, type WebhookRepositories, type WebhookResult } from './stripe-webhook';
+export {
+  handleStripeWebhook,
+  type WebhookRepositories,
+  type WebhookResult,
+} from './stripe-webhook';

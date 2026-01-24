@@ -16,9 +16,7 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
  * Create a mock schema for testing (compatible with manual validation)
  */
 function createMockSchema<T>(
-  validator: (data: unknown) =>
-    | { success: true; data: T }
-    | { success: false; error: Error },
+  validator: (data: unknown) => { success: true; data: T } | { success: false; error: Error },
 ): ValidationSchema<T> {
   return {
     safeParse: validator,
@@ -122,7 +120,7 @@ function createMockContext(): AppContext {
   return {
     db: {} as never,
     repos: {} as never,
-    : {} as never,
+    config: {} as never,
     log: {
       info: vi.fn(),
       debug: vi.fn(),

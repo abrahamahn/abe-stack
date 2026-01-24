@@ -40,7 +40,7 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
     db: {} as AppContext['db'],
     repos: {} as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
-    : {
+    config: {
       auth: {
         jwt: {
           secret: 'test-secret-32-characters-long!!',
@@ -54,7 +54,7 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
         lockout: {
           maxAttempts: 5,
           windowMs: 900000,
-          lockoutDurationMs: 1800000,
+          lockoutDconfigurationMs: 1800000,
         },
       },
       server: {
@@ -175,7 +175,7 @@ describe('handleLogin', () => {
       expect(authenticateUser).toHaveBeenCalledWith(
         ctx.db,
         ctx.repos,
-        ctx..auth,
+        ctx.config.auth,
         body.email,
         body.password,
         ctx.log,
@@ -211,7 +211,7 @@ describe('handleLogin', () => {
       expect(setRefreshTokenCookie).toHaveBeenCalledWith(
         reply,
         'refresh-token-456',
-        ctx..auth,
+        ctx.config.auth,
       );
     });
 
@@ -361,18 +361,18 @@ describe('handleLogin', () => {
         },
       };
 
-      let capturedCallback: ((userId: string) => void) | undefined;
+      let captconfiguredCallback: ((userId: string) => void) | undefined;
       vi.mocked(authenticateUser).mockImplementation(
         async (_db, _repos, _, _email, _password, _logger, _ip, _ua, callback) => {
-          capturedCallback = callback;
+          captconfiguredCallback = callback;
           return mockAuthResult;
         },
       );
 
       await handleLogin(ctx, body, request, reply);
 
-      expect(capturedCallback).toBeDefined();
-      capturedCallback?.('user-123');
+      expect(captconfiguredCallback).toBeDefined();
+      captconfiguredCallback?.('user-123');
 
       expect(ctx.log.info).toHaveBeenCalledWith({ userId: 'user-123' }, 'Password hash upgraded');
     });

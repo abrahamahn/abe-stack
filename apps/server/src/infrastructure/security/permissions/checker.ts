@@ -27,15 +27,11 @@ import {
 
 import type { UserRole } from '@abe-stack/core';
 
-
-
 // ============================================================================
 
 // Permission Checker Class
 
 // ============================================================================
-
-
 
 /**
 
@@ -44,7 +40,6 @@ import type { UserRole } from '@abe-stack/core';
  */
 
 export interface PermissionCheckerOptions {
-
   /** Permission configuration */
 
   config: PermissionConfig;
@@ -56,10 +51,7 @@ export interface PermissionCheckerOptions {
   /** Optional batch record loader for efficiency */
 
   batchRecordLoader?: BatchRecordLoader;
-
 }
-
-
 
 /**
 
@@ -68,7 +60,6 @@ export interface PermissionCheckerOptions {
  */
 
 export class PermissionChecker {
-
   private readonly config: PermissionConfig;
 
   private readonly recordLoader: RecordLoader;
@@ -77,43 +68,29 @@ export class PermissionChecker {
 
   private readonly tableConfigMap: Map<string, TablePermissionConfig>;
 
-
-
   constructor(options: PermissionCheckerOptions) {
-
     this.config = options.config;
 
     this.recordLoader = options.recordLoader;
 
     this.batchRecordLoader = options.batchRecordLoader;
 
-
-
     // Build table config lookup map
 
     this.tableConfigMap = new Map();
 
     if (options.config.tableConfigs) {
-
       for (const tableConfig of options.config.tableConfigs) {
-
         this.tableConfigMap.set(tableConfig.table, tableConfig);
-
       }
-
     }
-
   }
-
-
 
   // ==========================================================================
 
   // Public API
 
   // ==========================================================================
-
-
 
   /**
 
@@ -122,7 +99,6 @@ export class PermissionChecker {
    */
 
   async checkReadPermission(
-
     userId: string,
 
     userRole: UserRole,
@@ -130,14 +106,9 @@ export class PermissionChecker {
     table: string,
 
     recordId: string,
-
   ): Promise<PermissionResult> {
-
     return this.checkPermission(userId, userRole, table, recordId, 'read');
-
   }
-
-
 
   /**
 
@@ -146,7 +117,6 @@ export class PermissionChecker {
    */
 
   async checkWritePermission(
-
     userId: string,
 
     userRole: UserRole,
@@ -156,16 +126,11 @@ export class PermissionChecker {
     recordId: string,
 
     operation: 'create' | 'update' | 'delete' = 'update',
-
   ): Promise<PermissionResult> {
-
     const permissionType: PermissionType = operation === 'delete' ? 'delete' : 'write';
 
     return this.checkPermission(userId, userRole, table, recordId, permissionType, operation);
-
   }
-
-
 
   /**
 
@@ -174,7 +139,6 @@ export class PermissionChecker {
    */
 
   async checkAdminPermission(
-
     userId: string,
 
     userRole: UserRole,
@@ -182,14 +146,9 @@ export class PermissionChecker {
     table: string,
 
     recordId: string,
-
   ): Promise<PermissionResult> {
-
     return this.checkPermission(userId, userRole, table, recordId, 'admin');
-
   }
-
-
 
   /**
 
@@ -198,7 +157,6 @@ export class PermissionChecker {
    */
 
   async filterReadableRecords<T extends PermissionRecord>(
-
     userId: string,
 
     userRole: UserRole,
@@ -206,28 +164,17 @@ export class PermissionChecker {
     table: string,
 
     records: T[],
-
   ): Promise<T[]> {
-
     const results = await Promise.all(
-
       records.map(async (record) => {
-
         const result = await this.checkRecordPermission(userId, userRole, table, record, 'read');
 
         return { record, allowed: result.allowed };
-
       }),
-
     );
 
-
-
     return results.filter((r) => r.allowed).map((r) => r.record);
-
   }
-
-
 
   /**
 
@@ -236,49 +183,33 @@ export class PermissionChecker {
    */
 
   async filterReadablePointers(
-
     userId: string,
 
     userRole: UserRole,
 
     pointers: RecordPointer[],
-
   ): Promise<RecordPointer[]> {
-
     if (pointers.length === 0) {
-
       return [];
-
     }
-
-
 
     // Load all records
 
     const recordMap = await this.loadRecords(pointers);
 
-
-
     // Check permissions and filter
 
     const results = await Promise.all(
-
       pointers.map(async (pointer) => {
-
         const record = recordMap.get(getRecordKey(pointer));
 
         if (!record) {
-
           // Record doesn't exist, deny access
 
           return { pointer, allowed: false };
-
         }
 
-
-
         const result = await this.checkRecordPermission(
-
           userId,
 
           userRole,
@@ -288,22 +219,14 @@ export class PermissionChecker {
           record,
 
           'read',
-
         );
 
         return { pointer, allowed: result.allowed };
-
       }),
-
     );
 
-
-
     return results.filter((r) => r.allowed).map((r) => r.pointer);
-
   }
-
-
 
   /**
 
@@ -312,51 +235,34 @@ export class PermissionChecker {
    */
 
   async batchCheckPermissions(
-
     userId: string,
 
     userRole: UserRole,
 
     checks: Array<{ table: string; recordId: string; permission: PermissionType }>,
-
   ): Promise<Map<string, PermissionResult>> {
-
     // Load all records at once for efficiency
 
     const pointers = checks.map((c) => ({ table: c.table, id: c.recordId }));
 
     const recordMap = await this.loadRecords(pointers);
 
-
-
     // Check permissions for each
 
     const results = new Map<string, PermissionResult>();
 
-
-
     await Promise.all(
-
       checks.map(async (check) => {
-
         const key = getRecordKey({ table: check.table, id: check.recordId });
 
         const record = recordMap.get(key);
 
-
-
         let result: PermissionResult;
 
         if (!record) {
-
           result = denied('Record not found');
-
-        }
-
-        else {
-
+        } else {
           result = await this.checkRecordPermission(
-
             userId,
 
             userRole,
@@ -366,34 +272,21 @@ export class PermissionChecker {
             record,
 
             check.permission,
-
           );
-
         }
 
-
-
         results.set(key, result);
-
       }),
-
     );
 
-
-
     return results;
-
   }
-
-
 
   // ==========================================================================
 
   // Core Permission Logic
 
   // ==========================================================================
-
-
 
   /**
 
@@ -402,7 +295,6 @@ export class PermissionChecker {
    */
 
   private async checkPermission(
-
     userId: string,
 
     userRole: UserRole,
@@ -414,36 +306,23 @@ export class PermissionChecker {
     permission: PermissionType,
 
     operation?: 'create' | 'update' | 'delete',
-
   ): Promise<PermissionResult> {
-
     // For create operations, we don't need to load the record
 
     if (operation === 'create') {
-
       return this.checkCreatePermission(userId, userRole, table);
-
     }
-
-
 
     // Load the record
 
     const record = await this.recordLoader(table, recordId);
 
     if (!record) {
-
       return denied('Record not found');
-
     }
 
-
-
     return this.checkRecordPermission(userId, userRole, table, record, permission);
-
   }
-
-
 
   /**
 
@@ -452,65 +331,43 @@ export class PermissionChecker {
    */
 
   private checkCreatePermission(
-
     userId: string,
 
     userRole: UserRole,
 
     table: string,
-
   ): PermissionResult {
-
     // Get rules for this table
 
     const rules = this.getRulesForTable(table);
 
-
-
     // Check role-based rules first (they don't need a record)
 
     for (const rule of rules) {
-
       if (rule.type === 'role') {
-
         const roleRule = rule;
 
         if (roleRule.roles.includes(userRole) && roleRule.grants.includes('write')) {
-
           return allowed(`role:${userRole}`);
-
         }
-
       }
-
     }
-
-
 
     // Admin can always create
 
     if (userRole === 'admin') {
-
       return allowed('role:admin');
-
     }
-
-
 
     // Default: allow authenticated users to create
 
     // (they will own the record they create)
 
     if (userId) {
-
       return allowed('authenticated-create');
-
     }
 
-
-
     return this.getDefaultResult(table, 'write');
-
   }
 
   /**

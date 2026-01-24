@@ -416,7 +416,10 @@ export async function loadWithCache<T>(
       const value = await loader();
       cached.resolve(value);
     } catch (err) {
-      const message = err && typeof err === 'object' && 'message' in err ? String(err.message) : JSON.stringify(err);
+      const message =
+        err && typeof err === 'object' && 'message' in err
+          ? String(err.message)
+          : JSON.stringify(err);
       cached.reject(err instanceof Error ? err : new Error(message));
     }
   }

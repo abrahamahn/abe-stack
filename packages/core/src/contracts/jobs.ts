@@ -122,7 +122,8 @@ export const jobDetailsSchema: Schema<JobDetails> = createSchema((data: unknown)
     maxAttempts: obj.maxAttempts,
     scheduledAt: obj.scheduledAt,
     createdAt: obj.createdAt,
-    completedAt: obj.completedAt === null || typeof obj.completedAt === 'string' ? obj.completedAt : null,
+    completedAt:
+      obj.completedAt === null || typeof obj.completedAt === 'string' ? obj.completedAt : null,
     durationMs: typeof obj.durationMs === 'number' ? obj.durationMs : null,
     error: obj.error ? jobErrorSchema.parse(obj.error) : null,
     deadLetterReason:
@@ -229,7 +230,11 @@ export const jobListResponseSchema: Schema<JobListResponse> = createSchema((data
   if (typeof obj.hasPrev !== 'boolean') {
     throw new Error('hasPrev must be a boolean');
   }
-  if (typeof obj.totalPages !== 'number' || !Number.isInteger(obj.totalPages) || obj.totalPages < 0) {
+  if (
+    typeof obj.totalPages !== 'number' ||
+    !Number.isInteger(obj.totalPages) ||
+    obj.totalPages < 0
+  ) {
     throw new Error('totalPages must be a non-negative integer');
   }
 

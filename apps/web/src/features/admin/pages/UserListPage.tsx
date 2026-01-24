@@ -37,28 +37,23 @@ export function UserListPage(): JSX.Element {
             <Heading as="h1" size="xl">
               User Management
             </Heading>
-            <p className="text-gray-500 dark:text-gray-400 mt-1">
-              View and manage user accounts
-            </p>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">View and manage user accounts</p>
           </div>
-          <Button onClick={() => { void refresh(); }} disabled={isLoading}>
+          <Button
+            onClick={() => {
+              void refresh();
+            }}
+            disabled={isLoading}
+          >
             Refresh
           </Button>
         </div>
 
         {/* Error Alert */}
-        {error && (
-          <Alert tone="danger">
-            {error}
-          </Alert>
-        )}
+        {error && <Alert tone="danger">{error}</Alert>}
 
         {/* Filters */}
-        <UserFilters
-          filters={filters}
-          onFiltersChange={setFilters}
-          isLoading={isLoading}
-        />
+        <UserFilters filters={filters} onFiltersChange={setFilters} isLoading={isLoading} />
 
         {/* User Table */}
         <UserTable

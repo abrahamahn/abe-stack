@@ -428,9 +428,7 @@ export function SelectiveMemo<T extends Record<string, unknown>>({
   const typedProps = props as unknown as T;
   const propsRef = useRef(typedProps);
   propsRef.current = typedProps;
-  const watchedValuesKey = JSON.stringify(
-    watchKeys.map((key) => typedProps[key]),
-  );
+  const watchedValuesKey = JSON.stringify(watchKeys.map((key) => typedProps[key]));
   const memoizedChildren = useMemo(() => {
     void watchedValuesKey;
     return children(propsRef.current);

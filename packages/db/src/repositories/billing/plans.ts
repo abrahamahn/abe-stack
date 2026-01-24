@@ -6,13 +6,7 @@
  */
 
 import { and, eq, select, insert, update, deleteFrom, or } from '../../builder';
-import {
-  type NewPlan,
-  type Plan,
-  type UpdatePlan,
-  PLAN_COLUMNS,
-  PLANS_TABLE,
-} from '../../schema';
+import { type NewPlan, type Plan, type UpdatePlan, PLAN_COLUMNS, PLANS_TABLE } from '../../schema';
 import { toCamelCase, toSnakeCase, parseJsonb } from '../../utils';
 
 import type { RawDb } from '../../client';
@@ -109,19 +103,13 @@ export function createPlanRepository(db: RawDb): PlanRepository {
 
     async listAll(): Promise<Plan[]> {
       const results = await db.query<Record<string, unknown>>(
-        select(PLANS_TABLE)
-          .orderBy('sort_order', 'asc')
-          .orderBy('price_in_cents', 'asc')
-          .toSql(),
+        select(PLANS_TABLE).orderBy('sort_order', 'asc').orderBy('price_in_cents', 'asc').toSql(),
       );
       return results.map(transformPlan);
     },
 
     async create(plan: NewPlan): Promise<Plan> {
-      const snakeData = toSnakeCase(
-        plan as unknown as Record<string, unknown>,
-        PLAN_COLUMNS,
-      );
+      const snakeData = toSnakeCase(plan as unknown as Record<string, unknown>, PLAN_COLUMNS);
       // Ensure features is JSON stringified
       if (plan.features) {
         snakeData.features = JSON.stringify(plan.features);
@@ -136,49 +124,32 @@ export function createPlanRepository(db: RawDb): PlanRepository {
     },
 
     async update(id: string, data: UpdatePlan): Promise<Plan | null> {
-      const snakeData = toSnakeCase(
-        data as unknown as Record<string, unknown>,
-        PLAN_COLUMNS,
-      );
+      const snakeData = toSnakeCase(data as unknown as Record<string, unknown>, PLAN_COLUMNS);
       // Ensure features is JSON stringified
       if (data.features) {
         snakeData.features = JSON.stringify(data.features);
       }
       const result = await db.queryOne<Record<string, unknown>>(
-        update(PLANS_TABLE)
-          .set(snakeData)
-          .where(eq('id', id))
-          .returningAll()
-          .toSql(),
+        update(PLANS_TABLE).set(snakeData).where(eq('id', id)).returningAll().toSql(),
       );
       return result ? transformPlan(result) : null;
     },
 
     async delete(id: string): Promise<boolean> {
-      const count = await db.execute(
-        deleteFrom(PLANS_TABLE).where(eq('id', id)).toSql(),
-      );
+      const count = await db.execute(deleteFrom(PLANS_TABLE).where(eq('id', id)).toSql());
       return count > 0;
     },
 
     async deactivate(id: string): Promise<Plan | null> {
       const result = await db.queryOne<Record<string, unknown>>(
-        update(PLANS_TABLE)
-          .set({ is_active: false })
-          .where(eq('id', id))
-          .returningAll()
-          .toSql(),
+        update(PLANS_TABLE).set({ is_active: false }).where(eq('id', id)).returningAll().toSql(),
       );
       return result ? transformPlan(result) : null;
     },
 
     async activate(id: string): Promise<Plan | null> {
       const result = await db.queryOne<Record<string, unknown>>(
-        update(PLANS_TABLE)
-          .set({ is_active: true })
-          .where(eq('id', id))
-          .returningAll()
-          .toSql(),
+        update(PLANS_TABLE).set({ is_active: true }).where(eq('id', id)).returningAll().toSql(),
       );
       return result ? transformPlan(result) : null;
     },

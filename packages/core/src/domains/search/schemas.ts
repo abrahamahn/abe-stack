@@ -506,7 +506,12 @@ export const facetConfigSchema: Schema<FacetConfig> = createSchema((data: unknow
   // Validate size if provided
   let size: number | undefined;
   if (obj.size !== undefined) {
-    if (typeof obj.size !== 'number' || !Number.isInteger(obj.size) || obj.size < 1 || obj.size > 100) {
+    if (
+      typeof obj.size !== 'number' ||
+      !Number.isInteger(obj.size) ||
+      obj.size < 1 ||
+      obj.size > 100
+    ) {
       throw new Error('Facet size must be an integer between 1 and 100');
     }
     size = obj.size;
@@ -515,8 +520,7 @@ export const facetConfigSchema: Schema<FacetConfig> = createSchema((data: unknow
   return {
     field: obj.field,
     size,
-    sortBy:
-      obj.sortBy === 'count' || obj.sortBy === 'value' ? obj.sortBy : undefined,
+    sortBy: obj.sortBy === 'count' || obj.sortBy === 'value' ? obj.sortBy : undefined,
     sortOrder:
       obj.sortOrder === 'asc' || obj.sortOrder === 'desc'
         ? (obj.sortOrder as SortOrder)

@@ -101,9 +101,7 @@ export interface PaginatedResult<T> {
 /**
  * Schema factory for paginated results.
  */
-export function paginatedResultSchema<T>(
-  itemSchema: Schema<T>,
-): Schema<PaginatedResult<T>> {
+export function paginatedResultSchema<T>(itemSchema: Schema<T>): Schema<PaginatedResult<T>> {
   return createSchema((data: unknown) => {
     if (!data || typeof data !== 'object') {
       throw new Error('Invalid paginated result');

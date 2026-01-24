@@ -34,12 +34,12 @@ export {
 } from './file-type';
 
 // Image processing
-export { createImageProcessor, getImageFormat, ImageProcessor } from './image-processing';
+export { getImageFormat, optimizeImage, resizeImage, validateImage } from './image-processing';
 export type {
   ImageFormatOptions,
-  ImageMetadata,
-  ImageProcessingOptions,
   ImageResizeOptions,
+  ImageValidationOptions,
+  ValidationResult,
 } from './image-processing';
 
 // Security scanning

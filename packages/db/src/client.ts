@@ -140,8 +140,7 @@ type PostgresClient = Sql | TransactionSql;
  * @example const db = createRawDb({ connectionString: 'postgres://localhost/mydb' });
  */
 export function createRawDb(config: DbConfig | string): RawDb {
-  const dbConfig: DbConfig =
-    typeof config === 'string' ? { connectionString: config } : config;
+  const dbConfig: DbConfig = typeof config === 'string' ? { connectionString: config } : config;
 
   const sql = postgres(dbConfig.connectionString, {
     max: dbConfig.maxConnections ?? 10,
@@ -160,7 +159,7 @@ export function createRawDb(config: DbConfig | string): RawDb {
  */
 function createDbFromSql(sql: PostgresClient): RawDb {
   // Helper to execute unsafe queries with proper typing
-   
+
   const unsafeQuery = async <T>(text: string, values: readonly unknown[]): Promise<T[]> => {
     // The postgres driver's unsafe() accepts (query, args) where args is an array
     // We use any cast internally to bridge the postgres driver's strict typing
@@ -239,11 +238,12 @@ function createDbFromSql(sql: PostgresClient): RawDb {
 
       if (typeof savepointFn === 'function') {
         // Nested transactions: postgres uses savepoints and does not support SET TRANSACTION.
-        const result = (client as unknown as { savepoint: (cb: (tx: TransactionSql) => Promise<T>) => Promise<T> })
-          .savepoint(async (tx) => {
-            const txDb = createDbFromSql(tx);
-            return callback(txDb);
-          });
+        const result = (
+          client as unknown as { savepoint: (cb: (tx: TransactionSql) => Promise<T>) => Promise<T> }
+        ).savepoint(async (tx) => {
+          const txDb = createDbFromSql(tx);
+          return callback(txDb);
+        });
         return (await result) as T;
       }
 
@@ -327,10 +327,9 @@ export async function resolveConnectionStringWithFallback(
     return env.DATABASE_URL;
   }
 
-  const tryPorts = [
-    Number(env.POSTGRES_PORT ?? env.DB_PORT ?? NaN),
-    ...fallbackPorts,
-  ].filter((p) => !isNaN(p));
+  const tryPorts = [Number(env.POSTGRES_PORT ?? env.DB_PORT ?? NaN), ...fallbackPorts].filter(
+    (p) => !isNaN(p),
+  );
 
   const uniquePorts = [...new Set(tryPorts)];
 

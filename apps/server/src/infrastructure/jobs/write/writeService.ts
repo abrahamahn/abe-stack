@@ -12,9 +12,12 @@
  * - Extensible hooks for validation and side effects
  */
 
-import { SubKeys, withTransaction } from '@infrastructure/index';
 import { escapeIdentifier } from '@abe-stack/db';
+import { SubKeys, withTransaction } from '@infrastructure/index';
 
+import type { DbClient } from '@database';
+import type { SubscriptionManager } from '@infrastructure/index';
+import type { Logger } from '@logger';
 import type {
   AfterWriteHook,
   BeforeValidateHook,
@@ -26,9 +29,6 @@ import type {
   WriteOperation,
   WriteResult,
 } from './types';
-import type { DbClient } from '@database';
-import type { Logger } from '@logger';
-import type { SubscriptionManager } from '@pubsub';
 
 // ============================================================================
 // Write Service
@@ -180,9 +180,7 @@ export class WriteService {
       updated_at: new Date().toISOString(),
     };
 
-    await tx.raw(
-      `INSERT INTO ${escapeIdentifier(table)} ${this.buildInsertClause(record)}`,
-    );
+    await tx.raw(`INSERT INTO ${escapeIdentifier(table)} ${this.buildInsertClause(record)}`);
 
     return {
       operation,
@@ -205,9 +203,9 @@ export class WriteService {
       expectedVersion !== undefined ? `AND version = ${String(expectedVersion)}` : '';
 
     // Get current record for previous version
-    const currentRows = await tx.raw<{ version: number }>(
+    const currentRows = (await tx.raw<{ version: number }>(
       `SELECT version FROM ${escapeIdentifier(table)} WHERE id = '${String(id).replace(/'/g, "''")}'`,
-    );
+    )) as { version: number }[];
     const currentRow = currentRows[0];
     if (!currentRow) {
       throw this.createError('NOT_FOUND', `Record not found: ${table}/${id}`);
@@ -222,7 +220,7 @@ export class WriteService {
     }
 
     // Update with version bump
-    const newVersion = currentRow.version + 1;
+    const newVersion = Number(currentRow.version) + 1;
     const updateData = {
       ...data,
       version: newVersion,
@@ -230,12 +228,12 @@ export class WriteService {
     };
 
     const idEscaped = String(id).replace(/'/g, "''");
-    const result = await tx.raw<T & { id: string; version: number }>(
+    const result = (await tx.raw<T & { id: string; version: number }>(
       `UPDATE ${escapeIdentifier(table)}
       SET ${this.buildUpdateClause(updateData)}
       WHERE id = '${idEscaped}' ${versionCheck}
       RETURNING *`,
-    );
+    )) as (T & { id: string; version: number })[];
 
     if (result.length === 0) {
       throw this.createError('CONFLICT', 'Concurrent modification detected');
@@ -263,9 +261,9 @@ export class WriteService {
       expectedVersion !== undefined ? `AND version = ${String(expectedVersion)}` : '';
 
     // Get current version before delete
-    const currentRows = await tx.raw<{ version: number }>(
+    const currentRows = (await tx.raw<{ version: number }>(
       `SELECT version FROM ${escapeIdentifier(table)} WHERE id = '${idEscaped}'`,
-    );
+    )) as { version: number }[];
     const currentRow = currentRows[0];
     if (!currentRow) {
       throw this.createError('NOT_FOUND', `Record not found: ${table}/${id}`);
@@ -295,14 +293,24 @@ export class WriteService {
       for (const result of results) {
         const { operation, record } = result;
 
-        if (record && 'version' in record) {
-          this.pubsub?.publish(
-            SubKeys.record(operation.table, operation.id),
-            (record as { version: number }).version,
+        if (record && 'version' in record && this.pubsub) {
+          const pubsubManager = this.pubsub as SubscriptionManager;
+          const key = (SubKeys.record as (table: string, id: string) => string)(
+            operation.table as string,
+            operation.id as string,
           );
-        } else if (operation.type === 'delete') {
+          const version = (record as { version: number }).version;
+
+          (pubsubManager.publish as (key: string, version: number) => void)(key, version);
+        } else if (operation.type === 'delete' && this.pubsub) {
           // Publish deletion with version -1 to signal removal
-          this.pubsub?.publish(SubKeys.record(operation.table, operation.id), -1);
+          const pubsubManager = this.pubsub as SubscriptionManager;
+          const key = (SubKeys.record as (table: string, id: string) => string)(
+            operation.table as string,
+            operation.id as string,
+          );
+
+          (pubsubManager.publish as (key: string, version: number) => void)(key, -1);
         }
       }
     });

@@ -184,9 +184,9 @@ describe('Security Service', () => {
     test('should throw SecurityEventNotFoundError when event not found', async () => {
       mockDb.queryOne.mockResolvedValue(null);
 
-      await expect(
-        getSecurityEvent(asMockDb(mockDb), 'nonexistent-id'),
-      ).rejects.toThrow(SecurityEventNotFoundError);
+      await expect(getSecurityEvent(asMockDb(mockDb), 'nonexistent-id')).rejects.toThrow(
+        SecurityEventNotFoundError,
+      );
     });
 
     test('should parse metadata correctly', async () => {

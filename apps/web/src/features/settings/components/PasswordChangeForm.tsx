@@ -56,11 +56,7 @@ function PasswordStrengthIndicator({ password }: { password: string }): ReactEle
           />
         ))}
       </div>
-      {password && (
-        <p className="text-xs text-gray-500">
-          {strength.label}
-        </p>
-      )}
+      {password && <p className="text-xs text-gray-500">{strength.label}</p>}
     </div>
   );
 }
@@ -84,7 +80,9 @@ export function PasswordChangeForm({ onSuccess }: PasswordChangeFormProps): Reac
       setConfirmPassword('');
       reset();
       onSuccess?.();
-      setTimeout(() => { setSuccessMessage(null); }, 3000);
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
     },
   });
 
@@ -129,7 +127,9 @@ export function PasswordChangeForm({ onSuccess }: PasswordChangeFormProps): Reac
         <PasswordInput
           id="currentPassword"
           value={currentPassword}
-          onChange={(e) => { setCurrentPassword(e.target.value); }}
+          onChange={(e) => {
+            setCurrentPassword(e.target.value);
+          }}
           placeholder="Enter current password"
           autoComplete="current-password"
         />
@@ -139,7 +139,9 @@ export function PasswordChangeForm({ onSuccess }: PasswordChangeFormProps): Reac
         <PasswordInput
           id="newPassword"
           value={newPassword}
-          onChange={(e) => { setNewPassword(e.target.value); }}
+          onChange={(e) => {
+            setNewPassword(e.target.value);
+          }}
           placeholder="Enter new password"
           autoComplete="new-password"
         />
@@ -150,7 +152,9 @@ export function PasswordChangeForm({ onSuccess }: PasswordChangeFormProps): Reac
         <PasswordInput
           id="confirmPassword"
           value={confirmPassword}
-          onChange={(e) => { setConfirmPassword(e.target.value); }}
+          onChange={(e) => {
+            setConfirmPassword(e.target.value);
+          }}
           placeholder="Confirm new password"
           autoComplete="new-password"
         />
@@ -160,22 +164,13 @@ export function PasswordChangeForm({ onSuccess }: PasswordChangeFormProps): Reac
       </FormField>
 
       {(validationError ?? error) && (
-        <Alert tone="danger">
-          {validationError ?? error?.message}
-        </Alert>
+        <Alert tone="danger">{validationError ?? error?.message}</Alert>
       )}
 
-      {successMessage && (
-        <Alert tone="success">
-          {successMessage}
-        </Alert>
-      )}
+      {successMessage && <Alert tone="success">{successMessage}</Alert>}
 
       <div className="flex justify-end">
-        <Button
-          type="submit"
-          disabled={!isValid || isLoading}
-        >
+        <Button type="submit" disabled={!isValid || isLoading}>
           {isLoading ? 'Changing...' : 'Change Password'}
         </Button>
       </div>

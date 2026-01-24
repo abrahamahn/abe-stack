@@ -68,7 +68,7 @@ describe('MediaProcessingOrchestrator', () => {
       process: vi.fn().mockResolvedValue({
         success: true,
         outputPath: '/tmp/output.mp3',
-        metadata: { duration: 180 },
+        metadata: { dconfiguration: 180 },
       }),
     };
 
@@ -76,7 +76,7 @@ describe('MediaProcessingOrchestrator', () => {
       process: vi.fn().mockResolvedValue({
         success: true,
         outputPath: '/tmp/output.mp4',
-        metadata: { duration: 120, width: 1920, height: 1080 },
+        metadata: { dconfiguration: 120, width: 1920, height: 1080 },
       }),
     };
 
@@ -101,7 +101,7 @@ describe('MediaProcessingOrchestrator', () => {
       const stats = orchestrator.getStats();
 
       expect(stats.limits).toEqual({
-        maxDuration: 5 * 60 * 1000, // 5 minutes
+        maxDconfiguration: 5 * 60 * 1000, // 5 minutes
         maxFileSize: 100 * 1024 * 1024, // 100MB
         maxConcurrentJobs: 5,
         allowedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp3', 'wav', 'mp4', 'mov'],
@@ -220,7 +220,7 @@ describe('MediaProcessingOrchestrator', () => {
         mockImageProcessor as unknown as ImageProcessor,
         mockAudioProcessor as unknown as AudioProcessor,
         mockVideoProcessor as unknown as VideoProcessor,
-        { maxDuration: 1 }, // 1ms timeout
+        { maxDconfiguration: 1 }, // 1ms timeout
       );
 
       // Make the processor take longer than the timeout

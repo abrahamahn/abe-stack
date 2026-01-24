@@ -25,7 +25,10 @@ import type { RawDb } from '../client';
 export interface OAuthConnectionRepository {
   findById(id: string): Promise<OAuthConnection | null>;
   findByUserIdAndProvider(userId: string, provider: OAuthProvider): Promise<OAuthConnection | null>;
-  findByProviderUserId(provider: OAuthProvider, providerUserId: string): Promise<OAuthConnection | null>;
+  findByProviderUserId(
+    provider: OAuthProvider,
+    providerUserId: string,
+  ): Promise<OAuthConnection | null>;
   findByUserId(userId: string): Promise<OAuthConnection[]>;
   create(connection: NewOAuthConnection): Promise<OAuthConnection>;
   update(id: string, data: UpdateOAuthConnection): Promise<OAuthConnection | null>;
@@ -41,9 +44,7 @@ export function createOAuthConnectionRepository(db: RawDb): OAuthConnectionRepos
   return {
     async findById(id: string): Promise<OAuthConnection | null> {
       const result = await db.queryOne<Record<string, unknown>>(
-        select(OAUTH_CONNECTIONS_TABLE)
-          .where(eq('id', id))
-          .toSql()
+        select(OAUTH_CONNECTIONS_TABLE).where(eq('id', id)).toSql(),
       );
       return result ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS) : null;
     },
@@ -55,7 +56,7 @@ export function createOAuthConnectionRepository(db: RawDb): OAuthConnectionRepos
       const result = await db.queryOne<Record<string, unknown>>(
         select(OAUTH_CONNECTIONS_TABLE)
           .where(and(eq('user_id', userId), eq('provider', provider)))
-          .toSql()
+          .toSql(),
       );
       return result ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS) : null;
     },
@@ -67,7 +68,7 @@ export function createOAuthConnectionRepository(db: RawDb): OAuthConnectionRepos
       const result = await db.queryOne<Record<string, unknown>>(
         select(OAUTH_CONNECTIONS_TABLE)
           .where(and(eq('provider', provider), eq('provider_user_id', providerUserId)))
-          .toSql()
+          .toSql(),
       );
       return result ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS) : null;
     },
@@ -77,18 +78,18 @@ export function createOAuthConnectionRepository(db: RawDb): OAuthConnectionRepos
         select(OAUTH_CONNECTIONS_TABLE)
           .where(eq('user_id', userId))
           .orderBy('created_at', 'desc')
-          .toSql()
+          .toSql(),
       );
       return toCamelCaseArray<OAuthConnection>(results, OAUTH_CONNECTION_COLUMNS);
     },
 
     async create(connection: NewOAuthConnection): Promise<OAuthConnection> {
-      const snakeData = toSnakeCase(connection as unknown as Record<string, unknown>, OAUTH_CONNECTION_COLUMNS);
+      const snakeData = toSnakeCase(
+        connection as unknown as Record<string, unknown>,
+        OAUTH_CONNECTION_COLUMNS,
+      );
       const result = await db.queryOne<Record<string, unknown>>(
-        insert(OAUTH_CONNECTIONS_TABLE)
-          .values(snakeData)
-          .returningAll()
-          .toSql()
+        insert(OAUTH_CONNECTIONS_TABLE).values(snakeData).returningAll().toSql(),
       );
       if (!result) {
         throw new Error('Failed to create OAuth connection');
@@ -97,39 +98,32 @@ export function createOAuthConnectionRepository(db: RawDb): OAuthConnectionRepos
     },
 
     async update(id: string, data: UpdateOAuthConnection): Promise<OAuthConnection | null> {
-      const snakeData = toSnakeCase(data as unknown as Record<string, unknown>, OAUTH_CONNECTION_COLUMNS);
+      const snakeData = toSnakeCase(
+        data as unknown as Record<string, unknown>,
+        OAUTH_CONNECTION_COLUMNS,
+      );
       const result = await db.queryOne<Record<string, unknown>>(
-        update(OAUTH_CONNECTIONS_TABLE)
-          .set(snakeData)
-          .where(eq('id', id))
-          .returningAll()
-          .toSql()
+        update(OAUTH_CONNECTIONS_TABLE).set(snakeData).where(eq('id', id)).returningAll().toSql(),
       );
       return result ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS) : null;
     },
 
     async delete(id: string): Promise<boolean> {
       const count = await db.execute(
-        deleteFrom(OAUTH_CONNECTIONS_TABLE)
-          .where(eq('id', id))
-          .toSql()
+        deleteFrom(OAUTH_CONNECTIONS_TABLE).where(eq('id', id)).toSql(),
       );
       return count > 0;
     },
 
     async deleteByUserId(userId: string): Promise<number> {
-      return db.execute(
-        deleteFrom(OAUTH_CONNECTIONS_TABLE)
-          .where(eq('user_id', userId))
-          .toSql()
-      );
+      return db.execute(deleteFrom(OAUTH_CONNECTIONS_TABLE).where(eq('user_id', userId)).toSql());
     },
 
     async deleteByUserIdAndProvider(userId: string, provider: OAuthProvider): Promise<boolean> {
       const count = await db.execute(
         deleteFrom(OAUTH_CONNECTIONS_TABLE)
           .where(and(eq('user_id', userId), eq('provider', provider)))
-          .toSql()
+          .toSql(),
       );
       return count > 0;
     },

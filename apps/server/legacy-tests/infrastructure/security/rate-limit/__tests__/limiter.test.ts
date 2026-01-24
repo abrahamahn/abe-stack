@@ -241,8 +241,8 @@ describe('RateLimiter', () => {
 
       const stats = limiter.getStats();
 
-      expect(stats..windowMs).toBe(60000);
-      expect(stats..max).toBe(100);
+      expect(stats.config.windowMs).toBe(60000);
+      expect(stats.config.max).toBe(100);
       expect(stats.store).toBeDefined();
       expect(stats.store?.trackedClients).toBe(2);
     });
@@ -259,7 +259,7 @@ describe('RateLimiter', () => {
 
       const stats = limiter.getStats();
 
-      expect(stats.).toBeDefined();
+      expect(stats.config).toBeDefined();
       expect(stats.store).toBeUndefined();
     });
   });

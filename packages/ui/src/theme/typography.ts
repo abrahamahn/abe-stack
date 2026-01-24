@@ -1,6 +1,7 @@
 // packages/ui/src/theme/typography.ts
 export const typography = {
-  fontFamily: 'system-ui, -apple-system, Segoe UI, sans-serif',
+  fontFamily:
+    'system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji',
   sizes: {
     '2xs': '0.625rem', // 10px
     xs: '0.75rem', // 12px

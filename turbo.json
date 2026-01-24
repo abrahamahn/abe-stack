@@ -28,7 +28,7 @@
     },
     "type-check": {
       "dependsOn": ["^build"],
-      "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json", "config/ts/*.json"],
+      "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json", ".config/*.json"],
       "outputs": [],
       "cache": true,
       "env": ["NODE_ENV"]
@@ -54,9 +54,9 @@
   },
   "globalDependencies": [
     "tsconfig.json",
-    "config/.env/.env.development",
+    ".config/env/.config/env/.env.development",
     "config/.prettierrc",
-    "config/ts/*.json",
+    ".config/*.json",
     "config/schema/**",
     "eslint.config.ts"
   ]

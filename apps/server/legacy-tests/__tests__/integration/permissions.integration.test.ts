@@ -21,12 +21,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { parseJsonResponse } from './test-utils';
 
-import type {
-  PermissionChecker,
-  Permission,
-  PermissionRecord,
-  RecordLoader,
-} from '@permissions';
+import type { Permission, PermissionChecker, PermissionRecord, RecordLoader } from '@permissions';
 import type { FastifyInstance, FastifyReply, FastifyRequest, preHandlerHookHandler } from 'fastify';
 
 // ============================================================================
@@ -58,11 +53,11 @@ function createMockRecordLoader(records: Map<string, PermissionRecord>): RecordL
 }
 
 function createTestChecker(
-  : Permission,
+  config: Permission,
   records: Map<string, PermissionRecord> = new Map(),
 ): PermissionChecker {
   return createPermissionChecker({
-    ,
+    config,
     recordLoader: createMockRecordLoader(records),
   });
 }
@@ -83,12 +78,12 @@ describe('Permission Rule Factories', () => {
     });
 
     test('should create admin rule with custom priority', () => {
-      const : Permission = {
+      const config: Permission = {
         globalRules: [createAdminRule()],
         defaultDeny: true,
       };
 
-      expect(.globalRules[0]?.priority).toBe(100);
+      expect(config.globalRules[0]?.priority).toBe(100);
     });
   });
 
@@ -330,7 +325,7 @@ describe('PermissionChecker Integration', () => {
         ['posts:post-2', { id: 'post-2', ownerId: 'other', status: 'private' }],
       ]);
 
-      const : Permission = {
+      const config: Permission = {
         globalRules: [
           createAdminRule(),
           // Public posts are readable by anyone
@@ -345,7 +340,7 @@ describe('PermissionChecker Integration', () => {
         defaultDeny: true,
       };
 
-      const checker = createTestChecker(, records);
+      const checker = createTestChecker(config, records);
 
       // Public post should be readable
       const publicResult = await checker.checkReadPermission('user-1', 'user', 'posts', 'post-1');
@@ -362,7 +357,7 @@ describe('PermissionChecker Integration', () => {
         ['tasks:task-1', { id: 'task-1', ownerId: 'other' }],
       ]);
 
-      const : Permission = {
+      const config: Permission = {
         globalRules: [
           createCustomRule(async () => {
             // Simulate async check (e.g., external API call)
@@ -373,7 +368,7 @@ describe('PermissionChecker Integration', () => {
         defaultDeny: true,
       };
 
-      const checker = createTestChecker(, records);
+      const checker = createTestChecker(config, records);
       const result = await checker.checkReadPermission('user-1', 'user', 'tasks', 'task-1');
 
       expect(result.allowed).toBe(true);
@@ -874,17 +869,17 @@ describe('Permission Middleware with Custom Error Handler', () => {
 });
 
 // ============================================================================
-// Table-Specific Permission uration Tests
+// Table-Specific Permission configuration Tests
 // ============================================================================
 
-describe('Table-Specific Permission uration', () => {
+describe('Table-Specific Permission configuration', () => {
   test('should apply table-specific rules', async () => {
     const records = new Map<string, PermissionRecord>([
       ['public_posts:post-1', { id: 'post-1', ownerId: 'other' }],
       ['private_notes:note-1', { id: 'note-1', ownerId: 'other' }],
     ]);
 
-    const : Permission = {
+    const config: Permission = {
       globalRules: [createAdminRule(), createOwnerRule()],
       tables: [
         {
@@ -902,7 +897,7 @@ describe('Table-Specific Permission uration', () => {
       defaultDeny: true,
     };
 
-    const checker = createTestChecker(, records);
+    const checker = createTestChecker(config, records);
 
     // Public posts are readable by any authenticated user
     const postResult = await checker.checkReadPermission(
@@ -923,12 +918,12 @@ describe('Table-Specific Permission uration', () => {
     expect(noteResult.allowed).toBe(false);
   });
 
-  test('should allow deleted records when ured', async () => {
+  test('should allow deleted records when configured', async () => {
     const records = new Map<string, PermissionRecord>([
       ['archive:item-1', { id: 'item-1', ownerId: 'user-1', deleted: new Date() }],
     ]);
 
-    const : Permission = {
+    const config: Permission = {
       globalRules: [createOwnerRule()],
       tables: [
         {
@@ -940,7 +935,7 @@ describe('Table-Specific Permission uration', () => {
       defaultDeny: true,
     };
 
-    const checker = createTestChecker(, records);
+    const checker = createTestChecker(config, records);
     const result = await checker.checkReadPermission('user-1', 'user', 'archive', 'item-1');
 
     expect(result.allowed).toBe(true);

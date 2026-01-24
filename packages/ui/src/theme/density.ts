@@ -36,7 +36,10 @@ export function getSpacingForDensity(density: Density): Record<keyof typeof base
   const entries = Object.entries(baseSpacing) as [keyof typeof baseSpacing, number][];
 
   return Object.fromEntries(
-    entries.map(([key, value]) => [key, `${(value * multiplier).toFixed(3).replace(/\.?0+$/, '')}rem`]),
+    entries.map(([key, value]) => [
+      key,
+      `${(value * multiplier).toFixed(3).replace(/\.?0+$/, '')}rem`,
+    ]),
   ) as Record<keyof typeof baseSpacing, string>;
 }
 

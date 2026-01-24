@@ -7,27 +7,27 @@
  */
 
 import type { StorageConfig, StorageProviderName } from '@abe-stack/core/contracts/config';
-import { getBool, getInt } from '@abe-stack/core/config/utils';
+import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
 
 /**
  * Loads file storage configuration from environment variables.
  */
-export function loadStorage(env: Record<string, string | undefined>): StorageConfig {
+export function loadStorage(env: FullEnv): StorageConfig {
   const provider = (env.STORAGE_PROVIDER || 'local') as StorageProviderName;
 
   if (provider === 's3') {
     return {
       provider: 's3',
       bucket: env.S3_BUCKET || '',
-      region: env.S3_REGION || 'us-east-1',
+      region: env.S3_REGION || '',
       accessKeyId: env.S3_ACCESS_KEY_ID || '',
       secretAccessKey: env.S3_SECRET_ACCESS_KEY || '',
       // Custom endpoint for S3-compatible services (MinIO, R2, Spaces)
       endpoint: env.S3_ENDPOINT,
       // Path-style is required for MinIO and some S3-compatible services
-      forcePathStyle: getBool(env.S3_FORCE_PATH_STYLE),
+      forcePathStyle: env.S3_FORCE_PATH_STYLE === 'true',
       // Default presigned URLs to 1 hour
-      presignExpiresInSeconds: getInt(env.S3_PRESIGN_EXPIRES_IN_SECONDS, 3600),
+      presignExpiresInSeconds: env.S3_PRESIGN_EXPIRES_IN_SECONDS ?? 3600,
     };
   }
 

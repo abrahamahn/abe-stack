@@ -1,6 +1,7 @@
-// apps/server/src/config/auth.config.ts
+// apps/server/src/config/auth/auth.ts
 import type { AuthConfig, AuthStrategy, OAuthProviderConfig } from '@abe-stack/core';
-import { getBool, getInt, getList } from '@abe-stack/core/config/utils';
+import { getList } from '@abe-stack/core/config/utils';
+import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
 
 /**
  * Common weak secrets and patterns
@@ -28,17 +29,29 @@ export class AuthValidationError extends Error {
 
 // --- CORE LOGIC ---
 
-export function loadAuth(env: Record<string, string | undefined>, apiBaseUrl: string): AuthConfig {
+const VALID_STRATEGIES = new Set([
+  'local',
+  'magic',
+  'webauthn',
+  'google',
+  'github',
+  'facebook',
+  'microsoft',
+  'apple',
+]);
+
+export function loadAuth(env: FullEnv, apiBaseUrl: string): AuthConfig {
   const isProduction = env.NODE_ENV === 'production';
   const jwtSecret = env.JWT_SECRET || '';
 
-  // Helper to ensure we don't have double slashes if apiBaseUrl ends in /
   const buildUrl = (path: string): string => `${apiBaseUrl.replace(/\/$/, '')}${path}`;
 
   const config: AuthConfig = {
     strategies: (env.AUTH_STRATEGIES || 'local')
       .split(',')
-      .map((s) => s.trim().toLowerCase() as AuthStrategy),
+      .map((s) => s.trim().toLowerCase())
+      // Premium touch: Filter out invalid strategies to prevent downstream crashes
+      .filter((s): s is AuthStrategy => VALID_STRATEGIES.has(s)),
 
     jwt: {
       secret: jwtSecret,
@@ -49,8 +62,8 @@ export function loadAuth(env: Record<string, string | undefined>, apiBaseUrl: st
     },
 
     refreshToken: {
-      expiryDays: getInt(env.REFRESH_TOKEN_EXPIRY_DAYS, 7),
-      gracePeriodSeconds: getInt(env.REFRESH_TOKEN_GRACE_PERIOD, 30),
+      expiryDays: env.REFRESH_TOKEN_EXPIRY_DAYS ?? 7,
+      gracePeriodSeconds: env.REFRESH_TOKEN_GRACE_PERIOD ?? 30,
     },
 
     argon2: {
@@ -61,31 +74,43 @@ export function loadAuth(env: Record<string, string | undefined>, apiBaseUrl: st
     },
 
     password: {
-      minLength: getInt(env.PASSWORD_MIN_LENGTH, 8),
-      maxLength: getInt(env.PASSWORD_MAX_LENGTH, 64),
-      minZxcvbnScore: getInt(env.PASSWORD_MIN_SCORE, 3) as 0 | 1 | 2 | 3 | 4,
+      minLength: env.PASSWORD_MIN_LENGTH ?? 8,
+      maxLength: env.PASSWORD_MAX_LENGTH ?? 64,
+      minZxcvbnScore: (env.PASSWORD_MIN_SCORE ?? 3) as 0 | 1 | 2 | 3 | 4,
     },
 
     lockout: {
-      maxAttempts: getInt(env.LOCKOUT_MAX_ATTEMPTS, 10),
-      lockoutDurationMs: getInt(env.LOCKOUT_DURATION_MS, 1800000),
+      maxAttempts: env.LOCKOUT_MAX_ATTEMPTS ?? 10,
+      lockoutDurationMs: env.LOCKOUT_DURATION_MS ?? 1800000,
       progressiveDelay: true,
       baseDelayMs: 1000,
     },
 
-    bffMode: getBool(env.AUTH_BFF_MODE),
+    bffMode: env.AUTH_BFF_MODE === 'true',
 
     proxy: {
-      trustProxy: getBool(env.TRUST_PROXY),
+      trustProxy: env.TRUST_PROXY === 'true',
       trustedProxies: getList(env.TRUSTED_PROXIES),
-      maxProxyDepth: getInt(env.MAX_PROXY_DEPTH, 1),
+      maxProxyDepth: env.MAX_PROXY_DEPTH ?? 1,
     },
 
     rateLimit: {
-      login: { max: isProduction ? 5 : 100, windowMs: 15 * 60 * 1000 },
-      register: { max: isProduction ? 3 : 100, windowMs: 60 * 60 * 1000 },
-      forgotPassword: { max: isProduction ? 3 : 100, windowMs: 60 * 60 * 1000 },
-      verifyEmail: { max: isProduction ? 10 : 100, windowMs: 60 * 60 * 1000 },
+      login: {
+        max: env.RATE_LIMIT_LOGIN_MAX ?? (isProduction ? 5 : 100),
+        windowMs: 15 * 60 * 1000,
+      },
+      register: {
+        max: env.RATE_LIMIT_REGISTER_MAX ?? (isProduction ? 3 : 100),
+        windowMs: 60 * 60 * 1000,
+      },
+      forgotPassword: {
+        max: env.RATE_LIMIT_FORGOT_PASSWORD_MAX ?? (isProduction ? 3 : 100),
+        windowMs: 60 * 60 * 1000,
+      },
+      verifyEmail: {
+        max: env.RATE_LIMIT_VERIFY_EMAIL_MAX ?? (isProduction ? 10 : 100),
+        windowMs: 60 * 60 * 1000,
+      },
     },
 
     cookie: {
@@ -101,17 +126,17 @@ export function loadAuth(env: Record<string, string | undefined>, apiBaseUrl: st
       google: createOAuth(
         env.GOOGLE_CLIENT_ID,
         env.GOOGLE_CLIENT_SECRET,
-        env.GOOGLE_CALLBACK_URL || buildUrl('/api/auth/oauth/google/callback')
+        env.GOOGLE_CALLBACK_URL || buildUrl('/api/auth/oauth/google/callback'),
       ),
       github: createOAuth(
         env.GITHUB_CLIENT_ID,
         env.GITHUB_CLIENT_SECRET,
-        env.GITHUB_CALLBACK_URL || buildUrl('/api/auth/oauth/github/callback')
+        env.GITHUB_CALLBACK_URL || buildUrl('/api/auth/oauth/github/callback'),
       ),
       facebook: createOAuth(
         env.FACEBOOK_CLIENT_ID,
         env.FACEBOOK_CLIENT_SECRET,
-        env.FACEBOOK_CALLBACK_URL || buildUrl('/api/auth/oauth/facebook/callback')
+        env.FACEBOOK_CALLBACK_URL || buildUrl('/api/auth/oauth/facebook/callback'),
       ),
       microsoft: env.MICROSOFT_CLIENT_ID
         ? {
@@ -137,13 +162,13 @@ export function loadAuth(env: Record<string, string | undefined>, apiBaseUrl: st
     },
 
     magicLink: {
-      tokenExpiryMinutes: getInt(env.MAGIC_LINK_EXPIRY_MINUTES, 15),
-      maxAttempts: getInt(env.MAGIC_LINK_MAX_ATTEMPTS, 3),
+      tokenExpiryMinutes: env.MAGIC_LINK_EXPIRY_MINUTES ?? 15,
+      maxAttempts: env.MAGIC_LINK_MAX_ATTEMPTS ?? 3,
     },
 
     totp: {
       issuer: env.TOTP_ISSUER || 'ABE Stack',
-      window: getInt(env.TOTP_WINDOW, 1),
+      window: env.TOTP_WINDOW ?? 1,
     },
   };
 
@@ -156,7 +181,7 @@ export function validateAuth(config: AuthConfig): void {
   const { jwt, cookie, lockout, refreshToken, password } = config;
 
   if (jwt.secret.length < 32)
-    throw new AuthValidationError('JWT secret must be >= 32 chars', 'jwt.secret');
+    throw new AuthValidationError('JWT secret must be at least 32 characters', 'jwt.secret');
 
   if (WEAK_SECRETS.has(jwt.secret.toLowerCase().trim()))
     throw new AuthValidationError('JWT secret is a weak value', 'jwt.secret');
@@ -168,13 +193,29 @@ export function validateAuth(config: AuthConfig): void {
     throw new AuthValidationError('Cookie secret must be >= 32 chars', 'cookie.secret');
 
   if (lockout.maxAttempts < 3 || lockout.maxAttempts > 20)
-    throw new AuthValidationError('Lockout attempts must be between 3-20', 'lockout.maxAttempts');
+    throw new AuthValidationError(
+      'Lockout attempts must be between 3 and 20',
+      'lockout.maxAttempts',
+    );
+
+  // Added missing validation for duration (security best practice)
+  if (lockout.lockoutDurationMs < 60000)
+    throw new AuthValidationError(
+      'Lockout duration must be at least 60000ms',
+      'lockout.lockoutDurationMs',
+    );
 
   if (refreshToken.expiryDays < 1 || refreshToken.expiryDays > 30)
-    throw new AuthValidationError('Refresh expiry must be 1-30 days', 'refreshToken.expiryDays');
+    throw new AuthValidationError(
+      'Refresh expiry must be between 1 and 30 days',
+      'refreshToken.expiryDays',
+    );
 
   if (password.minLength < 8)
-    throw new AuthValidationError('Min password length must be 8', 'password.minLength');
+    throw new AuthValidationError(
+      'Min password length must be at least 8 characters',
+      'password.minLength',
+    );
 }
 
 /**
@@ -207,7 +248,7 @@ function createOAuth<T = Record<string, any>>(
   id: string | undefined,
   secret: string | undefined,
   callbackUrl: string,
-  extra?: T
+  extra?: T,
 ): (OAuthProviderConfig & T) | undefined {
   if (!id) return undefined;
   return {

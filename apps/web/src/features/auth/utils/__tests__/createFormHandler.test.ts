@@ -15,8 +15,7 @@ describe('createFormHandler', () => {
     mockSetIsSubmitting = vi.fn();
   });
 
-  const buildHandler = () =>
-    createFormHandler(mockSetIsSubmitting, mockSetErrors)(mockSubmitFn);
+  const buildHandler = () => createFormHandler(mockSetIsSubmitting, mockSetErrors)(mockSubmitFn);
 
   test('should create a form handler that calls submit function', async () => {
     const mockData = { email: 'test@example.com', password: 'password123' };
@@ -141,10 +140,11 @@ describe('createFormHandler', () => {
     const mockData2 = { email: 'test2@example.com' };
 
     // Mock a slow submission
-    mockSubmitFn.mockImplementation((data: { email: string }) =>
-      new Promise((resolve) => {
-        setTimeout(() => resolve({ success: true, data }), 10);
-      }),
+    mockSubmitFn.mockImplementation(
+      (data: { email: string }) =>
+        new Promise((resolve) => {
+          setTimeout(() => resolve({ success: true, data }), 10);
+        }),
     );
 
     const formHandler = buildHandler();

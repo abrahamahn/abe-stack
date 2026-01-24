@@ -5,11 +5,7 @@
  * Displays a single payment method with actions.
  */
 
-import {
-  forwardRef,
-  type ComponentPropsWithoutRef,
-  type ReactElement,
-} from 'react';
+import { forwardRef, type ComponentPropsWithoutRef, type ReactElement } from 'react';
 
 import { cn } from '../../utils/cn';
 
@@ -149,14 +145,14 @@ export const PaymentMethodCard = forwardRef<HTMLDivElement, PaymentMethodCardPro
             </>
           ) : (
             <span className="payment-method-card__type">
-              {type === 'bank_account' ? 'Bank Account' : type.charAt(0).toUpperCase() + type.slice(1)}
+              {type === 'bank_account'
+                ? 'Bank Account'
+                : type.charAt(0).toUpperCase() + type.slice(1)}
             </span>
           )}
         </div>
 
-        {isDefault && (
-          <span className="payment-method-card__badge">Default</span>
-        )}
+        {isDefault && <span className="payment-method-card__badge">Default</span>}
 
         <div className="payment-method-card__actions">
           {!isDefault && onSetDefault && (

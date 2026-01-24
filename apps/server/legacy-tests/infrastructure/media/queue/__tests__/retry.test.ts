@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/media/queue/__tests__/retry.test.ts
+// apps/server/legacy-tests/infrastructure/media/queue/__tests__/retry.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MediaProcessingRetryHandler, createMediaRetryHandler } from '../retry';
@@ -67,7 +67,7 @@ describe('MediaProcessingRetryHandler', () => {
       expect(operation).toHaveBeenCalledTimes(1);
       expect(mockLogger.info).toHaveBeenCalledWith(
         'Media processing succeeded',
-        expect.objectContaining({ operationId: 'op-1', attempt: 1 })
+        expect.objectContaining({ operationId: 'op-1', attempt: 1 }),
       );
 
       handler.destroy();
@@ -107,7 +107,7 @@ describe('MediaProcessingRetryHandler', () => {
       const operation = vi.fn().mockRejectedValue(new Error('Always fails'));
 
       await expect(handler.executeWithRetry('op-fail', operation)).rejects.toThrow(
-        'Media processing failed after 3 attempts: Always fails'
+        'Media processing failed after 3 attempts: Always fails',
       );
       expect(operation).toHaveBeenCalledTimes(3); // 1 initial + 2 retries
 
@@ -132,7 +132,7 @@ describe('MediaProcessingRetryHandler', () => {
           operationId: 'op-context',
           fileId: 'file-123',
           userId: 'user-456',
-        })
+        }),
       );
 
       handler.destroy();
@@ -149,7 +149,7 @@ describe('MediaProcessingRetryHandler', () => {
       const operation = vi.fn().mockRejectedValue('string error');
 
       await expect(handler.executeWithRetry('op-string-error', operation)).rejects.toThrow(
-        'string error'
+        'string error',
       );
 
       handler.destroy();
@@ -176,7 +176,7 @@ describe('MediaProcessingRetryHandler', () => {
         'Circuit breaker opened',
         expect.objectContaining({
           operationId: 'op-cb',
-        })
+        }),
       );
 
       handler.destroy();
@@ -198,7 +198,7 @@ describe('MediaProcessingRetryHandler', () => {
 
       // Second call should fail immediately with circuit open error
       await expect(handler.executeWithRetry('op-circuit', operation)).rejects.toThrow(
-        'Circuit breaker open for operation op-circuit'
+        'Circuit breaker open for operation op-circuit',
       );
 
       // Operation should only be called once (second call blocked by circuit)
@@ -225,7 +225,7 @@ describe('MediaProcessingRetryHandler', () => {
 
       // Check that scheduling retry was logged with increasing delays
       const scheduleCalls = (mockLogger.info as ReturnType<typeof vi.fn>).mock.calls.filter(
-        (call) => call[0] === 'Scheduling retry'
+        (call) => call[0] === 'Scheduling retry',
       );
 
       // Should have 3 retries scheduled
@@ -257,7 +257,7 @@ describe('MediaProcessingRetryHandler', () => {
       await expect(handler.executeWithRetry('capped-op', operation)).rejects.toThrow();
 
       const scheduleCalls = (mockLogger.info as ReturnType<typeof vi.fn>).mock.calls.filter(
-        (call) => call[0] === 'Scheduling retry'
+        (call) => call[0] === 'Scheduling retry',
       );
 
       // All delays should be <= maxDelayMs
@@ -389,7 +389,7 @@ describe('MediaProcessingRetryHandler', () => {
 });
 
 describe('createMediaRetryHandler', () => {
-  it('should create a ured retry handler', () => {
+  it('should create a configured retry handler', () => {
     const mockLogger = {
       info: vi.fn(),
       error: vi.fn(),

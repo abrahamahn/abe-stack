@@ -18,6 +18,9 @@ vi.mock('@features/dashboard', () => ({
 
 vi.mock('@demo', () => ({
   DemoPage: (): React.ReactElement => <div data-testid="demo-page">Demo Page</div>,
+  SidePeekDemoPage: (): React.ReactElement => (
+    <div data-testid="side-peek-demo-page">Side Peek Demo Page</div>
+  ),
 }));
 
 // Mock auth feature (LoginPage, RegisterPage + ProtectedRoute)

@@ -465,7 +465,6 @@ describe('FormComposition Integration Tests', () => {
         expect(screen.getByTestId('email-input')).not.toBeDisabled();
       });
     });
-
   });
 
   describe('Resend Verification Form with Cooldown', () => {

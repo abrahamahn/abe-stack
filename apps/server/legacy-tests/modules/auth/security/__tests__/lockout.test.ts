@@ -49,7 +49,7 @@ describe('Lockout Functions', () => {
   let mockDb: MockDb;
   const defaultLockout: Lockout = {
     maxAttempts: 5,
-    lockoutDurationMs: 15 * 60 * 1000, // 15 minutes
+    lockoutDconfigurationMs: 15 * 60 * 1000, // 15 minutes
     progressiveDelay: true,
     baseDelayMs: 1000,
   };
@@ -101,11 +101,7 @@ describe('Lockout Functions', () => {
     test('should return true when failed attempts exceed max', async () => {
       mockDb.queryOne.mockResolvedValue({ count: 5 });
 
-      const isLocked = await isAccountLocked(
-        asMockDb(mockDb),
-        'test@example.com',
-        defaultLockout,
-      );
+      const isLocked = await isAccountLocked(asMockDb(mockDb), 'test@example.com', defaultLockout);
 
       expect(isLocked).toBe(true);
     });
@@ -113,11 +109,7 @@ describe('Lockout Functions', () => {
     test('should return false when failed attempts below max', async () => {
       mockDb.queryOne.mockResolvedValue({ count: 3 });
 
-      const isLocked = await isAccountLocked(
-        asMockDb(mockDb),
-        'test@example.com',
-        defaultLockout,
-      );
+      const isLocked = await isAccountLocked(asMockDb(mockDb), 'test@example.com', defaultLockout);
 
       expect(isLocked).toBe(false);
     });
@@ -125,11 +117,7 @@ describe('Lockout Functions', () => {
     test('should return false when no failed attempts', async () => {
       mockDb.queryOne.mockResolvedValue({ count: 0 });
 
-      const isLocked = await isAccountLocked(
-        asMockDb(mockDb),
-        'test@example.com',
-        defaultLockout,
-      );
+      const isLocked = await isAccountLocked(asMockDb(mockDb), 'test@example.com', defaultLockout);
 
       expect(isLocked).toBe(false);
     });
@@ -137,8 +125,8 @@ describe('Lockout Functions', () => {
     test('should return true when attempts equal max', async () => {
       mockDb.queryOne.mockResolvedValue({ count: 5 });
 
-      const  = { ...defaultLockout, maxAttempts: 5 };
-      const isLocked = await isAccountLocked(asMockDb(mockDb), 'test@example.com', );
+      const config = { ...defaultLockout, maxAttempts: 5 };
+      const isLocked = await isAccountLocked(asMockDb(mockDb), 'test@example.com');
 
       expect(isLocked).toBe(true);
     });
@@ -151,11 +139,7 @@ describe('Lockout Functions', () => {
         progressiveDelay: false,
       };
 
-      const delay = await getProgressiveDelay(
-        asMockDb(mockDb),
-        'test@example.com',
-        WithoutDelay,
-      );
+      const delay = await getProgressiveDelay(asMockDb(mockDb), 'test@example.com', WithoutDelay);
 
       expect(delay).toBe(0);
     });
@@ -163,11 +147,7 @@ describe('Lockout Functions', () => {
     test('should return 0 when no failed attempts', async () => {
       mockDb.queryOne.mockResolvedValue({ count: 0 });
 
-      const delay = await getProgressiveDelay(
-        asMockDb(mockDb),
-        'test@example.com',
-        defaultLockout,
-      );
+      const delay = await getProgressiveDelay(asMockDb(mockDb), 'test@example.com', defaultLockout);
 
       expect(delay).toBe(0);
     });
@@ -176,11 +156,7 @@ describe('Lockout Functions', () => {
       // 1 failed attempt = 1000ms * 2^0 = 1000ms
       mockDb.queryOne.mockResolvedValue({ count: 1 });
 
-      const delay = await getProgressiveDelay(
-        asMockDb(mockDb),
-        'test@example.com',
-        defaultLockout,
-      );
+      const delay = await getProgressiveDelay(asMockDb(mockDb), 'test@example.com', defaultLockout);
 
       expect(delay).toBe(1000); // 1000 * 2^0
     });
@@ -189,11 +165,7 @@ describe('Lockout Functions', () => {
       // 3 failed attempts = 1000ms * 2^2 = 4000ms
       mockDb.queryOne.mockResolvedValue({ count: 3 });
 
-      const delay = await getProgressiveDelay(
-        asMockDb(mockDb),
-        'test@example.com',
-        defaultLockout,
-      );
+      const delay = await getProgressiveDelay(asMockDb(mockDb), 'test@example.com', defaultLockout);
 
       expect(delay).toBe(4000); // 1000 * 2^2
     });
@@ -202,11 +174,7 @@ describe('Lockout Functions', () => {
       // 10 failed attempts = 1000ms * 2^9 = 512000ms, capped at 30000ms
       mockDb.queryOne.mockResolvedValue({ count: 10 });
 
-      const delay = await getProgressiveDelay(
-        asMockDb(mockDb),
-        'test@example.com',
-        defaultLockout,
-      );
+      const delay = await getProgressiveDelay(asMockDb(mockDb), 'test@example.com', defaultLockout);
 
       expect(delay).toBe(30000); // MAX_PROGRESSIVE_DELAY_MS
     });
@@ -215,11 +183,7 @@ describe('Lockout Functions', () => {
       // 2 failed attempts = 1000ms * 2^1 = 2000ms
       mockDb.queryOne.mockResolvedValue({ count: 2 });
 
-      const delay = await getProgressiveDelay(
-        asMockDb(mockDb),
-        'test@example.com',
-        defaultLockout,
-      );
+      const delay = await getProgressiveDelay(asMockDb(mockDb), 'test@example.com', defaultLockout);
 
       expect(delay).toBe(2000);
     });
@@ -327,7 +291,7 @@ describe('Lockout Functions', () => {
       // Simulate multiple failed attempts at different times:
       // - Old attempt: 14 minutes ago
       // - Most recent attempt: 2 minutes ago
-      // With 15 minute lockout duration:
+      // With 15 minute lockout dconfiguration:
       // - If using old attempt: lockout would have expired (14min + 15min = unlocked)
       // - If using most recent: lockout is still active (2min + 15min = 13min remaining)
       const mostRecentAttemptTime = new Date(now - 2 * 60 * 1000); // 2 minutes ago
@@ -359,7 +323,7 @@ describe('Lockout Functions', () => {
 
       // Most recent attempt was 5 minutes ago
       const mostRecentAttemptTime = new Date(now - 5 * 60 * 1000);
-      // Expected: lockedUntil = mostRecent + lockoutDuration = 5min ago + 15min = 10min from now
+      // Expected: lockedUntil = mostRecent + lockoutDconfiguration = 5min ago + 15min = 10min from now
       const expectedLockedUntil = new Date(mostRecentAttemptTime.getTime() + 15 * 60 * 1000);
       const expectedRemainingTime = expectedLockedUntil.getTime() - now; // 10 minutes
 

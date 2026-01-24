@@ -1,6 +1,6 @@
 // apps/server/src/config/services/email.ts
-import { getBool, getInt } from '@abe-stack/core/config/utils';
 import type { EmailConfig, SmtpConfig } from '@abe-stack/core/contracts/config';
+import type { FullEnv } from '@abe-stack/core/contracts/config/environment';
 
 /**
  * Loads raw SMTP transport settings from environment variables.
@@ -8,14 +8,14 @@ import type { EmailConfig, SmtpConfig } from '@abe-stack/core/contracts/config';
  * @param env - Environment variable map
  * @returns SMTP configuration for nodemailer transport
  */
-export function loadSmtpConfig(env: Record<string, string | undefined>): SmtpConfig {
+export function loadSmtpConfig(env: FullEnv): SmtpConfig {
   return {
     host: env.SMTP_HOST || 'localhost',
-    port: getInt(env.SMTP_PORT, 587),
-    secure: getBool(env.SMTP_SECURE) ?? false,
+    port: env.SMTP_PORT ?? 587,
+    secure: env.SMTP_SECURE === 'true',
     auth: env.SMTP_USER && env.SMTP_PASS ? { user: env.SMTP_USER, pass: env.SMTP_PASS } : undefined,
-    connectionTimeout: getInt(env.SMTP_CONNECTION_TIMEOUT, 5000),
-    socketTimeout: getInt(env.SMTP_SOCKET_TIMEOUT, 30000),
+    connectionTimeout: env.SMTP_CONNECTION_TIMEOUT ?? 5000,
+    socketTimeout: env.SMTP_SOCKET_TIMEOUT ?? 30000,
   };
 }
 
@@ -36,7 +36,7 @@ export function loadSmtpConfig(env: Record<string, string | undefined>): SmtpCon
  * // emailConfig.provider === 'smtp' in production
  * ```
  */
-export function loadEmail(env: Record<string, string | undefined>): EmailConfig {
+export function loadEmail(env: FullEnv): EmailConfig {
   const provider = (env.EMAIL_PROVIDER || 'console') as EmailConfig['provider'];
 
   const smtp = loadSmtpConfig(env);

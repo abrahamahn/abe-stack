@@ -114,16 +114,14 @@ export function SessionCard({
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="font-medium">{browser} on {os}</span>
-            {session.isCurrent && (
-              <Badge tone="success">Current Session</Badge>
-            )}
+            <span className="font-medium">
+              {browser} on {os}
+            </span>
+            {session.isCurrent && <Badge tone="success">Current Session</Badge>}
           </div>
 
           <div className="text-sm text-gray-500 space-y-0.5">
-            {session.ipAddress && (
-              <p>IP: {session.ipAddress}</p>
-            )}
+            {session.ipAddress && <p>IP: {session.ipAddress}</p>}
             <p>Started: {formatDate(session.createdAt)}</p>
           </div>
         </div>

@@ -103,7 +103,9 @@ export function UserFilters({
           type="text"
           placeholder="Search by email or name..."
           value={searchValue}
-          onChange={(e) => { setSearchValue(e.target.value); }}
+          onChange={(e) => {
+            setSearchValue(e.target.value);
+          }}
           className="flex-1"
           disabled={isLoading}
         />

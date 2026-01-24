@@ -45,6 +45,12 @@ function createMockContext(): AppContext {
       oauthConnections: {} as never,
       pushSubscriptions: {} as never,
       notificationPreferences: {} as never,
+      plans: {} as never,
+      subscriptions: {} as never,
+      customerMappings: {} as never,
+      invoices: {} as never,
+      paymentMethods: {} as never,
+      billingEvents: {} as never,
     },
     config: {
       auth: {
@@ -67,6 +73,7 @@ function createMockContext(): AppContext {
     pubsub: {} as never,
     email: {} as never,
     storage: {} as never,
+    cache: {} as never,
   };
 }
 

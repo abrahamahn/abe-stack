@@ -9,11 +9,7 @@ import {
   PlanNotFoundError,
   CannotDeactivatePlanWithActiveSubscriptionsError,
 } from '@abe-stack/core';
-import type {
-  PlanRepository,
-  SubscriptionRepository,
-  Plan as DbPlan,
-} from '@abe-stack/db';
+import type { PlanRepository, SubscriptionRepository, Plan as DbPlan } from '@abe-stack/db';
 
 import type { PaymentProviderInterface } from '@infrastructure/billing';
 

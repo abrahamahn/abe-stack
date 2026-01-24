@@ -7,11 +7,7 @@
 
 import { useMutation, useQueryCache } from '@abe-stack/sdk';
 
-import {
-  createSettingsApi,
-  type AvatarDeleteResponse,
-  type AvatarUploadResponse,
-} from '../api';
+import { createSettingsApi, type AvatarDeleteResponse, type AvatarUploadResponse } from '../api';
 
 // ============================================================================
 // Settings API Instance
@@ -111,7 +107,9 @@ export function useAvatarDelete(options?: UseAvatarDeleteOptions): UseAvatarDele
   });
 
   return {
-    deleteAvatar: (): void => { mutation.mutate(); },
+    deleteAvatar: (): void => {
+      mutation.mutate();
+    },
     isLoading: mutation.status === 'pending',
     isSuccess: mutation.status === 'success',
     isError: mutation.status === 'error',

@@ -17,9 +17,7 @@ interface TestUser {
 describe('SearchQueryBuilder', () => {
   describe('filter methods', () => {
     test('where should add filter condition', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .where('status', 'eq', 'active')
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().where('status', 'eq', 'active').build();
 
       expect(query.filters).toEqual({
         field: 'status',
@@ -30,9 +28,7 @@ describe('SearchQueryBuilder', () => {
     });
 
     test('whereEq should add equality filter', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .whereEq('name', 'John')
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().whereEq('name', 'John').build();
 
       expect(query.filters).toMatchObject({
         field: 'name',
@@ -42,9 +38,7 @@ describe('SearchQueryBuilder', () => {
     });
 
     test('whereNeq should add not-equal filter', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .whereNeq('status', 'inactive')
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().whereNeq('status', 'inactive').build();
 
       expect(query.filters).toMatchObject({
         field: 'status',
@@ -143,9 +137,7 @@ describe('SearchQueryBuilder', () => {
     });
 
     test('whereBetween should work', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .whereBetween('age', 18, 65)
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().whereBetween('age', 18, 65).build();
 
       expect(query.filters).toMatchObject({
         field: 'age',
@@ -173,9 +165,7 @@ describe('SearchQueryBuilder', () => {
   describe('compound filters', () => {
     test('and should combine filters with AND', () => {
       const query = new SearchQueryBuilder<TestUser>()
-        .and((b) =>
-          b.whereEq('status', 'active').whereGte('age', 18),
-        )
+        .and((b) => b.whereEq('status', 'active').whereGte('age', 18))
         .build();
 
       expect(query.filters).toMatchObject({
@@ -189,9 +179,7 @@ describe('SearchQueryBuilder', () => {
 
     test('or should combine filters with OR', () => {
       const query = new SearchQueryBuilder<TestUser>()
-        .or((b) =>
-          b.whereEq('status', 'active').whereEq('status', 'pending'),
-        )
+        .or((b) => b.whereEq('status', 'active').whereEq('status', 'pending'))
         .build();
 
       expect(query.filters).toMatchObject({
@@ -214,9 +202,7 @@ describe('SearchQueryBuilder', () => {
     test('should allow nested compound filters', () => {
       const query = new SearchQueryBuilder<TestUser>()
         .whereEq('status', 'active')
-        .or((b) =>
-          b.whereEq('age', 25).whereEq('age', 30),
-        )
+        .or((b) => b.whereEq('age', 25).whereEq('age', 30))
         .build();
 
       expect(query.filters).toMatchObject({
@@ -231,9 +217,7 @@ describe('SearchQueryBuilder', () => {
 
   describe('sort methods', () => {
     test('orderBy should add sort config', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .orderBy('createdAt', 'desc')
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().orderBy('createdAt', 'desc').build();
 
       expect(query.sort).toEqual([{ field: 'createdAt', order: 'desc' }]);
     });
@@ -259,10 +243,7 @@ describe('SearchQueryBuilder', () => {
     });
 
     test('clearSort should remove all sorts', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .orderBy('name', 'asc')
-        .clearSort()
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().orderBy('name', 'asc').clearSort().build();
 
       expect(query.sort).toBeUndefined();
     });
@@ -270,34 +251,25 @@ describe('SearchQueryBuilder', () => {
 
   describe('search methods', () => {
     test('search should add full-text search config', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .search('john doe')
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().search('john doe').build();
 
       expect(query.search).toEqual({ query: 'john doe' });
     });
 
     test('searchIn should specify fields', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .searchIn('john', ['name', 'email'])
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().searchIn('john', ['name', 'email']).build();
 
       expect(query.search).toEqual({ query: 'john', fields: ['name', 'email'] });
     });
 
     test('searchFuzzy should add fuzziness', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .searchFuzzy('john', 0.7)
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().searchFuzzy('john', 0.7).build();
 
       expect(query.search).toEqual({ query: 'john', fuzziness: 0.7 });
     });
 
     test('clearSearch should remove search config', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .search('test')
-        .clearSearch()
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().search('test').clearSearch().build();
 
       expect(query.search).toBeUndefined();
     });
@@ -305,58 +277,43 @@ describe('SearchQueryBuilder', () => {
 
   describe('pagination methods', () => {
     test('page should set page number', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .page(3)
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().page(3).build();
 
       expect(query.page).toBe(3);
     });
 
     test('page should enforce minimum of 1', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .page(0)
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().page(0).build();
 
       expect(query.page).toBe(1);
     });
 
     test('limit should set items per page', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .limit(25)
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().limit(25).build();
 
       expect(query.limit).toBe(25);
     });
 
     test('limit should enforce maximum of 1000', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .limit(2000)
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().limit(2000).build();
 
       expect(query.limit).toBe(1000);
     });
 
     test('cursor should set cursor', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .cursor('abc123')
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().cursor('abc123').build();
 
       expect(query.cursor).toBe('abc123');
     });
 
     test('skip should convert to page', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .limit(10)
-        .skip(25)
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().limit(10).skip(25).build();
 
       expect(query.page).toBe(3); // Math.floor(25/10) + 1 = 3
     });
 
     test('take should be alias for limit', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .take(15)
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().take(15).build();
 
       expect(query.limit).toBe(15);
     });
@@ -364,18 +321,13 @@ describe('SearchQueryBuilder', () => {
 
   describe('select methods', () => {
     test('select should specify fields', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .select('id', 'name', 'email')
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().select('id', 'name', 'email').build();
 
       expect(query.select).toEqual(['id', 'name', 'email']);
     });
 
     test('clearSelect should remove selection', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .select('id', 'name')
-        .clearSelect()
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().select('id', 'name').clearSelect().build();
 
       expect(query.select).toBeUndefined();
     });
@@ -383,18 +335,13 @@ describe('SearchQueryBuilder', () => {
 
   describe('count methods', () => {
     test('withCount should enable count', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .withCount()
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().withCount().build();
 
       expect(query.includeCount).toBe(true);
     });
 
     test('withoutCount should disable count', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .withCount()
-        .withoutCount()
-        .build();
+      const query = new SearchQueryBuilder<TestUser>().withCount().withoutCount().build();
 
       expect(query.includeCount).toBe(false);
     });
@@ -414,10 +361,7 @@ describe('SearchQueryBuilder', () => {
     });
 
     test('clearFacets should remove all facets', () => {
-      const query = new SearchQueryBuilder<TestUser>()
-        .facet('status')
-        .clearFacets()
-        .buildFaceted();
+      const query = new SearchQueryBuilder<TestUser>().facet('status').clearFacets().buildFaceted();
 
       expect(query.facets).toBeUndefined();
     });
@@ -461,9 +405,7 @@ describe('SearchQueryBuilder', () => {
 
 describe('createSearchQuery', () => {
   test('should create new builder', () => {
-    const query = createSearchQuery<TestUser>()
-      .whereEq('status', 'active')
-      .build();
+    const query = createSearchQuery<TestUser>().whereEq('status', 'active').build();
 
     expect(query.filters).toMatchObject({
       field: 'status',

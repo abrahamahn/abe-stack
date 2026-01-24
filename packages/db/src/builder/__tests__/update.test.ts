@@ -79,10 +79,7 @@ describe('UpdateBuilder', () => {
     });
 
     it('increment generates column + value', () => {
-      const query = update('users')
-        .increment('login_count', 1)
-        .where(eq('id', 'user-123'))
-        .toSql();
+      const query = update('users').increment('login_count', 1).where(eq('id', 'user-123')).toSql();
       expect(query.text).toBe('UPDATE users SET login_count = login_count + $1 WHERE id = $2');
       expect(query.values).toEqual([1, 'user-123']);
     });
@@ -93,10 +90,7 @@ describe('UpdateBuilder', () => {
     });
 
     it('decrement generates column - value', () => {
-      const query = update('users')
-        .decrement('balance', 100)
-        .where(eq('id', 'user-123'))
-        .toSql();
+      const query = update('users').decrement('balance', 100).where(eq('id', 'user-123')).toSql();
       expect(query.text).toBe('UPDATE users SET balance = balance - $1 WHERE id = $2');
       expect(query.values).toEqual([100, 'user-123']);
     });

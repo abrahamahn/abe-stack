@@ -9,13 +9,32 @@ import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 import type { ClientEnvironment } from '@app/ClientEnvironment';
 import type { ComponentCategory, ComponentDemo } from '@demo/types';
 
-// Mock navigation
+// Mock navigation and other hooks
 const mockNavigate = vi.fn();
+const mockCycleDensity = vi.fn();
+const mockDensity = 'normal';
+const mockCycleContrastMode = vi.fn();
+const mockContrastMode = 'normal';
+const mockUseSidePeek = {
+  isOpen: false,
+  peekPath: null,
+  close: vi.fn(),
+};
+
 vi.mock('@abe-stack/ui', async () => {
   const actual = await vi.importActual('@abe-stack/ui');
   return {
     ...actual,
     useNavigate: (): typeof mockNavigate => mockNavigate,
+    useDensity: (_defaultValue: string) => ({
+      density: mockDensity,
+      cycleDensity: mockCycleDensity,
+    }),
+    useContrast: (_defaultValue: string, _resolvedTheme: string) => ({
+      contrastMode: mockContrastMode,
+      cycleContrastMode: mockCycleContrastMode,
+    }),
+    useSidePeek: () => mockUseSidePeek,
   };
 });
 
@@ -81,36 +100,6 @@ vi.mock('@demo/utils/lazyDocs', () => ({
   clearDocsCache: vi.fn(),
 }));
 
-// Helper to create mock ClientEnvironment
-function createMockClientEnvironment(): ClientEnvironment {
-  return {
-    config: {
-      apiUrl: 'http://localhost:3000',
-      tokenRefreshInterval: 60000,
-    } as ClientEnvironment['config'],
-    queryCache: {
-      getQueryData: vi.fn(),
-      setQueryData: vi.fn(),
-      getQueryState: vi.fn(),
-      invalidateQueries: vi.fn(),
-      subscribe: vi.fn(() => vi.fn()),
-      getAll: vi.fn(() => []),
-    } as unknown as ClientEnvironment['queryCache'],
-    auth: {
-      getState: vi.fn(() => ({
-        user: null,
-        isLoading: false,
-        isAuthenticated: false,
-      })),
-      subscribe: vi.fn(() => () => {}),
-      login: vi.fn(),
-      logout: vi.fn(),
-      register: vi.fn(),
-      destroy: vi.fn(),
-    } as unknown as ClientEnvironment['auth'],
-  };
-}
-
 describe('DemoPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -119,8 +108,37 @@ describe('DemoPage', () => {
     mockGetComponentDocsLazy = vi.fn(() => null);
   });
 
+  const createMockClientEnvironment2 = (): ClientEnvironment => {
+    return {
+      config: {
+        apiUrl: 'http://localhost:3000',
+        tokenRefreshInterval: 60000,
+      } as ClientEnvironment['config'],
+      queryCache: {
+        getQueryData: vi.fn(),
+        setQueryData: vi.fn(),
+        getQueryState: vi.fn(),
+        invalidateQueries: vi.fn(),
+        subscribe: vi.fn(() => vi.fn()),
+        getAll: vi.fn(() => []),
+      } as unknown as ClientEnvironment['queryCache'],
+      auth: {
+        getState: vi.fn(() => ({
+          user: null,
+          isLoading: false,
+          isAuthenticated: false,
+        })),
+        subscribe: vi.fn(() => () => {}),
+        login: vi.fn(),
+        logout: vi.fn(),
+        register: vi.fn(),
+        destroy: vi.fn(),
+      } as unknown as ClientEnvironment['auth'],
+    };
+  };
+
   const renderDemoPage = (): ReturnType<typeof render> => {
-    const mockEnv = createMockClientEnvironment();
+    const mockEnv = createMockClientEnvironment2();
     return render(
       <MemoryRouter>
         <ClientEnvironmentProvider value={mockEnv}>

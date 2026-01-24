@@ -344,9 +344,17 @@ export const ResizablePanel = forwardRef<HTMLDivElement, ResizablePanelProps>((p
       : {}),
   };
 
+  // Extract any non-DOM attributes to avoid React warnings
+  const domProps = rest;
+
   return (
     <>
-      <div ref={ref} className={`resizable-panel ${className}`.trim()} style={panelStyle} {...rest}>
+      <div
+        ref={ref}
+        className={`resizable-panel ${className}`.trim()}
+        style={panelStyle}
+        {...domProps}
+      >
         {children}
       </div>
       {!collapsed && (

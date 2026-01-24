@@ -4,8 +4,8 @@
   "description": "Minimal Fastify server for abe-stack",
   "main": "dist/main.js",
   "scripts": {
-    "dev": "tsx ../../tools/dev/kill-port.ts 8080 8081 8082 8083 && tsx --env-file=../../config/.env/.env.development src/main.ts",
-    "start": "node --env-file=../../config/.env/.env.production dist/main.js",
+    "dev": "tsx ../../tooling/scripts/dev/kill-port.ts 8080 8081 8082 8083 && tsx --env-file=../../.config/env/.env.development src/main.ts",
+    "start": "node --env-file=../../.config/env/.env.production dist/main.js",
     "build": "tsc -p tsconfig.build.json",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "type-check": "tsc --project tsconfig.json --noEmit",
@@ -13,8 +13,8 @@
     "test:unit": "vitest run --config ../../vitest.config.ts --project server --test-name-pattern '(unit|fast)'",
     "test:integration": "vitest run --config ../../vitest.config.ts --project server --test-name-pattern '(integration|critical)'",
     "test:full": "vitest run --config ../../vitest.config.ts --project server",
-    "db:push": "tsx --env-file=../../config/.env/.env.development src/scripts/db-push.ts",
-    "db:seed": "tsx --env-file=../../config/.env/.env.development src/scripts/seed.ts",
+    "db:push": "tsx --env-file=../../.config/env/.env.development src/scripts/db-push.ts",
+    "db:seed": "tsx --env-file=../../.config/env/.env.development src/scripts/seed.ts",
     "db:bootstrap:admin": "tsx src/scripts/bootstrap-admin.ts"
   },
   "dependencies": {
@@ -30,6 +30,7 @@
     "ws": "^8.19.0"
   },
   "devDependencies": {
-    "@types/ws": "^8.18.1"
+    "@types/ws": "^8.18.1",
+    "supertest": "^7.2.2"
   }
 }

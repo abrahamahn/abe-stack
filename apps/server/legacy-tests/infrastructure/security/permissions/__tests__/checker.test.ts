@@ -25,11 +25,11 @@ function createMockRecordLoader(records: Map<string, PermissionRecord>): RecordL
 }
 
 function createTestChecker(
-  : Permission,
+  config: Permission,
   records: Map<string, PermissionRecord> = new Map(),
 ): PermissionChecker {
   return createPermissionChecker({
-    ,
+    config,
     recordLoader: createMockRecordLoader(records),
   });
 }
@@ -140,12 +140,12 @@ describe('PermissionChecker', () => {
       expect(result.reason).toBe('Record is deleted');
     });
 
-    test('should allow access to deleted records when ured', async () => {
+    test('should allow access to deleted records when configured', async () => {
       const records = new Map<string, PermissionRecord>([
         ['tasks:task-1', { id: 'task-1', ownerId: 'user-1', deleted: new Date() }],
       ]);
 
-      const : Permission = {
+      const config: Permission = {
         ...createDefaultPermission(),
         tables: [
           {
@@ -156,7 +156,7 @@ describe('PermissionChecker', () => {
         ],
       };
 
-      const checker = createTestChecker(, records);
+      const checker = createTestChecker(config, records);
 
       const result = await checker.checkReadPermission('user-1', 'user', 'tasks', 'task-1');
 
@@ -201,12 +201,12 @@ describe('PermissionChecker', () => {
       expect(result.allowed).toBe(false);
     });
 
-    test('should allow member to write when ured', async () => {
+    test('should allow member to write when configured', async () => {
       const records = new Map<string, PermissionRecord>([
         ['tasks:task-1', { id: 'task-1', ownerId: 'owner', memberIds: ['user-1'] }],
       ]);
 
-      const : Permission = {
+      const config: Permission = {
         globalRules: [
           createAdminRule(),
           createOwnerRule(),
@@ -215,7 +215,7 @@ describe('PermissionChecker', () => {
         defaultDeny: true,
       };
 
-      const checker = createTestChecker(, records);
+      const checker = createTestChecker(config, records);
 
       const result = await checker.checkWritePermission('user-1', 'user', 'tasks', 'task-1');
 
@@ -397,7 +397,7 @@ describe('PermissionChecker', () => {
         ['tasks:task-2', { id: 'task-2', ownerId: 'other', status: 'private' }],
       ]);
 
-      const : Permission = {
+      const config: Permission = {
         globalRules: [
           createAdminRule(),
           // Custom rule: public records are readable by anyone
@@ -412,7 +412,7 @@ describe('PermissionChecker', () => {
         defaultDeny: true,
       };
 
-      const checker = createTestChecker(, records);
+      const checker = createTestChecker(config, records);
 
       // Public record should be readable
       const publicResult = await checker.checkReadPermission('user-1', 'user', 'tasks', 'task-1');
@@ -429,7 +429,7 @@ describe('PermissionChecker', () => {
         ['tasks:task-1', { id: 'task-1', ownerId: 'other' }],
       ]);
 
-      const : Permission = {
+      const config: Permission = {
         globalRules: [
           createCustomRule(
             async (_userId, _role, _record) => {
@@ -443,7 +443,7 @@ describe('PermissionChecker', () => {
         defaultDeny: true,
       };
 
-      const checker = createTestChecker(, records);
+      const checker = createTestChecker(config, records);
 
       const result = await checker.checkReadPermission('user-1', 'user', 'tasks', 'task-1');
 
@@ -455,7 +455,7 @@ describe('PermissionChecker', () => {
         ['tasks:task-1', { id: 'task-1', ownerId: 'other' }],
       ]);
 
-      const : Permission = {
+      const config: Permission = {
         globalRules: [
           createCustomRule(() => {
             throw new Error('Custom rule error');
@@ -464,7 +464,7 @@ describe('PermissionChecker', () => {
         defaultDeny: true,
       };
 
-      const checker = createTestChecker(, records);
+      const checker = createTestChecker(config, records);
 
       const result = await checker.checkReadPermission('user-1', 'user', 'tasks', 'task-1');
 
@@ -482,7 +482,7 @@ describe('PermissionChecker', () => {
         ['private_notes:note-1', { id: 'note-1', ownerId: 'other' }],
       ]);
 
-      const : Permission = {
+      const config: Permission = {
         globalRules: [createAdminRule(), createOwnerRule()],
         tables: [
           {
@@ -500,7 +500,7 @@ describe('PermissionChecker', () => {
         defaultDeny: true,
       };
 
-      const checker = createTestChecker(, records);
+      const checker = createTestChecker(config, records);
 
       // Public posts are readable
       const postResult = await checker.checkReadPermission(
@@ -528,7 +528,7 @@ describe('PermissionChecker', () => {
         ['tasks:task-1', { id: 'task-1', ownerId: 'user-1', status: 'blocked' }],
       ]);
 
-      const : Permission = {
+      const config: Permission = {
         globalRules: [
           // Blocking rule with higher priority
           createCustomRule(
@@ -548,7 +548,7 @@ describe('PermissionChecker', () => {
         defaultDeny: true,
       };
 
-      const checker = createTestChecker(, records);
+      const checker = createTestChecker(config, records);
 
       // Owner should be denied because blocking rule is checked first
       // and it doesn't grant access
@@ -565,12 +565,12 @@ describe('PermissionChecker', () => {
         ['tasks:task-1', { id: 'task-1', authorId: 'user-1' } as PermissionRecord],
       ]);
 
-      const : Permission = {
+      const config: Permission = {
         globalRules: [createOwnerRule(['read', 'write'], 'authorId')],
         defaultDeny: true,
       };
 
-      const checker = createTestChecker(, records);
+      const checker = createTestChecker(config, records);
 
       const result = await checker.checkReadPermission('user-1', 'user', 'tasks', 'task-1');
 
@@ -588,12 +588,12 @@ describe('PermissionChecker', () => {
         ],
       ]);
 
-      const : Permission = {
+      const config: Permission = {
         globalRules: [createMemberRule(['read'], 'collaborators')],
         defaultDeny: true,
       };
 
-      const checker = createTestChecker(, records);
+      const checker = createTestChecker(config, records);
 
       const result = await checker.checkReadPermission('user-1', 'user', 'tasks', 'task-1');
 
@@ -608,12 +608,12 @@ describe('PermissionChecker', () => {
         ['tasks:task-1', { id: 'task-1', ownerId: 'other' }],
       ]);
 
-      const : Permission = {
+      const config: Permission = {
         globalRules: [],
         defaultDeny: false,
       };
 
-      const checker = createTestChecker(, records);
+      const checker = createTestChecker(config, records);
 
       const result = await checker.checkReadPermission('user-1', 'user', 'tasks', 'task-1');
 
@@ -626,13 +626,13 @@ describe('PermissionChecker', () => {
 describe('Helper functions', () => {
   describe('createDefaultPermission', () => {
     test('should create  with admin, ownership, and membership rules', () => {
-      const  = createDefaultPermission();
+      const config = createDefaultPermission();
 
-      expect(.globalRules).toHaveLength(3);
-      expect(.globalRules[0]?.type).toBe('role');
-      expect(.globalRules[1]?.type).toBe('ownership');
-      expect(.globalRules[2]?.type).toBe('membership');
-      expect(.defaultDeny).toBe(true);
+      expect(config.globalRules).toHaveLength(3);
+      expect(config.globalRules[0]?.type).toBe('role');
+      expect(config.globalRules[1]?.type).toBe('ownership');
+      expect(config.globalRules[2]?.type).toBe('membership');
+      expect(config.defaultDeny).toBe(true);
     });
   });
 

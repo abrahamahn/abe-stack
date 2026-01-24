@@ -21,15 +21,8 @@
 
 import { randomBytes } from 'node:crypto';
 
-import { loadConfig } from '@config';
-import {
-  buildConnectionString,
-  createDbClient,
-  USERS_TABLE,
-  select,
-  eq,
-  insert,
-} from '@database';
+import { loadConfig } from '@/config';
+import { buildConnectionString, createDbClient, eq, insert, select, USERS_TABLE } from '@database';
 import { hashPassword } from '@modules/auth/utils/password';
 
 interface BootstrapResult {

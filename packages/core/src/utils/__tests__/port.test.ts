@@ -42,14 +42,12 @@ vi.mock('node:net', () => {
         hostOrCallback?: string | (() => void),
         callback?: () => void,
       ) {
-        const resolvedCallback =
-          typeof hostOrCallback === 'function' ? hostOrCallback : callback;
+        const resolvedCallback = typeof hostOrCallback === 'function' ? hostOrCallback : callback;
         const host =
           typeof portOrOptions === 'object'
             ? normalizeHost(portOrOptions.host)
             : normalizeHost(typeof hostOrCallback === 'string' ? hostOrCallback : undefined);
-        const port =
-          typeof portOrOptions === 'object' ? portOrOptions.port : portOrOptions;
+        const port = typeof portOrOptions === 'object' ? portOrOptions.port : portOrOptions;
 
         if (isPortTaken(port, host)) {
           const error = Object.assign(new Error('EADDRINUSE'), { code: 'EADDRINUSE' });

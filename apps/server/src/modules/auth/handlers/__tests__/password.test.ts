@@ -12,6 +12,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { handleForgotPassword, handleResetPassword, handleSetPassword } from '../password';
 
+import type { AppConfig } from '@/config';
 import type { AppContext, RequestWithCookies } from '@shared';
 
 // ============================================================================
@@ -28,33 +29,131 @@ vi.mock('@auth/service', () => ({
 // Test Helpers
 // ============================================================================
 
-function createMockContext(overrides?: Partial<AppContext>): AppContext {
+const baseConfig: AppConfig = {
+  env: 'test',
+  server: {
+    host: '127.0.0.1',
+    port: 8080,
+    portFallbacks: [],
+    cors: { origin: ['*'], credentials: false, methods: ['GET', 'POST'] },
+    trustProxy: false,
+    logLevel: 'silent',
+    maintenanceMode: false,
+    appBaseUrl: 'http://localhost:8080',
+    apiBaseUrl: 'http://localhost:8080',
+    rateLimit: { windowMs: 60000, max: 1000 },
+  },
+  database: {
+    provider: 'postgresql',
+    host: 'localhost',
+    port: 5432,
+    database: 'test',
+    user: 'test',
+    password: 'test',
+    maxConnections: 1,
+    portFallbacks: [],
+    ssl: false,
+  },
+  auth: {
+    strategies: ['local'],
+    jwt: {
+      secret: 'test-secret-32-characters-long!!',
+      accessTokenExpiry: '15m',
+      issuer: 'test',
+      audience: 'test',
+    },
+    refreshToken: { expiryDays: 7, gracePeriodSeconds: 30 },
+    argon2: { type: 2, memoryCost: 1024, timeCost: 1, parallelism: 1 },
+    password: { minLength: 8, maxLength: 64, minZxcvbnScore: 2 },
+    lockout: {
+      maxAttempts: 5,
+      lockoutDurationMs: 1800000,
+      progressiveDelay: false,
+      baseDelayMs: 0,
+    },
+    bffMode: false,
+    proxy: { trustProxy: false, trustedProxies: [], maxProxyDepth: 1 },
+    rateLimit: {
+      login: { max: 100, windowMs: 60000 },
+      register: { max: 100, windowMs: 60000 },
+      forgotPassword: { max: 100, windowMs: 60000 },
+      verifyEmail: { max: 100, windowMs: 60000 },
+    },
+    cookie: {
+      name: 'refreshToken',
+      secret: 'test',
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      path: '/',
+    },
+    oauth: {},
+    magicLink: { tokenExpiryMinutes: 15, maxAttempts: 3 },
+    totp: { issuer: 'Test', window: 1 },
+  },
+  email: {
+    provider: 'console',
+    smtp: {
+      host: '',
+      port: 587,
+      secure: false,
+      auth: { user: '', pass: '' },
+      connectionTimeout: 30000,
+      socketTimeout: 30000,
+    },
+    from: { name: 'Test', address: 'test@test.com' },
+    replyTo: 'test@test.com',
+  },
+  storage: { provider: 'local', rootPath: './test-uploads' },
+  billing: {
+    enabled: false,
+    provider: 'stripe',
+    currency: 'USD',
+    stripe: { secretKey: '', publishableKey: '', webhookSecret: '' },
+    paypal: { clientId: '', clientSecret: '', webhookId: '', sandbox: true },
+    plans: {},
+    urls: {
+      portalReturnUrl: 'http://localhost:8080/settings/billing',
+      checkoutSuccessUrl: 'http://localhost:8080/checkout/success',
+      checkoutCancelUrl: 'http://localhost:8080/checkout/cancel',
+    },
+  },
+  cache: { ttl: 300000, maxSize: 1000, useExternalProvider: false },
+  queue: {
+    provider: 'local',
+    pollIntervalMs: 1000,
+    concurrency: 1,
+    defaultMaxAttempts: 3,
+    backoffBaseMs: 1000,
+    maxBackoffMs: 30000,
+  },
+  notifications: {
+    enabled: false,
+    provider: 'fcm',
+    config: { credentials: '', projectId: '' },
+  },
+  search: { provider: 'sql', config: { defaultPageSize: 20, maxPageSize: 100 } },
+  packageManager: { provider: 'pnpm', strictPeerDeps: true, frozenLockfile: true },
+};
+
+type AppContextOverrides = Partial<AppContext> & {
+  config?: Partial<AppConfig> & { server?: Partial<AppConfig['server']> };
+};
+
+function createMockContext(overrides?: AppContextOverrides): AppContext {
+  const config: AppConfig = {
+    ...baseConfig,
+    ...(overrides?.config ?? {}),
+    server: {
+      ...baseConfig.server,
+      ...(overrides?.config?.server ?? {}),
+    },
+  };
   return {
     db: {} as AppContext['db'],
     repos: {} as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
-    config: {
-      auth: {
-        jwt: {
-          secret: 'test-secret-32-characters-long!!',
-          accessTokenExpiry: '15m',
-        },
-        argon2: {},
-        refreshToken: {
-          expiryDays: 7,
-          gracePeriodSeconds: 30,
-        },
-        lockout: {
-          maxAttempts: 5,
-          windowMs: 900000,
-          lockoutDurationMs: 1800000,
-        },
-      },
-      server: {
-        port: 8080,
-        appBaseUrl: 'http://localhost:8080',
-      },
-    },
+    config,
     log: {
       info: vi.fn(),
       warn: vi.fn(),
@@ -66,6 +165,7 @@ function createMockContext(overrides?: Partial<AppContext>): AppContext {
     },
     storage: {} as AppContext['storage'],
     pubsub: {} as AppContext['pubsub'],
+    cache: {} as AppContext['cache'],
     ...overrides,
   } as unknown as AppContext;
 }
@@ -79,7 +179,7 @@ function createMockRequest(userId?: string): RequestWithCookies {
       ipAddress: '127.0.0.1',
       userAgent: 'Test Browser',
     },
-    user: userId ? { userId, role: 'user' as const } : undefined,
+    user: userId ? { userId, email: 'test@example.com', role: 'user' as const } : undefined,
   };
 }
 
@@ -123,10 +223,12 @@ describe('handleForgotPassword', () => {
     });
 
     test('should use appBaseUrl from config', async () => {
+      const base = createMockContext().config;
       const ctx = createMockContext({
         config: {
-          ...createMockContext().config,
+          ...base,
           server: {
+            ...base.server,
             port: 3000,
             appBaseUrl: 'https://example.com',
           },
@@ -396,7 +498,7 @@ describe('handleResetPassword', () => {
       };
 
       vi.mocked(resetPassword).mockRejectedValue(
-        new WeakPasswordError('Password is too weak'),
+        new WeakPasswordError({ errors: ['Password is too weak'] }),
       );
 
       const result = await handleResetPassword(ctx, body);
@@ -561,7 +663,7 @@ describe('handleSetPassword', () => {
       const body = { password: 'NewSecureP@ssw0rd!' };
       const req = {
         ...createMockRequest(),
-        user: { userId: '', role: 'user' as const },
+        user: { userId: '', email: 'test@example.com', role: 'user' as const },
       };
 
       const result = await handleSetPassword(ctx, body, req);
@@ -627,7 +729,7 @@ describe('handleSetPassword', () => {
       const req = createMockRequest('user-123');
 
       vi.mocked(setPassword).mockRejectedValue(
-        new WeakPasswordError('Password is too weak'),
+        new WeakPasswordError({ errors: ['Password is too weak'] }),
       );
 
       const result = await handleSetPassword(ctx, body, req);
@@ -654,7 +756,7 @@ describe('handleSetPassword', () => {
       const body = { password: 'NewSecureP@ssw0rd!' };
       const req = createMockRequest('nonexistent-user');
 
-      const error = new InvalidCredentialsError('Invalid credentials');
+      const error = new InvalidCredentialsError();
       vi.mocked(setPassword).mockRejectedValue(error);
 
       const result = await handleSetPassword(ctx, body, req);
@@ -714,7 +816,11 @@ describe('handleSetPassword', () => {
       const body = { password: 'NewSecureP@ssw0rd!' };
       const req = {
         ...createMockRequest(),
-        user: { userId: null as unknown as string, role: 'user' as const },
+        user: {
+          userId: null as unknown as string,
+          email: 'test@example.com',
+          role: 'user' as const,
+        },
       };
 
       const result = await handleSetPassword(ctx, body, req);

@@ -66,8 +66,7 @@ describe('Domain Structure', () => {
     });
 
     test('should export user types and schemas from contracts', async () => {
-      const { userSchema, userRoleSchema, usersContract } =
-        await import('../contracts/index.js');
+      const { userSchema, userRoleSchema, usersContract } = await import('../contracts/index.js');
 
       expect(typeof userSchema).toBe('object');
       expect(typeof userRoleSchema).toBe('object');

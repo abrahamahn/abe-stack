@@ -43,9 +43,8 @@ describe('Notification Service', () => {
   // - getActiveSubscriptionCount(db)
 
   it('should export subscription management functions', async () => {
-    const { subscribe, unsubscribe, getUserSubscriptions, getSubscriptionById } = await import(
-      '../service.js'
-    );
+    const { subscribe, unsubscribe, getUserSubscriptions, getSubscriptionById } =
+      await import('../service.js');
     expect(typeof subscribe).toBe('function');
     expect(typeof unsubscribe).toBe('function');
     expect(typeof getUserSubscriptions).toBe('function');
@@ -53,18 +52,16 @@ describe('Notification Service', () => {
   });
 
   it('should export preference management functions', async () => {
-    const { getPreferences, updatePreferences, shouldSendNotification } = await import(
-      '../service.js'
-    );
+    const { getPreferences, updatePreferences, shouldSendNotification } =
+      await import('../service.js');
     expect(typeof getPreferences).toBe('function');
     expect(typeof updatePreferences).toBe('function');
     expect(typeof shouldSendNotification).toBe('function');
   });
 
   it('should export cleanup and stats functions', async () => {
-    const { cleanupExpiredSubscriptions, getSubscriptionStats, clearAllData } = await import(
-      '../service.js'
-    );
+    const { cleanupExpiredSubscriptions, getSubscriptionStats, clearAllData } =
+      await import('../service.js');
     expect(typeof cleanupExpiredSubscriptions).toBe('function');
     expect(typeof getSubscriptionStats).toBe('function');
     expect(typeof clearAllData).toBe('function');

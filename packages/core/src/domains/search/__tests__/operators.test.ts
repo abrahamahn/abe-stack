@@ -147,13 +147,21 @@ describe('operators', () => {
 
     describe('array operators', () => {
       test('in should match values in array', () => {
-        const condition: FilterCondition = { field: 'status', operator: 'in', value: ['active', 'pending'] };
+        const condition: FilterCondition = {
+          field: 'status',
+          operator: 'in',
+          value: ['active', 'pending'],
+        };
         expect(evaluateCondition(condition, { status: 'active' })).toBe(true);
         expect(evaluateCondition(condition, { status: 'inactive' })).toBe(false);
       });
 
       test('notIn should not match values in array', () => {
-        const condition: FilterCondition = { field: 'status', operator: 'notIn', value: ['deleted', 'banned'] };
+        const condition: FilterCondition = {
+          field: 'status',
+          operator: 'notIn',
+          value: ['deleted', 'banned'],
+        };
         expect(evaluateCondition(condition, { status: 'active' })).toBe(true);
         expect(evaluateCondition(condition, { status: 'deleted' })).toBe(false);
       });
@@ -191,8 +199,14 @@ describe('operators', () => {
 
     describe('array field operators', () => {
       test('arrayContains should check if field array contains value', () => {
-        const condition: FilterCondition = { field: 'tags', operator: 'arrayContains', value: 'typescript' };
-        expect(evaluateCondition(condition, { tags: ['javascript', 'typescript', 'react'] })).toBe(true);
+        const condition: FilterCondition = {
+          field: 'tags',
+          operator: 'arrayContains',
+          value: 'typescript',
+        };
+        expect(evaluateCondition(condition, { tags: ['javascript', 'typescript', 'react'] })).toBe(
+          true,
+        );
         expect(evaluateCondition(condition, { tags: ['python', 'java'] })).toBe(false);
       });
 
@@ -209,7 +223,11 @@ describe('operators', () => {
 
     describe('fullText operator', () => {
       test('should match all terms', () => {
-        const condition: FilterCondition = { field: 'description', operator: 'fullText', value: 'quick brown' };
+        const condition: FilterCondition = {
+          field: 'description',
+          operator: 'fullText',
+          value: 'quick brown',
+        };
         expect(evaluateCondition(condition, { description: 'The quick brown fox' })).toBe(true);
         expect(evaluateCondition(condition, { description: 'The quick red fox' })).toBe(false);
       });
@@ -270,10 +288,18 @@ describe('operators', () => {
         ],
       };
 
-      expect(evaluateCompoundFilter(filter, { status: 'active', role: 'admin', age: 18 })).toBe(true);
-      expect(evaluateCompoundFilter(filter, { status: 'active', role: 'user', age: 25 })).toBe(true);
-      expect(evaluateCompoundFilter(filter, { status: 'active', role: 'user', age: 18 })).toBe(false);
-      expect(evaluateCompoundFilter(filter, { status: 'inactive', role: 'admin', age: 25 })).toBe(false);
+      expect(evaluateCompoundFilter(filter, { status: 'active', role: 'admin', age: 18 })).toBe(
+        true,
+      );
+      expect(evaluateCompoundFilter(filter, { status: 'active', role: 'user', age: 25 })).toBe(
+        true,
+      );
+      expect(evaluateCompoundFilter(filter, { status: 'active', role: 'user', age: 18 })).toBe(
+        false,
+      );
+      expect(evaluateCompoundFilter(filter, { status: 'inactive', role: 'admin', age: 25 })).toBe(
+        false,
+      );
     });
   });
 

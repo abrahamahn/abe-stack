@@ -289,7 +289,7 @@ export async function handleCreateCheckout(
     return { status: 401, body: { message: 'Unauthorized' } };
   }
 
-  if (!ctx.config.billing || !ctx.config.billing.enabled) {
+  if (!ctx.config.billing.enabled) {
     return { status: 500, body: { message: 'Billing is not enabled' } };
   }
 
@@ -336,7 +336,7 @@ export async function handleCancelSubscription(
     return { status: 401, body: { message: 'Unauthorized' } };
   }
 
-  if (!ctx.config.billing || !ctx.config.billing.enabled) {
+  if (!ctx.config.billing.enabled) {
     return { status: 500, body: { message: 'Billing is not enabled' } };
   }
 
@@ -381,7 +381,7 @@ export async function handleResumeSubscription(
     return { status: 401, body: { message: 'Unauthorized' } };
   }
 
-  if (!ctx.config.billing || !ctx.config.billing.enabled) {
+  if (!ctx.config.billing.enabled) {
     return { status: 500, body: { message: 'Billing is not enabled' } };
   }
 
@@ -425,7 +425,7 @@ export async function handleUpdateSubscription(
     return { status: 401, body: { message: 'Unauthorized' } };
   }
 
-  if (!ctx.config.billing || !ctx.config.billing.enabled) {
+  if (!ctx.config.billing.enabled) {
     return { status: 500, body: { message: 'Billing is not enabled' } };
   }
 
@@ -536,7 +536,7 @@ export async function handleAddPaymentMethod(
     return { status: 401, body: { message: 'Unauthorized' } };
   }
 
-  if (!ctx.config.billing || !ctx.config.billing.enabled) {
+  if (!ctx.config.billing.enabled) {
     return { status: 500, body: { message: 'Billing is not enabled' } };
   }
 
@@ -585,7 +585,7 @@ export async function handleRemovePaymentMethod(
     return { status: 401, body: { message: 'Unauthorized' } };
   }
 
-  if (!ctx.config.billing || !ctx.config.billing.enabled) {
+  if (!ctx.config.billing.enabled) {
     return { status: 500, body: { message: 'Billing is not enabled' } };
   }
 
@@ -629,7 +629,7 @@ export async function handleSetDefaultPaymentMethod(
     return { status: 401, body: { message: 'Unauthorized' } };
   }
 
-  if (!ctx.config.billing || !ctx.config.billing.enabled) {
+  if (!ctx.config.billing.enabled) {
     return { status: 500, body: { message: 'Billing is not enabled' } };
   }
 
@@ -676,7 +676,7 @@ export async function handleCreateSetupIntent(
     return { status: 401, body: { message: 'Unauthorized' } };
   }
 
-  if (!ctx.config.billing || !ctx.config.billing.enabled) {
+  if (!ctx.config.billing.enabled) {
     return { status: 500, body: { message: 'Billing is not enabled' } };
   }
 

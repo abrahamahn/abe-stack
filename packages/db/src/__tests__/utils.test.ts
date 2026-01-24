@@ -436,7 +436,9 @@ describe('Database Utils', () => {
 
       // Verify structure is preserved
       expect(snakeCased).toHaveProperty('user_profile.personal_info.first_name');
-      expect(snakeCased).toHaveProperty('user_profile.preferences.notification_settings.email_notifications');
+      expect(snakeCased).toHaveProperty(
+        'user_profile.preferences.notification_settings.email_notifications',
+      );
       expect(Array.isArray(snakeCased.user_posts)).toBe(true);
       expect(snakeCased.user_posts[0]).toHaveProperty('post_id');
 

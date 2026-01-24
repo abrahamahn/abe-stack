@@ -54,9 +54,7 @@ export function createRefreshTokenFamilyRepository(db: RawDb): RefreshTokenFamil
   return {
     async findById(id: string): Promise<RefreshTokenFamily | null> {
       const result = await db.queryOne<Record<string, unknown>>(
-        select(REFRESH_TOKEN_FAMILIES_TABLE)
-          .where(eq('id', id))
-          .toSql()
+        select(REFRESH_TOKEN_FAMILIES_TABLE).where(eq('id', id)).toSql(),
       );
       return result ? toCamelCase<RefreshTokenFamily>(result, REFRESH_TOKEN_FAMILY_COLUMNS) : null;
     },
@@ -66,18 +64,18 @@ export function createRefreshTokenFamilyRepository(db: RawDb): RefreshTokenFamil
         select(REFRESH_TOKEN_FAMILIES_TABLE)
           .where(and(eq('user_id', userId), isNull('revoked_at')))
           .orderBy('created_at', 'desc')
-          .toSql()
+          .toSql(),
       );
       return toCamelCaseArray<RefreshTokenFamily>(results, REFRESH_TOKEN_FAMILY_COLUMNS);
     },
 
     async create(family: NewRefreshTokenFamily): Promise<RefreshTokenFamily> {
-      const snakeData = toSnakeCase(family as unknown as Record<string, unknown>, REFRESH_TOKEN_FAMILY_COLUMNS);
+      const snakeData = toSnakeCase(
+        family as unknown as Record<string, unknown>,
+        REFRESH_TOKEN_FAMILY_COLUMNS,
+      );
       const result = await db.queryOne<Record<string, unknown>>(
-        insert(REFRESH_TOKEN_FAMILIES_TABLE)
-          .values(snakeData)
-          .returningAll()
-          .toSql()
+        insert(REFRESH_TOKEN_FAMILIES_TABLE).values(snakeData).returningAll().toSql(),
       );
       if (!result) {
         throw new Error('Failed to create refresh token family');
@@ -90,7 +88,7 @@ export function createRefreshTokenFamilyRepository(db: RawDb): RefreshTokenFamil
         update(REFRESH_TOKEN_FAMILIES_TABLE)
           .set({ revoked_at: new Date(), revoke_reason: reason })
           .where(eq('id', id))
-          .toSql()
+          .toSql(),
       );
     },
 
@@ -99,7 +97,7 @@ export function createRefreshTokenFamilyRepository(db: RawDb): RefreshTokenFamil
         update(REFRESH_TOKEN_FAMILIES_TABLE)
           .set({ revoked_at: new Date(), revoke_reason: reason })
           .where(and(eq('user_id', userId), isNull('revoked_at')))
-          .toSql()
+          .toSql(),
       );
     },
   };
@@ -119,12 +117,12 @@ export interface LoginAttemptRepository {
 export function createLoginAttemptRepository(db: RawDb): LoginAttemptRepository {
   return {
     async create(attempt: NewLoginAttempt): Promise<LoginAttempt> {
-      const snakeData = toSnakeCase(attempt as unknown as Record<string, unknown>, LOGIN_ATTEMPT_COLUMNS);
+      const snakeData = toSnakeCase(
+        attempt as unknown as Record<string, unknown>,
+        LOGIN_ATTEMPT_COLUMNS,
+      );
       const result = await db.queryOne<Record<string, unknown>>(
-        insert(LOGIN_ATTEMPTS_TABLE)
-          .values(snakeData)
-          .returningAll()
-          .toSql()
+        insert(LOGIN_ATTEMPTS_TABLE).values(snakeData).returningAll().toSql(),
       );
       if (!result) {
         throw new Error('Failed to create login attempt');
@@ -137,12 +135,8 @@ export function createLoginAttemptRepository(db: RawDb): LoginAttemptRepository 
         select(LOGIN_ATTEMPTS_TABLE)
           .columns()
           .column(raw('COUNT(*)'), 'count')
-          .where(and(
-            eq('email', email),
-            eq('success', false),
-            gt('created_at', since)
-          ))
-          .toSql()
+          .where(and(eq('email', email), eq('success', false), gt('created_at', since)))
+          .toSql(),
       );
       return result ? parseInt(result.count, 10) : 0;
     },
@@ -153,17 +147,13 @@ export function createLoginAttemptRepository(db: RawDb): LoginAttemptRepository 
           .where(eq('email', email))
           .orderBy('created_at', 'desc')
           .limit(limit)
-          .toSql()
+          .toSql(),
       );
       return toCamelCaseArray<LoginAttempt>(results, LOGIN_ATTEMPT_COLUMNS);
     },
 
     async deleteOlderThan(date: Date): Promise<number> {
-      return db.execute(
-        deleteFrom(LOGIN_ATTEMPTS_TABLE)
-          .where(lt('created_at', date))
-          .toSql()
-      );
+      return db.execute(deleteFrom(LOGIN_ATTEMPTS_TABLE).where(lt('created_at', date)).toSql());
     },
   };
 }
@@ -187,9 +177,7 @@ export function createPasswordResetTokenRepository(db: RawDb): PasswordResetToke
   return {
     async findById(id: string): Promise<PasswordResetToken | null> {
       const result = await db.queryOne<Record<string, unknown>>(
-        select(PASSWORD_RESET_TOKENS_TABLE)
-          .where(eq('id', id))
-          .toSql()
+        select(PASSWORD_RESET_TOKENS_TABLE).where(eq('id', id)).toSql(),
       );
       return result ? toCamelCase<PasswordResetToken>(result, PASSWORD_RESET_TOKEN_COLUMNS) : null;
     },
@@ -197,12 +185,8 @@ export function createPasswordResetTokenRepository(db: RawDb): PasswordResetToke
     async findValidByTokenHash(tokenHash: string): Promise<PasswordResetToken | null> {
       const result = await db.queryOne<Record<string, unknown>>(
         select(PASSWORD_RESET_TOKENS_TABLE)
-          .where(and(
-            eq('token_hash', tokenHash),
-            gt('expires_at', new Date()),
-            isNull('used_at')
-          ))
-          .toSql()
+          .where(and(eq('token_hash', tokenHash), gt('expires_at', new Date()), isNull('used_at')))
+          .toSql(),
       );
       return result ? toCamelCase<PasswordResetToken>(result, PASSWORD_RESET_TOKEN_COLUMNS) : null;
     },
@@ -210,25 +194,21 @@ export function createPasswordResetTokenRepository(db: RawDb): PasswordResetToke
     async findValidByUserId(userId: string): Promise<PasswordResetToken | null> {
       const result = await db.queryOne<Record<string, unknown>>(
         select(PASSWORD_RESET_TOKENS_TABLE)
-          .where(and(
-            eq('user_id', userId),
-            gt('expires_at', new Date()),
-            isNull('used_at')
-          ))
+          .where(and(eq('user_id', userId), gt('expires_at', new Date()), isNull('used_at')))
           .orderBy('created_at', 'desc')
           .limit(1)
-          .toSql()
+          .toSql(),
       );
       return result ? toCamelCase<PasswordResetToken>(result, PASSWORD_RESET_TOKEN_COLUMNS) : null;
     },
 
     async create(token: NewPasswordResetToken): Promise<PasswordResetToken> {
-      const snakeData = toSnakeCase(token as unknown as Record<string, unknown>, PASSWORD_RESET_TOKEN_COLUMNS);
+      const snakeData = toSnakeCase(
+        token as unknown as Record<string, unknown>,
+        PASSWORD_RESET_TOKEN_COLUMNS,
+      );
       const result = await db.queryOne<Record<string, unknown>>(
-        insert(PASSWORD_RESET_TOKENS_TABLE)
-          .values(snakeData)
-          .returningAll()
-          .toSql()
+        insert(PASSWORD_RESET_TOKENS_TABLE).values(snakeData).returningAll().toSql(),
       );
       if (!result) {
         throw new Error('Failed to create password reset token');
@@ -241,7 +221,7 @@ export function createPasswordResetTokenRepository(db: RawDb): PasswordResetToke
         update(PASSWORD_RESET_TOKENS_TABLE)
           .set({ used_at: new Date() })
           .where(eq('id', id))
-          .toSql()
+          .toSql(),
       );
     },
 
@@ -250,23 +230,19 @@ export function createPasswordResetTokenRepository(db: RawDb): PasswordResetToke
         update(PASSWORD_RESET_TOKENS_TABLE)
           .set({ used_at: new Date() })
           .where(and(eq('user_id', userId), isNull('used_at')))
-          .toSql()
+          .toSql(),
       );
     },
 
     async deleteByUserId(userId: string): Promise<number> {
       return db.execute(
-        deleteFrom(PASSWORD_RESET_TOKENS_TABLE)
-          .where(eq('user_id', userId))
-          .toSql()
+        deleteFrom(PASSWORD_RESET_TOKENS_TABLE).where(eq('user_id', userId)).toSql(),
       );
     },
 
     async deleteExpired(): Promise<number> {
       return db.execute(
-        deleteFrom(PASSWORD_RESET_TOKENS_TABLE)
-          .where(lt('expires_at', new Date()))
-          .toSql()
+        deleteFrom(PASSWORD_RESET_TOKENS_TABLE).where(lt('expires_at', new Date())).toSql(),
       );
     },
   };
@@ -287,52 +263,50 @@ export interface EmailVerificationTokenRepository {
   deleteExpired(): Promise<number>;
 }
 
-export function createEmailVerificationTokenRepository(db: RawDb): EmailVerificationTokenRepository {
+export function createEmailVerificationTokenRepository(
+  db: RawDb,
+): EmailVerificationTokenRepository {
   return {
     async findById(id: string): Promise<EmailVerificationToken | null> {
       const result = await db.queryOne<Record<string, unknown>>(
-        select(EMAIL_VERIFICATION_TOKENS_TABLE)
-          .where(eq('id', id))
-          .toSql()
+        select(EMAIL_VERIFICATION_TOKENS_TABLE).where(eq('id', id)).toSql(),
       );
-      return result ? toCamelCase<EmailVerificationToken>(result, EMAIL_VERIFICATION_TOKEN_COLUMNS) : null;
+      return result
+        ? toCamelCase<EmailVerificationToken>(result, EMAIL_VERIFICATION_TOKEN_COLUMNS)
+        : null;
     },
 
     async findValidByTokenHash(tokenHash: string): Promise<EmailVerificationToken | null> {
       const result = await db.queryOne<Record<string, unknown>>(
         select(EMAIL_VERIFICATION_TOKENS_TABLE)
-          .where(and(
-            eq('token_hash', tokenHash),
-            gt('expires_at', new Date()),
-            isNull('used_at')
-          ))
-          .toSql()
+          .where(and(eq('token_hash', tokenHash), gt('expires_at', new Date()), isNull('used_at')))
+          .toSql(),
       );
-      return result ? toCamelCase<EmailVerificationToken>(result, EMAIL_VERIFICATION_TOKEN_COLUMNS) : null;
+      return result
+        ? toCamelCase<EmailVerificationToken>(result, EMAIL_VERIFICATION_TOKEN_COLUMNS)
+        : null;
     },
 
     async findValidByUserId(userId: string): Promise<EmailVerificationToken | null> {
       const result = await db.queryOne<Record<string, unknown>>(
         select(EMAIL_VERIFICATION_TOKENS_TABLE)
-          .where(and(
-            eq('user_id', userId),
-            gt('expires_at', new Date()),
-            isNull('used_at')
-          ))
+          .where(and(eq('user_id', userId), gt('expires_at', new Date()), isNull('used_at')))
           .orderBy('created_at', 'desc')
           .limit(1)
-          .toSql()
+          .toSql(),
       );
-      return result ? toCamelCase<EmailVerificationToken>(result, EMAIL_VERIFICATION_TOKEN_COLUMNS) : null;
+      return result
+        ? toCamelCase<EmailVerificationToken>(result, EMAIL_VERIFICATION_TOKEN_COLUMNS)
+        : null;
     },
 
     async create(token: NewEmailVerificationToken): Promise<EmailVerificationToken> {
-      const snakeData = toSnakeCase(token as unknown as Record<string, unknown>, EMAIL_VERIFICATION_TOKEN_COLUMNS);
+      const snakeData = toSnakeCase(
+        token as unknown as Record<string, unknown>,
+        EMAIL_VERIFICATION_TOKEN_COLUMNS,
+      );
       const result = await db.queryOne<Record<string, unknown>>(
-        insert(EMAIL_VERIFICATION_TOKENS_TABLE)
-          .values(snakeData)
-          .returningAll()
-          .toSql()
+        insert(EMAIL_VERIFICATION_TOKENS_TABLE).values(snakeData).returningAll().toSql(),
       );
       if (!result) {
         throw new Error('Failed to create email verification token');
@@ -345,7 +319,7 @@ export function createEmailVerificationTokenRepository(db: RawDb): EmailVerifica
         update(EMAIL_VERIFICATION_TOKENS_TABLE)
           .set({ used_at: new Date() })
           .where(eq('id', id))
-          .toSql()
+          .toSql(),
       );
     },
 
@@ -354,23 +328,19 @@ export function createEmailVerificationTokenRepository(db: RawDb): EmailVerifica
         update(EMAIL_VERIFICATION_TOKENS_TABLE)
           .set({ used_at: new Date() })
           .where(and(eq('user_id', userId), isNull('used_at')))
-          .toSql()
+          .toSql(),
       );
     },
 
     async deleteByUserId(userId: string): Promise<number> {
       return db.execute(
-        deleteFrom(EMAIL_VERIFICATION_TOKENS_TABLE)
-          .where(eq('user_id', userId))
-          .toSql()
+        deleteFrom(EMAIL_VERIFICATION_TOKENS_TABLE).where(eq('user_id', userId)).toSql(),
       );
     },
 
     async deleteExpired(): Promise<number> {
       return db.execute(
-        deleteFrom(EMAIL_VERIFICATION_TOKENS_TABLE)
-          .where(lt('expires_at', new Date()))
-          .toSql()
+        deleteFrom(EMAIL_VERIFICATION_TOKENS_TABLE).where(lt('expires_at', new Date())).toSql(),
       );
     },
   };
@@ -382,7 +352,10 @@ export function createEmailVerificationTokenRepository(db: RawDb): EmailVerifica
 
 export interface SecurityEventRepository {
   create(event: NewSecurityEvent): Promise<SecurityEvent>;
-  findByUserId(userId: string, options?: PaginationOptions): Promise<PaginatedResult<SecurityEvent>>;
+  findByUserId(
+    userId: string,
+    options?: PaginationOptions,
+  ): Promise<PaginatedResult<SecurityEvent>>;
   findByEmail(email: string, options?: PaginationOptions): Promise<PaginatedResult<SecurityEvent>>;
   findByType(eventType: string, timeRange?: TimeRangeFilter): Promise<SecurityEvent[]>;
   findBySeverity(severity: string, timeRange?: TimeRangeFilter): Promise<SecurityEvent[]>;
@@ -393,12 +366,12 @@ export interface SecurityEventRepository {
 export function createSecurityEventRepository(db: RawDb): SecurityEventRepository {
   return {
     async create(event: NewSecurityEvent): Promise<SecurityEvent> {
-      const snakeData = toSnakeCase(event as unknown as Record<string, unknown>, SECURITY_EVENT_COLUMNS);
+      const snakeData = toSnakeCase(
+        event as unknown as Record<string, unknown>,
+        SECURITY_EVENT_COLUMNS,
+      );
       const result = await db.queryOne<Record<string, unknown>>(
-        insert(SECURITY_EVENTS_TABLE)
-          .values(snakeData)
-          .returningAll()
-          .toSql()
+        insert(SECURITY_EVENTS_TABLE).values(snakeData).returningAll().toSql(),
       );
       if (!result) {
         throw new Error('Failed to create security event');
@@ -417,9 +390,7 @@ export function createSecurityEventRepository(db: RawDb): SecurityEventRepositor
       if (cursor) {
         const cursorDate = new Date(cursor);
         query = query.where(
-          direction === 'desc'
-            ? lt('created_at', cursorDate)
-            : gt('created_at', cursorDate)
+          direction === 'desc' ? lt('created_at', cursorDate) : gt('created_at', cursorDate),
         );
       }
 
@@ -450,9 +421,7 @@ export function createSecurityEventRepository(db: RawDb): SecurityEventRepositor
       if (cursor) {
         const cursorDate = new Date(cursor);
         query = query.where(
-          direction === 'desc'
-            ? lt('created_at', cursorDate)
-            : gt('created_at', cursorDate)
+          direction === 'desc' ? lt('created_at', cursorDate) : gt('created_at', cursorDate),
         );
       }
 
@@ -510,17 +479,13 @@ export function createSecurityEventRepository(db: RawDb): SecurityEventRepositor
           .columns()
           .column(raw('COUNT(*)'), 'count')
           .where(and(eq('event_type', eventType), gt('created_at', since)))
-          .toSql()
+          .toSql(),
       );
       return result ? parseInt(result.count, 10) : 0;
     },
 
     async deleteOlderThan(date: Date): Promise<number> {
-      return db.execute(
-        deleteFrom(SECURITY_EVENTS_TABLE)
-          .where(lt('created_at', date))
-          .toSql()
-      );
+      return db.execute(deleteFrom(SECURITY_EVENTS_TABLE).where(lt('created_at', date)).toSql());
     },
   };
 }

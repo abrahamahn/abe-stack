@@ -16,8 +16,8 @@
  * - demo@example.com / password123 (user role)
  */
 
-import { loadConfig } from '@config';
-import { buildConnectionString, createDbClient, USERS_TABLE, insert } from '@database';
+import { loadConfig } from '@/config';
+import { buildConnectionString, createDbClient, insert, USERS_TABLE } from '@database';
 import { hashPassword } from '@modules/auth/utils/password';
 
 import type { UserRole } from '@abe-stack/core';

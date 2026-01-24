@@ -100,7 +100,7 @@ describe('Custom Syntax Highlighter', () => {
       // Should contain newline characters
       const newlineElements = result.filter((el) => {
         if (el && typeof el === 'object' && 'props' in el) {
-          return (el).props.children === '\n';
+          return el.props.children === '\n';
         }
         return false;
       });

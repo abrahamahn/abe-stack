@@ -2,7 +2,7 @@
 import { ConsoleEmailService } from '@email/consoleEmailService';
 import { SmtpEmailService } from '@email/smtpEmailService';
 
-import type { EmailConfig } from '@config';
+import type { EmailConfig } from '@/config';
 import type { EmailService } from '@email/types';
 
 /**

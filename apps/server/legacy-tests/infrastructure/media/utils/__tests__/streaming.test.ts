@@ -48,7 +48,7 @@ vi.mock('fluent-ffmpeg', () => {
     size: vi.fn().mockReturnThis(),
     videoBitrate: vi.fn().mockReturnThis(),
     setStartTime: vi.fn().mockReturnThis(),
-    setDuration: vi.fn().mockReturnThis(),
+    setDconfiguration: vi.fn().mockReturnThis(),
     on: vi.fn().mockImplementation(function (
       this: typeof mockCommand,
       event: string,
@@ -220,7 +220,7 @@ describe('StreamingMediaProcessor', () => {
     it('should process video with time segment', async () => {
       const result = await processor.processLargeVideo('/tmp/input.mp4', '/tmp/output.mp4', {
         startTime: 10,
-        duration: 30,
+        dconfiguration: 30,
       });
 
       expect(result.success).toBe(true);
@@ -236,7 +236,7 @@ describe('StreamingMediaProcessor', () => {
         size: vi.fn().mockReturnThis(),
         videoBitrate: vi.fn().mockReturnThis(),
         setStartTime: vi.fn().mockReturnThis(),
-        setDuration: vi.fn().mockReturnThis(),
+        setDconfiguration: vi.fn().mockReturnThis(),
         on: vi.fn().mockImplementation(function (
           this: ReturnType<typeof mockFfmpeg>,
           event: string,
@@ -267,7 +267,7 @@ describe('StreamingMediaProcessor', () => {
         size: vi.fn().mockReturnThis(),
         videoBitrate: vi.fn().mockReturnThis(),
         setStartTime: vi.fn().mockReturnThis(),
-        setDuration: vi.fn().mockReturnThis(),
+        setDconfiguration: vi.fn().mockReturnThis(),
         on: vi.fn().mockImplementation(function (
           this: ReturnType<typeof mockFfmpeg>,
           event: string,

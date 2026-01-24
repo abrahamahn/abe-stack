@@ -395,9 +395,7 @@ describe('ResizablePanel', () => {
     });
 
     it('generates default label based on direction', () => {
-      const { rerender } = render(
-        <ResizableSeparator currentSize={50} direction="horizontal" />,
-      );
+      const { rerender } = render(<ResizableSeparator currentSize={50} direction="horizontal" />);
 
       let separator = screen.getByRole('separator');
       expect(separator.getAttribute('aria-label')).toContain('width');

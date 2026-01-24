@@ -22,6 +22,7 @@ function createMockUser(overrides: Partial<DbUser> = {}): DbUser {
     email: 'test@example.com',
     passwordHash: 'hash',
     name: 'Test User',
+    avatarUrl: null,
     role: 'user',
     emailVerified: true,
     emailVerifiedAt: new Date('2024-01-01'),
@@ -67,7 +68,10 @@ describe('Admin User Service', () => {
 
   describe('listUsers', () => {
     test('should return paginated users', async () => {
-      const mockUsers = [createMockUser(), createMockUser({ id: 'user-456', email: 'other@example.com' })];
+      const mockUsers = [
+        createMockUser(),
+        createMockUser({ id: 'user-456', email: 'other@example.com' }),
+      ];
       vi.mocked(mockRepo.listWithFilters).mockResolvedValue({
         items: mockUsers,
         total: 2,

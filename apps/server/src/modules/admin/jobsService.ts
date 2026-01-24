@@ -10,8 +10,8 @@ import type {
   JobDetails,
   JobListOptions,
   JobListResult,
-  QueueStats,
   PostgresQueueStore,
+  QueueStats,
 } from '@infrastructure';
 
 // ============================================================================
@@ -120,10 +120,6 @@ export async function listJobs(
   store: PostgresQueueStore,
   options: JobListOptions,
 ): Promise<JobListResult> {
-  if (!store.listJobs) {
-    throw new QueueStoreNotAvailableError('listJobs');
-  }
-
   const result = await store.listJobs(options);
 
   // Redact sensitive fields from all job payloads
@@ -136,14 +132,7 @@ export async function listJobs(
 /**
  * Get detailed job information with payload redaction
  */
-export async function getJobDetails(
-  store: PostgresQueueStore,
-  jobId: string,
-): Promise<JobDetails> {
-  if (!store.getJobDetails) {
-    throw new QueueStoreNotAvailableError('getJobDetails');
-  }
-
+export async function getJobDetails(store: PostgresQueueStore, jobId: string): Promise<JobDetails> {
   const job = await store.getJobDetails(jobId);
   if (!job) {
     throw new JobNotFoundError(jobId);
@@ -156,11 +145,7 @@ export async function getJobDetails(
  * Get queue statistics
  */
 export async function getQueueStats(store: PostgresQueueStore): Promise<QueueStats> {
-  if (!store.getQueueStats) {
-    throw new QueueStoreNotAvailableError('getQueueStats');
-  }
-
-  return await store.getQueueStats();
+  return store.getQueueStats();
 }
 
 /**
@@ -170,15 +155,12 @@ export async function retryJob(
   store: PostgresQueueStore,
   jobId: string,
 ): Promise<{ success: boolean; message: string }> {
-  if (!store.retryJob) {
-    throw new QueueStoreNotAvailableError('retryJob');
-  }
-
   const success = await store.retryJob(jobId);
 
   if (!success) {
     // Job either doesn't exist or is not in a retriable state
-    const job = store.getJobDetails ? await store.getJobDetails(jobId) : null;
+
+    const job = await store.getJobDetails(jobId);
     if (!job) {
       throw new JobNotFoundError(jobId);
     }
@@ -201,15 +183,12 @@ export async function cancelJob(
   store: PostgresQueueStore,
   jobId: string,
 ): Promise<{ success: boolean; message: string }> {
-  if (!store.cancelJob) {
-    throw new QueueStoreNotAvailableError('cancelJob');
-  }
-
   const success = await store.cancelJob(jobId);
 
   if (!success) {
     // Job either doesn't exist or is not in a cancellable state
-    const job = store.getJobDetails ? await store.getJobDetails(jobId) : null;
+
+    const job = await store.getJobDetails(jobId);
     if (!job) {
       throw new JobNotFoundError(jobId);
     }

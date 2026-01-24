@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { clearRefreshTokenCookie, setRefreshTokenCookie } from '../cookies';
 
-import type { AuthConfig } from '@config';
+import type { AuthConfig } from '@/config';
 
 // ============================================================================
 // Mock Helpers
@@ -201,7 +201,7 @@ describe('setRefreshTokenCookie', () => {
 
     setRefreshTokenCookie(reply as Parameters<typeof setRefreshTokenCookie>[0], 'token', config);
 
-    const expectedMaxAge = 7 * 24 * 60 * 60; // 7 days in seconds
+    const expectedMaxAge = 7 * 24 * 60 * 60 * 1000; // 7 days in ms
     expect(reply.setCookie).toHaveBeenCalledWith(
       expect.any(String),
       expect.any(String),
@@ -220,7 +220,7 @@ describe('setRefreshTokenCookie', () => {
 
     setRefreshTokenCookie(reply as Parameters<typeof setRefreshTokenCookie>[0], 'token', config);
 
-    const expectedMaxAge = 30 * 24 * 60 * 60; // 30 days in seconds
+    const expectedMaxAge = 30 * 24 * 60 * 60 * 1000; // 30 days in ms
     expect(reply.setCookie).toHaveBeenCalledWith(
       expect.any(String),
       expect.any(String),

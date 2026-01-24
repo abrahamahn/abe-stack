@@ -26,8 +26,7 @@ describe('AuthFormState type', () => {
       setIsLoading: () => undefined,
       setError: () => undefined,
       clearError: () => undefined,
-      wrapHandler: <T, R>(handler: (data: T) => Promise<R>) =>
-        handler,
+      wrapHandler: <T, R>(handler: (data: T) => Promise<R>) => handler,
     };
 
     // This assignment should compile without error

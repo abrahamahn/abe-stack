@@ -133,7 +133,9 @@ export function UserActionsMenu({
                 id="edit-name"
                 type="text"
                 value={editName}
-                onChange={(e) => { setEditName(e.target.value); }}
+                onChange={(e) => {
+                  setEditName(e.target.value);
+                }}
                 placeholder="Enter name"
                 disabled={isAnyLoading}
               />
@@ -149,7 +151,9 @@ export function UserActionsMenu({
               <Select
                 id="edit-role"
                 value={editRole}
-                onChange={(value) => { setEditRole(value as UserRole); }}
+                onChange={(value) => {
+                  setEditRole(value as UserRole);
+                }}
                 disabled={isAnyLoading}
               >
                 {ROLE_OPTIONS.map((option) => (
@@ -181,7 +185,9 @@ export function UserActionsMenu({
               This user is currently locked. Provide a reason to unlock their account.
             </Text>
             <form
-              onSubmit={(event) => { void handleUnlockSubmit(event); }}
+              onSubmit={(event) => {
+                void handleUnlockSubmit(event);
+              }}
               className="space-y-4"
             >
               <div>
@@ -194,7 +200,9 @@ export function UserActionsMenu({
                 <TextArea
                   id="unlock-reason"
                   value={unlockReason}
-                  onChange={(e) => { setUnlockReason(e.target.value); }}
+                  onChange={(e) => {
+                    setUnlockReason(e.target.value);
+                  }}
                   placeholder="Enter reason for unlocking this account"
                   rows={3}
                   disabled={isAnyLoading}
@@ -217,7 +225,9 @@ export function UserActionsMenu({
               Locking a user will prevent them from logging in.
             </Text>
             <form
-              onSubmit={(event) => { void handleLockSubmit(event); }}
+              onSubmit={(event) => {
+                void handleLockSubmit(event);
+              }}
               className="space-y-4"
             >
               <div>
@@ -230,7 +240,9 @@ export function UserActionsMenu({
                 <TextArea
                   id="lock-reason"
                   value={lockReason}
-                  onChange={(e) => { setLockReason(e.target.value); }}
+                  onChange={(e) => {
+                    setLockReason(e.target.value);
+                  }}
                   placeholder="Enter reason for locking this account"
                   rows={3}
                   disabled={isAnyLoading}
@@ -247,7 +259,9 @@ export function UserActionsMenu({
                 <Select
                   id="lock-duration"
                   value={lockDuration}
-                  onChange={(value) => { setLockDuration(value); }}
+                  onChange={(value) => {
+                    setLockDuration(value);
+                  }}
                   disabled={isAnyLoading}
                 >
                   {LOCK_DURATION_OPTIONS.map((option) => (

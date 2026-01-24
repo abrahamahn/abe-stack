@@ -3,26 +3,78 @@
  * Centralized Query Key Factory
  *
  * Provides type-safe, hierarchical query keys for the custom query hooks.
- * Using a factory pattern ensures:
- * - Consistent key structure across the app
- * - Type safety for filter/parameter objects
- * - Easy cache invalidation at any level of the hierarchy
- *
- * @example
- * ```ts
- * // Use in queries
- * useQuery({
- *   queryKey: queryKeys.users.detail(userId),
- *   queryFn: () => fetchUser(userId),
- * });
- *
- * // Invalidate all user queries
- * queryCache.invalidateQueries({ queryKey: queryKeys.users.all });
- *
- * // Invalidate specific user
- * queryCache.invalidateQueries({ queryKey: queryKeys.users.detail(userId) });
- * ```
  */
+
+// ============================================================================
+// Types
+// ============================================================================
+
+export type ListQueryKey<T extends string> = readonly [
+  T,
+  string,
+  ...(string | number | Record<string, unknown>)[],
+];
+export type DetailQueryKey<T extends string> = readonly [
+  T,
+  string,
+  string,
+  ...(string | number | Record<string, unknown>)[],
+];
+export type InfiniteQueryKey<T extends string> = readonly [
+  T,
+  string,
+  ...(string | number | Record<string, unknown>)[],
+];
+
+export type QueryKeyFactory<T extends string> = (
+  ...args: (string | number | Record<string, unknown>)[]
+) => readonly [T, ...(string | number | Record<string, unknown>)[]];
+
+export interface QueryKeysOptions {
+  list?: { key: string };
+  detail?: { key: string };
+  infinite?: { key: string };
+}
+
+export interface QueryKeys<T extends string> {
+  _def: readonly [T];
+  all: readonly [T];
+  list: ListQueryKey<T>;
+  detail: QueryKeyFactory<T>;
+  infinite: InfiniteQueryKey<T>;
+}
+
+// ============================================================================
+// Factory Function
+// ============================================================================
+
+/**
+ * Creates a standard set of query keys for a resource.
+ *
+ * @param entity The name of the entity (e.g. 'users', 'posts')
+ * @param options Custom key segments for list, detail, and infinite queries
+ */
+export function createQueryKeys<T extends string>(
+  entity: T,
+  options?: QueryKeysOptions,
+): QueryKeys<T> {
+  const listKey = options?.list?.key ?? 'list';
+  const detailKey = options?.detail?.key ?? 'detail';
+  const infiniteKey = options?.infinite?.key ?? 'infinite';
+
+  return {
+    _def: [entity] as const,
+    all: [entity] as const,
+    list: [entity, listKey] as const,
+    detail: (...args: (string | number | Record<string, unknown>)[]) =>
+      [entity, detailKey, ...args] as const,
+    infinite: [entity, infiniteKey] as const,
+  };
+}
+
+// ============================================================================
+// Legacy Static Keys (Deprecated - migrate to createQueryKeys)
+// ============================================================================
 
 /**
  * Filter types for list queries
@@ -45,66 +97,36 @@ export interface PostListFilters {
 
 /**
  * Query key factory for the entire application.
- *
- * Structure follows the pattern:
- * - all: Base key for the domain (for broad invalidation)
- * - list: List queries with optional filters
- * - detail: Single entity queries by ID
- *
- * Keys are typed as const tuples for strict type checking.
+ * Kept for backward compatibility.
  */
 export const queryKeys = {
-  /**
-   * Authentication-related query keys
-   */
   auth: {
     all: ['auth'] as const,
     user: () => [...queryKeys.auth.all, 'user'] as const,
     session: () => [...queryKeys.auth.all, 'session'] as const,
     permissions: () => [...queryKeys.auth.all, 'permissions'] as const,
   },
-
-  /**
-   * User-related query keys
-   */
   users: {
     all: ['users'] as const,
     list: (filters?: UserListFilters) => [...queryKeys.users.all, 'list', filters] as const,
     detail: (id: string) => [...queryKeys.users.all, 'detail', id] as const,
     profile: (id: string) => [...queryKeys.users.all, 'profile', id] as const,
   },
-
-  /**
-   * Posts/content-related query keys
-   */
   posts: {
     all: ['posts'] as const,
     list: (filters?: PostListFilters) => [...queryKeys.posts.all, 'list', filters] as const,
     detail: (id: string) => [...queryKeys.posts.all, 'detail', id] as const,
     comments: (postId: string) => [...queryKeys.posts.all, postId, 'comments'] as const,
   },
-
-  /**
-   * Notification-related query keys
-   */
   notifications: {
     all: ['notifications'] as const,
     list: (filters?: { read?: boolean }) =>
       [...queryKeys.notifications.all, 'list', filters] as const,
     unreadCount: () => [...queryKeys.notifications.all, 'unread-count'] as const,
   },
-
-  /**
-   * Settings-related query keys
-   */
   settings: {
     all: ['settings'] as const,
     user: () => [...queryKeys.settings.all, 'user'] as const,
     app: () => [...queryKeys.settings.all, 'app'] as const,
   },
 } as const;
-
-/**
- * Type helper to extract query key types
- */
-export type QueryKeys = typeof queryKeys;

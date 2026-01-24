@@ -109,7 +109,9 @@ function createBrowserHistory(): History {
 
   function notify(): void {
     updateCachedLocation();
-    listeners.forEach((listener) => { listener(); });
+    listeners.forEach((listener) => {
+      listener();
+    });
   }
 
   function saveScrollPosition(): void {

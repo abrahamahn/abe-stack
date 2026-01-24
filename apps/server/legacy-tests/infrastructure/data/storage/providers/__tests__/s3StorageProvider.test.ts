@@ -116,7 +116,7 @@ describe('S3StorageProvider', () => {
       expect(provider).toBeDefined();
     });
 
-    it('should use custom presign expiration when configured', () => {
+    it('should use custom presign expiration when configconfigured', () => {
       const configWithExpiration: S3StorageConfig = {
         ...baseConfig,
         presignExpiresInSeconds: 3600,
@@ -241,7 +241,7 @@ describe('S3StorageProvider', () => {
       });
     });
 
-    it('should use configured default expiration', async () => {
+    it('should use configconfigured default expiration', async () => {
       const configWithExpiration: S3StorageConfig = {
         ...baseConfig,
         presignExpiresInSeconds: 1800,

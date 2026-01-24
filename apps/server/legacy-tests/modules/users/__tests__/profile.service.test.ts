@@ -104,7 +104,9 @@ describe('Profile Service', () => {
       };
       vi.mocked(mockUsers.findById!).mockResolvedValue(mockUser);
       vi.mocked(mockStorage.upload!).mockResolvedValue({ key: 'avatars/user-123/123.jpg' });
-      vi.mocked(mockStorage.getSignedUrl!).mockResolvedValue('https://storage.example.com/signed-url');
+      vi.mocked(mockStorage.getSignedUrl!).mockResolvedValue(
+        'https://storage.example.com/signed-url',
+      );
 
       const file = {
         buffer: Buffer.from('fake-image-data'),

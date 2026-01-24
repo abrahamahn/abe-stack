@@ -72,7 +72,9 @@ export function PricingPage(): ReactElement {
         plans={plans}
         currentPlanId={subscription?.planId}
         loadingPlanId={isActing ? 'loading' : null}
-        onSelectPlan={(plan) => { void handleSelectPlan(plan); }}
+        onSelectPlan={(plan) => {
+          void handleSelectPlan(plan);
+        }}
         getActionLabel={getActionLabel}
         getBadge={getBadge}
         isLoading={plansLoading}

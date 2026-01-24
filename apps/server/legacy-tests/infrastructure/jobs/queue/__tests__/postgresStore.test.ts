@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/jobs/queue/__tests__/postgresStore.test.ts
+// apps/server/legacy-tests/infrastructure/jobs/queue/__tests__/postgresStore.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { PostgresQueueStore, createPostgresQueueStore } from '../postgresStore';
@@ -189,7 +189,7 @@ describe('PostgresQueueStore', () => {
         taskId: 'task-123',
         success: true,
         completedAt: new Date().toISOString(),
-        durationMs: 150,
+        dconfigurationMs: 150,
       };
 
       mockDb.execute.mockResolvedValueOnce(1);
@@ -210,7 +210,7 @@ describe('PostgresQueueStore', () => {
         success: false,
         error: { name: 'Error', message: 'Something failed' },
         completedAt: new Date().toISOString(),
-        durationMs: 50,
+        dconfigurationMs: 50,
       };
 
       mockDb.execute.mockResolvedValueOnce(1);
@@ -241,7 +241,7 @@ describe('PostgresQueueStore', () => {
       expect(mockDb.execute).toHaveBeenCalledTimes(1);
       expect(mockDb.execute).toHaveBeenCalledWith(
         expect.objectContaining({
-          text: expect.stringContaining('status = \'pending\''),
+          text: expect.stringContaining("status = 'pending'"),
         }),
       );
     });
@@ -259,7 +259,7 @@ describe('PostgresQueueStore', () => {
       expect(mockDb.execute).toHaveBeenCalledTimes(1);
       expect(mockDb.execute).toHaveBeenCalledWith(
         expect.objectContaining({
-          text: expect.stringContaining('status = \'failed\''),
+          text: expect.stringContaining("status = 'failed'"),
         }),
       );
     });
@@ -501,7 +501,7 @@ describe('PostgresQueueStore', () => {
           taskId: 'task-123',
           success: true,
           completedAt: new Date().toISOString(),
-          durationMs: 100,
+          dconfigurationMs: 100,
         }),
       ).rejects.toThrow('Write failed');
     });

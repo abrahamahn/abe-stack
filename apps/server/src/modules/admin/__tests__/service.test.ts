@@ -55,12 +55,7 @@ describe('Admin Service', () => {
       mockDb.queryOne.mockResolvedValue(null);
 
       await expect(
-        unlockUserAccount(
-          asMockDb(mockDb),
-          'nonexistent@example.com',
-          'admin-456',
-          'Test reason',
-        ),
+        unlockUserAccount(asMockDb(mockDb), 'nonexistent@example.com', 'admin-456', 'Test reason'),
       ).rejects.toThrow(UserNotFoundError);
     });
 
@@ -108,12 +103,7 @@ describe('Admin Service', () => {
       mockDb.queryOne.mockResolvedValue(mockUser);
 
       const customReason = 'User locked out due to forgotten password, verified via email';
-      await unlockUserAccount(
-        asMockDb(mockDb),
-        'test@example.com',
-        'admin-789',
-        customReason,
-      );
+      await unlockUserAccount(asMockDb(mockDb), 'test@example.com', 'admin-789', customReason);
 
       expect(unlockAccount).toHaveBeenCalledWith(
         asMockDb(mockDb),

@@ -29,7 +29,7 @@ function createMockContext(): AppContext {
     } as AppContext['db'],
     repos: {} as AppContext['repos'],
     email: { send: vi.fn().mockResolvedValue({ success: true }) } as AppContext['email'],
-    : {
+    config: {
       auth: {
         strategies: ['magic'],
         jwt: {
@@ -57,7 +57,7 @@ function createMockContext(): AppContext {
         port: 8080,
         appBaseUrl: 'http://localhost:8080',
       },
-    } as AppContext[''],
+    } as AppContext['config'],
     log: {
       error: vi.fn(),
     } as unknown as AppContext['log'],
@@ -125,12 +125,12 @@ describe('Magic Link Handlers', () => {
         mockCtx.repos,
         mockCtx.email,
         'test@example.com',
-        mockCtx..server.appBaseUrl,
+        mockCtx.config.server.appBaseUrl,
         '127.0.0.1',
         'test-agent',
         {
-          tokenExpiryMinutes: mockCtx..auth.magicLink.tokenExpiryMinutes,
-          maxAttemptsPerEmail: mockCtx..auth.magicLink.maxAttempts,
+          tokenExpiryMinutes: mockCtx.config.auth.magicLink.tokenExpiryMinutes,
+          maxAttemptsPerEmail: mockCtx.config.auth.magicLink.maxAttempts,
         },
       );
     });
@@ -206,13 +206,20 @@ describe('Magic Link Handlers', () => {
           createdAt: expect.any(String),
         },
       });
-      expect(verifyMagicLink).toHaveBeenCalledWith(mockCtx.db, mockCtx.repos, mockCtx..auth, 'valid-token');
+      expect(verifyMagicLink).toHaveBeenCalledWith(
+        mockCtx.db,
+        mockCtx.repos,
+        mockCtx.config.auth,
+        'valid-token',
+      );
     });
 
     test('should return error when token is missing', async () => {
       const body = { token: '' };
 
-      vi.mocked(verifyMagicLink).mockRejectedValue(new InvalidTokenError('Invalid or expired magic link'));
+      vi.mocked(verifyMagicLink).mockRejectedValue(
+        new InvalidTokenError('Invalid or expired magic link'),
+      );
 
       const result = await handleMagicLinkVerify(mockCtx, body, mockRequest, mockReply);
 
@@ -225,7 +232,9 @@ describe('Magic Link Handlers', () => {
         token: 'invalid-token',
       };
 
-      vi.mocked(verifyMagicLink).mockRejectedValue(new InvalidTokenError('Invalid or expired token'));
+      vi.mocked(verifyMagicLink).mockRejectedValue(
+        new InvalidTokenError('Invalid or expired token'),
+      );
 
       const result = await handleMagicLinkVerify(mockCtx, body, mockRequest, mockReply);
 

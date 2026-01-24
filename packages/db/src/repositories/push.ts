@@ -49,18 +49,14 @@ export function createPushSubscriptionRepository(db: RawDb): PushSubscriptionRep
   return {
     async findById(id: string): Promise<PushSubscription | null> {
       const result = await db.queryOne<Record<string, unknown>>(
-        select(PUSH_SUBSCRIPTIONS_TABLE)
-          .where(eq('id', id))
-          .toSql()
+        select(PUSH_SUBSCRIPTIONS_TABLE).where(eq('id', id)).toSql(),
       );
       return result ? toCamelCase<PushSubscription>(result, PUSH_SUBSCRIPTION_COLUMNS) : null;
     },
 
     async findByEndpoint(endpoint: string): Promise<PushSubscription | null> {
       const result = await db.queryOne<Record<string, unknown>>(
-        select(PUSH_SUBSCRIPTIONS_TABLE)
-          .where(eq('endpoint', endpoint))
-          .toSql()
+        select(PUSH_SUBSCRIPTIONS_TABLE).where(eq('endpoint', endpoint)).toSql(),
       );
       return result ? toCamelCase<PushSubscription>(result, PUSH_SUBSCRIPTION_COLUMNS) : null;
     },
@@ -70,7 +66,7 @@ export function createPushSubscriptionRepository(db: RawDb): PushSubscriptionRep
         select(PUSH_SUBSCRIPTIONS_TABLE)
           .where(eq('user_id', userId))
           .orderBy('created_at', 'desc')
-          .toSql()
+          .toSql(),
       );
       return toCamelCaseArray<PushSubscription>(results, PUSH_SUBSCRIPTION_COLUMNS);
     },
@@ -80,7 +76,7 @@ export function createPushSubscriptionRepository(db: RawDb): PushSubscriptionRep
         select(PUSH_SUBSCRIPTIONS_TABLE)
           .where(and(eq('user_id', userId), eq('is_active', true)))
           .orderBy('last_used_at', 'desc')
-          .toSql()
+          .toSql(),
       );
       return toCamelCaseArray<PushSubscription>(results, PUSH_SUBSCRIPTION_COLUMNS);
     },
@@ -89,18 +85,18 @@ export function createPushSubscriptionRepository(db: RawDb): PushSubscriptionRep
       const result = await db.queryOne<Record<string, unknown>>(
         select(PUSH_SUBSCRIPTIONS_TABLE)
           .where(and(eq('user_id', userId), eq('device_id', deviceId)))
-          .toSql()
+          .toSql(),
       );
       return result ? toCamelCase<PushSubscription>(result, PUSH_SUBSCRIPTION_COLUMNS) : null;
     },
 
     async create(subscription: NewPushSubscription): Promise<PushSubscription> {
-      const snakeData = toSnakeCase(subscription as unknown as Record<string, unknown>, PUSH_SUBSCRIPTION_COLUMNS);
+      const snakeData = toSnakeCase(
+        subscription as unknown as Record<string, unknown>,
+        PUSH_SUBSCRIPTION_COLUMNS,
+      );
       const result = await db.queryOne<Record<string, unknown>>(
-        insert(PUSH_SUBSCRIPTIONS_TABLE)
-          .values(snakeData)
-          .returningAll()
-          .toSql()
+        insert(PUSH_SUBSCRIPTIONS_TABLE).values(snakeData).returningAll().toSql(),
       );
       if (!result) {
         throw new Error('Failed to create push subscription');
@@ -113,50 +109,36 @@ export function createPushSubscriptionRepository(db: RawDb): PushSubscriptionRep
         update(PUSH_SUBSCRIPTIONS_TABLE)
           .set({ last_used_at: new Date() })
           .where(eq('id', id))
-          .toSql()
+          .toSql(),
       );
     },
 
     async deactivate(id: string): Promise<void> {
       await db.execute(
-        update(PUSH_SUBSCRIPTIONS_TABLE)
-          .set({ is_active: false })
-          .where(eq('id', id))
-          .toSql()
+        update(PUSH_SUBSCRIPTIONS_TABLE).set({ is_active: false }).where(eq('id', id)).toSql(),
       );
     },
 
     async activate(id: string): Promise<void> {
       await db.execute(
-        update(PUSH_SUBSCRIPTIONS_TABLE)
-          .set({ is_active: true })
-          .where(eq('id', id))
-          .toSql()
+        update(PUSH_SUBSCRIPTIONS_TABLE).set({ is_active: true }).where(eq('id', id)).toSql(),
       );
     },
 
     async delete(id: string): Promise<boolean> {
       const count = await db.execute(
-        deleteFrom(PUSH_SUBSCRIPTIONS_TABLE)
-          .where(eq('id', id))
-          .toSql()
+        deleteFrom(PUSH_SUBSCRIPTIONS_TABLE).where(eq('id', id)).toSql(),
       );
       return count > 0;
     },
 
     async deleteByUserId(userId: string): Promise<number> {
-      return db.execute(
-        deleteFrom(PUSH_SUBSCRIPTIONS_TABLE)
-          .where(eq('user_id', userId))
-          .toSql()
-      );
+      return db.execute(deleteFrom(PUSH_SUBSCRIPTIONS_TABLE).where(eq('user_id', userId)).toSql());
     },
 
     async deleteByEndpoint(endpoint: string): Promise<boolean> {
       const count = await db.execute(
-        deleteFrom(PUSH_SUBSCRIPTIONS_TABLE)
-          .where(eq('endpoint', endpoint))
-          .toSql()
+        deleteFrom(PUSH_SUBSCRIPTIONS_TABLE).where(eq('endpoint', endpoint)).toSql(),
       );
       return count > 0;
     },
@@ -165,7 +147,7 @@ export function createPushSubscriptionRepository(db: RawDb): PushSubscriptionRep
       return db.execute(
         deleteFrom(PUSH_SUBSCRIPTIONS_TABLE)
           .where(and(eq('is_active', false), lt('last_used_at', olderThan)))
-          .toSql()
+          .toSql(),
       );
     },
   };
@@ -179,7 +161,10 @@ export interface NotificationPreferenceRepository {
   findById(id: string): Promise<NotificationPreference | null>;
   findByUserId(userId: string): Promise<NotificationPreference | null>;
   create(preference: NewNotificationPreference): Promise<NotificationPreference>;
-  update(userId: string, data: Partial<NotificationPreference>): Promise<NotificationPreference | null>;
+  update(
+    userId: string,
+    data: Partial<NotificationPreference>,
+  ): Promise<NotificationPreference | null>;
   upsert(userId: string, data: Partial<NotificationPreference>): Promise<NotificationPreference>;
   delete(id: string): Promise<boolean>;
   deleteByUserId(userId: string): Promise<boolean>;
@@ -188,10 +173,15 @@ export interface NotificationPreferenceRepository {
 /**
  * Create a notification preference repository
  */
-export function createNotificationPreferenceRepository(db: RawDb): NotificationPreferenceRepository {
+export function createNotificationPreferenceRepository(
+  db: RawDb,
+): NotificationPreferenceRepository {
   // Helper to parse JSONB fields
   const parseResult = (result: Record<string, unknown>): NotificationPreference => {
-    const camelResult = toCamelCase<Record<string, unknown>>(result, NOTIFICATION_PREFERENCE_COLUMNS);
+    const camelResult = toCamelCase<Record<string, unknown>>(
+      result,
+      NOTIFICATION_PREFERENCE_COLUMNS,
+    );
     return {
       ...camelResult,
       quietHours: parseJsonb(camelResult.quietHours as string) ?? DEFAULT_QUIET_HOURS,
@@ -201,7 +191,10 @@ export function createNotificationPreferenceRepository(db: RawDb): NotificationP
 
   // Helper to prepare data for insert/update
   const prepareData = (data: Partial<NotificationPreference>): Record<string, unknown> => {
-    const snakeData = toSnakeCase(data as unknown as Record<string, unknown>, NOTIFICATION_PREFERENCE_COLUMNS);
+    const snakeData = toSnakeCase(
+      data as unknown as Record<string, unknown>,
+      NOTIFICATION_PREFERENCE_COLUMNS,
+    );
     if ('quiet_hours' in snakeData && snakeData.quiet_hours !== undefined) {
       snakeData.quiet_hours = formatJsonb(snakeData.quiet_hours);
     }
@@ -214,18 +207,14 @@ export function createNotificationPreferenceRepository(db: RawDb): NotificationP
   return {
     async findById(id: string): Promise<NotificationPreference | null> {
       const result = await db.queryOne<Record<string, unknown>>(
-        select(NOTIFICATION_PREFERENCES_TABLE)
-          .where(eq('id', id))
-          .toSql()
+        select(NOTIFICATION_PREFERENCES_TABLE).where(eq('id', id)).toSql(),
       );
       return result ? parseResult(result) : null;
     },
 
     async findByUserId(userId: string): Promise<NotificationPreference | null> {
       const result = await db.queryOne<Record<string, unknown>>(
-        select(NOTIFICATION_PREFERENCES_TABLE)
-          .where(eq('user_id', userId))
-          .toSql()
+        select(NOTIFICATION_PREFERENCES_TABLE).where(eq('user_id', userId)).toSql(),
       );
       return result ? parseResult(result) : null;
     },
@@ -233,10 +222,7 @@ export function createNotificationPreferenceRepository(db: RawDb): NotificationP
     async create(preference: NewNotificationPreference): Promise<NotificationPreference> {
       const snakeData = prepareData(preference);
       const result = await db.queryOne<Record<string, unknown>>(
-        insert(NOTIFICATION_PREFERENCES_TABLE)
-          .values(snakeData)
-          .returningAll()
-          .toSql()
+        insert(NOTIFICATION_PREFERENCES_TABLE).values(snakeData).returningAll().toSql(),
       );
       if (!result) {
         throw new Error('Failed to create notification preference');
@@ -254,7 +240,7 @@ export function createNotificationPreferenceRepository(db: RawDb): NotificationP
           .set(snakeData)
           .where(eq('user_id', userId))
           .returningAll()
-          .toSql()
+          .toSql(),
       );
       return result ? parseResult(result) : null;
     },
@@ -280,18 +266,14 @@ export function createNotificationPreferenceRepository(db: RawDb): NotificationP
 
     async delete(id: string): Promise<boolean> {
       const count = await db.execute(
-        deleteFrom(NOTIFICATION_PREFERENCES_TABLE)
-          .where(eq('id', id))
-          .toSql()
+        deleteFrom(NOTIFICATION_PREFERENCES_TABLE).where(eq('id', id)).toSql(),
       );
       return count > 0;
     },
 
     async deleteByUserId(userId: string): Promise<boolean> {
       const count = await db.execute(
-        deleteFrom(NOTIFICATION_PREFERENCES_TABLE)
-          .where(eq('user_id', userId))
-          .toSql()
+        deleteFrom(NOTIFICATION_PREFERENCES_TABLE).where(eq('user_id', userId)).toSql(),
       );
       return count > 0;
     },

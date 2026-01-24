@@ -36,7 +36,7 @@ describe('Users Handlers', () => {
   };
 
   const mockRequest = {
-    user: { userId: 'user-123' },
+    user: { userId: 'user-123', email: 'test@example.com', role: 'user' as const },
     headers: {},
     cookies: {},
   };
@@ -60,6 +60,7 @@ describe('Users Handlers', () => {
         id: 'user-123',
         email: 'test@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user' as const,
         createdAt: new Date('2024-01-01T00:00:00.000Z'),
       };
@@ -72,6 +73,7 @@ describe('Users Handlers', () => {
         id: 'user-123',
         email: 'test@example.com',
         name: 'Test User',
+        avatarUrl: null,
         role: 'user',
         createdAt: '2024-01-01T00:00:00.000Z',
       });

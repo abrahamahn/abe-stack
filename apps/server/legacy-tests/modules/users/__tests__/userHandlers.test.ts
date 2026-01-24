@@ -1,4 +1,4 @@
-// apps/server/src/modules/admin/__tests__/userHandlers.test.ts
+// apps/server/legacy-tests/modules/users/__tests__/userHandlers.test.ts
 import {
   handleGetUser,
   handleListUsers,
@@ -82,7 +82,7 @@ function createMockContext(): AppContext {
 function createMockRequest(
   overrides: Partial<RequestWithCookies> = {},
   params: Record<string, string> = {},
-  query: Record<string, unknown> = {}
+  query: Record<string, unknown> = {},
 ): RequestWithCookies & FastifyRequest {
   return {
     cookies: {},
@@ -152,7 +152,7 @@ describe('Admin User Handlers', () => {
       const req = createMockRequest(
         {},
         {},
-        { search: 'test', role: 'admin', status: 'active', sortBy: 'email' }
+        { search: 'test', role: 'admin', status: 'active', sortBy: 'email' },
       );
       await handleListUsers(mockCtx, undefined, req, createMockReply());
 
@@ -163,7 +163,7 @@ describe('Admin User Handlers', () => {
           role: 'admin',
           status: 'active',
           sortBy: 'email',
-        })
+        }),
       );
     });
   });
@@ -207,7 +207,7 @@ describe('Admin User Handlers', () => {
         mockCtx,
         { name: 'Updated Name' },
         req,
-        createMockReply()
+        createMockReply(),
       );
 
       expect(result.status).toBe(200);
@@ -239,9 +239,9 @@ describe('Admin User Handlers', () => {
       const req = createMockRequest({}, { id: 'user-123' });
       const result = await handleLockUser(
         mockCtx,
-        { reason: 'Terms violation', durationMinutes: 60 },
+        { reason: 'Terms violation', dconfigurationMinutes: 60 },
         req,
-        createMockReply()
+        createMockReply(),
       );
 
       expect(result.status).toBe(200);
@@ -251,7 +251,7 @@ describe('Admin User Handlers', () => {
     test('should return 400 when trying to lock self', async () => {
       const req = createMockRequest(
         { user: { userId: 'user-123', email: 'admin@example.com', role: 'admin' } },
-        { id: 'user-123' }
+        { id: 'user-123' },
       );
       const result = await handleLockUser(mockCtx, { reason: 'Test' }, req, createMockReply());
 
@@ -285,7 +285,7 @@ describe('Admin User Handlers', () => {
         mockCtx,
         { email: '', reason: 'Identity verified' },
         req,
-        createMockReply()
+        createMockReply(),
       );
 
       expect(result.status).toBe(200);
@@ -300,7 +300,7 @@ describe('Admin User Handlers', () => {
         mockCtx,
         { email: '', reason: 'Test' },
         req,
-        createMockReply()
+        createMockReply(),
       );
 
       expect(result.status).toBe(404);
@@ -312,7 +312,7 @@ describe('Admin User Handlers', () => {
         mockCtx,
         { email: '', reason: 'Test' },
         req,
-        createMockReply()
+        createMockReply(),
       );
 
       expect(result.status).toBe(401);

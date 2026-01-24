@@ -100,9 +100,7 @@ export async function cleanupOldLoginAttempts(
   if (dryRun) {
     // Count records that would be deleted
     const countResult = await db.queryOne<{ count: number }>(
-      selectCount(LOGIN_ATTEMPTS_TABLE)
-        .where(lt('created_at', cutoffDate))
-        .toSql(),
+      selectCount(LOGIN_ATTEMPTS_TABLE).where(lt('created_at', cutoffDate)).toSql(),
     );
 
     deletedCount = countResult?.count ?? 0;
@@ -156,9 +154,7 @@ export async function countOldLoginAttempts(
   cutoffDate.setHours(0, 0, 0, 0);
 
   const result = await db.queryOne<{ count: number }>(
-    selectCount(LOGIN_ATTEMPTS_TABLE)
-      .where(lt('created_at', cutoffDate))
-      .toSql(),
+    selectCount(LOGIN_ATTEMPTS_TABLE).where(lt('created_at', cutoffDate)).toSql(),
   );
 
   return result?.count ?? 0;
@@ -172,9 +168,7 @@ export async function countOldLoginAttempts(
  * @returns Total count of login attempts
  */
 export async function getTotalLoginAttemptCount(db: RawDb): Promise<number> {
-  const result = await db.queryOne<{ count: number }>(
-    selectCount(LOGIN_ATTEMPTS_TABLE).toSql(),
-  );
+  const result = await db.queryOne<{ count: number }>(selectCount(LOGIN_ATTEMPTS_TABLE).toSql());
 
   return result?.count ?? 0;
 }
