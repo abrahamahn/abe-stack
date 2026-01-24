@@ -6,8 +6,6 @@
     "types": ["node", "vitest/globals"],
     "paths": {
       "@/*": ["./src/*"],
-      "@abe-stack/core": ["../../packages/core/src/index.ts"],
-      "@abe-stack/core/*": ["../../packages/core/src/*"],
       "@admin": ["./src/modules/admin"],
       "@admin/*": ["./src/modules/admin/*"],
       "@auth": ["./src/modules/auth"],
@@ -100,10 +98,5 @@
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.server.tsbuildinfo"
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"],
-  "references": [
-    {
-      "path": "../../packages/core"
-    }
-  ]
+  "exclude": ["node_modules", "dist"]
 }

@@ -3,122 +3,122 @@
   "version": "1.1.0",
   "description": "API contracts, shared types, and validation schemas for abe-stack",
   "main": "dist/index.js",
-  "types": "src/index.ts",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
+      "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
     "./domains/auth": {
-      "types": "./src/domains/auth/index.ts",
+      "types": "./dist/domains/auth/index.d.ts",
       "default": "./dist/domains/auth/index.js"
     },
     "./domains/cache": {
-      "types": "./src/domains/cache/index.ts",
+      "types": "./dist/domains/cache/index.d.ts",
       "default": "./dist/domains/cache/index.js"
     },
     "./domains/users": {
-      "types": "./src/domains/users/index.ts",
+      "types": "./dist/domains/users/index.d.ts",
       "default": "./dist/domains/users/index.js"
     },
     "./domains/pagination": {
-      "types": "./src/domains/pagination/index.ts",
+      "types": "./dist/domains/pagination/index.d.ts",
       "default": "./dist/domains/pagination/index.js"
     },
     "./domains/admin": {
-      "types": "./src/domains/admin/index.ts",
+      "types": "./dist/domains/admin/index.d.ts",
       "default": "./dist/domains/admin/index.js"
     },
     "./infrastructure": {
-      "types": "./src/infrastructure/index.ts",
+      "types": "./dist/infrastructure/index.d.ts",
       "default": "./dist/infrastructure/index.js"
     },
     "./infrastructure/async": {
-      "types": "./src/infrastructure/async/index.ts",
+      "types": "./dist/infrastructure/async/index.d.ts",
       "default": "./dist/infrastructure/async/index.js"
     },
     "./infrastructure/constants": {
-      "types": "./src/infrastructure/constants/index.ts",
+      "types": "./dist/infrastructure/constants/index.d.ts",
       "default": "./dist/infrastructure/constants/index.js"
     },
     "./infrastructure/crypto": {
-      "types": "./src/infrastructure/crypto/index.ts",
+      "types": "./dist/infrastructure/crypto/index.d.ts",
       "default": "./dist/infrastructure/crypto/index.js"
     },
     "./infrastructure/errors": {
-      "types": "./src/infrastructure/errors/index.ts",
+      "types": "./dist/infrastructure/errors/index.d.ts",
       "default": "./dist/infrastructure/errors/index.js"
     },
     "./infrastructure/http": {
-      "types": "./src/infrastructure/http/index.ts",
+      "types": "./dist/infrastructure/http/index.d.ts",
       "default": "./dist/infrastructure/http/index.js"
     },
     "./infrastructure/transactions": {
-      "types": "./src/infrastructure/transactions/index.ts",
+      "types": "./dist/infrastructure/transactions/index.d.ts",
       "default": "./dist/infrastructure/transactions/index.js"
     },
     "./infrastructure/logger/console": {
-      "types": "./src/infrastructure/logger/console.ts",
+      "types": "./dist/infrastructure/logger/console.d.ts",
       "default": "./dist/infrastructure/logger/console.js"
     },
     "./contracts": {
-      "types": "./src/contracts/index.ts",
+      "types": "./dist/contracts/index.d.ts",
       "default": "./dist/contracts/index.js"
     },
     "./config": {
-      "types": "./src/config/types.ts",
+      "types": "./dist/config/types.d.ts",
       "default": "./dist/config/types.js"
     },
     "./config/types": {
-      "types": "./src/config/types.ts",
+      "types": "./dist/config/types.d.ts",
       "default": "./dist/config/types.js"
     },
     "./config/utils": {
-      "types": "./src/config/utils.ts",
+      "types": "./dist/config/utils.d.ts",
       "default": "./dist/config/utils.js"
     },
     "./contracts/config": {
-      "types": "./src/contracts/config/index.ts",
+      "types": "./dist/contracts/config/index.d.ts",
       "default": "./dist/contracts/config/index.js"
     },
     "./contracts/config/notification-schema": {
-      "types": "./src/contracts/config/notification-schema.ts",
+      "types": "./dist/contracts/config/notification-schema.d.ts",
       "default": "./dist/contracts/config/notification-schema.js"
     },
     "./contracts/config/environment": {
-      "types": "./src/contracts/config/environment.ts",
+      "types": "./dist/contracts/config/environment.d.ts",
       "default": "./dist/contracts/config/environment.js"
     },
     "./contracts/config/environment-schema": {
-      "types": "./src/contracts/config/environment-schema.ts",
+      "types": "./dist/contracts/config/environment-schema.d.ts",
       "default": "./dist/contracts/config/environment-schema.js"
     },
     "./crypto": {
-      "types": "./src/infrastructure/crypto/index.ts",
+      "types": "./dist/infrastructure/crypto/index.d.ts",
       "default": "./dist/infrastructure/crypto/index.js"
     },
     "./errors": {
-      "types": "./src/errors/index.ts",
+      "types": "./dist/errors/index.d.ts",
       "default": "./dist/errors/index.js"
     },
     "./http": {
-      "types": "./src/infrastructure/http/index.ts",
+      "types": "./dist/infrastructure/http/index.d.ts",
       "default": "./dist/infrastructure/http/index.js"
     },
     "./shared": {
-      "types": "./src/shared/index.ts",
+      "types": "./dist/shared/index.d.ts",
       "default": "./dist/shared/index.js"
     },
     "./utils": {
-      "types": "./src/utils/index.ts",
+      "types": "./dist/utils/index.d.ts",
       "default": "./dist/utils/index.js"
     },
     "./env": {
-      "types": "./src/env.ts",
+      "types": "./dist/env.d.ts",
       "default": "./dist/env.js"
     },
     "./pubsub": {
-      "types": "./src/infrastructure/pubsub/index.ts",
+      "types": "./dist/infrastructure/pubsub/index.d.ts",
       "default": "./dist/infrastructure/pubsub/index.js"
     }
   },
