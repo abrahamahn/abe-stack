@@ -183,12 +183,12 @@ export const NotificationEnvSchema = z.object({
 export const StorageEnvSchema = z.object({
   STORAGE_PROVIDER: z.enum(['local', 's3']).default('local'),
   STORAGE_ROOT_PATH: z.string().optional(),
-  STORAGE_PUBLIC_BASE_URL: z.string().optional(),
+  STORAGE_PUBLIC_BASE_URL: z.string().url().optional(),
   S3_ACCESS_KEY_ID: z.string().optional(),
   S3_SECRET_ACCESS_KEY: z.string().optional(),
   S3_BUCKET: z.string().optional(),
   S3_REGION: z.string().optional(),
-  S3_ENDPOINT: z.string().optional(),
+  S3_ENDPOINT: z.string().url().optional(),
   S3_FORCE_PATH_STYLE: z.enum(['true', 'false']).optional(),
   S3_PRESIGN_EXPIRES_IN_SECONDS: z.coerce.number().optional(),
 });
@@ -209,9 +209,9 @@ export const BillingEnvSchema = z.object({
   PLAN_FREE_ID: z.string().optional(),
   PLAN_PRO_ID: z.string().optional(),
   PLAN_ENTERPRISE_ID: z.string().optional(),
-  BILLING_PORTAL_RETURN_URL: z.string().optional(),
-  BILLING_CHECKOUT_SUCCESS_URL: z.string().optional(),
-  BILLING_CHECKOUT_CANCEL_URL: z.string().optional(),
+  BILLING_PORTAL_RETURN_URL: z.string().url().optional(),
+  BILLING_CHECKOUT_SUCCESS_URL: z.string().url().optional(),
+  BILLING_CHECKOUT_CANCEL_URL: z.string().url().optional(),
 });
 
 /**
@@ -256,13 +256,13 @@ export const ServerEnvSchema = z.object({
   RATE_LIMIT_MAX: z.coerce.number().optional(),
 
   // Public URLs (Preferred)
-  PUBLIC_API_URL: z.string().optional(),
-  PUBLIC_APP_URL: z.string().optional(),
-  APP_URL: z.string().optional(),
+  PUBLIC_API_URL: z.string().url().optional(),
+  PUBLIC_APP_URL: z.string().url().optional(),
+  APP_URL: z.string().url().optional(),
 
   // Deprecated URLs (Backward compatibility)
-  API_BASE_URL: z.string().optional(),
-  APP_BASE_URL: z.string().optional(),
+  API_BASE_URL: z.string().url().optional(),
+  APP_BASE_URL: z.string().url().optional(),
   CORS_ORIGIN: z.string().optional(),
   CORS_ORIGINS: z.string().optional(),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
@@ -314,10 +314,10 @@ export const PackageManagerEnvSchema = z.object({
  * Zod schema for frontend-related environment variables
  */
 export const FrontendEnvSchema = z.object({
-  VITE_API_URL: z.string().optional(),
+  VITE_API_URL: z.string().url().optional(),
   VITE_APP_NAME: z.string().optional(),
-  PUBLIC_APP_URL: z.string().optional(),
-  PUBLIC_API_URL: z.string().optional(),
+  PUBLIC_APP_URL: z.string().url().optional(),
+  PUBLIC_API_URL: z.string().url().optional(),
 });
 
 /**
@@ -338,6 +338,47 @@ export const FullEnvSchema = BaseEnvSchema.extend({
   ...PackageManagerEnvSchema.shape,
   ...NotificationEnvSchema.shape,
   ...FrontendEnvSchema.shape,
+}).superRefine((data, ctx) => {
+  const isProd = data.NODE_ENV === 'production';
+
+  // 1. Production Database Enforcement
+  if (isProd) {
+    const hasPostgres =
+      data.DATABASE_URL ||
+      (data.POSTGRES_HOST && data.POSTGRES_USER && data.POSTGRES_PASSWORD);
+
+    const hasSqlite = data.SQLITE_FILE_PATH;
+    const hasMongo = data.MONGODB_CONNECTION_STRING;
+
+    if (!hasPostgres && !hasSqlite && !hasMongo) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Production requires a valid database configuration (URL or host/user/pass)',
+        path: ['DATABASE_URL'],
+      });
+    }
+  }
+
+  // 2. Production Secret Strength (Basic check)
+  if (isProd) {
+    const weakSecrets = ['secret', 'password', 'changeme', 'jwt_secret', 'dev', 'prod', 'test'];
+    if (weakSecrets.includes(data.JWT_SECRET.toLowerCase()) || data.JWT_SECRET.length < 32) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Security Risk: JWT_SECRET must be at least 32 characters and not a common word in production',
+        path: ['JWT_SECRET'],
+      });
+    }
+  }
+
+  // 3. URL Cross-Validation (Consistency)
+  if (data.PUBLIC_API_URL && data.VITE_API_URL && data.PUBLIC_API_URL !== data.VITE_API_URL) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Consistency Error: PUBLIC_API_URL and VITE_API_URL must match if both are provided',
+      path: ['VITE_API_URL'],
+    });
+  }
 });
 
 export type FullEnv = z.infer<typeof FullEnvSchema>;

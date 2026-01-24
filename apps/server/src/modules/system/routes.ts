@@ -3,13 +3,13 @@ import type { RouteMap } from '@router';
 import { protectedRoute, publicRoute } from '@router';
 
 import {
-    handleApiInfo,
-    handleHealth,
-    handleListModules,
-    handleListRoutes,
-    handleLive,
-    handleRoot,
-    handleSystemStatus,
+  handleApiInfo,
+  handleHealth,
+  handleListModules,
+  handleListRoutes,
+  handleLive,
+  handleRoot,
+  handleSystemStatus,
 } from './handlers';
 
 export const systemRoutes: RouteMap = {

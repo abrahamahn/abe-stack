@@ -17,10 +17,7 @@ export function loadServer(env: FullEnv): ServerConfig {
 
   // URL resolution (flexible naming support)
   const appBaseUrl =
-    env.PUBLIC_APP_URL ||
-    env.APP_URL ||
-    env.APP_BASE_URL ||
-    `http://localhost:${appPort}`;
+    env.PUBLIC_APP_URL || env.APP_URL || env.APP_BASE_URL || `http://localhost:${appPort}`;
 
   const apiBaseUrl =
     env.PUBLIC_API_URL ||
