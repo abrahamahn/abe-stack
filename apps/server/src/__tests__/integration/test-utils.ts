@@ -365,6 +365,8 @@ export async function createTestServer(options: TestServerOptions = {}): Promise
     env: production ? 'production' : 'test',
   });
 
+  await Promise.resolve();
+
   const server = Fastify({
     logger: false,
     trustProxy: config.server.trustProxy,

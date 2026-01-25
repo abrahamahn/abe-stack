@@ -88,7 +88,7 @@ export interface RangeValue {
 }
 
 export const rangeValueSchema: Schema<RangeValue> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid range value');
   }
   const obj = data as Record<string, unknown>;
@@ -107,7 +107,7 @@ export const filterValueSchema: Schema<FilterValue> = createSchema((data: unknow
     return data.map((item) => filterPrimitiveSchema.parse(item));
   }
   // Try as range
-  if (data && typeof data === 'object' && 'min' in data && 'max' in data) {
+  if (data !== null && data !== undefined && typeof data === 'object' && 'min' in data && 'max' in data) {
     return rangeValueSchema.parse(data);
   }
   // Try as primitive
@@ -122,7 +122,7 @@ export const filterValueSchema: Schema<FilterValue> = createSchema((data: unknow
  * Schema for a single filter condition.
  */
 export const filterConditionSchema: Schema<FilterCondition> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid filter condition');
   }
   const obj = data as Record<string, unknown>;
@@ -143,7 +143,7 @@ export const filterConditionSchema: Schema<FilterCondition> = createSchema((data
  * Recursive schema for compound filters.
  */
 export const compoundFilterSchema: Schema<CompoundFilter> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid compound filter');
   }
   const obj = data as Record<string, unknown>;
@@ -173,7 +173,7 @@ export const compoundFilterSchema: Schema<CompoundFilter> = createSchema((data: 
  */
 export const filterSchema: Schema<FilterCondition | CompoundFilter> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid filter');
     }
     const obj = data as Record<string, unknown>;
@@ -207,7 +207,7 @@ export const sortOrderSchema: Schema<SortOrder> = createSchema((data: unknown) =
  * Schema for sort configuration.
  */
 export const sortConfigSchema: Schema<SortConfig> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid sort config');
   }
   const obj = data as Record<string, unknown>;
@@ -232,7 +232,7 @@ export const sortConfigSchema: Schema<SortConfig> = createSchema((data: unknown)
  */
 export const fullTextSearchConfigSchema: Schema<FullTextSearchConfig> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid full-text search config');
     }
     const obj = data as Record<string, unknown>;
@@ -278,7 +278,7 @@ export const SEARCH_DEFAULTS = {
  * Schema for search query.
  */
 export const searchQuerySchema: Schema<SearchQuery> = createSchema((data: unknown) => {
-  const obj = (data && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+  const obj = (data !== null && data !== undefined && typeof data === 'object' ? data : {}) as Record<string, unknown>;
 
   // Parse filters if present
   let filters: FilterCondition | CompoundFilter | undefined;
@@ -338,7 +338,7 @@ export type SearchQueryOutput = SearchQuery;
  * Schema for highlighted field.
  */
 export const highlightedFieldSchema: Schema<HighlightedField> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid highlighted field');
   }
   const obj = data as Record<string, unknown>;
@@ -365,7 +365,7 @@ export const highlightedFieldSchema: Schema<HighlightedField> = createSchema((da
  */
 export function searchResultItemSchema<T>(itemSchema: Schema<T>): Schema<SearchResultItem<T>> {
   return createSchema((data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid search result item');
     }
     const obj = data as Record<string, unknown>;
@@ -389,7 +389,7 @@ export function searchResultSchema<T>(itemSchema: Schema<T>): Schema<SearchResul
   const resultItemSchema = searchResultItemSchema(itemSchema);
 
   return createSchema((data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid search result');
     }
     const obj = data as Record<string, unknown>;
@@ -434,7 +434,7 @@ export function cursorSearchResultSchema<T>(itemSchema: Schema<T>): Schema<Curso
   const resultItemSchema = searchResultItemSchema(itemSchema);
 
   return createSchema((data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid cursor search result');
     }
     const obj = data as Record<string, unknown>;
@@ -478,7 +478,7 @@ export function cursorSearchResultSchema<T>(itemSchema: Schema<T>): Schema<Curso
  * Schema for facet bucket.
  */
 export const facetBucketSchema: Schema<FacetBucket> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid facet bucket');
   }
   const obj = data as Record<string, unknown>;
@@ -494,7 +494,7 @@ export const facetBucketSchema: Schema<FacetBucket> = createSchema((data: unknow
  * Schema for facet configuration.
  */
 export const facetConfigSchema: Schema<FacetConfig> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid facet config');
   }
   const obj = data as Record<string, unknown>;
@@ -533,7 +533,7 @@ export const facetConfigSchema: Schema<FacetConfig> = createSchema((data: unknow
  * Schema for facet result.
  */
 export const facetResultSchema: Schema<FacetResult> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid facet result');
   }
   const obj = data as Record<string, unknown>;
@@ -559,7 +559,7 @@ export const facetResultSchema: Schema<FacetResult> = createSchema((data: unknow
 export const facetedSearchQuerySchema: Schema<FacetedSearchQuery> = createSchema(
   (data: unknown) => {
     const base = searchQuerySchema.parse(data);
-    const obj = (data && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    const obj = (data !== null && data !== undefined && typeof data === 'object' ? data : {}) as Record<string, unknown>;
 
     return {
       ...base,
@@ -580,7 +580,7 @@ export function facetedSearchResultSchema<T>(
 
   return createSchema((data: unknown) => {
     const base = baseSchema.parse(data);
-    const obj = (data && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    const obj = (data !== null && data !== undefined && typeof data === 'object' ? data : {}) as Record<string, unknown>;
 
     return {
       ...base,
@@ -610,7 +610,7 @@ export interface UrlSearchParams {
  * Handles string-to-type conversions for URL parameters.
  */
 export const urlSearchParamsSchema: Schema<UrlSearchParams> = createSchema((data: unknown) => {
-  const obj = (data && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+  const obj = (data !== null && data !== undefined && typeof data === 'object' ? data : {}) as Record<string, unknown>;
 
   let page: number | undefined;
   if (obj.page !== undefined) {

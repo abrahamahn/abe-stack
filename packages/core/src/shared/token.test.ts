@@ -99,7 +99,7 @@ describe('token', () => {
   describe('createTokenStore.localStorage', () => {
     const localStorageMock = {
       store: {} as Record<string, string>,
-      getItem: vi.fn((key: string) => localStorageMock.store[key] || null),
+      getItem: vi.fn((key: string) => localStorageMock.store[key] ?? null),
       setItem: vi.fn((key: string, value: string) => {
         localStorageMock.store[key] = value;
       }),

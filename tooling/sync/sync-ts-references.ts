@@ -14,9 +14,7 @@ interface ProjectReference {
   path: string;
 }
 
-interface Meta {
-  name: string;
-}
+
 
 function findProjects(dir: string): string[] {
     const results: string[] = [];

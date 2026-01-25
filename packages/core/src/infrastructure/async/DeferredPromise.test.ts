@@ -244,8 +244,8 @@ describe('DeferredPromise', () => {
       const fastDeferred = new DeferredPromise<string>();
       const slowDeferred = new DeferredPromise<string>();
 
-      setTimeout(() => slowDeferred.resolve('slow'), 10);
-      setTimeout(() => fastDeferred.resolve('fast'), 5);
+      setTimeout(() => { slowDeferred.resolve('slow'); }, 10);
+      setTimeout(() => { fastDeferred.resolve('fast'); }, 5);
 
       const result = await Promise.race([fastDeferred.promise, slowDeferred.promise]);
       expect(result).toBe('fast');
@@ -256,9 +256,9 @@ describe('DeferredPromise', () => {
       const deferred2 = new DeferredPromise<number>();
       const deferred3 = new DeferredPromise<boolean>();
 
-      setTimeout(() => deferred1.resolve('first'), 5);
-      setTimeout(() => deferred2.resolve(42), 10);
-      setTimeout(() => deferred3.resolve(true), 15);
+      setTimeout(() => { deferred1.resolve('first'); }, 5);
+      setTimeout(() => { deferred2.resolve(42); }, 10);
+      setTimeout(() => { deferred3.resolve(true); }, 15);
 
       const results = await Promise.all([deferred1.promise, deferred2.promise, deferred3.promise]);
 
@@ -339,7 +339,7 @@ describe('DeferredPromise', () => {
 
     test('should handle resolution with another promise', async () => {
       const innerDeferred = new DeferredPromise<string>();
-      setTimeout(() => innerDeferred.resolve('inner value'), 5);
+      setTimeout(() => { innerDeferred.resolve('inner value'); }, 5);
       const localDeferred = new DeferredPromise<string | Promise<string>>();
       localDeferred.resolve(innerDeferred.promise);
 
@@ -350,7 +350,7 @@ describe('DeferredPromise', () => {
     test('should handle rejection with another promise', async () => {
       const innerDeferred = new DeferredPromise<string>();
       const error = new Error('inner error');
-      setTimeout(() => innerDeferred.reject(error), 5);
+      setTimeout(() => { innerDeferred.reject(error); }, 5);
       const localDeferred = new DeferredPromise<string | Promise<string>>();
       localDeferred.resolve(innerDeferred.promise);
 
@@ -389,8 +389,8 @@ describe('DeferredPromise', () => {
     const deferred1 = new DeferredPromise<string>();
     const deferred2 = new DeferredPromise<string>();
 
-    setTimeout(() => deferred1.resolve('success'), 5);
-    setTimeout(() => deferred2.reject(new Error('failure')), 10);
+    setTimeout(() => { deferred1.resolve('success'); }, 5);
+    setTimeout(() => { deferred2.reject(new Error('failure')); }, 10);
 
     const results = await Promise.allSettled([deferred1.promise, deferred2.promise]);
 

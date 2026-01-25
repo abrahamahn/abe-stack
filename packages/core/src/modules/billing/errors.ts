@@ -23,7 +23,7 @@ import { HTTP_STATUS } from '../../shared/constants/http';
  */
 export class PlanNotFoundError extends NotFoundError {
   constructor(planId?: string) {
-    super(planId ? `Plan not found: ${planId}` : 'Plan not found', 'PLAN_NOT_FOUND');
+    super(planId !== undefined && planId !== '' ? `Plan not found: ${planId}` : 'Plan not found', 'PLAN_NOT_FOUND');
   }
 }
 
@@ -32,7 +32,7 @@ export class PlanNotFoundError extends NotFoundError {
  */
 export class PlanNotActiveError extends BadRequestError {
   constructor(planId?: string) {
-    super(planId ? `Plan is not active: ${planId}` : 'Plan is not active', 'PLAN_NOT_ACTIVE');
+    super(planId !== undefined && planId !== '' ? `Plan is not active: ${planId}` : 'Plan is not active', 'PLAN_NOT_ACTIVE');
   }
 }
 
@@ -78,7 +78,7 @@ export { SubscriptionExistsError as BillingSubscriptionExistsError };
 export class SubscriptionNotFoundError extends NotFoundError {
   constructor(subscriptionId?: string) {
     super(
-      subscriptionId ? `Subscription not found: ${subscriptionId}` : 'Subscription not found',
+      subscriptionId !== undefined && subscriptionId !== '' ? `Subscription not found: ${subscriptionId}` : 'Subscription not found',
       'SUBSCRIPTION_NOT_FOUND',
     );
   }
@@ -132,7 +132,7 @@ export class CannotDowngradeInTrialError extends BadRequestError {
 export class PaymentMethodNotFoundError extends NotFoundError {
   constructor(paymentMethodId?: string) {
     super(
-      paymentMethodId ? `Payment method not found: ${paymentMethodId}` : 'Payment method not found',
+      paymentMethodId !== undefined && paymentMethodId !== '' ? `Payment method not found: ${paymentMethodId}` : 'Payment method not found',
       'PAYMENT_METHOD_NOT_FOUND',
     );
   }
@@ -169,7 +169,7 @@ export class PaymentMethodValidationError extends BadRequestError {
 export class CustomerNotFoundError extends NotFoundError {
   constructor(userId?: string) {
     super(
-      userId ? `Billing customer not found for user: ${userId}` : 'Billing customer not found',
+      userId !== undefined && userId !== '' ? `Billing customer not found for user: ${userId}` : 'Billing customer not found',
       'CUSTOMER_NOT_FOUND',
     );
   }
@@ -243,7 +243,7 @@ export class WebhookEventAlreadyProcessedError extends ConflictError {
  */
 export class InvoiceNotFoundError extends NotFoundError {
   constructor(invoiceId?: string) {
-    super(invoiceId ? `Invoice not found: ${invoiceId}` : 'Invoice not found', 'INVOICE_NOT_FOUND');
+    super(invoiceId !== undefined && invoiceId !== '' ? `Invoice not found: ${invoiceId}` : 'Invoice not found', 'INVOICE_NOT_FOUND');
   }
 }
 

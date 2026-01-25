@@ -2,7 +2,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 const CI = Boolean(process.env.CI);
 const PORT = 5173;
-const API_PORT = 8080;
+// const API_PORT = 8080; // Uncomment if your E2E tests require the live backend
 
 export default defineConfig({
   testDir: '../apps/web/src/test/e2e',

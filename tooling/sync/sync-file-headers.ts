@@ -53,12 +53,12 @@ function ensureHeader(content: string, header: string): { updated: boolean; next
   const lines = content.split('\n');
   const headerLine = `// ${header}`;
 
-  if (lines[0]?.startsWith('#!')) {
+  if ((lines[0]?.startsWith('#!')) ?? false) {
     if (lines[1] === headerLine) {
       return { updated: false, next: content };
     }
     const nextLines = [...lines];
-    if (lines[1]?.startsWith('//')) {
+    if ((lines[1]?.startsWith('//')) ?? false) {
       nextLines[1] = headerLine;
     } else {
       nextLines.splice(1, 0, headerLine);
@@ -71,7 +71,7 @@ function ensureHeader(content: string, header: string): { updated: boolean; next
   }
 
   const nextLines = [...lines];
-  if (lines[0]?.startsWith('//')) {
+  if ((lines[0]?.startsWith('//')) ?? false) {
     nextLines[0] = headerLine;
   } else {
     nextLines.unshift(headerLine);
@@ -99,15 +99,15 @@ function collectFiles(dirPath: string): string[] {
 
   while (stack.length > 0) {
     const current = stack.pop();
-    if (!current) continue;
+    if (typeof current !== 'string') continue;
     if (shouldSkipDir(current)) continue;
     const entries = fs.readdirSync(current, { withFileTypes: true });
     for (const entry of entries) {
       const fullPath = path.join(current, entry.name);
       if (entry.isDirectory()) {
-        stack.push(fullPath);
+         stack.push(fullPath);
       } else if (entry.isFile()) {
-        files.push(fullPath);
+         files.push(fullPath);
       }
     }
   }
@@ -141,7 +141,8 @@ function watchFiles(): void {
     const fullPath = path.join(ROOT, dir);
     if (!fs.existsSync(fullPath)) continue;
     const watcher = fs.watch(fullPath, { recursive: true }, (_event, filename) => {
-      if (!filename) return;
+      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+      if (typeof filename !== 'string' || filename === '') return;
       if (syncTimeout) clearTimeout(syncTimeout);
       syncTimeout = setTimeout(() => {
         const filePath = path.join(fullPath, filename);

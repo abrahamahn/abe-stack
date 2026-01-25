@@ -51,7 +51,7 @@ vi.mock('node:net', () => {
 
         if (isPortTaken(port, host)) {
           const error = Object.assign(new Error('EADDRINUSE'), { code: 'EADDRINUSE' });
-          if (errorHandler) queueMicrotask(() => errorHandler!(error));
+          if (errorHandler) queueMicrotask(() => { errorHandler!(error); });
           return this;
         }
 
@@ -60,7 +60,7 @@ vi.mock('node:net', () => {
         const ports = listeners.get(host) ?? new Set<number>();
         ports.add(port);
         listeners.set(host, ports);
-        if (resolvedCallback) queueMicrotask(() => resolvedCallback());
+        if (resolvedCallback) queueMicrotask(() => { resolvedCallback(); });
         return this;
       },
       close(cb?: () => void) {
@@ -73,7 +73,7 @@ vi.mock('node:net', () => {
         }
         boundPort = null;
         boundHost = null;
-        if (cb) queueMicrotask(() => cb());
+        if (cb) queueMicrotask(() => { cb(); });
         return this;
       },
       once(event: string, handler: ErrorHandler) {
@@ -207,7 +207,7 @@ describe('isPortFree', () => {
     listeners.clear();
     if (server) {
       await new Promise<void>((resolve) => {
-        server?.close(() => resolve());
+        server?.close(() => { resolve(); });
       });
       server = null;
     }
@@ -226,7 +226,7 @@ describe('isPortFree', () => {
     // Start a server on the port
     server = net.createServer();
     await new Promise<void>((resolve) => {
-      server?.listen(port, '0.0.0.0', () => resolve());
+      server?.listen(port, '0.0.0.0', () => { resolve(); });
     });
 
     const result = await isPortFree(port);
@@ -239,7 +239,7 @@ describe('isPortFree', () => {
     // Bind to localhost only
     server = net.createServer();
     await new Promise<void>((resolve) => {
-      server?.listen(port, '127.0.0.1', () => resolve());
+      server?.listen(port, '127.0.0.1', () => { resolve(); });
     });
 
     // Should be in use on localhost
@@ -255,7 +255,7 @@ describe('isPortListening', () => {
     listeners.clear();
     if (server) {
       await new Promise<void>((resolve) => {
-        server?.close(() => resolve());
+        server?.close(() => { resolve(); });
       });
       server = null;
     }
@@ -266,7 +266,7 @@ describe('isPortListening', () => {
 
     server = net.createServer();
     await new Promise<void>((resolve) => {
-      server?.listen(port, 'localhost', () => resolve());
+      server?.listen(port, 'localhost', () => { resolve(); });
     });
 
     const result = await isPortListening(port, 'localhost');
@@ -297,7 +297,7 @@ describe('pickAvailablePort', () => {
     listeners.clear();
     if (server) {
       await new Promise<void>((resolve) => {
-        server?.close(() => resolve());
+        server?.close(() => { resolve(); });
       });
       server = null;
     }
@@ -319,7 +319,7 @@ describe('pickAvailablePort', () => {
     // Occupy the first port
     server = net.createServer();
     await new Promise<void>((resolve) => {
-      server?.listen(port1, '0.0.0.0', () => resolve());
+      server?.listen(port1, '0.0.0.0', () => { resolve(); });
     });
 
     const result = await pickAvailablePort([port1, port2]);
@@ -338,7 +338,7 @@ describe('pickAvailablePort', () => {
     // Occupy the only port in the list
     server = net.createServer();
     await new Promise<void>((resolve) => {
-      server?.listen(port1, '0.0.0.0', () => resolve());
+      server?.listen(port1, '0.0.0.0', () => { resolve(); });
     });
 
     await expect(pickAvailablePort([port1])).rejects.toThrow('No available ports found in list');
@@ -351,7 +351,7 @@ describe('pickAvailablePort', () => {
     // Occupy both ports
     server = net.createServer();
     await new Promise<void>((resolve) => {
-      server?.listen(port1, '0.0.0.0', () => resolve());
+      server?.listen(port1, '0.0.0.0', () => { resolve(); });
     });
 
     const server2 = net.createServer();
@@ -389,7 +389,7 @@ describe('waitForPort', () => {
     listeners.clear();
     if (server) {
       await new Promise<void>((resolve) => {
-        server?.close(() => resolve());
+        server?.close(() => { resolve(); });
       });
       server = null;
     }
@@ -405,7 +405,7 @@ describe('waitForPort', () => {
 
       server = net.createServer();
       await new Promise<void>((resolve) => {
-        server?.listen(port, 'localhost', () => resolve());
+        server?.listen(port, 'localhost', () => { resolve(); });
       });
 
       const start = Date.now();
@@ -452,7 +452,7 @@ describe('waitForPort', () => {
 
       server = net.createServer();
       await new Promise<void>((resolve) => {
-        server?.listen(port, 'localhost', () => resolve());
+        server?.listen(port, 'localhost', () => { resolve(); });
       });
 
       const result = await waitForPort([undefined, port, undefined], 'localhost', 3, 50);

@@ -86,43 +86,7 @@ function updateTsConfig(config: AliasConfig): boolean {
     }
 
     const configDir = path.dirname(fullPath);
-    let paths: Record<string, string[]> = { ...config.manualAliases };
-
-    // Scan directories
-    for (const scanDirRelative of config.scanDirs) {
-        const scanDir = path.join(configDir, scanDirRelative);
-
-        // Special case: if scanDir is "src/utils", we want @utils pointing to it, not @utils/utils
-        // But the generic logic scans SUBDIRS.
-        // If we want to alias the dir itself, that's different.
-        // Let's assume scanDirs are PARENTS of the aliases (e.g. src/modules -> @auth, @users).
-
-        // Handling "src/utils" which contains index.ts but is not a container of utils module.
-        // If "scanDirs" contains a folder that IS the alias target itself, we need a flag?
-        // For now, let's treat "src/utils" as a PARENT? No, "src/utils" has "index.ts".
-        // Actually, the server config has "@utils": ["./src/utils"].
-        // So scanDirs logic needs to be robust.
-
-        // Adjusted Logic:
-        // If the scanDir ends in "utils" or "config" (common singletons), check if it maps to a single alias.
-        // But standardized approach: Scan subdirectories of the scanDir.
-
-        // What about @utils? usage: import { foo } from '@utils'.
-        // This implies src/utils/index.ts exists.
-        // My previous audit showed @utils -> ./src/utils.
-
-        // Let's add top-level folder detection?
-        // Actually, for the server, I'll rely on "src/modules" scanning.
-        // And for "src/utils", I'll add it to MANUAL aliases if it's a singleton.
-        // Wait, I put 'src/utils' in scanDirs. That implies looking for src/utils/foo -> @foo.
-        // That is NOT what we want.
-        // Removing 'src/utils' and 'src/config' from scanDirs in the config object above
-        // and moving them to manual aliases logic or special handling?
-
-        // Let's keep it simple: "scanDirs" are folders containing modules.
-        // "src/modules" contains "auth". => "@auth": ["src/modules/auth"].
-        // "src/infrastructure" contains "cache". => "@cache": ["src/infrastructure/cache"].
-    }
+    const paths: Record<string, string[]> = { ...config.manualAliases };
 
     // Correcting scanDirs for Server based on this logic:
     // We want folders INSIDE modules/infra to become aliases.
@@ -133,7 +97,7 @@ function updateTsConfig(config: AliasConfig): boolean {
         const subdirs = getSubdirectories(scanDir);
 
         for (const subdir of subdirs) {
-             if (config.scilentlyIgnore?.includes(subdir)) continue;
+             if ((config.scilentlyIgnore?.includes(subdir)) ?? false) continue;
 
              const alias = `@${subdir}`;
              const aliasPath = `./${path.join(scanDirRelative, subdir)}`;
@@ -161,10 +125,10 @@ function updateTsConfig(config: AliasConfig): boolean {
     }
 
     // Sort paths alphabetically
-    const sortedPaths = Object.keys(paths).sort().reduce((acc, key) => {
+    const sortedPaths = Object.keys(paths).sort().reduce<Record<string, string[]>>((acc, key) => {
         acc[key] = paths[key];
         return acc;
-    }, {} as Record<string, string[]>);
+    }, {});
 
     // Read and update file
     const content = fs.readFileSync(fullPath, 'utf-8');
@@ -174,7 +138,7 @@ function updateTsConfig(config: AliasConfig): boolean {
     // We can regex replace the "paths" block.
 
     const pathsString = JSON.stringify(sortedPaths, null, 6)
-        .replace(/\n      /g, '\n      ') // Adjust indentation
+        .replace(/\n {6}/g, '\n      ') // Adjust indentation
         .replace(/^{/, '') // Remove outer braces from stringify
         .replace(/}$/, '') // Remove outer braces
         .trim();
@@ -194,7 +158,7 @@ function updateTsConfig(config: AliasConfig): boolean {
     return false;
 }
 
-function main() {
+function main(): void {
     log('Syncing TSConfig Paths...');
     let changed = false;
     for (const config of configs) {

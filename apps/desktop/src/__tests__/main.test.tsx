@@ -162,6 +162,7 @@ describe('main.tsx', () => {
       if (rootElement) {
         const root = realCreateRoot(rootElement);
         await act(async () => {
+          await Promise.resolve(); // Add await to satisfy require-await rule
           root.render(
             <StrictMode>
               <div style={{ padding: '20px' }}>
@@ -189,6 +190,7 @@ describe('main.tsx', () => {
       if (rootElement) {
         const root = realCreateRoot(rootElement);
         await act(async () => {
+          await Promise.resolve(); // Add await to satisfy require-await rule
           root.render(
             <StrictMode>
               <div style={{ padding: '20px' }}>
@@ -238,6 +240,7 @@ describe('main.tsx', () => {
       if (rootElement) {
         const root = realCreateRoot(rootElement);
         await act(async () => {
+          await Promise.resolve(); // Add await to satisfy require-await rule
           root.render(
             <StrictMode>
               <div style={{ padding: '20px' }}>
@@ -284,6 +287,7 @@ describe('main.tsx', () => {
       if (rootElement) {
         const root = realCreateRoot(rootElement);
         await act(async () => {
+          await Promise.resolve(); // Add await to satisfy require-await rule
           root.render(
             <StrictMode>
               <div style={{ padding: '20px' }}>

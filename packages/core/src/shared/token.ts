@@ -18,7 +18,7 @@ export type TokenStore = {
  * @returns The same Headers object (for chaining)
  */
 export function addAuthHeader(headers: Headers, token: string | null | undefined): Headers {
-  if (token) {
+  if (token !== null && token !== undefined && token !== '') {
     headers.set('Authorization', `Bearer ${token}`);
   }
   return headers;

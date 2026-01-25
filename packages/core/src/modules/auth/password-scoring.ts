@@ -22,7 +22,7 @@ export function getCharsetSize(password: string): number {
   if (/[0-9]/.test(password)) size += 10;
   if (/[^a-zA-Z0-9]/.test(password)) size += 32; // Common symbols
 
-  return size || 1;
+  return size !== 0 ? size : 1;
 }
 
 /**

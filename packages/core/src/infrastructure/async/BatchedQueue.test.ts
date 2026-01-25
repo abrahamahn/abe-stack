@@ -14,7 +14,7 @@ describe('BatchedQueue', () => {
 
   describe('Basic Batching', () => {
     it('should batch items and process them together', async () => {
-      const processor = vi.fn(async (items: number[]) => items.map((n) => n * 2));
+      const processor = vi.fn((items: number[]) => Promise.resolve(items.map((n) => n * 2)));
       const queue = new BatchedQueue({
         processBatch: processor,
         maxParallel: 1,
@@ -39,7 +39,7 @@ describe('BatchedQueue', () => {
     });
 
     it('should flush when batch size is reached', async () => {
-      const processor = vi.fn(async (items: number[]) => items.map((n) => n * 2));
+      const processor = vi.fn((items: number[]) => Promise.resolve(items.map((n) => n * 2)));
       const queue = new BatchedQueue({
         processBatch: processor,
         maxParallel: 1,
@@ -57,7 +57,7 @@ describe('BatchedQueue', () => {
     });
 
     it('should flush on interval even if batch not full', async () => {
-      const processor = vi.fn(async (items: number[]) => items.map((n) => n * 2));
+      const processor = vi.fn((items: number[]) => Promise.resolve(items.map((n) => n * 2)));
       const queue = new BatchedQueue({
         processBatch: processor,
         maxParallel: 1,
@@ -78,7 +78,7 @@ describe('BatchedQueue', () => {
 
   describe('Multiple Batches', () => {
     it('should handle multiple batches correctly', async () => {
-      const processor = vi.fn(async (items: number[]) => items.map((n) => n * 2));
+      const processor = vi.fn((items: number[]) => Promise.resolve(items.map((n) => n * 2)));
       const queue = new BatchedQueue({
         processBatch: processor,
         maxParallel: 1,
@@ -107,9 +107,7 @@ describe('BatchedQueue', () => {
   describe('Error Handling', () => {
     it('should reject all items in batch if processor fails', async () => {
       const error = new Error('Processing failed');
-      const processor = vi.fn(async () => {
-        throw error;
-      });
+      const processor = vi.fn(() => Promise.reject(error));
       const queue = new BatchedQueue({
         processBatch: processor,
         maxParallel: 1,
@@ -126,12 +124,12 @@ describe('BatchedQueue', () => {
 
     it('should continue processing after error in previous batch', async () => {
       let callCount = 0;
-      const processor = vi.fn(async (items: number[]) => {
+      const processor = vi.fn((items: number[]) => {
         callCount++;
         if (callCount === 1) {
-          throw new Error('First batch failed');
+          return Promise.reject(new Error('First batch failed'));
         }
-        return items.map((n) => n * 2);
+        return Promise.resolve(items.map((n) => n * 2));
       });
 
       const queue = new BatchedQueue({
@@ -158,7 +156,7 @@ describe('BatchedQueue', () => {
 
   describe('Edge Cases', () => {
     it('should handle single item batches', async () => {
-      const processor = vi.fn(async (items: number[]) => items.map((n) => n * 2));
+      const processor = vi.fn((items: number[]) => Promise.resolve(items.map((n) => n * 2)));
       const queue = new BatchedQueue({
         processBatch: processor,
         maxParallel: 1,
@@ -172,7 +170,7 @@ describe('BatchedQueue', () => {
     });
 
     it('should handle empty processor results', async () => {
-      const processor = vi.fn(async () => []);
+      const processor = vi.fn(() => Promise.resolve([]));
       const queue = new BatchedQueue({
         processBatch: processor,
         maxParallel: 1,
@@ -188,7 +186,7 @@ describe('BatchedQueue', () => {
     });
 
     it('should handle concurrent adds', async () => {
-      const processor = vi.fn(async (items: number[]) => items.map((n) => n * 2));
+      const processor = vi.fn((items: number[]) => Promise.resolve(items.map((n) => n * 2)));
       const queue = new BatchedQueue({
         processBatch: processor,
         maxParallel: 1,
@@ -208,7 +206,7 @@ describe('BatchedQueue', () => {
 
   describe('Destroy', () => {
     it('should reject pending tasks on destroy', async () => {
-      const processor = vi.fn(async (items: number[]) => items);
+      const processor = vi.fn((items: number[]) => Promise.resolve(items));
       const queue = new BatchedQueue({
         processBatch: processor,
         maxParallel: 1,

@@ -47,7 +47,7 @@ function parseAndPopulate(filePath: string): void {
  * Initializes the environment by loading .env files with correct priority.
  */
 export function initEnv(): void {
-  const nodeEnv = process.env['NODE_ENV'] || 'development';
+  const nodeEnv = process.env['NODE_ENV'] ?? 'development';
   let currentDir = process.cwd();
   let configDir: string | null = null;
 
@@ -61,7 +61,7 @@ export function initEnv(): void {
     currentDir = path.dirname(currentDir);
   }
 
-  if (!configDir) {
+  if (configDir === null || configDir === undefined) {
     if (process.env['NODE_ENV'] !== 'test') {
       console.warn('[EnvLoader] Warning: .config directory not found. Environment files skipped.');
     }
@@ -75,7 +75,7 @@ export function initEnv(): void {
 
   // Priority 1: Explicit ENV_FILE
   const customPath = process.env['ENV_FILE'];
-  if (customPath) {
+  if (customPath !== undefined && customPath !== '') {
     const resolvedPath = path.resolve(process.cwd(), customPath);
     if (process.env['NODE_ENV'] !== 'test') {
       console.log(`[EnvLoader] Loading explicit file: ${customPath}`);
@@ -147,3 +147,4 @@ export function validateEnvironment(raw: Record<string, unknown> = process.env):
 
 export { EnvSchema, EnvSchema as serverEnvSchema };
 export type { FullEnv as ServerEnv };
+

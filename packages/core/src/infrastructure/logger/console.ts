@@ -86,9 +86,9 @@ export function createConsoleLogger(level: LogLevel): ConsoleLoggerConfig {
           const formatted = `server: [${formatTimestamp()}] ${lvl.toUpperCase()}${
             message ? ` ${message}` : ''
           }${payload ? ` ${payload}` : ''}`;
-          console.log(formatted);
+          process.stdout.write(formatted + '\n');
         } catch {
-          console.log(line);
+          process.stdout.write(line + '\n');
         }
       },
     },

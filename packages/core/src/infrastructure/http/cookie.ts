@@ -10,7 +10,7 @@
 export function parseCookies(cookieHeader: string | undefined | null): Record<string, string> {
   const cookies: Record<string, string> = {};
 
-  if (!cookieHeader) {
+  if (cookieHeader === undefined || cookieHeader === null || cookieHeader === '') {
     return cookies;
   }
 

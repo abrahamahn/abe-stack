@@ -50,13 +50,13 @@ const integrationMocks = vi.hoisted(() => {
     loadFile = vi.fn().mockResolvedValue(undefined);
 
     on(event: string, callback: (...args: unknown[]) => void) {
-      const handlers = windowEvents.get(event) || [];
+      const handlers = windowEvents.get(event) ?? [];
       handlers.push(callback);
       windowEvents.set(event, handlers);
     }
 
     emit(event: string, ...args: unknown[]) {
-      const handlers = windowEvents.get(event) || [];
+      const handlers = windowEvents.get(event) ?? [];
       handlers.forEach((handler) => handler(...args));
     }
 
@@ -123,7 +123,7 @@ describe('Integration: End-to-End IPC Flow', () => {
         disableHardwareAcceleration: vi.fn(),
         quit: vi.fn(),
         on: vi.fn((event: string, handler: (...args: unknown[]) => void) => {
-          const handlers = appEventHandlers.get(event) || [];
+          const handlers = appEventHandlers.get(event) ?? [];
           handlers.push(handler);
           appEventHandlers.set(event, handlers);
         }),
@@ -312,6 +312,7 @@ describe('Integration: End-to-End IPC Flow', () => {
 
       const windowInstance = integrationMocks.getWindowInstance();
       expect(windowInstance).not.toBeNull();
+      expect(windowInstance!).toBeDefined();
       expect(windowInstance!.options).toMatchObject({
         webPreferences: {
           nodeIntegration: false,
@@ -365,7 +366,7 @@ describe('Integration: Window Lifecycle Management', () => {
         disableHardwareAcceleration: vi.fn(),
         quit: appQuitMock,
         on: vi.fn((event: string, handler: (...args: unknown[]) => void) => {
-          const handlers = appEventHandlers.get(event) || [];
+          const handlers = appEventHandlers.get(event) ?? [];
           handlers.push(handler);
           appEventHandlers.set(event, handlers);
         }),
@@ -695,7 +696,7 @@ describe('Integration: App Initialization and Shutdown', () => {
         disableHardwareAcceleration: disableHardwareAccelerationMock,
         quit: vi.fn(),
         on: vi.fn((event: string, handler: (...args: unknown[]) => void) => {
-          const handlers = appEventHandlers.get(event) || [];
+          const handlers = appEventHandlers.get(event) ?? [];
           handlers.push(handler);
           appEventHandlers.set(event, handlers);
         }),
@@ -942,7 +943,7 @@ describe('Integration: Window Security Settings', () => {
         disableHardwareAcceleration: vi.fn(),
         quit: vi.fn(),
         on: vi.fn((event: string, handler: (...args: unknown[]) => void) => {
-          const handlers = appEventHandlers.get(event) || [];
+          const handlers = appEventHandlers.get(event) ?? [];
           handlers.push(handler);
           appEventHandlers.set(event, handlers);
         }),

@@ -24,7 +24,7 @@ import { HTTP_STATUS } from '../../shared/constants/http';
  */
 export class SubscriptionNotFoundError extends NotFoundError {
   constructor(identifier?: string) {
-    const message = identifier
+    const message = identifier !== undefined && identifier !== ''
       ? `Push subscription not found: ${identifier}`
       : 'Push subscription not found';
     super(message, 'SUBSCRIPTION_NOT_FOUND');
@@ -56,7 +56,7 @@ export class InvalidSubscriptionError extends BadRequestError {
  */
 export class SubscriptionExpiredError extends UnprocessableError {
   constructor(subscriptionId?: string) {
-    const message = subscriptionId
+    const message = subscriptionId !== undefined && subscriptionId !== ''
       ? `Push subscription has expired: ${subscriptionId}`
       : 'Push subscription has expired';
     super(message, 'SUBSCRIPTION_EXPIRED');
@@ -193,7 +193,7 @@ export class NotificationsDisabledError extends UnprocessableError {
     public readonly userId: string,
     public readonly notificationType?: string,
   ) {
-    const message = notificationType
+    const message = notificationType !== undefined && notificationType !== ''
       ? `User has disabled ${notificationType} notifications`
       : 'User has disabled notifications';
     super(message, 'NOTIFICATIONS_DISABLED', { userId, notificationType });
