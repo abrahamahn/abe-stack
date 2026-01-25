@@ -126,7 +126,7 @@ NODE_ENV=staging ENV_FILE=.config/env/.env.staging pnpm dev
 
 ### ✅ DO
 
-- Keep `.env.local` in `.gitignore` (already configured)
+- Keep `.env.*` in `.gitignore` (already configured)
 - Use strong secrets (32+ characters) for production
 - Rotate secrets regularly (at least quarterly)
 - Use different secrets for each environment

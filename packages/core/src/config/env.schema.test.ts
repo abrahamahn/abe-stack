@@ -1,8 +1,8 @@
 // packages/core/src/config/schema/__tests__/env.schema.test.ts
 import { describe, expect, it } from 'vitest';
-import { FullEnvSchema } from './env.schema';
+import { EnvSchema } from './env.schema';
 
-describe('FullEnvSchema', () => {
+describe('EnvSchema', () => {
   const baseValidEnv = {
     NODE_ENV: 'development',
     JWT_SECRET: 'super-secret-key-at-least-32-chars-long-reference',
@@ -11,7 +11,7 @@ describe('FullEnvSchema', () => {
   };
 
   it('should validate a correct development environment', () => {
-    const result = FullEnvSchema.safeParse(baseValidEnv);
+    const result = EnvSchema.safeParse(baseValidEnv);
     expect(result.success).toBe(true);
   });
 
@@ -22,7 +22,7 @@ describe('FullEnvSchema', () => {
         NODE_ENV: 'production',
         JWT_SECRET: 'too-short',
       };
-      const result = FullEnvSchema.safeParse(prodEnv);
+      const result = EnvSchema.safeParse(prodEnv);
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0]?.message).toContain('at least 32 characters');
@@ -36,13 +36,13 @@ describe('FullEnvSchema', () => {
         JWT_SECRET: 'jwt_secret_must_be_long_but_not_obvious_password',
       };
       // Password is in weakSecrets list
-      const result = FullEnvSchema.safeParse({
+      const result = EnvSchema.safeParse({
         ...prodEnv,
         JWT_SECRET: 'password'.repeat(4), // making it long enough but still weak
       });
       expect(result.success).toBe(false);
 
-      const weakResult = FullEnvSchema.safeParse({
+      const weakResult = EnvSchema.safeParse({
         ...prodEnv,
         JWT_SECRET: 'secret'.repeat(10),
       });
@@ -58,11 +58,11 @@ describe('FullEnvSchema', () => {
       };
       // We need to delete other providers to trigger the "no database" error
       const { SQLITE_FILE_PATH, ...rest } = prodEnv;
-      const result = FullEnvSchema.safeParse(rest);
+      const result = EnvSchema.safeParse(rest);
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(
-          result.error.issues.some((i) => i.message.includes('valid database configuration')),
+          result.error.issues.some((i: { message: string }) => i.message.includes('valid database configuration')),
         ).toBe(true);
       }
     });
@@ -75,7 +75,7 @@ describe('FullEnvSchema', () => {
         PUBLIC_API_URL: 'https://api.example.com',
         VITE_API_URL: 'https://api.wrong.com',
       };
-      const result = FullEnvSchema.safeParse(env);
+      const result = EnvSchema.safeParse(env);
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0]?.message).toContain('must match');
@@ -88,7 +88,7 @@ describe('FullEnvSchema', () => {
         PUBLIC_API_URL: 'https://api.example.com',
         VITE_API_URL: 'https://api.example.com',
       };
-      const result = FullEnvSchema.safeParse(env);
+      const result = EnvSchema.safeParse(env);
       expect(result.success).toBe(true);
     });
   });

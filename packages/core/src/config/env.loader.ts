@@ -1,7 +1,7 @@
 // packages/core/src/config/env-loader.ts
 import fs from 'node:fs';
 import path from 'node:path';
-import { FullEnvSchema, type FullEnv } from './env.schema';
+import { EnvSchema, type FullEnv } from './env.schema';
 
 /**
  * 1. Low-Level Disk Reader
@@ -112,7 +112,7 @@ export function loadServerEnv(): FullEnv {
   initEnv();
 
   // 2. Validate using the existing Zod Contract
-  const result = FullEnvSchema.safeParse(process.env);
+  const result = EnvSchema.safeParse(process.env);
 
   if (!result.success) {
     console.error('\n❌ ABE-STACK: Environment Validation Failed');
@@ -137,7 +137,7 @@ export function loadServerEnv(): FullEnv {
  * Validates the environment object.
  */
 export function validateEnvironment(raw: Record<string, unknown> = process.env): FullEnv {
-  const parsed = FullEnvSchema.safeParse(raw);
+  const parsed = EnvSchema.safeParse(raw);
   if (!parsed.success) {
     console.error('Environment Validation Failed:', parsed.error.message);
     process.exit(1);
@@ -145,5 +145,6 @@ export function validateEnvironment(raw: Record<string, unknown> = process.env):
   return parsed.data;
 }
 
-export { FullEnvSchema as envSchema, FullEnvSchema as serverEnvSchema };
+export { EnvSchema, EnvSchema as serverEnvSchema };
 export type { FullEnv as ServerEnv };
+

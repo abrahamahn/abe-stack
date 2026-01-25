@@ -5,7 +5,7 @@ import type {
   FullEnv,
   SqlSearchProviderConfig,
 } from '@abe-stack/core/config';
-import { FullEnvSchema, initEnv } from '@abe-stack/core/config';
+import { EnvSchema, initEnv } from '@abe-stack/core/config';
 
 import { loadAuthConfig, validateAuthConfig } from './auth/auth';
 import { loadCacheConfig } from './infra/cache';
@@ -31,7 +31,7 @@ import {
  *
  * **Responsibility**:
  * 1. Read raw environment variables (Record<string, string>).
- * 2. Validate them against the Zod schema (`FullEnvSchema`).
+ * 2. Validate them against the Zod schema (`EnvSchema`).
  * 3. Transform them into the structured `AppConfig` domain object.
  * 4. Apply domain-specific business rules (e.g., "SSL required in production").
  *
@@ -45,7 +45,7 @@ export function load(rawEnv: Record<string, string | undefined> = process.env): 
   }
 
   // 2. Validate raw strings against Zod Schema
-  const envResult = FullEnvSchema.safeParse(rawEnv);
+  const envResult = EnvSchema.safeParse(rawEnv);
 
   if (!envResult.success) {
     console.error('\n❌ ABE-STACK: Environment Validation Failed');

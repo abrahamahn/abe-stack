@@ -321,7 +321,7 @@ export const FrontendEnvSchema = z.object({
 /**
  * Combined environment schema for the entire application
  */
-export const FullEnvSchema = BaseEnvSchema.extend({
+export const EnvSchema = BaseEnvSchema.extend({
   // Add all other schemas here
   ...JwtEnvSchema.shape,
   ...DatabaseEnvSchema.shape,
@@ -379,4 +379,4 @@ export const FullEnvSchema = BaseEnvSchema.extend({
   }
 });
 
-export type FullEnv = z.infer<typeof FullEnvSchema>;
+export type FullEnv = z.infer<typeof EnvSchema>;

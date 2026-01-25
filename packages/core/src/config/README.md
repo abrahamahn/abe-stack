@@ -50,6 +50,7 @@ The `initEnv()` function searches for `.env` files and loads them into `process.
 6. **Root Fallbacks** - `.env.local`, `.env.{NODE_ENV}`, and `.env` in repository root (for deployment flexibility)
 
 **Why this order?** Higher priority sources override lower ones. This allows you to:
+
 - Set production secrets via your cloud platform (highest priority)
 - Override defaults locally without committing changes (`.env.local`)
 - Share team defaults via git (`.env.development`, `.env.production`)
@@ -77,7 +78,7 @@ The `initEnv()` function searches for `.env` files and loads them into `process.
 
 **File:** `env.schema.ts`
 
-After loading, the `FullEnvSchema` validates all environment variables using Zod. This ensures:
+After loading, the `EnvSchema` validates all environment variables using Zod. This ensures:
 
 - **Required variables exist** - Missing variables cause immediate failure
 - **Types are correct** - Strings are coerced to numbers, booleans, etc.
@@ -87,6 +88,7 @@ After loading, the `FullEnvSchema` validates all environment variables using Zod
 **Why Zod?** It provides runtime validation with automatic TypeScript type inference. The schema IS the type.
 
 **Example validation rules:**
+
 - `JWT_SECRET` must be 32+ characters in production
 - `DATABASE_URL` must be a valid connection string
 - `NODE_ENV` must be one of: `development`, `production`, `test`
@@ -98,7 +100,8 @@ After loading, the `FullEnvSchema` validates all environment variables using Zod
 
 While `env.schema.ts` validates **raw environment strings**, the contracts define **transformed configuration objects** used by your application.
 
-**Why separate?** 
+**Why separate?**
+
 - **Environment variables** are flat strings: `JWT_SECRET=abc123`, `JWT_ISSUER=myapp`
 - **Application config** is structured objects: `{ jwt: { secret: 'abc123', issuer: 'myapp' } }`
 
@@ -136,6 +139,7 @@ export function loadJWTConfig(env: FullEnv): JWTConfig {
 Type-safe helper functions for parsing environment values with defaults and validation.
 
 **Available parsers:**
+
 - `getInt(env, key, default)` - Parse integers with optional default
 - `getBool(env, key, default)` - Parse booleans (handles 'true', '1', 'yes', etc.)
 - `getList(env, key, default)` - Parse comma-separated lists
@@ -152,21 +156,23 @@ The `env.schema.ts` file is the **gatekeeper** of your application. It defines e
 **Structure:**
 
 ```typescript
-export const FullEnvSchema = z.object({
-  // Application
-  NODE_ENV: z.enum(['development', 'production', 'test']),
-  PORT: z.coerce.number().int().min(1).max(65535),
-  
-  // Auth
-  JWT_SECRET: z.string().min(32),
-  JWT_ISSUER: z.string(),
-  
-  // Database
-  DATABASE_PROVIDER: z.enum(['postgresql', 'sqlite', 'mongodb']),
-  DATABASE_URL: z.string().url().optional(),
-  
-  // ... hundreds more
-}).refine(/* custom validation rules */);
+export const EnvSchema = z
+  .object({
+    // Application
+    NODE_ENV: z.enum(['development', 'production', 'test']),
+    PORT: z.coerce.number().int().min(1).max(65535),
+
+    // Auth
+    JWT_SECRET: z.string().min(32),
+    JWT_ISSUER: z.string(),
+
+    // Database
+    DATABASE_PROVIDER: z.enum(['postgresql', 'sqlite', 'mongodb']),
+    DATABASE_URL: z.string().url().optional(),
+
+    // ... hundreds more
+  })
+  .refine(/* custom validation rules */);
 ```
 
 **Key features:**
@@ -237,6 +243,7 @@ pnpm test parsers.test.ts
 ```
 
 **What's tested:**
+
 - Environment loading priority
 - File parsing (quoted values, comments, multiline)
 - Schema validation (required fields, types, formats)
@@ -252,7 +259,7 @@ pnpm test parsers.test.ts
 **1. Add to schema** (`env.schema.ts`):
 
 ```typescript
-export const FullEnvSchema = z.object({
+export const EnvSchema = z.object({
   // ... existing fields
   MY_NEW_API_KEY: z.string().min(1),
   MY_NEW_TIMEOUT: z.coerce.number().int().min(1000).default(5000),

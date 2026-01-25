@@ -65,9 +65,8 @@ https://github.com/abrahamahn/abe-stack
 
 ```bash
 git clone https://github.com/abrahamahn/abe-stack.git && cd abe-stack
-corepack enable && corepack prepare pnpm@10.26.2 --activate
 pnpm install
-cp .env.example .config/env/.env.development
+cp .config/env/.env.development.example .config/env/.env.development
 pnpm dev
 ```
 
@@ -93,7 +92,7 @@ Ensure you have these installed:
 ```bash
 # Node.js 20+ and pnpm
 node --version  # Should be 20.x or higher
-corepack enable && corepack prepare pnpm@10.26.2 --activate
+pnpm --version  # Should be 10.x or higher
 
 # PostgreSQL (for local development)
 pg_isready  # Check if PostgreSQL is running

@@ -79,14 +79,14 @@ apps/server/src/config/
 
 The ABE Stack supports a sophisticated loading strategy with **six priority levels**:
 
-| Priority | Source                 | Purpose                                | Location            | Git Status |
-| -------- | ---------------------- | -------------------------------------- | ------------------- | ---------- |
-| **1**    | **System Environment** | Runtime/Cloud vars (Vercel, AWS, etc.) | Deployment platform | N/A        |
-| **2**    | **ENV_FILE**           | Explicit file path via env variable    | Custom path         | N/A        |
-| **3**    | **`.env.local`**       | Local overrides and developer secrets  | `.config/env/`      | Ignored    |
-| **4**    | **`.env.{NODE_ENV}`**  | Stage-specific (dev/prod/test)         | `.config/env/`      | Tracked    |
-| **5**    | **`.env`**             | Shared base defaults                   | `.config/env/`      | Tracked    |
-| **6**    | **Root Fallbacks**     | `.env.local`, `.env.{NODE_ENV}`, `.env` | Repository root    | Varies     |
+| Priority | Source                 | Purpose                                 | Location            |
+| -------- | ---------------------- | --------------------------------------- | ------------------- |
+| **1**    | **System Environment** | Runtime/Cloud vars (Vercel, AWS, etc.)  | Deployment platform |
+| **2**    | **ENV_FILE**           | Explicit file path via env variable     | Custom path         |
+| **3**    | **`.env.local`**       | Local overrides and developer secrets   | `.config/env/`      |
+| **4**    | **`.env.{NODE_ENV}`**  | Stage-specific (dev/prod/test)          | `.config/env/`      |
+| **5**    | **`.env`**             | Shared base defaults                    | `.config/env/`      |
+| **6**    | **Root Fallbacks**     | `.env.local`, `.env.{NODE_ENV}`, `.env` | Repository root     |
 
 **Priority rules:** Higher numbers override lower numbers. System environment always wins.
 
@@ -98,17 +98,17 @@ The ABE Stack supports a sophisticated loading strategy with **six priority leve
 
 The stack is pre-configured to toggle between enterprise-grade services and local mocks via simple environment switches.
 
-| Category          | Options                                      | Switch Variable          |
-| ----------------- | -------------------------------------------- | ------------------------ |
-| **Database**      | PostgreSQL, SQLite, MongoDB                  | `DATABASE_PROVIDER`      |
-| **Storage**       | Local Filesystem, AWS S3 / R2                | `STORAGE_PROVIDER`       |
-| **Cache**         | Local (Memory), Redis                        | `CACHE_PROVIDER`         |
-| **Queue**         | Local (Memory/DB), Redis                     | `QUEUE_PROVIDER`         |
-| **Auth**          | Local, OAuth (Google/GitHub/etc), Magic-Link | `AUTH_STRATEGIES`        |
-| **Search**        | SQL (ILIKE), Elasticsearch                   | `SEARCH_PROVIDER`        |
-| **Email**         | Console (Dev), SMTP, API (Resend/Postmark)   | `EMAIL_PROVIDER`         |
-| **Billing**       | Stripe, PayPal                               | `BILLING_PROVIDER`       |
-| **Notifications** | OneSignal, FCM, Courier                      | `NOTIFICATIONS_PROVIDER` |
+| Category          | Options                                      | Switch Variable            |
+| ----------------- | -------------------------------------------- | -------------------------- |
+| **Database**      | PostgreSQL, SQLite, MongoDB                  | `DATABASE_PROVIDER`        |
+| **Storage**       | Local Filesystem, AWS S3 / R2                | `STORAGE_PROVIDER`         |
+| **Cache**         | Local (Memory), Redis                        | `CACHE_PROVIDER`           |
+| **Queue**         | Local (Memory/DB), Redis                     | `QUEUE_PROVIDER`           |
+| **Auth**          | Local, OAuth (Google/GitHub/etc), Magic-Link | `AUTH_STRATEGIES`          |
+| **Search**        | SQL (ILIKE), Elasticsearch                   | `SEARCH_PROVIDER`          |
+| **Email**         | Console (Dev), SMTP, API (Resend/Postmark)   | `EMAIL_PROVIDER`           |
+| **Billing**       | Stripe, PayPal                               | `BILLING_PROVIDER`         |
+| **Notifications** | OneSignal, FCM, Courier                      | `NOTIFICATIONS_PROVIDER`   |
 | **Package Mgr**   | pnpm, npm, yarn                              | `PACKAGE_MANAGER_PROVIDER` |
 
 ---
@@ -159,7 +159,7 @@ The stack uses `initEnv()` from `@abe-stack/core` to recursively resolve the pro
 
 ### 2. Validation (The Zod Gatekeeper)
 
-Every variable is passed through `FullEnvSchema`. This ensures data integrity before the app even starts:
+Every variable is passed through `EnvSchema`. This ensures data integrity before the app even starts:
 
 - **Ports** are coerced into numbers.
 - **URLs** are validated against proper URI formats.
@@ -202,9 +202,9 @@ if (config.storage.provider === 's3') {
 
 To add a new variable, follow the **Triple-Point Update**:
 
-1. **Contract:** Add the variable and Zod rules to `packages/core/src/contracts/config/environment.ts`.
+1. **Schema:** Add the variable and Zod rules to `packages/core/src/config/env.schema.ts`.
 2. **Factory:** Update the relevant loader in `apps/server/src/config/` (e.g., `infra/database.ts`) to map the new variable.
-3. **Template:** Add the variable with documentation to `.env.example`.
+3. **Template:** Add the variable with documentation to `.config/env/.env.*.example` files.
 
 ---
 
