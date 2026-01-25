@@ -62,7 +62,9 @@ describe('EnvSchema', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(
-          result.error.issues.some((i: { message: string }) => i.message.includes('valid database configuration')),
+          result.error.issues.some((i: { message: string }) =>
+            i.message.includes('valid database configuration'),
+          ),
         ).toBe(true);
       }
     });

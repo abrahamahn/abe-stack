@@ -6,21 +6,27 @@ This directory contains all environment variable files for ABE Stack. The config
 
 **First time setup:**
 
-1. Copy the example files and remove `.example` from the filenames:
+1. Copy the example files:
 
    ```bash
    cp .config/env/.env.development.example .config/env/.env.development
    cp .config/env/.env.local.example .config/env/.env.local
    ```
 
-2. Start developing immediately - the defaults work out of the box:
+2. Choose your development method:
 
+   **Option A: Local Development**
    ```bash
    pnpm install
    pnpm dev
    ```
 
-3. Customize as needed by editing `.config/env/.env.local` with your preferences
+   **Option B: Docker**
+   ```bash
+   docker compose -f infra/docker/development/docker-compose.yml up
+   ```
+
+3. Customize as needed by editing `.config/env/.env.local`
 
 > **Note:** The four main env files (`.env.development`, `.env.production`, `.env.test`, `.env.local`) are gitignored for security.
 
@@ -100,26 +106,45 @@ Environment variables are loaded in this order (highest to lowest priority):
 
 ### Using a Specific Environment File
 
-```bash
-# Use a custom env file
-ENV_FILE=.config/env/.env.staging pnpm dev
+You can override the default file loading with the `ENV_FILE` variable:
 
-# Or set it in your shell
-export ENV_FILE=.config/env/.env.custom
-pnpm dev
+```bash
+# Use a custom environment file
+ENV_FILE=.config/env/.env.production pnpm dev
 ```
 
-### Creating Custom Environments
+### Setting NODE_ENV
+
+`NODE_ENV` determines which `.env.{NODE_ENV}` file is loaded:
 
 ```bash
-# Create a staging environment
-cp .config/env/.env.production.example .config/env/.env.staging
+# Development (default)
+NODE_ENV=development pnpm dev
 
-# Edit staging-specific values
-nano .config/env/.env.staging
+# Production
+NODE_ENV=production pnpm start
 
-# Use it
-NODE_ENV=staging ENV_FILE=.config/env/.env.staging pnpm dev
+# Test
+NODE_ENV=test pnpm test
+```
+
+### Customizing Environment Directory Location
+
+**Current default:** `.config/env/` (with repository root as fallback)
+
+**To change the directory:**
+
+1. Modify `packages/core/src/config/env.loader.ts`
+2. Update the `configDir` path in the `initEnv()` function
+3. Or use `ENV_FILE` to point to a specific file anywhere
+
+**Example using ENV_FILE:**
+```bash
+# Load from a different directory
+ENV_FILE=/path/to/my/custom/.env pnpm dev
+
+# Load from project root
+ENV_FILE=.env pnpm dev
 ```
 
 ## 🔒 Security Best Practices

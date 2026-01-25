@@ -76,7 +76,7 @@ Open [localhost:3000](http://localhost:3000).
 
 ```bash
 git clone https://github.com/abrahamahn/abe-stack.git && cd abe-stack
-docker compose -f config/docker/docker-compose.yml up --build
+docker compose -f infra/docker/development/docker-compose.yml up --build
 ```
 
 ---
