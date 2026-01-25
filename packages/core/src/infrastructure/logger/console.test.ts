@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createConsoleLogger, LOG_LEVELS, type LogLevel } from './console';
 
 describe('Console Logger', () => {
-
   beforeEach(() => {
     vi.spyOn(console, 'log').mockImplementation(() => {});
   });

@@ -86,7 +86,7 @@ export function loadNotificationsConfig(env: FullEnv): NotificationConfig {
   // Build configuration based on what provider would be used (even if not enabled due to missing credentials)
   const effectiveProvider = provider || 'onesignal'; // Default to onesignal
 
-  let config: NotificationConfig = {
+  const config: NotificationConfig = {
     enabled: isEnabled,
     provider: effectiveProvider,
     config: {},

@@ -7,13 +7,13 @@
  */
 
 import {
-    AccountLockedError,
-    EmailAlreadyExistsError,
-    EmailNotVerifiedError,
-    EmailSendError,
-    InvalidCredentialsError,
-    InvalidTokenError,
-    WeakPasswordError,
+  AccountLockedError,
+  EmailAlreadyExistsError,
+  EmailNotVerifiedError,
+  EmailSendError,
+  InvalidCredentialsError,
+  InvalidTokenError,
+  WeakPasswordError,
 } from './errors';
 
 /**
@@ -144,7 +144,10 @@ export function mapErrorToHttpResponse(
     }
     // Default: service unavailable
     logger.error(
-      { originalError: (error.originalError as Error | undefined)?.message, ...options?.logContext },
+      {
+        originalError: error.originalError?.message,
+        ...options?.logContext,
+      },
       'Email send failed',
     );
     return { status: 503, body: { message: HTTP_ERROR_MESSAGES.EMAIL_SEND_FAILED } };

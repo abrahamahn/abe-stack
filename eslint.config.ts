@@ -1,17 +1,22 @@
+// @ts-expect-error - types might be missing in this context
+import { includeIgnoreFile } from '@eslint/compat';
+import type { Linter } from 'eslint';
+import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-
-import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const gitignorePath = path.resolve(__dirname, '.gitignore');
 
 // Type assertion to handle plugin compatibility
 const reactHooksPluginTyped: any = reactHooksPlugin;
 
-import type { Linter } from 'eslint';
-
-const tsconfigRootDir: string = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
+const tsconfigRootDir: string = path.resolve(__dirname);
 const require = createRequire(import.meta.url);
+
 let jsConfigs: { recommended?: { languageOptions?: { parser?: Linter.Parser } } } = {};
 try {
   jsConfigs = require('@eslint/js').configs;
@@ -21,29 +26,16 @@ try {
 const jsParser: Linter.Parser | undefined = jsConfigs.recommended?.languageOptions?.parser;
 
 export default [
+  includeIgnoreFile(gitignorePath),
   {
     ignores: [
-      '**/node_modules/**',
-      '**/.cache/**',
-      '**/.claude/**',
-      '**/.vscode/**',
-      '**/.gemini/**',
       '**/.github/**',
-      '**/.pnpm-store/**',
-      '**/out/**',
-      '**/dist/**',
-      '**/build/**',
-      '**/.turbo/**',
-      '**/coverage/**',
       '**/tooling/scripts/**',
       '**/tooling/lint/**',
       '**/__tests__/e2e/**',
       '**/vite.config.ts',
       '**/vitest.config.js',
       '**/drizzle.config.ts',
-      '**/*.js.map',
-      '**/*.d.ts',
-      '**/*.d.ts.map',
       '**/eslint.config.ts',
     ],
   },
@@ -51,7 +43,7 @@ export default [
 
   // Configuration for ALL TypeScript files with strict type checking
   ...tseslint.configs.strictTypeChecked.map(
-    (config): Linter.Config => ({
+    (config: any): Linter.Config => ({
       ...config,
       files: ['**/*.{ts,tsx,cts,mts}'],
       languageOptions: {

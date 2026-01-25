@@ -114,23 +114,21 @@ export const jobDetailsSchema: Schema<JobDetails> = createSchema((data: unknown)
   }
 
   return {
-    id: obj.id as string,
-    name: obj.name as string,
+    id: obj.id,
+    name: obj.name,
     args: obj.args,
     status,
-    attempts: obj.attempts as number,
-    maxAttempts: obj.maxAttempts as number,
-    scheduledAt: obj.scheduledAt as string,
-    createdAt: obj.createdAt as string,
+    attempts: obj.attempts,
+    maxAttempts: obj.maxAttempts,
+    scheduledAt: obj.scheduledAt,
+    createdAt: obj.createdAt,
     completedAt:
-      obj.completedAt === null || typeof obj.completedAt === 'string'
-        ? (obj.completedAt as string | null)
-        : null,
-    durationMs: typeof obj.durationMs === 'number' ? (obj.durationMs as number) : null,
+      obj.completedAt === null || typeof obj.completedAt === 'string' ? obj.completedAt : null,
+    durationMs: typeof obj.durationMs === 'number' ? obj.durationMs : null,
     error: obj.error ? jobErrorSchema.parse(obj.error) : null,
     deadLetterReason:
       obj.deadLetterReason === null || typeof obj.deadLetterReason === 'string'
-        ? (obj.deadLetterReason as string | null)
+        ? obj.deadLetterReason
         : null,
   };
 });

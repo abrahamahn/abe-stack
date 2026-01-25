@@ -2,25 +2,25 @@
 import { describe, expect, test } from 'vitest';
 
 import {
-    AppError,
-    BadRequestError,
-    ConflictError,
-    NotFoundError,
-    TooManyRequestsError,
-    UnauthorizedError,
+  AppError,
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+  TooManyRequestsError,
+  UnauthorizedError,
 } from '../../infrastructure/errors';
 import {
-    AccountLockedError,
-    EmailAlreadyExistsError,
-    InvalidCredentialsError,
-    InvalidTokenError,
-    OAuthError,
-    OAuthStateMismatchError,
-    TokenReuseError,
-    TotpInvalidError,
-    TotpRequiredError,
-    UserNotFoundError,
-    WeakPasswordError,
+  AccountLockedError,
+  EmailAlreadyExistsError,
+  InvalidCredentialsError,
+  InvalidTokenError,
+  OAuthError,
+  OAuthStateMismatchError,
+  TokenReuseError,
+  TotpInvalidError,
+  TotpRequiredError,
+  UserNotFoundError,
+  WeakPasswordError,
 } from './errors';
 
 // ============================================================================

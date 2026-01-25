@@ -2,18 +2,18 @@
 import { describe, expect, test } from 'vitest';
 
 import {
-    compoundFilterSchema,
-    facetConfigSchema,
-    filterConditionSchema,
-    filterOperatorSchema,
-    filterValueSchema,
-    fullTextSearchConfigSchema,
-    logicalOperatorSchema,
-    rangeValueSchema,
-    SEARCH_DEFAULTS,
-    searchQuerySchema,
-    sortConfigSchema,
-    urlSearchParamsSchema,
+  compoundFilterSchema,
+  facetConfigSchema,
+  filterConditionSchema,
+  filterOperatorSchema,
+  filterValueSchema,
+  fullTextSearchConfigSchema,
+  logicalOperatorSchema,
+  rangeValueSchema,
+  SEARCH_DEFAULTS,
+  searchQuerySchema,
+  sortConfigSchema,
+  urlSearchParamsSchema,
 } from './schemas';
 
 describe('search schemas', () => {

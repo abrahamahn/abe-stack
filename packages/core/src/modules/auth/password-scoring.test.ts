@@ -2,12 +2,12 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-    calculateEntropy,
-    calculateScore,
-    estimateCrackTime,
-    generateFeedback,
-    getCharsetSize,
-    type PasswordPenalties,
+  calculateEntropy,
+  calculateScore,
+  estimateCrackTime,
+  generateFeedback,
+  getCharsetSize,
+  type PasswordPenalties,
 } from './password-scoring';
 
 describe('Password Scoring', () => {

@@ -6,12 +6,12 @@
  */
 
 import {
-    AppError,
-    BadRequestError,
-    ConflictError,
-    NotFoundError,
-    TooManyRequestsError,
-    UnauthorizedError,
+  AppError,
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+  TooManyRequestsError,
+  UnauthorizedError,
 } from '../../infrastructure/errors';
 import { HTTP_STATUS } from '../../shared/constants/http';
 

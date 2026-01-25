@@ -7,7 +7,7 @@ describe('PaginationError', () => {
   it('should create an error with correct properties', () => {
     const error = new PaginationError(
       PAGINATION_ERROR_TYPES.INVALID_CURSOR,
-      'Invalid cursor provided'
+      'Invalid cursor provided',
     );
 
     expect(error.type).toBe(PAGINATION_ERROR_TYPES.INVALID_CURSOR);
@@ -18,7 +18,7 @@ describe('PaginationError', () => {
   it('should handle sort mismatch error', () => {
     const error = new PaginationError(
       PAGINATION_ERROR_TYPES.CURSOR_SORT_MISMATCH,
-      'Sort order mismatch'
+      'Sort order mismatch',
     );
 
     expect(error.type).toBe(PAGINATION_ERROR_TYPES.CURSOR_SORT_MISMATCH);

@@ -98,16 +98,16 @@ export const planSchema: Schema<Plan> = createSchema((data: unknown) => {
   if (typeof obj.sortOrder !== 'number') throw new Error('Plan sortOrder must be a number');
 
   return {
-    id: obj.id as string,
-    name: obj.name as string,
-    description: obj.description as string | null,
+    id: obj.id,
+    name: obj.name,
+    description: obj.description,
     interval: obj.interval as PlanInterval,
-    priceInCents: obj.priceInCents as number,
-    currency: obj.currency as string,
+    priceInCents: obj.priceInCents,
+    currency: obj.currency,
     features: obj.features as PlanFeature[],
-    trialDays: obj.trialDays as number,
-    isActive: obj.isActive as boolean,
-    sortOrder: obj.sortOrder as number,
+    trialDays: obj.trialDays,
+    isActive: obj.isActive,
+    sortOrder: obj.sortOrder,
   };
 });
 
@@ -178,18 +178,18 @@ export const subscriptionSchema: Schema<Subscription> = createSchema((data: unkn
   if (typeof obj.createdAt !== 'string') throw new Error('createdAt must be a string');
 
   return {
-    id: obj.id as string,
-    userId: obj.userId as string,
-    planId: obj.planId as string,
+    id: obj.id,
+    userId: obj.userId,
+    planId: obj.planId,
     plan: planSchema.parse(obj.plan),
     provider: obj.provider as BillingProvider,
     status: obj.status as SubscriptionStatus,
-    currentPeriodStart: obj.currentPeriodStart as string,
-    currentPeriodEnd: obj.currentPeriodEnd as string,
-    cancelAtPeriodEnd: obj.cancelAtPeriodEnd as boolean,
-    canceledAt: obj.canceledAt as string | null,
-    trialEnd: obj.trialEnd as string | null,
-    createdAt: obj.createdAt as string,
+    currentPeriodStart: obj.currentPeriodStart,
+    currentPeriodEnd: obj.currentPeriodEnd,
+    cancelAtPeriodEnd: obj.cancelAtPeriodEnd,
+    canceledAt: obj.canceledAt,
+    trialEnd: obj.trialEnd,
+    createdAt: obj.createdAt,
   };
 });
 
@@ -350,16 +350,16 @@ export const invoiceSchema: Schema<Invoice> = createSchema((data: unknown) => {
   if (typeof obj.createdAt !== 'string') throw new Error('createdAt must be a string');
 
   return {
-    id: obj.id as string,
+    id: obj.id,
     status: obj.status as InvoiceStatus,
-    amountDue: obj.amountDue as number,
-    amountPaid: obj.amountPaid as number,
-    currency: obj.currency as string,
-    periodStart: obj.periodStart as string,
-    periodEnd: obj.periodEnd as string,
-    paidAt: obj.paidAt as string | null,
-    invoicePdfUrl: obj.invoicePdfUrl as string | null,
-    createdAt: obj.createdAt as string,
+    amountDue: obj.amountDue,
+    amountPaid: obj.amountPaid,
+    currency: obj.currency,
+    periodStart: obj.periodStart,
+    periodEnd: obj.periodEnd,
+    paidAt: obj.paidAt,
+    invoicePdfUrl: obj.invoicePdfUrl,
+    createdAt: obj.createdAt,
   };
 });
 
@@ -540,11 +540,11 @@ export const adminPlanSchema: Schema<AdminPlan> = createSchema((data: unknown) =
 
   return {
     ...basePlan,
-    stripePriceId: obj.stripePriceId as string | null,
-    stripeProductId: obj.stripeProductId as string | null,
-    paypalPlanId: obj.paypalPlanId as string | null,
-    createdAt: obj.createdAt as string,
-    updatedAt: obj.updatedAt as string,
+    stripePriceId: obj.stripePriceId,
+    stripeProductId: obj.stripeProductId,
+    paypalPlanId: obj.paypalPlanId,
+    createdAt: obj.createdAt,
+    updatedAt: obj.updatedAt,
   };
 });
 

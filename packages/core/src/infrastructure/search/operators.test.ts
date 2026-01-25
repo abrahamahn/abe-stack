@@ -2,13 +2,13 @@
 import { describe, expect, test } from 'vitest';
 
 import {
-    evaluateCompoundFilter,
-    evaluateCondition,
-    evaluateFilter,
-    filterArray,
-    getFieldValue,
-    paginateArray,
-    sortArray,
+  evaluateCompoundFilter,
+  evaluateCondition,
+  evaluateFilter,
+  filterArray,
+  getFieldValue,
+  paginateArray,
+  sortArray,
 } from './operators';
 import { type CompoundFilter, type FilterCondition } from './types';
 

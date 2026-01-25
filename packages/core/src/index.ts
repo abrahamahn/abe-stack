@@ -15,31 +15,31 @@ export * from './config';
 // ============================================================================
 export * from './infrastructure/async';
 export {
-    CacheCapacityError,
-    CacheConnectionError,
-    CacheDeserializationError,
-    CacheError,
-    CacheInvalidKeyError,
-    CacheMemoryLimitError,
-    CacheNotInitializedError,
-    CacheProviderNotFoundError,
-    CacheSerializationError,
-    CacheTimeoutError,
-    isCacheConnectionError,
-    isCacheError,
-    isCacheTimeoutError,
-    toCacheError
+  CacheCapacityError,
+  CacheConnectionError,
+  CacheDeserializationError,
+  CacheError,
+  CacheInvalidKeyError,
+  CacheMemoryLimitError,
+  CacheNotInitializedError,
+  CacheProviderNotFoundError,
+  CacheSerializationError,
+  CacheTimeoutError,
+  isCacheConnectionError,
+  isCacheError,
+  isCacheTimeoutError,
+  toCacheError,
 } from './infrastructure/cache';
 export type {
-    BaseCacheConfig,
-    CacheDeleteOptions,
-    CacheEntry,
-    CacheEntryMetadata,
-    CacheGetOptions,
-    CacheProvider,
-    CacheSetOptions,
-    CacheStats,
-    MemoryCacheConfig
+  BaseCacheConfig,
+  CacheDeleteOptions,
+  CacheEntry,
+  CacheEntryMetadata,
+  CacheGetOptions,
+  CacheProvider,
+  CacheSetOptions,
+  CacheStats,
+  MemoryCacheConfig,
 } from './infrastructure/cache';
 export * from './infrastructure/crypto';
 export * from './infrastructure/errors';
@@ -54,22 +54,37 @@ export * from './infrastructure/search';
 // ============================================================================
 export * from './modules/auth';
 export {
-    // Providers (avoid duplicates)
-    BillingProviderError,
-    // Aliases
-    BillingProviderNotConfiguredError, BillingSubscriptionExistsError, BillingSubscriptionNotFoundError, CannotDeactivatePlanWithActiveSubscriptionsError, CannotDowngradeInTrialError, CannotRemoveDefaultPaymentMethodError, CheckoutSessionError,
-    // Customers
-    CustomerNotFoundError,
-    // Invoices
-    InvoiceNotFoundError,
-    // Payment methods
-    PaymentMethodNotFoundError, PaymentMethodValidationError, PlanHasActiveSubscriptionsError, PlanNotActiveError,
-    // Plans
-    PlanNotFoundError,
-    // Subscriptions (avoid duplicates with infrastructure)
-    SubscriptionAlreadyCanceledError, SubscriptionNotActiveError, SubscriptionNotCancelingError, WebhookEventAlreadyProcessedError, WebhookSignatureError,
-    // Type guards
-    isBillingProviderError, isPlanError, isSubscriptionError
+  // Providers (avoid duplicates)
+  BillingProviderError,
+  // Aliases
+  BillingProviderNotConfiguredError,
+  BillingSubscriptionExistsError,
+  BillingSubscriptionNotFoundError,
+  CannotDeactivatePlanWithActiveSubscriptionsError,
+  CannotDowngradeInTrialError,
+  CannotRemoveDefaultPaymentMethodError,
+  CheckoutSessionError,
+  // Customers
+  CustomerNotFoundError,
+  // Invoices
+  InvoiceNotFoundError,
+  // Payment methods
+  PaymentMethodNotFoundError,
+  PaymentMethodValidationError,
+  PlanHasActiveSubscriptionsError,
+  PlanNotActiveError,
+  // Plans
+  PlanNotFoundError,
+  // Subscriptions (avoid duplicates with infrastructure)
+  SubscriptionAlreadyCanceledError,
+  SubscriptionNotActiveError,
+  SubscriptionNotCancelingError,
+  WebhookEventAlreadyProcessedError,
+  WebhookSignatureError,
+  // Type guards
+  isBillingProviderError,
+  isPlanError,
+  isSubscriptionError,
 } from './modules/billing';
 export * from './modules/notifications';
 export { PushSubscriptionExistsError } from './modules/notifications';
@@ -86,8 +101,11 @@ export * from '@abe-stack/contracts';
 
 // Realtime Aliases (server expectations)
 export type {
-    ListInsertOperation as RealtimeListInsertOperation,
-    ListRemoveOperation as RealtimeListRemoveOperation, Operation as RealtimeOperation, SetNowOperation as RealtimeSetNowOperation, SetOperation as RealtimeSetOperation
+  ListInsertOperation as RealtimeListInsertOperation,
+  ListRemoveOperation as RealtimeListRemoveOperation,
+  Operation as RealtimeOperation,
+  SetNowOperation as RealtimeSetNowOperation,
+  SetOperation as RealtimeSetOperation,
 } from '@abe-stack/contracts';
 
 // ============================================================================
@@ -97,4 +115,3 @@ export * from './shared';
 export * from './shared/constants';
 export * from './shared/pagination';
 export { addAuthHeader } from './shared/token';
-

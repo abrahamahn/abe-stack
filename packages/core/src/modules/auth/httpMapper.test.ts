@@ -2,19 +2,15 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import {
-    AccountLockedError,
-    EmailAlreadyExistsError,
-    EmailNotVerifiedError,
-    EmailSendError,
-    InvalidCredentialsError,
-    InvalidTokenError,
-    WeakPasswordError,
+  AccountLockedError,
+  EmailAlreadyExistsError,
+  EmailNotVerifiedError,
+  EmailSendError,
+  InvalidCredentialsError,
+  InvalidTokenError,
+  WeakPasswordError,
 } from './errors';
-import {
-    HTTP_ERROR_MESSAGES,
-    isKnownAuthError,
-    mapErrorToHttpResponse
-} from './httpMapper';
+import { HTTP_ERROR_MESSAGES, isKnownAuthError, mapErrorToHttpResponse } from './httpMapper';
 
 /**
  * Creates a mock logger for testing

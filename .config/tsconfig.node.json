@@ -1,10 +1,11 @@
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2022"],
-    "module": "Node16",
-    "moduleResolution": "node16",
-    "verbatimModuleSyntax": false
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "verbatimModuleSyntax": true,
+    "noEmit": false
   }
 }

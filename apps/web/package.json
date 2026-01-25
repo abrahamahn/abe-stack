@@ -4,10 +4,11 @@
   "description": "React web application for abe-stack",
   "type": "module",
   "scripts": {
-    "dev": "tsx ../../tooling/scripts/dev/kill-port.ts 5173 && vite --config ../../.config/vite.web.config.ts --open",
-    "build": "vite build --config ../../.config/vite.web.config.ts",
+    "dev": "tsx ../../tooling/scripts/dev/kill-port.ts 5173 && vite --open",
+    "build": "vite build",
+    "start": "vite preview --open",
     "type-check": "tsc --project tsconfig.json --noEmit",
-    "test": "vitest run --config vitest.config.ts"
+    "test": "vitest run --config ../../vitest.config.ts --project web"
   },
   "dependencies": {
     "@abe-stack/core": "workspace:*",
@@ -16,5 +17,8 @@
     "@abe-stack/ui": "workspace:*",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "vite-tsconfig-paths": "^6.0.5"
   }
 }

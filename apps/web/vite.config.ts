@@ -3,13 +3,13 @@ import path from 'node:path';
 import { defineConfig } from 'vite';
 
 import {
-  coreInternalAliases,
-  packageAliases,
-  uiInternalAliases,
-  webAliases,
-} from '../tooling/schema/aliases';
+    coreInternalAliases,
+    packageAliases,
+    uiInternalAliases,
+    webAliases,
+} from '../../tooling/schema/aliases';
 
-const repoRoot = path.resolve(__dirname, '..');
+const repoRoot = path.resolve(__dirname, '../../');
 const appsRoot = path.join(repoRoot, 'apps');
 
 const webRoot = path.join(appsRoot, 'web');

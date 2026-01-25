@@ -6,10 +6,10 @@
  */
 
 import type {
-    BillingProvider,
-    PaymentMethodType,
-    PlanInterval,
-    SubscriptionStatus,
+  BillingProvider,
+  PaymentMethodType,
+  PlanInterval,
+  SubscriptionStatus,
 } from './billing';
 
 // ============================================================================

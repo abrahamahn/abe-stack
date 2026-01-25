@@ -137,7 +137,7 @@ describe('SubscriptionManager', () => {
       expect(mockSocket.send).toHaveBeenCalled();
 
       // Should also publish via adapter
-      expect((mockAdapter.publish as any)).toHaveBeenCalledWith(key, 5);
+      expect(mockAdapter.publish as any).toHaveBeenCalledWith(key, 5);
     });
 
     it('should handle adapter errors gracefully', async () => {
@@ -252,7 +252,7 @@ describe('SubscriptionManager', () => {
       manager.subscribe(key, mockSocket);
       manager.publish(key, 5);
 
-      expect((mockAdapter.publish as any)).toHaveBeenCalled();
+      expect(mockAdapter.publish as any).toHaveBeenCalled();
     });
   });
 

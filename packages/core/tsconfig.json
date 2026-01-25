@@ -1,5 +1,5 @@
 {
-  "extends": "../../.config/tsconfig.base.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
@@ -11,7 +11,7 @@
       "@utils": ["./src/utils"],
       "@utils/*": ["./src/utils/*"]
     },
-    "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
+    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.core.tsbuildinfo"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "src/**/__tests__/**"]

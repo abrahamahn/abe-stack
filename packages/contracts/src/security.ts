@@ -8,10 +8,10 @@
 
 import { errorResponseSchema, uuidSchema } from './common';
 import {
-    paginatedResultSchema,
-    paginationOptionsSchema,
-    type PaginatedResult,
-    type PaginationOptions,
+  paginatedResultSchema,
+  paginationOptionsSchema,
+  type PaginatedResult,
+  type PaginationOptions,
 } from './pagination';
 import { createSchema, type Contract, type Schema } from './types';
 
@@ -96,15 +96,15 @@ export const securityEventSchema: Schema<SecurityEvent> = createSchema((data: un
   }
 
   return {
-    id: obj.id as string,
-    userId: obj.userId as string | null,
-    email: obj.email as string | null,
-    eventType: obj.eventType as string,
-    severity: obj.severity as string,
-    ipAddress: obj.ipAddress as string | null,
-    userAgent: obj.userAgent as string | null,
+    id: obj.id,
+    userId: obj.userId,
+    email: obj.email,
+    eventType: obj.eventType,
+    severity: obj.severity,
+    ipAddress: obj.ipAddress,
+    userAgent: obj.userAgent,
     metadata: obj.metadata as Record<string, unknown> | null,
-    createdAt: obj.createdAt as string,
+    createdAt: obj.createdAt,
   };
 });
 

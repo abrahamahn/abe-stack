@@ -18,7 +18,7 @@ export type {
   RequestBody,
   SafeParseResult,
   Schema,
-  SuccessResponse
+  SuccessResponse,
 } from './types';
 
 // Combined API contract
@@ -38,7 +38,7 @@ export {
   unlockAccountRequestSchema,
   unlockAccountResponseSchema,
   USER_STATUSES,
-  userStatusSchema
+  userStatusSchema,
 } from './admin';
 export type {
   AdminLockUserRequest,
@@ -50,7 +50,7 @@ export type {
   AdminUserListResponse,
   UnlockAccountRequest,
   UnlockAccountResponse,
-  UserStatus
+  UserStatus,
 } from './admin';
 
 // Jobs contract (admin job monitoring)
@@ -64,7 +64,7 @@ export {
   jobListResponseSchema,
   jobsContract,
   jobStatusSchema,
-  queueStatsSchema
+  queueStatsSchema,
 } from './jobs';
 export type {
   JobActionResponse,
@@ -74,7 +74,7 @@ export type {
   JobListQuery,
   JobListResponse,
   JobStatus,
-  QueueStats
+  QueueStats,
 } from './jobs';
 
 // Auth contract
@@ -100,7 +100,7 @@ export {
   resetPasswordRequestSchema,
   resetPasswordResponseSchema,
   setPasswordRequestSchema,
-  setPasswordResponseSchema
+  setPasswordResponseSchema,
 } from './auth';
 export type {
   AuthResponse,
@@ -123,7 +123,7 @@ export type {
   ResetPasswordRequest,
   ResetPasswordResponse,
   SetPasswordRequest,
-  SetPasswordResponse
+  SetPasswordResponse,
 } from './auth';
 
 // Common schemas
@@ -133,7 +133,7 @@ export {
   nameSchema,
   passwordSchema,
   requiredNameSchema,
-  uuidSchema
+  uuidSchema,
 } from './common';
 export type { ErrorResponse } from './common';
 
@@ -150,7 +150,7 @@ export type {
   EmailService,
   Logger,
   NotificationService,
-  StorageService
+  StorageService,
 } from './services';
 
 // Pagination schemas
@@ -161,7 +161,7 @@ export {
   paginationOptionsSchema,
   SORT_ORDER,
   universalPaginatedResultSchema,
-  universalPaginationOptionsSchema
+  universalPaginationOptionsSchema,
 } from './pagination';
 export type {
   CursorPaginatedResult,
@@ -170,7 +170,7 @@ export type {
   PaginationOptions,
   SortOrder,
   UniversalPaginatedResult,
-  UniversalPaginationOptions
+  UniversalPaginationOptions,
 } from './pagination';
 
 // Users contract
@@ -187,7 +187,7 @@ export {
   USER_ROLES,
   userRoleSchema,
   userSchema,
-  usersContract
+  usersContract,
 } from './users';
 export type {
   AvatarDeleteResponse,
@@ -200,7 +200,7 @@ export type {
   SessionsListResponse,
   UpdateProfileRequest,
   User,
-  UserRole
+  UserRole,
 } from './users';
 
 // OAuth contract
@@ -216,7 +216,7 @@ export {
   oauthLinkCallbackResponseSchema,
   oauthLinkResponseSchema,
   oauthProviderSchema,
-  oauthUnlinkResponseSchema
+  oauthUnlinkResponseSchema,
 } from './oauth';
 export type {
   OAuthCallbackQuery,
@@ -228,7 +228,7 @@ export type {
   OAuthLinkCallbackResponse,
   OAuthLinkResponse,
   OAuthProvider,
-  OAuthUnlinkResponse
+  OAuthUnlinkResponse,
 } from './oauth';
 
 // Realtime contract
@@ -247,7 +247,7 @@ export {
   setNowOperationSchema,
   setOperationSchema,
   transactionSchema,
-  writeResponseSchema
+  writeResponseSchema,
 } from './realtime';
 export type {
   ConflictResponse,
@@ -264,7 +264,7 @@ export type {
   SetNowOperation,
   SetOperation,
   Transaction,
-  WriteResponse
+  WriteResponse,
 } from './realtime';
 
 // Security contract
@@ -282,7 +282,7 @@ export {
   securityEventsListResponseSchema,
   securityMetricsRequestSchema,
   securityMetricsResponseSchema,
-  securityMetricsSchema
+  securityMetricsSchema,
 } from './security';
 export type {
   SecurityEvent,
@@ -297,7 +297,7 @@ export type {
   SecurityMetrics,
   SecurityMetricsRequest,
   SecurityMetricsResponse,
-  SecuritySeverity
+  SecuritySeverity,
 } from './security';
 
 // Billing contract
@@ -343,7 +343,7 @@ export type {
   SubscriptionStatus,
   SyncStripeResponse,
   UpdatePlanRequest,
-  UpdateSubscriptionRequest
+  UpdateSubscriptionRequest,
 } from './billing';
 export {
   // Schemas
@@ -378,6 +378,5 @@ export {
   subscriptionSchema,
   syncStripeResponseSchema,
   updatePlanRequestSchema,
-  updateSubscriptionRequestSchema
+  updateSubscriptionRequestSchema,
 } from './billing/billing';
-

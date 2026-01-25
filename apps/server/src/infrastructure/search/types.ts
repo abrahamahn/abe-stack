@@ -7,13 +7,13 @@
  */
 
 import type {
-    CursorSearchResult,
-    FacetedSearchQuery,
-    FacetedSearchResult,
-    FilterOperator,
-    SearchCapabilities,
-    SearchQuery,
-    SearchResult,
+  CursorSearchResult,
+  FacetedSearchQuery,
+  FacetedSearchResult,
+  FilterOperator,
+  SearchCapabilities,
+  SearchQuery,
+  SearchResult,
 } from '@abe-stack/core';
 
 // ============================================================================

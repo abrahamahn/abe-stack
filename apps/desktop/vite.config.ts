@@ -1,18 +1,17 @@
-// config/vite.desktop.config.ts
 import path from 'node:path';
 
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-import { pickAvailablePort } from '../packages/core/src/utils/port';
+import { pickAvailablePort } from '../../packages/core/src/shared/port';
 import {
-  desktopAliases,
-  packageAliases,
-  uiInternalAliases,
-  coreInternalAliases,
-} from '../tooling/schema/aliases';
+    coreInternalAliases,
+    desktopAliases,
+    packageAliases,
+    uiInternalAliases,
+} from '../../tooling/schema/aliases';
 
-const repoRoot = path.resolve(__dirname, '..');
+const repoRoot = path.resolve(__dirname, '../../');
 const desktopRoot = path.join(repoRoot, 'apps/desktop');
 
 /**

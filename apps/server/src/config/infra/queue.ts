@@ -27,7 +27,7 @@ export function loadQueueConfig(env: FullEnv): QueueConfig {
     maxBackoffMs: env.QUEUE_MAX_BACKOFF_MS ?? 300000,
 
     // Placeholder for Enterprise scaling (Redis support)
-    provider: (env.QUEUE_PROVIDER || 'local') as 'local' | 'redis',
+    provider: env.QUEUE_PROVIDER || 'local',
   };
 }
 

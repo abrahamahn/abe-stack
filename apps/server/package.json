@@ -3,10 +3,11 @@
   "version": "1.0.0",
   "description": "Minimal Fastify server for abe-stack",
   "main": "dist/main.js",
+  "type": "module",
   "scripts": {
     "dev": "tsx ../../tooling/scripts/dev/kill-port.ts 8080 8081 8082 8083 && tsx --env-file=../../.config/env/.env.development src/main.ts",
     "start": "node --env-file=../../.config/env/.env.production dist/main.js",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "type-check": "tsc --project tsconfig.json --noEmit",
     "test": "vitest run --config ../../vitest.config.ts --project server",
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@types/ws": "^8.18.1",
-    "supertest": "^7.2.2"
+    "supertest": "^7.2.2",
+    "vite-tsconfig-paths": "^6.0.5"
   }
 }

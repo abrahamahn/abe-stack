@@ -2,16 +2,16 @@
 import { describe, expect, test } from 'vitest';
 
 import {
-    DAYS_PER_WEEK,
-    HOURS_PER_DAY,
-    MINUTES_PER_HOUR,
-    MS_PER_DAY,
-    MS_PER_HOUR,
-    MS_PER_MINUTE,
-    MS_PER_SECOND,
-    SECONDS_PER_DAY,
-    SECONDS_PER_HOUR,
-    SECONDS_PER_MINUTE,
+  DAYS_PER_WEEK,
+  HOURS_PER_DAY,
+  MINUTES_PER_HOUR,
+  MS_PER_DAY,
+  MS_PER_HOUR,
+  MS_PER_MINUTE,
+  MS_PER_SECOND,
+  SECONDS_PER_DAY,
+  SECONDS_PER_HOUR,
+  SECONDS_PER_MINUTE,
 } from './time';
 
 describe('time constants', () => {

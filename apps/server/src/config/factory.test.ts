@@ -189,7 +189,7 @@ describe('Configuration Factory', () => {
       const config = load(prodBaseEnv);
       expect(config.env).toBe('production');
       if (config.database.provider === 'postgresql') {
-        expect((config.database as PostgresConfig).ssl).toBe(true);
+        expect(config.database.ssl).toBe(true);
       }
     });
 

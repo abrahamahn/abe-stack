@@ -90,7 +90,7 @@ apps/desktop → packages/core
 
 ```text
 tsconfig.json                    # Root: project references only
-.config/tsconfig.base.json     # Base config (strictest settings)
+.config/tsconfig.json     # Base config (strictest settings)
     ├── tsconfig.node.json       # Node.js apps (server, tools)
     ├── tsconfig.react.json      # React apps (web, desktop)
     └── tsconfig.eslint.json     # ESLint (no emit, all files)

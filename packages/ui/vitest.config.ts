@@ -1,12 +1,14 @@
-import react from '@vitejs/plugin-react';
+// packages/ui/vitest.config.ts
+
 import { mergeConfig } from 'vitest/config';
 import { baseConfig } from '../../.config/vitest.base';
 
 export default mergeConfig(baseConfig, {
-  plugins: [react()],
   test: {
-    name: 'web',
+    name: 'ui',
     environment: 'jsdom',
     setupFiles: ['./src/__tests__/setup.ts'],
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/*.spec.ts'],
   },
 });

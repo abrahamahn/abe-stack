@@ -3,20 +3,20 @@ import { describe, expect, test } from 'vitest';
 
 import { AppError } from '../errors';
 import {
-    CacheCapacityError,
-    CacheConnectionError,
-    CacheDeserializationError,
-    CacheError,
-    CacheInvalidKeyError,
-    CacheMemoryLimitError,
-    CacheNotInitializedError,
-    CacheProviderNotFoundError,
-    CacheSerializationError,
-    CacheTimeoutError,
-    isCacheConnectionError,
-    isCacheError,
-    isCacheTimeoutError,
-    toCacheError,
+  CacheCapacityError,
+  CacheConnectionError,
+  CacheDeserializationError,
+  CacheError,
+  CacheInvalidKeyError,
+  CacheMemoryLimitError,
+  CacheNotInitializedError,
+  CacheProviderNotFoundError,
+  CacheSerializationError,
+  CacheTimeoutError,
+  isCacheConnectionError,
+  isCacheError,
+  isCacheTimeoutError,
+  toCacheError,
 } from './errors';
 
 // ============================================================================

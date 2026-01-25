@@ -1,45 +1,53 @@
-// config/playwright.config.ts
 import { defineConfig, devices } from '@playwright/test';
 
 const CI = Boolean(process.env.CI);
+const PORT = 5173;
+const API_PORT = 8080;
 
 export default defineConfig({
-  // Look for test files in the e2e directory, relative to this configuration file.
   testDir: '../apps/web/src/test/e2e',
   testMatch: /.*\.e2e\.(ts|tsx)/,
-  reporter: [['list'], ['html', { open: CI ? 'never' : 'on-failure' }], CI ? ['github'] : ['line']],
-  fullyParallel: !CI, // Enable parallel execution in development
+  reporter: CI
+    ? [['github'], ['blob']]
+    : [['list'], ['html', { open: 'on-failure' }]],
+  fullyParallel: !CI,
   forbidOnly: CI,
-
-  retries: CI ? 2 : 0, // Retry failed tests in CI
-
-  expect: {
-    timeout: CI ? 10000 : 5000,
-  },
-  timeout: CI ? 30000 : 15000,
+  retries: CI ? 2 : 0,
+  workers: CI ? 1 : undefined,
 
   use: {
-    headless: CI, // Run headless in CI, headful in development
-
-    // Base URL to use in actions like `await page.goto('/')`.
-    baseURL: 'http://localhost:5173',
-
-    // Collect trace when retrying the failed test.
+    baseURL: `http://localhost:${PORT}`,
     trace: 'on-first-retry',
-    video: 'retain-on-failure',
+    video: 'on-first-retry',
     screenshot: 'only-on-failure',
+    headless: true,
   },
-  // Configure projects for major browsers.
+
   projects: [
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
+    {
+      name: 'mobile-chrome',
+      use: { ...devices['Pixel 5'] },
+    },
   ],
-  // Run your local dev server before starting the tests.
-  webServer: {
-    command: 'pnpm dev:web',
-    url: 'http://localhost:5173',
-    reuseExistingServer: !CI,
-  },
+
+  webServer: [
+    {
+      command: CI ? 'pnpm --filter @abe-stack/web preview' : 'pnpm dev:web',
+      url: `http://localhost:${PORT}`,
+      reuseExistingServer: !CI,
+      stdout: 'pipe',
+      stderr: 'pipe',
+    },
+    /* Uncomment if your E2E tests require the live backend
+    {
+      command: 'pnpm --filter @abe-stack/server dev',
+      url: `http://localhost:${API_PORT}/health`,
+      reuseExistingServer: !CI,
+    }
+    */
+  ],
 });

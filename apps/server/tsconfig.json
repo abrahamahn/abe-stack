@@ -3,98 +3,155 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.server.tsbuildinfo",
     "paths": {
-      "@/*": ["./src/*"],
-      "@admin": ["./src/modules/admin"],
-      "@admin/*": ["./src/modules/admin/*"],
-      "@auth": ["./src/modules/auth"],
-      "@auth/*": ["./src/modules/auth/*"],
-      "@billing": ["./src/infrastructure/billing"],
-      "@billing/*": ["./src/infrastructure/billing/*"],
-      "@cache": ["./src/infrastructure/cache"],
-      "@cache/*": ["./src/infrastructure/cache/*"],
-      "@config": ["./src/config"],
-      "@config/*": ["./src/config/*"],
-      "@crypto": ["./src/infrastructure/security/crypto"],
-      "@crypto/*": ["./src/infrastructure/security/crypto/*"],
-      "@data": ["./src/infrastructure/data"],
-      "@data/*": ["./src/infrastructure/data/*"],
-      "@database": ["./src/infrastructure/data/database"],
-      "@database/*": ["./src/infrastructure/data/database/*"],
-      "@email": ["./src/infrastructure/messaging/email"],
-      "@email/*": ["./src/infrastructure/messaging/email/*"],
-      "@files": ["./src/infrastructure/data/files"],
-      "@files/*": ["./src/infrastructure/data/files/*"],
-      "@handlers": ["./src/modules/auth/handlers"],
-      "@handlers/*": ["./src/modules/auth/handlers/*"],
-      "@health": ["./src/infrastructure/monitor/health"],
-      "@health/*": ["./src/infrastructure/monitor/health/*"],
-      "@http": ["./src/infrastructure/http"],
-      "@http/*": ["./src/infrastructure/http/*"],
-      "@infra": ["./src/config/infra"],
-      "@infra/*": ["./src/config/infra/*"],
-      "@infrastructure": ["./src/infrastructure"],
-      "@infrastructure/*": ["./src/infrastructure/*"],
-      "@jobs": ["./src/infrastructure/jobs"],
-      "@jobs/*": ["./src/infrastructure/jobs/*"],
-      "@logger": ["./src/infrastructure/monitor/logger"],
-      "@logger/*": ["./src/infrastructure/monitor/logger/*"],
-      "@magic-link": ["./src/modules/auth/magic-link"],
-      "@magic-link/*": ["./src/modules/auth/magic-link/*"],
-      "@media": ["./src/infrastructure/media"],
-      "@media/*": ["./src/infrastructure/media/*"],
-      "@messaging": ["./src/infrastructure/messaging"],
-      "@messaging/*": ["./src/infrastructure/messaging/*"],
-      "@middleware": ["./src/infrastructure/http/middleware"],
-      "@middleware/*": ["./src/infrastructure/http/middleware/*"],
-      "@modules": ["./src/modules"],
-      "@modules/*": ["./src/modules/*"],
-      "@monitor": ["./src/infrastructure/monitor"],
-      "@monitor/*": ["./src/infrastructure/monitor/*"],
-      "@notifications": ["./src/infrastructure/notifications"],
-      "@notifications/*": ["./src/infrastructure/notifications/*"],
-      "@oauth": ["./src/modules/auth/oauth"],
-      "@oauth/*": ["./src/modules/auth/oauth/*"],
-      "@pagination": ["./src/infrastructure/http/pagination"],
-      "@pagination/*": ["./src/infrastructure/http/pagination/*"],
-      "@permissions": ["./src/infrastructure/security/permissions"],
-      "@permissions/*": ["./src/infrastructure/security/permissions/*"],
-      "@processors": ["./src/infrastructure/media/processors"],
-      "@processors/*": ["./src/infrastructure/media/processors/*"],
-      "@providers": ["./src/modules/auth/oauth/providers"],
-      "@providers/*": ["./src/modules/auth/oauth/providers/*"],
-      "@queue": ["./src/infrastructure/jobs/queue"],
-      "@queue/*": ["./src/infrastructure/jobs/queue/*"],
-      "@rate-limit": ["./src/infrastructure/security/rate-limit"],
-      "@rate-limit/*": ["./src/infrastructure/security/rate-limit/*"],
-      "@realtime": ["./src/modules/realtime"],
-      "@realtime/*": ["./src/modules/realtime/*"],
-      "@router": ["./src/infrastructure/http/router"],
-      "@router/*": ["./src/infrastructure/http/router/*"],
-      "@scheduled": ["./src/infrastructure/jobs/scheduled"],
-      "@scheduled/*": ["./src/infrastructure/jobs/scheduled/*"],
-      "@search": ["./src/infrastructure/search"],
-      "@search/*": ["./src/infrastructure/search/*"],
-      "@security": ["./src/infrastructure/security"],
-      "@security/*": ["./src/infrastructure/security/*"],
-      "@services": ["./src/services"],
-      "@services/*": ["./src/services/*"],
-      "@shared": ["./src/shared"],
-      "@shared/*": ["./src/shared/*"],
-      "@storage": ["./src/infrastructure/data/storage"],
-      "@storage/*": ["./src/infrastructure/data/storage/*"],
-      "@system": ["./src/modules/system"],
-      "@system/*": ["./src/modules/system/*"],
-      "@users": ["./src/modules/users"],
-      "@users/*": ["./src/modules/users/*"],
-      "@webhooks": ["./src/modules/billing/webhooks"],
-      "@webhooks/*": ["./src/modules/billing/webhooks/*"],
-      "@websocket": ["./src/infrastructure/messaging/websocket"],
-      "@websocket/*": ["./src/infrastructure/messaging/websocket/*"],
-      "@write": ["./src/infrastructure/jobs/write"],
-      "@write/*": ["./src/infrastructure/jobs/write/*"]
+      "@/*": [
+            "./src/*"
+      ],
+      "@abe-stack/contracts": [
+            "../../packages/contracts/src/index.ts"
+      ],
+      "@abe-stack/contracts/*": [
+            "../../packages/contracts/src/*"
+      ],
+      "@abe-stack/core": [
+            "../../packages/core/src/index.ts"
+      ],
+      "@abe-stack/core/*": [
+            "../../packages/core/src/*"
+      ],
+      "@abe-stack/db": [
+            "../../packages/db/src/index.ts"
+      ],
+      "@abe-stack/db/*": [
+            "../../packages/db/src/*"
+      ],
+      "@abe-stack/media": [
+            "../../packages/media/src/index.ts"
+      ],
+      "@abe-stack/media/*": [
+            "../../packages/media/src/*"
+      ],
+      "@admin": [
+            "./src/modules/admin"
+      ],
+      "@admin/*": [
+            "./src/modules/admin/*"
+      ],
+      "@auth": [
+            "./src/modules/auth"
+      ],
+      "@auth/*": [
+            "./src/modules/auth/*"
+      ],
+      "@billing": [
+            "./src/modules/billing"
+      ],
+      "@billing/*": [
+            "./src/modules/billing/*"
+      ],
+      "@cache": [
+            "./src/infrastructure/cache"
+      ],
+      "@cache/*": [
+            "./src/infrastructure/cache/*"
+      ],
+      "@config": [
+            "./src/config"
+      ],
+      "@config/*": [
+            "./src/config/*"
+      ],
+      "@data": [
+            "./src/infrastructure/data"
+      ],
+      "@data/*": [
+            "./src/infrastructure/data/*"
+      ],
+      "@http": [
+            "./src/infrastructure/http"
+      ],
+      "@http/*": [
+            "./src/infrastructure/http/*"
+      ],
+      "@jobs": [
+            "./src/infrastructure/jobs"
+      ],
+      "@jobs/*": [
+            "./src/infrastructure/jobs/*"
+      ],
+      "@media": [
+            "./src/infrastructure/media"
+      ],
+      "@media/*": [
+            "./src/infrastructure/media/*"
+      ],
+      "@messaging": [
+            "./src/infrastructure/messaging"
+      ],
+      "@messaging/*": [
+            "./src/infrastructure/messaging/*"
+      ],
+      "@monitor": [
+            "./src/infrastructure/monitor"
+      ],
+      "@monitor/*": [
+            "./src/infrastructure/monitor/*"
+      ],
+      "@notifications": [
+            "./src/modules/notifications"
+      ],
+      "@notifications/*": [
+            "./src/modules/notifications/*"
+      ],
+      "@realtime": [
+            "./src/modules/realtime"
+      ],
+      "@realtime/*": [
+            "./src/modules/realtime/*"
+      ],
+      "@search": [
+            "./src/infrastructure/search"
+      ],
+      "@search/*": [
+            "./src/infrastructure/search/*"
+      ],
+      "@security": [
+            "./src/infrastructure/security"
+      ],
+      "@security/*": [
+            "./src/infrastructure/security/*"
+      ],
+      "@shared": [
+            "./src/shared"
+      ],
+      "@shared/*": [
+            "./src/shared/*"
+      ],
+      "@system": [
+            "./src/modules/system"
+      ],
+      "@system/*": [
+            "./src/modules/system/*"
+      ],
+      "@types": [
+            "./src/types"
+      ],
+      "@types/*": [
+            "./src/types/*"
+      ],
+      "@users": [
+            "./src/modules/users"
+      ],
+      "@users/*": [
+            "./src/modules/users/*"
+      ],
+      "@utils": [
+            "./src/utils"
+      ],
+      "@utils/*": [
+            "./src/utils/*"
+      ]
     },
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.server.tsbuildinfo"
   },

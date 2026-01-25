@@ -1,5 +1,5 @@
 {
-  "extends": "./tsconfig.node.json",
+  "extends": "../tsconfig.json",
   "compilerOptions": {
     "composite": false,
     "declaration": false,
@@ -10,7 +10,6 @@
   "include": [
     "../apps/*/src/**/*",
     "../packages/*/src/**/*",
-    "../tools/**/*",
     "../tooling/**/*",
     "../.config/**/*",
     "../*.ts",

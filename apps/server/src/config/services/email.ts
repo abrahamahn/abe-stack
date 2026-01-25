@@ -36,7 +36,7 @@ export function loadSmtpConfig(env: FullEnv): SmtpConfig {
  * ```
  */
 export function loadEmailConfig(env: FullEnv): EmailConfig {
-  const provider = (env.EMAIL_PROVIDER || 'console') as EmailConfig['provider'];
+  const provider = env.EMAIL_PROVIDER || 'console';
 
   const smtp = loadSmtpConfig(env);
 

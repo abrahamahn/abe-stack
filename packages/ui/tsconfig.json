@@ -1,5 +1,5 @@
 {
-  "extends": "../../.config/tsconfig.base.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
@@ -8,28 +8,86 @@
     "baseUrl": "./",
     "types": ["react", "react-dom", "vitest/globals"],
     "paths": {
-      "@abe-stack/core": ["../core/src"],
-      "@abe-stack/core/*": ["../core/src/*"],
-      "@components": ["./src/components"],
-      "@components/*": ["./src/components/*"],
-      "@containers": ["./src/layouts/containers"],
-      "@containers/*": ["./src/layouts/containers/*"],
-      "@elements": ["./src/elements"],
-      "@elements/*": ["./src/elements/*"],
-      "@hooks": ["./src/hooks"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@layers": ["./src/layouts/layers"],
-      "@layers/*": ["./src/layouts/layers/*"],
-      "@layouts": ["./src/layouts"],
-      "@layouts/*": ["./src/layouts/*"],
-      "@shells": ["./src/layouts/shells"],
-      "@shells/*": ["./src/layouts/shells/*"],
-      "@theme": ["./src/theme"],
-      "@theme/*": ["./src/theme/*"],
-      "@utils": ["./src/utils"],
-      "@utils/*": ["./src/utils/*"]
+      "@abe-stack/core": [
+            "../core/src"
+      ],
+      "@abe-stack/core/*": [
+            "../core/src/*"
+      ],
+      "@components": [
+            "./src/components"
+      ],
+      "@components/*": [
+            "./src/components/*"
+      ],
+      "@containers": [
+            "./src/layouts/containers"
+      ],
+      "@containers/*": [
+            "./src/layouts/containers/*"
+      ],
+      "@elements": [
+            "./src/elements"
+      ],
+      "@elements/*": [
+            "./src/elements/*"
+      ],
+      "@hooks": [
+            "./src/hooks"
+      ],
+      "@hooks/*": [
+            "./src/hooks/*"
+      ],
+      "@layers": [
+            "./src/layouts/layers"
+      ],
+      "@layers/*": [
+            "./src/layouts/layers/*"
+      ],
+      "@layouts": [
+            "./src/layouts"
+      ],
+      "@layouts/*": [
+            "./src/layouts/*"
+      ],
+      "@providers": [
+            "./src/providers"
+      ],
+      "@providers/*": [
+            "./src/providers/*"
+      ],
+      "@router": [
+            "./src/router"
+      ],
+      "@router/*": [
+            "./src/router/*"
+      ],
+      "@shells": [
+            "./src/layouts/shells"
+      ],
+      "@shells/*": [
+            "./src/layouts/shells/*"
+      ],
+      "@theme": [
+            "./src/theme"
+      ],
+      "@theme/*": [
+            "./src/theme/*"
+      ],
+      "@types": [
+            "./src/types"
+      ],
+      "@types/*": [
+            "./src/types/*"
+      ],
+      "@utils": [
+            "./src/utils"
+      ],
+      "@utils/*": [
+            "./src/utils/*"
+      ]
     },
-    "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
+    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.ui.tsbuildinfo"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "src/**/__tests__/**"],

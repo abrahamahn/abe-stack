@@ -4,14 +4,14 @@
     "types": ["vite/client", "react", "react-dom", "vitest/globals"],
     "paths": {
       "@/*": ["./src/*"],
-      "@abe-stack/core": ["../../packages/core/src/index.ts"],
-      "@abe-stack/core/*": ["../../packages/core/src/*"],
-      "@abe-stack/ui": ["../../packages/ui/src/index.ts"],
-      "@abe-stack/ui/*": ["../../packages/ui/src/*"],
+      "@abe-stack/contracts": ["../../packages/contracts/src/index.ts"],
+      "@abe-stack/contracts/*": ["../../packages/contracts/src/*"],
       "@abe-stack/sdk": ["../../packages/sdk/src/index.ts"],
       "@abe-stack/sdk/*": ["../../packages/sdk/src/*"],
       "@abe-stack/stores": ["../../packages/stores/src/index.ts"],
       "@abe-stack/stores/*": ["../../packages/stores/src/*"],
+      "@abe-stack/ui": ["../../packages/ui/src/index.ts"],
+      "@abe-stack/ui/*": ["../../packages/ui/src/*"],
       "@admin": ["./src/features/admin"],
       "@admin/*": ["./src/features/admin/*"],
       "@api": ["./src/api"],
@@ -51,13 +51,25 @@
   "exclude": ["node_modules"],
   "references": [
     {
+      "path": "../../packages/contracts"
+    },
+    {
       "path": "../../packages/core"
+    },
+    {
+      "path": "../../packages/db"
+    },
+    {
+      "path": "../../packages/media"
     },
     {
       "path": "../../packages/sdk"
     },
     {
+      "path": "../../packages/stores"
+    },
+    {
       "path": "../../packages/ui"
-    }
+    },
   ]
 }

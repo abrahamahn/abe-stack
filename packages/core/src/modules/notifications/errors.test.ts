@@ -9,20 +9,20 @@ import { describe, expect, it } from 'vitest';
 
 import { HTTP_STATUS } from '../../shared/constants/http';
 import {
-    InvalidPreferencesError,
-    InvalidSubscriptionError,
-    NotificationRateLimitError,
-    NotificationSendError,
-    NotificationsDisabledError,
-    PayloadTooLargeError,
-    PreferencesNotFoundError,
-    ProviderError,
-    ProviderNotConfiguredError,
-    QuietHoursActiveError,
-    SubscriptionExistsError,
-    SubscriptionExpiredError,
-    SubscriptionNotFoundError,
-    VapidNotConfiguredError,
+  InvalidPreferencesError,
+  InvalidSubscriptionError,
+  NotificationRateLimitError,
+  NotificationSendError,
+  NotificationsDisabledError,
+  PayloadTooLargeError,
+  PreferencesNotFoundError,
+  ProviderError,
+  ProviderNotConfiguredError,
+  QuietHoursActiveError,
+  SubscriptionExistsError,
+  SubscriptionExpiredError,
+  SubscriptionNotFoundError,
+  VapidNotConfiguredError,
 } from './errors';
 
 describe('Notification Errors', () => {

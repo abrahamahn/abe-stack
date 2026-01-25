@@ -244,7 +244,7 @@ export function getRefreshCookieOptions(config: AuthConfig): {
   return {
     httpOnly: config.cookie.httpOnly,
     secure: config.cookie.secure,
-    sameSite: config.cookie.sameSite as 'strict' | 'lax' | 'none',
+    sameSite: config.cookie.sameSite,
     path: config.cookie.path,
     maxAge: config.refreshToken.expiryDays * 24 * 60 * 60 * 1000,
   };

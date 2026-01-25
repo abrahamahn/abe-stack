@@ -5,7 +5,7 @@ node_modules
 dist
 build
 coverage
-.next
+.vscode
 out
 
 # generated artifacts

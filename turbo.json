@@ -2,62 +2,49 @@
   "$schema": "https://turbo.build/schema.json",
   "ui": "stream",
   "cacheDir": ".cache/turbo",
+  "globalPassThroughEnv": ["NODE_ENV", "APP_ENV", "VERCEL_ENV"],
   "tasks": {
-    "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**", "build/**", ".next/**"],
+    "build:theme": {
       "cache": true,
-      "env": ["NODE_ENV", "DATABASE_URL"]
+      "inputs": ["tooling/lint/sync-css-theme.ts", "packages/ui/src/theme/**"],
+      "outputs": ["packages/ui/src/generated/**"]
+    },
+    "build": {
+      "dependsOn": ["^build", "build:theme"],
+      "outputs": ["dist/**", "build/**", ".next/**", "!.cache/**"],
+      "cache": true,
+      "env": ["NODE_ENV", "DATABASE_URL", "NEXT_PUBLIC_*", "VITE_*", "PUBLIC_*"]
     },
     "dev": {
       "cache": false,
       "persistent": true
     },
     "lint": {
-      "inputs": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "**/*.cjs", "**/*.mjs"],
-      "outputs": [],
+      "inputs": ["**/*.{ts,tsx,js,jsx,cjs,mjs}", "eslint.config.ts", ".config/tsconfig.eslint.json"],
       "cache": true
-    },
-    "format:check": {
-      "inputs": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "**/*.json", "**/*.css", "**/*.md"],
-      "outputs": [],
-      "cache": true
-    },
-    "lint:fix": {
-      "cache": false
     },
     "type-check": {
-      "dependsOn": ["^build"],
-      "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json", ".config/*.json"],
-      "outputs": [],
-      "cache": true,
-      "env": ["NODE_ENV"]
+      "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"],
+      "cache": true
     },
     "test": {
-      "inputs": ["**/*.ts", "**/*.tsx", "**/*.test.ts", "**/*.test.tsx", "vitest.workspace.ts"],
-      "outputs": [],
+      "inputs": ["**/*.{ts,tsx}", "vitest.config.ts", "vitest.workspace.ts"],
       "cache": true,
-      "env": ["NODE_ENV", "DATABASE_URL"]
-    },
-    "test:watch": {
-      "cache": false,
-      "persistent": true
-    },
-    "clean": {
-      "cache": false
+      "env": ["NODE_ENV", "DATABASE_URL", "TEST_*"]
     },
     "validate": {
       "dependsOn": ["lint", "type-check", "test"],
-      "outputs": [],
       "cache": true
+    },
+    "clean": {
+      "cache": false
     }
   },
   "globalDependencies": [
+    "pnpm-lock.yaml",
     "tsconfig.json",
-    ".config/env/.env.development",
-    "config/.prettierrc",
-    ".config/*.json",
-    "config/schema/**",
+    ".config/env/.env.*",
+    ".prettierrc",
     "eslint.config.ts"
   ]
 }

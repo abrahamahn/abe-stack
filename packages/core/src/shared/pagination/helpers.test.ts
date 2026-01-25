@@ -4,10 +4,10 @@ import { describe, expect, it } from 'vitest';
 import { encodeCursor } from './cursor';
 import { PAGINATION_ERROR_TYPES, PaginationError } from './error';
 import {
-    buildCursorPaginationQuery,
-    calculateCursorPaginationMetadata,
-    paginateArrayWithCursor,
-    paginateLargeArrayWithCursor,
+  buildCursorPaginationQuery,
+  calculateCursorPaginationMetadata,
+  paginateArrayWithCursor,
+  paginateLargeArrayWithCursor,
 } from './helpers';
 
 describe('Cursor Pagination Query Building', () => {

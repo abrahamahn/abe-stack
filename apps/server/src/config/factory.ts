@@ -56,10 +56,10 @@ export function load(rawEnv: Record<string, string | undefined> = process.env): 
   // 2. Use the typed Zod output directly
   const env: FullEnv = envResult.data;
 
-  const nodeEnv = (env.NODE_ENV || 'development') as AppConfig['env'];
+  const nodeEnv = env.NODE_ENV || 'development';
   const server = loadServerConfig(env);
 
-  const searchProvider = (env.SEARCH_PROVIDER || 'sql') as 'sql' | 'elasticsearch';
+  const searchProvider = env.SEARCH_PROVIDER || 'sql';
 
   const config: AppConfig = {
     env: nodeEnv,

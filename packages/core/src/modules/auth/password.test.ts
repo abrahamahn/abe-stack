@@ -2,11 +2,11 @@
 import { describe, expect, test } from 'vitest';
 
 import {
-    defaultPasswordConfig,
-    getStrengthColor,
-    getStrengthLabel,
-    validatePassword,
-    validatePasswordBasic,
+  defaultPasswordConfig,
+  getStrengthColor,
+  getStrengthLabel,
+  validatePassword,
+  validatePasswordBasic,
 } from './password';
 
 describe('defaultPasswordConfig', () => {

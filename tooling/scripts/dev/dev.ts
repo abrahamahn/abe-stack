@@ -101,19 +101,7 @@ function startWatcher(script: string): ChildProcess {
   return watcher;
 }
 
-function startConfigGenerator(): ChildProcess {
-  const watcher = spawn('pnpm', ['tsx', 'config/generators/index.ts', '--watch', '--quiet'], {
-    cwd: ROOT,
-    stdio: 'ignore',
-    shell: false,
-  });
 
-  watcher.on('error', (err) => {
-    console.error('[config:generate] Failed to start:', err);
-  });
-
-  return watcher;
-}
 
 function startTurboDev(filter?: string): ChildProcess {
   const args = ['turbo', 'run', 'dev', '--log-order=stream', '--log-prefix=task'];
@@ -165,9 +153,9 @@ async function main(): Promise<void> {
 
   // Start all sync watchers silently in background
   const watchers = [
-    startConfigGenerator(), // Generates tsconfigs and aliases
-    startWatcher('tooling/lint/sync-file-headers.ts'),
-    startWatcher('tooling/lint/sync-css-theme.ts'),
+    startWatcher('tooling/sync/sync-file-headers.ts'),
+    startWatcher('tooling/sync/sync-css-theme.ts'),
+    startWatcher('tooling/sync/sync-aliases.ts'),
   ];
 
   logLine('[dev]', 'Watchers running (config, headers, theme)');

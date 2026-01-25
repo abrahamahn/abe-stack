@@ -9,6 +9,7 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./package.json": "./package.json",
     "./domains/auth": {
       "types": "./dist/domains/auth/index.d.ts",
       "default": "./dist/domains/auth/index.js"

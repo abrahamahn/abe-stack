@@ -2,9 +2,9 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-    formatValidationErrors,
-    type ValidationErrorResponse,
-    type ZodIssueMinimal,
+  formatValidationErrors,
+  type ValidationErrorResponse,
+  type ZodIssueMinimal,
 } from './validationError';
 
 describe('formatValidationErrors', () => {
@@ -269,7 +269,7 @@ describe('formatValidationErrors', () => {
 
       expect(result.error.details).toHaveLength(2);
       expect(result.error.details[0]!.field).toBe('items.0.quantity');
-        expect(result.error.details[1]!.field).toBe('items.2.productId');
+      expect(result.error.details[1]!.field).toBe('items.2.productId');
     });
 
     it('should handle discriminated union errors', () => {

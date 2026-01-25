@@ -5,6 +5,8 @@ node_modules/
 
 # Agents
 .claude/
+.gemini/
+.cursor/
 
 # Build outputs
 dist/
@@ -28,15 +30,6 @@ packages/*/src/**/*.d.ts.map
 # Electron specific
 release/
 
-# React Native specific
-android/build/
-android/app/build/
-ios/build/
-ios/Pods/
-*.jsbundle
-.expo/
-.expo-shared/
-
 # Turborepo cache
 .turbo/
 
@@ -56,7 +49,9 @@ project-data/
 # - Production env should NEVER be committed - use secrets manager
 
 # Root level env files (should not exist)
-.env
+.env.development
+.env.production
+.env.test
 .env.local
 .env.*.local
 
@@ -69,7 +64,11 @@ project-data/
 # App-level environment files (keep .env.example, ignore .env.local)
 apps/*/.env.local
 apps/*/.env.development.local
+apps/*/.env.development
 apps/*/.env.production.local
+apps/*/.env.production
+apps/*/.env.test.local
+apps/*/.env.test
 
 # Testing
 coverage/

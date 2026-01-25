@@ -7,10 +7,10 @@
  */
 
 import {
-    AppError,
-    BadRequestError,
-    ConflictError,
-    NotFoundError,
+  AppError,
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
 } from '../../infrastructure/errors';
 import { HTTP_STATUS } from '../../shared/constants/http';
 

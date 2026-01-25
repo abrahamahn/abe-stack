@@ -14,9 +14,7 @@ import type { FullEnv } from '@abe-stack/core/config';
  * - **Redis**: specific external cache (required for horizontal scaling/clusters).
  */
 export function loadCacheConfig(env: FullEnv): CacheConfig {
-  const provider = (env.CACHE_PROVIDER || (env.CACHE_USE_REDIS === 'true' ? 'redis' : 'local')) as
-    | 'local'
-    | 'redis';
+  const provider = env.CACHE_PROVIDER || (env.CACHE_USE_REDIS === 'true' ? 'redis' : 'local');
   const useExternal = provider === 'redis';
 
   return {

@@ -2,15 +2,15 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-    NOTIFICATION_CHANNELS,
-    NOTIFICATION_PRIORITIES,
-    NOTIFICATION_TYPES,
-    notificationChannelSchema,
-    notificationPrioritySchema,
-    notificationTypeSchema,
-    pushSubscriptionSchema,
-    sendNotificationRequestSchema,
-    updatePreferencesRequestSchema,
+  NOTIFICATION_CHANNELS,
+  NOTIFICATION_PRIORITIES,
+  NOTIFICATION_TYPES,
+  notificationChannelSchema,
+  notificationPrioritySchema,
+  notificationTypeSchema,
+  pushSubscriptionSchema,
+  sendNotificationRequestSchema,
+  updatePreferencesRequestSchema,
 } from './schemas';
 
 describe('Notification Schemas', () => {
