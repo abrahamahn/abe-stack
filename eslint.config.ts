@@ -35,8 +35,8 @@ export default [
       '**/build/**',
       '**/.turbo/**',
       '**/coverage/**',
-      '**/tooling/export/*',
-      '**/tooling/lint/*',
+      '**/tooling/scripts/**',
+      '**/tooling/lint/**',
       '**/__tests__/e2e/**',
       '**/vite.config.ts',
       '**/vitest.config.js',
@@ -50,18 +50,20 @@ export default [
   jsConfigs.recommended ? { ...jsConfigs.recommended } : {},
 
   // Configuration for ALL TypeScript files with strict type checking
-  ...tseslint.configs.strictTypeChecked.map((config): Linter.Config => ({
-    ...config,
-    files: ['**/*.{ts,tsx,cts,mts}'],
-    languageOptions: {
-      ...(config.languageOptions ?? {}),
-      parserOptions: {
-        ...((config.languageOptions?.parserOptions as Record<string, unknown> | undefined) ?? {}),
-        tsconfigRootDir,
-        project: ['./.config/tsconfig.eslint.json'],
+  ...tseslint.configs.strictTypeChecked.map(
+    (config): Linter.Config => ({
+      ...config,
+      files: ['**/*.{ts,tsx,cts,mts}'],
+      languageOptions: {
+        ...(config.languageOptions ?? {}),
+        parserOptions: {
+          ...((config.languageOptions?.parserOptions as Record<string, unknown> | undefined) ?? {}),
+          tsconfigRootDir,
+          project: ['./.config/tsconfig.eslint.json'],
+        },
       },
-    },
-  })),
+    }),
+  ),
   {
     files: ['apps/server/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
@@ -286,6 +288,35 @@ export default [
     files: ['packages/core/src/config/*'],
     rules: {
       'no-console': 'off',
+    },
+  },
+  {
+    // Test files: Relax rules for mocking and test setup
+    files: ['**/__tests__/**/*', '**/*.{spec,test}.{ts,tsx}'],
+    rules: {
+      // Allow 'any' because mocking deep objects is hard
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+
+      // Allow '!' because we control the test state
+      '@typescript-eslint/no-non-null-assertion': 'off',
+
+      // Don't require return types on test functions (it's overkill)
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+
+      // Relax other test-specific strictness
+      '@typescript-eslint/no-unnecessary-condition': 'off',
+      '@typescript-eslint/strict-boolean-expressions': 'off',
+
+      // KEEP STRICT: You MUST handle promises in tests
+      '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/await-thenable': 'error',
+      '@typescript-eslint/no-misused-promises': 'error',
     },
   },
 ] satisfies Linter.Config[];
