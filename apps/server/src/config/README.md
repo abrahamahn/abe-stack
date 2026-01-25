@@ -77,16 +77,20 @@ apps/server/src/config/
 
 ## 🏗 The Multi-Stage Environment Strategy
 
-The ABE Stack supports a sophisticated loading strategy. We recommend maintaining specific `.env` files in your `.config/env/` folder or root.
+The ABE Stack supports a sophisticated loading strategy with **six priority levels**:
 
-| File                   | Purpose                                | Priority    | Git Status |
-| ---------------------- | -------------------------------------- | ----------- | ---------- |
-| **System Env**         | Runtime/Cloud vars (Vercel, AWS, etc.) | 1 (Highest) | N/A        |
-| **`.env.local`**       | Local overrides and developer secrets  | 2           | Ignored    |
-| **`.env.test`**        | Unit and Integration test overrides    | 3           | Tracked    |
-| **`.env.production`**  | Production-safe defaults               | 4           | Tracked    |
-| **`.env.development`** | Standard development settings          | 5           | Tracked    |
-| **`.env`**             | Shared base defaults                   | 6 (Lowest)  | Tracked    |
+| Priority | Source                 | Purpose                                | Location            | Git Status |
+| -------- | ---------------------- | -------------------------------------- | ------------------- | ---------- |
+| **1**    | **System Environment** | Runtime/Cloud vars (Vercel, AWS, etc.) | Deployment platform | N/A        |
+| **2**    | **ENV_FILE**           | Explicit file path via env variable    | Custom path         | N/A        |
+| **3**    | **`.env.local`**       | Local overrides and developer secrets  | `.config/env/`      | Ignored    |
+| **4**    | **`.env.{NODE_ENV}`**  | Stage-specific (dev/prod/test)         | `.config/env/`      | Tracked    |
+| **5**    | **`.env`**             | Shared base defaults                   | `.config/env/`      | Tracked    |
+| **6**    | **Root Fallbacks**     | `.env.local`, `.env.{NODE_ENV}`, `.env` | Repository root    | Varies     |
+
+**Priority rules:** Higher numbers override lower numbers. System environment always wins.
+
+**Why root fallbacks?** Some deployment platforms expect `.env` files in the repository root. The loader checks both `.config/env/` (preferred) and root (fallback) for maximum flexibility.
 
 ---
 
@@ -98,12 +102,14 @@ The stack is pre-configured to toggle between enterprise-grade services and loca
 | ----------------- | -------------------------------------------- | ------------------------ |
 | **Database**      | PostgreSQL, SQLite, MongoDB                  | `DATABASE_PROVIDER`      |
 | **Storage**       | Local Filesystem, AWS S3 / R2                | `STORAGE_PROVIDER`       |
-| **Auth**          | Local, OAuth (Google/GitHub/etc), Magic-Link | `AUTH_STRATEGIES`        |
+| **Cache**         | Local (Memory), Redis                        | `CACHE_PROVIDER`         |
 | **Queue**         | Local (Memory/DB), Redis                     | `QUEUE_PROVIDER`         |
+| **Auth**          | Local, OAuth (Google/GitHub/etc), Magic-Link | `AUTH_STRATEGIES`        |
 | **Search**        | SQL (ILIKE), Elasticsearch                   | `SEARCH_PROVIDER`        |
 | **Email**         | Console (Dev), SMTP, API (Resend/Postmark)   | `EMAIL_PROVIDER`         |
 | **Billing**       | Stripe, PayPal                               | `BILLING_PROVIDER`       |
 | **Notifications** | OneSignal, FCM, Courier                      | `NOTIFICATIONS_PROVIDER` |
+| **Package Mgr**   | pnpm, npm, yarn                              | `PACKAGE_MANAGER_PROVIDER` |
 
 ---
 
@@ -119,9 +125,9 @@ apps/server/src/config/
 ├── infra/                   # Infrastructure Configuration
 │   ├── cache.ts             # Cache provider config (Redis, in-memory)
 │   ├── database.ts          # Database config (PostgreSQL, SQLite, MongoDB)
-│   ├── package.ts           # Package manager config
+│   ├── package.ts           # Package manager config (pnpm, npm, yarn)
 │   ├── queue.ts             # Queue provider config (Redis, in-memory)
-│   ├── server.ts            # Server settings (port, CORS, etc.)
+│   ├── server.ts            # Server settings (port, CORS, proxy, etc.)
 │   ├── storage.ts           # Storage provider config (S3, local, R2)
 │   └── index.ts             # Infra exports
 ├── services/                # External Service Integrations
@@ -132,9 +138,15 @@ apps/server/src/config/
 │   └── index.ts             # Services exports
 ├── factory.ts               # Main config factory (assembles everything)
 ├── index.ts                 # Public API exports
-├── README.md                # This file
-└── __tests__/               # Integration tests
-    └── config-integration.test.ts
+└── README.md                # This file
+```
+
+**Related directories:**
+
+```bash
+apps/server/src/__tests__/integration/
+├── index.ts                 # Integration test setup
+└── test-utils.ts            # Test utilities and helpers
 ```
 
 ---
