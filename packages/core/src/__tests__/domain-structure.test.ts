@@ -12,7 +12,7 @@ describe('Domain Structure', () => {
         getStrengthLabel,
         getStrengthColor,
         estimatePasswordStrength,
-      } = await import('../domains/auth/index.js');
+      } = await import('../modules/auth/index.js');
 
       expect(typeof defaultPasswordConfig).toBe('object');
       expect(typeof validatePassword).toBe('function');
@@ -36,7 +36,7 @@ describe('Domain Structure', () => {
         OAuthStateMismatchError,
         TotpRequiredError,
         TotpInvalidError,
-      } = await import('../domains/auth/index.js');
+      } = await import('../modules/auth/index.js');
 
       // Test that they are error classes by checking they extend Error
       expect(new InvalidCredentialsError()).toBeInstanceOf(Error);
@@ -57,7 +57,7 @@ describe('Domain Structure', () => {
   describe('Contracts', () => {
     test('should export auth schemas from contracts', async () => {
       const { authContract, loginRequestSchema, registerRequestSchema, authResponseSchema } =
-        await import('../contracts/index.js');
+        await import('@abe-stack/contracts/index.js');
 
       expect(typeof authContract).toBe('object');
       expect(typeof loginRequestSchema).toBe('object');
@@ -66,7 +66,8 @@ describe('Domain Structure', () => {
     });
 
     test('should export user types and schemas from contracts', async () => {
-      const { userSchema, userRoleSchema, usersContract } = await import('../contracts/index.js');
+      const { userSchema, userRoleSchema, usersContract } =
+        await import('@abe-stack/contracts/index.js');
 
       expect(typeof userSchema).toBe('object');
       expect(typeof userRoleSchema).toBe('object');
@@ -75,7 +76,7 @@ describe('Domain Structure', () => {
 
     test('should export admin schemas from contracts', async () => {
       const { adminContract, unlockAccountRequestSchema, unlockAccountResponseSchema } =
-        await import('../contracts/index.js');
+        await import('@abe-stack/contracts/index.js');
 
       expect(typeof adminContract).toBe('object');
       expect(typeof unlockAccountRequestSchema).toBe('object');
@@ -91,7 +92,7 @@ describe('Domain Structure', () => {
         PaginationError,
         buildCursorPaginationQuery,
         paginateArrayWithCursor,
-      } = await import('../domains/pagination/index.js');
+      } = await import('../modules/pagination/index.js');
 
       expect(typeof encodeCursor).toBe('function');
       expect(typeof decodeCursor).toBe('function');
@@ -195,7 +196,7 @@ describe('Domain Structure', () => {
         MINUTES_PER_HOUR,
         HOURS_PER_DAY,
         DAYS_PER_WEEK,
-      } = await import('../infrastructure/constants/index.js');
+      } = await import('../shared/constants/index.js');
 
       expect(typeof HTTP_STATUS).toBe('object');
       expect(typeof MS_PER_SECOND).toBe('number');

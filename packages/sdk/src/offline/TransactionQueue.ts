@@ -13,14 +13,14 @@
  */
 
 import {
-  DeferredPromise,
-  ReactiveMap,
-  MS_PER_SECOND,
-  type Transaction,
-  type Operation,
-  BadRequestError,
-  ForbiddenError,
-  InternalError,
+    BadRequestError,
+    DeferredPromise,
+    ForbiddenError,
+    InternalError,
+    MS_PER_SECOND,
+    ReactiveMap,
+    type Operation,
+    type Transaction,
 } from '@abe-stack/core';
 
 // ============================================================================
@@ -45,15 +45,7 @@ interface Thunk {
   transaction: QueuedTransaction;
 }
 
-/**
- * A transaction with author tracking for the queue.
- * Note: Using type intersection instead of interface extends for better
- * compatibility with TypeScript project references and path mappings.
- */
-export type QueuedTransaction = Transaction & {
-  /** ID of the user who created this transaction */
-  authorId: string;
-};
+export type QueuedTransaction = Transaction;
 
 /**
  * Options for the TransactionQueue.
@@ -170,17 +162,13 @@ function extractPointers(operations: Operation[]): TransactionRecordPointer[] {
   const pointers: TransactionRecordPointer[] = [];
 
   for (const op of operations) {
-    // Extract table and id from operation path
-    // Path format: ['table', 'id', ...rest]
-    if (op.path.length >= 2) {
-      const table = op.path[0];
-      const id = op.path[1];
-      if (typeof table === 'string' && typeof id === 'string') {
-        const key = `${table}:${id}`;
-        if (!seen.has(key)) {
-          seen.add(key);
-          pointers.push({ table, id });
-        }
+    const table = (op as any).table;
+    const id = (op as any).id;
+    if (typeof table === 'string' && typeof id === 'string') {
+      const key = `${table}:${id}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        pointers.push({ table, id });
       }
     }
   }
@@ -493,9 +481,9 @@ export class TransactionQueue {
     }
 
     const combinedTransaction: QueuedTransaction = {
-      id: generateId(),
+      txId: generateId(),
       authorId,
-      timestamp: Date.now(),
+      clientTimestamp: Date.now(),
       operations,
     };
 

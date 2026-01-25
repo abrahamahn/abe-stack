@@ -7,13 +7,13 @@
  */
 
 import {
-  type CompoundFilter,
-  type FilterCondition,
-  type FilterOperator,
-  type FilterValue,
-  type SearchQuery,
-  type SortConfig,
-  SORT_ORDER,
+    type CompoundFilter,
+    type FilterCondition,
+    type FilterOperator,
+    type FilterValue,
+    type SearchQuery,
+    type SortConfig,
+    SORT_ORDER,
 } from '@abe-stack/core';
 
 // ============================================================================
@@ -367,7 +367,9 @@ function serializeFilter<T>(
   if ('conditions' in filter) {
     return {
       op: filter.operator,
-      c: filter.conditions.map((c) => serializeFilter(c, compact)),
+      c: filter.conditions.map((c: FilterCondition<T> | CompoundFilter<T>) =>
+        serializeFilter(c, compact)
+      ),
     };
   }
 

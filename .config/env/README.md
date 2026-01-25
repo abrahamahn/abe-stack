@@ -16,12 +16,14 @@ This directory contains all environment variable files for ABE Stack. The config
 2. Choose your development method:
 
    **Option A: Local Development**
+
    ```bash
    pnpm install
    pnpm dev
    ```
 
    **Option B: Docker**
+
    ```bash
    docker compose -f infra/docker/development/docker-compose.yml up
    ```
@@ -139,6 +141,7 @@ NODE_ENV=test pnpm test
 3. Or use `ENV_FILE` to point to a specific file anywhere
 
 **Example using ENV_FILE:**
+
 ```bash
 # Load from a different directory
 ENV_FILE=/path/to/my/custom/.env pnpm dev

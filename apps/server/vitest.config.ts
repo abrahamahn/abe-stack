@@ -168,11 +168,11 @@ export default defineConfig({
         replacement: path.join(repoRoot, 'packages/core/src/errors/index.ts'),
       },
       {
-        find: '@abe-stack/core/contracts',
+        find: '@abe-stack/contracts',
         replacement: path.join(repoRoot, 'packages/core/src/contracts/index.ts'),
       },
       {
-        find: '@abe-stack/core/utils',
+        find: '@abe-stack/core/shared',
         replacement: path.join(repoRoot, 'packages/core/src/utils/index.ts'),
       },
       {
@@ -188,19 +188,19 @@ export default defineConfig({
         replacement: path.join(repoRoot, 'packages/core/src/infrastructure/index.ts'),
       },
       {
-        find: '@abe-stack/core/domains/auth',
+        find: '@abe-stack/core/modules/auth',
         replacement: path.join(repoRoot, 'packages/core/src/domains/auth/index.ts'),
       },
       {
-        find: '@abe-stack/core/domains/users',
+        find: '@abe-stack/core/modules/users',
         replacement: path.join(repoRoot, 'packages/core/src/domains/users/index.ts'),
       },
       {
-        find: '@abe-stack/core/domains/pagination',
+        find: '@abe-stack/core/modules/pagination',
         replacement: path.join(repoRoot, 'packages/core/src/domains/pagination/index.ts'),
       },
       {
-        find: '@abe-stack/core/domains/admin',
+        find: '@abe-stack/core/modules/admin',
         replacement: path.join(repoRoot, 'packages/core/src/domains/admin/index.ts'),
       },
       {

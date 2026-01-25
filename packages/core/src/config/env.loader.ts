@@ -1,4 +1,4 @@
-// packages/core/src/config/env-loader.ts
+// packages/core/src/config/env.loader.ts
 import fs from 'node:fs';
 import path from 'node:path';
 import { EnvSchema, type FullEnv } from './env.schema';

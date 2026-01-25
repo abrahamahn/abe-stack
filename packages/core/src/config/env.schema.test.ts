@@ -1,4 +1,4 @@
-// packages/core/src/config/schema/__tests__/env.schema.test.ts
+// packages/core/src/config/env.schema.test.ts
 import { describe, expect, it } from 'vitest';
 import { EnvSchema } from './env.schema';
 

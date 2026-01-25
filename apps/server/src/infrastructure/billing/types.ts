@@ -1,3 +1,4 @@
+// apps/server/src/infrastructure/billing/types.ts
 /**
  * Billing Infrastructure Types
  *

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { S3StorageProvider } from '../s3StorageProvider';
 
-import type { S3StorageConfig } from '@abe-stack/core/contracts/config';
+import type { S3StorageConfig } from '@abe-stack/core';
 
 // Use vi.hoisted to ensure mocks are created before vi.mock hoisting
 const { mockSend, MockS3Client, MockPutObjectCommand, mockGetSignedUrl, mockFromEnv } = vi.hoisted(

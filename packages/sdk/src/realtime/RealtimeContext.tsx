@@ -13,19 +13,21 @@
  */
 
 import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  useMemo,
-  useCallback,
-  useRef,
-  type ReactNode,
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    type ReactNode,
 } from 'react';
+
+import type { Operation } from '@abe-stack/core';
 
 import { type RecordCache, type TableMap } from '../cache/RecordCache';
 import { TransactionQueue, type QueuedTransaction } from '../offline/TransactionQueue';
-import { RecordStorage, type VersionedRecord, type RecordMap } from '../storage/RecordStorage';
+import { RecordStorage, type RecordMap, type VersionedRecord } from '../storage/RecordStorage';
 import { UndoRedoStack, type UndoableOperation, type UndoRedoState } from '../undo/UndoRedoStack';
 
 import { SubscriptionCache } from './SubscriptionCache';
@@ -333,32 +335,30 @@ export function RealtimeProvider<TTables extends TableMap = TableMap>({
       },
       onRollback: async (tx: QueuedTransaction): Promise<void> => {
         // Rollback optimistic updates from the transaction
-        // Operations have path format: ['table', 'id', ...keys]
         for (const op of tx.operations) {
-          if (op.path.length >= 2) {
-            const [table, id] = op.path;
-            if (typeof table === 'string' && typeof id === 'string') {
-              // Fetch fresh record from server
-              try {
-                const response = await fetch(fetchRecordsEndpoint, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ pointers: [{ table, id }] }),
-                });
-                const data = (await response.json()) as { recordMap: RecordMap };
-                const record = data.recordMap[table]?.[id];
-                if (record) {
-                  recordCache.set(
-                    table as keyof TTables & string,
-                    id,
-                    record as unknown as TTables[keyof TTables & string],
-                    { force: true },
-                  );
-                }
-              } catch {
-                // Failed to fetch - remove from cache
-                recordCache.delete(table as keyof TTables & string, id);
+          const table = (op as any).table;
+          const id = (op as any).id;
+          if (typeof table === 'string' && typeof id === 'string') {
+            // Fetch fresh record from server
+            try {
+              const response = await fetch(fetchRecordsEndpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pointers: [{ table, id }] }),
+              });
+              const data = (await response.json()) as { recordMap: RecordMap };
+              const record = data.recordMap[table]?.[id];
+              if (record) {
+                recordCache.set(
+                  table as keyof TTables & string,
+                  id,
+                  record as unknown as TTables[keyof TTables & string],
+                  { force: true },
+                );
               }
+            } catch {
+              // Failed to fetch - remove from cache
+              recordCache.delete(table as keyof TTables & string, id);
             }
           }
         }
@@ -458,16 +458,26 @@ export function RealtimeProvider<TTables extends TableMap = TableMap>({
         undoRedoStack.push({ operations, previousValues });
       }
 
+      // Create flat list of SetOperation objects for the transaction
+      const flatOperations: Operation[] = [];
+      for (const op of operations) {
+        for (const [key, value] of Object.entries(op.updates)) {
+          flatOperations.push({
+            type: 'set',
+            table: op.table,
+            id: op.id,
+            key,
+            value,
+          });
+        }
+      }
+
       // Create transaction for the queue
       const transaction: QueuedTransaction = {
-        id: `tx-${String(Date.now())}-${Math.random().toString(36).slice(2, 9)}`,
+        txId: `tx-${String(Date.now())}-${Math.random().toString(36).slice(2, 9)}`,
         authorId: userId,
-        timestamp: Date.now(),
-        operations: operations.map((op) => ({
-          type: 'set' as const,
-          path: [op.table, op.id, ...Object.keys(op.updates)],
-          value: op.updates,
-        })),
+        clientTimestamp: Date.now(),
+        operations: flatOperations,
       };
 
       // Enqueue for processing

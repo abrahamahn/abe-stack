@@ -7,13 +7,13 @@
  */
 
 import type {
-  CursorSearchResult,
-  FacetedSearchQuery,
-  FacetedSearchResult,
-  FilterOperator,
-  SearchCapabilities,
-  SearchQuery,
-  SearchResult,
+    CursorSearchResult,
+    FacetedSearchQuery,
+    FacetedSearchResult,
+    FilterOperator,
+    SearchCapabilities,
+    SearchQuery,
+    SearchResult,
 } from '@abe-stack/core';
 
 // ============================================================================
@@ -163,7 +163,7 @@ export interface SearchProviderFactoryOptions {
 // SQL-Specific Types
 // ============================================================================
 
-export type { SqlColumnMapping, SqlTableConfig } from '@abe-stack/core/contracts/config';
+export type { SqlColumnMapping, SqlTableConfig } from '@abe-stack/core';
 
 /**
  * SQL query execution options.

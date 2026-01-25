@@ -2,7 +2,7 @@
 /**
  * Electron Utilities
  *
- * Re-exports utilities from @abe-stack/core/utils.
+ * Re-exports utilities from @abe-stack/core/shared.
  * These are Node.js-only utilities for port handling and async operations.
  */
 
@@ -13,4 +13,4 @@ export {
   pickAvailablePort,
   uniquePorts,
   waitForPort,
-} from '@abe-stack/core/utils';
+} from '@abe-stack/core/shared';

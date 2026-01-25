@@ -1,4 +1,4 @@
-// packages/core/src/contracts/config/raw-schema.ts
+// packages/core/src/config/env.schema.ts
 import { z } from 'zod';
 
 /**

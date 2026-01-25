@@ -7,24 +7,24 @@
 
 // Base error class and utilities
 export {
-  AppError,
-  BaseError,
-  getErrorStatusCode,
-  getSafeErrorMessage,
-  isAppError,
-  toAppError,
+    AppError,
+    BaseError,
+    getErrorStatusCode,
+    getSafeErrorMessage,
+    isAppError,
+    toAppError
 } from './base';
 
 // HTTP error classes
 export {
-  BadRequestError,
-  ConflictError,
-  ForbiddenError,
-  InternalError,
-  NotFoundError,
-  TooManyRequestsError,
-  UnauthorizedError,
-  UnprocessableError,
+    BadRequestError,
+    ConflictError,
+    ForbiddenError,
+    InternalError,
+    NotFoundError,
+    TooManyRequestsError,
+    UnauthorizedError,
+    UnprocessableError
 } from './http';
 
 // API response types and guards
@@ -33,3 +33,10 @@ export type { ApiErrorResponse, ApiResponse, ApiSuccessResponse } from './respon
 
 // Validation error
 export { ValidationError } from './validation';
+export { formatValidationErrors } from './validationError';
+export type {
+    ValidationErrorDetail,
+    ValidationErrorResponse,
+    ZodIssueMinimal
+} from './validationError';
+

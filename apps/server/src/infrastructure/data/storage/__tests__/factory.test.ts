@@ -3,10 +3,10 @@ import { createStorage } from '@storage';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type {
-  LocalStorageConfig,
-  S3StorageConfig,
-  StorageConfig,
-} from '@abe-stack/core/contracts/config';
+    LocalStorageConfig,
+    S3StorageConfig,
+    StorageConfig,
+} from '@abe-stack/core';
 
 // Use vi.hoisted for class mocks
 const { MockLocalStorageProvider, MockS3StorageProvider } = vi.hoisted(() => {

@@ -6,7 +6,7 @@
  * All extend AppError for consistent error handling across the application.
  */
 
-import { HTTP_STATUS } from '../constants';
+import { HTTP_STATUS } from '../../shared/constants';
 
 import { AppError } from './base';
 

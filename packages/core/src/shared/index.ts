@@ -1,13 +1,20 @@
 // packages/core/src/shared/index.ts
 /**
- * Shared Utilities
+ * Utilities
  *
- * Token storage and general utilities used across the application.
+ * General-purpose utility functions for async, port management, and storage.
  */
 
-// Token storage
+// Async utilities
+export { delay } from './async';
+
+// Port utilities (server-only)
+export { isPortFree, isPortListening, pickAvailablePort, uniquePorts, waitForPort } from './port';
+
+// Storage utilities
+export { normalizeStorageKey } from './storage';
+
+// Token utilities
 export { addAuthHeader, createTokenStore, tokenStore } from './token';
 export type { TokenStore } from './token';
 
-// General utilities
-export { randomId } from './utils';

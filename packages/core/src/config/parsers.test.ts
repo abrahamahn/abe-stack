@@ -1,4 +1,4 @@
-// packages/core/src/config/utils/__tests__/parsers.test.ts
+// packages/core/src/config/parsers.test.ts
 import { describe, expect, it, test } from 'vitest';
 import { getBool, getInt, getList, getRequired } from './parsers';
 

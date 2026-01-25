@@ -9,7 +9,7 @@
  * - toJSON() for consistent API serialization
  */
 
-import { HTTP_STATUS } from '../constants';
+import { HTTP_STATUS } from '../../shared/constants';
 
 /**
  * Base abstract error class for the clean architecture.

@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { LocalStorageProvider } from '../localStorageProvider';
 
-import type { LocalStorageConfig } from '@abe-stack/core/contracts/config';
+import type { LocalStorageConfig } from '@abe-stack/core';
 
 // Mock node:crypto
 vi.mock('node:crypto', () => ({

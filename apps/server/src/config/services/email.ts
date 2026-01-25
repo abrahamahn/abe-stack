@@ -1,3 +1,4 @@
+// apps/server/src/config/services/email.ts
 import type { EmailConfig, FullEnv, SmtpConfig } from '@abe-stack/core/config';
 import { getInt } from '@abe-stack/core/config';
 

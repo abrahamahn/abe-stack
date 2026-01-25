@@ -6,16 +6,16 @@
  */
 
 import {
-  BillingProviderNotConfiguredError,
-  CannotDeactivatePlanWithActiveSubscriptionsError,
-  PlanNotFoundError,
-  type AdminPlan,
-  type AdminPlanResponse,
-  type AdminPlansListResponse,
-  type CreatePlanRequest,
-  type SubscriptionActionResponse,
-  type SyncStripeResponse,
-  type UpdatePlanRequest,
+    BillingProviderNotConfiguredError,
+    CannotDeactivatePlanWithActiveSubscriptionsError,
+    PlanNotFoundError,
+    type AdminPlan,
+    type AdminPlanResponse,
+    type AdminPlansListResponse,
+    type CreatePlanRequest,
+    type SubscriptionActionResponse,
+    type SyncStripeResponse,
+    type UpdatePlanRequest,
 } from '@abe-stack/core';
 import type { Plan as DbPlan } from '@abe-stack/db';
 
@@ -24,13 +24,13 @@ import { createBillingProvider } from '@infrastructure/billing';
 import type { AppContext, RequestWithCookies } from '@shared';
 
 import {
-  createPlan,
-  deactivatePlan,
-  getAllPlans,
-  getPlanById,
-  syncPlanToStripe,
-  updatePlan,
-  type AdminBillingRepositories,
+    createPlan,
+    deactivatePlan,
+    getAllPlans,
+    getPlanById,
+    syncPlanToStripe,
+    updatePlan,
+    type AdminBillingRepositories,
 } from './billingService';
 
 // ============================================================================
@@ -107,7 +107,7 @@ export async function handleAdminListPlans(
         plans: plans.map(formatAdminPlan),
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return handleError(error, ctx);
   }
 }
@@ -133,7 +133,7 @@ export async function handleAdminGetPlan(
         plan: formatAdminPlan(plan),
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return handleError(error, ctx);
   }
 }
@@ -158,7 +158,7 @@ export async function handleAdminCreatePlan(
         plan: formatAdminPlan(plan),
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return handleError(error, ctx);
   }
 }
@@ -184,7 +184,7 @@ export async function handleAdminUpdatePlan(
         plan: formatAdminPlan(plan),
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return handleError(error, ctx);
   }
 }
@@ -218,7 +218,7 @@ export async function handleAdminSyncPlanToStripe(
         stripeProductId: result.stripeProductId,
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return handleError(error, ctx);
   }
 }
@@ -246,7 +246,7 @@ export async function handleAdminDeactivatePlan(
         message: 'Plan deactivated successfully',
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return handleError(error, ctx);
   }
 }

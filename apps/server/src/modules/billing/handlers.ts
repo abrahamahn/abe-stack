@@ -6,33 +6,33 @@
  */
 
 import {
-  BillingProviderNotConfiguredError,
-  BillingSubscriptionExistsError,
-  BillingSubscriptionNotFoundError,
-  CannotRemoveDefaultPaymentMethodError,
-  CustomerNotFoundError,
-  PaymentMethodNotFoundError,
-  PlanNotActiveError,
-  PlanNotFoundError,
-  SubscriptionAlreadyCanceledError,
-  SubscriptionNotActiveError,
-  SubscriptionNotCancelingError,
-  type AddPaymentMethodRequest,
-  type CancelSubscriptionRequest,
-  type CheckoutRequest,
-  type CheckoutResponse,
-  type Invoice,
-  type InvoicesListResponse,
-  type PaymentMethod,
-  type PaymentMethodResponse,
-  type PaymentMethodsListResponse,
-  type Plan,
-  type PlansListResponse,
-  type SetupIntentResponse,
-  type Subscription,
-  type SubscriptionActionResponse,
-  type SubscriptionResponse,
-  type UpdateSubscriptionRequest,
+    BillingProviderNotConfiguredError,
+    BillingSubscriptionExistsError,
+    BillingSubscriptionNotFoundError,
+    CannotRemoveDefaultPaymentMethodError,
+    CustomerNotFoundError,
+    PaymentMethodNotFoundError,
+    PlanNotActiveError,
+    PlanNotFoundError,
+    SubscriptionAlreadyCanceledError,
+    SubscriptionNotActiveError,
+    SubscriptionNotCancelingError,
+    type AddPaymentMethodRequest,
+    type CancelSubscriptionRequest,
+    type CheckoutRequest,
+    type CheckoutResponse,
+    type Invoice,
+    type InvoicesListResponse,
+    type PaymentMethod,
+    type PaymentMethodResponse,
+    type PaymentMethodsListResponse,
+    type Plan,
+    type PlansListResponse,
+    type SetupIntentResponse,
+    type Subscription,
+    type SubscriptionActionResponse,
+    type SubscriptionResponse,
+    type UpdateSubscriptionRequest,
 } from '@abe-stack/core';
 
 import { createBillingProvider } from '@infrastructure/billing';
@@ -40,19 +40,19 @@ import { createBillingProvider } from '@infrastructure/billing';
 import type { AppContext, RequestWithCookies } from '@shared';
 
 import {
-  addPaymentMethod,
-  cancelSubscription,
-  createCheckoutSession,
-  createSetupIntent,
-  getActivePlans,
-  getUserInvoices,
-  getUserPaymentMethods,
-  getUserSubscription,
-  removePaymentMethod,
-  resumeSubscription,
-  setDefaultPaymentMethod,
-  updateSubscription,
-  type BillingRepositories,
+    addPaymentMethod,
+    cancelSubscription,
+    createCheckoutSession,
+    createSetupIntent,
+    getActivePlans,
+    getUserInvoices,
+    getUserPaymentMethods,
+    getUserSubscription,
+    removePaymentMethod,
+    resumeSubscription,
+    setDefaultPaymentMethod,
+    updateSubscription,
+    type BillingRepositories,
 } from './service';
 
 // ============================================================================
@@ -269,7 +269,7 @@ export async function handleGetSubscription(
         subscription: subscription ? formatSubscription(subscription) : null,
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return handleError(error, ctx);
   }
 }
@@ -309,7 +309,7 @@ export async function handleCreateCheckout(
       status: 200,
       body: session,
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return handleError(error, ctx);
   }
 }
@@ -348,7 +348,7 @@ export async function handleCancelSubscription(
           : 'Subscription will be canceled at the end of the billing period',
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return handleError(error, ctx);
   }
 }
@@ -384,7 +384,7 @@ export async function handleResumeSubscription(
         message: 'Subscription resumed',
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return handleError(error, ctx);
   }
 }
@@ -421,7 +421,7 @@ export async function handleUpdateSubscription(
         message: 'Subscription updated',
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return handleError(error, ctx);
   }
 }
@@ -455,7 +455,7 @@ export async function handleListInvoices(
         hasMore,
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return handleError(error, ctx);
   }
 }
@@ -488,7 +488,7 @@ export async function handleListPaymentMethods(
         paymentMethods: paymentMethods.map(formatPaymentMethod),
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return handleError(error, ctx);
   }
 }
@@ -530,7 +530,7 @@ export async function handleAddPaymentMethod(
         paymentMethod: formatPaymentMethod(paymentMethod),
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return handleError(error, ctx);
   }
 }
@@ -567,7 +567,7 @@ export async function handleRemovePaymentMethod(
         message: 'Payment method removed',
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return handleError(error, ctx);
   }
 }
@@ -608,7 +608,7 @@ export async function handleSetDefaultPaymentMethod(
         paymentMethod: formatPaymentMethod(paymentMethod),
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return handleError(error, ctx);
   }
 }
@@ -646,7 +646,7 @@ export async function handleCreateSetupIntent(
       status: 200,
       body: result,
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return handleError(error, ctx);
   }
 }
