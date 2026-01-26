@@ -1,16 +1,15 @@
 # Lint Progress Log
 
-## 2026-01-26 - Repo-wide Lint Check (Strict Mode)
+## 2026-01-26 - Repo-wide Lint Check (Hybrid Strict Mode)
 
-- **Total Errors:** 2083
+- **Total Errors:** 2233
 - **Status:** In Progress
+- **Configuration:**
+  - **Src:** Max Strict (no unchecked boolean expressions).
+  - **Tests:** Hybrid Strict (strict booleans, but allow `any`/`!`).
 - **Key Changes:**
-  - Enabled strict boolean expressions (no `allowString` or `allowNullableObject`).
-  - Fixed `packages/ui` config to include test files (revealed previously hidden errors).
-- **Major Issue Clusters:**
-  - `packages/ui/src/utils` (strict boolean checks).
-  - `packages/ui` test files (parsing errors & rule violations).
-  - `tooling/sync` scripts (null checks).
+  - Enforced `strict-boolean-expressions` in test files.
+  - Included `packages/ui` test files in linting.
 
 ## Next Steps
 - Resolve parsing errors for `vitest.config.ts`.

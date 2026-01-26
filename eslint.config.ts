@@ -303,7 +303,7 @@ export default [
 
       // Relax other test-specific strictness
       '@typescript-eslint/no-unnecessary-condition': 'off',
-      '@typescript-eslint/strict-boolean-expressions': 'off',
+
 
       // KEEP STRICT: You MUST handle promises in tests
       '@typescript-eslint/no-floating-promises': 'error',
