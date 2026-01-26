@@ -192,9 +192,9 @@ export default [
       '@typescript-eslint/strict-boolean-expressions': [
         'error',
         {
-          allowString: true, // Allows "if (myString)" - reduces noise
+          allowString: false, // Force explicit null checks
           allowNumber: false, // Keeps "if (count)" as error to prevent 0-value bugs
-          allowNullableObject: true, // Allows "if (user)" where user is User | null
+          allowNullableObject: false, // Force explicit null checks
         },
       ],
 

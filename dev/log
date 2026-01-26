@@ -1,15 +1,17 @@
 # Lint Progress Log
 
-## 2026-01-26 - Repo-wide Lint Check
+## 2026-01-26 - Repo-wide Lint Check (Strict Mode)
 
-- **Total Errors:** 1200
+- **Total Errors:** 2083
 - **Status:** In Progress
-- **Key Issues Identified:**
-  - Parsing errors in `packages/ui`: `parserOptions.project` configuration issue for test files.
-  - `strict-boolean-expressions` errors in `packages/ui/src/utils`.
-  - `no-non-null-assertion` errors in `packages/ui`.
-  - Remaining infrastructure lint errors were resolved in previous steps (apps/server/src/infrastructure).
+- **Key Changes:**
+  - Enabled strict boolean expressions (no `allowString` or `allowNullableObject`).
+  - Fixed `packages/ui` config to include test files (revealed previously hidden errors).
+- **Major Issue Clusters:**
+  - `packages/ui/src/utils` (strict boolean checks).
+  - `packages/ui` test files (parsing errors & rule violations).
+  - `tooling/sync` scripts (null checks).
 
 ## Next Steps
-- Fix `tsconfig` or `eslint` config for `packages/ui` to include test files.
-- Address strict boolean errors in `packages/ui`.
+- Resolve parsing errors for `vitest.config.ts`.
+- Fix strict boolean errors in `packages/ui`.
