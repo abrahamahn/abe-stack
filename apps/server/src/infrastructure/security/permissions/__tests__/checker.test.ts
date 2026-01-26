@@ -1,13 +1,14 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/security/permissions/__tests__/checker.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {
-  createAdminRule,
-  createCustomRule,
-  createDefaultPermissionConfig,
-  createMemberRule,
-  createOwnerRule,
-  createPermissionChecker,
+    createAdminRule,
+    createCustomRule,
+    createDefaultPermissionConfig,
+    createMemberRule,
+    createOwnerRule,
+    createPermissionChecker,
 } from '../checker';
 
 import type { PermissionChecker } from '../checker';
@@ -18,9 +19,9 @@ import type { PermissionConfig, PermissionRecord, RecordLoader } from '../types'
 // ============================================================================
 
 function createMockRecordLoader(records: Map<string, PermissionRecord>): RecordLoader {
-  return async (table: string, id: string) => {
+  return (table: string, id: string) => {
     const key = `${table}:${id}`;
-    return records.get(key) ?? null;
+    return Promise.resolve(records.get(key) ?? null);
   };
 }
 

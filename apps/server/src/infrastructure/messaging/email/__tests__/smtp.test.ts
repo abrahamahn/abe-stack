@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/messaging/email/__tests__/smtp.test.ts
 /**
  * Tests for the SMTP client utility functions.
@@ -16,7 +17,7 @@ import { SmtpClient, type SmtpConfig } from '../smtp';
 
 // Mock Socket class to simulate connection behavior
 class MockSocket extends EventEmitter {
-  write = vi.fn((_data, cb) => cb && cb(null));
+  write = vi.fn((_data, cb) => cb?.(null));
   destroy = vi.fn();
   setTimeout = vi.fn();
   end = vi.fn();

@@ -19,15 +19,15 @@ import type { DbClient } from '@database';
 import type { SubscriptionManager } from '@infrastructure/index';
 import type { Logger } from '@logger';
 import type {
-  AfterWriteHook,
-  BeforeValidateHook,
-  OperationResult,
-  WriteBatch,
-  WriteContext,
-  WriteError,
-  WriteHooks,
-  WriteOperation,
-  WriteResult,
+    AfterWriteHook,
+    BeforeValidateHook,
+    OperationResult,
+    WriteBatch,
+    WriteContext,
+    WriteError,
+    WriteHooks,
+    WriteOperation,
+    WriteResult,
 } from './types';
 
 // ============================================================================
@@ -167,7 +167,7 @@ export class WriteService {
   ): Promise<OperationResult<T>> {
     const { table, id, data } = operation;
 
-    if (!data) {
+    if (data == null) {
       throw new Error('Create operation requires data');
     }
 
@@ -194,7 +194,7 @@ export class WriteService {
   ): Promise<OperationResult<T>> {
     const { table, id, data, expectedVersion } = operation;
 
-    if (!data) {
+    if (data == null) {
       throw new Error('Update operation requires data');
     }
 
@@ -204,7 +204,7 @@ export class WriteService {
 
     // Get current record for previous version
     const currentRows = (await tx.raw<{ version: number }>(
-      `SELECT version FROM ${escapeIdentifier(table)} WHERE id = '${String(id).replace(/'/g, "''")}'`,
+      `SELECT version FROM ${escapeIdentifier(table)} WHERE id = '${(typeof id === 'string' ? id : String(id)).replace(/'/g, "''")}'`,
     )) as { version: number }[];
     const currentRow = currentRows[0];
     if (!currentRow) {
@@ -220,14 +220,14 @@ export class WriteService {
     }
 
     // Update with version bump
-    const newVersion = Number(currentRow.version) + 1;
+    const newVersion = currentRow.version + 1;
     const updateData = {
       ...data,
       version: newVersion,
       updated_at: new Date().toISOString(),
     };
 
-    const idEscaped = String(id).replace(/'/g, "''");
+    const idEscaped = (typeof id === 'string' ? id : String(id)).replace(/'/g, "''");
     const result = (await tx.raw<T & { id: string; version: number }>(
       `UPDATE ${escapeIdentifier(table)}
       SET ${this.buildUpdateClause(updateData)}
@@ -254,7 +254,7 @@ export class WriteService {
   ): Promise<OperationResult<T>> {
     const { table, id, expectedVersion } = operation;
 
-    const idEscaped = String(id).replace(/'/g, "''");
+    const idEscaped = (typeof id === 'string' ? id : String(id)).replace(/'/g, "''");
 
     // Build version check condition
     const versionCheck =
@@ -294,23 +294,13 @@ export class WriteService {
         const { operation, record } = result;
 
         if (record && 'version' in record && this.pubsub) {
-          const pubsubManager = this.pubsub as SubscriptionManager;
-          const key = (SubKeys.record as (table: string, id: string) => string)(
-            operation.table as string,
-            operation.id as string,
-          );
-          const version = (record as { version: number }).version;
-
-          (pubsubManager.publish as (key: string, version: number) => void)(key, version);
-        } else if (operation.type === 'delete' && this.pubsub) {
-          // Publish deletion with version -1 to signal removal
-          const pubsubManager = this.pubsub as SubscriptionManager;
-          const key = (SubKeys.record as (table: string, id: string) => string)(
-            operation.table as string,
-            operation.id as string,
+          const pubsubManager = this.pubsub;
+          const key = SubKeys.record(
+            operation.table,
+            operation.id,
           );
 
-          (pubsubManager.publish as (key: string, version: number) => void)(key, -1);
+          pubsubManager.publish(key, -1);
         }
       }
     });
@@ -367,7 +357,7 @@ export class WriteService {
   }
 
   private normalizeError(error: unknown): WriteError {
-    if (error && typeof error === 'object' && 'writeError' in error) {
+    if (error != null && typeof error === 'object' && 'writeError' in error) {
       return (error as { writeError: WriteError }).writeError;
     }
 

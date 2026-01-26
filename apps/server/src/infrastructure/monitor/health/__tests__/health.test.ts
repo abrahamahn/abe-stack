@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/monitor/health/__tests__/health.test.ts
 import {
   checkDatabase,

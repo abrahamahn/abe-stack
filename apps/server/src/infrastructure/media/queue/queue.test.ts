@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/media/queue/queue.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -21,12 +22,13 @@ class TestJobQueue extends CustomJobQueue<{ value: number }> {
   public shouldFail = false;
   public failCount = 0;
 
-  protected override async processJobData(data: { value: number }): Promise<void> {
+  protected override processJobData(data: { value: number }): Promise<void> {
     if (this.shouldFail) {
       this.failCount++;
-      throw new Error('Test job failed');
+      return Promise.reject(new Error('Test job failed'));
     }
     this.processedJobs.push(data);
+    return Promise.resolve();
   }
 }
 
@@ -280,9 +282,9 @@ describe('CustomJobQueue', () => {
       const attemptTimes: number[] = [];
 
       const backoffQueue = new (class extends CustomJobQueue<{ value: number }> {
-        protected override async processJobData(_data: { value: number }): Promise<void> {
+        protected override processJobData(_data: { value: number }): Promise<void> {
           attemptTimes.push(Date.now());
-          throw new Error('Always fails');
+          return Promise.reject(new Error('Always fails'));
         }
       })({
         concurrency: 1,

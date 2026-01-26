@@ -1,15 +1,16 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/http/pagination/__tests__/integration.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
 import { createPaginationHelpers } from '../helpers';
 import { createPaginationMiddleware } from '../middleware';
 
-import type { PaginationRequest } from '../types';
 import type { PaginationOptions } from '@abe-stack/core';
 import type { FastifyReply } from 'fastify';
+import type { PaginationRequest } from '../types';
 
 describe('Pagination Integration', () => {
-  it('should work end-to-end with middleware and helpers', async () => {
+  it('should work end-to-end with middleware and helpers', () => {
     // Mock Fastify request/reply
     const mockRequest = {
       query: {
@@ -47,7 +48,7 @@ describe('Pagination Integration', () => {
     expect(typeof helpers.createCursorResult).toBe('function');
   });
 
-  it('should handle cursor pagination end-to-end', async () => {
+  it('should handle cursor pagination end-to-end', () => {
     // Mock request with cursor
     const mockRequest = {
       query: {
@@ -127,7 +128,7 @@ describe('Pagination Integration', () => {
     expect(result.hasPrev).toBe(false);
   });
 
-  it('should handle error scenarios gracefully', async () => {
+  it('should handle error scenarios gracefully', () => {
     const middleware = createPaginationMiddleware();
 
     // Test invalid page
@@ -137,13 +138,17 @@ describe('Pagination Integration', () => {
 
     const reply = {} as FastifyReply;
 
-    expect(() => middleware(invalidRequest as unknown as PaginationRequest, reply)).toThrow();
+    expect(() => {
+      middleware(invalidRequest as unknown as PaginationRequest, reply);
+    }).toThrow();
 
     // Test limit too high
     const highLimitRequest = {
       query: { limit: '1000' },
     };
 
-    expect(() => middleware(highLimitRequest as unknown as PaginationRequest, reply)).toThrow();
+    expect(() => {
+      middleware(highLimitRequest as unknown as PaginationRequest, reply);
+    }).toThrow();
   });
 });

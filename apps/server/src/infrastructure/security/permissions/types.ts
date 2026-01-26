@@ -286,9 +286,12 @@ export function getRecordKey(pointer: RecordPointer): string {
  */
 export function parseRecordKey(key: string): RecordPointer {
   const parts = key.split(':');
-  if (parts.length !== 2 || !parts[0] || !parts[1]) {
+  const table = parts[0];
+  const id = parts[1];
+
+  if (table == null || table === '' || id == null || id === '') {
     throw new Error(`Invalid record key format: ${key}`);
   }
-  const [table, id] = parts;
+
   return { table, id };
 }

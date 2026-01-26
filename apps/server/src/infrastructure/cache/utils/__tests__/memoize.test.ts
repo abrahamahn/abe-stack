@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/cache/utils/__tests__/memoize.test.ts
 import { describe, expect, test } from 'vitest';
 

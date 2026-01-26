@@ -1,6 +1,6 @@
 // apps/server/src/modules/auth/security/events.ts
+import { eq, gte, insert, SECURITY_EVENTS_TABLE, select } from '@abe-stack/db';
 import { emailTemplates } from '@email';
-import { insert, select, eq, gte, SECURITY_EVENTS_TABLE } from '@abe-stack/db';
 
 import type { DbClient } from '@database';
 import type { EmailService } from '@email';
@@ -82,12 +82,12 @@ export async function logSecurityEvent(params: LogSecurityEventParams): Promise<
   await db.execute(
     insert(SECURITY_EVENTS_TABLE)
       .values({
-        user_id: userId || null,
-        email: email || null,
+        user_id: userId != null && userId !== '' ? userId : null,
+        email: email != null && email !== '' ? email : null,
         event_type: eventType,
         severity,
-        ip_address: ipAddress || null,
-        user_agent: userAgent || null,
+        ip_address: ipAddress != null && ipAddress !== '' ? ipAddress : null,
+        user_agent: userAgent != null && userAgent !== '' ? userAgent : null,
         metadata: metadata ? JSON.stringify(metadata) : null,
       })
       .toSql(),
@@ -310,7 +310,7 @@ export async function sendTokenReuseAlert(
 ): Promise<void> {
   const { email, ipAddress, userAgent, timestamp } = params;
 
-  const template = emailTemplates.tokenReuseAlert(ipAddress, userAgent || 'Unknown', timestamp);
+  const template = emailTemplates.tokenReuseAlert(ipAddress, userAgent ?? 'Unknown', timestamp);
 
   await emailService.send({
     ...template,

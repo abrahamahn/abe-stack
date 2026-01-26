@@ -7,22 +7,22 @@
  */
 
 import {
-  allowed,
-  denied,
-  getRecordKey,
-  type BatchRecordLoader,
-  type CustomRule,
-  type MembershipRule,
-  type OwnershipRule,
-  type PermissionConfig,
-  type PermissionRecord,
-  type PermissionResult,
-  type PermissionRule,
-  type PermissionType,
-  type RecordLoader,
-  type RecordPointer,
-  type RoleRule,
-  type TablePermissionConfig,
+    allowed,
+    denied,
+    getRecordKey,
+    type BatchRecordLoader,
+    type CustomRule,
+    type MembershipRule,
+    type OwnershipRule,
+    type PermissionConfig,
+    type PermissionRecord,
+    type PermissionResult,
+    type PermissionRule,
+    type PermissionType,
+    type RecordLoader,
+    type RecordPointer,
+    type RoleRule,
+    type TablePermissionConfig,
 } from './types';
 
 import type { UserRole } from '@abe-stack/core';
@@ -382,7 +382,7 @@ export class PermissionChecker {
   ): Promise<PermissionResult> {
     // Check if record is soft-deleted
     const tableConfig = this.tableConfigMap.get(table);
-    if (record.deleted && !tableConfig?.allowDeletedRecords) {
+    if (record.deleted && tableConfig?.allowDeletedRecords !== true) {
       return denied('Record is deleted');
     }
 
@@ -469,12 +469,12 @@ export class PermissionChecker {
     const ownerField = rule.ownerField;
 
     // Check specified owner field
-    if (ownerField && record[ownerField] === userId) {
+    if (ownerField != null && ownerField !== '' && record[ownerField] === userId) {
       return allowed(`ownership:${ownerField}`);
     }
 
     // Check default owner fields if no specific field is specified
-    if (!ownerField) {
+    if (ownerField == null || ownerField === '') {
       if (record.ownerId === userId) {
         return allowed('ownership:ownerId');
       }
@@ -497,7 +497,7 @@ export class PermissionChecker {
     const memberField = rule.memberField;
 
     // Check specified member field
-    if (memberField) {
+    if (memberField != null && memberField !== '') {
       const members = record[memberField];
       if (Array.isArray(members) && members.includes(userId)) {
         return allowed(`membership:${memberField}`);

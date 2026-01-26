@@ -65,6 +65,7 @@ describe('MediaProcessingRetryHandler', () => {
 
       expect(result).toBe('success');
       expect(operation).toHaveBeenCalledTimes(1);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(mockLogger.info).toHaveBeenCalledWith(
         'Media processing succeeded',
         expect.objectContaining({ operationId: 'op-1', attempt: 1 }),
@@ -91,6 +92,7 @@ describe('MediaProcessingRetryHandler', () => {
 
       expect(result).toBe('success');
       expect(operation).toHaveBeenCalledTimes(3);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(mockLogger.warn).toHaveBeenCalledTimes(2);
 
       handler.destroy();
@@ -126,6 +128,7 @@ describe('MediaProcessingRetryHandler', () => {
 
       await handler.executeWithRetry('op-context', operation, context);
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(mockLogger.info).toHaveBeenCalledWith(
         'Media processing succeeded',
         expect.objectContaining({
@@ -172,6 +175,7 @@ describe('MediaProcessingRetryHandler', () => {
       await expect(handler.executeWithRetry('op-cb', operation)).rejects.toThrow();
 
       // Circuit should be open now
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Circuit breaker opened',
         expect.objectContaining({

@@ -94,7 +94,7 @@ export function parseSignedUrl(url: string, secret: string): SignedUrlData | nul
     }
 
     const [, encodedFileId, encodedFilename] = match;
-    if (!encodedFileId || !encodedFilename) {
+    if (encodedFileId == null || encodedFileId === '' || encodedFilename == null || encodedFilename === '') {
       return null;
     }
 

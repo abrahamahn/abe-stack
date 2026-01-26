@@ -462,7 +462,9 @@ describe('Route Handler Behavior', () => {
 
     await registeredRoute!.handler(req, reply);
 
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(reply.status).toHaveBeenCalledWith(201);
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(reply.send).toHaveBeenCalledWith({ id: 'new-item', created: true });
   });
 

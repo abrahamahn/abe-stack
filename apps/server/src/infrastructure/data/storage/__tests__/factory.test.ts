@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/data/storage/__tests__/factory.test.ts
 import { createStorage } from '@storage';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

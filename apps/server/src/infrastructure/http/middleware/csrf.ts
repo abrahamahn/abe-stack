@@ -7,11 +7,11 @@
  */
 
 import {
-  randomBytes,
-  createHmac,
-  timingSafeEqual,
-  createCipheriv,
-  createDecipheriv,
+    createCipheriv,
+    createDecipheriv,
+    createHmac,
+    randomBytes,
+    timingSafeEqual,
 } from 'node:crypto';
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
@@ -179,7 +179,7 @@ function decryptToken(encryptedToken: string, secret: string): string | null {
     const encryptedPart = parts[1];
     const authTagStr = parts[2];
 
-    if (!ivStr || !encryptedPart || !authTagStr) {
+    if (ivStr == null || ivStr === '' || encryptedPart == null || encryptedPart === '' || authTagStr == null || authTagStr === '') {
       return null;
     }
 
@@ -225,7 +225,7 @@ export function validateCsrfToken(
 ): boolean {
   const { secret, encrypted = false, signed = true } = options;
 
-  if (!cookieToken || !requestToken) {
+  if ((cookieToken ?? '') === '' || (requestToken ?? '') === '') {
     return false;
   }
 
@@ -234,8 +234,8 @@ export function validateCsrfToken(
 
   if (encrypted) {
     // Decrypt first, then verify signature if signed
-    const decryptedToken = decryptToken(cookieToken, secret);
-    if (!decryptedToken) {
+    const decryptedToken = decryptToken(cookieToken as string, secret);
+    if (decryptedToken == null) {
       return false;
     }
 
@@ -243,16 +243,18 @@ export function validateCsrfToken(
       ? verifyToken(decryptedToken, secret)
       : { valid: true, token: decryptedToken };
   } else {
-    cookieResult = signed ? verifyToken(cookieToken, secret) : { valid: true, token: cookieToken };
+    cookieResult = signed
+      ? verifyToken(cookieToken as string, secret)
+      : { valid: true, token: cookieToken as string };
   }
 
-  if (!cookieResult.valid || !cookieResult.token) {
+  if (!cookieResult.valid || cookieResult.token == null) {
     return false;
   }
 
   // Compare tokens (timing-safe)
   try {
-    const tokenBuffer = Buffer.from(requestToken);
+    const tokenBuffer = Buffer.from(requestToken as string);
     const expectedBuffer = Buffer.from(cookieResult.token);
 
     if (tokenBuffer.length !== expectedBuffer.length) {
@@ -326,7 +328,7 @@ export function registerCsrf(server: FastifyInstance, options: CsrfOptions): voi
 
     // Get token from cookie
     const cookieToken = req.cookies[cookieName];
-    if (!cookieToken) {
+    if (cookieToken == null || cookieToken === '') {
       reply.status(403).send({
         error: 'Forbidden',
         message: 'Missing CSRF token',
@@ -340,7 +342,7 @@ export function registerCsrf(server: FastifyInstance, options: CsrfOptions): voi
     if (encrypted) {
       // Decrypt first, then verify signature if signed
       const decryptedToken = decryptToken(cookieToken, secret);
-      if (!decryptedToken) {
+      if (decryptedToken == null) {
         reply.status(403).send({
           error: 'Forbidden',
           message: 'Invalid CSRF token',
@@ -357,7 +359,7 @@ export function registerCsrf(server: FastifyInstance, options: CsrfOptions): voi
         : { valid: true, token: cookieToken };
     }
 
-    if (!cookieResult.valid || !cookieResult.token) {
+    if (!cookieResult.valid || cookieResult.token == null) {
       reply.status(403).send({
         error: 'Forbidden',
         message: 'Invalid CSRF token',
@@ -371,7 +373,7 @@ export function registerCsrf(server: FastifyInstance, options: CsrfOptions): voi
       req.headers[headerName.toLowerCase()] ??
       (req.body as Record<string, unknown> | null)?._csrf;
 
-    if (!headerToken || typeof headerToken !== 'string') {
+    if ((headerToken ?? '') === '' || typeof headerToken !== 'string') {
       reply.status(403).send({
         error: 'Forbidden',
         message: 'Missing CSRF token in request',

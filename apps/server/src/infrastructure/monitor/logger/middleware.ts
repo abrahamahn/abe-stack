@@ -6,14 +6,14 @@
  */
 
 import {
-  createRequestContext,
-  createRequestLogger,
-  generateCorrelationId,
-  getOrCreateCorrelationId,
+    createRequestContext,
+    createRequestLogger,
+    generateCorrelationId,
+    getOrCreateCorrelationId,
 } from './logger';
 
-import type { Logger, RequestContext } from './types';
 import type { FastifyInstance } from 'fastify';
+import type { Logger, RequestContext } from './types';
 
 // Extend Fastify request with our custom properties
 declare module 'fastify' {
@@ -97,7 +97,7 @@ export function createJobLogger(
   jobName: string,
   jobId?: string,
 ): Logger {
-  const correlationId = jobId || createJobCorrelationId(jobName);
+  const correlationId = jobId ?? createJobCorrelationId(jobName);
   return createRequestLogger(baseLogger, {
     correlationId,
     requestId: correlationId,

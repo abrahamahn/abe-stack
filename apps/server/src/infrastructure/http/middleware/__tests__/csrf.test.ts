@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/http/middleware/__tests__/csrf.test.ts
 import Fastify from 'fastify';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';

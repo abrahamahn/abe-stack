@@ -7,10 +7,10 @@
  */
 
 import {
-  createRawDb,
-  buildConnectionString as buildConnString,
-  canReachDatabase,
-  type RawDb,
+    buildConnectionString as buildConnString,
+    canReachDatabase,
+    createRawDb,
+    type RawDb,
 } from '@abe-stack/db';
 
 type DbEnv = Record<string, string | number | boolean | undefined>;
@@ -32,23 +32,21 @@ export function createDbClient(connectionString: string): RawDb {
   if (process.env.NODE_ENV !== 'production') {
     const globalWithDb = globalThis as GlobalWithDb;
 
-    if (!globalWithDb.rawDb) {
-      globalWithDb.rawDb = createRawDb({
-        connectionString,
-        maxConnections: Number(process.env.DB_MAX_CONNECTIONS || 10),
-        idleTimeout: Number(process.env.DB_IDLE_TIMEOUT || 30000),
-        connectTimeout: Number(process.env.DB_CONNECT_TIMEOUT || 10000),
-      });
-    }
+    globalWithDb.rawDb ??= createRawDb({
+      connectionString,
+      maxConnections: Number(process.env.DB_MAX_CONNECTIONS ?? 10),
+      idleTimeout: Number(process.env.DB_IDLE_TIMEOUT ?? 30000),
+      connectTimeout: Number(process.env.DB_CONNECT_TIMEOUT ?? 10000),
+    });
 
     return globalWithDb.rawDb;
   }
 
   return createRawDb({
     connectionString,
-    maxConnections: Number(process.env.DB_MAX_CONNECTIONS || 10),
-    idleTimeout: Number(process.env.DB_IDLE_TIMEOUT || 30000),
-    connectTimeout: Number(process.env.DB_CONNECT_TIMEOUT || 10000),
+    maxConnections: Number(process.env.DB_MAX_CONNECTIONS ?? 10),
+    idleTimeout: Number(process.env.DB_IDLE_TIMEOUT ?? 30000),
+    connectTimeout: Number(process.env.DB_CONNECT_TIMEOUT ?? 10000),
   });
 }
 
@@ -67,7 +65,7 @@ export async function resolveConnectionStringWithFallback(
   env: DbEnv = process.env as DbEnv,
   fallbackPorts: number[] = [5432, 5433, 5434],
 ): Promise<string> {
-  if (env.DATABASE_URL && typeof env.DATABASE_URL === 'string') {
+  if (typeof env.DATABASE_URL === 'string' && env.DATABASE_URL !== '') {
     return env.DATABASE_URL;
   }
 

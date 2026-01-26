@@ -1,0 +1,15 @@
+# Lint Progress Log
+
+## 2026-01-26 - Repo-wide Lint Check
+
+- **Total Errors:** 1200
+- **Status:** In Progress
+- **Key Issues Identified:**
+  - Parsing errors in `packages/ui`: `parserOptions.project` configuration issue for test files.
+  - `strict-boolean-expressions` errors in `packages/ui/src/utils`.
+  - `no-non-null-assertion` errors in `packages/ui`.
+  - Remaining infrastructure lint errors were resolved in previous steps (apps/server/src/infrastructure).
+
+## Next Steps
+- Fix `tsconfig` or `eslint` config for `packages/ui` to include test files.
+- Address strict boolean errors in `packages/ui`.

@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/search/__tests__/search-factory.test.ts
 import { afterEach, describe, expect, test } from 'vitest';
 
 import {
-  getSearchProviderFactory,
-  resetSearchProviderFactory,
-  SearchProviderFactory,
+    getSearchProviderFactory,
+    resetSearchProviderFactory,
+    SearchProviderFactory,
 } from '../search-factory';
 
 import type { RawDb, Repositories } from '@database';
@@ -12,10 +13,10 @@ import type { SqlTableConfig } from '../types';
 
 // Mock database
 const mockDb = {
-  raw: async () => [],
-  query: async () => [],
-  queryOne: async () => null,
-  execute: async () => 0,
+  raw: async () => await Promise.resolve([]),
+  query: async () => await Promise.resolve([]),
+  queryOne: async () => await Promise.resolve(null),
+  execute: async () => await Promise.resolve(0),
 } as unknown as RawDb;
 
 const mockRepos = {} as Repositories;

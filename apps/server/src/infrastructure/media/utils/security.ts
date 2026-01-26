@@ -192,7 +192,7 @@ export class MediaSecurityScanner {
       }
 
       // Suspicious dimensions (too large or unusual ratios)
-      if (metadata.width && metadata.height) {
+      if (metadata.width != null && metadata.height != null) {
         const ratio =
           Math.max(metadata.width, metadata.height) / Math.min(metadata.width, metadata.height);
 
@@ -206,7 +206,7 @@ export class MediaSecurityScanner {
       }
 
       // Check for embedded thumbnails or unusual metadata
-      if (metadata.hasProfile || metadata.hasAlpha) {
+      if (metadata.hasProfile === true || metadata.hasAlpha === true) {
         warnings.push('Image contains additional data (profile/alpha)');
       }
     } catch {

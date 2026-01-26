@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/data/database/schema/__tests__/validation.test.ts
 import { describe, expect, test, vi } from 'vitest';
 

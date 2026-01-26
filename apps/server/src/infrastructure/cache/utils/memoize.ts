@@ -78,7 +78,7 @@ export function memoize<TArgs extends unknown[], TResult>(
     const entry = cache.get(key);
     if (entry) {
       // Check if expired
-      if (entry.expiresAt && entry.expiresAt <= now) {
+      if (entry.expiresAt != null && entry.expiresAt <= now) {
         cache.delete(key);
         removeFromAccessOrder(key);
         misses++;

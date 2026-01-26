@@ -6,44 +6,44 @@
  */
 
 import {
-  createRawDb,
-  createUserRepository,
-  createRefreshTokenRepository,
-  createRefreshTokenFamilyRepository,
-  createLoginAttemptRepository,
-  createPasswordResetTokenRepository,
-  createEmailVerificationTokenRepository,
-  createSecurityEventRepository,
-  createMagicLinkTokenRepository,
-  createOAuthConnectionRepository,
-  createPushSubscriptionRepository,
-  createNotificationPreferenceRepository,
-  // Billing repositories
-  createPlanRepository,
-  createSubscriptionRepository,
-  createCustomerMappingRepository,
-  createInvoiceRepository,
-  createPaymentMethodRepository,
-  createBillingEventRepository,
-  type RawDb,
-  type UserRepository,
-  type RefreshTokenRepository,
-  type RefreshTokenFamilyRepository,
-  type LoginAttemptRepository,
-  type PasswordResetTokenRepository,
-  type EmailVerificationTokenRepository,
-  type SecurityEventRepository,
-  type MagicLinkTokenRepository,
-  type OAuthConnectionRepository,
-  type PushSubscriptionRepository,
-  type NotificationPreferenceRepository,
-  // Billing repository types
-  type PlanRepository,
-  type SubscriptionRepository,
-  type CustomerMappingRepository,
-  type InvoiceRepository,
-  type PaymentMethodRepository,
-  type BillingEventRepository,
+    createBillingEventRepository,
+    createCustomerMappingRepository,
+    createEmailVerificationTokenRepository,
+    createInvoiceRepository,
+    createLoginAttemptRepository,
+    createMagicLinkTokenRepository,
+    createNotificationPreferenceRepository,
+    createOAuthConnectionRepository,
+    createPasswordResetTokenRepository,
+    createPaymentMethodRepository,
+    // Billing repositories
+    createPlanRepository,
+    createPushSubscriptionRepository,
+    createRawDb,
+    createRefreshTokenFamilyRepository,
+    createRefreshTokenRepository,
+    createSecurityEventRepository,
+    createSubscriptionRepository,
+    createUserRepository,
+    type BillingEventRepository,
+    type CustomerMappingRepository,
+    type EmailVerificationTokenRepository,
+    type InvoiceRepository,
+    type LoginAttemptRepository,
+    type MagicLinkTokenRepository,
+    type NotificationPreferenceRepository,
+    type OAuthConnectionRepository,
+    type PasswordResetTokenRepository,
+    type PaymentMethodRepository,
+    // Billing repository types
+    type PlanRepository,
+    type PushSubscriptionRepository,
+    type RawDb,
+    type RefreshTokenFamilyRepository,
+    type RefreshTokenRepository,
+    type SecurityEventRepository,
+    type SubscriptionRepository,
+    type UserRepository,
 } from '@abe-stack/db';
 
 // ============================================================================
@@ -138,9 +138,7 @@ export function getRepositoryContext(connectionString: string): RepositoryContex
   if (process.env.NODE_ENV !== 'production') {
     const globalWithRepos = globalThis as GlobalWithRepos;
 
-    if (!globalWithRepos.repositoryContext) {
-      globalWithRepos.repositoryContext = createRepositories(connectionString);
-    }
+    globalWithRepos.repositoryContext ??= createRepositories(connectionString);
 
     return globalWithRepos.repositoryContext;
   }

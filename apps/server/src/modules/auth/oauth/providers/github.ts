@@ -97,9 +97,9 @@ export function createGitHubProvider(clientId: string, clientSecret: string): OA
 
       const data = (await response.json()) as GitHubTokenResponse;
 
-      if (data.error) {
+      if (data.error != null && data.error !== '') {
         throw new OAuthError(
-          `GitHub OAuth error: ${data.error_description || data.error}`,
+          `GitHub OAuth error: ${data.error_description ?? data.error}`,
           'github',
           'TOKEN_EXCHANGE_FAILED',
         );
@@ -160,7 +160,7 @@ export function createGitHubProvider(clientId: string, clientSecret: string): OA
         }
       }
 
-      if (!email) {
+      if (email == null || email === '') {
         throw new OAuthError(
           'No email found on GitHub account. Please make your email public or add a verified email.',
           'github',

@@ -15,7 +15,7 @@
  * 5. Remove previousSecret
  */
 
-import { jwtSign, jwtVerify, JwtError } from './index';
+import { JwtError, jwtSign, jwtVerify } from './index';
 
 import type { JwtPayload, JwtSignOptions } from './index';
 
@@ -112,7 +112,8 @@ export function verifyWithRotation(token: string, config: JwtRotationConfig): Jw
     // If we have a previous secret and current failed with signature error,
     // try the previous secret
     if (
-      config.previousSecret &&
+      config.previousSecret != null &&
+      config.previousSecret !== '' &&
       currentError instanceof JwtError &&
       currentError.code === 'INVALID_SIGNATURE'
     ) {
@@ -161,7 +162,8 @@ export function checkTokenSecret(
   } catch (currentError) {
     // Try previous secret if available and signature mismatch
     if (
-      config.previousSecret &&
+      config.previousSecret != null &&
+      config.previousSecret !== '' &&
       currentError instanceof JwtError &&
       currentError.code === 'INVALID_SIGNATURE'
     ) {

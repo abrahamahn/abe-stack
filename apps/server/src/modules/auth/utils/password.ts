@@ -153,7 +153,7 @@ export async function verifyPasswordSafe(
   password: string,
   hash: string | null | undefined,
 ): Promise<boolean> {
-  const hashToVerify = hash || (await getRandomDummyHash());
+  const hashToVerify = hash != null && hash !== '' ? hash : (await getRandomDummyHash());
   const isValid = await verifyPassword(password, hashToVerify);
-  return hash ? isValid : false;
+  return hash != null && hash !== '' ? isValid : false;
 }

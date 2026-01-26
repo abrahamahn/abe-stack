@@ -6,15 +6,15 @@
  */
 
 import {
-  and,
-  eq,
-  gte,
-  select,
-  selectCount,
-  insert,
-  LOGIN_ATTEMPTS_TABLE,
-  USERS_TABLE,
-  type DbClient,
+    and,
+    eq,
+    gte,
+    insert,
+    LOGIN_ATTEMPTS_TABLE,
+    select,
+    selectCount,
+    USERS_TABLE,
+    type DbClient,
 } from '@database';
 import { MAX_PROGRESSIVE_DELAY_MS, PROGRESSIVE_DELAY_WINDOW_MS } from '@shared/constants';
 
@@ -59,9 +59,9 @@ export async function logLoginAttempt(
       .values({
         email,
         success,
-        ip_address: ipAddress || null,
-        user_agent: userAgent || null,
-        failure_reason: failureReason || null,
+        ip_address: ipAddress != null && ipAddress !== '' ? ipAddress : null,
+        user_agent: userAgent != null && userAgent !== '' ? userAgent : null,
+        failure_reason: failureReason != null && failureReason !== '' ? failureReason : null,
       })
       .toSql(),
   );
@@ -227,8 +227,8 @@ export async function unlockAccount(
         email,
         success: true,
         failure_reason: `Unlocked by admin ${adminUserId}: ${reason}`,
-        ip_address: ipAddress || null,
-        user_agent: userAgent || 'Admin Console',
+        ip_address: ipAddress != null && ipAddress !== '' ? ipAddress : null,
+        user_agent: userAgent != null && userAgent !== '' ? userAgent : 'Admin Console',
       })
       .toSql(),
   );

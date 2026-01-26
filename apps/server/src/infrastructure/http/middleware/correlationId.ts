@@ -88,9 +88,7 @@ export function registerCorrelationIdHook(
     }
 
     // Generate new ID if not provided or not trusted
-    if (!correlationId) {
-      correlationId = randomUUID();
-    }
+    correlationId ??= randomUUID();
 
     // Attach to request for use in handlers
     req.correlationId = correlationId;

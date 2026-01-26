@@ -1,10 +1,11 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/media/__tests__/processor.test.ts
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-  MediaProcessingOrchestrator,
-  type ProcessingJob,
-  type ProcessingLimits,
+    MediaProcessingOrchestrator,
+    type ProcessingJob,
+    type ProcessingLimits,
 } from '../processor';
 
 import type { AudioProcessor } from '../processors/audio';
@@ -20,7 +21,7 @@ const mockFsStat = vi.hoisted(() =>
 );
 
 // Mock fs/promises - dynamic imports need proper module structure
-vi.mock('fs/promises', async () => {
+vi.mock('fs/promises', () => {
   return {
     stat: mockFsStat,
     default: {
@@ -226,7 +227,7 @@ describe('MediaProcessingOrchestrator', () => {
       // Make the processor take longer than the timeout
       const slowPromise = (): Promise<ProcessingResult> =>
         new Promise((resolve) =>
-          setTimeout(() => resolve({ success: true, outputPath: '/tmp/test.jpg' }), 100),
+          setTimeout(() => { resolve({ success: true, outputPath: '/tmp/test.jpg' }); }, 100),
         );
       mockImageProcessor.process = vi.fn().mockImplementation(slowPromise);
 

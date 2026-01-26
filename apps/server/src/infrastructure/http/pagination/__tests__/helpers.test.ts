@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/http/pagination/__tests__/helpers.test.ts
 import { encodeCursor, type CursorPaginatedResult, type PaginatedResult } from '@abe-stack/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/http/middleware/__tests__/proxyValidation.test.ts
 import { describe, expect, test } from 'vitest';
 

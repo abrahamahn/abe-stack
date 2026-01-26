@@ -119,15 +119,15 @@ export function serializeCookie(
     cookie += `; Path=${options.path}`;
   }
 
-  if (options.domain) {
+  if (options.domain != null && options.domain !== '') {
     cookie += `; Domain=${options.domain}`;
   }
 
-  if (options.httpOnly) {
+  if (options.httpOnly === true) {
     cookie += '; HttpOnly';
   }
 
-  if (options.secure) {
+  if (options.secure === true) {
     cookie += '; Secure';
   }
 
@@ -173,7 +173,7 @@ export function registerCookies(server: FastifyInstance, options: CookiePluginOp
       let cookieValue = value;
 
       // Sign if requested
-      if (opts.signed) {
+      if (opts.signed === true) {
         cookieValue = signCookie(value, secret);
       }
 
@@ -181,7 +181,7 @@ export function registerCookies(server: FastifyInstance, options: CookiePluginOp
 
       // Get existing Set-Cookie headers
       const existing = this.getHeader('Set-Cookie');
-      if (existing) {
+      if (existing != null) {
         const cookies = Array.isArray(existing) ? existing : [existing as string];
         this.header('Set-Cookie', [...cookies, serialized]);
       } else {

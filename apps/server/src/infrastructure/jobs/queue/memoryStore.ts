@@ -83,7 +83,7 @@ export class MemoryQueueStore implements QueueStore {
 
     task.error = error;
 
-    if (nextAttemptAt) {
+    if (nextAttemptAt != null && nextAttemptAt !== '') {
       // Retry
       task.status = 'pending';
       task.scheduledAt = nextAttemptAt;
@@ -132,9 +132,10 @@ export class MemoryQueueStore implements QueueStore {
 
     for (const [id, task] of this.tasks.entries()) {
       if (task.status !== 'completed') continue;
-      if (!task.completedAt) continue;
+      const completedAt = task.completedAt;
+      if (completedAt == null || completedAt === '') continue;
 
-      const completedTime = new Date(task.completedAt).getTime();
+      const completedTime = new Date(completedAt).getTime();
       if (completedTime < beforeTime) {
         this.tasks.delete(id);
         count++;

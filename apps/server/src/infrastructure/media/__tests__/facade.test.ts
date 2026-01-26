@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/media/__tests__/facade.test.ts
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 

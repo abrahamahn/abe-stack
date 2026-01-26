@@ -240,11 +240,11 @@ export class RateLimiter {
       record.violations = 0;
     } else {
       // Track violations for progressive delay
-      record.violations = (record.violations || 0) + 1;
+      record.violations = record.violations + 1;
       record.lastViolation = now;
 
       // Calculate progressive delay if enabled
-      if (this.config.progressiveDelay?.enabled && record.violations > 1) {
+      if (this.config.progressiveDelay?.enabled === true && record.violations > 1) {
         delayMs = this.calculateProgressiveDelay(record.violations);
       }
     }
@@ -295,7 +295,7 @@ export class RateLimiter {
       remaining: Math.floor(currentTokens),
       limit: effectiveConfig.max,
       resetMs: this.calculateResetMs(record, refillRate),
-      violations: record.violations || 0,
+      violations: record.violations,
     };
   }
 
@@ -329,7 +329,7 @@ export class RateLimiter {
   }
 
   private getEffectiveConfig(role?: string): { max: number; windowMs: number } {
-    if (role && this.config.roleLimits?.[role]) {
+    if (role != null && role !== '' && this.config.roleLimits?.[role]) {
       return this.config.roleLimits[role];
     }
     return { max: this.config.max, windowMs: this.config.windowMs };

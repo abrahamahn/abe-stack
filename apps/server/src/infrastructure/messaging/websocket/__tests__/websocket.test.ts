@@ -1,10 +1,9 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/messaging/websocket/__tests__/websocket.test.ts
 import { EventEmitter } from 'node:events';
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import type * as WebSocketModule from '../websocket';
-import type * as JwtModule from '@modules/auth/utils/jwt';
 
 // Shared mock handleUpgrade function
 let mockHandleUpgrade: ReturnType<typeof vi.fn>;
@@ -32,8 +31,7 @@ vi.mock('@http', () => ({
 }));
 
 // Types for dynamic imports
-type WebSocketModuleType = typeof WebSocketModule;
-type JwtModuleType = typeof JwtModule;
+
 
 describe('WebSocket Module', () => {
   beforeEach(() => {
@@ -49,7 +47,7 @@ describe('WebSocket Module', () => {
 
   describe('getWebSocketStats', () => {
     test('should return initial stats with zero connections', { timeout: 10000 }, async () => {
-      const { getWebSocketStats } = (await import('../websocket.js')) as WebSocketModuleType;
+      const { getWebSocketStats } = (await import('../websocket.js'));
       const stats = getWebSocketStats();
 
       expect(stats).toEqual({
@@ -60,7 +58,7 @@ describe('WebSocket Module', () => {
 
     test('should report pluginRegistered as true after registerWebSocket', async () => {
       const { getWebSocketStats, registerWebSocket } =
-        (await import('../websocket.js')) as WebSocketModuleType;
+        (await import('../websocket.js'));
 
       const mockHttpServer = new EventEmitter();
       const mockServer = {
@@ -96,7 +94,7 @@ describe('WebSocket Module', () => {
 
   describe('registerWebSocket', () => {
     test('should attach upgrade handler to HTTP server', async () => {
-      const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
+      const { registerWebSocket } = (await import('../websocket.js'));
 
       const mockHttpServer = new EventEmitter();
       const onSpy = vi.spyOn(mockHttpServer, 'on');
@@ -131,7 +129,7 @@ describe('WebSocket Module', () => {
     });
 
     test('should destroy socket for non-/ws paths', async () => {
-      const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
+      const { registerWebSocket } = (await import('../websocket.js'));
 
       const mockHttpServer = new EventEmitter();
       const mockServer = {
@@ -178,7 +176,7 @@ describe('WebSocket Module', () => {
 
   describe('WebSocket authentication', () => {
     test('should close socket if no token provided', async () => {
-      const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
+      const { registerWebSocket } = (await import('../websocket.js'));
 
       const mockHttpServer = new EventEmitter();
       const mockServer = {
@@ -246,9 +244,9 @@ describe('WebSocket Module', () => {
     });
 
     test('should accept connection with token in query param', async () => {
-      const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
+      const { registerWebSocket } = (await import('../websocket.js'));
       const { verifyToken } =
-        (await import('../../../../modules/auth/utils/jwt.js')) as JwtModuleType;
+        (await import('../../../../modules/auth/utils/jwt.js'));
 
       const mockHttpServer = new EventEmitter();
       const mockServer = {
@@ -319,9 +317,9 @@ describe('WebSocket Module', () => {
     });
 
     test('should accept connection with token in cookie', async () => {
-      const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
+      const { registerWebSocket } = (await import('../websocket.js'));
       const { verifyToken } =
-        (await import('../../../../modules/auth/utils/jwt.js')) as JwtModuleType;
+        (await import('../../../../modules/auth/utils/jwt.js'));
 
       const mockHttpServer = new EventEmitter();
       const mockServer = {
@@ -389,9 +387,9 @@ describe('WebSocket Module', () => {
     });
 
     test('should close socket if token is invalid', async () => {
-      const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
+      const { registerWebSocket } = (await import('../websocket.js'));
       const { verifyToken } =
-        (await import('../../../../modules/auth/utils/jwt.js')) as JwtModuleType;
+        (await import('../../../../modules/auth/utils/jwt.js'));
 
       (verifyToken as ReturnType<typeof vi.fn>).mockImplementation(() => {
         throw new Error('Invalid token');
@@ -467,7 +465,7 @@ describe('WebSocket Module', () => {
       // Configure CSRF validation to return false for this test
       mockValidateCsrfToken.mockReturnValue(false);
 
-      const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
+      const { registerWebSocket } = (await import('../websocket.js'));
 
       const mockHttpServer = new EventEmitter();
       const mockServer = {
@@ -527,7 +525,7 @@ describe('WebSocket Module', () => {
     });
 
     test('should extract CSRF token from sec-websocket-protocol header', async () => {
-      const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
+      const { registerWebSocket } = (await import('../websocket.js'));
 
       const mockHttpServer = new EventEmitter();
       const mockServer = {
@@ -602,7 +600,7 @@ describe('WebSocket Module', () => {
 
   describe('WebSocket production mode', () => {
     test('should use encrypted CSRF in production', async () => {
-      const { registerWebSocket } = (await import('../websocket.js')) as WebSocketModuleType;
+      const { registerWebSocket } = (await import('../websocket.js'));
 
       const mockHttpServer = new EventEmitter();
       const mockServer = {

@@ -133,7 +133,7 @@ export function applySecurityHeaders(res: FastifyReply, options: SecurityHeaderO
       "form-action 'self'",
     ];
 
-    if (cspNonce) {
+    if (cspNonce != null && cspNonce !== '') {
       // Insert nonce-based script-src if nonce is provided
       cspDirectives[1] = `script-src 'self' 'nonce-${cspNonce}'`;
     }
@@ -201,11 +201,11 @@ export function applyCors(req: FastifyRequest, res: FastifyReply, options: CorsO
   // Determine if origin should be allowed
   if (allowedOrigin === '*') {
     // Wildcard - allow any origin (development only)
-    res.header('Access-Control-Allow-Origin', requestOrigin || '*');
+    res.header('Access-Control-Allow-Origin', requestOrigin ?? '*');
   } else if (requestOrigin === allowedOrigin) {
     // Exact match
     res.header('Access-Control-Allow-Origin', requestOrigin);
-  } else if (requestOrigin && isOriginAllowed(requestOrigin, allowedOrigin)) {
+  } else if (requestOrigin != null && isOriginAllowed(requestOrigin, allowedOrigin)) {
     // Pattern match (comma-separated origins)
     res.header('Access-Control-Allow-Origin', requestOrigin);
   }
@@ -337,7 +337,7 @@ export function registerPrototypePollutionProtection(server: FastifyInstance): v
     (_req: FastifyRequest, body: string, done: (err: Error | null, body?: unknown) => void) => {
       try {
         // Handle empty body
-        if (!body || body.trim() === '') {
+        if (body === '' || body.trim() === '') {
           done(null, undefined);
           return;
         }

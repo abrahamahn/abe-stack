@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/media/utils/__tests__/security.test.ts
 import { promises as fs } from 'fs';
 

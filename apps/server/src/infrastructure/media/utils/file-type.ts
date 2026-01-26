@@ -121,7 +121,8 @@ export function detectFileType(buffer: Buffer): FileTypeResult | null {
 export function detectFileTypeFromPath(filePath: string): FileTypeResult | null {
   const ext = filePath.split('.').pop()?.toLowerCase();
 
-  if (!ext) return null;
+  const safeExt = ext ?? '';
+  if (safeExt === '') return null;
 
   // Extension to MIME type mapping
   const extToMime: Record<string, string> = {
@@ -162,9 +163,9 @@ export function detectFileTypeFromPath(filePath: string): FileTypeResult | null 
     pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   };
 
-  const mime = extToMime[ext];
-  if (mime) {
-    return { ext, mime };
+  const mime = extToMime[safeExt];
+  if ((mime ?? '') !== '') {
+    return { ext: safeExt, mime: mime as string };
   }
 
   return null;
@@ -203,7 +204,7 @@ export function isAllowedFileType(
   const baseType = fileType.mime.split('/')[0];
   return (
     allowedTypes.includes(fileType.mime) ||
-    (baseType ? allowedTypes.includes(`${baseType}/*`) : false)
+    (baseType !== '' ? allowedTypes.includes(`${String(baseType)}/*`) : false)
   );
 }
 

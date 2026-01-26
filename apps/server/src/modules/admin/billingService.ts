@@ -6,8 +6,8 @@
  */
 
 import {
-  CannotDeactivatePlanWithActiveSubscriptionsError,
-  PlanNotFoundError,
+    CannotDeactivatePlanWithActiveSubscriptionsError,
+    PlanNotFoundError,
 } from '@abe-stack/core';
 import type { Plan as DbPlan, PlanRepository, SubscriptionRepository } from '@abe-stack/db';
 
@@ -80,14 +80,14 @@ export async function createPlan(
 ): Promise<DbPlan> {
   return repos.plans.create({
     name: params.name,
-    description: params.description || null,
+    description: params.description ?? null,
     interval: params.interval,
     priceInCents: params.priceInCents,
-    currency: params.currency || 'usd',
-    features: params.features || [],
-    trialDays: params.trialDays || 0,
+    currency: params.currency ?? 'usd',
+    features: params.features ?? [],
+    trialDays: params.trialDays ?? 0,
     isActive: params.isActive ?? true,
-    sortOrder: params.sortOrder || 0,
+    sortOrder: params.sortOrder ?? 0,
     stripePriceId: null,
     stripeProductId: null,
     paypalPlanId: null,
@@ -167,16 +167,16 @@ export async function syncPlanToStripe(
   // Convert plan to CreateProductParams format
   const productParams = {
     name: plan.name,
-    description: plan.description || undefined,
+    description: plan.description ?? undefined,
     interval: plan.interval,
     priceInCents: plan.priceInCents,
     currency: plan.currency,
     metadata: { planId: plan.id },
   };
 
-  if (productId) {
+  if (productId != null && productId !== '') {
     // Update existing product
-    await provider.updateProduct(productId, plan.name, plan.description || undefined);
+    await provider.updateProduct(productId, plan.name, plan.description ?? undefined);
     // Note: Stripe doesn't allow updating prices, so if price changed,
     // we'd need to create a new price. For simplicity, we keep the existing price.
   } else {
@@ -193,7 +193,7 @@ export async function syncPlanToStripe(
   }
 
   return {
-    stripePriceId: priceId || '',
-    stripeProductId: productId || '',
+    stripePriceId: priceId ?? '',
+    stripeProductId: productId,
   };
 }

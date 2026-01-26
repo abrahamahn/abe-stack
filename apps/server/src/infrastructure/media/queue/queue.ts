@@ -78,7 +78,7 @@ export class CustomJobQueue<T = unknown> {
       createdAt: Date.now(),
     };
 
-    if (options.delay && options.delay > 0) {
+    if (options.delay != null && options.delay > 0) {
       job.nextRetryAt = Date.now() + options.delay;
     }
 
@@ -156,7 +156,7 @@ export class CustomJobQueue<T = unknown> {
       }
 
       // Check if job is delayed
-      if (job.nextRetryAt && job.nextRetryAt > now) {
+      if (job.nextRetryAt != null && job.nextRetryAt > now) {
         continue;
       }
 
@@ -245,17 +245,17 @@ export class CustomJobQueue<T = unknown> {
       .map((id) => this.jobs.get(id))
       .filter((job): job is JobData<T> => job !== undefined);
     const waitingJobs = this.waitingQueue.filter(
-      (job) => !job.nextRetryAt || job.nextRetryAt <= now,
+      (job) => job.nextRetryAt == null || job.nextRetryAt <= now,
     );
-    const delayedJobs = this.waitingQueue.filter((job) => job.nextRetryAt && job.nextRetryAt > now);
+    const delayedJobs = this.waitingQueue.filter((job) => job.nextRetryAt != null && job.nextRetryAt > now);
 
     return {
       total: this.jobs.size,
       waiting: waitingJobs.length,
       active: activeJobsList.length,
       delayed: delayedJobs.length,
-      completed: Array.from(this.jobs.values()).filter((job) => job.completedAt).length,
-      failed: Array.from(this.jobs.values()).filter((job) => job.failedAt).length,
+      completed: Array.from(this.jobs.values()).filter((job) => job.completedAt != null).length,
+      failed: Array.from(this.jobs.values()).filter((job) => job.failedAt != null).length,
     };
   }
 
@@ -278,7 +278,7 @@ export class CustomJobQueue<T = unknown> {
     // Remove expired completed/failed jobs
     for (const [jobId, job] of this.jobs) {
       const finishedAt = job.completedAt ?? job.failedAt;
-      if (finishedAt && now - finishedAt > retentionMs) {
+      if (finishedAt != null && now - finishedAt > retentionMs) {
         this.jobs.delete(jobId);
         cleanedCount++;
       }
@@ -288,7 +288,7 @@ export class CustomJobQueue<T = unknown> {
     if (this.jobs.size > this.options.maxJobsSize) {
       // Get finished jobs sorted by completion/failure time (oldest first)
       const finishedJobs = Array.from(this.jobs.entries())
-        .filter(([, job]) => job.completedAt || job.failedAt)
+        .filter(([, job]) => job.completedAt != null || job.failedAt != null)
         .sort(([, a], [, b]) => {
           const aTime = a.completedAt ?? a.failedAt ?? 0;
           const bTime = b.completedAt ?? b.failedAt ?? 0;

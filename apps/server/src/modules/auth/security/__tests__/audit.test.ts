@@ -1,17 +1,18 @@
 // apps/server/src/modules/auth/security/__tests__/audit.test.ts
+/* eslint-disable @typescript-eslint/unbound-method */
 import { promises as fs } from 'fs';
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-  SecurityAuditLogger,
-  registerSecurityAudit,
-  type AuditConfig,
-  type AuditEventType,
-  type IntrusionRule,
+    SecurityAuditLogger,
+    registerSecurityAudit,
+    type AuditConfig,
+    type AuditEventType,
+    type IntrusionRule,
 } from '../audit';
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 // Mock fs promises
 vi.mock('fs', () => ({
@@ -56,9 +57,7 @@ function createMockServer(): FastifyInstance {
   return {
     decorate: vi.fn(),
     addHook: vi.fn((hookName: string, handler: (...args: unknown[]) => unknown) => {
-      if (!hooks[hookName]) {
-        hooks[hookName] = [];
-      }
+      hooks[hookName] ??= [];
       hooks[hookName].push(handler);
     }),
     _hooks: hooks,

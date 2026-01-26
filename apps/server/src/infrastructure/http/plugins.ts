@@ -9,16 +9,16 @@ import type { FastifyInstance } from 'fastify';
 import type { AppConfig } from '@/config/index';
 
 import {
-  applyCors,
-  applySecurityHeaders,
-  getProductionSecurityDefaults,
-  handlePreflight,
-  registerCookies,
-  registerCorrelationIdHook,
-  registerCsrf,
-  registerPrototypePollutionProtection,
-  registerRequestInfoHook,
-  registerStaticServe,
+    applyCors,
+    applySecurityHeaders,
+    getProductionSecurityDefaults,
+    handlePreflight,
+    registerCookies,
+    registerCorrelationIdHook,
+    registerCsrf,
+    registerPrototypePollutionProtection,
+    registerRequestInfoHook,
+    registerStaticServe,
 } from './middleware';
 
 /**
@@ -49,7 +49,7 @@ export function registerPlugins(server: FastifyInstance, config: AppConfig): voi
 
     server.addHook('onResponse', (request, reply, done) => {
       const start = (request as { _startAt?: bigint })._startAt;
-      const durationMs = start
+      const durationMs = start != null
         ? Number(process.hrtime.bigint() - start) / 1_000_000
         : reply.elapsedTime;
       server.log.info(
@@ -138,7 +138,7 @@ export function registerPlugins(server: FastifyInstance, config: AppConfig): voi
 
     if (isAppError(error)) {
       statusCode = error.statusCode;
-      code = error.code || 'INTERNAL_ERROR';
+      code = error.code ?? 'INTERNAL_ERROR';
       message = error.message;
       details = error.details;
     } else if (error instanceof Error) {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/media/processors/__tests__/video.test.ts
 import ffmpeg from 'fluent-ffmpeg';
 import { describe, expect, it, vi, beforeEach, afterEach, type Mock } from 'vitest';
@@ -173,7 +174,7 @@ describe('VideoProcessor', () => {
         toFormat: vi.fn().mockReturnThis(),
         on: vi.fn().mockImplementation((event: string, callback: (err: Error) => void) => {
           if (event === 'error') {
-            setTimeout(() => callback(new Error('FFmpeg failed')), 0);
+            setTimeout(() => { callback(new Error('FFmpeg failed')); }, 0);
           }
           return mockFfmpeg.mock.results[0]?.value;
         }),
@@ -259,7 +260,7 @@ describe('VideoProcessor', () => {
         toFormat: vi.fn().mockReturnThis(),
         on: vi.fn().mockImplementation((event: string, callback: (err: Error) => void) => {
           if (event === 'error') {
-            setTimeout(() => callback(new Error('Audio extraction failed')), 0);
+            setTimeout(() => { callback(new Error('Audio extraction failed')); }, 0);
           }
           return mockFfmpeg.mock.results[0]?.value;
         }),
@@ -294,7 +295,7 @@ describe('VideoProcessor', () => {
         output: vi.fn().mockReturnThis(),
         on: vi.fn().mockImplementation((event: string, callback: (err: Error) => void) => {
           if (event === 'error') {
-            setTimeout(() => callback(new Error('HLS creation failed')), 0);
+            setTimeout(() => { callback(new Error('HLS creation failed')); }, 0);
           }
           return mockFfmpeg.mock.results[0]?.value;
         }),

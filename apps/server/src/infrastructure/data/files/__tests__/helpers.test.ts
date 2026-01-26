@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/data/files/__tests__/helpers.test.ts
 import { describe, expect, test } from 'vitest';
 

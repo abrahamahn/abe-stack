@@ -1,4 +1,6 @@
+
 // apps/server/src/modules/admin/__tests__/service.test.ts
+
 import { unlockUserAccount, UserNotFoundError } from '@admin/service';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 

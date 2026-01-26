@@ -8,6 +8,7 @@
  * Usage:
  *   pnpm --filter @abe-stack/server db:push
  */
+/* eslint-disable no-console */
 
 import { buildConnectionString, createDbClient } from '@database';
 

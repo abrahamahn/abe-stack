@@ -1,15 +1,16 @@
-// apps/server/src/modules/admin/__tests__/jobsService.test.ts
+
+
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-  cancelJob,
-  getJobDetails,
-  getQueueStats,
-  JobNotFoundError,
-  listJobs,
-  QueueStoreNotAvailableError,
-  redactSensitiveFields,
-  retryJob,
+    cancelJob,
+    getJobDetails,
+    getQueueStats,
+    JobNotFoundError,
+    listJobs,
+    QueueStoreNotAvailableError,
+    redactSensitiveFields,
+    retryJob,
 } from '@admin/jobsService';
 
 import type { JobDetails, JobListResult, PostgresQueueStore, QueueStats } from '@infrastructure';

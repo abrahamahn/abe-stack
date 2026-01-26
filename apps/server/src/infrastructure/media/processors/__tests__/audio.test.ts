@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/media/processors/__tests__/audio.test.ts
 import ffmpeg from 'fluent-ffmpeg';
 import { parseFile } from 'music-metadata';
@@ -126,7 +127,7 @@ describe('AudioProcessor', () => {
         toFormat: vi.fn().mockReturnThis(),
         on: vi.fn().mockImplementation((event: string, callback: (err: Error) => void) => {
           if (event === 'error') {
-            setTimeout(() => callback(new Error('FFmpeg failed')), 0);
+            setTimeout(() => { callback(new Error('FFmpeg failed')); }, 0);
           }
           return mockFfmpeg.mock.results[0]?.value;
         }),
@@ -208,7 +209,7 @@ describe('AudioProcessor', () => {
         setDuration: vi.fn().mockReturnThis(),
         on: vi.fn().mockImplementation((event: string, callback: (err: Error) => void) => {
           if (event === 'error') {
-            setTimeout(() => callback(new Error('Segment extraction failed')), 0);
+            setTimeout(() => { callback(new Error('Segment extraction failed')); }, 0);
           }
           return mockFfmpeg.mock.results[0]?.value;
         }),

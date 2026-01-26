@@ -452,9 +452,9 @@ export function createAppleProvider(config: AppleProviderConfig): OAuthProviderC
 
       const data = (await response.json()) as AppleTokenResponse;
 
-      if (data.error) {
+      if (data.error != null && data.error !== '') {
         throw new OAuthError(
-          `Apple OAuth error: ${data.error_description || data.error}`,
+          `Apple OAuth error: ${data.error_description ?? data.error}`,
           'apple',
           'TOKEN_EXCHANGE_FAILED',
         );
@@ -480,7 +480,7 @@ export function createAppleProvider(config: AppleProviderConfig): OAuthProviderC
       // Verify signature and decode (validates issuer, audience, expiration)
       const payload = await verifyAndDecodeIdToken(accessToken, clientId);
 
-      if (!payload.email) {
+      if (payload.email == null || payload.email === '') {
         throw new OAuthError(
           'No email found in Apple id_token. User may have chosen to hide their email.',
           'apple',
@@ -516,7 +516,7 @@ export async function extractAppleUserFromIdToken(
   // Fully verify the id_token (signature, issuer, audience, expiration)
   const payload = await verifyAndDecodeIdToken(idToken, clientId);
 
-  if (!payload.email) {
+  if (payload.email == null || payload.email === '') {
     throw new OAuthError('No email found in Apple id_token', 'apple', 'NO_EMAIL');
   }
 

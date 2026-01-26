@@ -1,15 +1,16 @@
 // apps/server/src/modules/auth/security/__tests__/events.test.ts
+/* eslint-disable @typescript-eslint/unbound-method */
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-  getSecurityEventMetrics,
-  getUserSecurityEvents,
-  logAccountLockedEvent,
-  logAccountUnlockedEvent,
-  logSecurityEvent,
-  logTokenFamilyRevokedEvent,
-  logTokenReuseEvent,
-  sendTokenReuseAlert,
+    getSecurityEventMetrics,
+    getUserSecurityEvents,
+    logAccountLockedEvent,
+    logAccountUnlockedEvent,
+    logSecurityEvent,
+    logTokenFamilyRevokedEvent,
+    logTokenReuseEvent,
+    sendTokenReuseAlert,
 } from '../events';
 
 import type { DbClient } from '@database';

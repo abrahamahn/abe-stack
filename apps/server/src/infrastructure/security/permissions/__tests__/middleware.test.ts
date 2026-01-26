@@ -1,13 +1,14 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/security/permissions/__tests__/middleware.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { createDefaultPermissionConfig, createPermissionChecker } from '../checker';
 import {
-  createPermissionMiddleware,
-  createStandalonePermissionGuard,
-  getPermissionDenialReason,
-  getRecordIdFromParams,
-  hasPermission,
+    createPermissionMiddleware,
+    createStandalonePermissionGuard,
+    getPermissionDenialReason,
+    getRecordIdFromParams,
+    hasPermission,
 } from '../middleware';
 
 import type { PermissionChecker } from '../checker';
@@ -56,9 +57,9 @@ function createMockReply(): MockReply {
 }
 
 function createMockRecordLoader(records: Map<string, PermissionRecord>): RecordLoader {
-  return async (table: string, id: string) => {
+  return (table: string, id: string) => {
     const key = `${table}:${id}`;
-    return records.get(key) ?? null;
+    return Promise.resolve(records.get(key) ?? null);
   };
 }
 

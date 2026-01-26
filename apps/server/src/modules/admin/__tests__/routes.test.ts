@@ -1,8 +1,7 @@
-// apps/server/src/modules/admin/__tests__/routes.test.ts
-/**
+/*
  * Admin Routes Tests
  *
- * Routes are tested through integration tests.
+ * Integration tests for admin routes are handled in the integration test suite.
  * @see src/__tests__/integration/auth-routes.integration.test.ts
  */
 

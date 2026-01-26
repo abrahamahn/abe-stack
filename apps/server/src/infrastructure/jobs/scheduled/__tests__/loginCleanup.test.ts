@@ -2,13 +2,13 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-  cleanupOldLoginAttempts,
-  countOldLoginAttempts,
-  DEFAULT_RETENTION_DAYS,
-  getLoginAttemptStats,
-  getTotalLoginAttemptCount,
-  MAX_BATCH_SIZE,
-  MIN_RETENTION_DAYS,
+    cleanupOldLoginAttempts,
+    countOldLoginAttempts,
+    DEFAULT_RETENTION_DAYS,
+    getLoginAttemptStats,
+    getTotalLoginAttemptCount,
+    MAX_BATCH_SIZE,
+    MIN_RETENTION_DAYS,
 } from '../loginCleanup';
 
 import type { RawDb } from '@abe-stack/db';
@@ -117,6 +117,7 @@ describe('loginCleanup', () => {
       expect(result.deletedCount).toBe(500);
       expect(result.dryRun).toBe(true);
       // Execute should not be called in dry run
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(mockDb.execute).not.toHaveBeenCalled();
     });
 
@@ -129,6 +130,7 @@ describe('loginCleanup', () => {
       const result = await cleanupOldLoginAttempts(mockDb);
 
       // Should have called execute twice (first batch full, second batch partial)
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(mockDb.execute).toHaveBeenCalledTimes(2);
       expect(result.deletedCount).toBe(MAX_BATCH_SIZE + 5000);
     });
@@ -169,6 +171,7 @@ describe('loginCleanup', () => {
       const count = await countOldLoginAttempts(mockDb, 30);
 
       expect(count).toBe(100);
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(mockDb.queryOne).toHaveBeenCalled();
     });
 
@@ -178,6 +181,7 @@ describe('loginCleanup', () => {
       await countOldLoginAttempts(mockDb, 3);
 
       // The function should use MIN_RETENTION_DAYS
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(mockDb.queryOne).toHaveBeenCalled();
     });
 

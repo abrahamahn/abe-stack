@@ -6,13 +6,13 @@
  * To be implemented when FCM integration is needed.
  */
 
-import type { FcmConfig, PushNotificationProvider, SendOptions, SubscriptionWithId } from './types';
 import type {
-  BatchSendResult,
-  NotificationPayload,
-  PushSubscription,
-  SendResult,
+    BatchSendResult,
+    NotificationPayload,
+    PushSubscription,
+    SendResult,
 } from '@abe-stack/core';
+import type { FcmConfig, PushNotificationProvider, SendOptions, SubscriptionWithId } from './types';
 
 // ============================================================================
 // FCM Provider Stub
@@ -128,7 +128,7 @@ export function createFcmProvider(env: {
   const credentials = env.FCM_CREDENTIALS;
   const projectId = env.FCM_PROJECT_ID;
 
-  if (!credentials || !projectId) {
+  if (credentials == null || credentials === '' || projectId == null || projectId === '') {
     return undefined;
   }
 

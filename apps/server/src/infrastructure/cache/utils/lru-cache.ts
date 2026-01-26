@@ -37,7 +37,7 @@ export class LRUCache<TKey, TValue> {
     }
 
     // Check if expired
-    if (node.expiresAt && node.expiresAt <= Date.now()) {
+    if (node.expiresAt != null && node.expiresAt <= Date.now()) {
       this.delete(key);
       return undefined;
     }
@@ -116,7 +116,7 @@ export class LRUCache<TKey, TValue> {
     }
 
     // Check if expired
-    if (node.expiresAt && node.expiresAt <= Date.now()) {
+    if (node.expiresAt != null && node.expiresAt <= Date.now()) {
       this.delete(key);
       return false;
     }
@@ -199,7 +199,7 @@ export class LRUCache<TKey, TValue> {
   private cleanupExpired(): void {
     const now = Date.now();
     for (const [key, node] of this.cache.entries()) {
-      if (node.expiresAt && node.expiresAt <= now) {
+      if (node.expiresAt != null && node.expiresAt <= now) {
         this.delete(key);
       }
     }

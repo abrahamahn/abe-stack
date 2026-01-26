@@ -8,32 +8,32 @@
 
 import { TokenReuseError } from '@abe-stack/core';
 import {
-  logTokenFamilyRevokedEvent,
-  logTokenReuseEvent,
-  withTransaction,
-  type DbClient,
-  type UserRole,
-} from '@infrastructure';
-import {
-  and,
-  eq,
-  gt,
-  lt,
-  select,
-  insert,
-  update,
-  deleteFrom,
-  toCamelCase,
-  REFRESH_TOKEN_FAMILIES_TABLE,
-  REFRESH_TOKEN_FAMILY_COLUMNS,
-  REFRESH_TOKENS_TABLE,
-  REFRESH_TOKEN_COLUMNS,
-  USERS_TABLE,
-  USER_COLUMNS,
-  type RefreshTokenFamily,
-  type RefreshToken,
-  type User,
+    REFRESH_TOKENS_TABLE,
+    REFRESH_TOKEN_COLUMNS,
+    REFRESH_TOKEN_FAMILIES_TABLE,
+    REFRESH_TOKEN_FAMILY_COLUMNS,
+    USERS_TABLE,
+    USER_COLUMNS,
+    and,
+    deleteFrom,
+    eq,
+    gt,
+    insert,
+    lt,
+    select,
+    toCamelCase,
+    update,
+    type RefreshToken,
+    type RefreshTokenFamily,
+    type User,
 } from '@abe-stack/db';
+import {
+    logTokenFamilyRevokedEvent,
+    logTokenReuseEvent,
+    withTransaction,
+    type DbClient,
+    type UserRole,
+} from '@infrastructure';
 
 import { createRefreshToken, getRefreshTokenExpiry } from './jwt';
 
@@ -132,7 +132,7 @@ export async function rotateRefreshToken(
       select(USERS_TABLE).where(eq('id', storedToken.userId)).limit(1).toSql(),
     ),
     // Family lookup - only if familyId exists
-    storedToken.familyId
+    storedToken.familyId != null
       ? db.queryOne<Record<string, unknown>>(
           select(REFRESH_TOKEN_FAMILIES_TABLE)
             .where(eq('id', storedToken.familyId))
@@ -154,7 +154,7 @@ export async function rotateRefreshToken(
 
   // Check if family is revoked (token reuse attack)
   // At this point, family exists if storedToken.familyId exists (from parallel fetch)
-  if (family?.revokedAt && storedToken.familyId) {
+  if (family?.revokedAt != null && storedToken.familyId != null) {
     await logTokenReuseEvent(db, user.id, user.email, storedToken.familyId, ipAddress, userAgent);
     await revokeTokenFamily(db, storedToken.familyId, 'Token reuse detected');
     throw new TokenReuseError(user.id, user.email, storedToken.familyId, ipAddress, userAgent);
@@ -162,7 +162,7 @@ export async function rotateRefreshToken(
 
   // OPTIMIZATION 3: Only check for recent tokens if family exists
   // Uses index on (family_id) combined with created_at filter
-  const recentTokenRow = storedToken.familyId
+  const recentTokenRow = storedToken.familyId != null
     ? await db.queryOne<Record<string, unknown>>(
         select(REFRESH_TOKENS_TABLE)
           .where(and(eq('family_id', storedToken.familyId), gt('created_at', graceWindowStart)))
@@ -188,7 +188,7 @@ export async function rotateRefreshToken(
 
   // Detect token reuse attack outside grace period
   if (recentTokenInFamily && recentTokenInFamily.token !== oldToken && !isWithinGracePeriod) {
-    if (storedToken.familyId) {
+    if (storedToken.familyId != null) {
       await logTokenReuseEvent(db, user.id, user.email, storedToken.familyId, ipAddress, userAgent);
       await logTokenFamilyRevokedEvent(
         db,

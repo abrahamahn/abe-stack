@@ -1,4 +1,5 @@
 // apps/server/src/scripts/__tests__/seed.test.ts
+/* eslint-disable no-console, @typescript-eslint/unbound-method */
 /**
  * Tests for Database Seed Script
  *
@@ -8,7 +9,7 @@
  * - Error handling
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock dependencies before importing the module
 const mockLoadConfig = vi.fn();
@@ -68,7 +69,7 @@ describe('seed script', () => {
     exitCode = undefined;
     process.exit = vi.fn((code?: number) => {
       exitCode = code;
-      throw new Error(`process.exit(${code})`);
+      throw new Error(`process.exit(${code ?? 'undefined'})`);
     }) as never;
 
     // Setup default mocks

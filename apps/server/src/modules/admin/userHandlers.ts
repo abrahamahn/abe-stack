@@ -6,19 +6,18 @@
  * All handlers expect admin role (enforced by route middleware).
  */
 
-import { UserNotFoundError } from '@shared';
-import { ERROR_MESSAGES, type AppContext } from '@shared';
 import { getUserById, listUsers, lockUser, unlockUser, updateUser } from '@admin/userService';
+import { ERROR_MESSAGES, UserNotFoundError, type AppContext } from '@shared';
 
 import type {
-  AdminLockUserRequest,
-  AdminLockUserResponse,
-  AdminUpdateUserRequest,
-  AdminUpdateUserResponse,
-  AdminUser,
-  AdminUserListFilters,
-  AdminUserListResponse,
-  UnlockAccountRequest,
+    AdminLockUserRequest,
+    AdminLockUserResponse,
+    AdminUpdateUserRequest,
+    AdminUpdateUserResponse,
+    AdminUser,
+    AdminUserListFilters,
+    AdminUserListResponse,
+    UnlockAccountRequest,
 } from '@abe-stack/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
@@ -42,7 +41,7 @@ export async function handleListUsers(
 
   try {
     // Parse query parameters from the request
-    const query = (request.query || {}) as Record<string, unknown>;
+    const query = (request.query ?? {}) as Record<string, unknown>;
 
     const filters: AdminUserListFilters = {
       search: typeof query.search === 'string' ? query.search : undefined,
@@ -60,8 +59,8 @@ export async function handleListUsers(
         typeof query.sortOrder === 'string'
           ? (query.sortOrder as AdminUserListFilters['sortOrder'])
           : undefined,
-      page: query.page ? Number(query.page) : undefined,
-      limit: query.limit ? Number(query.limit) : undefined,
+      page: query.page != null ? Number(query.page) : undefined,
+      limit: query.limit != null ? Number(query.limit) : undefined,
     };
 
     const result = await listUsers(ctx.repos.users, filters);

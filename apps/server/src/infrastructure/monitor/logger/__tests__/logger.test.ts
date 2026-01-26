@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/monitor/logger/__tests__/logger.test.ts
 import { describe, expect, test, vi, type Mock } from 'vitest';
 

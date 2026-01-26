@@ -3,9 +3,9 @@ import { PAGINATION_ERROR_TYPES, PaginationError, SORT_ORDER } from '@abe-stack/
 
 import { createPaginationHelpers } from './helpers';
 
-import type { PaginationContext, PaginationMiddlewareOptions, PaginationRequest } from './types';
 import type { CursorPaginationOptions, PaginationOptions } from '@abe-stack/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { PaginationContext, PaginationMiddlewareOptions, PaginationRequest } from './types';
 /**
  * Default pagination middleware options
  */
@@ -39,7 +39,7 @@ export function createPaginationMiddleware(options: PaginationMiddlewareOptions 
     const paramNames = config.paramNames;
 
     const getParam = (key: string | undefined): string | string[] | undefined => {
-      if (!key) return undefined;
+      if (key == null || key === '') return undefined;
       const value = query[key];
       if (typeof value === 'string') return value;
       if (Array.isArray(value) && value.every((entry) => typeof entry === 'string')) {
@@ -67,7 +67,7 @@ export function createPaginationMiddleware(options: PaginationMiddlewareOptions 
       const sortOrder = parseSortOrder(getParam(paramNames.sortOrder), config);
 
       cursorOptions = {
-        cursor: cursor || undefined,
+        cursor: cursor ?? undefined,
         limit,
         sortBy,
         sortOrder,
@@ -104,7 +104,7 @@ export function createPaginationMiddleware(options: PaginationMiddlewareOptions 
  * Parse page number from query parameter
  */
 function parsePage(pageParam: string | string[] | undefined): number {
-  if (!pageParam) return 1;
+  if (pageParam == null) return 1;
 
   const page = Array.isArray(pageParam) ? (pageParam[0] ?? '') : pageParam;
   const parsed = parseInt(page, 10);
@@ -126,7 +126,7 @@ function parseLimit(
   limitParam: string | string[] | undefined,
   config: Required<PaginationMiddlewareOptions>,
 ): number {
-  if (!limitParam) return config.defaultLimit;
+  if (limitParam == null) return config.defaultLimit;
 
   const limit = Array.isArray(limitParam) ? (limitParam[0] ?? '') : limitParam;
   const parsed = parseInt(limit, 10);
@@ -178,7 +178,7 @@ function parseSortOrder(
   sortOrderParam: string | string[] | undefined,
   config: Required<PaginationMiddlewareOptions>,
 ): typeof SORT_ORDER.ASC | typeof SORT_ORDER.DESC {
-  if (!sortOrderParam) return config.defaultSortOrder;
+  if (sortOrderParam == null) return config.defaultSortOrder;
 
   const sortOrder = Array.isArray(sortOrderParam) ? (sortOrderParam[0] ?? '') : sortOrderParam;
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/cache/cache-factory.test.ts
 import { afterEach, describe, expect, test, vi } from 'vitest';
 

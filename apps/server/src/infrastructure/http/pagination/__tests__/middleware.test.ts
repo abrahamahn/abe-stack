@@ -1,11 +1,12 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/http/pagination/__tests__/middleware.test.ts
 import { PAGINATION_ERROR_TYPES, PaginationError } from '@abe-stack/core';
 import { describe, expect, it } from 'vitest';
 
 import { createPaginationMiddleware } from '../middleware';
 
-import type { PaginationRequest } from '../types';
 import type { FastifyReply } from 'fastify';
+import type { PaginationRequest } from '../types';
 
 describe('Pagination Middleware', () => {
   const createMockRequest = (query: Record<string, string | string[]> = {}) => ({
@@ -14,7 +15,7 @@ describe('Pagination Middleware', () => {
 
   const createMockReply = () => ({});
 
-  it('should parse offset pagination correctly', async () => {
+  it('should parse offset pagination correctly', () => {
     const middleware = createPaginationMiddleware();
 
     const req = createMockRequest({
@@ -37,7 +38,7 @@ describe('Pagination Middleware', () => {
     });
   });
 
-  it('should parse cursor pagination correctly', async () => {
+  it('should parse cursor pagination correctly', () => {
     const middleware = createPaginationMiddleware();
 
     const req = createMockRequest({
@@ -60,7 +61,7 @@ describe('Pagination Middleware', () => {
     });
   });
 
-  it('should use defaults when parameters are missing', async () => {
+  it('should use defaults when parameters are missing', () => {
     const middleware = createPaginationMiddleware({
       defaultLimit: 20,
       defaultSortBy: 'id',
@@ -82,7 +83,7 @@ describe('Pagination Middleware', () => {
     });
   });
 
-  it('should prefer cursor pagination when cursor is present', async () => {
+  it('should prefer cursor pagination when cursor is present', () => {
     const middleware = createPaginationMiddleware();
 
     const req = createMockRequest({
@@ -97,7 +98,7 @@ describe('Pagination Middleware', () => {
     expect(typedReq.pagination.type).toBe('cursor');
   });
 
-  it('should handle array query parameters', async () => {
+  it('should handle array query parameters', () => {
     const middleware = createPaginationMiddleware();
 
     const req = createMockRequest({
@@ -119,15 +120,15 @@ describe('Pagination Middleware', () => {
     });
   });
 
-  it('should throw error for invalid page number', async () => {
+  it('should throw error for invalid page number', () => {
     const middleware = createPaginationMiddleware();
 
     const req = createMockRequest({ page: '0' });
     const reply = createMockReply();
 
-    expect(() =>
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply),
-    ).toThrow(PaginationError);
+    expect(() => {
+      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
+    }).toThrow(PaginationError);
 
     try {
       middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
@@ -140,15 +141,15 @@ describe('Pagination Middleware', () => {
     }
   });
 
-  it('should throw error for invalid limit', async () => {
+  it('should throw error for invalid limit', () => {
     const middleware = createPaginationMiddleware();
 
     const req = createMockRequest({ limit: '0' });
     const reply = createMockReply();
 
-    expect(() =>
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply),
-    ).toThrow(PaginationError);
+    expect(() => {
+      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
+    }).toThrow(PaginationError);
 
     try {
       middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
@@ -161,15 +162,15 @@ describe('Pagination Middleware', () => {
     }
   });
 
-  it('should throw error for limit exceeding maximum', async () => {
+  it('should throw error for limit exceeding maximum', () => {
     const middleware = createPaginationMiddleware({ maxLimit: 100 });
 
     const req = createMockRequest({ limit: '200' });
     const reply = createMockReply();
 
-    expect(() =>
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply),
-    ).toThrow(PaginationError);
+    expect(() => {
+      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
+    }).toThrow(PaginationError);
 
     try {
       middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
@@ -182,15 +183,15 @@ describe('Pagination Middleware', () => {
     }
   });
 
-  it('should throw error for invalid sort order', async () => {
+  it('should throw error for invalid sort order', () => {
     const middleware = createPaginationMiddleware();
 
     const req = createMockRequest({ sortOrder: 'invalid' });
     const reply = createMockReply();
 
-    expect(() =>
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply),
-    ).toThrow(PaginationError);
+    expect(() => {
+      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
+    }).toThrow(PaginationError);
 
     try {
       middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
@@ -203,15 +204,15 @@ describe('Pagination Middleware', () => {
     }
   });
 
-  it('should throw error for empty sort field', async () => {
+  it('should throw error for empty sort field', () => {
     const middleware = createPaginationMiddleware();
 
     const req = createMockRequest({ sortBy: '' });
     const reply = createMockReply();
 
-    expect(() =>
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply),
-    ).toThrow(PaginationError);
+    expect(() => {
+      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
+    }).toThrow(PaginationError);
 
     try {
       middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
@@ -224,7 +225,7 @@ describe('Pagination Middleware', () => {
     }
   });
 
-  it('should handle custom parameter names', async () => {
+  it('should handle custom parameter names', () => {
     const middleware = createPaginationMiddleware({
       paramNames: {
         page: 'p',
@@ -253,7 +254,7 @@ describe('Pagination Middleware', () => {
     });
   });
 
-  it('should disable cursor pagination when configured', async () => {
+  it('should disable cursor pagination when configured', () => {
     const middleware = createPaginationMiddleware({
       enableCursorPagination: false,
     });

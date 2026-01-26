@@ -6,15 +6,15 @@
  * Uses a doubly-linked list for O(1) LRU operations.
  */
 
-import type { CacheLogger, CreateCacheOptions, EvictionReason, LRUNode } from './types';
 import type {
-  CacheDeleteOptions,
-  CacheGetOptions,
-  CacheProvider,
-  CacheSetOptions,
-  CacheStats,
-  MemoryCacheConfig,
+    CacheDeleteOptions,
+    CacheGetOptions,
+    CacheProvider,
+    CacheSetOptions,
+    CacheStats,
+    MemoryCacheConfig,
 } from '@abe-stack/core';
+import type { CacheLogger, CreateCacheOptions, EvictionReason, LRUNode } from './types';
 
 // ============================================================================
 // Memory Cache Provider Implementation
@@ -92,7 +92,7 @@ export class MemoryCacheProvider implements CacheProvider {
     }
 
     // Check if expired
-    if (node.expiresAt && node.expiresAt <= Date.now()) {
+    if (node.expiresAt != null && node.expiresAt <= Date.now()) {
       this.removeNode(node);
       this.cache.delete(fullKey);
       this.updateTagIndex(fullKey, node.tags, []);
@@ -183,7 +183,7 @@ export class MemoryCacheProvider implements CacheProvider {
     }
 
     // Check if expired
-    if (node.expiresAt && node.expiresAt <= Date.now()) {
+    if (node.expiresAt != null && node.expiresAt <= Date.now()) {
       this.removeNode(node);
       this.cache.delete(fullKey);
       this.updateTagIndex(fullKey, node.tags, []);
@@ -507,7 +507,7 @@ export class MemoryCacheProvider implements CacheProvider {
     let cleaned = 0;
 
     for (const [fullKey, node] of this.cache) {
-      if (node.expiresAt && node.expiresAt <= now) {
+      if (node.expiresAt != null && node.expiresAt <= now) {
         this.removeNode(node);
         this.cache.delete(fullKey);
         this.updateTagIndex(fullKey, node.tags, []);

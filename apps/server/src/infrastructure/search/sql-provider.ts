@@ -7,36 +7,36 @@
  */
 
 import {
-  encodeCursor,
-  decodeCursor,
-  FILTER_OPERATORS,
-  LOGICAL_OPERATORS,
-  isFilterCondition,
-  isCompoundFilter,
-  InvalidFilterError,
-  InvalidCursorError,
-  SearchProviderError,
-  QueryTooComplexError,
-  SearchError,
-  type CompoundFilter,
-  type CursorSearchResult,
-  type FacetedSearchQuery,
-  type FacetedSearchResult,
-  type FilterCondition,
-  type FilterOperator,
-  type SearchCapabilities,
-  type SearchQuery,
-  type SearchResult,
-  type SortConfig,
+    decodeCursor,
+    encodeCursor,
+    FILTER_OPERATORS,
+    InvalidCursorError,
+    InvalidFilterError,
+    isCompoundFilter,
+    isFilterCondition,
+    LOGICAL_OPERATORS,
+    QueryTooComplexError,
+    SearchError,
+    SearchProviderError,
+    type CompoundFilter,
+    type CursorSearchResult,
+    type FacetedSearchQuery,
+    type FacetedSearchResult,
+    type FilterCondition,
+    type FilterOperator,
+    type SearchCapabilities,
+    type SearchQuery,
+    type SearchResult,
+    type SortConfig,
 } from '@abe-stack/core';
 
-import type {
-  SearchContext,
-  ServerSearchProvider,
-  SqlSearchProviderConfig,
-  SqlTableConfig,
-} from './types';
 import type { RawDb, Repositories } from '@database';
+import type {
+    SearchContext,
+    ServerSearchProvider,
+    SqlSearchProviderConfig,
+    SqlTableConfig,
+} from './types';
 
 // ============================================================================
 // Types
@@ -162,7 +162,7 @@ export class SqlSearchProvider<
 
       // Get total count if requested
       let total: number | undefined;
-      if (query.includeCount) {
+      if (query.includeCount === true) {
         // Reset param index for count query
         this.paramIndex = 0;
         const countWhereFragment = this.buildWhereClause(query);
@@ -206,7 +206,7 @@ export class SqlSearchProvider<
       let whereFragment = this.buildWhereClause(query);
 
       // Apply cursor if provided
-      if (query.cursor) {
+      if (query.cursor != null && query.cursor !== '') {
         const cursorFragment = this.buildCursorCondition(query.cursor, query.sort ?? []);
         if (cursorFragment) {
           if (whereFragment) {
@@ -238,7 +238,7 @@ export class SqlSearchProvider<
 
       // Get total count if requested
       let total: number | undefined;
-      if (query.includeCount) {
+      if (query.includeCount === true) {
         // Reset param index for count query
         this.paramIndex = 0;
         const baseWhereFragment = this.buildWhereClause(query);
@@ -282,7 +282,7 @@ export class SqlSearchProvider<
           ? await Promise.all(
               query.facets.map(async (facetConfig) => {
                 const columnName = this.resolveColumnName(facetConfig.field);
-                if (!columnName) {
+                if (columnName == null || columnName === '') {
                   return {
                     field: facetConfig.field,
                     buckets: [],
@@ -309,7 +309,7 @@ export class SqlSearchProvider<
                   buckets: bucketResults.map((row) => ({
                     value: row.value,
                     count:
-                      typeof row.count === 'number' ? row.count : parseInt(String(row.count), 10),
+                      typeof row.count === 'number' ? row.count : parseInt(typeof row.count === 'string' ? row.count : String(row.count), 10),
                   })),
                 };
               }),
@@ -416,7 +416,7 @@ export class SqlSearchProvider<
   private translateCondition(condition: FilterCondition<TRecord>): SqlFragment | undefined {
     const fieldName = String(condition.field);
     const columnName = this.resolveColumnName(fieldName);
-    if (!columnName) {
+    if (columnName == null || columnName === '') {
       throw new InvalidFilterError(`Unknown field: ${fieldName}`, fieldName);
     }
 
@@ -462,7 +462,7 @@ export class SqlSearchProvider<
 
       case FILTER_OPERATORS.LIKE:
         return {
-          text: condition.caseSensitive
+          text: condition.caseSensitive === true
             ? `${columnName} LIKE $${this.nextParam()}`
             : `${columnName} ILIKE $${this.nextParam()}`,
           values: [value],
@@ -553,19 +553,19 @@ export class SqlSearchProvider<
   // ============================================================================
 
   private buildOrderByClause(sort?: SortConfig<TRecord>[]): string {
-    if (!sort || sort.length === 0) {
+    if (sort == null || sort.length === 0) {
       // Default sort by primary key
       const pkKey = Array.isArray(this.tableConfig.primaryKey)
         ? this.tableConfig.primaryKey[0]
         : this.tableConfig.primaryKey;
-      const pkColumn = pkKey ? this.resolveColumnName(pkKey) : undefined;
-      return pkColumn ? `${pkColumn} ASC` : '';
+      const pkColumn = pkKey != null && pkKey !== '' ? this.resolveColumnName(pkKey) : undefined;
+      return pkColumn != null && pkColumn !== '' ? `${pkColumn} ASC` : '';
     }
 
     return sort
       .map((s) => {
         const columnName = this.resolveColumnName(String(s.field));
-        if (!columnName) return null;
+        if (columnName == null || columnName === '') return null;
         return `${columnName} ${s.order === 'desc' ? 'DESC' : 'ASC'}`;
       })
       .filter((s): s is string => s !== null)
@@ -594,7 +594,7 @@ export class SqlSearchProvider<
       const cursorValue = decoded.value;
 
       const columnName = this.resolveColumnName(sortField);
-      if (!columnName) {
+      if (columnName == null || columnName === '') {
         throw new InvalidCursorError(`Unknown sort field in cursor: ${sortField}`);
       }
 

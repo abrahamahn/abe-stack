@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/search/__tests__/sql-provider.test.ts
 import { FILTER_OPERATORS, QueryTooComplexError } from '@abe-stack/core';
 import { beforeEach, describe, expect, test, vi } from 'vitest';

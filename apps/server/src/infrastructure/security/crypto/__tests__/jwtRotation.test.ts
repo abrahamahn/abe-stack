@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/security/crypto/__tests__/jwtRotation.test.ts
 import { describe, expect, test } from 'vitest';
 

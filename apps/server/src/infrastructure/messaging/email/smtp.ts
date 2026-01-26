@@ -278,7 +278,7 @@ export class SmtpClient {
     content += `Subject: ${this.encodeHeader(message.subject)}\r\n`;
     content += 'MIME-Version: 1.0\r\n';
 
-    if (message.html && message.text) {
+    if (message.html != null && message.html !== '' && message.text != null && message.text !== '') {
       // Multipart alternative
       content += `Content-Type: multipart/alternative; boundary="${boundary}"\r\n`;
       content += '\r\n';
@@ -295,7 +295,7 @@ export class SmtpClient {
       content += this.encodeQuotedPrintable(message.html);
       content += '\r\n';
       content += `--${boundary}--`;
-    } else if (message.html) {
+    } else if (message.html != null && message.html !== '') {
       content += 'Content-Type: text/html; charset=utf-8\r\n';
       content += 'Content-Transfer-Encoding: quoted-printable\r\n';
       content += '\r\n';

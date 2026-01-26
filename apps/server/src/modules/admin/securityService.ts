@@ -7,29 +7,29 @@
  */
 
 import {
-  and,
-  eq,
-  gte,
-  ilike,
-  lte,
-  select,
-  selectCount,
-  SECURITY_EVENTS_TABLE,
-  SECURITY_EVENT_COLUMNS,
-  toCamelCase,
-  toCamelCaseArray,
-  type SecurityEvent as DbSecurityEvent,
+    SECURITY_EVENTS_TABLE,
+    SECURITY_EVENT_COLUMNS,
+    and,
+    eq,
+    gte,
+    ilike,
+    lte,
+    select,
+    selectCount,
+    toCamelCase,
+    toCamelCaseArray,
+    type SecurityEvent as DbSecurityEvent,
 } from '@abe-stack/db';
 
-import type { DbClient } from '@database';
 import type {
-  SecurityEvent,
-  SecurityEventsFilter,
-  SecurityEventsListResponse,
-  SecurityMetrics,
-  PaginationOptions,
+    PaginationOptions,
+    SecurityEvent,
+    SecurityEventsFilter,
+    SecurityEventsListResponse,
+    SecurityMetrics,
 } from '@abe-stack/core';
 import type { SqlFragment } from '@abe-stack/db';
+import type { DbClient } from '@database';
 
 // ============================================================================
 // Types
@@ -58,7 +58,7 @@ function toApiEvent(event: DbSecurityEvent): SecurityEvent {
     severity: event.severity,
     ipAddress: event.ipAddress,
     userAgent: event.userAgent,
-    metadata: event.metadata ? (JSON.parse(event.metadata) as Record<string, unknown>) : null,
+    metadata: event.metadata != null ? (JSON.parse(event.metadata) as Record<string, unknown>) : null,
     createdAt: event.createdAt.toISOString(),
   };
 }
@@ -69,35 +69,35 @@ function toApiEvent(event: DbSecurityEvent): SecurityEvent {
 function buildFilterConditions(filter: SecurityEventsFilter): SqlFragment[] {
   const conditions: SqlFragment[] = [];
 
-  if (filter.eventType) {
+  if (filter.eventType != null && filter.eventType !== '') {
     conditions.push(eq('event_type', filter.eventType));
   }
 
-  if (filter.severity) {
+  if (filter.severity != null && filter.severity !== '') {
     conditions.push(eq('severity', filter.severity));
   }
 
-  if (filter.userId) {
+  if (filter.userId != null && filter.userId !== '') {
     conditions.push(eq('user_id', filter.userId));
   }
 
-  if (filter.email) {
+  if (filter.email != null && filter.email !== '') {
     // Use case-insensitive partial match for email
     conditions.push(ilike('email', `%${filter.email}%`));
   }
 
-  if (filter.ipAddress) {
+  if (filter.ipAddress != null && filter.ipAddress !== '') {
     conditions.push(eq('ip_address', filter.ipAddress));
   }
 
-  if (filter.startDate) {
+  if (filter.startDate != null) {
     const startDate = new Date(filter.startDate);
     if (!isNaN(startDate.getTime())) {
       conditions.push(gte('created_at', startDate));
     }
   }
 
-  if (filter.endDate) {
+  if (filter.endDate != null) {
     const endDate = new Date(filter.endDate);
     if (!isNaN(endDate.getTime())) {
       conditions.push(lte('created_at', endDate));
@@ -250,7 +250,7 @@ export async function getSecurityMetrics(
   // Count by event type
   const eventsByType: Record<string, number> = {};
   for (const event of events) {
-    eventsByType[event.eventType] = (eventsByType[event.eventType] || 0) + 1;
+    eventsByType[event.eventType] = (eventsByType[event.eventType] ?? 0) + 1;
   }
 
   return {
@@ -322,15 +322,15 @@ export async function exportSecurityEvents(
   for (const event of apiEvents) {
     const row = [
       event.id,
-      event.userId || '',
-      event.email || '',
+      event.userId ?? '',
+      event.email ?? '',
       event.eventType,
       event.severity,
-      event.ipAddress || '',
+      event.ipAddress ?? '',
       // Escape user agent as it may contain commas
-      `"${(event.userAgent || '').replace(/"/g, '""')}"`,
+      `"${(event.userAgent ?? '').replace(/"/g, '""')}"`,
       // Serialize metadata as JSON, escaped for CSV
-      `"${JSON.stringify(event.metadata || {}).replace(/"/g, '""')}"`,
+      `"${JSON.stringify(event.metadata ?? {}).replace(/"/g, '""')}"`,
       event.createdAt,
     ];
     csvRows.push(row.join(','));

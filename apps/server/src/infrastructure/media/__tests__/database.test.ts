@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/media/__tests__/database.test.ts
 import { describe, expect, it, beforeEach, afterEach } from 'vitest';
 

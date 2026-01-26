@@ -38,14 +38,14 @@ export class LocalStorageProvider implements StorageProvider {
     try {
       await unlink(filePath);
     } catch (error: unknown) {
-      if (error && typeof error === 'object' && 'code' in error && error.code !== 'ENOENT') {
+      if (error != null && typeof error === 'object' && 'code' in error && error.code !== 'ENOENT') {
         throw error;
       }
     }
   }
 
   getSignedUrl(key: string): Promise<string> {
-    if (this.config.publicBaseUrl) {
+    if (this.config.publicBaseUrl != null && this.config.publicBaseUrl !== '') {
       return Promise.resolve(
         `${this.config.publicBaseUrl.replace(/\/+$/, '')}/${key.replace(/^\//, '')}`,
       );

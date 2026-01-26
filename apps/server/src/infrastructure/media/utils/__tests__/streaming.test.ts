@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/media/utils/__tests__/streaming.test.ts
-import { createReadStream, createWriteStream } from 'fs';
-import { promises as fs } from 'fs';
+import { createReadStream, createWriteStream, promises as fs } from 'fs';
 
-import { describe, expect, it, vi, beforeEach, afterEach, type Mock } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
 import { StreamingMediaProcessor, type StreamingOptions } from '../streaming';
 
@@ -55,7 +55,7 @@ vi.mock('fluent-ffmpeg', () => {
       callback: (err?: Error) => void,
     ) {
       if (event === 'end') {
-        setTimeout(() => callback(), 0);
+        setTimeout(() => { callback(); }, 0);
       }
       return this;
     }),
@@ -243,7 +243,7 @@ describe('StreamingMediaProcessor', () => {
           callback: (err?: Error) => void,
         ) {
           if (event === 'error') {
-            setTimeout(() => callback(new Error('FFmpeg failed')), 0);
+            setTimeout(() => { callback(new Error('FFmpeg failed')); }, 0);
           }
           return this;
         }),
@@ -274,7 +274,7 @@ describe('StreamingMediaProcessor', () => {
           callback: (err?: Error) => void,
         ) {
           if (event === 'error') {
-            setTimeout(() => callback(), 0);
+            setTimeout(() => { callback(); }, 0);
           }
           return this;
         }),

@@ -9,26 +9,26 @@ import { OAUTH_PROVIDERS, type OAuthProvider } from '@infrastructure';
 import { mapErrorToResponse, OAuthError, TooManyRequestsError, type AppContext } from '@shared';
 
 import {
-  authRateLimiters,
-  logOAuthLinkSuccessEvent,
-  logOAuthLoginFailureEvent,
-  logOAuthLoginSuccessEvent,
-  logOAuthUnlinkFailureEvent,
-  logOAuthUnlinkSuccessEvent,
-  type AuthEndpoint,
+    authRateLimiters,
+    logOAuthLinkSuccessEvent,
+    logOAuthLoginFailureEvent,
+    logOAuthLoginSuccessEvent,
+    logOAuthUnlinkFailureEvent,
+    logOAuthUnlinkSuccessEvent,
+    type AuthEndpoint,
 } from '../security';
 import { setRefreshTokenCookie } from '../utils';
 
 import {
-  getAuthorizationUrl,
-  getConnectedProviders,
-  handleOAuthCallback,
-  unlinkOAuthAccount,
+    getAuthorizationUrl,
+    getConnectedProviders,
+    handleOAuthCallback,
+    unlinkOAuthAccount,
 } from './service';
 
-import type { OAuthConnectionInfo } from './types';
 import type { AuthResponse } from '@abe-stack/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { OAuthConnectionInfo } from './types';
 
 // ============================================================================
 // Types
@@ -194,15 +194,15 @@ export async function handleOAuthCallbackRequest(
     const provider = validateProvider(params.provider);
 
     // Check for OAuth error from provider
-    if (query.error) {
+    if (query.error != null && query.error !== '') {
       throw new OAuthError(
-        query.error_description || query.error,
+        query.error_description ?? query.error,
         provider,
         `PROVIDER_ERROR_${query.error.toUpperCase()}`,
       );
     }
 
-    if (!query.code || !query.state) {
+    if ((query.code == null || query.code === '') || (query.state == null || query.state === '')) {
       throw new OAuthError('Missing code or state parameter', provider, 'MISSING_PARAMS');
     }
 

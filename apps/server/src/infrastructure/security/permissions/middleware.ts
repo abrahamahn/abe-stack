@@ -8,9 +8,9 @@
 
 import { isDenied, type PermissionRecord, type PermissionType, type RecordPointer } from './types';
 
-import type { PermissionChecker } from './checker';
 import type { UserRole } from '@abe-stack/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { PermissionChecker } from './checker';
 
 // ============================================================================
 // Type Definitions
@@ -93,17 +93,17 @@ function defaultGetRecordPointer(request: FastifyRequest): RecordPointer | null 
 
   // Try params first
   const table = params?.table;
-  const id = params?.id || params?.recordId;
+  const id = params?.id ?? params?.recordId;
 
-  if (table && id) {
+  if (table != null && table !== '' && id != null && id !== '') {
     return { table, id };
   }
 
   // Try body
   const bodyTable = body?.table as string | undefined;
-  const bodyId = (body?.id || body?.recordId) as string | undefined;
+  const bodyId = (body?.id ?? body?.recordId) as string | undefined;
 
-  if (bodyTable && bodyId) {
+  if (bodyTable != null && bodyTable !== '' && bodyId != null && bodyId !== '') {
     return { table: bodyTable, id: bodyId };
   }
 
@@ -239,7 +239,7 @@ export function createPermissionMiddleware(options: PermissionMiddlewareOptions)
   function createPermissionGuard(guardOptions: PermissionGuardOptions): PreHandlerHook {
     return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
       // Check if user is authenticated
-      if (!request.user?.userId) {
+      if (request.user === undefined || request.user.userId === '') {
         void reply.status(401).send({ message: 'Unauthorized' });
         return;
       }
@@ -252,14 +252,14 @@ export function createPermissionMiddleware(options: PermissionMiddlewareOptions)
 
       if (guardOptions.getRecordId) {
         const recordId = guardOptions.getRecordId(request);
-        if (recordId && guardOptions.table) {
+        if (recordId != null && recordId !== '' && guardOptions.table !== '') {
           pointer = { table: guardOptions.table, id: recordId };
         }
       } else if (guardOptions.table) {
         // Try to get ID from params
         const params = request.params as Record<string, string> | undefined;
-        const id = params?.id || params?.recordId;
-        if (id) {
+        const id = params?.id ?? params?.recordId;
+        if (id != null && id !== '') {
           pointer = { table: guardOptions.table, id };
         }
       } else {
@@ -345,11 +345,13 @@ export function createPermissionMiddleware(options: PermissionMiddlewareOptions)
     table: string,
     records: T[],
   ): Promise<T[]> {
-    if (!request.user?.userId) {
+    // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
+    if (!request.user || !request.user.userId) {
       return [];
     }
+    const user = request.user;
 
-    return checker.filterReadableRecords(request.user.userId, request.user.role, table, records);
+    return checker.filterReadableRecords(user.userId, user.role, table, records);
   }
 
   return {
@@ -391,13 +393,15 @@ export function createStandalonePermissionGuard(
   const { permission, table, getRecordId, operation, onDenied = defaultOnDenied } = options;
 
   return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
-    if (!request.user?.userId) {
+    // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
+    if (!request.user || !request.user.userId) {
       void reply.status(401).send({ message: 'Unauthorized' });
       return;
     }
+    const user = request.user;
 
     const recordId = getRecordId(request);
-    if (!recordId && operation !== 'create') {
+    if ((recordId == null || recordId === '') && operation !== 'create') {
       void reply.status(400).send({
         message: 'Bad Request',
         error: 'Record ID required',
@@ -409,8 +413,8 @@ export function createStandalonePermissionGuard(
     switch (permission) {
       case 'read':
         result = await checker.checkReadPermission(
-          request.user.userId,
-          request.user.role,
+          user.userId,
+          user.role,
           table,
           recordId ?? '',
         );
@@ -418,8 +422,8 @@ export function createStandalonePermissionGuard(
 
       case 'write':
         result = await checker.checkWritePermission(
-          request.user.userId,
-          request.user.role,
+          user.userId,
+          user.role,
           table,
           recordId ?? '',
           operation,
@@ -428,8 +432,8 @@ export function createStandalonePermissionGuard(
 
       case 'delete':
         result = await checker.checkWritePermission(
-          request.user.userId,
-          request.user.role,
+          user.userId,
+          user.role,
           table,
           recordId ?? '',
           'delete',
@@ -438,8 +442,8 @@ export function createStandalonePermissionGuard(
 
       case 'admin':
         result = await checker.checkAdminPermission(
-          request.user.userId,
-          request.user.role,
+          user.userId,
+          user.role,
           table,
           recordId ?? '',
         );
@@ -486,8 +490,8 @@ export function getRecordIdFromParams(
   if (!params) return null;
 
   for (const name of paramNames) {
-    if (params[name]) {
-      return params[name];
+    if (params[name] != null && params[name] !== '') {
+      return params[name] ?? null;
     }
   }
   return null;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/messaging/email/__tests__/templates.test.ts
 import { describe, expect, test } from 'vitest';
 

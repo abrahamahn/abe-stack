@@ -36,7 +36,7 @@ async function getRecordVersion(
   };
 
   const actualTable = tableMap[table];
-  if (!actualTable) return undefined;
+  if (actualTable == null || actualTable === '') return undefined;
 
   const row = await db.queryOne<{ version: number }>(
     select(actualTable).columns('version').where(eq('id', id)).limit(1).toSql(),
@@ -156,10 +156,10 @@ export function registerWebSocket(server: FastifyInstance, ctx: AppContext): voi
     csrfToken = url.searchParams.get('csrf') ?? undefined;
 
     // Check Sec-WebSocket-Protocol header (format: csrf.<token>)
-    if (!csrfToken && request.headers['sec-websocket-protocol']) {
+    if ((csrfToken == null || csrfToken === '') && request.headers['sec-websocket-protocol'] != null) {
       const protocols = request.headers['sec-websocket-protocol'].split(',').map((p) => p.trim());
       const csrfProtocol = protocols.find((p) => p.startsWith('csrf.'));
-      if (csrfProtocol) {
+      if (csrfProtocol != null && csrfProtocol !== '') {
         csrfToken = csrfProtocol.slice(5); // Remove 'csrf.' prefix
       }
     }
@@ -201,14 +201,14 @@ function handleConnection(socket: WebSocket, req: IncomingMessage, ctx: AppConte
 
   // Check protocol header (subprotocol) - primary method for browsers
   // Client connects with: new WebSocket(url, ['Bearer', tokenValue])
-  if (req.headers['sec-websocket-protocol']) {
+  if (req.headers['sec-websocket-protocol'] != null) {
     const protocols = req.headers['sec-websocket-protocol'].split(',').map((p) => p.trim());
     // Find token (skip known protocol names)
     token = protocols.find((p) => !['graphql', 'json', 'Bearer'].includes(p));
   }
 
   // Check cookies (accessToken cookie for seamless auth)
-  if (!token) {
+  if (token == null || token === '') {
     const rawCookies: unknown = parseCookies(req.headers.cookie);
     const cookies = isStringRecord(rawCookies) ? rawCookies : {};
     const accessToken = cookies.accessToken;
@@ -217,7 +217,7 @@ function handleConnection(socket: WebSocket, req: IncomingMessage, ctx: AppConte
     }
   }
 
-  if (!token) {
+  if (token == null || token === '') {
     socket.close(1008, 'Authentication required');
     return;
   }
@@ -266,7 +266,7 @@ function handleConnection(socket: WebSocket, req: IncomingMessage, ctx: AppConte
 }
 
 function isStringRecord(value: unknown): value is Record<string, string> {
-  if (!value || typeof value !== 'object') return false;
+  if (value == null || typeof value !== 'object') return false;
   return Object.values(value).every((entry) => typeof entry === 'string');
 }
 
@@ -301,7 +301,7 @@ function isValidSubscriptionKey(key: string): { valid: boolean; table?: string; 
   }
 
   const [, table, id] = parts;
-  if (!table || !id) {
+  if (table == null || table === '' || id == null || id === '') {
     return { valid: false };
   }
 
@@ -326,7 +326,7 @@ function isValidSubscriptionKey(key: string): { valid: boolean; table?: string; 
 async function sendInitialData(ctx: AppContext, socket: WebSocket, key: string): Promise<void> {
   // Validate subscription key format and table whitelist
   const validation = isValidSubscriptionKey(key);
-  if (!validation.valid || !validation.table || !validation.id) {
+  if (!validation.valid || (validation.table ?? '') === '' || (validation.id ?? '') === '') {
     ctx.log.warn({ key }, 'Invalid subscription key format or non-whitelisted table');
     return;
   }
@@ -334,7 +334,7 @@ async function sendInitialData(ctx: AppContext, socket: WebSocket, key: string):
   const { table, id } = validation;
 
   try {
-    const version = await getRecordVersion(ctx.db, table, id);
+    const version = await getRecordVersion(ctx.db, table ?? '', id ?? '');
 
     if (version !== undefined) {
       socket.send(JSON.stringify({ type: 'update', key, version }));

@@ -199,10 +199,10 @@ export class StripeProvider implements BillingService {
     const subscription = await this.stripe.subscriptions.retrieve(subscriptionId);
 
     const currentItem = subscription.items.data[0];
-    const priceId = currentItem?.price.id || '';
+    const priceId = currentItem?.price.id ?? '';
     // In newer Stripe API, period info is on the subscription item
-    const periodStart = currentItem?.current_period_start || subscription.start_date;
-    const periodEnd = currentItem?.current_period_end || subscription.start_date;
+    const periodStart = currentItem?.current_period_start ?? subscription.start_date;
+    const periodEnd = currentItem?.current_period_end ?? subscription.start_date;
 
     return {
       id: subscription.id,
@@ -215,8 +215,8 @@ export class StripeProvider implements BillingService {
       currentPeriodStart: new Date(periodStart * 1000),
       currentPeriodEnd: new Date(periodEnd * 1000),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000) : null,
-      trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
+      canceledAt: subscription.canceled_at != null ? new Date(subscription.canceled_at * 1000) : null,
+      trialEnd: subscription.trial_end != null ? new Date(subscription.trial_end * 1000) : null,
       metadata: subscription.metadata as Record<string, string>,
     };
   }
@@ -231,7 +231,7 @@ export class StripeProvider implements BillingService {
       payment_method_types: ['card'],
     });
 
-    if (!setupIntent.client_secret) {
+    if (setupIntent.client_secret == null || setupIntent.client_secret === '') {
       throw new Error('Failed to create setup intent');
     }
 
@@ -250,7 +250,7 @@ export class StripeProvider implements BillingService {
     const customer = await this.stripe.customers.retrieve(customerId);
     const defaultPaymentMethod =
       customer.deleted !== true ? customer.invoice_settings.default_payment_method : null;
-    const defaultPaymentMethodId = defaultPaymentMethod
+    const defaultPaymentMethodId = defaultPaymentMethod != null
       ? typeof defaultPaymentMethod === 'string'
         ? defaultPaymentMethod
         : defaultPaymentMethod.id
@@ -306,13 +306,13 @@ export class StripeProvider implements BillingService {
       if (typeof invData.subscription === 'string') {
         subscriptionId = invData.subscription;
       } else if (typeof invData.subscription === 'object' && invData.subscription) {
-        subscriptionId = (invData.subscription as { id?: string }).id || null;
+        subscriptionId = (invData.subscription as { id?: string }).id ?? null;
       }
 
       return {
         id: invoice.id,
         customerId:
-          typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id || '',
+          typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id ?? '',
         subscriptionId,
         status: mapStripeInvoiceStatus(invoice.status),
         amountDue: invoice.amount_due,
@@ -320,10 +320,10 @@ export class StripeProvider implements BillingService {
         currency: invoice.currency,
         periodStart: new Date(invoice.period_start * 1000),
         periodEnd: new Date(invoice.period_end * 1000),
-        paidAt: invoice.status_transitions.paid_at
+        paidAt: invoice.status_transitions.paid_at != null
           ? new Date(invoice.status_transitions.paid_at * 1000)
           : null,
-        invoicePdfUrl: invoice.invoice_pdf || null,
+        invoicePdfUrl: invoice.invoice_pdf ?? null,
       };
     });
   }
@@ -360,7 +360,7 @@ export class StripeProvider implements BillingService {
   async updateProduct(productId: string, name: string, description?: string): Promise<void> {
     await this.stripe.products.update(productId, {
       name,
-      description: description || undefined,
+      description: description != null && description !== '' ? description : undefined,
     });
   }
 
@@ -420,7 +420,7 @@ export class StripeProvider implements BillingService {
         } else if (typeof invData.subscription === 'object' && invData.subscription) {
           subscriptionId = (invData.subscription as { id?: string }).id;
         }
-        status = inv.status || undefined;
+        status = inv.status ?? undefined;
         break;
       }
       case 'charge.refunded': {
@@ -432,7 +432,7 @@ export class StripeProvider implements BillingService {
         const dispute = event.data.object as unknown as Stripe.Dispute;
         const disputeCharge = dispute.charge as Stripe.Charge;
         const chargeCustomer = disputeCharge.customer;
-        if (chargeCustomer) {
+        if (chargeCustomer != null) {
           customerId = typeof chargeCustomer === 'string' ? chargeCustomer : chargeCustomer.id;
         }
         break;

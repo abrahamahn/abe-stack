@@ -167,8 +167,8 @@ function ipv6ToBigInt(ip: string): bigint {
   let expanded = ip;
   if (ip.includes('::')) {
     const parts = ip.split('::');
-    const left = parts[0] ? parts[0].split(':') : [];
-    const right = parts[1] ? parts[1].split(':') : [];
+    const left = parts[0] != null ? parts[0].split(':') : [];
+    const right = parts[1] != null ? parts[1].split(':') : [];
     const missing = 8 - left.length - right.length;
     const middle: string[] = Array(missing).fill('0') as string[];
     expanded = [...left, ...middle, ...right].join(':');
@@ -248,7 +248,7 @@ export function ipMatchesCidr(ip: string, cidr: string): boolean {
  * ```
  */
 export function isFromTrustedProxy(requestIp: string, trustedProxies: string[]): boolean {
-  if (!requestIp || !isValidIp(requestIp)) return false;
+  if (requestIp === '' || !isValidIp(requestIp)) return false;
   if (trustedProxies.length === 0) return false;
 
   return trustedProxies.some((proxy) => {
@@ -270,7 +270,7 @@ export function isFromTrustedProxy(requestIp: string, trustedProxies: string[]):
  * @returns Array of IP addresses from the header
  */
 export function parseXForwardedFor(header: string | string[] | undefined): string[] {
-  if (!header) return [];
+  if (header == null) return [];
 
   const headerStr = Array.isArray(header) ? header.join(', ') : header;
 

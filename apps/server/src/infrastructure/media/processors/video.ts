@@ -7,7 +7,7 @@
 
 import path from 'path';
 
-import type { VideoProcessingOptions, ProcessingResult, MediaMetadata } from '../types';
+import type { MediaMetadata, ProcessingResult, VideoProcessingOptions } from '../types';
 
 export type { VideoProcessingOptions };
 
@@ -147,7 +147,7 @@ export class VideoProcessor {
         );
       }
 
-      if (options.bitrate) {
+      if (options.bitrate != null && options.bitrate !== '') {
         command = command.videoBitrate(options.bitrate);
       }
 
@@ -182,10 +182,10 @@ export class VideoProcessor {
           duration: data.format.duration,
           width: videoStream?.width,
           height: videoStream?.height,
-          bitrate: data.format.bit_rate ? parseInt(data.format.bit_rate, 10) : undefined,
+          bitrate: data.format.bit_rate != null && data.format.bit_rate !== '' ? parseInt(data.format.bit_rate, 10) : undefined,
           codec: videoStream?.codec_name,
           channels: audioStream?.channels,
-          sampleRate: audioStream?.sample_rate ? parseInt(audioStream.sample_rate, 10) : undefined,
+          sampleRate: audioStream?.sample_rate != null && audioStream.sample_rate !== '' ? parseInt(audioStream.sample_rate, 10) : undefined,
         });
       });
     });

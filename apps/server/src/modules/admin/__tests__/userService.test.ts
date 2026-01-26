@@ -1,13 +1,14 @@
 // apps/server/src/modules/admin/__tests__/userService.test.ts
 import {
-  getUserById,
-  getUserStatus,
-  listUsers,
-  lockUser,
-  unlockUser,
-  updateUser,
+    getUserById,
+    getUserStatus,
+    listUsers,
+    lockUser,
+    unlockUser,
+    updateUser,
 } from '@admin/userService';
 import { UserNotFoundError } from '@shared';
+/* eslint-disable @typescript-eslint/unbound-method */
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { User as DbUser, UserRepository } from '@abe-stack/db';

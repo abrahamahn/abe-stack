@@ -9,7 +9,7 @@
  */
 
 import { REQUIRED_TABLES, validateSchema } from '@database';
-import { getWebSocketStats } from '@websocket/index';
+import { getWebSocketStats } from '../../messaging/websocket/websocket';
 
 import type { AppContext } from '@shared/types';
 

@@ -6,7 +6,7 @@
  * Prevents injection attacks, validates data types, and sanitizes user input.
  */
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Types
@@ -322,21 +322,21 @@ export function registerInputValidation(
 
     // Store sanitized data back in request using Object.defineProperty
     // to avoid type assertions
-    if (validationResult.sanitizedBody) {
+    if (validationResult.sanitizedBody !== undefined) {
       Object.defineProperty(req, 'body', {
         value: validationResult.sanitizedBody,
         writable: true,
         configurable: true,
       });
     }
-    if (validationResult.sanitizedQuery) {
+    if (validationResult.sanitizedQuery !== undefined) {
       Object.defineProperty(req, 'query', {
         value: validationResult.sanitizedQuery,
         writable: true,
         configurable: true,
       });
     }
-    if (validationResult.sanitizedParams) {
+    if (validationResult.sanitizedParams !== undefined) {
       Object.defineProperty(req, 'params', {
         value: validationResult.sanitizedParams,
         writable: true,
@@ -369,7 +369,7 @@ function validateRequestInput(req: FastifyRequest, options: ValidationOptions): 
   let sanitizedParams: unknown;
 
   // Validate and sanitize body
-  if (req.body && typeof req.body === 'object') {
+  if (req.body != null && typeof req.body === 'object') {
     const result = sanitizeObject(req.body, options);
     allErrors.push(...result.errors);
     allWarnings.push(...result.warnings);
@@ -380,7 +380,7 @@ function validateRequestInput(req: FastifyRequest, options: ValidationOptions): 
   }
 
   // Validate and sanitize query parameters
-  if (req.query && typeof req.query === 'object') {
+  if (req.query != null && typeof req.query === 'object') {
     const result = sanitizeObject(req.query, options);
     allErrors.push(...result.errors);
     allWarnings.push(...result.warnings);
@@ -391,7 +391,7 @@ function validateRequestInput(req: FastifyRequest, options: ValidationOptions): 
   }
 
   // Validate and sanitize route parameters
-  if (req.params && typeof req.params === 'object') {
+  if (req.params != null && typeof req.params === 'object') {
     const result = sanitizeObject(req.params, options);
     allErrors.push(...result.errors);
     allWarnings.push(...result.warnings);
