@@ -6,33 +6,33 @@
  */
 
 import {
-  BillingProviderNotConfiguredError,
-  BillingSubscriptionExistsError,
-  BillingSubscriptionNotFoundError,
-  CannotRemoveDefaultPaymentMethodError,
-  CustomerNotFoundError,
-  PaymentMethodNotFoundError,
-  PlanNotActiveError,
-  PlanNotFoundError,
-  SubscriptionAlreadyCanceledError,
-  SubscriptionNotActiveError,
-  SubscriptionNotCancelingError,
-  type AddPaymentMethodRequest,
-  type CancelSubscriptionRequest,
-  type CheckoutRequest,
-  type CheckoutResponse,
-  type Invoice,
-  type InvoicesListResponse,
-  type PaymentMethod,
-  type PaymentMethodResponse,
-  type PaymentMethodsListResponse,
-  type Plan,
-  type PlansListResponse,
-  type SetupIntentResponse,
-  type Subscription,
-  type SubscriptionActionResponse,
-  type SubscriptionResponse,
-  type UpdateSubscriptionRequest,
+    BillingProviderNotConfiguredError,
+    BillingSubscriptionExistsError,
+    BillingSubscriptionNotFoundError,
+    CannotRemoveDefaultPaymentMethodError,
+    CustomerNotFoundError,
+    PaymentMethodNotFoundError,
+    PlanNotActiveError,
+    PlanNotFoundError,
+    SubscriptionAlreadyCanceledError,
+    SubscriptionNotActiveError,
+    SubscriptionNotCancelingError,
+    type AddPaymentMethodRequest,
+    type CancelSubscriptionRequest,
+    type CheckoutRequest,
+    type CheckoutResponse,
+    type Invoice,
+    type InvoicesListResponse,
+    type PaymentMethod,
+    type PaymentMethodResponse,
+    type PaymentMethodsListResponse,
+    type Plan,
+    type PlansListResponse,
+    type SetupIntentResponse,
+    type Subscription,
+    type SubscriptionActionResponse,
+    type SubscriptionResponse,
+    type UpdateSubscriptionRequest,
 } from '@abe-stack/core';
 
 import { createBillingProvider } from '@infrastructure/billing';
@@ -40,19 +40,19 @@ import { createBillingProvider } from '@infrastructure/billing';
 import type { AppContext, RequestWithCookies } from '@shared';
 
 import {
-  addPaymentMethod,
-  cancelSubscription,
-  createCheckoutSession,
-  createSetupIntent,
-  getActivePlans,
-  getUserInvoices,
-  getUserPaymentMethods,
-  getUserSubscription,
-  removePaymentMethod,
-  resumeSubscription,
-  setDefaultPaymentMethod,
-  updateSubscription,
-  type BillingRepositories,
+    addPaymentMethod,
+    cancelSubscription,
+    createCheckoutSession,
+    createSetupIntent,
+    getActivePlans,
+    getUserInvoices,
+    getUserPaymentMethods,
+    getUserSubscription,
+    removePaymentMethod,
+    resumeSubscription,
+    setDefaultPaymentMethod,
+    updateSubscription,
+    type BillingRepositories,
 } from './service';
 
 // ============================================================================
@@ -140,8 +140,8 @@ function formatSubscription(subscription: {
     currentPeriodStart: subscription.currentPeriodStart.toISOString(),
     currentPeriodEnd: subscription.currentPeriodEnd.toISOString(),
     cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
-    canceledAt: subscription.canceledAt?.toISOString() || null,
-    trialEnd: subscription.trialEnd?.toISOString() || null,
+    canceledAt: subscription.canceledAt?.toISOString() ?? null,
+    trialEnd: subscription.trialEnd?.toISOString() ?? null,
     createdAt: subscription.createdAt.toISOString(),
   };
 }
@@ -166,7 +166,7 @@ function formatInvoice(invoice: {
     currency: invoice.currency,
     periodStart: invoice.periodStart.toISOString(),
     periodEnd: invoice.periodEnd.toISOString(),
-    paidAt: invoice.paidAt?.toISOString() || null,
+    paidAt: invoice.paidAt?.toISOString() ?? null,
     invoicePdfUrl: invoice.invoicePdfUrl,
     createdAt: invoice.createdAt.toISOString(),
   };
@@ -301,8 +301,8 @@ export async function handleCreateCheckout(
       userId: request.user.userId,
       email: request.user.email,
       planId: body.planId,
-      successUrl: body.successUrl || ctx.config.billing.urls.checkoutSuccessUrl,
-      cancelUrl: body.cancelUrl || ctx.config.billing.urls.checkoutCancelUrl,
+      successUrl: typeof body.successUrl === 'string' && body.successUrl !== '' ? body.successUrl : ctx.config.billing.urls.checkoutSuccessUrl,
+      cancelUrl: typeof body.cancelUrl === 'string' && body.cancelUrl !== '' ? body.cancelUrl : ctx.config.billing.urls.checkoutCancelUrl,
     });
 
     return {
@@ -343,7 +343,7 @@ export async function handleCancelSubscription(
       status: 200,
       body: {
         success: true,
-        message: body.immediately
+        message: body.immediately === true
           ? 'Subscription canceled immediately'
           : 'Subscription will be canceled at the end of the billing period',
       },

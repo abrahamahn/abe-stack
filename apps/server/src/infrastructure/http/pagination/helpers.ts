@@ -2,16 +2,16 @@
 import { buildCursorPaginationQuery, calculateCursorPaginationMetadata } from '@abe-stack/core';
 
 import type {
-  CursorPaginationQueryBuilder,
-  OffsetPaginationQueryBuilder,
-  PaginationHelpers,
-} from './types';
-import type {
-  CursorPaginatedResult,
-  CursorPaginationOptions,
-  PaginatedResult,
-  PaginationOptions,
+    CursorPaginatedResult,
+    CursorPaginationOptions,
+    PaginatedResult,
+    PaginationOptions,
 } from '@abe-stack/core';
+import type {
+    CursorPaginationQueryBuilder,
+    OffsetPaginationQueryBuilder,
+    PaginationHelpers,
+} from './types';
 
 /**
  * Create pagination helper functions
@@ -79,7 +79,7 @@ async function applyOffsetPagination<T>(
   let query = queryBuilder.clone ? queryBuilder.clone() : queryBuilder;
 
   // Apply sorting
-  if (sortBy) {
+  if (typeof sortBy === 'string' && sortBy !== '') {
     query = query.orderBy(sortBy, sortOrder);
   }
 

@@ -7,10 +7,10 @@
  */
 
 import {
-  isKnownAuthError as coreIsKnownAuthError,
-  mapErrorToHttpResponse,
-  type ErrorMapperOptions as CoreErrorMapperOptions,
-  type HttpErrorResponse,
+    isKnownAuthError as coreIsKnownAuthError,
+    mapErrorToHttpResponse,
+    type ErrorMapperOptions as CoreErrorMapperOptions,
+    type HttpErrorResponse,
 } from '@abe-stack/core';
 
 import type { AppContext } from '@shared/types';
@@ -60,7 +60,7 @@ export function mapErrorToResponse(error: unknown, ctx: AppContext): HttpErrorRe
       ctx.log.warn(context, message);
     },
     error: (context: unknown, message?: string): void => {
-      if (message) {
+      if (message !== undefined && message !== '') {
         ctx.log.error(context as Record<string, unknown>, message);
       } else {
         ctx.log.error(context);

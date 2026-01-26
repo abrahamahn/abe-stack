@@ -9,11 +9,11 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-  createAccessToken,
-  createRefreshToken,
-  getRefreshTokenExpiry,
-  verifyToken,
-  JwtError,
+    createAccessToken,
+    createRefreshToken,
+    getRefreshTokenExpiry,
+    JwtError,
+    verifyToken,
 } from '../jwt';
 
 describe('JWT Utilities', () => {
@@ -105,7 +105,7 @@ describe('JWT Utilities', () => {
       const token = createAccessToken('user-123', 'test@example.com', 'user', validSecret);
       const parts = token.split('.');
       // Tamper with the payload
-      parts[1] = 'tampered' + parts[1];
+      parts[1] = 'tampered' + (parts[1] ?? '');
       const tamperedToken = parts.join('.');
 
       expect(() => verifyToken(tamperedToken, validSecret)).toThrow();

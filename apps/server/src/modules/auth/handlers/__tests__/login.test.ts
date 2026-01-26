@@ -6,9 +6,9 @@
  */
 
 import {
-  AccountLockedError,
-  EmailNotVerifiedError,
-  InvalidCredentialsError,
+    AccountLockedError,
+    EmailNotVerifiedError,
+    InvalidCredentialsError,
 } from '@abe-stack/core';
 import { authenticateUser } from '@auth/service';
 import { setRefreshTokenCookie } from '@auth/utils';
@@ -363,9 +363,9 @@ describe('handleLogin', () => {
 
       let capturedCallback: ((userId: string) => void) | undefined;
       vi.mocked(authenticateUser).mockImplementation(
-        async (_db, _repos, _config, _email, _password, _logger, _ip, _ua, callback) => {
+        (_db, _repos, _config, _email, _password, _logger, _ip, _ua, callback) => {
           capturedCallback = callback;
-          return mockAuthResult;
+          return Promise.resolve(mockAuthResult);
         },
       );
 

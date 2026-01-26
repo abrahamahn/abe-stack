@@ -7,11 +7,11 @@
 
 import { requestPasswordReset, resetPassword, setPassword } from '@auth/service';
 import {
-  EmailSendError,
-  mapErrorToResponse,
-  SUCCESS_MESSAGES,
-  type AppContext,
-  type RequestWithCookies,
+    EmailSendError,
+    mapErrorToResponse,
+    SUCCESS_MESSAGES,
+    type AppContext,
+    type RequestWithCookies,
 } from '@shared';
 
 export async function handleForgotPassword(
@@ -77,7 +77,7 @@ export async function handleSetPassword(
   try {
     // User ID comes from the authenticated request
     const userId = req.user?.userId;
-    if (!userId) {
+    if (userId === undefined || userId === '') {
       return {
         status: 401,
         body: { message: 'Authentication required' },

@@ -93,7 +93,7 @@ function createMockRequest(
   requestInfo?: Partial<RequestWithCookies['requestInfo']>,
 ): RequestWithCookies {
   return {
-    cookies: cookies || {},
+    cookies: cookies ?? {},
     headers: { 'user-agent': 'Test Browser' },
     ip: '127.0.0.1',
     requestInfo: {

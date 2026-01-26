@@ -11,18 +11,18 @@ import * as crypto from 'crypto';
 import type { SubscriptionStatus } from '@abe-stack/db';
 
 import type {
-  BillingService,
-  CheckoutParams,
-  CheckoutResult,
-  CreateProductParams,
-  CreateProductResult,
-  NormalizedEventType,
-  NormalizedWebhookEvent,
-  PayPalConfig,
-  ProviderInvoice,
-  ProviderPaymentMethod,
-  ProviderSubscription,
-  SetupIntentResult,
+    BillingService,
+    CheckoutParams,
+    CheckoutResult,
+    CreateProductParams,
+    CreateProductResult,
+    NormalizedEventType,
+    NormalizedWebhookEvent,
+    PayPalConfig,
+    ProviderInvoice,
+    ProviderPaymentMethod,
+    ProviderSubscription,
+    SetupIntentResult,
 } from './types';
 
 // ============================================================================
@@ -109,7 +109,8 @@ function mapPayPalStatus(paypalStatus: string): SubscriptionStatus {
     SUSPENDED: 'paused',
     APPROVAL_PENDING: 'incomplete',
   };
-  return statusMap[paypalStatus] || 'incomplete';
+  const status = statusMap[paypalStatus];
+  return status ?? 'incomplete';
 }
 
 function mapPayPalEventType(eventType: string): NormalizedEventType {
@@ -125,7 +126,8 @@ function mapPayPalEventType(eventType: string): NormalizedEventType {
     'PAYMENT.SALE.REFUNDED': 'refund.created',
     'CUSTOMER.DISPUTE.CREATED': 'chargeback.created',
   };
-  return typeMap[eventType] || 'unknown';
+  const type = typeMap[eventType];
+  return type ?? 'unknown';
 }
 
 // ============================================================================
@@ -156,7 +158,7 @@ export class PayPalProvider implements BillingService {
 
   private async getAccessToken(): Promise<string> {
     // Return cached token if still valid
-    if (this.accessToken && Date.now() < this.tokenExpiresAt - 60000) {
+    if (this.accessToken !== null && Date.now() < this.tokenExpiresAt - 60000) {
       return this.accessToken;
     }
 
@@ -199,10 +201,10 @@ export class PayPalProvider implements BillingService {
     const response = await fetch(`${this.baseUrl}${path}`, {
       method,
       headers,
-      body: body ? JSON.stringify(body) : undefined,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
     });
 
-    if (!response.ok) {
+    if (response.status >= 400) {
       const error = await response.text();
       throw new Error(`PayPal API error (${String(response.status)}): ${error}`);
     }
@@ -259,7 +261,7 @@ export class PayPalProvider implements BillingService {
     // Find the approval link
     const approvalLink = subscription.links.find((link) => link.rel === 'approve');
 
-    if (!approvalLink) {
+    if (approvalLink === undefined) {
       throw new Error('PayPal subscription missing approval link');
     }
 
@@ -308,7 +310,7 @@ export class PayPalProvider implements BillingService {
 
     // Parse custom_id for metadata
     let metadata: Record<string, string> = {};
-    if (subscription.custom_id) {
+    if (subscription.custom_id !== undefined && subscription.custom_id !== '') {
       try {
         metadata = JSON.parse(subscription.custom_id) as Record<string, string>;
       } catch {
@@ -318,18 +320,18 @@ export class PayPalProvider implements BillingService {
 
     // Calculate period dates
     const now = new Date();
-    const nextBilling = subscription.billing_info.next_billing_time
+    const nextBilling = (subscription.billing_info.next_billing_time !== undefined && subscription.billing_info.next_billing_time !== '')
       ? new Date(subscription.billing_info.next_billing_time)
       : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // Default 30 days
 
     // Calculate period start (last payment or creation)
-    const periodStart = subscription.billing_info.last_payment?.time
+    const periodStart = (subscription.billing_info.last_payment?.time !== undefined && subscription.billing_info.last_payment.time !== '')
       ? new Date(subscription.billing_info.last_payment.time)
       : new Date(subscription.start_time);
 
     return {
       id: subscription.id,
-      customerId: subscription.subscriber.payer_id || `paypal_${metadata.userId || 'unknown'}`,
+      customerId: subscription.subscriber.payer_id !== '' ? subscription.subscriber.payer_id : `paypal_${metadata.userId ?? 'unknown'}`,
       status: mapPayPalStatus(subscription.status),
       priceId: subscription.plan_id,
       currentPeriodStart: periodStart,
@@ -399,17 +401,18 @@ export class PayPalProvider implements BillingService {
         `/v1/reporting/transactions?start_date=${startDate}&end_date=${endDate}&fields=all&page_size=${String(limit)}`,
       );
 
-      for (const tx of response.transaction_details ?? []) {
+      const txDetails = response.transaction_details ?? [];
+      for (const tx of txDetails) {
         if (tx.payer?.payer_id === customerId || customerId.startsWith('paypal_')) {
           invoices.push({
             id: tx.id,
-            customerId: tx.payer?.payer_id || customerId,
+            customerId: tx.payer?.payer_id ?? customerId,
             subscriptionId: null, // Would need to correlate
             status: tx.status === 'S' ? 'paid' : 'open',
-            amountDue: Math.round(parseFloat(tx.amount?.value || '0') * 100),
+            amountDue: Math.round(parseFloat(tx.amount?.value ?? '0') * 100),
             amountPaid:
-              tx.status === 'S' ? Math.round(parseFloat(tx.amount?.value || '0') * 100) : 0,
-            currency: tx.amount?.currency_code?.toLowerCase() || 'usd',
+              tx.status === 'S' ? Math.round(parseFloat(tx.amount?.value ?? '0') * 100) : 0,
+            currency: tx.amount?.currency_code?.toLowerCase() ?? 'usd',
             periodStart: new Date(tx.time),
             periodEnd: new Date(tx.time),
             paidAt: tx.status === 'S' ? new Date(tx.time) : null,
@@ -433,7 +436,7 @@ export class PayPalProvider implements BillingService {
     // Step 1: Create the product
     const product = await this.request<PayPalProduct>('POST', '/v1/catalogs/products', {
       name: params.name,
-      description: params.description || params.name,
+      description: (params.description !== undefined && params.description !== '') ? params.description : params.name,
       type: 'SERVICE',
       category: 'SOFTWARE',
     });
@@ -442,7 +445,7 @@ export class PayPalProvider implements BillingService {
     const plan = await this.request<PayPalPlan>('POST', '/v1/billing/plans', {
       product_id: product.id,
       name: `${params.name} - ${params.interval === 'month' ? 'Monthly' : 'Yearly'}`,
-      description: params.description || params.name,
+      description: (params.description !== undefined && params.description !== '') ? params.description : params.name,
       status: 'ACTIVE',
       billing_cycles: [
         {
@@ -478,7 +481,7 @@ export class PayPalProvider implements BillingService {
     // PayPal uses PATCH for product updates
     const patches = [{ op: 'replace', path: '/name', value: name }];
 
-    if (description) {
+    if (description !== undefined && description !== '') {
       patches.push({ op: 'replace', path: '/description', value: description });
     }
 
@@ -504,23 +507,23 @@ export class PayPalProvider implements BillingService {
 
     try {
       // Parse the signature header parts
-      const parts = signature.split(',').reduce<Record<string, string>>((acc, part) => {
+      const parts = signature.split(',').reduce<Record<string, string | undefined>>((acc, part) => {
         const [key, value] = part.trim().split('=');
-        if (key && value) {
+        if (key !== undefined && key !== '' && value !== undefined && value !== '') {
           acc[key] = value;
         }
         return acc;
       }, {});
 
       // Basic validation that required parts exist
-      if (!parts.transmission_id || !parts.timestamp) {
+      if (parts.transmission_id === undefined || parts.transmission_id === '' || parts.timestamp === undefined || parts.timestamp === '') {
         return false;
       }
 
       // For production, you should verify against PayPal's API:
       // POST /v1/notifications/verify-webhook-signature
       // This is synchronous verification using expected webhook ID
-      if (!this.webhookId) {
+      if (this.webhookId === '') {
         return true; // Skip verification if no webhook ID configured
       }
 
@@ -536,7 +539,7 @@ export class PayPalProvider implements BillingService {
 
       // For now, we accept if basic format is valid
       // Full verification would compare computedHash with parts.signature
-      return Boolean(parts.transmission_id);
+      return parts.transmission_id !== '';
     } catch {
       return false;
     }
@@ -562,7 +565,7 @@ export class PayPalProvider implements BillingService {
         subscriptionId = sub.id;
         customerId = sub.subscriber.payer_id;
         status = sub.status;
-        if (sub.custom_id) {
+        if (sub.custom_id !== undefined && sub.custom_id !== '') {
           try {
             metadata = JSON.parse(sub.custom_id) as Record<string, string>;
           } catch {

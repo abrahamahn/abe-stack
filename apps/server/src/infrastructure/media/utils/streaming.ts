@@ -6,8 +6,7 @@
  * Processes files in chunks without loading entire file into memory.
  */
 
-import { promises as fs } from 'fs';
-import { createReadStream, createWriteStream } from 'fs';
+import { createReadStream, createWriteStream, promises as fs } from 'fs';
 import path from 'path';
 import { pipeline } from 'stream/promises';
 
@@ -185,7 +184,7 @@ export class StreamingMediaProcessor {
         }
 
         // Configure bitrate
-        if (operations.bitrate) {
+        if (typeof operations.bitrate === 'string' && operations.bitrate !== '') {
           command = command.videoBitrate(operations.bitrate);
         }
 

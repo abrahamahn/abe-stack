@@ -1,10 +1,10 @@
 // apps/server/src/config/services/search.ts
 import type {
-  ElasticsearchProviderConfig,
-  SqlSearchProviderConfig,
-  SqlTableConfig,
+    ElasticsearchProviderConfig,
+    FullEnv,
+    SqlSearchProviderConfig,
+    SqlTableConfig,
 } from '@abe-stack/core/config';
-import type { FullEnv } from '@abe-stack/core/config';
 
 /**
  * Default Search Schemas
@@ -47,10 +47,10 @@ export const DEFAULT_SEARCH_SCHEMAS: Record<string, SqlTableConfig> = {
  */
 export function loadElasticsearchConfig(env: FullEnv): ElasticsearchProviderConfig {
   return {
-    node: env.ELASTICSEARCH_NODE || 'http://localhost:9200',
-    index: env.ELASTICSEARCH_INDEX || 'default',
+    node: env.ELASTICSEARCH_NODE ?? 'http://localhost:9200',
+    index: env.ELASTICSEARCH_INDEX ?? 'default',
     auth:
-      env.ELASTICSEARCH_USERNAME && env.ELASTICSEARCH_PASSWORD
+      (env.ELASTICSEARCH_USERNAME != null && env.ELASTICSEARCH_USERNAME !== '') && (env.ELASTICSEARCH_PASSWORD != null && env.ELASTICSEARCH_PASSWORD !== '')
         ? {
             username: env.ELASTICSEARCH_USERNAME,
             password: env.ELASTICSEARCH_PASSWORD,

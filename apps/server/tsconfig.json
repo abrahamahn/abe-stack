@@ -1,8 +1,9 @@
 {
   "extends": "../../.config/tsconfig.node.json",
   "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "outDir": "./dist",
-    "rootDir": "./src",
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.server.tsbuildinfo",
     "paths": {
       "@/*": [
@@ -56,6 +57,12 @@
       "@cache/*": [
             "./src/infrastructure/cache/*"
       ],
+      "@crypto": [
+            "./src/infrastructure/security/crypto"
+      ],
+      "@crypto/*": [
+            "./src/infrastructure/security/crypto/*"
+      ],
       "@config": [
             "./src/config"
       ],
@@ -68,11 +75,29 @@
       "@data/*": [
             "./src/infrastructure/data/*"
       ],
+      "@database": [
+            "./src/infrastructure/data/database"
+      ],
+      "@database/*": [
+            "./src/infrastructure/data/database/*"
+      ],
+      "@email": [
+            "./src/infrastructure/messaging/email"
+      ],
+      "@email/*": [
+            "./src/infrastructure/messaging/email/*"
+      ],
       "@http": [
             "./src/infrastructure/http"
       ],
       "@http/*": [
             "./src/infrastructure/http/*"
+      ],
+      "@infrastructure": [
+            "./src/infrastructure"
+      ],
+      "@infrastructure/*": [
+            "./src/infrastructure/*"
       ],
       "@jobs": [
             "./src/infrastructure/jobs"
@@ -92,6 +117,12 @@
       "@messaging/*": [
             "./src/infrastructure/messaging/*"
       ],
+      "@logger": [
+            "./src/infrastructure/monitor/logger"
+      ],
+      "@logger/*": [
+            "./src/infrastructure/monitor/logger/*"
+      ],
       "@monitor": [
             "./src/infrastructure/monitor"
       ],
@@ -103,6 +134,12 @@
       ],
       "@notifications/*": [
             "./src/modules/notifications/*"
+      ],
+      "@modules": [
+            "./src/modules"
+      ],
+      "@modules/*": [
+            "./src/modules/*"
       ],
       "@realtime": [
             "./src/modules/realtime"
@@ -128,6 +165,30 @@
       "@shared/*": [
             "./src/shared/*"
       ],
+      "@pagination": [
+            "./src/infrastructure/http/pagination"
+      ],
+      "@pagination/*": [
+            "./src/infrastructure/http/pagination/*"
+      ],
+      "@rate-limit": [
+            "./src/infrastructure/security/rate-limit"
+      ],
+      "@rate-limit/*": [
+            "./src/infrastructure/security/rate-limit/*"
+      ],
+      "@router": [
+            "./src/infrastructure/http/router"
+      ],
+      "@router/*": [
+            "./src/infrastructure/http/router/*"
+      ],
+      "@storage": [
+            "./src/infrastructure/data/storage"
+      ],
+      "@storage/*": [
+            "./src/infrastructure/data/storage/*"
+      ],
       "@system": [
             "./src/modules/system"
       ],
@@ -152,10 +213,9 @@
       "@utils/*": [
             "./src/utils/*"
       ]
-    },
-    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.server.tsbuildinfo"
+    }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "vitest.config.ts"],
   "exclude": ["node_modules", "dist"],
   "references": [{ "path": "../../packages/core" }]
 }

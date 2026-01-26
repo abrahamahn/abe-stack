@@ -1,8 +1,8 @@
 // apps/desktop/src/electron/ipc/handlers.ts
 import { app, dialog, ipcMain, Notification } from 'electron';
 
-import type { OpenDialogOptions, SaveDialogOptions } from '../types';
 import type { BrowserWindow } from 'electron';
+import type { OpenDialogOptions, SaveDialogOptions } from '../types';
 
 /**
  * Registers all IPC handlers for communication between main and renderer processes.
@@ -24,7 +24,7 @@ export function registerIPCHandlers(getMainWindow: () => BrowserWindow | null): 
     const result = await dialog.showOpenDialog(mainWindow, {
       title: options.title,
       filters: options.filters,
-      properties: options.multiple ? ['openFile', 'multiSelections'] : ['openFile'],
+      properties: options.multiple === true ? ['openFile', 'multiSelections'] : ['openFile'],
     });
 
     return result.canceled ? null : result.filePaths;

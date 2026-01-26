@@ -64,7 +64,7 @@ export async function revokeSession(
   // Verify the session belongs to this user
   const family = await repos.refreshTokenFamilies.findById(sessionId);
 
-  if (!family || family.userId !== userId) {
+  if (family?.userId !== userId) {
     throw new NotFoundError('Session not found');
   }
 

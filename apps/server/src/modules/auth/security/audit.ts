@@ -9,7 +9,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 // Extended Fastify types for audit tracking
 interface RequestWithStartTime {
@@ -209,8 +209,8 @@ export class SecurityAuditLogger {
     const suspiciousIps = new Set<string>();
 
     for (const event of this.eventBuffer) {
-      eventsByType[event.eventType] = (eventsByType[event.eventType] || 0) + 1;
-      eventsBySeverity[event.severity] = (eventsBySeverity[event.severity] || 0) + 1;
+      eventsByType[event.eventType] = (eventsByType[event.eventType] ?? 0) + 1;
+      eventsBySeverity[event.severity] = (eventsBySeverity[event.severity] ?? 0) + 1;
 
       if (event.riskScore > this.config.riskThresholds.medium) {
         suspiciousIps.add(event.ipAddress);
@@ -243,7 +243,7 @@ export class SecurityAuditLogger {
     const logPath = this.config.logPath;
     const retentionDays = this.config.retentionDays;
 
-    if (!logPath || retentionDays === undefined) return;
+    if (logPath === undefined || logPath === '' || retentionDays === undefined) return;
 
     try {
       const logDir = path.dirname(logPath);
@@ -337,9 +337,9 @@ export class SecurityAuditLogger {
     // Additional factors
     const failedAttempts = details.failedAttempts ?? 0;
     if (failedAttempts > 5) score += 20;
-    if (details.suspiciousPatterns) score += 15;
-    if (details.unusualTiming) score += 10;
-    if (details.geographicAnomaly) score += 25;
+    if (details.suspiciousPatterns === true) score += 15;
+    if (details.unusualTiming === true) score += 10;
+    if (details.geographicAnomaly === true) score += 25;
 
     // Cap at 100
     return Math.min(score, 100);
@@ -349,7 +349,7 @@ export class SecurityAuditLogger {
     for (const rule of this.config.intrusionRules) {
       if (rule.condition(event)) {
         const stateKey = `${rule.name}:${event.ipAddress}`;
-        const state = this.intrusionState.get(stateKey) || { lastTriggered: 0, count: 0 };
+        const state = this.intrusionState.get(stateKey) ?? { lastTriggered: 0, count: 0 };
         const now = Date.now();
 
         // Check cooldown
@@ -436,7 +436,7 @@ export class SecurityAuditLogger {
     if (this.eventBuffer.length === 0) return;
 
     const logPath = this.config.logPath;
-    if (!logPath) return;
+    if (logPath === undefined || logPath === '') return;
 
     try {
       await this.ensureLogDirectory();
@@ -473,7 +473,7 @@ export class SecurityAuditLogger {
 
   private async ensureLogDirectory(): Promise<void> {
     const logPath = this.config.logPath;
-    if (!logPath) return;
+    if (logPath === undefined || logPath === '') return;
 
     try {
       const logDir = path.dirname(logPath);

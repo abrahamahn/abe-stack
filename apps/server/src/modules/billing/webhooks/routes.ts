@@ -51,7 +51,7 @@ export function registerWebhookRoutes(app: FastifyInstance, ctx: AppContext): vo
     async (request: FastifyRequest, reply: FastifyReply) => {
       const signature = request.headers['stripe-signature'];
 
-      if (!signature || typeof signature !== 'string') {
+      if (typeof signature !== 'string') {
         return reply.status(400).send({ error: 'Missing stripe-signature header' });
       }
 

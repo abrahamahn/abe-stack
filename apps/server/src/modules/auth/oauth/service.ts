@@ -9,44 +9,44 @@
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'node:crypto';
 
 import {
-  insert,
-  OAUTH_CONNECTIONS_TABLE,
-  toCamelCase,
-  USER_COLUMNS,
-  USERS_TABLE,
-  type User,
+    insert,
+    OAUTH_CONNECTIONS_TABLE,
+    toCamelCase,
+    USER_COLUMNS,
+    USERS_TABLE,
+    type User,
 } from '@abe-stack/db';
 import {
-  withTransaction,
-  type DbClient,
-  type OAuthProvider,
-  type Repositories,
-  type UserRole,
+    withTransaction,
+    type DbClient,
+    type OAuthProvider,
+    type Repositories,
+    type UserRole,
 } from '@infrastructure';
 import {
-  ConflictError,
-  EmailAlreadyExistsError,
-  NotFoundError,
-  OAuthError,
-  OAuthStateMismatchError,
+    ConflictError,
+    EmailAlreadyExistsError,
+    NotFoundError,
+    OAuthError,
+    OAuthStateMismatchError,
 } from '@shared';
 
 import { createAccessToken, createRefreshTokenFamily } from '../utils';
 
 import {
-  createAppleProvider,
-  createGitHubProvider,
-  createGoogleProvider,
-  extractAppleUserFromIdToken,
+    createAppleProvider,
+    createGitHubProvider,
+    createGoogleProvider,
+    extractAppleUserFromIdToken,
 } from './providers';
 
 import type { AuthConfig, OAuthProviderConfig } from '@/config';
 import type {
-  OAuthConnectionInfo,
-  OAuthProviderClient,
-  OAuthState,
-  OAuthTokenResponse,
-  OAuthUserInfo,
+    OAuthConnectionInfo,
+    OAuthProviderClient,
+    OAuthState,
+    OAuthTokenResponse,
+    OAuthUserInfo,
 } from './types';
 
 // ============================================================================
@@ -111,7 +111,7 @@ function encryptToken(token: string, encryptionKey: string): string {
 function decryptToken(encryptedData: string, encryptionKey: string): string {
   const [saltB64, ivB64, tagB64, encryptedB64] = encryptedData.split(':');
 
-  if (!saltB64 || !ivB64 || !tagB64 || !encryptedB64) {
+  if (saltB64 === undefined || ivB64 === undefined || tagB64 === undefined || encryptedB64 === undefined) {
     throw new Error('Invalid encrypted token format');
   }
 
@@ -222,20 +222,19 @@ export function getProviderClient(
         privateKey?: string;
       };
 
-      if (!appleConfig.teamId || !appleConfig.keyId || !appleConfig.privateKey) {
-        throw new OAuthError(
-          'Apple OAuth requires teamId, keyId, and privateKey configuration',
-          'apple',
-          'INCOMPLETE_CONFIG',
-        );
+      if (appleConfig.teamId !== undefined && appleConfig.keyId !== undefined && appleConfig.privateKey !== undefined) {
+        return createAppleProvider({
+          clientId: appleConfig.clientId,
+          teamId: appleConfig.teamId,
+          keyId: appleConfig.keyId,
+          privateKey: appleConfig.privateKey,
+        });
       }
-
-      return createAppleProvider({
-        clientId: appleConfig.clientId,
-        teamId: appleConfig.teamId,
-        keyId: appleConfig.keyId,
-        privateKey: appleConfig.privateKey,
-      });
+      throw new OAuthError(
+        'Apple OAuth requires teamId, keyId, and privateKey configuration',
+        'apple',
+        'INCOMPLETE_CONFIG',
+      );
     }
     default: {
       const exhaustiveCheck: never = provider;
@@ -315,7 +314,7 @@ export async function handleOAuthCallback(
   }
 
   // Handle linking vs authentication
-  if (stateObj.isLinking && stateObj.userId) {
+  if (stateObj.isLinking && stateObj.userId !== undefined) {
     await linkOAuthAccount(db, repos, config, stateObj.userId, provider, userInfo, tokens);
     return { isLinking: true, linked: true };
   }
@@ -348,7 +347,7 @@ async function authenticateOrCreateWithOAuth(
     // Update tokens and return existing user (using repository)
     await repos.oauthConnections.update(existingConnection.id, {
       accessToken: encryptToken(tokens.accessToken, encryptionKey),
-      refreshToken: tokens.refreshToken ? encryptToken(tokens.refreshToken, encryptionKey) : null,
+      refreshToken: tokens.refreshToken !== undefined ? encryptToken(tokens.refreshToken, encryptionKey) : null,
       expiresAt: tokens.expiresAt,
       providerEmail: userInfo.email,
       updatedAt: new Date(),
@@ -433,7 +432,7 @@ async function authenticateOrCreateWithOAuth(
           provider_user_id: userInfo.id,
           provider_email: userInfo.email,
           access_token: encryptToken(tokens.accessToken, encryptionKey),
-          refresh_token: tokens.refreshToken
+          refresh_token: tokens.refreshToken !== undefined
             ? encryptToken(tokens.refreshToken, encryptionKey)
             : null,
           expires_at: tokens.expiresAt,
@@ -526,7 +525,7 @@ export async function linkOAuthAccount(
     providerUserId: userInfo.id,
     providerEmail: userInfo.email,
     accessToken: encryptToken(tokens.accessToken, encryptionKey),
-    refreshToken: tokens.refreshToken ? encryptToken(tokens.refreshToken, encryptionKey) : null,
+    refreshToken: tokens.refreshToken !== undefined ? encryptToken(tokens.refreshToken, encryptionKey) : null,
     expiresAt: tokens.expiresAt,
   });
 }
@@ -605,13 +604,13 @@ export async function findUserByOAuthProvider(
   // Using repositories (two queries instead of JOIN)
   const connection = await repos.oauthConnections.findByProviderUserId(provider, providerUserId);
 
-  if (!connection) {
+  if (connection === null) {
     return null;
   }
 
   const user = await repos.users.findById(connection.userId);
 
-  if (!user) {
+  if (user === null) {
     return null;
   }
 

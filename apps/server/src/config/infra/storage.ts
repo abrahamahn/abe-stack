@@ -1,6 +1,5 @@
 // apps/server/src/config/infra/storage.ts
-import type { StorageConfig, StorageProviderName } from '@abe-stack/core/config';
-import type { FullEnv } from '@abe-stack/core/config';
+import type { FullEnv, StorageConfig, StorageProviderName } from '@abe-stack/core/config';
 
 import { resolve } from 'node:path';
 
@@ -24,15 +23,15 @@ import { resolve } from 'node:path';
  * @param env - Environment variables.
  */
 export function loadStorageConfig(env: FullEnv): StorageConfig {
-  const provider = (env.STORAGE_PROVIDER || 'local') as StorageProviderName;
+  const provider = (env.STORAGE_PROVIDER ?? 'local') as StorageProviderName;
 
   if (provider === 's3') {
     return {
       provider: 's3',
-      bucket: env.S3_BUCKET || '',
-      region: env.S3_REGION || '',
-      accessKeyId: env.S3_ACCESS_KEY_ID || '',
-      secretAccessKey: env.S3_SECRET_ACCESS_KEY || '',
+      bucket: env.S3_BUCKET ?? '',
+      region: env.S3_REGION ?? '',
+      accessKeyId: env.S3_ACCESS_KEY_ID ?? '',
+      secretAccessKey: env.S3_SECRET_ACCESS_KEY ?? '',
       // Custom endpoint for S3-compatible services (MinIO, R2, Spaces)
       endpoint: env.S3_ENDPOINT,
       // Path-style is required for MinIO and some S3-compatible services
@@ -50,7 +49,7 @@ export function loadStorageConfig(env: FullEnv): StorageConfig {
   return {
     provider: 'local',
     // In a monorepo, keep uploads in a known data directory
-    rootPath: env.STORAGE_ROOT_PATH ? resolve(process.cwd(), env.STORAGE_ROOT_PATH) : defaultPath,
+    rootPath: env.STORAGE_ROOT_PATH != null && env.STORAGE_ROOT_PATH !== '' ? resolve(process.cwd(), env.STORAGE_ROOT_PATH) : defaultPath,
     // Public URL for serving files (e.g., http://localhost:8080/uploads)
     publicBaseUrl: env.STORAGE_PUBLIC_BASE_URL,
   };

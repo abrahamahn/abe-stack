@@ -10,10 +10,10 @@ import { getInt } from '@abe-stack/core/config';
  */
 export function loadSmtpConfig(env: FullEnv): SmtpConfig {
   return {
-    host: env.SMTP_HOST || 'localhost',
+    host: env.SMTP_HOST ?? 'localhost',
     port: getInt(env.SMTP_PORT as any, 587),
     secure: env.SMTP_SECURE === 'true',
-    auth: env.SMTP_USER && env.SMTP_PASS ? { user: env.SMTP_USER, pass: env.SMTP_PASS } : undefined,
+    auth: (env.SMTP_USER != null && env.SMTP_USER !== '') && (env.SMTP_PASS != null && env.SMTP_PASS !== '') ? { user: env.SMTP_USER, pass: env.SMTP_PASS } : undefined,
     connectionTimeout: getInt(env.SMTP_CONNECTION_TIMEOUT as any, 5000),
     socketTimeout: getInt(env.SMTP_SOCKET_TIMEOUT as any, 30000),
   };

@@ -6,18 +6,18 @@
  * Uses SELECT FOR UPDATE SKIP LOCKED for safe concurrent dequeue.
  */
 
-import type {
-  JobDetails,
-  JobListOptions,
-  JobListResult,
-  JobStatus,
-  QueueStats,
-  QueueStore,
-  Task,
-  TaskError,
-  TaskResult,
-} from './types';
 import type { DbClient } from '@database';
+import type {
+    JobDetails,
+    JobListOptions,
+    JobListResult,
+    JobStatus,
+    QueueStats,
+    QueueStore,
+    Task,
+    TaskError,
+    TaskResult,
+} from './types';
 
 // ============================================================================
 // SQL Result Types
@@ -138,7 +138,7 @@ export class PostgresQueueStore implements QueueStore {
   }
 
   async fail(taskId: string, error: TaskError, nextAttemptAt?: string): Promise<void> {
-    if (nextAttemptAt) {
+    if (nextAttemptAt !== undefined && nextAttemptAt !== '') {
       // Retry: reset to pending with new scheduled time
       await this.db.execute({
         text: `UPDATE job_queue
@@ -224,7 +224,7 @@ export class PostgresQueueStore implements QueueStore {
       paramIndex++;
     }
 
-    if (name) {
+    if (name !== undefined && name !== '') {
       conditions.push(`name ILIKE $${String(paramIndex)}`);
       values.push(`%${name}%`);
       paramIndex++;
@@ -396,7 +396,7 @@ export class PostgresQueueStore implements QueueStore {
 
   private mapRowToJobDetails(row: JobDetailsRow): JobDetails {
     let parsedError: TaskError | null = null;
-    if (row.error) {
+    if (row.error !== null && row.error !== '') {
       try {
         parsedError = JSON.parse(row.error) as TaskError;
       } catch {

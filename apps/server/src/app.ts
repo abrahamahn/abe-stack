@@ -2,21 +2,21 @@
 import { buildConnectionString } from '@/config';
 import { DEFAULT_SEARCH_SCHEMAS } from '@/config/services/search';
 import {
-  createBillingProvider,
-  createDbClient,
-  createEmailService,
-  createNotificationService,
-  createPostgresPubSub,
-  createPostgresQueueStore,
-  createQueueServer,
-  createStorage,
-  createWriteService,
-  getRepositoryContext,
-  getSearchProviderFactory,
-  logStartupSummary,
-  registerWebSocket,
-  requireValidSchema,
-  SubscriptionManager,
+    createBillingProvider,
+    createDbClient,
+    createEmailService,
+    createNotificationService,
+    createPostgresPubSub,
+    createPostgresQueueStore,
+    createQueueServer,
+    createStorage,
+    createWriteService,
+    getRepositoryContext,
+    getSearchProviderFactory,
+    logStartupSummary,
+    registerWebSocket,
+    requireValidSchema,
+    SubscriptionManager,
 } from '@infrastructure/index';
 import { registerRoutes } from '@modules/index';
 import { type AppConfig, type AppContext, type IServiceContainer } from '@shared/index';
@@ -26,18 +26,18 @@ import { createServer, listen } from '@/server';
 import type { FcmConfig as FcmConfigType } from '@abe-stack/core';
 import { BaseError, createConsoleLogger } from '@abe-stack/core';
 import type {
-  BillingService,
-  DbClient,
-  EmailService,
-  FcmConfig,
-  NotificationFactoryOptions,
-  NotificationService,
-  PostgresPubSub,
-  QueueServer,
-  Repositories,
-  ServerSearchProvider,
-  StorageProvider,
-  WriteService,
+    BillingService,
+    DbClient,
+    EmailService,
+    FcmConfig,
+    NotificationFactoryOptions,
+    NotificationService,
+    PostgresPubSub,
+    QueueServer,
+    Repositories,
+    ServerSearchProvider,
+    StorageProvider,
+    WriteService,
 } from '@infrastructure/index';
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
 
@@ -156,10 +156,10 @@ export class App implements IServiceContainer {
   private setupPubSub(connectionString: string): void {
     const pubsubConnString =
       this.config.database.provider === 'postgresql'
-        ? this.config.database.connectionString || connectionString
+        ? (this.config.database.connectionString ?? connectionString)
         : null;
 
-    if (pubsubConnString && this.config.env !== 'test') {
+    if (pubsubConnString !== null && pubsubConnString !== '' && this.config.env !== 'test') {
       this._pgPubSub = createPostgresPubSub({
         connectionString: pubsubConnString,
         onMessage: (key, version) => {
@@ -193,7 +193,7 @@ export class App implements IServiceContainer {
       }
 
       // 2. Handle Schema Validation Errors (Fastify native)
-      if (error && typeof error === 'object' && 'validation' in error && error.validation) {
+      if (error !== null && typeof error === 'object' && 'validation' in error && (error as { validation?: unknown }).validation !== undefined) {
         return reply.status(400).send({
           error: 'ValidationError',
           message: 'Invalid request data',
@@ -287,12 +287,10 @@ export class App implements IServiceContainer {
   }
 
   get log(): FastifyBaseLogger {
-    if (this._server) return this._server.log;
-    if (!this._fallbackLogger) {
-      this._fallbackLogger = createConsoleLogger(
-        this.config.server.logLevel,
-      ) as unknown as FastifyBaseLogger;
-    }
+    if (this._server !== null) return this._server.log;
+    this._fallbackLogger ??= createConsoleLogger(
+      this.config.server.logLevel,
+    ) as unknown as FastifyBaseLogger;
     return this._fallbackLogger;
   }
 }

@@ -47,7 +47,7 @@
     },
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.web.tsbuildinfo"
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "vitest.config.ts"],
   "exclude": ["node_modules"],
   "references": [
     {
@@ -70,6 +70,6 @@
     },
     {
       "path": "../../packages/ui"
-    },
+    }
   ]
 }

@@ -27,7 +27,7 @@ export function getPathParam(req: RequestWithCookies, paramName: string): string
  */
 export function getRequiredPathParam(req: RequestWithCookies, paramName: string): string {
   const param = getPathParam(req, paramName);
-  if (!param) {
+  if (param === undefined || param === '') {
     throw new Error(`Required path parameter '${paramName}' is missing`);
   }
   return param;
@@ -46,7 +46,7 @@ export function getValidatedPathParam(
   validator?: (value: string) => boolean,
 ): string | undefined {
   const param = getPathParam(req, paramName);
-  if (param && validator && !validator(param)) {
+  if (param !== undefined && param !== '' && validator !== undefined && !validator(param)) {
     return undefined;
   }
   return param;
@@ -59,7 +59,7 @@ export function getValidatedPathParam(
  */
 export function getQueryParams(req: RequestWithCookies): Record<string, unknown> {
   const rawReq = req as RequestWithCookies & { query?: Record<string, unknown> };
-  return rawReq.query || {};
+  return rawReq.query ?? {};
 }
 
 /**

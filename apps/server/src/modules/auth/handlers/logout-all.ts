@@ -6,10 +6,10 @@
  */
 
 import {
-  mapErrorToResponse,
-  type AppContext,
-  type ReplyWithCookies,
-  type RequestWithCookies,
+    mapErrorToResponse,
+    type AppContext,
+    type ReplyWithCookies,
+    type RequestWithCookies,
 } from '@shared';
 
 import { clearRefreshTokenCookie, revokeAllUserTokens } from '../utils';
@@ -24,7 +24,7 @@ export async function handleLogoutAll(
   try {
     const userId = request.user?.userId;
 
-    if (!userId) {
+    if (userId === undefined || userId === '') {
       return {
         status: 401,
         body: { message: 'Unauthorized' },

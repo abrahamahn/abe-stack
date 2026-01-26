@@ -1,6 +1,6 @@
 // apps/server/src/config/auth/rate-limit.ts
-import { getBool, getInt } from '@abe-stack/core/config';
 import type { RateLimitConfig } from '@abe-stack/core/config';
+import { getBool, getInt } from '@abe-stack/core/config';
 
 /**
  * Load Rate Limit Configuration.
@@ -20,7 +20,7 @@ export function loadRateLimitConfig(env: Record<string, string | undefined>): Ra
     cleanupIntervalMs: getInt(env.RATE_LIMIT_CLEANUP_INTERVAL_MS, 60 * 1000),
 
     progressiveDelay: {
-      enabled: env.RATE_LIMIT_PROGRESSIVE_DELAY_ENABLED
+      enabled: env.RATE_LIMIT_PROGRESSIVE_DELAY_ENABLED != null && env.RATE_LIMIT_PROGRESSIVE_DELAY_ENABLED !== ''
         ? getBool(env.RATE_LIMIT_PROGRESSIVE_DELAY_ENABLED)
         : true,
       baseDelay: getInt(env.RATE_LIMIT_BASE_DELAY_MS, 1000),

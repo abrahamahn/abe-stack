@@ -7,17 +7,17 @@
 
 import { WebhookEventAlreadyProcessedError, WebhookSignatureError } from '@abe-stack/core';
 import type {
-  BillingEventRepository,
-  InvoiceRepository,
-  PlanRepository,
-  SubscriptionRepository,
-  CustomerMappingRepository,
+    BillingEventRepository,
+    CustomerMappingRepository,
+    InvoiceRepository,
+    PlanRepository,
+    SubscriptionRepository,
 } from '@abe-stack/db';
 
 import {
-  PayPalProvider,
-  type NormalizedWebhookEvent,
-  type PayPalConfig,
+    PayPalProvider,
+    type NormalizedWebhookEvent,
+    type PayPalConfig,
 } from '@infrastructure/billing';
 
 import type { FastifyBaseLogger } from 'fastify';
@@ -161,7 +161,7 @@ async function handleSubscriptionCreated(
 ): Promise<void> {
   const { subscriptionId, customerId, status, metadata } = event.data;
 
-  if (!subscriptionId) {
+  if (typeof subscriptionId !== 'string' || subscriptionId === '') {
     log.warn({ event }, 'Missing subscription ID in subscription.created event');
     return;
   }
@@ -170,7 +170,7 @@ async function handleSubscriptionCreated(
   const userId = metadata?.userId;
   const planId = metadata?.planId;
 
-  if (!userId || !planId) {
+  if (typeof userId !== 'string' || userId === '' || typeof planId !== 'string' || planId === '') {
     log.warn({ event }, 'Missing userId or planId in subscription metadata');
     return;
   }
@@ -191,13 +191,16 @@ async function handleSubscriptionCreated(
     };
   };
 
-  const startTime = raw.resource?.start_time ? new Date(raw.resource.start_time) : new Date();
-  const nextBillingTime = raw.resource?.billing_info?.next_billing_time
-    ? new Date(raw.resource.billing_info.next_billing_time)
+  const startTimeValue = raw.resource?.start_time;
+  const startTime = (typeof startTimeValue === 'string' && startTimeValue !== '') ? new Date(startTimeValue) : new Date();
+
+  const nextBillingTimeValue = raw.resource?.billing_info?.next_billing_time;
+  const nextBillingTime = (typeof nextBillingTimeValue === 'string' && nextBillingTimeValue !== '')
+    ? new Date(nextBillingTimeValue)
     : new Date(startTime.getTime() + 30 * 24 * 60 * 60 * 1000);
 
   // Create or update customer mapping
-  if (customerId) {
+  if (typeof customerId === 'string' && customerId !== '') {
     const existingMapping = await repos.customerMappings.findByProviderCustomerId(
       'paypal',
       customerId,
@@ -217,7 +220,7 @@ async function handleSubscriptionCreated(
     planId: plan.id,
     provider: 'paypal',
     providerSubscriptionId: subscriptionId,
-    providerCustomerId: customerId || `paypal_${userId}`,
+    providerCustomerId: (typeof customerId === 'string' && customerId !== '') ? customerId : `paypal_${userId}`,
     status: mapStatus(status),
     currentPeriodStart: startTime,
     currentPeriodEnd: nextBillingTime,
@@ -238,7 +241,7 @@ async function handleSubscriptionUpdated(
 ): Promise<void> {
   const { subscriptionId, status } = event.data;
 
-  if (!subscriptionId) {
+  if (typeof subscriptionId !== 'string' || subscriptionId === '') {
     log.warn({ event }, 'Missing subscription ID in subscription.updated event');
     return;
   }
@@ -265,11 +268,14 @@ async function handleSubscriptionUpdated(
     };
   };
 
-  const nextBillingTime = raw.resource?.billing_info?.next_billing_time
-    ? new Date(raw.resource.billing_info.next_billing_time)
+  const nextBillingTimeValue = raw.resource?.billing_info?.next_billing_time;
+  const nextBillingTime = (typeof nextBillingTimeValue === 'string' && nextBillingTimeValue !== '')
+    ? new Date(nextBillingTimeValue)
     : undefined;
-  const lastPaymentTime = raw.resource?.billing_info?.last_payment?.time
-    ? new Date(raw.resource.billing_info.last_payment.time)
+
+  const lastPaymentTimeValue = raw.resource?.billing_info?.last_payment?.time;
+  const lastPaymentTime = (typeof lastPaymentTimeValue === 'string' && lastPaymentTimeValue !== '')
+    ? new Date(lastPaymentTimeValue)
     : undefined;
 
   // SUSPENDED in PayPal means cancel at period end
@@ -296,7 +302,7 @@ async function handleSubscriptionCanceled(
 ): Promise<void> {
   const { subscriptionId } = event.data;
 
-  if (!subscriptionId) {
+  if (typeof subscriptionId !== 'string' || subscriptionId === '') {
     log.warn({ event }, 'Missing subscription ID in subscription.canceled event');
     return;
   }
@@ -330,7 +336,7 @@ async function handleInvoicePaid(
 ): Promise<void> {
   const { invoiceId, subscriptionId } = event.data;
 
-  if (!invoiceId) {
+  if (typeof invoiceId !== 'string' || invoiceId === '') {
     log.warn({ event }, 'Missing invoice/sale ID in invoice.paid event');
     return;
   }
@@ -347,18 +353,25 @@ async function handleInvoicePaid(
     };
   };
 
-  const amount = raw.resource?.amount?.total
-    ? Math.round(parseFloat(raw.resource.amount.total) * 100)
+  const amountValue = raw.resource?.amount?.total;
+  const amount = (typeof amountValue === 'string' && amountValue !== '')
+    ? Math.round(parseFloat(amountValue) * 100)
     : 0;
-  const currency = raw.resource?.amount?.currency?.toLowerCase() || 'usd';
-  const saleTime = raw.resource?.create_time ? new Date(raw.resource.create_time) : new Date();
+
+  const currencyValue = raw.resource?.amount?.currency?.toLowerCase();
+  const currency = (typeof currencyValue === 'string' && currencyValue !== '') ? currencyValue : 'usd';
+
+  const saleTimeValue = raw.resource?.create_time;
+  const saleTime = (typeof saleTimeValue === 'string' && saleTimeValue !== '') ? new Date(saleTimeValue) : new Date();
 
   // Find subscription
   let dbSubscriptionId: string | null = null;
   let userId: string | null = null;
-  const providerSubscriptionId = subscriptionId || raw.resource?.billing_agreement_id;
+  const providerSubscriptionId = (typeof subscriptionId === 'string' && subscriptionId !== '')
+    ? subscriptionId
+    : raw.resource?.billing_agreement_id;
 
-  if (providerSubscriptionId) {
+  if (typeof providerSubscriptionId === 'string' && providerSubscriptionId !== '') {
     const subscription = await repos.subscriptions.findByProviderSubscriptionId(
       'paypal',
       providerSubscriptionId,
@@ -376,7 +389,7 @@ async function handleInvoicePaid(
     }
   }
 
-  if (!userId) {
+  if (typeof userId !== 'string' || userId === '') {
     log.warn({ invoiceId }, 'Could not determine userId for PayPal sale');
     return;
   }
@@ -416,9 +429,11 @@ async function handleInvoicePaymentFailed(
       billing_agreement_id?: string;
     };
   };
-  const providerSubscriptionId = subscriptionId || raw.resource?.billing_agreement_id;
+  const providerSubscriptionId = (typeof subscriptionId === 'string' && subscriptionId !== '')
+    ? subscriptionId
+    : raw.resource?.billing_agreement_id;
 
-  if (!providerSubscriptionId) {
+  if (typeof providerSubscriptionId !== 'string' || providerSubscriptionId === '') {
     log.warn({ event }, 'Missing subscription ID in invoice.payment_failed event');
     return;
   }

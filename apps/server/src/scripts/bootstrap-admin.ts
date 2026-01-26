@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // apps/server/src/scripts/bootstrap-admin.ts
 /**
  * Production Admin Bootstrap Script
@@ -49,8 +50,10 @@ function generateSecurePassword(length = 24): string {
 }
 
 export async function bootstrapAdmin(): Promise<BootstrapResult> {
-  const email = process.env.ADMIN_EMAIL || 'admin@localhost';
-  const name = process.env.ADMIN_NAME || 'Administrator';
+  const envEmail = process.env.ADMIN_EMAIL;
+  const email = (envEmail !== undefined && envEmail !== '') ? envEmail : 'admin@localhost';
+  const envName = process.env.ADMIN_NAME;
+  const name = (envName !== undefined && envName !== '') ? envName : 'Administrator';
 
   console.log('🔐 Production Admin Bootstrap\n');
   console.log('Creating initial admin user...\n');
@@ -104,8 +107,9 @@ export async function bootstrapAdmin(): Promise<BootstrapResult> {
 // Only run when executed directly
 const isMainModule =
   typeof process !== 'undefined' &&
-  process.argv[1]?.includes('bootstrap-admin') &&
-  !process.env.VITEST;
+  process.argv[1] !== undefined &&
+  process.argv[1].includes('bootstrap-admin') &&
+  process.env.VITEST === undefined;
 
 if (isMainModule) {
   bootstrapAdmin()

@@ -37,7 +37,7 @@ function extractIpAddress(request: RequestWithClientInfo): string | undefined {
 function extractUserAgent(request: RequestWithClientInfo): string | undefined {
   const userAgent = request.headers['user-agent'];
 
-  if (!userAgent || typeof userAgent !== 'string') {
+  if (typeof userAgent !== 'string' || userAgent === '') {
     return undefined;
   }
 

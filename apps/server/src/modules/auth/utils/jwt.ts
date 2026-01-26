@@ -8,7 +8,7 @@
 
 import crypto from 'node:crypto';
 
-import { jwtSign, jwtVerify, JwtError } from '@crypto';
+import { JwtError, jwtSign, jwtVerify } from '@crypto';
 import { MIN_JWT_SECRET_LENGTH, REFRESH_TOKEN_BYTES } from '@shared/constants';
 
 import type { UserRole } from '@abe-stack/core';
@@ -87,7 +87,7 @@ export function getRefreshTokenExpiry(expiryDays: number): Date {
 }
 
 function isTokenPayload(value: unknown): value is TokenPayload {
-  if (!value || typeof value !== 'object') return false;
+  if (value === null || typeof value !== 'object') return false;
   const record = value as Record<string, unknown>;
   return (
     typeof record.userId === 'string' &&

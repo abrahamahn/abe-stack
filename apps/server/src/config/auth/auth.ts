@@ -1,8 +1,8 @@
 // apps/server/src/config/auth/auth.ts
 import type { AuthConfig, AuthStrategy, OAuthProviderConfig } from '@abe-stack/core';
 import { BaseError } from '@abe-stack/core';
-import { getList } from '@abe-stack/core/config';
 import type { FullEnv } from '@abe-stack/core/config';
+import { getList } from '@abe-stack/core/config';
 
 const WEAK_SECRETS = new Set([
   'secret',
@@ -47,12 +47,12 @@ export class AuthValidationError extends BaseError {
  */
 export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
   const isProduction = env.NODE_ENV === 'production';
-  const jwtSecret = env.JWT_SECRET || '';
+  const jwtSecret = env.JWT_SECRET;
 
   const buildUrl = (path: string): string => `${apiBaseUrl.replace(/\/$/, '')}${path}`;
 
   const config: AuthConfig = {
-    strategies: (env.AUTH_STRATEGIES || 'local')
+    strategies: (env.AUTH_STRATEGIES ?? 'local')
       .split(',')
       .map((s) => s.trim().toLowerCase())
       .filter((s): s is AuthStrategy => VALID_STRATEGIES.has(s)),
@@ -60,14 +60,14 @@ export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
     jwt: {
       secret: jwtSecret,
       previousSecret: env.JWT_SECRET_PREVIOUS,
-      accessTokenExpiry: env.ACCESS_TOKEN_EXPIRY || '15m',
-      issuer: env.JWT_ISSUER || 'abe-stack',
-      audience: env.JWT_AUDIENCE || 'abe-stack-api',
+      accessTokenExpiry: env.ACCESS_TOKEN_EXPIRY,
+      issuer: env.JWT_ISSUER,
+      audience: env.JWT_AUDIENCE,
     },
 
     refreshToken: {
-      expiryDays: env.REFRESH_TOKEN_EXPIRY_DAYS ?? 7,
-      gracePeriodSeconds: env.REFRESH_TOKEN_GRACE_PERIOD ?? 30,
+      expiryDays: env.REFRESH_TOKEN_EXPIRY_DAYS,
+      gracePeriodSeconds: env.REFRESH_TOKEN_GRACE_PERIOD,
     },
 
     argon2: {
@@ -78,14 +78,14 @@ export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
     },
 
     password: {
-      minLength: env.PASSWORD_MIN_LENGTH ?? 8,
-      maxLength: env.PASSWORD_MAX_LENGTH ?? 64,
-      minZxcvbnScore: (env.PASSWORD_MIN_SCORE ?? 3) as 0 | 1 | 2 | 3 | 4,
+      minLength: env.PASSWORD_MIN_LENGTH,
+      maxLength: env.PASSWORD_MAX_LENGTH,
+      minZxcvbnScore: env.PASSWORD_MIN_SCORE as 0 | 1 | 2 | 3 | 4,
     },
 
     lockout: {
-      maxAttempts: env.LOCKOUT_MAX_ATTEMPTS ?? 10,
-      lockoutDurationMs: env.LOCKOUT_DURATION_MS ?? 1800000,
+      maxAttempts: env.LOCKOUT_MAX_ATTEMPTS,
+      lockoutDurationMs: env.LOCKOUT_DURATION_MS,
       progressiveDelay: true,
       baseDelayMs: 1000,
     },
@@ -119,7 +119,7 @@ export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
 
     cookie: {
       name: 'refreshToken',
-      secret: env.COOKIE_SECRET || jwtSecret,
+      secret: env.COOKIE_SECRET ?? jwtSecret,
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? 'strict' : 'lax',
@@ -130,49 +130,49 @@ export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
       google: createOAuth(
         env.GOOGLE_CLIENT_ID,
         env.GOOGLE_CLIENT_SECRET,
-        env.GOOGLE_CALLBACK_URL || buildUrl('/api/auth/oauth/google/callback'),
+        env.GOOGLE_CALLBACK_URL ?? buildUrl('/api/auth/oauth/google/callback'),
       ),
       github: createOAuth(
         env.GITHUB_CLIENT_ID,
         env.GITHUB_CLIENT_SECRET,
-        env.GITHUB_CALLBACK_URL || buildUrl('/api/auth/oauth/github/callback'),
+        env.GITHUB_CALLBACK_URL ?? buildUrl('/api/auth/oauth/github/callback'),
       ),
       facebook: createOAuth(
         env.FACEBOOK_CLIENT_ID,
         env.FACEBOOK_CLIENT_SECRET,
-        env.FACEBOOK_CALLBACK_URL || buildUrl('/api/auth/oauth/facebook/callback'),
+        env.FACEBOOK_CALLBACK_URL ?? buildUrl('/api/auth/oauth/facebook/callback'),
       ),
-      microsoft: env.MICROSOFT_CLIENT_ID
+      microsoft: env.MICROSOFT_CLIENT_ID !== undefined && env.MICROSOFT_CLIENT_ID !== ''
         ? {
             clientId: env.MICROSOFT_CLIENT_ID,
-            clientSecret: env.MICROSOFT_CLIENT_SECRET || '',
+            clientSecret: env.MICROSOFT_CLIENT_SECRET ?? '',
             callbackUrl:
-              env.MICROSOFT_CALLBACK_URL || buildUrl('/api/auth/oauth/microsoft/callback'),
-            tenantId: env.MICROSOFT_TENANT_ID || 'common',
+              env.MICROSOFT_CALLBACK_URL ?? buildUrl('/api/auth/oauth/microsoft/callback'),
+            tenantId: env.MICROSOFT_TENANT_ID ?? 'common',
           }
         : undefined,
-      ...(env.APPLE_CLIENT_ID && {
+      ...(env.APPLE_CLIENT_ID !== undefined && env.APPLE_CLIENT_ID !== '' && {
         apple: {
           clientId: env.APPLE_CLIENT_ID,
           clientSecret: '',
-          callbackUrl: env.APPLE_CALLBACK_URL || buildUrl('/api/auth/oauth/apple/callback'),
-          teamId: env.APPLE_TEAM_ID || '',
-          keyId: env.APPLE_KEY_ID || '',
-          privateKey: env.APPLE_PRIVATE_KEY_BASE64
+          callbackUrl: env.APPLE_CALLBACK_URL ?? buildUrl('/api/auth/oauth/apple/callback'),
+          teamId: env.APPLE_TEAM_ID ?? '',
+          keyId: env.APPLE_KEY_ID ?? '',
+          privateKey: (env.APPLE_PRIVATE_KEY_BASE64 !== undefined && env.APPLE_PRIVATE_KEY_BASE64 !== '')
             ? Buffer.from(env.APPLE_PRIVATE_KEY_BASE64, 'base64').toString('utf8')
-            : env.APPLE_PRIVATE_KEY || '',
+            : (env.APPLE_PRIVATE_KEY ?? ''),
         },
       }),
     },
 
     magicLink: {
-      tokenExpiryMinutes: env.MAGIC_LINK_EXPIRY_MINUTES ?? 15,
-      maxAttempts: env.MAGIC_LINK_MAX_ATTEMPTS ?? 3,
+      tokenExpiryMinutes: env.MAGIC_LINK_EXPIRY_MINUTES,
+      maxAttempts: env.MAGIC_LINK_MAX_ATTEMPTS,
     },
 
     totp: {
-      issuer: env.TOTP_ISSUER || 'ABE Stack',
-      window: env.TOTP_WINDOW ?? 1,
+      issuer: env.TOTP_ISSUER,
+      window: env.TOTP_WINDOW,
     },
   };
 
@@ -203,7 +203,7 @@ export function validateAuthConfig(config: AuthConfig): void {
   if (REPEATING_PATTERN.test(jwt.secret))
     throw new AuthValidationError('JWT secret is a repeating pattern', 'jwt.secret');
 
-  if (cookie.secret && cookie.secret.length < 32)
+  if (cookie.secret.length < 32)
     throw new AuthValidationError('Cookie secret must be >= 32 chars', 'cookie.secret');
 
   if (lockout.maxAttempts < 3 || lockout.maxAttempts > 20)
@@ -257,16 +257,16 @@ export function isStrategyEnabled(config: AuthConfig, strategy: AuthStrategy): b
   return config.strategies.includes(strategy);
 }
 
-function createOAuth<T = Record<string, any>>(
+function createOAuth<T = Record<string, unknown>>(
   id: string | undefined,
   secret: string | undefined,
   callbackUrl: string,
   extra?: T,
 ): (OAuthProviderConfig & T) | undefined {
-  if (!id) return undefined;
+  if (id === undefined || id === '') return undefined;
   return {
     clientId: id,
-    clientSecret: secret || '',
+    clientSecret: secret ?? '',
     callbackUrl,
     ...(extra as T),
   };

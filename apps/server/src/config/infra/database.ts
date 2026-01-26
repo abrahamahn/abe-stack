@@ -1,11 +1,11 @@
 // apps/server/src/config/infra/database.ts
 import type {
-  DatabaseConfig,
-  DatabaseProvider,
-  JsonDatabaseConfig,
-  PostgresConfig,
+    DatabaseConfig,
+    DatabaseProvider,
+    FullEnv,
+    JsonDatabaseConfig,
+    PostgresConfig,
 } from '@abe-stack/core/config';
-import type { FullEnv } from '@abe-stack/core/config';
 
 /**
  * Load Database Configuration.
@@ -20,34 +20,41 @@ import type { FullEnv } from '@abe-stack/core/config';
  * @returns Provider-specific configuration.
  */
 export function loadDatabaseConfig(env: FullEnv): DatabaseConfig {
-  const provider = (env.DATABASE_PROVIDER || 'postgresql') as DatabaseProvider;
+  const provider = (env.DATABASE_PROVIDER ?? 'postgresql') as DatabaseProvider;
 
   switch (provider) {
     case 'json':
       return {
         provider: 'json',
-        filePath: env.JSON_DB_PATH || '.data/db.json',
+        filePath: env.JSON_DB_PATH ?? '.data/db.json',
         persistOnWrite: env.JSON_DB_PERSIST_ON_WRITE !== 'false',
       };
 
     case 'sqlite':
       return {
         provider: 'sqlite',
-        filePath: env.SQLITE_FILE_PATH || '.data/sqlite.db',
+        filePath: env.SQLITE_FILE_PATH ?? '.data/sqlite.db',
         walMode: env.SQLITE_WAL_MODE !== 'false',
         foreignKeys: env.SQLITE_FOREIGN_KEYS !== 'false',
         timeout: env.SQLITE_TIMEOUT_MS ?? 5000,
       };
 
-    case 'mongodb':
+    case 'mongodb': {
+      const dbUrl = env.DATABASE_URL;
+      let connectionString: string;
+
+      if (env.MONGODB_CONNECTION_STRING !== undefined && env.MONGODB_CONNECTION_STRING !== '') {
+        connectionString = env.MONGODB_CONNECTION_STRING;
+      } else if (dbUrl?.includes('mongodb') === true) {
+        connectionString = dbUrl;
+      } else {
+        connectionString = 'mongodb://localhost:27017/abe_stack_dev';
+      }
+
       return {
         provider: 'mongodb',
-        connectionString:
-          env.MONGODB_CONNECTION_STRING ||
-          (env.DATABASE_URL?.includes('mongodb')
-            ? env.DATABASE_URL
-            : 'mongodb://localhost:27017/abe_stack_dev'),
-        database: env.MONGODB_DATABASE || env.MONGODB_DB || 'abe_stack_dev',
+        connectionString,
+        database: (env.MONGODB_DATABASE !== undefined && env.MONGODB_DATABASE !== '') ? env.MONGODB_DATABASE : (env.MONGODB_DB ?? 'abe_stack_dev'),
         options: {
           ssl: env.MONGODB_SSL === 'true',
           connectTimeoutMs: env.MONGODB_CONNECT_TIMEOUT_MS ?? 30000,
@@ -55,27 +62,30 @@ export function loadDatabaseConfig(env: FullEnv): DatabaseConfig {
           useUnifiedTopology: env.MONGODB_USE_UNIFIED_TOPOLOGY !== 'false',
         },
       };
+    }
 
     case 'postgresql':
-    default:
+    default: {
       const pgDefaultPort = 5432;
       const isPgProd = env.NODE_ENV === 'production';
+      const dbUrl = env.DATABASE_URL;
+      const connectionString = (dbUrl?.includes('postgresql') === true ? dbUrl : undefined) ??
+        env.POSTGRES_CONNECTION_STRING;
 
       return {
         provider: 'postgresql',
-        host: env.POSTGRES_HOST || 'localhost',
+        host: env.POSTGRES_HOST ?? 'localhost',
         port: env.POSTGRES_PORT ?? pgDefaultPort,
-        database: env.POSTGRES_DB || 'abe_stack_dev',
-        user: env.POSTGRES_USER || 'postgres',
-        password: env.POSTGRES_PASSWORD || '',
-        connectionString:
-          (env.DATABASE_URL?.includes('postgresql') ? env.DATABASE_URL : undefined) ||
-          env.POSTGRES_CONNECTION_STRING,
+        database: env.POSTGRES_DB ?? 'abe_stack_dev',
+        user: env.POSTGRES_USER ?? 'postgres',
+        password: env.POSTGRES_PASSWORD ?? '',
+        connectionString,
         maxConnections: env.DB_MAX_CONNECTIONS ?? (isPgProd ? 20 : 10),
         portFallbacks: [pgDefaultPort, pgDefaultPort + 1, pgDefaultPort + 2],
         // ssl is usually required for cloud providers in production
-        ssl: env.DB_SSL ? env.DB_SSL === 'true' : isPgProd,
+        ssl: env.DB_SSL !== undefined ? env.DB_SSL === 'true' : isPgProd,
       };
+    }
   }
 }
 
@@ -88,14 +98,13 @@ export function loadDatabaseConfig(env: FullEnv): DatabaseConfig {
 export function buildConnectionString(config: DatabaseConfig): string {
   switch (config.provider) {
     case 'postgresql': {
-      if (config.connectionString) return config.connectionString;
+      const connStr = config.connectionString;
+      if (connStr !== undefined && connStr !== '') return connStr;
       const { user, password, host, port, database } = config;
-      if (!host) return '';
-      const encodedPassword = encodeURIComponent(password);
-      return `postgresql://${user}:${encodedPassword}@${host}:${port}/${database}`;
+      return `postgresql://${user}:${encodeURIComponent(password)}@${host}:${String(port)}/${database}`;
     }
     case 'mongodb':
-      return config.connectionString ?? '';
+      return config.connectionString;
     default:
       return '';
   }

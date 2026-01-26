@@ -111,7 +111,7 @@ export async function changePassword(
   }
 
   // Validate new password strength
-  const passwordValidation = await validatePassword(newPassword, [user.email, user.name || '']);
+  const passwordValidation = await validatePassword(newPassword, [user.email, user.name ?? '']);
   if (!passwordValidation.isValid) {
     throw new WeakPasswordError({ errors: passwordValidation.errors });
   }
@@ -194,7 +194,7 @@ export async function deleteAvatar(
     throw new NotFoundError('User not found');
   }
 
-  if (!user.avatarUrl) {
+  if (user.avatarUrl === null || user.avatarUrl === '') {
     return; // No avatar to delete
   }
 
@@ -215,16 +215,16 @@ export async function getAvatarUrl(
   userId: string,
 ): Promise<string | null> {
   const user = await repos.users.findById(userId);
-
-  if (!user || !user.avatarUrl) {
+  const avatarUrl = user?.avatarUrl;
+  if (avatarUrl === null || avatarUrl === undefined || avatarUrl === '') {
     return null;
   }
 
   // If avatar URL is a storage key (starts with avatars/), generate signed URL
-  if (user.avatarUrl.startsWith(AVATAR_PATH_PREFIX)) {
-    return storage.getSignedUrl(user.avatarUrl);
+  if (avatarUrl.startsWith(AVATAR_PATH_PREFIX)) {
+    return storage.getSignedUrl(avatarUrl);
   }
 
   // Otherwise return as-is (might be an external URL)
-  return user.avatarUrl;
+  return avatarUrl;
 }

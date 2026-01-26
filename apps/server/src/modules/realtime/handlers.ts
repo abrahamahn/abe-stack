@@ -10,12 +10,12 @@ import { withTransaction } from '@database';
 import { SubKeys } from '@infrastructure/index';
 
 import {
-  applyOperations,
-  checkVersionConflicts,
-  getOperationPointers,
-  isTableAllowed,
-  loadRecords,
-  saveRecords,
+    applyOperations,
+    checkVersionConflicts,
+    getOperationPointers,
+    isTableAllowed,
+    loadRecords,
+    saveRecords,
 } from './service';
 
 import type { RealtimeTransaction, RecordPointer } from '@abe-stack/core';
@@ -58,7 +58,7 @@ export async function handleWrite(
   const userId = req.user?.userId;
 
   // Require authentication
-  if (!userId) {
+  if (userId === undefined || userId === '') {
     return {
       status: 403,
       body: { message: 'Authentication required' },
@@ -212,7 +212,7 @@ export async function handleGetRecords(
   const userId = req.user?.userId;
 
   // Require authentication (can be made public if needed)
-  if (!userId) {
+  if (userId === undefined || userId === '') {
     return {
       status: 403,
       body: { message: 'Authentication required' },

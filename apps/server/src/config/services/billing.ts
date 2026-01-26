@@ -1,6 +1,5 @@
 // apps/server/src/config/services/billing.ts
-import type { BillingConfig, BillingProvider } from '@abe-stack/core/config';
-import type { FullEnv } from '@abe-stack/core/config';
+import type { BillingConfig, BillingProvider, FullEnv } from '@abe-stack/core/config';
 
 /**
  * Load Billing Configuration.
@@ -28,12 +27,12 @@ import type { FullEnv } from '@abe-stack/core/config';
  */
 export function loadBillingConfig(env: FullEnv, appBaseUrl?: string): BillingConfig {
   // Use passed URL or fall back to env/default
-  const appUrl = (appBaseUrl || env.APP_URL || 'http://localhost:5173').replace(/\/$/, '');
+  const appUrl = (appBaseUrl ?? env.APP_URL ?? 'http://localhost:5173').replace(/\/$/, '');
 
   // 1. Check which provider keys are present
   const availability = {
-    stripe: Boolean(env.STRIPE_SECRET_KEY && env.STRIPE_PUBLISHABLE_KEY),
-    paypal: Boolean(env.PAYPAL_CLIENT_ID && env.PAYPAL_CLIENT_SECRET),
+    stripe: (env.STRIPE_SECRET_KEY != null && env.STRIPE_SECRET_KEY !== '') && (env.STRIPE_PUBLISHABLE_KEY != null && env.STRIPE_PUBLISHABLE_KEY !== ''),
+    paypal: (env.PAYPAL_CLIENT_ID != null && env.PAYPAL_CLIENT_ID !== '') && (env.PAYPAL_CLIENT_SECRET != null && env.PAYPAL_CLIENT_SECRET !== ''),
   };
 
   // 2. Resolve active provider (Explicit Choice > Stripe > PayPal)
@@ -44,23 +43,23 @@ export function loadBillingConfig(env: FullEnv, appBaseUrl?: string): BillingCon
 
   const config: BillingConfig = {
     enabled: Boolean(provider),
-    provider: provider || 'stripe',
+    provider: provider ?? 'stripe',
 
     // Global Commerce Settings
-    currency: env.BILLING_CURRENCY || 'usd',
+    currency: env.BILLING_CURRENCY ?? 'usd',
 
     // Stripe Configuration
     stripe: {
-      secretKey: env.STRIPE_SECRET_KEY || '',
-      publishableKey: env.STRIPE_PUBLISHABLE_KEY || '',
-      webhookSecret: env.STRIPE_WEBHOOK_SECRET || '',
+      secretKey: env.STRIPE_SECRET_KEY ?? '',
+      publishableKey: env.STRIPE_PUBLISHABLE_KEY ?? '',
+      webhookSecret: env.STRIPE_WEBHOOK_SECRET ?? '',
     },
 
     // PayPal Configuration
     paypal: {
-      clientId: env.PAYPAL_CLIENT_ID || '',
-      clientSecret: env.PAYPAL_CLIENT_SECRET || '',
-      webhookId: env.PAYPAL_WEBHOOK_ID || '',
+      clientId: env.PAYPAL_CLIENT_ID ?? '',
+      clientSecret: env.PAYPAL_CLIENT_SECRET ?? '',
+      webhookId: env.PAYPAL_WEBHOOK_ID ?? '',
       // Explicitly check for 'production' string to disable sandbox
       sandbox: env.PAYPAL_MODE !== 'production',
     },
@@ -73,9 +72,9 @@ export function loadBillingConfig(env: FullEnv, appBaseUrl?: string): BillingCon
     },
 
     urls: {
-      portalReturnUrl: env.BILLING_PORTAL_RETURN_URL || `${appUrl}/settings/billing`,
-      checkoutSuccessUrl: env.BILLING_CHECKOUT_SUCCESS_URL || `${appUrl}/billing/success`,
-      checkoutCancelUrl: env.BILLING_CHECKOUT_CANCEL_URL || `${appUrl}/pricing`,
+      portalReturnUrl: env.BILLING_PORTAL_RETURN_URL ?? `${appUrl}/settings/billing`,
+      checkoutSuccessUrl: env.BILLING_CHECKOUT_SUCCESS_URL ?? `${appUrl}/billing/success`,
+      checkoutCancelUrl: env.BILLING_CHECKOUT_CANCEL_URL ?? `${appUrl}/pricing`,
     },
   };
 

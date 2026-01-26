@@ -1,7 +1,6 @@
 // apps/server/src/config/infra/server.ts
+import type { FullEnv, LogLevel, ServerConfig } from '@abe-stack/core/config';
 import { getList } from '@abe-stack/core/config';
-import type { LogLevel, ServerConfig } from '@abe-stack/core/config';
-import type { FullEnv } from '@abe-stack/core/config';
 
 /**
  * Loads the core HTTP server configuration.
@@ -26,7 +25,10 @@ export function loadServerConfig(env: FullEnv): ServerConfig {
 
   // URL resolution (flexible naming support)
   const appBaseUrl =
-    env.PUBLIC_APP_URL || env.APP_URL || env.APP_BASE_URL || `http://localhost:${appPort}`;
+    (env.PUBLIC_APP_URL != null && env.PUBLIC_APP_URL !== '') ? env.PUBLIC_APP_URL :
+    (env.APP_URL != null && env.APP_URL !== '') ? env.APP_URL :
+    (env.APP_BASE_URL != null && env.APP_BASE_URL !== '') ? env.APP_BASE_URL :
+    `http://localhost:${appPort}`;
 
   const apiBaseUrl =
     env.PUBLIC_API_URL ||

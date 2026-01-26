@@ -7,17 +7,17 @@
 
 import { WebhookEventAlreadyProcessedError, WebhookSignatureError } from '@abe-stack/core';
 import type {
-  BillingEventRepository,
-  InvoiceRepository,
-  PlanRepository,
-  SubscriptionRepository,
-  CustomerMappingRepository,
+    BillingEventRepository,
+    CustomerMappingRepository,
+    InvoiceRepository,
+    PlanRepository,
+    SubscriptionRepository,
 } from '@abe-stack/db';
 
 import {
-  StripeProvider,
-  type NormalizedWebhookEvent,
-  type StripeConfig,
+    StripeProvider,
+    type NormalizedWebhookEvent,
+    type StripeConfig,
 } from '@infrastructure/billing';
 
 import type { FastifyBaseLogger } from 'fastify';
@@ -161,7 +161,7 @@ async function handleSubscriptionCreated(
 ): Promise<void> {
   const { subscriptionId, customerId, status, metadata } = event.data;
 
-  if (!subscriptionId || !customerId) {
+  if (subscriptionId === undefined || subscriptionId === '' || customerId === undefined || customerId === '') {
     log.warn({ event }, 'Missing subscription or customer ID in subscription.created event');
     return;
   }
@@ -178,7 +178,7 @@ async function handleSubscriptionCreated(
 
   // Find plan by metadata or Stripe price ID
   const planId = metadata?.planId;
-  if (!planId) {
+  if (planId === undefined || planId === '' || typeof planId !== 'string') {
     log.warn({ event }, 'No planId in subscription metadata');
     return;
   }
@@ -204,9 +204,9 @@ async function handleSubscriptionCreated(
     providerSubscriptionId: subscriptionId,
     providerCustomerId: customerId,
     status: mapStatus(status),
-    currentPeriodStart: new Date((raw.current_period_start || 0) * 1000),
-    currentPeriodEnd: new Date((raw.current_period_end || 0) * 1000),
-    trialEnd: raw.trial_end ? new Date(raw.trial_end * 1000) : null,
+    currentPeriodStart: new Date((raw.current_period_start ?? 0) * 1000),
+    currentPeriodEnd: new Date((raw.current_period_end ?? 0) * 1000),
+    trialEnd: (raw.trial_end !== undefined && raw.trial_end !== null) ? new Date(raw.trial_end * 1000) : null,
     metadata: metadata as Record<string, unknown>,
   });
 
@@ -223,7 +223,7 @@ async function handleSubscriptionUpdated(
 ): Promise<void> {
   const { subscriptionId, status } = event.data;
 
-  if (!subscriptionId) {
+  if (subscriptionId === undefined || subscriptionId === '') {
     log.warn({ event }, 'Missing subscription ID in subscription.updated event');
     return;
   }
@@ -250,13 +250,13 @@ async function handleSubscriptionUpdated(
   // Update subscription record
   await repos.subscriptions.update(subscription.id, {
     status: mapStatus(status),
-    currentPeriodStart: raw.current_period_start
+    currentPeriodStart: raw.current_period_start !== undefined
       ? new Date(raw.current_period_start * 1000)
       : undefined,
-    currentPeriodEnd: raw.current_period_end ? new Date(raw.current_period_end * 1000) : undefined,
+    currentPeriodEnd: raw.current_period_end !== undefined ? new Date(raw.current_period_end * 1000) : undefined,
     cancelAtPeriodEnd: raw.cancel_at_period_end,
-    canceledAt: raw.canceled_at ? new Date(raw.canceled_at * 1000) : undefined,
-    trialEnd: raw.trial_end ? new Date(raw.trial_end * 1000) : undefined,
+    canceledAt: (raw.canceled_at !== undefined && raw.canceled_at !== null) ? new Date(raw.canceled_at * 1000) : undefined,
+    trialEnd: (raw.trial_end !== undefined && raw.trial_end !== null) ? new Date(raw.trial_end * 1000) : undefined,
   });
 
   log.info({ subscriptionId, status }, 'Updated subscription from webhook');
@@ -272,7 +272,7 @@ async function handleSubscriptionCanceled(
 ): Promise<void> {
   const { subscriptionId } = event.data;
 
-  if (!subscriptionId) {
+  if (subscriptionId === undefined || subscriptionId === '') {
     log.warn({ event }, 'Missing subscription ID in subscription.canceled event');
     return;
   }
@@ -306,7 +306,7 @@ async function handleInvoicePaid(
 ): Promise<void> {
   const { invoiceId, customerId, subscriptionId } = event.data;
 
-  if (!invoiceId || !customerId) {
+  if (invoiceId === undefined || invoiceId === '' || customerId === undefined || customerId === '') {
     log.warn({ event }, 'Missing invoice or customer ID in invoice.paid event');
     return;
   }
@@ -333,12 +333,12 @@ async function handleInvoicePaid(
 
   // Find or get subscription ID
   let dbSubscriptionId: string | null = null;
-  if (subscriptionId) {
+  if (subscriptionId !== undefined && subscriptionId !== '') {
     const subscription = await repos.subscriptions.findByProviderSubscriptionId(
       'stripe',
       subscriptionId,
     );
-    dbSubscriptionId = subscription?.id || null;
+    dbSubscriptionId = subscription?.id ?? null;
   }
 
   // Upsert invoice record
@@ -348,22 +348,22 @@ async function handleInvoicePaid(
     provider: 'stripe',
     providerInvoiceId: invoiceId,
     status: 'paid',
-    amountDue: raw.amount_due || 0,
-    amountPaid: raw.amount_paid || 0,
-    currency: raw.currency || 'usd',
-    periodStart: new Date((raw.period_start || 0) * 1000),
-    periodEnd: new Date((raw.period_end || 0) * 1000),
+    amountDue: raw.amount_due ?? 0,
+    amountPaid: raw.amount_paid ?? 0,
+    currency: raw.currency ?? 'usd',
+    periodStart: new Date((raw.period_start ?? 0) * 1000),
+    periodEnd: new Date((raw.period_end ?? 0) * 1000),
     paidAt: new Date(),
-    invoicePdfUrl: raw.invoice_pdf || null,
+    invoicePdfUrl: raw.invoice_pdf ?? null,
   });
 
   // Update subscription status to active if it was past_due
-  if (subscriptionId) {
+  if (subscriptionId !== undefined && subscriptionId !== '') {
     const subscription = await repos.subscriptions.findByProviderSubscriptionId(
       'stripe',
       subscriptionId,
     );
-    if (subscription && subscription.status === 'past_due') {
+    if (subscription !== null && subscription.status === 'past_due') {
       await repos.subscriptions.update(subscription.id, {
         status: 'active',
       });
@@ -383,7 +383,7 @@ async function handleInvoicePaymentFailed(
 ): Promise<void> {
   const { subscriptionId } = event.data;
 
-  if (!subscriptionId) {
+  if (subscriptionId === undefined || subscriptionId === '') {
     log.warn({ event }, 'Missing subscription ID in invoice.payment_failed event');
     return;
   }

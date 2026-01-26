@@ -10,18 +10,18 @@ import Stripe from 'stripe';
 import type { SubscriptionStatus } from '@abe-stack/db';
 
 import type {
-  BillingService,
-  CheckoutParams,
-  CheckoutResult,
-  CreateProductParams,
-  CreateProductResult,
-  NormalizedEventType,
-  NormalizedWebhookEvent,
-  ProviderInvoice,
-  ProviderPaymentMethod,
-  ProviderSubscription,
-  SetupIntentResult,
-  StripeConfig,
+    BillingService,
+    CheckoutParams,
+    CheckoutResult,
+    CreateProductParams,
+    CreateProductResult,
+    NormalizedEventType,
+    NormalizedWebhookEvent,
+    ProviderInvoice,
+    ProviderPaymentMethod,
+    ProviderSubscription,
+    SetupIntentResult,
+    StripeConfig,
 } from './types';
 
 // ============================================================================
@@ -59,7 +59,7 @@ function mapStripeInvoiceStatus(
     void: 'void',
     uncollectible: 'uncollectible',
   };
-  return statusMap[stripeStatus] || 'draft';
+  return statusMap[stripeStatus] ?? 'draft';
 }
 
 /**
@@ -75,7 +75,7 @@ function mapStripeEventType(stripeType: string): NormalizedEventType {
     'charge.refunded': 'refund.created',
     'charge.dispute.created': 'chargeback.created',
   };
-  return typeMap[stripeType] || 'unknown';
+  return typeMap[stripeType] ?? 'unknown';
 }
 
 // ============================================================================

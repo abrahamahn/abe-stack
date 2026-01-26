@@ -5,7 +5,7 @@
  * Handles audio processing operations using FFmpeg.
  */
 
-import type { AudioProcessingOptions, ProcessingResult, MediaMetadata } from '../types';
+import type { AudioProcessingOptions, MediaMetadata, ProcessingResult } from '../types';
 
 export type { AudioProcessingOptions };
 
@@ -124,11 +124,11 @@ export class AudioProcessor {
     return new Promise((resolve, reject) => {
       let command = ffmpegModule.default(inputPath);
 
-      if (options.format) {
-        command = command.toFormat(options.format);
+      if (typeof options.format === 'string' && options.format !== '') {
+        command = command.toFormat(options.format as string);
       }
 
-      if (options.bitrate) {
+      if (typeof options.bitrate === 'string' && options.bitrate !== '') {
         command = command.audioBitrate(options.bitrate);
       }
 

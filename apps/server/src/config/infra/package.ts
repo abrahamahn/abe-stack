@@ -1,6 +1,5 @@
 // apps/server/src/config/infra/package.ts
-import type { PackageManagerConfig, PackageManagerProvider } from '@abe-stack/core/config';
-import type { FullEnv } from '@abe-stack/core/config';
+import type { FullEnv, PackageManagerConfig, PackageManagerProvider } from '@abe-stack/core/config';
 
 /**
  * Loads package manager configuration from environment variables.
@@ -31,7 +30,7 @@ import type { FullEnv } from '@abe-stack/core/config';
  */
 
 export function loadPackageManagerConfig(env: FullEnv): PackageManagerConfig {
-  const provider = (env.PACKAGE_MANAGER_PROVIDER || 'pnpm') as PackageManagerProvider;
+  const provider = env.PACKAGE_MANAGER_PROVIDER as PackageManagerProvider;
 
   switch (provider) {
     case 'npm':

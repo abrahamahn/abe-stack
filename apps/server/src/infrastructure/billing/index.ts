@@ -6,7 +6,7 @@
  */
 
 // Types
-export * from './types';
+export type * from './types';
 
 // Factory
 export { createBillingProvider, isBillingConfigured } from './factory';
@@ -14,3 +14,4 @@ export { createBillingProvider, isBillingConfigured } from './factory';
 // Providers
 export { PayPalProvider } from './paypal-provider';
 export { StripeProvider } from './stripe-provider';
+

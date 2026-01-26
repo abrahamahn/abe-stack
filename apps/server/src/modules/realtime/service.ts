@@ -8,17 +8,17 @@
 
 import { and, eq, inArray, insert, select, update, USERS_TABLE, type User } from '@abe-stack/db';
 
-import type { ApplyOperationsResult, RealtimeRecord, VersionConflict } from './types';
 import type {
-  RealtimeListInsertOperation,
-  RealtimeListRemoveOperation,
-  RealtimeOperation,
-  RecordMap,
-  RecordPointer,
-  RealtimeSetNowOperation,
-  RealtimeSetOperation,
+    RealtimeListInsertOperation,
+    RealtimeListRemoveOperation,
+    RealtimeOperation,
+    RealtimeSetNowOperation,
+    RealtimeSetOperation,
+    RecordMap,
+    RecordPointer,
 } from '@abe-stack/core';
 import type { DbClient } from '@database';
+import type { ApplyOperationsResult, RealtimeRecord, VersionConflict } from './types';
 
 // ============================================================================
 // Table Configuration
@@ -64,7 +64,7 @@ export function isTableAllowed(table: string): boolean {
  */
 export function registerRealtimeTable(table: string, tableName?: string): void {
   ALLOWED_TABLES.add(table);
-  if (tableName) {
+  if (tableName !== undefined && tableName !== '') {
     tableNameMap[table] = tableName;
   }
 }
@@ -85,7 +85,7 @@ export function isFieldMutable(field: string): boolean {
  */
 function getPath(obj: Record<string, unknown>, path: string): unknown {
   return path.split('.').reduce<unknown>((acc, key) => {
-    if (acc && typeof acc === 'object' && key in acc) {
+    if (acc !== null && acc !== undefined && typeof acc === 'object' && key in acc) {
       return (acc as Record<string, unknown>)[key];
     }
     return undefined;
@@ -98,7 +98,7 @@ function getPath(obj: Record<string, unknown>, path: string): unknown {
 function setPath(obj: Record<string, unknown>, path: string, value: unknown): void {
   const keys = path.split('.');
   const lastKey = keys.pop();
-  if (!lastKey) return;
+  if (lastKey === undefined || lastKey === '') return;
 
   const target = keys.reduce<Record<string, unknown>>((acc, key) => {
     if (!(key in acc) || typeof acc[key] !== 'object' || acc[key] === null) {
@@ -115,8 +115,8 @@ function setPath(obj: Record<string, unknown>, path: string, value: unknown): vo
  */
 function deepEqual(a: unknown, b: unknown): boolean {
   if (a === b) return true;
-
-  if (a && b && typeof a === 'object' && typeof b === 'object') {
+  if (a === null || b === null) return false;
+  if (typeof a === 'object' && typeof b === 'object') {
     if (Array.isArray(a) !== Array.isArray(b)) return false;
 
     const keysA = Object.keys(a);
@@ -157,7 +157,7 @@ export async function loadRecords(db: DbClient, pointers: RecordPointer[]): Prom
       throw new Error(`Table '${pointer.table}' is not allowed for realtime operations`);
     }
 
-    const ids = byTable.get(pointer.table) || [];
+    const ids = byTable.get(pointer.table) ?? [];
     if (!ids.includes(pointer.id)) {
       ids.push(pointer.id);
     }
@@ -170,7 +170,7 @@ export async function loadRecords(db: DbClient, pointers: RecordPointer[]): Prom
   for (const [table, ids] of byTable.entries()) {
     recordMap[table] = {};
     const tableName = tableNameMap[table];
-    if (!tableName) {
+    if (tableName === undefined || tableName === '') {
       continue;
     }
 
@@ -210,8 +210,8 @@ export function getOperationPointers(operations: RealtimeOperation[]): RecordPoi
 export function applyOperation(record: RealtimeRecord, op: RealtimeOperation): RealtimeRecord {
   // Validate field is mutable
   const rootKey = op.key.split('.')[0];
-  if (!rootKey || !isFieldMutable(rootKey)) {
-    throw new Error(`Field '${rootKey || op.key}' cannot be modified`);
+  if (rootKey === undefined || rootKey === '' || !isFieldMutable(rootKey)) {
+    throw new Error(`Field '${rootKey ?? op.key}' cannot be modified`);
   }
 
   const newRecord: RealtimeRecord = {
@@ -389,7 +389,7 @@ export async function saveRecords(
  */
 async function insertRecord(db: DbClient, table: string, record: RealtimeRecord): Promise<void> {
   const tableName = tableNameMap[table];
-  if (!tableName) {
+  if (tableName === undefined || tableName === '') {
     throw new Error(`Table '${table}' is not registered for realtime operations`);
   }
   await db.execute(insert(tableName).values(record).toSql());
@@ -405,7 +405,7 @@ async function updateRecord(
   expectedVersion: number,
 ): Promise<boolean> {
   const tableName = tableNameMap[table];
-  if (!tableName) {
+  if (tableName === undefined || tableName === '') {
     throw new Error(`Table '${table}' is not registered for realtime operations`);
   }
 

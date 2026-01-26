@@ -9,25 +9,25 @@
 import { createHash, randomBytes } from 'node:crypto';
 
 import {
-  MAGIC_LINK_TOKENS_TABLE,
-  USERS_TABLE,
-  USER_COLUMNS,
-  and,
-  eq,
-  gt,
-  insert,
-  isNull,
-  select,
-  toCamelCase,
-  update,
-  type User,
+    MAGIC_LINK_TOKENS_TABLE,
+    USERS_TABLE,
+    USER_COLUMNS,
+    and,
+    eq,
+    gt,
+    insert,
+    isNull,
+    select,
+    toCamelCase,
+    update,
+    type User,
 } from '@abe-stack/db';
 import {
-  emailTemplates,
-  withTransaction,
-  type DbClient,
-  type EmailService,
-  type Repositories,
+    emailTemplates,
+    withTransaction,
+    type DbClient,
+    type EmailService,
+    type Repositories,
 } from '@infrastructure';
 import { EmailSendError, InvalidTokenError, TooManyRequestsError } from '@shared';
 
@@ -185,7 +185,7 @@ export async function requestMagicLink(
   }
 
   // Check IP-based rate limit (if IP is provided)
-  if (ipAddress) {
+  if (ipAddress !== undefined && ipAddress !== '') {
     const ipRateLimited = await isIpRateLimited(repos, ipAddress, maxAttemptsPerIp);
     if (ipRateLimited) {
       throw new TooManyRequestsError(

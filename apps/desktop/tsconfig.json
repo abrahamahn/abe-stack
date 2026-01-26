@@ -15,8 +15,8 @@
     },
     "tsBuildInfoFile": "./node_modules/.cache/tsconfig.desktop.tsbuildinfo"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "__tests__", "src/electron"],
+  "include": ["src/**/*", "vitest.config.ts", "**/*.test.ts", "**/*.test.tsx"],
+  "exclude": ["node_modules", "src/electron"],
   "references": [
     {
       "path": "../../packages/core"

@@ -9,9 +9,9 @@
 import { createFcmProvider, FcmProvider } from './fcm-provider';
 
 import type {
-  NotificationFactoryOptions,
-  NotificationService,
-  PushNotificationProvider,
+    NotificationFactoryOptions,
+    NotificationService,
+    PushNotificationProvider,
 } from './types';
 
 // ============================================================================
@@ -29,7 +29,7 @@ class NotificationServiceImpl implements NotificationService {
   }
 
   getFcmProvider(): PushNotificationProvider | undefined {
-    return this.fcmProvider?.isConfigured() ? this.fcmProvider : undefined;
+    return this.fcmProvider?.isConfigured() === true ? this.fcmProvider : undefined;
   }
 
   isConfigured(): boolean {

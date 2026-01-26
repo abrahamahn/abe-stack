@@ -7,27 +7,27 @@
  */
 
 import {
-  BillingSubscriptionExistsError,
-  BillingSubscriptionNotFoundError,
-  CannotRemoveDefaultPaymentMethodError,
-  CustomerNotFoundError,
-  PaymentMethodNotFoundError,
-  PlanNotActiveError,
-  PlanNotFoundError,
-  SubscriptionAlreadyCanceledError,
-  SubscriptionNotActiveError,
-  SubscriptionNotCancelingError,
+    BillingSubscriptionExistsError,
+    BillingSubscriptionNotFoundError,
+    CannotRemoveDefaultPaymentMethodError,
+    CustomerNotFoundError,
+    PaymentMethodNotFoundError,
+    PlanNotActiveError,
+    PlanNotFoundError,
+    SubscriptionAlreadyCanceledError,
+    SubscriptionNotActiveError,
+    SubscriptionNotCancelingError,
 } from '@abe-stack/core';
 import type {
-  CustomerMappingRepository,
-  Invoice as DbInvoice,
-  PaymentMethod as DbPaymentMethod,
-  Plan as DbPlan,
-  Subscription as DbSubscription,
-  InvoiceRepository,
-  PaymentMethodRepository,
-  PlanRepository,
-  SubscriptionRepository,
+    CustomerMappingRepository,
+    Invoice as DbInvoice,
+    PaymentMethod as DbPaymentMethod,
+    Plan as DbPlan,
+    Subscription as DbSubscription,
+    InvoiceRepository,
+    PaymentMethodRepository,
+    PlanRepository,
+    SubscriptionRepository,
 } from '@abe-stack/db';
 
 import type { BillingService } from '@infrastructure/billing';
@@ -128,7 +128,7 @@ export async function createCheckoutSession(
 
   // Get the Stripe price ID
   const priceId = plan.stripePriceId;
-  if (!priceId) {
+  if (priceId === null || priceId === '') {
     throw new Error(`Plan ${params.planId} has no Stripe price ID configured`);
   }
 
@@ -252,7 +252,7 @@ export async function updateSubscription(
   }
 
   const newPriceId = newPlan.stripePriceId;
-  if (!newPriceId) {
+  if (newPriceId === null || newPriceId === '') {
     throw new Error(`Plan ${newPlanId} has no Stripe price ID configured`);
   }
 
@@ -359,7 +359,7 @@ export async function addPaymentMethod(
     providerPaymentMethodId: paymentMethodId,
     type: providerMethod.type,
     isDefault,
-    cardDetails: providerMethod.card || null,
+    cardDetails: providerMethod.card ?? null,
   });
 }
 
@@ -374,7 +374,7 @@ export async function removePaymentMethod(
 ): Promise<void> {
   const paymentMethod = await repos.paymentMethods.findById(paymentMethodId);
 
-  if (!paymentMethod || paymentMethod.userId !== userId) {
+  if (paymentMethod?.userId !== userId) {
     throw new PaymentMethodNotFoundError(paymentMethodId);
   }
 
@@ -404,7 +404,7 @@ export async function setDefaultPaymentMethod(
 ): Promise<DbPaymentMethod> {
   const paymentMethod = await repos.paymentMethods.findById(paymentMethodId);
 
-  if (!paymentMethod || paymentMethod.userId !== userId) {
+  if (paymentMethod?.userId !== userId) {
     throw new PaymentMethodNotFoundError(paymentMethodId);
   }
 
@@ -447,5 +447,5 @@ export async function getCustomerId(
   userId: string,
 ): Promise<string | null> {
   const mapping = await repos.customerMappings.findByUserIdAndProvider(userId, provider.provider);
-  return mapping?.providerCustomerId || null;
+  return mapping?.providerCustomerId ?? null;
 }

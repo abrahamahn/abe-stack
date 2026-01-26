@@ -9,16 +9,16 @@
 import { createElasticsearchProvider } from './elasticsearch-provider';
 import { createSqlSearchProvider } from './sql-provider';
 
+import type { DbClient, Repositories } from '@database';
 import type { ElasticsearchProvider } from './elasticsearch-provider';
 import type { SqlSearchProvider } from './sql-provider';
 import type {
-  ElasticsearchProviderConfig,
-  SearchProviderType,
-  ServerSearchProvider,
-  SqlSearchProviderConfig,
-  SqlTableConfig,
+    ElasticsearchProviderConfig,
+    SearchProviderType,
+    ServerSearchProvider,
+    SqlSearchProviderConfig,
+    SqlTableConfig,
 } from './types';
-import type { DbClient, Repositories } from '@database';
 
 // ============================================================================
 // Factory Types
@@ -180,9 +180,7 @@ let factoryInstance: SearchProviderFactory | null = null;
  * Get the singleton factory instance.
  */
 export function getSearchProviderFactory(): SearchProviderFactory {
-  if (!factoryInstance) {
-    factoryInstance = new SearchProviderFactory();
-  }
+  factoryInstance ??= new SearchProviderFactory();
   return factoryInstance;
 }
 

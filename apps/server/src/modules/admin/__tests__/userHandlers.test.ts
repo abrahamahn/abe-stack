@@ -2,11 +2,11 @@
 import { UserNotFoundError } from '@shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
-  handleGetUser,
-  handleListUsers,
-  handleLockUser,
-  handleUnlockUser,
-  handleUpdateUser,
+    handleGetUser,
+    handleListUsers,
+    handleLockUser,
+    handleUnlockUser,
+    handleUpdateUser,
 } from '../userHandlers';
 
 import type { AppContext, RequestWithCookies } from '@shared';
@@ -110,7 +110,7 @@ function createMockReply(): FastifyReply {
 describe('Admin User Handlers', () => {
   let mockCtx: AppContext;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     mockCtx = createMockContext();
     vi.clearAllMocks();
   });

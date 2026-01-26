@@ -57,7 +57,7 @@ const integrationMocks = vi.hoisted(() => {
 
     emit(event: string, ...args: unknown[]) {
       const handlers = windowEvents.get(event) ?? [];
-      handlers.forEach((handler) => handler(...args));
+      handlers.forEach((handler) => { handler(...args); });
     }
 
     close = vi.fn();
@@ -306,7 +306,7 @@ describe('Integration: End-to-End IPC Flow', () => {
       await import('../electron/main');
 
       // Trigger the ready event
-      const readyHandlers = appEventHandlers.get('ready') || [];
+      const readyHandlers = appEventHandlers.get('ready') ?? [];
       expect(readyHandlers.length).toBeGreaterThan(0);
       await (readyHandlers[0] as () => Promise<void>)();
 
@@ -333,7 +333,7 @@ describe('Integration: End-to-End IPC Flow', () => {
       expect(integrationMocks.ipcHandlers.has('get-app-version')).toBe(true);
 
       // Create window
-      const readyHandlers = appEventHandlers.get('ready') || [];
+      const readyHandlers = appEventHandlers.get('ready') ?? [];
       await (readyHandlers[0] as () => Promise<void>)();
 
       // Now the window getter should return the window
@@ -412,7 +412,7 @@ describe('Integration: Window Lifecycle Management', () => {
 
       expect(integrationMocks.getWindowInstance()).toBeNull();
 
-      const readyHandlers = appEventHandlers.get('ready') || [];
+      const readyHandlers = appEventHandlers.get('ready') ?? [];
       await (readyHandlers[0] as () => Promise<void>)();
 
       expect(integrationMocks.getWindowInstance()).not.toBeNull();
@@ -425,7 +425,7 @@ describe('Integration: Window Lifecycle Management', () => {
 
       await import('../electron/main');
 
-      const readyHandlers = appEventHandlers.get('ready') || [];
+      const readyHandlers = appEventHandlers.get('ready') ?? [];
       await (readyHandlers[0] as () => Promise<void>)();
 
       const windowInstance = integrationMocks.getWindowInstance();
@@ -439,7 +439,7 @@ describe('Integration: Window Lifecycle Management', () => {
 
       await import('../electron/main');
 
-      const readyHandlers = appEventHandlers.get('ready') || [];
+      const readyHandlers = appEventHandlers.get('ready') ?? [];
       await (readyHandlers[0] as () => Promise<void>)();
 
       const windowInstance = integrationMocks.getWindowInstance();
@@ -457,7 +457,7 @@ describe('Integration: Window Lifecycle Management', () => {
       await import('../electron/main');
 
       // Create window
-      const readyHandlers = appEventHandlers.get('ready') || [];
+      const readyHandlers = appEventHandlers.get('ready') ?? [];
       await (readyHandlers[0] as () => Promise<void>)();
 
       const windowInstance = integrationMocks.getWindowInstance();
@@ -479,9 +479,10 @@ describe('Integration: Window Lifecycle Management', () => {
 
       await import('../electron/main');
 
-      const windowAllClosedHandlers = appEventHandlers.get('window-all-closed') || [];
+      const windowAllClosedHandlers = appEventHandlers.get('window-all-closed') ?? [];
       expect(windowAllClosedHandlers.length).toBeGreaterThan(0);
-      windowAllClosedHandlers[0]?.();
+      const handler = windowAllClosedHandlers[0];
+      handler?.();
 
       expect(appQuitMock).toHaveBeenCalledTimes(1);
 
@@ -496,9 +497,10 @@ describe('Integration: Window Lifecycle Management', () => {
 
       await import('../electron/main');
 
-      const windowAllClosedHandlers = appEventHandlers.get('window-all-closed') || [];
+      const windowAllClosedHandlers = appEventHandlers.get('window-all-closed') ?? [];
       expect(windowAllClosedHandlers.length).toBeGreaterThan(0);
-      windowAllClosedHandlers[0]?.();
+      const handler = windowAllClosedHandlers[0];
+      handler?.();
 
       expect(appQuitMock).not.toHaveBeenCalled();
 
@@ -514,7 +516,7 @@ describe('Integration: Window Lifecycle Management', () => {
       await import('../electron/main');
 
       // Verify that activate handler was registered
-      const activateHandlers = appEventHandlers.get('activate') || [];
+      const activateHandlers = appEventHandlers.get('activate') ?? [];
       expect(activateHandlers.length).toBeGreaterThan(0);
 
       delete process.env.NODE_ENV;
@@ -525,7 +527,7 @@ describe('Integration: Window Lifecycle Management', () => {
 
       await import('../electron/main');
 
-      const activateHandlers = appEventHandlers.get('activate') || [];
+      const activateHandlers = appEventHandlers.get('activate') ?? [];
       expect(typeof activateHandlers[0]).toBe('function');
 
       delete process.env.NODE_ENV;
@@ -640,6 +642,7 @@ describe('Integration: Preload Script Context Bridge', () => {
 
       await exposedAPI.openExternal('https://example.com');
 
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(shell.openExternal).toHaveBeenCalledWith('https://example.com');
     });
 
@@ -781,7 +784,7 @@ describe('Integration: App Initialization and Shutdown', () => {
       expect(appEventHandlers.size).toBe(3);
 
       // Step 4: Trigger ready event - window created
-      const readyHandlers = appEventHandlers.get('ready') || [];
+      const readyHandlers = appEventHandlers.get('ready') ?? [];
       await (readyHandlers[0] as () => Promise<void>)();
 
       expect(integrationMocks.getWindowInstance()).not.toBeNull();
@@ -803,7 +806,7 @@ describe('Integration: App Initialization and Shutdown', () => {
       vi.resetModules();
       await import('../electron/main');
 
-      const readyHandlers = appEventHandlers.get('ready') || [];
+      const readyHandlers = appEventHandlers.get('ready') ?? [];
       await (readyHandlers[0] as () => Promise<void>)();
 
       expect(waitForPortMock).toHaveBeenCalledWith(expect.arrayContaining([3000]), 'localhost');
@@ -827,7 +830,7 @@ describe('Integration: App Initialization and Shutdown', () => {
       vi.resetModules();
       await import('../electron/main');
 
-      const readyHandlers = appEventHandlers.get('ready') || [];
+      const readyHandlers = appEventHandlers.get('ready') ?? [];
       await (readyHandlers[0] as () => Promise<void>)();
 
       expect(waitForPortMock).toHaveBeenCalledWith(expect.arrayContaining([4000]), 'localhost');
@@ -987,7 +990,7 @@ describe('Integration: Window Security Settings', () => {
 
       await import('../electron/main');
 
-      const readyHandlers = appEventHandlers.get('ready') || [];
+      const readyHandlers = appEventHandlers.get('ready') ?? [];
       await (readyHandlers[0] as () => Promise<void>)();
 
       const windowInstance = integrationMocks.getWindowInstance();
@@ -1003,7 +1006,7 @@ describe('Integration: Window Security Settings', () => {
 
       await import('../electron/main');
 
-      const readyHandlers = appEventHandlers.get('ready') || [];
+      const readyHandlers = appEventHandlers.get('ready') ?? [];
       await (readyHandlers[0] as () => Promise<void>)();
 
       const windowInstance = integrationMocks.getWindowInstance();
@@ -1019,7 +1022,7 @@ describe('Integration: Window Security Settings', () => {
 
       await import('../electron/main');
 
-      const readyHandlers = appEventHandlers.get('ready') || [];
+      const readyHandlers = appEventHandlers.get('ready') ?? [];
       await (readyHandlers[0] as () => Promise<void>)();
 
       const windowInstance = integrationMocks.getWindowInstance();
@@ -1035,7 +1038,7 @@ describe('Integration: Window Security Settings', () => {
 
       await import('../electron/main');
 
-      const readyHandlers = appEventHandlers.get('ready') || [];
+      const readyHandlers = appEventHandlers.get('ready') ?? [];
       await (readyHandlers[0] as () => Promise<void>)();
 
       const windowInstance = integrationMocks.getWindowInstance();
@@ -1053,7 +1056,7 @@ describe('Integration: Window Security Settings', () => {
 
       await import('../electron/main');
 
-      const readyHandlers = appEventHandlers.get('ready') || [];
+      const readyHandlers = appEventHandlers.get('ready') ?? [];
       await (readyHandlers[0] as () => Promise<void>)();
 
       const windowInstance = integrationMocks.getWindowInstance();

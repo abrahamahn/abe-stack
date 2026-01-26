@@ -10,48 +10,48 @@ import { randomBytes } from 'node:crypto';
 
 import { validatePassword, type UserRole } from '@abe-stack/core';
 import {
-  and,
-  EMAIL_VERIFICATION_TOKENS_TABLE,
-  eq,
-  insert,
-  isNull,
-  PASSWORD_RESET_TOKENS_TABLE,
-  toCamelCase,
-  update,
-  USER_COLUMNS,
-  USERS_TABLE,
-  type User,
+    and,
+    EMAIL_VERIFICATION_TOKENS_TABLE,
+    eq,
+    insert,
+    isNull,
+    PASSWORD_RESET_TOKENS_TABLE,
+    toCamelCase,
+    update,
+    USER_COLUMNS,
+    USERS_TABLE,
+    type User,
 } from '@abe-stack/db';
 import {
-  applyProgressiveDelay,
-  emailTemplates,
-  getAccountLockoutStatus,
-  isAccountLocked,
-  logAccountLockedEvent,
-  logLoginAttempt,
-  withTransaction,
-  type DbClient,
-  type EmailService,
-  type Logger,
-  type Repositories,
+    applyProgressiveDelay,
+    emailTemplates,
+    getAccountLockoutStatus,
+    isAccountLocked,
+    logAccountLockedEvent,
+    logLoginAttempt,
+    withTransaction,
+    type DbClient,
+    type EmailService,
+    type Logger,
+    type Repositories,
 } from '@infrastructure';
 import {
-  AccountLockedError,
-  EmailNotVerifiedError,
-  EmailSendError,
-  InvalidCredentialsError,
-  InvalidTokenError,
-  WeakPasswordError,
+    AccountLockedError,
+    EmailNotVerifiedError,
+    EmailSendError,
+    InvalidCredentialsError,
+    InvalidTokenError,
+    WeakPasswordError,
 } from '@shared';
 
 import {
-  createAccessToken,
-  createAuthResponse,
-  createRefreshTokenFamily,
-  hashPassword,
-  needsRehash,
-  rotateRefreshToken as rotateRefreshTokenUtil,
-  verifyPasswordSafe,
+    createAccessToken,
+    createAuthResponse,
+    createRefreshTokenFamily,
+    hashPassword,
+    needsRehash,
+    rotateRefreshToken as rotateRefreshTokenUtil,
+    verifyPasswordSafe,
 } from './utils';
 
 import type { AuthConfig } from '@/config';
@@ -130,7 +130,7 @@ export async function registerUser(
   }
 
   // Validate password strength
-  const passwordValidation = await validatePassword(password, [email, name || '']);
+  const passwordValidation = await validatePassword(password, [email, name ?? '']);
   if (!passwordValidation.isValid) {
     throw new WeakPasswordError({ errors: passwordValidation.errors });
   }
@@ -143,7 +143,7 @@ export async function registerUser(
       insert(USERS_TABLE)
         .values({
           email,
-          name: name || null,
+          name: name ?? null,
           password_hash: passwordHash,
           role: 'user',
           email_verified: false,
@@ -165,7 +165,7 @@ export async function registerUser(
   });
 
   // Send verification email (baseUrl is required, provided by handlers)
-  if (!baseUrl) {
+  if (baseUrl === undefined || baseUrl === '') {
     throw new Error('baseUrl is required to send verification emails');
   }
   const verifyUrl = `${baseUrl}/auth/confirm-email?token=${verificationToken}`;
@@ -311,7 +311,7 @@ export async function logoutUser(
   repos: Repositories,
   refreshToken?: string,
 ): Promise<void> {
-  if (refreshToken) {
+  if (refreshToken !== undefined && refreshToken !== '') {
     await repos.refreshTokens.deleteByToken(refreshToken);
   }
 }
@@ -491,7 +491,7 @@ export async function resetPassword(
   }
 
   // Validate password strength first
-  const passwordValidation = await validatePassword(newPassword, [user.email, user.name || '']);
+  const passwordValidation = await validatePassword(newPassword, [user.email, user.name ?? '']);
   if (!passwordValidation.isValid) {
     throw new WeakPasswordError({ errors: passwordValidation.errors });
   }
@@ -553,7 +553,7 @@ export async function setPassword(
   }
 
   // Validate password strength
-  const passwordValidation = await validatePassword(newPassword, [user.email, user.name || '']);
+  const passwordValidation = await validatePassword(newPassword, [user.email, user.name ?? '']);
   if (!passwordValidation.isValid) {
     throw new WeakPasswordError({ errors: passwordValidation.errors });
   }

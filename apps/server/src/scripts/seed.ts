@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // apps/server/src/scripts/seed.ts
 /**
  * Database Seed Script
@@ -118,7 +119,10 @@ export async function seed(): Promise<void> {
 
 // Only run when executed directly (not imported for testing)
 const isMainModule =
-  typeof process !== 'undefined' && process.argv[1]?.includes('seed') && !process.env.VITEST;
+  typeof process !== 'undefined' &&
+  process.argv[1] !== undefined &&
+  process.argv[1].includes('seed') &&
+  process.env.VITEST === undefined;
 
 if (isMainModule) {
   seed().catch((error: unknown) => {

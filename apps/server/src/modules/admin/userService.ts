@@ -9,11 +9,11 @@
 import { UserNotFoundError } from '@shared';
 
 import type {
-  AdminUser,
-  AdminUserListFilters,
-  AdminUserListResponse,
-  UserRole,
-  UserStatus,
+    AdminUser,
+    AdminUserListFilters,
+    AdminUserListResponse,
+    UserRole,
+    UserStatus,
 } from '@abe-stack/core';
 import type { User as DbUser, UserRepository } from '@abe-stack/db';
 
@@ -202,7 +202,7 @@ export function getUserStatus(user: AdminUser): UserStatus {
   const now = new Date();
 
   // Check if locked
-  if (user.lockedUntil && new Date(user.lockedUntil) > now) {
+  if (user.lockedUntil !== null && new Date(user.lockedUntil) > now) {
     return 'locked';
   }
 

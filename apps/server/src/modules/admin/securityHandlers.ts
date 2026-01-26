@@ -7,21 +7,21 @@
  */
 
 import {
-  exportSecurityEvents,
-  getSecurityEvent,
-  getSecurityMetrics,
-  listSecurityEvents,
-  SecurityEventNotFoundError,
+    exportSecurityEvents,
+    getSecurityEvent,
+    getSecurityMetrics,
+    listSecurityEvents,
+    SecurityEventNotFoundError,
 } from '@admin/securityService';
 import { ERROR_MESSAGES, type AppContext } from '@shared';
 
 import type {
-  SecurityEvent,
-  SecurityEventsExportRequest,
-  SecurityEventsExportResponse,
-  SecurityEventsListRequest,
-  SecurityEventsListResponse,
-  SecurityMetrics,
+    SecurityEvent,
+    SecurityEventsExportRequest,
+    SecurityEventsExportResponse,
+    SecurityEventsListRequest,
+    SecurityEventsListResponse,
+    SecurityMetrics,
 } from '@abe-stack/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
@@ -109,7 +109,7 @@ export async function handleGetSecurityMetrics(
     const query = request.query as { period?: string };
     const periodParam = query.period;
     let period: 'hour' | 'day' | 'week' | 'month' = 'day';
-    if (periodParam && ['hour', 'day', 'week', 'month'].includes(periodParam)) {
+    if (typeof periodParam === 'string' && periodParam.length > 0 && ['hour', 'day', 'week', 'month'].includes(periodParam)) {
       period = periodParam as 'hour' | 'day' | 'week' | 'month';
     }
 

@@ -13,30 +13,30 @@
 
 import { DEFAULT_NOTIFICATION_PREFERENCES, PushSubscriptionExistsError } from '@abe-stack/core';
 import {
-  and,
-  eq,
-  inArray,
-  select,
-  selectCount,
-  insert,
-  update,
-  deleteFrom,
-  toCamelCase,
-  PUSH_SUBSCRIPTIONS_TABLE,
-  PUSH_SUBSCRIPTION_COLUMNS,
-  NOTIFICATION_PREFERENCES_TABLE,
-  NOTIFICATION_PREFERENCE_COLUMNS,
-  type PushSubscription as DbPushSubscription,
-  type NotificationPreference as DbNotificationPreference,
+    NOTIFICATION_PREFERENCES_TABLE,
+    NOTIFICATION_PREFERENCE_COLUMNS,
+    PUSH_SUBSCRIPTIONS_TABLE,
+    PUSH_SUBSCRIPTION_COLUMNS,
+    and,
+    deleteFrom,
+    eq,
+    inArray,
+    insert,
+    select,
+    selectCount,
+    toCamelCase,
+    update,
+    type NotificationPreference as DbNotificationPreference,
+    type PushSubscription as DbPushSubscription,
 } from '@abe-stack/db';
 import { type DbClient, type QuietHoursConfig, type TypePreferences } from '@infrastructure';
 
 import type {
-  NotificationPreferences,
-  NotificationType,
-  PushSubscription,
-  StoredPushSubscription,
-  UpdatePreferencesRequest,
+    NotificationPreferences,
+    NotificationType,
+    PushSubscription,
+    StoredPushSubscription,
+    UpdatePreferencesRequest,
 } from '@abe-stack/core';
 
 // ============================================================================
@@ -76,7 +76,7 @@ export async function subscribe(
             last_used_at: new Date(),
             keys_p256dh: subscription.keys.p256dh,
             keys_auth: subscription.keys.auth,
-            expiration_time: subscription.expirationTime
+            expiration_time: (subscription.expirationTime !== null && subscription.expirationTime !== 0)
               ? new Date(subscription.expirationTime)
               : null,
           })
@@ -94,7 +94,7 @@ export async function subscribe(
       .values({
         user_id: userId,
         endpoint: subscription.endpoint,
-        expiration_time: subscription.expirationTime ? new Date(subscription.expirationTime) : null,
+        expiration_time: (subscription.expirationTime !== null && subscription.expirationTime !== 0) ? new Date(subscription.expirationTime) : null,
         keys_p256dh: subscription.keys.p256dh,
         keys_auth: subscription.keys.auth,
         device_id: deviceId,
@@ -127,11 +127,11 @@ export async function unsubscribe(
 ): Promise<boolean> {
   let result: Record<string, unknown>[];
 
-  if (subscriptionId) {
+  if (subscriptionId !== undefined && subscriptionId !== '') {
     result = await db.query<Record<string, unknown>>(
       deleteFrom(PUSH_SUBSCRIPTIONS_TABLE).where(eq('id', subscriptionId)).returning('id').toSql(),
     );
-  } else if (endpoint) {
+  } else if (endpoint !== undefined && endpoint !== '') {
     result = await db.query<Record<string, unknown>>(
       deleteFrom(PUSH_SUBSCRIPTIONS_TABLE).where(eq('endpoint', endpoint)).returning('id').toSql(),
     );

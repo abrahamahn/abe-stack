@@ -1,12 +1,12 @@
 // apps/server/src/config/services/notifications.ts
 import type {
-  CourierConfig,
-  FcmConfig,
-  NotificationConfig,
-  NotificationProvider,
-  OneSignalConfig,
+    CourierConfig,
+    FcmConfig,
+    FullEnv,
+    NotificationConfig,
+    NotificationProvider,
+    OneSignalConfig,
 } from '@abe-stack/core/config';
-import type { FullEnv } from '@abe-stack/core/config';
 
 /**
  * Load Push Notification Configuration.
@@ -67,11 +67,9 @@ import type { FullEnv } from '@abe-stack/core/config';
 export function loadNotificationsConfig(env: FullEnv): NotificationConfig {
   // Check which provider keys are present
   const availability = {
-    onesignal: Boolean(
-      env.ONESIGNAL_REST_API_KEY && env.ONESIGNAL_USER_AUTH_KEY && env.ONESIGNAL_APP_ID,
-    ),
-    fcm: Boolean(env.FCM_PROJECT_ID && env.FCM_CREDENTIALS),
-    courier: Boolean(env.COURIER_API_KEY),
+    onesignal: (env.ONESIGNAL_REST_API_KEY != null && env.ONESIGNAL_REST_API_KEY !== '') && (env.ONESIGNAL_USER_AUTH_KEY != null && env.ONESIGNAL_USER_AUTH_KEY !== '') && (env.ONESIGNAL_APP_ID != null && env.ONESIGNAL_APP_ID !== ''),
+    fcm: (env.FCM_PROJECT_ID != null && env.FCM_PROJECT_ID !== '') && (env.FCM_CREDENTIALS != null && env.FCM_CREDENTIALS !== ''),
+    courier: (env.COURIER_API_KEY != null && env.COURIER_API_KEY !== ''),
   };
 
   // Resolve active provider (Explicit Choice > OneSignal > FCM > Courier)
@@ -84,7 +82,7 @@ export function loadNotificationsConfig(env: FullEnv): NotificationConfig {
   const isEnabled = Boolean(provider);
 
   // Build configuration based on what provider would be used (even if not enabled due to missing credentials)
-  const effectiveProvider = provider || 'onesignal'; // Default to onesignal
+  const effectiveProvider = provider ?? 'onesignal'; // Default to onesignal
 
   const config: NotificationConfig = {
     enabled: isEnabled,
@@ -97,9 +95,9 @@ export function loadNotificationsConfig(env: FullEnv): NotificationConfig {
   switch (effectiveProvider) {
     case 'onesignal':
       config.config = {
-        restApiKey: env.ONESIGNAL_REST_API_KEY || '',
-        userAuthKey: env.ONESIGNAL_USER_AUTH_KEY || '',
-        appId: env.ONESIGNAL_APP_ID || '',
+        restApiKey: env.ONESIGNAL_REST_API_KEY ?? '',
+        userAuthKey: env.ONESIGNAL_USER_AUTH_KEY ?? '',
+        appId: env.ONESIGNAL_APP_ID ?? '',
         settings: {
           enableLogging: env.ONESIGNAL_ENABLE_LOGGING === 'true',
         },
@@ -108,15 +106,15 @@ export function loadNotificationsConfig(env: FullEnv): NotificationConfig {
 
     case 'fcm':
       config.config = {
-        credentials: env.FCM_CREDENTIALS || '',
-        projectId: env.FCM_PROJECT_ID || '',
+        credentials: env.FCM_CREDENTIALS ?? '',
+        projectId: env.FCM_PROJECT_ID ?? '',
       };
       break;
 
     case 'courier':
       config.config = {
-        apiKey: env.COURIER_API_KEY || '',
-        apiUrl: env.COURIER_API_URL || 'https://api.courier.com',
+        apiKey: env.COURIER_API_KEY ?? '',
+        apiUrl: env.COURIER_API_URL ?? 'https://api.courier.com',
         settings: {
           enableLogging: env.COURIER_ENABLE_LOGGING === 'true',
         },

@@ -45,7 +45,7 @@ function extractIpAddress(req: FastifyRequest): string {
 function extractUserAgent(req: FastifyRequest): string | undefined {
   const userAgent = req.headers['user-agent'];
 
-  if (!userAgent || typeof userAgent !== 'string') {
+  if (typeof userAgent !== 'string' || userAgent === '') {
     return undefined;
   }
 

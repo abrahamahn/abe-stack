@@ -619,7 +619,7 @@ describe('User Routes Type Safety', () => {
     expect(typeof userRoutes['users/list']!.handler).toBe('function');
   });
 
-  test('handler should be async', async () => {
+  test('handler should be async', () => {
     const meHandler = userRoutes['users/me']!.handler;
     const listHandler = userRoutes['users/list']!.handler;
 

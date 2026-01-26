@@ -16,7 +16,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
  */
 export function extractTokenPayload(request: FastifyRequest, secret: string): TokenPayload | null {
   const authHeader = request.headers.authorization;
-  if (!authHeader?.startsWith('Bearer ')) {
+  if (typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
     return null;
   }
 
