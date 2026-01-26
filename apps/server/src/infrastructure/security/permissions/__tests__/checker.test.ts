@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/security/permissions/__tests__/checker.test.ts
 import { describe, expect, test } from 'vitest';
 

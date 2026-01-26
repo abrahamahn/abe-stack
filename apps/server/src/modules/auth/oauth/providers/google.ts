@@ -122,7 +122,7 @@ export function createGoogleProvider(clientId: string, clientSecret: string): OA
       return {
         id: data.id,
         email: data.email,
-        name: data.name || null,
+        name: data.name !== '' ? data.name : null,
         emailVerified: data.verified_email,
         picture: data.picture,
       };

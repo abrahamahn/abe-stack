@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/data/storage/__tests__/localStorageProvider.test.ts
 import { mkdir, writeFile } from 'node:fs/promises';
 

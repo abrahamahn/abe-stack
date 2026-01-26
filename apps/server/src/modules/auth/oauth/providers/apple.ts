@@ -100,7 +100,7 @@ async function fetchApplePublicKeys(): Promise<AppleJWK[]> {
   const now = Date.now();
 
   // Return cached keys if still valid
-  if (appleKeysCache && now - appleKeysCache.fetchedAt < KEYS_CACHE_TTL_MS) {
+  if (appleKeysCache != null && now - appleKeysCache.fetchedAt < KEYS_CACHE_TTL_MS) {
     return appleKeysCache.keys;
   }
 
@@ -189,11 +189,11 @@ async function verifyIdTokenSignature(idToken: string): Promise<void> {
   const keys = await fetchApplePublicKeys();
 
   // Find the key matching the token's kid
-  if (!header.kid) {
+  if (header.kid === '') {
     throw new OAuthError('Missing kid in JWT header', 'apple', 'MISSING_KID');
   }
   const key = keys.find((k) => k.kid === header.kid);
-  if (!key) {
+  if (key == null) {
     throw new OAuthError(
       `No matching public key found for kid: ${header.kid}`,
       'apple',

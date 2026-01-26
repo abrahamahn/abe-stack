@@ -20,14 +20,14 @@ export async function handleMe(
   request: RequestWithCookies,
 ): Promise<{ status: 200; body: User } | { status: 401 | 404 | 500; body: { message: string } }> {
   // User is already verified by middleware
-  if (!request.user) {
+  if (request.user == null) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
   try {
     const user = await getUserById(ctx.repos.users, request.user.userId);
 
-    if (!user) {
+    if (user == null) {
       return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
@@ -60,7 +60,7 @@ export async function handleListUsers(
 > {
   const { pagination } = request as RequestWithCookies & PaginationRequest;
 
-  if (pagination.type !== 'cursor' || !pagination.cursor) {
+  if (pagination.type !== 'cursor' || pagination.cursor == null) {
     return {
       status: 400,
       body: { message: 'This endpoint only supports cursor pagination' },

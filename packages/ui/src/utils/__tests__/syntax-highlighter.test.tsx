@@ -1,8 +1,9 @@
 // packages/ui/src/utils/__tests__/syntax-highlighter.test.tsx
 import { render } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { isValidElement } from 'react';
+import { describe, expect, it } from 'vitest';
 
-import { SyntaxHighlighter, highlightCode, lightTheme, darkTheme } from '../syntax-highlighter';
+import { SyntaxHighlighter, darkTheme, highlightCode, lightTheme } from '../syntax-highlighter';
 
 import type { ReactElement, ReactNode } from 'react';
 
@@ -12,8 +13,8 @@ type TestElement = ReactElement & { props: { children: string; style: { color: s
 // Helper to find element by children content
 function findByChildren(elements: ReactNode[], content: string): TestElement | undefined {
   for (const el of elements) {
-    if (el && typeof el === 'object' && 'props' in el) {
-      const element = el;
+    if (isValidElement(el) && 'props' in el) {
+      const element = el as TestElement;
       if (element.props.children === content) {
         return element;
       }
@@ -99,8 +100,8 @@ describe('Custom Syntax Highlighter', () => {
 
       // Should contain newline characters
       const newlineElements = result.filter((el) => {
-        if (el && typeof el === 'object' && 'props' in el) {
-          return el.props.children === '\n';
+        if (isValidElement(el) && 'props' in el) {
+          return (el as TestElement).props.children === '\n';
         }
         return false;
       });

@@ -106,7 +106,7 @@ export async function registerUser(
   // Check if email is already taken (using repository)
   const existingUser = await repos.users.findByEmail(email);
 
-  if (existingUser) {
+  if (existingUser != null) {
     // If user exists, send an email to them to notify about the new registration attempt
     // and return a generic success message to prevent user enumeration.
     try {
@@ -152,7 +152,7 @@ export async function registerUser(
         .toSql(),
     );
 
-    if (!newUserRows[0]) {
+    if (newUserRows[0] == null) {
       throw new Error('Failed to create user');
     }
 
@@ -208,8 +208,8 @@ export async function authenticateUser(
   onPasswordRehash?: (userId: string, error?: Error) => void,
 ): Promise<AuthResult> {
   // Check if account is locked
-  const locked = await isAccountLocked(db, email, config.lockout);
-  if (locked) {
+   const locked = await isAccountLocked(db, email, config.lockout);
+   if (locked) {
     await logLoginAttempt(db, email, false, ipAddress, userAgent, 'Account locked');
     throw new AccountLockedError();
   }
@@ -223,18 +223,18 @@ export async function authenticateUser(
   // Timing-safe password verification
   const isValid = await verifyPasswordSafe(password, user?.passwordHash);
 
-  if (!user) {
+  if (user === null) {
     await handleFailedLogin(db, config, email, 'User not found', ipAddress, userAgent);
     throw new InvalidCredentialsError();
-  }
+   }
 
-  if (!isValid) {
-    await handleFailedLogin(db, config, email, 'Invalid password', ipAddress, userAgent);
+   if (!isValid) {
+     await handleFailedLogin(db, config, email, 'Invalid password', ipAddress, userAgent);
     throw new InvalidCredentialsError();
   }
 
   // Check if email is verified
-  if (!user.emailVerified) {
+   if (!user.emailVerified) {
     await logLoginAttempt(db, email, false, ipAddress, userAgent, 'Email not verified');
     throw new EmailNotVerifiedError(email);
   }
@@ -284,7 +284,7 @@ export async function refreshUserTokens(
     config.refreshToken.gracePeriodSeconds,
   );
 
-  if (!result) {
+  if (result == null) {
     throw new InvalidTokenError();
   }
 
@@ -415,7 +415,7 @@ export async function requestPasswordReset(
   // Using repository for user lookup
   const user = await repos.users.findByEmail(email);
 
-  if (!user) {
+  if (user == null) {
     // Don't reveal user doesn't exist - silently succeed
     return;
   }
@@ -478,14 +478,14 @@ export async function resetPassword(
   // Find valid token (not expired, not used) - using repository
   const tokenRecord = await repos.passwordResetTokens.findValidByTokenHash(tokenHash);
 
-  if (!tokenRecord) {
+  if (tokenRecord == null) {
     throw new InvalidTokenError('Invalid or expired reset token');
   }
 
   // Using repository for user lookup
   const user = await repos.users.findById(tokenRecord.userId);
 
-  if (!user) {
+  if (user == null) {
     // This should not happen if the token is valid
     throw new InvalidTokenError('User not found for the given token');
   }
@@ -541,7 +541,7 @@ export async function setPassword(
   // Find the user - using repository
   const user = await repos.users.findById(userId);
 
-  if (!user) {
+  if (user == null) {
     throw new InvalidCredentialsError();
   }
 
@@ -611,7 +611,7 @@ export async function resendVerificationEmail(
   // Using repository for user lookup
   const user = await repos.users.findByEmail(email);
 
-  if (!user) {
+  if (user == null) {
     // Don't reveal user doesn't exist - silently succeed
     return;
   }
@@ -668,7 +668,7 @@ export async function verifyEmail(
   // Find valid token (not expired, not used) - using repository
   const tokenRecord = await repos.emailVerificationTokens.findValidByTokenHash(tokenHash);
 
-  if (!tokenRecord) {
+  if (tokenRecord == null) {
     throw new InvalidTokenError('Invalid or expired verification token');
   }
 
@@ -683,7 +683,7 @@ export async function verifyEmail(
         .toSql(),
     );
 
-    if (!updatedUserRows[0]) {
+    if (updatedUserRows[0] == null) {
       throw new Error('Failed to verify user');
     }
 

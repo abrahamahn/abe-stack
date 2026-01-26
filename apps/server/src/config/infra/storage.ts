@@ -23,7 +23,7 @@ import { resolve } from 'node:path';
  * @param env - Environment variables.
  */
 export function loadStorageConfig(env: FullEnv): StorageConfig {
-  const provider = (env.STORAGE_PROVIDER ?? 'local') as StorageProviderName;
+  const provider = env.STORAGE_PROVIDER as StorageProviderName;
 
   if (provider === 's3') {
     return {
@@ -62,12 +62,12 @@ export function validateStorage(config: StorageConfig, isProd: boolean): string[
   const errors: string[] = [];
 
   if (config.provider === 's3') {
-    if (!config.bucket) errors.push('S3_BUCKET is required for S3 storage');
-    if (!config.region) errors.push('S3_REGION is required for S3 storage');
-    if (isProd && !config.accessKeyId) {
+    if (config.bucket === '') errors.push('S3_BUCKET is required for S3 storage');
+    if (config.region === '') errors.push('S3_REGION is required for S3 storage');
+    if (isProd && config.accessKeyId === '') {
       errors.push('S3_ACCESS_KEY_ID is required in production');
     }
-    if (isProd && !config.secretAccessKey) {
+    if (isProd && config.secretAccessKey === '') {
       errors.push('S3_SECRET_ACCESS_KEY is required in production');
     }
   }

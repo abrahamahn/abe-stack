@@ -179,7 +179,7 @@ function createMockRequest(userId?: string): RequestWithCookies {
       ipAddress: '127.0.0.1',
       userAgent: 'Test Browser',
     },
-    user: userId ? { userId, email: 'test@example.com', role: 'user' as const } : undefined,
+    user: userId != null && userId !== '' ? { userId, email: 'test@example.com', role: 'user' as const } : undefined,
   };
 }
 

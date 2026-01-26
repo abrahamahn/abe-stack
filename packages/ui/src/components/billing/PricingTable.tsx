@@ -6,11 +6,11 @@
  */
 
 import {
-  forwardRef,
-  useState,
-  type ComponentPropsWithoutRef,
-  type ReactElement,
-  type ReactNode,
+    forwardRef,
+    useState,
+    type ComponentPropsWithoutRef,
+    type ReactElement,
+    type ReactNode,
 } from 'react';
 
 import { cn } from '../../utils/cn';
@@ -107,7 +107,7 @@ export const PricingTable = forwardRef<HTMLDivElement, PricingTableProps>(
       const monthlyPlan = plans.find((p) => p.interval === 'month');
       const yearlyPlan = plans.find((p) => p.interval === 'year');
 
-      if (!monthlyPlan || !yearlyPlan) return null;
+      if (monthlyPlan == null || yearlyPlan == null) return null;
 
       const monthlyAnnual = monthlyPlan.priceInCents * 12;
       const yearlyTotal = yearlyPlan.priceInCents;
@@ -119,7 +119,7 @@ export const PricingTable = forwardRef<HTMLDivElement, PricingTableProps>(
 
     const yearlySavings = getYearlySavings();
 
-    if (isLoading) {
+    if (isLoading === true) {
       return (
         <div
           ref={ref}
@@ -131,7 +131,7 @@ export const PricingTable = forwardRef<HTMLDivElement, PricingTableProps>(
       );
     }
 
-    if (error) {
+    if (error != null && error !== '') {
       return (
         <div ref={ref} className={cn('pricing-table', 'pricing-table--error', className)} {...rest}>
           <div className="pricing-table__error">{error}</div>

@@ -35,8 +35,10 @@ export function Toast({ message, duration = 3500, onDismiss }: ToastProps): Reac
   return (
     <div className="toast-card">
       <div>
-        {message.title ? <div className="toast-title">{message.title}</div> : null}
-        {message.description ? (
+        {message.title != null && message.title !== '' ? (
+          <div className="toast-title">{message.title}</div>
+        ) : null}
+        {message.description != null && message.description !== '' ? (
           <div className="toast-description">{message.description}</div>
         ) : null}
       </div>

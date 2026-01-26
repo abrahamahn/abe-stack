@@ -2,10 +2,10 @@
 import type { FullEnv } from '@abe-stack/core/config';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import {
-  getRefreshCookieOptions,
-  isStrategyEnabled,
-  loadAuthConfig,
-  validateAuthConfig,
+    getRefreshCookieOptions,
+    isStrategyEnabled,
+    loadAuthConfig,
+    validateAuthConfig,
 } from './auth';
 
 const apiBaseUrl = 'http://localhost:8080';
@@ -80,21 +80,21 @@ describe('Security Validation', () => {
     const config = baseValidConfig();
     (config.jwt as any).secret = 'short';
 
-    expect(() => validateAuthConfig(config)).toThrow(/JWT secret must be at least 32 characters/);
+    expect(() => { validateAuthConfig(config); }).toThrow(/JWT secret must be at least 32 characters/);
   });
 
   test('should throw if JWT secret is a weak value', () => {
     const config = baseValidConfig();
     (config.jwt as any).secret = 'password' + ' '.repeat(24);
 
-    expect(() => validateAuthConfig(config)).toThrow(/JWT secret is a weak value/);
+    expect(() => { validateAuthConfig(config); }).toThrow(/JWT secret is a weak value/);
   });
 
   test('should throw if password minLength is too small', () => {
     const config = baseValidConfig();
     (config.password as any).minLength = 6;
 
-    expect(() => validateAuthConfig(config)).toThrow(
+    expect(() => { validateAuthConfig(config); }).toThrow(
       /Min password length must be at least 8 characters/,
     );
   });
@@ -103,7 +103,7 @@ describe('Security Validation', () => {
     const config = baseValidConfig();
     (config.lockout as any).lockoutDurationMs = 30000;
 
-    expect(() => validateAuthConfig(config)).toThrow(/Lockout duration must be at least 60000ms/);
+    expect(() => { validateAuthConfig(config); }).toThrow(/Lockout duration must be at least 60000ms/);
   });
 });
 

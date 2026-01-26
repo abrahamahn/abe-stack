@@ -90,7 +90,7 @@ describe('Dialog', () => {
       const overlay = document.querySelector('.overlay');
       expect(overlay).toBeInTheDocument();
 
-      if (overlay) await user.click(overlay);
+      if (overlay !== null) await user.click(overlay);
 
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
@@ -285,7 +285,7 @@ describe('Dialog', () => {
       const overlay = document.querySelector('.overlay');
       expect(overlay).toBeInTheDocument();
 
-      if (overlay) await user.click(overlay);
+      if (overlay !== null) await user.click(overlay);
 
       // Dialog should still be open
       expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -341,7 +341,7 @@ describe('Dialog', () => {
       // Rapid clicks (10 times)
       for (let i = 0; i < 10; i++) {
         await user.click(trigger);
-        if (screen.queryByRole('dialog')) {
+        if (screen.queryByRole('dialog') !== null) {
           await user.click(screen.getByLabelText('Close dialog'));
         }
       }
@@ -529,7 +529,7 @@ describe('Dialog', () => {
       const overlay = document.querySelector('.overlay');
       expect(overlay).toBeInTheDocument();
 
-      if (overlay) await user.dblClick(overlay);
+      if (overlay !== null) await user.dblClick(overlay);
 
       // Should close on first click of double-click
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();

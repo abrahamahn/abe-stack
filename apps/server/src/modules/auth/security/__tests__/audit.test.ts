@@ -73,9 +73,9 @@ describe('SecurityAuditLogger', () => {
   });
 
   afterEach(async () => {
-    if (logger) {
-      await logger.destroy();
-    }
+     if (logger != null) {
+       await logger.destroy();
+     }
     vi.useRealTimers();
   });
 
@@ -683,9 +683,9 @@ describe('registerSecurityAudit', () => {
 
   afterEach(async () => {
     // Clean up any hooks
-    const hooks = (mockServer as unknown as { _hooks: Record<string, unknown[]> })._hooks;
-    if (hooks?.onClose) {
-      for (const hook of hooks.onClose) {
+     const hooks = (mockServer as unknown as { _hooks: Record<string, unknown[]> })._hooks;
+     if (hooks?.onClose != null) {
+       for (const hook of hooks.onClose) {
         if (typeof hook === 'function') {
           await (hook as () => Promise<void>)();
         }

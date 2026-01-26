@@ -78,14 +78,14 @@ describe('cn utility', () => {
   });
 
   test('should handle complex conditional logic', () => {
-    const variant = 'outline';
-    const size = 'lg';
+    const variant: string = 'outline';
+    const size: string = 'lg';
     const isDisabled = false;
 
     const result = cn('btn', `btn-${variant}`, `btn-${size}`, {
       'btn-disabled': isDisabled,
       'btn-enabled': !isDisabled,
-      [`btn-${variant}-${size}`]: variant && size,
+      [`btn-${variant}-${size}`]: variant !== '' && size !== '',
     });
 
     expect(result).toBe('btn btn-outline btn-lg btn-enabled btn-outline-lg');

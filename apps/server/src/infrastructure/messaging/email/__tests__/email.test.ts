@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/messaging/email/__tests__/email.test.ts
 
 import { ConsoleEmailService } from '@email/consoleEmailService';

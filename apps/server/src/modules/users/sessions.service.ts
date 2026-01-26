@@ -68,7 +68,7 @@ export async function revokeSession(
     throw new NotFoundError('Session not found');
   }
 
-  if (family.revokedAt) {
+  if (family.revokedAt != null) {
     // Already revoked, nothing to do
     return;
   }

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/media/processors/__tests__/image.test.ts
 import sharp from 'sharp';
 import { describe, expect, it, vi, beforeEach, afterEach, type Mock } from 'vitest';

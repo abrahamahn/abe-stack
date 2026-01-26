@@ -76,7 +76,7 @@ export function memoize<TArgs extends unknown[], TResult>(
 
     // Check cache
     const entry = cache.get(key);
-    if (entry) {
+    if (entry != null) {
       // Check if expired
       if (entry.expiresAt != null && entry.expiresAt <= now) {
         cache.delete(key);
@@ -87,7 +87,7 @@ export function memoize<TArgs extends unknown[], TResult>(
         hits++;
 
         // Update access time for sliding expiration
-        if (slidingExpiration && ttl) {
+        if (slidingExpiration && (ttl != null && ttl > 0)) {
           entry.expiresAt = now + ttl;
         }
         entry.lastAccessedAt = now;
@@ -107,7 +107,7 @@ export function memoize<TArgs extends unknown[], TResult>(
     // Evict if at capacity
     while (cache.size >= maxSize && accessOrder.length > 0) {
       const lruKey = accessOrder.shift();
-      if (lruKey) {
+      if (lruKey != null && lruKey !== '') {
         cache.delete(lruKey);
       }
     }
@@ -115,7 +115,7 @@ export function memoize<TArgs extends unknown[], TResult>(
     // Store result
     cache.set(key, {
       value: result,
-      expiresAt: ttl ? now + ttl : undefined,
+      expiresAt: ttl !== undefined && ttl > 0 ? now + ttl : undefined,
       lastAccessedAt: now,
     });
     accessOrder.push(key);
@@ -204,13 +204,13 @@ export function memoizeMethod(options: MemoizeOptions = {}): MethodDecorator {
     descriptor.value = function (this: object, ...args: unknown[]): Promise<unknown> {
       let memoizedFn = instanceCache.get(this);
 
-      if (!memoizedFn) {
+      if (memoizedFn == null) {
         // Create memoized function for this instance
         const boundMethod = originalMethod.bind(this);
 
         // Include instance identity in key to avoid cross-instance collisions
         const userKeyGenerator = options.keyGenerator;
-        const instanceKeyGenerator = userKeyGenerator
+        const instanceKeyGenerator = userKeyGenerator != null
           ? (...fnArgs: unknown[]): string =>
               `${String(propertyKey)}:${userKeyGenerator(...fnArgs)}`
           : (...fnArgs: unknown[]): string =>
@@ -308,7 +308,7 @@ export function createArgIndexKeyGenerator(indices: number[]): (...args: unknown
 export function createObjectKeyGenerator(props: string[]): (...args: unknown[]) => string {
   return (...args: unknown[]): string => {
     const obj = args[0] as Record<string, unknown> | undefined;
-    if (!obj || typeof obj !== 'object') {
+    if (obj == null || typeof obj !== 'object') {
       return defaultKeyGenerator(...args);
     }
 

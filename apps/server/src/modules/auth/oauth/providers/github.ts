@@ -147,13 +147,13 @@ export function createGitHubProvider(clientId: string, clientSecret: string): OA
         const emails = (await emailsResponse.json()) as GitHubEmail[];
         // Find primary verified email
         const primaryEmail = emails.find((e) => e.primary && e.verified);
-        if (primaryEmail) {
+        if (primaryEmail != null) {
           email = primaryEmail.email;
           emailVerified = true;
         } else {
           // Fall back to any verified email
           const verifiedEmail = emails.find((e) => e.verified);
-          if (verifiedEmail) {
+          if (verifiedEmail != null) {
             email = verifiedEmail.email;
             emailVerified = true;
           }

@@ -1,5 +1,5 @@
 // apps/server/src/config/factory.test.ts
-import type { ElasticsearchProviderConfig, PostgresConfig } from '@abe-stack/core';
+import type { ElasticsearchProviderConfig } from '@abe-stack/core';
 import { initEnv, loadServerEnv } from '@abe-stack/core';
 import fs from 'node:fs';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';

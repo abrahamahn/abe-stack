@@ -139,10 +139,10 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(
     },
     ref,
   ) => {
-    const showHeader = header && !headerCollapsed;
-    const showSidebar = sidebar && !sidebarCollapsed;
-    const showAside = aside && !asideCollapsed;
-    const showFooter = footer && !footerCollapsed;
+    const showHeader = header != null && !headerCollapsed;
+    const showSidebar = sidebar != null && !sidebarCollapsed;
+    const showAside = aside != null && !asideCollapsed;
+    const showFooter = footer != null && !footerCollapsed;
 
     // Calculate default sizes for resizable panels
     const headerDefaultSize = typeof headerHeight === 'number' ? headerHeight / 10 : 6;

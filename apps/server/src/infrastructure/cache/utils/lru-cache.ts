@@ -32,7 +32,7 @@ export class LRUCache<TKey, TValue> {
 
   get(key: TKey): TValue | undefined {
     const node = this.cache.get(key);
-    if (!node) {
+    if (node == null) {
       return undefined;
     }
 
@@ -51,10 +51,10 @@ export class LRUCache<TKey, TValue> {
   set(key: TKey, value: TValue, ttlOverride?: number): void {
     const now = Date.now();
     const ttl = ttlOverride ?? this.defaultTtl;
-    const expiresAt = ttl ? now + ttl : undefined;
+    const expiresAt = ttl !== undefined && ttl > 0 ? now + ttl : undefined;
 
     const existingNode = this.cache.get(key);
-    if (existingNode) {
+    if (existingNode != null) {
       // Update existing node
       existingNode.value = value;
       existingNode.expiresAt = expiresAt;
@@ -62,7 +62,7 @@ export class LRUCache<TKey, TValue> {
       this.moveToFront(existingNode);
     } else {
       // Remove oldest item if at capacity
-      if (this.cache.size >= this.maxSize && this.tail) {
+      if (this.cache.size >= this.maxSize && this.tail != null) {
         const tailKey = this.tail.key;
         this.removeNode(this.tail);
         this.cache.delete(tailKey);
@@ -78,23 +78,20 @@ export class LRUCache<TKey, TValue> {
         next: this.head,
       };
 
-      if (this.head) {
+      if (this.head != null) {
         this.head.prev = newNode;
       }
       this.head = newNode;
 
-      if (!this.tail) {
-        // This is the first node
-        this.tail = newNode;
-      }
+      this.tail ??= newNode;
 
-      this.cache.set(key, newNode);
+       this.cache.set(key, newNode);
     }
   }
 
   delete(key: TKey): boolean {
     const node = this.cache.get(key);
-    if (!node) {
+    if (node == null) {
       return false;
     }
 
@@ -111,7 +108,7 @@ export class LRUCache<TKey, TValue> {
 
   has(key: TKey): boolean {
     const node = this.cache.get(key);
-    if (!node) {
+    if (node == null) {
       return false;
     }
 
@@ -149,14 +146,14 @@ export class LRUCache<TKey, TValue> {
   }
 
   private removeNode(node: LRUCacheNode<TKey, TValue>): void {
-    if (node.prev) {
+    if (node.prev != null) {
       node.prev.next = node.next;
     } else {
       // This is the head
       this.head = node.next;
     }
 
-    if (node.next) {
+    if (node.next != null) {
       node.next.prev = node.prev;
     } else {
       // This is the tail
@@ -177,13 +174,13 @@ export class LRUCache<TKey, TValue> {
     node.prev = null;
     node.next = this.head;
 
-    if (this.head) {
+    if (this.head != null) {
       this.head.prev = node;
     }
     this.head = node;
 
     // Update tail if needed
-    if (!this.head.next) {
+    if (this.head.next == null) {
       // If we just moved the previous tail to head, update tail reference
       if (this.tail === node.next) {
         this.tail = node;
@@ -191,10 +188,8 @@ export class LRUCache<TKey, TValue> {
     }
 
     // If this is the first node, update tail
-    if (!this.tail) {
-      this.tail = node;
-    }
-  }
+     this.tail ??= node;
+   }
 
   private cleanupExpired(): void {
     const now = Date.now();

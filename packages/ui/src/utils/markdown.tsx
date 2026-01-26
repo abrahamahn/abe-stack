@@ -30,7 +30,7 @@ export interface MarkdownOptions {
 // ============================================================================
 
 export function parseMarkdown(text: string, options: MarkdownOptions = {}): ReactNode[] {
-  if (!text) return [];
+  if (text === '') return [];
 
   // Split into lines for processing
   const lines = text.split('\n');
@@ -54,14 +54,14 @@ export function parseMarkdown(text: string, options: MarkdownOptions = {}): Reac
   };
 
   const flushList = (keySuffix: string): void => {
-    if (!currentList) return;
+    if (currentList == null) return;
     const ListTag = currentList.type === 'ol' ? 'ol' : 'ul';
     elements.push(<ListTag key={`list-${keySuffix}`}>{currentList.items}</ListTag>);
     currentList = null;
   };
 
   const flushBlockquote = (keySuffix: string): void => {
-    if (!currentBlockquote) return;
+    if (currentBlockquote == null) return;
     elements.push(<blockquote key={`blockquote-${keySuffix}`}>{currentBlockquote}</blockquote>);
     currentBlockquote = null;
   };
@@ -87,7 +87,7 @@ export function parseMarkdown(text: string, options: MarkdownOptions = {}): Reac
         flushParagraph(String(i));
         flushList(String(i));
         flushBlockquote(String(i));
-        const className = codeBlockLanguage ? `language-${codeBlockLanguage}` : undefined;
+        const className = codeBlockLanguage !== '' ? `language-${codeBlockLanguage}` : undefined;
         elements.push(
           <pre key={`codeblock-${String(i)}`}>
             <code className={className}>{codeBlockContent}</code>
@@ -111,12 +111,12 @@ export function parseMarkdown(text: string, options: MarkdownOptions = {}): Reac
 
     // Handle headers
     const headerMatch = line.match(/^(#{1,6})\s+(.+)$/);
-    if (headerMatch && headerMatch[1] && headerMatch[2]) {
+    if (headerMatch !== null && (headerMatch[1] ?? '') !== '' && (headerMatch[2] ?? '') !== '') {
       flushParagraph(String(i));
       flushList(String(i));
       flushBlockquote(String(i));
-      const level = headerMatch[1].length;
-      const content = parseInlineMarkdown(headerMatch[2], options);
+      const level = headerMatch[1]?.length ?? 1;
+      const content = parseInlineMarkdown(headerMatch[2] ?? '', options);
       const tagName = `h${String(level)}` as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
       elements.push(createElement(tagName, { key: `header-${String(i)}` }, content));
       continue;
@@ -127,9 +127,7 @@ export function parseMarkdown(text: string, options: MarkdownOptions = {}): Reac
       flushParagraph(String(i));
       flushList(String(i));
       const quoteContent = line.slice(1).trim();
-      if (!currentBlockquote) {
-        currentBlockquote = [];
-      }
+      currentBlockquote ??= [];
       appendInline(currentBlockquote, parseInlineMarkdown(quoteContent, options));
       if (breaks) {
         currentBlockquote.push(<br key={`br-${String(i)}`} />);
@@ -137,7 +135,7 @@ export function parseMarkdown(text: string, options: MarkdownOptions = {}): Reac
 
       // Check if next line continues blockquote
       const nextLine = lines[i + 1];
-      if (i + 1 < lines.length && nextLine?.startsWith('>')) {
+      if (i + 1 < lines.length && (nextLine?.startsWith('>') ?? false)) {
         continue;
       }
 
@@ -148,18 +146,18 @@ export function parseMarkdown(text: string, options: MarkdownOptions = {}): Reac
 
     // Handle lists
     const listMatch = line.match(/^(\s*)([-*+]|\d+\.)\s+(.+)$/);
-    if (listMatch && listMatch[1] !== undefined && listMatch[2] && listMatch[3]) {
-      const marker = listMatch[2];
-      const content = parseInlineMarkdown(listMatch[3], options);
+    if (listMatch?.[1] !== undefined && (listMatch[2] ?? '') !== '' && (listMatch[3] ?? '') !== '') {
+      const marker = listMatch[2] ?? '';
+      const content = parseInlineMarkdown(listMatch[3] ?? '', options);
 
       const isOrdered = /^\d+\./.test(marker);
 
       flushParagraph(String(i));
       flushBlockquote(String(i));
 
-      if (!currentList || currentList.type !== (isOrdered ? 'ol' : 'ul')) {
+      if (currentList?.type !== (isOrdered ? 'ol' : 'ul')) {
         // Start new list
-        if (currentList) {
+        if (currentList != null) {
           flushList(String(i - 1));
         }
         currentList = {
@@ -172,7 +170,7 @@ export function parseMarkdown(text: string, options: MarkdownOptions = {}): Reac
 
       // Check if next line continues the list
       const nextListLine = lines[i + 1];
-      if (i + 1 >= lines.length || !nextListLine?.match(/^(\s*)([-*+]|\d+\.)\s+/)) {
+      if (i + 1 >= lines.length || nextListLine?.match(/^(\s*)([-*+]|\d+\.)\s+/) == null) {
         // End list
         flushList(String(i));
       }
@@ -223,7 +221,7 @@ export function parseMarkdown(text: string, options: MarkdownOptions = {}): Reac
 function parseInlineMarkdown(text: string, options: MarkdownOptions): ReactNode {
   const { sanitize = false } = options;
 
-  if (!text) return '';
+  if (text === '') return '';
 
   const unescaped = text.replace(/\\([`*\\])/g, '$1');
   if (unescaped !== text) {
@@ -297,14 +295,14 @@ function parseInlineMarkdown(text: string, options: MarkdownOptions): ReactNode 
     },
   ];
 
-  while (remaining) {
+  while (remaining !== '') {
     let earliestMatch: { index: number; match: string; replacement: ReactNode } | null = null;
 
     // Find the earliest match across all patterns
     for (const pattern of patterns) {
       pattern.regex.lastIndex = 0; // Reset regex state
       const regexMatch = pattern.regex.exec(remaining);
-      if (regexMatch && (earliestMatch === null || regexMatch.index < earliestMatch.index)) {
+      if (regexMatch !== null && (earliestMatch === null || regexMatch.index < earliestMatch.index)) {
         const groups = regexMatch.slice(1);
         const replacement = pattern.replace(groups);
         earliestMatch = {
@@ -315,7 +313,7 @@ function parseInlineMarkdown(text: string, options: MarkdownOptions): ReactNode 
       }
     }
 
-    if (earliestMatch) {
+    if (earliestMatch != null) {
       // Add text before the match
       if (earliestMatch.index > 0) {
         elements.push(remaining.slice(0, earliestMatch.index));

@@ -40,12 +40,12 @@ export function Tabs({ items, value, defaultValue, onChange }: TabsProps): React
   const active = items.find((item) => item.id === currentId) ?? items[0];
 
   const move = (dir: 1 | -1): void => {
-    if (!items.length) return;
+    if (items.length === 0) return;
     const currentIndex = items.findIndex((i) => i.id === currentId);
     const safeIndex = currentIndex >= 0 ? currentIndex : 0;
     const nextIndex = (safeIndex + dir + items.length) % items.length;
     const nextItem = items[nextIndex];
-    if (nextItem) {
+    if (nextItem != null) {
       if (value === undefined) setActiveId(nextItem.id);
       onChange?.(nextItem.id);
     }
@@ -53,7 +53,7 @@ export function Tabs({ items, value, defaultValue, onChange }: TabsProps): React
 
   const jumpTo = (index: number): void => {
     const item = items[index];
-    if (item) {
+    if (item != null) {
       if (value === undefined) setActiveId(item.id);
       onChange?.(item.id);
     }
@@ -103,7 +103,7 @@ export function Tabs({ items, value, defaultValue, onChange }: TabsProps): React
           );
         })}
       </div>
-      {active ? (
+      {active != null ? (
         <div
           id={`tabpanel-${active.id}`}
           className="tab-panel"

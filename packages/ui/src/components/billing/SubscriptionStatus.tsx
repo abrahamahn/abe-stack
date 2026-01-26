@@ -134,7 +134,7 @@ export const SubscriptionStatus = forwardRef<HTMLDivElement, SubscriptionStatusP
     ref,
   ): ReactElement => {
     // No subscription state
-    if (!subscription) {
+    if (subscription == null) {
       return (
         <div
           ref={ref}
@@ -187,7 +187,7 @@ export const SubscriptionStatus = forwardRef<HTMLDivElement, SubscriptionStatusP
         </div>
 
         <div className="subscription-status__details">
-          {isTrialing && trialEnd && (
+          {isTrialing && trialEnd != null && trialEnd !== '' && (
             <div className="subscription-status__detail">
               <span className="subscription-status__detail-label">Trial ends</span>
               <span className="subscription-status__detail-value">{formatDate(trialEnd)}</span>
@@ -220,7 +220,7 @@ export const SubscriptionStatus = forwardRef<HTMLDivElement, SubscriptionStatusP
         </div>
 
         <div className="subscription-status__actions">
-          {canChangePlan && onChangePlan && (
+          {canChangePlan && onChangePlan != null && (
             <button
               type="button"
               className="subscription-status__action subscription-status__action--secondary"
@@ -231,7 +231,7 @@ export const SubscriptionStatus = forwardRef<HTMLDivElement, SubscriptionStatusP
             </button>
           )}
 
-          {onManagePaymentMethods && (
+          {onManagePaymentMethods != null && (
             <button
               type="button"
               className="subscription-status__action subscription-status__action--secondary"
@@ -242,7 +242,7 @@ export const SubscriptionStatus = forwardRef<HTMLDivElement, SubscriptionStatusP
             </button>
           )}
 
-          {canResume && onResume && (
+          {canResume && onResume != null && (
             <button
               type="button"
               className="subscription-status__action subscription-status__action--primary"
@@ -253,7 +253,7 @@ export const SubscriptionStatus = forwardRef<HTMLDivElement, SubscriptionStatusP
             </button>
           )}
 
-          {canCancel && onCancel && (
+          {canCancel && onCancel != null && (
             <button
               type="button"
               className="subscription-status__action subscription-status__action--danger"

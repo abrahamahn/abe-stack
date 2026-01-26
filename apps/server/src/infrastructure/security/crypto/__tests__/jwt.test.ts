@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/security/crypto/__tests__/jwt.test.ts
 import { decode, JwtError, sign, verify } from '@abe-stack/core/crypto';
 import { describe, expect, test, vi } from 'vitest';

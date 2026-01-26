@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/search/__tests__/search-factory.test.ts
 import { afterEach, describe, expect, test } from 'vitest';
 

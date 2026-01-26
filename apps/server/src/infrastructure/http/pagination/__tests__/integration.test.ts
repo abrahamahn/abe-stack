@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/http/pagination/__tests__/integration.test.ts
 import { describe, expect, it, vi } from 'vitest';
 

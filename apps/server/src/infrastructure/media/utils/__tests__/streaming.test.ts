@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/media/utils/__tests__/streaming.test.ts
 import { createReadStream, createWriteStream, promises as fs } from 'fs';
 

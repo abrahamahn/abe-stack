@@ -1,15 +1,14 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/monitor/health/__tests__/health.test.ts
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  checkDatabase,
-  checkEmail,
-  checkStorage,
-  checkPubSub,
-  checkWebSocket,
-  checkRateLimit,
-  getDetailedHealth,
-} from '@health/index';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+    checkDatabase,
+    checkEmail,
+    checkPubSub,
+    checkRateLimit,
+    checkStorage,
+    checkWebSocket,
+    getDetailedHealth,
+} from '../index';
 
 import type { AppContext } from '@shared/types';
 

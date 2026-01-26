@@ -1,14 +1,14 @@
 // packages/ui/src/layouts/shells/ResizablePanel.tsx
 import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ComponentPropsWithoutRef,
-  type KeyboardEvent,
-  type MouseEvent,
-  type ReactNode,
+    forwardRef,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+    type ComponentPropsWithoutRef,
+    type KeyboardEvent,
+    type MouseEvent,
+    type ReactNode,
 } from 'react';
 import '../../styles/components.css';
 
@@ -165,7 +165,7 @@ export const ResizableSeparator = forwardRef<HTMLDivElement, ResizableSeparatorP
     // Keyboard handler for accessibility
     const handleKeyDown = useCallback(
       (e: KeyboardEvent<HTMLDivElement>): void => {
-        if (currentSize === undefined || !onSizeChange) return;
+        if (currentSize === undefined || onSizeChange == null) return;
 
         const step = e.shiftKey ? KEYBOARD_STEP_LARGE : KEYBOARD_STEP;
         let newSize: number | null = null;

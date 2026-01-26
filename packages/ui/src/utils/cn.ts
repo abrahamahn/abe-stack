@@ -7,7 +7,7 @@ type ClassValue =
   | undefined
   | null
   | ClassList
-  | { [key: string]: boolean };
+  | { [key: string]: boolean | null | undefined };
 
 type ClassList = ClassValue[];
 
@@ -24,13 +24,13 @@ export function cn(...inputs: ClassValue[]): string {
 
     if (typeof arg === 'string') {
       const trimmed = arg.trim();
-      if (trimmed) classes.push(trimmed); // Filter out whitespace-only strings
+      if (trimmed !== '') classes.push(trimmed); // Filter out whitespace-only strings
     } else if (typeof arg === 'number') {
       if (arg !== 0) classes.push(String(arg)); // Exclude 0 to match clsx behavior
     } else if (Array.isArray(arg)) {
-      if (arg.length) {
+      if (arg.length > 0) {
         const inner = cn(...arg);
-        if (inner) {
+        if (inner !== '') {
           classes.push(inner);
         }
       }
@@ -53,7 +53,7 @@ export function cn(...inputs: ClassValue[]): string {
       // Cast to Record<string, unknown> and verify values are truthy
       const obj = arg as Record<string, unknown>;
       for (const key of Object.keys(obj)) {
-        if (Object.prototype.hasOwnProperty.call(obj, key) && obj[key]) {
+        if (Object.prototype.hasOwnProperty.call(obj, key) && (obj[key] as boolean)) {
           classes.push(key);
         }
       }

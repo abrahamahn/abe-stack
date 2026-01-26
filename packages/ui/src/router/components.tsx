@@ -45,18 +45,18 @@ function matchPath(
   const { index, parentPath = '', hasChildren = false } = options ?? {};
 
   // Calculate the relative path for nested routes
-  const relativePath = parentPath ? pathname.slice(parentPath.length) || '/' : pathname;
+  const relativePath = parentPath !== '' ? (pathname.slice(parentPath.length) !== '' ? pathname.slice(parentPath.length) : '/') : pathname;
 
   // Handle index route - matches when relativePath is '/' or empty
-  if (index) {
+  if (index === true) {
     if (relativePath === '/' || relativePath === '') {
-      return { params: {}, path: parentPath || '/' };
+      return { params: {}, path: parentPath !== '' ? parentPath : '/' };
     }
     return null;
   }
 
   // If no pattern provided, no match
-  if (!pattern) return null;
+  if ((pattern ?? '') === '') return null;
 
   // Handle catch-all route
   if (pattern === '*') {
@@ -65,17 +65,17 @@ function matchPath(
 
   // Normalize pattern - handle parent path and avoid double slashes
   let fullPattern: string;
-  if (parentPath) {
+  if (parentPath !== '') {
     // If parent is root "/" and pattern doesn't start with "/", just prepend "/"
-    if (parentPath === '/' && !pattern.startsWith('/')) {
-      fullPattern = `/${pattern}`;
-    } else if (pattern.startsWith('/')) {
-      fullPattern = `${parentPath}${pattern}`;
+    if (parentPath === '/' && !(pattern ?? '').startsWith('/')) {
+      fullPattern = `/${pattern ?? ''}`;
+    } else if ((pattern ?? '').startsWith('/')) {
+      fullPattern = `${parentPath}${pattern ?? ''}`;
     } else {
-      fullPattern = `${parentPath}/${pattern}`;
+      fullPattern = `${parentPath}/${pattern ?? ''}`;
     }
   } else {
-    fullPattern = pattern;
+    fullPattern = pattern ?? '';
   }
 
   // Convert route pattern to regex
@@ -109,7 +109,7 @@ function matchPath(
 
   const match = pathname.match(matchRegex);
 
-  if (!match) return null;
+  if (match === null) return null;
 
   const params: Record<string, string> = {};
   paramNames.forEach((name, i) => {
@@ -117,14 +117,14 @@ function matchPath(
   });
 
   // Handle wildcard
-  if (pattern.endsWith('/*')) {
+  if (pattern?.endsWith('/*') === true) {
     params['*'] = match[match.length - 1] ?? '';
   }
 
   // Calculate remaining path for nested routes
   const exactMatch = pathname.match(exactRegex);
-  const matchedPath = exactMatch ? pathname : fullPattern;
-  const remainingPath = exactMatch ? '' : pathname.slice(fullPattern.length);
+  const matchedPath = exactMatch !== null ? pathname : fullPattern;
+  const remainingPath = exactMatch !== null ? '' : pathname.slice(fullPattern.length);
 
   return { params, path: matchedPath, remainingPath };
 }
@@ -165,7 +165,7 @@ function extractRoutes(children: ReactNode): RouteConfig[] {
   React.Children.forEach(children, (child) => {
     if (React.isValidElement(child) && child.type === Route) {
       const props = child.props as RouteProps;
-      const childRoutes = props.children ? extractRoutes(props.children) : undefined;
+      const childRoutes = props.children != null ? extractRoutes(props.children) : undefined;
       result.push({ ...props, childRoutes });
     }
   });
@@ -185,20 +185,20 @@ export function Routes({ children, _parentPath = '' }: RoutesProps): ReactElemen
       const routeMatch = matchPath(route.path, location.pathname, {
         index: route.index,
         parentPath: _parentPath,
-        hasChildren: Boolean(route.childRoutes && route.childRoutes.length > 0),
+        hasChildren: (route.childRoutes?.length ?? 0) > 0,
       });
-      if (routeMatch) {
+      if (routeMatch !== null) {
         return { route, match: routeMatch };
       }
     }
     return null;
   }, [routes, location.pathname, _parentPath]);
 
-  if (!match) return null;
+  if (match === null) return null;
 
   // If the route has child routes, render nested Routes as outlet
   let outlet: ReactElement | null = null;
-  if (match.route.childRoutes && match.route.childRoutes.length > 0) {
+  if (match.route.childRoutes != null && match.route.childRoutes.length > 0) {
     const childRouteElements = match.route.childRoutes.map((childRoute, i) => (
       <Route key={i} {...childRoute} />
     ));

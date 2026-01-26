@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/security/permissions/__tests__/middleware.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 

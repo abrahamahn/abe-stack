@@ -11,11 +11,11 @@ import { getInt } from '@abe-stack/core/config';
 export function loadSmtpConfig(env: FullEnv): SmtpConfig {
   return {
     host: env.SMTP_HOST ?? 'localhost',
-    port: getInt(env.SMTP_PORT as any, 587),
+    port: getInt(env.SMTP_PORT != null ? String(env.SMTP_PORT) : undefined, 587),
     secure: env.SMTP_SECURE === 'true',
     auth: (env.SMTP_USER != null && env.SMTP_USER !== '') && (env.SMTP_PASS != null && env.SMTP_PASS !== '') ? { user: env.SMTP_USER, pass: env.SMTP_PASS } : undefined,
-    connectionTimeout: getInt(env.SMTP_CONNECTION_TIMEOUT as any, 5000),
-    socketTimeout: getInt(env.SMTP_SOCKET_TIMEOUT as any, 30000),
+    connectionTimeout: getInt(env.SMTP_CONNECTION_TIMEOUT != null ? String(env.SMTP_CONNECTION_TIMEOUT) : undefined, 5000),
+    socketTimeout: getInt(env.SMTP_SOCKET_TIMEOUT != null ? String(env.SMTP_SOCKET_TIMEOUT) : undefined, 30000),
   };
 }
 
@@ -36,7 +36,7 @@ export function loadSmtpConfig(env: FullEnv): SmtpConfig {
  * ```
  */
 export function loadEmailConfig(env: FullEnv): EmailConfig {
-  const provider = env.EMAIL_PROVIDER || 'console';
+  const provider = env.EMAIL_PROVIDER;
 
   const smtp = loadSmtpConfig(env);
 
@@ -54,12 +54,12 @@ export function loadEmailConfig(env: FullEnv): EmailConfig {
 
     // Global "From" identity
     from: {
-      name: env.EMAIL_FROM_NAME || 'ABE Stack',
-      address: env.EMAIL_FROM_ADDRESS || 'noreply@example.com',
+      name: env.EMAIL_FROM_NAME ?? 'ABE Stack',
+      address: env.EMAIL_FROM_ADDRESS ?? 'noreply@example.com',
     },
 
     // Standard Enterprise feature: separate reply-to
-    replyTo: env.EMAIL_REPLY_TO || env.EMAIL_FROM_ADDRESS || 'noreply@example.com',
+    replyTo: env.EMAIL_REPLY_TO ?? env.EMAIL_FROM_ADDRESS ?? 'noreply@example.com',
   };
 }
 

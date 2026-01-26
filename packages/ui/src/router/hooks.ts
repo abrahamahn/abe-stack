@@ -80,7 +80,7 @@ export function useSearchParams(): [URLSearchParams, SetSearchParams] {
       }
 
       const search = nextParams.toString();
-      const url = `${location.pathname}${search ? `?${search}` : ''}${location.hash}`;
+      const url = `${location.pathname}${search !== '' ? `?${search}` : ''}${location.hash}`;
 
       navigate(url, { replace: options.replace });
     },

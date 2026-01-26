@@ -1,6 +1,5 @@
 // apps/server/src/config/infra/queue.ts
-import type { QueueConfig } from '@abe-stack/core/config';
-import type { FullEnv } from '@abe-stack/core/config';
+import type { FullEnv, QueueConfig } from '@abe-stack/core/config';
 
 /**
  * Loads Queue configuration for background job processing.
@@ -18,16 +17,16 @@ import type { FullEnv } from '@abe-stack/core/config';
 export function loadQueueConfig(env: FullEnv): QueueConfig {
   return {
     // Infrastructure settings
-    pollIntervalMs: env.QUEUE_POLL_INTERVAL_MS ?? 1000,
-    concurrency: env.QUEUE_CONCURRENCY ?? 5,
+    pollIntervalMs: env.QUEUE_POLL_INTERVAL_MS,
+    concurrency: env.QUEUE_CONCURRENCY,
 
     // Retry & Resilience logic
-    defaultMaxAttempts: env.QUEUE_MAX_ATTEMPTS ?? 3,
-    backoffBaseMs: env.QUEUE_BACKOFF_BASE_MS ?? 1000,
-    maxBackoffMs: env.QUEUE_MAX_BACKOFF_MS ?? 300000,
+    defaultMaxAttempts: env.QUEUE_MAX_ATTEMPTS,
+    backoffBaseMs: env.QUEUE_BACKOFF_BASE_MS,
+    maxBackoffMs: env.QUEUE_MAX_BACKOFF_MS,
 
     // Placeholder for Enterprise scaling (Redis support)
-    provider: env.QUEUE_PROVIDER || 'local',
+    provider: env.QUEUE_PROVIDER,
   };
 }
 

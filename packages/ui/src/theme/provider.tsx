@@ -4,12 +4,12 @@ import { useDensity } from '@hooks/useDensity';
 import { useThemeMode } from '@hooks/useThemeMode';
 import { createContext, useContext } from 'react';
 
-import type { ContrastMode } from './contrast';
-import type { Density } from './density';
 import type { UseContrastReturn } from '@hooks/useContrast';
 import type { UseDensityReturn } from '@hooks/useDensity';
 import type { ThemeMode, UseThemeModeReturn } from '@hooks/useThemeMode';
-import type { ReactNode, ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import type { ContrastMode } from './contrast';
+import type { Density } from './density';
 
 export type ThemeContextValue = UseThemeModeReturn & UseDensityReturn & UseContrastReturn;
 
@@ -148,7 +148,7 @@ export function ThemeProvider({
  */
 export function useTheme(): ThemeContextValue {
   const context = useContext(ThemeContext);
-  if (!context) {
+  if (context == null) {
     throw new Error('useTheme must be used within a ThemeProvider');
   }
   return context;

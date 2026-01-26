@@ -67,7 +67,7 @@ export function signWithRotation(
   config: JwtRotationConfig,
   options?: JwtSignOptions,
 ): string {
-  if (!config.secret) {
+  if (config.secret === '') {
     throw new JwtError('JWT secret is required', 'INVALID_TOKEN');
   }
 
@@ -101,7 +101,7 @@ export function signWithRotation(
  * ```
  */
 export function verifyWithRotation(token: string, config: JwtRotationConfig): JwtPayload {
-  if (!config.secret) {
+  if (config.secret === '') {
     throw new JwtError('JWT secret is required', 'INVALID_TOKEN');
   }
 
@@ -147,7 +147,7 @@ export function checkTokenSecret(
   usedSecret: 'current' | 'previous' | 'none';
   error?: JwtError;
 } {
-  if (!config.secret) {
+  if (config.secret === '') {
     return {
       isValid: false,
       usedSecret: 'none',

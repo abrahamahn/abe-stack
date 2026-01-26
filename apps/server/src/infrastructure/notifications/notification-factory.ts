@@ -62,7 +62,7 @@ export function createNotificationService(
 ): NotificationService {
   let fcmProvider: FcmProvider | undefined;
 
-  if (options.fcm) {
+  if (options.fcm != null) {
     fcmProvider = new FcmProvider(options.fcm);
   }
 

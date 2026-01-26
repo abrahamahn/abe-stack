@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/http/middleware/__tests__/correlationId.test.ts
 /**
  * Correlation ID Middleware Tests

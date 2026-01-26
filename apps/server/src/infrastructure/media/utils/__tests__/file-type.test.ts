@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/media/utils/__tests__/file-type.test.ts
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 

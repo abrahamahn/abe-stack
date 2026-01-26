@@ -57,7 +57,7 @@ export function loadElasticsearchConfig(env: FullEnv): ElasticsearchProviderConf
           }
         : undefined,
     apiKey: env.ELASTICSEARCH_API_KEY,
-    tls: env.ELASTICSEARCH_TLS ? env.ELASTICSEARCH_TLS === 'true' : undefined,
+    tls: env.ELASTICSEARCH_TLS === 'true',
     requestTimeout: env.ELASTICSEARCH_REQUEST_TIMEOUT_MS ?? undefined,
   };
 }
@@ -78,7 +78,7 @@ export function loadSqlSearchConfig(env: FullEnv): SqlSearchProviderConfig {
     maxPageSize: env.SQL_SEARCH_MAX_PAGE_SIZE ?? 1000,
     maxQueryDepth: env.SQL_SEARCH_MAX_QUERY_DEPTH ?? undefined,
     maxConditions: env.SQL_SEARCH_MAX_CONDITIONS ?? undefined,
-    logging: env.SQL_SEARCH_LOGGING ? env.SQL_SEARCH_LOGGING === 'true' : undefined,
+    logging: env.SQL_SEARCH_LOGGING === 'true',
     timeout: env.SQL_SEARCH_TIMEOUT_MS ?? undefined,
   };
 }
@@ -91,8 +91,8 @@ export function loadSqlSearchConfig(env: FullEnv): SqlSearchProviderConfig {
  */
 export function validateElasticsearchConfig(config: ElasticsearchProviderConfig): string[] {
   const errors: string[] = [];
-  if (!config.node) errors.push('ELASTICSEARCH_NODE is required');
-  if (!config.index) errors.push('ELASTICSEARCH_INDEX is required');
+  if (config.node === '') errors.push('ELASTICSEARCH_NODE is required');
+  if (config.index === '') errors.push('ELASTICSEARCH_INDEX is required');
   return errors;
 }
 
@@ -104,7 +104,7 @@ export function validateElasticsearchConfig(config: ElasticsearchProviderConfig)
  */
 export function validateSqlSearchConfig(config: SqlSearchProviderConfig): string[] {
   const errors: string[] = [];
-  if ((config.defaultPageSize ?? 0) > (config.maxPageSize ?? 0)) {
+  if (config.defaultPageSize > config.maxPageSize) {
     errors.push('SQL_SEARCH_DEFAULT_PAGE_SIZE cannot exceed MAX_PAGE_SIZE');
   }
   return errors;

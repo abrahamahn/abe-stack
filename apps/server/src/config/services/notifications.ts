@@ -79,7 +79,7 @@ export function loadNotificationsConfig(env: FullEnv): NotificationConfig {
   );
 
   // Determine if notifications should be enabled based on valid credentials
-  const isEnabled = Boolean(provider);
+  const isEnabled = provider != null;
 
   // Build configuration based on what provider would be used (even if not enabled due to missing credentials)
   const effectiveProvider = provider ?? 'onesignal'; // Default to onesignal
@@ -144,7 +144,7 @@ function resolveActiveProvider(
   if (explicit === 'generic') return 'generic';
 
   // Auto-detection logic if no explicit provider is set
-  if (!explicit) {
+  if (explicit == null) {
     if (avail.onesignal) return 'onesignal';
     if (avail.fcm) return 'fcm';
     if (avail.courier) return 'courier';
@@ -166,22 +166,22 @@ export function validateNotificationsConfig(config: NotificationConfig): string[
     switch (config.provider) {
       case 'onesignal': {
         const onesignal = config.config as OneSignalConfig;
-        if (!onesignal.restApiKey) errors.push('restApiKey: Required');
-        if (!onesignal.userAuthKey) errors.push('userAuthKey: Required');
-        if (!onesignal.appId) errors.push('appId: Required');
+        if (onesignal.restApiKey === '') errors.push('restApiKey: Required');
+        if (onesignal.userAuthKey === '') errors.push('userAuthKey: Required');
+        if (onesignal.appId === '') errors.push('appId: Required');
         break;
       }
 
       case 'fcm': {
         const fcm = config.config as FcmConfig;
-        if (!fcm.credentials) errors.push('credentials: Required');
-        if (!fcm.projectId) errors.push('projectId: Required');
+        if (fcm.credentials === '') errors.push('credentials: Required');
+        if (fcm.projectId === '') errors.push('projectId: Required');
         break;
       }
 
       case 'courier': {
         const courier = config.config as CourierConfig;
-        if (!courier.apiKey) errors.push('apiKey: Required');
+        if (courier.apiKey === '') errors.push('apiKey: Required');
         break;
       }
 

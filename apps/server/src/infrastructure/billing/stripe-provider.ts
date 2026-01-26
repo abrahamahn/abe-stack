@@ -51,7 +51,7 @@ function mapStripeStatus(stripeStatus: Stripe.Subscription.Status): Subscription
 function mapStripeInvoiceStatus(
   stripeStatus: Stripe.Invoice.Status | null,
 ): 'draft' | 'open' | 'paid' | 'void' | 'uncollectible' {
-  if (!stripeStatus) return 'draft';
+  if (stripeStatus == null) return 'draft';
   const statusMap: Record<string, 'draft' | 'open' | 'paid' | 'void' | 'uncollectible'> = {
     draft: 'draft',
     open: 'open',
@@ -141,7 +141,7 @@ export class StripeProvider implements BillingService {
     };
 
     // Add trial if specified
-    if (params.trialDays && params.trialDays > 0) {
+    if (params.trialDays !== undefined && params.trialDays > 0) {
       sessionParams.subscription_data = {
         ...sessionParams.subscription_data,
         trial_period_days: params.trialDays,
@@ -150,7 +150,7 @@ export class StripeProvider implements BillingService {
 
     const session = await this.stripe.checkout.sessions.create(sessionParams);
 
-    if (!session.url) {
+    if (session.url == null || session.url === '') {
       throw new Error('Failed to create checkout session URL');
     }
 
@@ -180,7 +180,7 @@ export class StripeProvider implements BillingService {
     const subscription = await this.stripe.subscriptions.retrieve(subscriptionId);
     const currentItem = subscription.items.data[0];
 
-    if (!currentItem) {
+    if (currentItem == null) {
       throw new Error('Subscription has no items');
     }
 
@@ -259,7 +259,7 @@ export class StripeProvider implements BillingService {
     return paymentMethods.data.map((pm) => ({
       id: pm.id,
       type: 'card' as const,
-      card: pm.card
+      card: pm.card != null
         ? {
             brand: pm.card.brand,
             last4: pm.card.last4,
@@ -305,7 +305,7 @@ export class StripeProvider implements BillingService {
       let subscriptionId: string | null = null;
       if (typeof invData.subscription === 'string') {
         subscriptionId = invData.subscription;
-      } else if (typeof invData.subscription === 'object' && invData.subscription) {
+      } else if (typeof invData.subscription === 'object' && invData.subscription != null) {
         subscriptionId = (invData.subscription as { id?: string }).id ?? null;
       }
 
@@ -413,13 +413,6 @@ export class StripeProvider implements BillingService {
         const inv = event.data.object as unknown as Stripe.Invoice;
         invoiceId = inv.id;
         customerId = typeof inv.customer === 'string' ? inv.customer : inv.customer?.id;
-        // Access subscription from event data (field may have different structure in new API)
-        const invData = eventData;
-        if (typeof invData.subscription === 'string') {
-          subscriptionId = invData.subscription;
-        } else if (typeof invData.subscription === 'object' && invData.subscription) {
-          subscriptionId = (invData.subscription as { id?: string }).id;
-        }
         status = inv.status ?? undefined;
         break;
       }
@@ -436,6 +429,15 @@ export class StripeProvider implements BillingService {
           customerId = typeof chargeCustomer === 'string' ? chargeCustomer : chargeCustomer.id;
         }
         break;
+      }
+    }
+
+    if (event.type === 'invoice.paid' || event.type === 'invoice.payment_failed') {
+      const invData = eventData;
+      if (typeof invData.subscription === 'string') {
+        subscriptionId = invData.subscription;
+      } else if (typeof invData.subscription === 'object' && invData.subscription != null) {
+        subscriptionId = (invData.subscription as { id?: string }).id;
       }
     }
 

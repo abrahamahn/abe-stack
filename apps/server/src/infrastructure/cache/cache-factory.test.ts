@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/cache/cache-factory.test.ts
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
@@ -45,10 +44,10 @@ describe('cache factory', () => {
     let cache: MemoryCacheProvider;
 
     afterEach(async () => {
-      if (cache) {
-        await cache.close();
-      }
-    });
+       if (cache != null) {
+         await cache.close();
+       }
+     });
 
     test('should create memory cache with defaults', () => {
       cache = createMemoryCache();

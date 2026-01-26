@@ -46,7 +46,7 @@ export function loadBillingConfig(env: FullEnv, appBaseUrl?: string): BillingCon
     provider: provider ?? 'stripe',
 
     // Global Commerce Settings
-    currency: env.BILLING_CURRENCY ?? 'usd',
+    currency: env.BILLING_CURRENCY,
 
     // Stripe Configuration
     stripe: {
@@ -89,7 +89,7 @@ function resolveActiveProvider(
   explicit: BillingProvider | undefined,
   avail: { stripe: boolean; paypal: boolean },
 ): BillingProvider | null {
-  if (explicit) return explicit;
+  if (explicit != null) return explicit;
 
   // Auto-detection logic if no explicit provider is set
   if (avail.stripe) return 'stripe';
@@ -102,16 +102,16 @@ export function validateBillingConfig(config: BillingConfig): string[] {
   const isProd = process.env.NODE_ENV === 'production';
 
   if (config.provider === 'stripe') {
-    if (!config.stripe.secretKey) errors.push('STRIPE_SECRET_KEY missing');
-    if (!config.stripe.publishableKey) errors.push('STRIPE_PUBLISHABLE_KEY missing');
-    if (isProd && !config.stripe.webhookSecret) {
+    if (config.stripe.secretKey === '') errors.push('STRIPE_SECRET_KEY missing');
+    if (config.stripe.publishableKey === '') errors.push('STRIPE_PUBLISHABLE_KEY missing');
+    if (isProd && config.stripe.webhookSecret === '') {
       errors.push('STRIPE_WEBHOOK_SECRET is mandatory in production');
     }
   }
 
   if (config.provider === 'paypal') {
-    if (!config.paypal.clientId) errors.push('PAYPAL_CLIENT_ID missing');
-    if (!config.paypal.clientSecret) errors.push('PAYPAL_CLIENT_SECRET missing');
+    if (config.paypal.clientId === '') errors.push('PAYPAL_CLIENT_ID missing');
+    if (config.paypal.clientSecret === '') errors.push('PAYPAL_CLIENT_SECRET missing');
   }
 
   return errors;

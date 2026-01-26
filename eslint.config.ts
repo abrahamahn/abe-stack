@@ -1,4 +1,4 @@
-// @ts-expect-error - types might be missing in this context
+
 import { includeIgnoreFile } from '@eslint/compat';
 import type { Linter } from 'eslint';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';

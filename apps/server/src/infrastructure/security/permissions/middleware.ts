@@ -250,25 +250,25 @@ export function createPermissionMiddleware(options: PermissionMiddlewareOptions)
       // Get record pointer
       let pointer: RecordPointer | null = null;
 
-      if (guardOptions.getRecordId) {
+       if (guardOptions.getRecordId != null) {
         const recordId = guardOptions.getRecordId(request);
         if (recordId != null && recordId !== '' && guardOptions.table !== '') {
           pointer = { table: guardOptions.table, id: recordId };
-        }
-      } else if (guardOptions.table) {
-        // Try to get ID from params
-        const params = request.params as Record<string, string> | undefined;
-        const id = params?.id ?? params?.recordId;
-        if (id != null && id !== '') {
+         }
+       } else if (guardOptions.table !== '') {
+         // Try to get ID from params
+         const params = request.params as Record<string, string> | undefined;
+         const id = params?.id ?? params?.recordId;
+         if (id != null && id !== '') {
           pointer = { table: guardOptions.table, id };
         }
       } else {
         pointer = getRecordPointer(request);
       }
 
-      // For create operations, we don't need a record pointer
-      const operation = guardOptions.operation ?? getOperation(request);
-      if (operation === 'create' && !pointer && guardOptions.table) {
+       // For create operations, we don't need a record pointer
+       const operation = guardOptions.operation ?? getOperation(request);
+       if (operation === 'create' && pointer == null && guardOptions.table !== '') {
         // Check write permission for create
         const result = await checker.checkWritePermission(
           userId,
@@ -283,10 +283,10 @@ export function createPermissionMiddleware(options: PermissionMiddlewareOptions)
         if (isDenied(result)) {
           await onDenied(request, reply, result.reason);
         }
-        return;
-      }
+         return;
+       }
 
-      if (!pointer) {
+       if (pointer == null) {
         void reply.status(400).send({
           message: 'Bad Request',
           error: 'Could not determine record to check permissions for',
@@ -343,10 +343,9 @@ export function createPermissionMiddleware(options: PermissionMiddlewareOptions)
   async function filterRecordsMiddleware<T extends PermissionRecord>(
     request: FastifyRequest,
     table: string,
-    records: T[],
-  ): Promise<T[]> {
-    // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
-    if (!request.user || !request.user.userId) {
+     records: T[],
+   ): Promise<T[]> {
+     if (request.user == null || request.user.userId === '') {
       return [];
     }
     const user = request.user;
@@ -392,9 +391,8 @@ export function createStandalonePermissionGuard(
 ): PreHandlerHook {
   const { permission, table, getRecordId, operation, onDenied = defaultOnDenied } = options;
 
-  return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
-    // eslint-disable-next-line @typescript-eslint/prefer-optional-chain
-    if (!request.user || !request.user.userId) {
+   return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+     if (request.user == null || request.user.userId === '') {
       void reply.status(401).send({ message: 'Unauthorized' });
       return;
     }
@@ -484,10 +482,10 @@ export function getPermissionDenialReason(request: FastifyRequest): string | und
  */
 export function getRecordIdFromParams(
   request: FastifyRequest,
-  paramNames: string[] = ['id', 'recordId'],
-): string | null {
-  const params = request.params as Record<string, string> | undefined;
-  if (!params) return null;
+   paramNames: string[] = ['id', 'recordId'],
+ ): string | null {
+   const params = request.params as Record<string, string> | undefined;
+   if (params == null) return null;
 
   for (const name of paramNames) {
     if (params[name] != null && params[name] !== '') {

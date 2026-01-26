@@ -20,33 +20,33 @@ export function loadServerConfig(env: FullEnv): ServerConfig {
   const defaultPort = 8080;
 
   // Port resolution
-  const port = env.API_PORT ?? env.PORT ?? defaultPort;
-  const appPort = env.APP_PORT ?? 5173;
+  const port = env.API_PORT ?? env.PORT;
+  const appPort = env.APP_PORT;
 
   // URL resolution (flexible naming support)
   const appBaseUrl =
     (env.PUBLIC_APP_URL != null && env.PUBLIC_APP_URL !== '') ? env.PUBLIC_APP_URL :
     (env.APP_URL != null && env.APP_URL !== '') ? env.APP_URL :
     (env.APP_BASE_URL != null && env.APP_BASE_URL !== '') ? env.APP_BASE_URL :
-    `http://localhost:${appPort}`;
+    `http://localhost:${String(appPort)}`;
 
   const apiBaseUrl =
-    env.PUBLIC_API_URL ||
-    env.VITE_API_URL || // Support Vite-style naming for API
-    env.API_BASE_URL ||
+    (env.PUBLIC_API_URL !== undefined && env.PUBLIC_API_URL !== '') ? env.PUBLIC_API_URL :
+    (env.VITE_API_URL !== undefined && env.VITE_API_URL !== '') ? env.VITE_API_URL :
+    (env.API_BASE_URL !== undefined && env.API_BASE_URL !== '') ? env.API_BASE_URL :
     `http://localhost:${port}`;
 
   return {
-    host: env.HOST || '0.0.0.0',
+    host: env.HOST !== '' ? env.HOST : '0.0.0.0',
     port,
     // Used by the starter logic to find an open port if the default is taken
     portFallbacks: [defaultPort, 3000, 5000, 8000],
 
     cors: {
       // Support multiple origins (e.g., Web + Desktop + Admin)
-      origin: env.CORS_ORIGINS
+      origin: env.CORS_ORIGINS !== undefined && env.CORS_ORIGINS !== ''
         ? getList(env.CORS_ORIGINS)
-        : env.CORS_ORIGIN
+        : env.CORS_ORIGIN !== undefined && env.CORS_ORIGIN !== ''
           ? getList(env.CORS_ORIGIN)
           : [appBaseUrl],
       credentials: true,
@@ -55,7 +55,7 @@ export function loadServerConfig(env: FullEnv): ServerConfig {
 
     // Operational Settings
     trustProxy: env.TRUST_PROXY === 'true' || (env.TRUST_PROXY === undefined && isProd),
-    logLevel: (env.LOG_LEVEL || 'info') as LogLevel,
+    logLevel: env.LOG_LEVEL as LogLevel,
     maintenanceMode: env.MAINTENANCE_MODE === 'true',
 
     // Identity/Discovery

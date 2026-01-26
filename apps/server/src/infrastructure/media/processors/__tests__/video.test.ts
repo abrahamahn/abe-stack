@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/media/processors/__tests__/video.test.ts
 import ffmpeg from 'fluent-ffmpeg';
 import { describe, expect, it, vi, beforeEach, afterEach, type Mock } from 'vitest';

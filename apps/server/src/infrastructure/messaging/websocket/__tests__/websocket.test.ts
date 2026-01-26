@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/messaging/websocket/__tests__/websocket.test.ts
 import { EventEmitter } from 'node:events';
 

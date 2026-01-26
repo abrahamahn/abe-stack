@@ -35,7 +35,7 @@ export function createRequireAuth(secret: string) {
   return (request: FastifyRequest, reply: FastifyReply): void => {
     const payload = extractTokenPayload(request, secret);
 
-    if (!payload) {
+    if (payload == null) {
       reply.status(401).send({ message: 'Unauthorized' });
       return;
     }
@@ -51,7 +51,7 @@ export function createRequireRole(secret: string, ...allowedRoles: UserRole[]) {
   return async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     const payload = extractTokenPayload(request, secret);
 
-    if (!payload) {
+    if (payload == null) {
       void reply.status(401).send({ message: 'Unauthorized' });
       return;
     }

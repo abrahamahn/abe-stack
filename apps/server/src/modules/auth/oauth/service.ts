@@ -195,7 +195,7 @@ export function getProviderClient(
 ): OAuthProviderClient {
   const providerConfig = config.oauth[provider as keyof typeof config.oauth];
 
-  if (!providerConfig) {
+  if (providerConfig == null) {
     throw new OAuthError(
       `OAuth provider ${provider} is not configured`,
       provider,
@@ -299,12 +299,12 @@ export async function handleOAuthCallback(
     // Apple: user info is in the id_token, pass it to getUserInfo
     // The tokens response should include id_token for Apple
     const appleTokens = tokens as OAuthTokenResponse & { idToken?: string };
-    if (!appleTokens.accessToken) {
+    if (appleTokens.accessToken === '') {
       throw new OAuthError('Apple OAuth did not return id_token', 'apple', 'NO_ID_TOKEN');
     }
     // Get Apple client_id for id_token audience validation
     const appleConfig = config.oauth.apple;
-    if (!appleConfig) {
+    if (appleConfig == null) {
       throw new OAuthError('Apple OAuth not configured', 'apple', 'NOT_CONFIGURED');
     }
     // Verify signature and extract user info from id_token
@@ -343,7 +343,7 @@ async function authenticateOrCreateWithOAuth(
     userInfo.id,
   );
 
-  if (existingConnection) {
+  if (existingConnection != null) {
     // Update tokens and return existing user (using repository)
     await repos.oauthConnections.update(existingConnection.id, {
       accessToken: encryptToken(tokens.accessToken, encryptionKey),
@@ -355,7 +355,7 @@ async function authenticateOrCreateWithOAuth(
 
     const user = await repos.users.findById(existingConnection.userId);
 
-    if (!user) {
+    if (user == null) {
       throw new NotFoundError('User not found');
     }
 
@@ -392,7 +392,7 @@ async function authenticateOrCreateWithOAuth(
   // Check if email already exists (for a different user) - using repository
   const existingUser = await repos.users.findByEmail(userInfo.email);
 
-  if (existingUser) {
+  if (existingUser != null) {
     // Email exists but no OAuth connection - user should link their account
     throw new EmailAlreadyExistsError(
       `An account with email ${userInfo.email} already exists. Please log in and link your ${provider} account.`,
@@ -417,7 +417,7 @@ async function authenticateOrCreateWithOAuth(
         .toSql(),
     );
 
-    if (!newUserRows[0]) {
+    if (newUserRows[0] == null) {
       throw new Error('Failed to create user');
     }
 
@@ -500,18 +500,18 @@ export async function linkOAuthAccount(
     repos.oauthConnections.findByProviderUserId(provider, userInfo.id),
   ]);
 
-  if (!user) {
+  if (user == null) {
     throw new NotFoundError('User not found');
   }
 
-  if (existingConnection) {
+  if (existingConnection != null) {
     throw new ConflictError(
       `${provider} is already linked to your account`,
       'OAUTH_ALREADY_LINKED',
     );
   }
 
-  if (otherConnection) {
+  if (otherConnection != null) {
     throw new ConflictError(
       `This ${provider} account is already linked to another user`,
       'OAUTH_LINKED_TO_OTHER',
@@ -551,11 +551,11 @@ export async function unlinkOAuthAccount(
     repos.oauthConnections.findByUserId(userId),
   ]);
 
-  if (!connection) {
+  if (connection == null) {
     throw new NotFoundError(`${provider} is not linked to your account`);
   }
 
-  if (!user) {
+  if (user == null) {
     throw new NotFoundError('User not found');
   }
 

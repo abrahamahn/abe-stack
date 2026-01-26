@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/http/pagination/__tests__/middleware.test.ts
 import { PAGINATION_ERROR_TYPES, PaginationError } from '@abe-stack/core';
 import { describe, expect, it } from 'vitest';

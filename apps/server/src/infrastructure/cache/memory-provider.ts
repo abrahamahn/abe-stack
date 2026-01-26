@@ -85,7 +85,7 @@ export class MemoryCacheProvider implements CacheProvider {
     const fullKey = this.getFullKey(key);
     const node = this.cache.get(fullKey);
 
-    if (!node) {
+    if (node == null) {
       this.stats.misses++;
       this.updateHitRate();
       return Promise.resolve(undefined);
@@ -124,18 +124,18 @@ export class MemoryCacheProvider implements CacheProvider {
 
     // Check if key already exists
     const existingNode = this.cache.get(fullKey);
-    if (existingNode) {
+    if (existingNode != null) {
       // Update existing node
-      if (this.config.trackMemoryUsage && existingNode.size) {
+      if (this.config.trackMemoryUsage && existingNode.size != null && existingNode.size > 0) {
         this.currentMemoryBytes -= existingNode.size;
       }
       // Save old tags before overwriting
       const oldTags = existingNode.tags;
       existingNode.value = value;
-      existingNode.expiresAt = options.updateTtlOnExisting ? expiresAt : existingNode.expiresAt;
+      existingNode.expiresAt = options.updateTtlOnExisting === true ? expiresAt : existingNode.expiresAt;
       existingNode.tags = tags;
       existingNode.size = size;
-      if (size) {
+      if (size != null && size > 0) {
         this.currentMemoryBytes += size;
       }
       this.moveToHead(existingNode);
@@ -163,7 +163,7 @@ export class MemoryCacheProvider implements CacheProvider {
       this.addToHead(node);
       this.updateTagIndex(fullKey, [], tags);
 
-      if (size) {
+      if (size != null && size > 0) {
         this.currentMemoryBytes += size;
       }
     }
@@ -178,7 +178,7 @@ export class MemoryCacheProvider implements CacheProvider {
     const fullKey = this.getFullKey(key);
     const node = this.cache.get(fullKey);
 
-    if (!node) {
+    if (node == null) {
       return Promise.resolve(false);
     }
 
@@ -196,14 +196,14 @@ export class MemoryCacheProvider implements CacheProvider {
   }
 
   delete(key: string, options: CacheDeleteOptions = {}): Promise<boolean> {
-    if (options.byTag) {
+    if (options.byTag === true) {
       return Promise.resolve(this.deleteByTag(key));
     }
 
     const fullKey = this.getFullKey(key);
     const node = this.cache.get(fullKey);
 
-    if (!node) {
+    if (node == null) {
       return Promise.resolve(false);
     }
 
@@ -211,7 +211,7 @@ export class MemoryCacheProvider implements CacheProvider {
     this.cache.delete(fullKey);
     this.updateTagIndex(fullKey, node.tags, []);
 
-    if (this.config.trackMemoryUsage && node.size) {
+    if (this.config.trackMemoryUsage && node.size !== undefined && node.size > 0) {
       this.currentMemoryBytes -= node.size;
     }
 
@@ -262,7 +262,7 @@ export class MemoryCacheProvider implements CacheProvider {
 
   clear(): Promise<void> {
     // Notify eviction for all keys
-    if (this.onEviction) {
+    if (this.onEviction != null) {
       for (const [fullKey] of this.cache) {
         const key = this.stripPrefix(fullKey);
         this.onEviction(key, 'clear');
@@ -288,7 +288,7 @@ export class MemoryCacheProvider implements CacheProvider {
       ...this.stats,
       size: this.cache.size,
       memoryUsage: this.currentMemoryBytes,
-      maxSize: this.config.maxSize || undefined,
+      maxSize: this.config.maxSize > 0 ? this.config.maxSize : undefined,
     };
   }
 
@@ -314,7 +314,7 @@ export class MemoryCacheProvider implements CacheProvider {
   }
 
   close(): Promise<void> {
-    if (this.cleanupTimer) {
+    if (this.cleanupTimer != null) {
       clearInterval(this.cleanupTimer);
       this.cleanupTimer = null;
     }
@@ -337,24 +337,22 @@ export class MemoryCacheProvider implements CacheProvider {
     node.prev = null;
     node.next = this.head;
 
-    if (this.head) {
+    if (this.head != null) {
       this.head.prev = node;
     }
     this.head = node;
 
-    if (!this.tail) {
-      this.tail = node;
-    }
+    this.tail ??= node;
   }
 
   private removeNode(node: LRUNode<unknown>): void {
-    if (node.prev) {
+    if (node.prev != null) {
       node.prev.next = node.next;
     } else {
       this.head = node.next;
     }
 
-    if (node.next) {
+    if (node.next != null) {
       node.next.prev = node.prev;
     } else {
       this.tail = node.prev;
@@ -370,7 +368,7 @@ export class MemoryCacheProvider implements CacheProvider {
   }
 
   private removeTail(): LRUNode<unknown> | null {
-    if (!this.tail) {
+    if (this.tail == null) {
       return null;
     }
 
@@ -384,11 +382,11 @@ export class MemoryCacheProvider implements CacheProvider {
   // --------------------------------------------------------------------------
 
   private getFullKey(key: string): string {
-    return this.config.keyPrefix ? `${this.config.keyPrefix}:${key}` : key;
+    return this.config.keyPrefix !== '' ? `${this.config.keyPrefix}:${key}` : key;
   }
 
   private stripPrefix(fullKey: string): string {
-    if (this.config.keyPrefix && fullKey.startsWith(`${this.config.keyPrefix}:`)) {
+    if (this.config.keyPrefix !== '' && fullKey.startsWith(`${this.config.keyPrefix}:`)) {
       return fullKey.slice(this.config.keyPrefix.length + 1);
     }
     return fullKey;
@@ -403,7 +401,7 @@ export class MemoryCacheProvider implements CacheProvider {
     // Remove from old tags
     for (const tag of oldTags) {
       const keys = this.tagIndex.get(tag);
-      if (keys) {
+      if (keys != null) {
         keys.delete(key);
         if (keys.size === 0) {
           this.tagIndex.delete(tag);
@@ -414,7 +412,7 @@ export class MemoryCacheProvider implements CacheProvider {
     // Add to new tags
     for (const tag of newTags) {
       let keys = this.tagIndex.get(tag);
-      if (!keys) {
+      if (keys == null) {
         keys = new Set();
         this.tagIndex.set(tag, keys);
       }
@@ -424,7 +422,7 @@ export class MemoryCacheProvider implements CacheProvider {
 
   private deleteByTag(tag: string): boolean {
     const keys = this.tagIndex.get(tag);
-    if (!keys || keys.size === 0) {
+    if (keys == null || keys.size === 0) {
       return false;
     }
 
@@ -434,12 +432,12 @@ export class MemoryCacheProvider implements CacheProvider {
 
     for (const fullKey of keysToDelete) {
       const node = this.cache.get(fullKey);
-      if (node) {
+      if (node != null) {
         this.removeNode(node);
         this.cache.delete(fullKey);
         // Clean up ALL tags that reference this key, not just the requested tag
         this.updateTagIndex(fullKey, node.tags, []);
-        if (this.config.trackMemoryUsage && node.size) {
+        if (this.config.trackMemoryUsage && node.size !== undefined && node.size > 0) {
           this.currentMemoryBytes -= node.size;
         }
         this.onEviction?.(this.stripPrefix(fullKey), 'manual');
@@ -462,10 +460,10 @@ export class MemoryCacheProvider implements CacheProvider {
     // Check size limit
     if (this.config.maxSize > 0 && this.cache.size >= this.config.maxSize) {
       const node = this.removeTail();
-      if (node) {
+      if (node != null) {
         this.cache.delete(node.key);
         this.updateTagIndex(node.key, node.tags, []);
-        if (this.config.trackMemoryUsage && node.size) {
+        if (this.config.trackMemoryUsage && node.size !== undefined && node.size > 0) {
           this.currentMemoryBytes -= node.size;
         }
         this.onEviction?.(this.stripPrefix(node.key), 'lru');
@@ -474,7 +472,7 @@ export class MemoryCacheProvider implements CacheProvider {
     }
 
     // Check memory limit
-    if (this.config.maxMemoryBytes > 0 && newSize) {
+    if (this.config.maxMemoryBytes > 0 && (newSize != null && newSize > 0)) {
       // If the entry is larger than maxMemoryBytes, it can never fit
       if (newSize > this.config.maxMemoryBytes) {
         this.logger?.warn('Cache entry too large to fit in memory limit', {
@@ -485,12 +483,12 @@ export class MemoryCacheProvider implements CacheProvider {
       }
 
       // Evict until we have room
-      while (this.tail && this.currentMemoryBytes + newSize > this.config.maxMemoryBytes) {
+      while (this.tail != null && this.currentMemoryBytes + newSize > this.config.maxMemoryBytes) {
         const node = this.removeTail();
-        if (node) {
+        if (node != null) {
           this.cache.delete(node.key);
           this.updateTagIndex(node.key, node.tags, []);
-          if (node.size) {
+          if (node.size !== undefined && node.size > 0) {
             this.currentMemoryBytes -= node.size;
           }
           this.onEviction?.(this.stripPrefix(node.key), 'memory_limit');
@@ -511,7 +509,7 @@ export class MemoryCacheProvider implements CacheProvider {
         this.removeNode(node);
         this.cache.delete(fullKey);
         this.updateTagIndex(fullKey, node.tags, []);
-        if (this.config.trackMemoryUsage && node.size) {
+        if (this.config.trackMemoryUsage && (node.size != null && node.size > 0)) {
           this.currentMemoryBytes -= node.size;
         }
         this.onEviction?.(this.stripPrefix(fullKey), 'expired');

@@ -1,13 +1,16 @@
 // packages/ui/src/utils/__tests__/createFormHandler.test.ts
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createFormHandler } from '../createFormHandler';
 
 import type { FormHandlerOptions } from '../createFormHandler';
 
+import type { Mock } from 'vitest';
+
+
 describe('createFormHandler', () => {
-  let setIsLoading: ReturnType<typeof vi.fn>;
-  let setError: ReturnType<typeof vi.fn>;
+  let setIsLoading: Mock<(loading: boolean) => void>;
+  let setError: Mock<(error: string | null) => void>;
 
   beforeEach(() => {
     setIsLoading = vi.fn();
@@ -151,8 +154,8 @@ describe('createFormHandler', () => {
         await wrappedHandler({ data: 'test' });
 
         expect(onStart).toHaveBeenCalledTimes(1);
-        expect(onStart.mock.invocationCallOrder[0]).toBeLessThan(
-          handler.mock.invocationCallOrder[0],
+        expect(onStart.mock.invocationCallOrder[0]!).toBeLessThan(
+          handler.mock.invocationCallOrder[0]!,
         );
       });
     });
@@ -203,7 +206,7 @@ describe('createFormHandler', () => {
         await expect(wrappedHandler({ data: 'test' })).rejects.toBe('string rejection');
 
         expect(onError).toHaveBeenCalledWith(expect.any(Error));
-        expect((onError.mock.calls[0][0] as Error).message).toBe('An error occurred');
+        expect((onError.mock.calls[0]?.[0] as Error).message).toBe('An error occurred');
       });
 
       it('does not call onError on success', async () => {
@@ -296,16 +299,16 @@ describe('createFormHandler', () => {
       const callOrder: string[] = [];
 
       const trackingSetIsLoading = vi.fn((loading: boolean) => {
-        callOrder.push(`setIsLoading(${loading})`);
+        callOrder.push(`setIsLoading(${String(loading)})`);
       });
       const trackingSetError = vi.fn((error: string | null) => {
-        callOrder.push(`setError(${error})`);
+        callOrder.push(`setError(${String(error)})`);
       });
 
       const wrapHandler = createFormHandler(trackingSetIsLoading, trackingSetError);
-      const handler = vi.fn().mockImplementation(async () => {
+      const handler = vi.fn().mockImplementation(() => {
         callOrder.push('handler');
-        return 'result';
+        return Promise.resolve('result');
       });
 
       const options: FormHandlerOptions = {
@@ -332,14 +335,14 @@ describe('createFormHandler', () => {
       const callOrder: string[] = [];
 
       const trackingSetIsLoading = vi.fn((loading: boolean) => {
-        callOrder.push(`setIsLoading(${loading})`);
+        callOrder.push(`setIsLoading(${String(loading)})`);
       });
       const trackingSetError = vi.fn((error: string | null) => {
-        callOrder.push(`setError(${error})`);
+        callOrder.push(`setError(${String(error)})`);
       });
 
       const wrapHandler = createFormHandler(trackingSetIsLoading, trackingSetError);
-      const handler = vi.fn().mockImplementation(async () => {
+      const handler = vi.fn().mockImplementation(() => {
         callOrder.push('handler');
         throw new Error('Test error');
       });

@@ -106,16 +106,16 @@ export const PaymentMethodCard = forwardRef<HTMLDivElement, PaymentMethodCardPro
     ref,
   ): ReactElement => {
     const { type, isDefault, cardDetails } = paymentMethod;
-    const isCard = type === 'card' && cardDetails;
+    const isCard = type === 'card' && cardDetails != null;
 
     const handleRemove = (): void => {
-      if (!isActing && !removeDisabled && onRemove) {
+      if (!isActing && !removeDisabled && onRemove != null) {
         onRemove(paymentMethod);
       }
     };
 
     const handleSetDefault = (): void => {
-      if (!isActing && !isDefault && onSetDefault) {
+      if (!isActing && !isDefault && onSetDefault != null) {
         onSetDefault(paymentMethod);
       }
     };
@@ -155,7 +155,7 @@ export const PaymentMethodCard = forwardRef<HTMLDivElement, PaymentMethodCardPro
         {isDefault && <span className="payment-method-card__badge">Default</span>}
 
         <div className="payment-method-card__actions">
-          {!isDefault && onSetDefault && (
+          {!isDefault && onSetDefault != null && (
             <button
               type="button"
               className="payment-method-card__action payment-method-card__action--default"
@@ -166,7 +166,7 @@ export const PaymentMethodCard = forwardRef<HTMLDivElement, PaymentMethodCardPro
             </button>
           )}
 
-          {onRemove && (
+          {onRemove != null && (
             <button
               type="button"
               className="payment-method-card__action payment-method-card__action--remove"

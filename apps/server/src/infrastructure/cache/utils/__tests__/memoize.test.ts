@@ -1,12 +1,11 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/cache/utils/__tests__/memoize.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {
-  createArgIndexKeyGenerator,
-  createObjectKeyGenerator,
-  memoize,
-  memoizeMethod,
+    createArgIndexKeyGenerator,
+    createObjectKeyGenerator,
+    memoize,
+    memoizeMethod,
 } from '../memoize';
 
 // ============================================================================
@@ -15,10 +14,10 @@ import {
 
 describe('memoize', () => {
   describe('basic memoization', () => {
-    test('should cache function results', async () => {
+    test('should cache function results', async () => { await Promise.resolve();
       let callCount = 0;
 
-      const fn = memoize(async (x: number) => {
+      const fn = memoize(async (x: number) => { await Promise.resolve();
         callCount++;
         return x * 2;
       });
@@ -28,10 +27,10 @@ describe('memoize', () => {
       expect(callCount).toBe(1);
     });
 
-    test('should cache different arguments separately', async () => {
+    test('should cache different arguments separately', async () => { await Promise.resolve();
       let callCount = 0;
 
-      const fn = memoize(async (x: number) => {
+      const fn = memoize(async (x: number) => { await Promise.resolve();
         callCount++;
         return x * 2;
       });
@@ -42,10 +41,11 @@ describe('memoize', () => {
       expect(callCount).toBe(2);
     });
 
-    test('should handle multiple arguments', async () => {
+    test('should handle multiple arguments', async () => { await Promise.resolve();
       let callCount = 0;
 
-      const fn = memoize(async (a: number, b: number) => {
+      const fn = memoize(async (a: number, b: number) => { await Promise.resolve();
+        await Promise.resolve();
         callCount++;
         return a + b;
       });
@@ -56,10 +56,11 @@ describe('memoize', () => {
       expect(callCount).toBe(2); // Different argument order = different key
     });
 
-    test('should handle object arguments', async () => {
+    test('should handle object arguments', async () => { await Promise.resolve();
       let callCount = 0;
 
-      const fn = memoize(async (obj: { id: number }) => {
+      const fn = memoize(async (obj: { id: number }) => { await Promise.resolve();
+        await Promise.resolve();
         callCount++;
         return obj.id * 2;
       });
@@ -69,10 +70,11 @@ describe('memoize', () => {
       expect(callCount).toBe(1);
     });
 
-    test('should handle no arguments', async () => {
+    test('should handle no arguments', async () => { await Promise.resolve();
       let callCount = 0;
 
-      const fn = memoize(async () => {
+      const fn = memoize(async () => { await Promise.resolve();
+        await Promise.resolve();
         callCount++;
         return 'result';
       });
@@ -84,11 +86,11 @@ describe('memoize', () => {
   });
 
   describe('TTL expiration', () => {
-    test('should expire entries after TTL', async () => {
+    test('should expire entries after TTL', async () => { await Promise.resolve();
       let callCount = 0;
 
       const fn = memoize(
-        async (x: number) => {
+        async (x: number) => { await Promise.resolve();
           callCount++;
           return x * 2;
         },
@@ -104,11 +106,11 @@ describe('memoize', () => {
       expect(callCount).toBe(2);
     });
 
-    test('should support sliding expiration', async () => {
+    test('should support sliding expiration', async () => { await Promise.resolve();
       let callCount = 0;
 
       const fn = memoize(
-        async (x: number) => {
+        async (x: number) => { await Promise.resolve();
           callCount++;
           return x * 2;
         },
@@ -131,11 +133,11 @@ describe('memoize', () => {
   });
 
   describe('LRU eviction', () => {
-    test('should evict LRU entries when at capacity', async () => {
+    test('should evict LRU entries when at capacity', async () => { await Promise.resolve();
       let callCount = 0;
 
       const fn = memoize(
-        async (x: number) => {
+        async (x: number) => { await Promise.resolve();
           callCount++;
           return x * 2;
         },
@@ -166,12 +168,13 @@ describe('memoize', () => {
   });
 
   describe('custom key generator', () => {
-    test('should use custom key generator', async () => {
+    test('should use custom key generator', async () => { await Promise.resolve();
       let callCount = 0;
 
       type User = { id: string; name: string };
       const fn = memoize<[User], string>(
-        async (user: User) => {
+        async (user: User) => { await Promise.resolve();
+          await Promise.resolve();
           callCount++;
           return user.name.toUpperCase();
         },
@@ -190,10 +193,10 @@ describe('memoize', () => {
   });
 
   describe('cache control methods', () => {
-    test('should clear all cached results', async () => {
+    test('should clear all cached results', async () => { await Promise.resolve();
       let callCount = 0;
 
-      const fn = memoize(async (x: number) => {
+      const fn = memoize(async (x: number) => { await Promise.resolve();
         callCount++;
         return x * 2;
       });
@@ -209,10 +212,10 @@ describe('memoize', () => {
       expect(callCount).toBe(4);
     });
 
-    test('should invalidate specific entry', async () => {
+    test('should invalidate specific entry', async () => { await Promise.resolve();
       let callCount = 0;
 
-      const fn = memoize(async (x: number) => {
+      const fn = memoize(async (x: number) => { await Promise.resolve();
         callCount++;
         return x * 2;
       });
@@ -228,8 +231,11 @@ describe('memoize', () => {
       expect(callCount).toBe(3); // Only 1 was invalidated
     });
 
-    test('should return statistics', async () => {
-      const fn = memoize(async (x: number) => x * 2);
+    test('should return statistics', async () => { await Promise.resolve();
+      const fn = memoize(async (x: number) => { await Promise.resolve();
+        await Promise.resolve();
+        return x * 2;
+      });
 
       await fn(1); // miss
       await fn(1); // hit

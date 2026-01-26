@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/modules/auth/__tests__/login-edge-cases.test.ts
 /**
  * Login Flow Edge Cases Tests
@@ -13,12 +14,12 @@
 import { AccountLockedError, InvalidCredentialsError } from '@abe-stack/core';
 import { authenticateUser, refreshUserTokens, verifyEmail } from '@auth/service';
 import {
-  applyProgressiveDelay,
-  getAccountLockoutStatus,
-  getProgressiveDelay,
-  isAccountLocked,
-  logLoginAttempt,
-  withTransaction,
+    applyProgressiveDelay,
+    getAccountLockoutStatus,
+    getProgressiveDelay,
+    isAccountLocked,
+    logLoginAttempt,
+    withTransaction,
 } from '@infrastructure';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -497,12 +498,12 @@ describe('Parallel Login Requests', () => {
 
     // Track failed attempts count
     let failedAttempts = 0;
-    vi.mocked(getAccountLockoutStatus).mockImplementation(async () => {
+    vi.mocked(getAccountLockoutStatus).mockImplementation(() => {
       failedAttempts++;
-      return {
+      return Promise.resolve({
         isLocked: failedAttempts >= 5,
         failedAttempts,
-      };
+      });
     });
 
     // Simulate 5 concurrent failed attempts
@@ -804,8 +805,9 @@ describe('Progressive Delay Timing', () => {
 
     const delayApplied = vi.fn();
     vi.mocked(isAccountLocked).mockResolvedValue(false);
-    vi.mocked(applyProgressiveDelay).mockImplementation(async () => {
+    vi.mocked(applyProgressiveDelay).mockImplementation(() => {
       delayApplied();
+      return Promise.resolve();
     });
     vi.mocked(repos.users.findByEmail).mockResolvedValue(mockUser);
 

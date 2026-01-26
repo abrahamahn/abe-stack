@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/cache/memory-provider.test.ts
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 

@@ -63,7 +63,7 @@ describe('Modal', () => {
       const overlay = document.body.querySelector('.overlay');
       expect(overlay).toBeInTheDocument();
 
-      if (overlay) {
+      if (overlay !== null) {
         await user.click(overlay as HTMLElement);
       }
 
@@ -127,7 +127,7 @@ describe('Modal', () => {
       );
 
       const overlay = document.body.querySelector('.overlay');
-      if (overlay) {
+      if (overlay !== null) {
         expect(() => user.click(overlay as HTMLElement)).not.toThrow();
       }
 
@@ -216,7 +216,7 @@ describe('Modal', () => {
       );
 
       const overlay = document.body.querySelector('.overlay');
-      if (overlay) {
+      if (overlay !== null) {
         const element = overlay as HTMLElement;
         // Click 5 times rapidly
         await user.click(element);
@@ -464,7 +464,7 @@ describe('Modal', () => {
       );
 
       const overlay = document.body.querySelector('.overlay');
-      if (overlay) {
+      if (overlay !== null) {
         await user.dblClick(overlay as HTMLElement);
       }
 

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/data/storage/__tests__/signedUrls.test.ts
 import { describe, expect, it, vi, afterEach, beforeEach } from 'vitest';
 

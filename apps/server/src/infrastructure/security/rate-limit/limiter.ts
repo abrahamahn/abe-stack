@@ -105,7 +105,7 @@ export class MemoryStore implements RateLimitStore {
 
   get(key: string): ClientRecord | undefined {
     const record = this.hits.get(key);
-    if (record) {
+    if (record != null) {
       // Move to end for LRU ordering (Map preserves insertion order)
       this.hits.delete(key);
       this.hits.set(key, record);
@@ -138,7 +138,7 @@ export class MemoryStore implements RateLimitStore {
   }
 
   destroy(): void {
-    if (this.cleanupTimer) {
+    if (this.cleanupTimer != null) {
       clearInterval(this.cleanupTimer);
       this.cleanupTimer = null;
     }
@@ -275,7 +275,7 @@ export class RateLimiter {
 
     const record = await this.store.get(key);
 
-    if (!record) {
+    if (record == null) {
       return {
         allowed: true,
         remaining: effectiveConfig.max,
@@ -329,14 +329,14 @@ export class RateLimiter {
   }
 
   private getEffectiveConfig(role?: string): { max: number; windowMs: number } {
-    if (role != null && role !== '' && this.config.roleLimits?.[role]) {
+    if (role != null && role !== '' && this.config.roleLimits?.[role] != null) {
       return this.config.roleLimits[role];
     }
     return { max: this.config.max, windowMs: this.config.windowMs };
   }
 
   private calculateProgressiveDelay(violations: number): number {
-    if (!this.config.progressiveDelay) return 0;
+    if (this.config.progressiveDelay == null) return 0;
 
     const { baseDelay, maxDelay, backoffFactor } = this.config.progressiveDelay;
     const delay = baseDelay * Math.pow(backoffFactor, violations - 2); // Start from second violation
@@ -362,7 +362,7 @@ export class RateLimiter {
     };
 
     // Include store stats if available
-    if (this.store.getStats) {
+    if (this.store.getStats != null) {
       stats.store = this.store.getStats();
     }
 

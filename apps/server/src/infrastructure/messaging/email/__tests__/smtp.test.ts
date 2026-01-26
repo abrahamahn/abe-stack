@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/messaging/email/__tests__/smtp.test.ts
 /**
  * Tests for the SMTP client utility functions.
@@ -53,7 +52,7 @@ describe('SmtpClient', () => {
       (_opts: unknown, cb: (err?: Error) => void) => {
         // Simulate async connection success
         setTimeout(() => {
-          if (cb) cb();
+          cb();
         }, 0);
         return mockSocket;
       },
@@ -61,7 +60,7 @@ describe('SmtpClient', () => {
 
     (connect as unknown as Mock).mockImplementation((_opts: unknown, cb: (err?: Error) => void) => {
       setTimeout(() => {
-        if (cb) cb();
+        cb();
       }, 0);
       return mockSocket;
     });

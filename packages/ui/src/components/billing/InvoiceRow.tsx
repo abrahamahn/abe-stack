@@ -138,7 +138,7 @@ export const InvoiceRow = forwardRef<HTMLDivElement, InvoiceRowProps>(
       <div ref={ref} className={cn('invoice-row', `invoice-row--${status}`, className)} {...rest}>
         <div className="invoice-row__date">
           <span className="invoice-row__date-label">
-            {paidAt ? formatDate(paidAt) : formatDate(createdAt)}
+            {paidAt != null ? formatDate(paidAt) : formatDate(createdAt)}
           </span>
         </div>
 
@@ -162,7 +162,7 @@ export const InvoiceRow = forwardRef<HTMLDivElement, InvoiceRowProps>(
         </div>
 
         <div className="invoice-row__actions">
-          {invoicePdfUrl && (
+          {invoicePdfUrl != null && invoicePdfUrl !== '' && (
             <a
               href={invoicePdfUrl}
               target="_blank"
@@ -279,7 +279,7 @@ export const InvoiceList = forwardRef<HTMLDivElement, InvoiceListProps>(
           ))}
         </div>
 
-        {hasMore && onLoadMore && (
+        {hasMore && onLoadMore != null && (
           <div className="invoice-list__load-more">
             <button
               type="button"

@@ -41,7 +41,7 @@ export function createAccessToken(
   secret: string,
   expiresIn: string | number = '15m',
 ): string {
-  if (!secret || secret.length < MIN_JWT_SECRET_LENGTH) {
+  if (secret === '' || secret.length < MIN_JWT_SECRET_LENGTH) {
     throw new Error(`JWT secret must be at least ${String(MIN_JWT_SECRET_LENGTH)} characters`);
   }
 
@@ -54,7 +54,7 @@ export function createAccessToken(
  * Verify an access token and return the payload
  */
 export function verifyToken(token: string, secret: string): TokenPayload {
-  if (!secret || secret.length < MIN_JWT_SECRET_LENGTH) {
+  if (secret === '' || secret.length < MIN_JWT_SECRET_LENGTH) {
     throw new Error(`JWT secret must be at least ${String(MIN_JWT_SECRET_LENGTH)} characters`);
   }
 

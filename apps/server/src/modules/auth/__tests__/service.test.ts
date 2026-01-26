@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/modules/auth/__tests__/service.test.ts
 import { validatePassword } from '@abe-stack/core';
 import { toCamelCase, type User } from '@abe-stack/db';

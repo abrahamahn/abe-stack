@@ -31,16 +31,16 @@
 
 import { FocusTrap } from '@components/FocusTrap';
 import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type ComponentPropsWithoutRef,
-  type ReactElement,
-  type ReactNode,
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useId,
+    useRef,
+    useState,
+    type ComponentPropsWithoutRef,
+    type ReactElement,
+    type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -69,7 +69,7 @@ const SidePeekContext = createContext<SidePeekContextValue | null>(null);
 
 function useSidePeekContext(): SidePeekContextValue {
   const ctx = useContext(SidePeekContext);
-  if (!ctx) {
+  if (ctx == null) {
     throw new Error('SidePeek compound components must be used within SidePeek.Root');
   }
   return ctx;
@@ -138,7 +138,7 @@ function SidePeekRoot({
 
   // Handle escape key
   useEffect((): (() => void) | undefined => {
-    if (!closeOnEscape || !open || !onClose) return undefined;
+    if (!closeOnEscape || !open || onClose == null) return undefined;
 
     const handleKeyDown = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') {
@@ -166,7 +166,7 @@ function SidePeekRoot({
   }, [open]);
 
   const handleOverlayClick = useCallback((): void => {
-    if (closeOnOverlayClick && onClose) {
+    if (closeOnOverlayClick && onClose != null) {
       onClose();
     }
   }, [closeOnOverlayClick, onClose]);
@@ -340,9 +340,9 @@ function SidePeekExpand({
   const expandRef = useRef<HTMLButtonElement>(null);
 
   const handleExpand = useCallback((): void => {
-    if (onExpand) {
+    if (onExpand != null) {
       onExpand();
-    } else if (to) {
+    } else if (to != null && to !== '') {
       // Navigate to full page and close peek
       window.history.pushState(null, '', to);
       window.dispatchEvent(new PopStateEvent('popstate'));
@@ -380,13 +380,14 @@ export const SidePeek = {
 };
 
 export type {
-  SidePeekCloseProps,
-  SidePeekContentProps,
-  SidePeekDescriptionProps,
-  SidePeekExpandProps,
-  SidePeekFooterProps,
-  SidePeekHeaderProps,
-  SidePeekRootProps,
-  SidePeekSize,
-  SidePeekTitleProps,
+    SidePeekCloseProps,
+    SidePeekContentProps,
+    SidePeekDescriptionProps,
+    SidePeekExpandProps,
+    SidePeekFooterProps,
+    SidePeekHeaderProps,
+    SidePeekRootProps,
+    SidePeekSize,
+    SidePeekTitleProps
 };
+

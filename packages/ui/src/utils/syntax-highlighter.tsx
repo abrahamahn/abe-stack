@@ -440,9 +440,9 @@ const languages: Record<string, LanguageDefinition> = {
 // ============================================================================
 
 export function highlightCode(code: string, language: string, theme: SyntaxTheme): ReactNode[] {
-  if (!code) return [];
+  if (code === '') return [];
   const langDef = languages[language.toLowerCase()] ?? languages.javascript;
-  if (!langDef) {
+  if (langDef == null) {
     return [<span key="0">{code}</span>];
   }
   const elements: ReactNode[] = [];
@@ -500,28 +500,28 @@ function tokenizeCode(code: string, language: string, langDef: LanguageDefinitio
     }
 
     const commentMatch = matchComment(code, index, language);
-    if (commentMatch) {
+    if (commentMatch !== null) {
       tokens.push({ type: 'comment', value: commentMatch });
       index += commentMatch.length;
       continue;
     }
 
     const stringMatch = matchString(code, index, language);
-    if (stringMatch) {
+    if (stringMatch !== null) {
       tokens.push({ type: 'string', value: stringMatch });
       index += stringMatch.length;
       continue;
     }
 
     const numberMatch = matchNumberAt(code, index);
-    if (numberMatch) {
+    if (numberMatch !== null) {
       tokens.push({ type: 'number', value: numberMatch });
       index += numberMatch.length;
       continue;
     }
 
     const wordMatch = matchWordAt(code, index);
-    if (wordMatch) {
+    if (wordMatch !== null) {
       tokens.push({
         type: langDef.keywords.includes(wordMatch) ? 'keyword' : 'plain',
         value: wordMatch,
@@ -531,7 +531,7 @@ function tokenizeCode(code: string, language: string, langDef: LanguageDefinitio
     }
 
     const operatorMatch = matchOperatorAt(code, index, operators);
-    if (operatorMatch) {
+    if (operatorMatch !== null) {
       if (!/^[(){}[\],;]$/.test(operatorMatch)) {
         tokens.push({ type: 'operator', value: operatorMatch });
       }
@@ -569,7 +569,7 @@ function matchComment(code: string, index: number, language: string): string | n
 
 function matchString(code: string, index: number, language: string): string | null {
   const char = code[index];
-  if (!char || !['"', "'", '`'].includes(char)) {
+  if ((char ?? '') === '' || !['"', "'", '`'].includes(char as string)) {
     if (language === 'python') {
       if (code.startsWith('"""', index) || code.startsWith("'''", index)) {
         const quote = code.slice(index, index + 3);
@@ -606,14 +606,14 @@ function matchWordAt(code: string, index: number): string | null {
   const wordRegex = /[A-Za-z_$][\w$]*/y;
   wordRegex.lastIndex = index;
   const match = wordRegex.exec(code);
-  return match ? match[0] : null;
+  return match != null ? match[0] : null;
 }
 
 function matchNumberAt(code: string, index: number): string | null {
   const numberRegex = /\d+(?:\.\d+)?/y;
   numberRegex.lastIndex = index;
   const match = numberRegex.exec(code);
-  return match ? match[0] : null;
+  return match != null ? match[0] : null;
 }
 
 function matchOperatorAt(code: string, index: number, operators: string[]): string | null {
@@ -716,4 +716,5 @@ export function SyntaxHighlighter({
 // Export themes for customization
 // ============================================================================
 
-export { lightTheme, darkTheme };
+export { darkTheme, lightTheme };
+

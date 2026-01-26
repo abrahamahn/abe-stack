@@ -170,7 +170,7 @@ export async function getAccountLockoutStatus(
       .toSql(),
   );
 
-  if (mostRecentAttempt) {
+  if (mostRecentAttempt != null) {
     const lockedUntil = new Date(
       mostRecentAttempt.created_at.getTime() + lockoutConfig.lockoutDurationMs,
     );
@@ -234,7 +234,7 @@ export async function unlockAccount(
   );
 
   // Log security event
-  if (user) {
+  if (user != null) {
     await logAccountUnlockedEvent(db, user.id, email, adminUserId, ipAddress, userAgent);
   }
 }

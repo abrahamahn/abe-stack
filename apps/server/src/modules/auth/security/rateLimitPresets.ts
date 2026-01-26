@@ -153,7 +153,7 @@ class AuthRateLimiterRegistry {
   getLimiter(endpoint: AuthEndpoint): RateLimiter {
     let limiter = this.limiters.get(endpoint);
 
-    if (!limiter) {
+    if (limiter == null) {
       const config = AUTH_RATE_LIMITS[endpoint];
       limiter = new RateLimiter({
         windowMs: config.windowMs,

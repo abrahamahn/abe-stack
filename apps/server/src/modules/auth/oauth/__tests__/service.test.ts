@@ -1,26 +1,27 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/modules/auth/oauth/__tests__/service.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { AuthConfig } from '@/config';
 import type {
-  OAuthConnectionRepository,
-  RefreshTokenRepository,
-  UserRepository,
+    OAuthConnectionRepository,
+    RefreshTokenRepository,
+    UserRepository,
 } from '@abe-stack/db';
 import type { DbClient, Repositories } from '@infrastructure';
 import { asMockDb, createMockDb } from '@infrastructure/data/database/utils/test-utils';
 
 import {
-  createOAuthState,
-  decodeOAuthState,
-  encodeOAuthState,
-  findUserByOAuthProvider,
-  getAuthorizationUrl,
-  getConnectedProviders,
-  getProviderClient,
-  handleOAuthCallback,
-  linkOAuthAccount,
-  unlinkOAuthAccount,
+    createOAuthState,
+    decodeOAuthState,
+    encodeOAuthState,
+    findUserByOAuthProvider,
+    getAuthorizationUrl,
+    getConnectedProviders,
+    getProviderClient,
+    handleOAuthCallback,
+    linkOAuthAccount,
+    unlinkOAuthAccount,
 } from '../service';
 import type { OAuthProviderClient, OAuthTokenResponse, OAuthUserInfo } from '../types';
 
@@ -55,8 +56,8 @@ vi.mock('@infrastructure', async () => {
   const actual = await vi.importActual<typeof import('@infrastructure')>('@infrastructure');
   return {
     ...actual,
-    withTransaction: vi.fn(async (db, callback) => {
-      return callback(db);
+    withTransaction: vi.fn((db, callback) => {
+      return Promise.resolve(callback(db));
     }),
   };
 });

@@ -2,17 +2,17 @@
 /** @vitest-environment jsdom */
 import { act, render, renderHook, screen } from '@testing-library/react';
 import React from 'react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-  createMemoizedContext,
-  createSelectiveContext,
-  createReducerContext,
-  createLazyContext,
-  createSubscriptionContext,
-  Memoized,
-  SelectiveMemo,
-  useRenderPerformance,
+    createLazyContext,
+    createMemoizedContext,
+    createReducerContext,
+    createSelectiveContext,
+    createSubscriptionContext,
+    Memoized,
+    SelectiveMemo,
+    useRenderPerformance,
 } from '../OptimizedProvider';
 
 // ============================================================================
@@ -189,7 +189,7 @@ describe('createReducerContext', () => {
       return (
         <div>
           <span data-testid="count">{state.count}</span>
-          <button onClick={() => dispatch({ type: 'INCREMENT' })}>Increment</button>
+          <button onClick={() => { dispatch({ type: 'INCREMENT' }); }}>Increment</button>
         </div>
       );
     }
@@ -211,10 +211,10 @@ describe('createReducerContext', () => {
       return (
         <div>
           <span data-testid="count">{state.count}</span>
-          <button data-testid="increment" onClick={() => dispatch({ type: 'INCREMENT' })}>
+          <button data-testid="increment" onClick={() => { dispatch({ type: 'INCREMENT' }); }}>
             Increment
           </button>
-          <button data-testid="decrement" onClick={() => dispatch({ type: 'DECREMENT' })}>
+          <button data-testid="decrement" onClick={() => { dispatch({ type: 'DECREMENT' }); }}>
             Decrement
           </button>
         </div>
@@ -271,7 +271,7 @@ describe('createReducerContext', () => {
       return (
         <div>
           <span data-testid="count">{count}</span>
-          <button data-testid="set" onClick={() => dispatch({ type: 'SET', payload: 42 })}>
+          <button data-testid="set" onClick={() => { dispatch({ type: 'SET', payload: 42 }); }}>
             Set to 42
           </button>
         </div>
@@ -403,7 +403,7 @@ describe('createSubscriptionContext', () => {
         <div>
           <span data-testid="data">{data ?? 'no-data'}</span>
           <span data-testid="loading">{isLoading ? 'loading' : 'loaded'}</span>
-          <button data-testid="subscribe" onClick={() => subscribe(() => {})}>
+          <button data-testid="subscribe" onClick={() => { subscribe(() => {}); }}>
             Subscribe
           </button>
         </div>
@@ -424,7 +424,7 @@ describe('createSubscriptionContext', () => {
     const { Provider, useContextValue } = createSubscriptionContext<string>();
     const unsubscribe = vi.fn();
     const mockSubscribe = vi.fn((callback: (data: string) => void) => {
-      setTimeout(() => callback('async-data'), 0);
+      setTimeout(() => { callback('async-data'); }, 0);
       return unsubscribe;
     });
 
@@ -436,7 +436,7 @@ describe('createSubscriptionContext', () => {
         <div>
           <span data-testid="data">{localData ?? data ?? 'no-data'}</span>
           <span data-testid="loading">{isLoading ? 'loading' : 'loaded'}</span>
-          <button data-testid="subscribe" onClick={() => subscribe(setLocalData)}>
+          <button data-testid="subscribe" onClick={() => { subscribe(setLocalData); }}>
             Subscribe
           </button>
         </div>
@@ -500,7 +500,7 @@ describe('createSubscriptionContext', () => {
       return (
         <div>
           <span data-testid="error">{error?.message ?? 'no-error'}</span>
-          <button data-testid="subscribe" onClick={() => subscribe(() => {})}>
+          <button data-testid="subscribe" onClick={() => { subscribe(() => {}); }}>
             Subscribe
           </button>
         </div>

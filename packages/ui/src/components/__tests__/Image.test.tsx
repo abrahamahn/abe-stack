@@ -152,10 +152,15 @@ describe('Image', () => {
 
       // Check if border style is in the computed style
       const computedStyle = window.getComputedStyle(wrapper);
-      const hasAnyBorder = computedStyle.border || computedStyle.borderTop || wrapper.style.border;
+      const hasAnyBorder =
+        computedStyle.border !== '' ||
+        computedStyle.borderTop !== '' ||
+        wrapper.style.border !== '';
 
       // If style forwarding works, at least one should have the border
-      expect(hasAnyBorder || wrapper.getAttribute('style')?.includes('border')).toBeTruthy();
+      expect(
+        hasAnyBorder || wrapper.getAttribute('style')?.includes('border') === true,
+      ).toBeTruthy();
     });
   });
 

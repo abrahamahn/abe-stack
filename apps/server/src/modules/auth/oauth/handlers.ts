@@ -91,7 +91,7 @@ function validateProvider(provider: string): OAuthProvider {
 function getCallbackUrl(ctx: AppContext, provider: OAuthProvider): string {
   const providerConfig = ctx.config.auth.oauth[provider as keyof typeof ctx.config.auth.oauth];
 
-  if (!providerConfig) {
+  if (providerConfig == null) {
     throw new OAuthError(
       `OAuth provider ${provider} is not configured`,
       provider,
@@ -158,8 +158,8 @@ export async function handleOAuthInitiate(
 
     // Check if user is authenticated (for linking)
     const user = (request as AuthenticatedRequest).user;
-    const isLinking = !!user;
-    const userId = user ? user.userId : undefined;
+    const isLinking = user != null;
+    const userId = user != null ? user.userId : undefined;
 
     const { url } = getAuthorizationUrl(provider, ctx.config.auth, redirectUri, isLinking, userId);
 
@@ -222,7 +222,7 @@ export async function handleOAuthCallbackRequest(
     if (result.isLinking) {
       // Log successful link event
       const user = (request as AuthenticatedRequest).user;
-      if (user) {
+      if (user != null) {
         await logOAuthLinkSuccessEvent(
           ctx.db,
           user.userId,
@@ -239,7 +239,7 @@ export async function handleOAuthCallbackRequest(
       };
     }
 
-    if (!result.auth) {
+    if (result.auth == null) {
       throw new OAuthError('OAuth authentication failed', provider, 'AUTH_FAILED');
     }
 
@@ -305,7 +305,7 @@ export async function handleOAuthLink(
     const provider = validateProvider(params.provider);
 
     const user = (request as AuthenticatedRequest).user;
-    if (!user) {
+    if (user == null) {
       return {
         status: 401,
         body: { message: 'Authentication required', code: 'UNAUTHORIZED' },
@@ -346,7 +346,7 @@ export async function handleOAuthUnlink(
     const provider = validateProvider(params.provider);
 
     const user = (request as AuthenticatedRequest).user;
-    if (!user) {
+    if (user == null) {
       return {
         status: 401,
         body: { message: 'Authentication required', code: 'UNAUTHORIZED' },
@@ -372,7 +372,7 @@ export async function handleOAuthUnlink(
   } catch (error) {
     // Log unlink failure event
     const userForLog = (request as AuthenticatedRequest).user;
-    if (userForLog) {
+    if (userForLog != null) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       await logOAuthUnlinkFailureEvent(
         ctx.db,
@@ -403,7 +403,7 @@ export async function handleGetConnections(
 > {
   try {
     const user = (request as AuthenticatedRequest).user;
-    if (!user) {
+    if (user == null) {
       return {
         status: 401,
         body: { message: 'Authentication required', code: 'UNAUTHORIZED' },

@@ -1,12 +1,11 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/search/__tests__/sql-provider.test.ts
 import { FILTER_OPERATORS, QueryTooComplexError } from '@abe-stack/core';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { SqlSearchProvider, createSqlSearchProvider } from '../sql-provider';
 
-import type { SqlTableConfig } from '../types';
 import type { RawDb, Repositories } from '@database';
+import type { SqlTableConfig } from '../types';
 
 // Mock RawDb interface
 const mockRaw = vi.fn();

@@ -8,13 +8,13 @@
 import { sendTokenReuseAlert } from '@auth/security';
 import { refreshUserTokens } from '@auth/service';
 import {
-  ERROR_MESSAGES,
-  InvalidTokenError,
-  mapErrorToResponse,
-  TokenReuseError,
-  type AppContext,
-  type ReplyWithCookies,
-  type RequestWithCookies,
+    ERROR_MESSAGES,
+    InvalidTokenError,
+    mapErrorToResponse,
+    TokenReuseError,
+    type AppContext,
+    type ReplyWithCookies,
+    type RequestWithCookies,
 } from '@shared';
 import { REFRESH_COOKIE_NAME } from '@shared/constants';
 
@@ -29,7 +29,7 @@ export async function handleRefresh(
 ): Promise<{ status: 200; body: RefreshResponse } | { status: number; body: { message: string } }> {
   const oldRefreshToken = request.cookies[REFRESH_COOKIE_NAME];
 
-  if (!oldRefreshToken) {
+  if (oldRefreshToken == null || oldRefreshToken === '') {
     return { status: 401, body: { message: ERROR_MESSAGES.NO_REFRESH_TOKEN } };
   }
 
@@ -64,11 +64,11 @@ export async function handleRefresh(
       clearRefreshTokenCookie(reply);
 
       // Send email alert (fire and forget - don't block the response)
-      if (error.email) {
+      if (error.email != null && error.email !== '') {
         sendTokenReuseAlert(ctx.email, {
           email: error.email,
-          ipAddress: error.ipAddress || ipAddress,
-          userAgent: error.userAgent || userAgent,
+          ipAddress: error.ipAddress ?? ipAddress,
+          userAgent: error.userAgent ?? userAgent,
           timestamp: new Date(),
         }).catch((emailError: unknown) => {
           ctx.log.error(

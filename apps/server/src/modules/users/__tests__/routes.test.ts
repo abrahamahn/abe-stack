@@ -104,13 +104,13 @@ function createMockRequest(
 ): RequestWithCookies & Partial<PaginationRequest> {
   return {
     cookies: {},
-    headers: { authorization: user ? 'Bearer test-token' : undefined },
+    headers: { authorization: user != null ? 'Bearer test-token' : undefined },
     user,
     requestInfo: {
       ipAddress: '127.0.0.1',
       userAgent: 'test-agent',
     },
-    ...(pagination && { pagination }),
+    ...(pagination != null && { pagination }),
   };
 }
 

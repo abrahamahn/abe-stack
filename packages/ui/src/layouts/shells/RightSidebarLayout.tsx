@@ -70,8 +70,8 @@ export const RightSidebarLayout = forwardRef<HTMLDivElement, RightSidebarLayoutP
       >
         {hasSlots ? (
           <>
-            {header && <div className="right-sidebar-header">{header}</div>}
-            {content && <div className="right-sidebar-content">{content}</div>}
+            {header != null && <div className="right-sidebar-header">{header}</div>}
+            {content != null && <div className="right-sidebar-content">{content}</div>}
           </>
         ) : (
           children

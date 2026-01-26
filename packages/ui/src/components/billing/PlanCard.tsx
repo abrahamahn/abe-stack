@@ -6,10 +6,10 @@
  */
 
 import {
-  forwardRef,
-  type ComponentPropsWithoutRef,
-  type ReactElement,
-  type ReactNode,
+    forwardRef,
+    type ComponentPropsWithoutRef,
+    type ReactElement,
+    type ReactNode,
 } from 'react';
 
 import { cn } from '../../utils/cn';
@@ -60,7 +60,7 @@ function defaultRenderFeature(feature: PlanFeature, index: number): ReactNode {
         {feature.included ? '\u2713' : '\u2717'}
       </span>
       <span className="plan-card__feature-name">{feature.name}</span>
-      {feature.description && (
+      {feature.description != null && feature.description !== '' && (
         <span className="plan-card__feature-description">{feature.description}</span>
       )}
     </li>
@@ -111,12 +111,12 @@ export const PlanCard = forwardRef<HTMLDivElement, PlanCardProps>(
     ref,
   ): ReactElement => {
     const handleAction = (): void => {
-      if (!isLoading && !isDisabled && onAction) {
+      if (!isLoading && !isDisabled && onAction != null) {
         onAction(plan);
       }
     };
 
-    const buttonLabel = actionLabel || (isCurrent ? 'Current Plan' : 'Get Started');
+    const buttonLabel = actionLabel ?? (isCurrent ? 'Current Plan' : 'Get Started');
     const buttonDisabled = isDisabled || isCurrent || isLoading;
 
     return (
@@ -130,11 +130,13 @@ export const PlanCard = forwardRef<HTMLDivElement, PlanCardProps>(
         )}
         {...rest}
       >
-        {badge && <div className="plan-card__badge">{badge}</div>}
+        {badge != null && badge !== '' && <div className="plan-card__badge">{badge}</div>}
 
         <div className="plan-card__header">
           <h3 className="plan-card__name">{plan.name}</h3>
-          {plan.description && <p className="plan-card__description">{plan.description}</p>}
+          {plan.description != null && plan.description !== '' && (
+            <p className="plan-card__description">{plan.description}</p>
+          )}
         </div>
 
         <div className="plan-card__price">

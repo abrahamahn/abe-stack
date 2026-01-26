@@ -34,17 +34,19 @@ export function createBillingProvider(config: BillingConfig): BillingService {
  * Check if billing is configured
  */
 export function isBillingConfigured(config: Partial<BillingConfig>): boolean {
-  if (!config.provider) return false;
+  if (config.provider == null) return false;
 
   switch (config.provider) {
     case 'stripe':
-      if (!config.stripe) return false;
-      return Boolean(
-        config.stripe.secretKey && config.stripe.publishableKey && config.stripe.webhookSecret,
+      if (config.stripe == null) return false;
+      return (
+        config.stripe.secretKey !== '' &&
+        config.stripe.publishableKey !== '' &&
+        config.stripe.webhookSecret !== ''
       );
     case 'paypal':
-      if (!config.paypal) return false;
-      return Boolean(config.paypal.clientId && config.paypal.clientSecret);
+      if (config.paypal == null) return false;
+      return config.paypal.clientId !== '' && config.paypal.clientSecret !== '';
     default:
       return false;
   }

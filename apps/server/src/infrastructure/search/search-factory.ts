@@ -188,7 +188,7 @@ export function getSearchProviderFactory(): SearchProviderFactory {
  * Reset the singleton factory instance (for testing).
  */
 export function resetSearchProviderFactory(): void {
-  if (factoryInstance) {
+  if (factoryInstance != null) {
     void factoryInstance.closeAll();
     factoryInstance = null;
   }

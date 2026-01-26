@@ -5,7 +5,7 @@
  * Performance-optimized context providers with memoization and selective re-renders.
  */
 
-import React, { createContext, useContext, useMemo, useReducer, useRef, useCallback } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useReducer, useRef } from 'react';
 
 // ============================================================================
 // Type Definitions
@@ -353,7 +353,7 @@ export function createSubscriptionContext<T>(): SubscriptionContextResult<T> {
     // Cleanup on unmount
     React.useEffect(() => {
       return (): void => {
-        if (unsubscribe) {
+        if (unsubscribe != null) {
           unsubscribe();
         }
       };

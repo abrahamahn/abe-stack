@@ -45,7 +45,7 @@ function createMockFastify() {
 
 function getHook(server: ReturnType<typeof createMockFastify>, hook: keyof HookMap): HookHandler {
   const handler = server.hooks[hook][0];
-  if (!handler) {
+  if (handler == null) {
     throw new Error(`Missing ${hook} hook`);
   }
   return handler;

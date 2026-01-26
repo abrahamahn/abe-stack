@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/security/rate-limit/__tests__/limiter.test.ts
 import { createRateLimiter, MemoryStore, RateLimiter, RateLimitPresets } from '@rate-limit';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';

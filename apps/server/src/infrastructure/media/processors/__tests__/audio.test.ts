@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/media/processors/__tests__/audio.test.ts
 import ffmpeg from 'fluent-ffmpeg';
 import { parseFile } from 'music-metadata';

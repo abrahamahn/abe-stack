@@ -241,7 +241,7 @@ What happened:
 Details:
 - Time: ${formattedDate}
 - IP Address: ${ipAddress}
-- Device/Browser: ${userAgent || 'Unknown'}
+- Device/Browser: ${userAgent !== '' ? userAgent : 'Unknown'}
 
 Recommended actions:
 1. Change your password immediately
@@ -272,7 +272,7 @@ If you need assistance, please contact our support team immediately.
           <table style="color: #4b5563; font-size: 14px;">
             <tr><td style="padding: 4px 12px 4px 0; font-weight: 500;">Time:</td><td>${formattedDate}</td></tr>
             <tr><td style="padding: 4px 12px 4px 0; font-weight: 500;">IP Address:</td><td>${ipAddress}</td></tr>
-            <tr><td style="padding: 4px 12px 4px 0; font-weight: 500;">Device/Browser:</td><td>${userAgent || 'Unknown'}</td></tr>
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: 500;">Device/Browser:</td><td>${userAgent !== '' ? userAgent : 'Unknown'}</td></tr>
           </table>
           <p style="color: #6b7280; font-size: 12px; margin: 8px 0 0 0;">Timestamp: ${formattedTime}</p>
         </div>

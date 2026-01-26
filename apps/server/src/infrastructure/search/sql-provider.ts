@@ -149,8 +149,8 @@ export class SqlSearchProvider<
       const orderByClause = this.buildOrderByClause(query.sort);
 
       // Build the query
-      const whereClause = whereFragment ? `WHERE ${whereFragment.text}` : '';
-      const orderBy = orderByClause ? `ORDER BY ${orderByClause}` : '';
+      const whereClause = whereFragment != null ? `WHERE ${whereFragment.text}` : '';
+      const orderBy = orderByClause !== '' ? `ORDER BY ${orderByClause}` : '';
 
       const sqlText = `SELECT * FROM ${this.tableConfig.table} ${whereClause} ${orderBy} LIMIT $${this.nextParam()} OFFSET $${this.nextParam()}`;
       const values = [...(whereFragment?.values ?? []), limit + 1, offset];
@@ -166,7 +166,7 @@ export class SqlSearchProvider<
         // Reset param index for count query
         this.paramIndex = 0;
         const countWhereFragment = this.buildWhereClause(query);
-        const countWhereClause = countWhereFragment ? `WHERE ${countWhereFragment.text}` : '';
+        const countWhereClause = countWhereFragment != null ? `WHERE ${countWhereFragment.text}` : '';
         const countSql = `SELECT COUNT(*) as count FROM ${this.tableConfig.table} ${countWhereClause}`;
         const countResult = await this.db.raw<CountRow>(countSql, countWhereFragment?.values ?? []);
         const countValue = countResult[0]?.count;
@@ -208,8 +208,8 @@ export class SqlSearchProvider<
       // Apply cursor if provided
       if (query.cursor != null && query.cursor !== '') {
         const cursorFragment = this.buildCursorCondition(query.cursor, query.sort ?? []);
-        if (cursorFragment) {
-          if (whereFragment) {
+        if (cursorFragment != null) {
+          if (whereFragment != null) {
             whereFragment = {
               text: `(${whereFragment.text}) AND (${cursorFragment.text})`,
               values: [...whereFragment.values, ...cursorFragment.values],
@@ -221,8 +221,8 @@ export class SqlSearchProvider<
       }
 
       const orderByClause = this.buildOrderByClause(query.sort);
-      const whereClause = whereFragment ? `WHERE ${whereFragment.text}` : '';
-      const orderBy = orderByClause ? `ORDER BY ${orderByClause}` : '';
+      const whereClause = whereFragment != null ? `WHERE ${whereFragment.text}` : '';
+      const orderBy = orderByClause !== '' ? `ORDER BY ${orderByClause}` : '';
 
       const sqlText = `SELECT * FROM ${this.tableConfig.table} ${whereClause} ${orderBy} LIMIT $${this.nextParam()}`;
       const values = [...(whereFragment?.values ?? []), limit + 1];
@@ -234,7 +234,7 @@ export class SqlSearchProvider<
 
       // Generate cursors
       const lastItem = data[data.length - 1];
-      const nextCursor = hasNext && lastItem ? this.createCursor(lastItem, query.sort ?? []) : null;
+      const nextCursor = hasNext && lastItem != null ? this.createCursor(lastItem, query.sort ?? []) : null;
 
       // Get total count if requested
       let total: number | undefined;
@@ -242,7 +242,7 @@ export class SqlSearchProvider<
         // Reset param index for count query
         this.paramIndex = 0;
         const baseWhereFragment = this.buildWhereClause(query);
-        const countWhereClause = baseWhereFragment ? `WHERE ${baseWhereFragment.text}` : '';
+        const countWhereClause = baseWhereFragment != null ? `WHERE ${baseWhereFragment.text}` : '';
         const countSql = `SELECT COUNT(*) as count FROM ${this.tableConfig.table} ${countWhereClause}`;
         const countResult = await this.db.raw<CountRow>(countSql, baseWhereFragment?.values ?? []);
         const countValue = countResult[0]?.count;
@@ -278,7 +278,7 @@ export class SqlSearchProvider<
 
       // Build facets if requested
       const facets =
-        query.facets && query.facets.length > 0
+        query.facets != null && query.facets.length > 0
           ? await Promise.all(
               query.facets.map(async (facetConfig) => {
                 const columnName = this.resolveColumnName(facetConfig.field);
@@ -294,7 +294,7 @@ export class SqlSearchProvider<
                 const whereFragment = this.buildWhereClause(query);
                 const facetLimit = facetConfig.size ?? 10;
 
-                const whereClause = whereFragment ? `WHERE ${whereFragment.text}` : '';
+                const whereClause = whereFragment != null ? `WHERE ${whereFragment.text}` : '';
                 const facetSql = `SELECT ${columnName} as value, COUNT(*) as count FROM ${this.tableConfig.table} ${whereClause} GROUP BY ${columnName} ORDER BY count DESC LIMIT $${this.nextParam()}`;
                 const values = [...(whereFragment?.values ?? []), facetLimit];
 
@@ -333,7 +333,7 @@ export class SqlSearchProvider<
       // Reset param index for this query
       this.paramIndex = 0;
       const whereFragment = this.buildWhereClause(query);
-      const whereClause = whereFragment ? `WHERE ${whereFragment.text}` : '';
+      const whereClause = whereFragment != null ? `WHERE ${whereFragment.text}` : '';
 
       const countSql = `SELECT COUNT(*) as count FROM ${this.tableConfig.table} ${whereClause}`;
       const countResult = await this.db.raw<CountRow>(countSql, whereFragment?.values ?? []);
@@ -370,7 +370,7 @@ export class SqlSearchProvider<
   // ============================================================================
 
   private buildWhereClause(query: SearchQuery<TRecord>): SqlFragment | undefined {
-    if (!query.filters) {
+    if (query.filters == null) {
       return undefined;
     }
 
@@ -583,13 +583,13 @@ export class SqlSearchProvider<
     try {
       const decoded = decodeCursor(cursor);
 
-      if (!decoded) {
+      if (decoded == null) {
         throw new InvalidCursorError('Invalid cursor format');
       }
 
       // For simple single-field cursor
       const firstSort = sort[0];
-      const sortField = firstSort ? String(firstSort.field) : 'id';
+      const sortField = firstSort != null ? String(firstSort.field) : 'id';
       const sortOrder = firstSort?.order ?? 'asc';
       const cursorValue = decoded.value;
 
@@ -614,7 +614,7 @@ export class SqlSearchProvider<
 
   private createCursor(record: TRecord, sort: SortConfig<TRecord>[]): string {
     const firstSort = sort[0];
-    const sortField = firstSort ? String(firstSort.field) : 'id';
+    const sortField = firstSort != null ? String(firstSort.field) : 'id';
     const sortValue = record[sortField];
     const tieBreaker = String(record['id'] ?? record[sortField]);
 
@@ -645,7 +645,7 @@ export class SqlSearchProvider<
   private resolveColumnName(field: string): string | undefined {
     // Check column mappings first
     const mapping = this.tableConfig.columns.find((c) => c.field === field);
-    if (mapping) {
+    if (mapping != null) {
       return mapping.column;
     }
 

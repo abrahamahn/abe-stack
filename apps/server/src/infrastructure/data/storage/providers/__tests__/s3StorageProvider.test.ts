@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/data/storage/providers/__tests__/s3StorageProvider.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

@@ -1,9 +1,9 @@
 // apps/server/src/config/factory.ts
 import type {
-  AppConfig,
-  ElasticsearchProviderConfig,
-  FullEnv,
-  SqlSearchProviderConfig,
+    AppConfig,
+    ElasticsearchProviderConfig,
+    FullEnv,
+    SqlSearchProviderConfig,
 } from '@abe-stack/core/config';
 import { EnvSchema, initEnv } from '@abe-stack/core/config';
 
@@ -18,10 +18,10 @@ import { loadBillingConfig, validateBillingConfig } from './services/billing';
 import { loadEmailConfig } from './services/email';
 import { loadNotificationsConfig, validateNotificationsConfig } from './services/notifications';
 import {
-  loadElasticsearchConfig,
-  loadSqlSearchConfig,
-  validateElasticsearchConfig,
-  validateSqlSearchConfig,
+    loadElasticsearchConfig,
+    loadSqlSearchConfig,
+    validateElasticsearchConfig,
+    validateSqlSearchConfig,
 } from './services/search';
 
 /**
@@ -48,18 +48,21 @@ export function load(rawEnv: Record<string, string | undefined> = process.env): 
   const envResult = EnvSchema.safeParse(rawEnv);
 
   if (!envResult.success) {
+    /* eslint-disable no-console */
     console.error('\n❌ ABE-STACK: Environment Validation Failed');
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     console.table(envResult.error.flatten().fieldErrors);
+    /* eslint-enable no-console */
     process.exit(1);
   }
 
   // 2. Use the typed Zod output directly
   const env: FullEnv = envResult.data;
 
-  const nodeEnv = env.NODE_ENV || 'development';
+  const nodeEnv = env.NODE_ENV;
   const server = loadServerConfig(env);
 
-  const searchProvider = env.SEARCH_PROVIDER || 'sql';
+  const searchProvider = env.SEARCH_PROVIDER;
 
   const config: AppConfig = {
     env: nodeEnv,
@@ -93,12 +96,16 @@ function validate(config: AppConfig): void {
   // Auth Domain
   try {
     validateAuthConfig(config.auth);
-  } catch (e: any) {
-    errors.push(e.message);
+  } catch (e) {
+    if (e instanceof Error) {
+      errors.push(e.message);
+    } else {
+      errors.push(String(e));
+    }
   }
 
   // Billing Domain
-  if (config.billing?.enabled) {
+  if (config.billing.enabled) {
     errors.push(...validateBillingConfig(config.billing));
   }
 
@@ -116,7 +123,7 @@ function validate(config: AppConfig): void {
 
   // Global Production Hard-Guards
   if (isProd) {
-    if (config.storage.provider === 's3' && !config.storage.accessKeyId) {
+    if (config.storage.provider === 's3' && config.storage.accessKeyId === '') {
       errors.push('Storage: S3_ACCESS_KEY_ID is required in production');
     }
     if (config.email.provider === 'console') {
@@ -129,11 +136,13 @@ function validate(config: AppConfig): void {
 
   if (errors.length > 0) {
     const report = errors.map((e) => `  ↳ ❌ ${e}`).join('\n');
+    /* eslint-disable no-console */
     console.error('\n' + '='.repeat(50));
     console.error('  ABE-STACK CONFIGURATION ERROR');
     console.error('='.repeat(50));
     console.error(report);
     console.error('='.repeat(50) + '\n');
+    /* eslint-enable no-console */
 
     throw new Error(`Server failed to start: Invalid Configuration\n${errors.join('\n')}`);
   }

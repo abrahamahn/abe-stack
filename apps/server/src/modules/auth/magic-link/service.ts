@@ -279,18 +279,18 @@ export async function verifyMagicLink(
     const tokenRecord = tokenRecords[0];
 
     // If no rows were updated, token is invalid, expired, or already used
-    if (!tokenRecord) {
-      throw new InvalidTokenError('Invalid or expired magic link');
-    }
+     if (tokenRecord == null) {
+       throw new InvalidTokenError('Invalid or expired magic link');
+     }
 
     // Find existing user
-    const userRow = await tx.queryOne<Record<string, unknown>>(
-      select(USERS_TABLE).where(eq('email', tokenRecord.email)).limit(1).toSql(),
-    );
-    let user: User | null = userRow ? toCamelCase<User>(userRow, USER_COLUMNS) : null;
+     const userRow = await tx.queryOne<Record<string, unknown>>(
+       select(USERS_TABLE).where(eq('email', tokenRecord.email)).limit(1).toSql(),
+     );
+     let user: User | null = userRow != null ? toCamelCase<User>(userRow, USER_COLUMNS) : null;
 
-    // If user doesn't exist, create them
-    if (!user) {
+     // If user doesn't exist, create them
+     if (user == null) {
       const newUserRows = await tx.query<Record<string, unknown>>(
         insert(USERS_TABLE)
           .values({
@@ -304,9 +304,9 @@ export async function verifyMagicLink(
           })
           .returningAll()
           .toSql(),
-      );
+       );
 
-      if (!newUserRows[0]) {
+       if (newUserRows[0] == null) {
         throw new Error('Failed to create user');
       }
       user = toCamelCase<User>(newUserRows[0], USER_COLUMNS);
@@ -318,22 +318,22 @@ export async function verifyMagicLink(
           .where(eq('id', user.id))
           .returningAll()
           .toSql(),
-      );
+       );
 
-      if (updatedRows[0]) {
+       if (updatedRows[0] != null) {
         user = toCamelCase<User>(updatedRows[0], USER_COLUMNS);
       }
     }
 
-    // Create refresh token
-    const { token: refreshToken } = await createRefreshTokenFamily(
-      tx,
-      user.id,
-      config.refreshToken.expiryDays,
-    );
+     // Create refresh token
+     const { token: refreshToken } = await createRefreshTokenFamily(
+       tx,
+       user.id,
+       config.refreshToken.expiryDays,
+     );
 
-    return { user, refreshToken };
-  });
+     return { user, refreshToken };
+   });
 
   // Create access token
   const accessToken = createAccessToken(

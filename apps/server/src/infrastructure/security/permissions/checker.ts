@@ -79,7 +79,7 @@ export class PermissionChecker {
 
     this.tableConfigMap = new Map();
 
-    if (options.config.tableConfigs) {
+    if (options.config.tableConfigs != null) {
       for (const tableConfig of options.config.tableConfigs) {
         this.tableConfigMap.set(tableConfig.table, tableConfig);
       }
@@ -203,7 +203,7 @@ export class PermissionChecker {
       pointers.map(async (pointer) => {
         const record = recordMap.get(getRecordKey(pointer));
 
-        if (!record) {
+        if (record == null) {
           // Record doesn't exist, deny access
 
           return { pointer, allowed: false };
@@ -259,7 +259,7 @@ export class PermissionChecker {
 
         let result: PermissionResult;
 
-        if (!record) {
+        if (record == null) {
           result = denied('Record not found');
         } else {
           result = await this.checkRecordPermission(
@@ -317,7 +317,7 @@ export class PermissionChecker {
 
     const record = await this.recordLoader(table, recordId);
 
-    if (!record) {
+    if (record == null) {
       return denied('Record not found');
     }
 
@@ -363,7 +363,7 @@ export class PermissionChecker {
 
     // (they will own the record they create)
 
-    if (userId) {
+    if (userId !== '') {
       return allowed('authenticated-create');
     }
 
@@ -382,7 +382,7 @@ export class PermissionChecker {
   ): Promise<PermissionResult> {
     // Check if record is soft-deleted
     const tableConfig = this.tableConfigMap.get(table);
-    if (record.deleted && tableConfig?.allowDeletedRecords !== true) {
+     if (record.deleted != null && tableConfig?.allowDeletedRecords !== true) {
       return denied('Record is deleted');
     }
 
@@ -410,13 +410,13 @@ export class PermissionChecker {
     const rules: PermissionRule[] = [];
 
     // Add table-specific rules first (they take precedence)
-    if (tableConfig) {
+    if (tableConfig != null) {
       rules.push(...tableConfig.rules);
     }
 
     // Add global rules that apply to this table
     for (const rule of this.config.globalRules) {
-      if (!rule.tables || rule.tables.length === 0 || rule.tables.includes(table)) {
+      if (rule.tables == null || rule.tables.length === 0 || rule.tables.includes(table)) {
         rules.push(rule);
       }
     }
@@ -506,13 +506,13 @@ export class PermissionChecker {
     }
 
     // Check default member fields
-    if (record.memberIds && Array.isArray(record.memberIds)) {
+    if (record.memberIds != null && Array.isArray(record.memberIds)) {
       if (record.memberIds.includes(userId)) {
         return allowed('membership:memberIds');
       }
     }
 
-    if (record.sharedWith && Array.isArray(record.sharedWith)) {
+    if (record.sharedWith != null && Array.isArray(record.sharedWith)) {
       if (record.sharedWith.includes(userId)) {
         return allowed('membership:sharedWith');
       }
@@ -567,7 +567,7 @@ export class PermissionChecker {
    * Load multiple records efficiently
    */
   private async loadRecords(pointers: RecordPointer[]): Promise<Map<string, PermissionRecord>> {
-    if (this.batchRecordLoader) {
+    if (this.batchRecordLoader != null) {
       return this.batchRecordLoader(pointers);
     }
 
@@ -577,7 +577,7 @@ export class PermissionChecker {
     await Promise.all(
       pointers.map(async (pointer) => {
         const record = await this.recordLoader(pointer.table, pointer.id);
-        if (record) {
+        if (record != null) {
           results.set(getRecordKey(pointer), record);
         }
       }),

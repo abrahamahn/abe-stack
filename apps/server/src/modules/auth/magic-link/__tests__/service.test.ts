@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/modules/auth/magic-link/__tests__/service.test.ts
 /**
  * Magic Link Service Tests
@@ -8,8 +9,8 @@
 
 import type { AuthConfig } from '@/config';
 import type { MagicLinkToken, RawDb, User } from '@abe-stack/db';
-import type { DbClient, EmailService, Repositories } from '../../../../infrastructure/index.js';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+import type { DbClient, EmailService, Repositories } from '../../../../infrastructure/index.js';
 import { cleanupExpiredMagicLinkTokens, requestMagicLink, verifyMagicLink } from '../service';
 
 // ============================================================================
@@ -30,7 +31,9 @@ function createMockRawDb(): RawDb {
     getClient: vi.fn() as unknown as RawDb['getClient'],
   } as RawDb;
 
-  tx.transaction = vi.fn(async (callback) => callback(tx));
+  tx.transaction = vi.fn((callback) => {
+     return Promise.resolve(callback(tx));
+   });
 
   return tx;
 }
@@ -85,7 +88,7 @@ vi.mock('../../utils/index.js', () => ({
     },
   })),
   createAccessToken: vi.fn(() => 'mock-access-token'),
-  createRefreshTokenFamily: vi.fn(async () => ({ token: 'mock-refresh-token' })),
+  createRefreshTokenFamily: vi.fn(() => Promise.resolve({ token: 'mock-refresh-token' })),
 }));
 
 // ============================================================================
@@ -306,7 +309,7 @@ describe('requestMagicLink', () => {
       );
 
       const call = vi.mocked(repos.magicLinkTokens.create).mock.calls[0]?.[0];
-      if (!call) {
+      if (call == null) {
         throw new Error('Expected magicLinkTokens.create to be called');
       }
       const expectedExpiry = now + 20 * 60 * 1000;
@@ -544,7 +547,7 @@ describe('requestMagicLink', () => {
       await requestMagicLink(db, repos, emailService, email, baseUrl);
 
       const call = vi.mocked(repos.magicLinkTokens.create).mock.calls[0]?.[0];
-      if (!call) {
+      if (call == null) {
         throw new Error('Expected magicLinkTokens.create to be called');
       }
       const expectedExpiry = now + 15 * 60 * 1000; // 15 minutes default

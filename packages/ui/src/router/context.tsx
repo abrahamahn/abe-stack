@@ -116,7 +116,7 @@ function createBrowserHistory(): History {
 
   function saveScrollPosition(): void {
     const key = getHistoryState().key;
-    if (key) {
+    if (key !== '') {
       scrollPositions.set(key, { x: window.scrollX, y: window.scrollY });
       // Also save to history state for persistence across page reloads
       const currentState = getHistoryState();
@@ -130,7 +130,7 @@ function createBrowserHistory(): History {
   function restoreScrollPosition(): void {
     const historyState = getHistoryState();
     const saved = scrollPositions.get(historyState.key);
-    if (saved) {
+    if (saved !== undefined) {
       window.scrollTo(saved.x, saved.y);
     } else if (historyState.scrollX !== undefined && historyState.scrollY !== undefined) {
       window.scrollTo(historyState.scrollX, historyState.scrollY);
@@ -161,7 +161,8 @@ function createBrowserHistory(): History {
       notify();
     },
     replace(to: string, state?: unknown): void {
-      const key = getHistoryState().key || createKey();
+      const currentKey = getHistoryState().key;
+      const key = currentKey !== '' ? currentKey : createKey();
       const historyState: HistoryState = { key, usr: state };
       window.history.replaceState(historyState, '', to);
       currentNavigationType = 'REPLACE';
@@ -191,10 +192,11 @@ function createBrowserHistory(): History {
 let browserHistory: History | null = null;
 
 function getBrowserHistory(): History {
-  if (!browserHistory && typeof window !== 'undefined') {
+  if (browserHistory === null && typeof window !== 'undefined') {
     browserHistory = createBrowserHistory();
   }
-  return browserHistory!;
+  if (browserHistory === null) throw new Error('Browser history not initialized');
+  return browserHistory;
 }
 
 // ============================================================================
@@ -288,7 +290,7 @@ export function Router({ children, scrollRestoration = true }: RouterProps): Rea
     const url = to.startsWith('/') ? to : `/${to}`;
     preventScrollRef.current = options.preventScrollReset ?? false;
 
-    if (options.replace) {
+    if (options.replace ?? false) {
       browserStore?.history.replace(url, options.state);
     } else {
       browserStore?.history.push(url, options.state);
@@ -297,7 +299,7 @@ export function Router({ children, scrollRestoration = true }: RouterProps): Rea
 
   // Handle scroll restoration
   useEffect(() => {
-    if (!scrollRestoration || !browserStore) return;
+    if (!scrollRestoration || browserStore === null) return;
 
     if (state.navigationType === 'POP') {
       // Back/forward navigation - restore previous scroll position
@@ -392,7 +394,7 @@ export function MemoryRouter({
       const url = to.startsWith('/') ? to : `/${to}`;
       const newEntry: MemoryEntry = { path: url, state: options.state ?? null, key: createKey() };
 
-      if (options.replace) {
+      if (options.replace ?? false) {
         setEntries((prev) => {
           const next = [...prev];
           next[index] = newEntry;
@@ -429,7 +431,7 @@ export function MemoryRouter({
 /** Access the full router context */
 export function useRouterContext(): RouterContextValue {
   const context = useContext(RouterContext);
-  if (!context) {
+  if (context === null) {
     throw new Error('useRouterContext must be used within a Router');
   }
   return context;

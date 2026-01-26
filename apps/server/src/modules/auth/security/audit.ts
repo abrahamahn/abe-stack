@@ -424,10 +424,9 @@ export class SecurityAuditLogger {
     const forwardedFor = req.headers['x-forwarded-for'];
     const realIp = req.headers['x-real-ip'];
     const ip =
-      (typeof forwardedFor === 'string' ? forwardedFor : '') ||
-      (typeof realIp === 'string' ? realIp : '') ||
-      req.ip ||
-      'unknown';
+       (typeof forwardedFor === 'string' && forwardedFor !== '' ? forwardedFor :
+       (typeof realIp === 'string' && realIp !== '' ? realIp :
+       (req.ip !== '' ? req.ip : 'unknown')));
     const parts = ip.split(',');
     return (parts[0] ?? 'unknown').trim();
   }
@@ -484,14 +483,14 @@ export class SecurityAuditLogger {
   }
 
   async destroy(): Promise<void> {
-    if (this.flushTimer) {
-      clearInterval(this.flushTimer);
-      this.flushTimer = undefined;
-    }
-    if (this.intrusionCleanupTimer) {
-      clearInterval(this.intrusionCleanupTimer);
-      this.intrusionCleanupTimer = undefined;
-    }
+     if (this.flushTimer != null) {
+       clearInterval(this.flushTimer);
+       this.flushTimer = undefined;
+     }
+    if (this.intrusionCleanupTimer != null) {
+       clearInterval(this.intrusionCleanupTimer);
+       this.intrusionCleanupTimer = undefined;
+     }
     await this.flush();
     this.intrusionState.clear();
   }

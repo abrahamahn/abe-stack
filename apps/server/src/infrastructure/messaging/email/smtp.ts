@@ -196,7 +196,7 @@ export class SmtpClient {
     }
 
     // Authenticate if credentials provided
-    if (this.config.auth) {
+    if (this.config.auth != null) {
       const authMethods = ehloResponse.includes('AUTH');
       if (!authMethods) {
         throw new Error('Server does not support authentication');
@@ -352,7 +352,7 @@ export class SmtpClient {
   }
 
   private async command(cmd: string): Promise<string> {
-    if (!this.socket) {
+    if (this.socket == null) {
       throw new Error('Not connected');
     }
 
@@ -360,7 +360,7 @@ export class SmtpClient {
 
     return new Promise((resolve, reject) => {
       socket.write(`${cmd}\r\n`, (err) => {
-        if (err) {
+        if (err != null) {
           reject(err);
         } else {
           this.readResponse().then(resolve).catch(reject);
@@ -372,7 +372,7 @@ export class SmtpClient {
   private async readResponse(): Promise<string> {
     return new Promise((resolve, reject) => {
       const socket = this.socket;
-      if (!socket) {
+      if (socket == null) {
         reject(new Error('Not connected'));
         return;
       }
@@ -401,7 +401,7 @@ export class SmtpClient {
 
   private async upgradeToTls(): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (!this.socket) {
+      if (this.socket == null) {
         reject(new Error('Not connected'));
         return;
       }
@@ -424,7 +424,7 @@ export class SmtpClient {
   }
 
   private cleanup(): void {
-    if (this.socket) {
+    if (this.socket != null) {
       this.socket.destroy();
       this.socket = null;
     }

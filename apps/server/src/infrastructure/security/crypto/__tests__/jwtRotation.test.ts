@@ -1,13 +1,12 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/security/crypto/__tests__/jwtRotation.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { JwtError, jwtSign } from '../index';
 import {
-  checkTokenSecret,
-  createJwtRotationHandler,
-  signWithRotation,
-  verifyWithRotation,
+    checkTokenSecret,
+    createJwtRotationHandler,
+    signWithRotation,
+    verifyWithRotation,
 } from '../jwtRotation';
 
 import type { JwtRotationConfig } from '../jwtRotation';

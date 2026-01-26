@@ -88,7 +88,7 @@ export async function logSecurityEvent(params: LogSecurityEventParams): Promise<
         severity,
         ip_address: ipAddress != null && ipAddress !== '' ? ipAddress : null,
         user_agent: userAgent != null && userAgent !== '' ? userAgent : null,
-        metadata: metadata ? JSON.stringify(metadata) : null,
+        metadata: metadata != null ? JSON.stringify(metadata) : null,
       })
       .toSql(),
   );

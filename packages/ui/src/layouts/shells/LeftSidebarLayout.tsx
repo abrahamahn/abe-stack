@@ -67,9 +67,9 @@ export const LeftSidebarLayout = forwardRef<HTMLDivElement, LeftSidebarLayoutPro
       >
         {hasSlots ? (
           <>
-            {header && <div className="left-sidebar-header">{header}</div>}
-            {content && <div className="left-sidebar-content">{content}</div>}
-            {footer && <div className="left-sidebar-footer">{footer}</div>}
+            {header != null && <div className="left-sidebar-header">{header}</div>}
+            {content != null && <div className="left-sidebar-content">{content}</div>}
+            {footer != null && <div className="left-sidebar-footer">{footer}</div>}
           </>
         ) : (
           children

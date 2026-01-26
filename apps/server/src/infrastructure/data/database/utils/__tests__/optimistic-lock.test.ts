@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/data/database/utils/__tests__/optimistic-lock.test.ts
 import { describe, expect, test, vi } from 'vitest';
 
