@@ -51,8 +51,8 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>((p
   const [internalValue, setInternalValue] = useState('');
 
   const inputId = id ?? `password-${Math.random().toString(36).slice(2, 7)}`;
-  const descId = description ? `${inputId}-desc` : undefined;
-  const errorId = error ? `${inputId}-err` : undefined;
+  const descId = (description != null && description !== '') ? `${inputId}-desc` : undefined;
+  const errorId = (error != null && error !== '') ? `${inputId}-err` : undefined;
 
   // Use controlled or internal value
   const passwordValue = value !== undefined ? String(value) : internalValue;
@@ -76,7 +76,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>((p
 
   return (
     <div className="input-field">
-      {label ? (
+      {label != null && label !== '' ? (
         <label htmlFor={inputId} className="input-label">
           {label}
         </label>
@@ -88,8 +88,8 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>((p
           id={inputId}
           type={isVisible ? 'text' : 'password'}
           className={`input password-input ${className}`.trim()}
-          aria-describedby={error ? errorId : descId}
-          aria-invalid={Boolean(error)}
+          aria-describedby={(error != null && error !== '') ? errorId : descId}
+          aria-invalid={error != null && error !== ''}
           value={passwordValue}
           onChange={handleChange}
           {...rest}
@@ -109,7 +109,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>((p
         )}
       </div>
 
-      {showStrength && strength && (
+      {showStrength && strength != null && (
         <div className="password-strength">
           <div className="password-strength-bar">
             <div
@@ -122,18 +122,18 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>((p
           </div>
           <Text tone="muted" className="password-strength-label">
             {getStrengthLabel(strength.score)}
-            {strength.feedback.warning && ` - ${strength.feedback.warning}`}
+            {strength.feedback.warning !== '' && ` - ${strength.feedback.warning}`}
           </Text>
         </div>
       )}
 
-      {description && !showStrength ? (
+      {(description != null && description !== '') && !showStrength ? (
         <Text id={descId} tone="muted" className="input-description">
           {description}
         </Text>
       ) : null}
 
-      {error ? (
+      {error != null && error !== '' ? (
         <Text id={errorId} tone="danger" className="input-error">
           {error}
         </Text>

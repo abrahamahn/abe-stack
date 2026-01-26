@@ -34,7 +34,7 @@ describe('Tooltip', () => {
 
     const wrapper = screen.getByText('Hover me').closest('.tooltip');
     expect(wrapper).toBeDefined();
-    if (!wrapper) return;
+    if (wrapper == null) return;
 
     fireEvent.mouseEnter(wrapper);
     expect(screen.getByText('Tooltip text')).toBeInTheDocument();
@@ -76,7 +76,7 @@ describe('Tooltip', () => {
 
     const wrapper = screen.getByText('Trigger').parentElement;
     expect(wrapper).toBeDefined();
-    if (!wrapper) return;
+    if (wrapper == null) return;
 
     fireEvent.mouseEnter(wrapper);
     fireEvent.mouseLeave(wrapper);

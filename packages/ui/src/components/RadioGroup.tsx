@@ -1,13 +1,13 @@
 // packages/ui/src/components/RadioGroup.tsx
 import { useControllableState } from '@hooks/useControllableState';
 import {
-  createContext,
-  useContext,
-  useId,
-  useRef,
-  type KeyboardEvent,
-  type ReactElement,
-  type ReactNode,
+    createContext,
+    useContext,
+    useId,
+    useRef,
+    type KeyboardEvent,
+    type ReactElement,
+    type ReactNode,
 } from 'react';
 
 import '../styles/components.css';
@@ -68,7 +68,7 @@ export function RadioGroup(props: RadioGroupProps): ReactElement {
 
   const groupRef = useRef<HTMLDivElement>(null);
   const generatedName = useId();
-  const radioName = name || generatedName;
+   const radioName = (name != null && name !== '') ? name : generatedName;
 
   const [value, setValue] = useControllableState({
     value: valueProp,
@@ -77,7 +77,7 @@ export function RadioGroup(props: RadioGroupProps): ReactElement {
   });
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
-    if (!groupRef.current) return;
+     if (groupRef.current == null) return;
 
     const radios = Array.from(
       groupRef.current.querySelectorAll<HTMLInputElement>(
@@ -135,7 +135,7 @@ export function RadioGroup(props: RadioGroupProps): ReactElement {
     }
 
     const nextRadio = radios[nextIndex];
-    if (nextRadio) {
+     if (nextRadio != null) {
       nextRadio.focus();
       // If we are controlling value, we should also trigger the change
       // But clicking triggers it natively for the input.

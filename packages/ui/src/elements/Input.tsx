@@ -49,15 +49,15 @@ InputRoot.displayName = 'Input';
 const InputField = forwardRef<HTMLInputElement, InputFieldProps>((props, ref) => {
   const { as, label, hideLabel, description, error, className, id, ...rest } = props;
   const inputId = id ?? `input-${Math.random().toString(36).slice(2, 7)}`;
-  const descId = description ? `${inputId}-desc` : undefined;
-  const errorId = error ? `${inputId}-err` : undefined;
+  const descId = (description != null && description !== '') ? `${inputId}-desc` : undefined;
+  const errorId = (error != null && error !== '') ? `${inputId}-err` : undefined;
 
   return (
     <div className="input-field">
-      {label ? (
+      {label != null && label !== '' ? (
         <label
           htmlFor={inputId}
-          className={`input-label ${hideLabel ? 'visually-hidden' : ''}`.trim()}
+          className={`input-label ${hideLabel === true ? 'visually-hidden' : ''}`.trim()}
         >
           {label}
         </label>
@@ -67,16 +67,16 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>((props, ref) =>
         id={inputId}
         ref={ref}
         className={className}
-        aria-describedby={error ? errorId : descId}
-        aria-invalid={Boolean(error)}
+        aria-describedby={(error != null && error !== '') ? errorId : descId}
+        aria-invalid={error != null && error !== ''}
         {...rest}
       />
-      {description ? (
+      {description != null && description !== '' ? (
         <Text id={descId} tone="muted" className="input-description">
           {description}
         </Text>
       ) : null}
-      {error ? (
+      {error != null && error !== '' ? (
         <Text id={errorId} tone="danger" className="input-error">
           {error}
         </Text>
@@ -90,4 +90,5 @@ export const Input = Object.assign(InputRoot, {
   Field: InputField,
 });
 
-export type { InputRootProps, InputFieldProps };
+export type { InputFieldProps, InputRootProps };
+

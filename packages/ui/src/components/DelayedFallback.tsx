@@ -63,7 +63,7 @@ export function DelayedFallback({
     return null;
   }
 
-  if (children) {
+  if (children != null) {
     return <>{children}</>;
   }
 

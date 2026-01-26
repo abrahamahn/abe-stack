@@ -57,7 +57,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref)
         className="checkbox-input"
         {...rest}
       />
-      {label ? <span className="checkbox-label">{label}</span> : null}
+      {label != null ? <span className="checkbox-label">{label}</span> : null}
     </label>
   );
 });

@@ -88,10 +88,10 @@ export function parseSignedUrl(url: string, secret: string): SignedUrlData | nul
     const pathname = urlObj.pathname;
 
     // Extract path components: /uploads/{fileId}/{filename}
-    const match = pathname.match(/^\/uploads\/([^/]+)\/([^/]+)$/);
-    if (!match) {
-      return null;
-    }
+     const match = pathname.match(/^\/uploads\/([^/]+)\/([^/]+)$/);
+     if (match == null) {
+       return null;
+     }
 
     const [, encodedFileId, encodedFilename] = match;
     if (encodedFileId == null || encodedFileId === '' || encodedFilename == null || encodedFilename === '') {
@@ -106,9 +106,9 @@ export function parseSignedUrl(url: string, secret: string): SignedUrlData | nul
     const expirationStr = urlObj.searchParams.get('expiration');
     const method = urlObj.searchParams.get('method') as 'get' | 'put' | null;
 
-    if (!signature || !expirationStr || !method) {
-      return null;
-    }
+     if (signature == null || signature === '' || expirationStr == null || expirationStr === '' || method == null) {
+       return null;
+     }
 
     // Validate method is one of the expected values
     if (!['get', 'put'].includes(method)) {

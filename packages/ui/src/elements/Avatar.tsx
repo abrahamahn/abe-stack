@@ -26,21 +26,21 @@ export const Avatar = forwardRef<HTMLDivElement, AvatarProps>((props, ref) => {
   const { src, alt, fallback, className, ...rest } = props;
 
   // Provide a default alt text for accessibility if none is given
-  const imageAlt = alt ?? (fallback ? `Avatar for ${fallback}` : 'User avatar');
+   const imageAlt = alt ?? (fallback != null && fallback !== '' ? `Avatar for ${fallback}` : 'User avatar');
 
   return (
     <div
       ref={ref}
       className={cn('avatar', className)}
       role="img"
-      aria-label={!src && fallback ? imageAlt : undefined}
-      {...rest}
+       aria-label={(src == null || src === '') && (fallback != null && fallback !== '') ? imageAlt : undefined}
+       {...rest}
     >
-      {src ? (
-        <img src={src} alt={imageAlt} />
-      ) : fallback ? (
-        <span aria-hidden="true">{fallback}</span>
-      ) : null}
+      {src != null && src !== '' ? (
+         <img src={src} alt={imageAlt} />
+       ) : fallback != null && fallback !== '' ? (
+         <span aria-hidden="true">{fallback}</span>
+       ) : null}
     </div>
   );
 });

@@ -53,7 +53,7 @@ class Mutex {
 
   release(): void {
     const next = this.queue.shift();
-    if (next) {
+    if (next != null) {
       next();
     } else {
       this.locked = false;
@@ -176,7 +176,7 @@ export class JsonDatabase {
    * Get all records from a table (returns a shallow copy to prevent reference leaks)
    */
   getAll<T extends DbRecord>(table: string): T[] {
-    const tableData = this.data[table] || [];
+    const tableData = this.data[table] ?? [];
     return [...tableData] as T[];
   }
 
@@ -187,7 +187,7 @@ export class JsonDatabase {
     let records = this.getAll<T>(table);
 
     // Apply where condition
-    if (options.where) {
+    if (options.where != null) {
       if (typeof options.where === 'function') {
         records = records.filter(options.where);
       } else {
@@ -199,7 +199,7 @@ export class JsonDatabase {
     }
 
     // Apply orderBy
-    if (options.orderBy) {
+    if (options.orderBy != null) {
       const { field, direction } = options.orderBy;
       records = [...records].sort((a, b) => {
         const aVal = a[field];
@@ -236,7 +236,7 @@ export class JsonDatabase {
    */
   findById(table: string, id: string): DbRecord | undefined {
     const record = this.getAll<DbRecord>(table).find((record) => record.id === id);
-    return record ? { ...record } : undefined;
+    return record != null ? { ...record } : undefined;
   }
 
   /**
@@ -247,12 +247,10 @@ export class JsonDatabase {
     data: Omit<T, 'id'> & { id?: string },
   ): Promise<T> {
     return this.writeMutex.withLock(() => {
-      const id = data.id || this.generateId();
+      const id = (data.id != null && data.id !== '') ? data.id : this.generateId();
       const record = { ...data, id } as T;
 
-      if (!this.data[table]) {
-        this.data[table] = [];
-      }
+      this.data[table] ??= [];
       this.data[table].push(record as DbRecord);
       this.saveToFile();
 
@@ -270,12 +268,10 @@ export class JsonDatabase {
     return this.writeMutex.withLock(() => {
       const inserted: T[] = [];
       for (const data of records) {
-        const id = data.id || this.generateId();
+        const id = (data.id != null && data.id !== '') ? data.id : this.generateId();
         const record = { ...data, id } as T;
 
-        if (!this.data[table]) {
-          this.data[table] = [];
-        }
+        this.data[table] ??= [];
         this.data[table].push(record as DbRecord);
         inserted.push(record);
       }
@@ -294,14 +290,14 @@ export class JsonDatabase {
   ): Promise<T[]> {
     return this.writeMutex.withLock(() => {
       const updated: T[] = [];
-      const tableData = this.data[table] || [];
+      const tableData = this.data[table] ?? [];
 
       tableData.forEach((record, i) => {
         const typedRecord = record as T;
         const matches =
           typeof where === 'function'
             ? where(typedRecord)
-            : Object.entries(where).every(([key, value]) => typedRecord[key as keyof T] === value);
+            : Object.entries(where as object).every(([key, value]) => typedRecord[key as keyof T] === value);
 
         if (matches) {
           const updatedRecord = { ...typedRecord, ...data } as T;
@@ -336,7 +332,7 @@ export class JsonDatabase {
   async delete<T extends DbRecord>(table: string, where: WhereCondition<T>): Promise<T[]> {
     return this.writeMutex.withLock(() => {
       const deleted: T[] = [];
-      const tableData = this.data[table] || [];
+      const tableData = this.data[table] ?? [];
       const remaining: DbRecord[] = [];
 
       for (const record of tableData) {
@@ -374,7 +370,7 @@ export class JsonDatabase {
    * Count records matching a condition
    */
   count(table: string, where?: WhereCondition<DbRecord>): number {
-    const records = where ? this.find<DbRecord>(table, { where }) : this.getAll(table);
+    const records = where != null ? this.find<DbRecord>(table, { where }) : this.getAll(table);
     return records.length;
   }
 
@@ -596,7 +592,7 @@ class JsonSelectBuilder<T extends DbRecord> {
     reject?: (reason: unknown) => TResult,
   ): Promise<TResult> {
     try {
-      if (!this.tableName) {
+      if (this.tableName == null || this.tableName === '') {
         throw new Error('Table not specified. Call .from() first.');
       }
 
@@ -608,7 +604,7 @@ class JsonSelectBuilder<T extends DbRecord> {
 
       return Promise.resolve(resolve(results));
     } catch (error) {
-      if (reject) {
+      if (reject != null) {
         return Promise.reject(error instanceof Error ? error : new Error(String(error)));
       }
       throw error;
@@ -616,7 +612,7 @@ class JsonSelectBuilder<T extends DbRecord> {
   }
 
   private parseCondition(condition: unknown): WhereCondition<T> | null {
-    if (!condition) return null;
+    if (condition == null) return null;
 
     if (isDrizzleSql(condition)) {
       return () => true;
@@ -662,7 +658,7 @@ class JsonInsertBuilder<T extends DbRecord> {
       const inserted = await this.db.insertMany<T>(this.tableName, this.data);
       return resolve(this.shouldReturn ? inserted : ([] as T[]));
     } catch (error) {
-      if (reject) {
+      if (reject != null) {
         return reject(error);
       }
       throw error;
@@ -705,13 +701,13 @@ class JsonUpdateBuilder<T extends DbRecord> {
     reject?: (reason: unknown) => TResult,
   ): Promise<TResult> {
     try {
-      if (!this.whereCondition) {
+      if (this.whereCondition == null) {
         throw new Error('WHERE condition required for UPDATE');
       }
       const updated = await this.db.update<T>(this.tableName, this.updateData, this.whereCondition);
       return resolve(this.shouldReturn ? updated : ([] as T[]));
     } catch (error) {
-      if (reject) {
+      if (reject != null) {
         return reject(error);
       }
       throw error;
@@ -747,13 +743,13 @@ class JsonDeleteBuilder<T extends DbRecord> {
     reject?: (reason: unknown) => TResult,
   ): Promise<TResult> {
     try {
-      if (!this.whereCondition) {
+      if (this.whereCondition == null) {
         throw new Error('WHERE condition required for DELETE');
       }
       const deleted = await this.db.delete<T>(this.tableName, this.whereCondition);
       return resolve(this.shouldReturn ? deleted : ([] as T[]));
     } catch (error) {
-      if (reject) {
+      if (reject != null) {
         return reject(error);
       }
       throw error;
@@ -815,7 +811,7 @@ class JsonTableQuery {
     where?: unknown;
     columns?: Record<string, boolean>;
   }): DbRecord | undefined {
-    const where = options?.where ? this.parseWhere(options.where) : undefined;
+    const where = options?.where != null ? this.parseWhere(options.where) : undefined;
     return this.db.findFirst(this.tableName, { where });
   }
 
@@ -825,7 +821,7 @@ class JsonTableQuery {
     offset?: number;
     columns?: Record<string, boolean>;
   }): T[] {
-    const where = options?.where ? this.parseWhere(options.where) : undefined;
+    const where = options?.where != null ? this.parseWhere(options.where) : undefined;
     return this.db.find<T>(this.tableName, {
       where,
       limit: options?.limit,
@@ -834,7 +830,7 @@ class JsonTableQuery {
   }
 
   private parseWhere<T>(where: unknown): WhereCondition<T> | undefined {
-    if (!where) return undefined;
+    if (where == null) return undefined;
 
     if (isDrizzleSql(where)) {
       return undefined;

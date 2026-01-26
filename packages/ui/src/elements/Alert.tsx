@@ -27,9 +27,9 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>((props, ref) => {
   const { tone = 'info', icon, title, children, className = '', ...rest } = props;
   return (
     <div ref={ref} className={`alert ${className}`.trim()} data-tone={tone} role="status" {...rest}>
-      {icon ? <span>{icon}</span> : null}
+      {icon != null ? <span>{icon}</span> : null}
       <div>
-        {title ? <div className="alert-title">{title}</div> : null}
+        {title != null ? <div className="alert-title">{title}</div> : null}
         <div>{children}</div>
       </div>
     </div>

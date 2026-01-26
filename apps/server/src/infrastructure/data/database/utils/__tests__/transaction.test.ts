@@ -167,10 +167,11 @@ describe('transaction rollback behavior', () => {
     const callback = vi
       .fn()
       .mockImplementation(async (tx: { insert: () => void; update: () => void }) => {
-        tx.insert(); // First operation succeeds
-        tx.update(); // Second operation succeeds
-        throw new Error('Business logic validation failed');
-      });
+         await Promise.resolve();
+         tx.insert(); // First operation succeeds
+         tx.update(); // Second operation succeeds
+         throw new Error('Business logic validation failed');
+       });
 
     await expect(withTransaction(mockDb, callback)).rejects.toThrow(
       'Business logic validation failed',
@@ -245,9 +246,10 @@ describe('transaction rollback behavior', () => {
 
     const mockTx = {
       query: vi.fn().mockImplementation(async (queryStr: string) => {
-        operationResults.push(`query:${queryStr}`);
-        return [];
-      }),
+         await Promise.resolve();
+         operationResults.push(`query:${queryStr}`);
+         return [];
+       }),
     };
 
     const mockTransaction = vi.fn().mockImplementation(async (cb: TransactionCallback<unknown>) => {

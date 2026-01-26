@@ -1,8 +1,8 @@
 // packages/ui/src/elements/Box.tsx
 import { cn } from '@utils/cn';
 
+import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import '../styles/elements.css';
-import type { ReactNode, CSSProperties, ReactElement } from 'react';
 
 export type BoxProps = {
   /** Content to render inside the box */
@@ -37,8 +37,8 @@ export const Box = ({
 }: BoxProps): ReactElement => {
   const boxPadding = typeof padding === 'number' ? `${String(padding)}px` : padding;
   const combinedStyle: CSSProperties = {
-    ...(flexDirection ? { '--ui-box-direction': flexDirection } : {}),
-    ...(boxPadding ? { '--ui-box-padding': boxPadding } : {}),
+    ...(flexDirection != null ? { '--ui-box-direction': flexDirection } : {}),
+     ...(boxPadding != null ? { '--ui-box-padding': boxPadding } : {}),
     ...style,
   };
 

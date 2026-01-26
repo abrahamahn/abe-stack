@@ -47,7 +47,7 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>((props, ref) => {
     onChange,
   });
 
-  const isGrouped = !!groupContext;
+  const isGrouped = groupContext != null;
   let isChecked = internalChecked ?? false;
   let name = nameProp;
 
@@ -56,8 +56,8 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>((props, ref) => {
       isChecked = groupContext.value === String(value);
     }
     // If name is not provided on Radio, use group name
-    name = nameProp || groupContext.name;
-  }
+     name = (nameProp != null && nameProp !== '') ? nameProp : groupContext.name;
+   }
 
   const handleChange = (): void => {
     if (isGrouped) {
@@ -85,7 +85,7 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>((props, ref) => {
         className="radio-input"
         {...rest}
       />
-      {label ? <span>{label}</span> : null}
+      {label != null ? <span>{label}</span> : null}
     </label>
   );
 });

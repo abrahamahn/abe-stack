@@ -1,9 +1,9 @@
 // apps/server/src/infrastructure/data/storage/providers/s3StorageProvider.ts
 import {
-  DeleteObjectCommand,
-  GetObjectCommand,
-  PutObjectCommand,
-  S3Client,
+    DeleteObjectCommand,
+    GetObjectCommand,
+    PutObjectCommand,
+    S3Client,
 } from '@aws-sdk/client-s3';
 import { fromEnv } from '@aws-sdk/credential-providers';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -21,8 +21,8 @@ export class S3StorageProvider implements StorageProvider {
       endpoint: config.endpoint,
       forcePathStyle: config.forcePathStyle,
       credentials:
-        config.accessKeyId && config.secretAccessKey
-          ? {
+         (config.accessKeyId !== '' && config.secretAccessKey !== '')
+           ? {
               accessKeyId: config.accessKeyId,
               secretAccessKey: config.secretAccessKey,
             }
@@ -56,7 +56,7 @@ export class S3StorageProvider implements StorageProvider {
       }),
     );
 
-    if (!result.Body) {
+    if (result.Body == null) {
       throw new Error(`Empty body returned for S3 key: ${key}`);
     }
 

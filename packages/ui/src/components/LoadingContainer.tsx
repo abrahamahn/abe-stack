@@ -43,7 +43,7 @@ export function LoadingContainer({
   return (
     <div className={`loading-container ${className}`.trim()} {...rest}>
       <Spinner size={spinnerSizes[size]} />
-      {text ? <Text tone="muted">{text}</Text> : null}
+      {text !== '' ? <Text tone="muted">{text}</Text> : null}
     </div>
   );
 }

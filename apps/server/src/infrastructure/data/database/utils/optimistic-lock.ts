@@ -14,16 +14,16 @@
  */
 
 import {
-  update,
-  select,
-  and,
-  eq,
-  USERS_TABLE,
-  USER_COLUMNS,
-  toCamelCase,
-  toSnakeCase,
-  type RawDb,
-  type User,
+    USERS_TABLE,
+    USER_COLUMNS,
+    and,
+    eq,
+    select,
+    toCamelCase,
+    toSnakeCase,
+    update,
+    type RawDb,
+    type User,
 } from '@abe-stack/db';
 
 /**
@@ -79,13 +79,13 @@ export async function updateUserWithVersion(
       .toSql(),
   );
 
-  if (!result) {
+  if (result == null) {
     // Version mismatch - fetch current version for error response
     const current = await db.queryOne<{ version: number }>(
       select(USERS_TABLE).columns('version').where(eq('id', id)).limit(1).toSql(),
     );
 
-    if (!current) {
+    if (current == null) {
       throw new Error('Record not found');
     }
 

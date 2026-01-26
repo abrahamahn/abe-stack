@@ -65,7 +65,7 @@ export function Dropdown({
         const menuItems = menuRef.current?.querySelectorAll<HTMLElement>(
           'button, a, [tabindex]:not([tabindex="-1"])',
         );
-        if (menuItems && menuItems.length > 0) {
+        if (menuItems != null && menuItems.length > 0) {
           const target = e.key === 'ArrowDown' ? menuItems[0] : menuItems[menuItems.length - 1];
           target?.focus();
         }

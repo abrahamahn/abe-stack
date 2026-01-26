@@ -1,10 +1,10 @@
 // packages/ui/src/components/Image.tsx
 import {
-  forwardRef,
-  useEffect,
-  useState,
-  type ComponentPropsWithoutRef,
-  type ReactNode,
+    forwardRef,
+    useEffect,
+    useState,
+    type ComponentPropsWithoutRef,
+    type ReactNode,
 } from 'react';
 import '../styles/elements.css';
 
@@ -85,13 +85,13 @@ export const Image = forwardRef<HTMLImageElement, ImageProps>((props, ref) => {
     onError?.(e);
   };
 
-  const showFallback = (isLoading || hasError) && fallback;
+  const showFallback = (isLoading || hasError) && fallback != null;
 
   return (
     <div
       className={`image-container ${className}`.trim()}
       style={{
-        aspectRatio: aspectRatio || 'auto',
+        aspectRatio: (aspectRatio != null && aspectRatio !== '') ? aspectRatio : 'auto',
         ...style,
       }}
     >

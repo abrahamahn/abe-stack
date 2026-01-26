@@ -3,15 +3,15 @@
 import { useControllableState } from '@hooks/useControllableState';
 import { useDisclosure } from '@hooks/useDisclosure';
 import {
-  Children,
-  forwardRef,
-  isValidElement,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-  type ComponentPropsWithoutRef,
-  type ReactNode,
+    Children,
+    forwardRef,
+    isValidElement,
+    useId,
+    useMemo,
+    useRef,
+    useState,
+    type ComponentPropsWithoutRef,
+    type ReactNode,
 } from 'react';
 import '../styles/components.css';
 
@@ -57,7 +57,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>((props, ref) => {
   } = props;
 
   const generatedId = useId();
-  const id = idProp || generatedId;
+  const id = (idProp != null && idProp !== '') ? idProp : generatedId;
   const listboxId = `${id}-listbox`;
   const triggerRef = useRef<HTMLButtonElement>(null);
 
@@ -96,15 +96,15 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>((props, ref) => {
   const setInitialHighlight = (): void => {
     const currentIndex = options.findIndex((opt) => opt.value === value);
     setHighlightedIndex(
-      currentIndex >= 0 && !options[currentIndex]?.disabled
+      currentIndex >= 0 && options[currentIndex]?.disabled !== true
         ? currentIndex
-        : options.findIndex((o) => !o.disabled),
+        : options.findIndex((o) => o.disabled !== true),
     );
   };
 
   const moveHighlight = (direction: 1 | -1): void => {
     const enabledIndices = options
-      .map((opt, index) => (opt.disabled ? -1 : index))
+      .map((opt, index) => (opt.disabled === true ? -1 : index))
       .filter((i) => i !== -1);
 
     if (enabledIndices.length === 0) return;
@@ -138,7 +138,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>((props, ref) => {
         }
         disabled={disabled}
         onClick={() => {
-          if (!disabled) {
+          if (disabled !== true) {
             const nextOpen = !isOpen;
             toggle();
             if (nextOpen) {
@@ -147,7 +147,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>((props, ref) => {
           }
         }}
         onKeyDown={(e) => {
-          if (disabled) return;
+          if (disabled === true) return;
 
           switch (e.key) {
             case 'ArrowDown':
@@ -170,7 +170,7 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>((props, ref) => {
               e.preventDefault();
               if (isOpen) {
                 const highlighted = options[highlightedIndex];
-                if (highlighted && !highlighted.disabled) {
+                if (highlighted != null && highlighted.disabled !== true) {
                   handleSelect(highlighted.value);
                 }
               } else {
@@ -191,13 +191,13 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>((props, ref) => {
             case 'Home':
               if (isOpen) {
                 e.preventDefault();
-                setHighlightedIndex(options.findIndex((o) => !o.disabled));
+                setHighlightedIndex(options.findIndex((o) => o.disabled !== true));
               }
               break;
             case 'End':
               if (isOpen) {
                 e.preventDefault();
-                const lastEnabled = [...options].reverse().findIndex((o) => !o.disabled);
+                const lastEnabled = [...options].reverse().findIndex((o) => o.disabled !== true);
                 if (lastEnabled !== -1) {
                   setHighlightedIndex(options.length - 1 - lastEnabled);
                 }
@@ -226,12 +226,12 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>((props, ref) => {
               data-highlighted={index === highlightedIndex}
               data-disabled={opt.disabled}
               onClick={() => {
-                if (!opt.disabled) {
+                if (opt.disabled !== true) {
                   handleSelect(opt.value);
                 }
               }}
               onMouseEnter={() => {
-                if (!opt.disabled) {
+                if (opt.disabled !== true) {
                   setHighlightedIndex(index);
                 }
               }}

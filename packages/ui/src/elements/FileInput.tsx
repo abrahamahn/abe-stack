@@ -41,15 +41,15 @@ FileInputRoot.displayName = 'FileInput';
 const FileInputField = forwardRef<HTMLInputElement, FileInputFieldProps>((props, ref) => {
   const { label, hideLabel, description, error, className, id, type = 'file', ...rest } = props;
   const inputId = id ?? `file-input-${Math.random().toString(36).slice(2, 7)}`;
-  const descId = description ? `${inputId}-desc` : undefined;
-  const errorId = error ? `${inputId}-err` : undefined;
+  const descId = (description != null && description !== '') ? `${inputId}-desc` : undefined;
+  const errorId = (error != null && error !== '') ? `${inputId}-err` : undefined;
 
   return (
     <div className="input-field">
-      {label ? (
+      {label != null && label !== '' ? (
         <label
           htmlFor={inputId}
-          className={`input-label ${hideLabel ? 'visually-hidden' : ''}`.trim()}
+          className={`input-label ${hideLabel === true ? 'visually-hidden' : ''}`.trim()}
         >
           {label}
         </label>
@@ -59,16 +59,16 @@ const FileInputField = forwardRef<HTMLInputElement, FileInputFieldProps>((props,
         id={inputId}
         type={type}
         className={className}
-        aria-describedby={error ? errorId : descId}
-        aria-invalid={Boolean(error)}
+        aria-describedby={(error != null && error !== '') ? errorId : descId}
+        aria-invalid={error != null && error !== ''}
         {...rest}
       />
-      {description ? (
+      {description != null && description !== '' ? (
         <Text id={descId} tone="muted" className="input-description">
           {description}
         </Text>
       ) : null}
-      {error ? (
+      {error != null && error !== '' ? (
         <Text id={errorId} tone="danger" className="input-error">
           {error}
         </Text>
@@ -83,4 +83,5 @@ export const FileInput = Object.assign(FileInputRoot, {
   Field: FileInputField,
 });
 
-export type { FileInputProps, FileInputFieldProps };
+export type { FileInputFieldProps, FileInputProps };
+

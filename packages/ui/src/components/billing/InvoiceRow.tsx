@@ -241,45 +241,45 @@ export const InvoiceList = forwardRef<HTMLDivElement, InvoiceListProps>(
       );
     }
 
-    if (error) {
-      return (
-        <div ref={ref} className={cn('invoice-list', 'invoice-list--error', className)} {...rest}>
-          <div className="invoice-list__error">{error}</div>
-        </div>
-      );
-    }
+    if (error != null && error !== '') {
+       return (
+         <div ref={ref} className={cn('invoice-list', 'invoice-list--error', className)} {...rest}>
+           <div className="invoice-list__error">{error}</div>
+         </div>
+       );
+     }
 
-    if (invoices.length === 0) {
-      return (
-        <div ref={ref} className={cn('invoice-list', 'invoice-list--empty', className)} {...rest}>
-          <div className="invoice-list__empty">No invoices yet</div>
-        </div>
-      );
-    }
+     if (invoices.length === 0) {
+       return (
+         <div ref={ref} className={cn('invoice-list', 'invoice-list--empty', className)} {...rest}>
+           <div className="invoice-list__empty">No invoices yet</div>
+         </div>
+       );
+     }
 
-    return (
-      <div ref={ref} className={cn('invoice-list', className)} {...rest}>
-        <div className="invoice-list__header">
-          <span className="invoice-list__header-date">Date</span>
-          <span className="invoice-list__header-period">Period</span>
-          <span className="invoice-list__header-amount">Amount</span>
-          <span className="invoice-list__header-status">Status</span>
-          <span className="invoice-list__header-actions" />
-        </div>
+     return (
+       <div ref={ref} className={cn('invoice-list', className)} {...rest}>
+         <div className="invoice-list__header">
+           <span className="invoice-list__header-date">Date</span>
+           <span className="invoice-list__header-period">Period</span>
+           <span className="invoice-list__header-amount">Amount</span>
+           <span className="invoice-list__header-status">Status</span>
+           <span className="invoice-list__header-actions" />
+         </div>
 
-        <div className="invoice-list__items">
-          {invoices.map((invoice) => (
-            <InvoiceRow
-              key={invoice.id}
-              invoice={invoice}
-              formatDate={formatDate}
-              formatPrice={formatPrice}
-              formatPeriod={formatPeriod}
-            />
-          ))}
-        </div>
+         <div className="invoice-list__items">
+           {invoices.map((invoice) => (
+             <InvoiceRow
+               key={invoice.id}
+               invoice={invoice}
+               formatDate={formatDate}
+               formatPrice={formatPrice}
+               formatPeriod={formatPeriod}
+             />
+           ))}
+         </div>
 
-        {hasMore && onLoadMore != null && (
+         {hasMore && onLoadMore != null && (
           <div className="invoice-list__load-more">
             <button
               type="button"

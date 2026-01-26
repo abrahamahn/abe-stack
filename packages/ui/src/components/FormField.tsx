@@ -62,12 +62,12 @@ export const FormField = forwardRef<HTMLDivElement, FormFieldProps>((props, ref)
         {required ? <span className="form-field-required">*</span> : null}
       </label>
       <div className="form-field-input">{children}</div>
-      {error ? (
-        <span className="form-field-error" role="alert">
-          {error}
-        </span>
-      ) : null}
-      {helperText && !error ? <span className="form-field-helper">{helperText}</span> : null}
+      {error != null && error !== '' ? (
+         <span className="form-field-error" role="alert">
+           {error}
+         </span>
+       ) : null}
+       {(helperText != null && helperText !== '') && (error == null || error === '') ? <span className="form-field-helper">{helperText}</span> : null}
     </div>
   );
 });

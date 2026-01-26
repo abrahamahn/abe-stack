@@ -2,19 +2,19 @@
 import { FocusTrap } from '@components/FocusTrap';
 import { useControllableState } from '@hooks/useControllableState';
 import {
-  Children,
-  createContext,
-  isValidElement,
-  useCallback,
-  useContext,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type ComponentPropsWithoutRef,
-  type ReactElement,
-  type ReactNode,
-  type RefObject,
+    Children,
+    createContext,
+    isValidElement,
+    useCallback,
+    useContext,
+    useEffect,
+    useId,
+    useRef,
+    useState,
+    type ComponentPropsWithoutRef,
+    type ReactElement,
+    type ReactNode,
+    type RefObject,
 } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -36,7 +36,7 @@ const DialogContext = createContext<DialogContextValue | null>(null);
 
 function useDialogContext(component: string): DialogContextValue {
   const ctx = useContext(DialogContext);
-  if (!ctx) {
+  if (ctx == null) {
     throw new Error(`${component} must be used within <Dialog.Root>`);
   }
   return ctx;
@@ -109,7 +109,7 @@ export function DialogRoot({
   }, [setOpen]);
 
   useEffect((): (() => void) | undefined => {
-    if (!closeOnEscape || !currentOpen) return undefined;
+    if (!closeOnEscape || !isOpen) return undefined;
     const onKey = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') {
         e.stopPropagation();
@@ -120,7 +120,7 @@ export function DialogRoot({
     return (): void => {
       window.removeEventListener('keydown', onKey);
     };
-  }, [closeOnEscape, currentOpen, setOpen]);
+  }, [closeOnEscape, isOpen, setOpen]);
 
   const value: DialogContextValue = {
     open: isOpen,
@@ -197,7 +197,7 @@ export function DialogContent(props: DialogContentProps): ReactElement | null {
   const contentRef = useRef<HTMLDivElement | null>(null);
 
   useEffect((): (() => void) | undefined => {
-    if (!title) return undefined;
+    if (title == null) return undefined;
     setLabelledBy(titleId);
     return (): void => {
       setLabelledBy(undefined);
@@ -211,7 +211,7 @@ export function DialogContent(props: DialogContentProps): ReactElement | null {
   }, [setDescribedBy]);
 
   useEffect((): void => {
-    if (!open && triggerRef.current) {
+    if (!open && triggerRef.current != null) {
       triggerRef.current.focus();
     }
   }, [open, triggerRef]);
@@ -223,7 +223,7 @@ export function DialogContent(props: DialogContentProps): ReactElement | null {
       className="modal"
       role="dialog"
       aria-modal="true"
-      aria-labelledby={title ? titleId : labelledBy}
+      aria-labelledby={title != null ? titleId : labelledBy}
       aria-describedby={describedBy}
     >
       <FocusTrap>
@@ -234,7 +234,7 @@ export function DialogContent(props: DialogContentProps): ReactElement | null {
             contentRef.current = node;
           }}
         >
-          {title ? (
+          {title != null ? (
             <div id={titleId} className="dialog-title">
               {title}
             </div>

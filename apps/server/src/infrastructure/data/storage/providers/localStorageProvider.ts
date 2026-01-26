@@ -21,7 +21,7 @@ export class LocalStorageProvider implements StorageProvider {
     data: Buffer | Uint8Array | string,
     _contentType: string,
   ): Promise<string> {
-    const finalKey = key || randomUUID();
+    const finalKey = (key !== '') ? key : randomUUID();
     const filePath = this.resolveKey(finalKey);
     await mkdir(dirname(filePath), { recursive: true });
     await writeFile(filePath, data);

@@ -29,7 +29,7 @@ export function FocusTrap({ children }: { children: ReactNode }): ReactElement {
 
   useEffect((): (() => void) => {
     const root = rootRef.current;
-    if (!root) return (): void => {};
+    if (root == null) return (): void => {};
 
     const previousActive = document.activeElement as HTMLElement | null;
 
