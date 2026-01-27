@@ -1,13 +1,13 @@
 // packages/ui/src/hooks/useHistoryNav.tsx
 import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    type ReactNode,
 } from 'react';
 
 import { useLocation, useNavigate } from '../router';
@@ -95,6 +95,6 @@ export function HistoryProvider({ children }: { children: ReactNode }): React.Re
 
 export function useHistoryNav(): HistoryContextValue {
   const ctx = useContext(HistoryContext);
-  if (!ctx) throw new Error('useHistoryNav must be used within HistoryProvider');
+  if (ctx === null) throw new Error('useHistoryNav must be used within HistoryProvider');
   return ctx;
 }

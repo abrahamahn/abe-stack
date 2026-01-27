@@ -48,7 +48,7 @@ export class SubscriptionManager {
   subscribe(key: SubscriptionKey, socket: WebSocket): void {
     // Add to key -> sockets map
     let sockets = this.subscriptions.get(key);
-    if (!sockets) {
+    if (sockets === undefined) {
       sockets = new Set();
       this.subscriptions.set(key, sockets);
     }
@@ -56,7 +56,7 @@ export class SubscriptionManager {
 
     // Track reverse mapping for cleanup
     let keys = this.socketSubscriptions.get(socket);
-    if (!keys) {
+    if (keys === undefined) {
       keys = new Set();
       this.socketSubscriptions.set(socket, keys);
     }
@@ -82,7 +82,7 @@ export class SubscriptionManager {
    */
   publishLocal(key: SubscriptionKey, version: number): void {
     const sockets = this.subscriptions.get(key);
-    if (!sockets || sockets.size === 0) return;
+    if (sockets === undefined || sockets.size === 0) return;
 
     const message: ServerMessage = { type: 'update', key, version };
     const payload = JSON.stringify(message);
@@ -104,7 +104,7 @@ export class SubscriptionManager {
     this.publishLocal(key, version);
 
     // If adapter is configured, also publish to other instances
-    if (this.adapter) {
+    if (this.adapter !== null) {
       // Fire and forget - don't block the response
       this.adapter.publish(key, version).catch(() => {
         // Errors are handled by adapter's onError callback
@@ -117,7 +117,7 @@ export class SubscriptionManager {
    */
   cleanup(socket: WebSocket): void {
     const keys = this.socketSubscriptions.get(socket);
-    if (!keys) return;
+    if (keys === undefined) return;
 
     for (const key of keys) {
       this.subscriptions.get(key)?.delete(socket);

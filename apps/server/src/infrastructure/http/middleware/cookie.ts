@@ -111,11 +111,11 @@ export function serializeCookie(
     cookie += `; Max-Age=${String(Math.floor(options.maxAge))}`;
   }
 
-  if (options.expires) {
+  if (options.expires !== undefined) {
     cookie += `; Expires=${options.expires.toUTCString()}`;
   }
 
-  if (options.path) {
+  if (options.path !== undefined) {
     cookie += `; Path=${options.path}`;
   }
 
@@ -131,7 +131,7 @@ export function serializeCookie(
     cookie += '; Secure';
   }
 
-  if (options.sameSite) {
+  if (options.sameSite !== undefined) {
     cookie += `; SameSite=${options.sameSite.charAt(0).toUpperCase()}${options.sameSite.slice(1)}`;
   }
 

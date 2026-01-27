@@ -55,17 +55,17 @@ function CreateUserModal({
   const validate = (): boolean => {
     const errors: Partial<Record<keyof UserData, string>> = {};
 
-    if (!formData.name.trim()) {
+    if (formData.name.trim() === '') {
       errors.name = 'Name is required';
     }
 
-    if (!formData.email.trim()) {
+    if (formData.email.trim() === '') {
       errors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       errors.email = 'Invalid email format';
     }
 
-    if (!formData.role) {
+    if (formData.role === '') {
       errors.role = 'Please select a role';
     }
 
@@ -100,7 +100,7 @@ function CreateUserModal({
 
   const handleChange = (field: keyof UserData, value: string): void => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    if (fieldErrors[field]) {
+    if (fieldErrors[field] !== undefined) {
       setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
@@ -116,8 +116,8 @@ function CreateUserModal({
           <Modal.Title>Create New User</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {error && (
-            <Alert variant="error" data-testid="modal-error">
+          {error !== null && (
+            <Alert tone="danger" data-testid="modal-error">
               {error}
             </Alert>
           )}
@@ -127,7 +127,7 @@ function CreateUserModal({
               id="modal-name"
               data-testid="modal-name"
               value={formData.name}
-              onChange={(e) => handleChange('name', e.target.value)}
+              onChange={(e) => { handleChange('name', e.target.value); }}
               disabled={isLoading}
             />
           </FormField>
@@ -138,7 +138,7 @@ function CreateUserModal({
               data-testid="modal-email"
               type="email"
               value={formData.email}
-              onChange={(e) => handleChange('email', e.target.value)}
+              onChange={(e) => { handleChange('email', e.target.value); }}
               disabled={isLoading}
             />
           </FormField>
@@ -148,7 +148,7 @@ function CreateUserModal({
               id="modal-role"
               data-testid="modal-role"
               value={formData.role}
-              onChange={(value) => handleChange('role', value)}
+              onChange={(value) => { handleChange('role', value); }}
               disabled={isLoading}
             >
               <option value="">Select a role</option>
@@ -163,7 +163,7 @@ function CreateUserModal({
               id="modal-bio"
               data-testid="modal-bio"
               value={formData.bio}
-              onChange={(e) => handleChange('bio', e.target.value)}
+              onChange={(e) => { handleChange('bio', e.target.value); }}
               disabled={isLoading}
             />
           </FormField>
@@ -223,8 +223,8 @@ function ConfirmDeleteModal({
             This action cannot be undone. Please type "{userName}" to confirm deletion.
           </Modal.Description>
 
-          {error && (
-            <Alert variant="error" data-testid="delete-error">
+          {error !== null && (
+            <Alert tone="danger" data-testid="delete-error">
               {error}
             </Alert>
           )}
@@ -234,7 +234,7 @@ function ConfirmDeleteModal({
               id="confirm-input"
               data-testid="confirm-input"
               value={confirmText}
-              onChange={(e) => setConfirmText(e.target.value)}
+              onChange={(e) => { setConfirmText(e.target.value); }}
               placeholder={`Type "${userName}" to confirm`}
               disabled={isLoading}
             />
@@ -322,8 +322,8 @@ function MultiStepFormModal({
           <Modal.Title>Setup Wizard - {currentStep?.label}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {error && (
-            <Alert variant="error" data-testid="wizard-error">
+          {error !== null && (
+            <Alert tone="danger" data-testid="wizard-error">
               {error}
             </Alert>
           )}
@@ -332,18 +332,18 @@ function MultiStepFormModal({
             Step {step + 1} of {steps.length}
           </div>
 
-          {currentStep && (
+          {currentStep !== undefined && (
             <FormField label={`${currentStep.label} Input`} htmlFor={currentStep.id}>
               <Input
                 id={currentStep.id}
                 data-testid={`${currentStep.field}-input`}
                 value={formData[currentStep.field]}
-                onChange={(e) =>
+                onChange={(e) => {
                   setFormData((prev) => ({
                     ...prev,
                     [currentStep.field]: e.target.value,
-                  }))
-                }
+                  }));
+                }}
                 disabled={isLoading}
               />
             </FormField>
@@ -428,7 +428,7 @@ function ModalWithUnsavedChanges({
               id="editor-content"
               data-testid="editor-content"
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => { setContent(e.target.value); }}
               disabled={isLoading}
               rows={5}
             />
@@ -591,7 +591,7 @@ describe('ModalFormIntegration Integration Tests', () => {
         expect(screen.getByTestId('modal-name')).toBeDisabled();
       });
 
-      await act(async () => {
+      act(() => {
         resolveSubmit();
       });
     });

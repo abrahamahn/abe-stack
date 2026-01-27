@@ -38,13 +38,13 @@ describe('Request Info Middleware', () => {
 
     // Route for handler test
     server.get('/handler-test', (request, reply) => {
-      const info = request.requestInfo;
+      const info = (request as unknown as Record<string, unknown>).requestInfo;
       if (!info) {
         return reply.status(500).send({ error: 'requestInfo not available' });
       }
       return {
-        hasIpAddress: typeof info.ipAddress === 'string',
-        hasUserAgent: 'userAgent' in info,
+        hasIpAddress: typeof (info as { ipAddress?: unknown }).ipAddress === 'string',
+        hasUserAgent: 'userAgent' in (info as object),
       };
     });
 

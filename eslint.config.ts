@@ -35,6 +35,7 @@ export default [
       '**/__tests__/e2e/**',
       '**/vite.config.ts',
       '**/vitest.config.js',
+      '**/vitest.config.ts',
       '**/drizzle.config.ts',
       '**/eslint.config.ts',
     ],
@@ -51,7 +52,7 @@ export default [
         parserOptions: {
           ...((config.languageOptions?.parserOptions as Record<string, unknown> | undefined) ?? {}),
           tsconfigRootDir,
-          project: ['./.config/tsconfig.eslint.json'],
+          project: ['./tsconfig.json'],
         },
       },
     }),
@@ -69,7 +70,7 @@ export default [
     files: ['apps/desktop/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./apps/desktop/tsconfig.json'],
+        project: ['./apps/desktop/tsconfig.json', './apps/desktop/src/electron/tsconfig.json'],
         tsconfigRootDir,
       },
     },
@@ -87,7 +88,7 @@ export default [
     files: ['packages/contracts/**/*.{ts,tsx,cts,mts}'],
     languageOptions: {
       parserOptions: {
-        project: ['./packages/core/tsconfig.json'],
+        project: ['./packages/contracts/tsconfig.json'],
         tsconfigRootDir,
       },
     },
@@ -198,6 +199,45 @@ export default [
         },
       ],
 
+      // Deprecation check
+      '@typescript-eslint/no-deprecated': 'error',
+
+      // 6. Naming Conventions (Big Tech Standard)
+      '@typescript-eslint/naming-convention': [
+        'error',
+        {
+          selector: 'default',
+          format: ['camelCase'],
+          leadingUnderscore: 'allow',
+          trailingUnderscore: 'allow',
+        },
+        {
+          selector: 'variable',
+          format: ['camelCase', 'UPPER_CASE', 'PascalCase'],
+          leadingUnderscore: 'allow',
+          trailingUnderscore: 'allow',
+        },
+        {
+          selector: 'typeLike',
+          format: ['PascalCase'],
+        },
+        {
+          selector: 'enumMember',
+          format: ['UPPER_CASE', 'PascalCase'],
+        },
+        {
+          selector: 'parameter',
+          format: ['camelCase'],
+          leadingUnderscore: 'allow',
+        },
+        {
+          // Allow destructured properties to match their source
+          selector: 'variable',
+          modifiers: ['destructured'],
+          format: null,
+        },
+      ],
+
       // Template expressions
       '@typescript-eslint/restrict-template-expressions': [
         'error',
@@ -208,6 +248,31 @@ export default [
           allowNullish: false,
         },
       ],
+    },
+  },
+  {
+    // Modern Import Handling & Cyclic Dependency Detection
+    files: ['**/*.{ts,tsx,cts,mts}'],
+    plugins: {
+      'import-x': require('eslint-plugin-import-x'),
+      'unused-imports': require('eslint-plugin-unused-imports'),
+    },
+    rules: {
+      // 7. Cyclic Dependency Detection (CPU & Memory Intensive)
+      // We limit maxDepth to 2 for performance in local dev. Bumping this to 'Infinity'
+      // is only recommended for CI environments with large heap limits.
+      'import-x/no-cycle': ['error', { maxDepth: 2, ignoreExternal: true }],
+      'import-x/no-self-import': 'error',
+      'import-x/no-duplicates': 'error',
+      'import-x/order': [
+        'error',
+        {
+          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'object', 'type'],
+          'newlines-between': 'always',
+          alphabetize: { order: 'asc', caseInsensitive: true },
+        },
+      ],
+      'unused-imports/no-unused-imports': 'error',
     },
   },
   {

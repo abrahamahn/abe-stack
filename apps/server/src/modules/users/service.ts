@@ -31,7 +31,7 @@ export interface ListUsersResult {
 export async function getUserById(userRepo: UserRepository, userId: string): Promise<User | null> {
   const user = await userRepo.findById(userId);
 
-   if (user == null) {
+   if (user === null) {
     return null;
   }
 

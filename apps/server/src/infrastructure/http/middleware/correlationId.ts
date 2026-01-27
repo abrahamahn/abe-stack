@@ -111,7 +111,7 @@ function isValidCorrelationId(id: string): boolean {
   // - Non-empty
   // - Reasonable length (UUID is 36 chars, allow up to 128 for custom formats)
   // - Contain only safe characters (alphanumeric, hyphens, underscores)
-  if (!id || id.length > 128) {
+  if (id === '' || id.length > 128) {
     return false;
   }
 

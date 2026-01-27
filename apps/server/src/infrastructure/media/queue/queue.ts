@@ -78,7 +78,7 @@ export class CustomJobQueue<T = unknown> {
       createdAt: Date.now(),
     };
 
-    if (options.delay != null && options.delay > 0) {
+    if (options.delay !== undefined && options.delay > 0) {
       job.nextRetryAt = Date.now() + options.delay;
     }
 
@@ -133,7 +133,7 @@ export class CustomJobQueue<T = unknown> {
 
       // Find next job to process
       const job = this.getNextJob();
-      if (!job) {
+      if (job === null) {
         await this.sleep(500); // No jobs available, wait
         continue;
       }
@@ -151,12 +151,12 @@ export class CustomJobQueue<T = unknown> {
 
     for (let i = 0; i < this.waitingQueue.length; i++) {
       const job = this.waitingQueue[i];
-      if (!job) {
+      if (job === undefined) {
         continue;
       }
 
       // Check if job is delayed
-      if (job.nextRetryAt != null && job.nextRetryAt > now) {
+      if (job.nextRetryAt !== undefined && job.nextRetryAt > now) {
         continue;
       }
 
@@ -245,17 +245,17 @@ export class CustomJobQueue<T = unknown> {
       .map((id) => this.jobs.get(id))
       .filter((job): job is JobData<T> => job !== undefined);
     const waitingJobs = this.waitingQueue.filter(
-      (job) => job.nextRetryAt == null || job.nextRetryAt <= now,
+      (job) => job.nextRetryAt === undefined || job.nextRetryAt <= now,
     );
-    const delayedJobs = this.waitingQueue.filter((job) => job.nextRetryAt != null && job.nextRetryAt > now);
+    const delayedJobs = this.waitingQueue.filter((job) => job.nextRetryAt !== undefined && job.nextRetryAt > now);
 
     return {
       total: this.jobs.size,
       waiting: waitingJobs.length,
       active: activeJobsList.length,
       delayed: delayedJobs.length,
-      completed: Array.from(this.jobs.values()).filter((job) => job.completedAt != null).length,
-      failed: Array.from(this.jobs.values()).filter((job) => job.failedAt != null).length,
+      completed: Array.from(this.jobs.values()).filter((job) => job.completedAt !== undefined).length,
+      failed: Array.from(this.jobs.values()).filter((job) => job.failedAt !== undefined).length,
     };
   }
 
@@ -278,7 +278,7 @@ export class CustomJobQueue<T = unknown> {
     // Remove expired completed/failed jobs
     for (const [jobId, job] of this.jobs) {
       const finishedAt = job.completedAt ?? job.failedAt;
-      if (finishedAt != null && now - finishedAt > retentionMs) {
+      if (finishedAt !== undefined && now - finishedAt > retentionMs) {
         this.jobs.delete(jobId);
         cleanedCount++;
       }
@@ -288,7 +288,7 @@ export class CustomJobQueue<T = unknown> {
     if (this.jobs.size > this.options.maxJobsSize) {
       // Get finished jobs sorted by completion/failure time (oldest first)
       const finishedJobs = Array.from(this.jobs.entries())
-        .filter(([, job]) => job.completedAt != null || job.failedAt != null)
+        .filter(([, job]) => job.completedAt !== undefined || job.failedAt !== undefined)
         .sort(([, a], [, b]) => {
           const aTime = a.completedAt ?? a.failedAt ?? 0;
           const bTime = b.completedAt ?? b.failedAt ?? 0;
@@ -299,7 +299,7 @@ export class CustomJobQueue<T = unknown> {
       const toRemove = this.jobs.size - this.options.maxJobsSize;
       for (let i = 0; i < toRemove && i < finishedJobs.length; i++) {
         const entry = finishedJobs[i];
-        if (entry) {
+        if (entry !== undefined) {
           this.jobs.delete(entry[0]);
           cleanedCount++;
         }

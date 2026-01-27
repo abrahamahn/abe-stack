@@ -1,14 +1,14 @@
 // packages/core/src/infrastructure/crypto/jwt.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  decode,
-  jwtDecode,
-  JwtError,
-  jwtSign,
-  jwtVerify,
-  sign,
-  verify,
-  verifyWithRotation,
+    decode,
+    jwtDecode,
+    JwtError,
+    jwtSign,
+    jwtVerify,
+    sign,
+    verify,
+    verifyWithRotation,
 } from './jwt';
 
 describe('JWT', () => {
@@ -153,7 +153,7 @@ describe('JWT', () => {
       const token = sign(payload, secret);
       // Tamper with the signature
       const parts = token.split('.');
-      const tamperedToken = `${parts[0]}.${parts[1]}.wrong-signature`;
+      const tamperedToken = `${parts[0]!}.${parts[1]!}.wrong-signature`;
 
       const decoded = decode(tamperedToken);
       expect(decoded?.userId).toBe('123');

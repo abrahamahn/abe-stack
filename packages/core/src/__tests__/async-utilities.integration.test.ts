@@ -241,13 +241,13 @@ describe('Async Utilities Integration', () => {
         const subscriber3Calls: string[] = [];
 
         map.subscribe('shared-key', (value) => {
-          if (value) subscriber1Calls.push(value);
+          if (value !== undefined) subscriber1Calls.push(value);
         });
         map.subscribe('shared-key', (value) => {
-          if (value) subscriber2Calls.push(value);
+          if (value !== undefined) subscriber2Calls.push(value);
         });
         map.subscribe('shared-key', (value) => {
-          if (value) subscriber3Calls.push(value);
+          if (value !== undefined) subscriber3Calls.push(value);
         });
 
         map.set('shared-key', 'value1');
@@ -499,7 +499,7 @@ describe('Async Utilities Integration', () => {
       // Consumer: resolves deferred promises
       const consume = (value: number) => {
         const deferred = queue.shift();
-        if (deferred) {
+        if (deferred !== undefined) {
           deferred.resolve(value);
         }
       };
@@ -531,9 +531,9 @@ describe('Async Utilities Integration', () => {
       const p3 = produce();
 
       // Mix of resolve and reject
-      queue[0].resolve(1);
-      queue[1].reject(new Error('rejected'));
-      queue[2].resolve(3);
+      queue[0]!.resolve(1);
+      queue[1]!.reject(new Error('rejected'));
+      queue[2]!.resolve(3);
 
       // Use allSettled to check all outcomes
       const results = await Promise.allSettled([p1, p2, p3]);

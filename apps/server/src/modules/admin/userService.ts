@@ -94,7 +94,7 @@ export async function listUsers(
  */
 export async function getUserById(userRepo: UserRepository, userId: string): Promise<AdminUser> {
   const user = await userRepo.findById(userId);
-  if (!user) {
+  if (user === null || user === undefined) {
     throw new UserNotFoundError(`User not found: ${userId}`);
   }
   return toAdminUser(user);
@@ -110,7 +110,7 @@ export async function updateUser(
 ): Promise<AdminUser> {
   // First check if user exists
   const existingUser = await userRepo.findById(userId);
-  if (!existingUser) {
+  if (existingUser === null || existingUser === undefined) {
     throw new UserNotFoundError(`User not found: ${userId}`);
   }
 
@@ -125,7 +125,7 @@ export async function updateUser(
 
   // Update user
   const updatedUser = await userRepo.update(userId, updateData);
-  if (!updatedUser) {
+  if (updatedUser === undefined || updatedUser === null) {
     throw new Error('Failed to update user');
   }
 
@@ -144,7 +144,7 @@ export async function lockUser(
 ): Promise<AdminUser> {
   // First check if user exists
   const existingUser = await userRepo.findById(userId);
-  if (!existingUser) {
+  if (existingUser === null || existingUser === undefined) {
     throw new UserNotFoundError(`User not found: ${userId}`);
   }
 
@@ -162,7 +162,7 @@ export async function lockUser(
 
   // Return updated user
   const updatedUser = await userRepo.findById(userId);
-  if (!updatedUser) {
+  if (updatedUser === undefined || updatedUser === null) {
     throw new Error('Failed to retrieve updated user');
   }
 
@@ -179,7 +179,7 @@ export async function unlockUser(
 ): Promise<AdminUser> {
   // First check if user exists
   const existingUser = await userRepo.findById(userId);
-  if (!existingUser) {
+  if (existingUser === null || existingUser === undefined) {
     throw new UserNotFoundError(`User not found: ${userId}`);
   }
 
@@ -188,7 +188,7 @@ export async function unlockUser(
 
   // Return updated user
   const updatedUser = await userRepo.findById(userId);
-  if (!updatedUser) {
+  if (updatedUser === undefined || updatedUser === null) {
     throw new Error('Failed to retrieve updated user');
   }
 

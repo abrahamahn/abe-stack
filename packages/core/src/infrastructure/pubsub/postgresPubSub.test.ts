@@ -9,20 +9,24 @@ vi.mock('postgres', () => {
     const listeners = new Map<string, (payload: string) => void>();
 
     return {
-      listen: vi.fn(async (channel: string, callback: (payload: string) => void) => {
+      listen: vi.fn((channel: string, callback: (payload: string) => void) => {
         listeners.set(channel, callback);
+        return Promise.resolve();
       }),
-      notify: vi.fn(async (channel: string, payload: string) => {
+      notify: vi.fn((channel: string, payload: string) => {
         const listener = listeners.get(channel);
-        if (listener) {
+        if (listener !== undefined) {
           // Simulate async notification
-          setTimeout(() => listener(payload), 0);
+          setTimeout(() => {
+            listener(payload);
+          }, 0);
         }
+        return Promise.resolve();
       }),
       end: vi.fn(async () => {}),
       _triggerNotification: (channel: string, payload: string) => {
         const listener = listeners.get(channel);
-        if (listener) listener(payload);
+        if (listener !== undefined) listener(payload);
       },
       _listeners: listeners,
     };
@@ -50,7 +54,7 @@ describe('PostgresPubSub', () => {
   });
 
   afterEach(async () => {
-    if (pubsub) {
+    if (pubsub !== undefined) {
       await pubsub.stop();
     }
   });

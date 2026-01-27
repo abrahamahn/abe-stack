@@ -93,7 +93,7 @@ describe('Database Utils', () => {
         objectVal: { nested: 'value' },
       };
 
-      const result = snakeifyKeys(input);
+      const result = snakeifyKeys(input) as any;
 
       expect(result.string_val).toBe('unchanged');
       expect(result.number_val).toBe(42);
@@ -224,7 +224,7 @@ describe('Database Utils', () => {
         object_val: { nested_val: 'value' },
       };
 
-      const result = camelizeKeys(input);
+      const result = camelizeKeys(input) as any;
 
       expect(result.stringValue).toBe('unchanged');
       expect(result.numberValue).toBe(42);
@@ -432,7 +432,7 @@ describe('Database Utils', () => {
       };
 
       // Convert to snake_case
-      const snakeCased = snakeifyKeys(complexInput);
+      const snakeCased = snakeifyKeys(complexInput) as any;
 
       // Verify structure is preserved
       expect(snakeCased).toHaveProperty('user_profile.personal_info.first_name');
@@ -458,12 +458,12 @@ describe('Database Utils', () => {
         actualValue: 'exists',
       };
 
-      const snakeResult = snakeifyKeys(input);
+      const snakeResult = snakeifyKeys(input) as any;
       expect(snakeResult.null_value).toBeNull();
       expect(snakeResult.undefined_value).toBeUndefined();
       expect(snakeResult.actual_value).toBe('exists');
 
-      const camelResult = camelizeKeys(snakeResult);
+      const camelResult = camelizeKeys(snakeResult) as any;
       expect(camelResult.nullValue).toBeNull();
       expect(camelResult.undefinedValue).toBeUndefined();
       expect(camelResult.actualValue).toBe('exists');
@@ -477,11 +477,11 @@ describe('Database Utils', () => {
         regexpField: regexp,
       };
 
-      const result = snakeifyKeys(input);
+      const result = snakeifyKeys(input) as any;
       expect(result.date_field).toBe(date);
       expect(result.regexp_field).toBe(regexp);
 
-      const backToCamel = camelizeKeys(result);
+      const backToCamel = camelizeKeys(result) as any;
       expect(backToCamel.dateField).toBe(date);
       expect(backToCamel.regexpField).toBe(regexp);
     });
@@ -490,10 +490,10 @@ describe('Database Utils', () => {
       const func = () => 'test';
       const input = { funcField: func };
 
-      const result = snakeifyKeys(input);
+      const result = snakeifyKeys(input) as any;
       expect(result.func_field).toBe(func);
 
-      const backToCamel = camelizeKeys(result);
+      const backToCamel = camelizeKeys(result) as any;
       expect(backToCamel.funcField).toBe(func);
     });
 
@@ -504,7 +504,7 @@ describe('Database Utils', () => {
       input.normalKey = 'normal value';
 
       // The transformation should only affect string keys
-      const result = snakeifyKeys(input);
+      const result = snakeifyKeys(input) as any;
       expect(result[sym]).toBe('symbol value');
       expect(result.normal_key).toBe('normal value');
     });

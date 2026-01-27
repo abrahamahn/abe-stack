@@ -4,22 +4,22 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-  deepEqual,
-  shallowEqual,
-  useDeepMemo,
-  useShallowMemo,
-  useDeepCallback,
-  useShallowCallback,
-  useDeepEffect,
-  useShallowEffect,
-  TTLCache,
-  LRUCache,
-  useTTLCache,
-  useLRUCache,
-  useExpensiveComputation,
-  useDebouncedState,
-  useThrottle,
-  useDebounce,
+    deepEqual,
+    LRUCache,
+    shallowEqual,
+    TTLCache,
+    useDebounce,
+    useDebouncedState,
+    useDeepCallback,
+    useDeepEffect,
+    useDeepMemo,
+    useExpensiveComputation,
+    useLRUCache,
+    useShallowCallback,
+    useShallowEffect,
+    useShallowMemo,
+    useThrottle,
+    useTTLCache,
 } from '../useOptimizedMemo';
 
 // ============================================================================
@@ -286,7 +286,7 @@ describe('useDeepEffect', () => {
   it('runs effect when deps are deeply different', () => {
     const effect = vi.fn();
 
-    const { rerender } = renderHook(({ deps }) => useDeepEffect(effect, deps), {
+    const { rerender } = renderHook(({ deps }) => { useDeepEffect(effect, deps); }, {
       initialProps: { deps: [{ a: 1 }] },
     });
 
@@ -301,7 +301,7 @@ describe('useDeepEffect', () => {
   it('does not run effect when deps are deeply equal', () => {
     const effect = vi.fn();
 
-    const { rerender } = renderHook(({ deps }) => useDeepEffect(effect, deps), {
+    const { rerender } = renderHook(({ deps }) => { useDeepEffect(effect, deps); }, {
       initialProps: { deps: [{ a: 1, b: { c: 2 } }] },
     });
 
@@ -322,7 +322,7 @@ describe('useShallowEffect', () => {
   it('runs effect when deps change shallowly', () => {
     const effect = vi.fn();
 
-    const { rerender } = renderHook(({ deps }) => useShallowEffect(effect, deps), {
+    const { rerender } = renderHook(({ deps }) => { useShallowEffect(effect, deps); }, {
       initialProps: { deps: [1, 2] },
     });
 
@@ -636,7 +636,7 @@ describe('useExpensiveComputation', () => {
     expect(result.current).toBe(4);
   });
 
-  it('debounces computation when debounceMs is set', async () => {
+  it('debounces computation when debounceMs is set', () => {
     const compute = vi.fn(() => 'result');
 
     const { result } = renderHook(() => useExpensiveComputation(compute, [], { debounceMs: 100 }));
@@ -656,7 +656,7 @@ describe('useExpensiveComputation', () => {
   it('skips initial useState computation when skipInitial is true', () => {
     const compute = vi.fn(() => 'result');
 
-    renderHook(() => useExpensiveComputation(compute, [], { skipInitial: true }));
+    renderHook(() => { useExpensiveComputation(compute, [], { skipInitial: true }); });
 
     // With skipInitial, compute is only called in useEffect (not useState)
     expect(compute).toHaveBeenCalledTimes(1);
@@ -680,9 +680,9 @@ describe('useExpensiveComputation', () => {
     });
 
     // This should not throw because the error is caught silently in useEffect
-    const { result } = renderHook(() =>
-      useExpensiveComputation(compute, [], { skipInitial: true }),
-    );
+    const { result } = renderHook(() => {
+      useExpensiveComputation(compute, [], { skipInitial: true });
+    });
 
     // The computation was attempted
     expect(compute).toHaveBeenCalled();

@@ -143,8 +143,8 @@ describe.skip('Env Loader (Integration)', () => {
       expect(process.env.SHARED_VAR).toBe('development');
     } finally {
       // Cleanup
-      if (originalDevEnv) fs.writeFileSync(devEnvPath, originalDevEnv);
-      if (originalLocalEnv) {
+      if (originalDevEnv !== '') fs.writeFileSync(devEnvPath, originalDevEnv);
+      if (originalLocalEnv !== null) {
         fs.writeFileSync(localEnvPath, originalLocalEnv);
       } else if (fs.existsSync(localEnvPath)) {
         fs.unlinkSync(localEnvPath);
@@ -176,7 +176,7 @@ describe.skip('Env Loader (Integration)', () => {
     } finally {
       // Cleanup
       if (fs.existsSync(customEnvPath)) fs.unlinkSync(customEnvPath);
-      if (originalLocalEnv) {
+      if (originalLocalEnv !== null) {
         fs.writeFileSync(localEnvPath, originalLocalEnv);
       } else if (fs.existsSync(localEnvPath)) {
         fs.unlinkSync(localEnvPath);

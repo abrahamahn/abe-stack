@@ -13,10 +13,14 @@
             "./src/electron/ipc/*"
       ]
     },
-    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.desktop.tsbuildinfo"
+    "outDir": "./dist",
+    "rootDir": "./",
+    "composite": true,
+    "noEmit": false,
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.desktop.tsbuildinfo"
   },
-  "include": ["src/**/*", "vitest.config.ts", "**/*.test.ts", "**/*.test.tsx"],
-  "exclude": ["node_modules", "src/electron"],
+  "include": ["src/**/*", "**/*.test.ts", "**/*.test.tsx"],
+  "exclude": ["node_modules", "src/electron", "vitest.config.ts"],
   "references": [
     {
       "path": "../../packages/core"

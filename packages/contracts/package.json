@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./*": "./src/*.ts"
+    ".": "./dist/index.js",
+    "./*": "./dist/*.js"
   },
   "scripts": {
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-contracts --report-unused-disable-directives"
   },
   "dependencies": {
     "zod": "^3.23.8"

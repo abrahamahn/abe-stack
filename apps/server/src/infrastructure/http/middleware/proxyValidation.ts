@@ -89,7 +89,7 @@ export function isValidIpv4(ip: string): boolean {
  */
 export function isValidIpv6(ip: string): boolean {
   // Empty string is not a valid IPv6
-  if (!ip || ip.length === 0) return false;
+  if (ip === '' || ip.length === 0) return false;
 
   // Handle IPv4-mapped IPv6 addresses (::ffff:192.168.1.1)
   if (ip.toLowerCase().startsWith('::ffff:')) {
@@ -178,7 +178,7 @@ function ipv6ToBigInt(ip: string): bigint {
   let result = BigInt(0);
 
   for (const group of groups) {
-    result = (result << BigInt(16)) + BigInt(parseInt(group || '0', 16));
+    result = (result << BigInt(16)) + BigInt(parseInt(group !== '' ? group : '0', 16));
   }
 
   return result;
@@ -200,7 +200,7 @@ function ipv6ToBigInt(ip: string): bigint {
  */
 export function ipMatchesCidr(ip: string, cidr: string): boolean {
   const parsedCidr = parseCidr(cidr);
-  if (!parsedCidr) return false;
+  if (parsedCidr === null) return false;
 
   const { ip: networkIp, prefixLength } = parsedCidr;
 
@@ -388,7 +388,7 @@ export function validateCidrList(cidrs: string[]): {
   const invalid: string[] = [];
 
   for (const cidr of cidrs) {
-    if (parseCidr(cidr)) {
+    if (parseCidr(cidr) !== null) {
       valid.push(cidr);
     } else {
       invalid.push(cidr);

@@ -6,29 +6,29 @@
  */
 
 import {
-  AppError,
-  BadRequestError,
-  ConflictError,
-  ForbiddenError,
-  InternalError,
-  NotFoundError,
-  TooManyRequestsError,
-  UnauthorizedError,
-  UnprocessableError,
+    AppError,
+    BadRequestError,
+    ConflictError,
+    ForbiddenError,
+    InternalError,
+    NotFoundError,
+    TooManyRequestsError,
+    UnauthorizedError,
+    UnprocessableError,
 } from '@abe-stack/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createApiClient, type ApiClient } from '../../api/client';
 import {
-  ApiError,
-  NetworkError,
-  TimeoutError,
-  createApiError,
-  isApiError,
-  isNetworkError,
-  isTimeoutError,
-  isUnauthorizedError,
-  getErrorMessage,
+    ApiError,
+    NetworkError,
+    TimeoutError,
+    createApiError,
+    getErrorMessage,
+    isApiError,
+    isNetworkError,
+    isTimeoutError,
+    isUnauthorizedError,
 } from '../../errors';
 
 // ============================================================================
@@ -41,7 +41,7 @@ type MockResponse = {
   json: () => Promise<unknown>;
 };
 
-let mockFetch: ReturnType<typeof vi.fn<[string, RequestInit?], Promise<MockResponse>>>;
+let mockFetch: any;
 
 function createMockResponse(status: number, body: unknown): MockResponse {
   return {
@@ -354,14 +354,14 @@ describe('API Client Error Handling Integration', () => {
     it('should return data on success', async () => {
       const responseData = {
         user: { id: 'u1', email: 'test@test.com' },
-        accessToken: 'token123',
+        token: 'token123',
       };
 
       mockFetch.mockResolvedValue(createMockResponse(200, responseData));
 
       const result = await client.login({ email: 'test@test.com', password: 'password' });
 
-      expect(result.accessToken).toBe('token123');
+      expect(result.token).toBe('token123');
     });
   });
 
@@ -444,7 +444,6 @@ describe('API Client Error Handling Integration', () => {
       });
 
       // Manual retry logic
-      let _lastError: unknown;
       let result: unknown;
 
       for (let i = 0; i < maxRetries; i++) {
@@ -452,7 +451,6 @@ describe('API Client Error Handling Integration', () => {
           result = await client.getCurrentUser();
           break;
         } catch (error) {
-          _lastError = error;
           if (!(error instanceof AppError) || !isRetryableError(error)) {
             throw error;
           }

@@ -255,7 +255,7 @@ export async function handleGetSubscription(
   | { status: 200; body: SubscriptionResponse }
   | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
 > {
-  if (!request.user) {
+  if (request.user === undefined) {
     return { status: 401, body: { message: 'Unauthorized' } };
   }
 
@@ -266,7 +266,7 @@ export async function handleGetSubscription(
     return {
       status: 200,
       body: {
-        subscription: subscription ? formatSubscription(subscription) : null,
+        subscription: subscription !== null ? formatSubscription(subscription) : null,
       },
     };
   } catch (error: unknown) {
@@ -285,7 +285,7 @@ export async function handleCreateCheckout(
   | { status: 200; body: CheckoutResponse }
   | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
 > {
-  if (!request.user) {
+  if (request.user === undefined) {
     return { status: 401, body: { message: 'Unauthorized' } };
   }
 
@@ -325,7 +325,7 @@ export async function handleCancelSubscription(
   | { status: 200; body: SubscriptionActionResponse }
   | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
 > {
-  if (!request.user) {
+  if (request.user === undefined) {
     return { status: 401, body: { message: 'Unauthorized' } };
   }
 
@@ -363,7 +363,7 @@ export async function handleResumeSubscription(
   | { status: 200; body: SubscriptionActionResponse }
   | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
 > {
-  if (!request.user) {
+  if (request.user === undefined) {
     return { status: 401, body: { message: 'Unauthorized' } };
   }
 
@@ -400,7 +400,7 @@ export async function handleUpdateSubscription(
   | { status: 200; body: SubscriptionActionResponse }
   | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
 > {
-  if (!request.user) {
+  if (request.user === undefined) {
     return { status: 401, body: { message: 'Unauthorized' } };
   }
 
@@ -440,7 +440,7 @@ export async function handleListInvoices(
   | { status: 200; body: InvoicesListResponse }
   | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
 > {
-  if (!request.user) {
+  if (request.user === undefined) {
     return { status: 401, body: { message: 'Unauthorized' } };
   }
 
@@ -474,7 +474,7 @@ export async function handleListPaymentMethods(
   | { status: 200; body: PaymentMethodsListResponse }
   | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
 > {
-  if (!request.user) {
+  if (request.user === undefined) {
     return { status: 401, body: { message: 'Unauthorized' } };
   }
 
@@ -504,7 +504,7 @@ export async function handleAddPaymentMethod(
   | { status: 200; body: PaymentMethodResponse }
   | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
 > {
-  if (!request.user) {
+  if (request.user === undefined) {
     return { status: 401, body: { message: 'Unauthorized' } };
   }
 
@@ -546,7 +546,7 @@ export async function handleRemovePaymentMethod(
   | { status: 200; body: SubscriptionActionResponse }
   | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
 > {
-  if (!request.user) {
+  if (request.user === undefined) {
     return { status: 401, body: { message: 'Unauthorized' } };
   }
 
@@ -583,7 +583,7 @@ export async function handleSetDefaultPaymentMethod(
   | { status: 200; body: PaymentMethodResponse }
   | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
 > {
-  if (!request.user) {
+  if (request.user === undefined) {
     return { status: 401, body: { message: 'Unauthorized' } };
   }
 
@@ -623,7 +623,7 @@ export async function handleCreateSetupIntent(
   | { status: 200; body: SetupIntentResponse }
   | { status: 400 | 401 | 404 | 409 | 500; body: { message: string } }
 > {
-  if (!request.user) {
+  if (request.user === undefined) {
     return { status: 401, body: { message: 'Unauthorized' } };
   }
 

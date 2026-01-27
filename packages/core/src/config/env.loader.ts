@@ -17,7 +17,7 @@ function parseAndPopulate(filePath: string): void {
 
     for (const line of lines) {
       const trimmed = line.trim();
-      if (!trimmed || trimmed.startsWith('#')) continue;
+      if (trimmed === '' || trimmed.startsWith('#')) continue;
 
       const idx = trimmed.indexOf('=');
       if (idx === -1) continue;
@@ -61,7 +61,7 @@ export function initEnv(): void {
     currentDir = path.dirname(currentDir);
   }
 
-  if (configDir === null || configDir === undefined) {
+  if (configDir === null) {
     if (process.env['NODE_ENV'] !== 'test') {
       console.warn('[EnvLoader] Warning: .config directory not found. Environment files skipped.');
     }

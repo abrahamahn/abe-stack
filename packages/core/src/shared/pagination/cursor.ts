@@ -29,7 +29,7 @@ function encodeCursorValue(value: CursorValue): EncodedCursorValue {
 function decodeCursorValue(value: unknown): CursorValue | null {
   if (typeof value === 'string' || typeof value === 'number') return value;
   if (value instanceof Date) return value;
-  if (value && typeof value === 'object' && '__date' in value) {
+  if (value !== null && value !== undefined && typeof value === 'object' && '__date' in value) {
     const dateValue = (value as { __date?: unknown }).__date;
     if (typeof dateValue === 'string') {
       const parsed = new Date(dateValue);
@@ -50,8 +50,8 @@ function parseCursorData(parsed: unknown): CursorData | null {
     const tieBreaker = parsedArray[1];
     const sortOrder = parsedArray[2];
     const additionalValues = parsedArray[3];
-    if (!value) return null;
-    if (typeof tieBreaker !== 'string' || !tieBreaker.trim()) return null;
+    if (value === null) return null;
+    if (typeof tieBreaker !== 'string' || tieBreaker.trim() === '') return null;
     if (!isSortOrder(sortOrder)) return null;
     if (typeof additionalValues !== 'undefined') {
       if (!Array.isArray(additionalValues)) return null;
@@ -73,11 +73,11 @@ function parseCursorData(parsed: unknown): CursorData | null {
     };
   }
 
-  if (!parsed || typeof parsed !== 'object') return null;
+  if (parsed === null || parsed === undefined || typeof parsed !== 'object') return null;
   const record = parsed as Record<string, unknown>;
   const value = decodeCursorValue(record.value);
-  if (!value) return null;
-  if (typeof record.tieBreaker !== 'string' || !record.tieBreaker.trim()) return null;
+  if (value === null) return null;
+  if (typeof record.tieBreaker !== 'string' || record.tieBreaker.trim() === '') return null;
   if (!isSortOrder(record.sortOrder)) return null;
   if (typeof record.additionalValues !== 'undefined') {
     if (!Array.isArray(record.additionalValues)) return null;
@@ -109,7 +109,7 @@ function parseCursorData(parsed: unknown): CursorData | null {
  */
 export function encodeCursor(data: CursorData): string {
   // Use a more compact representation for better performance
-  const compactData = data.additionalValues
+  const compactData = data.additionalValues !== undefined
     ? [
         encodeCursorValue(data.value),
         data.tieBreaker,
@@ -127,7 +127,7 @@ export function encodeCursor(data: CursorData): string {
  * Returns null if the cursor is invalid
  */
 export function decodeCursor(cursor: string): CursorData | null {
-  if (!cursor || typeof cursor !== 'string') {
+  if (cursor === '') {
     return null;
   }
 
@@ -143,19 +143,27 @@ export function decodeCursor(cursor: string): CursorData | null {
 /**
  * Creates a cursor for the given item based on sort configuration
  */
-export function createCursorForItem<T extends Record<string, unknown>>(
+export function createCursorForItem<T>(
   item: T,
   sortBy: string,
   sortOrder: SortOrder,
   tieBreakerField: keyof T = 'id' as keyof T,
 ): string {
-  const value = item[sortBy];
+  const value = (item as Record<string, unknown>)[sortBy];
   if (!isCursorValue(value)) {
     throw new Error(`Item missing or has invalid sort field: ${sortBy}`);
   }
-  const tieBreakerValue = item[tieBreakerField];
-  if (tieBreakerValue === undefined || tieBreakerValue === null) {
-    throw new Error(`Item missing tie-breaker field: ${String(tieBreakerField)}`);
+  const tieBreakerKey = String(tieBreakerField);
+  const tieBreakerValue = (item as Record<string, unknown>)[tieBreakerKey];
+
+  if (
+    tieBreakerValue === undefined ||
+    tieBreakerValue === null ||
+    (typeof tieBreakerValue !== 'string' && typeof tieBreakerValue !== 'number')
+  ) {
+    throw new Error(
+      `Invalid tie-breaker field: ${tieBreakerKey}. Must be string or number.`,
+    );
   }
   const tieBreaker = String(tieBreakerValue);
 
@@ -171,8 +179,8 @@ export function createCursorForItem<T extends Record<string, unknown>>(
 /**
  * Helper function to get sortable value from an item
  */
-export function getSortableValue(item: Record<string, unknown>, key: string): CursorValue {
-  const value = item[key];
+export function getSortableValue(item: unknown, key: string): CursorValue {
+  const value = (item as Record<string, unknown>)[key];
   if (!isCursorValue(value)) {
     throw new Error(`Invalid sort value for key "${key}"`);
   }

@@ -109,7 +109,7 @@ function isMac(): boolean {
  * Check if the target is an input element.
  */
 function isInputElement(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
+  if (target === null || !(target instanceof HTMLElement)) return false;
   return (
     target instanceof HTMLInputElement ||
     target instanceof HTMLTextAreaElement ||
@@ -352,7 +352,7 @@ export function useUndoRedoShortcuts(
     if (!enabled) return;
 
     const targetElement = target ?? (typeof window !== 'undefined' ? window : null);
-    if (!targetElement) return;
+    if (targetElement === null) return;
 
     targetElement.addEventListener('keydown', handleKeyDown);
 

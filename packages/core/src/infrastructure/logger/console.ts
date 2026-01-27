@@ -54,7 +54,7 @@ function formatValue(value: unknown): string {
 }
 
 function formatData(data?: LogData): string {
-  if (!data) return '';
+  if (data === undefined) return '';
   const entries = Object.entries(data)
     .filter(([, value]) => value !== undefined)
     .filter(([key]) => !['msg', 'level', 'time', 'pid', 'hostname', 'v'].includes(key));
@@ -77,15 +77,15 @@ export function createConsoleLogger(level: LogLevel): ConsoleLoggerConfig {
     stream: {
       write: (chunk: string): void => {
         const line = chunk.trim();
-        if (!line) return;
+        if (line === '') return;
         try {
           const parsed = JSON.parse(line) as LogData & { level?: number; msg?: string };
           const lvl = levelLabel(parsed.level ?? 30);
           const message = parsed.msg ?? '';
           const payload = formatData(parsed);
           const formatted = `server: [${formatTimestamp()}] ${lvl.toUpperCase()}${
-            message ? ` ${message}` : ''
-          }${payload ? ` ${payload}` : ''}`;
+            message !== '' ? ` ${message}` : ''
+          }${payload !== '' ? ` ${payload}` : ''}`;
           process.stdout.write(formatted + '\n');
         } catch {
           process.stdout.write(line + '\n');

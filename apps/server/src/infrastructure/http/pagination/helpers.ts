@@ -76,7 +76,7 @@ async function applyOffsetPagination<T>(
   const { page, limit, sortBy, sortOrder } = options;
 
   // Clone the query builder to avoid mutating the original
-  let query = queryBuilder.clone ? queryBuilder.clone() : queryBuilder;
+  let query = queryBuilder.clone !== undefined ? queryBuilder.clone() : queryBuilder;
 
   // Apply sorting
   if (typeof sortBy === 'string' && sortBy !== '') {
@@ -84,7 +84,7 @@ async function applyOffsetPagination<T>(
   }
 
   // Get total count
-  const countResult = await (queryBuilder.clone
+  const countResult = await (queryBuilder.clone !== undefined
     ? queryBuilder.clone().count()
     : queryBuilder.count());
   const total = Array.isArray(countResult)
@@ -123,10 +123,10 @@ async function applyCursorPagination<T extends Record<string, unknown>>(
     tieBreakerField,
   );
 
-  let query = queryBuilder.clone ? queryBuilder.clone() : queryBuilder;
+  let query = queryBuilder.clone !== undefined ? queryBuilder.clone() : queryBuilder;
 
   // Apply where clause if cursor exists
-  if (whereClause) {
+  if (whereClause !== '') {
     query = query.whereRaw(whereClause, params);
   }
 

@@ -300,13 +300,13 @@ export function applyOperations(
 
   for (const op of operations) {
     const record = newRecordMap[op.table]?.[op.id];
-    if (!record) {
+    if (record === undefined) {
       throw new Error(`Record not found: ${op.table}:${op.id}`);
     }
 
     const newRecord = applyOperation(record, op);
     let tableRecords = newRecordMap[op.table];
-    if (!tableRecords) {
+    if (tableRecords === undefined) {
       tableRecords = {};
       newRecordMap[op.table] = tableRecords;
     }
@@ -335,7 +335,7 @@ export function checkVersionConflicts(
     const original = originalRecordMap[table]?.[id];
     const current = currentRecordMap[table]?.[id];
 
-    if (original && current) {
+    if (original !== undefined && current !== undefined) {
       const originalVersion = (original as RealtimeRecord).version;
       const currentVersion = (current as RealtimeRecord).version;
 
@@ -370,7 +370,7 @@ export async function saveRecords(
     for (const [id, record] of Object.entries(records)) {
       const originalRecord = originalRecordMap[table]?.[id] as RealtimeRecord | undefined;
 
-      if (!originalRecord) {
+      if (originalRecord === undefined) {
         // New record - insert
         await insertRecord(db, table, record);
       } else if (record.version > originalRecord.version) {

@@ -135,7 +135,7 @@ export class BatchedQueue<I, O> {
    * Rejects all pending tasks with an error.
    */
   destroy(): void {
-    if (this.flushTimeoutId) {
+    if (this.flushTimeoutId !== null) {
       clearTimeout(this.flushTimeoutId);
       this.flushTimeoutId = null;
     }

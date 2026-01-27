@@ -176,7 +176,7 @@ async function handleSubscriptionCreated(
   }
 
   const plan = await repos.plans.findById(planId);
-  if (!plan) {
+  if (plan === null) {
     log.warn({ planId }, 'Plan not found');
     return;
   }
@@ -205,7 +205,7 @@ async function handleSubscriptionCreated(
       'paypal',
       customerId,
     );
-    if (!existingMapping) {
+    if (existingMapping === null) {
       await repos.customerMappings.create({
         userId,
         provider: 'paypal',
@@ -251,7 +251,7 @@ async function handleSubscriptionUpdated(
     'paypal',
     subscriptionId,
   );
-  if (!subscription) {
+  if (subscription === null) {
     log.warn({ subscriptionId }, 'Subscription not found');
     return;
   }
@@ -312,7 +312,7 @@ async function handleSubscriptionCanceled(
     'paypal',
     subscriptionId,
   );
-  if (!subscription) {
+  if (subscription === null) {
     log.warn({ subscriptionId }, 'Subscription not found');
     return;
   }
@@ -376,7 +376,7 @@ async function handleInvoicePaid(
       'paypal',
       providerSubscriptionId,
     );
-    if (subscription) {
+    if (subscription !== null) {
       dbSubscriptionId = subscription.id;
       userId = subscription.userId;
 
@@ -443,7 +443,7 @@ async function handleInvoicePaymentFailed(
     'paypal',
     providerSubscriptionId,
   );
-  if (!subscription) {
+  if (subscription === null) {
     log.warn({ subscriptionId: providerSubscriptionId }, 'Subscription not found');
     return;
   }

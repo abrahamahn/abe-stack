@@ -7,7 +7,7 @@ type ConnectHandler = () => void;
 const listeners = new Map<string, Set<number>>();
 
 const normalizeHost = (host?: string): string => {
-  if (!host || host.length === 0) return '0.0.0.0';
+  if (host === undefined || host === '' || host.length === 0) return '0.0.0.0';
   return host === 'localhost' ? '127.0.0.1' : host;
 };
 
@@ -51,7 +51,7 @@ vi.mock('node:net', () => {
 
         if (isPortTaken(port, host)) {
           const error = Object.assign(new Error('EADDRINUSE'), { code: 'EADDRINUSE' });
-          if (errorHandler) queueMicrotask(() => { errorHandler!(error); });
+          if (errorHandler !== null) queueMicrotask(() => { errorHandler!(error); });
           return this;
         }
 
@@ -60,20 +60,20 @@ vi.mock('node:net', () => {
         const ports = listeners.get(host) ?? new Set<number>();
         ports.add(port);
         listeners.set(host, ports);
-        if (resolvedCallback) queueMicrotask(() => { resolvedCallback(); });
+        if (resolvedCallback !== undefined) queueMicrotask(() => { resolvedCallback(); });
         return this;
       },
       close(cb?: () => void) {
         if (boundPort !== null && boundHost !== null) {
           const ports = listeners.get(boundHost);
-          if (ports) {
+          if (ports !== undefined) {
             ports.delete(boundPort);
             if (ports.size === 0) listeners.delete(boundHost);
           }
         }
         boundPort = null;
         boundHost = null;
-        if (cb) queueMicrotask(() => { cb(); });
+        if (cb !== undefined) queueMicrotask(() => { cb(); });
         return this;
       },
       once(event: string, handler: ErrorHandler) {
@@ -92,7 +92,7 @@ vi.mock('node:net', () => {
     let resolved = false;
 
     const clearTimeoutIfNeeded = () => {
-      if (timeoutId) {
+      if (timeoutId !== null) {
         clearTimeout(timeoutId);
         timeoutId = null;
       }
@@ -205,7 +205,7 @@ describe('isPortFree', () => {
 
   afterEach(async () => {
     listeners.clear();
-    if (server) {
+    if (server !== null) {
       await new Promise<void>((resolve) => {
         server?.close(() => { resolve(); });
       });
@@ -253,7 +253,7 @@ describe('isPortListening', () => {
 
   afterEach(async () => {
     listeners.clear();
-    if (server) {
+    if (server !== null) {
       await new Promise<void>((resolve) => {
         server?.close(() => { resolve(); });
       });
@@ -295,7 +295,7 @@ describe('pickAvailablePort', () => {
 
   afterEach(async () => {
     listeners.clear();
-    if (server) {
+    if (server !== null) {
       await new Promise<void>((resolve) => {
         server?.close(() => { resolve(); });
       });
@@ -356,7 +356,7 @@ describe('pickAvailablePort', () => {
 
     const server2 = net.createServer();
     await new Promise<void>((resolve) => {
-      server2.listen(port2, '0.0.0.0', () => resolve());
+      server2.listen(port2, '0.0.0.0', () => { resolve(); });
     });
 
     try {
@@ -365,7 +365,7 @@ describe('pickAvailablePort', () => {
       );
     } finally {
       await new Promise<void>((resolve) => {
-        server2.close(() => resolve());
+        server2.close(() => { resolve(); });
       });
     }
   });
@@ -387,7 +387,7 @@ describe('waitForPort', () => {
   afterEach(async () => {
     vi.useRealTimers();
     listeners.clear();
-    if (server) {
+    if (server !== null) {
       await new Promise<void>((resolve) => {
         server?.close(() => { resolve(); });
       });
@@ -424,7 +424,7 @@ describe('waitForPort', () => {
       // Start server on port2 only
       server = net.createServer();
       await new Promise<void>((resolve) => {
-        server?.listen(port2, 'localhost', () => resolve());
+        server?.listen(port2, 'localhost', () => { resolve(); });
       });
 
       const result = await waitForPort([port1, port2, port3], 'localhost', 3, 50);

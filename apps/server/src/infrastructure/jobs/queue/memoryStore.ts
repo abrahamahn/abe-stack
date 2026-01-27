@@ -50,7 +50,7 @@ export class MemoryQueueStore implements QueueStore {
       }
     }
 
-    if (!oldest) return Promise.resolve(null);
+    if (oldest === null) return Promise.resolve(null);
 
     // Mark as processing and increment attempts
     oldest.status = 'processing';
@@ -69,7 +69,7 @@ export class MemoryQueueStore implements QueueStore {
 
   complete(taskId: string, result: TaskResult): Promise<void> {
     const task = this.tasks.get(taskId);
-    if (!task) return Promise.resolve();
+    if (task === undefined) return Promise.resolve();
 
     task.status = 'completed';
     task.completedAt = result.completedAt;
@@ -79,7 +79,7 @@ export class MemoryQueueStore implements QueueStore {
 
   fail(taskId: string, error: TaskError, nextAttemptAt?: string): Promise<void> {
     const task = this.tasks.get(taskId);
-    if (!task) return Promise.resolve();
+    if (task === undefined) return Promise.resolve();
 
     task.error = error;
 
@@ -97,7 +97,7 @@ export class MemoryQueueStore implements QueueStore {
 
   get(taskId: string): Promise<Task | null> {
     const task = this.tasks.get(taskId);
-    if (!task) return Promise.resolve(null);
+    if (task === undefined) return Promise.resolve(null);
 
     return Promise.resolve({
       id: task.id,

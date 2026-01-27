@@ -121,10 +121,10 @@ function decryptToken(encryptedData: string, encryptionKey: string): string {
     throw new Error('Invalid encrypted token format');
   }
 
-  const salt = Buffer.from(saltB64, 'base64');
-  const iv = Buffer.from(ivB64, 'base64');
-  const tag = Buffer.from(tagB64, 'base64');
-  const encrypted = Buffer.from(encryptedB64, 'base64');
+  const salt = Buffer.from(saltB64 as string, 'base64');
+  const iv = Buffer.from(ivB64 as string, 'base64');
+  const tag = Buffer.from(tagB64 as string, 'base64');
+  const encrypted = Buffer.from(encryptedB64 as string, 'base64');
 
   const key = scryptSync(encryptionKey, salt, 32);
   const decipher = createDecipheriv(ENCRYPTION_ALGORITHM, key, iv);

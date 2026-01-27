@@ -11,21 +11,21 @@ import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 
 import {
-  authResponseSchema,
-  emailVerificationRequestSchema,
-  emailVerificationResponseSchema,
-  forgotPasswordRequestSchema,
-  loginRequestSchema,
-  registerRequestSchema,
-  registerResponseSchema,
-  resetPasswordRequestSchema,
+    authResponseSchema,
+    emailVerificationRequestSchema,
+    emailVerificationResponseSchema,
+    forgotPasswordRequestSchema,
+    loginRequestSchema,
+    registerRequestSchema,
+    registerResponseSchema,
+    resetPasswordRequestSchema,
 } from '@abe-stack/contracts/auth';
 import {
-  emailSchema,
-  errorResponseSchema,
-  nameSchema,
-  passwordSchema,
-  uuidSchema,
+    emailSchema,
+    errorResponseSchema,
+    nameSchema,
+    passwordSchema,
+    uuidSchema,
 } from '@abe-stack/contracts/common';
 import { userRoleSchema, userSchema } from '@abe-stack/contracts/users';
 
@@ -164,7 +164,7 @@ describe('Contract Schema Integration', () => {
         expect(result.success).toBe(true);
         if (result.success) {
           expect(result.data).toBe('Jo');
-          expect(result.data.length).toBeGreaterThanOrEqual(2);
+          expect(result.data!.length).toBeGreaterThanOrEqual(2);
         }
 
         const result2 = nameSchema.safeParse('John Doe');

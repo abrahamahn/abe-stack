@@ -1,6 +1,7 @@
 {
   "name": "@abe-stack/db",
   "version": "1.0.0",
+  "type": "module",
   "description": "Type-safe SQL query builder for PostgreSQL",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,8 +11,9 @@
   "scripts": {
     "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "type-check": "tsc --project tsconfig.json --noEmit",
-    "test": "vitest run --project db"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run --project db",
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-db --report-unused-disable-directives"
   },
   "keywords": [
     "abe-stack",

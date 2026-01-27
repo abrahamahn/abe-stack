@@ -17,7 +17,7 @@ export function useLocalStorage<T>(
     if (typeof window === 'undefined') return initialValue;
     try {
       const item = window.localStorage.getItem(key);
-      return item ? (JSON.parse(item) as T) : initialValue;
+      return item !== null ? (JSON.parse(item) as T) : initialValue;
     } catch {
       return initialValue;
     }

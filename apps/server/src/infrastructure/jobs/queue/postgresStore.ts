@@ -115,7 +115,7 @@ export class PostgresQueueStore implements QueueStore {
     if (rows.length === 0) return null;
 
     const row = rows[0];
-    if (!row) return null;
+    if (row === undefined) return null;
 
     return {
       id: row.id,
@@ -168,7 +168,7 @@ export class PostgresQueueStore implements QueueStore {
     if (rows.length === 0) return null;
 
     const row = rows[0];
-    if (!row) return null;
+    if (row === undefined) return null;
 
     return {
       id: row.id,
@@ -186,7 +186,7 @@ export class PostgresQueueStore implements QueueStore {
       `SELECT COUNT(*) as count FROM job_queue WHERE status = 'pending'`,
     );
     const row = rows[0];
-    return row ? parseInt(row.count, 10) : 0;
+    return row !== undefined ? parseInt(row.count, 10) : 0;
   }
 
   async getFailedCount(): Promise<number> {
@@ -194,7 +194,7 @@ export class PostgresQueueStore implements QueueStore {
       `SELECT COUNT(*) as count FROM job_queue WHERE status = 'failed'`,
     );
     const row = rows[0];
-    return row ? parseInt(row.count, 10) : 0;
+    return row !== undefined ? parseInt(row.count, 10) : 0;
   }
 
   async clearCompleted(before: string): Promise<number> {
@@ -218,7 +218,7 @@ export class PostgresQueueStore implements QueueStore {
     const values: unknown[] = [];
     let paramIndex = 1;
 
-    if (status) {
+    if (status !== undefined) {
       conditions.push(`status = $${String(paramIndex)}`);
       values.push(status);
       paramIndex++;
@@ -244,7 +244,7 @@ export class PostgresQueueStore implements QueueStore {
     // Get total count
     const countQuery = `SELECT COUNT(*) as count FROM job_queue ${whereClause}`;
     const countRows = await this.db.raw<CountRow>(countQuery, values);
-    const total = countRows[0] ? parseInt(countRows[0].count, 10) : 0;
+    const total = countRows[0] !== undefined ? parseInt(countRows[0].count, 10) : 0;
 
     // Get paginated data
     const dataQuery = `
@@ -282,7 +282,7 @@ export class PostgresQueueStore implements QueueStore {
       [taskId],
     );
 
-    if (rows.length === 0 || !rows[0]) return null;
+    if (rows.length === 0 || rows[0] === undefined) return null;
     return this.mapRowToJobDetails(rows[0]);
   }
 
@@ -338,8 +338,8 @@ export class PostgresQueueStore implements QueueStore {
       [],
     );
 
-    const recentCompleted = recentRows[0] ? parseInt(recentRows[0].recent_completed, 10) : 0;
-    const recentFailed = recentRows[0] ? parseInt(recentRows[0].recent_failed, 10) : 0;
+    const recentCompleted = recentRows[0] !== undefined ? parseInt(recentRows[0].recent_completed, 10) : 0;
+    const recentFailed = recentRows[0] !== undefined ? parseInt(recentRows[0].recent_failed, 10) : 0;
 
     const total = pending + processing + completed + failed + deadLetter + cancelled;
     const completedTotal = completed + failed;

@@ -7,7 +7,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createNotificationClient, urlBase64ToUint8Array } from '../client';
+import { createNotificationClient, urlBase64ToUint8Array } from '../client.js';
 
 describe('Notification Client', () => {
   const baseUrl = 'http://localhost:3001';
@@ -25,7 +25,7 @@ describe('Notification Client', () => {
     createNotificationClient({
       baseUrl,
       getToken: token ? () => token : undefined,
-      fetchImpl: mockFetch,
+      fetchImpl: mockFetch as any,
     });
 
   describe('getVapidKey', () => {
@@ -49,7 +49,8 @@ describe('Notification Client', () => {
 
       // Check no auth header
       const call = mockFetch.mock.calls[0];
-      const headers = call[1].headers as Headers;
+      if (!call) throw new Error('Call not found');
+      const headers = (call[1] as any).headers as Headers;
       expect(headers.get('Authorization')).toBeNull();
     });
   });
@@ -83,7 +84,8 @@ describe('Notification Client', () => {
 
       // Check auth header
       const call = mockFetch.mock.calls[0];
-      const headers = call[1].headers as Headers;
+      if (!call) throw new Error('Call not found');
+      const headers = (call[1] as any).headers as Headers;
       expect(headers.get('Authorization')).toBe('Bearer test-token');
     });
 

@@ -64,7 +64,7 @@ export async function createServer(deps: ServerDependencies): Promise<FastifyIns
 
   // Hybrid Context Hook (2026 Pattern)
   // If app instance is provided, attach context to request
-  if (app) {
+  if (app !== undefined) {
     server.addHook('onRequest', (req, _reply, done) => {
       // In a real async-safe implementation, we might use AsyncLocalStorage here
       // But for Fastify's request scope, direct assignment is safe and explicit.

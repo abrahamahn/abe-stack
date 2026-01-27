@@ -87,7 +87,7 @@ export class MediaSecurityScanner {
    * Lazy load sharp module
    */
   private async getSharp(): Promise<SharpFunction> {
-    if (!this.sharpModule) {
+    if (this.sharpModule === null) {
       const sharpModule = (await import('sharp')) as { default: SharpFunction };
       this.sharpModule = sharpModule.default;
     }
@@ -186,13 +186,13 @@ export class MediaSecurityScanner {
       };
 
       // Check for EXIF data (privacy concern)
-      if (metadata.exif) {
+      if (metadata.exif !== undefined) {
         scanMetadata.hasExif = true;
         warnings.push('File contains EXIF metadata (privacy concern)');
       }
 
       // Suspicious dimensions (too large or unusual ratios)
-      if (metadata.width != null && metadata.height != null) {
+      if (metadata.width !== undefined && metadata.height !== undefined) {
         const ratio =
           Math.max(metadata.width, metadata.height) / Math.min(metadata.width, metadata.height);
 
@@ -243,7 +243,7 @@ export class MediaSecurityScanner {
       const expectedSignature = this.getExpectedSignature(mimeType);
 
       if (
-        expectedSignature &&
+        expectedSignature !== null &&
         !actualSignature.subarray(0, expectedSignature.length).equals(expectedSignature)
       ) {
         threats.push('File signature mismatch (possible spoofed file type)');
@@ -291,13 +291,13 @@ export class MediaSecurityScanner {
 
       // Use our custom file type detection
       const fileType = detectFileType(buffer);
-      if (fileType) {
+      if (fileType !== null) {
         return fileType.mime;
       }
 
       // Fallback to extension-based detection
       const extFileType = detectFileTypeFromPath(filePath);
-      if (extFileType) {
+      if (extFileType !== null) {
         return extFileType.mime;
       }
 

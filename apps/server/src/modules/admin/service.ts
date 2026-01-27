@@ -6,9 +6,9 @@
  * No HTTP awareness - returns domain objects or throws errors.
  */
 
+import { eq, select, USERS_TABLE } from '@abe-stack/db';
 import { unlockAccount as infraUnlockAccount, type DbClient } from '@infrastructure';
 import { UserNotFoundError } from '@shared';
-import { select, eq, USERS_TABLE } from '@abe-stack/db';
 
 export { UserNotFoundError };
 
@@ -29,7 +29,7 @@ export async function unlockUserAccount(
     select(USERS_TABLE).columns('id').where(eq('email', email)).limit(1).toSql(),
   );
 
-  if (!targetUser) {
+  if (targetUser === undefined) {
     throw new UserNotFoundError(`User not found: ${email}`);
   }
 

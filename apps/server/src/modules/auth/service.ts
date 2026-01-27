@@ -106,7 +106,7 @@ export async function registerUser(
   // Check if email is already taken (using repository)
   const existingUser = await repos.users.findByEmail(email);
 
-  if (existingUser != null) {
+  if (existingUser !== null) {
     // If user exists, send an email to them to notify about the new registration attempt
     // and return a generic success message to prevent user enumeration.
     try {
@@ -152,7 +152,7 @@ export async function registerUser(
         .toSql(),
     );
 
-    if (newUserRows[0] == null) {
+    if (newUserRows[0] === undefined) {
       throw new Error('Failed to create user');
     }
 
@@ -284,7 +284,7 @@ export async function refreshUserTokens(
     config.refreshToken.gracePeriodSeconds,
   );
 
-  if (result == null) {
+  if (result === null) {
     throw new InvalidTokenError();
   }
 
@@ -415,7 +415,7 @@ export async function requestPasswordReset(
   // Using repository for user lookup
   const user = await repos.users.findByEmail(email);
 
-  if (user == null) {
+  if (user === null) {
     // Don't reveal user doesn't exist - silently succeed
     return;
   }
@@ -478,14 +478,14 @@ export async function resetPassword(
   // Find valid token (not expired, not used) - using repository
   const tokenRecord = await repos.passwordResetTokens.findValidByTokenHash(tokenHash);
 
-  if (tokenRecord == null) {
+  if (tokenRecord === null) {
     throw new InvalidTokenError('Invalid or expired reset token');
   }
 
   // Using repository for user lookup
   const user = await repos.users.findById(tokenRecord.userId);
 
-  if (user == null) {
+  if (user === null) {
     // This should not happen if the token is valid
     throw new InvalidTokenError('User not found for the given token');
   }
@@ -541,7 +541,7 @@ export async function setPassword(
   // Find the user - using repository
   const user = await repos.users.findById(userId);
 
-  if (user == null) {
+  if (user === null) {
     throw new InvalidCredentialsError();
   }
 
@@ -611,7 +611,7 @@ export async function resendVerificationEmail(
   // Using repository for user lookup
   const user = await repos.users.findByEmail(email);
 
-  if (user == null) {
+  if (user === null) {
     // Don't reveal user doesn't exist - silently succeed
     return;
   }
@@ -668,7 +668,7 @@ export async function verifyEmail(
   // Find valid token (not expired, not used) - using repository
   const tokenRecord = await repos.emailVerificationTokens.findValidByTokenHash(tokenHash);
 
-  if (tokenRecord == null) {
+  if (tokenRecord === null) {
     throw new InvalidTokenError('Invalid or expired verification token');
   }
 
@@ -683,7 +683,7 @@ export async function verifyEmail(
         .toSql(),
     );
 
-    if (updatedUserRows[0] == null) {
+    if (updatedUserRows[0] === undefined) {
       throw new Error('Failed to verify user');
     }
 

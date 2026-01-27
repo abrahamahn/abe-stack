@@ -151,7 +151,7 @@ describe('Integration: End-to-End IPC Flow', () => {
         invoke: vi.fn((channel: string, ...args: unknown[]) => {
           integrationMocks.invokedChannels.push({ channel, args });
           const handler = integrationMocks.ipcHandlers.get(channel);
-          if (handler) {
+          if (handler !== undefined) {
             return Promise.resolve(handler(null, ...args));
           }
           return Promise.reject(new Error(`No handler for channel: ${channel}`));
@@ -159,7 +159,7 @@ describe('Integration: End-to-End IPC Flow', () => {
         send: vi.fn((channel: string, ...args: unknown[]) => {
           integrationMocks.sentChannels.push({ channel, args });
           const listener = integrationMocks.ipcListeners.get(channel);
-          if (listener) {
+          if (listener !== undefined) {
             listener(null, ...args);
           }
         }),

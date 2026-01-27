@@ -57,7 +57,7 @@ describe('EnvSchema', () => {
         // Missing connection info
       };
       // We need to delete other providers to trigger the "no database" error
-      const { SQLITE_FILE_PATH, ...rest } = prodEnv;
+      const { SQLITE_FILE_PATH: _SQLITE_FILE_PATH, ...rest } = prodEnv;
       const result = EnvSchema.safeParse(rest);
       expect(result.success).toBe(false);
       if (!result.success) {

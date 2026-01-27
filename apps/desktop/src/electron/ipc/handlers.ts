@@ -19,7 +19,7 @@ export function registerIPCHandlers(getMainWindow: () => BrowserWindow | null): 
   // Show native open file dialog
   ipcMain.handle('show-open-dialog', async (_event, options: OpenDialogOptions) => {
     const mainWindow = getMainWindow();
-    if (!mainWindow) return null;
+    if (mainWindow === null) return null;
 
     const result = await dialog.showOpenDialog(mainWindow, {
       title: options.title,
@@ -33,7 +33,7 @@ export function registerIPCHandlers(getMainWindow: () => BrowserWindow | null): 
   // Show native save file dialog
   ipcMain.handle('show-save-dialog', async (_event, options: SaveDialogOptions) => {
     const mainWindow = getMainWindow();
-    if (!mainWindow) return null;
+    if (mainWindow === null) return null;
 
     const result = await dialog.showSaveDialog(mainWindow, {
       title: options.title,

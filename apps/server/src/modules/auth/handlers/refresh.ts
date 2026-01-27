@@ -29,7 +29,7 @@ export async function handleRefresh(
 ): Promise<{ status: 200; body: RefreshResponse } | { status: number; body: { message: string } }> {
   const oldRefreshToken = request.cookies[REFRESH_COOKIE_NAME];
 
-  if (oldRefreshToken == null || oldRefreshToken === '') {
+  if (oldRefreshToken === undefined || oldRefreshToken === '') {
     return { status: 401, body: { message: ERROR_MESSAGES.NO_REFRESH_TOKEN } };
   }
 

@@ -123,7 +123,7 @@ export interface PushSubscriptionKeys {
 
 export const pushSubscriptionKeysSchema: Schema<PushSubscriptionKeys> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid push subscription keys');
     }
     const obj = data as Record<string, unknown>;
@@ -156,7 +156,7 @@ export interface PushSubscription {
 }
 
 export const pushSubscriptionSchema: Schema<PushSubscription> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid push subscription');
   }
   const obj = data as Record<string, unknown>;
@@ -186,7 +186,7 @@ export interface SubscribeRequest {
 }
 
 export const subscribeRequestSchema: Schema<SubscribeRequest> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid subscribe request');
   }
   const obj = data as Record<string, unknown>;
@@ -225,7 +225,7 @@ export interface UnsubscribeRequest {
 
 export const unsubscribeRequestSchema: Schema<UnsubscribeRequest> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid unsubscribe request');
     }
     const obj = data as Record<string, unknown>;
@@ -267,7 +267,7 @@ export interface QuietHours {
 }
 
 export const quietHoursSchema: Schema<QuietHours> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     return {};
   }
   const obj = data as Record<string, unknown>;
@@ -312,7 +312,7 @@ export interface NotificationTypePreference {
 
 export const notificationTypePreferenceSchema: Schema<NotificationTypePreference> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       return {};
     }
     const obj = data as Record<string, unknown>;
@@ -342,7 +342,7 @@ export interface UpdatePreferencesRequest {
 
 export const updatePreferencesRequestSchema: Schema<UpdatePreferencesRequest> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       return {};
     }
     const obj = data as Record<string, unknown>;
@@ -384,7 +384,7 @@ export interface NotificationAction {
 
 export const notificationActionSchema: Schema<NotificationAction> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid notification action');
     }
     const obj = data as Record<string, unknown>;
@@ -431,7 +431,7 @@ export interface NotificationPayload {
 
 export const notificationPayloadSchema: Schema<NotificationPayload> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid notification payload');
     }
     const obj = data as Record<string, unknown>;
@@ -516,7 +516,7 @@ export interface SendNotificationRequest {
 
 export const sendNotificationRequestSchema: Schema<SendNotificationRequest> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid send notification request');
     }
     const obj = data as Record<string, unknown>;
@@ -567,7 +567,7 @@ export interface SubscribeResponse {
 }
 
 export const subscribeResponseSchema: Schema<SubscribeResponse> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid subscribe response');
   }
   const obj = data as Record<string, unknown>;
@@ -592,7 +592,7 @@ export interface UnsubscribeResponse {
 
 export const unsubscribeResponseSchema: Schema<UnsubscribeResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid unsubscribe response');
     }
     const obj = data as Record<string, unknown>;
@@ -619,7 +619,7 @@ export interface SendResult {
 }
 
 export const sendResultSchema: Schema<SendResult> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid send result');
   }
   const obj = data as Record<string, unknown>;
@@ -651,7 +651,7 @@ export interface BatchSendResult {
 }
 
 export const batchSendResultSchema: Schema<BatchSendResult> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid batch send result');
   }
   const obj = data as Record<string, unknown>;
@@ -701,7 +701,7 @@ export interface SendNotificationResponse {
 
 export const sendNotificationResponseSchema: Schema<SendNotificationResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid send notification response');
     }
     const obj = data as Record<string, unknown>;
@@ -725,7 +725,7 @@ export interface VapidKeyResponse {
 }
 
 export const vapidKeyResponseSchema: Schema<VapidKeyResponse> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid VAPID key response');
   }
   const obj = data as Record<string, unknown>;
@@ -763,12 +763,12 @@ export interface PreferencesResponse {
 
 export const preferencesResponseSchema: Schema<PreferencesResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid preferences response');
     }
     const obj = data as Record<string, unknown>;
 
-    if (!obj.preferences || typeof obj.preferences !== 'object') {
+    if (obj.preferences === undefined || obj.preferences === null || typeof obj.preferences !== 'object') {
       throw new Error('preferences is required');
     }
 
@@ -782,12 +782,12 @@ export const preferencesResponseSchema: Schema<PreferencesResponse> = createSche
       throw new Error('globalEnabled must be a boolean');
     }
 
-    if (!prefs.quietHours || typeof prefs.quietHours !== 'object') {
+    if (prefs.quietHours === undefined || prefs.quietHours === null || typeof prefs.quietHours !== 'object') {
       throw new Error('quietHours is required');
     }
     const qh = prefs.quietHours as Record<string, unknown>;
 
-    if (!prefs.types || typeof prefs.types !== 'object') {
+    if (prefs.types === undefined || prefs.types === null || typeof prefs.types !== 'object') {
       throw new Error('types is required');
     }
 
@@ -797,7 +797,7 @@ export const preferencesResponseSchema: Schema<PreferencesResponse> = createSche
     const typesObj = prefs.types as Record<string, unknown>;
     for (const type of NOTIFICATION_TYPES) {
       const t = typesObj[type] as Record<string, unknown> | undefined;
-      if (t && typeof t === 'object') {
+      if (t !== undefined && typeof t === 'object') {
         types[type] = {
           enabled: typeof t.enabled === 'boolean' ? t.enabled : false,
           channels: Array.isArray(t.channels)

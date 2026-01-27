@@ -1,18 +1,18 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../.config/tsconfig.react.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "./",
     "baseUrl": "./",
     "types": ["node", "vitest/globals"],
     "paths": {
       "@abe-stack/core": ["../core/src"],
       "@abe-stack/core/*": ["../core/src/*"]
     },
-    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.stores.tsbuildinfo"
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.stores.tsbuildinfo"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "src/**/__tests__/**"],
+  "include": ["src/**/*", "**/*.test.ts"],
+  "exclude": ["node_modules", "dist"],
   "references": [
     {
       "path": "../core"

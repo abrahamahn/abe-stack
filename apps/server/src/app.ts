@@ -95,7 +95,7 @@ export class App implements IServiceContainer {
     this.email = options.email ?? createEmailService(this.config.email);
 
     // 3. Notifications
-    if (options.notifications) {
+    if (options.notifications !== undefined) {
       this.notifications = options.notifications;
     } else {
       const notificationOptions: NotificationFactoryOptions = {
@@ -122,7 +122,7 @@ export class App implements IServiceContainer {
 
     // 5. Search
     const userSearchSchema = DEFAULT_SEARCH_SCHEMAS.users;
-    if (!userSearchSchema) throw new Error('User search schema not found');
+    if (userSearchSchema === undefined) throw new Error('User search schema not found');
 
     this.search =
       options.search ??
@@ -216,7 +216,7 @@ export class App implements IServiceContainer {
       await requireValidSchema(this.db);
 
       // Start internal async services
-      if (this._pgPubSub) await this._pgPubSub.start();
+      if (this._pgPubSub !== null) await this._pgPubSub.start();
 
       // Initialize Web Server
       this._server = await createServer({
@@ -248,14 +248,14 @@ export class App implements IServiceContainer {
 
   async stop(): Promise<void> {
     // 1. Stop processing new background work
-    if (this._pgPubSub) await this._pgPubSub.stop();
+    if (this._pgPubSub !== null) await this._pgPubSub.stop();
     await this.queue.stop();
 
     // 2. Clear volatile data
     this.cache.cleanup();
 
     // 3. Stop receiving HTTP traffic
-    if (this._server) {
+    if (this._server !== null) {
       await this._server.close();
       this._server = null;
     }
@@ -282,7 +282,7 @@ export class App implements IServiceContainer {
   }
 
   get server(): FastifyInstance {
-    if (!this._server) throw new Error('App not started');
+    if (this._server === null) throw new Error('App not started');
     return this._server;
   }
 

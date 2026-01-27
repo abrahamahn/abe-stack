@@ -3,13 +3,13 @@ import Fastify from 'fastify';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-  applyCors,
-  applySecurityHeaders,
-  getProductionSecurityDefaults,
-  hasDangerousKeys,
-  handlePreflight,
-  registerPrototypePollutionProtection,
-  sanitizeObject,
+    applyCors,
+    applySecurityHeaders,
+    getProductionSecurityDefaults,
+    handlePreflight,
+    hasDangerousKeys,
+    registerPrototypePollutionProtection,
+    sanitizeObject,
 } from '../security';
 
 import type { FastifyInstance } from 'fastify';
@@ -455,7 +455,7 @@ describe('HTTP Security', () => {
       server = Fastify();
       registerPrototypePollutionProtection(server);
 
-      server.post('/test', async (req) => {
+      server.post('/test', (req) => {
         return { received: req.body };
       });
 

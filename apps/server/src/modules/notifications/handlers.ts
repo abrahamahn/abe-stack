@@ -14,13 +14,13 @@ import { isAppError } from '@abe-stack/core';
 import { getPreferences, subscribe, unsubscribe, updatePreferences } from './service';
 
 import type {
-  PreferencesResponse,
-  SubscribeRequest,
-  SubscribeResponse,
-  UnsubscribeRequest,
-  UnsubscribeResponse,
-  UpdatePreferencesRequest,
-  VapidKeyResponse,
+    PreferencesResponse,
+    SubscribeRequest,
+    SubscribeResponse,
+    UnsubscribeRequest,
+    UnsubscribeResponse,
+    UpdatePreferencesRequest,
+    VapidKeyResponse,
 } from '@abe-stack/core';
 import type { AppContext, RequestWithCookies } from '@shared';
 
@@ -68,7 +68,7 @@ export async function handleSubscribe(
   body: SubscribeRequest,
   req: RequestWithCookies,
 ): Promise<HandlerResult<SubscribeResponse>> {
-  if (!req.user) {
+  if (req.user === undefined) {
     return {
       status: 401,
       body: { message: 'Unauthorized' },
@@ -120,7 +120,7 @@ export async function handleUnsubscribe(
   body: UnsubscribeRequest,
   req: RequestWithCookies,
 ): Promise<HandlerResult<UnsubscribeResponse>> {
-  if (!req.user) {
+  if (req.user === undefined) {
     return {
       status: 401,
       body: { message: 'Unauthorized' },
@@ -166,7 +166,7 @@ export async function handleGetPreferences(
   _body: undefined,
   req: RequestWithCookies,
 ): Promise<HandlerResult<PreferencesResponse>> {
-  if (!req.user) {
+  if (req.user === undefined) {
     return {
       status: 401,
       body: { message: 'Unauthorized' },
@@ -202,7 +202,7 @@ export async function handleUpdatePreferences(
   body: UpdatePreferencesRequest,
   req: RequestWithCookies,
 ): Promise<HandlerResult<PreferencesResponse>> {
-  if (!req.user) {
+  if (req.user === undefined) {
     return {
       status: 401,
       body: { message: 'Unauthorized' },
@@ -248,7 +248,7 @@ export function handleTestNotification(
   _body: undefined,
   req: RequestWithCookies,
 ): HandlerResult<{ message: string }> {
-  if (!req.user) {
+  if (req.user === undefined) {
     return {
       status: 401,
       body: { message: 'Unauthorized' },
@@ -281,7 +281,7 @@ export function handleSendNotification(
   _body: unknown,
   req: RequestWithCookies,
 ): HandlerResult<{ message: string }> {
-  if (!req.user) {
+  if (req.user === undefined) {
     return {
       status: 401,
       body: { message: 'Unauthorized' },

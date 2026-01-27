@@ -1,11 +1,13 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
+    "composite": true,
     "target": "ES2022",
     "lib": ["ES2022"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "verbatimModuleSyntax": true,
-    "noEmit": false
+    "noEmit": false,
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.node.tsbuildinfo"
   }
 }

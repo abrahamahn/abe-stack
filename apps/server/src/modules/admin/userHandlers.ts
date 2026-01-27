@@ -35,7 +35,7 @@ export async function handleListUsers(
   _reply: FastifyReply,
 ): Promise<{ status: number; body: AdminUserListResponse | { message: string } }> {
   const user = request.user as { userId: string; role: string } | undefined;
-  if (!user) {
+  if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
@@ -59,8 +59,8 @@ export async function handleListUsers(
         typeof query.sortOrder === 'string'
           ? (query.sortOrder as AdminUserListFilters['sortOrder'])
           : undefined,
-      page: query.page != null ? Number(query.page) : undefined,
-      limit: query.limit != null ? Number(query.limit) : undefined,
+      page: query.page !== undefined && query.page !== null ? Number(query.page) : undefined,
+      limit: query.limit !== undefined && query.limit !== null ? Number(query.limit) : undefined,
     };
 
     const result = await listUsers(ctx.repos.users, filters);
@@ -91,7 +91,7 @@ export async function handleGetUser(
   _reply: FastifyReply,
 ): Promise<{ status: number; body: AdminUser | { message: string } }> {
   const authUser = request.user as { userId: string; role: string } | undefined;
-  if (!authUser) {
+  if (authUser === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
@@ -100,7 +100,7 @@ export async function handleGetUser(
     const params = request.params as { id: string };
     const userId = params.id;
 
-    if (!userId) {
+    if (userId === undefined || userId === '') {
       return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
@@ -133,7 +133,7 @@ export async function handleUpdateUser(
   _reply: FastifyReply,
 ): Promise<{ status: number; body: AdminUpdateUserResponse | { message: string } }> {
   const authUser = request.user as { userId: string; role: string } | undefined;
-  if (!authUser) {
+  if (authUser === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
@@ -142,7 +142,7 @@ export async function handleUpdateUser(
     const params = request.params as { id: string };
     const userId = params.id;
 
-    if (!userId) {
+    if (userId === undefined || userId === '') {
       return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
@@ -184,7 +184,7 @@ export async function handleLockUser(
   _reply: FastifyReply,
 ): Promise<{ status: number; body: AdminLockUserResponse | { message: string } }> {
   const authUser = request.user as { userId: string; role: string } | undefined;
-  if (!authUser) {
+  if (authUser === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
@@ -193,7 +193,7 @@ export async function handleLockUser(
     const params = request.params as { id: string };
     const userId = params.id;
 
-    if (!userId) {
+    if (userId === undefined || userId === '') {
       return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 
@@ -245,7 +245,7 @@ export async function handleUnlockUser(
   _reply: FastifyReply,
 ): Promise<{ status: number; body: AdminLockUserResponse | { message: string } }> {
   const authUser = request.user as { userId: string; role: string } | undefined;
-  if (!authUser) {
+  if (authUser === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
@@ -254,7 +254,7 @@ export async function handleUnlockUser(
     const params = request.params as { id: string };
     const userId = params.id;
 
-    if (!userId) {
+    if (userId === undefined || userId === '') {
       return { status: 404, body: { message: ERROR_MESSAGES.USER_NOT_FOUND } };
     }
 

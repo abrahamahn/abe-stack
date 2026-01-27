@@ -106,12 +106,12 @@ describe('CSRF Protection', () => {
       const cookies = tokenResponse.headers['set-cookie'];
       const csrfCookie = Array.isArray(cookies)
         ? cookies.find((c) => c.startsWith('_csrf='))
-        : cookies?.startsWith('_csrf=')
+        : (cookies !== undefined && cookies.startsWith('_csrf='))
           ? cookies
           : undefined;
 
       expect(csrfCookie).toBeDefined();
-      if (!csrfCookie) {
+      if (csrfCookie === undefined) {
         throw new Error('Expected CSRF cookie to be set');
       }
 
@@ -143,7 +143,7 @@ describe('CSRF Protection', () => {
         : cookies;
 
       // Use wrong token
-      if (!csrfCookie) {
+      if (csrfCookie === undefined) {
         throw new Error('Expected CSRF cookie to be set');
       }
 
@@ -189,7 +189,7 @@ describe('CSRF Protection', () => {
         : cookies;
 
       // Make POST with token in body
-      if (!csrfCookie) {
+      if (csrfCookie === undefined) {
         throw new Error('Expected CSRF cookie to be set');
       }
 
@@ -236,7 +236,7 @@ describe('CSRF Protection', () => {
 
       const csrfCookie = Array.isArray(cookies)
         ? cookies.find((c) => c.startsWith('_csrf='))
-        : cookies?.startsWith('_csrf=')
+        : (cookies !== undefined && cookies.startsWith('_csrf='))
           ? cookies
           : undefined;
 
@@ -260,7 +260,7 @@ describe('CSRF Protection', () => {
         ? cookies.find((c) => c.startsWith('_csrf='))
         : cookies;
 
-      if (!csrfCookie) {
+      if (csrfCookie === undefined) {
         throw new Error('Expected CSRF cookie to be set');
       }
 
@@ -292,7 +292,7 @@ describe('CSRF Protection', () => {
         ? cookies.find((c) => c.startsWith('_csrf='))
         : cookies;
 
-      if (!csrfCookie) {
+      if (csrfCookie === undefined) {
         throw new Error('Expected CSRF cookie to be set');
       }
 
@@ -327,7 +327,7 @@ describe('CSRF Protection', () => {
         ? cookies.find((c) => c.startsWith('_csrf='))
         : cookies;
 
-      if (!csrfCookie) {
+      if (csrfCookie === undefined) {
         throw new Error('Expected CSRF cookie to be set');
       }
 
@@ -615,7 +615,7 @@ describe('CSRF with Encryption', () => {
       ? cookies.find((c) => c.startsWith('_csrf='))
       : cookies;
 
-    if (!csrfCookie) {
+    if (csrfCookie === undefined) {
       throw new Error('Expected CSRF cookie to be set');
     }
 
@@ -645,7 +645,7 @@ describe('CSRF with Encryption', () => {
       ? cookies.find((c) => c.startsWith('_csrf='))
       : cookies;
 
-    if (!csrfCookie) {
+    if (csrfCookie === undefined) {
       throw new Error('Expected CSRF cookie to be set');
     }
 
@@ -709,7 +709,7 @@ describe('CSRF with unsigned tokens', () => {
       ? cookies.find((c) => c.startsWith('_csrf='))
       : cookies;
 
-    if (!csrfCookie) {
+    if (csrfCookie === undefined) {
       throw new Error('Expected CSRF cookie to be set');
     }
 

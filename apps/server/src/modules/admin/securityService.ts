@@ -58,7 +58,7 @@ function toApiEvent(event: DbSecurityEvent): SecurityEvent {
     severity: event.severity,
     ipAddress: event.ipAddress,
     userAgent: event.userAgent,
-    metadata: event.metadata != null ? (JSON.parse(event.metadata) as Record<string, unknown>) : null,
+    metadata: event.metadata !== null ? (JSON.parse(event.metadata) as Record<string, unknown>) : null,
     createdAt: event.createdAt.toISOString(),
   };
 }
@@ -69,35 +69,35 @@ function toApiEvent(event: DbSecurityEvent): SecurityEvent {
 function buildFilterConditions(filter: SecurityEventsFilter): SqlFragment[] {
   const conditions: SqlFragment[] = [];
 
-  if (filter.eventType != null && filter.eventType !== '') {
+  if (filter.eventType !== undefined && filter.eventType !== null && filter.eventType !== '') {
     conditions.push(eq('event_type', filter.eventType));
   }
 
-  if (filter.severity != null && filter.severity !== '') {
+  if (filter.severity !== undefined && filter.severity !== null && filter.severity !== '') {
     conditions.push(eq('severity', filter.severity));
   }
 
-  if (filter.userId != null && filter.userId !== '') {
+  if (filter.userId !== undefined && filter.userId !== null && filter.userId !== '') {
     conditions.push(eq('user_id', filter.userId));
   }
 
-  if (filter.email != null && filter.email !== '') {
+  if (filter.email !== undefined && filter.email !== null && filter.email !== '') {
     // Use case-insensitive partial match for email
     conditions.push(ilike('email', `%${filter.email}%`));
   }
 
-  if (filter.ipAddress != null && filter.ipAddress !== '') {
+  if (filter.ipAddress !== undefined && filter.ipAddress !== null && filter.ipAddress !== '') {
     conditions.push(eq('ip_address', filter.ipAddress));
   }
 
-  if (filter.startDate != null) {
+  if (filter.startDate !== undefined && filter.startDate !== null) {
     const startDate = new Date(filter.startDate);
     if (!isNaN(startDate.getTime())) {
       conditions.push(gte('created_at', startDate));
     }
   }
 
-  if (filter.endDate != null) {
+  if (filter.endDate !== undefined && filter.endDate !== null) {
     const endDate = new Date(filter.endDate);
     if (!isNaN(endDate.getTime())) {
       conditions.push(lte('created_at', endDate));
@@ -206,7 +206,7 @@ export async function getSecurityEvent(db: DbClient, id: string): Promise<Securi
     select(SECURITY_EVENTS_TABLE).where(eq('id', id)).toSql(),
   );
 
-  if (!row) {
+  if (row === null) {
     throw new SecurityEventNotFoundError(id);
   }
 

@@ -430,6 +430,7 @@ describe('KeyboardNavigation Integration Tests', () => {
 
       // Click on the first menu item
       const menuItems = screen.getAllByRole('menuitem');
+      if (menuItems[0] === undefined) throw new Error('Menu item not found');
       await user.click(menuItems[0]);
 
       expect(onItemClick).toHaveBeenCalledWith('item1');
@@ -618,7 +619,7 @@ describe('KeyboardNavigation Integration Tests', () => {
 
     it('submits form with Enter on input', async () => {
       const user = userEvent.setup();
-      const onSubmit = vi.fn((e) => e.preventDefault());
+      const onSubmit = vi.fn((e) => { e.preventDefault(); });
       render(
         <form onSubmit={onSubmit}>
           <Input data-testid="form-input" />

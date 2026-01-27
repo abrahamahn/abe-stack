@@ -32,7 +32,7 @@ describe('main.tsx', () => {
 
   afterEach(() => {
     cleanup();
-    if (rootElement && document.body.contains(rootElement)) {
+    if (rootElement !== null && document.body.contains(rootElement)) {
       document.body.removeChild(rootElement);
     }
     rootElement = null;
@@ -48,7 +48,7 @@ describe('main.tsx', () => {
 
     it('should throw error when root container is not found', async () => {
       // Remove the root element
-      if (rootElement) {
+      if (rootElement !== null) {
         document.body.removeChild(rootElement);
         rootElement = null;
       }
@@ -159,7 +159,7 @@ describe('main.tsx', () => {
       const { StrictMode } = await import('react');
       const { createRoot: realCreateRoot } = await import('react-dom/client');
 
-      if (rootElement) {
+      if (rootElement !== null) {
         const root = realCreateRoot(rootElement);
         await act(async () => {
           await Promise.resolve(); // Add await to satisfy require-await rule
@@ -187,7 +187,7 @@ describe('main.tsx', () => {
       const { StrictMode } = await import('react');
       const { createRoot: realCreateRoot } = await import('react-dom/client');
 
-      if (rootElement) {
+      if (rootElement !== null) {
         const root = realCreateRoot(rootElement);
         await act(async () => {
           await Promise.resolve(); // Add await to satisfy require-await rule
@@ -237,7 +237,7 @@ describe('main.tsx', () => {
       const isElectron =
         typeof window !== 'undefined' && 'electronAPI' in window && Boolean(window.electronAPI);
 
-      if (rootElement) {
+      if (rootElement !== null) {
         const root = realCreateRoot(rootElement);
         await act(async () => {
           await Promise.resolve(); // Add await to satisfy require-await rule
@@ -284,7 +284,7 @@ describe('main.tsx', () => {
       const isElectron =
         typeof window !== 'undefined' && 'electronAPI' in window && Boolean(window.electronAPI);
 
-      if (rootElement) {
+      if (rootElement !== null) {
         const root = realCreateRoot(rootElement);
         await act(async () => {
           await Promise.resolve(); // Add await to satisfy require-await rule

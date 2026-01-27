@@ -7,14 +7,14 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { createCursorForItem, decodeCursor, encodeCursor } from './modules/pagination/cursor';
-import { PaginationError } from './modules/pagination/error';
+import { createCursorForItem, decodeCursor, encodeCursor } from '../shared/pagination/cursor';
+import { PaginationError } from '../shared/pagination/error';
 import {
-  buildCursorPaginationQuery,
-  calculateCursorPaginationMetadata,
-  paginateArrayWithCursor,
-  paginateLargeArrayWithCursor,
-} from './modules/pagination/helpers';
+    buildCursorPaginationQuery,
+    calculateCursorPaginationMetadata,
+    paginateArrayWithCursor,
+    paginateLargeArrayWithCursor,
+} from '../shared/pagination/helpers';
 
 describe('Pagination Integration', () => {
   describe('Cursor pagination with realistic data', () => {
@@ -54,7 +54,7 @@ describe('Pagination Integration', () => {
       for (let i = 0; i < page1.data.length - 1; i++) {
         const current = page1.data[i];
         const next = page1.data[i + 1];
-        if (current && next) {
+        if (current !== undefined && next !== undefined) {
           expect(current.publishedAt.getTime()).toBeGreaterThanOrEqual(next.publishedAt.getTime());
         }
       }
@@ -91,7 +91,7 @@ describe('Pagination Integration', () => {
       for (let i = 0; i < result.data.length - 1; i++) {
         const current = result.data[i];
         const next = result.data[i + 1];
-        if (current && next) {
+        if (current !== undefined && next !== undefined) {
           expect(current.views).toBeLessThanOrEqual(next.views);
         }
       }
@@ -104,19 +104,19 @@ describe('Pagination Integration', () => {
       let pageCount = 0;
 
       while (true) {
-        const result = paginateArrayWithCursor(
+        const result: any = paginateArrayWithCursor(
           articles,
           { cursor, limit: 10, sortOrder: 'desc' },
           'publishedAt',
         );
 
-        result.data.forEach((article) => {
+        result.data.forEach((article: any) => {
           allFetchedIds.add(article.id);
         });
 
         pageCount++;
 
-        if (!result.hasNext) break;
+        if (result.hasNext === false) break;
         cursor = result.nextCursor ?? undefined;
       }
 
@@ -378,7 +378,7 @@ describe('Pagination Integration', () => {
 
       const result = calculateCursorPaginationMetadata(items, 2, 'value', 'desc');
 
-      const decoded = decodeCursor(result.nextCursor);
+      const decoded = decodeCursor(result.nextCursor!);
       expect(decoded?.value).toBe(90); // Value of last item in page (id: 2)
       expect(decoded?.tieBreaker).toBe('2');
     });

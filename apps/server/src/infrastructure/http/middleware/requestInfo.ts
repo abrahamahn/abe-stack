@@ -35,7 +35,7 @@ declare module 'fastify' {
  */
 function extractIpAddress(req: FastifyRequest): string {
   // Fastify's req.ip respects trustProxy setting and handles X-Forwarded-For
-  return req.ip || 'unknown';
+  return (req.ip !== '' ? req.ip : 'unknown');
 }
 
 /**

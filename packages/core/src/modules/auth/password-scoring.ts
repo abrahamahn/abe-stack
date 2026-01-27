@@ -105,22 +105,22 @@ export function generateFeedback(
   }
 
   if (penalties.containsInput) {
-    warning = warning || 'This password contains personal information.';
+    warning = warning !== '' ? warning : 'This password contains personal information.';
     suggestions.push('Avoid using personal information in passwords');
   }
 
   if (penalties.hasKeyboard) {
-    warning = warning || 'This password uses a keyboard pattern.';
+    warning = warning !== '' ? warning : 'This password uses a keyboard pattern.';
     suggestions.push('Avoid keyboard patterns like "qwerty" or "asdf"');
   }
 
   if (penalties.hasSequence) {
-    warning = warning || 'This password contains sequential characters.';
+    warning = warning !== '' ? warning : 'This password contains sequential characters.';
     suggestions.push('Avoid sequential characters like "abc" or "123"');
   }
 
   if (penalties.hasRepeats) {
-    warning = warning || 'This password has repeated characters.';
+    warning = warning !== '' ? warning : 'This password has repeated characters.';
     suggestions.push('Avoid repeated characters like "aaa"');
   }
 

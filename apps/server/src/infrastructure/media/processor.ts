@@ -14,7 +14,7 @@ import { MediaSecurityScanner } from './utils/security';
 
 import type { ProcessingResult } from './types';
 
-export { ImageProcessor, AudioProcessor, VideoProcessor };
+export { AudioProcessor, ImageProcessor, VideoProcessor };
 
 export interface ProcessingJob {
   fileId: string;
@@ -95,7 +95,7 @@ export class MediaProcessingOrchestrator {
     try {
       return await Promise.race([processingPromise, timeoutPromise]);
     } finally {
-      if (timeoutId) {
+      if (timeoutId !== undefined) {
         clearTimeout(timeoutId);
       }
     }

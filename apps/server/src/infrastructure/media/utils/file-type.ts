@@ -184,7 +184,7 @@ export async function detectFileTypeFromFile(filePath: string): Promise<FileType
 
     // Try magic byte detection first
     const result = detectFileType(buffer);
-    if (result) return result;
+    if (result !== null) return result;
 
     // Fall back to extension-based detection
     return detectFileTypeFromPath(filePath);
@@ -200,7 +200,7 @@ export function isAllowedFileType(
   fileType: FileTypeResult | null,
   allowedTypes: string[],
 ): boolean {
-  if (!fileType) return false;
+  if (fileType === null) return false;
   const baseType = fileType.mime.split('/')[0];
   return (
     allowedTypes.includes(fileType.mime) ||

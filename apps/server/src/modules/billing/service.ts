@@ -91,12 +91,12 @@ export async function getUserSubscription(
 ): Promise<(DbSubscription & { plan: DbPlan }) | null> {
   const subscription = await repos.subscriptions.findActiveByUserId(userId);
 
-  if (!subscription) {
+  if (subscription === null) {
     return null;
   }
 
   const plan = await repos.plans.findById(subscription.planId);
-  if (!plan) {
+  if (plan === null) {
     return null;
   }
 
@@ -113,13 +113,13 @@ export async function createCheckoutSession(
 ): Promise<CheckoutSessionResult> {
   // Check if user already has an active subscription
   const existingSubscription = await repos.subscriptions.findActiveByUserId(params.userId);
-  if (existingSubscription) {
+  if (existingSubscription !== null) {
     throw new BillingSubscriptionExistsError();
   }
 
   // Get the plan
   const plan = await repos.plans.findById(params.planId);
-  if (!plan) {
+  if (plan === null) {
     throw new PlanNotFoundError(params.planId);
   }
   if (!plan.isActive) {
@@ -168,7 +168,7 @@ export async function cancelSubscription(
 ): Promise<void> {
   const subscription = await repos.subscriptions.findActiveByUserId(userId);
 
-  if (!subscription) {
+  if (subscription === null) {
     throw new BillingSubscriptionNotFoundError();
   }
 
@@ -206,7 +206,7 @@ export async function resumeSubscription(
 ): Promise<void> {
   const subscription = await repos.subscriptions.findActiveByUserId(userId);
 
-  if (!subscription) {
+  if (subscription === null) {
     throw new BillingSubscriptionNotFoundError();
   }
 
@@ -234,7 +234,7 @@ export async function updateSubscription(
 ): Promise<void> {
   const subscription = await repos.subscriptions.findActiveByUserId(userId);
 
-  if (!subscription) {
+  if (subscription === null) {
     throw new BillingSubscriptionNotFoundError();
   }
 
@@ -244,7 +244,7 @@ export async function updateSubscription(
 
   // Get the new plan
   const newPlan = await repos.plans.findById(newPlanId);
-  if (!newPlan) {
+  if (newPlan === null) {
     throw new PlanNotFoundError(newPlanId);
   }
   if (!newPlan.isActive) {
@@ -344,7 +344,7 @@ export async function addPaymentMethod(
     (pm: import('@abe-stack/core').ProviderPaymentMethod) => pm.id === paymentMethodId,
   );
 
-  if (!providerMethod) {
+  if (providerMethod === undefined) {
     throw new PaymentMethodNotFoundError(paymentMethodId);
   }
 
@@ -381,7 +381,7 @@ export async function removePaymentMethod(
   // Check if this is the default and user has active subscription
   if (paymentMethod.isDefault) {
     const subscription = await repos.subscriptions.findActiveByUserId(userId);
-    if (subscription) {
+    if (subscription !== null) {
       throw new CannotRemoveDefaultPaymentMethodError();
     }
   }
@@ -414,7 +414,7 @@ export async function setDefaultPaymentMethod(
     provider.provider,
   );
 
-  if (!customerMapping) {
+  if (customerMapping === null) {
     throw new CustomerNotFoundError(userId);
   }
 
@@ -427,7 +427,7 @@ export async function setDefaultPaymentMethod(
   // Update in database
   const updated = await repos.paymentMethods.setAsDefault(userId, paymentMethodId);
 
-  if (!updated) {
+  if (updated === null) {
     throw new PaymentMethodNotFoundError(paymentMethodId);
   }
 

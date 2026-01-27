@@ -81,7 +81,7 @@ export function useContrast(
     // Get CSS variable overrides
     const cssVariables = getContrastCssVariables(contrastMode, resolvedTheme, prefersHighContrast);
 
-    if (cssVariables) {
+    if (cssVariables !== null) {
       // Apply high contrast overrides
       Object.entries(cssVariables).forEach(([key, value]) => {
         root.style.setProperty(key, value);

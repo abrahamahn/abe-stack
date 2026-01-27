@@ -45,14 +45,14 @@ export async function updateProfile(
 ): Promise<ProfileUser> {
   const user = await repos.users.findById(userId);
 
-  if (user == null) {
+  if (user === null) {
     throw new NotFoundError('User not found');
   }
 
   // Only update if there are changes
   if ('name' in data) {
     const updated = await repos.users.update(userId, { name: data.name });
-    if (updated == null) {
+    if (updated === undefined || updated === null) {
       throw new Error('Failed to update user profile');
     }
 
@@ -93,7 +93,7 @@ export async function changePassword(
 ): Promise<void> {
   const user = await repos.users.findById(userId);
 
-  if (user == null) {
+  if (user === null) {
     throw new NotFoundError('User not found');
   }
 
@@ -145,7 +145,7 @@ export async function uploadAvatar(
 ): Promise<string> {
   const user = await repos.users.findById(userId);
 
-  if (user == null) {
+  if (user === null) {
     throw new NotFoundError('User not found');
   }
 
@@ -190,7 +190,7 @@ export async function deleteAvatar(
 ): Promise<void> {
   const user = await repos.users.findById(userId);
 
-  if (user == null) {
+  if (user === null) {
     throw new NotFoundError('User not found');
   }
 

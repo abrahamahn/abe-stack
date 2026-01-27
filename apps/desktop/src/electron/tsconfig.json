@@ -6,7 +6,11 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "types": ["node"],
-    "noEmit": true
+    "noEmit": false,
+    "composite": true,
+    "declaration": true,
+    "declarationMap": true,
+    "tsBuildInfoFile": "../../../node_modules/.cache/typescript/tsconfig.electron.tsbuildinfo"
   },
   "include": [
     "*.ts",

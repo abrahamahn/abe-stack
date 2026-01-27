@@ -10,9 +10,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RecordCache, type TableMap } from '../../cache/RecordCache';
 import {
-  TransactionQueue,
-  type QueuedTransaction,
-  type TransactionResponse,
+    TransactionQueue,
+    type QueuedTransaction,
+    type TransactionResponse,
 } from '../../offline/TransactionQueue';
 import { RecordStorage, type VersionedRecord } from '../../storage/RecordStorage';
 
@@ -134,8 +134,8 @@ interface OfflineSystem {
   cache: RecordCache<TestTables>;
   storage: RecordStorage<TestTableNames>;
   queue: TransactionQueue;
-  mockSubmit: ReturnType<typeof vi.fn<[QueuedTransaction], Promise<TransactionResponse>>>;
-  mockRollback: ReturnType<typeof vi.fn<[QueuedTransaction], Promise<void>>>;
+  mockSubmit: ReturnType<typeof vi.fn<(transaction: QueuedTransaction) => Promise<TransactionResponse>>>;
+  mockRollback: ReturnType<typeof vi.fn<(transaction: QueuedTransaction) => Promise<void>>>;
   applyOptimisticUpdate: (
     operations: Array<{
       table: keyof TestTables & string;
@@ -155,10 +155,10 @@ function createOfflineSystem(): OfflineSystem {
   const storage = new RecordStorage<TestTableNames>({ dbName: 'test-offline' });
 
   const mockSubmit = vi
-    .fn<[QueuedTransaction], Promise<TransactionResponse>>()
+    .fn<(transaction: QueuedTransaction) => Promise<TransactionResponse>>()
     .mockResolvedValue({ status: 200 });
 
-  const mockRollback = vi.fn<[QueuedTransaction], Promise<void>>().mockResolvedValue(undefined);
+  const mockRollback = vi.fn<(transaction: QueuedTransaction) => Promise<void>>().mockResolvedValue(undefined);
 
   const queue = new TransactionQueue({
     submitTransaction: mockSubmit,
@@ -183,13 +183,15 @@ function createOfflineSystem(): OfflineSystem {
     }
 
     const transaction: QueuedTransaction = {
-      id: `tx-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`,
+      txId: `tx-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`,
       authorId: 'test-user',
-      timestamp: Date.now(),
+      clientTimestamp: Date.now(),
       operations: operations.map((op) => ({
         type: 'set' as const,
-        path: [op.table, op.id, ...Object.keys(op.updates)],
-        value: op.updates,
+        table: op.table,
+        id: op.id,
+        key: Object.keys(op.updates)[0]!,
+        value: Object.values(op.updates)[0],
       })),
     };
 
@@ -312,7 +314,7 @@ describe('Offline Workflow Integration', () => {
       cache.set('user', user.id, user);
 
       const { rollbacks, transaction } = applyOptimisticUpdate([
-        { table: 'user', id: 'u1', updates: { name: 'Invalid Name' } },
+        { table: 'user', id: 'u1', updates: { name: 'Invalid Name' } as any },
       ]);
 
       // Optimistic value applied
@@ -356,12 +358,8 @@ describe('Offline Workflow Integration', () => {
 
       // Simulate server confirming with new version
       simulateServerConfirm('user', 'u1', {
-        id: 'u1',
-        version: 2,
-        name: 'Alice Updated',
-        email: 'alice@test.com',
         status: 'active',
-      });
+      } as User);
 
       // Optimistic state should be committed
       expect(cache.hasOptimisticUpdate('user', 'u1')).toBe(false);
@@ -397,12 +395,13 @@ describe('Offline Workflow Integration', () => {
       expect(parsed).toHaveLength(1);
       expect(parsed[0]).toEqual(
         expect.objectContaining({
-          id: transaction.id,
+          txId: transaction.txId,
           authorId: 'test-user',
           operations: expect.arrayContaining([
             expect.objectContaining({
               type: 'set',
-              value: { name: 'Offline Update' },
+              key: 'name',
+              value: 'Offline Update',
             }),
           ]),
         }),
@@ -411,10 +410,10 @@ describe('Offline Workflow Integration', () => {
 
     it('should restore queue from localStorage on init', async () => {
       const existingTx: QueuedTransaction = {
-        id: 'restored-tx',
+        txId: 'restored-tx',
         authorId: 'user-1',
-        timestamp: Date.now(),
-        operations: [{ type: 'set', path: ['user', 'u1', 'name'], value: { name: 'Restored' } }],
+        clientTimestamp: Date.now(),
+        operations: [{ type: 'set', table: 'user', id: 'u1', key: 'name', value: 'Restored' }],
       };
 
       mockLocalStorage.setItem('test-offline-queue', JSON.stringify([existingTx]));
@@ -428,12 +427,12 @@ describe('Offline Workflow Integration', () => {
       });
 
       expect(newQueue.getQueuedTransactions()).toHaveLength(1);
-      const restoredTx = newQueue.getQueuedTransactions()[0];
+      const restoredTx = newQueue.getQueuedTransactions()[0]!;
       expect(restoredTx).toEqual(
         expect.objectContaining({
-          id: 'restored-tx',
+          txId: 'restored-tx',
           authorId: 'user-1',
-          operations: [{ type: 'set', path: ['user', 'u1', 'name'], value: { name: 'Restored' } }],
+          operations: [{ type: 'set', table: 'user', id: 'u1', key: 'name', value: 'Restored' }],
         }),
       );
 
@@ -476,11 +475,12 @@ describe('Offline Workflow Integration', () => {
       // Verify the submitted transaction contains the expected data
       expect(mockSubmit).toHaveBeenCalledWith(
         expect.objectContaining({
-          id: transaction.id,
+          txId: transaction.txId,
           operations: expect.arrayContaining([
             expect.objectContaining({
               type: 'set',
-              value: { name: 'Offline Update' },
+              key: 'name',
+              value: 'Offline Update',
             }),
           ]),
         }),
@@ -524,7 +524,7 @@ describe('Offline Workflow Integration', () => {
         { table: 'user', id: 'u2', updates: { name: 'Bob Updated' } },
       ]);
       const { transaction: tx3 } = applyOptimisticUpdate([
-        { table: 'post', id: 'p1', updates: { title: 'Post Updated' } },
+        { table: 'post', id: 'p1', updates: { title: 'Post Updated' } as any },
       ]);
 
       const promise1 = queue.enqueue(tx1);
@@ -574,8 +574,8 @@ describe('Offline Workflow Integration', () => {
 
       // Atomic update across records
       const { transaction } = applyOptimisticUpdate([
-        { table: 'user', id: 'u1', updates: { status: 'inactive' } },
-        { table: 'post', id: 'p1', updates: { title: 'Updated Title' } },
+        { table: 'user', id: 'u1', updates: { status: 'inactive' } as any },
+        { table: 'post', id: 'p1', updates: { title: 'Updated Title' } as any },
       ]);
 
       // Both updated optimistically
@@ -608,8 +608,8 @@ describe('Offline Workflow Integration', () => {
       });
 
       const { rollbacks, transaction } = applyOptimisticUpdate([
-        { table: 'user', id: 'u1', updates: { status: 'inactive' } },
-        { table: 'post', id: 'p1', updates: { title: 'Updated Title' } },
+        { table: 'user', id: 'u1', updates: { status: 'inactive' } as any },
+        { table: 'post', id: 'p1', updates: { title: 'Updated Title' } as any },
       ]);
 
       const promise = queue.enqueue(transaction);
@@ -641,13 +641,13 @@ describe('Offline Workflow Integration', () => {
 
       // Rapid updates
       const { transaction: tx1 } = applyOptimisticUpdate([
-        { table: 'user', id: 'u1', updates: { name: 'Update 1' } },
+        { table: 'user', id: 'u1', updates: { name: 'Update 1' } as any },
       ]);
       const { transaction: tx2 } = applyOptimisticUpdate([
-        { table: 'user', id: 'u1', updates: { name: 'Update 2' } },
+        { table: 'user', id: 'u1', updates: { name: 'Update 2' } as any },
       ]);
       const { transaction: tx3 } = applyOptimisticUpdate([
-        { table: 'user', id: 'u1', updates: { name: 'Update 3' } },
+        { table: 'user', id: 'u1', updates: { name: 'Update 3' } as any },
       ]);
 
       // Latest value should win
@@ -677,7 +677,7 @@ describe('Offline Workflow Integration', () => {
       await storage.setRecord('user', user);
 
       const { transaction } = applyOptimisticUpdate([
-        { table: 'user', id: 'u1', updates: { name: 'Alice Updated' } },
+        { table: 'user', id: 'u1', updates: { name: 'Alice Updated' } as any },
       ]);
 
       await queue.enqueue(transaction);
@@ -725,7 +725,7 @@ describe('Offline Workflow Integration', () => {
       cache.set('user', user.id, user);
 
       const { transaction } = applyOptimisticUpdate([
-        { table: 'user', id: 'u1', updates: { name: 'Conflicting Update' } },
+        { table: 'user', id: 'u1', updates: { name: 'Conflicting Update' } as any },
       ]);
 
       await queue.enqueue(transaction);
@@ -749,7 +749,7 @@ describe('Offline Workflow Integration', () => {
       cache.set('user', user.id, user);
 
       const { transaction } = applyOptimisticUpdate([
-        { table: 'user', id: 'u1', updates: { name: 'Forbidden Update' } },
+        { table: 'user', id: 'u1', updates: { name: 'Forbidden Update' } as any },
       ]);
 
       await expect(queue.enqueue(transaction)).rejects.toThrow('Forbidden');
@@ -777,7 +777,7 @@ describe('Offline Workflow Integration', () => {
       cache.set('user', user.id, user);
 
       const { transaction } = applyOptimisticUpdate([
-        { table: 'user', id: 'u1', updates: { name: 'Update' } },
+        { table: 'user', id: 'u1', updates: { name: 'Update' } as any },
       ]);
 
       const promise = queue.enqueue(transaction);

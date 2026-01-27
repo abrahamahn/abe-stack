@@ -5,7 +5,7 @@
  * Handles image processing operations using Sharp library.
  */
 
-import type { ImageProcessingOptions, ProcessingResult, MediaMetadata } from '../types';
+import type { ImageProcessingOptions, MediaMetadata, ProcessingResult } from '../types';
 
 export type { ImageProcessingOptions };
 
@@ -36,7 +36,7 @@ export class ImageProcessor {
    * Lazy load sharp module
    */
   private async getSharp(): Promise<SharpFunction> {
-    if (!this.sharpModule) {
+    if (this.sharpModule === null) {
       const sharpModule = (await import('sharp')) as { default: SharpFunction };
       this.sharpModule = sharpModule.default;
     }
@@ -56,7 +56,7 @@ export class ImageProcessor {
       let pipeline = sharp(inputPath);
 
       // Apply resize if specified
-      if (options.resize) {
+      if (options.resize !== undefined) {
         pipeline = pipeline.resize({
           width: options.resize.width,
           height: options.resize.height,
@@ -66,7 +66,7 @@ export class ImageProcessor {
       }
 
       // Apply format conversion if specified
-      if (options.format) {
+      if (options.format !== undefined) {
         switch (options.format.format) {
           case 'jpeg':
             pipeline = pipeline.jpeg({
@@ -97,7 +97,7 @@ export class ImageProcessor {
 
       // Generate thumbnail if specified
       let thumbnailPath: string | undefined;
-      if (options.thumbnail) {
+      if (options.thumbnail !== undefined) {
         thumbnailPath = outputPath.replace(/(\.[^.]+)$/, '_thumb$1');
         await sharp(inputPath)
           .resize({

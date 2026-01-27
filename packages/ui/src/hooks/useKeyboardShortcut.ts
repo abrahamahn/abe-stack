@@ -206,7 +206,7 @@ export function formatKeyBinding(binding: ParsedKeyBinding, forMac?: boolean): s
   if (binding.shift) {
     parts.push('Shift');
   }
-  if (binding.key) {
+  if (binding.key !== '') {
     parts.push(binding.key.toUpperCase());
   }
 
@@ -307,7 +307,7 @@ export function useKeyboardShortcut(options: KeyboardShortcutOptions): void {
     if (!enabled) return;
 
     const targetElement = target ?? (typeof window !== 'undefined' ? window : null);
-    if (!targetElement) return;
+    if (targetElement === null) return;
 
     targetElement.addEventListener(eventType, handleKeyEvent as EventListener);
 
@@ -340,7 +340,7 @@ export function useKeyBindings(
       if (!(event instanceof KeyboardEvent)) return;
 
       // Skip if user is typing in input/textarea
-      if (restOptions.skipInputs && isInputElement(event.target)) {
+      if (restOptions.skipInputs === true && isInputElement(event.target)) {
         return;
       }
 
@@ -359,7 +359,7 @@ export function useKeyBindings(
         if (restOptions.preventDefault !== false) {
           event.preventDefault();
         }
-        if (restOptions.stopPropagation) {
+        if (restOptions.stopPropagation === true) {
           event.stopPropagation();
         }
 
@@ -374,7 +374,7 @@ export function useKeyBindings(
     if (!enabled) return;
 
     const targetElement = restOptions.target ?? (typeof window !== 'undefined' ? window : null);
-    if (!targetElement) return;
+    if (targetElement === null) return;
 
     const eventType = restOptions.eventType ?? 'keydown';
     targetElement.addEventListener(eventType, handleKeyEvent as EventListener);

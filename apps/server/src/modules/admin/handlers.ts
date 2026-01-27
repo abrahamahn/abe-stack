@@ -7,10 +7,10 @@
 
 import { unlockUserAccount, UserNotFoundError } from '@admin/service';
 import {
-  ERROR_MESSAGES,
-  SUCCESS_MESSAGES,
-  type AppContext,
-  type RequestWithCookies,
+    ERROR_MESSAGES,
+    SUCCESS_MESSAGES,
+    type AppContext,
+    type RequestWithCookies,
 } from '@shared';
 
 import type { UnlockAccountRequest, UnlockAccountResponse } from '@abe-stack/core';
@@ -27,7 +27,7 @@ export async function handleAdminUnlock(
   | { status: 401 | 403 | 404 | 500; body: { message: string } }
 > {
   // User and role are already verified by middleware
-  if (!request.user) {
+  if (request.user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 

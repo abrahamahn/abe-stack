@@ -65,7 +65,7 @@ export async function subscribe(
     select(PUSH_SUBSCRIPTIONS_TABLE).where(eq('endpoint', subscription.endpoint)).limit(1).toSql(),
   );
 
-  if (existingRow) {
+  if (existingRow !== undefined && existingRow !== null) {
     const existing = toCamelCase<DbPushSubscription>(existingRow, PUSH_SUBSCRIPTION_COLUMNS);
     if (existing.userId === userId) {
       // Update existing subscription - reactivate and update lastUsedAt
@@ -105,7 +105,7 @@ export async function subscribe(
       .toSql(),
   );
 
-  if (!newSubRows[0]) {
+  if (newSubRows[0] === undefined) {
     throw new Error('Failed to create subscription');
   }
 
@@ -180,7 +180,7 @@ export async function getSubscriptionById(
     select(PUSH_SUBSCRIPTIONS_TABLE).where(eq('id', subscriptionId)).limit(1).toSql(),
   );
 
-  if (!row) return undefined;
+  if (row === null || row === undefined) return undefined;
   const sub = toCamelCase<DbPushSubscription>(row, PUSH_SUBSCRIPTION_COLUMNS);
   return dbSubToStoredSub(sub);
 }
@@ -262,7 +262,7 @@ export async function getPreferences(
     select(NOTIFICATION_PREFERENCES_TABLE).where(eq('user_id', userId)).limit(1).toSql(),
   );
 
-  if (existingRow) {
+  if (existingRow !== undefined && existingRow !== null) {
     const prefs = toCamelCase<DbNotificationPreference>(
       existingRow,
       NOTIFICATION_PREFERENCE_COLUMNS,
@@ -283,7 +283,7 @@ export async function getPreferences(
       .toSql(),
   );
 
-  if (!newPrefsRows[0]) {
+  if (newPrefsRows[0] === undefined) {
     throw new Error('Failed to create notification preferences');
   }
 
@@ -340,7 +340,7 @@ export async function updatePreferences(
     const newTypes = { ...current.types };
     for (const type of Object.keys(updates.types) as NotificationType[]) {
       const typeUpdate = updates.types[type];
-      if (!typeUpdate) {
+      if (typeUpdate === undefined) {
         continue;
       }
       if (typeUpdate.enabled !== undefined) {
@@ -361,7 +361,7 @@ export async function updatePreferences(
       .toSql(),
   );
 
-  if (!updatedRows[0]) {
+  if (updatedRows[0] === undefined) {
     throw new Error('Failed to update notification preferences');
   }
 

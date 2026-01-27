@@ -238,7 +238,7 @@ export interface BrazeConfig {
  */
 export interface GenericNotificationConfig {
   /** Provider-specific configuration */
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**

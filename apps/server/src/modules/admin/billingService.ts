@@ -65,7 +65,7 @@ export async function getPlanById(
   planId: string,
 ): Promise<DbPlan> {
   const plan = await repos.plans.findById(planId);
-  if (!plan) {
+  if (plan === null || plan === undefined) {
     throw new PlanNotFoundError(planId);
   }
   return plan;
@@ -103,7 +103,7 @@ export async function updatePlan(
   params: UpdatePlanParams,
 ): Promise<DbPlan> {
   const plan = await repos.plans.findById(planId);
-  if (!plan) {
+  if (plan === null || plan === undefined) {
     throw new PlanNotFoundError(planId);
   }
 
@@ -119,7 +119,7 @@ export async function updatePlan(
     sortOrder: params.sortOrder,
   });
 
-  if (!updated) {
+  if (updated === null || updated === undefined) {
     throw new PlanNotFoundError(planId);
   }
 
@@ -134,7 +134,7 @@ export async function deactivatePlan(
   planId: string,
 ): Promise<void> {
   const plan = await repos.plans.findById(planId);
-  if (!plan) {
+  if (plan === null || plan === undefined) {
     throw new PlanNotFoundError(planId);
   }
 
@@ -156,7 +156,7 @@ export async function syncPlanToStripe(
   planId: string,
 ): Promise<{ stripePriceId: string; stripeProductId: string }> {
   const plan = await repos.plans.findById(planId);
-  if (!plan) {
+  if (plan === null || plan === undefined) {
     throw new PlanNotFoundError(planId);
   }
 
@@ -174,7 +174,7 @@ export async function syncPlanToStripe(
     metadata: { planId: plan.id },
   };
 
-  if (productId != null && productId !== '') {
+  if (productId !== null && productId !== '') {
     // Update existing product
     await provider.updateProduct(productId, plan.name, plan.description ?? undefined);
     // Note: Stripe doesn't allow updating prices, so if price changed,

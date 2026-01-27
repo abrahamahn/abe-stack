@@ -73,13 +73,13 @@ function ThemeToggle(): React.ReactElement {
       <Button onClick={cycleMode} data-testid="cycle-btn">
         Cycle Theme
       </Button>
-      <Button onClick={() => setMode('light')} data-testid="light-btn">
+      <Button onClick={() => { setMode('light'); }} data-testid="light-btn">
         Light
       </Button>
-      <Button onClick={() => setMode('dark')} data-testid="dark-btn">
+      <Button onClick={() => { setMode('dark'); }} data-testid="dark-btn">
         Dark
       </Button>
-      <Button onClick={() => setMode('system')} data-testid="system-btn">
+      <Button onClick={() => { setMode('system'); }} data-testid="system-btn">
         System
       </Button>
     </div>
@@ -507,7 +507,7 @@ describe('ThemeProvider Integration Tests', () => {
           <Button onClick={cycleMode} data-testid="hook-cycle">
             Cycle
           </Button>
-          <Button onClick={() => setMode('dark')} data-testid="hook-dark">
+          <Button onClick={() => { setMode('dark'); }} data-testid="hook-dark">
             Dark
           </Button>
         </div>

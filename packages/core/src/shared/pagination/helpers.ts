@@ -22,9 +22,9 @@ export function buildCursorPaginationQuery(
   const params: unknown[] = [];
   let whereClause = '';
 
-  if (cursor) {
+  if (cursor !== undefined && cursor !== '') {
     const cursorData = decodeCursor(cursor);
-    if (!cursorData) {
+    if (cursorData === null) {
       throw new PaginationError('INVALID_CURSOR', `Invalid cursor provided: ${cursor}`);
     }
 
@@ -61,7 +61,7 @@ export function buildCursorPaginationQuery(
 /**
  * Calculates pagination metadata for cursor-based results
  */
-export function calculateCursorPaginationMetadata<T extends Record<string, unknown>>(
+export function calculateCursorPaginationMetadata<T>(
   items: T[],
   requestedLimit: number,
   sortBy: string,
@@ -92,7 +92,7 @@ export function calculateCursorPaginationMetadata<T extends Record<string, unkno
  * Applies cursor-based pagination to an array of items
  * Useful for in-memory pagination or testing
  */
-export function paginateArrayWithCursor<T extends Record<string, unknown>>(
+export function paginateArrayWithCursor<T>(
   items: T[],
   options: CursorPaginationOptions,
   sortBy: string = 'id',
@@ -126,9 +126,9 @@ export function paginateArrayWithCursor<T extends Record<string, unknown>>(
 
   // Find start index from cursor
   let startIndex = 0;
-  if (cursor) {
+  if (cursor !== undefined && cursor !== '') {
     const cursorData = decodeCursor(cursor);
-    if (cursorData) {
+    if (cursorData !== null) {
       const cursorIndex = sortedItems.findIndex((item) => {
         const itemValue = getSortableValue(item, effectiveSortBy);
         const itemTieBreaker = String(getSortableValue(item, String(tieBreakerField)));
@@ -171,7 +171,7 @@ export function paginateArrayWithCursor<T extends Record<string, unknown>>(
 /**
  * Efficiently sorts items for large datasets
  */
-function sortItemsEfficiently<T extends Record<string, unknown>>(
+function sortItemsEfficiently<T>(
   items: T[],
   sortBy: string,
   sortOrder: SortOrder,
@@ -196,7 +196,7 @@ function sortItemsEfficiently<T extends Record<string, unknown>>(
 /**
  * Binary search for cursor position in large sorted arrays
  */
-function findCursorIndexBinary<T extends Record<string, unknown>>(
+function findCursorIndexBinary<T>(
   sortedItems: T[],
   cursorData: CursorData,
   sortBy: string,
@@ -210,7 +210,7 @@ function findCursorIndexBinary<T extends Record<string, unknown>>(
     const mid = Math.floor((left + right) / 2);
     const item = sortedItems[mid];
 
-    if (!item) break;
+    if (item === undefined) break;
 
     const itemValue = getSortableValue(item, sortBy);
     const itemTieBreaker = String(getSortableValue(item, String(tieBreakerField)));
@@ -241,7 +241,7 @@ function findCursorIndexBinary<T extends Record<string, unknown>>(
  * Performance-optimized version for large arrays
  * Uses binary search for cursor positioning
  */
-export function paginateLargeArrayWithCursor<T extends Record<string, unknown>>(
+export function paginateLargeArrayWithCursor<T>(
   items: T[],
   options: CursorPaginationOptions,
   sortBy: string = 'id',
@@ -259,9 +259,9 @@ export function paginateLargeArrayWithCursor<T extends Record<string, unknown>>(
 
   // Find start index using binary search
   let startIndex = 0;
-  if (cursor) {
+  if (cursor !== undefined && cursor !== '') {
     const cursorData = decodeCursor(cursor);
-    if (cursorData) {
+    if (cursorData !== null) {
       startIndex = findCursorIndexBinary(
         sortedItems,
         cursorData,

@@ -2,10 +2,10 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
-  createTransactionQueue,
-  TransactionQueue,
-  type QueuedTransaction,
-  type TransactionResponse,
+    createTransactionQueue,
+    TransactionQueue,
+    type QueuedTransaction,
+    type TransactionResponse,
 } from '../TransactionQueue';
 
 // Mock localStorage
@@ -89,17 +89,19 @@ Object.defineProperty(globalThis, 'window', {
 
 // Helper to create a valid transaction
 function createTestTransaction(
-  id = `tx-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`,
+  txId = `tx-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 5)}`,
   authorId = 'user-1',
 ): QueuedTransaction {
   return {
-    id,
+    txId,
     authorId,
-    timestamp: Date.now(),
+    clientTimestamp: Date.now(),
     operations: [
       {
         type: 'set',
-        path: ['posts', 'p1', 'title'],
+        table: 'posts',
+        id: 'p1',
+        key: 'title',
         value: 'Test Title',
       },
     ],
@@ -108,17 +110,17 @@ function createTestTransaction(
 
 describe('TransactionQueue', () => {
   let queue: TransactionQueue;
-  let mockSubmit: ReturnType<typeof vi.fn<[QueuedTransaction], Promise<TransactionResponse>>>;
-  let mockRollback: ReturnType<typeof vi.fn<[QueuedTransaction], Promise<void>>>;
+  let mockSubmit: ReturnType<typeof vi.fn<(transaction: QueuedTransaction) => Promise<TransactionResponse>>>;
+  let mockRollback: ReturnType<typeof vi.fn<(transaction: QueuedTransaction) => Promise<void>>>;
 
   beforeEach(() => {
     mockLocalStorage.clear();
     mockOnline = true;
     mockWindow.eventListeners.clear();
     mockSubmit = vi
-      .fn<[QueuedTransaction], Promise<TransactionResponse>>()
+      .fn<(transaction: QueuedTransaction) => Promise<TransactionResponse>>()
       .mockResolvedValue({ status: 200 });
-    mockRollback = vi.fn<[QueuedTransaction], Promise<void>>().mockResolvedValue(undefined);
+    mockRollback = vi.fn<(transaction: QueuedTransaction) => Promise<void>>().mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -148,7 +150,7 @@ describe('TransactionQueue', () => {
       });
 
       expect(queue.getQueuedTransactions()).toHaveLength(1);
-      expect(queue.getQueuedTransactions()[0]?.id).toBe('existing-tx');
+      expect(queue.getQueuedTransactions()[0]?.txId).toBe('existing-tx');
     });
 
     test('should use custom storage key', () => {
@@ -185,10 +187,10 @@ describe('TransactionQueue', () => {
 
       // Create a transaction with invalid path (less than 2 elements)
       const tx: QueuedTransaction = {
-        id: 'tx-short-path',
+        txId: 'tx-short-path',
         authorId: 'user-1',
-        timestamp: Date.now(),
-        operations: [{ type: 'set', path: ['only-one'], value: 'test' }],
+        clientTimestamp: Date.now(),
+        operations: [{ type: 'set', table: 'only-one', id: '', key: '', value: 'test' }],
       };
 
       void queue.enqueue(tx);
@@ -226,7 +228,7 @@ describe('TransactionQueue', () => {
       expect(stored).not.toBeNull();
       const parsed = JSON.parse(stored!) as QueuedTransaction[];
       expect(parsed).toHaveLength(1);
-      expect(parsed[0]?.id).toBe('persisted-tx');
+      expect(parsed[0]?.txId).toBe('persisted-tx');
     });
 
     test('should resolve promise when transaction succeeds', async () => {
@@ -277,10 +279,10 @@ describe('TransactionQueue', () => {
       });
 
       void queue.enqueue({
-        id: 'tx-1',
+        txId: 'tx-1',
         authorId: 'user-1',
-        timestamp: Date.now(),
-        operations: [{ type: 'set', path: ['posts', 'p1', 'title'], value: 'Test' }],
+        clientTimestamp: Date.now(),
+        operations: [{ type: 'set', table: 'posts', id: 'p1', key: 'title', value: 'Test' }],
       });
 
       expect(queue.isPendingWrite({ table: 'posts', id: 'p1' })).toBe(true);
@@ -296,10 +298,10 @@ describe('TransactionQueue', () => {
       const pointer = { table: 'posts', id: 'p1' };
 
       await queue.enqueue({
-        id: 'tx-1',
+        txId: 'tx-1',
         authorId: 'user-1',
-        timestamp: Date.now(),
-        operations: [{ type: 'set', path: ['posts', 'p1', 'title'], value: 'Test' }],
+        clientTimestamp: Date.now(),
+        operations: [{ type: 'set', table: 'posts', id: 'p1', key: 'title', value: 'Test' }],
       });
 
       expect(queue.isPendingWrite(pointer)).toBe(false);
@@ -320,10 +322,10 @@ describe('TransactionQueue', () => {
       queue.subscribeIsPendingWrite(pointer, callback);
 
       const promise = queue.enqueue({
-        id: 'tx-1',
+        txId: 'tx-1',
         authorId: 'user-1',
-        timestamp: Date.now(),
-        operations: [{ type: 'set', path: ['posts', 'p1', 'title'], value: 'Test' }],
+        clientTimestamp: Date.now(),
+        operations: [{ type: 'set', table: 'posts', id: 'p1', key: 'title', value: 'Test' }],
       });
 
       expect(callback).toHaveBeenCalledWith(true);
@@ -350,10 +352,10 @@ describe('TransactionQueue', () => {
       unsubscribe();
 
       void queue.enqueue({
-        id: 'tx-1',
+        txId: 'tx-1',
         authorId: 'user-1',
-        timestamp: Date.now(),
-        operations: [{ type: 'set', path: ['posts', 'p1', 'title'], value: 'Test' }],
+        clientTimestamp: Date.now(),
+        operations: [{ type: 'set', table: 'posts', id: 'p1', key: 'title', value: 'Test' }],
       });
 
       // Should not be called after unsubscribe
@@ -457,10 +459,10 @@ describe('TransactionQueue', () => {
       // Create a transaction with data that exceeds batch size
       const largeData = 'x'.repeat(100);
       const tx: QueuedTransaction = {
-        id: 'tx-large',
+        txId: 'tx-large',
         authorId: 'user-1',
-        timestamp: Date.now(),
-        operations: [{ type: 'set', path: ['table', 'id'], value: largeData }],
+        clientTimestamp: Date.now(),
+        operations: [{ type: 'set', table: 'table', id: 'id', key: '', value: largeData }],
       };
 
       await queue.enqueue(tx);

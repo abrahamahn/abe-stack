@@ -8,7 +8,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { LoaderCache, Loader, loadWithCache } from '../../cache/LoaderCache';
+import { Loader, LoaderCache, loadWithCache } from '../../cache/LoaderCache';
 
 // ============================================================================
 // Test Types
@@ -109,7 +109,7 @@ describe('LoaderCache Integration', () => {
   describe('LoaderCache request deduplication', () => {
     it('should deduplicate concurrent requests', async () => {
       const cache = new LoaderCache<User>();
-      const fetchUser = vi.fn<[], Promise<User>>().mockImplementation(async () => {
+      const fetchUser = vi.fn<() => Promise<User>>().mockImplementation(async () => {
         return { id: 'u1', name: 'Alice', email: 'alice@test.com' };
       });
 
@@ -128,7 +128,7 @@ describe('LoaderCache Integration', () => {
 
     it('should not deduplicate requests with different keys', async () => {
       const cache = new LoaderCache<User>();
-      const fetchUser = vi.fn<[string], Promise<User>>().mockImplementation(async (id: string) => {
+      const fetchUser = vi.fn<(id: string) => Promise<User>>().mockImplementation(async (id: string) => {
         return { id, name: `User ${id}`, email: `${id}@test.com` };
       });
 
@@ -146,7 +146,7 @@ describe('LoaderCache Integration', () => {
   describe('LoaderCache TTL and staleness', () => {
     it('should return cached result before TTL expires', async () => {
       const cache = new LoaderCache<User>({ defaultTtlMs: 1000 });
-      const fetchUser = vi.fn<[], Promise<User>>().mockImplementation(async () => {
+      const fetchUser = vi.fn<() => Promise<User>>().mockImplementation(async () => {
         return { id: 'u1', name: 'Alice', email: 'alice@test.com' };
       });
 
@@ -164,7 +164,7 @@ describe('LoaderCache Integration', () => {
     it('should re-fetch after TTL expires', async () => {
       const cache = new LoaderCache<User>({ defaultTtlMs: 1000, autoEvictStale: true });
       let callCount = 0;
-      const fetchUser = vi.fn<[], Promise<User>>().mockImplementation(async () => {
+      const fetchUser = vi.fn<() => Promise<User>>().mockImplementation(async () => {
         callCount++;
         return { id: 'u1', name: `Alice ${callCount}`, email: 'alice@test.com' };
       });
@@ -199,7 +199,7 @@ describe('LoaderCache Integration', () => {
   describe('LoaderCache invalidation', () => {
     it('should invalidate specific key', async () => {
       const cache = new LoaderCache<User>({ defaultTtlMs: 60000 });
-      const fetchUser = vi.fn<[], Promise<User>>().mockResolvedValue({
+      const fetchUser = vi.fn<() => Promise<User>>().mockResolvedValue({
         id: 'u1',
         name: 'Alice',
         email: 'alice@test.com',
@@ -268,7 +268,7 @@ describe('LoaderCache Integration', () => {
     it('should cache rejected loaders', async () => {
       const cache = new LoaderCache<User>();
       let callCount = 0;
-      const fetchUser = vi.fn<[], Promise<User>>().mockImplementation(async () => {
+      const fetchUser = vi.fn<() => Promise<User>>().mockImplementation(async () => {
         callCount++;
         throw new Error(`Fetch error ${callCount}`);
       });
@@ -285,7 +285,7 @@ describe('LoaderCache Integration', () => {
     it('should allow retry after error by invalidating', async () => {
       const cache = new LoaderCache<User>();
       let shouldFail = true;
-      const fetchUser = vi.fn<[], Promise<User>>().mockImplementation(async () => {
+      const fetchUser = vi.fn<() => Promise<User>>().mockImplementation(async () => {
         if (shouldFail) {
           throw new Error('Temporary failure');
         }
@@ -374,7 +374,7 @@ describe('LoaderCache Integration', () => {
       cache.create('user:u2');
 
       const visited: string[] = [];
-      cache.forEach((loader, key) => {
+      cache.forEach((_loader, key) => {
         visited.push(key);
       });
 
@@ -385,8 +385,7 @@ describe('LoaderCache Integration', () => {
   describe('Integration with API calls', () => {
     it('should coordinate cache with batch loading', async () => {
       const userCache = new LoaderCache<User>();
-      const batchFetch = vi
-        .fn<[string[]], Promise<Map<string, User>>>()
+      const batchFetch = vi.fn<(ids: string[]) => Promise<Map<string, User>>>()
         .mockImplementation(async (ids: string[]) => {
           const users = new Map<string, User>();
           for (const id of ids) {

@@ -59,7 +59,7 @@ function FormWithFocusOnError(): React.ReactElement {
     e.preventDefault();
     const value = inputRef.current?.value ?? '';
 
-    if (!value) {
+    if (value === '') {
       setError('This field is required');
       inputRef.current?.focus();
     } else if (value.length < 3) {
@@ -119,14 +119,14 @@ function NestedFocusTrap(): React.ReactElement {
     <FocusTrap>
       <div data-testid="outer-trap">
         <Button data-testid="outer-btn-1">Outer 1</Button>
-        <Button onClick={() => setShowInner(true)} data-testid="show-inner">
+        <Button onClick={() => { setShowInner(true); }} data-testid="show-inner">
           Show Inner
         </Button>
         {showInner && (
           <FocusTrap>
             <div data-testid="inner-trap">
               <Button data-testid="inner-btn-1">Inner 1</Button>
-              <Button onClick={() => setShowInner(false)} data-testid="close-inner">
+              <Button onClick={() => { setShowInner(false); }} data-testid="close-inner">
                 Close
               </Button>
             </div>
@@ -535,7 +535,7 @@ describe('FocusManagement Integration Tests', () => {
       expect(screen.getByTestId('disabled-button')).not.toHaveFocus();
     });
 
-    it('allows programmatic focus on tabindex=-1', async () => {
+    it('allows programmatic focus on tabindex=-1', () => {
       render(<FocusableElementsList />);
 
       const element = screen.getByTestId('tabindex-neg');
@@ -579,7 +579,7 @@ describe('FocusManagement Integration Tests', () => {
 
       return (
         <div>
-          <Button onClick={() => setShowField(true)} data-testid="add-field">
+          <Button onClick={() => { setShowField(true); }} data-testid="add-field">
             Add Field
           </Button>
           {showField && <Input ref={newFieldRef} data-testid="new-field" placeholder="New field" />}

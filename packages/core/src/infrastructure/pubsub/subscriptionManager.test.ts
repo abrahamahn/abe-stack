@@ -1,4 +1,5 @@
 // packages/core/src/infrastructure/pubsub/subscriptionManager.test.ts
+/* eslint-disable @typescript-eslint/unbound-method */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { PostgresPubSub } from './postgresPubSub';
 import { SubscriptionManager } from './subscriptionManager';
@@ -122,7 +123,7 @@ describe('SubscriptionManager', () => {
       expect(closedSocket.send).not.toHaveBeenCalled();
     });
 
-    it('should publish with adapter if configured', async () => {
+    it('should publish with adapter if configured', () => {
       const mockAdapter: PostgresPubSub = {
         publish: vi.fn().mockResolvedValue(undefined),
       } as unknown as PostgresPubSub;
@@ -140,7 +141,7 @@ describe('SubscriptionManager', () => {
       expect(mockAdapter.publish as any).toHaveBeenCalledWith(key, 5);
     });
 
-    it('should handle adapter errors gracefully', async () => {
+    it('should handle adapter errors gracefully', () => {
       const mockAdapter: PostgresPubSub = {
         publish: vi.fn().mockRejectedValue(new Error('Adapter error')),
       } as unknown as PostgresPubSub;
@@ -151,7 +152,7 @@ describe('SubscriptionManager', () => {
       manager.subscribe(key, mockSocket);
 
       // Should not throw
-      expect(() => manager.publish(key, 5)).not.toThrow();
+      expect(() => { manager.publish(key, 5); }).not.toThrow();
 
       // Local publish should still work
       expect(mockSocket.send).toHaveBeenCalled();
@@ -190,7 +191,7 @@ describe('SubscriptionManager', () => {
     it('should handle cleanup of non-subscribed socket', () => {
       const socket2 = createMockWebSocket();
 
-      expect(() => manager.cleanup(socket2)).not.toThrow();
+      expect(() => { manager.cleanup(socket2); }).not.toThrow();
     });
   });
 

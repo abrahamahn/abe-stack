@@ -13,7 +13,7 @@ export function StackedLayout({ hero, children }: StackedLayoutProps): ReactElem
   return (
     <div className="stacked-layout">
       <Container size="md">
-        {hero ? <div className="stacked-layout-hero">{hero}</div> : null}
+        {hero !== undefined && hero !== null ? <div className="stacked-layout-hero">{hero}</div> : null}
         <div className="stacked-layout-body">{children}</div>
       </Container>
     </div>

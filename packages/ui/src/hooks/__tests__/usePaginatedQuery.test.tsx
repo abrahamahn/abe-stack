@@ -2,18 +2,18 @@
 /** @vitest-environment jsdom */
 import { QueryCache, QueryCacheProvider } from '@abe-stack/sdk';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import React from 'react';
+
 import { describe, expect, it, vi } from 'vitest';
 
-import { usePaginatedQuery, useOffsetPaginatedQuery } from '../usePaginatedQuery';
+import { useOffsetPaginatedQuery, usePaginatedQuery } from '../usePaginatedQuery';
 
-import type {
-  UsePaginatedQueryOptions,
-  UsePaginatedQueryResult,
-  UseOffsetPaginatedQueryOptions,
-  UseOffsetPaginatedQueryResult,
-} from '../usePaginatedQuery';
 import type { ReactNode } from 'react';
+import type {
+    UseOffsetPaginatedQueryOptions,
+    UseOffsetPaginatedQueryResult,
+    UsePaginatedQueryOptions,
+    UsePaginatedQueryResult,
+} from '../usePaginatedQuery';
 
 const createWrapper = () => {
   const queryCache = new QueryCache({
@@ -40,7 +40,7 @@ describe('usePaginatedQuery', () => {
     it('should have correct type definitions for UsePaginatedQueryOptions', () => {
       const options: UsePaginatedQueryOptions<{ id: string }> = {
         queryKey: ['test'],
-        queryFn: async () => ({
+        queryFn: () => Promise.resolve({
           data: [{ id: '1' }],
           nextCursor: null,
           hasNext: false,
@@ -85,7 +85,7 @@ describe('usePaginatedQuery', () => {
     it('should have correct type definitions for UseOffsetPaginatedQueryOptions', () => {
       const options: UseOffsetPaginatedQueryOptions<{ id: string }> = {
         queryKey: ['test'],
-        queryFn: async () => ({
+        queryFn: () => Promise.resolve({
           data: [{ id: '1' }],
           page: 1,
           limit: 10,
@@ -281,7 +281,7 @@ describe('usePaginatedQuery', () => {
 
       expect(typeof result.current.refetch).toBe('function');
 
-      await act(async () => {
+      act(() => {
         result.current.refetch();
       });
 

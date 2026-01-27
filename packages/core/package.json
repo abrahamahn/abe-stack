@@ -1,6 +1,7 @@
 {
   "name": "@abe-stack/core",
   "version": "1.1.0",
+  "type": "module",
   "description": "API contracts, shared types, and validation schemas for abe-stack",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -110,8 +111,9 @@
   "scripts": {
     "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "type-check": "tsc --project tsconfig.json --noEmit",
-    "test": "vitest run --project core"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run --project core",
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-core --report-unused-disable-directives"
   },
   "keywords": [
     "abe-stack",

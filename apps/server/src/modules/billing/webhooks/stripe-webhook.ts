@@ -171,7 +171,7 @@ async function handleSubscriptionCreated(
     'stripe',
     customerId,
   );
-  if (!customerMapping) {
+  if (customerMapping === null) {
     log.warn({ customerId }, 'No customer mapping found for Stripe customer');
     return;
   }
@@ -184,7 +184,7 @@ async function handleSubscriptionCreated(
   }
 
   const plan = await repos.plans.findById(planId);
-  if (!plan) {
+  if (plan === null) {
     log.warn({ planId }, 'Plan not found');
     return;
   }
@@ -233,7 +233,7 @@ async function handleSubscriptionUpdated(
     'stripe',
     subscriptionId,
   );
-  if (!subscription) {
+  if (subscription === null) {
     log.warn({ subscriptionId }, 'Subscription not found');
     return;
   }
@@ -282,7 +282,7 @@ async function handleSubscriptionCanceled(
     'stripe',
     subscriptionId,
   );
-  if (!subscription) {
+  if (subscription === null) {
     log.warn({ subscriptionId }, 'Subscription not found');
     return;
   }
@@ -316,7 +316,7 @@ async function handleInvoicePaid(
     'stripe',
     customerId,
   );
-  if (!customerMapping) {
+  if (customerMapping === null) {
     log.warn({ customerId }, 'No customer mapping found for Stripe customer');
     return;
   }
@@ -393,7 +393,7 @@ async function handleInvoicePaymentFailed(
     'stripe',
     subscriptionId,
   );
-  if (!subscription) {
+  if (subscription === null) {
     log.warn({ subscriptionId }, 'Subscription not found');
     return;
   }

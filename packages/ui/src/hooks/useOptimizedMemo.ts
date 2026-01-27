@@ -18,7 +18,7 @@
  * @packageDocumentation
  */
 
-import { useCallback, useRef, useState, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 // ============================================================================
 // Deep Comparison Utilities
@@ -507,7 +507,7 @@ export class LRUCache<T> {
     } else if (this.cache.size >= this.maxSize) {
       // Remove least recently used (first item)
       const firstKeyResult = this.cache.keys().next();
-      if (!firstKeyResult.done) {
+      if (firstKeyResult.done !== true) {
         this.cache.delete(firstKeyResult.value);
       }
     }
@@ -616,9 +616,7 @@ export function useTTLCache<T>(defaultTTL?: number): TTLCache<T> {
 export function useLRUCache<T>(maxSize: number): LRUCache<T> {
   const cacheRef = useRef<LRUCache<T> | undefined>(undefined);
 
-  if (cacheRef.current === undefined) {
-    cacheRef.current = new LRUCache<T>(maxSize);
-  }
+    cacheRef.current ??= new LRUCache<T>(maxSize);
 
   return cacheRef.current;
 }

@@ -1,11 +1,13 @@
 {
   "name": "@abe-stack/media",
   "version": "1.0.0",
+  "type": "module",
   "description": "Media processing utilities for abe-stack (server-only)",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
   },
   "dependencies": {
     "sharp": "^0.33.2"
@@ -13,8 +15,9 @@
   "scripts": {
     "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
-    "type-check": "tsc --project tsconfig.json --noEmit",
-    "test": "vitest run --project media"
+    "type-check": "tsc --noEmit",
+    "test": "vitest run --project media",
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-media --report-unused-disable-directives"
   },
   "keywords": [
     "abe-stack",

@@ -1,4 +1,5 @@
 // packages/core/src/config/env.schema.ts
+/* eslint-disable @typescript-eslint/no-deprecated */
 import { z } from 'zod';
 
 /**

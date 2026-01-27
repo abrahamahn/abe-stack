@@ -63,7 +63,7 @@ function EmailVerification({
 
   return (
     <div data-testid="email-verification">
-      {error && <div data-testid="error">{error}</div>}
+      {error !== null && <div data-testid="error">{error}</div>}
       {emailSent && <div data-testid="success">Email sent!</div>}
 
       <Button onClick={handleSend} disabled={isLoading || isOnCooldown} data-testid="send-btn">
@@ -104,10 +104,10 @@ function DropdownWithClickOutside({
       </Button>
       {open && (
         <div data-testid="dropdown-menu" role="menu">
-          <button role="menuitem" onClick={() => handleSelect('option1')}>
+          <button role="menuitem" onClick={() => { handleSelect('option1'); }}>
             Option 1
           </button>
-          <button role="menuitem" onClick={() => handleSelect('option2')}>
+          <button role="menuitem" onClick={() => { handleSelect('option2'); }}>
             Option 2
           </button>
         </div>
@@ -138,7 +138,7 @@ function DebouncedSearch({
   const debouncedQuery = useDebounce(query, 300);
 
   useEffect(() => {
-    if (debouncedQuery) {
+    if (debouncedQuery !== undefined && debouncedQuery !== '') {
       onSearch(debouncedQuery);
     }
   }, [debouncedQuery, onSearch]);
@@ -147,7 +147,7 @@ function DebouncedSearch({
     <div data-testid="debounced-search">
       <Input
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => { setQuery(e.target.value); }}
         placeholder="Search..."
         data-testid="search-input"
       />
@@ -164,10 +164,10 @@ function KeyboardModal(): React.ReactElement {
   const { open, openFn, close, toggle } = useDisclosure({ defaultOpen: false });
 
   // Open modal with Ctrl+K
-  useKeyboardShortcut('ctrl+k', openFn);
+  useKeyboardShortcut({ key: 'k', ctrl: true, handler: openFn });
 
   // Close modal with Escape (handled internally)
-  useKeyboardShortcut('escape', close);
+  useKeyboardShortcut({ key: 'Escape', handler: close });
 
   return (
     <div data-testid="keyboard-modal">
@@ -240,17 +240,17 @@ function MultiStateForm({
       },
     });
 
-    void wrappedSubmit({ name, email });
+    void wrappedSubmit({ name: name ?? '', email: email ?? '' });
   };
 
   return (
     <form onSubmit={handleSubmit} data-testid="multi-state-form">
-      {error && <div data-testid="form-error">{error}</div>}
+      {error !== null && <div data-testid="form-error">{error}</div>}
       {submitted && <div data-testid="success-message">Form submitted!</div>}
 
       <Input
         value={name}
-        onChange={(e) => setName(e.target.value)}
+        onChange={(e) => { setName(e.target.value); }}
         placeholder="Name"
         data-testid="name-input"
         disabled={isLoading}
@@ -259,7 +259,7 @@ function MultiStateForm({
 
       <Input
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        onChange={(e) => { setEmail(e.target.value); }}
         placeholder="Email"
         type="email"
         data-testid="email-input"

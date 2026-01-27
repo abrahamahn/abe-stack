@@ -67,7 +67,7 @@ export class VideoProcessor {
    * Lazy load ffmpeg module
    */
   private async getFfmpeg(): Promise<FfmpegModule> {
-    if (!this.ffmpegModule) {
+    if (this.ffmpegModule === null) {
       const ffmpegStaticModule = (await import('ffmpeg-static')) as { default: string };
       const ffmpegModule = (await import('fluent-ffmpeg')) as unknown as FfmpegModule;
       this.ffmpegModule = ffmpegModule;
@@ -89,7 +89,7 @@ export class VideoProcessor {
 
       // Generate thumbnail if specified
       let thumbnailPath: string | undefined;
-      if (options.thumbnail) {
+      if (options.thumbnail !== undefined) {
         thumbnailPath = outputPath.replace(/(\.[^.]+)$/, '_thumb.jpg');
         // Thumbnail generation would be implemented here
       }
@@ -124,7 +124,7 @@ export class VideoProcessor {
     return new Promise((resolve, reject) => {
       let command = ffmpegModule.default(inputPath);
 
-      if (options.format) {
+      if (options.format !== undefined) {
         switch (options.format) {
           case 'mp4':
             command = command.videoCodec('libx264').toFormat('mp4');
@@ -141,13 +141,13 @@ export class VideoProcessor {
         }
       }
 
-      if (options.resolution) {
+      if (options.resolution !== undefined) {
         command = command.size(
           `${String(options.resolution.width)}x${String(options.resolution.height)}`,
         );
       }
 
-      if (options.bitrate != null && options.bitrate !== '') {
+      if (options.bitrate !== undefined && options.bitrate !== null && options.bitrate !== '') {
         command = command.videoBitrate(options.bitrate);
       }
 
@@ -170,7 +170,7 @@ export class VideoProcessor {
 
     return new Promise((resolve) => {
       ffmpegModule.ffprobe(inputPath, (err: Error | null, data: FfprobeData) => {
-        if (err) {
+        if (err !== null) {
           resolve({});
           return;
         }
@@ -182,10 +182,10 @@ export class VideoProcessor {
           duration: data.format.duration,
           width: videoStream?.width,
           height: videoStream?.height,
-          bitrate: data.format.bit_rate != null && data.format.bit_rate !== '' ? parseInt(data.format.bit_rate, 10) : undefined,
+          bitrate: data.format.bit_rate !== undefined && data.format.bit_rate !== null && data.format.bit_rate !== '' ? parseInt(data.format.bit_rate, 10) : undefined,
           codec: videoStream?.codec_name,
           channels: audioStream?.channels,
-          sampleRate: audioStream?.sample_rate != null && audioStream.sample_rate !== '' ? parseInt(audioStream.sample_rate, 10) : undefined,
+          sampleRate: audioStream?.sample_rate !== undefined && audioStream?.sample_rate !== null && audioStream.sample_rate !== '' ? parseInt(audioStream.sample_rate, 10) : undefined,
         });
       });
     });

@@ -1,7 +1,7 @@
 // packages/sdk/src/undo/__tests__/UndoRedoStack.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
-import { UndoRedoStack, createUndoRedoStack } from '../UndoRedoStack';
+import { UndoRedoStack, createUndoRedoStack } from '../UndoRedoStack.js';
 
 interface TestOperation {
   type: 'add' | 'remove' | 'update';

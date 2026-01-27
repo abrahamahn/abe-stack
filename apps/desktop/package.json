@@ -14,7 +14,8 @@
     "start": "electron --disable-features=SystemdIntegration dist/electron/main.js",
     "package": "electron-builder",
     "type-check": "tsc --noEmit",
-    "test": "vitest run --config ../../vitest.config.ts --project desktop"
+    "test": "vitest run --config ../../vitest.config.ts --project desktop",
+    "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-desktop --report-unused-disable-directives"
   },
   "dependencies": {
     "@abe-stack/core": "workspace:*",

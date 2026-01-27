@@ -39,7 +39,7 @@ export function useDisclosure({ open, defaultOpen = false, onChange }: UseDisclo
     setOpen(false);
   }, [setOpen]);
   const toggle = useCallback((): void => {
-    setOpen(!openState);
+    setOpen(!(openState ?? false));
   }, [openState, setOpen]);
 
   return {

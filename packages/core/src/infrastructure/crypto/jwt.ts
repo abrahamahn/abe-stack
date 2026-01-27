@@ -76,7 +76,7 @@ function parseExpiration(exp: string | number): number {
   if (typeof exp === 'number') return exp;
 
   const match = exp.match(/^(\d+)([smhd])$/);
-  if (!match || !match[1] || !match[2]) {
+  if (match?.[1] === undefined || match[2] === undefined) {
     throw new JwtError(`Invalid expiration format: ${exp}`, 'INVALID_TOKEN');
   }
 
@@ -118,7 +118,7 @@ export function sign(payload: object, secret: string, options?: SignOptions): st
   };
 
   // Add expiration if specified
-  if (options?.expiresIn) {
+  if (options?.expiresIn !== undefined) {
     const expiresInSeconds = parseExpiration(options.expiresIn);
     tokenPayload.exp = now + expiresInSeconds;
   }
@@ -152,7 +152,14 @@ export function verify(token: string, secret: string): JwtPayload {
 
   const [encodedHeader, encodedPayload, signature] = parts;
 
-  if (!encodedHeader || !encodedPayload || !signature) {
+  if (
+    encodedHeader === undefined ||
+    encodedHeader === '' ||
+    encodedPayload === undefined ||
+    encodedPayload === '' ||
+    signature === undefined ||
+    signature === ''
+  ) {
     throw new JwtError('Invalid token format', 'MALFORMED_TOKEN');
   }
 
@@ -166,7 +173,8 @@ export function verify(token: string, secret: string): JwtPayload {
   }
 
   if (
-    !header ||
+    header === null ||
+    header === undefined ||
     typeof header !== 'object' ||
     (header as Record<string, unknown>).alg !== 'HS256' ||
     (header as Record<string, unknown>).typ !== 'JWT'
@@ -218,7 +226,7 @@ export function decode(token: string): JwtPayload | null {
   try {
     const parts = token.split('.');
     const encodedPayload = parts[1];
-    if (parts.length !== 3 || !encodedPayload) return null;
+    if (parts.length !== 3 || encodedPayload === undefined || encodedPayload === '') return null;
 
     const payload = JSON.parse(base64UrlDecode(encodedPayload)) as JwtPayload;
     return payload;
@@ -256,7 +264,7 @@ export function jwtDecode(token: string): JwtPayload | null {
  * Check if a token secret meets minimum requirements
  */
 export function checkTokenSecret(secret: string): boolean {
-  if (!secret || typeof secret !== 'string' || secret.length === 0) {
+  if (secret === '') {
     return false;
   }
   // Additional validation could be added here
@@ -289,7 +297,7 @@ export function verifyWithRotation(token: string, config: JwtRotationConfig): Jw
     return jwtVerify(token, config.currentSecret);
   } catch (error) {
     // If that fails and a previous secret is provided, try with that
-    if (config.previousSecret) {
+    if (config.previousSecret !== undefined && config.previousSecret !== '') {
       return jwtVerify(token, config.previousSecret);
     }
     // If no previous secret or verification still fails, rethrow the error

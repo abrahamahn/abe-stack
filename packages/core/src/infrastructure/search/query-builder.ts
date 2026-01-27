@@ -7,20 +7,20 @@
  */
 
 import {
-  FILTER_OPERATORS,
-  LOGICAL_OPERATORS,
-  SORT_ORDER,
-  type CompoundFilter,
-  type FacetConfig,
-  type FacetedSearchQuery,
-  type FilterCondition,
-  type FilterOperator,
-  type FilterPrimitive,
-  type FilterValue,
-  type FullTextSearchConfig,
-  type SearchQuery,
-  type SortConfig,
-  type SortOrder,
+    FILTER_OPERATORS,
+    LOGICAL_OPERATORS,
+    SORT_ORDER,
+    type CompoundFilter,
+    type FacetConfig,
+    type FacetedSearchQuery,
+    type FilterCondition,
+    type FilterOperator,
+    type FilterPrimitive,
+    type FilterValue,
+    type FullTextSearchConfig,
+    type SearchQuery,
+    type SortConfig,
+    type SortOrder,
 } from './types';
 
 // ============================================================================
@@ -431,9 +431,7 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
    * Add a facet configuration.
    */
   facet(field: string, options?: Omit<FacetConfig, 'field'>): this {
-    if (!this._facets) {
-      this._facets = [];
-    }
+    this._facets ??= [];
     this._facets.push({ field, ...options });
     return this;
   }
@@ -472,15 +470,15 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
       query.sort = this._sort;
     }
 
-    if (this._search) {
+    if (this._search !== undefined) {
       query.search = this._search;
     }
 
-    if (this._cursor) {
+    if (this._cursor !== undefined) {
       query.cursor = this._cursor;
     }
 
-    if (this._select) {
+    if (this._select !== undefined) {
       query.select = this._select;
     }
 
@@ -497,7 +495,7 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
   buildFaceted(): FacetedSearchQuery<T> {
     const query = this.build() as FacetedSearchQuery<T>;
 
-    if (this._facets) {
+    if (this._facets !== undefined) {
       query.facets = this._facets;
     }
 
@@ -511,13 +509,13 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
     const cloned = new SearchQueryBuilder<T>();
     cloned._filters = [...this._filters];
     cloned._sort = [...this._sort];
-    cloned._search = this._search ? { ...this._search } : undefined;
+    cloned._search = this._search !== undefined ? { ...this._search } : undefined;
     cloned._page = this._page;
     cloned._limit = this._limit;
     cloned._cursor = this._cursor;
-    cloned._select = this._select ? [...this._select] : undefined;
+    cloned._select = this._select !== undefined ? [...this._select] : undefined;
     cloned._includeCount = this._includeCount;
-    cloned._facets = this._facets ? [...this._facets] : undefined;
+    cloned._facets = this._facets !== undefined ? [...this._facets] : undefined;
     return cloned;
   }
 
@@ -566,32 +564,32 @@ export function fromSearchQuery<T = Record<string, unknown>>(
 ): SearchQueryBuilder<T> {
   const builder = new SearchQueryBuilder<T>();
 
-  if (query.filters) {
+  if (query.filters !== undefined) {
     // Add filters directly to the builder's internal array
     builder['_filters'] = [query.filters];
   }
 
-  if (query.sort) {
+  if (query.sort !== undefined) {
     builder['_sort'] = [...query.sort];
   }
 
-  if (query.search) {
+  if (query.search !== undefined) {
     builder['_search'] = { ...query.search };
   }
 
-  if (query.page) {
+  if (query.page !== undefined) {
     builder['_page'] = query.page;
   }
 
-  if (query.limit) {
+  if (query.limit !== undefined) {
     builder['_limit'] = query.limit;
   }
 
-  if (query.cursor) {
+  if (query.cursor !== undefined) {
     builder['_cursor'] = query.cursor;
   }
 
-  if (query.select) {
+  if (query.select !== undefined) {
     builder['_select'] = [...query.select];
   }
 

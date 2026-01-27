@@ -37,7 +37,7 @@ export class CacheService {
   get<T>(key: string, defaultValue?: T): T | null {
     const item = this.cache.get(key);
 
-    if (!item) {
+    if (item === undefined) {
       return defaultValue ?? null;
     }
 
@@ -79,7 +79,7 @@ export class CacheService {
 
   has(key: string): boolean {
     const item = this.cache.get(key);
-    if (!item) {
+    if (item === undefined) {
       return false;
     }
 

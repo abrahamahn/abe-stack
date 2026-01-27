@@ -7,15 +7,15 @@
  */
 
 import {
-  FILTER_OPERATORS,
-  LOGICAL_OPERATORS,
-  isCompoundFilter,
-  isFilterCondition,
-  type CompoundFilter,
-  type FilterCondition,
-  type FilterOperator,
-  type FilterPrimitive,
-  type FilterValue,
+    FILTER_OPERATORS,
+    LOGICAL_OPERATORS,
+    isCompoundFilter,
+    isFilterCondition,
+    type CompoundFilter,
+    type FilterCondition,
+    type FilterOperator,
+    type FilterPrimitive,
+    type FilterValue,
 } from './types';
 
 // ============================================================================
@@ -468,7 +468,7 @@ export function filterArray<T extends Record<string, unknown>>(
   items: T[],
   filter: FilterCondition<T> | CompoundFilter<T> | undefined,
 ): T[] {
-  if (!filter) {
+  if (filter === undefined) {
     return items;
   }
 

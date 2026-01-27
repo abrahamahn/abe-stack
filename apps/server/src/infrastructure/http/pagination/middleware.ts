@@ -160,7 +160,7 @@ function parseSortBy(
   const sortBy = Array.isArray(sortByParam) ? (sortByParam[0] ?? '') : sortByParam;
 
   // Basic validation - should be a non-empty string
-  if (!sortBy.trim()) {
+  if (sortBy.trim() === '') {
     throw new PaginationError(
       PAGINATION_ERROR_TYPES.INVALID_SORT_FIELD,
       'Invalid sortBy parameter: cannot be empty.',

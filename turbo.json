@@ -24,6 +24,7 @@
       "cache": true
     },
     "type-check": {
+      "dependsOn": ["^build"],
       "inputs": ["**/*.ts", "**/*.tsx", "tsconfig.json", "tsconfig.*.json"],
       "cache": true
     },
@@ -45,6 +46,8 @@
     "tsconfig.json",
     ".config/env/.env.*",
     ".prettierrc",
-    "eslint.config.ts"
+    "eslint.config.ts",
+    ".config/.editorconfig",
+    ".pnpmrc"
   ]
 }

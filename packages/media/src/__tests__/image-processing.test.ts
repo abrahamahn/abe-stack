@@ -802,19 +802,16 @@ describe('Image Processing', () => {
     });
 
     test('should handle null/undefined input', async () => {
-      // @ts-expect-error - Testing invalid input
       await expect(validateImage(null)).resolves.toEqual(
         expect.objectContaining({ isValid: false }),
       );
 
-      // @ts-expect-error - Testing invalid input
       await expect(validateImage(undefined)).resolves.toEqual(
         expect.objectContaining({ isValid: false }),
       );
     });
 
     test('should handle non-buffer input', async () => {
-      // @ts-expect-error - Testing invalid input
       await expect(validateImage('not-a-buffer')).resolves.toEqual(
         expect.objectContaining({ isValid: false }),
       );

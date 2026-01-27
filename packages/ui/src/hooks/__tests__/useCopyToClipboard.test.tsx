@@ -12,7 +12,7 @@ function CopyHarness(): ReactElement {
   return (
     <div>
       <span data-testid="copied">{String(copied)}</span>
-      <span data-testid="error">{error ? error.message : ''}</span>
+      <span data-testid="error">{error != null ? error.message : ''}</span>
       <button
         type="button"
         onClick={() => {

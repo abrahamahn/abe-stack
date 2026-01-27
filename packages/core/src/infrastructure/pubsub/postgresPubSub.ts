@@ -110,12 +110,12 @@ export class PostgresPubSub {
     if (!this.isListening) return;
 
     try {
-      if (this.listenClient) {
+      if (this.listenClient !== null) {
         await this.listenClient.end({ timeout: 5 });
         this.listenClient = null;
       }
 
-      if (this.notifyClient) {
+      if (this.notifyClient !== null) {
         await this.notifyClient.end({ timeout: 5 });
         this.notifyClient = null;
       }
@@ -134,7 +134,7 @@ export class PostgresPubSub {
    * Publish a message to all instances via NOTIFY
    */
   async publish(key: SubscriptionKey, version: number): Promise<void> {
-    if (!this.notifyClient) {
+    if (this.notifyClient === null) {
       throw new Error('PostgresPubSub not started');
     }
 

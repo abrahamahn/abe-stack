@@ -19,7 +19,7 @@ export function useOnScreen<T extends HTMLElement>(
 
   useEffect((): (() => void) | undefined => {
     const element = ref.current;
-    if (!element || typeof IntersectionObserver === 'undefined') {
+    if (element === null || typeof IntersectionObserver === 'undefined') {
       return;
     }
 

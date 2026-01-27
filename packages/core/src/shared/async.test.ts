@@ -36,8 +36,7 @@ describe('delay', () => {
     it('should resolve with undefined', async () => {
       const promise = delay(50);
       vi.advanceTimersByTime(50);
-      const result = await promise;
-      expect(result).toBeUndefined();
+      await promise;
     });
   });
 

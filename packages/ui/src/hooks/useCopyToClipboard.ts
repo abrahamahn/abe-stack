@@ -20,7 +20,7 @@ export function useCopyToClipboard(): CopyToClipboardResult {
 
   useEffect(() => {
     return (): void => {
-      if (timeoutRef.current) {
+      if (timeoutRef.current !== null) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
       }
@@ -28,7 +28,7 @@ export function useCopyToClipboard(): CopyToClipboardResult {
   }, []);
 
   const copy = async (text: string): Promise<void> => {
-    if (typeof navigator === 'undefined' || typeof navigator.clipboard === 'undefined') {
+    if (typeof navigator === 'undefined' || !('clipboard' in navigator)) {
       const clipboardError = new Error('Clipboard API not available');
       setError(clipboardError);
       return;
@@ -40,7 +40,7 @@ export function useCopyToClipboard(): CopyToClipboardResult {
       setError(null);
 
       // Reset copied state after 2 seconds
-      if (timeoutRef.current) {
+      if (timeoutRef.current !== null) {
         clearTimeout(timeoutRef.current);
       }
       timeoutRef.current = setTimeout((): void => {

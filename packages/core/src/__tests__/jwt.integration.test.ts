@@ -149,7 +149,7 @@ describe('JWT Integration', () => {
       const payload = JSON.parse(Buffer.from(parts[1]!, 'base64url').toString());
       payload.role = 'admin';
       const tamperedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
-      const tamperedToken = `${parts[0]}.${tamperedPayload}.${parts[2]}`;
+      const tamperedToken = `${parts[0]!}.${tamperedPayload}.${parts[2]!}`;
 
       expect(() => verify(tamperedToken, SECRET)).toThrow('Invalid signature');
     });
@@ -162,7 +162,7 @@ describe('JWT Integration', () => {
       const header = JSON.parse(Buffer.from(parts[0]!, 'base64url').toString());
       header.alg = 'none';
       const tamperedHeader = Buffer.from(JSON.stringify(header)).toString('base64url');
-      const tamperedToken = `${tamperedHeader}.${parts[1]}.${parts[2]}`;
+      const tamperedToken = `${tamperedHeader}.${parts[1]!}.${parts[2]!}`;
 
       expect(() => verify(tamperedToken, SECRET)).toThrow('Algorithm not supported');
     });
@@ -174,7 +174,7 @@ describe('JWT Integration', () => {
       const parts = token.split('.');
       const tamperedSig =
         parts[2]!.slice(0, -1) + (parts[2]![parts[2]!.length - 1] === 'a' ? 'b' : 'a');
-      const tamperedToken = `${parts[0]}.${parts[1]}.${tamperedSig}`;
+      const tamperedToken = `${parts[0]!}.${parts[1]!}.${tamperedSig}`;
 
       expect(() => verify(tamperedToken, SECRET)).toThrow('Invalid signature');
     });

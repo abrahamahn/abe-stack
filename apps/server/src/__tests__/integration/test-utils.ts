@@ -7,13 +7,13 @@
  */
 
 import {
-  applyCors,
-  applySecurityHeaders,
-  registerCookies,
-  registerCorrelationIdHook,
-  registerCsrf,
-  registerPrototypePollutionProtection,
-  registerRequestInfoHook,
+    applyCors,
+    applySecurityHeaders,
+    registerCookies,
+    registerCorrelationIdHook,
+    registerCsrf,
+    registerPrototypePollutionProtection,
+    registerRequestInfoHook,
 } from '@http/index';
 import { RateLimiter } from '@rate-limit/index';
 import Fastify from 'fastify';
@@ -301,11 +301,11 @@ export async function getCsrfToken(server: FastifyInstance): Promise<CsrfTokenPa
   const cookies = response.headers['set-cookie'];
   const csrfCookie = Array.isArray(cookies)
     ? cookies.find((c) => c.startsWith('_csrf='))
-    : cookies?.startsWith('_csrf=')
+    : (cookies !== undefined && cookies.startsWith('_csrf='))
       ? cookies
       : undefined;
 
-  if (!csrfCookie) {
+  if (csrfCookie === undefined) {
     throw new Error('CSRF cookie not set');
   }
 
@@ -406,7 +406,7 @@ export async function createTestServer(options: TestServerOptions = {}): Promise
       return;
     }
 
-    if (limiter) {
+    if (limiter !== null) {
       const rateLimitInfo = await limiter.check(req.ip);
       res.header('X-RateLimit-Limit', String(rateLimitInfo.limit));
       res.header('X-RateLimit-Remaining', String(rateLimitInfo.remaining));
@@ -477,7 +477,7 @@ export async function createTestServer(options: TestServerOptions = {}): Promise
       return server.inject(opts);
     },
     close: async () => {
-      if (limiter) {
+      if (limiter !== null) {
         await limiter.destroy();
       }
       await server.close();
@@ -509,7 +509,7 @@ export function getResponseCookie(
   name: string,
 ): string | undefined {
   const cookies = response.headers['set-cookie'];
-  if (!cookies) return undefined;
+  if (cookies === undefined) return undefined;
 
   const cookieArray = Array.isArray(cookies) ? cookies : [cookies];
   const targetCookie = cookieArray.find((c) => c.startsWith(`${name}=`));
@@ -519,7 +519,7 @@ export function getResponseCookie(
 
 export function getAllCookies(response: LightMyRequestResponse): string[] {
   const cookies = response.headers['set-cookie'];
-  if (!cookies) return [];
+  if (cookies === undefined) return [];
   return Array.isArray(cookies) ? cookies : [cookies];
 }
 
@@ -541,17 +541,17 @@ export function buildAuthenticatedRequest(options: AuthenticatedRequestOptions):
   const cookieParts: string[] = [];
 
   // Add authorization header
-  if (accessToken) {
+  if (accessToken !== undefined) {
     allHeaders['authorization'] = `Bearer ${accessToken}`;
   }
 
   // Add CSRF token header
-  if (csrfToken) {
+  if (csrfToken !== undefined) {
     allHeaders['x-csrf-token'] = csrfToken;
   }
 
   // Add CSRF cookie
-  if (csrfCookie) {
+  if (csrfCookie !== undefined) {
     cookieParts.push(csrfCookie);
   }
 

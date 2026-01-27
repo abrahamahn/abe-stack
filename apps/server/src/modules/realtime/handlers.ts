@@ -109,7 +109,7 @@ export async function handleWrite(
 
       // 2. Verify all records exist
       for (const pointer of pointers) {
-        if (!originalRecordMap[pointer.table]?.[pointer.id]) {
+        if (originalRecordMap[pointer.table]?.[pointer.id] === undefined) {
           throw new RecordNotFoundError(pointer.table, pointer.id);
         }
       }

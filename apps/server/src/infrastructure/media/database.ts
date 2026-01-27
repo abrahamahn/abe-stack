@@ -98,7 +98,7 @@ export class InMemoryMediaDatabase implements MediaDatabaseAdapter {
   getPendingFiles(limit: number = 50): Promise<MediaProcessingRecord[]> {
     const pending: MediaProcessingRecord[] = [];
     for (const record of this.records.values()) {
-      if (record.storageKey == null || record.storageKey === '') {
+      if (record.storageKey === undefined || record.storageKey === null || record.storageKey === '') {
         pending.push(record);
         if (pending.length >= limit) break;
       }
@@ -115,7 +115,7 @@ export class InMemoryMediaDatabase implements MediaDatabaseAdapter {
     let files: MediaProcessingRecord[] = [];
     for (const record of this.records.values()) {
       if (record.ownerId === userId) {
-        if (contentType == null || contentType === '' || (record.contentType?.startsWith(contentType) ?? false)) {
+        if (contentType === undefined || contentType === null || contentType === '' || (record.contentType?.startsWith(contentType) ?? false)) {
           files.push(record);
         }
       }
@@ -134,10 +134,10 @@ export class InMemoryMediaDatabase implements MediaDatabaseAdapter {
 
     for (const record of this.records.values()) {
       totalFiles++;
-      if (record.storageKey != null && record.storageKey !== '') {
+      if (record.storageKey !== undefined && record.storageKey !== null && record.storageKey !== '') {
         processedFiles++;
       }
-      if (record.size != null && record.size > 0) {
+      if (record.size !== undefined && record.size !== null && record.size > 0) {
         storageUsed += record.size;
       }
     }
@@ -168,7 +168,7 @@ export class InMemoryMediaDatabase implements MediaDatabaseAdapter {
   getFileById(fileId: string, userId?: string): Promise<MediaProcessingRecord | null> {
     const record = this.records.get(fileId);
     if (!record) return Promise.resolve(null);
-    if (userId != null && userId !== '' && record.ownerId !== userId) return Promise.resolve(null);
+    if (userId !== undefined && userId !== null && userId !== '' && record.ownerId !== userId) return Promise.resolve(null);
     return Promise.resolve(record);
   }
 

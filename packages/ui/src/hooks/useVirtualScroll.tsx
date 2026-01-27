@@ -103,7 +103,7 @@ export function useVirtualScroll(
   // Set up scroll listener
   useEffect(() => {
     const container = containerRef.current;
-    if (container) {
+    if (container !== null) {
       container.addEventListener('scroll', handleScroll, { passive: true });
       return (): void => {
         container.removeEventListener('scroll', handleScroll);

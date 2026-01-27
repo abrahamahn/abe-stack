@@ -12,8 +12,8 @@
  * - Error serialization for debugging
  */
 
-import type { QueueConfig, QueueStore, Task, TaskError, TaskHandler, TaskHandlers } from './types';
 import type { Logger } from '@logger';
+import type { QueueConfig, QueueStore, Task, TaskError, TaskHandler, TaskHandlers } from './types';
 
 // ============================================================================
 // Constants
@@ -83,12 +83,12 @@ export class QueueServer {
     this.log?.info('Queue server stopping...');
 
     // Abort any pending sleep
-    if (this.sleepAbortController) {
+    if (this.sleepAbortController !== null) {
       this.sleepAbortController.abort();
       this.sleepAbortController = null;
     }
 
-    if (this.stopPromise) {
+    if (this.stopPromise !== null) {
       await this.stopPromise;
     }
 
@@ -143,7 +143,7 @@ export class QueueServer {
         const now = new Date().toISOString();
         const task = await this.store.dequeue(now);
 
-        if (task) {
+        if (task !== null) {
           await this.processTask(task);
         } else {
           // No tasks available, wait before polling again
@@ -163,7 +163,7 @@ export class QueueServer {
     const handler = this.handlers[task.name] as TaskHandler | undefined;
     const startTime = Date.now();
 
-    if (!handler) {
+    if (handler === undefined) {
       this.log?.error(`No handler for task: ${task.name}`, { taskId: task.id });
       await this.store.fail(task.id, {
         name: 'UnknownTaskError',

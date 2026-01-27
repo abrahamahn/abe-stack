@@ -63,7 +63,7 @@ function createCacheStorageSystem(): {
     table: T,
     record: TestTables[T],
   ): Promise<boolean> => {
-    return storage.setRecord(table as TestTableNames, record);
+    return storage.setRecord(table as TestTableNames, record as any);
   };
 
   const loadFromStorage = async <T extends keyof TestTables & string>(
@@ -71,7 +71,7 @@ function createCacheStorageSystem(): {
     id: string,
   ): Promise<TestTables[T] | undefined> => {
     await storage.ready();
-    const record = await storage.getRecord<TestTables[T]>({ table: table as TestTableNames, id });
+    const record = await storage.getRecord<TestTables[T]>({ table: table as TestTableNames, id }) as TestTables[T] | undefined;
     if (record) {
       cache.set(table, id, record);
     }
@@ -244,7 +244,7 @@ describe('RecordCache + RecordStorage Integration', () => {
       await syncToStorage('user', user);
 
       // Optimistic update
-      const _rollback = cache.optimisticUpdate('user', 'u1', { name: 'Alice Updated' });
+      cache.optimisticUpdate('user', 'u1', { name: 'Alice Updated' });
       expect(cache.get('user', 'u1')?.name).toBe('Alice Updated');
 
       // Server confirms with new version
@@ -254,7 +254,7 @@ describe('RecordCache + RecordStorage Integration', () => {
         name: 'Alice Updated',
         email: 'alice@test.com',
       };
-      cache.set('user', 'u1', confirmedUser, { force: true });
+      (cache as any).set('user', 'u1', confirmedUser as any, { force: true });
       cache.commitOptimisticUpdate('user', 'u1');
 
       await syncToStorage('user', confirmedUser);
@@ -283,7 +283,7 @@ describe('RecordCache + RecordStorage Integration', () => {
 
       const authorId = cachedPost?.authorId;
       if (authorId) {
-        const author = cache.get('user', authorId);
+        const author = (cache as any).get('user', authorId);
         expect(author?.name).toBe('Alice');
       }
 
@@ -310,7 +310,7 @@ describe('RecordCache + RecordStorage Integration', () => {
 
       // Batch sync to storage
       for (const { table, record } of updates) {
-        await storage.setRecord(table as TestTableNames, record as VersionedRecord);
+        await storage.setRecord(table as TestTableNames, record as any);
       }
 
       // Verify counts
@@ -327,7 +327,7 @@ describe('RecordCache + RecordStorage Integration', () => {
   describe('cache listeners with storage sync', () => {
     it('should trigger cache listeners on updates', async () => {
       const listener = vi.fn();
-      cache.subscribe('user', 'u1', listener);
+      (cache as any).subscribe('user', 'u1', listener);
 
       const user: User = { id: 'u1', version: 1, name: 'Alice', email: 'alice@test.com' };
       cache.set('user', user.id, user);

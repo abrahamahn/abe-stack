@@ -47,13 +47,13 @@ interface FormErrors {
 function validateForm(data: FormData): FormErrors {
   const errors: FormErrors = {};
 
-  if (!data.email) {
+  if (data.email === '') {
     errors.email = 'Email is required';
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
     errors.email = 'Invalid email format';
   }
 
-  if (!data.password) {
+  if (data.password === '') {
     errors.password = 'Password is required';
   } else if (data.password.length < 8) {
     errors.password = 'Password must be at least 8 characters';
@@ -63,13 +63,13 @@ function validateForm(data: FormData): FormErrors {
     errors.confirmPassword = 'Passwords do not match';
   }
 
-  if (!data.message) {
+  if (data.message === '') {
     errors.message = 'Message is required';
   } else if (data.message.length < 10) {
     errors.message = 'Message must be at least 10 characters';
   }
 
-  if (!data.country) {
+  if (data.country === '') {
     errors.country = 'Please select a country';
   }
 
@@ -109,15 +109,15 @@ function RegistrationForm({
   const handleChange = (field: keyof FormData, value: string): void => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear field error when user starts typing
-    if (fieldErrors[field]) {
+    if (fieldErrors[field] !== undefined) {
       setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
   return (
     <form onSubmit={handleSubmit} aria-label="Registration form">
-      {error && (
-        <Alert variant="error" data-testid="form-error">
+      {error !== null && (
+        <Alert tone="danger" data-testid="form-error">
           {error}
         </Alert>
       )}
@@ -128,7 +128,7 @@ function RegistrationForm({
           data-testid="email-input"
           type="email"
           value={formData.email}
-          onChange={(e) => handleChange('email', e.target.value)}
+          onChange={(e) => { handleChange('email', e.target.value); }}
           aria-invalid={Boolean(fieldErrors.email)}
           disabled={isLoading}
         />
@@ -140,7 +140,7 @@ function RegistrationForm({
           data-testid="password-input"
           type="password"
           value={formData.password}
-          onChange={(e) => handleChange('password', e.target.value)}
+          onChange={(e) => { handleChange('password', e.target.value); }}
           aria-invalid={Boolean(fieldErrors.password)}
           disabled={isLoading}
         />
@@ -157,7 +157,7 @@ function RegistrationForm({
           data-testid="confirm-password-input"
           type="password"
           value={formData.confirmPassword}
-          onChange={(e) => handleChange('confirmPassword', e.target.value)}
+          onChange={(e) => { handleChange('confirmPassword', e.target.value); }}
           aria-invalid={Boolean(fieldErrors.confirmPassword)}
           disabled={isLoading}
         />
@@ -174,7 +174,7 @@ function RegistrationForm({
           id="message"
           data-testid="message-input"
           value={formData.message}
-          onChange={(e) => handleChange('message', e.target.value)}
+          onChange={(e) => { handleChange('message', e.target.value); }}
           aria-invalid={Boolean(fieldErrors.message)}
           disabled={isLoading}
         />
@@ -185,7 +185,7 @@ function RegistrationForm({
           id="country"
           data-testid="country-select"
           value={formData.country}
-          onChange={(value) => handleChange('country', value)}
+          onChange={(value) => { handleChange('country', value); }}
           disabled={isLoading}
         >
           <option value="">Select a country</option>
@@ -222,8 +222,8 @@ function ResendVerificationForm({
 
   return (
     <div data-testid="resend-form">
-      {error && (
-        <Alert variant="error" data-testid="resend-error">
+      {error !== null && (
+        <Alert tone="danger" data-testid="resend-error">
           {error}
         </Alert>
       )}
@@ -410,7 +410,7 @@ describe('FormComposition Integration Tests', () => {
       });
 
       // Complete submission
-      await act(async () => {
+      act(() => {
         resolveSubmit();
       });
 
@@ -457,7 +457,7 @@ describe('FormComposition Integration Tests', () => {
       });
 
       // Complete submission
-      await act(async () => {
+      act(() => {
         resolveSubmit();
       });
 

@@ -2,14 +2,14 @@
 import { FocusTrap } from '@components/FocusTrap';
 import { Overlay } from '@layers/Overlay';
 import {
-  createContext,
-  useContext,
-  useEffect,
-  useId,
-  useState,
-  type ComponentPropsWithoutRef,
-  type ReactElement,
-  type ReactNode,
+    createContext,
+    useContext,
+    useEffect,
+    useId,
+    useState,
+    type ComponentPropsWithoutRef,
+    type ReactElement,
+    type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -26,7 +26,7 @@ type ModalContextValue = {
 const ModalContext = createContext<ModalContextValue | null>(null);
 const useModalCtx = (): ModalContextValue => {
   const ctx = useContext(ModalContext);
-  if (!ctx) throw new Error('Modal compound components must be used within Modal.Root');
+  if (ctx === null) throw new Error('Modal compound components must be used within Modal.Root');
   return ctx;
 };
 
@@ -49,7 +49,7 @@ function ModalRoot({ open, onClose, children }: ModalRootProps): ReactElement | 
   }, []);
 
   useEffect((): (() => void) | undefined => {
-    if (!open || !onClose) return undefined;
+    if (!open || onClose === undefined) return undefined;
 
     const handleKeyDown = (e: KeyboardEvent): void => {
       if (e.key === 'Escape') {

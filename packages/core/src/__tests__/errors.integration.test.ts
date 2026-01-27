@@ -8,25 +8,25 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  AppError,
-  getErrorStatusCode,
-  getSafeErrorMessage,
-  isAppError,
-  toAppError,
+    AppError,
+    getErrorStatusCode,
+    getSafeErrorMessage,
+    isAppError,
+    toAppError,
 } from '../infrastructure/errors/base';
 import {
-  BadRequestError,
-  ConflictError,
-  ForbiddenError,
-  InternalError,
-  NotFoundError,
-  TooManyRequestsError,
-  UnauthorizedError,
-  UnprocessableError,
+    BadRequestError,
+    ConflictError,
+    ForbiddenError,
+    InternalError,
+    NotFoundError,
+    TooManyRequestsError,
+    UnauthorizedError,
+    UnprocessableError,
 } from '../infrastructure/errors/http';
 import { isErrorResponse } from '../infrastructure/errors/response';
 import { ValidationError } from '../infrastructure/errors/validation';
-import { HTTP_STATUS } from './infrastructure/constants';
+import { HTTP_STATUS } from '../shared/constants/http';
 
 import type { ApiErrorResponse, ApiResponse } from '../infrastructure/errors/response';
 

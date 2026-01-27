@@ -31,8 +31,8 @@
 import { createAuthGuard } from '@auth/middleware';
 import type { AppContext } from '@shared';
 
-import type { BaseRouteDefinition, RouteDefinition, RouteMap, RouterOptions } from './types';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
+import type { BaseRouteDefinition, RouteDefinition, RouteMap, RouterOptions } from './types';
 
 // ============================================================================
 // Route Registration
@@ -109,7 +109,7 @@ function registerRoute(
 
   const routeHandler = async (req: FastifyRequest, reply: FastifyReply): Promise<void> => {
     // Validate body if schema provided
-    if (schema) {
+    if (schema !== undefined) {
       const parsed = schema.safeParse(req.body);
       if (!parsed.success) {
         void reply.status(400).send({ message: parsed.error.message });

@@ -7,13 +7,13 @@
  */
 
 import {
-  AccountLockedError,
-  EmailAlreadyExistsError,
-  EmailNotVerifiedError,
-  EmailSendError,
-  InvalidCredentialsError,
-  InvalidTokenError,
-  WeakPasswordError,
+    AccountLockedError,
+    EmailAlreadyExistsError,
+    EmailNotVerifiedError,
+    EmailSendError,
+    InvalidCredentialsError,
+    InvalidTokenError,
+    WeakPasswordError,
 } from './errors';
 
 /**
@@ -124,7 +124,7 @@ export function mapErrorToHttpResponse(
 
   // Weak password - validation failed
   if (error instanceof WeakPasswordError) {
-    if (options?.logContext) {
+    if (options?.logContext !== undefined) {
       logger.warn(
         { ...options.logContext, errors: error.details?.errors },
         'Password validation failed',
@@ -136,9 +136,9 @@ export function mapErrorToHttpResponse(
   // Email send error - may be handled differently per endpoint
   if (error instanceof EmailSendError) {
     // Allow custom handling (some endpoints want 503, others want success to prevent enumeration)
-    if (options?.onEmailSendError) {
+    if (options?.onEmailSendError !== undefined) {
       const customResponse = options.onEmailSendError(error);
-      if (customResponse) {
+      if (customResponse !== undefined) {
         return customResponse;
       }
     }

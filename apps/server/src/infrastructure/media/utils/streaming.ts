@@ -65,7 +65,7 @@ export class StreamingMediaProcessor {
    * Lazy load sharp module
    */
   private async getSharp(): Promise<SharpFunction> {
-    if (!this.sharpModule) {
+    if (this.sharpModule === null) {
       const sharpModule = (await import('sharp')) as { default: SharpFunction };
       this.sharpModule = sharpModule.default;
     }
@@ -76,7 +76,7 @@ export class StreamingMediaProcessor {
    * Lazy load ffmpeg module
    */
   private async getFfmpeg(): Promise<FfmpegModule> {
-    if (!this.ffmpegModule) {
+    if (this.ffmpegModule === null) {
       const ffmpegStaticModule = (await import('ffmpeg-static')) as { default: string };
       const ffmpegModule = (await import('fluent-ffmpeg')) as unknown as FfmpegModule;
       this.ffmpegModule = ffmpegModule;
@@ -105,7 +105,7 @@ export class StreamingMediaProcessor {
       let sharpPipeline = sharp(inputPath);
 
       // Configure resize if specified
-      if (operations.resize) {
+      if (operations.resize !== undefined) {
         sharpPipeline = sharpPipeline.resize({
           width: operations.resize.width,
           height: operations.resize.height,
@@ -115,7 +115,7 @@ export class StreamingMediaProcessor {
       }
 
       // Configure format and quality
-      if (operations.format) {
+      if (operations.format !== undefined) {
         const quality = operations.quality ?? 85;
         switch (operations.format) {
           case 'jpeg':
@@ -165,7 +165,7 @@ export class StreamingMediaProcessor {
         let command = ffmpegModule.default(inputPath);
 
         // Configure format
-        if (operations.format) {
+        if (operations.format !== undefined) {
           switch (operations.format) {
             case 'mp4':
               command = command.videoCodec('libx264').toFormat('mp4');
@@ -177,7 +177,7 @@ export class StreamingMediaProcessor {
         }
 
         // Configure resolution
-        if (operations.resolution) {
+        if (operations.resolution !== undefined) {
           command = command.size(
             `${String(operations.resolution.width)}x${String(operations.resolution.height)}`,
           );

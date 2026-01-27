@@ -45,10 +45,14 @@
       "@settings": ["./src/features/settings"],
       "@settings/*": ["./src/features/settings/*"]
     },
-    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.web.tsbuildinfo"
+    "outDir": "./dist",
+    "rootDir": "./",
+    "composite": true,
+    "noEmit": false,
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.web.tsbuildinfo"
   },
-  "include": ["src/**/*", "vitest.config.ts"],
-  "exclude": ["node_modules"],
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "vitest.config.ts"],
   "references": [
     {
       "path": "../../packages/contracts"

@@ -36,7 +36,7 @@ export async function handleListSecurityEvents(
   _reply: FastifyReply,
 ): Promise<{ status: number; body: SecurityEventsListResponse | { message: string } }> {
   const user = request.user as { userId: string; role: string } | undefined;
-  if (!user) {
+  if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
@@ -67,7 +67,7 @@ export async function handleGetSecurityEvent(
   _reply: FastifyReply,
 ): Promise<{ status: number; body: SecurityEvent | { message: string } }> {
   const user = request.user as { userId: string; role: string } | undefined;
-  if (!user) {
+  if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
@@ -100,7 +100,7 @@ export async function handleGetSecurityMetrics(
   _reply: FastifyReply,
 ): Promise<{ status: number; body: SecurityMetrics | { message: string } }> {
   const user = request.user as { userId: string; role: string } | undefined;
-  if (!user) {
+  if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
@@ -135,7 +135,7 @@ export async function handleExportSecurityEvents(
   _reply: FastifyReply,
 ): Promise<{ status: number; body: SecurityEventsExportResponse | { message: string } }> {
   const user = request.user as { userId: string; role: string } | undefined;
-  if (!user) {
+  if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 

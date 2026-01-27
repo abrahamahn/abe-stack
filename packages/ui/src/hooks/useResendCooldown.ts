@@ -44,14 +44,14 @@ export function useResendCooldown(
   // Cleanup interval on unmount to prevent memory leaks
   useEffect((): (() => void) => {
     return (): void => {
-      if (cooldownIntervalRef.current) {
+      if (cooldownIntervalRef.current !== null) {
         clearInterval(cooldownIntervalRef.current);
       }
     };
   }, []);
 
   const clearCooldownInterval = useCallback((): void => {
-    if (cooldownIntervalRef.current) {
+    if (cooldownIntervalRef.current !== null) {
       clearInterval(cooldownIntervalRef.current);
       cooldownIntervalRef.current = null;
     }

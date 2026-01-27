@@ -7,7 +7,7 @@ import '@abe-stack/ui/styles/elements.css';
 
 const container = document.getElementById('root');
 
-if (!container) {
+if (container === null) {
   throw new Error('Root container not found');
 }
 

@@ -111,7 +111,7 @@ export class ReactiveMap<K = string, V = unknown> {
    */
   subscribe(key: K, fn: (value: V | undefined) => void): () => void {
     let listenerSet = this.listeners.get(key);
-    if (!listenerSet) {
+    if (listenerSet === undefined) {
       listenerSet = new Set();
       this.listeners.set(key, listenerSet);
     }
@@ -143,7 +143,7 @@ export class ReactiveMap<K = string, V = unknown> {
     // Then notify all listeners
     for (const { key, value } of entries) {
       const listenerSet = this.listeners.get(key);
-      if (listenerSet) {
+      if (listenerSet !== undefined) {
         for (const fn of listenerSet) {
           fn(value);
         }

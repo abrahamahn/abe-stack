@@ -45,7 +45,7 @@ describe('Domain Structure', () => {
       expect(new TokenReuseError()).toBeInstanceOf(Error);
       expect(new WeakPasswordError()).toBeInstanceOf(Error);
       expect(new EmailAlreadyExistsError()).toBeInstanceOf(Error);
-      expect(new EmailNotVerifiedError()).toBeInstanceOf(Error);
+      expect(new EmailNotVerifiedError('test@example.com')).toBeInstanceOf(Error);
       expect(new UserNotFoundError()).toBeInstanceOf(Error);
       expect(new OAuthError('msg', 'google')).toBeInstanceOf(Error);
       expect(new OAuthStateMismatchError('google')).toBeInstanceOf(Error);
@@ -57,7 +57,7 @@ describe('Domain Structure', () => {
   describe('Contracts', () => {
     test('should export auth schemas from contracts', async () => {
       const { authContract, loginRequestSchema, registerRequestSchema, authResponseSchema } =
-        await import('@abe-stack/contracts/index.js');
+        await import('@abe-stack/contracts');
 
       expect(typeof authContract).toBe('object');
       expect(typeof loginRequestSchema).toBe('object');
@@ -67,7 +67,7 @@ describe('Domain Structure', () => {
 
     test('should export user types and schemas from contracts', async () => {
       const { userSchema, userRoleSchema, usersContract } =
-        await import('@abe-stack/contracts/index.js');
+        await import('@abe-stack/contracts');
 
       expect(typeof userSchema).toBe('object');
       expect(typeof userRoleSchema).toBe('object');
@@ -76,7 +76,7 @@ describe('Domain Structure', () => {
 
     test('should export admin schemas from contracts', async () => {
       const { adminContract, unlockAccountRequestSchema, unlockAccountResponseSchema } =
-        await import('@abe-stack/contracts/index.js');
+        await import('@abe-stack/contracts');
 
       expect(typeof adminContract).toBe('object');
       expect(typeof unlockAccountRequestSchema).toBe('object');
@@ -92,7 +92,7 @@ describe('Domain Structure', () => {
         PaginationError,
         buildCursorPaginationQuery,
         paginateArrayWithCursor,
-      } = await import('../modules/pagination/index.js');
+      } = await import('../shared/pagination/index');
 
       expect(typeof encodeCursor).toBe('function');
       expect(typeof decodeCursor).toBe('function');
@@ -220,27 +220,15 @@ describe('Domain Structure', () => {
       // Server-only env utils are in subpath export @abe-stack/core/env
       const {
         validateEnvironment,
-        validateEnvironmentSafe,
-        validateDatabaseEnv,
-        validateSecurityEnv,
-        validateStorageEnv,
-        validateEmailEnv,
-        validateDevelopmentEnv,
-        validateProductionEnv,
-        getEnvValidator,
-        envSchema,
-      } = await import('../env.js');
+        initEnv,
+        loadServerEnv,
+        EnvSchema,
+      } = await import('../config/index');
 
       expect(typeof validateEnvironment).toBe('function');
-      expect(typeof validateEnvironmentSafe).toBe('function');
-      expect(typeof validateDatabaseEnv).toBe('function');
-      expect(typeof validateSecurityEnv).toBe('function');
-      expect(typeof validateStorageEnv).toBe('function');
-      expect(typeof validateEmailEnv).toBe('function');
-      expect(typeof validateDevelopmentEnv).toBe('function');
-      expect(typeof validateProductionEnv).toBe('function');
-      expect(typeof getEnvValidator).toBe('function');
-      expect(typeof envSchema).toBe('object');
+      expect(typeof initEnv).toBe('function');
+      expect(typeof loadServerEnv).toBe('function');
+      expect(typeof EnvSchema).toBe('object');
     });
 
     test('should export domain utilities via main index', async () => {
@@ -260,7 +248,7 @@ describe('Domain Structure', () => {
         // Domains
         userRoleSchema,
         authContract,
-      } = await import('../index.js');
+      } = await import('../index');
 
       // Auth domain
       expect(typeof validatePassword).toBe('function');
@@ -283,7 +271,7 @@ describe('Domain Structure', () => {
   describe('Backward Compatibility', () => {
     test('should maintain existing import patterns', async () => {
       // This simulates how the server imports from @abe-stack/core
-      const core = await import('../index.js');
+      const core = await import('../index');
 
       // Common imports that should still work
       expect(typeof core.validatePassword).toBe('function');

@@ -2,12 +2,12 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  emailSchema,
-  errorResponseSchema,
-  nameSchema,
-  passwordSchema,
-  requiredNameSchema,
-  uuidSchema,
+    emailSchema,
+    errorResponseSchema,
+    nameSchema,
+    passwordSchema,
+    requiredNameSchema,
+    uuidSchema,
 } from '../common';
 
 describe('emailSchema', () => {
@@ -136,7 +136,9 @@ describe('nameSchema', () => {
   it('should accept undefined (optional field)', () => {
     const result = nameSchema.safeParse(undefined);
     expect(result.success).toBe(true);
-    expect(result.data).toBeUndefined();
+    if (result.success) {
+      expect(result.data).toBeUndefined();
+    }
   });
 
   it('should reject empty string', () => {

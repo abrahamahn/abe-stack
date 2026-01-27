@@ -7,11 +7,11 @@
  */
 
 import type {
-  JobDetails,
-  JobListOptions,
-  JobListResult,
-  PostgresQueueStore,
-  QueueStats,
+    JobDetails,
+    JobListOptions,
+    JobListResult,
+    PostgresQueueStore,
+    QueueStats,
 } from '@infrastructure';
 
 // ============================================================================
@@ -134,7 +134,7 @@ export async function listJobs(
  */
 export async function getJobDetails(store: PostgresQueueStore, jobId: string): Promise<JobDetails> {
   const job = await store.getJobDetails(jobId);
-  if (!job) {
+  if (job === null) {
     throw new JobNotFoundError(jobId);
   }
 
@@ -157,11 +157,11 @@ export async function retryJob(
 ): Promise<{ success: boolean; message: string }> {
   const success = await store.retryJob(jobId);
 
-  if (!success) {
+  if (success === false) {
     // Job either doesn't exist or is not in a retriable state
 
     const job = await store.getJobDetails(jobId);
-    if (!job) {
+    if (job === null) {
       throw new JobNotFoundError(jobId);
     }
     return {
@@ -185,11 +185,11 @@ export async function cancelJob(
 ): Promise<{ success: boolean; message: string }> {
   const success = await store.cancelJob(jobId);
 
-  if (!success) {
+  if (success === false) {
     // Job either doesn't exist or is not in a cancellable state
 
     const job = await store.getJobDetails(jobId);
-    if (!job) {
+    if (job === null) {
       throw new JobNotFoundError(jobId);
     }
     return {

@@ -207,7 +207,7 @@ export class WriteService {
       `SELECT version FROM ${escapeIdentifier(table)} WHERE id = '${(typeof id === 'string' ? id : String(id)).replace(/'/g, "''")}'`,
     )) as { version: number }[];
     const currentRow = currentRows[0];
-    if (!currentRow) {
+    if (currentRow === undefined) {
       throw this.createError('NOT_FOUND', `Record not found: ${table}/${id}`);
     }
 
@@ -265,7 +265,7 @@ export class WriteService {
       `SELECT version FROM ${escapeIdentifier(table)} WHERE id = '${idEscaped}'`,
     )) as { version: number }[];
     const currentRow = currentRows[0];
-    if (!currentRow) {
+    if (currentRow === undefined) {
       throw this.createError('NOT_FOUND', `Record not found: ${table}/${id}`);
     }
 
@@ -286,14 +286,14 @@ export class WriteService {
   }
 
   private publishResults<T>(results: OperationResult<T>[], _ctx: WriteContext): void {
-    if (!this.pubsub) return;
+    if (this.pubsub === undefined) return;
 
     // Use setImmediate to not block the response
     setImmediate(() => {
       for (const result of results) {
         const { operation, record } = result;
 
-        if (record && 'version' in record && this.pubsub) {
+        if (record && 'version' in record && this.pubsub !== undefined) {
           const pubsubManager = this.pubsub;
           const key = SubKeys.record(
             operation.table,

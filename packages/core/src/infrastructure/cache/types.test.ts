@@ -2,16 +2,16 @@
 import { describe, expect, test } from 'vitest';
 
 import type {
-  BaseCacheConfig,
-  CacheConfig,
-  CacheDeleteOptions,
-  CacheEntry,
-  CacheEntryMetadata,
-  CacheGetOptions,
-  CacheProvider,
-  CacheSetOptions,
-  CacheStats,
-  MemoryCacheConfig,
+    BaseCacheConfig,
+    CacheConfig,
+    CacheDeleteOptions,
+    CacheEntry,
+    CacheEntryMetadata,
+    CacheGetOptions,
+    CacheProvider,
+    CacheSetOptions,
+    CacheStats,
+    MemoryCacheConfig,
 } from './types';
 
 // ============================================================================
@@ -157,14 +157,14 @@ describe('cache types', () => {
       // Mock implementation to verify interface
       const mockProvider: CacheProvider = {
         name: 'mock',
-        get: async (_key: string) => undefined,
-        set: async (_key: string, _value: unknown) => {},
-        has: async (_key: string) => false,
-        delete: async (_key: string) => false,
-        getMultiple: async <T>(_keys: string[]) => new Map<string, T>(),
-        setMultiple: async <T>(_entries: Map<string, T>) => {},
-        deleteMultiple: async (_keys: string[]) => 0,
-        clear: async () => {},
+        get: (_key: string) => Promise.resolve(undefined),
+        set: (_key: string, _value: unknown) => Promise.resolve(),
+        has: (_key: string) => Promise.resolve(false),
+        delete: (_key: string) => Promise.resolve(false),
+        getMultiple: <T>(_keys: string[]) => Promise.resolve(new Map<string, T>()),
+        setMultiple: <T>(_entries: Map<string, T>) => Promise.resolve(),
+        deleteMultiple: (_keys: string[]) => Promise.resolve(0),
+        clear: () => Promise.resolve(),
         getStats: () => ({
           hits: 0,
           misses: 0,
@@ -175,8 +175,8 @@ describe('cache types', () => {
           evictions: 0,
         }),
         resetStats: () => {},
-        healthCheck: async () => true,
-        close: async () => {},
+        healthCheck: () => Promise.resolve(true),
+        close: () => Promise.resolve(),
       };
 
       expect(mockProvider.name).toBe('mock');

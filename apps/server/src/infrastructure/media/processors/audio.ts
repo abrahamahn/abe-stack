@@ -48,7 +48,7 @@ export class AudioProcessor {
     default: (input: string) => FfmpegCommand;
     setFfmpegPath: (path: string) => void;
   }> {
-    if (!this.ffmpegModule) {
+    if (this.ffmpegModule === null) {
       const ffmpegStaticModule = (await import('ffmpeg-static')) as { default: string };
       const ffmpegModule = (await import('fluent-ffmpeg')) as unknown as {
         default: (input: string) => FfmpegCommand;
@@ -64,7 +64,7 @@ export class AudioProcessor {
    * Lazy load music-metadata module
    */
   private async getParseFile(): Promise<(path: string) => Promise<ParsedAudioMetadata>> {
-    if (!this.parseFileModule) {
+    if (this.parseFileModule === null) {
       const musicMetadata = (await import('music-metadata')) as {
         parseFile: (path: string) => Promise<ParsedAudioMetadata>;
       };
@@ -124,8 +124,8 @@ export class AudioProcessor {
     return new Promise((resolve, reject) => {
       let command = ffmpegModule.default(inputPath);
 
-      if (typeof options.format === 'string' && options.format !== '') {
-        command = command.toFormat(options.format as string);
+      if (options.format !== undefined) {
+        command = command.toFormat(options.format);
       }
 
       if (typeof options.bitrate === 'string' && options.bitrate !== '') {

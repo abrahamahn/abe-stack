@@ -24,7 +24,7 @@
  * ```
  */
 export const getInt = (val: string | undefined, fallback: number): number => {
-  const parsed = parseInt(val || '', 10);
+  const parsed = parseInt(val ?? '', 10);
   return isNaN(parsed) ? fallback : parsed;
 };
 
@@ -66,7 +66,7 @@ export const getBool = (val: string | undefined): boolean => val?.toLowerCase().
  * ```
  */
 export const getList = (val: string | undefined): string[] =>
-  val
+  val !== undefined && val !== ''
     ? val
         .split(',')
         .map((s) => s.trim())
@@ -91,7 +91,7 @@ export const getList = (val: string | undefined): string[] =>
  * ```
  */
 export const getRequired = (val: string | undefined, key: string): string => {
-  if (!val) {
+  if (val === undefined || val === '') {
     throw new Error(`Configuration Error: Missing required environment variable [${key}]`);
   }
   return val;

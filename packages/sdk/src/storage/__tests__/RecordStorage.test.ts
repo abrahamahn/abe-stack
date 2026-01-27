@@ -1,16 +1,17 @@
 // packages/sdk/src/storage/__tests__/RecordStorage.test.ts
-import { describe, expect, it, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
-  RecordStorage,
-  RecordStorageError,
-  createRecordStorage,
-  iterateRecordMap,
-  createRecordMap,
-  type VersionedRecord,
-  type RecordMap,
-  type RecordWithTable,
-} from '../RecordStorage';
+    RecordStorage,
+    RecordStorageError,
+    createRecordMap,
+    createRecordStorage,
+    iterateRecordMap,
+    type RecordMap,
+    type RecordStorageErrorType,
+    type RecordWithTable,
+    type VersionedRecord,
+} from '../RecordStorage.js';
 
 // ============================================================================
 // Mock IndexedDB
@@ -218,6 +219,7 @@ interface PostRecord extends VersionedRecord {
   version: number;
   title: string;
   authorId: string;
+  content?: string;
 }
 
 // ============================================================================
@@ -712,9 +714,9 @@ describe('createRecordMap', () => {
 
     const recordMap = createRecordMap(records);
 
-    expect(recordMap.user?.u1?.name).toBe('Alice');
-    expect(recordMap.user?.u2?.name).toBe('Bob');
-    expect(recordMap.post?.p1?.title).toBe('Hello');
+    expect((recordMap.user?.u1 as UserRecord | undefined)?.name).toBe('Alice');
+    expect((recordMap.user?.u2 as UserRecord | undefined)?.name).toBe('Bob');
+    expect((recordMap.post?.p1 as PostRecord | undefined)?.title).toBe('Hello');
   });
 });
 
@@ -736,7 +738,7 @@ describe('RecordStorageError', () => {
   });
 
   it('should work without cause', () => {
-    const error = new RecordStorageError('Test error', 'NOT_FOUND');
+    const error = new RecordStorageError('Test error', 'UNKNOWN' as RecordStorageErrorType);
     expect(error.message).toBe('Test error');
     expect(error.type).toBe('NOT_FOUND');
     expect(error.cause).toBeUndefined();

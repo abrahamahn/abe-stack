@@ -152,7 +152,7 @@ export class MediaProcessingRetryHandler {
   private getOrCreateState(operationId: string): RetryState {
     let state = this.retryStates.get(operationId);
 
-    if (!state) {
+    if (state === undefined) {
       state = {
         attemptCount: 0,
         lastAttemptAt: 0,
@@ -252,7 +252,7 @@ export class MediaProcessingRetryHandler {
    * Destroy the handler and clean up resources
    */
   destroy(): void {
-    if (this.cleanupInterval) {
+    if (this.cleanupInterval !== null) {
       clearInterval(this.cleanupInterval);
       this.cleanupInterval = null;
     }

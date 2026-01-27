@@ -95,12 +95,12 @@ export function useKeyboardShortcuts(
         if (!keyMatches) continue;
 
         // Check modifier keys
-        if (shortcut.ctrlKey && !event.ctrlKey && !event.metaKey) continue;
-        if (shortcut.shiftKey && !event.shiftKey) continue;
-        if (shortcut.altKey && !event.altKey) continue;
+        if (shortcut.ctrlKey === true && !event.ctrlKey && !event.metaKey) continue;
+        if (shortcut.shiftKey === true && !event.shiftKey) continue;
+        if (shortcut.altKey === true && !event.altKey) continue;
 
         // If we want to match without modifiers, ensure none are pressed
-        if (!shortcut.ctrlKey && !shortcut.shiftKey && !shortcut.altKey) {
+        if (shortcut.ctrlKey !== true && shortcut.shiftKey !== true && shortcut.altKey !== true) {
           if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) continue;
         }
 

@@ -57,5 +57,5 @@ export const ProtectedRoute = ({
     return <Navigate to={redirectTo} replace />;
   }
 
-  return children ? <>{children}</> : <Outlet />;
+  return children !== undefined && children !== null ? <>{children}</> : <Outlet />;
 };

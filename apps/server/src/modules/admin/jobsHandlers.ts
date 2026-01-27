@@ -11,13 +11,13 @@ import { PostgresQueueStore, type JobListOptions } from '@infrastructure';
 import { ERROR_MESSAGES, type AppContext } from '@shared';
 
 import {
-  cancelJob,
-  getJobDetails,
-  getQueueStats,
-  JobNotFoundError,
-  listJobs,
-  QueueStoreNotAvailableError,
-  retryJob,
+    cancelJob,
+    getJobDetails,
+    getQueueStats,
+    JobNotFoundError,
+    listJobs,
+    QueueStoreNotAvailableError,
+    retryJob,
 } from './jobsService';
 
 import type { JobActionResponse, JobDetails, JobListResponse, QueueStats } from '@abe-stack/core';
@@ -50,7 +50,7 @@ export async function handleListJobs(
   _reply: FastifyReply,
 ): Promise<{ status: number; body: JobListResponse | { message: string } }> {
   const user = request.user as { userId: string; role: string } | undefined;
-  if (!user) {
+  if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
@@ -100,7 +100,7 @@ export async function handleGetJobDetails(
   _reply: FastifyReply,
 ): Promise<{ status: number; body: JobDetails | { message: string } }> {
   const user = request.user as { userId: string; role: string } | undefined;
-  if (!user) {
+  if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
@@ -135,7 +135,7 @@ export async function handleGetQueueStats(
   _reply: FastifyReply,
 ): Promise<{ status: number; body: QueueStats | { message: string } }> {
   const user = request.user as { userId: string; role: string } | undefined;
-  if (!user) {
+  if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
@@ -163,7 +163,7 @@ export async function handleRetryJob(
   _reply: FastifyReply,
 ): Promise<{ status: number; body: JobActionResponse | { message: string } }> {
   const user = request.user as { userId: string; role: string } | undefined;
-  if (!user) {
+  if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 
@@ -201,7 +201,7 @@ export async function handleCancelJob(
   _reply: FastifyReply,
 ): Promise<{ status: number; body: JobActionResponse | { message: string } }> {
   const user = request.user as { userId: string; role: string } | undefined;
-  if (!user) {
+  if (user === undefined) {
     return { status: 401, body: { message: ERROR_MESSAGES.UNAUTHORIZED } };
   }
 

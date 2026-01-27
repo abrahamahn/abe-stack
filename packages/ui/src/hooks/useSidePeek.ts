@@ -65,7 +65,7 @@ export function useSidePeek(): UseSidePeekResult {
     const newParams = new URLSearchParams(location.search);
     newParams.delete(PEEK_PARAM);
     const search = newParams.toString();
-    const url = `${location.pathname}${search ? `?${search}` : ''}${location.hash}`;
+    const url = `${location.pathname}${search !== '' ? `?${search}` : ''}${location.hash}`;
     navigate(url);
   }, [location.pathname, location.search, location.hash, navigate]);
 

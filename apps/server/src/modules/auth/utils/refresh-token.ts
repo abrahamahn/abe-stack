@@ -58,7 +58,7 @@ export async function createRefreshTokenFamily(
       insert(REFRESH_TOKEN_FAMILIES_TABLE).values({ user_id: userId }).returningAll().toSql(),
     );
 
-    if (familyRows[0] == null) {
+    if (familyRows[0] === undefined) {
       throw new Error('Failed to create refresh token family');
     }
 
@@ -114,7 +114,7 @@ export async function rotateRefreshToken(
       .toSql(),
   );
 
-  if (storedTokenRow == null) {
+  if (storedTokenRow === null) {
     return null;
   }
 
@@ -132,7 +132,7 @@ export async function rotateRefreshToken(
       select(USERS_TABLE).where(eq('id', storedToken.userId)).limit(1).toSql(),
     ),
     // Family lookup - only if familyId exists
-    storedToken.familyId != null
+    storedToken.familyId !== null
       ? db.queryOne<Record<string, unknown>>(
           select(REFRESH_TOKEN_FAMILIES_TABLE)
             .where(eq('id', storedToken.familyId))
@@ -143,18 +143,18 @@ export async function rotateRefreshToken(
   ]);
 
   // Early exit if user doesn't exist
-  if (userRow == null) {
+  if (userRow === null) {
     return null;
   }
 
   const user = toCamelCase<User>(userRow, USER_COLUMNS);
-  const family = familyRow != null
+  const family = familyRow !== null
     ? toCamelCase<RefreshTokenFamily>(familyRow, REFRESH_TOKEN_FAMILY_COLUMNS)
     : null;
 
   // Check if family is revoked (token reuse attack)
   // At this point, family exists if storedToken.familyId exists (from parallel fetch)
-  if (family?.revokedAt != null && storedToken.familyId != null) {
+  if (family?.revokedAt !== undefined && family.revokedAt !== null && storedToken.familyId !== null) {
     await logTokenReuseEvent(db, user.id, user.email, storedToken.familyId, ipAddress, userAgent);
     await revokeTokenFamily(db, storedToken.familyId, 'Token reuse detected');
     throw new TokenReuseError(user.id, user.email, storedToken.familyId, ipAddress, userAgent);
@@ -162,7 +162,7 @@ export async function rotateRefreshToken(
 
   // OPTIMIZATION 3: Only check for recent tokens if family exists
   // Uses index on (family_id) combined with created_at filter
-  const recentTokenRow = storedToken.familyId != null
+  const recentTokenRow = storedToken.familyId !== null
     ? await db.queryOne<Record<string, unknown>>(
         select(REFRESH_TOKENS_TABLE)
           .where(and(eq('family_id', storedToken.familyId), gt('created_at', graceWindowStart)))
@@ -172,12 +172,12 @@ export async function rotateRefreshToken(
       )
     : null;
 
-  const recentTokenInFamily = recentTokenRow != null
+  const recentTokenInFamily = recentTokenRow !== null
     ? toCamelCase<RefreshToken>(recentTokenRow, REFRESH_TOKEN_COLUMNS)
     : null;
 
   // Handle network retry case: return newer token if within grace period
-  if (recentTokenInFamily != null && recentTokenInFamily.token !== oldToken && isWithinGracePeriod) {
+  if (recentTokenInFamily !== null && recentTokenInFamily.token !== oldToken && isWithinGracePeriod) {
     return {
       token: recentTokenInFamily.token,
       userId: user.id,
@@ -187,8 +187,8 @@ export async function rotateRefreshToken(
   }
 
   // Detect token reuse attack outside grace period
-  if (recentTokenInFamily != null && recentTokenInFamily.token !== oldToken && !isWithinGracePeriod) {
-    if (storedToken.familyId != null) {
+  if (recentTokenInFamily !== null && recentTokenInFamily.token !== oldToken && !isWithinGracePeriod) {
+    if (storedToken.familyId !== null) {
       await logTokenReuseEvent(db, user.id, user.email, storedToken.familyId, ipAddress, userAgent);
       await logTokenFamilyRevokedEvent(
         db,

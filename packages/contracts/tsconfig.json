@@ -1,10 +1,11 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../.config/tsconfig.node.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
-    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.contracts.tsbuildinfo"
+    "rootDir": "./",
+    "types": ["node", "vitest/globals"],
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.contracts.tsbuildinfo"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+  "include": ["src/**/*", "vitest.config.ts", "**/*.test.ts"],
+  "exclude": ["node_modules", "dist"]
 }

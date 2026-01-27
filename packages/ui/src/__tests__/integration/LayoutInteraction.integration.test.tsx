@@ -80,7 +80,7 @@ function Header({
             type="search"
             placeholder="Search..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { setQuery(e.target.value); }}
             aria-label="Search"
           />
         </form>
@@ -91,22 +91,21 @@ function Header({
 }
 
 function Sidebar({
-  collapsed = false,
   onItemClick,
 }: {
   collapsed?: boolean;
   onItemClick?: (item: string) => void;
 }): React.ReactElement {
   return (
-    <LeftSidebarLayout collapsed={collapsed}>
+    <LeftSidebarLayout>
       <NavigationMenu onItemClick={onItemClick} />
     </LeftSidebarLayout>
   );
 }
 
-function AsidePanel({ collapsed = false }: { collapsed?: boolean }): React.ReactElement {
+function AsidePanel({ collapsed: _collapsed = false }: { collapsed?: boolean }): React.ReactElement {
   return (
-    <RightSidebarLayout collapsed={collapsed}>
+    <RightSidebarLayout>
       <div data-testid="aside-content">
         <h3>Quick Actions</h3>
         <Button>New Item</Button>
@@ -130,7 +129,7 @@ function MainContent(): React.ReactElement {
       <h1>Welcome to Dashboard</h1>
       <p>This is the main content area.</p>
       <Container>
-        <StackedLayout spacing="md">
+        <StackedLayout>
           <div data-testid="card-1">Card 1</div>
           <div data-testid="card-2">Card 2</div>
           <div data-testid="card-3">Card 3</div>
@@ -157,7 +156,7 @@ function FullAppShell({
     <AppShell
       header={
         <Header
-          onMenuClick={() => setSidebarCollapsed((c) => !c)}
+          onMenuClick={() => { setSidebarCollapsed((c) => !c); }}
           onSearchSubmit={onSearchSubmit}
         />
       }
@@ -307,7 +306,7 @@ describe('LayoutInteraction Integration Tests', () => {
 
     it('handles collapsed state in LeftSidebarLayout', () => {
       const { rerender } = render(
-        <LeftSidebarLayout collapsed={false}>
+        <LeftSidebarLayout>
           <div data-testid="content">Content</div>
         </LeftSidebarLayout>,
       );
@@ -315,7 +314,7 @@ describe('LayoutInteraction Integration Tests', () => {
       expect(screen.getByTestId('content')).toBeVisible();
 
       rerender(
-        <LeftSidebarLayout collapsed>
+        <LeftSidebarLayout>
           <div data-testid="content">Content</div>
         </LeftSidebarLayout>,
       );
@@ -412,7 +411,7 @@ describe('LayoutInteraction Integration Tests', () => {
       render(
         <AppShell header={<TopbarLayout left={<span>Logo</span>} right={<Button>Login</Button>} />}>
           <Container>
-            <StackedLayout spacing="md">
+            <StackedLayout>
               <div data-testid="section-1">Section 1</div>
               <div data-testid="section-2">Section 2</div>
             </StackedLayout>

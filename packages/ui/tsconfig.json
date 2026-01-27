@@ -1,11 +1,12 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../.config/tsconfig.react.json",
   "compilerOptions": {
     "outDir": "./dist",
+    "rootDir": "./",
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "baseUrl": "./",
-    "types": ["react", "react-dom", "vitest/globals"],
+    "types": ["react", "react-dom", "vitest/globals", "@testing-library/jest-dom", "node"],
     "paths": {
       "@abe-stack/core": [
             "../core/src"
@@ -86,10 +87,10 @@
             "./src/utils/*"
       ]
     },
-    "tsBuildInfoFile": "./node_modules/.cache/tsconfig.ui.tsbuildinfo"
+    "tsBuildInfoFile": "./node_modules/.cache/typescript/tsconfig.ui.tsbuildinfo"
   },
-  "include": ["src/**/*", "vitest.config.ts"],
-  "exclude": ["node_modules", "dist"],
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "vitest.config.ts"],
   "references": [
     {
       "path": "../core"
