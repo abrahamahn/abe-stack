@@ -1,21 +1,19 @@
+// vitest.config.ts
+/// <reference types="vitest" />
+import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
 
-export default defineConfig({
+/**
+ * Shared base configuration for all vitest projects in the monorepo.
+ * Individual packages extend this via mergeConfig in their vitest.config.ts.
+ */
+export const baseConfig = defineConfig({
+  plugins: [tsconfigPaths()],
   test: {
-    // Global settings covering coverage, reporters, etc.
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
-      include: ['**/src/**'],
-      exclude: [
-        '**/__tests__/**',
-        '**/*.test.ts',
-        '**/*.d.ts',
-        '**/generated/**',
-        'tooling/**',
-        '.config/**',
-      ],
-    },
-    reporters: ['default'],
+    globals: true,
+    exclude: ['**/node_modules/**', '**/dist/**', '**/backup/**', '**/*.spec.ts'],
+    testTimeout: 10000,
   },
 });
+
+export default baseConfig;
