@@ -1,7 +1,7 @@
 // packages/db/src/__tests__/utils.test.ts
 import { describe, expect, test } from 'vitest';
 
-import { camelizeKeys, snakeifyKeys, toCamelCase, toSnakeCase } from '../utils';
+import { camelizeKeys, snakeifyKeys, toCamelCase, toSnakeCase } from './utils';
 
 describe('Database Utils', () => {
   describe('snakeifyKeys', () => {
@@ -16,12 +16,12 @@ describe('Database Utils', () => {
       };
 
       const expected = {
-        first_name: 'John',
-        last_name: 'Doe',
-        email_address: 'john.doe@example.com',
-        user_id: 123,
-        is_active: true,
-        date_of_birth: input.dateOfBirth,
+        ['first_name']: 'John',
+        ['last_name']: 'Doe',
+        ['email_address']: 'john.doe@example.com',
+        ['user_id']: 123,
+        ['is_active']: true,
+        ['date_of_birth']: input.dateOfBirth,
       };
 
       const result = snakeifyKeys(input);
@@ -42,11 +42,11 @@ describe('Database Utils', () => {
 
       const expected = {
         user: {
-          first_name: 'Jane',
-          last_name: 'Smith',
+          ['first_name']: 'Jane',
+          ['last_name']: 'Smith',
           profile: {
-            bio_text: 'Software developer',
-            join_date: input.user.profile.joinDate,
+            ['bio_text']: 'Software developer',
+            ['join_date']: input.user.profile.joinDate,
           },
         },
       };
@@ -62,8 +62,8 @@ describe('Database Utils', () => {
       ];
 
       const expected = [
-        { first_name: 'John', last_name: 'Doe' },
-        { first_name: 'Jane', last_name: 'Smith' },
+        { ['first_name']: 'John', ['last_name']: 'Doe' },
+        { ['first_name']: 'Jane', ['last_name']: 'Smith' },
       ];
 
       const result = snakeifyKeys(input);
@@ -105,8 +105,8 @@ describe('Database Utils', () => {
 
     test('should handle already snake_cased keys', () => {
       const input = {
-        already_snake_cased: 'value',
-        normal_key: 'another_value',
+        ['already_snake_cased']: 'value',
+        ['normal_key']: 'another_value',
       };
 
       const result = snakeifyKeys(input);
@@ -118,19 +118,19 @@ describe('Database Utils', () => {
       const input = {
         camelCase: 'a',
         PascalCase: 'b',
-        snake_case: 'c',
-        SCREAMING_SNAKE_CASE: 'd',
-        'kebab-case': 'e',
+        ['snake_case']: 'c',
+        ['SCREAMING_SNAKE_CASE']: 'd',
+        ['kebab-case']: 'e',
       };
 
       const result = snakeifyKeys(input);
 
       expect(result).toEqual({
-        camel_case: 'a',
-        pascal_case: 'b',
-        snake_case: 'c',
-        screaming_snake_case: 'd',
-        kebab_case: 'e',
+        ['camel_case']: 'a',
+        ['pascal_case']: 'b',
+        ['snake_case']: 'c',
+        ['screaming_snake_case']: 'd',
+        ['kebab_case']: 'e',
       });
     });
   });
@@ -138,12 +138,12 @@ describe('Database Utils', () => {
   describe('camelizeKeys', () => {
     test('should convert snake_case keys to camelCase', () => {
       const input = {
-        first_name: 'John',
-        last_name: 'Doe',
-        email_address: 'john.doe@example.com',
-        user_id: 123,
-        is_active: true,
-        date_of_birth: new Date('1990-01-01'),
+        ['first_name']: 'John',
+        ['last_name']: 'Doe',
+        ['email_address']: 'john.doe@example.com',
+        ['user_id']: 123,
+        ['is_active']: true,
+        ['date_of_birth']: new Date('1990-01-01'),
       };
 
       const expected = {
@@ -162,11 +162,11 @@ describe('Database Utils', () => {
     test('should handle nested objects', () => {
       const input = {
         user: {
-          first_name: 'Jane',
-          last_name: 'Smith',
+          ['first_name']: 'Jane',
+          ['last_name']: 'Smith',
           profile: {
-            bio_text: 'Software developer',
-            join_date: new Date(),
+            ['bio_text']: 'Software developer',
+            ['join_date']: new Date(),
           },
         },
       };
@@ -177,7 +177,7 @@ describe('Database Utils', () => {
           lastName: 'Smith',
           profile: {
             bioText: 'Software developer',
-            joinDate: input.user.profile.join_date,
+            joinDate: input.user.profile['join_date'],
           },
         },
       };
@@ -188,8 +188,8 @@ describe('Database Utils', () => {
 
     test('should handle arrays of objects', () => {
       const input = [
-        { first_name: 'John', last_name: 'Doe' },
-        { first_name: 'Jane', last_name: 'Smith' },
+        { ['first_name']: 'John', ['last_name']: 'Doe' },
+        { ['first_name']: 'Jane', ['last_name']: 'Smith' },
       ];
 
       const expected = [
@@ -216,12 +216,12 @@ describe('Database Utils', () => {
 
     test('should not modify values, only keys', () => {
       const input = {
-        string_val: 'unchanged',
-        number_val: 42,
-        bool_val: false,
-        null_val: null,
-        array_val: [1, 2, 3],
-        object_val: { nested_val: 'value' },
+        ['string_val']: 'unchanged',
+        ['number_val']: 42,
+        ['bool_val']: false,
+        ['null_val']: null,
+        ['array_val']: [1, 2, 3],
+        ['object_val']: { ['nested_val']: 'value' },
       };
 
       const result = camelizeKeys(input) as any;
@@ -247,11 +247,11 @@ describe('Database Utils', () => {
 
     test('should handle mixed key formats', () => {
       const input = {
-        snake_case: 'a',
-        SCREAMING_SNAKE_CASE: 'b',
+        ['snake_case']: 'a',
+        ['SCREAMING_SNAKE_CASE']: 'b',
         camelCase: 'c',
         PascalCase: 'd',
-        'kebab-case': 'e',
+        ['kebab-case']: 'e',
       };
 
       const result = camelizeKeys(input);
@@ -374,11 +374,11 @@ describe('Database Utils', () => {
 
     test('camelizeKeys and snakeifyKeys should be inverses', () => {
       const original = {
-        first_name: 'John',
-        last_name: 'Doe',
-        email_address: 'john@example.com',
-        user_id: 123,
-        is_active: true,
+        ['first_name']: 'John',
+        ['last_name']: 'Doe',
+        ['email_address']: 'john@example.com',
+        ['user_id']: 123,
+        ['is_active']: true,
       };
 
       // Convert to camelCase and back to snake_case
@@ -501,12 +501,12 @@ describe('Database Utils', () => {
       const sym = Symbol('test');
       const input: Record<PropertyKey, unknown> = {};
       input[sym] = 'symbol value';
-      input.normalKey = 'normal value';
+      input['normalKey'] = 'normal value';
 
       // The transformation should only affect string keys
       const result = snakeifyKeys(input) as any;
       expect(result[sym]).toBe('symbol value');
-      expect(result.normal_key).toBe('normal value');
+      expect(result['normal_key']).toBe('normal value');
     });
 
     test('should handle circular references', () => {

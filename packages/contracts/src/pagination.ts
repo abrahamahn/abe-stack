@@ -6,7 +6,8 @@
  * Used in API contracts for paginated endpoints.
  */
 
-import { createSchema, type Schema } from './types';
+import { createSchema } from './schema';
+import type { Schema } from './types';
 
 // ============================================================================
 // Sort Order
@@ -48,17 +49,17 @@ function validateSortOrder(data: unknown): SortOrder {
 export interface PaginationOptions {
   page: number;
   limit: number;
-  sortBy?: string;
+  sortBy?: string | undefined;
   sortOrder: SortOrder;
 }
 
 export const paginationOptionsSchema: Schema<PaginationOptions> = createSchema((data: unknown) => {
-  const obj = (data && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+  const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
 
   // Page defaults to 1
   let page = 1;
-  if (obj.page !== undefined) {
-    page = validateInt(obj.page, 'page');
+  if (obj['page'] !== undefined) {
+    page = validateInt(obj['page'], 'page');
     if (page < 1) {
       throw new Error('page must be at least 1');
     }
@@ -66,8 +67,8 @@ export const paginationOptionsSchema: Schema<PaginationOptions> = createSchema((
 
   // Limit defaults to 50
   let limit = 50;
-  if (obj.limit !== undefined) {
-    limit = validateInt(obj.limit, 'limit');
+  if (obj['limit'] !== undefined) {
+    limit = validateInt(obj['limit'], 'limit');
     if (limit < 1) {
       throw new Error('limit must be at least 1');
     }
@@ -77,10 +78,10 @@ export const paginationOptionsSchema: Schema<PaginationOptions> = createSchema((
   }
 
   // sortBy is optional
-  const sortBy = typeof obj.sortBy === 'string' ? obj.sortBy : undefined;
+  const sortBy = typeof obj['sortBy'] === 'string' ? obj['sortBy'] : undefined;
 
   // sortOrder defaults to desc
-  const sortOrder = obj.sortOrder !== undefined ? validateSortOrder(obj.sortOrder) : 'desc';
+  const sortOrder = obj['sortOrder'] !== undefined ? validateSortOrder(obj['sortOrder']) : 'desc';
 
   return { page, limit, sortBy, sortOrder };
 });
@@ -103,39 +104,39 @@ export interface PaginatedResult<T> {
  */
 export function paginatedResultSchema<T>(itemSchema: Schema<T>): Schema<PaginatedResult<T>> {
   return createSchema((data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid paginated result');
     }
     const obj = data as Record<string, unknown>;
 
-    if (!Array.isArray(obj.data)) {
+    if (!Array.isArray(obj['data'])) {
       throw new Error('data must be an array');
     }
-    const parsedData = obj.data.map((item) => itemSchema.parse(item));
+    const parsedData = obj['data'].map((item) => itemSchema.parse(item));
 
-    const total = validateInt(obj.total, 'total');
+    const total = validateInt(obj['total'], 'total');
     if (total < 0) {
       throw new Error('total must be non-negative');
     }
 
-    const page = validateInt(obj.page, 'page');
+    const page = validateInt(obj['page'], 'page');
     if (page < 1) {
       throw new Error('page must be at least 1');
     }
 
-    const limit = validateInt(obj.limit, 'limit');
+    const limit = validateInt(obj['limit'], 'limit');
     if (limit < 1) {
       throw new Error('limit must be at least 1');
     }
 
-    if (typeof obj.hasNext !== 'boolean') {
+    if (typeof obj['hasNext'] !== 'boolean') {
       throw new Error('hasNext must be a boolean');
     }
-    if (typeof obj.hasPrev !== 'boolean') {
+    if (typeof obj['hasPrev'] !== 'boolean') {
       throw new Error('hasPrev must be a boolean');
     }
 
-    const totalPages = validateInt(obj.totalPages, 'totalPages');
+    const totalPages = validateInt(obj['totalPages'], 'totalPages');
     if (totalPages < 0) {
       throw new Error('totalPages must be non-negative');
     }
@@ -145,8 +146,8 @@ export function paginatedResultSchema<T>(itemSchema: Schema<T>): Schema<Paginate
       total,
       page,
       limit,
-      hasNext: obj.hasNext,
-      hasPrev: obj.hasPrev,
+      hasNext: obj['hasNext'],
+      hasPrev: obj['hasPrev'],
       totalPages,
     };
   });
@@ -161,23 +162,23 @@ export function paginatedResultSchema<T>(itemSchema: Schema<T>): Schema<Paginate
  * More efficient for large datasets and infinite scroll.
  */
 export interface CursorPaginationOptions {
-  cursor?: string;
+  cursor?: string | undefined;
   limit: number;
-  sortBy?: string;
+  sortBy?: string | undefined;
   sortOrder: SortOrder;
 }
 
 export const cursorPaginationOptionsSchema: Schema<CursorPaginationOptions> = createSchema(
   (data: unknown) => {
-    const obj = (data && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
 
     // cursor is optional
-    const cursor = typeof obj.cursor === 'string' ? obj.cursor : undefined;
+    const cursor = typeof obj['cursor'] === 'string' ? obj['cursor'] : undefined;
 
     // Limit defaults to 50
     let limit = 50;
-    if (obj.limit !== undefined) {
-      limit = validateInt(obj.limit, 'limit');
+    if (obj['limit'] !== undefined) {
+      limit = validateInt(obj['limit'], 'limit');
       if (limit < 1) {
         throw new Error('limit must be at least 1');
       }
@@ -187,10 +188,10 @@ export const cursorPaginationOptionsSchema: Schema<CursorPaginationOptions> = cr
     }
 
     // sortBy is optional
-    const sortBy = typeof obj.sortBy === 'string' ? obj.sortBy : undefined;
+    const sortBy = typeof obj['sortBy'] === 'string' ? obj['sortBy'] : undefined;
 
     // sortOrder defaults to desc
-    const sortOrder = obj.sortOrder !== undefined ? validateSortOrder(obj.sortOrder) : 'desc';
+    const sortOrder = obj['sortOrder'] !== undefined ? validateSortOrder(obj['sortOrder']) : 'desc';
 
     return { cursor, limit, sortBy, sortOrder };
   },
@@ -213,30 +214,30 @@ export function cursorPaginatedResultSchema<T>(
   itemSchema: Schema<T>,
 ): Schema<CursorPaginatedResult<T>> {
   return createSchema((data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid cursor paginated result');
     }
     const obj = data as Record<string, unknown>;
 
-    if (!Array.isArray(obj.data)) {
+    if (!Array.isArray(obj['data'])) {
       throw new Error('data must be an array');
     }
-    const parsedData = obj.data.map((item) => itemSchema.parse(item));
+    const parsedData = obj['data'].map((item) => itemSchema.parse(item));
 
     // nextCursor can be string or null
     let nextCursor: string | null = null;
-    if (obj.nextCursor !== null && obj.nextCursor !== undefined) {
-      if (typeof obj.nextCursor !== 'string') {
+    if (obj['nextCursor'] !== null && obj['nextCursor'] !== undefined) {
+      if (typeof obj['nextCursor'] !== 'string') {
         throw new Error('nextCursor must be a string or null');
       }
-      nextCursor = obj.nextCursor;
+      nextCursor = obj['nextCursor'];
     }
 
-    if (typeof obj.hasNext !== 'boolean') {
+    if (typeof obj['hasNext'] !== 'boolean') {
       throw new Error('hasNext must be a boolean');
     }
 
-    const limit = validateInt(obj.limit, 'limit');
+    const limit = validateInt(obj['limit'], 'limit');
     if (limit < 1) {
       throw new Error('limit must be at least 1');
     }
@@ -244,7 +245,7 @@ export function cursorPaginatedResultSchema<T>(
     return {
       data: parsedData,
       nextCursor,
-      hasNext: obj.hasNext,
+      hasNext: obj['hasNext'],
       limit,
     };
   });
@@ -263,15 +264,15 @@ export type UniversalPaginationOptions =
 
 export const universalPaginationOptionsSchema: Schema<UniversalPaginationOptions> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid universal pagination options');
     }
     const obj = data as Record<string, unknown>;
 
-    if (obj.type === 'offset') {
+    if (obj['type'] === 'offset') {
       const parsed = paginationOptionsSchema.parse(data);
       return { ...parsed, type: 'offset' as const };
-    } else if (obj.type === 'cursor') {
+    } else if (obj['type'] === 'cursor') {
       const parsed = cursorPaginationOptionsSchema.parse(data);
       return { ...parsed, type: 'cursor' as const };
     } else {
@@ -294,15 +295,15 @@ export function universalPaginatedResultSchema<T>(
   itemSchema: Schema<T>,
 ): Schema<UniversalPaginatedResult<T>> {
   return createSchema((data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid universal paginated result');
     }
     const obj = data as Record<string, unknown>;
 
-    if (obj.type === 'offset') {
+    if (obj['type'] === 'offset') {
       const parsed = paginatedResultSchema(itemSchema).parse(data);
       return { ...parsed, type: 'offset' as const };
-    } else if (obj.type === 'cursor') {
+    } else if (obj['type'] === 'cursor') {
       const parsed = cursorPaginatedResultSchema(itemSchema).parse(data);
       return { ...parsed, type: 'cursor' as const };
     } else {

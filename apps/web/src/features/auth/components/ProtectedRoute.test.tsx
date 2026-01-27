@@ -3,7 +3,7 @@ import { MemoryRouter, Route, Routes } from '@abe-stack/ui';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { ProtectedRoute } from '../ProtectedRoute';
+import { ProtectedRoute } from './ProtectedRoute';
 
 // Mock the useAuth hook
 const mockUseAuth = vi.fn();

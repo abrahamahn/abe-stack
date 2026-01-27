@@ -107,13 +107,26 @@ import type {
 } from './services';
 
 /**
+ * Unified search configuration for SQL provider.
+ */
+export interface SqlSearchConfig {
+  provider: 'sql';
+  config: SqlSearchProviderConfig;
+}
+
+/**
+ * Unified search configuration for Elasticsearch provider.
+ */
+export interface ElasticsearchSearchConfig {
+  provider: 'elasticsearch';
+  config: ElasticsearchProviderConfig;
+}
+
+/**
  * Unified search configuration.
  * Supports SQL-based search (simple) or Elasticsearch (scalable).
  */
-export interface SearchConfig {
-  provider: 'sql' | 'elasticsearch';
-  config: ElasticsearchProviderConfig | SqlSearchProviderConfig;
-}
+export type SearchConfig = SqlSearchConfig | ElasticsearchSearchConfig;
 
 /**
  * Complete application configuration.

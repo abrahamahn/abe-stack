@@ -14,6 +14,7 @@ import {
 } from 'react';
 
 import { cn } from '../../utils/cn';
+
 import { PlanCard } from './PlanCard';
 
 import type { Plan, PlanFeature, PlanInterval } from '@abe-stack/core';
@@ -192,6 +193,9 @@ export const PricingTable = forwardRef<HTMLDivElement, PricingTableProps>(
             const isHighlighted = highlightedPlanId === plan.id;
             const isLoadingPlan = loadingPlanId === plan.id;
 
+            const actionLabel = getActionLabel?.(plan, isCurrent);
+            const badge = getBadge?.(plan);
+
             return (
               <PlanCard
                 key={plan.id}
@@ -200,11 +204,11 @@ export const PricingTable = forwardRef<HTMLDivElement, PricingTableProps>(
                 isHighlighted={isHighlighted}
                 isLoading={isLoadingPlan}
                 isDisabled={loadingPlanId !== null && !isLoadingPlan}
-                actionLabel={getActionLabel?.(plan, isCurrent)}
-                onAction={onSelectPlan}
-                badge={getBadge?.(plan)}
-                formatPrice={formatPrice}
-                renderFeature={renderFeature}
+                {...(actionLabel !== undefined && { actionLabel })}
+                {...(onSelectPlan !== undefined && { onAction: onSelectPlan })}
+                {...(badge !== undefined && { badge })}
+                {...(formatPrice !== undefined && { formatPrice })}
+                {...(renderFeature !== undefined && { renderFeature })}
               />
             );
           })}

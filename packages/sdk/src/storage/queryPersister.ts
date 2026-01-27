@@ -125,7 +125,7 @@ export function createQueryPersister(options: QueryPersisterOptions = {}): Persi
   const doPersist = (): void => {
     persistTimeout = null;
 
-    if (pendingClient) {
+    if (pendingClient !== null) {
       const clientToSave = pendingClient;
       pendingClient = null;
 
@@ -140,7 +140,7 @@ export function createQueryPersister(options: QueryPersisterOptions = {}): Persi
       // Throttle writes to avoid excessive IndexedDB operations
       pendingClient = client;
 
-      if (persistTimeout) return;
+      if (persistTimeout !== null) return;
 
       persistTimeout = setTimeout(doPersist, throttleTime);
     },
@@ -148,7 +148,7 @@ export function createQueryPersister(options: QueryPersisterOptions = {}): Persi
     async restoreClient(): Promise<PersistedClient | undefined> {
       try {
         const data = await idbStorage.getItem(key);
-        if (!data) return undefined;
+        if (data === null || data === '') return undefined;
 
         const client = JSON.parse(data) as PersistedClient;
 

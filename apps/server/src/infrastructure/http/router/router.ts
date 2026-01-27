@@ -29,10 +29,10 @@
  */
 
 import { createAuthGuard } from '@auth/middleware';
-import type { AppContext } from '@shared';
 
-import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { BaseRouteDefinition, RouteDefinition, RouteMap, RouterOptions } from './types';
+import type { AppContext } from '@shared';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================
 // Route Registration

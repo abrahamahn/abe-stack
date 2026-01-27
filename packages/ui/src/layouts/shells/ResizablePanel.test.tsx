@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { ResizablePanelGroup, ResizablePanel, ResizableSeparator } from '../ResizablePanel';
+import { ResizablePanelGroup, ResizablePanel, ResizableSeparator } from './ResizablePanel';
 
 describe('ResizablePanel', () => {
   it('renders panel group with children', () => {

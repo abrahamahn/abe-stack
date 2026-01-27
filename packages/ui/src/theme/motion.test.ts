@@ -1,7 +1,7 @@
 // packages/ui/src/theme/__tests__/motion.test.ts
 import { describe, expect, it } from 'vitest';
 
-import { motion } from '../motion';
+import { motion } from './motion';
 
 const durationPattern = /^\d+ms$/;
 const cubicBezierPattern =

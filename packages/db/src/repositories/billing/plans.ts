@@ -5,8 +5,15 @@
  * Data access layer for billing plans table.
  */
 
-import { and, eq, select, insert, update, deleteFrom, or } from '../../builder';
-import { type NewPlan, type Plan, type UpdatePlan, PLAN_COLUMNS, PLANS_TABLE } from '../../schema';
+import { and, eq, select, insert, update, deleteFrom, or } from '../../builder/index';
+import {
+  type NewPlan,
+  type Plan,
+  type PlanFeature,
+  type UpdatePlan,
+  PLAN_COLUMNS,
+  PLANS_TABLE,
+} from '../../schema/index';
 import { toCamelCase, toSnakeCase, parseJsonb } from '../../utils';
 
 import type { RawDb } from '../../client';
@@ -60,7 +67,8 @@ export interface PlanRepository {
 function transformPlan(row: Record<string, unknown>): Plan {
   const plan = toCamelCase<Plan>(row, PLAN_COLUMNS);
   // Parse JSONB features
-  plan.features = parseJsonb(row.features as string | null) || [];
+  const parsedFeatures = parseJsonb(row['features'] as string | null) as PlanFeature[] | null;
+  plan.features = parsedFeatures ?? [];
   return plan;
 }
 
@@ -73,21 +81,21 @@ export function createPlanRepository(db: RawDb): PlanRepository {
       const result = await db.queryOne<Record<string, unknown>>(
         select(PLANS_TABLE).where(eq('id', id)).toSql(),
       );
-      return result ? transformPlan(result) : null;
+      return result !== null ? transformPlan(result) : null;
     },
 
     async findByStripePriceId(stripePriceId: string): Promise<Plan | null> {
       const result = await db.queryOne<Record<string, unknown>>(
         select(PLANS_TABLE).where(eq('stripe_price_id', stripePriceId)).toSql(),
       );
-      return result ? transformPlan(result) : null;
+      return result !== null ? transformPlan(result) : null;
     },
 
     async findByPaypalPlanId(paypalPlanId: string): Promise<Plan | null> {
       const result = await db.queryOne<Record<string, unknown>>(
         select(PLANS_TABLE).where(eq('paypal_plan_id', paypalPlanId)).toSql(),
       );
-      return result ? transformPlan(result) : null;
+      return result !== null ? transformPlan(result) : null;
     },
 
     async listActive(): Promise<Plan[]> {
@@ -111,13 +119,13 @@ export function createPlanRepository(db: RawDb): PlanRepository {
     async create(plan: NewPlan): Promise<Plan> {
       const snakeData = toSnakeCase(plan as unknown as Record<string, unknown>, PLAN_COLUMNS);
       // Ensure features is JSON stringified
-      if (plan.features) {
-        snakeData.features = JSON.stringify(plan.features);
+      if (plan.features !== undefined) {
+        snakeData['features'] = JSON.stringify(plan.features);
       }
       const result = await db.queryOne<Record<string, unknown>>(
         insert(PLANS_TABLE).values(snakeData).returningAll().toSql(),
       );
-      if (!result) {
+      if (result === null) {
         throw new Error('Failed to create plan');
       }
       return transformPlan(result);
@@ -126,13 +134,13 @@ export function createPlanRepository(db: RawDb): PlanRepository {
     async update(id: string, data: UpdatePlan): Promise<Plan | null> {
       const snakeData = toSnakeCase(data as unknown as Record<string, unknown>, PLAN_COLUMNS);
       // Ensure features is JSON stringified
-      if (data.features) {
-        snakeData.features = JSON.stringify(data.features);
+      if (data.features !== undefined) {
+        snakeData['features'] = JSON.stringify(data.features);
       }
       const result = await db.queryOne<Record<string, unknown>>(
         update(PLANS_TABLE).set(snakeData).where(eq('id', id)).returningAll().toSql(),
       );
-      return result ? transformPlan(result) : null;
+      return result !== null ? transformPlan(result) : null;
     },
 
     async delete(id: string): Promise<boolean> {
@@ -142,21 +150,21 @@ export function createPlanRepository(db: RawDb): PlanRepository {
 
     async deactivate(id: string): Promise<Plan | null> {
       const result = await db.queryOne<Record<string, unknown>>(
-        update(PLANS_TABLE).set({ is_active: false }).where(eq('id', id)).returningAll().toSql(),
+        update(PLANS_TABLE).set({ ['is_active']: false }).where(eq('id', id)).returningAll().toSql(),
       );
-      return result ? transformPlan(result) : null;
+      return result !== null ? transformPlan(result) : null;
     },
 
     async activate(id: string): Promise<Plan | null> {
       const result = await db.queryOne<Record<string, unknown>>(
-        update(PLANS_TABLE).set({ is_active: true }).where(eq('id', id)).returningAll().toSql(),
+        update(PLANS_TABLE).set({ ['is_active']: true }).where(eq('id', id)).returningAll().toSql(),
       );
-      return result ? transformPlan(result) : null;
+      return result !== null ? transformPlan(result) : null;
     },
 
     async existsByName(name: string, excludeId?: string): Promise<boolean> {
       let query = select(PLANS_TABLE).columns('1 as exists').where(eq('name', name)).limit(1);
-      if (excludeId) {
+      if (excludeId !== undefined && excludeId !== '') {
         query = select(PLANS_TABLE)
           .columns('1 as exists')
           .where(and(eq('name', name), or(eq('id', excludeId))))

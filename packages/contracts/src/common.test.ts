@@ -2,13 +2,13 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-    emailSchema,
-    errorResponseSchema,
-    nameSchema,
-    passwordSchema,
-    requiredNameSchema,
-    uuidSchema,
-} from '../common';
+  emailSchema,
+  errorResponseSchema,
+  nameSchema,
+  passwordSchema,
+  requiredNameSchema,
+  uuidSchema,
+} from './common';
 
 describe('emailSchema', () => {
   it('should validate correct email addresses', () => {

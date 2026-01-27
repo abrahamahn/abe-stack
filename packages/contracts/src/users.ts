@@ -6,7 +6,8 @@
  */
 
 import { emailSchema, errorResponseSchema, passwordSchema, uuidSchema } from './common';
-import { createSchema, type Contract, type Schema } from './types';
+import { createSchema } from './schema';
+import type { Contract, Schema } from './types';
 
 // ============================================================================
 // User Role
@@ -39,43 +40,43 @@ export interface User {
 }
 
 export const userSchema: Schema<User> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid user data');
   }
   const obj = data as Record<string, unknown>;
 
-  const id = uuidSchema.parse(obj.id);
-  const email = emailSchema.parse(obj.email);
-  const role = userRoleSchema.parse(obj.role);
+  const id = uuidSchema.parse(obj['id']);
+  const email = emailSchema.parse(obj['email']);
+  const role = userRoleSchema.parse(obj['role']);
 
   // Validate name (nullable)
   let name: string | null = null;
-  if (obj.name !== null && obj.name !== undefined) {
-    if (typeof obj.name !== 'string') {
+  if (obj['name'] !== null && obj['name'] !== undefined) {
+    if (typeof obj['name'] !== 'string') {
       throw new Error('Name must be a string or null');
     }
-    name = obj.name;
+    name = obj['name'];
   }
 
   // Validate avatarUrl (nullable)
   let avatarUrl: string | null = null;
-  if (obj.avatarUrl !== null && obj.avatarUrl !== undefined) {
-    if (typeof obj.avatarUrl !== 'string') {
+  if (obj['avatarUrl'] !== null && obj['avatarUrl'] !== undefined) {
+    if (typeof obj['avatarUrl'] !== 'string') {
       throw new Error('avatarUrl must be a string or null');
     }
-    avatarUrl = obj.avatarUrl;
+    avatarUrl = obj['avatarUrl'];
   }
 
   // Validate createdAt as ISO datetime string (must include time component)
-  if (typeof obj.createdAt !== 'string') {
+  if (typeof obj['createdAt'] !== 'string') {
     throw new Error('createdAt must be an ISO datetime string');
   }
   // ISO datetime format: YYYY-MM-DDTHH:mm:ss.sssZ or similar with time component
   const isoDatetimeRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
-  if (!isoDatetimeRegex.test(obj.createdAt)) {
+  if (!isoDatetimeRegex.test(obj['createdAt'])) {
     throw new Error('createdAt must be an ISO datetime string with time component');
   }
-  const createdAt = obj.createdAt;
+  const createdAt = obj['createdAt'];
 
   return { id, email, name, avatarUrl, role, createdAt };
 });
@@ -90,7 +91,7 @@ export interface UpdateProfileRequest {
 
 export const updateProfileRequestSchema: Schema<UpdateProfileRequest> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid update profile request');
     }
     const obj = data as Record<string, unknown>;
@@ -98,18 +99,18 @@ export const updateProfileRequestSchema: Schema<UpdateProfileRequest> = createSc
     const result: UpdateProfileRequest = {};
 
     if ('name' in obj) {
-      if (obj.name !== null && obj.name !== undefined) {
-        if (typeof obj.name !== 'string') {
+      if (obj['name'] !== null && obj['name'] !== undefined) {
+        if (typeof obj['name'] !== 'string') {
           throw new Error('Name must be a string or null');
         }
-        if (obj.name.length > 0 && obj.name.length < 2) {
+        if (obj['name'].length > 0 && obj['name'].length < 2) {
           throw new Error('Name must be at least 2 characters');
         }
-        if (obj.name.length > 100) {
+        if (obj['name'].length > 100) {
           throw new Error('Name must be at most 100 characters');
         }
       }
-      result.name = obj.name as string | null;
+      result.name = obj['name'] as string | null;
     }
 
     return result;
@@ -127,22 +128,22 @@ export interface ChangePasswordRequest {
 
 export const changePasswordRequestSchema: Schema<ChangePasswordRequest> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid change password request');
     }
     const obj = data as Record<string, unknown>;
 
-    if (typeof obj.currentPassword !== 'string') {
+    if (typeof obj['currentPassword'] !== 'string') {
       throw new Error('Current password is required');
     }
-    if (obj.currentPassword.length === 0) {
+    if (obj['currentPassword'].length === 0) {
       throw new Error('Current password cannot be empty');
     }
 
-    const newPassword = passwordSchema.parse(obj.newPassword);
+    const newPassword = passwordSchema.parse(obj['newPassword']);
 
     return {
-      currentPassword: obj.currentPassword,
+      currentPassword: obj['currentPassword'],
       newPassword,
     };
   },
@@ -155,21 +156,21 @@ export interface ChangePasswordResponse {
 
 export const changePasswordResponseSchema: Schema<ChangePasswordResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid change password response');
     }
     const obj = data as Record<string, unknown>;
 
-    if (typeof obj.success !== 'boolean') {
+    if (typeof obj['success'] !== 'boolean') {
       throw new Error('success must be a boolean');
     }
-    if (typeof obj.message !== 'string') {
+    if (typeof obj['message'] !== 'string') {
       throw new Error('message must be a string');
     }
 
     return {
-      success: obj.success,
-      message: obj.message,
+      success: obj['success'],
+      message: obj['message'],
     };
   },
 );
@@ -184,16 +185,16 @@ export interface AvatarUploadResponse {
 
 export const avatarUploadResponseSchema: Schema<AvatarUploadResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid avatar upload response');
     }
     const obj = data as Record<string, unknown>;
 
-    if (typeof obj.avatarUrl !== 'string') {
+    if (typeof obj['avatarUrl'] !== 'string') {
       throw new Error('avatarUrl must be a string');
     }
 
-    return { avatarUrl: obj.avatarUrl };
+    return { avatarUrl: obj['avatarUrl'] };
   },
 );
 
@@ -203,16 +204,16 @@ export interface AvatarDeleteResponse {
 
 export const avatarDeleteResponseSchema: Schema<AvatarDeleteResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid avatar delete response');
     }
     const obj = data as Record<string, unknown>;
 
-    if (typeof obj.success !== 'boolean') {
+    if (typeof obj['success'] !== 'boolean') {
       throw new Error('success must be a boolean');
     }
 
-    return { success: obj.success };
+    return { success: obj['success'] };
   },
 );
 
@@ -229,47 +230,47 @@ export interface Session {
 }
 
 export const sessionSchema: Schema<Session> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid session data');
   }
   const obj = data as Record<string, unknown>;
 
-  const id = uuidSchema.parse(obj.id);
+  const id = uuidSchema.parse(obj['id']);
 
-  if (typeof obj.createdAt !== 'string') {
+  if (typeof obj['createdAt'] !== 'string') {
     throw new Error('createdAt must be an ISO datetime string');
   }
   const isoDatetimeRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
-  if (!isoDatetimeRegex.test(obj.createdAt)) {
+  if (!isoDatetimeRegex.test(obj['createdAt'])) {
     throw new Error('createdAt must be an ISO datetime string with time component');
   }
 
   let ipAddress: string | null = null;
-  if (obj.ipAddress !== null && obj.ipAddress !== undefined) {
-    if (typeof obj.ipAddress !== 'string') {
+  if (obj['ipAddress'] !== null && obj['ipAddress'] !== undefined) {
+    if (typeof obj['ipAddress'] !== 'string') {
       throw new Error('ipAddress must be a string or null');
     }
-    ipAddress = obj.ipAddress;
+    ipAddress = obj['ipAddress'];
   }
 
   let userAgent: string | null = null;
-  if (obj.userAgent !== null && obj.userAgent !== undefined) {
-    if (typeof obj.userAgent !== 'string') {
+  if (obj['userAgent'] !== null && obj['userAgent'] !== undefined) {
+    if (typeof obj['userAgent'] !== 'string') {
       throw new Error('userAgent must be a string or null');
     }
-    userAgent = obj.userAgent;
+    userAgent = obj['userAgent'];
   }
 
-  if (typeof obj.isCurrent !== 'boolean') {
+  if (typeof obj['isCurrent'] !== 'boolean') {
     throw new Error('isCurrent must be a boolean');
   }
 
   return {
     id,
-    createdAt: obj.createdAt,
+    createdAt: obj['createdAt'],
     ipAddress,
     userAgent,
-    isCurrent: obj.isCurrent,
+    isCurrent: obj['isCurrent'],
   };
 });
 
@@ -279,16 +280,16 @@ export interface SessionsListResponse {
 
 export const sessionsListResponseSchema: Schema<SessionsListResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid sessions list response');
     }
     const obj = data as Record<string, unknown>;
 
-    if (!Array.isArray(obj.sessions)) {
+    if (!Array.isArray(obj['sessions'])) {
       throw new Error('sessions must be an array');
     }
 
-    const sessions = obj.sessions.map((s) => sessionSchema.parse(s));
+    const sessions = obj['sessions'].map((s) => sessionSchema.parse(s));
 
     return { sessions };
   },
@@ -300,16 +301,16 @@ export interface RevokeSessionResponse {
 
 export const revokeSessionResponseSchema: Schema<RevokeSessionResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid revoke session response');
     }
     const obj = data as Record<string, unknown>;
 
-    if (typeof obj.success !== 'boolean') {
+    if (typeof obj['success'] !== 'boolean') {
       throw new Error('success must be a boolean');
     }
 
-    return { success: obj.success };
+    return { success: obj['success'] };
   },
 );
 
@@ -320,19 +321,19 @@ export interface RevokeAllSessionsResponse {
 
 export const revokeAllSessionsResponseSchema: Schema<RevokeAllSessionsResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid revoke all sessions response');
     }
     const obj = data as Record<string, unknown>;
 
-    if (typeof obj.success !== 'boolean') {
+    if (typeof obj['success'] !== 'boolean') {
       throw new Error('success must be a boolean');
     }
-    if (typeof obj.revokedCount !== 'number') {
+    if (typeof obj['revokedCount'] !== 'number') {
       throw new Error('revokedCount must be a number');
     }
 
-    return { success: obj.success, revokedCount: obj.revokedCount };
+    return { success: obj['success'], revokedCount: obj['revokedCount'] };
   },
 );
 

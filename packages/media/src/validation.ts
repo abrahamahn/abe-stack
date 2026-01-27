@@ -37,7 +37,7 @@ export async function validateMediaFile(
 
     // Detect file type
     const fileType = await detectFileTypeFromFile(filePath);
-    if (!fileType) {
+    if (fileType === null) {
       return {
         valid: false,
         error: 'Unable to determine file type',
@@ -72,34 +72,42 @@ export function validateUploadConfig(config: {
 }): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
 
-  if (config.maxFileSize && config.maxFileSize <= 0) {
+  if (config.maxFileSize !== undefined && config.maxFileSize !== 0 && config.maxFileSize <= 0) {
     errors.push('maxFileSize must be positive');
   }
 
-  if (config.maxFileSize && config.maxFileSize > 1000 * 1024 * 1024) {
+  if (
+    config.maxFileSize !== undefined &&
+    config.maxFileSize !== 0 &&
+    config.maxFileSize > 1000 * 1024 * 1024
+  ) {
     // 1GB
     errors.push('maxFileSize cannot exceed 1GB');
   }
 
-  if (config.chunkSize && config.chunkSize <= 0) {
+  if (config.chunkSize !== undefined && config.chunkSize !== 0 && config.chunkSize <= 0) {
     errors.push('chunkSize must be positive');
   }
 
-  if (config.chunkSize && config.chunkSize > 10 * 1024 * 1024) {
+  if (
+    config.chunkSize !== undefined &&
+    config.chunkSize !== 0 &&
+    config.chunkSize > 10 * 1024 * 1024
+  ) {
     // 10MB
     errors.push('chunkSize cannot exceed 10MB');
   }
 
-  if (config.timeout && config.timeout <= 0) {
+  if (config.timeout !== undefined && config.timeout !== 0 && config.timeout <= 0) {
     errors.push('timeout must be positive');
   }
 
-  if (config.timeout && config.timeout > 3600000) {
+  if (config.timeout !== undefined && config.timeout !== 0 && config.timeout > 3600000) {
     // 1 hour
     errors.push('timeout cannot exceed 1 hour');
   }
 
-  if (config.allowedTypes && config.allowedTypes.length === 0) {
+  if (config.allowedTypes?.length === 0) {
     errors.push('allowedTypes cannot be empty');
   }
 
@@ -141,12 +149,15 @@ export function sanitizeFilename(filename: string): string {
   // Limit length
   if (sanitized.length > 255) {
     const ext = sanitized.split('.').pop();
-    const name = sanitized.slice(0, 255 - (ext ? ext.length + 1 : 0));
-    sanitized = ext ? `${name}.${ext}` : name;
+    const name = sanitized.slice(
+      0,
+      255 - (ext !== undefined && ext.length > 0 ? ext.length + 1 : 0),
+    );
+    sanitized = ext !== undefined && ext.length > 0 ? `${name}.${ext}` : name;
   }
 
   // Ensure not empty
-  if (!sanitized) {
+  if (sanitized.length === 0) {
     sanitized = 'file';
   }
 

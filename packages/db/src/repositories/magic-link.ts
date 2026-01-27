@@ -5,13 +5,24 @@
  * Data access layer for magic link authentication tokens.
  */
 
-import { and, eq, gt, isNull, lt, select, insert, update, deleteFrom, raw } from '../builder';
+import {
+  and,
+  deleteFrom,
+  eq,
+  gt,
+  insert,
+  isNull,
+  lt,
+  raw,
+  select,
+  update,
+} from '../builder/index';
 import {
   MAGIC_LINK_TOKEN_COLUMNS,
   MAGIC_LINK_TOKENS_TABLE,
   type MagicLinkToken,
   type NewMagicLinkToken,
-} from '../schema';
+} from '../schema/index';
 import { toCamelCase, toCamelCaseArray, toSnakeCase } from '../utils';
 
 import type { RawDb } from '../client';
@@ -42,7 +53,7 @@ export function createMagicLinkTokenRepository(db: RawDb): MagicLinkTokenReposit
       const result = await db.queryOne<Record<string, unknown>>(
         select(MAGIC_LINK_TOKENS_TABLE).where(eq('id', id)).toSql(),
       );
-      return result ? toCamelCase<MagicLinkToken>(result, MAGIC_LINK_TOKEN_COLUMNS) : null;
+      return result !== null ? toCamelCase<MagicLinkToken>(result, MAGIC_LINK_TOKEN_COLUMNS) : null;
     },
 
     async findValidByTokenHash(tokenHash: string): Promise<MagicLinkToken | null> {
@@ -51,7 +62,7 @@ export function createMagicLinkTokenRepository(db: RawDb): MagicLinkTokenReposit
           .where(and(eq('token_hash', tokenHash), gt('expires_at', new Date()), isNull('used_at')))
           .toSql(),
       );
-      return result ? toCamelCase<MagicLinkToken>(result, MAGIC_LINK_TOKEN_COLUMNS) : null;
+      return result !== null ? toCamelCase<MagicLinkToken>(result, MAGIC_LINK_TOKEN_COLUMNS) : null;
     },
 
     async findValidByEmail(email: string): Promise<MagicLinkToken | null> {
@@ -62,7 +73,7 @@ export function createMagicLinkTokenRepository(db: RawDb): MagicLinkTokenReposit
           .limit(1)
           .toSql(),
       );
-      return result ? toCamelCase<MagicLinkToken>(result, MAGIC_LINK_TOKEN_COLUMNS) : null;
+      return result !== null ? toCamelCase<MagicLinkToken>(result, MAGIC_LINK_TOKEN_COLUMNS) : null;
     },
 
     async findRecentByEmail(email: string, since: Date): Promise<MagicLinkToken[]> {
@@ -83,7 +94,7 @@ export function createMagicLinkTokenRepository(db: RawDb): MagicLinkTokenReposit
       const result = await db.queryOne<Record<string, unknown>>(
         insert(MAGIC_LINK_TOKENS_TABLE).values(snakeData).returningAll().toSql(),
       );
-      if (!result) {
+      if (result === null) {
         throw new Error('Failed to create magic link token');
       }
       return toCamelCase<MagicLinkToken>(result, MAGIC_LINK_TOKEN_COLUMNS);
@@ -91,7 +102,10 @@ export function createMagicLinkTokenRepository(db: RawDb): MagicLinkTokenReposit
 
     async markAsUsed(id: string): Promise<void> {
       await db.execute(
-        update(MAGIC_LINK_TOKENS_TABLE).set({ used_at: new Date() }).where(eq('id', id)).toSql(),
+        update(MAGIC_LINK_TOKENS_TABLE)
+          .set({ ['used_at']: new Date() })
+          .where(eq('id', id))
+          .toSql(),
       );
     },
 
@@ -113,7 +127,7 @@ export function createMagicLinkTokenRepository(db: RawDb): MagicLinkTokenReposit
           .where(and(eq('email', email), gt('created_at', since)))
           .toSql(),
       );
-      return result ? parseInt(result.count, 10) : 0;
+      return result !== null ? parseInt(result.count, 10) : 0;
     },
 
     async countRecentByIp(ipAddress: string, since: Date): Promise<number> {
@@ -124,7 +138,7 @@ export function createMagicLinkTokenRepository(db: RawDb): MagicLinkTokenReposit
           .where(and(eq('ip_address', ipAddress), gt('created_at', since)))
           .toSql(),
       );
-      return result ? parseInt(result.count, 10) : 0;
+      return result !== null ? parseInt(result.count, 10) : 0;
     },
   };
 }

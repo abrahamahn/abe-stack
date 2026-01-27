@@ -441,7 +441,7 @@ const languages: Record<string, LanguageDefinition> = {
 
 export function highlightCode(code: string, language: string, theme: SyntaxTheme): ReactNode[] {
   if (code === '') return [];
-  const langDef = languages[language.toLowerCase()] ?? languages.javascript;
+  const langDef = languages[language.toLowerCase()] ?? languages['javascript'];
   if (langDef == null) {
     return [<span key="0">{code}</span>];
   }
@@ -648,14 +648,14 @@ function getTokenColor(type: Token['type'], theme: SyntaxTheme): string {
 // React Component
 // ============================================================================
 
-export function SyntaxHighlighter({
+export const SyntaxHighlighter = ({
   language,
   children,
   showLineNumbers = false,
   startingLineNumber = 1,
   theme = 'dark',
   className,
-}: SyntaxHighlighterProps): React.ReactElement {
+}: SyntaxHighlighterProps): React.ReactElement => {
   const resolvedTheme =
     typeof theme === 'string' ? (theme === 'dark' ? darkTheme : lightTheme) : theme;
 
@@ -710,7 +710,7 @@ export function SyntaxHighlighter({
       <code>{highlighted}</code>
     </pre>
   );
-}
+};
 
 // ============================================================================
 // Export themes for customization

@@ -9,9 +9,9 @@ import type { ResetPasswordFormProps } from '@auth/components/ResetPasswordForm'
 import type { ReactElement, ReactNode } from 'react';
 
 // Wrapper component for Router context
-function RouterWrapper({ children }: { children: ReactNode }): ReactElement {
+const RouterWrapper = ({ children }: { children: ReactNode }): ReactElement => {
   return <MemoryRouter>{children}</MemoryRouter>;
-}
+};
 
 // Helper function to render with router
 function renderWithRouter(ui: ReactElement): ReturnType<typeof render> {
@@ -61,7 +61,7 @@ describe('ResetPasswordForm', () => {
     });
 
     it('renders back to sign in as a Link when onModeChange is not provided', () => {
-      renderWithRouter(<ResetPasswordForm {...defaultProps} onModeChange={undefined} />);
+      renderWithRouter(<ResetPasswordForm {...defaultProps} />);
 
       expect(screen.getByRole('link', { name: 'Back to sign in' })).toHaveAttribute(
         'href',
@@ -72,7 +72,7 @@ describe('ResetPasswordForm', () => {
 
   describe('Invalid/Missing Token - Error View', () => {
     it('shows invalid link message when token is missing', () => {
-      renderWithRouter(<ResetPasswordForm {...defaultProps} initialData={undefined} />);
+      renderWithRouter(<ResetPasswordForm {...defaultProps} />);
 
       expect(screen.getByRole('heading', { name: 'Invalid reset link' })).toBeInTheDocument();
       expect(
@@ -88,26 +88,14 @@ describe('ResetPasswordForm', () => {
 
     it('shows request new link button with onModeChange', () => {
       const mockOnModeChange = vi.fn();
-      renderWithRouter(
-        <ResetPasswordForm
-          {...defaultProps}
-          initialData={undefined}
-          onModeChange={mockOnModeChange}
-        />,
-      );
+      renderWithRouter(<ResetPasswordForm {...defaultProps} onModeChange={mockOnModeChange} />);
 
       expect(screen.getByRole('button', { name: 'Request a new reset link' })).toBeInTheDocument();
     });
 
     it('calls onModeChange with forgot-password when request new link is clicked', () => {
       const mockOnModeChange = vi.fn();
-      renderWithRouter(
-        <ResetPasswordForm
-          {...defaultProps}
-          initialData={undefined}
-          onModeChange={mockOnModeChange}
-        />,
-      );
+      renderWithRouter(<ResetPasswordForm {...defaultProps} onModeChange={mockOnModeChange} />);
 
       fireEvent.click(screen.getByRole('button', { name: 'Request a new reset link' }));
 
@@ -115,9 +103,7 @@ describe('ResetPasswordForm', () => {
     });
 
     it('shows request new link as a Link when onModeChange is not provided', () => {
-      renderWithRouter(
-        <ResetPasswordForm {...defaultProps} initialData={undefined} onModeChange={undefined} />,
-      );
+      renderWithRouter(<ResetPasswordForm {...defaultProps} />);
 
       expect(screen.getByRole('link', { name: 'Request a new reset link' })).toHaveAttribute(
         'href',
@@ -126,7 +112,7 @@ describe('ResetPasswordForm', () => {
     });
 
     it('does not render password form when token is missing', () => {
-      renderWithRouter(<ResetPasswordForm {...defaultProps} initialData={undefined} />);
+      renderWithRouter(<ResetPasswordForm {...defaultProps} />);
 
       expect(screen.queryByLabelText('New password')).not.toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Update password' })).not.toBeInTheDocument();
@@ -185,7 +171,7 @@ describe('ResetPasswordForm', () => {
     });
 
     it('does not call onResetPassword when no handler provided', async () => {
-      renderWithRouter(<ResetPasswordForm {...defaultProps} onResetPassword={undefined} />);
+      renderWithRouter(<ResetPasswordForm {...defaultProps} />);
 
       fireEvent.change(screen.getByLabelText('New password'), {
         target: { value: 'newpassword123' },
@@ -199,7 +185,7 @@ describe('ResetPasswordForm', () => {
     it('does not render form when token is missing', () => {
       // This shouldn't happen in practice since the form isn't rendered without token,
       // but we test that the form handles missing initialData gracefully
-      renderWithRouter(<ResetPasswordForm {...defaultProps} initialData={undefined} />);
+      renderWithRouter(<ResetPasswordForm {...defaultProps} />);
 
       // The form isn't rendered, so the password field shouldn't be present
       expect(screen.queryByLabelText('New password')).not.toBeInTheDocument();
@@ -325,7 +311,7 @@ describe('ResetPasswordForm', () => {
     });
 
     it('invalid token view has proper heading', () => {
-      renderWithRouter(<ResetPasswordForm {...defaultProps} initialData={undefined} />);
+      renderWithRouter(<ResetPasswordForm {...defaultProps} />);
 
       const heading = screen.getByRole('heading', { name: 'Invalid reset link' });
       expect(heading).toHaveClass('auth-form-title');

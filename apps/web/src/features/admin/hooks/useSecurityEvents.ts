@@ -7,9 +7,9 @@
 
 import { tokenStore } from '@abe-stack/core';
 import { useQuery, type UseQueryResult } from '@abe-stack/sdk';
+import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useCallback, useMemo, useState } from 'react';
 
-import { useClientEnvironment } from '@app/ClientEnvironment';
 
 import { createAdminApiClient } from '../services/adminApi';
 

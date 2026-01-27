@@ -9,7 +9,7 @@ type StackedLayoutProps = {
   children: ReactNode;
 };
 
-export function StackedLayout({ hero, children }: StackedLayoutProps): ReactElement {
+export const StackedLayout = ({ hero, children }: StackedLayoutProps): ReactElement => {
   return (
     <div className="stacked-layout">
       <Container size="md">
@@ -18,4 +18,4 @@ export function StackedLayout({ hero, children }: StackedLayoutProps): ReactElem
       </Container>
     </div>
   );
-}
+};

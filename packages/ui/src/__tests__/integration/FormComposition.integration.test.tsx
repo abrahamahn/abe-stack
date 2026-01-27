@@ -76,11 +76,11 @@ function validateForm(data: FormData): FormErrors {
   return errors;
 }
 
-function RegistrationForm({
+const RegistrationForm = ({
   onSubmit,
 }: {
   onSubmit: (data: FormData) => Promise<void>;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { isLoading, error, wrapHandler, clearError } = useFormState();
   const [formData, setFormData] = useState<FormData>({
     email: '',
@@ -122,7 +122,12 @@ function RegistrationForm({
         </Alert>
       )}
 
-      <FormField label="Email" htmlFor="email" error={fieldErrors.email} required>
+      <FormField
+        label="Email"
+        htmlFor="email"
+        {...(fieldErrors.email !== undefined && { error: fieldErrors.email })}
+        required
+      >
         <Input
           id="email"
           data-testid="email-input"
@@ -134,7 +139,12 @@ function RegistrationForm({
         />
       </FormField>
 
-      <FormField label="Password" htmlFor="password" error={fieldErrors.password} required>
+      <FormField
+        label="Password"
+        htmlFor="password"
+        {...(fieldErrors.password !== undefined && { error: fieldErrors.password })}
+        required
+      >
         <Input
           id="password"
           data-testid="password-input"
@@ -149,7 +159,7 @@ function RegistrationForm({
       <FormField
         label="Confirm Password"
         htmlFor="confirmPassword"
-        error={fieldErrors.confirmPassword}
+        {...(fieldErrors.confirmPassword !== undefined && { error: fieldErrors.confirmPassword })}
         required
       >
         <Input
@@ -166,7 +176,7 @@ function RegistrationForm({
       <FormField
         label="Message"
         htmlFor="message"
-        error={fieldErrors.message}
+        {...(fieldErrors.message !== undefined && { error: fieldErrors.message })}
         helperText="Tell us about yourself"
         required
       >
@@ -180,7 +190,12 @@ function RegistrationForm({
         />
       </FormField>
 
-      <FormField label="Country" htmlFor="country" error={fieldErrors.country} required>
+      <FormField
+        label="Country"
+        htmlFor="country"
+        {...(fieldErrors.country !== undefined && { error: fieldErrors.country })}
+        required
+      >
         <Select
           id="country"
           data-testid="country-select"
@@ -200,13 +215,13 @@ function RegistrationForm({
       </Button>
     </form>
   );
-}
+};
 
-function ResendVerificationForm({
+const ResendVerificationForm = ({
   onResend,
 }: {
   onResend: () => Promise<void>;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { isLoading, error, wrapHandler, clearError } = useFormState();
   const { cooldown, isOnCooldown, startCooldown } = useResendCooldown(30);
 
@@ -235,7 +250,7 @@ function ResendVerificationForm({
       </Button>
     </div>
   );
-}
+};
 
 // =============================================================================
 // Tests

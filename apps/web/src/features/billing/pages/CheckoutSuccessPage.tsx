@@ -3,8 +3,7 @@
  * CheckoutSuccessPage - Displayed after successful checkout.
  */
 
-import { Button, Card, PageContainer } from '@abe-stack/ui';
-import { useNavigate } from '@abe-stack/ui';
+import { Button, Card, PageContainer, useNavigate } from '@abe-stack/ui';
 import { useEffect, useState } from 'react';
 
 import type { ReactElement } from 'react';
@@ -13,7 +12,7 @@ import type { ReactElement } from 'react';
 // Component
 // ============================================================================
 
-export function CheckoutSuccessPage(): ReactElement {
+export const CheckoutSuccessPage = (): ReactElement => {
   const navigate = useNavigate();
   const [countdown, setCountdown] = useState(5);
 
@@ -69,4 +68,4 @@ export function CheckoutSuccessPage(): ReactElement {
       </Card>
     </PageContainer>
   );
-}
+};

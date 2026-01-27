@@ -152,16 +152,16 @@ export const AppShell = forwardRef<HTMLDivElement, AppShellProps>(
 
     // For non-resizable mode, use CSS variables
     const cssVars = {
-      '--app-shell-header-height':
+      ['--app-shell-header-height']:
         typeof headerHeight === 'number' ? `${String(headerHeight)}px` : headerHeight,
-      '--app-shell-footer-height':
+      ['--app-shell-footer-height']:
         typeof footerHeight === 'number' ? `${String(footerHeight)}px` : footerHeight,
-      '--app-shell-sidebar-width': sidebarCollapsed
+      ['--app-shell-sidebar-width']: sidebarCollapsed
         ? '0px'
         : typeof sidebarWidth === 'number'
           ? `${String(sidebarWidth)}px`
           : sidebarWidth,
-      '--app-shell-aside-width': asideCollapsed
+      ['--app-shell-aside-width']: asideCollapsed
         ? '0px'
         : typeof asideWidth === 'number'
           ? `${String(asideWidth)}px`

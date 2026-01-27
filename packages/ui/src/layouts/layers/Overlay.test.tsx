@@ -4,7 +4,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Overlay } from '../Overlay';
+import { Overlay } from './Overlay';
 
 describe('Overlay', () => {
   it('renders nothing when open is false', () => {

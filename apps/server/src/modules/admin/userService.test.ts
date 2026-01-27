@@ -7,7 +7,7 @@ import {
     unlockUser,
     updateUser,
 } from '@admin/userService';
-import { UserNotFoundError } from '@shared';
+import { UserNotFoundError } from '@abe-stack/core';
 /* eslint-disable @typescript-eslint/unbound-method */
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 

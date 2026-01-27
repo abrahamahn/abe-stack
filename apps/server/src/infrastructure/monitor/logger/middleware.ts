@@ -12,8 +12,8 @@ import {
     getOrCreateCorrelationId,
 } from './logger';
 
-import type { FastifyInstance } from 'fastify';
 import type { Logger, RequestContext } from './types';
+import type { FastifyInstance } from 'fastify';
 
 // Extend Fastify request with our custom properties
 declare module 'fastify' {

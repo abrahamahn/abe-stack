@@ -8,7 +8,7 @@
  */
 
 import { QueryCache } from '@abe-stack/sdk';
-import { clientConfig } from '@config';
+import { clientConfig } from '@/config';
 import { createAuthService } from '@features/auth';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -65,7 +65,7 @@ type GetElementById = (elementId: string) => HTMLElement | null;
 
 const documentRef = document as unknown as { getElementById: GetElementById };
 const rootElement = documentRef.getElementById('root');
-if (!rootElement) throw new Error('Failed to find the root element');
+if (rootElement === null) throw new Error('Failed to find the root element');
 
 const root = createRoot(rootElement);
 root.render(

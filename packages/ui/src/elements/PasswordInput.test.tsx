@@ -3,7 +3,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { PasswordInput } from '../PasswordInput';
+import { PasswordInput } from './PasswordInput';
 
 describe('PasswordInput', () => {
   it('renders a password input by default', () => {

@@ -7,9 +7,9 @@
 
 import { describe, expect, it, vi } from 'vitest';
 
-import { BatchedQueue } from '../infrastructure/async/BatchedQueue';
-import { DeferredPromise } from '../infrastructure/async/DeferredPromise';
-import { ReactiveMap } from '../infrastructure/async/ReactiveMap';
+import { BatchedQueue } from '../infrastructure/async/batched-queue';
+import { DeferredPromise } from '../infrastructure/async/deferred-promise';
+import { ReactiveMap } from '../infrastructure/async/reactive-map';
 
 describe('Async Utilities Integration', () => {
   describe('BatchedQueue under load', () => {
@@ -282,7 +282,11 @@ describe('Async Utilities Integration', () => {
     describe('Atomic batch writes', () => {
       it('should apply all writes before notifying', () => {
         const map = new ReactiveMap<string, number>();
-        const observedStates: Array<{ a?: number; b?: number; c?: number }> = [];
+        const observedStates: Array<{
+          a?: number | undefined;
+          b?: number | undefined;
+          c?: number | undefined;
+        }> = [];
 
         // Subscribe to all keys
         ['a', 'b', 'c'].forEach((key) => {

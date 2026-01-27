@@ -351,7 +351,7 @@ export function useShallowEffect(effect: React.EffectCallback, deps: React.Depen
  */
 export class TTLCache<T> {
   private cache = new Map<string, { value: T; expires: number }>();
-  private cleanupTimer?: ReturnType<typeof setTimeout>;
+  private cleanupTimer?: ReturnType<typeof setTimeout> | undefined;
 
   constructor(private defaultTTL: number = 300000) {} // 5 minutes default
 

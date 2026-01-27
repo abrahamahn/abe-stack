@@ -3,15 +3,15 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { useDisclosure } from '../useDisclosure';
+import { useDisclosure } from './useDisclosure';
 
 import type { ReactElement } from 'react';
 
-function DisclosureHarness(props: {
+const DisclosureHarness = (props: {
   open?: boolean;
   defaultOpen?: boolean;
   onChange?: (open: boolean) => void;
-}): ReactElement {
+}): ReactElement => {
   const { open, defaultOpen, onChange } = props;
   const {
     open: isOpen,
@@ -19,9 +19,9 @@ function DisclosureHarness(props: {
     close,
     toggle,
   } = useDisclosure({
-    open,
-    defaultOpen,
-    onChange,
+    ...(open !== undefined && { open }),
+    ...(defaultOpen !== undefined && { defaultOpen }),
+    ...(onChange !== undefined && { onChange }),
   });
 
   return (
@@ -38,7 +38,7 @@ function DisclosureHarness(props: {
       </button>
     </div>
   );
-}
+};
 
 describe('useDisclosure', () => {
   it('toggles open state when uncontrolled', () => {

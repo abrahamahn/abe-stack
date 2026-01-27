@@ -9,8 +9,9 @@ import {
   SORT_ORDER,
   universalPaginatedResultSchema,
   universalPaginationOptionsSchema,
-} from '../pagination';
-import { createSchema, type Schema } from '../types';
+} from './pagination';
+import { createSchema } from './schema';
+import type { Schema } from './types';
 
 // Helper to create simple test schemas
 const stringSchema: Schema<string> = createSchema((data: unknown) => {
@@ -21,31 +22,31 @@ const stringSchema: Schema<string> = createSchema((data: unknown) => {
 });
 
 const userSchemaManual: Schema<{ id: string; name: string }> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Expected object');
   }
   const obj = data as Record<string, unknown>;
-  if (typeof obj.id !== 'string') {
+  if (typeof obj['id'] !== 'string') {
     throw new Error('Expected id to be string');
   }
-  if (typeof obj.name !== 'string') {
+  if (typeof obj['name'] !== 'string') {
     throw new Error('Expected name to be string');
   }
-  return { id: obj.id, name: obj.name };
+  return { id: obj['id'], name: obj['name'] };
 });
 
 const productSchemaManual: Schema<{ id: string; price: number }> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Expected object');
   }
   const obj = data as Record<string, unknown>;
-  if (typeof obj.id !== 'string') {
+  if (typeof obj['id'] !== 'string') {
     throw new Error('Expected id to be string');
   }
-  if (typeof obj.price !== 'number') {
+  if (typeof obj['price'] !== 'number') {
     throw new Error('Expected price to be number');
   }
-  return { id: obj.id, price: obj.price };
+  return { id: obj['id'], price: obj['price'] };
 });
 
 describe('SORT_ORDER', () => {

@@ -4,8 +4,9 @@
  *
  * Communication channels:
  * - email: Email sending services
- * - pubsub: Real-time subscription management (Postgres NOTIFY/LISTEN)
  * - websocket: WebSocket connection handling
+ *
+ * Note: PubSub should be imported directly from @abe-stack/core/pubsub
  */
 
 // Email
@@ -22,24 +23,6 @@ export {
   type SmtpMessage,
   type SmtpResult,
 } from './email';
-
-// PubSub
-export {
-  PostgresPubSub,
-  SubKeys,
-  SubscriptionManager,
-  createPostgresPubSub,
-  publishAfterWrite,
-  type ClientMessage,
-  type ListKey,
-  type PostgresPubSubOptions,
-  type PubSubMessage,
-  type RecordKey,
-  type ServerMessage,
-  type SubscriptionKey,
-  type SubscriptionManagerOptions,
-  type WebSocket,
-} from '@abe-stack/core/pubsub';
 
 // WebSocket
 export { getWebSocketStats, registerWebSocket, type WebSocketStats } from './websocket';

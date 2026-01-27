@@ -39,10 +39,10 @@ export interface SidePeekDemoContentProps {
   onAction: () => void;
 }
 
-export function SidePeekDemoContent({
+export const SidePeekDemoContent = ({
   actionLabel,
   onAction,
-}: SidePeekDemoContentProps): ReactElement {
+}: SidePeekDemoContentProps): ReactElement => {
   return (
     <div className="space-y-4">
       <Markdown className="markdown-content">{SIDE_PEEK_MARKDOWN}</Markdown>
@@ -53,4 +53,4 @@ export function SidePeekDemoContent({
       </div>
     </div>
   );
-}
+};

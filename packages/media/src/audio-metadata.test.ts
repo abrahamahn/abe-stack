@@ -1,7 +1,7 @@
 // packages/media/src/__tests__/audio-metadata.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
-import { parseAudioMetadata, type AudioMetadata } from '../audio-metadata';
+import { parseAudioMetadata, type AudioMetadata } from './audio-metadata';
 
 // Mock fs module
 vi.mock('fs', () => ({

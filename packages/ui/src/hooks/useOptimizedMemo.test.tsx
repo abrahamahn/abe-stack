@@ -4,23 +4,23 @@ import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    deepEqual,
-    LRUCache,
-    shallowEqual,
-    TTLCache,
-    useDebounce,
-    useDebouncedState,
-    useDeepCallback,
-    useDeepEffect,
-    useDeepMemo,
-    useExpensiveComputation,
-    useLRUCache,
-    useShallowCallback,
-    useShallowEffect,
-    useShallowMemo,
-    useThrottle,
-    useTTLCache,
-} from '../useOptimizedMemo';
+  deepEqual,
+  LRUCache,
+  shallowEqual,
+  TTLCache,
+  useDebounce,
+  useDebouncedState,
+  useDeepCallback,
+  useDeepEffect,
+  useDeepMemo,
+  useExpensiveComputation,
+  useLRUCache,
+  useShallowCallback,
+  useShallowEffect,
+  useShallowMemo,
+  useThrottle,
+  useTTLCache,
+} from './useOptimizedMemo';
 
 // ============================================================================
 // Tests: deepEqual
@@ -95,7 +95,7 @@ describe('deepEqual', () => {
     });
 
     it('handles non-empty arrays vs objects correctly', () => {
-      expect(deepEqual([1], { 0: 1 })).toBe(true); // Arrays with numeric keys match object shape
+      expect(deepEqual([1], { [0]: 1 })).toBe(true); // Arrays with numeric keys match object shape
       expect(deepEqual([1, 2], { a: 1 })).toBe(false);
     });
 
@@ -286,9 +286,14 @@ describe('useDeepEffect', () => {
   it('runs effect when deps are deeply different', () => {
     const effect = vi.fn();
 
-    const { rerender } = renderHook(({ deps }) => { useDeepEffect(effect, deps); }, {
-      initialProps: { deps: [{ a: 1 }] },
-    });
+    const { rerender } = renderHook(
+      ({ deps }) => {
+        useDeepEffect(effect, deps);
+      },
+      {
+        initialProps: { deps: [{ a: 1 }] },
+      },
+    );
 
     expect(effect).toHaveBeenCalledTimes(1);
 
@@ -301,9 +306,14 @@ describe('useDeepEffect', () => {
   it('does not run effect when deps are deeply equal', () => {
     const effect = vi.fn();
 
-    const { rerender } = renderHook(({ deps }) => { useDeepEffect(effect, deps); }, {
-      initialProps: { deps: [{ a: 1, b: { c: 2 } }] },
-    });
+    const { rerender } = renderHook(
+      ({ deps }) => {
+        useDeepEffect(effect, deps);
+      },
+      {
+        initialProps: { deps: [{ a: 1, b: { c: 2 } }] },
+      },
+    );
 
     expect(effect).toHaveBeenCalledTimes(1);
 
@@ -322,9 +332,14 @@ describe('useShallowEffect', () => {
   it('runs effect when deps change shallowly', () => {
     const effect = vi.fn();
 
-    const { rerender } = renderHook(({ deps }) => { useShallowEffect(effect, deps); }, {
-      initialProps: { deps: [1, 2] },
-    });
+    const { rerender } = renderHook(
+      ({ deps }) => {
+        useShallowEffect(effect, deps);
+      },
+      {
+        initialProps: { deps: [1, 2] },
+      },
+    );
 
     expect(effect).toHaveBeenCalledTimes(1);
 
@@ -656,7 +671,9 @@ describe('useExpensiveComputation', () => {
   it('skips initial useState computation when skipInitial is true', () => {
     const compute = vi.fn(() => 'result');
 
-    renderHook(() => { useExpensiveComputation(compute, [], { skipInitial: true }); });
+    renderHook(() => {
+      useExpensiveComputation(compute, [], { skipInitial: true });
+    });
 
     // With skipInitial, compute is only called in useEffect (not useState)
     expect(compute).toHaveBeenCalledTimes(1);

@@ -8,14 +8,14 @@
  * - Disconnect existing OAuth providers
  */
 
-import { OAUTH_PROVIDERS, tokenStore, type OAuthProvider } from '@abe-stack/core';
+import { useCallback, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+
+import { OAUTH_PROVIDERS, tokenStore, type OAuthConnection, type OAuthProvider } from '@abe-stack/core';
 import { getOAuthLoginUrl, useEnabledOAuthProviders, useOAuthConnections } from '@abe-stack/sdk';
 import { Button, Card, Dialog, PageContainer } from '@abe-stack/ui';
-import { useClientEnvironment } from '@app/ClientEnvironment';
-import { useCallback, useMemo, useState } from 'react';
 
-import type { OAuthConnection } from '@abe-stack/core';
-import type { ReactElement } from 'react';
+import { useClientEnvironment } from '@app/ClientEnvironment';
 
 // ============================================================================
 // Provider Display Config
@@ -73,7 +73,7 @@ const PROVIDER_DISPLAY: Record<
 // Component
 // ============================================================================
 
-export function ConnectedAccountsPage(): ReactElement {
+export const ConnectedAccountsPage = (): ReactElement => {
   const { config } = useClientEnvironment();
   const [disconnectTarget, setDisconnectTarget] = useState<OAuthConnection | null>(null);
 
@@ -126,7 +126,7 @@ export function ConnectedAccountsPage(): ReactElement {
   }, []);
 
   const handleConfirmDisconnect = useCallback(async (): Promise<void> => {
-    if (!disconnectTarget) return;
+    if (disconnectTarget === null) return;
 
     try {
       await unlink(disconnectTarget.provider);
@@ -168,7 +168,7 @@ export function ConnectedAccountsPage(): ReactElement {
             const display = PROVIDER_DISPLAY[provider];
 
             // Don't show providers that aren't enabled
-            if (!isEnabled) return null;
+            if (isEnabled === false) return null;
 
             return (
               <Card key={provider} className="connected-account-card">
@@ -178,9 +178,9 @@ export function ConnectedAccountsPage(): ReactElement {
                       <div className="connected-account-icon-wrapper">{display.icon}</div>
                       <div className="connected-account-details">
                         <span className="connected-account-name">{display.label}</span>
-                        {connection ? (
+                        {connection !== undefined ? (
                           <span className="connected-account-email">
-                            {connection.providerEmail || 'Connected'} &middot; Since{' '}
+                            {connection.providerEmail ?? 'Connected'} &middot; Since{' '}
                             {formatDate(connection.connectedAt)}
                           </span>
                         ) : (
@@ -189,16 +189,16 @@ export function ConnectedAccountsPage(): ReactElement {
                       </div>
                     </div>
                     <div className="connected-account-action">
-                      {connection ? (
+                      {connection !== undefined ? (
                         <Button
                           variant="secondary"
                           onClick={() => {
                             handleDisconnect(connection);
                           }}
                           disabled={isActing || !canDisconnect}
-                          title={
-                            !canDisconnect ? 'You must have at least one login method' : undefined
-                          }
+                          {...(canDisconnect === false && {
+                            title: 'You must have at least one login method',
+                          })}
                         >
                           Disconnect
                         </Button>
@@ -250,12 +250,12 @@ export function ConnectedAccountsPage(): ReactElement {
         }}
       >
         <Dialog.Content
-          title={`Disconnect ${disconnectTarget ? PROVIDER_DISPLAY[disconnectTarget.provider].label : ''}?`}
+          title={`Disconnect ${disconnectTarget !== null ? PROVIDER_DISPLAY[disconnectTarget.provider].label : ''}?`}
         >
           <p>
             Are you sure you want to disconnect your{' '}
-            {disconnectTarget ? PROVIDER_DISPLAY[disconnectTarget.provider].label : ''} account? You
-            can reconnect it at any time.
+            {disconnectTarget !== null ? PROVIDER_DISPLAY[disconnectTarget.provider].label : ''}{' '}
+            account? You can reconnect it at any time.
           </p>
           {!canDisconnect && (
             <p className="text-danger text-sm">
@@ -355,4 +355,4 @@ export function ConnectedAccountsPage(): ReactElement {
       `}</style>
     </PageContainer>
   );
-}
+};

@@ -1,5 +1,6 @@
 // packages/core/src/infrastructure/crypto/jwt.test.ts
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import {
     decode,
     jwtDecode,
@@ -75,9 +76,9 @@ describe('JWT', () => {
       const token = sign(customPayload, secret);
       const decoded = decode(token);
 
-      expect(decoded?.userId).toBe('123');
-      expect(decoded?.role).toBe('admin');
-      expect(decoded?.permissions).toEqual(['read', 'write']);
+      expect(decoded?.['userId']).toBe('123');
+      expect(decoded?.['role']).toBe('admin');
+      expect(decoded?.['permissions']).toEqual(['read', 'write']);
     });
   });
 
@@ -86,8 +87,8 @@ describe('JWT', () => {
       const token = sign(payload, secret);
       const verified = verify(token, secret);
 
-      expect(verified.userId).toBe('123');
-      expect(verified.email).toBe('test@example.com');
+      expect(verified['userId']).toBe('123');
+      expect(verified['email']).toBe('test@example.com');
     });
 
     it('should throw on invalid signature', () => {
@@ -139,8 +140,8 @@ describe('JWT', () => {
       const token = sign(payload, secret);
       const decoded = decode(token);
 
-      expect(decoded?.userId).toBe('123');
-      expect(decoded?.email).toBe('test@example.com');
+      expect(decoded?.['userId']).toBe('123');
+      expect(decoded?.['email']).toBe('test@example.com');
     });
 
     it('should return null for invalid tokens', () => {
@@ -156,7 +157,7 @@ describe('JWT', () => {
       const tamperedToken = `${parts[0]!}.${parts[1]!}.wrong-signature`;
 
       const decoded = decode(tamperedToken);
-      expect(decoded?.userId).toBe('123');
+      expect(decoded?.['userId']).toBe('123');
     });
   });
 
@@ -170,7 +171,7 @@ describe('JWT', () => {
       const token = sign(payload, secret);
       const verified = verifyWithRotation(token, config);
 
-      expect(verified.userId).toBe('123');
+      expect(verified['userId']).toBe('123');
     });
 
     it('should verify with previous secret when current fails', () => {
@@ -186,7 +187,7 @@ describe('JWT', () => {
       const token = sign(payload, oldSecret);
       const verified = verifyWithRotation(token, config);
 
-      expect(verified.userId).toBe('123');
+      expect(verified['userId']).toBe('123');
     });
 
     it('should throw if token invalid for both secrets', () => {
@@ -221,13 +222,13 @@ describe('JWT', () => {
     it('jwtVerify should work like verify', () => {
       const token = jwtSign(payload, secret);
       const verified = jwtVerify(token, secret);
-      expect(verified.userId).toBe('123');
+      expect(verified['userId']).toBe('123');
     });
 
     it('jwtDecode should work like decode', () => {
       const token = jwtSign(payload, secret);
       const decoded = jwtDecode(token);
-      expect(decoded?.userId).toBe('123');
+      expect(decoded?.['userId']).toBe('123');
     });
   });
 
@@ -273,7 +274,7 @@ describe('JWT', () => {
       const token = sign(complexPayload, secret);
       const verified = verify(token, secret);
 
-      expect(verified.user).toEqual(complexPayload.user);
+      expect(verified['user']).toEqual(complexPayload.user);
     });
 
     it('should handle payload with arrays', () => {
@@ -285,8 +286,8 @@ describe('JWT', () => {
       const token = sign(payloadWithArray, secret);
       const verified = verify(token, secret);
 
-      expect(verified.roles).toEqual(['admin', 'user']);
-      expect(verified.permissions).toEqual([1, 2, 3]);
+      expect(verified['roles']).toEqual(['admin', 'user']);
+      expect(verified['permissions']).toEqual([1, 2, 3]);
     });
 
     it('should handle very long secrets', () => {
@@ -294,7 +295,7 @@ describe('JWT', () => {
       const token = sign(payload, longSecret);
       const verified = verify(token, longSecret);
 
-      expect(verified.userId).toBe('123');
+      expect(verified['userId']).toBe('123');
     });
   });
 });

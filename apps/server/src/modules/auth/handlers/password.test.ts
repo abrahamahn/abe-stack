@@ -5,9 +5,8 @@
  * Comprehensive tests for password reset and set password flows.
  */
 
-import { InvalidTokenError, WeakPasswordError } from '@abe-stack/core';
+import { EmailSendError, InvalidCredentialsError, InvalidTokenError, WeakPasswordError } from '@abe-stack/core';
 import { requestPasswordReset, resetPassword, setPassword } from '@auth/service';
-import { EmailSendError, InvalidCredentialsError } from '@shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { handleForgotPassword, handleResetPassword, handleSetPassword } from '../password';

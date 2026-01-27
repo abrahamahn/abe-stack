@@ -69,12 +69,12 @@ interface AppProps {
 // Components
 // ============================================================================
 
-function AppToaster(): ReactElement {
+const AppToaster = (): ReactElement => {
   const { messages, dismiss } = toastStore();
   return <Toaster messages={messages} onDismiss={dismiss} />;
-}
+};
 
-function AppRoutes(): ReactElement {
+const AppRoutes = (): ReactElement => {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
@@ -152,7 +152,7 @@ function AppRoutes(): ReactElement {
       </Route>
     </Routes>
   );
-}
+};
 
 // ============================================================================
 // App
@@ -176,7 +176,7 @@ function useQueryPersistence(environment: ClientEnvironment): void {
       // Restore cached data from IndexedDB in background
       try {
         const persistedClient = await persister.restoreClient();
-        if (persistedClient) {
+        if (persistedClient !== undefined) {
           for (const persistedQuery of persistedClient.clientState.queries) {
             queryCache.setQueryData(persistedQuery.queryKey, persistedQuery.state.data);
           }
@@ -236,7 +236,7 @@ function useQueryPersistence(environment: ClientEnvironment): void {
  * Query persistence is handled manually via useQueryPersistence hook,
  * which restores from and persists to IndexedDB.
  */
-export function App({ environment }: AppProps): ReactElement {
+export const App = ({ environment }: AppProps): ReactElement => {
   // Start background cache restoration (non-blocking)
   useQueryPersistence(environment);
 
@@ -256,4 +256,4 @@ export function App({ environment }: AppProps): ReactElement {
       </BrowserRouter>
     </QueryCacheProvider>
   );
-}
+};

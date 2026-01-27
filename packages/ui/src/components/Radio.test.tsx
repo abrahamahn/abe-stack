@@ -5,9 +5,9 @@ import userEvent from '@testing-library/user-event';
 import { useState, type ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Radio } from '../Radio';
+import { Radio } from './Radio';
 
-function RadioHarness(): ReactElement {
+const RadioHarness = (): ReactElement => {
   const [value, setValue] = useState<'a' | 'b'>('a');
   return (
     <div>
@@ -29,7 +29,7 @@ function RadioHarness(): ReactElement {
       />
     </div>
   );
-}
+};
 
 describe('Radio', () => {
   it('renders with label and handles click', async () => {

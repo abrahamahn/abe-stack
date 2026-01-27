@@ -1,9 +1,11 @@
 // packages/media/src/__tests__/image-processing.test.ts
-import type { Mock } from 'vitest';
+import sharp from 'sharp';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import type { ImageFormatOptions } from '../image-processing';
-import { optimizeImage, resizeImage, validateImage } from '../image-processing';
+import { optimizeImage, resizeImage, validateImage } from './image-processing';
+
+import type { ImageFormatOptions } from './image-processing';
+import type { Mock } from 'vitest';
 
 // Mock sharp since it's an external dependency
 vi.mock('sharp', () => {
@@ -75,13 +77,13 @@ vi.mock('sharp', () => {
   };
 });
 
-// Import the mocked module
-import sharp from 'sharp';
 // Cast strictly to Mock for use in tests
 const sharpMock = sharp as unknown as Mock;
 
 describe('Image Processing', () => {
   const mockImageBuffer = Buffer.from('test-image-data');
+  // Store mock instance for test assertions
+  let mockInstance: ReturnType<typeof sharpMock>;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -148,7 +150,8 @@ describe('Image Processing', () => {
     };
 
     // Reset mock to return the stable methods object
-    sharpMock.mockImplementation(() => mockMethods);
+    mockInstance = mockMethods as ReturnType<typeof sharpMock>;
+    sharpMock.mockImplementation(() => mockInstance);
   });
 
   describe('resizeImage', () => {
@@ -156,29 +159,29 @@ describe('Image Processing', () => {
       const result = await resizeImage(mockImageBuffer, { width: 800, height: 600 });
 
       expect(sharp).toHaveBeenCalledWith(mockImageBuffer);
-      expect(sharp().resize).toHaveBeenCalledWith(800, 600);
-      expect(sharp().toBuffer).toHaveBeenCalled();
+      expect(mockInstance.resize).toHaveBeenCalledWith(800, 600);
+      expect(mockInstance.toBuffer).toHaveBeenCalled();
       expect(result).toBeInstanceOf(Buffer);
     });
 
     test('should resize image with only width specified', async () => {
       const result = await resizeImage(mockImageBuffer, { width: 800 });
 
-      expect(sharp().resize).toHaveBeenCalledWith(800, undefined);
+      expect(mockInstance.resize).toHaveBeenCalledWith(800, undefined);
       expect(result).toBeInstanceOf(Buffer);
     });
 
     test('should resize image with only height specified', async () => {
       const result = await resizeImage(mockImageBuffer, { height: 600 });
 
-      expect(sharp().resize).toHaveBeenCalledWith(undefined, 600);
+      expect(mockInstance.resize).toHaveBeenCalledWith(undefined, 600);
       expect(result).toBeInstanceOf(Buffer);
     });
 
     test('should resize image with fit option', async () => {
       const result = await resizeImage(mockImageBuffer, { width: 800, height: 600, fit: 'cover' });
 
-      expect(sharp().resize).toHaveBeenCalledWith(800, 600, { fit: 'cover' });
+      expect(mockInstance.resize).toHaveBeenCalledWith(800, 600, { fit: 'cover' });
       expect(result).toBeInstanceOf(Buffer);
     });
 
@@ -190,7 +193,10 @@ describe('Image Processing', () => {
         position: 'center',
       });
 
-      expect(sharp().resize).toHaveBeenCalledWith(800, 600, { fit: 'cover', position: 'center' });
+      expect(mockInstance.resize).toHaveBeenCalledWith(800, 600, {
+        fit: 'cover',
+        position: 'center',
+      });
       expect(result).toBeInstanceOf(Buffer);
     });
 
@@ -201,14 +207,14 @@ describe('Image Processing', () => {
         withoutEnlargement: true,
       });
 
-      expect(sharp().resize).toHaveBeenCalledWith(2000, 1500, { withoutEnlargement: true });
+      expect(mockInstance.resize).toHaveBeenCalledWith(2000, 1500, { withoutEnlargement: true });
       expect(result).toBeInstanceOf(Buffer);
     });
 
     test('should handle resize with aspect ratio preservation', async () => {
       const result = await resizeImage(mockImageBuffer, { width: 800, fit: 'inside' });
 
-      expect(sharp().resize).toHaveBeenCalledWith(800, undefined, { fit: 'inside' });
+      expect(mockInstance.resize).toHaveBeenCalledWith(800, undefined, { fit: 'inside' });
       expect(result).toBeInstanceOf(Buffer);
     });
 
@@ -220,7 +226,10 @@ describe('Image Processing', () => {
         kernel: 'lanczos3',
       });
 
-      expect(sharp().resize).toHaveBeenCalledWith(800, 600, { fit: 'cover', kernel: 'lanczos3' });
+      expect(mockInstance.resize).toHaveBeenCalledWith(800, 600, {
+        fit: 'cover',
+        kernel: 'lanczos3',
+      });
       expect(result).toBeInstanceOf(Buffer);
     });
 
@@ -232,7 +241,7 @@ describe('Image Processing', () => {
         canvas: 'crop',
       });
 
-      expect(sharp().resize).toHaveBeenCalledWith(800, 600, {
+      expect(mockInstance.resize).toHaveBeenCalledWith(800, 600, {
         fit: 'contain',
         options: { canvas: 'crop' },
       });
@@ -257,14 +266,14 @@ describe('Image Processing', () => {
     test('should handle resize with very large dimensions', async () => {
       const result = await resizeImage(mockImageBuffer, { width: 10000, height: 10000 });
 
-      expect(sharp().resize).toHaveBeenCalledWith(10000, 10000);
+      expect(mockInstance.resize).toHaveBeenCalledWith(10000, 10000);
       expect(result).toBeInstanceOf(Buffer);
     });
 
     test('should handle resize with decimal dimensions', async () => {
       const result = await resizeImage(mockImageBuffer, { width: 800.5, height: 600.7 });
 
-      expect(sharp().resize).toHaveBeenCalledWith(801, 601); // Sharp typically rounds
+      expect(mockInstance.resize).toHaveBeenCalledWith(801, 601); // Sharp typically rounds
       expect(result).toBeInstanceOf(Buffer);
     });
   });
@@ -273,29 +282,29 @@ describe('Image Processing', () => {
     test('should optimize image to JPEG format with quality', async () => {
       const result = await optimizeImage(mockImageBuffer, { format: 'jpeg', quality: 80 });
 
-      expect(sharp().jpeg).toHaveBeenCalledWith({ quality: 80 });
-      expect(sharp().toBuffer).toHaveBeenCalled();
+      expect(mockInstance.jpeg).toHaveBeenCalledWith({ quality: 80 });
+      expect(mockInstance.toBuffer).toHaveBeenCalled();
       expect(result).toBeInstanceOf(Buffer);
     });
 
     test('should optimize image to PNG format', async () => {
       const result = await optimizeImage(mockImageBuffer, { format: 'png' });
 
-      expect(sharp().png).toHaveBeenCalledWith({});
+      expect(mockInstance.png).toHaveBeenCalledWith({});
       expect(result).toBeInstanceOf(Buffer);
     });
 
     test('should optimize image to WebP format with quality', async () => {
       const result = await optimizeImage(mockImageBuffer, { format: 'webp', quality: 75 });
 
-      expect(sharp().webp).toHaveBeenCalledWith({ quality: 75 });
+      expect(mockInstance.webp).toHaveBeenCalledWith({ quality: 75 });
       expect(result).toBeInstanceOf(Buffer);
     });
 
     test('should optimize image with AVIF format', async () => {
       const result = await optimizeImage(mockImageBuffer, { format: 'avif', quality: 60 });
 
-      expect(sharp().toFormat).toHaveBeenCalledWith('avif', { quality: 60 });
+      expect(mockInstance.toFormat).toHaveBeenCalledWith('avif', { quality: 60 });
       expect(result).toBeInstanceOf(Buffer);
     });
 
@@ -306,8 +315,8 @@ describe('Image Processing', () => {
         withMetadata: true,
       });
 
-      expect(sharp().withMetadata).toHaveBeenCalled();
-      expect(sharp().jpeg).toHaveBeenCalledWith({ quality: 85 });
+      expect(mockInstance.withMetadata).toHaveBeenCalled();
+      expect(mockInstance.jpeg).toHaveBeenCalledWith({ quality: 85 });
       expect(result).toBeInstanceOf(Buffer);
     });
 
@@ -317,7 +326,7 @@ describe('Image Processing', () => {
         removeAlpha: true,
       });
 
-      expect(sharp().removeAlpha).toHaveBeenCalled();
+      expect(mockInstance.removeAlpha).toHaveBeenCalled();
       expect(result).toBeInstanceOf(Buffer);
     });
 
@@ -328,7 +337,7 @@ describe('Image Processing', () => {
         background: { r: 255, g: 255, b: 255 },
       });
 
-      expect(sharp().flatten).toHaveBeenCalledWith({ background: { r: 255, g: 255, b: 255 } });
+      expect(mockInstance.flatten).toHaveBeenCalledWith({ background: { r: 255, g: 255, b: 255 } });
       expect(result).toBeInstanceOf(Buffer);
     });
 
@@ -338,17 +347,21 @@ describe('Image Processing', () => {
         progressive: true,
       });
 
-      expect(sharp().jpeg).toHaveBeenCalledWith({ progressive: true });
+      expect(mockInstance.jpeg).toHaveBeenCalledWith({ progressive: true });
       expect(result).toBeInstanceOf(Buffer);
     });
 
-    test('should optimize image with interlace', async () => {
+    test('should optimize image with progressive PNG', async () => {
       const result = await optimizeImage(mockImageBuffer, {
         format: 'png',
-        interlace: true,
+        progressive: true,
       });
 
-      expect(sharp().png).toHaveBeenCalledWith({ interlace: true });
+      expect(mockInstance.png).toHaveBeenCalledWith({
+        compressionLevel: undefined,
+        progressive: true,
+        adaptiveFiltering: undefined,
+      });
       expect(result).toBeInstanceOf(Buffer);
     });
 
@@ -358,7 +371,7 @@ describe('Image Processing', () => {
         compressionLevel: 9,
       });
 
-      expect(sharp().png).toHaveBeenCalledWith({ compressionLevel: 9 });
+      expect(mockInstance.png).toHaveBeenCalledWith({ compressionLevel: 9 });
       expect(result).toBeInstanceOf(Buffer);
     });
 
@@ -368,7 +381,7 @@ describe('Image Processing', () => {
         adaptiveFiltering: true,
       });
 
-      expect(sharp().png).toHaveBeenCalledWith({ adaptiveFiltering: true });
+      expect(mockInstance.png).toHaveBeenCalledWith({ adaptiveFiltering: true });
       expect(result).toBeInstanceOf(Buffer);
     });
 
@@ -378,7 +391,7 @@ describe('Image Processing', () => {
         chromaSubsampling: '4:2:0',
       });
 
-      expect(sharp().jpeg).toHaveBeenCalledWith({ chromaSubsampling: '4:2:0' });
+      expect(mockInstance.jpeg).toHaveBeenCalledWith({ chromaSubsampling: '4:2:0' });
       expect(result).toBeInstanceOf(Buffer);
     });
 
@@ -388,7 +401,7 @@ describe('Image Processing', () => {
         mozjpeg: true,
       });
 
-      expect(sharp().jpeg).toHaveBeenCalledWith({ mozjpeg: true });
+      expect(mockInstance.jpeg).toHaveBeenCalledWith({ mozjpeg: true });
       expect(result).toBeInstanceOf(Buffer);
     });
 
@@ -432,8 +445,8 @@ describe('Image Processing', () => {
 
       // Update the mock to return specific stats for this test if needed,
       // but default mock should suffice.
-      // NOTE: Checking sharp().stats calls is flaky with the current factory setup
-      // expect(sharp().stats).toHaveBeenCalled();
+      // NOTE: Checking mockInstance.stats calls is flaky with the current factory setup
+      // expect(mockInstance.stats).toHaveBeenCalled();
 
       sharpMock.mockImplementation(() => ({
         stats: vi.fn().mockResolvedValue(mockStats),
@@ -802,17 +815,17 @@ describe('Image Processing', () => {
     });
 
     test('should handle null/undefined input', async () => {
-      await expect(validateImage(null)).resolves.toEqual(
+      await expect(validateImage(null as unknown as Buffer)).resolves.toEqual(
         expect.objectContaining({ isValid: false }),
       );
 
-      await expect(validateImage(undefined)).resolves.toEqual(
+      await expect(validateImage(undefined as unknown as Buffer)).resolves.toEqual(
         expect.objectContaining({ isValid: false }),
       );
     });
 
     test('should handle non-buffer input', async () => {
-      await expect(validateImage('not-a-buffer')).resolves.toEqual(
+      await expect(validateImage('not-a-buffer' as unknown as Buffer)).resolves.toEqual(
         expect.objectContaining({ isValid: false }),
       );
     });

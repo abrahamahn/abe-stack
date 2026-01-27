@@ -1,7 +1,7 @@
 // packages/ui/src/theme/__tests__/colors.test.ts
 import { describe, expect, it } from 'vitest';
 
-import { colors, darkColors, lightColors } from '../colors';
+import { colors, darkColors, lightColors } from './colors';
 
 const hexColorPattern = /^#[0-9a-f]{6}$/i;
 const shadowPattern = /^0\s+\d+px\s+\d+px\s+rgba\(/i;

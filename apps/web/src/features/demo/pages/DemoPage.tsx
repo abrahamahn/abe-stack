@@ -10,7 +10,7 @@ import { useCallback, useMemo, useState } from 'react';
 import type { AuthMode } from '@auth/components/AuthForms';
 import type { ComponentDemo } from '@demo/types';
 
-export function DemoPage(): React.ReactElement {
+export const DemoPage = (): React.ReactElement => {
   const { cycleTheme, getThemeIcon, getThemeLabel, resolvedTheme } = useDemoTheme();
   const { density, cycleDensity } = useDensity('demo-density');
   const { contrastMode, cycleContrastMode } = useContrast('demo-contrast', resolvedTheme);
@@ -134,4 +134,4 @@ export function DemoPage(): React.ReactElement {
       </SidePeek.Root>
     </>
   );
-}
+};

@@ -77,9 +77,9 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>((props, ref) => {
   }, [children]);
 
   const [value, setValue] = useControllableState({
-    value: valueProp,
+    ...(valueProp !== undefined && { value: valueProp }),
     defaultValue: defaultValue ?? options[0]?.value ?? '',
-    onChange,
+    ...(onChange !== undefined && { onChange }),
   });
 
   const currentLabel = options.find((opt) => opt.value === value)?.label ?? value;

@@ -188,7 +188,7 @@ describe('Dialog', () => {
 
     it('handles undefined defaultOpen', () => {
       render(
-        <Dialog.Root defaultOpen={undefined}>
+        <Dialog.Root>
           <Dialog.Content title="Test">Content</Dialog.Content>
         </Dialog.Root>,
       );
@@ -198,7 +198,7 @@ describe('Dialog', () => {
 
     it('handles undefined open in controlled mode', () => {
       render(
-        <Dialog.Root open={undefined}>
+        <Dialog.Root>
           <Dialog.Content title="Test">Content</Dialog.Content>
         </Dialog.Root>,
       );

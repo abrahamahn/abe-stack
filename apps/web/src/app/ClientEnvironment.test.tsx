@@ -2,9 +2,9 @@
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ClientEnvironmentProvider, useClientEnvironment } from '../ClientEnvironment';
+import { ClientEnvironmentProvider, useClientEnvironment } from './ClientEnvironment';
 
-import type { ClientEnvironment } from '../ClientEnvironment';
+import type { ClientEnvironment } from './ClientEnvironment';
 import type { JSX } from 'react';
 
 // ============================================================================
@@ -40,16 +40,16 @@ function createMockClientEnvironment(): ClientEnvironment {
 }
 
 // Test component that uses the hook
-function TestConsumer(): JSX.Element {
+const TestConsumer = (): JSX.Element => {
   const env = useClientEnvironment();
   return (
     <div>
       <span data-testid="api-url">{env.config.apiUrl}</span>
-      <span data-testid="has-auth">{env.auth ? 'yes' : 'no'}</span>
-      <span data-testid="has-query-cache">{env.queryCache ? 'yes' : 'no'}</span>
+      <span data-testid="has-auth">{env.auth !== undefined ? 'yes' : 'no'}</span>
+      <span data-testid="has-query-cache">{env.queryCache !== undefined ? 'yes' : 'no'}</span>
     </div>
   );
-}
+};
 
 // ============================================================================
 // Tests
@@ -128,14 +128,14 @@ describe('ClientEnvironment', () => {
     it('should provide access to auth service', () => {
       const mockEnv = createMockClientEnvironment();
 
-      function AuthConsumer(): JSX.Element {
+      const AuthConsumer = (): JSX.Element => {
         const env = useClientEnvironment();
         return (
           <span data-testid="auth-state">
             {env.auth.getState().isAuthenticated ? 'auth' : 'anon'}
           </span>
         );
-      }
+      };
 
       render(
         <ClientEnvironmentProvider value={mockEnv}>
@@ -149,11 +149,11 @@ describe('ClientEnvironment', () => {
     it('should provide access to query cache', () => {
       const mockEnv = createMockClientEnvironment();
 
-      function QueryCacheConsumer(): JSX.Element {
+      const QueryCacheConsumer = (): JSX.Element => {
         const env = useClientEnvironment();
         const hasQueryCache = typeof env.queryCache.getQueryData === 'function';
         return <span data-testid="has-methods">{hasQueryCache ? 'yes' : 'no'}</span>;
-      }
+      };
 
       render(
         <ClientEnvironmentProvider value={mockEnv}>

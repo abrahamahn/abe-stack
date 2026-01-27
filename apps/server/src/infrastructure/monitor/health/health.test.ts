@@ -1,5 +1,6 @@
 // apps/server/src/infrastructure/monitor/health/__tests__/health.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import {
     checkDatabase,
     checkEmail,

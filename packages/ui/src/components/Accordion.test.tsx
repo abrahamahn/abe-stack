@@ -160,7 +160,7 @@ describe('Accordion', () => {
     });
 
     it('handles undefined defaultValue', () => {
-      render(<Accordion items={items} defaultValue={undefined} />);
+      render(<Accordion items={items} />);
 
       expect(screen.queryByText('Content One')).not.toBeInTheDocument();
       expect(screen.queryByText('Content Two')).not.toBeInTheDocument();

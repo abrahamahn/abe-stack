@@ -41,7 +41,7 @@ import {
   or,
   rawCondition,
   startsWith,
-} from '../conditions';
+} from './conditions';
 
 describe('conditions', () => {
   describe('comparison operators', () => {

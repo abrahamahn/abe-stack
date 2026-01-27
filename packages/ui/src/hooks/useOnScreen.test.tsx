@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import { useRef, type ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 
-import { useOnScreen } from '../useOnScreen';
+import { useOnScreen } from './useOnScreen';
 
 type ObserverCallback = (entries: Array<Partial<IntersectionObserverEntry>>) => void;
 
@@ -19,16 +19,16 @@ class FakeIntersectionObserver {
   disconnect(): void {}
 }
 
-function OnScreenHarness(): ReactElement {
+const OnScreenHarness = (): ReactElement => {
   const ref = useRef<HTMLDivElement | null>(null);
-  const visible = useOnScreen(ref);
+  const isVisible = useOnScreen(ref);
   return (
     <div>
       <div ref={ref} data-testid="target" />
-      <span data-testid="visible">{String(visible)}</span>
+      <span data-testid="visible">{String(isVisible)}</span>
     </div>
   );
-}
+};
 
 describe('useOnScreen', () => {
   it('sets visible when intersection observer reports visibility', () => {

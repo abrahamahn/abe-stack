@@ -64,7 +64,7 @@ export type {
     StorageProviderName,
     StripeProviderConfig,
     YarnConfig
-} from './types';
+} from './types/index';
 
 // ============================================================================
 // Environment Loading (from ./env.loader.ts)
@@ -92,6 +92,6 @@ export {
 export type { FullEnv } from './env.schema';
 
 // ============================================================================
-// Parsers (from ./parsers.ts)
+// Parsers (from ./env.parsers.ts)
 // ============================================================================
-export { getBool, getInt, getList, getRequired } from './parsers';
+export { getBool, getInt, getList, getRequired } from './env.parsers';

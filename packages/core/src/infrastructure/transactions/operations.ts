@@ -170,12 +170,15 @@ export function createListRemoveOperation(
   value: unknown,
   previousPosition?: number,
 ): ListRemoveOperation {
-  return {
+  const result: ListRemoveOperation = {
     type: 'listRemove',
     path,
     value,
-    previousPosition,
   };
+  if (previousPosition !== undefined) {
+    result.previousPosition = previousPosition;
+  }
+  return result;
 }
 
 /**

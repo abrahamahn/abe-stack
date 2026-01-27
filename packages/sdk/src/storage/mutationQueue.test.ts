@@ -125,7 +125,7 @@ describe('MutationQueue', () => {
 
       const stored = mockLocalStorage.getItem('abe-stack-mutation-queue');
       expect(stored).not.toBeNull();
-      if (stored) {
+      if (stored !== null && stored !== '') {
         const parsed = JSON.parse(stored) as unknown[];
         expect(parsed).toHaveLength(1);
       }
@@ -241,7 +241,7 @@ describe('MutationQueue', () => {
       queue.clear();
 
       const stored = mockLocalStorage.getItem('abe-stack-mutation-queue');
-      if (stored) {
+      if (stored !== null && stored !== '') {
         expect(JSON.parse(stored)).toHaveLength(0);
       }
     });

@@ -8,7 +8,21 @@
 // ============================================================================
 // Errors
 // ============================================================================
-export * from './errors';
+export {
+  AccountLockedError,
+  EmailAlreadyExistsError,
+  EmailNotVerifiedError,
+  EmailSendError,
+  InvalidCredentialsError,
+  InvalidTokenError,
+  OAuthError,
+  OAuthStateMismatchError,
+  TokenReuseError,
+  TotpInvalidError,
+  TotpRequiredError,
+  UserNotFoundError,
+  WeakPasswordError,
+} from './errors';
 
 // ============================================================================
 // Password Validation
@@ -50,10 +64,16 @@ export type { PasswordPenalties } from './password-scoring';
 // ============================================================================
 // Password Strength Estimation
 // ============================================================================
-export { estimatePasswordStrength } from './passwordStrength';
-export type { StrengthResult } from './passwordStrength';
+export { estimatePasswordStrength } from './password-strength';
+export type { StrengthResult } from './password-strength';
 
 // ============================================================================
 // HTTP Mapping
 // ============================================================================
-export * from './httpMapper';
+export { HTTP_ERROR_MESSAGES, isKnownAuthError, mapErrorToHttpResponse } from './http-mapper';
+export type {
+  ErrorMapperLogger,
+  ErrorMapperOptions,
+  ErrorStatusCode,
+  HttpErrorResponse,
+} from './http-mapper';

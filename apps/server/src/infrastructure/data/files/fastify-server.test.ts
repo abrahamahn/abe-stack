@@ -3,7 +3,7 @@ import { mkdtemp, rm, mkdir, writeFile, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-import Fastify from 'fastify';
+import fastify from 'fastify';
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 import { createSignature } from '../signatures';
@@ -32,7 +32,7 @@ describe('File Server', () => {
       signatureSecret: secretKey,
     };
 
-    server = Fastify();
+    server = fastify();
 
     // Register a pass-through content type parser for file uploads
     // This allows the route handler to stream request.raw directly without consuming it

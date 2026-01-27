@@ -53,7 +53,7 @@ export const BottombarLayout = forwardRef<HTMLDivElement, BottombarLayoutProps>(
     const hasSlots = left !== undefined || center !== undefined || right !== undefined;
 
     const cssVars = {
-      '--bottombar-height': typeof height === 'number' ? `${String(height)}px` : height,
+      ['--bottombar-height']: typeof height === 'number' ? `${String(height)}px` : height,
       ...style,
     } as CSSProperties;
 

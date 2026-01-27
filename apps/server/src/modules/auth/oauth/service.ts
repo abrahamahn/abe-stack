@@ -29,7 +29,7 @@ import {
     NotFoundError,
     OAuthError,
     OAuthStateMismatchError,
-} from '@shared';
+} from '@abe-stack/core';
 
 import { createAccessToken, createRefreshTokenFamily } from '../utils';
 
@@ -40,7 +40,6 @@ import {
     extractAppleUserFromIdToken,
 } from './providers';
 
-import type { AuthConfig, OAuthProviderConfig } from '@/config';
 import type {
     OAuthConnectionInfo,
     OAuthProviderClient,
@@ -48,6 +47,7 @@ import type {
     OAuthTokenResponse,
     OAuthUserInfo,
 } from './types';
+import type { AuthConfig, OAuthProviderConfig } from '@/config';
 
 // ============================================================================
 // Types

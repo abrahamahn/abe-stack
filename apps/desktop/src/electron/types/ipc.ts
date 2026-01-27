@@ -15,13 +15,24 @@ export type OpenDialogOptions = Parameters<NonNullable<NativeBridge['showOpenDia
 export type SaveDialogOptions = Parameters<NonNullable<NativeBridge['showSaveDialog']>>[0];
 
 /**
+ * Actual IPC channel names (kebab-case for wire protocol).
+ * Defined as const to ensure type safety.
+ */
+export const IPC_CHANNELS = {
+  getAppVersion: 'get-app-version',
+  showOpenDialog: 'show-open-dialog',
+  showSaveDialog: 'show-save-dialog',
+} as const;
+
+/**
  * Maps IPC channels to their argument types and return types.
  * Each channel defines the expected args tuple and result type.
+ * Uses computed property names from IPC_CHANNELS constant.
  */
 export type IPCChannelMap = {
-  'get-app-version': { args: []; result: string };
-  'show-open-dialog': { args: [OpenDialogOptions]; result: string[] | null };
-  'show-save-dialog': { args: [SaveDialogOptions]; result: string | null };
+  [IPC_CHANNELS.getAppVersion]: { args: []; result: string };
+  [IPC_CHANNELS.showOpenDialog]: { args: [OpenDialogOptions]; result: string[] | null };
+  [IPC_CHANNELS.showSaveDialog]: { args: [SaveDialogOptions]; result: string | null };
 };
 
 /** Union type of all valid IPC channel names */

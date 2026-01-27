@@ -415,7 +415,7 @@ export class JsonDatabase {
    */
   execute(): unknown[] {
     // Return a fake successful result for compatibility
-    return [{ '?column?': 1 }];
+    return [{ ['?column?']: 1 }];
   }
 
   /**

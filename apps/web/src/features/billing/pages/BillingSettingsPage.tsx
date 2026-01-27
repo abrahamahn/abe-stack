@@ -23,11 +23,10 @@ import {
   PageContainer,
   PaymentMethodCard,
   SubscriptionStatus,
+  useNavigate,
 } from '@abe-stack/ui';
-import { useNavigate } from '@abe-stack/ui';
-import { useState, useCallback } from 'react';
-
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useState, useCallback } from 'react';
 
 import type { PaymentMethod } from '@abe-stack/core';
 import type { ReactElement } from 'react';
@@ -36,7 +35,7 @@ import type { ReactElement } from 'react';
 // Component
 // ============================================================================
 
-export function BillingSettingsPage(): ReactElement {
+export const BillingSettingsPage = (): ReactElement => {
   const navigate = useNavigate();
   const { config } = useClientEnvironment();
 
@@ -103,7 +102,7 @@ export function BillingSettingsPage(): ReactElement {
   }, []);
 
   const handleConfirmRemove = useCallback(async (): Promise<void> => {
-    if (deleteMethodId) {
+    if (deleteMethodId !== null && deleteMethodId !== undefined) {
       await removePaymentMethod(deleteMethodId);
       setDeleteMethodId(null);
     }
@@ -117,7 +116,7 @@ export function BillingSettingsPage(): ReactElement {
   );
 
   // Determine if removal should be disabled
-  const hasActiveSubscription = subscription && subscription.status !== 'canceled';
+  const hasActiveSubscription = subscription !== null && subscription !== undefined && subscription.status !== 'canceled';
 
   return (
     <PageContainer className="billing-settings-page">
@@ -182,16 +181,16 @@ export function BillingSettingsPage(): ReactElement {
           </Card>
         ) : (
           <div className="billing-settings-page__payment-methods">
-            {paymentMethods.map((pm) => (
+            {paymentMethods.map((pm: PaymentMethod) => (
               <PaymentMethodCard
                 key={pm.id}
                 paymentMethod={pm}
                 isActing={pmActing}
                 onRemove={handleRemovePaymentMethod}
-                onSetDefault={(pm) => {
+                onSetDefault={(pm: PaymentMethod) => {
                   void handleSetDefault(pm);
                 }}
-                removeDisabled={pm.isDefault && hasActiveSubscription ? true : false}
+                removeDisabled={pm.isDefault && (hasActiveSubscription === true)}
               />
             ))}
           </div>
@@ -204,7 +203,7 @@ export function BillingSettingsPage(): ReactElement {
         <InvoiceList
           invoices={invoices}
           isLoading={invLoading}
-          error={invError?.message}
+          error={invError?.message ?? null}
           hasMore={hasMore}
         />
       </section>
@@ -270,4 +269,4 @@ export function BillingSettingsPage(): ReactElement {
       </Dialog.Root>
     </PageContainer>
   );
-}
+};

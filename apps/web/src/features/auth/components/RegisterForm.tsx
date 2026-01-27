@@ -18,13 +18,13 @@ export interface RegisterFormProps {
   error?: string | null;
 }
 
-export function RegisterForm({
+export const RegisterForm = ({
   onRegister,
   onResendVerification,
   onModeChange,
   isLoading,
   error,
-}: RegisterFormProps): ReactElement {
+}: RegisterFormProps): ReactElement => {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
@@ -35,10 +35,14 @@ export function RegisterForm({
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    if (!onRegister) return;
+    if (onRegister === undefined) return;
 
     try {
-      const result = await onRegister({ email, password, name: name || undefined });
+      const result = await onRegister({
+        email,
+        password,
+        ...(name.length > 0 && { name }),
+      });
       setRegistrationResult(result);
     } catch {
       // Error handled by parent component via onRegister callback
@@ -46,7 +50,13 @@ export function RegisterForm({
   };
 
   const handleResend = async (): Promise<void> => {
-    if (!onResendVerification || !registrationResult?.email || isOnCooldown) return;
+    if (
+      onResendVerification === undefined ||
+      registrationResult === null ||
+      registrationResult.email.length === 0 ||
+      isOnCooldown
+    )
+      return;
 
     setResendLoading(true);
     setResendMessage(null);
@@ -62,7 +72,7 @@ export function RegisterForm({
   };
 
   // Show success message after registration
-  if (registrationResult) {
+  if (registrationResult !== null) {
     return (
       <div className="auth-form">
         <div className="auth-form-content">
@@ -94,7 +104,7 @@ export function RegisterForm({
             Sent to: <strong>{registrationResult.email}</strong>
           </Text>
 
-          {resendMessage && (
+          {resendMessage !== null && resendMessage.length > 0 && (
             <Text
               tone={resendMessage.includes('Failed') ? 'danger' : 'success'}
               className="text-sm text-center"
@@ -103,7 +113,7 @@ export function RegisterForm({
             </Text>
           )}
 
-          {onResendVerification && (
+          {onResendVerification !== undefined && (
             <div className="text-center">
               <Button
                 variant="text"
@@ -123,7 +133,7 @@ export function RegisterForm({
 
           <div className="auth-form-footer">
             Already verified?{' '}
-            {onModeChange ? (
+            {onModeChange !== undefined ? (
               <Button
                 variant="text"
                 onClick={() => {
@@ -150,7 +160,7 @@ export function RegisterForm({
           <p className="auth-form-subtitle">Sign up for a new account</p>
         </div>
 
-        <OAuthButtons mode="register" disabled={isLoading} />
+        <OAuthButtons mode="register" {...(isLoading === true && { disabled: true })} />
 
         <form
           onSubmit={(e) => {
@@ -189,16 +199,16 @@ export function RegisterForm({
             disabled={isLoading}
           />
 
-          {error && <div className="auth-form-error">{error}</div>}
+          {error !== undefined && error !== null && <div className="auth-form-error">{error}</div>}
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Creating account...' : 'Create account'}
+            {isLoading === true ? 'Creating account...' : 'Create account'}
           </Button>
         </form>
 
         <div className="auth-form-footer">
           Already have an account?{' '}
-          {onModeChange ? (
+          {onModeChange !== undefined ? (
             <Button
               variant="text"
               onClick={() => {
@@ -215,4 +225,4 @@ export function RegisterForm({
       </div>
     </div>
   );
-}
+};

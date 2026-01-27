@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { BottombarLayout } from '../BottombarLayout';
+import { BottombarLayout } from './BottombarLayout';
 
 describe('BottombarLayout', () => {
   it('renders left/center/right sections when provided', () => {
@@ -51,13 +51,13 @@ describe('BottombarLayout', () => {
   it('applies default and custom height', () => {
     const { container, rerender } = render(<BottombarLayout>Content</BottombarLayout>);
 
-    expect(container.firstChild).toHaveStyle({ '--bottombar-height': '2.5rem' });
+    expect(container.firstChild).toHaveStyle({ ['--bottombar-height']: '2.5rem' });
 
     rerender(<BottombarLayout height={80}>Content</BottombarLayout>);
-    expect(container.firstChild).toHaveStyle({ '--bottombar-height': '80px' });
+    expect(container.firstChild).toHaveStyle({ ['--bottombar-height']: '80px' });
 
     rerender(<BottombarLayout height="3rem">Content</BottombarLayout>);
-    expect(container.firstChild).toHaveStyle({ '--bottombar-height': '3rem' });
+    expect(container.firstChild).toHaveStyle({ ['--bottombar-height']: '3rem' });
   });
 
   it('forwards ref, className, and data attributes', () => {

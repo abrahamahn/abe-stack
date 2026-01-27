@@ -1,7 +1,7 @@
 // packages/media/src/__tests__/security.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
-import { BasicSecurityScanner } from '../security';
+import { BasicSecurityScanner } from './security';
 
 // Mock fs module
 vi.mock('fs', () => ({
@@ -62,7 +62,7 @@ describe('BasicSecurityScanner', () => {
       const result = await scanner.scanFile('/large-file.mp4');
 
       expect(result.safe).toBe(false);
-      expect(result.threats.some((t) => t.includes('exceeds limit'))).toBe(true);
+      expect(result.threats.some((t: string) => t.includes('exceeds limit'))).toBe(true);
     });
 
     it('should detect empty file', async () => {
@@ -102,7 +102,7 @@ describe('BasicSecurityScanner', () => {
       const result = await scanner.scanFile('/malicious.txt');
 
       expect(result.safe).toBe(false);
-      expect(result.threats.some((t) => t.includes('XSS'))).toBe(true);
+      expect(result.threats.some((t: string) => t.includes('XSS'))).toBe(true);
     });
 
     it('should detect server-side code', async () => {
@@ -127,7 +127,7 @@ describe('BasicSecurityScanner', () => {
       const result = await scanner.scanFile('/malicious.txt');
 
       expect(result.safe).toBe(false);
-      expect(result.threats.some((t) => t.includes('Server-side code'))).toBe(true);
+      expect(result.threats.some((t: string) => t.includes('Server-side code'))).toBe(true);
     });
 
     it('should warn about high entropy files', async () => {
@@ -155,7 +155,7 @@ describe('BasicSecurityScanner', () => {
       const result = await scanner.scanFile('/encrypted.bin');
 
       // High entropy files get warnings, not threats
-      expect(result.warnings.some((w) => w.includes('entropy'))).toBe(true);
+      expect(result.warnings.some((w: string) => w.includes('entropy'))).toBe(true);
     });
 
     it('should handle scan errors gracefully', async () => {
@@ -166,7 +166,7 @@ describe('BasicSecurityScanner', () => {
       const result = await scanner.scanFile('/nonexistent.txt');
 
       expect(result.safe).toBe(false);
-      expect(result.threats.some((t) => t.includes('Scan failed'))).toBe(true);
+      expect(result.threats.some((t: string) => t.includes('Scan failed'))).toBe(true);
     });
   });
 });

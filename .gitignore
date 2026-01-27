@@ -15,14 +15,6 @@ out/
 *.tsbuildinfo
 *.txt
 
-# Compiled JS in src (should go to dist)
-apps/*/src/**/*.js
-apps/*/src/**/*.js.map
-packages/*/src/**/*.js
-packages/*/src/**/*.js.map
-packages/*/src/**/*.d.ts
-packages/*/src/**/*.d.ts.map
-
 # Allow Vite config for web build
 !config/build/
 !config/build/vite.config.ts
@@ -94,3 +86,6 @@ Thumbs.db
 
 # Uploads
 .data/
+
+# Temporary export files
+.tmp/

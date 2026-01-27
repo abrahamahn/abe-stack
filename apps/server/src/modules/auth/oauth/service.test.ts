@@ -1,15 +1,7 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/modules/auth/oauth/__tests__/service.test.ts
-import { beforeEach, describe, expect, test, vi } from 'vitest';
-
-import type { AuthConfig } from '@/config';
-import type {
-    OAuthConnectionRepository,
-    RefreshTokenRepository,
-    UserRepository,
-} from '@abe-stack/db';
-import type { DbClient, Repositories } from '@infrastructure';
 import { asMockDb, createMockDb } from '@infrastructure/data/database/utils/test-utils';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
     createOAuthState,
@@ -23,7 +15,17 @@ import {
     linkOAuthAccount,
     unlinkOAuthAccount,
 } from '../service';
+
 import type { OAuthProviderClient, OAuthTokenResponse, OAuthUserInfo } from '../types';
+import type { AuthConfig } from '@/config';
+import type {
+    OAuthConnectionRepository,
+    RefreshTokenRepository,
+    UserRepository,
+} from '@abe-stack/db';
+import type { DbClient, Repositories } from '@infrastructure';
+
+
 
 // Mock the crypto module for consistent state generation in tests
 vi.mock('node:crypto', async () => {

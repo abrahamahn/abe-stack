@@ -27,9 +27,9 @@ export function useDisclosure({ open, defaultOpen = false, onChange }: UseDisclo
   setOpen: (open: boolean) => void;
 } {
   const [openState, setOpen] = useControllableState<boolean>({
-    value: open,
+    ...(open !== undefined && { value: open }),
     defaultValue: defaultOpen,
-    onChange,
+    ...(onChange !== undefined && { onChange }),
   });
 
   const openFn = useCallback((): void => {

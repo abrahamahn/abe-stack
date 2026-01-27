@@ -6,7 +6,6 @@
  * Thin layer that calls services and formats responses.
  */
 
-import { isStrategyEnabled } from '@/config';
 import { InvalidTokenError } from '@abe-stack/core';
 import {
   EmailSendError,
@@ -27,6 +26,8 @@ import { setRefreshTokenCookie } from '../utils';
 import { requestMagicLink, verifyMagicLink } from './service';
 
 import type { AuthResponse, MagicLinkRequest, MagicLinkRequestResponse } from '@abe-stack/core';
+
+import { isStrategyEnabled } from '@/config';
 
 /**
  * Handle magic link request

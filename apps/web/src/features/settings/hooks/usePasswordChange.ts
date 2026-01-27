@@ -15,15 +15,13 @@ import { createSettingsApi, type ChangePasswordRequest, type ChangePasswordRespo
 
 let settingsApi: ReturnType<typeof createSettingsApi> | null = null;
 const apiBaseUrl =
-  typeof import.meta.env.VITE_API_URL === 'string' ? import.meta.env.VITE_API_URL : '';
+  typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
 
 function getSettingsApi(): ReturnType<typeof createSettingsApi> {
-  if (!settingsApi) {
-    settingsApi = createSettingsApi({
-      baseUrl: apiBaseUrl,
-      getToken: (): string | null => localStorage.getItem('accessToken'),
-    });
-  }
+  settingsApi ??= createSettingsApi({
+    baseUrl: apiBaseUrl,
+    getToken: (): string | null => localStorage.getItem('accessToken'),
+  });
   return settingsApi;
 }
 
@@ -51,8 +49,8 @@ export function usePasswordChange(options?: UsePasswordChangeOptions): UsePasswo
       const api = getSettingsApi();
       return api.changePassword(data);
     },
-    onSuccess: options?.onSuccess,
-    onError: options?.onError,
+    ...(options?.onSuccess !== undefined && { onSuccess: options.onSuccess }),
+    ...(options?.onError !== undefined && { onError: options.onError }),
   });
 
   return {

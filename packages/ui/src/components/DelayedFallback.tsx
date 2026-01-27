@@ -50,12 +50,12 @@ export interface DelayedFallbackProps {
  * </Suspense>
  * ```
  */
-export function DelayedFallback({
+export const DelayedFallback = ({
   delay = 150,
   children,
   text = '',
   size = 'md',
-}: DelayedFallbackProps): ReactElement | null {
+}: DelayedFallbackProps): ReactElement | null => {
   // Always pass true - we're always "loading" when this component renders
   const showFallback = useDelayedFlag(true, delay);
 
@@ -72,4 +72,4 @@ export function DelayedFallback({
       <LoadingContainer text={text} size={size} />
     </div>
   );
-}
+};

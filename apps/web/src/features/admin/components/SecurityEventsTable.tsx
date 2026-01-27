@@ -64,12 +64,12 @@ function formatDate(dateString: string): string {
 // Component
 // ============================================================================
 
-export function SecurityEventsTable({
+export const SecurityEventsTable = ({
   data,
   isLoading,
   pagination,
   onPageChange,
-}: SecurityEventsTableProps): JSX.Element {
+}: SecurityEventsTableProps): JSX.Element => {
   const navigate = useNavigate();
 
   const handleRowClick = (event: SecurityEvent): void => {
@@ -86,7 +86,15 @@ export function SecurityEventsTable({
     );
   }
 
-  if (!data || data.data.length === 0) {
+  if (data === undefined) {
+    return (
+      <div className="text-center py-12">
+        <Text tone="muted">No security events found</Text>
+      </div>
+    );
+  }
+
+  if (data.data.length === 0) {
     return (
       <div className="text-center py-12">
         <Text tone="muted">No security events found</Text>
@@ -162,4 +170,4 @@ export function SecurityEventsTable({
       </div>
     </div>
   );
-}
+};

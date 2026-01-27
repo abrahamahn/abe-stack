@@ -5,16 +5,15 @@
  * Displays linked OAuth providers and allows connecting/disconnecting.
  */
 
-import { useMemo, useState, type ReactElement } from 'react';
-
-import { Alert, Button, Card, Skeleton } from '@abe-stack/ui';
-
-import type { OAuthConnection, OAuthProvider } from '@abe-stack/core';
 import {
   useEnabledOAuthProviders,
   useOAuthConnections,
   type ApiClientConfig,
 } from '@abe-stack/sdk';
+import { Alert, Button, Card, Skeleton } from '@abe-stack/ui';
+import { useMemo, useState, type ReactElement } from 'react';
+
+import type { OAuthConnection, OAuthProvider } from '@abe-stack/core';
 
 // ============================================================================
 // Types
@@ -38,10 +37,10 @@ const providerInfo: Record<OAuthProvider, { name: string; icon: string }> = {
 // Component
 // ============================================================================
 
-export function OAuthConnectionsList({ onSuccess }: OAuthConnectionsListProps): ReactElement {
+export const OAuthConnectionsList = ({ onSuccess }: OAuthConnectionsListProps): ReactElement => {
   const [unlinkError, setUnlinkError] = useState<string | null>(null);
   const apiBaseUrl =
-    typeof import.meta.env.VITE_API_URL === 'string' ? import.meta.env.VITE_API_URL : '';
+    typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
 
   // API client config
   const clientConfig = useMemo<ApiClientConfig>(
@@ -100,7 +99,7 @@ export function OAuthConnectionsList({ onSuccess }: OAuthConnectionsListProps): 
   }
 
   // Error state
-  if (providersError || connectionsError) {
+  if (providersError !== null || connectionsError !== null) {
     return (
       <Alert tone="danger">
         Failed to load OAuth connections: {providersError?.message ?? connectionsError?.message}
@@ -122,14 +121,14 @@ export function OAuthConnectionsList({ onSuccess }: OAuthConnectionsListProps): 
     const connection = connections.find((c) => c.provider === provider);
     return {
       provider,
-      connected: !!connection,
+      connected: connection !== undefined,
       connection,
     };
   });
 
   return (
     <div className="space-y-3">
-      {unlinkError && <Alert tone="danger">{unlinkError}</Alert>}
+      {unlinkError !== null && unlinkError.length > 0 && <Alert tone="danger">{unlinkError}</Alert>}
 
       {providerList.map(({ provider, connected, connection }) => (
         <ProviderCard
@@ -154,7 +153,7 @@ export function OAuthConnectionsList({ onSuccess }: OAuthConnectionsListProps): 
       )}
     </div>
   );
-}
+};
 
 // ============================================================================
 // Provider Card Sub-component
@@ -169,14 +168,14 @@ interface ProviderCardProps {
   isDisconnecting: boolean;
 }
 
-function ProviderCard({
+const ProviderCard = ({
   provider,
   connected,
   connection,
   onConnect,
   onDisconnect,
   isDisconnecting,
-}: ProviderCardProps): ReactElement {
+}: ProviderCardProps): ReactElement => {
   const info = providerInfo[provider];
 
   return (
@@ -188,7 +187,7 @@ function ProviderCard({
           </div>
           <div>
             <p className="font-medium">{info.name}</p>
-            {connected && connection && (
+            {connected && connection !== null && (
               <p className="text-sm text-gray-500">{connection.providerEmail}</p>
             )}
           </div>
@@ -212,4 +211,4 @@ function ProviderCard({
       </div>
     </Card>
   );
-}
+};

@@ -7,7 +7,8 @@
  */
 
 import { errorResponseSchema } from './common';
-import { createSchema, type Contract, type Schema } from './types';
+import { createSchema } from './schema';
+import type { Contract, Schema } from './types';
 
 // ============================================================================
 // Job Status
@@ -18,7 +19,7 @@ export const JOB_STATUSES = {
   PROCESSING: 'processing',
   COMPLETED: 'completed',
   FAILED: 'failed',
-  DEAD_LETTER: 'dead_letter',
+  DEADLETTER: 'dead_letter',
   CANCELLED: 'cancelled',
 } as const;
 
@@ -47,24 +48,24 @@ export const jobStatusSchema: Schema<JobStatus> = createSchema((data: unknown) =
 export interface JobError {
   name: string;
   message: string;
-  stack?: string;
+  stack?: string | undefined;
 }
 
 export const jobErrorSchema: Schema<JobError> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid job error');
   }
   const obj = data as Record<string, unknown>;
-  if (typeof obj.name !== 'string') {
+  if (typeof obj['name'] !== 'string') {
     throw new Error('Error name must be a string');
   }
-  if (typeof obj.message !== 'string') {
+  if (typeof obj['message'] !== 'string') {
     throw new Error('Error message must be a string');
   }
   return {
-    name: obj.name,
-    message: obj.message,
-    stack: typeof obj.stack === 'string' ? obj.stack : undefined,
+    name: obj['name'],
+    message: obj['message'],
+    stack: typeof obj['stack'] === 'string' ? obj['stack'] : undefined,
   };
 });
 
@@ -88,47 +89,52 @@ export interface JobDetails {
 }
 
 export const jobDetailsSchema: Schema<JobDetails> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid job details');
   }
   const obj = data as Record<string, unknown>;
 
-  if (typeof obj.id !== 'string') {
+  if (typeof obj['id'] !== 'string') {
     throw new Error('Job id must be a string');
   }
-  if (typeof obj.name !== 'string') {
+  if (typeof obj['name'] !== 'string') {
     throw new Error('Job name must be a string');
   }
-  const status = jobStatusSchema.parse(obj.status);
-  if (typeof obj.attempts !== 'number' || !Number.isInteger(obj.attempts)) {
+  const status = jobStatusSchema.parse(obj['status']);
+  if (typeof obj['attempts'] !== 'number' || !Number.isInteger(obj['attempts'])) {
     throw new Error('Attempts must be an integer');
   }
-  if (typeof obj.maxAttempts !== 'number' || !Number.isInteger(obj.maxAttempts)) {
+  if (typeof obj['maxAttempts'] !== 'number' || !Number.isInteger(obj['maxAttempts'])) {
     throw new Error('Max attempts must be an integer');
   }
-  if (typeof obj.scheduledAt !== 'string') {
+  if (typeof obj['scheduledAt'] !== 'string') {
     throw new Error('Scheduled at must be a string');
   }
-  if (typeof obj.createdAt !== 'string') {
+  if (typeof obj['createdAt'] !== 'string') {
     throw new Error('Created at must be a string');
   }
 
   return {
-    id: obj.id,
-    name: obj.name,
-    args: obj.args,
+    id: obj['id'],
+    name: obj['name'],
+    args: obj['args'],
     status,
-    attempts: obj.attempts,
-    maxAttempts: obj.maxAttempts,
-    scheduledAt: obj.scheduledAt,
-    createdAt: obj.createdAt,
+    attempts: obj['attempts'],
+    maxAttempts: obj['maxAttempts'],
+    scheduledAt: obj['scheduledAt'],
+    createdAt: obj['createdAt'],
     completedAt:
-      obj.completedAt === null || typeof obj.completedAt === 'string' ? obj.completedAt : null,
-    durationMs: typeof obj.durationMs === 'number' ? obj.durationMs : null,
-    error: obj.error ? jobErrorSchema.parse(obj.error) : null,
+      obj['completedAt'] === null || typeof obj['completedAt'] === 'string'
+        ? obj['completedAt']
+        : null,
+    durationMs: typeof obj['durationMs'] === 'number' ? obj['durationMs'] : null,
+    error:
+      obj['error'] !== null && obj['error'] !== undefined
+        ? jobErrorSchema.parse(obj['error'])
+        : null,
     deadLetterReason:
-      obj.deadLetterReason === null || typeof obj.deadLetterReason === 'string'
-        ? obj.deadLetterReason
+      obj['deadLetterReason'] === null || typeof obj['deadLetterReason'] === 'string'
+        ? obj['deadLetterReason']
         : null,
   };
 });
@@ -138,30 +144,30 @@ export const jobDetailsSchema: Schema<JobDetails> = createSchema((data: unknown)
 // ============================================================================
 
 export interface JobListQuery {
-  status?: JobStatus;
-  name?: string;
+  status?: JobStatus | undefined;
+  name?: string | undefined;
   page: number;
   limit: number;
-  sortBy?: 'createdAt' | 'scheduledAt' | 'completedAt';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: 'createdAt' | 'scheduledAt' | 'completedAt' | undefined;
+  sortOrder?: 'asc' | 'desc' | undefined;
 }
 
 export const jobListQuerySchema: Schema<JobListQuery> = createSchema((data: unknown) => {
-  const obj = (data && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+  const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
 
   // Status is optional
   let status: JobStatus | undefined;
-  if (obj.status !== undefined && obj.status !== '') {
-    status = jobStatusSchema.parse(obj.status);
+  if (obj['status'] !== undefined && obj['status'] !== '') {
+    status = jobStatusSchema.parse(obj['status']);
   }
 
   // Name filter is optional
-  const name = typeof obj.name === 'string' && obj.name.length > 0 ? obj.name : undefined;
+  const name = typeof obj['name'] === 'string' && obj['name'].length > 0 ? obj['name'] : undefined;
 
   // Page defaults to 1
   let page = 1;
-  if (obj.page !== undefined) {
-    page = typeof obj.page === 'string' ? parseInt(obj.page, 10) : Number(obj.page);
+  if (obj['page'] !== undefined) {
+    page = typeof obj['page'] === 'string' ? parseInt(obj['page'], 10) : Number(obj['page']);
     if (!Number.isInteger(page) || page < 1) {
       throw new Error('Page must be an integer >= 1');
     }
@@ -169,8 +175,8 @@ export const jobListQuerySchema: Schema<JobListQuery> = createSchema((data: unkn
 
   // Limit defaults to 50
   let limit = 50;
-  if (obj.limit !== undefined) {
-    limit = typeof obj.limit === 'string' ? parseInt(obj.limit, 10) : Number(obj.limit);
+  if (obj['limit'] !== undefined) {
+    limit = typeof obj['limit'] === 'string' ? parseInt(obj['limit'], 10) : Number(obj['limit']);
     if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
       throw new Error('Limit must be an integer between 1 and 100');
     }
@@ -178,13 +184,17 @@ export const jobListQuerySchema: Schema<JobListQuery> = createSchema((data: unkn
 
   // Sort options
   let sortBy: 'createdAt' | 'scheduledAt' | 'completedAt' | undefined;
-  if (obj.sortBy === 'createdAt' || obj.sortBy === 'scheduledAt' || obj.sortBy === 'completedAt') {
-    sortBy = obj.sortBy;
+  if (
+    obj['sortBy'] === 'createdAt' ||
+    obj['sortBy'] === 'scheduledAt' ||
+    obj['sortBy'] === 'completedAt'
+  ) {
+    sortBy = obj['sortBy'];
   }
 
   let sortOrder: 'asc' | 'desc' | undefined;
-  if (obj.sortOrder === 'asc' || obj.sortOrder === 'desc') {
-    sortOrder = obj.sortOrder;
+  if (obj['sortOrder'] === 'asc' || obj['sortOrder'] === 'desc') {
+    sortOrder = obj['sortOrder'];
   }
 
   return { status, name, page, limit, sortBy, sortOrder };
@@ -205,47 +215,47 @@ export interface JobListResponse {
 }
 
 export const jobListResponseSchema: Schema<JobListResponse> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid job list response');
   }
   const obj = data as Record<string, unknown>;
 
-  if (!Array.isArray(obj.data)) {
+  if (!Array.isArray(obj['data'])) {
     throw new Error('Data must be an array');
   }
-  const parsedData = obj.data.map((item) => jobDetailsSchema.parse(item));
+  const parsedData = obj['data'].map((item) => jobDetailsSchema.parse(item));
 
-  if (typeof obj.total !== 'number' || !Number.isInteger(obj.total) || obj.total < 0) {
+  if (typeof obj['total'] !== 'number' || !Number.isInteger(obj['total']) || obj['total'] < 0) {
     throw new Error('Total must be a non-negative integer');
   }
-  if (typeof obj.page !== 'number' || !Number.isInteger(obj.page) || obj.page < 1) {
+  if (typeof obj['page'] !== 'number' || !Number.isInteger(obj['page']) || obj['page'] < 1) {
     throw new Error('Page must be an integer >= 1');
   }
-  if (typeof obj.limit !== 'number' || !Number.isInteger(obj.limit) || obj.limit < 1) {
+  if (typeof obj['limit'] !== 'number' || !Number.isInteger(obj['limit']) || obj['limit'] < 1) {
     throw new Error('Limit must be an integer >= 1');
   }
-  if (typeof obj.hasNext !== 'boolean') {
+  if (typeof obj['hasNext'] !== 'boolean') {
     throw new Error('hasNext must be a boolean');
   }
-  if (typeof obj.hasPrev !== 'boolean') {
+  if (typeof obj['hasPrev'] !== 'boolean') {
     throw new Error('hasPrev must be a boolean');
   }
   if (
-    typeof obj.totalPages !== 'number' ||
-    !Number.isInteger(obj.totalPages) ||
-    obj.totalPages < 0
+    typeof obj['totalPages'] !== 'number' ||
+    !Number.isInteger(obj['totalPages']) ||
+    obj['totalPages'] < 0
   ) {
     throw new Error('totalPages must be a non-negative integer');
   }
 
   return {
     data: parsedData,
-    total: obj.total,
-    page: obj.page,
-    limit: obj.limit,
-    hasNext: obj.hasNext,
-    hasPrev: obj.hasPrev,
-    totalPages: obj.totalPages,
+    total: obj['total'],
+    page: obj['page'],
+    limit: obj['limit'],
+    hasNext: obj['hasNext'],
+    hasPrev: obj['hasPrev'],
+    totalPages: obj['totalPages'],
   };
 });
 
@@ -266,7 +276,7 @@ export interface QueueStats {
 }
 
 export const queueStatsSchema: Schema<QueueStats> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid queue stats');
   }
   const obj = data as Record<string, unknown>;
@@ -286,15 +296,15 @@ export const queueStatsSchema: Schema<QueueStats> = createSchema((data: unknown)
   };
 
   return {
-    pending: validateNonNegativeInt(obj.pending, 'pending'),
-    processing: validateNonNegativeInt(obj.processing, 'processing'),
-    completed: validateNonNegativeInt(obj.completed, 'completed'),
-    failed: validateNonNegativeInt(obj.failed, 'failed'),
-    deadLetter: validateNonNegativeInt(obj.deadLetter, 'deadLetter'),
-    total: validateNonNegativeInt(obj.total, 'total'),
-    failureRate: validateNonNegativeNumber(obj.failureRate, 'failureRate'),
-    recentCompleted: validateNonNegativeInt(obj.recentCompleted, 'recentCompleted'),
-    recentFailed: validateNonNegativeInt(obj.recentFailed, 'recentFailed'),
+    pending: validateNonNegativeInt(obj['pending'], 'pending'),
+    processing: validateNonNegativeInt(obj['processing'], 'processing'),
+    completed: validateNonNegativeInt(obj['completed'], 'completed'),
+    failed: validateNonNegativeInt(obj['failed'], 'failed'),
+    deadLetter: validateNonNegativeInt(obj['deadLetter'], 'deadLetter'),
+    total: validateNonNegativeInt(obj['total'], 'total'),
+    failureRate: validateNonNegativeNumber(obj['failureRate'], 'failureRate'),
+    recentCompleted: validateNonNegativeInt(obj['recentCompleted'], 'recentCompleted'),
+    recentFailed: validateNonNegativeInt(obj['recentFailed'], 'recentFailed'),
   };
 });
 
@@ -307,14 +317,14 @@ export interface JobIdRequest {
 }
 
 export const jobIdRequestSchema: Schema<JobIdRequest> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid job ID request');
   }
   const obj = data as Record<string, unknown>;
-  if (typeof obj.jobId !== 'string' || obj.jobId.length === 0) {
+  if (typeof obj['jobId'] !== 'string' || obj['jobId'].length === 0) {
     throw new Error('Job ID must be a non-empty string');
   }
-  return { jobId: obj.jobId };
+  return { jobId: obj['jobId'] };
 });
 
 export interface JobActionResponse {
@@ -323,17 +333,17 @@ export interface JobActionResponse {
 }
 
 export const jobActionResponseSchema: Schema<JobActionResponse> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid job action response');
   }
   const obj = data as Record<string, unknown>;
-  if (typeof obj.success !== 'boolean') {
+  if (typeof obj['success'] !== 'boolean') {
     throw new Error('Success must be a boolean');
   }
-  if (typeof obj.message !== 'string') {
+  if (typeof obj['message'] !== 'string') {
     throw new Error('Message must be a string');
   }
-  return { success: obj.success, message: obj.message };
+  return { success: obj['success'], message: obj['message'] };
 });
 
 // ============================================================================

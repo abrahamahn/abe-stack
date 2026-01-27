@@ -123,10 +123,8 @@ export function createNotificationClient(config: NotificationClientConfig): Noti
         credentials: 'include',
       });
     } catch (error) {
-      throw new NetworkError(
-        `Failed to fetch ${options?.method ?? 'GET'} ${path}`,
-        error instanceof Error ? error : undefined,
-      );
+      const cause = error instanceof Error ? error : new Error(String(error));
+      throw new NetworkError(`Failed to fetch ${options?.method ?? 'GET'} ${path}`, cause);
     }
 
     const data = (await response.json().catch(() => ({}))) as ApiErrorBody &
@@ -290,7 +288,7 @@ export async function subscribeToPush(vapidPublicKey: string): Promise<PushSubsc
  */
 export async function unsubscribeFromPush(): Promise<boolean> {
   const subscription = await getExistingSubscription();
-  if (!subscription) {
+  if (subscription === null) {
     return false;
   }
   return subscription.unsubscribe();
@@ -307,7 +305,7 @@ export function getDeviceId(): string {
   const STORAGE_KEY = 'abe-stack-device-id';
 
   let deviceId = localStorage.getItem(STORAGE_KEY);
-  if (!deviceId) {
+  if (deviceId === null || deviceId === '') {
     deviceId = crypto.randomUUID();
     localStorage.setItem(STORAGE_KEY, deviceId);
   }

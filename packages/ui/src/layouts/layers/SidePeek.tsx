@@ -91,14 +91,14 @@ type SidePeekRootProps = {
   closeOnEscape?: boolean;
 };
 
-function SidePeekRoot({
+const SidePeekRoot = ({
   open,
   onClose,
   children,
   size = 'md',
   closeOnOverlayClick = true,
   closeOnEscape = true,
-}: SidePeekRootProps): ReactElement | null {
+}: SidePeekRootProps): ReactElement | null => {
   const [mounted, setMounted] = useState(false);
   const [titleId, setTitleId] = useState<string | undefined>(undefined);
   const [descriptionId, setDescriptionId] = useState<string | undefined>(undefined);
@@ -175,7 +175,14 @@ function SidePeekRoot({
 
   return createPortal(
     <SidePeekContext.Provider
-      value={{ onClose, titleId, descriptionId, setTitleId, setDescriptionId, size }}
+      value={{
+        ...(onClose !== undefined && { onClose }),
+        ...(titleId !== undefined && { titleId }),
+        ...(descriptionId !== undefined && { describedId: descriptionId }),
+        setTitleId,
+        setDescriptionId,
+        size,
+      }}
     >
       {/* Overlay */}
       <div
@@ -197,7 +204,7 @@ function SidePeekRoot({
     </SidePeekContext.Provider>,
     document.body,
   );
-}
+};
 
 // ============================================================================
 // Header Component
@@ -205,13 +212,13 @@ function SidePeekRoot({
 
 type SidePeekHeaderProps = ComponentPropsWithoutRef<'div'>;
 
-function SidePeekHeader({ children, className = '', ...rest }: SidePeekHeaderProps): ReactElement {
+const SidePeekHeader = ({ children, className = '', ...rest }: SidePeekHeaderProps): ReactElement => {
   return (
     <div className={`side-peek-header ${className}`.trim()} {...rest}>
       {children}
     </div>
   );
-}
+};
 
 // ============================================================================
 // Title Component
@@ -219,7 +226,7 @@ function SidePeekHeader({ children, className = '', ...rest }: SidePeekHeaderPro
 
 type SidePeekTitleProps = ComponentPropsWithoutRef<'h2'>;
 
-function SidePeekTitle({ children, className = '', ...rest }: SidePeekTitleProps): ReactElement {
+const SidePeekTitle = ({ children, className = '', ...rest }: SidePeekTitleProps): ReactElement => {
   const { setTitleId } = useSidePeekContext();
   const id = useId();
 
@@ -235,7 +242,7 @@ function SidePeekTitle({ children, className = '', ...rest }: SidePeekTitleProps
       {children}
     </h2>
   );
-}
+};
 
 // ============================================================================
 // Description Component
@@ -243,11 +250,11 @@ function SidePeekTitle({ children, className = '', ...rest }: SidePeekTitleProps
 
 type SidePeekDescriptionProps = ComponentPropsWithoutRef<'p'>;
 
-function SidePeekDescription({
+const SidePeekDescription = ({
   children,
   className = '',
   ...rest
-}: SidePeekDescriptionProps): ReactElement {
+}: SidePeekDescriptionProps): ReactElement => {
   const { setDescriptionId } = useSidePeekContext();
   const id = useId();
 
@@ -263,7 +270,7 @@ function SidePeekDescription({
       {children}
     </p>
   );
-}
+};
 
 // ============================================================================
 // Content Component
@@ -271,17 +278,17 @@ function SidePeekDescription({
 
 type SidePeekContentProps = ComponentPropsWithoutRef<'div'>;
 
-function SidePeekContent({
+const SidePeekContent = ({
   children,
   className = '',
   ...rest
-}: SidePeekContentProps): ReactElement {
+}: SidePeekContentProps): ReactElement => {
   return (
     <div className={`side-peek-content ${className}`.trim()} {...rest}>
       {children}
     </div>
   );
-}
+};
 
 // ============================================================================
 // Footer Component
@@ -289,13 +296,13 @@ function SidePeekContent({
 
 type SidePeekFooterProps = ComponentPropsWithoutRef<'div'>;
 
-function SidePeekFooter({ children, className = '', ...rest }: SidePeekFooterProps): ReactElement {
+const SidePeekFooter = ({ children, className = '', ...rest }: SidePeekFooterProps): ReactElement => {
   return (
     <div className={`side-peek-footer ${className}`.trim()} {...rest}>
       {children}
     </div>
   );
-}
+};
 
 // ============================================================================
 // Close Button Component
@@ -303,7 +310,7 @@ function SidePeekFooter({ children, className = '', ...rest }: SidePeekFooterPro
 
 type SidePeekCloseProps = ComponentPropsWithoutRef<'button'>;
 
-function SidePeekClose({ children, className = '', ...rest }: SidePeekCloseProps): ReactElement {
+const SidePeekClose = ({ children, className = '', ...rest }: SidePeekCloseProps): ReactElement => {
   const { onClose } = useSidePeekContext();
 
   return (
@@ -317,7 +324,7 @@ function SidePeekClose({ children, className = '', ...rest }: SidePeekCloseProps
       {children ?? '×'}
     </button>
   );
-}
+};
 
 // ============================================================================
 // Expand Button Component (open in full page)
@@ -329,13 +336,13 @@ type SidePeekExpandProps = ComponentPropsWithoutRef<'button'> & {
   onExpand?: () => void;
 };
 
-function SidePeekExpand({
+const SidePeekExpand = ({
   children,
   className = '',
   to,
   onExpand,
   ...rest
-}: SidePeekExpandProps): ReactElement {
+}: SidePeekExpandProps): ReactElement => {
   const { onClose } = useSidePeekContext();
   const expandRef = useRef<HTMLButtonElement>(null);
 
@@ -362,7 +369,7 @@ function SidePeekExpand({
       {children ?? '⤢'}
     </button>
   );
-}
+};
 
 // ============================================================================
 // Export

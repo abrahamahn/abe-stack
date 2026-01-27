@@ -149,7 +149,7 @@ export class WebsocketPubsubClient {
     >
   > &
     WebsocketPubsubClientConfig;
-  private readonly WebSocketConstructor: typeof WebSocket;
+  private readonly webSocketConstructor: typeof WebSocket;
   private onlineHandler: (() => void) | null = null;
 
   constructor(config: WebsocketPubsubClientConfig) {
@@ -164,7 +164,7 @@ export class WebsocketPubsubClient {
       baseReconnectDelayMs: config.baseReconnectDelayMs ?? SECOND_MS,
     };
 
-    this.WebSocketConstructor = config.WebSocketImpl ?? WebSocket;
+    this.webSocketConstructor = config.WebSocketImpl ?? WebSocket;
 
     // Start connection
     this.connect();
@@ -266,7 +266,7 @@ export class WebsocketPubsubClient {
     const url = `${protocol}://${this.config.host}/ws`;
 
     try {
-      this.ws = new this.WebSocketConstructor(url);
+      this.ws = new this.webSocketConstructor(url);
     } catch (error) {
       this.log('Failed to create WebSocket:', error);
       void this.attemptReconnect();
@@ -356,7 +356,7 @@ export class WebsocketPubsubClient {
   }
 
   private log(...args: unknown[]): void {
-    if (this.config.debug && this.config.onDebug) {
+    if (this.config.debug && this.config.onDebug !== undefined) {
       this.config.onDebug(...args);
     }
   }

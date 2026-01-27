@@ -72,19 +72,24 @@ export function loadDatabaseConfig(env: FullEnv): DatabaseConfig {
       const connectionString = (dbUrl?.includes('postgresql') === true ? dbUrl : undefined) ??
         env.POSTGRES_CONNECTION_STRING;
 
-      return {
+      const config: PostgresConfig = {
         provider: 'postgresql',
         host: env.POSTGRES_HOST ?? 'localhost',
         port: env.POSTGRES_PORT ?? pgDefaultPort,
         database: env.POSTGRES_DB ?? 'abe_stack_dev',
         user: env.POSTGRES_USER ?? 'postgres',
         password: env.POSTGRES_PASSWORD ?? '',
-        connectionString,
         maxConnections: env.DB_MAX_CONNECTIONS ?? (isPgProd ? 20 : 10),
         portFallbacks: [pgDefaultPort, pgDefaultPort + 1, pgDefaultPort + 2],
         // ssl is usually required for cloud providers in production
         ssl: env.DB_SSL !== undefined ? env.DB_SSL === 'true' : isPgProd,
       };
+
+      if (connectionString !== undefined) {
+        config.connectionString = connectionString;
+      }
+
+      return config;
     }
   }
 }

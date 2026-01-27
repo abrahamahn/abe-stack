@@ -57,10 +57,23 @@ npx eslint <files>
 pnpm --filter <package> type-check
 pnpm test -- --run <test-file>
 git commit -m "checkpoint: <summary>"
+```
 
-# End of session
+## End of Session Checklist (MANDATORY)
+
+Before ending ANY session, complete all:
+
+1. **Tests** - New/changed files have tests, all pass
+2. **Weekly Log** - Add entry to `docs/log/2026-W##.md`
+3. **Documentation** - Update `docs/dev/*.md` if patterns changed
+4. **Code Artifacts** - JSDoc synced, barrels updated, no TODOs
+
+```bash
+# Final verification
 pnpm build
 ```
+
+**Temporary files** (plans, scratch notes) → create in `.tmp/` directory.
 
 ## Example Prompts
 

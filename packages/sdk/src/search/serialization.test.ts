@@ -36,7 +36,8 @@ describe('serialization', () => {
 
       const filtersStr = params.get('filters');
       expect(filtersStr).toBeDefined();
-      const parsed = JSON.parse(filtersStr!);
+      if (filtersStr === null) throw new Error('filters is null');
+      const parsed = JSON.parse(filtersStr);
       expect(parsed.f).toBe('status');
       expect(parsed.o).toBe('eq');
       expect(parsed.v).toBe('active');
@@ -55,7 +56,8 @@ describe('serialization', () => {
 
       const params = serializeToURLParams(query);
       const filtersStr = params.get('filters');
-      const parsed = JSON.parse(filtersStr!);
+      if (filtersStr === null) throw new Error('filters is null');
+      const parsed = JSON.parse(filtersStr);
 
       expect(parsed.op).toBe('and');
       expect(parsed.c).toHaveLength(2);
@@ -174,7 +176,8 @@ describe('serialization', () => {
 
       const params = serializeToURLParams(query);
       const filtersStr = params.get('filters');
-      const parsed = JSON.parse(filtersStr!);
+      if (filtersStr === null) throw new Error('filters is null');
+      const parsed = JSON.parse(filtersStr);
 
       expect(parsed.v).toEqual({ $d: '2024-01-15T10:30:00.000Z' });
     });
@@ -190,7 +193,8 @@ describe('serialization', () => {
 
       const params = serializeToURLParams(query);
       const filtersStr = params.get('filters');
-      const parsed = JSON.parse(filtersStr!);
+      if (filtersStr === null) throw new Error('filters is null');
+      const parsed = JSON.parse(filtersStr);
 
       expect(parsed.v).toEqual({ $r: { min: 10, max: 100 } });
     });
@@ -511,7 +515,7 @@ describe('serialization', () => {
 
       test('should handle hash with # prefix', () => {
         const query: SearchQuery = { page: 3 };
-        const hash = '#' + serializeToHash(query);
+        const hash = `#${String(serializeToHash(query))}`;
 
         const restored = deserializeFromHash(hash);
         expect(restored.page).toBe(3);

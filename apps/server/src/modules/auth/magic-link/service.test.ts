@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/unbound-method */
+ 
 // apps/server/src/modules/auth/magic-link/__tests__/service.test.ts
 /**
  * Magic Link Service Tests
@@ -7,11 +7,14 @@
  * Tests requestMagicLink and verifyMagicLink with repository pattern.
  */
 
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+
+import { cleanupExpiredMagicLinkTokens, requestMagicLink, verifyMagicLink } from '../service';
+
+import type { DbClient, EmailService, Repositories } from '../../../../infrastructure/index';
 import type { AuthConfig } from '@/config';
 import type { MagicLinkToken, RawDb, User } from '@abe-stack/db';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
-import type { DbClient, EmailService, Repositories } from '../../../../infrastructure/index.js';
-import { cleanupExpiredMagicLinkTokens, requestMagicLink, verifyMagicLink } from '../service';
+
 
 // ============================================================================
 // Mock Dependencies

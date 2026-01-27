@@ -74,7 +74,7 @@ export function loadNotificationsConfig(env: FullEnv): NotificationConfig {
 
   // Resolve active provider (Explicit Choice > OneSignal > FCM > Courier)
   const provider = resolveActiveProvider(
-    env.NOTIFICATIONS_PROVIDER as NotificationProvider | undefined,
+    env.NOTIFICATIONS_PROVIDER,
     availability,
   );
 

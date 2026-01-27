@@ -19,15 +19,15 @@ import {
 } from '@abe-stack/core';
 
 // HTTP Status Constants
-const HTTP_STATUS = {
-  BAD_REQUEST: 400,
-  UNAUTHORIZED: 401,
-  FORBIDDEN: 403,
-  NOT_FOUND: 404,
-  CONFLICT: 409,
-  UNPROCESSABLE_ENTITY: 422,
-  TOO_MANY_REQUESTS: 429,
-  INTERNAL_SERVER_ERROR: 500,
+const HttpStatus = {
+  BadRequest: 400,
+  Unauthorized: 401,
+  Forbidden: 403,
+  NotFound: 404,
+  Conflict: 409,
+  UnprocessableEntity: 422,
+  TooManyRequests: 429,
+  InternalServerError: 500,
 } as const;
 
 /**
@@ -51,23 +51,20 @@ export class ApiError extends AppError {
     details?: Record<string, unknown>,
   ) {
     super(message, status, code, details);
-    this.name = 'ApiError';
   }
 
   /**
    * Check if this is a client error (4xx)
    */
   isClientError(): boolean {
-    return (
-      this.status >= HTTP_STATUS.BAD_REQUEST && this.status < HTTP_STATUS.INTERNAL_SERVER_ERROR
-    );
+    return this.status >= HttpStatus.BadRequest && this.status < HttpStatus.InternalServerError;
   }
 
   /**
    * Check if this is a server error (5xx)
    */
   isServerError(): boolean {
-    return this.status >= HTTP_STATUS.INTERNAL_SERVER_ERROR;
+    return this.status >= HttpStatus.InternalServerError;
   }
 
   /**
@@ -75,8 +72,7 @@ export class ApiError extends AppError {
    */
   isRetryable(): boolean {
     return (
-      this.status === HTTP_STATUS.TOO_MANY_REQUESTS ||
-      this.status >= HTTP_STATUS.INTERNAL_SERVER_ERROR
+      this.status === HttpStatus.TooManyRequests || this.status >= HttpStatus.InternalServerError
     );
   }
 }
@@ -90,7 +86,6 @@ export class NetworkError extends AppError {
     public readonly originalError?: Error,
   ) {
     super(message, 0, 'NETWORK_ERROR');
-    this.name = 'NetworkError';
   }
 }
 
@@ -102,8 +97,7 @@ export class TimeoutError extends AppError {
     message = 'Request timed out',
     public readonly timeoutMs?: number,
   ) {
-    super(message, 0, 'TIMEOUT_ERROR', timeoutMs ? { timeoutMs } : undefined);
-    this.name = 'TimeoutError';
+    super(message, 0, 'TIMEOUT_ERROR', timeoutMs !== undefined ? { timeoutMs } : undefined);
   }
 }
 
@@ -139,29 +133,29 @@ export function createApiError(status: number, body?: ApiErrorBody): AppError {
   const details = body?.details;
 
   switch (status) {
-    case HTTP_STATUS.BAD_REQUEST:
+    case HttpStatus.BadRequest:
       return new BadRequestError(message, code, details);
 
-    case HTTP_STATUS.UNAUTHORIZED:
+    case HttpStatus.Unauthorized:
       return new UnauthorizedError(message, code);
 
-    case HTTP_STATUS.FORBIDDEN:
+    case HttpStatus.Forbidden:
       return new ForbiddenError(message, code);
 
-    case HTTP_STATUS.NOT_FOUND:
+    case HttpStatus.NotFound:
       return new NotFoundError(message, code);
 
-    case HTTP_STATUS.CONFLICT:
+    case HttpStatus.Conflict:
       return new ConflictError(message, code);
 
-    case HTTP_STATUS.UNPROCESSABLE_ENTITY:
+    case HttpStatus.UnprocessableEntity:
       return new UnprocessableError(message, code, details);
 
-    case HTTP_STATUS.TOO_MANY_REQUESTS:
+    case HttpStatus.TooManyRequests:
       return new TooManyRequestsError(message);
 
     default:
-      if (status >= HTTP_STATUS.INTERNAL_SERVER_ERROR) {
+      if (status >= HttpStatus.InternalServerError) {
         return new InternalError(message, code);
       }
       return new ApiError(message, status, code, details);
@@ -205,6 +199,9 @@ export function getErrorMessage(error: unknown): string {
   }
   if (error instanceof Error) {
     return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
   }
   return 'An unexpected error occurred';
 }

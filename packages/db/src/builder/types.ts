@@ -164,18 +164,18 @@ export function formatTable(table: TableSpec): SqlFragment {
   let text = '';
   let values: unknown[] = [];
 
-  if (table.subquery) {
+  if (table.subquery !== undefined) {
     // For subqueries, wrap in parentheses if not already
     text = `(${table.subquery.text})`;
     values = [...table.subquery.values];
   } else {
-    if (table.schema) {
+    if (table.schema !== undefined && table.schema !== '') {
       text = escapeIdentifier(table.schema) + '.';
     }
     text += escapeIdentifier(table.name);
   }
 
-  if (table.alias) {
+  if (table.alias !== undefined && table.alias !== '') {
     text += ' AS ' + escapeIdentifier(table.alias);
   }
   return { text, values };

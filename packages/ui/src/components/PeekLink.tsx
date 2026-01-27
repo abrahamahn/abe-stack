@@ -32,13 +32,13 @@ export interface PeekLinkProps extends Omit<ComponentPropsWithoutRef<'a'>, 'href
   toggle?: boolean;
 }
 
-export function PeekLink({
+export const PeekLink = ({
   to,
   children,
   toggle = false,
   onClick,
   ...props
-}: PeekLinkProps): ReactElement {
+}: PeekLinkProps): ReactElement => {
   const { open, toggle: togglePeek, peekPath } = useSidePeek();
 
   const handleClick = useCallback(
@@ -73,4 +73,4 @@ export function PeekLink({
       {children}
     </a>
   );
-}
+};

@@ -5,8 +5,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { MenuItem } from '../../elements/MenuItem';
-import { Dropdown } from '../Dropdown';
+import { MenuItem } from '../elements/MenuItem';
+
+import { Dropdown } from './Dropdown';
 
 describe('Dropdown', () => {
   describe('happy path', () => {
@@ -150,7 +151,7 @@ describe('Dropdown', () => {
 
     it('handles undefined defaultOpen', () => {
       render(
-        <Dropdown trigger={<span>Open</span>} defaultOpen={undefined}>
+        <Dropdown trigger={<span>Open</span>}>
           <MenuItem>Item 1</MenuItem>
         </Dropdown>,
       );
@@ -160,7 +161,7 @@ describe('Dropdown', () => {
 
     it('handles undefined open in controlled mode', () => {
       render(
-        <Dropdown trigger={<span>Open</span>} open={undefined}>
+        <Dropdown trigger={<span>Open</span>}>
           <MenuItem>Item 1</MenuItem>
         </Dropdown>,
       );

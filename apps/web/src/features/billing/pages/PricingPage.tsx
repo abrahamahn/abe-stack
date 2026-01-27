@@ -5,9 +5,7 @@
 
 import { tokenStore } from '@abe-stack/core';
 import { usePlans, useSubscription, type BillingClientConfig } from '@abe-stack/sdk';
-import { PageContainer, PricingTable } from '@abe-stack/ui';
-import { useNavigate } from '@abe-stack/ui';
-
+import { PageContainer, PricingTable, useNavigate } from '@abe-stack/ui';
 import { useClientEnvironment } from '@app/ClientEnvironment';
 
 import type { Plan } from '@abe-stack/core';
@@ -17,7 +15,7 @@ import type { ReactElement } from 'react';
 // Component
 // ============================================================================
 
-export function PricingPage(): ReactElement {
+export const PricingPage = (): ReactElement => {
   const navigate = useNavigate();
   const { config } = useClientEnvironment();
 
@@ -47,7 +45,7 @@ export function PricingPage(): ReactElement {
 
   const getActionLabel = (_plan: Plan, isCurrent: boolean): string => {
     if (isCurrent) return 'Current Plan';
-    if (!subscription) return 'Get Started';
+    if (subscription === null || subscription === undefined) return 'Get Started';
     return 'Switch to This Plan';
   };
 
@@ -70,7 +68,7 @@ export function PricingPage(): ReactElement {
 
       <PricingTable
         plans={plans}
-        currentPlanId={subscription?.planId}
+        currentPlanId={subscription?.planId ?? null}
         loadingPlanId={isActing ? 'loading' : null}
         onSelectPlan={(plan) => {
           void handleSelectPlan(plan);
@@ -84,4 +82,4 @@ export function PricingPage(): ReactElement {
       />
     </PageContainer>
   );
-}
+};

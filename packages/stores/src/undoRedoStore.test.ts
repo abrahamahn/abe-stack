@@ -1,8 +1,8 @@
-// packages/stores/src/__tests__/undoRedoStore.test.ts
+// packages/stores/src/undoRedoStore.test.ts
 import { createSetOperation, createTransaction } from '@abe-stack/core/infrastructure/transactions';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createUndoRedoStore } from '../undoRedoStore';
+import { createUndoRedoStore } from './undoRedoStore';
 
 describe('undoRedoStore', () => {
   beforeEach(() => {

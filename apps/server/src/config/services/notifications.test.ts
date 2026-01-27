@@ -1,11 +1,13 @@
 // apps/server/src/config/services/notifications.test.ts
-import type { FullEnv, NotificationConfig, OneSignalConfig } from '@abe-stack/core/config';
 import { describe, expect, it } from 'vitest';
+
 import {
   DEFAULT_NOTIFICATION_CONFIG,
   loadNotificationsConfig,
   validateNotificationsConfig,
 } from './notifications';
+
+import type { FullEnv, NotificationConfig, OneSignalConfig } from '@abe-stack/core/config';
 
 describe('Notifications Configuration', () => {
   it('loads default configuration when no environment variables are set', () => {

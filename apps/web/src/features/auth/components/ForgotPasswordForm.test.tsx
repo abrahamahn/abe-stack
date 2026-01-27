@@ -9,9 +9,9 @@ import type { ForgotPasswordFormProps } from '@auth/components/ForgotPasswordFor
 import type { ReactElement, ReactNode } from 'react';
 
 // Wrapper component for Router context
-function RouterWrapper({ children }: { children: ReactNode }): ReactElement {
+const RouterWrapper = ({ children }: { children: ReactNode }): ReactElement => {
   return <MemoryRouter>{children}</MemoryRouter>;
-}
+};
 
 // Helper function to render with router
 function renderWithRouter(ui: ReactElement): ReturnType<typeof render> {
@@ -66,7 +66,7 @@ describe('ForgotPasswordForm', () => {
     });
 
     it('renders sign in as a Link when onModeChange is not provided', () => {
-      renderWithRouter(<ForgotPasswordForm {...defaultProps} onModeChange={undefined} />);
+      renderWithRouter(<ForgotPasswordForm {...defaultProps} />);
 
       expect(screen.getByText('Remember your password?')).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute(
@@ -127,7 +127,7 @@ describe('ForgotPasswordForm', () => {
     });
 
     it('does not call onForgotPassword when no handler provided', async () => {
-      renderWithRouter(<ForgotPasswordForm {...defaultProps} onForgotPassword={undefined} />);
+      renderWithRouter(<ForgotPasswordForm {...defaultProps} />);
 
       fireEvent.change(screen.getByLabelText('Email'), {
         target: { value: 'test@example.com' },

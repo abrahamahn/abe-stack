@@ -12,9 +12,9 @@
  * of the `App` class.
  */
 
+import { createApp } from '@/app';
 import { loadConfig } from '@/config/index';
 
-import { createApp } from '@/app';
 
 /**
  * Bootstraps the application.

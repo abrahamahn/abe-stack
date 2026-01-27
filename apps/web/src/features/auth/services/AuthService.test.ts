@@ -2,16 +2,16 @@
 import { tokenStore } from '@abe-stack/core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { AuthService, createAuthService } from '../AuthService';
+import { AuthService, createAuthService } from './AuthService';
 
-import type { User } from '../AuthService';
+import type { User } from './AuthService';
 import type {
   AuthResponse,
   LoginRequest,
   RegisterRequest,
   RegisterResponse,
 } from '@abe-stack/core';
-import type { ClientConfig } from '@config';
+import type { ClientConfig } from '@/config';
 
 // ============================================================================
 // Mocks
@@ -393,7 +393,7 @@ describe('AuthService', () => {
 
       // This would normally notify, but listeners are cleared
       // So we just verify destroy completes without error
-      expect(() => authService.destroy()).not.toThrow();
+      expect(() => { authService.destroy(); }).not.toThrow();
     });
   });
 

@@ -30,7 +30,7 @@ const STATUS_CONFIG: Record<
   processing: { tone: 'warning', label: 'Processing' },
   completed: { tone: 'success', label: 'Completed' },
   failed: { tone: 'danger', label: 'Failed' },
-  dead_letter: { tone: 'danger', label: 'Dead Letter' },
+  ['dead_letter']: { tone: 'danger', label: 'Dead Letter' },
   cancelled: { tone: 'warning', label: 'Cancelled' },
 };
 
@@ -38,8 +38,8 @@ const STATUS_CONFIG: Record<
 // Component
 // ============================================================================
 
-export function JobStatusBadge({ status }: JobStatusBadgeProps): JSX.Element {
+export const JobStatusBadge = ({ status }: JobStatusBadgeProps): JSX.Element => {
   const config = STATUS_CONFIG[status];
 
   return <Badge tone={config.tone}>{config.label}</Badge>;
-}
+};

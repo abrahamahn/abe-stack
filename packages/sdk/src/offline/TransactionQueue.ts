@@ -162,8 +162,9 @@ function extractPointers(operations: Operation[]): TransactionRecordPointer[] {
   const pointers: TransactionRecordPointer[] = [];
 
   for (const op of operations) {
-    const table = (op as any).table;
-    const id = (op as any).id;
+    // Extract table and id from operation
+    const table = op.table;
+    const id = op.id;
     if (typeof table === 'string' && typeof id === 'string') {
       const key = `${table}:${id}`;
       if (!seen.has(key)) {
@@ -467,7 +468,7 @@ export class TransactionQueue {
     }
 
     const firstThunk = batch[0];
-    if (batch.length === 1 && firstThunk) {
+    if (batch.length === 1 && firstThunk !== undefined) {
       // Single transaction - no need to combine
       return this.writeTransaction(firstThunk.transaction);
     }
@@ -555,7 +556,7 @@ export class TransactionQueue {
    */
   private getBatch(): Thunk[] {
     const first = this.thunks[0];
-    if (!first) return [];
+    if (first === undefined) return [];
 
     const firstSize = JSON.stringify(first.transaction).length;
 
@@ -569,7 +570,7 @@ export class TransactionQueue {
 
     for (let i = 1; i < this.thunks.length; i++) {
       const thunk = this.thunks[i];
-      if (!thunk) continue;
+      if (thunk === undefined) continue;
       const thunkSize = JSON.stringify(thunk.transaction).length;
 
       if (batchSize + thunkSize > this.options.maxBatchSize) {
@@ -652,7 +653,7 @@ export class TransactionQueue {
 
     try {
       const data = localStorage.getItem(this.options.storageKey);
-      if (!data) return;
+      if (data === null || data === '') return;
 
       const transactions = JSON.parse(data) as QueuedTransaction[];
       for (const transaction of transactions) {

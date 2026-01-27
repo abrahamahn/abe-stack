@@ -10,7 +10,7 @@ type PageContainerProps = ComponentPropsWithoutRef<'main'> & {
   gap?: number | string;
 };
 
-export function PageContainer({
+export const PageContainer = ({
   maxWidth,
   padding,
   gap,
@@ -18,12 +18,12 @@ export function PageContainer({
   className,
   children,
   ...rest
-}: PageContainerProps): ReactElement {
+}: PageContainerProps): ReactElement => {
   const cssVars: CSSProperties = {
-    ...(typeof maxWidth !== 'undefined' ? { '--ui-page-max-width': `${String(maxWidth)}px` } : {}),
-    ...(typeof padding !== 'undefined' ? { '--ui-page-padding': padding } : {}),
+    ...(typeof maxWidth !== 'undefined' ? { ['--ui-page-max-width']: `${String(maxWidth)}px` } : {}),
+    ...(typeof padding !== 'undefined' ? { ['--ui-page-padding']: padding } : {}),
     ...(typeof gap !== 'undefined'
-      ? { '--ui-page-gap': typeof gap === 'number' ? `${String(gap)}px` : gap }
+      ? { ['--ui-page-gap']: typeof gap === 'number' ? `${String(gap)}px` : gap }
       : {}),
     ...style,
   };
@@ -33,4 +33,4 @@ export function PageContainer({
       {children}
     </main>
   );
-}
+};

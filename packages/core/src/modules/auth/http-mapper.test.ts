@@ -1,4 +1,4 @@
-// packages/core/src/modules/auth/httpMapper.test.ts
+// packages/core/src/modules/auth/http-mapper.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
 import {
@@ -10,7 +10,7 @@ import {
   InvalidTokenError,
   WeakPasswordError,
 } from './errors';
-import { HTTP_ERROR_MESSAGES, isKnownAuthError, mapErrorToHttpResponse } from './httpMapper';
+import { HTTP_ERROR_MESSAGES, isKnownAuthError, mapErrorToHttpResponse } from './http-mapper';
 
 /**
  * Creates a mock logger for testing
@@ -31,7 +31,7 @@ describe('mapErrorToHttpResponse', () => {
       const result = mapErrorToHttpResponse(error, logger);
 
       expect(result.status).toBe(429);
-      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.ACCOUNT_LOCKED);
+      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.AccountLocked);
     });
 
     it('should map AccountLockedError with retryAfter to 429', () => {
@@ -41,7 +41,7 @@ describe('mapErrorToHttpResponse', () => {
       const result = mapErrorToHttpResponse(error, logger);
 
       expect(result.status).toBe(429);
-      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.ACCOUNT_LOCKED);
+      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.AccountLocked);
     });
   });
 
@@ -78,7 +78,7 @@ describe('mapErrorToHttpResponse', () => {
       const result = mapErrorToHttpResponse(error, logger);
 
       expect(result.status).toBe(401);
-      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.INVALID_CREDENTIALS);
+      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.InvalidCredentials);
     });
   });
 
@@ -90,7 +90,7 @@ describe('mapErrorToHttpResponse', () => {
       const result = mapErrorToHttpResponse(error, logger);
 
       expect(result.status).toBe(400);
-      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.INVALID_TOKEN);
+      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.InvalidToken);
     });
 
     it('should handle InvalidTokenError with custom message', () => {
@@ -100,7 +100,7 @@ describe('mapErrorToHttpResponse', () => {
       const result = mapErrorToHttpResponse(error, logger);
 
       expect(result.status).toBe(400);
-      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.INVALID_TOKEN);
+      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.InvalidToken);
     });
   });
 
@@ -112,7 +112,7 @@ describe('mapErrorToHttpResponse', () => {
       const result = mapErrorToHttpResponse(error, logger);
 
       expect(result.status).toBe(409);
-      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.EMAIL_ALREADY_REGISTERED);
+      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.EmailAlreadyRegistered);
     });
   });
 
@@ -124,7 +124,7 @@ describe('mapErrorToHttpResponse', () => {
       const result = mapErrorToHttpResponse(error, logger);
 
       expect(result.status).toBe(400);
-      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.WEAK_PASSWORD);
+      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.WeakPassword);
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
@@ -153,7 +153,7 @@ describe('mapErrorToHttpResponse', () => {
       const result = mapErrorToHttpResponse(error, logger);
 
       expect(result.status).toBe(503);
-      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.EMAIL_SEND_FAILED);
+      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.EmailSendFailed);
       expect(logger.error).toHaveBeenCalled();
     });
 
@@ -198,7 +198,7 @@ describe('mapErrorToHttpResponse', () => {
 
       expect(customHandler).toHaveBeenCalledWith(error);
       expect(result.status).toBe(503);
-      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.EMAIL_SEND_FAILED);
+      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.EmailSendFailed);
     });
   });
 
@@ -210,7 +210,7 @@ describe('mapErrorToHttpResponse', () => {
       const result = mapErrorToHttpResponse(error, logger);
 
       expect(result.status).toBe(500);
-      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.INTERNAL_ERROR);
+      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.InternalError);
       expect(logger.error).toHaveBeenCalledWith(error);
     });
 
@@ -221,7 +221,7 @@ describe('mapErrorToHttpResponse', () => {
       const result = mapErrorToHttpResponse(error, logger);
 
       expect(result.status).toBe(500);
-      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.INTERNAL_ERROR);
+      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.InternalError);
       expect(logger.error).toHaveBeenCalledWith(error);
     });
 
@@ -231,7 +231,7 @@ describe('mapErrorToHttpResponse', () => {
       const result = mapErrorToHttpResponse(null, logger);
 
       expect(result.status).toBe(500);
-      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.INTERNAL_ERROR);
+      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.InternalError);
     });
 
     it('should map undefined to 500', () => {
@@ -240,7 +240,7 @@ describe('mapErrorToHttpResponse', () => {
       const result = mapErrorToHttpResponse(undefined, logger);
 
       expect(result.status).toBe(500);
-      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.INTERNAL_ERROR);
+      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.InternalError);
     });
 
     it('should map object without Error prototype to 500', () => {
@@ -250,7 +250,7 @@ describe('mapErrorToHttpResponse', () => {
       const result = mapErrorToHttpResponse(error, logger);
 
       expect(result.status).toBe(500);
-      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.INTERNAL_ERROR);
+      expect(result.body.message).toBe(HTTP_ERROR_MESSAGES.InternalError);
     });
   });
 });
@@ -307,18 +307,18 @@ describe('isKnownAuthError', () => {
 
 describe('HTTP_ERROR_MESSAGES', () => {
   it('should have all required error messages defined', () => {
-    expect(HTTP_ERROR_MESSAGES.ACCOUNT_LOCKED).toBeDefined();
-    expect(HTTP_ERROR_MESSAGES.INVALID_CREDENTIALS).toBeDefined();
-    expect(HTTP_ERROR_MESSAGES.EMAIL_ALREADY_REGISTERED).toBeDefined();
-    expect(HTTP_ERROR_MESSAGES.INVALID_TOKEN).toBeDefined();
-    expect(HTTP_ERROR_MESSAGES.WEAK_PASSWORD).toBeDefined();
-    expect(HTTP_ERROR_MESSAGES.EMAIL_SEND_FAILED).toBeDefined();
-    expect(HTTP_ERROR_MESSAGES.INTERNAL_ERROR).toBeDefined();
+    expect(HTTP_ERROR_MESSAGES.AccountLocked).toBeDefined();
+    expect(HTTP_ERROR_MESSAGES.InvalidCredentials).toBeDefined();
+    expect(HTTP_ERROR_MESSAGES.EmailAlreadyRegistered).toBeDefined();
+    expect(HTTP_ERROR_MESSAGES.InvalidToken).toBeDefined();
+    expect(HTTP_ERROR_MESSAGES.WeakPassword).toBeDefined();
+    expect(HTTP_ERROR_MESSAGES.EmailSendFailed).toBeDefined();
+    expect(HTTP_ERROR_MESSAGES.InternalError).toBeDefined();
   });
 
   it('should have user-friendly messages', () => {
     // Messages should not expose internal details
-    expect(HTTP_ERROR_MESSAGES.INTERNAL_ERROR).toBe('Internal server error');
-    expect(HTTP_ERROR_MESSAGES.INVALID_CREDENTIALS).toBe('Invalid email or password');
+    expect(HTTP_ERROR_MESSAGES.InternalError).toBe('Internal server error');
+    expect(HTTP_ERROR_MESSAGES.InvalidCredentials).toBe('Invalid email or password');
   });
 });

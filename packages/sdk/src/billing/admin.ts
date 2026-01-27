@@ -6,6 +6,7 @@
  */
 
 import { addAuthHeader } from '@abe-stack/core';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { createApiError, NetworkError } from '../errors';
 
@@ -109,10 +110,8 @@ export function createAdminBillingClient(config: AdminBillingClientConfig): Admi
         credentials: 'include',
       });
     } catch (error) {
-      throw new NetworkError(
-        `Failed to fetch ${options?.method ?? 'GET'} ${path}`,
-        error instanceof Error ? error : undefined,
-      );
+      const cause = error instanceof Error ? error : new Error(String(error));
+      throw new NetworkError(`Failed to fetch ${options?.method ?? 'GET'} ${path}`, cause);
     }
 
     const data = (await response.json().catch(() => ({}))) as ApiErrorBody &
@@ -167,8 +166,6 @@ export function createAdminBillingClient(config: AdminBillingClientConfig): Admi
 // ============================================================================
 // Admin Hooks
 // ============================================================================
-
-import { useCallback, useEffect, useMemo, useState } from 'react';
 
 /**
  * Admin plans state
@@ -247,7 +244,7 @@ export function useAdminPlans(clientConfig: AdminBillingClientConfig): AdminPlan
     try {
       setIsLoading(true);
       setError(null);
-      const response = await client.listPlans();
+      const response: AdminPlansListResponse = await client.listPlans();
       setPlans(response.plans);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch plans'));
@@ -261,7 +258,7 @@ export function useAdminPlans(clientConfig: AdminBillingClientConfig): AdminPlan
       try {
         setIsActing(true);
         setError(null);
-        const response = await client.createPlan(data);
+        const response: AdminPlanResponse = await client.createPlan(data);
         await fetchPlans();
         return response.plan;
       } catch (err) {
@@ -280,7 +277,7 @@ export function useAdminPlans(clientConfig: AdminBillingClientConfig): AdminPlan
       try {
         setIsActing(true);
         setError(null);
-        const response = await client.updatePlan(planId, data);
+        const response: AdminPlanResponse = await client.updatePlan(planId, data);
         await fetchPlans();
         return response.plan;
       } catch (err) {
@@ -299,7 +296,7 @@ export function useAdminPlans(clientConfig: AdminBillingClientConfig): AdminPlan
       try {
         setIsActing(true);
         setError(null);
-        const response = await client.syncPlanToStripe(planId);
+        const response: SyncStripeResponse = await client.syncPlanToStripe(planId);
         await fetchPlans();
         return response;
       } catch (err) {

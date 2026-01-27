@@ -194,8 +194,8 @@ class IndexedDBBackend implements StorageBackend {
   }
 
   private async openDB(): Promise<IDBDatabase> {
-    if (this.db) return this.db;
-    if (this.dbPromise) return this.dbPromise;
+    if (this.db !== null) return this.db;
+    if (this.dbPromise !== null) return this.dbPromise;
 
     this.dbPromise = new Promise((resolve, reject) => {
       const request = indexedDB.open(this.dbName, 1);
@@ -313,7 +313,7 @@ class IndexedDBBackend implements StorageBackend {
 
       request.onsuccess = (): void => {
         const cursor = request.result;
-        if (cursor) {
+        if (cursor !== null) {
           const key = cursor.key as string;
           if (key.startsWith(prefix)) {
             results.push(cursor.value as T);
@@ -331,7 +331,7 @@ class IndexedDBBackend implements StorageBackend {
 
     const stringKeys = allKeys.filter((k): k is string => typeof k === 'string');
 
-    if (prefix) {
+    if (prefix !== undefined && prefix.length > 0) {
       return stringKeys.filter((k) => k.startsWith(prefix));
     }
 
@@ -425,7 +425,7 @@ class LocalStorageBackend implements StorageBackend {
 
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key?.startsWith(fullPrefix)) {
+      if (key?.startsWith(fullPrefix) === true) {
         const value = localStorage.getItem(key);
         if (value !== null) {
           try {
@@ -446,9 +446,9 @@ class LocalStorageBackend implements StorageBackend {
 
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key?.startsWith(basePrefix)) {
+      if (key?.startsWith(basePrefix) === true) {
         const unprefixedKey = key.slice(basePrefix.length);
-        if (!prefix || unprefixedKey.startsWith(prefix)) {
+        if (prefix === undefined || prefix.length === 0 || unprefixedKey.startsWith(prefix)) {
           result.push(unprefixedKey);
         }
       }
@@ -463,7 +463,7 @@ class LocalStorageBackend implements StorageBackend {
 
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key?.startsWith(basePrefix)) {
+      if (key?.startsWith(basePrefix) === true) {
         keysToRemove.push(key);
       }
     }
@@ -517,7 +517,7 @@ class MemoryBackend implements StorageBackend {
 
   getAllKeys(prefix?: string): Promise<string[]> {
     const allKeys = Array.from(this.storage.keys());
-    if (prefix) {
+    if (prefix !== undefined && prefix.length > 0) {
       return Promise.resolve(allKeys.filter((k) => k.startsWith(prefix)));
     }
     return Promise.resolve(allKeys);
@@ -665,7 +665,7 @@ export class RecordStorage<Tables extends string = string> {
     const key = createKey(pointer.table, pointer.id);
     const value = await this.backend.get<R>(key);
 
-    if (value) {
+    if (value !== undefined) {
       this.log('hit', pointer.table, pointer.id);
     } else {
       this.log('miss', pointer.table, pointer.id);
@@ -692,7 +692,7 @@ export class RecordStorage<Tables extends string = string> {
     const existing = await this.backend.get<VersionedRecord>(key);
 
     // Skip if existing record has same or higher version (unless forced)
-    if (!force && existing && existing.version >= record.version) {
+    if (!force && existing !== undefined && existing.version >= record.version) {
       this.log('skip (version)', table, record.id, existing.version, '>=', record.version);
       return false;
     }
@@ -701,7 +701,13 @@ export class RecordStorage<Tables extends string = string> {
     await this.backend.set(key, record);
 
     this.log('write', table, record.id, `v${String(record.version)}`);
-    this.emit({ type: 'write', table, id: record.id, record, previousRecord: existing });
+    this.emit({
+      type: 'write',
+      table,
+      id: record.id,
+      record,
+      ...(existing !== undefined && { previousRecord: existing }),
+    });
 
     return true;
   }
@@ -720,7 +726,7 @@ export class RecordStorage<Tables extends string = string> {
     // Check if record exists
     const existing = await this.backend.get<VersionedRecord>(key);
 
-    if (!existing) {
+    if (existing === undefined) {
       this.log('delete (not found)', pointer.table, pointer.id);
       return false;
     }
@@ -758,9 +764,9 @@ export class RecordStorage<Tables extends string = string> {
     for (const [table, records] of Object.entries(recordMap) as Array<
       [Tables, Record<string, R | undefined> | undefined]
     >) {
-      if (!records) continue;
+      if (records === undefined) continue;
       for (const record of Object.values(records)) {
-        if (record) {
+        if (record !== undefined) {
           const wasWritten = await this.setRecord(table, record, force);
           if (wasWritten) written++;
         }
@@ -931,9 +937,9 @@ export function* iterateRecordMap<Tables extends string, R extends VersionedReco
   for (const [table, records] of Object.entries(recordMap) as Array<
     [Tables, Record<string, R | undefined> | undefined]
   >) {
-    if (!records) continue;
+    if (records === undefined) continue;
     for (const [id, record] of Object.entries(records)) {
-      if (record) {
+      if (record !== undefined) {
         yield { table, id, record };
       }
     }
@@ -949,7 +955,7 @@ export function createRecordMap<Tables extends string, R extends VersionedRecord
   const map: RecordMap<Tables, R> = {};
 
   for (const { table, id, record } of records) {
-    if (!map[table]) {
+    if (map[table] === undefined) {
       (map as Record<Tables, Record<string, R>>)[table] = {};
     }
     (map[table] as Record<string, R>)[id] = record;

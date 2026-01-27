@@ -5,24 +5,24 @@
  * Full Stripe integration for subscriptions, payment methods, and invoices.
  */
 
-import Stripe from 'stripe';
-
-import type { SubscriptionStatus } from '@abe-stack/db';
-
 import type {
     BillingService,
     CheckoutParams,
     CheckoutResult,
     CreateProductParams,
     CreateProductResult,
-    NormalizedEventType,
-    NormalizedWebhookEvent,
     ProviderInvoice,
     ProviderPaymentMethod,
     ProviderSubscription,
-    SetupIntentResult,
-    StripeConfig,
-} from './types';
+    StripeProviderConfig as StripeConfig,
+} from '@abe-stack/core';
+import type { SubscriptionStatus } from '@abe-stack/db';
+import type StripeLib from 'stripe';
+
+import type { NormalizedEventType, NormalizedWebhookEvent, SetupIntentResult } from './types';
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+const Stripe = require('stripe');
 
 // ============================================================================
 // Stripe Status Mapping
@@ -31,8 +31,8 @@ import type {
 /**
  * Map Stripe subscription status to our status type
  */
-function mapStripeStatus(stripeStatus: Stripe.Subscription.Status): SubscriptionStatus {
-  const statusMap: Record<Stripe.Subscription.Status, SubscriptionStatus> = {
+function mapStripeStatus(stripeStatus: StripeLib.Subscription.Status): SubscriptionStatus {
+  const statusMap: Record<StripeLib.Subscription.Status, SubscriptionStatus> = {
     active: 'active',
     canceled: 'canceled',
     incomplete: 'incomplete',
@@ -49,7 +49,7 @@ function mapStripeStatus(stripeStatus: Stripe.Subscription.Status): Subscription
  * Map Stripe invoice status to our status type
  */
 function mapStripeInvoiceStatus(
-  stripeStatus: Stripe.Invoice.Status | null,
+  stripeStatus: StripeLib.Invoice.Status | null,
 ): 'draft' | 'open' | 'paid' | 'void' | 'uncollectible' {
   if (stripeStatus == null) return 'draft';
   const statusMap: Record<string, 'draft' | 'open' | 'paid' | 'void' | 'uncollectible'> = {
@@ -67,13 +67,13 @@ function mapStripeInvoiceStatus(
  */
 function mapStripeEventType(stripeType: string): NormalizedEventType {
   const typeMap: Record<string, NormalizedEventType> = {
-    'customer.subscription.created': 'subscription.created',
-    'customer.subscription.updated': 'subscription.updated',
-    'customer.subscription.deleted': 'subscription.canceled',
-    'invoice.paid': 'invoice.paid',
-    'invoice.payment_failed': 'invoice.payment_failed',
-    'charge.refunded': 'refund.created',
-    'charge.dispute.created': 'chargeback.created',
+    ['customer.subscription.created']: 'subscription.created',
+    ['customer.subscription.updated']: 'subscription.updated',
+    ['customer.subscription.deleted']: 'subscription.canceled',
+    ['invoice.paid']: 'invoice.paid',
+    ['invoice.payment_failed']: 'invoice.payment_failed',
+    ['charge.refunded']: 'refund.created',
+    ['charge.dispute.created']: 'chargeback.created',
   };
   return typeMap[stripeType] ?? 'unknown';
 }
@@ -85,7 +85,7 @@ function mapStripeEventType(stripeType: string): NormalizedEventType {
 export class StripeProvider implements BillingService {
   readonly provider = 'stripe' as const;
 
-  private stripe: Stripe;
+  private stripe: StripeLib;
   private webhookSecret: string;
 
   constructor(config: StripeConfig) {
@@ -115,7 +115,7 @@ export class StripeProvider implements BillingService {
   // -------------------------------------------------------------------------
 
   async createCheckoutSession(params: CheckoutParams): Promise<CheckoutResult> {
-    const sessionParams: Stripe.Checkout.SessionCreateParams = {
+    const sessionParams: StripeLib.Checkout.SessionCreateParams = {
       customer: params.userId, // This should be the Stripe customer ID
       mode: 'subscription',
       payment_method_types: ['card'],
@@ -256,19 +256,24 @@ export class StripeProvider implements BillingService {
         : defaultPaymentMethod.id
       : null;
 
-    return paymentMethods.data.map((pm) => ({
-      id: pm.id,
-      type: 'card' as const,
-      card: pm.card != null
-        ? {
-            brand: pm.card.brand,
-            last4: pm.card.last4,
-            expMonth: pm.card.exp_month,
-            expYear: pm.card.exp_year,
-          }
-        : undefined,
-      isDefault: pm.id === defaultPaymentMethodId,
-    }));
+    return paymentMethods.data.map((pm) => {
+      const method: ProviderPaymentMethod = {
+        id: pm.id,
+        type: 'card' as const,
+        isDefault: pm.id === defaultPaymentMethodId,
+      };
+
+      if (pm.card != null) {
+        method.card = {
+          brand: pm.card.brand,
+          last4: pm.card.last4,
+          expMonth: pm.card.exp_month,
+          expYear: pm.card.exp_year,
+        };
+      }
+
+      return method;
+    });
   }
 
   async attachPaymentMethod(customerId: string, paymentMethodId: string): Promise<void> {
@@ -303,10 +308,10 @@ export class StripeProvider implements BillingService {
       // Access subscription from invoice data (handle different API structures)
       const invData = invoice as unknown as Record<string, unknown>;
       let subscriptionId: string | null = null;
-      if (typeof invData.subscription === 'string') {
-        subscriptionId = invData.subscription;
-      } else if (typeof invData.subscription === 'object' && invData.subscription != null) {
-        subscriptionId = (invData.subscription as { id?: string }).id ?? null;
+      if (typeof invData['subscription'] === 'string') {
+        subscriptionId = invData['subscription'];
+      } else if (typeof invData['subscription'] === 'object' && invData['subscription'] != null) {
+        subscriptionId = (invData['subscription'] as { id?: string }).id ?? null;
       }
 
       return {
@@ -401,7 +406,7 @@ export class StripeProvider implements BillingService {
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted': {
-        const sub = event.data.object as unknown as Stripe.Subscription;
+        const sub = event.data.object as unknown as StripeLib.Subscription;
         subscriptionId = sub.id;
         customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer.id;
         status = sub.status;
@@ -410,20 +415,20 @@ export class StripeProvider implements BillingService {
       }
       case 'invoice.paid':
       case 'invoice.payment_failed': {
-        const inv = event.data.object as unknown as Stripe.Invoice;
+        const inv = event.data.object as unknown as StripeLib.Invoice;
         invoiceId = inv.id;
         customerId = typeof inv.customer === 'string' ? inv.customer : inv.customer?.id;
         status = inv.status ?? undefined;
         break;
       }
       case 'charge.refunded': {
-        const charge = event.data.object as unknown as Stripe.Charge;
+        const charge = event.data.object as unknown as StripeLib.Charge;
         customerId = typeof charge.customer === 'string' ? charge.customer : charge.customer?.id;
         break;
       }
       case 'charge.dispute.created': {
-        const dispute = event.data.object as unknown as Stripe.Dispute;
-        const disputeCharge = dispute.charge as Stripe.Charge;
+        const dispute = event.data.object as unknown as StripeLib.Dispute;
+        const disputeCharge = dispute.charge as StripeLib.Charge;
         const chargeCustomer = disputeCharge.customer;
         if (chargeCustomer != null) {
           customerId = typeof chargeCustomer === 'string' ? chargeCustomer : chargeCustomer.id;

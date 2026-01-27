@@ -91,12 +91,18 @@ class WindowSpecBuilder implements WindowSpec {
   }
 
   rows(start: FrameBound, end?: FrameBound): WindowSpec {
-    this._frame = { type: 'rows', start, end };
+    this._frame = { type: 'rows', start };
+    if (end !== undefined) {
+      this._frame.end = end;
+    }
     return this;
   }
 
   range(start: FrameBound, end?: FrameBound): WindowSpec {
-    this._frame = { type: 'range', start, end };
+    this._frame = { type: 'range', start };
+    if (end !== undefined) {
+      this._frame.end = end;
+    }
     return this;
   }
 
@@ -114,11 +120,12 @@ class WindowSpecBuilder implements WindowSpec {
       parts.push(`ORDER BY ${orderClauses.join(', ')}`);
     }
 
-    if (this._frame) {
+    if (this._frame !== null) {
       const frameType = this._frame.type.toUpperCase();
       const startBound = formatFrameBound(this._frame.start);
-      if (this._frame.end) {
-        const endBound = formatFrameBound(this._frame.end);
+      const endFrame = this._frame.end;
+      if (endFrame !== undefined) {
+        const endBound = formatFrameBound(endFrame);
         parts.push(`${frameType} BETWEEN ${startBound} AND ${endBound}`);
       } else {
         parts.push(`${frameType} ${startBound}`);
@@ -148,7 +155,7 @@ class WindowExprImpl implements WindowExpr {
   readonly values: readonly unknown[];
 
   constructor(funcText: string, funcValues: readonly unknown[], spec?: WindowSpec) {
-    const overClause = spec ? `OVER (${spec.toSql()})` : 'OVER ()';
+    const overClause = spec !== undefined ? `OVER (${spec.toSql()})` : 'OVER ()';
     this.text = `${funcText} ${overClause}`;
     this.values = funcValues;
   }
@@ -349,7 +356,7 @@ export function avg(column: string): AggregateFunction {
  * @example count().over(partitionBy('user_id'))
  */
 export function count(column?: string): AggregateFunction {
-  const expr = column ? escapeIdentifier(column) : '*';
+  const expr = column !== undefined && column !== '' ? escapeIdentifier(column) : '*';
   return new AggregateFunctionImpl(`COUNT(${expr})`);
 }
 

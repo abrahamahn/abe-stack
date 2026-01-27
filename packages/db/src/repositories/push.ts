@@ -5,7 +5,7 @@
  * Data access layer for push subscriptions and notification preferences.
  */
 
-import { and, eq, lt, select, insert, update, deleteFrom } from '../builder';
+import { and, eq, lt, select, insert, update, deleteFrom } from '../builder/index';
 import {
   DEFAULT_QUIET_HOURS,
   DEFAULT_TYPE_PREFERENCES,
@@ -17,7 +17,7 @@ import {
   PUSH_SUBSCRIPTION_COLUMNS,
   PUSH_SUBSCRIPTIONS_TABLE,
   type PushSubscription,
-} from '../schema';
+} from '../schema/index';
 import { formatJsonb, parseJsonb, toCamelCase, toCamelCaseArray, toSnakeCase } from '../utils';
 
 import type { RawDb } from '../client';
@@ -51,14 +51,18 @@ export function createPushSubscriptionRepository(db: RawDb): PushSubscriptionRep
       const result = await db.queryOne<Record<string, unknown>>(
         select(PUSH_SUBSCRIPTIONS_TABLE).where(eq('id', id)).toSql(),
       );
-      return result ? toCamelCase<PushSubscription>(result, PUSH_SUBSCRIPTION_COLUMNS) : null;
+      return result !== null
+        ? toCamelCase<PushSubscription>(result, PUSH_SUBSCRIPTION_COLUMNS)
+        : null;
     },
 
     async findByEndpoint(endpoint: string): Promise<PushSubscription | null> {
       const result = await db.queryOne<Record<string, unknown>>(
         select(PUSH_SUBSCRIPTIONS_TABLE).where(eq('endpoint', endpoint)).toSql(),
       );
-      return result ? toCamelCase<PushSubscription>(result, PUSH_SUBSCRIPTION_COLUMNS) : null;
+      return result !== null
+        ? toCamelCase<PushSubscription>(result, PUSH_SUBSCRIPTION_COLUMNS)
+        : null;
     },
 
     async findByUserId(userId: string): Promise<PushSubscription[]> {
@@ -87,7 +91,9 @@ export function createPushSubscriptionRepository(db: RawDb): PushSubscriptionRep
           .where(and(eq('user_id', userId), eq('device_id', deviceId)))
           .toSql(),
       );
-      return result ? toCamelCase<PushSubscription>(result, PUSH_SUBSCRIPTION_COLUMNS) : null;
+      return result !== null
+        ? toCamelCase<PushSubscription>(result, PUSH_SUBSCRIPTION_COLUMNS)
+        : null;
     },
 
     async create(subscription: NewPushSubscription): Promise<PushSubscription> {
@@ -98,7 +104,7 @@ export function createPushSubscriptionRepository(db: RawDb): PushSubscriptionRep
       const result = await db.queryOne<Record<string, unknown>>(
         insert(PUSH_SUBSCRIPTIONS_TABLE).values(snakeData).returningAll().toSql(),
       );
-      if (!result) {
+      if (result === null) {
         throw new Error('Failed to create push subscription');
       }
       return toCamelCase<PushSubscription>(result, PUSH_SUBSCRIPTION_COLUMNS);
@@ -107,7 +113,7 @@ export function createPushSubscriptionRepository(db: RawDb): PushSubscriptionRep
     async updateLastUsed(id: string): Promise<void> {
       await db.execute(
         update(PUSH_SUBSCRIPTIONS_TABLE)
-          .set({ last_used_at: new Date() })
+          .set({ ['last_used_at']: new Date() })
           .where(eq('id', id))
           .toSql(),
       );
@@ -115,13 +121,19 @@ export function createPushSubscriptionRepository(db: RawDb): PushSubscriptionRep
 
     async deactivate(id: string): Promise<void> {
       await db.execute(
-        update(PUSH_SUBSCRIPTIONS_TABLE).set({ is_active: false }).where(eq('id', id)).toSql(),
+        update(PUSH_SUBSCRIPTIONS_TABLE)
+          .set({ ['is_active']: false })
+          .where(eq('id', id))
+          .toSql(),
       );
     },
 
     async activate(id: string): Promise<void> {
       await db.execute(
-        update(PUSH_SUBSCRIPTIONS_TABLE).set({ is_active: true }).where(eq('id', id)).toSql(),
+        update(PUSH_SUBSCRIPTIONS_TABLE)
+          .set({ ['is_active']: true })
+          .where(eq('id', id))
+          .toSql(),
       );
     },
 
@@ -184,8 +196,8 @@ export function createNotificationPreferenceRepository(
     );
     return {
       ...camelResult,
-      quietHours: parseJsonb(camelResult.quietHours as string) ?? DEFAULT_QUIET_HOURS,
-      types: parseJsonb(camelResult.types as string) ?? DEFAULT_TYPE_PREFERENCES,
+      quietHours: parseJsonb(camelResult['quietHours'] as string) ?? DEFAULT_QUIET_HOURS,
+      types: parseJsonb(camelResult['types'] as string) ?? DEFAULT_TYPE_PREFERENCES,
     } as NotificationPreference;
   };
 
@@ -195,11 +207,11 @@ export function createNotificationPreferenceRepository(
       data as unknown as Record<string, unknown>,
       NOTIFICATION_PREFERENCE_COLUMNS,
     );
-    if ('quiet_hours' in snakeData && snakeData.quiet_hours !== undefined) {
-      snakeData.quiet_hours = formatJsonb(snakeData.quiet_hours);
+    if ('quiet_hours' in snakeData && snakeData['quiet_hours'] !== undefined) {
+      snakeData['quiet_hours'] = formatJsonb(snakeData['quiet_hours']);
     }
-    if ('types' in snakeData && snakeData.types !== undefined) {
-      snakeData.types = formatJsonb(snakeData.types);
+    if ('types' in snakeData && snakeData['types'] !== undefined) {
+      snakeData['types'] = formatJsonb(snakeData['types']);
     }
     return snakeData;
   };
@@ -209,14 +221,14 @@ export function createNotificationPreferenceRepository(
       const result = await db.queryOne<Record<string, unknown>>(
         select(NOTIFICATION_PREFERENCES_TABLE).where(eq('id', id)).toSql(),
       );
-      return result ? parseResult(result) : null;
+      return result !== null ? parseResult(result) : null;
     },
 
     async findByUserId(userId: string): Promise<NotificationPreference | null> {
       const result = await db.queryOne<Record<string, unknown>>(
         select(NOTIFICATION_PREFERENCES_TABLE).where(eq('user_id', userId)).toSql(),
       );
-      return result ? parseResult(result) : null;
+      return result !== null ? parseResult(result) : null;
     },
 
     async create(preference: NewNotificationPreference): Promise<NotificationPreference> {
@@ -224,7 +236,7 @@ export function createNotificationPreferenceRepository(
       const result = await db.queryOne<Record<string, unknown>>(
         insert(NOTIFICATION_PREFERENCES_TABLE).values(snakeData).returningAll().toSql(),
       );
-      if (!result) {
+      if (result === null) {
         throw new Error('Failed to create notification preference');
       }
       return parseResult(result);
@@ -242,7 +254,7 @@ export function createNotificationPreferenceRepository(
           .returningAll()
           .toSql(),
       );
-      return result ? parseResult(result) : null;
+      return result !== null ? parseResult(result) : null;
     },
 
     async upsert(
@@ -251,7 +263,7 @@ export function createNotificationPreferenceRepository(
     ): Promise<NotificationPreference> {
       // Try to update first
       const updated = await this.update(userId, data);
-      if (updated) {
+      if (updated !== null) {
         return updated;
       }
 

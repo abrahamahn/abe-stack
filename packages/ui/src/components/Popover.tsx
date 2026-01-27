@@ -20,7 +20,7 @@ type PopoverProps = {
   /** Callback when open state changes */
   onChange?: (open: boolean) => void;
   /** Accessible label for the popover trigger button */
-  'aria-label'?: string;
+  ['aria-label']?: string;
 };
 
 /**
@@ -33,7 +33,7 @@ type PopoverProps = {
  * </Popover>
  * ```
  */
-export function Popover({
+export const Popover = ({
   trigger,
   placement = 'bottom',
   children,
@@ -41,15 +41,15 @@ export function Popover({
   defaultOpen,
   onChange,
   'aria-label': ariaLabel = 'Toggle popover',
-}: PopoverProps): ReactElement {
+}: PopoverProps): ReactElement => {
   const {
     open: isOpen,
     toggle,
     close,
   } = useDisclosure({
-    open,
+    ...(open !== undefined && { open }),
     defaultOpen: defaultOpen ?? false,
-    onChange,
+    ...(onChange !== undefined && { onChange }),
   });
   const triggerRef = useRef<HTMLDivElement>(null);
   const popoverId = useId();
@@ -104,4 +104,4 @@ export function Popover({
       ) : null}
     </div>
   );
-}
+};

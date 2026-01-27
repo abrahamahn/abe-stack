@@ -56,7 +56,7 @@ interface DetailRowProps {
   isLoading: boolean;
 }
 
-function DetailRow({ label, value, isLoading }: DetailRowProps): JSX.Element {
+const DetailRow = ({ label, value, isLoading }: DetailRowProps): JSX.Element => {
   if (isLoading) {
     return (
       <div className="flex flex-col gap-1 py-2 border-b border-gray-100 dark:border-gray-700">
@@ -74,13 +74,13 @@ function DetailRow({ label, value, isLoading }: DetailRowProps): JSX.Element {
       <Text>{value ?? '-'}</Text>
     </div>
   );
-}
+};
 
 // ============================================================================
 // Component
 // ============================================================================
 
-export function SecurityEventCard({ event, isLoading }: SecurityEventCardProps): JSX.Element {
+export const SecurityEventCard = ({ event, isLoading }: SecurityEventCardProps): JSX.Element => {
   return (
     <div className="space-y-6">
       <Card className="p-6">
@@ -92,18 +92,18 @@ export function SecurityEventCard({ event, isLoading }: SecurityEventCardProps):
           <DetailRow label="Event ID" value={event?.id} isLoading={isLoading} />
           <DetailRow
             label="Created At"
-            value={event ? formatDate(event.createdAt) : undefined}
+            value={event !== undefined ? formatDate(event.createdAt) : undefined}
             isLoading={isLoading}
           />
           <DetailRow
             label="Event Type"
-            value={event ? formatEventType(event.eventType) : undefined}
+            value={event !== undefined ? formatEventType(event.eventType) : undefined}
             isLoading={isLoading}
           />
           <DetailRow
             label="Severity"
             value={
-              event ? (
+              event !== undefined ? (
                 <span
                   className={`px-2 py-1 rounded-full text-xs font-medium ${getSeverityBadgeClass(event.severity)}`}
                 >
@@ -137,7 +137,7 @@ export function SecurityEventCard({ event, isLoading }: SecurityEventCardProps):
           <DetailRow
             label="User Agent"
             value={
-              event?.userAgent ? (
+              event !== undefined && event.userAgent !== null && event.userAgent !== '' ? (
                 <Text className="break-all font-mono text-sm">{event.userAgent}</Text>
               ) : undefined
             }
@@ -146,7 +146,7 @@ export function SecurityEventCard({ event, isLoading }: SecurityEventCardProps):
         </div>
       </Card>
 
-      {event?.metadata && Object.keys(event.metadata).length > 0 && (
+      {event !== undefined && event.metadata !== null && Object.keys(event.metadata).length > 0 && (
         <Card className="p-6">
           <Heading as="h3" size="md" className="mb-4">
             Additional Metadata
@@ -159,4 +159,4 @@ export function SecurityEventCard({ event, isLoading }: SecurityEventCardProps):
       )}
     </div>
   );
-}
+};

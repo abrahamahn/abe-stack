@@ -176,8 +176,8 @@ export function verify(token: string, secret: string): JwtPayload {
     header === null ||
     header === undefined ||
     typeof header !== 'object' ||
-    (header as Record<string, unknown>).alg !== 'HS256' ||
-    (header as Record<string, unknown>).typ !== 'JWT'
+    (header as Record<string, unknown>)['alg'] !== 'HS256' ||
+    (header as Record<string, unknown>)['typ'] !== 'JWT'
   ) {
     throw new JwtError('Algorithm not supported', 'INVALID_TOKEN');
   }

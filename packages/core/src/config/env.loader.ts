@@ -1,6 +1,7 @@
 // packages/core/src/config/env.loader.ts
 import fs from 'node:fs';
 import path from 'node:path';
+
 import { EnvSchema, type FullEnv } from './env.schema';
 
 /**
@@ -112,7 +113,9 @@ export function loadServerEnv(): FullEnv {
   initEnv();
 
   // 2. Validate using the existing Zod Contract
-  const result = EnvSchema.safeParse(process.env);
+  const result = EnvSchema.safeParse(process.env) as
+    | { success: true; data: FullEnv }
+    | { success: false; error: { message: string } };
 
   if (!result.success) {
     console.error('\n❌ ABE-STACK: Environment Validation Failed');
@@ -137,7 +140,9 @@ export function loadServerEnv(): FullEnv {
  * Validates the environment object.
  */
 export function validateEnvironment(raw: Record<string, unknown> = process.env): FullEnv {
-  const parsed = EnvSchema.safeParse(raw);
+  const parsed = EnvSchema.safeParse(raw) as
+    | { success: true; data: FullEnv }
+    | { success: false; error: { message: string } };
   if (!parsed.success) {
     console.error('Environment Validation Failed:', parsed.error.message);
     process.exit(1);
@@ -147,4 +152,3 @@ export function validateEnvironment(raw: Record<string, unknown> = process.env):
 
 export { EnvSchema, EnvSchema as serverEnvSchema };
 export type { FullEnv as ServerEnv };
-

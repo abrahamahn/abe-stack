@@ -10,7 +10,7 @@ type DemoDocContentProps = {
   component: ComponentDemo;
 };
 
-export function DemoDocContent({ component }: DemoDocContentProps): ReactElement {
+export const DemoDocContent = ({ component }: DemoDocContentProps): ReactElement => {
   const [docs, setDocs] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -40,7 +40,7 @@ export function DemoDocContent({ component }: DemoDocContentProps): ReactElement
     );
   }
 
-  if (docs) {
+  if (docs !== null && docs.length > 0) {
     return <Markdown className="markdown-content">{docs}</Markdown>;
   }
 
@@ -66,4 +66,4 @@ export function DemoDocContent({ component }: DemoDocContentProps): ReactElement
       </section>
     </>
   );
-}
+};

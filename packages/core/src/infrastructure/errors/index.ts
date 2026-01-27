@@ -33,9 +33,9 @@ export type { ApiErrorResponse, ApiResponse, ApiSuccessResponse } from './respon
 
 // Validation error
 export { ValidationError } from './validation';
-export { formatValidationErrors } from './validationError';
+export { formatValidationErrors } from './validation-error';
 export type {
   ValidationErrorDetail,
   ValidationErrorResponse,
   ZodIssueMinimal,
-} from './validationError';
+} from './validation-error';

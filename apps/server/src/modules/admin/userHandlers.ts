@@ -6,8 +6,9 @@
  * All handlers expect admin role (enforced by route middleware).
  */
 
+import { UserNotFoundError } from '@abe-stack/core';
 import { getUserById, listUsers, lockUser, unlockUser, updateUser } from '@admin/userService';
-import { ERROR_MESSAGES, UserNotFoundError, type AppContext } from '@shared';
+import { ERROR_MESSAGES, type AppContext } from '@shared';
 
 import type {
     AdminLockUserRequest,

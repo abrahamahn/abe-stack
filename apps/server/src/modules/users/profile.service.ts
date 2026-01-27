@@ -6,13 +6,17 @@
  * Handles profile updates, password changes, and avatar management.
  */
 
-import { validatePassword, type UserRole } from '@abe-stack/core';
-import type { Repositories, StorageProvider } from '@infrastructure';
-import { BadRequestError, NotFoundError, WeakPasswordError } from '@shared';
-
+import {
+  BadRequestError,
+  NotFoundError,
+  validatePassword,
+  WeakPasswordError,
+  type UserRole,
+} from '@abe-stack/core';
 import { hashPassword, verifyPassword } from '@auth/utils';
 
 import type { AuthConfig } from '@/config';
+import type { Repositories, StorageProvider } from '@infrastructure';
 
 // ============================================================================
 // Types

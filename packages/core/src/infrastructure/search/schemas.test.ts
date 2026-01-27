@@ -320,7 +320,7 @@ describe('search schemas', () => {
     test('should have correct defaults', () => {
       expect(SEARCH_DEFAULTS.PAGE).toBe(1);
       expect(SEARCH_DEFAULTS.LIMIT).toBe(50);
-      expect(SEARCH_DEFAULTS.MAX_LIMIT).toBe(1000);
+      expect(SEARCH_DEFAULTS.MaxLimit).toBe(1000);
     });
   });
 });

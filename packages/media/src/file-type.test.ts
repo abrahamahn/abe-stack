@@ -6,7 +6,7 @@ import {
   detectFileTypeFromFile,
   detectFileTypeFromPath,
   isAllowedFileType,
-} from '../file-type';
+} from './file-type';
 
 // Mock fs module
 vi.mock('fs', () => ({

@@ -1,45 +1,49 @@
 // apps/web/src/app/__tests__/App.test.tsx
 import { render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
+import { type ReactElement, type ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { App } from '../App';
+import { App } from './App';
 
-import type { ClientEnvironment } from '../ClientEnvironment';
+import type { ClientEnvironment } from './ClientEnvironment';
 
 // Mock all page components - use alias paths to match App.tsx imports
-vi.mock('@pages/HomePage', () => ({
-  HomePage: (): React.ReactElement => <div data-testid="home-page">Home Page</div>,
-}));
+const HomePage = (): ReactElement => <div data-testid="home-page">Home Page</div>;
+vi.mock('@pages/HomePage', () => ({ HomePage }));
 
-vi.mock('@features/dashboard', () => ({
-  DashboardPage: (): React.ReactElement => <div data-testid="dashboard-page">Dashboard Page</div>,
-}));
+const DashboardPage = (): ReactElement => <div data-testid="dashboard-page">Dashboard Page</div>;
+vi.mock('@features/dashboard', () => ({ DashboardPage }));
 
-vi.mock('@demo', () => ({
-  DemoPage: (): React.ReactElement => <div data-testid="demo-page">Demo Page</div>,
-  SidePeekDemoPage: (): React.ReactElement => (
-    <div data-testid="side-peek-demo-page">Side Peek Demo Page</div>
-  ),
-}));
+const DemoPage = (): ReactElement => <div data-testid="demo-page">Demo Page</div>;
+const SidePeekDemoPage = (): ReactElement => (
+  <div data-testid="side-peek-demo-page">Side Peek Demo Page</div>
+);
+vi.mock('@demo', () => ({ DemoPage, SidePeekDemoPage }));
 
 // Mock auth feature (LoginPage, RegisterPage + ProtectedRoute)
+const LoginPage = (): ReactElement => <div data-testid="login-page">Login Page</div>;
+const RegisterPage = (): ReactElement => <div data-testid="register-page">Register Page</div>;
+const AuthPage = (): ReactElement => <div data-testid="auth-page">Auth Page</div>;
+const ResetPasswordPage = (): ReactElement => (
+  <div data-testid="reset-password-page">Reset Password</div>
+);
+const ConfirmEmailPage = (): ReactElement => (
+  <div data-testid="confirm-email-page">Confirm Email</div>
+);
+const ConnectedAccountsPage = (): ReactElement => (
+  <div data-testid="connected-accounts-page">Connected Accounts</div>
+);
+const ProtectedRoute = ({ children }: { children: ReactNode }): ReactElement => (
+  <div data-testid="protected-route">{children}</div>
+);
 vi.mock('@features/auth', () => ({
-  LoginPage: (): React.ReactElement => <div data-testid="login-page">Login Page</div>,
-  RegisterPage: (): React.ReactElement => <div data-testid="register-page">Register Page</div>,
-  AuthPage: (): React.ReactElement => <div data-testid="auth-page">Auth Page</div>,
-  ResetPasswordPage: (): React.ReactElement => (
-    <div data-testid="reset-password-page">Reset Password</div>
-  ),
-  ConfirmEmailPage: (): React.ReactElement => (
-    <div data-testid="confirm-email-page">Confirm Email</div>
-  ),
-  ConnectedAccountsPage: (): React.ReactElement => (
-    <div data-testid="connected-accounts-page">Connected Accounts</div>
-  ),
-  ProtectedRoute: ({ children }: { children: React.ReactNode }): React.ReactElement => (
-    <div data-testid="protected-route">{children}</div>
-  ),
+  LoginPage,
+  RegisterPage,
+  AuthPage,
+  ResetPasswordPage,
+  ConfirmEmailPage,
+  ConnectedAccountsPage,
+  ProtectedRoute,
 }));
 
 // Mock @abe-stack/core toastStore
@@ -51,36 +55,63 @@ vi.mock('@abe-stack/core', () => ({
 }));
 
 // Mock @abe-stack/sdk
+const QueryCacheProvider = ({ children }: { children: ReactNode }): ReactElement => (
+  <div data-testid="query-cache-provider">{children}</div>
+);
 vi.mock('@abe-stack/sdk', () => ({
   createQueryPersister: vi.fn(() => ({
     persistClient: vi.fn(),
     restoreClient: vi.fn().mockResolvedValue(undefined),
     removeClient: vi.fn(),
   })),
-  QueryCacheProvider: ({ children }: { children: React.ReactNode }): React.ReactElement => (
-    <div data-testid="query-cache-provider">{children}</div>
-  ),
+  QueryCacheProvider,
 }));
 
 // Mock @abe-stack/ui - replace BrowserRouter with MemoryRouter for tests
+const ScrollArea = ({ children }: { children: ReactNode }): ReactElement => <div>{children}</div>;
+const Toaster = (): ReactElement => <div data-testid="toaster">Toaster</div>;
+const HistoryProvider = ({ children }: { children: ReactNode }): ReactElement => (
+  <div data-testid="history-provider">{children}</div>
+);
+
 vi.mock('@abe-stack/ui', async () => {
   const actual = await vi.importActual('@abe-stack/ui');
   return {
     ...actual,
     // Use MemoryRouter instead of BrowserRouter in tests
-    BrowserRouter: actual.MemoryRouter,
-    ScrollArea: ({ children }: { children: React.ReactNode }): React.ReactElement => (
-      <div>{children}</div>
-    ),
-    Toaster: (): React.ReactElement => <div data-testid="toaster">Toaster</div>,
-    HistoryProvider: ({ children }: { children: React.ReactNode }): React.ReactElement => (
-      <div data-testid="history-provider">{children}</div>
-    ),
+    BrowserRouter: (actual as Record<string, unknown>)['MemoryRouter'],
+    ScrollArea,
+    Toaster,
+    HistoryProvider,
   };
 });
 
+// Store mock spies outside the object to avoid unbound-method errors
+let subscribeAllSpy: ReturnType<typeof vi.fn>;
+
 // Create a mock environment for testing
-function createMockEnvironment(): ClientEnvironment {
+const createMockEnvironment = (): ClientEnvironment => {
+  subscribeAllSpy = vi.fn(() => vi.fn());
+  const getQueryDataMock = vi.fn();
+  const setQueryDataMock = vi.fn();
+  const getQueryStateMock = vi.fn();
+  const invalidateQueriesMock = vi.fn();
+  const subscribeMock = vi.fn(() => vi.fn());
+  const getAllMock = vi.fn(() => []);
+
+  const getStateMock = vi.fn(() => ({ user: null, isLoading: false, isAuthenticated: false }));
+  const authSubscribeMock = vi.fn(() => () => {});
+  const loginMock = vi.fn();
+  const logoutMock = vi.fn();
+  const registerMock = vi.fn();
+  const refreshTokenMock = vi.fn();
+  const forgotPasswordMock = vi.fn();
+  const resetPasswordMock = vi.fn();
+  const verifyEmailMock = vi.fn();
+  const fetchCurrentUserMock = vi.fn();
+  const initializeMock = vi.fn();
+  const destroyMock = vi.fn();
+
   return {
     config: {
       mode: 'test',
@@ -91,30 +122,30 @@ function createMockEnvironment(): ClientEnvironment {
       uiVersion: '1.0.0',
     },
     queryCache: {
-      getQueryData: vi.fn(),
-      setQueryData: vi.fn(),
-      getQueryState: vi.fn(),
-      invalidateQueries: vi.fn(),
-      subscribe: vi.fn(() => vi.fn()),
-      subscribeAll: vi.fn(() => vi.fn()),
-      getAll: vi.fn(() => []),
+      getQueryData: getQueryDataMock,
+      setQueryData: setQueryDataMock,
+      getQueryState: getQueryStateMock,
+      invalidateQueries: invalidateQueriesMock,
+      subscribe: subscribeMock,
+      subscribeAll: subscribeAllSpy,
+      getAll: getAllMock,
     } as unknown as ClientEnvironment['queryCache'],
     auth: {
-      getState: vi.fn(() => ({ user: null, isLoading: false, isAuthenticated: false })),
-      subscribe: vi.fn(() => () => {}),
-      login: vi.fn(),
-      logout: vi.fn(),
-      register: vi.fn(),
-      refreshToken: vi.fn(),
-      forgotPassword: vi.fn(),
-      resetPassword: vi.fn(),
-      verifyEmail: vi.fn(),
-      fetchCurrentUser: vi.fn(),
-      initialize: vi.fn(),
-      destroy: vi.fn(),
+      getState: getStateMock,
+      subscribe: authSubscribeMock,
+      login: loginMock,
+      logout: logoutMock,
+      register: registerMock,
+      refreshToken: refreshTokenMock,
+      forgotPassword: forgotPasswordMock,
+      resetPassword: resetPasswordMock,
+      verifyEmail: verifyEmailMock,
+      fetchCurrentUser: fetchCurrentUserMock,
+      initialize: initializeMock,
+      destroy: destroyMock,
     } as unknown as ClientEnvironment['auth'],
   };
-}
+};
 
 describe('App', () => {
   let mockEnvironment: ClientEnvironment;
@@ -208,7 +239,7 @@ describe('App', () => {
       });
 
       // Verify queryCache.subscribeAll was called for persistence
-      expect(mockEnvironment.queryCache.subscribeAll).toHaveBeenCalled();
+      expect(subscribeAllSpy).toHaveBeenCalled();
     });
 
     it('should handle empty persisted state gracefully', async () => {

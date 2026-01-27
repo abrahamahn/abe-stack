@@ -343,14 +343,18 @@ export const EnvSchema = BaseEnvSchema.extend({
   // 1. Production Database Enforcement
   if (isProd) {
     const hasPostgres =
-      (data.DATABASE_URL !== undefined && data.DATABASE_URL !== '') || (data.POSTGRES_HOST !== undefined && data.POSTGRES_USER !== undefined && data.POSTGRES_PASSWORD !== undefined);
+      (data.DATABASE_URL !== undefined && data.DATABASE_URL !== '') ||
+      (data.POSTGRES_HOST !== undefined &&
+        data.POSTGRES_USER !== undefined &&
+        data.POSTGRES_PASSWORD !== undefined);
 
     const hasSqlite = data.SQLITE_FILE_PATH !== undefined && data.SQLITE_FILE_PATH !== '';
-    const hasMongo = data.MONGODB_CONNECTION_STRING !== undefined && data.MONGODB_CONNECTION_STRING !== '';
+    const hasMongo =
+      data.MONGODB_CONNECTION_STRING !== undefined && data.MONGODB_CONNECTION_STRING !== '';
 
     if (!hasPostgres && !hasSqlite && !hasMongo) {
       ctx.addIssue({
-        code: "custom",
+        code: 'custom',
         message: 'Production requires a valid database configuration (URL or host/user/pass)',
         path: ['DATABASE_URL'],
       });
@@ -362,7 +366,7 @@ export const EnvSchema = BaseEnvSchema.extend({
     const weakSecrets = ['secret', 'password', 'changeme', 'jwt_secret', 'dev', 'prod', 'test'];
     if (weakSecrets.includes(data.JWT_SECRET.toLowerCase()) || data.JWT_SECRET.length < 32) {
       ctx.addIssue({
-        code: "custom",
+        code: 'custom',
         message:
           'Security Risk: JWT_SECRET must be at least 32 characters and not a common word in production',
         path: ['JWT_SECRET'],
@@ -371,9 +375,15 @@ export const EnvSchema = BaseEnvSchema.extend({
   }
 
   // 3. URL Cross-Validation (Consistency)
-  if (data.PUBLIC_API_URL !== undefined && data.PUBLIC_API_URL !== '' && data.VITE_API_URL !== undefined && data.VITE_API_URL !== '' && data.PUBLIC_API_URL !== data.VITE_API_URL) {
+  if (
+    data.PUBLIC_API_URL !== undefined &&
+    data.PUBLIC_API_URL !== '' &&
+    data.VITE_API_URL !== undefined &&
+    data.VITE_API_URL !== '' &&
+    data.PUBLIC_API_URL !== data.VITE_API_URL
+  ) {
     ctx.addIssue({
-      code: "custom",
+      code: 'custom',
       message: 'Consistency Error: PUBLIC_API_URL and VITE_API_URL must match if both are provided',
       path: ['VITE_API_URL'],
     });

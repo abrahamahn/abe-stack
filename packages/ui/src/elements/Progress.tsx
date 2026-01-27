@@ -34,7 +34,7 @@ export const Progress = forwardRef<HTMLDivElement, ProgressProps>((props, ref) =
     >
       <div
         className="progress-bar"
-        style={{ '--progress-value': `${String(clamped)}%` } as CSSProperties}
+        style={{ ['--progress-value']: `${String(clamped)}%` } as CSSProperties}
       />
     </div>
   );

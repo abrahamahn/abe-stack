@@ -5,7 +5,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Popover } from '../Popover';
+import { Popover } from './Popover';
 
 describe('Popover', () => {
   it('opens and closes on trigger click', async () => {

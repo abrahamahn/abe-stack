@@ -4,7 +4,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { PageContainer } from '../PageContainer';
+import { PageContainer } from './PageContainer';
 
 describe('PageContainer', () => {
   it('renders a main element with defaults', () => {
@@ -23,9 +23,9 @@ describe('PageContainer', () => {
 
     const main = screen.getByTestId('page-container');
     expect(main).toHaveStyle({
-      '--ui-page-max-width': '1200px',
-      '--ui-page-gap': '20px',
-      '--ui-page-padding': '24px',
+      ['--ui-page-max-width']: '1200px',
+      ['--ui-page-gap']: '20px',
+      ['--ui-page-padding']: '24px',
     });
   });
 

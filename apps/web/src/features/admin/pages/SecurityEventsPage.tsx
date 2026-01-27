@@ -23,7 +23,7 @@ import type { JSX } from 'react';
 // Component
 // ============================================================================
 
-export function SecurityEventsPage(): JSX.Element {
+export const SecurityEventsPage = (): JSX.Element => {
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -134,4 +134,4 @@ export function SecurityEventsPage(): JSX.Element {
       </div>
     </PageContainer>
   );
-}
+};

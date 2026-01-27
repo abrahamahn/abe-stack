@@ -1,4 +1,4 @@
-// apps/desktop/src/electron/__tests__/main.test.ts
+// apps/desktop/src/electron/main.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Use vi.hoisted to ensure mocks are available at mock time
@@ -46,11 +46,11 @@ vi.mock('electron', () => {
   };
 });
 
-vi.mock('../ipc', () => ({
+vi.mock('./ipc', () => ({
   registerIPCHandlers: mocks.mockRegisterIPCHandlers,
 }));
 
-vi.mock('../utils', () => ({
+vi.mock('./utils', () => ({
   waitForPort: mocks.mockWaitForPort,
 }));
 
@@ -63,29 +63,29 @@ vi.mock('path', () => ({
 }));
 
 describe('main', () => {
-  const originalNodeEnv = process.env.NODE_ENV;
+  const originalNodeEnv = process.env['NODE_ENV'];
 
   beforeEach(() => {
     vi.clearAllMocks();
     // Default to development mode for most tests
-    process.env.NODE_ENV = 'development';
+    process.env['NODE_ENV'] = 'development';
   });
 
   afterEach(() => {
-    process.env.NODE_ENV = originalNodeEnv;
+    process.env['NODE_ENV'] = originalNodeEnv;
   });
 
   describe('app initialization', () => {
     it('should disable hardware acceleration', async () => {
       vi.resetModules();
-      await import('../main');
+      await import('./main');
 
       expect(mocks.mockDisableHardwareAcceleration).toHaveBeenCalledTimes(1);
     });
 
     it('should register IPC handlers with getMainWindow function', async () => {
       vi.resetModules();
-      await import('../main');
+      await import('./main');
 
       expect(mocks.mockRegisterIPCHandlers).toHaveBeenCalledTimes(1);
       expect(mocks.mockRegisterIPCHandlers).toHaveBeenCalledWith(expect.any(Function));
@@ -93,21 +93,21 @@ describe('main', () => {
 
     it('should register app ready event listener', async () => {
       vi.resetModules();
-      await import('../main');
+      await import('./main');
 
       expect(mocks.mockAppOn).toHaveBeenCalledWith('ready', expect.any(Function));
     });
 
     it('should register window-all-closed event listener', async () => {
       vi.resetModules();
-      await import('../main');
+      await import('./main');
 
       expect(mocks.mockAppOn).toHaveBeenCalledWith('window-all-closed', expect.any(Function));
     });
 
     it('should register activate event listener', async () => {
       vi.resetModules();
-      await import('../main');
+      await import('./main');
 
       expect(mocks.mockAppOn).toHaveBeenCalledWith('activate', expect.any(Function));
     });
@@ -116,7 +116,7 @@ describe('main', () => {
   describe('window creation in development mode', () => {
     it('should load URL in development mode', async () => {
       vi.resetModules();
-      await import('../main');
+      await import('./main');
 
       const readyCall = mocks.mockAppOn.mock.calls.find((call) => call[0] === 'ready') as
         | [string, unknown]
@@ -131,7 +131,7 @@ describe('main', () => {
 
     it('should wait for renderer port in development mode', async () => {
       vi.resetModules();
-      await import('../main');
+      await import('./main');
 
       const readyCall = mocks.mockAppOn.mock.calls.find((call) => call[0] === 'ready');
       const readyCallback = readyCall![1] as () => Promise<void>;
@@ -145,7 +145,7 @@ describe('main', () => {
 
     it('should call window.on when window is created', async () => {
       vi.resetModules();
-      await import('../main');
+      await import('./main');
 
       const readyCall = mocks.mockAppOn.mock.calls.find((call) => call[0] === 'ready');
       const readyCallback = readyCall![1] as () => void;
@@ -160,10 +160,10 @@ describe('main', () => {
 
   describe('window creation in production mode', () => {
     it('should load file in production mode', async () => {
-      process.env.NODE_ENV = 'production';
+      process.env['NODE_ENV'] = 'production';
 
       vi.resetModules();
-      await import('../main');
+      await import('./main');
 
       const readyCall = mocks.mockAppOn.mock.calls.find((call) => call[0] === 'ready');
       const readyCallback = readyCall![1] as () => Promise<void>;
@@ -182,7 +182,7 @@ describe('main', () => {
       Object.defineProperty(process, 'platform', { value: 'win32' });
 
       vi.resetModules();
-      await import('../main');
+      await import('./main');
 
       const windowAllClosedCall = mocks.mockAppOn.mock.calls.find(
         (call) => call[0] === 'window-all-closed',
@@ -200,7 +200,7 @@ describe('main', () => {
       Object.defineProperty(process, 'platform', { value: 'darwin' });
 
       vi.resetModules();
-      await import('../main');
+      await import('./main');
 
       const windowAllClosedCall = mocks.mockAppOn.mock.calls.find(
         (call) => call[0] === 'window-all-closed',
@@ -217,7 +217,7 @@ describe('main', () => {
   describe('activate handler', () => {
     it('should call createWindow when activate is triggered after window closed', async () => {
       vi.resetModules();
-      await import('../main');
+      await import('./main');
 
       // Trigger ready to create a window
       const readyCall = mocks.mockAppOn.mock.calls.find((call) => call[0] === 'ready');
@@ -254,7 +254,7 @@ describe('main', () => {
 
     it('should not create window on activate if window already exists', async () => {
       vi.resetModules();
-      await import('../main');
+      await import('./main');
 
       // Trigger ready to create a window
       const readyCall = mocks.mockAppOn.mock.calls.find((call) => call[0] === 'ready');
@@ -288,7 +288,7 @@ describe('main', () => {
   describe('getMainWindow', () => {
     it('should return null before window is created', async () => {
       vi.resetModules();
-      await import('../main');
+      await import('./main');
 
       // Get the getMainWindow function passed to registerIPCHandlers
       const getMainWindow = mocks.mockRegisterIPCHandlers.mock.calls[0]?.[0] as () => unknown;
@@ -299,7 +299,7 @@ describe('main', () => {
 
     it('should return window instance after window is created', async () => {
       vi.resetModules();
-      await import('../main');
+      await import('./main');
 
       // Get the getMainWindow function passed to registerIPCHandlers
       const getMainWindow = mocks.mockRegisterIPCHandlers.mock.calls[0]?.[0] as () => unknown;

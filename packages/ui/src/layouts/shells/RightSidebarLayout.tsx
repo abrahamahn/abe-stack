@@ -57,7 +57,7 @@ export const RightSidebarLayout = forwardRef<HTMLDivElement, RightSidebarLayoutP
     const hasSlots = header !== undefined || content !== undefined;
 
     const cssVars = {
-      '--right-sidebar-width': typeof width === 'number' ? `${String(width)}px` : width,
+      ['--right-sidebar-width']: typeof width === 'number' ? `${String(width)}px` : width,
       ...style,
     } as CSSProperties;
 

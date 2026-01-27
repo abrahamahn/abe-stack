@@ -5,13 +5,13 @@
  * Data access layer for userId ↔ provider customerId mapping.
  */
 
-import { and, eq, select, insert, deleteFrom } from '../../builder';
+import { and, eq, select, insert, deleteFrom } from '../../builder/index';
 import {
   type CustomerMapping,
   type NewCustomerMapping,
   CUSTOMER_MAPPING_COLUMNS,
   CUSTOMER_MAPPINGS_TABLE,
-} from '../../schema';
+} from '../../schema/index';
 import { toCamelCase, toSnakeCase } from '../../utils';
 
 import type { RawDb } from '../../client';
@@ -71,7 +71,7 @@ export function createCustomerMappingRepository(db: RawDb): CustomerMappingRepos
           .where(and(eq('user_id', userId), eq('provider', provider)))
           .toSql(),
       );
-      return result ? toCamelCase<CustomerMapping>(result, CUSTOMER_MAPPING_COLUMNS) : null;
+      return result !== null ? toCamelCase<CustomerMapping>(result, CUSTOMER_MAPPING_COLUMNS) : null;
     },
 
     async findByProviderCustomerId(
@@ -83,7 +83,7 @@ export function createCustomerMappingRepository(db: RawDb): CustomerMappingRepos
           .where(and(eq('provider', provider), eq('provider_customer_id', providerCustomerId)))
           .toSql(),
       );
-      return result ? toCamelCase<CustomerMapping>(result, CUSTOMER_MAPPING_COLUMNS) : null;
+      return result !== null ? toCamelCase<CustomerMapping>(result, CUSTOMER_MAPPING_COLUMNS) : null;
     },
 
     async findByUserId(userId: string): Promise<CustomerMapping[]> {
@@ -104,7 +104,7 @@ export function createCustomerMappingRepository(db: RawDb): CustomerMappingRepos
       const result = await db.queryOne<Record<string, unknown>>(
         insert(CUSTOMER_MAPPINGS_TABLE).values(snakeData).returningAll().toSql(),
       );
-      if (!result) {
+      if (result === null) {
         throw new Error('Failed to create customer mapping');
       }
       return toCamelCase<CustomerMapping>(result, CUSTOMER_MAPPING_COLUMNS);
@@ -128,7 +128,7 @@ export function createCustomerMappingRepository(db: RawDb): CustomerMappingRepos
     ): Promise<CustomerMapping> {
       // Check for existing mapping
       const existing = await this.findByUserIdAndProvider(userId, provider);
-      if (existing) {
+      if (existing !== null) {
         return existing;
       }
 

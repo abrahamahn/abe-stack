@@ -1,6 +1,7 @@
-// packages/core/src/config/parsers.test.ts
+// packages/core/src/config/env.parsers.test.ts
 import { describe, expect, it, test } from 'vitest';
-import { getBool, getInt, getList, getRequired } from './parsers';
+
+import { getBool, getInt, getList, getRequired } from './env.parsers';
 
 describe('Configuration Utilities', () => {
   describe('getInt', () => {
@@ -10,9 +11,12 @@ describe('Configuration Utilities', () => {
       ['abc', 3000, 3000], // Garbage string
       ['10.5', 3000, 10], // Float (should be floor)
       ['', 3000, 3000], // Empty string
-    ])('given %p and fallback %p, should return %p', (input, fallback, expected) => {
-      expect(getInt(input as any, fallback)).toBe(expected);
-    });
+    ])(
+      'given %p and fallback %p, should return %p',
+      (input: string | undefined, fallback, expected) => {
+        expect(getInt(input, fallback)).toBe(expected);
+      },
+    );
   });
 
   describe('getBool', () => {
@@ -23,8 +27,8 @@ describe('Configuration Utilities', () => {
       ['false', false],
       ['any-string', false],
       [undefined, false],
-    ])('given %p, should return %p', (input, expected) => {
-      expect(getBool(input as any)).toBe(expected);
+    ])('given %p, should return %p', (input: string | undefined, expected) => {
+      expect(getBool(input)).toBe(expected);
     });
   });
 

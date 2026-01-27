@@ -1,7 +1,7 @@
 // packages/ui/src/theme/__tests__/typography.test.ts
 import { describe, expect, it } from 'vitest';
 
-import { typography } from '../typography';
+import { typography } from './typography';
 
 const sizePattern = /^[\d.]+rem$/;
 

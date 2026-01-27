@@ -1,7 +1,7 @@
 // packages/ui/src/theme/__tests__/spacing.test.ts
 import { describe, expect, it } from 'vitest';
 
-import { spacing } from '../spacing';
+import { spacing } from './spacing';
 
 const spacingPattern = /^[\d.]+rem$/;
 

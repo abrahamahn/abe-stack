@@ -3,20 +3,20 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { useControllableState } from '../useControllableState';
+import { useControllableState } from './useControllableState';
 
 import type { ReactElement } from 'react';
 
-function ControllableStateHarness(props: {
+const ControllableStateHarness = (props: {
   value?: number;
   defaultValue?: number;
   onChange?: (value: number) => void;
-}): ReactElement {
+}): ReactElement => {
   const { value, defaultValue, onChange } = props;
   const [state, setState] = useControllableState<number>({
-    value,
-    defaultValue,
-    onChange,
+    ...(value !== undefined && { value }),
+    ...(defaultValue !== undefined && { defaultValue }),
+    ...(onChange !== undefined && { onChange }),
   });
 
   return (
@@ -25,14 +25,15 @@ function ControllableStateHarness(props: {
       <button
         type="button"
         onClick={() => {
-          setState((state ?? 0) + 1);
+          const currentValue: number = state ?? 0;
+          setState(currentValue + 1);
         }}
       >
         Increment
       </button>
     </div>
   );
-}
+};
 
 describe('useControllableState', () => {
   it('uses defaultValue when uncontrolled', () => {

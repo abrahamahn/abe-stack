@@ -8,9 +8,9 @@ import {
   isServiceWorkerSupported,
   registerServiceWorker,
   unregisterAllServiceWorkers,
-} from '../registerServiceWorker';
+} from './registerServiceWorker';
 
-import type { ServiceWorkerCallbacks } from '../registerServiceWorker';
+import type { ServiceWorkerCallbacks } from './registerServiceWorker';
 
 // ============================================================================
 // Mock Types
@@ -412,7 +412,9 @@ describe('registerServiceWorker', () => {
 
       // Simulate state change to installed
       installingWorker.state = 'installed';
-      stateChangeListeners.forEach((listener) => listener());
+      stateChangeListeners.forEach((listener) => {
+        listener();
+      });
 
       expect(callbacks.onStatusChange).toHaveBeenCalledWith('installed');
     });

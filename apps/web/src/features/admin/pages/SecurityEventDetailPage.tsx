@@ -16,9 +16,9 @@ import type { JSX } from 'react';
 // Component
 // ============================================================================
 
-export function SecurityEventDetailPage(): JSX.Element {
+export const SecurityEventDetailPage = (): JSX.Element => {
   const params = useParams();
-  const id = params.id;
+  const id = params['id'];
   const navigate = useNavigate();
 
   const { data: event, isLoading, isError, error } = useSecurityEvent(id);
@@ -40,7 +40,7 @@ export function SecurityEventDetailPage(): JSX.Element {
               <Heading as="h1" size="xl">
                 Security Event
               </Heading>
-              {event && (
+              {event !== null && event !== undefined && (
                 <Text tone="muted" size="sm">
                   ID: {event.id}
                 </Text>
@@ -67,4 +67,4 @@ export function SecurityEventDetailPage(): JSX.Element {
       </div>
     </PageContainer>
   );
-}
+};

@@ -5,7 +5,7 @@
  * Data access layer for OAuth provider connections.
  */
 
-import { and, eq, select, insert, update, deleteFrom } from '../builder';
+import { and, deleteFrom, eq, insert, select, update } from '../builder/index';
 import {
   type NewOAuthConnection,
   OAUTH_CONNECTION_COLUMNS,
@@ -13,7 +13,7 @@ import {
   type OAuthConnection,
   type OAuthProvider,
   type UpdateOAuthConnection,
-} from '../schema';
+} from '../schema/index';
 import { toCamelCase, toCamelCaseArray, toSnakeCase } from '../utils';
 
 import type { RawDb } from '../client';
@@ -46,7 +46,7 @@ export function createOAuthConnectionRepository(db: RawDb): OAuthConnectionRepos
       const result = await db.queryOne<Record<string, unknown>>(
         select(OAUTH_CONNECTIONS_TABLE).where(eq('id', id)).toSql(),
       );
-      return result ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS) : null;
+      return result !== null ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS) : null;
     },
 
     async findByUserIdAndProvider(
@@ -58,7 +58,7 @@ export function createOAuthConnectionRepository(db: RawDb): OAuthConnectionRepos
           .where(and(eq('user_id', userId), eq('provider', provider)))
           .toSql(),
       );
-      return result ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS) : null;
+      return result !== null ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS) : null;
     },
 
     async findByProviderUserId(
@@ -70,7 +70,7 @@ export function createOAuthConnectionRepository(db: RawDb): OAuthConnectionRepos
           .where(and(eq('provider', provider), eq('provider_user_id', providerUserId)))
           .toSql(),
       );
-      return result ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS) : null;
+      return result !== null ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS) : null;
     },
 
     async findByUserId(userId: string): Promise<OAuthConnection[]> {
@@ -91,7 +91,7 @@ export function createOAuthConnectionRepository(db: RawDb): OAuthConnectionRepos
       const result = await db.queryOne<Record<string, unknown>>(
         insert(OAUTH_CONNECTIONS_TABLE).values(snakeData).returningAll().toSql(),
       );
-      if (!result) {
+      if (result === null) {
         throw new Error('Failed to create OAuth connection');
       }
       return toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS);
@@ -105,7 +105,7 @@ export function createOAuthConnectionRepository(db: RawDb): OAuthConnectionRepos
       const result = await db.queryOne<Record<string, unknown>>(
         update(OAUTH_CONNECTIONS_TABLE).set(snakeData).where(eq('id', id)).returningAll().toSql(),
       );
-      return result ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS) : null;
+      return result !== null ? toCamelCase<OAuthConnection>(result, OAUTH_CONNECTION_COLUMNS) : null;
     },
 
     async delete(id: string): Promise<boolean> {

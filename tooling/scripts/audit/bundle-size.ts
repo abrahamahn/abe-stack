@@ -30,8 +30,9 @@ type BenchmarkResult = {
   totals: Record<string, { size: number; gzipSize: number }>;
 };
 
-const ROOT_DIR = path.resolve(__dirname, '..', '..');
-const BENCHMARK_FILE = path.join(ROOT_DIR, '.bundle-sizes.json');
+const ROOT_DIR = path.resolve(__dirname, '..', '..', '..');
+const OUTPUT_DIR = path.join(ROOT_DIR, '.tmp');
+const BENCHMARK_FILE = path.join(OUTPUT_DIR, '.bundle-sizes.json');
 
 // ANSI color codes
 const colors = {
@@ -246,6 +247,10 @@ function saveBenchmark(result: BenchmarkResult): void {
     history = history.slice(-50);
   }
 
+  // Ensure .tmp directory exists
+  if (!fs.existsSync(OUTPUT_DIR)) {
+    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  }
   fs.writeFileSync(BENCHMARK_FILE, JSON.stringify(history, null, 2));
   console.log(`\n${colors.green}✓ Benchmark saved to ${BENCHMARK_FILE}${colors.reset}`);
 }

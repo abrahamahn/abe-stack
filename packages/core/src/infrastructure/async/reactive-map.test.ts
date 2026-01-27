@@ -1,6 +1,7 @@
-// packages/core/src/infrastructure/async/ReactiveMap.test.ts
+// packages/core/src/infrastructure/async/reactive-map.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ReactiveMap } from './ReactiveMap';
+
+import { ReactiveMap } from './reactive-map';
 
 describe('ReactiveMap', () => {
   let map: ReactiveMap<string, number>;

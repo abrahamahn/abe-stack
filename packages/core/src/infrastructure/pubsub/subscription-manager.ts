@@ -1,4 +1,4 @@
-// packages/core/src/infrastructure/pubsub/subscriptionManager.ts
+// packages/core/src/infrastructure/pubsub/subscription-manager.ts
 /**
  * Subscription Manager
  *
@@ -10,7 +10,7 @@
  * - Cross-instance messaging via Postgres NOTIFY/LISTEN
  */
 
-import type { PostgresPubSub } from './postgresPubSub';
+import type { PostgresPubSub } from './postgres-pubsub';
 import type { ClientMessage, ServerMessage, SubscriptionKey, WebSocket } from './types';
 
 // ============================================================================

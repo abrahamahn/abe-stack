@@ -4,12 +4,12 @@ import { useDensity } from '@hooks/useDensity';
 import { useThemeMode } from '@hooks/useThemeMode';
 import { createContext, useContext } from 'react';
 
+import type { ContrastMode } from './contrast';
+import type { Density } from './density';
 import type { UseContrastReturn } from '@hooks/useContrast';
 import type { UseDensityReturn } from '@hooks/useDensity';
 import type { ThemeMode, UseThemeModeReturn } from '@hooks/useThemeMode';
 import type { ReactElement, ReactNode } from 'react';
-import type { ContrastMode } from './contrast';
-import type { Density } from './density';
 
 export type ThemeContextValue = UseThemeModeReturn & UseDensityReturn & UseContrastReturn;
 
@@ -90,6 +90,7 @@ export type ThemeProviderProps = {
  * }
  * ```
  */
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export function ThemeProvider({
   children,
   storageKey = 'theme-mode',

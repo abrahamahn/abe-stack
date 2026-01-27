@@ -48,7 +48,7 @@ export interface SettingsApi {
 const API_PREFIX = '/api';
 
 function addAuthHeader(headers: Headers, token: string | null | undefined): void {
-  if (token) {
+  if (token !== null && token !== undefined && token !== '') {
     headers.set('Authorization', `Bearer ${token}`);
   }
 }

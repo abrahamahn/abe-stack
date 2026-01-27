@@ -32,11 +32,11 @@ import { TopbarLayout } from '../../layouts/shells/TopbarLayout';
 // Test Components
 // =============================================================================
 
-function NavigationMenu({
+const NavigationMenu = ({
   onItemClick,
 }: {
   onItemClick?: (item: string) => void;
-}): React.ReactElement {
+}): React.ReactElement => {
   const items = ['Dashboard', 'Users', 'Settings', 'Reports'];
 
   return (
@@ -50,15 +50,15 @@ function NavigationMenu({
       </ul>
     </nav>
   );
-}
+};
 
-function Header({
+const Header = ({
   onMenuClick,
   onSearchSubmit,
 }: {
   onMenuClick?: () => void;
   onSearchSubmit?: (query: string) => void;
-}): React.ReactElement {
+}): React.ReactElement => {
   const [query, setQuery] = useState('');
 
   return (
@@ -80,7 +80,9 @@ function Header({
             type="search"
             placeholder="Search..."
             value={query}
-            onChange={(e) => { setQuery(e.target.value); }}
+            onChange={(e) => {
+              setQuery(e.target.value);
+            }}
             aria-label="Search"
           />
         </form>
@@ -88,22 +90,26 @@ function Header({
       right={<Button>Profile</Button>}
     />
   );
-}
+};
 
-function Sidebar({
+const Sidebar = ({
   onItemClick,
 }: {
   collapsed?: boolean;
   onItemClick?: (item: string) => void;
-}): React.ReactElement {
+}): React.ReactElement => {
   return (
     <LeftSidebarLayout>
-      <NavigationMenu onItemClick={onItemClick} />
+      <NavigationMenu {...(onItemClick !== undefined && { onItemClick })} />
     </LeftSidebarLayout>
   );
-}
+};
 
-function AsidePanel({ collapsed: _collapsed = false }: { collapsed?: boolean }): React.ReactElement {
+const AsidePanel = ({
+  collapsed: _collapsed = false,
+}: {
+  collapsed?: boolean;
+}): React.ReactElement => {
   return (
     <RightSidebarLayout>
       <div data-testid="aside-content">
@@ -113,17 +119,17 @@ function AsidePanel({ collapsed: _collapsed = false }: { collapsed?: boolean }):
       </div>
     </RightSidebarLayout>
   );
-}
+};
 
-function Footer(): React.ReactElement {
+const Footer = (): React.ReactElement => {
   return (
     <BottombarLayout>
       <span data-testid="footer-content">© 2024 Company</span>
     </BottombarLayout>
   );
-}
+};
 
-function MainContent(): React.ReactElement {
+const MainContent = (): React.ReactElement => {
   return (
     <PageContainer>
       <h1>Welcome to Dashboard</h1>
@@ -137,9 +143,9 @@ function MainContent(): React.ReactElement {
       </Container>
     </PageContainer>
   );
-}
+};
 
-function FullAppShell({
+const FullAppShell = ({
   onNavItemClick,
   onSearchSubmit,
   sidebarCollapsed = false,
@@ -149,18 +155,25 @@ function FullAppShell({
   onSearchSubmit?: (query: string) => void;
   sidebarCollapsed?: boolean;
   asideCollapsed?: boolean;
-}): React.ReactElement {
+}): React.ReactElement => {
   const [isSidebarCollapsed, setSidebarCollapsed] = useState(sidebarCollapsed);
 
   return (
     <AppShell
       header={
         <Header
-          onMenuClick={() => { setSidebarCollapsed((c) => !c); }}
-          onSearchSubmit={onSearchSubmit}
+          onMenuClick={() => {
+            setSidebarCollapsed((c) => !c);
+          }}
+          {...(onSearchSubmit !== undefined && { onSearchSubmit })}
         />
       }
-      sidebar={<Sidebar collapsed={isSidebarCollapsed} onItemClick={onNavItemClick} />}
+      sidebar={
+        <Sidebar
+          collapsed={isSidebarCollapsed}
+          {...(onNavItemClick !== undefined && { onItemClick: onNavItemClick })}
+        />
+      }
       aside={<AsidePanel collapsed={asideCollapsed} />}
       footer={<Footer />}
       sidebarCollapsed={isSidebarCollapsed}
@@ -169,7 +182,7 @@ function FullAppShell({
       <MainContent />
     </AppShell>
   );
-}
+};
 
 // =============================================================================
 // Tests

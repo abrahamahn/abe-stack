@@ -9,7 +9,7 @@
  * - toJSON() for consistent API serialization
  */
 
-import { HTTP_STATUS } from '../../shared/constants';
+import { HTTP_STATUS } from '../../shared/constants/index';
 
 /**
  * Base abstract error class for the clean architecture.
@@ -40,7 +40,12 @@ export class AppError extends BaseError {
     super(message);
   }
 
-  toJSON(): { error: string; message: string; code?: string; details?: Record<string, unknown> } {
+  toJSON(): {
+    error: string;
+    message: string;
+    code?: string | undefined;
+    details?: Record<string, unknown> | undefined;
+  } {
     return {
       error: this.name,
       message: this.message,

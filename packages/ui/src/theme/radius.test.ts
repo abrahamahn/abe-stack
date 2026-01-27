@@ -1,7 +1,7 @@
 // packages/ui/src/theme/__tests__/radius.test.ts
 import { describe, expect, it } from 'vitest';
 
-import { radius } from '../radius';
+import { radius } from './radius';
 
 const remPattern = /^\d+(\.\d+)?rem$/;
 

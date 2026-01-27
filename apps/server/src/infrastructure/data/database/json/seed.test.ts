@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/unbound-method */
+ 
 // apps/server/src/infrastructure/data/database/json/__tests__/seed.test.ts
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -72,7 +72,7 @@ describe('JsonDatabase', () => {
 
       const data = db.getData();
       expect(data.users).toHaveLength(1);
-      expect(data.users[0]!).toMatchObject({ id: '1', email: 'test@example.com' });
+      expect(data.users[0]).toMatchObject({ id: '1', email: 'test@example.com' });
     });
 
     test('should handle corrupted JSON file gracefully', () => {
@@ -162,7 +162,7 @@ describe('JsonDatabase', () => {
       const results = db.find('users', { offset: 1 });
 
       expect(results).toHaveLength(2);
-      expect(results[0]!).toMatchObject({ name: 'B' });
+      expect(results[0]).toMatchObject({ name: 'B' });
     });
 
     test('should respect orderBy option ascending', async () => {
@@ -533,7 +533,7 @@ describe('JsonDatabase', () => {
 
       const result = db.execute();
 
-      expect(result).toEqual([{ '?column?': 1 }]);
+      expect(result).toEqual([{ ['?column?']: 1 }]);
     });
   });
 
@@ -614,7 +614,7 @@ describe('JsonDbClient', () => {
       const results = await client.select().from('users').where({ name: 'Alice' });
 
       expect(results).toHaveLength(1);
-      expect(results[0]!).toMatchObject({ name: 'Alice' });
+      expect(results[0]).toMatchObject({ name: 'Alice' });
     });
 
     test('should select with limit', async () => {
@@ -691,7 +691,7 @@ describe('JsonDbClient', () => {
         .returning();
 
       expect(results).toHaveLength(1);
-      expect(results[0]!).toMatchObject({ email: 'new@test.com' });
+      expect(results[0]).toMatchObject({ email: 'new@test.com' });
     });
 
     test('should throw error when where not specified', async () => {
@@ -723,7 +723,7 @@ describe('JsonDbClient', () => {
     test('should return mock result for health checks', async () => {
       const result = await client.execute('SELECT 1');
 
-      expect(result).toEqual([{ '?column?': 1 }]);
+      expect(result).toEqual([{ ['?column?']: 1 }]);
     });
   });
 
@@ -796,7 +796,7 @@ describe('JsonDbClient', () => {
       // Should have rolled back to original state
       const users = await client.select().from('users');
       expect(users).toHaveLength(1);
-      expect(users[0]!).toMatchObject({ name: 'Original' });
+      expect(users[0]).toMatchObject({ name: 'Original' });
     });
 
     test('should allow nested operations', async () => {

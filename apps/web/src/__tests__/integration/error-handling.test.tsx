@@ -256,6 +256,7 @@ describe('Error Handling Integration', () => {
           throw new Error('First attempt failed');
         }
         // Second attempt succeeds
+        return Promise.resolve();
       });
 
       const { user } = renderWithProviders(<LoginPage />, { environment });
@@ -292,10 +293,10 @@ describe('Error Handling Integration', () => {
       });
 
       // Override logout to throw but handle the error internally
-      const logoutSpy = vi.fn().mockImplementation(async () => {
+      const logoutSpy = vi.fn().mockImplementation(() => {
         // Simulate local state clearing even if server call fails
         // The actual error is handled in the service, not thrown to component
-        return;
+        return Promise.resolve();
       });
       (environment.auth as { logout: () => Promise<void> }).logout = logoutSpy;
 

@@ -20,10 +20,10 @@ import type { AuthService } from '@features/auth';
 import type { ReactElement } from 'react';
 
 // Helper component to capture and display current location for testing
-function LocationDisplay(): ReactElement {
+const LocationDisplay = (): ReactElement => {
   const location = useLocation();
   return <div data-testid="location-display">{location.pathname + location.search}</div>;
-}
+};
 
 // ============================================================================
 // Login Flow Tests
@@ -304,7 +304,7 @@ describe('Auth Flow Integration', () => {
       expect(screen.getByRole('button', { name: /creating account/i })).toBeDisabled();
 
       // Cleanup: resolve the promise and wait for state updates to complete
-      await act(async () => {
+      act(() => {
         resolveRegister!({
           status: 'pending_verification',
           message: 'Check email',

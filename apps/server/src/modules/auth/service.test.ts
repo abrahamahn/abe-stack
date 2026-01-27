@@ -1,6 +1,14 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/modules/auth/__tests__/service.test.ts
-import { validatePassword } from '@abe-stack/core';
+import {
+  AccountLockedError,
+  EmailNotVerifiedError,
+  EmailSendError,
+  InvalidCredentialsError,
+  InvalidTokenError,
+  validatePassword,
+  WeakPasswordError,
+} from '@abe-stack/core';
 import { toCamelCase, type User } from '@abe-stack/db';
 import {
   applyProgressiveDelay,
@@ -13,14 +21,6 @@ import {
   type Repositories,
   type Logger,
 } from '@infrastructure';
-import {
-  AccountLockedError,
-  EmailNotVerifiedError,
-  EmailSendError,
-  InvalidCredentialsError,
-  InvalidTokenError,
-  WeakPasswordError,
-} from '@shared';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -37,7 +37,6 @@ import {
   verifyEmail,
   type AuthResult,
 } from '../service';
-
 import {
   createAccessToken,
   createAuthResponse,

@@ -1,6 +1,6 @@
 // apps/server/src/config/services/search.test.ts
-import type { FullEnv } from '@abe-stack/core/config';
 import { describe, expect, it } from 'vitest';
+
 import {
   DEFAULT_ELASTICSEARCH_CONFIG,
   DEFAULT_SEARCH_SCHEMAS,
@@ -10,6 +10,8 @@ import {
   validateElasticsearchConfig,
   validateSqlSearchConfig,
 } from './search';
+
+import type { FullEnv } from '@abe-stack/core/config';
 
 describe('Search Configuration', () => {
   describe('Elasticsearch Configuration', () => {

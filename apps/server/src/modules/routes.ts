@@ -1,4 +1,4 @@
-// apps/server/src/modules/index.ts
+// apps/server/src/modules/routes.ts
 /**
  * Route Registration
  *

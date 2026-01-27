@@ -31,7 +31,7 @@ export interface EndpointDef<TBody = unknown, TResponse = unknown, TQuery = unkn
   path: string;
   body?: Schema<TBody>;
   query?: Schema<TQuery>;
-  responses: Record<number, Schema<TResponse>>;
+  responses: Record<string, Schema<TResponse>>;
   summary?: string;
 }
 
@@ -42,14 +42,18 @@ export interface EndpointDef<TBody = unknown, TResponse = unknown, TQuery = unkn
 /**
  * Extract the success response type (200 or 201) from an endpoint definition.
  */
-export type SuccessResponse<E extends EndpointDef> = E['responses'] extends {
-  200: Schema<infer R>;
-}
-  ? R
-  : E['responses'] extends { 201: Schema<infer R> }
+export type SuccessResponse<E extends EndpointDef> = '200' extends keyof E['responses']
+  ? E['responses']['200'] extends Schema<infer R>
     ? R
-    : E['responses'] extends { 302: Schema<infer R> }
+    : never
+  : '201' extends keyof E['responses']
+    ? E['responses']['201'] extends Schema<infer R>
       ? R
+      : never
+    : '302' extends keyof E['responses']
+      ? E['responses']['302'] extends Schema<infer R>
+        ? R
+        : never
       : unknown;
 
 /**
@@ -85,30 +89,54 @@ export type ContractRouter = Record<string, Contract>;
  */
 export type SafeParseResult<T> = { success: true; data: T } | { success: false; error: Error };
 
-// ============================================================================
-// Schema Factory Helpers
-// ============================================================================
-
-/**
- * Create a schema from a validation function.
- * This is the building block for all manual validation schemas.
- */
-export function createSchema<T>(validate: (data: unknown) => T): Schema<T> {
-  return {
-    parse: validate,
-    safeParse: (data: unknown): SafeParseResult<T> => {
-      try {
-        const result = validate(data);
-        return { success: true, data: result };
-      } catch (e) {
-        return { success: false, error: e instanceof Error ? e : new Error(String(e)) };
-      }
-    },
-    _type: undefined as unknown as T,
-  };
-}
-
 /**
  * Infer the type from a schema (similar to z.infer).
  */
 export type InferSchema<S> = S extends Schema<infer T> ? T : never;
+
+// ============================================================================
+// Service Interfaces (Ports - Hexagonal Architecture)
+// ============================================================================
+
+/**
+ * Generic Logger interface
+ */
+export interface Logger {
+  info(msg: string, data?: Record<string, unknown>): void;
+  warn(msg: string, data?: Record<string, unknown>): void;
+  error(msg: string | Error, data?: Record<string, unknown>): void;
+  debug(msg: string, data?: Record<string, unknown>): void;
+  trace?(msg: string, data?: Record<string, unknown>): void;
+  fatal?(msg: string | Error, data?: Record<string, unknown>): void;
+  child?(bindings: Record<string, unknown>): Logger;
+}
+
+export interface EmailOptions {
+  to: string;
+  subject: string;
+  text?: string;
+  html?: string;
+  from?: { name: string; address: string };
+}
+
+export interface EmailResult {
+  success: boolean;
+  messageId?: string;
+  error?: string;
+}
+
+export interface EmailService {
+  send(options: EmailOptions): Promise<EmailResult>;
+}
+
+export interface StorageService {
+  upload(key: string, data: Uint8Array | string, contentType: string): Promise<string>;
+  download(key: string): Promise<unknown>;
+  delete(key: string): Promise<void>;
+  getSignedUrl(key: string, expiresIn: number): Promise<string>;
+}
+
+export interface NotificationService {
+  isConfigured(): boolean;
+  getFcmProvider?(): unknown;
+}

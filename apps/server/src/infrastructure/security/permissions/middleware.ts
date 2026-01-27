@@ -8,9 +8,9 @@
 
 import { isDenied, type PermissionRecord, type PermissionType, type RecordPointer } from './types';
 
+import type { PermissionChecker } from './checker';
 import type { UserRole } from '@abe-stack/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { PermissionChecker } from './checker';
 
 // ============================================================================
 // Type Definitions

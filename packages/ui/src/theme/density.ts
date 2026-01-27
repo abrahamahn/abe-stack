@@ -24,8 +24,8 @@ const baseSpacing = {
   md: 0.75, // 12px
   lg: 1, // 16px
   xl: 1.5, // 24px
-  '2xl': 2, // 32px
-  '3xl': 3, // 48px
+  ['2xl']: 2, // 32px
+  ['3xl']: 3, // 48px
 } as const;
 
 /**
@@ -50,13 +50,13 @@ export function getDensityCssVariables(density: Density): Record<string, string>
   const spacing = getSpacingForDensity(density);
 
   return {
-    '--ui-gap-xs': spacing.xs,
-    '--ui-gap-sm': spacing.sm,
-    '--ui-gap-md': spacing.md,
-    '--ui-gap-lg': spacing.lg,
-    '--ui-gap-xl': spacing.xl,
-    '--ui-gap-2xl': spacing['2xl'],
-    '--ui-gap-3xl': spacing['3xl'],
+    ['--ui-gap-xs']: spacing.xs,
+    ['--ui-gap-sm']: spacing.sm,
+    ['--ui-gap-md']: spacing.md,
+    ['--ui-gap-lg']: spacing.lg,
+    ['--ui-gap-xl']: spacing.xl,
+    ['--ui-gap-2xl']: spacing['2xl'],
+    ['--ui-gap-3xl']: spacing['3xl'],
   };
 }
 

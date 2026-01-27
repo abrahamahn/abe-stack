@@ -1,6 +1,7 @@
-// packages/core/src/infrastructure/async/BatchedQueue.test.ts
+// packages/core/src/infrastructure/async/batched-queue.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { BatchedQueue } from './BatchedQueue';
+
+import { BatchedQueue } from './batched-queue';
 
 describe('BatchedQueue', () => {
   beforeEach(() => {

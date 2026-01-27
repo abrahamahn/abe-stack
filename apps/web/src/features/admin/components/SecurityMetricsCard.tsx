@@ -30,12 +30,12 @@ interface MetricItemProps {
   isLoading: boolean;
 }
 
-function MetricItem({
+const MetricItem = ({
   label,
   value,
   variant = 'default',
   isLoading,
-}: MetricItemProps): JSX.Element {
+}: MetricItemProps): JSX.Element => {
   const getVariantClass = (): string => {
     switch (variant) {
       case 'critical':
@@ -70,13 +70,16 @@ function MetricItem({
       </Text>
     </div>
   );
-}
+};
 
 // ============================================================================
 // Component
 // ============================================================================
 
-export function SecurityMetricsCard({ metrics, isLoading }: SecurityMetricsCardProps): JSX.Element {
+export const SecurityMetricsCard = ({
+  metrics,
+  isLoading,
+}: SecurityMetricsCardProps): JSX.Element => {
   return (
     <Card className="p-6">
       <Heading as="h3" size="md" className="mb-4">
@@ -128,7 +131,7 @@ export function SecurityMetricsCard({ metrics, isLoading }: SecurityMetricsCardP
         </div>
       </div>
 
-      {metrics && (
+      {metrics !== undefined && (
         <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
           <Text tone="muted" size="xs">
             Period: {new Date(metrics.periodStart).toLocaleString()} -{' '}
@@ -138,4 +141,4 @@ export function SecurityMetricsCard({ metrics, isLoading }: SecurityMetricsCardP
       )}
     </Card>
   );
-}
+};

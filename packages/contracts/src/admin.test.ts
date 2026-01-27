@@ -1,7 +1,7 @@
 // packages/core/src/contracts/__tests__/admin.test.ts
 import { describe, expect, it } from 'vitest';
 
-import { adminContract, unlockAccountRequestSchema, unlockAccountResponseSchema } from '../admin';
+import { adminContract, unlockAccountRequestSchema, unlockAccountResponseSchema } from './admin';
 
 describe('unlockAccountRequestSchema', () => {
   it('should validate correct request data', () => {

@@ -2,7 +2,7 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { Markdown, parseMarkdown } from '../markdown';
+import { Markdown, parseMarkdown } from './markdown';
 
 describe('parseMarkdown', () => {
   it('should parse empty text', () => {

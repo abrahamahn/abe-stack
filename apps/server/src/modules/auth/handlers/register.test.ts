@@ -11,10 +11,10 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { handleRegister } from '../register';
 
-import type { RegisterRequest } from '@abe-stack/core';
 import type { AppConfig } from '@/config';
-import type { AppContext, ReplyWithCookies } from '@shared';
+import type { RegisterRequest } from '@abe-stack/core';
 import type { RegisterResult } from '@auth/service';
+import type { AppContext, ReplyWithCookies } from '@shared';
 
 // ============================================================================
 // Mock Dependencies

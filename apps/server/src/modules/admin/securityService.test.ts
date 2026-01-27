@@ -6,7 +6,6 @@ import {
     listSecurityEvents,
     SecurityEventNotFoundError,
 } from '@admin/securityService';
-
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { DbClient } from '@database';

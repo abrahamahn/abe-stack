@@ -116,4 +116,44 @@ export {
 } from './utils';
 
 // Security (login tracking, lockout, audit)
-export * from './security';
+export {
+  // Lockout functions
+  applyProgressiveDelay,
+  AUTH_RATE_LIMITS,
+  authRateLimiters,
+  clearLoginAttempts,
+  createAuthRateLimitHook,
+  getAccountLockoutStatus,
+  getProgressiveDelay,
+  getSecurityEventMetrics,
+  getUserSecurityEvents,
+  isAccountLocked,
+  logAccountLockedEvent,
+  logAccountUnlockedEvent,
+  logLoginAttempt,
+  logMagicLinkFailedEvent,
+  logMagicLinkRequestEvent,
+  logMagicLinkVerifiedEvent,
+  logOAuthLinkFailureEvent,
+  logOAuthLinkSuccessEvent,
+  logOAuthLoginFailureEvent,
+  logOAuthLoginSuccessEvent,
+  logOAuthUnlinkFailureEvent,
+  logOAuthUnlinkSuccessEvent,
+  logSecurityEvent,
+  logTokenFamilyRevokedEvent,
+  logTokenReuseEvent,
+  sendTokenReuseAlert,
+  unlockAccount,
+} from './security';
+export type {
+  AuthEndpoint,
+  AuthRateLimitConfig,
+  LockoutConfig,
+  LockoutStatus,
+  LogSecurityEventParams,
+  SecurityEventMetadata,
+  SecurityEventSeverity,
+  SecurityEventType,
+  SendTokenReuseAlertParams,
+} from './security';

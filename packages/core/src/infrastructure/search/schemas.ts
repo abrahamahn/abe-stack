@@ -93,8 +93,8 @@ export const rangeValueSchema: Schema<RangeValue> = createSchema((data: unknown)
   }
   const obj = data as Record<string, unknown>;
   return {
-    min: filterPrimitiveSchema.parse(obj.min),
-    max: filterPrimitiveSchema.parse(obj.max),
+    min: filterPrimitiveSchema.parse(obj['min']),
+    max: filterPrimitiveSchema.parse(obj['max']),
   };
 });
 
@@ -107,7 +107,13 @@ export const filterValueSchema: Schema<FilterValue> = createSchema((data: unknow
     return data.map((item) => filterPrimitiveSchema.parse(item));
   }
   // Try as range
-  if (data !== null && data !== undefined && typeof data === 'object' && 'min' in data && 'max' in data) {
+  if (
+    data !== null &&
+    data !== undefined &&
+    typeof data === 'object' &&
+    'min' in data &&
+    'max' in data
+  ) {
     return rangeValueSchema.parse(data);
   }
   // Try as primitive
@@ -127,16 +133,19 @@ export const filterConditionSchema: Schema<FilterCondition> = createSchema((data
   }
   const obj = data as Record<string, unknown>;
 
-  if (typeof obj.field !== 'string' || obj.field.length < 1) {
+  if (typeof obj['field'] !== 'string' || obj['field'].length < 1) {
     throw new Error('Filter field must be a non-empty string');
   }
 
-  return {
-    field: obj.field,
-    operator: filterOperatorSchema.parse(obj.operator),
-    value: filterValueSchema.parse(obj.value),
-    caseSensitive: typeof obj.caseSensitive === 'boolean' ? obj.caseSensitive : undefined,
+  const result: FilterCondition = {
+    field: obj['field'],
+    operator: filterOperatorSchema.parse(obj['operator']),
+    value: filterValueSchema.parse(obj['value']),
   };
+  if (typeof obj['caseSensitive'] === 'boolean') {
+    result.caseSensitive = obj['caseSensitive'];
+  }
+  return result;
 });
 
 /**
@@ -148,13 +157,13 @@ export const compoundFilterSchema: Schema<CompoundFilter> = createSchema((data: 
   }
   const obj = data as Record<string, unknown>;
 
-  const operator = logicalOperatorSchema.parse(obj.operator);
+  const operator = logicalOperatorSchema.parse(obj['operator']);
 
-  if (!Array.isArray(obj.conditions) || obj.conditions.length < 1) {
+  if (!Array.isArray(obj['conditions']) || obj['conditions'].length < 1) {
     throw new Error('Compound filter must have at least one condition');
   }
 
-  const conditions = obj.conditions.map((cond) => {
+  const conditions = obj['conditions'].map((cond) => {
     const c = cond as Record<string, unknown>;
     // Determine if it's a simple condition or compound filter
     if ('field' in c) {
@@ -212,15 +221,18 @@ export const sortConfigSchema: Schema<SortConfig> = createSchema((data: unknown)
   }
   const obj = data as Record<string, unknown>;
 
-  if (typeof obj.field !== 'string' || obj.field.length < 1) {
+  if (typeof obj['field'] !== 'string' || obj['field'].length < 1) {
     throw new Error('Sort field must be a non-empty string');
   }
 
-  return {
-    field: obj.field,
-    order: sortOrderSchema.parse(obj.order),
-    nulls: obj.nulls === 'first' || obj.nulls === 'last' ? obj.nulls : undefined,
+  const result: SortConfig = {
+    field: obj['field'],
+    order: sortOrderSchema.parse(obj['order']),
   };
+  if (obj['nulls'] === 'first' || obj['nulls'] === 'last') {
+    result.nulls = obj['nulls'];
+  }
+  return result;
 });
 
 // ============================================================================
@@ -237,27 +249,38 @@ export const fullTextSearchConfigSchema: Schema<FullTextSearchConfig> = createSc
     }
     const obj = data as Record<string, unknown>;
 
-    if (typeof obj.query !== 'string' || obj.query.length < 1 || obj.query.length > 1000) {
+    if (typeof obj['query'] !== 'string' || obj['query'].length < 1 || obj['query'].length > 1000) {
       throw new Error('Search query must be 1-1000 characters');
     }
 
     // Validate fuzziness if provided
     let fuzziness: number | undefined;
-    if (obj.fuzziness !== undefined) {
-      if (typeof obj.fuzziness !== 'number' || obj.fuzziness < 0 || obj.fuzziness > 1) {
+    if (obj['fuzziness'] !== undefined) {
+      if (typeof obj['fuzziness'] !== 'number' || obj['fuzziness'] < 0 || obj['fuzziness'] > 1) {
         throw new Error('fuzziness must be a number between 0 and 1');
       }
-      fuzziness = obj.fuzziness;
+      fuzziness = obj['fuzziness'];
     }
 
-    return {
-      query: obj.query,
-      fields: Array.isArray(obj.fields) ? obj.fields : undefined,
-      fuzziness,
-      highlight: typeof obj.highlight === 'boolean' ? obj.highlight : undefined,
-      highlightPrefix: typeof obj.highlightPrefix === 'string' ? obj.highlightPrefix : undefined,
-      highlightSuffix: typeof obj.highlightSuffix === 'string' ? obj.highlightSuffix : undefined,
+    const result: FullTextSearchConfig = {
+      query: obj['query'],
     };
+    if (Array.isArray(obj['fields'])) {
+      result.fields = obj['fields'];
+    }
+    if (fuzziness !== undefined) {
+      result.fuzziness = fuzziness;
+    }
+    if (typeof obj['highlight'] === 'boolean') {
+      result.highlight = obj['highlight'];
+    }
+    if (typeof obj['highlightPrefix'] === 'string') {
+      result.highlightPrefix = obj['highlightPrefix'];
+    }
+    if (typeof obj['highlightSuffix'] === 'string') {
+      result.highlightSuffix = obj['highlightSuffix'];
+    }
+    return result;
   },
 );
 
@@ -271,60 +294,75 @@ export const fullTextSearchConfigSchema: Schema<FullTextSearchConfig> = createSc
 export const SEARCH_DEFAULTS = {
   PAGE: 1 as number,
   LIMIT: 50 as number,
-  MAX_LIMIT: 1000 as number,
+  MaxLimit: 1000 as number,
 };
 
 /**
  * Schema for search query.
  */
 export const searchQuerySchema: Schema<SearchQuery> = createSchema((data: unknown) => {
-  const obj = (data !== null && data !== undefined && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+  const obj = (
+    data !== null && data !== undefined && typeof data === 'object' ? data : {}
+  ) as Record<string, unknown>;
 
   // Parse filters if present
   let filters: FilterCondition | CompoundFilter | undefined;
-  if (obj.filters !== undefined) {
-    filters = filterSchema.parse(obj.filters);
+  if (obj['filters'] !== undefined) {
+    filters = filterSchema.parse(obj['filters']);
   }
 
   // Parse sort if present
   let sort: SortConfig[] | undefined;
-  if (Array.isArray(obj.sort)) {
-    sort = obj.sort.map((s) => sortConfigSchema.parse(s));
+  if (Array.isArray(obj['sort'])) {
+    sort = obj['sort'].map((s) => sortConfigSchema.parse(s));
   }
 
   // Parse search if present
   let search: FullTextSearchConfig | undefined;
-  if (obj.search !== undefined) {
-    search = fullTextSearchConfigSchema.parse(obj.search);
+  if (obj['search'] !== undefined) {
+    search = fullTextSearchConfigSchema.parse(obj['search']);
   }
 
   // Parse pagination
   let page = SEARCH_DEFAULTS.PAGE;
-  if (obj.page !== undefined) {
-    if (typeof obj.page !== 'number' || !Number.isInteger(obj.page) || obj.page < 1) {
+  if (obj['page'] !== undefined) {
+    if (typeof obj['page'] !== 'number' || !Number.isInteger(obj['page']) || obj['page'] < 1) {
       throw new Error('page must be a positive integer');
     }
-    page = obj.page;
+    page = obj['page'];
   }
 
   let limit = SEARCH_DEFAULTS.LIMIT;
-  if (typeof obj.limit === 'number' && Number.isInteger(obj.limit)) {
-    if (obj.limit < 1 || obj.limit > SEARCH_DEFAULTS.MAX_LIMIT) {
-      throw new Error(`Limit must be between 1 and ${String(SEARCH_DEFAULTS.MAX_LIMIT)}`);
+  if (typeof obj['limit'] === 'number' && Number.isInteger(obj['limit'])) {
+    if (obj['limit'] < 1 || obj['limit'] > SEARCH_DEFAULTS.MaxLimit) {
+      throw new Error(`Limit must be between 1 and ${String(SEARCH_DEFAULTS.MaxLimit)}`);
     }
-    limit = obj.limit;
+    limit = obj['limit'];
   }
 
-  return {
-    filters,
-    sort,
-    search,
+  const result: SearchQuery = {
     page,
     limit,
-    cursor: typeof obj.cursor === 'string' ? obj.cursor : undefined,
-    select: Array.isArray(obj.select) ? (obj.select as string[]) : undefined,
-    includeCount: typeof obj.includeCount === 'boolean' ? obj.includeCount : undefined,
   };
+  if (filters !== undefined) {
+    result.filters = filters;
+  }
+  if (sort !== undefined) {
+    result.sort = sort;
+  }
+  if (search !== undefined) {
+    result.search = search;
+  }
+  if (typeof obj['cursor'] === 'string') {
+    result.cursor = obj['cursor'];
+  }
+  if (Array.isArray(obj['select'])) {
+    result.select = obj['select'] as string[];
+  }
+  if (typeof obj['includeCount'] === 'boolean') {
+    result.includeCount = obj['includeCount'];
+  }
+  return result;
 });
 
 export type SearchQueryInput = SearchQuery;
@@ -343,20 +381,20 @@ export const highlightedFieldSchema: Schema<HighlightedField> = createSchema((da
   }
   const obj = data as Record<string, unknown>;
 
-  if (typeof obj.field !== 'string') {
+  if (typeof obj['field'] !== 'string') {
     throw new Error('Highlighted field must have a field name');
   }
-  if (typeof obj.highlighted !== 'string') {
+  if (typeof obj['highlighted'] !== 'string') {
     throw new Error('Highlighted field must have highlighted text');
   }
-  if (typeof obj.original !== 'string') {
+  if (typeof obj['original'] !== 'string') {
     throw new Error('Highlighted field must have original text');
   }
 
   return {
-    field: obj.field,
-    highlighted: obj.highlighted,
-    original: obj.original,
+    field: obj['field'],
+    highlighted: obj['highlighted'],
+    original: obj['original'],
   };
 });
 
@@ -370,15 +408,16 @@ export function searchResultItemSchema<T>(itemSchema: Schema<T>): Schema<SearchR
     }
     const obj = data as Record<string, unknown>;
 
-    const item = itemSchema.parse(obj.item);
+    const item = itemSchema.parse(obj['item']);
 
-    return {
-      item,
-      score: typeof obj.score === 'number' ? obj.score : undefined,
-      highlights: Array.isArray(obj.highlights)
-        ? obj.highlights.map((h) => highlightedFieldSchema.parse(h))
-        : undefined,
-    };
+    const result: SearchResultItem<T> = { item };
+    if (typeof obj['score'] === 'number') {
+      result.score = obj['score'];
+    }
+    if (Array.isArray(obj['highlights'])) {
+      result.highlights = obj['highlights'].map((h) => highlightedFieldSchema.parse(h));
+    }
+    return result;
   });
 }
 
@@ -394,36 +433,42 @@ export function searchResultSchema<T>(itemSchema: Schema<T>): Schema<SearchResul
     }
     const obj = data as Record<string, unknown>;
 
-    if (!Array.isArray(obj.data)) {
+    if (!Array.isArray(obj['data'])) {
       throw new Error('Search result data must be an array');
     }
 
-    const parsedData = obj.data.map((item) => resultItemSchema.parse(item));
+    const parsedData = obj['data'].map((item) => resultItemSchema.parse(item));
 
-    if (typeof obj.page !== 'number' || obj.page < 1) {
+    if (typeof obj['page'] !== 'number' || obj['page'] < 1) {
       throw new Error('Page must be a positive integer');
     }
-    if (typeof obj.limit !== 'number' || obj.limit < 1) {
+    if (typeof obj['limit'] !== 'number' || obj['limit'] < 1) {
       throw new Error('Limit must be a positive integer');
     }
-    if (typeof obj.hasNext !== 'boolean') {
+    if (typeof obj['hasNext'] !== 'boolean') {
       throw new Error('hasNext must be a boolean');
     }
-    if (typeof obj.hasPrev !== 'boolean') {
+    if (typeof obj['hasPrev'] !== 'boolean') {
       throw new Error('hasPrev must be a boolean');
     }
 
-    return {
+    const result: SearchResult<T> = {
       data: parsedData,
-      total: typeof obj.total === 'number' && obj.total >= 0 ? obj.total : undefined,
-      page: obj.page,
-      limit: obj.limit,
-      hasNext: obj.hasNext,
-      hasPrev: obj.hasPrev,
-      totalPages:
-        typeof obj.totalPages === 'number' && obj.totalPages >= 0 ? obj.totalPages : undefined,
-      executionTime: typeof obj.executionTime === 'number' ? obj.executionTime : undefined,
+      page: obj['page'],
+      limit: obj['limit'],
+      hasNext: obj['hasNext'],
+      hasPrev: obj['hasPrev'],
     };
+    if (typeof obj['total'] === 'number' && obj['total'] >= 0) {
+      result.total = obj['total'];
+    }
+    if (typeof obj['totalPages'] === 'number' && obj['totalPages'] >= 0) {
+      result.totalPages = obj['totalPages'];
+    }
+    if (typeof obj['executionTime'] === 'number') {
+      result.executionTime = obj['executionTime'];
+    }
+    return result;
   });
 }
 
@@ -439,34 +484,39 @@ export function cursorSearchResultSchema<T>(itemSchema: Schema<T>): Schema<Curso
     }
     const obj = data as Record<string, unknown>;
 
-    if (!Array.isArray(obj.data)) {
+    if (!Array.isArray(obj['data'])) {
       throw new Error('Search result data must be an array');
     }
 
-    const parsedData = obj.data.map((item) => resultItemSchema.parse(item));
+    const parsedData = obj['data'].map((item) => resultItemSchema.parse(item));
 
-    if (typeof obj.hasNext !== 'boolean') {
+    if (typeof obj['hasNext'] !== 'boolean') {
       throw new Error('hasNext must be a boolean');
     }
-    if (typeof obj.hasPrev !== 'boolean') {
+    if (typeof obj['hasPrev'] !== 'boolean') {
       throw new Error('hasPrev must be a boolean');
     }
-    if (typeof obj.limit !== 'number' || obj.limit < 1) {
+    if (typeof obj['limit'] !== 'number' || obj['limit'] < 1) {
       throw new Error('Limit must be a positive integer');
     }
 
-    return {
+    const result: CursorSearchResult<T> = {
       data: parsedData,
       nextCursor:
-        obj.nextCursor === null || typeof obj.nextCursor === 'string' ? obj.nextCursor : null,
+        obj['nextCursor'] === null || typeof obj['nextCursor'] === 'string' ? obj['nextCursor'] : null,
       prevCursor:
-        obj.prevCursor === null || typeof obj.prevCursor === 'string' ? obj.prevCursor : null,
-      hasNext: obj.hasNext,
-      hasPrev: obj.hasPrev,
-      limit: obj.limit,
-      total: typeof obj.total === 'number' && obj.total >= 0 ? obj.total : undefined,
-      executionTime: typeof obj.executionTime === 'number' ? obj.executionTime : undefined,
+        obj['prevCursor'] === null || typeof obj['prevCursor'] === 'string' ? obj['prevCursor'] : null,
+      hasNext: obj['hasNext'],
+      hasPrev: obj['hasPrev'],
+      limit: obj['limit'],
     };
+    if (typeof obj['total'] === 'number' && obj['total'] >= 0) {
+      result.total = obj['total'];
+    }
+    if (typeof obj['executionTime'] === 'number') {
+      result.executionTime = obj['executionTime'];
+    }
+    return result;
   });
 }
 
@@ -483,11 +533,14 @@ export const facetBucketSchema: Schema<FacetBucket> = createSchema((data: unknow
   }
   const obj = data as Record<string, unknown>;
 
-  return {
-    value: filterPrimitiveSchema.parse(obj.value),
-    count: typeof obj.count === 'number' && Number.isInteger(obj.count) ? obj.count : 0,
-    selected: typeof obj.selected === 'boolean' ? obj.selected : undefined,
+  const result: FacetBucket = {
+    value: filterPrimitiveSchema.parse(obj['value']),
+    count: typeof obj['count'] === 'number' && Number.isInteger(obj['count']) ? obj['count'] : 0,
   };
+  if (typeof obj['selected'] === 'boolean') {
+    result.selected = obj['selected'];
+  }
+  return result;
 });
 
 /**
@@ -499,34 +552,40 @@ export const facetConfigSchema: Schema<FacetConfig> = createSchema((data: unknow
   }
   const obj = data as Record<string, unknown>;
 
-  if (typeof obj.field !== 'string' || obj.field.length < 1) {
+  if (typeof obj['field'] !== 'string' || obj['field'].length < 1) {
     throw new Error('Facet field must be a non-empty string');
   }
 
   // Validate size if provided
   let size: number | undefined;
-  if (obj.size !== undefined) {
+  if (obj['size'] !== undefined) {
     if (
-      typeof obj.size !== 'number' ||
-      !Number.isInteger(obj.size) ||
-      obj.size < 1 ||
-      obj.size > 100
+      typeof obj['size'] !== 'number' ||
+      !Number.isInteger(obj['size']) ||
+      obj['size'] < 1 ||
+      obj['size'] > 100
     ) {
       throw new Error('Facet size must be an integer between 1 and 100');
     }
-    size = obj.size;
+    size = obj['size'];
   }
 
-  return {
-    field: obj.field,
-    size,
-    sortBy: obj.sortBy === 'count' || obj.sortBy === 'value' ? obj.sortBy : undefined,
-    sortOrder:
-      obj.sortOrder === 'asc' || obj.sortOrder === 'desc'
-        ? (obj.sortOrder as SortOrder)
-        : undefined,
-    includeMissing: typeof obj.includeMissing === 'boolean' ? obj.includeMissing : undefined,
+  const result: FacetConfig = {
+    field: obj['field'],
   };
+  if (size !== undefined) {
+    result.size = size;
+  }
+  if (obj['sortBy'] === 'count' || obj['sortBy'] === 'value') {
+    result.sortBy = obj['sortBy'];
+  }
+  if (obj['sortOrder'] === 'asc' || obj['sortOrder'] === 'desc') {
+    result.sortOrder = obj['sortOrder'] as SortOrder;
+  }
+  if (typeof obj['includeMissing'] === 'boolean') {
+    result.includeMissing = obj['includeMissing'];
+  }
+  return result;
 });
 
 /**
@@ -538,19 +597,22 @@ export const facetResultSchema: Schema<FacetResult> = createSchema((data: unknow
   }
   const obj = data as Record<string, unknown>;
 
-  if (typeof obj.field !== 'string') {
+  if (typeof obj['field'] !== 'string') {
     throw new Error('Facet result must have a field');
   }
 
-  if (!Array.isArray(obj.buckets)) {
+  if (!Array.isArray(obj['buckets'])) {
     throw new Error('Facet result must have buckets array');
   }
 
-  return {
-    field: obj.field,
-    buckets: obj.buckets.map((b) => facetBucketSchema.parse(b)),
-    totalUnique: typeof obj.totalUnique === 'number' ? obj.totalUnique : undefined,
+  const result: FacetResult = {
+    field: obj['field'],
+    buckets: obj['buckets'].map((b) => facetBucketSchema.parse(b)),
   };
+  if (typeof obj['totalUnique'] === 'number') {
+    result.totalUnique = obj['totalUnique'];
+  }
+  return result;
 });
 
 /**
@@ -559,14 +621,15 @@ export const facetResultSchema: Schema<FacetResult> = createSchema((data: unknow
 export const facetedSearchQuerySchema: Schema<FacetedSearchQuery> = createSchema(
   (data: unknown) => {
     const base = searchQuerySchema.parse(data);
-    const obj = (data !== null && data !== undefined && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    const obj = (
+      data !== null && data !== undefined && typeof data === 'object' ? data : {}
+    ) as Record<string, unknown>;
 
-    return {
-      ...base,
-      facets: Array.isArray(obj.facets)
-        ? (obj.facets as unknown[]).map((f) => facetConfigSchema.parse(f))
-        : undefined,
-    };
+    const result: FacetedSearchQuery = { ...base };
+    if (Array.isArray(obj['facets'])) {
+      result.facets = (obj['facets'] as unknown[]).map((f) => facetConfigSchema.parse(f));
+    }
+    return result;
   },
 );
 
@@ -575,19 +638,20 @@ export const facetedSearchQuerySchema: Schema<FacetedSearchQuery> = createSchema
  */
 export function facetedSearchResultSchema<T>(
   itemSchema: Schema<T>,
-): Schema<SearchResult<T> & { facets?: FacetResult[] }> {
+): Schema<SearchResult<T> & { facets?: FacetResult[] | undefined }> {
   const baseSchema = searchResultSchema(itemSchema);
 
   return createSchema((data: unknown) => {
     const base = baseSchema.parse(data);
-    const obj = (data !== null && data !== undefined && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    const obj = (
+      data !== null && data !== undefined && typeof data === 'object' ? data : {}
+    ) as Record<string, unknown>;
 
-    return {
-      ...base,
-      facets: Array.isArray(obj.facets)
-        ? obj.facets.map((f) => facetResultSchema.parse(f))
-        : undefined,
-    };
+    const result: SearchResult<T> & { facets?: FacetResult[] } = { ...base };
+    if (Array.isArray(obj['facets'])) {
+      result.facets = obj['facets'].map((f) => facetResultSchema.parse(f));
+    }
+    return result;
   });
 }
 
@@ -596,13 +660,13 @@ export function facetedSearchResultSchema<T>(
 // ============================================================================
 
 export interface UrlSearchParams {
-  q?: string;
-  page?: number;
-  limit?: number;
-  sort?: string;
-  filters?: string;
-  cursor?: string;
-  fields?: string;
+  q?: string | undefined;
+  page?: number | undefined;
+  limit?: number | undefined;
+  sort?: string | undefined;
+  filters?: string | undefined;
+  cursor?: string | undefined;
+  fields?: string | undefined;
 }
 
 /**
@@ -610,38 +674,54 @@ export interface UrlSearchParams {
  * Handles string-to-type conversions for URL parameters.
  */
 export const urlSearchParamsSchema: Schema<UrlSearchParams> = createSchema((data: unknown) => {
-  const obj = (data !== null && data !== undefined && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+  const obj = (
+    data !== null && data !== undefined && typeof data === 'object' ? data : {}
+  ) as Record<string, unknown>;
 
   let page: number | undefined;
-  if (obj.page !== undefined) {
-    const parsed = Number(obj.page);
+  if (obj['page'] !== undefined) {
+    const parsed = Number(obj['page']);
     if (!isNaN(parsed) && Number.isInteger(parsed) && parsed >= 1) {
       page = parsed;
     }
   }
 
   let limit: number | undefined;
-  if (obj.limit !== undefined) {
-    const parsed = Number(obj.limit);
+  if (obj['limit'] !== undefined) {
+    const parsed = Number(obj['limit']);
     if (
       !isNaN(parsed) &&
       Number.isInteger(parsed) &&
       parsed >= 1 &&
-      parsed <= SEARCH_DEFAULTS.MAX_LIMIT
+      parsed <= SEARCH_DEFAULTS.MaxLimit
     ) {
       limit = parsed;
     }
   }
 
-  return {
-    q: typeof obj.q === 'string' ? obj.q : undefined,
-    page,
-    limit,
-    sort: typeof obj.sort === 'string' ? obj.sort : undefined,
-    filters: typeof obj.filters === 'string' ? obj.filters : undefined,
-    cursor: typeof obj.cursor === 'string' ? obj.cursor : undefined,
-    fields: typeof obj.fields === 'string' ? obj.fields : undefined,
-  };
+  const result: UrlSearchParams = {};
+  if (typeof obj['q'] === 'string') {
+    result.q = obj['q'];
+  }
+  if (page !== undefined) {
+    result.page = page;
+  }
+  if (limit !== undefined) {
+    result.limit = limit;
+  }
+  if (typeof obj['sort'] === 'string') {
+    result.sort = obj['sort'];
+  }
+  if (typeof obj['filters'] === 'string') {
+    result.filters = obj['filters'];
+  }
+  if (typeof obj['cursor'] === 'string') {
+    result.cursor = obj['cursor'];
+  }
+  if (typeof obj['fields'] === 'string') {
+    result.fields = obj['fields'];
+  }
+  return result;
 });
 
 export type UrlSearchParamsInput = UrlSearchParams;

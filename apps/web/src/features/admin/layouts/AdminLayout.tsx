@@ -37,7 +37,7 @@ interface AdminLayoutProps {
 // Icons (Simple inline SVGs)
 // ============================================================================
 
-function UsersIcon(): ReactElement {
+const UsersIcon = (): ReactElement => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -56,9 +56,9 @@ function UsersIcon(): ReactElement {
       <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </svg>
   );
-}
+};
 
-function ShieldIcon(): ReactElement {
+const ShieldIcon = (): ReactElement => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -74,9 +74,9 @@ function ShieldIcon(): ReactElement {
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
     </svg>
   );
-}
+};
 
-function QueueIcon(): ReactElement {
+const QueueIcon = (): ReactElement => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -94,9 +94,9 @@ function QueueIcon(): ReactElement {
       <line x1="3" y1="15" x2="21" y2="15" />
     </svg>
   );
-}
+};
 
-function BillingIcon(): ReactElement {
+const BillingIcon = (): ReactElement => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -113,7 +113,7 @@ function BillingIcon(): ReactElement {
       <line x1="1" y1="10" x2="23" y2="10" />
     </svg>
   );
-}
+};
 
 // ============================================================================
 // Navigation Items
@@ -130,7 +130,7 @@ const NAV_ITEMS: NavItem[] = [
 // Components
 // ============================================================================
 
-function NavButton({
+const NavButton = ({
   item,
   isActive,
   onClick,
@@ -138,7 +138,7 @@ function NavButton({
   item: NavItem;
   isActive: boolean;
   onClick: () => void;
-}): ReactElement {
+}): ReactElement => {
   return (
     <Button
       type="button"
@@ -151,9 +151,9 @@ function NavButton({
       <span>{item.label}</span>
     </Button>
   );
-}
+};
 
-function AdminSidebar(): ReactElement {
+const AdminSidebar = (): ReactElement => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -211,7 +211,7 @@ function AdminSidebar(): ReactElement {
       }
     />
   );
-}
+};
 
 // ============================================================================
 // AdminLayout
@@ -223,7 +223,7 @@ function AdminSidebar(): ReactElement {
  * Checks for admin role and redirects to dashboard if not authorized.
  * Renders child routes in a scrollable main content area.
  */
-export function AdminLayout({ children }: AdminLayoutProps): ReactElement {
+export const AdminLayout = ({ children }: AdminLayoutProps): ReactElement => {
   const { user, isLoading, isAuthenticated } = useAuth();
 
   // Show loading state while checking auth
@@ -255,4 +255,4 @@ export function AdminLayout({ children }: AdminLayoutProps): ReactElement {
       </main>
     </div>
   );
-}
+};

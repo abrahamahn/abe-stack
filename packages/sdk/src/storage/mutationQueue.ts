@@ -197,7 +197,7 @@ export class MutationQueue {
     while (this.queue.length > 0 && this.getStatus().isOnline) {
       // Remove from queue first - will re-add if retry needed
       const mutation = this.queue.shift();
-      if (!mutation) break; // Type guard (should never happen given length check)
+      if (mutation === undefined) break; // Type guard (should never happen given length check)
 
       try {
         await this.options.onProcess(mutation);
@@ -253,7 +253,7 @@ export class MutationQueue {
   private restoreQueue(): void {
     try {
       const data = localStorageQueue.get();
-      if (data) {
+      if (data !== null && data !== '') {
         this.queue = JSON.parse(data) as QueuedMutation[];
       }
     } catch {

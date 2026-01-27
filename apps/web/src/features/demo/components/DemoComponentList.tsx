@@ -10,12 +10,12 @@ interface DemoComponentListProps {
   onClose: () => void;
 }
 
-export function DemoComponentList({
+export const DemoComponentList = ({
   components,
   selectedComponent,
   onSelectComponent,
   onClose,
-}: DemoComponentListProps): React.ReactElement {
+}: DemoComponentListProps): React.ReactElement => {
   return (
     <div className="panel border-r">
       <div className="panel-header">
@@ -44,4 +44,4 @@ export function DemoComponentList({
       </ScrollArea>
     </div>
   );
-}
+};

@@ -7,19 +7,19 @@
 
 import {
   and,
+  deleteFrom,
   eq,
   gt,
   ilike,
+  insert,
   isNull,
   lt,
   or,
   select,
   selectCount,
-  insert,
-  update,
-  deleteFrom,
   type SqlFragment,
-} from '../builder';
+  update,
+} from '../builder/index';
 import {
   type NewRefreshToken,
   type NewUser,
@@ -29,13 +29,13 @@ import {
   type UpdateUser,
   USER_COLUMNS,
   type User,
+  type UserRole,
   USERS_TABLE,
-} from '../schema';
+} from '../schema/index';
 import { toCamelCase, toCamelCaseArray, toSnakeCase } from '../utils';
 
 import type { RawDb } from '../client';
 import type { PaginatedResult, PaginationOptions } from './types';
-import type { UserRole } from '../schema';
 
 // ============================================================================
 // Admin User List Filter Types
@@ -109,14 +109,14 @@ export function createUserRepository(db: RawDb): UserRepository {
       const result = await db.queryOne<Record<string, unknown>>(
         select(USERS_TABLE).where(eq('id', id)).toSql(),
       );
-      return result ? toCamelCase<User>(result, USER_COLUMNS) : null;
+      return result !== null ? toCamelCase<User>(result, USER_COLUMNS) : null;
     },
 
     async findByEmail(email: string): Promise<User | null> {
       const result = await db.queryOne<Record<string, unknown>>(
         select(USERS_TABLE).where(eq('email', email)).toSql(),
       );
-      return result ? toCamelCase<User>(result, USER_COLUMNS) : null;
+      return result !== null ? toCamelCase<User>(result, USER_COLUMNS) : null;
     },
 
     async create(user: NewUser): Promise<User> {
@@ -124,7 +124,7 @@ export function createUserRepository(db: RawDb): UserRepository {
       const result = await db.queryOne<Record<string, unknown>>(
         insert(USERS_TABLE).values(snakeData).returningAll().toSql(),
       );
-      if (!result) {
+      if (result === null) {
         throw new Error('Failed to create user');
       }
       return toCamelCase<User>(result, USER_COLUMNS);
@@ -135,7 +135,7 @@ export function createUserRepository(db: RawDb): UserRepository {
       const result = await db.queryOne<Record<string, unknown>>(
         update(USERS_TABLE).set(snakeData).where(eq('id', id)).returningAll().toSql(),
       );
-      return result ? toCamelCase<User>(result, USER_COLUMNS) : null;
+      return result !== null ? toCamelCase<User>(result, USER_COLUMNS) : null;
     },
 
     async updateWithVersion(
@@ -154,7 +154,7 @@ export function createUserRepository(db: RawDb): UserRepository {
           .returningAll()
           .toSql(),
       );
-      return result ? toCamelCase<User>(result, USER_COLUMNS) : null;
+      return result !== null ? toCamelCase<User>(result, USER_COLUMNS) : null;
     },
 
     async delete(id: string): Promise<boolean> {
@@ -168,13 +168,18 @@ export function createUserRepository(db: RawDb): UserRepository {
       // Build query with cursor-based pagination
       let query = select(USERS_TABLE);
 
-      if (cursor) {
+      if (cursor !== undefined) {
         // Cursor format: "timestamp_id" for tie-breaking
         const parts = cursor.split('_');
         const cursorValue = parts[0];
         const cursorId = parts[1];
 
-        if (cursorValue && cursorId) {
+        if (
+          cursorValue !== undefined &&
+          cursorValue !== '' &&
+          cursorId !== undefined &&
+          cursorId !== ''
+        ) {
           const cursorDate = new Date(cursorValue);
           if (direction === 'desc') {
             query = query.where(
@@ -203,7 +208,9 @@ export function createUserRepository(db: RawDb): UserRepository {
 
       const lastItem = items[items.length - 1];
       const nextCursor =
-        hasMore && lastItem ? `${lastItem.createdAt.toISOString()}_${lastItem.id}` : null;
+        hasMore && lastItem !== undefined
+          ? `${lastItem.createdAt.toISOString()}_${lastItem.id}`
+          : null;
 
       return { items, nextCursor };
     },
@@ -232,18 +239,18 @@ export function createUserRepository(db: RawDb): UserRepository {
       const conditions = [];
 
       // Search filter (email or name)
-      if (search) {
+      if (search !== undefined && search !== '') {
         const searchPattern = `%${search}%`;
         conditions.push(or(ilike('email', searchPattern), ilike('name', searchPattern)));
       }
 
       // Role filter
-      if (role) {
+      if (role !== undefined) {
         conditions.push(eq('role', role));
       }
 
       // Status filter
-      if (status) {
+      if (status !== undefined) {
         const now = new Date();
         switch (status) {
           case 'locked':
@@ -287,7 +294,7 @@ export function createUserRepository(db: RawDb): UserRepository {
       ]);
 
       const items = toCamelCaseArray<User>(results, USER_COLUMNS);
-      const total = countResult ? Number(countResult.count) : 0;
+      const total = countResult !== null ? Number(countResult.count) : 0;
       const totalPages = Math.ceil(total / limit);
 
       return {
@@ -310,7 +317,7 @@ export function createUserRepository(db: RawDb): UserRepository {
     async resetFailedAttempts(id: string): Promise<void> {
       await db.execute(
         update(USERS_TABLE)
-          .set({ failed_login_attempts: 0, locked_until: null })
+          .set({ ['failed_login_attempts']: 0, ['locked_until']: null })
           .where(eq('id', id))
           .toSql(),
       );
@@ -318,14 +325,14 @@ export function createUserRepository(db: RawDb): UserRepository {
 
     async lockAccount(id: string, until: Date): Promise<void> {
       await db.execute(
-        update(USERS_TABLE).set({ locked_until: until }).where(eq('id', id)).toSql(),
+        update(USERS_TABLE).set({ ['locked_until']: until }).where(eq('id', id)).toSql(),
       );
     },
 
     async unlockAccount(id: string): Promise<void> {
       await db.execute(
         update(USERS_TABLE)
-          .set({ locked_until: null, failed_login_attempts: 0 })
+          .set({ ['locked_until']: null, ['failed_login_attempts']: 0 })
           .where(eq('id', id))
           .toSql(),
       );
@@ -335,8 +342,8 @@ export function createUserRepository(db: RawDb): UserRepository {
       await db.execute(
         update(USERS_TABLE)
           .set({
-            email_verified: true,
-            email_verified_at: new Date(),
+            ['email_verified']: true,
+            ['email_verified_at']: new Date(),
           })
           .where(eq('id', id))
           .toSql(),
@@ -370,14 +377,14 @@ export function createRefreshTokenRepository(db: RawDb): RefreshTokenRepository 
       const result = await db.queryOne<Record<string, unknown>>(
         select(REFRESH_TOKENS_TABLE).where(eq('id', id)).toSql(),
       );
-      return result ? toCamelCase<RefreshToken>(result, REFRESH_TOKEN_COLUMNS) : null;
+      return result !== null ? toCamelCase<RefreshToken>(result, REFRESH_TOKEN_COLUMNS) : null;
     },
 
     async findByToken(token: string): Promise<RefreshToken | null> {
       const result = await db.queryOne<Record<string, unknown>>(
         select(REFRESH_TOKENS_TABLE).where(eq('token', token)).toSql(),
       );
-      return result ? toCamelCase<RefreshToken>(result, REFRESH_TOKEN_COLUMNS) : null;
+      return result !== null ? toCamelCase<RefreshToken>(result, REFRESH_TOKEN_COLUMNS) : null;
     },
 
     async findByUserId(userId: string): Promise<RefreshToken[]> {
@@ -398,7 +405,7 @@ export function createRefreshTokenRepository(db: RawDb): RefreshTokenRepository 
       const result = await db.queryOne<Record<string, unknown>>(
         insert(REFRESH_TOKENS_TABLE).values(snakeData).returningAll().toSql(),
       );
-      if (!result) {
+      if (result === null) {
         throw new Error('Failed to create refresh token');
       }
       return toCamelCase<RefreshToken>(result, REFRESH_TOKEN_COLUMNS);

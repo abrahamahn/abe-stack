@@ -188,7 +188,7 @@ export class RecordCache<TTables extends TableMap = TableMap> {
 
   private getTableStorage(table: string): Map<string, CacheEntry<unknown>> {
     let tableStorage = this.storage.get(table);
-    if (!tableStorage) {
+    if (tableStorage === undefined) {
       tableStorage = new Map();
       this.storage.set(table, tableStorage);
     }
@@ -221,7 +221,7 @@ export class RecordCache<TTables extends TableMap = TableMap> {
 
     // Notify specific listeners
     const specificListeners = this.listeners.get(key);
-    if (specificListeners) {
+    if (specificListeners !== undefined) {
       for (const listener of specificListeners) {
         listener(change as RecordChange);
       }
@@ -243,13 +243,13 @@ export class RecordCache<TTables extends TableMap = TableMap> {
    */
   get<T extends keyof TTables & string>(table: T, id: string): TTables[T] | undefined {
     const tableStorage = this.storage.get(table);
-    if (!tableStorage) {
+    if (tableStorage === undefined) {
       if (this.trackStats) this.stats.misses++;
       return undefined;
     }
 
     const entry = tableStorage.get(id);
-    if (!entry) {
+    if (entry === undefined) {
       if (this.trackStats) this.stats.misses++;
       return undefined;
     }
@@ -274,7 +274,7 @@ export class RecordCache<TTables extends TableMap = TableMap> {
     entry: CacheEntry<unknown>,
   ): void {
     const tableStorage = this.storage.get(table);
-    if (!tableStorage) return;
+    if (tableStorage === undefined) return;
 
     tableStorage.delete(id);
 
@@ -333,7 +333,7 @@ export class RecordCache<TTables extends TableMap = TableMap> {
     const existingNotExpired = existing !== undefined && !this.isExpired(existing);
 
     // Version check (unless forced)
-    if (!options.force && existingNotExpired && newVersion !== undefined) {
+    if (options.force !== true && existingNotExpired && newVersion !== undefined) {
       const existingVersion = existing.version;
       if (existingVersion !== undefined && existingVersion >= newVersion) {
         return false;
@@ -367,10 +367,10 @@ export class RecordCache<TTables extends TableMap = TableMap> {
    */
   has(table: keyof TTables & string, id: string): boolean {
     const tableStorage = this.storage.get(table);
-    if (!tableStorage) return false;
+    if (tableStorage === undefined) return false;
 
     const entry = tableStorage.get(id);
-    if (!entry) return false;
+    if (entry === undefined) return false;
 
     // Check expiration
     if (this.isExpired(entry)) {
@@ -390,10 +390,10 @@ export class RecordCache<TTables extends TableMap = TableMap> {
    */
   delete<T extends keyof TTables & string>(table: T, id: string): TTables[T] | undefined {
     const tableStorage = this.storage.get(table);
-    if (!tableStorage) return undefined;
+    if (tableStorage === undefined) return undefined;
 
     const entry = tableStorage.get(id);
-    if (!entry) return undefined;
+    if (entry === undefined) return undefined;
 
     tableStorage.delete(id);
 
@@ -520,7 +520,7 @@ export class RecordCache<TTables extends TableMap = TableMap> {
     // Return rollback function
     return () => {
       const state = this.optimisticStates.get(key);
-      if (!state) return;
+      if (state === undefined) return;
 
       this.optimisticStates.delete(key);
 
@@ -587,7 +587,7 @@ export class RecordCache<TTables extends TableMap = TableMap> {
     const key = this.getCacheKey(table, id);
 
     let listeners = this.listeners.get(key);
-    if (!listeners) {
+    if (listeners === undefined) {
       listeners = new Set();
       this.listeners.set(key, listeners);
     }
@@ -638,7 +638,7 @@ export class RecordCache<TTables extends TableMap = TableMap> {
    */
   getAll<T extends keyof TTables & string>(table: T): TTables[T][] {
     const tableStorage = this.storage.get(table);
-    if (!tableStorage) return [];
+    if (tableStorage === undefined) return [];
 
     const results: TTables[T][] = [];
     const expiredIds: string[] = [];
@@ -654,7 +654,7 @@ export class RecordCache<TTables extends TableMap = TableMap> {
     // Clean up expired entries
     for (const id of expiredIds) {
       const entry = tableStorage.get(id);
-      if (entry) {
+      if (entry !== undefined) {
         this.evictExpired(table, id, entry);
       }
     }
@@ -670,7 +670,7 @@ export class RecordCache<TTables extends TableMap = TableMap> {
    */
   getIds(table: keyof TTables & string): string[] {
     const tableStorage = this.storage.get(table);
-    if (!tableStorage) return [];
+    if (tableStorage === undefined) return [];
 
     const results: string[] = [];
     const expiredIds: string[] = [];
@@ -686,7 +686,7 @@ export class RecordCache<TTables extends TableMap = TableMap> {
     // Clean up expired entries
     for (const id of expiredIds) {
       const entry = tableStorage.get(id);
-      if (entry) {
+      if (entry !== undefined) {
         this.evictExpired(table, id, entry);
       }
     }
@@ -741,7 +741,7 @@ export class RecordCache<TTables extends TableMap = TableMap> {
    */
   clearTable(table: keyof TTables & string): void {
     const tableStorage = this.storage.get(table);
-    if (!tableStorage) return;
+    if (tableStorage === undefined) return;
 
     // Notify listeners about all deletions
     for (const [id, entry] of tableStorage.entries()) {
@@ -825,7 +825,7 @@ export class RecordCache<TTables extends TableMap = TableMap> {
 
       for (const id of idsToRemove) {
         const entry = tableStorage.get(id);
-        if (entry) {
+        if (entry !== undefined) {
           tableStorage.delete(id);
 
           const key = this.getCacheKey(table, id);
@@ -863,10 +863,10 @@ export class RecordCache<TTables extends TableMap = TableMap> {
    */
   refreshTtl(table: keyof TTables & string, id: string, ttl?: number): boolean {
     const tableStorage = this.storage.get(table);
-    if (!tableStorage) return false;
+    if (tableStorage === undefined) return false;
 
     const entry = tableStorage.get(id);
-    if (!entry) return false;
+    if (entry === undefined) return false;
 
     // Don't refresh if already expired
     if (this.isExpired(entry)) {

@@ -12,7 +12,7 @@ import {
   ConflictError,
   NotFoundError,
   UnprocessableError,
-} from '../../infrastructure/errors';
+} from '../../infrastructure/errors/index';
 import { HTTP_STATUS } from '../../shared/constants/http';
 
 // ============================================================================

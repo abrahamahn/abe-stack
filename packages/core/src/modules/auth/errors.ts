@@ -12,7 +12,7 @@ import {
   NotFoundError,
   TooManyRequestsError,
   UnauthorizedError,
-} from '../../infrastructure/errors';
+} from '../../infrastructure/errors/index';
 import { HTTP_STATUS } from '../../shared/constants/http';
 
 // ============================================================================

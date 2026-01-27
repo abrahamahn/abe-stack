@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/monitor/health/index.ts
+// apps/server/src/infrastructure/monitor/health/health.ts
 /**
  * Health Check Infrastructure
  *
@@ -9,6 +9,7 @@
  */
 
 import { REQUIRED_TABLES, validateSchema } from '@database';
+
 import { getWebSocketStats } from '../../messaging/websocket/websocket';
 
 import type { AppContext } from '@shared/types';

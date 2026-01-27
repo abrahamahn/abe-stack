@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { FormField } from '../FormField';
+import { FormField } from './FormField';
 
 describe('FormField', () => {
   it('renders label and children', () => {

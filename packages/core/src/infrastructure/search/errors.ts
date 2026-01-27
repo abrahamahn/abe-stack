@@ -6,7 +6,7 @@
  */
 
 import { HTTP_STATUS } from '../../shared/constants/http';
-import { AppError, BadRequestError } from '../errors';
+import { AppError, BadRequestError } from '../errors/index';
 
 // ============================================================================
 // Search Error Types
@@ -16,18 +16,18 @@ import { AppError, BadRequestError } from '../errors';
  * Search error type constants.
  */
 export const SEARCH_ERROR_TYPES = {
-  INVALID_QUERY: 'INVALID_QUERY',
-  INVALID_FILTER: 'INVALID_FILTER',
-  INVALID_OPERATOR: 'INVALID_OPERATOR',
-  INVALID_FIELD: 'INVALID_FIELD',
-  INVALID_SORT: 'INVALID_SORT',
-  INVALID_PAGINATION: 'INVALID_PAGINATION',
-  INVALID_CURSOR: 'INVALID_CURSOR',
-  PROVIDER_ERROR: 'PROVIDER_ERROR',
-  PROVIDER_UNAVAILABLE: 'PROVIDER_UNAVAILABLE',
-  UNSUPPORTED_OPERATOR: 'UNSUPPORTED_OPERATOR',
-  QUERY_TOO_COMPLEX: 'QUERY_TOO_COMPLEX',
-  SEARCH_TIMEOUT: 'SEARCH_TIMEOUT',
+  InvalidQuery: 'INVALID_QUERY',
+  InvalidFilter: 'INVALID_FILTER',
+  InvalidOperator: 'INVALID_OPERATOR',
+  InvalidField: 'INVALID_FIELD',
+  InvalidSort: 'INVALID_SORT',
+  InvalidPagination: 'INVALID_PAGINATION',
+  InvalidCursor: 'INVALID_CURSOR',
+  ProviderError: 'PROVIDER_ERROR',
+  ProviderUnavailable: 'PROVIDER_UNAVAILABLE',
+  UnsupportedOperator: 'UNSUPPORTED_OPERATOR',
+  QueryTooComplex: 'QUERY_TOO_COMPLEX',
+  SearchTimeout: 'SEARCH_TIMEOUT',
 } as const;
 
 export type SearchErrorType = (typeof SEARCH_ERROR_TYPES)[keyof typeof SEARCH_ERROR_TYPES];
@@ -60,7 +60,7 @@ export class SearchError extends AppError {
  */
 export class InvalidQueryError extends SearchError {
   constructor(message = 'Invalid search query', details?: Record<string, unknown>) {
-    super(message, SEARCH_ERROR_TYPES.INVALID_QUERY, HTTP_STATUS.BAD_REQUEST, details);
+    super(message, SEARCH_ERROR_TYPES.InvalidQuery, HTTP_STATUS.BAD_REQUEST, details);
     this.name = 'InvalidQueryError';
   }
 }
@@ -75,7 +75,7 @@ export class InvalidFilterError extends SearchError {
     public readonly operator?: string,
     details?: Record<string, unknown>,
   ) {
-    super(message, SEARCH_ERROR_TYPES.INVALID_FILTER, HTTP_STATUS.BAD_REQUEST, {
+    super(message, SEARCH_ERROR_TYPES.InvalidFilter, HTTP_STATUS.BAD_REQUEST, {
       field,
       operator,
       ...details,
@@ -91,7 +91,7 @@ export class InvalidOperatorError extends SearchError {
   constructor(operator: string, supportedOperators?: string[], details?: Record<string, unknown>) {
     super(
       `Unknown filter operator: ${operator}`,
-      SEARCH_ERROR_TYPES.INVALID_OPERATOR,
+      SEARCH_ERROR_TYPES.InvalidOperator,
       HTTP_STATUS.BAD_REQUEST,
       { operator, supportedOperators, ...details },
     );
@@ -104,7 +104,7 @@ export class InvalidOperatorError extends SearchError {
  */
 export class InvalidFieldError extends SearchError {
   constructor(field: string, allowedFields?: string[], details?: Record<string, unknown>) {
-    super(`Invalid field: ${field}`, SEARCH_ERROR_TYPES.INVALID_FIELD, HTTP_STATUS.BAD_REQUEST, {
+    super(`Invalid field: ${field}`, SEARCH_ERROR_TYPES.InvalidField, HTTP_STATUS.BAD_REQUEST, {
       field,
       allowedFields,
       ...details,
@@ -118,7 +118,7 @@ export class InvalidFieldError extends SearchError {
  */
 export class InvalidSortError extends SearchError {
   constructor(message = 'Invalid sort configuration', details?: Record<string, unknown>) {
-    super(message, SEARCH_ERROR_TYPES.INVALID_SORT, HTTP_STATUS.BAD_REQUEST, details);
+    super(message, SEARCH_ERROR_TYPES.InvalidSort, HTTP_STATUS.BAD_REQUEST, details);
     this.name = 'InvalidSortError';
   }
 }
@@ -128,7 +128,7 @@ export class InvalidSortError extends SearchError {
  */
 export class InvalidPaginationError extends BadRequestError {
   constructor(message = 'Invalid pagination parameters', details?: Record<string, unknown>) {
-    super(message, SEARCH_ERROR_TYPES.INVALID_PAGINATION, details);
+    super(message, SEARCH_ERROR_TYPES.InvalidPagination, details);
     this.name = 'InvalidPaginationError';
   }
 }
@@ -138,7 +138,7 @@ export class InvalidPaginationError extends BadRequestError {
  */
 export class InvalidCursorError extends SearchError {
   constructor(message = 'Invalid or expired cursor', details?: Record<string, unknown>) {
-    super(message, SEARCH_ERROR_TYPES.INVALID_CURSOR, HTTP_STATUS.BAD_REQUEST, details);
+    super(message, SEARCH_ERROR_TYPES.InvalidCursor, HTTP_STATUS.BAD_REQUEST, details);
     this.name = 'InvalidCursorError';
   }
 }
@@ -153,7 +153,7 @@ export class SearchProviderError extends SearchError {
     public readonly originalError?: Error,
     details?: Record<string, unknown>,
   ) {
-    super(message, SEARCH_ERROR_TYPES.PROVIDER_ERROR, HTTP_STATUS.INTERNAL_SERVER_ERROR, {
+    super(message, SEARCH_ERROR_TYPES.ProviderError, HTTP_STATUS.INTERNAL_SERVER_ERROR, {
       providerName,
       ...details,
     });
@@ -170,7 +170,7 @@ export class SearchProviderUnavailableError extends SearchError {
     message = `Search provider '${providerName}' is unavailable`,
     details?: Record<string, unknown>,
   ) {
-    super(message, SEARCH_ERROR_TYPES.PROVIDER_UNAVAILABLE, HTTP_STATUS.SERVICE_UNAVAILABLE, {
+    super(message, SEARCH_ERROR_TYPES.ProviderUnavailable, HTTP_STATUS.SERVICE_UNAVAILABLE, {
       providerName,
       ...details,
     });
@@ -190,7 +190,7 @@ export class UnsupportedOperatorError extends SearchError {
   ) {
     super(
       `Operator '${operator}' is not supported by provider '${providerName}'`,
-      SEARCH_ERROR_TYPES.UNSUPPORTED_OPERATOR,
+      SEARCH_ERROR_TYPES.UnsupportedOperator,
       HTTP_STATUS.BAD_REQUEST,
       { operator, providerName, supportedOperators, ...details },
     );
@@ -208,7 +208,7 @@ export class QueryTooComplexError extends SearchError {
     public readonly maxConditions?: number,
     details?: Record<string, unknown>,
   ) {
-    super(message, SEARCH_ERROR_TYPES.QUERY_TOO_COMPLEX, HTTP_STATUS.BAD_REQUEST, {
+    super(message, SEARCH_ERROR_TYPES.QueryTooComplex, HTTP_STATUS.BAD_REQUEST, {
       maxDepth,
       maxConditions,
       ...details,
@@ -228,7 +228,7 @@ export class SearchTimeoutError extends SearchError {
   ) {
     super(
       message,
-      SEARCH_ERROR_TYPES.SEARCH_TIMEOUT,
+      SEARCH_ERROR_TYPES.SearchTimeout,
       504, // Gateway Timeout
       { timeoutMs, ...details },
     );

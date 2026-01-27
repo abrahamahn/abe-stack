@@ -78,8 +78,8 @@ export function useJobsList(options: UseJobsListOptions = {}): UseJobsListResult
     queryKey,
     queryFn: async () => {
       return adminApi.listJobs({
-        status: filter.status,
-        name: filter.name,
+        ...(filter.status !== undefined && { status: filter.status }),
+        ...(filter.name !== undefined && { name: filter.name }),
         page: pagination.page,
         limit: pagination.limit,
         sortBy: pagination.sortBy,
@@ -100,7 +100,7 @@ export function useJobsList(options: UseJobsListOptions = {}): UseJobsListResult
   }, []);
 
   const setStatus = useCallback((status: JobStatus | undefined) => {
-    setFilter((prev) => ({ ...prev, status }));
+    setFilter((prev) => ({ ...prev, ...(status !== undefined && { status }) }));
     setPagination((prev) => ({ ...prev, page: 1 }));
   }, []);
 

@@ -6,7 +6,7 @@
  * Scopes: email, profile (for basic user info)
  */
 
-import { OAuthError } from '@shared';
+import { OAuthError } from '@abe-stack/core';
 
 import type { OAuthProviderClient, OAuthTokenResponse, OAuthUserInfo } from '../types';
 

@@ -1,4 +1,4 @@
-// packages/core/src/infrastructure/errors/validationError.ts
+// packages/core/src/infrastructure/errors/validation-error.ts
 /**
  * Validation Error Formatting
  *

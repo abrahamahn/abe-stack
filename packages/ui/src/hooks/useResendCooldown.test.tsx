@@ -3,7 +3,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useResendCooldown } from '../useResendCooldown';
+import { useResendCooldown } from './useResendCooldown';
 
 describe('useResendCooldown', () => {
   beforeEach(() => {

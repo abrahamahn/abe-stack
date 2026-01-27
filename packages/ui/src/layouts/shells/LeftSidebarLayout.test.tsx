@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { describe, it, expect } from 'vitest';
 
-import { LeftSidebarLayout } from '../LeftSidebarLayout';
+import { LeftSidebarLayout } from './LeftSidebarLayout';
 
 describe('LeftSidebarLayout', () => {
   describe('Basic Rendering', () => {
@@ -92,7 +92,7 @@ describe('LeftSidebarLayout', () => {
     it('uses default width', () => {
       render(<LeftSidebarLayout data-testid="sidebar">Content</LeftSidebarLayout>);
       const sidebar = screen.getByTestId('sidebar');
-      expect(sidebar).toHaveStyle({ '--left-sidebar-width': '3.125rem' });
+      expect(sidebar).toHaveStyle({ ['--left-sidebar-width']: '3.125rem' });
     });
 
     it('accepts string width', () => {
@@ -101,7 +101,7 @@ describe('LeftSidebarLayout', () => {
           Content
         </LeftSidebarLayout>,
       );
-      expect(screen.getByTestId('sidebar')).toHaveStyle({ '--left-sidebar-width': '5rem' });
+      expect(screen.getByTestId('sidebar')).toHaveStyle({ ['--left-sidebar-width']: '5rem' });
     });
 
     it('converts number width to pixels', () => {
@@ -110,7 +110,7 @@ describe('LeftSidebarLayout', () => {
           Content
         </LeftSidebarLayout>,
       );
-      expect(screen.getByTestId('sidebar')).toHaveStyle({ '--left-sidebar-width': '100px' });
+      expect(screen.getByTestId('sidebar')).toHaveStyle({ ['--left-sidebar-width']: '100px' });
     });
   });
 
@@ -200,7 +200,7 @@ describe('LeftSidebarLayout', () => {
       );
       const sidebar = screen.getByTestId('sidebar');
       expect(sidebar).toHaveStyle({
-        '--left-sidebar-width': '4rem',
+        ['--left-sidebar-width']: '4rem',
         padding: '10px',
         margin: '5px',
       });

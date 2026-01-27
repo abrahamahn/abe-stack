@@ -1,6 +1,7 @@
 // packages/core/src/infrastructure/logger/console.test.ts
 /* eslint-disable no-console */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { createConsoleLogger, LOG_LEVELS, type LogLevel } from './console';
 
 describe('Console Logger', () => {

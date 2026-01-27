@@ -91,9 +91,11 @@ export class InsertBuilder implements QueryBuilder {
    */
   onConflictDoNothing(columns?: string | string[]): this {
     this._onConflict = {
-      columns: columns ? (Array.isArray(columns) ? columns : [columns]) : undefined,
       action: 'nothing',
     };
+    if (columns !== undefined) {
+      this._onConflict.columns = Array.isArray(columns) ? columns : [columns];
+    }
     return this;
   }
 
@@ -122,8 +124,10 @@ export class InsertBuilder implements QueryBuilder {
       columns: Array.isArray(columns) ? columns : [columns],
       action: 'update',
       updateColumns,
-      updateWhere: where,
     };
+    if (where !== undefined) {
+      this._onConflict.updateWhere = where;
+    }
     return this;
   }
 
@@ -154,10 +158,10 @@ export class InsertBuilder implements QueryBuilder {
     parts.push(`VALUES ${rowPlaceholders.join(', ')}`);
 
     // ON CONFLICT
-    if (this._onConflict) {
-      if (this._onConflict.constraint) {
+    if (this._onConflict !== null) {
+      if (this._onConflict.constraint !== undefined && this._onConflict.constraint !== '') {
         parts.push(`ON CONFLICT ON CONSTRAINT ${escapeIdentifier(this._onConflict.constraint)}`);
-      } else if (this._onConflict.columns && this._onConflict.columns.length > 0) {
+      } else if (this._onConflict.columns !== undefined && this._onConflict.columns.length > 0) {
         const conflictCols = this._onConflict.columns.map(escapeIdentifier).join(', ');
         parts.push(`ON CONFLICT (${conflictCols})`);
       } else {
@@ -166,13 +170,16 @@ export class InsertBuilder implements QueryBuilder {
 
       if (this._onConflict.action === 'nothing') {
         parts.push('DO NOTHING');
-      } else if (this._onConflict.updateColumns) {
+      } else if (
+        this._onConflict.updateColumns !== undefined &&
+        this._onConflict.updateColumns.length > 0
+      ) {
         const setClauses = this._onConflict.updateColumns
           .map((col) => `${escapeIdentifier(col)} = EXCLUDED.${escapeIdentifier(col)}`)
           .join(', ');
         parts.push(`DO UPDATE SET ${setClauses}`);
 
-        if (this._onConflict.updateWhere) {
+        if (this._onConflict.updateWhere !== undefined) {
           // Renumber parameters in the WHERE clause
           let whereText = this._onConflict.updateWhere.text;
           const whereValues = this._onConflict.updateWhere.values;

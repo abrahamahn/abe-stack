@@ -2,8 +2,8 @@
 import { createCursorForItem, decodeCursor, getSortableValue } from './cursor';
 import { PaginationError } from './error';
 
-import type { CursorPaginationOptions, SortOrder } from '@abe-stack/contracts/pagination';
 import type { CursorData } from './cursor';
+import type { CursorPaginationOptions, SortOrder } from '@abe-stack/contracts/pagination';
 
 /**
  * Builds SQL WHERE clause and ORDER BY for cursor-based pagination

@@ -42,7 +42,9 @@ export function snakeToCamel(str: string): string {
   const input = str === str.toUpperCase() ? str.toLowerCase() : str;
 
   return input
-    .replace(/[-_]+(.)?/g, (_, c: string | undefined) => (c ? c.toUpperCase() : '')) // Handle separators
+    .replace(/[-_]+(.)?/g, (_, c: string | undefined) =>
+      c !== undefined && c !== '' ? c.toUpperCase() : '',
+    ) // Handle separators
     .replace(/^(.)/, (c: string) => c.toLowerCase()); // Ensure first char is lowercase
 }
 
@@ -79,20 +81,28 @@ export function toSnakeCase(
 /**
  * Convert a SQL record to TypeScript object
  * ALSO supports converting a single string if input is string
+ *
+ * @param record - The SQL record or string to convert
+ * @param mapping - Optional column mapping for field name conversion
+ * @returns Converted record in camelCase
  */
 export function toCamelCase(record: string, mapping?: ColumnMapping): string;
-export function toCamelCase<T>(record: Record<string, unknown>, mapping?: ColumnMapping): T;
 export function toCamelCase<T>(
+  record: Record<string, unknown>,
+  mapping?: ColumnMapping,
+  _typeHint?: T,
+): T;
+export function toCamelCase(
   record: string | Record<string, unknown>,
   mapping?: ColumnMapping,
-): string | T {
+): unknown {
   if (typeof record === 'string') {
     return snakeToCamel(record);
   }
 
   // Create reverse mapping (snake_case -> camelCase)
   const reverseMapping: Record<string, string> = {};
-  if (mapping) {
+  if (mapping !== undefined) {
     for (const [camel, snake] of Object.entries(mapping)) {
       reverseMapping[snake] = camel;
     }
@@ -103,17 +113,23 @@ export function toCamelCase<T>(
     const fieldName = reverseMapping[key] ?? snakeToCamel(key);
     result[fieldName] = value;
   }
-  return result as T;
+  return result;
 }
 
 /**
  * Convert an array of SQL records to TypeScript objects
  */
-export function toCamelCaseArray<T>(
+export function toCamelCaseArray<T = Record<string, unknown>>(
   records: Record<string, unknown>[],
   mapping?: ColumnMapping,
 ): T[] {
-  return records.map((r) => toCamelCase<T>(r, mapping));
+  return records.map((r) => {
+    const result = toCamelCase<T>(r, mapping);
+    if (typeof result === 'string') {
+      throw new Error('Unexpected string result from toCamelCase');
+    }
+    return result;
+  });
 }
 
 /**
@@ -124,7 +140,7 @@ function mapKeys(
   mapper: (key: string) => string,
   seen = new WeakMap<object, unknown>(),
 ): unknown {
-  if (!obj || typeof obj !== 'object') {
+  if (obj === null || obj === undefined || typeof obj !== 'object') {
     return obj;
   }
 
@@ -175,15 +191,15 @@ function mapKeys(
 /**
  * Recursively convert object keys to snake_case
  */
-export function snakeifyKeys<T = unknown>(obj: unknown): T {
-  return mapKeys(obj, camelToSnake) as T;
+export function snakeifyKeys(obj: unknown): unknown {
+  return mapKeys(obj, camelToSnake);
 }
 
 /**
  * Recursively convert object keys to camelCase
  */
-export function camelizeKeys<T = unknown>(obj: unknown): T {
-  return mapKeys(obj, snakeToCamel) as T;
+export function camelizeKeys(obj: unknown): unknown {
+  return mapKeys(obj, snakeToCamel);
 }
 
 // ============================================================================
@@ -208,12 +224,12 @@ export function formatJsonb(value: unknown): string {
 /**
  * Parse a JSONB value from database
  */
-export function parseJsonb<T = unknown>(value: string | null | undefined): T | null {
+export function parseJsonb(value: string | null | undefined): unknown {
   if (value === null || value === undefined) {
     return null;
   }
   try {
-    return JSON.parse(value) as T;
+    return JSON.parse(value) as unknown;
   } catch {
     return null;
   }

@@ -58,7 +58,7 @@ const STATUS_TABS: Array<{ id: string; label: string; status: JobStatus | undefi
 // Component
 // ============================================================================
 
-export function JobsTable({
+export const JobsTable = ({
   data,
   isLoading,
   isError,
@@ -69,7 +69,7 @@ export function JobsTable({
   onJobClick,
   onRetry,
   onCancel,
-}: JobsTableProps): JSX.Element {
+}: JobsTableProps): JSX.Element => {
   const activeTabId = STATUS_TABS.find((tab) => tab.status === selectedStatus)?.id ?? 'all';
 
   const handleTabChange = (tabId: string): void => {
@@ -97,11 +97,11 @@ export function JobsTable({
         </div>
       ) : isError ? (
         <Text tone="danger">{error?.message ?? 'Failed to load jobs'}</Text>
-      ) : !data?.data.length ? (
+      ) : (data?.data.length ?? 0) === 0 ? (
         <Text tone="muted" className="py-8 text-center">
           No jobs found
         </Text>
-      ) : (
+      ) : data !== undefined ? (
         <>
           <Table>
             <TableHeader>
@@ -135,10 +135,10 @@ export function JobsTable({
             </div>
           )}
         </>
-      )}
+      ) : null}
     </div>
   );
-}
+};
 
 // ============================================================================
 // Sub-components
@@ -151,7 +151,7 @@ interface JobRowProps {
   onCancel: (jobId: string) => Promise<void>;
 }
 
-function JobRow({ job, onClick, onRetry, onCancel }: JobRowProps): JSX.Element {
+const JobRow = ({ job, onClick, onRetry, onCancel }: JobRowProps): JSX.Element => {
   const canRetry = job.status === 'failed' || job.status === 'dead_letter';
   const canCancel = job.status === 'pending' || job.status === 'processing';
 
@@ -212,7 +212,7 @@ function JobRow({ job, onClick, onRetry, onCancel }: JobRowProps): JSX.Element {
       </TableCell>
     </TableRow>
   );
-}
+};
 
 // ============================================================================
 // Helpers

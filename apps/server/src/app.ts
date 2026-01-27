@@ -1,12 +1,11 @@
 // apps/server/src/app.ts
-import { buildConnectionString } from '@/config';
-import { DEFAULT_SEARCH_SCHEMAS } from '@/config/services/search';
+import { BaseError, createConsoleLogger } from '@abe-stack/core';
+import { createPostgresPubSub, SubscriptionManager } from '@abe-stack/core/pubsub';
 import {
     createBillingProvider,
     createDbClient,
     createEmailService,
     createNotificationService,
-    createPostgresPubSub,
     createPostgresQueueStore,
     createQueueServer,
     createStorage,
@@ -16,23 +15,20 @@ import {
     logStartupSummary,
     registerWebSocket,
     requireValidSchema,
-    SubscriptionManager,
 } from '@infrastructure/index';
 import { registerRoutes } from '@modules/index';
-import { type AppConfig, type AppContext, type IServiceContainer } from '@shared/index';
+import { type AppContext, type IServiceContainer } from '@shared/index';
+
 import { createCacheService, type CacheService } from './services/cache-service';
 
-import { createServer, listen } from '@/server';
-import type { FcmConfig as FcmConfigType } from '@abe-stack/core';
-import { BaseError, createConsoleLogger } from '@abe-stack/core';
+import type { AppConfig, BillingService, FcmConfig as FcmConfigType } from '@abe-stack/core';
+import type { PostgresPubSub } from '@abe-stack/core/pubsub';
 import type {
-    BillingService,
     DbClient,
     EmailService,
     FcmConfig,
     NotificationFactoryOptions,
     NotificationService,
-    PostgresPubSub,
     QueueServer,
     Repositories,
     ServerSearchProvider,
@@ -40,6 +36,10 @@ import type {
     WriteService,
 } from '@infrastructure/index';
 import type { FastifyBaseLogger, FastifyInstance } from 'fastify';
+
+import { buildConnectionString } from '@/config';
+import { DEFAULT_SEARCH_SCHEMAS } from '@/config/services/search';
+import { createServer, listen } from '@/server';
 
 export interface AppOptions {
   config: AppConfig;
@@ -121,7 +121,7 @@ export class App implements IServiceContainer {
       });
 
     // 5. Search
-    const userSearchSchema = DEFAULT_SEARCH_SCHEMAS.users;
+    const userSearchSchema = DEFAULT_SEARCH_SCHEMAS['users'];
     if (userSearchSchema === undefined) throw new Error('User search schema not found');
 
     this.search =
@@ -162,10 +162,10 @@ export class App implements IServiceContainer {
     if (pubsubConnString !== null && pubsubConnString !== '' && this.config.env !== 'test') {
       this._pgPubSub = createPostgresPubSub({
         connectionString: pubsubConnString,
-        onMessage: (key, version) => {
+        onMessage: (key: string, version: string) => {
           this.pubsub.publishLocal(key, version);
         },
-        onError: (err) => {
+        onError: (err: Error) => {
           this.log.error({ err }, 'PostgresPubSub error');
         },
       });
@@ -188,7 +188,7 @@ export class App implements IServiceContainer {
         return reply.status(error.statusCode).send({
           error: error.name,
           message: error.message,
-          code: (error as unknown as Record<string, unknown>).code,
+          code: (error as unknown as Record<string, unknown>)['code'],
         });
       }
 
@@ -197,7 +197,7 @@ export class App implements IServiceContainer {
         return reply.status(400).send({
           error: 'ValidationError',
           message: 'Invalid request data',
-          details: (error as Record<string, unknown>).validation,
+          details: (error as Record<string, unknown>)['validation'],
         });
       }
 

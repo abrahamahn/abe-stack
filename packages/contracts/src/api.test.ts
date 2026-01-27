@@ -18,7 +18,7 @@ import {
   unlockAccountResponseSchema,
   userRoleSchema,
   userSchema,
-} from '../';
+} from './index';
 
 describe('API Contract Integration', () => {
   describe('apiContract structure', () => {

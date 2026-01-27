@@ -7,7 +7,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createNotificationClient, urlBase64ToUint8Array } from '../client.js';
+import { createNotificationClient, urlBase64ToUint8Array } from '../client';
 
 describe('Notification Client', () => {
   const baseUrl = 'http://localhost:3001';
@@ -24,7 +24,7 @@ describe('Notification Client', () => {
   const createClient = (token?: string) =>
     createNotificationClient({
       baseUrl,
-      getToken: token ? () => token : undefined,
+      getToken: token !== undefined ? () => token : undefined,
       fetchImpl: mockFetch as any,
     });
 
@@ -32,7 +32,7 @@ describe('Notification Client', () => {
     it('should fetch VAPID key without auth', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: async () => ({ publicKey: 'test-public-key' }),
+        json: () => Promise.resolve({ publicKey: 'test-public-key' }),
       });
 
       const client = createClient();
@@ -49,8 +49,8 @@ describe('Notification Client', () => {
 
       // Check no auth header
       const call = mockFetch.mock.calls[0];
-      if (!call) throw new Error('Call not found');
-      const headers = (call[1] as any).headers as Headers;
+      if (call === undefined) throw new Error('Call not found');
+      const headers = call[1].headers as Headers;
       expect(headers.get('Authorization')).toBeNull();
     });
   });
@@ -59,7 +59,7 @@ describe('Notification Client', () => {
     it('should send subscription with auth', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: async () => ({ subscriptionId: 'sub-123', message: 'Subscribed' }),
+        json: () => Promise.resolve({ subscriptionId: 'sub-123', message: 'Subscribed' }),
       });
 
       const client = createClient('test-token');
@@ -84,8 +84,8 @@ describe('Notification Client', () => {
 
       // Check auth header
       const call = mockFetch.mock.calls[0];
-      if (!call) throw new Error('Call not found');
-      const headers = (call[1] as any).headers as Headers;
+      if (call === undefined) throw new Error('Call not found');
+      const headers = call[1].headers as Headers;
       expect(headers.get('Authorization')).toBe('Bearer test-token');
     });
 
@@ -93,7 +93,7 @@ describe('Notification Client', () => {
       mockFetch.mockResolvedValue({
         ok: false,
         status: 400,
-        json: async () => ({ message: 'Invalid subscription' }),
+        json: () => Promise.resolve({ message: 'Invalid subscription' }),
       });
 
       const client = createClient('test-token');
@@ -116,7 +116,7 @@ describe('Notification Client', () => {
     it('should send unsubscribe request', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: async () => ({ success: true, message: 'Unsubscribed' }),
+        json: () => Promise.resolve({ success: true, message: 'Unsubscribed' }),
       });
 
       const client = createClient('test-token');
@@ -144,7 +144,7 @@ describe('Notification Client', () => {
 
       mockFetch.mockResolvedValue({
         ok: true,
-        json: async () => mockPrefs,
+        json: () => Promise.resolve(mockPrefs),
       });
 
       const client = createClient('test-token');
@@ -158,11 +158,12 @@ describe('Notification Client', () => {
     it('should send preference updates', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: async () => ({
-          preferences: {
-            globalEnabled: false,
-          },
-        }),
+        json: () =>
+          Promise.resolve({
+            preferences: {
+              globalEnabled: false,
+            },
+          }),
       });
 
       const client = createClient('test-token');
@@ -179,10 +180,11 @@ describe('Notification Client', () => {
     it('should send test notification request', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: async () => ({
-          messageId: 'msg-123',
-          result: { total: 1, successful: 1, failed: 0 },
-        }),
+        json: () =>
+          Promise.resolve({
+            messageId: 'msg-123',
+            result: { total: 1, successful: 1, failed: 0 },
+          }),
       });
 
       const client = createClient('test-token');
@@ -200,10 +202,11 @@ describe('Notification Client', () => {
     it('should send notification request', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
-        json: async () => ({
-          messageId: 'msg-123',
-          result: { total: 10, successful: 9, failed: 1 },
-        }),
+        json: () =>
+          Promise.resolve({
+            messageId: 'msg-123',
+            result: { total: 10, successful: 9, failed: 1 },
+          }),
       });
 
       const client = createClient('admin-token');

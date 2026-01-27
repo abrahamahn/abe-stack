@@ -305,8 +305,12 @@ function main(): void {
 
     console.log(report);
 
-    // Save report
-    const reportPath = path.join(__dirname, '..', '..', 'build-performance-report.md');
+    // Save report to .tmp directory
+    const outputDir = path.join(__dirname, '..', '..', '..', '.tmp');
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+    const reportPath = path.join(outputDir, 'build-performance-report.md');
     fs.writeFileSync(reportPath, report);
     console.log(`\n📄 Report saved to: ${reportPath}`);
   } catch (error) {

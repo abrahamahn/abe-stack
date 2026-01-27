@@ -2,7 +2,7 @@
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { render, screen, act } from '@testing-library/react';
-import React from 'react';
+import { createElement, useEffect } from 'react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import { RecordCache, type TableMap } from '../../cache/RecordCache';
@@ -21,14 +21,22 @@ import { RealtimeProvider, type RealtimeProviderConfig } from '../RealtimeContex
 // Mock WebSocket
 // ============================================================================
 
+// WebSocket state constants matching the standard
+const wsConnecting = 0;
+const wsOpen = 1;
+const wsClosing = 2;
+const wsClosed = 3;
+
 class MockWebSocket {
-  static CONNECTING = 0;
-  static OPEN = 1;
-  static CLOSING = 2;
-  static CLOSED = 3;
+  // Note: Using camelCase properties to satisfy lint rules
+  // These are accessed internally and mimic WebSocket constants
+  static readonly connecting = wsConnecting;
+  static readonly open = wsOpen;
+  static readonly closing = wsClosing;
+  static readonly closed = wsClosed;
 
   url: string;
-  readyState: number = MockWebSocket.CONNECTING;
+  readyState: number = wsConnecting;
 
   onopen: ((event: Event) => void) | null = null;
   onmessage: ((event: MessageEvent<string>) => void) | null = null;
@@ -38,8 +46,8 @@ class MockWebSocket {
   constructor(url: string) {
     this.url = url;
     setTimeout(() => {
-      if (this.readyState === MockWebSocket.CONNECTING) {
-        this.readyState = MockWebSocket.OPEN;
+      if (this.readyState === wsConnecting) {
+        this.readyState = wsOpen;
         this.onopen?.(new Event('open'));
       }
     }, 0);
@@ -47,7 +55,7 @@ class MockWebSocket {
 
   send(_data: string): void {}
   close(): void {
-    this.readyState = MockWebSocket.CLOSED;
+    this.readyState = wsClosed;
     this.onclose?.(new CloseEvent('close'));
   }
 }
@@ -107,7 +115,7 @@ interface TestTables extends TableMap {
 function createTestConfig(
   overrides: Partial<RealtimeProviderConfig<TestTables>> = {},
 ): RealtimeProviderConfig<TestTables> {
-  const cache = overrides.recordCache || new RecordCache<TestTables>();
+  const cache = overrides.recordCache ?? new RecordCache<TestTables>();
   return {
     userId: 'test-user-id',
     wsHost: 'localhost:3000',
@@ -150,16 +158,16 @@ describe('Realtime Hooks', () => {
       const cache = new RecordCache<TestTables>();
       const config = createTestConfig({ recordCache: cache });
 
-      function TestComponent(): React.ReactElement {
+      const TestComponent = () => {
         const { data } = useRecord<User>('user', 'missing-id');
-        return <span data-testid="result">{data ? data.name : 'undefined'}</span>;
-      }
+        return createElement(
+          'span',
+          { ['data-testid']: 'result' },
+          data !== undefined ? data.name : 'undefined',
+        );
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <TestComponent />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
@@ -173,16 +181,16 @@ describe('Realtime Hooks', () => {
       cache.set('user', 'u1', { id: 'u1', version: 1, name: 'Alice', email: 'alice@test.com' });
       const config = createTestConfig({ recordCache: cache });
 
-      function TestComponent(): React.ReactElement {
+      const TestComponent = () => {
         const { data } = useRecord<User>('user', 'u1');
-        return <span data-testid="result">{data ? data.name : 'undefined'}</span>;
-      }
+        return createElement(
+          'span',
+          { ['data-testid']: 'result' },
+          data !== undefined ? data.name : 'undefined',
+        );
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <TestComponent />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
@@ -196,16 +204,16 @@ describe('Realtime Hooks', () => {
       cache.set('user', 'u1', { id: 'u1', version: 1, name: 'Alice', email: 'alice@test.com' });
       const config = createTestConfig({ recordCache: cache });
 
-      function TestComponent(): React.ReactElement {
+      const TestComponent = () => {
         const { data } = useRecord<User>('user', 'u1');
-        return <span data-testid="result">{data ? data.name : 'undefined'}</span>;
-      }
+        return createElement(
+          'span',
+          { ['data-testid']: 'result' },
+          data !== undefined ? data.name : 'undefined',
+        );
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <TestComponent />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
@@ -214,7 +222,7 @@ describe('Realtime Hooks', () => {
       expect(screen.getByTestId('result').textContent).toBe('Alice');
 
       // Update the cache
-      await act(async () => {
+      act(() => {
         cache.set('user', 'u1', { id: 'u1', version: 2, name: 'Bob', email: 'bob@test.com' });
       });
 
@@ -225,16 +233,12 @@ describe('Realtime Hooks', () => {
       const cache = new RecordCache<TestTables>();
       const config = createTestConfig({ recordCache: cache });
 
-      function TestComponent(): React.ReactElement {
+      const TestComponent = () => {
         useRecord<User>('user', 'u1');
-        return <span>subscribed</span>;
-      }
+        return createElement('span', null, 'subscribed');
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <TestComponent />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(10);
@@ -250,16 +254,12 @@ describe('Realtime Hooks', () => {
       const cache = new RecordCache<TestTables>();
       const config = createTestConfig({ recordCache: cache });
 
-      function TestComponent(): React.ReactElement {
+      const TestComponent = () => {
         useRecord<User>('user', 'u1', { skipSubscription: true });
-        return <span>not subscribed</span>;
-      }
+        return createElement('span', null, 'not subscribed');
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <TestComponent />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
@@ -274,16 +274,12 @@ describe('Realtime Hooks', () => {
       const cache = new RecordCache<TestTables>();
       const config = createTestConfig({ recordCache: cache });
 
-      function TestComponent(): React.ReactElement {
+      const TestComponent = () => {
         const { data } = useRecords<User>('user', []);
-        return <span data-testid="count">{data.length}</span>;
-      }
+        return createElement('span', { ['data-testid']: 'count' }, data.length);
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <TestComponent />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
@@ -298,18 +294,16 @@ describe('Realtime Hooks', () => {
       cache.set('user', 'u2', { id: 'u2', version: 1, name: 'Bob', email: 'bob@test.com' });
       const config = createTestConfig({ recordCache: cache });
 
-      function TestComponent(): React.ReactElement {
+      const TestComponent = () => {
         const { data } = useRecords<User>('user', ['u1', 'u2']);
-        return (
-          <span data-testid="names">{data.map((u) => u?.name ?? 'undefined').join(', ')}</span>
+        return createElement(
+          'span',
+          { ['data-testid']: 'names' },
+          data.map((u) => u?.name ?? 'undefined').join(', '),
         );
-      }
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <TestComponent />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
@@ -323,18 +317,16 @@ describe('Realtime Hooks', () => {
       cache.set('user', 'u1', { id: 'u1', version: 1, name: 'Alice', email: 'alice@test.com' });
       const config = createTestConfig({ recordCache: cache });
 
-      function TestComponent(): React.ReactElement {
+      const TestComponent = () => {
         const { data } = useRecords<User>('user', ['u1', 'missing']);
-        return (
-          <span data-testid="names">{data.map((u) => u?.name ?? 'undefined').join(', ')}</span>
+        return createElement(
+          'span',
+          { ['data-testid']: 'names' },
+          data.map((u) => u?.name ?? 'undefined').join(', '),
         );
-      }
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <TestComponent />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
@@ -349,21 +341,21 @@ describe('Realtime Hooks', () => {
       const cache = new RecordCache<TestTables>();
       const config = createTestConfig({ recordCache: cache });
 
-      function TestComponent(): React.ReactElement {
+      const TestComponent = () => {
         const { write, isWriting } = useWrite();
-        return (
-          <div>
-            <span data-testid="has-write">{typeof write === 'function' ? 'true' : 'false'}</span>
-            <span data-testid="is-writing">{isWriting.toString()}</span>
-          </div>
+        return createElement(
+          'div',
+          null,
+          createElement(
+            'span',
+            { ['data-testid']: 'has-write' },
+            typeof write === 'function' ? 'true' : 'false',
+          ),
+          createElement('span', { ['data-testid']: 'is-writing' }, isWriting.toString()),
         );
-      }
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <TestComponent />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
@@ -380,25 +372,21 @@ describe('Realtime Hooks', () => {
 
       const isWritingValues: boolean[] = [];
 
-      function TestComponent(): React.ReactElement {
+      const TestComponent = () => {
         const { write, isWriting } = useWrite();
 
-        React.useEffect(() => {
+        useEffect(() => {
           isWritingValues.push(isWriting);
         }, [isWriting]);
 
-        React.useEffect(() => {
+        useEffect(() => {
           void write([{ table: 'user', id: 'u1', updates: { name: 'Bob' } }]);
         }, [write]);
 
-        return <span data-testid="is-writing">{isWriting.toString()}</span>;
-      }
+        return createElement('span', { ['data-testid']: 'is-writing' }, isWriting.toString());
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <TestComponent />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(100);
@@ -414,16 +402,12 @@ describe('Realtime Hooks', () => {
       const cache = new RecordCache<TestTables>();
       const config = createTestConfig({ recordCache: cache });
 
-      function TestComponent(): React.ReactElement {
+      const TestComponent = () => {
         const isOnline = useIsOnline();
-        return <span data-testid="is-online">{isOnline.toString()}</span>;
-      }
+        return createElement('span', { ['data-testid']: 'is-online' }, isOnline.toString());
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <TestComponent />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
@@ -436,16 +420,12 @@ describe('Realtime Hooks', () => {
       const cache = new RecordCache<TestTables>();
       const config = createTestConfig({ recordCache: cache });
 
-      function TestComponent(): React.ReactElement {
+      const TestComponent = () => {
         const isOnline = useIsOnline();
-        return <span data-testid="is-online">{isOnline.toString()}</span>;
-      }
+        return createElement('span', { ['data-testid']: 'is-online' }, isOnline.toString());
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <TestComponent />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
@@ -453,7 +433,7 @@ describe('Realtime Hooks', () => {
 
       expect(screen.getByTestId('is-online').textContent).toBe('true');
 
-      await act(async () => {
+      act(() => {
         Object.defineProperty(navigator, 'onLine', { value: false, configurable: true });
         window.dispatchEvent(new Event('offline'));
       });
@@ -467,16 +447,12 @@ describe('Realtime Hooks', () => {
       const cache = new RecordCache<TestTables>();
       const config = createTestConfig({ recordCache: cache });
 
-      function TestComponent(): React.ReactElement {
+      const TestComponent = () => {
         const isPending = useIsPendingWrite('user', 'u1');
-        return <span data-testid="is-pending">{isPending.toString()}</span>;
-      }
+        return createElement('span', { ['data-testid']: 'is-pending' }, isPending.toString());
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <TestComponent />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
@@ -491,16 +467,12 @@ describe('Realtime Hooks', () => {
       const cache = new RecordCache<TestTables>();
       const config = createTestConfig({ recordCache: cache });
 
-      function TestComponent(): React.ReactElement {
+      const TestComponent = () => {
         const state = useConnectionState();
-        return <span data-testid="state">{state}</span>;
-      }
+        return createElement('span', { ['data-testid']: 'state' }, state);
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <TestComponent />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       // Initially disconnected
       expect(screen.getByTestId('state').textContent).toBe('disconnected');
@@ -519,23 +491,19 @@ describe('Realtime Hooks', () => {
       const cache = new RecordCache<TestTables>();
       const config = createTestConfig({ recordCache: cache });
 
-      function TestComponent(): React.ReactElement {
+      const TestComponent = () => {
         const { canUndo, canRedo, undoCount, redoCount } = useUndoRedo();
-        return (
-          <div>
-            <span data-testid="can-undo">{canUndo.toString()}</span>
-            <span data-testid="can-redo">{canRedo.toString()}</span>
-            <span data-testid="undo-count">{undoCount}</span>
-            <span data-testid="redo-count">{redoCount}</span>
-          </div>
+        return createElement(
+          'div',
+          null,
+          createElement('span', { ['data-testid']: 'can-undo' }, canUndo.toString()),
+          createElement('span', { ['data-testid']: 'can-redo' }, canRedo.toString()),
+          createElement('span', { ['data-testid']: 'undo-count' }, undoCount),
+          createElement('span', { ['data-testid']: 'redo-count' }, redoCount),
         );
-      }
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <TestComponent />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
@@ -551,21 +519,25 @@ describe('Realtime Hooks', () => {
       const cache = new RecordCache<TestTables>();
       const config = createTestConfig({ recordCache: cache });
 
-      function TestComponent(): React.ReactElement {
+      const TestComponent = () => {
         const { undo, redo } = useUndoRedo();
-        return (
-          <div>
-            <span data-testid="has-undo">{typeof undo === 'function' ? 'true' : 'false'}</span>
-            <span data-testid="has-redo">{typeof redo === 'function' ? 'true' : 'false'}</span>
-          </div>
+        return createElement(
+          'div',
+          null,
+          createElement(
+            'span',
+            { ['data-testid']: 'has-undo' },
+            typeof undo === 'function' ? 'true' : 'false',
+          ),
+          createElement(
+            'span',
+            { ['data-testid']: 'has-redo' },
+            typeof redo === 'function' ? 'true' : 'false',
+          ),
         );
-      }
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <TestComponent />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);

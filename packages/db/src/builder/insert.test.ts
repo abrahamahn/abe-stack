@@ -1,8 +1,8 @@
 // packages/db/src/builder/__tests__/insert.test.ts
 import { describe, expect, it } from 'vitest';
 
-import { gt } from '../conditions';
-import { insert } from '../insert';
+import { gt } from './conditions';
+import { insert } from './insert';
 
 describe('InsertBuilder', () => {
   describe('basic inserts', () => {
@@ -26,7 +26,7 @@ describe('InsertBuilder', () => {
 
     it('handles Date values', () => {
       const date = new Date('2024-01-01');
-      const query = insert('users').values({ email: 'user@example.com', created_at: date }).toSql();
+      const query = insert('users').values({ email: 'user@example.com', ['created_at']: date }).toSql();
       expect(query.values).toContain(date);
     });
 
@@ -102,7 +102,7 @@ describe('InsertBuilder', () => {
 
     it('generates ON CONFLICT DO NOTHING with multiple columns', () => {
       const query = insert('users')
-        .values({ email: 'user@example.com', tenant_id: 'tenant-1' })
+        .values({ email: 'user@example.com', ['tenant_id']: 'tenant-1' })
         .onConflictDoNothing(['email', 'tenant_id'])
         .toSql();
       expect(query.text).toContain('ON CONFLICT (email, tenant_id) DO NOTHING');
@@ -138,7 +138,7 @@ describe('InsertBuilder', () => {
 
     it('generates ON CONFLICT DO UPDATE with multiple columns', () => {
       const query = insert('users')
-        .values({ email: 'user@example.com', name: 'John', updated_at: new Date() })
+        .values({ email: 'user@example.com', name: 'John', ['updated_at']: new Date() })
         .onConflictDoUpdate('email', ['name', 'updated_at'])
         .toSql();
       expect(query.text).toContain(

@@ -28,7 +28,7 @@ import { Modal } from '../../layouts/layers/Modal';
 // Test Components
 // =============================================================================
 
-function NavigationForm(): React.ReactElement {
+const NavigationForm = (): React.ReactElement => {
   return (
     <form data-testid="navigation-form">
       <Input data-testid="input-1" placeholder="First input" />
@@ -42,9 +42,9 @@ function NavigationForm(): React.ReactElement {
       <Button data-testid="btn-2">Cancel</Button>
     </form>
   );
-}
+};
 
-function TabsExample({ onTabChange }: { onTabChange?: (id: string) => void }): React.ReactElement {
+const TabsExample = ({ onTabChange }: { onTabChange?: (id: string) => void }): React.ReactElement => {
   const items = [
     { id: 'tab1', label: 'Tab 1', content: <div data-testid="content-1">Content 1</div> },
     { id: 'tab2', label: 'Tab 2', content: <div data-testid="content-2">Content 2</div> },
@@ -52,12 +52,12 @@ function TabsExample({ onTabChange }: { onTabChange?: (id: string) => void }): R
     { id: 'tab4', label: 'Tab 4', content: <div data-testid="content-4">Content 4</div> },
   ];
 
-  return <Tabs items={items} onChange={onTabChange} />;
-}
+  return <Tabs items={items} {...(onTabChange !== undefined && { onChange: onTabChange })} />;
+};
 
-function SelectExample({ onSelect }: { onSelect?: (value: string) => void }): React.ReactElement {
+const SelectExample = ({ onSelect }: { onSelect?: (value: string) => void }): React.ReactElement => {
   return (
-    <Select data-testid="select" onChange={onSelect}>
+    <Select data-testid="select" {...(onSelect !== undefined && { onChange: onSelect })}>
       <option value="apple">Apple</option>
       <option value="banana">Banana</option>
       <option value="cherry" disabled>
@@ -66,13 +66,13 @@ function SelectExample({ onSelect }: { onSelect?: (value: string) => void }): Re
       <option value="date">Date</option>
     </Select>
   );
-}
+};
 
-function DropdownExample({
+const DropdownExample = ({
   onItemClick,
 }: {
   onItemClick?: (item: string) => void;
-}): React.ReactElement {
+}): React.ReactElement => {
   return (
     <Dropdown trigger={<span>Open Menu</span>}>
       {(close) => (
@@ -108,15 +108,15 @@ function DropdownExample({
       )}
     </Dropdown>
   );
-}
+};
 
-function ModalExample({
+const ModalExample = ({
   open,
   onClose,
 }: {
   open: boolean;
   onClose: () => void;
-}): React.ReactElement {
+}): React.ReactElement => {
   return (
     <Modal.Root open={open} onClose={onClose}>
       <Modal.Header>
@@ -131,9 +131,9 @@ function ModalExample({
       </Modal.Footer>
     </Modal.Root>
   );
-}
+};
 
-function FocusTrapExample(): React.ReactElement {
+const FocusTrapExample = (): React.ReactElement => {
   return (
     <FocusTrap>
       <div data-testid="focus-trap-container">
@@ -143,7 +143,7 @@ function FocusTrapExample(): React.ReactElement {
       </div>
     </FocusTrap>
   );
-}
+};
 
 // =============================================================================
 // Tests

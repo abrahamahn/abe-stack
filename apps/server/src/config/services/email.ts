@@ -1,6 +1,7 @@
 // apps/server/src/config/services/email.ts
-import type { EmailConfig, FullEnv, SmtpConfig } from '@abe-stack/core/config';
 import { getInt } from '@abe-stack/core/config';
+
+import type { EmailConfig, FullEnv, SmtpConfig } from '@abe-stack/core/config';
 
 /**
  * Loads raw SMTP transport settings from environment variables.
@@ -9,14 +10,19 @@ import { getInt } from '@abe-stack/core/config';
  * @returns SMTP configuration for nodemailer transport
  */
 export function loadSmtpConfig(env: FullEnv): SmtpConfig {
-  return {
+  const config: SmtpConfig = {
     host: env.SMTP_HOST ?? 'localhost',
     port: getInt(env.SMTP_PORT != null ? String(env.SMTP_PORT) : undefined, 587),
     secure: env.SMTP_SECURE === 'true',
-    auth: (env.SMTP_USER != null && env.SMTP_USER !== '') && (env.SMTP_PASS != null && env.SMTP_PASS !== '') ? { user: env.SMTP_USER, pass: env.SMTP_PASS } : undefined,
     connectionTimeout: getInt(env.SMTP_CONNECTION_TIMEOUT != null ? String(env.SMTP_CONNECTION_TIMEOUT) : undefined, 5000),
     socketTimeout: getInt(env.SMTP_SOCKET_TIMEOUT != null ? String(env.SMTP_SOCKET_TIMEOUT) : undefined, 30000),
   };
+
+  if ((env.SMTP_USER != null && env.SMTP_USER !== '') && (env.SMTP_PASS != null && env.SMTP_PASS !== '')) {
+    config.auth = { user: env.SMTP_USER, pass: env.SMTP_PASS };
+  }
+
+  return config;
 }
 
 /**
@@ -40,7 +46,7 @@ export function loadEmailConfig(env: FullEnv): EmailConfig {
 
   const smtp = loadSmtpConfig(env);
 
-  return {
+  const config: EmailConfig = {
     provider,
     // SMTP settings - used if provider is 'smtp'
     smtp: {
@@ -48,9 +54,6 @@ export function loadEmailConfig(env: FullEnv): EmailConfig {
       // Ensure auth object is at least an empty structure for type safety in some drivers
       auth: smtp.auth ?? { user: '', pass: '' },
     },
-
-    // API-based provider placeholder (e.g., Resend, Postmark)
-    apiKey: env.EMAIL_API_KEY,
 
     // Global "From" identity
     from: {
@@ -61,6 +64,13 @@ export function loadEmailConfig(env: FullEnv): EmailConfig {
     // Standard Enterprise feature: separate reply-to
     replyTo: env.EMAIL_REPLY_TO ?? env.EMAIL_FROM_ADDRESS ?? 'noreply@example.com',
   };
+
+  // API-based provider placeholder (e.g., Resend, Postmark)
+  if (env.EMAIL_API_KEY !== undefined) {
+    config.apiKey = env.EMAIL_API_KEY;
+  }
+
+  return config;
 }
 
 export const DEFAULT_SMTP_CONFIG: SmtpConfig = {

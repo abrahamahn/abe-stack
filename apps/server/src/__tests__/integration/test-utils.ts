@@ -7,16 +7,16 @@
  */
 
 import {
-    applyCors,
-    applySecurityHeaders,
-    registerCookies,
-    registerCorrelationIdHook,
-    registerCsrf,
-    registerPrototypePollutionProtection,
-    registerRequestInfoHook,
+  applyCors,
+  applySecurityHeaders,
+  registerCookies,
+  registerCorrelationIdHook,
+  registerCsrf,
+  registerPrototypePollutionProtection,
+  registerRequestInfoHook,
 } from '@http/index';
 import { RateLimiter } from '@rate-limit/index';
-import Fastify from 'fastify';
+import fastify from 'fastify';
 import { vi, type Mock } from 'vitest';
 
 import type { AppConfig } from '@/config';
@@ -81,8 +81,8 @@ export function createMockDb(): MockDbClient {
   });
 
   return {
-    execute: vi.fn().mockResolvedValue([{ '?column?': 1 }]),
-    insert: vi.fn().mockReturnValue(mockChain()),
+    execute: vi.fn().mockResolvedValue([{ ['?column?']: 1 }]) as MockFn,
+    insert: vi.fn().mockReturnValue(mockChain()) as MockFn,
     select: vi.fn().mockReturnValue(mockSelectChain()),
     update: vi.fn().mockReturnValue(mockChain()),
     delete: vi.fn().mockReturnValue(mockChain()),
@@ -301,7 +301,7 @@ export async function getCsrfToken(server: FastifyInstance): Promise<CsrfTokenPa
   const cookies = response.headers['set-cookie'];
   const csrfCookie = Array.isArray(cookies)
     ? cookies.find((c) => c.startsWith('_csrf='))
-    : (cookies !== undefined && cookies.startsWith('_csrf='))
+    : cookies?.startsWith('_csrf=') === true
       ? cookies
       : undefined;
 
@@ -367,7 +367,7 @@ export async function createTestServer(options: TestServerOptions = {}): Promise
 
   await Promise.resolve();
 
-  const server = Fastify({
+  const server = fastify({
     logger: false,
     trustProxy: config.server.trustProxy,
   });

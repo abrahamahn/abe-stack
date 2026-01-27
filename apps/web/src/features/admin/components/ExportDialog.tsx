@@ -27,7 +27,7 @@ export interface ExportDialogProps {
 // Component
 // ============================================================================
 
-export function ExportDialog({ isOpen, onClose, filter }: ExportDialogProps): JSX.Element {
+export const ExportDialog = ({ isOpen, onClose, filter }: ExportDialogProps): JSX.Element => {
   const [selectedFormat, setSelectedFormat] = useState<'csv' | 'json'>('csv');
   const { downloadExport, isExporting, isError, error } = useExportEvents();
 
@@ -91,4 +91,4 @@ export function ExportDialog({ isOpen, onClose, filter }: ExportDialogProps): JS
       </Modal.Footer>
     </Modal.Root>
   );
-}
+};

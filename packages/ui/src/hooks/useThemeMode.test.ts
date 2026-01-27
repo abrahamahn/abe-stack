@@ -3,7 +3,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { useThemeMode, type ThemeMode } from '../useThemeMode';
+import { useThemeMode, type ThemeMode } from './useThemeMode';
 
 describe('useThemeMode', () => {
   const storageKey = 'test-theme-mode';

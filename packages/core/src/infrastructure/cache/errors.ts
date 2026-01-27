@@ -6,8 +6,8 @@
  * serialization errors, and capacity limits.
  */
 
-import { HTTP_STATUS } from '../../shared/constants';
-import { AppError } from '../../infrastructure/errors';
+import { HTTP_STATUS } from '../../shared/constants/http';
+import { AppError } from '../errors/base';
 
 // ============================================================================
 // Base Cache Error
@@ -17,7 +17,7 @@ import { AppError } from '../../infrastructure/errors';
  * Base error for all cache-related errors.
  */
 export class CacheError extends AppError {
-  public readonly cacheErrorCause?: Error;
+  public readonly cacheErrorCause?: Error | undefined;
 
   constructor(message: string, code?: string, cause?: Error) {
     super(message, HTTP_STATUS.INTERNAL_SERVER_ERROR, code);

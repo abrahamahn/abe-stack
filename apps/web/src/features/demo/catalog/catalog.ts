@@ -1,4 +1,4 @@
-// apps/web/src/features/demo/catalog/index.ts
+// apps/web/src/features/demo/catalog/catalog.ts
 import { componentCatalog as components } from './componentCatalog';
 import { elementCatalog as elements } from './elementCatalog';
 import { layoutCatalog as layouts } from './layoutCatalog';

@@ -4,7 +4,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { StackedLayout } from '../StackedLayout';
+import { StackedLayout } from './StackedLayout';
 
 describe('StackedLayout', () => {
   it('renders children content', () => {

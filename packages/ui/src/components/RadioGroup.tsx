@@ -26,9 +26,9 @@ export type RadioGroupProps = {
   /** Additional CSS classes */
   className?: string;
   /** Accessible label for the group */
-  'aria-label'?: string;
+  ['aria-label']?: string;
   /** ID of element labeling the group */
-  'aria-labelledby'?: string;
+  ['aria-labelledby']?: string;
 };
 
 type RadioGroupContextType = {
@@ -54,7 +54,7 @@ export function useRadioGroupContext(): RadioGroupContextType | null {
  * </RadioGroup>
  * ```
  */
-export function RadioGroup(props: RadioGroupProps): ReactElement {
+export const RadioGroup = (props: RadioGroupProps): ReactElement => {
   const {
     value: valueProp,
     defaultValue,
@@ -71,9 +71,9 @@ export function RadioGroup(props: RadioGroupProps): ReactElement {
    const radioName = (name != null && name !== '') ? name : generatedName;
 
   const [value, setValue] = useControllableState({
-    value: valueProp,
-    defaultValue,
-    onChange: onValueChange,
+    ...(valueProp !== undefined && { value: valueProp }),
+    ...(defaultValue !== undefined && { defaultValue }),
+    ...(onValueChange !== undefined && { onChange: onValueChange }),
   });
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
@@ -150,7 +150,7 @@ export function RadioGroup(props: RadioGroupProps): ReactElement {
     <RadioGroupContext.Provider
       value={{
         name: radioName,
-        value,
+        ...(value !== undefined && { value }),
         onValueChange: setValue,
       }}
     >
@@ -167,4 +167,4 @@ export function RadioGroup(props: RadioGroupProps): ReactElement {
       </div>
     </RadioGroupContext.Provider>
   );
-}
+};

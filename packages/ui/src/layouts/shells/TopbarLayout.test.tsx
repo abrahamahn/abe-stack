@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { TopbarLayout } from '../TopbarLayout';
+import { TopbarLayout } from './TopbarLayout';
 
 describe('TopbarLayout', () => {
   it('renders left/center/right sections when provided', () => {
@@ -52,13 +52,13 @@ describe('TopbarLayout', () => {
   it('applies default and custom height', () => {
     const { container, rerender } = render(<TopbarLayout>Content</TopbarLayout>);
 
-    expect(container.firstChild).toHaveStyle({ '--topbar-height': '3rem' });
+    expect(container.firstChild).toHaveStyle({ ['--topbar-height']: '3rem' });
 
     rerender(<TopbarLayout height={100}>Content</TopbarLayout>);
-    expect(container.firstChild).toHaveStyle({ '--topbar-height': '100px' });
+    expect(container.firstChild).toHaveStyle({ ['--topbar-height']: '100px' });
 
     rerender(<TopbarLayout height="5rem">Content</TopbarLayout>);
-    expect(container.firstChild).toHaveStyle({ '--topbar-height': '5rem' });
+    expect(container.firstChild).toHaveStyle({ ['--topbar-height']: '5rem' });
   });
 
   it('forwards ref, className, and data attributes', () => {

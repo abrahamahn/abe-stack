@@ -23,13 +23,13 @@ export const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>((props, ref) =
   const { width, height, radius, className = '', style, ...rest } = props;
   const cssVars = {
     ...(width !== undefined && {
-      '--skeleton-width': typeof width === 'number' ? `${String(width)}px` : width,
+      ['--skeleton-width']: typeof width === 'number' ? `${String(width)}px` : width,
     }),
     ...(height !== undefined && {
-      '--skeleton-height': typeof height === 'number' ? `${String(height)}px` : height,
+      ['--skeleton-height']: typeof height === 'number' ? `${String(height)}px` : height,
     }),
     ...(radius !== undefined && {
-      '--skeleton-radius': typeof radius === 'number' ? `${String(radius)}px` : radius,
+      ['--skeleton-radius']: typeof radius === 'number' ? `${String(radius)}px` : radius,
     }),
   } as CSSProperties;
 

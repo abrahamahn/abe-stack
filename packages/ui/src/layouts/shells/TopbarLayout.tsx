@@ -53,7 +53,7 @@ export const TopbarLayout = forwardRef<HTMLDivElement, TopbarLayoutProps>(
     const hasSlots = left !== undefined || center !== undefined || right !== undefined;
 
     const cssVars = {
-      '--topbar-height': typeof height === 'number' ? `${String(height)}px` : height,
+      ['--topbar-height']: typeof height === 'number' ? `${String(height)}px` : height,
       ...style,
     } as CSSProperties;
 

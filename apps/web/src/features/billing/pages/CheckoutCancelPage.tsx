@@ -3,8 +3,7 @@
  * CheckoutCancelPage - Displayed after checkout is canceled.
  */
 
-import { Button, Card, PageContainer } from '@abe-stack/ui';
-import { useNavigate } from '@abe-stack/ui';
+import { Button, Card, PageContainer, useNavigate } from '@abe-stack/ui';
 
 import type { ReactElement } from 'react';
 
@@ -12,7 +11,7 @@ import type { ReactElement } from 'react';
 // Component
 // ============================================================================
 
-export function CheckoutCancelPage(): ReactElement {
+export const CheckoutCancelPage = (): ReactElement => {
   const navigate = useNavigate();
 
   return (
@@ -48,4 +47,4 @@ export function CheckoutCancelPage(): ReactElement {
       </Card>
     </PageContainer>
   );
-}
+};

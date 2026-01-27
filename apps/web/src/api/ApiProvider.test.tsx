@@ -5,7 +5,7 @@ import { ClientEnvironmentProvider } from '@app';
 import { render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ApiProvider, useApi } from '../ApiProvider';
+import { ApiProvider, useApi } from './ApiProvider';
 
 import type { ClientConfig, ClientEnvironment } from '@app';
 import type { AuthService } from '@features/auth';
@@ -81,10 +81,10 @@ function createMockEnvironment(): ClientEnvironment {
 }
 
 // Test component that uses the API context
-function TestConsumer(): React.ReactElement {
+const TestConsumer = (): React.ReactElement => {
   useApi();
   return <div data-testid="api-consumer">API Available</div>;
-}
+};
 
 describe('ApiProvider', () => {
   beforeEach(() => {

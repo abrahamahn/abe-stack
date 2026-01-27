@@ -2,7 +2,7 @@
 // NOTE: This file is manually maintained after refactor
 
 // API Client
-export { createApiClient } from './api';
+export { createApiClient } from './api/index';
 export type {
   ApiClient,
   ApiClientConfig,
@@ -15,10 +15,10 @@ export type {
   OAuthUnlinkResponse,
   RegisterRequest,
   User,
-} from './api';
+} from './api/index';
 
 // In-Memory Cache
-export { Loader, LoaderCache, RecordCache, loadWithCache } from './cache';
+export { Loader, LoaderCache, RecordCache, loadWithCache } from './cache/index';
 export type {
   CacheStats,
   IdentifiableRecord,
@@ -31,17 +31,17 @@ export type {
   RecordPointer,
   SetRecordOptions,
   TableMap,
-} from './cache';
+} from './cache/index';
 
 // Offline Support
-export { TransactionQueue, createTransactionQueue } from './offline';
+export { TransactionQueue, createTransactionQueue } from './offline/index';
 export type {
   QueuedTransaction,
   TransactionQueueOptions,
   TransactionQueueStatus,
   TransactionRecordPointer,
   TransactionResponse,
-} from './offline';
+} from './offline/index';
 
 // Real-Time
 export {
@@ -59,7 +59,7 @@ export {
   useIsPendingWrite,
   useConnectionState,
   useUndoRedo,
-} from './realtime';
+} from './realtime/index';
 export type {
   // Core Types
   ClientPubsubMessage,
@@ -81,7 +81,7 @@ export type {
   UseWriteResult,
   UseUndoRedoResult,
   WriteFn,
-} from './realtime';
+} from './realtime/index';
 
 // Persistent Storage
 export {
@@ -102,7 +102,7 @@ export {
   keys,
   localStorageQueue,
   set,
-} from './storage';
+} from './storage/index';
 export type {
   IDBStore,
   MutationQueueOptions,
@@ -117,16 +117,16 @@ export type {
   RecordWithTable,
   StorageAdapter,
   VersionedRecord,
-} from './storage';
+} from './storage/index';
 
 // Undo/Redo
-export { UndoRedoStack, createUndoRedoStack } from './undo';
+export { UndoRedoStack, createUndoRedoStack } from './undo/index';
 export type {
   OperationGroup,
   UndoRedoStackOptions,
   UndoRedoState,
   UndoableOperation,
-} from './undo';
+} from './undo/index';
 
 // Query Cache
 export { QueryCache, hashQueryKey, queryKeysEqual } from './query/QueryCache';
@@ -186,7 +186,7 @@ export {
   usePushPermission,
   usePushSubscription,
   useTestNotification,
-} from './notifications';
+} from './notifications/index';
 export type {
   NotificationClient,
   NotificationClientConfig,
@@ -196,7 +196,7 @@ export type {
   TestNotificationState,
   UseNotificationPreferencesOptions,
   UsePushSubscriptionOptions,
-} from './notifications';
+} from './notifications/index';
 
 // Search
 export {
@@ -231,7 +231,7 @@ export {
   useInfiniteSearch,
   useSearch,
   useSearchParams,
-} from './search';
+} from './search/index';
 export type {
   CursorSearchFn,
   SearchFn,
@@ -242,7 +242,7 @@ export type {
   UseInfiniteSearchResult,
   UseSearchOptions,
   UseSearchResult,
-} from './search';
+} from './search/index';
 
 // Billing
 export {
@@ -257,7 +257,7 @@ export {
   // Admin Client
   createAdminBillingClient,
   useAdminPlans,
-} from './billing';
+} from './billing/index';
 export type {
   // Client Types
   BillingClient,
@@ -271,7 +271,7 @@ export type {
   AdminBillingClient,
   AdminBillingClientConfig,
   AdminPlansState,
-} from './billing';
+} from './billing/index';
 
 // OAuth
 export {
@@ -279,5 +279,5 @@ export {
   oauthQueryKeys,
   useEnabledOAuthProviders,
   useOAuthConnections,
-} from './oauth';
-export type { EnabledOAuthProvidersState, OAuthConnectionsState } from './oauth';
+} from './oauth/index';
+export type { EnabledOAuthProvidersState, OAuthConnectionsState } from './oauth/index';

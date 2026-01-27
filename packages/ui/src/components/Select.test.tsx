@@ -282,7 +282,7 @@ describe('Select', () => {
 
     it('works in controlled mode with value and onChange', async () => {
       const user = userEvent.setup();
-      function ControlledSelect(): React.ReactElement {
+      const ControlledSelect = (): React.ReactElement => {
         const [val, setVal] = useState('apple');
         return (
           <Select aria-label="Fruit" value={val} onChange={setVal}>
@@ -290,7 +290,7 @@ describe('Select', () => {
             <option value="banana">Banana</option>
           </Select>
         );
-      }
+      };
 
       render(<ControlledSelect />);
       const trigger = screen.getByRole('button', { name: /fruit/i });

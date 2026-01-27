@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { Progress } from '../Progress';
+import { Progress } from './Progress';
 
 describe('Progress', () => {
   it('renders progress bar with value and ARIA attributes', () => {

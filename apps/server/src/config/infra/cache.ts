@@ -16,17 +16,20 @@ export function loadCacheConfig(env: FullEnv): CacheConfig {
   const provider = env.CACHE_PROVIDER ?? (env.CACHE_USE_REDIS === 'true' ? 'redis' : 'local');
   const useExternal = provider === 'redis';
 
-  return {
+  const config: CacheConfig = {
     ttl: env.CACHE_TTL_MS,
     maxSize: env.CACHE_MAX_SIZE,
     useExternalProvider: useExternal,
-    externalConfig: useExternal
-      ? {
-          host: env.REDIS_HOST !== '' ? env.REDIS_HOST : 'localhost',
-          port: env.REDIS_PORT,
-        }
-      : undefined,
   };
+
+  if (useExternal) {
+    config.externalConfig = {
+      host: env.REDIS_HOST !== '' ? env.REDIS_HOST : 'localhost',
+      port: env.REDIS_PORT,
+    };
+  }
+
+  return config;
 }
 
 export const DEFAULT_CACHE_CONFIG: CacheConfig = {

@@ -9,21 +9,21 @@ import {
   getUndoShortcutText,
   getRedoShortcutText,
   getUndoRedoShortcutTexts,
-} from '../useUndoRedoShortcuts';
+} from './useUndoRedoShortcuts';
 
-import type { UseUndoRedoShortcutsOptions } from '../useUndoRedoShortcuts';
+import type { UseUndoRedoShortcutsOptions } from './useUndoRedoShortcuts';
 import type { ReactElement } from 'react';
 
 // ============================================================================
 // Test Harness Components
 // ============================================================================
 
-function UndoRedoHarness(
+const UndoRedoHarness = (
   props: Omit<UseUndoRedoShortcutsOptions, 'onUndo' | 'onRedo'> & {
     onUndo?: () => void;
     onRedo?: () => void;
   },
-): ReactElement {
+): ReactElement => {
   const onUndo = props.onUndo ?? vi.fn();
   const onRedo = props.onRedo ?? vi.fn();
 
@@ -46,9 +46,9 @@ function UndoRedoHarness(
       </button>
     </div>
   );
-}
+};
 
-function StatefulUndoRedoHarness(): ReactElement {
+const StatefulUndoRedoHarness = (): ReactElement => {
   const [history, setHistory] = useState<number[]>([0]);
   const [index, setIndex] = useState(0);
 
@@ -96,7 +96,7 @@ function StatefulUndoRedoHarness(): ReactElement {
       </button>
     </div>
   );
-}
+};
 
 // ============================================================================
 // Tests: useUndoRedoShortcuts

@@ -6,7 +6,8 @@
  */
 
 import { emailSchema, errorResponseSchema, nameSchema, passwordSchema } from './common';
-import { createSchema, type Contract, type Schema } from './types';
+import { createSchema } from './schema';
+import type { Contract, Schema } from './types';
 import { userSchema, type User } from './users';
 
 // ============================================================================
@@ -19,31 +20,31 @@ export interface LoginRequest {
 }
 
 export const loginRequestSchema: Schema<LoginRequest> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid login request');
   }
   const obj = data as Record<string, unknown>;
   return {
-    email: emailSchema.parse(obj.email),
-    password: passwordSchema.parse(obj.password),
+    email: emailSchema.parse(obj['email']),
+    password: passwordSchema.parse(obj['password']),
   };
 });
 
 export interface RegisterRequest {
   email: string;
-  name?: string;
+  name?: string | undefined;
   password: string;
 }
 
 export const registerRequestSchema: Schema<RegisterRequest> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid register request');
   }
   const obj = data as Record<string, unknown>;
   return {
-    email: emailSchema.parse(obj.email),
-    name: nameSchema.parse(obj.name),
-    password: passwordSchema.parse(obj.password),
+    email: emailSchema.parse(obj['email']),
+    name: nameSchema.parse(obj['name']),
+    password: passwordSchema.parse(obj['password']),
   };
 });
 
@@ -53,14 +54,14 @@ export interface EmailVerificationRequest {
 
 export const emailVerificationRequestSchema: Schema<EmailVerificationRequest> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid email verification request');
     }
     const obj = data as Record<string, unknown>;
-    if (typeof obj.token !== 'string') {
+    if (typeof obj['token'] !== 'string') {
       throw new Error('Token must be a string');
     }
-    return { token: obj.token };
+    return { token: obj['token'] };
   },
 );
 
@@ -70,11 +71,11 @@ export interface ForgotPasswordRequest {
 
 export const forgotPasswordRequestSchema: Schema<ForgotPasswordRequest> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid forgot password request');
     }
     const obj = data as Record<string, unknown>;
-    return { email: emailSchema.parse(obj.email) };
+    return { email: emailSchema.parse(obj['email']) };
   },
 );
 
@@ -84,11 +85,11 @@ export interface ResendVerificationRequest {
 
 export const resendVerificationRequestSchema: Schema<ResendVerificationRequest> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid resend verification request');
     }
     const obj = data as Record<string, unknown>;
-    return { email: emailSchema.parse(obj.email) };
+    return { email: emailSchema.parse(obj['email']) };
   },
 );
 
@@ -99,16 +100,16 @@ export interface ResetPasswordRequest {
 
 export const resetPasswordRequestSchema: Schema<ResetPasswordRequest> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid reset password request');
     }
     const obj = data as Record<string, unknown>;
-    if (typeof obj.token !== 'string') {
+    if (typeof obj['token'] !== 'string') {
       throw new Error('Token must be a string');
     }
     return {
-      token: obj.token,
-      password: passwordSchema.parse(obj.password),
+      token: obj['token'],
+      password: passwordSchema.parse(obj['password']),
     };
   },
 );
@@ -119,11 +120,11 @@ export interface SetPasswordRequest {
 
 export const setPasswordRequestSchema: Schema<SetPasswordRequest> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid set password request');
     }
     const obj = data as Record<string, unknown>;
-    return { password: passwordSchema.parse(obj.password) };
+    return { password: passwordSchema.parse(obj['password']) };
   },
 );
 
@@ -136,11 +137,11 @@ export interface MagicLinkRequest {
 }
 
 export const magicLinkRequestSchema: Schema<MagicLinkRequest> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid magic link request');
   }
   const obj = data as Record<string, unknown>;
-  return { email: emailSchema.parse(obj.email) };
+  return { email: emailSchema.parse(obj['email']) };
 });
 
 export interface MagicLinkVerifyRequest {
@@ -149,14 +150,14 @@ export interface MagicLinkVerifyRequest {
 
 export const magicLinkVerifySchema: Schema<MagicLinkVerifyRequest> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid magic link verify request');
     }
     const obj = data as Record<string, unknown>;
-    if (typeof obj.token !== 'string' || obj.token.length < 1) {
+    if (typeof obj['token'] !== 'string' || obj['token'].length < 1) {
       throw new Error('Token is required');
     }
-    return { token: obj.token };
+    return { token: obj['token'] };
   },
 );
 
@@ -170,16 +171,16 @@ export interface AuthResponse {
 }
 
 export const authResponseSchema: Schema<AuthResponse> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid auth response');
   }
   const obj = data as Record<string, unknown>;
-  if (typeof obj.token !== 'string') {
+  if (typeof obj['token'] !== 'string') {
     throw new Error('Token must be a string');
   }
   return {
-    token: obj.token,
-    user: userSchema.parse(obj.user),
+    token: obj['token'],
+    user: userSchema.parse(obj['user']),
   };
 });
 
@@ -190,20 +191,20 @@ export interface RegisterResponse {
 }
 
 export const registerResponseSchema: Schema<RegisterResponse> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid register response');
   }
   const obj = data as Record<string, unknown>;
-  if (obj.status !== 'pending_verification') {
+  if (obj['status'] !== 'pending_verification') {
     throw new Error('Invalid status');
   }
-  if (typeof obj.message !== 'string') {
+  if (typeof obj['message'] !== 'string') {
     throw new Error('Message must be a string');
   }
   return {
     status: 'pending_verification',
-    message: obj.message,
-    email: emailSchema.parse(obj.email),
+    message: obj['message'],
+    email: emailSchema.parse(obj['email']),
   };
 });
 
@@ -212,14 +213,14 @@ export interface RefreshResponse {
 }
 
 export const refreshResponseSchema: Schema<RefreshResponse> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid refresh response');
   }
   const obj = data as Record<string, unknown>;
-  if (typeof obj.token !== 'string') {
+  if (typeof obj['token'] !== 'string') {
     throw new Error('Token must be a string');
   }
-  return { token: obj.token };
+  return { token: obj['token'] };
 });
 
 export interface LogoutResponse {
@@ -227,14 +228,14 @@ export interface LogoutResponse {
 }
 
 export const logoutResponseSchema: Schema<LogoutResponse> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid logout response');
   }
   const obj = data as Record<string, unknown>;
-  if (typeof obj.message !== 'string') {
+  if (typeof obj['message'] !== 'string') {
     throw new Error('Message must be a string');
   }
-  return { message: obj.message };
+  return { message: obj['message'] };
 });
 
 export interface EmailVerificationResponse {
@@ -245,20 +246,20 @@ export interface EmailVerificationResponse {
 
 export const emailVerificationResponseSchema: Schema<EmailVerificationResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid email verification response');
     }
     const obj = data as Record<string, unknown>;
-    if (typeof obj.verified !== 'boolean') {
+    if (typeof obj['verified'] !== 'boolean') {
       throw new Error('Verified must be a boolean');
     }
-    if (typeof obj.token !== 'string') {
+    if (typeof obj['token'] !== 'string') {
       throw new Error('Token must be a string');
     }
     return {
-      verified: obj.verified,
-      token: obj.token,
-      user: userSchema.parse(obj.user),
+      verified: obj['verified'],
+      token: obj['token'],
+      user: userSchema.parse(obj['user']),
     };
   },
 );
@@ -269,14 +270,14 @@ export interface ForgotPasswordResponse {
 
 export const forgotPasswordResponseSchema: Schema<ForgotPasswordResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid forgot password response');
     }
     const obj = data as Record<string, unknown>;
-    if (typeof obj.message !== 'string') {
+    if (typeof obj['message'] !== 'string') {
       throw new Error('Message must be a string');
     }
-    return { message: obj.message };
+    return { message: obj['message'] };
   },
 );
 
@@ -286,14 +287,14 @@ export interface ResendVerificationResponse {
 
 export const resendVerificationResponseSchema: Schema<ResendVerificationResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid resend verification response');
     }
     const obj = data as Record<string, unknown>;
-    if (typeof obj.message !== 'string') {
+    if (typeof obj['message'] !== 'string') {
       throw new Error('Message must be a string');
     }
-    return { message: obj.message };
+    return { message: obj['message'] };
   },
 );
 
@@ -303,14 +304,14 @@ export interface ResetPasswordResponse {
 
 export const resetPasswordResponseSchema: Schema<ResetPasswordResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid reset password response');
     }
     const obj = data as Record<string, unknown>;
-    if (typeof obj.message !== 'string') {
+    if (typeof obj['message'] !== 'string') {
       throw new Error('Message must be a string');
     }
-    return { message: obj.message };
+    return { message: obj['message'] };
   },
 );
 
@@ -320,14 +321,14 @@ export interface SetPasswordResponse {
 
 export const setPasswordResponseSchema: Schema<SetPasswordResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid set password response');
     }
     const obj = data as Record<string, unknown>;
-    if (typeof obj.message !== 'string') {
+    if (typeof obj['message'] !== 'string') {
       throw new Error('Message must be a string');
     }
-    return { message: obj.message };
+    return { message: obj['message'] };
   },
 );
 
@@ -338,17 +339,17 @@ export interface MagicLinkRequestResponse {
 
 export const magicLinkRequestResponseSchema: Schema<MagicLinkRequestResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid magic link request response');
     }
     const obj = data as Record<string, unknown>;
-    if (typeof obj.success !== 'boolean') {
+    if (typeof obj['success'] !== 'boolean') {
       throw new Error('Success must be a boolean');
     }
-    if (typeof obj.message !== 'string') {
+    if (typeof obj['message'] !== 'string') {
       throw new Error('Message must be a string');
     }
-    return { success: obj.success, message: obj.message };
+    return { success: obj['success'], message: obj['message'] };
   },
 );
 
@@ -359,16 +360,16 @@ export interface MagicLinkVerifyResponse {
 
 export const magicLinkVerifyResponseSchema: Schema<MagicLinkVerifyResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid magic link verify response');
     }
     const obj = data as Record<string, unknown>;
-    if (typeof obj.token !== 'string') {
+    if (typeof obj['token'] !== 'string') {
       throw new Error('Token must be a string');
     }
     return {
-      token: obj.token,
-      user: userSchema.parse(obj.user),
+      token: obj['token'],
+      user: userSchema.parse(obj['user']),
     };
   },
 );

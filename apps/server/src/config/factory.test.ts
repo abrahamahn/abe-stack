@@ -1,9 +1,11 @@
 // apps/server/src/config/factory.test.ts
-import type { ElasticsearchProviderConfig } from '@abe-stack/core';
-import { initEnv, loadServerEnv } from '@abe-stack/core';
 import fs from 'node:fs';
+
+import { initEnv, loadServerEnv } from '@abe-stack/core';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+
 import { load } from './factory';
+
 
 // Mock filesystem for consistent testing
 vi.mock('node:fs');
@@ -81,7 +83,7 @@ describe('Configuration Factory', () => {
       const esConfig = load(esEnv);
       expect(esConfig.search.provider).toBe('elasticsearch');
       if (esConfig.search.provider === 'elasticsearch') {
-        const config = esConfig.search.config as ElasticsearchProviderConfig;
+        const config = esConfig.search.config;
         expect(config.index).toBe('test-index');
       }
     });

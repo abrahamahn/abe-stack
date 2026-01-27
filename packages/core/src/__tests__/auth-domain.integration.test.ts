@@ -26,7 +26,7 @@ import {
   HTTP_ERROR_MESSAGES,
   isKnownAuthError,
   mapErrorToHttpResponse,
-} from '../modules/auth/httpMapper';
+} from '../modules/auth/http-mapper';
 import {
   defaultPasswordConfig,
   getStrengthColor,
@@ -34,7 +34,7 @@ import {
   validatePassword,
   validatePasswordBasic,
 } from '../modules/auth/password';
-import { HTTP_STATUS } from '../shared/constants';
+import { HTTP_STATUS } from '../shared/constants/index';
 
 describe('Auth Domain Integration', () => {
   describe('Password validation with strength estimation', () => {
@@ -227,7 +227,7 @@ describe('Auth Domain Integration', () => {
         const response = mapErrorToHttpResponse(error, mockLogger);
 
         expect(response.status).toBe(401);
-        expect(response.body.message).toBe(HTTP_ERROR_MESSAGES.INVALID_CREDENTIALS);
+        expect(response.body.message).toBe(HTTP_ERROR_MESSAGES.InvalidCredentials);
       });
     });
 
@@ -247,7 +247,7 @@ describe('Auth Domain Integration', () => {
         const response = mapErrorToHttpResponse(error, mockLogger);
 
         expect(response.status).toBe(400);
-        expect(response.body.message).toBe(HTTP_ERROR_MESSAGES.WEAK_PASSWORD);
+        expect(response.body.message).toBe(HTTP_ERROR_MESSAGES.WeakPassword);
       });
 
       it('should log warning when logContext provided', () => {
@@ -277,7 +277,7 @@ describe('Auth Domain Integration', () => {
         const response = mapErrorToHttpResponse(error, mockLogger);
 
         expect(response.status).toBe(429);
-        expect(response.body.message).toBe(HTTP_ERROR_MESSAGES.ACCOUNT_LOCKED);
+        expect(response.body.message).toBe(HTTP_ERROR_MESSAGES.AccountLocked);
       });
     });
 
@@ -295,7 +295,7 @@ describe('Auth Domain Integration', () => {
         const response = mapErrorToHttpResponse(error, mockLogger);
 
         expect(response.status).toBe(409);
-        expect(response.body.message).toBe(HTTP_ERROR_MESSAGES.EMAIL_ALREADY_REGISTERED);
+        expect(response.body.message).toBe(HTTP_ERROR_MESSAGES.EmailAlreadyRegistered);
       });
     });
 
@@ -331,7 +331,7 @@ describe('Auth Domain Integration', () => {
         const response = mapErrorToHttpResponse(error, mockLogger);
 
         expect(response.status).toBe(400);
-        expect(response.body.message).toBe(HTTP_ERROR_MESSAGES.INVALID_TOKEN);
+        expect(response.body.message).toBe(HTTP_ERROR_MESSAGES.InvalidToken);
       });
     });
 
@@ -360,7 +360,7 @@ describe('Auth Domain Integration', () => {
         const response = mapErrorToHttpResponse(error, mockLogger);
 
         expect(response.status).toBe(503);
-        expect(response.body.message).toBe(HTTP_ERROR_MESSAGES.EMAIL_SEND_FAILED);
+        expect(response.body.message).toBe(HTTP_ERROR_MESSAGES.EmailSendFailed);
       });
 
       it('should support custom handler', () => {
@@ -461,7 +461,7 @@ describe('Auth Domain Integration', () => {
       const response = mapErrorToHttpResponse(error, mockLogger);
 
       expect(response.status).toBe(500);
-      expect(response.body.message).toBe(HTTP_ERROR_MESSAGES.INTERNAL_ERROR);
+      expect(response.body.message).toBe(HTTP_ERROR_MESSAGES.InternalError);
       expect(mockLogger.error).toHaveBeenCalledWith(error);
     });
 
@@ -469,7 +469,7 @@ describe('Auth Domain Integration', () => {
       const response = mapErrorToHttpResponse('string error', mockLogger);
 
       expect(response.status).toBe(500);
-      expect(response.body.message).toBe(HTTP_ERROR_MESSAGES.INTERNAL_ERROR);
+      expect(response.body.message).toBe(HTTP_ERROR_MESSAGES.InternalError);
     });
   });
 
@@ -485,8 +485,8 @@ describe('Auth Domain Integration', () => {
           crackTime: result.crackTimeDisplay,
         });
 
-        expect(error.details?.score).toBe(result.score);
-        expect(error.details?.errors).toEqual(result.errors);
+        expect(error.details?.['score']).toBe(result['score']);
+        expect(error.details?.['errors']).toEqual(result['errors']);
       }
     });
 
@@ -510,7 +510,7 @@ describe('Auth Domain Integration', () => {
       });
 
       expect(response.status).toBe(400);
-      expect(response.body.message).toBe(HTTP_ERROR_MESSAGES.WEAK_PASSWORD);
+      expect(response.body.message).toBe(HTTP_ERROR_MESSAGES.WeakPassword);
     });
   });
 });

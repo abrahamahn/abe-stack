@@ -5,7 +5,7 @@ import { render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { describe, expect, it } from 'vitest';
 
-import { VersionBadge } from '../VersionBadge';
+import { VersionBadge } from './VersionBadge';
 
 describe('VersionBadge', () => {
   describe('rendering', () => {

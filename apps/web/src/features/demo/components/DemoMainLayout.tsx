@@ -40,7 +40,7 @@ export interface DemoMainLayoutProps {
   setSelectedComponent: (component: ComponentDemo | null) => void;
 }
 
-export function DemoMainLayout({
+export const DemoMainLayout = ({
   paneConfig,
   togglePane,
   handlePaneResize,
@@ -51,7 +51,7 @@ export function DemoMainLayout({
   componentsInCategory,
   selectedComponent,
   setSelectedComponent,
-}: DemoMainLayoutProps): ReactElement {
+}: DemoMainLayoutProps): ReactElement => {
   return (
     <div className="flex-1 min-h-0 flex">
       <ResizablePanelGroup direction="horizontal" className="flex-1 min-w-0">
@@ -171,7 +171,7 @@ export function DemoMainLayout({
                 />
               </div>
               <div className="panel-content">
-                {selectedComponent ? (
+                {selectedComponent !== null ? (
                   <DemoDocContent component={selectedComponent} />
                 ) : (
                   <Text tone="muted">Select a component to view documentation</Text>
@@ -186,4 +186,4 @@ export function DemoMainLayout({
       </ResizablePanelGroup>
     </div>
   );
-}
+};

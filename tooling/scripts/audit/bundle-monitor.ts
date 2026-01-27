@@ -167,8 +167,16 @@ function generateBundleReport(): BundleReport {
 // Historical Comparison
 // ============================================================================
 
+function getOutputDir(): string {
+  return path.join(__dirname, '..', '..', '..', '.tmp');
+}
+
+function getReportPath(): string {
+  return path.join(getOutputDir(), '.bundle-sizes.json');
+}
+
 function loadPreviousReport(): BundleReport | null {
-  const reportPath = path.join(__dirname, '..', '..', '.bundle-sizes.json');
+  const reportPath = getReportPath();
 
   if (!fs.existsSync(reportPath)) return null;
 
@@ -182,7 +190,13 @@ function loadPreviousReport(): BundleReport | null {
 }
 
 function saveReport(report: BundleReport): void {
-  const reportPath = path.join(__dirname, '..', '..', '.bundle-sizes.json');
+  const outputDir = getOutputDir();
+  const reportPath = getReportPath();
+
+  // Ensure .tmp directory exists
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
 
   let reports: BundleReport[] = [];
   if (fs.existsSync(reportPath)) {
@@ -289,7 +303,7 @@ function main(): void {
     displayReport(report, previous);
     saveReport(report);
 
-    console.log('\n💾 Report saved to .bundle-sizes.json');
+    console.log('\n💾 Report saved to .tmp/.bundle-sizes.json');
   } catch (error) {
     console.error('❌ Bundle monitoring failed:', error);
     process.exit(1);

@@ -32,7 +32,7 @@ export interface AuthFormProps {
   error?: string | null;
 }
 
-export function AuthForm(props: AuthFormProps): ReactElement {
+export const AuthForm = (props: AuthFormProps): ReactElement => {
   const {
     mode,
     onLogin,
@@ -51,56 +51,56 @@ export function AuthForm(props: AuthFormProps): ReactElement {
     case 'login':
       return (
         <LoginForm
-          onLogin={onLogin}
-          onForgotPassword={onForgotPassword}
-          onSuccess={onSuccess}
-          onModeChange={onModeChange}
-          isLoading={isLoading}
-          error={error}
+          {...(onLogin !== undefined && { onLogin })}
+          {...(onForgotPassword !== undefined && { onForgotPassword })}
+          {...(onSuccess !== undefined && { onSuccess })}
+          {...(onModeChange !== undefined && { onModeChange })}
+          {...(isLoading !== undefined && { isLoading })}
+          {...(error !== undefined && { error })}
         />
       );
     case 'register':
       return (
         <RegisterForm
-          onRegister={onRegister}
-          onResendVerification={onResendVerification}
-          onSuccess={onSuccess}
-          onModeChange={onModeChange}
-          isLoading={isLoading}
-          error={error}
+          {...(onRegister !== undefined && { onRegister })}
+          {...(onResendVerification !== undefined && { onResendVerification })}
+          {...(onSuccess !== undefined && { onSuccess })}
+          {...(onModeChange !== undefined && { onModeChange })}
+          {...(isLoading !== undefined && { isLoading })}
+          {...(error !== undefined && { error })}
         />
       );
     case 'forgot-password':
       return (
         <ForgotPasswordForm
-          onForgotPassword={onForgotPassword}
-          onSuccess={onSuccess}
-          onModeChange={onModeChange}
-          isLoading={isLoading}
-          error={error}
+          {...(onForgotPassword !== undefined && { onForgotPassword })}
+          {...(onSuccess !== undefined && { onSuccess })}
+          {...(onModeChange !== undefined && { onModeChange })}
+          {...(isLoading !== undefined && { isLoading })}
+          {...(error !== undefined && { error })}
         />
       );
     case 'reset-password':
       return (
         <ResetPasswordForm
-          onResetPassword={onResetPassword}
-          onSuccess={onSuccess}
-          onModeChange={onModeChange}
+          {...(onResetPassword !== undefined && { onResetPassword })}
+          {...(onSuccess !== undefined && { onSuccess })}
+          {...(onModeChange !== undefined && { onModeChange })}
           initialData={initialData as { token?: string }}
-          isLoading={isLoading}
-          error={error}
+          {...(isLoading !== undefined && { isLoading })}
+          {...(error !== undefined && { error })}
         />
       );
     default:
       return (
         <LoginForm
-          onLogin={onLogin}
-          onForgotPassword={onForgotPassword}
-          onSuccess={onSuccess}
-          onModeChange={onModeChange}
-          isLoading={isLoading}
-          error={error}
+          {...(onLogin !== undefined && { onLogin })}
+          {...(onForgotPassword !== undefined && { onForgotPassword })}
+          {...(onSuccess !== undefined && { onSuccess })}
+          {...(onModeChange !== undefined && { onModeChange })}
+          {...(isLoading !== undefined && { isLoading })}
+          {...(error !== undefined && { error })}
         />
       );
   }
-}
+};

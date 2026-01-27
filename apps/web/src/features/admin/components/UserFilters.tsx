@@ -38,62 +38,67 @@ const SORT_OPTIONS = [
   { value: 'name', label: 'Name' },
 ];
 
-export function UserFilters({
+export const UserFilters = ({
   filters,
   onFiltersChange,
   isLoading = false,
-}: UserFiltersProps): JSX.Element {
+}: UserFiltersProps): JSX.Element => {
   const [searchValue, setSearchValue] = useState(filters.search ?? '');
 
   const handleSearch = useCallback(
     (e: FormEvent) => {
       e.preventDefault();
-      onFiltersChange({ search: searchValue || undefined });
+      onFiltersChange({ ...(searchValue.length > 0 && { search: searchValue }) });
     },
     [searchValue, onFiltersChange],
   );
 
   const handleRoleChange = useCallback(
     (value: string) => {
-      onFiltersChange({ role: (value || undefined) as UserRole | undefined });
+      onFiltersChange({ ...(value.length > 0 && { role: value as UserRole }) });
     },
     [onFiltersChange],
   );
 
   const handleStatusChange = useCallback(
     (value: string) => {
-      onFiltersChange({ status: (value || undefined) as UserStatus | undefined });
+      onFiltersChange({ ...(value.length > 0 && { status: value as UserStatus }) });
     },
     [onFiltersChange],
   );
 
   const handleSortChange = useCallback(
     (value: string) => {
-      onFiltersChange({
-        sortBy: value as AdminUserListFilters['sortBy'],
-      });
+      if (value.length > 0) {
+        const newFilters: AdminUserListFilters = {
+          ...filters,
+          sortBy: value as 'email' | 'name' | 'createdAt' | 'updatedAt',
+        };
+        onFiltersChange(newFilters);
+      }
     },
-    [onFiltersChange],
+    [onFiltersChange, filters],
   );
 
   const handleSortOrderToggle = useCallback(() => {
     onFiltersChange({
+      ...filters,
       sortOrder: filters.sortOrder === 'asc' ? 'desc' : 'asc',
     });
-  }, [filters.sortOrder, onFiltersChange]);
+  }, [filters, onFiltersChange]);
 
   const handleClearFilters = useCallback(() => {
     setSearchValue('');
     onFiltersChange({
-      search: undefined,
-      role: undefined,
-      status: undefined,
       sortBy: 'createdAt',
       sortOrder: 'desc',
     });
   }, [onFiltersChange]);
 
-  const hasActiveFilters = Boolean(filters.search || filters.role || filters.status);
+  const hasActiveFilters =
+    (filters.search !== undefined && filters.search.length > 0) ||
+    filters.role !== undefined ||
+    filters.status !== undefined;
 
   return (
     <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -205,4 +210,4 @@ export function UserFilters({
       </div>
     </div>
   );
-}
+};

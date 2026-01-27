@@ -138,7 +138,7 @@ describe('Modal', () => {
       const user = userEvent.setup();
 
       render(
-        <Modal.Root open onClose={undefined}>
+        <Modal.Root open>
           <Modal.Body>Content</Modal.Body>
         </Modal.Root>,
       );

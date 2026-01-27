@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { Avatar } from '../Avatar';
+import { Avatar } from './Avatar';
 
 describe('Avatar', () => {
   it('renders fallback when no src provided', () => {

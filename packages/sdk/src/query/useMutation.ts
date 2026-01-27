@@ -173,7 +173,7 @@ export function useMutation<TData = unknown, TError = Error, TVariables = void, 
 
       try {
         // Call onMutate for optimistic updates
-        if (onMutate) {
+        if (onMutate !== undefined) {
           context = await onMutate(vars);
         }
 
@@ -202,7 +202,7 @@ export function useMutation<TData = unknown, TError = Error, TVariables = void, 
           throw new Error('Mutation superseded');
         }
 
-        if (lastError && result === undefined) {
+        if (lastError !== null && result === undefined) {
           throw lastError instanceof Error ? lastError : new Error(String(lastError));
         }
 
@@ -211,7 +211,7 @@ export function useMutation<TData = unknown, TError = Error, TVariables = void, 
         setData(result);
 
         // Invalidate queries
-        if (invalidateOnSuccess) {
+        if (invalidateOnSuccess !== undefined) {
           for (const queryKey of invalidateOnSuccess) {
             cache.invalidateQuery(queryKey);
           }

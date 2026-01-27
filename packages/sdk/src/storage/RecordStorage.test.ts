@@ -11,7 +11,7 @@ import {
     type RecordStorageErrorType,
     type RecordWithTable,
     type VersionedRecord,
-} from '../RecordStorage.js';
+} from '../RecordStorage';
 
 // ============================================================================
 // Mock IndexedDB
@@ -60,7 +60,7 @@ function createMockIndexedDB(): {
   const mockIndexedDB = {
     open: (dbName: string): IDBOpenDBRequest => {
       let store = stores.get(dbName);
-      if (!store) {
+      if (store === undefined) {
         store = { data: new Map() };
         stores.set(dbName, store);
       }
@@ -485,7 +485,7 @@ describe('RecordStorage', () => {
 
       const results = await storage.queryRecords<UserRecord>(
         'user',
-        (u) => u.name.startsWith('A') || u.name.startsWith('C'),
+        (u) => u.name.startsWith('A') === true || u.name.startsWith('C') === true,
       );
       expect(results).toHaveLength(2);
       expect(results.map((u) => u.name).sort()).toEqual(['Alice', 'Charlie']);

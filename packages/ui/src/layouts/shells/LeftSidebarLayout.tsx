@@ -54,7 +54,7 @@ export const LeftSidebarLayout = forwardRef<HTMLDivElement, LeftSidebarLayoutPro
     const hasSlots = header !== undefined || content !== undefined || footer !== undefined;
 
     const cssVars = {
-      '--left-sidebar-width': typeof width === 'number' ? `${String(width)}px` : width,
+      ['--left-sidebar-width']: typeof width === 'number' ? `${String(width)}px` : width,
       ...style,
     } as CSSProperties;
 

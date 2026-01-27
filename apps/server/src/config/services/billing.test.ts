@@ -1,7 +1,9 @@
 // apps/server/src/config/services/billing.test.ts
-import type { FullEnv } from '@abe-stack/core/config';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { loadBillingConfig, validateBillingConfig } from './billing';
+
+import type { FullEnv } from '@abe-stack/core/config';
 
 describe('Billing Configuration', () => {
   beforeEach(() => {

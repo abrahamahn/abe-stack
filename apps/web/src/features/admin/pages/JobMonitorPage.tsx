@@ -18,7 +18,7 @@ import type { JSX } from 'react';
 // Component
 // ============================================================================
 
-export function JobMonitorPage(): JSX.Element {
+export const JobMonitorPage = (): JSX.Element => {
   const [selectedJobId, setSelectedJobId] = useState<string | undefined>(undefined);
 
   // Fetch queue stats
@@ -88,7 +88,7 @@ export function JobMonitorPage(): JSX.Element {
       />
 
       {/* Job Details Side Panel */}
-      <SidePeek.Root open={Boolean(selectedJobId)} onClose={handleCloseDetails}>
+      <SidePeek.Root open={selectedJobId !== undefined} onClose={handleCloseDetails}>
         <SidePeek.Content>
           <JobDetailsPanel
             job={jobDetails.data}
@@ -103,4 +103,4 @@ export function JobMonitorPage(): JSX.Element {
       </SidePeek.Root>
     </PageContainer>
   );
-}
+};

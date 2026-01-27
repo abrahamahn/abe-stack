@@ -93,7 +93,6 @@ export function usePaginatedQuery<TData = unknown, TError = unknown>({
 
   // Default pagination options
   const defaultOptions: CursorPaginationOptions = {
-    cursor: undefined,
     limit: 50,
     sortBy: 'createdAt',
     sortOrder: 'desc',
@@ -106,7 +105,7 @@ export function usePaginatedQuery<TData = unknown, TError = unknown>({
     queryFn: async ({ pageParam }) => {
       const options: CursorPaginationOptions = {
         ...defaultOptions,
-        cursor: pageParam ?? undefined,
+        ...(pageParam !== undefined && { cursor: pageParam }),
       };
 
       try {
@@ -122,9 +121,9 @@ export function usePaginatedQuery<TData = unknown, TError = unknown>({
       return lastPage.hasNext ? (lastPage.nextCursor ?? undefined) : undefined;
     },
     enabled,
-    staleTime,
-    gcTime,
-    retry,
+    ...(staleTime !== undefined && { staleTime }),
+    ...(gcTime !== undefined && { gcTime }),
+    ...(retry !== undefined && { retry }),
   });
 
   // Flatten all pages into a single data array
@@ -251,9 +250,9 @@ export function useOffsetPaginatedQuery<TData = unknown, TError = unknown>({
       return firstPage.hasPrev ? firstPage.page - 1 : undefined;
     },
     enabled,
-    staleTime,
-    gcTime,
-    retry,
+    ...(staleTime !== undefined && { staleTime }),
+    ...(gcTime !== undefined && { gcTime }),
+    ...(retry !== undefined && { retry }),
   });
 
   const currentPageData = query.data?.pages[query.data.pages.length - 1];

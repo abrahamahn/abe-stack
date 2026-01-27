@@ -21,15 +21,13 @@ import {
 
 let settingsApi: ReturnType<typeof createSettingsApi> | null = null;
 const apiBaseUrl =
-  typeof import.meta.env.VITE_API_URL === 'string' ? import.meta.env.VITE_API_URL : '';
+  typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
 
 function getSettingsApi(): ReturnType<typeof createSettingsApi> {
-  if (!settingsApi) {
-    settingsApi = createSettingsApi({
-      baseUrl: apiBaseUrl,
-      getToken: (): string | null => localStorage.getItem('accessToken'),
-    });
-  }
+  settingsApi ??= createSettingsApi({
+    baseUrl: apiBaseUrl,
+    getToken: (): string | null => localStorage.getItem('accessToken'),
+  });
   return settingsApi;
 }
 
@@ -93,9 +91,11 @@ export function useRevokeSession(options?: UseRevokeSessionOptions): UseRevokeSe
     },
     onSuccess: (response) => {
       queryCache.invalidateQuery(['sessions']);
-      options?.onSuccess?.(response);
+      if (options?.onSuccess !== undefined) {
+        options.onSuccess(response);
+      }
     },
-    onError: options?.onError,
+    ...(options?.onError !== undefined && { onError: options.onError }),
   });
 
   return {
@@ -139,9 +139,11 @@ export function useRevokeAllSessions(
     },
     onSuccess: (response) => {
       queryCache.invalidateQuery(['sessions']);
-      options?.onSuccess?.(response);
+      if (options?.onSuccess !== undefined) {
+        options.onSuccess(response);
+      }
     },
-    onError: options?.onError,
+    ...(options?.onError !== undefined && { onError: options.onError }),
   });
 
   return {

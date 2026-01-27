@@ -6,6 +6,7 @@
  * to verify the SmtpClient's protocol implementation without real network calls.
  */
 import { EventEmitter } from 'node:events';
+
 import { beforeEach, describe, expect, test, vi, type Mock } from 'vitest';
 
 import { SmtpClient, type SmtpConfig } from '../smtp';

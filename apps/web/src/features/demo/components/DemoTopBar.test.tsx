@@ -3,9 +3,9 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { DemoTopBar } from '../DemoTopBar';
+import { DemoTopBar } from './DemoTopBar';
 
-import type { DemoTopBarProps } from '../DemoTopBar';
+import type { DemoTopBarProps } from './DemoTopBar';
 
 // Mock useNavigate and useSidePeek from @abe-stack/ui
 const mockNavigate = vi.fn();

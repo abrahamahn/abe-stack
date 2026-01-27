@@ -7,8 +7,8 @@
  */
 
 import { getOAuthLoginUrl, useEnabledOAuthProviders } from '@abe-stack/sdk';
-import { useClientEnvironment } from '@app/ClientEnvironment';
 import { OAuthButton } from '@abe-stack/ui';
+import { useClientEnvironment } from '@app/ClientEnvironment';
 import { useMemo } from 'react';
 
 import type { OAuthProvider } from '@abe-stack/core';
@@ -55,10 +55,10 @@ const AppleIcon = (): ReactElement => (
 // Provider Config
 // ============================================================================
 
-const PROVIDER_CONFIG: Record<OAuthProvider, { label: string; Icon: () => ReactElement }> = {
-  google: { label: 'Google', Icon: GoogleIcon },
-  github: { label: 'GitHub', Icon: GitHubIcon },
-  apple: { label: 'Apple', Icon: AppleIcon },
+const PROVIDER_CONFIG: Record<OAuthProvider, { label: string; icon: () => ReactElement }> = {
+  google: { label: 'Google', icon: GoogleIcon },
+  github: { label: 'GitHub', icon: GitHubIcon },
+  apple: { label: 'Apple', icon: AppleIcon },
 };
 
 // ============================================================================
@@ -76,7 +76,10 @@ export interface OAuthButtonsProps {
 // Component
 // ============================================================================
 
-export function OAuthButtons({ mode = 'login', disabled }: OAuthButtonsProps): ReactElement | null {
+export const OAuthButtons = ({
+  mode = 'login',
+  disabled,
+}: OAuthButtonsProps): ReactElement | null => {
   const { config } = useClientEnvironment();
 
   const clientConfig = useMemo(
@@ -92,7 +95,7 @@ export function OAuthButtons({ mode = 'login', disabled }: OAuthButtonsProps): R
   const error = oauthState.error;
 
   // Don't render anything if no providers are enabled or provider lookup failed
-  if ((!isLoading && providers.length === 0) || error) {
+  if ((isLoading === false && providers.length === 0) || error !== null) {
     return null;
   }
 
@@ -113,8 +116,8 @@ export function OAuthButtons({ mode = 'login', disabled }: OAuthButtonsProps): R
             Loading providers...
           </OAuthButton>
         ) : (
-          providers.map((provider) => {
-            const { label, Icon } = PROVIDER_CONFIG[provider];
+          providers.map((provider: OAuthProvider) => {
+            const { label, icon: IconComponent } = PROVIDER_CONFIG[provider];
             return (
               <OAuthButton
                 key={provider}
@@ -124,7 +127,7 @@ export function OAuthButtons({ mode = 'login', disabled }: OAuthButtonsProps): R
                 }}
                 disabled={disabled}
               >
-                <Icon />
+                <IconComponent />
                 <span>
                   {actionText} {label}
                 </span>
@@ -142,4 +145,4 @@ export function OAuthButtons({ mode = 'login', disabled }: OAuthButtonsProps): R
       )}
     </>
   );
-}
+};

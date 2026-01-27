@@ -1,7 +1,7 @@
 // apps/web/src/features/demo/utils/__tests__/lazyDocs.test.ts
 import { describe, expect, test } from 'vitest';
 
-import { clearDocsCache, getComponentDocsLazy } from '../lazyDocs';
+import { clearDocsCache, getComponentDocsLazy } from './lazyDocs';
 
 import type { ComponentCategory } from '@demo/types';
 
@@ -13,6 +13,6 @@ describe('lazyDocs utilities', () => {
   });
 
   test('should clear docs cache without throwing', () => {
-    expect(() => clearDocsCache()).not.toThrow();
+    expect(() => { clearDocsCache(); }).not.toThrow();
   });
 });

@@ -8,7 +8,7 @@ import {
   useKeyBindings,
   parseKeyBinding,
   formatKeyBinding,
-} from '../useKeyboardShortcut';
+} from './useKeyboardShortcut';
 
 import type { ReactElement } from 'react';
 
@@ -16,7 +16,7 @@ import type { ReactElement } from 'react';
 // Test Harness Components
 // ============================================================================
 
-function ShortcutHarness({
+const ShortcutHarness = ({
   shortcutKey,
   handler,
   ctrl,
@@ -40,7 +40,7 @@ function ShortcutHarness({
   stopPropagation?: boolean;
   skipInputs?: boolean;
   eventType?: 'keydown' | 'keyup';
-}): ReactElement {
+}): ReactElement => {
   useKeyboardShortcut({
     key: shortcutKey,
     handler,
@@ -62,22 +62,22 @@ function ShortcutHarness({
       <button type="button">Test Button</button>
     </div>
   );
-}
+};
 
-function KeyBindingsHarness({
+const KeyBindingsHarness = ({
   bindings,
   enabled,
 }: {
   bindings: Record<string, () => void>;
   enabled?: boolean;
-}): ReactElement {
+}): ReactElement => {
   useKeyBindings(bindings, { enabled });
   return (
     <div>
       <button type="button">Test Button</button>
     </div>
   );
-}
+};
 
 // ============================================================================
 // Tests: useKeyboardShortcut
@@ -356,12 +356,14 @@ describe('useKeyBindings', () => {
   it('handles multiple bindings', () => {
     const saveHandler = vi.fn();
     const undoHandler = vi.fn();
+    const ctrlS = 'ctrl+s';
+    const ctrlZ = 'ctrl+z';
 
     render(
       <KeyBindingsHarness
         bindings={{
-          'ctrl+s': saveHandler,
-          'ctrl+z': undoHandler,
+          [ctrlS]: saveHandler,
+          [ctrlZ]: undoHandler,
         }}
       />,
     );
@@ -376,11 +378,12 @@ describe('useKeyBindings', () => {
 
   it('handles bindings with multiple modifiers', () => {
     const handler = vi.fn();
+    const ctrlShiftZ = 'ctrl+shift+z';
 
     render(
       <KeyBindingsHarness
         bindings={{
-          'ctrl+shift+z': handler,
+          [ctrlShiftZ]: handler,
         }}
       />,
     );
@@ -396,11 +399,12 @@ describe('useKeyBindings', () => {
 
   it('can be disabled', () => {
     const handler = vi.fn();
+    const ctrlZ = 'ctrl+z';
 
     render(
       <KeyBindingsHarness
         bindings={{
-          'ctrl+z': handler,
+          [ctrlZ]: handler,
         }}
         enabled={false}
       />,

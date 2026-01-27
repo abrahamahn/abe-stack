@@ -1,14 +1,14 @@
 // apps/web/src/features/auth/pages/Login.tsx
-import { AuthLayout, useFormState, useNavigate } from '@abe-stack/ui';
+import { AuthLayout, useAuthModeNavigation, useFormState, useNavigate } from '@abe-stack/ui';
 import { AuthForm } from '@auth/components/AuthForms';
-import { useAuth, useAuthModeNavigation } from '@auth/hooks';
+import { useAuth } from '@auth/hooks';
 import { getPostLoginRedirect } from '@auth/utils';
 import { useEffect } from 'react';
 
 import type { AuthFormProps } from '@auth/components/AuthForms';
 import type { JSX } from 'react';
 
-export function LoginPage(): JSX.Element {
+export const LoginPage = (): JSX.Element => {
   const { login, forgotPassword, isAuthenticated, user } = useAuth();
   const { isLoading, error, wrapHandler } = useFormState();
   const { navigateToMode } = useAuthModeNavigation();
@@ -34,4 +34,4 @@ export function LoginPage(): JSX.Element {
       <AuthForm {...formProps} />
     </AuthLayout>
   );
-}
+};

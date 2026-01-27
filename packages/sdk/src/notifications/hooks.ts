@@ -130,14 +130,14 @@ export function usePushSubscription(options: UsePushSubscriptionOptions): PushSu
       setError(null);
 
       const existing = await getExistingSubscription();
-      if (existing) {
+      if (existing !== null) {
         const json = existing.toJSON();
         setSubscription({
           endpoint: json.endpoint ?? '',
           expirationTime: json.expirationTime ?? null,
           keys: {
-            p256dh: json.keys?.p256dh ?? '',
-            auth: json.keys?.auth ?? '',
+            p256dh: json.keys?.['p256dh'] ?? '',
+            auth: json.keys?.['auth'] ?? '',
           },
         });
         setIsSubscribed(true);
@@ -176,8 +176,8 @@ export function usePushSubscription(options: UsePushSubscriptionOptions): PushSu
         endpoint: json.endpoint ?? '',
         expirationTime: json.expirationTime ?? null,
         keys: {
-          p256dh: json.keys?.p256dh ?? '',
-          auth: json.keys?.auth ?? '',
+          p256dh: json.keys?.['p256dh'] ?? '',
+          auth: json.keys?.['auth'] ?? '',
         },
       };
 
@@ -211,9 +211,9 @@ export function usePushSubscription(options: UsePushSubscriptionOptions): PushSu
       await unsubscribeFromPush();
 
       // Unsubscribe from server
-      if (subscriptionId) {
+      if (subscriptionId !== null && subscriptionId !== '') {
         await client.unsubscribe({ subscriptionId });
-      } else if (subscription?.endpoint) {
+      } else if (subscription !== null && subscription.endpoint !== '') {
         await client.unsubscribe({ endpoint: subscription.endpoint });
       }
 

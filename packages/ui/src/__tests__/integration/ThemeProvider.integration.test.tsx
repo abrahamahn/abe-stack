@@ -60,7 +60,7 @@ const mockMatchMedia = (query: string): MediaQueryList => ({
 // Test Components
 // =============================================================================
 
-function ThemeToggle(): React.ReactElement {
+const ThemeToggle = (): React.ReactElement => {
   const { mode, cycleMode, isDark, isLight, resolvedTheme, setMode } = useTheme();
 
   return (
@@ -73,20 +73,35 @@ function ThemeToggle(): React.ReactElement {
       <Button onClick={cycleMode} data-testid="cycle-btn">
         Cycle Theme
       </Button>
-      <Button onClick={() => { setMode('light'); }} data-testid="light-btn">
+      <Button
+        onClick={() => {
+          setMode('light');
+        }}
+        data-testid="light-btn"
+      >
         Light
       </Button>
-      <Button onClick={() => { setMode('dark'); }} data-testid="dark-btn">
+      <Button
+        onClick={() => {
+          setMode('dark');
+        }}
+        data-testid="dark-btn"
+      >
         Dark
       </Button>
-      <Button onClick={() => { setMode('system'); }} data-testid="system-btn">
+      <Button
+        onClick={() => {
+          setMode('system');
+        }}
+        data-testid="system-btn"
+      >
         System
       </Button>
     </div>
   );
-}
+};
 
-function ThemeAwareComponent(): React.ReactElement {
+const ThemeAwareComponent = (): React.ReactElement => {
   const { isDark, resolvedTheme } = useTheme();
 
   return (
@@ -100,18 +115,18 @@ function ThemeAwareComponent(): React.ReactElement {
       <span data-testid="theme-text">Current theme: {resolvedTheme}</span>
     </div>
   );
-}
+};
 
-function NestedThemeConsumer(): React.ReactElement {
+const NestedThemeConsumer = (): React.ReactElement => {
   return (
     <div data-testid="nested-container">
       <ThemeToggle />
       <ThemeAwareComponent />
     </div>
   );
-}
+};
 
-function MultipleConsumers(): React.ReactElement {
+const MultipleConsumers = (): React.ReactElement => {
   return (
     <ThemeProvider storageKey="test-theme">
       <ThemeToggle />
@@ -123,7 +138,7 @@ function MultipleConsumers(): React.ReactElement {
       </div>
     </ThemeProvider>
   );
-}
+};
 
 // =============================================================================
 // Tests
@@ -494,7 +509,7 @@ describe('ThemeProvider Integration Tests', () => {
   });
 
   describe('useThemeMode Hook Direct Usage', () => {
-    function ThemeModeHookTest(): React.ReactElement {
+    const ThemeModeHookTest = (): React.ReactElement => {
       const { mode, setMode, cycleMode, isDark, isLight, resolvedTheme } =
         useThemeMode('direct-test');
 
@@ -507,12 +522,17 @@ describe('ThemeProvider Integration Tests', () => {
           <Button onClick={cycleMode} data-testid="hook-cycle">
             Cycle
           </Button>
-          <Button onClick={() => { setMode('dark'); }} data-testid="hook-dark">
+          <Button
+            onClick={() => {
+              setMode('dark');
+            }}
+            data-testid="hook-dark"
+          >
             Dark
           </Button>
         </div>
       );
-    }
+    };
 
     it('works without ThemeProvider wrapper', async () => {
       const user = userEvent.setup();

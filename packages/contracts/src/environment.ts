@@ -14,7 +14,7 @@
 // Note: AppConfig is defined in @abe-stack/core/config
 // We use a type reference here to avoid circular dependencies
 export interface ServerEnvironment {
-  readonly config: any; // Will be properly typed when extended in server
+  readonly config: unknown; // Will be properly typed when extended in server
 
   // We can add more specific service contracts here as they are fully migrated to core
   // For now, this serves as the base for IServiceContainer

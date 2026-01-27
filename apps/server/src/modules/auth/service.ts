@@ -8,7 +8,16 @@
 
 import { randomBytes } from 'node:crypto';
 
-import { validatePassword, type UserRole } from '@abe-stack/core';
+import {
+    AccountLockedError,
+    EmailNotVerifiedError,
+    EmailSendError,
+    InvalidCredentialsError,
+    InvalidTokenError,
+    validatePassword,
+    WeakPasswordError,
+    type UserRole,
+} from '@abe-stack/core';
 import {
     and,
     EMAIL_VERIFICATION_TOKENS_TABLE,
@@ -35,14 +44,6 @@ import {
     type Logger,
     type Repositories,
 } from '@infrastructure';
-import {
-    AccountLockedError,
-    EmailNotVerifiedError,
-    EmailSendError,
-    InvalidCredentialsError,
-    InvalidTokenError,
-    WeakPasswordError,
-} from '@shared';
 
 import {
     createAccessToken,

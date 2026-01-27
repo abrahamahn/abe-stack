@@ -11,8 +11,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 export interface VirtualScrollOptions {
   itemHeight: number | ((index: number) => number);
   containerHeight: number;
-  overscan?: number;
-  dynamicHeight?: boolean;
+  overscan?: number | undefined;
+  dynamicHeight?: boolean | undefined;
 }
 
 export interface VirtualScrollItem {
@@ -137,14 +137,14 @@ export interface VirtualScrollListProps<T> {
 /**
  * Virtual scroll list component
  */
-export function VirtualScrollList<T>({
+export const VirtualScrollList = <T,>({
   items,
   itemHeight,
   containerHeight,
   renderItem,
   className = '',
   overscan = 5,
-}: VirtualScrollListProps<T>): React.ReactElement {
+}: VirtualScrollListProps<T>): React.ReactElement => {
   const itemHeightFn =
     typeof itemHeight === 'function'
       ? (index: number): number => itemHeight(items[index] as T, index)
@@ -179,4 +179,4 @@ export function VirtualScrollList<T>({
       </div>
     </div>
   );
-}
+};

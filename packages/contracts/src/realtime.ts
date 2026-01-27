@@ -7,7 +7,8 @@
  */
 
 import { errorResponseSchema, uuidSchema } from './common';
-import { createSchema, type Contract, type Schema } from './types';
+import { createSchema } from './schema';
+import type { Contract, Schema } from './types';
 
 // ============================================================================
 // Validation Helpers
@@ -43,19 +44,19 @@ export interface SetOperation {
 }
 
 export const setOperationSchema: Schema<SetOperation> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid set operation');
   }
   const obj = data as Record<string, unknown>;
-  if (obj.type !== 'set') {
+  if (obj['type'] !== 'set') {
     throw new Error('Operation type must be "set"');
   }
   return {
     type: 'set',
-    table: validateNonEmptyString(obj.table, 'table'),
-    id: uuidSchema.parse(obj.id),
-    key: validateNonEmptyString(obj.key, 'key'),
-    value: obj.value,
+    table: validateNonEmptyString(obj['table'], 'table'),
+    id: uuidSchema.parse(obj['id']),
+    key: validateNonEmptyString(obj['key'], 'key'),
+    value: obj['value'],
   };
 });
 
@@ -70,18 +71,18 @@ export interface SetNowOperation {
 }
 
 export const setNowOperationSchema: Schema<SetNowOperation> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid set-now operation');
   }
   const obj = data as Record<string, unknown>;
-  if (obj.type !== 'set-now') {
+  if (obj['type'] !== 'set-now') {
     throw new Error('Operation type must be "set-now"');
   }
   return {
     type: 'set-now',
-    table: validateNonEmptyString(obj.table, 'table'),
-    id: uuidSchema.parse(obj.id),
-    key: validateNonEmptyString(obj.key, 'key'),
+    table: validateNonEmptyString(obj['table'], 'table'),
+    id: uuidSchema.parse(obj['id']),
+    key: validateNonEmptyString(obj['key'], 'key'),
   };
 });
 
@@ -94,13 +95,13 @@ export const listPositionSchema: Schema<ListPosition> = createSchema((data: unkn
   if (data === 'prepend' || data === 'append') {
     return data;
   }
-  if (data && typeof data === 'object') {
+  if (data !== null && typeof data === 'object') {
     const obj = data as Record<string, unknown>;
     if ('before' in obj) {
-      return { before: obj.before };
+      return { before: obj['before'] };
     }
     if ('after' in obj) {
-      return { after: obj.after };
+      return { after: obj['after'] };
     }
   }
   throw new Error('Invalid list position');
@@ -120,20 +121,20 @@ export interface ListInsertOperation {
 
 export const listInsertOperationSchema: Schema<ListInsertOperation> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid listInsert operation');
     }
     const obj = data as Record<string, unknown>;
-    if (obj.type !== 'listInsert') {
+    if (obj['type'] !== 'listInsert') {
       throw new Error('Operation type must be "listInsert"');
     }
     return {
       type: 'listInsert',
-      table: validateNonEmptyString(obj.table, 'table'),
-      id: uuidSchema.parse(obj.id),
-      key: validateNonEmptyString(obj.key, 'key'),
-      value: obj.value,
-      position: listPositionSchema.parse(obj.position),
+      table: validateNonEmptyString(obj['table'], 'table'),
+      id: uuidSchema.parse(obj['id']),
+      key: validateNonEmptyString(obj['key'], 'key'),
+      value: obj['value'],
+      position: listPositionSchema.parse(obj['position']),
     };
   },
 );
@@ -151,19 +152,19 @@ export interface ListRemoveOperation {
 
 export const listRemoveOperationSchema: Schema<ListRemoveOperation> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid listRemove operation');
     }
     const obj = data as Record<string, unknown>;
-    if (obj.type !== 'listRemove') {
+    if (obj['type'] !== 'listRemove') {
       throw new Error('Operation type must be "listRemove"');
     }
     return {
       type: 'listRemove',
-      table: validateNonEmptyString(obj.table, 'table'),
-      id: uuidSchema.parse(obj.id),
-      key: validateNonEmptyString(obj.key, 'key'),
-      value: obj.value,
+      table: validateNonEmptyString(obj['table'], 'table'),
+      id: uuidSchema.parse(obj['id']),
+      key: validateNonEmptyString(obj['key'], 'key'),
+      value: obj['value'],
     };
   },
 );
@@ -174,12 +175,12 @@ export const listRemoveOperationSchema: Schema<ListRemoveOperation> = createSche
 export type Operation = SetOperation | SetNowOperation | ListInsertOperation | ListRemoveOperation;
 
 export const operationSchema: Schema<Operation> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid operation');
   }
   const obj = data as Record<string, unknown>;
 
-  switch (obj.type) {
+  switch (obj['type']) {
     case 'set':
       return setOperationSchema.parse(data);
     case 'set-now':
@@ -189,7 +190,7 @@ export const operationSchema: Schema<Operation> = createSchema((data: unknown) =
     case 'listRemove':
       return listRemoveOperationSchema.parse(data);
     default:
-      throw new Error(`Unknown operation type: ${String(obj.type)}`);
+      throw new Error(`Unknown operation type: ${String(obj['type'])}`);
   }
 });
 
@@ -212,22 +213,22 @@ export interface Transaction {
 }
 
 export const transactionSchema: Schema<Transaction> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid transaction');
   }
   const obj = data as Record<string, unknown>;
 
-  const txId = uuidSchema.parse(obj.txId);
-  const authorId = uuidSchema.parse(obj.authorId);
-  const clientTimestamp = validatePositiveInt(obj.clientTimestamp, 'clientTimestamp');
+  const txId = uuidSchema.parse(obj['txId']);
+  const authorId = uuidSchema.parse(obj['authorId']);
+  const clientTimestamp = validatePositiveInt(obj['clientTimestamp'], 'clientTimestamp');
 
-  if (!Array.isArray(obj.operations)) {
+  if (!Array.isArray(obj['operations'])) {
     throw new Error('Operations must be an array');
   }
-  if (obj.operations.length < 1) {
+  if (obj['operations'].length < 1) {
     throw new Error('At least one operation is required');
   }
-  const operations = obj.operations.map((op) => operationSchema.parse(op));
+  const operations = obj['operations'].map((op) => operationSchema.parse(op));
 
   return { txId, authorId, operations, clientTimestamp };
 });
@@ -245,13 +246,13 @@ export interface RecordPointer {
 }
 
 export const recordPointerSchema: Schema<RecordPointer> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid record pointer');
   }
   const obj = data as Record<string, unknown>;
   return {
-    table: validateNonEmptyString(obj.table, 'table'),
-    id: uuidSchema.parse(obj.id),
+    table: validateNonEmptyString(obj['table'], 'table'),
+    id: uuidSchema.parse(obj['id']),
   };
 });
 
@@ -269,13 +270,13 @@ export interface RealtimeRecord {
 }
 
 export const recordSchema: Schema<RealtimeRecord> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid record');
   }
   const obj = data as Record<string, unknown>;
 
-  const id = uuidSchema.parse(obj.id);
-  const version = validatePositiveInt(obj.version, 'version');
+  const id = uuidSchema.parse(obj['id']);
+  const version = validatePositiveInt(obj['version'], 'version');
 
   return { ...obj, id, version } as RealtimeRecord;
 });
@@ -286,14 +287,14 @@ export const recordSchema: Schema<RealtimeRecord> = createSchema((data: unknown)
 export type RecordMap = Record<string, Record<string, RealtimeRecord>>;
 
 export const recordMapSchema: Schema<RecordMap> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid record map');
   }
   const result: RecordMap = {};
   const outer = data as Record<string, unknown>;
 
   for (const [table, records] of Object.entries(outer)) {
-    if (!records || typeof records !== 'object') {
+    if (records === null || records === undefined || typeof records !== 'object') {
       throw new Error(`Invalid records for table ${table}`);
     }
     result[table] = {};
@@ -314,12 +315,12 @@ export interface WriteResponse {
 }
 
 export const writeResponseSchema: Schema<WriteResponse> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid write response');
   }
   const obj = data as Record<string, unknown>;
   return {
-    recordMap: recordMapSchema.parse(obj.recordMap),
+    recordMap: recordMapSchema.parse(obj['recordMap']),
   };
 });
 
@@ -328,24 +329,24 @@ export const writeResponseSchema: Schema<WriteResponse> = createSchema((data: un
  */
 export interface ConflictResponse {
   message: string;
-  conflictingRecords?: RecordPointer[];
+  conflictingRecords?: RecordPointer[] | undefined;
 }
 
 export const conflictResponseSchema: Schema<ConflictResponse> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid conflict response');
   }
   const obj = data as Record<string, unknown>;
-  if (typeof obj.message !== 'string') {
+  if (typeof obj['message'] !== 'string') {
     throw new Error('Message must be a string');
   }
 
   let conflictingRecords: RecordPointer[] | undefined;
-  if (Array.isArray(obj.conflictingRecords)) {
-    conflictingRecords = obj.conflictingRecords.map((r) => recordPointerSchema.parse(r));
+  if (Array.isArray(obj['conflictingRecords'])) {
+    conflictingRecords = obj['conflictingRecords'].map((r) => recordPointerSchema.parse(r));
   }
 
-  return { message: obj.message, conflictingRecords };
+  return { message: obj['message'], conflictingRecords };
 });
 
 /**
@@ -357,12 +358,12 @@ export interface GetRecordsResponse {
 
 export const getRecordsResponseSchema: Schema<GetRecordsResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid get records response');
     }
     const obj = data as Record<string, unknown>;
     return {
-      recordMap: recordMapSchema.parse(obj.recordMap),
+      recordMap: recordMapSchema.parse(obj['recordMap']),
     };
   },
 );
@@ -376,21 +377,21 @@ export interface GetRecordsRequest {
 }
 
 export const getRecordsRequestSchema: Schema<GetRecordsRequest> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid get records request');
   }
   const obj = data as Record<string, unknown>;
-  if (!Array.isArray(obj.pointers)) {
+  if (!Array.isArray(obj['pointers'])) {
     throw new Error('Pointers must be an array');
   }
-  if (obj.pointers.length < 1) {
+  if (obj['pointers'].length < 1) {
     throw new Error('At least one pointer is required');
   }
-  if (obj.pointers.length > 100) {
+  if (obj['pointers'].length > 100) {
     throw new Error('Maximum 100 pointers allowed');
   }
   return {
-    pointers: obj.pointers.map((p) => recordPointerSchema.parse(p)),
+    pointers: obj['pointers'].map((p) => recordPointerSchema.parse(p)),
   };
 });
 

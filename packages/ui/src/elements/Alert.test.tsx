@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { Alert } from '../Alert';
+import { Alert } from './Alert';
 
 describe('Alert', () => {
   it('renders with default tone and role', () => {

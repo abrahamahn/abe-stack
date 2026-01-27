@@ -1,10 +1,4 @@
 // apps/server/src/config/factory.ts
-import type {
-    AppConfig,
-    ElasticsearchProviderConfig,
-    FullEnv,
-    SqlSearchProviderConfig,
-} from '@abe-stack/core/config';
 import { EnvSchema, initEnv } from '@abe-stack/core/config';
 
 import { loadAuthConfig, validateAuthConfig } from './auth/auth';
@@ -23,6 +17,11 @@ import {
     validateElasticsearchConfig,
     validateSqlSearchConfig,
 } from './services/search';
+
+import type {
+    AppConfig,
+    FullEnv,
+} from '@abe-stack/core/config';
 
 /**
  * Config Factory
@@ -75,13 +74,16 @@ export function load(rawEnv: Record<string, string | undefined> = process.env): 
     cache: loadCacheConfig(env),
     queue: loadQueueConfig(env),
     notifications: loadNotificationsConfig(env),
-    search: {
-      provider: searchProvider,
-      config:
-        searchProvider === 'elasticsearch'
-          ? loadElasticsearchConfig(env)
-          : loadSqlSearchConfig(env),
-    },
+    search:
+      searchProvider === 'elasticsearch'
+        ? {
+            provider: 'elasticsearch' as const,
+            config: loadElasticsearchConfig(env),
+          }
+        : {
+            provider: 'sql' as const,
+            config: loadSqlSearchConfig(env),
+          },
     packageManager: loadPackageManagerConfig(env),
   };
 
@@ -112,10 +114,10 @@ function validate(config: AppConfig): void {
   // Search Domain - Using clean Type Predicates
   if (config.search.provider === 'elasticsearch') {
     errors.push(
-      ...validateElasticsearchConfig(config.search.config as ElasticsearchProviderConfig),
+      ...validateElasticsearchConfig(config.search.config),
     );
   } else {
-    errors.push(...validateSqlSearchConfig(config.search.config as SqlSearchProviderConfig));
+    errors.push(...validateSqlSearchConfig(config.search.config));
   }
 
   // Notifications Domain

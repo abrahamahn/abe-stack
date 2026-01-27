@@ -584,10 +584,10 @@ describe('LoaderCache', () => {
       const cache = new LoaderCache<string>();
       let fetchCount = 0;
 
-      async function fetchData(key: string): Promise<string> {
+      function fetchData(key: string): Promise<string> {
         const { loader, created } = cache.getOrCreate(key);
 
-        if (created) {
+        if (created === true) {
           fetchCount++;
           // Simulate async fetch
           setTimeout(() => loader.resolve(`data-${key}`), 100);
@@ -612,9 +612,9 @@ describe('loadWithCache', () => {
     const cache = new LoaderCache<string>();
     let loadCount = 0;
 
-    const loader = async () => {
+    const loader = () => {
       loadCount++;
-      return 'data';
+      return Promise.resolve('data');
     };
 
     const result = await loadWithCache(cache, 'key', loader);
@@ -628,9 +628,9 @@ describe('loadWithCache', () => {
     const cache = new LoaderCache<string>();
     let loadCount = 0;
 
-    const loader = async () => {
+    const loader = () => {
       loadCount++;
-      return 'data';
+      return Promise.resolve('data');
     };
 
     await loadWithCache(cache, 'key', loader);
@@ -643,8 +643,8 @@ describe('loadWithCache', () => {
   it('should handle loader errors', async () => {
     const cache = new LoaderCache<string>();
 
-    const loader = async () => {
-      throw new Error('load failed');
+    const loader = () => {
+      return Promise.reject(new Error('load failed'));
     };
 
     await expect(loadWithCache(cache, 'key', loader)).rejects.toThrow('load failed');
@@ -653,13 +653,13 @@ describe('loadWithCache', () => {
   it('should convert non-Error rejections to Error', async () => {
     const cache = new LoaderCache<string>();
 
-    const loader = async (): Promise<string> => {
+    const loader = (): Promise<string> => {
       // Create a non-Error object to test handling of non-standard rejections
       // At runtime this is not instanceof Error, testing the fallback error path
       const nonErrorException = Object.assign(Object.create(null), {
         message: 'string error',
       }) as Error;
-      throw nonErrorException;
+      return Promise.reject(nonErrorException);
     };
 
     await expect(loadWithCache(cache, 'key', loader)).rejects.toThrow('string error');
@@ -668,7 +668,7 @@ describe('loadWithCache', () => {
   it('should pass options to loader', async () => {
     const cache = new LoaderCache<string>({ defaultTtlMs: 60000 });
 
-    await loadWithCache(cache, 'key', async () => 'data', { ttlMs: 5000 });
+    await loadWithCache(cache, 'key', () => Promise.resolve('data'), { ttlMs: 5000 });
 
     const loader = cache.get('key');
     expect(loader?.ttlMs).toBe(5000);

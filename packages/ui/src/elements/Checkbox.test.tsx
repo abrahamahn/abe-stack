@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Checkbox } from '../Checkbox';
+import { Checkbox } from './Checkbox';
 
 describe('Checkbox', () => {
   it('renders with label and toggles on click', async () => {

@@ -1,4 +1,4 @@
-// packages/core/src/infrastructure/pubsub/postgresPubSub.ts
+// packages/core/src/infrastructure/pubsub/postgres-pubsub.ts
 /**
  * PostgreSQL NOTIFY/LISTEN Pub/Sub Adapter
  *
@@ -12,7 +12,7 @@
  * 4. Each instance forwards to its local WebSocket clients
  */
 
-import postgres from 'postgres';
+import postgres, { type Options } from 'postgres';
 
 import type { SubscriptionKey } from './types';
 
@@ -76,20 +76,30 @@ export class PostgresPubSub {
 
     try {
       // Create dedicated LISTEN connection (cannot share with queries)
-      this.listenClient = postgres(this.connectionString, {
+      // Note: postgres library requires snake_case property names per its API
+      const listenOpts: Record<string, unknown> = {
         max: 1,
-        idle_timeout: 0, // Never timeout - keep connection open
-        connect_timeout: 10000,
-        onclose: () => {
-          this.onError(new Error('Postgres PubSub connection closed (attempting reconnection)'));
-        },
-      });
+      };
+      listenOpts['idle_timeout'] = 0; // Never timeout - keep connection open
+      listenOpts['connect_timeout'] = 10000;
+      listenOpts['onclose'] = (): void => {
+        this.onError(new Error('Postgres PubSub connection closed (attempting reconnection)'));
+      };
+      this.listenClient = postgres(
+        this.connectionString,
+        listenOpts as Options<Record<string, never>>,
+      );
 
       // Create separate connection for NOTIFY (can be shared)
-      this.notifyClient = postgres(this.connectionString, {
+      // Note: postgres library requires snake_case property names per its API
+      const notifyOpts: Record<string, unknown> = {
         max: 3,
-        idle_timeout: 30000,
-      });
+      };
+      notifyOpts['idle_timeout'] = 30000;
+      this.notifyClient = postgres(
+        this.connectionString,
+        notifyOpts as Options<Record<string, never>>,
+      );
 
       // Subscribe to channel
       await this.listenClient.listen(this.channel, (payload) => {

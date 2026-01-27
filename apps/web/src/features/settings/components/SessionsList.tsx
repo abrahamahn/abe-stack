@@ -5,9 +5,8 @@
  * Displays list of user sessions with revoke functionality.
  */
 
-import { useState, type ReactElement } from 'react';
-
 import { Alert, Button, Skeleton } from '@abe-stack/ui';
+import { useState, type ReactElement } from 'react';
 
 import { useRevokeAllSessions, useRevokeSession, useSessions } from '../hooks';
 
@@ -25,7 +24,7 @@ export interface SessionsListProps {
 // Component
 // ============================================================================
 
-export function SessionsList({ onRevokeSuccess }: SessionsListProps): ReactElement {
+export const SessionsList = ({ onRevokeSuccess }: SessionsListProps): ReactElement => {
   const [revokingId, setRevokingId] = useState<string | null>(null);
 
   const { sessions, isLoading, isError, error, refetch } = useSessions();
@@ -106,12 +105,12 @@ export function SessionsList({ onRevokeSuccess }: SessionsListProps): ReactEleme
         </Alert>
       )}
 
-      {(revokeError ?? revokeAllError) && (
+      {(revokeError !== null || revokeAllError !== null) && (
         <Alert tone="danger">{revokeError?.message ?? revokeAllError?.message}</Alert>
       )}
 
       {/* Current Session */}
-      {currentSession && <SessionCard session={currentSession} onRevoke={() => {}} />}
+      {currentSession !== undefined && <SessionCard session={currentSession} onRevoke={() => {}} />}
 
       {/* Other Sessions */}
       {otherSessions.length > 0 && (
@@ -151,4 +150,4 @@ export function SessionsList({ onRevokeSuccess }: SessionsListProps): ReactEleme
       )}
     </div>
   );
-}
+};

@@ -26,28 +26,28 @@ export const FILTER_OPERATORS = Object.freeze({
 
   // String operations
   CONTAINS: 'contains',
-  STARTS_WITH: 'startsWith',
-  ENDS_WITH: 'endsWith',
+  StartsWith: 'startsWith',
+  EndsWith: 'endsWith',
   LIKE: 'like',
   ILIKE: 'ilike',
 
   // Array operations
   IN: 'in',
-  NOT_IN: 'notIn',
+  NotIn: 'notIn',
 
   // Null checks
-  IS_NULL: 'isNull',
-  IS_NOT_NULL: 'isNotNull',
+  IsNull: 'isNull',
+  IsNotNull: 'isNotNull',
 
   // Range
   BETWEEN: 'between',
 
   // Array field operations
-  ARRAY_CONTAINS: 'arrayContains',
-  ARRAY_CONTAINS_ANY: 'arrayContainsAny',
+  ArrayContains: 'arrayContains',
+  ArrayContainsAny: 'arrayContainsAny',
 
   // Full-text search
-  FULL_TEXT: 'fullText',
+  FullText: 'fullText',
 } as const);
 
 export type FilterOperator = (typeof FILTER_OPERATORS)[keyof typeof FILTER_OPERATORS];
@@ -95,7 +95,7 @@ export interface FilterCondition<T = Record<string, unknown>> {
   /** Value to compare against */
   value: FilterValue;
   /** Case-insensitive comparison (for string operators) */
-  caseSensitive?: boolean;
+  caseSensitive?: boolean | undefined;
 }
 
 /**
@@ -149,7 +149,7 @@ export interface SortConfig<T = Record<string, unknown>> {
   /** Sort direction */
   order: SortOrder;
   /** Nulls first or last */
-  nulls?: 'first' | 'last';
+  nulls?: 'first' | 'last' | undefined;
 }
 
 // ============================================================================
@@ -163,15 +163,15 @@ export interface FullTextSearchConfig {
   /** Search query string */
   query: string;
   /** Fields to search in (empty = all searchable fields) */
-  fields?: string[];
+  fields?: string[] | undefined;
   /** Fuzzy matching threshold (0-1, lower = more strict) */
-  fuzziness?: number;
+  fuzziness?: number | undefined;
   /** Highlight matching terms in results */
-  highlight?: boolean;
+  highlight?: boolean | undefined;
   /** Prefix length for highlighting */
-  highlightPrefix?: string;
+  highlightPrefix?: string | undefined;
   /** Suffix length for highlighting */
-  highlightSuffix?: string;
+  highlightSuffix?: string | undefined;
 }
 
 // ============================================================================
@@ -183,21 +183,21 @@ export interface FullTextSearchConfig {
  */
 export interface SearchQuery<T = Record<string, unknown>> {
   /** Filter conditions */
-  filters?: FilterCondition<T> | CompoundFilter<T>;
+  filters?: FilterCondition<T> | CompoundFilter<T> | undefined;
   /** Sort configuration (array for multi-sort) */
-  sort?: SortConfig<T>[];
+  sort?: SortConfig<T>[] | undefined;
   /** Full-text search configuration */
-  search?: FullTextSearchConfig;
+  search?: FullTextSearchConfig | undefined;
   /** Pagination: page number (1-indexed) */
-  page?: number;
+  page?: number | undefined;
   /** Pagination: items per page */
-  limit?: number;
+  limit?: number | undefined;
   /** Cursor for cursor-based pagination */
-  cursor?: string;
+  cursor?: string | undefined;
   /** Select specific fields */
-  select?: Array<keyof T | string>;
+  select?: Array<keyof T | string> | undefined;
   /** Include total count in response */
-  includeCount?: boolean;
+  includeCount?: boolean | undefined;
 }
 
 // ============================================================================
@@ -223,9 +223,9 @@ export interface SearchResultItem<T> {
   /** The matched item */
   item: T;
   /** Relevance score (for full-text search) */
-  score?: number;
+  score?: number | undefined;
   /** Highlighted fields (if highlight enabled) */
-  highlights?: HighlightedField[];
+  highlights?: HighlightedField[] | undefined;
 }
 
 /**
@@ -235,7 +235,7 @@ export interface SearchResult<T> {
   /** Result items */
   data: SearchResultItem<T>[];
   /** Total count (if includeCount=true) */
-  total?: number;
+  total?: number | undefined;
   /** Current page */
   page: number;
   /** Items per page */
@@ -245,9 +245,9 @@ export interface SearchResult<T> {
   /** Has previous page */
   hasPrev: boolean;
   /** Total pages (if total is known) */
-  totalPages?: number;
+  totalPages?: number | undefined;
   /** Query execution time in ms */
-  executionTime?: number;
+  executionTime?: number | undefined;
 }
 
 /**
@@ -267,9 +267,9 @@ export interface CursorSearchResult<T> {
   /** Items per page */
   limit: number;
   /** Total count (if includeCount=true) */
-  total?: number;
+  total?: number | undefined;
   /** Query execution time in ms */
-  executionTime?: number;
+  executionTime?: number | undefined;
 }
 
 // ============================================================================
@@ -342,7 +342,7 @@ export interface FacetBucket {
   /** Count of items with this value */
   count: number;
   /** Optional: is this bucket selected in current query */
-  selected?: boolean;
+  selected?: boolean | undefined;
 }
 
 /**
@@ -352,13 +352,13 @@ export interface FacetConfig {
   /** Field to aggregate on */
   field: string;
   /** Maximum number of buckets */
-  size?: number;
+  size?: number | undefined;
   /** Sort buckets by count or value */
-  sortBy?: 'count' | 'value';
+  sortBy?: 'count' | 'value' | undefined;
   /** Sort order for buckets */
-  sortOrder?: SortOrder;
+  sortOrder?: SortOrder | undefined;
   /** Include missing values bucket */
-  includeMissing?: boolean;
+  includeMissing?: boolean | undefined;
 }
 
 /**
@@ -370,7 +370,7 @@ export interface FacetResult {
   /** Buckets with counts */
   buckets: FacetBucket[];
   /** Total unique values */
-  totalUnique?: number;
+  totalUnique?: number | undefined;
 }
 
 /**
@@ -378,7 +378,7 @@ export interface FacetResult {
  */
 export interface FacetedSearchQuery<T = Record<string, unknown>> extends SearchQuery<T> {
   /** Facet configurations */
-  facets?: FacetConfig[];
+  facets?: FacetConfig[] | undefined;
 }
 
 /**
@@ -386,5 +386,5 @@ export interface FacetedSearchQuery<T = Record<string, unknown>> extends SearchQ
  */
 export interface FacetedSearchResult<T> extends SearchResult<T> {
   /** Facet results */
-  facets?: FacetResult[];
+  facets?: FacetResult[] | undefined;
 }

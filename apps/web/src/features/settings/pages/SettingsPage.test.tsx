@@ -1,0 +1,140 @@
+// apps/web/src/features/settings/pages/SettingsPage.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+
+import { SettingsPage } from './SettingsPage';
+
+import type { User } from '../api';
+
+vi.mock('@abe-stack/sdk', () => ({
+  useQuery: vi.fn(),
+}));
+
+vi.mock('../components', () => ({
+  AvatarUpload: () => <div data-testid="avatar-upload">Avatar Upload</div>,
+  OAuthConnectionsList: () => <div data-testid="oauth-connections">OAuth Connections</div>,
+  PasswordChangeForm: () => <div data-testid="password-form">Password Form</div>,
+  ProfileForm: () => <div data-testid="profile-form">Profile Form</div>,
+  SessionsList: () => <div data-testid="sessions-list">Sessions List</div>,
+}));
+
+vi.mock('@abe-stack/ui', () => ({
+  Button: ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => (
+    <button onClick={onClick}>{children}</button>
+  ),
+  Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Container: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Heading: ({ children }: { children: React.ReactNode }) => <h1>{children}</h1>,
+  Tabs: ({ items }: { items: Array<{ id: string; label: string; content: React.ReactNode }> }) => (
+    <div data-testid="tabs">
+      {items.map(item => (
+        <div key={item.id} data-testid={`tab-${item.id}`}>
+          {item.label}
+          {item.content}
+        </div>
+      ))}
+    </div>
+  ),
+}));
+
+import { useQuery } from '@abe-stack/sdk';
+
+describe('SettingsPage', () => {
+  const mockUser: User = {
+    id: 'user-123',
+    email: 'test@example.com',
+    name: 'Test User',
+    avatarUrl: 'https://example.com/avatar.jpg',
+    role: 'user',
+    isVerified: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  beforeEach(() => {
+    Storage.prototype.getItem = vi.fn(() => 'mock-token');
+  });
+
+  describe('loading state', () => {
+    it('should show loading skeleton', () => {
+      vi.mocked(useQuery).mockReturnValue({
+        data: undefined,
+        status: 'pending',
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      render(<SettingsPage />);
+      expect(screen.getByText('Settings')).toBeInTheDocument();
+    });
+  });
+
+  describe('error state', () => {
+    it('should show error message', () => {
+      vi.mocked(useQuery).mockReturnValue({
+        data: undefined,
+        status: 'error',
+        error: new Error('Failed to load'),
+        refetch: vi.fn(),
+      });
+
+      render(<SettingsPage />);
+      expect(screen.getByText(/Unable to Load Settings/)).toBeInTheDocument();
+    });
+
+    it('should allow retry', () => {
+      const mockRefetch = vi.fn();
+      vi.mocked(useQuery).mockReturnValue({
+        data: undefined,
+        status: 'error',
+        error: new Error('Failed'),
+        refetch: mockRefetch,
+      });
+
+      render(<SettingsPage />);
+      fireEvent.click(screen.getByText('Try Again'));
+      expect(mockRefetch).toHaveBeenCalled();
+    });
+  });
+
+  describe('success state', () => {
+    beforeEach(() => {
+      vi.mocked(useQuery).mockReturnValue({
+        data: mockUser,
+        status: 'success',
+        error: null,
+        refetch: vi.fn(),
+      });
+    });
+
+    it('should render all tabs', () => {
+      render(<SettingsPage />);
+      expect(screen.getByTestId('tab-profile')).toBeInTheDocument();
+      expect(screen.getByTestId('tab-security')).toBeInTheDocument();
+      expect(screen.getByTestId('tab-sessions')).toBeInTheDocument();
+      expect(screen.getByTestId('tab-billing')).toBeInTheDocument();
+    });
+
+    it('should render profile tab content', () => {
+      render(<SettingsPage />);
+      expect(screen.getByTestId('avatar-upload')).toBeInTheDocument();
+      expect(screen.getByTestId('profile-form')).toBeInTheDocument();
+    });
+
+    it('should render security tab content', () => {
+      render(<SettingsPage />);
+      expect(screen.getByTestId('password-form')).toBeInTheDocument();
+      expect(screen.getByTestId('oauth-connections')).toBeInTheDocument();
+    });
+
+    it('should render sessions tab content', () => {
+      render(<SettingsPage />);
+      expect(screen.getByTestId('sessions-list')).toBeInTheDocument();
+    });
+
+    it('should render billing tab with link', () => {
+      render(<SettingsPage />);
+      expect(screen.getByText(/Billing page/)).toBeInTheDocument();
+    });
+  });
+});

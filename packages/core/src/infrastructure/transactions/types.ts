@@ -36,7 +36,7 @@ export type ListRemoveOperation = {
   /** Value to remove */
   value: unknown;
   /** Original position index (for inversion) */
-  previousPosition?: number;
+  previousPosition?: number | undefined;
 };
 
 /**

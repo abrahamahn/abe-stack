@@ -15,7 +15,7 @@ export interface DemoTopBarProps {
   onOpenAuthModal: (mode: AuthMode) => void;
 }
 
-export function DemoTopBar({
+export const DemoTopBar = ({
   size,
   visible,
   onResize,
@@ -23,7 +23,7 @@ export function DemoTopBar({
   user,
   onLogout,
   onOpenAuthModal,
-}: DemoTopBarProps): ReactElement {
+}: DemoTopBarProps): ReactElement => {
   const navigate = useNavigate();
   const { toggle, isOpen } = useSidePeek();
 
@@ -119,4 +119,4 @@ export function DemoTopBar({
       </div>
     </ResizablePanel>
   );
-}
+};

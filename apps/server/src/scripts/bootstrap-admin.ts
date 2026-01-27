@@ -22,9 +22,10 @@
 
 import { randomBytes } from 'node:crypto';
 
-import { loadConfig } from '@/config';
 import { buildConnectionString, createDbClient, eq, insert, select, USERS_TABLE } from '@database';
 import { hashPassword } from '@modules/auth/utils/password';
+
+import { loadConfig } from '@/config';
 
 interface BootstrapResult {
   email: string;

@@ -1,7 +1,8 @@
 // apps/server/src/modules/system/handlers.ts
 import { getDetailedHealth } from '@infrastructure/index';
-import type { RouteResult } from '@router';
 import { type AppContext } from '@shared/index';
+
+import type { RouteResult } from '@router';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 /**

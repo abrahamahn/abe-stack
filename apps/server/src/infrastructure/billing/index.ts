@@ -3,10 +3,13 @@
  * Billing Infrastructure
  *
  * Payment provider abstraction and implementations.
+ *
+ * Note: Core billing types (BillingService, CheckoutParams, etc.) should be
+ * imported directly from @abe-stack/core.
  */
 
-// Types
-export type * from './types';
+// Local webhook/setup types
+export type { NormalizedEventType, NormalizedWebhookEvent, SetupIntentResult } from './types';
 
 // Factory
 export { createBillingProvider, isBillingConfigured } from './factory';
@@ -14,4 +17,3 @@ export { createBillingProvider, isBillingConfigured } from './factory';
 // Providers
 export { PayPalProvider } from './paypal-provider';
 export { StripeProvider } from './stripe-provider';
-

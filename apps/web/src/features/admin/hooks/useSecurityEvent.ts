@@ -7,9 +7,8 @@
 
 import { tokenStore } from '@abe-stack/core';
 import { useQuery, type UseQueryResult } from '@abe-stack/sdk';
-import { useMemo } from 'react';
-
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useMemo } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';
 
@@ -55,12 +54,12 @@ export function useSecurityEvent(
   const queryResult: UseQueryResult<SecurityEvent> = useQuery({
     queryKey,
     queryFn: async () => {
-      if (!id) {
+      if (id === undefined || id.length === 0) {
         throw new Error('Event ID is required');
       }
       return adminApi.getSecurityEvent(id);
     },
-    enabled: !!id && options.enabled !== false,
+    enabled: id !== undefined && id.length > 0 && options.enabled !== false,
   });
 
   return {

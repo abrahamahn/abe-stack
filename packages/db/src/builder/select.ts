@@ -95,7 +95,7 @@ export class SelectBuilder implements QueryBuilder {
 
     // If an explicit alias is provided, strip any existing alias from the expression text
     let cleanExpr = expr;
-    if (alias && exprAlias) {
+    if (alias !== undefined && alias !== '' && exprAlias !== undefined && exprAlias !== '') {
       // Remove the " AS alias" suffix from the expression text
       const aliasPattern = new RegExp(` AS ${escapeIdentifier(exprAlias)}$`);
       cleanExpr = {
@@ -104,7 +104,12 @@ export class SelectBuilder implements QueryBuilder {
       };
     }
 
-    this._computedColumns.push({ expr: cleanExpr, alias: alias ?? exprAlias });
+    const computedCol: ComputedColumn = { expr: cleanExpr };
+    const finalAlias = alias ?? exprAlias;
+    if (finalAlias !== undefined) {
+      computedCol.alias = finalAlias;
+    }
+    this._computedColumns.push(computedCol);
     return this;
   }
 
@@ -222,7 +227,11 @@ export class SelectBuilder implements QueryBuilder {
    * @example select('users').orderBy('created_at', 'desc')
    */
   orderBy(column: string, direction: SortDirection = 'asc', nulls?: 'first' | 'last'): this {
-    this._orderBy.push({ column, direction, nulls });
+    const sortSpec: SortSpec = { column, direction };
+    if (nulls !== undefined) {
+      sortSpec.nulls = nulls;
+    }
+    this._orderBy.push(sortSpec);
     return this;
   }
 
@@ -351,7 +360,7 @@ export class SelectBuilder implements QueryBuilder {
         );
       }
 
-      if (computed.alias) {
+      if (computed.alias !== undefined && computed.alias !== '') {
         columnParts.push(`${exprText} AS ${escapeIdentifier(computed.alias)}`);
       } else {
         columnParts.push(exprText);
@@ -378,7 +387,7 @@ export class SelectBuilder implements QueryBuilder {
     }
 
     // WHERE
-    if (this._where && this._where.text) {
+    if (this._where !== null && this._where.text !== '') {
       parts.push({ text: `WHERE ${this._where.text}`, values: [...this._where.values] });
     }
 
@@ -389,7 +398,7 @@ export class SelectBuilder implements QueryBuilder {
     }
 
     // HAVING
-    if (this._having && this._having.text) {
+    if (this._having !== null && this._having.text !== '') {
       parts.push({ text: `HAVING ${this._having.text}`, values: [...this._having.values] });
     }
 
@@ -408,7 +417,7 @@ export class SelectBuilder implements QueryBuilder {
     if (this._orderBy.length > 0) {
       const orderClauses = this._orderBy.map((spec) => {
         let clause = `${escapeIdentifier(spec.column)} ${spec.direction.toUpperCase()}`;
-        if (spec.nulls) {
+        if (spec.nulls !== undefined) {
           clause += ` NULLS ${spec.nulls.toUpperCase()}`;
         }
         return clause;

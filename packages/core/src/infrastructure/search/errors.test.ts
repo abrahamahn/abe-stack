@@ -1,7 +1,8 @@
 // packages/core/src/infrastructure/search/errors.test.ts
 import { describe, expect, test } from 'vitest';
 
-import { AppError } from './../../infrastructure/errors';
+import { AppError } from '../errors/index';
+
 import {
   InvalidCursorError,
   InvalidFieldError,
@@ -27,21 +28,21 @@ import {
 describe('search errors', () => {
   describe('SearchError', () => {
     test('should have correct properties', () => {
-      const error = new SearchError('Test error', SEARCH_ERROR_TYPES.INVALID_QUERY);
+      const error = new SearchError('Test error', SEARCH_ERROR_TYPES.InvalidQuery);
 
       expect(error.message).toBe('Test error');
-      expect(error.errorType).toBe(SEARCH_ERROR_TYPES.INVALID_QUERY);
+      expect(error.errorType).toBe(SEARCH_ERROR_TYPES.InvalidQuery);
       expect(error.statusCode).toBe(400);
       expect(error.name).toBe('SearchError');
     });
 
     test('should extend AppError', () => {
-      const error = new SearchError('Test', SEARCH_ERROR_TYPES.INVALID_QUERY);
+      const error = new SearchError('Test', SEARCH_ERROR_TYPES.InvalidQuery);
       expect(error).toBeInstanceOf(AppError);
     });
 
     test('should accept custom status code and details', () => {
-      const error = new SearchError('Server error', SEARCH_ERROR_TYPES.PROVIDER_ERROR, 500, {
+      const error = new SearchError('Server error', SEARCH_ERROR_TYPES.ProviderError, 500, {
         additional: 'info',
       });
 
@@ -55,7 +56,7 @@ describe('search errors', () => {
       const error = new InvalidQueryError();
 
       expect(error.message).toBe('Invalid search query');
-      expect(error.errorType).toBe(SEARCH_ERROR_TYPES.INVALID_QUERY);
+      expect(error.errorType).toBe(SEARCH_ERROR_TYPES.InvalidQuery);
       expect(error.statusCode).toBe(400);
       expect(error.name).toBe('InvalidQueryError');
     });
@@ -73,7 +74,7 @@ describe('search errors', () => {
       const error = new InvalidFilterError();
 
       expect(error.message).toBe('Invalid filter condition');
-      expect(error.errorType).toBe(SEARCH_ERROR_TYPES.INVALID_FILTER);
+      expect(error.errorType).toBe(SEARCH_ERROR_TYPES.InvalidFilter);
       expect(error.name).toBe('InvalidFilterError');
     });
 
@@ -91,7 +92,7 @@ describe('search errors', () => {
       const error = new InvalidOperatorError('foobar');
 
       expect(error.message).toBe('Unknown filter operator: foobar');
-      expect(error.errorType).toBe(SEARCH_ERROR_TYPES.INVALID_OPERATOR);
+      expect(error.errorType).toBe(SEARCH_ERROR_TYPES.InvalidOperator);
       expect(error.name).toBe('InvalidOperatorError');
     });
 
@@ -110,7 +111,7 @@ describe('search errors', () => {
       const error = new InvalidFieldError('unknownField');
 
       expect(error.message).toBe('Invalid field: unknownField');
-      expect(error.errorType).toBe(SEARCH_ERROR_TYPES.INVALID_FIELD);
+      expect(error.errorType).toBe(SEARCH_ERROR_TYPES.InvalidField);
       expect(error.name).toBe('InvalidFieldError');
     });
 
@@ -129,7 +130,7 @@ describe('search errors', () => {
       const error = new InvalidSortError();
 
       expect(error.message).toBe('Invalid sort configuration');
-      expect(error.errorType).toBe(SEARCH_ERROR_TYPES.INVALID_SORT);
+      expect(error.errorType).toBe(SEARCH_ERROR_TYPES.InvalidSort);
       expect(error.name).toBe('InvalidSortError');
     });
   });
@@ -149,7 +150,7 @@ describe('search errors', () => {
       const error = new InvalidCursorError();
 
       expect(error.message).toBe('Invalid or expired cursor');
-      expect(error.errorType).toBe(SEARCH_ERROR_TYPES.INVALID_CURSOR);
+      expect(error.errorType).toBe(SEARCH_ERROR_TYPES.InvalidCursor);
       expect(error.name).toBe('InvalidCursorError');
     });
   });
@@ -182,7 +183,7 @@ describe('search errors', () => {
       const error = new UnsupportedOperatorError('fullText', 'sql', ['eq', 'neq', 'gt']);
 
       expect(error.message).toBe("Operator 'fullText' is not supported by provider 'sql'");
-      expect(error.errorType).toBe(SEARCH_ERROR_TYPES.UNSUPPORTED_OPERATOR);
+      expect(error.errorType).toBe(SEARCH_ERROR_TYPES.UnsupportedOperator);
       expect(error.details).toEqual({
         operator: 'fullText',
         providerName: 'sql',
@@ -199,7 +200,7 @@ describe('search errors', () => {
       expect(error.message).toBe('Too many conditions');
       expect(error.maxDepth).toBe(5);
       expect(error.maxConditions).toBe(100);
-      expect(error.errorType).toBe(SEARCH_ERROR_TYPES.QUERY_TOO_COMPLEX);
+      expect(error.errorType).toBe(SEARCH_ERROR_TYPES.QueryTooComplex);
       expect(error.name).toBe('QueryTooComplexError');
     });
   });
@@ -217,7 +218,7 @@ describe('search errors', () => {
 
   describe('type guards', () => {
     test('isSearchError should identify SearchError', () => {
-      const searchError = new SearchError('Test', SEARCH_ERROR_TYPES.INVALID_QUERY);
+      const searchError = new SearchError('Test', SEARCH_ERROR_TYPES.InvalidQuery);
       const appError = new AppError('Test', 400);
       const regularError = new Error('Test');
 
@@ -239,14 +240,14 @@ describe('search errors', () => {
 
     test('isSearchProviderError should identify SearchProviderError', () => {
       expect(isSearchProviderError(new SearchProviderError('Test', 'sql'))).toBe(true);
-      expect(
-        isSearchProviderError(new SearchError('Test', SEARCH_ERROR_TYPES.PROVIDER_ERROR)),
-      ).toBe(false);
+      expect(isSearchProviderError(new SearchError('Test', SEARCH_ERROR_TYPES.ProviderError))).toBe(
+        false,
+      );
     });
 
     test('isSearchTimeoutError should identify SearchTimeoutError', () => {
       expect(isSearchTimeoutError(new SearchTimeoutError(1000))).toBe(true);
-      expect(isSearchTimeoutError(new SearchError('Test', SEARCH_ERROR_TYPES.SEARCH_TIMEOUT))).toBe(
+      expect(isSearchTimeoutError(new SearchError('Test', SEARCH_ERROR_TYPES.SearchTimeout))).toBe(
         false,
       );
     });

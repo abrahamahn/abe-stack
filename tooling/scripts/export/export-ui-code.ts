@@ -20,12 +20,14 @@ interface ExportOptions {
  */
 async function main(): Promise<void> {
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
-  const repoRoot = path.resolve(__dirname, '..', '..'); // Go up two levels: tools/dev -> tools -> root
+  const repoRoot = path.resolve(__dirname, '..', '..', '..'); // Go up three levels: tooling/scripts/export -> tooling/scripts -> tooling -> root
 
   // Parse command line arguments
   const options = parseArgs(process.argv.slice(2));
 
-  const outputFile = path.resolve(repoRoot, 'ui_code.txt');
+  const outputDir = path.resolve(repoRoot, '.tmp');
+  await fs.mkdir(outputDir, { recursive: true });
+  const outputFile = path.resolve(outputDir, 'ui_code.txt');
   const files: string[] = [];
 
   if (options.includePaths.length > 0) {

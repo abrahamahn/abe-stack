@@ -19,7 +19,11 @@ export function getUserStatus(user: AdminUser): UserStatus {
   const now = new Date();
 
   // Check if locked
-  if (user.lockedUntil && new Date(user.lockedUntil) > now) {
+  if (
+    user.lockedUntil !== null &&
+    user.lockedUntil.length > 0 &&
+    new Date(user.lockedUntil) > now
+  ) {
     return 'locked';
   }
 
@@ -57,10 +61,10 @@ function getStatusLabel(status: UserStatus): string {
   }
 }
 
-export function StatusBadge({ status }: StatusBadgeProps): JSX.Element {
+export const StatusBadge = ({ status }: StatusBadgeProps): JSX.Element => {
   return (
     <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusStyles(status)}`}>
       {getStatusLabel(status)}
     </span>
   );
-}
+};

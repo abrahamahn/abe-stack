@@ -3,18 +3,18 @@
 import { act, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { useWindowSize } from '../useWindowSize';
+import { useWindowSize } from './useWindowSize';
 
 import type { ReactElement } from 'react';
 
-function WindowSizeHarness(): ReactElement {
+const WindowSizeHarness = (): ReactElement => {
   const { width, height } = useWindowSize();
   return (
     <span data-testid="size">
       {width}x{height}
     </span>
   );
-}
+};
 
 describe('useWindowSize', () => {
   it('updates after debounced resize events', () => {

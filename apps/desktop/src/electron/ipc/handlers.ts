@@ -1,8 +1,10 @@
 // apps/desktop/src/electron/ipc/handlers.ts
 import { app, dialog, ipcMain, Notification } from 'electron';
 
-import type { BrowserWindow } from 'electron';
+import { IPC_CHANNELS } from '../types';
+
 import type { OpenDialogOptions, SaveDialogOptions } from '../types';
+import type { BrowserWindow } from 'electron';
 
 /**
  * Registers all IPC handlers for communication between main and renderer processes.
@@ -12,12 +14,12 @@ import type { OpenDialogOptions, SaveDialogOptions } from '../types';
  */
 export function registerIPCHandlers(getMainWindow: () => BrowserWindow | null): void {
   // Get application version
-  ipcMain.handle('get-app-version', () => {
+  ipcMain.handle(IPC_CHANNELS.getAppVersion, () => {
     return app.getVersion();
   });
 
   // Show native open file dialog
-  ipcMain.handle('show-open-dialog', async (_event, options: OpenDialogOptions) => {
+  ipcMain.handle(IPC_CHANNELS.showOpenDialog, async (_event, options: OpenDialogOptions) => {
     const mainWindow = getMainWindow();
     if (mainWindow === null) return null;
 
@@ -31,7 +33,7 @@ export function registerIPCHandlers(getMainWindow: () => BrowserWindow | null): 
   });
 
   // Show native save file dialog
-  ipcMain.handle('show-save-dialog', async (_event, options: SaveDialogOptions) => {
+  ipcMain.handle(IPC_CHANNELS.showSaveDialog, async (_event, options: SaveDialogOptions) => {
     const mainWindow = getMainWindow();
     if (mainWindow === null) return null;
 

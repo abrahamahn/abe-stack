@@ -11,10 +11,10 @@ import '../styles/elements.css';
  * <Spinner size="24px" />
  * ```
  */
-export function Spinner(props: {
+export const Spinner = (props: {
   /** Size of the spinner (CSS value) */
   size?: string;
-}): ReactElement {
+}): ReactElement => {
   const size = props.size ?? 'var(--ui-gap-lg)';
-  return <span className="spinner" style={{ '--ui-spinner-size': size } as CSSProperties} />;
-}
+  return <span className="spinner" style={{ ['--ui-spinner-size']: size } as CSSProperties} />;
+};

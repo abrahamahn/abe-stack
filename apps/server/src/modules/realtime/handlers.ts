@@ -6,8 +6,8 @@
  * Implements write and getRecords endpoints with optimistic locking.
  */
 
+import { SubKeys } from '@abe-stack/core/pubsub';
 import { withTransaction } from '@database';
-import { SubKeys } from '@infrastructure/index';
 
 import {
     applyOperations,

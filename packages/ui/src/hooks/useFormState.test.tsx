@@ -3,7 +3,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { useFormState } from '../useFormState';
+import { useFormState } from './useFormState';
 
 describe('useFormState', () => {
   describe('initial state', () => {

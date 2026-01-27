@@ -5,8 +5,8 @@
  * Filter controls for security events list.
  */
 
-import { Button, Input, Select } from '@abe-stack/ui';
 import { SECURITY_EVENT_TYPES, SECURITY_SEVERITIES } from '@abe-stack/core';
+import { Button, Input, Select } from '@abe-stack/ui';
 import { useCallback, useState } from 'react';
 
 import type { SecurityEventsFilter } from '@abe-stack/core';
@@ -25,16 +25,16 @@ export interface SecurityEventsFiltersProps {
 // Component
 // ============================================================================
 
-export function SecurityEventsFilters({
+export const SecurityEventsFilters = ({
   filter,
   onFilterChange,
-}: SecurityEventsFiltersProps): JSX.Element {
+}: SecurityEventsFiltersProps): JSX.Element => {
   const [localFilter, setLocalFilter] = useState<SecurityEventsFilter>(filter);
 
   const handleInputChange = useCallback((field: keyof SecurityEventsFilter, value: string) => {
     setLocalFilter((prev) => ({
       ...prev,
-      [field]: value || undefined,
+      [field]: value !== '' ? value : undefined,
     }));
   }, []);
 
@@ -180,4 +180,4 @@ export function SecurityEventsFilters({
       </div>
     </div>
   );
-}
+};

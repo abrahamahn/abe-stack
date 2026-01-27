@@ -41,10 +41,10 @@ describe('JWT Integration', () => {
       const token = sign(payload, SECRET, { expiresIn: '15m' });
       const verified = verify(token, SECRET);
 
-      expect(verified.userId).toBe('user-123-abc');
-      expect(verified.email).toBe('john@example.com');
-      expect(verified.role).toBe('user');
-      expect(verified.permissions).toEqual(['read:profile', 'write:profile']);
+      expect(verified['userId']).toBe('user-123-abc');
+      expect(verified['email']).toBe('john@example.com');
+      expect(verified['role']).toBe('user');
+      expect(verified['permissions']).toEqual(['read:profile', 'write:profile']);
     });
 
     it('should include issued at and expiration claims', () => {
@@ -121,22 +121,22 @@ describe('JWT Integration', () => {
 
       // Verify original and issue new token
       const verified = verify(token1, REFRESH_SECRET);
-      expect(verified.version).toBe(1);
+      expect(verified['version']).toBe(1);
 
       // Issue rotated token with incremented version
       const token2 = sign(
         {
-          userId: verified.userId,
-          tokenFamily: verified.tokenFamily,
-          version: (verified.version as number) + 1,
+          userId: verified['userId'],
+          tokenFamily: verified['tokenFamily'],
+          version: (verified['version'] as number) + 1,
         },
         REFRESH_SECRET,
         { expiresIn: '7d' },
       );
 
       const verified2 = verify(token2, REFRESH_SECRET);
-      expect(verified2.version).toBe(2);
-      expect(verified2.tokenFamily).toBe('fam-1');
+      expect(verified2['version']).toBe(2);
+      expect(verified2['tokenFamily']).toBe('fam-1');
     });
   });
 
@@ -207,8 +207,8 @@ describe('JWT Integration', () => {
       const token = sign({ userId: '123', data: 'test' }, SECRET);
       const decoded = decode(token);
 
-      expect(decoded?.userId).toBe('123');
-      expect(decoded?.data).toBe('test');
+      expect(decoded?.['userId']).toBe('123');
+      expect(decoded?.['data']).toBe('test');
     });
 
     it('should decode even with wrong secret', () => {
@@ -216,7 +216,7 @@ describe('JWT Integration', () => {
       const decoded = decode(token);
 
       // decode() doesn't verify, so it should work
-      expect(decoded?.userId).toBe('123');
+      expect(decoded?.['userId']).toBe('123');
     });
 
     it('should return null for invalid tokens', () => {
@@ -339,11 +339,11 @@ describe('JWT Integration', () => {
 
       // Verify access token on API request
       const accessPayload = verify(accessToken, SECRET);
-      expect(accessPayload.userId).toBe(userId);
+      expect(accessPayload['userId']).toBe(userId);
 
       // Verify refresh token is valid
       const refreshPayload = verify(refreshToken, REFRESH_SECRET);
-      expect(refreshPayload.userId).toBe(userId);
+      expect(refreshPayload['userId']).toBe(userId);
     });
 
     it('should handle token refresh flow', () => {
@@ -359,14 +359,14 @@ describe('JWT Integration', () => {
 
       // Use refresh token to get new access token
       const refreshPayload = verify(refreshToken, REFRESH_SECRET);
-      expect(refreshPayload.userId).toBe(userId);
+      expect(refreshPayload['userId']).toBe(userId);
 
       // Issue new access token
-      const newAccessToken = sign({ userId: refreshPayload.userId }, SECRET, { expiresIn: '15m' });
+      const newAccessToken = sign({ userId: refreshPayload['userId'] }, SECRET, { expiresIn: '15m' });
 
       // New access token should be valid
       const newAccessPayload = verify(newAccessToken, SECRET);
-      expect(newAccessPayload.userId).toBe(userId);
+      expect(newAccessPayload['userId']).toBe(userId);
     });
 
     it('should handle logout and token invalidation', () => {
@@ -382,13 +382,13 @@ describe('JWT Integration', () => {
       const decoded = decode(accessToken);
 
       // Server would check: decoded.tokenVersion >= storedVersion
-      expect(decoded?.tokenVersion).toBe(tokenVersion);
+      expect(decoded?.['tokenVersion']).toBe(tokenVersion);
 
       // After logout, server increments stored version
       const newStoredVersion = 2;
 
       // Old token's version is now invalid
-      expect(decoded?.tokenVersion).toBeLessThan(newStoredVersion);
+      expect(decoded?.['tokenVersion']).toBeLessThan(newStoredVersion);
     });
 
     it('should handle admin vs user permissions', () => {
@@ -405,11 +405,11 @@ describe('JWT Integration', () => {
       const userPayload = verify(userToken, SECRET);
       const adminPayload = verify(adminToken, SECRET);
 
-      expect(userPayload.role).toBe('user');
-      expect((userPayload.permissions as string[]).includes('delete')).toBe(false);
+      expect(userPayload['role']).toBe('user');
+      expect((userPayload['permissions'] as string[]).includes('delete')).toBe(false);
 
-      expect(adminPayload.role).toBe('admin');
-      expect((adminPayload.permissions as string[]).includes('delete')).toBe(true);
+      expect(adminPayload['role']).toBe('admin');
+      expect((adminPayload['permissions'] as string[]).includes('delete')).toBe(true);
     });
   });
 
@@ -432,8 +432,8 @@ describe('JWT Integration', () => {
       const token = sign(payload, SECRET);
       const verified = verify(token, SECRET);
 
-      expect(verified.message).toBe(payload.message);
-      expect(verified.unicode).toBe(payload.unicode);
+      expect(verified['message']).toBe(payload.message);
+      expect(verified['unicode']).toBe(payload.unicode);
     });
 
     it('should handle nested payload objects', () => {
@@ -452,7 +452,7 @@ describe('JWT Integration', () => {
       const token = sign(payload, SECRET);
       const verified = verify(token, SECRET);
 
-      expect(verified.user).toEqual(payload.user);
+      expect(verified['user']).toEqual(payload.user);
     });
 
     it('should handle array values in payload', () => {
@@ -465,9 +465,9 @@ describe('JWT Integration', () => {
       const token = sign(payload, SECRET);
       const verified = verify(token, SECRET);
 
-      expect(verified.roles).toEqual(payload.roles);
-      expect(verified.permissions).toEqual(payload.permissions);
-      expect(verified.numbers).toEqual(payload.numbers);
+      expect(verified['roles']).toEqual(payload.roles);
+      expect(verified['permissions']).toEqual(payload.permissions);
+      expect(verified['numbers']).toEqual(payload.numbers);
     });
   });
 });

@@ -26,45 +26,45 @@ type ResizablePanelProps = ComponentPropsWithoutRef<'div'> & {
    * Controlled size as percentage (0-100) or pixels
    * When provided, component is controlled
    */
-  size?: number;
+  size?: number | undefined;
   /**
    * Default size as percentage (0-100) or pixels (uncontrolled mode)
    * @default 50
    */
-  defaultSize?: number;
+  defaultSize?: number | undefined;
   /**
    * Minimum size as percentage (0-100) or pixels
    * @default 10
    */
-  minSize?: number;
+  minSize?: number | undefined;
   /**
    * Maximum size as percentage (0-100) or pixels
    * @default 90
    */
-  maxSize?: number;
+  maxSize?: number | undefined;
   /**
    * Unit for size values ('%' or 'px')
    * @default '%'
    */
-  unit?: '%' | 'px';
+  unit?: '%' | 'px' | undefined;
   /**
    * Whether the panel is collapsed
    */
-  collapsed?: boolean;
+  collapsed?: boolean | undefined;
   /**
    * Resize direction
    * @default 'horizontal'
    */
-  direction?: 'horizontal' | 'vertical';
+  direction?: 'horizontal' | 'vertical' | undefined;
   /**
    * Reverse the resize delta direction
    * @default false
    */
-  invertResize?: boolean;
+  invertResize?: boolean | undefined;
   /**
    * Callback when panel size changes
    */
-  onResize?: (size: number) => void;
+  onResize?: ((size: number) => void) | undefined;
 };
 
 type ResizablePanelGroupProps = ComponentPropsWithoutRef<'div'> & {
@@ -76,27 +76,27 @@ type ResizablePanelGroupProps = ComponentPropsWithoutRef<'div'> & {
    * Layout direction
    * @default 'horizontal'
    */
-  direction?: 'horizontal' | 'vertical';
+  direction?: 'horizontal' | 'vertical' | undefined;
   /**
    * Reverse the panel order (row-reverse or column-reverse)
    * @default false
    */
-  reverse?: boolean;
+  reverse?: boolean | undefined;
 };
 
 type ResizableSeparatorProps = ComponentPropsWithoutRef<'div'> & {
   /**
    * Direction of resize
    */
-  direction?: 'horizontal' | 'vertical';
+  direction?: 'horizontal' | 'vertical' | undefined;
   /**
    * Handler callback for resize delta (mouse drag)
    */
-  onResize?: (delta: number) => void;
+  onResize?: ((delta: number) => void) | undefined;
   /**
    * Handler callback for direct size setting (keyboard)
    */
-  onSizeChange?: (size: number) => void;
+  onSizeChange?: ((size: number) => void) | undefined;
   /**
    * Callback when drag starts
    */
@@ -124,7 +124,7 @@ type ResizableSeparatorProps = ComponentPropsWithoutRef<'div'> & {
   /**
    * Accessible label for the separator
    */
-  'aria-label'?: string;
+  ['aria-label']?: string;
 };
 
 /**

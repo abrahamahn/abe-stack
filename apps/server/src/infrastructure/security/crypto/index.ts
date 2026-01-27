@@ -2,20 +2,11 @@
 /**
  * Cryptographic Infrastructure
  *
- * Re-exports from @abe-stack/core/crypto with server-specific naming.
- * Includes JWT rotation support for secret key rotation.
+ * JWT rotation support for secret key rotation.
+ *
+ * Note: Base JWT functions (sign, verify, decode, JwtError) should be
+ * imported directly from @abe-stack/core/crypto
  */
-
-export {
-  sign as jwtSign,
-  verify as jwtVerify,
-  decode as jwtDecode,
-  JwtError,
-  type JwtErrorCode,
-  type JwtHeader,
-  type JwtPayload,
-  type SignOptions as JwtSignOptions,
-} from '@abe-stack/core/crypto';
 
 // JWT Rotation Support
 export {

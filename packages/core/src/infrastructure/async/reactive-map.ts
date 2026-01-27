@@ -1,4 +1,4 @@
-// packages/core/src/infrastructure/async/ReactiveMap.ts
+// packages/core/src/infrastructure/async/reactive-map.ts
 
 /**
  * An observable key-value store with subscription support.

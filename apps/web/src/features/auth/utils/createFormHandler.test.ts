@@ -1,8 +1,10 @@
 // apps/web/src/features/auth/utils/__tests__/createFormHandler.test.ts
 import { describe, expect, test, vi, beforeEach } from 'vitest';
+
+import { createFormHandler } from './createFormHandler';
+
 import type { Mock } from 'vitest';
 
-import { createFormHandler } from '../createFormHandler';
 
 describe('createFormHandler', () => {
   let mockSubmitFn: Mock;
@@ -143,7 +145,7 @@ describe('createFormHandler', () => {
     mockSubmitFn.mockImplementation(
       (data: { email: string }) =>
         new Promise((resolve) => {
-          setTimeout(() => resolve({ success: true, data }), 10);
+          setTimeout(() => { resolve({ success: true, data }); }, 10);
         }),
     );
 

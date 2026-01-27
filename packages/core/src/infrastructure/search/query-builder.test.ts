@@ -77,8 +77,8 @@ describe('SearchQueryBuilder', () => {
         operator: LOGICAL_OPERATORS.AND,
         conditions: expect.arrayContaining([
           expect.objectContaining({ field: 'name', operator: FILTER_OPERATORS.CONTAINS }),
-          expect.objectContaining({ field: 'email', operator: FILTER_OPERATORS.STARTS_WITH }),
-          expect.objectContaining({ field: 'email', operator: FILTER_OPERATORS.ENDS_WITH }),
+          expect.objectContaining({ field: 'email', operator: FILTER_OPERATORS.StartsWith }),
+          expect.objectContaining({ field: 'email', operator: FILTER_OPERATORS.EndsWith }),
         ]),
       });
     });
@@ -114,7 +114,7 @@ describe('SearchQueryBuilder', () => {
           }),
           expect.objectContaining({
             field: 'id',
-            operator: FILTER_OPERATORS.NOT_IN,
+            operator: FILTER_OPERATORS.NotIn,
             value: ['1', '2', '3'],
           }),
         ],
@@ -130,8 +130,8 @@ describe('SearchQueryBuilder', () => {
       expect(query.filters).toMatchObject({
         operator: LOGICAL_OPERATORS.AND,
         conditions: [
-          expect.objectContaining({ field: 'email', operator: FILTER_OPERATORS.IS_NULL }),
-          expect.objectContaining({ field: 'name', operator: FILTER_OPERATORS.IS_NOT_NULL }),
+          expect.objectContaining({ field: 'email', operator: FILTER_OPERATORS.IsNull }),
+          expect.objectContaining({ field: 'name', operator: FILTER_OPERATORS.IsNotNull }),
         ],
       });
     });
@@ -155,8 +155,8 @@ describe('SearchQueryBuilder', () => {
       expect(query.filters).toMatchObject({
         operator: LOGICAL_OPERATORS.AND,
         conditions: [
-          expect.objectContaining({ field: 'tags', operator: FILTER_OPERATORS.ARRAY_CONTAINS }),
-          expect.objectContaining({ field: 'tags', operator: FILTER_OPERATORS.ARRAY_CONTAINS_ANY }),
+          expect.objectContaining({ field: 'tags', operator: FILTER_OPERATORS.ArrayContains }),
+          expect.objectContaining({ field: 'tags', operator: FILTER_OPERATORS.ArrayContainsAny }),
         ],
       });
     });

@@ -1,7 +1,7 @@
 // packages/media/src/__tests__/ffmpeg-wrapper.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
-import type { FFmpegOptions, FFmpegResult, MediaMetadataResult } from '../ffmpeg-wrapper';
+import type { FFmpegOptions, FFmpegResult, MediaMetadataResult } from './ffmpeg-wrapper';
 
 // Mock child_process and fs
 vi.mock('child_process', () => ({
@@ -104,6 +104,7 @@ describe('FFmpeg Wrapper Types', () => {
     it('should represent failure result', () => {
       const result: FFmpegResult = {
         success: false,
+        output: '',
         error: 'FFmpeg not found',
       };
 
@@ -114,6 +115,7 @@ describe('FFmpeg Wrapper Types', () => {
     it('should include duration', () => {
       const result: FFmpegResult = {
         success: true,
+        output: '',
         duration: 120.5,
       };
 

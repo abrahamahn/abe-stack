@@ -3,7 +3,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { MenuItem } from '../MenuItem';
+import { MenuItem } from './MenuItem';
 
 describe('MenuItem', () => {
   it('renders a button with default type="button"', () => {

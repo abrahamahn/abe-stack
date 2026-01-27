@@ -94,7 +94,7 @@ export function detectFileType(buffer: Buffer): FileTypeResult | null {
 export function detectFileTypeFromPath(filePath: string): FileTypeResult | null {
   const ext = filePath.split('.').pop()?.toLowerCase();
 
-  if (!ext) return null;
+  if (ext === undefined || ext.length === 0) return null;
 
   // Extension to MIME type mapping
   const extToMime: Record<string, string> = {
@@ -131,7 +131,7 @@ export function detectFileTypeFromPath(filePath: string): FileTypeResult | null 
   };
 
   const mime = extToMime[ext];
-  if (mime) {
+  if (mime !== undefined && mime.length > 0) {
     return { ext, mime };
   }
 
@@ -150,7 +150,7 @@ export async function detectFileTypeFromFile(filePath: string): Promise<FileType
 
     // Try magic byte detection first
     const result = detectFileType(buffer);
-    if (result) return result;
+    if (result !== null) return result;
 
     // Fall back to extension-based detection
     return detectFileTypeFromPath(filePath);
@@ -166,7 +166,7 @@ export function isAllowedFileType(
   fileType: FileTypeResult | null,
   allowedTypes: string[],
 ): boolean {
-  if (!fileType) return false;
+  if (fileType === null) return false;
   const mimeCategory = fileType.mime.split('/')[0] ?? '';
   return allowedTypes.includes(fileType.mime) || allowedTypes.includes(`${mimeCategory}/*`);
 }

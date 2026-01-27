@@ -37,11 +37,11 @@ interface UserData {
   bio: string;
 }
 
-function CreateUserModal({
+const CreateUserModal = ({
   onSubmit,
 }: {
   onSubmit: (data: UserData) => Promise<void>;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { open, openFn, close } = useDisclosure({ defaultOpen: false });
   const { isLoading, error, wrapHandler, clearError } = useFormState();
   const [formData, setFormData] = useState<UserData>({
@@ -122,33 +122,54 @@ function CreateUserModal({
             </Alert>
           )}
 
-          <FormField label="Name" htmlFor="modal-name" error={fieldErrors.name} required>
+          <FormField
+            label="Name"
+            htmlFor="modal-name"
+            {...(fieldErrors.name !== undefined && { error: fieldErrors.name })}
+            required
+          >
             <Input
               id="modal-name"
               data-testid="modal-name"
               value={formData.name}
-              onChange={(e) => { handleChange('name', e.target.value); }}
+              onChange={(e) => {
+                handleChange('name', e.target.value);
+              }}
               disabled={isLoading}
             />
           </FormField>
 
-          <FormField label="Email" htmlFor="modal-email" error={fieldErrors.email} required>
+          <FormField
+            label="Email"
+            htmlFor="modal-email"
+            {...(fieldErrors.email !== undefined && { error: fieldErrors.email })}
+            required
+          >
             <Input
               id="modal-email"
               data-testid="modal-email"
               type="email"
               value={formData.email}
-              onChange={(e) => { handleChange('email', e.target.value); }}
+              onChange={(e) => {
+                handleChange('email', e.target.value);
+              }}
               disabled={isLoading}
             />
           </FormField>
 
-          <FormField label="Role" htmlFor="modal-role" error={fieldErrors.role} required>
+          <FormField
+            label="Role"
+            htmlFor="modal-role"
+            {...(fieldErrors.role !== undefined && { error: fieldErrors.role })}
+            required
+          >
             <Select
               id="modal-role"
               data-testid="modal-role"
               value={formData.role}
-              onChange={(value) => { handleChange('role', value); }}
+              onChange={(value) => {
+                handleChange('role', value);
+              }}
               disabled={isLoading}
             >
               <option value="">Select a role</option>
@@ -163,7 +184,9 @@ function CreateUserModal({
               id="modal-bio"
               data-testid="modal-bio"
               value={formData.bio}
-              onChange={(e) => { handleChange('bio', e.target.value); }}
+              onChange={(e) => {
+                handleChange('bio', e.target.value);
+              }}
               disabled={isLoading}
             />
           </FormField>
@@ -179,15 +202,15 @@ function CreateUserModal({
       </Modal.Root>
     </div>
   );
-}
+};
 
-function ConfirmDeleteModal({
+const ConfirmDeleteModal = ({
   userName,
   onConfirm,
 }: {
   userName: string;
   onConfirm: () => Promise<void>;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { open, openFn, close } = useDisclosure({ defaultOpen: false });
   const { isLoading, error, wrapHandler, clearError } = useFormState();
   const [confirmText, setConfirmText] = useState('');
@@ -234,7 +257,9 @@ function ConfirmDeleteModal({
               id="confirm-input"
               data-testid="confirm-input"
               value={confirmText}
-              onChange={(e) => { setConfirmText(e.target.value); }}
+              onChange={(e) => {
+                setConfirmText(e.target.value);
+              }}
               placeholder={`Type "${userName}" to confirm`}
               disabled={isLoading}
             />
@@ -254,13 +279,13 @@ function ConfirmDeleteModal({
       </Modal.Root>
     </div>
   );
-}
+};
 
-function MultiStepFormModal({
+const MultiStepFormModal = ({
   onSubmit,
 }: {
   onSubmit: (data: Record<string, string>) => Promise<void>;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { open, openFn, close } = useDisclosure({ defaultOpen: false });
   const { isLoading, error, wrapHandler, clearError } = useFormState();
   const [step, setStep] = useState(0);
@@ -369,13 +394,13 @@ function MultiStepFormModal({
       </Modal.Root>
     </div>
   );
-}
+};
 
-function ModalWithUnsavedChanges({
+const ModalWithUnsavedChanges = ({
   onSave,
 }: {
   onSave: (data: string) => Promise<void>;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { open, openFn, close } = useDisclosure({ defaultOpen: false });
   const [content, setContent] = useState('');
   const [savedContent, setSavedContent] = useState('');
@@ -428,7 +453,9 @@ function ModalWithUnsavedChanges({
               id="editor-content"
               data-testid="editor-content"
               value={content}
-              onChange={(e) => { setContent(e.target.value); }}
+              onChange={(e) => {
+                setContent(e.target.value);
+              }}
               disabled={isLoading}
               rows={5}
             />
@@ -463,7 +490,7 @@ function ModalWithUnsavedChanges({
       </Modal.Root>
     </div>
   );
-}
+};
 
 // =============================================================================
 // Tests

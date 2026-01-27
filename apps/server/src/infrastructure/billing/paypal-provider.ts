@@ -8,22 +8,21 @@
 
 import * as crypto from 'crypto';
 
-import type { SubscriptionStatus } from '@abe-stack/db';
-
 import type {
     BillingService,
     CheckoutParams,
     CheckoutResult,
     CreateProductParams,
     CreateProductResult,
-    NormalizedEventType,
-    NormalizedWebhookEvent,
-    PayPalConfig,
+    PayPalProviderConfig as PayPalConfig,
     ProviderInvoice,
     ProviderPaymentMethod,
     ProviderSubscription,
-    SetupIntentResult,
-} from './types';
+} from '@abe-stack/core';
+import type { SubscriptionStatus } from '@abe-stack/db';
+
+import type { NormalizedEventType, NormalizedWebhookEvent, SetupIntentResult } from './types';
+
 
 // ============================================================================
 // PayPal API Types
@@ -114,19 +113,20 @@ function mapPayPalStatus(paypalStatus: string): SubscriptionStatus {
 }
 
 function mapPayPalEventType(eventType: string): NormalizedEventType {
-  const typeMap: Record<string, NormalizedEventType> = {
-    'BILLING.SUBSCRIPTION.CREATED': 'subscription.created',
-    'BILLING.SUBSCRIPTION.ACTIVATED': 'subscription.updated',
-    'BILLING.SUBSCRIPTION.UPDATED': 'subscription.updated',
-    'BILLING.SUBSCRIPTION.CANCELLED': 'subscription.canceled',
-    'BILLING.SUBSCRIPTION.SUSPENDED': 'subscription.updated',
-    'BILLING.SUBSCRIPTION.EXPIRED': 'subscription.canceled',
-    'PAYMENT.SALE.COMPLETED': 'invoice.paid',
-    'PAYMENT.SALE.DENIED': 'invoice.payment_failed',
-    'PAYMENT.SALE.REFUNDED': 'refund.created',
-    'CUSTOMER.DISPUTE.CREATED': 'chargeback.created',
-  };
-  const type = typeMap[eventType];
+  // Use Map to avoid ESLint naming-convention issues with dotted property names
+  const typeMap = new Map<string, NormalizedEventType>([
+    ['BILLING.SUBSCRIPTION.CREATED', 'subscription.created'],
+    ['BILLING.SUBSCRIPTION.ACTIVATED', 'subscription.updated'],
+    ['BILLING.SUBSCRIPTION.UPDATED', 'subscription.updated'],
+    ['BILLING.SUBSCRIPTION.CANCELLED', 'subscription.canceled'],
+    ['BILLING.SUBSCRIPTION.SUSPENDED', 'subscription.updated'],
+    ['BILLING.SUBSCRIPTION.EXPIRED', 'subscription.canceled'],
+    ['PAYMENT.SALE.COMPLETED', 'invoice.paid'],
+    ['PAYMENT.SALE.DENIED', 'invoice.payment_failed'],
+    ['PAYMENT.SALE.REFUNDED', 'refund.created'],
+    ['CUSTOMER.DISPUTE.CREATED', 'chargeback.created'],
+  ]);
+  const type = typeMap.get(eventType);
   return type ?? 'unknown';
 }
 
@@ -198,11 +198,16 @@ export class PayPalProvider implements BillingService {
       headers['Prefer'] = 'return=representation';
     }
 
-    const response = await fetch(`${this.baseUrl}${path}`, {
+    const requestInit: RequestInit = {
       method,
       headers,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
+    };
+
+    if (body !== undefined) {
+      requestInit.body = JSON.stringify(body);
+    }
+
+    const response = await fetch(`${this.baseUrl}${path}`, requestInit);
 
     if (response.status >= 400) {
       const error = await response.text();
@@ -331,7 +336,7 @@ export class PayPalProvider implements BillingService {
 
     return {
       id: subscription.id,
-      customerId: subscription.subscriber.payer_id !== '' ? subscription.subscriber.payer_id : `paypal_${metadata.userId ?? 'unknown'}`,
+      customerId: subscription.subscriber.payer_id !== '' ? subscription.subscriber.payer_id : `paypal_${metadata['userId'] ?? 'unknown'}`,
       status: mapPayPalStatus(subscription.status),
       priceId: subscription.plan_id,
       currentPeriodStart: periodStart,
@@ -516,7 +521,7 @@ export class PayPalProvider implements BillingService {
       }, {});
 
       // Basic validation that required parts exist
-      if (parts.transmission_id === undefined || parts.transmission_id === '' || parts.timestamp === undefined || parts.timestamp === '') {
+      if (parts['transmission_id'] === undefined || parts['transmission_id'] === '' || parts['timestamp'] === undefined || parts['timestamp'] === '') {
         return false;
       }
 
@@ -539,7 +544,7 @@ export class PayPalProvider implements BillingService {
 
       // For now, we accept if basic format is valid
       // Full verification would compare computedHash with parts.signature
-      return parts.transmission_id !== '';
+      return parts['transmission_id'] !== '';
     } catch {
       return false;
     }
@@ -591,17 +596,37 @@ export class PayPalProvider implements BillingService {
       }
     }
 
+    const webhookData: {
+      subscriptionId?: string;
+      customerId?: string;
+      invoiceId?: string;
+      status?: string;
+      metadata?: Record<string, string>;
+      raw: PayPalWebhookEvent;
+    } = {
+      raw: event,
+    };
+
+    if (subscriptionId !== undefined) {
+      webhookData.subscriptionId = subscriptionId;
+    }
+    if (customerId !== undefined) {
+      webhookData.customerId = customerId;
+    }
+    if (invoiceId !== undefined) {
+      webhookData.invoiceId = invoiceId;
+    }
+    if (status !== undefined) {
+      webhookData.status = status;
+    }
+    if (metadata !== undefined) {
+      webhookData.metadata = metadata;
+    }
+
     return {
       id: event.id,
       type: normalizedType,
-      data: {
-        subscriptionId,
-        customerId,
-        invoiceId,
-        status,
-        metadata,
-        raw: event,
-      },
+      data: webhookData,
       createdAt: new Date(event.create_time),
     };
   }

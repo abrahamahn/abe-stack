@@ -12,25 +12,25 @@ export interface CursorData {
   /** Sort direction */
   sortOrder: SortOrder;
   /** Optional additional sort fields */
-  additionalValues?: Array<string | number | Date>;
+  additionalValues?: Array<string | number | Date> | undefined;
 }
 
 type CursorValue = CursorData['value'];
-type EncodedCursorValue = string | number | { __date: string };
+type EncodedCursorValue = string | number | { dateIso: string };
 
 export function isCursorValue(value: unknown): value is CursorValue {
   return typeof value === 'string' || typeof value === 'number' || value instanceof Date;
 }
 
 function encodeCursorValue(value: CursorValue): EncodedCursorValue {
-  return value instanceof Date ? { __date: value.toISOString() } : value;
+  return value instanceof Date ? { dateIso: value.toISOString() } : value;
 }
 
 function decodeCursorValue(value: unknown): CursorValue | null {
   if (typeof value === 'string' || typeof value === 'number') return value;
   if (value instanceof Date) return value;
-  if (value !== null && value !== undefined && typeof value === 'object' && '__date' in value) {
-    const dateValue = (value as { __date?: unknown }).__date;
+  if (value !== null && value !== undefined && typeof value === 'object' && 'dateIso' in value) {
+    const dateValue = (value as { dateIso?: unknown }).dateIso;
     if (typeof dateValue === 'string') {
       const parsed = new Date(dateValue);
       if (!Number.isNaN(parsed.getTime())) return parsed;
@@ -75,28 +75,33 @@ function parseCursorData(parsed: unknown): CursorData | null {
 
   if (parsed === null || parsed === undefined || typeof parsed !== 'object') return null;
   const record = parsed as Record<string, unknown>;
-  const value = decodeCursorValue(record.value);
+  const value = decodeCursorValue(record['value']);
   if (value === null) return null;
-  if (typeof record.tieBreaker !== 'string' || record.tieBreaker.trim() === '') return null;
-  if (!isSortOrder(record.sortOrder)) return null;
-  if (typeof record.additionalValues !== 'undefined') {
-    if (!Array.isArray(record.additionalValues)) return null;
-    const decodedAdditionalValues = record.additionalValues
+  const tieBreaker = record['tieBreaker'];
+  if (typeof tieBreaker !== 'string' || tieBreaker.trim() === '') return null;
+  const sortOrder = record['sortOrder'];
+  if (!isSortOrder(sortOrder)) return null;
+  const recordAdditionalValues = record['additionalValues'];
+  if (typeof recordAdditionalValues !== 'undefined') {
+    if (!Array.isArray(recordAdditionalValues)) return null;
+    const decodedAdditionalValues = recordAdditionalValues
       .map((entry) => decodeCursorValue(entry))
       .filter((entry): entry is CursorValue => entry !== null);
-    if (decodedAdditionalValues.length !== record.additionalValues.length) return null;
+    if (decodedAdditionalValues.length !== recordAdditionalValues.length) return null;
   }
 
-  const extraValues = Array.isArray(record.additionalValues)
-    ? record.additionalValues
+  const extraValues: Array<string | number | Date> | undefined = Array.isArray(
+    recordAdditionalValues,
+  )
+    ? recordAdditionalValues
         .map((entry) => decodeCursorValue(entry))
         .filter((entry): entry is CursorValue => entry !== null)
     : undefined;
 
   return {
     value,
-    tieBreaker: record.tieBreaker,
-    sortOrder: record.sortOrder,
+    tieBreaker,
+    sortOrder,
     additionalValues: extraValues,
   };
 }
@@ -109,14 +114,15 @@ function parseCursorData(parsed: unknown): CursorData | null {
  */
 export function encodeCursor(data: CursorData): string {
   // Use a more compact representation for better performance
-  const compactData = data.additionalValues !== undefined
-    ? [
-        encodeCursorValue(data.value),
-        data.tieBreaker,
-        data.sortOrder,
-        data.additionalValues.map((value) => encodeCursorValue(value)),
-      ]
-    : [encodeCursorValue(data.value), data.tieBreaker, data.sortOrder];
+  const compactData =
+    data.additionalValues !== undefined
+      ? [
+          encodeCursorValue(data.value),
+          data.tieBreaker,
+          data.sortOrder,
+          data.additionalValues.map((value) => encodeCursorValue(value)),
+        ]
+      : [encodeCursorValue(data.value), data.tieBreaker, data.sortOrder];
 
   const jsonString = JSON.stringify(compactData);
   return Buffer.from(jsonString, 'utf8').toString('base64url');
@@ -161,9 +167,7 @@ export function createCursorForItem<T>(
     tieBreakerValue === null ||
     (typeof tieBreakerValue !== 'string' && typeof tieBreakerValue !== 'number')
   ) {
-    throw new Error(
-      `Invalid tie-breaker field: ${tieBreakerKey}. Must be string or number.`,
-    );
+    throw new Error(`Invalid tie-breaker field: ${tieBreakerKey}. Must be string or number.`);
   }
   const tieBreaker = String(tieBreakerValue);
 

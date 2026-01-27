@@ -1,6 +1,8 @@
 // apps/desktop/src/electron/preload.ts
 import { contextBridge, ipcRenderer, shell } from 'electron';
 
+import { IPC_CHANNELS } from './types';
+
 import type { IPCChannel, IPCChannelMap, OpenDialogOptions, SaveDialogOptions } from './types';
 import type { NativeBridge } from '@abe-stack/core';
 
@@ -30,15 +32,15 @@ const electronBridge: NativeBridge = {
 
   isNative: () => true,
 
-  getAppVersion: () => invoke('get-app-version'),
+  getAppVersion: () => invoke(IPC_CHANNELS.getAppVersion),
 
   openExternal: async (url: string) => {
     await shell.openExternal(url);
   },
 
-  showOpenDialog: (options: OpenDialogOptions) => invoke('show-open-dialog', options),
+  showOpenDialog: (options: OpenDialogOptions) => invoke(IPC_CHANNELS.showOpenDialog, options),
 
-  showSaveDialog: (options: SaveDialogOptions) => invoke('show-save-dialog', options),
+  showSaveDialog: (options: SaveDialogOptions) => invoke(IPC_CHANNELS.showSaveDialog, options),
 };
 
 contextBridge.exposeInMainWorld('electronAPI', electronBridge);

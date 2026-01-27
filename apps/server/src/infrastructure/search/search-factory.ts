@@ -9,7 +9,6 @@
 import { createElasticsearchProvider } from './elasticsearch-provider';
 import { createSqlSearchProvider } from './sql-provider';
 
-import type { DbClient, Repositories } from '@database';
 import type { ElasticsearchProvider } from './elasticsearch-provider';
 import type { SqlSearchProvider } from './sql-provider';
 import type {
@@ -19,6 +18,7 @@ import type {
     SqlSearchProviderConfig,
     SqlTableConfig,
 } from './types';
+import type { DbClient, Repositories } from '@database';
 
 // ============================================================================
 // Factory Types

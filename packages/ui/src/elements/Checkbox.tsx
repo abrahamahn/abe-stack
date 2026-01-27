@@ -1,8 +1,6 @@
 // packages/ui/src/elements/Checkbox.tsx
 import { useControllableState } from '@hooks/useControllableState';
-import { forwardRef, type ComponentPropsWithoutRef } from 'react';
-
-import type React from 'react';
+import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
 
 import '../styles/elements.css';
 
@@ -14,7 +12,7 @@ type CheckboxProps = Omit<ComponentPropsWithoutRef<'input'>, 'type' | 'onChange'
   /** Callback when checked state changes */
   onChange?: (checked: boolean) => void;
   /** Label text or element to display next to checkbox */
-  label?: React.ReactNode;
+  label?: ReactNode;
 };
 
 /**
@@ -29,9 +27,9 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref)
   const { checked, defaultChecked, onChange, label, className = '', ...rest } = props;
 
   const [currentChecked, setChecked] = useControllableState<boolean>({
-    value: checked,
+    ...(checked !== undefined && { value: checked }),
     defaultValue: defaultChecked ?? false,
-    onChange,
+    ...(onChange !== undefined && { onChange }),
   });
 
   const isChecked = currentChecked ?? false;
@@ -45,7 +43,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((props, ref)
         ref={ref}
         type="checkbox"
         checked={isChecked}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+        onChange={(event) => {
           setChecked(event.target.checked);
         }}
         onKeyDown={(event) => {

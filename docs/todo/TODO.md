@@ -14,6 +14,34 @@
 
 ---
 
+## High Priority: Codebase Consistency
+
+### File Naming Conventions
+
+- [ ] Standardize file naming across the entire codebase (kebab-case for server/core, decide convention for UI)
+  - `packages/core` - converted to kebab-case ✅
+  - `packages/db` - needs audit
+  - `packages/sdk` - needs audit
+  - `apps/server` - needs audit
+  - `apps/web` - needs audit
+  - `packages/ui` - needs audit
+
+### UI Documentation Strategy
+
+- [ ] Remove or convert `packages/ui/docs/` folder - current approach is outdated
+- [ ] Render `.tsx` files as "live markdown" with JSDoc included (self-documenting components)
+- [ ] Ensure all public component exports have comprehensive JSDoc comments
+
+### UI Hooks Consistency
+
+- [ ] Audit `packages/ui/src/hooks/` for file extension consistency (`.ts` vs `.tsx`)
+  - Hooks that return JSX or use React types → `.tsx`
+  - Pure logic hooks → `.ts`
+- [ ] Clean up and consolidate hook tests
+- [ ] Ensure consistent naming pattern (`use[Feature].ts` + `use[Feature].test.ts`)
+
+---
+
 ## Medium Priority: User Settings (Remaining)
 
 - [ ] 2FA setup UI (TOTP) + recovery codes

@@ -4,8 +4,8 @@ import { describe, expect, it } from 'vitest';
 
 import { createPaginationMiddleware } from '../middleware';
 
-import type { FastifyReply } from 'fastify';
 import type { PaginationRequest } from '../types';
+import type { FastifyReply } from 'fastify';
 
 describe('Pagination Middleware', () => {
   const createMockRequest = (query: Record<string, string | string[]> = {}) => ({

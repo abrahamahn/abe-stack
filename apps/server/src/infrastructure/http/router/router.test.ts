@@ -4,9 +4,9 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { protectedRoute, publicRoute, registerRouteMap } from '../router';
 
+import type { RouteMap, RouteResult, ValidationSchema } from '../types';
 import type { AppContext } from '@shared';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import type { RouteMap, RouteResult, ValidationSchema } from '../types';
 
 // ============================================================================
 // Mock Schema Helper

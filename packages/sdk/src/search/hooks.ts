@@ -222,13 +222,13 @@ export function useSearch<T = Record<string, unknown>, TError = Error>(
   const queryResult = useQueryBase<SearchResult<T>, TError>({
     queryKey,
     queryFn: () => searchFn(query),
-    enabled,
-    staleTime,
-    gcTime,
-    retry,
-    refetchOnWindowFocus,
-    onSuccess,
-    onError,
+    ...(enabled !== undefined && { enabled }),
+    ...(staleTime !== undefined && { staleTime }),
+    ...(gcTime !== undefined && { gcTime }),
+    ...(retry !== undefined && { retry }),
+    ...(refetchOnWindowFocus !== undefined && { refetchOnWindowFocus }),
+    ...(onSuccess !== undefined && { onSuccess }),
+    ...(onError !== undefined && { onError }),
   });
 
   // Update URL when query changes
@@ -254,7 +254,7 @@ export function useSearch<T = Record<string, unknown>, TError = Error>(
     (text: string) => {
       setQuery((prev: SearchQuery<T>) => ({
         ...prev,
-        search: text ? { query: text } : undefined,
+        search: text !== '' ? { query: text } : undefined,
         page: 1, // Reset to first page on search
       }));
     },
@@ -380,16 +380,16 @@ export function useInfiniteSearch<T = Record<string, unknown>>(
     queryFn: ({ pageParam }) => searchFn({ ...query, cursor: pageParam }),
     getNextPageParam: (lastPage: CursorSearchResult<T>) => lastPage.nextCursor ?? undefined,
     initialPageParam: undefined,
-    enabled,
-    staleTime,
-    gcTime,
-    retry,
-    refetchOnWindowFocus,
+    ...(enabled !== undefined && { enabled }),
+    ...(staleTime !== undefined && { staleTime }),
+    ...(gcTime !== undefined && { gcTime }),
+    ...(retry !== undefined && { retry }),
+    ...(refetchOnWindowFocus !== undefined && { refetchOnWindowFocus }),
   });
 
   // Flatten data from all pages
   const data = useMemo(() => {
-    if (!infiniteResult.data?.pages) return [];
+    if (infiniteResult.data?.pages === undefined || infiniteResult.data.pages === null) return [];
     return infiniteResult.data.pages.flatMap((page: CursorSearchResult<T>) =>
       page.data.map((item: SearchResultItem<T>) => item.item),
     );
@@ -412,7 +412,7 @@ export function useInfiniteSearch<T = Record<string, unknown>>(
     (text: string) => {
       setQuery((prev: SearchQuery<T>) => ({
         ...prev,
-        search: text ? { query: text } : undefined,
+        search: text !== '' ? { query: text } : undefined,
       }));
     },
     [setQuery],
@@ -442,7 +442,7 @@ export function useInfiniteSearch<T = Record<string, unknown>>(
     refetch: (): void => {
       void infiniteResult.refetch();
     },
-    total,
+    ...(total !== undefined && { total }),
   };
 }
 

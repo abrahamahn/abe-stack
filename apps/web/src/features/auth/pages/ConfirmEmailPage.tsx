@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 
 import type { ReactElement } from 'react';
 
-export function ConfirmEmailPage(): ReactElement {
+export const ConfirmEmailPage = (): ReactElement => {
   const searchParamsResult = useSearchParams();
   const searchParams: URLSearchParams = searchParamsResult[0];
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ export function ConfirmEmailPage(): ReactElement {
   const token = searchParams.get('token');
 
   useEffect(() => {
-    if (!token) {
+    if (token === null) {
       setStatus('error');
       setMessage('Invalid verification link');
       return;
@@ -126,4 +126,4 @@ export function ConfirmEmailPage(): ReactElement {
       </div>
     </AuthLayout>
   );
-}
+};

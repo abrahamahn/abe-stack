@@ -2,9 +2,9 @@
 import { useResendCooldown as uiUseResendCooldown } from '@abe-stack/ui';
 import { describe, expect, it } from 'vitest';
 
-import { useResendCooldown } from '../useResendCooldown';
+import { useResendCooldown } from './useResendCooldown';
 
-import type { UseResendCooldownReturn } from '../useResendCooldown';
+import type { UseResendCooldownReturn } from './useResendCooldown';
 import type { UseResendCooldownReturn as UIUseResendCooldownReturn } from '@abe-stack/ui';
 
 describe('useResendCooldown', () => {

@@ -1,7 +1,7 @@
 // packages/ui/src/utils/__tests__/cn.test.ts
 import { describe, expect, test } from 'vitest';
 
-import { cn } from '../cn';
+import { cn } from './cn';
 
 describe('cn utility', () => {
   test('should return empty string when no arguments provided', () => {
@@ -83,8 +83,8 @@ describe('cn utility', () => {
     const isDisabled = false;
 
     const result = cn('btn', `btn-${variant}`, `btn-${size}`, {
-      'btn-disabled': isDisabled,
-      'btn-enabled': !isDisabled,
+      ['btn-disabled']: isDisabled,
+      ['btn-enabled']: !isDisabled,
       [`btn-${variant}-${size}`]: variant !== '' && size !== '',
     });
 
@@ -104,9 +104,9 @@ describe('cn utility', () => {
 
   test('should handle falsey values in objects', () => {
     const result = cn('wrapper', {
-      'has-content': true,
-      'no-content': false,
-      'is-loading': null,
+      ['has-content']: true,
+      ['no-content']: false,
+      ['is-loading']: null,
       loaded: undefined,
     });
     expect(result).toBe('wrapper has-content');
@@ -160,7 +160,7 @@ describe('cn utility', () => {
   test('should handle complex nested structures', () => {
     const complexClasses = [
       'base',
-      ['level-1', ['level-2', { 'deep-active': true, 'deep-inactive': false }]],
+      ['level-1', ['level-2', { ['deep-active']: true, ['deep-inactive']: false }]],
       { top: true, bottom: false },
     ];
 
@@ -188,15 +188,15 @@ describe('cn utility', () => {
   });
 
   test('should handle objects with numeric keys', () => {
-    const obj = { 0: true, 1: false, 2: true };
+    const obj = { [0]: true, [1]: false, [2]: true };
     const result = cn('base', obj);
     expect(result).toBe('base 0 2');
   });
 
   test('should handle objects with mixed key types', () => {
     const obj = {
-      'string-key': true,
-      42: true,
+      ['string-key']: true,
+      [42]: true,
       [Symbol('sym')]: true, // This will be ignored as symbols are not enumerable in this context
       ['null']: true, // Explicit string key
     };

@@ -4,7 +4,7 @@ import { MemoryRouter } from '@abe-stack/ui';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ConfirmEmailPage } from '../ConfirmEmailPage';
+import { ConfirmEmailPage } from './ConfirmEmailPage';
 
 // Mock the auth hook
 const mockVerifyEmail = vi.fn();

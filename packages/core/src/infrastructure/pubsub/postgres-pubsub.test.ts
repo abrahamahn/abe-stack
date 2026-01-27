@@ -1,6 +1,7 @@
-// packages/core/src/infrastructure/pubsub/postgresPubSub.test.ts
+// packages/core/src/infrastructure/pubsub/postgres-pubsub.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { PostgresPubSub, type PostgresPubSubOptions } from './postgresPubSub';
+
+import { PostgresPubSub, type PostgresPubSubOptions } from './postgres-pubsub';
 import { SubKeys } from './types';
 
 // Mock postgres module

@@ -32,23 +32,23 @@ type DropdownProps = {
  * </Dropdown>
  * ```
  */
-export function Dropdown({
+export const Dropdown = ({
   trigger,
   placement = 'bottom',
   children,
   open,
   defaultOpen,
   onChange,
-}: DropdownProps): ReactElement {
+}: DropdownProps): ReactElement => {
   const {
     open: isOpen,
     toggle,
     close,
     setOpen,
   } = useDisclosure({
-    open,
+    ...(open !== undefined && { open }),
     defaultOpen: defaultOpen ?? false,
-    onChange,
+    ...(onChange !== undefined && { onChange }),
   });
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -115,4 +115,4 @@ export function Dropdown({
       ) : null}
     </div>
   );
-}
+};

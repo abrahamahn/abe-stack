@@ -34,16 +34,16 @@ const spinnerSizes = {
  * <LoadingContainer size="lg" text="Please wait..." />
  * ```
  */
-export function LoadingContainer({
+export const LoadingContainer = ({
   text = 'Loading...',
   size = 'md',
   className = '',
   ...rest
-}: LoadingContainerProps): ReactElement {
+}: LoadingContainerProps): ReactElement => {
   return (
     <div className={`loading-container ${className}`.trim()} {...rest}>
       <Spinner size={spinnerSizes[size]} />
       {text !== '' ? <Text tone="muted">{text}</Text> : null}
     </div>
   );
-}
+};

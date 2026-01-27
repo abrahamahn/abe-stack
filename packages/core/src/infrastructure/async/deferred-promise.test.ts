@@ -1,7 +1,7 @@
-// packages/core/src/infrastructure/async/DeferredPromise.test.ts
+// packages/core/src/infrastructure/async/deferred-promise.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { DeferredPromise } from './DeferredPromise';
+import { DeferredPromise } from './deferred-promise';
 
 describe('DeferredPromise', () => {
   let deferred: DeferredPromise<string>;

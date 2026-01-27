@@ -1,7 +1,7 @@
 // apps/web/src/features/admin/api/__tests__/adminApi.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { adminApi } from '../adminApi';
+import { adminApi } from './adminApi';
 
 vi.mock('@config', () => ({
   clientConfig: { apiUrl: 'http://localhost:3000' },

@@ -5,9 +5,8 @@
  * Form for changing user password with validation.
  */
 
-import { useState, type ReactElement } from 'react';
-
 import { Alert, Button, FormField, PasswordInput } from '@abe-stack/ui';
+import { useState, type ReactElement } from 'react';
 
 import { usePasswordChange } from '../hooks';
 
@@ -23,9 +22,9 @@ export interface PasswordChangeFormProps {
 // Password Strength Indicator
 // ============================================================================
 
-function PasswordStrengthIndicator({ password }: { password: string }): ReactElement {
+const PasswordStrengthIndicator = ({ password }: { password: string }): ReactElement => {
   const getStrength = (): { score: number; label: string; color: string } => {
-    if (!password) return { score: 0, label: 'Enter a password', color: 'bg-gray-300' };
+    if (password.length === 0) return { score: 0, label: 'Enter a password', color: 'bg-gray-300' };
 
     let score = 0;
     if (password.length >= 8) score++;
@@ -56,16 +55,16 @@ function PasswordStrengthIndicator({ password }: { password: string }): ReactEle
           />
         ))}
       </div>
-      {password && <p className="text-xs text-gray-500">{strength.label}</p>}
+      {password.length > 0 && <p className="text-xs text-gray-500">{strength.label}</p>}
     </div>
   );
-}
+};
 
 // ============================================================================
 // Component
 // ============================================================================
 
-export function PasswordChangeForm({ onSuccess }: PasswordChangeFormProps): ReactElement {
+export const PasswordChangeForm = ({ onSuccess }: PasswordChangeFormProps): ReactElement => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -158,16 +157,18 @@ export function PasswordChangeForm({ onSuccess }: PasswordChangeFormProps): Reac
           placeholder="Confirm new password"
           autoComplete="new-password"
         />
-        {confirmPassword && newPassword !== confirmPassword && (
+        {confirmPassword.length > 0 && newPassword !== confirmPassword && (
           <p className="text-sm text-red-500 mt-1">Passwords do not match</p>
         )}
       </FormField>
 
-      {(validationError ?? error) && (
+      {(validationError !== null || error !== null) && (
         <Alert tone="danger">{validationError ?? error?.message}</Alert>
       )}
 
-      {successMessage && <Alert tone="success">{successMessage}</Alert>}
+      {successMessage !== null && successMessage.length > 0 && (
+        <Alert tone="success">{successMessage}</Alert>
+      )}
 
       <div className="flex justify-end">
         <Button type="submit" disabled={!isValid || isLoading}>
@@ -176,4 +177,4 @@ export function PasswordChangeForm({ onSuccess }: PasswordChangeFormProps): Reac
       </div>
     </form>
   );
-}
+};

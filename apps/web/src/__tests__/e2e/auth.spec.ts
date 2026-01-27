@@ -1,11 +1,14 @@
 // apps/web/src/test/e2e/auth.spec.ts
 import { expect, test } from '@playwright/test';
 
-const baseURL = process.env.E2E_BASE_URL || 'http://localhost:5173';
+const baseURL = process.env['E2E_BASE_URL'] ?? 'http://localhost:5173';
 
 test.describe('Auth happy path', () => {
   test('user can sign up, land on dashboard, and logout', async ({ page }) => {
-    test.skip(!process.env.E2E_BASE_URL, 'Set E2E_BASE_URL to run this test against a live app');
+    test.skip(
+      process.env['E2E_BASE_URL'] === undefined,
+      'Set E2E_BASE_URL to run this test against a live app',
+    );
 
     const email = `user${String(Date.now())}@example.com`;
     const password = 'Passw0rd!';

@@ -1,9 +1,9 @@
 // apps/web/src/features/auth/pages/__tests__/Register.test.tsx
-import { renderWithProviders } from '../../../../__tests__/utils';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { RegisterPage } from '../Register';
+import { renderWithProviders } from './../../../__tests__/utils';
+import { RegisterPage } from './Register';
 
 // Mock the auth hook
 const mockRegister = vi.fn();
@@ -22,8 +22,8 @@ const mockUseAuth = vi.fn(() => ({
 const mockNavigate = vi.fn();
 
 // Mock the hooks module - useAuth and useAuthModeNavigation
-vi.mock('../../hooks', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../hooks')>();
+vi.mock('../hooks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../hooks')>();
   return {
     ...actual,
     useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),

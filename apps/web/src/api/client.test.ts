@@ -40,14 +40,14 @@ describe('api', () => {
     });
 
     it('should create an API client', async () => {
-      const { api } = await import('../client');
+      const { api } = await import('./client');
 
       expect(api).toBeDefined();
       expect(api).toHaveProperty('mockClient', true);
     });
 
     it('should use the configured base URL from environment', async () => {
-      await import('../client');
+      await import('./client');
       const { createApiClient } = await import('@abe-stack/sdk');
 
       expect(createApiClient).toHaveBeenCalled();
@@ -56,7 +56,7 @@ describe('api', () => {
     });
 
     it('should provide a getToken function', async () => {
-      await import('../client');
+      await import('./client');
 
       expect(capturedConfig).not.toBeNull();
       expect(typeof capturedConfig?.getToken).toBe('function');
@@ -64,7 +64,7 @@ describe('api', () => {
 
     it('should get token from tokenStore', async () => {
       const { tokenStore } = await import('@abe-stack/core');
-      await import('../client');
+      await import('./client');
 
       expect(capturedConfig).not.toBeNull();
       const token = capturedConfig?.getToken();
@@ -81,7 +81,7 @@ describe('api', () => {
     });
 
     it('should use empty baseUrl (relative URLs) when VITE_API_URL is not set', async () => {
-      await import('../client');
+      await import('./client');
 
       expect(capturedConfig).not.toBeNull();
       // Empty string = relative URLs, proxied by Vite in dev
@@ -98,7 +98,7 @@ describe('api', () => {
       const shared = await import('@abe-stack/core');
       vi.mocked(shared.tokenStore.get).mockReturnValueOnce(null);
 
-      await import('../client');
+      await import('./client');
 
       expect(capturedConfig).not.toBeNull();
       const token = capturedConfig?.getToken();

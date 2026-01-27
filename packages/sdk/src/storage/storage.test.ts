@@ -31,7 +31,7 @@ const createMockLocalStorage = (): {
       length: 0,
       key: (index: number): string | null => {
         const keys = Object.keys(store);
-        return keys[index] || null;
+        return keys[index] ?? null;
       },
     } as Storage,
     getItemMock,
@@ -134,9 +134,9 @@ describe('idbStorage', () => {
     // idbStorage is already exported, but needs IndexedDB
     // This is a behavioral test showing the expected interface
     const mockAdapter = {
-      getItem: async (key: string): Promise<string | null> => {
-        if (key === 'exists') return 'value';
-        return null;
+      getItem: (key: string): Promise<string | null> => {
+        if (key === 'exists') return Promise.resolve('value');
+        return Promise.resolve(null);
       },
       setItem: vi.fn(),
       removeItem: vi.fn(),

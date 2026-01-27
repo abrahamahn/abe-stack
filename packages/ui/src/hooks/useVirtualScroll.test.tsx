@@ -3,7 +3,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { useVirtualScroll, VirtualScrollList } from '../useVirtualScroll';
+import { useVirtualScroll, VirtualScrollList } from './useVirtualScroll';
 
 import type { ReactElement } from 'react';
 
@@ -18,12 +18,12 @@ interface HarnessProps {
   overscan?: number;
 }
 
-function VirtualScrollHarness({
+const VirtualScrollHarness = ({
   itemCount,
   itemHeight,
   containerHeight,
   overscan,
-}: HarnessProps): ReactElement {
+}: HarnessProps): ReactElement => {
   const { items, totalHeight, scrollTop, containerRef } = useVirtualScroll(itemCount, {
     itemHeight,
     containerHeight,
@@ -50,7 +50,7 @@ function VirtualScrollHarness({
       </div>
     </div>
   );
-}
+};
 
 // ============================================================================
 // useVirtualScroll Hook Tests

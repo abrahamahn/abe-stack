@@ -55,6 +55,8 @@ export interface QueryCacheProviderProps {
  * </QueryCacheProvider>
  * ```
  */
+// React component - PascalCase is correct
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export function QueryCacheProvider({
   cache,
   options,
@@ -86,7 +88,7 @@ export function QueryCacheProvider({
 export function useQueryCache(): QueryCache {
   const cache = useContext(QueryCacheContext);
 
-  if (!cache) {
+  if (cache === null) {
     throw new Error('useQueryCache must be used within a QueryCacheProvider');
   }
 

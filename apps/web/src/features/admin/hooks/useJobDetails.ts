@@ -52,10 +52,10 @@ export function useJobDetails(
   const queryResult: UseQueryResult<JobDetails> = useQuery({
     queryKey: ['job', jobId],
     queryFn: async () => {
-      if (!jobId) throw new Error('Job ID is required');
+      if (jobId === undefined || jobId.length === 0) throw new Error('Job ID is required');
       return adminApi.getJobDetails(jobId);
     },
-    enabled: options.enabled !== false && Boolean(jobId),
+    enabled: options.enabled !== false && jobId !== undefined && jobId.length > 0,
   });
 
   return {

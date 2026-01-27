@@ -7,8 +7,8 @@ import {
     SearchProviderFactory,
 } from '../search-factory';
 
-import type { RawDb, Repositories } from '@database';
 import type { SqlTableConfig } from '../types';
+import type { RawDb, Repositories } from '@database';
 
 // Mock database
 const mockDb = {

@@ -1,9 +1,10 @@
 // apps/web/src/features/auth/components/__tests__/LoginForm.test.tsx
 import { LoginForm } from '@auth/components/LoginForm';
-import { renderWithProviders } from '../../../../__tests__/utils';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+
+import { renderWithProviders } from './../../../__tests__/utils';
 
 import type { LoginFormProps } from '@auth/components/LoginForm';
 import type { ReactElement } from 'react';
@@ -72,7 +73,7 @@ describe('LoginForm', () => {
     });
 
     it('renders sign up as a Link when onModeChange is not provided', () => {
-      renderWithRouter(<LoginForm {...defaultProps} onModeChange={undefined} />);
+      renderWithRouter(<LoginForm {...defaultProps} />);
 
       expect(screen.getByText("Don't have an account?")).toBeInTheDocument();
       expect(screen.getByRole('link', { name: 'Sign up' })).toHaveAttribute(
@@ -144,7 +145,7 @@ describe('LoginForm', () => {
     });
 
     it('does not call onLogin when no handler provided', async () => {
-      renderWithRouter(<LoginForm {...defaultProps} onLogin={undefined} />);
+      renderWithRouter(<LoginForm {...defaultProps} />);
 
       fireEvent.change(screen.getByLabelText('Email'), {
         target: { value: 'test@example.com' },
@@ -351,13 +352,7 @@ describe('LoginForm', () => {
 
     it('does not call onModeChange for forgot password if not provided', () => {
       const mockOnForgotPassword = vi.fn();
-      renderWithRouter(
-        <LoginForm
-          {...defaultProps}
-          onForgotPassword={mockOnForgotPassword}
-          onModeChange={undefined}
-        />,
-      );
+      renderWithRouter(<LoginForm {...defaultProps} onForgotPassword={mockOnForgotPassword} />);
 
       fireEvent.click(screen.getByRole('button', { name: 'Forgot your password?' }));
 

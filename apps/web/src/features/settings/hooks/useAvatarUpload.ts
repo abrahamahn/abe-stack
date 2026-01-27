@@ -15,15 +15,13 @@ import { createSettingsApi, type AvatarDeleteResponse, type AvatarUploadResponse
 
 let settingsApi: ReturnType<typeof createSettingsApi> | null = null;
 const apiBaseUrl =
-  typeof import.meta.env.VITE_API_URL === 'string' ? import.meta.env.VITE_API_URL : '';
+  typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
 
 function getSettingsApi(): ReturnType<typeof createSettingsApi> {
-  if (!settingsApi) {
-    settingsApi = createSettingsApi({
-      baseUrl: apiBaseUrl,
-      getToken: (): string | null => localStorage.getItem('accessToken'),
-    });
-  }
+  settingsApi ??= createSettingsApi({
+    baseUrl: apiBaseUrl,
+    getToken: (): string | null => localStorage.getItem('accessToken'),
+  });
   return settingsApi;
 }
 
@@ -57,9 +55,11 @@ export function useAvatarUpload(options?: UseAvatarUploadOptions): UseAvatarUplo
     onSuccess: (response) => {
       // Invalidate user query to refresh the cached data
       queryCache.invalidateQuery(['user', 'me']);
-      options?.onSuccess?.(response);
+      if (options?.onSuccess !== undefined) {
+        options.onSuccess(response);
+      }
     },
-    onError: options?.onError,
+    ...(options?.onError !== undefined && { onError: options.onError }),
   });
 
   return {
@@ -101,9 +101,11 @@ export function useAvatarDelete(options?: UseAvatarDeleteOptions): UseAvatarDele
     },
     onSuccess: (response) => {
       queryCache.invalidateQuery(['user', 'me']);
-      options?.onSuccess?.(response);
+      if (options?.onSuccess !== undefined) {
+        options.onSuccess(response);
+      }
     },
-    onError: options?.onError,
+    ...(options?.onError !== undefined && { onError: options.onError }),
   });
 
   return {

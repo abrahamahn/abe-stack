@@ -4,7 +4,7 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { Spinner } from '../Spinner';
+import { Spinner } from './Spinner';
 
 describe('Spinner', () => {
   it('renders with default size token', () => {
@@ -13,7 +13,7 @@ describe('Spinner', () => {
     const spinner = container.querySelector('.spinner');
     expect(spinner).toBeInTheDocument();
     expect(spinner).toHaveClass('spinner');
-    expect(spinner).toHaveStyle({ '--ui-spinner-size': 'var(--ui-gap-lg)' });
+    expect(spinner).toHaveStyle({ ['--ui-spinner-size']: 'var(--ui-gap-lg)' });
   });
 
   it('applies custom size', () => {
@@ -21,7 +21,7 @@ describe('Spinner', () => {
 
     const spinner = container.querySelector('.spinner');
     expect(spinner).toBeInTheDocument();
-    expect(spinner).toHaveStyle({ '--ui-spinner-size': '32px' });
+    expect(spinner).toHaveStyle({ ['--ui-spinner-size']: '32px' });
   });
 
   it('renders safely with empty props', () => {

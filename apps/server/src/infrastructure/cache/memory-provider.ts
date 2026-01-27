@@ -6,6 +6,7 @@
  * Uses a doubly-linked list for O(1) LRU operations.
  */
 
+import type { CacheLogger, CreateCacheOptions, EvictionReason, LRUNode } from './types';
 import type {
     CacheDeleteOptions,
     CacheGetOptions,
@@ -14,7 +15,6 @@ import type {
     CacheStats,
     MemoryCacheConfig,
 } from '@abe-stack/core';
-import type { CacheLogger, CreateCacheOptions, EvictionReason, LRUNode } from './types';
 
 // ============================================================================
 // Memory Cache Provider Implementation

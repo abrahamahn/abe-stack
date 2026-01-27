@@ -42,9 +42,9 @@ export const Radio = forwardRef<HTMLInputElement, RadioProps>((props, ref) => {
   const groupContext = useRadioGroupContext();
 
   const [internalChecked, setInternalChecked] = useControllableState<boolean>({
-    value: checkedProp,
+    ...(checkedProp !== undefined && { value: checkedProp }),
     defaultValue: defaultChecked ?? false,
-    onChange,
+    ...(onChange !== undefined && { onChange }),
   });
 
   const isGrouped = groupContext != null;

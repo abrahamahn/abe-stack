@@ -559,7 +559,7 @@ describe('RecordCache', () => {
 
       const customCache = new RecordCache<CustomTables>({
         getVersion: (record: unknown) => {
-          if (record && typeof record === 'object' && 'rev' in record) {
+          if (record !== null && record !== undefined && typeof record === 'object' && 'rev' in record) {
             return (record as { rev: number }).rev;
           }
           return undefined;

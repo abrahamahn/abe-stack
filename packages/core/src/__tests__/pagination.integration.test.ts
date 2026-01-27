@@ -42,7 +42,7 @@ describe('Pagination Integration', () => {
       // First page
       const page1 = paginateArrayWithCursor(
         articles,
-        { cursor: undefined, limit: 10, sortOrder: 'desc' },
+        { limit: 10, sortOrder: 'desc' },
         'publishedAt',
       );
 
@@ -62,7 +62,7 @@ describe('Pagination Integration', () => {
       // Second page
       const page2 = paginateArrayWithCursor(
         articles,
-        { cursor: page1.nextCursor ?? undefined, limit: 10, sortOrder: 'desc' },
+        page1.nextCursor !== null ? { cursor: page1.nextCursor, limit: 10, sortOrder: 'desc' } : { limit: 10, sortOrder: 'desc' },
         'publishedAt',
       );
 
@@ -81,7 +81,7 @@ describe('Pagination Integration', () => {
 
       const result = paginateArrayWithCursor(
         articles,
-        { cursor: undefined, limit: 10, sortOrder: 'asc', sortBy: 'views' },
+        { limit: 10, sortOrder: 'asc', sortBy: 'views' },
         'views',
       );
 
@@ -106,7 +106,7 @@ describe('Pagination Integration', () => {
       while (true) {
         const result: any = paginateArrayWithCursor(
           articles,
-          { cursor, limit: 10, sortOrder: 'desc' },
+          cursor !== undefined ? { cursor, limit: 10, sortOrder: 'desc' } : { limit: 10, sortOrder: 'desc' },
           'publishedAt',
         );
 
@@ -149,7 +149,7 @@ describe('Pagination Integration', () => {
       const startTime = Date.now();
       const page1 = paginateLargeArrayWithCursor(
         users,
-        { cursor: undefined, limit: 100, sortOrder: 'desc' },
+        { limit: 100, sortOrder: 'desc' },
         'karma',
       );
       const firstPageTime = Date.now() - startTime;
@@ -163,7 +163,7 @@ describe('Pagination Integration', () => {
       for (let i = 0; i < 10; i++) {
         const page = paginateLargeArrayWithCursor(
           users,
-          { cursor: cursor ?? undefined, limit: 100, sortOrder: 'desc' },
+          cursor !== null ? { cursor, limit: 100, sortOrder: 'desc' } : { limit: 100, sortOrder: 'desc' },
           'karma',
         );
         cursor = page.nextCursor;
@@ -180,13 +180,13 @@ describe('Pagination Integration', () => {
 
       const regularResult = paginateArrayWithCursor(
         users,
-        { cursor: undefined, limit: 20, sortOrder: 'asc' },
+        { limit: 20, sortOrder: 'asc' },
         'createdAt',
       );
 
       const optimizedResult = paginateLargeArrayWithCursor(
         users,
-        { cursor: undefined, limit: 20, sortOrder: 'asc' },
+        { limit: 20, sortOrder: 'asc' },
         'createdAt',
       );
 
@@ -390,7 +390,7 @@ describe('Pagination Integration', () => {
 
       const result = paginateArrayWithCursor(
         items,
-        { cursor: undefined, limit: 10, sortOrder: 'desc' },
+        { limit: 10, sortOrder: 'desc' },
         'score',
       );
 
@@ -407,7 +407,7 @@ describe('Pagination Integration', () => {
 
       const result = paginateArrayWithCursor(
         items,
-        { cursor: undefined, limit: 100, sortOrder: 'desc' },
+        { limit: 100, sortOrder: 'desc' },
         'score',
       );
 
@@ -427,7 +427,7 @@ describe('Pagination Integration', () => {
       // First page
       const page1 = paginateArrayWithCursor(
         items,
-        { cursor: undefined, limit: 2, sortOrder: 'desc' },
+        { limit: 2, sortOrder: 'desc' },
         'score',
       );
 
@@ -436,7 +436,7 @@ describe('Pagination Integration', () => {
       // Second page should not overlap
       const page2 = paginateArrayWithCursor(
         items,
-        { cursor: page1.nextCursor ?? undefined, limit: 2, sortOrder: 'desc' },
+        page1.nextCursor !== null ? { cursor: page1.nextCursor, limit: 2, sortOrder: 'desc' } : { limit: 2, sortOrder: 'desc' },
         'score',
       );
 

@@ -3,12 +3,12 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { useKeyboardShortcuts } from '../useKeyboardShortcuts';
+import { useKeyboardShortcuts } from './useKeyboardShortcuts';
 
-import type { KeyboardShortcut } from '../useKeyboardShortcuts';
+import type { KeyboardShortcut } from './useKeyboardShortcuts';
 import type { ReactElement } from 'react';
 
-function ShortcutsHarness({ shortcuts }: { shortcuts: KeyboardShortcut[] }): ReactElement {
+const ShortcutsHarness = ({ shortcuts }: { shortcuts: KeyboardShortcut[] }): ReactElement => {
   useKeyboardShortcuts(shortcuts);
   return (
     <div>
@@ -16,7 +16,7 @@ function ShortcutsHarness({ shortcuts }: { shortcuts: KeyboardShortcut[] }): Rea
       <button type="button">Test Button</button>
     </div>
   );
-}
+};
 
 describe('useKeyboardShortcuts', () => {
   it('triggers handler when key is pressed', () => {
@@ -112,10 +112,10 @@ describe('useKeyboardShortcuts', () => {
   it('can disable shortcuts with enabled option', () => {
     const handler = vi.fn();
 
-    function DisabledHarness(): ReactElement {
+    const DisabledHarness = (): ReactElement => {
       useKeyboardShortcuts([{ key: 'L', handler }], { enabled: false });
       return <div>Test</div>;
-    }
+    };
 
     render(<DisabledHarness />);
     fireEvent.keyDown(window, { key: 'L' });

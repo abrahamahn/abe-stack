@@ -16,35 +16,35 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
  */
 const MIME_TYPES: Record<string, string> = {
   // Images
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.png': 'image/png',
-  '.gif': 'image/gif',
-  '.webp': 'image/webp',
-  '.svg': 'image/svg+xml',
-  '.ico': 'image/x-icon',
+  ['.jpg']: 'image/jpeg',
+  ['.jpeg']: 'image/jpeg',
+  ['.png']: 'image/png',
+  ['.gif']: 'image/gif',
+  ['.webp']: 'image/webp',
+  ['.svg']: 'image/svg+xml',
+  ['.ico']: 'image/x-icon',
 
   // Documents
-  '.pdf': 'application/pdf',
-  '.doc': 'application/msword',
-  '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  '.xls': 'application/vnd.ms-excel',
-  '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  ['.pdf']: 'application/pdf',
+  ['.doc']: 'application/msword',
+  ['.docx']: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ['.xls']: 'application/vnd.ms-excel',
+  ['.xlsx']: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 
   // Text
-  '.txt': 'text/plain',
-  '.csv': 'text/csv',
-  '.json': 'application/json',
-  '.xml': 'application/xml',
+  ['.txt']: 'text/plain',
+  ['.csv']: 'text/csv',
+  ['.json']: 'application/json',
+  ['.xml']: 'application/xml',
 
   // Media
-  '.mp3': 'audio/mpeg',
-  '.mp4': 'video/mp4',
-  '.webm': 'video/webm',
+  ['.mp3']: 'audio/mpeg',
+  ['.mp4']: 'video/mp4',
+  ['.webm']: 'video/webm',
 
   // Archives
-  '.zip': 'application/zip',
-  '.gz': 'application/gzip',
+  ['.zip']: 'application/zip',
+  ['.gz']: 'application/gzip',
 };
 
 /**

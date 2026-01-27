@@ -5,11 +5,10 @@
  * Displays information about a user session.
  */
 
-import type { ReactElement } from 'react';
-
 import { Badge, Button, Card } from '@abe-stack/ui';
 
 import type { Session } from '../api';
+import type { ReactElement } from 'react';
 
 // ============================================================================
 // Types
@@ -29,7 +28,7 @@ export interface SessionCardProps {
  * Parse user agent string to get device info
  */
 function parseUserAgent(userAgent: string | null): { browser: string; os: string } {
-  if (!userAgent) {
+  if (userAgent === null) {
     return { browser: 'Unknown browser', os: 'Unknown device' };
   }
 
@@ -102,11 +101,11 @@ function formatDate(dateString: string): string {
 // Component
 // ============================================================================
 
-export function SessionCard({
+export const SessionCard = ({
   session,
   onRevoke,
   isRevoking = false,
-}: SessionCardProps): ReactElement {
+}: SessionCardProps): ReactElement => {
   const { browser, os } = parseUserAgent(session.userAgent);
 
   return (
@@ -121,7 +120,9 @@ export function SessionCard({
           </div>
 
           <div className="text-sm text-gray-500 space-y-0.5">
-            {session.ipAddress && <p>IP: {session.ipAddress}</p>}
+            {session.ipAddress !== null && session.ipAddress.length > 0 && (
+              <p>IP: {session.ipAddress}</p>
+            )}
             <p>Started: {formatDate(session.createdAt)}</p>
           </div>
         </div>
@@ -140,4 +141,4 @@ export function SessionCard({
       </div>
     </Card>
   );
-}
+};

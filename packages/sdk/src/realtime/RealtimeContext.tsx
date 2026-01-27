@@ -23,7 +23,6 @@ import React, {
   type ReactNode,
 } from 'react';
 
-import type { Operation } from '@abe-stack/core';
 
 import { type RecordCache, type TableMap } from '../cache/RecordCache';
 import { TransactionQueue, type QueuedTransaction } from '../offline/TransactionQueue';
@@ -32,6 +31,8 @@ import { UndoRedoStack, type UndoableOperation, type UndoRedoState } from '../un
 
 import { SubscriptionCache } from './SubscriptionCache';
 import { WebsocketPubsubClient, type ConnectionState } from './WebsocketPubsubClient';
+
+import type { Operation } from '@abe-stack/core';
 
 // ============================================================================
 // Types

@@ -66,8 +66,8 @@ describe('ValidationError', () => {
       email: ['Must be a valid email address'],
     });
 
-    expect(error.fields.email).toHaveLength(1);
-    expect(error.fields.email?.[0]).toBe('Must be a valid email address');
+    expect(error.fields['email']).toHaveLength(1);
+    expect(error.fields['email']?.[0]).toBe('Must be a valid email address');
   });
 
   test('should handle multiple field errors', () => {
@@ -78,7 +78,7 @@ describe('ValidationError', () => {
     });
 
     expect(Object.keys(error.fields)).toHaveLength(3);
-    expect(error.fields.password).toHaveLength(3);
+    expect(error.fields['password']).toHaveLength(3);
   });
 
   test('should handle empty fields object', () => {
@@ -93,17 +93,19 @@ describe('ValidationError', () => {
       email: [],
     });
 
-    expect(error.fields.email).toEqual([]);
+    expect(error.fields['email']).toEqual([]);
   });
 
   test('should preserve field names with special characters', () => {
-    const error = new ValidationError('Test', {
-      'user.email': ['Invalid'],
-      'address[0].street': ['Required'],
-    });
+    const userEmailKey = 'user.email';
+    const addressStreetKey = 'address[0].street';
+    const fields: Record<string, string[]> = {};
+    fields[userEmailKey] = ['Invalid'];
+    fields[addressStreetKey] = ['Required'];
+    const error = new ValidationError('Test', fields);
 
-    expect(error.fields['user.email']).toEqual(['Invalid']);
-    expect(error.fields['address[0].street']).toEqual(['Required']);
+    expect(error.fields[userEmailKey]).toEqual(['Invalid']);
+    expect(error.fields[addressStreetKey]).toEqual(['Required']);
   });
 
   test('should be instanceof Error', () => {

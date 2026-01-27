@@ -5,9 +5,8 @@
  * Component for uploading and managing user avatar.
  */
 
-import { useRef, useState, type ReactElement } from 'react';
-
 import { Alert, Avatar, Button, FileInput, Spinner } from '@abe-stack/ui';
+import { useRef, useState, type ReactElement } from 'react';
 
 import { useAvatarDelete, useAvatarUpload } from '../hooks';
 
@@ -25,11 +24,11 @@ export interface AvatarUploadProps {
 // Component
 // ============================================================================
 
-export function AvatarUpload({
+export const AvatarUpload = ({
   currentAvatarUrl,
   userName,
   onSuccess,
-}: AvatarUploadProps): ReactElement {
+}: AvatarUploadProps): ReactElement => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -62,7 +61,7 @@ export function AvatarUpload({
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (file === undefined) return;
 
     // Validate file type
     const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -87,7 +86,7 @@ export function AvatarUpload({
   };
 
   const handleUpload = (): void => {
-    if (selectedFile) {
+    if (selectedFile !== null) {
       uploadAvatar(selectedFile);
     }
   };
@@ -95,7 +94,7 @@ export function AvatarUpload({
   const handleCancel = (): void => {
     setPreviewUrl(null);
     setSelectedFile(null);
-    if (fileInputRef.current) {
+    if (fileInputRef.current !== null) {
       fileInputRef.current.value = '';
     }
   };
@@ -123,7 +122,7 @@ export function AvatarUpload({
     <div className="space-y-4">
       <div className="flex items-center gap-4">
         <div className="relative">
-          {displayUrl ? (
+          {displayUrl !== null && displayUrl.length > 0 ? (
             <Avatar src={displayUrl} alt={userName ?? 'User avatar'} className="w-20 h-20" />
           ) : (
             <div className="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-2xl font-medium text-gray-600 dark:text-gray-300">
@@ -150,7 +149,7 @@ export function AvatarUpload({
             id="avatar-upload"
           />
 
-          {!selectedFile ? (
+          {selectedFile === null ? (
             <div className="flex gap-2">
               <Button
                 type="button"
@@ -160,7 +159,7 @@ export function AvatarUpload({
               >
                 Upload Photo
               </Button>
-              {currentAvatarUrl && (
+              {currentAvatarUrl !== null && (
                 <Button
                   type="button"
                   variant="text"
@@ -185,7 +184,7 @@ export function AvatarUpload({
         </div>
       </div>
 
-      {error && <Alert tone="danger">{error.message}</Alert>}
+      {error !== null && <Alert tone="danger">{error.message}</Alert>}
     </div>
   );
-}
+};

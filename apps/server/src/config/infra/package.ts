@@ -1,5 +1,12 @@
 // apps/server/src/config/infra/package.ts
-import type { FullEnv, PackageManagerConfig, PackageManagerProvider } from '@abe-stack/core/config';
+import type {
+  FullEnv,
+  NpmConfig,
+  PackageManagerConfig,
+  PackageManagerProvider,
+  PnpmConfig,
+  YarnConfig,
+} from '@abe-stack/core/config';
 
 /**
  * Loads package manager configuration from environment variables.
@@ -33,38 +40,54 @@ export function loadPackageManagerConfig(env: FullEnv): PackageManagerConfig {
   const provider = env.PACKAGE_MANAGER_PROVIDER as PackageManagerProvider;
 
   switch (provider) {
-    case 'npm':
-      return {
+    case 'npm': {
+      const config: NpmConfig = {
         provider: 'npm',
         audit: env.NPM_AUDIT !== 'false',
         legacyPeerDeps: env.NPM_LEGACY_PEER_DEPS === 'true',
-        registry: env.NPM_REGISTRY,
       };
+      if (env.NPM_REGISTRY !== undefined) {
+        config.registry = env.NPM_REGISTRY;
+      }
+      return config;
+    }
 
-    case 'pnpm':
-      return {
+    case 'pnpm': {
+      const config: PnpmConfig = {
         provider: 'pnpm',
         strictPeerDeps: env.PNPM_STRICT_PEER_DEPS !== 'false',
         frozenLockfile: env.PNPM_FROZEN_LOCKFILE !== 'false',
-        registry: env.PNPM_REGISTRY,
       };
+      if (env.PNPM_REGISTRY !== undefined) {
+        config.registry = env.PNPM_REGISTRY;
+      }
+      return config;
+    }
 
-    case 'yarn':
-      return {
+    case 'yarn': {
+      const config: YarnConfig = {
         provider: 'yarn',
         audit: env.YARN_AUDIT !== 'false',
         frozenLockfile: env.YARN_FROZEN_LOCKFILE !== 'false',
-        registry: env.YARN_REGISTRY,
       };
+      if (env.YARN_REGISTRY !== undefined) {
+        config.registry = env.YARN_REGISTRY;
+      }
+      return config;
+    }
 
-    default:
+    default: {
       // Default to pnpm as it's the most efficient for monorepos
-      return {
+      const config: PnpmConfig = {
         provider: 'pnpm',
         strictPeerDeps: env.PNPM_STRICT_PEER_DEPS !== 'false',
         frozenLockfile: env.PNPM_FROZEN_LOCKFILE !== 'false',
-        registry: env.PNPM_REGISTRY,
       };
+      if (env.PNPM_REGISTRY !== undefined) {
+        config.registry = env.PNPM_REGISTRY;
+      }
+      return config;
+    }
   }
 }
 

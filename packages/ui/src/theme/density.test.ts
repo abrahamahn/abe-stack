@@ -6,9 +6,9 @@ import {
   densityMultipliers,
   getDensityCssVariables,
   getSpacingForDensity,
-} from '../density';
+} from './density';
 
-import type { Density } from '../density';
+import type { Density } from './density';
 
 describe('density', () => {
   describe('densityMultipliers', () => {

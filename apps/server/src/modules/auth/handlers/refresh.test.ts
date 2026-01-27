@@ -5,8 +5,10 @@
  * Comprehensive tests for token refresh using HTTP-only cookie.
  */
 
+import { InvalidTokenError, TokenReuseError } from '@abe-stack/core';
 import { refreshUserTokens } from '@auth/service';
 import { clearRefreshTokenCookie, setRefreshTokenCookie } from '@auth/utils';
+import { ERROR_MESSAGES, REFRESH_COOKIE_NAME } from '@shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { handleRefresh } from '../refresh';
@@ -32,8 +34,6 @@ vi.mock('@auth/security', () => ({
 
 // Import after mocking
 import { sendTokenReuseAlert } from '@auth/security';
-import { ERROR_MESSAGES, InvalidTokenError, TokenReuseError } from '@shared';
-import { REFRESH_COOKIE_NAME } from '@shared/constants';
 
 // ============================================================================
 // Test Helpers

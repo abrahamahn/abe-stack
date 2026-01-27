@@ -66,8 +66,7 @@ describe('Domain Structure', () => {
     });
 
     test('should export user types and schemas from contracts', async () => {
-      const { userSchema, userRoleSchema, usersContract } =
-        await import('@abe-stack/contracts');
+      const { userSchema, userRoleSchema, usersContract } = await import('@abe-stack/contracts');
 
       expect(typeof userSchema).toBe('object');
       expect(typeof userRoleSchema).toBe('object');
@@ -92,7 +91,7 @@ describe('Domain Structure', () => {
         PaginationError,
         buildCursorPaginationQuery,
         paginateArrayWithCursor,
-      } = await import('../shared/pagination/index');
+      } = await import('../shared/pagination/index.js');
 
       expect(typeof encodeCursor).toBe('function');
       expect(typeof decodeCursor).toBe('function');
@@ -218,12 +217,8 @@ describe('Domain Structure', () => {
   describe('Main Package Exports', () => {
     test('should export environment validation via subpath', async () => {
       // Server-only env utils are in subpath export @abe-stack/core/env
-      const {
-        validateEnvironment,
-        initEnv,
-        loadServerEnv,
-        EnvSchema,
-      } = await import('../config/index');
+      const { validateEnvironment, initEnv, loadServerEnv, EnvSchema } =
+        await import('../config/index.js');
 
       expect(typeof validateEnvironment).toBe('function');
       expect(typeof initEnv).toBe('function');
@@ -248,7 +243,7 @@ describe('Domain Structure', () => {
         // Domains
         userRoleSchema,
         authContract,
-      } = await import('../index');
+      } = await import('../index.js');
 
       // Auth domain
       expect(typeof validatePassword).toBe('function');
@@ -271,7 +266,7 @@ describe('Domain Structure', () => {
   describe('Backward Compatibility', () => {
     test('should maintain existing import patterns', async () => {
       // This simulates how the server imports from @abe-stack/core
-      const core = await import('../index');
+      const core = await import('../index.js');
 
       // Common imports that should still work
       expect(typeof core.validatePassword).toBe('function');

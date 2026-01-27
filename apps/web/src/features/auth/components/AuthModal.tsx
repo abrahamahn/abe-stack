@@ -3,9 +3,8 @@ import { Modal, useFormState } from '@abe-stack/ui';
 import { useAuth } from '@auth/hooks';
 import { useEffect, useState } from 'react';
 
-import { AuthForm, type AuthMode } from './AuthForms';
+import { AuthForm, type AuthMode, type AuthFormProps } from './AuthForms';
 
-import type { AuthFormProps } from './AuthForms';
 import type { ReactElement } from 'react';
 
 interface AuthModalProps {
@@ -15,12 +14,12 @@ interface AuthModalProps {
   onSuccess?: () => void;
 }
 
-export function AuthModal({
+export const AuthModal = ({
   open,
   onOpenChange,
   initialMode = 'login',
   onSuccess,
-}: AuthModalProps): ReactElement | null {
+}: AuthModalProps): ReactElement | null => {
   const { login, register, forgotPassword, resetPassword, resendVerification } = useAuth();
   const { isLoading, error, setError, wrapHandler } = useFormState();
   const [mode, setMode] = useState<AuthMode>(initialMode);
@@ -65,4 +64,4 @@ export function AuthModal({
       <AuthForm {...formProps} />
     </Modal.Root>
   );
-}
+};

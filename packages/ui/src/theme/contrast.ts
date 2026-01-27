@@ -15,27 +15,27 @@ export type ContrastMode = 'system' | 'normal' | 'high';
  */
 export const highContrastLightOverrides = {
   // Text: maximum contrast
-  '--ui-color-text': '#000000',
-  '--ui-color-text-muted': '#1a1a1a',
+  ['--ui-color-text']: '#000000',
+  ['--ui-color-text-muted']: '#1a1a1a',
 
   // Backgrounds: pure white
-  '--ui-color-bg': '#ffffff',
-  '--ui-color-surface': '#ffffff',
+  ['--ui-color-bg']: '#ffffff',
+  ['--ui-color-surface']: '#ffffff',
 
   // Borders: darker for visibility
-  '--ui-color-border': '#000000',
-  '--ui-layout-border': '2px solid #000000',
+  ['--ui-color-border']: '#000000',
+  ['--ui-layout-border']: '2px solid #000000',
 
   // Core colors: more saturated
-  '--ui-color-primary': '#0040c0',
-  '--ui-color-danger': '#c00000',
-  '--ui-color-success': '#006000',
-  '--ui-color-warning': '#a06000',
-  '--ui-color-muted': '#333333',
+  ['--ui-color-primary']: '#0040c0',
+  ['--ui-color-danger']: '#c00000',
+  ['--ui-color-success']: '#006000',
+  ['--ui-color-warning']: '#a06000',
+  ['--ui-color-muted']: '#333333',
 
   // Focus: stronger outline
-  '--ui-focus': '0 0 0 3px #000000',
-  '--ui-outline-width': '3px',
+  ['--ui-focus']: '0 0 0 3px #000000',
+  ['--ui-outline-width']: '3px',
 } as const;
 
 /**
@@ -44,27 +44,27 @@ export const highContrastLightOverrides = {
  */
 export const highContrastDarkOverrides = {
   // Text: maximum contrast
-  '--ui-color-text': '#ffffff',
-  '--ui-color-text-muted': '#e6e6e6',
+  ['--ui-color-text']: '#ffffff',
+  ['--ui-color-text-muted']: '#e6e6e6',
 
   // Backgrounds: pure black
-  '--ui-color-bg': '#000000',
-  '--ui-color-surface': '#0a0a0a',
+  ['--ui-color-bg']: '#000000',
+  ['--ui-color-surface']: '#0a0a0a',
 
   // Borders: lighter for visibility
-  '--ui-color-border': '#ffffff',
-  '--ui-layout-border': '2px solid #ffffff',
+  ['--ui-color-border']: '#ffffff',
+  ['--ui-layout-border']: '2px solid #ffffff',
 
   // Core colors: brighter for dark bg
-  '--ui-color-primary': '#6699ff',
-  '--ui-color-danger': '#ff6666',
-  '--ui-color-success': '#66ff66',
-  '--ui-color-warning': '#ffcc00',
-  '--ui-color-muted': '#cccccc',
+  ['--ui-color-primary']: '#6699ff',
+  ['--ui-color-danger']: '#ff6666',
+  ['--ui-color-success']: '#66ff66',
+  ['--ui-color-warning']: '#ffcc00',
+  ['--ui-color-muted']: '#cccccc',
 
   // Focus: stronger outline
-  '--ui-focus': '0 0 0 3px #ffffff',
-  '--ui-outline-width': '3px',
+  ['--ui-focus']: '0 0 0 3px #ffffff',
+  ['--ui-outline-width']: '3px',
 } as const;
 
 /**

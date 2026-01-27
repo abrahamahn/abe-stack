@@ -17,7 +17,7 @@ import {
   resendVerificationResponseSchema,
   resetPasswordRequestSchema,
   resetPasswordResponseSchema,
-} from '../auth';
+} from './auth';
 
 // ============================================================================
 // Request Schema Tests

@@ -1,8 +1,7 @@
 // packages/db/src/__tests__/client.test.ts
-import { describe, expect, test, vi, beforeEach } from 'vitest';
-import type { Mock } from 'vitest';
+import { beforeEach, describe, expect, test, vi, type Mock } from 'vitest';
 
-import { createRawDb, type RawDb } from '../client';
+import { createRawDb, type RawDb } from './client';
 
 // Mock postgres module
 vi.mock('postgres', () => {
@@ -18,7 +17,7 @@ vi.mock('postgres', () => {
         begin: vi
           .fn()
           .mockImplementation(async (_isolation: string, cb: (tx: unknown) => unknown) => {
-            return cb(tx);
+            return await cb(tx);
           }),
       };
     }),
@@ -49,8 +48,8 @@ describe('Database Client', () => {
 
       expect(postgres).toHaveBeenCalledWith(mockConnectionString, {
         max: 10,
-        idle_timeout: 30000,
-        connect_timeout: 10000,
+        ['idle_timeout']: 30000,
+        ['connect_timeout']: 10000,
         ssl: undefined,
       });
     });
@@ -67,11 +66,11 @@ describe('Database Client', () => {
     test('should return client with required methods', () => {
       const client = createRawDb(mockConnectionString);
 
-      expect(client.execute).toBeTypeOf('function');
-      expect(client.query).toBeTypeOf('function');
-      expect(client.queryOne).toBeTypeOf('function');
-      expect(client.raw).toBeTypeOf('function');
-      expect(client.transaction).toBeTypeOf('function');
+      expect(typeof client.execute).toBe('function');
+      expect(typeof client.query).toBe('function');
+      expect(typeof client.queryOne).toBe('function');
+      expect(typeof client.raw).toBe('function');
+      expect(typeof client.transaction).toBe('function');
     });
 
     test('should handle connection errors gracefully', () => {
@@ -99,9 +98,10 @@ describe('Database Client', () => {
 
         const query = { text: 'SELECT * FROM users WHERE id = $1', values: [1] };
         const result = await dbClient.execute(query);
+        const mockInstance = postgres() as unknown as { unsafe: Mock };
 
         expect(result).toEqual(1);
-        expect(postgres().unsafe).toHaveBeenCalledWith(query.text, query.values);
+        expect(mockInstance.unsafe).toHaveBeenCalledWith(query.text, query.values);
       });
 
       test('should handle execute with empty result', async () => {
@@ -153,9 +153,10 @@ describe('Database Client', () => {
         }));
 
         const result = await dbClient.query({ text: 'SELECT * FROM users', values: [] });
+        const mockInstance = postgres() as unknown as { unsafe: Mock };
 
         expect(result).toEqual(mockResults);
-        expect(postgres().unsafe).toHaveBeenCalledWith('SELECT * FROM users', []);
+        expect(mockInstance.unsafe).toHaveBeenCalledWith('SELECT * FROM users', []);
       });
 
       test('should handle query with parameters', async () => {
@@ -168,9 +169,10 @@ describe('Database Client', () => {
           text: 'SELECT * FROM users WHERE id = $1',
           values: [1],
         });
+        const mockInstance = postgres() as unknown as { unsafe: Mock };
 
         expect(result).toEqual(mockResults);
-        expect(postgres().unsafe).toHaveBeenCalledWith('SELECT * FROM users WHERE id = $1', [1]);
+        expect(mockInstance.unsafe).toHaveBeenCalledWith('SELECT * FROM users WHERE id = $1', [1]);
       });
 
       test('should handle empty query results', async () => {
@@ -199,7 +201,7 @@ describe('Database Client', () => {
 
       test('should handle complex query with multiple parameters', async () => {
         const mockResults = [
-          { id: 1, name: 'Alice', email: 'alice@example.com', created_at: new Date() },
+          { id: 1, name: 'Alice', email: 'alice@example.com', ['created_at']: new Date() },
         ];
         postgresMock.mockImplementation(() => ({
           unsafe: vi.fn().mockResolvedValue(mockResults),
@@ -228,9 +230,10 @@ describe('Database Client', () => {
           text: 'SELECT * FROM users WHERE name = $1',
           values: ['Alice'],
         });
+        const mockInstance = postgres() as unknown as { unsafe: Mock };
 
         expect(result).toEqual({ id: 1, name: 'Alice' });
-        expect(postgres().unsafe).toHaveBeenCalledWith('SELECT * FROM users WHERE name = $1', [
+        expect(mockInstance.unsafe).toHaveBeenCalledWith('SELECT * FROM users WHERE name = $1', [
           'Alice',
         ]);
       });
@@ -301,9 +304,10 @@ describe('Database Client', () => {
         }));
 
         const result = await dbClient.raw('SELECT column1, column2 FROM some_table');
+        const mockInstance = postgres() as unknown as { unsafe: Mock };
 
         expect(result).toEqual(mockResult);
-        expect(postgres().unsafe).toHaveBeenCalledWith(
+        expect(mockInstance.unsafe).toHaveBeenCalledWith(
           'SELECT column1, column2 FROM some_table',
           [],
         );
@@ -316,9 +320,10 @@ describe('Database Client', () => {
         }));
 
         const result = await dbClient.raw('SELECT * FROM users WHERE id = $1', [1]);
+        const mockInstance = postgres() as unknown as { unsafe: Mock };
 
         expect(result).toEqual(mockResult);
-        expect(postgres().unsafe).toHaveBeenCalledWith('SELECT * FROM users WHERE id = $1', [1]);
+        expect(mockInstance.unsafe).toHaveBeenCalledWith('SELECT * FROM users WHERE id = $1', [1]);
       });
 
       test('should handle raw query with no results', async () => {
@@ -341,13 +346,13 @@ describe('Database Client', () => {
       });
 
       test('should handle raw query with complex SQL', async () => {
-        const mockResult = [{ user_id: 1, total_orders: 5, avg_amount: 99.99 }];
+        const mockResult = [{ ['user_id']: 1, ['total_orders']: 5, ['avg_amount']: 99.99 }];
         postgresMock.mockImplementation(() => ({
           unsafe: vi.fn().mockResolvedValue(mockResult),
         }));
 
         const sql = `
-          SELECT 
+          SELECT
             u.id as user_id,
             COUNT(o.id) as total_orders,
             AVG(o.amount) as avg_amount
@@ -371,7 +376,7 @@ describe('Database Client', () => {
           .fn()
           .mockImplementation(async (_isolation: string, cb: (tx: Tx) => unknown) => {
             const tx = { unsafe: vi.fn().mockResolvedValue([]) };
-            return cb(tx);
+            return await cb(tx);
           });
 
         postgresMock.mockImplementation(() => ({
@@ -381,7 +386,7 @@ describe('Database Client', () => {
         }));
 
         const client = createRawDb(mockConnectionString);
-        const result = await client.transaction(async () => 'committed');
+        const result = await client.transaction(() => Promise.resolve('committed'));
 
         expect(result).toBe('committed');
         expect(beginSpy).toHaveBeenCalledWith(
@@ -396,7 +401,7 @@ describe('Database Client', () => {
           .fn()
           .mockImplementation(async (_isolation: string, cb: (tx: Tx) => unknown) => {
             const tx = { unsafe: txUnsafe };
-            return cb(tx);
+            return await cb(tx);
           });
 
         postgresMock.mockImplementation(() => ({
@@ -406,7 +411,7 @@ describe('Database Client', () => {
         }));
 
         const client = createRawDb(mockConnectionString);
-        await client.transaction(async () => 'ok', { readOnly: true, deferrable: true });
+        await client.transaction(() => Promise.resolve('ok'), { readOnly: true, deferrable: true });
 
         expect(txUnsafe).toHaveBeenCalledWith('SET TRANSACTION READ ONLY DEFERRABLE');
       });
@@ -416,7 +421,7 @@ describe('Database Client', () => {
           .fn()
           .mockImplementation(async (cb: (tx: { unsafe: () => Promise<unknown[]> }) => unknown) => {
             const tx = { unsafe: vi.fn().mockResolvedValue([]) };
-            return cb(tx);
+            return await cb(tx);
           });
 
         postgresMock.mockImplementation(() => ({
@@ -426,7 +431,7 @@ describe('Database Client', () => {
         }));
 
         const client = createRawDb(mockConnectionString);
-        const result = await client.transaction(async () => 'nested');
+        const result = await client.transaction(() => Promise.resolve('nested'));
 
         expect(result).toBe('nested');
         expect(savepointSpy).toHaveBeenCalled();
@@ -457,8 +462,8 @@ describe('Database Client', () => {
           end: vi.fn().mockResolvedValue(undefined),
           begin: vi
             .fn()
-            .mockImplementation(async (_isolation: string, cb: (tx: Tx) => unknown) =>
-              cb({ unsafe: vi.fn() }),
+            .mockImplementation(
+              async (_isolation: string, cb: (tx: Tx) => unknown) => await cb({ unsafe: vi.fn() }),
             ),
         }));
 
@@ -478,8 +483,8 @@ describe('Database Client', () => {
           end: vi.fn().mockResolvedValue(undefined),
           begin: vi
             .fn()
-            .mockImplementation(async (_isolation: string, cb: (tx: Tx) => unknown) =>
-              cb({ unsafe: vi.fn() }),
+            .mockImplementation(
+              async (_isolation: string, cb: (tx: Tx) => unknown) => await cb({ unsafe: vi.fn() }),
             ),
         }));
 
@@ -538,7 +543,7 @@ describe('Database Client', () => {
     });
 
     describe('error handling', () => {
-      test('should handle connection errors', async () => {
+      test('should handle connection errors', () => {
         const connectionError = new Error('Connection refused');
         postgresMock.mockImplementation(() => {
           throw connectionError;

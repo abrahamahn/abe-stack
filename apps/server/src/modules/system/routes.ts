@@ -1,5 +1,4 @@
 // apps/server/src/modules/system/routes.ts
-import type { RouteMap } from '@router';
 import { protectedRoute, publicRoute } from '@router';
 
 import {
@@ -11,6 +10,8 @@ import {
   handleRoot,
   handleSystemStatus,
 } from './handlers';
+
+import type { RouteMap } from '@router';
 
 export const systemRoutes: RouteMap = {
   // Root Routes

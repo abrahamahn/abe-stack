@@ -22,7 +22,11 @@ export {
 } from './customer-mappings';
 
 // Invoices
-export { createInvoiceRepository, type InvoiceFilters, type InvoiceRepository } from './invoices';
+export {
+  createInvoiceRepository,
+  type InvoiceFilters,
+  type InvoiceRepository,
+} from './invoices';
 
 // Payment Methods
 export { createPaymentMethodRepository, type PaymentMethodRepository } from './payment-methods';

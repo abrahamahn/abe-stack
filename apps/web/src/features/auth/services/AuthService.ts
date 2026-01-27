@@ -22,24 +22,17 @@ import type {
   ResendVerificationResponse,
   ResetPasswordRequest,
   ResetPasswordResponse,
-  UserRole,
+  TokenStore,
+  User,
 } from '@abe-stack/core';
-import type { TokenStore } from '@abe-stack/core';
 import type { ApiClient } from '@abe-stack/sdk';
-import type { ClientConfig } from '@config';
+import type { ClientConfig } from '@/config';
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export type User = {
-  id: string;
-  email: string;
-  name: string | null;
-  avatarUrl: string | null;
-  role: UserRole;
-  createdAt: string;
-};
+export type { User } from '@abe-stack/core';
 
 export type AuthState = {
   user: User | null;
@@ -54,6 +47,18 @@ export type AuthState = {
 // Maximum backoff delay for token refresh (5 minutes)
 const MAX_REFRESH_BACKOFF_MS = 5 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 8000;
+
+// Type guard for User
+const isUser = (value: unknown): value is User => {
+  return (
+    value !== null &&
+    value !== undefined &&
+    typeof value === 'object' &&
+    'id' in value &&
+    'email' in value &&
+    'role' in value
+  );
+};
 
 const withTimeout = async <T>(promise: Promise<T>, label: string): Promise<T> =>
   new Promise<T>((resolve, reject) => {
@@ -105,7 +110,8 @@ export class AuthService {
     });
 
     // Start refresh interval if we have a token
-    if (tokenStoreTyped.get()) {
+    const currentToken = tokenStoreTyped.get();
+    if (currentToken !== null && currentToken !== undefined) {
       this.startRefreshInterval();
     }
   }
@@ -126,7 +132,8 @@ export class AuthService {
     this.initialized = true;
 
     // If we already have a token in memory, fetch the user
-    if (this.tokenStore.get()) {
+    const existingToken = this.tokenStore.get();
+    if (existingToken !== null && existingToken !== undefined) {
       try {
         return await this.fetchCurrentUser();
       } catch {
@@ -210,7 +217,7 @@ export class AuthService {
   /** Refresh access token (with mutex to prevent concurrent refresh requests) */
   async refreshToken(): Promise<boolean> {
     // If refresh already in progress, wait for it
-    if (this.refreshPromise) {
+    if (this.refreshPromise !== null) {
       return this.refreshPromise;
     }
 
@@ -228,10 +235,19 @@ export class AuthService {
   private async performRefresh(): Promise<boolean> {
     try {
       const response = await withTimeout(this.api.refresh(), 'Token refresh');
-      this.tokenStore.set(response.token);
-      this.resetRefreshBackoff();
-      this.notifyListeners();
-      return true;
+      // Type guard: ensure response has token property
+      if (
+        typeof response === 'object' &&
+        response !== null &&
+        'token' in response &&
+        typeof response.token === 'string'
+      ) {
+        this.tokenStore.set(response.token);
+        this.resetRefreshBackoff();
+        this.notifyListeners();
+        return true;
+      }
+      throw new Error('Invalid response format from refresh API');
     } catch {
       this.clearAuth();
       return false;
@@ -255,7 +271,8 @@ export class AuthService {
 
   /** Fetch current user (call on app load if token exists) */
   async fetchCurrentUser(): Promise<User | null> {
-    if (!this.tokenStore.get()) {
+    const currentToken = this.tokenStore.get();
+    if (currentToken === null || currentToken === undefined) {
       return null;
     }
 
@@ -263,17 +280,20 @@ export class AuthService {
     this.notifyListeners();
 
     try {
-      const user = await withTimeout(this.api.getCurrentUser(), 'Fetch current user');
-      this.user = user;
-      this.isLoadingUser = false;
-      this.notifyListeners();
-      return user;
+      const user = await withTimeout<User>(this.api.getCurrentUser(), 'Fetch current user');
+      if (isUser(user)) {
+        this.user = user;
+        this.isLoadingUser = false;
+        this.notifyListeners();
+        return user;
+      }
+      throw new Error('Invalid user data received from API');
     } catch {
       // Token might be expired, try refresh
       const refreshed = await this.refreshToken();
       if (refreshed) {
         try {
-          const user = await withTimeout(this.api.getCurrentUser(), 'Fetch current user');
+          const user = await withTimeout<User>(this.api.getCurrentUser(), 'Fetch current user');
           this.user = user;
           this.isLoadingUser = false;
           this.notifyListeners();
@@ -304,7 +324,7 @@ export class AuthService {
   async verifyEmail(data: EmailVerificationRequest): Promise<EmailVerificationResponse> {
     const response: EmailVerificationResponse = await this.api.verifyEmail(data);
     // Auto-login on successful verification
-    if (response.verified && response.token) {
+    if (response.verified && response.token !== null && response.token !== undefined) {
       this.handleAuthSuccess({ token: response.token, user: response.user });
     }
     return response;
@@ -361,7 +381,8 @@ export class AuthService {
     } else {
       // On failure, increment backoff and reschedule if we still have a token
       // (refreshToken() calls clearAuth() on failure, but we check anyway)
-      if (this.tokenStore.get()) {
+      const stillHasToken = this.tokenStore.get();
+      if (stillHasToken !== null && stillHasToken !== undefined) {
         this.incrementRefreshBackoff();
         this.scheduleNextRefresh();
       }
@@ -369,7 +390,7 @@ export class AuthService {
   }
 
   private stopRefreshInterval(): void {
-    if (this.refreshIntervalId) {
+    if (this.refreshIntervalId !== null) {
       clearTimeout(this.refreshIntervalId);
       this.refreshIntervalId = null;
     }

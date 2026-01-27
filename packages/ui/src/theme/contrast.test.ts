@@ -6,9 +6,9 @@ import {
   getContrastCssVariables,
   highContrastDarkOverrides,
   highContrastLightOverrides,
-} from '../contrast';
+} from './contrast';
 
-import type { ContrastMode } from '../contrast';
+import type { ContrastMode } from './contrast';
 
 describe('contrast', () => {
   describe('DEFAULT_CONTRAST_MODE', () => {

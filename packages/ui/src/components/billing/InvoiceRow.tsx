@@ -272,9 +272,9 @@ export const InvoiceList = forwardRef<HTMLDivElement, InvoiceListProps>(
              <InvoiceRow
                key={invoice.id}
                invoice={invoice}
-               formatDate={formatDate}
-               formatPrice={formatPrice}
-               formatPeriod={formatPeriod}
+               {...(formatDate !== undefined && { formatDate })}
+               {...(formatPrice !== undefined && { formatPrice })}
+               {...(formatPeriod !== undefined && { formatPeriod })}
              />
            ))}
          </div>

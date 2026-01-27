@@ -69,7 +69,7 @@ function parseMP3Metadata(buffer: Buffer): AudioMetadata {
     if (buffer[i] === 0xff && nextByte !== undefined && (nextByte & 0xe0) === 0xe0) {
       // Found MPEG frame
       const frame = parseMPEGFrame(buffer, i);
-      if (frame) {
+      if (frame !== null) {
         metadata.bitrate = frame.bitrate;
         metadata.sampleRate = frame.sampleRate;
         metadata.channels = frame.channels;
@@ -79,7 +79,12 @@ function parseMP3Metadata(buffer: Buffer): AudioMetadata {
   }
 
   // Parse ID3 tags for duration estimate
-  if (metadata.bitrate && metadata.sampleRate) {
+  if (
+    metadata.bitrate !== undefined &&
+    metadata.bitrate !== 0 &&
+    metadata.sampleRate !== undefined &&
+    metadata.sampleRate !== 0
+  ) {
     // Rough duration estimate: file_size * 8 / bitrate
     const fileSizeBits = buffer.length * 8;
     metadata.duration = fileSizeBits / metadata.bitrate;
@@ -111,28 +116,41 @@ function parseMPEGFrame(
     // Channel mode (bits 6-7 of byte3)
     const channelMode = (buffer[offset + 3] ?? 0) >> 6;
 
-    const bitrates: Record<number, number[]> = {
+    const bitrates: Record<string, number[]> = {
       // MPEG-1
-      3: [0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320],
+      mpeg1: [0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320],
       // MPEG-2/2.5
-      2: [0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160],
+      mpeg2: [0, 8, 16, 24, 32, 40, 48, 56, 64, 80, 96, 112, 128, 144, 160],
     };
 
-    const sampleRates: Record<number, number[]> = {
+    const sampleRates: Record<string, number[]> = {
       // MPEG-1
-      3: [44100, 48000, 32000],
+      mpeg1: [44100, 48000, 32000],
       // MPEG-2
-      2: [22050, 24000, 16000],
+      mpeg2: [22050, 24000, 16000],
       // MPEG-2.5
-      0: [11025, 12000, 8000],
+      mpeg25: [11025, 12000, 8000],
     };
 
-    const bitrateTable = bitrates[mpegVersion];
-    const sampleRateTable = sampleRates[mpegVersion];
+    const versionKey =
+      mpegVersion === 3
+        ? 'mpeg1'
+        : mpegVersion === 2
+          ? 'mpeg2'
+          : mpegVersion === 0
+            ? 'mpeg25'
+            : null;
+
+    if (versionKey === null) {
+      return null;
+    }
+
+    const bitrateTable = bitrates[versionKey];
+    const sampleRateTable = sampleRates[versionKey];
 
     if (
-      !bitrateTable ||
-      !sampleRateTable ||
+      bitrateTable === undefined ||
+      sampleRateTable === undefined ||
       bitrateIndex >= bitrateTable.length ||
       sampleRateIndex >= sampleRateTable.length
     ) {

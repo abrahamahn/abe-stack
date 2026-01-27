@@ -5,9 +5,8 @@
  * Form for updating user profile information.
  */
 
-import { useState, type ReactElement } from 'react';
-
 import { Alert, Button, FormField, Input } from '@abe-stack/ui';
+import { useState, type ReactElement } from 'react';
 
 import { useProfileUpdate } from '../hooks';
 
@@ -26,7 +25,7 @@ export interface ProfileFormProps {
 // Component
 // ============================================================================
 
-export function ProfileForm({ user, onSuccess }: ProfileFormProps): ReactElement {
+export const ProfileForm = ({ user, onSuccess }: ProfileFormProps): ReactElement => {
   const [name, setName] = useState(user.name ?? '');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -45,10 +44,10 @@ export function ProfileForm({ user, onSuccess }: ProfileFormProps): ReactElement
   const handleSubmit = (e: React.FormEvent): void => {
     e.preventDefault();
     setSuccessMessage(null);
-    updateProfile({ name: name.trim() || null });
+    updateProfile({ name: name.trim().length > 0 ? name.trim() : null });
   };
 
-  const hasChanges = (name.trim() || null) !== user.name;
+  const hasChanges = (name.trim().length > 0 ? name.trim() : null) !== user.name;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -76,9 +75,11 @@ export function ProfileForm({ user, onSuccess }: ProfileFormProps): ReactElement
         />
       </FormField>
 
-      {error && <Alert tone="danger">{error.message}</Alert>}
+      {error !== null && <Alert tone="danger">{error.message}</Alert>}
 
-      {successMessage && <Alert tone="success">{successMessage}</Alert>}
+      {successMessage !== null && successMessage.length > 0 && (
+        <Alert tone="success">{successMessage}</Alert>
+      )}
 
       <div className="flex justify-end">
         <Button type="submit" disabled={!hasChanges || isLoading}>
@@ -87,4 +88,4 @@ export function ProfileForm({ user, onSuccess }: ProfileFormProps): ReactElement
       </div>
     </form>
   );
-}
+};

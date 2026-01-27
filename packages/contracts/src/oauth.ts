@@ -7,7 +7,8 @@
 
 import { emptyBodySchema } from './auth';
 import { errorResponseSchema, uuidSchema } from './common';
-import { createSchema, type Contract, type Schema } from './types';
+import { createSchema } from './schema';
+import type { Contract, Schema } from './types';
 import { userSchema, type User } from './users';
 
 // ============================================================================
@@ -56,14 +57,14 @@ export interface OAuthInitiateResponse {
 
 export const oauthInitiateResponseSchema: Schema<OAuthInitiateResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid OAuth initiate response');
     }
     const obj = data as Record<string, unknown>;
-    if (typeof obj.url !== 'string' || !isValidUrl(obj.url)) {
+    if (typeof obj['url'] !== 'string' || !isValidUrl(obj['url'])) {
       throw new Error('URL must be a valid URL');
     }
-    return { url: obj.url };
+    return { url: obj['url'] };
   },
 );
 
@@ -71,24 +72,24 @@ export const oauthInitiateResponseSchema: Schema<OAuthInitiateResponse> = create
  * OAuth callback request (query parameters)
  */
 export interface OAuthCallbackQuery {
-  code?: string;
-  state?: string;
-  error?: string;
-  error_description?: string;
+  code?: string | undefined;
+  state?: string | undefined;
+  error?: string | undefined;
+  error_description?: string | undefined;
 }
 
 export const oauthCallbackQuerySchema: Schema<OAuthCallbackQuery> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       return {};
     }
     const obj = data as Record<string, unknown>;
     return {
-      code: typeof obj.code === 'string' ? obj.code : undefined,
-      state: typeof obj.state === 'string' ? obj.state : undefined,
-      error: typeof obj.error === 'string' ? obj.error : undefined,
+      code: typeof obj['code'] === 'string' ? obj['code'] : undefined,
+      state: typeof obj['state'] === 'string' ? obj['state'] : undefined,
+      error: typeof obj['error'] === 'string' ? obj['error'] : undefined,
       error_description:
-        typeof obj.error_description === 'string' ? obj.error_description : undefined,
+        typeof obj['error_description'] === 'string' ? obj['error_description'] : undefined,
     };
   },
 );
@@ -104,20 +105,20 @@ export interface OAuthCallbackResponse {
 
 export const oauthCallbackResponseSchema: Schema<OAuthCallbackResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid OAuth callback response');
     }
     const obj = data as Record<string, unknown>;
-    if (typeof obj.token !== 'string') {
+    if (typeof obj['token'] !== 'string') {
       throw new Error('Token must be a string');
     }
-    if (typeof obj.isNewUser !== 'boolean') {
+    if (typeof obj['isNewUser'] !== 'boolean') {
       throw new Error('isNewUser must be a boolean');
     }
     return {
-      token: obj.token,
-      user: userSchema.parse(obj.user),
-      isNewUser: obj.isNewUser,
+      token: obj['token'],
+      user: userSchema.parse(obj['user']),
+      isNewUser: obj['isNewUser'],
     };
   },
 );
@@ -130,14 +131,14 @@ export interface OAuthLinkResponse {
 }
 
 export const oauthLinkResponseSchema: Schema<OAuthLinkResponse> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid OAuth link response');
   }
   const obj = data as Record<string, unknown>;
-  if (typeof obj.url !== 'string' || !isValidUrl(obj.url)) {
+  if (typeof obj['url'] !== 'string' || !isValidUrl(obj['url'])) {
     throw new Error('URL must be a valid URL');
   }
-  return { url: obj.url };
+  return { url: obj['url'] };
 });
 
 /**
@@ -150,16 +151,16 @@ export interface OAuthLinkCallbackResponse {
 
 export const oauthLinkCallbackResponseSchema: Schema<OAuthLinkCallbackResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid OAuth link callback response');
     }
     const obj = data as Record<string, unknown>;
-    if (typeof obj.linked !== 'boolean') {
+    if (typeof obj['linked'] !== 'boolean') {
       throw new Error('Linked must be a boolean');
     }
     return {
-      linked: obj.linked,
-      provider: oauthProviderSchema.parse(obj.provider),
+      linked: obj['linked'],
+      provider: oauthProviderSchema.parse(obj['provider']),
     };
   },
 );
@@ -173,14 +174,14 @@ export interface OAuthUnlinkResponse {
 
 export const oauthUnlinkResponseSchema: Schema<OAuthUnlinkResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid OAuth unlink response');
     }
     const obj = data as Record<string, unknown>;
-    if (typeof obj.message !== 'string') {
+    if (typeof obj['message'] !== 'string') {
       throw new Error('Message must be a string');
     }
-    return { message: obj.message };
+    return { message: obj['message'] };
   },
 );
 
@@ -195,27 +196,27 @@ export interface OAuthConnection {
 }
 
 export const oauthConnectionSchema: Schema<OAuthConnection> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid OAuth connection');
   }
   const obj = data as Record<string, unknown>;
 
-  const id = uuidSchema.parse(obj.id);
-  const provider = oauthProviderSchema.parse(obj.provider);
+  const id = uuidSchema.parse(obj['id']);
+  const provider = oauthProviderSchema.parse(obj['provider']);
 
   let providerEmail: string | null = null;
-  if (obj.providerEmail !== null && obj.providerEmail !== undefined) {
-    if (typeof obj.providerEmail !== 'string') {
+  if (obj['providerEmail'] !== null && obj['providerEmail'] !== undefined) {
+    if (typeof obj['providerEmail'] !== 'string') {
       throw new Error('Provider email must be a string or null');
     }
-    providerEmail = obj.providerEmail;
+    providerEmail = obj['providerEmail'];
   }
 
   let connectedAt: Date;
-  if (obj.connectedAt instanceof Date) {
-    connectedAt = obj.connectedAt;
-  } else if (typeof obj.connectedAt === 'string' || typeof obj.connectedAt === 'number') {
-    connectedAt = new Date(obj.connectedAt);
+  if (obj['connectedAt'] instanceof Date) {
+    connectedAt = obj['connectedAt'];
+  } else if (typeof obj['connectedAt'] === 'string' || typeof obj['connectedAt'] === 'number') {
+    connectedAt = new Date(obj['connectedAt']);
     if (isNaN(connectedAt.getTime())) {
       throw new Error('Invalid connectedAt date');
     }
@@ -235,15 +236,15 @@ export interface OAuthConnectionsResponse {
 
 export const oauthConnectionsResponseSchema: Schema<OAuthConnectionsResponse> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid OAuth connections response');
     }
     const obj = data as Record<string, unknown>;
-    if (!Array.isArray(obj.connections)) {
+    if (!Array.isArray(obj['connections'])) {
       throw new Error('Connections must be an array');
     }
     return {
-      connections: obj.connections.map((c) => oauthConnectionSchema.parse(c)),
+      connections: obj['connections'].map((c) => oauthConnectionSchema.parse(c)),
     };
   },
 );
@@ -257,15 +258,15 @@ export interface OAuthEnabledProvidersResponse {
 
 export const oauthEnabledProvidersResponseSchema: Schema<OAuthEnabledProvidersResponse> =
   createSchema((data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid enabled providers response');
     }
     const obj = data as Record<string, unknown>;
-    if (!Array.isArray(obj.providers)) {
+    if (!Array.isArray(obj['providers'])) {
       throw new Error('Providers must be an array');
     }
     return {
-      providers: obj.providers.map((p) => oauthProviderSchema.parse(p)),
+      providers: obj['providers'].map((p) => oauthProviderSchema.parse(p)),
     };
   });
 

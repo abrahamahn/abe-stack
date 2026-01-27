@@ -2,7 +2,7 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { layoutCatalog } from '../layoutCatalog';
+import { layoutCatalog } from './layoutCatalog';
 
 import type { ComponentDemo, ComponentVariant } from '@demo/types';
 
@@ -45,11 +45,11 @@ describe('layoutCatalog', () => {
 
   describe('Container component', () => {
     it('is defined in the catalog', () => {
-      expect(layoutCatalog.container).toBeDefined();
+      expect(layoutCatalog['container']).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const container = layoutCatalog.container;
+      const container = layoutCatalog['container'];
       if (!container) return;
 
       container.variants.forEach((variant: ComponentVariant) => {
@@ -59,7 +59,7 @@ describe('layoutCatalog', () => {
     });
 
     it('has size variants', () => {
-      const container = layoutCatalog.container;
+      const container = layoutCatalog['container'];
       if (!container) return;
 
       const variantNames = container.variants.map((v: ComponentVariant) => v.name);
@@ -71,11 +71,11 @@ describe('layoutCatalog', () => {
 
   describe('AuthLayout component', () => {
     it('is defined in the catalog', () => {
-      expect(layoutCatalog.authLayout).toBeDefined();
+      expect(layoutCatalog['authLayout']).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const authLayout = layoutCatalog.authLayout;
+      const authLayout = layoutCatalog['authLayout'];
       if (!authLayout) return;
 
       authLayout.variants.forEach((variant: ComponentVariant) => {
@@ -85,7 +85,7 @@ describe('layoutCatalog', () => {
     });
 
     it('has form variants', () => {
-      const authLayout = layoutCatalog.authLayout;
+      const authLayout = layoutCatalog['authLayout'];
       if (!authLayout) return;
 
       const variantNames = authLayout.variants.map((v: ComponentVariant) => v.name);
@@ -96,11 +96,11 @@ describe('layoutCatalog', () => {
 
   describe('PageContainer component', () => {
     it('is defined in the catalog', () => {
-      expect(layoutCatalog.pageContainer).toBeDefined();
+      expect(layoutCatalog['pageContainer']).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const pageContainer = layoutCatalog.pageContainer;
+      const pageContainer = layoutCatalog['pageContainer'];
       if (!pageContainer) return;
 
       pageContainer.variants.forEach((variant: ComponentVariant) => {
@@ -112,11 +112,11 @@ describe('layoutCatalog', () => {
 
   describe('SidebarLayout component', () => {
     it('is defined in the catalog', () => {
-      expect(layoutCatalog.sidebarLayout).toBeDefined();
+      expect(layoutCatalog['sidebarLayout']).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const sidebarLayout = layoutCatalog.sidebarLayout;
+      const sidebarLayout = layoutCatalog['sidebarLayout'];
       if (!sidebarLayout) return;
 
       sidebarLayout.variants.forEach((variant: ComponentVariant) => {
@@ -128,11 +128,11 @@ describe('layoutCatalog', () => {
 
   describe('StackedLayout component', () => {
     it('is defined in the catalog', () => {
-      expect(layoutCatalog.stackedLayout).toBeDefined();
+      expect(layoutCatalog['stackedLayout']).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const stackedLayout = layoutCatalog.stackedLayout;
+      const stackedLayout = layoutCatalog['stackedLayout'];
       if (!stackedLayout) return;
 
       stackedLayout.variants.forEach((variant: ComponentVariant) => {
@@ -142,7 +142,7 @@ describe('layoutCatalog', () => {
     });
 
     it('has hero variant', () => {
-      const stackedLayout = layoutCatalog.stackedLayout;
+      const stackedLayout = layoutCatalog['stackedLayout'];
       if (!stackedLayout) return;
 
       const variantNames = stackedLayout.variants.map((v: ComponentVariant) => v.name);

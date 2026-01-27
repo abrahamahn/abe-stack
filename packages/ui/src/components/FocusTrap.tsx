@@ -24,7 +24,7 @@ const FOCUSABLE = [
  * </FocusTrap>
  * ```
  */
-export function FocusTrap({ children }: { children: ReactNode }): ReactElement {
+export const FocusTrap = ({ children }: { children: ReactNode }): ReactElement => {
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect((): (() => void) => {
@@ -64,4 +64,4 @@ export function FocusTrap({ children }: { children: ReactNode }): ReactElement {
   }, []);
 
   return <div ref={rootRef}>{children}</div>;
-}
+};

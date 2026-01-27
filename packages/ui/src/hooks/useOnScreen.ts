@@ -1,7 +1,5 @@
 // packages/ui/src/hooks/useOnScreen.ts
-import { useEffect, useState } from 'react';
-
-import type React from 'react';
+import { useEffect, useState, type RefObject } from 'react';
 
 /**
  * Detect if an element is visible in the viewport using IntersectionObserver.
@@ -12,7 +10,7 @@ import type React from 'react';
  * @returns true if element is visible, false otherwise
  */
 export function useOnScreen<T extends HTMLElement>(
-  ref: React.RefObject<T | null>,
+  ref: RefObject<T | null>,
   options?: IntersectionObserverInit,
 ): boolean {
   const [isVisible, setIsVisible] = useState(false);

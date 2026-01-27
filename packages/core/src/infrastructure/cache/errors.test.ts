@@ -1,7 +1,8 @@
 // packages/core/src/infrastructure/cache/errors.test.ts
 import { describe, expect, test } from 'vitest';
 
-import { AppError } from '../errors';
+import { AppError } from '../errors/index';
+
 import {
   CacheCapacityError,
   CacheConnectionError,

@@ -1,5 +1,6 @@
 // packages/core/src/config/env.schema.test.ts
 import { describe, expect, it } from 'vitest';
+
 import { EnvSchema } from './env.schema';
 
 describe('EnvSchema', () => {

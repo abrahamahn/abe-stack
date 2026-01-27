@@ -1,9 +1,11 @@
-// packages/core/src/infrastructure/pubsub/subscriptionManager.test.ts
+// packages/core/src/infrastructure/pubsub/subscription-manager.test.ts
 /* eslint-disable @typescript-eslint/unbound-method */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { PostgresPubSub } from './postgresPubSub';
-import { SubscriptionManager } from './subscriptionManager';
+
+import { SubscriptionManager } from './subscription-manager';
 import { SubKeys, type WebSocket } from './types';
+
+import type { PostgresPubSub } from './postgres-pubsub';
 
 // Mock WebSocket
 function createMockWebSocket(): WebSocket {

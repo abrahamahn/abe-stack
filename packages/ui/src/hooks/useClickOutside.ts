@@ -1,7 +1,5 @@
 // packages/ui/src/hooks/useClickOutside.ts
-import { useEffect } from 'react';
-
-import type React from 'react';
+import { useEffect, type RefObject } from 'react';
 
 /**
  * Hook to detect clicks outside a referenced element.
@@ -13,7 +11,7 @@ import type React from 'react';
  * ```
  */
 export function useClickOutside<T extends HTMLElement>(
-  ref: React.RefObject<T | null>,
+  ref: RefObject<T | null>,
   handler: (event: MouseEvent | TouchEvent) => void,
 ): void {
   useEffect((): (() => void) => {

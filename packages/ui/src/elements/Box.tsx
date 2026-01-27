@@ -37,8 +37,8 @@ export const Box = ({
 }: BoxProps): ReactElement => {
   const boxPadding = typeof padding === 'number' ? `${String(padding)}px` : padding;
   const combinedStyle: CSSProperties = {
-    ...(flexDirection != null ? { '--ui-box-direction': flexDirection } : {}),
-     ...(boxPadding != null ? { '--ui-box-padding': boxPadding } : {}),
+    ...(flexDirection != null ? { ['--ui-box-direction']: flexDirection } : {}),
+     ...(boxPadding != null ? { ['--ui-box-padding']: boxPadding } : {}),
     ...style,
   };
 

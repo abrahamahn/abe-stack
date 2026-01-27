@@ -1,7 +1,14 @@
 // apps/server/src/config/infra/storage.ts
-import type { FullEnv, StorageConfig, StorageProviderName } from '@abe-stack/core/config';
-
 import { resolve } from 'node:path';
+
+import type {
+  FullEnv,
+  LocalStorageConfig,
+  S3StorageConfig,
+  StorageConfig,
+  StorageProviderName,
+} from '@abe-stack/core/config';
+
 
 /**
  * Storage Configuration Loader
@@ -26,19 +33,22 @@ export function loadStorageConfig(env: FullEnv): StorageConfig {
   const provider = env.STORAGE_PROVIDER as StorageProviderName;
 
   if (provider === 's3') {
-    return {
+    const config: S3StorageConfig = {
       provider: 's3',
       bucket: env.S3_BUCKET ?? '',
       region: env.S3_REGION ?? '',
       accessKeyId: env.S3_ACCESS_KEY_ID ?? '',
       secretAccessKey: env.S3_SECRET_ACCESS_KEY ?? '',
-      // Custom endpoint for S3-compatible services (MinIO, R2, Spaces)
-      endpoint: env.S3_ENDPOINT,
       // Path-style is required for MinIO and some S3-compatible services
       forcePathStyle: env.S3_FORCE_PATH_STYLE === 'true',
       // Default presigned URLs to 1 hour
       presignExpiresInSeconds: env.S3_PRESIGN_EXPIRES_IN_SECONDS ?? 3600,
     };
+    // Custom endpoint for S3-compatible services (MinIO, R2, Spaces)
+    if (env.S3_ENDPOINT !== undefined) {
+      config.endpoint = env.S3_ENDPOINT;
+    }
+    return config;
   }
 
   // Local filesystem storage (development default)
@@ -46,13 +56,16 @@ export function loadStorageConfig(env: FullEnv): StorageConfig {
   // not the CWD (which might be the monorepo root)
   const defaultPath = resolve(__dirname, '../../../uploads');
 
-  return {
+  const config: LocalStorageConfig = {
     provider: 'local',
     // In a monorepo, keep uploads in a known data directory
     rootPath: env.STORAGE_ROOT_PATH != null && env.STORAGE_ROOT_PATH !== '' ? resolve(process.cwd(), env.STORAGE_ROOT_PATH) : defaultPath,
-    // Public URL for serving files (e.g., http://localhost:8080/uploads)
-    publicBaseUrl: env.STORAGE_PUBLIC_BASE_URL,
   };
+  // Public URL for serving files (e.g., http://localhost:8080/uploads)
+  if (env.STORAGE_PUBLIC_BASE_URL !== undefined) {
+    config.publicBaseUrl = env.STORAGE_PUBLIC_BASE_URL;
+  }
+  return config;
 }
 
 /**

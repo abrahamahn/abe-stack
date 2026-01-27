@@ -8,6 +8,7 @@
 
 import { and, eq, inArray, insert, select, update, USERS_TABLE, type User } from '@abe-stack/db';
 
+import type { ApplyOperationsResult, RealtimeRecord, VersionConflict } from './types';
 import type {
     RealtimeListInsertOperation,
     RealtimeListRemoveOperation,
@@ -18,7 +19,6 @@ import type {
     RecordPointer,
 } from '@abe-stack/core';
 import type { DbClient } from '@database';
-import type { ApplyOperationsResult, RealtimeRecord, VersionConflict } from './types';
 
 // ============================================================================
 // Table Configuration

@@ -1,4 +1,4 @@
-// packages/core/src/modules/auth/httpMapper.ts
+// packages/core/src/modules/auth/http-mapper.ts
 /**
  * HTTP Error Mapper
  *
@@ -7,13 +7,13 @@
  */
 
 import {
-    AccountLockedError,
-    EmailAlreadyExistsError,
-    EmailNotVerifiedError,
-    EmailSendError,
-    InvalidCredentialsError,
-    InvalidTokenError,
-    WeakPasswordError,
+  AccountLockedError,
+  EmailAlreadyExistsError,
+  EmailNotVerifiedError,
+  EmailSendError,
+  InvalidCredentialsError,
+  InvalidTokenError,
+  WeakPasswordError,
 } from './errors';
 
 /**
@@ -37,14 +37,14 @@ export interface HttpErrorResponse {
  * Standard error messages for HTTP responses
  */
 export const HTTP_ERROR_MESSAGES = {
-  ACCOUNT_LOCKED:
+  AccountLocked:
     'Account temporarily locked due to too many failed attempts. Please try again later.',
-  INVALID_CREDENTIALS: 'Invalid email or password',
-  EMAIL_ALREADY_REGISTERED: 'Email already registered',
-  INVALID_TOKEN: 'Invalid or expired token',
-  WEAK_PASSWORD: 'Password is too weak',
-  EMAIL_SEND_FAILED: 'Failed to send email. Please try again or use the resend option.',
-  INTERNAL_ERROR: 'Internal server error',
+  InvalidCredentials: 'Invalid email or password',
+  EmailAlreadyRegistered: 'Email already registered',
+  InvalidToken: 'Invalid or expired token',
+  WeakPassword: 'Password is too weak',
+  EmailSendFailed: 'Failed to send email. Please try again or use the resend option.',
+  InternalError: 'Internal server error',
 } as const;
 
 /**
@@ -92,7 +92,7 @@ export function mapErrorToHttpResponse(
 ): HttpErrorResponse {
   // Account locked - rate limiting response
   if (error instanceof AccountLockedError) {
-    return { status: 429, body: { message: HTTP_ERROR_MESSAGES.ACCOUNT_LOCKED } };
+    return { status: 429, body: { message: HTTP_ERROR_MESSAGES.AccountLocked } };
   }
 
   // Email not verified - needs verification before login
@@ -109,28 +109,28 @@ export function mapErrorToHttpResponse(
 
   // Invalid credentials - wrong email/password
   if (error instanceof InvalidCredentialsError) {
-    return { status: 401, body: { message: HTTP_ERROR_MESSAGES.INVALID_CREDENTIALS } };
+    return { status: 401, body: { message: HTTP_ERROR_MESSAGES.InvalidCredentials } };
   }
 
   // Invalid or expired token
   if (error instanceof InvalidTokenError) {
-    return { status: 400, body: { message: HTTP_ERROR_MESSAGES.INVALID_TOKEN } };
+    return { status: 400, body: { message: HTTP_ERROR_MESSAGES.InvalidToken } };
   }
 
   // Email already exists - conflict
   if (error instanceof EmailAlreadyExistsError) {
-    return { status: 409, body: { message: HTTP_ERROR_MESSAGES.EMAIL_ALREADY_REGISTERED } };
+    return { status: 409, body: { message: HTTP_ERROR_MESSAGES.EmailAlreadyRegistered } };
   }
 
   // Weak password - validation failed
   if (error instanceof WeakPasswordError) {
     if (options?.logContext !== undefined) {
       logger.warn(
-        { ...options.logContext, errors: error.details?.errors },
+        { ...options.logContext, errors: error.details?.['errors'] },
         'Password validation failed',
       );
     }
-    return { status: 400, body: { message: HTTP_ERROR_MESSAGES.WEAK_PASSWORD } };
+    return { status: 400, body: { message: HTTP_ERROR_MESSAGES.WeakPassword } };
   }
 
   // Email send error - may be handled differently per endpoint
@@ -143,19 +143,23 @@ export function mapErrorToHttpResponse(
       }
     }
     // Default: service unavailable
+    const errorMessage =
+      error.originalError !== undefined && error.originalError instanceof Error
+        ? error.originalError.message
+        : undefined;
     logger.error(
       {
-        originalError: error.originalError?.message,
+        originalError: errorMessage,
         ...options?.logContext,
       },
       'Email send failed',
     );
-    return { status: 503, body: { message: HTTP_ERROR_MESSAGES.EMAIL_SEND_FAILED } };
+    return { status: 503, body: { message: HTTP_ERROR_MESSAGES.EmailSendFailed } };
   }
 
   // Unknown error - log and return 500
   logger.error(error);
-  return { status: 500, body: { message: HTTP_ERROR_MESSAGES.INTERNAL_ERROR } };
+  return { status: 500, body: { message: HTTP_ERROR_MESSAGES.InternalError } };
 }
 
 /**

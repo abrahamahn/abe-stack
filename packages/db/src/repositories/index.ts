@@ -69,4 +69,4 @@ export {
   // Billing Events
   createBillingEventRepository,
   type BillingEventRepository,
-} from './billing';
+} from './billing/index';

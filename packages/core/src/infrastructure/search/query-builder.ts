@@ -7,20 +7,20 @@
  */
 
 import {
-    FILTER_OPERATORS,
-    LOGICAL_OPERATORS,
-    SORT_ORDER,
-    type CompoundFilter,
-    type FacetConfig,
-    type FacetedSearchQuery,
-    type FilterCondition,
-    type FilterOperator,
-    type FilterPrimitive,
-    type FilterValue,
-    type FullTextSearchConfig,
-    type SearchQuery,
-    type SortConfig,
-    type SortOrder,
+  FILTER_OPERATORS,
+  LOGICAL_OPERATORS,
+  SORT_ORDER,
+  type CompoundFilter,
+  type FacetConfig,
+  type FacetedSearchQuery,
+  type FilterCondition,
+  type FilterOperator,
+  type FilterPrimitive,
+  type FilterValue,
+  type FullTextSearchConfig,
+  type SearchQuery,
+  type SortConfig,
+  type SortOrder,
 } from './types';
 
 // ============================================================================
@@ -43,13 +43,13 @@ import {
 export class SearchQueryBuilder<T = Record<string, unknown>> {
   private _filters: Array<FilterCondition<T> | CompoundFilter<T>> = [];
   private _sort: SortConfig<T>[] = [];
-  private _search?: FullTextSearchConfig;
+  private _search?: FullTextSearchConfig | undefined;
   private _page = 1;
   private _limit = 50;
-  private _cursor?: string;
-  private _select?: Array<keyof T | string>;
-  private _includeCount?: boolean;
-  private _facets?: FacetConfig[];
+  private _cursor?: string | undefined;
+  private _select?: Array<keyof T | string> | undefined;
+  private _includeCount?: boolean | undefined;
+  private _facets?: FacetConfig[] | undefined;
 
   // ============================================================================
   // Filter Methods
@@ -64,12 +64,15 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
     value: FilterValue,
     options?: { caseSensitive?: boolean },
   ): this {
-    this._filters.push({
+    const condition: FilterCondition<T> = {
       field,
       operator,
       value,
-      caseSensitive: options?.caseSensitive,
-    });
+    };
+    if (options?.caseSensitive !== undefined) {
+      condition.caseSensitive = options.caseSensitive;
+    }
+    this._filters.push(condition);
     return this;
   }
 
@@ -126,14 +129,14 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
    * Add a starts-with filter.
    */
   whereStartsWith(field: keyof T | string, value: string, caseSensitive = false): this {
-    return this.where(field, FILTER_OPERATORS.STARTS_WITH, value, { caseSensitive });
+    return this.where(field, FILTER_OPERATORS.StartsWith, value, { caseSensitive });
   }
 
   /**
    * Add an ends-with filter.
    */
   whereEndsWith(field: keyof T | string, value: string, caseSensitive = false): this {
-    return this.where(field, FILTER_OPERATORS.ENDS_WITH, value, { caseSensitive });
+    return this.where(field, FILTER_OPERATORS.EndsWith, value, { caseSensitive });
   }
 
   /**
@@ -161,21 +164,21 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
    * Add a NOT IN array filter.
    */
   whereNotIn(field: keyof T | string, values: FilterPrimitive[]): this {
-    return this.where(field, FILTER_OPERATORS.NOT_IN, values);
+    return this.where(field, FILTER_OPERATORS.NotIn, values);
   }
 
   /**
    * Add an IS NULL filter.
    */
   whereNull(field: keyof T | string): this {
-    return this.where(field, FILTER_OPERATORS.IS_NULL, null);
+    return this.where(field, FILTER_OPERATORS.IsNull, null);
   }
 
   /**
    * Add an IS NOT NULL filter.
    */
   whereNotNull(field: keyof T | string): this {
-    return this.where(field, FILTER_OPERATORS.IS_NOT_NULL, null);
+    return this.where(field, FILTER_OPERATORS.IsNotNull, null);
   }
 
   /**
@@ -189,14 +192,14 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
    * Add an array contains filter.
    */
   whereArrayContains(field: keyof T | string, value: FilterPrimitive): this {
-    return this.where(field, FILTER_OPERATORS.ARRAY_CONTAINS, value);
+    return this.where(field, FILTER_OPERATORS.ArrayContains, value);
   }
 
   /**
    * Add an array contains any filter.
    */
   whereArrayContainsAny(field: keyof T | string, values: FilterPrimitive[]): this {
-    return this.where(field, FILTER_OPERATORS.ARRAY_CONTAINS_ANY, values);
+    return this.where(field, FILTER_OPERATORS.ArrayContainsAny, values);
   }
 
   // ============================================================================
@@ -458,7 +461,10 @@ export class SearchQueryBuilder<T = Record<string, unknown>> {
     };
 
     if (this._filters.length === 1) {
-      query.filters = this._filters[0];
+      const filter = this._filters[0];
+      if (filter !== undefined) {
+        query.filters = filter;
+      }
     } else if (this._filters.length > 1) {
       query.filters = {
         operator: LOGICAL_OPERATORS.AND,

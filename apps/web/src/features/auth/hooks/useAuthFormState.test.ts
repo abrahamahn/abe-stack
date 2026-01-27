@@ -2,9 +2,9 @@
 import { useFormState } from '@abe-stack/ui';
 import { describe, expect, it } from 'vitest';
 
-import { useAuthFormState } from '../useAuthFormState';
+import { useAuthFormState } from './useAuthFormState';
 
-import type { AuthFormState } from '../useAuthFormState';
+import type { AuthFormState } from './useAuthFormState';
 import type { FormState } from '@abe-stack/ui';
 
 describe('useAuthFormState', () => {

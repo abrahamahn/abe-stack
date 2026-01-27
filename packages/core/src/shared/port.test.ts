@@ -1,4 +1,6 @@
 // packages/core/src/shared/port.test.ts
+import net from 'node:net';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 type ErrorHandler = (error: Error) => void;
@@ -148,7 +150,6 @@ vi.mock('node:net', () => {
   };
 });
 
-import net from 'node:net';
 import { isPortFree, isPortListening, pickAvailablePort, uniquePorts, waitForPort } from './port';
 
 describe('uniquePorts', () => {

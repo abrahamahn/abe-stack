@@ -1,11 +1,11 @@
-// packages/core/src/infrastructure/errors/validationError.test.ts
+// packages/core/src/infrastructure/errors/validation-error.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {
   formatValidationErrors,
   type ValidationErrorResponse,
   type ZodIssueMinimal,
-} from './validationError';
+} from './validation-error';
 
 describe('formatValidationErrors', () => {
   describe('basic functionality', () => {

@@ -10,13 +10,13 @@ import { useCallback, useEffect, useRef } from 'react';
  */
 export interface KeyModifiers {
   /** Whether Ctrl (or Cmd on Mac) is required */
-  ctrl?: boolean;
+  ctrl?: boolean | undefined;
   /** Whether Alt (or Option on Mac) is required */
-  alt?: boolean;
+  alt?: boolean | undefined;
   /** Whether Shift is required */
-  shift?: boolean;
+  shift?: boolean | undefined;
   /** Whether Meta (Cmd on Mac, Win on Windows) is required */
-  meta?: boolean;
+  meta?: boolean | undefined;
 }
 
 /**
@@ -36,32 +36,32 @@ export interface KeyboardShortcutOptions extends KeyModifiers {
    * Whether shortcuts are enabled.
    * @default true
    */
-  enabled?: boolean;
+  enabled?: boolean | undefined;
   /**
    * Whether to prevent default browser behavior.
    * @default true
    */
-  preventDefault?: boolean;
+  preventDefault?: boolean | undefined;
   /**
    * Whether to stop propagation of the event.
    * @default false
    */
-  stopPropagation?: boolean;
+  stopPropagation?: boolean | undefined;
   /**
    * Whether to skip when user is typing in input/textarea/contenteditable.
    * @default false (different from useKeyboardShortcuts which defaults to true)
    */
-  skipInputs?: boolean;
+  skipInputs?: boolean | undefined;
   /**
    * Target element to attach the listener to.
    * @default window
    */
-  target?: EventTarget | null;
+  target?: EventTarget | null | undefined;
   /**
    * Event type to listen for.
    * @default 'keydown'
    */
-  eventType?: 'keydown' | 'keyup';
+  eventType?: 'keydown' | 'keyup' | undefined;
 }
 
 /**

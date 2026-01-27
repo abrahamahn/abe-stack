@@ -7,20 +7,20 @@ import '../styles/elements.css';
 
 type InputRootProps = ComponentPropsWithoutRef<'input'> & {
   /** The HTML element to render as */
-  as?: ElementType;
+  as?: ElementType | undefined;
 };
 
 type InputFieldProps = ComponentPropsWithoutRef<'input'> & {
   /** The HTML element to render as */
-  as?: ElementType;
+  as?: ElementType | undefined;
   /** Visible label text for the input */
-  label?: string;
+  label?: string | undefined;
   /** Visually hide the label (keeps it accessible) */
-  hideLabel?: boolean;
+  hideLabel?: boolean | undefined;
   /** Helper text displayed below the input */
-  description?: string;
+  description?: string | undefined;
   /** Error message (also sets aria-invalid) */
-  error?: string;
+  error?: string | undefined;
 };
 
 /**

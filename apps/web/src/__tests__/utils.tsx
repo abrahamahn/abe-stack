@@ -15,7 +15,7 @@ import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { ClientEnvironment } from '@app/ClientEnvironment';
-import type { ClientConfig } from '@config';
+import type { ClientConfig } from '@/config';
 import type { AuthService, AuthState, User } from '@features/auth';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import type { ReactElement, ReactNode } from 'react';
@@ -72,7 +72,7 @@ export function createMockAuthService(options: MockAuthServiceOptions = {}): Aut
   const {
     user = null,
     isLoading = false,
-    isAuthenticated = !!user,
+    isAuthenticated = user !== null,
     loginError,
     registerError,
     logoutError,
@@ -99,19 +99,19 @@ export function createMockAuthService(options: MockAuthServiceOptions = {}): Aut
       return Promise.resolve(state.user);
     },
     login: () => {
-      if (loginError) return Promise.reject(loginError);
+      if (loginError !== undefined) return Promise.reject(loginError);
       updateState({ user: mockUser, isAuthenticated: true });
       return Promise.resolve();
     },
     register: () => {
-      if (registerError) return Promise.reject(registerError);
+      if (registerError !== undefined) return Promise.reject(registerError);
       return Promise.resolve({
         message: 'Please check your email to verify your account',
         email: 'test@example.com',
       });
     },
     logout: () => {
-      if (logoutError) return Promise.reject(logoutError);
+      if (logoutError !== undefined) return Promise.reject(logoutError);
       updateState({ user: null, isAuthenticated: false });
       return Promise.resolve();
     },
@@ -184,15 +184,15 @@ export function renderWithProviders(
     ...renderOptions
   } = options;
 
-  const entries = route ? [route] : initialEntries;
+  const entries = route !== undefined ? [route] : initialEntries;
 
-  function Wrapper({ children }: { children: ReactNode }): ReactElement {
+  const Wrapper = ({ children }: { children: ReactNode }): ReactElement => {
     return (
       <MemoryRouter initialEntries={entries}>
         <ClientEnvironmentProvider value={environment}>{children}</ClientEnvironmentProvider>
       </MemoryRouter>
     );
-  }
+  };
 
   const user = userEvent.setup();
 

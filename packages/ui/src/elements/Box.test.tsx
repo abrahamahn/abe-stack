@@ -4,7 +4,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { Box } from '../Box';
+import { Box } from './Box';
 
 describe('Box', () => {
   it('renders children with default layout class', () => {
@@ -23,8 +23,8 @@ describe('Box', () => {
 
     const box = screen.getByText('Row');
     expect(box).toHaveStyle({
-      '--ui-box-padding': '12px',
-      '--ui-box-direction': 'row',
+      ['--ui-box-padding']: '12px',
+      ['--ui-box-direction']: 'row',
     });
   });
 
@@ -37,7 +37,7 @@ describe('Box', () => {
 
     const box = screen.getByText('Boxed');
     expect(box).toHaveClass('custom-box');
-    expect(box).toHaveStyle({ '--ui-box-padding': '2rem' });
+    expect(box).toHaveStyle({ ['--ui-box-padding']: '2rem' });
   });
 
   it('renders safely with null children', () => {

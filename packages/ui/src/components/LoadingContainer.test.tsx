@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { LoadingContainer } from '../LoadingContainer';
+import { LoadingContainer } from './LoadingContainer';
 
 describe('LoadingContainer', () => {
   it('renders with default text', () => {

@@ -57,7 +57,9 @@ const integrationMocks = vi.hoisted(() => {
 
     emit(event: string, ...args: unknown[]) {
       const handlers = windowEvents.get(event) ?? [];
-      handlers.forEach((handler) => { handler(...args); });
+      handlers.forEach((handler) => {
+        handler(...args);
+      });
     }
 
     close = vi.fn();
@@ -301,7 +303,7 @@ describe('Integration: End-to-End IPC Flow', () => {
 
   describe('Window creation and IPC handler coordination', () => {
     it('should create window with correct security settings', async () => {
-      process.env.NODE_ENV = 'production';
+      process.env['NODE_ENV'] = 'production';
 
       await import('../electron/main');
 
@@ -321,11 +323,11 @@ describe('Integration: End-to-End IPC Flow', () => {
         },
       });
 
-      delete process.env.NODE_ENV;
+      delete process.env['NODE_ENV'];
     });
 
     it('should coordinate window getter with IPC handlers', async () => {
-      process.env.NODE_ENV = 'production';
+      process.env['NODE_ENV'] = 'production';
 
       await import('../electron/main');
 
@@ -340,7 +342,7 @@ describe('Integration: End-to-End IPC Flow', () => {
       const windowInstance = integrationMocks.getWindowInstance();
       expect(windowInstance).not.toBeNull();
 
-      delete process.env.NODE_ENV;
+      delete process.env['NODE_ENV'];
     });
   });
 });
@@ -406,7 +408,7 @@ describe('Integration: Window Lifecycle Management', () => {
 
   describe('Window creation lifecycle', () => {
     it('should create window on app ready event', async () => {
-      process.env.NODE_ENV = 'development';
+      process.env['NODE_ENV'] = 'development';
 
       await import('../electron/main');
 
@@ -417,11 +419,11 @@ describe('Integration: Window Lifecycle Management', () => {
 
       expect(integrationMocks.getWindowInstance()).not.toBeNull();
 
-      delete process.env.NODE_ENV;
+      delete process.env['NODE_ENV'];
     });
 
     it('should load development URL in development mode', async () => {
-      process.env.NODE_ENV = 'development';
+      process.env['NODE_ENV'] = 'development';
 
       await import('../electron/main');
 
@@ -431,11 +433,11 @@ describe('Integration: Window Lifecycle Management', () => {
       const windowInstance = integrationMocks.getWindowInstance();
       expect(windowInstance!.loadURL).toHaveBeenCalledWith('http://localhost:5174');
 
-      delete process.env.NODE_ENV;
+      delete process.env['NODE_ENV'];
     });
 
     it('should load file in production mode', async () => {
-      process.env.NODE_ENV = 'production';
+      process.env['NODE_ENV'] = 'production';
 
       await import('../electron/main');
 
@@ -446,13 +448,13 @@ describe('Integration: Window Lifecycle Management', () => {
       expect(windowInstance!.loadFile).toHaveBeenCalled();
       expect(windowInstance!.loadURL).not.toHaveBeenCalled();
 
-      delete process.env.NODE_ENV;
+      delete process.env['NODE_ENV'];
     });
   });
 
   describe('Window close lifecycle', () => {
     it('should create window that will handle closed event', async () => {
-      process.env.NODE_ENV = 'development';
+      process.env['NODE_ENV'] = 'development';
 
       await import('../electron/main');
 
@@ -469,13 +471,13 @@ describe('Integration: Window Lifecycle Management', () => {
       expect(typeof windowInstance!.loadURL).toBe('function');
       expect(typeof windowInstance!.loadFile).toBe('function');
 
-      delete process.env.NODE_ENV;
+      delete process.env['NODE_ENV'];
     });
 
     it('should quit app on window-all-closed for non-darwin platforms', async () => {
       const originalPlatform = process.platform;
       Object.defineProperty(process, 'platform', { value: 'win32' });
-      process.env.NODE_ENV = 'development';
+      process.env['NODE_ENV'] = 'development';
 
       await import('../electron/main');
 
@@ -487,13 +489,13 @@ describe('Integration: Window Lifecycle Management', () => {
       expect(appQuitMock).toHaveBeenCalledTimes(1);
 
       Object.defineProperty(process, 'platform', { value: originalPlatform });
-      delete process.env.NODE_ENV;
+      delete process.env['NODE_ENV'];
     });
 
     it('should not quit app on window-all-closed for darwin platform', async () => {
       const originalPlatform = process.platform;
       Object.defineProperty(process, 'platform', { value: 'darwin' });
-      process.env.NODE_ENV = 'development';
+      process.env['NODE_ENV'] = 'development';
 
       await import('../electron/main');
 
@@ -505,13 +507,13 @@ describe('Integration: Window Lifecycle Management', () => {
       expect(appQuitMock).not.toHaveBeenCalled();
 
       Object.defineProperty(process, 'platform', { value: originalPlatform });
-      delete process.env.NODE_ENV;
+      delete process.env['NODE_ENV'];
     });
   });
 
   describe('App activate lifecycle', () => {
     it('should register activate event handler on app', async () => {
-      process.env.NODE_ENV = 'development';
+      process.env['NODE_ENV'] = 'development';
 
       await import('../electron/main');
 
@@ -519,18 +521,18 @@ describe('Integration: Window Lifecycle Management', () => {
       const activateHandlers = appEventHandlers.get('activate') ?? [];
       expect(activateHandlers.length).toBeGreaterThan(0);
 
-      delete process.env.NODE_ENV;
+      delete process.env['NODE_ENV'];
     });
 
     it('should have activate handler that is a function', async () => {
-      process.env.NODE_ENV = 'development';
+      process.env['NODE_ENV'] = 'development';
 
       await import('../electron/main');
 
       const activateHandlers = appEventHandlers.get('activate') ?? [];
       expect(typeof activateHandlers[0]).toBe('function');
 
-      delete process.env.NODE_ENV;
+      delete process.env['NODE_ENV'];
     });
   });
 });
@@ -770,7 +772,7 @@ describe('Integration: App Initialization and Shutdown', () => {
     });
 
     it('should complete full initialization flow', async () => {
-      process.env.NODE_ENV = 'development';
+      process.env['NODE_ENV'] = 'development';
 
       await import('../electron/main');
 
@@ -789,14 +791,14 @@ describe('Integration: App Initialization and Shutdown', () => {
 
       expect(integrationMocks.getWindowInstance()).not.toBeNull();
 
-      delete process.env.NODE_ENV;
+      delete process.env['NODE_ENV'];
     });
   });
 
   describe('Custom port configuration', () => {
     it('should respect DESKTOP_RENDERER_PORT environment variable', async () => {
-      process.env.NODE_ENV = 'development';
-      process.env.DESKTOP_RENDERER_PORT = '3000';
+      process.env['NODE_ENV'] = 'development';
+      process.env['DESKTOP_RENDERER_PORT'] = '3000';
 
       const waitForPortMock = vi.fn().mockResolvedValue(3000);
       vi.doMock('../electron/utils', () => ({
@@ -814,13 +816,13 @@ describe('Integration: App Initialization and Shutdown', () => {
       const windowInstance = integrationMocks.getWindowInstance();
       expect(windowInstance!.loadURL).toHaveBeenCalledWith('http://localhost:3000');
 
-      delete process.env.NODE_ENV;
-      delete process.env.DESKTOP_RENDERER_PORT;
+      delete process.env['NODE_ENV'];
+      delete process.env['DESKTOP_RENDERER_PORT'];
     });
 
     it('should respect VITE_PORT environment variable as fallback', async () => {
-      process.env.NODE_ENV = 'development';
-      process.env.VITE_PORT = '4000';
+      process.env['NODE_ENV'] = 'development';
+      process.env['VITE_PORT'] = '4000';
 
       const waitForPortMock = vi.fn().mockResolvedValue(4000);
       vi.doMock('../electron/utils', () => ({
@@ -835,8 +837,8 @@ describe('Integration: App Initialization and Shutdown', () => {
 
       expect(waitForPortMock).toHaveBeenCalledWith(expect.arrayContaining([4000]), 'localhost');
 
-      delete process.env.NODE_ENV;
-      delete process.env.VITE_PORT;
+      delete process.env['NODE_ENV'];
+      delete process.env['VITE_PORT'];
     });
   });
 });
@@ -986,7 +988,7 @@ describe('Integration: Window Security Settings', () => {
 
   describe('Window webPreferences security', () => {
     it('should disable nodeIntegration for security', async () => {
-      process.env.NODE_ENV = 'production';
+      process.env['NODE_ENV'] = 'production';
 
       await import('../electron/main');
 
@@ -998,11 +1000,11 @@ describe('Integration: Window Security Settings', () => {
 
       expect(options.webPreferences.nodeIntegration).toBe(false);
 
-      delete process.env.NODE_ENV;
+      delete process.env['NODE_ENV'];
     });
 
     it('should enable contextIsolation for security', async () => {
-      process.env.NODE_ENV = 'production';
+      process.env['NODE_ENV'] = 'production';
 
       await import('../electron/main');
 
@@ -1014,11 +1016,11 @@ describe('Integration: Window Security Settings', () => {
 
       expect(options.webPreferences.contextIsolation).toBe(true);
 
-      delete process.env.NODE_ENV;
+      delete process.env['NODE_ENV'];
     });
 
     it('should enable sandbox for security', async () => {
-      process.env.NODE_ENV = 'production';
+      process.env['NODE_ENV'] = 'production';
 
       await import('../electron/main');
 
@@ -1030,11 +1032,11 @@ describe('Integration: Window Security Settings', () => {
 
       expect(options.webPreferences.sandbox).toBe(true);
 
-      delete process.env.NODE_ENV;
+      delete process.env['NODE_ENV'];
     });
 
     it('should set correct preload path', async () => {
-      process.env.NODE_ENV = 'production';
+      process.env['NODE_ENV'] = 'production';
 
       await import('../electron/main');
 
@@ -1046,13 +1048,13 @@ describe('Integration: Window Security Settings', () => {
 
       expect(options.webPreferences.preload).toContain('preload.js');
 
-      delete process.env.NODE_ENV;
+      delete process.env['NODE_ENV'];
     });
   });
 
   describe('Window dimensions', () => {
     it('should create window with default dimensions', async () => {
-      process.env.NODE_ENV = 'production';
+      process.env['NODE_ENV'] = 'production';
 
       await import('../electron/main');
 
@@ -1065,7 +1067,7 @@ describe('Integration: Window Security Settings', () => {
       expect(options.width).toBe(1200);
       expect(options.height).toBe(800);
 
-      delete process.env.NODE_ENV;
+      delete process.env['NODE_ENV'];
     });
   });
 });

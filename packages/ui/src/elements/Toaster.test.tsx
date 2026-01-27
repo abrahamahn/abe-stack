@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Toaster } from '../Toaster';
+import { Toaster } from './Toaster';
 
 describe('Toaster', () => {
   describe('rendering', () => {

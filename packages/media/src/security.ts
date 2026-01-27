@@ -107,7 +107,7 @@ export class BasicSecurityScanner {
       }
 
       // Check for extremely large embedded data
-      const nullSequences = (content.match(/\0{10,}/g) || []).length;
+      const nullSequences = (content.match(/\0{10,}/g) ?? []).length;
       if (nullSequences > 5) {
         result.warnings.push('File contains unusual null byte sequences');
       }
@@ -154,7 +154,7 @@ export class BasicSecurityScanner {
    * Check if MIME type is text-based
    */
   private isTextBasedMimeType(mimeType: string | null): boolean {
-    if (!mimeType) return false;
+    if (mimeType === null || mimeType.length === 0) return false;
     return (
       mimeType.startsWith('text/') ||
       mimeType.includes('javascript') ||
@@ -169,7 +169,7 @@ export class BasicSecurityScanner {
   private detectMimeType(filePath: string): string | null {
     const ext = filePath.split('.').pop()?.toLowerCase();
 
-    if (!ext) return null;
+    if (ext === undefined || ext.length === 0) return null;
 
     const extToMime: Record<string, string> = {
       jpg: 'image/jpeg',

@@ -8,6 +8,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { HTTP_STATUS } from '../../shared/constants/http';
+
 import {
   InvalidPreferencesError,
   InvalidSubscriptionError,
@@ -150,7 +151,7 @@ describe('Notification Errors', () => {
       const original = new Error('Network error');
       const error = new ProviderError('Connection failed', 'fcm', original);
       expect(error.originalError).toBe(original);
-      expect(error.details?.originalMessage).toBe('Network error');
+      expect(error.details?.['originalMessage']).toBe('Network error');
     });
   });
 
@@ -212,7 +213,7 @@ describe('Notification Errors', () => {
       const endTime = new Date('2024-01-01T08:00:00Z');
       const error = new QuietHoursActiveError('user-123', endTime);
       expect(error.endTime).toBe(endTime);
-      expect(error.details?.endTime).toBe(endTime.toISOString());
+      expect(error.details?.['endTime']).toBe(endTime.toISOString());
     });
   });
 });

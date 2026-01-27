@@ -4,8 +4,9 @@ import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const root = path.resolve(__dirname, '..', '..'); // Go up two levels: tools/dev -> tools -> root
-const outputPath = path.join(root, 'full_code.txt');
+const root = path.resolve(__dirname, '..', '..', '..'); // Go up three levels: tooling/scripts/export -> tooling/scripts -> tooling -> root
+const outputDir = path.join(root, '.tmp');
+const outputPath = path.join(outputDir, 'full_code.txt');
 
 const excludedDirs = new Set<string>([
   'node_modules',
@@ -314,7 +315,7 @@ const run = (): void => {
   }
   output += '```\n\n';
 
-  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+  fs.mkdirSync(outputDir, { recursive: true });
   fs.writeFileSync(outputPath, output, 'utf8');
 
   log(`\n✅ Code snapshot written to ${outputPath}`);

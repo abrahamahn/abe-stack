@@ -30,7 +30,7 @@ export interface JobDetailsPanelProps {
 // Component
 // ============================================================================
 
-export function JobDetailsPanel({
+export const JobDetailsPanel = ({
   job,
   isLoading,
   isError,
@@ -38,7 +38,7 @@ export function JobDetailsPanel({
   onClose,
   onRetry,
   onCancel,
-}: JobDetailsPanelProps): JSX.Element {
+}: JobDetailsPanelProps): JSX.Element => {
   if (isLoading) {
     return (
       <div className="p-4">
@@ -49,7 +49,7 @@ export function JobDetailsPanel({
     );
   }
 
-  if (isError || !job) {
+  if (isError || job === undefined) {
     return (
       <div className="p-4">
         <Text tone="danger">{error?.message ?? 'Failed to load job details'}</Text>
@@ -95,11 +95,11 @@ export function JobDetailsPanel({
           <DetailItem label="Scheduled" value={formatDate(job.scheduledAt)} />
           <DetailItem
             label="Completed"
-            value={job.completedAt ? formatDate(job.completedAt) : '-'}
+            value={job.completedAt !== null ? formatDate(job.completedAt) : '-'}
           />
           <DetailItem
             label="Duration"
-            value={job.durationMs ? `${String(job.durationMs)}ms` : '-'}
+            value={job.durationMs !== null && job.durationMs !== 0 ? `${String(job.durationMs)}ms` : '-'}
           />
         </div>
       </Card>
@@ -123,7 +123,7 @@ export function JobDetailsPanel({
       </Card>
 
       {/* Error (if any) */}
-      {job.error && (
+      {job.error !== null && (
         <Card className="p-3 border-red-200 dark:border-red-800">
           <Text tone="muted" className="text-xs uppercase tracking-wide mb-2">
             Error
@@ -131,7 +131,7 @@ export function JobDetailsPanel({
           <Text tone="danger" className="font-semibold">
             {job.error.name}: {job.error.message}
           </Text>
-          {job.error.stack && (
+          {job.error.stack !== undefined && job.error.stack !== '' && (
             <pre className="bg-red-50 dark:bg-red-900/20 p-2 rounded text-xs overflow-auto max-h-32 mt-2">
               {job.error.stack}
             </pre>
@@ -140,7 +140,7 @@ export function JobDetailsPanel({
       )}
 
       {/* Dead Letter Reason (if any) */}
-      {job.deadLetterReason && (
+      {job.deadLetterReason !== undefined && job.deadLetterReason !== null && job.deadLetterReason !== '' && (
         <Card className="p-3 border-red-200 dark:border-red-800">
           <Text tone="muted" className="text-xs uppercase tracking-wide mb-2">
             Dead Letter Reason
@@ -152,7 +152,7 @@ export function JobDetailsPanel({
       {/* Actions */}
       {(canRetry || canCancel) && (
         <div className="flex gap-2 pt-4 border-t">
-          {canRetry && onRetry && (
+          {canRetry && onRetry !== undefined && (
             <Button
               variant="primary"
               size="small"
@@ -163,7 +163,7 @@ export function JobDetailsPanel({
               Retry Job
             </Button>
           )}
-          {canCancel && onCancel && (
+          {canCancel && onCancel !== undefined && (
             <Button
               variant="secondary"
               size="small"
@@ -178,7 +178,7 @@ export function JobDetailsPanel({
       )}
     </div>
   );
-}
+};
 
 // ============================================================================
 // Helpers
@@ -189,7 +189,7 @@ interface DetailItemProps {
   value: string;
 }
 
-function DetailItem({ label, value }: DetailItemProps): JSX.Element {
+const DetailItem = ({ label, value }: DetailItemProps): JSX.Element => {
   return (
     <div>
       <Text tone="muted" className="text-xs uppercase tracking-wide">
@@ -198,7 +198,7 @@ function DetailItem({ label, value }: DetailItemProps): JSX.Element {
       <Text>{value}</Text>
     </div>
   );
-}
+};
 
 function formatDate(dateStr: string): string {
   try {

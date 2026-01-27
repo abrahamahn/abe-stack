@@ -1,6 +1,7 @@
 // apps/server/src/config/auth/rate-limit.ts
-import type { RateLimitConfig } from '@abe-stack/core/config';
 import { getBool, getInt } from '@abe-stack/core/config';
+
+import type { RateLimitConfig } from '@abe-stack/core/config';
 
 /**
  * Load Rate Limit Configuration.
@@ -12,19 +13,22 @@ import { getBool, getInt } from '@abe-stack/core/config';
  * (backoff) to discourage brute-force or scraping without impacting legitimate users.
  */
 export function loadRateLimitConfig(env: Record<string, string | undefined>): RateLimitConfig {
-  const isProd = env.NODE_ENV === 'production';
+  const isProd = env['NODE_ENV'] === 'production';
+
+  const progressiveDelayEnabled = env['RATE_LIMIT_PROGRESSIVE_DELAY_ENABLED'];
+  const progressiveDelayEnabledValue = progressiveDelayEnabled != null && progressiveDelayEnabled !== ''
+    ? getBool(progressiveDelayEnabled)
+    : true;
 
   return {
-    windowMs: getInt(env.RATE_LIMIT_WINDOW_MS, 60 * 1000),
-    max: getInt(env.RATE_LIMIT_MAX, isProd ? 100 : 1000),
-    cleanupIntervalMs: getInt(env.RATE_LIMIT_CLEANUP_INTERVAL_MS, 60 * 1000),
+    windowMs: getInt(env['RATE_LIMIT_WINDOW_MS'], 60 * 1000),
+    max: getInt(env['RATE_LIMIT_MAX'], isProd ? 100 : 1000),
+    cleanupIntervalMs: getInt(env['RATE_LIMIT_CLEANUP_INTERVAL_MS'], 60 * 1000),
 
     progressiveDelay: {
-      enabled: env.RATE_LIMIT_PROGRESSIVE_DELAY_ENABLED != null && env.RATE_LIMIT_PROGRESSIVE_DELAY_ENABLED !== ''
-        ? getBool(env.RATE_LIMIT_PROGRESSIVE_DELAY_ENABLED)
-        : true,
-      baseDelay: getInt(env.RATE_LIMIT_BASE_DELAY_MS, 1000),
-      maxDelay: getInt(env.RATE_LIMIT_MAX_DELAY_MS, 10000),
+      enabled: progressiveDelayEnabledValue,
+      baseDelay: getInt(env['RATE_LIMIT_BASE_DELAY_MS'], 1000),
+      maxDelay: getInt(env['RATE_LIMIT_MAX_DELAY_MS'], 10000),
       backoffFactor: 2,
     },
   };

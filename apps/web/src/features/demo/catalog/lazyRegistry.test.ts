@@ -10,7 +10,7 @@ import {
   isCategoryLoaded,
   loadCategory,
   preloadCategories,
-} from '../lazyRegistry';
+} from './lazyRegistry';
 
 import type { ComponentCategory } from '@demo/types';
 

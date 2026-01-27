@@ -13,9 +13,10 @@ import path from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const root = path.resolve(__dirname, '..', '..');
+const root = path.resolve(__dirname, '..', '..', '..'); // Go up three levels: tooling/scripts/export -> tooling/scripts -> tooling -> root
 const serverSrcPath = path.join(root, 'apps', 'server', 'src');
-const outputPath = path.join(root, 'server_code.txt');
+const outputDir = path.join(root, '.tmp');
+const outputPath = path.join(outputDir, 'server_code.txt');
 
 const excludedDirs = new Set<string>(['node_modules', '.git', 'dist', '__tests__']);
 
@@ -120,6 +121,9 @@ const run = (): void => {
   output += `Output size: ${(output.length / 1024).toFixed(2)} KB\n`;
   output += '```\n';
 
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
   fs.writeFileSync(outputPath, output, 'utf8');
 
   log(`\n✅ Server code exported to ${outputPath}`);

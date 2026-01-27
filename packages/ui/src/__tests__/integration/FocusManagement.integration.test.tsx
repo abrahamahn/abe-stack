@@ -28,7 +28,7 @@ import { Modal } from '../../layouts/layers/Modal';
 // Test Components
 // =============================================================================
 
-function ModalWithFocusRestoration(): React.ReactElement {
+const ModalWithFocusRestoration = (): React.ReactElement => {
   const { open, openFn, close } = useDisclosure({ defaultOpen: false });
 
   return (
@@ -49,9 +49,9 @@ function ModalWithFocusRestoration(): React.ReactElement {
       </Modal.Root>
     </div>
   );
-}
+};
 
-function FormWithFocusOnError(): React.ReactElement {
+const FormWithFocusOnError = (): React.ReactElement => {
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -72,7 +72,7 @@ function FormWithFocusOnError(): React.ReactElement {
 
   return (
     <form onSubmit={handleSubmit} data-testid="error-focus-form">
-      <FormField label="Username" htmlFor="username" error={error ?? undefined}>
+      <FormField label="Username" htmlFor="username" {...(error !== null && { error })}>
         <Input
           ref={inputRef}
           id="username"
@@ -85,9 +85,9 @@ function FormWithFocusOnError(): React.ReactElement {
       </Button>
     </form>
   );
-}
+};
 
-function AutoFocusInput(): React.ReactElement {
+const AutoFocusInput = (): React.ReactElement => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -95,9 +95,9 @@ function AutoFocusInput(): React.ReactElement {
   }, []);
 
   return <Input ref={inputRef} data-testid="autofocus-input" placeholder="Auto focused" />;
-}
+};
 
-function FocusTrapWithMultipleElements(): React.ReactElement {
+const FocusTrapWithMultipleElements = (): React.ReactElement => {
   return (
     <FocusTrap>
       <div data-testid="trap-container">
@@ -110,9 +110,9 @@ function FocusTrapWithMultipleElements(): React.ReactElement {
       </div>
     </FocusTrap>
   );
-}
+};
 
-function NestedFocusTrap(): React.ReactElement {
+const NestedFocusTrap = (): React.ReactElement => {
   const [showInner, setShowInner] = useState(false);
 
   return (
@@ -136,9 +136,9 @@ function NestedFocusTrap(): React.ReactElement {
       </div>
     </FocusTrap>
   );
-}
+};
 
-function SkipLinksExample(): React.ReactElement {
+const SkipLinksExample = (): React.ReactElement => {
   return (
     <div>
       <a href="#main-content" className="skip-link" data-testid="skip-link">
@@ -155,9 +155,9 @@ function SkipLinksExample(): React.ReactElement {
       </main>
     </div>
   );
-}
+};
 
-function MultipleDialogs(): React.ReactElement {
+const MultipleDialogs = (): React.ReactElement => {
   const dialog1 = useDisclosure({ defaultOpen: false });
   const dialog2 = useDisclosure({ defaultOpen: false });
 
@@ -195,9 +195,9 @@ function MultipleDialogs(): React.ReactElement {
       </Modal.Root>
     </div>
   );
-}
+};
 
-function FocusableElementsList(): React.ReactElement {
+const FocusableElementsList = (): React.ReactElement => {
   return (
     <div data-testid="focusables-list">
       <a href="#" data-testid="link">
@@ -220,7 +220,7 @@ function FocusableElementsList(): React.ReactElement {
       </button>
     </div>
   );
-}
+};
 
 // =============================================================================
 // Tests
@@ -567,7 +567,7 @@ describe('FocusManagement Integration Tests', () => {
   });
 
   describe('Dynamic Focus Management', () => {
-    function DynamicForm(): React.ReactElement {
+    const DynamicForm = (): React.ReactElement => {
       const [showField, setShowField] = useState(false);
       const newFieldRef = useRef<HTMLInputElement>(null);
 
@@ -585,7 +585,7 @@ describe('FocusManagement Integration Tests', () => {
           {showField && <Input ref={newFieldRef} data-testid="new-field" placeholder="New field" />}
         </div>
       );
-    }
+    };
 
     it('focuses dynamically added elements', async () => {
       const user = userEvent.setup();

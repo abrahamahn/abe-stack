@@ -39,31 +39,31 @@ const CardRoot = forwardRef<HTMLElement, CardRootProps>((props, ref) => {
 CardRoot.displayName = 'Card';
 
 /** Card header section for titles and actions. */
-function CardHeader({ className, children, ...rest }: CardSectionProps): ReactElement {
+const CardHeader = ({ className, children, ...rest }: CardSectionProps): ReactElement => {
   return (
     <div className={cn('card-header', className)} {...rest}>
       {children}
     </div>
   );
-}
+};
 
 /** Card body section for main content. */
-function CardBody({ className, children, ...rest }: CardSectionProps): ReactElement {
+const CardBody = ({ className, children, ...rest }: CardSectionProps): ReactElement => {
   return (
     <div className={cn('card-body', className)} {...rest}>
       {children}
     </div>
   );
-}
+};
 
 /** Card footer section for actions and metadata. */
-function CardFooter({ className, children, ...rest }: CardSectionProps): ReactElement {
+const CardFooter = ({ className, children, ...rest }: CardSectionProps): ReactElement => {
   return (
     <div className={cn('card-footer', className)} {...rest}>
       {children}
     </div>
   );
-}
+};
 
 export const Card = Object.assign(CardRoot, {
   Header: CardHeader,

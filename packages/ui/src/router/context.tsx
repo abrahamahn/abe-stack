@@ -6,6 +6,7 @@
  * Inspired by react-router patterns but simplified.
  */
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 import React, { createContext, useContext, useEffect, useRef, useSyncExternalStore } from 'react';
 
 import type { ReactNode } from 'react';
@@ -264,7 +265,7 @@ export interface RouterProps {
   scrollRestoration?: boolean;
 }
 
-export function Router({ children, scrollRestoration = true }: RouterProps): React.ReactElement {
+export const Router = ({ children, scrollRestoration = true }: RouterProps): React.ReactElement => {
   const state = useSyncExternalStore(
     browserStore?.subscribe ?? ((): (() => void) => (): void => {}),
     browserStore?.getSnapshot ??
@@ -334,7 +335,7 @@ export function Router({ children, scrollRestoration = true }: RouterProps): Rea
       {children}
     </RouterContext.Provider>
   );
-}
+};
 
 // ============================================================================
 // Memory Router Provider (for tests)
@@ -352,6 +353,7 @@ interface MemoryEntry {
   key: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export function MemoryRouter({
   children,
   initialEntries = ['/'],

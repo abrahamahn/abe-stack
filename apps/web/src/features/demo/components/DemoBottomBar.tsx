@@ -1,6 +1,6 @@
 // apps/web/src/features/demo/components/DemoBottomBar.tsx
 import { Button, EnvironmentBadge, Kbd, ResizablePanel, Text, VersionBadge } from '@abe-stack/ui';
-import { clientConfig } from '@config';
+import { clientConfig } from '@/config';
 import { KEYBOARD_SHORTCUTS } from '@demo/hooks';
 
 import type { ReactElement } from 'react';
@@ -19,7 +19,7 @@ export interface DemoBottomBarProps {
   getContrastLabel: () => string;
 }
 
-export function DemoBottomBar({
+export const DemoBottomBar = ({
   size,
   visible,
   onResize,
@@ -31,7 +31,7 @@ export function DemoBottomBar({
   getDensityLabel,
   cycleContrast,
   getContrastLabel,
-}: DemoBottomBarProps): ReactElement {
+}: DemoBottomBarProps): ReactElement => {
   return (
     <ResizablePanel
       size={size}
@@ -103,4 +103,4 @@ export function DemoBottomBar({
       </div>
     </ResizablePanel>
   );
-}
+};

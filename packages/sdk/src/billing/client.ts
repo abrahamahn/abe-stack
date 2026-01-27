@@ -137,10 +137,8 @@ export function createBillingClient(config: BillingClientConfig): BillingClient 
         credentials: 'include',
       });
     } catch (error) {
-      throw new NetworkError(
-        `Failed to fetch ${options?.method ?? 'GET'} ${path}`,
-        error instanceof Error ? error : undefined,
-      );
+      const cause = error instanceof Error ? error : new Error(String(error));
+      throw new NetworkError(`Failed to fetch ${options?.method ?? 'GET'} ${path}`, cause);
     }
 
     const data = (await response.json().catch(() => ({}))) as ApiErrorBody &
@@ -176,7 +174,7 @@ export function createBillingClient(config: BillingClientConfig): BillingClient 
     ): Promise<SubscriptionActionResponse> {
       return request<SubscriptionActionResponse>('/billing/subscription/cancel', {
         method: 'POST',
-        body: JSON.stringify(data || {}),
+        body: JSON.stringify(data ?? {}),
       });
     },
 

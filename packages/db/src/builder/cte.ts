@@ -176,15 +176,15 @@ export interface CteDeleteBuilder extends QueryBuilder {
  * Build the WITH clause from CTE definitions
  */
 function buildWithClause(ctes: CteDefinition[]): QueryResult {
-  const hasRecursive = ctes.some((cte) => cte.recursive);
+  const hasRecursive = ctes.some((cte) => cte.recursive !== undefined);
   const keyword = hasRecursive ? 'WITH RECURSIVE' : 'WITH';
 
   const cteParts: QueryResult[] = [];
 
   for (const cte of ctes) {
-    const columnList = cte.columnNames ? ` (${cte.columnNames.join(', ')})` : '';
+    const columnList = cte.columnNames !== undefined ? ` (${cte.columnNames.join(', ')})` : '';
 
-    if (cte.recursive) {
+    if (cte.recursive !== undefined) {
       // Recursive CTE: base UNION ALL recursive
       const baseQuery = cte.recursive.base.toSql();
       const recursiveQuery = cte.recursive.recursive.toSql();
@@ -245,7 +245,7 @@ class CteBuilderImpl implements CteBuilder {
   private _ctes: CteDefinition[] = [];
 
   constructor(name: string, query: QueryBuilder, columnNames?: string[]) {
-    this._ctes.push({ name, query, columnNames });
+    this._ctes.push(columnNames !== undefined ? { name, query, columnNames } : { name, query });
   }
 
   static fromRecursive(
@@ -255,12 +255,15 @@ class CteBuilderImpl implements CteBuilder {
     columnNames?: string[],
   ): CteBuilderImpl {
     const builder = new CteBuilderImpl(name, base, columnNames);
-    builder._ctes[0] = { name, query: base, columnNames, recursive: { base, recursive } };
+    builder._ctes[0] =
+      columnNames !== undefined
+        ? { name, query: base, columnNames, recursive: { base, recursive } }
+        : { name, query: base, recursive: { base, recursive } };
     return builder;
   }
 
   withCte(name: string, query: QueryBuilder, columnNames?: string[]): CteBuilder {
-    this._ctes.push({ name, query, columnNames });
+    this._ctes.push(columnNames !== undefined ? { name, query, columnNames } : { name, query });
     return this;
   }
 
@@ -270,12 +273,15 @@ class CteBuilderImpl implements CteBuilder {
     recursive: QueryBuilder,
     columnNames?: string[],
   ): CteBuilder {
-    this._ctes.push({
+    const cte: CteDefinition = {
       name,
       query: base,
-      columnNames,
       recursive: { base, recursive },
-    });
+    };
+    if (columnNames !== undefined) {
+      cte.columnNames = columnNames;
+    }
+    this._ctes.push(cte);
     return this;
   }
 

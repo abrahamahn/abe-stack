@@ -11,7 +11,7 @@ import {
   BadRequestError,
   ConflictError,
   NotFoundError,
-} from '../../infrastructure/errors';
+} from '../../infrastructure/errors/index';
 import { HTTP_STATUS } from '../../shared/constants/http';
 
 // ============================================================================

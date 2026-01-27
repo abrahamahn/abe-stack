@@ -5,14 +5,14 @@
  * Data access layer for webhook idempotency tracking.
  */
 
-import { and, eq, lt, select, insert, deleteFrom } from '../../builder';
+import { and, eq, lt, select, insert, deleteFrom } from '../../builder/index';
 import {
   type BillingEvent,
   type BillingEventType,
   type NewBillingEvent,
   BILLING_EVENT_COLUMNS,
   BILLING_EVENTS_TABLE,
-} from '../../schema';
+} from '../../schema/index';
 import { toCamelCase, toSnakeCase, parseJsonb } from '../../utils';
 
 import type { RawDb } from '../../client';
@@ -54,7 +54,8 @@ export interface BillingEventRepository {
 function transformBillingEvent(row: Record<string, unknown>): BillingEvent {
   const event = toCamelCase<BillingEvent>(row, BILLING_EVENT_COLUMNS);
   // Parse JSONB payload
-  event.payload = parseJsonb(row.payload as string | null) || {};
+  const parsedPayload = parseJsonb(row['payload'] as string | null) as Record<string, unknown> | null;
+  event.payload = parsedPayload ?? {};
   return event;
 }
 
@@ -67,7 +68,7 @@ export function createBillingEventRepository(db: RawDb): BillingEventRepository 
       const result = await db.queryOne<Record<string, unknown>>(
         select(BILLING_EVENTS_TABLE).where(eq('id', id)).toSql(),
       );
-      return result ? transformBillingEvent(result) : null;
+      return result !== null ? transformBillingEvent(result) : null;
     },
 
     async findByProviderEventId(
@@ -79,7 +80,7 @@ export function createBillingEventRepository(db: RawDb): BillingEventRepository 
           .where(and(eq('provider', provider), eq('provider_event_id', providerEventId)))
           .toSql(),
       );
-      return result ? transformBillingEvent(result) : null;
+      return result !== null ? transformBillingEvent(result) : null;
     },
 
     async wasProcessed(provider: 'stripe' | 'paypal', providerEventId: string): Promise<boolean> {
@@ -99,17 +100,15 @@ export function createBillingEventRepository(db: RawDb): BillingEventRepository 
         BILLING_EVENT_COLUMNS,
       );
       // Ensure payload is JSON stringified
-      if (event.payload) {
-        snakeData.payload = JSON.stringify(event.payload);
+      if (event.payload !== undefined) {
+        snakeData['payload'] = JSON.stringify(event.payload);
       }
       // Set processedAt if not provided
-      if (!snakeData.processed_at) {
-        snakeData.processed_at = new Date();
-      }
+      snakeData['processed_at'] ??= new Date();
       const result = await db.queryOne<Record<string, unknown>>(
         insert(BILLING_EVENTS_TABLE).values(snakeData).returningAll().toSql(),
       );
-      if (!result) {
+      if (result === null) {
         throw new Error('Failed to record billing event');
       }
       return transformBillingEvent(result);

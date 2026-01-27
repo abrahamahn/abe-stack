@@ -4,6 +4,7 @@
  *
  */
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 import React, { createContext, useContext, useEffect, useMemo } from 'react';
 
 import { useRouterContext } from './context';
@@ -16,9 +17,9 @@ import type { ReactElement, ReactNode } from 'react';
 
 const RouteParamsContext = createContext<Record<string, string>>({});
 
-export function useParams(): Record<string, string> {
+export const useParams = (): Record<string, string> => {
   return useContext(RouteParamsContext);
-}
+};
 
 // ============================================================================
 // Route Matching
@@ -45,7 +46,12 @@ function matchPath(
   const { index, parentPath = '', hasChildren = false } = options ?? {};
 
   // Calculate the relative path for nested routes
-  const relativePath = parentPath !== '' ? (pathname.slice(parentPath.length) !== '' ? pathname.slice(parentPath.length) : '/') : pathname;
+  const relativePath =
+    parentPath !== ''
+      ? pathname.slice(parentPath.length) !== ''
+        ? pathname.slice(parentPath.length)
+        : '/'
+      : pathname;
 
   // Handle index route - matches when relativePath is '/' or empty
   if (index === true) {
@@ -60,7 +66,7 @@ function matchPath(
 
   // Handle catch-all route
   if (pattern === '*') {
-    return { params: { '*': pathname }, path: pathname };
+    return { params: { ['*']: pathname }, path: pathname };
   }
 
   // Normalize pattern - handle parent path and avoid double slashes
@@ -140,10 +146,10 @@ export interface RouteProps {
   index?: boolean;
 }
 
-export function Route(_props: RouteProps): ReactElement | null {
+export const Route = (_props: RouteProps): ReactElement | null => {
   // Route is just a configuration component, rendering is handled by Routes
   return null;
-}
+};
 
 // ============================================================================
 // Routes Component
@@ -166,14 +172,17 @@ function extractRoutes(children: ReactNode): RouteConfig[] {
     if (React.isValidElement(child) && child.type === Route) {
       const props = child.props as RouteProps;
       const childRoutes = props.children != null ? extractRoutes(props.children) : undefined;
-      result.push({ ...props, childRoutes });
+      result.push({
+        ...props,
+        ...(childRoutes !== undefined && { childRoutes }),
+      });
     }
   });
 
   return result;
 }
 
-export function Routes({ children, _parentPath = '' }: RoutesProps): ReactElement | null {
+export const Routes = ({ children, _parentPath = '' }: RoutesProps): ReactElement | null => {
   const { location } = useRouterContext();
 
   // Extract route configurations from children
@@ -183,7 +192,7 @@ export function Routes({ children, _parentPath = '' }: RoutesProps): ReactElemen
   const match = useMemo(() => {
     for (const route of routes) {
       const routeMatch = matchPath(route.path, location.pathname, {
-        index: route.index,
+        ...(route.index !== undefined && { index: route.index }),
         parentPath: _parentPath,
         hasChildren: (route.childRoutes?.length ?? 0) > 0,
       });
@@ -212,7 +221,7 @@ export function Routes({ children, _parentPath = '' }: RoutesProps): ReactElemen
       <OutletProvider outlet={outlet}>{element}</OutletProvider>
     </RouteParamsContext.Provider>
   );
-}
+};
 
 // ============================================================================
 // Link Component
@@ -225,14 +234,14 @@ export interface LinkProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchorEle
   children: ReactNode;
 }
 
-export function Link({
+export const Link = ({
   to,
   replace = false,
   state,
   children,
   onClick,
   ...props
-}: LinkProps): ReactElement {
+}: LinkProps): ReactElement => {
   const { navigate } = useRouterContext();
 
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>): void => {
@@ -251,7 +260,7 @@ export function Link({
       {children}
     </a>
   );
-}
+};
 
 // ============================================================================
 // Navigate Component (for redirects)
@@ -263,7 +272,7 @@ export interface NavigateProps {
   state?: unknown;
 }
 
-export function Navigate({ to, replace = false, state }: NavigateProps): null {
+export const Navigate = ({ to, replace = false, state }: NavigateProps): null => {
   const { navigate } = useRouterContext();
 
   useEffect(() => {
@@ -271,7 +280,7 @@ export function Navigate({ to, replace = false, state }: NavigateProps): null {
   }, [navigate, to, replace, state]);
 
   return null;
-}
+};
 
 // ============================================================================
 // Outlet Component (for nested routes)
@@ -279,15 +288,15 @@ export function Navigate({ to, replace = false, state }: NavigateProps): null {
 
 const OutletContext = createContext<ReactElement | null>(null);
 
-export function Outlet(): ReactElement | null {
+export const Outlet = (): ReactElement | null => {
   return useContext(OutletContext);
-}
+};
 
 export interface OutletProviderProps {
   children: ReactNode;
   outlet: ReactElement | null;
 }
 
-export function OutletProvider({ children, outlet }: OutletProviderProps): ReactElement {
+export const OutletProvider = ({ children, outlet }: OutletProviderProps): ReactElement => {
   return <OutletContext.Provider value={outlet}>{children}</OutletContext.Provider>;
-}
+};

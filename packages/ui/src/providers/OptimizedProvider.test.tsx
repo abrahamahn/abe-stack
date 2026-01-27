@@ -1,19 +1,19 @@
 // packages/ui/src/providers/__tests__/OptimizedProvider.test.tsx
 /** @vitest-environment jsdom */
 import { act, render, renderHook, screen } from '@testing-library/react';
-import React from 'react';
+import { useState, type ReactElement } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    createLazyContext,
-    createMemoizedContext,
-    createReducerContext,
-    createSelectiveContext,
-    createSubscriptionContext,
-    Memoized,
-    SelectiveMemo,
-    useRenderPerformance,
-} from '../OptimizedProvider';
+  createLazyContext,
+  createMemoizedContext,
+  createReducerContext,
+  createSelectiveContext,
+  createSubscriptionContext,
+  Memoized,
+  SelectiveMemo,
+  useRenderPerformance,
+} from './OptimizedProvider';
 
 // ============================================================================
 // Tests: createMemoizedContext
@@ -31,7 +31,8 @@ describe('createMemoizedContext', () => {
   it('provides value to children', () => {
     const { Provider, useContextValue } = createMemoizedContext<{ value: string }>();
 
-    function TestComponent(): React.ReactElement {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    function TestComponent(): ReactElement {
       const ctx = useContextValue();
       return <div data-testid="value">{ctx.value}</div>;
     }
@@ -61,7 +62,8 @@ describe('createMemoizedContext', () => {
     const { Provider, useContextValue } = createMemoizedContext<{ value: string }>();
     const renderCount = { current: 0 };
 
-    function TestComponent(): React.ReactElement {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    function TestComponent(): ReactElement {
       useContextValue();
       renderCount.current++;
       return <div>Test</div>;
@@ -110,7 +112,8 @@ describe('createSelectiveContext', () => {
       count: number;
     }>();
 
-    function TestComponent(): React.ReactElement {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    function TestComponent(): ReactElement {
       const ctx = useContextValue();
       return (
         <div>
@@ -184,12 +187,19 @@ describe('createReducerContext', () => {
   it('provides state and dispatch to children', () => {
     const { Provider, useContextValue } = createReducerContext<CounterState, CounterAction>();
 
-    function TestComponent(): React.ReactElement {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    function TestComponent(): ReactElement {
       const { state, dispatch } = useContextValue();
       return (
         <div>
           <span data-testid="count">{state.count}</span>
-          <button onClick={() => { dispatch({ type: 'INCREMENT' }); }}>Increment</button>
+          <button
+            onClick={() => {
+              dispatch({ type: 'INCREMENT' });
+            }}
+          >
+            Increment
+          </button>
         </div>
       );
     }
@@ -206,15 +216,26 @@ describe('createReducerContext', () => {
   it('dispatches actions correctly', () => {
     const { Provider, useContextValue } = createReducerContext<CounterState, CounterAction>();
 
-    function TestComponent(): React.ReactElement {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    function TestComponent(): ReactElement {
       const { state, dispatch } = useContextValue();
       return (
         <div>
           <span data-testid="count">{state.count}</span>
-          <button data-testid="increment" onClick={() => { dispatch({ type: 'INCREMENT' }); }}>
+          <button
+            data-testid="increment"
+            onClick={() => {
+              dispatch({ type: 'INCREMENT' });
+            }}
+          >
             Increment
           </button>
-          <button data-testid="decrement" onClick={() => { dispatch({ type: 'DECREMENT' }); }}>
+          <button
+            data-testid="decrement"
+            onClick={() => {
+              dispatch({ type: 'DECREMENT' });
+            }}
+          >
             Decrement
           </button>
         </div>
@@ -245,7 +266,8 @@ describe('createReducerContext', () => {
   it('useStateSelector returns selected state', () => {
     const { Provider, useStateSelector } = createReducerContext<CounterState, CounterAction>();
 
-    function TestComponent(): React.ReactElement {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    function TestComponent(): ReactElement {
       const count = useStateSelector((state) => state.count);
       return <span data-testid="count">{count}</span>;
     }
@@ -265,13 +287,19 @@ describe('createReducerContext', () => {
       CounterAction
     >();
 
-    function TestComponent(): React.ReactElement {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    function TestComponent(): ReactElement {
       const dispatch = useDispatch();
       const count = useStateSelector((state) => state.count);
       return (
         <div>
           <span data-testid="count">{count}</span>
-          <button data-testid="set" onClick={() => { dispatch({ type: 'SET', payload: 42 }); }}>
+          <button
+            data-testid="set"
+            onClick={() => {
+              dispatch({ type: 'SET', payload: 42 });
+            }}
+          >
             Set to 42
           </button>
         </div>
@@ -321,7 +349,8 @@ describe('createLazyContext', () => {
     const { Provider, useContextValue } = createLazyContext<{ data: string }>();
     const initializer = vi.fn(() => ({ data: 'initialized' }));
 
-    function TestComponent(): React.ReactElement {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    function TestComponent(): ReactElement {
       const ctx = useContextValue();
       return <span data-testid="data">{ctx.data}</span>;
     }
@@ -341,7 +370,8 @@ describe('createLazyContext', () => {
     let initCount = 0;
     const initializer = vi.fn(() => ({ data: `init-${++initCount}` }));
 
-    function TestComponent(): React.ReactElement {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    function TestComponent(): ReactElement {
       const ctx = useContextValue();
       return <span data-testid="data">{ctx.data}</span>;
     }
@@ -397,13 +427,19 @@ describe('createSubscriptionContext', () => {
       return () => {};
     });
 
-    function TestComponent(): React.ReactElement {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    function TestComponent(): ReactElement {
       const { data, isLoading, subscribe } = useContextValue();
       return (
         <div>
           <span data-testid="data">{data ?? 'no-data'}</span>
           <span data-testid="loading">{isLoading ? 'loading' : 'loaded'}</span>
-          <button data-testid="subscribe" onClick={() => { subscribe(() => {}); }}>
+          <button
+            data-testid="subscribe"
+            onClick={() => {
+              subscribe(() => {});
+            }}
+          >
             Subscribe
           </button>
         </div>
@@ -424,19 +460,27 @@ describe('createSubscriptionContext', () => {
     const { Provider, useContextValue } = createSubscriptionContext<string>();
     const unsubscribe = vi.fn();
     const mockSubscribe = vi.fn((callback: (data: string) => void) => {
-      setTimeout(() => { callback('async-data'); }, 0);
+      setTimeout(() => {
+        callback('async-data');
+      }, 0);
       return unsubscribe;
     });
 
-    function TestComponent(): React.ReactElement {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    function TestComponent(): ReactElement {
       const { data, isLoading, subscribe } = useContextValue();
-      const [localData, setLocalData] = React.useState<string | null>(null);
+      const [localData, setLocalData] = useState<string | null>(null);
 
       return (
         <div>
           <span data-testid="data">{localData ?? data ?? 'no-data'}</span>
           <span data-testid="loading">{isLoading ? 'loading' : 'loaded'}</span>
-          <button data-testid="subscribe" onClick={() => { subscribe(setLocalData); }}>
+          <button
+            data-testid="subscribe"
+            onClick={() => {
+              subscribe(setLocalData);
+            }}
+          >
             Subscribe
           </button>
         </div>
@@ -461,7 +505,8 @@ describe('createSubscriptionContext', () => {
     const unsubscribeFn = vi.fn();
     const mockSubscribe = vi.fn(() => () => {});
 
-    function TestComponent(): React.ReactElement {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    function TestComponent(): ReactElement {
       const ctx = useContextValue();
       return <div>{ctx.data}</div>;
     }
@@ -495,12 +540,18 @@ describe('createSubscriptionContext', () => {
       throw new Error('Subscribe error');
     });
 
-    function TestComponent(): React.ReactElement {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    function TestComponent(): ReactElement {
       const { error, subscribe } = useContextValue();
       return (
         <div>
           <span data-testid="error">{error?.message ?? 'no-error'}</span>
-          <button data-testid="subscribe" onClick={() => { subscribe(() => {}); }}>
+          <button
+            data-testid="subscribe"
+            onClick={() => {
+              subscribe(() => {});
+            }}
+          >
             Subscribe
           </button>
         </div>
@@ -539,7 +590,8 @@ describe('Memoized', () => {
   it('is memoized with shallow comparison', () => {
     const renderCount = { current: 0 };
 
-    function Child(): React.ReactElement {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    function Child(): ReactElement {
       renderCount.current++;
       return <span>Render count: {renderCount.current}</span>;
     }
@@ -621,11 +673,11 @@ describe('useRenderPerformance', () => {
   let originalNodeEnv: string | undefined;
 
   beforeEach(() => {
-    originalNodeEnv = process.env.NODE_ENV;
+    originalNodeEnv = process.env['NODE_ENV'];
   });
 
   afterEach(() => {
-    process.env.NODE_ENV = originalNodeEnv;
+    process.env['NODE_ENV'] = originalNodeEnv;
   });
 
   it('tracks render count', () => {
@@ -655,7 +707,7 @@ describe('useRenderPerformance', () => {
   });
 
   it('does not log in development mode (logging disabled in implementation)', () => {
-    process.env.NODE_ENV = 'development';
+    process.env['NODE_ENV'] = 'development';
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     renderHook(() => useRenderPerformance('TestComponent'));
@@ -667,7 +719,7 @@ describe('useRenderPerformance', () => {
   });
 
   it('does not log in production mode', () => {
-    process.env.NODE_ENV = 'production';
+    process.env['NODE_ENV'] = 'production';
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
     renderHook(() => useRenderPerformance('TestComponent'));

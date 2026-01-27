@@ -8,26 +8,25 @@
 
 import { randomUUID } from 'node:crypto';
 
-import { describe, expect, it } from 'vitest';
-
 import {
-    authResponseSchema,
-    emailVerificationRequestSchema,
-    emailVerificationResponseSchema,
-    forgotPasswordRequestSchema,
-    loginRequestSchema,
-    registerRequestSchema,
-    registerResponseSchema,
-    resetPasswordRequestSchema,
+  authResponseSchema,
+  emailVerificationRequestSchema,
+  emailVerificationResponseSchema,
+  forgotPasswordRequestSchema,
+  loginRequestSchema,
+  registerRequestSchema,
+  registerResponseSchema,
+  resetPasswordRequestSchema,
 } from '@abe-stack/contracts/auth';
 import {
-    emailSchema,
-    errorResponseSchema,
-    nameSchema,
-    passwordSchema,
-    uuidSchema,
+  emailSchema,
+  errorResponseSchema,
+  nameSchema,
+  passwordSchema,
+  uuidSchema,
 } from '@abe-stack/contracts/common';
 import { userRoleSchema, userSchema } from '@abe-stack/contracts/users';
+import { describe, expect, it } from 'vitest';
 
 describe('Contract Schema Integration', () => {
   describe('Common schemas with real data', () => {

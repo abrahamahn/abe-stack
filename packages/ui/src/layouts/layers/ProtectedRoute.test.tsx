@@ -3,8 +3,9 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { MemoryRouter, Route, Routes } from '../../../router';
-import { ProtectedRoute } from '../ProtectedRoute';
+import { MemoryRouter, Route, Routes } from '../../router';
+
+import { ProtectedRoute } from './ProtectedRoute';
 
 describe('ProtectedRoute', () => {
   describe('loading state', () => {

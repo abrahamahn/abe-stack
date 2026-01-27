@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+
 import { getUser } from '../api';
 
 import type { AdminUser } from '@abe-stack/core';
@@ -53,7 +54,7 @@ export function useAdminUser(userId: string | null): UseAdminUserResult {
 
   // Fetch user when userId changes
   useEffect(() => {
-    if (userId) {
+    if (userId !== null && userId !== '') {
       fetchUser(userId).catch(() => {
         // Error is already handled in fetchUser
       });
@@ -63,7 +64,7 @@ export function useAdminUser(userId: string | null): UseAdminUserResult {
   }, [userId, fetchUser]);
 
   const refresh = useCallback(async () => {
-    if (userId) {
+    if (userId !== null && userId !== '') {
       await fetchUser(userId);
     }
   }, [userId, fetchUser]);

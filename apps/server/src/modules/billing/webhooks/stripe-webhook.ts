@@ -6,6 +6,9 @@
  */
 
 import { WebhookEventAlreadyProcessedError, WebhookSignatureError } from '@abe-stack/core';
+import type { StripeProviderConfig as StripeConfig } from '@abe-stack/core';
+import { StripeProvider, type NormalizedWebhookEvent } from '@infrastructure/billing';
+
 import type {
     BillingEventRepository,
     CustomerMappingRepository,
@@ -13,13 +16,6 @@ import type {
     PlanRepository,
     SubscriptionRepository,
 } from '@abe-stack/db';
-
-import {
-    StripeProvider,
-    type NormalizedWebhookEvent,
-    type StripeConfig,
-} from '@infrastructure/billing';
-
 import type { FastifyBaseLogger } from 'fastify';
 
 // ============================================================================

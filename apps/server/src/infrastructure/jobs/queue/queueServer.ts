@@ -12,8 +12,8 @@
  * - Error serialization for debugging
  */
 
-import type { Logger } from '@logger';
 import type { QueueConfig, QueueStore, Task, TaskError, TaskHandler, TaskHandlers } from './types';
+import type { Logger } from '@logger';
 
 // ============================================================================
 // Constants

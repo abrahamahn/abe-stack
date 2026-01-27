@@ -6,7 +6,7 @@
  * Scopes: user:email, read:user (for basic user info and verified email)
  */
 
-import { OAuthError } from '@shared';
+import { OAuthError } from '@abe-stack/core';
 
 import type { OAuthProviderClient, OAuthTokenResponse, OAuthUserInfo } from '../types';
 

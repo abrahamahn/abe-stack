@@ -1,17 +1,17 @@
 // apps/web/src/features/auth/pages/AuthPage.tsx
+
 import { toastStore } from '@abe-stack/stores';
 import { AuthLayout, useFormState, useNavigate, useSearchParams } from '@abe-stack/ui';
-import { AuthForm, type AuthMode } from '@auth/components/AuthForms';
+import { AuthForm, type AuthMode, type AuthFormProps } from '@auth/components/AuthForms';
 import { useAuth } from '@auth/hooks';
 import { getPostLoginRedirect } from '@auth/utils';
 import { useEffect, useState } from 'react';
 
-import type { AuthFormProps } from '@auth/components/AuthForms';
 import type { ReactElement } from 'react';
 
 const VALID_MODES = ['login', 'register', 'forgot-password', 'reset-password'] as const;
 
-export function AuthPage(): ReactElement {
+export const AuthPage = (): ReactElement => {
   const searchParamsResult = useSearchParams();
   const searchParams: URLSearchParams = searchParamsResult[0];
   const navigate = useNavigate();
@@ -75,7 +75,7 @@ export function AuthPage(): ReactElement {
     onModeChange: handleModeChange,
     isLoading,
     error,
-    initialData: token ? { token } : undefined,
+    ...(token !== null && { initialData: { token } }),
   };
 
   return (
@@ -83,4 +83,4 @@ export function AuthPage(): ReactElement {
       <AuthForm {...formProps} />
     </AuthLayout>
   );
-}
+};

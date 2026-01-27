@@ -5,8 +5,9 @@
  * HTTP request handlers for OAuth authentication flows.
  */
 
+import { OAuthError, TooManyRequestsError } from '@abe-stack/core';
 import { OAUTH_PROVIDERS, type OAuthProvider } from '@infrastructure';
-import { mapErrorToResponse, OAuthError, TooManyRequestsError, type AppContext } from '@shared';
+import { mapErrorToResponse, type AppContext } from '@shared';
 
 import {
     authRateLimiters,
@@ -26,9 +27,9 @@ import {
     unlinkOAuthAccount,
 } from './service';
 
+import type { OAuthConnectionInfo } from './types';
 import type { AuthResponse } from '@abe-stack/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { OAuthConnectionInfo } from './types';
 
 // ============================================================================
 // Types

@@ -5,7 +5,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Pagination } from '../Pagination';
+import { Pagination } from './Pagination';
 
 describe('Pagination', () => {
   it('renders page buttons with active state', () => {

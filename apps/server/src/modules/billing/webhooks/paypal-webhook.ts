@@ -6,6 +6,9 @@
  */
 
 import { WebhookEventAlreadyProcessedError, WebhookSignatureError } from '@abe-stack/core';
+import type { PayPalProviderConfig as PayPalConfig } from '@abe-stack/core';
+import { PayPalProvider, type NormalizedWebhookEvent } from '@infrastructure/billing';
+
 import type {
     BillingEventRepository,
     CustomerMappingRepository,
@@ -13,13 +16,6 @@ import type {
     PlanRepository,
     SubscriptionRepository,
 } from '@abe-stack/db';
-
-import {
-    PayPalProvider,
-    type NormalizedWebhookEvent,
-    type PayPalConfig,
-} from '@infrastructure/billing';
-
 import type { FastifyBaseLogger } from 'fastify';
 
 // ============================================================================

@@ -1,5 +1,10 @@
 // apps/server/src/config/services/billing.ts
-import type { BillingConfig, BillingProvider, FullEnv } from '@abe-stack/core/config';
+import type {
+  BillingConfig,
+  BillingPlansConfig,
+  BillingProvider,
+  FullEnv,
+} from '@abe-stack/core/config';
 
 /**
  * Load Billing Configuration.
@@ -37,7 +42,7 @@ export function loadBillingConfig(env: FullEnv, appBaseUrl?: string): BillingCon
 
   // 2. Resolve active provider (Explicit Choice > Stripe > PayPal)
   const provider = resolveActiveProvider(
-    env.BILLING_PROVIDER as BillingProvider | undefined,
+    env.BILLING_PROVIDER,
     availability,
   );
 
@@ -65,11 +70,19 @@ export function loadBillingConfig(env: FullEnv, appBaseUrl?: string): BillingCon
     },
 
     // SaaS Plan IDs (The "Business" logic)
-    plans: {
-      free: env.PLAN_FREE_ID,
-      pro: env.PLAN_PRO_ID,
-      enterprise: env.PLAN_ENTERPRISE_ID,
-    },
+    plans: (() => {
+      const plans: BillingPlansConfig = {};
+      if (env.PLAN_FREE_ID !== undefined) {
+        plans.free = env.PLAN_FREE_ID;
+      }
+      if (env.PLAN_PRO_ID !== undefined) {
+        plans.pro = env.PLAN_PRO_ID;
+      }
+      if (env.PLAN_ENTERPRISE_ID !== undefined) {
+        plans.enterprise = env.PLAN_ENTERPRISE_ID;
+      }
+      return plans;
+    })(),
 
     urls: {
       portalReturnUrl: env.BILLING_PORTAL_RETURN_URL ?? `${appUrl}/settings/billing`,
@@ -99,7 +112,7 @@ function resolveActiveProvider(
 
 export function validateBillingConfig(config: BillingConfig): string[] {
   const errors: string[] = [];
-  const isProd = process.env.NODE_ENV === 'production';
+  const isProd = process.env['NODE_ENV'] === 'production';
 
   if (config.provider === 'stripe') {
     if (config.stripe.secretKey === '') errors.push('STRIPE_SECRET_KEY missing');

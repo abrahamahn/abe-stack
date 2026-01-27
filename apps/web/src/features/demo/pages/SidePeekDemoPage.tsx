@@ -4,7 +4,7 @@ import { SidePeekDemoContent } from '@demo/components';
 
 import type { ReactElement } from 'react';
 
-export function SidePeekDemoPage(): ReactElement {
+export const SidePeekDemoPage = (): ReactElement => {
   const navigate = useNavigate();
 
   return (
@@ -24,4 +24,4 @@ export function SidePeekDemoPage(): ReactElement {
       </PageContainer>
     </div>
   );
-}
+};

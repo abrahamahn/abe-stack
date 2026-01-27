@@ -8,7 +8,6 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
-import { hashQueryKey } from './QueryCache';
 import { useQueryCache } from './QueryCacheProvider';
 
 import type { QueryKey, QueryState } from './QueryCache';
@@ -172,7 +171,6 @@ export function useInfiniteQuery<
   } = options;
 
   const cache = useQueryCache();
-  const queryKeyHash = hashQueryKey(queryKey);
 
   // Local state for infinite data
   const [infiniteData, setInfiniteData] = useState<InfiniteData<TData, TPageParam> | undefined>(
@@ -188,7 +186,7 @@ export function useInfiniteQuery<
     (onStoreChange: () => void) => {
       return cache.subscribe(queryKey, onStoreChange);
     },
-    [cache, queryKeyHash],
+    [cache, queryKey],
   );
 
   // Get current state snapshot
@@ -196,29 +194,29 @@ export function useInfiniteQuery<
     | QueryState<InfiniteData<TData, TPageParam>, TError>
     | undefined => {
     return cache.getQueryState<InfiniteData<TData, TPageParam>, TError>(queryKey);
-  }, [cache, queryKeyHash]);
+  }, [cache, queryKey]);
 
   const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
   // Sync cache state to local state
   useEffect(() => {
-    if (state?.data) {
+    if (state !== undefined && state.data !== undefined && state.data !== null) {
       setInfiniteData(state.data);
     }
-  }, [state?.data]);
+  }, [state]);
 
   // Fetch a single page with retry logic
   const fetchPage = useCallback(
     async (pageParam: TPageParam): Promise<TData> => {
       const maxRetries = typeof retry === 'boolean' ? (retry ? DEFAULT_RETRY : 0) : retry;
-      let lastError: TError | null = null;
+      let lastError: Error | null = null;
 
       for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
           const data = await queryFn({ pageParam });
           return data;
         } catch (err) {
-          lastError = err as TError;
+          lastError = err instanceof Error ? err : new Error(String(err));
 
           if (attempt < maxRetries) {
             await new Promise((resolve) => setTimeout(resolve, retryDelay * Math.pow(2, attempt)));
@@ -227,7 +225,7 @@ export function useInfiniteQuery<
       }
 
       const errorToThrow = lastError ?? new Error('Unknown fetch error');
-      throw errorToThrow instanceof Error ? errorToThrow : new Error(String(errorToThrow));
+      throw errorToThrow;
     },
     [queryFn, retry, retryDelay],
   );
@@ -237,9 +235,11 @@ export function useInfiniteQuery<
     if (!enabled) return;
 
     // Check if data is fresh
-    if (!cache.isStale(queryKey) && infiniteData?.pages.length) return;
+    if (!cache.isStale(queryKey) && (infiniteData?.pages.length ?? 0) > 0) return;
 
-    abortController.current?.abort();
+    if (abortController.current !== null) {
+      abortController.current.abort();
+    }
     abortController.current = new AbortController();
 
     cache.setFetchStatus(queryKey, 'fetching');
@@ -247,7 +247,7 @@ export function useInfiniteQuery<
     try {
       const firstPage = await fetchPage(initialPageParam);
 
-      if (abortController.current.signal.aborted) return;
+      if (abortController.current !== null && abortController.current.signal.aborted) return;
 
       const newData: InfiniteData<TData, TPageParam> = {
         pages: [firstPage],
@@ -255,17 +255,22 @@ export function useInfiniteQuery<
       };
 
       setInfiniteData(newData);
-      cache.setQueryData(queryKey, newData, { staleTime });
-      onSuccess?.(newData);
+      cache.setQueryData(queryKey, newData, staleTime !== undefined ? { staleTime } : {});
+      if (onSuccess !== undefined) {
+        onSuccess(newData);
+      }
     } catch (err) {
-      if (abortController.current.signal.aborted) return;
+      if (abortController.current !== null && abortController.current.signal.aborted) return;
 
-      cache.setQueryError(queryKey, err as TError);
-      onError?.(err as TError);
+      const error = err instanceof Error ? err : new Error(String(err));
+      cache.setQueryError(queryKey, error);
+      if (onError !== undefined) {
+        onError(error as TError);
+      }
     }
   }, [
     enabled,
-    queryKeyHash,
+    queryKey,
     infiniteData,
     fetchPage,
     initialPageParam,
@@ -277,10 +282,10 @@ export function useInfiniteQuery<
 
   // Fetch next page
   const fetchNextPage = useCallback(async (): Promise<void> => {
-    if (!enabled || !infiniteData?.pages.length) return;
+    if (!enabled || infiniteData === undefined || infiniteData.pages.length === 0) return;
 
     const lastPage = infiniteData.pages[infiniteData.pages.length - 1];
-    if (!lastPage) return;
+    if (lastPage === undefined) return;
     const nextPageParam = getNextPageParam(lastPage, infiniteData.pages);
 
     if (nextPageParam === undefined) return;
@@ -297,11 +302,16 @@ export function useInfiniteQuery<
       };
 
       setInfiniteData(newData);
-      cache.setQueryData(queryKey, newData, { staleTime });
-      onSuccess?.(newData);
+      cache.setQueryData(queryKey, newData, staleTime !== undefined ? { staleTime } : {});
+      if (onSuccess !== undefined) {
+        onSuccess(newData);
+      }
     } catch (err) {
-      cache.setQueryError(queryKey, err as TError);
-      onError?.(err as TError);
+      const error = err instanceof Error ? err : new Error(String(err));
+      cache.setQueryError(queryKey, error);
+      if (onError !== undefined) {
+        onError(error as TError);
+      }
     } finally {
       setIsFetchingNextPage(false);
     }
@@ -314,15 +324,16 @@ export function useInfiniteQuery<
     onSuccess,
     onError,
     cache,
-    queryKeyHash,
+    queryKey,
   ]);
 
   // Fetch previous page
   const fetchPreviousPage = useCallback(async (): Promise<void> => {
-    if (!enabled || !infiniteData?.pages.length || !getPreviousPageParam) return;
+    if (!enabled || infiniteData === undefined || infiniteData.pages.length === 0 || getPreviousPageParam === undefined)
+      return;
 
     const firstPage = infiniteData.pages[0];
-    if (!firstPage) return;
+    if (firstPage === undefined) return;
     const prevPageParam = getPreviousPageParam(firstPage, infiniteData.pages);
 
     if (prevPageParam === undefined) return;
@@ -339,11 +350,16 @@ export function useInfiniteQuery<
       };
 
       setInfiniteData(newData);
-      cache.setQueryData(queryKey, newData, { staleTime });
-      onSuccess?.(newData);
+      cache.setQueryData(queryKey, newData, staleTime !== undefined ? { staleTime } : {});
+      if (onSuccess !== undefined) {
+        onSuccess(newData);
+      }
     } catch (err) {
-      cache.setQueryError(queryKey, err as TError);
-      onError?.(err as TError);
+      const error = err instanceof Error ? err : new Error(String(err));
+      cache.setQueryError(queryKey, error);
+      if (onError !== undefined) {
+        onError(error as TError);
+      }
     } finally {
       setIsFetchingPreviousPage(false);
     }
@@ -356,7 +372,7 @@ export function useInfiniteQuery<
     onSuccess,
     onError,
     cache,
-    queryKeyHash,
+    queryKey,
   ]);
 
   // Refetch all pages
@@ -370,20 +386,22 @@ export function useInfiniteQuery<
     setInfiniteData(undefined);
 
     await fetchInitialPage();
-  }, [enabled, queryKeyHash, fetchInitialPage, cache]);
+  }, [enabled, queryKey, fetchInitialPage, cache]);
 
   // Initial fetch effect
   useEffect(() => {
     if (!enabled) return;
 
-    if (cache.isStale(queryKey) || !infiniteData?.pages.length) {
+    if (cache.isStale(queryKey) || (infiniteData?.pages.length ?? 0) === 0) {
       void fetchInitialPage();
     }
 
     return (): void => {
-      abortController.current?.abort();
+      if (abortController.current !== null) {
+        abortController.current.abort();
+      }
     };
-  }, [enabled, queryKeyHash]);
+  }, [enabled, queryKey, cache, infiniteData, fetchInitialPage]);
 
   // Derive computed values
   const error = (state?.error as TError | null) ?? null;
@@ -397,13 +415,14 @@ export function useInfiniteQuery<
 
   // Calculate hasNextPage and hasPreviousPage
   const lastPageForNext = infiniteData?.pages[infiniteData.pages.length - 1];
-  const hasNextPage = lastPageForNext
-    ? getNextPageParam(lastPageForNext, infiniteData.pages) !== undefined
-    : false;
+  const hasNextPage =
+    lastPageForNext !== undefined && infiniteData !== undefined
+      ? getNextPageParam(lastPageForNext, infiniteData.pages) !== undefined
+      : false;
 
   const firstPageForPrev = infiniteData?.pages[0];
   const hasPreviousPage =
-    firstPageForPrev && getPreviousPageParam
+    firstPageForPrev !== undefined && getPreviousPageParam !== undefined && infiniteData !== undefined
       ? getPreviousPageParam(firstPageForPrev, infiniteData.pages) !== undefined
       : false;
 

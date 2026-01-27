@@ -46,20 +46,28 @@ export const DEFAULT_SEARCH_SCHEMAS: Record<string, SqlTableConfig> = {
  * @returns Elasticsearch provider configuration
  */
 export function loadElasticsearchConfig(env: FullEnv): ElasticsearchProviderConfig {
-  return {
+  const config: ElasticsearchProviderConfig = {
     node: env.ELASTICSEARCH_NODE ?? 'http://localhost:9200',
     index: env.ELASTICSEARCH_INDEX ?? 'default',
-    auth:
-      (env.ELASTICSEARCH_USERNAME != null && env.ELASTICSEARCH_USERNAME !== '') && (env.ELASTICSEARCH_PASSWORD != null && env.ELASTICSEARCH_PASSWORD !== '')
-        ? {
-            username: env.ELASTICSEARCH_USERNAME,
-            password: env.ELASTICSEARCH_PASSWORD,
-          }
-        : undefined,
-    apiKey: env.ELASTICSEARCH_API_KEY,
     tls: env.ELASTICSEARCH_TLS === 'true',
-    requestTimeout: env.ELASTICSEARCH_REQUEST_TIMEOUT_MS ?? undefined,
   };
+
+  if ((env.ELASTICSEARCH_USERNAME != null && env.ELASTICSEARCH_USERNAME !== '') && (env.ELASTICSEARCH_PASSWORD != null && env.ELASTICSEARCH_PASSWORD !== '')) {
+    config.auth = {
+      username: env.ELASTICSEARCH_USERNAME,
+      password: env.ELASTICSEARCH_PASSWORD,
+    };
+  }
+
+  if (env.ELASTICSEARCH_API_KEY !== undefined) {
+    config.apiKey = env.ELASTICSEARCH_API_KEY;
+  }
+
+  if (env.ELASTICSEARCH_REQUEST_TIMEOUT_MS !== undefined) {
+    config.requestTimeout = env.ELASTICSEARCH_REQUEST_TIMEOUT_MS;
+  }
+
+  return config;
 }
 
 /**
@@ -73,14 +81,25 @@ export function loadElasticsearchConfig(env: FullEnv): ElasticsearchProviderConf
  * @returns SQL search provider configuration
  */
 export function loadSqlSearchConfig(env: FullEnv): SqlSearchProviderConfig {
-  return {
+  const config: SqlSearchProviderConfig = {
     defaultPageSize: env.SQL_SEARCH_DEFAULT_PAGE_SIZE ?? 50,
     maxPageSize: env.SQL_SEARCH_MAX_PAGE_SIZE ?? 1000,
-    maxQueryDepth: env.SQL_SEARCH_MAX_QUERY_DEPTH ?? undefined,
-    maxConditions: env.SQL_SEARCH_MAX_CONDITIONS ?? undefined,
     logging: env.SQL_SEARCH_LOGGING === 'true',
-    timeout: env.SQL_SEARCH_TIMEOUT_MS ?? undefined,
   };
+
+  if (env.SQL_SEARCH_MAX_QUERY_DEPTH !== undefined) {
+    config.maxQueryDepth = env.SQL_SEARCH_MAX_QUERY_DEPTH;
+  }
+
+  if (env.SQL_SEARCH_MAX_CONDITIONS !== undefined) {
+    config.maxConditions = env.SQL_SEARCH_MAX_CONDITIONS;
+  }
+
+  if (env.SQL_SEARCH_TIMEOUT_MS !== undefined) {
+    config.timeout = env.SQL_SEARCH_TIMEOUT_MS;
+  }
+
+  return config;
 }
 
 /**

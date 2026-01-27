@@ -14,18 +14,18 @@ export interface ForgotPasswordFormProps {
   error?: string | null;
 }
 
-export function ForgotPasswordForm({
+export const ForgotPasswordForm = ({
   onForgotPassword,
   onModeChange,
   isLoading,
   error,
   onSuccess,
-}: ForgotPasswordFormProps): ReactElement {
+}: ForgotPasswordFormProps): ReactElement => {
   const [email, setEmail] = useState('');
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    if (!onForgotPassword) return;
+    if (onForgotPassword === undefined) return;
 
     try {
       await onForgotPassword({ email });
@@ -62,16 +62,18 @@ export function ForgotPasswordForm({
             disabled={isLoading}
           />
 
-          {error && <div className="auth-form-error">{error}</div>}
+          {error !== undefined && error !== null && error.length > 0 && (
+            <div className="auth-form-error">{error}</div>
+          )}
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Sending...' : 'Send reset link'}
+            {isLoading === true ? 'Sending...' : 'Send reset link'}
           </Button>
         </form>
 
         <div className="auth-form-footer">
           Remember your password?{' '}
-          {onModeChange ? (
+          {onModeChange !== undefined ? (
             <Button
               variant="text"
               onClick={() => {
@@ -88,4 +90,4 @@ export function ForgotPasswordForm({
       </div>
     </div>
   );
-}
+};

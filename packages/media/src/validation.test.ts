@@ -6,7 +6,7 @@ import {
   sanitizeFilename,
   validateMediaFile,
   validateUploadConfig,
-} from '../validation';
+} from './validation';
 
 // Mock fs module
 vi.mock('fs', () => ({
@@ -16,7 +16,7 @@ vi.mock('fs', () => ({
 }));
 
 // Mock file-type module
-vi.mock('../file-type', () => ({
+vi.mock('./file-type.js', () => ({
   detectFileTypeFromFile: vi.fn(),
   isAllowedFileType: vi.fn(),
 }));
@@ -24,7 +24,7 @@ vi.mock('../file-type', () => ({
 describe('validateMediaFile', () => {
   test('should validate a valid media file', async () => {
     const fs = await import('fs');
-    const fileType = await import('../file-type');
+    const fileType = await import('./file-type.js');
 
     vi.mocked(fs.promises.stat).mockResolvedValue({ size: 1024 } as never);
     vi.mocked(fileType.detectFileTypeFromFile).mockResolvedValue({
@@ -75,7 +75,7 @@ describe('validateMediaFile', () => {
 
   test('should reject file with undetectable type', async () => {
     const fs = await import('fs');
-    const fileType = await import('../file-type');
+    const fileType = await import('./file-type.js');
 
     vi.mocked(fs.promises.stat).mockResolvedValue({ size: 1024 } as never);
     vi.mocked(fileType.detectFileTypeFromFile).mockResolvedValue(null);
@@ -92,7 +92,7 @@ describe('validateMediaFile', () => {
 
   test('should reject file with disallowed type', async () => {
     const fs = await import('fs');
-    const fileType = await import('../file-type');
+    const fileType = await import('./file-type.js');
 
     vi.mocked(fs.promises.stat).mockResolvedValue({ size: 1024 } as never);
     vi.mocked(fileType.detectFileTypeFromFile).mockResolvedValue({
@@ -324,7 +324,7 @@ describe('sanitizeFilename', () => {
       const result = sanitizeFilename(withControlChars);
       const hasControlChars = result
         .split('')
-        .some((char) => char.charCodeAt(0) >= 0 && char.charCodeAt(0) < 32);
+        .some((char: string) => char.charCodeAt(0) >= 0 && char.charCodeAt(0) < 32);
       expect(hasControlChars).toBe(false);
     });
   });

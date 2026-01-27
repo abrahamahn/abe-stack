@@ -33,7 +33,7 @@ export type TabsProps = {
  * ]} />
  * ```
  */
-export function Tabs({ items, value, defaultValue, onChange }: TabsProps): ReactElement {
+export const Tabs = ({ items, value, defaultValue, onChange }: TabsProps): ReactElement => {
   const [activeId, setActiveId] = useState<string>(() => defaultValue ?? items[0]?.id ?? '');
   const currentId = value ?? activeId;
 

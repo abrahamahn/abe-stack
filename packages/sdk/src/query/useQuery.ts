@@ -171,7 +171,7 @@ export function useQuery<TData = unknown, TError = Error>(
         // Check if aborted
         if (abortController.current.signal.aborted) return;
 
-        cache.setQueryData(queryKey, data, { staleTime });
+        cache.setQueryData(queryKey, data, staleTime !== undefined ? { staleTime } : {});
         onSuccess?.(data);
         onSettled?.(data, null);
         return;
@@ -192,8 +192,8 @@ export function useQuery<TData = unknown, TError = Error>(
     }
 
     // All retries failed
-    if (lastError) {
-      cache.setQueryError(queryKey, lastError);
+    if (lastError !== null) {
+      cache.setQueryError(queryKey, lastError as Error);
       onError?.(lastError);
       onSettled?.(undefined, lastError);
     }
@@ -224,12 +224,12 @@ export function useQuery<TData = unknown, TError = Error>(
     }
 
     // Set initial data if provided and no data exists
-    if (initialData !== undefined && !state?.data) {
-      cache.setQueryData(queryKey, initialData, { staleTime });
+    if (initialData !== undefined && state?.data === undefined) {
+      cache.setQueryData(queryKey, initialData, staleTime !== undefined ? { staleTime } : {});
     }
 
     // Fetch if stale or no data
-    if (cache.isStale(queryKey) || !state?.data) {
+    if (cache.isStale(queryKey) || state?.data === undefined) {
       hasInitiatedFetch.current = true;
       void fetchData();
     }

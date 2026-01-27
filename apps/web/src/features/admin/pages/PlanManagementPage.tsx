@@ -28,9 +28,8 @@ import {
   TableHeader,
   TableRow,
 } from '@abe-stack/ui';
-import { useState, useCallback } from 'react';
-
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useState, useCallback } from 'react';
 
 import type { AdminPlan, CreatePlanRequest, PlanFeature, UpdatePlanRequest } from '@abe-stack/core';
 import type { ReactElement } from 'react';
@@ -73,7 +72,7 @@ interface PlanFormProps {
   isSubmitting?: boolean;
 }
 
-function PlanForm({ data, onChange, isSubmitting }: PlanFormProps): ReactElement {
+const PlanForm = ({ data, onChange, isSubmitting }: PlanFormProps): ReactElement => {
   const handleChange = <K extends keyof PlanFormData>(key: K, value: PlanFormData[K]): void => {
     onChange({ ...data, [key]: value });
   };
@@ -98,7 +97,7 @@ function PlanForm({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
   ): void => {
     const newFeatures = [...data.features];
     const currentFeature = newFeatures[index];
-    if (currentFeature) {
+    if (currentFeature !== undefined && currentFeature !== null) {
       newFeatures[index] = { ...currentFeature, [field]: value };
       onChange({ ...data, features: newFeatures });
     }
@@ -154,7 +153,8 @@ function PlanForm({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
             type="number"
             value={data.priceInCents.toString()}
             onChange={(e) => {
-              handleChange('priceInCents', parseInt(e.target.value, 10) || 0);
+              const parsedValue = parseInt(e.target.value, 10);
+              handleChange('priceInCents', Number.isNaN(parsedValue) ? 0 : parsedValue);
             }}
             placeholder="e.g., 1999 for $19.99"
             disabled={isSubmitting}
@@ -183,7 +183,8 @@ function PlanForm({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
             type="number"
             value={data.trialDays.toString()}
             onChange={(e) => {
-              handleChange('trialDays', parseInt(e.target.value, 10) || 0);
+              const parsedValue = parseInt(e.target.value, 10);
+              handleChange('trialDays', Number.isNaN(parsedValue) ? 0 : parsedValue);
             }}
             placeholder="0"
             disabled={isSubmitting}
@@ -197,7 +198,8 @@ function PlanForm({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
             type="number"
             value={data.sortOrder.toString()}
             onChange={(e) => {
-              handleChange('sortOrder', parseInt(e.target.value, 10) || 0);
+              const parsedValue = parseInt(e.target.value, 10);
+              handleChange('sortOrder', Number.isNaN(parsedValue) ? 0 : parsedValue);
             }}
             placeholder="0"
             disabled={isSubmitting}
@@ -263,13 +265,13 @@ function PlanForm({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
       </div>
     </div>
   );
-}
+};
 
 // ============================================================================
 // Main Component
 // ============================================================================
 
-export function PlanManagementPage(): ReactElement {
+export const PlanManagementPage = (): ReactElement => {
   const { config } = useClientEnvironment();
 
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -293,7 +295,7 @@ export function PlanManagementPage(): ReactElement {
   const handleOpenEdit = useCallback((plan: AdminPlan): void => {
     setFormData({
       name: plan.name,
-      description: plan.description || '',
+      description: plan.description ?? '',
       interval: plan.interval,
       priceInCents: plan.priceInCents,
       currency: plan.currency,
@@ -308,21 +310,21 @@ export function PlanManagementPage(): ReactElement {
   const handleCreate = useCallback(async (): Promise<void> => {
     const request: CreatePlanRequest = {
       name: formData.name,
-      description: formData.description || undefined,
+      ...(formData.description !== '' && { description: formData.description }),
       interval: formData.interval,
       priceInCents: formData.priceInCents,
       currency: formData.currency,
       trialDays: formData.trialDays,
       isActive: formData.isActive,
       sortOrder: formData.sortOrder,
-      features: formData.features.length > 0 ? formData.features : undefined,
+      ...(formData.features.length > 0 && { features: formData.features }),
     };
     await create(request);
     setCreateDialogOpen(false);
   }, [formData, create]);
 
   const handleUpdate = useCallback(async (): Promise<void> => {
-    if (!editPlan) return;
+    if (editPlan === null || editPlan === undefined) return;
     const request: UpdatePlanRequest = {
       name: formData.name,
       description: formData.description || null,
@@ -367,7 +369,7 @@ export function PlanManagementPage(): ReactElement {
         <Button onClick={handleOpenCreate}>Create Plan</Button>
       </div>
 
-      {error && (
+      {error !== undefined && error !== null && (
         <Card className="plan-management-page__error">
           <Card.Body>{error.message}</Card.Body>
         </Card>
@@ -392,11 +394,11 @@ export function PlanManagementPage(): ReactElement {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {plans.map((plan) => (
+              {plans.map((plan: AdminPlan) => (
                 <TableRow key={plan.id}>
                   <TableCell>
                     <strong>{plan.name}</strong>
-                    {plan.description && (
+                    {plan.description !== null && plan.description !== undefined && plan.description !== '' && (
                       <span className="text-muted block text-sm">{plan.description}</span>
                     )}
                   </TableCell>
@@ -411,7 +413,7 @@ export function PlanManagementPage(): ReactElement {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {plan.stripePriceId ? (
+                    {plan.stripePriceId !== null && plan.stripePriceId !== undefined && plan.stripePriceId !== '' ? (
                       <Badge tone="success">Synced</Badge>
                     ) : (
                       <Badge tone="warning">Not synced</Badge>
@@ -429,7 +431,7 @@ export function PlanManagementPage(): ReactElement {
                       >
                         Edit
                       </Button>
-                      {!plan.stripePriceId && (
+                      {(plan.stripePriceId === null || plan.stripePriceId === undefined || plan.stripePriceId === '') && (
                         <Button
                           size="small"
                           variant="text"
@@ -480,7 +482,7 @@ export function PlanManagementPage(): ReactElement {
               onClick={() => {
                 void handleCreate();
               }}
-              disabled={isActing || !formData.name || formData.priceInCents <= 0}
+              disabled={isActing || formData.name === '' || formData.priceInCents <= 0}
             >
               {isActing ? 'Creating...' : 'Create Plan'}
             </Button>
@@ -511,7 +513,7 @@ export function PlanManagementPage(): ReactElement {
               onClick={() => {
                 void handleUpdate();
               }}
-              disabled={isActing || !formData.name}
+              disabled={isActing || formData.name === ''}
             >
               {isActing ? 'Saving...' : 'Save Changes'}
             </Button>
@@ -520,4 +522,4 @@ export function PlanManagementPage(): ReactElement {
       </Dialog.Root>
     </PageContainer>
   );
-}
+};

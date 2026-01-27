@@ -1,10 +1,9 @@
 // packages/ui/src/utils/__tests__/createFormHandler.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createFormHandler } from '../createFormHandler';
+import { createFormHandler } from './createFormHandler';
 
-import type { FormHandlerOptions } from '../createFormHandler';
-
+import type { FormHandlerOptions } from './createFormHandler';
 import type { Mock } from 'vitest';
 
 

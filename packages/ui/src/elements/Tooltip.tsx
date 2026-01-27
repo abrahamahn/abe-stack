@@ -23,7 +23,7 @@ type TooltipProps = {
  * </Tooltip>
  * ```
  */
-export function Tooltip({ content, placement = 'top', children }: TooltipProps): ReactElement {
+export const Tooltip = ({ content, placement = 'top', children }: TooltipProps): ReactElement => {
   const [open, setOpen] = useState<boolean>(false);
   const timeoutRef = useRef<ReturnType<typeof globalThis.setTimeout> | null>(null);
 
@@ -54,4 +54,4 @@ export function Tooltip({ content, placement = 'top', children }: TooltipProps):
       {open ? <span className="tooltip-content">{content}</span> : null}
     </span>
   );
-}
+};

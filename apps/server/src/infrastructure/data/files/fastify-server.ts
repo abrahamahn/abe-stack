@@ -10,7 +10,7 @@ import { stat, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { pipeline } from 'node:stream/promises';
 
-import { SECONDS_PER_DAY } from '@shared';
+import { SECONDS_PER_DAY } from '@abe-stack/core';
 
 // ============================================================================
 // Path Traversal Protection

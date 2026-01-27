@@ -5,8 +5,8 @@ export const spacing = {
   md: '0.75rem', // 12px
   lg: '1rem', // 16px
   xl: '1.5rem', // 24px
-  '2xl': '2rem', // 32px
-  '3xl': '3rem', // 48px
+  ['2xl']: '2rem', // 32px
+  ['3xl']: '3rem', // 48px
 } as const;
 
 export type Spacing = typeof spacing;

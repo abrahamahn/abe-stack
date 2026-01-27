@@ -20,10 +20,7 @@ import {
   type SubscriptionResponse,
   type UpdateSubscriptionRequest,
 } from '@abe-stack/core';
-
 import { protectedRoute, publicRoute, type RouteMap, type RouteResult } from '@router';
-
-import type { AppContext, RequestWithCookies } from '@shared';
 
 import {
   handleAddPaymentMethod,
@@ -34,11 +31,12 @@ import {
   handleListInvoices,
   handleListPaymentMethods,
   handleListPlans,
-  handleRemovePaymentMethod as _handleRemovePaymentMethod,
   handleResumeSubscription,
-  handleSetDefaultPaymentMethod as _handleSetDefaultPaymentMethod,
   handleUpdateSubscription,
 } from './handlers';
+
+import type { AppContext, RequestWithCookies } from '@shared';
+
 
 // ============================================================================
 // Route Definitions

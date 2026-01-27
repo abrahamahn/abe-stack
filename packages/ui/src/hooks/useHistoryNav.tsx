@@ -1,5 +1,5 @@
 // packages/ui/src/hooks/useHistoryNav.tsx
-import React, {
+import {
     createContext,
     useCallback,
     useContext,
@@ -7,6 +7,7 @@ import React, {
     useMemo,
     useRef,
     useState,
+    type ReactElement,
     type ReactNode,
 } from 'react';
 
@@ -29,7 +30,7 @@ type LocationState = {
 
 const HistoryContext = createContext<HistoryContextValue | null>(null);
 
-export function HistoryProvider({ children }: { children: ReactNode }): React.ReactElement {
+export const HistoryProvider = ({ children }: { children: ReactNode }): ReactElement => {
   const navigate = useNavigate();
   const location = useLocation();
   const locationState = (location.state ?? null) as LocationState | null;
@@ -91,7 +92,7 @@ export function HistoryProvider({ children }: { children: ReactNode }): React.Re
   );
 
   return <HistoryContext.Provider value={value}>{children}</HistoryContext.Provider>;
-}
+};
 
 export function useHistoryNav(): HistoryContextValue {
   const ctx = useContext(HistoryContext);

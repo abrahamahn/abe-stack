@@ -1,10 +1,11 @@
 // apps/desktop/src/electron/main.ts
 import * as path from 'path';
 
+import { waitForPort } from '@abe-stack/core';
 import { app, BrowserWindow } from 'electron';
 
+
 import { registerIPCHandlers } from './ipc';
-import { waitForPort } from './utils';
 
 let mainWindow: BrowserWindow | null = null;
 

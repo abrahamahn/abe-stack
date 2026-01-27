@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { AppShell } from '../AppShell';
+import { AppShell } from './AppShell';
 
 describe('AppShell', () => {
   it('renders layout parts correctly', () => {
@@ -69,8 +69,8 @@ describe('AppShell', () => {
     );
 
     expect(container.firstChild).toHaveStyle({
-      '--app-shell-header-height': '100px',
-      '--app-shell-sidebar-width': '300px',
+      ['--app-shell-header-height']: '100px',
+      ['--app-shell-sidebar-width']: '300px',
     });
   });
 
@@ -87,8 +87,8 @@ describe('AppShell', () => {
     );
 
     expect(container.firstChild).toHaveStyle({
-      '--app-shell-sidebar-width': '0px',
-      '--app-shell-aside-width': '0px',
+      ['--app-shell-sidebar-width']: '0px',
+      ['--app-shell-aside-width']: '0px',
     });
   });
 
@@ -105,10 +105,10 @@ describe('AppShell', () => {
     );
 
     expect(container.firstChild).toHaveStyle({
-      '--app-shell-header-height': '80px',
-      '--app-shell-footer-height': '60px',
-      '--app-shell-sidebar-width': '20rem',
-      '--app-shell-aside-width': '15rem',
+      ['--app-shell-header-height']: '80px',
+      ['--app-shell-footer-height']: '60px',
+      ['--app-shell-sidebar-width']: '20rem',
+      ['--app-shell-aside-width']: '15rem',
     });
   });
 
@@ -134,10 +134,10 @@ describe('AppShell', () => {
     const { container } = render(<AppShell>Main</AppShell>);
 
     expect(container.firstChild).toHaveStyle({
-      '--app-shell-header-height': '4rem',
-      '--app-shell-footer-height': '3rem',
-      '--app-shell-sidebar-width': '15rem',
-      '--app-shell-aside-width': '15rem',
+      ['--app-shell-header-height']: '4rem',
+      ['--app-shell-footer-height']: '3rem',
+      ['--app-shell-sidebar-width']: '15rem',
+      ['--app-shell-aside-width']: '15rem',
     });
   });
 

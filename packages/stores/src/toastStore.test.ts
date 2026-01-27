@@ -1,13 +1,13 @@
-// packages/stores/src/__tests__/toastStore.test.ts
+// packages/stores/src/toastStore.test.ts
 import { describe, expect, it, beforeEach } from 'vitest';
 
-import { toastStore } from '../toastStore';
+import { toastStore, type ToastMessage } from './toastStore';
 
 describe('toastStore', () => {
   beforeEach(() => {
     // Clear all messages before each test
     const state = toastStore.getState();
-    state.messages.forEach((msg) => {
+    state.messages.forEach((msg: ToastMessage) => {
       state.dismiss(msg.id);
     });
   });

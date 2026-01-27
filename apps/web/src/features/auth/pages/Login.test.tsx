@@ -1,9 +1,9 @@
 // apps/web/src/features/auth/pages/__tests__/Login.test.tsx
-import { renderWithProviders } from '../../../../__tests__/utils';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { LoginPage } from '../Login';
+import { renderWithProviders } from './../../../__tests__/utils';
+import { LoginPage } from './Login';
 
 // Mock the auth hook
 const mockLogin = vi.fn();
@@ -22,8 +22,8 @@ const mockUseAuth = vi.fn(() => ({
 const mockNavigate = vi.fn();
 
 // Mock the hooks module - useAuth and useAuthModeNavigation
-vi.mock('../../hooks', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../hooks')>();
+vi.mock('../hooks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../hooks')>();
   return {
     ...actual,
     useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),
@@ -32,8 +32,8 @@ vi.mock('../../hooks', async (importOriginal) => {
         const routes: Record<string, string> = {
           login: '/login',
           register: '/register',
-          'forgot-password': '/auth?mode=forgot-password',
-          'reset-password': '/auth?mode=reset-password',
+          forgotPassword: '/auth?mode=forgot-password',
+          resetPassword: '/auth?mode=reset-password',
         };
         mockNavigate(routes[mode], { replace: false });
       },
@@ -153,11 +153,11 @@ describe('LoginPage', () => {
       expect(mockNavigate).toHaveBeenCalledWith('/register', { replace: false });
     });
 
-    it('should navigate to forgot password page when forgot password is clicked', async () => {
+    it('should navigate to forgot password page when forgot password is clicked', () => {
       renderLoginPage();
 
       const forgotButton = screen.getByRole('button', { name: /forgot your password/i });
-      await act(async () => {
+      act(() => {
         fireEvent.click(forgotButton);
       });
 
@@ -174,7 +174,7 @@ describe('LoginPage', () => {
       const passwordInput = screen.getByLabelText('Password');
       const signInButton = screen.getByRole('button', { name: /^sign in$/i });
 
-      await act(async () => {
+      act(() => {
         fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
         fireEvent.change(passwordInput, { target: { value: 'wrongpassword' } });
         fireEvent.click(signInButton);
@@ -193,7 +193,7 @@ describe('LoginPage', () => {
       const passwordInput = screen.getByLabelText('Password');
       const signInButton = screen.getByRole('button', { name: /^sign in$/i });
 
-      await act(async () => {
+      act(() => {
         fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
         fireEvent.change(passwordInput, { target: { value: 'password' } });
         fireEvent.click(signInButton);

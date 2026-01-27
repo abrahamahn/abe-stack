@@ -4,9 +4,6 @@ import path from 'node:path';
 
 import { RateLimiter } from '@rate-limit/index';
 import { isAppError, type ApiErrorResponse } from '@shared/index';
-import type { FastifyInstance } from 'fastify';
-
-import type { AppConfig } from '@/config/index';
 
 import {
     applyCors,
@@ -20,6 +17,11 @@ import {
     registerRequestInfoHook,
     registerStaticServe,
 } from './middleware';
+
+import type { AppConfig } from '@/config/index';
+import type { FastifyInstance } from 'fastify';
+
+
 
 /**
  * Register all application plugins and middleware

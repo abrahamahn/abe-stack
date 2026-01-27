@@ -2,7 +2,7 @@
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { componentCatalog } from '../componentCatalog';
+import { componentCatalog } from './componentCatalog';
 
 import type { ComponentDemo, ComponentVariant } from '@demo/types';
 
@@ -45,11 +45,11 @@ describe('componentCatalog', () => {
 
   describe('Box component', () => {
     it('is defined in the catalog', () => {
-      expect(componentCatalog.box).toBeDefined();
+      expect(componentCatalog['box']).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const box = componentCatalog.box;
+      const box = componentCatalog['box'];
       if (!box) return;
 
       box.variants.forEach((variant: ComponentVariant) => {
@@ -61,11 +61,11 @@ describe('componentCatalog', () => {
 
   describe('Button component', () => {
     it('is defined in the catalog', () => {
-      expect(componentCatalog.button).toBeDefined();
+      expect(componentCatalog['button']).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const button = componentCatalog.button;
+      const button = componentCatalog['button'];
       if (!button) return;
 
       button.variants.forEach((variant: ComponentVariant) => {
@@ -75,7 +75,7 @@ describe('componentCatalog', () => {
     });
 
     it('has expected variants', () => {
-      const button = componentCatalog.button;
+      const button = componentCatalog['button'];
       if (!button) return;
 
       const variantNames = button.variants.map((v: ComponentVariant) => v.name);
@@ -88,11 +88,11 @@ describe('componentCatalog', () => {
 
   describe('Card component', () => {
     it('is defined in the catalog', () => {
-      expect(componentCatalog.card).toBeDefined();
+      expect(componentCatalog['card']).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const card = componentCatalog.card;
+      const card = componentCatalog['card'];
       if (!card) return;
 
       card.variants.forEach((variant: ComponentVariant) => {
@@ -104,11 +104,11 @@ describe('componentCatalog', () => {
 
   describe('Input component', () => {
     it('is defined in the catalog', () => {
-      expect(componentCatalog.input).toBeDefined();
+      expect(componentCatalog['input']).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const input = componentCatalog.input;
+      const input = componentCatalog['input'];
       if (!input) return;
 
       input.variants.forEach((variant: ComponentVariant) => {
@@ -120,11 +120,11 @@ describe('componentCatalog', () => {
 
   describe('Spinner component', () => {
     it('is defined in the catalog', () => {
-      expect(componentCatalog.spinner).toBeDefined();
+      expect(componentCatalog['spinner']).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const spinner = componentCatalog.spinner;
+      const spinner = componentCatalog['spinner'];
       if (!spinner) return;
 
       spinner.variants.forEach((variant: ComponentVariant) => {
@@ -136,11 +136,11 @@ describe('componentCatalog', () => {
 
   describe('AppShell component', () => {
     it('is defined in the catalog', () => {
-      expect(componentCatalog.appShell).toBeDefined();
+      expect(componentCatalog['appShell']).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const appShell = componentCatalog.appShell;
+      const appShell = componentCatalog['appShell'];
       if (!appShell) return;
 
       appShell.variants.forEach((variant: ComponentVariant) => {
@@ -152,11 +152,11 @@ describe('componentCatalog', () => {
 
   describe('Badge component', () => {
     it('is defined in the catalog', () => {
-      expect(componentCatalog.badge).toBeDefined();
+      expect(componentCatalog['badge']).toBeDefined();
     });
 
     it('renders all variants', () => {
-      const badge = componentCatalog.badge;
+      const badge = componentCatalog['badge'];
       if (!badge) return;
 
       badge.variants.forEach((variant: ComponentVariant) => {
@@ -166,7 +166,7 @@ describe('componentCatalog', () => {
     });
 
     it('has tone variants', () => {
-      const badge = componentCatalog.badge;
+      const badge = componentCatalog['badge'];
       if (!badge) return;
 
       const variantNames = badge.variants.map((v: ComponentVariant) => v.name);

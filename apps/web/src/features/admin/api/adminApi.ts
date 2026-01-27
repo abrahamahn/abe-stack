@@ -7,7 +7,7 @@
 
 import { addAuthHeader, tokenStore } from '@abe-stack/core';
 import { createApiError, NetworkError } from '@abe-stack/sdk';
-import { clientConfig } from '@config';
+import { clientConfig } from '@/config';
 
 import type {
   AdminLockUserRequest,
@@ -68,18 +68,18 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 export async function listUsers(filters?: AdminUserListFilters): Promise<AdminUserListResponse> {
   const params = new URLSearchParams();
 
-  if (filters) {
-    if (filters.search) params.set('search', filters.search);
-    if (filters.role) params.set('role', filters.role);
-    if (filters.status) params.set('status', filters.status);
-    if (filters.sortBy) params.set('sortBy', filters.sortBy);
-    if (filters.sortOrder) params.set('sortOrder', filters.sortOrder);
-    if (filters.page) params.set('page', String(filters.page));
-    if (filters.limit) params.set('limit', String(filters.limit));
+  if (filters !== undefined) {
+    if (filters.search !== undefined) params.set('search', filters.search);
+    if (filters.role !== undefined) params.set('role', filters.role);
+    if (filters.status !== undefined) params.set('status', filters.status);
+    if (filters.sortBy !== undefined) params.set('sortBy', filters.sortBy);
+    if (filters.sortOrder !== undefined) params.set('sortOrder', filters.sortOrder);
+    if (filters.page !== undefined) params.set('page', String(filters.page));
+    if (filters.limit !== undefined) params.set('limit', String(filters.limit));
   }
 
   const queryString = params.toString();
-  const url = queryString ? `/admin/users?${queryString}` : '/admin/users';
+  const url = queryString.length > 0 ? `/admin/users?${queryString}` : '/admin/users';
 
   return request<AdminUserListResponse>(url);
 }

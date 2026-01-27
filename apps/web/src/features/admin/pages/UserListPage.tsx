@@ -12,7 +12,7 @@ import { useAdminUsers } from '../hooks';
 
 import type { JSX } from 'react';
 
-export function UserListPage(): JSX.Element {
+export const UserListPage = (): JSX.Element => {
   const {
     users,
     total,
@@ -50,7 +50,7 @@ export function UserListPage(): JSX.Element {
         </div>
 
         {/* Error Alert */}
-        {error && <Alert tone="danger">{error}</Alert>}
+        {error !== null && <Alert tone="danger">{error}</Alert>}
 
         {/* Filters */}
         <UserFilters filters={filters} onFiltersChange={setFilters} isLoading={isLoading} />
@@ -77,4 +77,4 @@ export function UserListPage(): JSX.Element {
       </div>
     </PageContainer>
   );
-}
+};

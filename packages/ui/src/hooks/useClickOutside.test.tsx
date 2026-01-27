@@ -4,12 +4,12 @@ import { fireEvent, render } from '@testing-library/react';
 import { useRef, type ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { useClickOutside } from '../useClickOutside';
+import { useClickOutside } from './useClickOutside';
 
-function ClickOutsideHarness(props: {
+const ClickOutsideHarness = (props: {
   onOutside: (event: MouseEvent | TouchEvent) => void;
   showTarget?: boolean;
-}): ReactElement {
+}): ReactElement => {
   const ref = useRef<HTMLDivElement | null>(null);
   useClickOutside(ref, props.onOutside);
 
@@ -23,7 +23,7 @@ function ClickOutsideHarness(props: {
       <div data-testid="outside">Outside</div>
     </div>
   );
-}
+};
 
 describe('useClickOutside', () => {
   it('calls handler when clicking outside the ref element', () => {

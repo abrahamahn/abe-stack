@@ -22,7 +22,7 @@ type ToastProps = {
  * <Toast message={{ id: '1', title: 'Success!' }} onDismiss={dismiss} />
  * ```
  */
-export function Toast({ message, duration = 3500, onDismiss }: ToastProps): ReactElement {
+export const Toast = ({ message, duration = 3500, onDismiss }: ToastProps): ReactElement => {
   useEffect(() => {
     const timer: ReturnType<typeof globalThis.setTimeout> = globalThis.setTimeout(() => {
       onDismiss?.(message.id);
@@ -44,7 +44,7 @@ export function Toast({ message, duration = 3500, onDismiss }: ToastProps): Reac
       </div>
     </div>
   );
-}
+};
 
 type ToastContainerProps = {
   /** Array of toast messages to display */
@@ -61,12 +61,16 @@ type ToastContainerProps = {
  * <ToastContainer messages={toasts} onDismiss={dismiss} />
  * ```
  */
-export function ToastContainer({ messages, onDismiss }: ToastContainerProps): ReactElement {
+export const ToastContainer = ({ messages, onDismiss }: ToastContainerProps): ReactElement => {
   return (
     <div className="toast">
       {messages.map((msg) => (
-        <Toast key={msg.id} message={msg} onDismiss={onDismiss} />
+        <Toast
+          key={msg.id}
+          message={msg}
+          {...(onDismiss !== undefined && { onDismiss })}
+        />
       ))}
     </div>
   );
-}
+};

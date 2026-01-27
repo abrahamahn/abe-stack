@@ -3,7 +3,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ScrollArea } from '../ScrollArea';
+import { ScrollArea } from './ScrollArea';
 
 describe('ScrollArea', () => {
   beforeEach(() => {
@@ -36,7 +36,7 @@ describe('ScrollArea', () => {
   it('applies scrollbarWidth prop', () => {
     const { container } = render(<ScrollArea scrollbarWidth="thick">Content</ScrollArea>);
     // Checked via style because class implementation might vary
-    expect(container.firstChild).toHaveStyle({ '--scrollbar-size': '0.75rem' });
+    expect(container.firstChild).toHaveStyle({ ['--scrollbar-size']: '0.75rem' });
   });
 
   it('applies maxHeight and maxWidth styles', () => {
@@ -120,12 +120,12 @@ describe('ScrollArea', () => {
 
   it('applies default scrollbar width (thin)', () => {
     const { container } = render(<ScrollArea>Content</ScrollArea>);
-    expect(container.firstChild).toHaveStyle({ '--scrollbar-size': '0.25rem' });
+    expect(container.firstChild).toHaveStyle({ ['--scrollbar-size']: '0.25rem' });
   });
 
   it('applies normal scrollbar width', () => {
     const { container } = render(<ScrollArea scrollbarWidth="normal">Content</ScrollArea>);
-    expect(container.firstChild).toHaveStyle({ '--scrollbar-size': '0.5rem' });
+    expect(container.firstChild).toHaveStyle({ ['--scrollbar-size']: '0.5rem' });
   });
 
   it('does not show scrollbar on hover when showOnHover is false', () => {

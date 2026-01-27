@@ -11,12 +11,12 @@ type CloseButtonProps = ComponentPropsWithoutRef<'button'> & {
  * A minimal close button for panels, cards, and overlays.
  * Positioned for top-right corner placement in flex containers.
  */
-export function CloseButton({
+export const CloseButton = ({
   children,
   className = '',
   'aria-label': ariaLabel = 'Close',
   ...rest
-}: CloseButtonProps): ReactElement {
+}: CloseButtonProps): ReactElement => {
   return (
     <button
       type="button"
@@ -27,4 +27,4 @@ export function CloseButton({
       {children ?? '✕'}
     </button>
   );
-}
+};

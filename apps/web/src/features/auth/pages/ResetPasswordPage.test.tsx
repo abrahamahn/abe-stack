@@ -4,7 +4,7 @@ import { MemoryRouter } from '@abe-stack/ui';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ResetPasswordPage } from '../ResetPasswordPage';
+import { ResetPasswordPage } from './ResetPasswordPage';
 
 // Mock the auth hook
 const mockResetPassword = vi.fn();
@@ -22,8 +22,8 @@ const mockUseAuth = vi.fn(() => ({
 const mockNavigate = vi.fn();
 
 // Mock the hooks module - useAuth and useAuthModeNavigation
-vi.mock('../../hooks', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../hooks')>();
+vi.mock('../hooks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../hooks')>();
   return {
     ...actual,
     useAuth: (): ReturnType<typeof mockUseAuth> => mockUseAuth(),

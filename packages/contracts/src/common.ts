@@ -6,7 +6,8 @@
  * Centralizes email, password, and other common field validations.
  */
 
-import { createSchema, type Schema } from './types';
+import { createSchema } from './schema';
+import type { Schema } from './types';
 
 // ============================================================================
 // Validation Helpers
@@ -111,27 +112,27 @@ export const requiredNameSchema: Schema<string> = createSchema((data: unknown) =
  */
 export interface ErrorResponse {
   message: string;
-  code?: string;
-  details?: Record<string, unknown>;
+  code?: string | undefined;
+  details?: Record<string, unknown> | undefined;
 }
 
 /**
  * Standard error response schema used across all API endpoints.
  */
 export const errorResponseSchema: Schema<ErrorResponse> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid error response');
   }
   const obj = data as Record<string, unknown>;
-  if (typeof obj.message !== 'string') {
+  if (typeof obj['message'] !== 'string') {
     throw new Error('Error response must have a message');
   }
   return {
-    message: obj.message,
-    code: typeof obj.code === 'string' ? obj.code : undefined,
+    message: obj['message'],
+    code: typeof obj['code'] === 'string' ? obj['code'] : undefined,
     details:
-      obj.details && typeof obj.details === 'object'
-        ? (obj.details as Record<string, unknown>)
+      obj['details'] !== null && obj['details'] !== undefined && typeof obj['details'] === 'object'
+        ? (obj['details'] as Record<string, unknown>)
         : undefined,
   };
 });

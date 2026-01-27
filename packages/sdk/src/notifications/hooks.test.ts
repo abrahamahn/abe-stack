@@ -78,7 +78,7 @@ describe('usePushSubscription', () => {
     vi.clearAllMocks();
   });
 
-  it('should initialize with correct state', async () => {
+  it('should initialize with correct state', () => {
     const { result } = renderHook(() => usePushSubscription({ clientConfig, autoCheck: false }));
 
     expect(result.current.isSupported).toBe(true);

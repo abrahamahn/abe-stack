@@ -1,7 +1,9 @@
 // apps/server/src/config/infra/cache.test.ts
-import type { FullEnv } from '@abe-stack/core/config';
 import { describe, expect, it } from 'vitest';
+
 import { DEFAULT_CACHE_CONFIG, loadCacheConfig } from './cache';
+
+import type { FullEnv } from '@abe-stack/core/config';
 
 describe('Cache Configuration', () => {
   it('loads default configuration when no environment variables are set', () => {

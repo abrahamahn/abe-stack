@@ -8,7 +8,8 @@ import {
   NotFoundError,
   TooManyRequestsError,
   UnauthorizedError,
-} from '../../infrastructure/errors';
+} from '../../infrastructure/errors/index';
+
 import {
   AccountLockedError,
   EmailAlreadyExistsError,

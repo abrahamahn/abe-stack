@@ -35,11 +35,11 @@ import { useWindowSize } from '../../hooks/useWindowSize';
 /**
  * Component using useFormState + useResendCooldown for email verification
  */
-function EmailVerification({
+const EmailVerification = ({
   onSendEmail,
 }: {
   onSendEmail: () => Promise<void>;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { isLoading, error, wrapHandler, clearError } = useFormState();
   const { cooldown, isOnCooldown, startCooldown, resetCooldown } = useResendCooldown(30);
   const [emailSent, setEmailSent] = useState(false);
@@ -75,16 +75,16 @@ function EmailVerification({
       </Button>
     </div>
   );
-}
+};
 
 /**
  * Component using useDisclosure + useClickOutside for dropdown
  */
-function DropdownWithClickOutside({
+const DropdownWithClickOutside = ({
   onSelect,
 }: {
   onSelect?: (value: string) => void;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { open, toggle, close } = useDisclosure({ defaultOpen: false });
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -114,12 +114,12 @@ function DropdownWithClickOutside({
       )}
     </div>
   );
-}
+};
 
 /**
  * Component using useControllableState + useDebounce for search
  */
-function DebouncedSearch({
+const DebouncedSearch = ({
   onSearch,
   defaultValue = '',
   value,
@@ -129,11 +129,11 @@ function DebouncedSearch({
   defaultValue?: string;
   value?: string;
   onChange?: (value: string) => void;
-}): React.ReactElement {
+}): React.ReactElement => {
   const [query, setQuery] = useControllableState({
-    value,
+    ...(value !== undefined && { value }),
     defaultValue,
-    onChange,
+    ...(onChange !== undefined && { onChange }),
   });
   const debouncedQuery = useDebounce(query, 300);
 
@@ -155,12 +155,12 @@ function DebouncedSearch({
       <div data-testid="debounced-query">{debouncedQuery}</div>
     </div>
   );
-}
+};
 
 /**
  * Component using useKeyboardShortcut + useDisclosure for modal
  */
-function KeyboardModal(): React.ReactElement {
+const KeyboardModal = (): React.ReactElement => {
   const { open, openFn, close, toggle } = useDisclosure({ defaultOpen: false });
 
   // Open modal with Ctrl+K
@@ -183,12 +183,12 @@ function KeyboardModal(): React.ReactElement {
       )}
     </div>
   );
-}
+};
 
 /**
  * Component using useWindowSize + useMediaQuery for responsive layout
  */
-function ResponsiveLayout(): React.ReactElement {
+const ResponsiveLayout = (): React.ReactElement => {
   const { width, height } = useWindowSize();
   const isMobile = useMediaQuery('(max-width: 768px)');
   const isTablet = useMediaQuery('(min-width: 769px) and (max-width: 1024px)');
@@ -209,16 +209,16 @@ function ResponsiveLayout(): React.ReactElement {
       <div data-testid="is-mobile">{isMobile ? 'true' : 'false'}</div>
     </div>
   );
-}
+};
 
 /**
  * Component combining multiple state hooks
  */
-function MultiStateForm({
+const MultiStateForm = ({
   onSubmit,
 }: {
   onSubmit: (data: { name: string; email: string }) => Promise<void>;
-}): React.ReactElement {
+}): React.ReactElement => {
   const { isLoading, error, wrapHandler, clearError } = useFormState();
   const { cooldown, isOnCooldown, startCooldown } = useResendCooldown(10);
   const { open: showAdvanced, toggle: toggleAdvanced } = useDisclosure({ defaultOpen: false });
@@ -281,7 +281,7 @@ function MultiStateForm({
       </Button>
     </form>
   );
-}
+};
 
 // =============================================================================
 // Tests

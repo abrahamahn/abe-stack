@@ -1,4 +1,4 @@
-// apps/desktop/src/__tests__/main.test.tsx
+// apps/desktop/src/main.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { act, cleanup, screen, waitFor } from '@testing-library/react';
@@ -40,7 +40,7 @@ describe('main.tsx', () => {
 
   describe('root container', () => {
     it('should find root container element', async () => {
-      await import('../main');
+      await import('./main');
 
       expect(mockCreateRoot).toHaveBeenCalledTimes(1);
       expect(mockCreateRoot).toHaveBeenCalledWith(rootElement);
@@ -53,11 +53,11 @@ describe('main.tsx', () => {
         rootElement = null;
       }
 
-      await expect(import('../main')).rejects.toThrow('Root container not found');
+      await expect(import('./main')).rejects.toThrow('Root container not found');
     });
 
     it('should call createRoot with the correct element', async () => {
-      await import('../main');
+      await import('./main');
 
       expect(mockCreateRoot).toHaveBeenCalledTimes(1);
       const rootArg = (mockCreateRoot.mock.calls[0] as unknown as [HTMLElement])[0];
@@ -69,7 +69,7 @@ describe('main.tsx', () => {
     it('should render application in StrictMode', async () => {
       const { StrictMode } = await import('react');
 
-      await import('../main');
+      await import('./main');
 
       expect(mockRender).toHaveBeenCalledTimes(1);
       const renderedElement = mockRender.mock.calls[0]?.[0];
@@ -79,7 +79,7 @@ describe('main.tsx', () => {
     });
 
     it('should render main content', async () => {
-      await import('../main');
+      await import('./main');
 
       expect(mockRender).toHaveBeenCalled();
       const renderedElement = mockRender.mock.calls[0]?.[0];
@@ -98,7 +98,7 @@ describe('main.tsx', () => {
       };
 
       vi.resetModules();
-      await import('../main');
+      await import('./main');
 
       expect(mockRender).toHaveBeenCalledTimes(1);
       const renderedElement = mockRender.mock.calls[0]?.[0];
@@ -114,7 +114,7 @@ describe('main.tsx', () => {
       delete (window as { electronAPI?: unknown }).electronAPI;
 
       vi.resetModules();
-      await import('../main');
+      await import('./main');
 
       expect(mockRender).toHaveBeenCalled();
     });
@@ -123,7 +123,7 @@ describe('main.tsx', () => {
       (window as { electronAPI?: unknown }).electronAPI = undefined;
 
       vi.resetModules();
-      await import('../main');
+      await import('./main');
 
       expect(mockRender).toHaveBeenCalled();
     });
@@ -132,7 +132,7 @@ describe('main.tsx', () => {
       (window as { electronAPI?: unknown }).electronAPI = null;
 
       vi.resetModules();
-      await import('../main');
+      await import('./main');
 
       expect(mockRender).toHaveBeenCalled();
     });
@@ -140,7 +140,7 @@ describe('main.tsx', () => {
 
   describe('integration rendering', () => {
     it('should render without crashing', async () => {
-      await import('../main');
+      await import('./main');
 
       expect(mockCreateRoot).toHaveBeenCalled();
       expect(mockRender).toHaveBeenCalled();

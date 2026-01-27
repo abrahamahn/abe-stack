@@ -12,7 +12,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../Table';
+} from './Table';
 
 describe('Table', () => {
   it('renders table structure correctly', () => {

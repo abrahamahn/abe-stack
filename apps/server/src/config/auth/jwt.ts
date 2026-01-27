@@ -9,17 +9,17 @@ import type { JwtRotationConfig } from '@abe-stack/core/config';
  * while Signing new tokens with the NEW key/secret.
  */
 export function loadJwtRotationConfig(env: Record<string, string | undefined>): JwtRotationConfig {
-  const secret = env.JWT_SECRET ?? '';
+  const secret = env['JWT_SECRET'] ?? '';
+  const previousSecret = env['JWT_SECRET_PREVIOUS'];
 
   return {
     secret,
     // Key rotation support: Tokens signed with the previous secret
     // are still accepted but will be re-issued with the new secret.
-    previousSecret: (env.JWT_SECRET_PREVIOUS != null && env.JWT_SECRET_PREVIOUS !== '') ? env.JWT_SECRET_PREVIOUS : undefined,
+    ...(previousSecret != null && previousSecret !== '' && { previousSecret }),
   };
 }
 
 export const DEFAULT_JWT_ROTATION_CONFIG: JwtRotationConfig = {
   secret: '',
-  previousSecret: undefined,
 };

@@ -30,13 +30,13 @@ import {
     type SortConfig,
 } from '@abe-stack/core';
 
-import type { RawDb, Repositories } from '@database';
 import type {
     SearchContext,
     ServerSearchProvider,
     SqlSearchProviderConfig,
     SqlTableConfig,
 } from './types';
+import type { RawDb, Repositories } from '@database';
 
 // ============================================================================
 // Types

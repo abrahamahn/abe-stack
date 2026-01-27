@@ -5,6 +5,7 @@
  * Performance-optimized context providers with memoization and selective re-renders.
  */
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 import React, { createContext, useCallback, useContext, useMemo, useReducer, useRef } from 'react';
 
 // ============================================================================
@@ -78,6 +79,7 @@ interface SubscriptionContextResult<T> {
 export function createMemoizedContext<T>(): MemoizedContextResult<T> {
   const Context = createContext<T | undefined>(undefined);
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   function Provider({
     children,
     value,
@@ -118,6 +120,7 @@ export function createSelectiveContext<
 >(): SelectiveContextResult<T> {
   const Context = createContext<T | undefined>(undefined);
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   function Provider({
     children,
     ...value
@@ -196,6 +199,7 @@ export function createReducerContext<T, A>(): ReducerContextResult<T, A> {
     | undefined
   >(undefined);
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   function Provider({
     children,
     reducer,
@@ -255,6 +259,7 @@ export function createReducerContext<T, A>(): ReducerContextResult<T, A> {
 export function createLazyContext<T>(): LazyContextResult<T> {
   const Context = createContext<T | undefined>(undefined);
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   function Provider({
     children,
     initializer,
@@ -305,6 +310,7 @@ export function createSubscriptionContext<T>(): SubscriptionContextResult<T> {
     | undefined
   >(undefined);
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   function Provider({
     children,
     subscribe: subscribeFn,
@@ -420,6 +426,7 @@ interface SelectiveMemoProps<T extends Record<string, unknown>> {
 /**
  * Component that only re-renders when specific props change
  */
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export function SelectiveMemo<T extends Record<string, unknown>>({
   children,
   watchKeys,
@@ -463,8 +470,9 @@ export function useRenderPerformance(_componentName: string): RenderPerformanceR
     const isDev =
       typeof globalThis !== 'undefined' &&
       'process' in globalThis &&
-      (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process?.env?.NODE_ENV ===
-        'development';
+      (globalThis as { process?: { env?: { ['NODE_ENV']?: string } } }).process?.env?.[
+        'NODE_ENV'
+      ] === 'development';
 
     if (isDev) {
       // Development-only logging for performance monitoring

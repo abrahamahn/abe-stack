@@ -244,7 +244,7 @@ export class QueryCache {
   ): QueryState<TData, TError> | undefined {
     const hash = hashQueryKey(queryKey);
     const entry = this.queries.get(hash) as QueryEntry<TData, TError> | undefined;
-    if (entry) {
+    if (entry !== undefined) {
       entry.lastAccessedAt = Date.now();
       this.resetGcTimer(hash, entry);
     }
@@ -254,8 +254,8 @@ export class QueryCache {
   /**
    * Get query data by key.
    */
-  getQueryData<TData = unknown>(queryKey: QueryKey): TData | undefined {
-    return this.getQueryState<TData>(queryKey)?.data;
+  getQueryData(queryKey: QueryKey): unknown {
+    return this.getQueryState(queryKey)?.data;
   }
 
   /**
@@ -271,7 +271,7 @@ export class QueryCache {
   isStale(queryKey: QueryKey): boolean {
     const hash = hashQueryKey(queryKey);
     const entry = this.queries.get(hash);
-    if (!entry || entry.state.dataUpdatedAt === 0) return true;
+    if (entry === undefined || entry.state.dataUpdatedAt === 0) return true;
     if (entry.state.isInvalidated) return true;
     return Date.now() - entry.state.dataUpdatedAt > entry.staleTime;
   }
@@ -283,19 +283,17 @@ export class QueryCache {
   /**
    * Set query data directly.
    */
-  setQueryData<TData>(queryKey: QueryKey, data: TData, options?: SetQueryDataOptions): void {
+  setQueryData(queryKey: QueryKey, data: unknown, options?: SetQueryDataOptions): void {
     const hash = hashQueryKey(queryKey);
     const existing = this.queries.get(hash);
 
-    const entry: QueryEntry<TData> = existing
-      ? (existing as QueryEntry<TData>)
-      : {
-          state: createInitialState<TData, Error>(),
-          staleTime: options?.staleTime ?? this.defaultStaleTime,
-          gcTime: options?.gcTime ?? this.defaultGcTime,
-          lastAccessedAt: Date.now(),
-          subscribers: new Set(),
-        };
+    const entry: QueryEntry = existing ?? {
+      state: createInitialState<unknown, Error>(),
+      staleTime: options?.staleTime ?? this.defaultStaleTime,
+      gcTime: options?.gcTime ?? this.defaultGcTime,
+      lastAccessedAt: Date.now(),
+      subscribers: new Set(),
+    };
 
     entry.state = {
       ...entry.state,
@@ -308,7 +306,7 @@ export class QueryCache {
       error: null,
     };
 
-    if (!existing) {
+    if (existing === undefined) {
       this.queries.set(hash, entry);
       this.resetGcTimer(hash, entry);
     }
@@ -320,11 +318,11 @@ export class QueryCache {
   /**
    * Set query error.
    */
-  setQueryError<TError = Error>(queryKey: QueryKey, error: TError): void {
+  setQueryError(queryKey: QueryKey, error: Error): void {
     const hash = hashQueryKey(queryKey);
     let entry = this.queries.get(hash);
 
-    if (!entry) {
+    if (entry === undefined) {
       entry = {
         state: createInitialState(),
         staleTime: this.defaultStaleTime,
@@ -337,7 +335,7 @@ export class QueryCache {
 
     entry.state = {
       ...entry.state,
-      error: error as unknown as Error,
+      error: error,
       status: 'error',
       fetchStatus: 'idle',
       errorUpdatedAt: Date.now(),
@@ -355,7 +353,7 @@ export class QueryCache {
     const hash = hashQueryKey(queryKey);
     let entry = this.queries.get(hash);
 
-    if (!entry) {
+    if (entry === undefined) {
       entry = {
         state: createInitialState(),
         staleTime: this.defaultStaleTime,
@@ -381,7 +379,7 @@ export class QueryCache {
   invalidateQuery(queryKey: QueryKey): void {
     const hash = hashQueryKey(queryKey);
     const entry = this.queries.get(hash);
-    if (!entry) return;
+    if (entry === undefined) return;
 
     entry.state = {
       ...entry.state,
@@ -397,7 +395,7 @@ export class QueryCache {
    */
   invalidateQueries(predicate?: (queryKey: QueryKey) => boolean): void {
     for (const [hash, entry] of this.queries) {
-      if (!predicate || predicate(JSON.parse(hash) as QueryKey)) {
+      if (predicate === undefined || predicate(JSON.parse(hash) as QueryKey)) {
         entry.state = {
           ...entry.state,
           isInvalidated: true,
@@ -414,9 +412,9 @@ export class QueryCache {
   removeQuery(queryKey: QueryKey): boolean {
     const hash = hashQueryKey(queryKey);
     const entry = this.queries.get(hash);
-    if (!entry) return false;
+    if (entry === undefined) return false;
 
-    if (entry.gcTimeout) {
+    if (entry.gcTimeout !== undefined) {
       clearTimeout(entry.gcTimeout);
     }
 
@@ -431,8 +429,8 @@ export class QueryCache {
   removeQueries(predicate?: (queryKey: QueryKey) => boolean): number {
     let count = 0;
     for (const [hash, entry] of this.queries) {
-      if (!predicate || predicate(JSON.parse(hash) as QueryKey)) {
-        if (entry.gcTimeout) {
+      if (predicate === undefined || predicate(JSON.parse(hash) as QueryKey)) {
+        if (entry.gcTimeout !== null && entry.gcTimeout !== undefined) {
           clearTimeout(entry.gcTimeout);
         }
         this.queries.delete(hash);
@@ -450,7 +448,7 @@ export class QueryCache {
    */
   clear(): void {
     for (const entry of this.queries.values()) {
-      if (entry.gcTimeout) {
+      if (entry.gcTimeout !== undefined) {
         clearTimeout(entry.gcTimeout);
       }
     }
@@ -470,7 +468,7 @@ export class QueryCache {
     const hash = hashQueryKey(queryKey);
     let entry = this.queries.get(hash);
 
-    if (!entry) {
+    if (entry === undefined) {
       entry = {
         state: createInitialState(),
         staleTime: this.defaultStaleTime,
@@ -484,9 +482,9 @@ export class QueryCache {
     entry.subscribers.add(callback);
 
     // Cancel GC when there are subscribers
-    if (entry.gcTimeout) {
+    if (entry.gcTimeout !== undefined) {
       clearTimeout(entry.gcTimeout);
-      entry.gcTimeout = undefined;
+      delete entry.gcTimeout;
     }
 
     return () => {
@@ -525,7 +523,7 @@ export class QueryCache {
   // ==========================================================================
 
   private resetGcTimer(hash: string, entry: QueryEntry<unknown, unknown>): void {
-    if (entry.gcTimeout) {
+    if (entry.gcTimeout !== undefined) {
       clearTimeout(entry.gcTimeout);
     }
 
@@ -547,7 +545,7 @@ export class QueryCache {
 
     for (const [hash, entry] of this.queries) {
       if (entry.subscribers.size === 0 && now - entry.lastAccessedAt > entry.gcTime) {
-        if (entry.gcTimeout) {
+        if (entry.gcTimeout !== null && entry.gcTimeout !== undefined) {
           clearTimeout(entry.gcTimeout);
         }
         this.queries.delete(hash);
@@ -567,16 +565,16 @@ export class QueryCache {
    */
   destroy(): void {
     if (typeof window !== 'undefined') {
-      if (this.windowFocusHandler) {
+      if (this.windowFocusHandler !== undefined) {
         window.removeEventListener('focus', this.windowFocusHandler);
       }
-      if (this.reconnectHandler) {
+      if (this.reconnectHandler !== undefined) {
         window.removeEventListener('online', this.reconnectHandler);
       }
     }
 
     for (const entry of this.queries.values()) {
-      if (entry.gcTimeout) {
+      if (entry.gcTimeout !== undefined) {
         clearTimeout(entry.gcTimeout);
       }
     }

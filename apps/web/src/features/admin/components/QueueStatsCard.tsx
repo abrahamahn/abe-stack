@@ -31,12 +31,12 @@ const HIGH_FAILURE_RATE_THRESHOLD = 10; // 10%
 // Component
 // ============================================================================
 
-export function QueueStatsCard({
+export const QueueStatsCard = ({
   stats,
   isLoading,
   isError,
   error,
-}: QueueStatsCardProps): JSX.Element {
+}: QueueStatsCardProps): JSX.Element => {
   if (isLoading) {
     return (
       <Card className="p-4">
@@ -47,7 +47,7 @@ export function QueueStatsCard({
     );
   }
 
-  if (isError || !stats) {
+  if (isError || stats === undefined) {
     return (
       <Card className="p-4">
         <Alert tone="danger">{error?.message ?? 'Failed to load queue statistics'}</Alert>
@@ -85,12 +85,12 @@ export function QueueStatsCard({
         <StatItem
           label="Failed"
           value={stats.failed}
-          tone={stats.failed > 0 ? 'danger' : undefined}
+          {...(stats.failed > 0 && { tone: 'danger' as const })}
         />
         <StatItem
           label="Dead Letter"
           value={stats.deadLetter}
-          tone={stats.deadLetter > 0 ? 'danger' : undefined}
+          {...(stats.deadLetter > 0 && { tone: 'danger' as const })}
         />
       </div>
 
@@ -100,7 +100,7 @@ export function QueueStatsCard({
           <StatItem
             label="Failure Rate"
             value={`${stats.failureRate.toFixed(1)}%`}
-            tone={hasHighFailureRate ? 'danger' : undefined}
+            {...(hasHighFailureRate && { tone: 'danger' as const })}
           />
           <StatItem
             label="Recent (1h)"
@@ -110,7 +110,7 @@ export function QueueStatsCard({
       </div>
     </Card>
   );
-}
+};
 
 // ============================================================================
 // Sub-components
@@ -122,7 +122,7 @@ interface StatItemProps {
   tone?: 'danger';
 }
 
-function StatItem({ label, value, tone }: StatItemProps): JSX.Element {
+const StatItem = ({ label, value, tone }: StatItemProps): JSX.Element => {
   const valueClass = tone === 'danger' ? 'text-red-600 dark:text-red-400' : '';
 
   return (
@@ -133,4 +133,4 @@ function StatItem({ label, value, tone }: StatItemProps): JSX.Element {
       <Text className={`text-2xl font-semibold ${valueClass}`}>{value}</Text>
     </div>
   );
-}
+};

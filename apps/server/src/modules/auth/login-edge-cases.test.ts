@@ -23,7 +23,7 @@ import {
 } from '@infrastructure';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import type { AuthConfig } from '@/config/index.js';
+import type { AuthConfig } from '@/config/index';
 import type { RawDb } from '@abe-stack/db';
 import type { Logger, Repositories } from '@infrastructure';
 

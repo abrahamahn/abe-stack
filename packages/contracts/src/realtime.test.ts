@@ -16,7 +16,7 @@ import {
   setOperationSchema,
   transactionSchema,
   writeResponseSchema,
-} from '../realtime';
+} from './realtime';
 
 // ============================================================================
 // Helper Constants
@@ -487,7 +487,7 @@ describe('recordSchema', () => {
     const result = recordSchema.safeParse(validRecord);
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.name).toBe('John');
+      expect(result.data['name']).toBe('John');
     }
   });
 

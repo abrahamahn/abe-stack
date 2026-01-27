@@ -1,4 +1,4 @@
-// packages/core/src/infrastructure/async/DeferredPromise.ts
+// packages/core/src/infrastructure/async/deferred-promise.ts
 
 /**
  * A Promise with externally accessible resolve and reject functions.

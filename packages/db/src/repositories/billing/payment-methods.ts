@@ -5,14 +5,15 @@
  * Data access layer for billing payment_methods table.
  */
 
-import { and, eq, select, insert, update, deleteFrom } from '../../builder';
+import { and, eq, select, insert, update, deleteFrom } from '../../builder/index';
 import {
+  type CardDetails,
   type NewPaymentMethod,
   type PaymentMethod,
   type UpdatePaymentMethod,
   PAYMENT_METHOD_COLUMNS,
   PAYMENT_METHODS_TABLE,
-} from '../../schema';
+} from '../../schema/index';
 import { toCamelCase, toSnakeCase, parseJsonb } from '../../utils';
 
 import type { RawDb } from '../../client';
@@ -69,7 +70,7 @@ export interface PaymentMethodRepository {
 function transformPaymentMethod(row: Record<string, unknown>): PaymentMethod {
   const pm = toCamelCase<PaymentMethod>(row, PAYMENT_METHOD_COLUMNS);
   // Parse JSONB card details
-  pm.cardDetails = parseJsonb(row.card_details as string | null);
+  pm.cardDetails = parseJsonb(row['card_details'] as string | null) as CardDetails | null;
   return pm;
 }
 
@@ -82,7 +83,7 @@ export function createPaymentMethodRepository(db: RawDb): PaymentMethodRepositor
       const result = await db.queryOne<Record<string, unknown>>(
         select(PAYMENT_METHODS_TABLE).where(eq('id', id)).toSql(),
       );
-      return result ? transformPaymentMethod(result) : null;
+      return result !== null ? transformPaymentMethod(result) : null;
     },
 
     async findByProviderPaymentMethodId(
@@ -99,7 +100,7 @@ export function createPaymentMethodRepository(db: RawDb): PaymentMethodRepositor
           )
           .toSql(),
       );
-      return result ? transformPaymentMethod(result) : null;
+      return result !== null ? transformPaymentMethod(result) : null;
     },
 
     async findByUserId(userId: string): Promise<PaymentMethod[]> {
@@ -120,7 +121,7 @@ export function createPaymentMethodRepository(db: RawDb): PaymentMethodRepositor
           .limit(1)
           .toSql(),
       );
-      return result ? transformPaymentMethod(result) : null;
+      return result !== null ? transformPaymentMethod(result) : null;
     },
 
     async create(paymentMethod: NewPaymentMethod): Promise<PaymentMethod> {
@@ -129,13 +130,13 @@ export function createPaymentMethodRepository(db: RawDb): PaymentMethodRepositor
         PAYMENT_METHOD_COLUMNS,
       );
       // Ensure card details is JSON stringified
-      if (paymentMethod.cardDetails) {
-        snakeData.card_details = JSON.stringify(paymentMethod.cardDetails);
+      if (paymentMethod.cardDetails !== undefined) {
+        snakeData['card_details'] = JSON.stringify(paymentMethod.cardDetails);
       }
       const result = await db.queryOne<Record<string, unknown>>(
         insert(PAYMENT_METHODS_TABLE).values(snakeData).returningAll().toSql(),
       );
-      if (!result) {
+      if (result === null) {
         throw new Error('Failed to create payment method');
       }
       return transformPaymentMethod(result);
@@ -147,13 +148,13 @@ export function createPaymentMethodRepository(db: RawDb): PaymentMethodRepositor
         PAYMENT_METHOD_COLUMNS,
       );
       // Ensure card details is JSON stringified
-      if (data.cardDetails) {
-        snakeData.card_details = JSON.stringify(data.cardDetails);
+      if (data.cardDetails !== undefined) {
+        snakeData['card_details'] = JSON.stringify(data.cardDetails);
       }
       const result = await db.queryOne<Record<string, unknown>>(
         update(PAYMENT_METHODS_TABLE).set(snakeData).where(eq('id', id)).returningAll().toSql(),
       );
-      return result ? transformPaymentMethod(result) : null;
+      return result !== null ? transformPaymentMethod(result) : null;
     },
 
     async delete(id: string): Promise<boolean> {
@@ -185,18 +186,18 @@ export function createPaymentMethodRepository(db: RawDb): PaymentMethodRepositor
       // Then set the specified payment method as default
       const result = await db.queryOne<Record<string, unknown>>(
         update(PAYMENT_METHODS_TABLE)
-          .set({ is_default: true })
+          .set({ ['is_default']: true })
           .where(and(eq('id', paymentMethodId), eq('user_id', userId)))
           .returningAll()
           .toSql(),
       );
-      return result ? transformPaymentMethod(result) : null;
+      return result !== null ? transformPaymentMethod(result) : null;
     },
 
     async clearDefaultForUser(userId: string): Promise<void> {
       await db.execute(
         update(PAYMENT_METHODS_TABLE)
-          .set({ is_default: false })
+          .set({ ['is_default']: false })
           .where(eq('user_id', userId))
           .toSql(),
       );

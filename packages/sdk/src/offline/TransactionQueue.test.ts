@@ -58,7 +58,7 @@ const mockWindow = {
   eventListeners: new Map<string, Set<EventHandler>>(),
   addEventListener: (type: string, handler: EventHandler): void => {
     let handlers = mockWindow.eventListeners.get(type);
-    if (!handlers) {
+    if (handlers === undefined) {
       handlers = new Set();
       mockWindow.eventListeners.set(type, handlers);
     }
@@ -66,13 +66,13 @@ const mockWindow = {
   },
   removeEventListener: (type: string, handler: EventHandler): void => {
     const handlers = mockWindow.eventListeners.get(type);
-    if (handlers) {
+    if (handlers !== undefined) {
       handlers.delete(handler);
     }
   },
   dispatchEvent: (event: Event): boolean => {
     const handlers = mockWindow.eventListeners.get(event.type);
-    if (handlers) {
+    if (handlers !== undefined) {
       for (const handler of handlers) {
         handler(event);
       }
@@ -178,7 +178,7 @@ describe('TransactionQueue', () => {
       expect(queue.getQueuedTransactions()).toHaveLength(0);
     });
 
-    test('should handle operations with short path gracefully', async () => {
+    test('should handle operations with short path gracefully', () => {
       mockOnline = false;
       queue = new TransactionQueue({
         submitTransaction: mockSubmit,
@@ -201,7 +201,7 @@ describe('TransactionQueue', () => {
   });
 
   describe('enqueue', () => {
-    test('should add transaction to queue', async () => {
+    test('should add transaction to queue', () => {
       mockOnline = false; // Prevent auto-processing
       queue = new TransactionQueue({
         submitTransaction: mockSubmit,
@@ -215,7 +215,7 @@ describe('TransactionQueue', () => {
       expect(promise).toBeInstanceOf(Promise);
     });
 
-    test('should persist queue to localStorage', async () => {
+    test('should persist queue to localStorage', () => {
       mockOnline = false;
       queue = new TransactionQueue({
         submitTransaction: mockSubmit,
@@ -255,7 +255,7 @@ describe('TransactionQueue', () => {
       expect(mockRollback).toHaveBeenCalledTimes(1);
     });
 
-    test('should call onQueueSizeChange', async () => {
+    test('should call onQueueSizeChange', () => {
       mockOnline = false;
       const onQueueSizeChange = vi.fn();
       queue = new TransactionQueue({
@@ -271,7 +271,7 @@ describe('TransactionQueue', () => {
   });
 
   describe('isPendingWrite', () => {
-    test('should track pending writes for records', async () => {
+    test('should track pending writes for records', () => {
       mockOnline = false;
       queue = new TransactionQueue({
         submitTransaction: mockSubmit,
@@ -364,7 +364,7 @@ describe('TransactionQueue', () => {
   });
 
   describe('getStatus', () => {
-    test('should return current queue status', async () => {
+    test('should return current queue status', () => {
       mockOnline = false;
       queue = new TransactionQueue({
         submitTransaction: mockSubmit,
@@ -382,7 +382,7 @@ describe('TransactionQueue', () => {
   });
 
   describe('reset', () => {
-    test('should clear queue and storage', async () => {
+    test('should clear queue and storage', () => {
       mockOnline = false;
       queue = new TransactionQueue({
         submitTransaction: mockSubmit,
@@ -471,12 +471,12 @@ describe('TransactionQueue', () => {
 
     test('should retry on conflict (409)', async () => {
       let callCount = 0;
-      mockSubmit.mockImplementation(async () => {
+      mockSubmit.mockImplementation(() => {
         callCount++;
         if (callCount < 3) {
-          return { status: 409, message: 'Conflict' };
+          return Promise.resolve({ status: 409, message: 'Conflict' });
         }
-        return { status: 200 };
+        return Promise.resolve({ status: 200 });
       });
 
       queue = new TransactionQueue({

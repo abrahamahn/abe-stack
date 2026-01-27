@@ -1,5 +1,5 @@
 // packages/core/src/modules/auth/password.ts
-import { estimatePasswordStrength } from './passwordStrength';
+import { estimatePasswordStrength } from './password-strength';
 
 /**
  * Password validation configuration

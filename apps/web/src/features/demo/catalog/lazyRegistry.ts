@@ -38,7 +38,7 @@ export function getLoadedComponentCount(): number {
 export async function loadCategory(category: ComponentCategory): Promise<ComponentDemo[]> {
   // Check cache first
   const cached = categoryCache.get(category);
-  if (cached) {
+  if (cached !== undefined) {
     return cached;
   }
 

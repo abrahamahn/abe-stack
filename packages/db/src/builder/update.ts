@@ -150,13 +150,13 @@ export class UpdateBuilder implements QueryBuilder {
     parts.push({ text: `SET ${setCombined.text}`, values: setCombined.values });
 
     // FROM clause (for joins)
-    if (this._from) {
+    if (this._from !== null) {
       const fromFragment = formatTable(this._from);
       parts.push({ text: `FROM ${fromFragment.text}`, values: [...fromFragment.values] });
     }
 
     // WHERE clause
-    if (this._where && this._where.text) {
+    if (this._where !== null && this._where.text !== '') {
       parts.push({ text: `WHERE ${this._where.text}`, values: [...this._where.values] });
     }
 

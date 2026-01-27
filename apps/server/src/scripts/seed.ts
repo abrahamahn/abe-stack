@@ -17,11 +17,12 @@
  * - demo@example.com / password123 (user role)
  */
 
-import { loadConfig } from '@/config';
 import { buildConnectionString, createDbClient, insert, USERS_TABLE } from '@database';
 import { hashPassword } from '@modules/auth/utils/password';
 
 import type { UserRole } from '@abe-stack/core';
+
+import { loadConfig } from '@/config';
 
 export interface SeedUser {
   email: string;

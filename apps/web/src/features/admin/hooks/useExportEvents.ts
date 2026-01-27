@@ -7,9 +7,8 @@
 
 import { tokenStore } from '@abe-stack/core';
 import { useMutation, type UseMutationResult } from '@abe-stack/sdk';
-import { useCallback, useMemo } from 'react';
-
 import { useClientEnvironment } from '@app/ClientEnvironment';
+import { useCallback, useMemo } from 'react';
 
 import { createAdminApiClient } from '../services/adminApi';
 
@@ -60,7 +59,7 @@ export function useExportEvents(): UseExportEventsResult {
 
   const exportEvents = useCallback(
     (format: 'csv' | 'json', filter?: SecurityEventsFilter) => {
-      mutation.mutate({ format, filter });
+      mutation.mutate({ format, ...(filter !== undefined && { filter }) });
     },
     [mutation],
   );
@@ -68,7 +67,7 @@ export function useExportEvents(): UseExportEventsResult {
   const downloadExport = useCallback(
     (format: 'csv' | 'json', filter?: SecurityEventsFilter) => {
       void mutation
-        .mutateAsync({ format, filter })
+        .mutateAsync({ format, ...(filter !== undefined && { filter }) })
         .then((response) => {
           // Create a blob and download link
           const blob = new Blob([response.data], { type: response.contentType });

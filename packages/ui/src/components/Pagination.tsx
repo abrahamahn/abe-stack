@@ -14,7 +14,7 @@ type PaginationProps = {
   /** Callback when page changes */
   onChange?: (value: number) => void;
   /** Accessible label for the pagination navigation */
-  'aria-label'?: string;
+  ariaLabel?: string;
 };
 
 /**
@@ -25,17 +25,17 @@ type PaginationProps = {
  * <Pagination value={page} totalPages={10} onChange={setPage} />
  * ```
  */
-export function Pagination({
+export const Pagination = ({
   value,
   defaultValue,
   totalPages,
   onChange,
-  'aria-label': ariaLabel = 'Pagination',
-}: PaginationProps): ReactElement {
+  ariaLabel = 'Pagination',
+}: PaginationProps): ReactElement => {
   const [currentPage, setPage] = useControllableState<number>({
-    value,
+    ...(value !== undefined && { value }),
     defaultValue: defaultValue ?? 1,
-    onChange,
+    ...(onChange !== undefined && { onChange }),
   });
 
   const page = currentPage ?? 1;
@@ -81,4 +81,4 @@ export function Pagination({
       </button>
     </nav>
   );
-}
+};

@@ -11,8 +11,48 @@ import { createApiClient } from '@abe-stack/sdk';
 import { useClientEnvironment } from '@app';
 import { createContext, useContext, useMemo } from 'react';
 
-import type { ApiClient } from '@abe-stack/sdk';
+import type {
+  AuthResponse,
+  EmailVerificationRequest,
+  EmailVerificationResponse,
+  ForgotPasswordRequest,
+  ForgotPasswordResponse,
+  LoginRequest,
+  LogoutResponse,
+  OAuthConnectionsResponse,
+  OAuthEnabledProvidersResponse,
+  OAuthProvider,
+  OAuthUnlinkResponse,
+  RefreshResponse,
+  RegisterRequest,
+  RegisterResponse,
+  ResendVerificationRequest,
+  ResendVerificationResponse,
+  ResetPasswordRequest,
+  ResetPasswordResponse,
+  User,
+} from '@abe-stack/core';
 import type { ReactElement, ReactNode } from 'react';
+
+/**
+ * API Client interface - mirrors @abe-stack/sdk ApiClient
+ * Defined inline due to SDK type resolution issues.
+ */
+interface ApiClient {
+  login: (data: LoginRequest) => Promise<AuthResponse>;
+  register: (data: RegisterRequest) => Promise<RegisterResponse>;
+  refresh: () => Promise<RefreshResponse>;
+  logout: () => Promise<LogoutResponse>;
+  getCurrentUser: () => Promise<User>;
+  forgotPassword: (data: ForgotPasswordRequest) => Promise<ForgotPasswordResponse>;
+  resetPassword: (data: ResetPasswordRequest) => Promise<ResetPasswordResponse>;
+  verifyEmail: (data: EmailVerificationRequest) => Promise<EmailVerificationResponse>;
+  resendVerification: (data: ResendVerificationRequest) => Promise<ResendVerificationResponse>;
+  getEnabledOAuthProviders: () => Promise<OAuthEnabledProvidersResponse>;
+  getOAuthConnections: () => Promise<OAuthConnectionsResponse>;
+  unlinkOAuthProvider: (provider: OAuthProvider) => Promise<OAuthUnlinkResponse>;
+  getOAuthLoginUrl: (provider: OAuthProvider) => string;
+}
 
 const ApiContext = createContext<ApiClient | null>(null);
 
@@ -22,7 +62,7 @@ const ApiContext = createContext<ApiClient | null>(null);
  */
 export const useApi = (): ApiClient => {
   const ctx = useContext(ApiContext);
-  if (!ctx) throw new Error('useApi must be used within ApiProvider');
+  if (ctx === null) throw new Error('useApi must be used within ApiProvider');
   return ctx;
 };
 
@@ -38,15 +78,16 @@ type ApiProviderProps = {
  * call site using try-catch. Use isUnauthorizedError() from @abe-stack/sdk
  * to check for 401 errors.
  */
-export function ApiProvider({ children }: ApiProviderProps): ReactElement {
+export const ApiProvider = ({ children }: ApiProviderProps): ReactElement => {
   const { config } = useClientEnvironment();
 
   const api = useMemo<ApiClient>(() => {
-    return createApiClient({
+    const client = createApiClient({
       baseUrl: config.apiUrl,
       getToken: () => tokenStore.get(),
     });
+    return client as ApiClient;
   }, [config.apiUrl]);
 
   return <ApiContext.Provider value={api}>{children}</ApiContext.Provider>;
-}
+};

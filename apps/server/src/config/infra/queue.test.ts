@@ -1,7 +1,9 @@
 // apps/server/src/config/infra/queue.test.ts
-import type { FullEnv } from '@abe-stack/core/config';
 import { describe, expect, it } from 'vitest';
+
 import { DEFAULT_QUEUE_CONFIG, loadQueueConfig } from './queue';
+
+import type { FullEnv } from '@abe-stack/core/config';
 
 describe('Queue Configuration', () => {
   it('loads default configuration when no environment variables are set', () => {

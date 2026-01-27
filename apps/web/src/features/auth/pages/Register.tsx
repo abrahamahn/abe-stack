@@ -1,12 +1,12 @@
 // apps/web/src/features/auth/pages/Register.tsx
-import { AuthLayout, useFormState } from '@abe-stack/ui';
+import { AuthLayout, useAuthModeNavigation, useFormState } from '@abe-stack/ui';
 import { AuthForm } from '@auth/components/AuthForms';
-import { useAuth, useAuthModeNavigation } from '@auth/hooks';
+import { useAuth } from '@auth/hooks';
 
 import type { AuthFormProps } from '@auth/components/AuthForms';
 import type { JSX } from 'react';
 
-export function RegisterPage(): JSX.Element {
+export const RegisterPage = (): JSX.Element => {
   const { register, resendVerification } = useAuth();
   const { isLoading, error, wrapHandler } = useFormState();
   const { navigateToMode } = useAuthModeNavigation();
@@ -25,4 +25,4 @@ export function RegisterPage(): JSX.Element {
       <AuthForm {...formProps} />
     </AuthLayout>
   );
-}
+};

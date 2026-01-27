@@ -7,7 +7,9 @@ interface DemoPreviewAreaProps {
   selectedComponent: ComponentDemo | null;
 }
 
-export function DemoPreviewArea({ selectedComponent }: DemoPreviewAreaProps): React.ReactElement {
+export const DemoPreviewArea = ({
+  selectedComponent,
+}: DemoPreviewAreaProps): React.ReactElement => {
   return (
     <div className="flex-1 min-w-0 flex-col">
       <ScrollArea className="scroll-flex">
@@ -15,20 +17,26 @@ export function DemoPreviewArea({ selectedComponent }: DemoPreviewAreaProps): Re
           <div className="panel-header">
             <div>
               <Heading as="h2" size="md">
-                {selectedComponent ? selectedComponent.name : 'Select a component'}
+                {selectedComponent !== null ? selectedComponent.name : 'Select a component'}
               </Heading>
-              {selectedComponent && <Text tone="muted">{selectedComponent.description}</Text>}
+              {selectedComponent !== null && (
+                <Text tone="muted">{selectedComponent.description}</Text>
+              )}
             </div>
           </div>
 
-          {selectedComponent ? <VariantGrid component={selectedComponent} /> : <EmptyState />}
+          {selectedComponent !== null ? (
+            <VariantGrid component={selectedComponent} />
+          ) : (
+            <EmptyState />
+          )}
         </div>
       </ScrollArea>
     </div>
   );
-}
+};
 
-function VariantGrid({ component }: { component: ComponentDemo }): React.ReactElement {
+const VariantGrid = ({ component }: { component: ComponentDemo }): React.ReactElement => {
   return (
     <div className="grid-auto">
       {component.variants.map((variant, idx) => (
@@ -36,13 +44,13 @@ function VariantGrid({ component }: { component: ComponentDemo }): React.ReactEl
       ))}
     </div>
   );
-}
+};
 
-function VariantCard({
+const VariantCard = ({
   variant,
 }: {
   variant: ComponentDemo['variants'][number];
-}): React.ReactElement {
+}): React.ReactElement => {
   return (
     <div className="variant-card border-current">
       <div className="variant-card-header">
@@ -75,12 +83,12 @@ function VariantCard({
       </details>
     </div>
   );
-}
+};
 
-function EmptyState(): React.ReactElement {
+const EmptyState = (): React.ReactElement => {
   return (
     <div className="empty-state">
       <Text tone="muted">Select a component from the left sidebar to view demos</Text>
     </div>
   );
-}
+};

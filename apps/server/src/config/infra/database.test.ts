@@ -1,6 +1,6 @@
 // apps/server/src/config/infra/database.test.ts
-import type { FullEnv } from '@abe-stack/core/config';
 import { describe, expect, test } from 'vitest';
+
 import {
   buildConnectionString,
   getSafeConnectionString,
@@ -8,6 +8,8 @@ import {
   isPostgres,
   loadDatabaseConfig,
 } from './database';
+
+import type { FullEnv } from '@abe-stack/core/config';
 
 describe('Database Configuration', () => {
   describe('loadDatabaseConfig', () => {

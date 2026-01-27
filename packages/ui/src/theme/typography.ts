@@ -3,7 +3,7 @@ export const typography = {
   fontFamily:
     'system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji',
   sizes: {
-    '2xs': '0.625rem', // 10px
+    ['2xs']: '0.625rem', // 10px
     xs: '0.75rem', // 12px
     sm: '0.875rem', // 14px
     md: '1rem', // 16px

@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { Switch } from '../Switch';
+import { Switch } from './Switch';
 
 describe('Switch', () => {
   it('renders with default state and toggles on click', async () => {

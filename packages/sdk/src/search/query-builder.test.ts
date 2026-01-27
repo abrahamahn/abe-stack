@@ -204,7 +204,9 @@ describe('ClientSearchQueryBuilder', () => {
       });
 
       expect(params.has('filters')).toBe(true);
-      const parsed = JSON.parse(params.get('filters')!);
+      const filtersValue = params.get('filters');
+      if (filtersValue === null) throw new Error('filters is null');
+      const parsed = JSON.parse(filtersValue);
       expect(parsed.f).toBe('status');
     });
 
@@ -250,7 +252,9 @@ describe('ClientSearchQueryBuilder', () => {
         filters: { field: 'createdAt', operator: 'gte', value: date },
       });
 
-      const parsed = JSON.parse(params.get('filters')!);
+      const filtersValue = params.get('filters');
+      if (filtersValue === null) throw new Error('filters is null');
+      const parsed = JSON.parse(filtersValue);
       expect(parsed.v.$date).toBe('2024-01-15T00:00:00.000Z');
     });
 
@@ -259,7 +263,9 @@ describe('ClientSearchQueryBuilder', () => {
         filters: { field: 'price', operator: 'between', value: { min: 10, max: 100 } },
       });
 
-      const parsed = JSON.parse(params.get('filters')!);
+      const filtersValue = params.get('filters');
+      if (filtersValue === null) throw new Error('filters is null');
+      const parsed = JSON.parse(filtersValue);
       expect(parsed.v.$range).toEqual({ min: 10, max: 100 });
     });
   });

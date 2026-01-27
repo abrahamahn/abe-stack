@@ -2,68 +2,11 @@
 /**
  * Shared Kernel
  *
- * Framework-agnostic constants, types, and errors
- * used throughout the application.
+ * Server-specific types, constants, and utilities.
+ *
+ * Note: Error classes, time constants, and service interfaces should be
+ * imported directly from @abe-stack/core.
  */
-
-// Basic types (from @abe-stack/core)
-export {
-  // Business Errors (Mapped from Core)
-  AccountLockedError,
-  // Errors
-  AppError,
-  BadRequestError,
-  ConflictError,
-  DAYS_PER_WEEK,
-  EmailAlreadyExistsError,
-  EmailNotVerifiedError,
-  EmailSendError,
-  ForbiddenError,
-  HOURS_PER_DAY,
-  HTTP_STATUS,
-  InternalError,
-  InvalidCredentialsError,
-  InvalidTokenError,
-  MINUTES_PER_HOUR,
-  MS_PER_DAY,
-  MS_PER_HOUR,
-  MS_PER_MINUTE,
-  // Constants
-  MS_PER_SECOND,
-  NotFoundError,
-  OAuthError,
-  OAuthStateMismatchError,
-  SECONDS_PER_DAY,
-  SECONDS_PER_HOUR,
-  SECONDS_PER_MINUTE,
-  TokenReuseError,
-  TooManyRequestsError,
-  TotpInvalidError,
-  TotpRequiredError,
-  UnauthorizedError,
-  UserNotFoundError,
-  WeakPasswordError,
-  isAppError,
-  // Auth Results
-  isKnownAuthError,
-  mapErrorToHttpResponse,
-  toAppError,
-} from '@abe-stack/core';
-
-// API Response Types (from @abe-stack/core)
-export type {
-  ApiErrorResponse,
-  ApiResponse,
-  ApiSuccessResponse,
-  AppConfig,
-  BillingService,
-  // Service Interfaces (Ports)
-  EmailService,
-  ErrorResponse,
-  Logger,
-  NotificationService,
-  StorageService,
-} from '@abe-stack/core';
 
 // Server-specific shared types
 export type {
@@ -92,14 +35,11 @@ export {
   CSRF_COOKIE_NAME,
   ERROR_MESSAGES,
   FAILURE_REASONS,
+  HTTP_STATUS,
+  MAX_PROGRESSIVE_DELAY_MS,
+  MIN_JWT_SECRET_LENGTH,
+  PROGRESSIVE_DELAY_WINDOW_MS,
   REFRESH_COOKIE_NAME,
+  REFRESH_TOKEN_BYTES,
   SUCCESS_MESSAGES,
 } from './constants';
-
-// Validation error utilities
-export {
-  formatValidationErrors,
-  type ValidationErrorDetail,
-  type ValidationErrorResponse,
-  type ZodIssueMinimal,
-} from './validationError';

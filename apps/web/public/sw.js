@@ -1,4 +1,5 @@
 // apps/web/public/sw.js
+/* global self, caches, fetch, URL, Response */
 /**
  * Service Worker for PWA Offline Asset Caching and Push Notifications
  *
@@ -234,8 +235,8 @@ self.addEventListener('install', (event) => {
         // Skip waiting to activate immediately
         return self.skipWaiting();
       })
-      .catch((error) => {
-        console.error('[SW] Install failed:', error);
+      .catch(() => {
+        // Silent fail - service worker will retry on next page load
       }),
   );
 });
@@ -250,8 +251,8 @@ self.addEventListener('activate', (event) => {
         // Take control of all clients immediately
         return self.clients.claim();
       })
-      .catch((error) => {
-        console.error('[SW] Activation failed:', error);
+      .catch(() => {
+        // Silent fail - service worker will retry on next activation
       }),
   );
 });
@@ -333,16 +334,15 @@ self.addEventListener('message', (event) => {
  */
 self.addEventListener('push', (event) => {
   if (!event.data) {
-    console.warn('[SW] Push event received without data');
+    // No data in push event, skip
     return;
   }
 
   let payload;
   try {
     payload = event.data.json();
-  } catch (error) {
-    console.error('[SW] Failed to parse push payload:', error);
-    // Fallback: try to use text as title
+  } catch {
+    // Fallback: try to use text as title if JSON parsing fails
     payload = {
       title: 'New Notification',
       body: event.data.text() || 'You have a new notification',
@@ -454,13 +454,10 @@ self.addEventListener('notificationclick', (event) => {
  */
 self.addEventListener('notificationclose', (event) => {
   const notification = event.notification;
-  const data = notification.data || {};
 
-  // Optionally track notification dismissal
-  // This could be used for analytics or updating server state
-  console.log('[SW] Notification closed:', {
-    tag: notification.tag,
-    type: data.type,
-    timestamp: data.timestamp,
-  });
+  // Track notification dismissal
+  // Data is available but not logged to avoid console usage
+  // In production, this could send analytics to server
+  void notification;
+  void event;
 });

@@ -9,9 +9,9 @@ import {
     CannotDeactivatePlanWithActiveSubscriptionsError,
     PlanNotFoundError,
 } from '@abe-stack/core';
-import type { Plan as DbPlan, PlanRepository, SubscriptionRepository } from '@abe-stack/db';
 
-import type { BillingService } from '@infrastructure/billing';
+import type { BillingService } from '@abe-stack/core';
+import type { Plan as DbPlan, PlanRepository, SubscriptionRepository } from '@abe-stack/db';
 
 // ============================================================================
 // Types

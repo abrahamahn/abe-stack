@@ -29,21 +29,21 @@ type DocKey =
   | 'ui'
   | 'sdk'
   // Dev docs
-  | 'api-test-plan'
+  | 'apiTestPlan'
   | 'architecture'
-  | 'config-setup'
-  | 'dev-environment'
+  | 'configSetup'
+  | 'devEnvironment'
   | 'legacy'
   | 'performance'
   | 'principles'
   | 'security'
-  | 'sync-scripts'
+  | 'syncScripts'
   | 'testing'
   // Logs
-  | 'log-w01'
-  | 'log-w02'
-  | 'log-w03'
-  | 'log-w04';
+  | 'logW01'
+  | 'logW02'
+  | 'logW03'
+  | 'logW04';
 
 interface DocMeta {
   label: string;
@@ -67,20 +67,20 @@ const docsMeta: Record<DocKey, DocMeta> = {
   // Dev docs
   architecture: { label: 'Architecture', category: 'dev' },
   principles: { label: 'Principles', category: 'dev' },
-  'dev-environment': { label: 'Dev Environment', category: 'dev' },
-  'config-setup': { label: 'Config Setup', category: 'dev' },
+  devEnvironment: { label: 'Dev Environment', category: 'dev' },
+  configSetup: { label: 'Config Setup', category: 'dev' },
   testing: { label: 'Testing', category: 'dev' },
   security: { label: 'Security', category: 'dev' },
-  'api-test-plan': { label: 'API Test Plan', category: 'dev' },
-  'sync-scripts': { label: 'Sync Scripts', category: 'dev' },
+  apiTestPlan: { label: 'API Test Plan', category: 'dev' },
+  syncScripts: { label: 'Sync Scripts', category: 'dev' },
   performance: { label: 'Performance', category: 'dev' },
   legacy: { label: 'Legacy', category: 'dev' },
 
   // Logs
-  'log-w01': { label: 'Week 01', category: 'logs' },
-  'log-w02': { label: 'Week 02', category: 'logs' },
-  'log-w03': { label: 'Week 03', category: 'logs' },
-  'log-w04': { label: 'Week 04', category: 'logs' },
+  logW01: { label: 'Week 01', category: 'logs' },
+  logW02: { label: 'Week 02', category: 'logs' },
+  logW03: { label: 'Week 03', category: 'logs' },
+  logW04: { label: 'Week 04', category: 'logs' },
 };
 
 // Lazy load doc content on demand
@@ -94,18 +94,18 @@ async function loadDocContent(key: DocKey): Promise<string> {
     sdk: () => import('../../../../packages/sdk/README.md?raw'),
     architecture: () => import('../../../../docs/specs/architecture.md?raw'),
     principles: () => import('../../../../docs/specs/principles.md?raw'),
-    'dev-environment': () => import('../../../../docs/dev/workflow.md?raw'),
-    'config-setup': () => import('../../../../docs/dev/configuration.md?raw'),
+    devEnvironment: () => import('../../../../docs/dev/workflow.md?raw'),
+    configSetup: () => import('../../../../docs/dev/configuration.md?raw'),
     testing: () => import('../../../../docs/dev/testing.md?raw'),
     security: () => import('../../../../docs/dev/security.md?raw'),
-    'api-test-plan': () => import('../../../../docs/todo/api-test-plan.md?raw'),
-    'sync-scripts': () => import('../../../../docs/dev/sync-scripts.md?raw'),
+    apiTestPlan: () => import('../../../../docs/todo/api-test-plan.md?raw'),
+    syncScripts: () => import('../../../../docs/dev/sync-scripts.md?raw'),
     performance: () => import('../../../../docs/dev/performance.md?raw'),
     legacy: () => import('../../../../docs/reference/legacy.md?raw'),
-    'log-w01': () => import('../../../../docs/log/2026-W01.md?raw'),
-    'log-w02': () => import('../../../../docs/log/2026-W02.md?raw'),
-    'log-w03': () => import('../../../../docs/log/2026-W03.md?raw'),
-    'log-w04': () => import('../../../../docs/log/2026-W04.md?raw'),
+    logW01: () => import('../../../../docs/log/2026-W01.md?raw'),
+    logW02: () => import('../../../../docs/log/2026-W02.md?raw'),
+    logW03: () => import('../../../../docs/log/2026-W03.md?raw'),
+    logW04: () => import('../../../../docs/log/2026-W04.md?raw'),
   };
 
   const module = await loaders[key]();
@@ -120,7 +120,7 @@ function useDocContent(key: DocKey): { content: string | null; isLoading: boolea
 
   useEffect(() => {
     const cached = cache.get(key);
-    if (cached) {
+    if (cached !== undefined) {
       setContent(cached);
       setIsLoading(false);
       return;
@@ -143,13 +143,13 @@ function useDocContent(key: DocKey): { content: string | null; isLoading: boolea
   return { content, isLoading };
 }
 
-function DocIndex({
+const DocIndex = ({
   activeDoc,
   onSelect,
 }: {
   activeDoc: DocKey;
   onSelect: (key: DocKey) => void;
-}): JSX.Element {
+}): JSX.Element => {
   const categories: { key: DocMeta['category']; label: string }[] = [
     { key: 'root', label: 'Home' },
     { key: 'apps', label: 'Apps' },
@@ -194,9 +194,9 @@ function DocIndex({
       </nav>
     </Card>
   );
-}
+};
 
-export function HomePage(): JSX.Element {
+export const HomePage = (): JSX.Element => {
   const [activeDoc, setActiveDoc] = useState<DocKey>('readme');
   const { content, isLoading } = useDocContent(activeDoc);
   // Delay showing skeleton to prevent flash for fast loads
@@ -241,4 +241,4 @@ export function HomePage(): JSX.Element {
       </Card>
     </PageContainer>
   );
-}
+};

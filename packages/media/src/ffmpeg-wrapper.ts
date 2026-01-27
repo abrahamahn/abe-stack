@@ -34,7 +34,7 @@ export interface FFmpegOptions {
 
 export interface FFmpegResult {
   success: boolean;
-  output?: string;
+  output: string;
   error?: string;
   duration?: number;
 }
@@ -47,7 +47,7 @@ export async function runFFmpeg(options: FFmpegOptions): Promise<FFmpegResult> {
     const args: string[] = [];
 
     // Input file
-    if (options.input) {
+    if (options.input !== undefined && options.input.length > 0) {
       args.push('-i', options.input);
     }
 
@@ -62,37 +62,37 @@ export async function runFFmpeg(options: FFmpegOptions): Promise<FFmpegResult> {
     }
 
     // Video codec
-    if (options.videoCodec) {
+    if (options.videoCodec !== undefined && options.videoCodec.length > 0) {
       args.push('-c:v', options.videoCodec);
     }
 
     // Audio codec
-    if (options.audioCodec) {
+    if (options.audioCodec !== undefined && options.audioCodec.length > 0) {
       args.push('-c:a', options.audioCodec);
     }
 
     // Video bitrate
-    if (options.videoBitrate) {
+    if (options.videoBitrate !== undefined && options.videoBitrate.length > 0) {
       args.push('-b:v', options.videoBitrate);
     }
 
     // Audio bitrate
-    if (options.audioBitrate) {
+    if (options.audioBitrate !== undefined && options.audioBitrate.length > 0) {
       args.push('-b:a', options.audioBitrate);
     }
 
     // Resolution
-    if (options.resolution) {
+    if (options.resolution !== undefined) {
       args.push('-s', `${String(options.resolution.width)}x${String(options.resolution.height)}`);
     }
 
     // Format
-    if (options.format) {
+    if (options.format !== undefined && options.format.length > 0) {
       args.push('-f', options.format);
     }
 
     // Special handling for thumbnails
-    if (options.thumbnail) {
+    if (options.thumbnail !== undefined) {
       const thumbSize = String(options.thumbnail.size);
       // Generate single frame at specific time
       args.push('-frames:v', '1');
@@ -105,7 +105,7 @@ export async function runFFmpeg(options: FFmpegOptions): Promise<FFmpegResult> {
     }
 
     // Special handling for waveforms
-    else if (options.waveform) {
+    else if (options.waveform !== undefined) {
       // Generate waveform visualization
       args.push(
         '-filter_complex',
@@ -116,7 +116,7 @@ export async function runFFmpeg(options: FFmpegOptions): Promise<FFmpegResult> {
     }
 
     // Output file (if not thumbnail/waveform)
-    else if (options.output) {
+    else if (options.output !== undefined && options.output.length > 0) {
       args.push(options.output);
     }
 
@@ -139,16 +139,24 @@ export async function runFFmpeg(options: FFmpegOptions): Promise<FFmpegResult> {
     ffmpeg.on('close', (code) => {
       const success = code === 0;
 
-      resolve({
-        success,
-        output: stdout,
-        error: success ? undefined : stderr || 'FFmpeg process failed',
-      });
+      if (success) {
+        resolve({
+          success: true,
+          output: stdout,
+        });
+      } else {
+        resolve({
+          success: false,
+          output: stdout,
+          error: stderr.length > 0 ? stderr : 'FFmpeg process failed',
+        });
+      }
     });
 
     ffmpeg.on('error', (error) => {
       resolve({
         success: false,
+        output: '',
         error: `Failed to start FFmpeg: ${error.message}`,
       });
     });
@@ -186,14 +194,21 @@ export async function getMediaMetadata(inputPath: string): Promise<MediaMetadata
     return probeResult;
   } catch {
     // Fallback to basic parsing from stderr
-    const lines = (result.error || '').split('\n');
+    const lines = (result.error ?? '').split('\n');
 
     for (const line of lines) {
       if (line.includes('Duration:')) {
         const durationMatch = line.match(/Duration: (\d+):(\d+):(\d+\.\d+)/);
-        if (durationMatch) {
+        if (durationMatch !== null) {
           const [, hours, minutes, seconds] = durationMatch;
-          if (hours && minutes && seconds) {
+          if (
+            hours !== undefined &&
+            hours.length > 0 &&
+            minutes !== undefined &&
+            minutes.length > 0 &&
+            seconds !== undefined &&
+            seconds.length > 0
+          ) {
             metadata.duration =
               parseInt(hours) * 3600 + parseInt(minutes) * 60 + parseFloat(seconds);
           }
@@ -204,11 +219,14 @@ export async function getMediaMetadata(inputPath: string): Promise<MediaMetadata
         if (line.includes('Video:')) {
           metadata.hasVideo = true;
           const resolutionMatch = line.match(/(\d+)x(\d+)/);
-          if (resolutionMatch && resolutionMatch[1] && resolutionMatch[2]) {
-            metadata.width = parseInt(resolutionMatch[1]);
-            metadata.height = parseInt(resolutionMatch[2]);
+          const width = resolutionMatch?.[1];
+          const height = resolutionMatch?.[2];
+          if (width !== undefined && height !== undefined) {
+            metadata.width = parseInt(width);
+            metadata.height = parseInt(height);
           }
-        } else if (line.includes('Audio:')) {
+        }
+        if (line.includes('Audio:')) {
           metadata.hasAudio = true;
         }
       }
@@ -244,21 +262,25 @@ async function runFFprobe(inputPath: string): Promise<MediaMetadataResult> {
         try {
           const parsed = JSON.parse(output) as {
             format?: { duration?: string };
-            streams?: Array<{ codec_type?: string; width?: number; height?: number }>;
+            streams?: Array<Record<string, unknown>>;
           };
           const result: MediaMetadataResult = {};
 
-          if (parsed.format?.duration) {
+          if (parsed.format?.duration !== undefined) {
             result.duration = parseFloat(parsed.format.duration);
           }
 
-          if (parsed.streams) {
+          if (parsed.streams !== undefined) {
             for (const stream of parsed.streams) {
-              if (stream.codec_type === 'video') {
+              const codecType = stream['codec_type'];
+              const width = stream['width'];
+              const height = stream['height'];
+
+              if (codecType === 'video') {
                 result.hasVideo = true;
-                if (stream.width) result.width = stream.width;
-                if (stream.height) result.height = stream.height;
-              } else if (stream.codec_type === 'audio') {
+                if (typeof width === 'number') result.width = width;
+                if (typeof height === 'number') result.height = height;
+              } else if (codecType === 'audio') {
                 result.hasAudio = true;
               }
             }
@@ -302,28 +324,28 @@ export async function convertVideo(
   // Set codecs based on format
   switch (options.format) {
     case 'mp4':
-      ffmpegOptions.videoCodec = options.videoCodec || 'libx264';
-      ffmpegOptions.audioCodec = options.audioCodec || 'aac';
+      ffmpegOptions.videoCodec = options.videoCodec ?? 'libx264';
+      ffmpegOptions.audioCodec = options.audioCodec ?? 'aac';
       break;
     case 'webm':
-      ffmpegOptions.videoCodec = options.videoCodec || 'libvpx-vp9';
-      ffmpegOptions.audioCodec = options.audioCodec || 'libopus';
+      ffmpegOptions.videoCodec = options.videoCodec ?? 'libvpx-vp9';
+      ffmpegOptions.audioCodec = options.audioCodec ?? 'libopus';
       break;
     case 'avi':
-      ffmpegOptions.videoCodec = options.videoCodec || 'libx264';
-      ffmpegOptions.audioCodec = options.audioCodec || 'mp3';
+      ffmpegOptions.videoCodec = options.videoCodec ?? 'libx264';
+      ffmpegOptions.audioCodec = options.audioCodec ?? 'mp3';
       break;
   }
 
-  if (options.videoBitrate) {
+  if (options.videoBitrate !== undefined && options.videoBitrate.length > 0) {
     ffmpegOptions.videoBitrate = options.videoBitrate;
   }
 
-  if (options.audioBitrate) {
+  if (options.audioBitrate !== undefined && options.audioBitrate.length > 0) {
     ffmpegOptions.audioBitrate = options.audioBitrate;
   }
 
-  if (options.resolution) {
+  if (options.resolution !== undefined) {
     ffmpegOptions.resolution = options.resolution;
   }
 

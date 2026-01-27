@@ -1,17 +1,17 @@
 // packages/core/src/contracts/__tests__/native.test.ts
 import { describe, expect, it } from 'vitest';
 
-import type { NativeBridge } from '../native';
+import type { NativeBridge } from './native';
 
 describe('NativeBridge interface', () => {
   it('should define required methods', () => {
     // Create a mock implementation to verify interface
     const mockBridge: NativeBridge = {
-      getPlatform: async () => 'electron',
+      getPlatform: () => Promise.resolve('electron'),
       sendNotification: () => {},
       isNative: () => true,
-      getAppVersion: async () => '1.0.0',
-      openExternal: async () => {},
+      getAppVersion: () => Promise.resolve('1.0.0'),
+      openExternal: () => Promise.resolve(),
     };
 
     expect(mockBridge.getPlatform).toBeDefined();
@@ -23,13 +23,13 @@ describe('NativeBridge interface', () => {
 
   it('should allow optional dialog methods', () => {
     const bridgeWithDialogs: NativeBridge = {
-      getPlatform: async () => 'electron',
+      getPlatform: () => Promise.resolve('electron'),
       sendNotification: () => {},
       isNative: () => true,
-      getAppVersion: async () => '1.0.0',
-      openExternal: async () => {},
-      showOpenDialog: async () => ['/path/to/file'],
-      showSaveDialog: async () => '/path/to/save',
+      getAppVersion: () => Promise.resolve('1.0.0'),
+      openExternal: () => Promise.resolve(),
+      showOpenDialog: () => Promise.resolve(['/path/to/file']),
+      showSaveDialog: () => Promise.resolve('/path/to/save'),
     };
 
     expect(bridgeWithDialogs.showOpenDialog).toBeDefined();
@@ -38,11 +38,11 @@ describe('NativeBridge interface', () => {
 
   it('should work without optional dialog methods', () => {
     const bridgeWithoutDialogs: NativeBridge = {
-      getPlatform: async () => 'web',
+      getPlatform: () => Promise.resolve('web'),
       sendNotification: () => {},
       isNative: () => false,
-      getAppVersion: async () => '1.0.0',
-      openExternal: async () => {},
+      getAppVersion: () => Promise.resolve('1.0.0'),
+      openExternal: () => Promise.resolve(),
     };
 
     expect(bridgeWithoutDialogs.showOpenDialog).toBeUndefined();
@@ -52,11 +52,11 @@ describe('NativeBridge interface', () => {
   describe('getPlatform', () => {
     it('should return platform string', async () => {
       const bridge: NativeBridge = {
-        getPlatform: async () => 'electron',
+        getPlatform: () => Promise.resolve('electron'),
         sendNotification: () => {},
         isNative: () => true,
-        getAppVersion: async () => '1.0.0',
-        openExternal: async () => {},
+        getAppVersion: () => Promise.resolve('1.0.0'),
+        openExternal: () => Promise.resolve(),
       };
 
       const platform = await bridge.getPlatform();
@@ -68,11 +68,11 @@ describe('NativeBridge interface', () => {
   describe('isNative', () => {
     it('should return boolean', () => {
       const bridge: NativeBridge = {
-        getPlatform: async () => 'electron',
+        getPlatform: () => Promise.resolve('electron'),
         sendNotification: () => {},
         isNative: () => true,
-        getAppVersion: async () => '1.0.0',
-        openExternal: async () => {},
+        getAppVersion: () => Promise.resolve('1.0.0'),
+        openExternal: () => Promise.resolve(),
       };
 
       expect(typeof bridge.isNative()).toBe('boolean');
@@ -82,16 +82,16 @@ describe('NativeBridge interface', () => {
   describe('showOpenDialog', () => {
     it('should accept options with filters', async () => {
       const bridge: NativeBridge = {
-        getPlatform: async () => 'electron',
+        getPlatform: () => Promise.resolve('electron'),
         sendNotification: () => {},
         isNative: () => true,
-        getAppVersion: async () => '1.0.0',
-        openExternal: async () => {},
-        showOpenDialog: async (options) => {
+        getAppVersion: () => Promise.resolve('1.0.0'),
+        openExternal: () => Promise.resolve(),
+        showOpenDialog: (options) => {
           expect(options.title).toBe('Select File');
           expect(options.filters).toEqual([{ name: 'Images', extensions: ['png', 'jpg'] }]);
           expect(options.multiple).toBe(true);
-          return ['/path/to/file.png'];
+          return Promise.resolve(['/path/to/file.png']);
         },
       };
 
@@ -106,12 +106,12 @@ describe('NativeBridge interface', () => {
 
     it('should return null when cancelled', async () => {
       const bridge: NativeBridge = {
-        getPlatform: async () => 'electron',
+        getPlatform: () => Promise.resolve('electron'),
         sendNotification: () => {},
         isNative: () => true,
-        getAppVersion: async () => '1.0.0',
-        openExternal: async () => {},
-        showOpenDialog: async () => null,
+        getAppVersion: () => Promise.resolve('1.0.0'),
+        openExternal: () => Promise.resolve(),
+        showOpenDialog: () => Promise.resolve(null),
       };
 
       const result = await bridge.showOpenDialog?.({});
@@ -122,15 +122,15 @@ describe('NativeBridge interface', () => {
   describe('showSaveDialog', () => {
     it('should accept options with defaultPath', async () => {
       const bridge: NativeBridge = {
-        getPlatform: async () => 'electron',
+        getPlatform: () => Promise.resolve('electron'),
         sendNotification: () => {},
         isNative: () => true,
-        getAppVersion: async () => '1.0.0',
-        openExternal: async () => {},
-        showSaveDialog: async (options) => {
+        getAppVersion: () => Promise.resolve('1.0.0'),
+        openExternal: () => Promise.resolve(),
+        showSaveDialog: (options) => {
           expect(options.title).toBe('Save File');
           expect(options.defaultPath).toBe('/default/path.txt');
-          return '/save/path.txt';
+          return Promise.resolve('/save/path.txt');
         },
       };
 
@@ -144,12 +144,12 @@ describe('NativeBridge interface', () => {
 
     it('should return null when cancelled', async () => {
       const bridge: NativeBridge = {
-        getPlatform: async () => 'electron',
+        getPlatform: () => Promise.resolve('electron'),
         sendNotification: () => {},
         isNative: () => true,
-        getAppVersion: async () => '1.0.0',
-        openExternal: async () => {},
-        showSaveDialog: async () => null,
+        getAppVersion: () => Promise.resolve('1.0.0'),
+        openExternal: () => Promise.resolve(),
+        showSaveDialog: () => Promise.resolve(null),
       };
 
       const result = await bridge.showSaveDialog?.({});

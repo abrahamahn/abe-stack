@@ -161,7 +161,7 @@ const STATEMENTS: string[] = [
   `CREATE UNIQUE INDEX IF NOT EXISTS idx_notification_prefs_user ON notification_preferences (user_id);`,
 ];
 
-async function pushSchema(): Promise<void> {
+export async function pushSchema(): Promise<void> {
   const connectionString = buildConnectionString();
   const db = createDbClient(connectionString);
 

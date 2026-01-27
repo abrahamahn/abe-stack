@@ -5,7 +5,7 @@
  * Data access layer for billing invoices table.
  */
 
-import { and, eq, gt, lt, or, select, insert, update } from '../../builder';
+import { and, eq, gt, lt, or, select, insert, update } from '../../builder/index';
 import {
   type Invoice,
   type InvoiceStatus,
@@ -13,7 +13,7 @@ import {
   type UpdateInvoice,
   INVOICE_COLUMNS,
   INVOICES_TABLE,
-} from '../../schema';
+} from '../../schema/index';
 import { toCamelCase, toSnakeCase } from '../../utils';
 
 import type { RawDb } from '../../client';
@@ -83,7 +83,7 @@ export function createInvoiceRepository(db: RawDb): InvoiceRepository {
       const result = await db.queryOne<Record<string, unknown>>(
         select(INVOICES_TABLE).where(eq('id', id)).toSql(),
       );
-      return result ? toCamelCase<Invoice>(result, INVOICE_COLUMNS) : null;
+      return result !== null ? toCamelCase<Invoice>(result, INVOICE_COLUMNS) : null;
     },
 
     async findByProviderInvoiceId(
@@ -95,7 +95,7 @@ export function createInvoiceRepository(db: RawDb): InvoiceRepository {
           .where(and(eq('provider', provider), eq('provider_invoice_id', providerInvoiceId)))
           .toSql(),
       );
-      return result ? toCamelCase<Invoice>(result, INVOICE_COLUMNS) : null;
+      return result !== null ? toCamelCase<Invoice>(result, INVOICE_COLUMNS) : null;
     },
 
     async findByUserId(
@@ -113,20 +113,20 @@ export function createInvoiceRepository(db: RawDb): InvoiceRepository {
       const conditions = [];
 
       // Apply filters
-      if (filters.userId) {
+      if (filters.userId !== undefined && filters.userId !== '') {
         conditions.push(eq('user_id', filters.userId));
       }
-      if (filters.subscriptionId) {
+      if (filters.subscriptionId !== undefined && filters.subscriptionId !== '') {
         conditions.push(eq('subscription_id', filters.subscriptionId));
       }
-      if (filters.status) {
+      if (filters.status !== undefined) {
         if (Array.isArray(filters.status)) {
           conditions.push(or(...filters.status.map((s) => eq('status', s))));
         } else {
           conditions.push(eq('status', filters.status));
         }
       }
-      if (filters.provider) {
+      if (filters.provider !== undefined) {
         conditions.push(eq('provider', filters.provider));
       }
 
@@ -135,7 +135,7 @@ export function createInvoiceRepository(db: RawDb): InvoiceRepository {
 
       if (conditions.length > 0) {
         const [firstCondition, ...restConditions] = conditions;
-        if (!firstCondition) {
+        if (firstCondition === undefined) {
           throw new Error('Failed to build invoice query conditions');
         }
         const whereCondition =
@@ -144,11 +144,16 @@ export function createInvoiceRepository(db: RawDb): InvoiceRepository {
       }
 
       // Cursor pagination
-      if (cursor) {
+      if (cursor !== undefined && cursor !== '') {
         const parts = cursor.split('_');
         const cursorDateStr = parts[0];
         const cursorId = parts[1];
-        if (cursorDateStr && cursorId) {
+        if (
+          cursorDateStr !== undefined &&
+          cursorDateStr !== '' &&
+          cursorId !== undefined &&
+          cursorId !== ''
+        ) {
           const cursorDate = new Date(cursorDateStr);
           if (direction === 'desc') {
             query = query.where(
@@ -174,16 +179,18 @@ export function createInvoiceRepository(db: RawDb): InvoiceRepository {
         .limit(limit + 1);
 
       const results = await db.query<Record<string, unknown>>(query.toSql());
-      const items = results.map((row) => toCamelCase<Invoice>(row, INVOICE_COLUMNS));
+      const items: Invoice[] = results.map((row) => toCamelCase<Invoice>(row, INVOICE_COLUMNS));
 
       const hasMore = items.length > limit;
       if (hasMore) {
         items.pop();
       }
 
-      const lastItem = items[items.length - 1];
+      const lastItem: Invoice | undefined = items[items.length - 1];
       const nextCursor =
-        hasMore && lastItem ? `${lastItem.createdAt.toISOString()}_${lastItem.id}` : null;
+        hasMore && lastItem !== undefined
+          ? `${lastItem.createdAt.toISOString()}_${lastItem.id}`
+          : null;
 
       return { items, nextCursor };
     },
@@ -193,7 +200,7 @@ export function createInvoiceRepository(db: RawDb): InvoiceRepository {
       const result = await db.queryOne<Record<string, unknown>>(
         insert(INVOICES_TABLE).values(snakeData).returningAll().toSql(),
       );
-      if (!result) {
+      if (result === null) {
         throw new Error('Failed to create invoice');
       }
       return toCamelCase<Invoice>(result, INVOICE_COLUMNS);
@@ -204,7 +211,7 @@ export function createInvoiceRepository(db: RawDb): InvoiceRepository {
       const result = await db.queryOne<Record<string, unknown>>(
         update(INVOICES_TABLE).set(snakeData).where(eq('id', id)).returningAll().toSql(),
       );
-      return result ? toCamelCase<Invoice>(result, INVOICE_COLUMNS) : null;
+      return result !== null ? toCamelCase<Invoice>(result, INVOICE_COLUMNS) : null;
     },
 
     async updateByProviderInvoiceId(
@@ -220,7 +227,7 @@ export function createInvoiceRepository(db: RawDb): InvoiceRepository {
           .returningAll()
           .toSql(),
       );
-      return result ? toCamelCase<Invoice>(result, INVOICE_COLUMNS) : null;
+      return result !== null ? toCamelCase<Invoice>(result, INVOICE_COLUMNS) : null;
     },
 
     async upsert(invoice: NewInvoice): Promise<Invoice> {
@@ -230,16 +237,23 @@ export function createInvoiceRepository(db: RawDb): InvoiceRepository {
         invoice.providerInvoiceId,
       );
 
-      if (existing) {
-        // Update existing invoice
-        const updated = await this.update(existing.id, {
+      if (existing !== null) {
+        // Update existing invoice - conditionally set optional fields
+        const updateData: UpdateInvoice = {
           status: invoice.status,
           amountDue: invoice.amountDue,
-          amountPaid: invoice.amountPaid,
-          paidAt: invoice.paidAt,
-          invoicePdfUrl: invoice.invoicePdfUrl,
-        });
-        return updated || existing;
+        };
+        if (invoice.amountPaid !== undefined) {
+          updateData.amountPaid = invoice.amountPaid;
+        }
+        if (invoice.paidAt !== undefined) {
+          updateData.paidAt = invoice.paidAt;
+        }
+        if (invoice.invoicePdfUrl !== undefined) {
+          updateData.invoicePdfUrl = invoice.invoicePdfUrl;
+        }
+        const updated = await this.update(existing.id, updateData);
+        return updated ?? existing;
       }
 
       // Create new invoice

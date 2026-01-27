@@ -15,20 +15,20 @@ export interface ResetPasswordFormProps {
   error?: string | null;
 }
 
-export function ResetPasswordForm({
+export const ResetPasswordForm = ({
   onResetPassword,
   onModeChange,
   isLoading,
   error,
   onSuccess,
   initialData,
-}: ResetPasswordFormProps): ReactElement {
+}: ResetPasswordFormProps): ReactElement => {
   const [password, setPassword] = useState('');
   const token = initialData?.token as string;
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    if (!onResetPassword || !token) return;
+    if (onResetPassword === undefined || token.length === 0) return;
 
     try {
       await onResetPassword({ token, password });
@@ -38,13 +38,13 @@ export function ResetPasswordForm({
     }
   };
 
-  if (!token) {
+  if (token.length === 0) {
     return (
       <div className="auth-form">
         <div className="auth-form-content text-center">
           <h2 className="auth-form-title text-danger">Invalid reset link</h2>
           <p className="auth-form-subtitle">This password reset link is invalid or has expired.</p>
-          {onModeChange ? (
+          {onModeChange !== undefined ? (
             <Button
               variant="secondary"
               onClick={() => {
@@ -87,15 +87,17 @@ export function ResetPasswordForm({
             disabled={isLoading}
           />
 
-          {error && <div className="auth-form-error">{error}</div>}
+          {error !== undefined && error !== null && error.length > 0 && (
+            <div className="auth-form-error">{error}</div>
+          )}
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Updating...' : 'Update password'}
+            {isLoading === true ? 'Updating...' : 'Update password'}
           </Button>
         </form>
 
         <div className="auth-form-footer">
-          {onModeChange ? (
+          {onModeChange !== undefined ? (
             <Button
               variant="text"
               onClick={() => {
@@ -112,4 +114,4 @@ export function ResetPasswordForm({
       </div>
     </div>
   );
-}
+};

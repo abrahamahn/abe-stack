@@ -38,7 +38,7 @@ const LOCK_DURATION_OPTIONS = [
   { value: '43200', label: '30 Days' },
 ];
 
-export function UserActionsMenu({
+export const UserActionsMenu = ({
   user,
   onUpdate,
   onLock,
@@ -47,7 +47,7 @@ export function UserActionsMenu({
   isLocking,
   isUnlocking,
   error,
-}: UserActionsMenuProps): JSX.Element {
+}: UserActionsMenuProps): JSX.Element => {
   // Edit form state
   const [editName, setEditName] = useState(user.name ?? '');
   const [editRole, setEditRole] = useState<UserRole>(user.role);
@@ -69,7 +69,7 @@ export function UserActionsMenu({
       const updates: { name?: string | null; role?: UserRole } = {};
 
       if (editName !== (user.name ?? '')) {
-        updates.name = editName || null;
+        updates.name = editName.length > 0 ? editName : null;
       }
       if (editRole !== user.role) {
         updates.role = editRole;
@@ -85,9 +85,9 @@ export function UserActionsMenu({
   const handleLockSubmit = useCallback(
     async (e: FormEvent) => {
       e.preventDefault();
-      if (!lockReason.trim()) return;
+      if (lockReason.trim().length === 0) return;
 
-      const duration = lockDuration ? Number(lockDuration) : undefined;
+      const duration = lockDuration.length > 0 ? Number(lockDuration) : undefined;
       await onLock(lockReason.trim(), duration);
       setLockReason('');
       setLockDuration('');
@@ -98,7 +98,7 @@ export function UserActionsMenu({
   const handleUnlockSubmit = useCallback(
     async (e: FormEvent) => {
       e.preventDefault();
-      if (!unlockReason.trim()) return;
+      if (unlockReason.trim().length === 0) return;
 
       await onUnlock(unlockReason.trim());
       setUnlockReason('');
@@ -108,7 +108,7 @@ export function UserActionsMenu({
 
   return (
     <div className="space-y-6">
-      {error && <Alert tone="danger">{error}</Alert>}
+      {error !== null && error.length > 0 && <Alert tone="danger">{error}</Alert>}
 
       {/* Edit User Section */}
       <Card>
@@ -209,7 +209,7 @@ export function UserActionsMenu({
                 />
               </div>
 
-              <Button type="submit" disabled={isAnyLoading || !unlockReason.trim()}>
+              <Button type="submit" disabled={isAnyLoading || unlockReason.trim().length === 0}>
                 {isUnlocking ? 'Unlocking...' : 'Unlock User'}
               </Button>
             </form>
@@ -275,7 +275,7 @@ export function UserActionsMenu({
               <Button
                 type="submit"
                 variant="secondary"
-                disabled={isAnyLoading || !lockReason.trim()}
+                disabled={isAnyLoading || lockReason.trim().length === 0}
               >
                 {isLocking ? 'Locking...' : 'Lock User'}
               </Button>
@@ -285,4 +285,4 @@ export function UserActionsMenu({
       )}
     </div>
   );
-}
+};

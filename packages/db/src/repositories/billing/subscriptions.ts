@@ -17,7 +17,7 @@ import {
   update,
   deleteFrom,
   raw,
-} from '../../builder';
+} from '../../builder/index';
 import {
   type NewSubscription,
   type Subscription,
@@ -25,7 +25,7 @@ import {
   type UpdateSubscription,
   SUBSCRIPTION_COLUMNS,
   SUBSCRIPTIONS_TABLE,
-} from '../../schema';
+} from '../../schema/index';
 import { toCamelCase, toSnakeCase, parseJsonb } from '../../utils';
 
 import type { RawDb } from '../../client';
@@ -108,7 +108,8 @@ export interface SubscriptionRepository {
 function transformSubscription(row: Record<string, unknown>): Subscription {
   const subscription = toCamelCase<Subscription>(row, SUBSCRIPTION_COLUMNS);
   // Parse JSONB metadata
-  subscription.metadata = parseJsonb(row.metadata as string | null) || {};
+  const parsedMetadata = parseJsonb(row['metadata'] as string | null) as Record<string, unknown> | null;
+  subscription.metadata = parsedMetadata ?? {};
   return subscription;
 }
 
@@ -126,7 +127,7 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
       const result = await db.queryOne<Record<string, unknown>>(
         select(SUBSCRIPTIONS_TABLE).where(eq('id', id)).toSql(),
       );
-      return result ? transformSubscription(result) : null;
+      return result !== null ? transformSubscription(result) : null;
     },
 
     async findByProviderSubscriptionId(
@@ -140,7 +141,7 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
           )
           .toSql(),
       );
-      return result ? transformSubscription(result) : null;
+      return result !== null ? transformSubscription(result) : null;
     },
 
     async findActiveByUserId(userId: string): Promise<Subscription | null> {
@@ -151,7 +152,7 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
           .limit(1)
           .toSql(),
       );
-      return result ? transformSubscription(result) : null;
+      return result !== null ? transformSubscription(result) : null;
     },
 
     async findByUserId(userId: string): Promise<Subscription[]> {
@@ -172,20 +173,20 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
       const conditions = [];
 
       // Apply filters
-      if (filters.userId) {
+      if (filters.userId !== undefined && filters.userId !== '') {
         conditions.push(eq('user_id', filters.userId));
       }
-      if (filters.planId) {
+      if (filters.planId !== undefined && filters.planId !== '') {
         conditions.push(eq('plan_id', filters.planId));
       }
-      if (filters.status) {
+      if (filters.status !== undefined) {
         if (Array.isArray(filters.status)) {
           conditions.push(inArray('status', filters.status));
         } else {
           conditions.push(eq('status', filters.status));
         }
       }
-      if (filters.provider) {
+      if (filters.provider !== undefined) {
         conditions.push(eq('provider', filters.provider));
       }
       if (filters.cancelAtPeriodEnd !== undefined) {
@@ -197,7 +198,7 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
 
       if (conditions.length > 0) {
         const [firstCondition, ...restConditions] = conditions;
-        if (!firstCondition) {
+        if (firstCondition === undefined) {
           throw new Error('Failed to build subscription query conditions');
         }
         const whereCondition =
@@ -206,11 +207,16 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
       }
 
       // Cursor pagination
-      if (cursor) {
+      if (cursor !== undefined && cursor !== '') {
         const parts = cursor.split('_');
         const cursorDateStr = parts[0];
         const cursorId = parts[1];
-        if (cursorDateStr && cursorId) {
+        if (
+          cursorDateStr !== undefined &&
+          cursorDateStr !== '' &&
+          cursorId !== undefined &&
+          cursorId !== ''
+        ) {
           const cursorDate = new Date(cursorDateStr);
           if (direction === 'desc') {
             query = query.where(
@@ -245,7 +251,7 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
 
       const lastItem = items[items.length - 1];
       const nextCursor =
-        hasMore && lastItem ? `${lastItem.createdAt.toISOString()}_${lastItem.id}` : null;
+        hasMore && lastItem !== undefined ? `${lastItem.createdAt.toISOString()}_${lastItem.id}` : null;
 
       return { items, nextCursor };
     },
@@ -256,13 +262,13 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
         SUBSCRIPTION_COLUMNS,
       );
       // Ensure metadata is JSON stringified
-      if (subscription.metadata) {
-        snakeData.metadata = JSON.stringify(subscription.metadata);
+      if (subscription.metadata !== undefined) {
+        snakeData['metadata'] = JSON.stringify(subscription.metadata);
       }
       const result = await db.queryOne<Record<string, unknown>>(
         insert(SUBSCRIPTIONS_TABLE).values(snakeData).returningAll().toSql(),
       );
-      if (!result) {
+      if (result === null) {
         throw new Error('Failed to create subscription');
       }
       return transformSubscription(result);
@@ -274,13 +280,13 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
         SUBSCRIPTION_COLUMNS,
       );
       // Ensure metadata is JSON stringified
-      if (data.metadata) {
-        snakeData.metadata = JSON.stringify(data.metadata);
+      if (data.metadata !== undefined) {
+        snakeData['metadata'] = JSON.stringify(data.metadata);
       }
       const result = await db.queryOne<Record<string, unknown>>(
         update(SUBSCRIPTIONS_TABLE).set(snakeData).where(eq('id', id)).returningAll().toSql(),
       );
-      return result ? transformSubscription(result) : null;
+      return result !== null ? transformSubscription(result) : null;
     },
 
     async updateByProviderSubscriptionId(
@@ -292,8 +298,8 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
         data as unknown as Record<string, unknown>,
         SUBSCRIPTION_COLUMNS,
       );
-      if (data.metadata) {
-        snakeData.metadata = JSON.stringify(data.metadata);
+      if (data.metadata !== undefined) {
+        snakeData['metadata'] = JSON.stringify(data.metadata);
       }
       const result = await db.queryOne<Record<string, unknown>>(
         update(SUBSCRIPTIONS_TABLE)
@@ -304,7 +310,7 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
           .returningAll()
           .toSql(),
       );
-      return result ? transformSubscription(result) : null;
+      return result !== null ? transformSubscription(result) : null;
     },
 
     async delete(id: string): Promise<boolean> {
@@ -350,7 +356,7 @@ export function createSubscriptionRepository(db: RawDb): SubscriptionRepository 
           .where(and(eq('plan_id', planId), inArray('status', ACTIVE_STATUSES)))
           .toSql(),
       );
-      return result ? Number(result.count) : 0;
+      return result !== null ? Number(result.count) : 0;
     },
   };
 }

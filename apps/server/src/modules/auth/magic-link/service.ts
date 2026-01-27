@@ -29,7 +29,7 @@ import {
     type EmailService,
     type Repositories,
 } from '@infrastructure';
-import { EmailSendError, InvalidTokenError, TooManyRequestsError } from '@shared';
+import { EmailSendError, InvalidTokenError, TooManyRequestsError } from '@abe-stack/core';
 
 import { createAccessToken, createAuthResponse, createRefreshTokenFamily } from '../utils';
 

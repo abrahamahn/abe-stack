@@ -20,6 +20,14 @@ Object.defineProperty(window, 'matchMedia', {
   }),
 });
 
+// Create root element for main.tsx tests
+// This must exist before main.tsx is imported
+if (document.getElementById('root') === null) {
+  const rootElement = document.createElement('div');
+  rootElement.id = 'root';
+  document.body.appendChild(rootElement);
+}
+
 afterEach(() => {
   // Clean up React Testing Library DOM
   cleanup();

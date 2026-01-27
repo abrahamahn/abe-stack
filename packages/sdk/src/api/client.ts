@@ -60,7 +60,11 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
   const request = async <T>(path: string, options?: RequestInit): Promise<T> => {
     const headers = new Headers(options?.headers);
     headers.set('Content-Type', 'application/json');
-    addAuthHeader(headers, config.getToken?.());
+
+    const token = config.getToken?.();
+    if (token !== null && token !== undefined) {
+      addAuthHeader(headers, token);
+    }
 
     const url = `${baseUrl}${API_PREFIX}${path}`;
 
@@ -71,20 +75,29 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
         headers,
         credentials: 'include', // Include cookies for refresh token
       });
-    } catch (error) {
+    } catch (error: unknown) {
       // Network error (offline, DNS failure, etc.)
-      throw new NetworkError(
-        `Failed to fetch ${options?.method ?? 'GET'} ${path}`,
-        error instanceof Error ? error : undefined,
-      );
+      const errorMessage = `Failed to fetch ${options?.method ?? 'GET'} ${path}`;
+      const originalError = error instanceof Error ? error : new Error(String(error));
+      throw new NetworkError(errorMessage, originalError);
     }
 
     const data = (await response.json().catch((_parseError: unknown) => {
       return {};
-    })) as ApiErrorBody & Record<string, unknown>;
+    })) as Record<string, unknown>;
 
     if (!response.ok) {
-      throw createApiError(response.status, data);
+      const errorBody: ApiErrorBody = {};
+      if (typeof data['message'] === 'string') {
+        errorBody.message = data['message'];
+      }
+      if (typeof data['code'] === 'string') {
+        errorBody.code = data['code'];
+      }
+      if (typeof data['details'] === 'object' && data['details'] !== null) {
+        errorBody.details = data['details'] as Record<string, unknown>;
+      }
+      throw createApiError(response.status, errorBody);
     }
 
     return data as T;
@@ -150,6 +163,7 @@ export function createApiClient(config: ApiClientConfig): ApiClient {
       return request<OAuthConnectionsResponse>('/auth/oauth/connections');
     },
     async unlinkOAuthProvider(provider: OAuthProvider): Promise<OAuthUnlinkResponse> {
+      // OAuthProvider is already a string literal union type
       return request<OAuthUnlinkResponse>(`/auth/oauth/${provider}/unlink`, {
         method: 'DELETE',
       });

@@ -143,10 +143,11 @@ export class UndoRedoStack<T = unknown> {
    * This clears the redo stack.
    */
   push(data: T, groupId?: string): string {
+    const finalGroupId = groupId ?? (this.activeGroupId !== null ? this.activeGroupId : undefined);
     const operation: UndoableOperation<T> = {
       id: this.generateId(),
       data,
-      groupId: groupId ?? this.activeGroupId ?? undefined,
+      ...(finalGroupId !== undefined && { groupId: finalGroupId }),
       timestamp: Date.now(),
     };
 
@@ -177,18 +178,18 @@ export class UndoRedoStack<T = unknown> {
 
     // Get the last operation
     const lastOperation = this.undoStack[this.undoStack.length - 1];
-    if (!lastOperation) {
+    if (lastOperation === undefined) {
       return null;
     }
 
     // If it has a group ID, undo all operations in that group
-    if (lastOperation.groupId) {
+    if (lastOperation.groupId !== undefined && lastOperation.groupId.length > 0) {
       return this.undoGroup(lastOperation.groupId);
     }
 
     // Undo single operation
     const operation = this.undoStack.pop();
-    if (!operation) {
+    if (operation === undefined) {
       return null;
     }
 
@@ -211,18 +212,18 @@ export class UndoRedoStack<T = unknown> {
 
     // Get the last undone operation
     const lastOperation = this.redoStack[this.redoStack.length - 1];
-    if (!lastOperation) {
+    if (lastOperation === undefined) {
       return null;
     }
 
     // If it has a group ID, redo all operations in that group
-    if (lastOperation.groupId) {
+    if (lastOperation.groupId !== undefined && lastOperation.groupId.length > 0) {
       return this.redoGroup(lastOperation.groupId);
     }
 
     // Redo single operation
     const operation = this.redoStack.pop();
-    if (!operation) {
+    if (operation === undefined) {
       return null;
     }
 
@@ -366,7 +367,7 @@ export class UndoRedoStack<T = unknown> {
       }
 
       const operation = this.undoStack.pop();
-      if (operation) {
+      if (operation !== undefined) {
         operations.push(operation);
         this.onUndo(operation);
       }
@@ -375,7 +376,7 @@ export class UndoRedoStack<T = unknown> {
     // Push to redo stack in reverse order (so redo applies in original order)
     for (let i = operations.length - 1; i >= 0; i--) {
       const op = operations[i];
-      if (op) {
+      if (op !== undefined) {
         this.redoStack.push(op);
       }
     }
@@ -400,7 +401,7 @@ export class UndoRedoStack<T = unknown> {
       }
 
       const operation = this.redoStack.pop();
-      if (operation) {
+      if (operation !== undefined) {
         operations.push(operation);
       }
     }

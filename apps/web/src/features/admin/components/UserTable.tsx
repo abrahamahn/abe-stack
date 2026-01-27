@@ -36,7 +36,7 @@ function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString();
 }
 
-export function UserTable({ data, isLoading, page, onPageChange }: UserTableProps): JSX.Element {
+export const UserTable = ({ data, isLoading, page, onPageChange }: UserTableProps): JSX.Element => {
   const navigate = useNavigate();
 
   const handleRowClick = (user: AdminUser): void => {
@@ -53,7 +53,15 @@ export function UserTable({ data, isLoading, page, onPageChange }: UserTableProp
     );
   }
 
-  if (!data || data.data.length === 0) {
+  if (data === undefined) {
+    return (
+      <div className="text-center py-12">
+        <Text tone="muted">No users found</Text>
+      </div>
+    );
+  }
+
+  if (data.data.length === 0) {
     return (
       <div className="text-center py-12">
         <Text tone="muted">No users found</Text>
@@ -75,7 +83,7 @@ export function UserTable({ data, isLoading, page, onPageChange }: UserTableProp
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.data.map((user) => (
+          {data.data.map((user: AdminUser) => (
             <TableRow
               key={user.id}
               className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -123,4 +131,4 @@ export function UserTable({ data, isLoading, page, onPageChange }: UserTableProp
       </div>
     </div>
   );
-}
+};

@@ -15,15 +15,13 @@ import { createSettingsApi, type UpdateProfileRequest, type User } from '../api'
 
 let settingsApi: ReturnType<typeof createSettingsApi> | null = null;
 const apiBaseUrl =
-  typeof import.meta.env.VITE_API_URL === 'string' ? import.meta.env.VITE_API_URL : '';
+  typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
 
 function getSettingsApi(): ReturnType<typeof createSettingsApi> {
-  if (!settingsApi) {
-    settingsApi = createSettingsApi({
-      baseUrl: apiBaseUrl,
-      getToken: (): string | null => localStorage.getItem('accessToken'),
-    });
-  }
+  settingsApi ??= createSettingsApi({
+    baseUrl: apiBaseUrl,
+    getToken: (): string | null => localStorage.getItem('accessToken'),
+  });
   return settingsApi;
 }
 
@@ -57,9 +55,11 @@ export function useProfileUpdate(options?: UseProfileUpdateOptions): UseProfileU
       // Invalidate user queries to refresh the cached data
       queryCache.invalidateQuery(['user', 'me']);
       queryCache.invalidateQuery(['users']);
-      options?.onSuccess?.(user);
+      if (options?.onSuccess !== undefined) {
+        options.onSuccess(user);
+      }
     },
-    onError: options?.onError,
+    ...(options?.onError !== undefined && { onError: options.onError }),
   });
 
   return {

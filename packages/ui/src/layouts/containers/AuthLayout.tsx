@@ -10,7 +10,7 @@ type AuthLayoutProps = {
   children: ReactNode;
 };
 
-export function AuthLayout({ title, description, children }: AuthLayoutProps): ReactElement {
+export const AuthLayout = ({ title, description, children }: AuthLayoutProps): ReactElement => {
   return (
     <div className="auth-layout">
       <Container size="sm">
@@ -22,4 +22,4 @@ export function AuthLayout({ title, description, children }: AuthLayoutProps): R
       </Container>
     </div>
   );
-}
+};

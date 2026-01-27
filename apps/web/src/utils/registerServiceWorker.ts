@@ -164,20 +164,20 @@ export async function registerServiceWorker(
       },
 
       async checkForUpdates(): Promise<void> {
-        if (registration) {
+        if (registration !== null) {
           await registration.update();
         }
       },
 
       async skipWaiting(): Promise<void> {
         const waiting = registration?.waiting;
-        if (waiting) {
+        if (waiting !== null && waiting !== undefined) {
           await postMessageToSW(waiting, { type: 'SKIP_WAITING' });
         }
       },
 
       async unregister(): Promise<boolean> {
-        if (registration) {
+        if (registration !== null) {
           const result = await registration.unregister();
           if (result) {
             registration = null;
@@ -190,7 +190,7 @@ export async function registerServiceWorker(
 
       async getVersion(): Promise<string | null> {
         const active = registration?.active;
-        if (active) {
+        if (active !== null && active !== undefined) {
           try {
             const response = (await postMessageToSW(active, { type: 'GET_VERSION' })) as {
               version: string;
@@ -205,7 +205,7 @@ export async function registerServiceWorker(
 
       async clearCache(): Promise<void> {
         const active = registration?.active;
-        if (active) {
+        if (active !== null && active !== undefined) {
           await postMessageToSW(active, { type: 'CLEAR_CACHE' });
         }
       },
@@ -221,26 +221,26 @@ export async function registerServiceWorker(
       updateStatus('registered');
 
       // Handle initial installation
-      if (registration.installing) {
+      if (registration.installing !== null) {
         trackInstallation(registration.installing);
       }
 
       // Handle updates
       registration.addEventListener('updatefound', () => {
         const newWorker = registration?.installing;
-        if (newWorker) {
+        if (newWorker !== null && newWorker !== undefined) {
           trackInstallation(newWorker);
         }
       });
 
       // Check if already active
-      if (registration.active) {
+      if (registration.active !== null) {
         updateStatus('activated');
         callbacks.onSuccess?.(registration);
       }
 
       // Check for waiting worker (update available)
-      if (registration.waiting) {
+      if (registration.waiting !== null) {
         callbacks.onUpdate?.({
           updateAvailable: true,
           waiting: true,
@@ -262,7 +262,7 @@ export async function registerServiceWorker(
         case 'installed':
           updateStatus('installed');
           // Check if this is an update
-          if (navigator.serviceWorker.controller) {
+          if (navigator.serviceWorker.controller !== null) {
             callbacks.onUpdate?.({
               updateAvailable: true,
               waiting: true,
@@ -275,7 +275,7 @@ export async function registerServiceWorker(
           break;
         case 'activated':
           updateStatus('activated');
-          if (registration) {
+          if (registration !== null) {
             callbacks.onSuccess?.(registration);
           }
           break;
@@ -332,7 +332,7 @@ export async function getServiceWorkerRegistration(): Promise<ServiceWorkerRegis
 export async function checkServiceWorkerUpdate(): Promise<ServiceWorkerUpdateInfo> {
   const registration = await getServiceWorkerRegistration();
 
-  if (!registration) {
+  if (registration === null) {
     return {
       updateAvailable: false,
       waiting: false,

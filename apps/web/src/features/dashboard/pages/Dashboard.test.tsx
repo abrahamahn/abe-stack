@@ -4,7 +4,7 @@ import { MemoryRouter } from '@abe-stack/ui';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { DashboardPage } from '../Dashboard';
+import { DashboardPage } from './Dashboard';
 
 // Mock useNavigate
 const mockNavigate = vi.fn();

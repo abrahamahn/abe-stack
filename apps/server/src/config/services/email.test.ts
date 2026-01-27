@@ -1,7 +1,9 @@
 // apps/server/src/config/services/email.test.ts
-import type { FullEnv } from '@abe-stack/core/config';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+
 import { loadEmailConfig } from './email';
+
+import type { FullEnv } from '@abe-stack/core/config';
 
 describe('Email Configuration', () => {
   beforeEach(() => {

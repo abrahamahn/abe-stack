@@ -7,7 +7,7 @@ import userEvent from '@testing-library/user-event';
 import { useState, type ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
-function RadioGroupHarness(): ReactElement {
+const RadioGroupHarness = (): ReactElement => {
   const [value, setValue] = useState<'a' | 'b' | 'c'>('a');
   return (
     <RadioGroup name="group" aria-label="Options">
@@ -37,7 +37,7 @@ function RadioGroupHarness(): ReactElement {
       />
     </RadioGroup>
   );
-}
+};
 
 describe('RadioGroup', () => {
   describe('happy path', () => {

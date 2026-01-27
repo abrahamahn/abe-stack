@@ -1,8 +1,8 @@
 // packages/db/src/builder/__tests__/select.test.ts
 import { describe, expect, test } from 'vitest';
 
-import { select } from '../select';
-import { fragment, raw } from '../types';
+import { select } from './select';
+import { fragment, raw } from './types';
 
 describe('Select Query Builder', () => {
   describe('select', () => {

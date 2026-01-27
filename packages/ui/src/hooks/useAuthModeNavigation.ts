@@ -40,8 +40,8 @@ export interface AuthModeNavigation {
 const DEFAULT_AUTH_MODE_ROUTES: Record<AuthMode, string> = {
   login: '/login',
   register: '/register',
-  'forgot-password': '/auth?mode=forgot-password',
-  'reset-password': '/auth?mode=reset-password',
+  ['forgot-password']: '/auth?mode=forgot-password',
+  ['reset-password']: '/auth?mode=reset-password',
 };
 
 /**

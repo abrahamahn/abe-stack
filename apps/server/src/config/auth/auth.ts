@@ -1,8 +1,9 @@
 // apps/server/src/config/auth/auth.ts
-import type { AuthConfig, AuthStrategy, OAuthProviderConfig } from '@abe-stack/core';
 import { BaseError } from '@abe-stack/core';
-import type { FullEnv } from '@abe-stack/core/config';
 import { getList } from '@abe-stack/core/config';
+
+import type { AuthConfig, AuthStrategy, OAuthProviderConfig } from '@abe-stack/core';
+import type { FullEnv } from '@abe-stack/core/config';
 
 const WEAK_SECRETS = new Set([
   'secret',
@@ -51,6 +52,62 @@ export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
 
   const buildUrl = (path: string): string => `${apiBaseUrl.replace(/\/$/, '')}${path}`;
 
+  // Helper to build OAuth config object conditionally
+  const buildOAuthProviders = (): AuthConfig['oauth'] => {
+    const providers: AuthConfig['oauth'] = {};
+
+    const googleConfig = createOAuth(
+      env.GOOGLE_CLIENT_ID,
+      env.GOOGLE_CLIENT_SECRET,
+      env.GOOGLE_CALLBACK_URL ?? buildUrl('/api/auth/oauth/google/callback'),
+    );
+    if (googleConfig !== undefined) {
+      providers.google = googleConfig;
+    }
+
+    const githubConfig = createOAuth(
+      env.GITHUB_CLIENT_ID,
+      env.GITHUB_CLIENT_SECRET,
+      env.GITHUB_CALLBACK_URL ?? buildUrl('/api/auth/oauth/github/callback'),
+    );
+    if (githubConfig !== undefined) {
+      providers.github = githubConfig;
+    }
+
+    const facebookConfig = createOAuth(
+      env.FACEBOOK_CLIENT_ID,
+      env.FACEBOOK_CLIENT_SECRET,
+      env.FACEBOOK_CALLBACK_URL ?? buildUrl('/api/auth/oauth/facebook/callback'),
+    );
+    if (facebookConfig !== undefined) {
+      providers.facebook = facebookConfig;
+    }
+
+    if (env.MICROSOFT_CLIENT_ID !== undefined && env.MICROSOFT_CLIENT_ID !== '') {
+      providers.microsoft = {
+        clientId: env.MICROSOFT_CLIENT_ID,
+        clientSecret: env.MICROSOFT_CLIENT_SECRET ?? '',
+        callbackUrl: env.MICROSOFT_CALLBACK_URL ?? buildUrl('/api/auth/oauth/microsoft/callback'),
+        tenantId: env.MICROSOFT_TENANT_ID ?? 'common',
+      };
+    }
+
+    if (env.APPLE_CLIENT_ID !== undefined && env.APPLE_CLIENT_ID !== '') {
+      providers.apple = {
+        clientId: env.APPLE_CLIENT_ID,
+        clientSecret: '',
+        callbackUrl: env.APPLE_CALLBACK_URL ?? buildUrl('/api/auth/oauth/apple/callback'),
+        teamId: env.APPLE_TEAM_ID ?? '',
+        keyId: env.APPLE_KEY_ID ?? '',
+        privateKey: (env.APPLE_PRIVATE_KEY_BASE64 !== undefined && env.APPLE_PRIVATE_KEY_BASE64 !== '')
+          ? Buffer.from(env.APPLE_PRIVATE_KEY_BASE64, 'base64').toString('utf8')
+          : (env.APPLE_PRIVATE_KEY ?? ''),
+      };
+    }
+
+    return providers;
+  };
+
   const config: AuthConfig = {
     strategies: (env.AUTH_STRATEGIES ?? 'local')
       .split(',')
@@ -59,7 +116,7 @@ export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
 
     jwt: {
       secret: jwtSecret,
-      previousSecret: env.JWT_SECRET_PREVIOUS,
+      ...(env.JWT_SECRET_PREVIOUS !== undefined && { previousSecret: env.JWT_SECRET_PREVIOUS }),
       accessTokenExpiry: env.ACCESS_TOKEN_EXPIRY,
       issuer: env.JWT_ISSUER,
       audience: env.JWT_AUDIENCE,
@@ -126,44 +183,7 @@ export function loadAuthConfig(env: FullEnv, apiBaseUrl: string): AuthConfig {
       path: '/',
     },
 
-    oauth: {
-      google: createOAuth(
-        env.GOOGLE_CLIENT_ID,
-        env.GOOGLE_CLIENT_SECRET,
-        env.GOOGLE_CALLBACK_URL ?? buildUrl('/api/auth/oauth/google/callback'),
-      ),
-      github: createOAuth(
-        env.GITHUB_CLIENT_ID,
-        env.GITHUB_CLIENT_SECRET,
-        env.GITHUB_CALLBACK_URL ?? buildUrl('/api/auth/oauth/github/callback'),
-      ),
-      facebook: createOAuth(
-        env.FACEBOOK_CLIENT_ID,
-        env.FACEBOOK_CLIENT_SECRET,
-        env.FACEBOOK_CALLBACK_URL ?? buildUrl('/api/auth/oauth/facebook/callback'),
-      ),
-      microsoft: env.MICROSOFT_CLIENT_ID !== undefined && env.MICROSOFT_CLIENT_ID !== ''
-        ? {
-            clientId: env.MICROSOFT_CLIENT_ID,
-            clientSecret: env.MICROSOFT_CLIENT_SECRET ?? '',
-            callbackUrl:
-              env.MICROSOFT_CALLBACK_URL ?? buildUrl('/api/auth/oauth/microsoft/callback'),
-            tenantId: env.MICROSOFT_TENANT_ID ?? 'common',
-          }
-        : undefined,
-      ...(env.APPLE_CLIENT_ID !== undefined && env.APPLE_CLIENT_ID !== '' && {
-        apple: {
-          clientId: env.APPLE_CLIENT_ID,
-          clientSecret: '',
-          callbackUrl: env.APPLE_CALLBACK_URL ?? buildUrl('/api/auth/oauth/apple/callback'),
-          teamId: env.APPLE_TEAM_ID ?? '',
-          keyId: env.APPLE_KEY_ID ?? '',
-          privateKey: (env.APPLE_PRIVATE_KEY_BASE64 !== undefined && env.APPLE_PRIVATE_KEY_BASE64 !== '')
-            ? Buffer.from(env.APPLE_PRIVATE_KEY_BASE64, 'base64').toString('utf8')
-            : (env.APPLE_PRIVATE_KEY ?? ''),
-        },
-      }),
-    },
+    oauth: buildOAuthProviders(),
 
     magicLink: {
       tokenExpiryMinutes: env.MAGIC_LINK_EXPIRY_MINUTES,

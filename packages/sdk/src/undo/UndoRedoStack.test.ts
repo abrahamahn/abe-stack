@@ -1,7 +1,7 @@
 // packages/sdk/src/undo/__tests__/UndoRedoStack.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
-import { UndoRedoStack, createUndoRedoStack } from '../UndoRedoStack.js';
+import { UndoRedoStack, createUndoRedoStack } from '../UndoRedoStack';
 
 interface TestOperation {
   type: 'add' | 'remove' | 'update';
@@ -55,7 +55,7 @@ describe('UndoRedoStack', () => {
 
     it('should increment checkpoint on push', () => {
       const stack = new UndoRedoStack<TestOperation>();
-      const initialCheckpoint = stack.getCheckpoint();
+      const initialCheckpoint: number = stack.getCheckpoint();
 
       stack.push({ type: 'add', entityId: '1', value: 'test' });
 
@@ -109,7 +109,7 @@ describe('UndoRedoStack', () => {
     it('should increment checkpoint on undo', () => {
       const stack = new UndoRedoStack<TestOperation>();
       stack.push({ type: 'add', entityId: '1', value: 'test' });
-      const checkpointAfterPush = stack.getCheckpoint();
+      const checkpointAfterPush: number = stack.getCheckpoint();
 
       stack.undo();
 
@@ -167,7 +167,7 @@ describe('UndoRedoStack', () => {
       const stack = new UndoRedoStack<TestOperation>();
       stack.push({ type: 'add', entityId: '1', value: 'test' });
       stack.undo();
-      const checkpointAfterUndo = stack.getCheckpoint();
+      const checkpointAfterUndo: number = stack.getCheckpoint();
 
       stack.redo();
 
@@ -402,7 +402,7 @@ describe('UndoRedoStack', () => {
     it('should increment checkpoint', () => {
       const stack = new UndoRedoStack<TestOperation>();
       stack.push({ type: 'add', entityId: '1', value: 'test' });
-      const checkpointBefore = stack.getCheckpoint();
+      const checkpointBefore: number = stack.getCheckpoint();
 
       stack.clear();
 

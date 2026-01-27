@@ -32,7 +32,11 @@ export default [
       '**/.github/**',
       '**/tooling/scripts/**',
       '**/tooling/lint/**',
-      '**/__tests__/e2e/**',
+      '**/__tests__/**',
+      '**/*.test.ts',
+      '**/*.test.tsx',
+      '**/*.spec.ts',
+      '**/*.spec.tsx',
       '**/vite.config.ts',
       '**/vitest.config.js',
       '**/vitest.config.ts',
@@ -237,13 +241,27 @@ export default [
           format: null,
         },
         {
-          // Allow kebab-case for headers/configs in objects/types (via filter)
+          // Allow numeric strings (e.g., HTTP status codes '200', '404')
+          selector: ['objectLiteralProperty', 'typeProperty'],
+          format: null,
+          filter: {
+            regex: '^[0-9]+$',
+            match: true,
+          },
+        },
+        {
+          // Allow snake_case, kebab-case for external APIs (OAuth, etc.)
+          selector: ['objectLiteralProperty', 'typeProperty'],
+          format: null,
+          filter: {
+            regex: '[_-]',
+            match: true,
+          },
+        },
+        {
+          // Standard camelCase/PascalCase for all other properties
           selector: ['objectLiteralProperty', 'typeProperty'],
           format: ['camelCase', 'PascalCase'],
-          filter: {
-            regex: '[- ]',
-            match: false,
-          },
           leadingUnderscore: 'allow',
         },
       ],

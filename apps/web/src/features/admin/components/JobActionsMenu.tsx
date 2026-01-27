@@ -27,14 +27,14 @@ export interface JobActionsMenuProps {
 // Component
 // ============================================================================
 
-export function JobActionsMenu({
+export const JobActionsMenu = ({
   jobId,
   status,
   onRetry,
   onCancel,
   isRetrying = false,
   isCancelling = false,
-}: JobActionsMenuProps): JSX.Element {
+}: JobActionsMenuProps): JSX.Element => {
   const canRetry = status === 'failed' || status === 'dead_letter';
   const canCancel = status === 'pending' || status === 'processing';
 
@@ -82,4 +82,4 @@ export function JobActionsMenu({
       )}
     </Dropdown>
   );
-}
+};

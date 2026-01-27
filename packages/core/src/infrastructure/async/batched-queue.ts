@@ -1,5 +1,5 @@
-// packages/core/src/infrastructure/async/BatchedQueue.ts
-import { DeferredPromise } from './DeferredPromise';
+// packages/core/src/infrastructure/async/batched-queue.ts
+import { DeferredPromise } from './deferred-promise';
 
 /**
  * Configuration options for BatchedQueue.

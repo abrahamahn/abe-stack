@@ -90,7 +90,7 @@ export class DeleteBuilder implements QueryBuilder {
     }
 
     // WHERE clause
-    if (this._where && this._where.text) {
+    if (this._where !== null && this._where.text !== '') {
       parts.push({ text: `WHERE ${this._where.text}`, values: [...this._where.values] });
     }
 

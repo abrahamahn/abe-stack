@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { describe, it, expect } from 'vitest';
 
-import { RightSidebarLayout } from '../RightSidebarLayout';
+import { RightSidebarLayout } from './RightSidebarLayout';
 
 describe('RightSidebarLayout', () => {
   describe('Basic Rendering', () => {
@@ -81,7 +81,7 @@ describe('RightSidebarLayout', () => {
     it('uses default width', () => {
       render(<RightSidebarLayout data-testid="sidebar">Content</RightSidebarLayout>);
       const sidebar = screen.getByTestId('sidebar');
-      expect(sidebar).toHaveStyle({ '--right-sidebar-width': '20rem' });
+      expect(sidebar).toHaveStyle({ ['--right-sidebar-width']: '20rem' });
     });
 
     it('accepts string width', () => {
@@ -90,7 +90,7 @@ describe('RightSidebarLayout', () => {
           Content
         </RightSidebarLayout>,
       );
-      expect(screen.getByTestId('sidebar')).toHaveStyle({ '--right-sidebar-width': '30rem' });
+      expect(screen.getByTestId('sidebar')).toHaveStyle({ ['--right-sidebar-width']: '30rem' });
     });
 
     it('converts number width to pixels', () => {
@@ -99,7 +99,7 @@ describe('RightSidebarLayout', () => {
           Content
         </RightSidebarLayout>,
       );
-      expect(screen.getByTestId('sidebar')).toHaveStyle({ '--right-sidebar-width': '400px' });
+      expect(screen.getByTestId('sidebar')).toHaveStyle({ ['--right-sidebar-width']: '400px' });
     });
   });
 
@@ -189,7 +189,7 @@ describe('RightSidebarLayout', () => {
       );
       const sidebar = screen.getByTestId('sidebar');
       expect(sidebar).toHaveStyle({
-        '--right-sidebar-width': '25rem',
+        ['--right-sidebar-width']: '25rem',
         padding: '16px',
         overflow: 'auto',
       });

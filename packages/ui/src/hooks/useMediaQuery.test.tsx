@@ -3,7 +3,7 @@
 import { act, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { useMediaQuery } from '../useMediaQuery';
+import { useMediaQuery } from './useMediaQuery';
 
 import type { ReactElement } from 'react';
 
@@ -53,10 +53,10 @@ function createMatchMedia(initialMatches: boolean): {
   };
 }
 
-function MediaQueryHarness(props: { query: string }): ReactElement {
+const MediaQueryHarness = (props: { query: string }): ReactElement => {
   const matches = useMediaQuery(props.query);
   return <span data-testid="matches">{String(matches)}</span>;
-}
+};
 
 describe('useMediaQuery', () => {
   it('reflects matchMedia results and updates on change', () => {

@@ -3,11 +3,13 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, useTheme } from '@theme/provider';
-import React from 'react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
+import type { ReactElement } from 'react';
+
 // Helper component to access theme context
-function ThemeConsumer(): React.ReactElement {
+// eslint-disable-next-line @typescript-eslint/naming-convention
+function ThemeConsumer(): ReactElement {
   const { mode, cycleMode, isDark, isLight, resolvedTheme, setMode } = useTheme();
   return (
     <div>

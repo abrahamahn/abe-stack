@@ -6,9 +6,10 @@ import {
   RegisterForm,
   ResetPasswordForm,
 } from '@auth/components';
-import { renderWithProviders } from '../../../../__tests__/utils';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+
+import { renderWithProviders } from './../../../__tests__/utils';
 
 import type { ReactElement } from 'react';
 

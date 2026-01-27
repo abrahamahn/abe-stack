@@ -13,7 +13,12 @@
  * const users = await db.query<User>(select('users').where(eq('active', true)));
  */
 
-import postgres, { type Sql, type TransactionSql } from 'postgres';
+import postgres, {
+  type Options,
+  type ParameterOrJSON,
+  type Sql,
+  type TransactionSql,
+} from 'postgres';
 
 import type { QueryResult } from './builder/types';
 
@@ -142,12 +147,15 @@ type PostgresClient = Sql | TransactionSql;
 export function createRawDb(config: DbConfig | string): RawDb {
   const dbConfig: DbConfig = typeof config === 'string' ? { connectionString: config } : config;
 
-  const sql = postgres(dbConfig.connectionString, {
-    max: dbConfig.maxConnections ?? 10,
-    idle_timeout: dbConfig.idleTimeout ?? 30000,
-    connect_timeout: dbConfig.connectTimeout ?? 10000,
-    ssl: dbConfig.ssl,
-  });
+  const postgresOptions: Partial<Options<Record<string, never>>> = {};
+  postgresOptions.max = dbConfig.maxConnections ?? 10;
+  postgresOptions.idle_timeout = dbConfig.idleTimeout ?? 30000;
+  postgresOptions.connect_timeout = dbConfig.connectTimeout ?? 10000;
+  if (dbConfig.ssl !== undefined) {
+    postgresOptions.ssl = dbConfig.ssl;
+  }
+
+  const sql = postgres(dbConfig.connectionString, postgresOptions);
 
   // The postgres client exposes begin() on the main Sql instance only.
   return createDbFromSql(sql);
@@ -162,12 +170,10 @@ function createDbFromSql(sql: PostgresClient): RawDb {
 
   const unsafeQuery = async <T>(text: string, values: readonly unknown[]): Promise<T[]> => {
     // The postgres driver's unsafe() accepts (query, args) where args is an array
-    // We use any cast internally to bridge the postgres driver's strict typing
+    // We use unknown[] internally to bridge the postgres driver's strict typing
     // with our generic interface. This is safe because we control the output type.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await sql.unsafe(text, values as any);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return result as any as T[];
+    const result = await sql.unsafe(text, [...values] as ParameterOrJSON<never>[]);
+    return result as unknown as T[];
   };
 
   return {
@@ -187,8 +193,7 @@ function createDbFromSql(sql: PostgresClient): RawDb {
     },
 
     async execute(query: QueryResult, _options?: QueryOptions): Promise<number> {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const result = await sql.unsafe(query.text, query.values as any);
+      const result = await sql.unsafe(query.text, [...query.values] as ParameterOrJSON<never>[]);
       return result.count;
     },
 
@@ -282,17 +287,17 @@ function createDbFromSql(sql: PostgresClient): RawDb {
 export function buildConnectionString(
   env: Record<string, string | undefined> = process.env,
 ): string {
-  if (env.DATABASE_URL) {
-    return env.DATABASE_URL;
+  if (env['DATABASE_URL'] !== undefined && env['DATABASE_URL'] !== '') {
+    return env['DATABASE_URL'];
   }
 
-  const user = env.POSTGRES_USER ?? env.DB_USER ?? 'postgres';
-  const password = env.POSTGRES_PASSWORD ?? env.DB_PASSWORD ?? '';
-  const host = env.POSTGRES_HOST ?? env.DB_HOST ?? 'localhost';
-  const port = env.POSTGRES_PORT ?? env.DB_PORT ?? '5432';
-  const database = env.POSTGRES_DB ?? env.DB_NAME ?? 'abe_stack_dev';
+  const user = env['POSTGRES_USER'] ?? env['DB_USER'] ?? 'postgres';
+  const password = env['POSTGRES_PASSWORD'] ?? env['DB_PASSWORD'] ?? '';
+  const host = env['POSTGRES_HOST'] ?? env['DB_HOST'] ?? 'localhost';
+  const port = env['POSTGRES_PORT'] ?? env['DB_PORT'] ?? '5432';
+  const database = env['POSTGRES_DB'] ?? env['DB_NAME'] ?? 'abe_stack_dev';
 
-  const auth = password ? `${user}:${password}` : user;
+  const auth = password !== '' ? `${user}:${password}` : user;
   return `postgres://${auth}@${host}:${port}/${database}`;
 }
 
@@ -300,11 +305,12 @@ export function buildConnectionString(
  * Test if a database is reachable
  */
 export async function canReachDatabase(connectionString: string): Promise<boolean> {
-  const testClient = postgres(connectionString, {
-    max: 1,
-    idle_timeout: 1000,
-    connect_timeout: 1000,
-  });
+  const testOptions: Partial<Options<Record<string, never>>> = {};
+  testOptions.max = 1;
+  testOptions.idle_timeout = 1000;
+  testOptions.connect_timeout = 1000;
+
+  const testClient = postgres(connectionString, testOptions);
 
   try {
     await testClient`SELECT 1`;
@@ -323,22 +329,21 @@ export async function resolveConnectionStringWithFallback(
   env: Record<string, string | undefined> = process.env,
   fallbackPorts: number[] = [5432, 5433, 5434],
 ): Promise<string> {
-  if (env.DATABASE_URL) {
-    return env.DATABASE_URL;
+  if (env['DATABASE_URL'] !== undefined && env['DATABASE_URL'] !== '') {
+    return env['DATABASE_URL'];
   }
 
-  const tryPorts = [Number(env.POSTGRES_PORT ?? env.DB_PORT ?? NaN), ...fallbackPorts].filter(
+  const tryPorts = [Number(env['POSTGRES_PORT'] ?? env['DB_PORT'] ?? NaN), ...fallbackPorts].filter(
     (p) => !isNaN(p),
   );
 
   const uniquePorts = [...new Set(tryPorts)];
 
   for (const port of uniquePorts) {
-    const connectionString = buildConnectionString({
-      ...env,
-      POSTGRES_PORT: String(port),
-      DB_PORT: String(port),
-    });
+    const envCopy: Record<string, string | undefined> = { ...env };
+    envCopy['POSTGRES_PORT'] = String(port);
+    envCopy['DB_PORT'] = String(port);
+    const connectionString = buildConnectionString(envCopy);
 
     if (await canReachDatabase(connectionString)) {
       return connectionString;

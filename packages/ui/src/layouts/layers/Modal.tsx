@@ -36,7 +36,7 @@ type ModalRootProps = {
   children: ReactNode;
 };
 
-function ModalRoot({ open, onClose, children }: ModalRootProps): ReactElement | null {
+const ModalRoot = ({ open, onClose, children }: ModalRootProps): ReactElement | null => {
   const [mounted, setMounted] = useState(false);
   const [titleId, setTitleId] = useState<string | undefined>(undefined);
   const [descriptionId, setDescriptionId] = useState<string | undefined>(undefined);
@@ -68,9 +68,15 @@ function ModalRoot({ open, onClose, children }: ModalRootProps): ReactElement | 
 
   return createPortal(
     <ModalContext.Provider
-      value={{ onClose, titleId, descriptionId, setTitleId, setDescriptionId }}
+      value={{
+        ...(onClose !== undefined && { onClose }),
+        ...(titleId !== undefined && { titleId }),
+        ...(descriptionId !== undefined && { describedId: descriptionId }),
+        setTitleId,
+        setDescriptionId,
+      }}
     >
-      <Overlay open={open} onClick={onClose} />
+      <Overlay open={open} {...(onClose !== undefined && { onClick: onClose })} />
       <div
         className="modal"
         role="dialog"
@@ -85,9 +91,9 @@ function ModalRoot({ open, onClose, children }: ModalRootProps): ReactElement | 
     </ModalContext.Provider>,
     document.body,
   );
-}
+};
 
-function ModalTitle({ children, ...rest }: ComponentPropsWithoutRef<'h2'>): ReactElement {
+const ModalTitle = ({ children, ...rest }: ComponentPropsWithoutRef<'h2'>): ReactElement => {
   const { setTitleId } = useModalCtx();
   const id = useId();
 
@@ -103,9 +109,9 @@ function ModalTitle({ children, ...rest }: ComponentPropsWithoutRef<'h2'>): Reac
       {children}
     </h2>
   );
-}
+};
 
-function ModalDescription({ children, ...rest }: ComponentPropsWithoutRef<'p'>): ReactElement {
+const ModalDescription = ({ children, ...rest }: ComponentPropsWithoutRef<'p'>): ReactElement => {
   const { setDescriptionId } = useModalCtx();
   const id = useId();
 
@@ -121,40 +127,40 @@ function ModalDescription({ children, ...rest }: ComponentPropsWithoutRef<'p'>):
       {children}
     </p>
   );
-}
+};
 
-function ModalHeader({ children, ...rest }: ComponentPropsWithoutRef<'div'>): ReactElement {
+const ModalHeader = ({ children, ...rest }: ComponentPropsWithoutRef<'div'>): ReactElement => {
   return (
     <div className="modal-header" {...rest}>
       {children}
     </div>
   );
-}
+};
 
-function ModalBody({ children, ...rest }: ComponentPropsWithoutRef<'div'>): ReactElement {
+const ModalBody = ({ children, ...rest }: ComponentPropsWithoutRef<'div'>): ReactElement => {
   return (
     <div className="modal-body" {...rest}>
       {children}
     </div>
   );
-}
+};
 
-function ModalFooter({ children, ...rest }: ComponentPropsWithoutRef<'div'>): ReactElement {
+const ModalFooter = ({ children, ...rest }: ComponentPropsWithoutRef<'div'>): ReactElement => {
   return (
     <div className="modal-footer" {...rest}>
       {children}
     </div>
   );
-}
+};
 
-function ModalClose({ children, ...rest }: ComponentPropsWithoutRef<'button'>): ReactElement {
+const ModalClose = ({ children, ...rest }: ComponentPropsWithoutRef<'button'>): ReactElement => {
   const { onClose } = useModalCtx();
   return (
     <button type="button" onClick={onClose} aria-label="Close" {...rest}>
       {children ?? 'Close'}
     </button>
   );
-}
+};
 
 export const Modal = {
   Root: ModalRoot,

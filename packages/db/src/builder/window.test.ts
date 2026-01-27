@@ -23,7 +23,7 @@ import {
   rowNumber,
   stringAgg,
   sum,
-} from '../window';
+} from './window';
 
 describe('Window Functions', () => {
   describe('window specification', () => {

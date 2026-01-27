@@ -1,7 +1,9 @@
 // packages/core/src/config/env.loader.test.ts
 import fs from 'node:fs';
 import path from 'node:path';
+
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+
 import { initEnv } from './env.loader';
 
 // We mock fs to avoid touching the real filesystem during tests
@@ -133,14 +135,14 @@ describe.skip('Env Loader (Integration)', () => {
       fs.writeFileSync(localEnvPath, 'TEST_VAR=local');
 
       // Clear env and load
-      process.env.NODE_ENV = 'development';
-      delete process.env.TEST_VAR;
-      delete process.env.SHARED_VAR;
+      process.env['NODE_ENV'] = 'development';
+      delete process.env['TEST_VAR'];
+      delete process.env['SHARED_VAR'];
 
       initEnv();
 
-      expect(process.env.TEST_VAR).toBe('local');
-      expect(process.env.SHARED_VAR).toBe('development');
+      expect(process.env['TEST_VAR']).toBe('local');
+      expect(process.env['SHARED_VAR']).toBe('development');
     } finally {
       // Cleanup
       if (originalDevEnv !== '') fs.writeFileSync(devEnvPath, originalDevEnv);
@@ -165,14 +167,14 @@ describe.skip('Env Loader (Integration)', () => {
       fs.writeFileSync(localEnvPath, 'TEST_VAR=local');
 
       // Set ENV_FILE and load
-      process.env.ENV_FILE = customEnvPath;
-      delete process.env.TEST_VAR;
-      delete process.env.CUSTOM_ONLY;
+      process.env['ENV_FILE'] = customEnvPath;
+      delete process.env['TEST_VAR'];
+      delete process.env['CUSTOM_ONLY'];
 
       initEnv();
 
-      expect(process.env.TEST_VAR).toBe('custom');
-      expect(process.env.CUSTOM_ONLY).toBe('true');
+      expect(process.env['TEST_VAR']).toBe('custom');
+      expect(process.env['CUSTOM_ONLY']).toBe('true');
     } finally {
       // Cleanup
       if (fs.existsSync(customEnvPath)) fs.unlinkSync(customEnvPath);
@@ -181,7 +183,7 @@ describe.skip('Env Loader (Integration)', () => {
       } else if (fs.existsSync(localEnvPath)) {
         fs.unlinkSync(localEnvPath);
       }
-      delete process.env.ENV_FILE;
+      delete process.env['ENV_FILE'];
     }
   });
 });

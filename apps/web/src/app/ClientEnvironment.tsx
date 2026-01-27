@@ -17,7 +17,7 @@ import { createContext, useContext } from 'react';
 
 import type { QueryCache } from '@abe-stack/sdk';
 import type { AuthService } from '@auth/services/AuthService';
-import type { ClientConfig } from '@config';
+import type { ClientConfig } from '@/config';
 import type { ReactElement, ReactNode } from 'react';
 
 // ============================================================================
@@ -55,17 +55,17 @@ const ClientEnvironmentContext = createContext<ClientEnvironment | undefined>(un
  * In production, use AppProvider which wraps this with other providers.
  * Use this directly in tests for fine-grained control.
  */
-export function ClientEnvironmentProvider({
+export const ClientEnvironmentProvider = ({
   value,
   children,
 }: {
   value: ClientEnvironment;
   children: ReactNode;
-}): ReactElement {
+}): ReactElement => {
   return (
     <ClientEnvironmentContext.Provider value={value}>{children}</ClientEnvironmentContext.Provider>
   );
-}
+};
 
 // ============================================================================
 // Hook
@@ -77,7 +77,7 @@ export function ClientEnvironmentProvider({
  */
 export function useClientEnvironment(): ClientEnvironment {
   const env = useContext(ClientEnvironmentContext);
-  if (!env) {
+  if (env === undefined) {
     throw new Error('useClientEnvironment must be used within ClientEnvironmentProvider');
   }
   return env;

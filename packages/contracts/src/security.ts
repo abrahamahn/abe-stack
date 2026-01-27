@@ -13,7 +13,8 @@ import {
   type PaginatedResult,
   type PaginationOptions,
 } from './pagination';
-import { createSchema, type Contract, type Schema } from './types';
+import { createSchema } from './schema';
+import type { Contract, Schema } from './types';
 
 // ============================================================================
 // Security Event Types
@@ -62,49 +63,49 @@ export interface SecurityEvent {
 }
 
 export const securityEventSchema: Schema<SecurityEvent> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid security event');
   }
   const obj = data as Record<string, unknown>;
 
-  if (typeof obj.id !== 'string') {
+  if (typeof obj['id'] !== 'string') {
     throw new Error('id must be a string');
   }
-  if (obj.userId !== null && typeof obj.userId !== 'string') {
+  if (obj['userId'] !== null && typeof obj['userId'] !== 'string') {
     throw new Error('userId must be a string or null');
   }
-  if (obj.email !== null && typeof obj.email !== 'string') {
+  if (obj['email'] !== null && typeof obj['email'] !== 'string') {
     throw new Error('email must be a string or null');
   }
-  if (typeof obj.eventType !== 'string') {
+  if (typeof obj['eventType'] !== 'string') {
     throw new Error('eventType must be a string');
   }
-  if (typeof obj.severity !== 'string') {
+  if (typeof obj['severity'] !== 'string') {
     throw new Error('severity must be a string');
   }
-  if (obj.ipAddress !== null && typeof obj.ipAddress !== 'string') {
+  if (obj['ipAddress'] !== null && typeof obj['ipAddress'] !== 'string') {
     throw new Error('ipAddress must be a string or null');
   }
-  if (obj.userAgent !== null && typeof obj.userAgent !== 'string') {
+  if (obj['userAgent'] !== null && typeof obj['userAgent'] !== 'string') {
     throw new Error('userAgent must be a string or null');
   }
-  if (obj.metadata !== null && typeof obj.metadata !== 'object') {
+  if (obj['metadata'] !== null && typeof obj['metadata'] !== 'object') {
     throw new Error('metadata must be an object or null');
   }
-  if (typeof obj.createdAt !== 'string') {
+  if (typeof obj['createdAt'] !== 'string') {
     throw new Error('createdAt must be a string');
   }
 
   return {
-    id: obj.id,
-    userId: obj.userId,
-    email: obj.email,
-    eventType: obj.eventType,
-    severity: obj.severity,
-    ipAddress: obj.ipAddress,
-    userAgent: obj.userAgent,
-    metadata: obj.metadata as Record<string, unknown> | null,
-    createdAt: obj.createdAt,
+    id: obj['id'],
+    userId: obj['userId'],
+    email: obj['email'],
+    eventType: obj['eventType'],
+    severity: obj['severity'],
+    ipAddress: obj['ipAddress'],
+    userAgent: obj['userAgent'],
+    metadata: obj['metadata'] as Record<string, unknown> | null,
+    createdAt: obj['createdAt'],
   };
 });
 
@@ -138,56 +139,56 @@ export const securityEventsFilterSchema: Schema<SecurityEventsFilter> = createSc
 
     const filter: SecurityEventsFilter = {};
 
-    if (obj.eventType !== undefined) {
-      if (typeof obj.eventType !== 'string') {
+    if (obj['eventType'] !== undefined) {
+      if (typeof obj['eventType'] !== 'string') {
         throw new Error('eventType must be a string');
       }
-      filter.eventType = obj.eventType;
+      filter.eventType = obj['eventType'];
     }
 
-    if (obj.severity !== undefined) {
-      if (typeof obj.severity !== 'string') {
+    if (obj['severity'] !== undefined) {
+      if (typeof obj['severity'] !== 'string') {
         throw new Error('severity must be a string');
       }
-      if (!SECURITY_SEVERITIES.includes(obj.severity as SecuritySeverity)) {
+      if (!SECURITY_SEVERITIES.includes(obj['severity'] as SecuritySeverity)) {
         throw new Error('Invalid severity level');
       }
-      filter.severity = obj.severity;
+      filter.severity = obj['severity'];
     }
 
-    if (obj.userId !== undefined) {
-      if (typeof obj.userId !== 'string') {
+    if (obj['userId'] !== undefined) {
+      if (typeof obj['userId'] !== 'string') {
         throw new Error('userId must be a string');
       }
-      filter.userId = obj.userId;
+      filter.userId = obj['userId'];
     }
 
-    if (obj.email !== undefined) {
-      if (typeof obj.email !== 'string') {
+    if (obj['email'] !== undefined) {
+      if (typeof obj['email'] !== 'string') {
         throw new Error('email must be a string');
       }
-      filter.email = obj.email;
+      filter.email = obj['email'];
     }
 
-    if (obj.ipAddress !== undefined) {
-      if (typeof obj.ipAddress !== 'string') {
+    if (obj['ipAddress'] !== undefined) {
+      if (typeof obj['ipAddress'] !== 'string') {
         throw new Error('ipAddress must be a string');
       }
-      filter.ipAddress = obj.ipAddress;
+      filter.ipAddress = obj['ipAddress'];
     }
 
-    if (obj.startDate !== undefined) {
-      if (typeof obj.startDate !== 'string') {
+    if (obj['startDate'] !== undefined) {
+      if (typeof obj['startDate'] !== 'string') {
         throw new Error('startDate must be a string');
       }
-      filter.startDate = obj.startDate;
+      filter.startDate = obj['startDate'];
     }
 
-    if (obj.endDate !== undefined) {
-      if (typeof obj.endDate !== 'string') {
+    if (obj['endDate'] !== undefined) {
+      if (typeof obj['endDate'] !== 'string') {
         throw new Error('endDate must be a string');
       }
-      filter.endDate = obj.endDate;
+      filter.endDate = obj['endDate'];
     }
 
     return filter;
@@ -197,11 +198,11 @@ export const securityEventsFilterSchema: Schema<SecurityEventsFilter> = createSc
 export const securityEventsListRequestSchema: Schema<SecurityEventsListRequest> = createSchema(
   (data: unknown) => {
     const pagination = paginationOptionsSchema.parse(data);
-    const obj = (data && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
 
     let filter: SecurityEventsFilter = {};
-    if (obj.filter !== undefined) {
-      filter = securityEventsFilterSchema.parse(obj.filter);
+    if (obj['filter'] !== undefined) {
+      filter = securityEventsFilterSchema.parse(obj['filter']);
     }
 
     return {
@@ -226,11 +227,11 @@ export interface SecurityEventDetailRequest {
 
 export const securityEventDetailRequestSchema: Schema<SecurityEventDetailRequest> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid request');
     }
     const obj = data as Record<string, unknown>;
-    const id = uuidSchema.parse(obj.id);
+    const id = uuidSchema.parse(obj['id']);
     return { id };
   },
 );
@@ -250,14 +251,14 @@ export interface SecurityMetricsRequest {
 
 export const securityMetricsRequestSchema: Schema<SecurityMetricsRequest> = createSchema(
   (data: unknown) => {
-    const obj = (data && typeof data === 'object' ? data : {}) as Record<string, unknown>;
+    const obj = (data !== null && typeof data === 'object' ? data : {}) as Record<string, unknown>;
 
     let period: 'hour' | 'day' | 'week' | 'month' = 'day';
-    if (obj.period !== undefined) {
-      if (!['hour', 'day', 'week', 'month'].includes(obj.period as string)) {
+    if (obj['period'] !== undefined) {
+      if (!['hour', 'day', 'week', 'month'].includes(obj['period'] as string)) {
         throw new Error('period must be one of: hour, day, week, month');
       }
-      period = obj.period as 'hour' | 'day' | 'week' | 'month';
+      period = obj['period'] as 'hour' | 'day' | 'week' | 'month';
     }
 
     return { period };
@@ -280,7 +281,7 @@ export interface SecurityMetrics {
 }
 
 export const securityMetricsSchema: Schema<SecurityMetrics> = createSchema((data: unknown) => {
-  if (!data || typeof data !== 'object') {
+  if (data === null || data === undefined || typeof data !== 'object') {
     throw new Error('Invalid security metrics');
   }
   const obj = data as Record<string, unknown>;
@@ -300,18 +301,18 @@ export const securityMetricsSchema: Schema<SecurityMetrics> = createSchema((data
   };
 
   return {
-    totalEvents: validateInt(obj.totalEvents, 'totalEvents'),
-    criticalEvents: validateInt(obj.criticalEvents, 'criticalEvents'),
-    highEvents: validateInt(obj.highEvents, 'highEvents'),
-    mediumEvents: validateInt(obj.mediumEvents, 'mediumEvents'),
-    lowEvents: validateInt(obj.lowEvents, 'lowEvents'),
-    tokenReuseCount: validateInt(obj.tokenReuseCount, 'tokenReuseCount'),
-    accountLockedCount: validateInt(obj.accountLockedCount, 'accountLockedCount'),
-    suspiciousLoginCount: validateInt(obj.suspiciousLoginCount, 'suspiciousLoginCount'),
-    eventsByType: obj.eventsByType as Record<string, number>,
-    period: validateString(obj.period, 'period'),
-    periodStart: validateString(obj.periodStart, 'periodStart'),
-    periodEnd: validateString(obj.periodEnd, 'periodEnd'),
+    totalEvents: validateInt(obj['totalEvents'], 'totalEvents'),
+    criticalEvents: validateInt(obj['criticalEvents'], 'criticalEvents'),
+    highEvents: validateInt(obj['highEvents'], 'highEvents'),
+    mediumEvents: validateInt(obj['mediumEvents'], 'mediumEvents'),
+    lowEvents: validateInt(obj['lowEvents'], 'lowEvents'),
+    tokenReuseCount: validateInt(obj['tokenReuseCount'], 'tokenReuseCount'),
+    accountLockedCount: validateInt(obj['accountLockedCount'], 'accountLockedCount'),
+    suspiciousLoginCount: validateInt(obj['suspiciousLoginCount'], 'suspiciousLoginCount'),
+    eventsByType: obj['eventsByType'] as Record<string, number>,
+    period: validateString(obj['period'], 'period'),
+    periodStart: validateString(obj['periodStart'], 'periodStart'),
+    periodEnd: validateString(obj['periodEnd'], 'periodEnd'),
   };
 });
 
@@ -330,22 +331,22 @@ export interface SecurityEventsExportRequest {
 
 export const securityEventsExportRequestSchema: Schema<SecurityEventsExportRequest> = createSchema(
   (data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid export request');
     }
     const obj = data as Record<string, unknown>;
 
-    if (!['csv', 'json'].includes(obj.format as string)) {
+    if (!['csv', 'json'].includes(obj['format'] as string)) {
       throw new Error('format must be either "csv" or "json"');
     }
 
     let filter: SecurityEventsFilter = {};
-    if (obj.filter !== undefined) {
-      filter = securityEventsFilterSchema.parse(obj.filter);
+    if (obj['filter'] !== undefined) {
+      filter = securityEventsFilterSchema.parse(obj['filter']);
     }
 
     return {
-      format: obj.format as 'csv' | 'json',
+      format: obj['format'] as 'csv' | 'json',
       filter,
     };
   },
@@ -359,25 +360,25 @@ export interface SecurityEventsExportResponse {
 
 export const securityEventsExportResponseSchema: Schema<SecurityEventsExportResponse> =
   createSchema((data: unknown) => {
-    if (!data || typeof data !== 'object') {
+    if (data === null || data === undefined || typeof data !== 'object') {
       throw new Error('Invalid export response');
     }
     const obj = data as Record<string, unknown>;
 
-    if (typeof obj.data !== 'string') {
+    if (typeof obj['data'] !== 'string') {
       throw new Error('data must be a string');
     }
-    if (typeof obj.filename !== 'string') {
+    if (typeof obj['filename'] !== 'string') {
       throw new Error('filename must be a string');
     }
-    if (typeof obj.contentType !== 'string') {
+    if (typeof obj['contentType'] !== 'string') {
       throw new Error('contentType must be a string');
     }
 
     return {
-      data: obj.data,
-      filename: obj.filename,
-      contentType: obj.contentType,
+      data: obj['data'],
+      filename: obj['filename'],
+      contentType: obj['contentType'],
     };
   });
 

@@ -1,7 +1,9 @@
 // apps/server/src/config/infra/storage.test.ts
-import type { FullEnv } from '@abe-stack/core/config';
 import { describe, expect, it } from 'vitest';
+
 import { loadStorageConfig, validateStorage } from './storage';
+
+import type { FullEnv } from '@abe-stack/core/config';
 
 describe('Storage Configuration', () => {
   describe('Local Provider', () => {

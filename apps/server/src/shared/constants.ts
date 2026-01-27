@@ -1,38 +1,13 @@
 // apps/server/src/shared/constants.ts
 /**
- * Centralized constants for the entire application
- * All magic numbers and string literals should be defined here
+ * Server-Specific Constants
+ *
+ * Centralized constants for the server application.
+ * Note: Time constants (MS_PER_SECOND, etc.) should be imported
+ * directly from @abe-stack/core.
  */
 
-import {
-  MS_PER_SECOND,
-  MS_PER_MINUTE,
-  MS_PER_HOUR,
-  MS_PER_DAY,
-  SECONDS_PER_MINUTE,
-  SECONDS_PER_HOUR,
-  SECONDS_PER_DAY,
-  MINUTES_PER_HOUR,
-  HOURS_PER_DAY,
-  DAYS_PER_WEEK,
-} from '@abe-stack/core';
-
-// ============================================================================
-// Time Constants (re-exported from @abe-stack/core)
-// ============================================================================
-
-export {
-  MS_PER_SECOND,
-  SECONDS_PER_MINUTE,
-  MINUTES_PER_HOUR,
-  HOURS_PER_DAY,
-  DAYS_PER_WEEK,
-  MS_PER_MINUTE,
-  MS_PER_HOUR,
-  MS_PER_DAY,
-  SECONDS_PER_HOUR,
-  SECONDS_PER_DAY,
-};
+import { MS_PER_MINUTE, MS_PER_SECOND } from '@abe-stack/core';
 
 // ============================================================================
 // Security Constants

@@ -1,5 +1,6 @@
 // packages/core/src/modules/billing/errors.test.ts
 import { describe, expect, it } from 'vitest';
+
 import {
   // Provider errors
   BillingProviderError,

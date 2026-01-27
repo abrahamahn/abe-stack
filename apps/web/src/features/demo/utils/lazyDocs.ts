@@ -40,7 +40,7 @@ const layoutDocsModules: DocsModules = import.meta.glob(
 function buildPathLookup(modules: DocsModules): Map<string, string> {
   const lookup = new Map<string, string>();
   for (const path of Object.keys(modules)) {
-    const filename = path.split('/').pop()?.replace('.md', '') || '';
+    const filename = path.split('/').pop()?.replace('.md', '') ?? '';
     const normalized = normalizeKey(filename);
     const raw = filename.toLowerCase();
     lookup.set(raw, path);
@@ -62,13 +62,14 @@ export async function getComponentDocsLazy(
   componentName?: string,
 ): Promise<string | null> {
   const id = normalizeKey(componentId);
-  const fallbackName = componentName ? normalizeKey(componentName) : '';
+  const fallbackName =
+    componentName !== undefined && componentName.length > 0 ? normalizeKey(componentName) : '';
 
   // Check cache first
   const cacheKey = `${category}:${id}`;
   const cached = docsCache.get(cacheKey);
   if (cached !== undefined) {
-    return cached || null;
+    return cached.length > 0 ? cached : null;
   }
 
   let pathLookup: Map<string, string>;
@@ -89,18 +90,18 @@ export async function getComponentDocsLazy(
 
   // Try to find the path
   let path = pathLookup.get(id);
-  if (!path && fallbackName) {
+  if ((path === undefined || path.length === 0) && fallbackName.length > 0) {
     path = pathLookup.get(fallbackName);
   }
 
-  if (!path) {
+  if (path === undefined || path.length === 0) {
     docsCache.set(cacheKey, '');
     return null;
   }
 
   try {
     const loader = modules[path];
-    if (!loader) {
+    if (loader === undefined) {
       docsCache.set(cacheKey, '');
       return null;
     }

@@ -126,21 +126,6 @@ export {
 } from './messaging/email';
 export type { EmailOptions, EmailResult, EmailService } from './messaging/email';
 
-// PubSub
-export {
-  PostgresPubSub,
-  SubKeys,
-  SubscriptionManager,
-  createPostgresPubSub,
-  publishAfterWrite,
-  type ListKey,
-  type PostgresPubSubOptions,
-  type PubSubMessage,
-  type RecordKey,
-  type SubscriptionKey,
-  type SubscriptionManagerOptions,
-} from '@abe-stack/core/pubsub';
-
 // Login Security (from auth module)
 export {
   applyProgressiveDelay,
@@ -192,15 +177,9 @@ export { getWebSocketStats, registerWebSocket, type WebSocketStats } from './mes
 
 // Billing
 export { createBillingProvider, isBillingConfigured } from './billing';
-export type {
-  BillingConfig,
-  BillingService,
-  CheckoutParams,
-  CheckoutResult,
-  ProviderInvoice,
-  ProviderPaymentMethod,
-  ProviderSubscription,
-} from './billing';
+export type { NormalizedEventType, NormalizedWebhookEvent, SetupIntentResult } from './billing';
+// Note: Core billing types (BillingService, CheckoutParams, etc.) should be
+// imported directly from @abe-stack/core
 
 // Search
 export { SearchProviderFactory, getSearchProviderFactory } from './search';

@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { Skeleton } from '../Skeleton';
+import { Skeleton } from './Skeleton';
 
 describe('Skeleton', () => {
   it('renders with default dimensions (uses CSS defaults when no props)', () => {

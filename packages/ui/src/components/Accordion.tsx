@@ -35,16 +35,16 @@ type AccordionProps = {
  * ]} />
  * ```
  */
-export function Accordion({
+export const Accordion = ({
   items,
   value,
   defaultValue = null,
   onChange,
-}: AccordionProps): ReactElement {
+}: AccordionProps): ReactElement => {
   const [openId, setOpenId] = useControllableState<string | null>({
-    value: value ?? undefined,
+    ...(value !== undefined && { value }),
     defaultValue,
-    onChange,
+    ...(onChange !== undefined && { onChange }),
   });
 
   return (
@@ -87,4 +87,4 @@ export function Accordion({
       })}
     </div>
   );
-}
+};

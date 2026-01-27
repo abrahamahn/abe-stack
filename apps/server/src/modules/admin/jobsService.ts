@@ -157,7 +157,7 @@ export async function retryJob(
 ): Promise<{ success: boolean; message: string }> {
   const success = await store.retryJob(jobId);
 
-  if (success === false) {
+  if (!success) {
     // Job either doesn't exist or is not in a retriable state
 
     const job = await store.getJobDetails(jobId);
@@ -185,7 +185,7 @@ export async function cancelJob(
 ): Promise<{ success: boolean; message: string }> {
   const success = await store.cancelJob(jobId);
 
-  if (success === false) {
+  if (!success) {
     // Job either doesn't exist or is not in a cancellable state
 
     const job = await store.getJobDetails(jobId);

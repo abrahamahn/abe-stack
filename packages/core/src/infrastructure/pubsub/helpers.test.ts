@@ -1,8 +1,10 @@
 // packages/core/src/infrastructure/pubsub/helpers.test.ts
 /* eslint-disable @typescript-eslint/unbound-method */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { publishAfterWrite } from './helpers';
-import type { SubscriptionManager } from './subscriptionManager';
+
+import type { SubscriptionManager } from './subscription-manager';
 
 describe('pubsub helpers', () => {
   let mockPubsub: SubscriptionManager;

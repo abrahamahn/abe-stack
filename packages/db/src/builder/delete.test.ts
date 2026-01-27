@@ -1,8 +1,8 @@
 // packages/db/src/builder/__tests__/delete.test.ts
 import { describe, expect, it } from 'vitest';
 
-import { and, eq, lt } from '../conditions';
-import { del, deleteFrom, truncate, truncateCascade } from '../delete';
+import { and, eq, lt } from './conditions';
+import { del, deleteFrom, truncate, truncateCascade } from './delete';
 
 describe('DeleteBuilder', () => {
   describe('basic deletes', () => {

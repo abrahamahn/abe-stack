@@ -2,7 +2,7 @@
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { render, screen, act, waitFor } from '@testing-library/react';
-import React from 'react';
+import { createElement, useEffect, useState } from 'react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import { RecordCache, type TableMap } from '../../cache/RecordCache';
@@ -12,14 +12,13 @@ import { RealtimeProvider, useRealtime, type RealtimeProviderConfig } from '../R
 // Mock WebSocket
 // ============================================================================
 
-class MockWebSocket {
-  static CONNECTING = 0;
-  static OPEN = 1;
-  static CLOSING = 2;
-  static CLOSED = 3;
+const WS_CONNECTING = 0;
+const WS_OPEN = 1;
+const WS_CLOSED = 3;
 
+class MockWebSocket {
   url: string;
-  readyState: number = MockWebSocket.CONNECTING;
+  readyState: number = WS_CONNECTING;
 
   onopen: ((event: Event) => void) | null = null;
   onmessage: ((event: MessageEvent<string>) => void) | null = null;
@@ -30,8 +29,8 @@ class MockWebSocket {
     this.url = url;
     // Simulate async connection
     setTimeout(() => {
-      if (this.readyState === MockWebSocket.CONNECTING) {
-        this.readyState = MockWebSocket.OPEN;
+      if (this.readyState === WS_CONNECTING) {
+        this.readyState = WS_OPEN;
         this.onopen?.(new Event('open'));
       }
     }, 0);
@@ -42,12 +41,12 @@ class MockWebSocket {
   }
 
   close(): void {
-    this.readyState = MockWebSocket.CLOSED;
+    this.readyState = WS_CLOSED;
     this.onclose?.(new CloseEvent('close'));
   }
 
   forceConnect(): void {
-    this.readyState = MockWebSocket.OPEN;
+    this.readyState = WS_OPEN;
     this.onopen?.(new Event('open'));
   }
 }
@@ -111,7 +110,7 @@ function createTestConfig(
   };
 }
 
-function TestConsumer(): React.ReactElement {
+const TestConsumer = (): JSX.Element => {
   const context = useRealtime<TestTables>();
   return (
     <div>
@@ -122,7 +121,7 @@ function TestConsumer(): React.ReactElement {
       <span data-testid="can-redo">{context.undoRedoState.canRedo.toString()}</span>
     </div>
   );
-}
+};
 
 // ============================================================================
 // Tests
@@ -258,11 +257,11 @@ describe('RealtimeContext', () => {
 
       const config = createTestConfig({ recordCache: cache });
 
-      function CacheConsumer(): React.ReactElement {
+      const CacheConsumer = (): JSX.Element => {
         const { recordCache } = useRealtime<TestTables>();
         const user = recordCache.get('user', 'u1');
         return <span data-testid="user-name">{user?.name ?? 'not found'}</span>;
-      }
+      };
 
       render(
         <RealtimeProvider config={config}>
@@ -280,20 +279,16 @@ describe('RealtimeContext', () => {
     it('should provide subscribe function', async () => {
       const config = createTestConfig();
 
-      function SubscribeConsumer(): React.ReactElement {
+      const TestComponent = (): JSX.Element => {
         const { subscribe } = useRealtime();
-        React.useEffect(() => {
+        useEffect(() => {
           const unsubscribe = subscribe('user', 'u1');
           return unsubscribe;
         }, [subscribe]);
-        return <span>subscribed</span>;
-      }
+        return createElement('span', null, 'subscribed');
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <SubscribeConsumer />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
@@ -308,11 +303,11 @@ describe('RealtimeContext', () => {
 
       const config = createTestConfig({ recordCache: cache });
 
-      function WriteConsumer(): React.ReactElement {
+      const TestComponent = (): JSX.Element => {
         const { write, recordCache } = useRealtime<TestTables>();
-        const [written, setWritten] = React.useState(false);
+        const [written, setWritten] = useState(false);
 
-        React.useEffect(() => {
+        useEffect(() => {
           if (!written) {
             void write([{ table: 'user', id: 'u1', updates: { name: 'Bob' } }]).then(() => {
               setWritten(true);
@@ -321,14 +316,10 @@ describe('RealtimeContext', () => {
         }, [write, written]);
 
         const user = recordCache.get('user', 'u1');
-        return <span data-testid="user-name">{user?.name ?? 'not found'}</span>;
-      }
+        return createElement('span', { ['data-testid']: 'user-name' }, user?.name ?? 'not found');
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <WriteConsumer />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(100);
@@ -345,11 +336,11 @@ describe('RealtimeContext', () => {
 
       const config = createTestConfig({ recordCache: cache });
 
-      function UndoConsumer(): React.ReactElement {
+      const TestComponent = (): JSX.Element => {
         const { write, undoRedoState } = useRealtime<TestTables>();
-        const [written, setWritten] = React.useState(false);
+        const [written, setWritten] = useState(false);
 
-        React.useEffect(() => {
+        useEffect(() => {
           if (!written) {
             void write([{ table: 'user', id: 'u1', updates: { name: 'Bob' } }]).then(() => {
               setWritten(true);
@@ -357,19 +348,15 @@ describe('RealtimeContext', () => {
           }
         }, [write, written]);
 
-        return (
-          <div>
-            <span data-testid="can-undo">{undoRedoState.canUndo.toString()}</span>
-            <span data-testid="undo-count">{undoRedoState.undoCount}</span>
-          </div>
+        return createElement(
+          'div',
+          null,
+          createElement('span', { ['data-testid']: 'can-undo' }, undoRedoState.canUndo.toString()),
+          createElement('span', { ['data-testid']: 'undo-count' }, undoRedoState.undoCount),
         );
-      }
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <UndoConsumer />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await waitFor(
         () => {
@@ -388,12 +375,12 @@ describe('RealtimeContext', () => {
 
       const config = createTestConfig({ recordCache: cache });
 
-      function UndoRestoreConsumer(): React.ReactElement {
+      const TestComponent = (): JSX.Element => {
         const { write, undo, recordCache, undoRedoState } = useRealtime<TestTables>();
-        const [written, setWritten] = React.useState(false);
-        const [undone, setUndone] = React.useState(false);
+        const [written, setWritten] = useState(false);
+        const [undone, setUndone] = useState(false);
 
-        React.useEffect(() => {
+        useEffect(() => {
           if (!written) {
             void write([{ table: 'user', id: 'u1', updates: { name: 'Bob' } }]).then(() => {
               setWritten(true);
@@ -401,27 +388,23 @@ describe('RealtimeContext', () => {
           }
         }, [write, written]);
 
-        React.useEffect(() => {
-          if (written && !undone && undoRedoState.canUndo) {
+        useEffect(() => {
+          if (written && !undone && undoRedoState.canUndo === true) {
             undo();
             setUndone(true);
           }
         }, [written, undone, undoRedoState.canUndo, undo]);
 
         const user = recordCache.get('user', 'u1');
-        return (
-          <div>
-            <span data-testid="user-name">{user?.name ?? 'not found'}</span>
-            <span data-testid="undone">{undone.toString()}</span>
-          </div>
+        return createElement(
+          'div',
+          null,
+          createElement('span', { ['data-testid']: 'user-name' }, user?.name ?? 'not found'),
+          createElement('span', { ['data-testid']: 'undone' }, undone.toString()),
         );
-      }
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <UndoRestoreConsumer />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await waitFor(
         () => {
@@ -451,7 +434,7 @@ describe('RealtimeContext', () => {
       expect(screen.getByTestId('is-online').textContent).toBe('true');
 
       // Simulate going offline
-      await act(async () => {
+      act(() => {
         Object.defineProperty(navigator, 'onLine', { value: false, configurable: true });
         window.dispatchEvent(new Event('offline'));
       });
@@ -475,7 +458,7 @@ describe('RealtimeContext', () => {
       });
 
       // Simulate coming online
-      await act(async () => {
+      act(() => {
         Object.defineProperty(navigator, 'onLine', { value: true, configurable: true });
         window.dispatchEvent(new Event('online'));
       });
@@ -492,17 +475,13 @@ describe('RealtimeContext', () => {
 
       const config = createTestConfig({ recordCache: cache });
 
-      function MessageConsumer(): React.ReactElement {
+      const TestComponent = (): JSX.Element => {
         const { recordCache } = useRealtime<TestTables>();
         const user = recordCache.get('user', 'u1');
-        return <span data-testid="user-name">{user?.name ?? 'not found'}</span>;
-      }
+        return createElement('span', { ['data-testid']: 'user-name' }, user?.name ?? 'not found');
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <MessageConsumer />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await waitFor(
         () => {
@@ -512,11 +491,11 @@ describe('RealtimeContext', () => {
       );
 
       const ws = mockWebSocketInstances[0];
-      if (ws) {
+      if (ws !== undefined) {
         ws.forceConnect();
 
         // Send a message with invalid key (no colon separator)
-        await act(async () => {
+        act(() => {
           ws.onmessage?.(
             new MessageEvent('message', {
               data: JSON.stringify({
@@ -529,7 +508,7 @@ describe('RealtimeContext', () => {
         });
 
         // Send a message with null value
-        await act(async () => {
+        act(() => {
           ws.onmessage?.(
             new MessageEvent('message', {
               data: JSON.stringify({
@@ -542,7 +521,7 @@ describe('RealtimeContext', () => {
         });
 
         // Send a message with non-object value
-        await act(async () => {
+        act(() => {
           ws.onmessage?.(
             new MessageEvent('message', {
               data: JSON.stringify({
@@ -570,11 +549,11 @@ describe('RealtimeContext', () => {
 
       const config = createTestConfig({ recordCache: cache });
 
-      function WriteNonExistentConsumer(): React.ReactElement {
+      const TestComponent = (): JSX.Element => {
         const { write, undoRedoState } = useRealtime<TestTables>();
-        const [written, setWritten] = React.useState(false);
+        const [written, setWritten] = useState(false);
 
-        React.useEffect(() => {
+        useEffect(() => {
           if (!written) {
             void write([{ table: 'user', id: 'nonexistent', updates: { name: 'New' } }]).then(
               () => {
@@ -584,19 +563,15 @@ describe('RealtimeContext', () => {
           }
         }, [write, written]);
 
-        return (
-          <div>
-            <span data-testid="written">{written.toString()}</span>
-            <span data-testid="can-undo">{undoRedoState.canUndo.toString()}</span>
-          </div>
+        return createElement(
+          'div',
+          null,
+          createElement('span', { ['data-testid']: 'written' }, written.toString()),
+          createElement('span', { ['data-testid']: 'can-undo' }, undoRedoState.canUndo.toString()),
         );
-      }
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <WriteNonExistentConsumer />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await waitFor(
         () => {
@@ -620,11 +595,11 @@ describe('RealtimeContext', () => {
 
       const config = createTestConfig({ recordCache: cache });
 
-      function RedoConsumer(): React.ReactElement {
+      const TestComponent = (): JSX.Element => {
         const { write, undo, redo, recordCache, undoRedoState } = useRealtime<TestTables>();
-        const [step, setStep] = React.useState(0);
+        const [step, setStep] = useState(0);
 
-        React.useEffect(() => {
+        useEffect(() => {
           if (step === 0) {
             void write([{ table: 'user', id: 'u1', updates: { name: 'Bob' } }]).then(() => {
               setStep(1);
@@ -632,34 +607,30 @@ describe('RealtimeContext', () => {
           }
         }, [write, step]);
 
-        React.useEffect(() => {
-          if (step === 1 && undoRedoState.canUndo) {
+        useEffect(() => {
+          if (step === 1 && undoRedoState.canUndo === true) {
             undo();
             setStep(2);
           }
         }, [step, undoRedoState.canUndo, undo]);
 
-        React.useEffect(() => {
-          if (step === 2 && undoRedoState.canRedo) {
+        useEffect(() => {
+          if (step === 2 && undoRedoState.canRedo === true) {
             redo();
             setStep(3);
           }
         }, [step, undoRedoState.canRedo, redo]);
 
         const user = recordCache.get('user', 'u1');
-        return (
-          <div>
-            <span data-testid="user-name">{user?.name ?? 'not found'}</span>
-            <span data-testid="step">{step}</span>
-          </div>
+        return createElement(
+          'div',
+          null,
+          createElement('span', { ['data-testid']: 'user-name' }, user?.name ?? 'not found'),
+          createElement('span', { ['data-testid']: 'step' }, step),
         );
-      }
+      };
 
-      render(
-        <RealtimeProvider config={config}>
-          <RedoConsumer />
-        </RealtimeProvider>,
-      );
+      render(createElement(RealtimeProvider, { config }, createElement(TestComponent)));
 
       await waitFor(
         () => {

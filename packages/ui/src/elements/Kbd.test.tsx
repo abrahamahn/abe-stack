@@ -3,7 +3,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { Kbd } from '../Kbd';
+import { Kbd } from './Kbd';
 
 describe('Kbd', () => {
   it('renders keyboard key with default size', () => {

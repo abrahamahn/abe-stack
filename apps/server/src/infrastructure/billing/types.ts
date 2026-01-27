@@ -2,26 +2,15 @@
 /**
  * Billing Infrastructure Types
  *
- * Re-exports contract types from @abe-stack/core to ensure
- * consistency across the application.
+ * Local type definitions for billing operations.
+ * Core types (BillingService, CheckoutParams, etc.) should be imported
+ * directly from @abe-stack/core.
  */
 
-// Export from core
-export type {
-  BillingConfig,
-  BillingService,
-  CheckoutParams,
-  CheckoutResult,
-  CreateProductParams,
-  CreateProductResult,
-  PayPalProviderConfig as PayPalConfig,
-  ProviderInvoice,
-  ProviderPaymentMethod,
-  ProviderSubscription,
-  StripeProviderConfig as StripeConfig,
-} from '@abe-stack/core';
+// ============================================================================
+// Webhook Types (Local)
+// ============================================================================
 
-// Workaround: Define types locally if import fails
 export type NormalizedEventType =
   | 'subscription.created'
   | 'subscription.updated'

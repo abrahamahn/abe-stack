@@ -21,12 +21,12 @@ export type {
 } from './types';
 
 // Subscription manager
-export { SubscriptionManager } from './subscriptionManager';
-export type { SubscriptionManagerOptions } from './subscriptionManager';
+export { SubscriptionManager } from './subscription-manager';
+export type { SubscriptionManagerOptions } from './subscription-manager';
 
 // Postgres NOTIFY/LISTEN adapter
-export { PostgresPubSub, createPostgresPubSub } from './postgresPubSub';
-export type { PostgresPubSubOptions, PubSubMessage } from './postgresPubSub';
+export { PostgresPubSub, createPostgresPubSub } from './postgres-pubsub';
+export type { PostgresPubSubOptions, PubSubMessage } from './postgres-pubsub';
 
 // Helpers
 export { publishAfterWrite } from './helpers';

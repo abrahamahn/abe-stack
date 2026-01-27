@@ -19,20 +19,27 @@ export interface UserDetailCardProps {
 }
 
 function formatDateTime(dateString: string | null): string {
-  if (!dateString) return 'Never';
+  if (dateString === null) return 'Never';
+  if (dateString.length === 0) return 'Never';
   return new Date(dateString).toLocaleString();
 }
 
-function InfoRow({ label, children }: { label: string; children: React.ReactNode }): JSX.Element {
+const InfoRow = ({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}): JSX.Element => {
   return (
     <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700 last:border-0">
       <Text className="font-medium text-gray-500 dark:text-gray-400">{label}</Text>
       <div>{children}</div>
     </div>
   );
-}
+};
 
-export function UserDetailCard({ user, isLoading }: UserDetailCardProps): JSX.Element {
+export const UserDetailCard = ({ user, isLoading }: UserDetailCardProps): JSX.Element => {
   if (isLoading) {
     return (
       <Card>
@@ -46,7 +53,7 @@ export function UserDetailCard({ user, isLoading }: UserDetailCardProps): JSX.El
     );
   }
 
-  if (!user) {
+  if (user === null) {
     return (
       <Card>
         <div className="p-4 text-center">
@@ -98,7 +105,7 @@ export function UserDetailCard({ user, isLoading }: UserDetailCardProps): JSX.El
             <Text>{user.failedLoginAttempts}</Text>
           </InfoRow>
 
-          {user.lockedUntil && (
+          {user.lockedUntil !== null && user.lockedUntil.length > 0 && (
             <InfoRow label="Locked Until">
               <Text size="sm">{formatDateTime(user.lockedUntil)}</Text>
             </InfoRow>
@@ -115,4 +122,4 @@ export function UserDetailCard({ user, isLoading }: UserDetailCardProps): JSX.El
       </div>
     </Card>
   );
-}
+};

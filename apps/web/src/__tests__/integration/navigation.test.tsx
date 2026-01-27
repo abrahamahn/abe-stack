@@ -21,10 +21,10 @@ import { createMockEnvironment, mockUser, renderWithProviders } from '../utils';
 import type { ReactElement, ReactNode } from 'react';
 
 // Helper component to capture and display current location for testing
-function LocationDisplay(): ReactElement {
+const LocationDisplay = (): ReactElement => {
   const location = useLocation();
   return <div data-testid="location-display">{location.pathname}</div>;
-}
+};
 
 // Mock useAuth hook for ProtectedRoute tests
 const mockUseAuth = vi.fn();
@@ -62,7 +62,7 @@ vi.mock('@abe-stack/ui', async (importOriginal) => {
       return <Navigate to={redirectTo} replace />;
     }
 
-    return children ? <>{children}</> : <Outlet />;
+    return children !== null && children !== undefined ? <>{children}</> : <Outlet />;
   };
 
   return {
@@ -164,7 +164,7 @@ describe('Navigation Integration', () => {
       expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
     });
 
-    it('should transition from loading to authenticated', async () => {
+    it('should transition from loading to authenticated', () => {
       // Start with loading state
       mockUseAuth.mockReturnValue({
         isAuthenticated: false,

@@ -14,7 +14,7 @@ const sizeClasses: Record<NonNullable<ContainerProps['size']>, string> = {
   lg: 'container--lg',
 };
 
-export function Container({ size = 'md', className, ...rest }: ContainerProps): ReactElement {
+export const Container = ({ size = 'md', className, ...rest }: ContainerProps): ReactElement => {
   const sizeClass = size in sizeClasses ? sizeClasses[size] : undefined;
   return <div className={cn('container', sizeClass, className)} {...rest} />;
-}
+};

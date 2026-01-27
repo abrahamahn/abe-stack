@@ -5,7 +5,7 @@ import { useAuth, type User } from '@auth';
 import type { NavigateFunction } from '@abe-stack/ui';
 import type { JSX } from 'react';
 
-export function DashboardPage(): JSX.Element {
+export const DashboardPage = (): JSX.Element => {
   const { user, logout }: { user: User | null; logout: () => Promise<void> } = useAuth();
   const navigate: NavigateFunction = useNavigate();
 
@@ -40,7 +40,7 @@ export function DashboardPage(): JSX.Element {
             <strong>Email:</strong> {user?.email}
           </Text>
           <Text>
-            <strong>Name:</strong> {user?.name || 'Not provided'}
+            <strong>Name:</strong> {user?.name ?? 'Not provided'}
           </Text>
           <Text>
             <strong>User ID:</strong> {user?.id}
@@ -59,4 +59,4 @@ export function DashboardPage(): JSX.Element {
       </Card>
     </PageContainer>
   );
-}
+};

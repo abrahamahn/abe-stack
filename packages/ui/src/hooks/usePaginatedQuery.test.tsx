@@ -2,24 +2,24 @@
 /** @vitest-environment jsdom */
 import { QueryCache, QueryCacheProvider } from '@abe-stack/sdk';
 import { act, renderHook, waitFor } from '@testing-library/react';
-
 import { describe, expect, it, vi } from 'vitest';
 
-import { useOffsetPaginatedQuery, usePaginatedQuery } from '../usePaginatedQuery';
+import { useOffsetPaginatedQuery, usePaginatedQuery } from './usePaginatedQuery';
 
-import type { ReactNode } from 'react';
 import type {
-    UseOffsetPaginatedQueryOptions,
-    UseOffsetPaginatedQueryResult,
-    UsePaginatedQueryOptions,
-    UsePaginatedQueryResult,
-} from '../usePaginatedQuery';
+  UseOffsetPaginatedQueryOptions,
+  UseOffsetPaginatedQueryResult,
+  UsePaginatedQueryOptions,
+  UsePaginatedQueryResult,
+} from './usePaginatedQuery';
+import type { ReactNode } from 'react';
 
 const createWrapper = () => {
   const queryCache = new QueryCache({
     defaultStaleTime: 0,
     defaultGcTime: 0,
   });
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   return function Wrapper({ children }: { children: ReactNode }) {
     return <QueryCacheProvider cache={queryCache}>{children}</QueryCacheProvider>;
   };
@@ -40,12 +40,13 @@ describe('usePaginatedQuery', () => {
     it('should have correct type definitions for UsePaginatedQueryOptions', () => {
       const options: UsePaginatedQueryOptions<{ id: string }> = {
         queryKey: ['test'],
-        queryFn: () => Promise.resolve({
-          data: [{ id: '1' }],
-          nextCursor: null,
-          hasNext: false,
-          limit: 10,
-        }),
+        queryFn: () =>
+          Promise.resolve({
+            data: [{ id: '1' }],
+            nextCursor: null,
+            hasNext: false,
+            limit: 10,
+          }),
         enabled: true,
         onDataReceived: () => {},
         onError: () => {},
@@ -85,15 +86,16 @@ describe('usePaginatedQuery', () => {
     it('should have correct type definitions for UseOffsetPaginatedQueryOptions', () => {
       const options: UseOffsetPaginatedQueryOptions<{ id: string }> = {
         queryKey: ['test'],
-        queryFn: () => Promise.resolve({
-          data: [{ id: '1' }],
-          page: 1,
-          limit: 10,
-          total: 100,
-          totalPages: 10,
-          hasNext: true,
-          hasPrev: false,
-        }),
+        queryFn: () =>
+          Promise.resolve({
+            data: [{ id: '1' }],
+            page: 1,
+            limit: 10,
+            total: 100,
+            totalPages: 10,
+            hasNext: true,
+            hasPrev: false,
+          }),
         enabled: true,
       };
 

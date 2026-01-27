@@ -40,9 +40,9 @@ export const Slider = forwardRef<HTMLInputElement, SliderProps>((props, ref) => 
   } = props;
 
   const [currentValue, setValue] = useControllableState<number>({
-    value,
+    ...(value !== undefined && { value }),
     defaultValue: defaultValue ?? min,
-    onChange,
+    ...(onChange !== undefined && { onChange }),
   });
 
   const sliderValue = currentValue ?? min;

@@ -1,7 +1,7 @@
 // apps/server/src/modules/admin/__tests__/userHandlers.test.ts
-import { UserNotFoundError } from '@shared';
-
+import { UserNotFoundError } from '@abe-stack/core';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
+
 import {
     handleGetUser,
     handleListUsers,

@@ -6,9 +6,9 @@
  * deferred promises, and reactive data stores.
  */
 
-export { BatchedQueue } from './BatchedQueue';
-export type { BatchedQueueOptions } from './BatchedQueue';
+export { BatchedQueue } from './batched-queue';
+export type { BatchedQueueOptions } from './batched-queue';
 
-export { DeferredPromise } from './DeferredPromise';
+export { DeferredPromise } from './deferred-promise';
 
-export { ReactiveMap } from './ReactiveMap';
+export { ReactiveMap } from './reactive-map';

@@ -1,10 +1,10 @@
 // packages/db/src/builder/__tests__/cte.test.ts
 import { describe, expect, it } from 'vitest';
 
-import { colEq, eq, gt, isNull } from '../conditions';
-import { select } from '../select';
-import { raw } from '../types';
-import { withCte, withRecursiveCte } from '../cte';
+import { colEq, eq, gt, isNull } from './conditions';
+import { withCte, withRecursiveCte } from './cte';
+import { select } from './select';
+import { raw } from './types';
 
 describe('CTE (Common Table Expressions)', () => {
   describe('simple CTE', () => {
@@ -84,7 +84,7 @@ describe('CTE (Common Table Expressions)', () => {
     it('generates CTE with INSERT query', () => {
       const query = withCte('old_data', select('temp_table').where(gt('age', 30)))
         .insert('archive')
-        .values({ source: 'temp', migrated_at: new Date('2024-01-01') })
+        .values({ source: 'temp', ['migrated_at']: new Date('2024-01-01') })
         .returning('id')
         .toSql();
 
@@ -98,7 +98,7 @@ describe('CTE (Common Table Expressions)', () => {
     it('generates CTE with UPDATE query', () => {
       const query = withCte('active', select('users').where(eq('status', 'active')))
         .update('users')
-        .set({ last_seen: new Date('2024-01-01') })
+        .set({ ['last_seen']: new Date('2024-01-01') })
         .where(eq('id', 'user-123'))
         .returning('id')
         .toSql();

@@ -17,20 +17,20 @@ export interface LoginFormProps {
   error?: string | null;
 }
 
-export function LoginForm({
+export const LoginForm = ({
   onLogin,
   onForgotPassword,
   onModeChange,
   isLoading,
   error,
   onSuccess,
-}: LoginFormProps): ReactElement {
+}: LoginFormProps): ReactElement => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    if (!onLogin) return;
+    if (onLogin === undefined) return;
 
     try {
       await onLogin({ email, password });
@@ -42,7 +42,7 @@ export function LoginForm({
 
   const handleForgotPassword = (): void => {
     void onForgotPassword?.({ email });
-    if (onModeChange) {
+    if (onModeChange !== undefined) {
       onModeChange('forgot-password');
     }
   };
@@ -55,7 +55,7 @@ export function LoginForm({
           <p className="auth-form-subtitle">Sign in to your account</p>
         </div>
 
-        <OAuthButtons mode="login" disabled={isLoading} />
+        <OAuthButtons mode="login" {...(isLoading !== undefined && { disabled: isLoading })} />
 
         <form
           onSubmit={(e) => {
@@ -84,10 +84,10 @@ export function LoginForm({
             disabled={isLoading}
           />
 
-          {error && <div className="auth-form-error">{error}</div>}
+          {error !== undefined && error !== null && <div className="auth-form-error">{error}</div>}
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Signing in...' : 'Sign in'}
+            {isLoading === true ? 'Signing in...' : 'Sign in'}
           </Button>
         </form>
 
@@ -99,7 +99,7 @@ export function LoginForm({
 
         <div className="auth-form-footer">
           Don't have an account?{' '}
-          {onModeChange ? (
+          {onModeChange !== undefined ? (
             <Button
               variant="text"
               onClick={() => {
@@ -116,4 +116,4 @@ export function LoginForm({
       </div>
     </div>
   );
-}
+};

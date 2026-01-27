@@ -7,15 +7,15 @@
  */
 
 import {
-    FILTER_OPERATORS,
-    LOGICAL_OPERATORS,
-    isCompoundFilter,
-    isFilterCondition,
-    type CompoundFilter,
-    type FilterCondition,
-    type FilterOperator,
-    type FilterPrimitive,
-    type FilterValue,
+  FILTER_OPERATORS,
+  LOGICAL_OPERATORS,
+  isCompoundFilter,
+  isFilterCondition,
+  type CompoundFilter,
+  type FilterCondition,
+  type FilterOperator,
+  type FilterPrimitive,
+  type FilterValue,
 } from './types';
 
 // ============================================================================
@@ -386,18 +386,18 @@ const OPERATOR_FUNCTIONS: Record<FilterOperator, OperatorFn> = {
   [FILTER_OPERATORS.LT]: evalLt,
   [FILTER_OPERATORS.LTE]: evalLte,
   [FILTER_OPERATORS.CONTAINS]: evalContains,
-  [FILTER_OPERATORS.STARTS_WITH]: evalStartsWith,
-  [FILTER_OPERATORS.ENDS_WITH]: evalEndsWith,
+  [FILTER_OPERATORS.StartsWith]: evalStartsWith,
+  [FILTER_OPERATORS.EndsWith]: evalEndsWith,
   [FILTER_OPERATORS.LIKE]: evalLike,
   [FILTER_OPERATORS.ILIKE]: evalIlike,
   [FILTER_OPERATORS.IN]: evalIn,
-  [FILTER_OPERATORS.NOT_IN]: evalNotIn,
-  [FILTER_OPERATORS.IS_NULL]: evalIsNull,
-  [FILTER_OPERATORS.IS_NOT_NULL]: evalIsNotNull,
+  [FILTER_OPERATORS.NotIn]: evalNotIn,
+  [FILTER_OPERATORS.IsNull]: evalIsNull,
+  [FILTER_OPERATORS.IsNotNull]: evalIsNotNull,
   [FILTER_OPERATORS.BETWEEN]: evalBetween,
-  [FILTER_OPERATORS.ARRAY_CONTAINS]: evalArrayContains,
-  [FILTER_OPERATORS.ARRAY_CONTAINS_ANY]: evalArrayContainsAny,
-  [FILTER_OPERATORS.FULL_TEXT]: evalFullText,
+  [FILTER_OPERATORS.ArrayContains]: evalArrayContains,
+  [FILTER_OPERATORS.ArrayContainsAny]: evalArrayContainsAny,
+  [FILTER_OPERATORS.FullText]: evalFullText,
 };
 
 // ============================================================================

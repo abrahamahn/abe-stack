@@ -5,7 +5,7 @@
 
 import { SubKeys } from './types';
 
-import type { SubscriptionManager } from './subscriptionManager';
+import type { SubscriptionManager } from './subscription-manager';
 
 /**
  * Helper to publish after a database write

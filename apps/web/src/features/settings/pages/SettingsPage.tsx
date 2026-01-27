@@ -5,10 +5,9 @@
  * Main settings page with tabs for Profile, Security, Sessions, and Billing.
  */
 
-import { useMemo, type ReactElement } from 'react';
-
-import { Button, Card, Container, Heading, Tabs } from '@abe-stack/ui';
 import { useQuery } from '@abe-stack/sdk';
+import { Button, Card, Container, Heading, Tabs } from '@abe-stack/ui';
+import { useMemo, type ReactElement } from 'react';
 
 import {
   AvatarUpload,
@@ -24,7 +23,7 @@ import type { User } from '../api';
 // Tab Content Components
 // ============================================================================
 
-function ProfileTab({ user }: { user: User }): ReactElement {
+const ProfileTab = ({ user }: { user: User }): ReactElement => {
   return (
     <div className="space-y-6">
       <div>
@@ -42,9 +41,9 @@ function ProfileTab({ user }: { user: User }): ReactElement {
       </div>
     </div>
   );
-}
+};
 
-function SecurityTab(): ReactElement {
+const SecurityTab = (): ReactElement => {
   return (
     <div className="space-y-6">
       <div>
@@ -62,9 +61,9 @@ function SecurityTab(): ReactElement {
       </div>
     </div>
   );
-}
+};
 
-function SessionsTab(): ReactElement {
+const SessionsTab = (): ReactElement => {
   return (
     <div>
       <Heading as="h3" size="md" className="mb-4">
@@ -77,9 +76,9 @@ function SessionsTab(): ReactElement {
       <SessionsList />
     </div>
   );
-}
+};
 
-function BillingTab(): ReactElement {
+const BillingTab = (): ReactElement => {
   return (
     <div>
       <Heading as="h3" size="md" className="mb-4">
@@ -97,16 +96,16 @@ function BillingTab(): ReactElement {
       </Card>
     </div>
   );
-}
+};
 
 // ============================================================================
 // Main Settings Page
 // ============================================================================
 
-export function SettingsPage(): ReactElement {
+export const SettingsPage = (): ReactElement => {
   // Fetch current user
   const apiBaseUrl =
-    typeof import.meta.env.VITE_API_URL === 'string' ? import.meta.env.VITE_API_URL : '';
+    typeof import.meta.env['VITE_API_URL'] === 'string' ? import.meta.env['VITE_API_URL'] : '';
   const {
     data: user,
     status,
@@ -138,7 +137,7 @@ export function SettingsPage(): ReactElement {
       {
         id: 'profile',
         label: 'Profile',
-        content: user ? <ProfileTab user={user} /> : null,
+        content: user !== undefined ? <ProfileTab user={user} /> : null,
       },
       {
         id: 'security',
@@ -172,7 +171,7 @@ export function SettingsPage(): ReactElement {
   }
 
   // Error state
-  if (status === 'error' || !user) {
+  if (status === 'error' || user === undefined) {
     return (
       <Container className="py-8">
         <Card className="p-6 text-center">
@@ -208,4 +207,4 @@ export function SettingsPage(): ReactElement {
       </Card>
     </Container>
   );
-}
+};

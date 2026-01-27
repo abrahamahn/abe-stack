@@ -1,7 +1,9 @@
 // apps/server/src/config/infra/server.test.ts
-import type { FullEnv } from '@abe-stack/core/config';
 import { describe, expect, test } from 'vitest';
+
 import { loadServerConfig } from './server';
+
+import type { FullEnv } from '@abe-stack/core/config';
 
 describe('Server Configuration', () => {
   describe('loadServerConfig', () => {

@@ -1,5 +1,6 @@
 // apps/server/src/config/auth/rate-limit.test.ts
 import { describe, expect, it } from 'vitest';
+
 import { DEFAULT_RATE_LIMIT_CONFIG, loadRateLimitConfig } from './rate-limit';
 
 describe('Rate Limit Configuration', () => {

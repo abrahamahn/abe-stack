@@ -6,7 +6,7 @@
  * All operations require admin privileges (enforced at route level).
  */
 
-import { UserNotFoundError } from '@shared';
+import { UserNotFoundError } from '@abe-stack/core';
 
 import type {
     AdminUser,
@@ -71,7 +71,7 @@ export async function listUsers(
   const result = await userRepo.listWithFilters({
     search: filters.search,
     role: filters.role,
-    status: filters.status as 'active' | 'locked' | 'unverified' | undefined,
+    status: filters.status,
     sortBy: mapSortByToColumn(filters.sortBy),
     sortOrder: filters.sortOrder ?? 'desc',
     page: filters.page ?? 1,

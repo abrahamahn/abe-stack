@@ -1,5 +1,4 @@
 // packages/media/src/image-processing.ts
-/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-redundant-type-constituents */
 import sharp from 'sharp';
 
 export interface ImageResizeOptions {
@@ -71,8 +70,8 @@ export async function resizeImage(buffer: Buffer, options: ImageResizeOptions): 
     throw new Error('Width and height must be positive numbers');
   }
 
-  const roundedWidth = width ? Math.round(width) : undefined;
-  const roundedHeight = height ? Math.round(height) : undefined;
+  const roundedWidth = width !== undefined && width !== 0 ? Math.round(width) : undefined;
+  const roundedHeight = height !== undefined && height !== 0 ? Math.round(height) : undefined;
 
   // Map options to Sharp options
   // Test expects: expect(sharp().resize).toHaveBeenCalledWith(800, 600, { fit: 'cover', position: 'center' });
@@ -85,18 +84,18 @@ export async function resizeImage(buffer: Buffer, options: ImageResizeOptions): 
   // undefined width/height let sharp auto-scale
 
   const sharpResizeOpts: sharp.ResizeOptions = {};
-  if (resizeOptions.fit) sharpResizeOpts.fit = resizeOptions.fit;
-  if (resizeOptions.position) sharpResizeOpts.position = resizeOptions.position;
-  if (resizeOptions.withoutEnlargement)
+  if (resizeOptions.fit !== undefined) sharpResizeOpts.fit = resizeOptions.fit;
+  if (resizeOptions.position !== undefined) sharpResizeOpts.position = resizeOptions.position;
+  if (resizeOptions.withoutEnlargement === true)
     sharpResizeOpts.withoutEnlargement = resizeOptions.withoutEnlargement;
-  if (resizeOptions.kernel) sharpResizeOpts.kernel = resizeOptions.kernel;
+  if (resizeOptions.kernel !== undefined) sharpResizeOpts.kernel = resizeOptions.kernel;
 
   // Handling the 'canvas' option from the test expectation implies passing it through?
   // The test: expect(sharp().resize).toHaveBeenCalledWith(800, 600, { fit: 'contain', options: { canvas: 'crop' } });
   // This looks like the implementation blindly passes extra props or keys 'canvas' under 'options'.
   // I will blindly pass 'canvas' inside 'options' property if it exists to satisfy the test matcher,
   // although Sharp 0.33+ simply takes options at top level.
-  if (resizeOptions.canvas) {
+  if (resizeOptions.canvas !== undefined) {
     (sharpResizeOpts as { options?: { canvas: string } }).options = {
       canvas: resizeOptions.canvas,
     };
@@ -126,16 +125,20 @@ export async function optimizeImage(buffer: Buffer, options: ImageFormatOptions)
 
   let chain = sharp(buffer);
 
-  if (options.withMetadata) {
+  if (options.withMetadata === true) {
     chain = chain.withMetadata();
   }
 
-  if (options.removeAlpha) {
+  if (options.removeAlpha === true) {
     chain = chain.removeAlpha();
   }
 
-  if (options.flatten) {
-    chain = chain.flatten(options.background ? { background: options.background } : undefined);
+  if (options.flatten === true) {
+    if (options.background !== undefined) {
+      chain = chain.flatten({ background: options.background });
+    } else {
+      chain = chain.flatten();
+    }
   }
 
   // Format specific options
@@ -154,11 +157,6 @@ export async function optimizeImage(buffer: Buffer, options: ImageFormatOptions)
         progressive: options.progressive,
         adaptiveFiltering: options.adaptiveFiltering,
       });
-      // Test expects interlace if set, maybe mapped from same input?
-      if (options.interlace) {
-        // Re-apply png with specific options if needed, but test calls optimizeImage with { format: 'png', interlace: true }
-        // So input interface should have interlace too
-      }
       break;
     case 'webp':
       chain = chain.webp({
@@ -173,22 +171,6 @@ export async function optimizeImage(buffer: Buffer, options: ImageFormatOptions)
       throw new Error(`Unsupported format: ${String(options.format)}`);
   }
 
-  // Re-applying generic format-specific args because switch logic above is simplified
-  // The tests imply direct mapping of some properties
-  if (options.format === 'png') {
-    const pngOptions: {
-      compressionLevel?: number;
-      adaptiveFiltering?: boolean;
-      interlace?: boolean;
-    } = {};
-    if (options.compressionLevel !== undefined)
-      pngOptions.compressionLevel = options.compressionLevel;
-    if (options.adaptiveFiltering) pngOptions.adaptiveFiltering = options.adaptiveFiltering;
-    if (options.interlace) pngOptions.interlace = options.interlace;
-    // The instruction removes this block, as the options are now directly in the switch case.
-    // chain = chain.png(pngOptions);
-  }
-
   return await chain.toBuffer();
 }
 
@@ -196,7 +178,7 @@ export async function optimizeImage(buffer: Buffer, options: ImageFormatOptions)
  * Validate an image
  */
 export async function validateImage(
-  buffer: Buffer | unknown,
+  buffer: Buffer,
   options: ImageValidationOptions = {},
 ): Promise<ValidationResult> {
   if (!Buffer.isBuffer(buffer)) {
@@ -207,36 +189,51 @@ export async function validateImage(
     return { isValid: false, error: 'Input buffer is empty' };
   }
 
-  if (options.maxSize && buffer.length > options.maxSize) {
+  if (options.maxSize !== undefined && options.maxSize !== 0 && buffer.length > options.maxSize) {
     return { isValid: false, error: 'Image size exceeds maximum allowed size' };
   }
 
   try {
     const s = sharp(buffer);
-    const metadata: Awaited<ReturnType<(typeof sharp)['prototype']['metadata']>> =
-      await s.metadata();
-    const stats: Awaited<ReturnType<(typeof sharp)['prototype']['stats']>> = await s.stats();
+    const metadata: sharp.Metadata = await s.metadata();
+    const stats: sharp.Stats = await s.stats();
 
     // Size Constraints
-    if (options.maxWidth && (metadata.width ?? 0) > options.maxWidth) {
+    if (
+      options.maxWidth !== undefined &&
+      metadata.width !== undefined &&
+      metadata.width > options.maxWidth
+    ) {
       return {
         isValid: false,
         error: `Image width ${String(metadata.width)} exceeds maximum allowed dimensions`,
       };
     }
-    if (options.maxHeight && (metadata.height ?? 0) > options.maxHeight) {
+    if (
+      options.maxHeight !== undefined &&
+      metadata.height !== undefined &&
+      metadata.height > options.maxHeight
+    ) {
       return {
         isValid: false,
         error: `Image height ${String(metadata.height)} exceeds maximum allowed dimensions`,
       };
     }
-    if (options.minWidth && (metadata.width ?? 0) < options.minWidth) {
+    if (
+      options.minWidth !== undefined &&
+      metadata.width !== undefined &&
+      metadata.width < options.minWidth
+    ) {
       return {
         isValid: false,
         error: `Image width ${String(metadata.width)} below minimum required dimensions`,
       };
     }
-    if (options.minHeight && (metadata.height ?? 0) < options.minHeight) {
+    if (
+      options.minHeight !== undefined &&
+      metadata.height !== undefined &&
+      metadata.height < options.minHeight
+    ) {
       return {
         isValid: false,
         error: `Image height ${String(metadata.height)} below minimum required dimensions`,
@@ -244,21 +241,28 @@ export async function validateImage(
     }
 
     // Format Constraints
-    if (options.allowedFormats && !options.allowedFormats.includes(metadata.format ?? '')) {
+    if (
+      options.allowedFormats !== undefined &&
+      metadata.format !== undefined &&
+      !options.allowedFormats.includes(metadata.format)
+    ) {
       return {
         isValid: false,
-        error: `Image format ${String(metadata.format)} format not allowed`,
+        error: `Image format ${metadata.format} format not allowed`,
       };
     }
 
     // Opaque check
-    if (options.requireOpaque && !stats.isOpaque) {
+    if (options.requireOpaque === true && !stats.isOpaque) {
       return { isValid: false, error: 'Image must not contain transparency' };
     }
 
     // Entropy check
-    const entropy = stats.entropy ?? 0;
-    if (options.minEntropy && entropy < options.minEntropy) {
+    if (
+      options.minEntropy !== undefined &&
+      options.minEntropy !== 0 &&
+      stats.entropy < options.minEntropy
+    ) {
       return { isValid: false, error: `Image does not meet minimum entropy` };
     }
 
@@ -267,11 +271,11 @@ export async function validateImage(
       width: metadata.width ?? 0,
       height: metadata.height ?? 0,
       format: metadata.format ?? 'unknown_format',
-      channels: stats.channels ? stats.channels.length : 0,
-      isOpaque: Boolean(stats.isOpaque),
-      entropy: stats.entropy ?? 0,
-      sharpness: stats.sharpness ?? 0,
-      dominantColor: stats.dominant ?? null,
+      channels: stats.channels.length,
+      isOpaque: stats.isOpaque,
+      entropy: stats.entropy,
+      sharpness: stats.sharpness,
+      dominantColor: stats.dominant,
       mimeType: metadata.format ?? 'unknown_format', // Simplified
     };
   } catch (error) {
@@ -295,12 +299,10 @@ export function getImageFormat(buffer: Buffer): string {
   if (hex.startsWith('89504e47')) return 'png';
   if (hex.startsWith('ffd8ffe')) return 'jpeg'; // JPEG files start with 0xFFD8FFE
   if (hex.startsWith('47494638')) return 'gif';
-  if (
-    hex.startsWith('52494646') &&
-    buffer.length >= 12 &&
-    buffer.subarray(8, 12).toString() === 'WEBP'
-  )
-    return 'webp';
+  if (hex.startsWith('52494646') && buffer.length >= 12) {
+    const webpCheck = buffer.subarray(8, 12).toString();
+    if (webpCheck === 'WEBP') return 'webp';
+  }
   if (hex.startsWith('424d')) return 'bmp';
   if (hex.startsWith('000000')) {
     const ftyp = buffer.subarray(4, 8).toString();

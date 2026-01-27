@@ -11,8 +11,8 @@ import {
     MIN_RETENTION_DAYS,
 } from '../loginCleanup';
 
-import type { RawDb } from '@abe-stack/db';
 import type { CleanupOptions } from '../loginCleanup';
+import type { RawDb } from '@abe-stack/db';
 
 // ============================================================================
 // Mock Setup

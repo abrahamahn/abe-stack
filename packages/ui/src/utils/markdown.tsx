@@ -364,11 +364,11 @@ export interface MarkdownProps extends MarkdownOptions {
   className?: string;
 }
 
-export function Markdown({
+export const Markdown = ({
   children,
   className,
   ...options
-}: MarkdownProps): React.ReactElement | null {
+}: MarkdownProps): React.ReactElement | null => {
   const elements = parseMarkdown(children, options);
 
   if (elements.length === 0) {
@@ -376,4 +376,4 @@ export function Markdown({
   }
 
   return <div className={className}>{elements}</div>;
-}
+};

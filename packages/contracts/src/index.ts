@@ -6,8 +6,10 @@
  * Uses manual TypeScript validation instead of zod.
  */
 
+// Schema factory helpers (runtime code)
+export { createSchema } from './schema';
+
 // Contract type definitions
-export { createSchema } from './types';
 export type {
   Contract,
   ContractRouter,
@@ -151,7 +153,7 @@ export type {
   Logger,
   NotificationService,
   StorageService,
-} from './services';
+} from './types';
 
 // Pagination schemas
 export {
@@ -344,7 +346,7 @@ export type {
   SyncStripeResponse,
   UpdatePlanRequest,
   UpdateSubscriptionRequest,
-} from './billing';
+} from './billing/index';
 export {
   // Schemas
   addPaymentMethodRequestSchema,
