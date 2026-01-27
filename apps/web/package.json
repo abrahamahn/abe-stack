@@ -8,7 +8,7 @@
     "build": "vite build",
     "start": "vite preview --open",
     "type-check": "tsc --noEmit",
-    "test": "vitest run --config ../../vitest.config.ts --project web",
+    "test": "vitest run --reporter=dot",
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-web --report-unused-disable-directives"
   },
   "dependencies": {

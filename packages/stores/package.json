@@ -13,7 +13,7 @@
     "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "type-check": "tsc --noEmit",
-    "test": "vitest run --project stores",
+    "test": "vitest run --reporter=dot",
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-stores --report-unused-disable-directives"
   },
   "keywords": [
