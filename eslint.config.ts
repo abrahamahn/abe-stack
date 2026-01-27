@@ -236,6 +236,16 @@ export default [
           modifiers: ['destructured'],
           format: null,
         },
+        {
+          // Allow kebab-case for headers/configs in objects/types (via filter)
+          selector: ['objectLiteralProperty', 'typeProperty'],
+          format: ['camelCase', 'PascalCase'],
+          filter: {
+            regex: '[- ]',
+            match: false,
+          },
+          leadingUnderscore: 'allow',
+        },
       ],
 
       // Template expressions

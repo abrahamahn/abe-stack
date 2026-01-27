@@ -1,7 +1,7 @@
 {
   "name": "@abe-stack/root",
   "version": "1.0.0",
-  "description": "A modern full-stack monorepo with PERN stack - Centralized Config & Tooling",
+  "description": "Abe-Stack: A Modern Full-Stack Typescript Monorepo for Developers.",
   "private": true,
   "engines": {
     "node": ">=18.19 <25"
@@ -12,9 +12,9 @@
     "start": "turbo run start",
     "lint": "turbo run lint --continue",
     "lint:fix": "turbo run lint --continue -- --fix",
-    "type-check": "turbo run type-check",
-    "format": "prettier --config config/.prettierrc --ignore-path config/.prettierignore --cache --cache-location .cache/prettier/.cache --write .",
-    "format:check": "prettier --config config/.prettierrc --ignore-path config/.prettierignore --cache --cache-location .cache/prettier/.cache --check .",
+    "type-check": "turbo run type-check --continue",
+    "format": "prettier --config config/.prettierrc --ignore-path config/.prettierignore --cache --cache-location node_modules/.cache/prettier/.cache --write .",
+    "format:check": "prettier --config config/.prettierrc --ignore-path config/.prettierignore --cache --cache-location node_modules/.cache/prettier/.cache --check .",
     "test": "vitest run --workspace .config/vitest.workspace.ts --reporter=dots",
     "test:watch": "vitest --workspace .config/vitest.workspace.ts --reporter=dots",
     "test:full": "vitest run --workspace .config/vitest.workspace.ts --reporter=verbose",
@@ -26,13 +26,14 @@
     "sync:aliases": "tsx tooling/sync/sync-aliases.ts",
     "sync:aliases:watch": "tsx tooling/sync/sync-aliases.ts --watch",
     "sync:ts": "tsx tooling/sync/sync-ts-references.ts",
-    "clean": "turbo run clean --output-logs=errors-only && rm -rf node_modules .turbo .cache",
+    "health-check": "tsx tooling/scripts/audit.ts",
+    "clean": "turbo run clean --output-logs=errors-only && rm -rf node_modules .turbo  node_modules/.cache",
     "db:push": "pnpm --filter @abe-stack/server db:push",
     "db:bootstrap": "tsx tooling/scripts/dev/bootstrap.ts",
-    "docker:dev": "docker compose --env-file .config/env/.env.development -f config/docker/docker-compose.dev.yml up --build",
-    "docker:dev:down": "docker compose -f config/docker/docker-compose.dev.yml down",
-    "docker:prod": "docker compose --env-file .config/env/.env.production -f config/docker/docker-compose.prod.yml up -d --build",
-    "docker:prod:down": "docker compose -f config/docker/docker-compose.prod.yml down",
+    "docker:dev": "docker compose --env-file .config/env/.env.development -f infra/docker/development/docker-compose.dev.yml up --build",
+    "docker:dev:down": "docker compose -f infra/docker/development/docker-compose.dev.yml down",
+    "docker:prod": "docker compose --env-file .config/env/.env.production -f infra/docker/production/docker-compose.prod.yml up -d --build",
+    "docker:prod:down": "docker compose -f infra/docker/production/docker-compose.prod.yml down",
     "pre-commit": "pnpm theme:build && pnpm format && pnpm lint && pnpm type-check"
   },
   "devDependencies": {
@@ -73,12 +74,7 @@
       "electron-winstaller",
       "esbuild",
       "unrs-resolver"
-    ],
-    "shamefully-hoist": false,
-    "public-hoist-pattern": [
-      "@types*"
-    ],
-    "link-workspace-packages": true
+    ]
   },
   "packageManager": "pnpm@10.26.2"
 }
