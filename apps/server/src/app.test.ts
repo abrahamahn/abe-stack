@@ -568,10 +568,9 @@ describe('App', () => {
       expect(typeof errorHandler).toBe('function');
     });
 
-    it('should handle AppError as unexpected error due to module identity', async () => {
-      // Note: Due to vite-tsconfig-paths resolving @abe-stack/core to source files,
-      // the BaseError class that app.ts imports differs from test imports.
-      // This test verifies the fallback behavior when instanceof check fails.
+    it('should handle AppError correctly with proper status code', async () => {
+      // With proper module resolution, AppError is now correctly recognized
+      // and handled with its actual status code and message.
       const config = createMockConfig();
       const mockServer = createMockServer();
 
@@ -605,12 +604,13 @@ describe('App', () => {
 
         await errorHandler(error, mockRequest, mockReply);
 
-        // Due to module identity issues, AppError is treated as unexpected error
-        expect(logErrorMock).toHaveBeenCalledWith({ err: error }, 'Unexpected Crash');
-        expect(replyStatusMock).toHaveBeenCalledWith(500);
+        // AppError is now properly recognized and handled with its status code
+        expect(logWarnMock).toHaveBeenCalledWith({ err: error }, 'Operational Error');
+        expect(replyStatusMock).toHaveBeenCalledWith(400);
         expect(replySendMock).toHaveBeenCalledWith({
-          error: 'InternalServerError',
-          message: 'Something went wrong',
+          code: undefined,
+          error: 'AppError',
+          message: 'Test error',
         });
       }
     });

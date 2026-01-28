@@ -131,12 +131,6 @@ describe('ProfileForm', () => {
       error: null,
       reset: mockReset,
     });
-
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
   });
 
   // ============================================================================
@@ -550,6 +544,7 @@ describe('ProfileForm', () => {
     });
 
     it('should hide success message after 3 seconds', () => {
+      vi.useFakeTimers();
       vi.mocked(useProfileUpdate).mockImplementation(({ onSuccess }) => {
         if (onSuccess !== undefined) {
           onSuccess();
@@ -570,9 +565,11 @@ describe('ProfileForm', () => {
       vi.advanceTimersByTime(3000);
 
       expect(screen.queryByText('Profile updated successfully')).not.toBeInTheDocument();
+      vi.useRealTimers();
     });
 
     it('should not hide success message before 3 seconds', () => {
+      vi.useFakeTimers();
       vi.mocked(useProfileUpdate).mockImplementation(({ onSuccess }) => {
         if (onSuccess !== undefined) {
           onSuccess();
@@ -593,6 +590,7 @@ describe('ProfileForm', () => {
       vi.advanceTimersByTime(2999);
 
       expect(screen.getByText('Profile updated successfully')).toBeInTheDocument();
+      vi.useRealTimers();
     });
   });
 

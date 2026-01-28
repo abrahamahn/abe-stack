@@ -3,6 +3,10 @@ import path from 'node:path';
 import { mergeConfig } from 'vitest/config';
 import { baseConfig } from '../../vitest.config';
 
+const corePkg = path.resolve(__dirname, '../../packages/core/src');
+const contractsPkg = path.resolve(__dirname, '../../packages/contracts/src');
+const dbPkg = path.resolve(__dirname, '../../packages/db/src');
+
 export default mergeConfig(baseConfig, {
   test: {
     name: 'server',
@@ -15,8 +19,34 @@ export default mergeConfig(baseConfig, {
     },
   },
   resolve: {
-    alias: {
-      '@/': path.resolve(__dirname, 'src') + '/',
-    },
+    alias: [
+      // Core package shortcut exports (must come before regex)
+      { find: '@abe-stack/core/http', replacement: `${corePkg}/infrastructure/http/index.ts` },
+      { find: '@abe-stack/core/crypto', replacement: `${corePkg}/infrastructure/crypto/index.ts` },
+      { find: '@abe-stack/core/errors', replacement: `${corePkg}/infrastructure/errors/index.ts` },
+      { find: '@abe-stack/core/shared', replacement: `${corePkg}/shared/index.ts` },
+      { find: '@abe-stack/core/utils', replacement: `${corePkg}/utils/index.ts` },
+      { find: '@abe-stack/core/env', replacement: `${corePkg}/config/index.ts` },
+      { find: '@abe-stack/core/pubsub', replacement: `${corePkg}/infrastructure/pubsub/index.ts` },
+      { find: '@abe-stack/core/config', replacement: `${corePkg}/config/index.ts` },
+      // Handle subpath imports with regex
+      {
+        find: /^@abe-stack\/contracts\/(.*)$/,
+        replacement: `${contractsPkg}/$1`,
+      },
+      {
+        find: /^@abe-stack\/core\/(.*)$/,
+        replacement: `${corePkg}/$1`,
+      },
+      // Handle main package imports
+      { find: '@abe-stack/contracts', replacement: `${contractsPkg}/index.ts` },
+      { find: '@abe-stack/core', replacement: `${corePkg}/index.ts` },
+      { find: '@abe-stack/db', replacement: `${dbPkg}/index.ts` },
+      // Server-specific aliases
+      {
+        find: /^@\/(.*)$/,
+        replacement: path.resolve(__dirname, 'src/$1'),
+      },
+    ],
   },
 });

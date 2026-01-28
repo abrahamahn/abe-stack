@@ -47,9 +47,13 @@ vi.mock('fastify', () => ({
   default: vi.fn(() => mockFastifyInstance),
 }));
 
-vi.mock('@abe-stack/core', () => ({
-  createConsoleLogger: mockCreateConsoleLogger,
-}));
+vi.mock('@abe-stack/core', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/core')>();
+  return {
+    ...actual,
+    createConsoleLogger: mockCreateConsoleLogger,
+  };
+});
 
 // Mock the http index - using both alias and relative paths to ensure coverage
 vi.mock('@http/index', () => ({

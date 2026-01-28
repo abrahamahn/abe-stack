@@ -252,6 +252,25 @@ export type {
   SortOrder,
   UrlSearchParamsInput,
 } from './infrastructure/search';
+export {
+  createListInsertOperation,
+  createListRemoveOperation,
+  createSetOperation,
+  createTransaction,
+  invertOperation,
+  invertTransaction,
+  mergeTransactions,
+  isListInsertOperation,
+  isListRemoveOperation,
+  isSetOperation,
+} from './infrastructure/transactions';
+export type {
+  ListInsertOperation as TransactionListInsertOperation,
+  ListRemoveOperation as TransactionListRemoveOperation,
+  Operation as TransactionOperation,
+  SetOperation as TransactionSetOperation,
+  Transaction as TransactionType,
+} from './infrastructure/transactions';
 
 // ============================================================================
 // Modules (Domain Logic)

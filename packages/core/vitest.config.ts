@@ -1,9 +1,24 @@
 // packages/core/vitest.config.ts
 
+import path from 'path';
 import { mergeConfig } from 'vitest/config';
 import { baseConfig } from '../../vitest.config';
 
 export default mergeConfig(baseConfig, {
+  resolve: {
+    alias: [
+      // Handle subpath imports first (e.g., @abe-stack/contracts/auth)
+      {
+        find: /^@abe-stack\/contracts\/(.*)$/,
+        replacement: path.resolve(__dirname, '../contracts/src/$1'),
+      },
+      // Handle main package import
+      {
+        find: '@abe-stack/contracts',
+        replacement: path.resolve(__dirname, '../contracts/src/index.ts'),
+      },
+    ],
+  },
   test: {
     name: 'core',
     environment: 'node',
