@@ -1,4 +1,4 @@
-// packages/sdk/src/undo/__tests__/UndoRedoStack.test.ts
+// packages/sdk/src/undo/UndoRedoStack.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
 import { UndoRedoStack, createUndoRedoStack } from '../UndoRedoStack';

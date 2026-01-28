@@ -7,7 +7,6 @@
  */
 
 import { jobListQuerySchema } from '@abe-stack/core';
-import { PostgresQueueStore, type JobListOptions } from '@infrastructure';
 import { ERROR_MESSAGES, type AppContext } from '@shared';
 
 import {
@@ -22,6 +21,8 @@ import {
 
 import type { JobActionResponse, JobDetails, JobListResponse, QueueStats } from '@abe-stack/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+
+import { PostgresQueueStore, type JobListOptions } from '@/infrastructure';
 
 // ============================================================================
 // Helper to get queue store
@@ -65,13 +66,21 @@ export async function handleListJobs(
 
     const query = queryResult.data;
     const options: JobListOptions = {
-      status: query.status,
-      name: query.name,
       page: query.page,
       limit: query.limit,
-      sortBy: query.sortBy,
-      sortOrder: query.sortOrder,
     };
+    if (query.status !== undefined) {
+      options.status = query.status;
+    }
+    if (query.name !== undefined) {
+      options.name = query.name;
+    }
+    if (query.sortBy !== undefined) {
+      options.sortBy = query.sortBy;
+    }
+    if (query.sortOrder !== undefined) {
+      options.sortOrder = query.sortOrder;
+    }
 
     const result = await listJobs(store, options);
 

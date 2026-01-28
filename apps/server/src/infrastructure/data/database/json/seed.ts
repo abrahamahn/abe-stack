@@ -100,10 +100,10 @@ type WhereCondition<T> = Partial<T> | ((record: T) => boolean);
 
 /** Query options */
 interface QueryOptions<T> {
-  where?: WhereCondition<T>;
-  limit?: number;
-  offset?: number;
-  orderBy?: { field: keyof T; direction: 'asc' | 'desc' };
+  where?: WhereCondition<T> | undefined;
+  limit?: number | undefined;
+  offset?: number | undefined;
+  orderBy?: { field: keyof T; direction: 'asc' | 'desc' } | undefined;
 }
 
 function isDrizzleSql(obj: unknown): obj is { queryChunks?: unknown[]; sql?: string } {

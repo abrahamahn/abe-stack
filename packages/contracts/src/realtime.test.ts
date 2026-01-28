@@ -1,4 +1,4 @@
-// packages/core/src/contracts/__tests__/realtime.test.ts
+// packages/contracts/src/realtime.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

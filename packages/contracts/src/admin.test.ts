@@ -1,4 +1,4 @@
-// packages/core/src/contracts/__tests__/admin.test.ts
+// packages/contracts/src/admin.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { adminContract, unlockAccountRequestSchema, unlockAccountResponseSchema } from './admin';

@@ -92,16 +92,16 @@ function defaultGetRecordPointer(request: FastifyRequest): RecordPointer | null 
   const body = request.body as Record<string, unknown> | undefined;
 
   // Try params first
-  const table = params?.table;
-  const id = params?.id ?? params?.recordId;
+  const table = params?.['table'];
+  const id = params?.['id'] ?? params?.['recordId'];
 
   if (table != null && table !== '' && id != null && id !== '') {
     return { table, id };
   }
 
   // Try body
-  const bodyTable = body?.table as string | undefined;
-  const bodyId = (body?.id ?? body?.recordId) as string | undefined;
+  const bodyTable = body?.['table'] as string | undefined;
+  const bodyId = (body?.['id'] ?? body?.['recordId']) as string | undefined;
 
   if (bodyTable != null && bodyTable !== '' && bodyId != null && bodyId !== '') {
     return { table: bodyTable, id: bodyId };
@@ -181,11 +181,14 @@ export function createPermissionMiddleware(options: PermissionMiddlewareOptions)
     table?: string,
     getRecordId?: (request: FastifyRequest) => string | null,
   ): PreHandlerHook {
-    return createPermissionGuard({
+    const guardOpts: PermissionGuardOptions = {
       table: table ?? '',
       permission: 'read',
-      getRecordId,
-    });
+    };
+    if (getRecordId !== undefined) {
+      guardOpts.getRecordId = getRecordId;
+    }
+    return createPermissionGuard(guardOpts);
   }
 
   /**
@@ -196,12 +199,17 @@ export function createPermissionMiddleware(options: PermissionMiddlewareOptions)
     getRecordId?: (request: FastifyRequest) => string | null,
     operation?: 'create' | 'update' | 'delete',
   ): PreHandlerHook {
-    return createPermissionGuard({
+    const guardOpts: PermissionGuardOptions = {
       table: table ?? '',
       permission: 'write',
-      getRecordId,
-      operation,
-    });
+    };
+    if (getRecordId !== undefined) {
+      guardOpts.getRecordId = getRecordId;
+    }
+    if (operation !== undefined) {
+      guardOpts.operation = operation;
+    }
+    return createPermissionGuard(guardOpts);
   }
 
   /**
@@ -211,12 +219,15 @@ export function createPermissionMiddleware(options: PermissionMiddlewareOptions)
     table?: string,
     getRecordId?: (request: FastifyRequest) => string | null,
   ): PreHandlerHook {
-    return createPermissionGuard({
+    const guardOpts: PermissionGuardOptions = {
       table: table ?? '',
       permission: 'delete',
-      getRecordId,
       operation: 'delete',
-    });
+    };
+    if (getRecordId !== undefined) {
+      guardOpts.getRecordId = getRecordId;
+    }
+    return createPermissionGuard(guardOpts);
   }
 
   /**
@@ -226,11 +237,14 @@ export function createPermissionMiddleware(options: PermissionMiddlewareOptions)
     table?: string,
     getRecordId?: (request: FastifyRequest) => string | null,
   ): PreHandlerHook {
-    return createPermissionGuard({
+    const guardOpts: PermissionGuardOptions = {
       table: table ?? '',
       permission: 'admin',
-      getRecordId,
-    });
+    };
+    if (getRecordId !== undefined) {
+      guardOpts.getRecordId = getRecordId;
+    }
+    return createPermissionGuard(guardOpts);
   }
 
   /**
@@ -258,7 +272,7 @@ export function createPermissionMiddleware(options: PermissionMiddlewareOptions)
        } else if (guardOptions.table !== '') {
          // Try to get ID from params
          const params = request.params as Record<string, string> | undefined;
-         const id = params?.id ?? params?.recordId;
+         const id = params?.['id'] ?? params?.['recordId'];
          if (id != null && id !== '') {
           pointer = { table: guardOptions.table, id };
         }

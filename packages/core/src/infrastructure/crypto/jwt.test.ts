@@ -2,14 +2,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
-    decode,
-    jwtDecode,
-    JwtError,
-    jwtSign,
-    jwtVerify,
-    sign,
-    verify,
-    verifyWithRotation,
+  decode,
+  jwtDecode,
+  JwtError,
+  jwtSign,
+  jwtVerify,
+  sign,
+  verify,
+  verifyWithRotation,
 } from './jwt';
 
 describe('JWT', () => {
@@ -120,10 +120,10 @@ describe('JWT', () => {
     });
 
     it('should reject tokens with unsupported algorithm', () => {
-      // Manually craft a token with "none" algorithm
+      // Manually craft a token with "none" algorithm and a dummy signature
       const header = Buffer.from(JSON.stringify({ alg: 'none', typ: 'JWT' })).toString('base64url');
       const encodedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
-      const maliciousToken = `${header}.${encodedPayload}.`;
+      const maliciousToken = `${header}.${encodedPayload}.dummy`;
 
       expect(() => verify(maliciousToken, secret)).toThrow('Algorithm not supported');
     });

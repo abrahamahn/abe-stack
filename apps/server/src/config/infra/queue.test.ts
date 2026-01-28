@@ -5,9 +5,25 @@ import { DEFAULT_QUEUE_CONFIG, loadQueueConfig } from './queue';
 
 import type { FullEnv } from '@abe-stack/core/config';
 
+/**
+ * Creates a base environment with queue-related defaults (as applied by Zod schema).
+ * Used to simulate properly parsed FullEnv in tests.
+ */
+function createBaseEnv(overrides: Partial<FullEnv> = {}): FullEnv {
+  return {
+    QUEUE_PROVIDER: 'local',
+    QUEUE_POLL_INTERVAL_MS: 1000,
+    QUEUE_CONCURRENCY: 5,
+    QUEUE_MAX_ATTEMPTS: 3,
+    QUEUE_BACKOFF_BASE_MS: 1000,
+    QUEUE_MAX_BACKOFF_MS: 300000,
+    ...overrides,
+  } as unknown as FullEnv;
+}
+
 describe('Queue Configuration', () => {
   it('loads default configuration when no environment variables are set', () => {
-    const config = loadQueueConfig({} as unknown as FullEnv);
+    const config = loadQueueConfig(createBaseEnv());
 
     expect(config).toMatchObject({
       provider: 'local',
@@ -20,14 +36,14 @@ describe('Queue Configuration', () => {
   });
 
   it('loads custom configuration from environment variables', () => {
-    const env = {
+    const env = createBaseEnv({
       QUEUE_PROVIDER: 'redis',
       QUEUE_CONCURRENCY: 10,
       QUEUE_POLL_INTERVAL_MS: 500,
       QUEUE_MAX_ATTEMPTS: 5,
       QUEUE_BACKOFF_BASE_MS: 2000,
       QUEUE_MAX_BACKOFF_MS: 600000,
-    } as unknown as FullEnv;
+    });
 
     const config = loadQueueConfig(env);
 
@@ -42,8 +58,8 @@ describe('Queue Configuration', () => {
   });
 
   it('correctly toggles between local and redis providers', () => {
-    const local = loadQueueConfig({ QUEUE_PROVIDER: 'local' } as unknown as FullEnv);
-    const redis = loadQueueConfig({ QUEUE_PROVIDER: 'redis' } as unknown as FullEnv);
+    const local = loadQueueConfig(createBaseEnv({ QUEUE_PROVIDER: 'local' }));
+    const redis = loadQueueConfig(createBaseEnv({ QUEUE_PROVIDER: 'redis' }));
 
     expect(local.provider).toBe('local');
     expect(redis.provider).toBe('redis');

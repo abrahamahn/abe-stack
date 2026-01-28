@@ -2,7 +2,7 @@
 import { LocalStorageProvider } from './providers/localStorageProvider';
 import { S3StorageProvider } from './providers/s3StorageProvider';
 
-import type { StorageConfig, StorageProvider } from '@storage/types';
+import type { StorageConfig, StorageProvider } from '@data/storage/types';
 
 function assertNever(value: never): never {
   throw new Error(

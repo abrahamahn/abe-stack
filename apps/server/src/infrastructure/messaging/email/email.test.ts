@@ -1,18 +1,18 @@
-// apps/server/src/infrastructure/messaging/email/__tests__/email.test.ts
+// apps/server/src/infrastructure/messaging/email/email.test.ts
 
-import { ConsoleEmailService } from '@email/consoleEmailService';
-import { createEmailService } from '@email/factory';
-import { SmtpEmailService } from '@email/smtpEmailService';
-import { emailTemplates } from '@email/templates';
+import { ConsoleEmailService } from './consoleEmailService';
+import { createEmailService } from './factory';
+import { SmtpEmailService } from './smtpEmailService';
+import { emailTemplates } from './templates';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { EmailConfig } from '@/config';
-import type { EmailOptions } from '@email/types';
+import type { EmailOptions } from './types';
 
 // Mock the SmtpClient
 const mockSend = vi.fn().mockResolvedValue({ success: true, messageId: 'smtp-123' });
 
-vi.mock('../smtp.js', () => ({
+vi.mock('./smtp', () => ({
   SmtpClient: class MockSmtpClient {
     send = mockSend;
     constructor(public config: unknown) {}

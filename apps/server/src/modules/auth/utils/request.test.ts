@@ -1,5 +1,5 @@
-// apps/server/src/modules/auth/utils/__tests__/request.test.ts
-import { extractRequestInfo } from '@modules/auth/utils/request';
+// apps/server/src/modules/auth/utils/request.test.ts
+import { extractRequestInfo } from './request';
 import { describe, expect, test } from 'vitest';
 
 describe('Request Utilities', () => {

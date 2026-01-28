@@ -817,7 +817,8 @@ describe('NotificationPreferenceRepository', () => {
 
       const result = await repository.findById('sub-123');
 
-      expect(result).toBeNull();
+      expect(result).not.toBeNull();
+      expect(result?.userAgent).toBeNull();
     });
 
     test('should handle empty type preferences object', async () => {

@@ -119,13 +119,16 @@ export function createGoogleProvider(clientId: string, clientSecret: string): OA
 
       const data = (await response.json()) as GoogleUserInfo;
 
-      return {
+      const result: OAuthUserInfo = {
         id: data.id,
         email: data.email,
         name: data.name !== '' ? data.name : null,
         emailVerified: data.verified_email,
-        picture: data.picture,
       };
+      if (data.picture !== undefined && data.picture !== '') {
+        result.picture = data.picture;
+      }
+      return result;
     },
   };
 }

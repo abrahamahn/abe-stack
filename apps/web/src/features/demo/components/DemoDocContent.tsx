@@ -1,9 +1,10 @@
 // apps/web/src/features/demo/components/DemoDocContent.tsx
 import { Heading, Markdown, Skeleton, Text } from '@abe-stack/ui';
-import { getComponentDocsLazy } from '@demo/utils/lazyDocs';
 import { useEffect, useState } from 'react';
 
-import type { ComponentDemo } from '@demo/types';
+import { getComponentDocsLazy } from '../utils/lazyDocs';
+
+import type { ComponentDemo } from '../types';
 import type { ReactElement } from 'react';
 
 type DemoDocContentProps = {

@@ -13,24 +13,32 @@ import {
 
 import type { FullEnv } from '@abe-stack/core/config';
 
+/**
+ * Creates a base environment with search-related defaults (as applied by Zod schema).
+ * Used to simulate properly parsed FullEnv in tests.
+ */
+function createBaseEnv(overrides: Partial<FullEnv> = {}): FullEnv {
+  return {
+    SEARCH_PROVIDER: 'sql',
+    ...overrides,
+  } as unknown as FullEnv;
+}
+
 describe('Search Configuration', () => {
   describe('Elasticsearch Configuration', () => {
     it('loads default configuration when no environment variables are set', () => {
-      const env = {} as unknown as FullEnv;
+      const env = createBaseEnv();
       const config = loadElasticsearchConfig(env);
 
       expect(config).toEqual({
         node: 'http://localhost:9200',
         index: 'default',
-        apiKey: undefined,
-        auth: undefined,
-        requestTimeout: undefined,
-        tls: undefined,
+        tls: false,
       });
     });
 
     it('loads custom configuration from environment variables', () => {
-      const env = {
+      const env = createBaseEnv({
         ELASTICSEARCH_NODE: 'https://my-es-cluster.com',
         ELASTICSEARCH_INDEX: 'my-index',
         ELASTICSEARCH_USERNAME: 'elastic-user',
@@ -38,7 +46,7 @@ describe('Search Configuration', () => {
         ELASTICSEARCH_API_KEY: 'my-api-key',
         ELASTICSEARCH_TLS: 'true',
         ELASTICSEARCH_REQUEST_TIMEOUT_MS: 60000,
-      } as unknown as FullEnv;
+      });
 
       const config = loadElasticsearchConfig(env);
 
@@ -56,12 +64,12 @@ describe('Search Configuration', () => {
     });
 
     it('loads configuration with basic auth only', () => {
-      const env = {
+      const env = createBaseEnv({
         ELASTICSEARCH_NODE: 'http://localhost:9200',
         ELASTICSEARCH_INDEX: 'my-index',
         ELASTICSEARCH_USERNAME: 'elastic-user',
         ELASTICSEARCH_PASSWORD: 'elastic-password',
-      } as unknown as FullEnv;
+      });
 
       const config = loadElasticsearchConfig(env);
 
@@ -73,11 +81,11 @@ describe('Search Configuration', () => {
     });
 
     it('loads configuration with API key only', () => {
-      const env = {
+      const env = createBaseEnv({
         ELASTICSEARCH_NODE: 'https://my-es-cluster.com',
         ELASTICSEARCH_INDEX: 'my-index',
         ELASTICSEARCH_API_KEY: 'my-api-key',
-      } as unknown as FullEnv;
+      });
 
       const config = loadElasticsearchConfig(env);
 
@@ -86,10 +94,10 @@ describe('Search Configuration', () => {
     });
 
     it('handles TLS and request timeout correctly', () => {
-      const env = {
+      const env = createBaseEnv({
         ELASTICSEARCH_TLS: 'false',
         ELASTICSEARCH_REQUEST_TIMEOUT_MS: 15000,
-      } as unknown as FullEnv;
+      });
 
       const config = loadElasticsearchConfig(env);
 
@@ -127,28 +135,25 @@ describe('Search Configuration', () => {
 
   describe('SQL Search Configuration', () => {
     it('loads default configuration when no environment variables are set', () => {
-      const env = {} as unknown as FullEnv;
+      const env = createBaseEnv();
       const config = loadSqlSearchConfig(env);
 
       expect(config).toEqual({
         defaultPageSize: 50,
         maxPageSize: 1000,
-        maxQueryDepth: undefined,
-        maxConditions: undefined,
-        logging: undefined,
-        timeout: undefined,
+        logging: false,
       });
     });
 
     it('loads custom configuration from environment variables', () => {
-      const env = {
+      const env = createBaseEnv({
         SQL_SEARCH_DEFAULT_PAGE_SIZE: 25,
         SQL_SEARCH_MAX_PAGE_SIZE: 500,
         SQL_SEARCH_MAX_QUERY_DEPTH: 10,
         SQL_SEARCH_MAX_CONDITIONS: 50,
         SQL_SEARCH_LOGGING: 'true',
         SQL_SEARCH_TIMEOUT_MS: 10000,
-      } as unknown as FullEnv;
+      });
 
       const config = loadSqlSearchConfig(env);
 
@@ -163,20 +168,20 @@ describe('Search Configuration', () => {
     });
 
     it('handles boolean conversion for logging', () => {
-      const env = {
+      const env = createBaseEnv({
         SQL_SEARCH_LOGGING: 'true',
-      } as unknown as FullEnv;
+      });
 
       const config = loadSqlSearchConfig(env);
       expect(config.logging).toBe(true);
     });
 
     it('handles zero values correctly for optional fields', () => {
-      const env = {
+      const env = createBaseEnv({
         SQL_SEARCH_MAX_QUERY_DEPTH: 0,
         SQL_SEARCH_MAX_CONDITIONS: 0,
         SQL_SEARCH_TIMEOUT_MS: 0,
-      } as unknown as FullEnv;
+      });
 
       const config = loadSqlSearchConfig(env);
 

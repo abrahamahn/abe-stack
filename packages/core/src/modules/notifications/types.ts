@@ -145,7 +145,7 @@ export interface NotificationAction {
   /** Button text */
   title: string;
   /** Optional icon URL */
-  icon?: string;
+  icon?: string | undefined;
 }
 
 /**
@@ -269,9 +269,9 @@ export interface SubscribeResponse {
  */
 export interface UnsubscribeRequest {
   /** Subscription ID or endpoint to unsubscribe */
-  subscriptionId?: string;
+  subscriptionId?: string | undefined;
   /** Endpoint URL (alternative to subscriptionId) */
-  endpoint?: string;
+  endpoint?: string | undefined;
 }
 
 /**

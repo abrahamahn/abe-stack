@@ -1,4 +1,4 @@
-// packages/ui/src/hooks/__tests__/useThemeMode.test.ts
+// packages/ui/src/hooks/useThemeMode.test.ts
 /** @vitest-environment jsdom */
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

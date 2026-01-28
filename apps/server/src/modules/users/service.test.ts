@@ -1,5 +1,5 @@
-// apps/server/src/modules/users/__tests__/service.test.ts
-import { getUserById } from '@users/service';
+// apps/server/src/modules/users/service.test.ts
+import { getUserById } from './service';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { UserRepository } from '@abe-stack/db';

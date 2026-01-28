@@ -1,4 +1,4 @@
-// apps/web/src/features/demo/components/__tests__/DemoTopBar.test.tsx
+// apps/web/src/features/demo/components/DemoTopBar.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -19,13 +19,17 @@ const mockUseSidePeek = vi.fn().mockReturnValue({
 });
 
 // Mock @abe-stack/core
-vi.mock('@abe-stack/core', () => ({
-  toastStore: {
-    getState: (): { show: typeof vi.fn } => ({
-      show: vi.fn(),
-    }),
-  },
-}));
+vi.mock('@abe-stack/core', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/core')>();
+  return {
+    ...actual,
+    toastStore: {
+      getState: (): { show: typeof vi.fn } => ({
+        show: vi.fn(),
+      }),
+    },
+  };
+});
 
 // Mock @abe-stack/ui components and router
 vi.mock('@abe-stack/ui', () => ({

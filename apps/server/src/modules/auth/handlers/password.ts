@@ -6,13 +6,7 @@
  */
 
 import { requestPasswordReset, resetPassword, setPassword } from '@auth/service';
-import {
-    EmailSendError,
-    mapErrorToResponse,
-    SUCCESS_MESSAGES,
-    type AppContext,
-    type RequestWithCookies,
-} from '@shared';
+import { mapErrorToResponse, SUCCESS_MESSAGES, type AppContext, type RequestWithCookies } from '@shared';
 
 export async function handleForgotPassword(
   ctx: AppContext,
@@ -32,9 +26,11 @@ export async function handleForgotPassword(
   } catch (error) {
     // Email send failed - log but return success to prevent user enumeration
     // The user can retry the forgot password request
-    if (error instanceof EmailSendError) {
+    // Use error.name check instead of instanceof for ESM compatibility
+    if (error instanceof Error && error.name === 'EmailSendError') {
+      const emailError = error as Error & { originalError?: Error };
       ctx.log.error(
-        { email: body.email, originalError: error.originalError?.message },
+        { email: body.email, originalError: emailError.originalError?.message },
         'Failed to send password reset email',
       );
       // Return success anyway to prevent enumeration (user can retry)
@@ -77,7 +73,7 @@ export async function handleSetPassword(
   try {
     // User ID comes from the authenticated request
     const userId = req.user?.userId;
-    if (userId === undefined || userId === '') {
+    if (userId === undefined || userId === null || userId === '') {
       return {
         status: 401,
         body: { message: 'Authentication required' },

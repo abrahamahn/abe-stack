@@ -1,3 +1,4 @@
+// packages/db/vitest.config.ts
 import { mergeConfig } from 'vitest/config';
 import { baseConfig } from '../../vitest.config';
 

@@ -7,8 +7,8 @@ import { DemoBottomBar, DemoMainLayout, DemoTopBar, SidePeekDemoContent } from '
 import { useDemoKeyboard, useDemoPanes, useDemoTheme } from '@demo/hooks';
 import { useCallback, useMemo, useState } from 'react';
 
+import type { ComponentDemo } from '../types';
 import type { AuthMode } from '@auth/components/AuthForms';
-import type { ComponentDemo } from '@demo/types';
 
 export const DemoPage = (): React.ReactElement => {
   const { cycleTheme, getThemeIcon, getThemeLabel, resolvedTheme } = useDemoTheme();

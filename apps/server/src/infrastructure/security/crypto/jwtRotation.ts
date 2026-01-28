@@ -175,11 +175,14 @@ export function checkTokenSecret(
       }
     }
 
-    return {
+    const result: { isValid: false; usedSecret: 'none'; error?: JwtError } = {
       isValid: false,
       usedSecret: 'none',
-      error: currentError instanceof JwtError ? currentError : undefined,
     };
+    if (currentError instanceof JwtError) {
+      result.error = currentError;
+    }
+    return result;
   }
 }
 

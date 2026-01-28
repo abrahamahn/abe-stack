@@ -8,7 +8,12 @@
  * - Content-Type: application/json (but accessed as raw Buffer)
  */
 
-import { WebhookEventAlreadyProcessedError, WebhookSignatureError } from '@abe-stack/core';
+// Error classes used in type comments only - instanceof checks use error.name for reliability
+// across module boundaries in monorepo setup
+// import { WebhookEventAlreadyProcessedError, WebhookSignatureError } from '@abe-stack/core';
+
+import { handlePayPalWebhook } from './paypal-webhook';
+import { handleStripeWebhook } from './stripe-webhook';
 
 import type { AppContext } from '@shared';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
@@ -19,9 +24,6 @@ declare module 'fastify' {
     rawBody?: Buffer;
   }
 }
-
-import { handlePayPalWebhook } from './paypal-webhook';
-import { handleStripeWebhook } from './stripe-webhook';
 
 // ============================================================================
 // Route Registration
@@ -59,7 +61,7 @@ export function registerWebhookRoutes(app: FastifyInstance, ctx: AppContext): vo
         return reply.status(500).send({ error: 'Stripe not configured' });
       }
 
-      if (!request.rawBody) {
+      if (request.rawBody === undefined) {
         return reply.status(400).send({ error: 'Missing request body' });
       }
 
@@ -84,12 +86,15 @@ export function registerWebhookRoutes(app: FastifyInstance, ctx: AppContext): vo
 
         return await reply.status(200).send(result);
       } catch (error) {
-        if (error instanceof WebhookSignatureError) {
-          return reply.status(400).send({ error: 'Invalid webhook signature' });
-        }
-        if (error instanceof WebhookEventAlreadyProcessedError) {
-          // Return success for idempotent requests
-          return reply.status(200).send({ success: true, message: 'Event already processed' });
+        // Use error name/code checking for reliability across module boundaries
+        if (error instanceof Error) {
+          if (error.name === 'WebhookSignatureError') {
+            return reply.status(400).send({ error: 'Invalid webhook signature' });
+          }
+          if (error.name === 'WebhookEventAlreadyProcessedError') {
+            // Return success for idempotent requests
+            return reply.status(200).send({ success: true, message: 'Event already processed' });
+          }
         }
         ctx.log.error({ error }, 'Stripe webhook error');
         return reply.status(500).send({ error: 'Webhook processing failed' });
@@ -125,7 +130,7 @@ export function registerWebhookRoutes(app: FastifyInstance, ctx: AppContext): vo
         return reply.status(500).send({ error: 'PayPal not configured' });
       }
 
-      if (!request.rawBody) {
+      if (request.rawBody === undefined) {
         return reply.status(400).send({ error: 'Missing request body' });
       }
 
@@ -151,12 +156,15 @@ export function registerWebhookRoutes(app: FastifyInstance, ctx: AppContext): vo
 
         return await reply.status(200).send(result);
       } catch (error) {
-        if (error instanceof WebhookSignatureError) {
-          return reply.status(400).send({ error: 'Invalid webhook signature' });
-        }
-        if (error instanceof WebhookEventAlreadyProcessedError) {
-          // Return success for idempotent requests
-          return reply.status(200).send({ success: true, message: 'Event already processed' });
+        // Use error name/code checking for reliability across module boundaries
+        if (error instanceof Error) {
+          if (error.name === 'WebhookSignatureError') {
+            return reply.status(400).send({ error: 'Invalid webhook signature' });
+          }
+          if (error.name === 'WebhookEventAlreadyProcessedError') {
+            // Return success for idempotent requests
+            return reply.status(200).send({ success: true, message: 'Event already processed' });
+          }
         }
         ctx.log.error({ error }, 'PayPal webhook error');
         return reply.status(500).send({ error: 'Webhook processing failed' });

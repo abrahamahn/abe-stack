@@ -19,7 +19,8 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 // Mocks (must be before local imports)
 // ============================================================================
 
-vi.mock('@router', () => ({
+// Mock dependencies - use relative paths to match how vitest resolves modules
+vi.mock('../infrastructure/http/router', () => ({
   registerRouteMap: vi.fn(),
   protectedRoute: vi.fn(),
   publicRoute: vi.fn(),
@@ -101,12 +102,12 @@ vi.mock('./users', () => ({
   handleMe: vi.fn(),
 }));
 
-import { registerRouteMap } from '@router';
+import { registerRouteMap } from '../infrastructure/http/router';
 
 import { registerWebhookRoutes } from './billing';
 import { registerRoutes } from './routes';
 
-import type { AppContext } from '@shared/index';
+import type { AppContext } from '../../shared/index';
 import type { FastifyInstance } from 'fastify';
 /* eslint-enable import-x/order */
 

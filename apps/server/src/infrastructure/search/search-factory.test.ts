@@ -1,13 +1,13 @@
-// apps/server/src/infrastructure/search/__tests__/search-factory.test.ts
+// apps/server/src/infrastructure/search/search-factory.test.ts
 import { afterEach, describe, expect, test } from 'vitest';
 
 import {
     getSearchProviderFactory,
     resetSearchProviderFactory,
     SearchProviderFactory,
-} from '../search-factory';
+} from './search-factory';
 
-import type { SqlTableConfig } from '../types';
+import type { SqlTableConfig } from './types';
 import type { RawDb, Repositories } from '@database';
 
 // Mock database

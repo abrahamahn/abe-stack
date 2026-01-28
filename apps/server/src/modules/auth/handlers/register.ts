@@ -6,14 +6,7 @@
  */
 
 import { registerUser, type RegisterResult } from '@auth/service';
-import {
-  EmailAlreadyExistsError,
-  EmailSendError,
-  mapErrorToResponse,
-  WeakPasswordError,
-  type AppContext,
-  type ReplyWithCookies,
-} from '@shared';
+import { mapErrorToResponse, type AppContext, type ReplyWithCookies } from '@shared';
 
 import type { RegisterRequest } from '@abe-stack/core';
 
@@ -49,9 +42,11 @@ export async function handleRegister(
   } catch (error) {
     // Handle EmailSendError specially for registration: user was created, but email failed
     // Return success with a flag so the user knows to use the resend endpoint
-    if (error instanceof EmailSendError) {
+    // Use error.name check instead of instanceof for ESM compatibility
+    if (error instanceof Error && error.name === 'EmailSendError') {
+      const emailError = error as Error & { originalError?: Error };
       ctx.log.error(
-        { email: body.email, originalError: error.originalError?.message },
+        { email: body.email, originalError: emailError.originalError?.message },
         'Failed to send verification email after user creation',
       );
       return {
@@ -66,12 +61,7 @@ export async function handleRegister(
       };
     }
 
-    // Use error mapper for standard errors (EmailAlreadyExistsError, WeakPasswordError, etc.)
-    // Need to handle these before the mapper for custom logging
-    if (error instanceof EmailAlreadyExistsError || error instanceof WeakPasswordError) {
-      return mapErrorToResponse(error, ctx);
-    }
-
+    // Use error mapper for all errors (including EmailAlreadyExistsError, WeakPasswordError, etc.)
     return mapErrorToResponse(error, ctx);
   }
 }

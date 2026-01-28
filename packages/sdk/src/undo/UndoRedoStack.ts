@@ -143,7 +143,7 @@ export class UndoRedoStack<T = unknown> {
    * This clears the redo stack.
    */
   push(data: T, groupId?: string): string {
-    const finalGroupId = groupId ?? (this.activeGroupId !== null ? this.activeGroupId : undefined);
+    const finalGroupId = groupId ?? this.activeGroupId ?? undefined;
     const operation: UndoableOperation<T> = {
       id: this.generateId(),
       data,

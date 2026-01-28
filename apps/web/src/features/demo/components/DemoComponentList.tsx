@@ -1,7 +1,7 @@
 // apps/web/src/features/demo/components/DemoComponentList.tsx
 import { CloseButton, Heading, MenuItem, ScrollArea, Text } from '@abe-stack/ui';
 
-import type { ComponentDemo } from '@demo/types';
+import type { ComponentDemo } from '../types';
 
 interface DemoComponentListProps {
   components: ComponentDemo[];

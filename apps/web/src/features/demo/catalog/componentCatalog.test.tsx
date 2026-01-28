@@ -1,4 +1,4 @@
-// apps/web/src/features/demo/catalog/__tests__/componentCatalog.test.tsx
+// apps/web/src/features/demo/catalog/componentCatalog.test.tsx
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 

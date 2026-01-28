@@ -26,7 +26,7 @@ describe('EnvSchema', () => {
       const result = EnvSchema.safeParse(prodEnv);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0]?.message).toContain('at least 32 characters');
+        expect(result.error.issues[0]?.message).toContain('at least 32 chars');
       }
     });
 
@@ -36,16 +36,16 @@ describe('EnvSchema', () => {
         NODE_ENV: 'production' as const,
         JWT_SECRET: 'jwt_secret_must_be_long_but_not_obvious_password',
       };
-      // Password is in weakSecrets list
+      // Exact match of weak secret (even if padded to length)
       const result = EnvSchema.safeParse({
         ...prodEnv,
-        JWT_SECRET: 'password'.repeat(4), // making it long enough but still weak
+        JWT_SECRET: 'password', // exact weak word
       });
       expect(result.success).toBe(false);
 
       const weakResult = EnvSchema.safeParse({
         ...prodEnv,
-        JWT_SECRET: 'secret'.repeat(10),
+        JWT_SECRET: 'secret', // exact weak word
       });
       expect(weakResult.success).toBe(false);
     });

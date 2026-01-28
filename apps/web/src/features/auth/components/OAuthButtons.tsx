@@ -95,7 +95,7 @@ export const OAuthButtons = ({
   const error = oauthState.error;
 
   // Don't render anything if no providers are enabled or provider lookup failed
-  if ((isLoading === false && providers.length === 0) || error !== null) {
+  if ((!isLoading && providers.length === 0) || error !== null) {
     return null;
   }
 

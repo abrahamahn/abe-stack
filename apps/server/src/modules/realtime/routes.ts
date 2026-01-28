@@ -7,7 +7,7 @@
  */
 
 import { getRecordsRequestSchema, transactionSchema } from '@abe-stack/core';
-import { protectedRoute, type RouteMap, type RouteResult } from '@router';
+import { createRouteMap, protectedRoute, type RouteResult } from '@http/router';
 
 import {
   handleGetRecords,
@@ -25,35 +25,38 @@ import type { FastifyReply } from 'fastify';
 // Route Definitions
 // ============================================================================
 
-export const realtimeRoutes: RouteMap = {
-  'realtime/write': protectedRoute<
-    RealtimeTransaction,
-    WriteResult | ConflictResult | { message: string }
-  >(
-    'POST',
-    async (
-      ctx: AppContext,
-      body: RealtimeTransaction,
-      req: RequestWithCookies & { user: { userId: string; email: string; role: string } },
-      _reply: FastifyReply,
-    ): Promise<RouteResult<WriteResult | ConflictResult | { message: string }>> => {
-      return handleWrite(ctx, body, req);
-    },
-    'user',
-    transactionSchema,
-  ),
+export const realtimeRoutes = createRouteMap([
+  [
+    'realtime/write',
+    protectedRoute<RealtimeTransaction, WriteResult | ConflictResult | { message: string }>(
+      'POST',
+      async (
+        ctx: AppContext,
+        body: RealtimeTransaction,
+        req: RequestWithCookies & { user: { userId: string; email: string; role: string } },
+        _reply: FastifyReply,
+      ): Promise<RouteResult<WriteResult | ConflictResult | { message: string }>> => {
+        return handleWrite(ctx, body, req);
+      },
+      'user',
+      transactionSchema,
+    ),
+  ],
 
-  'realtime/getRecords': protectedRoute<GetRecordsRequest, GetRecordsResult | { message: string }>(
-    'POST',
-    async (
-      ctx: AppContext,
-      body: GetRecordsRequest,
-      req: RequestWithCookies & { user: { userId: string; email: string; role: string } },
-      _reply: FastifyReply,
-    ): Promise<RouteResult<GetRecordsResult | { message: string }>> => {
-      return handleGetRecords(ctx, body as { pointers: RecordPointer[] }, req);
-    },
-    'user',
-    getRecordsRequestSchema,
-  ),
-};
+  [
+    'realtime/getRecords',
+    protectedRoute<GetRecordsRequest, GetRecordsResult | { message: string }>(
+      'POST',
+      async (
+        ctx: AppContext,
+        body: GetRecordsRequest,
+        req: RequestWithCookies & { user: { userId: string; email: string; role: string } },
+        _reply: FastifyReply,
+      ): Promise<RouteResult<GetRecordsResult | { message: string }>> => {
+        return handleGetRecords(ctx, body as { pointers: RecordPointer[] }, req);
+      },
+      'user',
+      getRecordsRequestSchema,
+    ),
+  ],
+]);

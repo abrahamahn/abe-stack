@@ -1,4 +1,4 @@
-// packages/ui/src/elements/__tests__/Alert.test.tsx
+// packages/ui/src/elements/Alert.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';

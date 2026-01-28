@@ -8,7 +8,8 @@
 
 import { UserNotFoundError } from '@abe-stack/core';
 import { eq, select, USERS_TABLE } from '@abe-stack/db';
-import { unlockAccount as infraUnlockAccount, type DbClient } from '@infrastructure';
+
+import { unlockAccount as infraUnlockAccount, type DbClient } from '@/infrastructure';
 
 export { UserNotFoundError };
 
@@ -29,7 +30,7 @@ export async function unlockUserAccount(
     select(USERS_TABLE).columns('id').where(eq('email', email)).limit(1).toSql(),
   );
 
-  if (targetUser === undefined) {
+  if (targetUser === null) {
     throw new UserNotFoundError(`User not found: ${email}`);
   }
 

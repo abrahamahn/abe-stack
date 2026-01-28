@@ -1,8 +1,8 @@
 // apps/web/src/features/admin/components/UserTable.test.tsx
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { renderWithProviders } from '@/__tests__/utils';
+import { renderWithProviders } from '../../../__tests__/utils';
 
 import { UserTable } from './UserTable';
 

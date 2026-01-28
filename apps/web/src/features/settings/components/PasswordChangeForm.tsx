@@ -85,7 +85,7 @@ export const PasswordChangeForm = ({ onSuccess }: PasswordChangeFormProps): Reac
     },
   });
 
-  const handleSubmit = (e: React.FormEvent): void => {
+  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>): void => {
     e.preventDefault();
     setValidationError(null);
     setSuccessMessage(null);

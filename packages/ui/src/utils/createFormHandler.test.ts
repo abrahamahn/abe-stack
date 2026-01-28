@@ -1,4 +1,4 @@
-// packages/ui/src/utils/__tests__/createFormHandler.test.ts
+// packages/ui/src/utils/createFormHandler.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createFormHandler } from './createFormHandler';

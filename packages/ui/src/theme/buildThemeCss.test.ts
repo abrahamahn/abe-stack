@@ -1,4 +1,4 @@
-// packages/ui/src/theme/__tests__/buildThemeCss.test.ts
+// packages/ui/src/theme/buildThemeCss.test.ts
 import { generateThemeCss } from '@theme/buildThemeCss';
 import { describe, expect, it } from 'vitest';
 

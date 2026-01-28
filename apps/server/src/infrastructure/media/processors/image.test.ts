@@ -1,8 +1,8 @@
-// apps/server/src/infrastructure/media/processors/__tests__/image.test.ts
+// apps/server/src/infrastructure/media/processors/image.test.ts
 import sharp from 'sharp';
 import { describe, expect, it, vi, beforeEach, afterEach, type Mock } from 'vitest';
 
-import { ImageProcessor, type ImageProcessingOptions } from '../image';
+import { ImageProcessor, type ImageProcessingOptions } from './image';
 
 // Mock sharp
 vi.mock('sharp', () => ({

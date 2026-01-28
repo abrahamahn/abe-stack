@@ -12,7 +12,7 @@
  * - Forgot/Reset Password: Strict limits prevent email enumeration and abuse
  */
 
-import { RateLimiter, type RateLimitConfig, type RateLimitInfo } from '@rate-limit';
+import { RateLimiter, type RateLimitConfig, type RateLimitInfo } from '@security/rate-limit';
 
 // ============================================================================
 // Types

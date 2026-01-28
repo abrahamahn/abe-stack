@@ -135,15 +135,21 @@ export function createRequestContext(
   },
   userId?: string,
 ): RequestContext {
-  return {
+  const context: RequestContext = {
     correlationId,
     requestId: request.id,
     method: request.method,
     path: request.url,
     ip: request.ip,
-    userAgent: request.headers['user-agent'],
-    userId,
   };
+  const userAgent = request.headers['user-agent'];
+  if (userAgent !== undefined) {
+    context.userAgent = userAgent;
+  }
+  if (userId !== undefined) {
+    context.userId = userId;
+  }
+  return context;
 }
 
 /**

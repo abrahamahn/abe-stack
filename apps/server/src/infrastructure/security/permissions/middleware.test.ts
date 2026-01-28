@@ -1,17 +1,17 @@
-// apps/server/src/infrastructure/security/permissions/__tests__/middleware.test.ts
+// apps/server/src/infrastructure/security/permissions/middleware.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { createDefaultPermissionConfig, createPermissionChecker } from '../checker';
+import { createDefaultPermissionConfig, createPermissionChecker } from './checker';
 import {
     createPermissionMiddleware,
     createStandalonePermissionGuard,
     getPermissionDenialReason,
     getRecordIdFromParams,
     hasPermission,
-} from '../middleware';
+} from './middleware';
 
-import type { PermissionChecker } from '../checker';
-import type { PermissionRecord, RecordLoader } from '../types';
+import type { PermissionChecker } from './checker';
+import type { PermissionRecord, RecordLoader } from './types';
 
 // ============================================================================
 // Test Helpers

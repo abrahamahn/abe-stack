@@ -45,9 +45,9 @@ import {
   VersionBadge,
   VisuallyHidden,
 } from '@abe-stack/ui';
-import React, { type ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 
-import type { ComponentDemo } from '@demo/types';
+import type { ComponentDemo } from '../types';
 
 export const elementCatalog: Record<string, ComponentDemo> = {
   accordion: {
@@ -291,7 +291,7 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         code: '<Modal.Root open={open} onClose={onClose}>...</Modal.Root>',
         render: (): ReactElement => {
           const ModalExample = (): ReactElement => {
-            const [open, setOpen] = React.useState(false);
+            const [open, setOpen] = useState(false);
             return (
               <>
                 <Button
@@ -335,7 +335,7 @@ export const elementCatalog: Record<string, ComponentDemo> = {
         code: '<Overlay open={true} />',
         render: (): ReactElement => {
           const OverlayExample = (): ReactElement => {
-            const [open, setOpen] = React.useState(false);
+            const [open, setOpen] = useState(false);
             return (
               <>
                 <Button

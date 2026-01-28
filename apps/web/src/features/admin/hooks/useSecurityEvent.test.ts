@@ -7,9 +7,9 @@ import { createAdminApiClient } from '../services/adminApi';
 
 import { useSecurityEvent } from './useSecurityEvent';
 
-import type { AdminApiClient } from '../services/adminApi';
 import type { SecurityEvent } from '@abe-stack/core';
 import type { UseQueryResult } from '@abe-stack/sdk';
+import type { AdminApiClient } from '../services/adminApi';
 
 vi.mock('@abe-stack/sdk', () => ({
   useQuery: vi.fn(),
@@ -23,11 +23,15 @@ vi.mock('@app/ClientEnvironment', () => ({
   useClientEnvironment: () => ({ config: { apiUrl: 'http://localhost:3000' } }),
 }));
 
-vi.mock('@abe-stack/core', () => ({
-  tokenStore: {
-    get: vi.fn().mockReturnValue('mock-token'),
-  },
-}));
+vi.mock('@abe-stack/core', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/core')>();
+  return {
+    ...actual,
+    tokenStore: {
+      get: vi.fn().mockReturnValue('mock-token'),
+    },
+  };
+});
 
 describe('useSecurityEvent', () => {
   const mockSecurityEvent: SecurityEvent = {

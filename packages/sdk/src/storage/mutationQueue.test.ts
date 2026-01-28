@@ -1,4 +1,4 @@
-// packages/sdk/src/storage/__tests__/mutationQueue.test.ts
+// packages/sdk/src/storage/mutationQueue.test.ts
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { createMutationQueue, MutationQueue } from '../mutationQueue';

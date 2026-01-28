@@ -1,4 +1,4 @@
-// packages/db/src/builder/__tests__/cte.test.ts
+// packages/db/src/builder/cte.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { colEq, eq, gt, isNull } from './conditions';

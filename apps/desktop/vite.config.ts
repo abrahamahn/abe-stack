@@ -1,3 +1,4 @@
+// apps/desktop/vite.config.ts
 import path from 'node:path';
 
 import react from '@vitejs/plugin-react';

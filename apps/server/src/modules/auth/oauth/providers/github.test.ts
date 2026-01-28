@@ -158,7 +158,7 @@ describe('createGitHubProvider', () => {
         });
       });
 
-      it('should not include refresh token or expiry (GitHub OAuth limitation)', () => {
+      it('should not include refresh token or expiry (GitHub OAuth limitation)', async () => {
         const mockResponse = {
           access_token: 'gho_test_token',
           token_type: 'bearer',
@@ -178,16 +178,18 @@ describe('createGitHubProvider', () => {
     });
 
     describe('when exchange fails', () => {
-      it('should throw OAuthError when HTTP request fails', () => {
+      it('should throw OAuthError when HTTP request fails', async () => {
         mockFetch.mockResolvedValue({
           ok: false,
           text: () => 'Invalid client credentials',
         });
 
-        await expect(provider.exchangeCode(code, redirectUri)).rejects.toThrow(OAuthError);
+        await expect(provider.exchangeCode(code, redirectUri)).rejects.toMatchObject({
+          name: 'OAuthError',
+        });
       });
 
-      it('should throw OAuthError with correct error code on HTTP failure', () => {
+      it('should throw OAuthError with correct error code on HTTP failure', async () => {
         mockFetch.mockResolvedValueOnce({
           ok: false,
           text: () => 'Network error',
@@ -197,12 +199,12 @@ describe('createGitHubProvider', () => {
           await provider.exchangeCode(code, redirectUri);
           expect.fail('Should have thrown OAuthError');
         } catch (error) {
-          expect(error).toBeInstanceOf(OAuthError);
+          expect((error as OAuthError).name).toBe('OAuthError');
           expect((error as OAuthError).provider).toBe('github');
         }
       });
 
-      it('should throw OAuthError when response contains error field', () => {
+      it('should throw OAuthError when response contains error field', async () => {
         const errorResponse = {
           error: 'invalid_grant',
           error_description: 'The code has expired',
@@ -218,7 +220,7 @@ describe('createGitHubProvider', () => {
         );
       });
 
-      it('should use error field when error_description is missing', () => {
+      it('should use error field when error_description is missing', async () => {
         const errorResponse = {
           error: 'bad_verification_code',
         };
@@ -233,7 +235,7 @@ describe('createGitHubProvider', () => {
         );
       });
 
-      it('should handle network errors', () => {
+      it('should handle network errors', async () => {
         mockFetch.mockRejectedValueOnce(new Error('Network failure'));
 
         await expect(provider.exchangeCode(code, redirectUri)).rejects.toThrow('Network failure');
@@ -241,7 +243,7 @@ describe('createGitHubProvider', () => {
     });
 
     describe('edge cases', () => {
-      it('should handle empty error field (treats as non-error)', () => {
+      it('should handle empty error field (treats as non-error)', async () => {
         const mockResponse = {
           access_token: 'gho_test_token',
           token_type: 'bearer',
@@ -259,7 +261,7 @@ describe('createGitHubProvider', () => {
         expect(result.accessToken).toBe('gho_test_token');
       });
 
-      it('should handle response with extra fields', () => {
+      it('should handle response with extra fields', async () => {
         const mockResponse = {
           access_token: 'gho_test_token',
           token_type: 'bearer',
@@ -287,7 +289,7 @@ describe('createGitHubProvider', () => {
     const accessToken = 'gho_test_access_token_123';
 
     describe('when user info fetch is successful', () => {
-      it('should retrieve user info with verified email', () => {
+      it('should retrieve user info with verified email', async () => {
         const mockUserData = {
           id: 12345678,
           login: 'octocat',
@@ -326,7 +328,7 @@ describe('createGitHubProvider', () => {
         });
       });
 
-      it('should call GitHub API with correct headers', () => {
+      it('should call GitHub API with correct headers', async () => {
         const mockUserData = {
           id: 12345678,
           login: 'octocat',
@@ -364,7 +366,7 @@ describe('createGitHubProvider', () => {
         });
       });
 
-      it('should prefer primary verified email over user profile email', () => {
+      it('should prefer primary verified email over user profile email', async () => {
         const mockUserData = {
           id: 12345678,
           login: 'octocat',
@@ -404,7 +406,7 @@ describe('createGitHubProvider', () => {
         expect(result.emailVerified).toBe(true);
       });
 
-      it('should fall back to any verified email if no primary', () => {
+      it('should fall back to any verified email if no primary', async () => {
         const mockUserData = {
           id: 12345678,
           login: 'octocat',
@@ -444,7 +446,7 @@ describe('createGitHubProvider', () => {
         expect(result.emailVerified).toBe(true);
       });
 
-      it('should use profile email when emails API fails', () => {
+      it('should use profile email when emails API fails', async () => {
         const mockUserData = {
           id: 12345678,
           login: 'octocat',
@@ -469,7 +471,7 @@ describe('createGitHubProvider', () => {
         expect(result.emailVerified).toBe(false);
       });
 
-      it('should handle null name in user profile', () => {
+      it('should handle null name in user profile', async () => {
         const mockUserData = {
           id: 12345678,
           login: 'octocat',
@@ -503,7 +505,7 @@ describe('createGitHubProvider', () => {
         expect(result.email).toBe('octocat@github.com');
       });
 
-      it('should convert numeric ID to string', () => {
+      it('should convert numeric ID to string', async () => {
         const mockUserData = {
           id: 99999999,
           login: 'testuser',
@@ -530,7 +532,7 @@ describe('createGitHubProvider', () => {
     });
 
     describe('when user info fetch fails', () => {
-      it('should throw OAuthError when user API fails', () => {
+      it('should throw OAuthError when user API fails', async () => {
         mockFetch.mockResolvedValue({
           ok: false,
           text: () => 'Unauthorized',
@@ -539,7 +541,7 @@ describe('createGitHubProvider', () => {
         await expect(provider.getUserInfo(accessToken)).rejects.toThrow('Failed to get user info');
       });
 
-      it('should throw OAuthError with correct error code on user API failure', () => {
+      it('should throw OAuthError with correct error code on user API failure', async () => {
         mockFetch.mockResolvedValueOnce({
           ok: false,
           text: () => 'Bad credentials',
@@ -549,12 +551,12 @@ describe('createGitHubProvider', () => {
           await provider.getUserInfo(accessToken);
           expect.fail('Should have thrown OAuthError');
         } catch (error) {
-          expect(error).toBeInstanceOf(OAuthError);
+          expect((error as OAuthError).name).toBe('OAuthError');
           expect((error as OAuthError).provider).toBe('github');
         }
       });
 
-      it('should throw OAuthError when no email is available', () => {
+      it('should throw OAuthError when no email is available', async () => {
         const mockUserData = {
           id: 12345678,
           login: 'octocat',
@@ -578,7 +580,7 @@ describe('createGitHubProvider', () => {
         await expect(provider.getUserInfo(accessToken)).rejects.toThrow('No email found');
       });
 
-      it('should throw OAuthError when email is empty string', () => {
+      it('should throw OAuthError when email is empty string', async () => {
         const mockUserData = {
           id: 12345678,
           login: 'octocat',
@@ -600,7 +602,7 @@ describe('createGitHubProvider', () => {
         await expect(provider.getUserInfo(accessToken)).rejects.toThrow('No email found');
       });
 
-      it('should handle network errors on user API call', () => {
+      it('should handle network errors on user API call', async () => {
         mockFetch.mockRejectedValueOnce(new Error('Network timeout'));
 
         await expect(provider.getUserInfo(accessToken)).rejects.toThrow('Network timeout');
@@ -608,7 +610,7 @@ describe('createGitHubProvider', () => {
     });
 
     describe('edge cases', () => {
-      it('should handle empty emails array', () => {
+      it('should handle empty emails array', async () => {
         const mockUserData = {
           id: 12345678,
           login: 'octocat',
@@ -633,7 +635,7 @@ describe('createGitHubProvider', () => {
         expect(result.emailVerified).toBe(false);
       });
 
-      it('should handle all unverified emails', () => {
+      it('should handle all unverified emails', async () => {
         const mockUserData = {
           id: 12345678,
           login: 'octocat',
@@ -673,7 +675,7 @@ describe('createGitHubProvider', () => {
         expect(result.emailVerified).toBe(false);
       });
 
-      it('should handle multiple verified emails (prefer primary)', () => {
+      it('should handle multiple verified emails (prefer primary)', async () => {
         const mockUserData = {
           id: 12345678,
           login: 'octocat',
@@ -713,7 +715,7 @@ describe('createGitHubProvider', () => {
         expect(result.emailVerified).toBe(true);
       });
 
-      it('should handle large user IDs correctly', () => {
+      it('should handle large user IDs correctly', async () => {
         const mockUserData = {
           id: 9007199254740991, // MAX_SAFE_INTEGER
           login: 'biguser',

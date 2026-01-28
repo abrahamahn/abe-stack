@@ -1,4 +1,4 @@
-// apps/server/src/modules/auth/utils/__tests__/jwt.test.ts
+// apps/server/src/modules/auth/utils/jwt.test.ts
 /**
  * JWT Token Utility Tests
  *
@@ -14,7 +14,7 @@ import {
     getRefreshTokenExpiry,
     JwtError,
     verifyToken,
-} from '../jwt';
+} from './jwt';
 
 describe('JWT Utilities', () => {
   const validSecret = 'this-is-a-very-long-secret-for-testing-purposes';

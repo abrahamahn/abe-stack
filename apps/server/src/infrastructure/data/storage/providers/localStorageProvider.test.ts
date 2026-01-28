@@ -1,9 +1,9 @@
-// apps/server/src/infrastructure/data/storage/__tests__/localStorageProvider.test.ts
+// apps/server/src/infrastructure/data/storage/providers/localStorageProvider.test.ts
 import { mkdir, writeFile } from 'node:fs/promises';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { LocalStorageProvider } from '../localStorageProvider';
+import { LocalStorageProvider } from './localStorageProvider';
 
 import type { LocalStorageConfig } from '@abe-stack/core';
 

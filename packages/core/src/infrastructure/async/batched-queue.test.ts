@@ -40,6 +40,9 @@ describe('BatchedQueue', () => {
     });
 
     it('should flush when batch size is reached', async () => {
+      // Use real timers for this test since batch size triggers immediate flush
+      vi.useRealTimers();
+
       const processor = vi.fn((items: number[]) => Promise.resolve(items.map((n) => n * 2)));
       const queue = new BatchedQueue({
         processBatch: processor,
@@ -55,6 +58,9 @@ describe('BatchedQueue', () => {
       const results = await Promise.all([promise1, promise2]);
       expect(results).toEqual([2, 4]);
       expect(processor).toHaveBeenCalledTimes(1);
+
+      // Restore fake timers for other tests
+      vi.useFakeTimers();
     });
 
     it('should flush on interval even if batch not full', async () => {
@@ -79,6 +85,9 @@ describe('BatchedQueue', () => {
 
   describe('Multiple Batches', () => {
     it('should handle multiple batches correctly', async () => {
+      // Use real timers since batch size triggers immediate flush
+      vi.useRealTimers();
+
       const processor = vi.fn((items: number[]) => Promise.resolve(items.map((n) => n * 2)));
       const queue = new BatchedQueue({
         processBatch: processor,
@@ -102,11 +111,17 @@ describe('BatchedQueue', () => {
       expect(processor).toHaveBeenCalledTimes(2);
       expect(processor).toHaveBeenNthCalledWith(1, [1, 2]);
       expect(processor).toHaveBeenNthCalledWith(2, [3, 4]);
+
+      // Restore fake timers for other tests
+      vi.useFakeTimers();
     });
   });
 
   describe('Error Handling', () => {
     it('should reject all items in batch if processor fails', async () => {
+      // Use real timers since batch size triggers immediate flush
+      vi.useRealTimers();
+
       const error = new Error('Processing failed');
       const processor = vi.fn(() => Promise.reject(error));
       const queue = new BatchedQueue({
@@ -121,9 +136,15 @@ describe('BatchedQueue', () => {
 
       await expect(promise1).rejects.toThrow('Processing failed');
       await expect(promise2).rejects.toThrow('Processing failed');
+
+      // Restore fake timers for other tests
+      vi.useFakeTimers();
     });
 
     it('should continue processing after error in previous batch', async () => {
+      // Use real timers since batch size triggers immediate flush
+      vi.useRealTimers();
+
       let callCount = 0;
       const processor = vi.fn((items: number[]) => {
         callCount++;
@@ -152,11 +173,17 @@ describe('BatchedQueue', () => {
 
       const results = await Promise.all([p3, p4]);
       expect(results).toEqual([6, 8]);
+
+      // Restore fake timers for other tests
+      vi.useFakeTimers();
     });
   });
 
   describe('Edge Cases', () => {
     it('should handle single item batches', async () => {
+      // Use real timers since batch size (1) triggers immediate flush
+      vi.useRealTimers();
+
       const processor = vi.fn((items: number[]) => Promise.resolve(items.map((n) => n * 2)));
       const queue = new BatchedQueue({
         processBatch: processor,
@@ -168,9 +195,12 @@ describe('BatchedQueue', () => {
       const result = await queue.enqueue(5);
       expect(result).toBe(10);
       expect(processor).toHaveBeenCalledWith([5]);
+
+      // Restore fake timers for other tests
+      vi.useFakeTimers();
     });
 
-    it('should handle empty processor results', async () => {
+    it('should reject when processor returns mismatched length', async () => {
       const processor = vi.fn(() => Promise.resolve([]));
       const queue = new BatchedQueue({
         processBatch: processor,
@@ -180,10 +210,17 @@ describe('BatchedQueue', () => {
       });
 
       const promise = queue.enqueue(1);
-      await vi.runAllTimersAsync();
 
-      // Should handle gracefully even if processor returns empty
-      await expect(promise).resolves.toBeUndefined();
+      // Advance timers and handle the rejection
+      const runPromise = vi.runAllTimersAsync();
+
+      // Should reject when processor returns wrong number of outputs
+      await expect(promise).rejects.toThrow(
+        'BatchedQueue: processBatch returned 0 outputs for 1 inputs',
+      );
+
+      // Wait for timer resolution to complete
+      await runPromise;
     });
 
     it('should handle concurrent adds', async () => {

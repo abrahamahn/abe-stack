@@ -6,7 +6,6 @@
  */
 
 import { OAuthError, TooManyRequestsError } from '@abe-stack/core';
-import { OAUTH_PROVIDERS, type OAuthProvider } from '@infrastructure';
 import { mapErrorToResponse, type AppContext } from '@shared';
 
 import {
@@ -31,6 +30,8 @@ import type { OAuthConnectionInfo } from './types';
 import type { AuthResponse } from '@abe-stack/core';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
+import { OAUTH_PROVIDERS, type OAuthProvider } from '@/infrastructure';
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -44,10 +45,10 @@ export interface OAuthCallbackParams {
 }
 
 export interface OAuthCallbackQuery {
-  code?: string;
-  state?: string;
-  error?: string;
-  error_description?: string;
+  code?: string | undefined;
+  state?: string | undefined;
+  error?: string | undefined;
+  error_description?: string | undefined;
 }
 
 export interface OAuthLinkParams {

@@ -17,7 +17,7 @@ import {
   TopbarLayout,
 } from '@abe-stack/ui';
 
-import type { ComponentDemo } from '@demo/types';
+import type { ComponentDemo } from '../types';
 import type { ReactElement } from 'react';
 
 export const layoutCatalog: Record<string, ComponentDemo> = {

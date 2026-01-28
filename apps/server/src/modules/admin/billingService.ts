@@ -10,7 +10,7 @@ import {
     PlanNotFoundError,
 } from '@abe-stack/core';
 
-import type { BillingService } from '@abe-stack/core';
+import type { BillingService, CreateProductParams } from '@abe-stack/core';
 import type { Plan as DbPlan, PlanRepository, SubscriptionRepository } from '@abe-stack/db';
 
 // ============================================================================
@@ -65,7 +65,7 @@ export async function getPlanById(
   planId: string,
 ): Promise<DbPlan> {
   const plan = await repos.plans.findById(planId);
-  if (plan === null || plan === undefined) {
+  if (plan === null) {
     throw new PlanNotFoundError(planId);
   }
   return plan;
@@ -103,23 +103,53 @@ export async function updatePlan(
   params: UpdatePlanParams,
 ): Promise<DbPlan> {
   const plan = await repos.plans.findById(planId);
-  if (plan === null || plan === undefined) {
+  if (plan === null) {
     throw new PlanNotFoundError(planId);
   }
 
-  const updated = await repos.plans.update(planId, {
-    name: params.name,
-    description: params.description,
-    interval: params.interval,
-    priceInCents: params.priceInCents,
-    currency: params.currency,
-    features: params.features,
-    trialDays: params.trialDays,
-    isActive: params.isActive,
-    sortOrder: params.sortOrder,
-  });
+  // Build update data conditionally to avoid undefined values
+  const updateData: {
+    name?: string;
+    description?: string | null;
+    interval?: 'month' | 'year';
+    priceInCents?: number;
+    currency?: string;
+    features?: { name: string; included: boolean; description?: string }[];
+    trialDays?: number;
+    isActive?: boolean;
+    sortOrder?: number;
+  } = {};
+  if (params.name !== undefined) {
+    updateData.name = params.name;
+  }
+  if (params.description !== undefined) {
+    updateData.description = params.description;
+  }
+  if (params.interval !== undefined) {
+    updateData.interval = params.interval;
+  }
+  if (params.priceInCents !== undefined) {
+    updateData.priceInCents = params.priceInCents;
+  }
+  if (params.currency !== undefined) {
+    updateData.currency = params.currency;
+  }
+  if (params.features !== undefined) {
+    updateData.features = params.features;
+  }
+  if (params.trialDays !== undefined) {
+    updateData.trialDays = params.trialDays;
+  }
+  if (params.isActive !== undefined) {
+    updateData.isActive = params.isActive;
+  }
+  if (params.sortOrder !== undefined) {
+    updateData.sortOrder = params.sortOrder;
+  }
 
-  if (updated === null || updated === undefined) {
+  const updated = await repos.plans.update(planId, updateData);
+
+  if (updated === null) {
     throw new PlanNotFoundError(planId);
   }
 
@@ -134,7 +164,7 @@ export async function deactivatePlan(
   planId: string,
 ): Promise<void> {
   const plan = await repos.plans.findById(planId);
-  if (plan === null || plan === undefined) {
+  if (plan === null) {
     throw new PlanNotFoundError(planId);
   }
 
@@ -156,7 +186,7 @@ export async function syncPlanToStripe(
   planId: string,
 ): Promise<{ stripePriceId: string; stripeProductId: string }> {
   const plan = await repos.plans.findById(planId);
-  if (plan === null || plan === undefined) {
+  if (plan === null) {
     throw new PlanNotFoundError(planId);
   }
 
@@ -165,14 +195,16 @@ export async function syncPlanToStripe(
   let priceId = plan.stripePriceId;
 
   // Convert plan to CreateProductParams format
-  const productParams = {
+  const productParams: CreateProductParams = {
     name: plan.name,
-    description: plan.description ?? undefined,
     interval: plan.interval,
     priceInCents: plan.priceInCents,
     currency: plan.currency,
     metadata: { planId: plan.id },
   };
+  if (plan.description !== null) {
+    productParams.description = plan.description;
+  }
 
   if (productId !== null && productId !== '') {
     // Update existing product

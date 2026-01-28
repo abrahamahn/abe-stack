@@ -9,6 +9,13 @@
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'node:crypto';
 
 import {
+    ConflictError,
+    EmailAlreadyExistsError,
+    NotFoundError,
+    OAuthError,
+    OAuthStateMismatchError,
+} from '@abe-stack/core';
+import {
     insert,
     OAUTH_CONNECTIONS_TABLE,
     toCamelCase,
@@ -16,20 +23,6 @@ import {
     USERS_TABLE,
     type User,
 } from '@abe-stack/db';
-import {
-    withTransaction,
-    type DbClient,
-    type OAuthProvider,
-    type Repositories,
-    type UserRole,
-} from '@infrastructure';
-import {
-    ConflictError,
-    EmailAlreadyExistsError,
-    NotFoundError,
-    OAuthError,
-    OAuthStateMismatchError,
-} from '@abe-stack/core';
 
 import { createAccessToken, createRefreshTokenFamily } from '../utils';
 
@@ -48,6 +41,14 @@ import type {
     OAuthUserInfo,
 } from './types';
 import type { AuthConfig, OAuthProviderConfig } from '@/config';
+
+import {
+    withTransaction,
+    type DbClient,
+    type OAuthProvider,
+    type Repositories,
+    type UserRole,
+} from '@/infrastructure';
 
 // ============================================================================
 // Types
@@ -348,7 +349,7 @@ async function authenticateOrCreateWithOAuth(
     await repos.oauthConnections.update(existingConnection.id, {
       accessToken: encryptToken(tokens.accessToken, encryptionKey),
       refreshToken: tokens.refreshToken !== undefined ? encryptToken(tokens.refreshToken, encryptionKey) : null,
-      expiresAt: tokens.expiresAt,
+      expiresAt: tokens.expiresAt ?? null,
       providerEmail: userInfo.email,
       updatedAt: new Date(),
     });
@@ -526,7 +527,7 @@ export async function linkOAuthAccount(
     providerEmail: userInfo.email,
     accessToken: encryptToken(tokens.accessToken, encryptionKey),
     refreshToken: tokens.refreshToken !== undefined ? encryptToken(tokens.refreshToken, encryptionKey) : null,
-    expiresAt: tokens.expiresAt,
+    expiresAt: tokens.expiresAt ?? null,
   });
 }
 

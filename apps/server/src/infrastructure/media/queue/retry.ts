@@ -6,7 +6,7 @@
  * reliable media processing with automatic failure recovery.
  */
 
-import type { Logger } from '@logger';
+import type { Logger } from '@monitor/logger';
 
 export interface RetryOptions {
   maxRetries: number;
@@ -31,8 +31,8 @@ export class MediaProcessingRetryHandler {
   private retryStates = new Map<string, RetryState>();
   private defaultOptions: Required<RetryOptions>;
   private cleanupInterval: NodeJS.Timeout | null = null;
-  private static readonly CLEANUP_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
-  private static readonly DEFAULT_MAX_AGE_MS = 60 * 60 * 1000; // 1 hour
+  private static readonly cleanupIntervalMs = 5 * 60 * 1000; // 5 minutes
+  private static readonly defaultMaxAgeMs = 60 * 60 * 1000; // 1 hour
 
   constructor(
     private logger: Logger,
@@ -51,8 +51,8 @@ export class MediaProcessingRetryHandler {
 
     // Start periodic cleanup
     this.cleanupInterval = setInterval(() => {
-      this.cleanup(MediaProcessingRetryHandler.DEFAULT_MAX_AGE_MS);
-    }, MediaProcessingRetryHandler.CLEANUP_INTERVAL_MS);
+      this.cleanup(MediaProcessingRetryHandler.defaultMaxAgeMs);
+    }, MediaProcessingRetryHandler.cleanupIntervalMs);
   }
 
   /**

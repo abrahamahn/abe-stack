@@ -1,4 +1,4 @@
-// packages/ui/src/elements/__tests__/Button.test.tsx
+// packages/ui/src/elements/Button.test.tsx
 // packages/ui/src/components/__tests__/Button.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';

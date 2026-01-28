@@ -251,14 +251,17 @@ export class RateLimiter {
 
     await this.store.set(key, record);
 
-    return {
+    const result: RateLimitInfo = {
       allowed,
       remaining: Math.floor(record.tokens),
       limit: effectiveConfig.max,
       resetMs: this.calculateResetMs(record, refillRate),
-      delayMs,
       violations: record.violations,
     };
+    if (delayMs !== undefined) {
+      result.delayMs = delayMs;
+    }
+    return result;
   }
 
   /**

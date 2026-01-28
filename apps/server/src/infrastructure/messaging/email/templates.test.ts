@@ -1,7 +1,7 @@
-// apps/server/src/infrastructure/messaging/email/__tests__/templates.test.ts
+// apps/server/src/infrastructure/messaging/email/templates.test.ts
 import { describe, expect, test } from 'vitest';
 
-import { emailTemplates } from '../templates';
+import { emailTemplates } from './templates';
 
 // ============================================================================
 // Email Templates Tests

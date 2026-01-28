@@ -1,14 +1,19 @@
-// apps/server/src/modules/users/__tests__/handlers.test.ts
-import { handleMe } from '@users/handlers';
+// apps/server/src/modules/users/handlers.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-// Mock getUserById service function
-vi.mock('@users/service', () => ({
-  getUserById: vi.fn(),
-  listUsers: vi.fn(),
+// Use vi.hoisted to create mock functions that survive hoisting
+const { mockGetUserById, mockListUsers } = vi.hoisted(() => ({
+  mockGetUserById: vi.fn(),
+  mockListUsers: vi.fn(),
 }));
 
-vi.mock('@shared', () => ({
+// Mock getUserById service function using relative path (Vitest 4.x resolves aliases differently)
+vi.mock('./service', () => ({
+  getUserById: mockGetUserById,
+  listUsers: mockListUsers,
+}));
+
+vi.mock('../../shared', () => ({
   ERROR_MESSAGES: {
     UNAUTHORIZED: 'Unauthorized',
     USER_NOT_FOUND: 'User not found',
@@ -16,7 +21,7 @@ vi.mock('@shared', () => ({
   },
 }));
 
-import * as userService from '@users/service';
+import { handleMe } from './handlers';
 
 describe('Users Handlers', () => {
   const mockCtx = {
@@ -47,7 +52,7 @@ describe('Users Handlers', () => {
 
   describe('handleMe', () => {
     test('should return 401 when user is not authenticated', async () => {
-      const requestWithoutUser = { ...mockRequest, user: null };
+      const requestWithoutUser = { ...mockRequest, user: undefined };
 
       const result = await handleMe(mockCtx as never, requestWithoutUser as never);
 
@@ -64,7 +69,7 @@ describe('Users Handlers', () => {
         role: 'user' as const,
         createdAt: new Date('2024-01-01T00:00:00.000Z'),
       };
-      vi.mocked(userService.getUserById).mockResolvedValue(mockUser);
+      mockGetUserById.mockResolvedValue(mockUser);
 
       const result = await handleMe(mockCtx as never, mockRequest as never);
 
@@ -80,7 +85,7 @@ describe('Users Handlers', () => {
     });
 
     test('should return 404 when user not found', async () => {
-      vi.mocked(userService.getUserById).mockResolvedValue(null);
+      mockGetUserById.mockResolvedValue(null);
 
       const result = await handleMe(mockCtx as never, mockRequest as never);
 
@@ -89,7 +94,7 @@ describe('Users Handlers', () => {
     });
 
     test('should return 500 on unexpected error', async () => {
-      vi.mocked(userService.getUserById).mockRejectedValue(new Error('Database error'));
+      mockGetUserById.mockRejectedValue(new Error('Database error'));
 
       const result = await handleMe(mockCtx as never, mockRequest as never);
 

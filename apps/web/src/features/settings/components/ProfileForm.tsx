@@ -41,7 +41,7 @@ export const ProfileForm = ({ user, onSuccess }: ProfileFormProps): ReactElement
     },
   });
 
-  const handleSubmit = (e: React.FormEvent): void => {
+  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>): void => {
     e.preventDefault();
     setSuccessMessage(null);
     updateProfile({ name: name.trim().length > 0 ? name.trim() : null });

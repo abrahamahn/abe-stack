@@ -7,6 +7,7 @@
  */
 
 import { createSchema } from './schema';
+
 import type { Schema } from './types';
 
 // ============================================================================

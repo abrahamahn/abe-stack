@@ -8,7 +8,7 @@
 
 import { NotFoundError } from '@abe-stack/core';
 
-import type { Repositories } from '@infrastructure';
+import type { Repositories } from '@/infrastructure';
 
 // ============================================================================
 // Types
@@ -69,7 +69,7 @@ export async function revokeSession(
     throw new NotFoundError('Session not found');
   }
 
-  if (family !== null && family !== undefined && family.revokedAt !== null) {
+  if (family.revokedAt !== null) {
     // Already revoked, nothing to do
     return;
   }

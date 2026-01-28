@@ -6,7 +6,6 @@
  * of the settings API and query cache invalidation.
  */
 
-
 import { QueryCache, QueryCacheProvider } from '@abe-stack/sdk';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -16,7 +15,6 @@ import { createSettingsApi } from '../api';
 
 import { useRevokeAllSessions, useRevokeSession, useSessions } from './useSessions';
 
-
 import type { Session, SessionsListResponse } from '../api';
 import type { ReactNode } from 'react';
 
@@ -24,9 +22,13 @@ import type { ReactNode } from 'react';
 // Mocks
 // ============================================================================
 
-vi.mock('../api', () => ({
-  createSettingsApi: vi.fn(),
-}));
+vi.mock('../api', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../api')>();
+  return {
+    ...actual,
+    createSettingsApi: vi.fn(),
+  };
+});
 
 // ============================================================================
 // Test Setup
@@ -36,13 +38,12 @@ const mockListSessions = vi.fn();
 const mockRevokeSession = vi.fn();
 const mockRevokeAllSessions = vi.fn();
 
-const createWrapper = (
-  cache: QueryCache,
-): ((props: { children: ReactNode }) => React.ReactElement) => {
-  return ({ children }: { children: ReactNode }): React.ReactElement => {
-    return React.createElement(QueryCacheProvider, { cache }, children);
+function createWrapper(cache: QueryCache): (props: { children: ReactNode }) => React.ReactElement {
+  // eslint-disable-next-line react/no-multi-comp, react/display-name
+  return function Wrapper({ children }: { children: ReactNode }): React.ReactElement {
+    return React.createElement(QueryCacheProvider, { cache, children });
   };
-};
+}
 
 const mockSessions: Session[] = [
   {

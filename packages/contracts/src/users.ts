@@ -7,6 +7,7 @@
 
 import { emailSchema, errorResponseSchema, passwordSchema, uuidSchema } from './common';
 import { createSchema } from './schema';
+
 import type { Contract, Schema } from './types';
 
 // ============================================================================

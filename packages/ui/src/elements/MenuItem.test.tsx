@@ -1,4 +1,4 @@
-// packages/ui/src/elements/__tests__/MenuItem.test.tsx
+// packages/ui/src/elements/MenuItem.test.tsx
 /** @vitest-environment jsdom */
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';

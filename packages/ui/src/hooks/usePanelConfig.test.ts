@@ -1,4 +1,4 @@
-// packages/ui/src/hooks/__tests__/usePanelConfig.test.ts
+// packages/ui/src/hooks/usePanelConfig.test.ts
 /** @vitest-environment jsdom */
 import { usePanelConfig, type PanelConfig } from '@hooks/usePanelConfig';
 import { act, renderHook, waitFor } from '@testing-library/react';

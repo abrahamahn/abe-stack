@@ -8,7 +8,6 @@
  */
 
 import { QueryCache } from '@abe-stack/sdk';
-import { clientConfig } from '@/config';
 import { createAuthService } from '@features/auth';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -17,6 +16,8 @@ import { App } from './app/App';
 import { registerServiceWorker } from './utils/registerServiceWorker';
 
 import type { ClientEnvironment } from '@app/ClientEnvironment';
+
+import { clientConfig } from '@/config';
 
 import '@abe-stack/ui/styles/elements.css';
 

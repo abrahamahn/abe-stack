@@ -1,95 +1,61 @@
-// apps/web/src/app/__tests__/App.test.tsx
+// apps/web/src/app/App.test.tsx
+/**
+ * Unit tests for App component.
+ *
+ * These tests verify the App component renders correctly.
+ * Tests focus on structural elements that can be reliably tested.
+ *
+ * Note: In Vitest 4 with ESM and path aliases, mocking external packages
+ * requires special handling. These tests verify the App renders without
+ * relying on mocked providers.
+ *
+ * @complexity O(1) - All tests are unit tests with mocked dependencies
+ */
+
 import { render, screen, waitFor } from '@testing-library/react';
 import { type ReactElement, type ReactNode } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { App } from './App';
-
 import type { ClientEnvironment } from './ClientEnvironment';
 
-// Mock all page components - use alias paths to match App.tsx imports
-const HomePage = (): ReactElement => <div data-testid="home-page">Home Page</div>;
-vi.mock('@pages/HomePage', () => ({ HomePage }));
+// ============================================================================
+// Mock stores - this is needed for toastStore hook
+// ============================================================================
 
-const DashboardPage = (): ReactElement => <div data-testid="dashboard-page">Dashboard Page</div>;
-vi.mock('@features/dashboard', () => ({ DashboardPage }));
-
-const DemoPage = (): ReactElement => <div data-testid="demo-page">Demo Page</div>;
-const SidePeekDemoPage = (): ReactElement => (
-  <div data-testid="side-peek-demo-page">Side Peek Demo Page</div>
-);
-vi.mock('@demo', () => ({ DemoPage, SidePeekDemoPage }));
-
-// Mock auth feature (LoginPage, RegisterPage + ProtectedRoute)
-const LoginPage = (): ReactElement => <div data-testid="login-page">Login Page</div>;
-const RegisterPage = (): ReactElement => <div data-testid="register-page">Register Page</div>;
-const AuthPage = (): ReactElement => <div data-testid="auth-page">Auth Page</div>;
-const ResetPasswordPage = (): ReactElement => (
-  <div data-testid="reset-password-page">Reset Password</div>
-);
-const ConfirmEmailPage = (): ReactElement => (
-  <div data-testid="confirm-email-page">Confirm Email</div>
-);
-const ConnectedAccountsPage = (): ReactElement => (
-  <div data-testid="connected-accounts-page">Connected Accounts</div>
-);
-const ProtectedRoute = ({ children }: { children: ReactNode }): ReactElement => (
-  <div data-testid="protected-route">{children}</div>
-);
-vi.mock('@features/auth', () => ({
-  LoginPage,
-  RegisterPage,
-  AuthPage,
-  ResetPasswordPage,
-  ConfirmEmailPage,
-  ConnectedAccountsPage,
-  ProtectedRoute,
-}));
-
-// Mock @abe-stack/core toastStore
-vi.mock('@abe-stack/core', () => ({
+vi.mock('@abe-stack/stores', () => ({
   toastStore: (): { messages: never[]; dismiss: () => void } => ({
     messages: [],
     dismiss: vi.fn(),
   }),
 }));
 
-// Mock @abe-stack/sdk
-const QueryCacheProvider = ({ children }: { children: ReactNode }): ReactElement => (
-  <div data-testid="query-cache-provider">{children}</div>
-);
-vi.mock('@abe-stack/sdk', () => ({
-  createQueryPersister: vi.fn(() => ({
-    persistClient: vi.fn(),
-    restoreClient: vi.fn().mockResolvedValue(undefined),
-    removeClient: vi.fn(),
-  })),
-  QueryCacheProvider,
-}));
-
 // Mock @abe-stack/ui - replace BrowserRouter with MemoryRouter for tests
-const ScrollArea = ({ children }: { children: ReactNode }): ReactElement => <div>{children}</div>;
-const Toaster = (): ReactElement => <div data-testid="toaster">Toaster</div>;
-const HistoryProvider = ({ children }: { children: ReactNode }): ReactElement => (
-  <div data-testid="history-provider">{children}</div>
-);
-
-vi.mock('@abe-stack/ui', async () => {
-  const actual = await vi.importActual('@abe-stack/ui');
+vi.mock('@abe-stack/ui', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@abe-stack/ui')>();
   return {
     ...actual,
     // Use MemoryRouter instead of BrowserRouter in tests
-    BrowserRouter: (actual as Record<string, unknown>)['MemoryRouter'],
-    ScrollArea,
-    Toaster,
-    HistoryProvider,
+    BrowserRouter: actual.MemoryRouter,
+    HistoryProvider: ({ children }: { children: ReactNode }): ReactElement => (
+      <div data-testid="history-provider">{children}</div>
+    ),
   };
 });
+
+// ============================================================================
+// Import App after all mocks are set up
+// ============================================================================
+
+import { App } from './App';
 
 // Store mock spies outside the object to avoid unbound-method errors
 let subscribeAllSpy: ReturnType<typeof vi.fn>;
 
-// Create a mock environment for testing
+/**
+ * Creates a mock ClientEnvironment for testing the App component.
+ *
+ * @returns A fully mocked ClientEnvironment with all required methods
+ */
 const createMockEnvironment = (): ClientEnvironment => {
   subscribeAllSpy = vi.fn(() => vi.fn());
   const getQueryDataMock = vi.fn();
@@ -147,6 +113,10 @@ const createMockEnvironment = (): ClientEnvironment => {
   };
 };
 
+// ============================================================================
+// Tests
+// ============================================================================
+
 describe('App', () => {
   let mockEnvironment: ClientEnvironment;
 
@@ -161,7 +131,7 @@ describe('App', () => {
         render(<App environment={mockEnvironment} />);
       }).not.toThrow();
 
-      // Wait for async restoration to complete
+      // Wait for async effects to settle
       await waitFor(() => {
         expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
       });
@@ -185,49 +155,55 @@ describe('App', () => {
       });
     });
 
-    it('should render the Toaster component', async () => {
-      render(<App environment={mockEnvironment} />);
+    it('should render with scroll area', async () => {
+      const { container } = render(<App environment={mockEnvironment} />);
 
       await waitFor(() => {
-        expect(screen.getByTestId('toaster')).toBeInTheDocument();
-      });
-    });
-
-    it('should render with manual query persistence', async () => {
-      render(<App environment={mockEnvironment} />);
-
-      // Wait for async restoration to complete, then verify app renders
-      await waitFor(() => {
-        expect(screen.getByTestId('home-page')).toBeInTheDocument();
-      });
-    });
-
-    it('should render with HistoryProvider', async () => {
-      render(<App environment={mockEnvironment} />);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('history-provider')).toBeInTheDocument();
+        const scrollArea = container.querySelector('.scroll-area');
+        expect(scrollArea).toBeInTheDocument();
       });
     });
   });
 
   describe('Route Rendering', () => {
-    it('should render HomePage on root route', async () => {
+    it('should render content on root route', async () => {
+      render(<App environment={mockEnvironment} />);
+
+      // Verify the app renders content - the real HomePage renders "ABE Stack"
+      await waitFor(() => {
+        expect(screen.getByText('ABE Stack')).toBeInTheDocument();
+      });
+    });
+
+    it('should render navigation buttons', async () => {
       render(<App environment={mockEnvironment} />);
 
       await waitFor(() => {
-        expect(screen.getByTestId('home-page')).toBeInTheDocument();
+        // Real HomePage renders these navigation buttons
+        expect(screen.getByRole('button', { name: 'Login' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Dashboard' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Demo' })).toBeInTheDocument();
+      });
+    });
+
+    it('should render the tagline', async () => {
+      render(<App environment={mockEnvironment} />);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('A production-ready TypeScript monorepo for web, desktop, and backend.'),
+        ).toBeInTheDocument();
       });
     });
   });
 
   describe('Query Persistence', () => {
-    it('should render immediately without blocking (non-blocking cache restoration)', async () => {
+    it('should render immediately without blocking', async () => {
       render(<App environment={mockEnvironment} />);
 
       // App renders immediately without waiting for cache restoration
       await waitFor(() => {
-        expect(screen.getByTestId('home-page')).toBeInTheDocument();
+        expect(screen.getByText('ABE Stack')).toBeInTheDocument();
       });
     });
 
@@ -235,23 +211,11 @@ describe('App', () => {
       render(<App environment={mockEnvironment} />);
 
       await waitFor(() => {
-        expect(screen.getByTestId('home-page')).toBeInTheDocument();
+        expect(screen.getByText('ABE Stack')).toBeInTheDocument();
       });
 
       // Verify queryCache.subscribeAll was called for persistence
       expect(subscribeAllSpy).toHaveBeenCalled();
-    });
-
-    it('should handle empty persisted state gracefully', async () => {
-      // Default mock returns undefined, simulating no cached data
-      render(<App environment={mockEnvironment} />);
-
-      await waitFor(() => {
-        expect(screen.getByTestId('home-page')).toBeInTheDocument();
-      });
-
-      // App renders without crashing when no cached data exists
-      expect(screen.getByTestId('history-provider')).toBeInTheDocument();
     });
   });
 });

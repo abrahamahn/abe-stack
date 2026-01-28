@@ -97,12 +97,15 @@ export class VideoProcessor {
       // Get metadata
       const metadata = await this.getMetadata(inputPath);
 
-      return {
+      const result: ProcessingResult = {
         success: true,
         outputPath,
-        thumbnailPath,
         metadata,
       };
+      if (thumbnailPath !== undefined) {
+        result.thumbnailPath = thumbnailPath;
+      }
+      return result;
     } catch (error) {
       return {
         success: false,
@@ -147,7 +150,7 @@ export class VideoProcessor {
         );
       }
 
-      if (options.bitrate !== undefined && options.bitrate !== null && options.bitrate !== '') {
+      if (options.bitrate !== undefined && options.bitrate !== '') {
         command = command.videoBitrate(options.bitrate);
       }
 
@@ -178,15 +181,29 @@ export class VideoProcessor {
         const videoStream = data.streams.find((s) => s.codec_type === 'video');
         const audioStream = data.streams.find((s) => s.codec_type === 'audio');
 
-        resolve({
-          duration: data.format.duration,
-          width: videoStream?.width,
-          height: videoStream?.height,
-          bitrate: data.format.bit_rate !== undefined && data.format.bit_rate !== null && data.format.bit_rate !== '' ? parseInt(data.format.bit_rate, 10) : undefined,
-          codec: videoStream?.codec_name,
-          channels: audioStream?.channels,
-          sampleRate: audioStream?.sample_rate !== undefined && audioStream?.sample_rate !== null && audioStream.sample_rate !== '' ? parseInt(audioStream.sample_rate, 10) : undefined,
-        });
+        const result: MediaMetadata = {};
+        if (data.format.duration !== undefined) {
+          result.duration = data.format.duration;
+        }
+        if (videoStream?.width !== undefined) {
+          result.width = videoStream.width;
+        }
+        if (videoStream?.height !== undefined) {
+          result.height = videoStream.height;
+        }
+        if (data.format.bit_rate !== undefined && data.format.bit_rate !== '') {
+          result.bitrate = parseInt(data.format.bit_rate, 10);
+        }
+        if (videoStream?.codec_name !== undefined) {
+          result.codec = videoStream.codec_name;
+        }
+        if (audioStream?.channels !== undefined) {
+          result.channels = audioStream.channels;
+        }
+        if (audioStream?.sample_rate !== undefined && audioStream.sample_rate !== '') {
+          result.sampleRate = parseInt(audioStream.sample_rate, 10);
+        }
+        resolve(result);
       });
     });
   }
@@ -327,7 +344,7 @@ export class VideoProcessor {
 
     return new Promise((resolve) => {
       ffmpegModule.ffprobe(inputPath, (err: Error | null, data: FfprobeData) => {
-        if (err) {
+        if (err !== null) {
           resolve(null);
           return;
         }

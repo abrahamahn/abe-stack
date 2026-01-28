@@ -27,15 +27,17 @@ import {
     type RefreshTokenFamily,
     type User,
 } from '@abe-stack/db';
+
+import { createRefreshToken, getRefreshTokenExpiry } from './jwt';
+
 import {
     logTokenFamilyRevokedEvent,
     logTokenReuseEvent,
     withTransaction,
     type DbClient,
     type UserRole,
-} from '@infrastructure';
+} from '@/infrastructure';
 
-import { createRefreshToken, getRefreshTokenExpiry } from './jwt';
 
 // ============================================================================
 // Token Family Management

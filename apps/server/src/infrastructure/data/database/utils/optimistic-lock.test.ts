@@ -1,11 +1,11 @@
-// apps/server/src/infrastructure/data/database/utils/__tests__/optimistic-lock.test.ts
+// apps/server/src/infrastructure/data/database/utils/optimistic-lock.test.ts
 import { describe, expect, test, vi } from 'vitest';
 
 import {
   isOptimisticLockError,
   OptimisticLockError,
   updateUserWithVersion,
-} from '../optimistic-lock';
+} from './optimistic-lock';
 
 import type { RawDb } from '@abe-stack/db';
 

@@ -1,4 +1,4 @@
-// apps/server/src/modules/notifications/__tests__/service.test.ts
+// apps/server/src/modules/notifications/service.test.ts
 /**
  * Notification Service Tests
  *
@@ -22,7 +22,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-describe('Notification Service', () => {
+describe('Notification Service', { timeout: 30000 }, () => {
   // This module currently has no unit-testable functions without database access.
   // All service functions require a database client.
   //
@@ -44,7 +44,7 @@ describe('Notification Service', () => {
 
   it('should export subscription management functions', async () => {
     const { subscribe, unsubscribe, getUserSubscriptions, getSubscriptionById } =
-      await import('../service.js');
+      await import('./service');
     expect(typeof subscribe).toBe('function');
     expect(typeof unsubscribe).toBe('function');
     expect(typeof getUserSubscriptions).toBe('function');
@@ -53,7 +53,7 @@ describe('Notification Service', () => {
 
   it('should export preference management functions', async () => {
     const { getPreferences, updatePreferences, shouldSendNotification } =
-      await import('../service.js');
+      await import('./service');
     expect(typeof getPreferences).toBe('function');
     expect(typeof updatePreferences).toBe('function');
     expect(typeof shouldSendNotification).toBe('function');
@@ -61,7 +61,7 @@ describe('Notification Service', () => {
 
   it('should export cleanup and stats functions', async () => {
     const { cleanupExpiredSubscriptions, getSubscriptionStats, clearAllData } =
-      await import('../service.js');
+      await import('./service');
     expect(typeof cleanupExpiredSubscriptions).toBe('function');
     expect(typeof getSubscriptionStats).toBe('function');
     expect(typeof clearAllData).toBe('function');

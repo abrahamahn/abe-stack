@@ -12,7 +12,7 @@ import * as handlers from './handlers';
 import { billingRoutes } from './routes';
 
 import type { RouteResult } from '@router';
-import type { AppContext } from '@shared';
+import type { AppContext } from '../../shared';
 
 // ============================================================================
 // Mocks

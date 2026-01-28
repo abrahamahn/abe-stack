@@ -1,4 +1,4 @@
-// packages/sdk/src/search/__tests__/serialization.test.ts
+// packages/sdk/src/search/serialization.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {

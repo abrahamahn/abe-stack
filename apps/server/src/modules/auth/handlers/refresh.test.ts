@@ -1,4 +1,4 @@
-// apps/server/src/modules/auth/handlers/__tests__/refresh.test.ts
+// apps/server/src/modules/auth/handlers/refresh.test.ts
 /**
  * Refresh Handler Tests
  *
@@ -6,34 +6,69 @@
  */
 
 import { InvalidTokenError, TokenReuseError } from '@abe-stack/core';
-import { refreshUserTokens } from '@auth/service';
-import { clearRefreshTokenCookie, setRefreshTokenCookie } from '@auth/utils';
-import { ERROR_MESSAGES, REFRESH_COOKIE_NAME } from '@shared';
+import { ERROR_MESSAGES, REFRESH_COOKIE_NAME } from '../../../shared';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { handleRefresh } from '../refresh';
+import { handleRefresh } from './refresh';
 
-import type { AppContext, ReplyWithCookies, RequestWithCookies } from '@shared';
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../../../shared';
 
 // ============================================================================
 // Mock Dependencies
 // ============================================================================
 
-vi.mock('@auth/service', () => ({
-  refreshUserTokens: vi.fn(),
+// Create mock functions via vi.hoisted to be available before vi.mock hoisting
+const {
+  mockRefreshUserTokens,
+  mockSetRefreshTokenCookie,
+  mockClearRefreshTokenCookie,
+  mockSendTokenReuseAlert,
+  mockMapErrorToResponse,
+} = vi.hoisted(() => ({
+  mockRefreshUserTokens: vi.fn(),
+  mockSetRefreshTokenCookie: vi.fn(),
+  mockClearRefreshTokenCookie: vi.fn(),
+  mockSendTokenReuseAlert: vi.fn().mockResolvedValue(undefined),
+  // Error mapper that uses error.name instead of instanceof (avoids ESM module boundary issues)
+  mockMapErrorToResponse: vi.fn((error: unknown, ctx: { log: { error: (e: unknown) => void } }) => {
+    if (error instanceof Error) {
+      switch (error.name) {
+        case 'InvalidTokenError':
+          return { status: 401, body: { message: error.message || 'Invalid or expired token' } };
+        case 'TokenReuseError':
+          return { status: 401, body: { message: 'Token has already been used' } };
+        default:
+          ctx.log.error(error);
+          return { status: 500, body: { message: 'Internal server error' } };
+      }
+    }
+    ctx.log.error(error);
+    return { status: 500, body: { message: 'Internal server error' } };
+  }),
 }));
 
-vi.mock('@auth/utils', () => ({
-  setRefreshTokenCookie: vi.fn(),
-  clearRefreshTokenCookie: vi.fn(),
+// Mock the service module - use relative path
+vi.mock('../service', () => ({
+  refreshUserTokens: mockRefreshUserTokens,
 }));
 
-vi.mock('@auth/security', () => ({
-  sendTokenReuseAlert: vi.fn().mockResolvedValue(undefined),
+vi.mock('../utils', () => ({
+  setRefreshTokenCookie: mockSetRefreshTokenCookie,
+  clearRefreshTokenCookie: mockClearRefreshTokenCookie,
 }));
 
-// Import after mocking
-import { sendTokenReuseAlert } from '@auth/security';
+vi.mock('../security', () => ({
+  sendTokenReuseAlert: mockSendTokenReuseAlert,
+}));
+
+// Mock @shared to provide working mapErrorToResponse
+vi.mock('../../../shared', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../../../shared')>();
+  return {
+    ...original,
+    mapErrorToResponse: mockMapErrorToResponse,
+  };
+});
 
 // ============================================================================
 // Test Helpers
@@ -124,7 +159,7 @@ describe('handleRefresh', () => {
         refreshToken: 'new-refresh-token-456',
       };
 
-      vi.mocked(refreshUserTokens).mockResolvedValue(mockRefreshResult);
+      mockRefreshUserTokens.mockResolvedValue(mockRefreshResult);
 
       const result = await handleRefresh(ctx, request, reply);
 
@@ -147,11 +182,11 @@ describe('handleRefresh', () => {
         refreshToken: 'new-refresh-token',
       };
 
-      vi.mocked(refreshUserTokens).mockResolvedValue(mockRefreshResult);
+      mockRefreshUserTokens.mockResolvedValue(mockRefreshResult);
 
       await handleRefresh(ctx, request, reply);
 
-      expect(refreshUserTokens).toHaveBeenCalledWith(
+      expect(mockRefreshUserTokens).toHaveBeenCalledWith(
         ctx.db,
         ctx.repos,
         ctx.config.auth,
@@ -171,11 +206,11 @@ describe('handleRefresh', () => {
         refreshToken: 'new-refresh-token-789',
       };
 
-      vi.mocked(refreshUserTokens).mockResolvedValue(mockRefreshResult);
+      mockRefreshUserTokens.mockResolvedValue(mockRefreshResult);
 
       await handleRefresh(ctx, request, reply);
 
-      expect(setRefreshTokenCookie).toHaveBeenCalledWith(
+      expect(mockSetRefreshTokenCookie).toHaveBeenCalledWith(
         reply,
         'new-refresh-token-789',
         ctx.config.auth,
@@ -192,11 +227,11 @@ describe('handleRefresh', () => {
         refreshToken: 'new-refresh-token',
       };
 
-      vi.mocked(refreshUserTokens).mockResolvedValue(mockRefreshResult);
+      mockRefreshUserTokens.mockResolvedValue(mockRefreshResult);
 
       await handleRefresh(ctx, request, reply);
 
-      expect(clearRefreshTokenCookie).not.toHaveBeenCalled();
+      expect(mockClearRefreshTokenCookie).not.toHaveBeenCalled();
     });
   });
 
@@ -234,7 +269,7 @@ describe('handleRefresh', () => {
 
       await handleRefresh(ctx, request, reply);
 
-      expect(refreshUserTokens).not.toHaveBeenCalled();
+      expect(mockRefreshUserTokens).not.toHaveBeenCalled();
     });
 
     test('should not set or clear cookies when token is missing', async () => {
@@ -244,8 +279,8 @@ describe('handleRefresh', () => {
 
       await handleRefresh(ctx, request, reply);
 
-      expect(setRefreshTokenCookie).not.toHaveBeenCalled();
-      expect(clearRefreshTokenCookie).not.toHaveBeenCalled();
+      expect(mockSetRefreshTokenCookie).not.toHaveBeenCalled();
+      expect(mockClearRefreshTokenCookie).not.toHaveBeenCalled();
     });
   });
 
@@ -255,7 +290,7 @@ describe('handleRefresh', () => {
       const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'invalid-token' });
       const reply = createMockReply();
 
-      vi.mocked(refreshUserTokens).mockRejectedValue(new InvalidTokenError());
+      mockRefreshUserTokens.mockRejectedValue(new InvalidTokenError());
 
       const result = await handleRefresh(ctx, request, reply);
 
@@ -270,11 +305,11 @@ describe('handleRefresh', () => {
       const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'invalid-token' });
       const reply = createMockReply();
 
-      vi.mocked(refreshUserTokens).mockRejectedValue(new InvalidTokenError());
+      mockRefreshUserTokens.mockRejectedValue(new InvalidTokenError());
 
       await handleRefresh(ctx, request, reply);
 
-      expect(clearRefreshTokenCookie).toHaveBeenCalledWith(reply);
+      expect(mockClearRefreshTokenCookie).toHaveBeenCalledWith(reply);
     });
 
     test('should not set new cookie on invalid token', async () => {
@@ -282,11 +317,11 @@ describe('handleRefresh', () => {
       const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'invalid-token' });
       const reply = createMockReply();
 
-      vi.mocked(refreshUserTokens).mockRejectedValue(new InvalidTokenError());
+      mockRefreshUserTokens.mockRejectedValue(new InvalidTokenError());
 
       await handleRefresh(ctx, request, reply);
 
-      expect(setRefreshTokenCookie).not.toHaveBeenCalled();
+      expect(mockSetRefreshTokenCookie).not.toHaveBeenCalled();
     });
   });
 
@@ -304,7 +339,7 @@ describe('handleRefresh', () => {
         'Mozilla/5.0',
       );
 
-      vi.mocked(refreshUserTokens).mockRejectedValue(tokenReuseError);
+      mockRefreshUserTokens.mockRejectedValue(tokenReuseError);
 
       const result = await handleRefresh(ctx, request, reply);
 
@@ -321,11 +356,11 @@ describe('handleRefresh', () => {
 
       const tokenReuseError = new TokenReuseError('user-123', 'user@example.com', 'family-id-789');
 
-      vi.mocked(refreshUserTokens).mockRejectedValue(tokenReuseError);
+      mockRefreshUserTokens.mockRejectedValue(tokenReuseError);
 
       await handleRefresh(ctx, request, reply);
 
-      expect(clearRefreshTokenCookie).toHaveBeenCalledWith(reply);
+      expect(mockClearRefreshTokenCookie).toHaveBeenCalledWith(reply);
     });
 
     test('should send security alert email when email is present', async () => {
@@ -344,14 +379,14 @@ describe('handleRefresh', () => {
         'Firefox Browser',
       );
 
-      vi.mocked(refreshUserTokens).mockRejectedValue(tokenReuseError);
+      mockRefreshUserTokens.mockRejectedValue(tokenReuseError);
 
       await handleRefresh(ctx, request, reply);
 
       // Wait for fire-and-forget email to be initiated
       await new Promise((resolve) => setTimeout(resolve, 10));
 
-      expect(sendTokenReuseAlert).toHaveBeenCalledWith(ctx.email, {
+      expect(mockSendTokenReuseAlert).toHaveBeenCalledWith(ctx.email, {
         email: 'user@example.com',
         ipAddress: '192.168.1.1',
         userAgent: 'Firefox Browser',
@@ -375,14 +410,14 @@ describe('handleRefresh', () => {
         undefined,
       );
 
-      vi.mocked(refreshUserTokens).mockRejectedValue(tokenReuseError);
+      mockRefreshUserTokens.mockRejectedValue(tokenReuseError);
 
       await handleRefresh(ctx, request, reply);
 
       // Wait for fire-and-forget email
       await new Promise((resolve) => setTimeout(resolve, 10));
 
-      expect(sendTokenReuseAlert).toHaveBeenCalledWith(ctx.email, {
+      expect(mockSendTokenReuseAlert).toHaveBeenCalledWith(ctx.email, {
         email: 'user@example.com',
         ipAddress: '10.0.0.1',
         userAgent: 'Chrome Browser',
@@ -397,14 +432,14 @@ describe('handleRefresh', () => {
 
       const tokenReuseError = new TokenReuseError('user-123', undefined, 'family-id-789');
 
-      vi.mocked(refreshUserTokens).mockRejectedValue(tokenReuseError);
+      mockRefreshUserTokens.mockRejectedValue(tokenReuseError);
 
       await handleRefresh(ctx, request, reply);
 
       // Wait to ensure email is not sent
       await new Promise((resolve) => setTimeout(resolve, 10));
 
-      expect(sendTokenReuseAlert).not.toHaveBeenCalled();
+      expect(mockSendTokenReuseAlert).not.toHaveBeenCalled();
     });
 
     test('should continue processing if email sending fails', async () => {
@@ -414,8 +449,8 @@ describe('handleRefresh', () => {
 
       const tokenReuseError = new TokenReuseError('user-123', 'user@example.com', 'family-id-789');
 
-      vi.mocked(refreshUserTokens).mockRejectedValue(tokenReuseError);
-      vi.mocked(sendTokenReuseAlert).mockRejectedValue(new Error('Email service down'));
+      mockRefreshUserTokens.mockRejectedValue(tokenReuseError);
+      mockSendTokenReuseAlert.mockRejectedValue(new Error('Email service down'));
 
       const result = await handleRefresh(ctx, request, reply);
 
@@ -437,8 +472,8 @@ describe('handleRefresh', () => {
       const tokenReuseError = new TokenReuseError('user-123', 'user@example.com', 'family-id-789');
 
       const emailError = new Error('SMTP connection failed');
-      vi.mocked(refreshUserTokens).mockRejectedValue(tokenReuseError);
-      vi.mocked(sendTokenReuseAlert).mockRejectedValue(emailError);
+      mockRefreshUserTokens.mockRejectedValue(tokenReuseError);
+      mockSendTokenReuseAlert.mockRejectedValue(emailError);
 
       await handleRefresh(ctx, request, reply);
 
@@ -462,8 +497,8 @@ describe('handleRefresh', () => {
 
       const tokenReuseError = new TokenReuseError('user-123', 'user@example.com', 'family-id-789');
 
-      vi.mocked(refreshUserTokens).mockRejectedValue(tokenReuseError);
-      vi.mocked(sendTokenReuseAlert).mockRejectedValue('String error message');
+      mockRefreshUserTokens.mockRejectedValue(tokenReuseError);
+      mockSendTokenReuseAlert.mockRejectedValue('String error message');
 
       await handleRefresh(ctx, request, reply);
 
@@ -487,7 +522,7 @@ describe('handleRefresh', () => {
       const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'valid-token' });
       const reply = createMockReply();
 
-      vi.mocked(refreshUserTokens).mockRejectedValue(new Error('Database connection failed'));
+      mockRefreshUserTokens.mockRejectedValue(new Error('Database connection failed'));
 
       const result = await handleRefresh(ctx, request, reply);
 
@@ -502,11 +537,11 @@ describe('handleRefresh', () => {
       const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'valid-token' });
       const reply = createMockReply();
 
-      vi.mocked(refreshUserTokens).mockRejectedValue(new Error('Unexpected error'));
+      mockRefreshUserTokens.mockRejectedValue(new Error('Unexpected error'));
 
       await handleRefresh(ctx, request, reply);
 
-      expect(clearRefreshTokenCookie).not.toHaveBeenCalled();
+      expect(mockClearRefreshTokenCookie).not.toHaveBeenCalled();
     });
 
     test('should not set new cookie on unexpected errors', async () => {
@@ -514,11 +549,11 @@ describe('handleRefresh', () => {
       const request = createMockRequest({ [REFRESH_COOKIE_NAME]: 'valid-token' });
       const reply = createMockReply();
 
-      vi.mocked(refreshUserTokens).mockRejectedValue(new Error('Unexpected error'));
+      mockRefreshUserTokens.mockRejectedValue(new Error('Unexpected error'));
 
       await handleRefresh(ctx, request, reply);
 
-      expect(setRefreshTokenCookie).not.toHaveBeenCalled();
+      expect(mockSetRefreshTokenCookie).not.toHaveBeenCalled();
     });
   });
 
@@ -536,11 +571,11 @@ describe('handleRefresh', () => {
         refreshToken: 'new-refresh-token',
       };
 
-      vi.mocked(refreshUserTokens).mockResolvedValue(mockRefreshResult);
+      mockRefreshUserTokens.mockResolvedValue(mockRefreshResult);
 
       await handleRefresh(ctx, request, reply);
 
-      expect(refreshUserTokens).toHaveBeenCalledWith(
+      expect(mockRefreshUserTokens).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -563,11 +598,11 @@ describe('handleRefresh', () => {
         refreshToken: 'new-refresh-token',
       };
 
-      vi.mocked(refreshUserTokens).mockResolvedValue(mockRefreshResult);
+      mockRefreshUserTokens.mockResolvedValue(mockRefreshResult);
 
       await handleRefresh(ctx, request, reply);
 
-      expect(refreshUserTokens).toHaveBeenCalledWith(
+      expect(mockRefreshUserTokens).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -590,11 +625,11 @@ describe('handleRefresh', () => {
         refreshToken: 'new-refresh-token',
       };
 
-      vi.mocked(refreshUserTokens).mockResolvedValue(mockRefreshResult);
+      mockRefreshUserTokens.mockResolvedValue(mockRefreshResult);
 
       await handleRefresh(ctx, request, reply);
 
-      expect(refreshUserTokens).toHaveBeenCalledWith(
+      expect(mockRefreshUserTokens).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -617,7 +652,7 @@ describe('handleRefresh', () => {
       expect(result.body).toEqual({
         message: ERROR_MESSAGES.NO_REFRESH_TOKEN,
       });
-      expect(refreshUserTokens).not.toHaveBeenCalled();
+      expect(mockRefreshUserTokens).not.toHaveBeenCalled();
     });
 
     test('should handle whitespace-only refresh token as valid', async () => {
@@ -625,12 +660,12 @@ describe('handleRefresh', () => {
       const request = createMockRequest({ [REFRESH_COOKIE_NAME]: '   ' });
       const reply = createMockReply();
 
-      vi.mocked(refreshUserTokens).mockRejectedValue(new InvalidTokenError());
+      mockRefreshUserTokens.mockRejectedValue(new InvalidTokenError());
 
       await handleRefresh(ctx, request, reply);
 
       // Should attempt to process the token (not treat as missing)
-      expect(refreshUserTokens).toHaveBeenCalledWith(
+      expect(mockRefreshUserTokens).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -651,11 +686,11 @@ describe('handleRefresh', () => {
         refreshToken: 'new-refresh-token',
       };
 
-      vi.mocked(refreshUserTokens).mockResolvedValue(mockRefreshResult);
+      mockRefreshUserTokens.mockResolvedValue(mockRefreshResult);
 
       await handleRefresh(ctx, request, reply);
 
-      expect(refreshUserTokens).toHaveBeenCalledWith(
+      expect(mockRefreshUserTokens).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -678,11 +713,11 @@ describe('handleRefresh', () => {
         refreshToken: 'new-refresh-token',
       };
 
-      vi.mocked(refreshUserTokens).mockResolvedValue(mockRefreshResult);
+      mockRefreshUserTokens.mockResolvedValue(mockRefreshResult);
 
       await handleRefresh(ctx, request, reply);
 
-      expect(refreshUserTokens).toHaveBeenCalledWith(
+      expect(mockRefreshUserTokens).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.anything(),

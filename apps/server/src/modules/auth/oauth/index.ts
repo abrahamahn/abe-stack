@@ -6,7 +6,7 @@
  */
 
 // Routes (for auto-registration)
-export { oauthRoutes } from './routes';
+export { oauthRouteEntries, oauthRoutes } from './routes';
 
 // Handlers
 export {

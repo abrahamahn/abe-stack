@@ -1,15 +1,15 @@
-// apps/server/src/infrastructure/security/crypto/__tests__/jwtRotation.test.ts
+// apps/server/src/infrastructure/security/crypto/jwtRotation.test.ts
+import { JwtError, sign as jwtSign } from '@abe-stack/core/crypto';
 import { describe, expect, test } from 'vitest';
 
-import { JwtError, jwtSign } from '../index';
 import {
     checkTokenSecret,
     createJwtRotationHandler,
     signWithRotation,
     verifyWithRotation,
-} from '../jwtRotation';
+} from './jwtRotation';
 
-import type { JwtRotationConfig } from '../jwtRotation';
+import type { JwtRotationConfig } from './jwtRotation';
 
 // ============================================================================
 // Test Fixtures

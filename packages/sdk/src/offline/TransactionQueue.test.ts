@@ -1,4 +1,4 @@
-// packages/sdk/src/offline/__tests__/TransactionQueue.test.ts
+// packages/sdk/src/offline/TransactionQueue.test.ts
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {

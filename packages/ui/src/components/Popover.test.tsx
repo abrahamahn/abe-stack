@@ -1,4 +1,4 @@
-// packages/ui/src/components/__tests__/Popover.test.tsx
+// packages/ui/src/components/Popover.test.tsx
 // packages/ui/src/elements/__tests__/Popover.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen, waitFor } from '@testing-library/react';

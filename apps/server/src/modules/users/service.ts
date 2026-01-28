@@ -54,12 +54,17 @@ export async function listUsers(
 ): Promise<ListUsersResult> {
   const { limit, cursor, sortOrder } = options;
 
-  const result = await userRepo.list({
+  // Build list options conditionally to satisfy exactOptionalPropertyTypes
+  const listOptions: Parameters<typeof userRepo.list>[0] = {
     limit,
-    cursor,
     direction: sortOrder,
     sortBy: 'created_at',
-  });
+  };
+  if (cursor !== undefined) {
+    listOptions.cursor = cursor;
+  }
+
+  const result = await userRepo.list(listOptions);
 
   return {
     users: result.items.map((user) => ({

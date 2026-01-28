@@ -1,4 +1,4 @@
-// packages/sdk/src/realtime/__tests__/WebsocketPubsubClient.test.ts
+// packages/sdk/src/realtime/WebsocketPubsubClient.test.ts
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import {

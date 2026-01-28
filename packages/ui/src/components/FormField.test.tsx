@@ -1,4 +1,4 @@
-// packages/ui/src/components/__tests__/FormField.test.tsx
+// packages/ui/src/components/FormField.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';

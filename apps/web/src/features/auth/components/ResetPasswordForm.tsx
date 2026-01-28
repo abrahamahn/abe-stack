@@ -26,7 +26,7 @@ export const ResetPasswordForm = ({
   const [password, setPassword] = useState('');
   const token = initialData?.token as string;
 
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     if (onResetPassword === undefined || token.length === 0) return;
 

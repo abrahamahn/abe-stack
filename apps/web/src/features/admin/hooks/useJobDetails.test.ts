@@ -1,4 +1,4 @@
-// apps/web/src/features/admin/hooks/__tests__/useJobDetails.test.ts
+// apps/web/src/features/admin/hooks/useJobDetails.test.ts
 import { useQuery } from '@abe-stack/sdk';
 import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
@@ -13,7 +13,7 @@ vi.mock('@abe-stack/sdk', () => ({
   useQuery: vi.fn(),
 }));
 
-vi.mock('../../services/adminApi', () => ({
+vi.mock('../services/adminApi', () => ({
   createAdminApiClient: vi.fn(),
 }));
 

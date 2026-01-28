@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/components/__tests__/ProtectedRoute.test.tsx
+// apps/web/src/features/auth/components/ProtectedRoute.test.tsx
 import { MemoryRouter, Route, Routes } from '@abe-stack/ui';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';

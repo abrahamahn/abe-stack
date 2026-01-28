@@ -1,9 +1,10 @@
 // apps/web/src/features/demo/components/DemoBottomBar.tsx
 import { Button, EnvironmentBadge, Kbd, ResizablePanel, Text, VersionBadge } from '@abe-stack/ui';
-import { clientConfig } from '@/config';
 import { KEYBOARD_SHORTCUTS } from '@demo/hooks';
 
 import type { ReactElement } from 'react';
+
+import { clientConfig } from '@/config';
 
 export interface DemoBottomBarProps {
   size: number;

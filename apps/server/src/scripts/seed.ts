@@ -1,3 +1,4 @@
+// apps/server/src/scripts/seed.ts
 /* eslint-disable no-console */
 // apps/server/src/scripts/seed.ts
 /**
@@ -17,8 +18,8 @@
  * - demo@example.com / password123 (user role)
  */
 
-import { buildConnectionString, createDbClient, insert, USERS_TABLE } from '@database';
-import { hashPassword } from '@modules/auth/utils/password';
+import { hashPassword } from '@auth/utils/password';
+import { buildConnectionString, createDbClient, insert, USERS_TABLE } from '@data/database';
 
 import type { UserRole } from '@abe-stack/core';
 
@@ -59,7 +60,7 @@ export const TEST_USERS: SeedUser[] = [
 
 export async function seed(): Promise<void> {
   // Safety check: refuse to seed in production
-  if (process.env.NODE_ENV === 'production') {
+  if (process.env['NODE_ENV'] === 'production') {
     console.error('');
     console.error('ERROR: Cannot run seed script in production!');
     console.error('');
@@ -123,7 +124,7 @@ const isMainModule =
   typeof process !== 'undefined' &&
   process.argv[1] !== undefined &&
   process.argv[1].includes('seed') &&
-  process.env.VITEST === undefined;
+  process.env['VITEST'] === undefined;
 
 if (isMainModule) {
   seed().catch((error: unknown) => {

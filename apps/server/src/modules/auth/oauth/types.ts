@@ -5,7 +5,7 @@
  * Shared type definitions for OAuth authentication flows.
  */
 
-import type { OAuthProvider } from '@infrastructure';
+import type { OAuthProvider } from '@/infrastructure';
 
 // Re-export OAuthProvider for convenience
 export type { OAuthProvider };
@@ -41,13 +41,13 @@ export interface OAuthTokenResponse {
   /** Access token for API calls */
   accessToken: string;
   /** Refresh token for refreshing access (if available) */
-  refreshToken?: string;
+  refreshToken?: string | undefined;
   /** Token expiry timestamp */
-  expiresAt?: Date;
+  expiresAt?: Date | undefined;
   /** Token type (usually 'Bearer') */
   tokenType: string;
   /** Scopes granted */
-  scope?: string;
+  scope?: string | undefined;
 }
 
 // ============================================================================
@@ -102,7 +102,7 @@ export interface OAuthState {
   /** Whether this is a link operation (vs login/register) */
   isLinking: boolean;
   /** User ID if linking to existing account */
-  userId?: string;
+  userId?: string | undefined;
   /** Timestamp for expiry check */
   createdAt: number;
 }

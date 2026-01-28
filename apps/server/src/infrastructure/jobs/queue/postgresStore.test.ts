@@ -1,9 +1,9 @@
-// apps/server/src/infrastructure/jobs/queue/__tests__/postgresStore.test.ts
+// apps/server/src/infrastructure/jobs/queue/postgresStore.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { PostgresQueueStore, createPostgresQueueStore } from '../postgresStore';
+import { PostgresQueueStore, createPostgresQueueStore } from './postgresStore';
 
-import type { Task, TaskError, TaskResult } from '../types';
+import type { Task, TaskError, TaskResult } from './types';
 import type { DbClient } from '@database';
 
 // ============================================================================

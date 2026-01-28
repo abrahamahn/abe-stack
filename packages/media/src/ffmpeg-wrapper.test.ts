@@ -1,4 +1,4 @@
-// packages/media/src/__tests__/ffmpeg-wrapper.test.ts
+// packages/media/src/ffmpeg-wrapper.test.ts
 import { describe, expect, it, vi } from 'vitest';
 
 import type { FFmpegOptions, FFmpegResult, MediaMetadataResult } from './ffmpeg-wrapper';

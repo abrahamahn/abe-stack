@@ -1,14 +1,15 @@
 // apps/web/src/features/auth/hooks/__tests__/useAuth.test.tsx
 import { QueryCache } from '@abe-stack/sdk';
-import { ClientEnvironmentProvider } from '@app';
+import { ClientEnvironmentProvider } from '@app/ClientEnvironment';
 import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { useAuth } from '../useAuth';
 
-import type { ClientConfig, ClientEnvironment } from '@app';
-import type { AuthService } from '@features/auth';
+import type { ClientEnvironment } from '@app/ClientEnvironment';
+import type { ClientConfig } from '@/config';
+import type { AuthService } from '@auth/services/AuthService';
 
 // Create a mock AuthService
 function createMockAuthService(
@@ -32,6 +33,10 @@ function createMockAuthService(
     register: vi.fn(),
     logout: vi.fn(),
     refreshToken: vi.fn().mockResolvedValue(true),
+    forgotPassword: vi.fn(),
+    resetPassword: vi.fn(),
+    verifyEmail: vi.fn(),
+    resendVerification: vi.fn(),
     fetchCurrentUser: vi.fn(),
     destroy: vi.fn(),
   } as unknown as AuthService;
@@ -150,7 +155,7 @@ describe('useAuth', () => {
   });
 
   it('should throw error when used outside ClientEnvironmentProvider', () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
     expect(() => {
       renderHook(() => useAuth());

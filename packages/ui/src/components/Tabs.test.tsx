@@ -1,4 +1,4 @@
-// packages/ui/src/components/__tests__/Tabs.test.tsx
+// packages/ui/src/components/Tabs.test.tsx
 /** @vitest-environment jsdom */
 import { fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';

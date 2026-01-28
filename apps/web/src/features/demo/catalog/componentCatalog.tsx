@@ -14,7 +14,7 @@ import {
   ToastContainer,
 } from '@abe-stack/ui';
 
-import type { ComponentDemo } from '@demo/types';
+import type { ComponentDemo } from '../types';
 import type { ReactElement } from 'react';
 
 export const componentCatalog: Record<string, ComponentDemo> = {

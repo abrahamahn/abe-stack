@@ -1,4 +1,4 @@
-// apps/web/src/features/demo/pages/__tests__/DemoPage.test.tsx
+// apps/web/src/features/demo/pages/DemoPage.test.tsx
 import { MemoryRouter } from '@abe-stack/ui';
 import { ClientEnvironmentProvider } from '@app/ClientEnvironment';
 import { DemoPage } from '@demo/pages/DemoPage';

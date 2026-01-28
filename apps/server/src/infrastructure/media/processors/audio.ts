@@ -88,7 +88,7 @@ export class AudioProcessor {
 
       // Generate waveform if specified
       let waveformPath: string | undefined;
-      if (options.waveform) {
+      if (options.waveform !== undefined) {
         waveformPath = outputPath.replace(/(\.[^.]+)$/, '_waveform.png');
         // Waveform generation would be implemented here
         // For now, just set the path
@@ -97,12 +97,15 @@ export class AudioProcessor {
       // Get metadata
       const metadata = await this.getMetadata(inputPath);
 
-      return {
+      const result: ProcessingResult = {
         success: true,
         outputPath,
-        waveformPath,
         metadata,
       };
+      if (waveformPath !== undefined) {
+        result.waveformPath = waveformPath;
+      }
+      return result;
     } catch (error) {
       return {
         success: false,
@@ -158,14 +161,26 @@ export class AudioProcessor {
     try {
       const parseFile = await this.getParseFile();
       const metadata = await parseFile(inputPath);
-      return {
-        duration: metadata.format.duration,
-        bitrate: metadata.format.bitrate,
-        codec: metadata.format.codec,
-        format: metadata.format.container,
-        channels: metadata.format.numberOfChannels,
-        sampleRate: metadata.format.sampleRate,
-      };
+      const result: MediaMetadata = {};
+      if (metadata.format.duration !== undefined) {
+        result.duration = metadata.format.duration;
+      }
+      if (metadata.format.bitrate !== undefined) {
+        result.bitrate = metadata.format.bitrate;
+      }
+      if (metadata.format.codec !== undefined) {
+        result.codec = metadata.format.codec;
+      }
+      if (metadata.format.container !== undefined) {
+        result.format = metadata.format.container;
+      }
+      if (metadata.format.numberOfChannels !== undefined) {
+        result.channels = metadata.format.numberOfChannels;
+      }
+      if (metadata.format.sampleRate !== undefined) {
+        result.sampleRate = metadata.format.sampleRate;
+      }
+      return result;
     } catch {
       return {};
     }

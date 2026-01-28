@@ -1,3 +1,4 @@
+// apps/server/src/infrastructure/media/queue/jobs.test.ts
 /* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/infrastructure/media/queue/jobs.test.ts
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';

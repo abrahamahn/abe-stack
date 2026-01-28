@@ -1,4 +1,4 @@
-// apps/server/src/modules/realtime/__tests__/service.test.ts
+// apps/server/src/modules/realtime/service.test.ts
 /**
  * Realtime Service Unit Tests
  *
@@ -21,9 +21,9 @@ import {
   isTableAllowed,
   loadRecords,
   registerRealtimeTable,
-} from '../service';
+} from './service';
 
-import type { RealtimeRecord } from '../types';
+import type { RealtimeRecord } from './types';
 import type {
   RealtimeListInsertOperation,
   RealtimeListRemoveOperation,

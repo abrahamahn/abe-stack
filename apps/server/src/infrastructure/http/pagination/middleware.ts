@@ -67,11 +67,13 @@ export function createPaginationMiddleware(options: PaginationMiddlewareOptions 
       const sortOrder = parseSortOrder(getParam(paramNames.sortOrder), config);
 
       cursorOptions = {
-        cursor: cursor ?? undefined,
         limit,
         sortBy,
         sortOrder,
       };
+      if (cursor !== undefined) {
+        cursorOptions.cursor = cursor;
+      }
     } else {
       paginationType = 'offset';
 
@@ -91,10 +93,14 @@ export function createPaginationMiddleware(options: PaginationMiddlewareOptions 
     // Attach pagination context to request
     const paginationContext: PaginationContext = {
       type: paginationType,
-      offset: offsetOptions,
-      cursor: cursorOptions,
       helpers: createPaginationHelpers(),
     };
+    if (offsetOptions !== undefined) {
+      paginationContext.offset = offsetOptions;
+    }
+    if (cursorOptions !== undefined) {
+      paginationContext.cursor = cursorOptions;
+    }
 
     (request as PaginationRequest).pagination = paginationContext;
   };

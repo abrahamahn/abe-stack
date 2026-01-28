@@ -1,3 +1,4 @@
+// apps/server/src/infrastructure/data/database/json/seed.test.ts
  
 // apps/server/src/infrastructure/data/database/json/__tests__/seed.test.ts
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
@@ -6,7 +7,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
-import { createJsonDbClient, JsonDatabase, JsonDbClient } from '../seed';
+import { createJsonDbClient, JsonDatabase, JsonDbClient } from './seed';
 
 // ============================================================================
 // Test Helpers

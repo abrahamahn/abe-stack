@@ -1,4 +1,4 @@
-// packages/sdk/src/search/__tests__/hooks.test.ts
+// packages/sdk/src/search/hooks.test.ts
 /**
  * @vitest-environment jsdom
  */

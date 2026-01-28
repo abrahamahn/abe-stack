@@ -1,4 +1,4 @@
-// packages/ui/src/hooks/__tests__/useMediaQuery.test.tsx
+// packages/ui/src/hooks/useMediaQuery.test.tsx
 /** @vitest-environment jsdom */
 import { act, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';

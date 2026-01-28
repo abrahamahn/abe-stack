@@ -1,4 +1,4 @@
-// apps/server/src/modules/admin/__tests__/userService.test.ts
+// apps/server/src/modules/admin/userService.test.ts
 import {
     getUserById,
     getUserStatus,
@@ -6,8 +6,7 @@ import {
     lockUser,
     unlockUser,
     updateUser,
-} from '@admin/userService';
-import { UserNotFoundError } from '@abe-stack/core';
+} from './userService';
 /* eslint-disable @typescript-eslint/unbound-method */
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -167,7 +166,7 @@ describe('Admin User Service', () => {
     test('should throw UserNotFoundError when user not found', async () => {
       vi.mocked(mockRepo.findById).mockResolvedValue(null);
 
-      await expect(getUserById(mockRepo, 'nonexistent')).rejects.toThrow(UserNotFoundError);
+      await expect(getUserById(mockRepo, 'nonexistent')).rejects.toThrow('User not found');
     });
   });
 
@@ -200,7 +199,7 @@ describe('Admin User Service', () => {
       vi.mocked(mockRepo.findById).mockResolvedValue(null);
 
       await expect(updateUser(mockRepo, 'nonexistent', { name: 'Test' })).rejects.toThrow(
-        UserNotFoundError,
+        'User not found',
       );
     });
   });
@@ -238,7 +237,7 @@ describe('Admin User Service', () => {
       vi.mocked(mockRepo.findById).mockResolvedValue(null);
 
       await expect(lockUser(mockRepo, 'nonexistent', 'Test reason')).rejects.toThrow(
-        UserNotFoundError,
+        'User not found',
       );
     });
   });
@@ -262,7 +261,7 @@ describe('Admin User Service', () => {
       vi.mocked(mockRepo.findById).mockResolvedValue(null);
 
       await expect(unlockUser(mockRepo, 'nonexistent', 'Test reason')).rejects.toThrow(
-        UserNotFoundError,
+        'User not found',
       );
     });
   });

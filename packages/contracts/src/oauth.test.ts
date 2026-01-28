@@ -183,7 +183,7 @@ describe('oauthCallbackQuerySchema', () => {
 
 describe('oauthCallbackResponseSchema', () => {
   const validUser = {
-    id: 'user_123',
+    id: '550e8400-e29b-41d4-a716-446655440000',
     email: 'user@example.com',
     name: 'Test User',
     role: 'user',

@@ -97,7 +97,7 @@ const PlanForm = ({ data, onChange, isSubmitting }: PlanFormProps): ReactElement
   ): void => {
     const newFeatures = [...data.features];
     const currentFeature = newFeatures[index];
-    if (currentFeature !== undefined && currentFeature !== null) {
+    if (currentFeature !== undefined) {
       newFeatures[index] = { ...currentFeature, [field]: value };
       onChange({ ...data, features: newFeatures });
     }
@@ -324,10 +324,10 @@ export const PlanManagementPage = (): ReactElement => {
   }, [formData, create]);
 
   const handleUpdate = useCallback(async (): Promise<void> => {
-    if (editPlan === null || editPlan === undefined) return;
+    if (editPlan === null) return;
     const request: UpdatePlanRequest = {
       name: formData.name,
-      description: formData.description || null,
+      description: formData.description !== '' ? formData.description : null,
       interval: formData.interval,
       priceInCents: formData.priceInCents,
       currency: formData.currency,
@@ -369,7 +369,7 @@ export const PlanManagementPage = (): ReactElement => {
         <Button onClick={handleOpenCreate}>Create Plan</Button>
       </div>
 
-      {error !== undefined && error !== null && (
+      {error !== null && (
         <Card className="plan-management-page__error">
           <Card.Body>{error.message}</Card.Body>
         </Card>
@@ -398,7 +398,7 @@ export const PlanManagementPage = (): ReactElement => {
                 <TableRow key={plan.id}>
                   <TableCell>
                     <strong>{plan.name}</strong>
-                    {plan.description !== null && plan.description !== undefined && plan.description !== '' && (
+                    {plan.description !== null && plan.description !== '' && (
                       <span className="text-muted block text-sm">{plan.description}</span>
                     )}
                   </TableCell>
@@ -413,7 +413,7 @@ export const PlanManagementPage = (): ReactElement => {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {plan.stripePriceId !== null && plan.stripePriceId !== undefined && plan.stripePriceId !== '' ? (
+                    {plan.stripePriceId !== null && plan.stripePriceId !== '' ? (
                       <Badge tone="success">Synced</Badge>
                     ) : (
                       <Badge tone="warning">Not synced</Badge>
@@ -431,7 +431,7 @@ export const PlanManagementPage = (): ReactElement => {
                       >
                         Edit
                       </Button>
-                      {(plan.stripePriceId === null || plan.stripePriceId === undefined || plan.stripePriceId === '') && (
+                      {(plan.stripePriceId === null || plan.stripePriceId === '') && (
                         <Button
                           size="small"
                           variant="text"

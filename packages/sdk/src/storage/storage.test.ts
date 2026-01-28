@@ -1,4 +1,4 @@
-// packages/sdk/src/storage/__tests__/storage.test.ts
+// packages/sdk/src/storage/storage.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { localStorageQueue } from '../storage';

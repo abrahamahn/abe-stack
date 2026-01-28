@@ -1,7 +1,7 @@
-// apps/server/src/infrastructure/data/database/utils/__tests__/test-utils.test.ts
+// apps/server/src/infrastructure/data/database/utils/test-utils.test.ts
 import { describe, expect, test } from 'vitest';
 
-import { asMockDb, createMockDb, createMockDbWithData } from '../test-utils';
+import { asMockDb, createMockDb, createMockDbWithData } from './test-utils';
 
 describe('createMockDb', () => {
   test('should return an object with query, queryOne, execute, and raw properties', () => {

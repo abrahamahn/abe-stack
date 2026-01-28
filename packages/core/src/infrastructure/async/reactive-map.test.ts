@@ -236,8 +236,9 @@ describe('ReactiveMap', () => {
       map.subscribe('b', fn);
       expect(map.totalListenerCount).toBe(2);
 
+      // Subscribing same function to same key is deduplicated (Set behavior)
       map.subscribe('a', fn);
-      expect(map.totalListenerCount).toBe(3);
+      expect(map.totalListenerCount).toBe(2);
     });
   });
 

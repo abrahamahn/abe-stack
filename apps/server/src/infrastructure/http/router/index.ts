@@ -40,4 +40,4 @@ export type {
 } from './types';
 
 // Router
-export { protectedRoute, publicRoute, registerRouteMap } from './router';
+export { createRouteMap, protectedRoute, publicRoute, registerRouteMap } from './router';

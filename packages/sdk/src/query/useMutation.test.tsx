@@ -729,12 +729,12 @@ describe('useMutation - Race Conditions', () => {
     );
 
     // Start first mutation
-    const promise1 = act(() => result.current.mutateAsync({ value: 1 }));
+    const promise1 = result.current.mutateAsync({ value: 1 });
 
     await delay(10);
 
     // Start second mutation
-    const promise2 = act(() => result.current.mutateAsync({ value: 2 }));
+    const promise2 = result.current.mutateAsync({ value: 2 });
 
     await delay(10);
 
@@ -776,6 +776,10 @@ describe('useMutation - Edge Cases', () => {
       },
     );
 
+    // Ensure hook rendered without errors
+    expect(result.error).toBeUndefined();
+    expect(result.current).not.toBeNull();
+
     await act(async () => {
       await result.current.mutateAsync(undefined);
     });
@@ -791,6 +795,9 @@ describe('useMutation - Edge Cases', () => {
     const { result } = renderHook(() => useMutation({ mutationFn }), {
       wrapper: createWrapper(cache),
     });
+
+    expect(result.error).toBeUndefined();
+    expect(result.current).not.toBeNull();
 
     await act(async () => {
       try {
@@ -809,9 +816,9 @@ describe('useMutation - Edge Cases', () => {
     const mutationFn = vi.fn().mockResolvedValue({ id: '1', value: 42 });
 
     // Should throw when used outside provider
-    expect(() => {
-      renderHook(() => useMutation({ mutationFn }));
-    }).toThrow('useQueryCache must be used within a QueryCacheProvider');
+    const { result } = renderHook(() => useMutation({ mutationFn }));
+    expect(result.error).toBeDefined();
+    expect(result.error?.message).toContain('useQueryCache must be used within a QueryCacheProvider');
   });
 
   it('should preserve variables after mutation completes', async () => {
@@ -822,6 +829,12 @@ describe('useMutation - Edge Cases', () => {
         wrapper: createWrapper(cache),
       },
     );
+
+    if (result.error !== undefined) {
+      console.log('Hook error:', result.error);
+    }
+    expect(result.error).toBeUndefined();
+    expect(result.current).not.toBeNull();
 
     await act(async () => {
       await result.current.mutateAsync({ value: 42 });
@@ -836,6 +849,9 @@ describe('useMutation - Edge Cases', () => {
       wrapper: createWrapper(cache),
     });
 
+    expect(result.error).toBeUndefined();
+    expect(result.current).not.toBeNull();
+
     await act(async () => {
       await result.current.mutateAsync({ value: 42 });
     });
@@ -848,6 +864,9 @@ describe('useMutation - Edge Cases', () => {
     const { result, rerender } = renderHook(() => useMutation({ mutationFn }), {
       wrapper: createWrapper(cache),
     });
+
+    expect(result.error).toBeUndefined();
+    expect(result.current).not.toBeNull();
 
     const firstMutate = result.current.mutate;
     const firstMutateAsync = result.current.mutateAsync;
@@ -886,8 +905,13 @@ describe('useMutation - Options Updates', () => {
       },
     );
 
+    expect(result.error).toBeUndefined();
+    expect(result.current).not.toBeNull();
+
     // First mutation
-    await act(() => result.current.mutateAsync({ value: 1 }));
+    await act(async () => {
+      await result.current.mutateAsync({ value: 1 });
+    });
 
     expect(mutationFn1).toHaveBeenCalled();
     expect(result.current.data).toEqual({ id: '1', value: 1 });
@@ -896,7 +920,9 @@ describe('useMutation - Options Updates', () => {
     rerender({ mutationFn: mutationFn2 });
 
     // Second mutation with new function
-    await act(() => result.current.mutateAsync({ value: 2 }));
+    await act(async () => {
+      await result.current.mutateAsync({ value: 2 });
+    });
 
     expect(mutationFn2).toHaveBeenCalled();
     expect(result.current.data).toEqual({ id: '1', value: 2 });
@@ -924,8 +950,13 @@ describe('useMutation - Options Updates', () => {
       },
     );
 
+    expect(result.error).toBeUndefined();
+    expect(result.current).not.toBeNull();
+
     // First mutation
-    await act(() => result.current.mutateAsync({ value: 1 }));
+    await act(async () => {
+      await result.current.mutateAsync({ value: 1 });
+    });
 
     expect(onSuccess1).toHaveBeenCalled();
     expect(onSuccess2).not.toHaveBeenCalled();
@@ -934,7 +965,9 @@ describe('useMutation - Options Updates', () => {
     rerender({ onSuccess: onSuccess2 });
 
     // Second mutation with new callback
-    await act(() => result.current.mutateAsync({ value: 2 }));
+    await act(async () => {
+      await result.current.mutateAsync({ value: 2 });
+    });
 
     expect(onSuccess2).toHaveBeenCalled();
   });

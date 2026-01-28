@@ -1,7 +1,7 @@
-// apps/server/src/infrastructure/http/middleware/__tests__/static.test.ts
+// apps/server/src/infrastructure/http/middleware/static.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { registerStaticServe } from '../static';
+import { registerStaticServe } from './static';
 
 // Mock node:fs
 vi.mock('node:fs', () => ({

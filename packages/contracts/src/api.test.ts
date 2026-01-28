@@ -1,4 +1,4 @@
-// packages/core/src/contracts/__tests__/api.test.ts
+// packages/contracts/src/api.test.ts
 /**
  * Integration tests for the combined API contract.
  * Tests that all domain contracts are properly exported.

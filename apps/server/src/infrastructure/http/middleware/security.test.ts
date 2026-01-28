@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/http/middleware/__tests__/security.test.ts
+// apps/server/src/infrastructure/http/middleware/security.test.ts
 import Fastify from 'fastify';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -10,7 +10,7 @@ import {
     hasDangerousKeys,
     registerPrototypePollutionProtection,
     sanitizeObject,
-} from '../security';
+} from './security';
 
 import type { FastifyInstance } from 'fastify';
 

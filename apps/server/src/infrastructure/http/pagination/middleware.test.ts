@@ -1,10 +1,10 @@
-// apps/server/src/infrastructure/http/pagination/__tests__/middleware.test.ts
-import { PAGINATION_ERROR_TYPES, PaginationError } from '@abe-stack/core';
+// apps/server/src/infrastructure/http/pagination/middleware.test.ts
+import { PAGINATION_ERROR_TYPES } from '@abe-stack/core';
 import { describe, expect, it } from 'vitest';
 
-import { createPaginationMiddleware } from '../middleware';
+import { createPaginationMiddleware } from './middleware';
 
-import type { PaginationRequest } from '../types';
+import type { PaginationRequest } from './types';
 import type { FastifyReply } from 'fastify';
 
 describe('Pagination Middleware', () => {
@@ -125,19 +125,20 @@ describe('Pagination Middleware', () => {
     const req = createMockRequest({ page: '0' });
     const reply = createMockReply();
 
+    let thrownError: unknown;
     expect(() => {
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
-    }).toThrow(PaginationError);
-
-    try {
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
-    } catch (error) {
-      if (error instanceof PaginationError) {
-        expect(error.type).toBe(PAGINATION_ERROR_TYPES.INVALID_PAGE);
-      } else {
-        throw error;
+      try {
+        middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
+      } catch (e) {
+        thrownError = e;
+        throw e;
       }
-    }
+    }).toThrow();
+
+    expect(thrownError).toMatchObject({
+      name: 'PaginationError',
+      type: PAGINATION_ERROR_TYPES.INVALID_PAGE,
+    });
   });
 
   it('should throw error for invalid limit', () => {
@@ -146,19 +147,20 @@ describe('Pagination Middleware', () => {
     const req = createMockRequest({ limit: '0' });
     const reply = createMockReply();
 
+    let thrownError: unknown;
     expect(() => {
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
-    }).toThrow(PaginationError);
-
-    try {
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
-    } catch (error) {
-      if (error instanceof PaginationError) {
-        expect(error.type).toBe(PAGINATION_ERROR_TYPES.INVALID_LIMIT);
-      } else {
-        throw error;
+      try {
+        middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
+      } catch (e) {
+        thrownError = e;
+        throw e;
       }
-    }
+    }).toThrow();
+
+    expect(thrownError).toMatchObject({
+      name: 'PaginationError',
+      type: PAGINATION_ERROR_TYPES.INVALID_LIMIT,
+    });
   });
 
   it('should throw error for limit exceeding maximum', () => {
@@ -167,19 +169,20 @@ describe('Pagination Middleware', () => {
     const req = createMockRequest({ limit: '200' });
     const reply = createMockReply();
 
+    let thrownError: unknown;
     expect(() => {
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
-    }).toThrow(PaginationError);
-
-    try {
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
-    } catch (error) {
-      if (error instanceof PaginationError) {
-        expect(error.type).toBe(PAGINATION_ERROR_TYPES.INVALID_LIMIT);
-      } else {
-        throw error;
+      try {
+        middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
+      } catch (e) {
+        thrownError = e;
+        throw e;
       }
-    }
+    }).toThrow();
+
+    expect(thrownError).toMatchObject({
+      name: 'PaginationError',
+      type: PAGINATION_ERROR_TYPES.INVALID_LIMIT,
+    });
   });
 
   it('should throw error for invalid sort order', () => {
@@ -188,19 +191,20 @@ describe('Pagination Middleware', () => {
     const req = createMockRequest({ sortOrder: 'invalid' });
     const reply = createMockReply();
 
+    let thrownError: unknown;
     expect(() => {
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
-    }).toThrow(PaginationError);
-
-    try {
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
-    } catch (error) {
-      if (error instanceof PaginationError) {
-        expect(error.type).toBe(PAGINATION_ERROR_TYPES.INVALID_SORT_ORDER);
-      } else {
-        throw error;
+      try {
+        middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
+      } catch (e) {
+        thrownError = e;
+        throw e;
       }
-    }
+    }).toThrow();
+
+    expect(thrownError).toMatchObject({
+      name: 'PaginationError',
+      type: PAGINATION_ERROR_TYPES.INVALID_SORT_ORDER,
+    });
   });
 
   it('should throw error for empty sort field', () => {
@@ -209,19 +213,20 @@ describe('Pagination Middleware', () => {
     const req = createMockRequest({ sortBy: '' });
     const reply = createMockReply();
 
+    let thrownError: unknown;
     expect(() => {
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
-    }).toThrow(PaginationError);
-
-    try {
-      middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
-    } catch (error) {
-      if (error instanceof PaginationError) {
-        expect(error.type).toBe(PAGINATION_ERROR_TYPES.INVALID_SORT_FIELD);
-      } else {
-        throw error;
+      try {
+        middleware(req as unknown as PaginationRequest, reply as unknown as FastifyReply);
+      } catch (e) {
+        thrownError = e;
+        throw e;
       }
-    }
+    }).toThrow();
+
+    expect(thrownError).toMatchObject({
+      name: 'PaginationError',
+      type: PAGINATION_ERROR_TYPES.INVALID_SORT_FIELD,
+    });
   });
 
   it('should handle custom parameter names', () => {

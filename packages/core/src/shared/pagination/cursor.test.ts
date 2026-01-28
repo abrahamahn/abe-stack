@@ -30,8 +30,8 @@ describe('Cursor Encoding/Decoding', () => {
     expect(decoded!.sortOrder).toBe('asc');
   });
 
-  it('should throw error for invalid cursor format', () => {
-    expect(() => decodeCursor('invalid-cursor')).toThrow();
+  it('should return null for invalid cursor format', () => {
+    expect(decodeCursor('invalid-cursor')).toBeNull();
   });
 
   it('should handle numeric values as strings', () => {

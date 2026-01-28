@@ -120,6 +120,7 @@ function createBaseOptions(
 
 /**
  * Mock OAuth connection row from database
+ * Token format is salt:iv:tag:encrypted (4 parts, base64 encoded)
  */
 function createMockConnection(overrides: Partial<{
   id: string;
@@ -130,7 +131,8 @@ function createMockConnection(overrides: Partial<{
   return {
     id: 'conn-123',
     provider: 'google',
-    refresh_token: 'encrypted:refresh:token:data',
+    // base64 encoded parts: salt=c2FsdA==, iv=aXY=, tag=dGFn, encrypted=ZW5jcnlwdGVk
+    refresh_token: 'c2FsdA==:aXY=:dGFn:ZW5jcnlwdGVk',
     expires_at: new Date('2024-01-15T13:00:00Z'),
     ...overrides,
   };
@@ -159,17 +161,16 @@ function mockSuccessfulTokenResponse(overrides: Partial<{
 
 describe('refreshExpiringOAuthTokens', () => {
   let mockDb: RawDb;
-  let originalDateNow: typeof Date.now;
 
   beforeEach(() => {
     vi.clearAllMocks();
     mockDb = createMockDb();
-    originalDateNow = Date.now;
-    Date.now = vi.fn(() => new Date('2024-01-15T12:00:00Z').getTime());
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-15T12:00:00Z'));
   });
 
   afterEach(() => {
-    Date.now = originalDateNow;
+    vi.useRealTimers();
   });
 
   describe('dry-run mode', () => {
@@ -302,7 +303,8 @@ describe('refreshExpiringOAuthTokens', () => {
     });
 
     it('should keep old refresh token if new one not provided', async () => {
-      const oldRefreshToken = 'encrypted:old:token';
+      // Token format is salt:iv:tag:encrypted (4 parts, base64 encoded)
+      const oldRefreshToken = 'c2FsdA==:aXY=:dGFn:ZW5jcnlwdGVk';
       vi.mocked(mockDb.query).mockResolvedValue([
         createMockConnection({ refresh_token: oldRefreshToken }),
       ]);
@@ -404,9 +406,10 @@ describe('refreshExpiringOAuthTokens', () => {
     it('should handle missing access_token in response', async () => {
       vi.mocked(mockDb.query).mockResolvedValue([createMockConnection()]);
 
+      // Source checks for access_token === '', so provide empty string
       vi.mocked(global.fetch).mockResolvedValue({
         ok: true,
-        json: vi.fn().mockResolvedValue({ expires_in: 3600 }),
+        json: vi.fn().mockResolvedValue({ access_token: '', expires_in: 3600 }),
       } as never);
 
       const options = createBaseOptions();
@@ -510,7 +513,12 @@ describe('countExpiringOAuthTokens', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockDb = createMockDb();
-    Date.now = vi.fn(() => new Date('2024-01-15T12:00:00Z').getTime());
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-15T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should count tokens expiring within default window', async () => {
@@ -552,7 +560,12 @@ describe('getOAuthTokenStats', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockDb = createMockDb();
-    Date.now = vi.fn(() => new Date('2024-01-15T12:00:00Z').getTime());
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-01-15T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should return comprehensive statistics', async () => {

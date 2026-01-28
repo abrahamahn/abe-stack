@@ -1,4 +1,4 @@
-// packages/sdk/src/__tests__/queryKeys.test.ts
+// packages/sdk/src/queryKeys.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {

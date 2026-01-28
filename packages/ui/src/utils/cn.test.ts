@@ -1,4 +1,4 @@
-// packages/ui/src/utils/__tests__/cn.test.ts
+// packages/ui/src/utils/cn.test.ts
 import { describe, expect, test } from 'vitest';
 
 import { cn } from './cn';

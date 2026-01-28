@@ -5,6 +5,9 @@
  * Full Stripe integration for subscriptions, payment methods, and invoices.
  */
 
+import stripeDefault from 'stripe';
+
+import type { NormalizedEventType, NormalizedWebhookEvent, SetupIntentResult } from './types';
 import type {
     BillingService,
     CheckoutParams,
@@ -17,12 +20,8 @@ import type {
     StripeProviderConfig as StripeConfig,
 } from '@abe-stack/core';
 import type { SubscriptionStatus } from '@abe-stack/db';
-import type StripeLib from 'stripe';
+import type stripeLib from 'stripe';
 
-import type { NormalizedEventType, NormalizedWebhookEvent, SetupIntentResult } from './types';
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
-const Stripe = require('stripe');
 
 // ============================================================================
 // Stripe Status Mapping
@@ -31,8 +30,8 @@ const Stripe = require('stripe');
 /**
  * Map Stripe subscription status to our status type
  */
-function mapStripeStatus(stripeStatus: StripeLib.Subscription.Status): SubscriptionStatus {
-  const statusMap: Record<StripeLib.Subscription.Status, SubscriptionStatus> = {
+function mapStripeStatus(stripeStatus: stripeLib.Subscription.Status): SubscriptionStatus {
+  const statusMap: Record<stripeLib.Subscription.Status, SubscriptionStatus> = {
     active: 'active',
     canceled: 'canceled',
     incomplete: 'incomplete',
@@ -49,7 +48,7 @@ function mapStripeStatus(stripeStatus: StripeLib.Subscription.Status): Subscript
  * Map Stripe invoice status to our status type
  */
 function mapStripeInvoiceStatus(
-  stripeStatus: StripeLib.Invoice.Status | null,
+  stripeStatus: stripeLib.Invoice.Status | null,
 ): 'draft' | 'open' | 'paid' | 'void' | 'uncollectible' {
   if (stripeStatus == null) return 'draft';
   const statusMap: Record<string, 'draft' | 'open' | 'paid' | 'void' | 'uncollectible'> = {
@@ -85,11 +84,11 @@ function mapStripeEventType(stripeType: string): NormalizedEventType {
 export class StripeProvider implements BillingService {
   readonly provider = 'stripe' as const;
 
-  private stripe: StripeLib;
+  private stripe: stripeLib;
   private webhookSecret: string;
 
   constructor(config: StripeConfig) {
-    this.stripe = new Stripe(config.secretKey, {
+    this.stripe = new stripeDefault(config.secretKey, {
       apiVersion: '2025-12-15.clover',
       typescript: true,
     });
@@ -115,7 +114,7 @@ export class StripeProvider implements BillingService {
   // -------------------------------------------------------------------------
 
   async createCheckoutSession(params: CheckoutParams): Promise<CheckoutResult> {
-    const sessionParams: StripeLib.Checkout.SessionCreateParams = {
+    const sessionParams: stripeLib.Checkout.SessionCreateParams = {
       customer: params.userId, // This should be the Stripe customer ID
       mode: 'subscription',
       payment_method_types: ['card'],
@@ -256,7 +255,7 @@ export class StripeProvider implements BillingService {
         : defaultPaymentMethod.id
       : null;
 
-    return paymentMethods.data.map((pm) => {
+    return paymentMethods.data.map((pm: stripeLib.PaymentMethod) => {
       const method: ProviderPaymentMethod = {
         id: pm.id,
         type: 'card' as const,
@@ -304,7 +303,7 @@ export class StripeProvider implements BillingService {
       limit,
     });
 
-    return invoices.data.map((invoice) => {
+    return invoices.data.map((invoice: stripeLib.Invoice) => {
       // Access subscription from invoice data (handle different API structures)
       const invData = invoice as unknown as Record<string, unknown>;
       let subscriptionId: string | null = null;
@@ -339,22 +338,30 @@ export class StripeProvider implements BillingService {
 
   async createProduct(params: CreateProductParams): Promise<CreateProductResult> {
     // Create product
-    const product = await this.stripe.products.create({
+    const productParams: stripeLib.ProductCreateParams = {
       name: params.name,
-      description: params.description,
-      metadata: params.metadata,
-    });
+    };
+    if (params.description !== undefined) {
+      productParams.description = params.description;
+    }
+    if (params.metadata !== undefined) {
+      productParams.metadata = params.metadata;
+    }
+    const product = await this.stripe.products.create(productParams);
 
     // Create recurring price
-    const price = await this.stripe.prices.create({
+    const priceParams: stripeLib.PriceCreateParams = {
       product: product.id,
       unit_amount: params.priceInCents,
       currency: params.currency.toLowerCase(),
       recurring: {
         interval: params.interval,
       },
-      metadata: params.metadata,
-    });
+    };
+    if (params.metadata !== undefined) {
+      priceParams.metadata = params.metadata;
+    }
+    const price = await this.stripe.prices.create(priceParams);
 
     return {
       productId: product.id,
@@ -363,10 +370,11 @@ export class StripeProvider implements BillingService {
   }
 
   async updateProduct(productId: string, name: string, description?: string): Promise<void> {
-    await this.stripe.products.update(productId, {
-      name,
-      description: description != null && description !== '' ? description : undefined,
-    });
+    const updateParams: stripeLib.ProductUpdateParams = { name };
+    if (description != null && description !== '') {
+      updateParams.description = description;
+    }
+    await this.stripe.products.update(productId, updateParams);
   }
 
   async archivePrice(priceId: string): Promise<void> {
@@ -406,7 +414,7 @@ export class StripeProvider implements BillingService {
       case 'customer.subscription.created':
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted': {
-        const sub = event.data.object as unknown as StripeLib.Subscription;
+        const sub = event.data.object as unknown as stripeLib.Subscription;
         subscriptionId = sub.id;
         customerId = typeof sub.customer === 'string' ? sub.customer : sub.customer.id;
         status = sub.status;
@@ -415,20 +423,20 @@ export class StripeProvider implements BillingService {
       }
       case 'invoice.paid':
       case 'invoice.payment_failed': {
-        const inv = event.data.object as unknown as StripeLib.Invoice;
+        const inv = event.data.object as unknown as stripeLib.Invoice;
         invoiceId = inv.id;
         customerId = typeof inv.customer === 'string' ? inv.customer : inv.customer?.id;
         status = inv.status ?? undefined;
         break;
       }
       case 'charge.refunded': {
-        const charge = event.data.object as unknown as StripeLib.Charge;
+        const charge = event.data.object as unknown as stripeLib.Charge;
         customerId = typeof charge.customer === 'string' ? charge.customer : charge.customer?.id;
         break;
       }
       case 'charge.dispute.created': {
-        const dispute = event.data.object as unknown as StripeLib.Dispute;
-        const disputeCharge = dispute.charge as StripeLib.Charge;
+        const dispute = event.data.object as unknown as stripeLib.Dispute;
+        const disputeCharge = dispute.charge as stripeLib.Charge;
         const chargeCustomer = disputeCharge.customer;
         if (chargeCustomer != null) {
           customerId = typeof chargeCustomer === 'string' ? chargeCustomer : chargeCustomer.id;
@@ -439,24 +447,36 @@ export class StripeProvider implements BillingService {
 
     if (event.type === 'invoice.paid' || event.type === 'invoice.payment_failed') {
       const invData = eventData;
-      if (typeof invData.subscription === 'string') {
-        subscriptionId = invData.subscription;
-      } else if (typeof invData.subscription === 'object' && invData.subscription != null) {
-        subscriptionId = (invData.subscription as { id?: string }).id;
+      if (typeof invData['subscription'] === 'string') {
+        subscriptionId = invData['subscription'];
+      } else if (typeof invData['subscription'] === 'object' && invData['subscription'] != null) {
+        subscriptionId = (invData['subscription'] as { id?: string }).id;
       }
+    }
+
+    const data: NormalizedWebhookEvent['data'] = {
+      raw: event.data.object,
+    };
+    if (subscriptionId !== undefined) {
+      data.subscriptionId = subscriptionId;
+    }
+    if (customerId !== undefined) {
+      data.customerId = customerId;
+    }
+    if (invoiceId !== undefined) {
+      data.invoiceId = invoiceId;
+    }
+    if (status !== undefined) {
+      data.status = status;
+    }
+    if (metadata !== undefined) {
+      data.metadata = metadata;
     }
 
     return {
       id: event.id,
       type: normalizedType,
-      data: {
-        subscriptionId,
-        customerId,
-        invoiceId,
-        status,
-        metadata,
-        raw: event.data.object,
-      },
+      data,
       createdAt: new Date(event.created * 1000),
     };
   }

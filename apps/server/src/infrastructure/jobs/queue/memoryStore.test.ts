@@ -1,9 +1,9 @@
-// apps/server/src/infrastructure/jobs/queue/__tests__/memoryStore.test.ts
+// apps/server/src/infrastructure/jobs/queue/memoryStore.test.ts
 import { beforeEach, describe, expect, test } from 'vitest';
 
-import { createMemoryQueueStore } from '../memoryStore';
+import { createMemoryQueueStore } from './memoryStore';
 
-import type { MemoryQueueStore } from '../memoryStore';
+import type { MemoryQueueStore } from './memoryStore';
 
 // ============================================================================
 // MemoryQueueStore Tests

@@ -1,8 +1,8 @@
-// apps/web/src/pages/__tests__/HomePage.test.tsx
+// apps/web/src/pages/HomePage.test.tsx
 import { MemoryRouter } from '@abe-stack/ui';
-import { HomePage } from '@pages/HomePage';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import { HomePage } from './HomePage';
 
 // Mock all markdown imports
 // Root README
@@ -54,11 +54,11 @@ vi.mock('../../../../../docs/specs/architecture.md?raw', () => ({
   default: `# Architecture\n\nArchitecture documentation.`,
 }));
 
-vi.mock('../../../../../docs/dev/configuration.md?raw', () => ({
+vi.mock('../../../../../docs/deploy/dev/configuration.md?raw', () => ({
   default: `# Config Setup\n\nConfiguration setup documentation.`,
 }));
 
-vi.mock('../../../../../docs/dev/workflow.md?raw', () => ({
+vi.mock('../../../../../docs/deploy/dev/workflow.md?raw', () => ({
   default: `# Dev Environment\n\nDevelopment environment setup.`,
 }));
 
@@ -66,7 +66,7 @@ vi.mock('../../../../../docs/reference/legacy.md?raw', () => ({
   default: `# Legacy\n\nLegacy documentation.`,
 }));
 
-vi.mock('../../../../../docs/dev/performance.md?raw', () => ({
+vi.mock('../../../../../docs/deploy/dev/performance.md?raw', () => ({
   default: `# Performance\n\nPerformance documentation.`,
 }));
 
@@ -74,15 +74,15 @@ vi.mock('../../../../../docs/specs/principles.md?raw', () => ({
   default: `# Principles\n\nDesign principles.`,
 }));
 
-vi.mock('../../../../../docs/dev/security.md?raw', () => ({
+vi.mock('../../../../../docs/deploy/dev/security.md?raw', () => ({
   default: `# Security\n\nSecurity documentation.`,
 }));
 
-vi.mock('../../../../../docs/dev/sync-scripts.md?raw', () => ({
+vi.mock('../../../../../docs/deploy/dev/sync-scripts.md?raw', () => ({
   default: `# Sync Scripts\n\nSync scripts documentation.`,
 }));
 
-vi.mock('../../../../../docs/dev/testing.md?raw', () => ({
+vi.mock('../../../../../docs/deploy/dev/testing.md?raw', () => ({
   default: `# Testing\n\nTesting documentation.`,
 }));
 

@@ -102,7 +102,7 @@ export const BillingSettingsPage = (): ReactElement => {
   }, []);
 
   const handleConfirmRemove = useCallback(async (): Promise<void> => {
-    if (deleteMethodId !== null && deleteMethodId !== undefined) {
+    if (deleteMethodId !== null) {
       await removePaymentMethod(deleteMethodId);
       setDeleteMethodId(null);
     }
@@ -116,7 +116,7 @@ export const BillingSettingsPage = (): ReactElement => {
   );
 
   // Determine if removal should be disabled
-  const hasActiveSubscription = subscription !== null && subscription !== undefined && subscription.status !== 'canceled';
+  const hasActiveSubscription = subscription !== null && subscription.status !== 'canceled';
 
   return (
     <PageContainer className="billing-settings-page">
@@ -190,7 +190,7 @@ export const BillingSettingsPage = (): ReactElement => {
                 onSetDefault={(pm: PaymentMethod) => {
                   void handleSetDefault(pm);
                 }}
-                removeDisabled={pm.isDefault && (hasActiveSubscription === true)}
+                removeDisabled={pm.isDefault && (hasActiveSubscription)}
               />
             ))}
           </div>

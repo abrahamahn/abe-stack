@@ -35,7 +35,7 @@ describe('pubsub helpers', () => {
       await new Promise((resolve) => setImmediate(resolve));
 
       const call = (mockPubsub.publish as any).mock.calls[0];
-      expect(call[0]).toEqual({ table: 'users', id: '123' });
+      expect(call[0]).toBe('record:users:123');
       expect(call[1]).toBe(5);
     });
 

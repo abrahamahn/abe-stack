@@ -1,12 +1,12 @@
-// apps/server/src/modules/auth/__tests__/middleware.test.ts
+// apps/server/src/modules/auth/middleware.test.ts
 import {
   createAuthGuard,
   createRequireAuth,
   createRequireRole,
   extractTokenPayload,
   isAdmin,
-} from '@auth/middleware';
-import { verifyToken } from '@auth/utils/jwt';
+} from './middleware';
+import { verifyToken } from './utils/jwt';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { UserRole } from '@abe-stack/core';
@@ -17,7 +17,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 // ============================================================================
 
 // Mock the JWT verification module
-vi.mock('@auth/utils/jwt', () => ({
+vi.mock('./utils/jwt', () => ({
   verifyToken: vi.fn(),
 }));
 

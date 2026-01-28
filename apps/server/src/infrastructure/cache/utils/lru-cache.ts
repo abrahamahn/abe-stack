@@ -27,7 +27,9 @@ export class LRUCache<TKey, TValue> {
   constructor(maxSize: number, defaultTtl?: number) {
     this.cache = new Map();
     this.maxSize = maxSize;
-    this.defaultTtl = defaultTtl;
+    if (defaultTtl !== undefined) {
+      this.defaultTtl = defaultTtl;
+    }
   }
 
   get(key: TKey): TValue | undefined {
@@ -57,7 +59,11 @@ export class LRUCache<TKey, TValue> {
     if (existingNode != null) {
       // Update existing node
       existingNode.value = value;
-      existingNode.expiresAt = expiresAt;
+      if (expiresAt !== undefined) {
+        existingNode.expiresAt = expiresAt;
+      } else {
+        delete existingNode.expiresAt;
+      }
       existingNode.lastAccessedAt = now;
       this.moveToFront(existingNode);
     } else {
@@ -72,11 +78,13 @@ export class LRUCache<TKey, TValue> {
       const newNode: LRUCacheNode<TKey, TValue> = {
         key,
         value,
-        expiresAt,
         lastAccessedAt: now,
         prev: null,
         next: this.head,
       };
+      if (expiresAt !== undefined) {
+        newNode.expiresAt = expiresAt;
+      }
 
       if (this.head != null) {
         this.head.prev = newNode;

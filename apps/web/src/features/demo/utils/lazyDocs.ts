@@ -1,6 +1,6 @@
 // apps/web/src/features/demo/utils/lazyDocs.ts
 
-import type { ComponentCategory } from '@demo/types';
+import type { ComponentCategory } from '../types';
 
 type DocsLoader = () => Promise<string>;
 type DocsModules = Record<string, DocsLoader>;

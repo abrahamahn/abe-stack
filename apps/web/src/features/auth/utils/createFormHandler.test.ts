@@ -1,4 +1,4 @@
-// apps/web/src/features/auth/utils/__tests__/createFormHandler.test.ts
+// apps/web/src/features/auth/utils/createFormHandler.test.ts
 import { describe, expect, test, vi, beforeEach } from 'vitest';
 
 import { createFormHandler } from './createFormHandler';

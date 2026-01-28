@@ -1,3 +1,4 @@
+// apps/server/src/modules/auth/oauth/handlers.test.ts
 /* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/modules/auth/oauth/handlers.test.ts
 /**
@@ -10,7 +11,7 @@
 
 
 
-import { OAUTH_PROVIDERS } from '@infrastructure';
+import { OAUTH_PROVIDERS } from '../../../infrastructure';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 
@@ -45,8 +46,8 @@ vi.mock('../utils', () => ({
 }));
 
 // Mock infrastructure
-vi.mock('@infrastructure', async () => {
-  const actual = await vi.importActual<typeof import('@infrastructure')>('@infrastructure');
+vi.mock('../../../infrastructure', async () => {
+  const actual = await vi.importActual<typeof import('../../../infrastructure')>('../../../infrastructure');
   return {
     ...actual,
     OAUTH_PROVIDERS: ['google', 'github', 'apple'] as const,
@@ -79,7 +80,7 @@ import {
 } from './service';
 
 import type { OAuthConnectionInfo } from './types';
-import type { AppContext } from '@shared/types';
+import type { AppContext } from '../../shared/types';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 // ============================================================================

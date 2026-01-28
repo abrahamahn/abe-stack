@@ -1,4 +1,4 @@
-// packages/sdk/src/__tests__/errors.test.ts
+// packages/sdk/src/errors.test.ts
 import {
   BadRequestError,
   ConflictError,

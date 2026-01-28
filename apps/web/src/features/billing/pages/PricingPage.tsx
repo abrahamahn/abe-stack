@@ -45,7 +45,7 @@ export const PricingPage = (): ReactElement => {
 
   const getActionLabel = (_plan: Plan, isCurrent: boolean): string => {
     if (isCurrent) return 'Current Plan';
-    if (subscription === null || subscription === undefined) return 'Get Started';
+    if (subscription === null) return 'Get Started';
     return 'Switch to This Plan';
   };
 
@@ -76,7 +76,7 @@ export const PricingPage = (): ReactElement => {
         getActionLabel={getActionLabel}
         getBadge={getBadge}
         isLoading={plansLoading}
-        error={plansError?.message}
+        error={plansError?.message ?? null}
         showIntervalToggle
         defaultInterval="month"
       />

@@ -36,7 +36,7 @@ import type {
     SqlSearchProviderConfig,
     SqlTableConfig,
 } from './types';
-import type { RawDb, Repositories } from '@database';
+import type { RawDb, Repositories } from '@data/database';
 
 // ============================================================================
 // Types
@@ -72,14 +72,14 @@ const SUPPORTED_OPERATORS: FilterOperator[] = [
   FILTER_OPERATORS.LT,
   FILTER_OPERATORS.LTE,
   FILTER_OPERATORS.CONTAINS,
-  FILTER_OPERATORS.STARTS_WITH,
-  FILTER_OPERATORS.ENDS_WITH,
+  FILTER_OPERATORS.StartsWith,
+  FILTER_OPERATORS.EndsWith,
   FILTER_OPERATORS.LIKE,
   FILTER_OPERATORS.ILIKE,
   FILTER_OPERATORS.IN,
-  FILTER_OPERATORS.NOT_IN,
-  FILTER_OPERATORS.IS_NULL,
-  FILTER_OPERATORS.IS_NOT_NULL,
+  FILTER_OPERATORS.NotIn,
+  FILTER_OPERATORS.IsNull,
+  FILTER_OPERATORS.IsNotNull,
   FILTER_OPERATORS.BETWEEN,
 ];
 
@@ -448,13 +448,13 @@ export class SqlSearchProvider<
           values: [`%${this.escapeLikePattern(stringValue)}%`],
         };
 
-      case FILTER_OPERATORS.STARTS_WITH:
+      case FILTER_OPERATORS.StartsWith:
         return {
           text: `${columnName} ILIKE $${this.nextParam()}`,
           values: [`${this.escapeLikePattern(stringValue)}%`],
         };
 
-      case FILTER_OPERATORS.ENDS_WITH:
+      case FILTER_OPERATORS.EndsWith:
         return {
           text: `${columnName} ILIKE $${this.nextParam()}`,
           values: [`%${this.escapeLikePattern(stringValue)}`],
@@ -479,7 +479,7 @@ export class SqlSearchProvider<
         return { text: `${columnName} IN (${placeholders})`, values: value };
       }
 
-      case FILTER_OPERATORS.NOT_IN: {
+      case FILTER_OPERATORS.NotIn: {
         if (!Array.isArray(value) || value.length === 0) {
           return undefined;
         }
@@ -487,10 +487,10 @@ export class SqlSearchProvider<
         return { text: `${columnName} NOT IN (${placeholders})`, values: value };
       }
 
-      case FILTER_OPERATORS.IS_NULL:
+      case FILTER_OPERATORS.IsNull:
         return { text: `${columnName} IS NULL`, values: [] };
 
-      case FILTER_OPERATORS.IS_NOT_NULL:
+      case FILTER_OPERATORS.IsNotNull:
         return { text: `${columnName} IS NOT NULL`, values: [] };
 
       case FILTER_OPERATORS.BETWEEN:

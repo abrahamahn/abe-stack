@@ -2,6 +2,7 @@
   --ui-radius-sm: 0.25rem;
   --ui-radius-md: 0.625rem;
   --ui-radius-lg: 1rem;
+  --ui-radius-full: 999px;
   --ui-gap-xs: 0.25rem;
   --ui-gap-sm: 0.5rem;
   --ui-gap-md: 0.75rem;
@@ -12,7 +13,6 @@
   --ui-border-width: 1px;
   --ui-outline-width: 2px;
   --ui-outline-offset: 2px;
-  --ui-radius-full: 999px;
   --ui-motion-duration-fast: 120ms;
   --ui-motion-duration-base: 180ms;
   --ui-motion-duration-slow: 240ms;
@@ -22,8 +22,8 @@
   --ui-motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ui-motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ui-font-family:
-    system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji, Segoe UI Emoji,
-    Noto Color Emoji;
+    system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji,
+    Segoe UI Emoji, Noto Color Emoji;
   --ui-font-size-base: 0.875rem;
   --ui-font-size-2xs: 0.625rem;
   --ui-font-size-xs: 0.75rem;
@@ -81,10 +81,11 @@
   --ui-badge-neutral-border: #e2e8f0;
 }
 
-:root[data-theme='light'] {
+:root[data-theme="light"] {
   --ui-radius-sm: 0.25rem;
   --ui-radius-md: 0.625rem;
   --ui-radius-lg: 1rem;
+  --ui-radius-full: 999px;
   --ui-gap-xs: 0.25rem;
   --ui-gap-sm: 0.5rem;
   --ui-gap-md: 0.75rem;
@@ -95,7 +96,6 @@
   --ui-border-width: 1px;
   --ui-outline-width: 2px;
   --ui-outline-offset: 2px;
-  --ui-radius-full: 999px;
   --ui-motion-duration-fast: 120ms;
   --ui-motion-duration-base: 180ms;
   --ui-motion-duration-slow: 240ms;
@@ -105,8 +105,8 @@
   --ui-motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ui-motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ui-font-family:
-    system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji, Segoe UI Emoji,
-    Noto Color Emoji;
+    system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji,
+    Segoe UI Emoji, Noto Color Emoji;
   --ui-font-size-base: 0.875rem;
   --ui-font-size-2xs: 0.625rem;
   --ui-font-size-xs: 0.75rem;
@@ -164,10 +164,11 @@
   --ui-badge-neutral-border: #e2e8f0;
 }
 
-:root[data-theme='dark'] {
+:root[data-theme="dark"] {
   --ui-radius-sm: 0.25rem;
   --ui-radius-md: 0.625rem;
   --ui-radius-lg: 1rem;
+  --ui-radius-full: 999px;
   --ui-gap-xs: 0.25rem;
   --ui-gap-sm: 0.5rem;
   --ui-gap-md: 0.75rem;
@@ -178,7 +179,6 @@
   --ui-border-width: 1px;
   --ui-outline-width: 2px;
   --ui-outline-offset: 2px;
-  --ui-radius-full: 999px;
   --ui-motion-duration-fast: 120ms;
   --ui-motion-duration-base: 180ms;
   --ui-motion-duration-slow: 240ms;
@@ -188,8 +188,8 @@
   --ui-motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ui-motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ui-font-family:
-    system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji, Segoe UI Emoji,
-    Noto Color Emoji;
+    system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji,
+    Segoe UI Emoji, Noto Color Emoji;
   --ui-font-size-base: 0.875rem;
   --ui-font-size-2xs: 0.625rem;
   --ui-font-size-xs: 0.75rem;
@@ -252,6 +252,7 @@
     --ui-radius-sm: 0.25rem;
     --ui-radius-md: 0.625rem;
     --ui-radius-lg: 1rem;
+    --ui-radius-full: 999px;
     --ui-gap-xs: 0.25rem;
     --ui-gap-sm: 0.5rem;
     --ui-gap-md: 0.75rem;
@@ -262,7 +263,6 @@
     --ui-border-width: 1px;
     --ui-outline-width: 2px;
     --ui-outline-offset: 2px;
-    --ui-radius-full: 999px;
     --ui-motion-duration-fast: 120ms;
     --ui-motion-duration-base: 180ms;
     --ui-motion-duration-slow: 240ms;
@@ -272,8 +272,8 @@
     --ui-motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
     --ui-motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
     --ui-font-family:
-      system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji, Segoe UI Emoji,
-      Noto Color Emoji;
+      system-ui, -apple-system, Segoe UI, sans-serif, Apple Color Emoji,
+      Segoe UI Emoji, Noto Color Emoji;
     --ui-font-size-base: 0.875rem;
     --ui-font-size-2xs: 0.625rem;
     --ui-font-size-xs: 0.75rem;

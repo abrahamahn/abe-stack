@@ -1,4 +1,4 @@
-// apps/server/src/modules/auth/__tests__/routes.test.ts
+// apps/server/src/modules/auth/routes.test.ts
 /**
  * Auth Routes Unit Tests
  *
@@ -23,7 +23,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest';
 // Mocks (must be before imports)
 // ============================================================================
 
-vi.mock('../handlers', () => ({
+vi.mock('./handlers', () => ({
   handleForgotPassword: vi.fn(),
   handleLogin: vi.fn(),
   handleLogout: vi.fn(),
@@ -32,10 +32,11 @@ vi.mock('../handlers', () => ({
   handleRegister: vi.fn(),
   handleResendVerification: vi.fn(),
   handleResetPassword: vi.fn(),
+  handleSetPassword: vi.fn(),
   handleVerifyEmail: vi.fn(),
 }));
 
-import { authRoutes } from '../routes';
+import { authRoutes } from './routes';
 
 import type { BaseRouteDefinition } from '@router';
 import type { AppContext, ReplyWithCookies, RequestWithCookies } from '@shared';
@@ -164,7 +165,7 @@ describe('Auth Routes', () => {
       });
 
       test('should call handleRegister with correct arguments', async () => {
-        const { handleRegister } = await import('../handlers.js');
+        const { handleRegister } = await import('./handlers');
         vi.mocked(handleRegister).mockResolvedValue({
           status: 201,
           body: {
@@ -190,7 +191,7 @@ describe('Auth Routes', () => {
       });
 
       test('should return result from handleRegister', async () => {
-        const { handleRegister } = await import('../handlers.js');
+        const { handleRegister } = await import('./handlers');
         const expectedResult = {
           status: 201 as const,
           body: {
@@ -242,7 +243,7 @@ describe('Auth Routes', () => {
       });
 
       test('should call handleLogin with correct arguments', async () => {
-        const { handleLogin } = await import('../handlers.js');
+        const { handleLogin } = await import('./handlers');
         vi.mocked(handleLogin).mockResolvedValue({
           status: 200,
           body: {
@@ -299,7 +300,7 @@ describe('Auth Routes', () => {
       });
 
       test('should call handleRefresh with correct arguments', async () => {
-        const { handleRefresh } = await import('../handlers.js');
+        const { handleRefresh } = await import('./handlers');
         vi.mocked(handleRefresh).mockResolvedValue({
           status: 200,
           body: { token: 'new-access-token' },
@@ -341,7 +342,7 @@ describe('Auth Routes', () => {
       });
 
       test('should call handleLogout with correct arguments', async () => {
-        const { handleLogout } = await import('../handlers.js');
+        const { handleLogout } = await import('./handlers');
         vi.mocked(handleLogout).mockResolvedValue({
           status: 200,
           body: { message: 'Logged out successfully' },
@@ -383,7 +384,7 @@ describe('Auth Routes', () => {
       });
 
       test('should call handleLogoutAll with correct arguments', async () => {
-        const { handleLogoutAll } = await import('../handlers.js');
+        const { handleLogoutAll } = await import('./handlers');
         vi.mocked(handleLogoutAll).mockResolvedValue({
           status: 200,
           body: { message: 'All sessions logged out' },
@@ -429,7 +430,7 @@ describe('Auth Routes', () => {
       });
 
       test('should call handleForgotPassword with correct arguments', async () => {
-        const { handleForgotPassword } = await import('../handlers.js');
+        const { handleForgotPassword } = await import('./handlers');
         vi.mocked(handleForgotPassword).mockResolvedValue({
           status: 200,
           body: { message: 'Password reset email sent' },
@@ -473,7 +474,7 @@ describe('Auth Routes', () => {
       });
 
       test('should call handleResetPassword with correct arguments', async () => {
-        const { handleResetPassword } = await import('../handlers.js');
+        const { handleResetPassword } = await import('./handlers');
         vi.mocked(handleResetPassword).mockResolvedValue({
           status: 200,
           body: { message: 'Password reset successfully' },
@@ -520,7 +521,7 @@ describe('Auth Routes', () => {
       });
 
       test('should call handleVerifyEmail with correct arguments', async () => {
-        const { handleVerifyEmail } = await import('../handlers.js');
+        const { handleVerifyEmail } = await import('./handlers');
         vi.mocked(handleVerifyEmail).mockResolvedValue({
           status: 200,
           body: {
@@ -575,7 +576,7 @@ describe('Auth Routes', () => {
       });
 
       test('should call handleResendVerification with correct arguments', async () => {
-        const { handleResendVerification } = await import('../handlers.js');
+        const { handleResendVerification } = await import('./handlers');
         vi.mocked(handleResendVerification).mockResolvedValue({
           status: 200,
           body: { message: 'Verification email sent' },

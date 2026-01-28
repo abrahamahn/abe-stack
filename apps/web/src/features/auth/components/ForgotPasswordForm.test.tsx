@@ -1,12 +1,12 @@
-// apps/web/src/features/auth/components/__tests__/ForgotPasswordForm.test.tsx
+// apps/web/src/features/auth/components/ForgotPasswordForm.test.tsx
 import { MemoryRouter } from '@abe-stack/ui';
-import { ForgotPasswordForm } from '@auth/components/ForgotPasswordForm';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ForgotPasswordForm } from './ForgotPasswordForm';
 
-import type { ForgotPasswordFormProps } from '@auth/components/ForgotPasswordForm';
 import type { ReactElement, ReactNode } from 'react';
+import type { ForgotPasswordFormProps } from './ForgotPasswordForm';
 
 // Wrapper component for Router context
 const RouterWrapper = ({ children }: { children: ReactNode }): ReactElement => {

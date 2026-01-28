@@ -12,9 +12,9 @@
  * - Extensible hooks for validation and side effects
  */
 
-import { escapeIdentifier } from '@abe-stack/db';
 import { SubKeys } from '@abe-stack/core/pubsub';
-import { withTransaction } from '@infrastructure/index';
+import { escapeIdentifier } from '@abe-stack/db';
+
 
 import type {
     AfterWriteHook,
@@ -28,8 +28,10 @@ import type {
     WriteResult,
 } from './types';
 import type { SubscriptionManager } from '@abe-stack/core/pubsub';
-import type { DbClient } from '@database';
-import type { Logger } from '@logger';
+import type { DbClient } from '@data/database';
+import type { Logger } from '@monitor/logger';
+
+import { withTransaction } from '@/infrastructure/index';
 
 // ============================================================================
 // Write Service
@@ -50,8 +52,12 @@ export class WriteService {
 
   constructor(options: WriteServiceOptions) {
     this.db = options.db;
-    this.pubsub = options.pubsub;
-    this.log = options.log;
+    if (options.pubsub !== undefined) {
+      this.pubsub = options.pubsub;
+    }
+    if (options.log !== undefined) {
+      this.log = options.log;
+    }
     this.hooks = options.hooks ?? {};
   }
 
@@ -241,6 +247,9 @@ export class WriteService {
     }
 
     const row = result[0];
+    if (row === undefined) {
+      throw this.createError('INTERNAL', 'Update returned no data');
+    }
 
     return {
       operation,
@@ -294,12 +303,9 @@ export class WriteService {
       for (const result of results) {
         const { operation, record } = result;
 
-        if (record && 'version' in record && this.pubsub !== undefined) {
+        if (record !== undefined && 'version' in record && this.pubsub !== undefined) {
           const pubsubManager = this.pubsub;
-          const key = SubKeys.record(
-            operation.table,
-            operation.id,
-          );
+          const key = SubKeys.record(operation.table, operation.id);
 
           pubsubManager.publish(key, -1);
         }

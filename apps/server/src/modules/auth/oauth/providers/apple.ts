@@ -230,6 +230,14 @@ async function verifyIdTokenSignature(idToken: string): Promise<void> {
 /**
  * Generate Apple client_secret JWT
  * Apple requires a JWT signed with your private key as the client_secret
+ *
+ * @param options - Configuration options for client secret generation
+ * @param options.teamId - Your Apple Developer Team ID
+ * @param options.clientId - Your Apple Services ID (client_id)
+ * @param options.keyId - The key ID from your Apple private key
+ * @param options.privateKey - The private key in PEM format
+ * @returns A signed ES256 JWT for use as client_secret
+ * @throws Error if the private key is invalid or signing fails
  */
 async function generateClientSecret(options: AppleClientSecretOptions): Promise<string> {
   const { teamId, clientId, keyId, privateKey } = options;

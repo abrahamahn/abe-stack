@@ -1,4 +1,4 @@
-// packages/ui/src/hooks/__tests__/useOnScreen.test.tsx
+// packages/ui/src/hooks/useOnScreen.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';
 import { useRef, type ReactElement } from 'react';

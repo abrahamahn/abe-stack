@@ -18,7 +18,7 @@ import type {
     RecordMap,
     RecordPointer,
 } from '@abe-stack/core';
-import type { DbClient } from '@database';
+import type { DbClient } from '@data/database';
 
 // ============================================================================
 // Table Configuration

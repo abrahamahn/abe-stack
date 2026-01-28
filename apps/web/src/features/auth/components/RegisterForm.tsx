@@ -33,7 +33,7 @@ export const RegisterForm = ({
   const [resendMessage, setResendMessage] = useState<string | null>(null);
   const { cooldown, isOnCooldown, startCooldown } = useResendCooldown();
 
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     if (onRegister === undefined) return;
 

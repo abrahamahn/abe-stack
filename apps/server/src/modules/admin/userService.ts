@@ -15,7 +15,7 @@ import type {
     UserRole,
     UserStatus,
 } from '@abe-stack/core';
-import type { User as DbUser, UserRepository } from '@abe-stack/db';
+import type { AdminUserListFilters as DbAdminUserListFilters, User as DbUser, UserRepository } from '@abe-stack/db';
 
 // ============================================================================
 // Type Conversion Helpers
@@ -68,15 +68,23 @@ export async function listUsers(
   userRepo: UserRepository,
   filters: AdminUserListFilters,
 ): Promise<AdminUserListResponse> {
-  const result = await userRepo.listWithFilters({
-    search: filters.search,
-    role: filters.role,
-    status: filters.status,
+  // Build db-specific filters with snake_case sortBy
+  const dbFilters: DbAdminUserListFilters = {
     sortBy: mapSortByToColumn(filters.sortBy),
     sortOrder: filters.sortOrder ?? 'desc',
     page: filters.page ?? 1,
     limit: filters.limit ?? 20,
-  });
+  };
+  if (filters.search !== undefined) {
+    dbFilters.search = filters.search;
+  }
+  if (filters.role !== undefined) {
+    dbFilters.role = filters.role;
+  }
+  if (filters.status !== undefined) {
+    dbFilters.status = filters.status;
+  }
+  const result = await userRepo.listWithFilters(dbFilters);
 
   return {
     data: result.items.map(toAdminUser),
@@ -94,7 +102,7 @@ export async function listUsers(
  */
 export async function getUserById(userRepo: UserRepository, userId: string): Promise<AdminUser> {
   const user = await userRepo.findById(userId);
-  if (user === null || user === undefined) {
+  if (user === null) {
     throw new UserNotFoundError(`User not found: ${userId}`);
   }
   return toAdminUser(user);
@@ -110,7 +118,7 @@ export async function updateUser(
 ): Promise<AdminUser> {
   // First check if user exists
   const existingUser = await userRepo.findById(userId);
-  if (existingUser === null || existingUser === undefined) {
+  if (existingUser === null) {
     throw new UserNotFoundError(`User not found: ${userId}`);
   }
 
@@ -125,7 +133,7 @@ export async function updateUser(
 
   // Update user
   const updatedUser = await userRepo.update(userId, updateData);
-  if (updatedUser === undefined || updatedUser === null) {
+  if (updatedUser === null) {
     throw new Error('Failed to update user');
   }
 
@@ -144,7 +152,7 @@ export async function lockUser(
 ): Promise<AdminUser> {
   // First check if user exists
   const existingUser = await userRepo.findById(userId);
-  if (existingUser === null || existingUser === undefined) {
+  if (existingUser === null) {
     throw new UserNotFoundError(`User not found: ${userId}`);
   }
 
@@ -162,7 +170,7 @@ export async function lockUser(
 
   // Return updated user
   const updatedUser = await userRepo.findById(userId);
-  if (updatedUser === undefined || updatedUser === null) {
+  if (updatedUser === null) {
     throw new Error('Failed to retrieve updated user');
   }
 
@@ -179,7 +187,7 @@ export async function unlockUser(
 ): Promise<AdminUser> {
   // First check if user exists
   const existingUser = await userRepo.findById(userId);
-  if (existingUser === null || existingUser === undefined) {
+  if (existingUser === null) {
     throw new UserNotFoundError(`User not found: ${userId}`);
   }
 
@@ -188,7 +196,7 @@ export async function unlockUser(
 
   // Return updated user
   const updatedUser = await userRepo.findById(userId);
-  if (updatedUser === undefined || updatedUser === null) {
+  if (updatedUser === null) {
     throw new Error('Failed to retrieve updated user');
   }
 

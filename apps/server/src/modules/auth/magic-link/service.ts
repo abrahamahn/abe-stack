@@ -8,6 +8,7 @@
 
 import { createHash, randomBytes } from 'node:crypto';
 
+import { EmailSendError, InvalidTokenError, TooManyRequestsError } from '@abe-stack/core';
 import {
     MAGIC_LINK_TOKENS_TABLE,
     USERS_TABLE,
@@ -22,18 +23,18 @@ import {
     update,
     type User,
 } from '@abe-stack/db';
+
+import { createAccessToken, createAuthResponse, createRefreshTokenFamily } from '../utils';
+
+import type { AuthConfig } from '@/config';
+
 import {
     emailTemplates,
     withTransaction,
     type DbClient,
     type EmailService,
     type Repositories,
-} from '@infrastructure';
-import { EmailSendError, InvalidTokenError, TooManyRequestsError } from '@abe-stack/core';
-
-import { createAccessToken, createAuthResponse, createRefreshTokenFamily } from '../utils';
-
-import type { AuthConfig } from '@/config';
+} from '@/infrastructure';
 
 // ============================================================================
 // Constants

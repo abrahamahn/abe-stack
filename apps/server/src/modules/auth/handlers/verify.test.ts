@@ -1,7 +1,7 @@
-// apps/server/src/modules/auth/handlers/__tests__/verify.test.ts
+// apps/server/src/modules/auth/handlers/verify.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { handleResendVerification, handleVerifyEmail } from '../verify';
+import { handleResendVerification, handleVerifyEmail } from './verify';
 
 // Use vi.hoisted to create mock functions before vi.mock hoisting
 const { mockVerifyEmail, mockResendVerificationEmail, mockSetRefreshTokenCookie } = vi.hoisted(
@@ -28,47 +28,25 @@ const mockMapErrorToResponse = vi.hoisted(() =>
   }),
 );
 
-// Mock auth service
-vi.mock('@auth/service', () => ({
+// Mock auth service - use relative path for proper module resolution
+vi.mock('../service', () => ({
   verifyEmail: mockVerifyEmail,
   resendVerificationEmail: mockResendVerificationEmail,
 }));
 
 // Mock the auth utils module (used by the handler as ../utils which resolves to auth/utils)
-vi.mock('../../utils', () => ({
+vi.mock('../utils', () => ({
   setRefreshTokenCookie: mockSetRefreshTokenCookie,
 }));
 
-// Mock @shared
-vi.mock('@shared', () => ({
-  InvalidTokenError: class InvalidTokenError extends Error {
-    code = 'INVALID_TOKEN';
-    constructor(message = 'Invalid or expired token') {
-      super(message);
-      this.name = 'InvalidTokenError';
-    }
-  },
-  EmailSendError: class EmailSendError extends Error {
-    originalError?: Error;
-    constructor(message: string, originalError?: Error) {
-      super(message);
-      this.name = 'EmailSendError';
-      this.originalError = originalError;
-    }
-  },
-  UserNotFoundError: class UserNotFoundError extends Error {
-    code = 'USER_NOT_FOUND';
-    constructor(message = 'User not found') {
-      super(message);
-      this.name = 'UserNotFoundError';
-    }
-  },
-  SUCCESS_MESSAGES: {
-    VERIFICATION_EMAIL_SENT:
-      'If an account exists with this email, a verification link has been sent.',
-  },
-  mapErrorToResponse: mockMapErrorToResponse,
-}));
+// Mock @shared - use relative path for proper module resolution
+vi.mock('../../../shared', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../../../shared')>();
+  return {
+    ...original,
+    mapErrorToResponse: mockMapErrorToResponse,
+  };
+});
 
 describe('Email Verification Handlers', () => {
   const mockCtx = {
@@ -345,7 +323,7 @@ describe('Email Verification Handlers', () => {
 
         expect(result.status).toBe(200);
         expect(result.body).toEqual({
-          message: 'If an account exists with this email, a verification link has been sent.',
+          message: 'Verification email sent. Please check your inbox and click the confirmation link.',
         });
         expect(mockResendVerificationEmail).toHaveBeenCalledWith(
           mockCtx.db,
@@ -365,7 +343,7 @@ describe('Email Verification Handlers', () => {
 
         expect(result.status).toBe(200);
         expect(result.body).toEqual({
-          message: 'If an account exists with this email, a verification link has been sent.',
+          message: 'Verification email sent. Please check your inbox and click the confirmation link.',
         });
       });
 
@@ -377,7 +355,7 @@ describe('Email Verification Handlers', () => {
         });
 
         expect(result.status).toBe(200);
-        expect(result.body.message).toContain('If an account exists');
+        expect(result.body.message).toContain('Verification email sent');
       });
 
       test('should pass correct baseUrl from config', async () => {

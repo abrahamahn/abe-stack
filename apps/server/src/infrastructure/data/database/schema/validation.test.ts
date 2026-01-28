@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/data/database/schema/__tests__/validation.test.ts
+// apps/server/src/infrastructure/data/database/schema/validation.test.ts
 import { describe, expect, test, vi } from 'vitest';
 
 import {
@@ -7,7 +7,7 @@ import {
   REQUIRED_TABLES,
   SchemaValidationError,
   validateSchema,
-} from '../validation';
+} from './validation';
 
 import type { RawDb } from '@abe-stack/db';
 

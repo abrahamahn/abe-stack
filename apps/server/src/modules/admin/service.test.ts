@@ -1,15 +1,16 @@
-
-// apps/server/src/modules/admin/__tests__/service.test.ts
-
-import { unlockUserAccount, UserNotFoundError } from '@admin/service';
+// apps/server/src/modules/admin/service.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import type { DbClient } from '@database';
+import type { DbClient } from '@abe-stack/db';
 
-// Mock dependencies
-vi.mock('../../../infrastructure/index.js', () => ({
+// Mock dependencies - use relative path that matches the resolved path
+// service.ts imports from '@/infrastructure' which resolves to '../../infrastructure'
+vi.mock('../../infrastructure', () => ({
   unlockAccount: vi.fn().mockResolvedValue(undefined),
 }));
+
+import { unlockUserAccount, UserNotFoundError } from './service';
+import * as infra from '../../infrastructure';
 
 // Create mock db matching RawDb interface
 function createMockDb() {
@@ -62,7 +63,6 @@ describe('Admin Service', () => {
     });
 
     test('should call infraUnlockAccount with correct parameters including reason', async () => {
-      const { unlockAccount } = await import('../../../infrastructure/index.js');
       const mockUser = { id: 'user-123' };
       mockDb.queryOne.mockResolvedValue(mockUser);
 
@@ -75,7 +75,7 @@ describe('Admin Service', () => {
         'Mozilla/5.0',
       );
 
-      expect(unlockAccount).toHaveBeenCalledWith(
+      expect(infra.unlockAccount).toHaveBeenCalledWith(
         asMockDb(mockDb),
         'test@example.com',
         'admin-456',
@@ -100,14 +100,13 @@ describe('Admin Service', () => {
     });
 
     test('should pass reason through to infraUnlockAccount', async () => {
-      const { unlockAccount } = await import('../../../infrastructure/index.js');
       const mockUser = { id: 'user-123' };
       mockDb.queryOne.mockResolvedValue(mockUser);
 
       const customReason = 'User locked out due to forgotten password, verified via email';
       await unlockUserAccount(asMockDb(mockDb), 'test@example.com', 'admin-789', customReason);
 
-      expect(unlockAccount).toHaveBeenCalledWith(
+      expect(infra.unlockAccount).toHaveBeenCalledWith(
         asMockDb(mockDb),
         'test@example.com',
         'admin-789',

@@ -17,8 +17,8 @@ interface RequestWithStartTime {
 }
 
 interface RequestWithUser {
-  user?: { id: string };
-  sessionId?: string;
+  user?: { id: string; userId?: string } | undefined;
+  sessionId?: string | undefined;
 }
 
 // ============================================================================
@@ -40,13 +40,13 @@ export interface AuditEvent {
   timestamp: string;
   eventType: AuditEventType;
   severity: 'low' | 'medium' | 'high' | 'critical';
-  userId?: string;
-  sessionId?: string;
+  userId?: string | undefined;
+  sessionId?: string | undefined;
   ipAddress: string;
-  userAgent?: string;
+  userAgent?: string | undefined;
   url: string;
   method: string;
-  statusCode?: number;
+  statusCode?: number | undefined;
   details: AuditEventDetails;
   riskScore: number;
 }
@@ -122,12 +122,12 @@ export interface AuditStats {
 export class SecurityAuditLogger {
   private config: AuditConfig;
   private eventBuffer: AuditEvent[] = [];
-  private flushTimer?: NodeJS.Timeout;
-  private intrusionCleanupTimer?: NodeJS.Timeout;
+  private flushTimer?: NodeJS.Timeout | undefined;
+  private intrusionCleanupTimer?: NodeJS.Timeout | undefined;
   private intrusionState = new Map<string, { lastTriggered: number; count: number }>();
-  private static readonly MAX_BUFFER_SIZE = 10000;
-  private static readonly INTRUSION_STATE_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
-  private static readonly INTRUSION_CLEANUP_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
+  private static readonly maxBufferSize = 10000;
+  private static readonly intrusionStateMaxAgeMs = 24 * 60 * 60 * 1000; // 24 hours
+  private static readonly intrusionCleanupIntervalMs = 60 * 60 * 1000; // 1 hour
 
   constructor(config: Partial<AuditConfig>) {
     const defaultRiskThresholds = {
@@ -186,9 +186,9 @@ export class SecurityAuditLogger {
     this.eventBuffer.push(event);
 
     // Evict oldest events if buffer exceeds max size
-    if (this.eventBuffer.length > SecurityAuditLogger.MAX_BUFFER_SIZE) {
+    if (this.eventBuffer.length > SecurityAuditLogger.maxBufferSize) {
       // Drop oldest 10% of events to avoid frequent evictions
-      const evictCount = Math.floor(SecurityAuditLogger.MAX_BUFFER_SIZE * 0.1);
+      const evictCount = Math.floor(SecurityAuditLogger.maxBufferSize * 0.1);
       this.eventBuffer.splice(0, evictCount);
     }
 
@@ -409,13 +409,13 @@ export class SecurityAuditLogger {
 
   private extractUserId(req: FastifyRequest): string | undefined {
     // Extract from JWT token or session
-    const reqWithUser = req as RequestWithUser;
-    return reqWithUser.user?.id;
+    const reqWithUser = req as unknown as RequestWithUser;
+    return reqWithUser.user?.id ?? reqWithUser.user?.userId;
   }
 
   private extractSessionId(req: FastifyRequest): string | undefined {
     // Extract from session cookie or JWT
-    const reqWithUser = req as RequestWithUser;
+    const reqWithUser = req as unknown as RequestWithUser;
     return reqWithUser.sessionId;
   }
 
@@ -458,11 +458,11 @@ export class SecurityAuditLogger {
   private startIntrusionStateCleanup(): void {
     this.intrusionCleanupTimer = setInterval(() => {
       this.cleanupIntrusionState();
-    }, SecurityAuditLogger.INTRUSION_CLEANUP_INTERVAL_MS);
+    }, SecurityAuditLogger.intrusionCleanupIntervalMs);
   }
 
   private cleanupIntrusionState(): void {
-    const cutoff = Date.now() - SecurityAuditLogger.INTRUSION_STATE_MAX_AGE_MS;
+    const cutoff = Date.now() - SecurityAuditLogger.intrusionStateMaxAgeMs;
     for (const [key, state] of this.intrusionState.entries()) {
       if (state.lastTriggered < cutoff) {
         this.intrusionState.delete(key);

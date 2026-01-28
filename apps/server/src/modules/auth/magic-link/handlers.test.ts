@@ -15,7 +15,7 @@ import { requestMagicLink, verifyMagicLink } from './service';
 import type { MagicLinkResult, RequestMagicLinkResult } from './service';
 import type { AppConfig } from '@/config';
 import type { MagicLinkRequest } from '@abe-stack/core';
-import type { AppContext, ReplyWithCookies, RequestWithCookies } from '@shared';
+import type { AppContext, ReplyWithCookies, RequestWithCookies } from '../../shared';
 
 // ============================================================================
 // Mock Dependencies

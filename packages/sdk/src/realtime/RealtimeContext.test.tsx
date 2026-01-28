@@ -1,4 +1,4 @@
-// packages/sdk/src/realtime/__tests__/RealtimeContext.test.tsx
+// packages/sdk/src/realtime/RealtimeContext.test.tsx
 /** @vitest-environment jsdom */
 import '@testing-library/jest-dom/vitest';
 import { render, screen, act, waitFor } from '@testing-library/react';

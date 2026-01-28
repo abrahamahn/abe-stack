@@ -12,7 +12,7 @@
  * - Record subscriptions via SubscriptionCache
  */
 
-import React, {
+import {
   createContext,
   useCallback,
   useContext,
@@ -21,8 +21,8 @@ import React, {
   useRef,
   useState,
   type ReactNode,
+  type ReactElement,
 } from 'react';
-
 
 import { type RecordCache, type TableMap } from '../cache/RecordCache';
 import { TransactionQueue, type QueuedTransaction } from '../offline/TransactionQueue';
@@ -167,10 +167,10 @@ export interface RealtimeProviderProps<TTables extends TableMap = TableMap> {
  * }
  * ```
  */
-export function RealtimeProvider<TTables extends TableMap = TableMap>({
+export const RealtimeProvider = <TTables extends TableMap = TableMap>({
   children,
   config,
-}: RealtimeProviderProps<TTables>): React.ReactElement {
+}: RealtimeProviderProps<TTables>): ReactElement => {
   const {
     userId,
     wsHost,
@@ -218,9 +218,9 @@ export function RealtimeProvider<TTables extends TableMap = TableMap>({
         for (let i = 0; i < operations.length; i++) {
           const op = operations[i];
           const prevValue = previousValues[i];
-          if (op && prevValue !== undefined) {
+          if (op !== undefined && prevValue !== undefined) {
             const existing = recordCache.get(op.table as keyof TTables & string, op.id);
-            if (existing) {
+            if (existing !== undefined) {
               const restored = { ...existing, ...prevValue };
               recordCache.set(
                 op.table as keyof TTables & string,
@@ -237,7 +237,7 @@ export function RealtimeProvider<TTables extends TableMap = TableMap>({
         const { operations } = operation.data;
         for (const op of operations) {
           const existing = recordCache.get(op.table as keyof TTables & string, op.id);
-          if (existing) {
+          if (existing !== undefined) {
             const updated = { ...existing, ...op.updates };
             recordCache.set(
               op.table as keyof TTables & string,
@@ -280,7 +280,7 @@ export function RealtimeProvider<TTables extends TableMap = TableMap>({
       onMessage: (key: string, value: unknown): void => {
         // Parse key: "table:id"
         const [table, id] = key.split(':');
-        if (!table || !id) return;
+        if (table === undefined || table === '' || id === undefined || id === '') return;
 
         // Validate value is an object before using as record
         if (typeof value !== 'object' || value === null) return;
@@ -290,7 +290,11 @@ export function RealtimeProvider<TTables extends TableMap = TableMap>({
         const existing = recordCache.get(table as keyof TTables & string, id) as
           | VersionedRecord
           | undefined;
-        if (!existing || (record.version && record.version > existing.version)) {
+
+        // Update if no existing record or if new version is higher
+        const shouldUpdate = existing === undefined || record.version > existing.version;
+
+        if (shouldUpdate) {
           recordCache.set(
             table as keyof TTables & string,
             id,
@@ -337,8 +341,9 @@ export function RealtimeProvider<TTables extends TableMap = TableMap>({
       onRollback: async (tx: QueuedTransaction): Promise<void> => {
         // Rollback optimistic updates from the transaction
         for (const op of tx.operations) {
-          const table = (op as any).table;
-          const id = (op as any).id;
+          const writeOp = op as unknown as WriteOperation;
+          const table = writeOp.table;
+          const id = writeOp.id;
           if (typeof table === 'string' && typeof id === 'string') {
             // Fetch fresh record from server
             try {
@@ -349,7 +354,7 @@ export function RealtimeProvider<TTables extends TableMap = TableMap>({
               });
               const data = (await response.json()) as { recordMap: RecordMap };
               const record = data.recordMap[table]?.[id];
-              if (record) {
+              if (record !== undefined) {
                 recordCache.set(
                   table as keyof TTables & string,
                   id,
@@ -433,7 +438,7 @@ export function RealtimeProvider<TTables extends TableMap = TableMap>({
           | (Record<string, unknown> & { id: string })
           | undefined;
 
-        if (existing) {
+        if (existing !== undefined) {
           // Capture only the keys being updated for rollback
           const prevValue: Record<string, unknown> = {};
           for (const key of Object.keys(op.updates)) {
@@ -547,7 +552,7 @@ export function RealtimeProvider<TTables extends TableMap = TableMap>({
       {children}
     </RealtimeContext.Provider>
   );
-}
+};
 
 // ============================================================================
 // Hook
@@ -580,7 +585,7 @@ export function RealtimeProvider<TTables extends TableMap = TableMap>({
 export function useRealtime<TTables extends TableMap = TableMap>(): RealtimeContextValue<TTables> {
   const context = useContext(RealtimeContext);
 
-  if (!context) {
+  if (context === null) {
     throw new Error('useRealtime must be used within a RealtimeProvider');
   }
 

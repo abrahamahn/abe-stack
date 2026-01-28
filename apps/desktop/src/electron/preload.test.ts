@@ -1,4 +1,4 @@
-// apps/desktop/src/electron/__tests__/preload.test.ts
+// apps/desktop/src/electron/preload.test.ts
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock ipcRenderer
@@ -42,14 +42,14 @@ describe('preload', () => {
 
   describe('contextBridge exposure', () => {
     it('should expose electronAPI to main world', async () => {
-      await import('../preload');
+      await import('./preload');
 
       expect(mockExposeInMainWorld).toHaveBeenCalledTimes(1);
       expect(mockExposeInMainWorld).toHaveBeenCalledWith('electronAPI', expect.any(Object));
     });
 
     it('should expose NativeBridge interface', async () => {
-      await import('../preload');
+      await import('./preload');
 
       const exposedApi = mockExposeInMainWorld.mock.calls[0]?.[1] as NativeBridge;
 
@@ -68,7 +68,7 @@ describe('preload', () => {
 
     beforeEach(async () => {
       vi.resetModules();
-      await import('../preload');
+      await import('./preload');
       electronBridge = mockExposeInMainWorld.mock.calls[0]?.[1] as NativeBridge;
     });
 
@@ -222,7 +222,7 @@ describe('preload', () => {
   describe('type-safe invoke function', () => {
     beforeEach(async () => {
       vi.resetModules();
-      await import('../preload');
+      await import('./preload');
     });
 
     it('should pass through IPC channel arguments correctly', async () => {

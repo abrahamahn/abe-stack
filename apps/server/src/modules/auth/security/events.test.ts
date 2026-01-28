@@ -1,4 +1,4 @@
-// apps/server/src/modules/auth/security/__tests__/events.test.ts
+// apps/server/src/modules/auth/security/events.test.ts
 /* eslint-disable @typescript-eslint/unbound-method */
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
@@ -11,7 +11,7 @@ import {
     logTokenFamilyRevokedEvent,
     logTokenReuseEvent,
     sendTokenReuseAlert,
-} from '../events';
+} from './events';
 
 import type { DbClient } from '@database';
 import type { EmailService } from '@email';

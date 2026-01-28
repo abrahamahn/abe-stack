@@ -57,8 +57,12 @@ export class MemoryCacheProvider implements CacheProvider {
       maxMemoryBytes: config.maxMemoryBytes ?? 0,
       trackMemoryUsage: config.trackMemoryUsage ?? false,
     };
-    this.logger = options.logger;
-    this.onEviction = options.onEviction;
+    if (options.logger !== undefined) {
+      this.logger = options.logger;
+    }
+    if (options.onEviction !== undefined) {
+      this.onEviction = options.onEviction;
+    }
 
     // Start cleanup timer for expired entries
     if (this.config.cleanupInterval > 0) {
@@ -132,9 +136,19 @@ export class MemoryCacheProvider implements CacheProvider {
       // Save old tags before overwriting
       const oldTags = existingNode.tags;
       existingNode.value = value;
-      existingNode.expiresAt = options.updateTtlOnExisting === true ? expiresAt : existingNode.expiresAt;
+      if (options.updateTtlOnExisting === true) {
+        if (expiresAt !== undefined) {
+          existingNode.expiresAt = expiresAt;
+        } else {
+          delete existingNode.expiresAt;
+        }
+      }
       existingNode.tags = tags;
-      existingNode.size = size;
+      if (size !== undefined) {
+        existingNode.size = size;
+      } else {
+        delete existingNode.size;
+      }
       if (size != null && size > 0) {
         this.currentMemoryBytes += size;
       }
@@ -154,10 +168,14 @@ export class MemoryCacheProvider implements CacheProvider {
         value,
         prev: null,
         next: null,
-        expiresAt,
         tags,
-        size,
       };
+      if (expiresAt !== undefined) {
+        node.expiresAt = expiresAt;
+      }
+      if (size !== undefined) {
+        node.size = size;
+      }
 
       this.cache.set(fullKey, node);
       this.addToHead(node);
@@ -284,12 +302,15 @@ export class MemoryCacheProvider implements CacheProvider {
   }
 
   getStats(): CacheStats {
-    return {
+    const stats: CacheStats = {
       ...this.stats,
       size: this.cache.size,
       memoryUsage: this.currentMemoryBytes,
-      maxSize: this.config.maxSize > 0 ? this.config.maxSize : undefined,
     };
+    if (this.config.maxSize > 0) {
+      stats.maxSize = this.config.maxSize;
+    }
+    return stats;
   }
 
   resetStats(): void {

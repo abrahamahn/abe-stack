@@ -1,4 +1,4 @@
-// packages/ui/src/elements/__tests__/EnvironmentBadge.test.tsx
+// packages/ui/src/elements/EnvironmentBadge.test.tsx
 // packages/ui/src/components/__tests__/EnvironmentBadge.test.tsx
 /** @vitest-environment jsdom */
 import { render, screen } from '@testing-library/react';

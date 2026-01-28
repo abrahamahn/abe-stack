@@ -1,4 +1,4 @@
-// packages/ui/src/components/__tests__/RadioGroup.test.tsx
+// packages/ui/src/components/RadioGroup.test.tsx
 /** @vitest-environment jsdom */
 import { Radio } from '@components/Radio';
 import { RadioGroup } from '@components/RadioGroup';

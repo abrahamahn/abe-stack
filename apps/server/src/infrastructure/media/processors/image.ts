@@ -57,12 +57,25 @@ export class ImageProcessor {
 
       // Apply resize if specified
       if (options.resize !== undefined) {
-        pipeline = pipeline.resize({
-          width: options.resize.width,
-          height: options.resize.height,
-          fit: options.resize.fit,
-          withoutEnlargement: options.resize.withoutEnlargement,
-        });
+        const resizeOptions: {
+          width?: number;
+          height?: number;
+          fit?: string;
+          withoutEnlargement?: boolean;
+        } = {};
+        if (options.resize.width !== undefined) {
+          resizeOptions.width = options.resize.width;
+        }
+        if (options.resize.height !== undefined) {
+          resizeOptions.height = options.resize.height;
+        }
+        if (options.resize.fit !== undefined) {
+          resizeOptions.fit = options.resize.fit;
+        }
+        if (options.resize.withoutEnlargement !== undefined) {
+          resizeOptions.withoutEnlargement = options.resize.withoutEnlargement;
+        }
+        pipeline = pipeline.resize(resizeOptions);
       }
 
       // Apply format conversion if specified
@@ -111,12 +124,15 @@ export class ImageProcessor {
       // Get metadata
       const metadata = await this.getMetadata(inputPath);
 
-      return {
+      const result: ProcessingResult = {
         success: true,
         outputPath,
-        thumbnailPath,
         metadata,
       };
+      if (thumbnailPath !== undefined) {
+        result.thumbnailPath = thumbnailPath;
+      }
+      return result;
     } catch (error) {
       return {
         success: false,
@@ -132,11 +148,17 @@ export class ImageProcessor {
     try {
       const sharp = await this.getSharp();
       const metadata = await sharp(inputPath).metadata();
-      return {
-        width: metadata.width,
-        height: metadata.height,
-        format: metadata.format,
-      };
+      const result: MediaMetadata = {};
+      if (metadata.width !== undefined) {
+        result.width = metadata.width;
+      }
+      if (metadata.height !== undefined) {
+        result.height = metadata.height;
+      }
+      if (metadata.format !== undefined) {
+        result.format = metadata.format;
+      }
+      return result;
     } catch {
       return {};
     }

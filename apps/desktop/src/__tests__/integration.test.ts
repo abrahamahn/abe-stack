@@ -194,8 +194,8 @@ describe('Integration: End-to-End IPC Flow', () => {
       },
     }));
 
-    // Mock utils
-    vi.doMock('../electron/utils', () => ({
+    // Mock @abe-stack/core which exports waitForPort
+    vi.doMock('@abe-stack/core', () => ({
       waitForPort: vi.fn().mockResolvedValue(5174),
     }));
   });
@@ -203,7 +203,7 @@ describe('Integration: End-to-End IPC Flow', () => {
   afterEach(() => {
     vi.doUnmock('electron');
     vi.doUnmock('path');
-    vi.doUnmock('../electron/utils');
+    vi.doUnmock('@abe-stack/core');
   });
 
   describe('IPC handler registration and invocation flow', () => {
@@ -395,7 +395,7 @@ describe('Integration: Window Lifecycle Management', () => {
       },
     }));
 
-    vi.doMock('../electron/utils', () => ({
+    vi.doMock('@abe-stack/core', () => ({
       waitForPort: vi.fn().mockResolvedValue(5174),
     }));
   });
@@ -403,7 +403,7 @@ describe('Integration: Window Lifecycle Management', () => {
   afterEach(() => {
     vi.doUnmock('electron');
     vi.doUnmock('path');
-    vi.doUnmock('../electron/utils');
+    vi.doUnmock('@abe-stack/core');
   });
 
   describe('Window creation lifecycle', () => {
@@ -732,7 +732,7 @@ describe('Integration: App Initialization and Shutdown', () => {
       },
     }));
 
-    vi.doMock('../electron/utils', () => ({
+    vi.doMock('@abe-stack/core', () => ({
       waitForPort: vi.fn().mockResolvedValue(5174),
     }));
   });
@@ -740,7 +740,7 @@ describe('Integration: App Initialization and Shutdown', () => {
   afterEach(() => {
     vi.doUnmock('electron');
     vi.doUnmock('path');
-    vi.doUnmock('../electron/utils');
+    vi.doUnmock('@abe-stack/core');
   });
 
   describe('App initialization sequence', () => {
@@ -801,11 +801,57 @@ describe('Integration: App Initialization and Shutdown', () => {
       process.env['DESKTOP_RENDERER_PORT'] = '3000';
 
       const waitForPortMock = vi.fn().mockResolvedValue(3000);
-      vi.doMock('../electron/utils', () => ({
+
+      // Clear all mocks and reset modules first
+      vi.doUnmock('electron');
+      vi.doUnmock('path');
+      vi.doUnmock('@abe-stack/core');
+      vi.resetModules();
+      appEventHandlers.clear();
+      integrationMocks.clearAll();
+
+      // Re-apply all mocks with custom waitForPort
+      vi.doMock('electron', () => ({
+        app: {
+          getVersion: vi.fn().mockReturnValue('1.0.0'),
+          disableHardwareAcceleration: disableHardwareAccelerationMock,
+          quit: vi.fn(),
+          on: vi.fn((event: string, handler: (...args: unknown[]) => void) => {
+            const handlers = appEventHandlers.get(event) ?? [];
+            handlers.push(handler);
+            appEventHandlers.set(event, handlers);
+          }),
+        },
+        BrowserWindow: integrationMocks.MockBrowserWindow,
+        dialog: {
+          showOpenDialog: vi.fn().mockResolvedValue({ canceled: false, filePaths: [] }),
+          showSaveDialog: vi.fn().mockResolvedValue({ canceled: false, filePath: '' }),
+        },
+        ipcMain: {
+          handle: vi.fn((channel: string, handler: (...args: unknown[]) => unknown) => {
+            integrationMocks.ipcHandlers.set(channel, handler);
+          }),
+          on: vi.fn((channel: string, listener: (...args: unknown[]) => void) => {
+            integrationMocks.ipcListeners.set(channel, listener);
+          }),
+        },
+        Notification: class {
+          show() {}
+          static isSupported = vi.fn().mockReturnValue(true);
+        },
+      }));
+
+      vi.doMock('path', () => ({
+        join: vi.fn((...args: string[]) => args.join('/')),
+        default: {
+          join: vi.fn((...args: string[]) => args.join('/')),
+        },
+      }));
+
+      vi.doMock('@abe-stack/core', () => ({
         waitForPort: waitForPortMock,
       }));
 
-      vi.resetModules();
       await import('../electron/main');
 
       const readyHandlers = appEventHandlers.get('ready') ?? [];
@@ -825,11 +871,57 @@ describe('Integration: App Initialization and Shutdown', () => {
       process.env['VITE_PORT'] = '4000';
 
       const waitForPortMock = vi.fn().mockResolvedValue(4000);
-      vi.doMock('../electron/utils', () => ({
+
+      // Clear all mocks and reset modules first
+      vi.doUnmock('electron');
+      vi.doUnmock('path');
+      vi.doUnmock('@abe-stack/core');
+      vi.resetModules();
+      appEventHandlers.clear();
+      integrationMocks.clearAll();
+
+      // Re-apply all mocks with custom waitForPort
+      vi.doMock('electron', () => ({
+        app: {
+          getVersion: vi.fn().mockReturnValue('1.0.0'),
+          disableHardwareAcceleration: disableHardwareAccelerationMock,
+          quit: vi.fn(),
+          on: vi.fn((event: string, handler: (...args: unknown[]) => void) => {
+            const handlers = appEventHandlers.get(event) ?? [];
+            handlers.push(handler);
+            appEventHandlers.set(event, handlers);
+          }),
+        },
+        BrowserWindow: integrationMocks.MockBrowserWindow,
+        dialog: {
+          showOpenDialog: vi.fn().mockResolvedValue({ canceled: false, filePaths: [] }),
+          showSaveDialog: vi.fn().mockResolvedValue({ canceled: false, filePath: '' }),
+        },
+        ipcMain: {
+          handle: vi.fn((channel: string, handler: (...args: unknown[]) => unknown) => {
+            integrationMocks.ipcHandlers.set(channel, handler);
+          }),
+          on: vi.fn((channel: string, listener: (...args: unknown[]) => void) => {
+            integrationMocks.ipcListeners.set(channel, listener);
+          }),
+        },
+        Notification: class {
+          show() {}
+          static isSupported = vi.fn().mockReturnValue(true);
+        },
+      }));
+
+      vi.doMock('path', () => ({
+        join: vi.fn((...args: string[]) => args.join('/')),
+        default: {
+          join: vi.fn((...args: string[]) => args.join('/')),
+        },
+      }));
+
+      vi.doMock('@abe-stack/core', () => ({
         waitForPort: waitForPortMock,
       }));
 
-      vi.resetModules();
       await import('../electron/main');
 
       const readyHandlers = appEventHandlers.get('ready') ?? [];
@@ -975,7 +1067,7 @@ describe('Integration: Window Security Settings', () => {
       },
     }));
 
-    vi.doMock('../electron/utils', () => ({
+    vi.doMock('@abe-stack/core', () => ({
       waitForPort: vi.fn().mockResolvedValue(5174),
     }));
   });
@@ -983,7 +1075,7 @@ describe('Integration: Window Security Settings', () => {
   afterEach(() => {
     vi.doUnmock('electron');
     vi.doUnmock('path');
-    vi.doUnmock('../electron/utils');
+    vi.doUnmock('@abe-stack/core');
   });
 
   describe('Window webPreferences security', () => {

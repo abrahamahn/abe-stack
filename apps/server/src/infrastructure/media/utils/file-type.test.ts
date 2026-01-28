@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/media/utils/__tests__/file-type.test.ts
+// apps/server/src/infrastructure/media/utils/file-type.test.ts
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 
 import {
@@ -8,7 +8,7 @@ import {
   isAllowedFileType,
   getExtensionFromMime,
   type FileTypeResult,
-} from '../file-type';
+} from './file-type';
 
 // Mock fs/promises
 vi.mock('fs/promises', () => ({

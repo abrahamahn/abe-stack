@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/monitor/health/__tests__/health.test.ts
+// apps/server/src/infrastructure/monitor/health/health.test.ts
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -9,14 +9,16 @@ import {
     checkStorage,
     checkWebSocket,
     getDetailedHealth,
-} from '../index';
+} from './index';
 
-import type { AppContext } from '@shared/types';
+import type { AppContext } from '../../shared/types';
 
-// Mock database module
+// Mock database schema validation module using relative path for correct interception
 const mockValidateSchema = vi.hoisted(() => vi.fn());
-vi.mock('@database', async () => {
-  const actual = await vi.importActual('@database');
+vi.mock('../../data/database/schema/validation', async () => {
+  const actual = await vi.importActual<
+    typeof import('../../data/database/schema/validation')
+  >('../../data/database/schema/validation');
   return {
     ...actual,
     validateSchema: mockValidateSchema,
@@ -24,7 +26,7 @@ vi.mock('@database', async () => {
 });
 
 // Mock websocket module
-vi.mock('@websocket', () => ({
+vi.mock('../../messaging/websocket/websocket', () => ({
   getWebSocketStats: vi.fn(() => ({
     activeConnections: 0,
     pluginRegistered: true,

@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/jobs/scheduled/__tests__/loginCleanup.test.ts
+// apps/server/src/infrastructure/jobs/scheduled/loginCleanup.test.ts
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
@@ -9,9 +9,9 @@ import {
     getTotalLoginAttemptCount,
     MAX_BATCH_SIZE,
     MIN_RETENTION_DAYS,
-} from '../loginCleanup';
+} from './loginCleanup';
 
-import type { CleanupOptions } from '../loginCleanup';
+import type { CleanupOptions } from './loginCleanup';
 import type { RawDb } from '@abe-stack/db';
 
 // ============================================================================

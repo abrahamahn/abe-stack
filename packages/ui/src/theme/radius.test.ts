@@ -1,4 +1,4 @@
-// packages/ui/src/theme/__tests__/radius.test.ts
+// packages/ui/src/theme/radius.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { radius } from './radius';

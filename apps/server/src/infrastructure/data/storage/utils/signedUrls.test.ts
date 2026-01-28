@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/data/storage/__tests__/signedUrls.test.ts
+// apps/server/src/infrastructure/data/storage/utils/signedUrls.test.ts
 import { describe, expect, it, vi, afterEach, beforeEach } from 'vitest';
 
 import {
@@ -10,7 +10,7 @@ import {
   normalizeFilename,
   getDefaultExpiration,
   type SignedUrlData,
-} from '../signedUrls';
+} from './signedUrls';
 
 const TEST_SECRET = 'test-secret-key-for-signing';
 

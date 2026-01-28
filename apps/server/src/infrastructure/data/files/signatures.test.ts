@@ -1,9 +1,9 @@
-// apps/server/src/infrastructure/data/files/__tests__/signatures.test.ts
+// apps/server/src/infrastructure/data/files/signatures.test.ts
 import { describe, expect, test } from 'vitest';
 
-import { createSignature, verifySignature } from '../signatures';
+import { createSignature, verifySignature } from './signatures';
 
-import type { FileSignatureData } from '../helpers';
+import type { FileSignatureData } from './helpers';
 
 describe('File Signatures', () => {
   const secretKey = Buffer.from('test-secret-key-for-file-signatures');

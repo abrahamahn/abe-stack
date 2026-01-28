@@ -1,4 +1,4 @@
-// apps/server/src/modules/auth/handlers/__tests__/register.test.ts
+// apps/server/src/modules/auth/handlers/register.test.ts
 /**
  * Register Handler Tests
  *
@@ -6,23 +6,54 @@
  */
 
 import { EmailSendError, WeakPasswordError } from '@abe-stack/core';
-import { registerUser } from '@auth/service';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { handleRegister } from '../register';
+import { handleRegister } from './register';
 
 import type { AppConfig } from '@/config';
 import type { RegisterRequest } from '@abe-stack/core';
-import type { RegisterResult } from '@auth/service';
-import type { AppContext, ReplyWithCookies } from '@shared';
+import type { RegisterResult } from '../service';
+import type { AppContext, ReplyWithCookies } from '../../../shared';
 
 // ============================================================================
 // Mock Dependencies
 // ============================================================================
 
-vi.mock('@auth/service', () => ({
-  registerUser: vi.fn(),
+// Create mock functions via vi.hoisted to be available before vi.mock hoisting
+const { mockRegisterUser, mockMapErrorToResponse } = vi.hoisted(() => ({
+  mockRegisterUser: vi.fn(),
+  // Error mapper that uses error.name instead of instanceof (avoids ESM module boundary issues)
+  mockMapErrorToResponse: vi.fn((error: unknown, ctx: { log: { error: (e: unknown) => void } }) => {
+    if (error instanceof Error) {
+      switch (error.name) {
+        case 'WeakPasswordError':
+          return { status: 400, body: { message: 'Password is too weak' } };
+        case 'EmailSendError':
+          return { status: 503, body: { message: 'Failed to send email' } };
+        default:
+          // Log unknown errors like the real implementation does
+          ctx.log.error(error);
+          return { status: 500, body: { message: 'Internal server error' } };
+      }
+    }
+    ctx.log.error(error);
+    return { status: 500, body: { message: 'Internal server error' } };
+  }),
 }));
+
+// Mock the service module - use relative path
+vi.mock('../service', () => ({
+  registerUser: mockRegisterUser,
+}));
+
+// Mock @shared to provide working mapErrorToResponse
+vi.mock('../../../shared', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../../../shared')>();
+  return {
+    ...original,
+    mapErrorToResponse: mockMapErrorToResponse,
+  };
+});
 
 // ============================================================================
 // Test Helpers
@@ -207,7 +238,7 @@ describe('handleRegister', () => {
         email: 'newuser@example.com',
       };
 
-      vi.mocked(registerUser).mockResolvedValue(mockRegisterResult);
+      mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
       const result = await handleRegister(ctx, body, reply);
 
@@ -226,11 +257,11 @@ describe('handleRegister', () => {
         email: 'newuser@example.com',
       };
 
-      vi.mocked(registerUser).mockResolvedValue(mockRegisterResult);
+      mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
       await handleRegister(ctx, body, reply);
 
-      expect(registerUser).toHaveBeenCalledWith(
+      expect(mockRegisterUser).toHaveBeenCalledWith(
         ctx.db,
         ctx.repos,
         ctx.email,
@@ -253,11 +284,11 @@ describe('handleRegister', () => {
         email: 'newuser@example.com',
       };
 
-      vi.mocked(registerUser).mockResolvedValue(mockRegisterResult);
+      mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
       await handleRegister(ctx, body, reply);
 
-      expect(registerUser).toHaveBeenCalledWith(
+      expect(mockRegisterUser).toHaveBeenCalledWith(
         ctx.db,
         ctx.repos,
         ctx.email,
@@ -290,11 +321,11 @@ describe('handleRegister', () => {
         email: 'newuser@example.com',
       };
 
-      vi.mocked(registerUser).mockResolvedValue(mockRegisterResult);
+      mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
       await handleRegister(ctx, body, reply);
 
-      expect(registerUser).toHaveBeenCalledWith(
+      expect(mockRegisterUser).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -317,7 +348,7 @@ describe('handleRegister', () => {
         email: 'newuser@example.com',
       };
 
-      vi.mocked(registerUser).mockResolvedValue(mockRegisterResult);
+      mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
       await handleRegister(ctx, body, reply);
 
@@ -332,7 +363,7 @@ describe('handleRegister', () => {
       const body = createRegisterBody();
 
       const originalError = new Error('SMTP connection timeout');
-      vi.mocked(registerUser).mockRejectedValue(
+      mockRegisterUser.mockRejectedValue(
         new EmailSendError('Failed to send', originalError),
       );
 
@@ -354,7 +385,7 @@ describe('handleRegister', () => {
       const body = createRegisterBody({ email: 'test@example.com' });
 
       const originalError = new Error('Email service unavailable');
-      vi.mocked(registerUser).mockRejectedValue(
+      mockRegisterUser.mockRejectedValue(
         new EmailSendError('Failed to send', originalError),
       );
 
@@ -374,7 +405,7 @@ describe('handleRegister', () => {
       const reply = createMockReply();
       const body = createRegisterBody();
 
-      vi.mocked(registerUser).mockRejectedValue(new EmailSendError('Failed to send'));
+      mockRegisterUser.mockRejectedValue(new EmailSendError('Failed to send'));
 
       const result = await handleRegister(ctx, body, reply);
 
@@ -396,7 +427,7 @@ describe('handleRegister', () => {
         errors: ['Password must be at least 12 characters long', 'Password must contain a number'],
       });
 
-      vi.mocked(registerUser).mockRejectedValue(weakPasswordError);
+      mockRegisterUser.mockRejectedValue(weakPasswordError);
 
       const result = await handleRegister(ctx, body, reply);
 
@@ -413,7 +444,7 @@ describe('handleRegister', () => {
       const emailExistsError = new Error('Email already in use');
       emailExistsError.name = 'EmailAlreadyExistsError';
 
-      vi.mocked(registerUser).mockRejectedValue(emailExistsError);
+      mockRegisterUser.mockRejectedValue(emailExistsError);
 
       const result = await handleRegister(ctx, body, reply);
 
@@ -429,7 +460,7 @@ describe('handleRegister', () => {
       const reply = createMockReply();
       const body = createRegisterBody();
 
-      vi.mocked(registerUser).mockRejectedValue(new Error('Database connection failed'));
+      mockRegisterUser.mockRejectedValue(new Error('Database connection failed'));
 
       const result = await handleRegister(ctx, body, reply);
 
@@ -442,7 +473,7 @@ describe('handleRegister', () => {
       const reply = createMockReply();
       const body = createRegisterBody();
 
-      vi.mocked(registerUser).mockRejectedValue(new Error('Unexpected error'));
+      mockRegisterUser.mockRejectedValue(new Error('Unexpected error'));
 
       await handleRegister(ctx, body, reply);
 
@@ -455,7 +486,7 @@ describe('handleRegister', () => {
       const body = createRegisterBody();
 
       const error = new Error('Unexpected database error');
-      vi.mocked(registerUser).mockRejectedValue(error);
+      mockRegisterUser.mockRejectedValue(error);
 
       await handleRegister(ctx, body, reply);
 
@@ -475,12 +506,12 @@ describe('handleRegister', () => {
         email: 'NewUser@EXAMPLE.COM',
       };
 
-      vi.mocked(registerUser).mockResolvedValue(mockRegisterResult);
+      mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
       const result = await handleRegister(ctx, body, reply);
 
       expect(result.status).toBe(201);
-      expect(registerUser).toHaveBeenCalledWith(
+      expect(mockRegisterUser).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -503,11 +534,11 @@ describe('handleRegister', () => {
         email: 'newuser@example.com',
       };
 
-      vi.mocked(registerUser).mockResolvedValue(mockRegisterResult);
+      mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
       await handleRegister(ctx, body, reply);
 
-      expect(registerUser).toHaveBeenCalledWith(
+      expect(mockRegisterUser).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -530,12 +561,12 @@ describe('handleRegister', () => {
         email: 'newuser@example.com',
       };
 
-      vi.mocked(registerUser).mockResolvedValue(mockRegisterResult);
+      mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
       await handleRegister(ctx, body, reply);
 
       // Empty string should be passed as-is (service layer handles normalization)
-      expect(registerUser).toHaveBeenCalledWith(
+      expect(mockRegisterUser).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -559,11 +590,11 @@ describe('handleRegister', () => {
         email: 'newuser@example.com',
       };
 
-      vi.mocked(registerUser).mockResolvedValue(mockRegisterResult);
+      mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
       await handleRegister(ctx, body, reply);
 
-      expect(registerUser).toHaveBeenCalledWith(
+      expect(mockRegisterUser).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.anything(),
@@ -588,7 +619,7 @@ describe('handleRegister', () => {
         email: 'test@example.com',
       };
 
-      vi.mocked(registerUser).mockResolvedValue(mockRegisterResult);
+      mockRegisterUser.mockResolvedValue(mockRegisterResult);
 
       const result = await handleRegister(ctx, body, reply);
 
@@ -601,7 +632,7 @@ describe('handleRegister', () => {
       const reply = createMockReply();
       const body = createRegisterBody();
 
-      vi.mocked(registerUser).mockRejectedValue(new EmailSendError('Email failed'));
+      mockRegisterUser.mockRejectedValue(new EmailSendError('Email failed'));
 
       const result = await handleRegister(ctx, body, reply);
 

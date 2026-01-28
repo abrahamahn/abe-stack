@@ -1,4 +1,4 @@
-// apps/server/src/modules/auth/security/__tests__/lockout.test.ts
+// apps/server/src/modules/auth/security/lockout.test.ts
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
@@ -9,9 +9,9 @@ import {
   isAccountLocked,
   logLoginAttempt,
   unlockAccount,
-} from '../lockout';
+} from './lockout';
 
-import type { LockoutConfig, LockoutStatus } from '../types';
+import type { LockoutConfig, LockoutStatus } from './types';
 import type { DbClient } from '@database';
 
 // Mock constants

@@ -17,7 +17,7 @@ import {
   type SyncStripeResponse,
   type UpdatePlanRequest,
 } from '@abe-stack/core';
-import { createBillingProvider } from '@infrastructure/billing';
+
 
 import {
   createPlan,
@@ -31,6 +31,8 @@ import {
 
 import type { Plan as DbPlan } from '@abe-stack/db';
 import type { AppContext, RequestWithCookies } from '@shared';
+
+import { createBillingProvider } from '@/infrastructure/billing';
 
 
 // ============================================================================

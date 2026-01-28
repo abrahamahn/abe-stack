@@ -3,7 +3,7 @@ import { componentCatalog as components } from './componentCatalog';
 import { elementCatalog as elements } from './elementCatalog';
 import { layoutCatalog as layouts } from './layoutCatalog';
 
-import type { ComponentDemo } from '@demo/types';
+import type { ComponentDemo } from '../types';
 
 // Combine all catalogs into a single catalog
 export const componentCatalog: Record<string, ComponentDemo> = {

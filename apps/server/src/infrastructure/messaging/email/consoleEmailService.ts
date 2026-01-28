@@ -6,7 +6,7 @@
  * Use this in development to see email output without SMTP.
  */
 
-import type { EmailOptions, EmailResult, EmailService } from '@email/types';
+import type { EmailOptions, EmailResult, EmailService } from './types';
 
 type LogFn = (message: string) => void;
 
@@ -32,7 +32,9 @@ export class ConsoleEmailService implements EmailService {
     this.log(`  To:      ${options.to}`);
     this.log(`  Subject: ${options.subject}`);
     this.log('───────────────────────────────────────────────────────────────');
-    this.log(options.text);
+    if (options.text !== undefined) {
+      this.log(options.text);
+    }
     this.log('═══════════════════════════════════════════════════════════════\n');
 
     return Promise.resolve({

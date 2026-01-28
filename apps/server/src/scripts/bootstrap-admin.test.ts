@@ -16,20 +16,36 @@ import { randomBytes } from 'node:crypto';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Mock dependencies before importing the module
-const mockLoadConfig = vi.fn();
-const mockBuildConnectionString = vi.fn();
-const mockCreateDbClient = vi.fn();
-const mockQuery = vi.fn();
-const mockExecute = vi.fn();
-const mockHashPassword = vi.fn();
-const mockSelect = vi.fn();
-const mockWhere = vi.fn();
-const mockLimit = vi.fn();
-const mockToSql = vi.fn();
-const mockInsert = vi.fn();
-const mockValues = vi.fn();
-const mockEq = vi.fn();
+// Use vi.hoisted to ensure mock functions are defined before vi.mock hoisting
+const {
+  mockLoadConfig,
+  mockBuildConnectionString,
+  mockCreateDbClient,
+  mockQuery,
+  mockExecute,
+  mockHashPassword,
+  mockSelect,
+  mockWhere,
+  mockLimit,
+  mockToSql,
+  mockInsert,
+  mockValues,
+  mockEq,
+} = vi.hoisted(() => ({
+  mockLoadConfig: vi.fn(),
+  mockBuildConnectionString: vi.fn(),
+  mockCreateDbClient: vi.fn(),
+  mockQuery: vi.fn(),
+  mockExecute: vi.fn(),
+  mockHashPassword: vi.fn(),
+  mockSelect: vi.fn(),
+  mockWhere: vi.fn(),
+  mockLimit: vi.fn(),
+  mockToSql: vi.fn(),
+  mockInsert: vi.fn(),
+  mockValues: vi.fn(),
+  mockEq: vi.fn(),
+}));
 
 vi.mock('node:crypto', async () => {
   const actual = await vi.importActual('node:crypto');
@@ -39,11 +55,15 @@ vi.mock('node:crypto', async () => {
   };
 });
 
-vi.mock('@/config', () => ({
+// Mock the config factory module directly using relative path from test file
+// In Vitest 4.x, vi.mock paths are resolved relative to the test file
+vi.mock('../config/factory', () => ({
+  load: mockLoadConfig,
   loadConfig: mockLoadConfig,
 }));
 
-vi.mock('@database', () => ({
+// Mock the database module using relative path from test file
+vi.mock('../infrastructure/data/database', () => ({
   buildConnectionString: mockBuildConnectionString,
   createDbClient: mockCreateDbClient,
   USERS_TABLE: 'users',
@@ -52,7 +72,8 @@ vi.mock('@database', () => ({
   eq: mockEq,
 }));
 
-vi.mock('@modules/auth/utils/password', () => ({
+// Mock the password utils using relative path from test file
+vi.mock('../modules/auth/utils/password', () => ({
   hashPassword: mockHashPassword,
 }));
 
@@ -148,7 +169,7 @@ describe('bootstrap-admin script', () => {
       });
 
       it('should create admin user with default email and name', async () => {
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         const result = await bootstrapAdmin();
 
@@ -161,7 +182,7 @@ describe('bootstrap-admin script', () => {
       it('should create admin user with custom email from env', async () => {
         process.env.ADMIN_EMAIL = 'custom@example.com';
 
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         const result = await bootstrapAdmin();
 
@@ -172,7 +193,7 @@ describe('bootstrap-admin script', () => {
       it('should create admin user with custom name from env', async () => {
         process.env.ADMIN_NAME = 'Custom Admin';
 
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await bootstrapAdmin();
 
@@ -184,7 +205,7 @@ describe('bootstrap-admin script', () => {
       });
 
       it('should generate a secure random password', async () => {
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         const result = await bootstrapAdmin();
 
@@ -194,7 +215,7 @@ describe('bootstrap-admin script', () => {
       });
 
       it('should hash the password with argon2 config', async () => {
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await bootstrapAdmin();
 
@@ -207,7 +228,7 @@ describe('bootstrap-admin script', () => {
       });
 
       it('should insert admin user with correct fields', async () => {
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await bootstrapAdmin();
 
@@ -225,7 +246,7 @@ describe('bootstrap-admin script', () => {
       it('should set email_verified_at to current date', async () => {
         const beforeDate = new Date();
 
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await bootstrapAdmin();
 
@@ -238,7 +259,7 @@ describe('bootstrap-admin script', () => {
       });
 
       it('should display success message with credentials', async () => {
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         const result = await bootstrapAdmin();
 
@@ -256,7 +277,7 @@ describe('bootstrap-admin script', () => {
       });
 
       it('should build connection string from process.env', async () => {
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await bootstrapAdmin();
 
@@ -264,7 +285,7 @@ describe('bootstrap-admin script', () => {
       });
 
       it('should load config from process.env', async () => {
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await bootstrapAdmin();
 
@@ -272,7 +293,7 @@ describe('bootstrap-admin script', () => {
       });
 
       it('should query for existing admin user', async () => {
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await bootstrapAdmin();
 
@@ -295,7 +316,7 @@ describe('bootstrap-admin script', () => {
       });
 
       it('should not create a new admin user', async () => {
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         const result = await bootstrapAdmin();
 
@@ -306,7 +327,7 @@ describe('bootstrap-admin script', () => {
       });
 
       it('should display warning message', async () => {
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await bootstrapAdmin();
 
@@ -316,7 +337,7 @@ describe('bootstrap-admin script', () => {
       });
 
       it('should not display credentials', async () => {
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await bootstrapAdmin();
 
@@ -335,7 +356,7 @@ describe('bootstrap-admin script', () => {
           },
         ]);
 
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         const result = await bootstrapAdmin();
 
@@ -349,7 +370,7 @@ describe('bootstrap-admin script', () => {
       it('should handle empty ADMIN_EMAIL env var (use default)', async () => {
         process.env.ADMIN_EMAIL = '';
 
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         const result = await bootstrapAdmin();
 
@@ -359,7 +380,7 @@ describe('bootstrap-admin script', () => {
       it('should handle empty ADMIN_NAME env var (use default)', async () => {
         process.env.ADMIN_NAME = '';
 
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await bootstrapAdmin();
 
@@ -373,7 +394,7 @@ describe('bootstrap-admin script', () => {
       it('should handle whitespace in ADMIN_EMAIL', async () => {
         process.env.ADMIN_EMAIL = '  admin@test.com  ';
 
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         const result = await bootstrapAdmin();
 
@@ -393,14 +414,14 @@ describe('bootstrap-admin script', () => {
           return buffer;
         });
 
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         const result1 = await bootstrapAdmin();
 
         // Reset mocks but not randomBytes
         mockQuery.mockResolvedValue([]);
         vi.resetModules();
-        const { bootstrapAdmin: bootstrapAdmin2 } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin: bootstrapAdmin2 } = await import('./bootstrap-admin');
 
         const result2 = await bootstrapAdmin2();
 
@@ -414,7 +435,7 @@ describe('bootstrap-admin script', () => {
           throw new Error('Invalid configuration');
         });
 
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await expect(bootstrapAdmin()).rejects.toThrow('Invalid configuration');
       });
@@ -424,7 +445,7 @@ describe('bootstrap-admin script', () => {
           throw new Error('Cannot build connection string');
         });
 
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await expect(bootstrapAdmin()).rejects.toThrow('Cannot build connection string');
       });
@@ -432,7 +453,7 @@ describe('bootstrap-admin script', () => {
       it('should throw error if query for existing admin fails', async () => {
         mockQuery.mockRejectedValue(new Error('Database query failed'));
 
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await expect(bootstrapAdmin()).rejects.toThrow('Database query failed');
       });
@@ -440,7 +461,7 @@ describe('bootstrap-admin script', () => {
       it('should throw error if password hashing fails', async () => {
         mockHashPassword.mockRejectedValue(new Error('Hashing failed'));
 
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await expect(bootstrapAdmin()).rejects.toThrow('Hashing failed');
       });
@@ -448,7 +469,7 @@ describe('bootstrap-admin script', () => {
       it('should throw error if user insertion fails', async () => {
         mockExecute.mockRejectedValue(new Error('Insert failed'));
 
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await expect(bootstrapAdmin()).rejects.toThrow('Insert failed');
       });
@@ -458,7 +479,7 @@ describe('bootstrap-admin script', () => {
           throw new Error('Crypto operation failed');
         });
 
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await expect(bootstrapAdmin()).rejects.toThrow('Crypto operation failed');
       });
@@ -469,7 +490,7 @@ describe('bootstrap-admin script', () => {
         // Mock randomBytes to return controlled data
         vi.mocked(randomBytes).mockReturnValue(Buffer.alloc(24, 0));
 
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         const result = await bootstrapAdmin();
 
@@ -478,7 +499,7 @@ describe('bootstrap-admin script', () => {
       });
 
       it('should use cryptographically secure random source', async () => {
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await bootstrapAdmin();
 
@@ -496,7 +517,7 @@ describe('bootstrap-admin script', () => {
           return buffer;
         });
 
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         const result = await bootstrapAdmin();
 
@@ -511,7 +532,7 @@ describe('bootstrap-admin script', () => {
       });
 
       it('should generate non-empty password', async () => {
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         const result = await bootstrapAdmin();
 
@@ -526,7 +547,7 @@ describe('bootstrap-admin script', () => {
         // Generate password with all possible byte values
         vi.mocked(randomBytes).mockReturnValue(Buffer.from(Array.from({ length: 24 }, (_, i) => i)));
 
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         const result = await bootstrapAdmin();
 
@@ -539,7 +560,7 @@ describe('bootstrap-admin script', () => {
 
     describe('console output', () => {
       it('should display bootstrap header', async () => {
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await bootstrapAdmin();
 
@@ -550,7 +571,7 @@ describe('bootstrap-admin script', () => {
       });
 
       it('should display credentials with separators', async () => {
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await bootstrapAdmin();
 
@@ -559,7 +580,7 @@ describe('bootstrap-admin script', () => {
       });
 
       it('should display warning about changing password', async () => {
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         await bootstrapAdmin();
 
@@ -573,7 +594,7 @@ describe('bootstrap-admin script', () => {
 
     describe('BootstrapResult interface', () => {
       it('should return correct result structure when created', async () => {
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         const result = await bootstrapAdmin();
 
@@ -588,7 +609,7 @@ describe('bootstrap-admin script', () => {
       it('should return correct result structure when not created', async () => {
         mockQuery.mockResolvedValue([{ id: 1, email: 'admin@localhost' }]);
 
-        const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+        const { bootstrapAdmin } = await import('./bootstrap-admin');
 
         const result = await bootstrapAdmin();
 
@@ -607,7 +628,7 @@ describe('bootstrap-admin script', () => {
       const exitSpy = vi.spyOn(process, 'exit');
 
       // Just import the module
-      await import('./bootstrap-admin.js');
+      await import('./bootstrap-admin');
 
       // Should not call process.exit during import
       expect(exitSpy).not.toHaveBeenCalled();
@@ -617,7 +638,7 @@ describe('bootstrap-admin script', () => {
       process.env.VITEST = 'true';
       const exitSpy = vi.spyOn(process, 'exit');
 
-      await import('./bootstrap-admin.js');
+      await import('./bootstrap-admin');
 
       expect(exitSpy).not.toHaveBeenCalled();
     });
@@ -625,7 +646,7 @@ describe('bootstrap-admin script', () => {
 
   describe('integration with database layer', () => {
     it('should use correct table name', async () => {
-      const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+      const { bootstrapAdmin } = await import('./bootstrap-admin');
 
       await bootstrapAdmin();
 
@@ -634,7 +655,7 @@ describe('bootstrap-admin script', () => {
     });
 
     it('should construct proper select query', async () => {
-      const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+      const { bootstrapAdmin } = await import('./bootstrap-admin');
 
       await bootstrapAdmin();
 
@@ -645,7 +666,7 @@ describe('bootstrap-admin script', () => {
     });
 
     it('should construct proper insert query', async () => {
-      const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+      const { bootstrapAdmin } = await import('./bootstrap-admin');
 
       await bootstrapAdmin();
 
@@ -655,7 +676,7 @@ describe('bootstrap-admin script', () => {
     });
 
     it('should execute insert with SQL from builder', async () => {
-      const { bootstrapAdmin } = await import('./bootstrap-admin.js');
+      const { bootstrapAdmin } = await import('./bootstrap-admin');
 
       await bootstrapAdmin();
 

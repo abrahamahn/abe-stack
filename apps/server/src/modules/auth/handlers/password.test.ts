@@ -1,4 +1,4 @@
-// apps/server/src/modules/auth/handlers/__tests__/password.test.ts
+// apps/server/src/modules/auth/handlers/password.test.ts
 /**
  * Password Handler Tests
  *
@@ -6,23 +6,63 @@
  */
 
 import { EmailSendError, InvalidCredentialsError, InvalidTokenError, WeakPasswordError } from '@abe-stack/core';
-import { requestPasswordReset, resetPassword, setPassword } from '@auth/service';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { handleForgotPassword, handleResetPassword, handleSetPassword } from '../password';
+import { handleForgotPassword, handleResetPassword, handleSetPassword } from './password';
 
 import type { AppConfig } from '@/config';
-import type { AppContext, RequestWithCookies } from '@shared';
+import type { AppContext, RequestWithCookies } from '../../../shared';
 
 // ============================================================================
 // Mock Dependencies
 // ============================================================================
 
-vi.mock('@auth/service', () => ({
-  requestPasswordReset: vi.fn(),
-  resetPassword: vi.fn(),
-  setPassword: vi.fn(),
+// Create mock functions via vi.hoisted to be available before vi.mock hoisting
+const {
+  mockRequestPasswordReset,
+  mockResetPassword,
+  mockSetPassword,
+  mockMapErrorToResponse,
+} = vi.hoisted(() => ({
+  mockRequestPasswordReset: vi.fn(),
+  mockResetPassword: vi.fn(),
+  mockSetPassword: vi.fn(),
+  // Error mapper that uses error.name instead of instanceof (avoids ESM module boundary issues)
+  mockMapErrorToResponse: vi.fn((error: unknown, _ctx: unknown) => {
+    if (error instanceof Error) {
+      switch (error.name) {
+        case 'InvalidTokenError':
+          return { status: 400, body: { message: error.message || 'Invalid or expired token' } };
+        case 'WeakPasswordError':
+          return { status: 400, body: { message: 'Password is too weak' } };
+        case 'InvalidCredentialsError':
+          return { status: 401, body: { message: 'Invalid email or password' } };
+        case 'EmailSendError':
+          return { status: 503, body: { message: 'Failed to send email' } };
+        default:
+          return { status: 500, body: { message: 'Internal server error' } };
+      }
+    }
+    return { status: 500, body: { message: 'Internal server error' } };
+  }),
 }));
+
+// Mock the service module - use relative path
+vi.mock('../service', () => ({
+  requestPasswordReset: mockRequestPasswordReset,
+  resetPassword: mockResetPassword,
+  setPassword: mockSetPassword,
+}));
+
+// Mock @shared to provide working mapErrorToResponse
+vi.mock('../../../shared', async (importOriginal) => {
+  const original = await importOriginal<typeof import('../../../shared')>();
+  return {
+    ...original,
+    mapErrorToResponse: mockMapErrorToResponse,
+  };
+});
+
 
 // ============================================================================
 // Test Helpers
@@ -196,7 +236,7 @@ describe('handleForgotPassword', () => {
       const ctx = createMockContext();
       const body = { email: 'test@example.com' };
 
-      vi.mocked(requestPasswordReset).mockResolvedValue(undefined);
+      mockRequestPasswordReset.mockResolvedValue(undefined);
 
       const result = await handleForgotPassword(ctx, body);
 
@@ -208,11 +248,11 @@ describe('handleForgotPassword', () => {
       const ctx = createMockContext();
       const body = { email: 'test@example.com' };
 
-      vi.mocked(requestPasswordReset).mockResolvedValue(undefined);
+      mockRequestPasswordReset.mockResolvedValue(undefined);
 
       await handleForgotPassword(ctx, body);
 
-      expect(requestPasswordReset).toHaveBeenCalledWith(
+      expect(mockRequestPasswordReset).toHaveBeenCalledWith(
         ctx.db,
         ctx.repos,
         ctx.email,
@@ -235,11 +275,11 @@ describe('handleForgotPassword', () => {
       });
       const body = { email: 'test@example.com' };
 
-      vi.mocked(requestPasswordReset).mockResolvedValue(undefined);
+      mockRequestPasswordReset.mockResolvedValue(undefined);
 
       await handleForgotPassword(ctx, body);
 
-      expect(requestPasswordReset).toHaveBeenCalledWith(
+      expect(mockRequestPasswordReset).toHaveBeenCalledWith(
         ctx.db,
         ctx.repos,
         ctx.email,
@@ -257,12 +297,12 @@ describe('handleForgotPassword', () => {
       ];
 
       for (const email of emails) {
-        vi.mocked(requestPasswordReset).mockResolvedValue(undefined);
+        mockRequestPasswordReset.mockResolvedValue(undefined);
 
         const result = await handleForgotPassword(ctx, { email });
 
         expect(result.status).toBe(200);
-        expect(requestPasswordReset).toHaveBeenCalledWith(
+        expect(mockRequestPasswordReset).toHaveBeenCalledWith(
           ctx.db,
           ctx.repos,
           ctx.email,
@@ -281,7 +321,7 @@ describe('handleForgotPassword', () => {
 
       const emailError = new EmailSendError('SMTP connection failed', new Error('SMTP timeout'));
 
-      vi.mocked(requestPasswordReset).mockRejectedValue(emailError);
+      mockRequestPasswordReset.mockRejectedValue(emailError);
 
       const result = await handleForgotPassword(ctx, body);
 
@@ -296,7 +336,7 @@ describe('handleForgotPassword', () => {
       const originalError = new Error('SMTP connection failed');
       const emailError = new EmailSendError('Email send failed', originalError);
 
-      vi.mocked(requestPasswordReset).mockRejectedValue(emailError);
+      mockRequestPasswordReset.mockRejectedValue(emailError);
 
       await handleForgotPassword(ctx, body);
 
@@ -315,7 +355,7 @@ describe('handleForgotPassword', () => {
 
       const emailError = new EmailSendError('Email send failed');
 
-      vi.mocked(requestPasswordReset).mockRejectedValue(emailError);
+      mockRequestPasswordReset.mockRejectedValue(emailError);
 
       const result = await handleForgotPassword(ctx, body);
 
@@ -336,7 +376,7 @@ describe('handleForgotPassword', () => {
       const body = { email: 'test@example.com' };
 
       const dbError = new Error('Database connection failed');
-      vi.mocked(requestPasswordReset).mockRejectedValue(dbError);
+      mockRequestPasswordReset.mockRejectedValue(dbError);
 
       const result = await handleForgotPassword(ctx, body);
 
@@ -350,7 +390,7 @@ describe('handleForgotPassword', () => {
 
       const error = new Error('Invalid token');
       error.name = 'InvalidTokenError';
-      vi.mocked(requestPasswordReset).mockRejectedValue(error);
+      mockRequestPasswordReset.mockRejectedValue(error);
 
       const result = await handleForgotPassword(ctx, body);
 
@@ -377,7 +417,7 @@ describe('handleResetPassword', () => {
         password: 'NewSecureP@ssw0rd!',
       };
 
-      vi.mocked(resetPassword).mockResolvedValue(undefined);
+      mockResetPassword.mockResolvedValue(undefined);
 
       const result = await handleResetPassword(ctx, body);
 
@@ -392,11 +432,11 @@ describe('handleResetPassword', () => {
         password: 'NewSecureP@ssw0rd!',
       };
 
-      vi.mocked(resetPassword).mockResolvedValue(undefined);
+      mockResetPassword.mockResolvedValue(undefined);
 
       await handleResetPassword(ctx, body);
 
-      expect(resetPassword).toHaveBeenCalledWith(
+      expect(mockResetPassword).toHaveBeenCalledWith(
         ctx.db,
         ctx.repos,
         ctx.config.auth,
@@ -415,7 +455,7 @@ describe('handleResetPassword', () => {
       ];
 
       for (const password of complexPasswords) {
-        vi.mocked(resetPassword).mockResolvedValue(undefined);
+        mockResetPassword.mockResolvedValue(undefined);
 
         const result = await handleResetPassword(ctx, {
           token: 'token-123',
@@ -423,7 +463,7 @@ describe('handleResetPassword', () => {
         });
 
         expect(result.status).toBe(200);
-        expect(resetPassword).toHaveBeenCalledWith(
+        expect(mockResetPassword).toHaveBeenCalledWith(
           ctx.db,
           ctx.repos,
           ctx.config.auth,
@@ -442,12 +482,12 @@ describe('handleResetPassword', () => {
         password: 'NewSecureP@ssw0rd!',
       };
 
-      vi.mocked(resetPassword).mockResolvedValue(undefined);
+      mockResetPassword.mockResolvedValue(undefined);
 
       const result = await handleResetPassword(ctx, body);
 
       expect(result.status).toBe(200);
-      expect(resetPassword).toHaveBeenCalledWith(
+      expect(mockResetPassword).toHaveBeenCalledWith(
         ctx.db,
         ctx.repos,
         ctx.config.auth,
@@ -466,7 +506,7 @@ describe('handleResetPassword', () => {
       };
 
       const error = new InvalidTokenError('Invalid or expired reset token');
-      vi.mocked(resetPassword).mockRejectedValue(error);
+      mockResetPassword.mockRejectedValue(error);
 
       const result = await handleResetPassword(ctx, body);
 
@@ -482,7 +522,7 @@ describe('handleResetPassword', () => {
       };
 
       const error = new InvalidTokenError('Invalid or expired reset token');
-      vi.mocked(resetPassword).mockRejectedValue(error);
+      mockResetPassword.mockRejectedValue(error);
 
       const result = await handleResetPassword(ctx, body);
 
@@ -496,7 +536,7 @@ describe('handleResetPassword', () => {
         password: 'weak',
       };
 
-      vi.mocked(resetPassword).mockRejectedValue(
+      mockResetPassword.mockRejectedValue(
         new WeakPasswordError({ errors: ['Password is too weak'] }),
       );
 
@@ -513,7 +553,7 @@ describe('handleResetPassword', () => {
         password: 'NewSecureP@ssw0rd!',
       };
 
-      vi.mocked(resetPassword).mockRejectedValue(new Error('Database connection failed'));
+      mockResetPassword.mockRejectedValue(new Error('Database connection failed'));
 
       const result = await handleResetPassword(ctx, body);
 
@@ -529,7 +569,7 @@ describe('handleResetPassword', () => {
       };
 
       const error = new InvalidTokenError('Token already used');
-      vi.mocked(resetPassword).mockRejectedValue(error);
+      mockResetPassword.mockRejectedValue(error);
 
       const result = await handleResetPassword(ctx, body);
 
@@ -553,7 +593,7 @@ describe('handleSetPassword', () => {
       const body = { password: 'NewSecureP@ssw0rd!' };
       const req = createMockRequest('user-123');
 
-      vi.mocked(setPassword).mockResolvedValue(undefined);
+      mockSetPassword.mockResolvedValue(undefined);
 
       const result = await handleSetPassword(ctx, body, req);
 
@@ -566,11 +606,11 @@ describe('handleSetPassword', () => {
       const body = { password: 'NewSecureP@ssw0rd!' };
       const req = createMockRequest('user-123');
 
-      vi.mocked(setPassword).mockResolvedValue(undefined);
+      mockSetPassword.mockResolvedValue(undefined);
 
       await handleSetPassword(ctx, body, req);
 
-      expect(setPassword).toHaveBeenCalledWith(
+      expect(mockSetPassword).toHaveBeenCalledWith(
         ctx.db,
         ctx.repos,
         ctx.config.auth,
@@ -585,13 +625,13 @@ describe('handleSetPassword', () => {
       const userIds = ['user-1', 'user-999', 'uuid-abc-123'];
 
       for (const userId of userIds) {
-        vi.mocked(setPassword).mockResolvedValue(undefined);
+        mockSetPassword.mockResolvedValue(undefined);
 
         const req = createMockRequest(userId);
         const result = await handleSetPassword(ctx, body, req);
 
         expect(result.status).toBe(200);
-        expect(setPassword).toHaveBeenCalledWith(
+        expect(mockSetPassword).toHaveBeenCalledWith(
           ctx.db,
           ctx.repos,
           ctx.config.auth,
@@ -612,12 +652,12 @@ describe('handleSetPassword', () => {
       ];
 
       for (const password of complexPasswords) {
-        vi.mocked(setPassword).mockResolvedValue(undefined);
+        mockSetPassword.mockResolvedValue(undefined);
 
         const result = await handleSetPassword(ctx, { password }, req);
 
         expect(result.status).toBe(200);
-        expect(setPassword).toHaveBeenCalledWith(
+        expect(mockSetPassword).toHaveBeenCalledWith(
           ctx.db,
           ctx.repos,
           ctx.config.auth,
@@ -639,7 +679,7 @@ describe('handleSetPassword', () => {
 
       expect(result.status).toBe(401);
       expect(result.body.message).toBe('Authentication required');
-      expect(setPassword).not.toHaveBeenCalled();
+      expect(mockSetPassword).not.toHaveBeenCalled();
     });
 
     test('should return 401 when req.user is undefined', async () => {
@@ -654,7 +694,7 @@ describe('handleSetPassword', () => {
 
       expect(result.status).toBe(401);
       expect(result.body.message).toBe('Authentication required');
-      expect(setPassword).not.toHaveBeenCalled();
+      expect(mockSetPassword).not.toHaveBeenCalled();
     });
 
     test('should return 401 when userId is empty string', async () => {
@@ -669,7 +709,7 @@ describe('handleSetPassword', () => {
 
       expect(result.status).toBe(401);
       expect(result.body.message).toBe('Authentication required');
-      expect(setPassword).not.toHaveBeenCalled();
+      expect(mockSetPassword).not.toHaveBeenCalled();
     });
   });
 
@@ -681,7 +721,7 @@ describe('handleSetPassword', () => {
 
       const error = new Error('User already has a password set');
       error.name = 'PasswordAlreadySetError';
-      vi.mocked(setPassword).mockRejectedValue(error);
+      mockSetPassword.mockRejectedValue(error);
 
       const result = await handleSetPassword(ctx, body, req);
 
@@ -697,7 +737,7 @@ describe('handleSetPassword', () => {
       // Test that error name must be exactly 'PasswordAlreadySetError'
       const error = new Error('User already has a password set');
       error.name = 'PasswordAlreadySetError';
-      vi.mocked(setPassword).mockRejectedValue(error);
+      mockSetPassword.mockRejectedValue(error);
 
       const result = await handleSetPassword(ctx, body, req);
 
@@ -712,7 +752,7 @@ describe('handleSetPassword', () => {
       // Test with different error name
       const error = new Error('Password exists');
       error.name = 'PasswordExistsError'; // Different name
-      vi.mocked(setPassword).mockRejectedValue(error);
+      mockSetPassword.mockRejectedValue(error);
 
       const result = await handleSetPassword(ctx, body, req);
 
@@ -727,7 +767,7 @@ describe('handleSetPassword', () => {
       const body = { password: 'weak' };
       const req = createMockRequest('user-123');
 
-      vi.mocked(setPassword).mockRejectedValue(
+      mockSetPassword.mockRejectedValue(
         new WeakPasswordError({ errors: ['Password is too weak'] }),
       );
 
@@ -742,7 +782,7 @@ describe('handleSetPassword', () => {
       const body = { password: 'NewSecureP@ssw0rd!' };
       const req = createMockRequest('user-123');
 
-      vi.mocked(setPassword).mockRejectedValue(new Error('Database connection failed'));
+      mockSetPassword.mockRejectedValue(new Error('Database connection failed'));
 
       const result = await handleSetPassword(ctx, body, req);
 
@@ -756,7 +796,7 @@ describe('handleSetPassword', () => {
       const req = createMockRequest('nonexistent-user');
 
       const error = new InvalidCredentialsError();
-      vi.mocked(setPassword).mockRejectedValue(error);
+      mockSetPassword.mockRejectedValue(error);
 
       const result = await handleSetPassword(ctx, body, req);
 
@@ -768,7 +808,7 @@ describe('handleSetPassword', () => {
       const body = { password: 'NewSecureP@ssw0rd!' };
       const req = createMockRequest('user-123');
 
-      vi.mocked(setPassword).mockRejectedValue(new Error('Unknown error'));
+      mockSetPassword.mockRejectedValue(new Error('Unknown error'));
 
       const result = await handleSetPassword(ctx, body, req);
 
@@ -784,12 +824,12 @@ describe('handleSetPassword', () => {
       const body = { password: longPassword };
       const req = createMockRequest('user-123');
 
-      vi.mocked(setPassword).mockResolvedValue(undefined);
+      mockSetPassword.mockResolvedValue(undefined);
 
       const result = await handleSetPassword(ctx, body, req);
 
       expect(result.status).toBe(200);
-      expect(setPassword).toHaveBeenCalledWith(
+      expect(mockSetPassword).toHaveBeenCalledWith(
         ctx.db,
         ctx.repos,
         ctx.config.auth,
@@ -803,7 +843,7 @@ describe('handleSetPassword', () => {
       const body = { password: 'P@ssw0rd123!🔒' };
       const req = createMockRequest('user-123');
 
-      vi.mocked(setPassword).mockResolvedValue(undefined);
+      mockSetPassword.mockResolvedValue(undefined);
 
       const result = await handleSetPassword(ctx, body, req);
 

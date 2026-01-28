@@ -8,6 +8,7 @@
 
 import { errorResponseSchema, uuidSchema } from '../common';
 import { createSchema } from '../schema';
+
 import type { Contract, Schema } from '../types';
 
 // ============================================================================

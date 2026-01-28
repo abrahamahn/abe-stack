@@ -1,9 +1,9 @@
-// apps/server/src/infrastructure/media/utils/__tests__/streaming.test.ts
+// apps/server/src/infrastructure/media/utils/streaming.test.ts
 import { createReadStream, createWriteStream, promises as fs } from 'fs';
 
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
 
-import { StreamingMediaProcessor, type StreamingOptions } from '../streaming';
+import { StreamingMediaProcessor, type StreamingOptions } from './streaming';
 
 // Mock fs promises
 vi.mock('fs', async (importOriginal) => {

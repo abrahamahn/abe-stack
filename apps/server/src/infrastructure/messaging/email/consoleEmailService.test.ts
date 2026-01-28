@@ -1,9 +1,9 @@
-// apps/server/src/infrastructure/messaging/email/__tests__/consoleEmailService.test.ts
+// apps/server/src/infrastructure/messaging/email/consoleEmailService.test.ts
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { ConsoleEmailService } from '../consoleEmailService';
+import { ConsoleEmailService } from './consoleEmailService';
 
-import type { EmailOptions } from '../types';
+import type { EmailOptions } from './types';
 
 // ============================================================================
 // Test Fixtures

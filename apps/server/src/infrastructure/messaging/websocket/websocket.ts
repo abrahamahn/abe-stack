@@ -7,11 +7,12 @@
 
 import { parseCookies } from '@abe-stack/core/http';
 import { eq, select, USERS_TABLE } from '@abe-stack/db';
+import { verifyToken } from '@auth/utils/jwt';
 import { validateCsrfToken } from '@http';
-import { verifyToken } from '@modules/auth/utils/jwt';
 import { WebSocketServer, type WebSocket } from 'ws';
 
-import type { SubscriptionKey } from '@infrastructure/index';
+/** Subscription key format: "table:id" */
+type SubscriptionKey = `${string}:${string}`;
 import type { AppContext } from '@shared';
 import type { FastifyInstance } from 'fastify';
 import type { IncomingMessage } from 'node:http';
@@ -147,7 +148,7 @@ export function registerWebSocket(server: FastifyInstance, ctx: AppContext): voi
     // Extract CSRF token from cookie
     const rawCookies: unknown = parseCookies(request.headers.cookie);
     const cookies = isStringRecord(rawCookies) ? rawCookies : {};
-    const csrfCookie = cookies._csrf;
+    const csrfCookie = cookies['_csrf'];
 
     // Extract CSRF token from request (query param or subprotocol)
     let csrfToken: string | undefined;
@@ -211,7 +212,7 @@ function handleConnection(socket: WebSocket, req: IncomingMessage, ctx: AppConte
   if (token == null || token === '') {
     const rawCookies: unknown = parseCookies(req.headers.cookie);
     const cookies = isStringRecord(rawCookies) ? rawCookies : {};
-    const accessToken = cookies.accessToken;
+    const accessToken = cookies['accessToken'];
     if (typeof accessToken === 'string') {
       token = accessToken;
     }

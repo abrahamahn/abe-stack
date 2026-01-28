@@ -1,4 +1,4 @@
-// apps/web/src/features/dashboard/pages/__tests__/Dashboard.test.tsx
+// apps/web/src/features/dashboard/pages/Dashboard.test.tsx
 import { QueryCache, QueryCacheProvider } from '@abe-stack/sdk';
 import { MemoryRouter } from '@abe-stack/ui';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';

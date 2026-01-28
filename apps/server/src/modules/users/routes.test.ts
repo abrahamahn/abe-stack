@@ -1,4 +1,4 @@
-// apps/server/src/modules/users/__tests__/routes.test.ts
+// apps/server/src/modules/users/routes.test.ts
 /**
  * User Routes Tests
  *
@@ -8,23 +8,27 @@
 
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { userRoutes } from '../routes';
+import { userRoutes } from './routes';
 
 import type { CursorPaginatedResult, CursorPaginationOptions, User } from '@abe-stack/core';
-import type { AppContext, RequestWithCookies } from '@shared';
+import type { AppContext, RequestWithCookies } from '../../shared';
 
 // ============================================================================
 // Mock Dependencies
 // ============================================================================
 
-// Mock the service module so real handlers can run with mocked DB calls
-vi.mock('../service', () => ({
-  getUserById: vi.fn(),
-  listUsers: vi.fn(),
+// Use vi.hoisted to create mock functions that survive hoisting
+const { mockGetUserById, mockListUsers } = vi.hoisted(() => ({
+  mockGetUserById: vi.fn(),
+  mockListUsers: vi.fn(),
 }));
 
-// Import mocked service functions
-import * as userService from '../service';
+// Mock the service module so real handlers can run with mocked DB calls
+// Use relative path since Vitest 4.x resolves aliases differently
+vi.mock('./service', () => ({
+  getUserById: mockGetUserById,
+  listUsers: mockListUsers,
+}));
 
 // ============================================================================
 // Test Helpers
@@ -221,7 +225,7 @@ describe('User Routes Handler Mapping', () => {
       const request = createMockRequest(user);
 
       // Mock the service to return a user
-      (userService.getUserById as ReturnType<typeof vi.fn>).mockResolvedValue({
+      mockGetUserById.mockResolvedValue({
         id: 'user-123',
         email: 'test@example.com',
         name: 'Test User',
@@ -259,7 +263,7 @@ describe('User Routes Handler Mapping', () => {
       const request = createMockRequest(user);
 
       // Mock the service to return null (user not found)
-      (userService.getUserById as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+      mockGetUserById.mockResolvedValue(null);
 
       const result = await userRoutes['users/me']!.handler(
         ctx,
@@ -276,7 +280,7 @@ describe('User Routes Handler Mapping', () => {
       const request = createMockRequest(user);
 
       // Mock the service to throw an error
-      (userService.getUserById as ReturnType<typeof vi.fn>).mockRejectedValue(
+      mockGetUserById.mockRejectedValue(
         new Error('Database error'),
       );
 
@@ -329,7 +333,7 @@ describe('User Routes Pagination (users/list)', () => {
     ctx = createMockContext();
 
     // Default mock: return mock users
-    (userService.listUsers as ReturnType<typeof vi.fn>).mockResolvedValue({
+    mockListUsers.mockResolvedValue({
       users: mockUsers,
       nextCursor: null,
       hasNext: false,
@@ -343,7 +347,7 @@ describe('User Routes Pagination (users/list)', () => {
       const request = createMockRequest(user, pagination);
 
       // Mock to return 2 users
-      (userService.listUsers as ReturnType<typeof vi.fn>).mockResolvedValue({
+      mockListUsers.mockResolvedValue({
         users: mockUsers.slice(0, 2),
         nextCursor: 'cursor-123',
         hasNext: true,
@@ -553,14 +557,14 @@ describe('User Routes Return Values', () => {
     ctx = createMockContext();
 
     // Setup default service mocks
-    (userService.getUserById as ReturnType<typeof vi.fn>).mockResolvedValue({
+    mockGetUserById.mockResolvedValue({
       id: 'user-123',
       email: 'test@example.com',
       name: 'Test User',
       role: 'user',
       createdAt: new Date('2024-01-01'),
     });
-    (userService.listUsers as ReturnType<typeof vi.fn>).mockResolvedValue({
+    mockListUsers.mockResolvedValue({
       users: [
         {
           id: 'user-1',
@@ -628,14 +632,14 @@ describe('User Routes Type Safety', () => {
     const request = createMockRequest({ userId: '1', email: 'test@example.com', role: 'user' });
 
     // Setup service mocks
-    (userService.getUserById as ReturnType<typeof vi.fn>).mockResolvedValue({
+    mockGetUserById.mockResolvedValue({
       id: '1',
       email: 'test@example.com',
       name: null,
       role: 'user',
       createdAt: new Date(),
     });
-    (userService.listUsers as ReturnType<typeof vi.fn>).mockResolvedValue({
+    mockListUsers.mockResolvedValue({
       users: [],
       nextCursor: null,
       hasNext: false,

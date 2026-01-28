@@ -5,9 +5,23 @@ import { DEFAULT_CACHE_CONFIG, loadCacheConfig } from './cache';
 
 import type { FullEnv } from '@abe-stack/core/config';
 
+/**
+ * Creates a base environment with cache-related defaults (as applied by Zod schema).
+ * Used to simulate properly parsed FullEnv in tests.
+ */
+function createBaseEnv(overrides: Partial<FullEnv> = {}): FullEnv {
+  return {
+    CACHE_TTL_MS: 300000,
+    CACHE_MAX_SIZE: 1000,
+    REDIS_HOST: 'localhost',
+    REDIS_PORT: 6379,
+    ...overrides,
+  } as unknown as FullEnv;
+}
+
 describe('Cache Configuration', () => {
   it('loads default configuration when no environment variables are set', () => {
-    const env = {} as unknown as FullEnv;
+    const env = createBaseEnv();
     const config = loadCacheConfig(env);
 
     expect(config).toEqual({
@@ -18,13 +32,13 @@ describe('Cache Configuration', () => {
   });
 
   it('loads custom configuration from environment variables', () => {
-    const env = {
+    const env = createBaseEnv({
       CACHE_TTL_MS: 600000,
       CACHE_MAX_SIZE: 2000,
       CACHE_USE_REDIS: 'true',
       REDIS_HOST: 'my-redis-host',
       REDIS_PORT: 6380,
-    } as unknown as FullEnv;
+    });
 
     const config = loadCacheConfig(env);
 
@@ -40,29 +54,29 @@ describe('Cache Configuration', () => {
   });
 
   it('prioritizes CACHE_PROVIDER=redis over CACHE_USE_REDIS=false', () => {
-    const env = {
+    const env = createBaseEnv({
       CACHE_PROVIDER: 'redis',
       CACHE_USE_REDIS: 'false',
-    } as unknown as FullEnv;
+    });
 
     const config = loadCacheConfig(env);
     expect(config.useExternalProvider).toBe(true);
   });
 
   it('supports CACHE_PROVIDER=local explicitly', () => {
-    const env = {
+    const env = createBaseEnv({
       CACHE_PROVIDER: 'local',
       CACHE_USE_REDIS: 'true',
-    } as unknown as FullEnv;
+    });
 
     const config = loadCacheConfig(env);
     expect(config.useExternalProvider).toBe(false);
   });
 
   it('uses default redis config when redis is enabled but host/port not specified', () => {
-    const env = {
+    const env = createBaseEnv({
       CACHE_USE_REDIS: 'true',
-    } as unknown as FullEnv;
+    });
 
     const config = loadCacheConfig(env);
 
@@ -74,7 +88,7 @@ describe('Cache Configuration', () => {
   });
 
   it('defaults to false for useExternalProvider when not specified', () => {
-    const env = {} as unknown as FullEnv;
+    const env = createBaseEnv();
     const config = loadCacheConfig(env);
 
     expect(config.useExternalProvider).toBe(false);

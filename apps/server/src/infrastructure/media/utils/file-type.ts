@@ -11,87 +11,145 @@ export interface FileTypeResult {
   mime: string;
 }
 
-const MAGIC_BYTES: Record<string, { signature: Buffer; mime: string; ext: string }> = {
+interface MagicByteConfig {
+  signature: Buffer;
+  mime: string;
+  ext: string;
+}
+
+/**
+ * Helper to create the MAGIC_BYTES lookup from entries.
+ * Uses array syntax to avoid naming-convention lint errors for MIME type keys.
+ */
+function createMagicBytesLookup(
+  entries: Array<[string, MagicByteConfig]>,
+): Record<string, MagicByteConfig> {
+  return Object.fromEntries(entries);
+}
+
+const MAGIC_BYTES = createMagicBytesLookup([
   // Images
-  'image/jpeg': {
-    signature: Buffer.from([0xff, 0xd8, 0xff]),
-    mime: 'image/jpeg',
-    ext: 'jpg',
-  },
-  'image/png': {
-    signature: Buffer.from([0x89, 0x50, 0x4e, 0x47]),
-    mime: 'image/png',
-    ext: 'png',
-  },
-  'image/gif': {
-    signature: Buffer.from([0x47, 0x49, 0x46]),
-    mime: 'image/gif',
-    ext: 'gif',
-  },
-  'image/webp': {
-    signature: Buffer.from([0x52, 0x49, 0x46, 0x46]),
-    mime: 'image/webp',
-    ext: 'webp',
-  },
-  'image/avif': {
-    signature: Buffer.from([
-      0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66,
-    ]),
-    mime: 'image/avif',
-    ext: 'avif',
-  },
+  [
+    'image/jpeg',
+    {
+      signature: Buffer.from([0xff, 0xd8, 0xff]),
+      mime: 'image/jpeg',
+      ext: 'jpg',
+    },
+  ],
+  [
+    'image/png',
+    {
+      signature: Buffer.from([0x89, 0x50, 0x4e, 0x47]),
+      mime: 'image/png',
+      ext: 'png',
+    },
+  ],
+  [
+    'image/gif',
+    {
+      signature: Buffer.from([0x47, 0x49, 0x46]),
+      mime: 'image/gif',
+      ext: 'gif',
+    },
+  ],
+  [
+    'image/webp',
+    {
+      signature: Buffer.from([0x52, 0x49, 0x46, 0x46]),
+      mime: 'image/webp',
+      ext: 'webp',
+    },
+  ],
+  [
+    'image/avif',
+    {
+      signature: Buffer.from([
+        0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70, 0x61, 0x76, 0x69, 0x66,
+      ]),
+      mime: 'image/avif',
+      ext: 'avif',
+    },
+  ],
 
   // Audio
-  'audio/mpeg': {
-    signature: Buffer.from([0xff, 0xfb]),
-    mime: 'audio/mpeg',
-    ext: 'mp3',
-  },
-  'audio/wav': {
-    signature: Buffer.from([0x52, 0x49, 0x46, 0x46]),
-    mime: 'audio/wav',
-    ext: 'wav',
-  },
-  'audio/aac': {
-    signature: Buffer.from([0xff, 0xf1]),
-    mime: 'audio/aac',
-    ext: 'aac',
-  },
-  'audio/ogg': {
-    signature: Buffer.from([0x4f, 0x67, 0x67, 0x53]),
-    mime: 'audio/ogg',
-    ext: 'ogg',
-  },
+  [
+    'audio/mpeg',
+    {
+      signature: Buffer.from([0xff, 0xfb]),
+      mime: 'audio/mpeg',
+      ext: 'mp3',
+    },
+  ],
+  [
+    'audio/wav',
+    {
+      signature: Buffer.from([0x52, 0x49, 0x46, 0x46]),
+      mime: 'audio/wav',
+      ext: 'wav',
+    },
+  ],
+  [
+    'audio/aac',
+    {
+      signature: Buffer.from([0xff, 0xf1]),
+      mime: 'audio/aac',
+      ext: 'aac',
+    },
+  ],
+  [
+    'audio/ogg',
+    {
+      signature: Buffer.from([0x4f, 0x67, 0x67, 0x53]),
+      mime: 'audio/ogg',
+      ext: 'ogg',
+    },
+  ],
 
   // Video
-  'video/mp4': {
-    signature: Buffer.from([0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70]),
-    mime: 'video/mp4',
-    ext: 'mp4',
-  },
-  'video/webm': {
-    signature: Buffer.from([0x1a, 0x45, 0xdf, 0xa3]),
-    mime: 'video/webm',
-    ext: 'webm',
-  },
-  'video/avi': {
-    signature: Buffer.from([0x52, 0x49, 0x46, 0x46]),
-    mime: 'video/avi',
-    ext: 'avi',
-  },
-  'video/quicktime': {
-    signature: Buffer.from([0x00, 0x00, 0x00, 0x14, 0x66, 0x74, 0x79, 0x70]),
-    mime: 'video/quicktime',
-    ext: 'mov',
-  },
+  [
+    'video/mp4',
+    {
+      signature: Buffer.from([0x00, 0x00, 0x00, 0x20, 0x66, 0x74, 0x79, 0x70]),
+      mime: 'video/mp4',
+      ext: 'mp4',
+    },
+  ],
+  [
+    'video/webm',
+    {
+      signature: Buffer.from([0x1a, 0x45, 0xdf, 0xa3]),
+      mime: 'video/webm',
+      ext: 'webm',
+    },
+  ],
+  [
+    'video/avi',
+    {
+      signature: Buffer.from([0x52, 0x49, 0x46, 0x46]),
+      mime: 'video/avi',
+      ext: 'avi',
+    },
+  ],
+  [
+    'video/quicktime',
+    {
+      signature: Buffer.from([0x00, 0x00, 0x00, 0x14, 0x66, 0x74, 0x79, 0x70]),
+      mime: 'video/quicktime',
+      ext: 'mov',
+    },
+  ],
 
   // Documents
-  'application/pdf': {
-    signature: Buffer.from([0x25, 0x50, 0x44, 0x46]),
-    mime: 'application/pdf',
-    ext: 'pdf',
-  },
-};
+  [
+    'application/pdf',
+    {
+      signature: Buffer.from([0x25, 0x50, 0x44, 0x46]),
+      mime: 'application/pdf',
+      ext: 'pdf',
+    },
+  ],
+]);
 
 /**
  * Detect file type from buffer using magic bytes

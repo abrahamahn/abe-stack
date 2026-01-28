@@ -1,7 +1,7 @@
-// apps/server/src/infrastructure/data/database/utils/__tests__/transaction.test.ts
+// apps/server/src/infrastructure/data/database/utils/transaction.test.ts
 import { describe, expect, test, vi } from 'vitest';
 
-import { isInTransaction, withTransaction } from '../transaction';
+import { isInTransaction, withTransaction } from './transaction';
 
 import type { DbClient } from '../../client';
 

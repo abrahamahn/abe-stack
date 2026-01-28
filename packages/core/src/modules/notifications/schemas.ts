@@ -5,7 +5,9 @@
  * Validation schemas for notification-related requests and data.
  */
 
-import { createSchema, type Schema } from '@abe-stack/contracts/types';
+import { createSchema } from '@abe-stack/contracts';
+
+import type { Schema } from '@abe-stack/contracts/types';
 
 // ============================================================================
 // Constants

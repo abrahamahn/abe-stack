@@ -257,7 +257,11 @@ export function denied(reason: string): PermissionDenied {
  * Create an allowed permission result
  */
 export function allowed(matchedRule?: string): PermissionAllowed {
-  return { allowed: true, matchedRule };
+  const result: PermissionAllowed = { allowed: true };
+  if (matchedRule !== undefined) {
+    result.matchedRule = matchedRule;
+  }
+  return result;
 }
 
 /**

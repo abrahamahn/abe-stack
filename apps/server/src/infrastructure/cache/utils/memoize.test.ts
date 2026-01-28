@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/cache/utils/__tests__/memoize.test.ts
+// apps/server/src/infrastructure/cache/utils/memoize.test.ts
 import { describe, expect, test } from 'vitest';
 
 import {
@@ -6,7 +6,7 @@ import {
     createObjectKeyGenerator,
     memoize,
     memoizeMethod,
-} from '../memoize';
+} from './memoize';
 
 // ============================================================================
 // Memoize Tests

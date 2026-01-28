@@ -19,6 +19,7 @@ import {
     SubscriptionNotCancelingError,
 } from '@abe-stack/core';
 
+import type { BillingService } from '@abe-stack/core';
 import type {
     CustomerMappingRepository,
     Invoice as DbInvoice,
@@ -30,7 +31,6 @@ import type {
     PlanRepository,
     SubscriptionRepository,
 } from '@abe-stack/db';
-import type { BillingService } from '@abe-stack/core';
 
 // ============================================================================
 // Types

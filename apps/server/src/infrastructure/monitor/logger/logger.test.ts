@@ -1,4 +1,4 @@
-// apps/server/src/infrastructure/monitor/logger/__tests__/logger.test.ts
+// apps/server/src/infrastructure/monitor/logger/logger.test.ts
 import { describe, expect, test, vi, type Mock } from 'vitest';
 
 import {
@@ -9,7 +9,7 @@ import {
     getOrCreateCorrelationId,
     LOG_LEVELS,
     shouldLog,
-} from '../logger';
+} from './logger';
 
 interface MockBaseLogger {
   trace: Mock;

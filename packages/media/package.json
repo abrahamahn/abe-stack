@@ -16,7 +16,7 @@
     "build": "[ -d dist ] || rm -f tsconfig.tsbuildinfo && tsc --build",
     "clean": "rm -rf dist tsconfig.tsbuildinfo",
     "type-check": "tsc --noEmit",
-    "test": "vitest run --reporter=dot",
+    "test": "vitest run --reporter=dot --silent=passed-only",
     "lint": "eslint . --cache --cache-location ../../node_modules/.cache/eslint/.eslintcache-abe-stack-media --report-unused-disable-directives"
   },
   "keywords": [

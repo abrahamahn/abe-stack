@@ -9,9 +9,10 @@ import {
   ScrollArea,
   Text,
 } from '@abe-stack/ui';
-import { DemoDocContent, DemoPreviewArea } from '@demo/components';
 
-import type { ComponentDemo, DemoPaneConfig } from '@demo/types';
+import { DemoDocContent, DemoPreviewArea } from '.';
+
+import type { ComponentDemo, DemoPaneConfig } from '../types';
 import type { ReactElement } from 'react';
 
 type LayoutToggle = {

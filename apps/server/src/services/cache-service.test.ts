@@ -1,3 +1,4 @@
+// apps/server/src/services/cache-service.test.ts
 /* eslint-disable @typescript-eslint/unbound-method */
 // apps/server/src/services/cache-service.test.ts
 /**
@@ -248,13 +249,18 @@ describe('CacheService', () => {
       expect(logger.debug).toHaveBeenCalledWith('Cache set: key (ttl: 1000ms)');
     });
 
-    it('should handle zero TTL', () => {
+    it('should handle zero TTL as immediate expiry boundary', () => {
       vi.useFakeTimers();
       cache.set('key', 'value', 0);
 
-      vi.advanceTimersByTime(1000000);
-
+      // TTL=0 means expiry = Date.now(), so immediately checking returns value
+      // (Date.now() > expiry is false when equal)
       expect(cache.get('key')).toBe('value');
+
+      // But after even 1ms, it expires
+      vi.advanceTimersByTime(1);
+      expect(cache.get('key')).toBeNull();
+
       vi.useRealTimers();
     });
 
@@ -585,9 +591,13 @@ describe('CacheService', () => {
       vi.useFakeTimers();
       cache.set('key', 'value', 0);
 
-      vi.advanceTimersByTime(Number.MAX_SAFE_INTEGER);
-
+      // TTL=0 means expiry = Date.now(), value available when checked immediately
       expect(cache.get('key')).toBe('value');
+
+      // After any time passes, it expires
+      vi.advanceTimersByTime(1);
+      expect(cache.get('key')).toBeNull();
+
       vi.useRealTimers();
     });
 

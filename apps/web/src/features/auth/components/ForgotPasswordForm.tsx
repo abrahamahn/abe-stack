@@ -23,7 +23,7 @@ export const ForgotPasswordForm = ({
 }: ForgotPasswordFormProps): ReactElement => {
   const [email, setEmail] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     if (onForgotPassword === undefined) return;
 

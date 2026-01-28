@@ -1,4 +1,4 @@
-// packages/core/src/contracts/__tests__/common.test.ts
+// packages/contracts/src/common.test.ts
 import { describe, expect, it } from 'vitest';
 
 import {

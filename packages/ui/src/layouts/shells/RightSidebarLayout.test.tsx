@@ -1,4 +1,4 @@
-// packages/ui/src/layouts/shells/__tests__/RightSidebarLayout.test.tsx
+// packages/ui/src/layouts/shells/RightSidebarLayout.test.tsx
 import { render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { describe, it, expect } from 'vitest';

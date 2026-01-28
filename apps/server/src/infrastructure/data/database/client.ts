@@ -29,14 +29,14 @@ export function buildConnectionString(env: DbEnv = process.env as DbEnv): string
  * Create a raw SQL database client
  */
 export function createDbClient(connectionString: string): RawDb {
-  if (process.env.NODE_ENV !== 'production') {
+  if (process.env['NODE_ENV'] !== 'production') {
     const globalWithDb = globalThis as GlobalWithDb;
 
     globalWithDb.rawDb ??= createRawDb({
       connectionString,
-      maxConnections: Number(process.env.DB_MAX_CONNECTIONS ?? 10),
-      idleTimeout: Number(process.env.DB_IDLE_TIMEOUT ?? 30000),
-      connectTimeout: Number(process.env.DB_CONNECT_TIMEOUT ?? 10000),
+      maxConnections: Number(process.env['DB_MAX_CONNECTIONS'] ?? 10),
+      idleTimeout: Number(process.env['DB_IDLE_TIMEOUT'] ?? 30000),
+      connectTimeout: Number(process.env['DB_CONNECT_TIMEOUT'] ?? 10000),
     });
 
     return globalWithDb.rawDb;
@@ -44,9 +44,9 @@ export function createDbClient(connectionString: string): RawDb {
 
   return createRawDb({
     connectionString,
-    maxConnections: Number(process.env.DB_MAX_CONNECTIONS ?? 10),
-    idleTimeout: Number(process.env.DB_IDLE_TIMEOUT ?? 30000),
-    connectTimeout: Number(process.env.DB_CONNECT_TIMEOUT ?? 10000),
+    maxConnections: Number(process.env['DB_MAX_CONNECTIONS'] ?? 10),
+    idleTimeout: Number(process.env['DB_IDLE_TIMEOUT'] ?? 30000),
+    connectTimeout: Number(process.env['DB_CONNECT_TIMEOUT'] ?? 10000),
   });
 }
 
@@ -65,13 +65,13 @@ export async function resolveConnectionStringWithFallback(
   env: DbEnv = process.env as DbEnv,
   fallbackPorts: number[] = [5432, 5433, 5434],
 ): Promise<string> {
-  if (typeof env.DATABASE_URL === 'string' && env.DATABASE_URL !== '') {
-    return env.DATABASE_URL;
+  if (typeof env['DATABASE_URL'] === 'string' && env['DATABASE_URL'] !== '') {
+    return env['DATABASE_URL'];
   }
 
   const preferredPorts = uniquePorts([
-    Number(env.POSTGRES_PORT ?? Number.NaN),
-    Number(env.DB_PORT ?? Number.NaN),
+    Number(env['POSTGRES_PORT'] ?? Number.NaN),
+    Number(env['DB_PORT'] ?? Number.NaN),
     ...fallbackPorts,
   ]);
 
@@ -85,8 +85,8 @@ export async function resolveConnectionStringWithFallback(
     // Return on the first reachable port
     if (await canReachDatabase(connectionString)) {
       if (env === process.env) {
-        process.env.POSTGRES_PORT = String(port);
-        process.env.DB_PORT = String(port);
+        process.env['POSTGRES_PORT'] = String(port);
+        process.env['DB_PORT'] = String(port);
       }
       return connectionString;
     }

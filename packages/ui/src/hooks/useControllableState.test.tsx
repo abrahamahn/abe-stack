@@ -1,4 +1,4 @@
-// packages/ui/src/hooks/__tests__/useControllableState.test.tsx
+// packages/ui/src/hooks/useControllableState.test.tsx
 /** @vitest-environment jsdom */
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';

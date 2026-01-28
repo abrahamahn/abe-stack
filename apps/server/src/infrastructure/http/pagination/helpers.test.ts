@@ -1,8 +1,8 @@
-// apps/server/src/infrastructure/http/pagination/__tests__/helpers.test.ts
+// apps/server/src/infrastructure/http/pagination/helpers.test.ts
 import { encodeCursor, type CursorPaginatedResult, type PaginatedResult } from '@abe-stack/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { createPaginationHelpers } from '../helpers';
+import { createPaginationHelpers } from './helpers';
 
 describe('Pagination Helpers', () => {
   const helpers = createPaginationHelpers();

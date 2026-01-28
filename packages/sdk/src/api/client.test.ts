@@ -1,4 +1,4 @@
-// packages/sdk/src/api/__tests__/client.test.ts
+// packages/sdk/src/api/client.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 import { createApiClient } from '../client';

@@ -11,7 +11,7 @@ import {
   ElasticsearchProvider,
   createElasticsearchProvider,
 } from './elasticsearch-provider';
-import { SearchProviderUnavailableError, FILTER_OPERATORS } from '@abe-stack/core';
+import { FILTER_OPERATORS } from '@abe-stack/core';
 import type { SearchQuery, FacetedSearchQuery } from '@abe-stack/core';
 import type { ElasticsearchProviderConfig } from './types';
 
@@ -112,9 +112,9 @@ describe('ElasticsearchProvider', () => {
           FILTER_OPERATORS.StartsWith,
           FILTER_OPERATORS.EndsWith,
           FILTER_OPERATORS.IN,
-          FILTER_OPERATORS.NOT_IN,
-          FILTER_OPERATORS.IS_NULL,
-          FILTER_OPERATORS.IS_NOT_NULL,
+          FILTER_OPERATORS.NotIn,
+          FILTER_OPERATORS.IsNull,
+          FILTER_OPERATORS.IsNotNull,
           FILTER_OPERATORS.BETWEEN,
           FILTER_OPERATORS.FullText,
           FILTER_OPERATORS.ArrayContains,
@@ -170,7 +170,9 @@ describe('ElasticsearchProvider', () => {
     it('should throw SearchProviderUnavailableError for search', async () => {
       const query = createSearchQuery();
 
-      await expect(provider.search(query)).rejects.toThrow(SearchProviderUnavailableError);
+      await expect(provider.search(query)).rejects.toMatchObject({
+        name: 'SearchProviderUnavailableError',
+      });
     });
 
     it('should include provider name and method in error for search', async () => {
@@ -180,80 +182,70 @@ describe('ElasticsearchProvider', () => {
         await provider.search(query);
         expect.fail('Should have thrown');
       } catch (error) {
-        expect(error).toBeInstanceOf(SearchProviderUnavailableError);
-        if (error instanceof SearchProviderUnavailableError) {
-          expect(error.message).toContain('test-elasticsearch');
-          expect(error.message).toContain('search');
-          expect(error.message).toContain('not yet implemented');
-        }
+        expect(error).toMatchObject({
+          name: 'SearchProviderUnavailableError',
+          details: { providerName: 'test-elasticsearch' },
+        });
+        const err = error as Error;
+        expect(err.message).toContain('search');
+        expect(err.message).toContain('not yet implemented');
       }
     });
 
     it('should throw SearchProviderUnavailableError for searchWithCursor', async () => {
       const query = createSearchQuery();
 
-      await expect(provider.searchWithCursor(query)).rejects.toThrow(
-        SearchProviderUnavailableError,
-      );
+      await expect(provider.searchWithCursor(query)).rejects.toMatchObject({
+        name: 'SearchProviderUnavailableError',
+      });
     });
 
     it('should include method name in error for searchWithCursor', async () => {
       const query = createSearchQuery();
 
-      try {
-        await provider.searchWithCursor(query);
-        expect.fail('Should have thrown');
-      } catch (error) {
-        if (error instanceof SearchProviderUnavailableError) {
-          expect(error.message).toContain('searchWithCursor');
-        }
-      }
+      await expect(provider.searchWithCursor(query)).rejects.toMatchObject({
+        message: expect.stringContaining('searchWithCursor'),
+      });
     });
 
     it('should throw SearchProviderUnavailableError for searchFaceted', async () => {
       const query = createFacetedSearchQuery();
 
-      await expect(provider.searchFaceted(query)).rejects.toThrow(
-        SearchProviderUnavailableError,
-      );
+      await expect(provider.searchFaceted(query)).rejects.toMatchObject({
+        name: 'SearchProviderUnavailableError',
+      });
     });
 
     it('should include method name in error for searchFaceted', async () => {
       const query = createFacetedSearchQuery();
 
-      try {
-        await provider.searchFaceted(query);
-        expect.fail('Should have thrown');
-      } catch (error) {
-        if (error instanceof SearchProviderUnavailableError) {
-          expect(error.message).toContain('searchFaceted');
-        }
-      }
+      await expect(provider.searchFaceted(query)).rejects.toMatchObject({
+        message: expect.stringContaining('searchFaceted'),
+      });
     });
 
     it('should throw SearchProviderUnavailableError for count', async () => {
       const query = createSearchQuery();
 
-      await expect(provider.count(query)).rejects.toThrow(SearchProviderUnavailableError);
+      await expect(provider.count(query)).rejects.toMatchObject({
+        name: 'SearchProviderUnavailableError',
+      });
     });
 
     it('should include method name in error for count', async () => {
       const query = createSearchQuery();
 
-      try {
-        await provider.count(query);
-        expect.fail('Should have thrown');
-      } catch (error) {
-        if (error instanceof SearchProviderUnavailableError) {
-          expect(error.message).toContain('count');
-        }
-      }
+      await expect(provider.count(query)).rejects.toMatchObject({
+        message: expect.stringContaining('count'),
+      });
     });
   });
 
   describe('connection methods (not implemented)', () => {
     it('should throw SearchProviderUnavailableError for connect', async () => {
-      await expect(provider.connect()).rejects.toThrow(SearchProviderUnavailableError);
+      await expect(provider.connect()).rejects.toMatchObject({
+        name: 'SearchProviderUnavailableError',
+      });
     });
 
     it('should return false for isConnected', () => {
@@ -281,25 +273,29 @@ describe('ElasticsearchProvider', () => {
     it('should throw SearchProviderUnavailableError for createIndex', async () => {
       const mapping = { properties: { title: { type: 'text' } } };
 
-      await expect(provider.createIndex(mapping)).rejects.toThrow(
-        SearchProviderUnavailableError,
-      );
+      await expect(provider.createIndex(mapping)).rejects.toMatchObject({
+        name: 'SearchProviderUnavailableError',
+      });
     });
 
     it('should throw SearchProviderUnavailableError for deleteIndex', async () => {
-      await expect(provider.deleteIndex()).rejects.toThrow(SearchProviderUnavailableError);
+      await expect(provider.deleteIndex()).rejects.toMatchObject({
+        name: 'SearchProviderUnavailableError',
+      });
     });
 
     it('should throw SearchProviderUnavailableError for indexExists', async () => {
-      await expect(provider.indexExists()).rejects.toThrow(SearchProviderUnavailableError);
+      await expect(provider.indexExists()).rejects.toMatchObject({
+        name: 'SearchProviderUnavailableError',
+      });
     });
   });
 
   describe('document operations (not implemented)', () => {
     it('should throw SearchProviderUnavailableError for indexDocument', async () => {
-      await expect(provider.indexDocument('doc-1', { title: 'Test' })).rejects.toThrow(
-        SearchProviderUnavailableError,
-      );
+      await expect(provider.indexDocument('doc-1', { title: 'Test' })).rejects.toMatchObject({
+        name: 'SearchProviderUnavailableError',
+      });
     });
 
     it('should throw SearchProviderUnavailableError for bulkIndex', async () => {
@@ -308,15 +304,15 @@ describe('ElasticsearchProvider', () => {
         { id: 'doc-2', document: { title: 'Test 2' } },
       ];
 
-      await expect(provider.bulkIndex(documents)).rejects.toThrow(
-        SearchProviderUnavailableError,
-      );
+      await expect(provider.bulkIndex(documents)).rejects.toMatchObject({
+        name: 'SearchProviderUnavailableError',
+      });
     });
 
     it('should throw SearchProviderUnavailableError for deleteDocument', async () => {
-      await expect(provider.deleteDocument('doc-1')).rejects.toThrow(
-        SearchProviderUnavailableError,
-      );
+      await expect(provider.deleteDocument('doc-1')).rejects.toMatchObject({
+        name: 'SearchProviderUnavailableError',
+      });
     });
   });
 
@@ -354,7 +350,9 @@ describe('ElasticsearchProvider', () => {
     it('should handle empty search query', async () => {
       const query = createSearchQuery({ filters: [] });
 
-      await expect(provider.search(query)).rejects.toThrow(SearchProviderUnavailableError);
+      await expect(provider.search(query)).rejects.toMatchObject({
+        name: 'SearchProviderUnavailableError',
+      });
     });
 
     it('should handle complex search query with filters', async () => {
@@ -365,7 +363,9 @@ describe('ElasticsearchProvider', () => {
         ],
       });
 
-      await expect(provider.search(query)).rejects.toThrow(SearchProviderUnavailableError);
+      await expect(provider.search(query)).rejects.toMatchObject({
+        name: 'SearchProviderUnavailableError',
+      });
     });
 
     it('should handle search query with sort', async () => {
@@ -373,7 +373,9 @@ describe('ElasticsearchProvider', () => {
         sort: [{ field: 'createdAt', direction: 'desc' }],
       });
 
-      await expect(provider.search(query)).rejects.toThrow(SearchProviderUnavailableError);
+      await expect(provider.search(query)).rejects.toMatchObject({
+        name: 'SearchProviderUnavailableError',
+      });
     });
 
     it('should handle faceted query with multiple facets', async () => {
@@ -381,9 +383,9 @@ describe('ElasticsearchProvider', () => {
         facets: [{ field: 'category' }, { field: 'brand' }],
       });
 
-      await expect(provider.searchFaceted(query)).rejects.toThrow(
-        SearchProviderUnavailableError,
-      );
+      await expect(provider.searchFaceted(query)).rejects.toMatchObject({
+        name: 'SearchProviderUnavailableError',
+      });
     });
   });
 });

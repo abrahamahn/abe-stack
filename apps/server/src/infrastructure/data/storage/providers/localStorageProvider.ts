@@ -3,9 +3,9 @@ import { randomUUID } from 'node:crypto';
 import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
-import { normalizeStorageKey } from '@storage/utils';
+import { normalizeStorageKey } from '@data/storage/utils';
 
-import type { LocalStorageConfig, StorageProvider } from '@storage/types';
+import type { LocalStorageConfig, StorageProvider } from '@data/storage/types';
 
 export class LocalStorageProvider implements StorageProvider {
   constructor(private readonly config: LocalStorageConfig) {}

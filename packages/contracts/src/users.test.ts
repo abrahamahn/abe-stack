@@ -1,4 +1,4 @@
-// packages/core/src/contracts/__tests__/users.test.ts
+// packages/contracts/src/users.test.ts
 import { describe, expect, it } from 'vitest';
 
 import { userRoleSchema, userSchema, usersContract } from './users';

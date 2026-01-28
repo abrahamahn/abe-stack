@@ -8,9 +8,9 @@
  * - Reset password flow with token
  */
 
-import { AuthPage } from '@features/auth';
 import { screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { AuthPage } from '../../features/auth';
 
 import { renderWithProviders } from '../utils';
 
@@ -37,7 +37,7 @@ const mockNavigateToMode = vi.fn();
 const mockNavigateToLogin = vi.fn();
 const mockStartCooldown = vi.fn();
 
-vi.mock('@auth/hooks', () => ({
+vi.mock('../../features/auth/hooks', () => ({
   useAuth: () => ({
     login: mockLogin,
     register: mockRegister,

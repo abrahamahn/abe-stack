@@ -7,8 +7,9 @@
 
 import { emailSchema, errorResponseSchema, nameSchema, passwordSchema } from './common';
 import { createSchema } from './schema';
-import type { Contract, Schema } from './types';
 import { userSchema, type User } from './users';
+
+import type { Contract, Schema } from './types';
 
 // ============================================================================
 // Request Schemas

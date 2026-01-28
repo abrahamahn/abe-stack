@@ -4,18 +4,19 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PostgresPubSub, type PostgresPubSubOptions } from './postgres-pubsub';
 import { SubKeys } from './types';
 
-// Mock postgres module
+// Mock postgres module with shared listeners across all instances
 vi.mock('postgres', () => {
-  const createMockClient = () => {
-    const listeners = new Map<string, (payload: string) => void>();
+  // Shared listeners map across all mock client instances
+  const sharedListeners = new Map<string, (payload: string) => void>();
 
+  const createMockClient = () => {
     return {
       listen: vi.fn((channel: string, callback: (payload: string) => void) => {
-        listeners.set(channel, callback);
+        sharedListeners.set(channel, callback);
         return Promise.resolve();
       }),
       notify: vi.fn((channel: string, payload: string) => {
-        const listener = listeners.get(channel);
+        const listener = sharedListeners.get(channel);
         if (listener !== undefined) {
           // Simulate async notification
           setTimeout(() => {
@@ -24,12 +25,15 @@ vi.mock('postgres', () => {
         }
         return Promise.resolve();
       }),
-      end: vi.fn(async () => {}),
+      end: vi.fn(async () => {
+        // Clear listeners on end
+        sharedListeners.clear();
+      }),
       _triggerNotification: (channel: string, payload: string) => {
-        const listener = listeners.get(channel);
+        const listener = sharedListeners.get(channel);
         if (listener !== undefined) listener(payload);
       },
-      _listeners: listeners,
+      _listeners: sharedListeners,
     };
   };
 
@@ -169,9 +173,9 @@ describe('PostgresPubSub', () => {
 
       await pubsub.start();
 
-      // Simulate message from another instance
+      // Simulate message from another instance with correct subscription key format
       const message = {
-        key: { table: 'users', id: '123' },
+        key: 'record:users:123',
         version: 1,
         instanceId: 'different-instance-id',
       };
@@ -196,9 +200,9 @@ describe('PostgresPubSub', () => {
 
       await pubsub.start();
 
-      // Simulate message from self
+      // Simulate message from self with correct subscription key format
       const message = {
-        key: { table: 'users', id: '123' },
+        key: 'record:users:123',
         version: 1,
         instanceId: pubsub.id,
       };

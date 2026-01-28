@@ -1,8 +1,8 @@
-// apps/server/src/infrastructure/media/processors/__tests__/video.test.ts
+// apps/server/src/infrastructure/media/processors/video.test.ts
 import ffmpeg from 'fluent-ffmpeg';
 import { describe, expect, it, vi, beforeEach, afterEach, type Mock } from 'vitest';
 
-import { VideoProcessor, type VideoProcessingOptions } from '../video';
+import { VideoProcessor, type VideoProcessingOptions } from './video';
 
 interface FfprobeCallback {
   (err: Error | null, data: FfprobeData | null): void;
